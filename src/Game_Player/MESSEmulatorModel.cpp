@@ -1,7 +1,5 @@
 /** 
- * X11EmulatorModel - Creates a simple model that can be used 
- * to hold configuration and state information for the
- * an emulator controlled via X11 keys and events
+ * MESSEmulatorModel - base configuration state for MESS based emulators
  *
  * Author: Thomas Cherryhomes <thom.cherryhomes@gmail.com>
  *
@@ -20,8 +18,6 @@ namespace DCE
   MESSEmulatorModel::MESSEmulatorModel()
     : X11EmulatorModel()
   {
-    m_sConfigFile = MESS_CONFIG_FILE;
-    m_sConfigFileTemplate = MESS_CONFIG_FILE_TEMPLATE;
     m_sWindowName = "mess.mess";
     m_sSystemName = "";
     m_bCanSaveState=true;
@@ -30,7 +26,6 @@ namespace DCE
 
   MESSEmulatorModel::~MESSEmulatorModel()
   {
-  
   }
 
   string MESSEmulatorModel::getVideoAccelleration()
@@ -39,22 +34,16 @@ namespace DCE
     return "opengl";
   }
 
-  void MESSEmulatorModel::updateTemplateVariables()
-  {
-    
-    m_mapConfigTemplateItems["###ROMPATH###"] = FileUtils::BasePath(m_mapMedia_Find("default"));
-    m_mapConfigTemplateItems["###VIDEO###"] = getVideoAccelleration();
-    m_mapConfigTemplateItems["###AVIWRITE###"] = (m_bIsRecording ? "recorded.avi" : "");
-    return;
-
-  }
-
   /**
    * Update the /root/.mame/mame.ini file as needed.
    */
   bool MESSEmulatorModel::updateConfig()
   {
-    return X11EmulatorModel::updateConfig();
+    ConfigurationWriter config(MESS_CONFIG_FILE_TEMPLATE, MESS_CONFIG_FILE, m_sSystemConfiguration);
+    config.Add("###ROMPATH###",FileUtils::BasePath(m_mapMedia_Find("default")));
+    config.Add("###VIDEO###",getVideoAccelleration());
+    config.Add("###AVIWRITE###",(m_bIsRecording ? "recorded.avi" : ""));
+    return config.Write();
   }
 
   void MESSEmulatorModel::initializeActionstoKeysyms()

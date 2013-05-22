@@ -32,7 +32,8 @@ namespace DCE
 
   bool X11EmulatorModel::updateConfig()
   {
-    return EmulatorModel::updateConfig();
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorModel::updateConfig - do not call this method. It is abstract.");
+    return false;
   }
 
   /**

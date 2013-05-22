@@ -15,7 +15,7 @@ using namespace std;
 
 #include <string>
 #include <map>
-
+#include "ConfigurationWriter.h"
 #include "DCE/Logger.h"
 
 namespace DCE
@@ -25,11 +25,11 @@ namespace DCE
   {
 
     friend class EmulatorController; // for updateConfig()
-    
+    friend class ConfigurationWriter; // also for updateConfig()
+
   private:
   protected:
-    virtual bool updateConfig();
-    virtual void updateTemplateVariables() = 0;
+    virtual bool updateConfig() = 0;
     virtual string getVideoAccelleration() = 0;
   public:
     string m_sConfigFileTemplate;

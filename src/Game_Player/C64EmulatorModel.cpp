@@ -22,4 +22,9 @@ namespace DCE
   
   }
 
+  bool C64EmulatorModel::updateConfig()
+  {
+    return VICEEmulatorModel::updateConfig();
+  }
+
 }

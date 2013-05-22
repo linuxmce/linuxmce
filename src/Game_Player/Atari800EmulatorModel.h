@@ -29,7 +29,6 @@ namespace DCE
 
     virtual void initializeActionstoKeysyms(); // set key mappings for ATARI800.
     virtual bool updateConfig();
-    virtual void updateTemplateVariables();
     virtual string getVideoAccelleration();
     
   private:

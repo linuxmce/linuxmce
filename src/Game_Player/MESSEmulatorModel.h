@@ -1,7 +1,5 @@
 /** 
- * MESSEmulatorModel - Creates a simple model that can be used 
- * to hold configuration and state information for the
- * an emulator controlled via X11 keys and events
+ * MESSEmulatorModel - Base configuration model for MESS based emulators
  *
  * Author: Thomas Cherryhomes <thom.cherryhomes@gmail.com>
  *
@@ -31,10 +29,8 @@ namespace DCE
 
     virtual void initializeActionstoKeysyms(); // set key mappings for MESS.
     virtual bool updateConfig();
-    virtual void updateTemplateVariables();
     virtual string getVideoAccelleration();
     
-  private:
   };
 }
 

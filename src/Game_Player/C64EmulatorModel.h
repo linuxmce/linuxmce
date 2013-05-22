@@ -1,6 +1,6 @@
 /**
  * 
- * C64EmulatorModel - C-64 Emulation Support
+ * C64EmulatorModel - Commodore 64 Emulation Support
  * 
  * Author: Thom Cherryhomes <thom.cherryhomes@gmail.com>
  *
@@ -18,6 +18,9 @@ namespace DCE
   public:
     C64EmulatorModel();
     ~C64EmulatorModel();
+
+    virtual bool updateConfig();
+
   };
 }
 

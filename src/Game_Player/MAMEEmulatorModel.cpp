@@ -18,8 +18,6 @@ namespace DCE
   MAMEEmulatorModel::MAMEEmulatorModel()
     : X11EmulatorModel()
   {
-    m_sConfigFile = MAME_CONFIG_FILE;
-    m_sConfigFileTemplate = MAME_CONFIG_FILE_TEMPLATE;
     m_sWindowName = "mame.mame";
     m_bCanSaveState=true;
     initializeActionstoKeysyms();
@@ -27,7 +25,6 @@ namespace DCE
 
   MAMEEmulatorModel::~MAMEEmulatorModel()
   {
-  
   }
 
   string MAMEEmulatorModel::getVideoAccelleration()
@@ -36,22 +33,16 @@ namespace DCE
     return "opengl";
   }
 
-  void MAMEEmulatorModel::updateTemplateVariables()
-  {
-    
-    m_mapConfigTemplateItems["###ROMPATH###"] = FileUtils::BasePath(m_mapMedia_Find("default"));
-    m_mapConfigTemplateItems["###VIDEO###"] = getVideoAccelleration();
-    m_mapConfigTemplateItems["###AVIWRITE###"] = (m_bIsRecording ? "recorded.avi" : "");
-    return;
-
-  }
-
   /**
    * Update the /root/.mame/mame.ini file as needed.
    */
   bool MAMEEmulatorModel::updateConfig()
   {
-    return X11EmulatorModel::updateConfig();
+    ConfigurationWriter config(MAME_CONFIG_FILE_TEMPLATE, MAME_CONFIG_FILE, m_sSystemConfiguration);
+    config.Add("###ROMPATH###",FileUtils::BasePath(m_mapMedia_Find("default")));
+    config.Add("###VIDEO###",getVideoAccelleration());
+    config.Add("###AVIWRITE###",(m_bIsRecording ? "recorded.avi" : ""));
+    return config.Write();
   }
 
   void MAMEEmulatorModel::initializeActionstoKeysyms()

@@ -23,8 +23,8 @@ namespace DCE
 
   protected:
     virtual void initializeActionstoKeysyms(); // set key mappings for VICE.
+    virtual void initializeButtontoKeysyms();  // keyboard mappings
     virtual bool updateConfig();
-    virtual void updateTemplateVariables();
     virtual string getVideoAccelleration();
   };
 }
