@@ -35,6 +35,8 @@ class PlaylistClass: public QAbstractListModel
 public:
 
     explicit PlaylistClass(PlaylistItemClass* prototype, QObject* parent = 0);
+
+
     ~PlaylistClass();
 #ifdef QT5
     QHash <int, QByteArray> roleNames() const ;
@@ -72,7 +74,7 @@ public slots:
     void setCurrentIndex(int i);
     int getCurrentIndex();
 
-    void appendRow(PlaylistItemClass* item);
+    void appendRow(PlaylistItemClass *item);
     void populate();
 private slots:
     void handleItemChange();

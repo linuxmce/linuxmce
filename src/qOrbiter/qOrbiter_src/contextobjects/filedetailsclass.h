@@ -186,10 +186,10 @@ signals:
 public slots:
     void clear();
 
-    void setRating(QString r) {rating = r; emit ratingChanged();}
+    void setRating(const QString r) {rating = r; emit ratingChanged();}
     QString getRating(){return rating;}
 
-    void setStorageDevice(QString device) {
+    void setStorageDevice(const QString device) {
         qs_storageDevice = device;
         if(device=="-1")
         {
@@ -206,57 +206,57 @@ public slots:
 
 
 
-    void setProgram(QString newProgram) {program = newProgram;  emit programChanged();}
+    void setProgram(const QString newProgram) {program = newProgram;  emit programChanged();}
     QString getProgram () {return program;}
 
-    void setTitle (QString inc_title) {qs_mainTitle = inc_title; emit titleChanged();}
+    void setTitle (const QString inc_title) {qs_mainTitle = inc_title; emit titleChanged();}
     QString getTitle () {return qs_mainTitle;}
 
-    void setTitle2 (QString inc_title) {qs_mainTitle2 = inc_title; emit titleChanged2();}
+    void setTitle2 (const QString inc_title) {qs_mainTitle2 = inc_title; emit titleChanged2();}
     QString getTitle2 () {return qs_mainTitle2;}
 
-    void setSubTitle (QString inc_subTitle) {qs_subTitle = inc_subTitle; emit titleChanged();}
+    void setSubTitle (const QString inc_subTitle) {qs_subTitle = inc_subTitle; emit titleChanged();}
     QString getSubTitle () {return qs_subTitle;}
 
 
     //general media getters and setters ----//
 
-    void setMediaTitle (QString inc_mediaTitle) {mediatitle = inc_mediaTitle;  emit mediaTitleChanged();}
+    void setMediaTitle (const QString inc_mediaTitle) {mediatitle = inc_mediaTitle;  emit mediaTitleChanged();}
     QString getMediaTitle () {return mediatitle;}
 
-    void setStudio (QString inc_studio) {channel = inc_studio;  emit studioChanged();}
+    void setStudio (const QString inc_studio) {channel = inc_studio;  emit studioChanged();}
     QString getStudio () {return studio;}
 
     //--tv getters and setters-------------//
 
-    void setChannel (QString inc_channel) {channel = inc_channel;  emit channelChanged();}
+    void setChannel (const QString inc_channel) {channel = inc_channel;  emit channelChanged();}
     QString getChannel () {return channel;}
 
-    void setChannelID (QString inc_channelID) {channelID = inc_channelID;  emit channelChanged();}
+    void setChannelID (const QString inc_channelID) {channelID = inc_channelID;  emit channelChanged();}
     QString getChannelID () {return channelID;}
 
-    void setEpisode (QString inc_episode) {episode = inc_episode;  emit episodeChanged();}
+    void setEpisode (const QString inc_episode) {episode = inc_episode;  emit episodeChanged();}
     QString getEpisode () {return episode;}
 
     //-----audio getters and setter--------//
-    void setAlbum (QString inc_album) {album = inc_album;  emit albumChanged();}
+    void setAlbum (const QString inc_album) {album = inc_album;  emit albumChanged();}
     QString getAlbum () {return album;}
 
-    void setTrack (QString inc_track) {track = inc_track;  emit trackChanged();}
+    void setTrack (const QString inc_track) {track = inc_track;  emit trackChanged();}
     QString getTrack() {return track;}
 
-    void setPerformers (QString inc_performer) {performers << inc_performer; emit performersChanged();}
+    void setPerformers (const QString inc_performer) {performers << inc_performer; emit performersChanged();}
     QString getPerformers() {performerlist = performers.join(" | "); return performerlist;}
     QStringList getPerformerList() {return performers;}
 
-    void setComposers (QString inc_composer) {composers << inc_composer;  emit composersChanged();}
+    void setComposers (const QString inc_composer) {composers << inc_composer;  emit composersChanged();}
     QString getComposers() {composerlist = composers.join(" | "); return composerlist;}
     QStringList getComposerList() {return composers;}
 
-    void setDirector (QString inc_director) {directors << inc_director;  emit directorChanged();}
+    void setDirector (const QString inc_director) {directors << inc_director;  emit directorChanged();}
     QString getDirector() {director = directors.join(" | "); return director;}
 
-    void setGenre (QString inc_genre) {genre.append(inc_genre+" | ");  emit genreChanged();}
+    void setGenre (const QString inc_genre) {genre.append(inc_genre+" | ");  emit genreChanged();}
     QString getGenre() { return genre;}
 
     void setFileMediaType();
@@ -271,7 +271,7 @@ public slots:
     QString getImageAspect() {return aspect;}
 
     inline QString getFile () {return file;}
-    inline void setFile(QString incFile) { file = incFile; emit FileChanged(file); }
+    inline void setFile(const QString incFile) { file = incFile; emit FileChanged(file); }
 
 
 
@@ -280,7 +280,7 @@ public slots:
 
 
     inline QString getSynop() {return synop;}
-    inline void setSynop(QString s) { synop = s; emit synopChanged(); }
+    inline void setSynop(const QString s) { synop = s; emit synopChanged(); }
 
     inline void setScreenshot(QString u) {
         screenshot = u.remove("home/mediapics/") ; emit screenShotChanged();
@@ -288,10 +288,10 @@ public slots:
     inline QString getScreenShot() {return screenshot;}
 
     inline QString getFilename() {return filename;}
-    inline void setFilename (QString f) {filename = f; emit fileNameChanged();}
+    inline void setFilename (const QString f) {filename = f; emit fileNameChanged();}
 
     inline QString getPath() {return path;}
-    inline void setPath (QString f) {path = f; emit pathChanged();}
+    inline void setPath (const QString f) {path = f; emit pathChanged();}
 
     inline bool isVisible () { return showDetails; }
     inline void setVisible (bool state) { clear(); showDetails = state; emit VisibleChanged( showDetails);}

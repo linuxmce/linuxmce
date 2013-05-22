@@ -76,17 +76,16 @@ ListModel::~ListModel() {
     clear();
 }
 
-void ListModel::appendRow( gridItem *item)
+void ListModel::appendRow(  gridItem *item)
 {
     setLoadingStatus(true);
     // qDebug() << "adding" << m_list.count()+1;
 
-    gridItem * copiedItem = new gridItem();
-    copiedItem = item;
+    gridItem * copiedItem = new gridItem(item->id(), item->name(), item->path(), item->index(), this );
+
     //  QObject::connect(copiedItem, SIGNAL(destroyed(QObject*)), this, SLOT(objectDestroyed(QObject*)));
     appendRows(QList<gridItem*>() << copiedItem);
-
-
+    item->deleteLater();
 }
 
 void ListModel::appendRows(const QList<gridItem *> &items)

@@ -739,16 +739,18 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
     cout << "Parm #19 - Data  (data value)" << endl;
     cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
 
-    QByteArray imgData;
-    qDebug() << iData_Size;
-    imgData.setRawData(pData,iData_Size);
-    QImage t;
-    t.loadFromData(imgData, "4");
-    if(!t.isNull())
-        emit objectUpdate(t);
-    else
-        emit mediaResponseChanged("Screenshot returned is invalid!");
-    imgData=NULL;
+    emit objectUpdate(QByteArray(pData, iData_Size));
+
+//    QByteArray imgData;
+//    qDebug() << iData_Size;
+//    imgData.setRawData(pData,iData_Size);
+//    QImage t;
+//    t.loadFromData(imgData, "4");
+//    if(!t.isNull())
+
+//    else
+//        emit mediaResponseChanged("Screenshot returned is invalid!");
+//    imgData=NULL;
 
 }
 
@@ -2168,6 +2170,7 @@ void qOrbiter::requestFileFormats(int type)
 
 void qOrbiter::getFloorplanDeviceCommand(int device)
 {
+    //todo - add code to dce router get the info back. directly.
 }
 
 void qOrbiter::shutdown()
@@ -3598,9 +3601,9 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                           //                }
                           //            }
                           index = pMediaGridTable->CovertColRowType(it->first).first;
-                          gridItem * item = new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index, this);
+
                           if(!b_cancelRequest){
-                              emit addItem(item);
+                              emit addItem(new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index, this));
 
                               QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef rpi
@@ -3618,9 +3621,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                               pMediaGridTable->ClearData();
                               delete pMediaGridTable;
                               pMediaGridTable=NULL;
-
                               delete []pData; pData=NULL;
-                              item->deleteLater();
                               return;
                           }
                       }
@@ -4985,8 +4986,8 @@ void qOrbiter::getFloorPlanImage(QString fp_path)
 #ifdef QT5
         //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
-        const uchar *data = (uchar*)picData;
-        emit floorPlanImageData(data, picData_Size);
+
+        emit floorPlanImageData( (const uchar*)picData, picData_Size);
     }
 }
 

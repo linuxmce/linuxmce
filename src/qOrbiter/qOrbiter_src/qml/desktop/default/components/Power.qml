@@ -15,9 +15,9 @@ Rectangle{
         width: scaleX(40)
         height: scaleY(40)
         clip: true
-        color: style.darkhighlight
+        color: skinStyle.darkhighlight
         anchors.centerIn: parent
-        border.color: style.lighthighlight
+        border.color: skinStyle.lighthighlight
         border.width: 2
         radius: 5
         scale: 0

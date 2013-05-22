@@ -35,9 +35,9 @@ QVariant FloorPlanModel::data(const QModelIndex &index, int role) const
 }
 
 
-void FloorPlanModel::appendRow(FloorplanDevice *item)
+void FloorPlanModel::appendRow(const FloorplanDevice *item)
 {
-    appendRows(QList<FloorplanDevice*>() << item);
+    appendRows(QList<FloorplanDevice*>() << new FloorplanDevice(item->id(), item->deviceNum(), item->deviceType(), item->floorplanType(), item->pagePosition(), this));
 }
 
 void FloorPlanModel::appendRows(const QList<FloorplanDevice *> &items)

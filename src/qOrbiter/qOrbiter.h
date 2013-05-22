@@ -1325,7 +1325,7 @@ signals:
     void modelPagesChanged(int p);
 
     void screenSaverImages(QStringList images);
-    void objectUpdate(QImage bytes);
+    void objectUpdate(QByteArray b);
     void objectDataUpdate( char,int);
     void mediaMessage(QString msg);
     void gridModelSizeChange(int size);

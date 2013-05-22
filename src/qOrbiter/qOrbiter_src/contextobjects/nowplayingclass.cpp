@@ -34,7 +34,8 @@ void NowPlayingClass::resetData()
     setStreamID(0);
     setProgram("");
     setRelease("");
-
+//    setImage(QImage());
+//    setStreamImage(QImage());
 
 
 }

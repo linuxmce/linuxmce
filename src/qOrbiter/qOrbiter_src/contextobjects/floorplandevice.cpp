@@ -4,8 +4,8 @@
 #include <QDebug>
 #endif
 
-FloorplanDevice::FloorplanDevice(QString &name, int &deviceNo, int &floorplan_device_type, int i_flooplanType, QString &position, QImage &icon,  QObject *parent) :
-    mQS_name(name), mI_deviceNo(deviceNo), mI_floorplan_device_type(floorplan_device_type), mI_floorplanType(i_flooplanType), mQS_position(position), mIM_icon(icon)
+FloorplanDevice::FloorplanDevice(QString name, int deviceNo, int floorplan_device_type, int i_flooplanType, QString position, QObject *parent) :
+    mQS_name(name), mI_deviceNo(deviceNo), mI_floorplan_device_type(floorplan_device_type), mI_floorplanType(i_flooplanType), mQS_position(position)
 
 {
     setCurrentX(0);

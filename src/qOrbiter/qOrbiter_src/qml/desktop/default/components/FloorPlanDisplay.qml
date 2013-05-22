@@ -1,10 +1,11 @@
 import QtQuick 1.1
 
-Rectangle {
+Item {
     objectName: "floorplan_display"
+    id:floorplandisplay
     width: childrenRect.width
     height: childrenRect.height
-    color: "transparent"
+
     property int scaleFactor:floorplanimage.scale
 
 
@@ -24,7 +25,7 @@ Rectangle {
         c = Qt.createComponent("FpSprite.qml");
         if(c.status === Component.Loading)
         {   console.log("Component Loading")
-           finishPlacingSprites(c,pX,pY, num, state, devtype)
+            finishPlacingSprites(c,pX,pY, num, state, devtype)
         }
         else if (c.status === Component.Error)
         {
@@ -59,20 +60,19 @@ Rectangle {
 
         }
     }
+
     Component.onCompleted: floorplan_devices.setCurrentPage(1)
-
-
 
     Rectangle{
         id:mainRect
         objectName: "main_rect"
         height: scaleY(80)
         width:scaleX(80)
-        border.color: style.highlight1
+        border.color: skinStyle.highlight1
         border.width: scaleX(1) *.25
-        radius: 10
+        radius: 5
         anchors.centerIn: parent
-        color:style.lighthighlight
+        color:skinStyle.lighthighlight
 
         Image {
             objectName: "floorplan_image"
@@ -80,14 +80,13 @@ Rectangle {
             source: ""
             anchors.centerIn: parent
             scale: floorplanimage.height > floorplanimage.width ? .5 : .75
-
         }
 
         Rectangle
         {
             height: childrenRect.height + 5
             width: scaleX(18)
-            color: style.lighthighlight
+            color: skinStyle.lighthighlight
             anchors.right: parent.right
             Text{
                 id:fplabel
@@ -101,15 +100,15 @@ Rectangle {
                 width: scaleX(18)
                 model:floorplan_pages
                 clip:true
-
+                visible: floorplanlist.count !==0
                 anchors.top: fplabel.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
 
                 delegate:Rectangle{
                     height: scaleY(9)
                     width: scaleX(16)
-                    color: style.accentcolor
-                    border.color: style.darkhighlight
+                    color: skinStyle.accentcolor
+                    border.color: skinStyle.darkhighlight
                     Text {
                         id: desc
                         text: m_description
@@ -130,54 +129,71 @@ Rectangle {
     ListView
     {
         id:floorplanDevices
-        height: scaleY(20)
-        width: scaleX(80)
+        height: mainRect.height -12
+        width: mainRect.width -2
         model:floorplan_devices
         clip:true
-        orientation: ListView.Horizontal
-        anchors.top: mainRect.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        visible:false
+        orientation: ListView.Vertical
+        anchors.centerIn: mainRect
+        visible:true
+        spacing:scaleY(1)
         delegate:
-            Rectangle{
+            Item{
             id:fp_device_rect
             height: scaleY(20)
-            width: scaleY(20)
+            width: parent.width
 
-            color: "lightgrey"
-
+            Rectangle{
+                id:phil
+                anchors.fill: parent
+                color:mickey.pressed ?"yellow" :"white"
+                opacity: .75
+            }
+            Rectangle{
+                id:standin
+                height: parent.height
+                width: scaleX(10)
+                border.color: "black"
+                border.width: 1
+                Text {
+                    text: qsTr("Image PlaceHolder")
+                }
+            }
 
             Column{
+                height: parent.height
+                width: parent.width*66
+                anchors.left: standin.right
                 Text {
                     id: fpDevice_name
-                    text: "I am " + name
+                    text: name
+                    font.pointSize:scaleY(3)
                 }
-                Text {
-                    id: fpDevice_type
-                    text: "I am type" + type
-                }
-                Text {
-                    id: fp_type
-                    text: "Floorplan type" + floorplantype
-                }
-                Text {
-                    id: fpDevice_no
-                    text: "I am Dev#" + deviceno
-                }
-                Text {
-                    id: fpDevice_pos
-                    text: "Position" + floorplan_devices.getDeviceX(deviceno) + "," + floorplan_devices.getDeviceY(deviceno)
-                    // onTextChanged: placeSprites(floorplan_devices.getDeviceX(deviceno),floorplan_devices.getDeviceY(deviceno),deviceno)
-                }
+//                Text {
+//                    id: fpDevice_type
+//                    text: "I am type" + type
+//                }
+//                Text {
+//                    id: fp_type
+//                    text: "Floorplan type" + floorplantype
+//                }
+//                Text {
+//                    id: fpDevice_no
+//                    text: "I am Dev#" + deviceno
+//                }
+//                Text {
+//                    id: fpDevice_pos
+//                    text: "Position" + floorplan_devices.getDeviceX(deviceno) + "," + floorplan_devices.getDeviceY(deviceno)
+//                    // onTextChanged: placeSprites(floorplan_devices.getDeviceX(deviceno),floorplan_devices.getDeviceY(deviceno),deviceno)
+//                }
             }
 
             MouseArea{
+                id:mickey
                 anchors.fill: parent
-                onClicked: manager.getFloorplanDeviceCommand(type)
+               // onClicked: manager.getFloorplanDeviceCommand(type)
             }
         }
     }
-
-
 }
 

@@ -61,7 +61,7 @@ public:
 public slots:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-    void appendRow(EPGItemClass* item);
+    void appendRow(EPGItemClass *item);
     void appendRows(const QList<EPGItemClass*> &items);
     void insertRow(int row, EPGItemClass* item);
     bool removeRow(int row, const QModelIndex &parent = QModelIndex());

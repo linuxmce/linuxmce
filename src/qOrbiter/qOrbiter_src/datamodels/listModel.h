@@ -36,7 +36,7 @@ public:
     QHash<int, QByteArray> roleNames() const;
 
     void appendRows(const QList<gridItem*> &items);
-    Q_INVOKABLE  void appendRow(gridItem* item);
+    Q_INVOKABLE  void appendRow(gridItem *item);
     // bool insertRows(int row, int count, gridItem *item);
     void insertRow(int row, gridItem* item);
     bool removeRow(int row, const QModelIndex &parent = QModelIndex());

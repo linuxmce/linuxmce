@@ -558,7 +558,7 @@ void qorbiterManager::processConfig(QByteArray config)
             fpType = 5;
         }
         QImage icon;
-        floorplans->appendRow(new FloorplanDevice( name, fp_deviceno, fp_deviceType, fpType, position, icon, floorplans));
+        floorplans->appendRow(new FloorplanDevice( name, fp_deviceno, fp_deviceType, fpType, position, floorplans));
     }
     emit loadingMessage("Floorplan Devices complete");
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -1527,11 +1527,11 @@ void qorbiterManager::setScreenShotVariables(screenshotAttributes *t)
 
     qDebug("Setting thumbnail attributes to screen");
 
-    screenshotVars.append(t);
+    screenshotVars.append(new screenshotAttributes(t->attributeName, t->attributeType, t->attributeNo, this));
 
 }
 
-void qorbiterManager::setMediaScreenShot(QImage screen_shot)
+void qorbiterManager::setMediaScreenShot(const QImage screen_shot)
 {
     mediaScreenShot = screen_shot;
     emit mediaScreenShotReady();
@@ -1596,7 +1596,7 @@ void qorbiterManager::updateAlarm(bool toggle, int grp)
 
 void qorbiterManager::showSleepingAlarms(SleepingAlarm *s)
 {
-    sleeping_alarms->appendRow(s);
+    sleeping_alarms->appendRow(new SleepingAlarm(s->eventHandler, s->name, s->alarmTime, s->b_state, s->timeLeft, s->activeDays));
 }
 
 

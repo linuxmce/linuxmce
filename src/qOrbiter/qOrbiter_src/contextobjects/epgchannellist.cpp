@@ -31,9 +31,9 @@ EPGChannelList::~EPGChannelList() {
     clear();
 }
 
-void EPGChannelList::appendRow(EPGItemClass *item)
+void EPGChannelList::appendRow( EPGItemClass *item)
 {
-    appendRows(QList<EPGItemClass*>() << item);
+    appendRows(QList<EPGItemClass*>() << new EPGItemClass(item->name(), item->channel(), item->name(), item->program(), item->id(), item->channelImage(), item->programImage(), this ) );
 }
 
 void EPGChannelList::appendRows(const QList<EPGItemClass *> &items)

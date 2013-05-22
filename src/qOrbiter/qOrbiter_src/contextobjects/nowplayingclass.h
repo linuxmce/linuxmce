@@ -256,33 +256,25 @@ public slots:
 
     QString getStorageDevice() {return qs_storageDevice;}
 
-    void setNetwork(QString bcast_network) {network = bcast_network; emit networkChanged();}
+    void setNetwork(const QString bcast_network) {network = bcast_network; emit networkChanged();}
     QString getNetwork() {return network;}
 
-    void setImageAspect(QString i_aspect) { aspect = i_aspect; emit imageAspectChanged();}
+    void setImageAspect(const QString i_aspect) { aspect = i_aspect; emit imageAspectChanged();}
     QString getImageAspect() { return aspect;}
 
-    void setProgram(QString newProgram) {tvProgram = newProgram; emit programChanged();}
+    void setProgram(const QString newProgram) {tvProgram = newProgram; emit programChanged();}
     QString getProgram () {return tvProgram;}
 
-    void setImageUrl(QUrl incImage) {nowPlayingImageUrl = incImage;}
+    void setImageUrl(const QUrl incImage) {nowPlayingImageUrl = incImage;}
 
     QUrl getImageUrl () { return nowPlayingImageUrl;}
 
-    void setImageData(QImage t) {
-        emit statusMessage("Now Playing Class::Recieved Image data");
-        emit statusMessage("Image valid -" + QString::number(t.height()));
-        setImage(t);
-    }
-    void setImageData( char data, int iData_size) {
-        emit statusMessage("Now Playing Class::Android ARM Now Playing Process Called");
-        QImage t;
-        const uchar *localDat =(uchar*)&data;
-        int dataSize = iData_size;
-        if( t.loadFromData(localDat, dataSize, "4"))
-        {
 
-            setImage(t);
+    void setImageData(  QByteArray b) {
+        QImage t;
+        if( t.loadFromData(b))
+        {
+          setImage(t);
             emit statusMessage("Now Playing Class::Set Cover Art");
         }
         else

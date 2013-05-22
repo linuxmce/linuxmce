@@ -33,7 +33,7 @@ AttributeSortModel::~AttributeSortModel() {
 void AttributeSortModel::appendRow(AttributeSortItem *item)
 {
 
-  appendRows(QList<AttributeSortItem*>() << item);
+  appendRows(QList<AttributeSortItem*>() << new AttributeSortItem(item->name(), item->fileformat(), item->cellImage(), item->selectedStatus()));
 }
 
 void AttributeSortModel::appendRows(const QList<AttributeSortItem *> &items)

@@ -53,7 +53,7 @@ typedef QMap <int, QString> myMap;
 #endif
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-    void appendRow(FloorplanDevice* item);
+    void appendRow(const FloorplanDevice *item);
     void appendRows(const QList<FloorplanDevice*> &items);
     void insertRow(int row, FloorplanDevice* item);
 

@@ -63,7 +63,7 @@ public:
 
 public:
     PlaylistItemClass() {}
-    explicit PlaylistItemClass( QString &ident,  QString &path,  int &index);
+    explicit PlaylistItemClass( QString ident,  QString path,  int index);
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
 

@@ -426,7 +426,7 @@ int main(int argc, char* argv[])
         //  QObject::connect(&dceThread, SIGNAL(finished()), &a, SLOT(quit()),Qt::QueuedConnection);
 
         //tv epg signals
-        QObject::connect(&pqOrbiter, SIGNAL(addChannel(EPGItemClass*)), simpleEPGmodel, SLOT(appendRow(EPGItemClass*)), Qt::QueuedConnection );
+        QObject::connect(&pqOrbiter, SIGNAL(addChannel(EPGItemClass*)), simpleEPGmodel, SLOT(appendRow( EPGItemClass*)), Qt::QueuedConnection );
         QObject::connect(&w, SIGNAL(newGridChannel(QString,QString)), &pqOrbiter, SLOT(TuneToChannel(QString,QString)), Qt::QueuedConnection );
         QObject::connect(&w, SIGNAL(clearModel()), simpleEPGmodel, SLOT(clear()), Qt::QueuedConnection);
         //security video frames
@@ -593,7 +593,7 @@ int main(int argc, char* argv[])
 
         QObject::connect(&pqOrbiter, SIGNAL(mediaTypeChanged(int)), &w, SLOT(setMediaType(int)), Qt::QueuedConnection);
         //QObject::connect(&pqOrbiter,SIGNAL(objectDataUpdate( char,int)), w.nowPlayingButton, SLOT(setDroidImageData(char,int)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter,SIGNAL(objectUpdate(QImage)), w.nowPlayingButton, SLOT(setImageData(QImage)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(objectUpdate(QByteArray)), w.nowPlayingButton, SLOT(setImageData(QByteArray)), Qt::QueuedConnection);
 
 
         QObject::connect(simpleEPGmodel, SIGNAL(channelNumberChanged(QString)), w.nowPlayingButton, SLOT(setChannel(QString)), Qt::QueuedConnection);
