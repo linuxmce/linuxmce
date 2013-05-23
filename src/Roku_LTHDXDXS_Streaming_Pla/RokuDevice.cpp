@@ -35,7 +35,7 @@ namespace DCE
     
     memcpy(&m_server, m_pServerInfo->ai_addr, sizeof(struct sockaddr_in));
     m_server.sin_family = AF_INET;
-    m_server.sin_port = htons(8080);
+    m_server.sin_port = htons(8060);
     freeaddrinfo(m_pServerInfo);
     // At this point, the socket is ready for connect.
 
@@ -63,14 +63,24 @@ namespace DCE
 	return false;
       }
 
-    sCommand += "quit\r\n";
-
     if (-1 == send(m_iSockFd, sCommand.c_str(), (size_t) strlen(sCommand.c_str()) + 1, 0)) {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not send %s",sCommand.c_str());
       return false;
     }
 
     usleep(2000);
+
+    char buf[8192];
+    
+    if (-1 == recv(m_iSockFd, buf, sizeof(buf), 0))
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not receive Response after sending data.");
+	return false;
+      }
+    else
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Received data %s",buf);
+      }
 
     close(m_iSockFd);
 

@@ -361,7 +361,7 @@ void Roku_LTHDXDXS_Streaming_Pla::CMD_EnterGo(int iStreamID,string &sCMD_Result,
 	cout << "Need to implement command #190 - Enter/Go" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	PLUTO_SAFETY_LOCK(rm, m_RokuMutex);
-	m_pRokuDevice->SendToRoku("press s\r\n");
+	m_pRokuDevice->SendToRoku("POST /keypress/Select HTTP/1.1\r\n\r\n");
 
 }
 
@@ -378,7 +378,7 @@ void Roku_LTHDXDXS_Streaming_Pla::CMD_Move_Up(int iStreamID,string &sCMD_Result,
 	cout << "Need to implement command #200 - Move Up" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	PLUTO_SAFETY_LOCK(rm, m_RokuMutex);
-	m_pRokuDevice->SendToRoku("press u\r\n");
+	m_pRokuDevice->SendToRoku("POST /keypress/Up HTTP/1.1\r\n\r\n");
 	
 
 }
@@ -396,7 +396,7 @@ void Roku_LTHDXDXS_Streaming_Pla::CMD_Move_Down(int iStreamID,string &sCMD_Resul
 	cout << "Need to implement command #201 - Move Down" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	PLUTO_SAFETY_LOCK(rm, m_RokuMutex);
-	m_pRokuDevice->SendToRoku("press d\r\n");
+	m_pRokuDevice->SendToRoku("POST /keypress/Down HTTP/1.1\r\n\r\n");
 
 
 }
@@ -414,7 +414,7 @@ void Roku_LTHDXDXS_Streaming_Pla::CMD_Move_Left(int iStreamID,string &sCMD_Resul
 	cout << "Need to implement command #202 - Move Left" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	PLUTO_SAFETY_LOCK(rm, m_RokuMutex);
-	m_pRokuDevice->SendToRoku("press l\r\n");
+	m_pRokuDevice->SendToRoku("POST /keypress/Left HTTP/1.1\r\n\r\n");
 
 
 }
@@ -432,7 +432,7 @@ void Roku_LTHDXDXS_Streaming_Pla::CMD_Move_Right(int iStreamID,string &sCMD_Resu
 	cout << "Need to implement command #203 - Move Right" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	PLUTO_SAFETY_LOCK(rm, m_RokuMutex);
-	m_pRokuDevice->SendToRoku("press r\r\n");
+	m_pRokuDevice->SendToRoku("POST /keypress/Right HTTP/1.1\r\n\r\n");
 
 
 }
@@ -461,7 +461,7 @@ void Roku_LTHDXDXS_Streaming_Pla::CMD_Back_Prior_Menu(int iStreamID,string &sCMD
 	cout << "Need to implement command #240 - Back / Prior Menu" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	PLUTO_SAFETY_LOCK(rm, m_RokuMutex);
-	m_pRokuDevice->SendToRoku("press k\r\n");
+	m_pRokuDevice->SendToRoku("POST /keypress/Back HTTP/1.1\r\n\r\n");
 
 
 }
@@ -542,5 +542,4 @@ void Roku_LTHDXDXS_Streaming_Pla::CMD_Process_Receive_Command_For_Child(string &
 {
 	cout << "Need to implement command #384 - Process Receive Command For Child" << endl;
 }
-
 
