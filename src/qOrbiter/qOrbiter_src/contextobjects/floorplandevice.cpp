@@ -27,6 +27,7 @@ QHash<int, QByteArray> FloorplanDevice::roleNames() const
     names[IconImageRole]= "iconimage";
     names[XRole]= "x";
     names[YRole]= "y";
+    names[CommandRole]="commandlist";
     return names;
 }
 
@@ -50,21 +51,26 @@ QVariant FloorplanDevice::data(int role) const
         return getCurrentX();
     case YRole:
         return getCurrentY();
+    case CommandRole:
+        return getDeviceCommands();
     default:
         return QVariant();
     }
 }
 
+/*!
+ * \brief FloorplanDevice::setupFloorplanPositions sets initial coordinates for devices across a floorplan.
+ */
 void FloorplanDevice::setupFloorplanPositions()
 {
     QStringList positions = mQS_position.split(",");
-    QStringList::const_iterator constIterator;
-    // positions should have minimum 2 entries, one device with X+Y co-ords
+
+    /*!positions should have minimum 2 entries, one device with X+Y co-ords*/
+
     if (positions.count() >= 2)
     {
         for (int i = 0; i < positions.count(); ++i)
         {
-
        // qDebug() << mQS_name << " Floorplan #" << positions.at(i);
        // qDebug() << "Coordinates" << positions.at(i+1) << "," << positions.at(i+2);
             mm_currentPosition.append(positions.at(i+1)+","+ positions.at(i+2));
@@ -78,12 +84,20 @@ void FloorplanDevice::setupFloorplanPositions()
         }
     }
 }
-
+/*!
+ * \brief FloorplanDevice::getPagePosition
+ * \param page
+ * \warn Depreciated
+ */
 void FloorplanDevice::getPagePosition(int page)
 {
 
 }
 
+/*!
+ * \brief FloorplanDevice::setCurrentPage
+ * \param page The desired page from the array of uploaded floorplan images.
+ */
 void FloorplanDevice::setCurrentPage(int page)
 {
     //qDebug() <<page;

@@ -27,11 +27,19 @@
 #include <QImage>
 #include <QMap>
 #include <QStringList>
+#include <QVariantMap>
+
+/*!
+ * \brief The FloorplanDevice class encapsulates a singular floorplan object.
+ * It contains the normal properties and methods of a custom QML element
+ *
+ */
 
 class FloorplanDevice : public QObject
 {
     Q_PROPERTY (int currentFloorplanX READ getCurrentX WRITE setCurrentX NOTIFY floorplanXChanged)
     Q_PROPERTY (int currentFloorplanY READ getCurrentY WRITE setCurrentY NOTIFY floorplanYChanged)
+
 
     Q_OBJECT
 
@@ -44,7 +52,8 @@ class FloorplanDevice : public QObject
         FloorPlanTypeRole = Qt::UserRole+6,
         XRole = Qt::UserRole+7,
         YRole = Qt::UserRole+8,
-        StatusRole = Qt::UserRole+9
+        StatusRole = Qt::UserRole+9,
+        CommandRole= Qt::UserRole+10
     };
 
 public:
@@ -53,15 +62,59 @@ public:
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
 
+    /*!
+     * \brief id
+     * \return
+     */
     inline QString id() const {  return mQS_name; }                         //returns name
+
+    /*!
+     * \brief deviceNum
+     * \return
+     */
     inline int deviceNum() const { return mI_deviceNo; }                    //returns device no
+
+    /*!
+     * \brief deviceType
+     * \return
+     */
     inline int deviceType() const { return mI_floorplan_device_type; }      // returns device type
+
+    /*!
+     * \brief floorplanType
+     * \return
+     */
     inline int floorplanType() const { return mI_floorplanType; }
+
+    /*!
+     * \brief pagePosition
+     * \return
+     */
     inline QString pagePosition() const { return mQS_position; }            // returns page position raw, will be converted to return current page position
+    /*!
+     * \brief iconPath
+     * \return
+     */
     inline QString iconPath() const { return mQS_iconpath; }
+    /*!
+     * \brief deviceImage
+     * \return
+     */
     inline QImage deviceImage() const {  return mIM_icon; }
+    /*!
+     * \brief getCurrentX
+     * \return
+     */
     inline int getCurrentX () const {return currentFloorplanX; }
+    /*!
+     * \brief getCurrentY
+     * \return
+     */
     inline int getCurrentY () const {return currentFloorplanY;}
+    /*!
+     * \brief getStatus
+     * \return
+     */
     inline bool getStatus() const {return status;}
 
     QString mQS_name;                       //device name
@@ -71,18 +124,20 @@ public:
     QString mQS_position;                   //postion, raw in string form
     QImage mIM_icon;                        //raw image data
     QStringList mm_currentPosition;     //map of positions on pages
-    QMap <QString, QString> mm_commands;    //command map with command and corresponding ??
+
     QString mQS_iconpath;                   //icon path to be used in the future with skins
     int currentFloorplanX;
     int currentFloorplanY;
     bool status;
 
+    QVariantMap deviceCommands;
 
 signals:
     void statusChanged();
     void dataChanged();
     void floorplanXChanged();
     void floorplanYChanged();
+    void deviceCommandsChanged();
 
 public slots:
     void getPagePosition(int page);
@@ -91,6 +146,20 @@ public slots:
     void setCurrentX(int x) {currentFloorplanX = x; emit floorplanXChanged(); }
     void setCurrentY( int y) {currentFloorplanY = y; emit floorplanYChanged();}
     void setStatus( bool state) {status = state; emit statusChanged(); emit dataChanged(); }
+    /*!
+     * \brief setDeviceCommand
+     * \param p
+     * Sets an a formatted device command to the QVariantMap that will be returned to the qml caller.
+     */
+    void setDeviceCommand(QVariantMap p){ deviceCommands.insert("command", p); emit deviceCommandsChanged();}
+
+    /*!
+     * \brief getDeviceCommands
+     * \return
+     * The return value is a QVariantMap which should be compatible with parsing as a Javascript Object.
+     */
+    inline QVariantMap getDeviceCommands () const {return deviceCommands;}
+
 
 
 private:

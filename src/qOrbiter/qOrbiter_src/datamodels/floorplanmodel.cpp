@@ -162,6 +162,22 @@ FloorplanDevice * FloorPlanModel::find(const QString &id) const
     return 0;
 }
 
+FloorplanDevice *FloorPlanModel::find(int device) const
+{
+    foreach(FloorplanDevice* item, m_list) {
+
+        if(item->deviceNum() == device)
+        {
+            return item;
+        }
+        else
+        {
+            //  qDebug() << item->id();
+        }
+    }
+    return 0;
+}
+
 QModelIndex FloorPlanModel::indexFromItem(const FloorplanDevice *item) const
 {
     Q_ASSERT(item);

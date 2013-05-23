@@ -426,7 +426,7 @@ int main(int argc, char* argv[])
         //  QObject::connect(&dceThread, SIGNAL(finished()), &a, SLOT(quit()),Qt::QueuedConnection);
 
         //tv epg signals
-        QObject::connect(&pqOrbiter, SIGNAL(addChannel(EPGItemClass*)), simpleEPGmodel, SLOT(appendRow( EPGItemClass*)), Qt::QueuedConnection );
+        QObject::connect(&pqOrbiter, SIGNAL(addChannel(EPGItemClass*)), simpleEPGmodel, SLOT(appendRow(EPGItemClass*)), Qt::QueuedConnection );
         QObject::connect(&w, SIGNAL(newGridChannel(QString,QString)), &pqOrbiter, SLOT(TuneToChannel(QString,QString)), Qt::QueuedConnection );
         QObject::connect(&w, SIGNAL(clearModel()), simpleEPGmodel, SLOT(clear()), Qt::QueuedConnection);
         //security video frames
@@ -548,7 +548,8 @@ int main(int argc, char* argv[])
         QObject::connect(w.floorplans, SIGNAL(requestNewFloorPlanData(QString)), &pqOrbiter, SLOT(updateFloorPlan(QString)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(floorplanTypeChanged(int)), w.floorplans, SLOT(setCurrentFloorPlanType(int)),Qt::QueuedConnection);
         QObject::connect(w.floorplans, SIGNAL(adjustLevel(int,myMap)), &pqOrbiter, SLOT(adjustLighting(int,myMap)),Qt::QueuedConnection);
-
+        QObject::connect(&w, SIGNAL(populate_floorplan_device_commands(int)), &pqOrbiter, SLOT(getFloorplanDeviceCommand(int)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(addFloorplanDeviceCommand(QVariantMap)), &w, SLOT(setFloorPlanCommand(QVariantMap)), Qt::QueuedConnection);
         //mediagrid
         // QObject::connect(&w, SIGNAL(gridStatus(bool)), &pqOrbiter, SLOT(setGridStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(updateSelectedAttributes(QString)), &w, SLOT(updateSelectedAttributes(QString)), Qt::QueuedConnection);

@@ -19,8 +19,7 @@ public:
     explicit ScreenSaverClass(QObject *parent = 0);
     QStringList images;
     QString currentImage;
-    QImage qi_currentImage;
-    QImage qi_newImage;
+    QImage qi_currentImage;  
 
     bool active;
     int transitionDuration;

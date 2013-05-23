@@ -92,7 +92,7 @@ public slots:
     QModelIndex getChannelIndex(const QString &name) const;
 
     void itemDeleted(){
-        qDebug() << "Model Item Destroyed Signal emitted.";
+   //     qDebug() << "Model Item Destroyed Signal emitted.";
     }
 void clear();
     //void clear() { m_list.clear(); }

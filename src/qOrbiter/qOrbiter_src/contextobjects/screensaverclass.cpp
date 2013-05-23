@@ -19,7 +19,6 @@ void ScreenSaverClass::setImageList(QStringList imgList)
     {
         setImage(images.at(0));
         emit screenSaverReady();
-
     }
     else
     {
@@ -104,7 +103,6 @@ void ScreenSaverClass::setImage(QString url)
 {
     currentImage =  url;
     qDebug() << url;
-
-    qi_currentImage.detach();
+    qi_currentImage = QImage();
     emit requestNewImage(currentImage);
 }

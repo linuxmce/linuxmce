@@ -61,6 +61,7 @@ typedef QMap <int, QString> myMap;
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
     FloorplanDevice* takeRow(int row);
     FloorplanDevice* find(const QString &id) const;
+    FloorplanDevice* find(int device) const;
     QModelIndex indexFromItem( const FloorplanDevice* item) const;
     FloorplanDevice* currentRow();
 

@@ -27,8 +27,6 @@
 #include "Gen_Devices/qOrbiterBase.h"
 
 //<-dceag-d-e->
-
-//<-dceag-d-b->!
 #include <DataGrid.h>
 #include "Virtual_Device_Translator.h"
 #include <contextobjects/bookmarkitem.h>
@@ -45,6 +43,9 @@
 #include <contextobjects/promptdata.h>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
+#include <QVariant>
+//<-dceag-d-b->!
+
 
 
 //dceag-d-e->
@@ -1317,6 +1318,7 @@ signals:
     //floorplans
     void floorPlanImageData(const uchar* ,int);
     void floorplanTypeChanged(int f);
+    void addFloorplanDeviceCommand(QVariantMap c);
 
     //media
     void screenShotReady(QImage data);

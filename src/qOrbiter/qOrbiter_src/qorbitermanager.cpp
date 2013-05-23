@@ -1515,6 +1515,25 @@ void qorbiterManager::showfloorplan(int fptype)
     //pqOrbiter->ShowFloorPlan(fptype);
 }
 
+void qorbiterManager::setFloorPlanCommand(QVariantMap t)
+{
+  // qDebug() << t;
+    qDebug() << "Device " << t["device"].toInt();
+ FloorplanDevice *p = floorplans->find(t["device"].toInt());
+ if(p){
+     QVariantMap b = t["commands"].toMap();
+
+       foreach(QVariant cmd , t["commands"].toMap()){
+           QVariantMap l = cmd.toMap();
+           qDebug() << l["command_name"] << " => " << l["command_number"];
+
+
+      }
+   }
+}
+
+
+
 
 void qorbiterManager::updateImageChanged(QImage img)
 {

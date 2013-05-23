@@ -595,6 +595,7 @@ signals:
     /*device related*/
     void osdChanged(bool);
     void newLightLevel(QString l);
+    void populate_floorplan_device_commands(int d);
 
     //setup related
     void orbiterReady(bool);
@@ -786,10 +787,15 @@ public slots:
     void setExternalHost(QString h) { externalHost = h; emit externalHostChanged();}
     QString getExternalHost() {return externalHost;}
 
-    /*floorplan slots*/
+    /*! @name floorplan slots*/
+    //@{
     void getFloorplanDevices(int floorplantype);
     void setFloorplanType(int t);
     void showfloorplan(int fptype);
+    void getFloorplanDeviceCommands(int device ) { emit populate_floorplan_device_commands(device);}
+
+    void setFloorPlanCommand(QVariantMap t);
+    //@}
 
     void setSkinStatus(bool status) { b_skinReady = status ; emit skinDataLoaded(b_skinReady); }
     void setOrbiterStatus(bool status) {b_orbiterReady = status ; emit orbiterReady(b_orbiterReady);}

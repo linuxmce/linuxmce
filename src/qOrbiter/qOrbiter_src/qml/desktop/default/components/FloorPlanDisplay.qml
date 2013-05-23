@@ -100,7 +100,7 @@ Item {
                 width: scaleX(18)
                 model:floorplan_pages
                 clip:true
-                visible: floorplanlist.count !==0
+                visible: floorplan_pages.count() !==0
                 anchors.top: fplabel.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
 
@@ -156,7 +156,9 @@ Item {
                 border.color: "black"
                 border.width: 1
                 Text {
-                    text: qsTr("Image PlaceHolder")
+                     text: "Floorplan type \n" + floorplantype
+                     anchors.centerIn: parent
+                     font.pointSize: 14
                 }
             }
 
@@ -191,7 +193,7 @@ Item {
             MouseArea{
                 id:mickey
                 anchors.fill: parent
-               // onClicked: manager.getFloorplanDeviceCommand(type)
+               onClicked: manager.getFloorplanDeviceCommands(deviceno)
             }
         }
     }
