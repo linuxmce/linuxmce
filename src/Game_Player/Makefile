@@ -67,7 +67,9 @@ sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files) \
 	VIC20EmulatorModel.cpp \
 	VIC20EmulatorController.cpp \
 	C64EmulatorModel.cpp \
-	C64EmulatorController.cpp
+	C64EmulatorController.cpp \
+	Apple2EmulatorModel.cpp \
+	Apple2EmulatorController.cpp
 #<-dceag-mh-e->
 
 CXXFLAGS += 

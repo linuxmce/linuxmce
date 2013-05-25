@@ -21,6 +21,7 @@ namespace DCE
     m_sWindowName = "mame.mame";
     m_bCanSaveState=true;
     initializeActionstoKeysyms();
+    m_sState="";
   }
 
   MAMEEmulatorModel::~MAMEEmulatorModel()
@@ -42,6 +43,7 @@ namespace DCE
     config.Add("###ROMPATH###",FileUtils::BasePath(m_mapMedia_Find("default")));
     config.Add("###VIDEO###",getVideoAccelleration());
     config.Add("###AVIWRITE###",(m_bIsRecording ? "recorded.avi" : ""));
+    config.Add("###STATE###",m_sState);
     return config.Write();
   }
 

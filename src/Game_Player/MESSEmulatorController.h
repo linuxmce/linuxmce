@@ -36,9 +36,10 @@ namespace DCE
   protected:
     virtual void setSystemName(string sSystemName);
     virtual string getSystemName();
+    virtual string getRomPathFromSlot();
+
   private:
     string getRomFromSlot();
-    string getRomPathFromSlot();
     string getSlotTypeForFilename(string sFilename);
     string getSystemFromSlot();
     string getSlotsAndRoms();

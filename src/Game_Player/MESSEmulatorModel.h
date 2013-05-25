@@ -19,11 +19,14 @@ namespace DCE
 {
   class MESSEmulatorModel : public X11EmulatorModel
   {
+  private:
   public:
     MESSEmulatorModel();
     ~MESSEmulatorModel();
 
     string m_sSystemName;   // Emulator System name
+    string m_sState;
+    string m_sRomPath;
     
   protected:
 

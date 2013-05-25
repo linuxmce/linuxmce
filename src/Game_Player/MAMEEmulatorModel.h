@@ -19,9 +19,12 @@ namespace DCE
 {
   class MAMEEmulatorModel : public X11EmulatorModel
   {
+  private:
   public:
     MAMEEmulatorModel();
     ~MAMEEmulatorModel();
+
+    string m_sState; 
 
   protected:
 

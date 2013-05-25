@@ -17,8 +17,6 @@ namespace DCE
     m_pEmulatorModel = pEmulatorModel;
     m_pEmulatorModel->m_sEmulatorBinary="/usr/bin/mame";
     m_pEmulatorModel->m_sProcessName="mame";
-    m_pEmulatorModel->m_sConfigFileTemplate="/usr/pluto/templates/mame.ini.template";
-    m_pEmulatorModel->m_sConfigFile="/root/.mame/mame.ini";
     m_pEmulatorModel->m_sWindowName="mame.mame"; // wmclass.wmname of window.
     m_pEmulatorModel->m_bChangeRequiresRestart=true;
     m_pEmulatorModel->m_bRunning=false;
@@ -76,18 +74,14 @@ namespace DCE
 	return false;
       }
 
-    
-
     m_pEmulatorModel->m_sArgs = getRomFromSlot();
-    m_pEmulatorModel->m_mapConfigTemplateItems["###ROMPATH###"] = getRomPathFromSlot();
-
     // If a media position was set (i.e. as part of the CMD_Play_Media, then put it in
     // the mame configuration file to load. Otherwise, blank it out.
     if (!m_pEmulatorModel->m_sMediaPosition.empty() && 
 	!m_pEmulatorModel->m_bIsStreamingSource && 
 	m_pEmulatorModel->m_bCanSaveState)
       {
-	m_pEmulatorModel->m_mapConfigTemplateItems["###STATE###"] = "1";
+	m_pEmulatorModel->m_sState = "1";
 
 	string sPath = "/home/mamedata/sta/"+getRomFromSlot();
 	string sSource = sPath + "/" + m_pEmulatorModel->m_sMediaPosition;
@@ -117,7 +111,7 @@ namespace DCE
       }
     else
       {
-	m_pEmulatorModel->m_mapConfigTemplateItems["###STATE###"] = "";      
+	m_pEmulatorModel->m_sState = "";      
       }
     
     // Finally, let's take care of setting up streaming, if needed.

@@ -59,7 +59,6 @@ namespace DCE
     string m_sSystemConfiguration;
     int m_iExit_Code;
     bool emulatorHasCrashed() { return (m_iExit_Code > 0); }
-    map<string, string> m_mapConfigTemplateItems;
 
     map<string, string> m_mapMedia;
     string m_mapMedia_Find(string sSlot) 

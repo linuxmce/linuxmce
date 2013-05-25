@@ -20,6 +20,7 @@ namespace DCE
   {
     m_sWindowName = "mess.mess";
     m_sSystemName = "";
+    m_sRomPath = "";
     m_bCanSaveState=true;
     initializeActionstoKeysyms();
   }
@@ -40,9 +41,10 @@ namespace DCE
   bool MESSEmulatorModel::updateConfig()
   {
     ConfigurationWriter config(MESS_CONFIG_FILE_TEMPLATE, MESS_CONFIG_FILE, m_sSystemConfiguration);
-    config.Add("###ROMPATH###",FileUtils::BasePath(m_mapMedia_Find("default")));
     config.Add("###VIDEO###",getVideoAccelleration());
     config.Add("###AVIWRITE###",(m_bIsRecording ? "recorded.avi" : ""));
+    config.Add("###STATE###",m_sState);
+    config.Add("###ROMPATH###",m_sRomPath);
     return config.Write();
   }
 

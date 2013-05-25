@@ -45,6 +45,8 @@
 #include "VIC20EmulatorController.h"
 #include "C64EmulatorModel.h"
 #include "C64EmulatorController.h"
+#include "Apple2EmulatorModel.h"
+#include "Apple2EmulatorController.h"
 
 using namespace std;
 
@@ -109,6 +111,7 @@ namespace DCE
     addEmulatorForMediaType(MEDIATYPE_lmce_Game_vectrex_CONST,new VectrexEmulatorController(m_pGame_Player, new VectrexEmulatorModel()));
     addEmulatorForMediaType(MEDIATYPE_lmce_Game_vic20_CONST,new VIC20EmulatorController(m_pGame_Player, new VIC20EmulatorModel()));
     addEmulatorForMediaType(MEDIATYPE_lmce_Game_c64_CONST,new C64EmulatorController(m_pGame_Player, new C64EmulatorModel()));
+    addEmulatorForMediaType(MEDIATYPE_lmce_Game_apple2_CONST,new Apple2EmulatorController(m_pGame_Player, new Apple2EmulatorModel()));
     return true;
   }
 
