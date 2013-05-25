@@ -2025,6 +2025,12 @@ void qOrbiter::finishSetup()
     emit commandResponseChanged("Setup Complete, restarting");
 }
 
+void qOrbiter::getMountDevices()
+{
+    QVariantList storageDevices;
+
+}
+
 void qOrbiter::connectionError()
 {
 
@@ -3078,7 +3084,12 @@ void qOrbiter::updateFloorPlan(QString p)
     // qDebug() << "This Page Floorplan Data for Page " <<  p << ", Floorplan device type " << i_current_floorplanType << "::" <<sval.c_str();
 }
 
-void DCE::qOrbiter::GetScreenSaverImages() // unused at this time
+/*!
+ * \brief DCE::qOrbiter::GetScreenSaverImages
+ * returns list of the availible screen saver images downloaded by the core.
+ *
+ */
+void DCE::qOrbiter::GetScreenSaverImages()
 {
     string sFilename;
     CMD_Get_Screen_Saver_Files screen_saver_files(m_dwPK_Device, iPK_Device_OrbiterPlugin,m_dwPK_Device, &sFilename);
@@ -3087,6 +3098,7 @@ void DCE::qOrbiter::GetScreenSaverImages() // unused at this time
     emit screenSaverImages(tempList);
     tempList.detachShared();
     tempList.clear();
+    qDebug() << "Sent Screen saver images";
 }
 
 void DCE::qOrbiter::BindMediaRemote(bool onoff)
@@ -5228,11 +5240,7 @@ void qOrbiter::checkInstall()
 
     connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(verifyInstall(QNetworkReply*)));
     QNetworkRequest s;
-
-
     QNetworkReply *badReply = pingManager->get(QNetworkRequest(url));
-
-
 }
 
 void qOrbiter::verifyInstall(QNetworkReply *r)

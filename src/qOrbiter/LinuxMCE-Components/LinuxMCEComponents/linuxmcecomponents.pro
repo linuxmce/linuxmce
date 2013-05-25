@@ -10,11 +10,13 @@ OTHER_FILES = qmldir
 # Input
 SOURCES += \
     button.cpp \
-    uielements_plugin.cpp
+    uielements_plugin.cpp \
+    screensaver.cpp
 
 HEADERS += \
     button.h \
-    uielements_plugin.h
+    uielements_plugin.h \
+    screensaver.h
 
 DESTDIR = ../../qOrbiter_src/imports/Linuxmce/UIElements
 

@@ -1,6 +1,8 @@
 import QtQuick 1.1
 import Qt.labs.shaders 1.0
 import AudioVisual 1.0
+import Linuxmce.UIElements 1.0
+
 import "effects"
 import "components"
 import "../lib/components"
@@ -167,16 +169,29 @@ Item {
         Keys.onTabPressed: hideUI()
 
 
-        ScreenSaver
-        {   id:ss
-            height: manager.appHeight
-            width: manager.appWidth
-            anchors.centerIn: parent
-            Component.onCompleted: screensaver.setActive(true)
-            MouseArea{
-                anchors.fill: ss
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
-                onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
+//        ScreenSaver
+//        {   id:ss
+//            height: manager.appHeight
+//            width: manager.appWidth
+//            anchors.centerIn: parent
+//            Component.onCompleted: screensaver.setActive(true)
+//            MouseArea{
+//                anchors.fill: ss
+//                acceptedButtons: Qt.LeftButton | Qt.RightButton
+//                onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
+//            }
+//        }
+
+        GlScreenSaver{
+            id:ss
+            height: parent.height
+            width: parent.width
+            onRequestNewImage: ss.newImageUrl = "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(ss.currentImage)
+          //  onNewImageUrlChanged:console.log("New Url::"+ss.newImageUrl)
+
+            Connections{
+                target:manager
+                onScreenSaverImagesReady:{ss.setActive(true); ss.setInterval(8000); console.log("Screen Saver is activated")}
             }
         }
 

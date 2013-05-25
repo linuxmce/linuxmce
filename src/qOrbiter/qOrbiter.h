@@ -1552,6 +1552,7 @@ public slots:
     void setCurrentScreen(QString s);
     void setOrbiterSetupVars(int users, int room, int skin, int lang, int height, int width);
     void finishSetup();
+    void getMountDevices();
 
     void pingCore();
     void checkPing(QHostInfo info);

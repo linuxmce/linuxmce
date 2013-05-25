@@ -501,7 +501,7 @@ int main(int argc, char* argv[])
 
         QObject::connect(&w, SIGNAL(executeCMD(int)), &pqOrbiter, SLOT(executeCommandGroup(int)));
 
-        QObject::connect(&pqOrbiter, SIGNAL(screenSaverImages(QStringList)), w.ScreenSaver, SLOT(setImageList(QStringList)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(screenSaverImages(QStringList)), &w, SLOT(setScreenSaverImages(QStringList)),Qt::QueuedConnection);
 
         QObject::connect(&pqOrbiter, SIGNAL(setMyIp(QString)), &w, SLOT(setInternalIp(QString)),Qt::QueuedConnection);
         QObject::connect(&orbiterWin, SIGNAL(setupNewOrbiter()), &pqOrbiter,SLOT(populateSetupInformation()));

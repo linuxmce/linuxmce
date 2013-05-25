@@ -305,6 +305,7 @@ public:
     Q_INVOKABLE void refreshUI(QUrl url);
     void swapSkins(QString incSkin);
 
+
     //device state
     bool cleanupData();
     QString dceResponse;
@@ -383,6 +384,8 @@ Param 10 - pk_attribute
     QList<QObject*> current_floorplan_devices;
     QList<QObject*> current_bookmarks;
     QList<QObject*> existingOrbiters;
+
+    QStringList screensaverImages;
 
     QStringList *gotoScreenList;
 
@@ -560,6 +563,7 @@ signals:
     void dceResponseChanged();
     void imageAspectChanged();
     void connectedStateChanged();
+    void screenSaverImagesReady();
 
     /*Settings Signals*/
     void debugModeChanged();
@@ -689,7 +693,7 @@ public slots:
 
 
     QString translateAttribute(QString a){
-       return a;
+        return a;
     }
 
     /*!
@@ -1080,8 +1084,38 @@ public slots:
     void setMediaScreenShot(QImage screen_shot);
     void saveScreenShot(QString attribute);
     void cleanupScreenie();
-    //@}
 
+    void setScreenSaverImages(QStringList i){
+        qDebug() << "Recieved Screen Saver Images" << i.count();
+        screensaverImages = i;
+        if(screensaverImages.contains("")){
+            qDebug() <<"Invalid image url found in list, removing.";
+            int d = screensaverImages.indexOf("");
+            screensaverImages.removeAt(d);
+            qDebug() << "Bad Data removed from list at entry " << d;
+        }
+        emit screenSaverImagesReady();
+    }
+
+
+    QString getNextScreenSaverImage(QString current){
+
+        if(screensaverImages.isEmpty()){
+
+            return "";
+        }
+        else {
+            qDebug() << "Current url::"+current;
+            QString search = current.split("&val=").at(1);
+            int index = screensaverImages.lastIndexOf(search);
+            if (index+1 < screensaverImages.count()){
+                return  screensaverImages.at(index+1);
+            }else{
+                return screensaverImages.at(0);
+            }
+        }
+
+    }
     /*! @name Media Devices slots*/
     //@{
     void showDeviceCodes(int code) {emit populateDeviceCommands(code);}

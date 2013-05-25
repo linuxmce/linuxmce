@@ -1763,9 +1763,6 @@ int qorbiterManager::loadSplash()
     return 0;
 }
 
-
-
-
 /*!
  * \brief qorbiterManager::createAndroidConfig
  *This function tries to determine the external storage location for a given android device so that it can read / write the user settings.
