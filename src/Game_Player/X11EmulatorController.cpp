@@ -282,10 +282,13 @@ namespace DCE
 	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Sending key %d, modifier %d, to window %x",m_pEmulatorModel->m_mapButtonToKeysyms_Find(iPK_Button),
 													m_pEmulatorModel->m_iCurrentKeyModifier,
 													m_pEmulatorModel->m_iWindowId);
+	    
+	    XTestFakeKeyEvent( m_pEmulatorModel->m_pDisplay, XKeysymToKeycode( m_pEmulatorModel->m_pDisplay, m_pEmulatorModel->m_iCurrentKeyModifier),True, CurrentTime );
 	    WindowUtils::SendKeyToWindow(m_pEmulatorModel->m_pDisplay,
 					 m_pEmulatorModel->m_iWindowId,
 					 m_pEmulatorModel->m_mapButtonToKeysyms_Find(iPK_Button),
 					 m_pEmulatorModel->m_iCurrentKeyModifier);
+	    XTestFakeKeyEvent( m_pEmulatorModel->m_pDisplay, XKeysymToKeycode( m_pEmulatorModel->m_pDisplay, m_pEmulatorModel->m_iCurrentKeyModifier),False, CurrentTime );
 	    m_pEmulatorModel->m_iCurrentKeyModifier=0; // unpress modifier after use.
 	  }
 	else
