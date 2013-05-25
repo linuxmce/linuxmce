@@ -2172,17 +2172,19 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
 {
     //todo - add code to dce router get the info back. directly.
     QVariantMap t;
-    QVariantMap d;
+    QVariantList d;
     DCE::DeviceData_Base * fpDevice = this->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(device);
     for (map<int, string>::iterator it = fpDevice->m_mapCommands.begin(); it!=fpDevice->m_mapCommands.end(); ++it){
         QVariantMap l;
         l.insert("command_name", QString::fromStdString(it->second) );
         l.insert("command_number",QVariant(it->first) );
-        d.insert(QString::number(it->first), l);
+        d.append(l);
+
     }
     t.insert("commands",d);
     t.insert("device", device);
-    emit(addFloorplanDeviceCommand(t)) ;
+
+    emit addFloorplanDeviceCommand(t) ;
 }
 
 void qOrbiter::shutdown()

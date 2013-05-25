@@ -71,7 +71,7 @@ public slots:
    bool removeRow(int row, const QModelIndex &parent = QModelIndex());
    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
    void clear();
-   void itemDeletion() { /*qDebug() << "Attribute Sort Item Destroyed::"*/  ;}
+   void itemDeletion() { qDebug() << "Attribute Sort Item Destroyed"  ;}
    void objectDestroyed(QObject*){
        qDebug()<< "Attribute QObject* item destroyed";
 }

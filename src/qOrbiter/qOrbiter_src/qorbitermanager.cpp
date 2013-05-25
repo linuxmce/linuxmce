@@ -1521,14 +1521,14 @@ void qorbiterManager::setFloorPlanCommand(QVariantMap t)
     qDebug() << "Device " << t["device"].toInt();
  FloorplanDevice *p = floorplans->find(t["device"].toInt());
  if(p){
-     QVariantMap b = t["commands"].toMap();
 
-       foreach(QVariant cmd , t["commands"].toMap()){
-           QVariantMap l = cmd.toMap();
-           qDebug() << l["command_name"] << " => " << l["command_number"];
-
-
-      }
+     QVariantMap b;
+     b.insert("commands", t["commands"]);
+   //  qDebug() << b;
+        p->setDeviceCommand(b);
+//       foreach(QVariant cmd , t["commands"].toMap()){
+//           QVariantMap l = cmd.toMap();
+//           qDebug() << l["command_name"] << " => " << l["command_number"];      }
    }
 }
 

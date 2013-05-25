@@ -5,7 +5,7 @@ Item {
     id:floorplandisplay
     width: childrenRect.width
     height: childrenRect.height
-
+    Component.onCompleted:{ floorplan_devices.setCurrentPage(1)}
     property int scaleFactor:floorplanimage.scale
 
 
@@ -61,7 +61,7 @@ Item {
         }
     }
 
-    Component.onCompleted: floorplan_devices.setCurrentPage(1)
+
 
     Rectangle{
         id:mainRect
@@ -113,7 +113,6 @@ Item {
                         id: desc
                         text: m_description
                     }
-
                     MouseArea{
                         anchors.fill: parent
                         onPressed:{
@@ -142,12 +141,43 @@ Item {
             id:fp_device_rect
             height: scaleY(20)
             width: parent.width
+            // property variant commands:commandlist
+
+            property variant cmds:commandlist
+
+            onCmdsChanged: {
+                console.log(JSON.stringify(commandlist))
+
+            }
+
+            Component.onCompleted:  manager.getFloorplanDeviceCommands(deviceno);
+
 
             Rectangle{
                 id:phil
                 anchors.fill: parent
                 color:mickey.pressed ?"yellow" :"white"
                 opacity: .75
+            }
+
+
+
+
+//            ListModel{
+//                id:cmdsList
+//            }
+
+            ListView{
+                anchors.centerIn: parent
+                width: parent.width
+                model:commandlist["commands"]
+                delegate: Text{
+                    text:command_number
+                    font.pointSize: 12
+                    color: "Black"
+                    width: parent.width
+
+                }
             }
             Rectangle{
                 id:standin
@@ -156,9 +186,9 @@ Item {
                 border.color: "black"
                 border.width: 1
                 Text {
-                     text: "Floorplan type \n" + floorplantype
-                     anchors.centerIn: parent
-                     font.pointSize: 14
+                    text: "Floorplan type \n" + floorplantype
+                    anchors.centerIn: parent
+                    font.pointSize: 14
                 }
             }
 
@@ -171,29 +201,29 @@ Item {
                     text: name
                     font.pointSize:scaleY(3)
                 }
-//                Text {
-//                    id: fpDevice_type
-//                    text: "I am type" + type
-//                }
-//                Text {
-//                    id: fp_type
-//                    text: "Floorplan type" + floorplantype
-//                }
-//                Text {
-//                    id: fpDevice_no
-//                    text: "I am Dev#" + deviceno
-//                }
-//                Text {
-//                    id: fpDevice_pos
-//                    text: "Position" + floorplan_devices.getDeviceX(deviceno) + "," + floorplan_devices.getDeviceY(deviceno)
-//                    // onTextChanged: placeSprites(floorplan_devices.getDeviceX(deviceno),floorplan_devices.getDeviceY(deviceno),deviceno)
-//                }
+                //                Text {
+                //                    id: fpDevice_type
+                //                    text: "I am type" + type
+                //                }
+                //                Text {
+                //                    id: fp_type
+                //                    text: "Floorplan type" + floorplantype
+                //                }
+                //                Text {
+                //                    id: fpDevice_no
+                //                    text: "I am Dev#" + deviceno
+                //                }
+                //                Text {
+                //                    id: fpDevice_pos
+                //                    text: "Position" + floorplan_devices.getDeviceX(deviceno) + "," + floorplan_devices.getDeviceY(deviceno)
+                //                    // onTextChanged: placeSprites(floorplan_devices.getDeviceX(deviceno),floorplan_devices.getDeviceY(deviceno),deviceno)
+                //                }
             }
 
             MouseArea{
                 id:mickey
                 anchors.fill: parent
-               onClicked: manager.getFloorplanDeviceCommands(deviceno)
+                onClicked: manager.getFloorplanDeviceCommands(deviceno)
             }
         }
     }

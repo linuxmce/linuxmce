@@ -51,7 +51,8 @@ QVariant AvCodeGrid::data(const QModelIndex &index, int role) const
 
 void AvCodeGrid::appendRow(AvCommand *item)
 {
-    appendRows(QList<AvCommand*>() << item);
+    appendRows(QList<AvCommand*>() << new AvCommand(item->command(), item->name(), item->learnState(), item->cmdParent()));
+    item->deleteLater();
 }
 
 void AvCodeGrid::appendRows(const QList<AvCommand *> &items)

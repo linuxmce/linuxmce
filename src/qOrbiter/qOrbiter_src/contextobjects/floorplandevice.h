@@ -39,6 +39,7 @@ class FloorplanDevice : public QObject
 {
     Q_PROPERTY (int currentFloorplanX READ getCurrentX WRITE setCurrentX NOTIFY floorplanXChanged)
     Q_PROPERTY (int currentFloorplanY READ getCurrentY WRITE setCurrentY NOTIFY floorplanYChanged)
+   // Q_PROPERTY(QVariantMap deviceCommands READ getDeviceCommands WRITE setDeviceCommand NOTIFY deviceCommandsChanged)
 
 
     Q_OBJECT
@@ -151,14 +152,14 @@ public slots:
      * \param p
      * Sets an a formatted device command to the QVariantMap that will be returned to the qml caller.
      */
-    void setDeviceCommand(QVariantMap p){ deviceCommands.insert("command", p); emit deviceCommandsChanged();}
+    void setDeviceCommand(QVariantMap p){ deviceCommands= p; emit deviceCommandsChanged();}
 
     /*!
      * \brief getDeviceCommands
      * \return
      * The return value is a QVariantMap which should be compatible with parsing as a Javascript Object.
      */
-    inline QVariantMap getDeviceCommands () const {return deviceCommands;}
+  Q_INVOKABLE inline QVariantMap getDeviceCommands () const {return deviceCommands;}
 
 
 

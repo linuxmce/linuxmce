@@ -48,8 +48,9 @@ DeviceModel::~DeviceModel() {
 void DeviceModel::appendRow(AvDevice *item)
 {
     setLoadingStatus(true);
-    appendRows(QList<AvDevice*>() << item);
-    qDebug() << m_list.count();
+    appendRows(QList<AvDevice*>() << new AvDevice(item->deviceNumber(), item->id(), item->controlled(), item->located(), item->device_Type(), item->activity(), this));
+
+    item->deleteLater();
 }
 
 void DeviceModel::appendRows(const QList<AvDevice *> &items)

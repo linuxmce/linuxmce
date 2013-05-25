@@ -28,7 +28,6 @@
 
 #include "datamodels/listModel.h"
 
-
 ListModel::ListModel(gridItem* prototype, QObject* parent) :
     QAbstractListModel(parent),  m_prototype(prototype)
 {
@@ -76,16 +75,13 @@ ListModel::~ListModel() {
     clear();
 }
 
-void ListModel::appendRow(  gridItem *item)
+void ListModel::appendRow(gridItem *item)
 {
     setLoadingStatus(true);
     // qDebug() << "adding" << m_list.count()+1;
-
-    gridItem * copiedItem = new gridItem(item->id(), item->name(), item->path(), item->index(), this );
-
-    //  QObject::connect(copiedItem, SIGNAL(destroyed(QObject*)), this, SLOT(objectDestroyed(QObject*)));
-    appendRows(QList<gridItem*>() << copiedItem);
-    item->deleteLater();
+//    gridItem * copiedItem = new gridItem(item->id(), item->name(), item->path(), item->index(), this );
+    appendRows(QList<gridItem*>() << new gridItem(item->id(), item->name(), item->path(), item->index(), this ));
+    item->destruct();
 }
 
 void ListModel::appendRows(const QList<gridItem *> &items)

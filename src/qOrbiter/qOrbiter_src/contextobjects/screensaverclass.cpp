@@ -15,6 +15,13 @@ ScreenSaverClass::ScreenSaverClass(QObject *parent) :
 void ScreenSaverClass::setImageList(QStringList imgList)
 {
     images = imgList;
+    if(images.contains("")){
+        qDebug() <<"Invalid imagae url found in list, removing.";
+
+        int d = images.indexOf("");
+        images.removeAt(d);
+        qDebug() << "Bad Data removed from list at entry " << d;
+    }
     if(!images.empty())
     {
         setImage(images.at(0));
@@ -34,10 +41,10 @@ void ScreenSaverClass::clearImageList()
 
 void ScreenSaverClass::setImageData( QByteArray buffer)
 {
-    qi_currentImage = QImage();
-    qi_currentImage.loadFromData(buffer);
-    emit imageChanged();
-    buffer.clear();
+//    qi_currentImage = QImage();
+//    qi_currentImage.loadFromData(buffer);
+  //  emit imageChanged();
+    //buffer.clear();
 }
 
 void ScreenSaverClass::setActive(bool state)
@@ -101,8 +108,14 @@ QString ScreenSaverClass::getImage()
 
 void ScreenSaverClass::setImage(QString url)
 {
+    if(!url.isEmpty()){
     currentImage =  url;
-    qDebug() << url;
-    qi_currentImage = QImage();
-    emit requestNewImage(currentImage);
+    qDebug() << url;   
+    emit imageChanged();
+ //  emit requestNewImage(currentImage);
+    }
+    else{
+        currentImage="";
+        selectNew();
+    }
 }

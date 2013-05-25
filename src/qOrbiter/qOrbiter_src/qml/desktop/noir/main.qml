@@ -151,10 +151,10 @@ Item {
         source: "fonts/Sawasdee.ttf"
     }
 
-    ScreenSaver{
-        id:pss
-        anchors.centerIn: parent
-    }
+//    ScreenSaver{
+//        id:pss
+//        anchors.centerIn: parent
+//    }
 
     FocusScope
     {
