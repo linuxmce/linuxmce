@@ -28,7 +28,7 @@ Rectangle {
             id:roomdelegate
             height:90
             width: 160
-            color: style.not_color
+            color: skinStyle.not_color
             Image {
                 id: roomimage
                 source: room_image

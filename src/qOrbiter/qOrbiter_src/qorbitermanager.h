@@ -755,7 +755,8 @@ public slots:
     int loadSplash();
     void startOrbiter();
     bool createAndroidConfig();
-    void processConfig(QByteArray config);
+    void processConfig(QNetworkReply* config);
+    void getConfiguration();
     bool writeConfig();
     bool readLocalConfig();
     void setConnectedState(bool state) { connectedState = state; checkConnection(); emit connectedStateChanged(); }
@@ -1103,6 +1104,8 @@ public slots:
         if(screensaverImages.isEmpty()){
 
             return "";
+        } else if(current.isEmpty()){
+            return screensaverImages.at(0);
         }
         else {
             qDebug() << "Current url::"+current;

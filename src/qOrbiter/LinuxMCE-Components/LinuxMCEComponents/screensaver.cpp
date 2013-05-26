@@ -94,9 +94,9 @@ void ScreenSaver::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWi
 
     QRect plane;
     plane.setSize(QSize( (int)this->width(),(int)this->height()) );
-    QPen pen;
-    QBrush(color);
-    pen.setWidthF(1.0);
+//    QPen pen;
+//    QBrush(color);
+//    pen.setWidthF(1.0);
     //pen.setColor(color);
     painter->drawImage(plane, qi_currentImage.scaled(QSize(this->width(), this->height()), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
    sleep(.045);

@@ -474,8 +474,10 @@ void qorbiterManager::refreshUI(QUrl url)
  *
  * \note Many of the sections here have been made dynamic in an attempt to remove the need for the xml based configuration file.
  */
-void qorbiterManager::processConfig(QByteArray config)
+void qorbiterManager::processConfig(QNetworkReply *config)
 {
+
+    qDebug() << "Processing config.";
     iPK_Device_DatagridPlugIn =  long(6);
     iPK_Device_OrbiterPlugin = long(9);
     iPK_Device_GeneralInfoPlugin = long(4);
@@ -489,15 +491,19 @@ void qorbiterManager::processConfig(QByteArray config)
     m_pOrbiterCat = 5;
     s_onOFF = "1";
 
-    QDomDocument configData;
-    QByteArray tConf =  config;
-    configData.setContent(config,false);
+    QDomDocument configData;//(config->readAll());
+    QByteArray tConf= config->readAll().replace("\n", "");
+    tConf.remove(0,0);
+   qDebug() << tConf;
+    configData.setContent(tConf,false);
     if(configData.isDocument() == false)
     {
         setDceResponse("Invalid config for device: " + QString::number(iPK_Device));
         setDceResponse("Please run http://dcerouter/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device)) ;
         setDceResponse("Invalid Config");
         emit orbiterConfigReady(false);
+        qDebug() << "Error in config";
+        return;
     }
 
     setDceResponse("Attempting to write config");
@@ -507,6 +513,7 @@ void qorbiterManager::processConfig(QByteArray config)
     }
 
     QDomElement root = configData.documentElement();        //represent configuration in memeory
+
 
     //------------DEFAULTS-FOR-ORBITER------------------------------------------------------------
     QDomElement defaults = root.firstChildElement("Default");
@@ -711,6 +718,7 @@ void qorbiterManager::processConfig(QByteArray config)
     }
     setDceResponse("Climate Done");
 
+
     //TELECOM------SCENARIOS-------------------------------------------------------------------------------------
     QDomElement tScenarios = root.firstChildElement("TelecomScenarios");
     QDomNodeList tScenarioList = tScenarios.childNodes();
@@ -836,6 +844,17 @@ void qorbiterManager::processConfig(QByteArray config)
     setOrbiterStatus(true);
 }
 
+void qorbiterManager::getConfiguration()
+{
+    QNetworkRequest updateDevice;
+    QNetworkAccessManager *ud= new QNetworkAccessManager();
+    qDebug() << "Getting config";
+    updateDevice.setUrl("http://"+m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device ));
+    QObject::connect(ud, SIGNAL(finished(QNetworkReply*)), this, SLOT(processConfig(QNetworkReply*)));
+    ud->get(updateDevice);
+   // DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", m_dwPK_Device);
+}
+
 bool qorbiterManager::OrbiterGen()
 {
     return true;
@@ -934,8 +953,12 @@ void qorbiterManager::closeOrbiter()
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
 #endif
     //  emit unregisterOrbiter((userList->find(sPK_User)->data(4).toInt()), QString(iFK_Room), iea_area );
-    emit orbiterClosing();
-    this->deleteLater();
+
+
+    if(cleanupData()){
+        this->deleteLater();
+         emit orbiterClosing();
+    }
 }
 
 /*
@@ -1214,6 +1237,7 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 
     setDceResponse("Initializing Local Manager");
     initializeManager(incrouterip.toStdString(), incdeviceid.toLong());
+    getConfiguration();
 }
 
 /*!
@@ -1636,7 +1660,7 @@ void qorbiterManager::regenError(QProcess::ProcessError)
 
 bool qorbiterManager::cleanupData()
 {
-
+    qDebug() << "Cleaning up data";
     roomLights->clear();                 //current room scenarios model
     roomMedia->clear();
     roomClimate->clear();
@@ -1651,6 +1675,21 @@ bool qorbiterManager::cleanupData()
     filedetailsclass->clear();
     devices->clear();
     myOrbiters->clear();
+    deviceCommands->clear();
+    floorplans->clear();
+    nowPlayingButton->resetData();
+    filedetailsclass->clear();
+    sleeping_alarms->clear();
+    screensaverImages.clear();
+
+    attribFilter->clear();
+    genreFilter->clear();
+    mediaTypeFilter->clear();
+    uiFileFilter->clear();
+    userList->clear();
+
+    m_bStartingUp=true;
+
 
     return true;
 }
@@ -1730,13 +1769,13 @@ void qorbiterManager::reloadHandler()
 
 void qorbiterManager::disconnectHandler()
 {
-    cleanupData();
+
     gotoQScreen("Splash.qml");
 }
 
 void qorbiterManager::replaceHandler()
 {
-    cleanupData();
+
     gotoQScreen("Splash.qml");
 }
 
@@ -1745,11 +1784,7 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-
-
     qDebug() << dceResponse;
-
-
 }
 
 QString qorbiterManager::getDceResponse()

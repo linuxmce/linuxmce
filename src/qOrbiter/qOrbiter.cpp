@@ -1804,7 +1804,7 @@ bool DCE::qOrbiter::initialize()
         emit deviceValid(true);
         emit commandResponseChanged("Starting Manager");
         emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sIPAddress));
-        requestConfigData();
+
         CreateChildren();
         return true;
     }
@@ -1858,17 +1858,15 @@ bool DCE::qOrbiter::initialize()
 
 void qOrbiter::requestConfigData()
 {
+    pthread_yield();
     QNetworkRequest updateDevice;
-    QNetworkAccessManager *ud= new QNetworkAccessManager(this);
-
+    QNetworkAccessManager *ud= new QNetworkAccessManager();
+    qDebug() << "Getting congig";
     updateDevice.setUrl("http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(m_dwPK_Device));
 
     QObject::connect(ud, SIGNAL(finished(QNetworkReply*)), this, SLOT(processConfigData(QNetworkReply*)));
-    ud->get(updateDevice);
-    qDebug()<< updateDevice.url();
+    ud->get(updateDevice);  
     DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", m_dwPK_Device);
-
-
 }
 
 void qOrbiter::processConfigData(QNetworkReply *r)
@@ -4374,6 +4372,7 @@ void qOrbiter::OnDisconnect()
     setNowPlaying(false);
     emit eventResponseChanged("Connection Lost");
     emit routerDisconnect();
+    DisconnectAndWait();
 }
 
 void qOrbiter::OnReload()
@@ -4396,6 +4395,9 @@ void qOrbiter::OnReload()
         m_pRouter->Reload();
 #endif
     emit routerReload();
+    pthread_yield();
+
+    DisconnectAndWait();
 }
 
 bool qOrbiter::OnReplaceHandler(string msg)
