@@ -182,18 +182,18 @@ Item {
 //            }
 //        }
 
-        GlScreenSaver{
-            id:ss
-            height: parent.height
-            width: parent.width
-            onRequestNewImage: ss.newImageUrl = "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(ss.currentImage)
-          //  onNewImageUrlChanged:console.log("New Url::"+ss.newImageUrl)
+//        GlScreenSaver{
+//            id:ss
+//            height: parent.height
+//            width: parent.width
+//            onRequestNewImage: ss.newImageUrl = "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(ss.currentImage)
+//          //  onNewImageUrlChanged:console.log("New Url::"+ss.newImageUrl)
 
-            Connections{
-                target:manager
-                onScreenSaverImagesReady:{ss.setActive(true); ss.setInterval(8000); console.log("Screen Saver is activated")}
-            }
-        }
+//            Connections{
+//                target:manager
+//                onScreenSaverImagesReady:{ss.setActive(true); ss.setInterval(8000); console.log("Screen Saver is activated")}
+//            }
+//        }
 
         Image {
             id: appbackground

@@ -41,7 +41,7 @@ QHash<int, QByteArray> PlaylistClass::roleNames() const
 #endif
 void PlaylistClass::appendRow( PlaylistItemClass *item)
 {
-    appendRows(QList<PlaylistItemClass*>() << new PlaylistItemClass(item->id(), item->path(), item->index()));
+    appendRows(QList<PlaylistItemClass*>() << new PlaylistItemClass(item->name(), item->path(), item->index()));
     item->destruct();
 }
 //the purpose of this function is to first clear the existing playlist data out, and add the new data in due to the way the dce router send the updated playlist to us
