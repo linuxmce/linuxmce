@@ -90,8 +90,8 @@ unsigned int Telegram::getUIntData() const
 	switch(_length)
 	{
 		case(0): return _shortdata; break;
-		case(1): return (int)*(unsigned char*)_data;break;
-		case(2): return ( (int)(unsigned char)_data[0] <<8 )  + (int)(unsigned char)_data[1];
+		case(1): return (unsigned int)*(unsigned char*)_data;break;
+		case(2): return ( (unsigned int)(unsigned char)_data[0] <<8 )  + (unsigned int)(unsigned char)_data[1];
 		default: return 0;
 	}
 
