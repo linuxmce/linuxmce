@@ -61,13 +61,14 @@ Component{
                 font.family: "Droid Sans"
             }
 
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    currentroom = name
-                   setActiveRoom(intRoom, entertain_area)
-                    loadComponent("NullComponent.qml")
-                }
+
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                currentroom = name
+               setActiveRoom(intRoom, entertain_area)
+                loadComponent("NullComponent.qml")
             }
         }
     }
