@@ -117,6 +117,7 @@ namespace DCE
       }
     // magic to make emulator windows always get swallowed by orbiter, but only
     // once the window is present and acquired.
+    usleep(100000);
     m_pGame_Player->EVENT_Menu_Onscreen(m_pEmulatorModel->m_iStreamID,false);
     XSetErrorHandler(NULL);  // put everything back.
   }

@@ -40,6 +40,11 @@ namespace DCE
 	sSlot = "autostart";
       }
 
+    if (StringUtils::ToLower(sMediaFile).find(".t64") != string::npos)
+      {
+        sSlot = "autostart";	
+      }
+
     EmulatorController::insertMediaNamed(sMediaFile,sSlot);
 
   }
