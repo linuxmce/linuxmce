@@ -240,14 +240,14 @@ Message *LightSwitchRGB::handleTelegram(const Telegram *tl) // // <ON/OFF>|<R VA
 				{
 					if(tl->getGroupAddress()==_v_addrlist.at(1))
 					{
-						return createLevelChangedEventMessage(tl->getIntData());
+						return createLevelChangedEventMessage(tl->getUIntData());
 					}
 				}break;
 				case(EIBRESPONSE):
 				{
 					if(tl->getGroupAddress()==_v_addrlist.at(0))
 					{
-						return createLevelChangedEventMessage(tl->getIntData());
+						return createLevelChangedEventMessage(tl->getUIntData());
 					}
 				}break;
 			}
@@ -267,7 +267,7 @@ Message *LightSwitchRGB::handleTelegram(const Telegram *tl) // // <ON/OFF>|<R VA
 				{
 					if(tl->getGroupAddress()==_v_addrlist.at(2))	// Actual level
 					{
-						return createLevelChangedEventMessage(tl->getIntData());
+						return createLevelChangedEventMessage(tl->getUIntData());
 					}
 					if(tl->getGroupAddress()==_v_addrlist.at(3))	// Actuel angle
 					{
@@ -278,7 +278,7 @@ Message *LightSwitchRGB::handleTelegram(const Telegram *tl) // // <ON/OFF>|<R VA
 				{
 					if(tl->getGroupAddress()==_v_addrlist.at(0))	// Set level
 					{
-						return createLevelChangedEventMessage(tl->getIntData());
+						return createLevelChangedEventMessage(tl->getUIntData());
 					}
 					if(tl->getGroupAddress()==_v_addrlist.at(1))	// Set angle
 					{
