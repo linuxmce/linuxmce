@@ -8,10 +8,10 @@ import "../../lib/handlers"
 import "../js/ComponentLoader.js" as MyJs
 
 
-Rectangle {
+Item {
     id:fileviewscreen
     anchors.fill: parent
-    color: "transparent"
+
     clip: true
     focus:true
     property int mouselocY: 0
@@ -21,6 +21,10 @@ Rectangle {
     //        target:dcerouter
     //        onNewGrid:{manager.requestPage(0); console.log("New Orbiter Grid Ready")}
     //    }
+
+    Component.onCompleted: {
+        qmlroot.updateBackground("media_center_living_room-wallpaper-1920x1080.jpg")
+    }
 
     function runEffects()
     {

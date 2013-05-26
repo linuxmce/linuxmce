@@ -152,7 +152,7 @@ public slots:
      * \param p
      * Sets an a formatted device command to the QVariantMap that will be returned to the qml caller.
      */
-    void setDeviceCommand(QVariantMap p){ deviceCommands= p; emit deviceCommandsChanged();}
+    void setDeviceCommand(QVariantMap p){ deviceCommands= p; emit deviceCommandsChanged(); emit dataChanged();}
 
     /*!
      * \brief getDeviceCommands

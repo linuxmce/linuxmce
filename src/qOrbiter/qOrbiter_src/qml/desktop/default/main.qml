@@ -106,6 +106,9 @@ Item {
         }
     }
 
+    function updateBackground(newImage){
+        appbackground.source=manager.imagePath+"ui3/"+newImage
+    }
 
     function loadComponent(componentName )
     {
@@ -197,7 +200,7 @@ Item {
 
         Image {
             id: appbackground
-            source: manager.imagePath+"ui3/appBackground.png"
+            source: manager.imagePath+"ui3/light_gray_texture-wallpaper-1920x1080.jpg"
             anchors.fill: parent
             opacity: .25
         }
@@ -207,6 +210,8 @@ Item {
             z:6
 
         }
+
+
 
         //        Rectangle{
         //            id:alternate_background

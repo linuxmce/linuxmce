@@ -44,7 +44,7 @@ public slots:
     bool setStatus(bool b) { m_isSelected = b; emit dataChanged();}
     bool updateSelection (bool newBool) ;
     void destruct() {
-        qDebug() << "Calling destructor for AttributeSortItem in " << this->thread();
+       // qDebug() << "Calling destructor for AttributeSortItem in " << this->thread();
        this->deleteLater();
     }
 };

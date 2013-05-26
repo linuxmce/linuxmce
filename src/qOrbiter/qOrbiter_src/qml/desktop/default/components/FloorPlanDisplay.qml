@@ -141,44 +141,21 @@ Item {
             id:fp_device_rect
             height: scaleY(20)
             width: parent.width
-            // property variant commands:commandlist
-
-            property variant cmds:commandlist
-
-            onCmdsChanged: {
-                console.log(JSON.stringify(commandlist))
-
-            }
-
             Component.onCompleted:  manager.getFloorplanDeviceCommands(deviceno);
-
 
             Rectangle{
                 id:phil
                 anchors.fill: parent
                 color:mickey.pressed ?"yellow" :"white"
                 opacity: .75
-            }
-
-
-
-
-//            ListModel{
-//                id:cmdsList
-//            }
-
-            ListView{
-                anchors.centerIn: parent
-                width: parent.width
-                model:commandlist["commands"]
-                delegate: Text{
-                    text:command_number
-                    font.pointSize: 12
-                    color: "Black"
-                    width: parent.width
-
+                MouseArea{
+                    id:mickey
+                    anchors.fill: parent
+                    onClicked: manager.getFloorplanDeviceCommands(deviceno)
                 }
             }
+
+
             Rectangle{
                 id:standin
                 height: parent.height
@@ -220,10 +197,34 @@ Item {
                 //                }
             }
 
-            MouseArea{
-                id:mickey
-                anchors.fill: parent
-                onClicked: manager.getFloorplanDeviceCommands(deviceno)
+
+
+            ListView{
+               anchors.bottom: parent.bottom
+               anchors.left: standin.right
+                width: parent.width
+                height: parent.height/2
+                model:commandlist["commands"]
+                orientation:ListView.Horizontal
+                spacing:10
+                delegate: Rectangle{
+                    id:thisone
+                    height:50
+                    width: 76
+                    color: sublist_hit.containsMouse ? "lightblue": sublist_hit.pressed ? "green": "darkblue"
+                    StyledText{
+                        text: commandlist["commands"][index].command_name
+                        anchors.centerIn: parent
+                    }
+                    MouseArea{
+                        id:sublist_hit
+                        anchors.fill: thisone
+                        onClicked: console.log("Grebbed")
+
+                    }
+
+                }
+
             }
         }
     }

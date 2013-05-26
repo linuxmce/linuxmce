@@ -46,7 +46,7 @@ public:
 
 public slots:
     void destruct() {
-      qDebug() << "calling destructor for GridItem in " << this->thread();
+    //  qDebug() << "calling destructor for GridItem in " << this->thread();
        this->deleteLater();
     }
 

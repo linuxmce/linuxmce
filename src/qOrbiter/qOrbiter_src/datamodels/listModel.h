@@ -83,10 +83,10 @@ signals:
 public slots:
 
     void objectDestroyed(QObject*){
-        qDebug()<< "Model item deleted";
+     //   qDebug()<< "Model item deleted";
 }
     void itemDeleted(){
-        qDebug() << "Model Item Destroyed Signal emitted.";
+      //  qDebug() << "Model Item Destroyed Signal emitted.";
     }
 
 

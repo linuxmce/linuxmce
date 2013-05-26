@@ -13,6 +13,11 @@ Item
 {
     anchors.centerIn: parent
     anchors.fill: parent
+
+    Component.onCompleted:{
+        qmlroot.updateBackground("light_gray_texture-wallpaper-1920x1080.jpg")
+    }
+
     Rectangle {
         id:stage
 

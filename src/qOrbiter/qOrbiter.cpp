@@ -741,16 +741,16 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
 
     emit objectUpdate(QByteArray(pData, iData_Size));
 
-//    QByteArray imgData;
-//    qDebug() << iData_Size;
-//    imgData.setRawData(pData,iData_Size);
-//    QImage t;
-//    t.loadFromData(imgData, "4");
-//    if(!t.isNull())
+    //    QByteArray imgData;
+    //    qDebug() << iData_Size;
+    //    imgData.setRawData(pData,iData_Size);
+    //    QImage t;
+    //    t.loadFromData(imgData, "4");
+    //    if(!t.isNull())
 
-//    else
-//        emit mediaResponseChanged("Screenshot returned is invalid!");
-//    imgData=NULL;
+    //    else
+    //        emit mediaResponseChanged("Screenshot returned is invalid!");
+    //    imgData=NULL;
 
 }
 
@@ -1144,7 +1144,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit playlistPositionChanged(iValue);
         GetNowPlayingAttributes();
 
-            emit clearPlaylist();
+        emit clearPlaylist();
 
 
     }
@@ -1865,7 +1865,7 @@ void qOrbiter::requestConfigData()
     updateDevice.setUrl("http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(m_dwPK_Device));
 
     QObject::connect(ud, SIGNAL(finished(QNetworkReply*)), this, SLOT(processConfigData(QNetworkReply*)));
-    ud->get(updateDevice);  
+    ud->get(updateDevice);
     DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", m_dwPK_Device);
 }
 
@@ -2189,6 +2189,9 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
     t.insert("device", device);
 
     emit addFloorplanDeviceCommand(t) ;
+
+
+
 }
 
 void qOrbiter::shutdown()
@@ -3633,7 +3636,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 #ifdef rpi
                               Sleep(60);
 #elif ANDROID
-                             Sleep(40);
+                              Sleep(40);
 #else
                               // Sleep(10);
 #endif
@@ -5031,12 +5034,12 @@ void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
 #ifdef QT5
         //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
-pthread_yield();
+        pthread_yield();
 
         emit mediaResponseChanged("DCE::Recieved Screensaver image");
         emit currentScreenSaverImage(QByteArray(picData, picData_Size));
 
-       delete picData;
+        delete picData;
         picData=NULL;
         picData_Size = 0;
 
@@ -5280,7 +5283,7 @@ void qOrbiter::CMD_Guide(string &sCMD_Result,Message *pMessage)
 
 void qOrbiter::getAttributeImage(QString param)
 {
-    CMD_Get_Attribute_Image attributeImage(m_dwPK_Device , iMediaPluginID );   
+    CMD_Get_Attribute_Image attributeImage(m_dwPK_Device , iMediaPluginID );
 
 }
 

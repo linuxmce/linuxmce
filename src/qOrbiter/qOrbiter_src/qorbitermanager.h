@@ -620,6 +620,7 @@ signals:
     void reInitialize();
     void showSetup();
     void continueSetup();
+    void gotMountDevices();
 
     /*DCE Signals*/
     void reloadRouter();
@@ -1044,6 +1045,10 @@ public slots:
      * \param d
      */
     void mountMediaDevice(int d);
+
+    void getMediaDevices();
+
+    void setMediaDevices(QNetworkReply* d);
     //@}
 
     /*! @name Media Control Slots*/

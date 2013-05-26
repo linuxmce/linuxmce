@@ -34,6 +34,7 @@
 #include <QApplication>
 #include <QTimer>
 #include <QtDeclarative/QtDeclarative>
+#include <QtScript/QScriptValueList>
 #endif
 
 #include <contextobjects/epgchannellist.h>
@@ -493,8 +494,6 @@ void qorbiterManager::processConfig(QNetworkReply *config)
 
     QDomDocument configData;//(config->readAll());
     QByteArray tConf= config->readAll().replace("\n", "");
-    tConf.remove(0,0);
-   qDebug() << tConf;
     configData.setContent(tConf,false);
     if(configData.isDocument() == false)
     {
@@ -839,6 +838,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     tConf.clear();
     configData.clear();
     //---update object image
+    getMediaDevices();
     setDceResponse(" Remote Config Complete");
     emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
     setOrbiterStatus(true);
@@ -852,7 +852,7 @@ void qorbiterManager::getConfiguration()
     updateDevice.setUrl("http://"+m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(iPK_Device ));
     QObject::connect(ud, SIGNAL(finished(QNetworkReply*)), this, SLOT(processConfig(QNetworkReply*)));
     ud->get(updateDevice);
-   // DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", m_dwPK_Device);
+    // DCE::LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Connected, requesting configuration for device %d", m_dwPK_Device);
 }
 
 bool qorbiterManager::OrbiterGen()
@@ -887,7 +887,7 @@ void qorbiterManager::swapSkins(QString incSkin)
 #ifdef __ANDROID__
         qorbiterUIwin->engine()->rootContext()->setContextProperty("style", tskinModel->currentItem);
 #else
-          qorbiterUIwin->engine()->rootContext()->setContextProperty("skinStyle", tskinModel->currentItem);
+        qorbiterUIwin->engine()->rootContext()->setContextProperty("skinStyle", tskinModel->currentItem);
 #endif
 
 #if (QT5)
@@ -957,7 +957,7 @@ void qorbiterManager::closeOrbiter()
 
     if(cleanupData()){
         this->deleteLater();
-         emit orbiterClosing();
+        emit orbiterClosing();
     }
 }
 
@@ -1117,11 +1117,43 @@ void qorbiterManager::mountMediaDevice(int d)
 
 }
 
+void qorbiterManager::getMediaDevices()
+{
+    qDebug() << "Getting mount devices";
+    QNetworkAccessManager * m = new QNetworkAccessManager();
+    QNetworkRequest req;
+    req.setUrl(QUrl("http://"+m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?m"));
+    m->get(req);
+    QObject::connect(m, SIGNAL(finished(QNetworkReply*)), this, SLOT(setMediaDevices(QNetworkReply*)));
+
+
+
+}
+
+void qorbiterManager::setMediaDevices(QNetworkReply *d)
+{
+    QString str= d->readAll().replace("\n", "");
+    qDebug() <<"Recieved mount devices";
+    qDebug() <<"Devices" << str;
+
+ QScriptEngine script;
+QVariantList p = script.evaluate(str).toVariant().toList();
+foreach (QVariant x, p){
+   QVariantMap l = x.toMap();
+   qDebug() << l["Device"].toString();
+}
+
+    //    for (QVariant t, jData){
+
+    //    }
+}
+
+
 bool qorbiterManager::loadSkins(QUrl base)
 {
     emit skinMessage("Local Skins path" +base.toString());
     tskinModel = new SkinDataModel(base, new SkinDataItem, this);
-     QObject::connect(tskinModel, SIGNAL(currentSkinReady()), this, SLOT(showSkin()));
+    QObject::connect(tskinModel, SIGNAL(currentSkinReady()), this, SLOT(showSkin()));
     qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
     QObject::connect(tskinModel, SIGNAL(skinsFinished(bool)), this, SLOT(setSkinStatus(bool)));
 
@@ -1306,7 +1338,7 @@ bool qorbiterManager::readLocalConfig()
         setDceResponse("Reading Local Config");
         QByteArray tDoc;
         tDoc = localConfigFile.readAll();
-      //  localConfigFile.close();
+        //  localConfigFile.close();
 
         if (!localConfig.setContent(tDoc))
         {
@@ -1329,48 +1361,48 @@ bool qorbiterManager::readLocalConfig()
             }
 
 
-                if(!configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue().isEmpty())
-                {
+            if(!configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue().isEmpty())
+            {
 
-                   setInternalIp(configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue());}
-                else
-                {
-                    setInternalIp("192.168.80.1");
+                setInternalIp(configVariables.namedItem("routerip").attributes().namedItem("id").nodeValue());}
+            else
+            {
+                setInternalIp("192.168.80.1");
 
-                }
-
-                currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
-                if (currentSkin.isEmpty()){
-#ifdef QT5
-                    currentSkin = "noir";
-#else
-                    currentSkin = "default";
-#endif
-                }
-
-                if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)
-                {
-                    setDeviceNumber(iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong());}
-                else
-                {
-                    setDeviceNumber(iPK_Device = -1)
-                            ;}
-
-                if(!configVariables.namedItem("externalip").attributes().namedItem("id").nodeValue().isEmpty() )
-                {setExternalIp(configVariables.namedItem("externalip").attributes().namedItem("id").nodeValue());}
-                else
-                {setExternalIp("fill.me.in.com");}
-
-                if(!configVariables.namedItem("debug").attributes().namedItem("id").nodeValue().toInt() == 0 )
-                {setDebugMode(false);}
-                else
-                {setDebugMode(true);}
-
-                if(!configVariables.namedItem("phone").attributes().namedItem("id").nodeValue().toInt() == 1 )
-                {setFormFactor(1);}
-                else
-                {setFormFactor(2);}
             }
+
+            currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
+            if (currentSkin.isEmpty()){
+#ifdef QT5
+                currentSkin = "noir";
+#else
+                currentSkin = "default";
+#endif
+            }
+
+            if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)
+            {
+                setDeviceNumber(iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong());}
+            else
+            {
+                setDeviceNumber(iPK_Device = -1)
+                        ;}
+
+            if(!configVariables.namedItem("externalip").attributes().namedItem("id").nodeValue().isEmpty() )
+            {setExternalIp(configVariables.namedItem("externalip").attributes().namedItem("id").nodeValue());}
+            else
+            {setExternalIp("fill.me.in.com");}
+
+            if(!configVariables.namedItem("debug").attributes().namedItem("id").nodeValue().toInt() == 0 )
+            {setDebugMode(false);}
+            else
+            {setDebugMode(true);}
+
+            if(!configVariables.namedItem("phone").attributes().namedItem("id").nodeValue().toInt() == 1 )
+            {setFormFactor(1);}
+            else
+            {setFormFactor(2);}
+        }
 
         return true;
     }
@@ -1541,19 +1573,19 @@ void qorbiterManager::showfloorplan(int fptype)
 
 void qorbiterManager::setFloorPlanCommand(QVariantMap t)
 {
-  // qDebug() << t;
+    // qDebug() << t;
     qDebug() << "Device " << t["device"].toInt();
- FloorplanDevice *p = floorplans->find(t["device"].toInt());
- if(p){
+    FloorplanDevice *p = floorplans->find(t["device"].toInt());
+    if(p){
 
-     QVariantMap b;
-     b.insert("commands", t["commands"]);
-   //  qDebug() << b;
+        QVariantMap b;
+        b.insert("commands", t["commands"]);
+        //  qDebug() << b;
         p->setDeviceCommand(b);
-//       foreach(QVariant cmd , t["commands"].toMap()){
-//           QVariantMap l = cmd.toMap();
-//           qDebug() << l["command_name"] << " => " << l["command_number"];      }
-   }
+        //       foreach(QVariant cmd , t["commands"].toMap()){
+        //           QVariantMap l = cmd.toMap();
+        //           qDebug() << l["command_name"] << " => " << l["command_number"];      }
+    }
 }
 
 
@@ -1761,7 +1793,7 @@ void qorbiterManager::initializeConnections()
 void qorbiterManager::reloadHandler()
 {
     if(cleanupData()){
-      gotoQScreen("ReloadHandler.qml");
+        gotoQScreen("ReloadHandler.qml");
     }
 
 
