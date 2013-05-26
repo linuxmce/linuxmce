@@ -36,7 +36,7 @@ cheat_file                cheat.dat
 #
 # CORE STATE/PLAYBACK OPTIONS
 #
-statei			###STATE###
+state			###STATE###
 autosave                  0
 playback
 record
