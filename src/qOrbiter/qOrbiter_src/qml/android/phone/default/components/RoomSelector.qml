@@ -8,14 +8,9 @@ Rectangle {
     border.color: "orange"
     border.width: 1
     clip: true
-    color:"transparent"
+    color:"black"
    anchors.centerIn: parent
 
-    Image {
-        id: bg
-        source: "../img/bkg.png"
-        anchors.fill: genericview
-    }
     Rectangle{
         id:exit_button
         height: scaleY(8)

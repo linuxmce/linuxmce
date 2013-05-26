@@ -33,7 +33,7 @@ Rectangle {
         id:imdb
         anchors.fill: parent
         source:"http://"+m_ipAddress+"/lmce-admin/imdbImage.php?file="+filedetailsclass.file+"&prop="+bgImageProp
-        onStatusChanged: imdb.status == Image.Ready ? filedetailrect.height = scaleY(100) : ""
+        onStatusChanged:  filedetailrect.height = scaleY(100) 
     }
 
     //    Connections{

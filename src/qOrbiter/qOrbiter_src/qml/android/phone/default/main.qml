@@ -34,6 +34,20 @@ Item {
         }
     }
 
+    Image {
+        id: appBackground
+        source: manager.b_orientation ? pSource : wSource
+        anchors.fill: parent
+        property string pSource:""
+        property string wSource:""
+
+    }
+
+    function updateBackground(portait, wide){
+        appBackground.pSource = portait
+        appBackground.wSource = wide
+    }
+
 
     function screenchange(screenname )
     {

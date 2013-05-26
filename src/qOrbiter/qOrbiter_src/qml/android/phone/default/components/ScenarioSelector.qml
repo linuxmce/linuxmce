@@ -1,14 +1,15 @@
 import QtQuick 1.1
 import com.nokia.android 1.1
+
 Rectangle {
     id:generic_model_display
     width: generic_view.width
     height: generic_view.height + listClose.height
-    property alias currentModel:generic_view.model
+    property variant currentModel:dummy
     state:"inactive"
     color: "black"
 
-    onCurrentModelChanged: currentModel !==undefined ? state = "active" : state = "inactive"
+    onCurrentModelChanged: currentModel !==dummy ? state = "active" : state = "inactive"
     ListModel{
         id:dummy
     }
@@ -33,7 +34,7 @@ Rectangle {
         }
         MouseArea{
             anchors.fill: parent
-            onClicked: {currentModel=undefined;  }
+            onClicked: {currentModel=dummy  }
         }
     }
     ListView{
@@ -41,7 +42,7 @@ Rectangle {
         anchors.top: listClose.bottom
         width: scaleX(61)
         height: scaleY(50)
-        model:undefined
+        model:currentModel
         spacing:1
         orientation:ListView.Vertical
         delegate:  HomeButtonDelegate{}
