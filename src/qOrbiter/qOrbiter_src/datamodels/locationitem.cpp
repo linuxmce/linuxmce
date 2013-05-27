@@ -11,8 +11,8 @@
  *
  *
  */
-LocationItem::LocationItem(const QString &name, const int &intRoom,  const int &ea, const QString &ea_name, const int &roomType, const QUrl &rmimg, QObject *parent) :
-    m_name(name), m_val(intRoom), m_iEA(ea), m_eaname(ea_name), m_iType(roomType), roomImage(rmimg)
+LocationItem::LocationItem(QString &name, int &intRoom, int &roomType, QUrl &rmimg, QObject *parent) :
+    m_name(name), m_val(intRoom), m_iType(roomType), roomImage(rmimg)
 {
 }
 
@@ -25,12 +25,11 @@ QHash<int, QByteArray> LocationItem::roleNames() const
 {
 
   QHash<int, QByteArray> names; 
-  names[NameRole] = "name";
-  names[EaRole] = "entertain_area";
+  names[NameRole] = "name"; 
   names[intRole] = "intRoom"; 
   names[TypeRole] = "room_type";
   names[ImageRole] = "room_image";
-  names[EaNameRole] = "ea_name";
+  names[EaListRole] = "ea_list";
   return names;
 }
 
@@ -44,16 +43,14 @@ QVariant LocationItem::data(int role) const
   switch(role) {
   case NameRole:
     return id();
-  case EaRole:
-    return entertain_area(); 
   case intRole:
     return roomVal();
   case TypeRole:
       return room_type();
   case ImageRole:
       return room_image();
-  case EaNameRole:
-      return eaId();
+  case EaListRole:
+      return entertainAreas();
   default:
     return QVariant();
   }

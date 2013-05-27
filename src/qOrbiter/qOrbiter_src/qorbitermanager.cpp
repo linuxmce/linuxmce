@@ -26,6 +26,7 @@
 #include <QtQml/QQmlContext>
 #include <QtQuick/QQuickView>
 #include <QtXml/QDomDocument>
+#include <QtScript/QScriptEngine>
 #else
 #include <QtDeclarative/QDeclarativeProperty>
 #include <QFile>
@@ -83,9 +84,13 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #ifndef __ANDROID__
     b_localLoading = true; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
 #else
+#ifndef QT5
     androidHelper = jniHelper;
+     qorbiterUIwin->rootContext()->setContextProperty("android", androidHelper);
+#endif
     b_localLoading = false;
-    qorbiterUIwin->rootContext()->setContextProperty("android", androidHelper);
+
+
 #endif
 
     setDceResponse("Starting...");
@@ -594,6 +599,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     m_lRooms = new LocationModel(new LocationItem, this);   //roomlistmodel
     QMap <QString, int> RroomMapping;                       //map for later reference
     QDomNodeList roomListXml = roomXml.childNodes();
+
     for(int index = 0; index < roomListXml.count(); index++)
     {
         QString m_name = roomListXml.at(index).attributes().namedItem("Description").nodeValue();
@@ -625,7 +631,12 @@ void qorbiterManager::processConfig(QNetworkReply *config)
             break;
         }
         RroomMapping.insert(m_name, m_val);
-        m_lRooms->appendRow(new LocationItem(m_name, m_val, m_iEA,ea, m_iType, imagePath, m_lRooms));
+        if(m_lRooms->check(m_val)){
+        LocationItem *t= m_lRooms->find(m_name);
+        t->addEa(ea, m_iEA);
+        }
+        else
+        m_lRooms->appendRow(new LocationItem(m_name, m_val, m_iType, imagePath, m_lRooms));
     }
     m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
     m_lRooms->idefault_Ea = RroomMapping.value(m_lRooms->sdefault_Ea);
@@ -1106,15 +1117,30 @@ void qorbiterManager::nowPlayingChanged(bool b)
     nowPlayingButton->setStatus(b);
 }
 
-void qorbiterManager::mountMediaDevice(int d)
+void qorbiterManager::mountMediaDevices()
 {
+    qDebug() << "Attemping to verify status of storage devices";
 
-    QString mountProg = "mount";
-    QStringList args;
-    args << qs_routerip+":/mnt/device/"+QString::number(d) << "/mnt/remote/"+QString::number(d);
-    QProcess *mountProcess = new QProcess(this);
-    mountProcess->start(mountProg, args);
+    for(int dc =0; dc < storageDevices.count(); dc++){
+        qDebug()<< "Starting process for device " << storageDevices.at(dc).toMap()["Description"].toString() << " #"<<storageDevices.at(dc).toMap()["Device"].toString();
+    int d = storageDevices.at(dc).toMap()["Device"].toInt();
+                QString mountProg = "gksudo";
+                QStringList args;
+                args.append(QString("mount -t nfs "+m_ipAddress+":/mnt/device/"+QString::number(d) + " /mnt/remote/"+QString::number(d)));
+                QProcess *mountProcess = new QProcess(this);
+                mountProcess->start(mountProg, args);
+                mountProcess->waitForFinished(10000);
+                qDebug() << "Process Status ::" <<mountProcess->state();
+                if(mountProcess->state()== QProcess::FailedToStart){
+                    qDebug() << "command failed to start!";
+                    qDebug() << mountProcess->readAllStandardError();
+                    qDebug() << mountProcess->errorString();
+                }
 
+
+               qDebug() << "QProcess Exiting, state is :"<< mountProcess->state();
+               qDebug() << "Process exited with::"<< mountProcess->exitCode();
+            }
 }
 
 void qorbiterManager::getMediaDevices()
@@ -1142,10 +1168,14 @@ foreach (QVariant x, p){
    QVariantMap l = x.toMap();
    qDebug() << l["Device"].toString();
 }
+storageDevices = p;
 
     //    for (QVariant t, jData){
 
     //    }
+if(!storageDevices.isEmpty()){
+    mountMediaDevices();
+}
 }
 
 
@@ -1295,9 +1325,14 @@ bool qorbiterManager::readLocalConfig()
 #elif __ANDROID__
     QString xmlPath ;
 
+#ifdef QT4_8
     if(setupMobileStorage(androidHelper->externalStorageLocation)){
         xmlPath = mobileStorageLocation+"/config.xml" ;
     }
+#elif QT5
+
+#endif
+
 
 #elif WIN32
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";

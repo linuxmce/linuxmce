@@ -211,7 +211,7 @@ macx{
 #android deployment
  android-g++{
 #nfs mount to work with skins on core directly
-folder_01.source = /mnt/remote/android-qml/
+#folder_01.source = /mnt/remote/android-qml/
 #folder_01.source = qml/android/
 folder_01.target = qml
 
@@ -732,7 +732,13 @@ OTHER_FILES += Readme.txt \
     android/src/org/kde/necessitas/origo/QtApplication.java \
     android/src/org/kde/necessitas/origo/QtActivity.java \
     android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl
+    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
+    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
+    android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
+    android/READ-THIS-BEFORE-MANUALLY-ADDING-FILES-TO-PACKAGE.txt \
+    android/libjava.so \
+    android/Makefile \
+    android/java.pro
 
 
 for_harmattan{

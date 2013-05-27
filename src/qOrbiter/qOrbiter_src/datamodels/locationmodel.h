@@ -33,6 +33,7 @@ public:
     LocationItem* takeRow(int row);
     LocationItem* find(const QString &id) const;
     void sortModel(int column, Qt::SortOrder order);
+    bool check(int room);
 #ifdef QT5
  QHash<int, QByteArray> roleNames() const;
 #endif

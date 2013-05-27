@@ -268,6 +268,7 @@ public:
     QString skinsPath;
     QDir skinsDir;
     QString m_SkinsDirectoryPath;
+    QVariantList storageDevices;
 
 
     //ui
@@ -283,7 +284,9 @@ public:
 #endif
 
 #ifdef ANDROID
+#ifndef QT5
     AndroidSystem *androidHelper;
+#endif
 #endif
 
     ScreenSaverClass *ScreenSaver;
@@ -1041,10 +1044,10 @@ public slots:
     QString getMediaResponse(){return mediaResponse;}
 
     /*!
-     * \brief mountMediaDevice
+     * \brief mountMediaDevices
      * \param d
      */
-    void mountMediaDevice(int d);
+    void mountMediaDevices();
 
     void getMediaDevices();
 

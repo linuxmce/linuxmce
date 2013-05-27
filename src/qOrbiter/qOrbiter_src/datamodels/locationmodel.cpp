@@ -70,6 +70,14 @@ void LocationModel::sortModel(int column, Qt::SortOrder order)
 {
 }
 
+bool LocationModel::check(int room)
+{
+    foreach(LocationItem* item, m_list) {
+      if(item->roomVal() == room) return true;
+    }
+    return false;
+}
+
 #ifdef QT5
 QHash<int, QByteArray> LocationModel::roleNames() const
 {
@@ -96,14 +104,14 @@ void LocationModel::setLocation(int ea, int room)
 {
 
     foreach(LocationItem* item, m_list) {
-      if(item->roomVal()== room && item->entertain_area() == ea)
-      {
-          i_currentEA = item->entertain_area();
-          i_currentRoom = item->roomVal();
-          setCurrentEA(item->eaId());
-          setCurrentRoom(item->id());
-          setCurrentItem(indexFromItem(item).row());
-      }
+//      if(item->roomVal()== room && item->entertain_area() == ea)
+//      {
+//          i_currentEA = item->entertain_area();
+//          i_currentRoom = item->roomVal();
+//          setCurrentEA(item->eaId());
+//          setCurrentRoom(item->id());
+//          setCurrentItem(indexFromItem(item).row());
+//      }
     }
 
 }

@@ -15,18 +15,22 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
 {
 
+
     setFlag(ItemHasNoContents, false);
     serverAddress = "";
     deviceNumber = -1;
     timeCodeServer = new QTcpServer();
     setCurrentStatus("Media Manager defaults set, initializing media engines");
 #ifdef QT4
-    audioSink = new Phonon::AudioOutput();
-    QList <Phonon::AudioOutputDevice> outputs = Phonon::BackendCapabilities::availableAudioOutputDevices();
-    qDebug() << outputs;
-    audioSink->setOutputDevice(outputs.last());
-    videoSurface = new Phonon::VideoWidget();
+
+    // QList <Phonon::AudioOutputDevice> outputs = Phonon::BackendCapabilities::availableAudioOutputDevices();
+    //  qDebug() << outputs;
+    // audioSink->setOutputDevice(outputs.last());
+
     mediaObject = new Phonon::MediaObject();
+    videoSurface = new Phonon::VideoWidget();
+    audioSink = new Phonon::AudioOutput();
+
     Phonon::createPath(mediaObject, audioSink);
     setCurrentStatus("Audio Sink Initialized");
     Phonon::createPath(mediaObject, videoSurface);
@@ -185,11 +189,16 @@ void MediaManager::setMediaUrl(QString url)
 {
     setCurrentStatus("Got New Media Url::"+url);
     filepath=url;
-#ifdef QT4
+#ifdef QT4_8
     mediaObject->setCurrentSource(Phonon::MediaSource(url));
+    qDebug() << mediaObject->currentSource();
 #elif QT5
 
 #endif
+
+
+    qDebug() <<"Item is playing? " << mediaObject->state();
+    qDebug() << "Errors " << mediaObject->errorString();
 }
 
 

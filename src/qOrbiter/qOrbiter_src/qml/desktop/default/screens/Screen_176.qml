@@ -10,6 +10,12 @@ import "../components"
 Rectangle {
     width: 100
     height: 62
+    color: "transparent"
+
+    StyledText{
+        anchors.centerIn: parent
+        text:"Video Playback Screen?"
+    }
 
     HomeButton{}
 }

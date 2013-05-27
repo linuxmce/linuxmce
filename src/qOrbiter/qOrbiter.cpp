@@ -1858,7 +1858,10 @@ bool DCE::qOrbiter::initialize()
 
 void qOrbiter::requestConfigData()
 {
-    pthread_yield();
+#ifndef __ANDROID__
+     pthread_yield();
+#endif
+
     QNetworkRequest updateDevice;
     QNetworkAccessManager *ud= new QNetworkAccessManager();
     qDebug() << "Getting congig";
@@ -4398,7 +4401,9 @@ void qOrbiter::OnReload()
         m_pRouter->Reload();
 #endif
     emit routerReload();
-    pthread_yield();
+#ifndef __ANDROID__
+     pthread_yield();
+#endif
 
     DisconnectAndWait();
 }
@@ -5034,7 +5039,9 @@ void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
 #ifdef QT5
         //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
-        pthread_yield();
+#ifndef __ANDROID__
+     pthread_yield();
+#endif
 
         emit mediaResponseChanged("DCE::Recieved Screensaver image");
         emit currentScreenSaverImage(QByteArray(picData, picData_Size));

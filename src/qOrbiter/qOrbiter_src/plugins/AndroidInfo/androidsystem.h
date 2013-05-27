@@ -3,7 +3,10 @@
 
 #include <QObject>
 #include <jni.h>
+
+#ifndef QT5
 #include <QPlatformNativeInterface>
+#endif
 #include <QColor>
 
 

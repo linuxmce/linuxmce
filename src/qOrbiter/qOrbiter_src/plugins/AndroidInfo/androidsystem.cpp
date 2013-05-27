@@ -105,7 +105,7 @@ bool AndroidSystem::findClassIdents()
                 jstring extPath = (jstring)env->CallObjectMethod(myFileRef, findPathID);
 
                 const char*myPath = env->GetStringUTFChars(extPath, 0);
-                setExternalStorageLocation(QString::fromAscii(myPath));
+                setExternalStorageLocation(QString::fromLatin1(myPath));
             }else
             {
                 qDebug() << myConvertedStorageState;
