@@ -1,9 +1,9 @@
 /*! \page setup1 Setting up Build Environment
- *
+ * \tableofcontents
  * Setting up the build environment will depend on your target in some cases, so please be attentive to platform specific details.
  * In most cases, it is preferable to use the qt development libraries availible for the current version of your platform.
  *
- * \subsection general_setups General Setup information
+ * \section generalsetups General Setup information
  *
  * You will need to get the linuxmce source tree to compile this application.
  *This consists of (2) parts. The source tree, and the additional image resources that go along with the application, some of
@@ -16,11 +16,37 @@
  * Checkout out the relevant directories into their corresponding qml folders. The easiest way is to use the svn externals command.
  * - example on how to set a external dir:
  * -# 'svn propedit svn:externals .' in the qml directory of the skin in question. In this case we are using 'desktop/default' skin as an example.
- * - in the file that opens, simply edit the file like to contain this: the following, with no quotations
+ * - In the file that opens, simply edit the file like to contain this: the following, with no quotations
  * -# http://svn.linuxmce.org/svn/trunk/extra/QOrbiter-images/default img
  * -#  ^---Source of external                                           ^------Directory its going to inside of our skin.
  * - Svn update should then pull the additional images.
  *
  * Alternatively, you can do an svn co to the img folder of the skin or skins you are working on and that should also have the same effect.
+ *
+ * \section qtsetup Setting up build environment
+ * You have many different options with how you get the Qt version of your choice installed.
+ * - The universal method is to install Qt Development libraries from website. http://qt-project.org/downloads . You can find binary installers as well
+ * as source files.
+ * - Compiling Qt from source is outside of the scope of this documentation, but information can be found here http://qt-project.org/wiki/Building_Qt_Documentation
+ * - It is _highly_ recommended that you use the latest QtCreator. The latest as of this writing is Qt Creator 2.7.1 and can be found on the same downloads page. While you can use other IDE's
+ * the integrated environment QtCreator provides is difficult to beat. Unless you are not into speed and ease of use.
+ *
+ * \section runningapplication Running QOrbiter
+ * To run the application, you need to open the .pro file, located in src/qOrbiter/qOrbiter_src
+ * - For Av support, you will need to compile the AudioVisual plugin.
+ * - For Linuxmce UIElements component, you will need to compile the UIElements plugin.
+ * \note The plugins are already setup to place the compiled plugin files (qmldir and shared lib file) into the qOrbiter 'imports' directory. You should not need to change this.
+ *
+ * \section androidsetup Setting up Android Builds
+ *  Currently, the established method of building is to use Necessitas Alpha 4. This provides and integrated development environment (using qt creator) to produce the needed
+ * Android resources and code to make your Qt Application run on Android. While Qt5 on Android is availible, it is not supported at this time. When it does become availible,
+ * this documentation will be updated.
+ *
+ * - Necessitas4 can be downloaded here : http://sourceforge.net/p/necessitas/home/necessitas/
+ * - Qt5 for Android can be downloaded for the experienced developer here: http://qt-project.org/wiki/Qt5ForAndroidBuilding
+ * -# Requires git
+ *
+ *
+ *
  *
  */

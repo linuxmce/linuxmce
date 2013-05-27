@@ -10,7 +10,7 @@
 * resources. As there is no DCE simulation library at this point, you will need a working linuxmce core to point the application to
 * besides going past the splash screen!
 *
-* If you are looking design a skin then you should just get a current copy for you Os and checkout th
+* If you are looking design a skin then you should just get a current copy for your os and checkout the code. Click \ref setup1 for more details.
 *
 * \section cplusplus C++ Code
 This section references the c++ code that is a part of QOrbiter. It is split into two parts. \ref dcesection and the \ref qtsection
