@@ -189,14 +189,15 @@ void MediaManager::setMediaUrl(QString url)
 {
     setCurrentStatus("Got New Media Url::"+url);
     filepath=url;
-#ifdef QT4_8
+#ifndef QT5
     mediaObject->setCurrentSource(Phonon::MediaSource(url));
-    qDebug() << mediaObject->currentSource();
+    setCurrentStatus(QString("MediaObject Source::"+mediaObject->currentSource().fileName()));
+    qDebug() <<"Media Object Source::"<< mediaObject->currentSource().type();
+    qDebug() <<"Media Object Source::"<< mediaObject->currentSource().fileName();
 #elif QT5
 
 #endif
-
-
+mediaObject->play();
     qDebug() <<"Item is playing? " << mediaObject->state();
     qDebug() << "Errors " << mediaObject->errorString();
 }
