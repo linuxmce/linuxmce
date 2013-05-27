@@ -23,6 +23,8 @@ This section references the c++ code that is a part of QOrbiter. It is split int
 -# \ref linuxmce_components
 -# \ref qml_skins
 -# \ref qml_api
+\subsection sectSetup Setting up Build Environment
+-# \ref setup1 - Setting up the build environment
 */
 
 /*!

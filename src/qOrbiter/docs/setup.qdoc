@@ -1,0 +1,26 @@
+/*! \page setup1 Setting up Build Environment
+ *
+ * Setting up the build environment will depend on your target in some cases, so please be attentive to platform specific details.
+ * In most cases, it is preferable to use the qt development libraries availible for the current version of your platform.
+ *
+ * \subsection general_setups General Setup information
+ *
+ * You will need to get the linuxmce source tree to compile this application.
+ *This consists of (2) parts. The source tree, and the additional image resources that go along with the application, some of
+ *which are compiled into the QRC.
+ * - SVN Location: http://svn.linuxmce.org/svn/trunk/src
+ * - Additional resources are in two (similar) locations:
+ * -# Image Resource location: http://svn.linuxmce.org/svn/trunk/extra/QOrbiter-Images
+ * -# Font Resource location : http://svn.linuxmce.org/svn/trunk/extra/QOrbiter-Fonts
+ *
+ * Checkout out the relevant directories into their corresponding qml folders. The easiest way is to use the svn externals command.
+ * - example on how to set a external dir:
+ * -# 'svn propedit svn:externals .' in the qml directory of the skin in question. In this case we are using 'desktop/default' skin as an example.
+ * - in the file that opens, simply edit the file like to contain this: the following, with no quotations
+ * -# http://svn.linuxmce.org/svn/trunk/extra/QOrbiter-images/default img
+ * -#  ^---Source of external                                           ^------Directory its going to inside of our skin.
+ * - Svn update should then pull the additional images.
+ *
+ * Alternatively, you can do an svn co to the img folder of the skin or skins you are working on and that should also have the same effect.
+ *
+ */
