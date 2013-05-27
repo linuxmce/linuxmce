@@ -11,94 +11,51 @@ import "../components"
                              roombutton.buttontext = title
   */
 
-Rectangle {
-    id:roomselectorrect
-    height:110
-    width: 600
-    color: "transparent"
-    anchors.centerIn: parent
+Item {
+    id:roomSelector
+    anchors.fill: parent
 
-    Component
-    {
-        id:roomselectioncomponent
-
-
-        //delegate
-        Rectangle{
-            id:roomdelegate
-            height:90
-            width: 160
-            color: skinStyle.not_color
-            Image {
-                id: roomimage
-                source: room_image
-                height: 90
-                fillMode: Image.PreserveAspectFit
-                width:160
-            }
-            Rectangle{
-                id:delegateheader
-                height: 20
-                width: roomdelegate.width
-                color: "transparent"
-                anchors.top: parent.top
-                Text {
-                    id: celllabel
-                    height: 25
-                    width: parent.width
-                    text: name
-                    wrapMode: "WrapAnywhere"
-                    font.bold: true
-                }
-            }
-
-
-
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    currentroom = name
-                   manager.setActiveRoom(intRoom, entertain_area)
-                    roombutton.buttontext = name
-                    roomselectorrect.destroy()
-                }
-            }
+    Rectangle{
+        id:phil
+        color: "black"
+        anchors.centerIn: parent
+        anchors.fill: parent
+        opacity:.65
+        MouseArea{
+            id:block
+            anchors.fill: parent
         }
     }
 
-
     Rectangle{
         id:roomselectorheader
-        height: 15
-        gradient: Gradient {
-            GradientStop {
-                position: 0
-                color: "#99e1f1"
-            }
+        height: scaleY(10)
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: scaleY(-20)
+        width:parent.width
+        color:"slategrey"
 
-            GradientStop {
-                position: 1
-                color: "#bbc5db"
-            }
-        }
-        width: roomselectorrect.width
-        Text {
+        StyledText {
             id: headertext
             text: "Select Room Please"
+            anchors.centerIn: parent
         }
 
     }
     ListView{
         id:roomsource
         anchors.top: roomselectorheader.bottom
-        height: 90
-        width: 600
+        anchors.horizontalCenter: roomselectorheader.horizontalCenter
+        height: scaleY(45)
+        width: parent.width
         orientation: ListView.Horizontal
-
         spacing: 5
         clip: true
         model: roomList
-        delegate: roomselectioncomponent
+        delegate:
+            RoomSelectionDelegate {
+                id: roomselectioncomponent
+            }
         flickableDirection: "HorizontalFlick"
 
 

@@ -86,10 +86,10 @@ Rectangle {
             id:roombutton
             width: skinStyle.widebuttonw
             height: skinStyle.widebuttonh
-            buttontext: currentroom
+            buttontext: roomList.currentRoom+"\n"+roomList.currentEA
             MouseArea{
                 anchors.fill: parent
-                onClicked:MyJs.createRoomSelector()
+                onClicked:componentLoader.source ="../components/RoomSelector.qml"
             }
         }
 

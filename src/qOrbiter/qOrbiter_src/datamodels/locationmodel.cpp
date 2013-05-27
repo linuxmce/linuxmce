@@ -36,7 +36,7 @@ void LocationModel::appendRows(const QList<LocationItem *> &items)
 {
   beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
   foreach(LocationItem *item, items) {
-    //connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
+    connect(item, SIGNAL(dataChanged()), SLOT(handleItemChange()));
     m_list.append(item);
   }
   endInsertRows();
@@ -104,14 +104,21 @@ void LocationModel::setLocation(int ea, int room)
 {
 
     foreach(LocationItem* item, m_list) {
-//      if(item->roomVal()== room && item->entertain_area() == ea)
-//      {
-//          i_currentEA = item->entertain_area();
-//          i_currentRoom = item->roomVal();
-//          setCurrentEA(item->eaId());
-//          setCurrentRoom(item->id());
-//          setCurrentItem(indexFromItem(item).row());
-//      }
+      if(item->roomVal()== room )
+      {
+          QVariantList l = item->entertainAreas();
+          foreach(QVariant t, l){
+              QVariantMap tl = t.toMap();
+              if(tl["ea_number"].toInt()==ea){
+                  i_currentEA = ea;
+                  i_currentRoom= room;
+                  setCurrentEA(tl["ea_name"].toString());
+                  setCurrentRoom(item->id());
+                  //setCurrentItem(indexFromItem(item).row());                          .
+              }
+          }
+
+      }
     }
 
 }

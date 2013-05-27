@@ -80,6 +80,7 @@ signals:
     void eaChanged();
     void roomChanged();
     void userChanged();
+    void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
     void locationChanged();
 

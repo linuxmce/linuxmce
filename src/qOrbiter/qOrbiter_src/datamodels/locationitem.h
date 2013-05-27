@@ -5,6 +5,7 @@
 #include <QVariant>
 #include <QImage>
 #include <QUrl>
+#include <QDebug>
 /*!
  * \brief The LocationItem class.
  * Represents a single item in the LocationModel Listmodel
@@ -43,8 +44,13 @@ public:
     inline QVariantList entertainAreas() const {return ea_list;}
     void addEa(QString name, int no){
         QVariantMap p;
-        p.insert(name, no);
+
+        p.insert("ea_number", no);
+        p.insert("ea_name", name);
         ea_list.append(p);
+
+        emit dataChanged();
+        qDebug() << ea_list;
     }
 
 private:

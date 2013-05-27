@@ -86,7 +86,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #else
 #ifndef QT5
     androidHelper = jniHelper;
-     qorbiterUIwin->rootContext()->setContextProperty("android", androidHelper);
+    qorbiterUIwin->rootContext()->setContextProperty("android", androidHelper);
 #endif
     b_localLoading = false;
 
@@ -632,11 +632,14 @@ void qorbiterManager::processConfig(QNetworkReply *config)
         }
         RroomMapping.insert(m_name, m_val);
         if(m_lRooms->check(m_val)){
-        LocationItem *t= m_lRooms->find(m_name);
-        t->addEa(ea, m_iEA);
+            LocationItem *t= m_lRooms->find(m_name);
+            t->addEa(ea, m_iEA);
         }
-        else
-        m_lRooms->appendRow(new LocationItem(m_name, m_val, m_iType, imagePath, m_lRooms));
+        else{
+            m_lRooms->appendRow(new LocationItem(m_name, m_val, m_iType, imagePath, m_lRooms));
+              LocationItem *t= m_lRooms->find(m_name);
+            t->addEa(ea, m_iEA);
+        }
     }
     m_lRooms->sdefault_Ea = defaults.attribute("DefaultLocation");
     m_lRooms->idefault_Ea = RroomMapping.value(m_lRooms->sdefault_Ea);
@@ -1123,24 +1126,24 @@ void qorbiterManager::mountMediaDevices()
 
     for(int dc =0; dc < storageDevices.count(); dc++){
         qDebug()<< "Starting process for device " << storageDevices.at(dc).toMap()["Description"].toString() << " #"<<storageDevices.at(dc).toMap()["Device"].toString();
-    int d = storageDevices.at(dc).toMap()["Device"].toInt();
-                QString mountProg = "gksudo";
-                QStringList args;
-                args.append(QString("mount -t nfs "+m_ipAddress+":/mnt/device/"+QString::number(d) + " /mnt/remote/"+QString::number(d)));
-                QProcess *mountProcess = new QProcess(this);
-                mountProcess->start(mountProg, args);
-                mountProcess->waitForFinished(10000);
-                qDebug() << "Process Status ::" <<mountProcess->state();
-                if(mountProcess->state()== QProcess::FailedToStart){
-                    qDebug() << "command failed to start!";
-                    qDebug() << mountProcess->readAllStandardError();
-                    qDebug() << mountProcess->errorString();
-                }
+        int d = storageDevices.at(dc).toMap()["Device"].toInt();
+        QString mountProg = "gksudo";
+        QStringList args;
+        args.append(QString("mount -t nfs "+m_ipAddress+":/mnt/device/"+QString::number(d) + " /mnt/remote/"+QString::number(d)));
+        QProcess *mountProcess = new QProcess(this);
+        mountProcess->start(mountProg, args);
+        mountProcess->waitForFinished(10000);
+        qDebug() << "Process Status ::" <<mountProcess->state();
+        if(mountProcess->state()== QProcess::FailedToStart){
+            qDebug() << "command failed to start!";
+            qDebug() << mountProcess->readAllStandardError();
+            qDebug() << mountProcess->errorString();
+        }
 
 
-               qDebug() << "QProcess Exiting, state is :"<< mountProcess->state();
-               qDebug() << "Process exited with::"<< mountProcess->exitCode();
-            }
+        qDebug() << "QProcess Exiting, state is :"<< mountProcess->state();
+        qDebug() << "Process exited with::"<< mountProcess->exitCode();
+    }
 }
 
 void qorbiterManager::getMediaDevices()
@@ -1162,20 +1165,20 @@ void qorbiterManager::setMediaDevices(QNetworkReply *d)
     qDebug() <<"Recieved mount devices";
     qDebug() <<"Devices" << str;
 
- QScriptEngine script;
-QVariantList p = script.evaluate(str).toVariant().toList();
-foreach (QVariant x, p){
-   QVariantMap l = x.toMap();
-   qDebug() << l["Device"].toString();
-}
-storageDevices = p;
+    QScriptEngine script;
+    QVariantList p = script.evaluate(str).toVariant().toList();
+    foreach (QVariant x, p){
+        QVariantMap l = x.toMap();
+        qDebug() << l["Device"].toString();
+    }
+    storageDevices = p;
 
     //    for (QVariant t, jData){
 
     //    }
-if(!storageDevices.isEmpty()){
-    mountMediaDevices();
-}
+    if(!storageDevices.isEmpty()){
+        mountMediaDevices();
+    }
 }
 
 
