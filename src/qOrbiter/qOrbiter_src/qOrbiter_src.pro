@@ -95,10 +95,11 @@ TRANSLATIONS += app_de.ts
 #linux deploy configuration
 linux-g++{
         contains(QT_VERSION,4.*.*){
+		QT += script
                 folder_01.source = qml/desktop
                 folder_01.target = $$DESTDIR/qml
-                 plugins_folder.source = imports/
-                 plugins_folder.target = $$DESTDIR
+		plugins_folder.source = imports/
+		plugins_folder.target = $$DESTDIR
         }
         else:contains(QT_VERSION,5.0.*){
                 folder_01.source = qml/rpi
@@ -113,7 +114,7 @@ linux-g++{
 
         DEPLOYMENTFOLDERS+= plugins_folder
         DEPLOYMENTFOLDERS += folder_01  folder_03
-QML_IMPORT_PATH=imports
+	QML_IMPORT_PATH=imports
 }
 
 #windows deployment and module config
