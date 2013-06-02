@@ -52,7 +52,7 @@ contains(QT_VERSION,5.*.*){
         message("$$QT_VERSION Core")
         DEFINES+=QT5
         DEFINES+=GLENABLED
-        QT+= opengl script webkit widgets
+        QT+= opengl script  widgets
 }
 
 
@@ -251,7 +251,7 @@ folder_01.target = qml
         DEFINES+=ANDROID
         DEPLOYMENTFOLDERS = qmlcomponents base folder_01
         QML_IMPORT_PATH = "androidComponents"
-        QT+=network script
+        QT+=network script webkit
 
         HEADERS += plugins/AndroidInfo/androidsystem.h
         SOURCES += plugins/AndroidInfo/androidsystem.cpp
