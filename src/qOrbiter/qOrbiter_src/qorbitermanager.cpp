@@ -27,6 +27,8 @@
 #include <QtQuick/QQuickView>
 #include <QtXml/QDomDocument>
 #include <QtScript/QScriptEngine>
+#include <QtScript/QScriptValue>
+#include <QtScriptTools/QtScriptTools>
 #else
 #include <QtDeclarative/QDeclarativeProperty>
 #include <QFile>

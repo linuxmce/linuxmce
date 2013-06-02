@@ -36,11 +36,15 @@ CONFIG += thread
 contains(QT_VERSION,4.8.*){
         message("$$QT_VERSION Core")
         DEFINES+=QT4_8
+!android-g++{
+        QT+= webkit declarative phonon
+}
 }
 
 contains(QT_VERSION,4.7.*){
         message("$$QT_VERSION Core")
         DEFINES+=QT4_7
+        QT+= webkit declarative phonon
 }
 
 
@@ -48,7 +52,7 @@ contains(QT_VERSION,5.*.*){
         message("$$QT_VERSION Core")
         DEFINES+=QT5
         DEFINES+=GLENABLED
-        QT+= opengl
+        QT+= opengl script webkit widgets
 }
 
 
@@ -162,6 +166,7 @@ for_android{
         INSTALLS+= qmlplugins
         DEFINES+=for_android
         DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
+        QT+=script
 }
 
 #freemantle config
@@ -246,7 +251,7 @@ folder_01.target = qml
         DEFINES+=ANDROID
         DEPLOYMENTFOLDERS = qmlcomponents base folder_01
         QML_IMPORT_PATH = "androidComponents"
-        QT+=network
+        QT+=network script
 
         HEADERS += plugins/AndroidInfo/androidsystem.h
         SOURCES += plugins/AndroidInfo/androidsystem.cpp
@@ -279,15 +284,6 @@ symbian:TARGET.UID3 = 0xE0D07D4D
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 #LinuxMCE Specific include path. Linking in the app instead of against dce libs for multi-platform expediency.
 INCLUDEPATH += ../../ ../../DCE/
-
-#Modules, by platform
-QT4_*{
-        QT+= webkit declarative phonon #note that the qml module declarations are in the qmlapplicationviewer
-}
-
-QT5{
-        QT+= webkit mobility widgets qtcore #note that the qml module declarations are in the qmlapplicationviewer
-}
 
 #turtlenecks and such
 macx{
