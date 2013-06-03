@@ -9,13 +9,14 @@
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
 
-export buildenv="/opt/pos/QtSDK.121/Desktop/Qt/4.8.1/gcc/bin"
+#export buildenv="/opt/pos/QtSDK.121/Desktop/Qt/4.8.1/gcc/bin"
 export spec=linux-g++
 export imgsrc=~/lmce-trunk/extra/QOrbiter-Images/default/img/
-export srcroot=~/lmce-trunk/src/
-export projectdir=$(srcroot)/qOrbiter/qOrbiterMaster
-export buildoutput=$(srcroot)/qOrbiter/build-output
-export binoutput=$(srcroot)/qOrbiter/QOrbiter-build-4.8.1
+#export srcroot=~/lmce-trunk/src/
+export srcroot=.
+export projectdir=$(srcroot)/qOrbiterMaster
+export buildoutput=$(srcroot)/build-output
+export binoutput=$(srcroot)/QOrbiter-build-4.8.1
 export config="CONFIG+=debug CONFIG+=for_desktop CONFIG+=for_debian"
 export project=qOrbiterMaster.pro
 
@@ -56,8 +57,8 @@ override_dh_strip:
 
 override_dh_auto_configure:
 	echo "Starting the QMake process"
-	cd $(buildenv) || :
-	qmake -makefile -nocache $(projectdir)/qOrbiterMaster.pro -o $(buildoutput)/Makefile -r -spec $(spec) $(config)
+#	cd $(buildenv) || :
+	qmake -makefile -nocache $(projectdir)/qOrbiterMaster.pro -o ../$(buildoutput)/Makefile -r -spec $(spec) $(config)
 
 override_dh_auto_build:
 	echo "Changing into $(buildoutput)"
@@ -66,7 +67,7 @@ override_dh_auto_build:
 	make -f $(buildoutput)/Makefile clean
 	echo "Copying the images from the extra directory where golgoj4 has put them"
 	mkdir -p $(projectdir)/../qOrbiter_src/qml/desktop/default/img/
-	cp -r $(imgsrc)/* $(projectdir)/../qOrbiter_src/qml/desktop/default/img/
+#	cp -r $(imgsrc)/* $(projectdir)/../qOrbiter_src/qml/desktop/default/img/
 	make -f $(buildoutput)/Makefile -w
 
 override_dh_shlibdeps:
