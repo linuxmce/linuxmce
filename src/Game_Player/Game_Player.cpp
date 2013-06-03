@@ -1163,6 +1163,11 @@ void Game_Player::CMD_Application_Exited(int iPID,int iExit_Code,string &sCMD_Re
 					iPID, iExit_Code);
 
   // Tell the controller the emulator process has exited.
+  if (!m_pEmulatorController)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Application Exited called, probably due to emulator crash. not calling EmulatorHasExited()");
+      return;
+    }
   m_pEmulatorController->EmulatorHasExited(iExit_Code);
 
   // void *data;

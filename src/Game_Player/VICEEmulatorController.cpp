@@ -133,7 +133,7 @@ namespace DCE
     switch(iMenu)
       {
       case 0:
-	if (m_pEmulatorModel->m_iActiveMenu > 1) // 2 and above is a UI of some sort.
+	if (m_pEmulatorModel->m_iActiveMenu == 2) // 2 and above is a UI of some sort.
 	  doAction("UI_EXIT");
 	break;
       case 1:

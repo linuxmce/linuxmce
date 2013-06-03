@@ -309,6 +309,7 @@ namespace DCE
   bool X11EmulatorController::getSnap(long int iPK_Device, int iWidth, int iHeight, char **pData, int& iData_Size)
   {
     size_t size; // length of image in bytes.
+    XSetInputFocus(m_pEmulatorModel->m_pDisplay, m_pEmulatorModel->m_iWindowId, RevertToNone, CurrentTime);
     string sGeometry = StringUtils::itos(iWidth) + "x" + StringUtils::itos(iHeight);
     m_pEmulatorModel->updateVideoFrameGeometry(iPK_Device,iWidth,iHeight);
 
