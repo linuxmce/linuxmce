@@ -45,7 +45,7 @@ Roku_LTHDXDXS_Streaming_Pla.so: $(sources:.cpp=.o)
 	cp $@ ../bin
 #	chmod +x post_make.sh
 #	./post_make.sh $@
-
+		
 Roku_LTHDXDXS_Streaming_Pla: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	mkdir -p ../bin
