@@ -19,6 +19,7 @@
 #include "Other.h"
 
 #ifndef SYMBIAN
+#include "md5.h"
 	#include "MultiThreadIncludes.h"
 	#include <stdio.h>
 	#if (defined(SMARTPHONE2005)) && !defined(ARMV4I)		//--- CHANGED4WM5 ----//
@@ -1195,4 +1196,63 @@ vector<string> StringUtils::Split(string sInput, string sDelimiters, bool bRemov
 
 	return vOutput;
 }
+
+/** 
+ * Create a title hash from a given title, normalize like so:
+ * (1) remove everything up to a paren or bracket
+ * (2) trim whitespace
+ * (3) convert to uppercase
+ * (4) remove superfluous spaces, or any characters not [A-Z] || [0-9]
+ * (5) generate and return md5
+ */
+string StringUtils::TitleHash(string sTitle)
+{
+
+  string sTmp, sNormalizedTitle;
+
+  if (sTitle.empty())
+    {
+      return "";
+    }
+  
+  for (string::iterator it=sTitle.begin(); it!=sTitle.end(); ++it)
+    {
+      char cChar = *it;
+      if ((cChar>='0' && cChar<='9') || (cChar>='A' && cChar<='Z'))
+	{
+	  sTmp += cChar;
+	}
+      else if (cChar>='a' && cChar<='z')
+	{
+	  sTmp += cChar-32;
+	}
+      else if (cChar=='(' || cChar==')' || cChar=='[' || cChar==']')
+	{
+	  break;
+	}
+    }
+
+  sNormalizedTitle = TrimSpaces(sTmp);
+
+  // now do the MD5
+  MD5_CTX ctx;
+  char tmp[3];
+  string md5;
+
+  MD5Init(&ctx);
+  MD5Update(&ctx, (unsigned char *)sNormalizedTitle.c_str(), 
+	    (unsigned int)sNormalizedTitle.size());
+  unsigned char digest[16];
+  MD5Final(digest, &ctx);
+  
+  for (int i=0; i<16; i++)
+    {
+      sprintf(tmp, "%02x", digest[i]);
+      md5 += tmp;
+    }
+  
+  return md5;
+
+}
+
 #endif //#ifndef SYMBIAN

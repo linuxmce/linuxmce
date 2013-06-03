@@ -254,6 +254,9 @@ namespace StringUtils
 	 */
 
 	vector<string> Split(string sInput, string sDelimiters, bool bRemoveEmptyElements=false);
+
+	string TitleHash(string sTitle); /** Calculate a title hash */
+
 #endif //#ifndef SYMBIAN
 };
 
