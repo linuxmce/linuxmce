@@ -200,9 +200,10 @@ Item {
 
         Image {
             id: appbackground
-            source: manager.imagePath+"ui3/light_gray_texture-wallpaper-1920x1080.jpg"
+            source:""// manager.imagePath+"ui3/light_gray_texture-wallpaper-1920x1080.jpg"
             anchors.fill: parent
             opacity: .25
+            visible:false
         }
 
         DataHeader {

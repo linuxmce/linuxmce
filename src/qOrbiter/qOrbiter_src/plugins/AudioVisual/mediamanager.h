@@ -139,7 +139,14 @@ public slots:
     void setErrorStatus(bool e) {hasError = e; emit hasErrorChanged();}
     bool getErrorStatus() {return hasError;}
 
-    void setMediaPlaying(bool s) {mediaPlaying = s; qDebug() << "media playback changed in plugin!" << s; emit mediaPlayingChanged(); }
+    void setMediaPlaying(bool s) {mediaPlaying = s;
+                                  qDebug() << "media playback changed in plugin!" << s;
+                                  if (mediaPlaying==false)
+                                  { filterProxy->hide();}
+                                  else
+                                  {filterProxy->show();}
+                                emit mediaPlayingChanged();
+                                 }
     bool getMediaPlaying() {return mediaPlaying;}
 
     void setFileReference(QString f){fileReference = f.at(0); setFileNumber(f.remove(0,1).toInt()); }

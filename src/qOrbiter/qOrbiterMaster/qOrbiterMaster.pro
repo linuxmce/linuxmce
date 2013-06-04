@@ -9,7 +9,8 @@ OTHER_FILES += \
     qtc_packaging/debian_harmattan/compat \
     qtc_packaging/debian_harmattan/changelog
 
-SUBDIRS = ../qOrbiter_src/plugins/AudioVisual
+SUBDIRS =  ../LinuxMCE-Components/LinuxMCEComponents/linuxmcecomponents.pro
+SUBDIRS += ../qOrbiter_src/plugins/AudioVisual
 SUBDIRS += ../qOrbiter_src
 
 #folder_01.source = ../qOrbiter_src/qml/desktop

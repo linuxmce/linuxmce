@@ -43,6 +43,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     filterProxy = new ColorFilterProxyWidget(this);
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
+    filterProxy->hide();
 
 #endif
     setCurrentStatus("Window Initialized");
