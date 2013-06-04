@@ -29,7 +29,7 @@ void NowPlayingClass::resetData()
     setDirector("");
     setTrack(""); emit trackChanged();
     setMediaTitle(""); 
-    setMediaType(NULL);
+    setMediaType(0);
     setSynop(""); emit synopChanged();
     setStreamID(0);
     setProgram("");

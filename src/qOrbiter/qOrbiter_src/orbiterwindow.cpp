@@ -25,7 +25,7 @@
 #include <QtCore/QDir>
 #include <shaders/filereader.h>
 #include <QThread>
-#include <QtOpenGL/QGLFormat> >
+#include <QtOpenGL/QGLFormat>
 #if (QT5)
 #include <QtQml/QtQml>
 #include <QtQml/QQmlContext>

@@ -252,7 +252,7 @@ folder_01.target = qml
         DEFINES+=ANDROID
         DEPLOYMENTFOLDERS = qmlcomponents base folder_01
         QML_IMPORT_PATH = "androidComponents"
-        QT+=network script webkit
+        QT+=network script
 
         HEADERS += plugins/AndroidInfo/androidsystem.h
         SOURCES += plugins/AndroidInfo/androidsystem.cpp
