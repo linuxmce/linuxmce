@@ -286,6 +286,18 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
 
+	m_omxplayer = new OMXPlayer;
+
+        // open file
+        m_omxplayer->OpenFile(sMediaURL);
+
+	// start the engine running
+        m_omxplayer->StartEngine();
+
+	m_bOMXIsRunning = true;
+
+	sCMD_Result = "OK";
+/*
 	if (m_pDevice_App_Server)
 	{
 		string sMessage =
@@ -314,6 +326,7 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - no app server");
 	
 //	return false;	
+*/
 }
 
 //<-dceag-c38-b->
@@ -331,7 +344,15 @@ void OMX_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 	cout << "Need to implement command #38 - Stop Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-	
+
+	m_omxplayer->SendCommand('q');	
+
+	delete m_omxplayer;
+
+	m_bOMXIsRunning = false;
+
+	sCMD_Result = "OK";
+/*
 	DeviceData_Base *pDevice_App_Server = NULL;
 	string sResponse;
 	if (!m_bRouterReloading)
@@ -346,13 +367,14 @@ void OMX_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 							  "omxplayer",
 							  false);
 
-			/*return*/ SendCommand (CMD_Kill_Application, &sResponse);	// Get return confirmation so we know it's gone before we continue
+			SendCommand (CMD_Kill_Application, &sResponse);	// Get return confirmation so we know it's gone before we continue
 		}
 	}
 
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS,"OMX_Player::CMD_Stop_Media %p %s",pDevice_App_Server,	sResponse.c_str ());
 
 //	return false;
+*/
 }
 
 //<-dceag-c39-b->
@@ -367,6 +389,9 @@ void OMX_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMes
 {
 	cout << "Need to implement command #39 - Pause Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+	m_omxplayer->SendCommand('p');
+	sCMD_Result = "OK";
 }
 
 //<-dceag-c40-b->
@@ -381,6 +406,9 @@ void OMX_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pM
 {
 	cout << "Need to implement command #40 - Restart Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+	m_omxplayer->SendCommand('p');
+	sCMD_Result = "OK";
 }
 
 //<-dceag-c41-b->
@@ -432,6 +460,9 @@ void OMX_Player::CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_Re
 {
 	cout << "Need to implement command #63 - Skip Fwd - Channel/Track Greater" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+	m_omxplayer->SendCommand(0x5b43);
+	sCMD_Result = "OK";
 }
 
 //<-dceag-c64-b->
@@ -446,6 +477,9 @@ void OMX_Player::CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Res
 {
 	cout << "Need to implement command #64 - Skip Back - Channel/Track Lower" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+	m_omxplayer->SendCommand(0x5b44);
+	sCMD_Result = "OK";
 }
 
 //<-dceag-c65-b->
@@ -477,6 +511,9 @@ void OMX_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
 {
 	cout << "Need to implement command #92 - Pause" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+	m_omxplayer->SendCommand('p');
+	sCMD_Result = "OK";
 }
 
 //<-dceag-c95-b->
@@ -494,6 +531,9 @@ void OMX_Player::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message 
 	cout << "Need to implement command #95 - Stop" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #203 - Eject=" << bEject << endl;
+
+	m_omxplayer->SendCommand('q');
+	sCMD_Result = "OK";
 }
 
 //<-dceag-c126-b->

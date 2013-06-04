@@ -6,10 +6,10 @@ SNR_LDFLAGS ?=
 
 ROOT = ..
 CXX = g++
-CXXFLAGS = -Wall -fPIC -ggdb3
+CXXFLAGS = -Wall -fPIC -ggdb3 -fpermissive
 CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
-BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
+BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread -lomxengine
 
 MYNAME = OMX_Player
 VERSION = 2.0.0
@@ -19,8 +19,15 @@ Gen_Dev_Files = $(GENDEV)/OMX_PlayerBase.cpp
 sources = Main.cpp OMX_Player.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
+include omxplayer/Makefile.include
+
+CFLAGS+=-std=c++0x -DSTANDALONE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POSIX -D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_CMAKE_CONFIG -D__VIDEOCORE4__ -U_FORTIFY_SOURCE -Wall -DHAVE_OMXLIB -DUSE_EXTERNAL_FFMPEG  -DHAVE_LIBAVCODEC_AVCODEC_H -DHAVE_LIBAVUTIL_OPT_H -DHAVE_LIBAVUTIL_MEM_H -DHAVE_LIBAVUTIL_AVUTIL_H -DHAVE_LIBAVFORMAT_AVFORMAT_H -DHAVE_LIBAVFILTER_AVFILTER_H -DHAVE_LIBSWRESAMPLE_SWRESAMPLE_H -DOMX -DOMX_SKIP64BIT -ftree-vectorize -DUSE_EXTERNAL_OMX -DTARGET_RASPBERRY_PI -DUSE_EXTERNAL_LIBBCM_HOST
+
+LDFLAGS+=-L./omxplayer -Lomxplayer/ffmpeg_compiled/usr/local/lib/
+INCLUDES+=-Iomxplayer -Iomxplayer/linux -Iomxplayer/ffmpeg_compiled/usr/local/include/
+
 CXXFLAGS +=
-CPPFLAGS +=
+CPPFLAGS += $(INCLUDES) $(CFLAGS)
 LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r
 

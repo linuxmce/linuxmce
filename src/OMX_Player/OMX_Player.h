@@ -20,6 +20,8 @@
 #include "Gen_Devices/OMX_PlayerBase.h"
 //<-dceag-d-e->
 
+#include "omxplayer/omxengine.h"
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -29,6 +31,8 @@ namespace DCE
 		// Private member variables
 		DeviceData_Base *m_pDevice_OMX_Plugin;
 		DeviceData_Base *m_pDevice_App_Server;
+	        OMXPlayer *m_omxplayer;
+
 		bool m_bOMXIsRunning;
 		// Private methods
 public:
