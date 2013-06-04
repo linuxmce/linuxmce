@@ -25,12 +25,16 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+// Additional required includes
+#include "pluto_main/Define_DeviceTemplate.h"
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 OMX_Player::OMX_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: OMX_Player_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
+	m_pDevice_App_Server = NULL;
 }
 
 //<-dceag-const2-b->
@@ -48,6 +52,13 @@ OMX_Player::~OMX_Player()
 	
 }
 
+void
+OMX_Player::PrepareToDelete ()
+{
+  Command_Impl::PrepareToDelete ();
+  m_pDevice_App_Server = NULL;
+}
+
 //<-dceag-getconfig-b->
 bool OMX_Player::GetConfig()
 {
@@ -57,7 +68,23 @@ bool OMX_Player::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
-	return true;
+	m_pDevice_OMX_Plugin =
+		m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_OMX_Plugin_CONST);
+	if (!m_pDevice_OMX_Plugin)
+	{
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"I need an OMX plugin to function.");
+		return false;
+	}
+
+	m_pDevice_App_Server =
+		m_pData->FindFirstRelatedDeviceOfCategory (DEVICECATEGORY_App_Server_CONST, this);
+	if (!m_pDevice_App_Server)
+	{
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"I need an App Server to function.");
+		return false;
+	}
+
+  return true;
 }
 
 //<-dceag-reg-b->
@@ -258,6 +285,35 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
+
+	if (m_pDevice_App_Server)
+	{
+		string sMessage =
+		StringUtils::itos (m_dwPK_Device) + " " +
+		StringUtils::itos (m_dwPK_Device) +
+		" 1 " TOSTRING (COMMAND_Application_Exited_CONST) " "
+		TOSTRING (COMMANDPARAMETER_Exit_Code_CONST) " ";
+
+		DCE::CMD_Spawn_Application CMD_Spawn_Application (m_dwPK_Device,
+							m_pDevice_App_Server->
+							m_dwPK_Device,
+							"omxplayer",
+							"omxplayer", "" + sMediaURL + "",
+							sMessage + "1",
+							sMessage + "0", false,
+							false, true, false);
+		if (SendCommand (CMD_Spawn_Application))
+		{
+			m_bOMXIsRunning = true;
+
+//			return true;
+		}
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - failed to launch");
+	}
+	else
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - no app server");
+	
+//	return false;	
 }
 
 //<-dceag-c38-b->
@@ -275,6 +331,28 @@ void OMX_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 	cout << "Need to implement command #38 - Stop Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+	
+	DeviceData_Base *pDevice_App_Server = NULL;
+	string sResponse;
+	if (!m_bRouterReloading)
+	{
+		pDevice_App_Server =
+			m_pData->FindFirstRelatedDeviceOfCategory (DEVICECATEGORY_App_Server_CONST,this);
+		if (pDevice_App_Server)
+		{
+			DCE::CMD_Kill_Application CMD_Kill_Application (m_dwPK_Device,
+							  pDevice_App_Server->
+							  m_dwPK_Device,
+							  "omxplayer",
+							  false);
+
+			/*return*/ SendCommand (CMD_Kill_Application, &sResponse);	// Get return confirmation so we know it's gone before we continue
+		}
+	}
+
+	LoggerWrapper::GetInstance ()->Write (LV_STATUS,"OMX_Player::CMD_Stop_Media %p %s",pDevice_App_Server,	sResponse.c_str ());
+
+//	return false;
 }
 
 //<-dceag-c39-b->

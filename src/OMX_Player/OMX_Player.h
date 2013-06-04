@@ -27,10 +27,13 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
-
+		DeviceData_Base *m_pDevice_OMX_Plugin;
+		DeviceData_Base *m_pDevice_App_Server;
+		bool m_bOMXIsRunning;
 		// Private methods
 public:
 		// Public member variables
+		virtual void PrepareToDelete();
 
 //<-dceag-const-b->
 public:
