@@ -1,1 +1,0 @@
-tail -f /var/log/pluto/20_LaunchOrbiter.sh.log | grep -i 'surrender\|yield'
