@@ -133,7 +133,7 @@ void OMX_Plugin::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,strin
 void OMX_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
-	sCMD_Result = "UNKNOWN COMMAND";
+	sCMD_Result = "UNKNOWN DEVICE";
 }
 
 //<-dceag-sample-b->!
