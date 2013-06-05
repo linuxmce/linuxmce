@@ -286,6 +286,16 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
 
+
+	if (m_bOMXIsRunning) {
+		if (m_omxplayer) {
+			m_omxplayer->SendCommand('q');
+			usleep(1000);
+			delete m_omxplayer;
+		}
+		m_bOMXIsRunning = false;
+	}
+
 	m_omxplayer = new OMXPlayer;
 
         // open file
@@ -429,6 +439,9 @@ void OMX_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
 	cout << "Parm #220 - Report=" << bReport << endl;
+
+	m_omxplayer->SendCommand('p');
+	sCMD_Result = "OK";
 }
 
 //<-dceag-c42-b->
@@ -497,6 +510,20 @@ void OMX_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStre
 	cout << "Need to implement command #65 - Jump Position In Playlist" << endl;
 	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+	if (atoi(sValue_To_Assign.c_str())==0) {
+		string filename=m_omxplayer->m_filename;
+		m_omxplayer->SendCommand('q');
+		usleep(1000);
+		delete m_omxplayer;
+		m_bOMXIsRunning = false;
+
+	        m_omxplayer = new OMXPlayer;
+	        m_omxplayer->OpenFile(filename);
+	        m_omxplayer->StartEngine();
+	        m_bOMXIsRunning = true;
+	}
+	sCMD_Result = "OK";
 }
 
 //<-dceag-c92-b->
