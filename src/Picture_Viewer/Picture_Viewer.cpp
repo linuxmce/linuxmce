@@ -27,6 +27,8 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include "utilities/linux/window_manager/WMController/WMController.h"
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Picture_Viewer::Picture_Viewer(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -211,6 +213,22 @@ void Picture_Viewer::SomeFunction()
 */
 //<-dceag-sample-e->
 
+void Picture_Viewer::Minimize()
+{
+  WMControllerImpl *pWMController = new WMControllerImpl();
+  if (pWMController)
+    {
+      bool bResult = pWMController->SetVisible("Picture_Viewer.Picture_Viewer",false);
+      if (!bResult)
+	{
+	  // Failed to minimize, try again, in half a second
+	  Sleep(500);
+	  bResult = pWMController->SetVisible("Picture_Viewer.Picture_Viewer",false);
+	}
+      delete pWMController;
+      pWMController=NULL;
+    } 
+}
 
 void Picture_Viewer::SetupPictureCanvas()
 {
@@ -221,7 +239,7 @@ void Picture_Viewer::SetupPictureCanvas()
 	int width = atoi(w.c_str());
 	int height = atoi(h.c_str());
 	m_PictureCanvas.Setup(width, height, string("Picture_Viewer"));
-
+	Minimize();
 }
 
 void Picture_Viewer::AlarmCallback(int id, void* param) {
@@ -333,6 +351,7 @@ void Picture_Viewer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string 
 	m_PictureCanvas.Clear();
         m_pAlarmManager->Clear();
 	m_iAlarmID = -1;
+	Minimize();
 }
 
 //<-dceag-c39-b->

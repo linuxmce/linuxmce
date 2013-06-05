@@ -20,13 +20,15 @@ sources = Main.cpp Picture_Viewer.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS += -I/usr/include/SDL -I/usr/include/exiv2
-LDFLAGS += -lSDL -lSDL_image -lXrender -lglib-2.0 -lXmu -lSDL_gfx -lexiv2
+CPPFLAGS += -I/usr/include/SDL -I/usr/include/exiv2 `pkg-config --cflags glib-2.0`
+LDFLAGS += -lSDL -lSDL_image -lXrender -lXmu -lSDL_gfx -lexiv2 `pkg-config --libs glib-2.0`
 XTRALDLIBS = -lmysqlclient_r
 
 Gen_Dev_Files +=
 sources += Picture.cpp \
-	PictureCanvas.cpp
+	PictureCanvas.cpp \
+	../utilities/linux/window_manager/WMController/WMController.cpp \
+	../utilities/linux/window_manager/wmctrl/wmctrl.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
@@ -45,7 +47,7 @@ Picture_Viewer.so: $(sources:.cpp=.o)
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
-		
+
 Picture_Viewer: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
