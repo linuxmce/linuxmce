@@ -216,6 +216,68 @@ LoggerWrapper::GetInstance()->Write(LV_WARNING, "list %s : %s date: %d", pf->m_s
 	return pMediaListGrid;
 }
 
+bool Media_Plugin::IsGameMediaType(int iPK_MediaType)
+{
+  bool bMediaType = 
+    (iPK_MediaType == MEDIATYPE_lmce_Game_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_a2600_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_a5200_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_a7800_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_coleco_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_intv_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_famicom_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_nes_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_sms_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_sg1000_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_vectrex_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_tg16_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_genesis_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_snes_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_megadriv_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_snespal_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_sgx_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_pce_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_apple2_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_ps1_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_ps2_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_jaguar_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_vic20_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_c64_CONST) ||
+    (iPK_MediaType == MEDIATYPE_lmce_Game_Atari800_CONST);
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"bMediaType is %d",bMediaType);
+}
+
+string Media_Plugin::GameMediaTypes()
+{
+  string sMediaTypes = TOSTRING(MEDIATYPE_lmce_Game_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_a2600_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_a5200_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_a7800_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_coleco_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_intv_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_famicom_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_nes_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_sms_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_sg1000_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_vectrex_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_tg16_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_genesis_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_snes_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_megadriv_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_snespal_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_sgx_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_pce_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_apple2_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_ps1_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_ps2_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_jaguar_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_vic20_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_c64_CONST) ","
+    TOSTRING(MEDIATYPE_lmce_Game_Atari800_CONST);
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Returning media types: %s",sMediaTypes.c_str());
+  return sMediaTypes;
+}
+
 void Media_Plugin::AttributesBrowser( MediaListGrid *pMediaListGrid,int PK_MediaType, string sPK_Attribute, int PK_AttributeType_Sort, bool bShowFiles, string &sPK_MediaSubType, string &sPK_FileFormat, string &sPK_Attribute_Genres, string &sPK_Sources, string &sPK_Users_Private, int PK_Users, int iLastViewed, int *iPK_Variable, string *sValue_To_Assign )
 {
 	bool bFile=false,bDiscs=false,bSubDirectory=false,bBookmarks=false,bDownload=false;
@@ -362,6 +424,8 @@ void Media_Plugin::AttributesBrowser( MediaListGrid *pMediaListGrid,int PK_Media
 		sSQL_Where_MediaType = " EK_MediaType IN (" TOSTRING(MEDIATYPE_pluto_StoredAudio_CONST) "," TOSTRING(MEDIATYPE_pluto_CD_CONST) "," TOSTRING(MEDIATYPE_lmce_StreamedAudio_CONST)")";
 	else if( PK_MediaType==MEDIATYPE_pluto_StoredVideo_CONST )
 		sSQL_Where_MediaType = " EK_MediaType IN (" TOSTRING(MEDIATYPE_pluto_StoredVideo_CONST) "," TOSTRING(MEDIATYPE_pluto_DVD_CONST) "," TOSTRING(MEDIATYPE_pluto_HDDVD_CONST) "," TOSTRING(MEDIATYPE_pluto_BD_CONST) "," TOSTRING(MEDIATYPE_lmce_StreamedVideo_CONST)")";
+        else if( IsGameMediaType(PK_MediaType) )
+                sSQL_Where_MediaType = " EK_MediaType IN (" + GameMediaTypes() + ")";
 	else 
 		sSQL_Where_MediaType = " EK_MediaType=" + StringUtils::itos(PK_MediaType);
 
@@ -419,7 +483,7 @@ void Media_Plugin::AttributesBrowser( MediaListGrid *pMediaListGrid,int PK_Media
 		sSQL_Where += string(" AND DateLastViewed IS ") + (iLastViewed==1 ? "NOT" : "") + " NULL ";
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Media_Plugin::AttributesBrowser - path: %s", sPath.c_str());
-
+	
 	//path condition correction
 	string sPath_Clone(sPath);
 	StringUtils::Replace(&sPath_Clone, "'", "");

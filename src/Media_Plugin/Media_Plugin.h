@@ -710,6 +710,8 @@ public:
 	*	Since this class is so big, all the datagrid function have been moved to Media_Plugin_Grids.cpp
 	*/
     class DataGridTable *MediaBrowser( string GridID,string Parms,void *ExtraData,int *iPK_Variable,string *sValue_To_Assign,class Message *pMessage );
+        bool IsGameMediaType(int iPK_MediaType);
+	string GameMediaTypes();
 	void AttributesBrowser( MediaListGrid *pMediaListGrid,int PK_MediaType, string sPK_Attribute, int PK_AttributeType_Sort, bool bShowFiles, string &sPK_MediaSubType, string &sPK_FileFormat, string &sPK_Attribute_Genres, string &sPK_Sources, string &sPK_Users_Private, int PK_Users, int iLastViewed, int *iPK_Variable, string *sValue_To_Assign );
 	void FileBrowser( MediaListGrid *pMediaListGrid,int PK_MediaType, string &sPK_MediaSubType, string &sPK_FileFormat, string &sPK_Attribute_Genres, string &sSources, string &sPK_Users_Private, int PK_Users, int *iPK_Variable, string *sValue_To_Assign );
 	void FetchPictures(string sWhichTable,string &sPK_File_Or_Disc,map<int,int> &mapFile_To_Pic,int PK_AttributeType_Sort);

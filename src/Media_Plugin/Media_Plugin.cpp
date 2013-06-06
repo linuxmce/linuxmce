@@ -2007,10 +2007,12 @@ dequeMediaFile->size() ? (*dequeMediaFile)[0]->m_sPath.c_str() : "NO",
 
     OH_Orbiter *pOH_Orbiter = m_pOrbiter_Plugin->m_mapOH_Orbiter_Find(PK_Device_Orbiter);
 
-	// See if we can queue it
+	// See if we can queue it 
+
     if( !bResume && pMediaStream_AllEAsPlaying && !pMediaStream_AllEAsPlaying->m_bResume &&
 		pMediaStream_AllEAsPlaying->m_pMediaHandlerInfo->m_pMediaHandlerBase == pMediaHandlerInfo->m_pMediaHandlerBase &&
-		pMediaStream_AllEAsPlaying->m_iPK_MediaType == pMediaHandlerInfo->m_PK_MediaType &&
+		(pMediaStream_AllEAsPlaying->m_iPK_MediaType == pMediaHandlerInfo->m_PK_MediaType ||
+                 pMediaStream_AllEAsPlaying->m_iPK_MediaType == IsGameMediaType(pMediaHandlerInfo->m_PK_MediaType)) &&
 		!pMediaStream_AllEAsPlaying->m_bContainsTitlesOrSections &&
 		!bContainsTitlesOrSections &&
 		pMediaStream_AllEAsPlaying->m_dequeMediaFile.size() &&
