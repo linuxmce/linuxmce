@@ -69,7 +69,9 @@ sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files) \
 	C64EmulatorModel.cpp \
 	C64EmulatorController.cpp \
 	Apple2EmulatorModel.cpp \
-	Apple2EmulatorController.cpp
+	Apple2EmulatorController.cpp \
+	Atari800EmulatorModel.cpp \
+	Atari800EmulatorController.cpp
 #<-dceag-mh-e->
 
 CXXFLAGS += 

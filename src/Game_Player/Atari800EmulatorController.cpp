@@ -15,15 +15,6 @@ namespace DCE
   {
     m_pGame_Player = pGame_Player;
     m_pEmulatorModel = pEmulatorModel;
-    m_pEmulatorModel->m_sEmulatorBinary="/usr/bin/atari800";
-    m_pEmulatorModel->m_sProcessName="atari800";
-    m_pEmulatorModel->m_sConfigFileTemplate="/usr/pluto/templates/mame.ini.template";
-    m_pEmulatorModel->m_sConfigFile="/root/.mame/mame.ini";
-    m_pEmulatorModel->m_sWindowName="atari800.atari800"; // wmclass.wmname of window.
-    m_pEmulatorModel->m_bChangeRequiresRestart=true;
-    m_pEmulatorModel->m_bRunning=false;
-    m_pEmulatorModel->m_bHasArgs=true;
-    m_pEmulatorModel->m_sArgs="";
   }
 
   Atari800EmulatorController::~Atari800EmulatorController()
@@ -36,56 +27,102 @@ namespace DCE
     return X11EmulatorController::init();
   }
 
-  string Atari800EmulatorController::getRomFromSlot()
+  void Atari800EmulatorController::insertMediaNamed(string sMediaFile, string sSlot)
   {
-    string sMedia;
-    if (getMediaInSlot(sMedia))
+    string sMediaUpper = StringUtils::ToUpper(sMediaFile);
+    if ((sMediaUpper.find(".ATR") != string::npos) ||
+	(sMediaUpper.find(".XFD") != string::npos) ||
+	(sMediaUpper.find(".DCM") != string::npos))
       {
-	if (!FileUtils::FileExists(sMedia))
-	  {
-	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Atari800EmulatorController::run() - could not find media in default slot: %s",sMedia.c_str());
-	    return "";
-	  }
+	sSlot=""; // Atari800 doesn't use a switch for this one.
       }
-    else
+    else if ((sMediaUpper.find(".CAR") != string::npos) ||
+	     (sMediaUpper.find(".ROM") != string::npos))
       {
-	return "";
+	sSlot="-cart";
       }
-    return sMedia;
+    else if ((sMediaUpper.find(".XEX") != string::npos))
+      {
+	sSlot="-run";
+      }
+
+    EmulatorController::insertMediaNamed(sMediaFile, sSlot);
   }
 
-  string Atari800EmulatorController::getRomPathFromSlot()
+  string Atari800EmulatorController::getSlotsAndRoms()
   {
-    string sMedia;
-    if (!getMediaInSlot(sMedia))
+    string sRet = "";
+    
+    if (!m_pEmulatorModel)
       {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MESSEmulatorController::getSlotsAndRoms() - no m_pEmulatorModel, bailing!");
 	return "";
       }
-    else
+    
+    for (map<string,string>::iterator it=m_pEmulatorModel->m_mapMedia.begin(); it!=m_pEmulatorModel->m_mapMedia.end(); ++it)
       {
-	return sMedia;
+	string sSlot = it->first;
+	string sMediaFile = it->second;
+		
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Inserting %s into slot %s",sSlot.c_str(),sMediaFile.c_str());
+	
+	sRet += "-" + sSlot + "\t" +
+	  sMediaFile;
       }
+
+    return sRet;
   }
 
   bool Atari800EmulatorController::run()
   {
-    
     if (!m_pEmulatorModel)
       {
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Atari800EmulatorController::run() - pEmulatorModel is null. Bailing.");
 	return false;
       }
 
-    m_pEmulatorModel->m_sArgs = "-dsprate\t48000\t" + getRomFromSlot();
+    m_pEmulatorModel->m_sArgs = getSlotsAndRoms();
 
-    // If a media position was set (i.e. as part of the CMD_Play_Media, then put it in
-    // the mame configuration file to load. Otherwise, blank it out.
+    if (!m_pEmulatorModel->m_sMediaPosition.empty() && !m_pEmulatorModel->m_bIsStreamingSource)
+      {
+	// Implement State loading if possible.
+      }
+
+    if (m_pEmulatorModel->m_bIsStreaming)
+      {
+	// Implement Streaming if possible.
+	if (m_pEmulatorModel->m_bIsStreamingSource)
+	  {
+	    // This is the server, set args as needed.
+	  }
+	else
+	  {
+	    // This is the client, set appropriately.
+	  }
+      }
+    else
+      {
+	// Regular Non-streaming instance
+      }
 
     if (X11EmulatorController::run())
-      return true;
-
+      {
+        usleep(2000);
+        m_pGame_Player->EVENT_Menu_Onscreen(m_pEmulatorModel->m_iStreamID,false);
+        usleep(2000);
+      	return true;
+      }
+    
     return false;
+  }
 
+  bool Atari800EmulatorController::stop()
+  {
+      X11EmulatorController::stop();
+
+      // TODO: remember why the hell I removed this from the base class!
+      m_pEmulatorModel->m_mapMedia.clear();
+      return true;
   }
 
   bool Atari800EmulatorController::setSpeed(int iSpeed)
@@ -125,7 +162,7 @@ namespace DCE
 
   bool Atari800EmulatorController::saveState(string& sPosition, string& sText, bool bAutoSave, string sAutoSaveName)
   {
-
+    return false;
   }
 
   void Atari800EmulatorController::setMediaPosition(string sMediaPosition)
@@ -136,56 +173,13 @@ namespace DCE
   
   bool Atari800EmulatorController::loadState(string sPosition)
   {
-    
+    return false;
   }
   
-  /** 
-   * given a path, iterate through files named 0000.avi, etc. until one does not
-   * exist. Then return that path name. 
-   * This was done to support multiple recordings being done of the same game.
-   */
-  bool Atari800EmulatorController::getRecordingFilename(string sPath, string &sFilename)
-  {
-    int i;
-    for (i=0;i<100;i++)
-      {
-	char cFilename[9];
-	snprintf(cFilename,sizeof(cFilename),"%04d.avi",i);
-	string sCurrentIndex = cFilename;
-	string sCurrentFilename = sPath + "/" + sCurrentIndex;
-	if (!FileUtils::FileExists(sCurrentFilename))
-	  {
-	    // found one, set and break. This is what Atari800 will name the file. 
-	    sFilename = sCurrentIndex;
-	    return true;
-	  }
-      }
-    return false; // Somehow we have 100 active game recordings for this game. this is probably bad.
-  }
-
   bool Atari800EmulatorController::record()
   {
-    string sPath = "/home/mamedata/shots/"+getRomFromSlot();
-    if (!m_pEmulatorModel->m_bIsRecording)
-      {
-	// Not recording. Start a recording.
-	// Our patched Atari800 records an AVI by default.
-	if (!getRecordingFilename(sPath,m_pEmulatorModel->m_sRecordingFilename))
-	  {
-	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Atari800yEmulatorController::record() - Could not get a filename for path %s. Bailing on record!",sPath.c_str());
-	    return false;
-	  }
-	EmulatorController::record(); // set recording flags and trigger recording action.
-      }
-    else
-      {
-	EmulatorController::record();
-	// We are recording, trigger a transcoding job.
-	m_pGame_Player->TranscodeAfterRecord(sPath,
-					     m_pEmulatorModel->m_sRecordingFilename,
-					     m_pEmulatorModel->m_dwPK_Device_Orbiter);
-      }
-    return true;
+    // implement record.
+    return false;
   }
 
 }

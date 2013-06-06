@@ -47,6 +47,8 @@
 #include "C64EmulatorController.h"
 #include "Apple2EmulatorModel.h"
 #include "Apple2EmulatorController.h"
+#include "Atari800EmulatorModel.h"
+#include "Atari800EmulatorController.h"
 
 using namespace std;
 
@@ -112,6 +114,7 @@ namespace DCE
     addEmulatorForMediaType(MEDIATYPE_lmce_Game_vic20_CONST,new VIC20EmulatorController(m_pGame_Player, new VIC20EmulatorModel()));
     addEmulatorForMediaType(MEDIATYPE_lmce_Game_c64_CONST,new C64EmulatorController(m_pGame_Player, new C64EmulatorModel()));
     addEmulatorForMediaType(MEDIATYPE_lmce_Game_apple2_CONST,new Apple2EmulatorController(m_pGame_Player, new Apple2EmulatorModel()));
+    addEmulatorForMediaType(MEDIATYPE_lmce_Game_Atari800_CONST,new Atari800EmulatorController(m_pGame_Player, new Atari800EmulatorModel()));
     return true;
   }
 
