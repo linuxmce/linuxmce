@@ -522,9 +522,10 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 	    || mediaURL.find("/a130xe") != string::npos
 	    || StringUtils::ToLower(mediaURL).find(".atr") != string::npos
 	    || StringUtils::ToLower(mediaURL).find(".xfd") != string::npos
-	    || StringUtils::ToLower(mediaURL).find(".rom") != string::npos)
+	    || StringUtils::ToLower(mediaURL).find(".rom") != string::npos
+	    || StringUtils::ToLower(mediaURL).find(".xex") != string::npos)
 	  {
-	    pGameMediaStream->m_sAppName = "mess.mess";
+	    pGameMediaStream->m_sAppName = "atari800.atari800";
 	    pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_Atari800_CONST;
 	  }
 
