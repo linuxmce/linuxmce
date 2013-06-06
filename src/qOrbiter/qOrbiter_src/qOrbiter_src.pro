@@ -219,17 +219,11 @@ macx{
 #nfs mount to work with skins on core directly
 #folder_01.source = /mnt/remote/android-qml/
 #folder_01.source = qml/android/
-folder_01.target = qml
+#folder_01.target = qml
 
+        contains(QT_VERSION,4.*.*){
         base.source = qml/android/Base.qml
         base.target = qml/
-
-        folder_03.source = config.xml
-        folder_03.target = $$DESTDIR
-
-        qmlcomponents.source = ../platforms/Android/androidComponents
-        qmlcomponents.target = imports
-
 
         x86 {
                 qmlplugins.files = ../platforms/Android/androidPlugins/x86/libqmlshadersplugin.so
@@ -246,12 +240,26 @@ folder_01.target = qml
         qmlplugins.files += ../platforms/Android/androidPlugins/armeabi/libandroidplugin_1_1.so
                 qmlplugins.path = /libs/armeabi
 
+        INSTALLS+= qmlplugins
         }
 
-	INSTALLS+= qmlplugins
+        }
+        else:contains(QT_VERSION,5.0.*){
+        base.source = qml/android/Welcome.qml
+        base.target = qml/
+        }
+
+        folder_03.source = config.xml
+        folder_03.target = $$DESTDIR
+
+        qmlcomponents.source = ../platforms/Android/androidComponents
+        qmlcomponents.target = imports
+
         DEFINES+=ANDROID
-        DEPLOYMENTFOLDERS = qmlcomponents base folder_01
+
+        DEPLOYMENTFOLDERS = qmlcomponents base
         QML_IMPORT_PATH = "androidComponents"
+
         QT+=network script
 
         HEADERS += plugins/AndroidInfo/androidsystem.h
@@ -566,11 +574,13 @@ HEADERS += \
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
-    android/src/org/kde/necessitas/origo/QtActivity.java \
-    android/src/org/kde/necessitas/origo/QtApplication.java \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/version.xml \
+        qml/desktop/lib/effects/qmldir \
+    qml/android/Welcome.qml
+
+android-g++{
+
+OTHER_FILES+= \
+        android/version.xml \
     android/res/values-et/strings.xml \
     android/res/values-fa/strings.xml \
     android/res/values-pl/strings.xml \
@@ -599,143 +609,33 @@ OTHER_FILES += Readme.txt \
     android/res/drawable-hdpi/icon.png \
     android/res/drawable-ldpi/icon.png \
     android/AndroidManifest.xml \
-    android/src/org/kde/necessitas/origo/QtActivity.java \
-    android/src/org/kde/necessitas/origo/QtApplication.java \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/version.xml \
-    android/res/values-et/strings.xml \
-    android/res/values-fa/strings.xml \
-    android/res/values-pl/strings.xml \
-    android/res/drawable/logo.png \
-    android/res/drawable/icon.png \
-    android/res/values-el/strings.xml \
-    android/res/values-zh-rTW/strings.xml \
-    android/res/values-ro/strings.xml \
-    android/res/values-de/strings.xml \
-    android/res/values-fr/strings.xml \
-    android/res/values-ms/strings.xml \
-    android/res/drawable-mdpi/icon.png \
-    android/res/values-es/strings.xml \
-    android/res/values-rs/strings.xml \
-    android/res/values-zh-rCN/strings.xml \
-    android/res/values-ru/strings.xml \
-    android/res/values/strings.xml \
-    android/res/values/libs.xml \
-    android/res/values-nl/strings.xml \
-    android/res/values-nb/strings.xml \
-    android/res/drawable-hdpi/icon.png \
-    android/res/values-ja/strings.xml \
-    android/res/values-it/strings.xml \
-    android/res/values-pt-rBR/strings.xml \
-    android/res/layout/splash.xml \
-    android/res/values-id/strings.xml \
-    android/res/drawable-ldpi/icon.png \
-    android/AndroidManifest.xml \
-    android/src/org/kde/necessitas/origo/QtActivity.java \
-    android/src/org/kde/necessitas/origo/QtApplication.java \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/res/values-et/strings.xml \
-    android/res/values-fa/strings.xml \
-    android/res/values-pl/strings.xml \
-    android/res/drawable/logo.png \
-    android/res/drawable/icon.png \
-    android/res/values-el/strings.xml \
-    android/res/values-zh-rTW/strings.xml \
-    android/res/values-ro/strings.xml \
-    android/res/values-de/strings.xml \
-    android/res/values-fr/strings.xml \
-    android/res/values-ms/strings.xml \
-    android/res/drawable-mdpi/icon.png \
-    android/res/values-es/strings.xml \
-    android/res/values-rs/strings.xml \
-    android/res/values-zh-rCN/strings.xml \
-    android/res/values-ru/strings.xml \
-    android/res/values/strings.xml \
-    android/res/values/libs.xml \
-    android/res/values-nl/strings.xml \
-    android/res/values-nb/strings.xml \
-    android/res/drawable-hdpi/icon.png \
-    android/res/values-ja/strings.xml \
-    android/res/values-it/strings.xml \
-    android/res/values-pt-rBR/strings.xml \
-    android/res/layout/splash.xml \
-    android/res/values-id/strings.xml \
-    android/res/drawable-ldpi/icon.png \
-    qml/desktop/lib/effects/qmldir \
-    android/src/org/kde/necessitas/origo/QtActivity.java \
-    android/src/org/kde/necessitas/origo/QtApplication.java \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/res/values-et/strings.xml \
-    android/res/values-fa/strings.xml \
-    android/res/values-pl/strings.xml \
-    android/res/drawable/logo.png \
-    android/res/drawable/icon.png \
-    android/res/values-el/strings.xml \
-    android/res/values-zh-rTW/strings.xml \
-    android/res/values-ro/strings.xml \
-    android/res/values-de/strings.xml \
-    android/res/values-fr/strings.xml \
-    android/res/values-ms/strings.xml \
-    android/res/drawable-mdpi/icon.png \
-    android/res/values-es/strings.xml \
-    android/res/values-rs/strings.xml \
-    android/res/values-zh-rCN/strings.xml \
-    android/res/values-ru/strings.xml \
-    android/res/values/strings.xml \
-    android/res/values/libs.xml \
-    android/res/values-nl/strings.xml \
-    android/res/values-nb/strings.xml \
-    android/res/drawable-hdpi/icon.png \
-    android/res/values-ja/strings.xml \
-    android/res/values-it/strings.xml \
-    android/res/values-pt-rBR/strings.xml \
-    android/res/layout/splash.xml \
-    android/res/values-id/strings.xml \
-    android/res/drawable-ldpi/icon.png \
-    android/res/values-et/strings.xml \
-    android/res/values-fa/strings.xml \
-    android/res/values-pl/strings.xml \
-    android/res/drawable/logo.png \
-    android/res/drawable/icon.png \
-    android/res/values-el/strings.xml \
-    android/res/values-zh-rTW/strings.xml \
-    android/res/values-ro/strings.xml \
-    android/res/values-de/strings.xml \
-    android/res/values-fr/strings.xml \
-    android/res/values-ms/strings.xml \
-    android/res/drawable-mdpi/icon.png \
-    android/res/values-es/strings.xml \
-    android/res/values-rs/strings.xml \
-    android/res/values-zh-rCN/strings.xml \
-    android/res/values-ru/strings.xml \
-    android/res/values/strings.xml \
-    android/res/values/libs.xml \
-    android/res/values-nl/strings.xml \
-    android/res/values-nb/strings.xml \
-    android/res/drawable-hdpi/icon.png \
-    android/res/values-ja/strings.xml \
-    android/res/values-it/strings.xml \
-    android/res/values-pt-rBR/strings.xml \
-    android/res/layout/splash.xml \
-    android/res/values-id/strings.xml \
-    android/res/drawable-ldpi/icon.png \
-    android/src/org/kde/necessitas/origo/QtActivity.java \
-    android/src/org/kde/necessitas/origo/QtApplication.java \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/src/org/kde/necessitas/origo/QtApplication.java \
-    android/src/org/kde/necessitas/origo/QtActivity.java \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
-    android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
     android/READ-THIS-BEFORE-MANUALLY-ADDING-FILES-TO-PACKAGE.txt \
     android/libjava.so \
     android/Makefile \
     android/java.pro
+
+
+!QT5{
+OTHER_FILES+= \
+  #  android/src/org/kde/necessitas/origo/QtActivity.java \
+  #  android/src/org/kde/necessitas/origo/QtApplication.java \
+  #  android/src/org/kde/necessitas/ministro/IMinistro.aidl \
+  # android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl
+}
+
+QT5{
+OTHER_FILES+= \
+   android/src/org/kde/necessitas/ministro/IMinistro.aidl \
+ android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
+    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
+    android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
+   ../platforms/Android/androidPlugins/--Managed_by_Qt_Creator--QtAndroid-bundled.jar
+}
+
+}
+
+
+
 
 
 for_harmattan{

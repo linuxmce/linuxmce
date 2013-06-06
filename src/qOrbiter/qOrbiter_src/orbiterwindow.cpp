@@ -59,10 +59,6 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 
     if(frameless==true){
         mainView.window()->setWindowFlags(Qt::FramelessWindowHint);
-        mainView.window()->setAttribute(Qt::WA_TranslucentBackground, true);
-        QPalette p;
-        p.setColor(QPalette::Base, Qt::transparent);
-        mainView.setPalette(p);
     }
 #elif QT5
     if(frameless == true){

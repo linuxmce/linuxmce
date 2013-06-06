@@ -100,7 +100,7 @@ Item {
                 width: scaleX(18)
                 model:floorplan_pages
                 clip:true
-                visible: floorplan_pages.count() !==0
+                visible: floorplan_pages.count !==0
                 anchors.top: fplabel.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
 

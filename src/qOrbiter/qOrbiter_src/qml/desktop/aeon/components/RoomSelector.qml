@@ -3,8 +3,8 @@ import Qt.labs.shaders 1.0
 import "../effects"
 Rectangle {
     id: recScreen
-    height: style.orbiterH
-    width: style.orbiterW
+    height: skinStyle.orbiterH
+    width: skinStyle.orbiterW
     color: "transparent"
     Rectangle {
         anchors.fill: parent
@@ -69,7 +69,7 @@ Rectangle {
                         Rectangle{
                             height:roomsource.height
                             width: roomsource.width/4
-                            color: style.not_color
+                            color: skinStyle.not_color
                             Image {
                                 source: room_image
                                 anchors.fill: parent

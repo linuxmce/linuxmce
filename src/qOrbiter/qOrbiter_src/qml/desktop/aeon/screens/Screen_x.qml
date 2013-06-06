@@ -3,14 +3,14 @@ import "../components"
 Item{
     id:security
     Rectangle{
-        width: style.orbiterW
-        height: style.orbiterH
+        width: skinStyle.orbiterW
+        height: skinStyle.orbiterH
         color: "black"
         opacity:  .8
     }
     Rectangle{
-        width: style.orbiterW
-        height: style.orbiterH
+        width: skinStyle.orbiterW
+        height: skinStyle.orbiterH
         color: "transparent"
         Text {
             id: unknownscreen
