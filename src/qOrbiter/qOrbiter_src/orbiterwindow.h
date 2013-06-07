@@ -3,18 +3,18 @@
 
 #include <QObject>
 #include <contextobjects/existingorbiter.h>
-#if (QT5)
+#ifdef QT5
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <QtQuick/QQuickView>
+#include <qtquick2applicationviewer.h>
 #else
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/QDeclarativeContext>
-
+#include <qmlapplicationviewer.h>
 #endif
 #include <QVariant>
-#include <qmlapplicationviewer.h>
-#if defined (GLENABLED) || (QT5)
+#ifdef GLENABLED
 #include <QtOpenGL/QGLWidget>
 #include <shaders/filereader.h>
 #endif
@@ -59,7 +59,11 @@ public:
     //public members
 
     QString message;
+#ifdef QT5
+    QtQuick2ApplicationViewer mainView;
+#else
     QmlApplicationViewer  mainView;
+#endif
 
     QString buildType;
     QString qrcPath;

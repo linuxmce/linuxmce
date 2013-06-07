@@ -214,7 +214,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.addImportPath("assets:/imports/androidComponents");
     mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
     mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
-    mainView.setMainQmlFile(QString("qml/Base.qml"));
+    mainView.setMainQmlFile(QString("qml/Welcome.qml"));
 #elif !for_harmattan
     mainView.setSource(QApplication::applicationDirPath().remove("/bin")+buildType+"/Splash.qml");
 #elif for_harmattan

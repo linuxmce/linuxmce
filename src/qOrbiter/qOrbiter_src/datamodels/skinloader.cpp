@@ -39,8 +39,11 @@ void SkinLoader::loadSkin(QString name) {
  current_component->loadUrl(style); //= new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), style);
     if (current_component->isLoading()) {
         //qDebug() << "Hooking up slot";
-
+#ifdef QT4_8
         if (QObject::connect(current_component, SIGNAL(statusChanged(QDeclarativeComponent::Status)),this, SLOT(continueLoading())))
+#elif QT5
+         if (QObject::connect(current_component, SIGNAL(statusChanged(QQmlComponent::Status)),this, SLOT(continueLoading())))
+#endif
         {
             //qDebug() << "Hooked!";
         } else {
@@ -52,8 +55,16 @@ void SkinLoader::loadSkin(QString name) {
 
         qWarning() << current_component->errors();
         qWarning() << "Style.qml is corrupt, moving to next skin. \n";
-        skinsToLoad.takeAt(loadercounter);
-        totalSkinsToLoad = skinsToLoad.size();
+
+        if(!skinsToLoad.isEmpty()){
+            skinsToLoad.takeAt(loadercounter);
+            totalSkinsToLoad = skinsToLoad.size();
+        }
+        else{
+
+            qWarning() << "No Other Availible skins, setting error screen.";
+            exit(99);
+        }
 
         if(loadercounter != totalSkinsToLoad){
 

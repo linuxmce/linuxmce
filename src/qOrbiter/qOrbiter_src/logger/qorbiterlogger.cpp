@@ -225,7 +225,7 @@ bool QOrbiterLogger::initializeSkinFile()
             QDir t;
             t.setPath(logLocation);
             t.remove(skinFile.fileName());
-            initializeSkinFile();
+             if(initializeSkinFile())
             return false;
         }
         else

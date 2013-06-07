@@ -575,7 +575,13 @@ OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
         qml/desktop/lib/effects/qmldir \
-    qml/android/Welcome.qml
+    qml/android/Welcome.qml \
+    qml/android/phone/qt5default/main.qml \
+    qml/android/phone/qt5default/Style.qml \
+    qml/android/phone/qt5default/Screens/Screen_1.qml \
+    qml/android/tablet/qt5default/main.qml \
+    qml/android/tablet/qt5default/Style.qml \
+    qml/android/tablet/qt5default/Screens/Screen_1.qml
 
 android-g++{
 

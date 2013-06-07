@@ -206,8 +206,10 @@ class qorbiterManager : public QObject
 
 
 public:
-#if (QT5)
+#if QT5 && !ANDROID
     qorbiterManager(QQuickView * view, QObject *parent=0);  //constructor
+#elif ANDROID && QT5
+    qorbiterManager(QQuickView *view, AndroidSystem *jniHelper,  QObject *parent=0);
 #elif ANDROID
     qorbiterManager(QDeclarativeView *view, AndroidSystem *jniHelper,  QObject *parent =0);
 #elif   QT4_8
@@ -284,7 +286,7 @@ public:
 #endif
 
 #ifdef ANDROID
-#ifndef QT5
+#ifdef QT5 && ANDROID
     AndroidSystem *androidHelper;
 #endif
 #endif

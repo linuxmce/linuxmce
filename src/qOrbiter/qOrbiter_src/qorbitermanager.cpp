@@ -65,8 +65,10 @@ using namespace DCE;
   then (hopefully) notify us of background progress. A splash bar or loading indicator needs to be added, but a textual
   messaging system will be the initial method of communication
 */
-#if (QT5)
+#if (QT5) && !defined (ANDROID)
 qorbiterManager::qorbiterManager(QQuickView *view, QObject *parent) :
+    #elif ANDROID && QT5
+qorbiterManager::qorbiterManager(QQuickView *view, AndroidSystem *jniHelper,  QObject *parent) :
     #elif ANDROID
 qorbiterManager::qorbiterManager(QDeclarativeView *view, AndroidSystem *jniHelper,  QObject *parent) :
     #else
@@ -85,15 +87,14 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
 #ifndef __ANDROID__
     b_localLoading = true; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
-#else
-#ifndef QT5
+#elif defined QT5 && ANDROID || defined(ANDROID)
     androidHelper = jniHelper;
     qorbiterUIwin->rootContext()->setContextProperty("android", androidHelper);
 #endif
     b_localLoading = false;
 
 
-#endif
+
 
     setDceResponse("Starting...");
 
@@ -155,14 +156,15 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
      */
 
 #ifdef for_desktop
-#ifndef QT5
+#ifdef QT4_8
     buildType = "/qml/desktop";
-#else
+#elif QT5 && !defined ANDROID
     buildType = "/qml/rpi";
 #endif
     qrcPath = buildType+"/Splash.qml";
     //mainView.setSource(QApplication::applicationDirPath()+qrcPath);
-#elif defined (WIN32)
+#endif
+#ifdef  WIN32
     buildType="/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
 #elif defined (for_freemantle)
@@ -176,8 +178,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qrcPath = "qrc:osx/Splash.qml";
 #elif defined (RPI)
     buildType="/qml/rpi";
-
-#elif defined (__ANDROID__)
+#elif defined ANDROID
     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
         setFormFactor(2);
@@ -639,7 +640,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
         }
         else{
             m_lRooms->appendRow(new LocationItem(m_name, m_val, m_iType, imagePath, m_lRooms));
-              LocationItem *t= m_lRooms->find(m_name);
+            LocationItem *t= m_lRooms->find(m_name);
             t->addEa(ea, m_iEA);
         }
     }
@@ -1208,10 +1209,18 @@ bool qorbiterManager::loadSkins(QUrl base)
 
 #elif __ANDROID__
     if(isPhone < 2){
+#ifdef QT5
+        tskinModel->addSkin("qt5default");
+#else
         tskinModel->addSkin("default");
+#endif
     }
     else{
+#ifdef QT5
+        tskinModel->addSkin("qt5default");
+#else
         tskinModel->addSkin("default,data,wip,lustylizard");
+#endif
     }
 #elif for_android
     tskinModel->addSkin("default");
@@ -1334,8 +1343,10 @@ bool qorbiterManager::readLocalConfig()
     if(setupMobileStorage(androidHelper->externalStorageLocation)){
         xmlPath = mobileStorageLocation+"/config.xml" ;
     }
-#elif QT5
-
+#elif QT5 && ANDROID
+    if(setupMobileStorage(androidHelper->externalStorageLocation)){
+        xmlPath = mobileStorageLocation+"/config.xml" ;
+    }
 #endif
 
 
