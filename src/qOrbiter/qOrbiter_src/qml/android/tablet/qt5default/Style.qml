@@ -17,8 +17,8 @@ QtObject{
     objectName: "orbiter_style"
     //skin description
     property string skincreator: "Langston Ball (aka golgoj4)"
-    property string skinname: "default"
-    property string skindir: "default"
+    property string skinname: "qt5default"
+    property string skindir: "qt5default"
     property string skindescription: "Android phone skin, work in progress"
     property string skinversion: "1.0"
     property string skinvariation: "Android 320X480"
