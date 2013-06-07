@@ -42,6 +42,7 @@ so: Hulu_Player.so
 Hulu_Player.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
+	cp libflashplayer-hulu.so ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
 		
