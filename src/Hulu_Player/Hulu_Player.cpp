@@ -205,7 +205,7 @@ Hulu_Player::UpdateHuluConfig ()
     "button_name_menu = Home\n"
     "\n"
     "[flash]\n"
-    "flash_location = /usr/lib/mozilla/plugins/flashplugin-alternative.so\n"
+    "flash_location = /usr/pluto/bin/libflashplayer-hulu.so\n"
     "\n"
     "[screensaver]\n"
     "suspend_script = (null)\n"
