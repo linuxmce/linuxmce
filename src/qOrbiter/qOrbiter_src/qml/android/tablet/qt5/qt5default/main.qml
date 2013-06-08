@@ -2,9 +2,10 @@ import QtQuick 2.0
 
 Item {
     id: item
-    width:manager.appWidth
+    width:manager.appWidth 
     height:manager.appHeight
-
+//height:parent.height
+//width:parent.width
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
@@ -15,7 +16,7 @@ Item {
     property string dynamic_width
 
     function scaleX(x){
-        return x/100*manager.appWidth
+        return x/100*manager.appWidth 
     }
     function scaleY(y){
         return y/100*manager.appHeight
