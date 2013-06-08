@@ -67,6 +67,14 @@ namespace DCE
   }
 
   /**
+   * Eject all media from all slots. Called typically from CMD_Play_Media
+   */
+  void EmulatorController::ejectAllMedia()
+  {
+    m_pEmulatorModel->m_mapMedia.clear();
+  }
+
+  /**
    * return the media in the specified slot.
    */
   bool EmulatorController::getMediaInSlot(string& sMediaFile,string sSlot)

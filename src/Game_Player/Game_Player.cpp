@@ -380,6 +380,9 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
       return;
     }
 
+  // Eject all media from all slots.
+  m_pEmulatorController->ejectAllMedia();
+
   // Detect if we are a streaming slave, and if so, parse URL, and point back to server.
   if (sMediaURL.find("slave://") != string::npos)
     {

@@ -41,6 +41,7 @@ namespace DCE
     virtual void EmulatorHasExited(int iExit_Code);
     virtual void insertMediaNamed(string sMediaFile, string sSlot="default");
     virtual void ejectMediaFromSlot(string sSlot="default");
+    virtual void ejectAllMedia();
     virtual bool getMediaInSlot(string& sMediaFile, string sSlot="default");
     virtual void setStreaming(bool bStreaming);
     virtual void setStreamingMaster(bool bStreamingMaster);
