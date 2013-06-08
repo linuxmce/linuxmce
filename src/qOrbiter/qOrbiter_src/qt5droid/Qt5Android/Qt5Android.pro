@@ -325,10 +325,7 @@ HEADERS += \
 OTHER_FILES += ../../Readme.txt \
         ../../OrbiterVariables.txt \
         ../../config.xml \
-        ../../qml/desktop/lib/effects/qmldir \
-
-
-
+        ../../qml/desktop/lib/effects/qmldir
 
 OTHER_FILES+= \
     android/src/org/kde/necessitas/ministro/IMinistro.aidl \

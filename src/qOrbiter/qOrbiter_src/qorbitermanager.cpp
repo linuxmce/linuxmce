@@ -90,7 +90,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #elif defined QT5 && ANDROID || defined(ANDROID)
     androidHelper = jniHelper;
     qorbiterUIwin->rootContext()->setContextProperty("android", androidHelper);
-     b_localLoading = false;
+    b_localLoading = false;
 #endif
 
 
@@ -394,6 +394,13 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 
 #ifdef __ANDROID__
     setDceResponse("Loading Skins");
+#ifdef QANDROID
+    setDceResponse("Loading Qt Quick 2 Skins for Qt5");
+    remoteDirectoryPath.append("/qt5/");
+#else
+    setDceResponse("Loading Qt Quick 1 Skins for Qt 4");
+#endif
+
     if( !loadSkins(QUrl(remoteDirectoryPath)))
     {   emit skinIndexReady(false);
         b_skinReady = false;
@@ -1189,6 +1196,8 @@ void qorbiterManager::setMediaDevices(QNetworkReply *d)
 bool qorbiterManager::loadSkins(QUrl base)
 {
     emit skinMessage("Local Skins path" +base.toString());
+
+
     tskinModel = new SkinDataModel(base, new SkinDataItem, this);
     QObject::connect(tskinModel, SIGNAL(currentSkinReady()), this, SLOT(showSkin()));
     qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
@@ -1211,14 +1220,14 @@ bool qorbiterManager::loadSkins(QUrl base)
 #elif __ANDROID__
     if(isPhone < 2){
 #ifdef QT5
-        tskinModel->addSkin("qt5default");
+        tskinModel->addSkin("default");
 #elif !QT5
         tskinModel->addSkin("default");
 #endif
     }
     else{
 #ifdef QT5
-        tskinModel->addSkin("qt5default");
+        tskinModel->addSkin("default");
 #elif !QT5
         tskinModel->addSkin("default,data,wip,lustylizard");
 #endif
@@ -1406,7 +1415,7 @@ bool qorbiterManager::readLocalConfig()
             {
 
 #ifdef QANDROID
-                currentSkin = "qt5default";
+                currentSkin = "default";
 #elif QT5
                 currentSkin = "noir";
 #else
@@ -1427,15 +1436,15 @@ bool qorbiterManager::readLocalConfig()
             }
 
 #ifdef QANDROID
-            currentSkin = "qt5default";
+            currentSkin = "default";
 #else
-             currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
+            currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
 #endif
 
 
             if (currentSkin.isEmpty()){
 #ifdef QANDROID
-                currentSkin = "qt5default";
+                currentSkin = "default";
 #elif QT5
                 currentSkin = "noir";
 #else
