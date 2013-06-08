@@ -61,6 +61,8 @@
 #define MEDIATYPE_lmce_AirPlay_video_CONST 61
 #define MEDIATYPE_lmce_AirPlay_photos_CONST 62
 #define MEDIATYPE_lmce_YouTube_CONST 63
+#define MEDIATYPE_np_InternetMedia_CONST 64
+#define MEDIATYPE_lmce_Game_amiga_CONST 65
 
 #define MEDIATYPE_TABLE "MediaType"
 #define MEDIATYPE_PK_MEDIATYPE_FIELD "PK_MediaType"

@@ -145,10 +145,10 @@
 #define SCREEN_DVDMenuFullScreenOpt_CONST 144
 #define SCREEN_VlcFullScreen_CONST 145
 #define SCREEN_VlcFullScreenOpt_CONST 146
-#define SCREEN_popLights_CONST 147
-#define SCREEN_popMedia_CONST 148
-#define SCREEN_popClimate_CONST 149
-#define SCREEN_popTelecom_CONST 150
+#define SCREEN_Game_Commodore_Remote_Alt_CONST 147
+#define SCREEN_rokuRemote_CONST 148
+#define SCREEN_rokuKBD_CONST 149
+#define SCREEN_Game_Atari800KBD_CONST 150
 #define SCREEN_popSecurity_CONST 151
 #define SCREEN_popOthers_CONST 152
 #define SCREEN_Game_Atari_5200_CONST 153
@@ -170,8 +170,8 @@
 #define SCREEN_AirTunes_CONST 169
 #define SCREEN_AirTunes_FS_CONST 170
 #define SCREEN_AirTunes_FS_Options_CONST 171
-#define SCREEN_AudiFullScreen_CONST 172
-#define SCREEN_AudiVideoRemote_CONST 173
+#define SCREEN_Commodore_FS_CONST 172
+#define SCREEN_Commodore_FS_Options_CONST 173
 #define SCREEN_CleanScreen_CONST 174
 #define SCREEN_VideoWizard_CONST 175
 #define SCREEN_DialogCannotPlayMedia_CONST 176
