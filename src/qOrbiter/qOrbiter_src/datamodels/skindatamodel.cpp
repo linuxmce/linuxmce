@@ -177,8 +177,8 @@ void SkinDataModel::setActiveSkin(QString name)
 
    //dir -l qDebug() << skinURL;
 
-#if (QT5)
-     current_style = new QQmlComponent(ui_reference->qorbiterUIwin->engine(), skinURL);
+#ifdef QT5
+     current_style = new QQmlComponent(ui_reference->qorbiterUIwin->engine(), QUrl(skinURL));
 
 #elif __ANDROID__
      current_style = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), QUrl(skinURL));

@@ -279,17 +279,17 @@ public:
     QString remoteDirectoryPath;
     SkinDataItem* skin;
 
-#if (QT5)
+#if QT5 || defined(QANDROID)
     QQuickView *qorbiterUIwin;
 #else
     QDeclarativeView *qorbiterUIwin;    //Qml declarativeview
 #endif
 
-#ifdef ANDROID
-#ifdef QT5 && ANDROID
+
+#if QANDROID || defined(ANDROID)
     AndroidSystem *androidHelper;
 #endif
-#endif
+
 
     ScreenSaverClass *ScreenSaver;
 

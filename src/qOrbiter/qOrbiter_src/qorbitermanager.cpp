@@ -90,8 +90,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #elif defined QT5 && ANDROID || defined(ANDROID)
     androidHelper = jniHelper;
     qorbiterUIwin->rootContext()->setContextProperty("android", androidHelper);
+     b_localLoading = false;
 #endif
-    b_localLoading = false;
+
 
 
 
@@ -1211,14 +1212,14 @@ bool qorbiterManager::loadSkins(QUrl base)
     if(isPhone < 2){
 #ifdef QT5
         tskinModel->addSkin("qt5default");
-#else
+#elif !QT5
         tskinModel->addSkin("default");
 #endif
     }
     else{
 #ifdef QT5
         tskinModel->addSkin("qt5default");
-#else
+#elif !QT5
         tskinModel->addSkin("default,data,wip,lustylizard");
 #endif
     }
@@ -1403,7 +1404,10 @@ bool qorbiterManager::readLocalConfig()
             QDomElement configVariables = localConfig.documentElement().toElement();
             if(configVariables.namedItem("firstrun").attributes().namedItem("id").nodeValue()=="true")
             {
-#ifdef QT5
+
+#ifdef QANDROID
+                currentSkin = "qt5default";
+#elif QT5
                 currentSkin = "noir";
 #else
                 currentSkin = "default";
@@ -1422,9 +1426,17 @@ bool qorbiterManager::readLocalConfig()
 
             }
 
-            currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
+#ifdef QANDROID
+            currentSkin = "qt5default";
+#else
+             currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
+#endif
+
+
             if (currentSkin.isEmpty()){
-#ifdef QT5
+#ifdef QANDROID
+                currentSkin = "qt5default";
+#elif QT5
                 currentSkin = "noir";
 #else
                 currentSkin = "default";

@@ -7,7 +7,7 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <QtQuick/QQuickView>
-#include <qtquick2applicationviewer.h>
+#include "qt5droid/Qt5Android/qtquick2applicationviewer/qtquick2applicationviewer.h"
 #else
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/QDeclarativeContext>

@@ -1,0 +1,26 @@
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes.dex : \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/origo/QtActivity$5.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/origo/QtActivity$3$1.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/origo/QtActivity$6.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/origo/QtApplication.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/origo/QtActivity$2.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/origo/QtActivity.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/origo/QtActivity$4.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/origo/QtApplication$InvokeResult.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/origo/QtActivity$3$1$1.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/origo/QtActivity$3.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/origo/QtActivity$1.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/ministro/IMinistro$Stub.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/ministro/IMinistroCallback.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/ministro/IMinistro$Stub$Proxy.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/ministro/IMinistroCallback$Stub$Proxy.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/ministro/IMinistroCallback$Stub.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/kde/necessitas/ministro/IMinistro.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/linuxmce/QOrbiterQt4/R$layout.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/linuxmce/QOrbiterQt4/R$drawable.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/linuxmce/QOrbiterQt4/R$array.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/linuxmce/QOrbiterQt4/R$attr.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/linuxmce/QOrbiterQt4/R$string.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/linuxmce/QOrbiterQt4/BuildConfig.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/classes/org/linuxmce/QOrbiterQt4/R.class \
+/src/trunk/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas/android/bin/dexedLibs/annotations-62c62628d033e10d2c79d9f2270168cf.jar \
