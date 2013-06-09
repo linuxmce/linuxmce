@@ -37,29 +37,24 @@ Item {
         id:scenarios
         ListElement{
             name:"Lights"
-            model:"currentRoomLights"
+            modelName:"currentRoomLights"
         }
         ListElement{
             name:"Media"
-            model:"currentRoomMedia"
+            modelName:"currentRoomMedia"
         }
         ListElement{
             name:"Climate"
-            model:"currentRoomClimate"
+            modelName:"currentRoomClimate"
         }
         ListElement{
             name:"Telecom"
-            model:"currentRoomTelecom"
+            modelName:"currentRoomTelecom"
         }
         ListElement{
             name:"Security"
-            model:"currentRoomSecurity"
+            modelName:"currentRoomSecurity"
         }
-
-
-
-
-
     }
 
     Image {
@@ -68,19 +63,21 @@ Item {
         anchors.fill: parent
         property string pSource:""
         property string wSource:""
-
     }
 
     Item{
         id:mini_screen_saver
         anchors.fill: qml_root
 
-
-
-        Connections{
-            target:screensaver
-            onImageChanged:changeBGimage()
+        Timer{
+            id:mini_ss_timer
+            interval:10000
+            running: true // screensaver.active
+            triggeredOnStart: true
+            onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
+            repeat: true
         }
+
         Image{
             id:mini_screen_saver_image
             height: mini_screen_saver.height
@@ -98,37 +95,10 @@ Item {
     function screenchange(screenname )
     {
         pageLoader.source = "screens/"+screenname
-        if (pageLoader.status == Component.Ready)
-        {
-            manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-        }
-        else if (pageLoader.status == Component.Loading)
-        {
-            console.log("loading page from network")
-            finishLoading(screenname)
-        }
-        else
-        {
-            console.log("Command to change to:" + screenname + " failed!")
-            screenfile = screenname
-            pageLoader.source = "screens/Screen_x.qml"
-        }
-    }
-
-    function finishLoading (screenname)
-    {
-        if(pageLoader.status != Component.Ready)
-        {
-            console.log("finishing load")
-            pageLoader.source = "screens/"+screenname
-            console.log("screen" + screenname + " loaded.")
-        }
-        else
-        {
-            finishLoading(screenname)
-        }
 
     }
+
+
 
     function checkStatus(component)
     {
@@ -151,6 +121,22 @@ Item {
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
         }
+        onStatusChanged:  if (pageLoader.status == Component.Ready)
+                          {
+                              manager.setDceResponse("Command to change to:" + source+ " was successfull")
+                          }
+                          else if (pageLoader.status == Component.Loading)
+                          {
+                              console.log("loading page from network")
+
+                          }
+                          else if(pageLoader.status == Component.Error)
+                          {
+                              console.log("Command to change to:" + source + " failed!")
+
+                              pageLoader.source = "screens/Screen_X.qml"
+                              screenfile = source
+                          }
     }
 
     //=================Components==================================================//
@@ -170,7 +156,6 @@ Item {
         {
             console.log("Command to add: " + componentName + " failed!")
             componentFile = componentName
-
         }
     }
 

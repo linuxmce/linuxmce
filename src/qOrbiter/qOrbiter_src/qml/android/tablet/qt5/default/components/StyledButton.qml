@@ -2,11 +2,12 @@ import QtQuick 2.0
 
 Item{
     id:styled_button
-    height: scaleY(5)
-    width: scaleX(8)
-    property string phil:fly_trap.pressed ? "green": "transparent"
+    height: button_label.paintedHeight < scaleY(5) ? scaleY(5) : button_label.paintedHeight+(button_label.paintedHeight*.02)
+    width: button_label.paintedWidth < scaleX(9) ? scaleX(9) : (button_label.paintedWidth) + (button_label.paintedWidth*.02)
+    property string phil:fly_trap.pressed ? "green": "black"
     property int textSize:28
     property alias buttonText:button_label
+    property alias hitArea:fly_trap
     Rectangle{
         id:bg_fill
         anchors.fill: parent
@@ -14,6 +15,8 @@ Item{
         border.color: "white"
         border.width: 1
         radius: 5
+        opacity: fly_trap.pressed ? 1 : .65
+
     }
 
     StyledText{
@@ -28,7 +31,6 @@ Item{
     MouseArea{
         id:fly_trap
         anchors.fill: styled_button
-
     }
 
 }
