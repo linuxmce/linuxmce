@@ -1,19 +1,14 @@
 /*
   Splash.qml This is the general linuxmce splash screen and should be used for all devices on startup.
   */
-import QtQuick 1.1
+import QtQuick 2.0
 
-Item {
+Rectangle {
     id: splashLogic
     height:appH
     width:appW
     property bool orbiterSetup:false
-
-    Rectangle{
-        id:phil
-        anchors.fill: splashLogic
-        color: "darkgreen"
-    }
+    color:"black"
 
     onOrbiterSetupChanged:{  console.log(orbiterSetup) ;
         existing_orbiters.visible = false;
@@ -25,13 +20,12 @@ Item {
         id: splash
         anchors.centerIn: parent
         fillMode: Image.PreserveAspectFit
-        source: "tablet/default/img/icons/backgrounds/bedroom.png"
+        source: "../tablet/default/img/icons/backgrounds/bedroom.png"
         anchors.fill: parent
   }
     FontLoader{
         id:myFont
-        name:"Sawasdee"
-        source: "fonts/Sawasdee.ttf"
+        name:"Roboto"
     }
 
     function scaleX(x){

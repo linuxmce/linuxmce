@@ -1,13 +1,15 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
-import QtQuick 1.1
+import QtQuick 2.0
 
-Rectangle {
+
+Item {
     height:appH
     width:appW
     id:splashPage
-    color: "transparent"
+
     signal setupStart(string x, string y)
     signal splashLoaded()
+
 
     Connections{
         target: window
@@ -27,10 +29,11 @@ Rectangle {
     Text {
         id: welcome
         text: qsTr("LinuxMCE")
-        font.family: myFont.name
+        font.family:"Roboto-Regular"
         font.pointSize: 42
         anchors.top: parent.top
         anchors.topMargin: scaleY(5)
+        font.bold: false
         anchors.horizontalCenter: parent.horizontalCenter
         color:"white"
     }
@@ -62,7 +65,7 @@ Rectangle {
         text: "Status " + manager.commandResponse
         anchors.topMargin: scaleY(15)
         font.pixelSize: 14
-        font.family: myFont.name
+        font.family:"Roboto"
         color: "white"
         anchors.top: connectionBox.bottom
         anchors.horizontalCenter: connectionBox.horizontalCenter
