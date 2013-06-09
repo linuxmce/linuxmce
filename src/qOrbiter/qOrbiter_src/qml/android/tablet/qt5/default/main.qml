@@ -1,11 +1,16 @@
 import QtQuick 2.0
+import QtMultimedia 5.0
+import QtSensors 5.0 as SensorArray
+import QtGraphicalEffects 1.0
+
 
 Item {
-    id: item
-    width:manager.appWidth 
-    height:manager.appHeight
-//height:parent.height
-//width:parent.width
+    id: qml_root
+
+
+    onWidthChanged: console.log(width+"::"+height)
+    height:parent.height
+    width:parent.width
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
@@ -16,20 +21,45 @@ Item {
     property string dynamic_width
 
     function scaleX(x){
-        return x/100*manager.appWidth 
+        return x/100*qml_root.width
     }
     function scaleY(y){
-        return y/100*manager.appHeight
+        return y/100*qml_root.height
     }
 
     Rectangle{
         anchors.fill: parent
         id:bgFill
-        gradient: Gradient{
-            GradientStop{position: 0.0; color: "Black"}
-            GradientStop{position: .45; color: "darkgrey"}
-            GradientStop{position: .65; color: "black"}
+        color:"black"
+    }
+
+    ListModel{
+        id:scenarios
+        ListElement{
+            name:"Lights"
+            model:"currentRoomLights"
         }
+        ListElement{
+            name:"Media"
+            model:"currentRoomMedia"
+        }
+        ListElement{
+            name:"Climate"
+            model:"currentRoomClimate"
+        }
+        ListElement{
+            name:"Telecom"
+            model:"currentRoomTelecom"
+        }
+        ListElement{
+            name:"Security"
+            model:"currentRoomSecurity"
+        }
+
+
+
+
+
     }
 
     Image {
@@ -39,6 +69,24 @@ Item {
         property string pSource:""
         property string wSource:""
 
+    }
+
+    Item{
+        id:mini_screen_saver
+        anchors.fill: qml_root
+
+
+
+        Connections{
+            target:screensaver
+            onImageChanged:changeBGimage()
+        }
+        Image{
+            id:mini_screen_saver_image
+            height: mini_screen_saver.height
+            width: mini_screen_saver.width
+            source: "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
+        }
     }
 
     function updateBackground(portait, wide){
@@ -87,6 +135,12 @@ Item {
         console.log(component.progress)
     }
 
+    FontLoader{
+        id:appFont
+        name:"Sawasdee"
+        source:"../../../fonts/Sawasdee.ttf"
+    }
+
 
     Loader {
         id:pageLoader
@@ -97,7 +151,7 @@ Item {
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
         }
-   }
+    }
 
     //=================Components==================================================//
     function loadComponent(componentName)
