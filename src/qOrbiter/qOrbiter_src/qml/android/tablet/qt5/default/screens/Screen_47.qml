@@ -16,19 +16,19 @@ Item {
     GridView{
         id:typeSelection
         anchors.centerIn: parent
-        height:parent.height/2
-        width: parent.width /2
+        height:parent.height / 2
+        width: parent.width *.85
         model:mediatypefilter
-        cellWidth:scaleX(16)
-        cellHeight:scaleY(12)
+        cellWidth:scaleX(25)
+        cellHeight:scaleY(15)
         delegate:
             Item{
-            height: scaleY(8)
-            width: scaleX(15)
+            height: childrenRect.height
+            width: childrenRect.width
 
             StyledButton{
               buttonText.text: name
-              buttonText.fontSize: 48
+             textSize: 48
               hitArea.onReleased:{ mediatypefilter.setSelectionStatus(name); files_view_screen.state="viewing"}
             }
         }
