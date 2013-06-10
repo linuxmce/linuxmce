@@ -27,6 +27,8 @@ using namespace DCE;
 
 // Additional required includes
 #include "pluto_main/Define_DeviceTemplate.h"
+#include "pluto_main/Define_Command.h"
+#include "pluto_main/Define_CommandParameter.h"
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -49,7 +51,7 @@ OMX_Player::OMX_Player(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pDa
 OMX_Player::~OMX_Player()
 //<-dceag-dest-e->
 {
-	
+//	EVENT_Playback_Completed("",0,false);
 }
 
 void
@@ -98,11 +100,11 @@ bool OMX_Player::Register()
 /*  Since several parents can share the same child class, and each has it's own implementation, the base class in Gen_Devices
 	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
 	can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
-//<-dceag-createinst-b->
-OMX_Player_Command *Create_OMX_Player(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-{
-	return new OMX_Player(pPrimaryDeviceCommand, pData, pEvent, pRouter);
-}
+//<-dceag-createinst-b->!
+//OMX_Player_Command *Create_OMX_Player(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+//{
+//	return new OMX_Player(pPrimaryDeviceCommand, pData, pEvent, pRouter);
+//}
 //<-dceag-createinst-e->
 
 /*
@@ -264,6 +266,38 @@ void OMX_Player::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char 
 	cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
 }
 
+void OMX_Player::ProcessNotification(void *pObject, int event)
+{
+//	void EVENT_Playback_Completed(string sMRL,int iStream_ID,bool bWith_Errors) { GetEvents()->Playback_Completed(sMRL.c_str(),iStream_ID,bWith_Errors); }
+//	void EVENT_Playback_Started(string sMRL,int iStream_ID,string sSectionDescription,string sAudio,string sVideo) { GetEvents()->Playback_Started(sMRL.c_str(),iStream_ID,sSectionDescription.c_str(),sAudio.c_str(),sVideo.c_str()); }
+
+        cout << "PROCESS NOTIFICATION FUNCTION CALLED!!!  " << event << endl;
+
+
+if (m_pEvent == NULL)
+	cout << "SHITTTTTTTTTYYY!!!!" << endl;
+else
+	cout << "m_pEvent is not NULL." << endl;
+
+//	OMX_Player* pThis = (OMX_Player*) pObject;
+//	pThis->EVENT_Playback_Completed(pThis->m_filename,pThis->m_iStreamID,false);
+
+//if (pThis == this)
+//	cout << "pThis == this! Okay." << endl;
+//else
+//	cout << "pThis != this! Argh!" << endl;
+
+}
+
+
+void OMX_Player::NotifierCallback(void *pObject, int event)
+{
+        cout << "CALLBACK FUNCTION CALLED!!!  " << event << endl;
+	OMX_Player* pThis = (OMX_Player*) pObject;
+//	pThis->EVENT_Playback_Completed(pThis->m_filename,pThis->m_iStreamID,false);
+	pThis->ProcessNotification(pObject, event);
+}
+
 //<-dceag-c37-b->
 
 	/** @brief COMMAND: #37 - Play Media */
@@ -297,15 +331,22 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 		m_bOMXIsRunning = false;
 	}
 
+	m_iStreamID = iStreamID;
+
 	m_omxplayer = new CLibOMX;
 
         // open file
         m_omxplayer->OpenFile(sMediaURL);
 
+        m_omxplayer->RegisterNotifier(OMX_Player::NotifierCallback, this);
+
 	// start the engine running
         m_omxplayer->Start();
 
 	m_bOMXIsRunning = true;
+
+//	void EVENT_Playback_Started(string sMRL,int iStream_ID,string sSectionDescription,string sAudio,string sVideo) { GetEvents()->Playback_Started(sMRL.c_str(),iStream_ID,sSectionDescription.c_str(),sAudio.c_str(),sVideo.c_str()); }
+//	EVENT_Playback_Started(sMediaURL,m_iStreamID,"","","");
 
 	sCMD_Result = "OK";
 /*
@@ -364,6 +405,8 @@ void OMX_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 		delete m_omxplayer;
 
 	m_bOMXIsRunning = false;
+
+//	EVENT_Playback_Completed(m_filename,iStreamID,false);
 
 	sCMD_Result = "OK";
 /*

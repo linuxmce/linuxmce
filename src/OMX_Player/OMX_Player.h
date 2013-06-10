@@ -33,10 +33,14 @@ namespace DCE
 		DeviceData_Base *m_pDevice_OMX_Plugin;
 		DeviceData_Base *m_pDevice_App_Server;
 	        CLibOMX *m_omxplayer;
-
 		bool m_bOMXIsRunning;
+
 		// Private methods
+
+		void ProcessNotification(void *pObject, int event);
 public:
+		int m_iStreamID;
+		string m_filename;
 		// Public member variables
 		virtual void PrepareToDelete();
 
@@ -51,6 +55,7 @@ public:
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
 
+		static void NotifierCallback(void* pObject, int event);
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
