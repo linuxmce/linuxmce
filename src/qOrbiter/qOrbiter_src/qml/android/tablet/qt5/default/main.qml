@@ -2,11 +2,11 @@ import QtQuick 2.0
 import QtMultimedia 5.0
 import QtSensors 5.0 as SensorArray
 import QtGraphicalEffects 1.0
-
+import "../../lib/handlers"
+import "components"
 
 Item {
     id: qml_root
-
 
     onWidthChanged: console.log(width+"::"+height)
     height:parent.height
@@ -14,6 +14,9 @@ Item {
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
+
+    property variant current_scenario_model
+    property variant current_header_model:scenarios
 
     property string locationinfo: "standby"
     property string screenfile
@@ -57,13 +60,28 @@ Item {
         }
     }
 
-    Image {
-        id: appBackground
-        source: manager.b_orientation ? pSource : wSource
-        anchors.fill: parent
-        property string pSource:""
-        property string wSource:""
+    ListModel{
+        id:media_filters
+        ListElement{
+            name:"Attribute"
+        }
+        ListElement{
+            name:"Genre"
+        }
+        ListElement{
+            name:"MediaType"
+        }
+        ListElement{
+            name:"Resolution"
+        }
+        ListElement{
+            name:"Source"
+        }
+        ListElement{
+            name:"View"
+        }
     }
+
 
     Item{
         id:mini_screen_saver
@@ -85,6 +103,64 @@ Item {
             source: "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
         }
     }
+    Rectangle{
+        anchors.fill: nav_row
+        color: "black"
+        opacity: .65
+    }
+
+    Row{
+        id:nav_row
+        height: scaleY(8)
+        width:parent.width
+        spacing:scaleY(2)
+        ListView{
+            id:scenarioList
+            height:scaleY(7)
+            width:  (scaleX(10)*8)
+            spacing: scaleY(2)
+            model:current_header_model
+            clip:true
+            orientation:ListView.Horizontal
+            anchors.verticalCenter: parent.verticalCenter
+            delegate: Item{
+                height: childrenRect.height
+                width: childrenRect.width
+                StyledButton{
+                    id:dummy
+                    buttonText.text: name
+                    buttonText.color: "antiquewhite"
+                    hitArea.onReleased: {
+                        if(modelName==="currentRoomLights")
+                           current_scenario_model = currentRoomLights
+                        else if(modelName==="currentRoomMedia")
+                            current_scenario_model = currentRoomMedia
+                        else if(modelName==="currentRoomClimate")
+                            current_scenario_model = currentRoomClimate
+                        else if(modelName==="currentRoomTelecom")
+                            current_scenario_model=currentRoomTelecom
+                        else if(modelName==="currentRoomSecurity")
+                            current_scenario_model = currentRoomSecurity
+                    }
+                }
+            }
+        }
+            StyledButton{
+                buttonText.text:"Advanced"
+            }
+            StyledButton {
+                id: exit_label
+                buttonText.text: qsTr("Exit")
+                hitArea.onReleased: manager.exitApp()
+                visible:manager.currentScreen ==="Screen_1.qml"
+            }
+            StyledButton {
+                id: home_label
+                buttonText.text: qsTr("Home")
+                hitArea.onReleased: manager.gotoQScreen("Screen_1.qml")
+                visible: manager.currentScreen !=="Screen_1.qml"
+            }
+        }
 
     function updateBackground(portait, wide){
         appBackground.pSource = portait
@@ -116,6 +192,8 @@ Item {
         id:pageLoader
         objectName: "loadbot"
         focus: true
+        height: qml_root.height-nav_row.height
+        anchors.top: nav_row.bottom
         Keys.onBackPressed: console.log("back")
         onSourceChanged:  loadin
         onLoaded: {
@@ -171,7 +249,6 @@ Item {
         {
             finishLoadingComponent(comp)
         }
-
     }
 
 
@@ -191,15 +268,12 @@ Item {
             id:fadeout
             target:pageLoader
             properties: "opacity"; to: "0"; duration: 5000
-
         }
+
         PropertyAnimation{
             id: fadein
             target:pageLoader
             properties: "opacity"; to: "1"; duration: 5000
         }
-
     }
-
-
 }

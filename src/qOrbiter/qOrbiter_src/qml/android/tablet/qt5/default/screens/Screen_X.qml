@@ -20,14 +20,5 @@ Item{
         color: "Red"
         font.pixelSize: 32
         font.bold: false
-
-    }
-
-    StyledButton{
-        id:go_home
-        buttonText.text:"Home"
-        anchors.top: mask.bottom
-        hitArea.onReleased: manager.gotoQScreen("Screen_1.qml")
-
     }
 }

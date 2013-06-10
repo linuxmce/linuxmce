@@ -1,3 +1,5 @@
 Clock Clock.qml
 StyledText StyledText.qml
 StyledButton StyledButton.qml
+MediaListProgressBar MediaListProgressBar.qml
+MultiViewMediaList MultiViewMediaList.qml
