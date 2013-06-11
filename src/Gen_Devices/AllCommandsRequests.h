@@ -15058,27 +15058,31 @@ namespace DCE
 	};
 	class CMD_Mode : public PreformedCommand {
 	public:
-		CMD_Mode(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+		CMD_Mode(long DeviceIDFrom, long DeviceIDTo,string sParameters) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
 			COMMAND_Mode_CONST,
-			0 /* number of parameters */); }
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Parameters_CONST, sParameters.c_str()); }
 	};
 	class CMD_Mode_DL : public PreformedCommand {
 	public:
-		CMD_Mode_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Mode_DL(long DeviceIDFrom, string DeviceIDTo,string sParameters) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Mode_CONST,
-			0 /* number of parameters */); }
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Parameters_CONST, sParameters.c_str()); }
 	};
 	class CMD_Mode_DT : public PreformedCommand {
 	public:
-		CMD_Mode_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Mode_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sParameters) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Mode_CONST,
-			0 /* number of parameters */); }
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Parameters_CONST, sParameters.c_str()); }
 	};
 	class CMD_Mode_Cat : public PreformedCommand {
 	public:
-		CMD_Mode_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Mode_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sParameters) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Mode_CONST,
-			0 /* number of parameters */); }
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Parameters_CONST, sParameters.c_str()); }
 	};
 	class CMD_Monitor : public PreformedCommand {
 	public:
@@ -17222,27 +17226,31 @@ namespace DCE
 	};
 	class CMD_Strobe : public PreformedCommand {
 	public:
-		CMD_Strobe(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+		CMD_Strobe(long DeviceIDFrom, long DeviceIDTo,string sOnOff) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
 			COMMAND_Strobe_CONST,
-			0 /* number of parameters */); }
+			1 /* number of parameters */,
+			COMMANDPARAMETER_OnOff_CONST, sOnOff.c_str()); }
 	};
 	class CMD_Strobe_DL : public PreformedCommand {
 	public:
-		CMD_Strobe_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Strobe_DL(long DeviceIDFrom, string DeviceIDTo,string sOnOff) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Strobe_CONST,
-			0 /* number of parameters */); }
+			1 /* number of parameters */,
+			COMMANDPARAMETER_OnOff_CONST, sOnOff.c_str()); }
 	};
 	class CMD_Strobe_DT : public PreformedCommand {
 	public:
-		CMD_Strobe_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Strobe_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sOnOff) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Strobe_CONST,
-			0 /* number of parameters */); }
+			1 /* number of parameters */,
+			COMMANDPARAMETER_OnOff_CONST, sOnOff.c_str()); }
 	};
 	class CMD_Strobe_Cat : public PreformedCommand {
 	public:
-		CMD_Strobe_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Strobe_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sOnOff) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Strobe_CONST,
-			0 /* number of parameters */); }
+			1 /* number of parameters */,
+			COMMANDPARAMETER_OnOff_CONST, sOnOff.c_str()); }
 	};
 	class CMD_Subpage : public PreformedCommand {
 	public:
@@ -26762,31 +26770,35 @@ namespace DCE
 	};
 	class CMD_Set_Game_Options : public PreformedCommand {
 	public:
-		CMD_Set_Game_Options(long DeviceIDFrom, long DeviceIDTo,string sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+		CMD_Set_Game_Options(long DeviceIDFrom, long DeviceIDTo,string sValue_To_Assign,string sPath) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
 			COMMAND_Set_Game_Options_CONST,
-			1 /* number of parameters */,
-			COMMANDPARAMETER_Value_To_Assign_CONST, sValue_To_Assign.c_str()); }
+			2 /* number of parameters */,
+			COMMANDPARAMETER_Value_To_Assign_CONST, sValue_To_Assign.c_str(),
+			COMMANDPARAMETER_Path_CONST, sPath.c_str()); }
 	};
 	class CMD_Set_Game_Options_DL : public PreformedCommand {
 	public:
-		CMD_Set_Game_Options_DL(long DeviceIDFrom, string DeviceIDTo,string sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Set_Game_Options_DL(long DeviceIDFrom, string DeviceIDTo,string sValue_To_Assign,string sPath) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Set_Game_Options_CONST,
-			1 /* number of parameters */,
-			COMMANDPARAMETER_Value_To_Assign_CONST, sValue_To_Assign.c_str()); }
+			2 /* number of parameters */,
+			COMMANDPARAMETER_Value_To_Assign_CONST, sValue_To_Assign.c_str(),
+			COMMANDPARAMETER_Path_CONST, sPath.c_str()); }
 	};
 	class CMD_Set_Game_Options_DT : public PreformedCommand {
 	public:
-		CMD_Set_Game_Options_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Set_Game_Options_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sValue_To_Assign,string sPath) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Set_Game_Options_CONST,
-			1 /* number of parameters */,
-			COMMANDPARAMETER_Value_To_Assign_CONST, sValue_To_Assign.c_str()); }
+			2 /* number of parameters */,
+			COMMANDPARAMETER_Value_To_Assign_CONST, sValue_To_Assign.c_str(),
+			COMMANDPARAMETER_Path_CONST, sPath.c_str()); }
 	};
 	class CMD_Set_Game_Options_Cat : public PreformedCommand {
 	public:
-		CMD_Set_Game_Options_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sValue_To_Assign) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+		CMD_Set_Game_Options_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sValue_To_Assign,string sPath) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_Set_Game_Options_CONST,
-			1 /* number of parameters */,
-			COMMANDPARAMETER_Value_To_Assign_CONST, sValue_To_Assign.c_str()); }
+			2 /* number of parameters */,
+			COMMANDPARAMETER_Value_To_Assign_CONST, sValue_To_Assign.c_str(),
+			COMMANDPARAMETER_Path_CONST, sPath.c_str()); }
 	};
 	class RESP_Get_Game_Options : public PreformedCommandResponse {
 		string *m_sValue_To_Assign;
@@ -30279,6 +30291,42 @@ namespace DCE
 		CMD_CinemaNow_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
 			COMMAND_CinemaNow_CONST,
 			0 /* number of parameters */); }
+	};
+	class CMD_Hue : public PreformedCommand {
+	public:
+		CMD_Hue(long DeviceIDFrom, long DeviceIDTo,string sLevel,int iHue,int iSaturation) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Hue_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_Level_CONST, sLevel.c_str(),
+			COMMANDPARAMETER_Hue_CONST, StringUtils::itos(iHue).c_str(),
+			COMMANDPARAMETER_Saturation_CONST, StringUtils::itos(iSaturation).c_str()); }
+	};
+	class CMD_Hue_DL : public PreformedCommand {
+	public:
+		CMD_Hue_DL(long DeviceIDFrom, string DeviceIDTo,string sLevel,int iHue,int iSaturation) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Hue_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_Level_CONST, sLevel.c_str(),
+			COMMANDPARAMETER_Hue_CONST, StringUtils::itos(iHue).c_str(),
+			COMMANDPARAMETER_Saturation_CONST, StringUtils::itos(iSaturation).c_str()); }
+	};
+	class CMD_Hue_DT : public PreformedCommand {
+	public:
+		CMD_Hue_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sLevel,int iHue,int iSaturation) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Hue_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_Level_CONST, sLevel.c_str(),
+			COMMANDPARAMETER_Hue_CONST, StringUtils::itos(iHue).c_str(),
+			COMMANDPARAMETER_Saturation_CONST, StringUtils::itos(iSaturation).c_str()); }
+	};
+	class CMD_Hue_Cat : public PreformedCommand {
+	public:
+		CMD_Hue_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sLevel,int iHue,int iSaturation) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Hue_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_Level_CONST, sLevel.c_str(),
+			COMMANDPARAMETER_Hue_CONST, StringUtils::itos(iHue).c_str(),
+			COMMANDPARAMETER_Saturation_CONST, StringUtils::itos(iSaturation).c_str()); }
 	};
 }
 #endif

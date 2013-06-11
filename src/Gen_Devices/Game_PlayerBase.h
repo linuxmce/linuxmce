@@ -299,6 +299,8 @@ public:
 	virtual void CMD_Report_Playback_Position(int iStreamID,string *sText,string *sMediaPosition,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Media_Position(int iStreamID,string sMediaPosition,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Menu(string sText,int iStreamID,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Select_A(string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Select_B(string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Application_Exited(int iPID,int iExit_Code,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_Result,class Message *pMessage) {};
@@ -314,7 +316,7 @@ public:
 	virtual void CMD_Game_Select(string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Game_Option(string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Game_Reset(string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Set_Game_Options(string sValue_To_Assign,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Set_Game_Options(string sValue_To_Assign,string sPath,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
@@ -1439,6 +1441,56 @@ public:
 					};
 					iHandled++;
 					continue;
+				case COMMAND_Select_A_CONST:
+					{
+						string sCMD_Result="OK";
+						CMD_Select_A(sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Select_A(sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Select_B_CONST:
+					{
+						string sCMD_Result="OK";
+						CMD_Select_B(sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Select_B(sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
 				case COMMAND_Application_Exited_CONST:
 					{
 						string sCMD_Result="OK";
@@ -1828,7 +1880,8 @@ public:
 					{
 						string sCMD_Result="OK";
 						string sValue_To_Assign=pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST];
-						CMD_Set_Game_Options(sValue_To_Assign.c_str(),sCMD_Result,pMessage);
+						string sPath=pMessage->m_mapParameters[COMMANDPARAMETER_Path_CONST];
+						CMD_Set_Game_Options(sValue_To_Assign.c_str(),sPath.c_str(),sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -1845,7 +1898,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Set_Game_Options(sValue_To_Assign.c_str(),sCMD_Result,pMessage);
+								CMD_Set_Game_Options(sValue_To_Assign.c_str(),sPath.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
