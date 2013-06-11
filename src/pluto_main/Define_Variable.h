@@ -72,6 +72,8 @@
 #define VARIABLE_Net_Mask_CONST 69
 #define VARIABLE_Gateway_CONST 70
 #define VARIABLE_DNS_CONST 71
+#define VARIABLE_Keypad_1_Use_CONST 72
+#define VARIABLE_Keypad_2_Use_CONST 73
 
 #define VARIABLE_TABLE "Variable"
 #define VARIABLE_PK_VARIABLE_FIELD "PK_Variable"
