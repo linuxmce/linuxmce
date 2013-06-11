@@ -546,6 +546,14 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
                 pGameMediaStream->m_sAppName = "pcsx2.pcsx2";
                 pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_ps2_CONST;
 	}
+
+	if (mediaURL.find("/amiga") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".adf") != string::npos
+		|| StringUtils::ToLower(mediaURL).find(".ipf") != string::npos)
+	{
+		pGameMediaStream->m_sAppName = "fs-emu.fs-emu";
+		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_amiga_CONST;
+	}
 	
 	DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
 					   pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
