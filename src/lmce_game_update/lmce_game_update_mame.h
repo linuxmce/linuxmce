@@ -1,11 +1,11 @@
 /**
- * lmce_game_update - Update the lmce_game database with the output from a running sdlmame.
+ * lmce_game_update_mame - Update the lmce_game database with the output from a running sdlmame.
  * 
  * This will skip any existing ROM entries, only putting in ROM entries that do not already
  * exist.
  *
  * Author:     Thomas Cherryhomes <thom.cherryhomes@gmail.com>
- * Version:    1.0
+ * Version:    2.0
  *
  */
 
@@ -29,26 +29,23 @@
 
 #include "DCE/Logger.h"
 #include "PlutoUtils/DBHelper.h"
+#include "MAMECategory.h"
+#include "MAMEParser.h"
 
-class LMCE_Game_Update
+class LMCE_Game_Update_MAME
 {
   /* ctor and dtor */
  public:
-  LMCE_Game_Update(string sMamePath);
-  virtual ~LMCE_Game_Update();
+  LMCE_Game_Update_MAME(string sMamePath, string sCategoryPath);
+  virtual ~LMCE_Game_Update_MAME();
   int Run();
 
  private:
-  Database_lmce_game *m_pMyDatabase;
+  Database_lmce_game *m_pDatabase;
   string m_sMamePath;
-  vector<string> m_vRomNames;
-  vector<string> m_vRomDescriptions;
+  string m_sCategoryPath;
+  MAMECategory *m_pMAMECategory;
 
-  bool InitDatabase();
-  bool RomExists(string sRomName);
-  int AddRomm(string sRomName);  // Returns PK_Rom #
-  bool AddRommAttribute(int iPK_Rom, int iRomAttributeType,string sName);
-  bool ParseGameListFromMAME();
-  bool GetMetadataForRom(string sRomName, string& sMetaData);
-  
+  bool GetMAMEOutput(string &sMameOutput);
+
 };

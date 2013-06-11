@@ -11,15 +11,17 @@ CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
-MYNAME = lmce_game_update
+MYNAME = lmce_game_update_mame
 VERSION = 2.0.0
 
-sources = lmce_game_update.cpp
+sources = lmce_game_update_mame.cpp \
+	MAMECategory.cpp \
+	MAMEParser.cpp
 #<-dceag-mh-e->
 
-CXXFLAGS +=
-CPPFLAGS +=
-LDFLAGS +=
+CXXFLAGS += `pkg-config libxml++-2.6 --cflags`
+CPPFLAGS += 
+LDFLAGS += `pkg-config libxml++-2.6 --libs`
 XTRALDLIBS = -lmysqlclient_r -llmce_game
 
 Gen_Dev_Files +=
@@ -28,21 +30,18 @@ sources +=
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo:
-	@echo "type 'make bin' or 'make all'"
-
 all: bin
 
-bin: lmce_game_update
-		
-lmce_game_update: $(sources:.cpp=.o)
+bin: lmce_game_update_mame
+
+lmce_game_update_mame: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
 	cp get_rom_info.pl ../bin
 	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) lmce_game_update >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) lmce_game_update_mame >/dev/null
 
 include $(ROOT)/PlutoUtils/make.rules
 ifeq (,$(findstring clean, $(MAKECMDGOALS)))
