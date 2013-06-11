@@ -64,21 +64,28 @@ Item {
         id:media_filters
         ListElement{
             name:"Attribute"
+            pksort:10
         }
         ListElement{
             name:"Genre"
+            pksort:4
         }
         ListElement{
             name:"MediaType"
+            pksort:7
+
         }
         ListElement{
             name:"Resolution"
+            pksort:-1
         }
         ListElement{
             name:"Source"
+            pksort:5
         }
         ListElement{
             name:"View"
+            pksort:-1
         }
     }
 
@@ -131,36 +138,64 @@ Item {
                     buttonText.text: name
                     buttonText.color: "antiquewhite"
                     hitArea.onReleased: {
-                        if(modelName==="currentRoomLights")
-                           current_scenario_model = currentRoomLights
-                        else if(modelName==="currentRoomMedia")
-                            current_scenario_model = currentRoomMedia
-                        else if(modelName==="currentRoomClimate")
-                            current_scenario_model = currentRoomClimate
-                        else if(modelName==="currentRoomTelecom")
-                            current_scenario_model=currentRoomTelecom
-                        else if(modelName==="currentRoomSecurity")
-                            current_scenario_model = currentRoomSecurity
+                        if(manager.currentScreen==="Screen_1.qml"){
+                            if(modelName==="currentRoomLights")
+                                current_scenario_model = currentRoomLights
+                            else if(modelName==="currentRoomMedia")
+                                current_scenario_model = currentRoomMedia
+                            else if(modelName==="currentRoomClimate")
+                                current_scenario_model = currentRoomClimate
+                            else if(modelName==="currentRoomTelecom")
+                                current_scenario_model=currentRoomTelecom
+                            else if(modelName==="currentRoomSecurity")
+                                current_scenario_model = currentRoomSecurity
+                        }else if (manager.currentScreen==="Screen_47"){
+
+                            if(name==="Attribute")
+                                console.log("attribute selected")
+                        }
+
+
                     }
                 }
             }
         }
-            StyledButton{
-                buttonText.text:"Advanced"
-            }
-            StyledButton {
-                id: exit_label
-                buttonText.text: qsTr("Exit")
-                hitArea.onReleased: manager.exitApp()
-                visible:manager.currentScreen ==="Screen_1.qml"
-            }
-            StyledButton {
-                id: home_label
-                buttonText.text: qsTr("Home")
-                hitArea.onReleased: manager.gotoQScreen("Screen_1.qml")
-                visible: manager.currentScreen !=="Screen_1.qml"
-            }
+        StyledButton{
+            buttonText.text:"Advanced"
+            visible: manager.currentScreen === "Screen_1.qml"
         }
+        StyledButton {
+            id: exit_label
+            buttonText.text: qsTr("Exit")
+            hitArea.onReleased: manager.exitApp()
+            visible:manager.currentScreen ==="Screen_1.qml"
+        }
+        StyledButton {
+            id: home_label
+            buttonText.text: qsTr("Home")
+            hitArea.onReleased: manager.gotoQScreen("Screen_1.qml")
+            visible: manager.currentScreen !=="Screen_1.qml"
+        }
+        StyledButton{
+            id:media_goback
+            buttonText.text: "Back"
+            hitArea.onReleased:
+            {
+                if(manager.i_current_mediaType !== 5){
+                    manager.goBackGrid();
+                 }
+                else{
+
+                    pageLoader.item.state="selection"
+                    manager.goBackGrid()
+                   mediatypefilter.reset()
+                }
+
+
+            }
+            visible: manager.currentScreen==="Screen_47.qml"
+        }
+    }
 
     function updateBackground(portait, wide){
         appBackground.pSource = portait

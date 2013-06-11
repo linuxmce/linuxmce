@@ -3,11 +3,19 @@ import "../components"
 
 Item {
     id:files_view_screen
-    anchors.fill: parent
+    height: parent.height
+    width:parent.width
     property int current_view_type:1
     Component.onCompleted: current_header_model=media_filters
     state: manager.i_current_mediaType === 5 ? "selection" : "viewing"
-
+    Connections
+    {
+        target: filedetailsclass
+        onShowDetailsChanged:
+        {
+            files_view_screen.state="detail"
+        }
+    }
     MultiViewMediaList{
         id:media_view
         anchors.centerIn: parent
@@ -40,6 +48,13 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
     }
 
+    Loader{
+        id:file_details_loader
+        height: parent.height
+        width: parent.width
+        anchors.left: files_view_screen.right
+    }
+
     states: [
         State {
             name: "selection"
@@ -55,6 +70,11 @@ Item {
                 target: typeSelection
                 visible:true
             }
+            AnchorChanges{
+                target: file_details_loader
+                anchors.left: parent.right
+            }
+
         },
         State {
             name: "viewing"
@@ -69,6 +89,33 @@ Item {
             PropertyChanges{
                 target:typeSelection
                 visible:false
+            }
+            AnchorChanges{
+                target: file_details_loader
+                anchors.left: parent.right
+            }
+        },
+        State {
+            name: "detail"
+            PropertyChanges {
+                target: progress_bar
+                visible:false
+            }
+            PropertyChanges {
+                target: media_view
+                visible:false
+            }
+            PropertyChanges{
+                target:typeSelection
+                visible:false
+            }
+            AnchorChanges{
+                target: file_details_loader
+                anchors.left: parent.left
+            }
+            PropertyChanges {
+                target: file_details_loader
+                source:"../components/FileDetails_"+manager.i_current_mediaType+".qml"
             }
         }
 
