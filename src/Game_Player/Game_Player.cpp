@@ -1365,10 +1365,16 @@ void Game_Player::CMD_Get_Ripping_Status(string *sStatus,string &sCMD_Result,Mes
 	/** Set Options for the running Game System driver. */
 		/** @param #5 Value To Assign */
 			/** Dependent on driver, but usually a single line in the format of key,value */
+		/** @param #219 Path */
+			/** The Option to Set */
 
-void Game_Player::CMD_Set_Game_Options(string sValue_To_Assign,string &sCMD_Result,Message *pMessage)
+void Game_Player::CMD_Set_Game_Options(string sValue_To_Assign,string sPath,string &sCMD_Result,Message *pMessage)
 //<-dceag-c982-e->
 {
+  if (m_pEmulatorController)
+    {
+      m_pEmulatorController->setOption(sPath,sValue_To_Assign);
+    }
 }
 
 //<-dceag-c983-b->
@@ -1383,6 +1389,10 @@ void Game_Player::CMD_Set_Game_Options(string sValue_To_Assign,string &sCMD_Resu
 void Game_Player::CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c983-e->
 {
+  if (m_pEmulatorController)
+    {
+      m_pEmulatorController->getOption(sPath,&sValue_To_Assign);
+    }
 }
 
 //<-dceag-c952-b->
@@ -1447,4 +1457,30 @@ void Game_Player::CMD_Record(string &sCMD_Result,Message *pMessage)
   // This is simply a toggle, the EmulatorController will do the right thing.
   m_pEmulatorController->setOrbiter(pMessage->m_dwPK_Device_From);
   m_pEmulatorController->record();
+}
+//<-dceag-c616-b->
+
+	/** @brief COMMAND: #616 - Select A */
+	/** Select P1 keypad on supported game systems. */
+
+void Game_Player::CMD_Select_A(string &sCMD_Result,Message *pMessage)
+//<-dceag-c616-e->
+{
+  if (m_pEmulatorController)
+    {
+      m_pEmulatorController->selectA();
+    }
+}
+//<-dceag-c617-b->
+
+	/** @brief COMMAND: #617 - Select B */
+	/** Select P2 keypad on supported game systems. */
+
+void Game_Player::CMD_Select_B(string &sCMD_Result,Message *pMessage)
+//<-dceag-c617-e->
+{
+  if (m_pEmulatorController)
+    {
+      m_pEmulatorController->selectB();
+    }
 }

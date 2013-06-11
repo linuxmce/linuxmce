@@ -489,4 +489,24 @@ namespace DCE
     return m_pEmulatorModel->m_bCanSaveState;
   }
 
+  bool EmulatorController::selectA()
+  {
+    return doAction("selectA");
+  }
+  
+  bool EmulatorController::selectB()
+  {
+    return doAction("selectB");
+  }
+
+  void getOption(string sPath, string &sValue_To_Assign)
+  {
+    sValue_To_Assign=m_pEmulatorModel->m_mapOptions_Find(sPath);
+  }
+  
+  void setOption(string sPath, string sValue_To_Assign)
+  {
+    m_pEmulatorModel->m_mapOptions[sPath]=sValue_To_Assign;
+  }
+
 }

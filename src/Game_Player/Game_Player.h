@@ -53,8 +53,6 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-	class EmulatorFactory;
-	class EmulatorController;
 	class Game_Player : public Game_Player_Command
 	{
 //<-dceag-decl-e->
@@ -546,6 +544,20 @@ public:
 	virtual void CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #616 - Select A */
+	/** Select P1 keypad on supported game systems. */
+
+	virtual void CMD_Select_A() { string sCMD_Result; CMD_Select_A(sCMD_Result,NULL);};
+	virtual void CMD_Select_A(string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #617 - Select B */
+	/** Select P2 keypad on supported game systems. */
+
+	virtual void CMD_Select_B() { string sCMD_Result; CMD_Select_B(sCMD_Result,NULL);};
+	virtual void CMD_Select_B(string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #812 - Application Exited */
 	/** Notify us that Myth Player exited */
 		/** @param #227 PID */
@@ -673,9 +685,11 @@ public:
 	/** Set Options for the running Game System driver. */
 		/** @param #5 Value To Assign */
 			/** Dependent on driver, but usually a single line in the format of key,value */
+		/** @param #219 Path */
+			/** The Option to Set */
 
-	virtual void CMD_Set_Game_Options(string sValue_To_Assign) { string sCMD_Result; CMD_Set_Game_Options(sValue_To_Assign.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Set_Game_Options(string sValue_To_Assign,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Set_Game_Options(string sValue_To_Assign,string sPath) { string sCMD_Result; CMD_Set_Game_Options(sValue_To_Assign.c_str(),sPath.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Set_Game_Options(string sValue_To_Assign,string sPath,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #983 - Get Game Options */

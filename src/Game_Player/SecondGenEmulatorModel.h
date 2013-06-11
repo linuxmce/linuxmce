@@ -19,15 +19,24 @@
 #define SECONDGENEMULATORMODEL_H
 
 #include "MESSEmulatorModel.h"
+#include <map>
 
 namespace DCE
 {
   class SecondGenEmulatorModel : public MESSEmulatorModel
   {
+
+  protected:
+    map<int, int> m_mapOrbiterToKeypadPlayer;
+    int m_mapOrbiterToKeypadPlayer_Find(int iPK_Orbiter)
+    {
+      map<int, int>::iterator it = m_mapOrbiterToKeypadPlayer.find(iPK_Orbiter);
+      return it == m_mapOrbiterToKeypadPlayer.end() ? 1 : it->second;
+    }
+
   public:
     SecondGenEmulatorModel();
     ~SecondGenEmulatorModel();
-
   };
 }
 

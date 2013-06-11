@@ -72,6 +72,13 @@ namespace DCE
       return it != m_mapMedia.end();
     }
 
+    map<string,string> m_mapOptions;
+    string m_mapOptions_Find(string sPath) 
+    {
+      map<string, string>::iterator it = m_mapOptions.find(sPath);
+      return it == m_mapOptions.end() ? "" : (*it).second;
+    }    
+
     EmulatorModel();
     ~EmulatorModel();
   };

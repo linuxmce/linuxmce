@@ -49,12 +49,12 @@ namespace DCE
     map<string, pair<int, int> > m_mapActionsToKeysyms;
     map<int, int> m_mapButtonToKeysyms;    
 
-    pair<int, int> m_mapActionsToKeysyms_Find(string sAction) 
+    virtual pair<int, int> m_mapActionsToKeysyms_Find(string sAction) 
     {
       map<string, pair<int, int> >::iterator it = m_mapActionsToKeysyms.find(sAction);
       return it == m_mapActionsToKeysyms.end() ? make_pair(0,0) : (*it).second;
     }
-    bool m_mapActionsToKeysyms_Exists(string sAction)
+    virtual bool m_mapActionsToKeysyms_Exists(string sAction)
     {
       map<string, pair<int, int> >::iterator it = m_mapActionsToKeysyms.find(sAction);
       return it != m_mapActionsToKeysyms.end();

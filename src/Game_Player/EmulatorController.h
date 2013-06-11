@@ -95,8 +95,11 @@ namespace DCE
     virtual bool reset();
     virtual bool record();
     virtual bool gracefulExit();
-
-    bool canSaveState(); 
+    virtual bool selectA();
+    virtual bool selectB();
+    bool canSaveState();
+    virtual void getOption(string sPath, string &sValue_To_Assign);
+    virtual void setOption(string sPath, string sValue_To_Assign);
 
   };
 
