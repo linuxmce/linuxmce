@@ -20,6 +20,7 @@ using namespace DCE;
 Database_lmce_game::Database_lmce_game(Logger *pLogger)
 {
 	LoggerWrapper::SetInstance(pLogger);
+tblConfiguration=NULL;
 tblGameSystem=NULL;
 tblRom=NULL;
 tblRomAttribute=NULL;
@@ -41,6 +42,9 @@ Database_lmce_game::~Database_lmce_game()
 bool Database_lmce_game::Commit(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow)
 {
 bool bResult=true;
+if( tblConfiguration!=NULL )
+	if( !Commit_Configuration(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
 if( tblGameSystem!=NULL )
 	if( !Commit_GameSystem(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
 		bResult=false;
@@ -80,6 +84,7 @@ return bResult;
 
 void Database_lmce_game::DeleteAllTables()
 {
+DeleteTable_Configuration();
 DeleteTable_GameSystem();
 DeleteTable_Rom();
 DeleteTable_RomAttribute();

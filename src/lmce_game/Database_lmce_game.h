@@ -25,6 +25,8 @@ Database_lmce_game(Logger *pLogger=NULL);
 ~Database_lmce_game();
 void DeleteAllTables();
 private:
+class Table_Configuration* tblConfiguration;
+bool Commit_Configuration(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_GameSystem* tblGameSystem;
 bool Commit_GameSystem(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_Rom* tblRom;
@@ -48,6 +50,7 @@ bool Commit_psc_game_schema(bool bDeleteFailedModifiedRow,bool bDeleteFailedInse
 class Table_psc_game_tables* tblpsc_game_tables;
 bool Commit_psc_game_tables(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 public:
+class Table_Configuration* Configuration_get() { if( !tblConfiguration ) CreateTable_Configuration(); return tblConfiguration; }
 class Table_GameSystem* GameSystem_get() { if( !tblGameSystem ) CreateTable_GameSystem(); return tblGameSystem; }
 class Table_Rom* Rom_get() { if( !tblRom ) CreateTable_Rom(); return tblRom; }
 class Table_RomAttribute* RomAttribute_get() { if( !tblRomAttribute ) CreateTable_RomAttribute(); return tblRomAttribute; }
@@ -65,6 +68,7 @@ bool Connect(class DCEConfig *pDCEConfig);
 void Disconnect();
 bool Commit(bool bDeleteFailedModifiedRow=false,bool bDeleteFailedInsertRow=false);
 private:
+void CreateTable_Configuration();
 void CreateTable_GameSystem();
 void CreateTable_Rom();
 void CreateTable_RomAttribute();
@@ -76,6 +80,7 @@ void CreateTable_psc_game_batuser();
 void CreateTable_psc_game_repset();
 void CreateTable_psc_game_schema();
 void CreateTable_psc_game_tables();
+void DeleteTable_Configuration();
 void DeleteTable_GameSystem();
 void DeleteTable_Rom();
 void DeleteTable_RomAttribute();

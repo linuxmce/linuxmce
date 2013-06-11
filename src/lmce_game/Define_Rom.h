@@ -11,6 +11,8 @@
 #define ROM_ROMNAME_TABLE_FIELD "Rom.Romname"
 #define ROM_MD5_FIELD "md5"
 #define ROM_MD5_TABLE_FIELD "Rom.md5"
+#define ROM_FK_CONFIGURATION_FIELD "FK_Configuration"
+#define ROM_FK_CONFIGURATION_TABLE_FIELD "Rom.FK_Configuration"
 #define ROM_PSC_ID_FIELD "psc_id"
 #define ROM_PSC_ID_TABLE_FIELD "Rom.psc_id"
 #define ROM_PSC_BATCH_FIELD "psc_batch"

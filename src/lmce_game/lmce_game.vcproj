@@ -118,6 +118,9 @@
 				RelativePath=".\TableRow.cpp">
 			</File>
 			<File
+				RelativePath=".\Table_Configuration.cpp">
+			</File>
+			<File
 				RelativePath=".\Table_GameSystem.cpp">
 			</File>
 			<File

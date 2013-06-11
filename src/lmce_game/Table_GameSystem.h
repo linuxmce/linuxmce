@@ -159,7 +159,8 @@ void psc_restrict_setNull(bool val);
 		
 
 		// Return the rows in other tables with foreign keys pointing here
-		void Rom_FK_GameSystem_getrows(vector <class Row_Rom*> *rows);
+		void Configuration_FK_GameSystem_getrows(vector <class Row_Configuration*> *rows);
+void Rom_FK_GameSystem_getrows(vector <class Row_Rom*> *rows);
 void RomAttribute_FK_GameSystem_getrows(vector <class Row_RomAttribute*> *rows);
 
 

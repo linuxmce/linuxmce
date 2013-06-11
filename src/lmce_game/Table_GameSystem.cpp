@@ -32,6 +32,7 @@ using namespace std;
 #include "PlutoUtils/StringUtils.h"
 #include "Table_GameSystem.h"
 
+#include "Table_Configuration.h"
 #include "Table_Rom.h"
 #include "Table_RomAttribute.h"
 
@@ -954,6 +955,13 @@ sscanf(row[8], "%li", &(pRow->m_psc_restrict));
 
 
 
+void Row_GameSystem::Configuration_FK_GameSystem_getrows(vector <class Row_Configuration*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Configuration *pTable = table->database->Configuration_get();
+pTable->GetRows("`FK_GameSystem`=" + StringUtils::itos(m_PK_GameSystem),rows);
+}
 void Row_GameSystem::Rom_FK_GameSystem_getrows(vector <class Row_Rom*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
