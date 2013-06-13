@@ -8,6 +8,9 @@
 
 #include "SecondGenEmulatorModel.h"
 
+#define INTV_CONFIG_FILE_TEMPLATE "/usr/pluto/templates/intv.cfg.template"
+#define INTV_CONFIG_FILE "/home/mamedata/cfg/intv.cfg"
+
 namespace DCE
 {
   class IntellivisionEmulatorModel : public SecondGenEmulatorModel
@@ -16,8 +19,7 @@ namespace DCE
     IntellivisionEmulatorModel();
     ~IntellivisionEmulatorModel();
 
-    virtual void initializeActionstoKeysyms();
-
+    virtual bool updateConfig(); 
   };
 }
 

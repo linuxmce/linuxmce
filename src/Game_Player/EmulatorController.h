@@ -12,6 +12,7 @@
 #include "EmulatorModel.h"
 #include "Game_Player.h"
 #include "Gen_Devices/AllCommandsRequests.h"
+#include "DCE/Message.h"
 
 namespace DCE
 {
@@ -61,7 +62,7 @@ namespace DCE
     virtual bool coin2();
     virtual bool pause();
     virtual bool unpause();
-    virtual bool pressButton(int iPK_Button) = 0;
+    virtual bool pressButton(int iPK_Button, Message *pMessage) = 0;
     virtual bool pressClick(int iPositionX, int iPositionY, int iButtons) = 0;
     virtual bool setSpeed(int iSpeed);
     virtual bool getSnap(long int iPK_Device, int iWidth, int iHeight, char **pData, int& iData_Size) = 0;
@@ -71,16 +72,16 @@ namespace DCE
     virtual bool uiLeft();
     virtual bool uiRight();
     virtual bool uiOK();
-    virtual bool press0();
-    virtual bool press1();
-    virtual bool press2();
-    virtual bool press3();
-    virtual bool press4();
-    virtual bool press5();
-    virtual bool press6();
-    virtual bool press7();
-    virtual bool press8();
-    virtual bool press9();
+    virtual bool press0(Message *pMessage);
+    virtual bool press1(Message *pMessage);
+    virtual bool press2(Message *pMessage);
+    virtual bool press3(Message *pMessage);
+    virtual bool press4(Message *pMessage);
+    virtual bool press5(Message *pMessage);
+    virtual bool press6(Message *pMessage);
+    virtual bool press7(Message *pMessage);
+    virtual bool press8(Message *pMessage);
+    virtual bool press9(Message *pMessage);
     virtual bool pressAsterisk();
     virtual bool pressPound();
     virtual bool uiBack();
@@ -98,8 +99,8 @@ namespace DCE
     virtual bool selectA();
     virtual bool selectB();
     bool canSaveState();
-    virtual void getOption(string sPath, string &sValue_To_Assign);
-    virtual void setOption(string sPath, string sValue_To_Assign);
+    virtual void getOption(string sPath, string &sValue_To_Assign, Message *pMessage);
+    virtual void setOption(string sPath, string sValue_To_Assign, Message *pMessage);
 
   };
 

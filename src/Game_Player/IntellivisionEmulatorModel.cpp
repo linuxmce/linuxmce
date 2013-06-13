@@ -22,14 +22,11 @@ namespace DCE
   
   }
 
-  void IntellivisionEmulatorModel::initializeActionstoKeysyms()
+  bool IntellivisionEmulatorModel::updateConfig()
   {
-
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Setting new keysyms for intv...");
-    MESSEmulatorModel::initializeActionstoKeysyms();
-    m_mapActionsToKeysyms["*"] = make_pair(XK_KP_Delete,0);
-    m_mapActionsToKeysyms["#"] = make_pair(XK_KP_Enter,0);
-
+    MESSEmulatorModel::updateConfig();
+    ConfigurationWriter keypadConfig(INTV_CONFIG_FILE_TEMPLATE, INTV_CONFIG_FILE, "");
+    return keypadConfig.Write();
   }
 
 }

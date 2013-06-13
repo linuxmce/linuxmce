@@ -299,7 +299,7 @@ void Game_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
       return;
     }
 
-  m_pEmulatorController->pressButton(iPK_Button);
+  m_pEmulatorController->pressButton(iPK_Button, pMessage);
 
 }
 
@@ -871,7 +871,7 @@ void Game_Player::CMD_0(string &sCMD_Result,Message *pMessage)
 //<-dceag-c204-e->
 {
   cout << "Need to implement command #204 - 0" << endl;
-  m_pEmulatorController->press0();
+  m_pEmulatorController->press0(pMessage);
 }
 
 //<-dceag-c205-b->
@@ -883,7 +883,7 @@ void Game_Player::CMD_1(string &sCMD_Result,Message *pMessage)
 //<-dceag-c205-e->
 {
   cout << "Need to implement command #205 - 1" << endl;
-  m_pEmulatorController->press1();
+  m_pEmulatorController->press1(pMessage);
 }
 
 //<-dceag-c206-b->
@@ -895,7 +895,7 @@ void Game_Player::CMD_2(string &sCMD_Result,Message *pMessage)
 //<-dceag-c206-e->
 {
   cout << "Need to implement command #206 - 2" << endl;
-  m_pEmulatorController->press2();
+  m_pEmulatorController->press2(pMessage);
 }
 
 //<-dceag-c207-b->
@@ -907,7 +907,7 @@ void Game_Player::CMD_3(string &sCMD_Result,Message *pMessage)
 //<-dceag-c207-e->
 {
   cout << "Need to implement command #207 - 3" << endl;
-  m_pEmulatorController->press3();
+  m_pEmulatorController->press3(pMessage);
 }
 
 //<-dceag-c208-b->
@@ -919,7 +919,7 @@ void Game_Player::CMD_4(string &sCMD_Result,Message *pMessage)
 //<-dceag-c208-e->
 {
   cout << "Need to implement command #208 - 4" << endl;
-  m_pEmulatorController->press4();
+  m_pEmulatorController->press4(pMessage);
 }
 
 //<-dceag-c209-b->
@@ -931,7 +931,7 @@ void Game_Player::CMD_5(string &sCMD_Result,Message *pMessage)
 //<-dceag-c209-e->
 {
   cout << "Need to implement command #209 - 5" << endl;
-  m_pEmulatorController->press5();
+  m_pEmulatorController->press5(pMessage);
 }
 
 //<-dceag-c210-b->
@@ -943,7 +943,7 @@ void Game_Player::CMD_6(string &sCMD_Result,Message *pMessage)
 //<-dceag-c210-e->
 {
   cout << "Need to implement command #210 - 6" << endl;
-  m_pEmulatorController->press6();
+  m_pEmulatorController->press6(pMessage);
 }
 
 //<-dceag-c211-b->
@@ -955,7 +955,7 @@ void Game_Player::CMD_7(string &sCMD_Result,Message *pMessage)
 //<-dceag-c211-e->
 {
   cout << "Need to implement command #211 - 7" << endl;
-  m_pEmulatorController->press7();
+  m_pEmulatorController->press7(pMessage);
 }
 
 //<-dceag-c212-b->
@@ -967,7 +967,7 @@ void Game_Player::CMD_8(string &sCMD_Result,Message *pMessage)
 //<-dceag-c212-e->
 {
   cout << "Need to implement command #212 - 8" << endl;
-  m_pEmulatorController->press8();
+  m_pEmulatorController->press8(pMessage);
 }
 
 //<-dceag-c213-b->
@@ -979,7 +979,7 @@ void Game_Player::CMD_9(string &sCMD_Result,Message *pMessage)
 //<-dceag-c213-e->
 {
   cout << "Need to implement command #213 - 9" << endl;
-  m_pEmulatorController->press9();
+  m_pEmulatorController->press9(pMessage);
 }
 
 //<-dceag-c240-b->
@@ -1373,7 +1373,7 @@ void Game_Player::CMD_Set_Game_Options(string sValue_To_Assign,string sPath,stri
 {
   if (m_pEmulatorController)
     {
-      m_pEmulatorController->setOption(sPath,sValue_To_Assign);
+      m_pEmulatorController->setOption(sPath,sValue_To_Assign,pMessage);
     }
 }
 
@@ -1389,9 +1389,11 @@ void Game_Player::CMD_Set_Game_Options(string sValue_To_Assign,string sPath,stri
 void Game_Player::CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c983-e->
 {
+  string sTmpValue;
   if (m_pEmulatorController)
     {
-      m_pEmulatorController->getOption(sPath,&sValue_To_Assign);
+      m_pEmulatorController->getOption(sPath,sTmpValue,pMessage);
+      *sValue_To_Assign=sTmpValue;
     }
 }
 

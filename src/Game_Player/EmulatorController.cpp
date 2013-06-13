@@ -355,52 +355,52 @@ namespace DCE
     return doAction("UI_OK");
   }
 
-  bool EmulatorController::press0()
+  bool EmulatorController::press0(Message *pMessage)
   {
     return doAction("0");
   }
 
-  bool EmulatorController::press1()
+  bool EmulatorController::press1(Message *pMessage)
   {
     return doAction("1");
   }
 
-  bool EmulatorController::press2()
+  bool EmulatorController::press2(Message *pMessage)
   {
     return doAction("2");
   }
 
-  bool EmulatorController::press3()
+  bool EmulatorController::press3(Message *pMessage)
   {
     return doAction("3");
   }
 
-  bool EmulatorController::press4()
+  bool EmulatorController::press4(Message *pMessage)
   {
     return doAction("4");
   }
 
-  bool EmulatorController::press5()
+  bool EmulatorController::press5(Message *pMessage)
   {
     return doAction("5");
   }
 
-  bool EmulatorController::press6()
+  bool EmulatorController::press6(Message *pMessage)
   {
     return doAction("6");
   }
 
-  bool EmulatorController::press7()
+  bool EmulatorController::press7(Message *pMessage)
   {
     return doAction("7");
   }
 
-  bool EmulatorController::press8()
+  bool EmulatorController::press8(Message *pMessage)
   {
     return doAction("8");
   }
 
-  bool EmulatorController::press9()
+  bool EmulatorController::press9(Message *pMessage)
   {
     return doAction("9");
   }
@@ -499,13 +499,15 @@ namespace DCE
     return doAction("selectB");
   }
 
-  void getOption(string sPath, string &sValue_To_Assign)
+  void EmulatorController::getOption(string sPath, string &sValue_To_Assign, Message *pMessage)
   {
+    // pMessage not used in base class
     sValue_To_Assign=m_pEmulatorModel->m_mapOptions_Find(sPath);
   }
   
-  void setOption(string sPath, string sValue_To_Assign)
+  void EmulatorController::setOption(string sPath, string sValue_To_Assign, Message *pMessage)
   {
+    // pMessage not used in base class
     m_pEmulatorModel->m_mapOptions[sPath]=sValue_To_Assign;
   }
 

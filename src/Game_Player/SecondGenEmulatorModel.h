@@ -18,6 +18,9 @@
 #ifndef SECONDGENEMULATORMODEL_H
 #define SECONDGENEMULATORMODEL_H
 
+#define SECONDGEN_P1 0
+#define SECONDGEN_P2 1024 // Second generation console button offset when P2 selected.
+
 #include "MESSEmulatorModel.h"
 #include <map>
 
@@ -27,16 +30,21 @@ namespace DCE
   {
 
   protected:
-    map<int, int> m_mapOrbiterToKeypadPlayer;
-    int m_mapOrbiterToKeypadPlayer_Find(int iPK_Orbiter)
-    {
-      map<int, int>::iterator it = m_mapOrbiterToKeypadPlayer.find(iPK_Orbiter);
-      return it == m_mapOrbiterToKeypadPlayer.end() ? 1 : it->second;
-    }
 
   public:
     SecondGenEmulatorModel();
     ~SecondGenEmulatorModel();
+
+    map<long, int> m_mapOrbiterToKeypadPlayer;
+    int m_mapOrbiterToKeypadPlayer_Find(int iPK_Orbiter)
+    {
+      map<long, int>::iterator it = m_mapOrbiterToKeypadPlayer.find(iPK_Orbiter);
+      return it == m_mapOrbiterToKeypadPlayer.end() ? 1 : it->second;
+    }
+
+    virtual void initializeActionstoKeysyms();
+    virtual void initializeButtontoKeysyms();
+
   };
 }
 

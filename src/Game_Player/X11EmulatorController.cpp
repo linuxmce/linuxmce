@@ -245,7 +245,7 @@ namespace DCE
       }
   }
 
-  bool X11EmulatorController::pressButton(int iPK_Button)
+  bool X11EmulatorController::pressButton(int iPK_Button, Message *pMessage)
   {
     if (!m_pEmulatorModel->m_pDisplay)
       {

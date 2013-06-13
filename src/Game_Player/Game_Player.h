@@ -53,6 +53,9 @@
 //<-dceag-decl-b->
 namespace DCE
 {
+	class EmulatorFactory;
+	class EmulatorController;
+
 	class Game_Player : public Game_Player_Command
 	{
 //<-dceag-decl-e->

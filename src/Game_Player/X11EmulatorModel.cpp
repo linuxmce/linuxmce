@@ -21,6 +21,7 @@ namespace DCE
     m_pDisplay = NULL;
     m_iWindowId = 0;
     m_iEventSerialNum = 0;
+    m_iCurrentKeyModifier=0;
     initializeButtontoKeysyms();
   }
 

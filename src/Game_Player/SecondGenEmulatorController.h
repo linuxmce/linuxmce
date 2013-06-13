@@ -33,6 +33,21 @@ namespace DCE
 
     SecondGenEmulatorModel *m_pEmulatorModel;
 
+    virtual bool pressButton(int iPK_Button, Message *pMessage);
+    virtual void getOption(string sPath, string &sValue_To_Assign, Message *pMessage);
+    virtual void setOption(string sPath, string sValue_To_Assign, Message *pMessage);
+
+    virtual bool press0(Message *pMessage);
+    virtual bool press1(Message *pMessage);
+    virtual bool press2(Message *pMessage);
+    virtual bool press3(Message *pMessage);
+    virtual bool press4(Message *pMessage);
+    virtual bool press5(Message *pMessage);
+    virtual bool press6(Message *pMessage);
+    virtual bool press7(Message *pMessage);
+    virtual bool press8(Message *pMessage);
+    virtual bool press9(Message *pMessage);
+
   };
 
 }

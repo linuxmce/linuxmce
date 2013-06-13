@@ -35,7 +35,7 @@ namespace DCE
     void findWindow();
 
     virtual bool doAction(string sAction);
-    virtual bool pressButton(int iPK_Button);
+    virtual bool pressButton(int iPK_Button, Message *pMessage);
     virtual bool pressClick(int iPositionX, int iPositionY, int iButtons);
     virtual bool getSnap(long int iPK_Device, int iWidth, int iHeight, char **pData, int& iData_Size);
     virtual bool setSpeed(int iSpeed);
