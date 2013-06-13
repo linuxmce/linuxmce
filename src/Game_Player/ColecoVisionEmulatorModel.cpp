@@ -16,6 +16,7 @@ namespace DCE
   {
     m_sSystemName = "coleco";
     initializeActionstoKeysyms();
+    initializeButtontoKeysyms();
   }
 
   ColecoVisionEmulatorModel::~ColecoVisionEmulatorModel()
@@ -32,9 +33,15 @@ namespace DCE
 
   void ColecoVisionEmulatorModel::initializeButtontoKeysyms()
   {
-    MESSEmulatorModel::initializeButtontoKeysyms();
     m_mapButtonToKeysyms[BUTTON_asterisk_CONST] = XK_KP_Add;
     m_mapButtonToKeysyms[BUTTON_Pound_CONST] = XK_KP_Subtract;
+  }
+
+  bool ColecoVisionEmulatorModel::updateConfig()
+  {
+    MESSEmulatorModel::updateConfig();
+    ConfigurationWriter keypadConfig(COLECO_CONFIG_FILE_TEMPLATE, COLECO_CONFIG_FILE, "");
+    return keypadConfig.Write();
   }
 
 }
