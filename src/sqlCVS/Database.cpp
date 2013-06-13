@@ -45,7 +45,7 @@ Database::Database( string db_host, string db_user, string db_pass, string db_na
 	{
 		// Try connecting without a database
 		m_sMySQLDBName = "";
-		MySQLConnect();
+		MySQLConnect(true);
 		if( !m_bConnected )
 			return;  // Nope, the connection is no good
 
@@ -54,7 +54,7 @@ Database::Database( string db_host, string db_user, string db_pass, string db_na
 		cout << "Creating database " << db_name << endl;
 		threaded_mysql_query("CREATE DATABASE " + db_name);
 		m_sMySQLDBName = db_name; // Set it back and try again
-		MySQLConnect();
+		MySQLConnect(true);
 		if( !m_bConnected )
 			return;
 	}
