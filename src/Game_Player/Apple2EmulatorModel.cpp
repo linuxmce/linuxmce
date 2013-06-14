@@ -13,6 +13,7 @@ namespace DCE
   Apple2EmulatorModel::Apple2EmulatorModel() : MESSEmulatorModel()
   {
     m_sSystemName = "apple2e";
+    m_bIsComputer=true;
   }
 
   Apple2EmulatorModel::~Apple2EmulatorModel()

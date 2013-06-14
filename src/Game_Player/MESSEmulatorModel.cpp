@@ -23,6 +23,7 @@ namespace DCE
     m_sRomPath = "";
     m_bCanSaveState=true;
     initializeActionstoKeysyms();
+    m_bIsComputer=false;
   }
 
   MESSEmulatorModel::~MESSEmulatorModel()
@@ -52,6 +53,7 @@ namespace DCE
   {
   
     // overridden by subclass.
+    m_mapActionsToKeysyms["PARTIALKBD"] = make_pair(XK_Scroll_Lock,0);
     m_mapActionsToKeysyms["P1_START"] = make_pair(XK_1,0);
     m_mapActionsToKeysyms["P2_START"] = make_pair(XK_2,0);
     m_mapActionsToKeysyms["P3_START"] = make_pair(XK_3,0);

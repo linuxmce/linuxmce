@@ -27,7 +27,8 @@ namespace DCE
     string m_sSystemName;   // Emulator System name
     string m_sState;
     string m_sRomPath;
-    
+    bool m_bIsComputer; // Is machine a computer, and therefore needs partial keyboard toggle?
+
   protected:
 
     virtual void initializeActionstoKeysyms(); // set key mappings for MESS.

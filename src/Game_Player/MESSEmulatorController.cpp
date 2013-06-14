@@ -222,6 +222,42 @@ namespace DCE
 
   }
 
+  bool MESSEmulatorController::reset()
+  {
+    if (m_pEmulatorModel->m_bIsComputer)
+      doAction("PARTIALKBD");
+    usleep(2000);
+    bool bRet = doAction("RESET");
+    usleep(2000);
+    if (m_pEmulatorModel->m_bIsComputer)
+      doAction("PARTIALKBD");
+    return bRet;
+  }
+
+  bool MESSEmulatorController::pause()
+  {
+    if (m_pEmulatorModel->m_bIsComputer)
+      doAction("PARTIALKBD");
+    usleep(2000);
+    bool bRet = doAction("PAUSE");
+    usleep(2000);
+    if (m_pEmulatorModel->m_bIsComputer)
+      doAction("PARTIALKBD");
+    return bRet;
+  }
+
+  bool MESSEmulatorController::unpause()
+  {
+    if (m_pEmulatorModel->m_bIsComputer)
+      doAction("PARTIALKBD");
+    usleep(2000);
+    bool bRet = doAction("UNPAUSE");
+    usleep(2000);
+    if (m_pEmulatorModel->m_bIsComputer)
+      doAction("PARTIALKBD");
+    return bRet;
+  }
+  
   bool MESSEmulatorController::setSpeed(int iSpeed)
   {
     switch (iSpeed)
@@ -244,14 +280,32 @@ namespace DCE
     switch(iMenu)
       {
       case 0:
-	if (m_pEmulatorModel->m_iActiveMenu > 1) // 2 and above is a UI of some sort.
-	  doAction("UI_EXIT");
+	if (m_pEmulatorModel->m_iActiveMenu > 1 && m_pEmulatorModel->m_iActiveMenu != 3) // 2 and above is a UI of some sort.
+	  {
+	    if (m_pEmulatorModel->m_bIsComputer)
+	      doAction("PARTIALKBD");
+	    doAction("UI_EXIT");
+	    if (m_pEmulatorModel->m_bIsComputer)
+	      doAction("PARTIALKBD");
+	  }
 	break;
       case 1:
+	if (m_pEmulatorModel->m_bIsComputer)
+	  doAction("PARTIALKBD");
 	doAction("MONITOR_MODE");
+	if (m_pEmulatorModel->m_bIsComputer)
+	  doAction("PARTIALKBD");
 	break;
       case 2:
+	if (m_pEmulatorModel->m_bIsComputer)
+	  doAction("PARTIALKBD");
 	doAction("UI_ENTER");
+	if (m_pEmulatorModel->m_bIsComputer)
+	  doAction("PARTIALKBD");
+	break;
+      case 3:
+	usleep(2000);
+	break;
       }
     
     return X11EmulatorController::gotoMenu(iMenu); // and up the chain...
@@ -263,9 +317,13 @@ namespace DCE
     if (!m_pEmulatorModel->m_bIsStreaming && 
 	m_pEmulatorModel->m_bCanSaveState)
       {
+	if (m_pEmulatorModel->m_bIsComputer)
+	  doAction("PARTIALKBD");
 	doAction("SAVE_STATE");
 	doAction("1");
-	
+	if (m_pEmulatorModel->m_bIsComputer)
+	  doAction("PARTIALKBD");
+
 	// the save game is now in /home/mamedata/sta/<ROMNAME>/1.sta. We need to 
 	// make a copy of this to reference later.
 	
@@ -353,8 +411,12 @@ namespace DCE
 	  }
 	
 	// File moved into place, save state.
+	if (m_pEmulatorModel->m_bIsComputer)
+	  doAction("PARTIALKBD");
 	doAction("LOAD_STATE");
 	doAction("1");
+	if (m_pEmulatorModel->m_bIsComputer)
+	  doAction("PARTIALKBD");
 	
 	return true;
       }

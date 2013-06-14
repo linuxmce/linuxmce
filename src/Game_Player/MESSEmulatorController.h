@@ -29,7 +29,9 @@ namespace DCE
     virtual void setMediaPosition(string sMediaPosition);
     virtual bool saveState(string& sPosition, string& sText, bool bAutoSave=false, string sAutoSaveName="");
     virtual bool loadState(string sPosition);
-
+    virtual bool reset();
+    virtual bool pause();
+    virtual bool unpause();
     bool getRecordingFilename(string sPath, string &sFilename);
     virtual bool record();
 
