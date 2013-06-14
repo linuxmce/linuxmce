@@ -60,6 +60,10 @@ Item {
            anchors.bottom:parent.bottom
            anchors.left: parent.left
             visible: info_panel.state==="mediaactive"
+            MouseArea{
+                anchors.fill: parent
+                onPressed: manager.gotoQScreen(dcenowplaying.qs_screen)
+            }
         }
         Connections{
             target: dcenowplaying
