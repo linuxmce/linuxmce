@@ -2,11 +2,11 @@
 import QtQuick 1.1
 import "../../lib/effects"
 
-Rectangle {
+Item {
     id:mediaPlaybackBase
     height: parent.height
     width: manager.appWidth
-    color: "transparent"
+
     state:"default"
     Component.onCompleted: manager.setBoundStatus(true)
     property alias metadataComponent:mediaTypeMetaData.sourceComponent
