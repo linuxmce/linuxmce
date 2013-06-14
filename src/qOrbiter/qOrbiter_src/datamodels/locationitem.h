@@ -47,6 +47,7 @@ public:
 
         p.insert("ea_number", no);
         p.insert("ea_name", name);
+        p.insert("room",roomVal());
         ea_list.append(p);
 
         emit dataChanged();

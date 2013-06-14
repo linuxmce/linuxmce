@@ -34,10 +34,9 @@ TRANSLATIONS += app_de.ts
 #NFS mount to work with skins on core directly.
 #   Since Android uses remote loading, you can mount /var/www/lmce-admin/skins/android directory to /mnt/remote/android-qml on your local
 #   machine. This will let you work with the qml files that are on the router as if they were local and make debugging and coding easier.
-
+#folder_01.source = qml/android/
 
 #folder_01.source = /mnt/remote/android-qml/
-#folder_01.source = qml/android/
 #folder_01.target = qml
 
 
@@ -79,7 +78,7 @@ TRANSLATIONS += app_de.ts
         #The defines that the variables listed will be deployed with the application assets. Since
         #Qt 5.1.0 on Android uses a similar deployment scheme to Necessitas, the same qmake tricks
         #apply. Mostly
-        DEPLOYMENTFOLDERS = qmlcomponents base
+        DEPLOYMENTFOLDERS = qmlcomponents base #folder_01
         QML_IMPORT_PATH = "androidComponents"
 
         INSTALLS+= qmlplugins

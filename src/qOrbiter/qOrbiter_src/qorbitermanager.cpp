@@ -93,10 +93,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     b_localLoading = false;
 #endif
 
-
-
-
-
     setDceResponse("Starting...");
 
 
@@ -144,6 +140,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #else
     QObject::connect(qorbiterUIwin, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
     QObject::connect(qorbiterUIwin, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
+
 #endif
 
     QObject::connect(this, SIGNAL(orbiterReady(bool)), this, SLOT(showUI(bool)));
@@ -396,7 +393,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     setDceResponse("Loading Skins");
 #ifdef QANDROID
     setDceResponse("Loading Qt Quick 2 Skins for Qt5");
-    remoteDirectoryPath.append("/qt5/");
+    remoteDirectoryPath.append("/qt5");
 #else
     setDceResponse("Loading Qt Quick 1 Skins for Qt 4");
 #endif
@@ -1988,6 +1985,9 @@ void qorbiterManager::checkOrientation(QSize)
     if(appHeight < appWidth)
     {
         setOrientation(false);
+
+
+
     }
     else
     {

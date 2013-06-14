@@ -8,7 +8,7 @@ ScreenSaverClass::ScreenSaverClass(QObject *parent) :
 {
     qi_currentImage = QImage();
     primary = true;
-    transitionDuration = 60000;
+    transitionDuration = 15000;
     connect(&picChanger, SIGNAL(timeout()), this, SLOT(selectNew()));
 }
 
@@ -16,7 +16,7 @@ void ScreenSaverClass::setImageList(QStringList imgList)
 {
     images = imgList;
     if(images.contains("")){
-        qDebug() <<"Invalid imagae url found in list, removing.";
+        qDebug() <<"Invalid image url found in list, removing.";
 
         int d = images.indexOf("");
         images.removeAt(d);
@@ -25,12 +25,15 @@ void ScreenSaverClass::setImageList(QStringList imgList)
     if(!images.empty())
     {
         setImage(images.at(0));
+        picChanger.start();
+        qDebug() << "Screensaver starting";
         emit screenSaverReady();
     }
     else
     {
         setActive(false);
-        //("Screensaver image list error!");
+       qDebug("Screensaver image list error!");
+       picChanger.stop();
     }
 }
 
@@ -54,9 +57,9 @@ void ScreenSaverClass::setActive(bool state)
     }else
     {
         if(state==true){
-          //  picChanger.start(transitionDuration);
+        picChanger.start(transitionDuration);
         } else {
-          //  picChanger.stop();
+        picChanger.stop();
 
         }
         active = state;

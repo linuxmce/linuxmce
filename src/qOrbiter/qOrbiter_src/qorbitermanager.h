@@ -782,11 +782,11 @@ public slots:
     void setLocation(const int& , const int& ) ;
     void qmlSetupLmce(QString incdeviceid, QString incrouterip);
     void displayModelPages(QList<QObject*> pages);
-    void setAppH(int h) {appHeight = h;}
+    void setAppH(int h) {appHeight = h;checkOrientation(qorbiterUIwin->size());}
     int getAppH() {return appHeight;}
 
     void setAppW(int w) {appWidth = w; checkOrientation(qorbiterUIwin->size());}
-    int getAppW(){return appWidth;  checkOrientation(qorbiterUIwin->size());}
+    int getAppW(){return appWidth; }
 
     /*Network State property functions*/
     void setInternalIp(QString s) { m_ipAddress = s; setDceResponse("got ip address, sending to dce"); emit internalIpChanged(m_ipAddress); }
@@ -829,7 +829,7 @@ public slots:
     void checkOrientation(QSize);
 
     bool getOrientation (){return b_orientation;}
-    void setOrientation (bool s) { b_orientation = s; setDceResponse("orientation changed!! "); emit orientationChanged();}
+    void setOrientation (bool s) {  appHeight = qorbiterUIwin->height(); appWidth=qorbiterUIwin->width();  b_orientation = s; setDceResponse("orientation changed!! "); emit orientationChanged();}
     //! Returns the current screen in string format
     QString getCurrentScreen();
     //! Sets the current screen in string format.
@@ -1118,7 +1118,7 @@ public slots:
             return screensaverImages.at(0);
         }
         else {
-            qDebug() << "Current url::"+current;
+
             QString search = current.split("&val=").at(1);
             int index = screensaverImages.lastIndexOf(search);
             if (index+1 < screensaverImages.count()){
