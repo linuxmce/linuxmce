@@ -5,7 +5,7 @@ import "../../../lib/handlers"
 Item {
     height:manager.appHeight
     width:manager.appWidth
-    Component.onCompleted: current_header_model=scenarios
+    Component.onCompleted:{ current_header_model=scenarios;manager.setBoundStatus(true) }
     Item{
         id:home_panel
         height: parent.height - info_panel.height - nav_row.height
@@ -41,7 +41,7 @@ Item {
         width:parent.width
         anchors.left:parent.left
         anchors.bottom: parent.bottom
-        Component.onCompleted: info_panel.state="retracted"
+        Component.onCompleted: dcenowplaying.b_mediaPlaying ? info_panel.state="mediaactive": info_panel.state="retracted"
 
 
         Rectangle{
@@ -50,6 +50,53 @@ Item {
             color: "black"
             opacity: .65
         }
+
+        Image {
+            id: nowplayingimage
+
+            height:parent.height
+            fillMode: Image.PreserveAspectFit
+            source: "image://listprovider/updateobject/"+securityvideo.timestamp
+           anchors.bottom:parent.bottom
+           anchors.left: parent.left
+            visible: info_panel.state==="mediaactive"
+        }
+        Connections{
+            target: dcenowplaying
+            onImageChanged: refreshtimer.restart()
+        }
+
+        Timer{
+            id:refreshtimer
+            interval: 1000
+            onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+            running: nowplayingimage.visible
+        }
+        StyledText {
+            id: generaltitle
+            width: scaleX(35)
+            text:  dcenowplaying.mediatitle === "" ? dcenowplaying.qs_mainTitle : dcenowplaying.mediatitle
+            font.bold: true
+            //  wrapMode: "WrapAtWordBoundaryOrAnywhere"
+            elide: "ElideRight"
+            smooth: true
+            color:"white"
+            font.pixelSize: scaleY(4)
+            anchors.top:parent.top
+            anchors.left: nowplayingimage.right
+        }
+
+        StyledText {
+            id: updating_time
+            text: dceTimecode.qsCurrentTime + " of " + dceTimecode.qsTotalTime
+            fontSize:32
+            color: "white"
+            anchors.left: nowplayingimage.right
+            anchors.bottom: nowplayingimage.bottom
+        }
+
+
+
         StyledText{
             id:orbiter_status_text
             text:"LinuxMCE Orbiter "+manager.m_dwPK_Device + " connected."
@@ -83,7 +130,13 @@ Item {
             id:close
             buttonText.text: "Close"
             hitArea.onReleased: info_panel.state="retracted"
+            anchors.right: parent.right
         }
+
+        RoomSelector{
+            visible: info_panel.state==="room"
+        }
+
         states: [
             State {
                 name: "retracted"
@@ -188,6 +241,35 @@ Item {
                 PropertyChanges {
                     target: info_fill
                     color:"green"
+                }
+            },
+            State {
+                name: "mediaactive"
+                when: dcenowplaying.b_mediaPlaying === true
+                PropertyChanges {
+                    target: time_keeper
+                    visible:false
+                }
+                PropertyChanges{
+                    target: orbiter_status_text
+                    visible:false
+                }
+                PropertyChanges {
+                    target: info_panel
+                    height:scaleY(15)
+                }
+
+                PropertyChanges{
+                    target:location_info
+                    visible:true
+                }
+                PropertyChanges{
+                    target:user_info
+                    visible:true
+                }
+                PropertyChanges{
+                    target:close
+                    visible:false
                 }
             }
 

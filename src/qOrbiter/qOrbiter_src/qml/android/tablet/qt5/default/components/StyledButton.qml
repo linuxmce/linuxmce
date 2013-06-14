@@ -3,7 +3,7 @@ import QtQuick 2.0
 Item{
     id:styled_button
     height: button_label.paintedHeight < scaleY(5) ? scaleY(5) : button_label.paintedHeight+(button_label.paintedHeight*.02)
-    width: button_label.paintedWidth < scaleX(9) ? scaleX(9) : (button_label.paintedWidth) + (button_label.paintedWidth*.02)
+    width: button_label.paintedWidth < scaleX(10) ? scaleX(10) : (button_label.paintedWidth) + (button_label.paintedWidth*.02)
     property string phil:fly_trap.pressed ? "green": "black"
     property int textSize:28
     property alias buttonText:button_label
@@ -26,6 +26,7 @@ Item{
         font.pixelSize: textSize
         anchors.centerIn: parent
         color:"antiquewhite"
+        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     }
 
     MouseArea{
