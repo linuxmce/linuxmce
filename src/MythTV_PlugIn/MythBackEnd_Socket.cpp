@@ -17,7 +17,7 @@
 using namespace std;
 using namespace DCE;
 
-#define MYTH_PROTOCOL	56	
+#define MYTH_PROTOCOL	72	
 #include "Gen_Devices/AllCommandsRequests.h"
 
 MythBackEnd_Socket::MythBackEnd_Socket(MythTV_PlugIn *pMythTV_PlugIn,string sIPAddress)
@@ -157,7 +157,7 @@ bool MythBackEnd_Socket::Connect( )
 	m_bConnected=true;
 
 	string sResponse;
-	if( !InternalSendMythString("MYTH_PROTO_VERSION " TOSTRING(MYTH_PROTOCOL),&sResponse,"ACCEPT") )
+	if( !InternalSendMythString("MYTH_PROTO_VERSION " TOSTRING(MYTH_PROTOCOL) " D78EFD6F",&sResponse,"ACCEPT") )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MythBackEnd_Socket::Connect couldn't send MYTH_PROTO_VERSION m_bConnected=false");
 		DeleteSocket();
