@@ -12,34 +12,34 @@ Item{
     property alias playlistDelegate:playlist.delegate
     property bool enableScrollbar:true
 
-    Item{
-        id: options_display
-    }
+//    Item{
+//        id: options_display
+//    }
 
-    Loader{
-        id:mediaTypeMetaData
-    }
+//    Loader{
+//        id:mediaTypeMetaData
+//    }
 
-    Item{
-        id:now_playing_image_container
-    }
-    Loader{
-        id:mediaScrollerTarget
-    }
+//    Item{
+//        id:now_playing_image_container
+//    }
+//    Loader{
+//        id:mediaScrollerTarget
+//    }
 
-    Loader{
-        id:controlsLoader
-    }
+//    Loader{
+//        id:controlsLoader
+//    }
 
-   PlaylistView{
-       id:playlist
-       anchors.left: parent.left
+//    PlaylistView{
+//        id:playlist
+//        anchors.left: parent.left
 
-   }
+//    }
 
-   NowPlayingImage{
-anchors.centerIn: parent
-   }
+//    NowPlayingImage{
+//        anchors.centerIn: parent
+//    }
 
 
 }

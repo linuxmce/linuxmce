@@ -2,6 +2,8 @@ Clock Clock.qml
 FileDetails_5 FileDetails_5.qml
 FileDetails_4 FileDetails_4.qml
 FileDetails_21 FileDetails_21.qml
+InformationPanel InformationPanel.qml
+NavigationRow NavigationRow.qml
 NowPlayingImage NowPlayingImage.qml
 MediaListProgressBar MediaListProgressBar.qml
 MultiViewMediaList MultiViewMediaList.qml
