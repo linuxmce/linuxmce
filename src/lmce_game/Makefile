@@ -17,6 +17,8 @@ Table_GameSystem.cpp \
 Table_Rom.cpp \
 Table_RomAttribute.cpp \
 Table_RomAttributeType.cpp \
+Table_RomTitles.cpp \
+Table_Rom_Configuration.cpp \
 Table_Rom_RomAttribute.cpp \
 Table_psc_game_batdet.cpp \
 Table_psc_game_bathdr.cpp \

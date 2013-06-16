@@ -1,8 +1,6 @@
 #ifndef __Define_Configuration_H__
 #define __Define_Configuration_H__
 
-#define CONFIGURATION_ATARI_130XE_CONST 1
-#define CONFIGURATION_ATARI_800_CONST 2
 
 #define CONFIGURATION_TABLE "Configuration"
 #define CONFIGURATION_PK_CONFIGURATION_FIELD "PK_Configuration"

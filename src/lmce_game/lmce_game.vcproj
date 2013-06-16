@@ -133,6 +133,12 @@
 				RelativePath=".\Table_RomAttributeType.cpp">
 			</File>
 			<File
+				RelativePath=".\Table_RomTitles.cpp">
+			</File>
+			<File
+				RelativePath=".\Table_Rom_Configuration.cpp">
+			</File>
+			<File
 				RelativePath=".\Table_Rom_RomAttribute.cpp">
 			</File>
 			<File

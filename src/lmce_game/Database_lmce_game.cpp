@@ -25,6 +25,8 @@ tblGameSystem=NULL;
 tblRom=NULL;
 tblRomAttribute=NULL;
 tblRomAttributeType=NULL;
+tblRomTitles=NULL;
+tblRom_Configuration=NULL;
 tblRom_RomAttribute=NULL;
 tblpsc_game_batdet=NULL;
 tblpsc_game_bathdr=NULL;
@@ -56,6 +58,12 @@ if( tblRomAttribute!=NULL )
 		bResult=false;
 if( tblRomAttributeType!=NULL )
 	if( !Commit_RomAttributeType(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
+if( tblRomTitles!=NULL )
+	if( !Commit_RomTitles(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
+		bResult=false;
+if( tblRom_Configuration!=NULL )
+	if( !Commit_Rom_Configuration(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
 		bResult=false;
 if( tblRom_RomAttribute!=NULL )
 	if( !Commit_Rom_RomAttribute(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
@@ -89,6 +97,8 @@ DeleteTable_GameSystem();
 DeleteTable_Rom();
 DeleteTable_RomAttribute();
 DeleteTable_RomAttributeType();
+DeleteTable_RomTitles();
+DeleteTable_Rom_Configuration();
 DeleteTable_Rom_RomAttribute();
 DeleteTable_psc_game_batdet();
 DeleteTable_psc_game_bathdr();

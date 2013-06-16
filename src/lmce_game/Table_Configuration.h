@@ -169,6 +169,7 @@ void psc_restrict_setNull(bool val);
 
 		// Return the rows in other tables with foreign keys pointing here
 		void Rom_FK_Configuration_getrows(vector <class Row_Rom*> *rows);
+void Rom_Configuration_FK_Configuration_getrows(vector <class Row_Rom_Configuration*> *rows);
 
 
 		// Setup binary serialization

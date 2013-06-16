@@ -35,6 +35,10 @@ class Table_RomAttribute* tblRomAttribute;
 bool Commit_RomAttribute(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_RomAttributeType* tblRomAttributeType;
 bool Commit_RomAttributeType(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
+class Table_RomTitles* tblRomTitles;
+bool Commit_RomTitles(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
+class Table_Rom_Configuration* tblRom_Configuration;
+bool Commit_Rom_Configuration(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_Rom_RomAttribute* tblRom_RomAttribute;
 bool Commit_Rom_RomAttribute(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertRow);
 class Table_psc_game_batdet* tblpsc_game_batdet;
@@ -55,6 +59,8 @@ class Table_GameSystem* GameSystem_get() { if( !tblGameSystem ) CreateTable_Game
 class Table_Rom* Rom_get() { if( !tblRom ) CreateTable_Rom(); return tblRom; }
 class Table_RomAttribute* RomAttribute_get() { if( !tblRomAttribute ) CreateTable_RomAttribute(); return tblRomAttribute; }
 class Table_RomAttributeType* RomAttributeType_get() { if( !tblRomAttributeType ) CreateTable_RomAttributeType(); return tblRomAttributeType; }
+class Table_RomTitles* RomTitles_get() { if( !tblRomTitles ) CreateTable_RomTitles(); return tblRomTitles; }
+class Table_Rom_Configuration* Rom_Configuration_get() { if( !tblRom_Configuration ) CreateTable_Rom_Configuration(); return tblRom_Configuration; }
 class Table_Rom_RomAttribute* Rom_RomAttribute_get() { if( !tblRom_RomAttribute ) CreateTable_Rom_RomAttribute(); return tblRom_RomAttribute; }
 class Table_psc_game_batdet* psc_game_batdet_get() { if( !tblpsc_game_batdet ) CreateTable_psc_game_batdet(); return tblpsc_game_batdet; }
 class Table_psc_game_bathdr* psc_game_bathdr_get() { if( !tblpsc_game_bathdr ) CreateTable_psc_game_bathdr(); return tblpsc_game_bathdr; }
@@ -73,6 +79,8 @@ void CreateTable_GameSystem();
 void CreateTable_Rom();
 void CreateTable_RomAttribute();
 void CreateTable_RomAttributeType();
+void CreateTable_RomTitles();
+void CreateTable_Rom_Configuration();
 void CreateTable_Rom_RomAttribute();
 void CreateTable_psc_game_batdet();
 void CreateTable_psc_game_bathdr();
@@ -85,6 +93,8 @@ void DeleteTable_GameSystem();
 void DeleteTable_Rom();
 void DeleteTable_RomAttribute();
 void DeleteTable_RomAttributeType();
+void DeleteTable_RomTitles();
+void DeleteTable_Rom_Configuration();
 void DeleteTable_Rom_RomAttribute();
 void DeleteTable_psc_game_batdet();
 void DeleteTable_psc_game_bathdr();

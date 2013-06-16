@@ -34,6 +34,7 @@ using namespace std;
 #include "Table_GameSystem.h"
 
 #include "Table_Rom.h"
+#include "Table_Rom_Configuration.h"
 
 
 void Database_lmce_game::CreateTable_Configuration()
@@ -1059,6 +1060,13 @@ void Row_Configuration::Rom_FK_Configuration_getrows(vector <class Row_Rom*> *ro
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Rom *pTable = table->database->Rom_get();
+pTable->GetRows("`FK_Configuration`=" + StringUtils::itos(m_PK_Configuration),rows);
+}
+void Row_Configuration::Rom_Configuration_FK_Configuration_getrows(vector <class Row_Rom_Configuration*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Rom_Configuration *pTable = table->database->Rom_Configuration_get();
 pTable->GetRows("`FK_Configuration`=" + StringUtils::itos(m_PK_Configuration),rows);
 }
 

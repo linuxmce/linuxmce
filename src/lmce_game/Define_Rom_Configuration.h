@@ -1,0 +1,27 @@
+#ifndef __Define_Rom_Configuration_H__
+#define __Define_Rom_Configuration_H__
+
+
+#define ROM_CONFIGURATION_TABLE "Rom_Configuration"
+#define ROM_CONFIGURATION_PK_ROM_CONFIGURATION_FIELD "PK_Rom_Configuration"
+#define ROM_CONFIGURATION_PK_ROM_CONFIGURATION_TABLE_FIELD "Rom_Configuration.PK_Rom_Configuration"
+#define ROM_CONFIGURATION_FK_ROM_FIELD "FK_Rom"
+#define ROM_CONFIGURATION_FK_ROM_TABLE_FIELD "Rom_Configuration.FK_Rom"
+#define ROM_CONFIGURATION_FK_CONFIGURATION_FIELD "FK_Configuration"
+#define ROM_CONFIGURATION_FK_CONFIGURATION_TABLE_FIELD "Rom_Configuration.FK_Configuration"
+#define ROM_CONFIGURATION_PSC_ID_FIELD "psc_id"
+#define ROM_CONFIGURATION_PSC_ID_TABLE_FIELD "Rom_Configuration.psc_id"
+#define ROM_CONFIGURATION_PSC_BATCH_FIELD "psc_batch"
+#define ROM_CONFIGURATION_PSC_BATCH_TABLE_FIELD "Rom_Configuration.psc_batch"
+#define ROM_CONFIGURATION_PSC_USER_FIELD "psc_user"
+#define ROM_CONFIGURATION_PSC_USER_TABLE_FIELD "Rom_Configuration.psc_user"
+#define ROM_CONFIGURATION_PSC_FROZEN_FIELD "psc_frozen"
+#define ROM_CONFIGURATION_PSC_FROZEN_TABLE_FIELD "Rom_Configuration.psc_frozen"
+#define ROM_CONFIGURATION_PSC_MOD_FIELD "psc_mod"
+#define ROM_CONFIGURATION_PSC_MOD_TABLE_FIELD "Rom_Configuration.psc_mod"
+#define ROM_CONFIGURATION_PSC_RESTRICT_FIELD "psc_restrict"
+#define ROM_CONFIGURATION_PSC_RESTRICT_TABLE_FIELD "Rom_Configuration.psc_restrict"
+
+
+#endif
+

@@ -34,6 +34,7 @@ using namespace std;
 #include "Table_GameSystem.h"
 #include "Table_Configuration.h"
 
+#include "Table_Rom_Configuration.h"
 #include "Table_Rom_RomAttribute.h"
 
 
@@ -1062,6 +1063,13 @@ return pTable->GetRow(m_FK_Configuration);
 }
 
 
+void Row_Rom::Rom_Configuration_FK_Rom_getrows(vector <class Row_Rom_Configuration*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_Rom_Configuration *pTable = table->database->Rom_Configuration_get();
+pTable->GetRows("`FK_Rom`=" + StringUtils::itos(m_PK_Rom),rows);
+}
 void Row_Rom::Rom_RomAttribute_FK_Rom_getrows(vector <class Row_Rom_RomAttribute*> *rows)
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
