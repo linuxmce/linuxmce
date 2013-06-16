@@ -17,9 +17,6 @@ Item{
         opacity: .65
     }
     
-
-    
-    
     StyledText{
         id:orbiter_status_text
         text:"LinuxMCE Orbiter "+manager.m_dwPK_Device + " connected."
@@ -33,7 +30,7 @@ Item{
     Clock{
         id:time_keeper
         anchors.top: orbiter_status_text.bottom
-        anchors.left:nowplayingimage.visible ? updating_time.left : orbiter_status_text.left
+        anchors.left: orbiter_status_text.left
     }
     Column{
         id:user_info

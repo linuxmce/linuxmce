@@ -8,6 +8,35 @@ Row{
     height: scaleY(8)
     width:parent.width
     spacing:scaleY(2)
+
+    Connections{
+        target: roomList
+        onCurrentRoomChanged: {current_scenario_model = []; refresh.restart() }
+    }
+    Timer{
+        id:refresh
+        running:false
+        interval: 750
+        onTriggered:{
+            if(manager.currentScreen==="Screen_1.qml"){
+                if(scenarioList.currentModelName==="currentRoomLights")
+                    current_scenario_model = currentRoomLights
+                else if(scenarioList.currentModelName==="currentRoomMedia")
+                    current_scenario_model = currentRoomMedia
+                else if(scenarioList.currentModelName==="currentRoomClimate")
+                    current_scenario_model = currentRoomClimate
+                else if(scenarioList.currentModelName==="currentRoomTelecom")
+                    current_scenario_model=currentRoomTelecom
+                else if(scenarioList.currentModelName==="currentRoomSecurity")
+                    current_scenario_model = currentRoomSecurity
+            }else if (manager.currentScreen==="Screen_47"){
+
+                if(name==="Attribute")
+                    console.log("attribute selected")
+            }
+        }
+    }
+
     ListView{
         id:scenarioList
         height:scaleY(7)
@@ -17,6 +46,7 @@ Row{
         clip:true
         orientation:ListView.Horizontal
         anchors.verticalCenter: parent.verticalCenter
+        property string currentModelName:""
         delegate: Item{
             height: childrenRect.height
             width: childrenRect.width
@@ -41,8 +71,7 @@ Row{
                         if(name==="Attribute")
                             console.log("attribute selected")
                     }
-                    
-                    
+                    scenarioList.currentModelName = modelName
                 }
             }
         }

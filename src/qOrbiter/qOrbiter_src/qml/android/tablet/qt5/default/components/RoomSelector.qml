@@ -31,7 +31,7 @@ Item{
                 buttonText.text: entertainArea_list.model[index].ea_name
                 hitArea.onReleased: {
                     manager.setActiveRoom(entertainArea_list.model[index].room, entertainArea_list.model[index].ea_number);
-                    info_panel.state==="retracted"
+                    info_panel.state="retracted"
                     manager.setBoundStatus(true)
                     room_selection_component.state = "roomselect"
                 }
