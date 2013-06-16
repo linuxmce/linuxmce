@@ -7,8 +7,8 @@ Item{
     width:parent.width
     anchors.left:parent.left
     anchors.bottom: parent.bottom
-    Component.onCompleted: dcenowplaying.b_mediaPlaying ? info_panel.state="mediaactive": info_panel.state="retracted"
-    
+    Component.onCompleted: info_panel.state="retracted"
+
     
     Rectangle{
         id:info_fill
@@ -17,54 +17,7 @@ Item{
         opacity: .65
     }
     
-    Image {
-        id: nowplayingimage
-        
-        height:parent.height
-        fillMode: Image.PreserveAspectFit
-        source: "image://listprovider/updateobject/"+securityvideo.timestamp
-        anchors.bottom:parent.bottom
-        anchors.left: parent.left
-        visible: info_panel.state==="mediaactive"
-        MouseArea{
-            anchors.fill: parent
-            onPressed: manager.gotoQScreen(dcenowplaying.qs_screen)
-        }
-    }
-    Connections{
-        target: dcenowplaying
-        onImageChanged: refreshtimer.restart()
-    }
-    
-    Timer{
-        id:refreshtimer
-        interval: 1000
-        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-        running: nowplayingimage.visible
-    }
-    StyledText {
-        id: generaltitle
-        width: scaleX(35)
-        text:  dcenowplaying.mediatitle === "" ? dcenowplaying.qs_mainTitle : dcenowplaying.mediatitle
-        font.bold: true
-        //  wrapMode: "WrapAtWordBoundaryOrAnywhere"
-        elide: "ElideRight"
-        smooth: true
-        color:"white"
-        font.pixelSize: scaleY(4)
-        anchors.top:parent.top
-        anchors.left: nowplayingimage.right
-    }
-    
-    StyledText {
-        id: updating_time
-        text: dceTimecode.qsCurrentTime + " of " + dceTimecode.qsTotalTime
-        fontSize:32
-        color: "white"
-        anchors.left: nowplayingimage.right
-        anchors.bottom: nowplayingimage.bottom
-    }
-    
+
     
     
     StyledText{
@@ -75,11 +28,12 @@ Item{
         font.pixelSize:36
         font.bold: true
         color:"green"
+
     }
     Clock{
         id:time_keeper
         anchors.top: orbiter_status_text.bottom
-        anchors.left: orbiter_status_text.left
+        anchors.left:nowplayingimage.visible ? updating_time.left : orbiter_status_text.left
     }
     Column{
         id:user_info
@@ -96,16 +50,18 @@ Item{
             hitArea.onReleased: info_panel.state="room"
         }
     }
+
+    RoomSelector{
+        visible: info_panel.state==="room"
+    }
+
     StyledButton{
         id:close
         buttonText.text: "Close"
         hitArea.onReleased: info_panel.state="retracted"
         anchors.right: parent.right
     }
-    
-    RoomSelector{
-        visible: info_panel.state==="room"
-    }
+
     
     states: [
         State {
@@ -127,7 +83,7 @@ Item{
                 visible:false
             }
             PropertyChanges{
-                target:home_panel
+                target:pageLoader
                 visible:true
             }
             PropertyChanges{
@@ -166,7 +122,7 @@ Item{
                 visible:true
             }
             PropertyChanges{
-                target:home_panel
+                target:pageLoader
                 visible:false
             }
             PropertyChanges{
@@ -212,10 +168,15 @@ Item{
                 target: info_fill
                 color:"green"
             }
-        },
+            PropertyChanges{
+                target:pageLoader
+                visible:false
+            }
+
+        },      
         State {
-            name: "mediaactive"
-            when: dcenowplaying.b_mediaPlaying === true
+            name: "hidden"
+         //   when: screenfile !=="Screen_1.qml"
             PropertyChanges {
                 target: time_keeper
                 visible:false
@@ -226,21 +187,27 @@ Item{
             }
             PropertyChanges {
                 target: info_panel
-                height:scaleY(15)
+                height:scaleY(0)
+                visible:false
             }
-            
+
             PropertyChanges{
                 target:location_info
-                visible:true
+                visible:false
             }
             PropertyChanges{
                 target:user_info
-                visible:true
+                visible:false
             }
             PropertyChanges{
                 target:close
                 visible:false
             }
+            PropertyChanges{
+                target:pageLoader
+                visible:true
+            }
+
         }
         
     ]

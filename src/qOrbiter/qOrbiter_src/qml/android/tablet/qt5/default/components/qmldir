@@ -13,3 +13,4 @@ StyledText StyledText.qml
 StyledButton StyledButton.qml
 UserSelector UserSelector.qml
 MediaPlaybackBase MediaPlaybackBase.qml
+MediaPopup MediaPopup.qml

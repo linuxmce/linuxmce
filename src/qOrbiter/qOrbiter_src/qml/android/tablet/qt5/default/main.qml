@@ -110,6 +110,35 @@ Item {
             source: "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
         }
     }
+
+    Loader {
+        id:pageLoader
+        objectName: "loadbot"
+        focus: true
+        height: qml_root.height-nav_row.height-info_panel.height
+        anchors.top: nav_row.bottom
+        Keys.onBackPressed: console.log("back")
+        onSourceChanged:  loadin
+        onLoaded: {
+            console.log("Screen Changed:" + pageLoader.source)
+        }
+        onStatusChanged:  if (pageLoader.status == Component.Ready)
+                          {
+                              manager.setDceResponse("Command to change to:" + source+ " was successfull")
+                          }
+                          else if (pageLoader.status == Component.Loading)
+                          {
+                              console.log("loading page from network")
+
+                          }
+                          else if(pageLoader.status == Component.Error)
+                          {
+                              console.log("Command to change to:" + source + " failed!")
+
+                              pageLoader.source = "screens/Screen_X.qml"
+                              screenfile = source
+                          }
+    }
     Rectangle{
         anchors.fill: nav_row
         color: "black"
@@ -118,6 +147,10 @@ Item {
 
     NavigationRow {
         id: nav_row
+    }
+    MediaPopup{
+    id:media_notification
+
     }
 
     InformationPanel {
@@ -150,34 +183,7 @@ Item {
     }
 
 
-    Loader {
-        id:pageLoader
-        objectName: "loadbot"
-        focus: true
-        height: qml_root.height-nav_row.height-info_panel.height
-        anchors.top: nav_row.bottom
-        Keys.onBackPressed: console.log("back")
-        onSourceChanged:  loadin
-        onLoaded: {
-            console.log("Screen Changed:" + pageLoader.source)
-        }
-        onStatusChanged:  if (pageLoader.status == Component.Ready)
-                          {
-                              manager.setDceResponse("Command to change to:" + source+ " was successfull")
-                          }
-                          else if (pageLoader.status == Component.Loading)
-                          {
-                              console.log("loading page from network")
 
-                          }
-                          else if(pageLoader.status == Component.Error)
-                          {
-                              console.log("Command to change to:" + source + " failed!")
-
-                              pageLoader.source = "screens/Screen_X.qml"
-                              screenfile = source
-                          }
-    }
 
     //=================Components==================================================//
     function loadComponent(componentName)

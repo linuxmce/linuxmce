@@ -1,9 +1,7 @@
 import QtQuick 2.0
-import QtMultimedia 5.0
-import QtSensors 5.0 as SensorArray
-import QtGraphicalEffects 1.0
-import "../../lib/handlers"
-import "components"
+
+import "../../../lib/handlers"
+
 
 Row{
     id:nav_row
