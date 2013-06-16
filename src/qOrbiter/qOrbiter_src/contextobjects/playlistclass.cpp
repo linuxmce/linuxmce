@@ -47,7 +47,7 @@ void PlaylistClass::appendRow( PlaylistItemClass *item)
 //the purpose of this function is to first clear the existing playlist data out, and add the new data in due to the way the dce router send the updated playlist to us
 void PlaylistClass::populate()
 {
-    qDebug("Playlist Clearing");
+//    qDebug("Playlist Clearing");
     emit modelAboutToBeReset();
     beginResetModel();
     if(resetInternalData()){
@@ -238,12 +238,12 @@ bool PlaylistClass::resetInternalData()
     QList<PlaylistItemClass*>::iterator i;
     for( i = m_list.begin(); i !=m_list.end(); ++i){
         PlaylistItemClass* pItem = m_list.takeFirst();
-        qDebug() <<"removing item ::" <<counter << " of " << total;
-        qDebug() << "item thread ::" << pItem->thread() << " Parent thread::" << this->thread();
+//        qDebug() <<"removing item ::" <<counter << " of " << total;
+//        qDebug() << "item thread ::" << pItem->thread() << " Parent thread::" << this->thread();
         pItem->destruct();
         counter++;
     }
-    qDebug() << counter << "::Items cleared. Remaining Count:: "<< m_list.size();
+//    qDebug() << counter << "::Items cleared. Remaining Count:: "<< m_list.size();
 
     return true;
 }

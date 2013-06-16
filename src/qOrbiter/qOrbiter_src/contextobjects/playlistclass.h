@@ -78,7 +78,7 @@ public slots:
     void populate();
 private slots:
     void handleItemChange();
-    void itemDeletion() { qDebug() << "Playlist Item Destroyed::" << m_list.size(); }
+    void itemDeletion() { /*qDebug() << "Playlist Item Destroyed::" << m_list.size();*/ }
 
 private:
     PlaylistItemClass* m_prototype;

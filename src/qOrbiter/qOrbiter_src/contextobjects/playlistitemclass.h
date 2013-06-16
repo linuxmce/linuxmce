@@ -81,7 +81,7 @@ public:
 public slots:
     void addedToModel();
     void destruct() {
-        qDebug() << "calling destructor for item.";
+//        qDebug() << "calling destructor for item.";
        this->deleteLater();
     }
 
