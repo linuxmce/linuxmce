@@ -6,7 +6,7 @@ Item {
     height: parent.height
     width:parent.width
     property int current_view_type:1
-    Component.onCompleted: current_header_model=media_filters
+    Component.onCompleted: {current_header_model=media_filters; }
     state: manager.i_current_mediaType === 5 ? "selection" : "viewing"
     Connections
     {
@@ -74,7 +74,13 @@ Item {
                 target: file_details_loader
                 anchors.left: parent.right
             }
-
+            StateChangeScript{
+                script: {manager.resetModelAttributes; mediatypefilter.resetStates(); attribfilter.resetStates(); }
+            }
+        //("5", "", "", "", "1,2", "", "13", "", "2", "")
+        //("5", "1", "", "", "1,2", "", "12", "", "2", "")
+        //("5", "1", "", "", "1,2", "", "52", "", "2", "7691")
+        //("5", "1", "", "", "1,2", "", "12", "", "2", "")
         },
         State {
             name: "viewing"
