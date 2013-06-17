@@ -203,6 +203,7 @@ void AttributeSortModel::resetStates()
     foreach(AttributeSortItem* item, m_list) {
         item->setStatus(false);
     }
+    return ReturnSelectedItems();
 }
 
 #ifdef QT5

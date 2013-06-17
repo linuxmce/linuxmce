@@ -540,7 +540,7 @@ signals:
     /*Datagrid Signals*/
     void typeSortChanged();
     void subTypeChanged();
-
+    void resetSearchParams();
     void gridStatus(bool s);
     void gridGoBack();
     void mediaTypeChanged();
@@ -1155,7 +1155,12 @@ public slots:
 
     /*! @name Datagrid Slots*/
     //@{
+    /*! Resets the datagrid parameters to default */
+    void resetModelAttributes(){emit resetSearchParams(); }
+
+    /*! Updates the datagrid with the attributes from the attribute model*/
     void updateSelectedAttributes(QString attributes);
+
     void setGridStatus(bool s) {emit gridStatus(s);}
     void setSorting(int i);
 

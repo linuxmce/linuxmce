@@ -38,7 +38,7 @@ Rectangle {
        y: 150
        width: 350
        height: 350
-       color: style.advanced_bg
+       color: skinStyle.advanced_bg
        anchors.horizontalCenter: parent.horizontalCenter
        anchors.verticalCenter: parent.verticalCenter
 
