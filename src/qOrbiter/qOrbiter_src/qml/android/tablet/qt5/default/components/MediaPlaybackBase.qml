@@ -3,12 +3,12 @@ Item{
     id:media_playback_base
     height: manager.appHeight
     width: manager.appWidth
-    state:"playlist"
+    state:"metadata"
 
     Component.onCompleted: manager.setBoundStatus(true)
     property string metadataComponent:"Metadata_"+manager.i_current_mediaType+".qml"
     property alias scrollBarComponent:mediaScrollerTarget.sourceComponent
-    property alias controlComponent: controlsLoader.sourceComponent
+    property string controlComponent: "Controls_"+manager.i_current_mediaType+".qml" //controlsLoader.sourceComponent
     property alias playlistSource:playlist.model
     property alias playlistDelegate:playlist.delegate
     property bool enableScrollbar:true
@@ -47,35 +47,6 @@ Item{
         height: parent.height
         width: parent.width
         clip:true
-
-
-        NowPlayingImage{
-            id:npImage
-            anchors.top:parent.top
-        }
-
-        Loader{
-            id:mediaTypeMetaData
-            source: metadataComponent
-            anchors.left: npImage.right
-            anchors.top: npImage.top
-
-        }
-
-        Loader{
-            id:mediaScrollerTarget
-        }
-
-        Loader{
-            id:controlsLoader
-        }
-        Item{
-            id:hiddenDrag
-            height: parent.height
-            width: parent.width/2
-            x:parent.width /2
-        }
-
         MouseArea{
             id:dragHandler
             anchors.fill: parent
@@ -100,6 +71,41 @@ Item{
 
            // onReleased: media_playback_base.state="playlist"
         }
+
+        NowPlayingImage{
+            id:npImage
+            anchors.top:parent.top
+        }
+
+        Loader{
+            id:mediaTypeMetaData
+            width: parent.width-npImage.width
+            source: metadataComponent
+            anchors.right: metaDataPanel.right
+            anchors.top: npImage.top
+
+        }
+
+        Loader{
+            id:mediaScrollerTarget
+
+        }
+
+        Loader{
+            id:controlsLoader
+            width: parent.width
+
+            source:controlComponent
+            anchors.bottom: parent.bottom
+        }
+        Item{
+            id:hiddenDrag
+            height: parent.height
+            width: parent.width/2
+            x:parent.width /2
+        }
+
+
     }
 
     Item{

@@ -4,7 +4,7 @@ Item{
     id:textrect
     visible: true
     height: textCol.height
-    width: scaleX(40)
+    width: parent.width
     Rectangle{
         anchors.fill: parent
         color:"black"
@@ -17,7 +17,9 @@ Item{
     Column{
         id:textCol
         spacing: scaleY(.5)
-        width: childrenRect.width
+        width: parent.width
+        anchors.left: parent.left
+        anchors.leftMargin: scaleY(1)
         height: childrenRect.height
         StyledText {
             id: video_title
