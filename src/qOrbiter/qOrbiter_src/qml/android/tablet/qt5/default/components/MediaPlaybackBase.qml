@@ -3,10 +3,10 @@ Item{
     id:media_playback_base
     height: manager.appHeight
     width: manager.appWidth
-    state:"metadata"
+    state:"playlist"
 
     Component.onCompleted: manager.setBoundStatus(true)
-    property alias metadataComponent:mediaTypeMetaData.sourceComponent
+    property string metadataComponent:"Metadata_"+manager.i_current_mediaType+".qml"
     property alias scrollBarComponent:mediaScrollerTarget.sourceComponent
     property alias controlComponent: controlsLoader.sourceComponent
     property alias playlistSource:playlist.model
@@ -22,11 +22,92 @@ Item{
     }
 
     Item{
+        id:controlPanel
+        height: parent.height
+        width: parent.width
+        clip:true
+        anchors.right: metaDataPanel.left
+
+        StyledText{
+            id:ct
+            text:"Controls go here!"
+            anchors.centerIn: parent
+            fontSize: 48
+            color:"white"
+        }
+
+        MouseArea{
+            anchors.fill: parent
+            onReleased: media_playback_base.state="metadata"
+        }
+    }
+
+    Item{
+        id:metaDataPanel
+        height: parent.height
+        width: parent.width
+        clip:true
+
+
+        NowPlayingImage{
+            id:npImage
+            anchors.top:parent.top
+        }
+
+        Loader{
+            id:mediaTypeMetaData
+            source: metadataComponent
+            anchors.left: npImage.right
+            anchors.top: npImage.top
+
+        }
+
+        Loader{
+            id:mediaScrollerTarget
+        }
+
+        Loader{
+            id:controlsLoader
+        }
+        Item{
+            id:hiddenDrag
+            height: parent.height
+            width: parent.width/2
+            x:parent.width /2
+        }
+
+        MouseArea{
+            id:dragHandler
+            anchors.fill: parent
+            drag.target: hiddenDrag
+            drag.axis: Drag.XAxis
+            drag.minimumX: 0
+            drag.maximumX: parent.width
+
+            onReleased:  {
+
+                console.log(hiddenDrag.x)
+
+                if(hiddenDrag.x  < parent.width /2 ){
+                    console.log("playlist") ;
+                   media_playback_base.state = "playlist"
+                }
+                else {
+                    media_playback_base.state = "controls";
+                    console.log("controls")
+                }
+            }
+
+           // onReleased: media_playback_base.state="playlist"
+        }
+    }
+
+    Item{
         id:playlistPanel
         height: parent.height
         width: parent.width
         clip: true
-        anchors.right: metaDataPanel.left
+        anchors.left: metaDataPanel.right
         PlaylistView{
             id:playlist
             anchors.left: parent.left
@@ -47,33 +128,7 @@ Item{
         }
     }
 
-    Item{
-        id:metaDataPanel
-        height: parent.height
-        width: parent.width
-        clip:true
-        NowPlayingImage{
-            anchors.centerIn: parent
-        }
 
-        Loader{
-            id:mediaTypeMetaData
-        }
-
-        Loader{
-            id:mediaScrollerTarget
-        }
-
-        Loader{
-            id:controlsLoader
-        }
-
-        MouseArea{
-            id:metadataDrag
-            anchors.fill: parent
-            onReleased: media_playback_base.state="playlist"
-        }
-    }
 
 
     states: [
@@ -81,13 +136,28 @@ Item{
             name: "metadata"
             AnchorChanges{
                 target:metaDataPanel
+                    anchors.right: undefined
                 anchors.left: media_playback_base.left
+            }
+            PropertyChanges {
+                target: hiddenDrag
+                x:media_playback_base.x / 2
+
             }
         },
         State {
             name: "playlist"
             AnchorChanges{
                 target: metaDataPanel
+                anchors.left: undefined
+                anchors.right:media_playback_base.left
+           }
+        },
+        State {
+            name: "controls"
+            AnchorChanges{
+                target: metaDataPanel
+                 anchors.right: undefined
                 anchors.left: media_playback_base.right
             }
         }
@@ -98,9 +168,9 @@ Item{
             from: "*"
             to: "*"
             AnchorAnimation{
-                duration: 1000
-                easing.type: Easing.InOutElastic
-                easing.amplitude: .5
+                duration: 500
+                easing.type: Easing.SineCurve
+                easing.amplitude: 1
             }
         }
     ]

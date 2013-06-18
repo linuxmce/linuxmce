@@ -15,4 +15,6 @@ import QtQuick 2.0
         font.family: appFont.name
         height: paintedHeight
         width: paintedWidth
+        color:"white"
+
     }

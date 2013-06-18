@@ -14,3 +14,5 @@ StyledButton StyledButton.qml
 UserSelector UserSelector.qml
 MediaPlaybackBase MediaPlaybackBase.qml
 MediaPopup MediaPopup.qml
+Metadata_4 Metadata_4.qml
+Metadata_5 Metadata_5.qml
