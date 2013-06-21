@@ -15,7 +15,7 @@ LOG_ERR=3
 UNIQUE_ID=$RANDOM
 
 CIFS_FileSystem="cifs"
-CIFS_ExtraOpts=",iocharset=utf8"
+CIFS_ExtraOpts=",iocharset=utf8,nounix,sec=ntlmssp"
 function Log {
 	SEVERITY=$1
 	shift
