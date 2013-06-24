@@ -28,6 +28,22 @@ ReplyToDCE()
 	builtin printf "%s\n%s\n" "$(ParmEncode "$String0")" "$OutVars"
 }
 
+# Description: Ask the router if a device has registered
+# Usage: DeviceIsRegistered DeviceNumber
+DeviceIsRegistered()
+{
+	local DeviceNumber="$1"
+
+	/usr/pluto/bin/fdwrite --raw --fd "$Framework_FD_DCE" --data "DEVICE_REGISTERED $1"$'\n'
+	local Reply=$(/usr/pluto/bin/fdread --raw --line --eol $'\n' --fd "$Framework_FD_DCE")
+
+	if [[ "$Reply" == "DEVICE_REGISTERED "* ]]; then
+		builtin printf "${Reply#DEVICE_REGISTERED }"
+	else
+		builtin printf "E"
+	fi
+}
+
 ## Device communication functions
 ReadFromDevice()
 {
@@ -68,6 +84,7 @@ SendToDevice()
 		;;
 	esac
 
+	Log "SendToDevice: $1"
 	/usr/pluto/bin/fdwrite "--$Encoding" --fd "$Framework_FD_Device" --data "$1"
 	if [[ "$DeviceProtocol_AutoAppendSeparator" == yes ]]; then
 		/usr/pluto/bin/fdwrite "--$Encoding" --fd "$Framework_FD_Device" --data "$DeviceProtocol_Separator"
@@ -286,6 +303,12 @@ Framework_ConnectDevice()
 			socat PTY,link="$Framework_PipeDir/ttyDevice",echo=0,icanon=0,raw "/dev/fd/$FD_SerialPort" &
 			Framework_PIDofDevConn=$!
 			exec {FD_SerialPort}>&-
+
+			# work around pl2303 driver bug (?)
+			# - all sent data (but not any received data) is scrambled without this delay
+			# - but only if we attempt to send data first; if we receive data first without the delay, the bug doesn't happen.
+			# - once the bug happens, it never recovers during the session; reopenning the file and waiting does though
+			sleep 0.1
 		;;
 		inet)
 			Log "ConnectDevice: Parameters: Protocol=$DeviceConnection_Protocol Endpoint: $DeviceConnection_Endpoint"
@@ -349,7 +372,7 @@ Framework_ReadFromDCE()
 		## This is done this way in order to prevent path expansion on parameters containing stars and other shell pattern characters
 		while read -d' ' line; do
 			DCECmd=("${DCECmd[@]}" "$line")
-		done <<<"$DCEline " # NOTE: space at the end required because we told 'read' that the line separator
+		done <<<"$DCEline " # NOTE: space at the end required because we told 'read' that is the line separator
 		Reply="${DCECmd[0]}"
 		From="${DCECmd[1]}"
 		To="${DCECmd[2]}"

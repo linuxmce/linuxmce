@@ -43,6 +43,13 @@ static void *StartShellThread(void *Parm)
 	return true;
 }
 
+/*private*/ void ShellInterface::WriteToShell(const char *Cstring)
+{
+	//dprintf(fdStdOut, "%s\n", sMessage.c_str());
+	fprintf(fStdOut, "%s\n", Cstring);
+	fflush(fStdOut);
+}
+
 /*virtual*/ ShellInterface::~ShellInterface()
 {
 	pthread_mutex_destroy(&m_ReplyMutex);
@@ -62,6 +69,17 @@ void *ShellInterface::MainThread(void *Parm)
 				StringUtils::Tokenize(MsgText, " ", vect_sTokens);
 				size_t vect_sTokens_size = vect_sTokens.size();
 				string CommandForDCE;
+
+				if (vect_sTokens[0] == "DEVICE_REGISTERED")
+				{
+					if (vect_sTokens_size == 2)
+					{
+						int DeviceNumber = atoi(vect_sTokens[1].c_str());
+						char cDeviceIsRegistered = TheWhisperer->DeviceIsRegistered(DeviceNumber);
+						WriteToShell((vect_sTokens[0] + " " + cDeviceIsRegistered).c_str());
+					}
+					continue;
+				}
 
 				size_t idx_start = 0;
 				bool b_isReply = false;
@@ -141,9 +159,7 @@ void ShellInterface::SendMessage(Message *pMessage, Message *&pMessage_Reply, st
 		sMessage += " " + StringUtils::itos(ParmIt->first) + " " + StringUtils::URLEncode(ParmIt->second);
 	}
 
-	//dprintf(fdStdOut, "%s\n", sMessage.c_str());
-	fprintf(fStdOut, "%s\n", sMessage.c_str());
-	fflush(fStdOut);
+	WriteToShell(sMessage.c_str());
 
 	pthread_mutex_lock(&m_ReplyMutex);
 	if (m_bWaitingReply)

@@ -24,6 +24,7 @@ private:
 	bool m_bReplyIsCmd;
 
 	bool ReadRow(string &Row);
+	void WriteToShell(const char *Cstring);
 public:
 	static ShellInterface* Get();
 

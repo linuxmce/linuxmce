@@ -14,6 +14,13 @@
 {
 	m_pEvent = new Event_Impl(DeviceNo, 0, RouterAddress);
 	m_pData = new DeviceData_Impl();
+	m_pcRequestSocket = new Event_Impl(m_dwPK_Device, 0, RouterAddress);
+
+	if( m_iInstanceID )
+	{
+		m_pEvent->m_pClientSocket->SendString("INSTANCE " + StringUtils::itos(m_iInstanceID));
+		m_pcRequestSocket->m_pClientSocket->SendString("INSTANCE " + StringUtils::itos(m_iInstanceID));
+	}
 }
 
 /*private*/ Whisperer::Whisperer()
