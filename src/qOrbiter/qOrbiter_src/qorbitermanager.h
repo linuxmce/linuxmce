@@ -1156,7 +1156,7 @@ public slots:
     /*! @name Datagrid Slots*/
     //@{
     /*! Resets the datagrid parameters to default */
-    void resetModelAttributes(){emit resetSearchParams(); }
+    void resetModelAttributes(){emit resetFilter(); }
 
     /*! Updates the datagrid with the attributes from the attribute model*/
     void updateSelectedAttributes(QString attributes);

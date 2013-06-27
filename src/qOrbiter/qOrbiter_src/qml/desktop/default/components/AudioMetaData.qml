@@ -90,7 +90,6 @@ Rectangle{
             fontSize: scaleY(2)
             visible:  dcenowplaying.releasedate =="" ? false: true
             color:skinStyle.accentColor
-        }
-        
+        }        
     }
 }

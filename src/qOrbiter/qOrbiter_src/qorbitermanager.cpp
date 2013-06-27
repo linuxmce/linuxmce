@@ -274,15 +274,13 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
      */
 }
 
-
-
 void qorbiterManager::gotoQScreen(QString s)
 {
 
     if(s == "Screen_1.qml")
     {
         bool t = false;
-        emit keepLoading(t);
+
         emit clearModel();
         emit cancelRequests();
         emit resetFilter();
@@ -1143,14 +1141,14 @@ void qorbiterManager::mountMediaDevices()
         mountProcess->waitForFinished(10000);
         qDebug() << "Process Status ::" <<mountProcess->state();
         if(mountProcess->state()== QProcess::FailedToStart){
-            qDebug() << "command failed to start!";
+            qWarning() << "command failed to start!";
             qDebug() << mountProcess->readAllStandardError();
             qDebug() << mountProcess->errorString();
         }
 
 
-        qDebug() << "QProcess Exiting, state is :"<< mountProcess->state();
-        qDebug() << "Process exited with::"<< mountProcess->exitCode();
+        qWarning() << "QProcess Exiting, state is :"<< mountProcess->state();
+        qWarning() << "Process exited with::"<< mountProcess->exitCode();
     }
 }
 
@@ -1181,9 +1179,6 @@ void qorbiterManager::setMediaDevices(QNetworkReply *d)
     }
     storageDevices = p;
 
-    //    for (QVariant t, jData){
-
-    //    }
     if(!storageDevices.isEmpty()){
         mountMediaDevices();
     }

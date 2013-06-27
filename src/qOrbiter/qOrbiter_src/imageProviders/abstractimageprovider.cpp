@@ -22,14 +22,19 @@ QImage AbstractImageProvider::floorplanProvider()
         key.load(":/icons/icon.png");
     }
 
+
+
     //aspect checking
     if(key.height() > key.width())
     {
         managerreference->nowPlayingButton->setImageAspect("poster");
     }
-    else
+    else if (key.height() < key.width())
     {
         managerreference->nowPlayingButton->setImageAspect("wide");
+    }
+    else if(key.height() == key.width()){
+        managerreference->nowPlayingButton->setImageAspect("album");
     }
     return key;
 }
@@ -59,13 +64,20 @@ QImage AbstractImageProvider::updateObjectProvider()
 
     }
     //aspect checking
-    if(key.height() > key.width())
+    double aspectRatio = key.height() / key.width();
+    qDebug() << "Aspect Ratio Check    ==> Height / Width";
+    qDebug() << "Aspect RatioResult  ==> "<< aspectRatio;
+
+    if( key.height() > key.width())
     {
         managerreference->nowPlayingButton->setImageAspect("poster");
     }
-    else
+    else if (key.height() < key.width())
     {
         managerreference->nowPlayingButton->setImageAspect("wide");
+    }
+    else if(key.height() == key.width()){
+        managerreference->nowPlayingButton->setImageAspect("album");
     }
     return key;
 }

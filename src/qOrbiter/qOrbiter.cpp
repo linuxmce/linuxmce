@@ -1864,7 +1864,7 @@ void qOrbiter::requestConfigData()
 
     QNetworkRequest updateDevice;
     QNetworkAccessManager *ud= new QNetworkAccessManager();
-    qDebug() << "Getting congig";
+    qDebug() << "Getting config";
     updateDevice.setUrl("http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(m_dwPK_Device));
 
     QObject::connect(ud, SIGNAL(finished(QNetworkReply*)), this, SLOT(processConfigData(QNetworkReply*)));
@@ -2477,8 +2477,6 @@ void qOrbiter::goBackGrid()
 
         if(!goBack.empty()){
             int back = goBack.count()-1;
-
-
             QStringList reverseParams = goBack.at(back).split("|", QString::KeepEmptyParts);
             q_mediaType = reverseParams.first();
             q_subType = reverseParams.at(1);

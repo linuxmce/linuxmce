@@ -274,7 +274,7 @@ public slots:
         QImage t;
         if( t.loadFromData(b))
         {
-          setImage(t);
+            setImage(t);
             emit statusMessage("Now Playing Class::Set Cover Art");
         }
         else
@@ -283,7 +283,14 @@ public slots:
         }
     }
 
-    void setImage(QImage img) {fileImage = img;  emit imageChanged();}
+    void setImage(QImage img) {
+        fileImage = img;
+        if(!fileImage.isNull()){
+            qDebug() << fileImage.width();
+            qDebug() << fileImage.height();
+        }
+        emit imageChanged();
+    }
     QImage getImage() {return fileImage;}
     /*!
      * \brief setStreamImage this function sets the stream image only.
