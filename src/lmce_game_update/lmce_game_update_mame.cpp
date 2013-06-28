@@ -29,11 +29,23 @@ LMCE_Game_Update_MAME::LMCE_Game_Update_MAME(string sMamePath, string sCategoryP
   m_sMamePath=sMamePath;
   m_sCategoryPath=sCategoryPath;
   m_pMAMECategory=new MAMECategory(sCategoryPath);
+  m_pGameDatabase=new GameDatabase();
 }
 
 LMCE_Game_Update_MAME::~LMCE_Game_Update_MAME()
 {
-  delete m_pMAMECategory;
+  if (m_pMAMECategory)
+    {
+      delete m_pMAMECategory;
+      m_pMAMECategory=NULL;
+    }
+
+  if (m_pGameDatabase)
+    {
+      delete m_pGameDatabase;
+      m_pGameDatabase=NULL;
+    }
+
 }
 
 bool LMCE_Game_Update_MAME::GetMAMEOutput(string &sMAMEOutput)
@@ -43,21 +55,39 @@ bool LMCE_Game_Update_MAME::GetMAMEOutput(string &sMAMEOutput)
 
 int LMCE_Game_Update_MAME::Run()
 {
+
+  if (!m_pGameDatabase)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not initialize GameDatabase object.");
+      return 1;
+    }
+
+  if (!m_pGameDatabase->Init())
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not initialize GameDatabase connection.");
+      return 1;
+    }
+
+  cout << "Parsing category list, Please Wait...";
   if (!m_pMAMECategory->Parse())
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not parse category file. See above error messages.");
       return 1;
     }
+  cout << endl;
 
   string sMameOutput;
   string sErr;
 
+  cout << "Grabbing XML output from MAME, Please Wait...";
   const char *args[]={m_sMamePath.c_str(),"-listxml",NULL};
   ProcessUtils::GetCommandOutput(args[0],args,sMameOutput,sErr);
   FileUtils::WriteTextFile("/tmp/mame.tmp",sMameOutput);
+  cout << endl;
 
   MAMEParser p;
 
+  cout << "Parsing MAME XML output, Please Wait...";
   try
     {
       p.set_substitute_entities(true);
@@ -71,6 +101,8 @@ int LMCE_Game_Update_MAME::Run()
 
   FileUtils::DelFile("/tmp/mame.tmp");
 
+  cout << endl;
+  cout << "Processing MAME Game Entries into Database, Please Wait...";
   for (map<string, MAMERom *>::iterator it=p.m_mapRomToMAMERom.begin();
        it != p.m_mapRomToMAMERom.end();
        ++it)
@@ -80,13 +112,50 @@ int LMCE_Game_Update_MAME::Run()
       ProcessEntry(sRomEntry, pCurrentRom);
     }
 
+  cout << "Done." << endl << endl;
   return 0;
 }
 
-void LMCE_Game_Update::ProcessEntry(string sRomName, MAMERom* pCurrentRom)
+void LMCE_Game_Update_MAME::ProcessEntry(string sRomName, MAMERom* pCurrentRom)
 {
-  // Come back here and implement the sql2cpp calls
-  // after the schema changes have been made.
+  string sRomFile=sRomName+".zip";
+  if (!pCurrentRom)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ProcessEntry(%s) - MAMERom = NULL.",sRomName.c_str());
+      return;
+    }
+
+  if (m_pGameDatabase->RomExists(sRomFile))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"ProcessEntry(%s) - ROM Exists.",sRomName.c_str());
+      return;
+    }
+
+  int iPK_Rom = m_pGameDatabase->AddRom(sRomFile);
+
+  if (iPK_Rom == 0)
+    {
+      // Ignore
+    }
+  else
+    {
+      string sTitle;
+      if (!m_pGameDatabase->GetTitleForHash(pCurrentRom->TitleHash_get(), sTitle))
+	{
+	  m_pGameDatabase->AddTitleHash(pCurrentRom->RomTitle_get(),pCurrentRom->TitleHash_get());
+	  m_pGameDatabase->AddRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_title_CONST,pCurrentRom->RomTitle_get());
+	}
+      else
+	{
+	  m_pGameDatabase->AddRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_title_CONST,sTitle);
+	}
+      m_pGameDatabase->AddRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_subtitle_CONST,pCurrentRom->RomSubtitle_get());
+      m_pGameDatabase->AddRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_manufacturer_CONST,pCurrentRom->RomManufacturer_get());
+      m_pGameDatabase->AddRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_genre_CONST,m_pMAMECategory->m_mapRomToCategory_Find(sRomName));
+      m_pGameDatabase->AddRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_year_CONST,pCurrentRom->RomYear_get());
+    }
+
+
 }
 
 int main(int argc, char* argv[])
@@ -98,7 +167,7 @@ int main(int argc, char* argv[])
   char c;              // Current Option.
   int iRetCode;        // Return code
 
-  cout << "lmce_game_update, v. 2.0" << endl;
+  cout << "lmce_game_update_mame, v. 2.0" << endl;
 
   for(int optnum=1;optnum<argc;++optnum)
     {

@@ -30,6 +30,7 @@
 #include "DCE/Logger.h"
 #include "PlutoUtils/DBHelper.h"
 #include "MAMECategory.h"
+#include "GameDatabase.h"
 #include "MAMEParser.h"
 
 class LMCE_Game_Update_MAME
@@ -41,11 +42,11 @@ class LMCE_Game_Update_MAME
   int Run();
 
  private:
-  Database_lmce_game *m_pDatabase;
+  GameDatabase *m_pGameDatabase;
   string m_sMamePath;
   string m_sCategoryPath;
   MAMECategory *m_pMAMECategory;
 
   bool GetMAMEOutput(string &sMameOutput);
-
+  void ProcessEntry(string sRomName, MAMERom *pCurrentRom);
 };

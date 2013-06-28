@@ -16,6 +16,7 @@ VERSION = 2.0.0
 
 sources = lmce_game_update_mame.cpp \
 	MAMECategory.cpp \
+	GameDatabase.cpp \
 	MAMEParser.cpp
 #<-dceag-mh-e->
 
