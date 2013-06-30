@@ -459,6 +459,7 @@ public:
 	string m_sSaveFile_FullBasePath;
 	string m_sSaveFile_FileName;
 	string m_sSaveFile_Command;
+	bool m_bSaveFile_IsMove;
 	bool m_bSaveFile_CreatingFolder;
 	bool m_bSaveFile_Advanced_options;
 	bool m_bUseDirectoryStructure;  // The drive we're saving to should use our public/private directory structure

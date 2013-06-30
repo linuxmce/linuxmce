@@ -553,10 +553,12 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"ScreenHandler::MediaBrowser_Objec
 	      TOSTRING(COMMANDPARAMETER_Path_CONST) " " +
 	      "<%=" TOSTRING(VARIABLE_Misc_Data_5_CONST) "%>/" +
 	      "<%=" TOSTRING(VARIABLE_Seek_Value_CONST) "%>";
-	      
+	     
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Sending command %s to Media Plugin",sCommand.c_str());		
+ 
 	    string sTitle = "Choose a location to move the file. You can also change the file name here.";
-	    
-	    DCE::SCREEN_FileSave screen_FileSave(m_pOrbiter->m_dwPK_Device,m_pOrbiter->m_dwPK_Device,mediaFileBrowserOptions.m_PK_MediaType,-998,sTitle,sCommand,true); // true allows us to see the destination disk
+	    m_bSaveFile_IsMove=true;
+	    DCE::SCREEN_FileSave screen_FileSave(m_pOrbiter->m_dwPK_Device,m_pOrbiter->m_dwPK_Device,mediaFileBrowserOptions.m_PK_MediaType,-999,sTitle,sCommand,true); // true allows us to see the destination disk
 	    m_pOrbiter->SendCommand(screen_FileSave);
 
 	  }
@@ -2561,7 +2563,14 @@ void ScreenHandler::SCREEN_FileSave(long PK_Screen, int iPK_MediaType, int iEK_D
 	if( iEK_Disc==-999 )  // Special things means go to the bulk ripping screen
 	{
 		m_pOrbiter->CMD_Goto_DesignObj(0,TOSTRING(DESIGNOBJ_mnuBulkRipping_CONST),"","",false,false);
-		m_pOrbiter->CMD_Set_Text(TOSTRING(DESIGNOBJ_mnuBulkRipping_CONST), m_pOrbiter->m_mapTextString[TEXT_Bulk_rip_choose_name_CONST], TEXT_STATUS_CONST);
+		if (m_bSaveFile_IsMove)
+		  {
+		    m_pOrbiter->CMD_Set_Text(TOSTRING(DESIGNOBJ_mnuBulkRipping_CONST), m_pOrbiter->m_mapTextString[2174], TEXT_STATUS_CONST); // FIXME: use CONST
+		  }
+		else
+		  {
+		    m_pOrbiter->CMD_Set_Text(TOSTRING(DESIGNOBJ_mnuBulkRipping_CONST), m_pOrbiter->m_mapTextString[TEXT_Bulk_rip_choose_name_CONST], TEXT_STATUS_CONST);
+		  }
 	}
 	else
 		ScreenHandlerBase::SCREEN_FileSave(PK_Screen, iPK_MediaType, iEK_Disc, sCaption, sCommand, bAdvanced_options);
@@ -2596,6 +2605,7 @@ void ScreenHandler::Reset_SaveFile_Info()
 	m_bUseDirectoryStructure = false;
 	m_nSaveFile_PK_DeviceDrive = 0;
 	m_nPK_Users_SaveFile = 0;
+	m_bSaveFile_IsMove=false;
 }
 //-----------------------------------------------------------------------------------------------------
 bool ScreenHandler::FileSave_ObjectSelected(CallBackData *pData)
@@ -2652,7 +2662,7 @@ bool ScreenHandler::FileSave_ObjectSelected(CallBackData *pData)
 			)
 			{
 				m_sSaveFile_FileName = m_pOrbiter->m_mapVariable_Find(VARIABLE_Seek_Value_CONST);
-
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"m_sSaveFile_FileName == %s",m_sSaveFile_FileName.c_str());
 				bool bUnknownSubdirectory=false;
 				string sSubDir = m_pOrbiter->m_mapVariable_Find(VARIABLE_Status_CONST);
 				if( m_bUseDirectoryStructure==false )
@@ -2685,7 +2695,8 @@ bool ScreenHandler::FileSave_ObjectSelected(CallBackData *pData)
 			else if(pObjectInfoData->m_PK_DesignObj_SelectedObject == DESIGNOBJ_butChooseDrive_CONST ||
 				pObjectInfoData->m_PK_DesignObj_SelectedObject == DESIGNOBJ_objCurrentUser_CONST)
 			{
-                m_sSaveFile_FileName = m_pOrbiter->m_mapVariable_Find(VARIABLE_Seek_Value_CONST);				
+                		m_sSaveFile_FileName = m_pOrbiter->m_mapVariable_Find(VARIABLE_Seek_Value_CONST);
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Once again, m_sSaveFile_FileName is %s set from <%=17%>",m_sSaveFile_FileName.c_str());				
 			}
 		}
 	}
@@ -2749,6 +2760,7 @@ void ScreenHandler::SaveFile_GotoChooseFolderDesignObj()
 	string sNewPath = FileUtils::IncludeTrailingSlash(m_sSaveFile_FullBasePath) + m_sSaveFile_RelativeFolder;
 
 	m_pOrbiter->CMD_Set_Variable(VARIABLE_Misc_Data_5_CONST, FileUtils::ExcludeTrailingSlash(sNewPath) + "\nMT-1\nP");
+	m_pOrbiter->CMD_Set_Variable(VARIABLE_Seek_Value_CONST, m_sSaveFile_FileName);
 	m_pOrbiter->CMD_Goto_DesignObj(0, StringUtils::ltos(DESIGNOBJ_mnuChooseFolder_CONST), "", "", 
 		false, true);
 
