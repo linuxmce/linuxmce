@@ -1228,6 +1228,7 @@
 #define TEXT_dial_CONST 2171
 #define TEXT_Your_selection_is_not_valid_please_try_CONST 2172
 #define TEXT_Thank_you_for_calling_CONST 2173
+#define TEXT_Move_File_choose_dest_CONST 2174
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

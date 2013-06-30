@@ -2849,6 +2849,11 @@
 #define DESIGNOBJ_grpComputerRemotePDA_CONST 6247
 #define DESIGNOBJ_grpAtari8KeyboardPDA_CONST 6248
 #define DESIGNOBJ_grpApple2KeyboardPDA_CONST 6249
+#define DESIGNOBJ_grpNumberPad_INTV_CONST 6250
+#define DESIGNOBJ_butEnter_INTV_CONST 6251
+#define DESIGNOBJ_butClear_INTV_CONST 6252
+#define DESIGNOBJ_mnuIntellivisionController_CONST 6253
+#define DESIGNOBJ_mnuMoveFile_CONST 6254
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

@@ -149,7 +149,7 @@
 #define SCREEN_rokuRemote_CONST 148
 #define SCREEN_rokuKBD_CONST 149
 #define SCREEN_Game_Atari800KBD_CONST 150
-#define SCREEN_popSecurity_CONST 151
+#define SCREEN_Game_Intellivision_CONST 151
 #define SCREEN_popOthers_CONST 152
 #define SCREEN_Game_Atari_5200_CONST 153
 #define SCREEN_Game_Atari_5200_Monitor_Mode_CONST 154
