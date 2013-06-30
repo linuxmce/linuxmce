@@ -2562,13 +2562,15 @@ void ScreenHandler::SCREEN_FileSave(long PK_Screen, int iPK_MediaType, int iEK_D
 	m_pOrbiter->CMD_Set_Text(StringUtils::ltos(m_p_MapDesignObj_Find(PK_Screen)), sCaption, TEXT_STATUS_CONST);
 	if( iEK_Disc==-999 )  // Special things means go to the bulk ripping screen
 	{
-		m_pOrbiter->CMD_Goto_DesignObj(0,TOSTRING(DESIGNOBJ_mnuBulkRipping_CONST),"","",false,false);
 		if (m_bSaveFile_IsMove)
 		  {
-		    m_pOrbiter->CMD_Set_Text(TOSTRING(DESIGNOBJ_mnuBulkRipping_CONST), m_pOrbiter->m_mapTextString[2174], TEXT_STATUS_CONST); // FIXME: use CONST
+		    // Move File uses its own screen, but hides the Folder button, as it is superfluous.
+		    m_pOrbiter->CMD_Goto_DesignObj(0,TOSTRING(DESIGNOBJ_mnuMoveFile_CONST),"","",false,false);
+		    m_pOrbiter->CMD_Set_Text(TOSTRING(DESIGNOBJ_mnuMoveFile_CONST), m_pOrbiter->m_mapTextString[2174], TEXT_STATUS_CONST); // FIXME: use CONST
 		  }
 		else
 		  {
+	            m_pOrbiter->CMD_Goto_DesignObj(0,TOSTRING(DESIGNOBJ_mnuBulkRipping_CONST),"","",false,false);
 		    m_pOrbiter->CMD_Set_Text(TOSTRING(DESIGNOBJ_mnuBulkRipping_CONST), m_pOrbiter->m_mapTextString[TEXT_Bulk_rip_choose_name_CONST], TEXT_STATUS_CONST);
 		  }
 	}
@@ -2654,7 +2656,8 @@ bool ScreenHandler::FileSave_ObjectSelected(CallBackData *pData)
 				m_pOrbiter->CMD_Set_Variable(VARIABLE_Misc_Data_4_CONST, sParentFolder + sNewFolder + "/");
 			}
 		}
-		else if(GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuFileSave_CONST || GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuBulkRipping_CONST)
+		else if(GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuFileSave_CONST || GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuBulkRipping_CONST || 
+			GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuMoveFile_CONST)
 		{
 			if(
 				pObjectInfoData->m_PK_DesignObj_SelectedObject == DESIGNOBJ_objPlayListSavePrivate_CONST ||
@@ -2685,9 +2688,16 @@ bool ScreenHandler::FileSave_ObjectSelected(CallBackData *pData)
 					SaveFile_GotoChooseFolderDesignObj();
 				else
 				{
-					if( bUnknownSubdirectory || GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuBulkRipping_CONST )
-						m_pOrbiter->CMD_Set_Variable(VARIABLE_Path_CONST,m_sSaveFile_FullBasePath);
-					SaveFile_SendCommand(m_nPK_Users_SaveFile);
+					if (m_bSaveFile_IsMove)
+					{
+						SaveFile_GotoChooseFolderDesignObj();
+					}
+					else
+					{
+						if( bUnknownSubdirectory || GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuBulkRipping_CONST )
+							m_pOrbiter->CMD_Set_Variable(VARIABLE_Path_CONST,m_sSaveFile_FullBasePath);
+						SaveFile_SendCommand(m_nPK_Users_SaveFile);
+					}
 				}
 
 				return true;
