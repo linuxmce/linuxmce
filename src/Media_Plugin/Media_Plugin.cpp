@@ -167,6 +167,7 @@ void MoveJob::AddMoveTasks(TasklistPosition position)
   vector <Task *> vTasks;
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX AddMoveTasks - from %s to %s",m_sFileName.c_str(),m_sDestinationFileName.c_str());
   // Move original filename.
+  m_sDestinationFileName+="/"+FileUtils::FilenameWithoutPath(m_sFileName);
   if (FileUtils::FileExists(m_sFileName))
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX Adding Move Task for Main File");
@@ -354,18 +355,19 @@ int MoveTask::Run()
     }
 
   m_bAlreadySpawned=true;
-  return 1000;  // Check again in 1 second.
 
-  // if (m_sName == "Move Media")
-  //   {
-  //     // Set the database location appropriately.
-  //     string sDestinationPath = FileUtils::BasePath(m_sDestinationFileName);
-  //     string sDestinationBaseName = FileUtils::FilenameWithoutPath(m_sDestinationFileName);
+  /* if (m_sName == "Move Media")
+     {
+       // Set the database location appropriately.
+       string sDestinationPath = FileUtils::BasePath(m_sDestinationFileName);
+       string sDestinationBaseName = FileUtils::FilenameWithoutPath(m_sDestinationFileName);
 
-  //     m_pMoveJob->m_pRow_File->Path_set(sDestinationPath);
-  //     m_pMoveJob->m_pRow_File->Path_set(sDestinationBaseName);
-  //     m_pMoveJob->m_pDatabase_pluto_media->File_get()->Commit();
-  //   }
+       m_pMoveJob->m_pRow_File->Path_set(sDestinationPath);
+       m_pMoveJob->m_pRow_File->Path_set(sDestinationBaseName);
+       m_pMoveJob->m_pDatabase_pluto_media->File_get()->Commit();
+     } */
+
+  return 1000; // check again in 1 second
 }
 
 bool MoveTask::Abort()
@@ -457,6 +459,7 @@ MoveDBTask::MoveDBTask(class MoveJob *pMoveJob,
   m_bAlreadySpawned=false;
   m_pMoveJob=pMoveJob;
   m_bReportResult=bReportResult;
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX MoveDBTask Added for sName %s",sName.c_str());
 }
 
 MoveDBTask::~MoveDBTask()
@@ -472,10 +475,15 @@ int MoveDBTask::Run()
 
   if (FileUtils::FileExists(m_pMoveJob->m_sDestinationFileName))
     {
-      m_pMoveJob->m_pRow_File->Path_set(sDestinationPath);
-      m_pMoveJob->m_pRow_File->Filename_set(sDestinationBaseName);
+      string sOldPath = m_pMoveJob->m_pRow_File->Path_get();
+      string sUpdOldCmd = "/usr/pluto/bin/UpdateMedia -d "+sOldPath;
+      string sUpdNewCmd = "/usr/pluto/bin/UpdateMedia -d "+FileUtils::BasePath(m_pMoveJob->m_sDestinationFileName);
+      m_pMoveJob->m_pRow_File->Path_set(m_pMoveJob->m_sDestinationFileName);
       m_pMoveJob->m_pDatabase_pluto_media->File_get()->Commit();
+      system(sUpdOldCmd.c_str());
+      system(sUpdNewCmd.c_str());
       m_eTaskStatus_set(TASK_COMPLETED);
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Database entry for file %d set to Path %s Filename %s",m_pMoveJob->m_pRow_File->PK_File_get(),sDestinationPath.c_str(),sDestinationBaseName.c_str());
     }
   else
     m_eTaskStatus_set(TASK_FAILED_ABORT);  // If this didn't work, no point in doing other tasks.
@@ -8058,6 +8066,20 @@ void Media_Plugin::CMD_Move_File(string sFilename,string sPath,string &sCMD_Resu
 	  pRow_File->Reload();
 	  sFilename=pRow_File->Path_get()+"/"+pRow_File->Filename_get();
 	  string sDestinationFileName = sPath;
+
+	  // Oddness follows, I have to ask the General Info Plugin for the symlink.
+	  CMD_Get_Home_Symlink_DT CMD_Get_Home_Symlink(m_dwPK_Device, (long)DEVICETEMPLATE_General_Info_Plugin_CONST, BL_SameHouse, sPath, &sDestinationFileName);
+	  if (!SendCommand(CMD_Get_Home_Symlink))
+	    {
+	      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not send CMD_Get_Home_Symlink to General_Info_Plugin. Aborting CMD_Move_File.");
+	      sCMD_Result="ERROR";
+	      return;
+	    }
+	  else
+	    {
+	      LoggerWrapper::GetInstance()->Write(LV_WARNING,"");
+	    }
+
 	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXX Moving file %s to %s",sFilename.c_str(),sDestinationFileName.c_str());
 
 	  MoveJob *pMoveJob = new MoveJob(m_pDatabase_pluto_media,
