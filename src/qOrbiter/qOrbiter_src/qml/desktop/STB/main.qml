@@ -186,6 +186,7 @@ Item {
         console.log("Header Focus::"+hdr.activeFocus)
         console.log("Loader Focus::"+pageLoader.activeFocus)
          console.log("Footer Focus::"+ftr.activeFocus)
+        ftr.currentItem = -1
     }
 
     Item{

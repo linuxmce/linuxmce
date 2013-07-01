@@ -7,6 +7,7 @@ Item{
     width: qmlroot.width
     height:scaleY(10)
     onFocusChanged: if(activeFocus) scenarioList.forceActiveFocus()
+    property int currentItem: -1
     Rectangle{
         anchors.fill: parent
         opacity:ftr.activeFocus ? 1 : .65
@@ -21,52 +22,89 @@ Item{
         width: parent.width
         spacing:scaleX(1)
         orientation: ListView.Horizontal
-        onActiveFocusChanged: console.log("Active focus on Scenario listmodel is " + activeFocus)
+        onActiveFocusChanged:{ console.log("Active focus on Scenario listmodel is " + activeFocus); forceActiveFocus()}
         clip:false
-        focus:true
+        focus:false
         model:scenarios
         delegate: Item{
-            property bool showSublist:activeFocus
+            id:scenarioParent
             height: parent.height
             width: scaleX(18)
-            onActiveFocusChanged: {console.log(name + " listview active focus is " + activeFocus); if(!activeFocus) {showSublist=false} else showSublist = true }
+            onActiveFocusChanged: {
+                if(activeFocus){
+                    currentItem= index
+                    if(manager.currentScreen==="Screen_1.qml"){
+                        if(modelName==="currentRoomLights")
+                          submodel.model = currentRoomLights
+                        else if(modelName==="currentRoomMedia")
+                            submodel.model = currentRoomMedia
+                        else if(modelName==="currentRoomClimate")
+                           submodel.model = currentRoomClimate
+                        else if(modelName==="currentRoomTelecom")
+                            submodel.model=currentRoomTelecom
+                        else if(modelName==="currentRoomSecurity")
+                           submodel.model= currentRoomSecurity
+                    }else if (manager.currentScreen==="Screen_47"){
+
+                        if(name==="Attribute")
+                            console.log("attribute selected")
+                    }
+                    submodel.currentIndex = 0
+
+                }
+
+            }
+
             Rectangle{
                 anchors.fill: parent
-                color: parent.activeFocus ? appStyle.lightHighlightColor : appStyle.darkHighlightColor
+                color: currentItem===index ? appStyle.lightHighlightColor : appStyle.darkHighlightColor
             }
             Text{
                 anchors.centerIn: parent
                 text:name
                 font.pixelSize: 32
             }
-            Keys.onEnterPressed:{ console.log("Clicked "+ name);showSublist = true }
             Keys.onTabPressed: swapFocus()
+            Keys.onUpPressed:  submodel.decrementCurrentIndex()
+            Keys.onDownPressed: submodel.incrementCurrentIndex()
+
             ListView{
-                height: parent.showSublist ? scaleY(65) : 0
+                id:submodel
+                height:ftr.currentItem === index ? scaleY(85) : 0
                 width: parent.width
-                onHeightChanged: positionViewAtEnd()
-                model:currentRoomLights
+                focus: true
+
+              //  onHeightChanged: {pos itionViewAtEnd(); console.log(name+" expanding")}
+
                 orientation:ListView.Vertical
                 clip:true
                 anchors.bottom: parent.top
                 spacing:scaleY(1)
                 delegate: Rectangle{
-                    color:"black"
-                    height:scaleY(10)
+                    radius:5
+                    clip: true
+                    color:submodel.currentIndex === index ? "grey" : "black"
+                    height:label.paintedHeight
                     width: parent.width
                     opacity: .65
                     Text {
+                        id:label
                         color:"white"
                         text: title
+                        width:parent.width
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                         anchors.centerIn: parent
-                        font.pointSize: 18
-                    }
-                }
-                Behavior on height {
-                    PropertyAnimation{
-                        duration: 750
+                        font.pointSize: 28
 
                     }
+
+                }
+
+                Behavior on height {
+                    PropertyAnimation{
+                        duration: 500
+                    }
+
                 }
             }
         }

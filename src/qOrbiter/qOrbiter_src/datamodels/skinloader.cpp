@@ -54,11 +54,14 @@ void SkinLoader::loadSkin(QString name) {
     {
 
         qWarning() << current_component->errors();
-        qWarning() << "Style.qml is corrupt, moving to next skin. \n";
+        qWarning() << "Style.qml is corrupt for skin at index "<< loadercounter << " of " << totalSkinsToLoad << " , moving to next skin. \n";
 
         if(!skinsToLoad.isEmpty()){
-            skinsToLoad.takeAt(loadercounter);
+            qWarning() << "Attempting to remove damaged Style.qml from list of availible skins";
+           skinsToLoad.takeAt(loadercounter);
             totalSkinsToLoad = skinsToLoad.size();
+            qWarning() << "Updated the list of skins to " << totalSkinsToLoad;
+            loadercounter++;
         }
         else{
 
