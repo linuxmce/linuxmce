@@ -4227,11 +4227,23 @@ void Telecom_Plugin::TurnOnMediaDirectorAttachedToOrbiter(int nOrbiterID)
   DeviceData_Router *pDevice_Orbiter = m_pRouter->m_mapDeviceData_Router_Find(nOrbiterID);
   if (pDevice_Orbiter)
     {
-      DeviceData_Base *pDevice_MD = pDevice_Orbiter->FindSelfOrParentWithinCategory(DEVICECATEGORY_Media_Director_CONST);
-      if (pDevice_MD)
+      DeviceData_Base *pDevice_SimplePhone = pDevice_Orbiter->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_Orbiter_Embedded_Phone_CONST);
+      if (pDevice_SimplePhone)
 	{
-	  CMD_On CMD_On(m_dwPK_Device, pDevice_MD->m_dwPK_Device, 0, ""); // turn on all pipes
-	  SendCommand(CMD_On);
+	  DeviceData_Router *pDevice_SimplePhone_Router = m_pRouter->m_mapDeviceData_Router_Find(pDevice_SimplePhone->m_dwPK_Device);
+	  if (pDevice_SimplePhone_Router)
+	    {
+	      // If Ignore Video Pipes is set to 1, then tell the system to only turn on audio pipes (which is also, 1, so am abusing this fact a bit.) 
+	      string sIgnorePipes = pDevice_SimplePhone_Router->m_mapParameters_Find(DEVICEDATA_Ignore_Video_Pipes_CONST);
+	      sIgnorePipes = (sIgnorePipes.empty() ? "0" : sIgnorePipes); // If ignore pipes is empty (possible if this is an older installation, then assume 0)
+	      int iIgnorePipes = atoi(sIgnorePipes.c_str());
+	      DeviceData_Base *pDevice_MD = pDevice_Orbiter->FindSelfOrParentWithinCategory(DEVICECATEGORY_Media_Director_CONST);
+	      if (pDevice_MD)
+		{
+		  CMD_On CMD_On(m_dwPK_Device, pDevice_MD->m_dwPK_Device, iIgnorePipes, "");
+		  SendCommand(CMD_On);
+		}
+	    }
 	}
     }
 }
