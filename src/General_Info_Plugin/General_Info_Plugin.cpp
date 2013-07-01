@@ -914,7 +914,7 @@ class DataGridTable *General_Info_Plugin::QuickStartApps( string GridID, string 
 	}
 */
 	// This will be the template we use for string applications
-	Row_QuickStartTemplate *pRow_QuickStartTemplate = p_Bookmarks ? m_pDatabase_pluto_main->QuickStartTemplate_get()->GetRow(1) : NULL;
+	Row_QuickStartTemplate *pRow_QuickStartTemplate = p_Bookmarks ? m_pDatabase_pluto_main->QuickStartTemplate_get()->GetRow(7) : NULL; // HACKOMATIC!
 
 	int iRow=0;
 	while(true)
