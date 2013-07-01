@@ -508,6 +508,11 @@ private:
 	 */
 	bool ConcurrentAccessToSoundCardAllowed(int nOrbiterID);
 
+	/**
+	 * Turn On Media Director associated with Simplephone Orbiter
+	 */
+	void TurnOnMediaDirectorAttachedToOrbiter(int nOrbiterID);
+
 private:
 	int iCmdCounter;
 	int generate_NewCommandID();

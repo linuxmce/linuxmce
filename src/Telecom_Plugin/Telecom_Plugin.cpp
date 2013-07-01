@@ -837,6 +837,7 @@ Telecom_Plugin::Ring( class Socket *pSocket, class Message *pMessage, class Devi
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Telecom_Plugin : pause device %d", nOrbiterDeviceID);
 
+			TurnOnMediaDirectorAttachedToOrbiter(nOrbiterDeviceID);
 			if(ConcurrentAccessToSoundCardAllowed(nOrbiterDeviceID))
 			{
 				DCE::CMD_Pause_Media cmd_Pause_Media(nOrbiterDeviceID, pMediaPlugin->m_dwPK_Device, 0);
@@ -3600,7 +3601,7 @@ bool Telecom_Plugin::InternalMakeCall(int iFK_Device_From, string sFromExten, st
 				//TODO: to orbiter?
 
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Telecom_Plugin : pause device %d", iFK_Device_From);
-
+				TurnOnMediaDirectorAttachedToOrbiter(iFK_Device_From);
 				if(ConcurrentAccessToSoundCardAllowed(iFK_Device_From))
 				{
 					DCE::CMD_Pause_Media cmd_Pause_Media(iFK_Device_From, pMediaPlugin->m_dwPK_Device, 0);
@@ -4219,6 +4220,20 @@ string Telecom_Plugin::GetCallerName(string sChannel, string sCallerID)
 		sCallerName.c_str(), sChannel.c_str(), sCallerID.c_str(), sExten.c_str());
 
 	return sCallerName;
+}
+
+void Telecom_Plugin::TurnOnMediaDirectorAttachedToOrbiter(int nOrbiterID)
+{
+  DeviceData_Router *pDevice_Orbiter = m_pRouter->m_mapDeviceData_Router_Find(nOrbiterID);
+  if (pDevice_Orbiter)
+    {
+      DeviceData_Base *pDevice_MD = pDevice_Orbiter->FindSelfOrParentWithinCategory(DEVICECATEGORY_Media_Director_CONST);
+      if (pDevice_MD)
+	{
+	  CMD_On CMD_On(m_dwPK_Device, pDevice_MD->m_dwPK_Device, 0, ""); // turn on all pipes
+	  SendCommand(CMD_On);
+	}
+    }
 }
 
 bool Telecom_Plugin::ConcurrentAccessToSoundCardAllowed(int nOrbiterID)
