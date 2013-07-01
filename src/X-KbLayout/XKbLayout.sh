@@ -118,7 +118,7 @@ else
 	XConfPath=""
 fi
 
-XConfFile="$XConfPath/etc/default/console-setup"
+XConfFile="$XConfPath/etc/default/keyboard"
 
 case "$Action" in
 	get)
