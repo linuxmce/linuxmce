@@ -459,7 +459,10 @@ values_list_comma_separated = values_list_comma_separated + pRow->PK_RomTitles_a
 			
 			long int id = (long int) db_wrapper_insert_id(database->m_pDB);
 		
-				
+			if (id!=0)
+		pRow->m_PK_RomTitles=id;
+else 
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"PK_RomTitles is auto increment but has no value %s",database->m_sLastDBError.c_str());	
 			
 			addedRows.erase(i);
 			SingleLongKey key(pRow->m_PK_RomTitles);	
