@@ -50,13 +50,13 @@ Item{
                             console.log("attribute selected")
                     }
                     submodel.currentIndex = 0
-
                 }
 
             }
 
             Rectangle{
                 anchors.fill: parent
+                radius:5
                 color: currentItem===index ? appStyle.lightHighlightColor : appStyle.darkHighlightColor
             }
             Text{
@@ -70,11 +70,11 @@ Item{
 
             ListView{
                 id:submodel
-                height:ftr.currentItem === index ? scaleY(85) : 0
+                height:ftr.currentItem === index ?childrenRect.height : 0
                 width: parent.width
                 focus: true
 
-              //  onHeightChanged: {pos itionViewAtEnd(); console.log(name+" expanding")}
+              onHeightChanged: {positionViewAtEnd(); console.log(name+" expanding")}
 
                 orientation:ListView.Vertical
                 clip:true
