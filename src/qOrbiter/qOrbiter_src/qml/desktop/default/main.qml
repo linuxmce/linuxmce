@@ -36,7 +36,7 @@ Item {
     signal changeScreen(string s)
     signal setupStart(int x, string y)
 
-    Component.onCompleted: {logger.userLogMsg = "Main.qml loaded in default skin"; manager.setBoundStatus(true)}
+    Component.onCompleted: {logger.userLogMsg = "Main.qml loaded in default skin"; manager.setBoundStatus(true);  dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)}
 
     FontLoader{
         id:myFont
@@ -233,7 +233,10 @@ Item {
 
             onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
             z:dceplayer.mediaPlaying ==false ? -5 : 0
-            Component.onCompleted: {setWindowSize(manager.appHeight, manager.appWidth); dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)}
+            Component.onCompleted: {
+                setWindowSize(manager.appHeight, manager.appWidth);
+
+            }
 
             Connections{
                 target:manager

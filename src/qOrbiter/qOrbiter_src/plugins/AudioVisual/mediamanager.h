@@ -67,7 +67,7 @@ public:
 
     QString currentStatus;
     QString qs_totalTime;
-    QThread *dcethread;
+
 
     QTcpServer *timeCodeServer;
     QString current_position;
@@ -120,10 +120,10 @@ public slots:
 
     void mediaStarted(){setMediaPlaying(true);  }
 
-    void setServerAddress(QString a) {serverAddress = a;emit serverAddressChanged();}
+    void setServerAddress(QString a) {if(serverAddress !=a) {serverAddress = a;emit serverAddressChanged();}}
     QString getServerAddress(){return serverAddress;}
 
-    void setDeviceNumber(int d) {deviceNumber = d; emit deviceNumberChanged();}
+    void setDeviceNumber(int d) { if(deviceNumber !=d) {deviceNumber = d; emit deviceNumberChanged();}}
     int getDeviceNumber() {return deviceNumber;}
 
     void updateMetaData(){}

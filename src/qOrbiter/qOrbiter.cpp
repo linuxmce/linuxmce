@@ -1064,7 +1064,9 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         if(iPK_MediaType !=18)
         {
             checkTimeCode();
+
             QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
+            qWarning() << "Device Ip Address ==>" << port;
             emit newTCport(port.toInt());
         }
 
@@ -2983,19 +2985,24 @@ void DCE::qOrbiter::requestMediaPlaylist()
 
 void qOrbiter::checkTimeCode()
 {
+    qWarning() << "Searching for ip address of media player";
     emit setMyIp(QString::fromStdString(m_sIPAddress));
 
     DeviceData_Base *pDevice = m_dwPK_Device_NowPlaying ? m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_dwPK_Device_NowPlaying) : NULL;
 
     string sIPAddress = pDevice->m_sIPAddress;
+    qWarning() << "1st pass result is ==>" << sIPAddress.c_str();
     if( sIPAddress.empty() )
     {
         if( pDevice->m_pDevice_MD && !pDevice->m_pDevice_MD->m_sIPAddress.empty() )
             sIPAddress = pDevice->m_pDevice_MD->m_sIPAddress;
         else if( pDevice->m_pDevice_Core && !pDevice->m_pDevice_Core->m_sIPAddress.empty() )
             sIPAddress = pDevice->m_pDevice_Core->m_sIPAddress;
+        else if( pDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_qMediaPlayer_CONST ){
+            sIPAddress = pDevice->m_sIPAddress;
+        }
         else
-        {
+        { qWarning() << "Could not find ip address";
             LoggerWrapper::GetInstance()->Write(LV_WARNING,"Media Player Has No Address");
             return;
         }
@@ -3008,6 +3015,7 @@ void qOrbiter::checkTimeCode()
     {
         emit stopTimeCode();
     }
+    qWarning() << " New ip :: " << sIPAddress.c_str();
 }
 
 void qOrbiter::getStreamingVideo()

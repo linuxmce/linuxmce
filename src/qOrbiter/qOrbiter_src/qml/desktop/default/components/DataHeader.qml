@@ -102,6 +102,7 @@ Item{
                 isBold: true
                 color: "black"
             }
+            visible: dceplayer.connected
 
         }
 

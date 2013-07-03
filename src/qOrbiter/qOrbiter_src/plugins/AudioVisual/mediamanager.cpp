@@ -56,9 +56,10 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
 void MediaManager::initializePlayer()
 {
     setCurrentStatus("Initializing Media Player");
-    mediaPlayer = new qMediaPlayer(deviceNumber, serverAddress.toStdString(), true, false);
-    dcethread = new QThread();
-    mediaPlayer->moveToThread(dcethread);
+    if(!mediaPlayer){
+          mediaPlayer = new qMediaPlayer(deviceNumber, serverAddress.toStdString(), this, true, false);
+    }
+
     initializeConnections();
 }
 
@@ -68,26 +69,26 @@ void MediaManager::initializeConnections()
 
 
     /*From Dce MediaPlayer*/
-    QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)),Qt::QueuedConnection);
-    QObject::connect(mediaPlayer,SIGNAL(startPlayback()), mediaObject, SLOT(play()),Qt::QueuedConnection);
+    QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)));
+    QObject::connect(mediaPlayer,SIGNAL(startPlayback()), mediaObject, SLOT(play()));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(mediaStarted()));
-    QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), mediaObject, SLOT(stop()),Qt::QueuedConnection);
+    QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), mediaObject, SLOT(stop()));
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopTimeCodeServer()));
-    QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), mediaObject, SLOT(pause()),Qt::QueuedConnection);
-    QObject::connect(mediaPlayer,SIGNAL(commandResponseChanged(QString)), this ,SLOT(setCurrentStatus(QString)),Qt::QueuedConnection);
-    QObject::connect(mediaPlayer,SIGNAL(setZoomLevel(QString)), this, SLOT(setZoomLevel(QString)),Qt::QueuedConnection);
+    QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), mediaObject, SLOT(pause()));
+    QObject::connect(mediaPlayer,SIGNAL(commandResponseChanged(QString)), this ,SLOT(setCurrentStatus(QString)));
+    QObject::connect(mediaPlayer,SIGNAL(setZoomLevel(QString)), this, SLOT(setZoomLevel(QString)));
     QObject::connect(mediaPlayer,SIGNAL(streamIdChanged(int)), this , SLOT(setStreamId(int)));
     QObject::connect(mediaPlayer, SIGNAL(mediaIdChanged(QString)), this, SLOT(setFileReference(QString)));
-    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()),Qt::QueuedConnection);
-    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(raise()),Qt::QueuedConnection);
+    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()));
+    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(raise()));
 
     QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
     QObject::connect(mediaPlayer,SIGNAL(jumpToStreamPosition(int)), this, SLOT(setMediaPosition(int)));
 
     /*From internal plugin*/
-    QObject::connect(mediaObject, SIGNAL(finished()), mediaPlayer, SLOT(mediaEnded()),Qt::QueuedConnection);
-    QObject::connect(mediaObject, SIGNAL(tick(qint64)), this, SLOT(processTimeCode(qint64)),Qt::QueuedConnection);
-    QObject::connect(mediaObject, SIGNAL(finished()), videoSurface, SLOT(lower()),Qt::QueuedConnection);
+    QObject::connect(mediaObject, SIGNAL(finished()), mediaPlayer, SLOT(mediaEnded()));
+    QObject::connect(mediaObject, SIGNAL(tick(qint64)), this, SLOT(processTimeCode(qint64)));
+    QObject::connect(mediaObject, SIGNAL(finished()), videoSurface, SLOT(lower()));
     QObject::connect(mediaObject, SIGNAL(totalTimeChanged(qint64)), this, SLOT(setTotalTime(qint64)));
     QObject::connect(mediaObject, SIGNAL(bufferStatus(int)), this, SLOT(setMediaBuffer(int)));
     QObject::connect(mediaObject, SIGNAL(aboutToFinish()), this, SIGNAL(mediaAboutToFinish()));
@@ -97,13 +98,13 @@ void MediaManager::initializeConnections()
 
 
     /*internals*/
-    QObject::connect(dcethread, SIGNAL(started()), mediaPlayer, SLOT(run()));
+
 #ifdef QT4
     mediaObject->setTickInterval(quint32(1000));
 #elif QT5
 
 #endif
-    dcethread->start();
+
 }
 
 void MediaManager::setConnectionDetails(int r, QString s)
@@ -112,10 +113,12 @@ void MediaManager::setConnectionDetails(int r, QString s)
     setDeviceNumber(r);
 
 
-    if(!serverAddress.isEmpty() && deviceNumber > 0)
+    if(!serverAddress.isEmpty() && deviceNumber > 1)
     {
+        if(!mediaPlayer){
         setCurrentStatus("Got address "+serverAddress+" and device number "+QString::number(deviceNumber)+", initializing");
         initializePlayer();
+        }
 
     }else
     {
@@ -160,7 +163,6 @@ void MediaManager::stopTimeCodeServer()
         c->disconnectFromHost();
     }
     timeCodeServer->close();
-
     setMediaPlaying(false);
 }
 
