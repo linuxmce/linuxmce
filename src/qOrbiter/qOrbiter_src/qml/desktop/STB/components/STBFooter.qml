@@ -3,11 +3,22 @@ import Qt.labs.shaders 1.0
 import "../../lib/components"
 Item{
     id:ftr
-    anchors.bottom: parent.bottom
+
     width: qmlroot.width
-    height:scaleY(10)
-    onFocusChanged: if(activeFocus) scenarioList.forceActiveFocus()
+    height:scaleY(12)
+    anchors.top: parent.bottom
+    onFocusChanged:{ if(activeFocus){
+            scenarioList.forceActiveFocus()
+            ftr.state="showing"
+            console.log("showing state")
+            scenarioList.currentIndex = -1
+        }
+    }
+    Component.onCompleted: ftr.state = "hidden"
+
     property int currentItem: -1
+
+
     Rectangle{
         anchors.fill: parent
         opacity:ftr.activeFocus ? 1 : .65
@@ -33,23 +44,25 @@ Item{
             onActiveFocusChanged: {
                 if(activeFocus){
                     currentItem= index
-                    if(manager.currentScreen==="Screen_1.qml"){
+                    if(manager.currentScreen!=="Screen_47.qml"){
                         if(modelName==="currentRoomLights")
-                          submodel.model = currentRoomLights
+                            submodel.model = currentRoomLights
                         else if(modelName==="currentRoomMedia")
                             submodel.model = currentRoomMedia
                         else if(modelName==="currentRoomClimate")
-                           submodel.model = currentRoomClimate
+                            submodel.model = currentRoomClimate
                         else if(modelName==="currentRoomTelecom")
                             submodel.model=currentRoomTelecom
                         else if(modelName==="currentRoomSecurity")
-                           submodel.model= currentRoomSecurity
+                            submodel.model= currentRoomSecurity
+                        else if (modelName==="advancedMenu")
+                            submodel.model=advancedMenu
                     }else if (manager.currentScreen==="Screen_47"){
 
                         if(name==="Attribute")
                             console.log("attribute selected")
                     }
-                    submodel.currentIndex = 0
+                    submodel.currentIndex = -1
                 }
 
             }
@@ -59,43 +72,57 @@ Item{
                 radius:5
                 color: currentItem===index ? appStyle.lightHighlightColor : appStyle.darkHighlightColor
             }
-            Text{
+            StyledText{
                 anchors.centerIn: parent
                 text:name
                 font.pixelSize: 32
             }
-            Keys.onTabPressed: swapFocus()
+            Keys.onTabPressed: {swapFocus();ftr.state="hidden"}
             Keys.onUpPressed:  submodel.decrementCurrentIndex()
             Keys.onDownPressed: submodel.incrementCurrentIndex()
+            Keys.onEnterPressed: { pressed() }
+            Keys.onPressed: {
+                console.log(event.key)
+                if(event.key === 16777220 )
+                    pressed()
+            }
+            signal pressed()
 
             ListView{
                 id:submodel
                 height:ftr.currentItem === index ?childrenRect.height : 0
                 width: parent.width
                 focus: true
-
-              onHeightChanged: {positionViewAtEnd(); console.log(name+" expanding")}
-
                 orientation:ListView.Vertical
+                keyNavigationWraps: true
                 clip:true
                 anchors.bottom: parent.top
                 spacing:scaleY(1)
-                delegate: Rectangle{
-                    radius:5
-                    clip: true
-                    color:submodel.currentIndex === index ? "grey" : "black"
+                delegate: Item{
                     height:label.paintedHeight
                     width: parent.width
-                    opacity: .65
-                    Text {
+                    Rectangle{
+                        anchors.fill: parent
+                        radius:5
+                        clip: true
+                        color:submodel.currentIndex === index ? "darkgrey" : "black"
+                        opacity: submodel.currentIndex === index ? .85 : .65
+                    }
+
+                    StyledText {
                         id:label
                         color:"white"
                         text: title
+                        font.bold: submodel.currentIndex === index
                         width:parent.width
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                         anchors.centerIn: parent
-                        font.pointSize: 28
+                        font.pointSize: submodel.currentIndex === index ? headerText : mediumText
 
+                    }
+                    Connections{
+                        target:scenarioParent
+                        onPressed:if(submodel.currentIndex === index) manager.execGrp(params)
                     }
 
                 }
@@ -110,6 +137,40 @@ Item{
         }
 
     }
+    Row{
+        id:metarow
+        height: parent.height/3
+        width: parent.width
+        anchors.bottom: parent.bottom
+        Item{
+            id:userInfo
+            width: parent.width/3
+            height: parent.height
+            StyledText {
+                anchors.centerIn: parent
+                text: manager.sPK_User
+                fontSize: headerText
+                color:appStyle.accentcolor
+            }
+
+        }
+        Item{
+            id:locationInfo
+            width: parent.width/3
+            height: parent.height
+
+            StyledText {
+                id: loc
+                text: roomList.currentRoom+"::"+roomList.currentEA
+                fontSize: mediumText
+                color:appStyle.accentcolor
+            }
+        }
+        Clock{
+            id:timekeeper
+        }
+
+    }
 
     Keys.onTabPressed:swapFocus()
     onActiveFocusChanged: {
@@ -118,4 +179,46 @@ Item{
         else
             console.log("Footer lost focus")
     }
+
+    states: [
+        State {
+            name: "hidden"
+            PropertyChanges {
+                target: hdr
+                state:"hidden"
+            }
+
+            AnchorChanges{
+                target:ftr
+                anchors.bottom: undefined
+                anchors.top: qmlroot.bottom
+            }
+        },
+        State {
+            name: "showing"
+            PropertyChanges {
+                target: hdr
+                state:"showing"
+            }
+            AnchorChanges{
+                target:ftr
+                anchors.top: undefined
+                anchors.bottom: qmlroot.bottom
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+
+            AnchorAnimation{
+                duration: appStyle.globalAnimationSpeed
+                easing.type: appStyle.globalAnimationEasing
+
+            }
+        }
+    ]
+
 }

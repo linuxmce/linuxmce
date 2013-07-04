@@ -2,16 +2,15 @@ import QtQuick 1.1
 import Qt.labs.shaders 1.0
 import "../../lib/components"
 
-
 Item{
     id:hdr
-    anchors.top: parent.top
+    anchors.bottom: parent.top
     width: qmlroot.width
     height:scaleY(8)
-
+    state:"hidden"
     Rectangle{
         anchors.fill: parent
-        color:appStyle.lightHighlightColor
+        color:appStyle.mainColor
         border.width: hdr.activeFocus ? 2 : 0
         focus:false
         border.color:"red"
@@ -22,9 +21,19 @@ Item{
         height: parent.height
         width: parent.width
         spacing: 5
-        Text {
+        StyledText {
             id: name
             text: "Orbiter "+ manager.m_dwPK_Device + " is connected to "+ manager.m_ipAddress
+            fontSize: mediumText
+            color: "white"
+        }
+        
+        StyledText{
+            id:timecodeDisplay
+            text:dceTimecode.qsCurrentTime
+            visible: dcenowplaying.b_mediaPlaying
+            color:"white"
+            fontSize: headerText
         }
     }
 
@@ -36,4 +45,36 @@ Item{
         else
             console.log("Header lost focus")
     }
+    states: [
+        State {
+            name: "hidden"
+            AnchorChanges{
+                target:hdr
+                anchors.top: undefined
+                anchors.bottom: qmlroot.top
+            }
+        },
+        State {
+            name: "showing"
+            AnchorChanges{
+                target:hdr
+                anchors.bottom: undefined
+                anchors.top: qmlroot.top
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+
+            AnchorAnimation{
+                duration: appStyle.globalAnimationSpeed
+                easing.type: appStyle.globalAnimationEasing
+
+            }
+        }
+    ]
+
 }

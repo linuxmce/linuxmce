@@ -9,6 +9,7 @@
 
 import QtQuick 1.1
 import Qt.labs.shaders 1.0
+import AudioVisual 1.0
 import "../lib/components"
 import "components"
 
@@ -28,6 +29,12 @@ Item {
     Connections{
         target: manager
         onOrientationChanged: checkLayout()
+    }
+
+    FontLoader{
+        id:myFont
+        name:"Sawasdee"
+        source: "fonts/Sawasdee.ttf"
     }
 
     ListModel{
@@ -52,6 +59,41 @@ Item {
             name:"Security"
             modelName:"currentRoomSecurity"
         }
+        ListElement{
+            name:"Advanced"
+            modelName:"advancedMenu"
+        }
+    }
+
+    ListModel{
+        id:advancedMenu
+
+        ListElement{
+            title:"KDE Desktop"
+            screen:""
+        }
+
+        ListElement{
+            title:"Quick Reload"
+            screen:""
+        }
+        ListElement{
+            title:"Regenerate"
+            screen:""
+        }
+        ListElement{
+            title:"Power"
+            screen:""
+        }
+        ListElement{
+            title:"Advanced"
+            screen:""
+        }
+        ListElement{
+            title:"Computing"
+            screen:""
+        }
+
     }
 
     ListModel{
@@ -209,6 +251,31 @@ Item {
           //  source: "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
         }
     }
+    MediaManager{
+        id:dceplayer
+        anchors.top: parent.top
+        anchors.left:parent.left
+
+        onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
+        z:dceplayer.mediaPlaying ==false ? -5 : 0
+        Component.onCompleted: {
+            setWindowSize(manager.appHeight, manager.appWidth);
+
+        }
+
+        Connections{
+            target:manager
+            onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
+            onMediaPlayerIdChanged:{
+                console.log("initializing media player"+manager.mediaPlayerID)
+                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+            }
+        }
+
+        onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
+        onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
+        onMediaPlayingChanged: console.log("Media Playback status changed locally "+dceplayer.mediaBuffer)
+    }
 
     Loader {
         id:pageLoader
@@ -246,7 +313,6 @@ Item {
     }
     STBFooter {
         id: ftr
-
     }
 
 

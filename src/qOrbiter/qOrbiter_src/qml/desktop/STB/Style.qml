@@ -33,6 +33,11 @@ Item{
     property string maincolor: "Black"
     property string accentcolor: "white"
 
+    /* Animation Properties */
+    property int globalAnimationSpeed:750
+    property int globalAnimationEasing:Easing.InOutQuad
+    /* End Animation Properties */
+
     property int orbiterH: 600
     property int orbiterW: 800
 
