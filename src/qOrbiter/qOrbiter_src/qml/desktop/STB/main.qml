@@ -183,11 +183,11 @@ Item {
     function loadComponent(componentName )
     {
         componentLoader.source = "components/"+componentName
-        if (componentLoader.status == Component.Ready)
+        if (componentLoader.status === Component.Ready)
         {
             manager.setDceResponse("Command to change to:" + componentName+ " was successfull")
         }
-        else if (componentLoader.status == Component.Loading)
+        else if (componentLoader.status === Component.Loading)
         {
             console.log("loading page from network")
             finishLoadingComponent(componentName)
@@ -201,7 +201,7 @@ Item {
 
     function finishLoadingComponent (componentName)
     {
-        if(componentLoader.status != Component.Ready)
+        if(componentLoader.status !== Component.Ready)
         {
             console.log("finishing network load")
             componentLoader.source = "components/"+componentName
@@ -250,6 +250,11 @@ Item {
             width: mini_screen_saver.width
           //  source: "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
         }
+        Rectangle{
+            anchors.fill: parent
+            color:"black"
+            opacity: pageLoader .activeFocus ? .65 : .25
+        }
     }
     MediaManager{
         id:dceplayer
@@ -285,12 +290,13 @@ Item {
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
             pageLoader.item.focus = true
+
         }
         onActiveFocusChanged: {
             if(activeFocus)
-                console.log("Pageloader gained active focus")
+            {  console.log("Pageloader gained active focus");  pageLoader.item.focus = true  }
             else
-                console.log("Page loader lost active focus")
+            { console.log("Page loader lost active focus");  pageLoader.item.focus = true}
         }
         Keys.onTabPressed:{
             console.log("Loaded Item triggering focus swap")
