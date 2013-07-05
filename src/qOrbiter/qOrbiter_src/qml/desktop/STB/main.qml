@@ -289,17 +289,18 @@ Item {
         focus:true
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
-            pageLoader.item.focus = true
+            pageLoader.forceActiveFocus()
+
 
         }
         onActiveFocusChanged: {
             if(activeFocus)
             {  console.log("Pageloader gained active focus");  pageLoader.item.focus = true  }
             else
-            { console.log("Page loader lost active focus");  pageLoader.item.focus = true}
+            { console.log("Page loader lost active focus");  pageLoader.item.focus = false}
         }
         Keys.onTabPressed:{
-            console.log("Loaded Item triggering focus swap")
+            console.log("Tab Focus Swap.")
             qmlroot.swapFocus()
         }
         Keys.onPressed: {
@@ -309,7 +310,6 @@ Item {
                 console.log("Show Header")
             }
         }
-
     }
 
 

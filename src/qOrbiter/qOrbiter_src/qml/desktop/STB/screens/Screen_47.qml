@@ -6,6 +6,7 @@ Item {
     width: scaleX(100)
     state: "browsing"
     property int depth:0
+        Component.onCompleted: screen_forty_seven_of_nine.forceActiveFocus()
     onActiveFocusChanged: {
         console.log(mediaList.parent.objectName+ " recieved focus, passing to mediaList grid")
         mediaList.forceActiveFocus()
@@ -21,12 +22,17 @@ Item {
         }
     }
 
+    MediaListGridDelagate {
+        id: contactDelegate
+       visible: false
+    }
+
     GridView{
         id:mediaList
         height: parent.height
         width: parent.width
-        cellHeight: scaleY(24)
-        cellWidth: scaleX(18)
+        cellHeight: contactDelegate.height
+        cellWidth: contactDelegate.width
         contentHeight: scaleY(24)
         contentWidth: scaleX(18)
         model: dataModel
@@ -70,28 +76,7 @@ Item {
             border.color: "white"
             border.width: 2
         }
-        delegate: Rectangle{
-            height:scaleY(22)
-            width: scaleX(15)
-            color:"black"
-            StyledText{
-                text:name
-                color:"white"
-            }
-            Image
-            {
-                id: imagerect;
-                source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=img&val="+path : ""
-                anchors.centerIn: parent;
-                fillMode: Image.PreserveAspectFit
-                smooth: true
-                asynchronous: true
-                anchors.fill: parent
-                sourceSize.width:parent.width
-                sourceSize.height:parent.height
-
-            }
-        }
+        delegate:MediaListGridDelagate{}
 
     }
 

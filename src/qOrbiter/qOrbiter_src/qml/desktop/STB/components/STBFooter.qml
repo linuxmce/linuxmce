@@ -7,11 +7,16 @@ Item{
     width: qmlroot.width
     height:scaleY(12)
     anchors.top: parent.bottom
-    onFocusChanged:{ if(activeFocus){
+    onActiveFocusChanged:{ if(activeFocus){
             scenarioList.forceActiveFocus()
             ftr.state="showing"
             console.log("showing state")
             scenarioList.currentIndex = -1
+        }
+        else{
+            currentItem = -1
+            ftr.state = "hidden"
+            pageLoader.item.focus = true
         }
     }
     Component.onCompleted: ftr.state = "hidden"
@@ -84,7 +89,12 @@ Item{
             Keys.onPressed: {
                 console.log(event.key)
                 if(event.key === 16777220 )
+                {
                     pressed()
+                    currentItem = -1
+                   swapFocus()
+                    ftr.state = "hidden"
+                }
             }
             signal pressed()
 
@@ -173,12 +183,7 @@ Item{
     }
 
     Keys.onTabPressed:swapFocus()
-    onActiveFocusChanged: {
-        if(activeFocus)
-            console.log("Footer gained focus")
-        else
-            console.log("Footer lost focus")
-    }
+
 
     states: [
         State {
