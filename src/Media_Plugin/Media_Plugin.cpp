@@ -2018,21 +2018,34 @@ dequeMediaFile->size() ? (*dequeMediaFile)[0]->m_sPath.c_str() : "NO",
 	// See if we can queue it 
 
     if( !bResume && pMediaStream_AllEAsPlaying && !pMediaStream_AllEAsPlaying->m_bResume &&
-		pMediaStream_AllEAsPlaying->m_pMediaHandlerInfo->m_pMediaHandlerBase == pMediaHandlerInfo->m_pMediaHandlerBase &&
-		(pMediaStream_AllEAsPlaying->m_iPK_MediaType == pMediaHandlerInfo->m_PK_MediaType ||
-                 pMediaStream_AllEAsPlaying->m_iPK_MediaType == IsGameMediaType(pMediaHandlerInfo->m_PK_MediaType)) &&
-		!pMediaStream_AllEAsPlaying->m_bContainsTitlesOrSections &&
-		!bContainsTitlesOrSections &&
-		pMediaStream_AllEAsPlaying->m_dequeMediaFile.size() &&
-		pMediaStream_AllEAsPlaying->m_dwPK_Disc==0 && pMediaStream_AllEAsPlaying->m_discid==0 /* don't resume disks */ )
-    {
+	pMediaStream_AllEAsPlaying->m_pMediaHandlerInfo->m_pMediaHandlerBase == pMediaHandlerInfo->m_pMediaHandlerBase &&
+	pMediaStream_AllEAsPlaying->m_iPK_MediaType == pMediaHandlerInfo->m_PK_MediaType &&
+	!pMediaStream_AllEAsPlaying->m_bContainsTitlesOrSections &&
+	!bContainsTitlesOrSections &&
+	pMediaStream_AllEAsPlaying->m_dequeMediaFile.size() &&
+	pMediaStream_AllEAsPlaying->m_dwPK_Disc==0 && pMediaStream_AllEAsPlaying->m_discid==0 /* don't resume disks */ )
+      {
         pMediaStream = pMediaStream_AllEAsPlaying;
         pMediaStream->m_dequeMediaFile += *dequeMediaFile;
 	if (pMediaStream->m_dequeMediaFile.size() == dequeMediaFile->size() || !bQueue)
-		// If deque sizes are the same(we just started playing) or we don't queue(play newly added file), set new starting position
-		pMediaStream->m_iDequeMediaFile_Pos = pMediaStream->m_dequeMediaFile.size()-dequeMediaFile->size();
+	  // If deque sizes are the same(we just started playing) or we don't queue(play newly added file), set new starting position
+	  pMediaStream->m_iDequeMediaFile_Pos = pMediaStream->m_dequeMediaFile.size()-dequeMediaFile->size();
 	pMediaStream->m_iPK_MediaType = pMediaHandlerInfo->m_PK_MediaType;
-    }
+      }
+    else if (!bResume && pMediaStream_AllEAsPlaying && !pMediaStream_AllEAsPlaying->m_bResume &&
+	     pMediaStream_AllEAsPlaying->m_pMediaHandlerInfo->m_pMediaHandlerBase == pMediaHandlerInfo->m_pMediaHandlerBase && 
+	     IsGameMediaType(pMediaHandlerInfo->m_PK_MediaType) &&
+	     pMediaStream_AllEAsPlaying->m_dequeMediaFile.size())
+      {
+	// We want the same behavior, as above, IF the game being added is a game media type
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_PlugIn::StartMedia() - Special StartMedia case for Adding Games to queue.");
+	pMediaStream = pMediaStream_AllEAsPlaying;
+	pMediaStream->m_dequeMediaFile += *dequeMediaFile;
+	if (pMediaStream->m_dequeMediaFile.size() == dequeMediaFile->size() || !bQueue)
+	  // If deque sizes are the same(we just started playing) or we don't queue(play newly added file), set new starting position
+	  pMediaStream->m_iDequeMediaFile_Pos = pMediaStream->m_dequeMediaFile.size()-dequeMediaFile->size();
+	pMediaStream->m_iPK_MediaType = pMediaHandlerInfo->m_PK_MediaType;
+      }
     else
     {
 		if ( (pMediaStream = pMediaHandlerInfo->m_pMediaHandlerBase->CreateMediaStream(pMediaHandlerInfo,iPK_MediaProvider,vectEntertainArea,pMediaDevice,(pOH_Orbiter ? pOH_Orbiter->PK_Users_get() : 0),dequeMediaFile,++m_iStreamID)) == NULL )

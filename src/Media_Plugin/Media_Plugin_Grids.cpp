@@ -119,6 +119,14 @@ class DataGridTable *Media_Plugin::MediaBrowser( string GridID, string Parms, vo
 	if( sPK_Sources.size()==0 )
 		sPK_Sources = TOSTRING(MEDIASOURCE_File_CONST) "," TOSTRING(MEDIASOURCE_Jukebox_CONST) "," TOSTRING(MEDIASOURCE_Local_Disc_CONST);
 
+	// FIXME: Find a better way to select the game grid, OTHER than hijacking the MediaBrowser grid!
+	if (IsGameMediaType(PK_MediaType) && PK_AttributeType_Sort == 0 && sPK_Attribute.empty())   // We are being called from the file list.
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::MediaBrowser - Media Type is a Game System, setting Games Media Type and System Sort Value.");
+	    PK_MediaType = MEDIATYPE_lmce_Game_CONST;
+	    PK_AttributeType_Sort = ATTRIBUTETYPE_System_CONST;
+	  }
+
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "MediaBrowser parms: mediatype %d, submediatype %s, "
 		"fileformat %s, attribute_genres %s, sources %s, users_private %s, attributetype_sort %d, "
 		"users %d, last_viewed %d, pk_attribute %s", 
@@ -245,6 +253,7 @@ bool Media_Plugin::IsGameMediaType(int iPK_MediaType)
     (iPK_MediaType == MEDIATYPE_lmce_Game_c64_CONST) ||
     (iPK_MediaType == MEDIATYPE_lmce_Game_Atari800_CONST);
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"bMediaType is %d",bMediaType);
+  return bMediaType;
 }
 
 string Media_Plugin::GameMediaTypes()
