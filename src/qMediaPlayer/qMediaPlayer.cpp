@@ -19,9 +19,6 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
-#include <mediamanager.h>
-#include <QDebug>
-#include <QPixmap>
 
 #include <iostream>
 using namespace std;
@@ -33,7 +30,7 @@ using namespace DCE;
 #include <QStringList>
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
-qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress, MediaManager *manager, bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
+qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: qMediaPlayer_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
@@ -110,7 +107,7 @@ bool qMediaPlayer::Register()
     cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You
     can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
 //<-dceag-createinst-b->
-qMediaPlayer_Command *Create_qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter, MediaManager *manager)
+qMediaPlayer_Command *Create_qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 {
 	return new qMediaPlayer(pPrimaryDeviceCommand, pData, pEvent, pRouter);
 }
@@ -643,7 +640,7 @@ void qMediaPlayer::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Messag
 //<-dceag-c97-b->
 
 	/** @brief COMMAND: #97 - Mute */
-	/** VDR mute */
+	/** mute */
 
 void qMediaPlayer::CMD_Mute(string &sCMD_Result,Message *pMessage)
 //<-dceag-c97-e->
@@ -1393,118 +1390,118 @@ void qMediaPlayer::setCommandResponse(QString r)
 
 //<-dceag-c102-b->
 
-    /** @brief COMMAND: #102 - Record */
-    /** Record the current game. Toggle on off */
+	/** @brief COMMAND: #102 - Record */
+	/** Record the current game. Toggle on off */
 
 void qMediaPlayer::CMD_Record(string &sCMD_Result,Message *pMessage)
 //<-dceag-c102-e->
 {}
 //<-dceag-c882-b->
 
-    /** @brief COMMAND: #882 - Abort Task */
-    /** Abort a pending task */
-        /** @param #248 Parameter ID */
-            /** The ID of the task to abort */
+	/** @brief COMMAND: #882 - Abort Task */
+	/** Abort a pending task */
+		/** @param #248 Parameter ID */
+			/** The ID of the task to abort */
 
 void qMediaPlayer::CMD_Abort_Task(int iParameter_ID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c882-e->
 {}
 //<-dceag-c942-b->
 
-    /** @brief COMMAND: #942 - Get Ripping Status */
-    /** Tell Game to Start 1 Player */
-        /** @param #199 Status */
-            /** Ripping status */
+	/** @brief COMMAND: #942 - Get Ripping Status */
+	/** Tell Game to Start 1 Player */
+		/** @param #199 Status */
+			/** Ripping status */
 
 void qMediaPlayer::CMD_Get_Ripping_Status(string *sStatus,string &sCMD_Result,Message *pMessage)
 //<-dceag-c942-e->
 {}
 //<-dceag-c943-b->
 
-    /** @brief COMMAND: #943 - Game 1P Start */
-    /** 1P start */
+	/** @brief COMMAND: #943 - Game 1P Start */
+	/** 1P start */
 
 void qMediaPlayer::CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c943-e->
 {}
 //<-dceag-c944-b->
 
-    /** @brief COMMAND: #944 - Game 2P Start */
-    /** 2P Start */
+	/** @brief COMMAND: #944 - Game 2P Start */
+	/** 2P Start */
 
 void qMediaPlayer::CMD_Game_2P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c944-e->
 {}
 //<-dceag-c945-b->
 
-    /** @brief COMMAND: #945 - Game 3P Start */
-    /** 3P Start */
+	/** @brief COMMAND: #945 - Game 3P Start */
+	/** 3P Start */
 
 void qMediaPlayer::CMD_Game_3P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c945-e->
 {}
 //<-dceag-c946-b->
 
-    /** @brief COMMAND: #946 - Game 4P Start */
-    /** 4P Start */
+	/** @brief COMMAND: #946 - Game 4P Start */
+	/** 4P Start */
 
 void qMediaPlayer::CMD_Game_4P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c946-e->
 {}
 //<-dceag-c947-b->
 
-    /** @brief COMMAND: #947 - Game Insert Coin */
-    /** Insert Coin */
+	/** @brief COMMAND: #947 - Game Insert Coin */
+	/** Insert Coin */
 
 void qMediaPlayer::CMD_Game_Insert_Coin(string &sCMD_Result,Message *pMessage)
 //<-dceag-c947-e->
 {}
 //<-dceag-c948-b->
 
-    /** @brief COMMAND: #948 - Game Service */
-    /** Service Mode */
+	/** @brief COMMAND: #948 - Game Service */
+	/** Service Mode */
 
 void qMediaPlayer::CMD_Game_Service(string &sCMD_Result,Message *pMessage)
 //<-dceag-c948-e->
 {}
 //<-dceag-c949-b->
 
-    /** @brief COMMAND: #949 - Game Start */
-    /** Game Start */
+	/** @brief COMMAND: #949 - Game Start */
+	/** Game Start */
 
 void qMediaPlayer::CMD_Game_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c949-e->
 {}
 //<-dceag-c950-b->
 
-    /** @brief COMMAND: #950 - Game Select */
-    /** Game Select */
+	/** @brief COMMAND: #950 - Game Select */
+	/** Game Select */
 
 void qMediaPlayer::CMD_Game_Select(string &sCMD_Result,Message *pMessage)
 //<-dceag-c950-e->
 {}
 //<-dceag-c951-b->
 
-    /** @brief COMMAND: #951 - Game Option */
-    /** Game Option */
+	/** @brief COMMAND: #951 - Game Option */
+	/** Game Option */
 
 void qMediaPlayer::CMD_Game_Option(string &sCMD_Result,Message *pMessage)
 //<-dceag-c951-e->
 {}
 //<-dceag-c952-b->
 
-    /** @brief COMMAND: #952 - Game Reset */
-    /** Game Reset */
+	/** @brief COMMAND: #952 - Game Reset */
+	/** Game Reset */
 
 void qMediaPlayer::CMD_Game_Reset(string &sCMD_Result,Message *pMessage)
 //<-dceag-c952-e->
 {}
 //<-dceag-c982-b->
 
-    /** @brief COMMAND: #982 - Set Game Options */
-    /** Set Options for the running Game System driver. */
-        /** @param #5 Value To Assign */
-            /** Dependent on driver, but usually a single line in the format of key,value */
+	/** @brief COMMAND: #982 - Set Game Options */
+	/** Set Options for the running Game System driver. */
+		/** @param #5 Value To Assign */
+			/** Dependent on driver, but usually a single line in the format of key,value */
 		/** @param #219 Path */
 			/** The Option to Set */
 
@@ -1513,12 +1510,12 @@ void qMediaPlayer::CMD_Set_Game_Options(string sValue_To_Assign,string sPath,str
 {}
 //<-dceag-c983-b->
 
-    /** @brief COMMAND: #983 - Get Game Options */
-    /** Get Options for the currently running driver. */
-        /** @param #5 Value To Assign */
-            /** The Returned value. */
-        /** @param #219 Path */
-            /** The Parameter to return, usually left side of comma in Set Game Options. */
+	/** @brief COMMAND: #983 - Get Game Options */
+	/** Get Options for the currently running driver. */
+		/** @param #5 Value To Assign */
+			/** The Returned value. */
+		/** @param #219 Path */
+			/** The Parameter to return, usually left side of comma in Set Game Options. */
 
 void qMediaPlayer::CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c983-e->
@@ -1538,12 +1535,39 @@ void qMediaPlayer::mediaEnded()
 	/** @brief COMMAND: #616 - Select A */
 	/** Select P1 keypad on supported game systems. */
 
-void qMediaPlayer::CMD_Select_A(string &sCMD_Result,Message *pMessage){}
+void qMediaPlayer::CMD_Select_A(string &sCMD_Result,Message *pMessage)
 //<-dceag-c616-e->
 //<-dceag-c617-b->
 
 	/** @brief COMMAND: #617 - Select B */
 	/** Select P2 keypad on supported game systems. */
 
-void qMediaPlayer::CMD_Select_B(string &sCMD_Result,Message *pMessage){}
+void qMediaPlayer::CMD_Select_B(string &sCMD_Result,Message *pMessage)
 //<-dceag-c617-e->
+//<-dceag-c89-b->
+
+	/** @brief COMMAND: #89 - Vol Up */
+	/** volume up */
+		/** @param #72 Repeat Command */
+			/** If specified, repeat the volume up this many times */
+
+void qMediaPlayer::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMessage)
+//<-dceag-c89-e->
+//<-dceag-c90-b->
+
+	/** @brief COMMAND: #90 - Vol Down */
+	/** volume down */
+		/** @param #72 Repeat Command */
+			/** If specified, repeat the volume down this many times. */
+
+void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMessage)
+//<-dceag-c90-e->
+//<-dceag-c184-b->
+
+	/** @brief COMMAND: #184 - Set Level */
+	/** Set discreet volume level */
+		/** @param #76 Level */
+			/** The level to set, as a value between 0 (off) and 100 (full).  It can be preceeded with a - or + indicating a relative value.  +20 means up 20%. */
+
+void qMediaPlayer::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMessage)
+//<-dceag-c184-e->

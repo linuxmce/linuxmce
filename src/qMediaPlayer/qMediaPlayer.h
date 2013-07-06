@@ -20,8 +20,6 @@
 //	DCE Implemenation for #2205 qMediaPlayer
 
 #include "Gen_Devices/qMediaPlayerBase.h"
-
-
 //<-dceag-d-e->
 #include <QTime>
 #include <QString>
@@ -60,21 +58,18 @@ public:
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
-        qMediaPlayer(int DeviceID, string ServerAddress, MediaManager *manager,bool bConnectEventHandler=true,bool bLocalMode=false, class Router *pRouter=NULL);
+		qMediaPlayer(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
 		virtual ~qMediaPlayer();
 		virtual bool GetConfig();
 		virtual bool Register();
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
-
-        virtual void OnDisconnect();
-
 //<-dceag-const-e->
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-        qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
+		qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
 //<-dceag-const2-e->
 
 //<-dceag-h-b->
@@ -85,7 +80,14 @@ public:
 
 	/*
 			*****DATA***** accessors inherited from base class
+	bool DATA_Get_No_Effects();
+	void DATA_Set_No_Effects(bool Value,bool bUpdateDatabase=false);
+	string DATA_Get_TCP_Address();
+	void DATA_Set_TCP_Address(string Value,bool bUpdateDatabase=false);
+	string DATA_Get_Mount_Point();
+	void DATA_Set_Mount_Point(string Value,bool bUpdateDatabase=false);
 	int DATA_Get_Port();
+	void DATA_Set_Port(int Value,bool bUpdateDatabase=false);
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Playback_Info_Changed(string sMediaDescription,string sSectionDescription,string sSynposisDescription);
@@ -288,6 +290,24 @@ public:
 	virtual void CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #89 - Vol Up */
+	/** volume up */
+		/** @param #72 Repeat Command */
+			/** If specified, repeat the volume up this many times */
+
+	virtual void CMD_Vol_Up(int iRepeat_Command) { string sCMD_Result; CMD_Vol_Up(iRepeat_Command,sCMD_Result,NULL);};
+	virtual void CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #90 - Vol Down */
+	/** volume down */
+		/** @param #72 Repeat Command */
+			/** If specified, repeat the volume down this many times. */
+
+	virtual void CMD_Vol_Down(int iRepeat_Command) { string sCMD_Result; CMD_Vol_Down(iRepeat_Command,sCMD_Result,NULL);};
+	virtual void CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #92 - Pause */
 	/** Pause the media */
 		/** @param #41 StreamID */
@@ -309,7 +329,7 @@ public:
 
 
 	/** @brief COMMAND: #97 - Mute */
-	/** VDR mute */
+	/** mute */
 
 	virtual void CMD_Mute() { string sCMD_Result; CMD_Mute(sCMD_Result,NULL);};
 	virtual void CMD_Mute(string &sCMD_Result,Message *pMessage);
@@ -378,6 +398,15 @@ public:
 
 	virtual void CMD_Angle(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Angle(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
 	virtual void CMD_Angle(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #184 - Set Level */
+	/** Set discreet volume level */
+		/** @param #76 Level */
+			/** The level to set, as a value between 0 (off) and 100 (full).  It can be preceeded with a - or + indicating a relative value.  +20 means up 20%. */
+
+	virtual void CMD_Set_Level(string sLevel) { string sCMD_Result; CMD_Set_Level(sLevel.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #190 - Enter/Go */
