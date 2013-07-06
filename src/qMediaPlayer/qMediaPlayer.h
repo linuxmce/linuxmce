@@ -20,10 +20,13 @@
 //	DCE Implemenation for #2205 qMediaPlayer
 
 #include "Gen_Devices/qMediaPlayerBase.h"
+
+
 //<-dceag-d-e->
 #include <QTime>
 #include <QString>
 
+class MediaManager;
 
 //<-dceag-decl-b->
 namespace DCE
@@ -57,18 +60,21 @@ public:
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
-		qMediaPlayer(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
+        qMediaPlayer(int DeviceID, string ServerAddress, MediaManager *manager,bool bConnectEventHandler=true,bool bLocalMode=false, class Router *pRouter=NULL);
 		virtual ~qMediaPlayer();
 		virtual bool GetConfig();
 		virtual bool Register();
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
+
+        virtual void OnDisconnect();
+
 //<-dceag-const-e->
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-		qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
+        qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
 //<-dceag-const2-e->
 
 //<-dceag-h-b->
@@ -960,6 +966,10 @@ public:
 
         void setMediaResponse(QString m) {mediaResponse = QTime::currentTime().toString()+"::QMediaPlayer:: "+ m; emit mediaResponseChanged(mediaResponse);}
         QString getMediaResponse() {return mediaResponse;}
+
+
+    private:
+        MediaManager * mp_manager;
 
     };
 

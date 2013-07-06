@@ -42,8 +42,8 @@ using namespace DCE;
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
-qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
-	: qOrbiter_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter, QObject*parent)
+    : qOrbiter_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
     qDebug() << "Constructing";
@@ -3511,7 +3511,7 @@ void DCE::qOrbiter::TuneToChannel(QString channel, QString chanid) //tunes to ch
 
 void DCE::qOrbiter::mute()
 {
-    CMD_Mute muteAudio(m_dwPK_Device, iMediaPluginID);
+    DCE::CMD_Mute  muteAudio(m_dwPK_Device, iMediaPluginID);
     SendCommand(muteAudio);
 }
 
@@ -4361,12 +4361,12 @@ void DCE::qOrbiter::adjustVolume(int vol)
     {
         if (vol > 0)
         {
-            CMD_Vol_Up raiseVol(m_dwPK_Device, iMediaPluginID, vol);
+            DCE::CMD_Vol_Up raiseVol(m_dwPK_Device, iMediaPluginID, vol);
             SendCommand(raiseVol);
         }
         else
         {
-            CMD_Vol_Down lowerVolume(m_dwPK_Device, iMediaPluginID, vol);
+           DCE::CMD_Vol_Down lowerVolume(m_dwPK_Device, iMediaPluginID, vol);
             SendCommand(lowerVolume);
 
         }
@@ -5369,23 +5369,12 @@ void qOrbiter::checkRouterConnection()
 }
 
 
-//<-dceag-dest-b->
-qOrbiter::~qOrbiter()
-//<-dceag-dest-e->
-//<-dceag-getconfig-b->
-bool qOrbiter::GetConfig()
-{
-	if( !qOrbiter_Command::GetConfig() )
-		return false;
-//<-dceag-getconfig-e->
-//<-dceag-c89-b->
-
 	/** @brief COMMAND: #89 - Vol Up */
 	/** volume up */
 		/** @param #72 Repeat Command */
 			/** If specified, repeat the volume up this many times */
 
-void qOrbiter::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMessage)
+void qOrbiter::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMessage){}
 //<-dceag-c89-e->
 //<-dceag-c90-b->
 
@@ -5394,12 +5383,12 @@ void qOrbiter::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMess
 		/** @param #72 Repeat Command */
 			/** If specified, repeat the volume down this many times. */
 
-void qOrbiter::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMessage)
+void qOrbiter::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMessage){}
 //<-dceag-c90-e->
 //<-dceag-c97-b->
 
 	/** @brief COMMAND: #97 - Mute */
 	/** mute */
 
-void qOrbiter::CMD_Mute(string &sCMD_Result,Message *pMessage)
+void qOrbiter::CMD_Mute(string &sCMD_Result,Message *pMessage){}
 //<-dceag-c97-e->

@@ -19,6 +19,9 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
+#include <mediamanager.h>
+#include <QDebug>
+#include <QPixmap>
 
 #include <iostream>
 using namespace std;
@@ -30,12 +33,25 @@ using namespace DCE;
 #include <QStringList>
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
-qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
+qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress, MediaManager *manager, bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: qMediaPlayer_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
     setCommandResponse("Created media player as standalone with device number " + QString::number(DeviceID));
-    GetConfig();
+    qWarning() << "Standalone Constructor";
+     mp_manager = manager;
+
+    if(GetConfig() && Connect(DEVICETEMPLATE_qMediaPlayer_CONST)){
+        setCommandResponse("qMediaPlayer::Device "+QString::number(m_dwPK_Device)+" Connected.");
+        connected = true;
+
+    }else
+    { connected = false;
+        setCommandResponse("qMediaPlayer::Connection failed for "+QString::fromStdString(this->m_sIPAddress)+" and device number"+QString::number(m_dwPK_Device));
+        setConnectionStatus(false);
+    }
+    mp_manager->setConnectionStatus(connected);
+
 }
 
 
@@ -94,7 +110,7 @@ bool qMediaPlayer::Register()
     cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You
     can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
 //<-dceag-createinst-b->
-qMediaPlayer_Command *Create_qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+qMediaPlayer_Command *Create_qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter, MediaManager *manager)
 {
 	return new qMediaPlayer(pPrimaryDeviceCommand, pData, pEvent, pRouter);
 }
@@ -127,17 +143,15 @@ void qMediaPlayer::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
     sCMD_Result = "UNKNOWN COMMAND";
 }
 
+void qMediaPlayer::OnDisconnect()
+{
+    connected= false;
+    mp_manager->setConnectionStatus(connected);
+}
+
 void qMediaPlayer::run()
 {
-    if(GetConfig() && Connect(DEVICETEMPLATE_qMediaPlayer_CONST)){
-        setCommandResponse("Device "+QString::number(m_dwPK_Device)+" Connected.");
-        setConnectionStatus(true);
 
-    }else
-    {
-        setCommandResponse("Connection failed for"+QString::fromStdString(this->m_sIPAddress)+" and device number"+QString::number(m_dwPK_Device));
-        setConnectionStatus(false);
-    }
 }
 
 //<-dceag-sample-b->
@@ -285,7 +299,7 @@ void qMediaPlayer::CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int 
 void qMediaPlayer::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *pData,int iData_Size,string sDisable_Aspect_Lock,string &sCMD_Result,Message *pMessage)
 //<-dceag-c32-e->
 {
-    cout << "Need to implement command #32 - Update Object Image" << endl;
+    cout << "qMediaPlayer::Need to implement command #32 - Update Object Image" << endl;
     cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
     cout << "Parm #14 - Type=" << sType << endl;
     cout << "Parm #19 - Data  (data value)" << endl;
@@ -308,6 +322,7 @@ void qMediaPlayer::CMD_Update_Object_Image(string sPK_DesignObj,string sType,cha
 void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string &sCMD_Result,Message *pMessage)
 //<-dceag-c37-e->
 {
+    qWarning() << "qMediaPlayer::Got Play Command";
     setCommandResponse("Recieved play command!");
     setMediaType(iPK_MediaType);
     setStreamID(iStreamID);
@@ -399,7 +414,7 @@ void qMediaPlayer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pM
 //<-dceag-c39-e->
 {
     if(!m_bPaused){
-    emit pausePlayback();   
+    emit pausePlayback();
       setCommandResponse("Need to implement command #39 - Pause Media");
     }
     else
@@ -461,7 +476,8 @@ void qMediaPlayer::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iS
     setCommandResponse(" Jump to Position in Stream");
    // cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
    // cout << "Parm #41 - StreamID=" << iStreamID << endl;
-    emit jumpToStreamPosition(QString::fromStdString(sValue_To_Assign).toInt());
+   // emit jumpToStreamPosition(QString::fromStdString(sValue_To_Assign).toInt());
+    mp_manager->mediaObject->seek(QString::fromStdString(sValue_To_Assign).toInt());
 }
 
 //<-dceag-c63-b->
@@ -565,8 +581,9 @@ void qMediaPlayer::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID
     cout << "Parm #60 - Width=" << iWidth << endl;
     cout << "Parm #61 - Height=" << iHeight << endl;
 
-    emit getScreenShot();
-
+   QImage t;
+   t.copy(0, 0, mp_manager->videoSurface->width(), mp_manager->videoSurface->height());
+   qWarning() << "ScreenShot Size==>" << t.size();
 }
 
 //<-dceag-c87-b->
@@ -1376,118 +1393,118 @@ void qMediaPlayer::setCommandResponse(QString r)
 
 //<-dceag-c102-b->
 
-	/** @brief COMMAND: #102 - Record */
-	/** Record the current game. Toggle on off */
+    /** @brief COMMAND: #102 - Record */
+    /** Record the current game. Toggle on off */
 
 void qMediaPlayer::CMD_Record(string &sCMD_Result,Message *pMessage)
 //<-dceag-c102-e->
 {}
 //<-dceag-c882-b->
 
-	/** @brief COMMAND: #882 - Abort Task */
-	/** Abort a pending task */
-		/** @param #248 Parameter ID */
-			/** The ID of the task to abort */
+    /** @brief COMMAND: #882 - Abort Task */
+    /** Abort a pending task */
+        /** @param #248 Parameter ID */
+            /** The ID of the task to abort */
 
 void qMediaPlayer::CMD_Abort_Task(int iParameter_ID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c882-e->
 {}
 //<-dceag-c942-b->
 
-	/** @brief COMMAND: #942 - Get Ripping Status */
-	/** Tell Game to Start 1 Player */
-		/** @param #199 Status */
-			/** Ripping status */
+    /** @brief COMMAND: #942 - Get Ripping Status */
+    /** Tell Game to Start 1 Player */
+        /** @param #199 Status */
+            /** Ripping status */
 
 void qMediaPlayer::CMD_Get_Ripping_Status(string *sStatus,string &sCMD_Result,Message *pMessage)
 //<-dceag-c942-e->
 {}
 //<-dceag-c943-b->
 
-	/** @brief COMMAND: #943 - Game 1P Start */
-	/** 1P start */
+    /** @brief COMMAND: #943 - Game 1P Start */
+    /** 1P start */
 
 void qMediaPlayer::CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c943-e->
 {}
 //<-dceag-c944-b->
 
-	/** @brief COMMAND: #944 - Game 2P Start */
-	/** 2P Start */
+    /** @brief COMMAND: #944 - Game 2P Start */
+    /** 2P Start */
 
 void qMediaPlayer::CMD_Game_2P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c944-e->
 {}
 //<-dceag-c945-b->
 
-	/** @brief COMMAND: #945 - Game 3P Start */
-	/** 3P Start */
+    /** @brief COMMAND: #945 - Game 3P Start */
+    /** 3P Start */
 
 void qMediaPlayer::CMD_Game_3P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c945-e->
 {}
 //<-dceag-c946-b->
 
-	/** @brief COMMAND: #946 - Game 4P Start */
-	/** 4P Start */
+    /** @brief COMMAND: #946 - Game 4P Start */
+    /** 4P Start */
 
 void qMediaPlayer::CMD_Game_4P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c946-e->
 {}
 //<-dceag-c947-b->
 
-	/** @brief COMMAND: #947 - Game Insert Coin */
-	/** Insert Coin */
+    /** @brief COMMAND: #947 - Game Insert Coin */
+    /** Insert Coin */
 
 void qMediaPlayer::CMD_Game_Insert_Coin(string &sCMD_Result,Message *pMessage)
 //<-dceag-c947-e->
 {}
 //<-dceag-c948-b->
 
-	/** @brief COMMAND: #948 - Game Service */
-	/** Service Mode */
+    /** @brief COMMAND: #948 - Game Service */
+    /** Service Mode */
 
 void qMediaPlayer::CMD_Game_Service(string &sCMD_Result,Message *pMessage)
 //<-dceag-c948-e->
 {}
 //<-dceag-c949-b->
 
-	/** @brief COMMAND: #949 - Game Start */
-	/** Game Start */
+    /** @brief COMMAND: #949 - Game Start */
+    /** Game Start */
 
 void qMediaPlayer::CMD_Game_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c949-e->
 {}
 //<-dceag-c950-b->
 
-	/** @brief COMMAND: #950 - Game Select */
-	/** Game Select */
+    /** @brief COMMAND: #950 - Game Select */
+    /** Game Select */
 
 void qMediaPlayer::CMD_Game_Select(string &sCMD_Result,Message *pMessage)
 //<-dceag-c950-e->
 {}
 //<-dceag-c951-b->
 
-	/** @brief COMMAND: #951 - Game Option */
-	/** Game Option */
+    /** @brief COMMAND: #951 - Game Option */
+    /** Game Option */
 
 void qMediaPlayer::CMD_Game_Option(string &sCMD_Result,Message *pMessage)
 //<-dceag-c951-e->
 {}
 //<-dceag-c952-b->
 
-	/** @brief COMMAND: #952 - Game Reset */
-	/** Game Reset */
+    /** @brief COMMAND: #952 - Game Reset */
+    /** Game Reset */
 
 void qMediaPlayer::CMD_Game_Reset(string &sCMD_Result,Message *pMessage)
 //<-dceag-c952-e->
 {}
 //<-dceag-c982-b->
 
-	/** @brief COMMAND: #982 - Set Game Options */
-	/** Set Options for the running Game System driver. */
-		/** @param #5 Value To Assign */
-			/** Dependent on driver, but usually a single line in the format of key,value */
+    /** @brief COMMAND: #982 - Set Game Options */
+    /** Set Options for the running Game System driver. */
+        /** @param #5 Value To Assign */
+            /** Dependent on driver, but usually a single line in the format of key,value */
 		/** @param #219 Path */
 			/** The Option to Set */
 
@@ -1496,12 +1513,12 @@ void qMediaPlayer::CMD_Set_Game_Options(string sValue_To_Assign,string sPath,str
 {}
 //<-dceag-c983-b->
 
-	/** @brief COMMAND: #983 - Get Game Options */
-	/** Get Options for the currently running driver. */
-		/** @param #5 Value To Assign */
-			/** The Returned value. */
-		/** @param #219 Path */
-			/** The Parameter to return, usually left side of comma in Set Game Options. */
+    /** @brief COMMAND: #983 - Get Game Options */
+    /** Get Options for the currently running driver. */
+        /** @param #5 Value To Assign */
+            /** The Returned value. */
+        /** @param #219 Path */
+            /** The Parameter to return, usually left side of comma in Set Game Options. */
 
 void qMediaPlayer::CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c983-e->
@@ -1510,8 +1527,10 @@ void qMediaPlayer::CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,st
 
 void qMediaPlayer::mediaEnded()
 {
-    DCE::CMD_Stop finished(this->m_dwPK_Device, this->m_dwPK_Device, i_StreamId, false );
-    SendCommand(finished);
+    qDebug("Stream Ended");
+   // DCE::CMD_Stop finished(this->m_dwPK_Device, this->m_dwPK_Device, i_StreamId, false );
+//    SendCommand(finished);
+    EVENT_Playback_Completed(currentMediaUrl.toStdString(), i_StreamId, false);
    // EVENT_Playback_Started(currentMediaUrl.toStdString(), i_StreamId, "Media", "none", "none");
 }
 //<-dceag-c616-b->
@@ -1519,12 +1538,12 @@ void qMediaPlayer::mediaEnded()
 	/** @brief COMMAND: #616 - Select A */
 	/** Select P1 keypad on supported game systems. */
 
-void qMediaPlayer::CMD_Select_A(string &sCMD_Result,Message *pMessage)
+void qMediaPlayer::CMD_Select_A(string &sCMD_Result,Message *pMessage){}
 //<-dceag-c616-e->
 //<-dceag-c617-b->
 
 	/** @brief COMMAND: #617 - Select B */
 	/** Select P2 keypad on supported game systems. */
 
-void qMediaPlayer::CMD_Select_B(string &sCMD_Result,Message *pMessage)
+void qMediaPlayer::CMD_Select_B(string &sCMD_Result,Message *pMessage){}
 //<-dceag-c617-e->

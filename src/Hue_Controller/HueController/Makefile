@@ -10,13 +10,13 @@
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DQT_SHARED
+DEFINES       = -DQT_WEBKIT -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DQT_SHARED
 CFLAGS        = -pipe -O2 -Wall -W -D_REENTRANT $(DEFINES)
 CXXFLAGS      = -pipe -O2 -Wall -W -D_REENTRANT $(DEFINES)
 INCPATH       = -I/usr/share/qt4/mkspecs/linux-g++ -I. -I/usr/include/qt4/QtCore -I/usr/include/qt4/QtNetwork -I/usr/include/qt4/QtGui -I/usr/include/qt4 -I/usr/include/qjson -I../.. -I../../DCE -I.
 LINK          = g++
 LFLAGS        = -Wl,-O1
-LIBS          = $(SUBLIBS)  -L/usr/lib -lqjson -lQtGui -lQtNetwork -lQtCore -lpthread 
+LIBS          = $(SUBLIBS)  -L/usr/lib/i386-linux-gnu -lqjson -lQtGui -lQtNetwork -lQtCore -lpthread 
 AR            = ar cqs
 RANLIB        = 
 QMAKE         = /usr/bin/qmake
@@ -112,16 +112,21 @@ OBJECTS       = Main.o \
 		moc_Hue_Controller.o \
 		moc_huecontrollerhardware.o \
 		moc_huebulb.o
-DIST          = /usr/share/qt4/mkspecs/common/g++.conf \
-		/usr/share/qt4/mkspecs/common/unix.conf \
+DIST          = /usr/share/qt4/mkspecs/common/unix.conf \
 		/usr/share/qt4/mkspecs/common/linux.conf \
+		/usr/share/qt4/mkspecs/common/gcc-base.conf \
+		/usr/share/qt4/mkspecs/common/gcc-base-unix.conf \
+		/usr/share/qt4/mkspecs/common/g++-base.conf \
+		/usr/share/qt4/mkspecs/common/g++-unix.conf \
 		/usr/share/qt4/mkspecs/qconfig.pri \
+		/usr/share/qt4/mkspecs/modules/qt_webkit_version.pri \
 		/usr/share/qt4/mkspecs/features/qt_functions.prf \
 		/usr/share/qt4/mkspecs/features/qt_config.prf \
 		/usr/share/qt4/mkspecs/features/exclusive_builds.prf \
 		/usr/share/qt4/mkspecs/features/default_pre.prf \
 		/usr/share/qt4/mkspecs/features/release.prf \
 		/usr/share/qt4/mkspecs/features/default_post.prf \
+		/usr/share/qt4/mkspecs/features/unix/gdb_dwarf_index.prf \
 		/usr/share/qt4/mkspecs/features/warn_on.prf \
 		/usr/share/qt4/mkspecs/features/qt.prf \
 		/usr/share/qt4/mkspecs/features/unix/thread.prf \
@@ -163,16 +168,21 @@ all: Makefile $(TARGET)
 $(TARGET):  $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
-Makefile: HueController.pro  /usr/share/qt4/mkspecs/linux-g++/qmake.conf /usr/share/qt4/mkspecs/common/g++.conf \
-		/usr/share/qt4/mkspecs/common/unix.conf \
+Makefile: HueController.pro  /usr/share/qt4/mkspecs/linux-g++/qmake.conf /usr/share/qt4/mkspecs/common/unix.conf \
 		/usr/share/qt4/mkspecs/common/linux.conf \
+		/usr/share/qt4/mkspecs/common/gcc-base.conf \
+		/usr/share/qt4/mkspecs/common/gcc-base-unix.conf \
+		/usr/share/qt4/mkspecs/common/g++-base.conf \
+		/usr/share/qt4/mkspecs/common/g++-unix.conf \
 		/usr/share/qt4/mkspecs/qconfig.pri \
+		/usr/share/qt4/mkspecs/modules/qt_webkit_version.pri \
 		/usr/share/qt4/mkspecs/features/qt_functions.prf \
 		/usr/share/qt4/mkspecs/features/qt_config.prf \
 		/usr/share/qt4/mkspecs/features/exclusive_builds.prf \
 		/usr/share/qt4/mkspecs/features/default_pre.prf \
 		/usr/share/qt4/mkspecs/features/release.prf \
 		/usr/share/qt4/mkspecs/features/default_post.prf \
+		/usr/share/qt4/mkspecs/features/unix/gdb_dwarf_index.prf \
 		/usr/share/qt4/mkspecs/features/warn_on.prf \
 		/usr/share/qt4/mkspecs/features/qt.prf \
 		/usr/share/qt4/mkspecs/features/unix/thread.prf \
@@ -182,20 +192,25 @@ Makefile: HueController.pro  /usr/share/qt4/mkspecs/linux-g++/qmake.conf /usr/sh
 		/usr/share/qt4/mkspecs/features/yacc.prf \
 		/usr/share/qt4/mkspecs/features/lex.prf \
 		/usr/share/qt4/mkspecs/features/include_source_dir.prf \
-		/usr/lib/libQtGui.prl \
-		/usr/lib/libQtNetwork.prl \
-		/usr/lib/libQtCore.prl
+		/usr/lib/i386-linux-gnu/libQtGui.prl \
+		/usr/lib/i386-linux-gnu/libQtNetwork.prl \
+		/usr/lib/i386-linux-gnu/libQtCore.prl
 	$(QMAKE) -unix -o Makefile HueController.pro
-/usr/share/qt4/mkspecs/common/g++.conf:
 /usr/share/qt4/mkspecs/common/unix.conf:
 /usr/share/qt4/mkspecs/common/linux.conf:
+/usr/share/qt4/mkspecs/common/gcc-base.conf:
+/usr/share/qt4/mkspecs/common/gcc-base-unix.conf:
+/usr/share/qt4/mkspecs/common/g++-base.conf:
+/usr/share/qt4/mkspecs/common/g++-unix.conf:
 /usr/share/qt4/mkspecs/qconfig.pri:
+/usr/share/qt4/mkspecs/modules/qt_webkit_version.pri:
 /usr/share/qt4/mkspecs/features/qt_functions.prf:
 /usr/share/qt4/mkspecs/features/qt_config.prf:
 /usr/share/qt4/mkspecs/features/exclusive_builds.prf:
 /usr/share/qt4/mkspecs/features/default_pre.prf:
 /usr/share/qt4/mkspecs/features/release.prf:
 /usr/share/qt4/mkspecs/features/default_post.prf:
+/usr/share/qt4/mkspecs/features/unix/gdb_dwarf_index.prf:
 /usr/share/qt4/mkspecs/features/warn_on.prf:
 /usr/share/qt4/mkspecs/features/qt.prf:
 /usr/share/qt4/mkspecs/features/unix/thread.prf:
@@ -205,9 +220,9 @@ Makefile: HueController.pro  /usr/share/qt4/mkspecs/linux-g++/qmake.conf /usr/sh
 /usr/share/qt4/mkspecs/features/yacc.prf:
 /usr/share/qt4/mkspecs/features/lex.prf:
 /usr/share/qt4/mkspecs/features/include_source_dir.prf:
-/usr/lib/libQtGui.prl:
-/usr/lib/libQtNetwork.prl:
-/usr/lib/libQtCore.prl:
+/usr/lib/i386-linux-gnu/libQtGui.prl:
+/usr/lib/i386-linux-gnu/libQtNetwork.prl:
+/usr/lib/i386-linux-gnu/libQtCore.prl:
 qmake:  FORCE
 	@$(QMAKE) -unix -o Makefile HueController.pro
 
@@ -227,6 +242,8 @@ distclean: clean
 	-$(DEL_FILE) $(TARGET) 
 	-$(DEL_FILE) Makefile
 
+
+check: first
 
 mocclean: compiler_moc_header_clean compiler_moc_source_clean
 
@@ -471,9 +488,19 @@ moc_huebulb.o: moc_huebulb.cpp
 
 ####### Install
 
-install:   FORCE
+install_target: first FORCE
+	@$(CHK_DIR_EXISTS) $(INSTALL_ROOT)/tmp/ || $(MKDIR) $(INSTALL_ROOT)/tmp/ 
+	-$(INSTALL_PROGRAM) "$(QMAKE_TARGET)" "$(INSTALL_ROOT)/tmp/$(QMAKE_TARGET)"
+	-$(STRIP) "$(INSTALL_ROOT)/tmp/$(QMAKE_TARGET)"
 
-uninstall:   FORCE
+uninstall_target:  FORCE
+	-$(DEL_FILE) "$(INSTALL_ROOT)/tmp/$(QMAKE_TARGET)"
+	-$(DEL_DIR) $(INSTALL_ROOT)/tmp/ 
+
+
+install:  install_target  FORCE
+
+uninstall: uninstall_target   FORCE
 
 FORCE:
 

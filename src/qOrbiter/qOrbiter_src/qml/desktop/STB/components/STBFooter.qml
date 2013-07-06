@@ -83,8 +83,8 @@ Item{
                 font.pixelSize: 32
             }
             Keys.onTabPressed: {swapFocus();ftr.state="hidden"}
-            Keys.onUpPressed:  submodel.decrementCurrentIndex()
-            Keys.onDownPressed: submodel.incrementCurrentIndex()
+            Keys.onDownPressed:  submodel.decrementCurrentIndex()
+            Keys.onUpPressed: submodel.incrementCurrentIndex()
             Keys.onEnterPressed: { pressed() }
             Keys.onPressed: {
                 console.log(event.key)
@@ -100,15 +100,17 @@ Item{
 
             ListView{
                 id:submodel
-                height:ftr.currentItem === index ?childrenRect.height : 0
+                height:ftr.currentItem === index ?scaleY(85) : 0
                 width: parent.width
                 focus: true
+                rotation: 180
                 orientation:ListView.Vertical
                 keyNavigationWraps: true
                 clip:true
                 anchors.bottom: parent.top
                 spacing:scaleY(1)
                 delegate: Item{
+                    rotation: 180
                     height:label.paintedHeight
                     width: parent.width
                     Rectangle{

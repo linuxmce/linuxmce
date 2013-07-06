@@ -133,10 +133,10 @@ Item {
 
 
     function scaleX(x){
-        return x/100*appW
+        return x/100*manager.appWidth
     }
     function scaleY(y){
-        return y/100*appH
+        return y/100*manager.appHeight
     }
 
 

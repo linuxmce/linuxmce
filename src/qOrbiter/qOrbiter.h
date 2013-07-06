@@ -234,12 +234,10 @@ public:
     //<-dceag-const-b->
 public:
 		// Constructors/Destructor
-		qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
+        qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject *parent = 0);
 		virtual ~qOrbiter();
-		virtual bool GetConfig();
-		virtual bool Register();
-		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
-		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
+        //virtual bool GetConfig();
+
 //<-dceag-const-e->
     //  virtual bool GetConfig();
     virtual bool Register();
