@@ -63,8 +63,8 @@ namespace DCE
         virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
         virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
         virtual void CreateChildren();
-        virtual void OnDisconnect();
-        virtual void OnReload();
+       
+       
         //<-dceag-const-e->
         void initBridgeConnection();
         bool findControllers();

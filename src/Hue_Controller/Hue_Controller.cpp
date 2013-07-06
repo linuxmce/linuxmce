@@ -332,18 +332,6 @@ void Hue_Controller::CreateChildren()
         qDebug() << hueBulbs.count()- m_pData->m_vectDeviceData_Impl_Children.size() << " device(s) not added to linuxmce.";
 }
 
-void Hue_Controller::OnDisconnect()
-{
-    pthread_yield();
-   exit(1);
-
-}
-
-void Hue_Controller::OnReload()
-{
-    pthread_yield();
-    exit(1);
-}
 
 //<-dceag-sample-b->
 /*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
