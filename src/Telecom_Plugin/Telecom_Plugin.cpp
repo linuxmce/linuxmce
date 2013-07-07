@@ -840,8 +840,13 @@ Telecom_Plugin::Ring( class Socket *pSocket, class Message *pMessage, class Devi
 			TurnOnMediaDirectorAttachedToOrbiter(nOrbiterDeviceID);
 			if(ConcurrentAccessToSoundCardAllowed(nOrbiterDeviceID))
 			{
-				DCE::CMD_Pause_Media cmd_Pause_Media(nOrbiterDeviceID, pMediaPlugin->m_dwPK_Device, 0);
-				SendCommand(cmd_Pause_Media);
+				// DCE::CMD_Pause_Media cmd_Pause_Media(nOrbiterDeviceID, pMediaPlugin->m_dwPK_Device, 0); // keeping this here in case.
+				
+				// Since we are not trying to emulate toggle Pause behaviour, and we should _ALWAYS_ pause in any case, when the 
+				// phone rings, we explicitly change playback speed here, instead of sending a Pause Media, why? because
+				// Pause Media is transformed in Media Plugin's ReceivedMessage.
+				DCE::CMD_Change_Playback_Speed cmd_Change_Playback_Speed(nOrbiterDeviceID, pMediaPlugin->m_dwPK_Device, 0, 0, 0);
+				SendCommand(cmd_Change_Playback_Speed);
 			}
 			else
 			{
@@ -3604,8 +3609,14 @@ bool Telecom_Plugin::InternalMakeCall(int iFK_Device_From, string sFromExten, st
 				TurnOnMediaDirectorAttachedToOrbiter(iFK_Device_From);
 				if(ConcurrentAccessToSoundCardAllowed(iFK_Device_From))
 				{
-					DCE::CMD_Pause_Media cmd_Pause_Media(iFK_Device_From, pMediaPlugin->m_dwPK_Device, 0);
-					SendCommand(cmd_Pause_Media);
+	                                // Since we are not trying to emulate toggle Pause behaviour, and we should _ALWAYS_ pause in any case, when the 
+        	                        // phone rings, we explicitly change playback speed here, instead of sending a Pause Media, why? because
+                	                // Pause Media is transformed in Media Plugin's ReceivedMessage.
+                        	        DCE::CMD_Change_Playback_Speed cmd_Change_Playback_Speed(iFK_Device_From, pMediaPlugin->m_dwPK_Device, 0, 0, 0);
+                                	SendCommand(cmd_Change_Playback_Speed);
+
+					// DCE::CMD_Pause_Media cmd_Pause_Media(iFK_Device_From, pMediaPlugin->m_dwPK_Device, 0);
+					// SendCommand(cmd_Pause_Media);
 				}
 				else
 				{
