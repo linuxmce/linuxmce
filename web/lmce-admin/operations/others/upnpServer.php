@@ -20,7 +20,7 @@ function upnpServer($output,$dbADO) {
 		$data=exec_batch_command('sudo -u root /usr/pluto/bin/Network_DisplaySettings.sh --all',1);
 		$ret=parse_ini_str($data);
 
-		$out.='<iframe src="http://'.$_SERVER['HTTP_HOST'].':49153/" style="width:98%;height:600px;"></iframe>';
+		$out.='<iframe src="http://'.$_SERVER['HTTP_HOST'].':49155/" style="width:98%;height:600px;"></iframe>';
 		/*
 		// config changed to allow external access
 		if(isset($ret['INTERNAL_IP']) && same_network($ip,$ret['INTERNAL_IP'],$ret['INTERNAL_NETMASK'])){
