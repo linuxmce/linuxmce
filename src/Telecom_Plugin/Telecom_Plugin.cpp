@@ -4282,8 +4282,8 @@ bool Telecom_Plugin::ConcurrentAccessToSoundCardAllowed(int nOrbiterID)
 				);
 				SendCommand(cmd_Get_Device_Data_DT);
 	
-				// search for C or O, if it is present - then no simultaneous access
-				if(sAudioSettings.find("C") == string::npos && sAudioSettings.find("O") == string::npos)
+				// search for C or O or H, if any of these is present - then no simultaneous access
+				if(sAudioSettings.find("H") == string::npos && sAudioSettings.find("C") == string::npos && sAudioSettings.find("O") == string::npos)
 				{
 					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Audio settings '%s', concurrent access allowed!", sAudioSettings.c_str());
 					return true;
