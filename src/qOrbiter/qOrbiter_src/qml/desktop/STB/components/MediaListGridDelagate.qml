@@ -99,8 +99,8 @@ Item
                 when:manager.q_attributetype_sort !== ("52") && manager.q_subType !==("2"||"3") && manager.q_mediaType !== "4"
                 PropertyChanges {
                     target: mainItem
-                    width: scaleX(21);
-                    height: scaleY(21)
+                    width: scaleX(33);
+                    height: scaleY(33)
                     color: "transparent"
                 }
             },

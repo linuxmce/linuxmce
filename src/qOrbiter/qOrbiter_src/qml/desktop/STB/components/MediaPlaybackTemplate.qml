@@ -66,6 +66,13 @@ Item {
             manager.changedPlaylistPosition((mediaplaylist.currentIndex-1))
             break;
 
+        case Qt.Key_Plus: /*Plus sign */
+        manager.adjustVolume(+1)
+        break;
+
+        case Qt.Key_Minus: /* Minus Sign */
+            manager.adjustVolume(-1)
+            break;
         default:
             console.log(event.key)
             break
