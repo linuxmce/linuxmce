@@ -1,0 +1,385 @@
+# lirc Brazilian Portuguese translation 
+# Copyright (C) 2007 THE lirc'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the lirc package.
+# Felipe Augusto van de Wiel (faw) <faw@debian.org>, 2007.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: lirc (20071008)\n"
+"Report-Msgid-Bugs-To: lirc@packages.debian.org\n"
+"POT-Creation-Date: 2009-10-09 20:56-0500\n"
+"PO-Revision-Date: 2007-10-08 00:47-0300\n"
+"Last-Translator: Felipe Augusto van de Wiel (faw) <faw@debian.org>\n"
+"Language-Team: l10n portuguese <debian-l10n-portuguese@lists.debian.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"pt_BR utf-8\n"
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:2001
+msgid "Create LIRC device nodes if they are not there?"
+msgstr "Criar nós de dispositivo LIRC se eles não existirem?"
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:2001
+msgid "LIRC needs the /dev/lirc, /dev/lircd and /dev/lircm files in /dev."
+msgstr ""
+"O LIRC precisa dos arquivos /dev/lirc, /dev/lircd e /dev/lircm no /dev."
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:3001
+msgid "Do you want to reconfigure LIRC?"
+msgstr "Você quer reconfigurar o LIRC?"
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:3001
+msgid ""
+"LIRC is already configured, reconfiguring it may overwrite the existing "
+"configuration in /etc/lirc/hardware.conf."
+msgstr ""
+"O LIRC já está configurado, reconfigurá-lo pode sobrescrever as "
+"configurações existentes em /etc/lirc/hardware.conf."
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:3001
+msgid "However, comments, LIRC_ARGS and other unknown code will be preserved."
+msgstr ""
+"No entanto, comentários, LIRC_ARGS e outros códigos desconhecidos serão "
+"preservados."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:4001
+msgid "Old configuration files found"
+msgstr "Arquivos de configuração antigos encontrados"
+
+#. Type: note
+#. Description
+#: ../lirc.templates:4001
+msgid ""
+"Previous versions of this package didn't include any configuration file and "
+"expected users to create their own /etc/lircd.conf and /etc/lircmd.conf."
+msgstr ""
+"Versões anteriores deste pacote não incluíam quaisquer arquivos de "
+"configuração e esperavam que os usuários criassem seus próprios /etc/lircd."
+"conf e /etc/lircmd.conf."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:4001
+msgid "The new location for these files is /etc/lirc/."
+msgstr "A nova localização destes arquivos é /etc/lirc/."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:4001
+msgid ""
+"File locations will be corrected but you should check that none of LIRC "
+"configuration files are left directly under /etc/."
+msgstr ""
+"As localizações dos arquivos será consertada mas você deveria verificar se "
+"nenhum arquivo de configuração LIRC foi deixado diretamente sob /etc/."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:19001
+msgid "IntelliMouse protocol preferred over IMPS/2"
+msgstr "Protocolo IntelliMouse preferido sobre IMPS/2"
+
+#. Type: note
+#. Description
+#: ../lirc.templates:19001
+msgid ""
+"You are currently using lircmd with the IMPS/2 protocol. This is not "
+"compatible with the method lircmd uses to simulate a mouse, so IntelliMouse "
+"support has been added and is now the preferred protocol."
+msgstr ""
+"Você está atualmente usando lircmd com o protocolo IMPS/2. Isto não é "
+"compatível com o método que o lircmd usa para simular um mouse, portanto o "
+"suporte IntelliMouse foi adicionado e agora é o protocolo preferido."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:19001
+msgid ""
+"You should update /etc/lirc/lircmd.conf and the configuration of any program "
+"which uses lircmd as a mouse to use the IntelliMouse protocol instead."
+msgstr ""
+"Você deveria atualizar /etc/lirc/lircmd.conf e a configuração de qualquer "
+"programa que use o lircmd como um mouse para usar o protocolo IntelliMouse."
+
+#. Type: note
+#. Description
+#: ../lirc.templates:19001
+msgid "NOTE: gpm will refuse to use lircmd as a mouse with IMPS/2 protocol."
+msgstr ""
+"NOTA: gpm se recusará a usar o lircmd como um mouse com o protocolo IMPS/2."
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:20001
+msgid "Delete /var/log/lircd?"
+msgstr "Apagar /var/log/lircd?"
+
+#. Type: boolean
+#. Description
+#: ../lirc.templates:20001
+msgid ""
+"LIRC now uses syslog as a logging mechanism, so /var/log/lircd is no longer "
+"relevant."
+msgstr ""
+"O LIRC agora usa o syslog como mecanismo de registro de log, então o /var/"
+"log/lircd não é mais relevante."
+
+#. Type: select
+#. Description
+#: ../lirc.templates:21001
+msgid "Remote control configuration:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:21001
+msgid ""
+"If you choose a remote or transmitter, but already have a configuration file "
+"in /etc/lirc/lircd.conf, the existing file will be renamed to /etc/lirc/"
+"lircd.conf.dpkg-old and the community configurations loaded into /etc/lirc/"
+"lircd.conf.  If you have a /etc/lirc/lircd.conf.dpkg-old file already, it "
+"will not be overwritten and your current /etc/lirc/lircd.conf will be lost."
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:22001
+msgid "IR transmitter, if present:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:22001
+msgid ""
+"IR transmitters can be used for controlling external devices.  Some devices "
+"are considered transceivers, with the ability to both send and receive.  "
+"Other devices require separate hardware to accomplish these tasks."
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:23001
+msgid "Custom event interface for your dev/input device:"
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:23001
+msgid ""
+"Many remotes that were previously supported by the lirc_gpio interface now "
+"need to be set up via the dev/input interface.  You will need to custom "
+"select your remote's event character device.  This can be determined by "
+"'cat /proc/bus/input/devices'."
+msgstr ""
+
+#. Type: select
+#. Description
+#: ../lirc.templates:25001
+#, fuzzy
+#| msgid "Please choose the supported serial device type:"
+msgid "Port your serial device is attached to:"
+msgstr "Por favor, escolha o tipo do dispositivo serial suportado:"
+
+#. Type: select
+#. Description
+#: ../lirc.templates:25001
+msgid ""
+"The UART (serial) driver is a low level driver that takes advantage of bit "
+"banging a character device.  This means that you can only use it with "
+"hardware serial devices.  It unfortunately does not work with USB serial "
+"devices."
+msgstr ""
+
+#~ msgid "Drivers to build:"
+#~ msgstr "Drivers a construir:"
+
+#~ msgid ""
+#~ " atiusb:      ATI/NVidia/X10 I & II RF Remote\n"
+#~ " bt829:       Tekram M230 Mach64\n"
+#~ " cmdir:       COMMANDIR USB Transceiver\n"
+#~ " gpio:        TV cards from FlyVideo98, Avermedia, MiRO and many others\n"
+#~ " i2c:         TV cards from Hauppauge and PixelView\n"
+#~ " igorplugusb: Igor Cesko's USB IR Receiver\n"
+#~ " imon:        Soundgraph iMON MultiMedian IR/VFD\n"
+#~ " it87:        ITE IT8705/12 CIR ports (ECS K7S5A, Asus DigiMatrix...)\n"
+#~ " mceusb:      Windows Media Center Remotes (old version, MicroSoft USB "
+#~ "ID)\n"
+#~ " mceusb2:     Windows Media Center Remotes (new version, Philips et al.)\n"
+#~ " parallel:    Home-brew parallel-port receiver\n"
+#~ " sasem:       Dign HV5 HTPC IR/VFD Module\n"
+#~ " serial:      Home-brew serial-port driver\n"
+#~ " sir:         Serial InfraRed (IRDA)\n"
+#~ " streamzap:   Streamzap PC Remote"
+#~ msgstr ""
+#~ " atiusb:      Remoto ATI/NVidia/X10 I & II RF\n"
+#~ " bt829:       Tekram M230 Mach64\n"
+#~ " cmdir:       Transceptor COMMANDIR USB\n"
+#~ " gpio:        Placas de TV da FlyVideo98, Avermedia, MiRO e outras\n"
+#~ " i2c:         Placas de TV da Hauppauge e PixelView\n"
+#~ " igorplugusb: Receptor USB IR de Igor Cesko\n"
+#~ " imon:        Soundgraph iMON MultiMedian IR/VFD\n"
+#~ " it87:        Portas ITE IT8705/12 CIR (ECS K7S5A, Asus DigiMatrix...)\n"
+#~ " mceusb:      Rem. Windows Media Center (vers. antiga, MicroSoft USB ID)\n"
+#~ " mceusb2:     Rem. Windows Media Center (vers. nova, Philips et al.)\n"
+#~ " parallel:    Receptor de porta paralela feito em casa\n"
+#~ " sasem:       Módulo Dign HV5 HTPC IR/VFD\n"
+#~ " serial:      Driver de porta serial feito em casa\n"
+#~ " sir:         Infra-Vermelho Serial (IRDA)\n"
+#~ " streamzap:   Remoto Streamzap PC"
+
+#~ msgid "Try to automatically select hardware support options?"
+#~ msgstr "Tentar selecionar automaticamente as opções de suporte a hardware?"
+
+#~ msgid ""
+#~ "Your previous answers can be used as a basis for guessing the list of "
+#~ "kernel modules that should be built, along with their parameters."
+#~ msgstr ""
+#~ "Suas respostas anteriores podem ser usadas como base para adivinhar a "
+#~ "lista de módulos do kernel que deveriam ser construídos, juntamente com "
+#~ "seus parâmetros."
+
+#~ msgid "Please choose whether this should happen."
+#~ msgstr "Por favor, escolha se isto deveria acontecer."
+
+#~ msgid "Additional kernel modules not needed"
+#~ msgstr "Módulos do kernel adicionais não são necessários"
+
+#~ msgid ""
+#~ "Unless you want to build LIRC kernel modules for another system, this "
+#~ "package is useless on this system."
+#~ msgstr ""
+#~ "A menos que você queira construir módulos LIRC para o kernel para outro "
+#~ "sistema, este pacote é inútil neste sistema."
+
+#~ msgid "Binary modules package build instructions"
+#~ msgstr "Instruções de construção para pacote binário de módulos"
+
+#~ msgid ""
+#~ "For instructions on how to build the binary modules package, please read "
+#~ "the /usr/share/doc/lirc-modules-source/README.Debian file."
+#~ msgstr ""
+#~ "Para instruções sobre como construir o pacote binário de módulos, por "
+#~ "favor, leia o arquivos /usr/share/doc/lirc-modules-source/README.Debian."
+
+#~ msgid "Standard"
+#~ msgstr "Padrão"
+
+#~ msgid "Type of ITE8705/12 CIR port to support:"
+#~ msgstr "Tipo da porta ITE8705/12 CIR a ser suportada:"
+
+#~ msgid "Please choose the supported ITE8705/12 CIR port chip:"
+#~ msgstr "Por favor, escolha o chip da porta ITE8705/12 CIR suportada:"
+
+#~ msgid ""
+#~ " Standard:   Standard setup chip;\n"
+#~ " DigiMatrix: Setup for Asus DigiMatrix onboard chip."
+#~ msgstr ""
+#~ " Standard:   Configuração padrão do chip;\n"
+#~ " DigiMatrix: Configuração para o chip \"onboard\" Asus DigiMatrix."
+
+#~ msgid "Other"
+#~ msgstr "Outro"
+
+#~ msgid "Serial device to support:"
+#~ msgstr "Dispositivo serial a ser suportado:"
+
+#~ msgid ""
+#~ " ANIMAX: Anir Multimedia Magic;\n"
+#~ " IRDEO:  IRdeo;\n"
+#~ " Other:  Any other supported device."
+#~ msgstr ""
+#~ " ANIMAX: Anir Multimedia Magic;\n"
+#~ " IRDEO:  IRdeo;\n"
+#~ " Outro:  Qualquer outra dispositivo suportado."
+
+#~ msgid "Is the serial IR device a transmitter?"
+#~ msgstr "O dispositivo IR serial é um transmissor?"
+
+#~ msgid "Should the carrier signal be generated by software?"
+#~ msgstr "O sinal de linha deveria ser gerado pelo software?"
+
+#~ msgid "IR serial device I/O port:"
+#~ msgstr "Porta E/S do dispositivo serial IR:"
+
+#~ msgid "IR serial device IRQ:"
+#~ msgstr "IRQ do dispositivo serial IR:"
+
+#~ msgid "Type of supported SIR device:"
+#~ msgstr "Tipo do dispositivo SIR suportado:"
+
+#~ msgid "Please choose the supported SIR device type:"
+#~ msgstr "Por favor, escolha o tipo do dispositivo SIR suportado:"
+
+#~ msgid ""
+#~ " ACTISYS_ACT200L: Actisys Act200L dongle;\n"
+#~ " TEKRAM:          Tekram Irmate 210 (16x50 UART compatible serial port);\n"
+#~ " Other:           Any other supported device."
+#~ msgstr ""
+#~ " ACTISYS_ACT200L: Adaptador Actisys Act200L;\n"
+#~ " TEKRAM:          Tekram Irmate 210 (porta seria compatível 16x50 UART);\n"
+#~ " Outro:           Qualquer outro dispositivo suportado."
+
+#~ msgid "SIR device I/O port:"
+#~ msgstr "Porta E/S do dispositivo SIR:"
+
+#~ msgid "SIR device IRQ:"
+#~ msgstr "IRQ do dispositivo SIR:"
+
+#~ msgid "Parallel IR device I/O port:"
+#~ msgstr "Porta E/S do dispositivo IR paralelo:"
+
+#~ msgid "Parallel IR device IRQ:"
+#~ msgstr "IRQ do dispositivo IR paralelo:"
+
+#~ msgid "Parallel IR device timer:"
+#~ msgstr "Temporizador do dispositivo IR paralelo:"
+
+#~ msgid "Automatically build the modules?"
+#~ msgstr "Construir os módulos automaticamente?"
+
+#~ msgid ""
+#~ "New LIRC kernel modules can be built and installed if the source and "
+#~ "build environment for the current kernel are present locally."
+#~ msgstr ""
+#~ "Os novos módulos LIRC para o kernel podem ser construídos e instalados se "
+#~ "o código fonte e o ambiente de construção para o kernel atual estiverem "
+#~ "localmente presentes."
+
+#~ msgid ""
+#~ "Even if you choose this option, you should build and install a binary "
+#~ "'kernel modules' package so that the package manager can keep track of "
+#~ "the files."
+#~ msgstr ""
+#~ "Mesmo se você escolher esta opção, você deveria construir e instalar um "
+#~ "pacote de 'módulos do kernel' binário para que o gerenciador de pacotes "
+#~ "possa fazer acompanhamento dos arquivos."
+
+#~ msgid "Kernel source location:"
+#~ msgstr "Localização do código fonte do kernel:"
+
+#~ msgid ""
+#~ "Please enter the location of the kernel source tree, to build the lirc "
+#~ "kernel modules."
+#~ msgstr ""
+#~ "Por favor, informe a localização da árvore do código fonte do kernel, "
+#~ "para construir os módulos lirc para o kernel."
+
+#~ msgid "${ksrc}: invalid kernel source tree"
+#~ msgstr "${ksrc}: árvore de código fonte do kernel inválida"
+
+#~ msgid "Quick walkthrough:"
+#~ msgstr "Rápido passo-a-passo:"

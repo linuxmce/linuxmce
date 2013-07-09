@@ -1,0 +1,148 @@
+diff -Naur lirc-0.9.0/daemons/lircd.c lirc-0.9.0+lmce1/daemons/lircd.c
+--- lirc-0.9.0/daemons/lircd.c	2011-03-25 17:28:18.000000000 -0500
++++ lirc-0.9.0+lmce1/daemons/lircd.c	2013-07-09 17:47:50.445408813 -0500
+@@ -116,6 +116,7 @@
+ 	{"SEND_ONCE", send_once},
+ 	{"SEND_START", send_start},
+ 	{"SEND_STOP", send_stop},
++	{"SEND_PRONTO", send_pronto},
+ 	{"VERSION", version},
+ 	{"SET_TRANSMITTERS", set_transmitters},
+ 	{"SIMULATE", simulate},
+@@ -1149,6 +1150,60 @@
+ 	}
+ }
+ 
++static struct ir_remote *ProntoIRSenderPseudoRemote()
++{
++	static struct ir_remote *ProntoRemote = NULL;
++
++	if (ProntoRemote == NULL)
++	{
++		ProntoRemote = (struct ir_remote *) malloc(sizeof(struct ir_remote));
++		memset(ProntoRemote, 0, sizeof(struct ir_remote));
++		ProntoRemote->name = strdup("ProntoIRSenderPseudoRemote");
++		ProntoRemote->flags = RAW_CODES;
++		ProntoRemote->eps = 30;
++		ProntoRemote->aeps = 100;
++		ProntoRemote->gap = 34937;
++		ProntoRemote->min_repeat = 0;
++	}
++
++	return ProntoRemote;
++}
++
++static int parse_pronto(char *pronto, struct ir_ncode *code, struct ir_remote *remote)
++{
++	int length = strlen(pronto);
++	if (length % 4 != 0 || length < 16)
++		return 0;
++
++	int value;
++
++	sscanf(pronto, "%4x", &value); // code type
++	if (value != 0 && value != 256)
++		return 0;
++
++	sscanf(pronto + 4, "%4x", &value); // carrier divider
++	long int frequency = ((41450 / value + 5) / 10) * 1000; // carrier frequency in Hz
++	remote->freq = frequency;
++
++	int single_count, repeat_count;
++	sscanf(pronto + 8, "%4x", &single_count);
++	sscanf(pronto + 12, "%4x", &repeat_count);
++
++	pronto += 16;
++	code->length = strlen(pronto) / 4;
++	code->signals = (lirc_t *) malloc(code->length * sizeof(lirc_t));
++	lirc_t *current_signal = code->signals;
++
++	int i;
++	for (i = 0; i < 2 * (single_count + repeat_count); ++i, pronto += 4, ++current_signal)
++	{
++		sscanf(pronto, "%4x", &value);
++		*current_signal = 1000000 * value / frequency; // pulse/space duration in microseconds
++	}
++
++	return 1;
++}
++
+ int parse_rc(int fd, char *message, char *arguments, struct ir_remote **remote, struct ir_ncode **code, int *reps,
+ 	     int n, int *err)
+ {
+@@ -1157,20 +1212,43 @@
+ 	*remote = NULL;
+ 	*code = NULL;
+ 	*err = 1;
++
++	static struct ir_ncode *pronto_code = NULL;
++	if (pronto_code != NULL)
++	{
++		free(pronto_code->signals);
++		free(pronto_code);
++		pronto_code = NULL;
++	}
++
+ 	if (arguments == NULL)
+ 		goto arg_check;
+ 
+ 	name = strtok(arguments, WHITE_SPACE);
+ 	if (name == NULL)
+ 		goto arg_check;
+-	*remote = get_ir_remote(remotes, name);
++	if (strcasecmp(name, "ProntoIRSenderPseudoRemote") == 0)
++		*remote = ProntoIRSenderPseudoRemote();
++	else
++		*remote=get_ir_remote(remotes,name);
+ 	if (*remote == NULL) {
+ 		return (send_error(fd, message, "unknown remote: \"%s\"\n", name));
+ 	}
+ 	command = strtok(NULL, WHITE_SPACE);
+ 	if (command == NULL)
+ 		goto arg_check;
+-	*code = get_code_by_name(*remote, command);
++	if (strcasecmp((*remote)->name, "ProntoIRSenderPseudoRemote") == 0)
++	{
++		pronto_code = (struct ir_ncode *) malloc(sizeof(struct ir_ncode));
++		memset(pronto_code, 0, sizeof(struct ir_ncode));
++		if (!parse_pronto(command, pronto_code, *remote))
++			return send_error(fd, message, "invalid or unsupported pronto code\n");
++		*code = pronto_code;
++	}
++	else
++	{
++		*code=get_code_by_name(*remote,command);
++	}
+ 	if (*code == NULL) {
+ 		return (send_error(fd, message, "unknown command: \"%s\"\n", command));
+ 	}
+@@ -1609,6 +1687,17 @@
+ 	return (1);
+ }
+ 
++int send_pronto(int fd, char *message, char *arguments)
++{
++	if (arguments == NULL)
++		return send_error(fd, message, "bad send packet\n");
++	char *new_arguments = (char *) malloc(strlen(arguments) + strlen("ProntoIRSenderPseudoRemote ") + 1);
++	sprintf(new_arguments, "ProntoIRSenderPseudoRemote %s", arguments); 
++	int ret = send_core(fd, message, new_arguments, 1);
++	free(new_arguments);
++	return ret;
++}
++
+ int get_command(int fd)
+ {
+ 	int length;
+diff -Naur lirc-0.9.0/tools/irsend.c lirc-0.9.0+lmce1/tools/irsend.c
+--- lirc-0.9.0/tools/irsend.c	2011-03-25 17:28:18.000000000 -0500
++++ lirc-0.9.0+lmce1/tools/irsend.c	2013-07-09 17:48:13.121750163 -0500
+@@ -48,7 +48,7 @@
+ typedef uint32_t __u32;
+ #endif
+ 
+-#define PACKET_SIZE 256
++#define PACKET_SIZE 4096 
+ /* three seconds */
+ #define TIMEOUT 3
+ 

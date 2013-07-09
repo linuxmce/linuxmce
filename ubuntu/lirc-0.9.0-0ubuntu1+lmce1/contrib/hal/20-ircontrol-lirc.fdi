@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="ISO-8859-1"?> <!-- -*- SGML -*- -->
+<deviceinfo version="0.2">
+  <device>
+  <match key="info.bus" string="usb_device">
+  <!-- vendor -->
+  <match key="usb_device.vendor_id" int="0x03eb">
+    <!-- Igor Plug USB (Atmel's Manufact. ID), driver : igorplugusb -->
+    <match key="usb_device.product_id" int="0x0002">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+    <!-- Fit PC2 Infrared Adapter, driver : igorplugusb -->
+    <match key="usb_device.product_id" int="0x21fe">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+  </match>
+  <!-- vendor -->
+  <match key="usb_device.vendor_id" int="0x040b">
+    <!-- Gamester Xbox DVD Movie Playback Kit IR, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x6521">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+  </match>
+  <!-- vendor -->
+  <match key="usb_device.vendor_id" int="0x045e">
+    <!-- Microsoft Xbox DVD Movie Playback Kit IR, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x0284">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+  </match>
+  <!-- vendor -->
+  <match key="usb_device.vendor_id" int="0x0471">
+    <!-- ATI Remote Wonder 2: Input Device, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x0602">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+    <!-- ATI Remote Wonder 2: Controller (???), driver : atiusb -->
+    <match key="usb_device.product_id" int="0x0603">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+  </match>
+  <!-- vendor -->
+  <match key="usb_device.vendor_id" int="0x04e8">
+    <!-- SoundGraph iMON (IR only) -- sg_imon.inf, driver : imon -->
+    <match key="usb_device.product_id" int="0xff30">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+  </match>
+  <!-- vendor -->
+  <match key="usb_device.vendor_id" int="0x0aa8">
+    <!-- TriGem iMON (IR only) -- TG_iMON.inf, driver : imon -->
+    <match key="usb_device.product_id" int="0x8001">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+    <!-- SoundGraph iMON VFD (IR & VFD) -- iMON_VFD.inf, driver : imon -->
+    <match key="usb_device.product_id" int="0xffda">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+  </match>
+  <!-- vendor -->
+  <match key="usb_device.vendor_id" int="0x0B48">
+    <!-- TechnoTrend USB IR Receiver, driver : ttusbir -->
+    <match key="usb_device.product_id" int="0x2003">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+  </match>
+  <!-- vendor -->
+  <match key="usb_device.vendor_id" int="0x0bc7">
+    <!-- X10 USB Firecracker Interface, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x0002">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+    <!-- X10 VGA Video Sender, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x0003">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+    <!-- ATI Wireless Remote Receiver, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x0004">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+    <!-- NVIDIA Wireless Remote Receiver, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x0005">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+    <!-- ATI Wireless Remote Receiver, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x0006">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+    <!-- X10 USB Wireless Transceivers, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x0007">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+    <!-- X10 USB Wireless Transceivers, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x0008">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+    <!-- X10 USB Wireless Transceivers, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x0009">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+    <!-- X10 USB Wireless Transceivers, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x000A">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+    <!-- X10 USB Wireless Transceivers, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x000B">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+    <!-- X10 USB Wireless Transceivers, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x000C">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+    <!-- X10 USB Wireless Transceivers, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x000D">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+    <!-- X10 USB Wireless Transceivers, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x000E">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+    <!-- X10 USB Wireless Transceivers, driver : atiusb -->
+    <match key="usb_device.product_id" int="0x000F">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+  </match>
+  <!-- vendor -->
+  <match key="usb_device.vendor_id" int="0x11ba">
+    <!-- Sasem USB Control Board, driver : sasem -->
+    <match key="usb_device.product_id" int="0x0101">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+  </match>
+  <!-- vendor -->
+  <match key="usb_device.vendor_id" int="0x15c2">
+    <!-- SoundGraph iMON SS (IR & VFD) -- iMON_SS.inf, driver : imon -->
+    <match key="usb_device.product_id" int="0xffda">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+  </match>
+  <!-- vendor -->
+  <match key="usb_device.vendor_id" int="0xFFFF">
+    <!-- Microsoft Xbox DVD Movie Playback Kit IR, driver : atiusb -->
+    <match key="usb_device.product_id" int="0xFFFF">
+      <merge key="info.category" type="string">input</merge>
+      <append key="info.capabilities" type="strlist">input</append>
+      <append key="info.capabilities" type="strlist">input.remote_control</append>
+    </match>
+  </match>
+  </match>
+  </device>
+</deviceinfo>

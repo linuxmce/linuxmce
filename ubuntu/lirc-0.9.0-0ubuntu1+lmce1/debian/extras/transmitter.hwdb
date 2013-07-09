@@ -1,0 +1,45 @@
+# LIRC - Transmitter Hardware DataBase
+#
+# This file lists cable and satellite boxes supported by LIRC
+#
+# The format is:
+#
+# [remote controls type]
+# description;driver;lirc driver;HW_DEFAULT;lircd_conf;
+#
+
+[Motorola Cable box]
+Serial Port (UART) : Motorola Cable box;serial;lirc_dev lirc_serial;hw_default;motorola/dctxxxx.conf
+Microsoft Windows Media Center V2 (usb) : Motorola Cable box;none;lirc_dev mceusb;hw_default;motorola/dctxxxx.conf
+Command IR : Motorola Cable box;none;lirc_dev lirc_cmdir;hw_default;motorola/dctxxxx.conf
+USB-UIRT2 : Motorola Cable box;uirt2_raw;none;hw_uirt2_raw;motorola/dctxxxx.conf
+
+[Sky Satellite]
+Serial Port (UART) : Sky Satellite Receiver;serial;lirc_dev lirc_serial;hw_default;sky/general.conf
+Microsoft Windows Media Center V2 (usb) : Sky Satellite Receiver;none;lirc_dev mceusb;hw_default;sky/general.conf
+Command IR : Sky Satellite Receiver;none;lirc_dev lirc_cmdir;hw_default;sky/general.conf
+USB-UIRT2 : Sky Satellite Receiver;uirt2_raw;none;hw_uirt2_raw;sky/general.conf
+
+[Dish Networks]
+Serial Port (UART) : Dish Receiver;serial;lirc_dev lirc_serial;hw_default;dish/general.conf
+Microsoft Windows Media Center V2 (usb) : Dish Receiver;none;lirc_dev mceusb;hw_default;dish/general.conf
+Command IR : Dish Receiver;none;lirc_dev lirc_cmdir;hw_default;dish/general.conf
+USB-UIRT2 : Dish Receiver;uirt2_raw;none;hw_uirt2_raw;dish/general.conf
+
+[Direct TV]
+Serial Port (UART) : Direct TV Receiver;serial;lirc_dev lirc_serial;hw_default;directtv/general.conf
+Microsoft Windows Media Center V2 (usb) : Direct TV Receiver;none;lirc_dev mceusb;hw_default;directtv/general.conf
+Command IR : Direct TV Receiver;none;lirc_dev lirc_cmdir;hw_default;directtv/general.conf
+USB-UIRT2 : Direct TV Receiver;uirt2_raw;none;hw_uirt2_raw;directtv/general.conf
+
+[Pioneer Cable box]
+Serial Port (UART) : Pioneer Cable box;serial;lirc_dev lirc_serial;hw_default;pioneer/general.conf
+Microsoft Windows Media Center V2 (usb) : Pioneer Cable box;none;lirc_dev mceusb;hw_default;pioneer/general.conf
+Command IR : Pioneer Cable box;none;lirc_dev lirc_cmdir;hw_default;pioneer/general.conf
+USB-UIRT2 : Pioneer Cable box;uirt2_raw;none;hw_uirt2_raw;pioneer/general.conf
+
+[Scientific Atlanta Cable box]
+Serial Port (UART) : Scientific Atlanta Cable box;serial;lirc_dev lirc_serial;hw_default;scientificatlanta/general.conf
+Microsoft Windows Media Center V2 (usb) : Scientific Atlanta Cable box;none;lirc_dev mceusb;hw_default;scientificatlanta/general.conf
+Command IR : Scientific Atlanta Cable box;none;lirc_dev lirc_cmdir;hw_default;scientificatlanta/general.conf
+USB-UIRT2 : Scientific Atlanta Cable box;uirt2_raw;none;hw_uirt2_raw;scientificatlanta/general.conf

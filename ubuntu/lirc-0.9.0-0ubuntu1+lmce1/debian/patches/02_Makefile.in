@@ -1,0 +1,59 @@
+prevent autotools from getting run on every build.
+
+(C) 2006 Hector Garcia <hector@debian.org>
+(C) 2008 Stefan Lippers-Hollmann <s.l-h@gmx.de>, rediffed
+
+Index: lirc/Makefile.in
+===================================================================
+--- lirc.orig/Makefile.in	2011-03-25 17:28:54.000000000 -0500
++++ lirc/Makefile.in	2011-05-05 14:28:58.519649463 -0500
+@@ -103,12 +103,8 @@
+ GZIP_ENV = --best
+ distuninstallcheck_listfiles = find . -type f -print
+ distcleancheck_listfiles = find . -type f -print
+-ACLOCAL = @ACLOCAL@
+ AMTAR = @AMTAR@
+ AR = @AR@
+-AUTOCONF = @AUTOCONF@
+-AUTOHEADER = @AUTOHEADER@
+-AUTOMAKE = @AUTOMAKE@
+ AWK = @AWK@
+ CC = @CC@
+ CCDEPMODE = @CCDEPMODE@
+@@ -265,18 +261,6 @@
+ am--refresh:
+ 	@:
+ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+-	@for dep in $?; do \
+-	  case '$(am__configure_deps)' in \
+-	    *$$dep*) \
+-	      echo ' cd $(srcdir) && $(AUTOMAKE) --gnu'; \
+-	      $(am__cd) $(srcdir) && $(AUTOMAKE) --gnu \
+-		&& exit 0; \
+-	      exit 1;; \
+-	  esac; \
+-	done; \
+-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu Makefile'; \
+-	$(am__cd) $(top_srcdir) && \
+-	  $(AUTOMAKE) --gnu Makefile
+ .PRECIOUS: Makefile
+ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
+ 	@case '$?' in \
+@@ -292,9 +276,7 @@
+ 	$(SHELL) ./config.status --recheck
+ 
+ $(top_srcdir)/configure:  $(am__configure_deps)
+-	$(am__cd) $(srcdir) && $(AUTOCONF)
+ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
+-	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
+ $(am__aclocal_m4_deps):
+ 
+ config.h: stamp-h1
+@@ -307,7 +289,6 @@
+ 	@rm -f stamp-h1
+ 	cd $(top_builddir) && $(SHELL) ./config.status config.h
+ $(srcdir)/config.h.in:  $(am__configure_deps) 
+-	($(am__cd) $(top_srcdir) && $(AUTOHEADER))
+ 	rm -f stamp-h1
+ 	touch $@
+ 
