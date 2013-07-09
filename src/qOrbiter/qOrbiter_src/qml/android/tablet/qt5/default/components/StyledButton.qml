@@ -22,7 +22,7 @@ Item{
     StyledText{
         id:button_label
         text:"ipsum"
-        font.bold:false
+        isBold: false
         font.pixelSize: textSize
         anchors.centerIn: parent
         color:"antiquewhite"

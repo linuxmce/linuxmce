@@ -1,18 +1,22 @@
-import QtQuick 1.0
+import QtQuick 1.1
 
 
 Rectangle {
     id: filedetailrect
-    width: scaleX(65)
+    width: scaleX(85)
     height: scaleY(75)
     anchors.top: parent.top
     anchors.topMargin: scaleY(5)
     anchors.horizontalCenter: parent.horizontalCenter
-    color: style.highlight2
+    color: skinStyle.highlight2
     clip: true
     radius: 5
-    border.color: style.highlight1
+    border.color: skinStyle.highlight1
     border.width: 3
+    MouseArea{
+        anchors.fill: filedetailrect
+        hoverEnabled: true
+    }
     Image {
         id: fdbg
         source: "../img/icons/nowplaying.png"
@@ -29,9 +33,9 @@ Rectangle {
         id:titlerect
         height: childrenRect.height + 5
         width: parent.width
-        color:style.highlight1
+        color:skinStyle.highlight1
         radius:2.5
-        Text {
+        StyledText {
             id: text2
             anchors.horizontalCenter: parent.horizontalCenter
             text: filedetailsclass.filename
@@ -48,7 +52,7 @@ Rectangle {
         width:childrenRect.width
         color: "transparent"
 
-       anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.leftMargin: scaleX(2)
         BorderImage {
@@ -86,148 +90,108 @@ Rectangle {
         height: childrenRect.height
         radius: 2.5
         clip:  true
-        color: style.darkhighlight
-        border.color: style.highlight1
+        color: "transparent"
+
         anchors.left: imageholder.right
         anchors.leftMargin: scaleX(1)
 
-            Column
-            {
-                spacing:5
-                anchors.margins: scaleY(1)
-                width: parent.width
-                height: childrenRect.height
-                Text {
-                    id: fnametext
-                    text: "Title: " + filedetailsclass.objecttitle
-                    font.pixelSize: scaleY(2)
-                    color:"aliceblue"
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                     width: rectangle1.width *.95
-                }
+        Column
+        {
+            spacing:5
+            anchors.margins: scaleY(1)
+            width: parent.width
+            height: childrenRect.height
+            StyledText {
+                id: fnametext
+                text: "Title: " + filedetailsclass.mediatitle
+                font.pixelSize: scaleY(2)
+                color:"aliceblue"
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                width: rectangle1.width *.95
+            }
 
-                Text {
-                    id: programtext
-                    width: scaleX(35)
-                    text: qsTr("Album: ") + filedetailsclass.album
-                    font.family: "Droid Sans"
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
+            StyledText {
+                id: programtext
+                width: scaleX(35)
+                text: qsTr("Album: ") + filedetailsclass.album
+                font.family: "Droid Sans"
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
 
-                    smooth: true
-                    font.pixelSize: scaleY(2)
-                    visible:  filedetailsclass.album =="" ? false: true
-                }
+                smooth: true
+                font.pixelSize: scaleY(2)
+                visible:  filedetailsclass.album =="" ? false: true
+            }
 
-                Text {
-                    id: episode
-                    width: scaleX(35)
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: qsTr("Track: ") + filedetailsclass.track
-                    font.family: "Droid Sans"
+            StyledText {
+                id: episode
+                width: scaleX(35)
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                text: qsTr("Track: ") + filedetailsclass.track
+                font.family: "Droid Sans"
 
-                    smooth: true
-                    font.pixelSize: scaleY(2)
-                    visible:  filedetailsclass.track =="" ? false: true
-                }
+                smooth: true
+                font.pixelSize: scaleY(2)
+                visible:  filedetailsclass.track =="" ? false: true
+            }
 
-                Text {
-                    id: genre
-                    width: scaleX(35)
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: qsTr("Genre(s): ") + filedetailsclass.genre
-                    font.family: "Droid Sans"
-                    //font.bold: true
-                    smooth: true
-                    font.pixelSize: scaleY(2)
-                    visible:  filedetailsclass.genre =="" ? false: true
-                    MouseArea{
-                        anchors.fill: genre
-                        hoverEnabled: true
-                        onEntered: { genre.elide = "ElideNone" ; }
-                        onExited: {genre.elide = "ElideRight"; }
-                    }
-                }
-                Text {
-                    id: released
-                    width: scaleX(35)
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: qsTr("Released: ") + dcenowplaying.releasedate
-                    font.family: "Droid Sans"
-                    // font.bold: true
-                    smooth: true
-                    font.pixelSize: scaleY(2)
-                    visible:  filedetailsclass.releasedate ==="" ? false: true
+            StyledText {
+                id: genre
+                width: scaleX(35)
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                text: qsTr("Genre(s): ") + filedetailsclass.genre
 
-                }
-
-
-                Text {
-                    id: starring
-                    width: scaleX(35)
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: qsTr("Perfomers: ") + filedetailsclass.performerlist
-                    font.family: "Droid Sans"
-                    //  font.bold: true
-                    smooth: true
-                    font.pixelSize: scaleY(2)
-                    elide: "ElideRight"
-                    visible:  filedetailsclass.performerlist =="" ? false: true
-
-                    MouseArea{
-                        anchors.fill: starring
-                        hoverEnabled: true
-                        onEntered: { starring.elide = "ElideNone" ; }
-                        onExited: {starring.elide = "ElideRight"; }
-                    }
+                //font.bold: true
+                smooth: true
+                isBold: false
+                font.pixelSize: scaleY(5)
+                visible:  filedetailsclass.genre =="" ? false: true
+                MouseArea{
+                    anchors.fill: genre
+                    hoverEnabled: true
+                    onEntered: { genre.elide = "ElideNone" ; }
+                    onExited: {genre.elide = "ElideRight"; }
                 }
             }
+            StyledText {
+                id: released
+                width: scaleX(35)
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                text: qsTr("Released: ") + dcenowplaying.releasedate
+
+                // font.bold: true
+                smooth: true
+                font.pixelSize: scaleY(4)
+                visible:  filedetailsclass.releasedate ==="" ? false: true
+
+            }
+
+
+            StyledText {
+                id: starring
+                width: scaleX(35)
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                text: qsTr("Perfomers: ") + filedetailsclass.performerlist
+
+                //  font.bold: true
+                isBold: false
+                smooth: true
+                font.pixelSize: scaleY(3)
+                elide: "ElideRight"
+                visible:  filedetailsclass.performerlist =="" ? false: true
+
+                MouseArea{
+                    anchors.fill: starring
+                    hoverEnabled: true
+                    onEntered: { starring.elide = "ElideNone" ; }
+                    onExited: {starring.elide = "ElideRight"; }
+                }
+            }
+        }
     }
 
-
-    Row{
+    FileDetailsButtons{
         id:controlrow
-        anchors.top: imageholder.bottom
-        anchors.topMargin: scaleY(1)
-        anchors.horizontalCenter: parent.horizontalCenter
-        spacing: scaleY(.5)
-        AvOptionButton {
-            id: buttonsq1
-            width: style.stdbuttonw
-            height: style.stdbuttonh
-            radius: 10
-
-            //anchors.leftMargin: 18
-            buttontext: "Play"
-            MouseArea
-            {
-                anchors.fill: parent
-                onClicked: manager.playMedia(filedetailsclass.file)  //dce function
-            }
-        }
-
-        AvOptionButton {
-            id: buttonsq2
-            width: style.stdbuttonw
-            height: style.stdbuttonh
-            radius: 10
-            buttontext: "Move"
-        }
-
-        AvOptionButton {
-            id: buttonsq3
-            width: style.stdbuttonw
-            height: style.stdbuttonh
-            radius: 10
-            buttontext: "Close"
-            x: ((parent.width/3)*2)
-            MouseArea{
-                anchors.fill:  parent
-                onClicked: { filedetailrect.destroy()}
-            }
-        }
     }
-
-
 }
 
 

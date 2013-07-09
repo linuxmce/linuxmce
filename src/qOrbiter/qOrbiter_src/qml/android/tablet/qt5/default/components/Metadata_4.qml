@@ -1,13 +1,16 @@
 import QtQuick 2.0
 
 
-Rectangle{
+Item{
     id:textrect
     visible: true
     height: childrenRect.height
-    width: scaleX(40)
-    color:"transparent"
-
+    width: parent.width
+    Rectangle{
+        anchors.fill: parent
+        color:"black"
+        opacity:.65
+    }
     clip:true
 
     Column{
@@ -17,7 +20,7 @@ Rectangle{
         height: dcenowplaying.aspect == "wide"?scaleY(25): scaleY(35)
         StyledText {
             id: generaltitle
-            width: scaleX(35)
+            width:parent.width
             text:  dcenowplaying.mediatitle
             font.bold: true
             //  wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -29,13 +32,13 @@ Rectangle{
         }
         StyledText { /* showing up with performers! fix */
             id: title_text
-            width: scaleX(35)
+            width:parent.width
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text: dcenowplaying.qs_mainTitle
             font.bold: true
             font.italic: true
             smooth: true
-            fontSize: scaleY(3.5)
+            fontSize: scaleY(4)
             visible:  dcenowplaying.qs_mainTitle =="" ? false: true
             opacity: .65
             style: Text.Sunken
@@ -48,43 +51,43 @@ Rectangle{
             color: "Aliceblue"
             //  font.bold: true
             smooth: true
-            fontSize: scaleY(3)
+            fontSize: scaleY(4)
             elide: "ElideRight"
             visible:false
         }
 
         StyledText {
             id: album_text
-            width: scaleX(35)
+            width:parent.width
             text: dcenowplaying.album
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             smooth: true
             font.bold: true
-            fontSize: scaleY(3.5)
+            fontSize: scaleY(4)
             color:style.maincolor
         }
 
         StyledText {
             id: genre_text
-            width: scaleX(35)
+            width:parent.width
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text: qsTr("Genre(s): ") + dcenowplaying.genre
             smooth: true
-            fontSize: scaleY(2)
+            fontSize: scaleY(4)
             font.bold: true
             visible:  dcenowplaying.genre =="" ? false: true
 
         }
         StyledText {
             id: released_text
-            width: scaleX(35)
+            width:parent.width
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text: qsTr("Released: ") + dcenowplaying.releasedate
             // font.italic: true
 
             smooth: true
             font.bold: true
-            fontSize: scaleY(2)
+            fontSize: scaleY(4)
             visible:  dcenowplaying.releasedate =="" ? false: true
             color:skinStyle.accentColor
         }

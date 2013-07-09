@@ -25,7 +25,7 @@ Rectangle {
         repeat: false
         interval: 250
         triggeredOnStart: false
-        onTriggered: filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
+        onTriggered: filedetailsclass.screenshot !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=img&val="+filedetailsclass.screenshot : ""
         running: true
     }
 
@@ -68,7 +68,7 @@ Rectangle {
             id: filedetailsimage
             width: scaleX(15)
             height:scaleY(15)
-            source: ""
+            source: filedetailsclass.screenshot !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=img&val="+filedetailsclass.screenshot : ""
             smooth: true
         }
 

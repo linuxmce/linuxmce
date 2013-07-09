@@ -116,8 +116,8 @@ Rectangle {
 
         ButtonSq{
             id:roombutton
-            height: scaleY(5)
-            width: scaleX(10)
+            height: style.stdbuttonh
+            width: style.stdbuttonw
             buttontext: roomList.currentEA
             MouseArea{
                 anchors.fill: parent

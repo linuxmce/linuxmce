@@ -3,13 +3,13 @@ import "../components"
 import "../js/ComponentLoader.js" as MyJs
 import "../../lib/handlers"
 
-Rectangle {
+Item {
     id:fileviewscreen
     width: manager.appWidth
     height: manager.appHeight
-    color: "black"
+
     clip: true
-    border.color: "silver"
+
 
 
     Connections
@@ -86,19 +86,19 @@ Rectangle {
             height: scaleY(15)
             Rectangle {
                 id: background
-                color: mouseclick.pressed ? "orange":"transparent"
+                color: mouseclick.pressed ? "orange":"black"
                 anchors.centerIn: parent
                 border.color: "silver"
                 height: scaleY(15)
                 width: scaleX(75)
-                opacity: 0
+                opacity: mouseclick.pressed ? 1 : .75
                 Component.onCompleted: PropertyAnimation { target: background; property: "opacity"; to: 1; duration: 1000}
 
                 Row{
                     Image
                     {
                         id: imagerect;
-                        source: path !=="" ?"http://"+srouterip+"/lmce-admin/MediaImage.php?img="+path : ""
+                        source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=img&val="+path : ""
                         height: scaleX(15);
                         width: scaleY(15);
                         fillMode: Image.PreserveAspectFit;

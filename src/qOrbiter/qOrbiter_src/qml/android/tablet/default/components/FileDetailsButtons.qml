@@ -1,6 +1,5 @@
 import QtQuick 1.0
 
-
 Row{
     id:controlrow
     anchors.bottom: parent.bottom
@@ -9,15 +8,13 @@ Row{
     spacing: scaleY(5)
     FileDetailsButton {
         id: buttonsq1
-
-        radius: 10
-        
+        radius: 10        
         //anchors.leftMargin: 18
         buttontext: "Play"
         MouseArea
         {
             anchors.fill: parent
-            onClicked: manager.playMedia(filedetailsclass.file)  //dce function
+            onClicked: {manager.playMedia(filedetailsclass.file) ; filedetailrect.destroy()} //dce function
         }
     }
     

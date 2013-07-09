@@ -24,29 +24,29 @@ Item {
         return y/100*manager.appHeight
     }
 
-    Rectangle{
-        anchors.fill: parent
-        id:bgFill
-        gradient: Gradient{
-            GradientStop{position: 0.0; color: "Black"}
-            GradientStop{position: .45; color: "darkgrey"}
-            GradientStop{position: .65; color: "black"}
-        }
-    }
+//    Rectangle{
+//        anchors.fill: parent
+//        id:bgFill
+//        gradient: Gradient{
+//            GradientStop{position: 0.0; color: "Black"}
+//            GradientStop{position: .45; color: "darkgrey"}
+//            GradientStop{position: .65; color: "black"}
+//        }
+//    }
 
     Image {
         id: appBackground
-        source: manager.b_orientation ? pSource : wSource
+        source: "img/bg.jpg"
         anchors.fill: parent
         property string pSource:""
         property string wSource:""
 
     }
 
-    function updateBackground(portait, wide){
-        appBackground.pSource = portait
-        appBackground.wSource = wide
-    }
+//    function updateBackground(portait, wide){
+//        appBackground.pSource = portait
+//        appBackground.wSource = wide
+//    }
 
 
     function screenchange(screenname )

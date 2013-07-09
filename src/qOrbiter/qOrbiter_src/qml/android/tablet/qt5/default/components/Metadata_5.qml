@@ -23,10 +23,9 @@ Item{
         height: childrenRect.height
         StyledText {
             id: video_title
-            width: scaleX(35)
+            width:parent.width
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text:dcenowplaying.episode =="" ? qsTr("Title: ")+ dcenowplaying.qs_mainTitle :qsTr("Program: ")+ dcenowplaying.tvProgram
-            font.bold: true
             font.italic: false
             smooth: true
             fontSize: scaleY(4)
@@ -35,13 +34,12 @@ Item{
         }
         StyledText {
             id: episode_title
-            width: scaleX(35)
-            text: qsTr("Episode: ")+ dcenowplaying.episode
-            font.bold: true
+            width:parent.width
+            text: qsTr("Episode: ")+ dcenowplaying.episode          
             //  wrapMode: "WrapAtWordBoundaryOrAnywhere"
             elide: "ElideRight"
             smooth: true
-            font.pointSize: scaleY(3.5)
+            fontSize: scaleY(4)
             visible:  dcenowplaying.episode =="" ? false: true
            // color:skinStyle.accentcolor
         }
@@ -65,12 +63,12 @@ Item{
         }
         StyledText {
             id: genre
-            width: scaleX(35)
+            width:parent.width
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text: qsTr("Genre(s): ") + dcenowplaying.genre
             smooth: true
-            fontSize: scaleY(2)
-            font.bold: true
+            fontSize: scaleY(3)
+
             visible:  dcenowplaying.genre =="" ? false: true
             MouseArea{
                 anchors.fill: genre
@@ -81,25 +79,24 @@ Item{
         }
         StyledText {
             id: released
-            width: scaleX(35)
+            width:parent.width
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text: qsTr("Released: ") + dcenowplaying.releasedate
             // font.italic: true
-            smooth: true
-            font.bold: true
-            fontSize: scaleY(2)
+            smooth: true            
+            fontSize: scaleY(4)
             visible:  dcenowplaying.releasedate =="" ? false: true
            // color:skinStyle.accentColor
         }
 
         StyledText {
             id: synopsis_text
-            width: scaleX(35)
+            width:parent.width
             text: qsTr("Synopsis: ") + dcenowplaying.synop
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             smooth: true
             font.bold: true
-            fontSize: scaleY(2)
+            fontSize: scaleY(3)
             color:"White"
             visible:  dcenowplaying.synop =="" ? false: true
         }

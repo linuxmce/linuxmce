@@ -126,4 +126,6 @@ QtObject{
     property color stage_bg: "lightSteelblue"
     property color bgcolor: "lightsteelblue"
 
+
+
 }
