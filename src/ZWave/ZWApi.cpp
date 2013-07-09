@@ -2564,6 +2564,7 @@ int ZWApi::ZWApi::getDeviceTemplate(int basic, int generic, int specific, char *
 					// DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "smoke detector found");
 				break;
 			}
+		break;  // hari, shame on you, forgetting a break here. ;) -tschak
 		case GENERIC_TYPE_AV_CONTROL_POINT:
 			devicetemplate = DEVICETEMPLATE_Generic_Tuner_CONST;
 			break;
