@@ -73,6 +73,7 @@ int send_once(int fd, char *message, char *arguments);
 int send_start(int fd, char *message, char *arguments);
 int send_stop(int fd, char *message, char *arguments);
 int send_core(int fd, char *message, char *arguments, int once);
+int send_pronto(int fd,char *message,char *arguments);
 int version(int fd, char *message, char *arguments);
 int get_pid(int fd, char *message, char *arguments);
 int get_command(int fd);
