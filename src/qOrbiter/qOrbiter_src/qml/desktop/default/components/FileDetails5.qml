@@ -1,15 +1,12 @@
 import QtQuick 1.1
 
 
-Rectangle {
+Item {
     id: filedetailrect
     width: scaleX(100)
     height:0
-    anchors.centerIn: parent
-    color:"transparent"
-    clip: true    
-    border.color: "white"
-    border.width: 3
+    anchors.centerIn: parent 
+    clip: true       
     property int bgImageProp:manager.q_subType ==="1" ? 43 : manager.q_attributetype_sort===53 ? 43 :36
 
     Timer{

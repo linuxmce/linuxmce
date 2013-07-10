@@ -43,7 +43,7 @@ Item {
         height: scaleY(25)
         width: scaleX(25)
         color:"black"
-        visible: manager.i_current_mediaType !== 11
+        visible: manager.i_current_mediaType !== 11 && manager.i_current_mediaType !==43
     }
 
 

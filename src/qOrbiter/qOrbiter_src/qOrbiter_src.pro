@@ -581,7 +581,8 @@ OTHER_FILES += Readme.txt \
     qml/android/phone/qt5default/Screens/Screen_1.qml \
     qml/android/tablet/qt5default/main.qml \
     qml/android/tablet/qt5default/Style.qml \
-    qml/android/tablet/qt5default/Screens/Screen_1.qml
+    qml/android/tablet/qt5default/Screens/Screen_1.qml \
+    qml/desktop/STB/components/FileDetails.qml
 
 android-g++{
 

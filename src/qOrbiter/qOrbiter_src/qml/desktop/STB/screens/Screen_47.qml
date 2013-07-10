@@ -43,14 +43,20 @@ Item {
         contentWidth: scaleX(25)
         anchors.top: parent.top
         model: dataModel
+        focus:true
         clip:true
         onCurrentIndexChanged: console.log("Current index changed: ==> " +currentIndex)
         Keys.onPressed: { // enter and back keys
-            if(event.key ===Qt.Key_Enter || (event.key === 16777220 || event.key ===16777221)) {
+            if(event.key ===Qt.Key_Enter || (event.key === 16777220 || event.key ===16777221 || event.key === Qt.Key_Return)) {
                 manager.setStringParam(4, dataModel.get(mediaList.currentIndex, "id"))
                 console.log("Current Index ==>"+mediaList.currentIndex)
                 mediaList.positionViewAtIndex(mediaList.currentIndex, ListView.Visible)
-               indexStack.append({"idx":mediaList.currentIndex})
+
+
+                if(indexStack.count !==0 && indexStack.get(indexStack.count).idx !==mediaList.currentIndex){
+                    indexStack.append({"idx":mediaList.currentIndex})
+                }
+
                 console.log("IndexStack length ==>" + indexStack.count)
                 depth++
                 return;
@@ -70,13 +76,15 @@ Item {
         Keys.onEscapePressed: {
             if(screen_forty_seven_of_nine.state=== "detail")
             {
+
                 screen_forty_seven_of_nine.state = "browsing"
+
             } else if (depth!==0){
                 manager.goBackGrid()
                 if(indexStack.count!==0){
-                mediaList.currentIndex = indexStack.get(indexStack.count-1).val
-                mediaList.positionViewAtIndex(mediaList.currentItem)
-                indexStack.remove(indexStack.count)
+                    mediaList.currentIndex = indexStack.get(indexStack.count-1).val
+                    mediaList.positionViewAtIndex(mediaList.currentItem)
+                    indexStack.remove(indexStack.count)
                 }
                 depth--
             }
@@ -121,6 +129,9 @@ Item {
             opacity:.85
             radius:5
         }
+        FileDetails{
+            id:file_details
+        }
 
         Behavior on width {
             PropertyAnimation{
@@ -128,8 +139,12 @@ Item {
             }
         }
         Keys.onEscapePressed: {
+            console.log("Setting grid back in focus")
+            console.log("Changing focus from details")
+            mediaList.forceActiveFocus()
             screen_forty_seven_of_nine.state = "browsing"
         }
+
     }
 
     Row{
@@ -144,7 +159,11 @@ Item {
         onActiveFocusChanged: {
             sorting_filter.forceActiveFocus()
         }
-
+        Behavior on opacity{
+            PropertyAnimation{
+                duration: 500
+            }
+        }
         function moveFocus(idx){
             if(idx !==-1 && idx !==childCount ){
                 for (var i = 0; i < filtering.children.length; i++){
@@ -225,6 +244,8 @@ Item {
             depth++
         }
 
+
+
         ListView{
             id:filterView
             height: scaleY(65)
@@ -272,7 +293,10 @@ Item {
                 target: infoPanel
                 width:0
             }
-
+            PropertyChanges {
+                target: filtering
+                opacity:1
+            }
         },
         State {
             name: "detail"
@@ -286,13 +310,15 @@ Item {
                 width:scaleX(100)
                 opacity:.90
             }
-            //            StateChangeScript{
-            //                name:updateIndex
-            //                script:{
-            //                    mediaList.positionViewAtIndex(mediaList.currentIndex, ListView.Beginning)
-            //                    infoPanel.forceActiveFocus()
-            //                }
-            //            }
+            PropertyChanges {
+                target: filtering
+                opacity:0
+            }
+            StateChangeScript{
+                script:{
+                    infoPanel.forceActiveFocus()
+                }
+            }
         }
     ]
 
