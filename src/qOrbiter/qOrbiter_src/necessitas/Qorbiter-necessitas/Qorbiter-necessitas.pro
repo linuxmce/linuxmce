@@ -35,7 +35,7 @@ TARGET=qorbiter-$$QT_VERSION
 #   machine. This will let you work with the qml files that are on the router as if they were local and make debugging and coding easier.
 
 
-folder_01.source = /mnt/remote/android-qml/
+#folder_01.source = /mnt/remote/android-qml/
 #folder_01.source = qml/android/
 #folder_01.target = qml
 
@@ -75,7 +75,7 @@ folder_01.source = /mnt/remote/android-qml/
         DEPLOYMENTFOLDERS = qmlcomponents base
         QML_IMPORT_PATH = "androidComponents"
 
-        DEPLOYMENTFOLDERS+=folder_01
+ #       DEPLOYMENTFOLDERS+=folder_01
 
         INSTALLS+= qmlplugins
         HEADERS += ../../plugins/AndroidInfo/androidsystem.h
