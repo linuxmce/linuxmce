@@ -11,13 +11,14 @@ ListView{
     Connections{
         target: mediaplaylist
         onActiveItemChanged:{
-            positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
+            playlist.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
         }
     }
     
     delegate: Item{
         height: scaleY(15)
         width: parent.width
+        clip:true
         Rectangle{
             anchors.fill: parent
             color:playlist.currentIndex === index? skinStyle.darkHighlightColor : skinStyle.lightHighlightColor
@@ -26,7 +27,7 @@ ListView{
         Image {
             id: playlistimage
             fillMode: Image.PreserveAspectCrop
-            source: index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: ""
+            source:  index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: ""
             anchors.fill: parent
             opacity: .5
 
@@ -40,7 +41,7 @@ ListView{
                     running: false
                     onTriggered: {
                         console.log("interval is" + interval)
-                        positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
+                       playlist.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
                         console.log("Current index is " + mediaplaylist.currentIndex)
                     }
                 }
