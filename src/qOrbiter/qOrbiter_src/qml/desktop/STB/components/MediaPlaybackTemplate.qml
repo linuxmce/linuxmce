@@ -1,6 +1,7 @@
 import QtQuick 1.1
-
+import "../../lib/handlers"
 Item {
+    id:template
     height: scaleY(100)
     width: scaleX(100)
     focus:true
@@ -11,29 +12,8 @@ Item {
         }
     }
 
-    ListView{
-        id:playlist
-        height: scaleY(65)
-        width: scaleX(25)
-        anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
-        model: dcenowplaying.qs_screen==="Screen_63.qml" ? simpleepg : mediaplaylist
-
-        delegate: Item{
-            height: scaleY(15)
-            width: parent.width
-            Rectangle{
-                anchors.fill: parent
-                color: "black"
-                opacity: .85
-            }
-            StyledText{
-                id:label
-                text:name
-                fontSize: mediumText
-                color:"white"
-            }
-        }
+    TemplateListView {
+        id: playlist
     }
 
 
@@ -43,7 +23,7 @@ Item {
         height: scaleY(25)
         width: scaleX(25)
         color:"black"
-        visible: manager.i_current_mediaType !== 11 && manager.i_current_mediaType !==43
+        visible: false
     }
 
 
@@ -67,15 +47,41 @@ Item {
             break;
 
         case Qt.Key_Plus: /*Plus sign */
-        manager.adjustVolume(+1)
-        break;
+            manager.adjustVolume(+1)
+            break;
 
         case Qt.Key_Minus: /* Minus Sign */
             manager.adjustVolume(-1)
+            break;
+        case Qt.Key_T:
+            if(playlist.state==="showing")
+                playlist.state="hidden"
+            else
+                playlist.state = "showing"
+
             break;
         default:
             console.log(event.key)
             break
         }
     }
+
+    states: [
+        State {
+            name: "video_playback"
+            when:manager.i_current_mediaType === 5
+            PropertyChanges {
+                target: playlist
+                state:"hidden"
+
+            }
+        }, State {
+            when:manager.i_current_mediaType === 4
+            name: "audio_playback"
+            PropertyChanges {
+                target: playlist
+                state:"showing"
+            }
+        }
+    ]
 }

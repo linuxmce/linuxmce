@@ -81,7 +81,7 @@ void ListModel::appendRow(gridItem *item)
     // qDebug() << "adding" << m_list.count()+1;
 //    gridItem * copiedItem = new gridItem(item->id(), item->name(), item->path(), item->index(), this );
     appendRows(QList<gridItem*>() << new gridItem(item->id(), item->name(), item->path(), item->index(), this ));
-    item->destruct();
+  //  item->destruct();
 }
 
 void ListModel::appendRows(const QList<gridItem *> &items)
@@ -132,15 +132,15 @@ void ListModel::handleItemChange()
 void ListModel::reset()
 {
     clearing = true;
-    QApplication::processEvents(QEventLoop::AllEvents);
+   // QApplication::processEvents(QEventLoop::AllEvents);
     emit modelAboutToBeReset();
     beginResetModel();
     resetInternalData();
     setProgress(0.0);
-    QApplication::processEvents(QEventLoop::AllEvents);
+   // QApplication::processEvents(QEventLoop::AllEvents);
     endResetModel();
     emit modelReset();
-    QApplication::processEvents(QEventLoop::AllEvents);
+   // QApplication::processEvents(QEventLoop::AllEvents);
     clearing = false;
 }
 

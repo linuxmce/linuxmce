@@ -123,6 +123,7 @@ Item {
         width: 0
         focus:false
         anchors.right: screen_forty_seven_of_nine.right
+        onActiveFocusChanged: file_details.forceActiveFocus()
         Rectangle{
             anchors.fill: parent
             color:"black"
@@ -297,6 +298,12 @@ Item {
                 target: filtering
                 opacity:1
             }
+            StateChangeScript{
+                script:{
+                    mediaList.forceActiveFocus()
+                    console.log("Setting Media list focus to active.")
+                }
+            }
         },
         State {
             name: "detail"
@@ -317,6 +324,7 @@ Item {
             StateChangeScript{
                 script:{
                     infoPanel.forceActiveFocus()
+                    console.log("Setting info panel focus to active.")
                 }
             }
         }

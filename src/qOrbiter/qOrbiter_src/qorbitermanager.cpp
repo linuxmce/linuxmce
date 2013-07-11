@@ -274,13 +274,15 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
      */
 }
 
+
+
 void qorbiterManager::gotoQScreen(QString s)
 {
 
     if(s == "Screen_1.qml")
     {
         bool t = false;
-
+        emit keepLoading(t);
         emit clearModel();
         emit cancelRequests();
         emit resetFilter();

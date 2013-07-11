@@ -5,6 +5,9 @@ Item{
     height: scaleY(10)
     width: scaleX(10)
     property string actionLabel:""
+    property int rowIndex:-1
+    signal execute()
+    onActiveFocusChanged: console.log(actionLabel + " gained active focus")
     
     Rectangle{
         anchors.fill: parent
@@ -15,15 +18,17 @@ Item{
         id:fdActionLabel
         text:fdActionButton.actionLabel
         fontSize: mediumText
+        color:parent.activeFocus ?  "white" :"grey"
     }
 
+
+
     Keys.onLeftPressed: {
-        if(fd_action_row.currentItem !==0)
-            fd_action_row.currentItem--
+      fd_action_row.moveFocus(rowIndex-1)
     }
     Keys.onRightPressed: {
-        if(fd_action_row.currentItem !== fd_action_row.children.length){
-                fd_action_row.currentItem++
-        }
+         fd_action_row.moveFocus(rowIndex+1)
     }
+    Keys.onEnterPressed: execute()
+    Keys.onReturnPressed: execute()
 }
