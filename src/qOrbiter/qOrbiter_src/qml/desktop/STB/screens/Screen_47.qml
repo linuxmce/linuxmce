@@ -214,9 +214,10 @@ Item {
             rowindex: 4
             onActiveFocusChanged: if(activeFocus) {filter_view.currentFilterModel = "" }
             Keys.onPressed: {
-                if(event.key === Qt.Key_Enter){
+                if(event.key === Qt.Key_Enter|| event.key ===Qt.Key_Return){
                     manager.playMedia("!G"+iPK_Device)
                 }
+                console.log(event.key)
             }
         }
     }

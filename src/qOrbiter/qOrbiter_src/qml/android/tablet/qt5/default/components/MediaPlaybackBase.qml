@@ -114,6 +114,7 @@ Item{
         width: parent.width
         clip: true
         anchors.left: metaDataPanel.right
+
         PlaylistView{
             id:playlist
             anchors.left: parent.left

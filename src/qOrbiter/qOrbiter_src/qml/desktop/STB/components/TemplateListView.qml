@@ -6,6 +6,7 @@ ListView{
     width: scaleX(35)
     anchors.left: parent.left
     anchors.verticalCenter: parent.verticalCenter
+     Component.onCompleted: manager.setBoundStatus(true)
     model: dcenowplaying.qs_screen==="Screen_63.qml" ? simpleepg : mediaplaylist
     
     Connections{
@@ -16,20 +17,21 @@ ListView{
     }
     
     delegate: Item{
-        height: scaleY(15)
+        height: index === dcenowplaying.m_iplaylistPosition ? scaleY(12) : scaleY(8)
         width: parent.width
         clip:true
         Rectangle{
             anchors.fill: parent
             color:playlist.currentIndex === index? skinStyle.darkHighlightColor : skinStyle.lightHighlightColor
             opacity: .85
+            border.width: index === dcenowplaying.m_iplaylistPosition ? 4 : 0
         }
         Image {
             id: playlistimage
             fillMode: Image.PreserveAspectCrop
             source:  index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: ""
             anchors.fill: parent
-            opacity: .5
+            opacity: 1
 
             Connections{
                 target: mediaplaylist
@@ -49,7 +51,7 @@ ListView{
         }
         StyledText{
             id:label
-            text:name
+            text:index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
             fontSize: mediumText
             color:"white"
             width: parent.width

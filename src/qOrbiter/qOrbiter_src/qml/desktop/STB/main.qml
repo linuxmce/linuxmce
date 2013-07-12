@@ -129,6 +129,7 @@ Item {
     {
         console.log("c++ slot orientation changed")
         console.log(manager.appHeight+" x " + manager.appWidth)
+        pageLoader.forceActiveFocus()
     }
 
 
@@ -262,7 +263,7 @@ Item {
         anchors.left:parent.left
 
         onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
-        z:dceplayer.mediaPlaying ==false ? -5 : 0
+        z:dceplayer.mediaPlaying ===false ? -5 : 0
         Component.onCompleted: {
             setWindowSize(manager.appHeight, manager.appWidth);
 
