@@ -19,17 +19,4 @@ namespace DCE
   {
   
   }
-
-  void FamicomEmulatorModel::updateTemplateVariables()
-  {
-    // TODO: come back here and figure out a better scheme for inherited
-    // configuration writers.
-
-    // ConfigurationWriter config();
-    // if (m_mapMedia_Find("default").empty())
-    //   {
-    //	m_pConfigurationWriter->Add("###ROMPATH###",FileUtils::BasePath(m_mapMedia_Find("flop")));
-    //  }
-  }
-
 }

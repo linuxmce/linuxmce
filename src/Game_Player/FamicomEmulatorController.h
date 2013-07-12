@@ -24,7 +24,7 @@ namespace DCE
     virtual void insertMediaNamed(string sMediaFile, string sSlot);
 
     FamicomEmulatorModel *m_pEmulatorModel;
-
+    virtual string getRomPathFromSlot();
     
 
   };

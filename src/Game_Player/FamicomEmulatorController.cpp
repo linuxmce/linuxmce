@@ -34,4 +34,18 @@ namespace DCE
 
   }
 
+  string FamicomEmulatorController::getRomPathFromSlot()
+  {
+    string sMedia;
+    if (!this->getMediaInSlot(sMedia))
+      {
+	// No media in cart slot, try floppy.
+	if (!this->getMediaInSlot(sMedia,"flop"))
+	  {
+	    return "";
+	  }
+      }
+    return FileUtils::BasePath(sMedia);
+  }
+
 }
