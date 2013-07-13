@@ -34,101 +34,31 @@ Item {
 
             Behavior on x {
                 PropertyAnimation{
-                    duration: 750
-                    easing.type: Easing.InOutBounce
-                    easing.amplitude: .5
+                    duration: 750                   
                 }
             }
 
-            Column{
+            Loader{
                 id:textCol
-                spacing: scaleY(.5)
-                width: childrenRect.width
-                height: dcenowplaying.aspect == "wide"?scaleY(25): scaleY(35)
-                visible: playlist.state === "hidden"
-                StyledText {
-                    id: generaltitle
-                    width: scaleX(45)
-                    text:  dcenowplaying.mediatitle
-                    font.bold: true
-                    //  wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    elide: "ElideRight"
-                    smooth: true
-                    fontSize: 40
-                    visible:  dcenowplaying.mediatitle =="" ? false: true
-                    color:skinStyle.accentcolor
-                }
-                StyledText { /* showing up with performers! fix */
-                    id: title_text
-                    width: scaleX(45)
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: dcenowplaying.qs_mainTitle
-                    font.bold: true
-                    font.italic: true
-                    smooth: true
-                    fontSize: 32
-                    visible:  dcenowplaying.qs_mainTitle =="" ? false: true
-                    opacity: .65
-                    style: Text.Sunken
-                }
-                StyledText {
-                    id: starring_text
-                    width: scaleX(40)
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: dcenowplaying.performerlist == "" ? dcenowplaying.performerlist : qsTr("No Performer Information")
-                    color: "Aliceblue"
-                    smooth: true
-                    fontSize: 32
-                    elide: "ElideRight"
-                    visible:false
-                }
-
-                StyledText {
-                    id: album_text
-                    width: scaleX(35)
-                    text: dcenowplaying.album
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    smooth: true
-                    font.bold: true
-                    fontSize: 32
-                    color:style.maincolor
-                }
-
-                StyledText {
-                    id: genre_text
-                    width: scaleX(35)
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: qsTr("Genre(s): ") + dcenowplaying.genre
-                    smooth: true
-                    fontSize: 32
-                    font.bold: true
-                    visible:  dcenowplaying.genre =="" ? false: true
-
-                }
-                StyledText {
-                    id: released_text
-                    width: scaleX(35)
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    text: qsTr("Released: ") + dcenowplaying.releasedate
-                    // font.italic: true
-                    smooth: true
-                    font.bold: true
-                    fontSize: 32
-                    visible:  dcenowplaying.releasedate =="" ? false: true
-                    color:skinStyle.accentColor
-                }
+                source:"Metadata"+manager.i_current_mediaType+".qml"
+                visible:playlist.state === "hidden"
             }
+
+
             Row{
                 id:temporalData
                 height: childrenRect.height
                 width: childrenRect.width
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
+                anchors.rightMargin: scaleX(15)
                 visible: playlist.state === "hidden"
+                spacing:scaleX(2)
                 StyledText {
                     id: updating_time
                     text: dceTimecode.qsCurrentTime
                     fontSize:32
+                    color:"white"
                 }
 
                 StyledText {
@@ -142,12 +72,10 @@ Item {
                     id: totalTime
                     text: dceTimecode.qsTotalTime
                     fontSize:32
+                    color:"white"
                 }
             }
         }
-
-
-
     }
 
     NowPlayingImage {
@@ -156,14 +84,12 @@ Item {
         anchors.topMargin: scaleY(20)
         anchors.right: parent.right
         anchors.rightMargin: scaleX(15)
-        visible:false
     }
-
-
 
 
     Keys.onVolumeDownPressed: manager.adjustVolume("-1")
     Keys.onVolumeUpPressed:  manager.adjustVolume("+1")
+
 
     Keys.onPressed: {
 
@@ -180,7 +106,6 @@ Item {
         case 16777346: /* Keycode Track Backwards */
             manager.changedPlaylistPosition((mediaplaylist.currentIndex-1))
             break;
-
         case Qt.Key_Plus: /*Plus sign */
             manager.adjustVolume(+1)
             break;
@@ -194,6 +119,21 @@ Item {
             else
                 playlist.state = "showing"
 
+            break;
+
+        case Qt.Key_Pause:
+                manager.pauseMedia()
+            break;
+        case Qt.Key_P:
+            manager.pauseMedia()
+            break;
+
+        case Qt.Key_PageUp:
+            manager.changedPlaylistPosition(mediaplaylist.currentIndex-1)
+            break;
+
+        case Qt.Key_PageDown:
+             manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
             break;
         default:
             console.log(event.key)
@@ -211,7 +151,7 @@ Item {
             }
             PropertyChanges {
                 target: imageholder
-                visible:false
+                visible:true
             }
 
         }, State {

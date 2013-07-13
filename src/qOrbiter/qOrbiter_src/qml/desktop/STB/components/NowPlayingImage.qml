@@ -5,8 +5,8 @@ import "../../lib/effects"
 
 Rectangle{
     id:imageholder
-    height:childrenRect.height
-    width:scaleX(30)
+    height: playlist.state==="hidden" ? childrenRect.height : 0
+    width: playlist.state === "hidden" ? scaleX(30) :0
     color: "transparent"
     Connections{
         target: dcenowplaying
@@ -30,6 +30,7 @@ Rectangle{
         distance: 4
         color:"black"
         anchors.fill: sourceItem
+        visible:nowplayingimage.visible
     }
     Image {
         id: nowplayingimage
@@ -39,7 +40,7 @@ Rectangle{
         source: "image://listprovider/updateobject/"+securityvideo.timestamp
         anchors.horizontalCenter: parent.horizontalCenter
         smooth: true
-        visible: source == undefined ? false : true
+        visible: playlist.state ==="hidden" ? source == undefined ? false : true :false
     }
     Timer{
         id:refreshtimer

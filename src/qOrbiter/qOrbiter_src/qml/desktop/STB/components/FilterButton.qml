@@ -32,6 +32,5 @@ Item{
     Keys.onUpPressed: filterView.decrementCurrentIndex()
     Keys.onDownPressed: filterView.incrementCurrentIndex()
     Keys.onEnterPressed: filter_view.selectItem()
-
-
+    Keys.onReturnPressed: filter_view.selectItem()
 }
