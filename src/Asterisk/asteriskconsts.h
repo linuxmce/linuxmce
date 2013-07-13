@@ -57,7 +57,7 @@
 #define EVENT_NEWCHANNEL 	"Newchannel"
 #define EVENT_NEWEXTEN 		"Newexten"
 #define EVENT_HANGUP 		"Hangup"
-#define EVENT_LINK			"Link"
+#define EVENT_LINK			"Bridge"
 #define EVENT_NEWSTATE		"Newstate"
 #define EVENT_PEER_STATUS	"PeerStatus"
 #define EVENT_EXTEN_STATUS	"ExtensionStatus"
