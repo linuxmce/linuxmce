@@ -2567,6 +2567,15 @@ void ScreenHandler::SCREEN_FileSave(long PK_Screen, int iPK_MediaType, int iEK_D
 		    // Move File uses its own screen, but hides the Folder button, as it is superfluous.
 		    m_pOrbiter->CMD_Goto_DesignObj(0,TOSTRING(DESIGNOBJ_mnuMoveFile_CONST),"","",false,false);
 		    m_pOrbiter->CMD_Set_Text(TOSTRING(DESIGNOBJ_mnuMoveFile_CONST), m_pOrbiter->m_mapTextString[2174], TEXT_STATUS_CONST); // FIXME: use CONST
+		    string sPicture = m_mapKeywords_Find("PICTURE");
+		    if (sPicture.empty() == false)
+		      {
+			size_t size;
+			char *pGraphicData = m_pOrbiter->ReadFileIntoBuffer(sPicture,size);
+			m_pOrbiter->CMD_Update_Object_Image("6254.0.0.2355","jpg",pGraphicData,(int)size,"0");
+			delete [] pGraphicData;
+			pGraphicData=NULL;
+		      }
 		  }
 		else
 		  {
@@ -4023,33 +4032,25 @@ void ScreenHandler::SCREEN_DevIncomingCall(long PK_Screen, string sPhoneNumber, 
 //-----------------------------------------------------------------------------------------------------
 void ScreenHandler::SCREEN_Call_Dropped(long PK_Screen, string sReason)
 {
-	m_pOrbiter->CMD_Set_Variable(VARIABLE_My_Channel_ID_CONST, "");
-	m_pOrbiter->CMD_Set_Variable(VARIABLE_My_Call_ID_CONST, "");
-	m_sMyCallID.clear();
-
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SCREEN_Call_Dropped : my call is now %s", m_sMyCallID.c_str());
-
-	if(
-		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_devCallInProgress_CONST			|| 
-		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_devIncomingCall_CONST				||
-		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuPopupMessage_CONST				||
-		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuActiveCalls_CONST				|| 
-		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuMakingLinPhoneBroadcast_CONST		||
-		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuMenu2_CONST				||
-		GetCurrentScreen_PK_DesignObj() == DESIGNOBJ_mnuAudioCallInProgress_CONST		||
-		GetCurrentScreen_PK_DesignObj() == 4815 	// devCallInProgress for SmallUI. BAD Pluto, BAD! Duplicate CONST!
-	)
-	{
-		DCE::SCREEN_Main screen_Main(m_pOrbiter->m_dwPK_Device, m_pOrbiter->m_dwPK_Device, "");
-		m_pOrbiter->SendCommand(screen_Main);
-	}
-	else
-	{
-		m_pOrbiter->CMD_Refresh("*");
-	}
-
-	m_TelecomCommandStatus = tcsDirectDial;
-	m_pOrbiter->CMD_Display_Alert("Call dropped. Reason: " + sReason, "", "5", interuptAlways);
+  m_pOrbiter->CMD_Set_Variable(VARIABLE_My_Channel_ID_CONST, "");
+  m_pOrbiter->CMD_Set_Variable(VARIABLE_My_Call_ID_CONST, "");
+  m_sMyCallID.clear();
+  
+  LoggerWrapper::GetInstance()->Write(LV_STATUS, "SCREEN_Call_Dropped : my call is now %s", m_sMyCallID.c_str());
+  
+  // If something was playing, we go back to the now playing remote,
+  // Otherwise, we bounce back to main. 
+  if( m_pOrbiter->m_sNowPlaying.length())
+    {
+      m_pOrbiter->CMD_Goto_Screen("",SCREEN_CurrentlyActiveRemote_CONST);
+    }
+  else
+    {
+      m_pOrbiter->CMD_Goto_Screen("",SCREEN_Main_CONST);
+    }
+  
+  m_TelecomCommandStatus = tcsDirectDial;
+  m_pOrbiter->CMD_Display_Alert("Call dropped. Reason: " + sReason, "", "5", interuptAlways);
 }
 //-----------------------------------------------------------------------------------------------------
 void ScreenHandler::SCREEN_Assisted_Transfer_In_Progress(long PK_Screen, bool bTrueFalse, string sTask)
