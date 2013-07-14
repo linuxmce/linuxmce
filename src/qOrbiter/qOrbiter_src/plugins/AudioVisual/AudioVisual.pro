@@ -18,7 +18,7 @@ contains(QT_VERSION,5.0.*){
 CONFIG += qt plugin
 CONFIG += warn_off
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
-INCLUDEPATH += ../../../../ ../../../../DCE/
+INCLUDEPATH += ../../../../ ../../../../DCE/ $$[QT_INSTALL_PREFIX]/include/phonon/phonon
 
 TARGET = $$qtLibraryTarget($$TARGET)
 
