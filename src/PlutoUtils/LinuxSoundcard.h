@@ -10,6 +10,5 @@
 #include "DCE/Logger.h"
 
 using namespace DCE;
-string TranslateSoundCard(string sInput,string sIPAddress="");
-
-#endif
+  string TranslateSoundcard(string sInput,string sIPAddress="");
+#endif /* LINUXSOUNDCARD_H */
