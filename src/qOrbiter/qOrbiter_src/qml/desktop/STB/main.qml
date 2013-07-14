@@ -248,14 +248,18 @@ Item {
             pageLoader.forceActiveFocus()
         else if (pageLoader.activeFocus)
             ftr.forceActiveFocus()
-        else if(ftr.activeFocus)
+        else if(ftr.activeFocus && dceplayer.mediaPlaying)
+            dceplayer.forceActiveFocus()
+        else if(dceplayer.activeFocus)
             hdr.forceActiveFocus()
         else
             pageLoader.forceActiveFocus()
 
         console.log("Header Focus::"+hdr.activeFocus)
-        console.log("Loader Focus::"+pageLoader.activeFocus)
-        console.log("Footer Focus::"+ftr.activeFocus)
+        console.log("Loader Focus::"+pageLoader.item.focus)
+        console.log("Footer Focus::"+ftr.isActive)
+        console.log("Dceplayer Focus::"+dceplayer.activeFocus)
+
         ftr.currentItem = -1
     }
 
@@ -293,7 +297,6 @@ Item {
         onActiveFocusChanged: {
             if(activeFocus){
                 console.log("Media Player has focus")
-
             }
         }
 
@@ -316,7 +319,7 @@ Item {
 
         Keys.onVolumeDownPressed: manager.adjustVolume("-1")
         Keys.onVolumeUpPressed:  manager.adjustVolume("+1")
-
+        Keys.onTabPressed: swapFocus()
 
         Keys.onPressed: {
 

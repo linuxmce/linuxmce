@@ -7,16 +7,19 @@ Item{
     width: qmlroot.width
     height:scaleY(14)
     anchors.top: parent.bottom
+    property bool isActive: false
     onActiveFocusChanged:{ if(activeFocus){
             scenarioList.forceActiveFocus()
             ftr.state="showing"
             console.log("showing state")
             scenarioList.currentIndex = -1
+            isActive = true
         }
         else{
             currentItem = -1
             ftr.state = "hidden"
             pageLoader.item.focus = true
+            isActive = false;
         }
     }
     Component.onCompleted: ftr.state = "hidden"
@@ -114,6 +117,7 @@ Item{
             }
             signal pressed()
 
+
             ListView{
                 id:submodel
                 height:ftr.currentItem === index ?scaleY(85) : 0
@@ -153,6 +157,15 @@ Item{
                         onPressed:if(submodel.currentIndex === index) manager.execGrp(params)
                     }
 
+                    MouseArea{
+                        anchors.fill: parent
+                        onReleased:{ manager.execGrp(params)
+                            currentItem = -1
+                            swapFocus()
+                            ftr.state = "hidden"
+                        }
+                    }
+
                 }
 
                 Behavior on height {
@@ -162,6 +175,11 @@ Item{
 
                 }
             }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {scenarioList.currentIndex = index; forceActiveFocus()}
+            }
+
         }
 
     }

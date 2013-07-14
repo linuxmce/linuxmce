@@ -55,6 +55,14 @@ Item
             color: "transparent"
             
             MediaListClickHandler {
+                onClicked: {
+                    if(indexStack.count !==0 && indexStack.get(indexStack.count).idx !==mediaList.currentIndex){
+                        indexStack.append({"idx":mediaList.currentIndex})
+                    }
+                    console.log("IndexStack length ==>" + indexStack.count)
+                    depth++
+
+                }
             }
             
 

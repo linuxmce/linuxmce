@@ -12,11 +12,6 @@ Item {
         }
     }
 
-    TemplateListView {
-        id: playlist
-    }
-
-
     Item{
         id:mediaInformation
         height: imageholder.height *.95
@@ -43,7 +38,6 @@ Item {
                 source:"Metadata"+manager.i_current_mediaType+".qml"
                 visible:playlist.state === "showing"
             }
-
 
             Row{
                 id:temporalData
@@ -142,6 +136,10 @@ Item {
             console.log(event.key)
             break
         }
+    }
+
+    TemplateListView {
+        id: playlist
     }
 
     states: [
