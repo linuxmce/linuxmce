@@ -263,7 +263,7 @@ Item {
             onLoaded: {
                 console.log("Screen Changed:" + pageLoader.source)
             }
-            visible: !dceplayer.focus && !dceplayer.mediaPlaying
+            visible: !dceplayer.focus
             z:5
 
         }

@@ -24,6 +24,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
 #ifdef QT4
 
      QList <Phonon::AudioOutputDevice> outputs = Phonon::BackendCapabilities::availableAudioOutputDevices();
+
      qDebug() << outputs;
 
     mediaObject = new Phonon::MediaObject();
@@ -40,7 +41,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     // layout = new QVBoxLayout();
     // layout->addWidget(videoSurface);
     //  window->setLayout(layout);
-    filterProxy = new ColorFilterProxyWidget(this);
+    filterProxy = new QGraphicsProxyWidget(this);
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
     filterProxy->hide();
@@ -83,6 +84,8 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaPlayer, SIGNAL(mediaIdChanged(QString)), this, SLOT(setFileReference(QString)));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(raise()));
+
+    QObject::connect(mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(setState(Phonon::State,Phonon::State)));
 
     QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
     QObject::connect(mediaPlayer,SIGNAL(jumpToStreamPosition(int)), this, SLOT(setMediaPosition(int)));

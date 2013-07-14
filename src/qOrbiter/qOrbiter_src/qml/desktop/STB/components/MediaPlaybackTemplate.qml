@@ -118,7 +118,10 @@ Item {
                 playlist.state="hidden"
             else
                 playlist.state = "showing"
+            break;
 
+        case Qt.key_s:
+            manager.stopMedia()
             break;
 
         case Qt.Key_Pause:

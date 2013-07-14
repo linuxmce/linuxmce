@@ -77,7 +77,7 @@ public:
     QVBoxLayout *layout;
     qMediaPlayer *mediaPlayer;
 
-    ColorFilterProxyWidget *filterProxy;
+    QGraphicsProxyWidget *filterProxy;
     QList<QTcpSocket*> clientList;
     QProcess *mountProcess;
 
@@ -179,6 +179,32 @@ public slots:
     void newClientConnected();
     void startTimeCodeServer();
     void stopTimeCodeServer();
+
+    void handleError(){
+
+
+    }
+
+    void setState(Phonon::State,Phonon::State){
+        qDebug() << mediaObject->state();
+        int i =  mediaObject->errorType();
+        if(i==0){
+            setCurrentStatus("Media Player Loading");
+        } else if( i== 1){
+            setCurrentStatus("Media Player Stopped");
+        } else if( i ==2) {
+            setCurrentStatus("Media is playing.");
+        } else if (i == 3) {
+            setCurrentStatus("Media is buffering");
+        } else if ( i == 4 ){
+            setCurrentStatus("Media is paused.");
+        }
+        else if (i == 5 ){
+            setCurrentStatus("Media Error.");
+            mediaPlayer->EVENT_Playback_Completed(mediaPlayer->currentMediaUrl.toStdString(), mediaPlayer->i_StreamId, false);
+            qWarning("Media could not start.");
+        }
+    }
 
 
     void setMediaPosition(int msec) {

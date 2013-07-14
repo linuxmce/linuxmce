@@ -110,8 +110,6 @@ linux-g++{
         folder_03.target = $$DESTDIR
         DEFINES += for_desktop
 
-
-
         DEPLOYMENTFOLDERS+= plugins_folder
         DEPLOYMENTFOLDERS += folder_01  folder_03
 	QML_IMPORT_PATH=imports
@@ -292,7 +290,7 @@ QML_IMPORT_PATH=imports
 symbian:TARGET.UID3 = 0xE0D07D4D
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 #LinuxMCE Specific include path. Linking in the app instead of against dce libs for multi-platform expediency.
-INCLUDEPATH += ../../ ../../DCE/
+INCLUDEPATH += ../../ ../../DCE/ $$[QT_INSTALL_PREFIX]/include/phonon/phonon
 
 #turtlenecks and such
 macx{
