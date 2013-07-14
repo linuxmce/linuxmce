@@ -9,7 +9,7 @@
 
 #else
 #include <QBoxLayout>
-#include <Phonon>
+#include <phonon>
 #include <QDeclarativeItem>
 #include <QKeyEvent>
 
