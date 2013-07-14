@@ -120,12 +120,36 @@ public:
 			return (m_mapParameters[DEVICEDATA_Speak_in_the_House_CONST]=="1" ? true : false);
 	}
 
+	string Get_Password()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Password_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_Password_CONST];
+	}
+
 	string Get_Server_IP()
 	{
 		if( m_bRunningWithoutDeviceData )
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Server_IP_CONST);
 		else
 			return m_mapParameters[DEVICEDATA_Server_IP_CONST];
+	}
+
+	string Get_Sound_Card()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Sound_Card_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_Sound_Card_CONST];
+	}
+
+	bool Get_Ignore_Video_Pipes()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Ignore_Video_Pipes_CONST)=="1" ? true : false);
+		else
+			return (m_mapParameters[DEVICEDATA_Ignore_Video_Pipes_CONST]=="1" ? true : false);
 	}
 
 };
@@ -236,7 +260,10 @@ public:
 	string DATA_Get_PhoneType() { return GetData()->Get_PhoneType(); }
 	string DATA_Get_PhoneNumber() { return GetData()->Get_PhoneNumber(); }
 	bool DATA_Get_Speak_in_the_House() { return GetData()->Get_Speak_in_the_House(); }
+	string DATA_Get_Password() { return GetData()->Get_Password(); }
 	string DATA_Get_Server_IP() { return GetData()->Get_Server_IP(); }
+	string DATA_Get_Sound_Card() { return GetData()->Get_Sound_Card(); }
+	bool DATA_Get_Ignore_Video_Pipes() { return GetData()->Get_Ignore_Video_Pipes(); }
 	//Event accessors
 	void EVENT_Incoming_Call(string sPhoneCallerID) { GetEvents()->Incoming_Call(sPhoneCallerID.c_str()); }
 	//Commands - Override these to handle commands from the server
