@@ -41,6 +41,7 @@ using namespace DCE;
 #include "SIP_Thread.h"
 
 #include "pluto_main/Define_Button.h"
+#include "PlutoUtils/LinuxSoundcard.h"
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -80,43 +81,54 @@ bool SimplePhone::GetConfig()
     // The configuration parameters DATA_ are now populated
     
 	string sServerIP = DATA_Get_Server_IP();
+	string sSoundCard = DATA_Get_Sound_Card();
+	string sAlsaDevice = "asym_analog";
+	    
 	SimplePhoneConf::Instance().Set_Server_IP(sServerIP.empty() ? "dcerouter" : sServerIP);
 
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Server IP: %s", SimplePhoneConf::Instance().Get_Server_IP().c_str());
 
-	/* Get MD Audio Settings */
-
-	string sAudioSettings = Get_MD_AudioSettings();
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "MD Audio Settings: %s", sAudioSettings.c_str());
-	string sAlsaDevice = "asym_analog";
-	// TODO: FIX ME with the changes to asound.conf by l3top
-	for (size_t i = 0; i < sAudioSettings.length(); i++)
-	{
+	if (sSoundCard.empty())
+	  {
+	    /* Sound card device data is empty - Get MD Audio Settings */
+	    
+	    string sAudioSettings = Get_MD_AudioSettings();
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "MD Audio Settings: %s", sAudioSettings.c_str());
+	    // TODO: FIX ME with the changes to asound.conf by l3top
+	    for (size_t i = 0; i < sAudioSettings.length(); i++)
+	      {
 		switch (sAudioSettings[i])
-		{
-			case 'C':
-			case 'O':
-				sAlsaDevice = "default"; // used to be "asym_spdif";
-				break;
-			case 'S':
-			case 'L':
-				sAlsaDevice = "default"; // used to be "asym_analog";
-				break;
-			case 'M':
-			        if (FileUtils::FileExists("/etc/pluto/simplephone.conf")) {
-                                    sAlsaDevice = "donttouch"; // used to be "plughw:1";
-                                } else {
-                                    sAlsaDevice = "default";   // If we do not have a simplephone.conf we create a default one.
-                                }
-				break;
-			case 'H':
-				sAlsaDevice = "default"; // used to be "asym_hdmi";
-				break;
-			default:
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Flag unprocessed: '%c'", sAudioSettings[i]);
-		}
-	}
-
+		  {
+		  case 'C':
+		  case 'O':
+		    sAlsaDevice = "default"; // used to be "asym_spdif";
+		  break;
+		  case 'S':
+		  case 'L':
+		    sAlsaDevice = "default"; // used to be "asym_analog";
+		  break;
+		  case 'H':
+		    sAlsaDevice = "default"; // used to be "asym_hdmi";
+		    break;
+		  default:
+		    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Flag unprocessed: '%c'", sAudioSettings[i]);
+		  }
+	      }
+	  }
+	else
+	  {
+	    /* An explicit sound card is specified, use it. */
+	    string sSoundCardNumber = TranslateSoundcard(sSoundCard);
+	    if (sSoundCardNumber.empty()) // Somehow the translate failed
+	      {
+		sAlsaDevice = "default"; // use the default.
+	      }
+	    else
+	      {
+		sAlsaDevice = "plughw:"+sSoundCardNumber;
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Soundcard explicitly set by pulldown to plughw:%s",sSoundCardNumber.c_str());
+	      }
+	  }
 	/* Read config file template, replace certain settings and write Linphone config file for SIP Thread */
 	vector<string> vectLinphoneConfig;
 	FileUtils::ReadFileIntoVector("/usr/pluto/templates/simplephone.conf", vectLinphoneConfig);
@@ -130,17 +142,17 @@ bool SimplePhone::GetConfig()
 
                 if (strstr(pcConfigLine, "playback_dev_id=") == pcConfigLine)
 		{
-			vectLinphoneConfig[i] = "playback_dev_id=ALSA: " + sAlsaDevice;
+			vectLinphoneConfig[i] = "playback_dev_id=ALSA:" + sAlsaDevice;
 		}
 
 		if (strstr(pcConfigLine, "ringer_dev_id=") == pcConfigLine)
 		{
-			vectLinphoneConfig[i] = "ringer_dev_id=ALSA: " + sAlsaDevice;
+			vectLinphoneConfig[i] = "ringer_dev_id=ALSA:" + sAlsaDevice;
 		}
 
 		if (strstr(pcConfigLine, "capture_dev_id=") == pcConfigLine)
 		{
-			vectLinphoneConfig[i] = "capture_dev_id=ALSA: " + sAlsaDevice;		
+			vectLinphoneConfig[i] = "capture_dev_id=ALSA:" + sAlsaDevice;		
 		}
 
 	}

@@ -77,7 +77,10 @@ public:
 	string DATA_Get_PhoneType();
 	string DATA_Get_PhoneNumber();
 	bool DATA_Get_Speak_in_the_House();
+	string DATA_Get_Password();
 	string DATA_Get_Server_IP();
+	string DATA_Get_Sound_Card();
+	bool DATA_Get_Ignore_Video_Pipes();
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Incoming_Call(string sPhoneCallerID);
@@ -122,7 +125,6 @@ public:
 
 	virtual void CMD_Phone_Drop() { string sCMD_Result; CMD_Phone_Drop(sCMD_Result,NULL);};
 	virtual void CMD_Phone_Drop(string &sCMD_Result,Message *pMessage);
-
 
 //<-dceag-h-e->
     };
