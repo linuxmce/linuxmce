@@ -40,6 +40,7 @@ class MediaManager : public QDeclarativeItem
     Q_PROPERTY(bool hasError READ getErrorStatus WRITE setErrorStatus NOTIFY hasErrorChanged)
     Q_PROPERTY(QString lastError READ getMediaError WRITE setMediaError NOTIFY lastErrorChanged)
     Q_PROPERTY(int mediaBuffer READ getMediaBuffer WRITE setMediaBuffer NOTIFY mediaBufferChanged)
+    Q_PROPERTY(qreal volume READ getVolume NOTIFY volumeChanged)
 
     Q_PROPERTY(QString serverAddress READ getServerAddress WRITE setServerAddress NOTIFY serverAddressChanged)
     Q_PROPERTY(int deviceNumber READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
@@ -63,6 +64,7 @@ public:
     QString lastError;
 
     //--------------------------
+    qreal volume;
 
 
     QString currentStatus;
@@ -116,7 +118,19 @@ signals:
     void serverAddressChanged();
     void deviceNumberChanged();
 
+    void volumeChanged();
+
 public slots:
+
+    void setVolume(qreal vol){
+        qDebug() << vol;
+        volume = vol;
+        emit volumeChanged();
+    }
+
+    qreal getVolume(){
+        return volume;
+    }
 
     void mediaStarted(){setMediaPlaying(true);  }
 

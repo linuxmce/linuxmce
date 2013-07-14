@@ -1574,6 +1574,10 @@ void qMediaPlayer::CMD_Select_B(string &sCMD_Result,Message *pMessage){
 void qMediaPlayer::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMessage){
     cout << "Need to implement command #89 - Volume Up" << endl;
     cout << "Repeat Count=" << iRepeat_Command << endl;
+    qreal c = mp_manager->audioSink->volume();
+     qWarning() << "Current volume" << c;
+    qreal d = c+0.01;
+    mp_manager->audioSink->setVolume(d);
 }
 
 //<-dceag-c89-e->
@@ -1585,6 +1589,15 @@ void qMediaPlayer::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *p
 /** If specified, repeat the volume down this many times. */
 
 void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMessage){
+    qreal c = mp_manager->audioSink->volume();
+    qWarning() << "Current volume" << c;
+    qreal d = c-.01;
+    if(d < 0){
+        d= 0;
+    }
+     mp_manager->audioSink->setVolume(d);
+     qWarning("Set audio level down.");
+
 
 }
 //<-dceag-c90-e->
@@ -1596,6 +1609,33 @@ void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message 
 /** The level to set, as a value between 0 (off) and 100 (full).  It can be preceeded with a - or + indicating a relative value.  +20 means up 20%. */
 
 void qMediaPlayer::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMessage){
+    QString t = QString::fromStdString(sLevel.c_str());
+    if(t.contains("+") || t.contains("-")){
+        if(t.contains("+")){
+            qreal e = mp_manager->audioSink->volume();
+            qreal inc = t.remove("+").toDouble()/100;
+            qreal n = e+inc;
+            mp_manager->audioSink->setVolume(n);
+        }
+        else if( t.contains("-")){
+            qreal e = mp_manager->audioSink->volume();
+            qreal inc = t.remove("-").toInt();
+            qreal n = e-inc;
+            if(n>0)
+                mp_manager->audioSink->setVolume(n);
+            else
+                mp_manager->audioSink->setVolume(0);
+
+        }
+
+    }
+    else{
+        int csLevl = t.toInt();
+        mp_manager->audioSink->setVolume(csLevl);
+        sCMD_Result = "OK -Level Set.";
+    }
+
+
 
 }
 //<-dceag-c184-e->

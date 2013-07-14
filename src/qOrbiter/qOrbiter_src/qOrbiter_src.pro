@@ -290,7 +290,7 @@ QML_IMPORT_PATH=imports
 symbian:TARGET.UID3 = 0xE0D07D4D
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 #LinuxMCE Specific include path. Linking in the app instead of against dce libs for multi-platform expediency.
-INCLUDEPATH += ../../ ../../DCE/ $$[QT_INSTALL_PREFIX]/include/phonon/phonon
+INCLUDEPATH += ../../ ../../DCE/
 
 #turtlenecks and such
 macx{

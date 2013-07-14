@@ -120,7 +120,7 @@ Item {
                 playlist.state = "showing"
             break;
 
-        case Qt.key_s:
+        case Qt.Key_S:
             manager.stopMedia()
             break;
 

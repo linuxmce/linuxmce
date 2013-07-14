@@ -45,7 +45,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
     filterProxy->hide();
-   // audioSink->setOutputDevice(outputs.last());
+  //audioSink->setOutputDevice(outputs.first());
 
 
 #endif
@@ -85,6 +85,7 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(raise()));
 
+
     QObject::connect(mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(setState(Phonon::State,Phonon::State)));
 
     QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
@@ -103,6 +104,8 @@ void MediaManager::initializeConnections()
 
 
     /*internals*/
+    QObject::connect(audioSink, SIGNAL(volumeChanged(qreal)), this, SLOT(setVolume(qreal)));
+
 
 #ifdef QT4
     mediaObject->setTickInterval(quint32(1000));
