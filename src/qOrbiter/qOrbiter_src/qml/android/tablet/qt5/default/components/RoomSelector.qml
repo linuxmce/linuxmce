@@ -50,6 +50,7 @@ Item{
         delegate: Item{
             height: scaleY(16)
             width: scaleX(18)
+
             StyledButton{
                 height: scaleY(16)
                 width: scaleX(18)

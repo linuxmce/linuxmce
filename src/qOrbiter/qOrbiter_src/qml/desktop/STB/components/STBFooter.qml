@@ -5,7 +5,7 @@ Item{
     id:ftr
 
     width: qmlroot.width
-    height:scaleY(12)
+    height:scaleY(14)
     anchors.top: parent.bottom
     onActiveFocusChanged:{ if(activeFocus){
             scenarioList.forceActiveFocus()
@@ -38,7 +38,14 @@ Item{
         width: parent.width
         spacing:scaleX(1)
         orientation: ListView.Horizontal
-        onActiveFocusChanged:{ console.log("Active focus on Scenario listmodel is " + activeFocus); forceActiveFocus()}
+        onActiveFocusChanged:{
+            console.log("Active focus on Scenario listmodel is " + activeFocus);
+            if(activeFocus){
+                if(scenarioList.count === 0){
+
+                }
+            }
+        }
         clip:false
         focus:false
         model:scenarios
@@ -83,7 +90,16 @@ Item{
                 font.pixelSize: 32
             }
             Keys.onTabPressed: {swapFocus();ftr.state="hidden"}
-            Keys.onDownPressed:  submodel.decrementCurrentIndex()
+            Keys.onDownPressed: {
+                if(submodel.currentIndex !==0){
+                    submodel.decrementCurrentIndex()
+                }
+                else{
+                    metarow.forceActiveFocus()
+                    submodel.currentIndex = -1
+                }
+            }
+
             Keys.onUpPressed: submodel.incrementCurrentIndex()
             Keys.onEnterPressed: { pressed() }
             Keys.onPressed: {
@@ -92,7 +108,7 @@ Item{
                 {
                     pressed()
                     currentItem = -1
-                   swapFocus()
+                    swapFocus()
                     ftr.state = "hidden"
                 }
             }
@@ -149,38 +165,34 @@ Item{
         }
 
     }
-    Row{
+    FocusRow{
         id:metarow
         height: parent.height/3
         width: parent.width
         anchors.bottom: parent.bottom
-        Item{
-            id:userInfo
-            width: parent.width/3
-            height: parent.height
-            StyledText {
-                anchors.centerIn: parent
-                text: manager.sPK_User
-                fontSize: headerText
-                color:appStyle.accentcolor
-            }
+        Keys.onUpPressed: scenarioList.forceActiveFocus()
 
-        }
-        Item{
-            id:locationInfo
-            width: parent.width/3
+        FocusButton{
+            text:manager.sPK_User
+            fontSize: 22
             height: parent.height
 
-            StyledText {
-                id: loc
-                text: roomList.currentRoom+"::"+roomList.currentEA
-                fontSize: mediumText
-                color:appStyle.accentcolor
-            }
+
         }
-        Clock{
-            id:timekeeper
+
+        FocusButton{
+            text:roomList.currentRoom+"::"+roomList.currentEA
+            fontSize: 22
+            height: parent.height
+            width:textObj.paintedWidth
+            onSelect:{ overLay.source = "RoomSelector.qml"; ftr.state = "hidden" }
+
         }
+    }
+    Clock{
+        id:timekeeper
+        anchors.top: metarow.top
+        anchors.right: metarow.right
 
     }
 
@@ -194,11 +206,16 @@ Item{
                 target: hdr
                 state:"hidden"
             }
+            PropertyChanges {
+                target: ftr
+                currentItem:-1
+            }
 
             AnchorChanges{
                 target:ftr
                 anchors.bottom: undefined
                 anchors.top: qmlroot.bottom
+
             }
         },
         State {

@@ -31,6 +31,10 @@ Item {
         onOrientationChanged: checkLayout()
     }
 
+    Component.onCompleted: {
+        dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+    }
+
     FontLoader{
         id:myFont
         name:"Sawasdee"
@@ -122,6 +126,29 @@ Item {
         ListElement{
             name:"View"
             pksort:-1
+        }
+    }
+
+    Loader{
+        id:overLay
+        source: ""
+        onSourceChanged: {
+            if(source !== ""){
+                z=10
+               overLay.forceActiveFocus()
+            }
+            else
+            {
+                z=0
+
+            }
+
+            if(overLay.status === Component.Ready){
+                overLay.forceActiveFocus()
+            }
+            else{
+                pageLoader.forceActiveFocus()
+            }
         }
     }
 
@@ -228,7 +255,7 @@ Item {
 
         console.log("Header Focus::"+hdr.activeFocus)
         console.log("Loader Focus::"+pageLoader.activeFocus)
-         console.log("Footer Focus::"+ftr.activeFocus)
+        console.log("Footer Focus::"+ftr.activeFocus)
         ftr.currentItem = -1
     }
 
@@ -249,7 +276,7 @@ Item {
             id:mini_screen_saver_image
             height: mini_screen_saver.height
             width: mini_screen_saver.width
-          //  source: "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
+            //  source: "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
         }
         Rectangle{
             anchors.fill: parent
@@ -263,10 +290,9 @@ Item {
         anchors.left:parent.left
 
         onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
-        z:dceplayer.mediaPlaying ===false ? -5 : 0
+
         Component.onCompleted: {
             setWindowSize(manager.appHeight, manager.appWidth);
-
         }
 
         Connections{
@@ -292,7 +318,6 @@ Item {
             console.log("Screen Changed:" + pageLoader.source)
             pageLoader.forceActiveFocus()
 
-
         }
         onActiveFocusChanged: {
             if(activeFocus)
@@ -312,6 +337,7 @@ Item {
             }
         }
     }
+
 
 
     STBHeader {

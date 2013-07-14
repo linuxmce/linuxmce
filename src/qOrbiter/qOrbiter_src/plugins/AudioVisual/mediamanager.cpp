@@ -23,9 +23,8 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     setCurrentStatus("Media Manager defaults set, initializing media engines");
 #ifdef QT4
 
-    // QList <Phonon::AudioOutputDevice> outputs = Phonon::BackendCapabilities::availableAudioOutputDevices();
-    //  qDebug() << outputs;
-    // audioSink->setOutputDevice(outputs.last());
+     QList <Phonon::AudioOutputDevice> outputs = Phonon::BackendCapabilities::availableAudioOutputDevices();
+     qDebug() << outputs;
 
     mediaObject = new Phonon::MediaObject();
     videoSurface = new Phonon::VideoWidget();
@@ -35,6 +34,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     setCurrentStatus("Audio Sink Initialized");
     Phonon::createPath(mediaObject, videoSurface);
     setCurrentStatus("Video Player Initialized");
+
     videoSurface->setAspectRatio(Phonon::VideoWidget::AspectRatioAuto);
     videoSurface->setScaleMode(Phonon::VideoWidget::FitInView);
     // layout = new QVBoxLayout();
@@ -44,6 +44,8 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
     filterProxy->hide();
+   // audioSink->setOutputDevice(outputs.last());
+
 
 #endif
     setCurrentStatus("Window Initialized");

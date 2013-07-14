@@ -27,10 +27,10 @@ Item {
             id:phil
             color: skinStyle.mainColor
             height: parent.height
-            width: playlist.state === "hidden" ? (appW) : 0
-            x: playlist.state === "hidden"? 0: imageholder.x
+            width: playlist.state === "showing" ? (appW) : 0
+            x: playlist.state === "showing"? 0: imageholder.x
             clip:false
-            opacity: .95
+            opacity: playlist.state === "showing" ? .95 : 0
 
             Behavior on x {
                 PropertyAnimation{
@@ -41,7 +41,7 @@ Item {
             Loader{
                 id:textCol
                 source:"Metadata"+manager.i_current_mediaType+".qml"
-                visible:playlist.state === "hidden"
+                visible:playlist.state === "showing"
             }
 
 
@@ -52,7 +52,7 @@ Item {
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
                 anchors.rightMargin: scaleX(15)
-                visible: playlist.state === "hidden"
+                visible: playlist.state === "showing"
                 spacing:scaleX(2)
                 StyledText {
                     id: updating_time

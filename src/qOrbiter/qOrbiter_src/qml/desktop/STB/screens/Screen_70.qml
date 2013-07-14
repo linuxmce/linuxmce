@@ -12,11 +12,7 @@ Item {
         }
     }
 
-    Rectangle{
-        anchors.fill: parent
-        color:"black"
-        opacity: parent.activeFocus ? .65 : .25
-    }
+
 
 
     MediaPlaybackTemplate{
