@@ -1157,6 +1157,10 @@ void LM::updateScripts()
 	writeLog("Running UpdateAvailableSerialPorts.sh", true, LV_STATUS);
 	string sCmd = "/usr/pluto/bin/UpdateAvailableSerialPorts.sh";
 	exec_system(sCmd,true);
+	writeOSD("Detecting Sound Cards. Please Wait.");
+	writeLog("Running UpdateAvailableSoundCards.sh", true, LV_STATUS);
+	string sCmd2="/usr/pluto/bin/UpdateAvailableSoundCards.sh";
+	exec_system(sCmd,true);
 	writeLog("Process completed.");
 
 		
