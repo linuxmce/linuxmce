@@ -31,6 +31,20 @@ Item {
         onOrientationChanged: checkLayout()
     }
 
+    Connections{
+        target: dcenowplaying
+        onMediaStatusChanged:checkPlayStatus()
+
+    }
+
+    function checkPlayStatus(){
+        if(dcenowplaying.b_mediaPlaying && manager.currentScreen==="Screen_1.qml")
+        {
+            console.log("going to screen "+ dcenowplaying.qs_screen)
+            manager.gotoQScreen(dcenowplaying.qs_screen)
+        }
+    }
+
     Component.onCompleted: {
         dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
     }
@@ -74,28 +88,32 @@ Item {
 
         ListElement{
             title:"KDE Desktop"
-            screen:""
+            params:0
         }
 
         ListElement{
             title:"Quick Reload"
-            screen:""
+            params:1
         }
         ListElement{
             title:"Regenerate"
-            screen:""
+            params:2
         }
         ListElement{
             title:"Power"
-            screen:""
+            params:3
         }
         ListElement{
             title:"Advanced"
-            screen:""
+            params:5
         }
         ListElement{
             title:"Computing"
-            screen:""
+            params:6
+        }
+        ListElement{
+            title:"Exit"
+            params:7
         }
 
     }
@@ -135,7 +153,7 @@ Item {
         onSourceChanged: {
             if(source !== ""){
                 z=10
-               overLay.forceActiveFocus()
+                overLay.forceActiveFocus()
             }
             else
             {
@@ -297,6 +315,7 @@ Item {
         onActiveFocusChanged: {
             if(activeFocus){
                 console.log("Media Player has focus")
+                pageLoader.forceActiveFocus()
             }
         }
 
@@ -316,10 +335,10 @@ Item {
         onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
         onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
         onMediaPlayingChanged: console.log("Media Playback status changed locally "+dceplayer.mediaBuffer)
-
+        onVolumeChanged:console.log(volume)
         Keys.onVolumeDownPressed: manager.adjustVolume("-1")
         Keys.onVolumeUpPressed:  manager.adjustVolume("+1")
-        Keys.onTabPressed: swapFocus()
+        Keys.onTabPressed: ftr.forceActiveFocus()
 
         Keys.onPressed: {
 
@@ -356,7 +375,7 @@ Item {
                 break;
 
             case Qt.Key_Pause:
-                    manager.pauseMedia()
+                manager.pauseMedia()
                 break;
             case Qt.Key_P:
                 manager.pauseMedia()
@@ -367,15 +386,56 @@ Item {
                 break;
 
             case Qt.Key_PageDown:
-                 manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
+                manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
                 break;
             default:
                 console.log(event.key)
                 break
             }
         }
-
     }
+
+    Item{
+        id:vIndicator
+        height: volLevel.paintedHeight
+        width: volLevel.paintedWidth
+        opacity:0
+        Timer{
+            id:fader
+            running:false
+            interval: 1100
+            onTriggered: vIndicator.opacity=0
+        }
+
+
+        Rectangle{
+            anchors.fill: parent
+            color:"black"
+            opacity: .65
+        }
+
+        StyledText{
+            id:volLevel
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            text:dceplayer.volume
+            color: "white"
+            fontSize: 42
+            font.bold: true
+            onTextChanged: {
+                fader.restart()
+                vIndicator.opacity=1
+            }
+        }
+
+        Behavior on opacity {
+            PropertyAnimation{
+                duration: 750
+            }
+        }
+    }
+
+
 
     Loader {
         id:pageLoader

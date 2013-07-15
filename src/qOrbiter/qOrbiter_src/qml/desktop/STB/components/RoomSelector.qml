@@ -102,6 +102,7 @@ Item {
                         if(event.key === Qt.Key_Enter || event.key === Qt.Key_Return){
                             manager.setActiveRoom(innerList.model[index].room, innerList.model[index].ea_number);
                             manager.setBoundStatus(true)
+
                             close()
                         }
                         else{

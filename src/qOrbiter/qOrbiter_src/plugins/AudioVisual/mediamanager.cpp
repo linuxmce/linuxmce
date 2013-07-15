@@ -3,6 +3,8 @@
 #include <QTcpSocket>
 #include <QProcess>
 #include <QGraphicsScene>
+#include <QtOpenGL/QGLWidget>
+#include <QGraphicsView>
 using namespace DCE;
 
 
@@ -15,6 +17,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
 {
 
+    QGraphicsScene *scene = new QGraphicsScene(this);
 
     setFlag(ItemHasNoContents, false);
     serverAddress = "";
@@ -23,13 +26,13 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     setCurrentStatus("Media Manager defaults set, initializing media engines");
 #ifdef QT4
 
-     QList <Phonon::AudioOutputDevice> outputs = Phonon::BackendCapabilities::availableAudioOutputDevices();
-
-     qDebug() << outputs;
+    setAvailibleOutputs(Phonon::BackendCapabilities::availableAudioOutputDevices());
+    qDebug() << outputs;
 
     mediaObject = new Phonon::MediaObject();
     videoSurface = new Phonon::VideoWidget();
     audioSink = new Phonon::AudioOutput();
+    discController = new Phonon::MediaController(mediaObject);
 
     Phonon::createPath(mediaObject, audioSink);
     setCurrentStatus("Audio Sink Initialized");
@@ -42,10 +45,12 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     // layout->addWidget(videoSurface);
     //  window->setLayout(layout);
     filterProxy = new QGraphicsProxyWidget(this);
+    QGraphicsView *view = new QGraphicsView(scene);
+    view->setViewport(new QGLWidget);
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
     filterProxy->hide();
-  //audioSink->setOutputDevice(outputs.first());
+    //audioSink->setOutputDevice(outputs.first());
 
 
 #endif
@@ -60,7 +65,7 @@ void MediaManager::initializePlayer()
 {
     setCurrentStatus("Initializing Media Player");
     if(!mediaPlayer){
-          mediaPlayer = new qMediaPlayer(deviceNumber, serverAddress.toStdString(), this, true, false);
+        mediaPlayer = new qMediaPlayer(deviceNumber, serverAddress.toStdString(), this, true, false);
     }
 
     initializeConnections();
@@ -86,6 +91,7 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(raise()));
 
 
+
     QObject::connect(mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(setState(Phonon::State,Phonon::State)));
 
     QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
@@ -105,7 +111,7 @@ void MediaManager::initializeConnections()
 
     /*internals*/
     QObject::connect(audioSink, SIGNAL(volumeChanged(qreal)), this, SLOT(setVolume(qreal)));
-
+    QObject::connect(audioSink, SIGNAL(mutedChanged(bool)), this, SLOT(setMuted(bool)));
 
 #ifdef QT4
     mediaObject->setTickInterval(quint32(1000));
@@ -124,8 +130,8 @@ void MediaManager::setConnectionDetails(int r, QString s)
     if(!serverAddress.isEmpty() && deviceNumber > 1)
     {
         if(!mediaPlayer){
-        setCurrentStatus("Got address "+serverAddress+" and device number "+QString::number(deviceNumber)+", initializing");
-        initializePlayer();
+            setCurrentStatus("Got address "+serverAddress+" and device number "+QString::number(deviceNumber)+", initializing");
+            initializePlayer();
         }
 
     }else
@@ -205,10 +211,11 @@ void MediaManager::setMediaUrl(QString url)
     setCurrentStatus(QString("MediaObject Source::"+mediaObject->currentSource().fileName()));
     qDebug() <<"Media Object Source::"<< mediaObject->currentSource().type();
     qDebug() <<"Media Object Source::"<< mediaObject->currentSource().fileName();
+
 #elif QT5
 
 #endif
-mediaObject->play();
+    mediaObject->play();
     qDebug() <<"Item is playing? " << mediaObject->state();
     qDebug() << "Errors " << mediaObject->errorString();
 }

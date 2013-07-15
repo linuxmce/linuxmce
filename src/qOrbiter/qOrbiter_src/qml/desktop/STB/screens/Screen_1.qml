@@ -6,11 +6,15 @@ Item {
     width: manager.appWidth
 
     Component.onCompleted: {
-        if(dcenowplaying.b_mediaPlaying)
+        manager.setBoundStatus(true)
+        if(dcenowplaying.b_mediaPlaying )
         {
+            console.log("going to screen "+ dcenowplaying.qs_screen)
             manager.gotoQScreen(dcenowplaying.qs_screen)
         }
     }
+
+
 
     Rectangle{
         anchors.fill: parent

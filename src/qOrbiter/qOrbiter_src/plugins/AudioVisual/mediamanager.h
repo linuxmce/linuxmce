@@ -41,6 +41,8 @@ class MediaManager : public QDeclarativeItem
     Q_PROPERTY(QString lastError READ getMediaError WRITE setMediaError NOTIFY lastErrorChanged)
     Q_PROPERTY(int mediaBuffer READ getMediaBuffer WRITE setMediaBuffer NOTIFY mediaBufferChanged)
     Q_PROPERTY(qreal volume READ getVolume NOTIFY volumeChanged)
+    Q_PROPERTY(bool muted READ getMuted WRITE setMuted NOTIFY mutedChanged)
+    Q_PROPERTY(QList <Phonon::AudioOutputDevice> outputs READ getAvailibleOutputs NOTIFY availibleAudioOutputsChanged())
 
     Q_PROPERTY(QString serverAddress READ getServerAddress WRITE setServerAddress NOTIFY serverAddressChanged)
     Q_PROPERTY(int deviceNumber READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
@@ -56,6 +58,7 @@ public:
     QString fileReference;
     int fileno;
     QString filepath;
+    QList <Phonon::AudioOutputDevice> outputs;
 
     int mediaBuffer;
 
@@ -65,6 +68,7 @@ public:
 
     //--------------------------
     qreal volume;
+    bool muted;
 
 
     QString currentStatus;
@@ -95,6 +99,7 @@ public:
     Phonon::VideoWidget *videoSurface;
     Phonon::AudioOutput *audioSink;
     Phonon::MediaObject *mediaObject;
+    Phonon::MediaController * discController;
 #else
     QAbstractAudioOutput *audioSink;
     QMediaObject *mediaObject;
@@ -119,8 +124,17 @@ signals:
     void deviceNumberChanged();
 
     void volumeChanged();
+    void mutedChanged();
+
+    void availibleAudioOutputsChanged();
 
 public slots:
+
+    void setAvailibleOutputs(QList<Phonon::AudioOutputDevice> l){outputs.clear(); outputs = l; emit availibleAudioOutputsChanged(); }
+    QList <Phonon::AudioOutputDevice> getAvailibleOutputs(){ return outputs;}
+
+    void setMuted(bool m){muted = m; emit mutedChanged();}
+    bool getMuted(){ return muted;}
 
     void setVolume(qreal vol){
         qDebug() << vol;
@@ -153,14 +167,22 @@ public slots:
     void setErrorStatus(bool e) {hasError = e; emit hasErrorChanged();}
     bool getErrorStatus() {return hasError;}
 
-    void setMediaPlaying(bool s) {mediaPlaying = s;
-                                  qDebug() << "media playback changed in plugin!" << s;
-                                  if (mediaPlaying==false)
-                                  { filterProxy->hide();}
-                                  else
-                                  {filterProxy->show();}
-                                emit mediaPlayingChanged();
-                                 }
+    void setMediaPlaying(bool s) {
+        mediaPlaying = s;
+        qDebug() << "media playback changed in plugin!" << s;
+        if (mediaPlaying==false)
+        {
+            filterProxy->hide();
+        }
+        else
+        {
+            filterProxy->show();
+        }
+        emit mediaPlayingChanged();
+        qDebug() << "Titles ==>" << discController->availableTitles();
+        qDebug() << "subTitles==>" << discController->availableSubtitles();
+        qDebug() << "Availible titles ==>" << discController->availableTitles();
+    }
     bool getMediaPlaying() {return mediaPlaying;}
 
     void setFileReference(QString f){fileReference = f.at(0); setFileNumber(f.remove(0,1).toInt()); }
@@ -193,7 +215,6 @@ public slots:
     void newClientConnected();
     void startTimeCodeServer();
     void stopTimeCodeServer();
-
     void handleError(){
 
 
@@ -273,6 +294,8 @@ private:
     void initializeConnections();
     void shutdownDevice();
     void mountDrive(int device);
+
+    QGraphicsScene *mp_parent;
 
 
 private slots:

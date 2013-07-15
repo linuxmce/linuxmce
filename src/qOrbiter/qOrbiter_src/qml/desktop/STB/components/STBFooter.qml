@@ -154,15 +154,36 @@ Item{
                     }
                     Connections{
                         target:scenarioParent
-                        onPressed:if(submodel.currentIndex === index) manager.execGrp(params)
+                        onPressed:{
+                            if(submodel.currentIndex === index && submodel.model !==advancedMenu)
+                                manager.execGrp(params)
+                            else{
+                                switch(params){
+                                case 7:
+                                    manager.exitApp()
+                                    break;
+                                }
+                            }
+                        }
                     }
 
                     MouseArea{
                         anchors.fill: parent
-                        onReleased:{ manager.execGrp(params)
-                            currentItem = -1
-                            swapFocus()
-                            ftr.state = "hidden"
+                        onReleased:{
+                            if(submodel.currentIndex === index && submodel.model !==advancedMenu)
+                            {
+                                manager.execGrp(params)
+                                currentItem = -1
+                                swapFocus()
+                                ftr.state = "hidden"
+                            }
+                            else{
+                                switch(params){
+                                case 7:
+                                    manager.exitApp()
+                                    break;
+                                }
+                            }
                         }
                     }
 
