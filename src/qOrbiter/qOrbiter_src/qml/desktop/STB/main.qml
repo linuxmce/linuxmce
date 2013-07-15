@@ -359,6 +359,14 @@ Item {
                 manager.adjustVolume(+1)
                 break;
 
+            case Qt.Key_VolumeMute:
+                manager.mute()
+                break;
+
+            case Qt.Key_M:
+                manager.mute()
+                break;
+
             case Qt.Key_Minus: /* Minus Sign */
                 manager.adjustVolume(-1)
                 break;
