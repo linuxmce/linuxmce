@@ -88,7 +88,7 @@ bool SimplePhone::GetConfig()
 
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Server IP: %s", SimplePhoneConf::Instance().Get_Server_IP().c_str());
 
-	if (sSoundCard.empty())
+	if (sSoundCard.empty() || sSoundCard == "0") // the 0 catches the weird edge case that somebody flips it back to Please Select... on the dropdown.
 	  {
 	    /* Sound card device data is empty - Get MD Audio Settings */
 	    
