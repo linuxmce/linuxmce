@@ -38,3 +38,7 @@ Sound_Card_Location="$MANUFACTURER;$id"
 Q="REPLACE INTO Device_DeviceData (FK_Device, FK_DeviceData, IK_DeviceData) 
       VALUES ('$PK_Device_SimplePhone','$DEVICEDATA_Sound_Card_CONST','$Sound_Card_Location')"
 RunSQL "$Q"
+
+# And kill SimplePhone...yes.. this is bad, replace with a proper DCE "Reset Device" SYSCOMMAND.
+killall -9 SimplePhone
+
