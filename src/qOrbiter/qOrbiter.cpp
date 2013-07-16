@@ -4410,6 +4410,7 @@ void qOrbiter::OnReload()
 #endif
 
     DisconnectAndWait();
+
 }
 
 bool qOrbiter::OnReplaceHandler(string msg)

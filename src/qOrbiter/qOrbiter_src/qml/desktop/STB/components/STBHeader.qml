@@ -8,6 +8,7 @@ Item{
     width: qmlroot.width
     height:scaleY(8)
     state:"hidden"
+    property bool isActive: activeFocus
     Rectangle{
         anchors.fill: parent
         color:appStyle.mainColor
@@ -48,6 +49,7 @@ Item{
     states: [
         State {
             name: "hidden"
+
             AnchorChanges{
                 target:hdr
                 anchors.top: undefined

@@ -14,6 +14,11 @@ Item {
         }
     }
 
+    Connections{
+        target: dcenowplaying
+        onScreenTypeChanged:manager.gotoQScreen(dcenowplaying.qs_screen)
+    }
+
 
 
     Rectangle{

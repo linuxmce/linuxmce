@@ -33,8 +33,7 @@ Item {
 
     Connections{
         target: dcenowplaying
-        onMediaStatusChanged:checkPlayStatus()
-
+        onMediaStatusChanged:{checkPlayStatus(); console.log("Media Playback changed to ==>"+dcenowplaying.b_mediaPlaying)}
     }
 
     function checkPlayStatus(){
@@ -262,20 +261,33 @@ Item {
 
     function swapFocus(){
 
+        console.log("Swap Focus Function.")
+
         if(hdr.activeFocus)
+        { console.log("Header had focus, set to page loader.")
             pageLoader.forceActiveFocus()
+        }
         else if (pageLoader.activeFocus)
+        {
+            console.log("Pageloader had, sending to footer menu.")
             ftr.forceActiveFocus()
-        else if(ftr.activeFocus && dceplayer.mediaPlaying)
+        }
+        else if(ftr.activeFocus)
+        {
+            console.log("Footer Had focus, sending to video plane.")
             dceplayer.forceActiveFocus()
+        }
         else if(dceplayer.activeFocus)
+        {   console.log("Player had focus, sending to header.")
             hdr.forceActiveFocus()
+        }
         else
             pageLoader.forceActiveFocus()
 
+
         console.log("Header Focus::"+hdr.activeFocus)
-        console.log("Loader Focus::"+pageLoader.item.focus)
-        console.log("Footer Focus::"+ftr.isActive)
+        console.log("Loader Focus::"+pageLoader.activeFocus)
+        console.log("Footer Focus::"+ftr.activeFocus)
         console.log("Dceplayer Focus::"+dceplayer.activeFocus)
 
         ftr.currentItem = -1
@@ -344,7 +356,7 @@ Item {
 
             switch(event.key){
             case Qt.Key_Back:
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex-1));
+                manager.changedPlaylistPosition((mediaplaylist.currentIndex-++1));
                 break;
             case Qt.Key_Forward:
                 manager.changedPlaylistPosition((mediaplaylist.currentIndex+1))
@@ -457,13 +469,14 @@ Item {
         }
         onActiveFocusChanged: {
             if(activeFocus)
-            {  console.log("Pageloader gained active focus");  pageLoader.item.focus = true  }
+            {  console.log("Pageloader gained active focus");   }
             else
-            { console.log("Page loader lost active focus");  pageLoader.item.focus = false}
+            { console.log("Page loader lost active focus");   }
         }
         Keys.onTabPressed:{
             console.log("Tab Focus Swap.")
-            qmlroot.swapFocus()
+            ftr.forceActiveFocus()
+            pageLoader.focus = false;
         }
         Keys.onPressed: {
             if(event.key === Qt.Key_M){
