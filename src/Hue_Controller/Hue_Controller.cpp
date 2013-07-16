@@ -805,6 +805,9 @@ bool Hue_Controller::sendPowerMessage(QUrl message, QVariant params)
     return true;
 }
 
-
+void Hue_Controller::OnReload(){
+Disconnect();
+exit(0);
+}
 
 

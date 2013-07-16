@@ -70,7 +70,7 @@ namespace DCE
         bool findControllers();
         bool downloadControllerConfig(QUrl deviceIp, int index);
         void getScreenSaverColor();
-
+	virtual void OnReload();
 
 
 
