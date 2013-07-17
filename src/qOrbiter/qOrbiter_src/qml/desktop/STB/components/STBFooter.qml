@@ -91,6 +91,8 @@ Item{
                 anchors.centerIn: parent
                 text:name
                 font.pixelSize: 32
+                font.bold: true
+                font.capitalization: Font.SmallCaps
             }
             Keys.onTabPressed: {swapFocus();ftr.state="hidden"}
             Keys.onDownPressed: {
@@ -107,11 +109,17 @@ Item{
             Keys.onEnterPressed: { pressed() }
             Keys.onPressed: {
                 console.log(event.key)
-                if(event.key === 16777220 )
+                if(event.key === Qt.Key_Enter || event.key===Qt.Key_Return )
                 {
-                    pressed()
-                    currentItem = -1
-                    swapFocus()
+                    if(submodel.currentIndex !==-1){
+                        pressed()
+                        currentItem = -1
+
+                    }else{
+                        manager.gotoQScreen("Screen_"+(index+2)+".qml")
+                    }
+
+
                     ftr.state = "hidden"
                 }
             }
@@ -202,6 +210,7 @@ Item{
             }
 
         }
+
 
     }
     FocusRow{
