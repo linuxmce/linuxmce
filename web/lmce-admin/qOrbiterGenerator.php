@@ -835,17 +835,23 @@ if(mysql_select_db("pluto_main", $conn)){
 //      echo "found db";
 } 
 
-$query =" SELECT * from `Command_CommandParameter` where `FK_Command` = ".$cmd.""; 
+$sql = "SELECT Command_CommandParameter.FK_Command, Command_CommandParameter.FK_CommandParameter, Command_CommandParameter.Description as cptype , CommandParameter.PK_CommandParameter, CommandParameter.Description, CommandParameter.FK_ParameterType, ParameterType.Description as ParamDesc FROM Command_CommandParameter LEFT JOIN CommandParameter "
+    . "ON CommandParameter.PK_CommandParameter = Command_CommandParameter.FK_CommandParameter LEFT JOIN ParameterType  ON "
+    . "CommandParameter.FK_ParameterType = ParameterType.PK_ParameterType WHERE Command_CommandParameter.FK_Command = ".$cmd." LIMIT 0, 30 ";
+ 
 $paramArray = array();
-
-$res = mysql_query(mysql_real_escape_string($query), $conn) or die(mysql_error($conn));
+$res = mysql_query(mysql_real_escape_string($sql), $conn) or die(mysql_error($conn));
 
  while ($row = mysql_fetch_array($res)){
-		     
-  $paramArray[] = array("Description"=>$row['Description'], "Command"=>$row["FK_Command"], "CommandParameter"=>$row["FK_CommandParameter"]  );
+
+  $paramArray = array(
+"type"=>$row["ParamDesc"],
+"Command"=>$row["FK_Command"],
+"CommandParameter"=>$row["FK_CommandParameter"],
+"CommandHint"=>$row["cptype"],
+"CommandDescription"=>$row["Description"]
+  );
  }
-
-
  return json_encode($paramArray);
 
 }	
