@@ -844,7 +844,7 @@ $res = mysql_query(mysql_real_escape_string($sql), $conn) or die(mysql_error($co
 
  while ($row = mysql_fetch_array($res)){
 
-  $paramArray = array(
+  $paramArray[] = array(
 "type"=>$row["ParamDesc"],
 "Command"=>$row["FK_Command"],
 "CommandParameter"=>$row["FK_CommandParameter"],
