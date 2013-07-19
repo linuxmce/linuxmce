@@ -243,6 +243,18 @@ FloorplanDevice * FloorPlanModel::currentRow()
     return item;
 }
 
+FloorplanDevice *FloorPlanModel::get(int idx)
+{
+
+    FloorplanDevice* item = m_list.at(idx);
+    if(item)
+    return item;
+    else
+        return new FloorplanDevice();
+
+
+}
+
 void FloorPlanModel::sortModel(int column, Qt::SortOrder order)
 {
 }

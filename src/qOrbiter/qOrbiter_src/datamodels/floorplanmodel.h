@@ -44,6 +44,7 @@ class FloorPlanModel : public QAbstractListModel
     Q_PROPERTY (int iCurrentPage READ getCurrentIntPage WRITE setCurrentIntPage NOTIFY pageChanged)
     Q_PROPERTY (bool itemSelected READ getStatus WRITE setStatus NOTIFY selectedChanged )
     Q_PROPERTY (int selectedDevice  READ getSelectedDevice WRITE setSelectedDevice NOTIFY selectedDeviceChanged )
+
     Q_OBJECT
 public:
     explicit FloorPlanModel(FloorplanDevice *m_prototype, qorbiterManager *r, QObject *parent = 0);
@@ -64,6 +65,7 @@ typedef QMap <int, QString> myMap;
     FloorplanDevice* find(int device) const;
     QModelIndex indexFromItem( const FloorplanDevice* item) const;
     FloorplanDevice* currentRow();
+    FloorplanDevice *get(int idx);
 
     void sortModel(int column, Qt::SortOrder order);
     QString m_installation;

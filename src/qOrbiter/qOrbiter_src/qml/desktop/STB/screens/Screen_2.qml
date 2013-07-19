@@ -15,7 +15,38 @@ Item {
         }
     }
 
+    Item {
+        id: requestParamManager
+        property string requestUrl: ("http://"+manager.m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?c=")
+
+        function getParams(cmd_no){
+
+            var paramsRequest = new XMLHttpRequest();
+            paramsRequest.onreadystatechange = function(){
+                if(paramsRequest.readyState===XMLHttpRequest.DONE){
+                        processParamCallback(paramsRequest.responseText)
+                }
+            }
+            paramsRequest.open("POST",(requestUrl+cmd_no))
+            paramsRequest.send();
+        }
+
+
+
+        function processParamCallback(data){
+            console.log(requestUrl)
+            //console.log(JSON.stringify(data))
+
+            var params = JSON.parse(data)
+            for (var p in params){
+                console.log(params[p].CommandDescription+":"+params[p].CommandHint)
+            }
+
+        }
+    }
+
     property bool image:false
+
     onActiveFocusChanged: {
         console.log("Floorplan has focus")
         if(state==="list"){
@@ -24,6 +55,17 @@ Item {
         else{
             floorplan.forceActiveFocus()
         }
+    }
+
+    function createProxy(){
+        console.log("Getting proxy model.")
+        console.log(floorplan_devices.count)
+        for(var i = 0; i < floorplan_devices.count; i++){
+            if(floorplan_devices.get(i).floorplantype===2){
+                console.log("sucess")
+            }
+        }
+
     }
 
     Keys.onEscapePressed: manager.gotoQScreen("Screen_1.qml")
@@ -43,7 +85,10 @@ Item {
 
     ListDisplay{
        id:listdisplay
+       floorplanType: 2
     }
+
+
 
     states: [
         State {

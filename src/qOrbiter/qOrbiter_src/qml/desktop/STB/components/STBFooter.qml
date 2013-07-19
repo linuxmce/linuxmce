@@ -19,7 +19,7 @@ Item{
             currentItem = -1
             ftr.state = "hidden"
             pageLoader.item.focus = true
-            isActive = false;
+
         }
     }
     Component.onCompleted: ftr.state = "hidden"
@@ -174,11 +174,11 @@ Item{
                             }
                         }
                     }
-
                     MouseArea{
                         anchors.fill: parent
                         onReleased:{
-                            if(submodel.currentIndex === index && submodel.model !==advancedMenu)
+
+                            if(submodel.model !==advancedMenu)
                             {
                                 manager.execGrp(params)
                                 currentItem = -1
@@ -194,7 +194,6 @@ Item{
                             }
                         }
                     }
-
                 }
 
                 Behavior on height {
@@ -257,6 +256,7 @@ Item{
             PropertyChanges {
                 target: ftr
                 currentItem:-1
+                isActive:false
             }
 
             AnchorChanges{
@@ -271,6 +271,7 @@ Item{
             PropertyChanges {
                 target: hdr
                 state:"showing"
+                isActive:true
             }
             AnchorChanges{
                 target:ftr

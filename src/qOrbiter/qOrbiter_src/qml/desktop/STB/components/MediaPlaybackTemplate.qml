@@ -9,6 +9,7 @@ Item {
         if(activeFocus){
             console.log("Template recieved active focus")
             console.log(dcenowplaying.qs_screen)
+            playlist.forceActiveFocus()
         }
     }
 
@@ -169,4 +170,20 @@ Item {
 
         }
     ]
+
+    MouseArea{
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton
+        onClicked: {
+            console.log(ftr.isActive)
+            if(ftr.isActive){
+                pageLoader.forceActiveFocus()
+                ftr.state="hidden"
+            }
+            else
+            {
+                ftr.forceActiveFocus()
+            }
+        }
+    }
 }

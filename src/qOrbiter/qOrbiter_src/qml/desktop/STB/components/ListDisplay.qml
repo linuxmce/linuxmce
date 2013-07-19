@@ -2,6 +2,7 @@ import QtQuick 1.1
 
     ListView
     {
+        property int floorplanType:0
         id:floorplanDevices
         width: scaleX(85)
         height: scaleY(85)
@@ -106,7 +107,7 @@ import QtQuick 1.1
                     MouseArea{
                         id:sublist_hit
                         anchors.fill: thisone
-                        onClicked: {console.log("Grabbed"); console.log(JSON.stringify(commandlist["commands"][index]))}
+                        onClicked: {console.log("Grabbed"); console.log(JSON.stringify(commandlist["commands"][index])); requestParamManager.getParams(commandlist["commands"][index].command_number) }
 
                     }
 

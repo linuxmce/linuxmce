@@ -2181,6 +2181,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
     QVariantMap t;
     QVariantList d;
     DCE::DeviceData_Base * fpDevice = this->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(device);
+
     for (map<int, string>::iterator it = fpDevice->m_mapCommands.begin(); it!=fpDevice->m_mapCommands.end(); ++it){
         QVariantMap l;
         l.insert("command_name", QString::fromStdString(it->second) );

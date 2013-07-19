@@ -48,6 +48,7 @@ Item {
         dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
     }
 
+
     FontLoader{
         id:myFont
         name:"Sawasdee"
@@ -299,7 +300,7 @@ Item {
 
         Timer{
             id:mini_ss_timer
-            interval:10000
+            interval:60000
             running: true // screensaver.active
             triggeredOnStart: true
             onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
