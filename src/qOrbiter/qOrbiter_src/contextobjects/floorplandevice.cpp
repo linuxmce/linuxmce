@@ -30,6 +30,7 @@ QHash<int, QByteArray> FloorplanDevice::roleNames() const
     names[YRole]= "y";
     names[CommandRole]="commandlist";
     names[ParamRole]="paramlist";
+    names[SelectedRole]="selected";
     return names;
 }
 
@@ -57,6 +58,8 @@ QVariant FloorplanDevice::data(int role) const
         return getDeviceCommands();
     case ParamRole:
         return getParams();
+    case SelectedRole:
+        return getStatus();
     default:
         return QVariant();
     }

@@ -17,9 +17,9 @@ Item{
     Rectangle {
         width: scaleX(22)
         height: childrenRect.height + scaleY(2)
-        color:style.lighthighlight
+        color:skinStyle.lighthighlight
         id:remotenumberpad
-        border.color: style.highlight1
+        border.color: skinStyle.lightHighlight
         border.width: 2
         radius:2.5
         anchors.centerIn: parent
@@ -35,10 +35,10 @@ Item{
                 id: numberdisplay
                 width: numberrect.width
                 height: scaleY(8)
-                color: style.highlight1
+                color: skinStyle.lightHighlight
                 radius: 5
                 anchors.horizontalCenter: parent.horizontalCenter
-                border.color: style.accentcolor
+                border.color: skinStyle.accentcolor
                 border.width: 2
 
                 TextInput {
@@ -61,8 +61,8 @@ Item{
                 anchors.top: numberdisplay.bottom
                 anchors.topMargin: 5
                 anchors.horizontalCenter: parent.horizontalCenter
-                border.color: style.highlight2
-                color: style.highlight1
+                border.color: skinStyle.highlight2
+                color: skinStyle.lightHighlight
                 radius: 2.5
                 Column{
                     id: numberrowcolum

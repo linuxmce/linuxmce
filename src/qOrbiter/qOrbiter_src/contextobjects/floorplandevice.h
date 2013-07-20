@@ -55,7 +55,8 @@ class FloorplanDevice : public QObject
         YRole = Qt::UserRole+8,
         StatusRole = Qt::UserRole+9,
         CommandRole= Qt::UserRole+10,
-        ParamRole= Qt::UserRole+11
+        ParamRole= Qt::UserRole+11,
+        SelectedRole= Qt::EditRole+12
     };
 
 public:
@@ -133,6 +134,8 @@ public:
     int currentFloorplanX;
     int currentFloorplanY;
     bool status;
+    /*! The Selected Status of this floorplan object item for the GUI */
+    bool selected;
 
     QVariantMap deviceCommands;
     QVariantList commandParams;

@@ -1702,9 +1702,10 @@ void qorbiterManager::showBookmarks(QList<QObject *> t)
     //  qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
 }
 
-void qorbiterManager::setHouseMode(int mode, int pass)
+void qorbiterManager::setHouseMode(QString pass, int mode)
 {
-    // pqOrbiter->SetSecurityMode(pass, mode);
+    emit newHouseMode(pass, mode);
+   // pqOrbiter->SetSecurityMode(pass, mode);
 }
 
 void qorbiterManager::setCurrentUser(QString inc_user)

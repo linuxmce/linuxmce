@@ -57,9 +57,9 @@ void ScreenSaverClass::setActive(bool state)
     }else
     {
         if(state==true){
-        picChanger.start(transitionDuration);
+      //  picChanger.start(transitionDuration);
         } else {
-        picChanger.stop();
+     //   picChanger.stop();
 
         }
         active = state;

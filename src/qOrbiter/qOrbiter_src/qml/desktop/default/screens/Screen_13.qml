@@ -57,7 +57,6 @@ Stage{
             image: "security/Sleeping.png"
             mode:6
         }
-
     }
 
     //delegate
@@ -78,15 +77,14 @@ Stage{
                     anchors.fill: parent
                     hoverEnabled: true
                     onEntered: {
-                        delegatetext.color = "white"; secrect.color = style.darkhighlight
+                        delegatetext.color = "white"; secrect.color = skinStyle.darkhighlight
                     }
                     onExited: {
                         delegatetext.color = "black"; secrect.color = "whitesmoke"
                     }
 
                     onClicked: {
-                        setHouseMode(mode, securitynumbers.pass)
-                        console.log(securitynumbers)
+                        manager.setHouseMode(mode, securitynumbers.pass)
                     }
                 }
             }
@@ -102,10 +100,10 @@ Stage{
     }
 
 
-//main layout
+    //main layout
     Rectangle{
-        id:container       
-        color: style.highlight1
+        id:container
+        color: skinStyle.lightHighlight
         anchors.centerIn: parent
         height: childrenRect.height + scaleY(1)
         width: contentrow.width + scaleX(1)
@@ -120,37 +118,36 @@ Stage{
             font.pointSize: 15
         }
 
-            Row{
-                id:contentrow
-                height: securitynumbers.height
-                width: scaleX(55)
-                spacing: scaleX(5)
-                anchors.centerIn: container
-                HomeButton{smooth: true}
-//numberpad
-                SecurityPad{id:securitynumbers; }
+        Row{
+            id:contentrow
+            height: securitynumbers.height
+            width: scaleX(55)
+            spacing: scaleX(5)
+            anchors.centerIn: container
+            HomeButton{smooth: true}
+            //numberpad
+            SecurityPad{id:securitynumbers; }
 
-                Rectangle {
-                    id: rectangle4
-                    width: scaleX(15)
-                    height: scaleY(45)
-                    color: "#a7b8c4"
-                    radius: 2.5
+            Rectangle {
+                id: rectangle4
+                width: scaleX(15)
+                height: scaleY(45)
+                color: "#a7b8c4"
+                radius: 2.5
+                clip: true
+
+                ListView
+                {
+                    id:securitylist
+                    height: parent.height
+                    width: parent.width
                     clip: true
-
-                    ListView
-                    {
-                        id:securitylist
-                        height: parent.height
-                        width: parent.width
-                        clip: true
-                        model: securityModes
-                        orientation: ListView.Vertical
-                        delegate: securityDelegate
-
-                    }
+                    model: securityModes
+                    orientation: ListView.Vertical
+                    delegate: securityDelegate
                 }
             }
+        }
 
     }
 }

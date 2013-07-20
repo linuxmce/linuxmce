@@ -1701,7 +1701,7 @@ public slots:
     void adjustVolume( int vol);
     void mute();
     void changedTrack(QString direction);
-    void SetSecurityMode(int pin, int mode);
+    void SetSecurityMode(QString pass, int mode);
     void setLocation(int location, int ea);
     void setUser(int user);
     void quickReload();

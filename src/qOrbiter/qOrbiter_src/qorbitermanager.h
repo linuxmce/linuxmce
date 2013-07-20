@@ -514,6 +514,8 @@ signals:
     void signalGoBack();
 
 
+
+
     void redButton();
     void blueButton();
     void greenButton();
@@ -626,6 +628,8 @@ signals:
     void showSetup();
     void continueSetup();
     void gotMountDevices();
+
+     void newHouseMode(QString pass, int mode);
 
     /*DCE Signals*/
     void reloadRouter();
@@ -854,7 +858,7 @@ public slots:
      * \param pass
      * \ingroup qorbiter_properties
      */
-    void setHouseMode(int mode, int pass);
+    void setHouseMode( QString pass, int mode);
 
 
     /*! @name Media Metadata Slots*/
@@ -1107,6 +1111,7 @@ public slots:
             qDebug() << "Bad Data removed from list at entry " << d;
         }
         emit screenSaverImagesReady();
+        ScreenSaver->setActive(true);
     }
 
 
