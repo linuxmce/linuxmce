@@ -5394,3 +5394,17 @@ void qOrbiter::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMe
 
 void qOrbiter::CMD_Mute(string &sCMD_Result,Message *pMessage){}
 //<-dceag-c97-e->
+
+
+void qOrbiter::setVariable(int pkvar ,QString val)
+{
+    DCE::CMD_Set_Variable setVar(m_dwPK_Device,this->iPK_Device_GeneralInfoPlugin, pkvar, val.toStdString());
+    string resp ="";
+
+    if(SendCommand(setVar, &resp) && resp=="OK"){
+        qWarning("CMD_Set_Variable Sucessful!");
+    } else
+    {
+        qWarning("CMD_Set_Variable Failed!");
+    }
+}

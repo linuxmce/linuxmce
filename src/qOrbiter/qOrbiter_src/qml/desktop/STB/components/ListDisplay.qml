@@ -77,11 +77,12 @@ import QtQuick 1.1
 
             ListView{
                 id:parameters
-                height: parent.height
+              height: floorplanDevices.currentIndex === index ? scaleY(20) : fpDevice_name.paintedHeight
                 width: 200
                 model:paramlist
                 anchors.right: parent.right
                 anchors.bottom:parent.bottom
+                clip:true
                 delegate: StyledText{
                     text: parameters.model[index].CommandDescription
                     fontSize: mediumText

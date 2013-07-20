@@ -635,6 +635,7 @@ signals:
     void getSingleCam(int i_pk_camera_device, int h, int w);
     void dceGridSepChanged(int d);
     void commandCompleted();
+    void setDceVar(int variable, QString valToAssign);
 
     //runtime
     void commandResponseChanged();
@@ -1214,6 +1215,7 @@ public slots:
     void replaceHandler();
     bool OrbiterGen();              //prelim orbter generation
     void quickReload();
+    void setVariable(int variable, QString valueToAssign){ if(!valueToAssign.isEmpty())  emit setDceVar(variable, valueToAssign);  }
 
     /*Sleeping menu slots. */
     void updateAlarm(bool toggle, int grp);

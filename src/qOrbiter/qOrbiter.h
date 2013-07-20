@@ -1515,8 +1515,13 @@ signals:
     void dceIPChanged();
     void DCEHostChanged();
 
+
+
 public slots:
 
+
+    /*Special*/
+    void setVariable(int pkvar, QString val);
     void checkRouterConnection();
 
 

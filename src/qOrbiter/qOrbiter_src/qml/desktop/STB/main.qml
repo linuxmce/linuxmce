@@ -304,7 +304,7 @@ Item {
         Timer{
             id:mini_ss_timer
             interval:60000
-            running: true // screensaver.active
+            running: screensaver.active
             triggeredOnStart: true
             onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
             repeat: true

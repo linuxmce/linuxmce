@@ -674,6 +674,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(setVolume(int)), &pqOrbiter,SLOT(adjustVolume(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(resendDeviceCode(int,int)), &pqOrbiter, SLOT(sendAvCommand(int,int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(osdChanged(bool)), &pqOrbiter, SLOT(displayToggle(bool)),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(setDceVar(int,QString)), &pqOrbiter, SLOT(setVariable(int,QString)), Qt::QueuedConnection);
         // QObject::connect(&pqOrbiter,SIGNAL(routerReloading(QString)), &w, SLOT(reloadHandler()) );
         QObject::connect(&w, SIGNAL(newLightLevel(QString)), &pqOrbiter, SLOT(adjustRoomLights(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(zoomLevelChanged(QString)), &pqOrbiter, SLOT(setZoom(QString)), Qt::QueuedConnection);
