@@ -45,6 +45,7 @@ import QtQuick 1.1
             }
 
             Column{
+                id:infocol
                 height: parent.height
                 width: parent.width*.25
                 anchors.right: parent.right
@@ -72,6 +73,25 @@ import QtQuick 1.1
                     color:"white"
                     // onTextChanged: placeSprites(floorplan_devices.getDeviceX(deviceno),floorplan_devices.getDeviceY(deviceno),deviceno)
                 }
+            }
+
+            ListView{
+                id:parameters
+                height: parent.height
+                width: 200
+                model:paramlist
+                anchors.right: parent.right
+                anchors.bottom:parent.bottom
+                delegate: StyledText{
+                    text: parameters.model[index].CommandDescription
+                    fontSize: mediumText
+                    color:"white"
+                    font.bold: true
+                }
+            }
+            Connections{
+                target: parameters
+                onCountChanged:console.log("Param Model==>"+JSON.stringify(parameters.model))
             }
 
             MouseArea{
@@ -107,12 +127,10 @@ import QtQuick 1.1
                     MouseArea{
                         id:sublist_hit
                         anchors.fill: thisone
-                        onClicked: {console.log("Grabbed"); console.log(JSON.stringify(commandlist["commands"][index])); requestParamManager.getParams(commandlist["commands"][index].command_number) }
+                        onClicked: {console.log("Grabbed"); console.log(JSON.stringify(commandlist["commands"][index])); requestParamManager.getParams(commandlist["commands"][index].command_number, deviceno) }
 
                     }
-
                 }
-
             }
         }
     }

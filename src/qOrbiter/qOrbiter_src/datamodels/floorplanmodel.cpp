@@ -70,6 +70,15 @@ void FloorPlanModel::insertRow(int row, FloorplanDevice *item)
     endInsertRows();
 }
 
+void FloorPlanModel::setDeviceParams(QVariantList p, int device)
+{
+
+    FloorplanDevice *d = find(device);
+    if(d){
+        d->setParams(p);
+    }
+}
+
 void FloorPlanModel::setDeviceSelection(int devNo)
 {
     qDebug() << "Handling status change for:" << devNo;

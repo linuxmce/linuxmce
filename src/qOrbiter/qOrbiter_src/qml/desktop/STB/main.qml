@@ -25,6 +25,9 @@ Item {
     property string screenfile
     property string dynamic_height
     property string dynamic_width
+    onActiveFocusChanged: {
+        pageLoader.forceActiveFocus()
+    }
 
     Connections{
         target: manager

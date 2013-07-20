@@ -28,7 +28,7 @@
 #include <QMap>
 #include <QStringList>
 #include <QVariantMap>
-
+#include <QDebug>
 /*!
  * \brief The FloorplanDevice class encapsulates a singular floorplan object.
  * It contains the normal properties and methods of a custom QML element
@@ -39,7 +39,7 @@ class FloorplanDevice : public QObject
 {
     Q_PROPERTY (int currentFloorplanX READ getCurrentX WRITE setCurrentX NOTIFY floorplanXChanged)
     Q_PROPERTY (int currentFloorplanY READ getCurrentY WRITE setCurrentY NOTIFY floorplanYChanged)
-   // Q_PROPERTY(QVariantMap deviceCommands READ getDeviceCommands WRITE setDeviceCommand NOTIFY deviceCommandsChanged)
+    // Q_PROPERTY(QVariantMap deviceCommands READ getDeviceCommands WRITE setDeviceCommand NOTIFY deviceCommandsChanged)
 
 
     Q_OBJECT
@@ -54,7 +54,8 @@ class FloorplanDevice : public QObject
         XRole = Qt::UserRole+7,
         YRole = Qt::UserRole+8,
         StatusRole = Qt::UserRole+9,
-        CommandRole= Qt::UserRole+10
+        CommandRole= Qt::UserRole+10,
+        ParamRole= Qt::UserRole+11
     };
 
 public:
@@ -118,6 +119,8 @@ public:
      */
     inline bool getStatus() const {return status;}
 
+
+
     QString mQS_name;                       //device name
     int mI_deviceNo;                        //device number
     int mI_floorplan_device_type;           //floorplan device type
@@ -132,6 +135,7 @@ public:
     bool status;
 
     QVariantMap deviceCommands;
+    QVariantList commandParams;
 
 signals:
     void statusChanged();
@@ -139,6 +143,7 @@ signals:
     void floorplanXChanged();
     void floorplanYChanged();
     void deviceCommandsChanged();
+    void commandParamsChanged();
 
 public slots:
     void getPagePosition(int page);
@@ -159,8 +164,11 @@ public slots:
      * \return
      * The return value is a QVariantMap which should be compatible with parsing as a Javascript Object.
      */
-  Q_INVOKABLE inline QVariantMap getDeviceCommands () const {return deviceCommands;}
+    Q_INVOKABLE inline QVariantMap getDeviceCommands () const {return deviceCommands;}
 
+    Q_INVOKABLE inline void setParams(QVariantList p) {commandParams = p; emit commandParamsChanged(); emit dataChanged(); }
+
+    Q_INVOKABLE inline QVariantList getParams() const {return commandParams;}
 
 
 private:

@@ -13,6 +13,7 @@ FloorplanDevice::FloorplanDevice(QString name, int deviceNo, int floorplan_devic
    setStatus(false);
     setupFloorplanPositions();
 
+
 }
 
 QHash<int, QByteArray> FloorplanDevice::roleNames() const
@@ -28,6 +29,7 @@ QHash<int, QByteArray> FloorplanDevice::roleNames() const
     names[XRole]= "x";
     names[YRole]= "y";
     names[CommandRole]="commandlist";
+    names[ParamRole]="paramlist";
     return names;
 }
 
@@ -53,6 +55,8 @@ QVariant FloorplanDevice::data(int role) const
         return getCurrentY();
     case CommandRole:
         return getDeviceCommands();
+    case ParamRole:
+        return getParams();
     default:
         return QVariant();
     }

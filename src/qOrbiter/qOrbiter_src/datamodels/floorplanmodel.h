@@ -58,6 +58,8 @@ typedef QMap <int, QString> myMap;
     void appendRows(const QList<FloorplanDevice*> &items);
     void insertRow(int row, FloorplanDevice* item);
 
+
+
     bool removeRow(int row, const QModelIndex &parent = QModelIndex());
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
     FloorplanDevice* takeRow(int row);
@@ -146,6 +148,8 @@ public slots:
 
     void setCurrentFloorPlanType(int t) { currentFloorPlanType = t; emit floorplanTypeChanged(); }
     int getCurrentFloorPlanType() {return currentFloorPlanType; }
+
+ void setDeviceParams(QVariantList p, int device);
 
 private:
     FloorplanDevice* m_prototype;
