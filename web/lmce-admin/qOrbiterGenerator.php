@@ -840,11 +840,12 @@ $sql = "SELECT Command_CommandParameter.FK_Command, Command_CommandParameter.FK_
     . "CommandParameter.FK_ParameterType = ParameterType.PK_ParameterType WHERE Command_CommandParameter.FK_Command = ".$cmd." LIMIT 0, 30 ";
  
 $paramArray = array();
+$paramArray["device"] = array("device"=>$_GET["idx"]);
 $res = mysql_query(mysql_real_escape_string($sql), $conn) or die(mysql_error($conn));
-
+$p1Array = array();
  while ($row = mysql_fetch_array($res)){
 
-  $paramArray[] = array(
+  $p1Array[] = array(
 "type"=>$row["ParamDesc"],
 "Command"=>$row["FK_Command"],
 "CommandParameter"=>$row["FK_CommandParameter"],
@@ -852,6 +853,7 @@ $res = mysql_query(mysql_real_escape_string($sql), $conn) or die(mysql_error($co
 "CommandDescription"=>$row["Description"]
   );
  }
+$paramArray["params"] = $p1Array;
  return json_encode($paramArray);
 
 }	
