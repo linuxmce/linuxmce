@@ -4,19 +4,21 @@ ListView
 {
     property int floorplanType:0
     id:floorplanDevices
-    width: scaleX(85)
-    height: scaleY(85)
+    width: scaleX(100)
+    height: scaleY(100)
     model:floorplan_devices
     anchors.top: parent.top
     anchors.left: parent.left
     clip:true
     focus:true
+
     orientation: ListView.Vertical
     spacing:scaleY(1)
     delegate:Item{
         id:fp_device_rect
         height: floorplanDevices.currentIndex === index ? scaleY(26) : fpDevice_name.paintedHeight
         width: parent.width
+
         Component.onCompleted:  manager.getFloorplanDeviceCommands(deviceno);
         Keys.onPressed: {
             if(event.key===Qt.Key_Left){
@@ -91,7 +93,7 @@ ListView
                 id:fp_submodel
                 opacity: floorplanDevices.currentIndex === index ? 1 : 0
                 width: parent.width
-                height: parent.height/2
+                height: scaleY(8)
                 model:commandlist["commands"]
                 orientation:ListView.Horizontal
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -113,38 +115,112 @@ ListView
                     MouseArea{
                         id:sublist_hit
                         anchors.fill: thisone
-                        onClicked: {console.log("Grabbed"); console.log(JSON.stringify(commandlist["commands"][index])); requestParamManager.getParams(commandlist["commands"][index].command_number, deviceno) }
+                        onClicked: {fp_submodel.currentIndex = index; console.log(JSON.stringify(commandlist["commands"][index])); requestParamManager.getParams(commandlist["commands"][index].command_number, deviceno) }
 
                     }
                 }
             }
             ListView{
                 id:parameters
-                height: floorplanDevices.currentIndex === index ? scaleY(8) : 0
-                width: parent.width
-                model:paramlist
-                spacing:scaleX(2)
+                height: floorplanDevices.currentIndex === index ? scaleY(12) : 0
+                width: scaleX(75)
+                model:floorplanDevices.currentIndex===index ?  paramlist: undefined
+                spacing:scaleX(8)
+                anchors.horizontalCenter: parent.horizontalCenter
                 orientation: ListView.Horizontal
 
                 clip:true
                 delegate:
                     Item{
                     height: parameters.height
-                    width: childrenRect.width
+                    width: plabel.paintedWidth
+                    property string value:stringbox.text
 
-                    StyledText{
-                        text: parameters.model[index].CommandDescription
-                        fontSize: mediumText
-                        color:"white"
-                        font.bold: true
+                    Column{
+                        height:parent.height
+                        width: scaleX(5)
+                        Item{
+                            id:entryItem
+                            height: parent.height*.55
+                            width: parent.height
+                            Rectangle{
+                                anchors.fill: parent
+                                color:"white"
+                                radius:5
+                            }
+
+                            TextInput{
+                                id:stringbox
+                                width: parent.width
+                                height: parent.height
+                                font.pixelSize: scaleY(4)
+                                text:parameters.model[index].value
+                                Keys.onPressed:
+                                    if(event.key=== Qt.Key_Enter || event.key === Qt.Key_Return){
+                                        var b= paramlist
+                                        b[index].value=stringbox.text
+                                        floorplan_devices.setDeviceParams(b, deviceno)
+                                        stringbox.text = b[index].value
+                                        console.log("updated")
+                                    }
+                                }
+                            }
+
+                        StyledText{
+                            id:plabel
+                            text: parameters.model[index].CommandDescription
+                            fontSize: mediumText
+                            color:"white"
+                            font.bold: true
+                        }
                     }
                 }
+            }
 
+            Item{
+                id:sendCmdBtn
+                height:scaleY(6)
+                width: scaleX(6)
+                visible:floorplanDevices.currentIndex===index
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                Rectangle{
+                    anchors.fill: parent
+                    color: "black"
+                    radius: 5
+                }
+                StyledText{
+                    text: "Send"
+                    fontSize: mediumText
+                    color:"white"
+                    font.bold: true
+                }
 
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+                        var t = paramlist
+
+                        var commandObj = {};
+                        commandObj.command =commandlist["commands"][fp_submodel.currentIndex].command_number
+                        var tParams = Array()
+                        for (var pp in t){
+                            var tpObj = {}
+                            tpObj.paramno=t[pp].CommandParameter
+                            tpObj.val=t[pp].value
+                            tParams.push(tpObj)
+                        }
+
+                        commandObj.params = tParams;
+                        commandObj.count= t.length
+                        commandObj.to = deviceno
+                        manager.sendDceMessage(commandObj)
+                    }
+                }
             }
             Connections{
                 target: parameters
-                onCountChanged:console.log("Param Model==>"+JSON.stringify(parameters.model))
+               // onCountChanged:console.log("Param Model==>"+JSON.stringify(parameters.model))
             }
         }
 
@@ -159,9 +235,10 @@ ListView
             anchors.top: parent.top
             Rectangle{
                 id:select_indicator
-                height: selected ? parent.height -1 : 0
-                width: selected ? parent.width -1 : 0
+                height: selected ? parent.height  : 0
+                width: selected ? parent.width : 0
                 color:"green"
+                anchors.centerIn: parent
             }
             Keys.onPressed: {
                 if(event.key===Qt.Key_Enter || event.key=== Qt.Key_Return){
@@ -177,8 +254,6 @@ ListView
                     else if (event.key === Qt.Key_Down){
                         floorplanDevices.incrementCurrentIndex()
                     }
-
-
                     return
                 }
 
@@ -191,6 +266,7 @@ ListView
                    floorplan_devices.setDeviceSelection(deviceno)
                 }
             }
+
         }
     }
 }

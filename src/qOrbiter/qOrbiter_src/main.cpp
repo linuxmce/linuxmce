@@ -476,7 +476,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(containsVideo(bool)), &w, SLOT(setContainsVideo(bool)));
         QObject::connect(&pqOrbiter, SIGNAL(isOsd(bool)), &w, SLOT(setOsd(bool)));
         QObject::connect(&pqOrbiter, SIGNAL(monitorStatusChanged(bool)), &w, SLOT(setMonitorStatus(bool)));
-        QObject::connect(&w, SIGNAL(newMessageSend(QString)), &pqOrbiter, SLOT(executeMessageSend(QString)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(newMessageSend(QVariantMap)), &pqOrbiter, SLOT(executeMessageSend(QVariantMap)), Qt::QueuedConnection);
 
         //timecodemanager signals / slots
         QObject::connect(&pqOrbiter, SIGNAL(updateTimeCode(QString,int)), timecode, SLOT(start(QString,int)), Qt::QueuedConnection);

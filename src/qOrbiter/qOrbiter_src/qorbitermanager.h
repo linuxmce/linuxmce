@@ -488,7 +488,7 @@ signals:
     void communicatorConnected(bool connect);
 
 
-    void newMessageSend(QString message);
+    void newMessageSend(QVariantMap message);
 
 
 
@@ -675,7 +675,7 @@ public slots:
     */
     void setFormFactor(int f) {isPhone = f;}
 
-    void sendDceMessage(QString m) {emit newMessageSend(m);}
+    void sendDceMessage(QVariantMap m) {if(!m.isEmpty()) emit newMessageSend(m);}
 
     /*!
      * \brief Requests the media subtypes for given subtype

@@ -1537,7 +1537,7 @@ public slots:
 
     void osdBack();
 
-    void executeMessageSend(QString outGoing);
+    void executeMessageSend(QVariantMap outGoing);
 
     void getVolume();
 
@@ -1721,6 +1721,7 @@ public slots:
 
 
     void sendAvCommand(int deviceto, int command);
+    void sendStringMessage(QString msg);
     //floorplans
     void getFloorplanDeviceCommand(int device);
 

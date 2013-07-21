@@ -5071,6 +5071,13 @@ void DCE::qOrbiter::sendAvCommand(int deviceto, int command)
 
 }
 
+void qOrbiter::sendStringMessage(QString msg)
+{
+    Message m(msg.toStdString());
+    bool ok=true;
+    SendMessage(&m,ok);
+}
+
 void DCE::qOrbiter::setGridSeperator(int sep)
 {
     media_pageSeperator = sep;
@@ -5338,20 +5345,22 @@ void qOrbiter::getVolume()
 }
 
 
-void qOrbiter::executeMessageSend(QString outGoing)
+void qOrbiter::executeMessageSend(QVariantMap outGoing)
 {
-    string cMsg = outGoing.toStdString();
-    string msgResponse="";
 
-    Message elMessage(cMsg);
-    this->m_pEvent->SendMessage(&elMessage, msgResponse);
+    qDebug() << outGoing;
+//    string cMsg = outGoing.toStdString();
+//    string msgResponse="";
 
-    if(msgResponse=="OK"){
-        emit commandResponseChanged("MessageSend OK!");
-    }else
-    {
-        emit commandResponseChanged("MessageSend Failed!");
-    }
+//    Message elMessage(cMsg);
+//    this->m_pEvent->SendMessage(&elMessage, msgResponse);
+
+//    if(msgResponse=="OK"){
+//        emit commandResponseChanged("MessageSend OK!");
+//    }else
+//    {
+//        emit commandResponseChanged("MessageSend Failed!");
+//    }
 
 }
 

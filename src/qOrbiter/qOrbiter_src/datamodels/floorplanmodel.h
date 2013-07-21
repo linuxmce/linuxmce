@@ -58,8 +58,6 @@ typedef QMap <int, QString> myMap;
     void appendRows(const QList<FloorplanDevice*> &items);
     void insertRow(int row, FloorplanDevice* item);
 
-
-
     bool removeRow(int row, const QModelIndex &parent = QModelIndex());
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
     FloorplanDevice* takeRow(int row);

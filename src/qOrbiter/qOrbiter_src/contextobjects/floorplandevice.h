@@ -55,7 +55,7 @@ class FloorplanDevice : public QObject
         YRole = Qt::UserRole+8,
         StatusRole = Qt::UserRole+9,
         CommandRole= Qt::UserRole+10,
-        ParamRole= Qt::UserRole+11,
+        ParamRole= Qt::EditRole+11,
         SelectedRole= Qt::EditRole+12
     };
 
