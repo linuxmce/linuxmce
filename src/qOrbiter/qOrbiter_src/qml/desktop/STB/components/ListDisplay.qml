@@ -26,9 +26,15 @@ ListView
             } else if(event.key===Qt.Key_Right){
                 console.log(fp_submodel.currentIndex)
                 if(fp_submodel.currentIndex !== fp_submodel.count-1)
-                fp_submodel.incrementCurrentIndex()
+                    fp_submodel.incrementCurrentIndex()
                 else
                     chkBox.forceActiveFocus()
+            }
+            else if (event.key === Qt.Key_Space){
+
+                    requestParamManager.getParams(commandlist["commands"][fp_submodel.currentIndex].command_number, deviceno)
+                    parameters.forceActiveFocus()
+
             }
         }
 
@@ -118,8 +124,12 @@ ListView
                         onClicked: {fp_submodel.currentIndex = index; console.log(JSON.stringify(commandlist["commands"][index])); requestParamManager.getParams(commandlist["commands"][index].command_number, deviceno) }
 
                     }
+
                 }
             }
+
+
+
             ListView{
                 id:parameters
                 height: floorplanDevices.currentIndex === index ? scaleY(12) : 0
@@ -135,6 +145,10 @@ ListView
                     height: parameters.height
                     width: plabel.paintedWidth
                     property string value:stringbox.text
+                    onActiveFocusChanged: {
+                        if(activeFocus)
+                            stringbox.forceActiveFocus()
+                    }
 
                     Column{
                         height:parent.height
@@ -155,6 +169,25 @@ ListView
                                 height: parent.height
                                 font.pixelSize: scaleY(4)
                                 text:parameters.model[index].value
+                                focus:true
+
+                                Keys.onTabPressed: {
+                                    var b= paramlist
+                                    b[index].value=stringbox.text
+                                    floorplan_devices.setDeviceParams(b, deviceno)
+                                    stringbox.text = b[index].value
+                                    console.log("updated")
+
+                                    if(activeFocus && parameters.currentIndex !== parameters.count-1){
+                                      parameters.incrementCurrentIndex()
+                                    }
+                                    else{
+                                        sendCmdBtn.send()
+                                    }
+
+                                }
+
+
                                 Keys.onPressed:
                                     if(event.key=== Qt.Key_Enter || event.key === Qt.Key_Return){
                                         var b= paramlist
@@ -163,8 +196,20 @@ ListView
                                         stringbox.text = b[index].value
                                         console.log("updated")
                                     }
-                                }
+
+//                                onActiveFocusChanged: {
+//                                    if(text.length!==0){
+//                                        var b= paramlist
+//                                        b[index].value=stringbox.text
+//                                        floorplan_devices.setDeviceParams(b, deviceno)
+//                                        stringbox.text = b[index].value
+//                                        console.log("updated")
+//                                    }
+//                            }
+
+
                             }
+                        }
 
                         StyledText{
                             id:plabel
@@ -184,6 +229,25 @@ ListView
                 visible:floorplanDevices.currentIndex===index
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
+
+                function send(){
+                    console.log(JSON.stringify(floorplan_devices.selectedDevices))
+                    var t = paramlist
+                    var commandObj = {};
+                    commandObj.command =commandlist["commands"][fp_submodel.currentIndex].command_number
+                    var tParams = Array()
+                    for (var pp in t){
+                        var tpObj = {}
+                        tpObj.paramno=t[pp].CommandParameter
+                        tpObj.val=t[pp].value
+                        tParams.push(tpObj)
+                    }
+                    commandObj.params = tParams;
+                    commandObj.count= t.length
+                    commandObj.to = floorplan_devices.selectedDevices
+                    manager.sendDceMessage(commandObj)
+                }
+
                 Rectangle{
                     anchors.fill: parent
                     color: "black"
@@ -199,28 +263,14 @@ ListView
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        var t = paramlist
 
-                        var commandObj = {};
-                        commandObj.command =commandlist["commands"][fp_submodel.currentIndex].command_number
-                        var tParams = Array()
-                        for (var pp in t){
-                            var tpObj = {}
-                            tpObj.paramno=t[pp].CommandParameter
-                            tpObj.val=t[pp].value
-                            tParams.push(tpObj)
-                        }
-
-                        commandObj.params = tParams;
-                        commandObj.count= t.length
-                        commandObj.to = deviceno
-                        manager.sendDceMessage(commandObj)
+                   //    floorplan_devices.executeDeviceCommand(deviceno, commandlist["commands"][fp_submodel.currentIndex].command_number )
                     }
                 }
             }
             Connections{
                 target: parameters
-               // onCountChanged:console.log("Param Model==>"+JSON.stringify(parameters.model))
+                // onCountChanged:console.log("Param Model==>"+JSON.stringify(parameters.model))
             }
         }
 
@@ -263,7 +313,7 @@ ListView
                 anchors.fill: parent
                 onClicked: {
                     parent.forceActiveFocus()
-                   floorplan_devices.setDeviceSelection(deviceno)
+                    floorplan_devices.setDeviceSelection(deviceno)
                 }
             }
 

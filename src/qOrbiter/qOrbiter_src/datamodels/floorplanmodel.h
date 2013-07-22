@@ -44,6 +44,7 @@ class FloorPlanModel : public QAbstractListModel
     Q_PROPERTY (int iCurrentPage READ getCurrentIntPage WRITE setCurrentIntPage NOTIFY pageChanged)
     Q_PROPERTY (bool itemSelected READ getStatus WRITE setStatus NOTIFY selectedChanged )
     Q_PROPERTY (int selectedDevice  READ getSelectedDevice WRITE setSelectedDevice NOTIFY selectedDeviceChanged )
+    Q_PROPERTY(QVariantMap selectedDevices READ getSelectedDevices NOTIFY selectedDevicesChanged)
 
     Q_OBJECT
 public:
@@ -67,6 +68,7 @@ typedef QMap <int, QString> myMap;
     FloorplanDevice* currentRow();
     FloorplanDevice *get(int idx);
 
+
     void sortModel(int column, Qt::SortOrder order);
     QString m_installation;
     QString currentPage;
@@ -76,12 +78,13 @@ typedef QMap <int, QString> myMap;
     int iCurrentPage;
 
     bool itemSelected;
+    bool multiSelect;
     int selectedDevice;
 
     QString imageBasePath;
 
     QMap<int, QString*> floorplanPages;
-    myMap selectedDevices;
+    QVariantMap selectedDevices;
 
 #if (QT5)
     QQmlComponent *fpProxy;
@@ -106,7 +109,9 @@ signals:
     void floorplanTypeChanged();
     void selectedChanged();
     void selectedDeviceChanged();
+    void selectedDevicesChanged();
     void adjustLevel(int, myMap);
+    void sendCommandMessage(QVariantMap cmdMsg);
 
 
 public slots:
@@ -116,7 +121,8 @@ public slots:
     void updateDevice(int device);
     void setDeviceSelection(int devNo);
     bool getDeviceSelection(int devNo);
-    void set(int level) {emit adjustLevel(level, selectedDevices);}
+    void set(int level) {/*emit adjustLevel(level, selectedDevices);*/}
+    void executeDeviceCommand(int deviceId, int cmdId);
 
     void setStatus(bool status) { itemSelected = status; emit selectedChanged();}
     bool getStatus() {return itemSelected;}
@@ -148,6 +154,8 @@ public slots:
     int getCurrentFloorPlanType() {return currentFloorPlanType; }
 
  void setDeviceParams(QVariantList p, int device);
+
+QVariantMap getSelectedDevices(){return selectedDevices;}
 
 private:
     FloorplanDevice* m_prototype;

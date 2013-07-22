@@ -44,7 +44,7 @@ using namespace DCE;
 // The primary constructor when the class is created as a stand-alone device
 qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter, QObject*parent)
     : qOrbiter_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
-//<-dceag-const-e->
+    //<-dceag-const-e->
 {
     qDebug() << "Constructing";
     QObject::connect(this, SIGNAL(dceIPChanged()), this, SLOT(pingCore()));
@@ -53,8 +53,8 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
 qOrbiter::qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: qOrbiter_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
-//<-dceag-const2-e->
+    : qOrbiter_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
+    //<-dceag-const2-e->
 {
 
 }
@@ -74,7 +74,7 @@ bool qOrbiter::Register()
 //<-dceag-createinst-b->
 qOrbiter_Command *Create_qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 {
-	return new qOrbiter(pPrimaryDeviceCommand, pData, pEvent, pRouter);
+    return new qOrbiter(pPrimaryDeviceCommand, pData, pEvent, pRouter);
 }
 //<-dceag-createinst-e->
 
@@ -117,74 +117,74 @@ The above blocks are actually <- not <=.  We don't want a substitution here
 
 void qOrbiter::SomeFunction()
 {
-	// If this is going to be loaded into the router as a plug-in, you can implement: 	virtual bool Register();
-	// to do all your registration, such as creating message interceptors
+    // If this is going to be loaded into the router as a plug-in, you can implement: 	virtual bool Register();
+    // to do all your registration, such as creating message interceptors
 
-	// If you use an IDE with auto-complete, after you type DCE:: it should give you a list of all
-	// commands and requests, including the parameters.  See "AllCommandsRequests.h"
+    // If you use an IDE with auto-complete, after you type DCE:: it should give you a list of all
+    // commands and requests, including the parameters.  See "AllCommandsRequests.h"
 
-	// Examples:
-	
-	// Send a specific the "CMD_Simulate_Mouse_Click" command, which takes an X and Y parameter.  We'll use 55,77 for X and Y.
-	DCE::CMD_Simulate_Mouse_Click CMD_Simulate_Mouse_Click(m_dwPK_Device,OrbiterID,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click);
+    // Examples:
 
-	// Send the message to orbiters 32898 and 27283 (ie a device list, hence the _DL)
-	// And we want a response, which will be "OK" if the command was successfull
-	string sResponse;
-	DCE::CMD_Simulate_Mouse_Click_DL CMD_Simulate_Mouse_Click_DL(m_dwPK_Device,"32898,27283",55,77)
-	SendCommand(CMD_Simulate_Mouse_Click_DL,&sResponse);
+    // Send a specific the "CMD_Simulate_Mouse_Click" command, which takes an X and Y parameter.  We'll use 55,77 for X and Y.
+    DCE::CMD_Simulate_Mouse_Click CMD_Simulate_Mouse_Click(m_dwPK_Device,OrbiterID,55,77);
+    SendCommand(CMD_Simulate_Mouse_Click);
 
-	// Send the message to all orbiters within the house, which is all devices with the category DEVICECATEGORY_Orbiter_CONST (see pluto_main/Define_DeviceCategory.h)
-	// Note the _Cat for category
-	DCE::CMD_Simulate_Mouse_Click_Cat CMD_Simulate_Mouse_Click_Cat(m_dwPK_Device,DEVICECATEGORY_Orbiter_CONST,true,BL_SameHouse,55,77)
+    // Send the message to orbiters 32898 and 27283 (ie a device list, hence the _DL)
+    // And we want a response, which will be "OK" if the command was successfull
+    string sResponse;
+    DCE::CMD_Simulate_Mouse_Click_DL CMD_Simulate_Mouse_Click_DL(m_dwPK_Device,"32898,27283",55,77)
+    SendCommand(CMD_Simulate_Mouse_Click_DL,&sResponse);
+
+    // Send the message to all orbiters within the house, which is all devices with the category DEVICECATEGORY_Orbiter_CONST (see pluto_main/Define_DeviceCategory.h)
+    // Note the _Cat for category
+    DCE::CMD_Simulate_Mouse_Click_Cat CMD_Simulate_Mouse_Click_Cat(m_dwPK_Device,DEVICECATEGORY_Orbiter_CONST,true,BL_SameHouse,55,77)
     SendCommand(CMD_Simulate_Mouse_Click_Cat);
 
-	// Send the message to all "DeviceTemplate_Orbiter_CONST" devices within the room (see pluto_main/Define_DeviceTemplate.h)
-	// Note the _DT.
-	DCE::CMD_Simulate_Mouse_Click_DT CMD_Simulate_Mouse_Click_DT(m_dwPK_Device,DeviceTemplate_Orbiter_CONST,true,BL_SameRoom,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click_DT);
+    // Send the message to all "DeviceTemplate_Orbiter_CONST" devices within the room (see pluto_main/Define_DeviceTemplate.h)
+    // Note the _DT.
+    DCE::CMD_Simulate_Mouse_Click_DT CMD_Simulate_Mouse_Click_DT(m_dwPK_Device,DeviceTemplate_Orbiter_CONST,true,BL_SameRoom,55,77);
+    SendCommand(CMD_Simulate_Mouse_Click_DT);
 
-	// This command has a normal string parameter, but also an int as an out parameter
-	int iValue;
-	DCE::CMD_Get_Signal_Strength CMD_Get_Signal_Strength(m_dwDeviceID, DestDevice, sMac_address,&iValue);
-	// This send command will wait for the destination device to respond since there is
-	// an out parameter
-	SendCommand(CMD_Get_Signal_Strength);  
+    // This command has a normal string parameter, but also an int as an out parameter
+    int iValue;
+    DCE::CMD_Get_Signal_Strength CMD_Get_Signal_Strength(m_dwDeviceID, DestDevice, sMac_address,&iValue);
+    // This send command will wait for the destination device to respond since there is
+    // an out parameter
+    SendCommand(CMD_Get_Signal_Strength);
 
-	// This time we don't care about the out parameter.  We just want the command to 
-	// get through, and don't want to wait for the round trip.  The out parameter, iValue,
-	// will not get set
-	SendCommandNoResponse(CMD_Get_Signal_Strength);  
+    // This time we don't care about the out parameter.  We just want the command to
+    // get through, and don't want to wait for the round trip.  The out parameter, iValue,
+    // will not get set
+    SendCommandNoResponse(CMD_Get_Signal_Strength);
 
-	// This command has an out parameter of a data block.  Any parameter that is a binary
-	// data block is a pair of int and char *
-	// We'll also want to see the response, so we'll pass a string for that too
+    // This command has an out parameter of a data block.  Any parameter that is a binary
+    // data block is a pair of int and char *
+    // We'll also want to see the response, so we'll pass a string for that too
 
-	int iFileSize;
-	char *pFileContents
-	string sResponse;
-	DCE::CMD_Request_File CMD_Request_File(m_dwDeviceID, DestDevice, "filename",&pFileContents,&iFileSize,&sResponse);
-	SendCommand(CMD_Request_File);
+    int iFileSize;
+    char *pFileContents
+    string sResponse;
+    DCE::CMD_Request_File CMD_Request_File(m_dwDeviceID, DestDevice, "filename",&pFileContents,&iFileSize,&sResponse);
+    SendCommand(CMD_Request_File);
 
-	// If the device processed the command (in this case retrieved the file),
-	// sResponse will be "OK", and iFileSize will be the size of the file
-	// and pFileContents will be the file contents.  **NOTE**  We are responsible
-	// free deleting pFileContents.
+    // If the device processed the command (in this case retrieved the file),
+    // sResponse will be "OK", and iFileSize will be the size of the file
+    // and pFileContents will be the file contents.  **NOTE**  We are responsible
+    // free deleting pFileContents.
 
 
-	// To access our data and events below, you can type this-> if your IDE supports auto complete to see all the data and events you can access
+    // To access our data and events below, you can type this-> if your IDE supports auto complete to see all the data and events you can access
 
-	// Get our IP address from our data
-	string sIP = DATA_Get_IP_Address();
+    // Get our IP address from our data
+    string sIP = DATA_Get_IP_Address();
 
-	// Set our data "Filename" to "myfile"
-	DATA_Set_Filename("myfile");
+    // Set our data "Filename" to "myfile"
+    DATA_Set_Filename("myfile");
 
-	// Fire the "Finished with file" event, which takes no parameters
-	EVENT_Finished_with_file();
-	// Fire the "Touch or click" which takes an X and Y parameter
-	EVENT_Touch_or_click(10,150);
+    // Fire the "Finished with file" event, which takes no parameters
+    EVENT_Finished_with_file();
+    // Fire the "Touch or click" which takes an X and Y parameter
+    EVENT_Touch_or_click(10,150);
 }
 */
 //<-dceag-sample-e->
@@ -197,22 +197,22 @@ void qOrbiter::SomeFunction()
 
 //<-dceag-c1-b->
 
-	/** @brief COMMAND: #1 - Capture Keyboard To Variable */
-	/** As the user types, using either the keyboard or simulate keypress commands, what he types will be stored in a variable and/or put into a text object. */
-		/** @param #3 PK_DesignObj */
-			/** The Design Object which contains the text Object */
-		/** @param #4 PK_Variable */
-			/** The variable in which to store the input */
-		/** @param #8 On/Off */
-			/** If 0, this stops capturing */
-		/** @param #14 Type */
-			/** 1=normal, 2=pin, 3=phone number */
-		/** @param #24 Reset */
-			/** if true, the next keypress will clear the variable and start new */
-		/** @param #25 PK_Text */
-			/** The text object in which to store the current input */
-		/** @param #55 DataGrid */
-			/** If 1, we'll scroll the data grid too when typing keys. */
+/** @brief COMMAND: #1 - Capture Keyboard To Variable */
+/** As the user types, using either the keyboard or simulate keypress commands, what he types will be stored in a variable and/or put into a text object. */
+/** @param #3 PK_DesignObj */
+/** The Design Object which contains the text Object */
+/** @param #4 PK_Variable */
+/** The variable in which to store the input */
+/** @param #8 On/Off */
+/** If 0, this stops capturing */
+/** @param #14 Type */
+/** 1=normal, 2=pin, 3=phone number */
+/** @param #24 Reset */
+/** if true, the next keypress will clear the variable and start new */
+/** @param #25 PK_Text */
+/** The text object in which to store the current input */
+/** @param #55 DataGrid */
+/** If 1, we'll scroll the data grid too when typing keys. */
 
 void qOrbiter::CMD_Capture_Keyboard_To_Variable(string sPK_DesignObj,int iPK_Variable,string sOnOff,string sType,string sReset,int iPK_Text,bool bDataGrid,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1-e->
@@ -229,8 +229,8 @@ void qOrbiter::CMD_Capture_Keyboard_To_Variable(string sPK_DesignObj,int iPK_Var
 
 //<-dceag-c2-b->
 
-	/** @brief COMMAND: #2 - Orbiter Beep */
-	/** Make the orbiter beep */
+/** @brief COMMAND: #2 - Orbiter Beep */
+/** Make the orbiter beep */
 
 void qOrbiter::CMD_Orbiter_Beep(string &sCMD_Result,Message *pMessage)
 //<-dceag-c2-e->
@@ -240,12 +240,12 @@ void qOrbiter::CMD_Orbiter_Beep(string &sCMD_Result,Message *pMessage)
 
 //<-dceag-c3-b->
 
-	/** @brief COMMAND: #3 - Display On/Off */
-	/** Turn the display on or off */
-		/** @param #8 On/Off */
-			/** 0=Off, 1=On */
-		/** @param #125 Already processed */
-			/** Normally Orbiter will forward the on/off through DCE so the other devices can turn on/off.  If this is true, it won't. */
+/** @brief COMMAND: #3 - Display On/Off */
+/** Turn the display on or off */
+/** @param #8 On/Off */
+/** 0=Off, 1=On */
+/** @param #125 Already processed */
+/** Normally Orbiter will forward the on/off through DCE so the other devices can turn on/off.  If this is true, it won't. */
 
 void qOrbiter::CMD_Display_OnOff(string sOnOff,bool bAlready_processed,string &sCMD_Result,Message *pMessage)
 //<-dceag-c3-e->
@@ -257,12 +257,12 @@ void qOrbiter::CMD_Display_OnOff(string sOnOff,bool bAlready_processed,string &s
 
 //<-dceag-c4-b->
 
-	/** @brief COMMAND: #4 - Go back */
-	/** Make the orbiter go back to the prior screen, like the back button in a web browser */
-		/** @param #16 PK_DesignObj_CurrentScreen */
-			/** If this is specified, the orbiter will ignore the command unless this is the current screen */
-		/** @param #21 Force */
-			/** Screens can be flagged, "Cant go back", meaning the go back will skip over them.  If Force=1, the Orbiter returns to the prior screen regardless */
+/** @brief COMMAND: #4 - Go back */
+/** Make the orbiter go back to the prior screen, like the back button in a web browser */
+/** @param #16 PK_DesignObj_CurrentScreen */
+/** If this is specified, the orbiter will ignore the command unless this is the current screen */
+/** @param #21 Force */
+/** Screens can be flagged, "Cant go back", meaning the go back will skip over them.  If Force=1, the Orbiter returns to the prior screen regardless */
 
 void qOrbiter::CMD_Go_back(string sPK_DesignObj_CurrentScreen,string sForce,string &sCMD_Result,Message *pMessage)
 //<-dceag-c4-e->
@@ -274,20 +274,20 @@ void qOrbiter::CMD_Go_back(string sPK_DesignObj_CurrentScreen,string sForce,stri
 
 //<-dceag-c5-b->
 
-	/** @brief COMMAND: #5 - Goto DesignObj */
-	/** Goto a specific design obj */
-		/** @param #2 PK_Device */
-			/** For this screen only, override the normal "control device" stored in variable #1, and treat this device as the control screen.  When the screen changes, it will be reset */
-		/** @param #3 PK_DesignObj */
-			/** The screen to go to.  Can be be fully qualified (x.y.z), or just contain the screen # */
-		/** @param #10 ID */
-			/** Assigns an optional ID to this particular "viewing" of the screen, used with Kill Screen.  There can be lots of instances of the same screen in the history queue (such as call in progress).  This allows a program to pop a particular one out of the queue. */
-		/** @param #16 PK_DesignObj_CurrentScreen */
-			/** If this is specified, the orbiter will ignore the command unless this is the current screen.  If this is -1, that will match a main menu or screen saver (ie the Orbiter is not in use). */
-		/** @param #22 Store Variables */
-			/** If 1, the Orbiter will store the current variable values, and restore them if a 'go back' causes it to return to this screen */
-		/** @param #114 Cant Go Back */
-			/** If true, then when this screen goes away the user won't be able to return to it -- it will be skipped over, unless Go Back with Force=1 is used.  This prevents layers of popup screens. */
+/** @brief COMMAND: #5 - Goto DesignObj */
+/** Goto a specific design obj */
+/** @param #2 PK_Device */
+/** For this screen only, override the normal "control device" stored in variable #1, and treat this device as the control screen.  When the screen changes, it will be reset */
+/** @param #3 PK_DesignObj */
+/** The screen to go to.  Can be be fully qualified (x.y.z), or just contain the screen # */
+/** @param #10 ID */
+/** Assigns an optional ID to this particular "viewing" of the screen, used with Kill Screen.  There can be lots of instances of the same screen in the history queue (such as call in progress).  This allows a program to pop a particular one out of the queue. */
+/** @param #16 PK_DesignObj_CurrentScreen */
+/** If this is specified, the orbiter will ignore the command unless this is the current screen.  If this is -1, that will match a main menu or screen saver (ie the Orbiter is not in use). */
+/** @param #22 Store Variables */
+/** If 1, the Orbiter will store the current variable values, and restore them if a 'go back' causes it to return to this screen */
+/** @param #114 Cant Go Back */
+/** If true, then when this screen goes away the user won't be able to return to it -- it will be skipped over, unless Go Back with Force=1 is used.  This prevents layers of popup screens. */
 
 void qOrbiter::CMD_Goto_DesignObj(int iPK_Device,string sPK_DesignObj,string sID,string sPK_DesignObj_CurrentScreen,bool bStore_Variables,bool bCant_Go_Back,string &sCMD_Result,Message *pMessage)
 //<-dceag-c5-e->
@@ -303,18 +303,18 @@ void qOrbiter::CMD_Goto_DesignObj(int iPK_Device,string sPK_DesignObj,string sID
 
 //<-dceag-c6-b->
 
-	/** @brief COMMAND: #6 - Show Object */
-	/** Change an objects visible state. */
-		/** @param #3 PK_DesignObj */
-			/** The object to show or hide */
-		/** @param #4 PK_Variable */
-			/** The variable to use in the comparisson.  See Comparisson Value. */
-		/** @param #6 Comparisson Operator */
-			/** A type of comparisson: =  <  <>  !=  > */
-		/** @param #7 Comparisson Value */
-			/** If a Variable, Comparisson Type, and Comparisson Value are specified, the command will be ignored if the comparisson is not true */
-		/** @param #8 On/Off */
-			/** 1=show object, 0=hide object */
+/** @brief COMMAND: #6 - Show Object */
+/** Change an objects visible state. */
+/** @param #3 PK_DesignObj */
+/** The object to show or hide */
+/** @param #4 PK_Variable */
+/** The variable to use in the comparisson.  See Comparisson Value. */
+/** @param #6 Comparisson Operator */
+/** A type of comparisson: =  <  <>  !=  > */
+/** @param #7 Comparisson Value */
+/** If a Variable, Comparisson Type, and Comparisson Value are specified, the command will be ignored if the comparisson is not true */
+/** @param #8 On/Off */
+/** 1=show object, 0=hide object */
 
 void qOrbiter::CMD_Show_Object(string sPK_DesignObj,int iPK_Variable,string sComparisson_Operator,string sComparisson_Value,string sOnOff,string &sCMD_Result,Message *pMessage)
 //<-dceag-c6-e->
@@ -329,8 +329,8 @@ void qOrbiter::CMD_Show_Object(string sPK_DesignObj,int iPK_Variable,string sCom
 
 //<-dceag-c7-b->
 
-	/** @brief COMMAND: #7 - Terminate Orbiter */
-	/** Causes the Orbiter application to exit */
+/** @brief COMMAND: #7 - Terminate Orbiter */
+/** Causes the Orbiter application to exit */
 
 void qOrbiter::CMD_Terminate_Orbiter(string &sCMD_Result,Message *pMessage)
 //<-dceag-c7-e->
@@ -340,12 +340,12 @@ void qOrbiter::CMD_Terminate_Orbiter(string &sCMD_Result,Message *pMessage)
 
 //<-dceag-c8-b->
 
-	/** @brief COMMAND: #8 - Remove Screen From History */
-	/** The orbiter keeps a history of visible screens, allowing the user to go back.  See Go_Back.  This removes screens from the queue that should not available anymore.  An example is when a call comes in, the controllers are sent to an incoming call screen. */
-		/** @param #10 ID */
-			/** If specified, only screens that match this ID will be removed */
-		/** @param #159 PK_Screen */
-			/** The screen to remove */
+/** @brief COMMAND: #8 - Remove Screen From History */
+/** The orbiter keeps a history of visible screens, allowing the user to go back.  See Go_Back.  This removes screens from the queue that should not available anymore.  An example is when a call comes in, the controllers are sent to an incoming call screen. */
+/** @param #10 ID */
+/** If specified, only screens that match this ID will be removed */
+/** @param #159 PK_Screen */
+/** The screen to remove */
 
 void qOrbiter::CMD_Remove_Screen_From_History(string sID,int iPK_Screen,string &sCMD_Result,Message *pMessage)
 //<-dceag-c8-e->
@@ -358,14 +358,14 @@ void qOrbiter::CMD_Remove_Screen_From_History(string sID,int iPK_Screen,string &
 
 //<-dceag-c9-b->
 
-	/** @brief COMMAND: #9 - Scroll Grid */
-	/** Scroll a datagrid */
-		/** @param #1 Relative Level */
-			/** The grid will scroll this many lines.  If prefaced with a P, it will scroll this many pages.  If not specified, it will scroll 1 page. */
-		/** @param #3 PK_DesignObj */
-			/** The grid to scroll.  If not specified, any currently visible grids will scroll */
-		/** @param #30 PK_Direction */
-			/** The direction to scroll the grid */
+/** @brief COMMAND: #9 - Scroll Grid */
+/** Scroll a datagrid */
+/** @param #1 Relative Level */
+/** The grid will scroll this many lines.  If prefaced with a P, it will scroll this many pages.  If not specified, it will scroll 1 page. */
+/** @param #3 PK_DesignObj */
+/** The grid to scroll.  If not specified, any currently visible grids will scroll */
+/** @param #30 PK_Direction */
+/** The direction to scroll the grid */
 
 void qOrbiter::CMD_Scroll_Grid(string sRelative_Level,string sPK_DesignObj,int iPK_Direction,string &sCMD_Result,Message *pMessage)
 //<-dceag-c9-e->
@@ -378,14 +378,14 @@ void qOrbiter::CMD_Scroll_Grid(string sRelative_Level,string sPK_DesignObj,int i
 
 //<-dceag-c10-b->
 
-	/** @brief COMMAND: #10 - Move Highlight */
-	/** Move the current highlight pointer */
-		/** @param #1 Relative Level */
-			/** The grid will scroll this many lines.  If prefaced with a P, it will scroll this many pages.  If not specified, it will scroll 1 page. */
-		/** @param #3 PK_DesignObj */
-			/** The grid to scroll.  If not specified, any currently visible grids will scroll */
-		/** @param #30 PK_Direction */
-			/** The direction to move the highlight */
+/** @brief COMMAND: #10 - Move Highlight */
+/** Move the current highlight pointer */
+/** @param #1 Relative Level */
+/** The grid will scroll this many lines.  If prefaced with a P, it will scroll this many pages.  If not specified, it will scroll 1 page. */
+/** @param #3 PK_DesignObj */
+/** The grid to scroll.  If not specified, any currently visible grids will scroll */
+/** @param #30 PK_Direction */
+/** The direction to move the highlight */
 
 void qOrbiter::CMD_Move_Highlight(string sRelative_Level,string sPK_DesignObj,int iPK_Direction,string &sCMD_Result,Message *pMessage)
 //<-dceag-c10-e->
@@ -398,12 +398,12 @@ void qOrbiter::CMD_Move_Highlight(string sRelative_Level,string sPK_DesignObj,in
 
 //<-dceag-c13-b->
 
-	/** @brief COMMAND: #13 - Play Sound */
-	/** Plays a sound file on the orbiter */
-		/** @param #19 Data */
-			/** A pointer to a block of memory representing the sound file to play */
-		/** @param #20 Format */
-			/** Indicates what type of data is in the memory block.  1=wav, 2=mp3 */
+/** @brief COMMAND: #13 - Play Sound */
+/** Plays a sound file on the orbiter */
+/** @param #19 Data */
+/** A pointer to a block of memory representing the sound file to play */
+/** @param #20 Format */
+/** Indicates what type of data is in the memory block.  1=wav, 2=mp3 */
 
 void qOrbiter::CMD_Play_Sound(char *pData,int iData_Size,string sFormat,string &sCMD_Result,Message *pMessage)
 //<-dceag-c13-e->
@@ -415,10 +415,10 @@ void qOrbiter::CMD_Play_Sound(char *pData,int iData_Size,string sFormat,string &
 
 //<-dceag-c14-b->
 
-	/** @brief COMMAND: #14 - Refresh */
-	/** Invalidates and redraws the current screen, optionally re-requesting data from a datagrid.  The OnLoad commands are not fired.  See Regen Screen. */
-		/** @param #15 DataGrid ID */
-			/** Normally refresh does not cause the orbiter to re-request data.  But if a specific grid ID is specified, that grid will be refreshed.  Specify * to re-request all grids on the current screen */
+/** @brief COMMAND: #14 - Refresh */
+/** Invalidates and redraws the current screen, optionally re-requesting data from a datagrid.  The OnLoad commands are not fired.  See Regen Screen. */
+/** @param #15 DataGrid ID */
+/** Normally refresh does not cause the orbiter to re-request data.  But if a specific grid ID is specified, that grid will be refreshed.  Specify * to re-request all grids on the current screen */
 
 void qOrbiter::CMD_Refresh(string sDataGrid_ID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c14-e->
@@ -429,8 +429,8 @@ void qOrbiter::CMD_Refresh(string sDataGrid_ID,string &sCMD_Result,Message *pMes
 
 //<-dceag-c15-b->
 
-	/** @brief COMMAND: #15 - Regen Screen */
-	/** The screen is reloaded like the user was going to it for the first time.  The OnUnload and OnLoad commands are fired. */
+/** @brief COMMAND: #15 - Regen Screen */
+/** The screen is reloaded like the user was going to it for the first time.  The OnUnload and OnLoad commands are fired. */
 
 void qOrbiter::CMD_Regen_Screen(string &sCMD_Result,Message *pMessage)
 //<-dceag-c15-e->
@@ -440,8 +440,8 @@ void qOrbiter::CMD_Regen_Screen(string &sCMD_Result,Message *pMessage)
 
 //<-dceag-c16-b->
 
-	/** @brief COMMAND: #16 - Requires Special Handling */
-	/** When a button needs to do something too sophisticated for a normal command, attach this command.  When the controller sees it, it will pass execution to a local handler that must be added to the Orbiter's code. */
+/** @brief COMMAND: #16 - Requires Special Handling */
+/** When a button needs to do something too sophisticated for a normal command, attach this command.  When the controller sees it, it will pass execution to a local handler that must be added to the Orbiter's code. */
 
 void qOrbiter::CMD_Requires_Special_Handling(string &sCMD_Result,Message *pMessage)
 //<-dceag-c16-e->
@@ -451,16 +451,16 @@ void qOrbiter::CMD_Requires_Special_Handling(string &sCMD_Result,Message *pMessa
 
 //<-dceag-c17-b->
 
-	/** @brief COMMAND: #17 - Seek Data Grid */
-	/** Causes a datagrid to seek to a particular position. */
-		/** @param #9 Text */
-			/** If specified, the orbiter will jump to the first row which has a cell that starts with this text.  Specify Position X to use a column other than the first one. */
-		/** @param #11 Position X */
-			/** The column to jump to.  If Text is not blank, the column to search. */
-		/** @param #12 Position Y */
-			/** The row to jump to.  Ignored if Text is not blank */
-		/** @param #15 DataGrid ID */
-			/** The datagrid to scroll.  If not specified, the first visible one will be used */
+/** @brief COMMAND: #17 - Seek Data Grid */
+/** Causes a datagrid to seek to a particular position. */
+/** @param #9 Text */
+/** If specified, the orbiter will jump to the first row which has a cell that starts with this text.  Specify Position X to use a column other than the first one. */
+/** @param #11 Position X */
+/** The column to jump to.  If Text is not blank, the column to search. */
+/** @param #12 Position Y */
+/** The row to jump to.  Ignored if Text is not blank */
+/** @param #15 DataGrid ID */
+/** The datagrid to scroll.  If not specified, the first visible one will be used */
 
 void qOrbiter::CMD_Seek_Data_Grid(string sText,int iPosition_X,int iPosition_Y,string sDataGrid_ID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c17-e->
@@ -474,12 +474,12 @@ void qOrbiter::CMD_Seek_Data_Grid(string sText,int iPosition_X,int iPosition_Y,s
 
 //<-dceag-c18-b->
 
-	/** @brief COMMAND: #18 - Set Graphic To Display */
-	/** All objects on screen can be either in "Normal" mode, "Selected mode", "Highlighted mode", or any number of "Alternate modes".  These are like "views".  A Selected mode may appear depressed, for example.  All children of this object will also be set. */
-		/** @param #3 PK_DesignObj */
-			/** The object to set */
-		/** @param #10 ID */
-			/** 0=standard mode, -1=selected -2=highlight a positive number is one of the alternates */
+/** @brief COMMAND: #18 - Set Graphic To Display */
+/** All objects on screen can be either in "Normal" mode, "Selected mode", "Highlighted mode", or any number of "Alternate modes".  These are like "views".  A Selected mode may appear depressed, for example.  All children of this object will also be set. */
+/** @param #3 PK_DesignObj */
+/** The object to set */
+/** @param #10 ID */
+/** 0=standard mode, -1=selected -2=highlight a positive number is one of the alternates */
 
 void qOrbiter::CMD_Set_Graphic_To_Display(string sPK_DesignObj,string sID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c18-e->
@@ -491,14 +491,14 @@ void qOrbiter::CMD_Set_Graphic_To_Display(string sPK_DesignObj,string sID,string
 
 //<-dceag-c20-b->
 
-	/** @brief COMMAND: #20 - Set Object Parameter */
-	/** changes one of the object's DesignObjParameters */
-		/** @param #3 PK_DesignObj */
-			/** The object to change */
-		/** @param #5 Value To Assign */
-			/** The value to assign */
-		/** @param #27 PK_DesignObjParameter */
-			/** The parameter */
+/** @brief COMMAND: #20 - Set Object Parameter */
+/** changes one of the object's DesignObjParameters */
+/** @param #3 PK_DesignObj */
+/** The object to change */
+/** @param #5 Value To Assign */
+/** The value to assign */
+/** @param #27 PK_DesignObjParameter */
+/** The parameter */
 
 void qOrbiter::CMD_Set_Object_Parameter(string sPK_DesignObj,string sValue_To_Assign,int iPK_DesignObjParameter,string &sCMD_Result,Message *pMessage)
 //<-dceag-c20-e->
@@ -511,14 +511,14 @@ void qOrbiter::CMD_Set_Object_Parameter(string sPK_DesignObj,string sValue_To_As
 
 //<-dceag-c21-b->
 
-	/** @brief COMMAND: #21 - Set Object Position */
-	/** Change an objects's position on the screen */
-		/** @param #3 PK_DesignObj */
-			/** The object to move.  Can be a fully qualified object (x.y.z), or just the object ID, in which case the orbiter will find all such objects currently on screen. */
-		/** @param #11 Position X */
-			/**  */
-		/** @param #12 Position Y */
-			/**  */
+/** @brief COMMAND: #21 - Set Object Position */
+/** Change an objects's position on the screen */
+/** @param #3 PK_DesignObj */
+/** The object to move.  Can be a fully qualified object (x.y.z), or just the object ID, in which case the orbiter will find all such objects currently on screen. */
+/** @param #11 Position X */
+/**  */
+/** @param #12 Position Y */
+/**  */
 
 void qOrbiter::CMD_Set_Object_Position(string sPK_DesignObj,int iPosition_X,int iPosition_Y,string &sCMD_Result,Message *pMessage)
 //<-dceag-c21-e->
@@ -532,14 +532,14 @@ void qOrbiter::CMD_Set_Object_Position(string sPK_DesignObj,int iPosition_X,int 
 
 //<-dceag-c22-b->
 
-	/** @brief COMMAND: #22 - Set Object Size */
-	/** Change an object's size */
-		/** @param #3 PK_DesignObj */
-			/** The object to move.  Can be a fully qualified object (x.y.z), or just the object ID, in which case the orbiter will find all such objects currently on screen. */
-		/** @param #11 Position X */
-			/**  */
-		/** @param #12 Position Y */
-			/**  */
+/** @brief COMMAND: #22 - Set Object Size */
+/** Change an object's size */
+/** @param #3 PK_DesignObj */
+/** The object to move.  Can be a fully qualified object (x.y.z), or just the object ID, in which case the orbiter will find all such objects currently on screen. */
+/** @param #11 Position X */
+/**  */
+/** @param #12 Position Y */
+/**  */
 
 void qOrbiter::CMD_Set_Object_Size(string sPK_DesignObj,int iPosition_X,int iPosition_Y,string &sCMD_Result,Message *pMessage)
 //<-dceag-c22-e->
@@ -552,14 +552,14 @@ void qOrbiter::CMD_Set_Object_Size(string sPK_DesignObj,int iPosition_X,int iPos
 
 //<-dceag-c23-b->
 
-	/** @brief COMMAND: #23 - Set Pos Rel To Parent */
-	/** Like Set Object Position, but the X and Y coordinates are assumed to be relative to the parent rather than absolute */
-		/** @param #3 PK_DesignObj */
-			/** The object to move.  Can be a fully qualified object (x.y.z), or just the object ID, in which case the orbiter will find all such objects currently on screen. */
-		/** @param #11 Position X */
-			/**  */
-		/** @param #12 Position Y */
-			/**  */
+/** @brief COMMAND: #23 - Set Pos Rel To Parent */
+/** Like Set Object Position, but the X and Y coordinates are assumed to be relative to the parent rather than absolute */
+/** @param #3 PK_DesignObj */
+/** The object to move.  Can be a fully qualified object (x.y.z), or just the object ID, in which case the orbiter will find all such objects currently on screen. */
+/** @param #11 Position X */
+/**  */
+/** @param #12 Position Y */
+/**  */
 
 void qOrbiter::CMD_Set_Pos_Rel_To_Parent(string sPK_DesignObj,int iPosition_X,int iPosition_Y,string &sCMD_Result,Message *pMessage)
 //<-dceag-c23-e->
@@ -572,14 +572,14 @@ void qOrbiter::CMD_Set_Pos_Rel_To_Parent(string sPK_DesignObj,int iPosition_X,in
 
 //<-dceag-c24-b->
 
-	/** @brief COMMAND: #24 - Set Size Rel To Parent */
-	/** Change an object's size, relative to it's parent object */
-		/** @param #3 PK_DesignObj */
-			/** The object to move.  Can be a fully qualified object (x.y.z), or just the object ID, in which case the orbiter will find all such objects currently on screen. */
-		/** @param #11 Position X */
-			/** The percentage of the parent object's width.  100=the parent's full width. */
-		/** @param #12 Position Y */
-			/** The percentage of the parent object's height.  100=the parent's full height. */
+/** @brief COMMAND: #24 - Set Size Rel To Parent */
+/** Change an object's size, relative to it's parent object */
+/** @param #3 PK_DesignObj */
+/** The object to move.  Can be a fully qualified object (x.y.z), or just the object ID, in which case the orbiter will find all such objects currently on screen. */
+/** @param #11 Position X */
+/** The percentage of the parent object's width.  100=the parent's full width. */
+/** @param #12 Position Y */
+/** The percentage of the parent object's height.  100=the parent's full height. */
 
 void qOrbiter::CMD_Set_Size_Rel_To_Parent(string sPK_DesignObj,int iPosition_X,int iPosition_Y,string &sCMD_Result,Message *pMessage)
 //<-dceag-c24-e->
@@ -592,14 +592,14 @@ void qOrbiter::CMD_Set_Size_Rel_To_Parent(string sPK_DesignObj,int iPosition_X,i
 
 //<-dceag-c25-b->
 
-	/** @brief COMMAND: #25 - Set Text */
-	/** Change the text within a text object on the fly */
-		/** @param #3 PK_DesignObj */
-			/** The Design Object which contains the text object.  Can be a fully qualified object (x.y.z), or just the object ID, in which case the orbiter will find all such objects currently on screen. */
-		/** @param #9 Text */
-			/** The text to assign */
-		/** @param #25 PK_Text */
-			/** The text object in which to store the current input */
+/** @brief COMMAND: #25 - Set Text */
+/** Change the text within a text object on the fly */
+/** @param #3 PK_DesignObj */
+/** The Design Object which contains the text object.  Can be a fully qualified object (x.y.z), or just the object ID, in which case the orbiter will find all such objects currently on screen. */
+/** @param #9 Text */
+/** The text to assign */
+/** @param #25 PK_Text */
+/** The text object in which to store the current input */
 
 void qOrbiter::CMD_Set_Text(string sPK_DesignObj,string sText,int iPK_Text,string &sCMD_Result,Message *pMessage)
 //<-dceag-c25-e->
@@ -613,14 +613,14 @@ void qOrbiter::CMD_Set_Text(string sPK_DesignObj,string sText,int iPK_Text,strin
 
 //<-dceag-c26-b->
 
-	/** @brief COMMAND: #26 - Set Bound Icon */
-	/** Sets an icon that is bound to status.  "Bind Icon" is put in the object's on load commands, and then this command sets the status at runtime. */
-		/** @param #5 Value To Assign */
-			/** The value corresponding to an alt graphic. */
-		/** @param #9 Text */
-			/** Text for the binding */
-		/** @param #14 Type */
-			/** The type of bound icon. */
+/** @brief COMMAND: #26 - Set Bound Icon */
+/** Sets an icon that is bound to status.  "Bind Icon" is put in the object's on load commands, and then this command sets the status at runtime. */
+/** @param #5 Value To Assign */
+/** The value corresponding to an alt graphic. */
+/** @param #9 Text */
+/** Text for the binding */
+/** @param #14 Type */
+/** The type of bound icon. */
 
 void qOrbiter::CMD_Set_Bound_Icon(string sValue_To_Assign,string sText,string sType,string &sCMD_Result,Message *pMessage)
 //<-dceag-c26-e->
@@ -636,12 +636,12 @@ void qOrbiter::CMD_Set_Bound_Icon(string sValue_To_Assign,string sText,string sT
 
 //<-dceag-c27-b->
 
-	/** @brief COMMAND: #27 - Set Variable */
-	/** Change the value of a variable */
-		/** @param #4 PK_Variable */
-			/** The variable to change */
-		/** @param #5 Value To Assign */
-			/** The value to assign */
+/** @brief COMMAND: #27 - Set Variable */
+/** Change the value of a variable */
+/** @param #4 PK_Variable */
+/** The variable to change */
+/** @param #5 Value To Assign */
+/** The value to assign */
 
 void qOrbiter::CMD_Set_Variable(int iPK_Variable,string sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c27-e->
@@ -654,14 +654,14 @@ void qOrbiter::CMD_Set_Variable(int iPK_Variable,string sValue_To_Assign,string 
 
 //<-dceag-c28-b->
 
-	/** @brief COMMAND: #28 - Simulate Keypress */
-	/** Simulates that a key has been touched.  Touchable keys on screen can use this command to allow for simultaneous operation with keyboard or mouse.  Also works with the "Capture Keyboard to Variable" command. */
-		/** @param #26 PK_Button */
-			/** What key to simulate being pressed.  If 2 numbers are specified, separated by a comma, the second will be used if the Shift key is specified. */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
-		/** @param #50 Name */
-			/** The application to send the keypress to. If not specified, it goes to the DCE device. */
+/** @brief COMMAND: #28 - Simulate Keypress */
+/** Simulates that a key has been touched.  Touchable keys on screen can use this command to allow for simultaneous operation with keyboard or mouse.  Also works with the "Capture Keyboard to Variable" command. */
+/** @param #26 PK_Button */
+/** What key to simulate being pressed.  If 2 numbers are specified, separated by a comma, the second will be used if the Shift key is specified. */
+/** @param #41 StreamID */
+/** ID of stream to apply */
+/** @param #50 Name */
+/** The application to send the keypress to. If not specified, it goes to the DCE device. */
 
 void qOrbiter::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage)
 //<-dceag-c28-e->
@@ -674,14 +674,14 @@ void qOrbiter::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sNam
 
 //<-dceag-c29-b->
 
-	/** @brief COMMAND: #29 - Simulate Mouse Click */
-	/** Simulates a mouse click or touch on the indicated x & y coordinates */
-		/** @param #11 Position X */
-			/** position X */
-		/** @param #12 Position Y */
-			/** position Y */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
+/** @brief COMMAND: #29 - Simulate Mouse Click */
+/** Simulates a mouse click or touch on the indicated x & y coordinates */
+/** @param #11 Position X */
+/** position X */
+/** @param #12 Position Y */
+/** position Y */
+/** @param #41 StreamID */
+/** ID of stream to apply */
 
 void qOrbiter::CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c29-e->
@@ -694,8 +694,8 @@ void qOrbiter::CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int iStr
 
 //<-dceag-c30-b->
 
-	/** @brief COMMAND: #30 - Stop Sound */
-	/** If a sound file is being played, it will be stopped. */
+/** @brief COMMAND: #30 - Stop Sound */
+/** If a sound file is being played, it will be stopped. */
 
 void qOrbiter::CMD_Stop_Sound(string &sCMD_Result,Message *pMessage)
 //<-dceag-c30-e->
@@ -705,8 +705,8 @@ void qOrbiter::CMD_Stop_Sound(string &sCMD_Result,Message *pMessage)
 
 //<-dceag-c31-b->
 
-	/** @brief COMMAND: #31 - Store Variables */
-	/** The orbiter will store a snapshot of the variables at this moment, and if the user returns to this screen with a go back, it will restore the variables to this value. */
+/** @brief COMMAND: #31 - Store Variables */
+/** The orbiter will store a snapshot of the variables at this moment, and if the user returns to this screen with a go back, it will restore the variables to this value. */
 
 void qOrbiter::CMD_Store_Variables(string &sCMD_Result,Message *pMessage)
 //<-dceag-c31-e->
@@ -716,16 +716,16 @@ void qOrbiter::CMD_Store_Variables(string &sCMD_Result,Message *pMessage)
 
 //<-dceag-c32-b->
 
-	/** @brief COMMAND: #32 - Update Object Image */
-	/** Changes the background image within an object */
-		/** @param #3 PK_DesignObj */
-			/** The object in which to put the bitmap */
-		/** @param #14 Type */
-			/** 1=bmp, 2=jpg, 3=png */
-		/** @param #19 Data */
-			/** The contents of the bitmap, like reading from the file into a memory buffer */
-		/** @param #23 Disable Aspect Lock */
-			/** If 1, the image will be stretched to fit the object */
+/** @brief COMMAND: #32 - Update Object Image */
+/** Changes the background image within an object */
+/** @param #3 PK_DesignObj */
+/** The object in which to put the bitmap */
+/** @param #14 Type */
+/** 1=bmp, 2=jpg, 3=png */
+/** @param #19 Data */
+/** The contents of the bitmap, like reading from the file into a memory buffer */
+/** @param #23 Disable Aspect Lock */
+/** If 1, the image will be stretched to fit the object */
 
 void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *pData,int iData_Size,string sDisable_Aspect_Lock,string &sCMD_Result,Message *pMessage)
 //<-dceag-c32-e->
@@ -754,10 +754,10 @@ void qOrbiter::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *p
 
 //<-dceag-c58-b->
 
-	/** @brief COMMAND: #58 - Set Current User */
-	/** Sets what user is currently using the orbiter. */
-		/** @param #17 PK_Users */
-			/** The user currently using the orbiter. */
+/** @brief COMMAND: #58 - Set Current User */
+/** Sets what user is currently using the orbiter. */
+/** @param #17 PK_Users */
+/** The user currently using the orbiter. */
 
 void qOrbiter::CMD_Set_Current_User(int iPK_Users,string &sCMD_Result,Message *pMessage)
 //<-dceag-c58-e->
@@ -768,10 +768,10 @@ void qOrbiter::CMD_Set_Current_User(int iPK_Users,string &sCMD_Result,Message *p
 
 //<-dceag-c59-b->
 
-	/** @brief COMMAND: #59 - Set Entertainment Area */
-	/** If you don't know the location, you can also set just the entertainment area */
-		/** @param #45 PK_EntertainArea */
-			/** The current entertainment area where the orbiter is. */
+/** @brief COMMAND: #59 - Set Entertainment Area */
+/** If you don't know the location, you can also set just the entertainment area */
+/** @param #45 PK_EntertainArea */
+/** The current entertainment area where the orbiter is. */
 
 void qOrbiter::CMD_Set_Entertainment_Area(string sPK_EntertainArea,string &sCMD_Result,Message *pMessage)
 //<-dceag-c59-e->
@@ -782,14 +782,14 @@ void qOrbiter::CMD_Set_Entertainment_Area(string sPK_EntertainArea,string &sCMD_
 
 //<-dceag-c66-b->
 
-	/** @brief COMMAND: #66 - Select Object */
-	/** The same as clicking on an object. */
-		/** @param #3 PK_DesignObj */
-			/** The object to select. */
-		/** @param #16 PK_DesignObj_CurrentScreen */
-			/** Will only happen if this is the current screen. */
-		/** @param #102 Time */
-			/** If specified, rather than happening immediately it will happen in x seconds. */
+/** @brief COMMAND: #66 - Select Object */
+/** The same as clicking on an object. */
+/** @param #3 PK_DesignObj */
+/** The object to select. */
+/** @param #16 PK_DesignObj_CurrentScreen */
+/** Will only happen if this is the current screen. */
+/** @param #102 Time */
+/** If specified, rather than happening immediately it will happen in x seconds. */
 
 void qOrbiter::CMD_Select_Object(string sPK_DesignObj,string sPK_DesignObj_CurrentScreen,string sTime,string &sCMD_Result,Message *pMessage)
 //<-dceag-c66-e->
@@ -802,26 +802,26 @@ void qOrbiter::CMD_Select_Object(string sPK_DesignObj,string sPK_DesignObj_Curre
 
 //<-dceag-c67-b->
 
-	/** @brief COMMAND: #67 - Spawn Application */
-	/** Spawn the given application.  Mainly used for windows orbiters. */
-		/** @param #13 Filename */
-			/** The name of the executable file to spawn */
-		/** @param #50 Name */
-			/** A name that we'll remember the application by for future kill commands */
-		/** @param #51 Arguments */
-			/** Command arguments, tab delimited */
-		/** @param #94 SendOnFailure */
-			/** Send this messages if the process exited with failure error code. */
-		/** @param #95 SendOnSuccess */
-			/** Send this messages if the process exited with success error code. */
-		/** @param #115 Show logo */
-			/** If this is set then we will first select the logo  before spawning the application. */
-		/** @param #120 Retransmit */
-			/** If false, and if Exclusive is true and another instance is killed, the 'send messages on termination' will not be sent. */
-		/** @param #126 Exclusive */
-			/** If true, then kill other apps with this same name */
-		/** @param #241 Detach */
-			/** Detach application after spawning / Don't kill this app on reload. */
+/** @brief COMMAND: #67 - Spawn Application */
+/** Spawn the given application.  Mainly used for windows orbiters. */
+/** @param #13 Filename */
+/** The name of the executable file to spawn */
+/** @param #50 Name */
+/** A name that we'll remember the application by for future kill commands */
+/** @param #51 Arguments */
+/** Command arguments, tab delimited */
+/** @param #94 SendOnFailure */
+/** Send this messages if the process exited with failure error code. */
+/** @param #95 SendOnSuccess */
+/** Send this messages if the process exited with success error code. */
+/** @param #115 Show logo */
+/** If this is set then we will first select the logo  before spawning the application. */
+/** @param #120 Retransmit */
+/** If false, and if Exclusive is true and another instance is killed, the 'send messages on termination' will not be sent. */
+/** @param #126 Exclusive */
+/** If true, then kill other apps with this same name */
+/** @param #241 Detach */
+/** Detach application after spawning / Don't kill this app on reload. */
 
 void qOrbiter::CMD_Spawn_Application(string sFilename,string sName,string sArguments,string sSendOnFailure,string sSendOnSuccess,bool bShow_logo,bool bRetransmit,bool bExclusive,bool bDetach,string &sCMD_Result,Message *pMessage)
 //<-dceag-c67-e->
@@ -840,14 +840,14 @@ void qOrbiter::CMD_Spawn_Application(string sFilename,string sName,string sArgum
 
 //<-dceag-c72-b->
 
-	/** @brief COMMAND: #72 - Surrender to OS */
-	/** Let the O/S take over.  This is useful with the Orbiter running on the media director's desktop as a full screen app, and media is inserted, or the user starts a computer application on the mobile phone.  The orbiter will then let the other application ta */
-		/** @param #8 On/Off */
-			/** 1=Hide and let the OS take over.  0=The orbiter comes up again. */
-		/** @param #54 Fully release keyboard */
-			/** Only applies if on/off is 1.  If this is false, the orbiter will still filter keystrokes, looking for macros to implement, and only pass on keys that it doesn't catch.  If true, it will pass all keys.  True also releases the mouse. */
-		/** @param #225 Always */
-			/** If true, the mouse will always be ignored */
+/** @brief COMMAND: #72 - Surrender to OS */
+/** Let the O/S take over.  This is useful with the Orbiter running on the media director's desktop as a full screen app, and media is inserted, or the user starts a computer application on the mobile phone.  The orbiter will then let the other application ta */
+/** @param #8 On/Off */
+/** 1=Hide and let the OS take over.  0=The orbiter comes up again. */
+/** @param #54 Fully release keyboard */
+/** Only applies if on/off is 1.  If this is false, the orbiter will still filter keystrokes, looking for macros to implement, and only pass on keys that it doesn't catch.  If true, it will pass all keys.  True also releases the mouse. */
+/** @param #225 Always */
+/** If true, the mouse will always be ignored */
 
 void qOrbiter::CMD_Surrender_to_OS(string sOnOff,bool bFully_release_keyboard,bool bAlways,string &sCMD_Result,Message *pMessage)
 //<-dceag-c72-e->
@@ -860,10 +860,10 @@ void qOrbiter::CMD_Surrender_to_OS(string sOnOff,bool bFully_release_keyboard,bo
 
 //<-dceag-c77-b->
 
-	/** @brief COMMAND: #77 - Set Current Room */
-	/** If you don't know the location, you can also set just the room */
-		/** @param #57 PK_Room */
-			/** The room */
+/** @brief COMMAND: #77 - Set Current Room */
+/** If you don't know the location, you can also set just the room */
+/** @param #57 PK_Room */
+/** The room */
 
 void qOrbiter::CMD_Set_Current_Room(int iPK_Room,string &sCMD_Result,Message *pMessage)
 //<-dceag-c77-e->
@@ -878,10 +878,10 @@ void qOrbiter::CMD_Set_Current_Room(int iPK_Room,string &sCMD_Result,Message *pM
 
 //<-dceag-c85-b->
 
-	/** @brief COMMAND: #85 - Reset Highlight */
-	/** Resets the currently highlighted object.  Do this when you hide or unhide blocks that have tab stops. */
-		/** @param #3 PK_DesignObj */
-			/** If specified, this object will be highlighted.  Otherwise the first detected one. */
+/** @brief COMMAND: #85 - Reset Highlight */
+/** Resets the currently highlighted object.  Do this when you hide or unhide blocks that have tab stops. */
+/** @param #3 PK_DesignObj */
+/** If specified, this object will be highlighted.  Otherwise the first detected one. */
 
 void qOrbiter::CMD_Reset_Highlight(string sPK_DesignObj,string &sCMD_Result,Message *pMessage)
 //<-dceag-c85-e->
@@ -892,10 +892,10 @@ void qOrbiter::CMD_Reset_Highlight(string sPK_DesignObj,string &sCMD_Result,Mess
 
 //<-dceag-c88-b->
 
-	/** @brief COMMAND: #88 - Set Current Location */
-	/** Sets the location the orbiter is in.  The location is a combination of room and entertainment area. */
-		/** @param #65 LocationID */
-			/** The location ID is a sequential number created by OrbiterGen which defines a combination of room and entertainment area. */
+/** @brief COMMAND: #88 - Set Current Location */
+/** Sets the location the orbiter is in.  The location is a combination of room and entertainment area. */
+/** @param #65 LocationID */
+/** The location ID is a sequential number created by OrbiterGen which defines a combination of room and entertainment area. */
 
 void qOrbiter::CMD_Set_Current_Location(int iLocationID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c88-e->
@@ -906,12 +906,12 @@ void qOrbiter::CMD_Set_Current_Location(int iLocationID,string &sCMD_Result,Mess
 
 //<-dceag-c192-b->
 
-	/** @brief COMMAND: #192 - On */
-	/** Turn the device on */
-		/** @param #97 PK_Pipe */
-			/** Normally when a device is turned on all the inputs and outputs are selected automatically.  If this parameter is specified, only the settings along this pipe will be set. */
-		/** @param #98 PK_Device_Pipes */
-			/** Normally when a device is turned on the corresponding "pipes" are enabled by default. if this parameter is blank.  If this parameter is 0, no pipes will be enabled.  This can also be a comma seperated list of devices, meaning only the pipes to those devic */
+/** @brief COMMAND: #192 - On */
+/** Turn the device on */
+/** @param #97 PK_Pipe */
+/** Normally when a device is turned on all the inputs and outputs are selected automatically.  If this parameter is specified, only the settings along this pipe will be set. */
+/** @param #98 PK_Device_Pipes */
+/** Normally when a device is turned on the corresponding "pipes" are enabled by default. if this parameter is blank.  If this parameter is 0, no pipes will be enabled.  This can also be a comma seperated list of devices, meaning only the pipes to those devic */
 
 void qOrbiter::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_Result,Message *pMessage)
 //<-dceag-c192-e->
@@ -923,10 +923,10 @@ void qOrbiter::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_Result,M
 
 //<-dceag-c193-b->
 
-	/** @brief COMMAND: #193 - Off */
-	/** Turn the device off */
-		/** @param #97 PK_Pipe */
-			/** Normally when a device is turned on all the inputs and outputs are selected automatically.  If this parameter is specified, only the settings along this pipe will be set. */
+/** @brief COMMAND: #193 - Off */
+/** Turn the device off */
+/** @param #97 PK_Pipe */
+/** Normally when a device is turned on all the inputs and outputs are selected automatically.  If this parameter is specified, only the settings along this pipe will be set. */
 
 void qOrbiter::CMD_Off(int iPK_Pipe,string &sCMD_Result,Message *pMessage)
 //<-dceag-c193-e->
@@ -937,10 +937,10 @@ void qOrbiter::CMD_Off(int iPK_Pipe,string &sCMD_Result,Message *pMessage)
 
 //<-dceag-c238-b->
 
-	/** @brief COMMAND: #238 - Continuous Refresh */
-	/** Continuously refresh the current page.  Used when the page contains constantly changing data. */
-		/** @param #102 Time */
-			/** The interval time in seconds */
+/** @brief COMMAND: #238 - Continuous Refresh */
+/** Continuously refresh the current page.  Used when the page contains constantly changing data. */
+/** @param #102 Time */
+/** The interval time in seconds */
 
 void qOrbiter::CMD_Continuous_Refresh(string sTime,string &sCMD_Result,Message *pMessage)
 //<-dceag-c238-e->
@@ -951,26 +951,26 @@ void qOrbiter::CMD_Continuous_Refresh(string sTime,string &sCMD_Result,Message *
 
 //<-dceag-c242-b->
 
-	/** @brief COMMAND: #242 - Set Now Playing */
-	/** Used by the media engine to set the "now playing" text on an orbiter.  If the orbiter is bound to the remote for an entertainment area it will get more updates than just media,  like cover art, but this is the basic information that is visible on screens */
-		/** @param #3 PK_DesignObj */
-			/** 4 comma delimited objects: normal remote, popup remote, file list remote, popup file list remote, guide */
-		/** @param #5 Value To Assign */
-			/** The description of the media */
-		/** @param #9 Text */
-			/** The description of the current section (ie chapter in a dvd, etc.) */
-		/** @param #29 PK_MediaType */
-			/** The type of media playing */
-		/** @param #41 StreamID */
-			/** The ID of the current stream */
-		/** @param #48 Value */
-			/** The track number or position in the playlist */
-		/** @param #50 Name */
-			/** The name of the window for the application to remain in the foreground */
-		/** @param #103 List PK Device */
-			/** (comma-delimited list): The current source device, video device, the current audio device, 1/0 if audio device supports discrete volume */
-		/** @param #120 Retransmit */
-			/** If true, it will re-request the plist (current playlist) grid */
+/** @brief COMMAND: #242 - Set Now Playing */
+/** Used by the media engine to set the "now playing" text on an orbiter.  If the orbiter is bound to the remote for an entertainment area it will get more updates than just media,  like cover art, but this is the basic information that is visible on screens */
+/** @param #3 PK_DesignObj */
+/** 4 comma delimited objects: normal remote, popup remote, file list remote, popup file list remote, guide */
+/** @param #5 Value To Assign */
+/** The description of the media */
+/** @param #9 Text */
+/** The description of the current section (ie chapter in a dvd, etc.) */
+/** @param #29 PK_MediaType */
+/** The type of media playing */
+/** @param #41 StreamID */
+/** The ID of the current stream */
+/** @param #48 Value */
+/** The track number or position in the playlist */
+/** @param #50 Name */
+/** The name of the window for the application to remain in the foreground */
+/** @param #103 List PK Device */
+/** (comma-delimited list): The current source device, video device, the current audio device, 1/0 if audio device supports discrete volume */
+/** @param #120 Retransmit */
+/** If true, it will re-request the plist (current playlist) grid */
 
 void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,string sText,int iPK_MediaType,int iStreamID,int iValue,string sName,string sList_PK_Device,bool bRetransmit,string &sCMD_Result,Message *pMessage)
 //<-dceag-c242-e->
@@ -1166,14 +1166,14 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
 //<-dceag-c254-b->
 
-	/** @brief COMMAND: #254 - Bind Icon */
-	/** Used to make a button have an icon that reflects a current state, such as the user's status, the house mode, etc.  This is accomplished by creating an object with multiple alternate versions, and then executing a "Set  Bound Icon" to select the right one. */
-		/** @param #3 PK_DesignObj */
-			/** The object which contains the icon, or whose child objects contain the icon. */
-		/** @param #14 Type */
-			/** The type of binding, like "housemode", "userstatus_39288", etc. */
-		/** @param #104 Child */
-			/** If true, it will set the property for the child object(s), rather than the designated object. */
+/** @brief COMMAND: #254 - Bind Icon */
+/** Used to make a button have an icon that reflects a current state, such as the user's status, the house mode, etc.  This is accomplished by creating an object with multiple alternate versions, and then executing a "Set  Bound Icon" to select the right one. */
+/** @param #3 PK_DesignObj */
+/** The object which contains the icon, or whose child objects contain the icon. */
+/** @param #14 Type */
+/** The type of binding, like "housemode", "userstatus_39288", etc. */
+/** @param #104 Child */
+/** If true, it will set the property for the child object(s), rather than the designated object. */
 
 void qOrbiter::CMD_Bind_Icon(string sPK_DesignObj,string sType,bool bChild,string &sCMD_Result,Message *pMessage)
 //<-dceag-c254-e->
@@ -1186,10 +1186,10 @@ void qOrbiter::CMD_Bind_Icon(string sPK_DesignObj,string sType,bool bChild,strin
 
 //<-dceag-c258-b->
 
-	/** @brief COMMAND: #258 - Clear Selected Devices */
-	/** Floorplans, in particular, rely on a vector of selected devices, allowing the user to select more than one.  This command clears that list, removing any selected devices.  It can optionally cause the Object passed in as a parameter to be refreshed. */
-		/** @param #3 PK_DesignObj */
-			/** If specified, the object referenced here will be invalidated and redrawn. */
+/** @brief COMMAND: #258 - Clear Selected Devices */
+/** Floorplans, in particular, rely on a vector of selected devices, allowing the user to select more than one.  This command clears that list, removing any selected devices.  It can optionally cause the Object passed in as a parameter to be refreshed. */
+/** @param #3 PK_DesignObj */
+/** If specified, the object referenced here will be invalidated and redrawn. */
 
 void qOrbiter::CMD_Clear_Selected_Devices(string sPK_DesignObj,string &sCMD_Result,Message *pMessage)
 //<-dceag-c258-e->
@@ -1200,10 +1200,10 @@ void qOrbiter::CMD_Clear_Selected_Devices(string sPK_DesignObj,string &sCMD_Resu
 
 //<-dceag-c260-b->
 
-	/** @brief COMMAND: #260 - Set Main Menu */
-	/** Sets the Main Menu to 'Normal', 'Sleeping' or 'Screen Saver', optionally assigning new screens to those values. */
-		/** @param #9 Text */
-			/** Can be N, S, or V to set to the Normal, Sleeping, or Screen Saver, optionally followed by an = to assign a new screen to that menu.  e.g. N or N=1872.0.0 */
+/** @brief COMMAND: #260 - Set Main Menu */
+/** Sets the Main Menu to 'Normal', 'Sleeping' or 'Screen Saver', optionally assigning new screens to those values. */
+/** @param #9 Text */
+/** Can be N, S, or V to set to the Normal, Sleeping, or Screen Saver, optionally followed by an = to assign a new screen to that menu.  e.g. N or N=1872.0.0 */
 
 void qOrbiter::CMD_Set_Main_Menu(string sText,string &sCMD_Result,Message *pMessage)
 //<-dceag-c260-e->
@@ -1214,8 +1214,8 @@ void qOrbiter::CMD_Set_Main_Menu(string sText,string &sCMD_Result,Message *pMess
 
 //<-dceag-c265-b->
 
-	/** @brief COMMAND: #265 - Quit */
-	/** Exits the orbiter application */
+/** @brief COMMAND: #265 - Quit */
+/** Exits the orbiter application */
 
 void qOrbiter::CMD_Quit(string &sCMD_Result,Message *pMessage)
 //<-dceag-c265-e->
@@ -1225,12 +1225,12 @@ void qOrbiter::CMD_Quit(string &sCMD_Result,Message *pMessage)
 
 //<-dceag-c324-b->
 
-	/** @brief COMMAND: #324 - Set Timeout */
-	/** Specifies when a given screen will timeout, executing the timeout actions.  This will also reset a pending timeout */
-		/** @param #3 PK_DesignObj */
-			/** The screen to set the timeout on.  If blank the current screen. */
-		/** @param #102 Time */
-			/** The timeout in seconds.  0 or blank means no timeout. */
+/** @brief COMMAND: #324 - Set Timeout */
+/** Specifies when a given screen will timeout, executing the timeout actions.  This will also reset a pending timeout */
+/** @param #3 PK_DesignObj */
+/** The screen to set the timeout on.  If blank the current screen. */
+/** @param #102 Time */
+/** The timeout in seconds.  0 or blank means no timeout. */
 
 void qOrbiter::CMD_Set_Timeout(string sPK_DesignObj,string sTime,string &sCMD_Result,Message *pMessage)
 //<-dceag-c324-e->
@@ -1242,10 +1242,10 @@ void qOrbiter::CMD_Set_Timeout(string sPK_DesignObj,string sTime,string &sCMD_Re
 
 //<-dceag-c325-b->
 
-	/** @brief COMMAND: #325 - Keep Screen On */
-	/** Allow or don't allow the screen to blank with the screen saver. */
-		/** @param #8 On/Off */
-			/** If other than "0", the screen saver will be disabled. */
+/** @brief COMMAND: #325 - Keep Screen On */
+/** Allow or don't allow the screen to blank with the screen saver. */
+/** @param #8 On/Off */
+/** If other than "0", the screen saver will be disabled. */
 
 void qOrbiter::CMD_Keep_Screen_On(string sOnOff,string &sCMD_Result,Message *pMessage)
 //<-dceag-c325-e->
@@ -1256,10 +1256,10 @@ void qOrbiter::CMD_Keep_Screen_On(string sOnOff,string &sCMD_Result,Message *pMe
 
 //<-dceag-c330-b->
 
-	/** @brief COMMAND: #330 - Set Mouse Pointer Over Object */
-	/** Positions the on-screen mouse pointer centered over a certain object */
-		/** @param #3 PK_DesignObj */
-			/** The object to center the mouse over. */
+/** @brief COMMAND: #330 - Set Mouse Pointer Over Object */
+/** Positions the on-screen mouse pointer centered over a certain object */
+/** @param #3 PK_DesignObj */
+/** The object to center the mouse over. */
 
 void qOrbiter::CMD_Set_Mouse_Pointer_Over_Object(string sPK_DesignObj,string &sCMD_Result,Message *pMessage)
 //<-dceag-c330-e->
@@ -1270,10 +1270,10 @@ void qOrbiter::CMD_Set_Mouse_Pointer_Over_Object(string sPK_DesignObj,string &sC
 
 //<-dceag-c354-b->
 
-	/** @brief COMMAND: #354 - Show Mouse Pointer */
-	/** Shows or hides the mouse pointer. */
-		/** @param #8 On/Off */
-			/** 1=show it, 0=hide it. */
+/** @brief COMMAND: #354 - Show Mouse Pointer */
+/** Shows or hides the mouse pointer. */
+/** @param #8 On/Off */
+/** 1=show it, 0=hide it. */
 
 void qOrbiter::CMD_Show_Mouse_Pointer(string sOnOff,string &sCMD_Result,Message *pMessage)
 //<-dceag-c354-e->
@@ -1284,10 +1284,10 @@ void qOrbiter::CMD_Show_Mouse_Pointer(string sOnOff,string &sCMD_Result,Message 
 
 //<-dceag-c366-b->
 
-	/** @brief COMMAND: #366 - Activate Window */
-	/** ActivateApplication - Used by Linux On Screeen Orbiters only */
-		/** @param #50 Name */
-			/** Name as known by ratpoison. */
+/** @brief COMMAND: #366 - Activate Window */
+/** ActivateApplication - Used by Linux On Screeen Orbiters only */
+/** @param #50 Name */
+/** Name as known by ratpoison. */
 
 void qOrbiter::CMD_Activate_Window(string sName,string &sCMD_Result,Message *pMessage)
 //<-dceag-c366-e->
@@ -1298,12 +1298,12 @@ void qOrbiter::CMD_Activate_Window(string sName,string &sCMD_Result,Message *pMe
 
 //<-dceag-c389-b->
 
-	/** @brief COMMAND: #389 - Send Message */
-	/** Sends a message stored in a parameter as a text object. */
-		/** @param #9 Text */
-			/** The message in command line-style format */
-		/** @param #144 Go Back */
-			/** Go back after sending the command if it does not contain another goto screen or go back */
+/** @brief COMMAND: #389 - Send Message */
+/** Sends a message stored in a parameter as a text object. */
+/** @param #9 Text */
+/** The message in command line-style format */
+/** @param #144 Go Back */
+/** Go back after sending the command if it does not contain another goto screen or go back */
 
 void qOrbiter::CMD_Send_Message(string sText,bool bGo_Back,string &sCMD_Result,Message *pMessage)
 //<-dceag-c389-e->
@@ -1315,22 +1315,22 @@ void qOrbiter::CMD_Send_Message(string sText,bool bGo_Back,string &sCMD_Result,M
 
 //<-dceag-c397-b->
 
-	/** @brief COMMAND: #397 - Show Popup */
-	/** Shows a screen as a popup, at position x, y */
-		/** @param #3 PK_DesignObj */
-			/** The ID of the screen */
-		/** @param #11 Position X */
-			/** X position */
-		/** @param #12 Position Y */
-			/** Y position */
-		/** @param #16 PK_DesignObj_CurrentScreen */
-			/** If specified the popup will be local to this screen, otherwise it will be global.  Global and local popups are treated separately */
-		/** @param #50 Name */
-			/** The popup name */
-		/** @param #126 Exclusive */
-			/** Hide any other popups that are also visible, unless don't hide is set. */
-		/** @param #127 Dont Auto Hide */
-			/** If true, this popup will not be automatically hidden when the screen changes or another exclusive is shown.  It must be explicitly hidden. */
+/** @brief COMMAND: #397 - Show Popup */
+/** Shows a screen as a popup, at position x, y */
+/** @param #3 PK_DesignObj */
+/** The ID of the screen */
+/** @param #11 Position X */
+/** X position */
+/** @param #12 Position Y */
+/** Y position */
+/** @param #16 PK_DesignObj_CurrentScreen */
+/** If specified the popup will be local to this screen, otherwise it will be global.  Global and local popups are treated separately */
+/** @param #50 Name */
+/** The popup name */
+/** @param #126 Exclusive */
+/** Hide any other popups that are also visible, unless don't hide is set. */
+/** @param #127 Dont Auto Hide */
+/** If true, this popup will not be automatically hidden when the screen changes or another exclusive is shown.  It must be explicitly hidden. */
 
 void qOrbiter::CMD_Show_Popup(string sPK_DesignObj,int iPosition_X,int iPosition_Y,string sPK_DesignObj_CurrentScreen,string sName,bool bExclusive,bool bDont_Auto_Hide,string &sCMD_Result,Message *pMessage)
 //<-dceag-c397-e->
@@ -1347,12 +1347,12 @@ void qOrbiter::CMD_Show_Popup(string sPK_DesignObj,int iPosition_X,int iPosition
 
 //<-dceag-c398-b->
 
-	/** @brief COMMAND: #398 - Remove Popup */
-	/** Hides a popup. */
-		/** @param #16 PK_DesignObj_CurrentScreen */
-			/** (optional).  The screen on which it's a local popup */
-		/** @param #50 Name */
-			/** The name of the popup.  If not specified all popups will be removed */
+/** @brief COMMAND: #398 - Remove Popup */
+/** Hides a popup. */
+/** @param #16 PK_DesignObj_CurrentScreen */
+/** (optional).  The screen on which it's a local popup */
+/** @param #50 Name */
+/** The name of the popup.  If not specified all popups will be removed */
 
 void qOrbiter::CMD_Remove_Popup(string sPK_DesignObj_CurrentScreen,string sName,string &sCMD_Result,Message *pMessage)
 //<-dceag-c398-e->
@@ -1364,8 +1364,8 @@ void qOrbiter::CMD_Remove_Popup(string sPK_DesignObj_CurrentScreen,string sName,
 
 //<-dceag-c399-b->
 
-	/** @brief COMMAND: #399 - Show Shortcuts */
-	/** Shows keyboard shortcuts for 10 seconds or until the screen changes. */
+/** @brief COMMAND: #399 - Show Shortcuts */
+/** Shows keyboard shortcuts for 10 seconds or until the screen changes. */
 
 void qOrbiter::CMD_Show_Shortcuts(string &sCMD_Result,Message *pMessage)
 //<-dceag-c399-e->
@@ -1375,10 +1375,10 @@ void qOrbiter::CMD_Show_Shortcuts(string &sCMD_Result,Message *pMessage)
 
 //<-dceag-c401-b->
 
-	/** @brief COMMAND: #401 - Show File List */
-	/** Shows the file list */
-		/** @param #29 PK_MediaType */
-			/** The type of media the user wants to browse. */
+/** @brief COMMAND: #401 - Show File List */
+/** Shows the file list */
+/** @param #29 PK_MediaType */
+/** The type of media the user wants to browse. */
 
 void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message *pMessage)
 //<-dceag-c401-e->
@@ -1405,14 +1405,14 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
 //<-dceag-c402-b->
 
-	/** @brief COMMAND: #402 - Use Popup Remote Controls */
-	/** If this command is executed the remote controls will be displayed as popups. */
-		/** @param #11 Position X */
-			/** The location of the popup */
-		/** @param #12 Position Y */
-			/** The location of the popup */
-		/** @param #16 PK_DesignObj_CurrentScreen */
-			/** The screen on which to put the popup */
+/** @brief COMMAND: #402 - Use Popup Remote Controls */
+/** If this command is executed the remote controls will be displayed as popups. */
+/** @param #11 Position X */
+/** The location of the popup */
+/** @param #12 Position Y */
+/** The location of the popup */
+/** @param #16 PK_DesignObj_CurrentScreen */
+/** The screen on which to put the popup */
 
 void qOrbiter::CMD_Use_Popup_Remote_Controls(int iPosition_X,int iPosition_Y,string sPK_DesignObj_CurrentScreen,string &sCMD_Result,Message *pMessage)
 //<-dceag-c402-e->
@@ -1425,14 +1425,14 @@ void qOrbiter::CMD_Use_Popup_Remote_Controls(int iPosition_X,int iPosition_Y,str
 
 //<-dceag-c403-b->
 
-	/** @brief COMMAND: #403 - Use Popup File List */
-	/** If this command is executed the file lists will be displayed as popups. */
-		/** @param #11 Position X */
-			/** The location of the popup */
-		/** @param #12 Position Y */
-			/** The location of the popup */
-		/** @param #16 PK_DesignObj_CurrentScreen */
-			/** The screen to put the popup on */
+/** @brief COMMAND: #403 - Use Popup File List */
+/** If this command is executed the file lists will be displayed as popups. */
+/** @param #11 Position X */
+/** The location of the popup */
+/** @param #12 Position Y */
+/** The location of the popup */
+/** @param #16 PK_DesignObj_CurrentScreen */
+/** The screen to put the popup on */
 
 void qOrbiter::CMD_Use_Popup_File_List(int iPosition_X,int iPosition_Y,string sPK_DesignObj_CurrentScreen,string &sCMD_Result,Message *pMessage)
 //<-dceag-c403-e->
@@ -1445,10 +1445,10 @@ void qOrbiter::CMD_Use_Popup_File_List(int iPosition_X,int iPosition_Y,string sP
 
 //<-dceag-c405-b->
 
-	/** @brief COMMAND: #405 - Scale this object */
-	/** If you add this command to the startup list of an object it will cause Orbiter Gen to scale this object and all it's children. */
-		/** @param #48 Value */
-			/** The value to scale to.  100=full size, 50=half size */
+/** @brief COMMAND: #405 - Scale this object */
+/** If you add this command to the startup list of an object it will cause Orbiter Gen to scale this object and all it's children. */
+/** @param #48 Value */
+/** The value to scale to.  100=full size, 50=half size */
 
 void qOrbiter::CMD_Scale_this_object(int iValue,string &sCMD_Result,Message *pMessage)
 //<-dceag-c405-e->
@@ -1459,16 +1459,16 @@ void qOrbiter::CMD_Scale_this_object(int iValue,string &sCMD_Result,Message *pMe
 
 //<-dceag-c407-b->
 
-	/** @brief COMMAND: #407 - Set Floorplan */
-	/** Sets the object to use for one of the following types:
+/** @brief COMMAND: #407 - Set Floorplan */
+/** Sets the object to use for one of the following types:
 light, media, climate, security, telecom */
-		/** @param #3 PK_DesignObj */
-			/** The screen to use for this floorplan */
-		/** @param #14 Type */
-			/** One of the following:
+/** @param #3 PK_DesignObj */
+/** The screen to use for this floorplan */
+/** @param #14 Type */
+/** One of the following:
 light, climate, media, security, telecom */
-		/** @param #119 True/False */
-			/** True if this is a popup.  False if it's full screen */
+/** @param #119 True/False */
+/** True if this is a popup.  False if it's full screen */
 
 void qOrbiter::CMD_Set_Floorplan(string sPK_DesignObj,string sType,bool bTrueFalse,string &sCMD_Result,Message *pMessage)
 //<-dceag-c407-e->
@@ -1481,14 +1481,14 @@ void qOrbiter::CMD_Set_Floorplan(string sPK_DesignObj,string sType,bool bTrueFal
 
 //<-dceag-c408-b->
 
-	/** @brief COMMAND: #408 - Show Floorplan */
-	/** Shows the floorplan */
-		/** @param #11 Position X */
-			/** If the floorplan is not full screen, the location where it should be displayed */
-		/** @param #12 Position Y */
-			/** If the floorplan is not full screen, the location where it should be displayed */
-		/** @param #14 Type */
-			/** The type of floorplan */
+/** @brief COMMAND: #408 - Show Floorplan */
+/** Shows the floorplan */
+/** @param #11 Position X */
+/** If the floorplan is not full screen, the location where it should be displayed */
+/** @param #12 Position Y */
+/** If the floorplan is not full screen, the location where it should be displayed */
+/** @param #14 Type */
+/** The type of floorplan */
 
 void qOrbiter::CMD_Show_Floorplan(int iPosition_X,int iPosition_Y,string sType,string &sCMD_Result,Message *pMessage)
 //<-dceag-c408-e->
@@ -1501,10 +1501,10 @@ void qOrbiter::CMD_Show_Floorplan(int iPosition_X,int iPosition_Y,string sType,s
 
 //<-dceag-c413-b->
 
-	/** @brief COMMAND: #413 - Forward local k/b to OSD */
-	/** Means this orbiter's keyboard should be controlling the application running on the media director. */
-		/** @param #119 True/False */
-			/** If 1, do it.  It 0, stop */
+/** @brief COMMAND: #413 - Forward local k/b to OSD */
+/** Means this orbiter's keyboard should be controlling the application running on the media director. */
+/** @param #119 True/False */
+/** If 1, do it.  It 0, stop */
 
 void qOrbiter::CMD_Forward_local_kb_to_OSD(bool bTrueFalse,string &sCMD_Result,Message *pMessage)
 //<-dceag-c413-e->
@@ -1515,12 +1515,12 @@ void qOrbiter::CMD_Forward_local_kb_to_OSD(bool bTrueFalse,string &sCMD_Result,M
 
 //<-dceag-c415-b->
 
-	/** @brief COMMAND: #415 - Set Mouse Position Relative */
-	/** Move the mouse relative to its current position */
-		/** @param #11 Position X */
-			/** The X Position to move */
-		/** @param #12 Position Y */
-			/** The Y Position to move */
+/** @brief COMMAND: #415 - Set Mouse Position Relative */
+/** Move the mouse relative to its current position */
+/** @param #11 Position X */
+/** The X Position to move */
+/** @param #12 Position Y */
+/** The Y Position to move */
 
 void qOrbiter::CMD_Set_Mouse_Position_Relative(int iPosition_X,int iPosition_Y,string &sCMD_Result,Message *pMessage)
 //<-dceag-c415-e->
@@ -1532,10 +1532,10 @@ void qOrbiter::CMD_Set_Mouse_Position_Relative(int iPosition_X,int iPosition_Y,s
 
 //<-dceag-c416-b->
 
-	/** @brief COMMAND: #416 - Simulate Mouse Click At Present Pos */
-	/** Simulates clicking the mouse button */
-		/** @param #14 Type */
-			/** If L or empty, the left button.  If R the right button. */
+/** @brief COMMAND: #416 - Simulate Mouse Click At Present Pos */
+/** Simulates clicking the mouse button */
+/** @param #14 Type */
+/** If L or empty, the left button.  If R the right button. */
 
 void qOrbiter::CMD_Simulate_Mouse_Click_At_Present_Pos(string sType,string &sCMD_Result,Message *pMessage)
 //<-dceag-c416-e->
@@ -1546,20 +1546,20 @@ void qOrbiter::CMD_Simulate_Mouse_Click_At_Present_Pos(string sType,string &sCMD
 
 //<-dceag-c689-b->
 
-	/** @brief COMMAND: #689 - Update Time Code */
-	/** Update the time code of the current media */
-		/** @param #41 StreamID */
-			/** The Stream to update */
-		/** @param #102 Time */
-			/** The current time.  If there is both a section time and total time, they should be \t delimited, like 1:03\t60:30 */
-		/** @param #132 Total */
-			/** If there is both a section time and total time, they should be \t delimited, like 1:03\t60:30 */
-		/** @param #133 Speed */
-			/** The current speed */
-		/** @param #134 Title */
-			/** For DVD's, the title */
-		/** @param #135 Section */
-			/** For DVD's, the section */
+/** @brief COMMAND: #689 - Update Time Code */
+/** Update the time code of the current media */
+/** @param #41 StreamID */
+/** The Stream to update */
+/** @param #102 Time */
+/** The current time.  If there is both a section time and total time, they should be \t delimited, like 1:03\t60:30 */
+/** @param #132 Total */
+/** If there is both a section time and total time, they should be \t delimited, like 1:03\t60:30 */
+/** @param #133 Speed */
+/** The current speed */
+/** @param #134 Title */
+/** For DVD's, the title */
+/** @param #135 Section */
+/** For DVD's, the section */
 
 void qOrbiter::CMD_Update_Time_Code(int iStreamID,string sTime,string sTotal,string sSpeed,string sTitle,string sSection,string &sCMD_Result,Message *pMessage)
 //<-dceag-c689-e->
@@ -1575,18 +1575,18 @@ void qOrbiter::CMD_Update_Time_Code(int iStreamID,string sTime,string sTotal,str
 
 //<-dceag-c741-b->
 
-	/** @brief COMMAND: #741 - Goto Screen */
-	/** Goto a specific screen. */
-		/** @param #10 ID */
-			/** Assigns an optional ID to this particular "viewing" of the screen, used with Kill Screen.  There can be lots of instances of the same screen in the history queue (such as call in progress).  This allows a program to pop a particular one out of the queue. */
-		/** @param #159 PK_Screen */
-			/** The screen id. */
-		/** @param #251 Interruption */
-			/** Indicates at what times to ignore the screen change if it would interrupt the user.  A value in: enum eInterruption */
-		/** @param #252 Turn On */
-			/** If true, turn the display on if it's off. */
-		/** @param #253 Queue */
-			/** If true, then if the screen change was ignored so as not to interrpt the user, queue it for when the user is done */
+/** @brief COMMAND: #741 - Goto Screen */
+/** Goto a specific screen. */
+/** @param #10 ID */
+/** Assigns an optional ID to this particular "viewing" of the screen, used with Kill Screen.  There can be lots of instances of the same screen in the history queue (such as call in progress).  This allows a program to pop a particular one out of the queue. */
+/** @param #159 PK_Screen */
+/** The screen id. */
+/** @param #251 Interruption */
+/** Indicates at what times to ignore the screen change if it would interrupt the user.  A value in: enum eInterruption */
+/** @param #252 Turn On */
+/** If true, turn the display on if it's off. */
+/** @param #253 Queue */
+/** If true, then if the screen change was ignored so as not to interrpt the user, queue it for when the user is done */
 
 void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool bTurn_On,bool bQueue,string &sCMD_Result,Message *pMessage)
 //<-dceag-c741-e->
@@ -1617,16 +1617,16 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
 
 //<-dceag-c795-b->
 
-	/** @brief COMMAND: #795 - Set Mouse Behavior */
-	/** Indicates if the mouse should be locked to horizontal or vertical movements, how to handle range of motion, etc. */
-		/** @param #3 PK_DesignObj */
-			/** An object to lock the movement to */
-		/** @param #39 Options */
-			/** The following letter(s): [r/a]ramp/absolute */
-		/** @param #126 Exclusive */
-			/** If true, all existing mouse behavior will be removed */
-		/** @param #211 Direction */
-			/** a letter: [h]orizontal, [v]ertical, [b]oth */
+/** @brief COMMAND: #795 - Set Mouse Behavior */
+/** Indicates if the mouse should be locked to horizontal or vertical movements, how to handle range of motion, etc. */
+/** @param #3 PK_DesignObj */
+/** An object to lock the movement to */
+/** @param #39 Options */
+/** The following letter(s): [r/a]ramp/absolute */
+/** @param #126 Exclusive */
+/** If true, all existing mouse behavior will be removed */
+/** @param #211 Direction */
+/** a letter: [h]orizontal, [v]ertical, [b]oth */
 
 void qOrbiter::CMD_Set_Mouse_Behavior(string sPK_DesignObj,string sOptions,bool bExclusive,string sDirection,string &sCMD_Result,Message *pMessage)
 //<-dceag-c795-e->
@@ -1640,10 +1640,10 @@ void qOrbiter::CMD_Set_Mouse_Behavior(string sPK_DesignObj,string sOptions,bool 
 
 //<-dceag-c801-b->
 
-	/** @brief COMMAND: #801 - Set Mouse Sensitivity */
-	/** 1=Sensitive, 3=not sensitive */
-		/** @param #48 Value */
-			/** 1=sensitive, 3=least sensitive */
+/** @brief COMMAND: #801 - Set Mouse Sensitivity */
+/** 1=Sensitive, 3=not sensitive */
+/** @param #48 Value */
+/** 1=sensitive, 3=least sensitive */
 
 void qOrbiter::CMD_Set_Mouse_Sensitivity(int iValue,string &sCMD_Result,Message *pMessage)
 //<-dceag-c801-e->
@@ -1654,16 +1654,16 @@ void qOrbiter::CMD_Set_Mouse_Sensitivity(int iValue,string &sCMD_Result,Message 
 
 //<-dceag-c809-b->
 
-	/** @brief COMMAND: #809 - Display Alert */
-	/** Displays a short alert that appears on the orbiter as a discrete popup message that goes away automatically. */
-		/** @param #9 Text */
-			/** The text in the alert */
-		/** @param #70 Tokens */
-			/** File this alert with this token, and if another alert comes in before timeout with the same token, replace it. */
-		/** @param #182 Timeout */
-			/** Make the alert go away after this many seconds */
-		/** @param #251 Interruption */
-			/** How to interrupt the user if something is happening */
+/** @brief COMMAND: #809 - Display Alert */
+/** Displays a short alert that appears on the orbiter as a discrete popup message that goes away automatically. */
+/** @param #9 Text */
+/** The text in the alert */
+/** @param #70 Tokens */
+/** File this alert with this token, and if another alert comes in before timeout with the same token, replace it. */
+/** @param #182 Timeout */
+/** Make the alert go away after this many seconds */
+/** @param #251 Interruption */
+/** How to interrupt the user if something is happening */
 
 void qOrbiter::CMD_Display_Alert(string sText,string sTokens,string sTimeout,int iInterruption,string &sCMD_Result,Message *pMessage)
 //<-dceag-c809-e->
@@ -1677,16 +1677,16 @@ void qOrbiter::CMD_Display_Alert(string sText,string sTokens,string sTimeout,int
 
 //<-dceag-c810-b->
 
-	/** @brief COMMAND: #810 - Set Active Application */
-	/** Tells an On screen orbiter what application is currently active */
-		/** @param #50 Name */
-			/** A description of the app */
-		/** @param #159 PK_Screen */
-			/** The Screen for the OSD */
-		/** @param #216 Identifier */
-			/** The window identifier */
-		/** @param #226 PK_Screen_GoTo */
-			/** The screen for the orbiter remote */
+/** @brief COMMAND: #810 - Set Active Application */
+/** Tells an On screen orbiter what application is currently active */
+/** @param #50 Name */
+/** A description of the app */
+/** @param #159 PK_Screen */
+/** The Screen for the OSD */
+/** @param #216 Identifier */
+/** The window identifier */
+/** @param #226 PK_Screen_GoTo */
+/** The screen for the orbiter remote */
 
 void qOrbiter::CMD_Set_Active_Application(string sName,int iPK_Screen,string sIdentifier,int iPK_Screen_GoTo,string &sCMD_Result,Message *pMessage)
 //<-dceag-c810-e->
@@ -1700,16 +1700,16 @@ void qOrbiter::CMD_Set_Active_Application(string sName,int iPK_Screen,string sId
 
 //<-dceag-c811-b->
 
-	/** @brief COMMAND: #811 - Get Active Application */
-	/** Return the currently active application */
-		/** @param #50 Name */
-			/** A description of the app */
-		/** @param #159 PK_Screen */
-			/** The Screen for the OSD */
-		/** @param #216 Identifier */
-			/** The window identifier */
-		/** @param #226 PK_Screen_GoTo */
-			/** The Screen for the orbiter remote */
+/** @brief COMMAND: #811 - Get Active Application */
+/** Return the currently active application */
+/** @param #50 Name */
+/** A description of the app */
+/** @param #159 PK_Screen */
+/** The Screen for the OSD */
+/** @param #216 Identifier */
+/** The window identifier */
+/** @param #226 PK_Screen_GoTo */
+/** The Screen for the orbiter remote */
 
 void qOrbiter::CMD_Get_Active_Application(string *sName,int *iPK_Screen,string *sIdentifier,int *iPK_Screen_GoTo,string &sCMD_Result,Message *pMessage)
 //<-dceag-c811-e->
@@ -1723,10 +1723,10 @@ void qOrbiter::CMD_Get_Active_Application(string *sName,int *iPK_Screen,string *
 
 //<-dceag-c834-b->
 
-	/** @brief COMMAND: #834 - Execute Shortcut */
-	/** Execute the shortcut associated with a key.  Called when a key is held down. */
-		/** @param #48 Value */
-			/** The ascii value of the key (ie 65='A').  Valid are 0-9,*,#,A-Z */
+/** @brief COMMAND: #834 - Execute Shortcut */
+/** Execute the shortcut associated with a key.  Called when a key is held down. */
+/** @param #48 Value */
+/** The ascii value of the key (ie 65='A').  Valid are 0-9,*,#,A-Z */
 
 void qOrbiter::CMD_Execute_Shortcut(int iValue,string &sCMD_Result,Message *pMessage)
 //<-dceag-c834-e->
@@ -1737,8 +1737,8 @@ void qOrbiter::CMD_Execute_Shortcut(int iValue,string &sCMD_Result,Message *pMes
 
 //<-dceag-c838-b->
 
-	/** @brief COMMAND: #838 - Bind to Wireless Keyboard */
-	/** If the USB RF dongle is attached it causes it to do a bind request and add a remote. */
+/** @brief COMMAND: #838 - Bind to Wireless Keyboard */
+/** If the USB RF dongle is attached it causes it to do a bind request and add a remote. */
 
 void qOrbiter::CMD_Bind_to_Wireless_Keyboard(string &sCMD_Result,Message *pMessage)
 //<-dceag-c838-e->
@@ -1749,10 +1749,10 @@ void qOrbiter::CMD_Bind_to_Wireless_Keyboard(string &sCMD_Result,Message *pMessa
 
 //<-dceag-c912-b->
 
-	/** @brief COMMAND: #912 - Activate PC Desktop */
-	/** Activate or de-activate the PC-desktop */
-		/** @param #119 True/False */
-			/** If true, switch to the last PC desktop.  If false, switch to Orbiter's desktop */
+/** @brief COMMAND: #912 - Activate PC Desktop */
+/** Activate or de-activate the PC-desktop */
+/** @param #119 True/False */
+/** If true, switch to the last PC desktop.  If false, switch to Orbiter's desktop */
 
 void qOrbiter::CMD_Activate_PC_Desktop(bool bTrueFalse,string &sCMD_Result,Message *pMessage)
 //<-dceag-c912-e->
@@ -1763,16 +1763,16 @@ void qOrbiter::CMD_Activate_PC_Desktop(bool bTrueFalse,string &sCMD_Result,Messa
 
 //<-dceag-c923-b->
 
-	/** @brief COMMAND: #923 - Assisted Make Call */
-	/** Send make call command back to Orbiter and let it decide if we are going to make a direct call or a transfer/conference */
-		/** @param #17 PK_Users */
-			/** The called user. Only one is supported now. */
-		/** @param #83 PhoneExtension */
-			/** The phone number to be called. */
-		/** @param #184 PK_Device_From */
-			/** The device which starts the call. */
-		/** @param #263 PK_Device_To */
-			/** The called device. */
+/** @brief COMMAND: #923 - Assisted Make Call */
+/** Send make call command back to Orbiter and let it decide if we are going to make a direct call or a transfer/conference */
+/** @param #17 PK_Users */
+/** The called user. Only one is supported now. */
+/** @param #83 PhoneExtension */
+/** The phone number to be called. */
+/** @param #184 PK_Device_From */
+/** The device which starts the call. */
+/** @param #263 PK_Device_To */
+/** The called device. */
 
 void qOrbiter::CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To,string &sCMD_Result,Message *pMessage)
 //<-dceag-c923-e->
@@ -1859,7 +1859,7 @@ bool DCE::qOrbiter::initialize()
 void qOrbiter::requestConfigData()
 {
 #ifndef __ANDROID__
-     pthread_yield();
+    pthread_yield();
 #endif
 
     QNetworkRequest updateDevice;
@@ -4367,7 +4367,7 @@ void DCE::qOrbiter::adjustVolume(int vol)
         }
         else
         {
-           DCE::CMD_Vol_Down lowerVolume(m_dwPK_Device, iMediaPluginID, vol);
+            DCE::CMD_Vol_Down lowerVolume(m_dwPK_Device, iMediaPluginID, vol);
             SendCommand(lowerVolume);
 
         }
@@ -4407,7 +4407,7 @@ void qOrbiter::OnReload()
 #endif
     emit routerReload();
 #ifndef __ANDROID__
-     pthread_yield();
+    pthread_yield();
 #endif
 
     DisconnectAndWait();
@@ -5046,7 +5046,7 @@ void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
         //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
 #ifndef __ANDROID__
-     pthread_yield();
+        pthread_yield();
 #endif
 
         emit mediaResponseChanged("DCE::Recieved Screensaver image");
@@ -5089,20 +5089,20 @@ void DCE::qOrbiter::setGridSeperator(int sep)
 
 //<-dceag-c190-b->
 
-	/** @brief COMMAND: #190 - Enter/Go */
-	/** Select the highlighted item */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
+/** @brief COMMAND: #190 - Enter/Go */
+/** Select the highlighted item */
+/** @param #41 StreamID */
+/** ID of stream to apply */
 
 void qOrbiter::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c190-e->
 {}
 //<-dceag-c194-b->
 
-	/** @brief COMMAND: #194 - Toggle Power */
-	/** First time stops any media playing.  Second time turns the display off.  Third time powers off the media director. */
-		/** @param #8 On/Off */
-			/** Depending on each device On/Off can be interpreted differently, but in genereal On/Off has a value of 1 for on and 0 for Off */
+/** @brief COMMAND: #194 - Toggle Power */
+/** First time stops any media playing.  Second time turns the display off.  Third time powers off the media director. */
+/** @param #8 On/Off */
+/** Depending on each device On/Off can be interpreted differently, but in genereal On/Off has a value of 1 for on and 0 for Off */
 
 void qOrbiter::CMD_Toggle_Power(string sOnOff,string &sCMD_Result,Message *pMessage)
 //<-dceag-c194-e->
@@ -5112,10 +5112,10 @@ void qOrbiter::CMD_Toggle_Power(string sOnOff,string &sCMD_Result,Message *pMess
 
 //<-dceag-c200-b->
 
-	/** @brief COMMAND: #200 - Move Up */
-	/** Move the highlight up */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
+/** @brief COMMAND: #200 - Move Up */
+/** Move the highlight up */
+/** @param #41 StreamID */
+/** ID of stream to apply */
 
 void qOrbiter::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c200-e->
@@ -5125,10 +5125,10 @@ void qOrbiter::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage)
 
 //<-dceag-c201-b->
 
-	/** @brief COMMAND: #201 - Move Down */
-	/** Move the highlight down */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
+/** @brief COMMAND: #201 - Move Down */
+/** Move the highlight down */
+/** @param #41 StreamID */
+/** ID of stream to apply */
 
 void qOrbiter::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c201-e->
@@ -5138,10 +5138,10 @@ void qOrbiter::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage
 
 //<-dceag-c202-b->
 
-	/** @brief COMMAND: #202 - Move Left */
-	/** Move the highlight left */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
+/** @brief COMMAND: #202 - Move Left */
+/** Move the highlight left */
+/** @param #41 StreamID */
+/** ID of stream to apply */
 
 void qOrbiter::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c202-e->
@@ -5151,10 +5151,10 @@ void qOrbiter::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage
 
 //<-dceag-c203-b->
 
-	/** @brief COMMAND: #203 - Move Right */
-	/** Move the highlight right */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
+/** @brief COMMAND: #203 - Move Right */
+/** Move the highlight right */
+/** @param #41 StreamID */
+/** ID of stream to apply */
 
 void qOrbiter::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c203-e->
@@ -5164,10 +5164,10 @@ void qOrbiter::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessag
 
 //<-dceag-c240-b->
 
-	/** @brief COMMAND: #240 - Back / Prior Menu */
-	/** If at a remote control, forward to media plugin.  Otherwise go back 1 screen. */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
+/** @brief COMMAND: #240 - Back / Prior Menu */
+/** If at a remote control, forward to media plugin.  Otherwise go back 1 screen. */
+/** @param #41 StreamID */
+/** ID of stream to apply */
 
 void qOrbiter::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c240-e->
@@ -5177,8 +5177,8 @@ void qOrbiter::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pM
 
 //<-dceag-c363-b->
 
-	/** @brief COMMAND: #363 - Back / Clear Entry */
-	/** If at a remote control, forward to media plugin.  Otherwise clear typing */
+/** @brief COMMAND: #363 - Back / Clear Entry */
+/** If at a remote control, forward to media plugin.  Otherwise clear typing */
 
 void qOrbiter::CMD_Back_Clear_Entry(string &sCMD_Result,Message *pMessage)
 //<-dceag-c363-e->
@@ -5188,12 +5188,12 @@ void qOrbiter::CMD_Back_Clear_Entry(string &sCMD_Result,Message *pMessage)
 
 //<-dceag-c548-b->
 
-	/** @brief COMMAND: #548 - Menu */
-	/** Shows the main menu */
-		/** @param #9 Text */
-			/** A string indicating which menu should appear.  The parameter is only used for smart media devices */
-		/** @param #41 StreamID */
-			/** ID of stream to apply */
+/** @brief COMMAND: #548 - Menu */
+/** Shows the main menu */
+/** @param #9 Text */
+/** A string indicating which menu should appear.  The parameter is only used for smart media devices */
+/** @param #41 StreamID */
+/** ID of stream to apply */
 
 void qOrbiter::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c548-e->
@@ -5292,8 +5292,8 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
 
 //<-dceag-c126-b->
 
-	/** @brief COMMAND: #126 - Guide */
-	/** Go to the media guide if applicable, otherwise forward to media plugin. */
+/** @brief COMMAND: #126 - Guide */
+/** Go to the media guide if applicable, otherwise forward to media plugin. */
 
 void qOrbiter::CMD_Guide(string &sCMD_Result,Message *pMessage)
 //<-dceag-c126-e->
@@ -5348,19 +5348,54 @@ void qOrbiter::getVolume()
 void qOrbiter::executeMessageSend(QVariantMap outGoing)
 {
 
-    qDebug() << outGoing;
-//    string cMsg = outGoing.toStdString();
-//    string msgResponse="";
 
-//    Message elMessage(cMsg);
-//    this->m_pEvent->SendMessage(&elMessage, msgResponse);
+    QVariant l = outGoing["to"].toMap();
+    QVariantList paramList = outGoing["params"].toList();
+    QMap<long, string> map_params;
+    foreach (QVariant t, paramList) {
+        QVariantMap item = t.toMap();
+        int f = item["paramno"].toInt();
+        string a = item["val"].toString().toStdString();
+        map_params.insert((long)f, a);
+    }
 
-//    if(msgResponse=="OK"){
-//        emit commandResponseChanged("MessageSend OK!");
-//    }else
-//    {
-//        emit commandResponseChanged("MessageSend Failed!");
-//    }
+
+
+
+    int cmd = outGoing["command"].toInt();
+    long paramCount = outGoing["count"].toInt();
+  //  long deviceTo = outGoing["to"].toInt();
+
+    vector<class Message *> b;
+    QStringList keys = outGoing["to"].toMap().keys();
+
+    QString targets = keys.join(",");
+    qDebug() <<targets;
+    QString outMessage;
+    outMessage.append('http://192.168.80.1 -targetType category -bl 5 1 5 1 809 251 0 9 "TESTING QOrbiter ALERT" 182 15 70 "test"');
+    //(QString::fromLocal8Bit('dcerouter -targetType category -bl 5 1 5 1 809 251 0 9 "TESTING QORBITER ALERT" 182 15 70 "test"'));
+    Message* m = new Message();
+    m->m_dwPK_Device_From = m_dwPK_Device;
+    m->m_sPK_Device_List_To =targets.toStdString();
+    m->m_dwPK_Device_To = DEVICEID_LIST;
+    m->m_mapParameters = map_params.toStdMap() ;
+    m->m_dwMessage_Type = 1;
+    m->m_dwID = cmd;
+
+    m->m_bCanBuffer = false;
+    m->m_eBroadcastLevel = BL_SameHouse;
+    m->m_eRetry = MR_None;
+    m->m_dwPriority = 1;
+    string *msgResponse;
+    qDebug() <<"Message content";
+    qDebug() <<"Device From ==>" << m->m_dwPK_Device_From;
+    qDebug() <<"Device to ==>" << m->m_sPK_Device_List_To.c_str();
+
+    qDebug("pooh");
+    qDebug() << m->ToString().c_str();
+
+    if(m->m_dwPK_Device_To != -1 && m->m_dwPK_Device_Template != -1 && m->m_dwPK_Device_Category_To !=-1)
+    this->m_pPrimaryDeviceCommand->SendMessageToRouter(m);
 
 }
 
@@ -5380,26 +5415,26 @@ void qOrbiter::checkRouterConnection()
 }
 
 
-	/** @brief COMMAND: #89 - Vol Up */
-	/** volume up */
-		/** @param #72 Repeat Command */
-			/** If specified, repeat the volume up this many times */
+/** @brief COMMAND: #89 - Vol Up */
+/** volume up */
+/** @param #72 Repeat Command */
+/** If specified, repeat the volume up this many times */
 
 void qOrbiter::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMessage){}
 //<-dceag-c89-e->
 //<-dceag-c90-b->
 
-	/** @brief COMMAND: #90 - Vol Down */
-	/** volume down */
-		/** @param #72 Repeat Command */
-			/** If specified, repeat the volume down this many times. */
+/** @brief COMMAND: #90 - Vol Down */
+/** volume down */
+/** @param #72 Repeat Command */
+/** If specified, repeat the volume down this many times. */
 
 void qOrbiter::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMessage){}
 //<-dceag-c90-e->
 //<-dceag-c97-b->
 
-	/** @brief COMMAND: #97 - Mute */
-	/** mute */
+/** @brief COMMAND: #97 - Mute */
+/** mute */
 
 void qOrbiter::CMD_Mute(string &sCMD_Result,Message *pMessage){}
 //<-dceag-c97-e->

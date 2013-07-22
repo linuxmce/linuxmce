@@ -1137,7 +1137,7 @@ void qorbiterManager::mountMediaDevices()
         int d = storageDevices.at(dc).toMap()["Device"].toInt();
         QString mountProg = "gksudo";
         QStringList args;
-        args.append(QString("mount -t nfs "+m_ipAddress+":/mnt/device/"+QString::number(d) + " /mnt/remote/"+QString::number(d)));
+        args.append(QString("mount -t nfs "+m_ipAddress+":/mnt/device/"+QString::number(d) + " /mnt/remote/"+QString::number(d)) +" -o vers=3" );
         QProcess *mountProcess = new QProcess(this);
         mountProcess->start(mountProg, args);
         mountProcess->waitForFinished(10000);

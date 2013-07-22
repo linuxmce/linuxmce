@@ -10,7 +10,9 @@ FloorPlanModel::FloorPlanModel(FloorplanDevice* prototype, qorbiterManager *r, Q
     setRoleNames(m_prototype->roleNames());
 #endif
     qRegisterMetaType<QModelIndex>("QModelIndex");
+      qRegisterMetaType<QMap<int, QString*> >("QMap");
     setStatus(false);
+    multiSelect = true;
 
 }
 #ifdef QT5
@@ -85,7 +87,7 @@ void FloorPlanModel::setDeviceSelection(int devNo)
     for (int i =0; i < m_list.count(); i++){
         if (m_list.at(i)->deviceNum() == devNo){
             if(m_list.at(i)->status == false){
-               selectedDevices.insert(devNo, m_list.at(i)->id());
+               selectedDevices.insert(QString::number(devNo), m_list.at(i)->id() );
             }
             else
             {
@@ -95,6 +97,7 @@ void FloorPlanModel::setDeviceSelection(int devNo)
             m_list.at(i)->setStatus(!m_list.at(i)->status);
         }
     }
+
     if(selectedDevices.count() > 0){
         setStatus(true);
     }
@@ -103,7 +106,7 @@ void FloorPlanModel::setDeviceSelection(int devNo)
         setStatus(false);
     }
     qDebug()<< selectedDevices.count();
-
+ emit selectedDeviceChanged();
 }
 
 bool FloorPlanModel::getDeviceSelection(int devNo)
@@ -120,6 +123,25 @@ bool FloorPlanModel::getDeviceSelection(int devNo)
     }
 }
 
+void FloorPlanModel::executeDeviceCommand(int deviceId, int cmdId)
+{
+QVariantMap outGoingCommandMsg;
+
+QVariantList params;
+int deviceTo;
+int deviceFrom;
+
+FloorplanDevice *bellWeather = find(deviceId);
+if(bellWeather){
+    qDebug() << bellWeather->getDeviceCommands();
+    QVariantMap t=bellWeather->getDeviceCommands();
+    qDebug() << t;
+}
+
+
+
+}
+
 void FloorPlanModel::handleItemChange()
 {
     FloorplanDevice* item = static_cast<FloorplanDevice*>(sender());
@@ -132,13 +154,15 @@ void FloorPlanModel::handleItemChange()
 
 void FloorPlanModel::handleStatusChange(int device)
 {
-    myMap::iterator dev = selectedDevices.begin();
-    while (dev != selectedDevices.end()) {
-        if (dev.key() == device)
-            dev = selectedDevices.erase(dev);
-        else
-            ++dev;
-    }
+    selectedDevices.remove(QString::number(device));
+    qDebug() << selectedDevices;
+//    myMap::iterator dev = selectedDevices.begin();
+//    while (dev != selectedDevices.end()) {
+//        if (dev.key() == device)
+//            dev = selectedDevices.erase(dev);
+//        else
+//            ++dev;
+//    }
 
 }
 
