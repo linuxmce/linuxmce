@@ -130,6 +130,7 @@
 #define DEVICECATEGORY_USB_Game_Pad_Remote_Controls_CONST 183
 #define DEVICECATEGORY_Wii_Remote_Controls_CONST 184
 #define DEVICECATEGORY_Game_Consoles_CONST 185
+#define DEVICECATEGORY_Weather_PlugIns_CONST 186
 
 #define DEVICECATEGORY_TABLE "DeviceCategory"
 #define DEVICECATEGORY_PK_DEVICECATEGORY_FIELD "PK_DeviceCategory"
