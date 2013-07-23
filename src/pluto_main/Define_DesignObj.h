@@ -2854,6 +2854,8 @@
 #define DESIGNOBJ_butClear_INTV_CONST 6252
 #define DESIGNOBJ_mnuIntellivisionController_CONST 6253
 #define DESIGNOBJ_mnuMoveFile_CONST 6254
+#define DESIGNOBJ_mnuWeatherNow_CONST 6255
+#define DESIGNOBJ_icoWeatherNow_CONST 6256
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

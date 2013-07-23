@@ -1229,6 +1229,23 @@
 #define TEXT_Your_selection_is_not_valid_please_try_CONST 2172
 #define TEXT_Thank_you_for_calling_CONST 2173
 #define TEXT_Move_File_choose_dest_CONST 2174
+#define TEXT_Move_Select_Destination_CONST 2175
+#define TEXT_Current_Conditions_CONST 2176
+#define TEXT_Current_Temperature_CONST 2177
+#define TEXT_Current_Description_CONST 2178
+#define TEXT_Current_Humidity_Header_CONST 2179
+#define TEXT_Current_Pressure_Header_CONST 2180
+#define TEXT_Current_Wind_Header_CONST 2181
+#define TEXT_Current_Direction_Header_CONST 2182
+#define TEXT_Current_Visibility_Header_CONST 2183
+#define TEXT_Current_Feels_Like_Header_CONST 2184
+#define TEXT_Current_Humidity_Data_CONST 2185
+#define TEXT_Current_Pressure_Data_CONST 2186
+#define TEXT_Current_Wind_Data_CONST 2187
+#define TEXT_Current_Direction_Data_CONST 2188
+#define TEXT_Current_Visibility_Data_CONST 2189
+#define TEXT_Current_Feels_Like_Data_CONST 2190
+#define TEXT_City_Data_CONST 2191
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

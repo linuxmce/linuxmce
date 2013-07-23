@@ -16,6 +16,7 @@
 #define DEVICETEMPLATE_VirtDev_Local_Media_Player_CONST -152
 #define DEVICETEMPLATE_VirtDev_Local_Media_Director_CONST -151
 #define DEVICETEMPLATE_VirtDev_Local_AppServer_CONST -150
+#define DEVICETEMPLATE_VirtDev_Weather_PlugIn_CONST -112
 #define DEVICETEMPLATE_VirtDev_Plug_And_Play_PlugI_CONST -111
 #define DEVICETEMPLATE_VirtDev_Infrared_Plugin_CONST -110
 #define DEVICETEMPLATE_VirtDev_Event_Plugin_CONST -109
@@ -2090,6 +2091,8 @@
 #define DEVICETEMPLATE_OMX_Player_CONST 2259
 #define DEVICETEMPLATE_OMX_Plugin_CONST 2260
 #define DEVICETEMPLATE_2600daptor_II_CONST 2261
+#define DEVICETEMPLATE_mini_i8_CONST 2262
+#define DEVICETEMPLATE_Weather_PlugIn_CONST 2263
 
 #define DEVICETEMPLATE_TABLE "DeviceTemplate"
 #define DEVICETEMPLATE_PK_DEVICETEMPLATE_FIELD "PK_DeviceTemplate"

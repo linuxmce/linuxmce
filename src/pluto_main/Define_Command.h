@@ -1010,6 +1010,7 @@
 #define COMMAND_VUDU_CONST 1112
 #define COMMAND_CinemaNow_CONST 1113
 #define COMMAND_Hue_CONST 1115
+#define COMMAND_Get_Weather_Data_CONST 1116
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"
