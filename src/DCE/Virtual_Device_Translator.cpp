@@ -74,6 +74,9 @@ bool Virtual_Device_Translator::GetConfig(DeviceData_Base *pDeviceData_Base)
 		case DEVICECATEGORY_Orbiter_Plugins_CONST:
 			m_dwPK_Device_OrbiterPlugIn = pDeviceData_Base->m_dwPK_Device;
 			break;
+		case DEVICECATEGORY_Weather_PlugIns_CONST:
+		        m_dwPK_Device_WeatherPlugIn = pDeviceData_Base->m_dwPK_Device;
+		        break;
 		case DEVICETEMPLATE_VirtDev_Plug_And_Play_PlugI_CONST:
 			m_dwPK_Device_PlugAndPlayPlugIn = pDeviceData_Base->m_dwPK_Device;
 			break;
@@ -211,5 +214,10 @@ void Virtual_Device_Translator::TranslateVirtualDevice(int PK_DeviceTemplate,lon
 	case DEVICETEMPLATE_VirtDev_Local_Media_Player_CONST:
 		PK_Device=m_dwPK_Device_LocalMediaPlayer;
 		break;
+        
+        case DEVICETEMPLATE_VirtDev_Weather_PlugIn_CONST:
+	        PK_Device=m_dwPK_Device_WeatherPlugIn;
+	        break;
+
 	}
 }

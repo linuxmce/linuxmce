@@ -41,7 +41,7 @@ class Virtual_Device_Translator
 	// Some global devices
 	int m_dwPK_Device_Router,m_dwPK_Device_DatagridPlugIn,m_dwPK_Device_InfraredPlugIn,m_dwPK_Device_GeneralInfoPlugIn,m_dwPK_Device_EventPlugIn,m_dwPK_Device_OrbiterPlugIn,
 		m_dwPK_Device_LightingPlugIn, m_dwPK_Device_ClimatePlugIn, m_dwPK_Device_MediaPlugIn, m_dwPK_Device_TelecomPlugIn, m_dwPK_Device_SecurityPlugIn, m_dwPK_Device_PlugAndPlayPlugIn,
-		m_dwPK_Device_LocalAppServer,m_dwPK_Device_LocalMediaPlayer;
+		m_dwPK_Device_LocalAppServer,m_dwPK_Device_LocalMediaPlayer, m_dwPK_Device_WeatherPlugIn;
 
 public:
 	Virtual_Device_Translator() {};
