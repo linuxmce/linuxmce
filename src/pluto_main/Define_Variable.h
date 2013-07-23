@@ -74,6 +74,16 @@
 #define VARIABLE_DNS_CONST 71
 #define VARIABLE_Keypad_1_Use_CONST 72
 #define VARIABLE_Keypad_2_Use_CONST 73
+#define VARIABLE_Weather_Data_1_CONST 74
+#define VARIABLE_Weather_Data_2_CONST 75
+#define VARIABLE_Weather_Data_3_CONST 76
+#define VARIABLE_Weather_Data_4_CONST 77
+#define VARIABLE_Weather_Data_5_CONST 78
+#define VARIABLE_Weather_Data_6_CONST 79
+#define VARIABLE_Weather_Data_7_CONST 80
+#define VARIABLE_Weather_Data_8_CONST 81
+#define VARIABLE_Weather_Data_9_CONST 82
+#define VARIABLE_Weather_Data_10_CONST 83
 
 #define VARIABLE_TABLE "Variable"
 #define VARIABLE_PK_VARIABLE_FIELD "PK_Variable"
