@@ -105,7 +105,7 @@ CreateDialplanLines()
 			do
 				Number=$(echo $Rest|cut -d"," -f1)
 				Rest=$(echo $Rest|cut -d"," -f2-)
-				AppParam="${AppParam}Local/${PHONES[$Number]}@trusted&"
+				AppParam="${AppParam}Local/${PHONES[$Number]}@trusted/nj&"
 			done
 			App="Dial"
 			AppParam="$(echo $AppParam|sed 's/\(.*\)./\1/'),$TIMEOUT";
@@ -114,13 +114,13 @@ CreateDialplanLines()
 		if [[ $Routing == user* ]]; then
 			User=$(echo $Routing|cut -d"," -f2)
 			App="Dial"
-			AppParam="Local/${USERS[$User]}@trusted,$TIMEOUT"
+			AppParam="Local/${USERS[$User]}@trusted/nj,$TIMEOUT"
 		fi
 
 		if [[ $Routing == transfer* ]]; then
 			User=$(echo $Routing|cut -d"," -f2)
 			App="Dial"
-			AppParam="Local/$User@trusted,$TIMEOUT"
+			AppParam="Local/$User@trusted/nj,$TIMEOUT"
 		fi
 
 		if [[ $Routing == voicemail* ]]; then
@@ -195,7 +195,7 @@ CreateDialplanUsers()
 			if [[ $Routing == "ring," ]]; then
 				AppParam=
 				for i in "${PHONES[@]}"; do
-					AppParam="${AppParam}Local/$i@trusted&"
+					AppParam="${AppParam}Local/$i@trusted/nj&"
 				done
 				App="Dial"
 				AppParam="$(echo $AppParam|sed 's/\(.*\)./\1/'),$TIMEOUT";
@@ -208,7 +208,7 @@ CreateDialplanUsers()
 					do
 						Number=$(echo $Rest|cut -d"," -f1)
 						Rest=$(echo $Rest|cut -d"," -f2-)
-						AppParam="${AppParam}Local/${PHONES[$Number]}@trusted&"
+						AppParam="${AppParam}Local/${PHONES[$Number]}@trusted/nj&"
 					done
 					App="Dial"
 					AppParam="$(echo $AppParam|sed 's/\(.*\)./\1/'),$TIMEOUT";
@@ -218,13 +218,13 @@ CreateDialplanUsers()
 			if [[ $Routing == user* ]]; then
 				i=$(echo $Routing|cut -d"," -f2)
 				App="Dial"
-				AppParam="Local/${USERS[$i]}@trusted,$TIMEOUT"
+				AppParam="Local/${USERS[$i]}@trusted/nj,$TIMEOUT"
 			fi
 
 			if [[ $Routing == transfer* ]]; then
 				i=$(echo $Routing|cut -d"," -f2)
 				App="Dial"
-				AppParam="Local/$i@trusted,$TIMEOUT"
+				AppParam="Local/$i@trusted/nj,$TIMEOUT"
 			fi
 
 			if [[ $Routing == voicemail* ]]; then
@@ -278,7 +278,7 @@ CreateVoiceMenu()
 	SQL="SET AUTOCOMMIT=0; START TRANSACTION;"
 	
 	for i in "${PHONES[@]}"; do
-		PhonesList="${PhonesList}Local/$i@trusted&"
+		PhonesList="${PhonesList}Local/$i@trusted/nj&"
 	done
 
 	PhonesList="$(echo $PhonesList|sed 's/\(.*\)./\1/')";
@@ -302,7 +302,7 @@ CreateVoiceMenu()
 	SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
 	('$Context_Voice_Menu','#','1','VoiceMail','100'),
 	('$Context_Voice_Menu','#','2','Hangup',''),
-	('$Context_Voice_Menu','_XXX','1','Dial','Local/\${EXTEN}@trusted'),
+	('$Context_Voice_Menu','_XXX','1','Dial','Local/\${EXTEN}@trusted/nj'),
 	('$Context_Voice_Menu','_XXX','2','Hangup',''),
 	('$Context_Voice_Menu','i','1','Background','pluto/invalid-entry'),
 	('$Context_Voice_Menu','i','2','Goto','$Context_Voice_Menu,s,1');"
