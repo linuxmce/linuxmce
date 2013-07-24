@@ -266,9 +266,11 @@ CreateDialplanUsers()
 
 CreateConferenceRooms()
 {
-	SQL="INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
+	SQL="SET AUTOCOMMIT=0; START TRANSACTION;"
+	SQL="$SQL INSERT INTO $DB_Extensions_Table (context,exten,priority,app,appdata) VALUES
 	('$Context_From_Lmce','_000.','1','Meetme','\${EXTEN}|q'),
 	('$Context_From_Lmce','_000.','2','Hangup','');"
+	SQL="$SQL COMMIT;"
 	UseDB "asterisk"
 	R=$(RunSQL "$SQL")
 }
