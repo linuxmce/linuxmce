@@ -1,3 +1,10 @@
+lmce-asterisk (0+0.3.3-3ubuntu4) precise; urgency=low
+
+  * Fixes a lot of simplephone problems due to local channel
+    optimizations
+
+ -- Serge Wagener <serge@linuxmce.org>  Wed, 24 Jul 2013 08:54:54 +0200
+
 lmce-asterisk (0+0.3.3-3ubuntu3) precise; urgency=low
 
   * Add Cisco 7941 template and configure script
