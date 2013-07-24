@@ -51,6 +51,7 @@ function phoneLines($output,$astADO,$dbADO) {
 		
 		// edit phoneline block
 		if(isset($GLOBALS['count']) && $GLOBALS['count']==0 || isset($_REQUEST['eid'])){
+			if(isset($GLOBALS['count']) && $GLOBALS['count']==0) $out.='<input type="hidden" name="isFirst" value="true">';
 			$res=$dbADO->Execute("SELECT PK_Users, CONCAT(FirstName,' ',LastName) AS Name FROM Users WHERE ForwardEmail <> '' ORDER BY LastName,FirstName");
 			while($row=$res->FetchRow()) $UsersList[$row['PK_Users']]=$row['Name'];	
 			$out.='
@@ -138,6 +139,25 @@ function phoneLines($output,$astADO,$dbADO) {
 	}
 	else{ // process area
 		
+		// add new phoneline entry and reload form in edit mode
+		if(isset($action) && $action == 'add') {
+			$SQL="INSERT INTO phonelines (enabled,protocol) VALUES ('no','SIP')";
+			$res=$astADO->Execute($SQL);
+			$res=$astADO->Execute('SELECT LAST_INSERT_ID();');
+			$row=$res->FetchRow();
+			$id=$row[0];
+			$cmd='sudo -u root /usr/pluto/bin/db_create_dialplan.sh';
+			exec_batch_command($cmd,1);
+			if ($_REQUEST['isFirst'] == 'true') {
+				$action = 'update';
+				$_REQUEST['editedID'] = $id;
+			} else {
+				$suffix='&msg='.translate('TEXT_ADD_PHONE_LINE_CMD_SENT_CONST');
+				header('Location: index.php?section=phoneLines&action=form&eid='.$id.@$suffix);
+				exit();
+			}
+		}
+
 		// edit existing phoneline
 		if(isset($action) && $action == 'update') {
 			$editedID=$_REQUEST['editedID'];
@@ -186,20 +206,6 @@ function phoneLines($output,$astADO,$dbADO) {
 			exit();
 		}
 		
-		// add new phoneline entry and reload form in edit mode
-		if(isset($action) && $action == 'add') {
-			$SQL="INSERT INTO phonelines (enabled,protocol) VALUES ('no','SIP')";
-			$res=$astADO->Execute($SQL);
-			$res=$astADO->Execute('SELECT LAST_INSERT_ID();');
-			$row=$res->FetchRow();
-			$id=$row[0];
-			$cmd='sudo -u root /usr/pluto/bin/db_create_dialplan.sh';
-			exec_batch_command($cmd,1);
-			$suffix='&msg='.translate('TEXT_ADD_PHONE_LINE_CMD_SENT_CONST');
-			header('Location: index.php?section=phoneLines&action=form&eid='.$id.@$suffix);
-			exit();
-		}
-
 		if(isset($action) && $action == 'update_emergency'){
 			$val_296=$_POST['value_296'];
 			$val_297=$_POST['value_297'];
