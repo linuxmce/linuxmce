@@ -3,7 +3,7 @@
 	includeLangFile('common.lang.php');
 	includeLangFile('phoneLines.lang.php');
 
-function phoneLines($output,$astADO,$dbADO) {
+function phoneLines($output,$astADO,$dbADO,$telecomADO) {
 	global $wikiHost, $editedID, $editdata;
 	
 	// check if database asterisk exists
@@ -197,6 +197,8 @@ function phoneLines($output,$astADO,$dbADO) {
 			$astADO->Execute($SQL);
 			$SQL="ALTER TABLE phonelines AUTO_INCREMENT=1";
 			$astADO->Execute($SQL);
+			$SQL="DELETE FROM Line_HouseMode WHERE ID='".$id."'";
+			$telecomADO->Execute($SQL);
 			$cmd='sudo -u root /usr/pluto/bin/db_phone_config.sh lines';
 			exec_batch_command($cmd,1);
 			$cmd='sudo -u root /usr/pluto/bin/db_create_dialplan.sh';
