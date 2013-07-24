@@ -23,7 +23,7 @@ function login($output,$dbADO) {
 		$weborbiterInstalled=true;
 	}
 
-
+	$version = exec("dpkg -s pluto-website-admin|grep 'Version: '|cut -d ' ' -f 2");
 	$loginFormBig= '
 		<script>
 			function windowOpen(locationA,attributes) {
@@ -86,7 +86,7 @@ function login($output,$dbADO) {
 	      <td colspan="2" align="left">Learn about LinuxMCE at <a href="http://www.linuxmce.org" target="_top">www.linuxmce.org</a><br><br>'.translate('TEXT_DOWNLOAD_CONST').' <a href="index.php?section=orbitersWin">'.translate('TEXT_ORBITER_WIN_INSTALLER_CONST').'</a></td>
 	    </tr>
 	    <tr>
-	      <td colspan="2" align="left">'.translate('TEXT_VERSION_CONST').': 2.0.0.44.09112522510</td>
+	      <td colspan="2" align="left">'.translate('TEXT_VERSION_CONST').': '.$version.'</td>
 	    </tr>
 	  </table>
 	</form>
