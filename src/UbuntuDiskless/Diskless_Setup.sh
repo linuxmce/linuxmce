@@ -245,6 +245,7 @@ function update_config_files
 	fi
 	pushd "$ScriptDir" >/dev/null
 	for Script in $ScriptsList ;do
+		echo "INFO : Executing script $Script"
 		if [[ ! -x $ScriptDir/$Script ]] ;then
 			echo "WARNING: Script $Script cannot be executed"
 			continue
@@ -363,9 +364,13 @@ for Row in $R; do
 	/usr/pluto/bin/Diskless_InstallKernel.sh "$Moon_DeviceID"
 
 	## Setting Up
+	echo "INFO : Updating config files for Moon $Moon_DeviceID"
 	update_config_files
+	echo "INFO : Setting up TFTP boot for Moon $Moon_DeviceID"
 	setup_tftp_boot
+	echo "INFO : Setting up mysql access for Moon $Moon_DeviceID"
 	setup_mysql_access
+	echo "INFO : Generating diskless installer for Moon $Moon_DeviceID"
 	generate_diskless_installer
 
 #	## Create /var/log/pluto for this device as a symlink

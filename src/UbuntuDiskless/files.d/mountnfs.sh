@@ -51,7 +51,7 @@ esac
 EOF
 
 chmod +x "${Parm_RootLocation}/${File}"
-LC_ALL=C chroot "${Parm_RootLocation}" insserv -fv mountnfs.sh
+LC_ALL=C chroot "${Parm_RootLocation}" /usr/lib/insserv/insserv -fv mountnfs.sh
 
 ## This script is broken so we better remove it
 rm -f ${Parm_RootLocation}/etc/init.d/waitnfs.sh
