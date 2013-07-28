@@ -62,7 +62,7 @@ public:
 #ifdef QT5
     QtQuick2ApplicationViewer mainView;
 #else
-    QmlApplicationViewer  mainView;
+    QDeclarativeView  mainView;
 #endif
 
     QString buildType;

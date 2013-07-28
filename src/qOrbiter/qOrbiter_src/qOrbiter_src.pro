@@ -580,7 +580,11 @@ OTHER_FILES += Readme.txt \
     qml/android/tablet/qt5default/main.qml \
     qml/android/tablet/qt5default/Style.qml \
     qml/android/tablet/qt5default/Screens/Screen_1.qml \
-    qml/desktop/STB/components/FileDetails.qml
+    qml/desktop/STB/components/FileDetails.qml \
+    android/src/org/kde/necessitas/origo/QtActivity.java \
+    android/src/org/kde/necessitas/origo/QtApplication.java \
+    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
+    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl
 
 android-g++{
 

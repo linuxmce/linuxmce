@@ -133,9 +133,8 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     //mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #elif ANDROID && QT4_8
     QGLFormat format= QGLFormat::defaultFormat();
-    glWidget = new QGLWidget(format);
+    glWidget = new QGLWidget();
     glWidget->setAutoFillBackground(false);
-
     mainView.setViewport(glWidget);
     mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #endif
@@ -211,10 +210,10 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 
 #endif
 #ifdef ANDROID
-    mainView.addImportPath("assets:/imports/androidComponents");
+    mainView.engine()->addImportPath("assets:/imports/androidComponents");
     mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
     mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
-    mainView.setMainQmlFile(QString("qml/Welcome.qml"));
+    mainView.setSource(QString("assets:/qml/Base.qml"));
 #elif !for_harmattan
     mainView.setSource(QApplication::applicationDirPath().remove("/bin")+buildType+"/Splash.qml");
 #elif for_harmattan

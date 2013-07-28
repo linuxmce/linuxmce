@@ -117,6 +117,8 @@ public slots:
     void setApiLevel(int lvl){ apiLevel = lvl; emit apiLevelChanged();}
     int getApiLevel(){ return apiLevel;}
 
+
+
 private:
 
     bool findClassIdents();

@@ -64,7 +64,7 @@ Item {
                 height: scaleY(25)
                 width:parent.width
                 anchors.left: rm_lbl.right
-                focus:true
+
                 model:ea_list
                 onActiveFocusChanged: {
                     if(activeFocus){

@@ -3,7 +3,7 @@
 #include <QTcpSocket>
 #include <QProcess>
 #include <QGraphicsScene>
-#include <QtOpenGL/QGLWidget>
+
 #include <QGraphicsView>
 using namespace DCE;
 
@@ -17,8 +17,6 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
 {
 
-    QGraphicsScene *scene = new QGraphicsScene(this);
-
     setFlag(ItemHasNoContents, false);
     serverAddress = "";
     deviceNumber = -1;
@@ -28,6 +26,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
 
     setAvailibleOutputs(Phonon::BackendCapabilities::availableAudioOutputDevices());
     qDebug() << outputs;
+    qDebug() << Phonon::BackendCapabilities::availableMimeTypes();
 
     mediaObject = new Phonon::MediaObject();
     videoSurface = new Phonon::VideoWidget();
@@ -45,8 +44,8 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     // layout->addWidget(videoSurface);
     //  window->setLayout(layout);
     filterProxy = new QGraphicsProxyWidget(this);
-    QGraphicsView *view = new QGraphicsView(scene);
-    view->setViewport(new QGLWidget);
+
+
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
     filterProxy->hide();
@@ -218,6 +217,7 @@ void MediaManager::setMediaUrl(QString url)
     mediaObject->play();
     qDebug() <<"Item is playing? " << mediaObject->state();
     qDebug() << "Errors " << mediaObject->errorString();
+    qDebug() << discController->currentTitle();
 }
 
 
@@ -289,6 +289,6 @@ void MediaManager::mountDrive(int device)
 {
     mountProcess = new QProcess();
     QObject::connect(mountProcess, SIGNAL(readyRead()), this, SLOT(setCurrentStatus(QString)));
-    mountProcess->execute("gksudo mount 192.168.80.1:/mnt/device/121 /mnt/device/121");
+    mountProcess->execute("gksudo  mount 192.168.80.1:/mnt/device/121 /mnt/device/121");
     qDebug() << mountProcess->state();
 }

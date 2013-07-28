@@ -44,6 +44,13 @@ Item {
         source: "fonts/Sawasdee.ttf"
     }
 
+    Rectangle{
+        id:phil
+        height: parent.height
+        width: parent.width
+        color:"darkslategrey"
+    }
+
 
 
     /*! Depreciated function.

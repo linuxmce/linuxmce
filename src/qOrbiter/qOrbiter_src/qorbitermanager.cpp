@@ -1135,6 +1135,21 @@ void qorbiterManager::mountMediaDevices()
     for(int dc =0; dc < storageDevices.count(); dc++){
         qDebug()<< "Starting process for device " << storageDevices.at(dc).toMap()["Description"].toString() << " #"<<storageDevices.at(dc).toMap()["Device"].toString();
         int d = storageDevices.at(dc).toMap()["Device"].toInt();
+
+        QString dirCmd = "gksudo";
+        QDir mntDir;
+        mntDir.setPath("/mnt/remote/"+QString::number(d));
+        qDebug() << mntDir.exists();
+        if(!mntDir.exists()){
+            QProcess *mkPath = new QProcess(this);
+            QStringList dArgs;
+            dArgs.append("mkdir -p /mnt/remote/"+QString::number(d));
+            mkPath->start(dirCmd, dArgs);
+            mkPath->waitForFinished(10000);
+
+        }
+
+
         QString mountProg = "gksudo";
         QStringList args;
         args.append(QString("mount -t nfs "+m_ipAddress+":/mnt/device/"+QString::number(d) + " /mnt/remote/"+QString::number(d)) +" -o vers=3" );
@@ -1181,9 +1196,11 @@ void qorbiterManager::setMediaDevices(QNetworkReply *d)
     }
     storageDevices = p;
 
+#ifndef ANDROID
     if(!storageDevices.isEmpty()){
         mountMediaDevices();
     }
+#endif
 }
 
 
@@ -1347,6 +1364,9 @@ bool qorbiterManager::readLocalConfig()
     if(setupMobileStorage(androidHelper->externalStorageLocation)){
         xmlPath = mobileStorageLocation+"/config.xml" ;
     }
+    else{
+
+    }
 #elif QT5 && ANDROID
     if(setupMobileStorage(androidHelper->externalStorageLocation)){
         xmlPath = mobileStorageLocation+"/config.xml" ;
@@ -1385,7 +1405,11 @@ bool qorbiterManager::readLocalConfig()
 
     if (!localConfigFile.open(QFile::ReadWrite))
     {
+        qDebug()<< "No Config Found.";
         setDceResponse("config not found!::"+localConfigFile.fileName());
+        setInternalIp("192.168.80.1");
+        currentSkin="default";
+        setDeviceNumber(-1);
         return false;
     }
     else
@@ -1408,7 +1432,7 @@ bool qorbiterManager::readLocalConfig()
             if(configVariables.namedItem("firstrun").attributes().namedItem("id").nodeValue()=="true")
             {
 
-#ifdef QANDROID
+#ifdef __ANDROID__
                 currentSkin = "default";
 #elif QT5
                 currentSkin = "noir";
@@ -1429,7 +1453,7 @@ bool qorbiterManager::readLocalConfig()
 
             }
 
-#ifdef QANDROID
+#ifdef __ANDROID__
             currentSkin = "default";
 #else
             currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
@@ -1437,7 +1461,7 @@ bool qorbiterManager::readLocalConfig()
 
 
             if (currentSkin.isEmpty()){
-#ifdef QANDROID
+#ifdef __ANDROID__
                 currentSkin = "default";
 #elif QT5
                 currentSkin = "noir";
@@ -1905,7 +1929,7 @@ int qorbiterManager::loadSplash()
 bool qorbiterManager::createAndroidConfig()
 {
 
-    QFile droidConfig(mobileStorageLocation+"/config.xml");
+    QFile droidConfig(mobileStorageLocation+"config.xml");
     setDceResponse("Config File Path::"+droidConfig.fileName());
     if (droidConfig.exists() && droidConfig.size() != 0)
     {
@@ -1920,9 +1944,15 @@ bool qorbiterManager::createAndroidConfig()
             setDceResponse("Made path");
         }
 
-        QFile defaultConfig(":main/config.xml");
+        QFile defaultConfig;
+        defaultConfig.setFileName(":/main/config.xml");
+        if(!defaultConfig.open(QFile::ReadOnly)){
+            qDebug() << "Cannot find config in QRC";
+            qDebug() << defaultConfig.errorString();
+            return false;
+        }
 
-        if(defaultConfig.copy(mobileStorageLocation+"/config.xml"))
+        if(defaultConfig.copy(mobileStorageLocation+"config.xml"))
         {
             setDceResponse("file copied, verifying");
             /*
@@ -1946,7 +1976,7 @@ bool qorbiterManager::createAndroidConfig()
         else
         {
             setDceResponse("Cannot install configuration!!");
-            setDceResponse(droidConfig.errorString());
+            setDceResponse(defaultConfig.errorString());
             return false;
         }
     }
