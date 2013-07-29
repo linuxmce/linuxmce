@@ -401,7 +401,7 @@ CREATE TABLE IF NOT EXISTS `cdr` (
 --
 CREATE OR REPLACE ALGORITHM = MERGE
 VIEW view_lmce_phones AS
-Select PK_Device
+Select PK_Device,FK_DeviceTemplate
 ,(select IK_DeviceData from pluto_main.Device_DeviceData WHERE FK_Device=PK_Device AND FK_DeviceData=31) AS ext
 ,(select IK_DeviceData from pluto_main.Device_DeviceData WHERE FK_Device=PK_Device AND FK_DeviceData=29) AS type
 ,(select IK_DeviceData from pluto_main.Device_DeviceData WHERE FK_Device=PK_Device AND FK_DeviceData=260) AS ip
