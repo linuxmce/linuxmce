@@ -8,6 +8,7 @@
 # Version 1.0 - 27. sep 2011 - Serge Wagener (foxi352) - first version
 # Version 1.1 - 29. nov 2011 - Serge Wagener (foxi352) - added fax support
 # Version 1.2 - 18. sep 2012 - Serge Wagener (foxi352) - added german and french voice and tts support
+# Version 1.3 - 29. jul 2013 - Serge Wagener (foxi352) - added qualify=yes to MD simplephones to not lose connection
 
 . /usr/pluto/bin/pluto.func
 . /usr/pluto/bin/Config_Ops.sh
@@ -29,6 +30,7 @@ DEVICE_TelecomPlugIn=11
 DEVICECATEGORY_HARDPHONE=90
 DEVICECATEGORY_SOFTPHONE=91
 DEVICEDATA_Language=26
+DEVICETEMPLATE_EmbeddedPhone=1759
 
 DIAL_ALL_PHONES=
 ALL_TRUNKS=
@@ -76,7 +78,7 @@ WriteExtLocal()
 
 WriteSipPhone()
 {
-		# If peer supports video, add needed codecs, else add audio only codecs
+	# If peer supports video, add needed codecs, else add audio only codecs
 	if [[ "$VideoSupport" == "1" ]]; then
 		codecs="alaw;ulaw;h263p;h263;h264"
 		videosupported="yes"
@@ -84,10 +86,17 @@ WriteSipPhone()
 		codecs="alaw;ulaw"
 		videosupported="no"
 	fi
-
+	
+	# If peer is orbiter embedded phone then set qualify to yes for not losing connection
+	if [[ "$DeviceTemplate" == "$DEVICETEMPLATE_EmbeddedPhone" ]]; then
+		qualify="yes"
+	else
+		qualify="no"
+	fi
+	
 	# adds configuration of current SIP phone to SQL query buffer.
-	PHONESSQL="$PHONESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,port,mailbox,secret,callerid,context,allow,videosupport,language)
-	VALUES ('$PhoneNumber','$PhoneNumber','$Port','$PhoneNumber@device','$Secret','device <$PhoneNumber>','from-internal','$codecs','$videosupported','$LANGUAGE');"
+	PHONESSQL="$PHONESSQL INSERT INTO $DB_SIP_Device_Table (name,defaultuser,port,mailbox,secret,callerid,context,allow,videosupport,language,qualify)
+	VALUES ('$PhoneNumber','$PhoneNumber','$Port','$PhoneNumber@device','$Secret','device <$PhoneNumber>','from-internal','$codecs','$videosupported','$LANGUAGE','$qualify');"
 }
 
 WriteIAXPhone()
@@ -194,6 +203,8 @@ WorkThePhones()
 	    ServerIp=$(Field 4 "$Row")
 	    Secret=$(Field 5 "$Row")
 		VideoSupport=$(Field 6 "$Row")
+		DeviceTemplate=$(Field 7 "$Row")
+		
 		# If it's a new device it does not yet have a phonenumber
 		if [[ ! -n $PhoneNumber ]]; then
 			# get next free extension
