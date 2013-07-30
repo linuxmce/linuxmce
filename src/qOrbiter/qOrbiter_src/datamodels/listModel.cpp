@@ -159,6 +159,7 @@ bool ListModel::resetInternalData()
         counter++;
     }
  //   qDebug() << counter << "::Items cleared. Remaining Count:: "<< m_list.size();
+    m_list.clear();
     return true;
 }
 
@@ -209,6 +210,10 @@ void ListModel::clear()
     beginResetModel();
     if(resetInternalData()){
         setProgress(0.0);
+        totalcells = 0;
+        loadingStatus = false;
+        progress = 0;
+        setTotalPages(0);
         QApplication::processEvents(QEventLoop::AllEvents);
         endResetModel();
         emit modelReset();

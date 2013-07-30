@@ -279,10 +279,11 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 void qorbiterManager::gotoQScreen(QString s)
 {
 
-    if(s == "Screen_1.qml")
+    if(s.contains("Screen_1"))
     {
+        qDebug() << "Clearing Models";
         bool t = false;
-        emit keepLoading(t);
+        //emit keepLoading(t);
         emit clearModel();
         emit cancelRequests();
         emit resetFilter();
@@ -1812,8 +1813,6 @@ bool qorbiterManager::cleanupData()
     userList->clear();
 
     m_bStartingUp=true;
-
-
     return true;
 }
 
