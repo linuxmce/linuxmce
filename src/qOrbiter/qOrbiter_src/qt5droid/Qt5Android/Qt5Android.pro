@@ -398,7 +398,8 @@ OTHER_FILES+= \
     android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
     android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
     android/AndroidManifest.xml \
-    android/res/values/libs.xml
+    android/res/values/libs.xml \
+    android/AndroidManifest.xml
 
 RESOURCES += \
         ../../skinData.qrc
