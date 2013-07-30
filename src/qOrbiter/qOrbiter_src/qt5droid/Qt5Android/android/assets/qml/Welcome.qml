@@ -1,19 +1,23 @@
 import QtQuick 2.0
 
 Rectangle {
-anchors.fill: parent
-    color: "black"
+    id:welcome
+    height: manager.appHeight
+    width: manager.appWidth
+    color: wait.running ? "darkyellow": "darkgreen"
+
     Timer{
         id:wait
         interval: 3500
-        onTriggered: {mainContent.source = "http://"+window.router+"/lmce-admin/skins/android/Splash.qml"; }
-        running:true
+        onTriggered: {mainContent.source = "http://"+window.router+"/lmce-admin/skins/android/qt5/Splash.qml"; }
+        running:false
+        Component.onCompleted: wait.start()
     }
     Rectangle{
         id:spinner
         height:  parent.height *.10
         width: parent.width*.25
-        color: rotation > 270 ? "darkgrey" : "white"
+        color: "green"  //rotation > 270 ? "darkgrey" : "white"
         opacity: .75
         anchors.top: loading.bottom
         anchors.horizontalCenter: parent.horizontalCenter
@@ -49,10 +53,10 @@ anchors.fill: parent
                              console.log(mainContent.sourceComponent.errorString())
                              wait.restart()
                          }
-//                         else if (mainContent.status != Loader.Loading){
-//                             loading.text = "Loading, please wait \n" + progress +"% \n"+sourceComponent.errorString()
+        //                         else if (mainContent.status != Loader.Loading){
+        //                             loading.text = "Loading, please wait \n" + progress +"% \n"+sourceComponent.errorString()
 
-//                         }
+        //                         }
                          else  if (mainContent.status === Loader.Ready){
                              mainContent.opacity = .01
                              loading.visible= false
