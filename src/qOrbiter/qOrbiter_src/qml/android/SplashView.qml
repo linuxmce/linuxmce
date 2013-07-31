@@ -2,8 +2,8 @@
 import QtQuick 1.1
 
 Rectangle {
-    height:appH
-    width:appW
+    height: manager.appHeight
+    width: manager.appWidth
     id:splashPage
     color: "transparent"
     signal setupStart(string x, string y)
@@ -28,7 +28,7 @@ Rectangle {
         id: welcome
         text: qsTr("LinuxMCE")
         font.family: myFont.name
-        font.pointSize: 42
+        font.pointSize: headerTextSize
         anchors.top: parent.top
         anchors.topMargin: scaleY(5)
         anchors.horizontalCenter: parent.horizontalCenter
@@ -57,16 +57,6 @@ Rectangle {
     }
 
 
-    Text {
-        id: loadingStatus
-        text: "Status " + manager.commandResponse
-        anchors.topMargin: scaleY(15)
-        font.pixelSize: 14
-        font.family: myFont.name
-        color: "white"
-        anchors.top: connectionBox.bottom
-        anchors.horizontalCenter: connectionBox.horizontalCenter
-    }
 
     ExistingOrbiters {
         id: existing_orbiters
@@ -76,6 +66,16 @@ Rectangle {
         id: newOrbiterButton
     }
 
+    Text {
+        id: loadingStatus
+        text: "Status " + manager.commandResponse
+        anchors.topMargin: scaleY(15)
+        font.pixelSize: infoTextSize
+        font.family: myFont.name
+        color: "white"
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: connectionBox.horizontalCenter
+    }
 }
 
 

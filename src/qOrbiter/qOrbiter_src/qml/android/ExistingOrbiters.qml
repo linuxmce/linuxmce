@@ -2,14 +2,14 @@ import QtQuick 1.1
 
 ListView{
     id:existing_orbiters
-    height: scaleY(35)
-    width: scaleX(55)
+    height: scaleY(65)
+    width: scaleX(95)
     clip: true
     anchors.left: parent.right
     anchors.verticalCenter: parent.verticalCenter
     model:orbiterList
     visible: true
-    spacing: scaleY(2)
+    spacing: scaleY(1)
     opacity: 0
     Behavior on opacity{
         PropertyAnimation{
@@ -38,13 +38,13 @@ ListView{
         {
             id:labelColumn
             height: childrenRect.height
-            width: parent.width *.65
+            width: parent.width
             anchors.centerIn: parent
             
             Text {
                 id: orbiter_label
                 text: qsTr("Orbiter:")+ label
-                font.pixelSize: 18
+                font.pixelSize: infoTextSize
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 font.family: myFont.name
 
@@ -54,7 +54,7 @@ ListView{
             Text {
                 id: dev_num
                 text:qsTr("Device:")+ device
-                font.pixelSize: 12
+                font.pixelSize:  infoTextSize
                 font.italic: true
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 font.family: myFont.name

@@ -2,20 +2,15 @@
 import QtQuick 1.1
 
 Rectangle {
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
     color: "transparent"
     //palette?
     property string orangeRed: "#993300"
     property string deYork: "#99CC99"
     property string midnightBlue: "#003366"
     //---------
-    function scaleX(x){
-        return x/100*appH
-    }
-    function scaleY(y){
-        return y/100*appW
-    }
+
     Component.onCompleted: window.showSetup()
 
 
@@ -73,13 +68,17 @@ Rectangle {
             }
         }
         Row{
+            height: childrenRect.height
+            width: parent.width
             Text {
                 id: welcome
-                text: qsTr("Setup A New Orbiter")
+                text: qsTr("Setup A New Orbiter - Choose user and room, then select go.")
                 color:"white"
                 font.pointSize: 18
                 font.bold: true
                 font.family: myFont.name
+                width: parent.width
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             }          
         }
 
@@ -93,22 +92,22 @@ Rectangle {
             ListView{
                 id:usersView
                 height: 75
+                clip:true
                 width: parent.width
                 orientation: ListView.Horizontal
                 spacing: 20
                 model:users
                 Component.onCompleted: currentIndex = -1
                 delegate:Rectangle{
-                    height:newOrbiterSetupContainer.height *.15
-                    width: newOrbiterSetupContainer.width *.09
+                    height:startButtonHeight
+                    width:startButtonWidth
                     radius:10
                     border.color:usersView.currentIndex === index ? midnightBlue : orangeRed
                     color: usersView.currentIndex === index ? deYork : "white"
                     Text {
                         text: dataTitle
-                        font.pointSize: 12
-                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                        width: parent.width *.75
+                        font.pointSize: infoTextSize
+                        wrapMode: Text.WrapAtWordBoundaryOrAnywhere                        
                         anchors.centerIn: parent
                         font.family: myFont.name
                     }
@@ -130,20 +129,20 @@ Rectangle {
                 width: parent.width
                 orientation: ListView.Horizontal
                 model:rooms
-                contentHeight: newOrbiterSetupContainer.height *.15
-                contentWidth: newOrbiterSetupContainer.width *.09
+                contentHeight: startButtonHeight
+                contentWidth: startButtonWidth
                 spacing:20
                   Component.onCompleted: currentIndex = -1
                 delegate:
                     Rectangle{
-                    height:newOrbiterSetupContainer.height *.15
-                    width: newOrbiterSetupContainer.width *.09
+                    height:startButtonHeight
+                    width: startButtonWidth
                     radius:10
                     border.color:roomsView.currentIndex === index ? midnightBlue : orangeRed
                     color: roomsView.currentIndex === index ? deYork : "white"
                     Text {
                         text: dataTitle
-                        font.pointSize: 12
+                        font.pointSize: infoTextSize
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                         width: parent.width *.75
                         anchors.centerIn: parent
@@ -178,7 +177,7 @@ Rectangle {
 
                     Text {
                         text: lang
-                        font.pointSize: 12
+                        font.pointSize: infoTextSize
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                         width: parent.width *.75
                         anchors.centerIn: parent
@@ -196,23 +195,23 @@ Rectangle {
             }
         }
 
-        Text {
-            id: logo
-            text: qsTr("LinuxMCE")
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-            anchors.rightMargin: 10
-            font.bold: true
-            color:"white"
-            font.pointSize: 12
-            font.family: myFont.name
-        }
+//        Text {
+//            id: logo
+//            text: qsTr("LinuxMCE")
+//            anchors.bottom: parent.bottom
+//            anchors.right: parent.right
+//            anchors.rightMargin: 10
+//            font.bold: true
+//            color:"white"
+//            font.pointSize: 12
+//            font.family: myFont.name
+//        }
 
         Rectangle{
             id:setupButton
             height: scaleY(8)
             width: scaleX(14)
-            color: "blue"
+            color: "white"
             radius: 8
             anchors.bottom: parent.bottom
             anchors.horizontalCenter: parent.horizontalCenter
@@ -220,7 +219,7 @@ Rectangle {
             Text{
                 text:"Go!"
                 anchors.centerIn: parent
-                color:"white"
+                color:"green"
                 font.family: myFont.name
             }
             MouseArea{
@@ -233,7 +232,7 @@ Rectangle {
             id:exitButton
             height: scaleY(8)
             width: scaleX(14)
-            color: "blue"
+            color: "white"
             radius: 8
             anchors.bottom: parent.bottom
             anchors.left: setupButton.right
@@ -242,8 +241,9 @@ Rectangle {
             Text{
                 text:"Exit!"
                 anchors.centerIn: parent
-                color:"white"
+                color:"red"
                 font.family: myFont.name
+                font.pixelSize: infoTextSize
             }
             MouseArea{
                 anchors.fill: parent

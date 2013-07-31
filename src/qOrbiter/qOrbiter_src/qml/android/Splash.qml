@@ -5,8 +5,12 @@ import QtQuick 1.1
 
 Item {
     id: splashLogic
-    height:appH
-    width:appW
+   height: manager.appHeight
+   width: manager.appWidth
+    property int infoTextSize:24
+    property int headerTextSize:42
+    property int startButtonHeight:45
+    property int startButtonWidth:100
     property bool orbiterSetup:false
 
     Rectangle{
@@ -21,13 +25,13 @@ Item {
         newOrbiterOptionContainer.visible=true; window.showSetup()
     }
     onWidthChanged: console.log("detected size change")
-    Image {
-        id: splash
-        anchors.centerIn: parent
-        fillMode: Image.PreserveAspectFit
-        source: "tablet/default/img/icons/backgrounds/bedroom.png"
-        anchors.fill: parent
-  }
+//    Image {
+//        id: splash
+//        anchors.centerIn: parent
+//        fillMode: Image.PreserveAspectFit
+//        source: "tablet/default/img/icons/backgrounds/bedroom.png"
+//        anchors.fill: parent
+//  }
     FontLoader{
         id:myFont
         name:"Sawasdee"
@@ -35,10 +39,10 @@ Item {
     }
 
     function scaleX(x){
-        return x/100*appH
+        return x/100*manager.appWidth
     }
     function scaleY(y){
-        return y/100*appW
+        return y/100*manager.appHeight
     }
 
     Connections{

@@ -12,7 +12,6 @@ Item{
             height: scaleX(5)
             width: scaleX(5)
             color: "transparent"
-
             Text {
                 id: connection_label
                 text: qsTr("Connection")

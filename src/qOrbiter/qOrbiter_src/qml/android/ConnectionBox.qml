@@ -1,13 +1,11 @@
 import QtQuick 1.1
-Rectangle{
+Item{
     id: connectionBoxContainer
     anchors.verticalCenter: parent.verticalCenter
     anchors.horizontalCenter: parent.horizontalCenter
-    anchors.verticalCenterOffset:10
-    width: scaleX(65)
-    height: scaleY(20)
-    color: "transparent"
-
+    anchors.verticalCenterOffset:-10
+    width: parent.width -10
+    height: scaleY(55)
     Rectangle {
         anchors.fill: parent
         radius: 7
@@ -30,66 +28,91 @@ Rectangle{
     Text {
         id: connectionlabel
         text: qsTr("Set Connection Details")
-        font.pointSize: 16
-        font.bold: false
+        font.pointSize: infoTextSize
+        font.bold: true
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         font.family: myFont.name
+        color:"white"
     }
 
     Row{
         id:connectionVars
-            anchors.centerIn: parent
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 10
+        anchors.top: connectionlabel.bottom
+        spacing: 10
+        height: parent.height*.65
+        width: childrenRect.width
+
+        Column{
+            height: parent.height
+            width: childrenRect.width
+            spacing:scaleY(1)
             Text {
                 text: qsTr("Host:")
-                font.pointSize: 12
+                font.pointSize:infoTextSize
                 font.family: myFont.name
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            TextInput {
-                id: routerip
-                width: 80
-                text: window.router
-                font.pointSize: 12
-                font.family: myFont.name
-                //  onTextChanged: setRouterIp(routerip.text)
-                fillColor: "grey"
-                anchors.verticalCenter: parent.verticalCenter
-
-            }
-
-            TextInput {
-                id: ext_routerip
-                width: 80
-                text: extip
-                font.pointSize: 12
-                font.family: myFont.name
-                //  onTextChanged: setRouterIp(routerip.text)
-                fillColor: "grey"
-                anchors.verticalCenter: parent.verticalCenter
-                visible: false
+                color:"white"
             }
 
             Text {
                 text: qsTr("Device:")
-                font.pointSize: 12
+                font.pointSize: infoTextSize
+                font.family: myFont.name
+                color:"white"
+            }
+
+            Text {
+                text: qsTr("External Ip:")
+                font.pointSize: infoTextSize
                 font.family: myFont.name
                 anchors.verticalCenter: parent.verticalCenter
+                color:"white"
+                visible:ext_routerip.visible
+                height: visible ? paintedHeight :0
             }
+        }
+
+
+        Column{
+            height: parent.height
+            width: childrenRect.width
+            spacing:scaleY(1)
+
+            TextInput {
+                id: routerip
+                width: scaleX(40)
+                text: window.router
+                font.pointSize: infoTextSize
+                font.family: myFont.name
+                //  onTextChanged: setRouterIp(routerip.text)
+                fillColor: "grey"
+
+            }
+
             TextInput {
                 id: devicenumber
                 width: scaleX(10)
                 text: window.deviceno
                 font.family: myFont.name
-                font.pointSize: 12
+                font.pointSize: infoTextSize
                 //onTextChanged: setDeviceNo(devicenumber.text)
                 fillColor: "grey"
-                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            TextInput {
+                id: ext_routerip
+                width: 80
+                height: visible? devicenumber.height :0
+                text: extip
+                font.pointSize:infoTextSize
+                font.family: myFont.name
+                //  onTextChanged: setRouterIp(routerip.text)
+                fillColor: "grey"
+                visible: false
             }
         }
+
+    }
 
     Row{
         id:goBox
@@ -99,19 +122,20 @@ Rectangle{
         spacing: scaleX(15)
         Rectangle {
             id: connectbutton
-            height: scaleY(2)
-            width: scaleX(10)
+            height: startButtonHeight
+            width: startButtonWidth
             color:"red"
 
             Text {
                 id: name
                 anchors.centerIn: parent
-                anchors.fill: parent
+
                 text: qsTr("Go!")
-                font.pointSize: 12
+                font.pointSize: infoTextSize
                 verticalAlignment: Text.AlignTop
                 font.bold: true
                 font.family: myFont.name
+                color:"white"
             }
 
             radius:  5
@@ -127,15 +151,13 @@ Rectangle{
 
         Rectangle {
             id: exitbutton
-            height: scaleY(3)
-            width: scaleX(6)
-
+            height: startButtonHeight
+            width:startButtonWidth
             Text {
                 id: exitlabel
                 anchors.centerIn: parent
-                anchors.fill: parent
                 text: qsTr("Exit")
-                font.pixelSize: 11
+                font.pixelSize:infoTextSize
                 font.family: myFont.name
             }
             radius:  4

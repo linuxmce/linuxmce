@@ -23,6 +23,7 @@ Rectangle {
         source: "../tablet/default/img/icons/backgrounds/bedroom.png"
         anchors.fill: parent
   }
+
     FontLoader{
         id:myFont
         name:"Roboto"

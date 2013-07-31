@@ -3,10 +3,10 @@ import QtQuick 1.1
 Rectangle{
     id:newOrbiterButton
     height: scaleY(10)
-    width:scaleX(55)
+    width:existing_orbiters.width
     opacity: 0
     border.color: "#99CC99"
-    anchors.verticalCenter: parent.verticalCenter
+
     Component.onCompleted: state="hidden"
     gradient: Gradient {
         GradientStop {
@@ -26,12 +26,12 @@ Rectangle{
     Text {
         id: newOrbiterLabel
         text: qsTr("Create New Orbiter? \n Or choose and Existing Orbiter")
-        font.pointSize: 15
+        font.pointSize:infoTextSize
         width: parent.width
         anchors.centerIn: parent
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         font.family: myFont.name
-        font.bold: true
+
         color:"#99CC99"
     }
     
@@ -61,10 +61,10 @@ Rectangle{
             }
             AnchorChanges{
                 target: newOrbiterButton
-                anchors.top: undefined
+                anchors.top: existing_orbiters.bottom
                 anchors.right: undefined
                 anchors.horizontalCenter: splashPage.horizontalCenter
-                anchors.verticalCenter: splashPage.verticalCenter
+
             }
         }
     ]
