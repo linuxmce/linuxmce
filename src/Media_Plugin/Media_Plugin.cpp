@@ -3656,9 +3656,19 @@ void Media_Plugin::CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_Med
 						if( pValue[0]=='!' && pValue[1]=='F' )
 						{
 							int PK_File = atoi(&pValue[2]);
+							Row_File *pRow_File = m_pDatabase_pluto_media->File_get()->GetRow(PK_File);
+							bool bIsMissing=1;
+							if (pRow_File)
+							  {
+							    bIsMissing=pRow_File->Missing_get();
+							  }
+							else
+							  {
+							    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not get File row for PK_File %d",PK_File);
+							  }
 							int PK_MediaType=0;
 							string sFilename = m_pMediaAttributes->m_pMediaAttributes_LowLevel->GetFilePathFromFileID(PK_File,&PK_MediaType);
-							if( sFilename.empty()==false && !IgnoreFileForMediaType(sFilename, PK_MediaType))
+							if( sFilename.empty()==false && !IgnoreFileForMediaType(sFilename, PK_MediaType) && !bIsMissing)
 							{
 								MediaFile *pMediaFile = new MediaFile(m_pMediaAttributes->m_pMediaAttributes_LowLevel,
 									PK_File,
@@ -3682,9 +3692,11 @@ void Media_Plugin::CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_Med
 							{
 								Row_File_Attribute *pRow_File_Attribute = vectRow_File_Attribute[s];
 								Row_File *pRow_File = pRow_File_Attribute->FK_File_getrow();
+								bool bIsMissing=1;
 								if( pRow_File )
 								{
-								  if (!IgnoreFileForMediaType(pRow_File->Path_get() + "/" + pRow_File->Filename_get(),pRow_File->EK_MediaType_get()))
+								  bIsMissing=pRow_File->Missing_get();
+								  if (!bIsMissing && !IgnoreFileForMediaType(pRow_File->Path_get() + "/" + pRow_File->Filename_get(),pRow_File->EK_MediaType_get()))
 									{
 										MediaFile *pMediaFile = new MediaFile(m_pMediaAttributes->m_pMediaAttributes_LowLevel,pRow_File->PK_File_get(),pRow_File->Path_get() + "/" + pRow_File->Filename_get());
 										pMediaFile->m_dwPK_MediaType=pRow_File->EK_MediaType_get();
