@@ -95,7 +95,7 @@ if [[ "$DisklessBoot" == "1" ]] ;then
 	mkdir -p "${Parm_RootLocation}/$(dirname $File)"
 
 	# Remove old dcerouter entry from /etc/hosts
-	grep -v '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*.*dcerouter[^:alnum:-_.]*$' "$FullFilePath" > "$FullFilePath.aux" || :
+	grep -v '[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*.*dcerouter[[:alnum:]_\.-]*$' "$FullFilePath" > "$FullFilePath.aux" || :
 	mv "$FullFilePath.aux" "$FullFilePath"
 	
 	# Add new dcerouter entry to /etc/hosts
