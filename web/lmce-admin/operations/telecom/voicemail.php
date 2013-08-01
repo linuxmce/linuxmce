@@ -27,6 +27,8 @@ function scanforvm($vmpath,&$messages, $new) {
 		$url=str_replace(".txt", "", $url);
 		$messages[$id]['msgurl']=$url;
 	}
+	if($vmfiles) return TRUE;
+	else return FALSE;
 }
 
 function listvm($messages) {
@@ -176,8 +178,11 @@ function voicemail($output,$dbADO) {
 		case 'read':
 			$vmpath=$vmbase.'/'.$_SESSION['Extension'].'/'.$vminbox.'/msg'.$_REQUEST['id'].'.*';
 			$vmold=$vmbase.'/'.$_SESSION['Extension'].'/'.$vminbox.'/Old';
-			$cmd='sudo -u root mkdir -p '.$vmold.';mv '.$vmpath.' '.$vmold;
-			$response=exec_batch_command($cmd,1);
+			exec_batch_command('sudo -u root mkdir -p '.$vmold,1);
+			exec_batch_command('sudo -u root chown -R asterisk:www-data '.$vmold,1);
+			exec_batch_command('sudo -u root chmod 770 '.$vmold,1);
+			exec_batch_command('sudo -u root chmod 770 '.$vmpath,1);
+			exec_batch_command('sudo -u root mv '.$vmpath.' '.$vmold,1);
 			if($_SESSION['Extension']==$generalvm) $suffix='&general=1';
 			header('Location: index.php?section=voicemail'.@$suffix);
 			break;
