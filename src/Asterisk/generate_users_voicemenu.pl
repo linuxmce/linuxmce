@@ -83,8 +83,9 @@ $list .= "/tmp/pluto-default-voicemenu4.gsm";
 `/bin/chmod 770 -R /usr/share/asterisk/sounds/pluto`;
 `/usr/bin/sox $list /usr/share/asterisk/sounds/pluto/pluto-default-voicemenu.gsm`;
 `/bin/mkdir -p /var/spool/asterisk/voicemail/default/`;
-`/bin/chown -R asterisk:www-data /var/spool/asterisk/voicemail/*`;
-`/bin/chmod 770 -R /var/spool/asterisk/voicemail/*`;
+`/bin/chown -R asterisk:www-data /var/spool/asterisk/voicemail`;
+`/bin/chmod 755 -R /var/spool/asterisk`;
+`/bin/chmod 770 -R /var/spool/asterisk/voicemail`;
 
 # Clear $list and generate voice for invalid IVR entries
 $list = "";
