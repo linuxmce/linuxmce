@@ -352,6 +352,7 @@
 	
 	$GLOBALS['hardware_acceleration']=array(
 	'auto'=>'auto',
+        'vaapi'=>'vaapi',
 	'vdpau'=>'vdpau',
 	'cle266x11'=>'cle266x11',
 	'xv'=>'xv',
