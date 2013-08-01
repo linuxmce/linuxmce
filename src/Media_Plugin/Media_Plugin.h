@@ -514,6 +514,7 @@ public:
     }
 
     int DetermineUserOnOrbiter(int iPK_Device_Orbiter);
+    bool IgnoreFileForMediaType(string sFilename, int iPK_MediaType);
 
 	// For the alarm callbacks
 	virtual void AlarmCallback(int id, void* param);

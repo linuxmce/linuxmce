@@ -3534,6 +3534,22 @@ int Media_Plugin::DetermineUserOnOrbiter(int iPK_Device_Orbiter)
     return pOH_Orbiter->PK_Users_get();
 }
 
+bool Media_Plugin::IgnoreFileForMediaType(string sFilename, int iPK_MediaType)
+{
+  if (iPK_MediaType == MEDIATYPE_pluto_StoredAudio_CONST)
+    {
+      if (FileUtils::DirExists(sFilename)) // This is a directory.
+        {	
+		return true;
+	}
+      if (!FileUtils::FileExists(sFilename)) // File does not exist somehow.
+	{
+		return true;
+	}
+    }
+  return false;
+}
+
 //<-dceag-c43-b->
 
 	/** @brief COMMAND: #43 - MH Play Media */
@@ -3642,7 +3658,7 @@ void Media_Plugin::CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_Med
 							int PK_File = atoi(&pValue[2]);
 							int PK_MediaType=0;
 							string sFilename = m_pMediaAttributes->m_pMediaAttributes_LowLevel->GetFilePathFromFileID(PK_File,&PK_MediaType);
-							if( sFilename.empty()==false )
+							if( sFilename.empty()==false && !IgnoreFileForMediaType(sFilename, PK_MediaType))
 							{
 								MediaFile *pMediaFile = new MediaFile(m_pMediaAttributes->m_pMediaAttributes_LowLevel,
 									PK_File,
@@ -3668,9 +3684,12 @@ void Media_Plugin::CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_Med
 								Row_File *pRow_File = pRow_File_Attribute->FK_File_getrow();
 								if( pRow_File )
 								{
-									MediaFile *pMediaFile = new MediaFile(m_pMediaAttributes->m_pMediaAttributes_LowLevel,pRow_File->PK_File_get(),pRow_File->Path_get() + "/" + pRow_File->Filename_get());
-									pMediaFile->m_dwPK_MediaType=pRow_File->EK_MediaType_get();
-									dequeMediaFile.push_back(pMediaFile);
+								  if (!IgnoreFileForMediaType(pRow_File->Path_get() + "/" + pRow_File->Filename_get(),pRow_File->EK_MediaType_get()))
+									{
+										MediaFile *pMediaFile = new MediaFile(m_pMediaAttributes->m_pMediaAttributes_LowLevel,pRow_File->PK_File_get(),pRow_File->Path_get() + "/" + pRow_File->Filename_get());
+										pMediaFile->m_dwPK_MediaType=pRow_File->EK_MediaType_get();
+										dequeMediaFile.push_back(pMediaFile);
+									}
 								}
 							}
 						} else if ( pValue[0]=='/' )
