@@ -6,7 +6,7 @@ if [ "$KVER" ]
 then
 	Moon_KernelVersion=$KVER
 else
-	Moon_KernelVersion=$(find /lib/modules/* -maxdepth 0 -type d |sort -r |head -1)
+	Moon_KernelVersion=$(find /lib/modules/* -maxdepth 0 -type d | grep -v "+" |sort -r |head -1)
 fi
 
 #Moon_KernelArch=$(apt-config dump | grep 'APT::Architecture ' | sed 's/APT::Architecture "\(.*\)".*/\1/g')

@@ -1,4 +1,4 @@
-linux-image-default-raspbian-wheezy (3.2.0-4-rpi) unstable; urgency=low
+linux-image-default-raspbian-wheezy (3.6-trunk-rpi) unstable; urgency=low
 
   * build for raspbian lmce
 
