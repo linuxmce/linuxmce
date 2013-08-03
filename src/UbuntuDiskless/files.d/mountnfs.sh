@@ -5,6 +5,15 @@ set -e
 
 File="/etc/init.d/mountnfs.sh"
 
+INSSERV="/sbin/insserv"
+if ! [[ -x "${Parm_RootLocation}$INSSERV" ]]; then
+        INSSERV="/usr/lib/insserv/insserv"
+fi
+if ! [[ -x "${Parm_RootLocation}$INSSERV" ]]; then
+        echo "No insserv found.  Exiting."
+        exit 1
+fi
+
 mkdir -p "${Parm_RootLocation}/$(dirname $File)"
 cat >"${Parm_RootLocation}/$File" <<"EOF"
 #!/bin/sh
@@ -51,7 +60,9 @@ esac
 EOF
 
 chmod +x "${Parm_RootLocation}/${File}"
-LC_ALL=C chroot "${Parm_RootLocation}" /usr/lib/insserv/insserv -fv mountnfs.sh
+#LC_ALL=C chroot "${Parm_RootLocation}" insserv -fv mountnfs.sh
+LC_ALL=C chroot "${Parm_RootLocation}" "${INSSERV}" -fv mountnfs.sh
 
 ## This script is broken so we better remove it
-rm -f ${Parm_RootLocation}/etc/init.d/waitnfs.sh
+rm -f "${Parm_RootLocation}"/etc/init.d/waitnfs.sh
+

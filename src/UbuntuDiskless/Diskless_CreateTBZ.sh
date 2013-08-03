@@ -465,16 +465,19 @@ case "$TARGET_DISTRO" in
 		# raspbian doesn't come with lsb-release by default???
 		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install lsb-release
 
-		# FIXME: need a way to detect recent kernels
-		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-image-3.2.0-4-rpi
+		# HACK: copy the foundation kernel.img to a normal linux kernal name with version
+		# FIXME: is there a better way to do this?  the raspbian kernels are missing the fdt.
+		#LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-image-3.6-trunk-rpi
+		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi0 raspberrypi-bootloader rpi-update
+		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install rpi-update
+		LC_ALL=C chroot "$TEMP_DIR" rpi-update
+		LC_ALL=C chroot "$TEMP_DIR" cp /boot/kernel.img /boot/vmlinuz-3.6-trunk-rpi
+		LC_ALL=C chroot "$TEMP_DIR" touch /boot/initrd.img-3.6-trunk-rpi
 
-		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi0 raspberrypi-bootloader
+		LC_ALL=C chroot "$TEMP_DIR" mkdir /sdcard
 
                 LC_ALL=C chroot $TEMP_DIR apt-get -y install alsa-base alsa-utils pulseaudio
                 VerifyExitCode "alsa-base, alsa-utils or pulseaudio packages install failed"
-
-                LC_ALL=C chroot $TEMP_DIR apt-get -y install xorg
-                VerifyExitCode "xorg package install failed"
 		;;
 esac
 
@@ -576,7 +579,7 @@ case "$TARGET_DISTRO" in
 
 		if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
 			LC_ALL=C chroot $TEMP_DIR apt-get -y install kubuntu-desktop
-#			LC_ALL=C chroot $TEMP_DIR apt-get -y install kde-minimal
+			#LC_ALL=C chroot $TEMP_DIR apt-get -y install kde-minimal
 		fi
 		echo '/bin/false' >"$TEMP_DIR/etc/X11/default-display-manager"
 
@@ -587,16 +590,18 @@ case "$TARGET_DISTRO" in
 		#Install ancillary programs
 		LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all$TARGET_KVER_LTS_HES linux-firmware
 		VerifyExitCode "Ancillary programs install failed"
-
 		;;
 	"raspbian")
-                #Install nfs-common and openssh-server
-                LC_ALL=C chroot $TEMP_DIR apt-get -y install nfs-common openssh-server
-                VerifyExitCode "nfs-common or openssh-server programs install failed"
+		#Install nfs-common and openssh-server
+		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install nfs-common openssh-server
+		VerifyExitCode "nfs-common or openssh-server programs install failed"
 
-		#FIXME: why is this required, something else is missing
-                LC_ALL=C chroot $TEMP_DIR addgroup --force-badname Debian-exim
-                VerifyExitCode "addgroup Debian-Exim failed"
+#		#FIXME: why is this required, something missing?
+#		LC_ALL=C chroot $TEMP_DIR addgroup --force-badname Debian-exim
+#		VerifyExitCode "addgroup Debian-Exim failed"
+		LC_ALL=C chroot "$TEMP_DIR" sed -i '/Debian-exim/d' /var/lib/dpkg/statoverride
+
+		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install xinit
 		;;
 esac
 

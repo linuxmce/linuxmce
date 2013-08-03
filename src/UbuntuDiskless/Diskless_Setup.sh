@@ -79,8 +79,8 @@ function setup_tftp_boot
 
 		# Only create the pxeconfig if $DefaultBootName is defined.
 		if [[ -n "$DefaultBootName" ]]; then
-			BootConf="${BootConf}DEFAULT Pluto\n"
-			BootConf="${BootConf}LABEL Pluto\n"
+			BootConf="${BootConf}DEFAULT LinuxMCE\n"
+			BootConf="${BootConf}LABEL LinuxMCE\n"
 			BootConf="${BootConf}KERNEL ${Moon_DeviceID}/$DefaultBootName/vmlinuz\n"
 			BootConf="${BootConf}APPEND initrd=${Moon_DeviceID}/$DefaultBootName/initrd.img ramdisk=10240 rw root=/dev/nfs boot=nfs nfsroot=${IntIP}:/usr/pluto/diskless/${Moon_DeviceID}/$DefaultBootName,intr,nolock,udp,rsize=32768,wsize=32768,retrans=10,timeo=50 ${BootParams}\n"
 			echo -e "$BootConf" > "$Moon_BootConfFile"
@@ -126,24 +126,26 @@ function setup_tftp_boot
 		chmod +r /tftpboot/${Moon_DeviceID}/vmlinuz
 		chmod +r /tftpboot/${Moon_DeviceID}/initrd.img
 
-		## these are needed because by default they see the kernel running on the core,
-		## which may be different from the one installed on the MD, thus not doing what we want by default
-		chroot /usr/pluto/diskless/"$Moon_DeviceID" depmod "$Kver"
-		chroot /usr/pluto/diskless/"$Moon_DeviceID" update-initramfs -k "$Kver" -u
-
 		case $Moon_DistroID in
 			19)
-			nfsroot="${IntIP}:/usr/pluto/diskless/${Moon_DeviceID}"
-			;;
+				nfsroot="${IntIP}:/usr/pluto/diskless/${Moon_DeviceID}"
+				initrd=""
+				;;
 			*)
-			nfsroot="${IntIP}:/usr/pluto/diskless/${Moon_DeviceID},intr,nolock,udp,rsize=32768,wsize=32768,retrans=10,timeo=50"
-			;;
+				## these are needed because by default they see the kernel running on the core,
+				## which may be different from the one installed on the MD, thus not doing what we want by default
+				chroot /usr/pluto/diskless/"$Moon_DeviceID" depmod "$Kver"
+				chroot /usr/pluto/diskless/"$Moon_DeviceID" update-initramfs -k "$Kver" -u
+
+				nfsroot="${IntIP}:/usr/pluto/diskless/${Moon_DeviceID},intr,nolock,udp,rsize=32768,wsize=32768,retrans=10,timeo=50"
+				initrd="initrd=${Moon_DeviceID}/initrd.img ramdisk=10240 rw"
+				;;
 		esac
 
-		BootConf="${BootConf}DEFAULT Pluto\n"
-		BootConf="${BootConf}LABEL Pluto\n"
+		BootConf="${BootConf}DEFAULT LinuxMCE\n"
+		BootConf="${BootConf}LABEL LinuxMCE\n"
 		BootConf="${BootConf}KERNEL ${Moon_DeviceID}/vmlinuz\n"
-		BootConf="${BootConf}APPEND initrd=${Moon_DeviceID}/initrd.img ramdisk=10240 rw root=/dev/nfs boot=nfs nfsroot=${nfsroot} ${BootParams}\n"
+		BootConf="${BootConf}APPEND ${initrd} root=/dev/nfs boot=nfs nfsroot=${nfsroot} ${BootParams}\n"
 		echo -e "$BootConf" > "$Moon_BootConfFile"
 	fi
 }
@@ -159,7 +161,7 @@ function setup_mysql_access
 function generate_diskless_installer 
 {
 	
-	echo "* Generating Pluto Installer for MD #${Moon_DeviceID}"
+	echo "* Generating LinuxMCE Installer for MD #${Moon_DeviceID}"
 
 	## Copy installer files
 	mkdir -p $Moon_RootLocation/usr/pluto/install

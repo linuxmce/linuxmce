@@ -1,15 +1,71 @@
 #!/bin/bash
-# vim:set ft=sh:
+set -e
 
-set -e 
 . ./filesd-parms.sh $@
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Network_Parameters.sh
 
 ## firstrun for diskless mds
-File="/etc/rcS.d/S99firstrun"
-Content="#!/bin/bash
-trap 'rm -f $File' EXIT
+File="/etc/init.d/firstrun"
+Link="/etc/rc2.d/S00firstrun"
+
+INSSERV="/sbin/insserv"
+if ! [[ -x "${Parm_RootLocation}$INSSERV" ]]; then
+        INSSERV="/usr/lib/insserv/insserv"
+fi
+if ! [[ -x "${Parm_RootLocation}$INSSERV" ]]; then
+        echo "No insserv found.  Exiting."
+        exit 1
+fi
+
+#echo "${Content}" > "${Parm_RootLocation}/${File}"
+cat >"${Parm_RootLocation}/${File}" <<'EOF'
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          firstrun
+# Required-Start:    $remote_fs
+# Required-Stop:     $remote_fs
+# Should-Start:
+# Default-Start:     S 2
+# Default-Stop:
+# Short-Description: firstrun
+# Description:       This script is run the first time linuxmce boots
+### END INIT INFO #
+
+if ! [[ -d "${Parm_RootLocation}/$(dirname $File)" ]]; then
+	mkdir -p "${Parm_RootLocation}/$(dirname $File)"
+fi
+
+do_start () {
+trap '${INSSERV} -rfv firstrun' EXIT
+
+DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
+
+. /usr/pluto/bin/Config_Ops.sh
+
+if [[ "$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST" -eq "$PK_Distro" ]]; then
+
+	INSSERV="/sbin/insserv"
+
+	echo -e "\n\n\n\n\n\n\n\n\nFIRSTRUN\n\n\n\n\n\n\n\n\n"
+
+	# copy contents of /boot to /sdcard
+	cp /boot/* /sdcard/
+
+	# not required with working u-boot
+	# remove u-boot kernel from /sdcard/config.txt
+	#[[ ! -f /sdcard/config.txt.lmcebackup ]] && cp /sdcard/config.txt /sdcard/config.txt.lmcebackup
+	#sed -i 's/^[kK]ernel/#&/' /sdcard/config.txt
+	# add extra kernel boot args to /sdcard/cmdline.txt
+	#[[ ! -f /sdcard/cmdline.txt.lmcebackup ]] && cp /sdcard/cmdline.txt /sdcard/cmdline.txt.lmcebackup
+	#echo "dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 elevator=deadline rootwait root=/dev/nfs nfsroot=192.168.80.1:/usr/pluto/diskless/$PK_Device ip=dhcp rootfstype=nfs" > /sdcard/cmdline.txt
+
+	${INSSERV} -fv linuxmce
+	${INSSERV} -rfv firstrun
+	reboot
+	exit 0
+fi
+
 apt-get update
 update-pciids
 
@@ -18,14 +74,45 @@ dpkg -l libdvdcss2 | grep ^ii || find /usr/pluto/deb-cache/ -iname 'libdvdcss*' 
 
 ## Install video driver
 . /usr/pluto/bin/Utils.sh
-CheckVideoDriver 
-sleep 5 
-if echo \"\$Best_Video_Driver\" | grep -Eq '(nvidia|fglrx|via|virge|savage)'; then 
-	reboot 
+CheckVideoDriver
+sleep 5
+if echo "$Best_Video_Driver" | grep -Eq '(nvidia|fglrx|via|virge|savage)'; then
+	rm -f "$Link"
+	reboot
 fi
-"
-if ! [[ -d "${Parm_RootLocation}/$(dirname $File)" ]]; then
-	mkdir -p "${Parm_RootLocation}/$(dirname $File)"
-fi
-echo "$Content" > "${Parm_RootLocation}/${File}"
+}
+
+do_status () {
+        return 0
+}
+
+case "$1" in
+  start|"")
+        do_start
+        ;;
+  restart|reload|force-reload)
+        echo "Error: argument '$1' not supported" >&2
+        exit 3
+        ;;
+  stop)
+        # No-op
+        ;;
+  status)
+        do_status
+        exit $?
+        ;;
+  *)
+        echo "Usage: firstrun [start|stop|status]" >&2
+        exit 3
+        ;;
+esac
+
+:
+EOF
+
 chmod +x "${Parm_RootLocation}/${File}"
+LC_ALL=C chroot "${Parm_RootLocation}" "${INSSERV}" -fv firstrun
+
+#pushd "${Parm_RootLocation}$(dirname $Link)" >/dev/null
+#ln -sf "../init.d/$(basename $File)" "$(basename $Link)"
+#popd >/dev/null
