@@ -1,7 +1,7 @@
 import QtQuick 1.0
 Item{
     id:media_playback_base
-    height: manager.appHeight
+    height: parent.height
     width: manager.appWidth
     state:"metadata"
 
@@ -43,34 +43,25 @@ Item{
     }
 
     Item{
+        id:optionsButton
+        height: parent.height
+        width: parent.width*.07
+        Rectangle{
+            anchors.fill: parent
+            color: "green"
+        }
+        StyledText{
+            text:"Options"
+            rotation:270
+        }
+    }
+
+    Item{
         id:metaDataPanel
         height: parent.height
         width: parent.width
         clip:true
-        MouseArea{
-            id:dragHandler
-            anchors.fill: parent
-            drag.target: hiddenDrag
-            drag.axis: Drag.XAxis
-            drag.minimumX: 0
-            drag.maximumX: parent.width
 
-            onReleased:  {
-
-                console.log(hiddenDrag.x)
-
-                if(hiddenDrag.x  < parent.width /2 ){
-                    console.log("playlist") ;
-                   media_playback_base.state = "playlist"
-                }
-                else {
-                    media_playback_base.state = "controls";
-                    console.log("controls")
-                }
-            }
-
-           // onReleased: media_playback_base.state="playlist"
-        }
 
         NowPlayingImage{
             id:npImage
@@ -104,8 +95,6 @@ Item{
             width: parent.width/2
             x:parent.width /2
         }
-
-
     }
 
     Item{
@@ -134,9 +123,6 @@ Item{
             }
         }
     }
-
-
-
 
     states: [
         State {

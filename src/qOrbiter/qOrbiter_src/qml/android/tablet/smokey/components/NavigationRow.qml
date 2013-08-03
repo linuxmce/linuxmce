@@ -30,9 +30,10 @@ Row{
                 else if(scenarioList.currentModelName==="currentRoomSecurity")
                     current_scenario_model = currentRoomSecurity
             }else if (manager.currentScreen==="Screen_47"){
-
                 if(name==="Attribute")
                     console.log("attribute selected")
+            } else {
+                current_scenario_model = []
             }
         }
     }
@@ -66,11 +67,14 @@ Row{
                             current_scenario_model=currentRoomTelecom
                         else if(modelName==="currentRoomSecurity")
                             current_scenario_model = currentRoomSecurity
-                    }else if (manager.currentScreen==="Screen_47"){
-                        
+                    }else if (manager.currentScreen==="Screen_47"){                        
                         if(name==="Attribute")
                             console.log("attribute selected")
                     }
+                    else{
+                        current_scenario_model = []
+                    }
+
                     scenarioList.currentModelName = modelName
                 }
             }
