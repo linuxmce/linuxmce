@@ -11,6 +11,7 @@ MediaListProgressBar MediaListProgressBar.qml
 MultiViewMediaList MultiViewMediaList.qml
 PlaylistView PlaylistView.qml
 RoomSelector RoomSelector.qml
+ScenarioComponent ScenarioComponent.qml
 StyledText StyledText.qml
 StyledButton StyledButton.qml
 UserSelector UserSelector.qml
@@ -18,3 +19,5 @@ MediaPlaybackBase MediaPlaybackBase.qml
 MediaPopup MediaPopup.qml
 Metadata_4 Metadata_4.qml
 Metadata_5 Metadata_5.qml
+MediaOptions4 MediaOptions4.qml
+MediaOptions5 MediaOptions5.qml
