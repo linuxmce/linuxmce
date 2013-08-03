@@ -1,6 +1,6 @@
 import QtQuick 1.0
 
-import "../../../lib/handlers"
+import "../../lib/handlers"
 
 
 Row{

@@ -6,8 +6,8 @@ Item {
     id: qml_root
 
     onWidthChanged: console.log(width+"::"+height)
-    height:parent.height
-    width:parent.width
+    height:manager.appHeight
+    width:manager.appWidth
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
