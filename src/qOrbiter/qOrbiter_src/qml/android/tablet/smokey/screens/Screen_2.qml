@@ -2,18 +2,10 @@ import QtQuick 1.1
 import "../components"
 
 Item {
-    width: scaleY(100)
-    height: scaleX(100)
+    width:pageLoader.width
+    height: pageLoader.height
     state:"list"
-    focus:true
-    onStateChanged: {
-        if(state==="list"){
-            listdisplay.forceActiveFocus()
-        }
-        else{
-            floorplan.forceActiveFocus()
-        }
-    }
+    Component.onCompleted: nav_row.navSource="../components/FloorPlanOptions.qml"
 
     Item {
         id: requestParamManager
@@ -105,6 +97,7 @@ Item {
             PropertyChanges {
                 target: listdisplay
                 visible:true
+                opacity:1
 
             }
         },
@@ -117,6 +110,7 @@ Item {
             PropertyChanges {
                 target: listdisplay
                 visible:false
+                opacity:0
             }
         }
     ]

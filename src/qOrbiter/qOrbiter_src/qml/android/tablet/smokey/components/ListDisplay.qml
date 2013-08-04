@@ -9,6 +9,7 @@ ListView
     model:floorplan_devices
     anchors.top: parent.top
     anchors.left: parent.left
+    visible:parent.state ==="list"
     clip:true
     focus:true
 

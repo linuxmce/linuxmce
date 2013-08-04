@@ -10,9 +10,11 @@ Item{
         spacing:scaleX(10)
         StyledButton{
             buttonText.text: "List"
+            hitArea.onReleased: pageLoader.item.state="list"
         }
         StyledButton{
             buttonText.text: "Image"
+             hitArea.onReleased: pageLoader.item.state="floorplan"
         }
     }
 }

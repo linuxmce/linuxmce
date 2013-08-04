@@ -3,14 +3,12 @@ import QtQuick 1.1
 Item {
     objectName: "floorplan_display"
     id:floorplandisplay
-    width: childrenRect.width
-    height: childrenRect.height
-  //  Component.onCompleted:{ floorplan_devices.setCurrentPage(1)}
+    width:parent.width
+    height: parent.height
+   Component.onCompleted:{ floorplan_devices.setCurrentPage(1)}
     property int scaleFactor:floorplanimage.scale
 
-
     function setCommandType(){
-
         if(floorplan_devices.getCurrentFloorPlanType()=== 2)
             return lightingCommands
     }
@@ -45,19 +43,12 @@ Item {
         {
             var sprite = c.createObject(floorplanimage, {"x": x, "y": y, "deviceNum": num, "deviceType": devtype});
         }
-        else
-        {
-            finishPlacingSprites(c,x,y,num, state, devtype)
-        }
-
     }
-
 
     Connections{
         target: floorplan_devices
         onFloorPlanImageChanged: {
             floorplanimage.source = "image://listprovider/floorplan/"+floorplan_devices.currentPage
-
         }
     }
 
@@ -66,8 +57,8 @@ Item {
     Rectangle{
         id:mainRect
         objectName: "main_rect"
-        height: scaleY(80)
-        width:scaleX(80)
+        height: floorplandisplay.height
+        width:floorplandisplay.width
         border.color: "black"
         border.width: scaleX(1) *.25
         radius: 5

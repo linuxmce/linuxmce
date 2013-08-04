@@ -5,6 +5,7 @@ Controls_43 Controls_43.qml
 FileDetails_5 FileDetails_5.qml
 FileDetails_4 FileDetails_4.qml
 FileDetails_21 FileDetails_21.qml
+FpSprite FpSprite.qml
 HomeScreenContent HomeScreenContent.qml
 InformationPanel InformationPanel.qml
 ListDisplay ListDisplay.qml
