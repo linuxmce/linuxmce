@@ -176,11 +176,8 @@ Item {
     FontLoader{
         id:appFont
         name:"Sawasdee"
-        source:"../../../fonts/Sawasdee.ttf"
+        source:"../../fonts/Sawasdee.ttf"
     }
-
-
-
 
     //=================Components==================================================//
     function loadComponent(componentName)

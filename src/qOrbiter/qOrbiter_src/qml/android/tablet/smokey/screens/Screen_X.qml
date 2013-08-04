@@ -2,15 +2,15 @@ import QtQuick 1.0
 import "../components"
 Item{
     id:screen_x_root
-   height: parent.height
-   width: parent.width
+   height: manager.appHeight
+   width: manager.appWidth
 
     Rectangle{
         id:mask
         width: parent.width*85
         height: scaleY(15)
         color: "black"
-        opacity: .65
+        opacity: .85
         anchors.centerIn: parent
     }
 

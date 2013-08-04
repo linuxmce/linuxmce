@@ -14,4 +14,5 @@ import QtQuick 1.0
         font.pixelSize: fontSize
         font.family: appFont.name       
         color:"white"
+
     }

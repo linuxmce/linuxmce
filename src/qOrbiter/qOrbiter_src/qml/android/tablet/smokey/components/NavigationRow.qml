@@ -20,6 +20,7 @@ Row{
     StyledButton{
         buttonText.text:"Advanced"
         opacity: manager.currentScreen === "Screen_1.qml" ? 1 : 0
+
     }
     StyledButton {
         id: exit_label

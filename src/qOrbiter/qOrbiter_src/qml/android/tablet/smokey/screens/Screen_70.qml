@@ -13,5 +13,5 @@ import "../components"
   */
 MediaPlaybackBase{
 id:screen_70
-Component.onCompleted: current_header_model = []
+
 }

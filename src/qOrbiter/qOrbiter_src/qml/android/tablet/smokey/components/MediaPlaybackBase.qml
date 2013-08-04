@@ -5,10 +5,17 @@ Item{
     width: manager.appWidth
     state:"metadata"
 
-    Component.onCompleted: {manager.setBoundStatus(true);nav_row.navSource="NavOptions"+manager.i_current_mediaType+".qml"; info_panel.state="hidden"; }
+    Component.onCompleted: {
+        manager.setBoundStatus(true);
+        nav_row.navSource="NavOptions5.qml";
+        info_panel.state="hidden";
+        controlComponent = "Controls_5.qml" //controlsLoader.sourceComponent
+    }
+
+
     property string metadataComponent:"Metadata_"+manager.i_current_mediaType+".qml"
     property alias scrollBarComponent:mediaScrollerTarget.sourceComponent
-    property string controlComponent: "Controls_"+manager.i_current_mediaType+".qml" //controlsLoader.sourceComponent
+    property string controlComponent: ""
     property alias playlistSource:playlist.model
     property alias playlistDelegate:playlist.delegate
     property bool enableScrollbar:true
