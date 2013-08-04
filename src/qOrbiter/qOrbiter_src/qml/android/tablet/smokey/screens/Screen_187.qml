@@ -2,7 +2,8 @@ import QtQuick 1.1
 import "../components"
 Item{
     id:screen_187
-    anchors.fill: parent
+    height: pageLoader.height
+    width: pageLoader.width
 
     property int device_from:screenparams.getParam(184) /*!< \brief Device from */
     property int device_mediasource:screenparams.getParam(186)/*!< \brief Device's mediasource id */
