@@ -7,6 +7,7 @@ FileDetails_4 FileDetails_4.qml
 FileDetails_21 FileDetails_21.qml
 HomeScreenContent HomeScreenContent.qml
 InformationPanel InformationPanel.qml
+ListDisplay ListDisplay.qml
 NavigationRow NavigationRow.qml
 NavOptions5 NavOptions5.qml
 NavOptions43 NavOptions43.qml
@@ -27,3 +28,4 @@ Metadata_43 Metadata_43.qml
 MediaOptions4 MediaOptions4.qml
 MediaOptions5 MediaOptions5.qml
 FloorplanDisplay FloorplanDisplay.qml
+FloorPlanOptions FloorPlanOptions.qml

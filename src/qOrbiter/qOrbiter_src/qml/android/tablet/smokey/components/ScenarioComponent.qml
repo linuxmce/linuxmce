@@ -20,6 +20,7 @@ ListView{
             id:dummy
             buttonText.text: name
             buttonText.color: "antiquewhite"
+            hitArea.onPressAndHold: manager.showfloorplan(index+2)
             hitArea.onReleased: {
                 if(manager.currentScreen==="Screen_1.qml"){
                     if(modelName==="currentRoomLights")
