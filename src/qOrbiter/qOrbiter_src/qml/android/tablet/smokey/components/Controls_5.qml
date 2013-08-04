@@ -1,5 +1,5 @@
 import QtQuick 1.0
-
+import "../../lib/handlers"
 Item {
     width: childrenRect.width
     height: childrenRect.height
@@ -42,5 +42,20 @@ Item {
             buttonText.text: "Stop"
             hitArea.onReleased: manager.stopMedia()
         }
+
+        StyledButton{
+            buttonText.text: "+"
+            hitArea.onReleased: manager.adjustVolume(5)
+        }
+        StyledButton{
+            buttonText.text: "Mute"
+            hitArea.onReleased: manager.mute()
+        }
+        StyledButton{
+            buttonText.text: "-"
+            hitArea.onReleased: manager.adjustVolume(-5)
+        }
     }
+
+
 }

@@ -9,6 +9,7 @@ Item{
     anchors.bottom: parent.bottom
     Component.onCompleted: info_panel.state="retracted"
 
+
     
     Rectangle{
         id:info_fill

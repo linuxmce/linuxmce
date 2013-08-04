@@ -5,7 +5,7 @@ Item{
     width: manager.appWidth
     state:"metadata"
 
-    Component.onCompleted: {manager.setBoundStatus(true);nav_row.navSource=""}
+    Component.onCompleted: {manager.setBoundStatus(true);nav_row.navSource="NavOptions"+manager.i_current_mediaType+".qml"; info_panel.state="hidden"; }
     property string metadataComponent:"Metadata_"+manager.i_current_mediaType+".qml"
     property alias scrollBarComponent:mediaScrollerTarget.sourceComponent
     property string controlComponent: "Controls_"+manager.i_current_mediaType+".qml" //controlsLoader.sourceComponent
@@ -42,46 +42,7 @@ Item{
         }
     }
 
-    Item{
-        id:optionsButton
-        height: parent.height
-        width: parent.width*.07
 
-        Rectangle{
-            anchors.fill: parent
-            color: media_playback_base.state==="controls" ? "yellow" : "green"
-        }
-        StyledText{
-            text:media_playback_base.state==="controls" ? qsTr("MetaData") :qsTr("Options")
-            rotation:270
-            anchors.centerIn: parent
-            fontSize: scaleY(8)
-        }
-        MouseArea{
-            anchors.fill: parent
-            onClicked:media_playback_base.state="controls"
-        }
-    }
-    Item{
-        id:playlistButton
-        height: parent.height
-        width: parent.width*.07
-
-        Rectangle{
-            anchors.fill: parent
-            color: media_playback_base.state==="controls" ? "red" : "green"
-        }
-        StyledText{
-            text:media_playback_base.state==="playlist" ? qsTr("MetaData") :qsTr("Playlist")
-            rotation:270
-            anchors.centerIn: parent
-            fontSize: scaleY(8)
-        }
-        MouseArea{
-            anchors.fill: parent
-            onClicked:media_playback_base.state="playlist"
-        }
-    }
 
     Item{
         id:metaDataPanel
@@ -159,24 +120,6 @@ Item{
                 anchors.right: undefined
                 anchors.left: media_playback_base.left
             }
-            AnchorChanges{
-                target: optionsButton
-                anchors.left: media_playback_base.left
-                anchors.right: undefined
-            }
-            AnchorChanges{
-                target: playlistButton
-                anchors.right: media_playback_base.right
-                anchors.left: undefined
-            }
-            PropertyChanges{
-                target: optionsButton
-                opacity:1
-            }
-            PropertyChanges {
-                target: playlistButton
-                opacity:1
-            }
 
             PropertyChanges {
                 target: hiddenDrag
@@ -191,15 +134,6 @@ Item{
                 anchors.left: undefined
                 anchors.right:media_playback_base.left
             }
-            AnchorChanges{
-                target: playlistButton
-                anchors.left: media_playback_base.left
-                anchors.right: undefined
-            }
-            PropertyChanges{
-                target: optionsButton
-                opacity:0
-            }
         },
         State {
             name: "controls"
@@ -207,16 +141,6 @@ Item{
                 target: metaDataPanel
                 anchors.right: undefined
                 anchors.left: media_playback_base.right
-            }
-
-            AnchorChanges{
-                target: optionsButton
-                anchors.left: undefined
-                anchors.right: media_playback_base.right
-            }
-            PropertyChanges {
-                target: playlistButton
-                opacity:0
             }
 
         }

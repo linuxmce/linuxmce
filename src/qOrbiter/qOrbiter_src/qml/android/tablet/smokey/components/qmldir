@@ -6,6 +6,7 @@ FileDetails_4 FileDetails_4.qml
 FileDetails_21 FileDetails_21.qml
 InformationPanel InformationPanel.qml
 NavigationRow NavigationRow.qml
+NavOptions5 NavOptions5.qml
 NowPlayingImage NowPlayingImage.qml
 MediaListProgressBar MediaListProgressBar.qml
 MultiViewMediaList MultiViewMediaList.qml

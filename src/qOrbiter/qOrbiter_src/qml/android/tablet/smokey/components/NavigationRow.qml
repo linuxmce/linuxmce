@@ -8,29 +8,30 @@ Row{
     height: scaleY(8)
     width:parent.width
     property alias navigation:nav
-    property string navSource:""
+    property string defaultSource:"ScenarioComponent.qml"
+    property string navSource:"ScenarioComponent.qml"
     spacing:scaleX(2)
     Loader{
         id:nav
-        sourceComponent: ScenarioComponent{}
+        source:navSource
         height: parent.height
         width: parent.width*.75
     }
     StyledButton{
         buttonText.text:"Advanced"
-        visible: manager.currentScreen === "Screen_1.qml"
+        opacity: manager.currentScreen === "Screen_1.qml" ? 1 : 0
     }
     StyledButton {
         id: exit_label
         buttonText.text: qsTr("Exit")
         hitArea.onReleased: manager.exitApp()
-        visible:manager.currentScreen ==="Screen_1.qml"
+        opacity:manager.currentScreen ==="Screen_1.qml" ? 1 : 0
     }
     StyledButton {
         id: home_label
         buttonText.text: qsTr("Home")
         hitArea.onReleased: manager.gotoQScreen("Screen_1.qml")
-        visible: manager.currentScreen !=="Screen_1.qml"
+        opacity: manager.currentScreen !=="Screen_1.qml" ? 1 : 0
     }
     StyledButton{
         id:media_goback
