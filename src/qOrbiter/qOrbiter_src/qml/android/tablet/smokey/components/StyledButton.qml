@@ -29,7 +29,7 @@ Item{
         id:button_label
         text:"ipsum"
         isBold: false
-        font.pixelSize: textSize
+        fontSize: textSize
         anchors.centerIn: parent
         color:"antiquewhite"
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere

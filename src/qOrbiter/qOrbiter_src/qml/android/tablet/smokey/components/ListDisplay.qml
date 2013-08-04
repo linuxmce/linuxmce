@@ -18,6 +18,7 @@ ListView
         id:fp_device_rect
         height: scaleY(26)
         width: parent.width
+        property bool activated:floorplanDevices.currentIndex === index
         Component.onCompleted:  manager.getFloorplanDeviceCommands(deviceno);
         Keys.onPressed: {
             if(event.key===Qt.Key_Left){
@@ -42,13 +43,11 @@ ListView
             opacity: .75
 
         }
-
         MouseArea{
             id:mickey
             anchors.fill: parent
-            onClicked: {manager.getFloorplanDeviceCommands(deviceno); floorplanDevices.currentIndex = index}
+            onClicked: {manager.getFloorplanDeviceCommands(deviceno); floorplanDevices.currentIndex = index; chkBox.trip()}
         }
-
         Column{
             width: parent.width
             height: parent.height
@@ -56,7 +55,7 @@ ListView
             StyledText {
                 id: fpDevice_name
                 text: name
-                fontSize: headerText
+                fontSize: fp_device_rect.activated ? scaleY(5) : scaleY(8)
                 color:"white"
                 anchors.horizontalCenter: parent.horizontalCenter
             }
@@ -65,6 +64,7 @@ ListView
                 id:fp_submodel
                 width: parent.width
                 height: scaleY(8)
+                visible:fp_device_rect.activated
                 model:commandlist["commands"]
                 orientation:ListView.Horizontal
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -86,6 +86,7 @@ ListView
                 width: scaleX(75)
                 model: paramlist.length===0 ? undefined :paramlist
                 spacing:scaleX(8)
+                visible: fp_device_rect.activated
                 anchors.horizontalCenter: parent.horizontalCenter
                 orientation: ListView.Horizontal
                 clip:true
@@ -120,44 +121,17 @@ ListView
                                 fillColor: "white"
                                 text:parameters.model[index].value
                                 focus:true
-
-                                Keys.onTabPressed: {
-                                    var b= paramlist
-                                    b[index].value=stringbox.text
-                                    floorplan_devices.setDeviceParams(b, deviceno)
-                                    stringbox.text = b[index].value
-                                    console.log("updated")
-
-                                    if(activeFocus && parameters.currentIndex !== parameters.count-1){
-                                        parameters.incrementCurrentIndex()
-                                    }
-                                    else{
-                                        sendCmdBtn.send()
-                                    }
-
-                                }
-
-
                                 Keys.onPressed:
-                                    if(event.key=== Qt.Key_Enter || event.key === Qt.Key_Return){
+                                    if(event.key=== Qt.Key_Enter || event.key === Qt.Key_Return ){
                                         var b= paramlist
                                         b[index].value=stringbox.text
                                         floorplan_devices.setDeviceParams(b, deviceno)
                                         stringbox.text = b[index].value
                                         console.log("updated")
                                     }
-
-                                //                                onActiveFocusChanged: {
-                                //                                    if(text.length!==0){
-                                //                                        var b= paramlist
-                                //                                        b[index].value=stringbox.text
-                                //                                        floorplan_devices.setDeviceParams(b, deviceno)
-                                //                                        stringbox.text = b[index].value
-                                //                                        console.log("updated")
-                                //                                    }
-                                //                            }
-
-
+                                    else{
+                                        console.log(event.key)
+                                    }
                             }
                         }
 
@@ -172,14 +146,16 @@ ListView
                 }
             }
 
-            Item{
+            StyledButton{
                 id:sendCmdBtn
                 height:scaleY(6)
                 width: scaleX(6)
                 visible:floorplanDevices.currentIndex===index
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-
+                buttonText.text: qsTr("Send")
+                textSize: scaleY(8)
+                hitArea.onReleased: send()
                 function send(){
                     console.log(JSON.stringify(floorplan_devices.selectedDevices))
                     var t = paramlist
@@ -197,27 +173,8 @@ ListView
                     commandObj.to = floorplan_devices.selectedDevices
                     manager.sendDceMessage(commandObj)
                 }
-
-                Rectangle{
-                    anchors.fill: parent
-                    color: "black"
-                    radius: 5
-                }
-                StyledText{
-                    text: "Send"
-                    fontSize: scaleY(4)
-                    color:"white"
-                    font.bold: true
-                }
-
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked: {
-
-                        sendCmdBtn.send()
-                    }
-                }
             }
+
             Connections{
                 target: parameters
                 // onCountChanged:console.log("Param Model==>"+JSON.stringify(parameters.model))
@@ -227,12 +184,17 @@ ListView
         Rectangle{
             id:chkBox
             color: "red"
-            height: scaleY(5)
-            width: scaleY(5)
+            height: scaleY(8)
+            width: scaleY(8)
             radius: 2
-            border.color: activeFocus ? "white" : "red"
+            border.color: activeFocus ? "white" : "orange"
             anchors.right: parent.right
             anchors.top: parent.top
+
+            function trip(){
+                floorplan_devices.setDeviceSelection(deviceno)
+            }
+
             Rectangle{
                 id:select_indicator
                 height: selected ? parent.height  : 0
@@ -240,34 +202,15 @@ ListView
                 color:"green"
                 anchors.centerIn: parent
             }
-            Keys.onPressed: {
-                if(event.key===Qt.Key_Enter || event.key=== Qt.Key_Return){
-                    floorplan_devices.setDeviceSelection(deviceno)
-                    return;
-                } else if(event.key ===Qt.Key_Left){
-                    fp_device_rect.forceActiveFocus()
-                    return;
-                }else if(event.key === Qt.Key_Up || event.key=== Qt.Key_Down ){
-                    if(event.key===Qt.Key_Up){
-                        floorplanDevices.decrementCurrentIndex()
-                    }
-                    else if (event.key === Qt.Key_Down){
-                        floorplanDevices.incrementCurrentIndex()
-                    }
-                    return
-                }
-
-            }
 
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    parent.forceActiveFocus()
-                    floorplan_devices.setDeviceSelection(deviceno)
+                    chkBox.trip()
                 }
             }
-
         }
+
     }
 }
 
