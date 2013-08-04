@@ -1,0 +1,25 @@
+*******************************************
+* joggler-backlight-ambient-sensor-daemon *
+*******************************************
+
+Author: Thomas Cherryhomes <thom.cherryhomes@gmail.com>
+
+License: see COPYING
+
+Synopsis:
+	joggler-backlight-ambient-sensor-daemon is a daemon that listens to
+	the ambient light sensor present on an OpenPeak OpenFrame based
+	device (such as the O2 Joggler), and alters the backlight, based on
+	the amount of ambient light present in the room, brightening the
+	display as more ambient light is present; darkening the display 
+	when ambient light decreases in a room.
+
+To run:
+	The program runs as a daemon, simply run the program, e.g. as 
+	part of an init script, or in rc-local, or as part of a X
+	session script, the daemon will detach from the parent
+	appropriately.
+
+TODO:
+	* Make backlight values NOT hard coded; more intelligent.
+
