@@ -2,7 +2,8 @@ import QtQuick 1.0
 import "../components"
 Item{
     id:screen_x_root
-    anchors.fill: parent
+   height: parent.height
+   width: parent.width
 
     Rectangle{
         id:mask
