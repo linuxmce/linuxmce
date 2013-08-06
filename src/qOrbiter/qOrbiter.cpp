@@ -1383,7 +1383,7 @@ void qOrbiter::CMD_Show_Shortcuts(string &sCMD_Result,Message *pMessage)
 void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message *pMessage)
 //<-dceag-c401-e->
 {
-    emit gotoQml("Screen_47.qml");
+
     setMediaType(iPK_MediaType);
     if (iPK_MediaType != q_mediaType.toInt())
     {
@@ -1395,12 +1395,13 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     q_mediaType = QString::number(iPK_MediaType);
 
     currentScreen= "Screen_47.qml";
-    emit commandResponseChanged("Show File List Complete, Calling request Media Grid");
+
     setGridStatus(true);
     prepareFileList(iPK_MediaType);
     requestTypes(iPK_MediaType);
     emit commandComplete();
-
+    emit gotoQml("Screen_47.qml");
+    emit commandResponseChanged("Show File List Complete, Calling request Media Grid");
 }
 
 //<-dceag-c402-b->
@@ -1960,10 +1961,11 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
 void qOrbiter::qmlSetup(int device, QString address)
 {
     m_dwPK_Device = device;
+    qWarning() << "DCE IP::" << address;
     m_sHostName = address.toStdString();
     m_sIPAddress = address.toStdString();
-    if(!m_bOrbiterConnected )
-        pingCore();
+    Disconnect();
+    pingCore();
 
 }
 
@@ -5364,7 +5366,7 @@ void qOrbiter::executeMessageSend(QVariantMap outGoing)
 
     int cmd = outGoing["command"].toInt();
     long paramCount = outGoing["count"].toInt();
-  //  long deviceTo = outGoing["to"].toInt();
+    //  long deviceTo = outGoing["to"].toInt();
 
     vector<class Message *> b;
     QStringList keys = outGoing["to"].toMap().keys();
@@ -5395,7 +5397,7 @@ void qOrbiter::executeMessageSend(QVariantMap outGoing)
     qDebug() << m->ToString().c_str();
 
     if(m->m_dwPK_Device_To != -1 && m->m_dwPK_Device_Template != -1 && m->m_dwPK_Device_Category_To !=-1)
-    this->m_pPrimaryDeviceCommand->SendMessageToRouter(m);
+        this->m_pPrimaryDeviceCommand->SendMessageToRouter(m);
 
 }
 

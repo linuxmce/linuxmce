@@ -38,7 +38,7 @@ override_dh_install:
 	# like copying a config file into bin
 	cp $(binoutput)/config.xml ./usr/bin
 	# and blindly copying the qml under usr.
-	cp -r $(binoutput)/qml ./usr/pluto/qml
+        cp -r $(binoutput)/qml/* ./usr/pluto/qml
 	cp -r $(binoutput)/imports ./usr
 	# The Qt libs we currently use. 
 	# maybe we should copy the complete lib dir...

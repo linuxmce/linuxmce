@@ -50,8 +50,6 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     totalTime=0;
     setMediaBuffer(0);
     setMediaPlaying(false);
-
-
 }
 
 void MediaManager::initializePlayer()
@@ -81,7 +79,8 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaPlayer,SIGNAL(streamIdChanged(int)), this , SLOT(setStreamId(int)));
     QObject::connect(mediaPlayer, SIGNAL(mediaIdChanged(QString)), this, SLOT(setFileReference(QString)));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()));
-    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(raise()));
+    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(showMaximized()));
+    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), filterProxy, SLOT(show()));
 
 
 
@@ -308,7 +307,6 @@ bool MediaManager::initViews(bool flipped)
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
     filterProxy->hide();
-
     return true;
 
 }
