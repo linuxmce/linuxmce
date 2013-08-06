@@ -327,8 +327,101 @@ Item {
             opacity: pageLoader .activeFocus ? .65 : .25
         }
     }
-    Dceplayer {
-        id: dceplayer
+    MediaManager{
+        id:dceplayer
+        anchors.top: parent.top
+        anchors.left:parent.left
+
+        onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
+        onActiveFocusChanged: {
+            if(activeFocus){
+                console.log("Media Player has focus")
+                pageLoader.forceActiveFocus()
+            }
+        }
+
+        Component.onCompleted: {
+            setWindowSize(manager.appHeight, manager.appWidth);
+        }
+
+        Connections{
+            target:manager
+            onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
+            onMediaPlayerIdChanged:{
+                console.log("initializing media player"+manager.mediaPlayerID)
+                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+            }
+        }
+
+        onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
+        onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
+        onMediaPlayingChanged: console.log("Media Playback status changed locally "+dceplayer.mediaBuffer)
+        onVolumeChanged:console.log(volume)
+        Keys.onVolumeDownPressed: manager.adjustVolume("-1")
+        Keys.onVolumeUpPressed:  manager.adjustVolume("+1")
+        Keys.onTabPressed: ftr.forceActiveFocus()
+
+        Keys.onPressed: {
+
+            switch(event.key){
+            case Qt.Key_Back:
+                manager.changedPlaylistPosition((mediaplaylist.currentIndex-++1));
+                break;
+            case Qt.Key_Forward:
+                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1))
+                break;
+            case 16777347: /* Keycode Track forward */
+                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1));
+                break;
+            case 16777346: /* Keycode Track Backwards */
+                manager.changedPlaylistPosition((mediaplaylist.currentIndex-1))
+                break;
+            case Qt.Key_Plus: /*Plus sign */
+                manager.adjustVolume(+1)
+                break;
+
+            case Qt.Key_VolumeMute:
+                manager.mute()
+                break;
+
+            case Qt.Key_M:
+                manager.mute()
+                break;
+
+            case Qt.Key_Minus: /* Minus Sign */
+                manager.adjustVolume(-1)
+                break;
+            case Qt.Key_T:
+                if(playlist.state==="showing")
+                    playlist.state="hidden"
+                else
+                    playlist.state = "showing"
+
+                break;
+
+            case Qt.Key_S:
+                manager.stopMedia()
+                break;
+
+            case Qt.Key_Pause:
+                manager.pauseMedia()
+                break;
+            case Qt.Key_P:
+                manager.pauseMedia()
+                break;
+
+            case Qt.Key_PageUp:
+                manager.changedPlaylistPosition(mediaplaylist.currentIndex-1)
+                break;
+
+            case Qt.Key_PageDown:
+                manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
+                break;
+            default:
+                console.log(event.key)
+                break
+            }
+        }
     }
 
     Item{
