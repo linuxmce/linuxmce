@@ -17,7 +17,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
 {
 
-    QGraphicsScene * mp_parent = new QGraphicsScene(this);
+
     setFlag(ItemHasNoContents, false);
     serverAddress = "";
     deviceNumber = -1;
@@ -42,17 +42,8 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     videoSurface->setAspectRatio(Phonon::VideoWidget::AspectRatioAuto);
     videoSurface->setScaleMode(Phonon::VideoWidget::FitInView);
 
-
-
-    filterProxy = new QGraphicsProxyWidget(this);
-    QGraphicsView *qgv_view = new QGraphicsView(mp_parent);
-    qgv_view->setViewport(new QGLWidget);
-
-    filterProxy->setWidget(videoSurface);
-    filterProxy->setAutoFillBackground(false);
-    filterProxy->hide();
-    //audioSink->setOutputDevice(outputs.first());
-
+    if(initViews(true))
+        setCurrentStatus("Color Filter Applied.");
 
 #endif
     setCurrentStatus("Window Initialized");
@@ -294,4 +285,30 @@ void MediaManager::mountDrive(int device)
     QObject::connect(mountProcess, SIGNAL(readyRead()), this, SLOT(setCurrentStatus(QString)));
     mountProcess->execute("gksudo  mount 192.168.80.1:/mnt/device/121 /mnt/device/121");
     qDebug() << mountProcess->state();
+}
+
+bool MediaManager::initViews(bool flipped)
+{
+ QGraphicsScene * mp_parent = new QGraphicsScene(this);
+    if(mediaObject->state() == Phonon::PlayingState){
+        tempTime = mediaObject->currentTime();
+        mediaObject->stop();
+        filterProxy = NULL;
+    }
+
+    if(flipped){
+        filterProxy = new ColorFilterProxyWidget(this);
+    }
+    else{
+        filterProxy = new QGraphicsProxyWidget(this);
+    }
+    QGraphicsView *qgv_view = new QGraphicsView(mp_parent);
+    qgv_view->setViewport(new QGLWidget);
+
+    filterProxy->setWidget(videoSurface);
+    filterProxy->setAutoFillBackground(false);
+    filterProxy->hide();
+
+    return true;
+
 }

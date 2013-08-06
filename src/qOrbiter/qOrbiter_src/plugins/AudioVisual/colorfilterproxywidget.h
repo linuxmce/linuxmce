@@ -32,7 +32,6 @@ protected:
         painter_inverted->end();
         painter->drawImage(0,0,invertedColor.rgbSwapped());
     }
-
     
 };
 

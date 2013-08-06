@@ -42,6 +42,7 @@ class MediaManager : public QDeclarativeItem
     Q_PROPERTY(int mediaBuffer READ getMediaBuffer WRITE setMediaBuffer NOTIFY mediaBufferChanged)
     Q_PROPERTY(qreal volume READ getVolume NOTIFY volumeChanged)
     Q_PROPERTY(bool muted READ getMuted WRITE setMuted NOTIFY mutedChanged)
+    Q_PROPERTY(bool flipColors READ getColorFlip() WRITE setColorFlip NOTIFY colorFlipChanged)
     Q_PROPERTY(QList <Phonon::AudioOutputDevice> outputs READ getAvailibleOutputs NOTIFY availibleAudioOutputsChanged())
 
     Q_PROPERTY(QString serverAddress READ getServerAddress WRITE setServerAddress NOTIFY serverAddressChanged)
@@ -95,6 +96,9 @@ public:
     int videoHeight;
     int videoWidth;
 
+    bool flipColors;
+    quint64 tempTime;
+
 #ifdef QT4
     Phonon::VideoWidget *videoSurface;
     Phonon::AudioOutput *audioSink;
@@ -110,6 +114,8 @@ signals:
     void connectedChanged();
     void currentStatusChanged();
     void totalTimeChanged();
+
+    void colorFlipChanged();
 
     void newData(QByteArray b);
 
@@ -129,6 +135,13 @@ signals:
     void availibleAudioOutputsChanged();
 
 public slots:
+
+    void setColorFlip(bool f){
+        flipColors = f;
+        if(initViews(f) )
+            emit colorFlipChanged();
+    }
+    bool getColorFlip() { return flipColors;}
 
     void setAvailibleOutputs(QList<Phonon::AudioOutputDevice> l){outputs.clear(); outputs = l; emit availibleAudioOutputsChanged(); }
     QList <Phonon::AudioOutputDevice> getAvailibleOutputs(){ return outputs;}
@@ -299,7 +312,7 @@ private:
 
 
 private slots:
-
+    bool initViews(bool flipped);
 
 };
 
