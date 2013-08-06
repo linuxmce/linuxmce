@@ -222,12 +222,12 @@ int main(int argc, char* argv[])
     localLogger.setLogLocation(QString(androidHelper.externalStorageLocation+"/LinuxMCE/"));
 #endif
 
-//#ifdef __ANDROID__ && !defined(QT5) // workaround for 'text as boxes' issue.
-//    QFont f = a.font();
-//    f.setFamily("Droid Sans");
-//    f.setBold("true");
-//    a.setFont(f);
-//#endif
+#ifdef __ANDROID__ && !defined(QT5) // workaround for 'text as boxes' issue.
+    QFont f = a.font();
+    f.setFamily("Droid Sans");
+    f.setBold("true");
+    a.setFont(f);
+#endif
 
 
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);

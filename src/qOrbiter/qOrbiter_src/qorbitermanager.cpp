@@ -282,8 +282,8 @@ void qorbiterManager::gotoQScreen(QString s)
     if(s.contains("Screen_1"))
     {
         qDebug() << "Clearing Models";
-        bool t = false;
-        //emit keepLoading(t);
+
+       emit keepLoading(false);
         emit clearModel();
         emit cancelRequests();
         emit resetFilter();
@@ -1241,7 +1241,7 @@ bool qorbiterManager::loadSkins(QUrl base)
 #ifdef QT5
         tskinModel->addSkin("default");
 #elif !QT5
-        tskinModel->addSkin("default,data,wip,lustylizard");
+        tskinModel->addSkin("default,data,wip,lustylizard,smokey");
 #endif
     }
 #elif for_android
@@ -1433,14 +1433,6 @@ bool qorbiterManager::readLocalConfig()
             if(configVariables.namedItem("firstrun").attributes().namedItem("id").nodeValue()=="true")
             {
 
-#ifdef __ANDROID__
-                currentSkin = "default";
-#elif QT5
-                currentSkin = "noir";
-#else
-                currentSkin = "default";
-#endif
-
             }
 
 
@@ -1454,12 +1446,6 @@ bool qorbiterManager::readLocalConfig()
 
             }
 
-#ifdef __ANDROID__
-            currentSkin = "default";
-#else
-            currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
-#endif
-
 
             if (currentSkin.isEmpty()){
 #ifdef __ANDROID__
@@ -1469,6 +1455,9 @@ bool qorbiterManager::readLocalConfig()
 #else
                 currentSkin = "default";
 #endif
+            }
+            else{
+                currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
             }
 
             if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)

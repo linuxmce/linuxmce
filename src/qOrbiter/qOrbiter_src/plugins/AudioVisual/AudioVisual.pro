@@ -11,7 +11,7 @@ message("$$QT_VERSION DCE-Av-Plugin")
 
 contains(QT_VERSION,5.0.*){
 	message("$$QT_VERSION DCE-Av-Plugin")
-        QT += quick1 multimedia network
+        QT += quick1 multimedia network opengl
 	DEFINES+=QT5
 }
 

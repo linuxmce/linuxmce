@@ -213,7 +213,12 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.engine()->addImportPath("assets:/imports/androidComponents");
     mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
     mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
-    mainView.setSource(QString("assets:/qml/Base.qml"));
+
+#ifdef QT5
+    mainView.setSource(QString("assets:/qml/Welcome.qml"));
+#else
+      mainView.setSource(QString("assets:/qml/Base.qml"));
+#endif
 #elif !for_harmattan
     mainView.setSource(QApplication::applicationDirPath().remove("/bin")+buildType+"/Splash.qml");
 #elif for_harmattan
@@ -341,6 +346,7 @@ void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)
 #ifdef QT_DEBUG
     qDebug() << "Prompt for response" << type;
 #endif
+    userList.clear();
     if(type==1){
         userList.clear();
         userList = pList;

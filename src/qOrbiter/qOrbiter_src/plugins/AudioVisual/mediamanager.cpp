@@ -3,7 +3,7 @@
 #include <QTcpSocket>
 #include <QProcess>
 #include <QGraphicsScene>
-
+#include <QtOpenGL/QGLWidget>
 #include <QGraphicsView>
 using namespace DCE;
 
@@ -17,6 +17,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
 {
 
+    QGraphicsScene * mp_parent = new QGraphicsScene(this);
     setFlag(ItemHasNoContents, false);
     serverAddress = "";
     deviceNumber = -1;
@@ -40,11 +41,12 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
 
     videoSurface->setAspectRatio(Phonon::VideoWidget::AspectRatioAuto);
     videoSurface->setScaleMode(Phonon::VideoWidget::FitInView);
-    // layout = new QVBoxLayout();
-    // layout->addWidget(videoSurface);
-    //  window->setLayout(layout);
-    filterProxy = new QGraphicsProxyWidget(this);
 
+
+
+    filterProxy = new QGraphicsProxyWidget(this);
+    QGraphicsView *qgv_view = new QGraphicsView(mp_parent);
+    qgv_view->setViewport(new QGLWidget);
 
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
@@ -57,6 +59,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     totalTime=0;
     setMediaBuffer(0);
     setMediaPlaying(false);
+
 
 }
 
