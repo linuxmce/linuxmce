@@ -1,4 +1,10 @@
-lmce-asterisk (0+0.3.3-3ubuntu4) precise; urgency=low
+lmce-asterisk (0+0.3.3-4) precise; urgency=low
+
+  * Added qualify=5000 to orbiter embedded phones
+
+ -- Serge Wagener <serge@linuxmce.org>  Wed, 31 Jul 2013 12:57:00 +0200
+
+ lmce-asterisk (0+0.3.3-3ubuntu4) precise; urgency=low
 
   * Fixes a lot of simplephone problems due to local channel
     optimizations

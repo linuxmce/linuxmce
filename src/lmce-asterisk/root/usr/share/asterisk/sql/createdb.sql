@@ -182,7 +182,7 @@ CREATE TABLE IF NOT EXISTS `sip_devices` (
   `language` char(2) DEFAULT NULL,
   `mailbox` varchar(50) DEFAULT NULL,
   `pickupgroup` varchar(10) DEFAULT NULL,
-  `qualify` char(3) DEFAULT 'no',
+  `qualify` char(5) DEFAULT 'no',
   `regexten` varchar(80) DEFAULT NULL,
   `rtptimeout` char(3) DEFAULT NULL,
   `rtpholdtimeout` char(3) DEFAULT NULL,
