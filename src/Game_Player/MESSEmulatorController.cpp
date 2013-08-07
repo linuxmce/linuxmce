@@ -160,7 +160,7 @@ namespace DCE
       {
 	m_pEmulatorModel->m_sState = "1";
 
-	string sPath = "/home/mamedata/sta/"+getRomFromSlot();
+	string sPath = "/home/mamedata/sta/"+getSystemFromSlot();
 	string sSource = sPath + "/" + m_pEmulatorModel->m_sMediaPosition;
 	string sDest = sPath + "/1.sta";
 	
