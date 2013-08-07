@@ -16,7 +16,7 @@ function dynamicDNS($output, $dbADO) {
 		"OrgDNS.org account-configuration"	=> "protocol=dyndns2,server=www.orgdns.org,use=web,web=members.orgdns.org/nic/ip",
 		"DnsPark.com"				=> "protocol=dnspark,use=web,web=ipdetect.dnspark.com,web-skip='Current Address:'",
 		"NameCheap (namecheap.com)"		=> "protocol=namecheap,server=dynamicdns.park-your-domain.com",
-		"No-IP (noip.com)"		=> "protocol=noip,server=dynupdate.no-ip.com/nic/update"
+		"No-IP (noip.com)"		=> "protocol=noip,server=dynupdate.no-ip.com"
 	);
 
 	$out='';
