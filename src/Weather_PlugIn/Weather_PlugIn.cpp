@@ -1,0 +1,298 @@
+/*
+     Copyright (C) 2013 LinuxMCE
+
+     www.linuxmce.org
+
+
+     This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+     This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+     of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+     See the GNU General Public License for more details.
+
+*/
+//<-dceag-d-b->
+#include "Weather_PlugIn.h"
+#include "DCE/Logger.h"
+#include "PlutoUtils/FileUtils.h"
+#include "PlutoUtils/StringUtils.h"
+#include "PlutoUtils/Other.h"
+
+#include <iostream>
+using namespace std;
+using namespace DCE;
+
+#include "Gen_Devices/AllCommandsRequests.h"
+//<-dceag-d-e->
+
+#include "DCERouter.h"
+#include "Orbiter_Plugin/Orbiter_Plugin.h"
+#include "pluto_main/Database_pluto_main.h"
+#include "pluto_main/Table_CommandGroup.h"
+#include "pluto_main/Table_CommandGroup_Room.h"
+#include "pluto_main/Define_Array.h"
+#include "pluto_main/Define_DeviceTemplate.h"
+#include "pluto_main/Define_DataGrid.h"
+#include "pluto_main/Define_DeviceCategory.h"
+#include "pluto_main/Define_Command.h"
+#include "pluto_main/Define_CommandParameter.h"
+#include "pluto_main/Define_Event.h"
+#include "pluto_main/Define_EventParameter.h"
+#include "pluto_main/Define_FloorplanObjectType.h"
+#include "pluto_main/Define_FloorplanObjectType_Color.h"
+#include "PlutoUtils/HttpUtils.h"
+
+#ifdef SIM_RADAR
+#define SIM_RADAR_URL1 "http://images.weather.com/looper/archive/us_radar_plus_usen/1L.jpg"
+#define SIM_RADAR_URL2 "http://images.weather.com/looper/archive/us_radar_plus_usen/2L.jpg"
+#define SIM_RADAR_URL3 "http://images.weather.com/looper/archive/us_radar_plus_usen/3L.jpg"
+#define SIM_RADAR_URL4 "http://images.weather.com/looper/archive/us_radar_plus_usen/4L.jpg"
+#define SIM_RADAR_URL5 "http://images.weather.com/looper/archive/us_radar_plus_usen/5L.jpg"
+#endif
+
+//<-dceag-const-b->
+// The primary constructor when the class is created as a stand-alone device
+Weather_PlugIn::Weather_PlugIn(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
+	: Weather_PlugIn_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+//<-dceag-const-e->
+	,m_Weather_PlugInMutex("weather plugin")
+{
+  m_Weather_PlugInMutex.Init(NULL);
+}
+
+//<-dceag-const2-b->
+// The constructor when the class is created as an embedded instance within another stand-alone device
+Weather_PlugIn::Weather_PlugIn(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+	: Weather_PlugIn_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
+//<-dceag-const2-e->
+	,m_Weather_PlugInMutex("weather plugin")
+{
+  m_Weather_PlugInMutex.Init(NULL);
+}
+
+//<-dceag-dest-b->
+Weather_PlugIn::~Weather_PlugIn()
+//<-dceag-dest-e->
+{
+  m_dequeRadarFrames.clear();
+}
+
+//<-dceag-getconfig-b->
+bool Weather_PlugIn::GetConfig()
+{
+	if( !Weather_PlugIn_Command::GetConfig() )
+		return false;
+//<-dceag-getconfig-e->
+
+#ifdef SIM_RADAR
+	// Load 5 temporary images in from
+	string sResponse;
+	string sBuffer1,sBuffer2,sBuffer3,sBuffer4,sBuffer5;
+	sResponse=HttpGet(SIM_RADAR_URL1,&sBuffer1);
+	sResponse=HttpGet(SIM_RADAR_URL2,&sBuffer2);
+	sResponse=HttpGet(SIM_RADAR_URL3,&sBuffer3);
+	sResponse=HttpGet(SIM_RADAR_URL4,&sBuffer4);
+	sResponse=HttpGet(SIM_RADAR_URL5,&sBuffer5);
+	m_dequeRadarFrames.push_back(RadarFrame(720,486,1,sBuffer1));
+	m_dequeRadarFrames.push_back(RadarFrame(720,486,1,sBuffer2));
+	m_dequeRadarFrames.push_back(RadarFrame(720,486,1,sBuffer3));
+	m_dequeRadarFrames.push_back(RadarFrame(720,486,1,sBuffer4));
+	m_dequeRadarFrames.push_back(RadarFrame(720,486,1,sBuffer5));
+#endif
+
+	// Put your code here to initialize the data in this class
+	// The configuration parameters DATA_ are now populated
+	return true;
+}
+
+//<-dceag-reg-b->
+// This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()
+bool Weather_PlugIn::Register()
+//<-dceag-reg-e->
+{
+  m_pOrbiter_Plugin=(Orbiter_Plugin*)m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST);
+  if (!m_pOrbiter_Plugin)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Cannot find sister plugins to weather plugin");
+      return false;
+    }
+
+  RegisterMsgInterceptor((MessageInterceptorFn)(&Weather_PlugIn::DataChanged), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Outside_Temp_Changed_CONST);
+  RegisterMsgInterceptor((MessageInterceptorFn)(&Weather_PlugIn::DataChanged), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Outside_Condition_Changed_CONST);
+  
+
+  return Connect(PK_DeviceTemplate_get()); 
+}
+
+/*  Since several parents can share the same child class, and each has it's own implementation, the base class in Gen_Devices
+	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
+	can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
+//<-dceag-createinst-b->
+Weather_PlugIn_Command *Create_Weather_PlugIn(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+{
+	return new Weather_PlugIn(pPrimaryDeviceCommand, pData, pEvent, pRouter);
+}
+//<-dceag-createinst-e->
+
+/*
+	When you receive commands that are destined to one of your children,
+	then if that child implements DCE then there will already be a separate class
+	created for the child that will get the message.  If the child does not, then you will 
+	get all	commands for your children in ReceivedCommandForChild, where 
+	pDeviceData_Base is the child device.  If you handle the message, you 
+	should change the sCMD_Result to OK
+*/
+//<-dceag-cmdch-b->
+void Weather_PlugIn::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
+//<-dceag-cmdch-e->
+{
+	sCMD_Result = "UNHANDLED CHILD";
+}
+
+/*
+	When you received a valid command, but it wasn't for one of your children,
+	then ReceivedUnknownCommand gets called.  If you handle the message, you 
+	should change the sCMD_Result to OK
+*/
+//<-dceag-cmduk-b->
+void Weather_PlugIn::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
+//<-dceag-cmduk-e->
+{
+	sCMD_Result = "UNKNOWN COMMAND";
+}
+
+//<-dceag-sample-b->!
+
+void Weather_PlugIn::DumpData()
+{
+  for (map<string, string>::iterator it=m_mapWeatherData.begin(); it!=m_mapWeatherData.end(); ++it)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Key: %s, Value: %s",it->first.c_str(), it->second.c_str());
+    }
+}
+
+/**
+ * Event Callbacks
+ */
+
+bool Weather_PlugIn::DataChanged(class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo)
+{
+
+  PLUTO_SAFETY_LOCK(wm, m_Weather_PlugInMutex);
+
+  string sName = pMessage->m_mapParameters[EVENTPARAMETER_Name_CONST];
+  string sValue = pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST];
+
+  if (sName.empty() || sValue.empty())
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Refusing to change data value, name or value was empty.");
+      return false;
+    }
+
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Setting Weather Value [%s]=%s",sName.c_str(),sValue.c_str());
+  m_mapWeatherData[sName]=sValue;
+
+  DumpData();
+
+  return true;
+
+}
+
+/*
+
+	COMMANDS TO IMPLEMENT
+
+*/
+
+//<-dceag-c1116-b->
+
+	/** @brief COMMAND: #1116 - Get Weather Data */
+	/** Get Accumulated Weather Data */
+		/** @param #4 PK_Variable */
+			/** Assign Requested Data to this Orbiter Variable */
+		/** @param #19 Data */
+			/** The Requested Weather Data given Name */
+		/** @param #50 Name */
+			/** Name of Weather Data Parameter to Return, e.g. "current_temp" */
+
+void Weather_PlugIn::CMD_Get_Weather_Data(int iPK_Variable,string sName,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1116-e->
+{
+	cout << "Need to implement command #1116 - Get Weather Data" << endl;
+	cout << "Parm #4 - PK_Variable=" << iPK_Variable << endl;
+	cout << "Parm #19 - Data  (data value)" << endl;
+	cout << "Parm #50 - Name=" << sName << endl;
+
+	PLUTO_SAFETY_LOCK(wm, m_Weather_PlugInMutex);
+
+	if (sName.empty())
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_Plugin::CMD_Get_Weather_Data -Cowardly refusing to return value for empty name.");
+	    return;
+	  }
+
+	string sData = m_mapWeatherData[sName];
+	long dwPK_DeviceTo = pMessage->m_dwPK_Device_From;
+
+	if (iPK_Variable>0)
+	  {
+	    CMD_Set_Variable CMD_Set_Variable(m_dwPK_Device, dwPK_DeviceTo, iPK_Variable, sData);
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_Plugin::CMD_Get_Weather_Data - Setting variable %d, to %s",iPK_Variable, sData.c_str());
+	    SendCommand(CMD_Set_Variable);
+	  }
+
+	*pData = (char*)sData.data();
+	*iData_Size = (int)sData.size();
+}
+
+
+//<-dceag-c84-b->
+
+	/** @brief COMMAND: #84 - Get Video Frame */
+	/** Get Video Frame for Radar Video */
+		/** @param #19 Data */
+			/** The video frame */
+		/** @param #20 Format */
+			/** Format of the frame */
+		/** @param #23 Disable Aspect Lock */
+			/** Disable Aspect Ratio */
+		/** @param #41 StreamID */
+			/** The ID of the stream */
+		/** @param #60 Width */
+			/** Frame width */
+		/** @param #61 Height */
+			/** Frame height */
+
+void Weather_PlugIn::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat,string &sCMD_Result,Message *pMessage)
+//<-dceag-c84-e->
+{
+  PLUTO_SAFETY_LOCK(wm, m_Weather_PlugInMutex);
+  long dwPK_Device_From = pMessage->m_dwPK_Device_From;
+
+  map<long, deque<RadarFrame>::iterator >::iterator it = m_mapitRadarFrameDeque.find(dwPK_Device_From);
+  if (it==m_mapitRadarFrameDeque.end())
+    {
+      m_mapitRadarFrameDeque[dwPK_Device_From] = m_dequeRadarFrames.begin();
+      m_itRadarFrameDeque=m_mapitRadarFrameDeque[dwPK_Device_From];
+    }
+  else
+    {
+      m_itRadarFrameDeque=it->second;
+    }
+
+  if (m_itRadarFrameDeque == m_dequeRadarFrames.end())
+    {
+      // Loop back around.
+      m_mapitRadarFrameDeque[dwPK_Device_From] = m_dequeRadarFrames.begin();
+    }
+  else
+    {
+      m_mapitRadarFrameDeque[dwPK_Device_From] = ++m_itRadarFrameDeque;
+    }
+
+  char *cTemp = new char[m_itRadarFrameDeque->size()];
+  memcpy(cTemp,m_itRadarFrameDeque->data().data(),m_itRadarFrameDeque->size()); 
+  *pData = cTemp;
+  *iData_Size = m_itRadarFrameDeque->size();
+
+}
