@@ -34,6 +34,7 @@ function DisplayUsage() {
 	echo "  OrgDNS.org account-configuration : protocol=dyndns2,server=www.orgdns.org,use=web,web=members.orgdns.org/nic/ip"
 	echo "  DnsPark.com                      : protocol=dnspark,use=web,web=ipdetect.dnspark.com,web-skip='Current Address:'"
 	echo "  NameCheap (namecheap.com)        : protocol=namecheap,server=dynamicdns.park-your-domain.com"
+	echo "  No-IP (no-ip.com)				 : protocol=noip,server=dynupdate.no-ip.com/nic/update"
 	echo 
 
 }
