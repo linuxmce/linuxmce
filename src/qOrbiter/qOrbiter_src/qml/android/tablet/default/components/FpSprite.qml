@@ -16,8 +16,8 @@ Item {
     property string deviceType: ""
     property string imgUrl: ""
     property bool selected:floorplan_devices.getDeviceSelection(deviceNum)
-    property int itemH:scaleY(3)
-    property int itemW: scaleY(3)
+    property int itemH:scaleY(5)
+    property int itemW: scaleY(5)
     property double iconScale: 1.5
 
     Connections{
@@ -32,31 +32,35 @@ Item {
         sprite.border.width = selected ? 1 : 0
     }
 
-//    Image {
-//        id: fpDevice_image
-//        source: "../img/floorplanitems/"+deviceType+".png"
-//        sourceSize:Qt.size(scaleY(5), scaleY(5))
-//        anchors.centerIn: parent
-//        cache: false
-//    }
-
-    Text {
-        id: device_number
-        text: deviceNum
+    Image {
+        id: fpDevice_image
+        source: "../img/floorplanitems/"+deviceType+".png"
+        sourceSize:Qt.size(scaleY(5), scaleY(5))
         anchors.centerIn: parent
-        font.pixelSize: scaleY(2)
+        cache: false
     }
+
+
 
     Rectangle{
         id:sprite
         height: parent.height - 1
         width: parent.width - 1
         color: "transparent"
-        opacity: 0
-        border.color: "white"
-        border.width:sprite.border.width = selected ? 1 : 0
-        Component.onCompleted: PropertyAnimation {target:sprite ; property:"opacity"; to: 1; duration:1500 }
+        radius:5
+        opacity: .25
+        border.color:selected ? "red" : "black"
+        border.width:sprite.border.width = selected ? 4 : 2
+        Component.onCompleted: PropertyAnimation {target:sprite ; property:"opacity"; to: .50; duration:1500 }
         scale: iconScale
+    }
+
+    Text {
+        id: device_number
+        text: deviceNum
+        anchors.centerIn: parent
+        font.pixelSize: scaleY(3)
+        color:selected ? "pink" : "white"
     }
 
     Connections{

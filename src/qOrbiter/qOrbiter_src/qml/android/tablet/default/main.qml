@@ -33,13 +33,13 @@ Item {
 
     Rectangle{
         anchors.fill: parent
-        gradient: Gradient{
-            GradientStop { position: .10; color: "black" }
-            GradientStop { position: 0.65; color: "#657383" }
-            GradientStop { position: .70; color: "black" }
-        }
+        color:"black"
     }
 
+    Image{
+        source:"img/bg.jpg"
+        anchors.fill: parent
+    }
 
     signal close()
     signal changeScreen(string s)
@@ -60,10 +60,6 @@ Item {
         target: manager
         onOrientationChanged: checkLayout()
     }
-
-
-
-
 
     function scaleX(x){
         return x/100*manager.appWidth

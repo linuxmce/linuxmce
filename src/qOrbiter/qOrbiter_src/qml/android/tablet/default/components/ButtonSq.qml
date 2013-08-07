@@ -1,8 +1,6 @@
 import QtQuick 1.0
 
-Rectangle{
-
-    color: "transparent"
+Item{
     height: style.stdbuttonw
     width: style.stdbuttonw
     property alias buttontext: buttonLabel.text
@@ -12,39 +10,44 @@ Rectangle{
     property alias buttontextitalic: buttonLabel.font.italic
     property alias buttontextzindex: buttonLabel.z
     property alias buttonsqradius:  buttonBase.radius
-
-
+    clip:true
 
     Rectangle {
         id:buttonBase
-        color:style.button_system_color
-        height: parent.height
-        width: parent.width
+        color:ms.pressed ? "white": "darkblue"
         border.width: 2
-        border.color: style.highlight1
+        border.color: "white"
         radius: 5
+        opacity: ms.pressed ? 1 : .35
+        anchors.fill: parent
+
+        Behavior on opacity {
+            PropertyAnimation{
+                duration:500
+            }
+        }
+
+        Behavior on color{
+            PropertyAnimation{
+                duration: 500
+            }
+        }
+    }
 
         Text {
             id: buttonLabel
-            x: 50
-            y: 50
-            width: -1
-            height: 0
             text:"null ipsum delorium"
-            font.pixelSize: 14
+            font.pixelSize: scaleY(5)
             verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignHCenter
-            anchors.fill: parent
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.margins: 5
-            font.family: "Droid Sans"
+            horizontalAlignment: Text.AlignHCenter        
+            anchors.margins: 5           
+            font.bold: false
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             // elide: "ElideRight"
-            color:"black"
-            z:1
+            color:"white"
         }
         MouseArea{
+            id:ms
             anchors.fill: buttonLabel
             hoverEnabled: true
             onEntered: {
@@ -60,4 +63,4 @@ Rectangle{
             }
         }
     }
-}
+

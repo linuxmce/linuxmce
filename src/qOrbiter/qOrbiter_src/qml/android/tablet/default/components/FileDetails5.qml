@@ -4,7 +4,7 @@ import QtQuick 1.0
 Rectangle {
     id: filedetailrect
     width: scaleX(100)
-    height: 0
+    height: scaleY(100)
     anchors.centerIn: parent
     color: style.highlight2
     clip: true

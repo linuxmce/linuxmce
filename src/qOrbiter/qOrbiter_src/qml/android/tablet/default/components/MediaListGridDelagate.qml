@@ -109,8 +109,8 @@ Item
                 when:manager.q_attributetype_sort !== ("52") && manager.q_subType !==("2"||"3") && manager.q_mediaType !== "4"
                 PropertyChanges {
                     target: mainItem
-                    width: scaleX(21);
-                    height: scaleY(21)
+                    width: scaleX(25);
+                    height: scaleY(25)
                     color: "transparent"
                 }
             },
@@ -119,8 +119,8 @@ Item
                 when:manager.q_attributetype_sort === "12"
                 PropertyChanges {
                     target: mainItem
-                    width: scaleX(21);
-                    height: scaleY(21)
+                    width: scaleX(33);
+                    height: scaleY(20)
                     color: "transparent"
                 }
 
@@ -130,8 +130,8 @@ Item
                 when:manager.q_subType === "2"
                 PropertyChanges {
                     target: mainItem
-                    width: scaleX(16);
-                    height: scaleY(42)
+                    width: scaleX(20);
+                    height: scaleY(50)
                     color: "transparent"
                 }
                 PropertyChanges {
@@ -149,8 +149,8 @@ Item
                 when:manager.q_attributetype_sort === "52"
                 PropertyChanges {
                     target: mainItem
-                    width: scaleX(14);
-                    height: scaleY(38)
+                    width: scaleX(20);
+                    height: scaleY(50)
                     color: "transparent"
                 }
             },
@@ -159,8 +159,8 @@ Item
                 when: manager.q_mediaType === "4"
                 PropertyChanges {
                     target: mainItem
-                    width: scaleX(17);
-                    height: scaleY(28)
+                    width: scaleX(25);
+                    height: scaleY(25)
                     color: "transparent"
                 }
             }

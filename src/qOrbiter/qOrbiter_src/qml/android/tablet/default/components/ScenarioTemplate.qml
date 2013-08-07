@@ -15,7 +15,7 @@ Rectangle{
     property int floorplantype
     property variant scenariomodel
     property alias rowFillImage: imgFill.source
-    property alias rowFillColor: rectFill
+    property string rowFillColor: "darkblue"
 
 
     Rectangle {
@@ -41,19 +41,13 @@ Rectangle{
             }
         }
     }
+
     Loader{
         id:popupButton
-        Component.onCompleted: {
-            if(floorplantype===3)
-                source = "NowPlayingButton.qml"
-            anchors.left =templatefloorplan.right
+        anchors.verticalCenter: parent.verticalCenter
+        source:floorplantype===3 ? "NowPlayingButton.qml" :""
+        anchors.left:templatefloorplan.right
 
-        }
-    }
-    DropShadow{
-        sourceItem: rectFill
-        anchors.fill: rectFill
-        color:"black"
     }
 
     Image{
@@ -63,56 +57,61 @@ Rectangle{
         Component.onCompleted: {if(source==="") rectFill.visible = false}
     }
 
-    Rectangle{
-        id:rectFill
-        anchors.fill: scenarioview
-        color: "skyblue"
-        opacity:.25
-    }
-
     ListView{
         id: scenarioview
-        width: parent.width
+        width: parent.width-popupButton.width
+        contentWidth:  (count+1) * scaleX(20)
         height: parent.height
         model: scenariomodel
         spacing: 5
         orientation:ListView.Horizontal
         anchors.left:popupButton.source !== "" ? popupButton.right: templatefloorplan.right
         clip:true
-        delegate: Rectangle{
-            height:parent.height
-            width:scaleX(20)
-            color: "transparent"
-            ListItem{
+        delegate:
+            Item{
                 id:scenariodelegate
                 width:scaleX(20)
                 height:parent.height
                 enabled:true
                 clip:true
-                DropShadow{
-                    sourceItem: sT
-                    anchors.fill: sT
-                    color: "darkgrey"
-                    opacity:.5
-                    blur:.75
-                    transform: Translate{x:2}
 
+                Rectangle{
+                    anchors.fill: parent
+                    color:ms.pressed ? "white" : rowFillColor
+                    opacity: ms.pressed ? 1 : .25
+                    border.color: "white"
+                    border.width: 2
+
+                    Behavior on color{
+                        PropertyAnimation{
+                            duration: 500
+                        }
+                    }
+
+                    Behavior on opacity {
+                        PropertyAnimation{
+                            duration:500
+                        }
+                    }
                 }
+
                 StyledText{
                     id:sT
                     text:title
                     fontSize: scaleY(4.5)
-                    height:parent.height
-                    width: parent.width
                     anchors.centerIn: parent
                     isBold: true
+                    color:"white"
                 }
-                onClicked: manager.execGrp(params)
+
+                MouseArea{
+                    id:ms
+                    anchors.fill: parent
+                    onClicked: manager.execGrp(params)
+                }
             }
-        }
         interactive: true
     }
-
 }
 
 

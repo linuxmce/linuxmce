@@ -76,16 +76,12 @@ Rectangle {
 
 
 
-    Rectangle{
+    Item{
         id:mainRect
         objectName: "main_rect"
-        height: scaleY(80)
-        width:scaleX(80)
-        border.color: style.highlight1
-        border.width: scaleX(1) *.25
-        radius: 10
-        anchors.centerIn: parent
-        color:style.lighthighlight
+        height: scaleY(95)
+        width:scaleX(95)
+        anchors.centerIn: parent  
 
         Image {
             objectName: "floorplan_image"
@@ -93,7 +89,6 @@ Rectangle {
             source: ""
             anchors.centerIn: parent
             scale: floorplanimage.height > floorplanimage.width ? .5 : .75
-
         }
 
         Rectangle

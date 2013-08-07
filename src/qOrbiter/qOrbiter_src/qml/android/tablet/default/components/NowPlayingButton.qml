@@ -1,18 +1,59 @@
 import QtQuick 1.0
 
-
-ButtonSq {
-    id: now_playing
-    anchors.top: parent.top
-    anchors.topMargin: scaleY(2)
+Item{
+    id:nowplayingbutton
     visible: dcenowplaying.b_mediaPlaying ? true : false
-    height: style.stdbuttonh
-    width: style.stdbuttonw
-    radius: style.but_smooth
-    buttontext: dcenowplaying.qs_mainTitle +" \n " + dceTimecode.qsCurrentTime
-    
-    MouseArea{
+    width:!visible ? 0 :scaleX(20)
+    height:scaleY(16)
+
+    clip:true
+
+    Rectangle{
         anchors.fill: parent
-        onClicked:manager.gotoQScreen(dcenowplaying.qs_screen)
+        color:ms.pressed ? "white" : "darkblue"
+        opacity: ms.pressed ? 1 : .25
+        border.color: "white"
+        border.width: 2
+
+        Behavior on color{
+            PropertyAnimation{
+                duration: 500
+            }
+        }
+
+        Behavior on opacity {
+            PropertyAnimation{
+                duration:500
+            }
+        }
+    }
+
+    StyledText{
+        id:sT
+        text:dcenowplaying.qs_mainTitle
+        fontSize: scaleY(3.5)
+        anchors.top: parent.top
+        isBold: true
+        height: parent.height-tm.height
+        color:"white"
+        width: parent.width
+        wrapMode: "WrapAtWordBoundaryOrAnywhere"
+        elide:Text.ElideRight
+    }
+    StyledText{
+        id:tm
+        text: dceTimecode.qsCurrentTime
+        fontSize: scaleY(3.5)
+        anchors.bottom: parent.bottom
+        isBold: true
+        color:"white"
+    }
+
+    MouseArea{
+        id:ms
+        anchors.fill: parent
+       onClicked:manager.gotoQScreen(dcenowplaying.qs_screen)
     }
 }
+
+
