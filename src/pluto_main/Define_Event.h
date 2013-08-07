@@ -89,7 +89,8 @@
 #define EVENT_Contact_List_Presence_Cha_CONST 88
 #define EVENT_Skype_Ring_CONST 89
 #define EVENT_Media_Position_Changed_CONST 90
-#define EVENT_Weather_Temperature_Chang_CONST 91
+#define EVENT_Outside_Temp_Changed_CONST 91
+#define EVENT_Outside_Condition_Changed_CONST 92
 
 #define EVENT_TABLE "Event"
 #define EVENT_PK_EVENT_FIELD "PK_Event"
