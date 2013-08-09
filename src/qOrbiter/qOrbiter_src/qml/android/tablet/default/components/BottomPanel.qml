@@ -2,32 +2,40 @@ import QtQuick 1.0
 import "../js/ComponentLoader.js" as MyJs
 
 
-Rectangle {
+Item {
     id:advanced_panel
     width: manager.appWidth
     height: style.widebuttonh + scaleY(4)
-    color:"transparent"
 
-    Image {
-        id: panelbg
-        source: "../img/ui3/footer.png"
-        height: parent.height
-        width: parent.width
-        opacity: .85
+    Rectangle{
+        anchors.fill: parent
+        color: "darkred"
+        opacity: .35
+        border.color: "white"
+        border.width: 2
+
     }
+
+//    Image {
+//        id: panelbg
+//        source: "../img/ui3/footer.png"
+//        height: parent.height
+//        width: parent.width
+//        opacity: .85
+//    }
 
     Row{
         id:advancedrow
         height:childrenRect.height +5
         width: childrenRect.width
-        anchors.centerIn: panelbg
+        anchors.centerIn: advanced_panel
         spacing:10
         clip: false
 
         AdvancedButton {          
             id: buttonsq1
             buttontext: "Advanced"
-            radius: 5
+            buttonsqradius: 5
             MouseArea{
                 anchors.fill: parent
                 onClicked:gotoQScreen("Screen_44.qml")
@@ -37,7 +45,7 @@ Rectangle {
         AdvancedButton {
             id: buttonsq2                     
             buttontext: "Power"
-            radius: 5
+            buttonsqradius: 5
             MouseArea{
                 anchors.fill: parent
                 onClicked:componentLoader.source="Power.qml"
@@ -48,7 +56,7 @@ Rectangle {
         AdvancedButton {
             id: buttonsq3
             buttontext: "Sleeping Menu"
-            radius: 5
+            buttonsqradius: 5
 
             MouseArea{
                 anchors.fill: parent
@@ -63,6 +71,7 @@ Rectangle {
         AdvancedButton{
             id:roombutton           
             buttontext: roomList.currentEA
+            buttonsqradius:5
             MouseArea{
                 anchors.fill: parent
                 onClicked:componentLoader.source="RoomSelector.qml"
@@ -81,6 +90,7 @@ Rectangle {
         AdvancedButton{
             id:exit           
             buttontext: "Exit Orbiter"
+            buttonsqradius:5
             MouseArea{
                 anchors.fill: exit
                 onClicked: manager.closeOrbiter()

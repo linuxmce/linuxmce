@@ -1,8 +1,8 @@
 import QtQuick 1.0
 
-Rectangle{
-
-    color: "transparent"
+Item{
+    id:advancedRoot
+    property string color: "transparent"
     height: style.stdbuttonh
     width: style.stdbuttonw
     property alias buttontext: buttonLabel.text
@@ -12,57 +12,65 @@ Rectangle{
     property alias buttontextitalic: buttonLabel.font.italic
     property alias buttontextzindex: buttonLabel.z
     property alias buttonsqradius:  buttonBase.radius
-
-
+    property string imgSource:""
 
     Rectangle {
         id:buttonBase
-        color: "transparent"
+        color: ms.pressed ? "white" : "darkblue"
         height: parent.height
         width: parent.width
-
-        Image {
-            id: buttonbg
-            source: "../img/ui3/linuxmcewidebutton.png"
-            height: parent.height
-            width: parent.width
-            opacity: .5
+        opacity:ms.pressed ? .65 : .45
+        border.color: "white"
+        border.width: 2
+        radius:10
+        Behavior on color {
+            PropertyAnimation{
+                duration:500
+            }
         }
 
-        Text {
-            id: buttonLabel
-            x: 50
-            y: 50
-            width: -1
-            height: 0
-            text:"null ipsum delorium"
-            font.pixelSize: scaleY(2)
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignHCenter
-            anchors.fill: parent
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.margins: 5
-            font.family: "Droid Sans"
-            wrapMode: "WrapAtWordBoundaryOrAnywhere"
-            // elide: "ElideRight"
-            color:"black"
-            z:1
+        Behavior on opacity {
+            PropertyAnimation{
+                duration:500
+            }
         }
-        MouseArea{
-            anchors.fill: buttonLabel
-            hoverEnabled: true
-            onEntered: {
-                buttonbg.opacity = 1
-                buttonLabel.color = style.lighttext
-                buttonLabel.font.capitalization = Font.AllUppercase
-            }
 
-            onExited: {
-                buttonbg.opacity = .85
-                buttonLabel.font.capitalization = Font.Normal
-                buttonLabel.color = "black"
-            }
+
+    }
+    Image {
+        id: buttonbg
+        source:imgSource
+        height: parent.height
+        width: parent.width
+        opacity: .5
+    }
+
+    StyledText {
+        id: buttonLabel
+        text:"null ipsum delorium"
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+        anchors.fill: parent
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.margins: 5
+        wrapMode: "WrapAtWordBoundaryOrAnywhere"
+        color:"White"
+
+    }
+
+    MouseArea{
+        id:ms
+        anchors.fill: advancedRoot
+        hoverEnabled: true
+        onEntered: {
+            buttonLabel.color = style.lighttext
+            buttonLabel.font.capitalization = Font.AllUppercase
+        }
+
+        onExited: {
+            buttonLabel.font.capitalization = Font.Normal
+            buttonLabel.color = "white"
         }
     }
 }

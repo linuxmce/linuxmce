@@ -1,80 +1,123 @@
-import QtQuick 1.0
-import com.nokia.android 1.1
+import QtQuick 1.1
 
-import "../components"
-
-//roomsList
-// text: title + ":" + intRoom + ", In EA: " + entertain_area
-// setActiveRoom(intRoom, entertain_area)
-/*
-                            setActiveRoom(intRoom, entertain_area)
-                            rooms.state = "Default"
-                            currentroom = title
-                             roombutton.buttontext = title
-  */
-
-Rectangle {
-    id:roomselectorrect
-    height:manager.appHeight
+Item {
+    id:roomSelector
     width: manager.appWidth
-    color: "transparent"
-    anchors.centerIn: parent
-    MouseArea{
-        anchors.fill: parent
-        hoverEnabled: true
+    height: manager.appHeight
+    onActiveFocusChanged: if(activeFocus) room_list.forceActiveFocus()
+    focus:true
+    Keys.onEscapePressed: close()
+    function close(){
+        opacity = 0
+        while(opacity !==0){
+
+        }
+        pageLoader.forceActiveFocus();
+        overLay.source = ""
+    }
+
+    Component.onCompleted: {
+        westWing.opacity = .85
     }
 
     Rectangle{
-        anchors.fill: parent
-        opacity: .85
+        id:westWing
+        height: roomSelector.height
+        width: roomSelector.width
         color:"black"
-    }
-    StyledText{
-        anchors.bottom: roomsource.top
-        fontSize: scaleY(7)
-        text: qsTr("Please Select Location")
-        color: "white"
+        opacity: 0
+
+        Behavior on opacity {
+            PropertyAnimation{
+                duration: 750
+            }
+        }
     }
 
     ListView{
-        id:roomsource
-        anchors.centerIn: parent
-        height: scaleY(45)
-        width: manager.appWidth
-        orientation: ListView.Horizontal
-        spacing: 5
-        clip: true
+        id:room_list
+        height: scaleY(85)
+        width: parent.width
         model: roomList
         delegate: Item{
-            height: scaleY(35)
-            width: scaleX(20)
-            ListItem{
-                anchors.fill: parent
-                Image {
-                    id: roomimage
-                    source: room_image
-                    fillMode: Image.PreserveAspectFit
-                    anchors.centerIn: parent
-                    anchors.fill: parent
-                    opacity: .50
+            height: scaleY(25)
+            width:parent.width
+            onActiveFocusChanged: {
+                if(activeFocus){
+                    innerList.forceActiveFocus()
+                    console.log("Room List Item Parent index ==>"+index+ " gained focus, setting to child model view.")
+                   }
+            }
+
+            StyledText{
+                id:rm_lbl
+                height: scaleY(16)
+                width: scaleX(18)
+                anchors.left: parent.left
+                font.bold:index === room_list.currentIndex
+                text: name
+                color:"white"
+            }
+
+            ListView{
+                id:innerList
+                height: scaleY(25)
+                width:parent.width
+                anchors.left: rm_lbl.right
+
+                model:ea_list
+                onActiveFocusChanged: {
+                    if(activeFocus){
+                        console.log("Inner model item ==>"+innerList.model[index].ea_name+ "gained focus.")
+                    }
+                    else{
+                        currentIndex = -1
+                    }
                 }
-                StyledText{
-                    text: "Name:"+ name + "\n EA: " + ea_name
-                    fontSize: scaleY(4)
-                    isBold: true
-                    anchors.centerIn: parent
-                    color: "white"
-                }
-                onClicked: {
-                    currentroom = name
-                    setActiveRoom(intRoom, entertain_area)
-                    //roombutton.buttontext = title
-                    componentLoader.source=""
+
+                orientation:ListView.Horizontal
+                spacing:scaleX(2)
+                Keys.onDownPressed: room_list.incrementCurrentIndex()
+                Keys.onUpPressed:  room_list.decrementCurrentIndex()
+
+                delegate:Item{
+                    height: scaleY(16)
+                    width: scaleX(18)
+                    Rectangle{
+                        anchors.fill: parent
+                        color: index === innerList.currentIndex ? style.mainColor : "grey"
+                        radius: 5
+                        opacity:index === innerList.currentIndex ? .65 : .50
+                    }
+
+                    StyledText{
+                        text: innerList.model[index].ea_name
+                        color:"white"
+                        font.bold: index === innerList.currentIndex
+                        fontSize: headerText
+                        anchors.centerIn: parent
+
+                    }
+                    Keys.onPressed: {
+                        if(event.key === Qt.Key_Enter || event.key === Qt.Key_Return){
+                            manager.setActiveRoom(innerList.model[index].room, innerList.model[index].ea_number);
+                            manager.setBoundStatus(true)
+                            close()
+                        }
+                        else{
+                            console.log(event.key)
+                        }
+                    }
+                    MouseArea{
+                        anchors.fill: parent
+                        onReleased: {
+                            manager.setActiveRoom(innerList.model[index].room, innerList.model[index].ea_number);
+                            manager.setBoundStatus(true)
+                            close()
+                        }
+                    }
                 }
             }
         }
-
-        flickableDirection: "HorizontalFlick"
     }
-
 }

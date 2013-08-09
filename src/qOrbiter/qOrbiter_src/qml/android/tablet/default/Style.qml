@@ -63,8 +63,8 @@ QtObject{
     //icon sizes
     property int iconHeight: 9
     property int iconWidth: 9
-    property int  stdbuttonh: !b_orientation ? scaleY(13) : scaleY(8)
-    property int  stdbuttonw: !b_orientation ? scaleX(8) :scaleX(13)
+    property int  stdbuttonh: !b_orientation ? scaleY(13) : scaleY(9)
+    property int  stdbuttonw: !b_orientation ? scaleX(8) :scaleX(17)
     property int widebuttonw: scaleX(10)
     property int widebuttonh: scaleY(10)
     property int mediabuttonH:!b_orientation ? scaleY(13) : scaleY(12)
