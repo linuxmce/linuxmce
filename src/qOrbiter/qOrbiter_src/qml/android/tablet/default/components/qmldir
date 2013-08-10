@@ -3,6 +3,7 @@ RoomSelectorDelegate RoomSelectorDelegate.qml
 HomeSecurityRow HomeSecurityRow.qml
 GenreFilter GenreFilter.qml
 AlertBox AlertBox.qml
+ExitConfirm ExitConfirm.qml
 SkinListDelegate SkinListDelegate.qml
 Timers Timers.qml
 Floorplan Floorplan.qml

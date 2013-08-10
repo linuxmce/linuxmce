@@ -13,6 +13,7 @@ Item {
     Item{
         height: parent.height/2
         width: parent.width /2
+        anchors.centerIn: parent
         Rectangle{
             anchors.fill: parent
             color:"darkred"

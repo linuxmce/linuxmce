@@ -7,12 +7,24 @@ Item {
     width:manager.appWidth
     height:manager.appHeight
     focus:true
-   Connections{
-   target:manager
-   onBackButtonPressed:console.log("Go Back Button!")
-   }
-   Keys.onPressed: if(event.key ===Qt.Key_MediaPrevious) {console.log("back!")} else console.log(event.key)
+    Connections{
+        target:manager
+        onBackButtonPressed:console.log("Go Back Button!")
+    }
+    Keys.onPressed: if(event.key ===Qt.Key_MediaPrevious) {
+                        executeBack();
+                    } else if(event.key === Qt.Key_Menu){
+                        console.log("menu button!")
+                    } else if(event.key===Qt.Key_VolumeUp){
+                        console.log("Volume up button!")
+                    } else if (event.key===Qt.Key_VolumeDown){
+                        console.log("Volume Down button!")
+                    }
+                    else {console.log(event.key)}
 
+    function executeBack(){
+        componentLoader.source="components/ExitConfirm.qml"
+    }
 
     //    Rectangle{
     //        anchors.fill: parent
