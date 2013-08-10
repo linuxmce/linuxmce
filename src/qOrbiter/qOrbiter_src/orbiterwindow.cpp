@@ -99,6 +99,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #if defined (GLENABLED) || (QT5)
     fileReader = new FileReader();
     mainView.rootContext()->setContextProperty("fileReader", fileReader);
+
 #endif
 
 #if (QT5)
