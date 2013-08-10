@@ -43,8 +43,6 @@ ListModel::ListModel(gridItem* prototype, QObject* parent) :
     clearing = false;
     clear();
     setTotalPages(0);
-
-
 }
 
 int ListModel::rowCount(const QModelIndex &parent) const
@@ -71,17 +69,29 @@ QHash<int, QByteArray> ListModel::roleNames() const
 }
 
 ListModel::~ListModel() {
-    delete m_prototype;
-    clear();
+    beginResetModel();
+    if(resetInternalData()){
+        setProgress(0.0);
+        totalcells = 0;
+        loadingStatus = false;
+        progress = 0;
+        setTotalPages(0);
+        QApplication::processEvents(QEventLoop::AllEvents);
+        endResetModel();
+        emit modelReset();
+        QApplication::processEvents(QEventLoop::AllEvents);
+        delete m_prototype;
+    }
+
 }
 
 void ListModel::appendRow(gridItem *item)
 {
     setLoadingStatus(true);
     // qDebug() << "adding" << m_list.count()+1;
-//    gridItem * copiedItem = new gridItem(item->id(), item->name(), item->path(), item->index(), this );
+    //    gridItem * copiedItem = new gridItem(item->id(), item->name(), item->path(), item->index(), this );
     appendRows(QList<gridItem*>() << new gridItem(item->id(), item->name(), item->path(), item->index(), this ));
-  //  item->destruct();
+    //  item->destruct();
 }
 
 void ListModel::appendRows(const QList<gridItem *> &items)
@@ -90,7 +100,7 @@ void ListModel::appendRows(const QList<gridItem *> &items)
     foreach(gridItem *item, items) {
         QObject::connect(item, SIGNAL(destroyed()), this, SLOT(itemDeleted()),Qt::QueuedConnection);
         QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
-        m_list.append(item);       
+        m_list.append(item);
     }
 
     endInsertRows();
@@ -132,34 +142,27 @@ void ListModel::handleItemChange()
 void ListModel::reset()
 {
     clearing = true;
-   // QApplication::processEvents(QEventLoop::AllEvents);
+
     emit modelAboutToBeReset();
     beginResetModel();
-    resetInternalData();
-    setProgress(0.0);
-   // QApplication::processEvents(QEventLoop::AllEvents);
-    endResetModel();
-    emit modelReset();
-   // QApplication::processEvents(QEventLoop::AllEvents);
-    clearing = false;
+    if(resetInternalData()){
+        setProgress(0.0);
+        endResetModel();
+        emit modelReset();
+        clearing = false;
+    }
+ QApplication::processEvents(QEventLoop::AllEvents);
 }
 
 bool ListModel::resetInternalData()
 {
     qDebug("Resetting Media Listmodel data");
-    int total = m_list.size();
-    int counter=0;
-
-    QList<gridItem*>::iterator i;
-    for( i = m_list.begin(); i !=m_list.end(); ++i){
-        gridItem* pItem = m_list.takeFirst();
-      //  qDebug() <<"removing item ::" <<counter << " of " << total;
-       // qDebug() << "item thread ::" << pItem->thread() << " Parent thread::" << this->thread();
-        pItem->destruct();
-        counter++;
+    qDebug() <<  "::Items to be cleared:: "<< m_list.size();
+    m_list.erase(m_list.begin(), m_list.end());
+    if(m_list.empty()){
+        qDebug() << "Cleaned list," << m_list.size() << "remain.";
     }
- //   qDebug() << counter << "::Items cleared. Remaining Count:: "<< m_list.size();
-    m_list.clear();
+ QApplication::processEvents(QEventLoop::AllEvents);
     return true;
 }
 
@@ -194,11 +197,8 @@ QModelIndex ListModel::indexFromItem(const gridItem *item) const
 {
     Q_ASSERT(item);
     for(int row=0; row<m_list.size(); ++row) {
-
         if(m_list.at(row) == item) return index(row);
-
     }
-
     return QModelIndex();
 }
 
@@ -209,8 +209,8 @@ void ListModel::clear()
     emit modelAboutToBeReset();
     beginResetModel();
     if(resetInternalData()){
-        setProgress(0.0);
-        totalcells = 0;
+        setProgress(0.0);        
+        setTotalCells(0);
         loadingStatus = false;
         progress = 0;
         setTotalPages(0);
@@ -261,6 +261,7 @@ gridItem * ListModel::currentRow()
 
 void ListModel::sortModel(int column, Qt::SortOrder order)
 {
+
 }
 
 void ListModel::checkForMore()
@@ -277,15 +278,14 @@ void ListModel::populateGrid(int mediaType)
 void ListModel::setTotalCells(int cells)
 {
     totalcells = cells;
-    emit statusMessage("Size Changed" + QString::number(totalcells));
+    emit statusMessage("Size Changed to" + QString::number(totalcells));
     if ( m_list.size() < totalcells)
     {
-        setLoadingStatus(true);
-
+       // setLoadingStatus(true);
     }
     else
     {
-        setLoadingStatus(false);
+      //  setLoadingStatus(false);
 
     }
     emit sizeChanged(cells);
@@ -348,10 +348,11 @@ void ListModel::clearAndRequest(int type)
     QApplication::processEvents(QEventLoop::AllEvents);
     emit modelAboutToBeReset();
     beginResetModel();
-    if(    resetInternalData()){
+    if( resetInternalData()){
         setProgress(0.0);
         QApplication::processEvents(QEventLoop::AllEvents);
         endResetModel();
+
         emit modelReset();
         QApplication::processEvents(QEventLoop::AllEvents);
         clearing = false;
@@ -365,23 +366,20 @@ void ListModel::clearAndRequest(int type)
 
 void ListModel::clearForPaging()
 {
+    if(m_list.size() > 0){
+        QApplication::processEvents(QEventLoop::AllEvents);
+        emit modelAboutToBeReset();
+        beginResetModel();
+        if(resetInternalData()){
+            setProgress(0.0);
+            QApplication::processEvents(QEventLoop::AllEvents);
+            endResetModel();
+            emit modelReset();
 
-    /*
-    if(removeRows(0, m_list.count(), QModelIndex()))
-        emit pagingCleared();
-        */
-    QApplication::processEvents(QEventLoop::AllEvents);
-    emit modelAboutToBeReset();
-    beginResetModel();
-    if(resetInternalData()){
-        setProgress(0.0);
-        QApplication::processEvents(QEventLoop::AllEvents);
-        endResetModel();
-        emit modelReset();
-        emit pagingCleared();
-        QApplication::processEvents(QEventLoop::AllEvents);
+            QApplication::processEvents(QEventLoop::AllEvents);
+        }
     }
-
+    emit pagingCleared();
 }
 
 

@@ -1523,12 +1523,9 @@ public slots:
     /*Special*/
     void setVariable(int pkvar, QString val);
     void checkRouterConnection();
-
-
-
-
     void cancelAllRequests(){
         b_cancelRequest = true;
+        emit clearModel();
         qDebug() << "Requests cancelled!";
     }
 

@@ -588,6 +588,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(setNowPlaying(bool)), w.nowPlayingButton,SLOT(setStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(streamIdChanged(int)), w.nowPlayingButton, SLOT(setStreamID(int)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(currentScreenChanged(QString)), w.nowPlayingButton, SLOT(setScreen(QString)),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(screenChange(QString)), &pqOrbiter, SLOT(setCurrentScreen(QString)));
         QObject::connect(&w, SIGNAL(requestStreamImage()), &pqOrbiter, SLOT(getStreamingVideo()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(requestStoredMediaImage(QString)), &pqOrbiter, SLOT(grabScreenshot(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(requestVideoFrame()), &pqOrbiter, SLOT(getStreamingVideo()), Qt::QueuedConnection );

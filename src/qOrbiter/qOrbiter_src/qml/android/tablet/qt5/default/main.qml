@@ -9,6 +9,8 @@ Item {
     onWidthChanged: console.log(width+"::"+height)
     height:parent.height
     width:parent.width
+    focus:true
+    Component.onCompleted: forceActiveFocus()
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
@@ -20,6 +22,27 @@ Item {
     property string screenfile
     property string dynamic_height
     property string dynamic_width
+
+
+    Keys.onReleased: {
+        console.log(event.key)
+        switch(event.key){
+        case Qt.Key_Back:
+            event.accepted=true
+            console.log("Back triggered in switch statement")
+            break;
+        case Qt.Key_VolumeUp:
+            console.log("Switch Caught Vol Up")
+            break;
+        case Qt.Key_VolumeDown:
+            console.log("Switch Caught Vol Down")
+            break;
+        case Qt.Key_Menu:
+            console.log("Switch caught Menu")
+        default:
+            console.log("Key outside range==>"+event.key)
+        }
+    }
 
     function scaleX(x){
         return x/100*qml_root.width
@@ -112,7 +135,7 @@ Item {
     Loader {
         id:pageLoader
         objectName: "loadbot"
-        focus: true
+
         height: qml_root.height-nav_row.height-info_panel.height
         anchors.top: nav_row.bottom
         Keys.onBackPressed: console.log("back")

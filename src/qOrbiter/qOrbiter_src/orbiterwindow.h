@@ -108,16 +108,7 @@ public slots:
     Q_INVOKABLE void forceResponse (QString forced);
     void loadSetupPage();
 
-#ifdef ANDROID
-    void keyPressEvent(QKeyEvent *k){
-        if(k->key()==Qt::Key_MediaPrevious){
-            emit backButtonPressed();
-        }
-        else{
-            qDebug() << k->key();
-        }
-    }
-#endif
+
 
     /*!
      * \brief qmlSetupLmce - Initiates a connection and startup procedure

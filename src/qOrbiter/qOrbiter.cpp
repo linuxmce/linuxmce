@@ -1385,6 +1385,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 {
 
     setMediaType(iPK_MediaType);
+
     if (iPK_MediaType != q_mediaType.toInt())
     {
         initializeGrid();
@@ -1395,12 +1396,14 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     q_mediaType = QString::number(iPK_MediaType);
 
     currentScreen= "Screen_47.qml";
+    emit gotoQml("Screen_47.qml");
 
     setGridStatus(true);
+    b_cancelRequest = false;
     prepareFileList(iPK_MediaType);
     requestTypes(iPK_MediaType);
     emit commandComplete();
-    emit gotoQml("Screen_47.qml");
+
     emit commandResponseChanged("Show File List Complete, Calling request Media Grid");
 }
 
@@ -1971,7 +1974,7 @@ void qOrbiter::qmlSetup(int device, QString address)
 
 void qOrbiter::setCurrentScreen(QString s)
 {
-    //currentScreen = s;
+    currentScreen = s;
 }
 
 void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int height, int width)
@@ -4753,6 +4756,16 @@ void qOrbiter::adjustRoomLights(QString level)
 
 void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 {
+    if(currentScreen == "Screen_1.qml"){
+        qDebug() << "Current screen error!"   ;
+        return;
+    }
+    else
+    {
+        qDebug() << currentScreen;
+     }
+
+    qDebug() << "Preparing file list, mediatype==>" << iPK_MediaType;
     q_mediaType = QString::number(iPK_MediaType);
     requestMore = false;
     media_currentRow = 0;
@@ -4937,15 +4950,16 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 media_totalPages = (i_mediaModelRows / media_pageSeperator)+1; //16 being the items per page.
                 setModelPages(media_totalPages);
                 emit mediaResponseChanged(QString::number(media_totalPages)+ " pages from request, populating first page.");
-
                 delete[] pData;
                 pMediaGridTable->ClearData();
                 delete pMediaGridTable;
                 pData = NULL;
                 pMediaGridTable = NULL;
                 if(b_cancelRequest)
-                    b_cancelRequest=false;
-                requestPage(0);
+                    b_cancelRequest=false;{
+                     requestPage(0);
+                }
+
                 //requestGenres(iPK_MediaType);
             }
         }

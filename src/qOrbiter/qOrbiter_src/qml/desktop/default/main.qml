@@ -84,6 +84,8 @@ Item {
         {
             var s = String(screenname)
             manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
+            console.log("eggs")
+            manager.setCurrentScreen(screenname)
         }
         else if (pageLoader.status==Component.Error)
         {

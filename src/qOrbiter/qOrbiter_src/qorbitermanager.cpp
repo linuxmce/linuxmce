@@ -284,11 +284,10 @@ void qorbiterManager::gotoQScreen(QString s)
         return;
     }
 
-    if(s.contains("Screen_1"))
+    if(s.contains("Screen_1.qml"))
     {
         qDebug() << "Clearing Models";
-
-       emit keepLoading(false);
+        emit keepLoading(false);
         emit clearModel();
         emit cancelRequests();
         emit resetFilter();
@@ -306,7 +305,8 @@ void qorbiterManager::gotoQScreen(QString s)
     setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
         setDceResponse("Done call to screenchange()");
-        setCurrentScreen(lameFix);
+
+        setCurrentScreen(s);
         if(!currentScreen.contains("187"))
             gotoScreenList->append(currentScreen);
 
@@ -1724,7 +1724,7 @@ void qorbiterManager::showBookmarks(QList<QObject *> t)
 void qorbiterManager::setHouseMode(QString pass, int mode)
 {
     emit newHouseMode(pass, mode);
-   // pqOrbiter->SetSecurityMode(pass, mode);
+    // pqOrbiter->SetSecurityMode(pass, mode);
 }
 
 void qorbiterManager::setCurrentUser(QString inc_user)
