@@ -1,6 +1,8 @@
 import QtQuick 1.0
 Item {
-property bool verticalMirror: false
+    height: childrenRect.height
+    width: childrenRect.width
+    property bool verticalMirror: false
     function getDate(){
         var d = new Date();
         return Qt.formatDateTime(d, "dddd ,MMMM d| hh:mm ");
@@ -10,13 +12,14 @@ property bool verticalMirror: false
         onTriggered: txtDate.text = getDate()
     }
 
-    Text{
+    StyledText{
         id: txtDate
         text: getDate()
         color: "aliceblue"
         font.letterSpacing: 2
         smooth: true
         anchors.centerIn: parent
+        fontSize: scaleY(5)
 
     }
 }

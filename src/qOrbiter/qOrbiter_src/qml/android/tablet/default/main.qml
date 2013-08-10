@@ -11,7 +11,7 @@ Item {
         target:manager
         onBackButtonPressed:console.log("Go Back Button!")
     }
-    Keys.onPressed: if(event.key ===Qt.Key_MediaPrevious) {
+    Keys.onPressed: if(event.key ===Qt.Key_MediaPrevious && manager.currentScreen==="Screen_1.qml") {
                         executeBack();
                     } else if(event.key === Qt.Key_Menu){
                         console.log("menu button!")
@@ -23,6 +23,9 @@ Item {
                     else {console.log(event.key)}
 
     function executeBack(){
+        if(componentLoader.source !=="")
+            componentLoader.source = ""
+        else
         componentLoader.source="components/ExitConfirm.qml"
     }
 

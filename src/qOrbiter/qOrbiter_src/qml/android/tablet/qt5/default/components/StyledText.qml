@@ -12,7 +12,7 @@ import QtQuick 2.0
         font.bold: isBold
         font.italic: isItalic
         font.pixelSize: fontSize
-        font.family: appFont.name
+
         height: paintedHeight
         width: paintedWidth
         color:"white"

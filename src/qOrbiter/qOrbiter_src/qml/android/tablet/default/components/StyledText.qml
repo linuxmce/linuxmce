@@ -16,7 +16,6 @@ import "../../lib/effects"
         font.italic: isItalic
         font.pixelSize: fontSize
         font.family: myFont.name
-
     }
 
 

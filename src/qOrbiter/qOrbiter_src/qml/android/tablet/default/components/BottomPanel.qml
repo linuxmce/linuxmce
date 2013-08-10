@@ -28,7 +28,7 @@ Item {
         id:advancedrow
         height:childrenRect.height +5
         width: childrenRect.width
-        anchors.centerIn: advanced_panel
+        anchors.left: advanced_panel.left
         spacing:10
         clip: false
 
@@ -62,7 +62,6 @@ Item {
                 anchors.fill: parent
                 onClicked: {
                     gotoQScreen("Screen_29.qml")
-
                 }
             }
         }
@@ -96,7 +95,12 @@ Item {
                 onClicked: componentLoader.source="ExitConfirm.qml"
             }
         }
+    }
 
+    Clock{
+        id:screen1time
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
     }
 }
 

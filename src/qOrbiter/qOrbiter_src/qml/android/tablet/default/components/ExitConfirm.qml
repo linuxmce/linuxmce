@@ -9,6 +9,10 @@ Item {
         color:"black"
         opacity:.65
     }
+    MouseArea{
+        anchors.fill: parent
+
+    }
 
     Item{
         height: parent.height/2

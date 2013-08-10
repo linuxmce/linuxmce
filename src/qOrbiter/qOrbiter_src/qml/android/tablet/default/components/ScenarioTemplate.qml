@@ -26,12 +26,15 @@ Rectangle{
         anchors.topMargin: scaleY(2)
         anchors.left: parent.left
         color:"transparent"
-        Image {
-            id: onimg
-            source: bgimgSource //"../img/ui3/lightingbig.png"
-            height: parent.height
-            width: parent.width
+
+        StyledText{
+            text: "F"
+            font.bold: true
+            fontSize: listViewText
+            color:"white"
+            anchors.centerIn: parent
         }
+
         MouseArea{
             id: mousearea1
             anchors.fill: parent
@@ -47,7 +50,6 @@ Rectangle{
         anchors.verticalCenter: parent.verticalCenter
         source:floorplantype===3 ? "NowPlayingButton.qml" :""
         anchors.left:templatefloorplan.right
-
     }
 
     Image{

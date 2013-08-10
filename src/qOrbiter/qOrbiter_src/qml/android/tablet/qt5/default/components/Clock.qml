@@ -16,8 +16,7 @@ width: childrenRect.width
         id: txtDate
         text: getDate()
         color: "aliceblue"
-        font.letterSpacing: 2
-        font.family: appFont.name
+        font.letterSpacing: 2      
         smooth: true
         anchors.centerIn: parent
         font.pixelSize: 32

@@ -5,93 +5,52 @@ import "../components"
 
 Item
 {
+    id:stage
     anchors.centerIn: parent
+    height: manager.appHeight
+    width: manager.appWidth
+    signal swapStyle()
 
-    Rectangle {
-        id:stage
-
-        signal swapStyle()
-        height: manager.appHeight
-        width: manager.appWidth
-        color:"transparent"
-
-
-        Image {
-            id: headerbg
-            source: "../img/ui3/header.png"
-            anchors.top: stage.top
-            height: scaleY(7)
-            width: scaleX(99)
+    Column{
+        id:maindisplay
+        anchors.top:parent.top
+        height: childrenRect.height
+        width: scaleX(100)
+        ScenarioTemplate{
+            id:lightrow
+            scenariomodel: currentRoomLights
+            floorplantype: 2
+            bgimgSource: "../img/ui3/lightingbig.png"
+        }
+        ScenarioTemplate{
+            id:mediaRow
+            scenariomodel: currentRoomMedia
+            floorplantype: 3
+            bgimgSource: "../img/ui3/mediabig.png"
+        }
+        ScenarioTemplate{
+            id:climateRow
+            scenariomodel: currentRoomClimate
+            floorplantype: 4
+            bgimgSource: "../img/ui3/climatebig.png"
+        }
+        ScenarioTemplate{
+            id:telecomRow
+            scenariomodel: currentRoomTelecom
+            floorplantype: 6
+            bgimgSource: "../img/ui3/telephonebig.png"
+        }
+        ScenarioTemplate{
+            id:securityRow
+            scenariomodel: currentRoomSecurity
+            floorplantype: 7
+            bgimgSource: "../img/ui3/securitybig.png"
 
         }
 
-        Label{
-            id:connectstatus
-            text: "Orbiter "+ deviceid + " is connected."
-            font.family: "Droid Sans"
-            color: "aliceblue"
-            font.letterSpacing: 2
-            anchors.left: parent.left
-            anchors.leftMargin: scaleX(5)
-            anchors.verticalCenter: headerbg.verticalCenter
 
-        }
-
-        Clock{
-            id:screen1time
-            anchors.right: headerbg.right
-            anchors.rightMargin: scaleX(25)
-            anchors.verticalCenter: headerbg.verticalCenter
-        }
-
-        Column{
-            id:maindisplay
-            anchors.top:headerbg.bottom
-            height: childrenRect.height
-            width: scaleX(100)
-            ScenarioTemplate{
-                id:lightrow
-                scenariomodel: currentRoomLights
-                floorplantype: 2
-                bgimgSource: "../img/ui3/lightingbig.png"
-
-
-            }
-            ScenarioTemplate{
-                id:mediaRow
-                scenariomodel: currentRoomMedia
-                floorplantype: 3
-                bgimgSource: "../img/ui3/mediabig.png"
-
-
-            }
-            ScenarioTemplate{
-                id:climateRow
-                scenariomodel: currentRoomClimate
-                floorplantype: 4
-                bgimgSource: "../img/ui3/climatebig.png"
-
-
-            }
-            ScenarioTemplate{
-                id:telecomRow
-                scenariomodel: currentRoomTelecom
-                floorplantype: 6
-                bgimgSource: "../img/ui3/telephonebig.png"
-
-
-            }
-            ScenarioTemplate{
-                id:securityRow
-                scenariomodel: currentRoomSecurity
-                floorplantype: 7
-                bgimgSource: "../img/ui3/securitybig.png"
-
-            }
-
-
-        }
-        BottomPanel{id: advanced; anchors.bottom: stage.bottom}
     }
+    BottomPanel{id: advanced; anchors.bottom: stage.bottom}
+
 }
 

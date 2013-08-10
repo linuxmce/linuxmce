@@ -3,11 +3,14 @@ import "../components"
 import "../js/ComponentLoader.js" as MyJs
 import "../../lib/effects"
 
-Rectangle {
+Item {
     id:fileviewscreen
     width: manager.appWidth
     height: manager.appHeight
-    color: "transparent"
+   focus:true
+   Component.onCompleted: forceActiveFocus()
+   Keys.onMenuPressed: console.log("show subtypes menu!")
+   Keys.onPressed: if(event.key===Qt.Key_MediaPrevious){manager.goBackGrid()}
     clip: true
     property int mouselocY: 0
     property int mouselocX: 0
