@@ -225,11 +225,11 @@ bool Weather_PlugIn::RadarChanged(class Socket *pSocket, class Message *pMessage
 {
   PLUTO_SAFETY_LOCK(wm, m_Weather_PlugInMutex); // This one is especially important.
 
-  string sFormat = pMessage->m_mapParameters[EVENTPARAMETER_Format_CONST];
+  int iFormat = atoi(pMessage->m_mapParameters[EVENTPARAMETER_Format_CONST].c_str());
   string sText = pMessage->m_mapParameters[EVENTPARAMETER_Text_CONST];
 
 
-  if (sFormat.empty() || sText.empty())
+  if (iFormat==0 || sText.empty())
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_PlugIn::RadarChanged() - Empty format or text parameters. Ignoring.");
       return true;
@@ -238,7 +238,7 @@ bool Weather_PlugIn::RadarChanged(class Socket *pSocket, class Message *pMessage
   // urls are | delimited.
   deque<string> deque_urls;
   deque<string>::iterator itDeque_urls;
-  string sFirstImageBuffer, sNextImageBuffer;
+  string sFirstImageBuffer;
   StringUtils::Tokenize(sText,string("|"),deque_urls,false); // push_back
   itDeque_urls=deque_urls.begin();
   
@@ -270,11 +270,16 @@ bool Weather_PlugIn::RadarChanged(class Socket *pSocket, class Message *pMessage
   // and try to get the rest.
 
   m_dequeRadarFrames.clear();
+  m_mapitRadarFrameDeque.clear();
+
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_Plugin::RadarChanged() - Clearing out the Radar images deque.");
 
   // Grab the next one
   while ( itDeque_urls != deque_urls.end() )
     {
+      string sNextImageBuffer;
       sError=HttpGet(*itDeque_urls, &sNextImageBuffer);
+      string sNextUrl=*itDeque_urls;
       if (sError=="ERROR")
 	{
 	  // This image failed, forget doing the rest of them.
@@ -284,7 +289,8 @@ bool Weather_PlugIn::RadarChanged(class Socket *pSocket, class Message *pMessage
 	}
       
       // Add image to deque
-      m_dequeRadarFrames.push_back(RadarFrame(0,0,1,sNextImageBuffer));
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_PlugIn::RadarChanged() - Fetched image from %s",sNextUrl.c_str());
+      m_dequeRadarFrames.push_back(RadarFrame(0,0,iFormat,sNextImageBuffer));
       ++itDeque_urls; // and back around...
     }
 
@@ -361,13 +367,21 @@ void Weather_PlugIn::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStream
   map<long, deque<RadarFrame>::iterator >::iterator it = m_mapitRadarFrameDeque.find(dwPK_Device_From);
   if (it==m_mapitRadarFrameDeque.end())
     {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXX Resetting radar frame deque for %d",dwPK_Device_From);
       m_mapitRadarFrameDeque[dwPK_Device_From] = m_dequeRadarFrames.begin();
       m_itRadarFrameDeque=m_mapitRadarFrameDeque[dwPK_Device_From];
     }
   else
     {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXX grabbing deque for existing device %d",dwPK_Device_From);
       m_itRadarFrameDeque=it->second;
     }
+
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXX Grabbing image data of size %d",m_itRadarFrameDeque->data().size());
+  char *cTemp = new char[m_itRadarFrameDeque->data().size()];
+  memcpy(cTemp,m_itRadarFrameDeque->data().data(),m_itRadarFrameDeque->data().size());
+  *pData = cTemp;
+  *iData_Size = m_itRadarFrameDeque->data().size();
 
   if (m_itRadarFrameDeque == m_dequeRadarFrames.end())
     {
@@ -378,11 +392,6 @@ void Weather_PlugIn::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStream
     {
       m_mapitRadarFrameDeque[dwPK_Device_From] = ++m_itRadarFrameDeque;
     }
-
-  char *cTemp = new char[m_itRadarFrameDeque->size()];
-  memcpy(cTemp,m_itRadarFrameDeque->data().data(),m_itRadarFrameDeque->size()); 
-  *pData = cTemp;
-  *iData_Size = m_itRadarFrameDeque->size();
 
 }
 //<-dceag-c1117-b->
