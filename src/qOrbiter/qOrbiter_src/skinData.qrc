@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/img">
-        <file alias="harmattan_splash_bkg.png">img/harmattan_splash_bkg.png</file>
         <file alias="harmattan_splash.png">img/harmattan_splash.png</file>
         <file alias="Splash.png">qml/desktop/default/img/icons/backgrounds/bedroom.png</file>
     </qresource>
@@ -25,8 +24,7 @@
         <file alias="audio.png">qml/desktop/default/img/icons/kmix.png</file>
         <file alias="video.png">qml/desktop/default/img/icons/xine.png</file>
         <file alias="games.png">qml/desktop/default/img/icons/Games.png</file>
-        <file alias="mediacell.png">qml/desktop/default/img/ui3/linuxmcewidebutton.png</file>
-        <file alias="playlist.png">qml/desktop/default/img/icons/package_editors.png</file>
+        <file alias="playlist.png">qml/desktop/default/img/icons/kedit.png</file>
     </qresource>
     <qresource prefix="/components">
         <file alias="FpSprite.qml">qml/desktop/default/components/FpSprite.qml</file>
