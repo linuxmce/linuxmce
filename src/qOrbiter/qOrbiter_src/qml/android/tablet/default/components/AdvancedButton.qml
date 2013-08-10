@@ -13,7 +13,7 @@ Item{
     property alias buttontextzindex: buttonLabel.z
     property alias buttonsqradius:  buttonBase.radius
     property string imgSource:""
-
+    signal btnPress()
     Rectangle {
         id:buttonBase
         color: ms.pressed ? "white" : "darkblue"
@@ -72,5 +72,6 @@ Item{
             buttonLabel.font.capitalization = Font.Normal
             buttonLabel.color = "white"
         }
+        onPressed: btnPress()
     }
 }

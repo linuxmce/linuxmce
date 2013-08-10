@@ -13,7 +13,7 @@ Item {
 
         }
         pageLoader.forceActiveFocus();
-        overLay.source = ""
+       componentLoader.source=""
     }
 
     Component.onCompleted: {

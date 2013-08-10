@@ -93,7 +93,7 @@ Item {
             buttonsqradius:5
             MouseArea{
                 anchors.fill: exit
-                onClicked: manager.closeOrbiter()
+                onClicked: componentLoader.source="ExitConfirm.qml"
             }
         }
 

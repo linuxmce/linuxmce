@@ -9,7 +9,7 @@ Item {
     focus:true
    Connections{
    target:manager
-   onBackButtonPressed:console.log("Gog Back Button!")
+   onBackButtonPressed:console.log("Go Back Button!")
    }
    Keys.onPressed: if(event.key ===Qt.Key_MediaPrevious) {console.log("back!")} else console.log(event.key)
 

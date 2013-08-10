@@ -6,7 +6,10 @@ import "../../lib/effects"
         property int textWidth
         property bool isBold:false
         property bool isItalic:false
-        property double fontSize:scaleY(2.5)
+        property double fontSize:scaleY(3.5)
+        property int headerText:scaleY(10)
+        property int paraText:scaleY(6)
+        property int listViewText:scaleY(7)
         id:labelelement
         text: textLabel
         font.bold: isBold

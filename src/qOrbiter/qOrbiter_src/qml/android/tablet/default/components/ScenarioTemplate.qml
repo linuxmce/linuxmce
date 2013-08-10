@@ -70,8 +70,8 @@ Rectangle{
         delegate:
             Item{
                 id:scenariodelegate
-                width:sT.paintedWidth > scaleX(20) ? sT.paintedWidth+10 : style.mediabuttonW
-                height:style.mediabuttonH
+                width:sT.paintedWidth > scaleX(20) ? sT.paintedWidth+10 : scaleX(20)
+                height:parent.height
                 enabled:true
                 clip:true
 
