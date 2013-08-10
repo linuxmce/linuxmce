@@ -1,7 +1,7 @@
 #<-dceag-mh-b->
 GENDEV=../Gen_Devices
 
-SNR_CPPFLAGS ?= -DSIM_RADAR -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
+SNR_CPPFLAGS ?= -DKDE_LMCE -DDEBUG -DTHREAD_LOG -DLOG_ALL_QUERIES
 SNR_LDFLAGS ?= 
 
 ROOT = ..
@@ -33,7 +33,9 @@ LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 whattodo: all
 	@echo "type 'make bin', 'make so' or 'make all'"
 
-all: so
+all: bin so
+
+bin: Weather_PlugIn
 
 so: Weather_PlugIn.so
 
@@ -43,9 +45,15 @@ Weather_PlugIn.so: $(sources:.cpp=.o)
 	cp $@ ../bin
 #	chmod +x post_make.sh
 #	./post_make.sh $@
+		
+Weather_PlugIn: $(sources:.cpp=.o)
+	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
+	cp $@ ../bin
+#	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Weather_PlugIn.so >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Weather_PlugIn Weather_PlugIn.so >/dev/null
 
 package:
 	chmod +x make_package.sh

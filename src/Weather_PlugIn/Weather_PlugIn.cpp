@@ -50,6 +50,8 @@ using namespace DCE;
 #define SIM_RADAR_URL5 "http://images.weather.com/looper/archive/us_radar_plus_usen/5L.jpg"
 #endif
 
+#define FILE_NO_RADAR_DATA "/usr/pluto/share/weather_no_radar_data.jpg"
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Weather_PlugIn::Weather_PlugIn(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -117,9 +119,18 @@ bool Weather_PlugIn::Register()
       return false;
     }
 
+  /** 
+   * Register the Event interceptors we need to capture weather data
+   */
   RegisterMsgInterceptor((MessageInterceptorFn)(&Weather_PlugIn::DataChanged), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Outside_Temp_Changed_CONST);
   RegisterMsgInterceptor((MessageInterceptorFn)(&Weather_PlugIn::DataChanged), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Outside_Condition_Changed_CONST);
-  
+  RegisterMsgInterceptor((MessageInterceptorFn)(&Weather_PlugIn::DataChanged), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Outside_Humidity_Changed_CONST);
+  RegisterMsgInterceptor((MessageInterceptorFn)(&Weather_PlugIn::DataChanged), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Outside_Pressure_Changed_CONST);
+  RegisterMsgInterceptor((MessageInterceptorFn)(&Weather_PlugIn::DataChanged), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Outside_Wind_Speed_Change_CONST);
+  RegisterMsgInterceptor((MessageInterceptorFn)(&Weather_PlugIn::DataChanged), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Outside_Wind_Direction_Ch_CONST);
+  RegisterMsgInterceptor((MessageInterceptorFn)(&Weather_PlugIn::DataChanged), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Outside_Visibility_Change_CONST);
+  RegisterMsgInterceptor((MessageInterceptorFn)(&Weather_PlugIn::DataChanged), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Outside_Feels_Like_Change_CONST);
+  RegisterMsgInterceptor((MessageInterceptorFn)(&Weather_PlugIn::RadarChanged), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Radar_Images_Changed_CONST);
 
   return Connect(PK_DeviceTemplate_get()); 
 }
@@ -165,34 +176,117 @@ void Weather_PlugIn::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessag
 
 void Weather_PlugIn::DumpData()
 {
-  for (map<string, string>::iterator it=m_mapWeatherData.begin(); it!=m_mapWeatherData.end(); ++it)
+  /*  for (map<string, string>::iterator it=m_mapWeatherData.begin(); it!=m_mapWeatherData.end(); ++it)
     {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Key: %s, Value: %s",it->first.c_str(), it->second.c_str());
-    }
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Key: %s, Value: %d",it->first.c_str(), it->second.c_str());
+      } */
 }
 
 /**
  * Event Callbacks
  */
 
+/**
+ * This is the catch-all for any of the weather events, except Radar images. Take the data out of 
+ * The event parameters, and populate the maps.
+ */
 bool Weather_PlugIn::DataChanged(class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo)
 {
 
   PLUTO_SAFETY_LOCK(wm, m_Weather_PlugInMutex);
 
   string sName = pMessage->m_mapParameters[EVENTPARAMETER_Name_CONST];
-  string sValue = pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST];
+  int sValue = atoi(pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST].c_str());
+  string sText = pMessage->m_mapParameters[EVENTPARAMETER_Text_CONST];
 
-  if (sName.empty() || sValue.empty())
+  if (sName.empty())
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Refusing to change data value, name or value was empty.");
       return false;
     }
 
-  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Setting Weather Value [%s]=%s",sName.c_str(),sValue.c_str());
-  m_mapWeatherData[sName]=sValue;
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Setting Weather Value [%s]=%d",sName.c_str(),sValue);
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Setting Weather Text [%s]=%s",sName.c_str(),sText.c_str());
+
+  m_mapWeatherTexts[sName]=sText;
+  m_mapWeatherValues[sName]=sValue;
 
   DumpData();
+
+  return true;
+
+}
+
+/**
+ * Get the radar images specified by URLs. Each call wipes the deque
+ * and repopulates it.
+ */
+bool Weather_PlugIn::RadarChanged(class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo)
+{
+  PLUTO_SAFETY_LOCK(wm, m_Weather_PlugInMutex); // This one is especially important.
+
+  string sFormat = pMessage->m_mapParameters[EVENTPARAMETER_Format_CONST];
+  string sText = pMessage->m_mapParameters[EVENTPARAMETER_Text_CONST];
+
+
+  if (sFormat.empty() || sText.empty())
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_PlugIn::RadarChanged() - Empty format or text parameters. Ignoring.");
+      return true;
+    }
+
+  // urls are | delimited.
+  deque<string> deque_urls;
+  deque<string>::iterator itDeque_urls;
+  string sFirstImageBuffer, sNextImageBuffer;
+  StringUtils::Tokenize(sText,string("|"),deque_urls,false); // push_back
+  itDeque_urls=deque_urls.begin();
+  
+  string sError=HttpGet(*itDeque_urls, &sFirstImageBuffer);
+
+  // Somehow we failed to get the first image. If the deque is empty, we 
+  // return back a placeholder graphic. Otherwise, we simply fail, and
+  // the last successful radar images will be preserved.
+  if (sError=="ERROR")
+    {
+      // URL failed to fetch, assume the rest will too, send back a placeholder image
+      size_t nSize=0;
+      char *pData = FileUtils::ReadFileIntoBuffer(FILE_NO_RADAR_DATA, nSize);
+      if (pData && m_dequeRadarFrames.empty())
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_PlugIn::RadarChanged() - Could not fetch first radar image. Sending back placeholder instead.");
+	  string sPlaceHolderImage=string(pData,nSize);
+	  m_dequeRadarFrames.push_back(RadarFrame(0,0,1,sPlaceHolderImage));
+	  return true;
+	}
+      else
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_PlugIn::RadarChanged() - Could not find placeholder image!");
+	}
+      return true;
+    }
+
+  // If we got here, we got at least one image, clear out the radar deque
+  // and try to get the rest.
+
+  m_dequeRadarFrames.clear();
+
+  // Grab the next one
+  while ( itDeque_urls != deque_urls.end() )
+    {
+      sError=HttpGet(*itDeque_urls, &sNextImageBuffer);
+      if (sError=="ERROR")
+	{
+	  // This image failed, forget doing the rest of them.
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_PlugIn::RadarChanged() - Could not fetch next radar image. Not retrieving the remaining images for this pass.");
+	  itDeque_urls=deque_urls.end();
+	  break;
+	}
+      
+      // Add image to deque
+      m_dequeRadarFrames.push_back(RadarFrame(0,0,1,sNextImageBuffer));
+      ++itDeque_urls; // and back around...
+    }
 
   return true;
 
@@ -206,43 +300,38 @@ bool Weather_PlugIn::DataChanged(class Socket *pSocket, class Message *pMessage,
 
 //<-dceag-c1116-b->
 
-	/** @brief COMMAND: #1116 - Get Weather Data */
-	/** Get Accumulated Weather Data */
+	/** @brief COMMAND: #1116 - Get Weather Text */
+	/** Get one of the pieces of Accumulated weather texts. */
 		/** @param #4 PK_Variable */
-			/** Assign Requested Data to this Orbiter Variable */
+			/** Assign Requested Text to this Orbiter Variable */
 		/** @param #19 Data */
-			/** The Requested Weather Data given Name */
+			/** The Requested Weather Text given Name */
 		/** @param #50 Name */
-			/** Name of Weather Data Parameter to Return, e.g. "current_temp" */
+			/** Name of Weather Text Parameter to Return, e.g. "current_temp" */
 
-void Weather_PlugIn::CMD_Get_Weather_Data(int iPK_Variable,string sName,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage)
+void Weather_PlugIn::CMD_Get_Weather_Text(int iPK_Variable,string sName,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1116-e->
 {
-	cout << "Need to implement command #1116 - Get Weather Data" << endl;
-	cout << "Parm #4 - PK_Variable=" << iPK_Variable << endl;
-	cout << "Parm #19 - Data  (data value)" << endl;
-	cout << "Parm #50 - Name=" << sName << endl;
-
 	PLUTO_SAFETY_LOCK(wm, m_Weather_PlugInMutex);
 
 	if (sName.empty())
 	  {
-	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_Plugin::CMD_Get_Weather_Data -Cowardly refusing to return value for empty name.");
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_Plugin::CMD_Get_Weather_Text -Cowardly refusing to return value for empty name.");
 	    return;
 	  }
 
-	string sData = m_mapWeatherData[sName];
+	string sText = m_mapWeatherTexts[sName];
 	long dwPK_DeviceTo = pMessage->m_dwPK_Device_From;
 
 	if (iPK_Variable>0)
 	  {
-	    CMD_Set_Variable CMD_Set_Variable(m_dwPK_Device, dwPK_DeviceTo, iPK_Variable, sData);
-	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_Plugin::CMD_Get_Weather_Data - Setting variable %d, to %s",iPK_Variable, sData.c_str());
+	    CMD_Set_Variable CMD_Set_Variable(m_dwPK_Device, dwPK_DeviceTo, iPK_Variable, sText);
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_Plugin::CMD_Get_Weather_Text - Setting variable %d, to %s",iPK_Variable, sText.c_str());
 	    SendCommand(CMD_Set_Variable);
 	  }
 
-	*pData = (char*)sData.data();
-	*iData_Size = (int)sData.size();
+	*pData = (char*)sText.data();
+	*iData_Size = (int)sText.size();
 }
 
 
@@ -294,5 +383,39 @@ void Weather_PlugIn::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStream
   memcpy(cTemp,m_itRadarFrameDeque->data().data(),m_itRadarFrameDeque->size()); 
   *pData = cTemp;
   *iData_Size = m_itRadarFrameDeque->size();
+
+}
+//<-dceag-c1117-b->
+
+	/** @brief COMMAND: #1117 - Get Weather Value */
+	/** Get one of the pieces of Accumulated weather values. */
+		/** @param #4 PK_Variable */
+			/** Orbiter Variable # to set. */
+		/** @param #48 Value */
+			/** The returned integer value */
+		/** @param #50 Name */
+			/** The name of the Weather value to return, e.g. "temp_current" */
+
+void Weather_PlugIn::CMD_Get_Weather_Value(int iPK_Variable,string sName,int *iValue,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1117-e->
+{
+	PLUTO_SAFETY_LOCK(wm, m_Weather_PlugInMutex);
+
+	if (sName.empty())
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_Plugin::CMD_Get_Weather_Data -Cowardly refusing to return value for empty name.");
+	    return;
+	  }
+
+	long dwPK_DeviceTo = pMessage->m_dwPK_Device_From;
+
+	if (iPK_Variable>0)
+	  {
+	    CMD_Set_Variable CMD_Set_Variable(m_dwPK_Device, dwPK_DeviceTo, iPK_Variable, TOSTRING(iValue));
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_Plugin::CMD_Get_Weather_Value - Setting variable %d, to %d",iPK_Variable, iValue);
+	    SendCommand(CMD_Set_Variable);
+	  }
+
+	*iValue = m_mapWeatherValues[sName];
 
 }

@@ -31,7 +31,8 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
-	  map<string, string> m_mapWeatherData;
+	  map<string, int> m_mapWeatherValues;
+	  map<string, string> m_mapWeatherTexts;
 	  deque<RadarFrame> m_dequeRadarFrames;
 	  map<long, deque<RadarFrame>::iterator > m_mapitRadarFrameDeque;
 	  deque<RadarFrame>::iterator m_itRadarFrameDeque;
@@ -58,6 +59,7 @@ public:
 		 * Event Message Interceptors
 		 */
 		bool DataChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
+		bool RadarChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
 
 		void DumpData();
 
@@ -101,17 +103,30 @@ public:
 	virtual void CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat,string &sCMD_Result,Message *pMessage);
 
 
-	/** @brief COMMAND: #1116 - Get Weather Data */
-	/** Get Accumulated Weather Data */
+	/** @brief COMMAND: #1116 - Get Weather Text */
+	/** Get one of the pieces of Accumulated weather texts. */
 		/** @param #4 PK_Variable */
-			/** Assign Requested Data to this Orbiter Variable */
+			/** Assign Requested Text to this Orbiter Variable */
 		/** @param #19 Data */
-			/** The Requested Weather Data given Name */
+			/** The Requested Weather Text given Name */
 		/** @param #50 Name */
-			/** Name of Weather Data Parameter to Return, e.g. "current_temp" */
+			/** Name of Weather Text Parameter to Return, e.g. "current_temp" */
 
-	virtual void CMD_Get_Weather_Data(int iPK_Variable,string sName,char **pData,int *iData_Size) { string sCMD_Result; CMD_Get_Weather_Data(iPK_Variable,sName.c_str(),pData,iData_Size,sCMD_Result,NULL);};
-	virtual void CMD_Get_Weather_Data(int iPK_Variable,string sName,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Get_Weather_Text(int iPK_Variable,string sName,char **pData,int *iData_Size) { string sCMD_Result; CMD_Get_Weather_Text(iPK_Variable,sName.c_str(),pData,iData_Size,sCMD_Result,NULL);};
+	virtual void CMD_Get_Weather_Text(int iPK_Variable,string sName,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #1117 - Get Weather Value */
+	/** Get one of the pieces of Accumulated weather values. */
+		/** @param #4 PK_Variable */
+			/** Orbiter Variable # to set. */
+		/** @param #48 Value */
+			/** The returned integer value */
+		/** @param #50 Name */
+			/** The name of the Weather value to return, e.g. "temp_current" */
+
+	virtual void CMD_Get_Weather_Value(int iPK_Variable,string sName,int *iValue) { string sCMD_Result; CMD_Get_Weather_Value(iPK_Variable,sName.c_str(),iValue,sCMD_Result,NULL);};
+	virtual void CMD_Get_Weather_Value(int iPK_Variable,string sName,int *iValue,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 	};
