@@ -24,6 +24,7 @@ Item{
                 color:trap.pressed ? "darkgreen" : "black"
             }
             Image{
+                id:img
                 source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=img&val="+path : ""
                 anchors.left: parent.left
                 height:parent.height
@@ -37,6 +38,9 @@ Item{
                 anchors.centerIn: parent
                 fontSize: 36
                 color: "White"
+                fontWeight: Font.Normal
+                width: parent.width - img.width
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             }
 
             MouseArea{

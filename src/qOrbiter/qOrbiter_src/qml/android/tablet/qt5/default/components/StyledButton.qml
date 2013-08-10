@@ -25,6 +25,7 @@ Item{
         isBold: false
         font.pixelSize: textSize
         anchors.centerIn: parent
+        fontWeight: Font.Normal
         color:"antiquewhite"
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     }
