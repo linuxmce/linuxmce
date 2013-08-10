@@ -288,6 +288,8 @@ public:
 
 #if QANDROID || defined(ANDROID)
     AndroidSystem *androidHelper;
+
+
 #endif
 
 
@@ -653,6 +655,9 @@ signals:
     void isOsd( );
     void monitorStatusChanged( );
 
+#ifdef ANDROID
+    void backButtonPressed();
+#endif
 
 public slots:
 

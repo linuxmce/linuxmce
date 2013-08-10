@@ -86,6 +86,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     //qDebug() << mainView.size();
 
 
+
     userList.append(new PromptData("No Users",0));
     roomList.append(new PromptData("No Rooms",0));
 

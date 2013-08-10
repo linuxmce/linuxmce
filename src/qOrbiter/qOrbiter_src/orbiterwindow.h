@@ -2,6 +2,7 @@
 #define ORBITERWINDOW_H
 
 #include <QObject>
+#include <QDebug>
 #include <contextobjects/existingorbiter.h>
 #ifdef QT5
 #include <QQmlEngine>
@@ -19,6 +20,10 @@
 #include <shaders/filereader.h>
 #endif
 #include <QtNetwork/QNetworkReply>
+
+#ifdef ANDROID
+#include <QKeyEvent>
+#endif
 
 /*!
  * \brief orbiterWindow - Responsible for the initial setup of the application window.
@@ -102,6 +107,17 @@ public slots:
 
     Q_INVOKABLE void forceResponse (QString forced);
     void loadSetupPage();
+
+#ifdef ANDROID
+    void keyPressEvent(QKeyEvent *k){
+        if(k->key()==Qt::Key_MediaPrevious){
+            emit backButtonPressed();
+        }
+        else{
+            qDebug() << k->key();
+        }
+    }
+#endif
 
     /*!
      * \brief qmlSetupLmce - Initiates a connection and startup procedure
@@ -187,6 +203,7 @@ signals:
     void newOrbiterData(int u, int r, int s, int l, int h, int w);
     void pageChanged();
     void routerChanged();
+    void backButtonPressed();
 };
 #endif
 
