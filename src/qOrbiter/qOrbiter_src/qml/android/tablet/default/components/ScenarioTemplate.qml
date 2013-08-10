@@ -60,7 +60,7 @@ Rectangle{
     ListView{
         id: scenarioview
         width: parent.width-popupButton.width
-        contentWidth:  (count+1) * scaleX(20)
+        contentWidth:  (count+1) * scaleX(25)
         height: parent.height
         model: scenariomodel
         spacing: 5
@@ -70,8 +70,8 @@ Rectangle{
         delegate:
             Item{
                 id:scenariodelegate
-                width:scaleX(20)
-                height:parent.height
+                width:sT.paintedWidth > scaleX(20) ? sT.paintedWidth+10 : style.mediabuttonW
+                height:style.mediabuttonH
                 enabled:true
                 clip:true
 
@@ -84,13 +84,13 @@ Rectangle{
 
                     Behavior on color{
                         PropertyAnimation{
-                            duration: 500
+                            duration: 100
                         }
                     }
 
                     Behavior on opacity {
                         PropertyAnimation{
-                            duration:500
+                            duration:250
                         }
                     }
                 }

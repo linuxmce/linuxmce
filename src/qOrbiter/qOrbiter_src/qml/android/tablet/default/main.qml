@@ -6,6 +6,13 @@ Item {
     id: item
     width:manager.appWidth
     height:manager.appHeight
+    focus:true
+   Connections{
+   target:manager
+   onBackButtonPressed:console.log("Gog Back Button!")
+   }
+   Keys.onPressed: if(event.key ===Qt.Key_MediaPrevious) {console.log("back!")} else console.log(event.key)
+
 
     //    Rectangle{
     //        anchors.fill: parent
