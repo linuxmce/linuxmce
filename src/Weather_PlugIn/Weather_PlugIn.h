@@ -22,6 +22,7 @@
 
 #include "DCE/DCERouter.h"
 #include <deque>
+#include <set>
 #include "RadarFrame.h"
 
 //<-dceag-decl-b->
@@ -37,6 +38,9 @@ namespace DCE
 	  map<long, deque<RadarFrame>::iterator > m_mapitRadarFrameDeque;
 	  deque<RadarFrame>::iterator m_itRadarFrameDeque;
 	  pluto_pthread_mutex_t m_Weather_PlugInMutex;
+
+	  // Used for OrbiterRegistered
+	  set<long> m_setOrbiters;
 
 		// Private methods
 public:
@@ -61,7 +65,13 @@ public:
 		bool DataChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
 		bool RadarChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
 
+		/**
+		 * Command Message Interceptors
+		 */
+		bool OrbiterRegistered( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
+
 		void DumpData();
+		void UpdateOrbiterWeatherScenarios();
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router

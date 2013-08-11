@@ -132,6 +132,18 @@ bool Weather_PlugIn::Register()
   RegisterMsgInterceptor((MessageInterceptorFn)(&Weather_PlugIn::DataChanged), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Outside_Feels_Like_Change_CONST);
   RegisterMsgInterceptor((MessageInterceptorFn)(&Weather_PlugIn::RadarChanged), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Radar_Images_Changed_CONST);
 
+  /**
+   * We also intercept Orbiter Registered commands, so that we can set the current weather icon on the main screen,
+   * and to be able to change it on subsequent data changes.
+   */
+  RegisterMsgInterceptor((MessageInterceptorFn)(&Weather_PlugIn::OrbiterRegistered),0,0,0,0,MESSAGETYPE_COMMAND,COMMAND_Orbiter_Registered_CONST);
+
+
+  // Bootstrap weather_plugin variable to the Device ID of this Weather Plugin
+  // Needed for the Radar.
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Setting name weather_plugin to device ID %d",m_dwPK_Device);
+  m_mapWeatherValues["weather_plugin"]=m_dwPK_Device;
+
   return Connect(PK_DeviceTemplate_get()); 
 }
 
@@ -211,10 +223,86 @@ bool Weather_PlugIn::DataChanged(class Socket *pSocket, class Message *pMessage,
   m_mapWeatherTexts[sName]=sText;
   m_mapWeatherValues[sName]=sValue;
 
-  DumpData();
+  UpdateOrbiterWeatherScenarios();
 
   return true;
 
+}
+
+/**
+ * Command Callbacks
+ */
+bool Weather_PlugIn::OrbiterRegistered(class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo)
+{
+  bool bRegistered = pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST]=="1";
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Weather_PlugIn::OrbiterRegistered() Orbiter %d registered %d",pMessage->m_dwPK_Device_From,(int)bRegistered);
+
+  if (bRegistered)
+    {
+      // Orbiter is Registering.
+      if (m_setOrbiters.find(pMessage->m_dwPK_Device_From) == m_setOrbiters.end())
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Weather_PlugIn::OrbiterRegistered Orbiter %d hasn't registered yet, adding.",pMessage->m_dwPK_Device_From);
+	  m_setOrbiters.insert(pMessage->m_dwPK_Device_From);
+	}
+      else
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather_PlugIn::OrbiterRegistered Orbiter %d has attempted to re-register.",pMessage->m_dwPK_Device_From);
+	}
+    }
+  else
+    {
+      // Orbiter is Unregistering.
+      if (m_setOrbiters.find(pMessage->m_dwPK_Device_From) == m_setOrbiters.end())
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather_PlugIn::OrbiterRegistered Orbiter %d asked to unregister, but it wasn't registered!");
+	}
+      else
+	{
+	  set<long>::iterator it=m_setOrbiters.find(pMessage->m_dwPK_Device_From);
+	  m_setOrbiters.erase(it);
+	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Weather_PlugIn::OrbiterRegistered Orbiter %d has unregistered.",pMessage->m_dwPK_Device_From);
+	}
+    }
+
+  UpdateOrbiterWeatherScenarios();
+
+  return false; // Let this bubble up the chain. 
+
+}
+
+/**
+ * Update the scenario icon on the main page of each orbiter with the most recent weather data.
+ */
+void Weather_PlugIn::UpdateOrbiterWeatherScenarios()
+{
+  if (!m_setOrbiters.empty())
+    {
+      string sDeviceIDs;
+      for (set<long>::iterator it=m_setOrbiters.begin(); it!=m_setOrbiters.end(); ++it)
+	{
+	  sDeviceIDs+=StringUtils::itos(*it)+",";
+	}
+      sDeviceIDs=sDeviceIDs.substr(0,sDeviceIDs.size()-1); // strip away trailing comma
+
+      string sText=""; // Doesn't really matter.
+      string sType="weather"; // change the weather icon.
+      string sValue_To_Assign;
+      if (m_mapWeatherValues.find("condicon_current") == m_mapWeatherValues.end())
+	{
+		sValue_To_Assign="0";
+	}
+      else
+	{
+		sValue_To_Assign=StringUtils::itos(m_mapWeatherValues["condicon_current"]);
+	}
+      CMD_Set_Bound_Icon_DL CMD_Set_Bound_Icon_DL(m_dwPK_Device, sDeviceIDs, sValue_To_Assign, sText, sType);
+      SendCommand(CMD_Set_Bound_Icon_DL);
+    }
+  else
+    {
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather_PlugIn::UpdateOrbiterWeatherScenarios() called while I have no orbiters!");
+    }
 }
 
 /**
@@ -227,7 +315,6 @@ bool Weather_PlugIn::RadarChanged(class Socket *pSocket, class Message *pMessage
 
   int iFormat = atoi(pMessage->m_mapParameters[EVENTPARAMETER_Format_CONST].c_str());
   string sText = pMessage->m_mapParameters[EVENTPARAMETER_Text_CONST];
-
 
   if (iFormat==0 || sText.empty())
     {
@@ -289,7 +376,7 @@ bool Weather_PlugIn::RadarChanged(class Socket *pSocket, class Message *pMessage
 	}
       
       // Add image to deque
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_PlugIn::RadarChanged() - Fetched image from %s",sNextUrl.c_str());
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Weather_PlugIn::RadarChanged() - Fetched image from %s",sNextUrl.c_str());
       m_dequeRadarFrames.push_back(RadarFrame(0,0,iFormat,sNextImageBuffer));
       ++itDeque_urls; // and back around...
     }
@@ -367,31 +454,24 @@ void Weather_PlugIn::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStream
   map<long, deque<RadarFrame>::iterator >::iterator it = m_mapitRadarFrameDeque.find(dwPK_Device_From);
   if (it==m_mapitRadarFrameDeque.end())
     {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXX Resetting radar frame deque for %d",dwPK_Device_From);
       m_mapitRadarFrameDeque[dwPK_Device_From] = m_dequeRadarFrames.begin();
       m_itRadarFrameDeque=m_mapitRadarFrameDeque[dwPK_Device_From];
     }
   else
     {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXX grabbing deque for existing device %d",dwPK_Device_From);
       m_itRadarFrameDeque=it->second;
+      if (m_itRadarFrameDeque==m_dequeRadarFrames.end())
+	{
+	  m_itRadarFrameDeque=m_dequeRadarFrames.begin();
+	}
     }
 
-  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXX Grabbing image data of size %d",m_itRadarFrameDeque->data().size());
   char *cTemp = new char[m_itRadarFrameDeque->data().size()];
   memcpy(cTemp,m_itRadarFrameDeque->data().data(),m_itRadarFrameDeque->data().size());
   *pData = cTemp;
   *iData_Size = m_itRadarFrameDeque->data().size();
 
-  if (m_itRadarFrameDeque == m_dequeRadarFrames.end())
-    {
-      // Loop back around.
-      m_mapitRadarFrameDeque[dwPK_Device_From] = m_dequeRadarFrames.begin();
-    }
-  else
-    {
-      m_mapitRadarFrameDeque[dwPK_Device_From] = ++m_itRadarFrameDeque;
-    }
+  m_mapitRadarFrameDeque[dwPK_Device_From] = ++m_itRadarFrameDeque;
 
 }
 //<-dceag-c1117-b->
@@ -418,13 +498,14 @@ void Weather_PlugIn::CMD_Get_Weather_Value(int iPK_Variable,string sName,int *iV
 
 	long dwPK_DeviceTo = pMessage->m_dwPK_Device_From;
 
+	*iValue = m_mapWeatherValues[sName];
+
 	if (iPK_Variable>0)
 	  {
-	    CMD_Set_Variable CMD_Set_Variable(m_dwPK_Device, dwPK_DeviceTo, iPK_Variable, TOSTRING(iValue));
-	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_Plugin::CMD_Get_Weather_Value - Setting variable %d, to %d",iPK_Variable, iValue);
+	    int iVarValue = m_mapWeatherValues[sName];
+	    CMD_Set_Variable CMD_Set_Variable(m_dwPK_Device, dwPK_DeviceTo, iPK_Variable, StringUtils::itos(iVarValue));
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_Plugin::CMD_Get_Weather_Value - Setting variable %d, to %d",iPK_Variable, iVarValue);
 	    SendCommand(CMD_Set_Variable);
 	  }
-
-	*iValue = m_mapWeatherValues[sName];
 
 }

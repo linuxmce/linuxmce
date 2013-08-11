@@ -25,7 +25,7 @@ LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r -lcurl
 
 Gen_Dev_Files +=
-sources += RadarFrame.cpp
+sources += ../PlutoUtils/HttpUtils.cpp RadarFrame.cpp 
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
