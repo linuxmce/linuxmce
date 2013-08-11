@@ -414,7 +414,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(destroyed()), &dceThread, SLOT(quit()), Qt::QueuedConnection);
         QObject::connect(&dceThread, SIGNAL(finished()), &dceThread, SLOT(deleteLater()));
         QObject::connect(&a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()));
-        //QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));
+        QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));
 
 
         QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
