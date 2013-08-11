@@ -29,6 +29,7 @@ Item{
         id:button_label
         text:"ipsum"
         isBold: false
+        font.weight: Font.Light
         fontSize: textSize
         anchors.centerIn: parent
         color:"antiquewhite"

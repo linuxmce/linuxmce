@@ -3,10 +3,9 @@ import "../js/ComponentLoader.js" as MyJs
 
 Rectangle {
     id: attributeitem
-    height: childrenRect.height
+    height:parent.visible ? childrenRect.height :0
     width: childrenRect.width
     color: "transparent"
-
 
     Row{
         id:attributerow

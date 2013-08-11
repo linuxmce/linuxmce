@@ -20,20 +20,7 @@ Item
         state:'unsorted'
         color:"transparent"
       //  onStateChanged: console.log("State changed in DG delegate to "+ state)
-        MouseArea{
-            anchors.fill: mainItem
-            hoverEnabled: true
-            onEntered: {
-                mainItem.color = skinStyle.darkhighlight
-                mainItem.scale = 1.25
-                mainItem.z = 10
-            }
-            onExited: {
-                mainItem.color = "transparent"
-                mainItem.scale = 1
-                mainItem.z = 1
-            }
-        }
+
 
         ParallelAnimation {
             id:fade_and_scale
@@ -57,17 +44,9 @@ Item
             color: "transparent"
 
             MediaListClickHandler {
+
             }
 
-//            BorderImage {
-//                id: borderimg
-//                horizontalTileMode: BorderImage.Repeat
-//                source: "../img/icons/drpshadow.png"
-//                anchors.fill: imagerect
-//                anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
-//                border { left: 10; top: 10; right: 10; bottom: 10 }
-//                smooth: true
-//            }
 
             Image
             {
@@ -84,16 +63,17 @@ Item
             }
             Rectangle{
                 id:textmask
-                color: "grey"
+                color: "black"
                 anchors.fill:celllabel
-                opacity: .5
+                opacity: .8
             }
 
             StyledText
             {
                 id:celllabel
                 text: name
-                font.pointSize: 12;
+               fontSize: paraText
+               font.weight: Font.Light
                 color: "white" ;
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 width: imagerect.width
@@ -109,8 +89,8 @@ Item
                 when:manager.q_attributetype_sort !== ("52") && manager.q_subType !==("2"||"3") && manager.q_mediaType !== "4"
                 PropertyChanges {
                     target: mainItem
-                    width: scaleX(25);
-                    height: scaleY(25)
+                    width: scaleX(35);
+                    height: scaleY(35)
                     color: "transparent"
                 }
             },
@@ -131,7 +111,7 @@ Item
                 PropertyChanges {
                     target: mainItem
                     width: scaleX(20);
-                    height: scaleY(50)
+                    height: scaleY(45)
                     color: "transparent"
                 }
                 PropertyChanges {
@@ -150,7 +130,7 @@ Item
                 PropertyChanges {
                     target: mainItem
                     width: scaleX(20);
-                    height: scaleY(50)
+                    height: scaleY(45)
                     color: "transparent"
                 }
             },
@@ -159,8 +139,8 @@ Item
                 when: manager.q_mediaType === "4"
                 PropertyChanges {
                     target: mainItem
-                    width: scaleX(25);
-                    height: scaleY(25)
+                    width: scaleX(45);
+                    height: scaleY(45)
                     color: "transparent"
                 }
             }

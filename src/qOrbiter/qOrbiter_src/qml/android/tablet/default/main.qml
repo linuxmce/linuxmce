@@ -49,8 +49,8 @@ Item {
 
     FontLoader{
         id:myFont
-        name:"Sawasdee"
-        source: "../../fonts/Sawasdee.ttf"
+        name:"Roboto"
+
     }
 
     Rectangle{

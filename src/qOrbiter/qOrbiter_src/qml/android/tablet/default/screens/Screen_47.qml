@@ -7,10 +7,16 @@ Item {
     id:fileviewscreen
     width: manager.appWidth
     height: manager.appHeight
-   focus:true
-   Component.onCompleted: forceActiveFocus()
-   Keys.onMenuPressed: console.log("show subtypes menu!")
-   Keys.onPressed: if(event.key===Qt.Key_MediaPrevious){manager.goBackGrid()}
+    focus:true
+    state:"gridbrowsing"
+    Component.onCompleted: forceActiveFocus()
+    Keys.onMenuPressed: {
+        if(fileviewscreen.state!=="sorting")
+        fileviewscreen.state = "sorting"
+        else
+            fileviewscreen.state = "gridbrowsing"
+    }
+    Keys.onPressed: if(event.key===Qt.Key_MediaPrevious){manager.goBackGrid()}
     clip: true
     property int mouselocY: 0
     property int mouselocX: 0
@@ -32,7 +38,7 @@ Item {
 
     MediaListGridDelagate {
         id: contactDelegate
-       visible: false
+        visible: false
     }
 
     Rectangle{
@@ -141,63 +147,6 @@ Item {
     }
 
 
-
-//    Component
-//    {
-//        id: contactDelegate
-////        DropShadow{
-////            sourceItem: imagerect
-////            anchors.fill: imagerect
-////            color:"black"
-////            blur:.75
-////        }
-//        Rectangle
-//        {
-//            id:mainItem
-//            width: scaleX(25);
-//            height: scaleY(25)
-//            color: "transparent"
-//            clip:true
-
-//            Image
-//            {
-//                id: imagerect;
-//                source: path !=="" ? "http://192.168.80.1/lmce-admin/MediaImage.php?img="+path : ""
-//                height: scaleY(12);
-//                width: scaleX(18);
-//                anchors.centerIn: parent;
-//                fillMode: Image.PreserveAspectCrop
-//                 smooth: true
-//                asynchronous: true
-//            }
-
-//            Rectangle{
-//                id:textmask
-//                color: "grey"
-//                anchors.fill:celllabel
-//                opacity: .80
-//            }
-
-//            Text
-//            {
-//                id:celllabel
-//                text: name;
-//                font.pointSize: 14;
-//                color: "Black" ;
-//                wrapMode: "WrapAtWordBoundaryOrAnywhere"
-//                width: imagerect.width
-//                font.bold: true
-//                anchors.top: imagerect.top
-//                anchors.horizontalCenter: imagerect.horizontalCenter
-//            }
-//            MouseArea
-//            {
-//                anchors.fill: parent
-//                onClicked: {setStringParam(4, id); mouselocX = mouseX; mouselocY = mouseY}
-//            }
-//        }
-//    }
-
     Component
     {
         id: contactDelegateList
@@ -250,7 +199,10 @@ Item {
     }
 
 
-    MultiStateFileDisplay{id:grid_view1; anchors.top: pos_label.bottom}
+    MultiStateFileDisplay{
+        id:grid_view1; anchors.top: pos_label.bottom
+        height: scaleY(100)-pos_label.height-sortingOptions.height
+    }
 
 
     ListView{
@@ -270,7 +222,6 @@ Item {
                 anchors.centerIn: parent
                 color: index == manager.media_currentPage ? "green":"slategrey"
                 font.bold: true
-
             }
 
             MouseArea{
@@ -326,31 +277,29 @@ Item {
         }
     }
 
-
-
-
     Row
     {
+        id:sortingOptions
         height: childrenRect.height
         anchors.topMargin: 0
         width: childrenRect.width
         anchors.top: grid_view1.bottom
         anchors.horizontalCenter: parent.horizontalCenter
+        z:1
 
-        ButtonSq
-        {
+        ButtonSq{
             height: scaleY(style.iconHeight)
             width: scaleX(style.iconWidth)
             buttontext: "Go Back"
             buttontextbold: true
-            MouseArea
-            {
+            MouseArea{
                 anchors.fill:parent
                 onClicked: manager.goBackGrid()
             }
         }
         AttributeSelector {}
     }
+
     ListModel{
         id:alphabetlist
 
@@ -460,7 +409,30 @@ Item {
     GenericAttributeSelector{
         id:selector
         activeModel: "NULL"
-
     }
+
+    states: [
+        State {
+            name: "gridbrowsing"
+            PropertyChanges {
+                target: sortingOptions
+                height:0
+                visible:false
+                z:0
+            }
+        },
+        State{
+            name:"sorting"
+            PropertyChanges{
+                target:sortingOptions
+                height:childrenRect.height
+                visible:true
+                z:5
+            }
+        },
+        State{
+            name:"menu"
+        }
+    ]
 }
 

@@ -12,7 +12,8 @@ import QtQuick 1.0
         font.bold: isBold
         font.italic: isItalic
         font.pixelSize: fontSize
-        font.family: appFont.name       
+        font.family: appFont.name
+        font.weight: Font.Light
         color:"white"
 
     }
