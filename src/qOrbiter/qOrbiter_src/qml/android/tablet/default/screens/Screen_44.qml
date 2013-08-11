@@ -17,7 +17,7 @@ Item {
         anchors.centerIn: parent
         Rectangle{
             id:phil
-            color: "darkred"
+            color: "darkblue"
             radius: 5
 
             anchors.fill: parent

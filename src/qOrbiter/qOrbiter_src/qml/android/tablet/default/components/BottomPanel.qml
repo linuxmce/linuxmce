@@ -9,11 +9,10 @@ Item {
 
     Rectangle{
         anchors.fill: parent
-        color: "darkred"
+        color: "darkblue"
         opacity: .35
         border.color: "white"
         border.width: 2
-
     }
 
 //    Image {
@@ -29,6 +28,7 @@ Item {
         height:childrenRect.height +5
         width: childrenRect.width
         anchors.left: advanced_panel.left
+        anchors.verticalCenter: parent.verticalCenter
         spacing:10
         clip: false
 

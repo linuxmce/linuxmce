@@ -15,7 +15,7 @@ Rectangle{
     property int floorplantype
     property variant scenariomodel
     property alias rowFillImage: imgFill.source
-    property string rowFillColor: "darkblue"
+    property string rowFillColor: "maroon"
 
 
     Rectangle {

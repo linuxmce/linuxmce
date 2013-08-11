@@ -16,7 +16,7 @@ Item{
     signal btnPress()
     Rectangle {
         id:buttonBase
-        color: ms.pressed ? "white" : "darkblue"
+        color: ms.pressed ? "white" : "maroon"
         height: parent.height
         width: parent.width
         opacity:ms.pressed ? .65 : .45
