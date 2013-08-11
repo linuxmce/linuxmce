@@ -1770,6 +1770,10 @@ void Orbiter::SpecialHandlingObjectSelected(DesignObj_Orbiter *pDesignObj_Orbite
 		}
 		CMD_Bind_Icon(pDesignObj_Orbiter->m_ObjectID, "housemode" + StringUtils::itos(PK_DeviceGroup),true);
 	}
+	else if ( pDesignObj_Orbiter->m_iBaseObjectID==DESIGNOBJ_butWeatherMain_CONST || pDesignObj_Orbiter->m_iBaseObjectID==DESIGNOBJ_icoWeatherNow_CONST )
+	{
+		CMD_Bind_Icon(pDesignObj_Orbiter->m_ObjectID, "weather", true);
+	}
 	else if( pDesignObj_Orbiter->m_iBaseObjectID==DESIGNOBJ_butUserStatus_CONST || pDesignObj_Orbiter->m_iBaseObjectID==DESIGNOBJ_icoUserVoicemail_CONST )
 	{
 		DesignObj_Orbiter *pDesignObj_Orbiter_With_Commands = pDesignObj_Orbiter->m_iBaseObjectID==DESIGNOBJ_butUserStatus_CONST ? pDesignObj_Orbiter : (DesignObj_Orbiter *) pDesignObj_Orbiter->m_pParentObject;
@@ -1793,7 +1797,7 @@ void Orbiter::SpecialHandlingObjectSelected(DesignObj_Orbiter *pDesignObj_Orbite
 				}
 			}
 		}
-		
+	
 		if( pDesignObj_Orbiter->m_iBaseObjectID==DESIGNOBJ_icoUserVoicemail_CONST )
 		{
 			CMD_Bind_Icon(pDesignObj_Orbiter->m_ObjectID, "vm" + StringUtils::itos(PK_Users),true);
