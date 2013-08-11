@@ -286,6 +286,11 @@
 #define SCREEN_NonPluto_BluRay_FS_Options_CONST 300
 #define SCREEN_Tivo_Series_3_Remote_CONST 301
 #define SCREEN_Tivo_Series_2_Remote_CONST 302
+#define SCREEN_Weather_Now_CONST 303
+#define SCREEN_Weather_Forecast_CONST 304
+#define SCREEN_Weather_3day_CONST 305
+#define SCREEN_Weather_6day_CONST 306
+#define SCREEN_Weather_Radar_CONST 307
 
 #define SCREEN_TABLE "Screen"
 #define SCREEN_PK_SCREEN_FIELD "PK_Screen"

@@ -2856,6 +2856,27 @@
 #define DESIGNOBJ_mnuMoveFile_CONST 6254
 #define DESIGNOBJ_mnuWeatherNow_CONST 6255
 #define DESIGNOBJ_icoWeatherNow_CONST 6256
+#define DESIGNOBJ_mnuWeatherNowDesc_CONST 6257
+#define DESIGNOBJ_grpWeatherButtons_CONST 6258
+#define DESIGNOBJ_mnuWeatherForecast3_CONST 6259
+#define DESIGNOBJ_icoWeather1_CONST 6260
+#define DESIGNOBJ_icoWeather2_CONST 6261
+#define DESIGNOBJ_butWeatherNow_CONST 6262
+#define DESIGNOBJ_butWeatherForecast_CONST 6263
+#define DESIGNOBJ_butWeather3day_CONST 6264
+#define DESIGNOBJ_butWeather6day_CONST 6265
+#define DESIGNOBJ_butWeatherRadar_CONST 6266
+#define DESIGNOBJ_mnuWeatherForecast6_CONST 6267
+#define DESIGNOBJ_icoWeather3_CONST 6268
+#define DESIGNOBJ_icoWeather4_CONST 6269
+#define DESIGNOBJ_icoWeather5_CONST 6270
+#define DESIGNOBJ_mnuPanasonicBDTRemote_CONST 6271
+#define DESIGNOBJ_butNetflix_CONST 6272
+#define DESIGNOBJ_icoNetflix_CONST 6273
+#define DESIGNOBJ_butDMP_0_CONST 6274
+#define DESIGNOBJ_butDMP_1_CONST 6275
+#define DESIGNOBJ_mnuWeatherRadar_CONST 6276
+#define DESIGNOBJ_objWeatherRadar_CONST 6277
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

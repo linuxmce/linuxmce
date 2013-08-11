@@ -91,6 +91,13 @@
 #define EVENT_Media_Position_Changed_CONST 90
 #define EVENT_Outside_Temp_Changed_CONST 91
 #define EVENT_Outside_Condition_Changed_CONST 92
+#define EVENT_Outside_Humidity_Changed_CONST 93
+#define EVENT_Outside_Pressure_Changed_CONST 94
+#define EVENT_Outside_Wind_Speed_Change_CONST 95
+#define EVENT_Outside_Wind_Direction_Ch_CONST 96
+#define EVENT_Outside_Visibility_Change_CONST 97
+#define EVENT_Outside_Feels_Like_Change_CONST 98
+#define EVENT_Radar_Images_Changed_CONST 99
 
 #define EVENT_TABLE "Event"
 #define EVENT_PK_EVENT_FIELD "PK_Event"

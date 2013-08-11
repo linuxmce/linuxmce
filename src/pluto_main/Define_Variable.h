@@ -84,6 +84,22 @@
 #define VARIABLE_Weather_Data_8_CONST 81
 #define VARIABLE_Weather_Data_9_CONST 82
 #define VARIABLE_Weather_Data_10_CONST 83
+#define VARIABLE_Weather_Icon_1_CONST 84
+#define VARIABLE_Weather_Icon_2_CONST 85
+#define VARIABLE_Weather_Icon_3_CONST 86
+#define VARIABLE_Weather_Icon_4_CONST 87
+#define VARIABLE_Weather_Icon_5_CONST 88
+#define VARIABLE_Weather_Icon_6_CONST 89
+#define VARIABLE_Weather_Icon_7_CONST 90
+#define VARIABLE_Weather_Icon_8_CONST 91
+#define VARIABLE_Weather_Data_11_CONST 92
+#define VARIABLE_Weather_Data_12_CONST 93
+#define VARIABLE_Weather_Data_13_CONST 94
+#define VARIABLE_Weather_Data_14_CONST 95
+#define VARIABLE_Weather_Data_15_CONST 96
+#define VARIABLE_Weather_Data_16_CONST 97
+#define VARIABLE_Weather_Data_17_CONST 98
+#define VARIABLE_Weather_Data_18_CONST 99
 
 #define VARIABLE_TABLE "Variable"
 #define VARIABLE_PK_VARIABLE_FIELD "PK_Variable"
