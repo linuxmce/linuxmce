@@ -2877,13 +2877,13 @@
 #define DESIGNOBJ_butDMP_1_CONST 6275
 #define DESIGNOBJ_mnuWeatherRadar_CONST 6276
 #define DESIGNOBJ_objWeatherRadar_CONST 6277
-#define DESIGNOBJ_butWeatherMain_CONST 6279
-#define DESIGNOBJ_butWeatherMain_Button_CONST 6280
-#define DESIGNOBJ_icoWeatherTonight_CONST 6281
-#define DESIGNOBJ_icoWeather6_CONST 6282
-#define DESIGNOBJ_icoWeather16day_CONST 6283
-#define DESIGNOBJ_icoWeather26day_CONST 6284
-#define DESIGNOBJ_icoWeather36day_CONST 6285
+#define DESIGNOBJ_butWeatherMain_CONST 6278
+#define DESIGNOBJ_butWeatherMain_Button_CONST 6279
+#define DESIGNOBJ_icoWeatherTonight_CONST 6280
+#define DESIGNOBJ_icoWeather6_CONST 6281
+#define DESIGNOBJ_icoWeather16day_CONST 6282
+#define DESIGNOBJ_icoWeather26day_CONST 6283
+#define DESIGNOBJ_icoWeather36day_CONST 6284
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

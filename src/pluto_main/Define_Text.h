@@ -1280,6 +1280,7 @@
 #define TEXT_DMT_0_CONST 2223
 #define TEXT_DMT_1_CONST 2224
 #define TEXT_Weather_Radar_CONST 2225
+#define TEXT_Weather_CONST 2226
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"
