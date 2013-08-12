@@ -56,6 +56,7 @@
 #include "pluto_main/Define_UserMode.h"
 #include "pluto_main/Define_CommandParameter.h"
 #include "pluto_main/Define_Icon.h"
+#include "pluto_main/Define_Text.h"
 #include "pluto_main/Table_Command.h"
 #include "pluto_main/Table_CommandGroup.h"
 #include "pluto_main/Table_CommandGroup_Command.h"
@@ -85,4 +86,22 @@ void UpdateEntArea::AddDefaultClimateScenarios()
 
 void UpdateEntArea::AddDefaultClimateScenarios(Row_Room *pRow_Room)
 {
+  CommandGroup *pCommandGroup;
+  string sSQL;
+  CommandGroupArray commandGroupArray(pRow_Room,ARRAY_Climate_Scenarios_CONST,true);
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Starting to add climate scenarios ...");
+
+  // Add a weather button, if the Weather Plugin exists.
+  sSQL="SELECT PK_Device FROM Device JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_DeviceCategory="+StringUtils::itos(DEVICECATEGORY_Weather_PlugIns_CONST);
+  PlutoSqlResult result_set;
+  if( (result_set.r=m_pDatabase_pluto_main->db_wrapper_query_result(sSQL)) && result_set.r->row_count>0 )
+    {
+      pCommandGroup = commandGroupArray.FindCommandGroupByTemplate(TEMPLATE_Weather_Scenarios_CONST,"Weather",0,0,0,0,0,TEXT_Weather_CONST);
+      if (pCommandGroup)
+	{
+	  pCommandGroup->AddCommand(DEVICETEMPLATE_This_Orbiter_CONST,COMMAND_Goto_Screen_CONST,1,1,COMMANDPARAMETER_PK_Screen_CONST,StringUtils::itos(SCREEN_Weather_Now_CONST).c_str());
+	  pCommandGroup->m_pRow_CommandGroup->FK_DesignObj_set(DESIGNOBJ_butWeatherMain_CONST);
+	}
+    }
+
 }
