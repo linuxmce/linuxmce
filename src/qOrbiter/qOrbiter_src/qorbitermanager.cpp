@@ -279,10 +279,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 void qorbiterManager::gotoQScreen(QString s)
 {
 
-    if(currentScreen ==s ){
-        emit skinMessage("You are already on"+s);
-        return;
-    }
+
 
     if(s.contains("Screen_1.qml"))
     {
