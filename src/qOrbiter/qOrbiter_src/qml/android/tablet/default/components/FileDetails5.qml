@@ -1,16 +1,23 @@
 import QtQuick 1.0
 
 
-Rectangle {
+Item {
     id: filedetailrect
     width: scaleX(100)
     height: scaleY(100)
     anchors.centerIn: parent
-    color: style.highlight2
+
+    Rectangle{
+        id:phil
+        anchors.fill: parent
+        radius: 5
+        border.color: style.highlight1
+        border.width: 3
+        color: "darkred"
+    }
+
     clip: true
-    radius: 5
-    border.color: style.highlight1
-    border.width: 3
+
     property int bgImageProp:manager.q_subType ==="1" ? 43 : manager.q_attributetype_sort===53 ? 43 :36
 
     Behavior on height{
@@ -23,17 +30,12 @@ Rectangle {
         }
     }
 
-    Image {
-        id: fdbg
-        source: "../img/icons/nowplaying.png"
-        anchors.fill: filedetailrect
 
-    }
     Image{
         id:imdb
         anchors.fill: parent
         source:"http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=imdb&file="+filedetailsclass.file+"&val="+bgImageProp
-       onStatusChanged: imdb.status == Image.Ready ? filedetailrect.height = scaleY(100) : ""
+        onStatusChanged: imdb.status == Image.Ready ? filedetailrect.height = scaleY(100) : ""
     }
 
     //    Connections{
@@ -41,118 +43,108 @@ Rectangle {
     //        onImageChanged:filedetailsimage.source = "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?file="+filedetailsclass.file+"&prop="+bgImageProp
     //    }
 
-    Rectangle{
+    Item{
         id:titlerect
         height: childrenRect.height + 5
         width: parent.width
-        color:"transparent"
+
         Rectangle{
             anchors.fill: parent
             color:"black"
             opacity: .65
         }
 
-        radius:2.5
-        Text {
+        StyledText {
             id: text2
             anchors.horizontalCenter: parent.horizontalCenter
             text: qsTr("Filename")+filedetailsclass.path+ "/"+filedetailsclass.filename
-            font.pixelSize: 16
+            fontSize: paraText
             font.bold: true
-            color: "black"
+            color: "white"
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         }
 
     }
 
+//    Item{
+//        id:imageholder
+//        height:childrenRect.height
+//        width:childrenRect.width
+
+//        anchors.verticalCenter: parent.verticalCenter
+//        anchors.left: parent.left
+//        anchors.leftMargin: scaleX(2)
+//        BorderImage {
+//            id: borderimg
+//            horizontalTileMode: BorderImage.Repeat
+//            source: "../img/icons/drpshadow.png"
+//            anchors.fill: filedetailsimage
+//            anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
+//            border { left: 10; top: 10; right: 10; bottom: 10 }
+//            smooth: true
+//        }
+//        Image {
+//            id: filedetailsimage
+//            property bool profile : filedetailsimage.sourceSize.height > filedetailsimage.sourceSize.width ? true : false
+//            width:profile ? scaleX(25) : scaleX(45)
+//            height:profile ? scaleY(65) : scaleY(58)
+//            source:filedetailsclass.screenshot !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=img&val="+filedetailsclass.screenshot : ""
+//            smooth: true
+//        }
+
+//        Image {
+//            id: npmask
+//            source: "../img/icons/transparencymask.png"
+//            anchors.fill: filedetailsimage
+//            opacity: .5
+
+//        }
+//    }
     Rectangle{
-        id:imageholder
-        height:childrenRect.height
-        width:childrenRect.width
-        color: "transparent"
-
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
-        anchors.leftMargin: scaleX(2)
-        BorderImage {
-            id: borderimg
-            horizontalTileMode: BorderImage.Repeat
-            source: "../img/icons/drpshadow.png"
-            anchors.fill: filedetailsimage
-            anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
-            border { left: 10; top: 10; right: 10; bottom: 10 }
-            smooth: true
-        }
-        Image {
-            id: filedetailsimage
-            property bool profile : filedetailsimage.sourceSize.height > filedetailsimage.sourceSize.width ? true : false
-            width:profile ? scaleX(25) : scaleX(45)
-            height:profile ? scaleY(65) : scaleY(58)
-           source:filedetailsclass.screenshot !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=img&val="+filedetailsclass.screenshot : ""
-            smooth: true
-        }
-
-        Image {
-            id: npmask
-            source: "../img/icons/transparencymask.png"
-            anchors.fill: filedetailsimage
-            opacity: .5
-
-        }
+        anchors.fill: rectangle1
+        color: "black"
+        opacity: .65
     }
 
-
-    Rectangle {
+    Flickable {
         id: rectangle1
-        anchors.verticalCenter: imageholder.verticalCenter
-
-        width:  parent.width  - imageholder.width
-        height: childrenRect.height
-        radius:2.5
-        clip:  true
-        color:"transparent"
-
-        anchors.left: imageholder.right
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: titlerect.bottom
+        width:  parent.width
+        height: scaleY(75)
+        anchors.left: parent.left
         anchors.leftMargin: scaleX(1)
-        Rectangle{
-            anchors.fill: parent
-            color: "black"
-            opacity: .65
-        }
+        contentHeight: infoCol.height
+        contentWidth: width
+        clip:true
+
 
         Column
         {
+        id:infoCol
             spacing:5
             anchors.margins: scaleY(1)
             width: parent.width*.95
             height: childrenRect.height
             StyledText {
                 id: fnametext
-                text: "Title: " + filedetailsclass.mediatitle
-                font.pixelSize: scaleY(4)
+                text: filedetailsclass.mediatitle
+                fontSize: headerText
                 color:"white"
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 width: parent.width
             }
 
-            StyledText {
-                id: storageDeviceText
-                width: scaleX(35)
-                text: qsTr("Located on Storage Device: ") + filedetailsclass.qs_storageDevice
-                wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                smooth: true
-                font.pixelSize: scaleY(3)
-                color:"white"
-            }
+
 
             StyledText {
                 id: programtext
                 width:parent.width
-                text: qsTr("Album: ") + filedetailsclass.album
+                text:  filedetailsclass.program
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 smooth: true
-                font.pixelSize: scaleY(3)
-                visible:  filedetailsclass.album =="" ? false: true
+               fontSize: headerText
+                visible:  filedetailsclass.program =="" ? false: true
                 color:"white"
             }
 
@@ -160,10 +152,10 @@ Rectangle {
                 id: episode
                 width: scaleX(35)
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                text: qsTr("Track: ") + filedetailsclass.track
+                text: qsTr("Episode: ") + filedetailsclass.episode
                 smooth: true
-                font.pixelSize: scaleY(3)
-                visible:  filedetailsclass.track =="" ? false: true
+                fontSize: paraText
+                visible:  filedetailsclass.episode =="" ? false: true
                 color:"white"
             }
 
@@ -174,7 +166,7 @@ Rectangle {
                 text: qsTr("Genre(s): ") + filedetailsclass.genre
                 //font.bold: true
                 smooth: true
-                font.pixelSize: scaleY(3)
+               fontSize: paraText
                 visible:  filedetailsclass.genre =="" ? false: true
                 color:"white"
 
@@ -184,10 +176,9 @@ Rectangle {
                 width: scaleX(35)
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 text: qsTr("Released: ") + dcenowplaying.releasedate
-                font.family: "Droid Sans"
                 // font.bold: true
                 smooth: true
-                font.pixelSize: scaleY(3)
+                fontSize:paraText
                 visible:  filedetailsclass.releasedate ==="" ? false: true
                 color:"white"
             }
@@ -198,8 +189,6 @@ Rectangle {
                 width: parent.width
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 text: qsTr("Perfomers: ") + filedetailsclass.performerlist
-
-                //  font.bold: true
                 smooth: true
                 font.pixelSize: scaleY(3)
                 elide: "ElideRight"
@@ -211,10 +200,9 @@ Rectangle {
                 id: studiotext
                 width: scaleX(35)
                 text: qsTr("Program: ") + filedetailsclass.studio
-
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 smooth: true
-                font.pixelSize: scaleY(2)
+                fontSize: paraText
                 visible:  filedetailsclass.studio =="" ? false: true
                 color:"white"
             }
@@ -224,7 +212,8 @@ Rectangle {
                 text: filedetailsclass.rating
                 visible:  filedetailsclass.rating ==="" ? false: true
                 color:"white"
-                font.pixelSize: scaleY(3)
+                font.pixelSize:headerText
+                font.weight: Font.DemiBold
             }
 
             StyledText {
@@ -233,11 +222,20 @@ Rectangle {
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 text:  filedetailsclass.synop
                 smooth: true
-                font.pixelSize: scaleY(3)
-               // elide: "ElideRight"
+                font.pixelSize: paraText
+                // elide: "ElideRight"
                 visible:  filedetailsclass.synop =="" ? false: true
                 color:"white"
 
+            }
+            StyledText {
+                id: storageDeviceText
+                width: scaleX(35)
+                text: qsTr("Located on Storage Device: ") + filedetailsclass.qs_storageDevice
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                smooth: true
+                fontSize: paraText
+                color:"white"
             }
         }
     }

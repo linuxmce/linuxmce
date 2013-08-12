@@ -94,25 +94,29 @@ Item {
     function screenchange(screenname )
     {
 
+        if(pageLoader.source === "screens/"+screenname)
+            return;
+
         componentLoader.source = ""
         pageLoader.source = "screens/"+screenname
 
-        if (pageLoader.status == Component.Ready)
-        {
-            manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-        }
-        else if (pageLoader.status == Component.Loading)
-        {
-            console.log("loading page from network")
-            finishLoading(screenname)
-        }
-        else
-        {
-            console.log("Command to change to:" + screenname + " failed!")
-            screenfile = screenname
-            pageLoader.source = "screens/Screen_x.qml"
 
-        }
+//        if (pageLoader.status == Component.Ready)
+//        {
+//            manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
+//        }
+//        else if (pageLoader.status == Component.Loading)
+//        {
+//            console.log("loading page from network")
+//            finishLoading(screenname)
+//        }
+//        else
+//        {
+//            console.log("Command to change to:" + screenname + " failed!")
+//            screenfile = screenname
+//            pageLoader.source = "screens/Screen_x.qml"
+
+//        }
     }
 
     function finishLoading (screenname)

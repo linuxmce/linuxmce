@@ -139,7 +139,7 @@ Item
                 when: manager.q_mediaType === "4"
                 PropertyChanges {
                     target: mainItem
-                    width: scaleX(45);
+                    width: scaleX(25);
                     height: scaleY(45)
                     color: "transparent"
                 }

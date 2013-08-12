@@ -87,4 +87,4 @@ MediaListGridDelagate MediaListGridDelagate.qml
 FileDetailsButtons FileDetailsButtons.qml
 FileDetailsButton FileDetailsButton.qml
 GenericAttributeSelector GenericAttributeSelector.qml
-MediaListPositionHeader MediaListPositionHeader.qml
+MediaPositionHeader MediaPositionHeader.qml
