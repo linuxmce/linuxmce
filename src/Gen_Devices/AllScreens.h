@@ -7694,10 +7694,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popLights : public PreformedCommand
+	class SCREEN_Game_Commodore_Remote_Alt : public PreformedCommand
 	{
 	public:
-		SCREEN_popLights(long DeviceIDFrom, long DeviceIDTo,
+		SCREEN_Game_Commodore_Remote_Alt(long DeviceIDFrom, long DeviceIDTo,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7709,10 +7709,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popLights_DL : public PreformedCommand
+	class SCREEN_Game_Commodore_Remote_Alt_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_popLights_DL(long DeviceIDFrom, string sDeviceIDTo,
+		SCREEN_Game_Commodore_Remote_Alt_DL(long DeviceIDFrom, string sDeviceIDTo,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7724,10 +7724,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popLights_DT : public PreformedCommand
+	class SCREEN_Game_Commodore_Remote_Alt_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_popLights_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,
+		SCREEN_Game_Commodore_Remote_Alt_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7739,10 +7739,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popLights_Cat : public PreformedCommand
+	class SCREEN_Game_Commodore_Remote_Alt_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_popLights_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,
+		SCREEN_Game_Commodore_Remote_Alt_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7754,10 +7754,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popMedia : public PreformedCommand
+	class SCREEN_rokuRemote : public PreformedCommand
 	{
 	public:
-		SCREEN_popMedia(long DeviceIDFrom, long DeviceIDTo,
+		SCREEN_rokuRemote(long DeviceIDFrom, long DeviceIDTo,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7769,10 +7769,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popMedia_DL : public PreformedCommand
+	class SCREEN_rokuRemote_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_popMedia_DL(long DeviceIDFrom, string sDeviceIDTo,
+		SCREEN_rokuRemote_DL(long DeviceIDFrom, string sDeviceIDTo,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7784,10 +7784,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popMedia_DT : public PreformedCommand
+	class SCREEN_rokuRemote_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_popMedia_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,
+		SCREEN_rokuRemote_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7799,10 +7799,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popMedia_Cat : public PreformedCommand
+	class SCREEN_rokuRemote_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_popMedia_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,
+		SCREEN_rokuRemote_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7814,10 +7814,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popClimate : public PreformedCommand
+	class SCREEN_rokuKBD : public PreformedCommand
 	{
 	public:
-		SCREEN_popClimate(long DeviceIDFrom, long DeviceIDTo,
+		SCREEN_rokuKBD(long DeviceIDFrom, long DeviceIDTo,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7829,10 +7829,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popClimate_DL : public PreformedCommand
+	class SCREEN_rokuKBD_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_popClimate_DL(long DeviceIDFrom, string sDeviceIDTo,
+		SCREEN_rokuKBD_DL(long DeviceIDFrom, string sDeviceIDTo,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7844,10 +7844,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popClimate_DT : public PreformedCommand
+	class SCREEN_rokuKBD_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_popClimate_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,
+		SCREEN_rokuKBD_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7859,10 +7859,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popClimate_Cat : public PreformedCommand
+	class SCREEN_rokuKBD_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_popClimate_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,
+		SCREEN_rokuKBD_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7874,10 +7874,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popTelecom : public PreformedCommand
+	class SCREEN_Game_Atari800KBD : public PreformedCommand
 	{
 	public:
-		SCREEN_popTelecom(long DeviceIDFrom, long DeviceIDTo,
+		SCREEN_Game_Atari800KBD(long DeviceIDFrom, long DeviceIDTo,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7889,10 +7889,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popTelecom_DL : public PreformedCommand
+	class SCREEN_Game_Atari800KBD_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_popTelecom_DL(long DeviceIDFrom, string sDeviceIDTo,
+		SCREEN_Game_Atari800KBD_DL(long DeviceIDFrom, string sDeviceIDTo,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7904,10 +7904,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popTelecom_DT : public PreformedCommand
+	class SCREEN_Game_Atari800KBD_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_popTelecom_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,
+		SCREEN_Game_Atari800KBD_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7919,10 +7919,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popTelecom_Cat : public PreformedCommand
+	class SCREEN_Game_Atari800KBD_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_popTelecom_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,
+		SCREEN_Game_Atari800KBD_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7934,10 +7934,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popSecurity : public PreformedCommand
+	class SCREEN_Game_Intellivision : public PreformedCommand
 	{
 	public:
-		SCREEN_popSecurity(long DeviceIDFrom, long DeviceIDTo,
+		SCREEN_Game_Intellivision(long DeviceIDFrom, long DeviceIDTo,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7949,10 +7949,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popSecurity_DL : public PreformedCommand
+	class SCREEN_Game_Intellivision_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_popSecurity_DL(long DeviceIDFrom, string sDeviceIDTo,
+		SCREEN_Game_Intellivision_DL(long DeviceIDFrom, string sDeviceIDTo,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7964,10 +7964,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popSecurity_DT : public PreformedCommand
+	class SCREEN_Game_Intellivision_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_popSecurity_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,
+		SCREEN_Game_Intellivision_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -7979,10 +7979,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_popSecurity_Cat : public PreformedCommand
+	class SCREEN_Game_Intellivision_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_popSecurity_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,
+		SCREEN_Game_Intellivision_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,
 			string sLocation,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 5, 
@@ -8826,10 +8826,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiLighting : public PreformedCommand
+	class SCREEN_Commodore_Remote : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiLighting(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Commodore_Remote(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "168" /* screen ID */
@@ -8839,10 +8839,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiLighting_DL : public PreformedCommand
+	class SCREEN_Commodore_Remote_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiLighting_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Commodore_Remote_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "168" /* screen ID */
@@ -8852,10 +8852,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiLighting_DT : public PreformedCommand
+	class SCREEN_Commodore_Remote_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiLighting_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Commodore_Remote_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "168" /* screen ID */
@@ -8865,10 +8865,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiLighting_Cat : public PreformedCommand
+	class SCREEN_Commodore_Remote_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiLighting_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Commodore_Remote_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "168" /* screen ID */
@@ -8878,10 +8878,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiClimate : public PreformedCommand
+	class SCREEN_AirTunes : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiClimate(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_AirTunes(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "169" /* screen ID */
@@ -8891,10 +8891,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiClimate_DL : public PreformedCommand
+	class SCREEN_AirTunes_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiClimate_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_AirTunes_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "169" /* screen ID */
@@ -8904,10 +8904,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiClimate_DT : public PreformedCommand
+	class SCREEN_AirTunes_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiClimate_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_AirTunes_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "169" /* screen ID */
@@ -8917,10 +8917,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiClimate_Cat : public PreformedCommand
+	class SCREEN_AirTunes_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiClimate_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_AirTunes_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "169" /* screen ID */
@@ -8930,10 +8930,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiSecurity : public PreformedCommand
+	class SCREEN_AirTunes_FS : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiSecurity(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_AirTunes_FS(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "170" /* screen ID */
@@ -8943,10 +8943,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiSecurity_DL : public PreformedCommand
+	class SCREEN_AirTunes_FS_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiSecurity_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_AirTunes_FS_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "170" /* screen ID */
@@ -8956,10 +8956,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiSecurity_DT : public PreformedCommand
+	class SCREEN_AirTunes_FS_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiSecurity_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_AirTunes_FS_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "170" /* screen ID */
@@ -8969,10 +8969,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiSecurity_Cat : public PreformedCommand
+	class SCREEN_AirTunes_FS_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiSecurity_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_AirTunes_FS_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "170" /* screen ID */
@@ -8982,10 +8982,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiTelecom : public PreformedCommand
+	class SCREEN_AirTunes_FS_Options : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiTelecom(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_AirTunes_FS_Options(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "171" /* screen ID */
@@ -8995,10 +8995,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiTelecom_DL : public PreformedCommand
+	class SCREEN_AirTunes_FS_Options_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiTelecom_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_AirTunes_FS_Options_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "171" /* screen ID */
@@ -9008,10 +9008,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiTelecom_DT : public PreformedCommand
+	class SCREEN_AirTunes_FS_Options_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiTelecom_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_AirTunes_FS_Options_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "171" /* screen ID */
@@ -9021,10 +9021,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiTelecom_Cat : public PreformedCommand
+	class SCREEN_AirTunes_FS_Options_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiTelecom_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_AirTunes_FS_Options_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "171" /* screen ID */
@@ -9034,10 +9034,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiFullScreen : public PreformedCommand
+	class SCREEN_Commodore_FS : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiFullScreen(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Commodore_FS(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "172" /* screen ID */
@@ -9047,10 +9047,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiFullScreen_DL : public PreformedCommand
+	class SCREEN_Commodore_FS_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiFullScreen_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Commodore_FS_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "172" /* screen ID */
@@ -9060,10 +9060,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiFullScreen_DT : public PreformedCommand
+	class SCREEN_Commodore_FS_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiFullScreen_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Commodore_FS_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "172" /* screen ID */
@@ -9073,10 +9073,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiFullScreen_Cat : public PreformedCommand
+	class SCREEN_Commodore_FS_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiFullScreen_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Commodore_FS_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "172" /* screen ID */
@@ -9086,10 +9086,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiVideoRemote : public PreformedCommand
+	class SCREEN_Commodore_FS_Options : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiVideoRemote(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Commodore_FS_Options(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "173" /* screen ID */
@@ -9099,10 +9099,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiVideoRemote_DL : public PreformedCommand
+	class SCREEN_Commodore_FS_Options_DL : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiVideoRemote_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Commodore_FS_Options_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "173" /* screen ID */
@@ -9112,10 +9112,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiVideoRemote_DT : public PreformedCommand
+	class SCREEN_Commodore_FS_Options_DT : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiVideoRemote_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Commodore_FS_Options_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "173" /* screen ID */
@@ -9125,10 +9125,10 @@ namespace DCE
 		}
 	};
 
-	class SCREEN_AudiVideoRemote_Cat : public PreformedCommand
+	class SCREEN_Commodore_FS_Options_Cat : public PreformedCommand
 	{
 	public:
-		SCREEN_AudiVideoRemote_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		SCREEN_Commodore_FS_Options_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
 		{
 			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
 				COMMANDPARAMETER_PK_Screen_CONST, "173" /* screen ID */
@@ -15282,6 +15282,266 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 		}
 	};
 
+	class SCREEN_Weather_Now : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_Now(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "303" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_Now_DL : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_Now_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "303" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_Now_DT : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_Now_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "303" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_Now_Cat : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_Now_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "303" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_Forecast : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_Forecast(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "304" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_Forecast_DL : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_Forecast_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "304" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_Forecast_DT : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_Forecast_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "304" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_Forecast_Cat : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_Forecast_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "304" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_3day : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_3day(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "305" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_3day_DL : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_3day_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "305" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_3day_DT : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_3day_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "305" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_3day_Cat : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_3day_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "305" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_6day : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_6day(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "306" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_6day_DL : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_6day_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "306" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_6day_DT : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_6day_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "306" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_6day_Cat : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_6day_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "306" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_Radar : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_Radar(long DeviceIDFrom, long DeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "307" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_Radar_DL : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_Radar_DL(long DeviceIDFrom, string sDeviceIDTo,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, sDeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "307" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_Radar_DT : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_Radar_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "307" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
+	class SCREEN_Weather_Radar_Cat : public PreformedCommand
+	{
+	public:
+		SCREEN_Weather_Radar_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,eInterruption _eInterruption=interuptAlways,bool bTurnOnMonitor=false,bool bQueueIfIgnored=false)
+		{
+			m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, COMMAND_Goto_Screen_CONST, 4, 
+				COMMANDPARAMETER_PK_Screen_CONST, "307" /* screen ID */
+				,COMMANDPARAMETER_Turn_On_CONST, bTurnOnMonitor ? "1" : "0" /* turn on monitor */
+				,COMMANDPARAMETER_Interruption_CONST, StringUtils::itos(_eInterruption).c_str() /* interruption */
+				,COMMANDPARAMETER_Queue_CONST, bQueueIfIgnored ? "1" : "0" /* queue the message if it's ignored */);
+		}
+	};
+
 
 	class ScreenHandlerBase
 	{
@@ -15452,11 +15712,11 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 		virtual void SCREEN_DVDMenuFullScreenOpt(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_VlcFullScreen(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_VlcFullScreenOpt(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_popLights(long PK_Screen, string sLocation){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_popMedia(long PK_Screen, string sLocation){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_popClimate(long PK_Screen, string sLocation){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_popTelecom(long PK_Screen, string sLocation){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_popSecurity(long PK_Screen, string sLocation){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Game_Commodore_Remote_Alt(long PK_Screen, string sLocation){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_rokuRemote(long PK_Screen, string sLocation){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_rokuKBD(long PK_Screen, string sLocation){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Game_Atari800KBD(long PK_Screen, string sLocation){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Game_Intellivision(long PK_Screen, string sLocation){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_popOthers(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_Game_Atari_5200(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_Game_Atari_5200_Monitor_Mode(long PK_Screen){ GotoScreen(PK_Screen); }
@@ -15473,12 +15733,12 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 		virtual void SCREEN_Get_Capture_Card_Audio_Port(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_Apple_2_Remote(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_Apple_2_FS(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiLighting(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiClimate(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiSecurity(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiTelecom(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiFullScreen(long PK_Screen){ GotoScreen(PK_Screen); }
-		virtual void SCREEN_AudiVideoRemote(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Commodore_Remote(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_AirTunes(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_AirTunes_FS(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_AirTunes_FS_Options(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Commodore_FS(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Commodore_FS_Options(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_CleanScreen(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_VideoWizard(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_DialogCannotPlayMedia(long PK_Screen, string sErrors){ GotoScreen(PK_Screen); }
@@ -15593,6 +15853,11 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 		virtual void SCREEN_NonPluto_BluRay_FS_Options(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_Tivo_Series_3_Remote(long PK_Screen){ GotoScreen(PK_Screen); }
 		virtual void SCREEN_Tivo_Series_2_Remote(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Weather_Now(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Weather_Forecast(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Weather_3day(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Weather_6day(long PK_Screen){ GotoScreen(PK_Screen); }
+		virtual void SCREEN_Weather_Radar(long PK_Screen){ GotoScreen(PK_Screen); }
 
 		virtual void ReceivedGotoScreenMessage(int nPK_Screen, Message *pMessage)
 		{
@@ -16518,35 +16783,35 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 				{
 					ResetCallBacks();
 					string sLocation = pMessage->m_mapParameters[195];
-					SCREEN_popLights(nPK_Screen, sLocation);
+					SCREEN_Game_Commodore_Remote_Alt(nPK_Screen, sLocation);
 					break;
 				}
 				case 148:
 				{
 					ResetCallBacks();
 					string sLocation = pMessage->m_mapParameters[195];
-					SCREEN_popMedia(nPK_Screen, sLocation);
+					SCREEN_rokuRemote(nPK_Screen, sLocation);
 					break;
 				}
 				case 149:
 				{
 					ResetCallBacks();
 					string sLocation = pMessage->m_mapParameters[195];
-					SCREEN_popClimate(nPK_Screen, sLocation);
+					SCREEN_rokuKBD(nPK_Screen, sLocation);
 					break;
 				}
 				case 150:
 				{
 					ResetCallBacks();
 					string sLocation = pMessage->m_mapParameters[195];
-					SCREEN_popTelecom(nPK_Screen, sLocation);
+					SCREEN_Game_Atari800KBD(nPK_Screen, sLocation);
 					break;
 				}
 				case 151:
 				{
 					ResetCallBacks();
 					string sLocation = pMessage->m_mapParameters[195];
-					SCREEN_popSecurity(nPK_Screen, sLocation);
+					SCREEN_Game_Intellivision(nPK_Screen, sLocation);
 					break;
 				}
 				case 152:
@@ -16648,37 +16913,37 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 				case 168:
 				{
 					ResetCallBacks();
-					SCREEN_AudiLighting(nPK_Screen);
+					SCREEN_Commodore_Remote(nPK_Screen);
 					break;
 				}
 				case 169:
 				{
 					ResetCallBacks();
-					SCREEN_AudiClimate(nPK_Screen);
+					SCREEN_AirTunes(nPK_Screen);
 					break;
 				}
 				case 170:
 				{
 					ResetCallBacks();
-					SCREEN_AudiSecurity(nPK_Screen);
+					SCREEN_AirTunes_FS(nPK_Screen);
 					break;
 				}
 				case 171:
 				{
 					ResetCallBacks();
-					SCREEN_AudiTelecom(nPK_Screen);
+					SCREEN_AirTunes_FS_Options(nPK_Screen);
 					break;
 				}
 				case 172:
 				{
 					ResetCallBacks();
-					SCREEN_AudiFullScreen(nPK_Screen);
+					SCREEN_Commodore_FS(nPK_Screen);
 					break;
 				}
 				case 173:
 				{
 					ResetCallBacks();
-					SCREEN_AudiVideoRemote(nPK_Screen);
+					SCREEN_Commodore_FS_Options(nPK_Screen);
 					break;
 				}
 				case 174:
@@ -17405,6 +17670,36 @@ PK_DeviceData .... */, sOptions.c_str(), 224 /* PK_PnpQueue */, StringUtils::lto
 				{
 					ResetCallBacks();
 					SCREEN_Tivo_Series_2_Remote(nPK_Screen);
+					break;
+				}
+				case 303:
+				{
+					ResetCallBacks();
+					SCREEN_Weather_Now(nPK_Screen);
+					break;
+				}
+				case 304:
+				{
+					ResetCallBacks();
+					SCREEN_Weather_Forecast(nPK_Screen);
+					break;
+				}
+				case 305:
+				{
+					ResetCallBacks();
+					SCREEN_Weather_3day(nPK_Screen);
+					break;
+				}
+				case 306:
+				{
+					ResetCallBacks();
+					SCREEN_Weather_6day(nPK_Screen);
+					break;
+				}
+				case 307:
+				{
+					ResetCallBacks();
+					SCREEN_Weather_Radar(nPK_Screen);
 					break;
 				}
 

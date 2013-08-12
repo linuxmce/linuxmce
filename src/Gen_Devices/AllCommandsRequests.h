@@ -30328,5 +30328,157 @@ namespace DCE
 			COMMANDPARAMETER_Hue_CONST, StringUtils::itos(iHue).c_str(),
 			COMMANDPARAMETER_Saturation_CONST, StringUtils::itos(iSaturation).c_str()); }
 	};
+	class RESP_Get_Weather_Text : public PreformedCommandResponse {
+		char **m_pData;int *m_iData_Size;
+	public:
+		RESP_Get_Weather_Text(char **pData,int *iData_Size) { 
+		m_pData=pData; m_iData_Size=iData_Size; }
+		void ParseResponse(Message *pMessage) {
+			*m_pData=pMessage->m_mapData_Parameters[COMMANDPARAMETER_Data_CONST]; pMessage->m_mapData_Parameters.erase(COMMANDPARAMETER_Data_CONST); *m_iData_Size=pMessage->m_mapData_Lengths[COMMANDPARAMETER_Data_CONST]; };
+	};
+	class CMD_Get_Weather_Text : public PreformedCommand {
+	public:
+		CMD_Get_Weather_Text(long DeviceIDFrom, long DeviceIDTo,int iPK_Variable,string sName,char **pData,int *iData_Size) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Get_Weather_Text_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_PK_Variable_CONST, StringUtils::itos(iPK_Variable).c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str(),
+			- COMMANDPARAMETER_Data_CONST, *pData,*iData_Size);		m_pcResponse = new RESP_Get_Weather_Text(pData,iData_Size); }
+	};
+	class CMD_Get_Weather_Text_DL : public PreformedCommand {
+	public:
+		CMD_Get_Weather_Text_DL(long DeviceIDFrom, string DeviceIDTo,int iPK_Variable,string sName,char **pData,int *iData_Size) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Weather_Text_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_PK_Variable_CONST, StringUtils::itos(iPK_Variable).c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str(),
+			- COMMANDPARAMETER_Data_CONST, *pData,*iData_Size);		m_pcResponse = new RESP_Get_Weather_Text(pData,iData_Size); }
+	};
+	class CMD_Get_Weather_Text_DT : public PreformedCommand {
+	public:
+		CMD_Get_Weather_Text_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,int iPK_Variable,string sName,char **pData,int *iData_Size) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Weather_Text_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_PK_Variable_CONST, StringUtils::itos(iPK_Variable).c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str(),
+			- COMMANDPARAMETER_Data_CONST, *pData,*iData_Size);		m_pcResponse = new RESP_Get_Weather_Text(pData,iData_Size); }
+	};
+	class CMD_Get_Weather_Text_Cat : public PreformedCommand {
+	public:
+		CMD_Get_Weather_Text_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,int iPK_Variable,string sName,char **pData,int *iData_Size) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Weather_Text_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_PK_Variable_CONST, StringUtils::itos(iPK_Variable).c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str(),
+			- COMMANDPARAMETER_Data_CONST, *pData,*iData_Size);		m_pcResponse = new RESP_Get_Weather_Text(pData,iData_Size); }
+	};
+	class CMD_NOREP_Get_Weather_Text : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Weather_Text(long DeviceIDFrom, long DeviceIDTo,int iPK_Variable,string sName) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Weather_Text_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_PK_Variable_CONST, StringUtils::itos(iPK_Variable).c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str()); }
+	};
+	class CMD_NOREP_Get_Weather_Text_DL : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Weather_Text_DL(long DeviceIDFrom, string DeviceIDTo,int iPK_Variable,string sName) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Weather_Text_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_PK_Variable_CONST, StringUtils::itos(iPK_Variable).c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str()); }
+	};
+	class CMD_NOREP_Get_Weather_Text_DT : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Weather_Text_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,int iPK_Variable,string sName) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Weather_Text_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_PK_Variable_CONST, StringUtils::itos(iPK_Variable).c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str()); }
+	};
+	class CMD_NOREP_Get_Weather_Text_Cat : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Weather_Text_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,int iPK_Variable,string sName) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Weather_Text_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_PK_Variable_CONST, StringUtils::itos(iPK_Variable).c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str()); }
+	};
+	class RESP_Get_Weather_Value : public PreformedCommandResponse {
+		int *m_iValue;
+	public:
+		RESP_Get_Weather_Value(int *iValue) { 
+		m_iValue=iValue; }
+		void ParseResponse(Message *pMessage) {
+			*m_iValue=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Value_CONST].c_str()); };
+	};
+	class CMD_Get_Weather_Value : public PreformedCommand {
+	public:
+		CMD_Get_Weather_Value(long DeviceIDFrom, long DeviceIDTo,int iPK_Variable,string sName,int *iValue) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Get_Weather_Value_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_PK_Variable_CONST, StringUtils::itos(iPK_Variable).c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str(),
+			COMMANDPARAMETER_Value_CONST, StringUtils::itos(*iValue).c_str());		m_pcResponse = new RESP_Get_Weather_Value(iValue); }
+	};
+	class CMD_Get_Weather_Value_DL : public PreformedCommand {
+	public:
+		CMD_Get_Weather_Value_DL(long DeviceIDFrom, string DeviceIDTo,int iPK_Variable,string sName,int *iValue) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Weather_Value_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_PK_Variable_CONST, StringUtils::itos(iPK_Variable).c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str(),
+			COMMANDPARAMETER_Value_CONST, StringUtils::itos(*iValue).c_str());		m_pcResponse = new RESP_Get_Weather_Value(iValue); }
+	};
+	class CMD_Get_Weather_Value_DT : public PreformedCommand {
+	public:
+		CMD_Get_Weather_Value_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,int iPK_Variable,string sName,int *iValue) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Weather_Value_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_PK_Variable_CONST, StringUtils::itos(iPK_Variable).c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str(),
+			COMMANDPARAMETER_Value_CONST, StringUtils::itos(*iValue).c_str());		m_pcResponse = new RESP_Get_Weather_Value(iValue); }
+	};
+	class CMD_Get_Weather_Value_Cat : public PreformedCommand {
+	public:
+		CMD_Get_Weather_Value_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,int iPK_Variable,string sName,int *iValue) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Weather_Value_CONST,
+			3 /* number of parameters */,
+			COMMANDPARAMETER_PK_Variable_CONST, StringUtils::itos(iPK_Variable).c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str(),
+			COMMANDPARAMETER_Value_CONST, StringUtils::itos(*iValue).c_str());		m_pcResponse = new RESP_Get_Weather_Value(iValue); }
+	};
+	class CMD_NOREP_Get_Weather_Value : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Weather_Value(long DeviceIDFrom, long DeviceIDTo,int iPK_Variable,string sName) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Weather_Value_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_PK_Variable_CONST, StringUtils::itos(iPK_Variable).c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str()); }
+	};
+	class CMD_NOREP_Get_Weather_Value_DL : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Weather_Value_DL(long DeviceIDFrom, string DeviceIDTo,int iPK_Variable,string sName) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Weather_Value_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_PK_Variable_CONST, StringUtils::itos(iPK_Variable).c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str()); }
+	};
+	class CMD_NOREP_Get_Weather_Value_DT : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Weather_Value_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,int iPK_Variable,string sName) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Weather_Value_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_PK_Variable_CONST, StringUtils::itos(iPK_Variable).c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str()); }
+	};
+	class CMD_NOREP_Get_Weather_Value_Cat : public PreformedCommand {
+	public:
+		CMD_NOREP_Get_Weather_Value_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,int iPK_Variable,string sName) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Get_Weather_Value_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_PK_Variable_CONST, StringUtils::itos(iPK_Variable).c_str(),
+			COMMANDPARAMETER_Name_CONST, sName.c_str()); }
+	};
 }
 #endif
