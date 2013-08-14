@@ -47,6 +47,7 @@ public:
 
 	// Used to find any USB microphones
 	DeviceData_Base *m_pUSBMicrophoneDevice;
+	string m_sSoundCardNumber;
 	
 //<-dceag-const-b->
 public:

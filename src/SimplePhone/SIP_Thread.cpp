@@ -78,6 +78,17 @@ static void LS_RegisterWithAsterisk()
 	{
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "LS_RegisterWithAsterisk: Proxy wasn't registered");
 	}
+
+		const char** soundcards=linphone_core_get_sound_devices(LS_LinphoneCore);
+		if (!LS_pSimplePhone->m_sSoundCardNumber.empty())
+		  {
+		    int iSoundCardNum=atoi(LS_pSimplePhone->m_sSoundCardNumber.c_str());
+		    linphone_core_set_capture_device(LS_LinphoneCore,soundcards[iSoundCardNum+1]);
+		    linphone_core_set_playback_device(LS_LinphoneCore,soundcards[iSoundCardNum+1]);
+		    linphone_core_set_ringer_device(LS_LinphoneCore,soundcards[iSoundCardNum+1]);
+		    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"LS_RegisterWithAsterisk: Sound card set to %s",soundcards[iSoundCardNum+1]);
+		  }
+
 	func_exit("LS_RegisterWithAsterisk");
 }
 /** Thread main loop */

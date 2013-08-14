@@ -119,6 +119,7 @@ bool SimplePhone::GetConfig()
 	  {
 	    /* An explicit sound card is specified, use it. */
 	    string sSoundCardNumber = TranslateSoundcard(sSoundCard);
+	    m_sSoundCardNumber=sSoundCardNumber;
 	    if (sSoundCardNumber.empty()) // Somehow the translate failed
 	      {
 		sAlsaDevice = "default"; // use the default.
