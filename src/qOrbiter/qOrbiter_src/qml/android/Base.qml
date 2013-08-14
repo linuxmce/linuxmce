@@ -2,7 +2,7 @@ import QtQuick 1.1
 
 
 Rectangle {
-anchors.fill: parent
+    anchors.fill: parent
     color: "black"
     Timer{
         id:wait
@@ -10,33 +10,49 @@ anchors.fill: parent
         onTriggered: {mainContent.source = "http://"+window.router+"/lmce-admin/skins/android/Splash.qml"; }
         running:true
     }
+
     Rectangle{
-        id:spinner
-        height:  parent.height *.10
-        width: parent.width*.25
-        color: rotation > 270 ? "darkgrey" : "white"
-        opacity: .75
-        anchors.top: loading.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        radius:10
-        PropertyAnimation on rotation{
-            from:0
-            to:360
-            duration:1500
-            loops:Animation.Infinite
+        id:fil
+        anchors.centerIn: parent
+        height: parent.height/2
+        width: parent.width/2
+        color:"black"
+        border.color: "white"
+        border.width: 1
+        Text {
+            id: loading
+            text: qsTr("Connecting to "+window.router+", please be patient \n" )
+            anchors.centerIn: parent
+            font.pixelSize: 16
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            color: "white"
+            opacity: .85
         }
+
     }
 
-    Text {
-        id: loading
-        text: qsTr("Connecting to "+window.router+", please be patient \n" )
-        anchors.centerIn: parent
-        font.pixelSize: 16
-        font.family: "Droid"
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        color: "white"
-        opacity: .85
-    }
+//    Row{
+//        anchors.bottom: parent.bottom
+//        width: parent.width/2
+//        height: childrenRect.height
+//        Text{
+//            text: "Api Level:"+ android.apiLevel
+//            font.pixelSize: 16
+//            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+//            color: "white"
+//            opacity: .85
+//        }
+
+//        Text{
+//            text: "Api Level:"+ android.externalStorageLocation
+//            font.pixelSize: 16
+//            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+//            color: "white"
+//            opacity: .85
+//        }
+//    }
+
+
 
     Loader{
         id:mainContent
@@ -50,10 +66,10 @@ anchors.fill: parent
                              console.log(mainContent.sourceComponent.errorString())
                              wait.restart()
                          }
-//                         else if (mainContent.status != Loader.Loading){
-//                             loading.text = "Loading, please wait \n" + progress +"% \n"+sourceComponent.errorString()
+        //                         else if (mainContent.status != Loader.Loading){
+        //                             loading.text = "Loading, please wait \n" + progress +"% \n"+sourceComponent.errorString()
 
-//                         }
+        //                         }
                          else  if (mainContent.status === Loader.Ready){
                              mainContent.opacity = .01
                              loading.visible= false

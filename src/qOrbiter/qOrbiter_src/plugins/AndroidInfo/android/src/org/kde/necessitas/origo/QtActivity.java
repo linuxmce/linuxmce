@@ -694,48 +694,68 @@ public class QtActivity extends Activity
     //---------------------------------------------------------------------------
 
 
-    @Override
+@Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
+        int newKeyCode = keyCode;
+        if ( (keyCode == KeyEvent.KEYCODE_BACK) )
+        {
+           newKeyCode = KeyEvent.KEYCODE_MEDIA_PREVIOUS;
+        }
         if (QtApplication.m_delegateObject != null && QtApplication.onKeyDown != null)
-            return (Boolean) QtApplication.invokeDelegateMethod(QtApplication.onKeyDown, keyCode, event);
+            return (Boolean)
+            QtApplication.invokeDelegateMethod(QtApplication.onKeyDown, newKeyCode,event);
         else
-            return super.onKeyDown(keyCode, event);
+            return super.onKeyDown(newKeyCode, event);
     }
     public boolean super_onKeyDown(int keyCode, KeyEvent event)
     {
         return super.onKeyDown(keyCode, event);
     }
-    //---------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------
 
-    @Override
+ @Override
     public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event)
     {
+        int newKeyCode = keyCode;
+        if ( (keyCode == KeyEvent.KEYCODE_BACK) )
+        {
+            newKeyCode = KeyEvent.KEYCODE_MEDIA_PREVIOUS;
+        }
         if (QtApplication.m_delegateObject != null && QtApplication.onKeyMultiple != null)
-            return (Boolean) QtApplication.invokeDelegateMethod(QtApplication.onKeyMultiple ,keyCode, repeatCount, event);
+            return (Boolean)
+            QtApplication.invokeDelegateMethod(QtApplication.onKeyMultiple ,newKeyCode, repeatCount, event);
         else
-            return super.onKeyMultiple(keyCode, repeatCount, event);
+            return super.onKeyMultiple(newKeyCode, repeatCount, event);
     }
-    public boolean super_onKeyMultiple(int keyCode, int repeatCount, KeyEvent event)
+
+    public boolean super_onKeyMultiple(int keyCode, int repeatCount,KeyEvent event)
     {
         return super.onKeyMultiple(keyCode, repeatCount, event);
     }
-    //---------------------------------------------------------------------------
 
-    @Override
+//---------------------------------------------------------------------------
+
+@Override
     public boolean onKeyUp(int keyCode, KeyEvent event)
     {
+        int newKeyCode = keyCode;
+        if ( (keyCode == KeyEvent.KEYCODE_BACK) )
+        {
+            newKeyCode = KeyEvent.KEYCODE_MEDIA_PREVIOUS;
+        }
         if (QtApplication.m_delegateObject != null  && QtApplication.onKeyDown != null)
-            return (Boolean) QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, keyCode, event);
+            return (Boolean)
+QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
         else
-            return super.onKeyUp(keyCode, event);
+            return super.onKeyUp(newKeyCode, event);
     }
     public boolean super_onKeyUp(int keyCode, KeyEvent event)
     {
         return super.onKeyUp(keyCode, event);
     }
-    //---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 
     @Override
     public void onLowMemory()
@@ -1165,7 +1185,7 @@ public class QtActivity extends Activity
 //QtCreator         return super.dispatchKeyShortcutEvent(event);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator 
+//QtCreator
 //QtCreator     @Override
 //QtCreator     public void onActionModeFinished(ActionMode mode)
 //QtCreator     {
@@ -1177,7 +1197,7 @@ public class QtActivity extends Activity
 //QtCreator         super.onActionModeFinished(mode);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator 
+//QtCreator
 //QtCreator     @Override
 //QtCreator     public void onActionModeStarted(ActionMode mode)
 //QtCreator     {
@@ -1189,7 +1209,7 @@ public class QtActivity extends Activity
 //QtCreator         super.onActionModeStarted(mode);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator 
+//QtCreator
 //QtCreator     @Override
 //QtCreator     public void onAttachFragment(Fragment fragment)
 //QtCreator     {
@@ -1201,7 +1221,7 @@ public class QtActivity extends Activity
 //QtCreator         super.onAttachFragment(fragment);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator 
+//QtCreator
 //QtCreator     @Override
 //QtCreator     public View onCreateView(View parent, String name, Context context, AttributeSet attrs)
 //QtCreator     {
@@ -1216,7 +1236,7 @@ public class QtActivity extends Activity
 //QtCreator         return super.onCreateView(parent, name, context, attrs);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator 
+//QtCreator
 //QtCreator     @Override
 //QtCreator     public boolean onKeyShortcut(int keyCode, KeyEvent event)
 //QtCreator     {
@@ -1230,7 +1250,7 @@ public class QtActivity extends Activity
 //QtCreator         return super.onKeyShortcut(keyCode, event);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator 
+//QtCreator
 //QtCreator     @Override
 //QtCreator     public ActionMode onWindowStartingActionMode(Callback callback)
 //QtCreator     {
@@ -1262,7 +1282,7 @@ public class QtActivity extends Activity
 //QtCreator         return super.dispatchGenericMotionEvent(event);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator 
+//QtCreator
 //QtCreator     @Override
 //QtCreator     public boolean onGenericMotionEvent(MotionEvent event)
 //QtCreator     {

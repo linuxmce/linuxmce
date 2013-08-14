@@ -1,69 +1,48 @@
 import QtQuick 1.1
 
-Rectangle {
-   anchors.fill: parent
-   color:"black"
+Item {
+    id:qmlroot
+    anchors.fill: parent
+    focus:true
+    Keys.onReleased: {
+        console.log(event.key)
+        event.accepted = true
+    }
 
-   Column{
-      anchors.centerIn: parent
-       width: childrenRect.width
-       height: childrenRect.height
+    Rectangle{
+        id:fil
+        anchors.fill: parent
+        color:"darkblue"
+    }
 
-       spacing:10
-       Text {
-           text:"Status::"+system.statusMessage
-           font.pixelSize: 20
-           color: system.blueHighlight
-           Rectangle{
-               height: 1
-               width: parent.width
-               color: system.blueStandard
-           }
-       }
-       Text {
-           text:"Api Level::"+system.apiLevel
-           font.pixelSize: 20
-           color: system.redStandard
-       }
-       Text {
-           text:"Device Name::"+system.deviceName
-           font.pixelSize: 20
-           color: system.purpleStandard
-       }
-       Text {
-           text:"Device Brand::"+system.deviceBrand
-           font.pixelSize: 20
-           color: system.greenStandard
-       }
-       Text {
-           text:"Device Manufacturer::"+system.deviceManufacturer
-           font.pixelSize: 20
-           color: system.orangeStandard
-       }
-       Text {
-           text:"Mount Status::"+system.mountStatus
-           font.pixelSize: 20
-           color: system.orangeStandard
-       }
-       Text {
-           text:"Mount Location::"+system.externalStorageLocation
-           font.pixelSize: 20
-           color: system.orangeStandard
-       }
+   Loader{
+    id:pageloader
+    source:"Home.qml"
+    height: parent.height - nav.height
+    width: parent.width
+    anchors.top: parent.top
    }
 
-    Text {
-        text: qsTr("Hello Android \n Tap to exit.")
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        font.bold: true
-        color: "white"
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                Qt.quit();
-            }
+
+
+    Row{
+        id:nav
+        height: childrenRect.height
+        width:parent.width
+        spacing:2
+        anchors.bottom: parent.bottom
+
+        Button {
+            id: btn
+            label:"Home"
+            onActivated: pageloader.source = "Home.qml"
         }
+
+        Button{
+            label:"Build Information"
+            onActivated: pageloader.source = "BuildInfo.qml"
+        }
+
     }
 
 }

@@ -89,7 +89,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     b_localLoading = true; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
 #elif defined QT5 && ANDROID || defined(ANDROID)
     androidHelper = jniHelper;
-    qorbiterUIwin->rootContext()->setContextProperty("android", androidHelper);
+    qorbiterUIwin->rootContext()->setContextProperty("android",androidHelper);
     b_localLoading = false;
 #endif
 
@@ -2079,6 +2079,7 @@ bool qorbiterManager::setupMobileStorage(QString externalStorage)
     }
     else
     {
+        qCritical("Falling back to guessing location method");
         for(int i = 0; i < androidStorageLocation.count(); i++)
         {
             extLocation.setPath(androidStorageLocation.at(i));

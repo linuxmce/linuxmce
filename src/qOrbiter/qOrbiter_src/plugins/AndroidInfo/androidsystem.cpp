@@ -82,7 +82,7 @@ bool AndroidSystem::findClassIdents()
     if(m_pvm->AttachCurrentThread(&env, NULL)<0){
         qCritical()<<"AttachCurrentThread failed";
         return false;
-    } else{
+    }
 
         if(externalStorageClass!=0){
             qDebug() << "Found External Storage Class";
@@ -105,8 +105,8 @@ bool AndroidSystem::findClassIdents()
                 setMountStatus(false);
             }
         }
-    }
-    qDebug() << "eggs";
+
+
     m_pvm->DetachCurrentThread();
 
     setStatusMessage("Device info Gather complete.");
