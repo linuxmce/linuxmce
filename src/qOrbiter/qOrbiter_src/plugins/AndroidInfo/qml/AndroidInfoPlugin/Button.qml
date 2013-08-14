@@ -3,7 +3,7 @@ import QtQuick 1.1
 Item{
     id:btn
     height: 65
-    width: childrenRect.width +10
+    width: txt.width +10
     signal activated()
     property string label: ""
     Rectangle{
@@ -13,6 +13,7 @@ Item{
     }
     
     Text{
+        id:txt
         anchors.centerIn: parent
         text:btn.label
         font.pixelSize: 22

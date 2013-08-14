@@ -7,11 +7,11 @@ static JavaVM *m_pvm = 0;
 
 jclass buildVersionClass;
 
-jclass externalStorageClass;
-jclass fileClass;
-jmethodID storageMethodID;
-jmethodID findPathID;
-jmethodID storageLocationID;
+static jclass externalStorageClass =0;
+static jclass fileClass = 0;
+//static jmethodID storageMethodID =0;
+static jmethodID findPathID =0;
+//static jmethodID storageLocationID=0 ;
 
 jclass displayInfoClass;
 jclass displayContextClass;
@@ -55,23 +55,26 @@ AndroidSystem::AndroidSystem(QObject *parent) :
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 {
     JNIEnv* env;
+
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
         qCritical()<<"Can't get the enviroument";
         return -1;
     }
-    else{
-        qCritical("Got Env?");
-        m_pvm = vm;
-        if(m_pvm->AttachCurrentThread(&env, NULL)<0){
-            externalStorageClass = env->FindClass("android.os.Environment");
-            storageMethodID = env->GetStaticMethodID(externalStorageClass, "getExternalStorageState", "()Ljava/lang/String;");
-            storageLocationID = env->GetStaticMethodID(externalStorageClass, "getExternalStorageDirectory", "()Ljava/io/File;");
-            fileClass=env->FindClass("java/io/File");
-            findPathID=env->GetMethodID(fileClass, "getPath", "()Ljava/lang/String;");
-            m_pvm->DetachCurrentThread();
-        }
-    }
+    m_pvm = vm;
 
+
+    jclass lesc = env->FindClass("android.os.Environment");
+    externalStorageClass = reinterpret_cast<jclass>(env->NewGlobalRef(lesc));
+
+    jclass lfpid = env->FindClass("java/io/File");
+    fileClass= reinterpret_cast<jclass>(env->NewGlobalRef(lfpid));
+    findPathID=env->GetMethodID(fileClass, "getPath", "()Ljava/lang/String;");
+
+    env->DeleteLocalRef(lesc);
+    env->DeleteLocalRef(lfpid);
+
+
+    qCritical() << "Exiting JNI onLoad";
     return JNI_VERSION_1_6;
 }
 
@@ -84,29 +87,43 @@ bool AndroidSystem::findClassIdents()
         return false;
     }
 
-        if(externalStorageClass!=0){
-            qDebug() << "Found External Storage Class";
+    qCritical("Storage Searching..");
 
-            static jstring jStorageState = (jstring)env->CallObjectMethod(externalStorageClass, storageMethodID);
+    if(externalStorageClass!=0){
+        qDebug() << "Found External Storage Class";
+        jmethodID storageMethodID = env->GetStaticMethodID(externalStorageClass, "getExternalStorageState", "()Ljava/lang/String;");
+        jmethodID storageLocationID = env->GetStaticMethodID(externalStorageClass, "getExternalStorageDirectory", "()Ljava/io/File;");
 
-            const char* myConvertedStorageState = env->GetStringUTFChars(jStorageState, 0);
+        jstring jStorageState = (jstring)env->CallStaticObjectMethod(externalStorageClass, storageMethodID);
 
-            env->ReleaseStringUTFChars(jStorageState, myConvertedStorageState);
+        const char* myConvertedStorageState = env->GetStringUTFChars(jStorageState, 0);
 
-            if(strcmp(myConvertedStorageState, "mounted")==0){
-                setMountStatus(true);
-                jobject myFileRef = env->CallStaticObjectMethod(externalStorageClass, storageLocationID);
-                jstring extPath = (jstring)env->CallObjectMethod(myFileRef, findPathID);
-                const char*myPath = env->GetStringUTFChars(extPath, 0);
-                setExternalStorageLocation(QString::fromLatin1(myPath));
-            }else
-            {
-                qDebug() << myConvertedStorageState;
-                setMountStatus(false);
-            }
+        env->ReleaseStringUTFChars(jStorageState, myConvertedStorageState);
+
+        if(strcmp(myConvertedStorageState, "mounted")==0){
+            qCritical("Media is mounted");
+            setMountStatus(true);
+            jobject myFileRef = env->CallStaticObjectMethod(externalStorageClass, storageLocationID);
+            jstring extPath = (jstring)env->CallObjectMethod(myFileRef, findPathID);
+            const char*myPath = env->GetStringUTFChars(extPath, 0);
+            setExternalStorageLocation(QString::fromLatin1(myPath));
+            env->ReleaseStringUTFChars(extPath, myPath);
+            env->DeleteLocalRef(myFileRef);
+            env->DeleteLocalRef(extPath);
+        }else
+        {
+            qCritical("Media is not mounted!");
+            setMountStatus(false);
         }
 
+        env->DeleteLocalRef(jStorageState);
 
+    }
+    else{
+        qCritical("externalStorageClass reference was invalid.");
+    }
+
+    qCritical("Storage Search Complete");
     m_pvm->DetachCurrentThread();
 
     setStatusMessage("Device info Gather complete.");
