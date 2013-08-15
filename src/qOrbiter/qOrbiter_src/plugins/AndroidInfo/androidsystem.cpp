@@ -5,7 +5,8 @@
 static JavaVM *m_pvm = 0;
 
 
-jclass buildVersionClass;
+static jclass buildVersionClass = 0;
+static jclass buildVersionSDKClass = 0;
 
 /* Cache of class ids and methodID lookups for use later for finding sdcard path. */
 static jclass externalStorageClass =0;
@@ -44,14 +45,13 @@ AndroidSystem::AndroidSystem(QObject *parent) :
     {
         setStatusMessage("Android Plugin Connected");
         if(findClassIdents()){
-            setStatusMessage("Phase I complete.");
+            setStatusMessage("Found Class ID's.");
         }
 
-        //        if(getDisplayInfo()){
-        //            //  setStatusMessage("Phase 2 Complete");
-        //        }
+        if(updateBuildInformation()){
+            setStatusMessage("Retrieved build information");
+        }
 
-        updateBuildInformation();
     }
     else
     {
@@ -69,36 +69,34 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
     }
     m_pvm = vm;
 
-    jclass localBuildClass = env->FindClass("android.os.Build");
+    jclass localBuildClass = env->FindClass("android/os/Build");
     buildVersionClass = reinterpret_cast<jclass>(env->NewGlobalRef(localBuildClass));
 
-    jclass lesc = env->FindClass("android.os.Environment");
+    jclass localSDKclass = env->FindClass("android/os/Build$VERSION");
+    buildVersionSDKClass =reinterpret_cast<jclass>(env->NewGlobalRef(localSDKclass));
+
+    jclass lesc = env->FindClass("android/os/Environment");
 
     externalStorageClass = reinterpret_cast<jclass>(env->NewGlobalRef(lesc));
 
     jclass lfpid = env->FindClass("java/io/File");
     fileClass= reinterpret_cast<jclass>(env->NewGlobalRef(lfpid));
 
-
-
     findPathID=env->GetMethodID(fileClass, "getPath", "()Ljava/lang/String;");
 
+//    jclass localActivityClass = env->FindClass("android/app/NativeActivity");
+//    activityClass = reinterpret_cast<jclass>(env->NewGlobalRef(localActivityClass));
+//    getWindowManagerID = env->GetMethodID(localActivityClass, "getWindowManager", "()Landroid/view/WindowManager;");
 
+//    jclass localDisplayContextClassID= env->FindClass("android/content/Context");
+//   displayContextClass = reinterpret_cast<jclass>(env->NewGlobalRef(localDisplayContextClassID));
+//    contextMethodID = env->GetStaticMethodID(displayContextClass, "getSystemService", "()Ljava/lang/String;");
 
+ //   jclass localDisplayObjClass = env->FindClass("android/view/Display;");
+   // displayObjClass = reinterpret_cast<jclass>(env->NewGlobalRef(localDisplayObjClass));
 
-    //    jclass localDisplayContextClassID= env->FindClass("android/content/Context");
-    //    displayContextClass = reinterpret_cast<jclass>(env->NewGlobalRef(localDisplayContextClassID));
+   // displayID = env->GetMethodID(displayObjClass, "getDisplay", "I");
 
-    //    jclass localActivityClass = env->FindClass("android/app/NativeActivity");
-    //    activityClass = reinterpret_cast<jclass>(env->NewGlobalRef(localActivityClass));
-
-
-    //    jclass localDisplayObjClass = env->FindClass("android/view/Display;");
-    //  displayObjClass = reinterpret_cast<jclass>(env->NewGlobalRef(localDisplayObjClass));
-    //   displayID = env->GetMethodID(displayObjClass, "getDisplay", "()I");
-
-    // getWindowManagerID = env->GetMethodID(activityClass, "getWindowManager", "()Landroid/view/WindowManager");
-    // contextMethodID = env->GetStaticMethodID(displayContextClass, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;");
 
     //    jclass localWSclass =  env->FindClass("android/hardware/display/DisplayManager");
     //    window_service_class = reinterpret_cast<jclass>(env->NewGlobalRef(localWSclass));
@@ -111,6 +109,9 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 
     env->DeleteLocalRef(lesc);
     env->DeleteLocalRef(lfpid);
+//    env->DeleteLocalRef(localActivityClass);
+//   env->DeleteLocalRef(localDisplayContextClassID);
+  //  env->DeleteLocalRef(localDisplayObjClass);
     qCritical() << "Exiting JNI onLoad";
     return JNI_VERSION_1_6;
 }
@@ -221,6 +222,13 @@ bool AndroidSystem::updateBuildInformation()
     setStatusMessage("Checking build info.");
 
     if(buildVersionClass !=0){
+
+        jfieldID sdkTarget = env->GetStaticFieldID(buildVersionSDKClass, "SDK_INT", "I");
+        jint apilvl = (jint)env->GetStaticIntField(buildVersionSDKClass, sdkTarget);
+
+        setApiLevel(apilvl);
+
+
         jfieldID brand = env->GetStaticFieldID(buildVersionClass, "BRAND", "Ljava/lang/String;");
         jstring brand_txt =(jstring)env->GetStaticObjectField(buildVersionClass, brand);
         const char* myBrandTxt = env->GetStringUTFChars(brand_txt, 0);
@@ -240,6 +248,10 @@ bool AndroidSystem::updateBuildInformation()
         setDeviceManufacturer(QString::fromUtf8(mymanufTxt));
         env->ReleaseStringUTFChars(manuf_txt, mymanufTxt);
         setStatusMessage("Finished Gathering Build info.");
+
+        env->DeleteLocalRef(manuf_txt);
+        env->DeleteLocalRef(name_txt);
+        env->DeleteLocalRef(brand_txt);
 
     }
 
