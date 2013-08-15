@@ -31,6 +31,7 @@ namespace DCE
 		// Private member variables
 	  RokuDevice* m_pRokuDevice;
 	  pluto_pthread_mutex_t m_RokuMutex;
+	  bool m_bIsPaused;
 		// Private methods
 public:
 		// Public member variables

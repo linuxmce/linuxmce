@@ -33,6 +33,7 @@ Roku_LTHDXDXS_Streaming_Pla::Roku_LTHDXDXS_Streaming_Pla(int DeviceID, string Se
 	,m_RokuMutex("roku")
 {
   m_RokuMutex.Init(NULL);
+  m_bIsPaused=false;
 }
 
 //<-dceag-const2-b->!
@@ -262,7 +263,7 @@ void Roku_LTHDXDXS_Streaming_Pla::CMD_Pause(int iStreamID,string &sCMD_Result,Me
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
         PLUTO_SAFETY_LOCK(rm, m_RokuMutex);
         m_pRokuDevice->SendToRoku("POST /keypress/Play HTTP/1.1\r\n\r\n");
-
+	m_bIsPaused=true;
 }
 
 //<-dceag-c93-b->
@@ -356,6 +357,7 @@ void Roku_LTHDXDXS_Streaming_Pla::CMD_Play(int iStreamID,string &sCMD_Result,Mes
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
         PLUTO_SAFETY_LOCK(rm, m_RokuMutex);
         m_pRokuDevice->SendToRoku("POST /keypress/Play HTTP/1.1\r\n\r\n");
+	m_bIsPaused=false;
 }
 
 //<-dceag-c190-b->
@@ -686,6 +688,30 @@ void Roku_LTHDXDXS_Streaming_Pla::CMD_Restart_Media(int iStreamID,string &sCMD_R
 void Roku_LTHDXDXS_Streaming_Pla::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed,bool bReport,string &sCMD_Result,Message *pMessage)
 //<-dceag-c41-e->
 {
+  PLUTO_SAFETY_LOCK(rm, m_RokuMutex);
+  if (iMediaPlaybackSpeed<0)
+    {
+      m_bIsPaused=false;
+      CMD_Scan_BackRewind();
+    }
+  else if (iMediaPlaybackSpeed>1000)
+    {
+      m_bIsPaused=false;
+      CMD_Scan_FwdFast_Fwd();
+    }
+  else if (iMediaPlaybackSpeed==0)
+    {
+      m_bIsPaused=true;
+      CMD_Pause(iStreamID);
+    }
+  else if (iMediaPlaybackSpeed==1000)
+    {
+      if (m_bIsPaused)
+	{
+	  CMD_Play(iStreamID);
+	  m_bIsPaused=false;
+	}
+    }
 }
 //<-dceag-c42-b->
 
