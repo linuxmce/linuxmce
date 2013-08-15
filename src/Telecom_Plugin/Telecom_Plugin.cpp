@@ -51,11 +51,13 @@ using namespace DCE;
 #include "pluto_main/Define_Event.h"
 #include "pluto_main/Define_EventParameter.h"
 #include "pluto_main/Define_MediaType.h"
+#include "pluto_main/Define_Variable.h"
 #include "pluto_main/Table_Users.h"
 #include "pluto_telecom/Table_Contact.h"
 #include "pluto_telecom/Table_PhoneNumber.h"
 #include "pluto_telecom/Table_PhoneType.h"
 #include "Orbiter_Plugin/Orbiter_Plugin.h"
+#include "Media_Plugin/Media_Plugin.h"
 #include "PlutoUtils/ProcessUtils.h"
 #include "PlutoUtils/PlutoHelpers.h"
 
@@ -81,6 +83,8 @@ int UniqueColors[MAX_TELECOM_COLORS];
 
 #include <stdlib.h>
 #include <time.h>
+
+#include "Media_Plugin/EntertainArea.h"
 
 #define CONFERENCE_MAX_NO 50
 
@@ -1093,11 +1097,25 @@ bool Telecom_Plugin::Hangup( class Socket *pSocket, class Message *pMessage, cla
 
 		if(ConcurrentAccessToSoundCardAllowed(nOrbiterDeviceID))
 		{
-			Command_Impl * pMediaPlugin = m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
+			Media_Plugin * pMediaPlugin = (Media_Plugin *)m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
 			if( pMediaPlugin != NULL )
 			{
 					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Telecom_Plugin : resume %d", nOrbiterDeviceID);
-
+					// Determine if EntertainArea(s) had live AV viewing present, and if so, resend Live AV Path to the EA.
+					vector<EntertainArea *> vectEntertainArea;
+					pMediaPlugin->DetermineEntArea(nOrbiterDeviceID, 0, "", vectEntertainArea);
+					for (size_t s=0;s<vectEntertainArea.size();++s)
+					  {
+					    EntertainArea *pEntertainArea=vectEntertainArea[s];
+					    if (!pEntertainArea->m_pMediaStream)
+					      continue; // not relevant to us. There isn't a stream there anymore.
+					    if (pEntertainArea->m_bViewingLiveAVPath)
+					      {
+						DCE::CMD_Live_AV_Path CMD_Live_AV_Path(nOrbiterDeviceID, pMediaPlugin->m_dwPK_Device, StringUtils::itos(pEntertainArea->m_iPK_EntertainArea), 1);
+						SendCommand(CMD_Live_AV_Path);
+					      }
+					    
+					  }
 					DCE::CMD_Change_Playback_Speed cmd_Change_Playback_Speed(nOrbiterDeviceID, pMediaPlugin->m_dwPK_Device, 0, 1000, 0);
 					SendCommand(cmd_Change_Playback_Speed);
 			}
@@ -3054,7 +3072,7 @@ void Telecom_Plugin::CMD_Speak_in_house(int iPK_Device,string sPhoneNumber,strin
 		if(NULL != pListDeviceData)
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Doing a speak in ALL house with master %s", sPhoneNumber.c_str());
-
+			
 			list<int> listDevices;
 			list<string> listSlavesExtensions;
 			for(ListDeviceData_Router::iterator it = pListDeviceData->begin(); it != pListDeviceData->end(); ++it)
