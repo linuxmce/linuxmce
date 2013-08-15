@@ -8,47 +8,40 @@ Item {
                 anchors.centerIn: parent
                 width: childrenRect.width
                 height: childrenRect.height
-
                 spacing:10
-                Text {
-                    text:"Status::"+system.statusMessage
-                    font.pixelSize: 20
-                    color: system.blueHighlight
-                    Rectangle{
-                        height: 1
-                        width: parent.width
-                        color: system.blueStandard
-                    }
-                }
+
                 Text {
                     text:"Api Level::"+system.apiLevel
-                    font.pixelSize: 20
+                    font.pixelSize: 36
                     color: system.redStandard
+                    font.capitalization: Font.SmallCaps
+                    font.weight: Font.Light
                 }
-                Text {
-                    text:"Device Name::"+system.deviceName
-                    font.pixelSize: 20
-                    color: system.purpleStandard
+                Button {
+                    label:"Device Name::"+system.deviceName
+
+                    labelColor: system.purpleStandard
+                    onActivated: system.updateBuildInformation()
                 }
                 Text {
                     text:"Device Brand::"+system.deviceBrand
-                    font.pixelSize: 20
+                    font.pixelSize: 36
                     color: system.greenStandard
                 }
                 Text {
                     text:"Device Manufacturer::"+system.deviceManufacturer
-                    font.pixelSize: 20
+                    font.pixelSize: 36
                     color: system.orangeStandard
                 }
                 Text {
                     text:"Mount Status::"+system.mountStatus
-                    font.pixelSize: 20
+                    font.pixelSize: 36
                     color: system.orangeStandard
                 }
-                Text {
-                    text:"Mount Location::"+system.externalStorageLocation
-                    font.pixelSize: 20
-                    color: system.orangeStandard
+                Button {
+                    label:"Mount Location::"+system.externalStorageLocation
+                    labelColor: system.orangeStandard
+                    onActivated: system.updateExternalStorageLocation()
                 }
             }
 }

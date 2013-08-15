@@ -12,7 +12,7 @@ Item {
     Rectangle{
         id:fil
         anchors.fill: parent
-        color:"darkblue"
+        color:"black"
     }
 
    Loader{
@@ -27,9 +27,9 @@ Item {
 
     Row{
         id:nav
-        height: childrenRect.height
+        height: childrenRect.height +10
         width:parent.width
-        spacing:2
+        spacing:5
         anchors.bottom: parent.bottom
 
         Button {

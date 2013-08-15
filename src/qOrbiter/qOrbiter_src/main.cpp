@@ -219,7 +219,10 @@ int main(int argc, char* argv[])
     QOrbiterLogger localLogger;
 
 #ifdef ANDROID
-  //  localLogger.setLogLocation(QString(androidHelper.externalStorageLocation+"/LinuxMCE/"));
+    if(androidHelper.updateExternalStorageLocation()){
+       localLogger.setLogLocation(QString(androidHelper.externalStorageLocation+"/LinuxMCE/"));
+    }
+
 #endif
 
 

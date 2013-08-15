@@ -6,19 +6,31 @@ Item{
     width: txt.width +10
     signal activated()
     property string label: ""
+    property string labelColor:system.greenHighlight
     Rectangle{
         id:filler
-        color:ms.pressed ? system.blueHighlight : "white"
+        color:ms.pressed ? "white": labelColor
         anchors.fill: parent
+        border.width:2
+        border.color:"white"
+        radius:2
+
+        Behavior on color{
+            PropertyAnimation{
+                duration:550
+
+            }
+        }
     }
     
     Text{
         id:txt
         anchors.centerIn: parent
         text:btn.label
-        font.pixelSize: 22
+        font.pixelSize: 24
         font.weight: Font.Light
-        color:"black"
+        font.capitalization: Font.SmallCaps
+        color:"white"
     }
     
     MouseArea{

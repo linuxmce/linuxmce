@@ -91,6 +91,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     androidHelper = jniHelper;
     qorbiterUIwin->rootContext()->setContextProperty("android",androidHelper);
     b_localLoading = false;
+    if(androidHelper->updateExternalStorageLocation()){
+        androidHelper->updateBuildInformation();
+    }
 #endif
 
     setDceResponse("Starting...");

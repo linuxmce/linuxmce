@@ -117,7 +117,8 @@ public slots:
     void setApiLevel(int lvl){ apiLevel = lvl; emit apiLevelChanged();}
     int getApiLevel(){ return apiLevel;}
 
-
+    Q_INVOKABLE bool updateExternalStorageLocation();
+    Q_INVOKABLE bool updateBuildInformation();
 
 private:
 
