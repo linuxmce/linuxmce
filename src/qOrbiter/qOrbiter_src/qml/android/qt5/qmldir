@@ -1,0 +1,7 @@
+Splash Splash.qml
+SplashView SplashView.qml
+ConnectionBox ConnectionBox.qml
+ExistingOrbiters ExistingOrbiters.qml
+NewOrbiterButton NewOrbiterButton.qml
+SetupNewOrbiter SetupNewOrbiter.qml
+StatusRow StatusRow.qml
