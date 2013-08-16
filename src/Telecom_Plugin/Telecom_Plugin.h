@@ -68,6 +68,9 @@ namespace DCE
 	string m_sDestChannel;
 	bool m_bReplacedChannel;
 
+	// adding orbiter to LiveAV mapping, so we can save it and flip back and forth appropriately.
+	std::map<int, bool> m_mapOrbiter_IsUsingLiveAV;
+
 	// Los93soL
 	std::map<string,string> m_mapChannel2CallerID;
 

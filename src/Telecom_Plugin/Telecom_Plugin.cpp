@@ -836,10 +836,29 @@ Telecom_Plugin::Ring( class Socket *pSocket, class Message *pMessage, class Devi
 	if(nOrbiterDeviceID)
 	{
 		// stop the media
-		Command_Impl * pMediaPlugin = m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
+	        Media_Plugin * pMediaPlugin = (Media_Plugin *)m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
 		if( pMediaPlugin != NULL )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Telecom_Plugin : pause device %d", nOrbiterDeviceID);
+
+			// Figure out EA, and then keep track if it was using a Live AV path map.
+			// So when it hangs up, we can switch it back. -tschak
+			vector<EntertainArea *> vectEntertainArea;
+			pMediaPlugin->DetermineEntArea(nOrbiterDeviceID, 0, "", vectEntertainArea);
+			if (vectEntertainArea.size()==1)
+			  {
+			    EntertainArea *pEntertainArea=vectEntertainArea[0];
+			    if (!pEntertainArea->m_pMediaStream)
+			      {
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Telecom_Plugin::Ring() Trying to get EA without media stream!");
+			      }
+			    else
+			      {
+				bool bViewingLiveAVPath = pEntertainArea->m_bViewingLiveAVPath;
+				LoggerWrapper::GetInstance()->Write(LV_WARNING,"Telecom_Plugin::Ring() EA for Orbiter %d ViewingLiveAVPath %d",nOrbiterDeviceID, bViewingLiveAVPath);
+				m_mapOrbiter_IsUsingLiveAV[nOrbiterDeviceID]=bViewingLiveAVPath;
+			      }
+			  }
 
 			TurnOnMediaDirectorAttachedToOrbiter(nOrbiterDeviceID);
 			if(ConcurrentAccessToSoundCardAllowed(nOrbiterDeviceID))
@@ -1109,10 +1128,20 @@ bool Telecom_Plugin::Hangup( class Socket *pSocket, class Message *pMessage, cla
 					    EntertainArea *pEntertainArea=vectEntertainArea[s];
 					    if (!pEntertainArea->m_pMediaStream)
 					      continue; // not relevant to us. There isn't a stream there anymore.
-					    if (pEntertainArea->m_bViewingLiveAVPath)
+					    if (m_mapOrbiter_IsUsingLiveAV[nOrbiterDeviceID])
 					      {
+						LoggerWrapper::GetInstance()->Write(LV_WARNING,"Telecom_Plugin::Hangup() - Orbiter %d was attached to EA that had live AV enabled, re-enabling.",nOrbiterDeviceID);
 						DCE::CMD_Live_AV_Path CMD_Live_AV_Path(nOrbiterDeviceID, pMediaPlugin->m_dwPK_Device, StringUtils::itos(pEntertainArea->m_iPK_EntertainArea), 1);
 						SendCommand(CMD_Live_AV_Path);
+
+						DCE::SCREEN_CurrentlyActiveRemote SCREEN_CurrentlyActiveRemote(m_dwPK_Device, nOrbiterDeviceID);
+						SendCommand(SCREEN_CurrentlyActiveRemote);
+
+						Sleep(400);
+												 
+                                                DCE::CMD_Live_AV_Path CMD_Live_AV_Path1(nOrbiterDeviceID, pMediaPlugin->m_dwPK_Device, StringUtils::itos(pEntertainArea->m_iPK_EntertainArea), 1);
+                                                SendCommand(CMD_Live_AV_Path1);
+
 					      }
 					    
 					  }
