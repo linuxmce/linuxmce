@@ -8,7 +8,7 @@ Rectangle {
     width: appW
     color: "transparent"
     id: advancedscreen
-
+    state: "reg"
     HomeButton{}
 
     Flow {
@@ -89,9 +89,91 @@ Rectangle {
                 onClicked: MyJs.createComponentObjects("SkinSelector.qml")
             }
         }
+        ButtonSq{
+            id:diagnostic
+            height: style.buttonH
+            width: style.buttonW
+            buttontext: "Diagnostics"
+            radius: 5
 
-
-
+            MouseArea{
+                anchors.fill: parent
+                onClicked:advancedscreen.state="diag"
+            }
+        }
     }
+
+    Rectangle{
+        id:diagPanel
+        anchors.fill: parent
+        color:"black"
+
+        ButtonSq{
+            anchors.top:parent.top
+            anchors.left: parent.left
+            MouseArea{
+                anchors.fill: parent
+                onClicked: advancedscreen.state="reg"
+            }
+        }
+        Column{
+            height: parent.height*.75
+            width: parent.width*.85
+            anchors.bottom: parent.bottom
+            StyledText{
+                text: "Api Level:"+ android.apiLevel
+                font.pixelSize: 16
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                color: "white"
+
+            }
+
+            StyledText{
+                text: "Storage Location:"+ android.externalStorageLocation
+                font.pixelSize: 16
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                color: "white"
+            }
+            StyledText{
+                text: "Codename:"+ android.codename
+                font.pixelSize: 16
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                color: "white"
+            }
+            StyledText{
+                text: "Devicename:"+ android.deviceName
+                font.pixelSize: 16
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                color: "white"
+            }
+
+        }
+    }
+
+    states: [
+        State {
+            name: "reg"
+            PropertyChanges {
+                target: flow1
+                visible:true
+            }
+            PropertyChanges {
+                target: diagPanel
+                visible:false
+            }
+        },
+        State{
+            name:"diagnostic"
+            PropertyChanges{
+                target:flow1
+                visible:false
+            }
+            PropertyChanges {
+                target: diagPanel
+                visible:true
+            }
+        }
+
+    ]
 
 }

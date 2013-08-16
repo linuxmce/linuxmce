@@ -11,8 +11,7 @@ import "../../lib/effects"
         text: textLabel
         font.bold: isBold
         font.italic: isItalic
-        font.pixelSize: fontSize
-        font.family: myFont.name
+        font.pixelSize: fontSize       
 
 
     }
