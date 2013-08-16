@@ -2246,7 +2246,7 @@ class DataGridTable *Telecom_Plugin::RecentCallsGrid(string GridID,string Parms,
 	int Row = 0;
 
 	DCEConfig dceconf;
-	DBHelper mySqlHelper(dceconf.m_sDBHost, dceconf.m_sDBUser, dceconf.m_sDBPassword, "asteriskcdrdb" ,dceconf.m_iDBPort);
+	DBHelper mySqlHelper(dceconf.m_sDBHost, dceconf.m_sDBUser, dceconf.m_sDBPassword, "asterisk" ,dceconf.m_iDBPort);
 	PlutoSqlResult result_set;
 	DB_ROW row=NULL;
 	if( (result_set.r=mySqlHelper.db_wrapper_query_result("SELECT src, dst, calldate, billsec, channel FROM cdr ORDER BY calldate DESC LIMIT 0,20")) == NULL )
