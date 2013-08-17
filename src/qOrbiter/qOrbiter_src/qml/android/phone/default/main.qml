@@ -7,6 +7,28 @@ Item {
     id: item
     width:manager.appWidth
     height:manager.appHeight
+    focus:true
+
+    Component.onCompleted: {
+        android.updateBuildInformation()
+    }
+
+    Keys.onReleased: {
+        switch(event.key){
+
+        case Qt.Key_Back:
+            if(manager.currentScreen==="Screen_1.qml"){
+                showExitConfirm()
+            } else{
+                manager.goBacktoQScreen()
+            }
+
+
+            break
+        default:
+            console.log(event.key)
+        }
+    }
 
     signal close()
     signal changeScreen(string s)
@@ -24,15 +46,15 @@ Item {
         return y/100*manager.appHeight
     }
 
-//    Rectangle{
-//        anchors.fill: parent
-//        id:bgFill
-//        gradient: Gradient{
-//            GradientStop{position: 0.0; color: "Black"}
-//            GradientStop{position: .45; color: "darkgrey"}
-//            GradientStop{position: .65; color: "black"}
-//        }
-//    }
+    //    Rectangle{
+    //        anchors.fill: parent
+    //        id:bgFill
+    //        gradient: Gradient{
+    //            GradientStop{position: 0.0; color: "Black"}
+    //            GradientStop{position: .45; color: "darkgrey"}
+    //            GradientStop{position: .65; color: "black"}
+    //        }
+    //    }
 
     Image {
         id: appBackground
@@ -43,10 +65,14 @@ Item {
 
     }
 
-//    function updateBackground(portait, wide){
-//        appBackground.pSource = portait
-//        appBackground.wSource = wide
-//    }
+    //    function updateBackground(portait, wide){
+    //        appBackground.pSource = portait
+    //        appBackground.wSource = wide
+    //    }
+
+    function showExitConfirm(){
+
+    }
 
 
     function screenchange(screenname )
@@ -99,7 +125,7 @@ Item {
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
         }
-   }
+    }
 
     //=================Components==================================================//
     function loadComponent(componentName)
@@ -142,7 +168,7 @@ Item {
         id:componentLoader
         height: parent.height
         width: parent.width
-        objectName: "componentbot"      
+        objectName: "componentbot"
         onLoaded: {console.log("Component is loaded")}
     }
 

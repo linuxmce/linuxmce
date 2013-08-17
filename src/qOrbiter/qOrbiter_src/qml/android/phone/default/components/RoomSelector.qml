@@ -9,13 +9,15 @@ Rectangle {
     border.width: 1
     clip: true
     color:"black"
-   anchors.centerIn: parent
+    anchors.centerIn: parent
+    property bool subMenu:false
+    property variant subModel
 
     Rectangle{
         id:exit_button
         height: scaleY(8)
         width: scaleX(61)
-        anchors.top: generic_list.top
+        anchors.top: genericlist.top
         color: "transparent"
         Image {
             id: headerbg
@@ -35,57 +37,65 @@ Rectangle {
         }
     }
 
-Component{
-  id:delegatemenu
+    Component{
+        id:delegatemenu
 
 
-  Item{
-        id:generic_item
-        //important!! these need to be set on an imported component otherwise its appears all wrong!
-        height:  container.height
-        width: container.width
+        Item{
+            id:generic_item
+            //important!! these need to be set on an imported component otherwise its appears all wrong!
+            height:  container.height
+            width: container.width
 
-        Rectangle{
-           id:container
-            width: scaleX(61)
-            height: scaleY(15)
-            border.color: "silver"
-            border.width: 1
-            color:"transparent"
-            Text {
-                id: generic_label
-                text:  ea_name+" in "+ name
-                color: "white"
-                font.pixelSize: scaleY(3)
-                anchors.centerIn: container
-                font.family: "Droid Sans"
+            Rectangle{
+                id:container
+                width: scaleX(61)
+                height: scaleY(15)
+                border.color: "silver"
+                border.width: 1
+                color:"transparent"
+                Text {
+                    id: generic_label
+                    text:subMenu ? subModel[index].ea_name : name
+                    color: "white"
+                    font.pixelSize: scaleY(5)
+                    anchors.centerIn: container
+                }
+
+
             }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    if(subMenu){
 
+                        manager.setActiveRoom(genericview.model[index].room, genericview.model[index].ea_number);
+                        manager.setBoundStatus(true)
+                        loadComponent("NullComponent.qml")
+                    }
+                    else
+                    {
+                        genericlist.subModel = ea_list
+                        subMenu = true
 
-        }
-        MouseArea{
-            anchors.fill: parent
-            onClicked: {
-                currentroom = name
-               setActiveRoom(intRoom, entertain_area)
-                loadComponent("NullComponent.qml")
+                    }
+                }
             }
         }
     }
-}
 
     ListView{
         id: genericview
         width: scaleX(61)
         height: scaleY(50)
         anchors.top: exit_button.bottom
-        model: roomList
+        model:subMenu ?  subModel :roomList
         spacing:1
         orientation:ListView.Vertical
         delegate:  delegatemenu
         interactive: true
         clip:true
-       // contentHeight: (roomList.count +1) * scaleY(5)
+        // contentHeight: (roomList.count +1) * scaleY(5)
 
     }
 }

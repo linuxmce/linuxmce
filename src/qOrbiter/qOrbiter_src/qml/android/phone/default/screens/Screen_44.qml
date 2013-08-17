@@ -108,9 +108,16 @@ Rectangle {
         anchors.fill: parent
         color:"black"
 
+        onVisibleChanged: {
+            if(visible){
+                android.updateBuildInformation()
+            }
+        }
+
         ButtonSq{
             anchors.top:parent.top
             anchors.left: parent.left
+            buttontext: qsTr("Back")
             MouseArea{
                 anchors.fill: parent
                 onClicked: advancedscreen.state="reg"
@@ -172,6 +179,7 @@ Rectangle {
                 target: diagPanel
                 visible:true
             }
+
         }
 
     ]

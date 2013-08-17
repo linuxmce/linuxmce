@@ -1,14 +1,19 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
 
-Rectangle {
+Item {
     id:np_box
     width: manager.b_orientation ? scaleX(90) : scaleX(40)
-    height: manager.b_orientation ? scaleY(35) : scaleY(55)
-    color: "transparent"
+    height: manager.b_orientation ? childrenRect.height : scaleY(55)
     visible: dcenowplaying.b_mediaPlaying ? true : false
     clip:true
     property real textSize:style.buttonLabelText
+    Rectangle{
+        anchors.fill: parent
+        color: "black"
+        opacity:.35
+    }
+
     Column{
         id:textcol
         spacing: scaleY(1)
@@ -20,13 +25,12 @@ Rectangle {
             id: genera_title
             width: parent.width
             text:  dcenowplaying.qs_mainTitle
-            font.family: "Droid Sans"
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             smooth: true
-            font.bold: true
-            font.pixelSize: scaleY(4)
+            font.weight: Font.DemiBold
+            font.pixelSize: scaleY(5)
             visible:  dcenowplaying.mediatitle ==="" ? true: false
-            color: "silver"
+            color: "white"
             elide: Text.ElideRight
         }
 
@@ -34,11 +38,10 @@ Rectangle {
             id: tracktitle
             width: parent.width
             text:  dcenowplaying.mediatitle
-            font.family: "Droid Sans"
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             smooth: true
             font.bold: true
-            font.pixelSize: scaleY(3)
+            font.pixelSize: scaleY(4)
             visible:  dcenowplaying.mediatitle =="" || dcenowplaying.tvProgram !== "" ? false: true
             color: "silver"
             elide: Text.ElideRight
@@ -48,34 +51,29 @@ Rectangle {
             width: parent.width
             text:  dcenowplaying.album + "|" + dcenowplaying.releasedate
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
-            font.bold: true
             smooth: true
             font.pixelSize: textSize
             visible:  dcenowplaying.album =="" ? false: true
-            color: "silver"
+            color: "white"
             elide: Text.ElideRight
         }
         Text {
             id: track
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text: qsTr("Track: ") + dcenowplaying.track
-            font.family: "Droid Sans"
             font.bold: true
-            //font.italic: true
             smooth: true
             font.pixelSize: textSize
             visible:  dcenowplaying.track =="" ? false: true
             color: "orange"
-            opacity: .50
+            opacity: .85
         }
 
         Text {
             id: programtext
             width: parent.width
             text: qsTr("Program :") + dcenowplaying.tvProgram
-            font.family: "Droid Sans"
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
-            //  font.bold: true
             smooth: true
             font.pixelSize: textSize
             visible:  dcenowplaying.tvProgram ==="" ? false: true
@@ -87,12 +85,10 @@ Rectangle {
             width: parent.width
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text: qsTr("Episode: ") + dcenowplaying.episode
-            font.family: "Droid Sans"
-            //  font.bold: true
             smooth: true
             font.pixelSize: textSize
             visible:  dcenowplaying.episode ==="" ? false: true
-            color:"silver"
+            color:"white"
         }
 
         Text {
@@ -100,12 +96,10 @@ Rectangle {
             width: parent.width
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text: qsTr("Genre(s): ") + dcenowplaying.genre
-            font.family: "Droid Sans"
-            // font.bold: true
             smooth: true
             font.pixelSize: textSize
             visible:  dcenowplaying.genre ==="" ? false: true
-            color:"silver"
+            color:"white"
             MouseArea{
                 anchors.fill: genre
                 hoverEnabled: true
@@ -120,13 +114,11 @@ Rectangle {
             width: manager.b_orientation ? scaleX (65) : scaleX (25)
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text: qsTr("Perfomers: ") + dcenowplaying.performerlist
-            font.family: "Droid Sans"
-            //  font.bold: true
             smooth: true
             font.pixelSize: textSize
             elide: "ElideRight"
             visible:  dcenowplaying.performerlist ==="" ? false: true
-            color:"silver"
+            color:"white"
             MouseArea{
                 anchors.fill: starring
                 hoverEnabled: true
@@ -139,7 +131,6 @@ Rectangle {
             id: network_id
             wrapMode: "NoWrap"
             text: qsTr("Network: ") + dcenowplaying.channelID
-            font.family: "Droid Sans"
             font.bold: true
             smooth: true
             horizontalAlignment: Text.AlignHCenter
@@ -153,7 +144,6 @@ Rectangle {
             id: channel_id
             wrapMode: "NoWrap"
             text: qsTr("Channel: ") + dcenowplaying.channel
-            font.family: "Droid Sans"
             font.bold: true
             smooth: true
             horizontalAlignment: Text.AlignHCenter
@@ -168,6 +158,7 @@ Rectangle {
             text:dceTimecode.qsCurrentTime
             font.pixelSize: scaleY(4)
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            font.weight:Font.Light
             color: "white"
             visible:  dceTimecode.qsCurrentTime ==="00:00:00" && manager.i_current_mediaType ==4 ? false: true
         }

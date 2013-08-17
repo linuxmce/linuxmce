@@ -5,15 +5,32 @@ import "../components"
 import "../js/ComponentLoader.js" as MyJs
 
 
-Rectangle {
+Item {
     id:stage
     anchors.centerIn: parent
     signal swapStyle()
+    property bool showOptions:false
     width:manager.appWidth
     height:manager.appHeight
-    color: "transparent"
+    Component.onCompleted: forceActiveFocus()
 
-/*
+    focus:true
+    Keys.onReleased: {
+        event.accepted=true
+        switch(event.key){
+        case Qt.Key_Back:
+            console.log("show exit")
+            break;
+        case Qt.Key_Menu :
+showOptions = !showOptions
+            break;
+        default:
+            console.log(event.key)
+            break;
+        }
+    }
+
+    /*
     Text{
         id:spaceholder
         text:manager.dceResponse
@@ -33,7 +50,7 @@ Rectangle {
         anchors.leftMargin: manager.b_orientation ? (fs_npButton.width / 2) * -1 : scaleX(2)
     }
 
-  /*
+    /*
     Image {
         id: np_bg
         fillMode: Image.PreserveAspectFit
@@ -57,7 +74,7 @@ Rectangle {
         anchors.centerIn: parent
     }
 
-/*
+    /*
     EffectGaussianBlur{
         id: blur
         anchors.fill: bg
@@ -77,65 +94,75 @@ Rectangle {
     }
 */
 
-    Image {
-        id: bottomBg
-        source: "../img/lowerbkg.png"
-        height: advancedrow.height + scaleY(4)
-        width: advancedrow.width + scaleX(4)
-        anchors.bottom: stage.bottom
-        anchors.horizontalCenter: stage.horizontalCenter
-
-    }
-    Row
-    {
-        id:advancedrow
+    Item{
+        width: parent.width
         height: childrenRect.height
-        width: childrenRect.width
-        anchors.centerIn: bottomBg
-        spacing: manager.b_orientation ? scaleX(10) : scaleX(12)
+        anchors.bottom: parent.bottom
 
-        ButtonSq{
-            height: style.stdbuttonh
-            width: style.stdbuttonw
-            buttontext: qsTr("Power")
-            MouseArea{
-                anchors.fill: parent
-                onClicked: loadComponent("Power.qml")
+        Rectangle{
+            anchors.fill: parent
+            color: android.greenHighlight
+        }
+        opacity: showOptions ? 1 : 0
+
+        Behavior on opacity{
+            PropertyAnimation{
+                duration:350
             }
         }
 
-        ButtonSq{
-            height: scaleY(10)
-            width: scaleX(10)
-            buttontext:manager.sPK_User
-            MouseArea{
-                anchors.fill: parent
-                onClicked:  loadComponent("UserSelector.qml")
-            }
-        }
+        Row {
+            id:advancedrow
+            height: childrenRect.height
+            width: childrenRect.width
+            anchors.centerIn: bottomBg
+            spacing: manager.b_orientation ? scaleX(10) : scaleX(12)
 
-        ButtonSq{
-            id:roombutton
-            height: style.stdbuttonh
-            width: style.stdbuttonw
-            buttontext: roomList.currentEA
-            MouseArea{
-                anchors.fill: parent
-                onClicked:  loadComponent("RoomSelector.qml")
+            ButtonSq{
+                height: style.stdbuttonh
+                width: style.stdbuttonw
+                buttontext: qsTr("Power")
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: loadComponent("Power.qml")
+                }
             }
-        }
 
-        ButtonSq{
-            height: style.stdbuttonh
-            width: style.stdbuttonw
-            buttontext: qsTr("Exit")
-            MouseArea{
-                anchors.fill: parent
-                onClicked: closeOrbiter()
+            ButtonSq{
+                height: scaleY(10)
+                width: scaleX(10)
+                buttontext:manager.sPK_User
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked:  loadComponent("UserSelector.qml")
+                }
             }
-        }
 
+            ButtonSq{
+                id:roombutton
+                height: style.stdbuttonh * 2
+                width: style.stdbuttonw
+                buttontext: roomList.currentEA
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked:  loadComponent("RoomSelector.qml")
+                }
+            }
+
+            ButtonSq{
+                height: style.stdbuttonh
+                width: style.stdbuttonw
+                buttontext: qsTr("Exit")
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: closeOrbiter()
+                }
+            }
+
+        }
     }
+
+
 
 }
 
