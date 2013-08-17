@@ -11,7 +11,7 @@ Item{
             id: screen_not_found
             anchors.centerIn: parent
             width: scaleX(75)
-            text: "Error: Screen file not found: " + screenfile
+            text: pageLoader.errorString()+"\n " + screenfile
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             font.family: "Droid Sans"
             font.bold: false

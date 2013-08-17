@@ -90,6 +90,7 @@ Item {
         else
         {
             console.log("Command to change to:" + screenname + " failed!")
+
             screenfile = screenname
             pageLoader.source = "screens/Screen_x.qml"
         }

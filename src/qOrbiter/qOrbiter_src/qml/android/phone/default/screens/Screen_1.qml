@@ -22,7 +22,10 @@ Item {
             console.log("show exit")
             break;
         case Qt.Key_Menu :
-showOptions = !showOptions
+            showOptions = !showOptions
+            break;
+        case Qt.Key_MediaPrevious:
+            console.log("Media previous")
             break;
         default:
             console.log(event.key)
@@ -96,12 +99,12 @@ showOptions = !showOptions
 
     Item{
         width: parent.width
-        height: childrenRect.height
+        height: childrenRect.height +10
         anchors.bottom: parent.bottom
 
         Rectangle{
             anchors.fill: parent
-            color: android.greenHighlight
+            color: android.orangeStandard
         }
         opacity: showOptions ? 1 : 0
 
@@ -111,54 +114,8 @@ showOptions = !showOptions
             }
         }
 
-        Row {
-            id:advancedrow
-            height: childrenRect.height
-            width: childrenRect.width
-            anchors.centerIn: bottomBg
-            spacing: manager.b_orientation ? scaleX(10) : scaleX(12)
-
-            ButtonSq{
-                height: style.stdbuttonh
-                width: style.stdbuttonw
-                buttontext: qsTr("Power")
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked: loadComponent("Power.qml")
-                }
-            }
-
-            ButtonSq{
-                height: scaleY(10)
-                width: scaleX(10)
-                buttontext:manager.sPK_User
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked:  loadComponent("UserSelector.qml")
-                }
-            }
-
-            ButtonSq{
-                id:roombutton
-                height: style.stdbuttonh * 2
-                width: style.stdbuttonw
-                buttontext: roomList.currentEA
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked:  loadComponent("RoomSelector.qml")
-                }
-            }
-
-            ButtonSq{
-                height: style.stdbuttonh
-                width: style.stdbuttonw
-                buttontext: qsTr("Exit")
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked: closeOrbiter()
-                }
-            }
-
+        HomeOptions {
+            id: advancedrow
         }
     }
 
