@@ -112,7 +112,7 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 		instance_id = atoi(vectNI[1].c_str());
 	} else {
 	        node_id = atoi(nodeInstance.c_str());
-		instance_id = 0;
+		instance_id = 1;
 	}
 	// TODO: use instance id in commands below
 	if (node_id > 0 && node_id <= 233) {
@@ -122,27 +122,63 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 		uint32 homeId = m_pZWInterface->GetHomeId();
 		switch (pMessage->m_dwID) {
 			case COMMAND_Generic_On_CONST:
+			{
 			        LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ON RECEIVED FOR CHILD %d/%d",node_id, instance_id);
 				m_pZWInterface->Lock();
-				OpenZWave::Manager::Get()->SetNodeOn(homeId,node_id);
+				OpenZWave::ValueID* valueID = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, "Basic");
+				if (valueID != NULL)
+				{
+					if (OpenZWave::Manager::Get()->SetValue(*valueID, (uint8)100)) {
+						LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Value set to ON (level 100) successful");
+					} else {
+						LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Value Set FAILED!");
+					}
+				} else {
+					OpenZWave::Manager::Get()->SetNodeOn(homeId,node_id);
+				}
 				m_pZWInterface->UnLock();
 				break;
 				;;
+			}
 			case COMMAND_Generic_Off_CONST:
-				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"OFF RECEIVED FOR CHILD %d",node_id);
+			{
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"OFF RECEIVED FOR CHILD %d/%d",node_id, instance_id);
 				m_pZWInterface->Lock();
-				OpenZWave::Manager::Get()->SetNodeOff(homeId,node_id);
+				OpenZWave::ValueID* valueID = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, "Basic");
+				if (valueID != NULL)
+				{
+					if (OpenZWave::Manager::Get()->SetValue(*valueID, (uint8)0)) {
+						LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Value set to OFF (level 0) successful");
+					} else {
+						LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Value Set FAILED!");
+					}
+				} else {
+					OpenZWave::Manager::Get()->SetNodeOff(homeId,node_id);
+				}
 				m_pZWInterface->UnLock();
 				break;
 				;;
+			}
 			case COMMAND_Set_Level_CONST:
+			{
 				level = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str());
 				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET LEVEL RECEIVED FOR CHILD %d, level: %d",node_id,level);
 				m_pZWInterface->Lock();
-				OpenZWave::Manager::Get()->SetNodeLevel(homeId,node_id,level>99?99:level);
+				OpenZWave::ValueID* valueID = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, "Level");
+				if (valueID != NULL)
+				{
+					if (OpenZWave::Manager::Get()->SetValue(*valueID, (uint8)(level>99?99:level))) {
+						LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Set Level successful");
+					} else {
+						LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Set Level FAILED!");
+					}
+				} else {
+					OpenZWave::Manager::Get()->SetNodeLevel(homeId,node_id,level>99?99:level);
+				}
 				m_pZWInterface->UnLock();
 				break;
 				;;
+			}
 			case COMMAND_Set_Temperature_CONST:
 				temp = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST].c_str());
 				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET TEMPERATURE RECEIVED FOR CHILD %d, level: %d",node_id,temp);
@@ -398,14 +434,21 @@ void ZWave::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMes
 //<-dceag-c788-e->
 {
 	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() sArgument %s", sArguments.c_str());
-	if (sArguments.find("NU") != std::string::npos) {
-		uint8 nodeId = atoi(sArguments.substr(2).c_str());
+	if (StringUtils::StartsWith(sArguments,"NNU")) {
+		uint8 nodeId = atoi(sArguments.substr(3).c_str());
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() RequestNodeNeighborUpdate node %d", nodeId);
 		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_RequestNodeNeighborUpdate, controller_update, NULL, false, nodeId, 0);
-	} else if (sArguments.find("HNN") != std::string::npos) {
+	} else if (StringUtils::StartsWith(sArguments,"NU")) {
+		uint8 nodeId = atoi(sArguments.substr(2).c_str());
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() RequestNetworkUpdate node %d", nodeId);
+		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_RequestNetworkUpdate, controller_update, NULL, false, nodeId, 0);
+	} else if (StringUtils::StartsWith(sArguments,"HNN")) {
 		uint8 nodeId = atoi(sArguments.substr(3).c_str());
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() HealNodeNetwork node %d", nodeId);
 		OpenZWave::Manager::Get()->HealNetworkNode(m_pZWInterface->GetHomeId(), nodeId, true);
+	} else if (StringUtils::StartsWith(sArguments,"HN")) {
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() HealNetwork");
+		OpenZWave::Manager::Get()->HealNetwork(m_pZWInterface->GetHomeId(), true);
 	}
 }
 
@@ -604,8 +647,8 @@ void ZWave::CMD_Remove_Node(string sOptions,int iValue,string sTimeout,bool bMul
 void ZWave::CMD_Resync_node(int iNodeID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c1085-e->
 {
-	cout << "Need to implement command #1085 - Resync node" << endl;
-	cout << "Parm #239 - NodeID=" << iNodeID << endl;
+	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::CMD_Resync_node() node %d", iNodeID);
+	OpenZWave::Manager::Get()->RefreshNodeInfo(m_pZWInterface->GetHomeId(), iNodeID);
 }
 
 
@@ -920,7 +963,7 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 			OpenZWave::ValueID value = *valIt;
 			string label = OpenZWave::Manager::Get()->GetValueLabel(value);
 			DeviceData_Impl* pDevice_Inst = GetDevice(node->m_nodeId, value.GetCommandClassId(), value.GetInstance());
-			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "   - Instance=%d, class=%d, label=%s (PK_Device=%d)", value.GetInstance(), value.GetCommandClassId(), label.c_str(),  pDevice_Inst != NULL ? pDevice_Inst->m_dwPK_Device : 0);
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "   - Instance=%d, class=%d, label=%s, type=%s (PK_Device=%d)", value.GetInstance(), value.GetCommandClassId(), label.c_str(), OpenZWave::Value::GetTypeNameFromEnum(value.GetType()), pDevice_Inst != NULL ? pDevice_Inst->m_dwPK_Device : 0);
 
 			// TODO : create correct ID, also see TODO below
 			string sId = StringUtils::itos(node->m_nodeId);

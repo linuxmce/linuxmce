@@ -188,6 +188,7 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 		nodeInfo->m_homeId = _notification->GetHomeId();
 		nodeInfo->m_nodeId = _notification->GetNodeId();
 		nodeInfo->m_polled = false;		
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Node Added nodeId = %d", nodeInfo->m_nodeId);
 		g_nodes.push_back( nodeInfo );
 		break;
 	}
@@ -202,6 +203,7 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 			NodeInfo* nodeInfo = *it;
 			if( ( nodeInfo->m_homeId == homeId ) && ( nodeInfo->m_nodeId == nodeId ) )
 			{
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Node Removed nodeId = %d", nodeId);
 				g_nodes.erase( it );
 				delete nodeInfo;
 				break;
@@ -229,8 +231,10 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 			// Remove the value from out list
 			for( list<OpenZWave::ValueID>::iterator it = nodeInfo->m_values.begin(); it != nodeInfo->m_values.end(); ++it )
 			{
-				if( (*it) == _notification->GetValueID() )
+				OpenZWave::ValueID id = _notification->GetValueID();
+				if( (*it) == id )
 				{
+					LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Value Removed Home 0x%08x Node %d Genre %d Class %d Instance %d Index %d Type %d\n", _notification->GetHomeId(), _notification->GetNodeId(), id.GetGenre(), id.GetCommandClassId(), id.GetInstance(), id.GetIndex(), id.GetType());
 					nodeInfo->m_values.erase( it );
 					break;
 				}
@@ -291,23 +295,33 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 	UnLock();
 }
 
-OpenZWave::ValueID* ZWInterface::GetValueIdByLabel(NodeInfo* pNodeInfo, string label)
+OpenZWave::ValueID* ZWInterface::GetValueIdByNodeInstanceLabel(int iNodeId, int iInstance, string label)
+{
+	NodeInfo* pNodeInfo = GetNodeInfo(g_homeId, iNodeId);
+	if ( pNodeInfo != NULL )
+	{
+		return GetValueIdByLabel(pNodeInfo, iInstance, label);
+	}
+	return NULL;
+}
+
+OpenZWave::ValueID* ZWInterface::GetValueIdByLabel(NodeInfo* pNodeInfo, int iInstance, string label)
 {
 	for( list<OpenZWave::ValueID>::iterator it = pNodeInfo->m_values.begin(); it != pNodeInfo->m_values.end(); ++it )
 	{
 		string lab = OpenZWave::Manager::Get()->GetValueLabel((*it));
-		if ( lab == label )
+		if ( iInstance == (*it).GetInstance() && lab == label )
 			return &(*it);
 	}
 	return NULL;
 }
 
-bool ZWInterface::SetIntValue(int iNodeId, string label, int iValue)
+bool ZWInterface::SetIntValue(int iNodeId, int iInstance, string label, int iValue)
 {
 	NodeInfo* pNodeInfo = GetNodeInfo(g_homeId, iNodeId);
 	if ( pNodeInfo != NULL )
 	{
-		OpenZWave::ValueID* valueId = GetValueIdByLabel(pNodeInfo, label);
+		OpenZWave::ValueID* valueId = GetValueIdByLabel(pNodeInfo, iInstance, label);
 		if ( valueId != NULL ) {
 			OpenZWave::Manager::Get()->SetValue(*valueId, iValue);
 			return true;
@@ -317,5 +331,6 @@ bool ZWInterface::SetIntValue(int iNodeId, string label, int iValue)
 }
 
 bool ZWInterface::SetWakeUp(int iNodeId, int iValue) {
-	return SetIntValue(iNodeId, "Wake-up Interval", iValue);
+	return SetIntValue(iNodeId, 1, "Wake-up Interval", iValue);
+// TODO: When to use the "normal" set wakeup CC ?
 }
