@@ -58,6 +58,8 @@ OTHER_FILES += \
     android/res/layout/splash.xml \
     android/res/values-id/strings.xml \
     android/res/drawable-ldpi/icon.png \
-    android/AndroidManifest.xml
+    android/AndroidManifest.xml \
+    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
+    android/src/org/qtproject/qt5/android/bindings/QtApplication.java
 
 

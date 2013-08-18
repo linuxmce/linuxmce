@@ -33,6 +33,11 @@ void QOrbiterLogger::setLogLocation(QString l)
         if(!fileLocation.exists())
         {
             qDebug() << "-----------------log directory doesnt exit, setting up.";
+
+        }
+        else
+        {
+            qDebug() << "Log Location sucessfully set. ";
             if(!fileLocation.mkpath(logLocation)){
                 qDebug() << "---------------------------Cant create logfile directory!";
                 return;
@@ -41,12 +46,6 @@ void QOrbiterLogger::setLogLocation(QString l)
                 qDebug() << "Log Location sucessfully created. " << fileLocation.exists();
                 loggingEnabled = true;
             }
-        }
-        else
-        {
-            qDebug() << "Log Location sucessfully set. ";
-            loggingEnabled = true;
-
         }
 
         emit logLocationChanged(logLocation);

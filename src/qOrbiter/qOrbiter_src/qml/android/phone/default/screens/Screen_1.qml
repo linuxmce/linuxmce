@@ -112,12 +112,11 @@ Item {
             PropertyAnimation{
                 duration:350
             }
-        }
 
         HomeOptions {
             id: advancedrow
-        }
     }
+
 
 
 

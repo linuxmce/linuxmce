@@ -29,6 +29,7 @@ static jmethodID displayID = 0;
 AndroidSystem::AndroidSystem(QObject *parent) :
     QObject(parent)
 {
+
     blueStandard = "#33B5E5";
     blueHighlight= "#0099CC";
     purpleStandard ="#AA66CC";
@@ -76,7 +77,6 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
     buildVersionSDKClass =reinterpret_cast<jclass>(env->NewGlobalRef(localSDKclass));
 
     jclass lesc = env->FindClass("android/os/Environment");
-
     externalStorageClass = reinterpret_cast<jclass>(env->NewGlobalRef(lesc));
 
     jclass lfpid = env->FindClass("java/io/File");

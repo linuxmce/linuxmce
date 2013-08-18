@@ -348,6 +348,7 @@ int main(int argc, char* argv[])
         qorbiterManager  w(&orbiterWin.mainView);
 #else
         qorbiterManager w(&orbiterWin.mainView, &androidHelper);
+        orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
 
 #endif
         AbstractImageProvider modelimageprovider(&w);

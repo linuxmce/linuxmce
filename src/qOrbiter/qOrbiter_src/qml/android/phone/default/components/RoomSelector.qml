@@ -81,6 +81,21 @@ Rectangle {
                     }
                 }
             }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    if(subMenu){
+                        currentroom = name
+                        manager.setActiveRoom(genericview.model[index].room, genericview.model[index].ea_number);
+                        manager.setBoundStatus(true)
+                        loadComponent("NullComponent.qml")
+                    }
+                    else
+                    {
+                        subMenu = true
+                    }
+                }
+            }
         }
     }
 

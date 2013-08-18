@@ -89,7 +89,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     b_localLoading = true; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
 #elif defined QT5 && ANDROID || defined(ANDROID)
     androidHelper = jniHelper;
-    qorbiterUIwin->rootContext()->setContextProperty("android",androidHelper);
+ //   qorbiterUIwin->rootContext()->setContextProperty("android",androidHelper);
     b_localLoading = false;
     if(androidHelper->updateExternalStorageLocation()){
         androidHelper->updateBuildInformation();
