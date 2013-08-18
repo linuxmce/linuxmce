@@ -33,19 +33,6 @@ Item {
         }
     }
 
-    /*
-    Text{
-        id:spaceholder
-        text:manager.dceResponse
-        font.pixelSize: scaleY(3)
-        font.family: "Droid Sans"
-        anchors.top: stage.top
-        anchors.topMargin: scaleY(1)
-        width: scaleX(99)
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        color: "silver"
-    }
-*/
     NowPlayingButton{
         id:fs_npButton
         anchors.top: spaceholder.bottom
@@ -53,17 +40,6 @@ Item {
         anchors.leftMargin: manager.b_orientation ? (fs_npButton.width / 2) * -1 : scaleX(2)
     }
 
-    /*
-    Image {
-        id: np_bg
-        fillMode: Image.PreserveAspectFit
-        source: "image://listprovider/updateobject/"+securityvideo.timestamp
-        height: scaleY(35)
-        anchors.right: parent.right
-        anchors.top: parent.top
-        visible: dcenowplaying.b_mediaPlaying ? true : false
-    }
-    */
 
     DroidHomeSelector{
         id:home_selector;
@@ -97,29 +73,11 @@ Item {
     }
 */
 
-    Item{
-        width: parent.width
-        height: childrenRect.height +10
-        anchors.bottom: parent.bottom
 
-        Rectangle{
-            anchors.fill: parent
-            color: android.orangeStandard
-        }
-        opacity: showOptions ? 1 : 0
 
-        Behavior on opacity{
-            PropertyAnimation{
-                duration:350
-            }
-
-        HomeOptions {
-            id: advancedrow
+    HomeOptions {
+        id: advancedrow
     }
-
-
-
-
 }
 
 
