@@ -15,15 +15,12 @@ id:btnBase
     property int textSize: style.buttonLabelText
     property color color:"transparent"
     property string imgSource:"../img/buttonbg.png"
-    property color activatedColor:"orange"
+    property color activatedColor:androidSystem.blueStandard
     signal activated()
-
-
 
     Rectangle {
         id:buttonBase
-        height: style.stdbuttonh
-        width: style.stdbuttonw
+       anchors.fill: btnBase
         color:ms.pressed ? activatedColor : btnBase.color
         radius: btnBase.radius
         opacity:.65

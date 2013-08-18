@@ -65,8 +65,8 @@ QtObject{
     //icon sizes
     property int iconHeight: manager.b_orientation ? scaleY(22) :scaleY(16)
     property int iconWidth: manager.b_orientation ? scaleY(22) :scaleY(16)
-    property int  stdbuttonh: manager.b_orientation ? scaleY(15) :scaleY(12)
-    property int  stdbuttonw: manager.b_orientation ? scaleY(15) :scaleY(12)
+    property int  stdbuttonh: manager.b_orientation ? scaleY(16) :scaleY(13)
+    property int  stdbuttonw: manager.b_orientation ? scaleY(16) :scaleY(13)
     property int buttonLabelText : manager.b_orientation ? scaleY(3) : scaleY(2.5)
 
     //textStyles

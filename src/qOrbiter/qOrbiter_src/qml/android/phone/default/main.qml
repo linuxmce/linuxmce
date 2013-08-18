@@ -1,4 +1,6 @@
 import QtQuick 1.1
+
+
 import "components"
 import "js/ComponentLoader.js" as MyJs
 
@@ -9,8 +11,28 @@ Item {
     height:manager.appHeight
     focus:true
 
+    Rectangle{
+        id:canary
+        height: 1
+        width: 1
+        color:"white"
+    }
+
+    Timer{
+        id:refresh
+        interval: 500
+        running:true
+        repeat: true
+        onTriggered: {
+            if(canary.rotation===360)
+                canary.rotation =1
+            else
+                canary.rotation=(canary.rotation+1)
+        }
+    }
+
     Component.onCompleted: {
-        android.updateBuildInformation()
+        androidSystem.updateBuildInformation()
     }
 
     Keys.onReleased: {
@@ -22,8 +44,13 @@ Item {
             } else{
                 manager.goBacktoQScreen()
             }
-
-
+            break
+        case Qt.Key_MediaPrevious:
+            if(manager.currentScreen==="Screen_1.qml"){
+                showExitConfirm()
+            } else{
+                manager.goBacktoQScreen()
+            }
             break
         default:
             console.log(event.key)
@@ -72,7 +99,7 @@ Item {
 
     function showExitConfirm(){
 
-    }
+    } 
 
 
     function screenchange(screenname )
@@ -164,14 +191,37 @@ Item {
 
     }
 
+    Rectangle{
+        id:mask
+        height: parent.height
+        width: parent.width
+        color: "black"
+        opacity:0
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {}
+        }
+
+    }
 
     Loader{
         id:componentLoader
         height: parent.height
         width: parent.width
+        source:""
         objectName: "componentbot"
-        onLoaded: {console.log("Component is loaded")}
+        onSourceChanged:  {
+            if(source!==""){
+                mask.opacity = .65
+                console.log("Component is loaded")
+            }else {
+                mask.opacity =0
+            }
+        }
+
     }
+
+
 
 
     SequentialAnimation{

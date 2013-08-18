@@ -1,6 +1,4 @@
 import QtQuick 1.1
-//
-
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 
@@ -52,28 +50,6 @@ Item {
         currentModel:undefined
         anchors.centerIn: parent
     }
-
-    /*
-    EffectGaussianBlur{
-        id: blur
-        anchors.fill: bg
-        divider: false
-        dividerValue: 1
-        opacity: 1
-        radius: 0.75
-        targetHeight: bg.height
-        targetWidth: bg.width
-        source: ShaderEffectSource { sourceItem: bg; hideSource: true }
-        Component.onCompleted: console.log("blur loaded?")
-    }
-
-    EffectBillboard{
-        id:billboard
-
-    }
-*/
-
-
 
     HomeOptions {
         id: advancedrow

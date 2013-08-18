@@ -3,10 +3,9 @@ import "../components"
 import "../js/ComponentLoader.js" as MyJs
 
 
-Rectangle {
+Item {
     height: appH
-    width: appW
-    color: "transparent"
+    width: appW 
     id: advancedscreen
     state: "reg"
     HomeButton{}
@@ -14,7 +13,7 @@ Rectangle {
     Flow {
         id: flow1
         anchors.centerIn: parent
-        height: scaleY(85)
+        height: scaleY(75)
         width: scaleX(85)
         spacing: 10
 
@@ -110,7 +109,8 @@ Rectangle {
 
         onVisibleChanged: {
             if(visible){
-                android.updateBuildInformation()
+                androidSystem.updateBuildInformation()
+                androidSystem.updateExternalStorageLocation()
             }
         }
 
@@ -127,31 +127,41 @@ Rectangle {
             height: parent.height*.75
             width: parent.width*.85
             anchors.bottom: parent.bottom
-            StyledText{
-                text: "Api Level:"+ android.apiLevel
-                font.pixelSize: 16
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                color: "white"
 
-            }
 
             StyledText{
-                text: "Storage Location:"+ android.externalStorageLocation
-                font.pixelSize: 16
+                text: "Api Level:"+ androidSystem.apiLevel
+                font.pixelSize: 26
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                color: androidSystem.redStandard
+            }
+
+            StyledText{
+                text: "Storage Location:"+ androidSystem.externalStorageLocation
+                font.pixelSize: 26
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                color: androidSystem.blueStandard
+            }
+
+            StyledText{
+                text: "Media Mount Status:"+ androidSystem.mountStatus
+                font.pixelSize: 26
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                color: androidSystem.getOrangeStandard()
+            }
+
+            StyledText{
+                text: "Made By:"+ androidSystem.deviceManufacturer
+                font.pixelSize: 26
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 color: "white"
             }
+
             StyledText{
-                text: "Codename:"+ android.codename
-                font.pixelSize: 16
+                text: "Devicename:"+ androidSystem.deviceName
+                font.pixelSize: 26
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                color: "white"
-            }
-            StyledText{
-                text: "Devicename:"+ android.deviceName
-                font.pixelSize: 16
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                color: "white"
+                color: androidSystem.purpleStandard
             }
 
         }

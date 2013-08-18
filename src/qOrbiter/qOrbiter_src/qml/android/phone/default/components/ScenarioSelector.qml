@@ -1,47 +1,97 @@
 import QtQuick 1.1
-import com.nokia.android 1.1
 
-Rectangle {
+
+Item {
     id:generic_model_display
     width: generic_view.width
     height: generic_view.height + listClose.height
     property variant currentModel:dummy
     state:"inactive"
-    color: "black"
+    onStateChanged:console.log("ScenarioView State Change");
+
+
+    Behavior on opacity{
+
+        SequentialAnimation{
+            PropertyAnimation{
+                duration:350
+            }
+            ScriptAction{ script:
+                    if(state==="inactive"){
+                        console.log("destroying")
+                    componentLoader.source=""
+                }
+            }
+        }
+
+
+    }
+
+    Rectangle{
+        anchors.fill: parent
+        color: "black"
+    }
+
 
     onCurrentModelChanged: currentModel !==dummy ? state = "active" : state = "inactive"
     ListModel{
         id:dummy
     }
 
-    Rectangle{
+    Item{
         id:listClose
         height: scaleY(8)
         width: scaleX(61)
         anchors.top: parent.top
-        color: "transparent"
-        Image {
-            id: headerbg
-            source: "../img/widegreyshape.png"
-            anchors.fill: listClose
+
+        Rectangle{
+            anchors.fill: parent
+            color:androidSystem.orangeStandard
         }
 
-        Text {
+        Rectangle{
+            anchors.fill: parent
+            opacity:.15
+            gradient: Gradient{
+                GradientStop{ position:0.0;color:"transparent"}
+                GradientStop{ position:0.35;color:androidSystem.orangeHighlight}
+                GradientStop{ position:0.65;color:"black"}
+            }
+        }
+
+        StyledText {
             id: exit
             text: qsTr("Exit")
-            font.pixelSize: scaleY(3)
-            anchors.centerIn: parent
+            font.pixelSize: scaleY(4)
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
         }
         MouseArea{
             anchors.fill: parent
             onClicked: {currentModel=dummy  }
         }
+
+        Rectangle{
+            height: parent.height - 5
+            width: height
+            color: "black"
+            opacity: .65
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            StyledText{
+                anchors.centerIn: parent
+                text: "F"
+                font.weight: Font.DemiBold
+                fontSize: scaleY(5)
+                color: "white"
+            }
+        }
     }
     ListView{
         id: generic_view
         anchors.top: listClose.bottom
-        width: scaleX(61)
-        height: scaleY(50)
+        width: scaleX(75)
+        height: scaleY(75)
         model:currentModel
         spacing:1
         orientation:ListView.Vertical
@@ -56,7 +106,7 @@ Rectangle {
             name: "active"
             PropertyChanges {
                 target: generic_model_display
-                visible:true
+               opacity:1
 
             }
         },
@@ -64,11 +114,8 @@ Rectangle {
             name: "inactive"
             PropertyChanges {
                 target: generic_model_display
-                visible:false
-            }
-
-
+                opacity:0
+            }           
         }
-
     ]
 }

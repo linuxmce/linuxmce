@@ -10,7 +10,10 @@ Item {
     height:parent.height
     width:parent.width
     focus:true
-    Component.onCompleted: forceActiveFocus()
+    Component.onCompleted: {
+        forceActiveFocus()
+        androidSystem.updateBuildInformation()
+    }
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
