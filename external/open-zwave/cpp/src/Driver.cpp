@@ -32,6 +32,7 @@
 #include "Node.h"
 #include "Msg.h"
 #include "Notification.h"
+#include "Scene.h"
 
 #include "Event.h"
 #include "Mutex.h"
@@ -104,8 +105,8 @@ static char const* c_controllerCommandNames[] =
 static char const* c_sendQueueNames[] =
 {
 	"Command",
-	"Controller",
 	"NoOp",
+	"Controller",
 	"WakeUp",
 	"Send",
 	"Query",
@@ -230,6 +231,7 @@ Driver::~Driver
 		if( save )
 		{
 			WriteConfig();
+			Scene::WriteXML( "zwscene.xml" );
 		}
 	}
 
@@ -245,7 +247,6 @@ Driver::~Driver
 	m_driverThread->Release();
 
 	m_sendMutex->Release();
-	m_pollMutex->Release();
 
 	m_controller->Close();
 	m_controller->Release();
@@ -269,6 +270,9 @@ Driver::~Driver
 		}
 	}
 	ReleaseNodes();
+
+	// Don't release until all nodes have removed their poll values
+	m_pollMutex->Release();
 
 	// Clear the send Queue
 	for( int32 i=0; i<MsgQueue_Count; ++i )
@@ -346,8 +350,8 @@ void Driver::DriverThreadProc
 			waitObjects[1] = m_notificationsEvent;			// Notifications waiting to be sent.
 			waitObjects[2] = m_controller;				// Controller has received data.
 			waitObjects[3] = m_queueEvent[MsgQueue_Command];	// A controller command is in progress.
-			waitObjects[4] = m_queueEvent[MsgQueue_Controller];	// A multi-part controller command is in progress
-			waitObjects[5] = m_queueEvent[MsgQueue_NoOp];		// Send device probes and diagnostics messages
+			waitObjects[4] = m_queueEvent[MsgQueue_NoOp];		// Send device probes and diagnostics messages
+			waitObjects[5] = m_queueEvent[MsgQueue_Controller];	// A multi-part controller command is in progress
 			waitObjects[6] = m_queueEvent[MsgQueue_WakeUp];		// A node has woken. Pending messages should be sent.
 			waitObjects[7] = m_queueEvent[MsgQueue_Send];		// Ordinary requests to be sent.
 			waitObjects[8] = m_queueEvent[MsgQueue_Query];		// Node queries are pending.
@@ -366,11 +370,15 @@ void Driver::DriverThreadProc
 				if( m_waitingForAck || m_expectedCallbackId || m_expectedReply )
 				{
 					count = 3;
-					timeout = retryTimeStamp.TimeRemaining();
+					timeout = m_waitingForAck ? ACK_TIMEOUT : retryTimeStamp.TimeRemaining();
 					if( timeout < 0 )
 					{
 						timeout = 0;
 					}
+				}
+				else if( m_currentControllerCommand != NULL )
+				{
+					count = 6;
 				}
 				else
 				{
@@ -634,18 +642,19 @@ bool Driver::ReadConfig
 		m_controllerCaps = (uint8)intVal;
 	}
 
-/*	// Poll Interval
+	// Poll Interval
 	if( TIXML_SUCCESS == driverElement->QueryIntAttribute( "poll_interval", &intVal ) )
 	{
 		m_pollInterval = intVal;
 	}
 
 	// Poll Interval--between polls or period for polling the entire pollList?
-	if( TIXML_SUCCESS == driverElement->QueryIntAttribute( "poll_interval_between", &intVal ) )
+	char const* cstr = driverElement->Attribute( "poll_interval_between" );
+	if( cstr )
 	{
-		m_bIntervalBetweenPolls = ( intVal != 0 );
+		m_bIntervalBetweenPolls = !strcmp( str, "true" );
 	}
-*/
+
 	// Read the nodes
 	LockNodes();
 	TiXmlElement const* nodeElement = driverElement->FirstChildElement();
@@ -732,12 +741,12 @@ void Driver::WriteConfig
 	snprintf( str, sizeof(str), "%d", m_controllerCaps );
 	driverElement->SetAttribute( "controller_capabilities", str );
 
-/*	snprintf( str, sizeof(str), "%d", m_pollInterval );
+	snprintf( str, sizeof(str), "%d", m_pollInterval );
 	driverElement->SetAttribute( "poll_interval", str );
 
 	snprintf( str, sizeof(str), "%d", (int) m_bIntervalBetweenPolls );
 	driverElement->SetAttribute( "poll_interval_between", str );
-*/
+
 	LockNodes();
 	for( int i=0; i<256; ++i )
 	{
@@ -869,8 +878,8 @@ void Driver::SendQueryStageComplete
 }
 
 //-----------------------------------------------------------------------------
-// <Driver::RemoveQueryStageComplete>
-// Remove an item from the query queue so current stage will be repeated
+// <Driver::RetryQueryStageComplete>
+// Request the current stage will be repeated
 //-----------------------------------------------------------------------------
 void Driver::RetryQueryStageComplete
 (
@@ -1041,6 +1050,13 @@ bool Driver::WriteNextMsg
 				m_currentControllerCommand->m_controllerStateChanged = false;
 			}
 		}
+		else
+		{
+			Log::Write( LogLevel_Info, "WriteNextMsg Controller nothing to do" );
+			m_sendMutex->Lock();
+			m_queueEvent[_queue]->Reset();
+			m_sendMutex->Unlock();
+		}
 		return true;
 	}
 
@@ -1071,31 +1087,23 @@ bool Driver::WriteMsg
 	uint8 attempts = m_currentMsg->GetSendAttempts();
 	uint8 nodeId = m_currentMsg->GetTargetNodeId();
 	Node* node = GetNode( nodeId );
-	if( attempts >= m_currentMsg->GetMaxSendAttempts() || (node != NULL && !node->IsNodeAlive() ) )
+	if( attempts >= m_currentMsg->GetMaxSendAttempts() || (node != NULL && !node->IsNodeAlive() && !m_currentMsg->IsNoOperation() ) )
 	{
-		// That's it - already tried to send GetMaxSendAttempt() times.
 		if( node != NULL && !node->IsNodeAlive() )
 		{
 			Log::Write( LogLevel_Error, nodeId, "ERROR: Dropping command because node is presumed dead" );
 		}
 		else
 		{
+			// That's it - already tried to send GetMaxSendAttempt() times.
 			Log::Write( LogLevel_Error, nodeId, "ERROR: Dropping command, expected response not received after %d attempt(s)", m_currentMsg->GetMaxSendAttempts() );
 		}
-		delete m_currentMsg;
-		m_currentMsg = NULL;
-
+		RemoveCurrentMsg();
 		m_dropped++;
 		if( node != NULL )
 		{
 		    	ReleaseNodes();
 		}
-
-		m_expectedCallbackId = 0;
-		m_expectedCommandClassId = 0;
-		m_expectedNodeId = 0;
-		m_expectedReply = 0;
-		m_waitingForAck = false;
 		return false;
 	}
 
@@ -1335,6 +1343,7 @@ bool Driver::MoveMessagesToWakeUpQueue
 //-----------------------------------------------------------------------------
 // <Driver::HandleErrorResponse>
 // For messages that return a ZW_SEND_DATA response, process the results here
+// If it is a non-listeing (sleeping) node return true.
 //-----------------------------------------------------------------------------
 bool Driver::HandleErrorResponse
 (
@@ -1375,6 +1384,13 @@ bool Driver::HandleErrorResponse
 		m_notidle++;
 		Log::Write( LogLevel_Info, _nodeId, "ERROR: %s failed. Network is busy.", _funcStr );
 	}
+	if( Node* node = GetNodeUnsafe( _nodeId ) )
+	{
+		if( ++node->m_errors >= 3 )
+		{
+			node->SetNodeAlive( false );
+		}
+	}
 	return false;
 }
 
@@ -1386,6 +1402,7 @@ void Driver::CheckCompletedNodeQueries
 (
 )
 {
+	Log::Write( LogLevel_Warning, "CheckCompletedNodeQueries m_allNodesQueried=%d m_awakeNodesQueried=%d", m_allNodesQueried, m_awakeNodesQueried );
 	if( !m_allNodesQueried )
 	{
 		bool all = true;
@@ -1414,6 +1431,7 @@ void Driver::CheckCompletedNodeQueries
 		}
 		ReleaseNodes();
 
+		Log::Write( LogLevel_Warning, "CheckCompletedNodeQueries all=%d, deadFound=%d sleepingOnly=%d", all, deadFound, sleepingOnly );
 		if( all )
 		{
 			if( deadFound )
@@ -2097,8 +2115,7 @@ void Driver::ProcessMsg
 					notification->SetNotification( Notification::Code_MsgComplete );
 					QueueNotification( notification );
 				}
-				delete m_currentMsg;
-				m_currentMsg = NULL;
+				RemoveCurrentMsg();
 			}
 		}
 	}
@@ -2209,12 +2226,18 @@ void Driver::HandleGetSerialAPICapabilitiesResponse
 		SendMsg( msg, MsgQueue_Command );
 	}
 	SendMsg( new Msg( "FUNC_ID_SERIAL_API_GET_INIT_DATA", 0xff, REQUEST, FUNC_ID_SERIAL_API_GET_INIT_DATA, false ), MsgQueue_Command);
+	if( !IsBridgeController() )
+	{
+		Msg* msg = new Msg( "FUNC_ID_SERIAL_API_SET_TIMEOUTS", 0xff, REQUEST, FUNC_ID_SERIAL_API_SET_TIMEOUTS, false );
+		msg->Append( ACK_TIMEOUT / 10 );
+		msg->Append( BYTE_TIMEOUT / 10 );
+		SendMsg( msg, MsgQueue_Command );
+	}
 	Msg* msg = new Msg( "FUNC_ID_SERIAL_API_APPL_NODE_INFORMATION", 0xff, REQUEST, FUNC_ID_SERIAL_API_APPL_NODE_INFORMATION, false, false );
 	msg->Append( APPLICATION_NODEINFO_LISTENING );
 	msg->Append( 0x02 );			// Generic Static Controller
 	msg->Append( 0x01 );			// Specific Static PC Controller
-	msg->Append( 0x01 );
-	msg->Append( 0x2b );			// Scene Activation
+	msg->Append( 0x00 );			// Length
 	SendMsg( msg, MsgQueue_Command );
 }
 
@@ -2401,7 +2424,7 @@ void Driver::HandleSerialAPIGetInitDataResponse
 							{
 								// The node was read in from the config, so we
 								// only need to get its current state
-								node->SetQueryStage( Node::QueryStage_Associations );
+								node->SetQueryStage( Node::QueryStage_Probe1 );
 							}
 
 							ReleaseNodes();
@@ -2593,14 +2616,19 @@ void Driver::HandleIsFailedNodeResponse
 )
 {
 	ControllerState state;
+	uint8 nodeId = m_currentControllerCommand ? m_currentControllerCommand->m_controllerCommandNode : GetNodeNumber( m_currentMsg );
 	if( _data[2] )
 	{
-		Log::Write( LogLevel_Warning, GetNodeNumber( m_currentMsg ), "WARNING: Received reply to FUNC_ID_ZW_IS_FAILED_NODE_ID - node failed" );
+		Log::Write( LogLevel_Warning, nodeId, "WARNING: Received reply to FUNC_ID_ZW_IS_FAILED_NODE_ID - node %d failed", nodeId );
 		state = ControllerState_NodeFailed;
 	}
 	else
 	{
-		Log::Write( LogLevel_Warning, GetNodeNumber( m_currentMsg ), "Received reply to FUNC_ID_ZW_IS_FAILED_NODE_ID - has not failed" );
+		Log::Write( LogLevel_Warning, nodeId, "Received reply to FUNC_ID_ZW_IS_FAILED_NODE_ID - node %d has not failed", nodeId );
+		if( Node* node = GetNodeUnsafe( nodeId ) )
+		{
+			node->SetNodeAlive( true );
+		}
 		state = ControllerState_NodeOK;
 	}
 	UpdateControllerState( state );
@@ -2755,13 +2783,15 @@ void Driver::HandleSendDataRequest
 		{
 			if( !HandleErrorResponse( _data[3], nodeId, _replication ? "ZW_REPLICATION_END_DATA" : "ZW_SEND_DATA", !_replication ) )
 			{
-				if( node != NULL && node->GetCurrentQueryStage() == Node::QueryStage_Probe && m_currentMsg->IsNoOperation() )
+				if( m_currentMsg->IsNoOperation() && node != NULL &&
+				    ( node->GetCurrentQueryStage() == Node::QueryStage_Probe  ||
+				      node->GetCurrentQueryStage() == Node::QueryStage_Probe1 ) )
 				{
-					node->QueryStageRetry( Node::QueryStage_Probe, 3 );
+					node->QueryStageRetry( node->GetCurrentQueryStage(), 3 );
 				}
 			}
 		}
-		else
+		else if( node != NULL )
 		{
 		  	// If WakeUpNoMoreInformation request succeeds, update our status
 		  	if( m_currentMsg->IsWakeUpNoMoreInformationCommand() )
@@ -2771,6 +2801,11 @@ void Driver::HandleSendDataRequest
 					// Mark the node as asleep
 					wakeUp->SetAwake( false );
 				}
+			}
+			// If node is not alive, mark it alive now
+			if( !node->IsNodeAlive() )
+			{
+				node->SetNodeAlive( true );
 			}
 		}
 		// Command reception acknowledged by node, error or not
@@ -3195,6 +3230,7 @@ void Driver::HandleApplicationCommandHandlerRequest
 	if( node != NULL )
 	{
 		node->m_receivedCnt++;
+		node->m_errors = 0;
 		int cmp = memcmp( _data, node->m_lastReceivedMessage, sizeof(node->m_lastReceivedMessage));
 		if( cmp == 0 && node->m_receivedTS.TimeRemaining() > -500 )
 		{
@@ -3417,8 +3453,14 @@ bool Driver::HandleApplicationUpdateRequest
 )
 {
 	bool messageRemoved = false;
-
 	uint8 nodeId = _data[3];
+	Node* node = GetNodeUnsafe( nodeId );
+
+	// If node is not alive, mark it alive now
+	if( node != NULL && !node->IsNodeAlive() )
+	{
+		node->SetNodeAlive( true );
+	}
 
 	switch( _data[2] )
 	{
@@ -3463,16 +3505,16 @@ bool Driver::HandleApplicationUpdateRequest
 			// assume the message came from the last node to which we sent a request.
 			if( m_currentMsg )
 			{
-				Node* node = GetNodeUnsafe( m_currentMsg->GetTargetNodeId() );
-				if( node )
+				Node* tnode = GetNodeUnsafe( m_currentMsg->GetTargetNodeId() );
+				if( tnode )
 				{
 					// Retry the query twice
-					node->QueryStageRetry( Node::QueryStage_NodeInfo, 2 );
+					tnode->QueryStageRetry( Node::QueryStage_NodeInfo, 2 );
 
 					// Just in case the failure was due to the node being asleep, we try
 					// to move its pending messages to its wakeup queue.  If it is not
 					// a sleeping device, this will have no effect.
-					if( MoveMessagesToWakeUpQueue( node->GetNodeId(), true ) )
+					if( MoveMessagesToWakeUpQueue( tnode->GetNodeId(), true ) )
 					{
 						messageRemoved = true;
 					}
@@ -3488,7 +3530,7 @@ bool Driver::HandleApplicationUpdateRequest
 		case UPDATE_STATE_NODE_INFO_RECEIVED:
 		{
 			Log::Write( LogLevel_Info, nodeId, "UPDATE_STATE_NODE_INFO_RECEIVED from node %d", nodeId );
-			if( Node* node = GetNodeUnsafe( nodeId ) )
+			if( node )
 			{
 				node->UpdateNodeInfo( &_data[8], _data[4] - 3 );
 			}
@@ -3665,7 +3707,7 @@ bool Driver::EnablePoll
 			Notification* notification = new Notification( Notification::Type_PollingEnabled );
 			notification->SetHomeAndNodeIds( m_homeId, _valueId.GetNodeId() );
 			QueueNotification( notification );
-			Log::Write( LogLevel_Info, nodeId, "EnablePoll for HomeID 0x%.8x, value(cc=0x%02x,in=0x%02x,id=0x%02x)--pollList has %d items",
+			Log::Write( LogLevel_Info, nodeId, "EnablePoll for HomeID 0x%.8x, value(cc=0x%02x,in=0x%02x,id=0x%02x)--poll list has %d items",
 				    _valueId.GetHomeId(), _valueId.GetCommandClassId(), _valueId.GetIndex(), _valueId.GetInstance(), m_pollList.size() );
 			return true;
 		}
@@ -3718,7 +3760,7 @@ bool Driver::DisablePoll
 				Notification* notification = new Notification( Notification::Type_PollingDisabled );
 				notification->SetHomeAndNodeIds( m_homeId, _valueId.GetNodeId() );
 				QueueNotification( notification );
-				Log::Write( LogLevel_Info, nodeId, "Node%03d, DisablePoll for HomeID 0x%.8x, value(cc=0x%02x,in=0x%02x,id=0x%02x)--poll list has %d items",
+				Log::Write( LogLevel_Info, nodeId, "DisablePoll for HomeID 0x%.8x, value(cc=0x%02x,in=0x%02x,id=0x%02x)--poll list has %d items",
 					    _valueId.GetHomeId(), _valueId.GetCommandClassId(), _valueId.GetIndex(), _valueId.GetInstance(), m_pollList.size() );
 				return true;
 			}

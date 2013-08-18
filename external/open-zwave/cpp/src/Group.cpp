@@ -31,6 +31,7 @@
 #include "Driver.h"
 #include "Node.h"
 #include "Notification.h"
+#include "Options.h"
 #include "Association.h"
 #include "AssociationCommandConfiguration.h"
 
@@ -140,11 +141,10 @@ Group::Group
 		associationElement = associationElement->NextSiblingElement();
 	}
 
-	// Group must be added before OnGroupChanged is called so UpdateNodeRoutes can find it
-	if( Node* node = Manager::Get()->GetDriver( m_homeId )->GetNodeUnsafe( _nodeId ) )
-	{
-		node->AddGroup( this );
-	}
+	// Group must be added before OnGroupChanged is called so UpdateNodeRoutes can find it.
+	// Since we do not want to update return routes UpdateNodeRoutes won't find the group
+	// so nothing will go out from here. The not sending of return routes information
+	// only works by a side effect of not finding the group.
 	OnGroupChanged( pending );
 }
 
@@ -309,7 +309,12 @@ void Group::OnGroupChanged
 		notification->SetGroupIdx( m_groupIdx );
 		Manager::Get()->GetDriver( m_homeId )->QueueNotification( notification ); 
 		// Update routes on remote node if necessary
-		Manager::Get()->GetDriver( m_homeId )->UpdateNodeRoutes( m_nodeId );
+		bool update = false;
+		Options::Get()->GetOptionAsBool( "PerformReturnRoutes", &update );
+		if( update )
+		{
+			Manager::Get()->GetDriver( m_homeId )->UpdateNodeRoutes( m_nodeId );
+		}
 	}
 }
 

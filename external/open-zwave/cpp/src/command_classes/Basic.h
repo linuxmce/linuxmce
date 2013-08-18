@@ -45,7 +45,8 @@ namespace OpenZWave
 		static uint8 const StaticGetCommandClassId(){ return 0x20; }		
 		static string const StaticGetCommandClassName(){ return "COMMAND_CLASS_BASIC"; }
 
-		bool SetMapping( uint8 const _commandClassId );	// Map COMMAND_CLASS_BASIC messages to another command class
+		bool SetMapping( uint8 const _commandClassId, bool const _doLog = true );	// Map COMMAND_CLASS_BASIC messages to another command class
+		uint8 GetMapping(){ return m_mapping; }
 
 		// From CommandClass
 		virtual void ReadXML( TiXmlElement const* _ccElement );
@@ -57,8 +58,6 @@ namespace OpenZWave
 		virtual bool HandleMsg( uint8 const* _data, uint32 const _length, uint32 const _instance = 1 );
 		virtual bool SetValue( Value const& _value );
 
-		virtual void SetValueBasic( uint8 const _instance, uint8 const _level );
-
 		void Set( uint8 const _level );
 
 	protected:
@@ -68,6 +67,7 @@ namespace OpenZWave
 		Basic( uint32 const _homeId, uint8 const _nodeId );
 
 		uint8						m_mapping;
+		bool						m_ignoreMapping;
 		bool						m_setAsReport;
 	};
 
