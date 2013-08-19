@@ -3,10 +3,10 @@ Item{
     id: connectionBoxContainer
     anchors.verticalCenter: parent.verticalCenter
     anchors.horizontalCenter: parent.horizontalCenter
-    anchors.verticalCenterOffset:10
+    anchors.verticalCenterOffset:-25
     width: manager.appWidth *.75
     height: scaleY(20)
-
+    state:"hidden"
 
     Rectangle {
         anchors.fill: parent
@@ -30,11 +30,9 @@ Item{
     Text {
         id: connectionlabel
         text: qsTr("Set Connection Details")
-        font.pointSize: 16
-        font.bold: false
+        font.pointSize: 16        
         anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        font.family:"Roboto"
+        anchors.horizontalCenter: parent.horizontalCenter       
     }
 
     Row{
@@ -147,7 +145,7 @@ Item{
         State {
             name: "showing"
             PropertyChanges {
-                target: connectionBox
+                target: connectionBoxContainer
                 opacity:1
                 scale:1
             }
@@ -155,7 +153,7 @@ Item{
         State {
             name: "hidden"
             PropertyChanges {
-                target: connectionBox
+                target: connectionBoxContainer
                 opacity:0
                 scale:0
             }

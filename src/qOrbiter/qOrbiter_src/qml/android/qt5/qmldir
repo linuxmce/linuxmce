@@ -1,5 +1,6 @@
 Splash Splash.qml
 SplashView SplashView.qml
+SplashViewPhone SplashViewPhone.qml
 ConnectionBox ConnectionBox.qml
 ExistingOrbiters ExistingOrbiters.qml
 NewOrbiterButton NewOrbiterButton.qml

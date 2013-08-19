@@ -3,42 +3,48 @@ import QtQuick 2.0
 
 
 Item {
-  anchors.fill: parent
+    height:manager.appHeight
+    width:manager.appWidth
     id:splashPage
 
     signal setupStart(string x, string y)
     signal splashLoaded()
 
+    Component.onCompleted: {
+        if(existing_orbiters.count!==0){
+            existing_orbiters.state="showing"
+            newOrbiterButton.state="showing"
+            connectionBox.state="hidden"
+        }
+    }
 
     Connections{
         target: window
         onShowList:{
-
+            console.log("Showing list")
             if(existing_orbiters.count === 0){
                 screenChange("NewOrbiterSetup.qml")
             }
             else{
-                existing_orbiters.state="showing"
-                newOrbiterButton.state="showing"
-                connectionBox.state="hidden"
+
             }
         }
         onPageChanged:screenchange(qmlPage)
     }
     Text {
         id: welcome
-        text: qsTr("LinuxMCE")      
+        text: qsTr("LinuxMCE")
         font.pointSize: 42
         anchors.top: parent.top
         anchors.topMargin: scaleY(5)
-        anchors.left: parent.left
-        font.bold: false
+        font.weight: Font.Light
         anchors.horizontalCenter: parent.horizontalCenter
-        color:"white"
+
     }
 
     StatusRow {
         id: statusRow
+        anchors.top: parent.top
     }
 
     Connections{
@@ -74,9 +80,9 @@ Item {
         id: existing_orbiters
     }
 
-    NewOrbiterButton {
-        id: newOrbiterButton
-    }
+//    NewOrbiterButton {
+//        id: newOrbiterButton
+//    }
 
 }
 

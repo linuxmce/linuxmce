@@ -2,7 +2,7 @@ import QtQuick 2.0
 
 ListView{
     id:existing_orbiters
-    height: scaleY(35)
+    height: scaleY(45)
     width: scaleX(55)
     clip: true
     anchors.left: parent.right
@@ -38,28 +38,28 @@ ListView{
         {
             id:labelColumn
             height: childrenRect.height
-            width: parent.width *.65
+            width: parent.width *.95
             anchors.centerIn: parent
             
             Text {
                 id: orbiter_label
                 text: qsTr("Orbiter:")+ label
-                font.pixelSize: 18
+                font.pixelSize: 28
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 font.family: myFont.name
 
                 width: parent.width
-                color: "#99CC99"
+                color: "white"
             }
-            Text {
-                id: dev_num
-                text:qsTr("Device:")+ device
-                font.pixelSize: 12
-                font.italic: true
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                font.family: myFont.name
-                width: parent.width
-            }
+//            Text {
+//                id: dev_num
+//                text:qsTr("Device:")+ device
+//                font.pixelSize: 28
+//                font.italic: true
+//                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+//                font.family: myFont.name
+//                width: parent.width
+//            }
         }
         MouseArea {
             anchors.fill: parent

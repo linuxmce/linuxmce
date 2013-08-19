@@ -5,12 +5,13 @@ import QtQuick 2.0
 
 Rectangle {
     id: splashLogic
-    height:appH
-    width:appW
+    height:manager.appHeight
+    width:manager.appWidth
     property bool orbiterSetup:false
     color:"black"
 
-    onOrbiterSetupChanged:{  console.log(orbiterSetup) ;
+    onOrbiterSetupChanged:{
+        console.log(orbiterSetup) ;
         existing_orbiters.visible = false;
         orbiter_options.visible = true;
         newOrbiterOptionContainer.visible=true; window.showSetup()
@@ -19,7 +20,7 @@ Rectangle {
     Image {
         id: splash
         anchors.centerIn: parent
-        fillMode: Image.PreserveAspectFit
+        fillMode: Image.PreserveAspectCrop
         source: "../tablet/default/img/icons/backgrounds/bedroom.png"
         anchors.fill: parent
   }
@@ -30,10 +31,10 @@ Rectangle {
     }
 
     function scaleX(x){
-        return x/100*appH
+        return x/100*manager.appWidth
     }
     function scaleY(y){
-        return y/100*appW
+        return y/100*manager.appHeight
     }
 
     Connections{
@@ -61,8 +62,10 @@ Rectangle {
 
     Loader {
         id:pageLoader
+        height:parent.height
+        width: parent.width
         objectName: "loadbot"
-        source: "SplashView.qml"
+        source:manager.isPhone===2 ? "SplashView.qml" : "SplashViewPhone.qml"
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
         }

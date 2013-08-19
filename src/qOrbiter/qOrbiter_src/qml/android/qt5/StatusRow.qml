@@ -1,26 +1,30 @@
 import QtQuick 2.0
 Item{
-height: childrenRect.height
-width:childrenRect.width
+    height: childrenRect.height
+    width:manager.appWidth
 
+    Rectangle{
+        anchors.fill: parent
+        color:"black"
+        opacity: .65
+    }
     Row{
         id:statusRow
         height: childrenRect.height
-        width: scaleX(85)
+        width: parent.width
         spacing: scaleX(10)
 
         Rectangle{
-
             id:connection_indicator
             height: scaleX(5)
-            width: scaleX(5)
+            width: childrenRect.width
             color: "transparent"
 
             Text {
                 id: connection_label
                 text: qsTr("Connection")
                 color: window.b_connectionPresent ? "green" : "red"
-                font.pixelSize: window.b_connectionPresent ? 14 : 12
+                font.pixelSize: window.b_connectionPresent ? 22 : 18
                 font.family: myFont.name
             }
         }
@@ -28,7 +32,7 @@ width:childrenRect.width
         Rectangle{
             id:device_indicator
             height: scaleX(5)
-            width: scaleX(5)
+            width: childrenRect.width
             color: "transparent"
             Image {
                 id: device_icon
@@ -39,7 +43,7 @@ width:childrenRect.width
                 id: device_Label
                 text: qsTr("Device")
                 color: window.b_devicePresent ? "green" : "red"
-                font.pixelSize: window.b_devicePresent ? 14 : 12
+                font.pixelSize: window.b_devicePresent ? 22 : 18
                 font.family: myFont.name
             }
         }
