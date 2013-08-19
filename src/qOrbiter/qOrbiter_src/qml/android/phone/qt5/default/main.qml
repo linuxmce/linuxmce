@@ -72,7 +72,7 @@ Item {
         {
             console.log("finishing load")
             pageLoader.source = "screens/"+screenname
-            console.log("screen" + screenname + " loaded.")
+            console.log("screen::==>" + screenname + " loaded.")
         }
         else
         {
