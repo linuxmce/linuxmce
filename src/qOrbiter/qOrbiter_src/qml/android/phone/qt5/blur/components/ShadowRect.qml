@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 //drop shadow rectangle component for display panel
 Item{
     property alias rectcolor: shadowrectcontainer.color
