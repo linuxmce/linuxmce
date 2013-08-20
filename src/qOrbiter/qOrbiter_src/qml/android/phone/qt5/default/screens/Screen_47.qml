@@ -1,16 +1,38 @@
 import QtQuick 2.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
-import "../../../lib/handlers"
+import "../../lib/handlers"
 
 Item {
     id:fileviewscreen
-    width: manager.manager.appWidth
-    height: manager.manager.appHeight
-
+    width: manager.appWidth
+    height: manager.appHeight
     clip: true
+    focus:true
+    Component.onCompleted: {
+        forceActiveFocus()
+    }
 
+    Keys.onReleased: {
+        event.accepted=true
+        switch(event.key){
+        case Qt.Key_Back:
+            manager.goBackGrid()
+            break;
+        case Qt.Key_Menu:
 
+            break;
+        case Qt.Key_M:
+            if(selector.state === "hidden")
+                selector.state ="atrselect"
+            else
+            selector.state ="hidden"
+            break;
+        default:
+            console.log(event.key)
+            break
+        }
+    }
 
     Connections
     {
@@ -25,13 +47,13 @@ Item {
         height: scaleY(3)
         width: scaleX(50)
         color: "transparent"
-
+        radius:5
         anchors.top: list_view1.bottom
         anchors.horizontalCenter: list_view1.horizontalCenter
         Text {
             id: total_cells
             text: dataModel.totalcells
-            color: "grey"
+            color: "yellow"
             font.pixelSize: scaleY(3)
             anchors.left: progress_bar.right
         }
@@ -39,7 +61,7 @@ Item {
         Text {
             id: current_cells
             text: dataModel.currentCells
-            color: "grey"
+            color: "green"
             font.pixelSize: scaleY(3)
             anchors.left: progress_bar_fill.right
         }
@@ -48,16 +70,10 @@ Item {
             id:progress_bar_fill
             height: parent.height
             width: 0
-            color: "transparent"
+            color: androdSystem.orangeHighlight
             anchors.bottom: parent.bottom
             clip:true
-            Image {
-                id: fill_image
-                source: "../img/blue.png"
-                height: parent.height
-                width: parent.width
-            }
-
+            radius:5
         }
     }
 
@@ -71,69 +87,65 @@ Item {
         }
     }
 
-    AttributeSelector {
-        id:selector
-        anchors.left:fileviewscreen.left
-        anchors.verticalCenter: fileviewscreen.verticalCenter
-    }
+
 
 
     Component
     {
         id: contactDelegateList
         Item {
-            width: scaleX(75)
+            width: scaleX(95)
             height: scaleY(15)
+
             Rectangle {
                 id: background
                 color: mouseclick.pressed ? "orange":"black"
-                anchors.centerIn: parent
-                border.color: "silver"
-                height: scaleY(15)
-                width: scaleX(75)
+                anchors.fill: parent
                 opacity: mouseclick.pressed ? 1 : .75
-                Component.onCompleted: PropertyAnimation { target: background; property: "opacity"; to: 1; duration: 1000}
-
-                Row{
-                    Image
-                    {
-                        id: imagerect;
-                        source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=img&val="+path : ""
-                        height: scaleX(15);
-                        width: scaleY(15);
-                        fillMode: Image.PreserveAspectFit;
-                    }
-
-                    StyledText {
-                        text: name;
-                        font.pixelSize: scaleY(2.5);
-                        color: "Silver" ;
-                        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                        //anchors.fill: parent
-                        width: scaleX(55)
-                        height: scaleY(20)
-                        font.family: "Droid Sans"
-                        font.bold: true
-                    }
-                }
-
-              MediaListClickHandler{
-                    id:mouseclick
-              }
             }
+
+            Image  {
+                id: imagerect;
+                fillMode: Image.PreserveAspectCrop
+                source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=img&val="+path : ""
+                anchors.fill: parent
+            }
+            Rectangle{
+                id:mask
+                anchors.fill: parent
+                color:"black"
+                opacity:.65
+            }
+
+            StyledText {
+                text: name;
+                font.pixelSize: scaleY(3.5);
+                color: "White" ;
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                width: parent.width
+                height: parent.height
+                font.weight: Font.Light
+            }
+
+
+            MediaListClickHandler{
+                id:mouseclick
+            }
+
         }
     }
 
 
     ListView {
         id: list_view1
-        width: scaleX(75)
-        height:scaleY(85)
+        width: scaleX(95)
+        height:scaleY(90)
         model:dataModel
         delegate: contactDelegateList
         clip: true
         cacheBuffer: 15
-        anchors.left: selector.right
+        anchors.left: parent.left
+        anchors.leftMargin: scaleX(2)
         anchors.top: fileviewscreen.top
 
     }
@@ -171,10 +183,14 @@ Item {
         id:spaceholder
         text:manager.dceResponse
         font.pixelSize: scaleY(3)
-        font.family: "Droid Sans"
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         color: "silver"
+
+    }
+
+    AttributeSelector {
+        id:selector
 
     }
 

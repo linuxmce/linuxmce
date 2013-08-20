@@ -5,6 +5,7 @@ Item{
     width: showOptions ? parent.width : 0
     height: showOptions ? parent.height : 0
     opacity: showOptions ? 1 : 0
+    onWidthChanged: console.log("show iptions")
     Rectangle{
         anchors.fill: parent
         color: "black"

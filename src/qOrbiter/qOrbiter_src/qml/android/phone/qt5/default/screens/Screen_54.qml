@@ -1,19 +1,18 @@
 import QtQuick 2.0
 import "../components"
 
-Rectangle {
+Item {
 
     // property alias synText:
     id: storedAudioRemote
-    height: manager.manager.appHeight
-    width: manager.manager.appWidth
-    color: "transparent"
+    height: manager.appHeight
+    width: manager.appWidth
 
     Connections
-     {
-         target: dcenowplaying
-         onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-     }
+    {
+        target: dcenowplaying
+        onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+    }
 
 
 
@@ -35,7 +34,7 @@ Rectangle {
         id:img_add
         running: false
         PropertyAnimation { target: nowplayingimage; property: "scale"; to: 1; duration: 1500}
-         PropertyAnimation { target: nowplayingimage; property: "opacity"; to: 1; duration: 1500}
+        PropertyAnimation { target: nowplayingimage; property: "opacity"; to: 1; duration: 1500}
     }
 
     ParallelAnimation {
@@ -43,21 +42,20 @@ Rectangle {
         running:false
         PropertyAction { target: nowplayingimage; property: "scale"; value: 0 }
 
-        onCompleted: img_add.running = true
     }
 
     Image {
-       id: nowplayingimage
-       height: scaleX(55)
-       width: scaleX(55)
-       fillMode: Image.PreserveAspectFit
-       source: ""
-       opacity: 0
-       scale:0
-       onSourceChanged: changeTracksTransition()
-       anchors.top: parent.top
-       anchors.horizontalCenter: parent.horizontalCenter
-   }
+        id: nowplayingimage
+        height: scaleX(55)
+        width: scaleX(55)
+        fillMode: Image.PreserveAspectFit
+        source: ""
+        opacity: 0
+        scale:0
+        onSourceChanged: changeTracksTransition()
+        anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+    }
 
     Column{
         id:textcol
@@ -193,37 +191,37 @@ Rectangle {
         opacity: 0
     }
 
-states: [
-State {
-    name: "State1"
+    states: [
+        State {
+            name: "State1"
 
-    PropertyChanges {
-        target: nonepgplaylist3
-        visible: true
-        opacity: 1
-    }
+            PropertyChanges {
+                target: nonepgplaylist3
+                visible: true
+                opacity: 1
+            }
 
-    PropertyChanges {
-        target: textcol
-        visible: false
-    }
+            PropertyChanges {
+                target: textcol
+                visible: false
+            }
 
-    PropertyChanges {
-        target: nowplayingimage
-        visible: false
-    }
+            PropertyChanges {
+                target: nowplayingimage
+                visible: false
+            }
 
-    PropertyChanges {
-        target: metadata
-        visible: true
-    }
+            PropertyChanges {
+                target: metadata
+                visible: true
+            }
 
-    PropertyChanges {
-        target: buttonsq1
-        visible: false
-    }
-}
-]
+            PropertyChanges {
+                target: buttonsq1
+                visible: false
+            }
+        }
+    ]
 }
 
 

@@ -42,6 +42,7 @@ Item {
             break;
         case Qt.Key_Menu:
             console.log("Switch caught Menu")
+            break;
         default:
             console.log("Key outside range==>"+event.key)
         }
@@ -187,7 +188,7 @@ Item {
     }
 
 
-    function screenchange(screenname )
+    function screenchange(screenname)
     {
         pageLoader.source = "screens/"+screenname
 

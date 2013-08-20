@@ -192,9 +192,7 @@ Item {
 //    }
 
     Loader{
-        id:componentLoader
-        height: parent.height
-        width: parent.width
+        id:componentLoader       
         source:""
         objectName: "componentbot"
         onSourceChanged:  {

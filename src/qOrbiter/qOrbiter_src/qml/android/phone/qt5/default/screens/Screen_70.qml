@@ -5,8 +5,8 @@ Rectangle {
 
     // property alias synText:
     id: storedVideoRemote
-    height: manager.manager.appHeight
-    width: manager.manager.appWidth
+    height: manager.appHeight
+    width: manager.appWidth
     color: "transparent"
     Component.onCompleted: manager.getStoredPlaylist()
 

@@ -1,9 +1,9 @@
 import QtQuick 2.0
-import "../../../lib/handlers"
+import "../../lib/handlers"
 
 Rectangle {
-    width: childrenRect.width
-    height: childrenRect.height
+    width: manager.appWidth
+    height: scaleY(12)
     color: "transparent"
 
     Image {

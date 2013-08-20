@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import  1.1
+
 
 Rectangle {
     id:generic_filter_view
@@ -14,27 +14,33 @@ Rectangle {
     state:"inactive"
 
     onCurrentModelChanged: currentModel !== "" ? state="active": state="inactive"
+    Item{
+        id:heading
+        anchors.top: generic_filter_view.top
+        width: filterlist.width
+        height: scaleY(8)
+        Rectangle{
+            anchors.fill: parent
+            color:androidSystem.orangeStandard
+        }
 
+        StyledText{
+            text: "Click to Close"
+            color:"black"
+            font.pixelSize: 18
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: generic_filter_view.currentModel=""
+        }
+    }
     ListView{
         id:filterlist
         height: scaleY(65)
         width:scaleX(55)
         model:currentModel
-        ListHeading{
-            id:heading
-            anchors.top: generic_filter_view.top
-            width: filterlist.width
-            height: scaleY(8)
-            Label{
-                text: "Click to Close"
-            }
-            MouseArea{
-                anchors.fill: parent
-                onClicked: generic_filter_view.currentModel=""
-            }
-        }
-
-        delegate:ListItem{
+        anchors.top: heading.bottom
+        delegate:Item{
         height:delegateHeight
             Rectangle{
                 anchors.fill: parent
@@ -43,17 +49,23 @@ Rectangle {
                 border.width: 1
                 Row{
                     anchors.fill: parent
-                    ListItemText{
+                    StyledText{
                         text: name
-                        color: "white"
-                        font.family: "Droid Sans"
+                        color: "white"                        
                         width:parent.width *.75
-                        font.pointSize:scaleY(2)
+                        font.pointSize:scaleY(4)
                     }
 
-                    CheckBox{
-                        onClicked:filterlist.model.setSelectionStatus(name)
-                        checked: status
+                    Rectangle{
+                        height: 45
+                        width: 45
+                        color: status ? "green" : "red"
+
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked:filterlist.model.setSelectionStatus(name)
+
+                        }
                     }
                 }
             }

@@ -1,4 +1,4 @@
-// import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
+// import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 2.0
 
 Rectangle {
@@ -12,6 +12,7 @@ Rectangle {
     anchors.centerIn: parent
     property bool subMenu:false
     property variant subModel
+    onSubMenuChanged: console.log("submenu changed")
 
     Rectangle{
         id:exit_button
@@ -67,35 +68,22 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
+                    console.log("click")
                     if(subMenu){
-
                         manager.setActiveRoom(genericview.model[index].room, genericview.model[index].ea_number);
                         manager.setBoundStatus(true)
                         loadComponent("NullComponent.qml")
                     }
                     else
                     {
-                        genericlist.subModel = ea_list
-                        subMenu = true
+                        console.log("setting sublist active")
+                         genericlist.subModel= ea_list
+                        genericlist.subMenu = true
 
                     }
                 }
             }
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    if(subMenu){
-                        currentroom = name
-                        manager.setActiveRoom(genericview.model[index].room, genericview.model[index].ea_number);
-                        manager.setBoundStatus(true)
-                        loadComponent("NullComponent.qml")
-                    }
-                    else
-                    {
-                        subMenu = true
-                    }
-                }
-            }
+
         }
     }
 

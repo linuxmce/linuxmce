@@ -11,8 +11,8 @@ Item {
     width:manager.appWidth
     height:manager.appHeight
     Component.onCompleted: forceActiveFocus()
-
     focus:true
+
     Keys.onReleased: {
         event.accepted=true
         switch(event.key){
@@ -23,6 +23,8 @@ Item {
             showOptions = !showOptions
             console.log("toggle menu")
             break;
+        case Qt.Key_M:
+            showOptions = !showOptions
         case Qt.Key_MediaPrevious:
             console.log("Media previous")
             break;
