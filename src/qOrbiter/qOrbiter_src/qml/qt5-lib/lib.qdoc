@@ -1,0 +1,19 @@
+/*!
+\defgroup lib_handlers
+\ingroup linuxmce_components
+ */
+
+/*!
+ * \defgroup lib_components Components
+ * \ingroup linuxmce_components
+ */
+
+/*!
+ * \defgroup lib_images Images
+ * \ingroup linuxmce_components
+ */
+
+/*!
+ * \defgroup lib_startup Startup
+ * \ingroup linuxmce_components
+ */
