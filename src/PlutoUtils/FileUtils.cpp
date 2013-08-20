@@ -987,6 +987,17 @@ bool FileUtils::PUCopyFile(string sSource,string sDestination)
 {
 #ifndef WIN32
     system(("mkdir -p \"" + FileUtils::BasePath(sDestination) + "\"").c_str());
+
+    struct stat statinfo;
+    if( lstat(sSource.c_str(), &statinfo) < 0)
+        return false;
+
+    if( S_ISLNK(statinfo.st_mode)) // Symlinks should not be binary copied.
+    {
+        system(("cp -a \"" + sSource + "\" \"" + sDestination + "\"").c_str());
+        return true;
+    }
+
 #endif
 
     FILE *fileSource = fopen(sSource.c_str(),"rb");
