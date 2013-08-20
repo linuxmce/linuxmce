@@ -3962,7 +3962,7 @@ void ScreenHandler::SCREEN_MakeCallDevice(long PK_Screen)
 void ScreenHandler::SCREEN_DevCallInProgress(long PK_Screen, string sPhoneCallerID, string sPhoneCallID, 
 	string sChannel)
 {
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SCREEN_DevCallInProgress called with caller id %s, call id %s, channel %s",
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "SCREEN_DevCallInProgress called with caller id %s, call id %s, channel %s",
 		sPhoneCallerID.c_str(), sPhoneCallID.c_str(), sChannel.c_str());
 
 	if(!sPhoneCallerID.empty())
@@ -4823,3 +4823,36 @@ bool ScreenHandler::SCREEN_Network_Settings_VariableChanged(CallBackData *pData)
 }
 
 //-----------------------------------------------------------------------------------------------------
+
+void ScreenHandler::SCREEN_UserStatus(long PK_Screen)
+{
+  ScreenHandlerBase::SCREEN_UserStatus(PK_Screen);
+  RegisterCallBack(cbDataGridRendering, (ScreenHandlerCallBack) &ScreenHandler::UserStatus_Voicemail_GridRendering, new DatagridAcquiredBackData());
+}
+
+bool ScreenHandler::UserStatus_Voicemail_GridRendering(CallBackData *pData)
+{
+  DatagridAcquiredBackData *pDatagridAcquiredBackData = (DatagridAcquiredBackData *) pData;
+  
+  if (pDatagridAcquiredBackData->m_pObj->m_iPK_Datagrid==DATAGRID_User_VoiceMail_CONST)
+    {
+      for(MemoryDataTable::iterator it=pDatagridAcquiredBackData->m_pDataGridTable->m_MemoryDataTable.begin();it!=pDatagridAcquiredBackData->m_pDataGridTable->m_MemoryDataTable.end();++it)
+	{
+	  DataGridCell *pCell = it->second;
+	  pair<int,int> colRow = DataGridTable::CovertColRowType(it->first);  // Get the column/row for the cell
+	  if(pDatagridAcquiredBackData->m_pObj->m_mapChildDgObjects.size() != 0)
+	    colRow.second = colRow.second % int(pDatagridAcquiredBackData->m_pObj->m_mapChildDgObjects.size());
+	  // See if there is an object assigned for this column/row
+	  map< pair<int,int>, DesignObj_Orbiter *>::iterator itobj = pDatagridAcquiredBackData->m_pObj->m_mapChildDgObjects.find( colRow );
+	  if( itobj!=pDatagridAcquiredBackData->m_pObj->m_mapChildDgObjects.end() )
+	    {
+	      DesignObj_Orbiter *pObj = itobj->second;  // This is the cell's object.
+	      if (pCell->m_AltColor==12345) // This is an old message.
+		{
+		  pObj->m_GraphicToDisplay_set("voicemail",1); // This is an alt graphic defined by the designobj
+		}
+	    }
+	}
+    }
+  return false;
+}

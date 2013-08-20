@@ -481,7 +481,13 @@ public:
 
 	//data
 	map<string,string> m_mapNetworkSettings;
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// UserStatus stuff
+//
 
+	void SCREEN_UserStatus(long PK_Screen);
+	bool UserStatus_Voicemail_GridRendering(CallBackData *pData);
 //
 
 };
