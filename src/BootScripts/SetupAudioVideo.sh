@@ -20,6 +20,8 @@ DEVICEDATA_Channel_Left="311"
 DEVICEDATA_Channel_Right="312"
 DEVICEDATA_Channel="81"
 DEVICEDATA_Sampling_Rate="310"
+DEVICEDATA_Distro_Raspbian="19"
+
 SettingsFile="/etc/pluto/lastaudiovideo.conf"
 # don't let KDE override xorg.conf
 rm -f {/home/*,/root}/.kde/share/config/displayconfigrc
@@ -37,8 +39,8 @@ ConfGet "AlternateSC"
 
 # FIXME: This needs to move to an rpi version of AVWizard, for now here is fine
 case "$PK_Distro" in
-	19)
-		# Detect and use the current boot resolution
+	"$DEVICEDATA_Distro_Raspbian")
+		# Detect and use the current boot resolution 
 		FBWIDTH=$(for arg in $(cat /proc/cmdline); do echo $arg |grep "fbwidth" | cut -d '=' -f 2; done)
 		FBHEIGHT=$(for arg in $(cat /proc/cmdline); do echo $arg |grep "fbheight" | cut -d '=' -f 2; done)
 
@@ -47,6 +49,9 @@ case "$PK_Distro" in
 		# FIXME: Grab these values from environment
 		SetDeviceData "$PK_Device" "$DEVICEDATA_Connector" "HDMI-0"
 		SetDeviceData "$PK_Device" "$DEVICEDATA_TV_Standard" "1080P"
+
+		# Prevent /etc/asound.conf from being generated on rpi
+		SetDeviceData "$PK_Device" "$DEVICEDATA_Audio_settings" "M"
 		;;
 esac
 
