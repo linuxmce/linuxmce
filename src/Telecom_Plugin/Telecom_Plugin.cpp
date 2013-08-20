@@ -318,6 +318,8 @@ bool Telecom_Plugin::Register()
 	//telecom snapshot status
 	RegisterMsgInterceptor( ( MessageInterceptorFn )( &Telecom_Plugin::CallsStatusChanged), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Calls_Status_CONST );
 	RegisterMsgInterceptor( ( MessageInterceptorFn )( &Telecom_Plugin::ExtensionsStatusChanged), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Extensions_Status_CONST );
+
+	RegisterMsgInterceptor( ( MessageInterceptorFn )( &Telecom_Plugin::PlaybackStarted), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Playback_Started_CONST );
 	
     if (pthread_create(&m_displayThread, NULL, startDisplayThread, (void *) this))
     {
@@ -721,6 +723,39 @@ Telecom_Plugin::ExtensionsStatusChanged(class Socket *pSocket,class Message *pMe
 	}
 
 	return false;
+}
+
+/**
+ * Intercept Playback Started Events, to move new voicemails to old.
+ */
+bool
+Telecom_Plugin::PlaybackStarted( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo )
+{
+  string sMRL = pMessage->m_mapParameters[EVENTPARAMETER_MRL_CONST];
+  bool bIsOld = sMRL.find("/Old/") != string::npos;
+  if (!bIsOld) // Move the voicemail, if it is new.
+    {
+      string sTmp = FileUtils::FilenameWithoutPath(sMRL);
+      string sFilename = sTmp.substr(0,sTmp.length()-3); // rip away extenson, leave .
+      string sOldPath = FileUtils::BasePath(sMRL);
+      string sOldFilename = sOldPath+"/"+sFilename;
+      string sNewFilename = sOldPath + "/Old/" + sFilename;
+      FileUtils::MoveFile(sOldFilename+"wav",sNewFilename+"wav");
+      FileUtils::MoveFile(sOldFilename+"mp3",sNewFilename+"mp3");
+      FileUtils::MoveFile(sOldFilename+"gsm",sNewFilename+"gsm");
+      FileUtils::MoveFile(sOldFilename+"txt",sNewFilename+"txt");
+    }
+
+  // FIXME: come back here and change this map to only deal with orbiters in the same target EA
+  // for now, we just send a refresh EVERYWHERE.
+  for(map<int,OH_Orbiter *>::iterator it=m_pOrbiter_Plugin->m_mapOH_Orbiter.begin();it!=m_pOrbiter_Plugin->m_mapOH_Orbiter.end();++it)
+    {
+      OH_Orbiter *pOH_Orbiter = it->second;
+      DCE::CMD_Refresh CMD_Refresh(m_dwPK_Device, pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device, "*");
+      SendCommand(CMD_Refresh);
+    }
+
+  return false;
 }
 
 bool
@@ -2849,7 +2884,7 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
                         // string url= VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
 
 			// Date Cell
-			pCell = new DataGridCell(mapVMData["vmTimestamp"],file_path);
+/*			pCell = new DataGridCell(mapVMData["vmTimestamp"],file_path);
 			pDataGrid->SetData(0, Row, pCell);
 
 			// Duration Cell
@@ -2860,15 +2895,15 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
 			pCell = new DataGridCell(mapVMData["vmCallerID"],file_path);
 			pCell->m_Colspan = 8;
 			pDataGrid->SetData(2, Row, pCell);
-
-/*                        pCell = new DataGridCell(text,file_path);
+*/
+                        pCell = new DataGridCell(text,file_path);
 
                         pCell->m_mapAttributes["vmTimestamp"] = mapVMData["vmTimestamp"];
                         pCell->m_mapAttributes["vmDuration"] = mapVMData["vmDuration"];
                         pCell->m_mapAttributes["vmCallerID"] = mapVMData["vmCallerID"];
 
                         pDataGrid->SetData(0,Row,pCell);
-*/
+
                         Row++;			
 		}
 
@@ -2877,7 +2912,7 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
     }
 
     // now for the Old voicemails
-    user_path=string(VOICEMAIL_LOCATION)+sExtension+string("/INBOX/Old");
+    user_path=string(VOICEMAIL_LOCATION)+sExtension+string("/INBOX/Old/");
     n = scandir(user_path.c_str(),&namelist, 0, alphasort);     // alphasort Defined in _SVID_SOURCE
     if (n < 0)
     {
@@ -2907,23 +2942,16 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
                                 ProcessUtils::GetCommandOutput(args[0], args, URL_Parm, StdErr);
                         }
 
-                        string url= VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
+                        // string url= VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
 
-                       // Date Cell
-                        pCell = new DataGridCell(mapVMData["vmTimestamp"],file_path);
-			pCell->m_AltColor = 7829367;
-                        pDataGrid->SetData(0, Row, pCell);
+                        pCell = new DataGridCell(text,file_path);
+			pCell->m_AltColor=12345; // We catch this in the screen handler.
 
-                        // Duration Cell
-                        pCell = new DataGridCell(mapVMData["vmDuration"],file_path);
-                        pCell->m_AltColor = 7829367;
-                        pDataGrid->SetData(1, Row, pCell);
+                        pCell->m_mapAttributes["vmTimestamp"] = mapVMData["vmTimestamp"];
+                        pCell->m_mapAttributes["vmDuration"] = mapVMData["vmDuration"];
+                        pCell->m_mapAttributes["vmCallerID"] = mapVMData["vmCallerID"];
 
-                        // Caller ID Cell
-                        pCell = new DataGridCell(mapVMData["vmCallerID"],file_path);
-                        pCell->m_Colspan = 8;
-                        pCell->m_AltColor = 7829367;
-                        pDataGrid->SetData(2, Row, pCell);
+                        pDataGrid->SetData(0,Row,pCell);
 
                         Row++;
                 }

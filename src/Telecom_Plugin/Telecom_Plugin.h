@@ -441,7 +441,8 @@ private:
 					 			class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );	
 	bool VoiceMailChanged( class Socket *pSocket, class Message *pMessage,
 					 			class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );	
-		
+	bool PlaybackStarted ( class Socket *pSocekt, class Message *pMessage, class DeviceData_Base *pDeviceFrom, 
+			       class DeviceData_Base *pDeviceTo);
 private:
 	DeviceData_Router* find_AsteriskDevice();
 	DeviceData_Router* find_Device(int iPK_Device);
