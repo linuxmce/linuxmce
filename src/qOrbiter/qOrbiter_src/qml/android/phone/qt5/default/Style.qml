@@ -26,10 +26,10 @@ QtObject{
 
     //scale function
     function scaleX(x){
-        return x/100*appH
+        return x/100*manager.appWidth
     }
     function scaleY(y){
-        return y/100*appW
+        return y/100*manager.appHeight
     }
 
     //end scale function
@@ -45,8 +45,8 @@ QtObject{
     property color lighthighlight: "green"
     //--end color definitions
     //main stage styles
-    property int orbiterH:appH
-    property int orbiterW: appW
+    property int orbiterH:manager.appHeight
+    property int orbiterW: manager.appWidth
     property int orbiterWp: 480
     property int orbiterHp: 320
     property color stageBG: "slategray"
@@ -63,8 +63,8 @@ QtObject{
 
 
     //icon sizes
-    property int iconHeight: manager.b_orientation ? scaleY(22) :scaleY(16)
-    property int iconWidth: manager.b_orientation ? scaleY(22) :scaleY(16)
+    property int iconHeight: manager.b_orientation ? scaleY(20) :scaleY(10)
+    property int iconWidth: manager.b_orientation ? scaleX(25) :scaleY(12)
     property int  stdbuttonh: manager.b_orientation ? scaleY(16) :scaleY(13)
     property int  stdbuttonw: manager.b_orientation ? scaleY(16) :scaleY(13)
     property int buttonLabelText : manager.b_orientation ? scaleY(3) : scaleY(2.5)

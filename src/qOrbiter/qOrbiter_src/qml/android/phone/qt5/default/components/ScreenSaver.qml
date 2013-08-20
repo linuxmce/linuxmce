@@ -1,8 +1,8 @@
 import QtQuick 2.0
 
 Rectangle {
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
     color: "darkslateblue"
     anchors.centerIn: parent
     function changeStuff()
@@ -24,8 +24,8 @@ Rectangle {
 
     Image {
         id: ssimg
-        height: appH
-         width: appW
+        height: manager.appHeight
+         width: manager.appWidth
 
         source: "image://listprovider/screensaver"+screensaver.timestamp
         anchors.centerIn: parent

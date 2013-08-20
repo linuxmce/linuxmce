@@ -5,16 +5,16 @@ Rectangle {
 
     // property alias synText:
     id: satcableboxremote
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     state: ""
     color: "transparent"
 
     Image {
         id: bg
         source: b_orientation ? "../img/storedMediaP.png" : "../img/storedMediaW.png"
-        height: appH
-        width: appW
+        height: manager.appHeight
+        width: manager.appWidth
     }
 
     NowPlayingBox{id:np_box

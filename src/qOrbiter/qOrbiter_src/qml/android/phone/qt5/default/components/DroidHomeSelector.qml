@@ -1,15 +1,13 @@
 // import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 2.0
-import "../js/ComponentLoader.js" as MyJs
 
-
-Rectangle{
+Item{
     id:selector
     height: childrenRect.height
     width: childrenRect.width
     anchors.horizontalCenter: parent.horizontalCenter
     property int imagebuttonsize: scaleY(15)
-    color:"transparent"
+
 
     Row{
         id:toprow

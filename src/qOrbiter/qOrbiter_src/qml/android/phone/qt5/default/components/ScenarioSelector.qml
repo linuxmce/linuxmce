@@ -1,14 +1,11 @@
 import QtQuick 2.0
-
-
 Item {
     id:generic_model_display
     width: generic_view.width
     height: generic_view.height + listClose.height
     property variant currentModel:dummy
     state:"inactive"
-    onStateChanged:console.log("ScenarioView State Change");
-
+    onStateChanged:console.log("ScenarioView State Change to "+generic_model_display.state);
 
     Behavior on opacity{
 
@@ -16,15 +13,7 @@ Item {
             PropertyAnimation{
                 duration:350
             }
-            ScriptAction{ script:
-                    if(state==="inactive"){
-                        console.log("destroying")
-                    componentLoader.source=""
-                }
-            }
         }
-
-
     }
 
     Rectangle{
@@ -32,8 +21,7 @@ Item {
         color: "black"
     }
 
-
-    onCurrentModelChanged: currentModel !==dummy ? state = "active" : state = "inactive"
+    onCurrentModelChanged:{ currentModel !==dummy ? state = "active" : state = "inactive" ; console.log("current model changed.")}
     ListModel{
         id:dummy
     }
@@ -106,8 +94,13 @@ Item {
             name: "active"
             PropertyChanges {
                 target: generic_model_display
-               opacity:1
-
+                opacity:1
+                visible:true
+            }
+            AnchorChanges{
+                anchors.right: undefined
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
             }
         },
         State {
@@ -115,7 +108,14 @@ Item {
             PropertyChanges {
                 target: generic_model_display
                 opacity:0
-            }           
+                visible:false
+            }
+            AnchorChanges{
+                anchors.right: parent.left
+                anchors.verticalCenter: undefined
+                anchors.horizontalCenter:  undefined
+            }
+
         }
     ]
 }

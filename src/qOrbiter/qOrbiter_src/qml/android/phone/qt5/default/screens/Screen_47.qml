@@ -1,12 +1,12 @@
 import QtQuick 2.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
-import "../../lib/handlers"
+import "../../../lib/handlers"
 
 Item {
     id:fileviewscreen
-    width: manager.appWidth
-    height: manager.appHeight
+    width: manager.manager.appWidth
+    height: manager.manager.appHeight
 
     clip: true
 
@@ -139,7 +139,7 @@ Item {
     }
     ListView{
         id:model_pages
-        height: appH
+        height: manager.appHeight
         width: scaleX(10)
         model: dataModel.totalPages
         anchors.left: list_view1.right

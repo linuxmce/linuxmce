@@ -3,8 +3,8 @@ import "../components"
 
 Rectangle {
     id:myth_recordings
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
 
     Image {
         id: bg

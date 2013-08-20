@@ -1,35 +1,16 @@
 import QtQuick 2.0
-
-
 import "components"
 import "js/ComponentLoader.js" as MyJs
 
 
 Item {
-    id: item
+    id: qml_root
     width:manager.appWidth
     height:manager.appHeight
     focus:true
 
-    Rectangle{
-        id:canary
-        height: 1
-        width: 1
-        color:"white"
-    }
+    property Item appStyle: style
 
-    Timer{
-        id:refresh
-        interval: 500
-        running:true
-        repeat: true
-        onTriggered: {
-            if(canary.rotation===360)
-                canary.rotation =1
-            else
-                canary.rotation=(canary.rotation+1)
-        }
-    }
 
     Component.onCompleted: {
         androidSystem.updateBuildInformation()
@@ -65,6 +46,11 @@ Item {
     property string screenfile
     property string dynamic_height
     property string dynamic_width
+
+    Connections{
+        target:manager
+        onChangeScreen:screenchange(screenname)
+    }
 
     function scaleX(x){
         return x/100*manager.appWidth
@@ -102,25 +88,25 @@ Item {
     } 
 
 
-    function screenchange(screenname )
+    function screenchange(screenname)
     {
         pageLoader.source = "screens/"+screenname
-        if (pageLoader.status == Component.Ready)
-        {
-            manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-        }
-        else if (pageLoader.status == Component.Loading)
-        {
-            console.log("loading page from network")
-            finishLoading(screenname)
-        }
-        else
-        {
-            console.log("Command to change to:" + screenname + " failed!")
+//        if (pageLoader.status == Component.Ready)
+//        {
+//            manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
+//        }
+//        else if (pageLoader.status == Component.Loading)
+//        {
+//            console.log("loading page from network")
+//            finishLoading(screenname)
+//        }
+//        else
+//        {
+//            console.log("Command to change to:" + screenname + " failed!")
 
-            screenfile = screenname
-            pageLoader.source = "screens/Screen_x.qml"
-        }
+//            screenfile = screenname
+//            pageLoader.source = "screens/Screen_x.qml"
+//        }
     }
 
     function finishLoading (screenname)
@@ -148,6 +134,7 @@ Item {
         id:pageLoader
         objectName: "loadbot"
         focus: true
+        source:"screens/Screen_1.qml"
         Keys.onBackPressed: console.log("back")
         onSourceChanged:  loadin
         onLoaded: {
@@ -191,18 +178,18 @@ Item {
 
     }
 
-    Rectangle{
-        id:mask
-        height: parent.height
-        width: parent.width
-        color: "black"
-        opacity:0
-        MouseArea{
-            anchors.fill: parent
-            onClicked: {}
-        }
+//    Rectangle{
+//        id:mask
+//        height: parent.height
+//        width: parent.width
+//        color: "black"
+//        opacity:0
+//        MouseArea{
+//            anchors.fill: parent
+//            onClicked: {}
+//        }
 
-    }
+//    }
 
     Loader{
         id:componentLoader
@@ -212,10 +199,10 @@ Item {
         objectName: "componentbot"
         onSourceChanged:  {
             if(source!==""){
-                mask.opacity = .65
+             //   mask.opacity = .65
                 console.log("Component is loaded")
             }else {
-                mask.opacity =0
+             //   mask.opacity=0
             }
         }
 

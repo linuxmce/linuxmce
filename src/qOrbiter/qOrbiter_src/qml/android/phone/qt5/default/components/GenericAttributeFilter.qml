@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import com.nokia.android 1.1
+import  1.1
 
 Rectangle {
     id:generic_filter_view

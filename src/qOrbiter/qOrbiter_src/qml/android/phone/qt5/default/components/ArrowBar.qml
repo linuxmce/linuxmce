@@ -1,14 +1,14 @@
 import QtQuick 2.0
 
 Rectangle {
-    width: appW
+    width: manager.appWidth
     height: childrenRect.height
     color: "transparent"
 
     Image {
         id: overlay
         source: "../img/widegreyshape.png"
-        width: appW
+        width: manager.appWidth
         height: style.stdbuttonh
         anchors.centerIn: parent
 

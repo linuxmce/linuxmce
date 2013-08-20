@@ -2,8 +2,8 @@ import QtQuick 2.0
 import "../components"
 Rectangle{
     id:reloadrouter
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     color: "transparent"
 
     Rectangle{

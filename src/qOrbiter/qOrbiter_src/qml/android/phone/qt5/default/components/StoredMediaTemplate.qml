@@ -1,6 +1,6 @@
 import QtQuick 2.0
 
 Rectangle {
-    width: appH
-    height: appW
+    width: manager.appHeight
+    height: manager.appWidth
 }

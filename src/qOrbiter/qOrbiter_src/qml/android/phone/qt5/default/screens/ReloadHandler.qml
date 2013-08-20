@@ -5,8 +5,8 @@ import "../components"
 
 Rectangle {
     id:router_reloading
-    width: manager.appWidth
-    height: manager.appHeight
+    width: manager.manager.appWidth
+    height: manager.manager.appHeight
     color: "transparent"
 
     Text {

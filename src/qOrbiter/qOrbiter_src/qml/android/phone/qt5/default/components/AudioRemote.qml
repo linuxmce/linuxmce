@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import "../../lib/handlers"
+import "../../../lib/handlers"
 
 Rectangle {
     width: childrenRect.width
@@ -9,7 +9,7 @@ Rectangle {
     Image {
         id: overlay
         source: "../img/widegreyshape.png"
-        width: appW
+        width: manager.appWidth
         height: style.stdbuttonh
         anchors.centerIn: parent
 
@@ -31,9 +31,11 @@ Rectangle {
             height: style.stdbuttonh
             width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
-ChangeTrackHandler{
-    trackDirection: "-1"
-}
+            MouseArea{
+                property string trackDirection:"-1" /*! takes value of +1 or -1  */
+                anchors.fill: parent
+                onClicked: manager.newTrack(trackDirection)
+            }
 
         }
 
@@ -43,8 +45,10 @@ ChangeTrackHandler{
             height: style.stdbuttonh
             width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
-            PlaybackSpeedHandler {
-                speed:-2
+            MouseArea{
+                property int speed:-2
+                anchors.fill: parent
+                onClicked: manager.setPlaybackSpeed(speed)
             }
         }
 
@@ -55,8 +59,11 @@ ChangeTrackHandler{
             height: style.stdbuttonh
             width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
-            PauseButtonHandler {
+            MouseArea {
+                anchors.fill: parent
+                onClicked: manager.pauseMedia()
             }
+
         }
 
         MediaButton {id:ff ;
@@ -65,9 +72,11 @@ ChangeTrackHandler{
             height: style.stdbuttonh
             width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
-           PlaybackSpeedHandler{
-               speed:2
-           }
+            MouseArea{
+                property int speed:2
+                anchors.fill: parent
+                onClicked: manager.setPlaybackSpeed(speed)
+            }
 
         }
         MediaButton {id:next ;
@@ -76,8 +85,10 @@ ChangeTrackHandler{
             height: style.stdbuttonh
             width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
-            ChangeTrackHandler {
-                trackDirection: "+1"
+            MouseArea{
+                property string trackDirection:"+1" /*! takes value of +1 or -1  */
+                anchors.fill: parent
+                onClicked: manager.newTrack(trackDirection)
             }
         }
 
@@ -89,8 +100,12 @@ ChangeTrackHandler{
             height: style.stdbuttonh
             width: style.stdbuttonw
             anchors.verticalCenter: parent.verticalCenter
-            StopMediaHandler {
+            MouseArea
+            {
+                anchors.fill: parent
+                onClicked: manager.stopMedia()
             }
+
         }
     }
 }

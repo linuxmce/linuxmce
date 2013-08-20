@@ -42,8 +42,8 @@ width:scaleX(50)
         id:np_image
         fillMode: Image.PreserveAspectCrop
         source:"../img/transparencymask.png"
-        height:  appH
-        width: appW
+        height:  manager.appHeight
+        width: manager.appWidth
         anchors.centerIn: np_box
         asynchronous: true
         opacity: .25

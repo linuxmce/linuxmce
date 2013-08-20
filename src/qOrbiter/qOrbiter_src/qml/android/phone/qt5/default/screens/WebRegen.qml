@@ -2,8 +2,8 @@ import QtQuick 2.0
 
 
 Rectangle {
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
 
     Text {
         id: label

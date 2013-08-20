@@ -6,8 +6,8 @@ Rectangle {
 
     // property alias synText:
     id: games_system_remote
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     state: ""
     color: "transparent"
 

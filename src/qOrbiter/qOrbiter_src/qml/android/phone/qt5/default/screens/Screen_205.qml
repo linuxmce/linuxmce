@@ -3,8 +3,8 @@ import "../components"
 
 Rectangle {
 
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
     color: "transparent"
 
 

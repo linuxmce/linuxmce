@@ -19,8 +19,8 @@ import "../components"
 
    Rectangle {
     id:asktoresume
-    width: appW
-    height: appH
+    width: manager.appWidth
+    height: manager.appHeight
     color: "transparent"
 
     Image {

@@ -5,8 +5,8 @@ Rectangle {
 
     // property alias synText:
     id: satcableboxremote
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
     state: ""
     color: "transparent"
 

@@ -4,8 +4,8 @@ Item{
     id:no_screen
 
     Rectangle{
-        width: appW
-        height: appH
+        width: manager.appWidth
+        height: manager.appHeight
         color: "transparent"
         Text {            
             id: screen_not_found

@@ -1,19 +1,16 @@
 import QtQuick 2.0
-//
-
 import "../components"
-import "../js/ComponentLoader.js" as MyJs
 Item{
     id:optionPanel
-    width: parent.width
-    height: parent.height
-
+    width: showOptions ? parent.width : 0
+    height: showOptions ? parent.height : 0
+    opacity: showOptions ? 1 : 0
     Rectangle{
         anchors.fill: parent
         color: "black"
     }
 
-    opacity: showOptions ? 1 : 0
+
 
     Behavior on opacity{
         PropertyAnimation{
@@ -62,9 +59,9 @@ Item{
             buttontextfontsize: scaleY(4)
             buttontext:roomList.currentEA
             onActivated: {
-loadComponent("RoomSelector.qml")
+                loadComponent("RoomSelector.qml")
                 showOptions = !showOptions
-}
+            }
 
         }
 
@@ -78,6 +75,5 @@ loadComponent("RoomSelector.qml")
             buttontext: qsTr("Exit")
             onActivated:  {closeOrbiter(); showOptions = !showOptions }
         }
-
     }
 }
