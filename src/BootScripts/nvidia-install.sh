@@ -69,7 +69,7 @@ getNvidiaInstalled() {
 # getInstalledNvidiaDriver()
 # echos the currently installed nVidia driver (if there is one)
 getInstalledNvidiaDriver() {
-	(dpkg-query -l "nvidia-glx*" "nvidia-current" | grep "^ii" | awk '{print $2}') 2>/dev/null
+	(dpkg-query -l "nvidia-96" "nvidia-173" "nvidia-current" | grep "^ii" | awk '{print $2}') 2>/dev/null
 }
 
 # getPreferredNvidiaDriver()
@@ -93,19 +93,19 @@ getPreferredNvidiaDriver() {
 	esac
 
 	case " $Driver_173_Supported " in *" $PCI_Id "*)
-		echo "nvidia-glx-173"
+		echo "nvidia-173"
 		return 1
 	esac
 
 	case " $Driver_96_Supported " in *" $PCI_Id "*)
-		echo "nvidia-glx-96"
+		echo "nvidia-96"
 		return 1
 	esac
 
-	case " $Driver_71_Supported " in *" $PCI_Id "*)
-		echo "nvidia-glx-71"
-		return 0
-	esac
+#	case " $Driver_71_Supported " in *" $PCI_Id "*)
+#		echo "nvidia-71"
+#		return 0
+#	esac
 	#Could not map PCI_Id to a correct nVidia device.
 	return 0
 

@@ -572,10 +572,10 @@ DriverRank () {
 			current_nvidia=$(getInstalledNvidiaDriver)
 			preferred_nvidia=$(getPreferredNvidiaDriver)
 			case "$preferred_nvidia" in
-				nvidia-glx-71) driver_rank="2" ;;
-				nvidia-glx-96) driver_rank="3" ;;
-				nvidia-glx-173) driver_rank="6" ;;
-				nvidia-glx-260) driver_rank="9" ;;
+#				nvidia-71) driver_rank="2" ;;
+				nvidia-96) driver_rank="3" ;;
+				nvidia-173) driver_rank="6" ;;
+#				nvidia-260) driver_rank="9" ;;
 				nvidia-current) driver_rank="10" ;;
 			esac
 	esac
@@ -673,7 +673,7 @@ InstallVideoDriver () {
 	distro="$(lsb_release -c -s)"
 	case "$prop_driver" in
 		nvidia)
-			if ! PackageIsInstalled nvidia-glx-71 && ! PackageIsInstalled nvidia-glx-96 && ! PackageIsInstalled nvidia-glx-173 && ! PackageIsInstalled nvidia-glx-180 && ! PackageIsInstalled nvidia-glx-190 && ! PackageIsInstalled nvidia-glx-195 && ! PackageIsInstalled nvidia-glx-260 && ! PackageIsInstalled nvidia-glx-185 && ! PackageIsInstalled nvidia-current; then 
+			if ! PackageIsInstalled nvidia-96 && ! PackageIsInstalled nvidia-173 && ! PackageIsInstalled nvidia-current; then 
 				apt-get -yf install pluto-nvidia-video-drivers
 				VerifyExitCode "Install Pluto nVidia Driver"
 				nv_pid=$(pidof nvidia-install.sh)
