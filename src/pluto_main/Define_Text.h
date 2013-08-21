@@ -1281,6 +1281,10 @@
 #define TEXT_DMT_1_CONST 2224
 #define TEXT_Weather_Radar_CONST 2225
 #define TEXT_Weather_CONST 2226
+#define TEXT_Delete_All_CONST 2227
+#define TEXT_Rew_2_sec_CONST 2228
+#define TEXT_Fwd_2_sec_CONST 2229
+#define TEXT_Confirm_Voicemail_Delete_CONST 2230
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"
