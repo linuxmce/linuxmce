@@ -442,8 +442,8 @@ case "$TARGET_DISTRO" in
 		StatsMessage "Installing kernel headers"
 		#Install headers and run depmod for the seamless integraton function, ensure no errors exist
 		TARGET_KVER_LTS_HES=""
-		#[[ "precise" = "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-raring"
-		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-headers-generic$TARGET_KVER_LTS_HES
+		[[ "precise" = "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-raring"
+		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-headers-generic"$TARGET_KVER_LTS_HES"
 		VerifyExitCode "Install linux headers package failed"
 
 		TARGET_KVER=$(ls -vd "$TEMP_DIR"/lib/modules/[0-9]* | sed 's/.*\///g' | tail -1) 
@@ -451,7 +451,7 @@ case "$TARGET_DISTRO" in
 		VerifyExitCode "depmod failed for $TARGET_KVER" 
 
 		StatsMessage "Installing kernel"
-		LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y --no-install-recommends install linux-image-generic$TARGET_KVER_LTS_HES
+		LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y --no-install-recommends install linux-image-generic"$TARGET_KVER_LTS_HES"
 		VerifyExitCode "Install linux kernel package failed"
 
 		## Prevent lpadmin from running as it blocks the system
@@ -588,7 +588,9 @@ case "$TARGET_DISTRO" in
 		LC_ALL=C chroot $TEMP_DIR update-rc.d -f NetworkManager remove
 
 		#Install ancillary programs
-		LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all$TARGET_KVER_LTS_HES linux-firmware
+		LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg"$TARGET_KVER_LTS_HES"
+		VerifyExitCode "xserver-xorg$TARGET_KVER_LTS_HES install failed"
+		LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all"$TARGET_KVER_LTS_HES" linux-firmware
 		VerifyExitCode "Ancillary programs install failed"
 		;;
 	"raspbian")
