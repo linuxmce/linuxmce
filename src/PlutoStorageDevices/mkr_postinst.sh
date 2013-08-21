@@ -29,7 +29,7 @@ if [[ "$PK_Device" -eq "1" ]]; then
 fi
 
 ## Samba Share Helper 
-if [[ "$(id -u sambahelper)" == "" ]] ;then
+if [[ "$(id -u sambahelper 2>/dev/null)" == "" ]] ;then
 	useradd -c "Pluto Samba Share Helper" -d /tmp -s /bin/false sambahelper
 fi
 
@@ -59,7 +59,9 @@ if [[ -r /usr/pluto/var/sambaCredentials.secret ]] ;then
 	# This is not the correct way but it works(tm)
 	if ! BlacklistConfFiles '/etc/samba/smbpasswd' ;then
 		if [ ! -e '/etc/samba/smbpasswd.pbackup' ] ;then
-			cp /etc/samba/smbpasswd /etc/samba/smbpasswd.pbackup || :
+			if [ -e '/etc/samba/smbpasswd' ]; then
+				cp /etc/samba/smbpasswd /etc/samba/smbpasswd.pbackup || :
+			fi
 		fi
 		smbpass=$(/usr/pluto/bin/smbpass.pl $smbpass)
 		echo "$smbuser:$LinuxUserID:$smbpass:[U          ]:LCT-00000001:,,," >> /etc/samba/smbpasswd 
