@@ -10,9 +10,9 @@
 Version=$(dpkg -s pluto-boot-scripts | grep '^Version:' | sed  's/Version: //')
 ConfSet "PlutoVersion" "$Version"
 
-if [ ! -e /etc/apt/apt.conf.d/30pluto.pbackup ] ;then
+if [ ! -e /etc/apt/30pluto.pbackup ] ;then
 	if [ -e /etc/apt/apt.conf.d/30pluto ] ; then
-		cp /etc/apt/apt.conf.d/30pluto /etc/apt/apt.conf.d/30pluto.pbackup || :
+		cp /etc/apt/apt.conf.d/30pluto /etc/apt/30pluto.pbackup || :
 	fi
 fi
 
