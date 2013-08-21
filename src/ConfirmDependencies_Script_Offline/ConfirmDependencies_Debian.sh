@@ -94,19 +94,31 @@ case "$URL_TYPE" in
 		fi
 		
 		SingleEndSlash='s!//*!/!g; s!/*$!/!g; s!^http:/!http://!g; s!^ftp:/!ftp://!g'
+		FilteredRepos=$(echo "$REPOS_SRC" | sed 's/[^A-Za-z0-9_./+=:-]/-/g; '"$SingleEndSlash")
 		EndSlashRepos=$(echo "$REPOS_SRC" | sed "$SingleEndSlash")
-		AptSrc_ParseSourcesList
-		if [ $REPOS = `lsb_release -c -s`]; then
-                	if AptSrc_AddSource "deb $EndSlashRepos $REPOS $SECTIONS"; then
-                        	if ! BlacklistConfFiles '/etc/apt/sources.list' ;then
-                                	AptSrc_WriteSourcesList >/etc/apt/sources.list
-	                        fi
-        	                if [[ "$InternetConnection" != NoInternetConnection ]]; then
-                	                apt-get update
-                        	fi
-	                fi
+
+#		echo "Repository test string: '$FilteredRepos.+$REPOS.+$SECTIONS'"
+		results=$(cat /etc/apt/sources.list | sed "$SPACE_SED" | egrep -v "^#" | egrep -c -- "$FilteredRepos.+$REPOS.+$SECTIONS" 2>/dev/null)
+		lsbrelease=$(lsb_release -c -s)
+		if [ "$results" -eq 0 ]; then
+			AptSrc_ParseSourcesList
+			if [ "$REPOS" = "$lsbrelease" ] || [ "$REPOS" = "20dev_ubuntu" ]; then
+				if [ "$REPOS" = "20dev_ubuntu" ]; then 
+					REPOS="$lsbrelease"
+				fi
+				if AptSrc_AddSource "deb $EndSlashRepos $REPOS $SECTIONS"; then
+					if ! BlacklistConfFiles '/etc/apt/sources.list' ;then
+						AptSrc_WriteSourcesList >/etc/apt/sources.list
+					fi
+					if [[ "$InternetConnection" != NoInternetConnection ]]; then
+						apt-get update
+					fi
+				fi
+			else
+				echo "Repositories do not match - skipping update of the sources.list file"
+			fi
 		else
-			echo "Repositories do not match - skipping update of the sources.list file"
+			echo "Repository already exists in sources.list file."
 		fi
 
 		if ! PackageIsInstalled "$PKG_NAME"; then
