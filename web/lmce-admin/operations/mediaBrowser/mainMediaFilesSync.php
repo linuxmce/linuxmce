@@ -24,6 +24,9 @@ function mainMediaFilesSync($output,$mediadbADO,$dbADO) {
 	$_SESSION['show_attributes']=isset($_SESSION['show_attributes'])?$_SESSION['show_attributes']:0;
  	$_SESSION['show_attributes']=isset($_REQUEST['show_attributes'])?$_REQUEST['show_attributes']:$_SESSION['show_attributes'];
 
+	$_SESSION['show_woattribute']=isset($_SESSION['show_woattribute'])?$_SESSION['show_woattribute']:0;
+ 	$_SESSION['show_woattribute']=isset($_REQUEST['show_woattribute'])?$_REQUEST['show_woattribute']:$_SESSION['show_woattribute'];
+
 	$_SESSION['filter']=(isset($_SESSION['filter']))?$_SESSION['filter']:'filter_coverart';
 	$_SESSION['filter']=(isset($_REQUEST['filter']))?$_REQUEST['filter']:$_SESSION['filter'];
 	$_SESSION['selectedFilterMode']=(isset($_SESSION['selectedFilterMode']))?$_SESSION['selectedFilterMode']:'without';
