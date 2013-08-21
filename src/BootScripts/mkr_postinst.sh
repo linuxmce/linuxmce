@@ -16,6 +16,10 @@ if [ ! -e /etc/apt/30pluto.pbackup ] ;then
 	fi
 fi
 
+if [ -e /etc/apt/apt.conf.d/30pluto.pbackup ] ;then
+	rm /etc/apt/apt.conf.d/30pluto.pbackup ]
+fi
+
 rm -f /etc/logrotate.d/plut*
 
 if [ ! -e /etc/asound.conf.pbackup ] ;then
