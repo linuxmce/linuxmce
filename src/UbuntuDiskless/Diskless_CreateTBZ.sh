@@ -442,7 +442,7 @@ case "$TARGET_DISTRO" in
 		StatsMessage "Installing kernel headers"
 		#Install headers and run depmod for the seamless integraton function, ensure no errors exist
 		TARGET_KVER_LTS_HES=""
-		[[ "precise" = "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-raring"
+		#[[ "precise" = "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-raring"
 		LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-headers-generic"$TARGET_KVER_LTS_HES"
 		VerifyExitCode "Install linux headers package failed"
 
