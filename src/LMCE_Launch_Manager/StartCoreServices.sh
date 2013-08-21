@@ -11,8 +11,8 @@ echo "$(date -R) Starting Core Services - starting dcerouter" >> /var/log/pluto/
 bash -x /usr/pluto/bin/Start_DCERouter.sh >> /var/log/pluto/StartCoreServices.log 2>&1
 echo "$(date -R) Starting Core Services - done starting dcerouter" >> /var/log/pluto/StartCoreServices.log 2>&1
 
-echo "$(date -R) Starting Core Services - start orbitergen " >> /var/log/pluto/StartCoreServices.log 2>&1
-bash -x /usr/pluto/bin/Start_OrbiterGen.sh >> /var/log/pluto/StartCoreServices.log 2>&1
+#echo "$(date -R) Starting Core Services - start orbitergen " >> /var/log/pluto/StartCoreServices.log 2>&1
+#bash -x /usr/pluto/bin/Start_OrbiterGen.sh >> /var/log/pluto/StartCoreServices.log 2>&1
 
 Q="SELECT Enabled FROM Device_StartupScript WHERE FK_Device=$PK_Device AND FK_StartupScript=61"
 StartUpdateMedia=$(RunSQL "$Q")
