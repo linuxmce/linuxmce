@@ -70,7 +70,7 @@ Item {
             id:progress_bar_fill
             height: parent.height
             width: 0
-            color: androdSystem.orangeHighlight
+            color: androidSystem.orangeHighlight
             anchors.bottom: parent.bottom
             clip:true
             radius:5

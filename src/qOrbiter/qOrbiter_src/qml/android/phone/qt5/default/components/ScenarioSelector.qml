@@ -1,8 +1,8 @@
 import QtQuick 2.0
 Item {
     id:generic_model_display
-    width: generic_view.width
-    height: generic_view.height + listClose.height
+    width: scaleX(100)
+    height: scaleY(100)
     property variant currentModel:dummy
     state:"inactive"
     onStateChanged:console.log("ScenarioView State Change to "+generic_model_display.state);
@@ -19,6 +19,7 @@ Item {
     Rectangle{
         anchors.fill: parent
         color: "black"
+        opacity:.75
     }
 
     onCurrentModelChanged:{ currentModel !==dummy ? state = "active" : state = "inactive" ; console.log("current model changed.")}
@@ -30,7 +31,9 @@ Item {
         id:listClose
         height: scaleY(8)
         width: scaleX(61)
-        anchors.top: parent.top
+       anchors.horizontalCenter: parent.horizontalCenter
+       anchors.verticalCenter: parent.verticalCenter
+       anchors.verticalCenterOffset: scaleY(-40)
 
         Rectangle{
             anchors.fill: parent
@@ -78,6 +81,7 @@ Item {
     ListView{
         id: generic_view
         anchors.top: listClose.bottom
+        anchors.left: listClose.left
         width: scaleX(75)
         height: scaleY(75)
         model:currentModel

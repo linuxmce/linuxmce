@@ -13,7 +13,7 @@ Item {
     }
     Behavior on opacity{
         PropertyAnimation{
-        duration:350
+            duration:350
         }
     }
 
@@ -25,93 +25,79 @@ Item {
 
         ButtonSq{
             buttontext: "Play All"
-            height: style.stdbuttonh /2
+            height: style.stdbuttonh
             width: parent.width
             buttontextbold: true
             imgSource: ""
-            color: androidSystem.orangeStandard
-            MouseArea{
-                anchors.fill:parent
-                onClicked: manager.playMedia("!G"+iPK_Device)
-            }
+            color: "black"
+            onActivated: manager.playMedia("!G"+iPK_Device)
+
         }
 
 
         ButtonSq{
             buttontext: "Attribute Sort"
             buttonsqradius: 7
-            height: style.stdbuttonh /2
+            height: style.stdbuttonh
             width: parent.width
             imgSource: ""
             color: androidSystem.orangeStandard
-            MouseArea{
-                anchors.fill:parent
-                onReleased:filterTarget.currentModel = attribfilter
-            }
+            onActivated:{filterTarget.currentModel = attribfilter; attributeSelector.state="hidden"}
         }
 
 
         ButtonSq{
             buttontext: "Genre"
             buttonsqradius: 7
-            height: style.stdbuttonh /2
+            height: style.stdbuttonh
             width: parent.width
             imgSource: ""
             color: androidSystem.orangeStandard
-            MouseArea{
-                anchors.fill:parent
-                onReleased: filterTarget.currentModel = genrefilter
-            }
+            onActivated:{filterTarget.currentModel = genrefilter; attributeSelector.state="hidden"}
         }
 
 
         ButtonSq{
             buttontext: "Sources"
             buttonsqradius: 7
-            height: style.stdbuttonh /2
+            height: style.stdbuttonh
             width: parent.width
             imgSource: ""
             color: androidSystem.orangeStandard
-            MouseArea{
-                anchors.fill:parent
-                onReleased: filterTarget.currentModel = mediasourcelist
-            }
+            onActivated:{ filterTarget.currentModel = mediasourcelist;attributeSelector.state="hidden"}
         }
-
-
-
 
         ButtonSq{
             buttontext: "Resolution"
             buttonsqradius: 7
-            height: style.stdbuttonh /2
+            height: style.stdbuttonh
             width: parent.width
             imgSource: ""
             color: androidSystem.orangeStandard
-            MouseArea{
-                anchors.fill:parent
-                onReleased: filterTarget.currentModel = fileformatmodel
-            }
+            onActivated: {filterTarget.currentModel = fileformatmodel;attributeSelector.state="hidden"}
         }
 
 
         ButtonSq{
             buttontext: "Mediatypes"
             buttonsqradius: 7
-            height: style.stdbuttonh /2
+            height: style.stdbuttonh
             width: parent.width
             imgSource: ""
             color: androidSystem.orangeStandard
-            MouseArea{
-                anchors.fill:parent
-                onReleased: filterTarget.currentModel = mediatypefilter
-            }
+            onActivated: {filterTarget.currentModel = mediatypefilter;attributeSelector.state="hidden"}
+
         }
 
-        HomeButton{
-            id:home
-            height: style.stdbuttonh /2
-            width: style.stdbuttonw
+        ButtonSq{
+            buttontext: "Home"
+            buttonsqradius: 7
+            height: style.stdbuttonh
+            width: parent.width
+            imgSource: ""
+            color: androidSystem.orangeStandard
+            onActivated:{manager.goBacktoQScreen("Screen_1.qml");attributeSelector.state="hidden"}
+
         }
     }
 

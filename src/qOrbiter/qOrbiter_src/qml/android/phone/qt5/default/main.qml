@@ -11,6 +11,12 @@ Item {
 
     property Item appStyle: style
 
+    FontLoader{
+        id:appFont
+        name: "Sawasdee"
+        source:"../../../fonts/Sawasdee.ttf"
+    }
+
 
     Component.onCompleted: {
         androidSystem.updateBuildInformation()

@@ -1,22 +1,29 @@
 import QtQuick 2.0
 
 
-Rectangle {
+Item {
     id:generic_filter_view
-    width: filterlist.width
-    height: heading.height + filterlist.height
-    color: "black"
-    anchors.centerIn: parent
+    width: manager.appWidth
+    height: manager.appHeight
     clip: true
     property variant currentModel
     property int modelCount: filterlist.count
     property int delegateHeight:scaleY(10)
     state:"inactive"
-
     onCurrentModelChanged: currentModel !== "" ? state="active": state="inactive"
+
+    Rectangle{
+        anchors.fill: parent
+        color: "black"
+        MouseArea{
+            anchors.fill: parent
+        }
+    }
+
     Item{
         id:heading
         anchors.top: generic_filter_view.top
+        anchors.horizontalCenter: parent.horizontalCenter
         width: filterlist.width
         height: scaleY(8)
         Rectangle{
@@ -27,7 +34,7 @@ Rectangle {
         StyledText{
             text: "Click to Close"
             color:"black"
-            font.pixelSize: 18
+            font.pixelSize: 22
         }
         MouseArea{
             anchors.fill: parent
@@ -40,8 +47,10 @@ Rectangle {
         width:scaleX(55)
         model:currentModel
         anchors.top: heading.bottom
+        anchors.left: heading.left
         delegate:Item{
-        height:delegateHeight
+            height:scaleY(15)
+            width: scaleX(55)
             Rectangle{
                 anchors.fill: parent
                 color: "black"
@@ -51,7 +60,7 @@ Rectangle {
                     anchors.fill: parent
                     StyledText{
                         text: name
-                        color: "white"                        
+                        color: "white"
                         width:parent.width *.75
                         font.pointSize:scaleY(4)
                     }
@@ -59,8 +68,10 @@ Rectangle {
                     Rectangle{
                         height: 45
                         width: 45
+                        radius:5
                         color: status ? "green" : "red"
-
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
                         MouseArea{
                             anchors.fill: parent
                             onClicked:filterlist.model.setSelectionStatus(name)

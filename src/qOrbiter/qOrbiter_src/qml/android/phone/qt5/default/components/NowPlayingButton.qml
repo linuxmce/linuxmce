@@ -109,23 +109,23 @@ Item {
         }
 
 
-        Text {
-            id: starring
-            width: manager.b_orientation ? scaleX (65) : scaleX (25)
-            wrapMode: "WrapAtWordBoundaryOrAnywhere"
-            text: qsTr("Perfomers: ") + dcenowplaying.performerlist
-            smooth: true
-            font.pixelSize: textSize
-            elide: "ElideRight"
-            visible:  dcenowplaying.performerlist ==="" ? false: true
-            color:"white"
-            MouseArea{
-                anchors.fill: starring
-                hoverEnabled: true
-                onEntered: { starring.elide = "ElideNone" ; }
-                onExited: {starring.elide = "ElideRight"; }
-            }
-        }
+//        Text {
+//            id: starring
+//            width: manager.b_orientation ? scaleX (65) : scaleX (25)
+//            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+//            text: qsTr("Perfomers: ") + dcenowplaying.performerlist
+//            smooth: true
+//            font.pixelSize: textSize
+//            elide: "ElideRight"
+//            visible:  dcenowplaying.performerlist ==="" ? false: true
+//            color:"white"
+//            MouseArea{
+//                anchors.fill: starring
+//                hoverEnabled: true
+//                onEntered: { starring.elide = "ElideNone" ; }
+//                onExited: {starring.elide = "ElideRight"; }
+//            }
+//        }
 
         Text {
             id: network_id
@@ -191,5 +191,17 @@ Item {
         anchors.fill: parent
         onClicked:manager.setCurrentScreen(dcenowplaying.qs_screen)
     }
+
+    states: [
+        State {
+            name: "video"
+            when:manager.i_current_mediaType === 5
+            PropertyChanges {
+                target: object
+
+            }
+        }
+    ]
+
 }
 
