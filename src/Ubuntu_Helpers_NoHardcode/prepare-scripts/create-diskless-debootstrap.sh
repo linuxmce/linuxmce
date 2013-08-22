@@ -56,6 +56,13 @@ function Create_Diskless_Debootstrap_Archive {
 	# And make sure, the latest repos info is available
 	chroot $temp_dir apt-get update
 
+	if [ -e "$temp_dir/etc/default/resolveconf/resolv.conf.d/original" ]; then
+		rm -f "$temp_dir/etc/default/resolveconf/resolv.conf.d/original"
+	fi
+	if [ -e "$temp_dir/etc/default/resolveconf/resolv.conf.d/tail" ]; then
+		rm -f "$temp_dir/etc/default/resolveconf/resolv.conf.d/tail"
+	fi
+
 	# Pack the diskless image in the right dir
 	mkdir -p "$diskless_dir"
 	pushd "$temp_dir"
