@@ -220,7 +220,7 @@ public:
 	virtual void CMD_Get_Home_Symlink(string sPath,string *sSymlink,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Get_Devices_To_Start(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Update_Device(int iPK_Device,string sMac_address,int iPK_Room,string sIP_Address,string sData_String,string sDescription,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Send_Email(string sTo,string sSubject,string sMessageBody,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Send_Email(string sTo,string sSubject,string sMessageBody,string sFrom,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Get_Users(string *sValue_To_Assign,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Get_Rooms(string *sValue_To_Assign,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Get_Scenarios(string sPK_EntertainArea,int iValue,int iPK_Room,string *sValue_To_Assign,string &sCMD_Result,class Message *pMessage) {};
@@ -1210,7 +1210,8 @@ public:
 						string sTo=pMessage->m_mapParameters[COMMANDPARAMETER_To_CONST];
 						string sSubject=pMessage->m_mapParameters[COMMANDPARAMETER_Subject_CONST];
 						string sMessageBody=pMessage->m_mapParameters[COMMANDPARAMETER_MessageBody_CONST];
-						CMD_Send_Email(sTo.c_str(),sSubject.c_str(),sMessageBody.c_str(),sCMD_Result,pMessage);
+						string sFrom=pMessage->m_mapParameters[COMMANDPARAMETER_From_CONST];
+						CMD_Send_Email(sTo.c_str(),sSubject.c_str(),sMessageBody.c_str(),sFrom.c_str(),sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
@@ -1227,7 +1228,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Send_Email(sTo.c_str(),sSubject.c_str(),sMessageBody.c_str(),sCMD_Result,pMessage);
+								CMD_Send_Email(sTo.c_str(),sSubject.c_str(),sMessageBody.c_str(),sFrom.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;

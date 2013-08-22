@@ -588,9 +588,12 @@ Delimiter: '\n' */
 			/** Synopsis of what happened. */
 		/** @param #284 MessageBody */
 			/** Details about the event. */
+		/** @param #288 From */
+			/** What is the sender's email address? */
 
-	virtual void CMD_Send_Email(string sFrom,string sTo,string sSubject,string sMessageBody) { string sCMD_Result; CMD_Send_Email(sFrom.c_str(),sTo.c_str(),sSubject.c_str(),sMessageBody.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Send_Email(string sFrom,string sTo,string sSubject,string sMessageBody,string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Send_Email(string sTo,string sSubject,string sMessageBody,string sFrom) { string sCMD_Result; CMD_Send_Email(sTo.c_str(),sSubject.c_str(),sMessageBody.c_str(),sFrom.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Send_Email(string sTo,string sSubject,string sMessageBody,string sFrom,string &sCMD_Result,Message *pMessage);
+
 
 	/** @brief COMMAND: #1106 - Get Users */
 	/** Get users */

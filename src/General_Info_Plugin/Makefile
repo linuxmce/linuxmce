@@ -7,7 +7,7 @@ SNR_LDFLAGS ?=
 ROOT = ..
 CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
+CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
@@ -52,16 +52,14 @@ General_Info_Plugin.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	mkdir -p ../bin
 	cp $@ ../bin
-	chmod +x post_make.sh
-	./post_make.sh $@
+#	chmod +x post_make.sh
+#	./post_make.sh $@
 		
 General_Info_Plugin: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	mkdir -p ../bin
 	cp $@ ../bin
-	./post_make.sh $@
-
-distclean: clean
+#	./post_make.sh $@
 
 clean: clean-recursive
 	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) General_Info_Plugin.bin General_Info_Plugin.so >/dev/null
@@ -69,6 +67,10 @@ clean: clean-recursive
 package:
 	chmod +x make_package.sh
 	./make_package.sh $(MYNAME) $(VERSION) $(MYDEVTEMPLATEID)
+
+install: 
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp General_Info_Plugin.so $(DESTDIR)/usr/pluto/bin
 
 include $(ROOT)/PlutoUtils/make.rules
 ifeq (,$(findstring clean, $(MAKECMDGOALS)))
@@ -79,6 +81,3 @@ endif
 Web_DHCP_Query_test: $(sources:.cpp=.o)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o Web_DHCP_Query_test Web_DHCP_Query.o Web_DHCP_Query_test.cpp $(LDFLAGS) $(LDLIBS)
 
-install: 
-	mkdir -p $(DESTDIR)/usr/pluto/bin
-	cp General_Info_Plugin.so $(DESTDIR)/usr/pluto/bin
