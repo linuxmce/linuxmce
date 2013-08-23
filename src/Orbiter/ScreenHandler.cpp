@@ -4827,32 +4827,47 @@ bool ScreenHandler::SCREEN_Network_Settings_VariableChanged(CallBackData *pData)
 void ScreenHandler::SCREEN_UserStatus(long PK_Screen)
 {
   ScreenHandlerBase::SCREEN_UserStatus(PK_Screen);
-  RegisterCallBack(cbDataGridRendering, (ScreenHandlerCallBack) &ScreenHandler::UserStatus_Voicemail_GridRendering, new DatagridAcquiredBackData());
+  RegisterCallBack(cbDataGridSelected, (ScreenHandlerCallBack) &ScreenHandler::UserStatus_Voicemail_DataGridSelected, new DatagridCellBackData());
 }
 
-bool ScreenHandler::UserStatus_Voicemail_GridRendering(CallBackData *pData)
+bool ScreenHandler::UserStatus_Voicemail_DataGridSelected(CallBackData *pData)
 {
-  DatagridAcquiredBackData *pDatagridAcquiredBackData = (DatagridAcquiredBackData *) pData;
+  DatagridCellBackData *pCellInfoData = (DatagridCellBackData *)pData;
   
-  if (pDatagridAcquiredBackData->m_pObj->m_iPK_Datagrid==DATAGRID_User_VoiceMail_CONST)
+  if (pCellInfoData && pCellInfoData->m_pDesignObj_DataGrid && 
+      pCellInfoData->m_pDesignObj_DataGrid->m_iBaseObjectID == DESIGNOBJ_dgVoiceMailManager_CONST &&
+      pCellInfoData->m_Column == 11)
     {
-      for(MemoryDataTable::iterator it=pDatagridAcquiredBackData->m_pDataGridTable->m_MemoryDataTable.begin();it!=pDatagridAcquiredBackData->m_pDataGridTable->m_MemoryDataTable.end();++it)
-	{
-	  DataGridCell *pCell = it->second;
-	  pair<int,int> colRow = DataGridTable::CovertColRowType(it->first);  // Get the column/row for the cell
-	  if(pDatagridAcquiredBackData->m_pObj->m_mapChildDgObjects.size() != 0)
-	    colRow.second = colRow.second % int(pDatagridAcquiredBackData->m_pObj->m_mapChildDgObjects.size());
-	  // See if there is an object assigned for this column/row
-	  map< pair<int,int>, DesignObj_Orbiter *>::iterator itobj = pDatagridAcquiredBackData->m_pObj->m_mapChildDgObjects.find( colRow );
-	  if( itobj!=pDatagridAcquiredBackData->m_pObj->m_mapChildDgObjects.end() )
-	    {
-	      DesignObj_Orbiter *pObj = itobj->second;  // This is the cell's object.
-	      if (pCell->m_AltColor==12345) // This is an old message.
-		{
-		  pObj->m_GraphicToDisplay_set("voicemail",1); // This is an alt graphic defined by the designobj
-		}
-	    }
-	}
+      int iRow=pCellInfoData->m_Row;
+      DataGridTable *pDataGridTable = pCellInfoData->m_pDesignObj_DataGrid->m_pDataGridTable_Current_get();
+      DataGridCell *pCell;
+      pCell = pDataGridTable->GetData(1,pCellInfoData->m_Row);
+      string sTimestamp = pCell->GetText();
+      pCell = pDataGridTable->GetData(3,pCellInfoData->m_Row);
+      string sCallerID = pCell->GetText();
+      string sMessage=m_pOrbiter->m_mapTextString[TEXT_Confirm_Voicemail_Delete_CONST];
+      StringUtils::Replace(&sMessage,"<%=TIMESTAMP%>",sTimestamp);
+      StringUtils::Replace(&sMessage,"<%=CALLERID%>",sCallerID);
+
+      string sMessageDoDelete=
+	StringUtils::itos(m_pOrbiter->m_dwPK_Device) + " " +
+	StringUtils::itos(m_pOrbiter->m_dwPK_Device_TelecomPlugIn) + " 1 " // Command
+	TOSTRING(COMMAND_Delete_File_CONST) " "
+	TOSTRING(COMMANDPARAMETER_Filename_CONST) " \"" + pCell->GetValue() + "\"";
+      
+      string sMessageCancel=
+	StringUtils::itos(m_pOrbiter->m_dwPK_Device) + " " +
+	StringUtils::itos(m_pOrbiter->m_dwPK_Device) + " " + " 1 " // command
+	TOSTRING(COMMAND_Goto_Screen_CONST) " "
+	TOSTRING(COMMANDPARAMETER_PK_Screen_CONST) " "
+	TOSTRING(SCREEN_UserStatus_CONST);
+      
+      DisplayMessageOnOrbiter(0, sMessage, false, "0", true,
+			      m_pOrbiter->m_mapTextString[TEXT_YES_CONST],
+			      sMessageDoDelete,
+			      m_pOrbiter->m_mapTextString[TEXT_NO_CONST],
+			      sMessageCancel);      
     }
+
   return false;
 }
