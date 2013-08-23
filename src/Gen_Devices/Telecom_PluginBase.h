@@ -112,6 +112,22 @@ public:
 			return atoi(m_mapParameters[DEVICEDATA_No_of_sec_to_ring_before_IVR_CONST].c_str());
 	}
 
+	string Get_Emergency_numbers()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Emergency_numbers_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_Emergency_numbers_CONST];
+	}
+
+	int Get_Emergency_phoneline()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Emergency_phoneline_CONST).c_str());
+		else
+			return atoi(m_mapParameters[DEVICEDATA_Emergency_phoneline_CONST].c_str());
+	}
+
 };
 
 
@@ -220,6 +236,8 @@ public:
 	int DATA_Get_Telecom_Prepend_Digit() { return GetData()->Get_Telecom_Prepend_Digit(); }
 	int DATA_Get_Telecom_Local_Number_Length() { return GetData()->Get_Telecom_Local_Number_Length(); }
 	int DATA_Get_No_of_sec_to_ring_before_IVR() { return GetData()->Get_No_of_sec_to_ring_before_IVR(); }
+	string DATA_Get_Emergency_numbers() { return GetData()->Get_Emergency_numbers(); }
+	int DATA_Get_Emergency_phoneline() { return GetData()->Get_Emergency_phoneline(); }
 	//Event accessors
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,class Message *pMessage) {};
@@ -234,6 +252,7 @@ public:
 	virtual void CMD_PL_Add_VOIP_Account(string sName,string sPhoneNumber,string sPassword,string sUsers,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_PL_Join_Call(int iPK_Users,string sPhoneExtension,string sPhoneCallID,int iPK_Device_To,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Speak_in_house(int iPK_Device,string sPhoneNumber,string sList_PK_Device,int iPK_Device_Related,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Delete_File(string sFilename,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Make_Call(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Merge_Calls(string sPhone_Call_ID_1,string sPhone_Call_ID_2,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Assisted_Transfer(int iPK_Device,int iPK_Users,string sPhoneExtension,string sPhoneCallID,string sChannel,string *sTask,string &sCMD_Result,class Message *pMessage) {};
@@ -601,6 +620,32 @@ public:
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
 								CMD_Speak_in_house(iPK_Device,sPhoneNumber.c_str(),sList_PK_Device.c_str(),iPK_Device_Related,sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Delete_File_CONST:
+					{
+						string sCMD_Result="OK";
+						string sFilename=pMessage->m_mapParameters[COMMANDPARAMETER_Filename_CONST];
+						CMD_Delete_File(sFilename.c_str(),sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Delete_File(sFilename.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
