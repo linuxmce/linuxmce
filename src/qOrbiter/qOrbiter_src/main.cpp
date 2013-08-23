@@ -214,13 +214,14 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
 #ifdef ANDROID
     AndroidSystem androidHelper;
+
 #endif
 
     QOrbiterLogger localLogger;
 
 #ifdef ANDROID
     if(androidHelper.updateExternalStorageLocation()){
-       localLogger.setLogLocation(QString(androidHelper.externalStorageLocation+"/LinuxMCE/"));
+        localLogger.setLogLocation(QString(androidHelper.externalStorageLocation+"/LinuxMCE/"));
     }
 
 #endif
@@ -342,6 +343,9 @@ int main(int argc, char* argv[])
         qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
 
         orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm);
+#ifdef __ANDROID__
+        orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
+#endif
         orbiterWin.setMessage("Setting up Lmce");
 
 #ifndef ANDROID
@@ -349,7 +353,7 @@ int main(int argc, char* argv[])
 #else
         qorbiterManager w(&orbiterWin.mainView, &androidHelper);
         orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
-
+        orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
 #endif
         AbstractImageProvider modelimageprovider(&w);
         orbiterWin.mainView.engine()->addImageProvider("listprovider", &modelimageprovider);
@@ -373,8 +377,8 @@ int main(int argc, char* argv[])
 
         ListModel *mediaModel = new ListModel(new gridItem);
         mediaModel->moveToThread(w.thread());
-       storedVideoPlaylist->moveToThread(w.thread());
-       simpleEPGmodel->moveToThread(w.thread());
+        storedVideoPlaylist->moveToThread(w.thread());
+        simpleEPGmodel->moveToThread(w.thread());
 #ifndef QT5
         //   mediaModel->moveToThread(mediaThread);
 #endif
@@ -399,7 +403,7 @@ int main(int argc, char* argv[])
 
 #ifdef QT4_8
         QObject::connect(orbiterWin.mainView.engine(), SIGNAL(warnings(QList<QDeclarativeError>)), &localLogger, SLOT(logQmlErrors(QList<QDeclarativeError>)));
-     #elif QT5
+#elif QT5
         QObject::connect(orbiterWin.mainView.engine(), SIGNAL(warnings(QList<QQmlError>)), &localLogger, SLOT(logQmlErrors(QList<QQmlError>)));
 #endif
         QObject::connect(&w, SIGNAL(skinMessage(QString)), &localLogger, SLOT(logSkinMessage(QString)));
@@ -437,7 +441,7 @@ int main(int argc, char* argv[])
         //filedetails
         QObject::connect(&pqOrbiter, SIGNAL(fd_imageUrlChanged(QString)), w.filedetailsclass, SLOT(setScreenshot(QString)));
         QObject::connect(&pqOrbiter, SIGNAL(fd_titleChanged(QString)), w.filedetailsclass, SLOT(setTitle(QString)), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter,SIGNAL(fd_storageDeviceChanged(QString)), w.filedetailsclass, SLOT(setStorageDevice(QString)), Qt::QueuedConnection);        
+        QObject::connect(&pqOrbiter,SIGNAL(fd_storageDeviceChanged(QString)), w.filedetailsclass, SLOT(setStorageDevice(QString)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(fd_mediaTitleChanged(QString)), w.filedetailsclass, SLOT(setMediaTitle(QString)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(fd_directorChanged(QString)), w.filedetailsclass, SLOT(setDirector(QString)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(fd_programChanged(QString)), w.filedetailsclass, SLOT(setProgram(QString)),Qt::QueuedConnection);
@@ -693,21 +697,21 @@ int main(int argc, char* argv[])
         //   QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &pqOrbiter, SLOT(setdceIP(QString)));
         dceThread.start();
 
-
+        orbiterWin.initView();
         // tcThread->start();
 #ifndef QT5
         //mediaThread->start();
         //epgThread->start();
 #endif
 
-//#ifdef Q_OS_LINUX
-//        QProcess p;
-//        p.start("awk", QStringList() << "/MemTotal/ { print $2 }" << "/proc/meminfo");
-//        p.waitForFinished();
-//        QString memory = p.readAllStandardOutput();
-//        system_info.append(QString("; RAM: %1 MB").arg(memory.toLong() / 1024));
-//        p.close();
-//#endif
+        //#ifdef Q_OS_LINUX
+        //        QProcess p;
+        //        p.start("awk", QStringList() << "/MemTotal/ { print $2 }" << "/proc/meminfo");
+        //        p.waitForFinished();
+        //        QString memory = p.readAllStandardOutput();
+        //        system_info.append(QString("; RAM: %1 MB").arg(memory.toLong() / 1024));
+        //        p.close();
+        //#endif
         if(sRouter_IP!="")
         {
             qDebug()<< "Command Line override. Using command line settings";
@@ -728,11 +732,11 @@ int main(int argc, char* argv[])
         pqOrbiter.qmlSetup(PK_Device, QString::fromStdString(sRouter_IP));
         a.exec();
 
-         localLogger.deleteLater();
-         timecode->deleteLater();
-         mediaModel->deleteLater();
-         storedVideoPlaylist->deleteLater();
-         simpleEPGmodel->deleteLater();
+        localLogger.deleteLater();
+        timecode->deleteLater();
+        mediaModel->deleteLater();
+        storedVideoPlaylist->deleteLater();
+        simpleEPGmodel->deleteLater();
     }
 
 

@@ -65,6 +65,14 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
         mainView.setFlags(Qt::FramelessWindowHint);
     }
 #endif
+
+    if(fullScreen){
+        fullScreenOrbiter = true;
+    }
+    else {
+        fullScreenOrbiter = false;
+    }
+
     router = QString::fromStdString(routerip);
     phoneSize = false;
     localPath = "";
@@ -227,6 +235,11 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.setSource(QApplication::applicationDirPath()+"qml/Splash.qml");
 #endif
 
+}
+
+void orbiterWindow::initView()
+{
+
 #ifdef Q_OS_SYMBIAN
     mainView.showFullScreen();
 #elif defined(Q_WS_MAEMO_5)
@@ -234,7 +247,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #elif defined(for_harmattan)
     mainView.showFullScreen();
 #elif defined(for_desktop)
-    if(fullScreen==true){
+    if(fullScreenOrbiter==true){
         mainView.showFullScreen();
     }
     else{

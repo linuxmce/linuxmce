@@ -94,6 +94,9 @@ public:
     QString qmlPage;
     QString localPath;
     bool phoneSize;
+    bool fullScreenOrbiter;
+
+    void initView();
 
 public slots:
     void setDeviceNumber(int d){deviceno = d; emit deviceChanged();}
@@ -107,6 +110,8 @@ public slots:
 
     Q_INVOKABLE void forceResponse (QString forced);
     void loadSetupPage();
+
+
 
 
 

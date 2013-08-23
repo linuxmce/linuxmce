@@ -53,9 +53,12 @@ AndroidSystem::AndroidSystem(QObject *parent) :
             setStatusMessage("Retrieved build information");
         }
 
+        setReadyStatus(true);
+
     }
     else
     {
+        setReadyStatus(false);
         setStatusMessage("Android Plugin malfunction. Unable to get env.");
     }
 }
@@ -113,6 +116,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 //   env->DeleteLocalRef(localDisplayContextClassID);
   //  env->DeleteLocalRef(localDisplayObjClass);
     qCritical() << "Exiting JNI onLoad";
+
     return JNI_VERSION_1_6;
 }
 

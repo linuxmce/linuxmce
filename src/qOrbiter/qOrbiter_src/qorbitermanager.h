@@ -199,6 +199,8 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString deviceResponse READ getDeviceResponse WRITE setDeviceResponse NOTIFY deviceResponseChanged) // for use in display of messages associated with specific devices
     Q_PROPERTY (QString imagePath READ getImagePath WRITE setImagePath NOTIFY imagePathChanged)
 
+
+    Q_PROPERTY(int isPhone READ getFormFactor NOTIFY formFactorChanged)
     /*!
      * \warning enablescreensavermode - currently unused, should be built anyways
      * \warning networkload - currently is used for android devices
@@ -492,6 +494,8 @@ signals:
 
     void newMessageSend(QVariantMap message);
 
+    /* Mobile device signals */
+    void formFactorChanged();
 
 
     /* Media Playback Controls */
@@ -642,6 +646,7 @@ signals:
     void dceGridSepChanged(int d);
     void commandCompleted();
     void setDceVar(int variable, QString valToAssign);
+    void changeScreen(QString screen);
 
     //runtime
     void commandResponseChanged();
@@ -678,8 +683,8 @@ public slots:
     * \param f
     * \ingroup qorbiter_properties
     */
-    void setFormFactor(int f) {isPhone = f;}
-
+    void setFormFactor(int f) {isPhone = f; emit formFactorChanged();}
+    int getFormFactor(){ return isPhone;}
     void sendDceMessage(QVariantMap m) {if(!m.isEmpty()) emit newMessageSend(m);}
 
     /*!

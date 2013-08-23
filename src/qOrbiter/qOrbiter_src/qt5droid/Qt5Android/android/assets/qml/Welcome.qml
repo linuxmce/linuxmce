@@ -1,27 +1,56 @@
 import QtQuick 2.0
 
-Rectangle {
+Item {
     id:welcome
     height: manager.appHeight
     width: manager.appWidth
-    color: wait.running ? "darkyellow": "darkgreen"
+
+    Rectangle{
+        anchors.fill: parent
+        color:"black"
+    }
+
+    Rectangle{
+        anchors.fill: parent
+        opacity:.25
+        gradient: Gradient{
+            GradientStop{position: 0.0; color: "transparent"}
+            GradientStop{position: .45; color:"white"}
+        }
+    }
+
+
+    Connections{
+        target:androidSystem
+        onReadyStatusChanged:{
+            if(androidSystem.androidReady){
+                console.log("Got startup signal from anroid!")
+                forceActiveFocus()
+                if(androidSystem.updateBuildInformation() && androidSystem.updateExternalStorageLocation()){
+                    wait.start()
+                    logger.setLogLocation(androidSystem.externalStorageLocation)
+                }
+            }
+        }
+    }
+
 
     Keys.onReleased: {
 
-            switch(event.key){
-            case Qt.Key_Back:
-                Qt.quit()
-                break;
-            case Qt.Key_MediaPrevious:
-                Qt.quit()
-                break;
-            default:
-                console.log(event.key)
-                break;
+        switch(event.key){
+        case Qt.Key_Back:
+            Qt.quit()
+            break;
+        case Qt.Key_MediaPrevious:
+            Qt.quit()
+            break;
+        default:
+            console.log(event.key)
+            break;
 
-            }
-            event.accepted=true
         }
+        event.accepted=true
+    }
 
     Timer{
         id:wait
@@ -30,12 +59,9 @@ Rectangle {
         running:false
         Component.onCompleted:
         {
+            console.log("Wait timer checking")
             forceActiveFocus()
             wait.start()
-            if(androidSystem.updateBuildInformation() && androidSystem.updateExternalStorageLocation()){
-                wait.start()
-                logger.setLogLocation(androidSystem.externalStorageLocation)
-            }
         }
     }
 
@@ -53,9 +79,9 @@ Rectangle {
 
     Text {
         id: splashtxt
-        text: qsTr("LinuxMCE for your " + androidSystem.deviceName )
+        text: qsTr("LinuxMCE for your "  )
         anchors.bottom: parent.bottom
-        font.pixelSize: 28
+        font.pixelSize:36
         width: parent.width
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         color: "green"
@@ -98,30 +124,30 @@ Rectangle {
         }
     }
 
-        Loader{
-            id:mainContent
-            height: manager.appHeight
-            width: manager.appWidth
-            source:""
-            opacity: 0
-            onOpacityChanged: PropertyAnimation {target:mainContent; property: "opacity"; to:1 ; duration: 1500}
-            onStatusChanged: if(mainContent.status === Loader.Error){
-                                 loading.text = qsTr("Im Sorry I couldnt connect to a LinuxMCE Server at "+window.router+" Please ensure you can reach your core. \n I will continue trying. \n"+ mainContent.sourceComponent.errorString())
-                                 console.log(mainContent.sourceComponent.errorString())
-                                 wait.restart()
-                             }
-            //                         else if (mainContent.status != Loader.Loading){
-            //                             loading.text = "Loading, please wait \n" + progress +"% \n"+sourceComponent.errorString()
+    Loader{
+        id:mainContent
+        height: manager.appHeight
+        width: manager.appWidth
+        source:""
+        opacity: 0
+        onOpacityChanged: PropertyAnimation {target:mainContent; property: "opacity"; to:1 ; duration: 1500}
+        onStatusChanged: if(mainContent.status === Loader.Error){
+                             loading.text = qsTr("Im Sorry I couldnt connect to a LinuxMCE Server at "+window.router+" Please ensure you can reach your core. \n I will continue trying. \n"+ mainContent.sourceComponent.errorString())
+                             console.log(mainContent.sourceComponent.errorString())
+                             wait.restart()
+                         }
+        //                         else if (mainContent.status != Loader.Loading){
+        //                             loading.text = "Loading, please wait \n" + progress +"% \n"+sourceComponent.errorString()
 
-            //                         }
-                             else  if (mainContent.status === Loader.Ready){
-                                 mainContent.opacity = .01
-                                 loading.visible= false
-                                 loading.text = "Content Loaded, one moment"
-                             }
-
-        }
-
-
+        //                         }
+                         else  if (mainContent.status === Loader.Ready){
+                             mainContent.opacity = .01
+                             loading.visible= false
+                             loading.text = "Content Loaded, one moment"
+                         }
 
     }
+
+
+
+}

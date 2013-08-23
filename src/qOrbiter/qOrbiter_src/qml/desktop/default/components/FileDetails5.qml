@@ -45,7 +45,7 @@ Item {
     Image{
         id:imdb
         anchors.fill: parent
-        source:"http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=imdb&file="+filedetailsclass.file+"&val="+bgImageProp
+        source:"http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=imdb&file="+filedetailsclass.file+"&val="+bgImageProp
        // onStatusChanged: imdb.status == Image.Ready ? filedetailrect.height = scaleY(100) : ""
     }   
 
@@ -76,7 +76,7 @@ Item {
             property bool profile : filedetailsimage.sourceSize.height > filedetailsimage.sourceSize.width ? true : false
             width:profile ? scaleX(25) : scaleX(45)
             height:profile ? scaleY(65) : scaleY(58)
-           source:filedetailsclass.screenshot !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=img&val="+filedetailsclass.screenshot : ""
+           source:filedetailsclass.screenshot !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot : ""
             smooth: true
         }
 

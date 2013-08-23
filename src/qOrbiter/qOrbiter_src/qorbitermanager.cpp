@@ -282,8 +282,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 void qorbiterManager::gotoQScreen(QString s)
 {
 
-
-
     if(s.contains("Screen_1.qml"))
     {
         qDebug() << "Clearing Models";
@@ -305,13 +303,13 @@ void qorbiterManager::gotoQScreen(QString s)
     setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
         setDceResponse("Done call to screenchange()");
-
         setCurrentScreen(s);
         if(!currentScreen.contains("187"))
             gotoScreenList->append(currentScreen);
 
     } else {
         setDceResponse("screenchange() FAILED");
+        emit changeScreen(screenname.toString());
     }
 }
 

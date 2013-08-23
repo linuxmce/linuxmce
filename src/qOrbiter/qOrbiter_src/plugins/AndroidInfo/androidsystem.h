@@ -19,6 +19,7 @@ class AndroidSystem : public QObject
     Q_PROPERTY(QString deviceName READ getDeviceName NOTIFY deviceNameChanged)
     Q_PROPERTY(QString deviceManufacturer READ getDeviceManufacturer NOTIFY deviceManufacturerChanged)
     Q_PROPERTY(QString deviceBrand READ getDeviceBrand NOTIFY deviceBrandChanged )
+    Q_PROPERTY(bool androidReady READ getReadyStatus NOTIFY readyStatusChanged)
 
     Q_PROPERTY(bool mountStatus READ getMountStatus NOTIFY mountStatusChanged)
     Q_PROPERTY(QString externalStorageLocation READ getExternalStorageLocation NOTIFY externalStorageLocationChanged)
@@ -43,6 +44,7 @@ public:
     QString deviceManufacturer;
     QString deviceBrand;
     QString externalStorageLocation;
+    bool androidReady;
 
     bool mountStatus;
 
@@ -67,6 +69,7 @@ signals:
     void deviceNameChanged();
     void deviceManufacturerChanged();
     void deviceBrandChanged();
+    void readyStatusChanged();
 
     void blueStandardChanged();
     void blueHightlightChanged();
@@ -81,6 +84,9 @@ signals:
 
 
 public slots:
+    void setReadyStatus(bool s) { androidReady = s; emit readyStatusChanged();}
+    bool getReadyStatus() { return androidReady;}
+
     void setMountStatus(bool b) {mountStatus = b; emit mountStatusChanged();}
     bool getMountStatus(){return mountStatus;}
 

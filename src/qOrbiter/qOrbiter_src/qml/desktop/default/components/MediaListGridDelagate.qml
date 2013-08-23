@@ -75,7 +75,7 @@ Item
             Image
             {
                 id: imagerect;
-                source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=img&val="+path : ""
+                source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
                 anchors.centerIn: parent;
                 fillMode: Image.PreserveAspectFit
                 smooth: true
@@ -83,6 +83,7 @@ Item
                 anchors.fill: parent
                 sourceSize.width:parent.width
                 sourceSize.height:parent.height
+
 
             }
             Rectangle{
