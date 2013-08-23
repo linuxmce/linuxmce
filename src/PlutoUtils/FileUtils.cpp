@@ -392,7 +392,8 @@ bool FileUtils::CheckPathSanity(string sPath)
 {
     bool bIsHome = (sPath.find("/home/") != string::npos);
     bool bIsMntDevice = (sPath.find("/mnt/device/") != string::npos);
-    return (bIsHome || bIsMntDevice);
+    bool bIsVoiceMail = (sPath.find("/var/spool/asterisk/voicemail/") != string::npos);
+    return (bIsHome || bIsMntDevice || bIsVoiceMail);
 }
 
 #ifndef WIN32
