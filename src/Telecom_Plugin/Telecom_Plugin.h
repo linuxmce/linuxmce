@@ -171,6 +171,8 @@ public:
 	int DATA_Get_Telecom_Prepend_Digit();
 	int DATA_Get_Telecom_Local_Number_Length();
 	int DATA_Get_No_of_sec_to_ring_before_IVR();
+	string DATA_Get_Emergency_numbers();
+	int DATA_Get_Emergency_phoneline();
 
 			*****EVENT***** accessors inherited from base class
 
@@ -328,6 +330,15 @@ public:
 	virtual void CMD_Speak_in_house(int iPK_Device,string sPhoneNumber,string sList_PK_Device,int iPK_Device_Related,string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #845 - Delete File */
+	/** Used to delete a voicemail from the Voicemail spool */
+		/** @param #13 Filename */
+			/** The file to delete */
+
+	virtual void CMD_Delete_File(string sFilename) { string sCMD_Result; CMD_Delete_File(sFilename.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Delete_File(string sFilename,string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #921 - Make Call */
 	/** Create a call. */
 		/** @param #17 PK_Users */
@@ -418,7 +429,6 @@ The response is a task id */
 
 	virtual void CMD_Add_To_Speed_Dial(int iPK_Device,string sCallerID,string sPhoneExtension) { string sCMD_Result; CMD_Add_To_Speed_Dial(iPK_Device,sCallerID.c_str(),sPhoneExtension.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Add_To_Speed_Dial(int iPK_Device,string sCallerID,string sPhoneExtension,string &sCMD_Result,Message *pMessage);
-
 
 //<-dceag-h-e->
 

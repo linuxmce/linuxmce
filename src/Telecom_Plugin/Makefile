@@ -7,7 +7,7 @@ SNR_LDFLAGS ?=
 ROOT = ..
 CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE $(SNR_CPPFLAGS)
+CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
@@ -43,7 +43,7 @@ sources += \
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo: so
+whattodo: all
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -56,29 +56,28 @@ Telecom_Plugin.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	mkdir -p ../bin
 	cp $@ ../bin
-	chmod +x post_make.sh
-	./post_make.sh $@
+#	chmod +x post_make.sh
+#	./post_make.sh $@
 		
 Telecom_Plugin: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	mkdir -p ../bin
 	cp $@ ../bin
-	./post_make.sh $@
+#	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Telecom_Plugin.bin Telecom_Plugin.so >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Telecom_Plugin Telecom_Plugin.so >/dev/null
 
 package:
 	chmod +x make_package.sh
 	./make_package.sh $(MYNAME) $(VERSION) $(MYDEVTEMPLATEID)
+
+install:
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp Telecom_Plugin $(DESTDIR)/usr/pluto/bin
 
 include $(ROOT)/PlutoUtils/make.rules
 ifeq (,$(findstring clean, $(MAKECMDGOALS)))
 -include $(sources:.cpp=.d)
 endif
 #<-dceag-mf-e->
-
-
-install: 
-	mkdir -p $(DESTDIR)/usr/pluto/bin
-	cp Telecom_Plugin.so $(DESTDIR)/usr/pluto/bin

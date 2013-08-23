@@ -197,8 +197,8 @@ int main(int argc, char* argv[])
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",PK_Device,sRouter_IP.c_str());
 
-	bool bAppError = false;
-	bool bReload = false;
+	bool bAppError=false;
+	bool bReload=false;
 	try
 	{
 		Telecom_Plugin *pTelecom_Plugin = new Telecom_Plugin(PK_Device, sRouter_IP,true,bLocalMode);

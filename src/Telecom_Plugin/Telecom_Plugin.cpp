@@ -2777,12 +2777,12 @@ string Telecom_Plugin::ParseVoiceMailMetadata(string s_VoiceMailFile, map<string
 		{
 			vector<string> vectParam;
 			StringUtils::Tokenize(vectVoiceMailFile[i],"=",vectParam);
-			s_CallerID = vectParam[1];
+			s_CallerID = "\"Cherryhomes, Tho\"\n" + vectParam[1];
 		}
 
 		if (vectVoiceMailFile[i].find("origtime=") != string::npos) 
 		{
-			char temp[16];
+			char temp[64];
 			struct tm *tmp;
 			time_t mytime;
 			vector<string> vectParam;
@@ -2792,7 +2792,7 @@ string Telecom_Plugin::ParseVoiceMailMetadata(string s_VoiceMailFile, map<string
 			is >> iTimeStamp;
 			mytime = iTimeStamp;
 			tmp = localtime(&mytime);
-			strftime(temp, sizeof(temp), "%d %b", tmp);
+			strftime(temp, sizeof(temp), "%d %b\n%H:%M", tmp);
 			s_TimeStamp = temp;
 		}
 
@@ -2804,6 +2804,11 @@ string Telecom_Plugin::ParseVoiceMailMetadata(string s_VoiceMailFile, map<string
 			istringstream is(s_CallDuration);
 			is >> iCallDuration;
 			s_CallDuration = StringUtils::SecondsAsTime(iCallDuration);
+			if (s_CallDuration[0]==':')
+			{
+				string sTmp = "00";
+				s_CallDuration = sTmp+s_CallDuration;
+			}
 		}
 	}
 
@@ -2883,26 +2888,30 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
 
                         // string url= VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
 
-			// Date Cell
-/*			pCell = new DataGridCell(mapVMData["vmTimestamp"],file_path);
+			// New/Old
+			pCell = new DataGridCell("New",file_path);
+			pCell->m_AltColor=27756;
 			pDataGrid->SetData(0, Row, pCell);
 
-			// Duration Cell
-			pCell = new DataGridCell(mapVMData["vmDuration"],file_path);
+			// Date Cell
+			pCell = new DataGridCell(mapVMData["vmTimestamp"],file_path);
+			pCell->m_AltColor=27756;
+			pCell->m_Colspan=2;
 			pDataGrid->SetData(1, Row, pCell);
 
 			// Caller ID Cell
 			pCell = new DataGridCell(mapVMData["vmCallerID"],file_path);
 			pCell->m_Colspan = 8;
-			pDataGrid->SetData(2, Row, pCell);
-*/
-                        pCell = new DataGridCell(text,file_path);
+			pCell->m_AltColor=27756;
+			pDataGrid->SetData(3, Row, pCell);
 
-                        pCell->m_mapAttributes["vmTimestamp"] = mapVMData["vmTimestamp"];
-                        pCell->m_mapAttributes["vmDuration"] = mapVMData["vmDuration"];
-                        pCell->m_mapAttributes["vmCallerID"] = mapVMData["vmCallerID"];
-
-                        pDataGrid->SetData(0,Row,pCell);
+			// Delete Voicemail Cell
+			pCell = new DataGridCell("delete",file_path);
+			size_t iLength;
+			char *pData = FileUtils::ReadFileIntoBuffer("/usr/pluto/orbiter/skins/Basic/Icons/comm/delete_voicemail.png", iLength);
+			pCell->SetImage(pData, iLength, GR_PNG); // SetImage frees the pData.
+			pCell->m_AltColor=27756;
+			pDataGrid->SetData(11,Row,pCell);
 
                         Row++;			
 		}
@@ -2943,15 +2952,26 @@ class DataGridTable *Telecom_Plugin::UserVoiceMailGrid(string GridID,string Parm
                         }
 
                         // string url= VOICEMAIL_URL + StringUtils::Replace(URL_Parm, "\n", "");
+			// New/Old
+			pCell = new DataGridCell("Old",file_path);
+			pDataGrid->SetData(0, Row, pCell);
 
-                        pCell = new DataGridCell(text,file_path);
-			pCell->m_AltColor=12345; // We catch this in the screen handler.
+			// Date Cell
+			pCell = new DataGridCell(mapVMData["vmTimestamp"],file_path);
+			pCell->m_Colspan=2;
+			pDataGrid->SetData(1, Row, pCell);
 
-                        pCell->m_mapAttributes["vmTimestamp"] = mapVMData["vmTimestamp"];
-                        pCell->m_mapAttributes["vmDuration"] = mapVMData["vmDuration"];
-                        pCell->m_mapAttributes["vmCallerID"] = mapVMData["vmCallerID"];
+			// Caller ID Cell
+			pCell = new DataGridCell(mapVMData["vmCallerID"],file_path);
+			pCell->m_Colspan = 8;
+			pDataGrid->SetData(3, Row, pCell);
 
-                        pDataGrid->SetData(0,Row,pCell);
+			// Delete Voicemail Cell
+			pCell = new DataGridCell("delete",file_path);
+			size_t iLength;
+			char *pData = FileUtils::ReadFileIntoBuffer("/usr/pluto/orbiter/skins/Basic/Icons/comm/delete_voicemail.png", iLength);
+			pCell->SetImage(pData, iLength, GR_PNG); // SetImage frees the pData.
+			pDataGrid->SetData(11,Row,pCell);
 
                         Row++;
                 }
@@ -4386,4 +4406,125 @@ bool Telecom_Plugin::ConcurrentAccessToSoundCardAllowed(int nOrbiterID)
 	}
 		
 	return false;
+}
+//<-dceag-c845-b->
+
+	/** @brief COMMAND: #845 - Delete File */
+	/** Used to delete a voicemail from the Voicemail spool */
+		/** @param #13 Filename */
+			/** The file to delete, or orbiter # to delete all */
+
+void Telecom_Plugin::CMD_Delete_File(string sFilename,string &sCMD_Result,Message *pMessage)
+//<-dceag-c845-e->
+{
+  // Only delete files within the voicemail spool!
+  bool bDeleteAll = (sFilename.find("!V") != string::npos);
+  bool bIsVoicemail = ((sFilename.find("/var/spool/asterisk/voicemail/") != string::npos) || bDeleteAll);
+  bool bError=false;
+  vector<string> vectVoicemailsToDelete; // used by delete all
+
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Telecom_Plugin::CMD_Delete_File() - Are we even making it in here?");
+
+  if (!bIsVoicemail)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Telecom_Plugin::CMD_Delete_File() - Attempted to delete a file outside the voicemail spool! %s. Ignoring.",sFilename.c_str());
+      sCMD_Result="ERROR";
+      bError=true;
+    }
+  else if (bDeleteAll)
+    {
+      // Delete all voicemails.
+      sFilename=sFilename.substr(2); // Strip away !V, we don't need it any further down.
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Telecom_Plugin::CMD_Delete_File() - Deleting all voicemails for orbiter %s.",sFilename.c_str());
+      string sDataGridID="Voicemail_"+sFilename;
+      DataGridTable *pDataGridTable = m_pDatagrid_Plugin->DataGridTable_get(sDataGridID);
+      if (pDataGridTable)
+	{
+	  for (int iRow=0; iRow<pDataGridTable->GetRows(); ++iRow)
+	    {
+	      DataGridCell *pCell = pDataGridTable->GetData(0, iRow);
+	      if (pCell)
+		{
+		  string sCurrentFilename = pCell->GetValue();
+		  if (!sCurrentFilename.empty() && FileUtils::FileExists(sCurrentFilename))
+		    {
+		      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Telecom_Plugin::CMD_Delete_File() - Selecting Voicemail %s to delete.",sCurrentFilename.c_str());
+		    }
+		  vectVoicemailsToDelete.push_back(sCurrentFilename);
+		}
+	      else
+		{
+		  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Telecom_Plugin::CMD_Delete_File() - could not get cell for Row %d column 0 to get voicemail file!",iRow);
+		}
+	    }
+	}
+      else
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Telecom_Plugin::CMD_Delete_File() - Attempted to delete voicemails in datagrid Voicemail_%s, which does not exist!",sFilename.c_str());
+	}
+      bError=false;
+    }
+  else if (sFilename.find(".wav") == string::npos)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Telecom_Plugin::CMD_Delete_File() - Attempted to delete incorrect file inside voicemail spool %s - ignoring.",sFilename.c_str());
+      sCMD_Result="ERROR";
+      bError=true;
+    }
+  else  // Everything okay.
+    {
+      sCMD_Result="OK";
+      bError=false;
+    }
+
+  if (!bError)
+    {
+      if (bDeleteAll)
+	{
+	  // Come back here and implement this.
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXX DELETING ALL VOICEMAILS!");
+	  for (vector<string>::iterator it=vectVoicemailsToDelete.begin(); it!=vectVoicemailsToDelete.end(); ++it)
+	    {
+	      string sCurrentFilename = *it;
+	      string sFilenameSansExt = sCurrentFilename.substr(0,sCurrentFilename.length()-3);
+	      FileUtils::DelFile(sFilenameSansExt+"txt");
+	      FileUtils::DelFile(sFilenameSansExt+"wav");
+	      FileUtils::DelFile(sFilenameSansExt+"mp3");
+	      FileUtils::DelFile(sFilenameSansExt+"gsm");
+	      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXX DELETING THIS VOICEMAIL!");
+	    }
+
+	  // Now go back to the voicemail screen and refresh the datagrids.
+	  SCREEN_UserStatus SCREEN_UserStatus(m_dwPK_Device, pMessage->m_dwPK_Device_From);
+	  SendCommand(SCREEN_UserStatus);
+	  
+	  // FIXME: come back here and change this map to only deal with orbiters in the same target EA
+	  // for now, we just send a refresh EVERYWHERE.
+	  for(map<int,OH_Orbiter *>::iterator it=m_pOrbiter_Plugin->m_mapOH_Orbiter.begin();it!=m_pOrbiter_Plugin->m_mapOH_Orbiter.end();++it)
+	    {
+	      OH_Orbiter *pOH_Orbiter = it->second;
+	      DCE::CMD_Refresh CMD_Refresh(m_dwPK_Device, pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device, "*");
+	      SendCommand(CMD_Refresh);
+	    } 
+	}
+      else
+	{
+	  string sFilenameSansExt=sFilename.substr(0,sFilename.length()-3);
+	  FileUtils::DelFile(sFilenameSansExt+"txt");
+	  FileUtils::DelFile(sFilenameSansExt+"wav");
+	  FileUtils::DelFile(sFilenameSansExt+"mp3");
+	  FileUtils::DelFile(sFilenameSansExt+"gsm");
+
+	  SCREEN_UserStatus SCREEN_UserStatus(m_dwPK_Device, pMessage->m_dwPK_Device_From);
+	  SendCommand(SCREEN_UserStatus);
+
+	  // FIXME: come back here and change this map to only deal with orbiters in the same target EA
+	  // for now, we just send a refresh EVERYWHERE.
+	  for(map<int,OH_Orbiter *>::iterator it=m_pOrbiter_Plugin->m_mapOH_Orbiter.begin();it!=m_pOrbiter_Plugin->m_mapOH_Orbiter.end();++it)
+	    {
+	      OH_Orbiter *pOH_Orbiter = it->second;
+	      DCE::CMD_Refresh CMD_Refresh(m_dwPK_Device, pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device, "*");
+	      SendCommand(CMD_Refresh);
+	    }
+	}
+    }
 }
