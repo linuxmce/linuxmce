@@ -1,29 +1,38 @@
 import QtQuick 1.0
 
-Rectangle {
+Item {
     property alias media_but_img: media_button_image.source
     property alias media_but_txt: media_button_text.text
-    id: rectangle1
-    color:transparent
-    height: style.stdbuttonh
-    width: style.stdbuttonw
+    property string color:"transparent"
+
+    id: buttonRect
+    signal activated()
+    height: scaleX(14)
+    width: height
+
+    Rectangle{
+        anchors.fill: parent
+        color:buttonRect.color
+    }
 
     Image {
         id: media_button_image
-        fillMode: Image.PreserveAspectFit
         source: "../img/chkbxempty.png"
-        anchors.centerIn: parent
-
+        anchors.fill: parent
     }
 
     Text {
         id: media_button_text
         text: "text"
         style: Text.Normal
-        font.pixelSize: 10
-        font.family: "Droid Sans"
+        font.pixelSize: 18
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
+    }
+
+    MouseArea{
+        anchors.fill: parent
+        onReleased:activated()
     }
 
 }

@@ -1,16 +1,22 @@
 import QtQuick 1.0
 
-
-Rectangle {
+Item {
     id: filedetailrect
-    width: scaleX(90)
-    height: scaleY(85)
-  anchors.centerIn: parent
-    color: "darkgrey"
-    clip: false
-    radius: 5
-    border.color: "orange"
-    border.width: 3
+    width: scaleX(100)
+    height: scaleY(100)
+    anchors.centerIn: parent
+    Rectangle{
+         color: "darkgrey"
+        border.color: "orange"
+        border.width: 3
+        anchors.fill: parent
+        MouseArea{
+            anchors.fill: parent
+            onClicked: loadCompnent("NullComponent.qml")
+        }
+    }
+
+    clip: true
     //opacity: 0
     scale:0
     Component.onCompleted: PropertyAnimation { target: filedetailrect; property: "scale"; to:1; duration: 1000}
@@ -20,22 +26,6 @@ Rectangle {
         source: "../img/bkg.png"
         anchors.fill: filedetailrect
     }
-
-    Rectangle{
-        id:masking_rect
-        height: appH
-        width: appW
-        color: "darkgrey"
-        opacity: .75
-        z:-1
-
-        anchors.centerIn: parent
-        MouseArea{
-            anchors.fill: parent
-            onClicked: loadComponent("NullComponent")
-        }
-    }
-
 
     Connections{
         target:filedetailsclass
@@ -51,8 +41,8 @@ Rectangle {
         Text {
             id: text2
             anchors.horizontalCenter: parent.horizontalCenter
-               text: "Location: " + filedetailsclass.path
-               font.pixelSize: scaleY(2)
+            text: "Location: " + filedetailsclass.path
+            font.pixelSize: scaleY(2)
             font.bold: true
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         }
@@ -61,66 +51,29 @@ Rectangle {
     Text {
         id: filename_block
         anchors.horizontalCenter: parent.horizontalCenter
-           text: "Filename: " + filedetailsclass.file
-           font.pixelSize: scaleY(3)
+        text: "Filename: " + filedetailsclass.file
+        font.pixelSize: scaleY(3)
         font.bold: true
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         anchors.bottom: parent.bottom
 
     }
 
-    Rectangle{
-        id:imageholder
-        height:childrenRect.height
-        width:childrenRect.width
-        color: "transparent"
-        anchors.verticalCenter: parent.verticalCenter
-  
-        anchors.left: parent.left
-        anchors.leftMargin: filedetailsclass.aspect=="wide"? scaleX(2.6) : scaleX(7)
-        BorderImage {
-            id: borderimg
-            horizontalTileMode: BorderImage.Repeat
-            source: "../img/icons/drpshadow.png"
-            anchors.fill: filedetailsimage
-            anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
-            border { left: 10; top: 10; right: 10; bottom: 10 }
-            smooth: true
-        }
-        Image {
-            id: filedetailsimage
-            width: filedetailsclass.aspect=="wide"? scaleX(42.5) : scaleX(45)
-            height:filedetailsclass.aspect=="wide"?scaleY(42.5) : scaleY(55)
-            source: "../img/icons/mediatime.png"
-transform: Rotation { origin.x: 30; origin.y: 30; axis { x: 0; y: 1; z: 0 } angle: 35 }
-            smooth: true
-        }
-
-        Image {
-            id: npmask
-            source: "../img/icons/transparencymask.png"
-            anchors.fill: filedetailsimage
-transform: Rotation { origin.x: 30; origin.y: 30; axis { x: 0; y: 1; z: 0 } angle: 35 }
-            opacity: .5
-        }
-    }
-    
-
-
 
     Rectangle {
         id: rectangle1
-        anchors.verticalCenter: imageholder.verticalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.right: parent.right
         width:  filedetailsclass.aspect=="wide"? parent.width *.40 : parent.width *.45
-        height: scaleY(45)
+        height: scaleY(75)
         radius: 2.5
         clip:  true
         color: "black"
         border.color: "orange"
         anchors.left: imageholder.right
         anchors.leftMargin: scaleX(-10)
-smooth:true
-transform: Rotation { origin.x: 30; origin.y: 30; axis { x: 0; y: 1; z: 0 } angle: -25 }
+        smooth:true
+        transform: Rotation { origin.x: 30; origin.y: 30; axis { x: 0; y: 1; z: 0 } angle: -25 }
 
 
         Flickable {
@@ -136,14 +89,14 @@ transform: Rotation { origin.x: 30; origin.y: 30; axis { x: 0; y: 1; z: 0 } angl
                 anchors.margins: scaleY(1)
                 width: parent.width
                 height: childrenRect.height
-Text {
+                Text {
                     id:  titletext
                     text:filedetailsclass.mediatitle
                     font.pixelSize: scaleY(3)
                     font.bold: true
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                     width: parent.width
+                    width: parent.width
 
                 }
                 Text {
@@ -152,7 +105,7 @@ Text {
                     font.pixelSize: scaleY(2)
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                     width: rectangle1.width *.95
+                    width: rectangle1.width *.95
                 }
 
 
@@ -164,8 +117,8 @@ Text {
                     font.bold: true
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                     width: rectangle1.width *.95
-                     visible:  filedetailsclass.program =="" ? false: true
+                    width: rectangle1.width *.95
+                    visible:  filedetailsclass.program =="" ? false: true
                 }
 
                 Text {
@@ -175,8 +128,8 @@ Text {
                     font.bold: true
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                     width: rectangle1.width *.95
-                     visible:  filedetailsclass.episode =="" ? false: true
+                    width: rectangle1.width *.95
+                    visible:  filedetailsclass.episode =="" ? false: true
                 }
                 Text {
                     id: album_block
@@ -189,7 +142,7 @@ Text {
                     visible:  filedetailsclass.album =="" ? false: true
                 }
 
-              /*  Text {
+                /*  Text {
                     id: rating
                    width: rectangle1.width *.95
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
@@ -205,14 +158,14 @@ Text {
                 */
                 Text {
                     id: genre_block
-                   width: rectangle1.width *.95
+                    width: rectangle1.width *.95
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: filedetailsclass.genre
                     font.family: "Droid Sans"
-                     font.bold: false
+                    font.bold: false
                     smooth: true
                     font.pixelSize: scaleY(2)
-                     color:"aliceblue"
+                    color:"aliceblue"
                     elide: "ElideRight"
                     visible:  filedetailsclass.genre =="" ? false: true
 
@@ -225,14 +178,14 @@ Text {
                 }
                 Text {
                     id: director_block
-                   width: rectangle1.width *.95
+                    width: rectangle1.width *.95
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: qsTr("Directed By: ") + filedetailsclass.director
                     font.family: "Droid Sans"
-                     font.bold: false
+                    font.bold: false
                     smooth: true
                     font.pixelSize: scaleY(2)
-                     color:"aliceblue"
+                    color:"aliceblue"
                     elide: "ElideRight"
                     visible:  filedetailsclass.director =="" ? false: true
 
@@ -246,14 +199,14 @@ Text {
 
                 Text {
                     id: starring
-                   width: rectangle1.width *.95
+                    width: rectangle1.width *.95
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: qsTr("Starring: ") + filedetailsclass.performerlist
                     font.family: "Droid Sans"
                     //  font.bold: true
                     smooth: true
                     font.pixelSize: scaleY(2)
-                     color:"aliceblue"
+                    color:"aliceblue"
                     elide: "ElideRight"
                     visible:  filedetailsclass.performerlist =="" ? false: true
 
@@ -336,8 +289,7 @@ Text {
 
     Row{
         id:controlrow
-        anchors.top:filedetailsclass.aspect=="wide"? imageholder.bottom: rectangle1.bottom
-        anchors.topMargin: scaleY(1)
+        anchors.bottom: parent.bottom
         anchors.horizontalCenter: filedetailsclass.aspect=="wide"? parent.horizontalCenter : rectangle1.horizontalCenter
         spacing: scaleY(.5)
         AvOptionButton {
@@ -351,7 +303,7 @@ Text {
             MouseArea
             {
                 anchors.fill: parent
-                onClicked:{ manager.playMedia(filedetailsclass.file); loadComponent("NullComponent") }  //dce function
+                onClicked:{ manager.playMedia(filedetailsclass.file); loadComponent("NullComponent.qml") }  //dce function
             }
         }
 

@@ -4,8 +4,8 @@ import "../js/ComponentLoader.js" as MyJs
 
 
 Item {
-    height: appH
-    width: appW 
+    height: manager.appHeight
+    width:  manager.appWidth
     id: advancedscreen
     state: "reg"
     HomeButton{}
@@ -85,7 +85,7 @@ Item {
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: MyJs.createComponentObjects("SkinSelector.qml")
+               // onClicked: MyJs.createComponentObjects("SkinSelector.qml")
             }
         }
         ButtonSq{

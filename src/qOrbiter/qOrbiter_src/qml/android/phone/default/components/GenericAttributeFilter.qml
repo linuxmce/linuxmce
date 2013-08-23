@@ -1,41 +1,56 @@
 import QtQuick 1.0
-import com.nokia.android 1.1
 
-Rectangle {
+
+Item {
     id:generic_filter_view
-    width: filterlist.width
-    height: heading.height + filterlist.height
-    color: "black"
-    anchors.centerIn: parent
+    width: manager.appWidth
+    height: manager.appHeight
     clip: true
     property variant currentModel
     property int modelCount: filterlist.count
     property int delegateHeight:scaleY(10)
     state:"inactive"
-
     onCurrentModelChanged: currentModel !== "" ? state="active": state="inactive"
 
+    Rectangle{
+        anchors.fill: parent
+        color: "black"
+        MouseArea{
+            anchors.fill: parent
+        }
+    }
+
+    Item{
+        id:heading
+        anchors.top: generic_filter_view.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: filterlist.width
+        height: scaleY(8)
+        Rectangle{
+            anchors.fill: parent
+            color:androidSystem.orangeStandard
+        }
+
+        StyledText{
+            text: "Click to Close"
+            color:"black"
+            font.pixelSize: 22
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: generic_filter_view.currentModel=""
+        }
+    }
     ListView{
         id:filterlist
         height: scaleY(65)
         width:scaleX(55)
         model:currentModel
-        ListHeading{
-            id:heading
-            anchors.top: generic_filter_view.top
-            width: filterlist.width
-            height: scaleY(8)
-            Label{
-                text: "Click to Close"
-            }
-            MouseArea{
-                anchors.fill: parent
-                onClicked: generic_filter_view.currentModel=""
-            }
-        }
-
-        delegate:ListItem{
-        height:delegateHeight
+        anchors.top: heading.bottom
+        anchors.left: heading.left
+        delegate:Item{
+            height:scaleY(15)
+            width: scaleX(55)
             Rectangle{
                 anchors.fill: parent
                 color: "black"
@@ -43,17 +58,25 @@ Rectangle {
                 border.width: 1
                 Row{
                     anchors.fill: parent
-                    ListItemText{
+                    StyledText{
                         text: name
                         color: "white"
-                        font.family: "Droid Sans"
                         width:parent.width *.75
-                        font.pointSize:scaleY(2)
+                        font.pointSize:scaleY(4)
                     }
 
-                    CheckBox{
-                        onClicked:filterlist.model.setSelectionStatus(name)
-                        checked: status
+                    Rectangle{
+                        height: 45
+                        width: 45
+                        radius:5
+                        color: status ? "green" : "red"
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked:filterlist.model.setSelectionStatus(name)
+
+                        }
                     }
                 }
             }

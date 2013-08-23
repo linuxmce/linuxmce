@@ -7,7 +7,7 @@ Rectangle{
     id:selector
     height: childrenRect.height
     width: childrenRect.width
-    anchors.horizontalCenter: parent.horizontalCenter
+   anchors.centerIn: parent
     property int imagebuttonsize: scaleY(15)
     color:"transparent"
 

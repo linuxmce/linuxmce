@@ -1,13 +1,12 @@
 import QtQuick 1.0
 import "../components"
 
-Rectangle {
+Item {
 
     // property alias synText:
     id: storedVideoRemote
     height: manager.appHeight
-    width: manager.appWidth
-    color: "transparent"
+    width: manager.appWidth 
     Component.onCompleted: manager.getStoredPlaylist()
 
 

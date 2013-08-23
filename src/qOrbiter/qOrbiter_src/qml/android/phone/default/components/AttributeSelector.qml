@@ -1,49 +1,47 @@
 import QtQuick 1.0
-import "../js/ComponentLoader.js" as MyJs
 
-Rectangle {
-    id: attributeitem
-    height: childrenRect.height
-    width: childrenRect.width
-    color: "transparent"
+Item {
+    id: attributeSelector
+    height: 0
+    width: 0
+    state:"hidden"
+
+    Rectangle{
+        anchors.fill: parent
+        color:"black"
+    }
+    Behavior on opacity{
+        PropertyAnimation{
+            duration:350
+        }
+    }
+
     Column{
         id:attributerow
-        height: childrenRect.height
-        width: childrenRect.width
+        height: parent.height * .95
+        width: parent.width*.85
         spacing: 5
 
         ButtonSq{
             buttontext: "Play All"
             height: style.stdbuttonh
-            width: style.stdbuttonw
+            width: parent.width
             buttontextbold: true
-            MouseArea{
-                anchors.fill:parent
-                onClicked: manager.playMedia("!G"+iPK_Device)
-            }
+            imgSource: ""
+            color: "black"
+            onActivated: manager.playMedia("!G"+iPK_Device)
+
         }
 
-        ButtonSq
-        {
-            height: style.stdbuttonh
-            width: style.stdbuttonw
-            buttontext: "Grid Back"
-            buttontextbold: true
-            MouseArea
-            {
-                anchors.fill:parent
-                onReleased: manager.goBackGrid()
-            }
-        }
+
         ButtonSq{
             buttontext: "Attribute Sort"
             buttonsqradius: 7
             height: style.stdbuttonh
-            width: style.stdbuttonw
-            MouseArea{
-                anchors.fill:parent
-                onReleased:filterTarget.currentModel = attribfilter
-            }
+            width: parent.width
+            imgSource: ""
+            color: androidSystem.orangeStandard
+            onActivated:{filterTarget.currentModel = attribfilter; attributeSelector.state="hidden"}
         }
 
 
@@ -51,11 +49,10 @@ Rectangle {
             buttontext: "Genre"
             buttonsqradius: 7
             height: style.stdbuttonh
-            width: style.stdbuttonw
-            MouseArea{
-                anchors.fill:parent
-                onReleased: filterTarget.currentModel = genrefilter
-            }
+            width: parent.width
+            imgSource: ""
+            color: androidSystem.orangeStandard
+            onActivated:{filterTarget.currentModel = genrefilter; attributeSelector.state="hidden"}
         }
 
 
@@ -63,26 +60,20 @@ Rectangle {
             buttontext: "Sources"
             buttonsqradius: 7
             height: style.stdbuttonh
-            width: style.stdbuttonw
-
-            MouseArea{
-                anchors.fill:parent
-                onReleased: filterTarget.currentModel = mediasourcelist
-            }
+            width: parent.width
+            imgSource: ""
+            color: androidSystem.orangeStandard
+            onActivated:{ filterTarget.currentModel = mediasourcelist;attributeSelector.state="hidden"}
         }
-
-
-
 
         ButtonSq{
             buttontext: "Resolution"
             buttonsqradius: 7
             height: style.stdbuttonh
-            width: style.stdbuttonw
-            MouseArea{
-                anchors.fill:parent
-                onReleased: filterTarget.currentModel = fileformatmodel
-            }
+            width: parent.width
+            imgSource: ""
+            color: androidSystem.orangeStandard
+            onActivated: {filterTarget.currentModel = fileformatmodel;attributeSelector.state="hidden"}
         }
 
 
@@ -90,19 +81,47 @@ Rectangle {
             buttontext: "Mediatypes"
             buttonsqradius: 7
             height: style.stdbuttonh
-            width: style.stdbuttonw
-            MouseArea{
-                anchors.fill:parent
-                onReleased: filterTarget.currentModel = mediatypefilter
-            }
+            width: parent.width
+            imgSource: ""
+            color: androidSystem.orangeStandard
+            onActivated: {filterTarget.currentModel = mediatypefilter;attributeSelector.state="hidden"}
+
         }
 
-        HomeButton{
-            id:home
+        ButtonSq{
+            buttontext: "Home"
+            buttonsqradius: 7
             height: style.stdbuttonh
-            width: style.stdbuttonw
+            width: parent.width
+            imgSource: ""
+            color: androidSystem.orangeStandard
+            onActivated:{manager.goBacktoQScreen("Screen_1.qml");attributeSelector.state="hidden"}
+
         }
     }
+
+    states: [
+        State {
+            name: "hidden"
+            PropertyChanges {
+                target: attributeSelector
+                opacity:0
+                height:0
+                width:0
+                visible:false
+            }
+        },
+        State {
+            name: "atrselect"
+            PropertyChanges {
+                target: attributeSelector
+                visible:true
+                opacity:1
+                height:manager.appHeight
+                width:manager.appWidth
+            }
+        }
+    ]
 }
 
 

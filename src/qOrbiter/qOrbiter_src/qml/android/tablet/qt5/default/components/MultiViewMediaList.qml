@@ -18,21 +18,21 @@ Item{
             id:mediaViewDelegate
             height: scaleY(25)
             width: parent.width
+
+            Image{
+                id:img
+                source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
+                anchors.left: parent.left
+                anchors.fill: parent
+                fillMode: Image.PreserveAspectCrop
+                smooth: true
+                asynchronous: true
+            }
             Rectangle{
                 anchors.fill: parent
                 opacity: .65
                 color:trap.pressed ? "darkgreen" : "black"
             }
-            Image{
-                id:img
-                source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=img&val="+path : ""
-                anchors.left: parent.left
-                height:parent.height
-                fillMode: Image.PreserveAspectFit
-                smooth: true
-                asynchronous: true
-            }
-
             StyledText{
                 text: name
                 anchors.centerIn: parent

@@ -1,15 +1,17 @@
 import QtQuick 1.1
-
-
 import "components"
 import "js/ComponentLoader.js" as MyJs
 
 
 Item {
-    id: item
+    id: qmlroot
     width:manager.appWidth
     height:manager.appHeight
     focus:true
+
+    Style{
+        id:skinStyle
+    }
 
     Rectangle{
         id:canary
@@ -165,7 +167,7 @@ Item {
         }
         else if (componentLoader.status == Component.Loading)
         {
-            console.log("loading page from network")
+            console.log("loading component from network")
             finishLoadingComponent(componentName)
         }
         else
@@ -182,7 +184,7 @@ Item {
         {
             console.log("finishing network load")
             componentLoader.source = "components/"+comp
-            console.log("screen" + comp + " loaded.")
+            console.log("Component " + comp + " loaded.")
         }
         else
         {
@@ -210,11 +212,13 @@ Item {
         width: parent.width
         source:""
         objectName: "componentbot"
-        onSourceChanged:  {
-            if(source!==""){
+        onLoaded:  {
+            console.log("checking mask")
+            if(!source.toString().match("NullComponent.qml")){
                 mask.opacity = .65
-                console.log("Component is loaded")
-            }else {
+                console.log( source.toString()+ " is loaded")
+            }else  {
+                console.log("hiding mask")
                 mask.opacity =0
             }
         }
