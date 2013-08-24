@@ -1,6 +1,7 @@
 <?
 
-$pass=""; $user="root"; $db="pluto_media"; $con= mysql_connect("localhost", $user, $pass); 	 // connection
+$pass=""; $user="root"; $db="pluto_media";
+ $con= mysql_connect("localhost", $user, $pass); 	 // connection
 	if (!$con) { die('Could not Connect'.mysql_error()); //error messaging
 	$connMessage="Fail";
 	};
@@ -8,23 +9,28 @@ $pass=""; $user="root"; $db="pluto_media"; $con= mysql_connect("localhost", $use
 	$connMessage="Conn Good";
 	};
 
-function mediaImage($output,$mediadbADO,$dbADO){
+
 	$test = $_GET['type'];
     $val = $_GET['val'];
 
     if($test=="img"){
-echo mediaPicsImage($val);
+mediaPicsImage($val);
 	}
 else if ($test=="attribute"){
 	echo attributeImage($val);
 }
+else if($test=="imdb"){
+
+} else if ($test==="screensaver"){
+screensaverImg($val);
+}
 else{
 	
 	echo file_get_contents("operations/mediaBrowser/images/addAll.png");
-	echo "failed";
+	
 }
 
-}
+
 
 function mediaPicsImage($fileName){
 
@@ -34,6 +40,15 @@ echo $img;
 
 function attributeImage($fileName){
 $test=mysql_query("SELECT * FROM Picture_Attribute WHERE FK_Attribute=\"$attribute\" ") or die (mysql_error("MYsql Error"));	
+}
+
+function imdbImage($imdbID){
+
+}
+
+function screensaverImg($ssimg){
+$img = file_get_contents($ssimg);
+echo $img;
 }
 
 ?>
