@@ -10,6 +10,13 @@ Item
     height: manager.appHeight
     width: manager.appWidth
     signal swapStyle()
+    focus:true
+    Component.onCompleted: forceActiveFocus()
+    Keys.onReleased: {
+        event.accepted = true
+        if(event.key===Qt.Key_MediaPrevious)
+            console.log("Recieved back.")
+    }
 
     Column{
         id:maindisplay

@@ -7,20 +7,36 @@ Item {
     width:manager.appWidth
     height:manager.appHeight
     focus:true
+    Component.onCompleted: forceActiveFocus()
     Connections{
         target:manager
         onBackButtonPressed:console.log("Go Back Button!")
     }
-    Keys.onPressed: if(event.key ===Qt.Key_MediaPrevious && manager.currentScreen==="Screen_1.qml") {
-                        executeBack();
-                    } else if(event.key === Qt.Key_Menu){
-                        console.log("menu button!")
-                    } else if(event.key===Qt.Key_VolumeUp){
-                        console.log("Volume up button!")
-                    } else if (event.key===Qt.Key_VolumeDown){
-                        console.log("Volume Down button!")
-                    }
-                    else {console.log(event.key)}
+    Keys.onReleased:{
+
+        switch(event.key){
+        case Qt.Key_Menu:
+            console.log("menu button caught in root!")
+            break;
+        case Qt.Key_VolumeUp:
+            console.log("Vol up")
+            break;
+        case Qt.Key_VolumeDown:
+            console.log("vol down")
+            break;
+           case Qt.Key_MediaPrevious:
+               console.log("Caught back button! Phew!")
+               break;
+           case Qt.Key_Back:
+               console.log("Caught Back again! Tricky...")
+               break;
+           default:
+               console.log("I have no idea what key " + event.key + " is. ")
+               break;
+        }
+
+        event.accepted= true
+    }
 
     function executeBack(){
         if(componentLoader.source !=="")
