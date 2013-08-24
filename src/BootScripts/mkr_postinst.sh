@@ -17,7 +17,7 @@ if [ ! -e /etc/apt/30pluto.pbackup ] ;then
 fi
 
 if [ -e /etc/apt/apt.conf.d/30pluto.pbackup ] ;then
-	rm /etc/apt/apt.conf.d/30pluto.pbackup ]
+	rm /etc/apt/apt.conf.d/30pluto.pbackup
 fi
 
 rm -f /etc/logrotate.d/plut*
