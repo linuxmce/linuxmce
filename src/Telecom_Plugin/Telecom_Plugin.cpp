@@ -733,7 +733,7 @@ Telecom_Plugin::PlaybackStarted( class Socket *pSocket, class Message *pMessage,
 {
   string sMRL = pMessage->m_mapParameters[EVENTPARAMETER_MRL_CONST];
 
-  bool bIsVoicemail = (sMRL.find("/var/log/spool/asterisk/voicemail/") == string::npos);
+  bool bIsVoicemail = (sMRL.find("/var/log/spool/asterisk/voicemail/") != string::npos);
 
   if (!bIsVoicemail)
     return false; // Not a voicemail. don't even bother.
