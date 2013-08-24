@@ -26,7 +26,32 @@ Item {
     function scaleY(y){
         return y/100*qml_root.height
     }
+    focus:true
+    Keys.onReleased:{
 
+            switch(event.key){
+            case Qt.Key_Menu:
+                console.log("menu button caught in root!")
+                break;
+            case Qt.Key_VolumeUp:
+                console.log("Vol up")
+                break;
+            case Qt.Key_VolumeDown:
+                console.log("vol down")
+                break;
+               case Qt.Key_MediaPrevious:
+                   console.log("Caught back button! Phew!")
+                   break;
+               case Qt.Key_Back:
+                   console.log("Caught Back again! Tricky...")
+                   break;
+               default:
+                   console.log("I have no idea what key " + event.key + " is. ")
+                   break;
+            }
+
+            event.accepted= true
+        }
     Rectangle{
         anchors.fill: parent
         id:bgFill
@@ -96,7 +121,7 @@ Item {
             interval:10000
             running: true // screensaver.active
             triggeredOnStart: true
-            onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
+            onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
             repeat: true
         }
 
@@ -104,7 +129,7 @@ Item {
             id:mini_screen_saver_image
             height: mini_screen_saver.height
             width: mini_screen_saver.width
-            source: "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
+            source: "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
         }
     }
 

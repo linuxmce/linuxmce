@@ -13,9 +13,9 @@ Item
     focus:true
     Component.onCompleted: forceActiveFocus()
     Keys.onReleased: {
-        event.accepted = true
+
         if(event.key===Qt.Key_MediaPrevious)
-            console.log("Recieved back.")
+        { console.log("Recieved back."); event.accepted = true}
     }
 
     Column{
