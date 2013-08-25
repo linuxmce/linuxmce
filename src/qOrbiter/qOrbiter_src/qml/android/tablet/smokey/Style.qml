@@ -16,12 +16,12 @@ QtObject{
     id:classicstyle
     objectName: "orbiter_style"
     //skin description
-    property string skincreator: "Langston Ball (aka golgoj4)"
+    property string skincreator: "Langston Ball "
     property string skinname: "Smokey"
     property string skindir: "smokey"
     property string skindescription: "Defualt QOrbiter Skin"
     property string skinversion: "1.0"
-    property string skinvariation: "Tablet 320X480"
+    property string skinvariation: "Tablet 1280 x 736"
     property string maincolor: "black"
 
     //scale function

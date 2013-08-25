@@ -1,13 +1,14 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
 
-Rectangle {
+Item {
     height: manager.appHeight
     width: manager.appWidth
-    id:splashPage
-    color: "transparent"
+    id:splashPage   
     signal setupStart(string x, string y)
     signal splashLoaded()
+    focus:true
+
 
     Connections{
         target: window
@@ -65,6 +66,11 @@ Rectangle {
     NewOrbiterButton {
         id: newOrbiterButton
     }
+
+//    FirstRunOptions{
+//        anchors.bottom: parent.bottom
+//        visible: manager.first_run
+//    }
 
     Text {
         id: loadingStatus

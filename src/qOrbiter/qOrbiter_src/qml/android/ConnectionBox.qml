@@ -86,6 +86,21 @@ Item{
                 font.family: myFont.name
                 //  onTextChanged: setRouterIp(routerip.text)
                 fillColor: "grey"
+                Keys.onReleased: {
+                    switch(event.key){
+                    case Qt.Key_Enter:
+                        closeSoftwareInputPanel()
+                        break;
+                    case Qt.Key_Return:
+                        closeSoftwareInputPanel()
+                        break;
+                    default:
+                        console.log("Caught Key");
+                        console.log(event.key)
+                        break
+                    }
+                    event.accepted = true
+                }
 
             }
 
@@ -97,6 +112,12 @@ Item{
                 font.pointSize: infoTextSize
                 //onTextChanged: setDeviceNo(devicenumber.text)
                 fillColor: "grey"
+                Keys.onReleased: {
+                    switch(event.key){
+                    case Qt.Key_Enter:
+                        closeSoftwareInputPanel()
+                    }
+                }
             }
 
             TextInput {

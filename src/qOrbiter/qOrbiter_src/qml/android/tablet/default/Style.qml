@@ -33,12 +33,12 @@ QtObject{
         return y/100*manager.appHeight
     }
     //skin description
-    property string skincreator: "Langston Ball (aka golgoj4)"
-    property string skinname: "Pluto Classic"
+    property string skincreator: "Langston Ball "
+    property string skinname: "Android Default"
     property string skindir: "default"
-    property string skindescription: "Pluto Classic Skin"
+    property string skindescription: "Android Default Skin"
     property string skinversion: "1.0"
-    property string skinvariation: "Desktop 800x600"
+    property string skinvariation: "Android 1280 x 720"
     property color maincolor: "#0D4392"
     property color accentcolor: "#EE873B"
     property color highlight1: "aliceblue"

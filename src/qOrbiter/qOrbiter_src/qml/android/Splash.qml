@@ -13,6 +13,8 @@ Item {
     property int startButtonWidth:100
     property bool orbiterSetup:false
 
+   Component.onCompleted: console.log("splash loaded")
+
     Rectangle{
         id:phil
         anchors.fill: splashLogic
