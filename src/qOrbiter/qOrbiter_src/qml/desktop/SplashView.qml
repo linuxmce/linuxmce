@@ -80,6 +80,7 @@ Rectangle {
 
     FirstRunOptions {
         id: firstRunOptions
+        visible:manager.first_run
         anchors.bottom: parent.bottom
     }
 

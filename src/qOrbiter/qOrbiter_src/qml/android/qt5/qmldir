@@ -6,3 +6,5 @@ ExistingOrbiters ExistingOrbiters.qml
 NewOrbiterButton NewOrbiterButton.qml
 SetupNewOrbiter SetupNewOrbiter.qml
 StatusRow StatusRow.qml
+PropAndValDisplay PropAndValDisplay.qml
+FirstRunOptions FirstRunOptions.qml
