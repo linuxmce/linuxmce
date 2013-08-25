@@ -6,8 +6,9 @@ Rectangle {
     color: "black"
     focus:true
     Component.onCompleted: {forceActiveFocus();
+         wait.start()
         if(androidSystem.updateBuildInformation() && androidSystem.updateExternalStorageLocation()){
-            wait.start()
+
             logger.setLogLocation(androidSystem.externalStorageLocation)
         }
     }
@@ -33,8 +34,9 @@ Rectangle {
     Timer{
         id:wait
         interval: 3500
-        onTriggered: {mainContent.source = "http://"+window.router+"/lmce-admin/skins/android/Splash.qml"; }
+        onTriggered: {mainContent.source = "http://"+window.router+"/lmce-admin/skins/android/Splash.qml"; console.log("conecting")}
         running:false
+        repeat:true
     }
 
     Text {
@@ -141,6 +143,7 @@ Rectangle {
                                  mainContent.opacity = .01
                                  loading.visible= false
                                  loading.text = "Content Loaded, one moment"
+                                 wait.stop()
                              }
 
         }

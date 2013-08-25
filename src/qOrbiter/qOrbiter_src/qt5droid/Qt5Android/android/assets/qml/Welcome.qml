@@ -4,6 +4,8 @@ Item {
     id:welcome
     height: manager.appHeight
     width: manager.appWidth
+    Component.onCompleted: forceActiveFocus()
+    focus:true
 
     Rectangle{
         anchors.fill: parent
@@ -29,6 +31,11 @@ Item {
                 if(androidSystem.updateBuildInformation() && androidSystem.updateExternalStorageLocation()){
                     wait.start()
                     logger.setLogLocation(androidSystem.externalStorageLocation)
+                }
+                else{
+                    wait.start()
+                    androidSystem.updateBuildInformation()
+                    androidSystem.updateExternalStorageLocation()
                 }
             }
         }

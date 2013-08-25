@@ -354,12 +354,14 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
         setDceResponse("Guessing Android Tablet, Loading Tablet Skins");
         QApplication::processEvents(QEventLoop::AllEvents);
+        setFormFactor(2);
     }
     else
     {
         remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/phone";
         setDceResponse("Guessing Android Phone, Loading Phone Skins");
         QApplication::processEvents(QEventLoop::AllEvents);
+        setFormFactor(1);
     }
 
 #elif MACOSX
@@ -956,10 +958,7 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status)
 
         m_bStartingUp = false;
         QApplication::processEvents(QEventLoop::AllEvents);
-        if(writeConfig())
-        {
-
-        }
+        writeConfig();
 
         startOrbiter();
 
@@ -1240,18 +1239,17 @@ bool qorbiterManager::loadSkins(QUrl base)
     tskinModel->addSkin("default");
 
 #elif __ANDROID__
-    if(isPhone < 2){
+    if(isPhone == 1){
 #ifdef QT5
         tskinModel->addSkin("default");
-#elif !QT5
+#elif NECESSITAS
         tskinModel->addSkin("default");
 #endif
-    }
-    else{
+    }else{
 #ifdef QT5
         tskinModel->addSkin("default");
-#elif !QT5
-        tskinModel->addSkin("default,data,wip,lustylizard,smokey");
+#else
+        tskinModel->addSkin("default,data,smokey");
 #endif
     }
 #elif for_android
@@ -1372,7 +1370,7 @@ bool qorbiterManager::readLocalConfig()
 #elif __ANDROID__
     QString xmlPath ;
 
-#ifdef QT4_8
+#ifdef NECESSITAS
     if(setupMobileStorage(androidHelper->externalStorageLocation)){
         xmlPath = mobileStorageLocation+"/config.xml" ;
     }
@@ -1501,10 +1499,13 @@ bool qorbiterManager::readLocalConfig()
             else
             {setDebugMode(true);}
 
-            if(!configVariables.namedItem("phone").attributes().namedItem("id").nodeValue().toInt() == 1 )
-            {setFormFactor(1);}
-            else
-            {setFormFactor(2);}
+            if(!first_run){
+                if(!configVariables.namedItem("phone").attributes().namedItem("id").nodeValue().toInt() == 1 )
+                {setFormFactor(1);}
+                else
+                {setFormFactor(2);}
+            }
+
         }
 
         return true;
