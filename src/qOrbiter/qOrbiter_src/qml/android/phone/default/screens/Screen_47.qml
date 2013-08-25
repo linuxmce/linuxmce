@@ -113,7 +113,7 @@ Item {
             Image  {
                 id: imagerect;
                 fillMode: Image.PreserveAspectCrop
-                source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
+                source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=img&val="+path : ""
                 anchors.fill: parent
             }
             Rectangle{
