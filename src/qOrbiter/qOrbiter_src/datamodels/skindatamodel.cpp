@@ -206,6 +206,8 @@ void SkinDataModel::setActiveSkin(QString name)
             }
         }
         currentItem = current_style->create();
+        ui_reference->currentSkin = name;
+        ui_reference->writeConfig();
         emit currentSkinReady();
     }
 

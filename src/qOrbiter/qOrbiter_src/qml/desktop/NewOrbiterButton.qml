@@ -3,10 +3,10 @@ import QtQuick 1.1
 Rectangle{
     id:newOrbiterButton
     height: scaleY(10)
-    width:scaleX(55)
+    width:scaleX(25)
     opacity: 0
     border.color: "#99CC99"
-    anchors.verticalCenter: parent.verticalCenter
+    anchors.bottom: firstRunOptions.top
     Component.onCompleted: state="hidden"
     gradient: Gradient {
         GradientStop {
@@ -63,8 +63,7 @@ Rectangle{
                 target: newOrbiterButton
                 anchors.top: undefined
                 anchors.right: undefined
-                anchors.horizontalCenter: splashPage.horizontalCenter
-                anchors.verticalCenter: splashPage.verticalCenter
+                anchors.horizontalCenter: splashPage.horizontalCenter                
             }
         }
     ]

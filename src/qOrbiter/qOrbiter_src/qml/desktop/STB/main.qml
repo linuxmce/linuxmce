@@ -311,7 +311,7 @@ Item {
             interval:60000
             running: screensaver.active
             triggeredOnStart: true
-            onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
+            onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
             repeat: true
         }
 
@@ -319,7 +319,7 @@ Item {
             id:mini_screen_saver_image
             height: mini_screen_saver.height
             width: mini_screen_saver.width
-            //  source: "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
+              source: "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
         }
         Rectangle{
             anchors.fill: parent

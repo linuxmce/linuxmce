@@ -2,8 +2,8 @@
 import QtQuick 1.1
 
 Rectangle {
-    height:appH
-    width:appW
+    height:manager.appHeight
+    width:manager.appWidth
     id:splashPage
     color: "transparent"
     signal setupStart(string x, string y)
@@ -76,6 +76,11 @@ Rectangle {
 
     NewOrbiterButton {
         id: newOrbiterButton
+    }
+
+    FirstRunOptions {
+        id: firstRunOptions
+        anchors.bottom: parent.bottom
     }
 
 }

@@ -60,12 +60,14 @@ Item {
                 console.log("IndexStack length ==>" + indexStack.count)
                 depth++
                 return;
-            } if(event.key === Qt.Key_Shift){
+            } else if(event.key === Qt.Key_Shift){
                 filtering.forceActiveFocus()
             } else if(event.key !== Qt.Key_Escape && event.key !== Qt.Key_Tab&& event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235){
                 mediaList.currentIndex = dataModel.setSection(event.key)
                 console.log("Letter Jump Index ==>  "+mediaList.currentIndex)
                 mediaList.positionViewAtIndex(mediaList.currentIndex,ListView.visible)
+            } else if(event.key=== Qt.Key_M){
+                manager.gotoQScreen("Screen_1.qml")
             }
 
             console.log(event.key)
@@ -76,7 +78,6 @@ Item {
         Keys.onEscapePressed: {
             if(screen_forty_seven_of_nine.state=== "detail")
             {
-
                 screen_forty_seven_of_nine.state = "browsing"
 
             } else if (depth!==0){

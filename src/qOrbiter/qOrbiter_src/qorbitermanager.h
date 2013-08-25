@@ -192,12 +192,13 @@ class qorbiterManager : public QObject
     Q_PROPERTY (bool m_bIsOSD READ getOsd WRITE setOsd NOTIFY isOsd)
     Q_PROPERTY (bool monitorAvailible READ getMonitorStatus WRITE setMonitorStatus NOTIFY monitorStatusChanged)
     Q_PROPERTY(int deviceVolume READ getDeviceVolume WRITE setDeviceVolume NOTIFY deviceVolumeChanged)
-
+    Q_PROPERTY(bool first_run  READ getRunStatus NOTIFY firstRunChanged)
     Q_PROPERTY (QString mediaResponse READ getMediaResponse WRITE setMediaResponse NOTIFY mediaResponseChanged)
     Q_PROPERTY (QString commandResponse READ getCommandResponse WRITE setCommandResponse NOTIFY commandResponseChanged)//for use in displaying command related dce replies.
     Q_PROPERTY (QString eventResponse READ getEventResponse WRITE setEventResponse NOTIFY eventResponseChanged) // for use in displaying message associated with incoming events
     Q_PROPERTY (QString deviceResponse READ getDeviceResponse WRITE setDeviceResponse NOTIFY deviceResponseChanged) // for use in display of messages associated with specific devices
     Q_PROPERTY (QString imagePath READ getImagePath WRITE setImagePath NOTIFY imagePathChanged)
+    Q_PROPERTY(QString currentSkin READ getCurrentSkin NOTIFY currentSkinChanged)
 
 
     Q_PROPERTY(int isPhone READ getFormFactor NOTIFY formFactorChanged)
@@ -222,6 +223,7 @@ public:
     //FileReader * fileReader;
 
     bool b_glEnabled;
+    bool first_run;
     int isPhone;
     //settings
     QString sPK_User;
@@ -518,7 +520,7 @@ signals:
     void mobileStorageChanged(QString location);
     void moveArrowDirection(int d);
     void signalGoBack();
-
+    void currentSkinChanged();
 
 
 
@@ -577,6 +579,7 @@ signals:
     void imageAspectChanged();
     void connectedStateChanged();
     void screenSaverImagesReady();
+    void firstRunChanged();
 
     /*Settings Signals*/
     void debugModeChanged();
@@ -712,10 +715,27 @@ public slots:
      */
     void requestAttributeTypes(){}
 
-
+    /*!
+     * \brief translateAttribute
+     * \param a
+     * \return
+     */
     QString translateAttribute(QString a){
         return a;
     }
+
+
+    /*!
+     * \brief setRunStatus
+     * \param d
+     */
+    void setRunStatus(bool d){first_run = d; emit firstRunChanged();}
+
+    /*!
+     * \brief getRunStatus
+     * \return
+     */
+    bool getRunStatus(){return first_run;}
 
     /*!
      * \brief requestGenres
@@ -1162,6 +1182,7 @@ public slots:
     void setActiveSkin(QString name);
     bool loadSkins(QUrl url);
     void showSkin() { swapSkins(currentSkin); }
+    QString getCurrentSkin(){return currentSkin;}
 #if (QT5)
     void skinLoaded(QQuickView::Status status);
 #else

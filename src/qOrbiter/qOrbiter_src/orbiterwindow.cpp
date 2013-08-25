@@ -110,13 +110,14 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 
 #endif
 
-#if (QT5)
+#ifdef QT5
     mainView.setResizeMode(QQuickView::SizeViewToRootObject);
-
 #else
     mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
+
     mainView.rootContext()->setContextProperty("window", this);
+
 #ifndef QT5
     mainView.setWindowTitle("LinuxMCE Orbiter ");
 #else
@@ -127,6 +128,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #ifdef GLENABLED
 
 #ifdef for_desktop
+
 #ifndef QT5
     QGLFormat format= QGLFormat::defaultFormat();
     glWidget = new QGLWidget(format);
@@ -134,6 +136,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.setViewport(glWidget);
     mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #endif
+
 #elif RPI
 
     mainView.setSurfaceType(QSurface::OpenGLSurface);
@@ -148,14 +151,17 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.setViewport(glWidget);
     mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #endif
+
 #endif
     // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
 
 #ifdef ANDROID
+
 #ifndef QT5
     mainView.rootContext()->setContextProperty("appW", (mainView.window()->width()/ 2));//this is done because android reports the desktop width as 2x what it is.at least on my phone
     mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
 #endif
+
 #elif for_android
     mainView.rootContext()->setContextProperty("appW", 1280);
     mainView.rootContext()->setContextProperty("appH", 720);

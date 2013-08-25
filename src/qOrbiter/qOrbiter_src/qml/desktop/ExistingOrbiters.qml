@@ -2,8 +2,8 @@ import QtQuick 1.1
 
 ListView{
     id:existing_orbiters
-    height: scaleY(35)
-    width: scaleX(55)
+    height: scaleY(75)
+    width: scaleX(35)
     clip: true
     anchors.left: parent.right
     anchors.verticalCenter: parent.verticalCenter

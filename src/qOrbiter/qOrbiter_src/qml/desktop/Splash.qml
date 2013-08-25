@@ -26,10 +26,10 @@ Item {
     }
 
     function scaleX(x){
-        return x/100*appH
+        return x/100*appW
     }
     function scaleY(y){
-        return y/100*appW
+        return y/100*appH
     }
 
 

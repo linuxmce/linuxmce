@@ -1557,6 +1557,7 @@ public slots:
 
     void getAttributeImage(QString param);
 
+
     void setDeviceId(int d) {m_dwPK_Device = d; emit deviceIdChanged();}
     int getDeviceId() {return m_dwPK_Device;}
 

@@ -89,7 +89,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     b_localLoading = true; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
 #elif defined QT5 && ANDROID || defined(ANDROID)
     androidHelper = jniHelper;
- //   qorbiterUIwin->rootContext()->setContextProperty("android",androidHelper);
+    //   qorbiterUIwin->rootContext()->setContextProperty("android",androidHelper);
     b_localLoading = false;
     if(androidHelper->updateExternalStorageLocation()){
         androidHelper->updateBuildInformation();
@@ -479,6 +479,8 @@ void qorbiterManager::refreshUI(QUrl url)
 
     qorbiterUIwin->rootContext()->setBaseUrl(url);
     qorbiterUIwin->setSource(url);
+
+    emit currentSkinChanged();
 
 }
 
@@ -955,7 +957,13 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status)
 
         m_bStartingUp = false;
         QApplication::processEvents(QEventLoop::AllEvents);
+        if(writeConfig())
+        {
+
+        }
+
         startOrbiter();
+
     }
 }
 
@@ -1357,6 +1365,7 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
  */
 bool qorbiterManager::readLocalConfig()
 {
+
     qDebug() << " config Break";
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
@@ -1435,7 +1444,10 @@ bool qorbiterManager::readLocalConfig()
             QDomElement configVariables = localConfig.documentElement().toElement();
             if(configVariables.namedItem("firstrun").attributes().namedItem("id").nodeValue()=="true")
             {
-
+                setRunStatus(true);
+            }
+            else {
+                setRunStatus(false);
             }
 
 
@@ -1449,8 +1461,9 @@ bool qorbiterManager::readLocalConfig()
 
             }
 
+            QString configSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
 
-            if (currentSkin.isEmpty()){
+            if (configSkin.isEmpty()){
 #ifdef __ANDROID__
                 currentSkin = "default";
 #elif QT5
@@ -1460,7 +1473,7 @@ bool qorbiterManager::readLocalConfig()
 #endif
             }
             else{
-                currentSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
+                currentSkin =configSkin;
             }
 
             if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)
@@ -1530,7 +1543,7 @@ bool qorbiterManager::writeConfig()
             configVariables.namedItem("routerip").attributes().namedItem("id").setNodeValue(m_ipAddress);           //internal ip
             configVariables.namedItem("routeraddress").attributes().namedItem("id").setNodeValue(internalHost);     //internal hostname
             configVariables.namedItem("skin").attributes().namedItem("id").setNodeValue(currentSkin);              //curent skin
-
+            configVariables.namedItem("routerport").attributes().namedItem("id").setNodeValue("80");
 
             configVariables.namedItem("externalip").attributes().namedItem("id").setNodeValue(qs_ext_routerip);     //externalip
             configVariables.namedItem("externalHost").attributes().namedItem("id").setNodeValue(externalHost);      //external host
@@ -1546,6 +1559,8 @@ bool qorbiterManager::writeConfig()
             {
                 localConfigFile.close();
                 setDceResponse("save failed");
+                qWarning("Save Failed");
+
                 return false;
             }
             localConfigFile.close();

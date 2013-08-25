@@ -70,7 +70,7 @@ Item
             Image
             {
                 id: imagerect;
-                source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=img&val="+path : ""
+                source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
                 anchors.centerIn: parent;
                 fillMode: Image.PreserveAspectFit
                 smooth: true
