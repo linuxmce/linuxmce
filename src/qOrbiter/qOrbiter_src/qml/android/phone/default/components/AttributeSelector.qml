@@ -95,7 +95,7 @@ Item {
             width: parent.width
             imgSource: ""
             color: androidSystem.orangeStandard
-            onActivated:{manager.goBacktoQScreen("Screen_1.qml");attributeSelector.state="hidden"}
+            onActivated:{manager.gotoQScreen("Screen_1.qml");attributeSelector.state="hidden"}
 
         }
     }

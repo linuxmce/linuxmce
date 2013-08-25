@@ -18,6 +18,7 @@ Item{
             id:mediaViewDelegate
             height: scaleY(25)
             width: parent.width
+            clip:true
 
             Image{
                 source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""

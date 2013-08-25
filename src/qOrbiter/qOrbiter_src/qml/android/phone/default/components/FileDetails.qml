@@ -5,31 +5,30 @@ Item {
     width: scaleX(100)
     height: scaleY(100)
     anchors.centerIn: parent
+    property int bgImageProp:manager.q_subType ==="1" ? 43 : manager.q_attributetype_sort===53 ? 43 :36
+    clip: true
+    scale:0
+    Component.onCompleted: PropertyAnimation { target: filedetailrect; property: "scale"; to:1; duration: 500}
+
+    MouseArea{
+        anchors.fill: parent
+        onClicked: {}
+    }
+
+    Image{
+        id:imdb
+        fillMode: Image.PreserveAspectCrop
+        anchors.fill: parent
+        source:"http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=atr&file="+filedetailsclass.file+"&val="+bgImageProp
+        // onStatusChanged: imdb.status == Image.Ready ? filedetailrect.height = scaleY(100) : ""
+    }
+
     Rectangle{
-         color: "darkgrey"
+        color: "black"
         border.color: "orange"
         border.width: 3
         anchors.fill: parent
-        MouseArea{
-            anchors.fill: parent
-            onClicked: loadCompnent("NullComponent.qml")
-        }
-    }
-
-    clip: true
-    //opacity: 0
-    scale:0
-    Component.onCompleted: PropertyAnimation { target: filedetailrect; property: "scale"; to:1; duration: 1000}
-
-    Image {
-        id: fdbg
-        source: "../img/bkg.png"
-        anchors.fill: filedetailrect
-    }
-
-    Connections{
-        target:filedetailsclass
-        onObjectChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
+        opacity: .55
     }
 
     Rectangle{
@@ -38,48 +37,42 @@ Item {
         width: parent.width
         color:"black"
         radius:2.5
-        Text {
-            id: text2
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: "Location: " + filedetailsclass.path
-            font.pixelSize: scaleY(2)
-            font.bold: true
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        }
-
-    }
-    Text {
-        id: filename_block
+        anchors.top:parent.top
         anchors.horizontalCenter: parent.horizontalCenter
-        text: "Filename: " + filedetailsclass.file
-        font.pixelSize: scaleY(3)
-        font.bold: true
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        anchors.bottom: parent.bottom
+//        Text {
+//            id: text2
+//            anchors.centerIn: parent
+//            text: qsTr("File Location: ") + filedetailsclass.path
+//            font.pixelSize: scaleY(2)
+//            font.bold: true
+//            color:"white"
+//            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+//        }
+        Text {
+            id: filename_block
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "Filename: " + filedetailsclass.file
+            font.pixelSize: scaleY(3)
+            font.bold: true
+            color:"white"
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            anchors.bottom: parent.bottom
 
+        }
     }
 
 
-    Rectangle {
-        id: rectangle1
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.right: parent.right
-        width:  filedetailsclass.aspect=="wide"? parent.width *.40 : parent.width *.45
+    Item {
+        id: displayData
+        anchors.centerIn: parent
+        width:  parent.width*.95
         height: scaleY(75)
-        radius: 2.5
         clip:  true
-        color: "black"
-        border.color: "orange"
-        anchors.left: imageholder.right
-        anchors.leftMargin: scaleX(-10)
-        smooth:true
-        transform: Rotation { origin.x: 30; origin.y: 30; axis { x: 0; y: 1; z: 0 } angle: -25 }
-
 
         Flickable {
             anchors.fill: parent
             flickableDirection: Flickable.VerticalFlick
-            contentWidth: parent.width
+            contentWidth: textcol.width
             contentHeight: textcol.height
             id: contentFlick
             Column
@@ -87,28 +80,17 @@ Item {
                 id:textcol
                 spacing:scaleY(2)
                 anchors.margins: scaleY(1)
-                width: parent.width
+                width: displayData.width
                 height: childrenRect.height
                 Text {
                     id:  titletext
                     text:filedetailsclass.mediatitle
-                    font.pixelSize: scaleY(3)
+                    font.pixelSize: scaleY(4)
                     font.bold: true
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    width: parent.width
-
+                    width:scaleX(75)
                 }
-                Text {
-                    id: fnametext
-
-                    font.pixelSize: scaleY(2)
-                    color:"aliceblue"
-                    wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    width: rectangle1.width *.95
-                }
-
-
 
                 Text {
                     id:  program_block
@@ -117,7 +99,6 @@ Item {
                     font.bold: true
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    width: rectangle1.width *.95
                     visible:  filedetailsclass.program =="" ? false: true
                 }
 
@@ -128,23 +109,22 @@ Item {
                     font.bold: true
                     color:"aliceblue"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                    width: rectangle1.width *.95
                     visible:  filedetailsclass.episode =="" ? false: true
                 }
                 Text {
                     id: album_block
                     width: scaleX(35)
                     text: qsTr("Album: ") + filedetailsclass.album
-                    font.family: "Droid Sans"
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     smooth: true
+                    color:"white"
                     font.pixelSize: scaleY(2)
                     visible:  filedetailsclass.album =="" ? false: true
                 }
 
-                /*  Text {
+                  Text {
                     id: rating
-                   width: rectangle1.width *.95
+
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: qsTr("Rating") + filedetailsclass
                     font.family: "Droid Sans"
@@ -155,16 +135,15 @@ Item {
                     elide: "ElideRight"
                     visible:  filedetailsclass.rating =="" ? false: true
                 }
-                */
+
                 Text {
                     id: genre_block
-                    width: rectangle1.width *.95
+                    width: parent.width
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: filedetailsclass.genre
-                    font.family: "Droid Sans"
                     font.bold: false
                     smooth: true
-                    font.pixelSize: scaleY(2)
+                    font.pixelSize: scaleY(3)
                     color:"aliceblue"
                     elide: "ElideRight"
                     visible:  filedetailsclass.genre =="" ? false: true
@@ -178,17 +157,15 @@ Item {
                 }
                 Text {
                     id: director_block
-                    width: rectangle1.width *.95
+                    width: parent.width
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: qsTr("Directed By: ") + filedetailsclass.director
-                    font.family: "Droid Sans"
                     font.bold: false
                     smooth: true
-                    font.pixelSize: scaleY(2)
+                    font.pixelSize: scaleY(3)
                     color:"aliceblue"
                     elide: "ElideRight"
                     visible:  filedetailsclass.director =="" ? false: true
-
                     MouseArea{
                         anchors.fill: parent
                         hoverEnabled: true
@@ -199,13 +176,12 @@ Item {
 
                 Text {
                     id: starring
-                    width: rectangle1.width *.95
+                    width: parent.width
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: qsTr("Starring: ") + filedetailsclass.performerlist
-                    font.family: "Droid Sans"
                     //  font.bold: true
                     smooth: true
-                    font.pixelSize: scaleY(2)
+                    font.pixelSize: scaleY(3)
                     color:"aliceblue"
                     elide: "ElideRight"
                     visible:  filedetailsclass.performerlist =="" ? false: true
@@ -220,11 +196,11 @@ Item {
 
                 Text {
                     id: synopsistext
-                    width: rectangle1.width *.95
+                    width: parent.width
                     wrapMode: "WrapAtWordBoundaryOrAnywhere"
                     text: filedetailsclass.synop
-                    font.pixelSize: scaleY(2)
-                    color:"aliceblue"
+                    font.pixelSize: scaleY(3)
+                    color:"white"
                 }
             }
         }

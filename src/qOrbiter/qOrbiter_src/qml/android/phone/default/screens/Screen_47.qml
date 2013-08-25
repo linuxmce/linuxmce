@@ -54,7 +54,7 @@ Item {
         width: scaleX(50)
         color: "transparent"
         radius:5
-        anchors.top: list_view1.bottom
+        anchors.bottom: parent.bottom
         anchors.horizontalCenter: list_view1.horizontalCenter
         Text {
             id: total_cells
@@ -103,30 +103,32 @@ Item {
             width: scaleX(95)
             height: scaleY(15)
             clip:true
-            Rectangle {
-                id: background
-                color: mouseclick.pressed ? "orange":"black"
-                anchors.fill: parent
-                opacity: mouseclick.pressed ? 1 : .75
-            }
+
 
             Image  {
                 id: imagerect;
                 fillMode: Image.PreserveAspectCrop
-                source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=img&val="+path : ""
+                source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
                 anchors.fill: parent
             }
-            Rectangle{
-                id:mask
+            Rectangle {
+                id: background
+                color: mouseclick.pressed ? "white":"black"
                 anchors.fill: parent
-                color:"black"
-                opacity:.65
+                opacity: mouseclick.pressed ? 1 : .65
+
+                Behavior on color {
+                    PropertyAnimation{
+                        duration:250
+                    }
+                }
             }
 
             StyledText {
                 text: name;
                 font.pixelSize: scaleY(3.5);
                 color: "White" ;
+                isBold: false
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 width: parent.width
                 height: parent.height
@@ -145,14 +147,13 @@ Item {
     ListView {
         id: list_view1
         width: scaleX(95)
-        height:scaleY(90)
+        height:scaleY(85)
         model:dataModel
         delegate: contactDelegateList
         clip: true
         cacheBuffer: 15
-        anchors.left: parent.left
-        anchors.leftMargin: scaleX(2)
-        anchors.top: fileviewscreen.top
+        anchors.centerIn: parent
+        spacing:scaleY(1)
 
     }
     ListView{
@@ -184,17 +185,6 @@ Item {
         }
 
     }
-
-    Text{
-        id:spaceholder
-        text:manager.dceResponse
-        font.pixelSize: scaleY(3)
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        color: "silver"
-
-    }
-
     AttributeSelector {
         id:selector
 
