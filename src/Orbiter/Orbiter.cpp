@@ -801,7 +801,6 @@ bool Orbiter::GetConfig()
 	m_pOrbiterRenderer->Configure();
 
 	m_pDevice_ScreenSaver = m_pData->FindSelfOrChildWithinCategory(DEVICECATEGORY_Screen_Savers_CONST);
-	m_sOperatingSystem = m_pEvent->GetDeviceDataFromDatabase( m_pData->m_dwPK_Device_ControlledVia, DEVICEDATA_Operating_System_CONST );
 
 	return true;
 }
@@ -4339,7 +4338,26 @@ string Orbiter::SubstituteVariables( string Input,  DesignObj_Orbiter *pObj,  in
 				Output += StringUtils::itos( m_pLocationInfo->m_dwPK_Device_MediaDirector );
 		}
 		else if(  Variable=="OS" )
-			Output += m_sOperatingSystem;
+		  {
+		    long dwPK_Device_MD;
+		    if( m_bIsOSD )
+		      {
+			if ( m_pLocationInfo && m_pLocationInfo->m_dwPK_Device_MediaDirector!=-1 )
+			  {
+			    // Are we in a different room? if so, grab the device from Location
+			    dwPK_Device_MD = m_pLocationInfo->m_dwPK_Device_MediaDirector;
+			  }
+			else
+			  {
+			    dwPK_Device_MD = m_pData->m_dwPK_Device_ControlledVia;
+			  }
+		      }
+		    else if( m_pLocationInfo && m_pLocationInfo->m_dwPK_Device_MediaDirector!=-1 )
+		      dwPK_Device_MD=m_pLocationInfo->m_dwPK_Device_MediaDirector;
+
+		    // At this point, we have the target MD to get device data from.
+		    Output += m_pEvent->GetDeviceDataFromDatabase(dwPK_Device_MD, DEVICEDATA_Operating_System_CONST);
+		  }
 		else if(  Variable=="MDH"  )
 			Output += StringUtils::itos( m_pLocationInfo_Initial->m_dwPK_Device_MediaDirector );
 		else if(  Variable=="L:0" && m_pLocationInfo  )

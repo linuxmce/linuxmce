@@ -1375,6 +1375,25 @@ void ScreenHandler::SCREEN_Power(long PK_Screen)
 	RegisterCallBack(cbObjectSelected, (ScreenHandlerCallBack) &ScreenHandler::Power_ObjectSelected, new ObjectInfoBackData());
 	int PK_DesignObj = m_p_MapDesignObj_Find(PK_Screen);
 	string sPK_DesignObj = StringUtils::itos(PK_DesignObj) + ".0.0.";
+	
+	long dwPK_Device_MD;
+	if( m_pOrbiter->m_bIsOSD )
+	  {
+	    if ( m_pOrbiter->m_pLocationInfo && m_pOrbiter->m_pLocationInfo->m_dwPK_Device_MediaDirector!=-1 )
+	      {
+		// Are we in a different room? if so, grab the device from Location
+		dwPK_Device_MD = m_pOrbiter->m_pLocationInfo->m_dwPK_Device_MediaDirector;
+	      }
+	    else
+	      {
+		dwPK_Device_MD = m_pOrbiter->m_pData->m_dwPK_Device_ControlledVia;
+	      }
+	  }
+	else if( m_pOrbiter->m_pLocationInfo && m_pOrbiter->m_pLocationInfo->m_dwPK_Device_MediaDirector!=-1 )
+	  dwPK_Device_MD=m_pOrbiter->m_pLocationInfo->m_dwPK_Device_MediaDirector;
+	
+	// At this point, we have the target MD to get device data from.
+	string sOperating_System = m_pOrbiter->m_pEvent->GetDeviceDataFromDatabase(dwPK_Device_MD, DEVICEDATA_Operating_System_CONST);
 
 	if( !m_pOrbiter->m_pLocationInfo->m_dwPK_Device_MediaDirector || m_pOrbiter->m_pLocationInfo->m_dwPK_Device_MediaDirector==DEVICEID_NULL )
 	{
@@ -1393,7 +1412,7 @@ void ScreenHandler::SCREEN_Power(long PK_Screen)
 
 		if( sStatus.length()>1 && sStatus.substr(0,2)=="MD" )
 		{
-			if( m_pOrbiter->m_sOperatingSystem.empty() )
+			if( sOperating_System.empty() )
 			{
 				m_pOrbiter->CMD_Show_Object( sPK_DesignObj + StringUtils::itos(DESIGNOBJ_mnuBootHD_CONST), 0, "", "",  "0" );
 				m_pOrbiter->CMD_Show_Object( sPK_DesignObj + StringUtils::itos(DESIGNOBJ_mnuBootNet_CONST), 0, "", "",  "0" );
@@ -1411,7 +1430,7 @@ void ScreenHandler::SCREEN_Power(long PK_Screen)
 		}
 		else
 		{
-			if( m_pOrbiter->m_sOperatingSystem.empty() )
+			if( sOperating_System.empty() )
 			{
 				m_pOrbiter->CMD_Show_Object( sPK_DesignObj + StringUtils::itos(DESIGNOBJ_mnuBootHD_CONST), 0, "", "",  "0" );
 				m_pOrbiter->CMD_Show_Object( sPK_DesignObj + StringUtils::itos(DESIGNOBJ_mnuBootNet_CONST), 0, "", "",  "0" );
@@ -2837,9 +2856,29 @@ void ScreenHandler::SaveFile_SendCommand(int PK_Users)
 /*virtual*/ void ScreenHandler::SCREEN_Halt_System(long PK_Screen)
 {
 	ScreenHandlerBase::SCREEN_Halt_System(PK_Screen);
+
+	long dwPK_Device_MD;
+	if( m_pOrbiter->m_bIsOSD )
+	  {
+	    if ( m_pOrbiter->m_pLocationInfo && m_pOrbiter->m_pLocationInfo->m_dwPK_Device_MediaDirector!=-1 )
+	      {
+		// Are we in a different room? if so, grab the device from Location
+		dwPK_Device_MD = m_pOrbiter->m_pLocationInfo->m_dwPK_Device_MediaDirector;
+	      }
+	    else
+	      {
+		dwPK_Device_MD = m_pOrbiter->m_pData->m_dwPK_Device_ControlledVia;
+	      }
+	  }
+	else if( m_pOrbiter->m_pLocationInfo && m_pOrbiter->m_pLocationInfo->m_dwPK_Device_MediaDirector!=-1 )
+	  dwPK_Device_MD=m_pOrbiter->m_pLocationInfo->m_dwPK_Device_MediaDirector;
+	
+	// At this point, we have the target MD to get device data from.
+	string sOperating_System = m_pOrbiter->m_pEvent->GetDeviceDataFromDatabase(dwPK_Device_MD, DEVICEDATA_Operating_System_CONST);
+
 	DesignObj_Orbiter *pDesignObj = m_pOrbiter->FindObject( TOSTRING(DESIGNOBJ_mnuSystemHalt_CONST) ".0.0." TOSTRING(DESIGNOBJ_butReset_AsOtherOS_CONST) );
 	if( pDesignObj )
-		pDesignObj->m_bHidden = m_pOrbiter->m_sOperatingSystem.empty();
+		pDesignObj->m_bHidden = sOperating_System.empty();
 }
 
 /*virtual*/ void ScreenHandler::SCREEN_CreateViewBookmarksTV(long PK_Screen)
