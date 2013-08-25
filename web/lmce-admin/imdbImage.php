@@ -2,6 +2,7 @@
 
 include 'operations/mediaBrowser/httpImageProvider.php';
 
+/*
 $file =$_GET['file'];
 $prop =$_GET['prop'];
 
@@ -19,5 +20,6 @@ $ref.=$row['FK_Picture'];
 
 $img =file_get_contents("mediapics/".$ref.".jpg");
 echo $img;
+*/
 
 ?>
