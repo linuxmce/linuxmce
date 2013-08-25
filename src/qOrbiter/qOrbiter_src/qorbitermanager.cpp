@@ -254,7 +254,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     //floorplan model initialization for slots in main.cpp
     floorplans = new FloorPlanModel( new FloorplanDevice , this);
 
-
     //----------------Security Video setup
     SecurityVideo = new SecurityVideoClass(this);
     qorbiterUIwin->rootContext()->setContextProperty("securityvideo", SecurityVideo);
@@ -1475,6 +1474,14 @@ bool qorbiterManager::readLocalConfig()
             else{
                 currentSkin =configSkin;
             }
+            QString tRp = configVariables.namedItem("routerport").attributes().namedItem("id").nodeValue();
+            if(tRp.isEmpty()){
+                setRouterPort("80");
+            }
+            else{
+                setRouterPort(tRp);
+            }
+
 
             if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)
             {
@@ -1543,7 +1550,7 @@ bool qorbiterManager::writeConfig()
             configVariables.namedItem("routerip").attributes().namedItem("id").setNodeValue(m_ipAddress);           //internal ip
             configVariables.namedItem("routeraddress").attributes().namedItem("id").setNodeValue(internalHost);     //internal hostname
             configVariables.namedItem("skin").attributes().namedItem("id").setNodeValue(currentSkin);              //curent skin
-            configVariables.namedItem("routerport").attributes().namedItem("id").setNodeValue("80");
+            configVariables.namedItem("routerport").attributes().namedItem("id").setNodeValue(routerPort);
 
             configVariables.namedItem("externalip").attributes().namedItem("id").setNodeValue(qs_ext_routerip);     //externalip
             configVariables.namedItem("externalHost").attributes().namedItem("id").setNodeValue(externalHost);      //external host

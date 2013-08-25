@@ -2,7 +2,7 @@ import QtQuick 1.1
 
 Item{
     width: parent.width
-    height: scaleY(5)
+    height: scaleY(15)
     property string title
     property string value
     property alias editedValue:input.text
@@ -14,19 +14,27 @@ Item{
     }
     Row{
         width: parent.width - 15
-        height: parent.height
+        height: childrenRect.height
         anchors.centerIn: parent
         Text{
             text:title
-            font.pointSize: scaleY(2)
+            font.pointSize: scaleY(6)
+            width:parent.width /2
+            color:"white"
+            font.weight: Font.Light
         }
         TextInput{
             id:input
             //displayText: value
             text:value
-            echoMode: TextInput.Normal
-            font.pointSize: scaleY(2)
+            width:parent.width*.45
+            color:"white"
+            echoMode: TextInput.Normal /*< important because it links the value to the assigned property value. */
+            font.underline: true
+            font.pointSize: scaleY(6)
             Keys.onEnterPressed: set()
+            font.weight: Font.DemiBold
+            horizontalAlignment: TextInput.AlignRight
         }
         
     }

@@ -4,6 +4,11 @@ Item{
     id:firstRunOptions
     state:"hidden"
     anchors.bottom: parent.bottom
+    MouseArea{
+        anchors.fill: parent
+        onClicked: {}
+    }
+
     Rectangle{
         id:phil
         anchors.fill: parent
@@ -72,20 +77,29 @@ Item{
 
     Column{
         id:optionCol
-        height: parent.height
-        width: parent.width*.65
+        height: childrenRect.height
+        width: parent.width*.75
         spacing:scaleY(1)
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
 
         PropAndValDisplay {
             id:routerAddress
-            title:"Internal Router Address"
+            title:"Home Router Address"
             value: manager.m_ipAddress
-            onSet: {manager.setInternalIp(routerAddress.editedValue); console.log(routerAddress.editedValue)}
+            onSet: {manager.m_ipAddress = editedValue}
         }
         PropAndValDisplay {
-            id:hostName
-            title:"Internal Router Host"
-            value: manager.internalHost
+            id:routerPort
+            title:"Home Router Port"
+            value: manager.routerPort
+            onSet: manager.routerPort = editedValue
+        }
+        PropAndValDisplay {
+            id:awayIp
+            title:"Away Ip Address"
+            value: manager.externalip
+            onSet: manager.externalip = editedValue
         }
 
         PropAndValDisplay {
@@ -94,6 +108,14 @@ Item{
             value: manager.currentSkin
             onSet: manager.currentSkin = editedValue
         }
+
+        PropAndValDisplay {
+            id:deviceType
+            title:"Type of Device"
+            value: manager.isPhone
+            onSet: manager.isPhone = editedValue
+        }
+
 
     }
 

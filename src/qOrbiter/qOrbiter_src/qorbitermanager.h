@@ -198,10 +198,10 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString eventResponse READ getEventResponse WRITE setEventResponse NOTIFY eventResponseChanged) // for use in displaying message associated with incoming events
     Q_PROPERTY (QString deviceResponse READ getDeviceResponse WRITE setDeviceResponse NOTIFY deviceResponseChanged) // for use in display of messages associated with specific devices
     Q_PROPERTY (QString imagePath READ getImagePath WRITE setImagePath NOTIFY imagePathChanged)
-    Q_PROPERTY(QString currentSkin READ getCurrentSkin NOTIFY currentSkinChanged)
+    Q_PROPERTY(QString currentSkin READ getCurrentSkin WRITE setConfigSkin NOTIFY currentSkinChanged)
+    Q_PROPERTY(QString routerPort READ getRouterPort WRITE setRouterPort NOTIFY routerPortChanged)
+    Q_PROPERTY(int isPhone READ getFormFactor WRITE setFormFactor NOTIFY formFactorChanged)
 
-
-    Q_PROPERTY(int isPhone READ getFormFactor NOTIFY formFactorChanged)
     /*!
      * \warning enablescreensavermode - currently unused, should be built anyways
      * \warning networkload - currently is used for android devices
@@ -224,11 +224,12 @@ public:
 
     bool b_glEnabled;
     bool first_run;
-    int isPhone;
+    int isPhone; /*!< 1) phone 2) tablet 3)PC 4)htpc */
     //settings
     QString sPK_User;
     QString buildType;
     QByteArray binaryConfig;
+    QString routerPort;
     long iPK_Device;
     QString qs_ext_routerip;
     /*messaging*/
@@ -493,7 +494,7 @@ signals:
     void communicatorIdChanged();
     void communicatorConnected(bool connect);
 
-
+    void routerPortChanged();
     void newMessageSend(QVariantMap message);
 
     /* Mobile device signals */
@@ -668,6 +669,9 @@ signals:
 #endif
 
 public slots:
+
+    void setRouterPort(QString p){routerPort = p; emit routerPortChanged();}
+    QString getRouterPort(){return routerPort;}
 
     void setSubType(QString t) {q_subType = t; emit subTypeChanged();}
     QString getSubType(){return q_subType;}
@@ -1183,6 +1187,7 @@ public slots:
     bool loadSkins(QUrl url);
     void showSkin() { swapSkins(currentSkin); }
     QString getCurrentSkin(){return currentSkin;}
+    void setConfigSkin(QString skin){currentSkin = skin; emit currentSkinChanged(); }
 #if (QT5)
     void skinLoaded(QQuickView::Status status);
 #else
