@@ -67,8 +67,11 @@ static void LS_RegisterWithAsterisk()
 	
 	linphone_core_enable_logs(stdout);
 	//linphone_core_disable_logs();
-
+#ifdef BUILD_FOR_1004
+	LS_LinphoneCore = linphone_core_new(&LS_LinphoneCoreVTable, "/etc/pluto/simplephone.conf", NULL);
+#else
 	LS_LinphoneCore = linphone_core_new(&LS_LinphoneCoreVTable, "/etc/pluto/simplephone.conf", NULL, NULL);
+#endif
 	const char** soundcards=linphone_core_get_sound_devices(LS_LinphoneCore);
 	if (!LS_pSimplePhone->m_sSoundCardNumber.empty())
 	  {
