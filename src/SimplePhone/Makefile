@@ -9,7 +9,7 @@ CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
 CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
-BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lmysqlclient_r -lpthread
+BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = SimplePhone
 VERSION = 2.0.0
@@ -30,7 +30,7 @@ sources += SIP_Thread.cpp
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo:
+whattodo: all
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -41,21 +41,27 @@ so: SimplePhone.so
 
 SimplePhone.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
-	chmod +x post_make.sh
-	./post_make.sh $@
+#	chmod +x post_make.sh
+#	./post_make.sh $@
 		
 SimplePhone: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
-	./post_make.sh $@
+#	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) SimplePhone.bin SimplePhone.so >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) SimplePhone SimplePhone.so >/dev/null
 
 package:
 	chmod +x make_package.sh
 	./make_package.sh $(MYNAME) $(VERSION) $(MYDEVTEMPLATEID)
+
+install:
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp SimplePhone $(DESTDIR)/usr/pluto/bin
 
 include $(ROOT)/PlutoUtils/make.rules
 ifeq (,$(findstring clean, $(MAKECMDGOALS)))

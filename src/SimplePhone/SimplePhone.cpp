@@ -524,3 +524,26 @@ string SimplePhone::GetPassword()
 {
 	return m_sPassword;
 }
+//<-dceag-c313-b->
+
+	/** @brief COMMAND: #313 - Set Volume */
+	/** Set volume of Target Audio card device. 0 to 100, with 0 meaning mute and * meaning whatever the previous value was. */
+		/** @param #76 Level */
+			/** A value between 0 and 100 where 0 is mute and 100 is full volume.  Numbers preceded with a - or + are relative.  +15 means up 15, -10 means down 10 */
+
+void SimplePhone::CMD_Set_Volume(string sLevel,string &sCMD_Result,Message *pMessage)
+//<-dceag-c313-e->
+{
+  // This can be expanded upon later, but for now, this will at least get things started!
+  string sCmd;
+  if (sLevel=="0")
+    {
+      system("alsactl store"); // So it can be restored
+      sCmd = "amixer -c "+m_sSoundCardNumber+" set Mic 0 capture mute";
+      system(sCmd.c_str());
+    }
+  else if (sLevel=="100")
+    {
+      system("alsactl restore");
+    }
+}
