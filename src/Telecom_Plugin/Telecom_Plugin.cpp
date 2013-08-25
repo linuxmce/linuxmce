@@ -3631,7 +3631,7 @@ void Telecom_Plugin::DumpActiveCalls()
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Active calls %d: \n%s", map_call2status.size(), sDebugInfo.c_str());
 }
 
-bool Telecom_Plugin::InternalMakeCall(int iFK_Device_From, string sFromExten, string sPhoneNumberToCall, Message *pMessage)
+bool Telecom_Plugin::InternalMakeCall(int iFK_Device_From, string sFromExten, string sPhoneNumberToCall, Message *pMessage, bool bStopPause)
 {
 	PLUTO_SAFETY_LOCK(vm, m_TelecomMutex);
 
@@ -3700,9 +3700,9 @@ bool Telecom_Plugin::InternalMakeCall(int iFK_Device_From, string sFromExten, st
 			}
 			map_ext2pending[sFromExten] = pPendingCall;
 			
-			// stop the media
+			// stop the media if bStopPause=true
 			Command_Impl * pMediaPlugin = m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
-			if( pMediaPlugin != NULL )
+			if( pMediaPlugin != NULL && bStopPause )
 			{
 				//TODO: to orbiter?
 
@@ -4418,7 +4418,7 @@ bool Telecom_Plugin::ConcurrentAccessToSoundCardAllowed(int nOrbiterID)
 	/** @brief COMMAND: #845 - Delete File */
 	/** Used to delete a voicemail from the Voicemail spool */
 		/** @param #13 Filename */
-			/** The file to delete, or orbiter # to delete all */
+			/** The file to delete */
 
 void Telecom_Plugin::CMD_Delete_File(string sFilename,string &sCMD_Result,Message *pMessage)
 //<-dceag-c845-e->
@@ -4533,4 +4533,235 @@ void Telecom_Plugin::CMD_Delete_File(string sFilename,string &sCMD_Result,Messag
 	    }
 	}
     }
+}
+//<-dceag-c313-b->
+
+	/** @brief COMMAND: #313 - Set Volume */
+	/** Set volume of Target Audio card device. 0 to 100, with 0 meaning mute and * meaning whatever the previous value was. */
+		/** @param #76 Level */
+			/** A value between 0 and 100 where 0 is mute and 100 is full volume.  Numbers preceded with a - or + are relative.  +15 means up 15, -10 means down 10 */
+
+void Telecom_Plugin::CMD_Set_Volume(string sLevel,string &sCMD_Result,Message *pMessage)
+{
+	// Not implemented.
+}
+//<-dceag-c313-e->
+//<-dceag-c1118-b->
+
+	/** @brief COMMAND: #1118 - Phone to Baby Monitor */
+	/** Speak in House, except PK_Device is unmated, while all the other SimplePhones are muted. */
+		/** @param #2 PK_Device */
+			/** If not 0, this is presumed to be a device associated with a phone number, such a mobile orbiter or a phone extension, and which will be patched in. */
+		/** @param #75 PhoneNumber */
+			/** If specified this is the number that will be patched in and PK_Device will be ignored. */
+		/** @param #103 List PK Device */
+			/** The list of speakerphone type devices to broadcast the voice through.  If this and  PK_Device_Related are not specified all devices are assumed.  If specified this overrides PK_Device_Related */
+		/** @param #201 PK_Device_Related */
+			/** Broadcast through a speakerphone related to this device.  If List PK Device  is blank then this device can be a camera, doorbell, etc., and the List PK Device will be filled in automatically with the most related device, either explicitly related, or in t */
+
+void Telecom_Plugin::CMD_Phone_to_Baby_Monitor(int iPK_Device,string sPhoneNumber,string sList_PK_Device,int iPK_Device_Related,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1118-e->
+{
+	// If there's no phone number, fine one associated with the device
+
+  long dwPK_Device_Master_SimplePhone;
+	int dwDevice_Caller = 0;
+	bool bEmbeddedPhone = false;
+	if( sPhoneNumber.empty() )
+	{
+		DeviceData_Router *pDevice = m_pRouter->m_mapDeviceData_Router_Find(iPK_Device);
+		dwDevice_Caller = pDevice->m_dwPK_Device;
+		if( pDevice )
+		{
+			sPhoneNumber = pDevice->m_mapParameters_Find(DEVICEDATA_PhoneNumber_CONST);
+			bEmbeddedPhone = pDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Orbiter_Embedded_Phone_CONST;
+
+			if( sPhoneNumber.empty() )
+				sPhoneNumber = pDevice->m_mapParameters_Find(DEVICEDATA_Mobile_Orbiter_Phone_CONST);
+		}
+		if( sPhoneNumber.empty() )
+		{
+			pDevice = m_pRouter->m_mapDeviceData_Router_Find(pMessage->m_dwPK_Device_From);
+			if( pDevice )
+			{
+				dwDevice_Caller = pDevice->m_dwPK_Device;
+				bEmbeddedPhone = pDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Orbiter_Embedded_Phone_CONST;
+				sPhoneNumber = pDevice->m_mapParameters_Find(DEVICEDATA_PhoneNumber_CONST);
+				if( sPhoneNumber.empty() )
+					sPhoneNumber = pDevice->m_mapParameters_Find(DEVICEDATA_Mobile_Orbiter_Phone_CONST);
+			}
+		}
+        
+		if( sPhoneNumber.empty() ) //maybe we are a OnScreen Orbiter; let's find the simple phone child
+		{
+			if(NULL != pDevice)
+			{
+				vector<DeviceData_Router *> vectDeviceData_Router;
+                pDevice->FindChildrenWithinCategory(DEVICECATEGORY_Soft_Phones_CONST, vectDeviceData_Router);
+
+				LoggerWrapper::GetInstance()->Write(LV_STATUS,"Telecom_Plugin::CMD_Speak_in_house : found %d simple phones", vectDeviceData_Router.size());
+				if(vectDeviceData_Router.size() >= 1)
+				{
+					DeviceData_Router *pDeviceData_Router = *vectDeviceData_Router.begin();
+					dwDevice_Caller = pDeviceData_Router->m_dwPK_Device;
+					bEmbeddedPhone = pDeviceData_Router->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Orbiter_Embedded_Phone_CONST;
+
+					LoggerWrapper::GetInstance()->Write(LV_STATUS,"Telecom_Plugin::CMD_Speak_in_house : found device %d", pDeviceData_Router->m_dwPK_Device);
+					dwPK_Device_Master_SimplePhone=pDeviceData_Router->m_dwPK_Device;
+					sPhoneNumber = pDeviceData_Router->m_mapParameters_Find(DEVICEDATA_PhoneNumber_CONST);
+					LoggerWrapper::GetInstance()->Write(LV_STATUS,"Telecom_Plugin::CMD_Speak_in_house : found phone number of embedded phone %s", sPhoneNumber.c_str());
+				}
+			}
+		}
+
+
+		//what if we are a non-osd orbiter? get the phone number of the md from that room
+		if(sPhoneNumber.empty())
+		{
+			sPhoneNumber = GetPhoneNumber(0, "", pMessage->m_dwPK_Device_From);
+			bEmbeddedPhone = true;
+
+			int nMasterDevice = FindValueInMap(map_ext2device, sPhoneNumber, 0); 
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Doing a speak in house from a non-osd orbiter with %d", nMasterDevice);
+			DCE::CMD_Phone_Initiate cmd(m_dwPK_Device, nMasterDevice, 0, SPEAKINTHEHOUSE_CONFERENCE_IVR);
+			SendCommand(cmd);
+		}
+
+		if( sPhoneNumber.empty() )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Telecom_Plugin::CMD_Speak_in_house -- can't find a phone number");
+			return;
+		}
+	}
+
+	// is this an embedded phone?
+	if(!bEmbeddedPhone)
+	{
+		// 555 = bogus call id, 998 = all speaker phones in house conf room
+	  // The false causes pause to not trigger.
+	  if( !InternalMakeCall(0, SPEAKINTHEHOUSE_INVALID_EXT, SPEAKINTHEHOUSE_CONFERENCE_ALL, pMessage, false) )
+		{
+			sCMD_Result = string("ERROR : couldn't make a call from") + SPEAKINTHEHOUSE_INVALID_EXT + "to" + SPEAKINTHEHOUSE_CONFERENCE_ALL;
+		}
+		return;
+	}
+
+	// Find the playback devices if sList_PK_Device isn't specified
+	if(sList_PK_Device.empty() )
+	{
+		if(iPK_Device_Related)  // Use related devices.  This device may be a camera
+		{
+			DeviceData_Router *pDevice = m_pRouter->m_mapDeviceData_Router_Find(iPK_Device_Related);
+			if( pDevice )
+			{
+				list<int> listDevices;
+				list<string> listSlavesExtensions;
+				for(map<int,DeviceRelation *>::iterator it=pDevice->m_mapDeviceRelation.begin();it!=pDevice->m_mapDeviceRelation.end();++it)
+				{
+					string sExtension;
+					DeviceRelation *pDeviceRelation = (*it).second;
+					sExtension = pDeviceRelation->m_pDevice->m_mapParameters_Find(DEVICEDATA_PhoneNumber_CONST);
+					if( sExtension.empty()==false ) // got one
+					{
+						listSlavesExtensions.push_back(sExtension);
+						listDevices.push_back(pDeviceRelation->m_pDevice->m_dwPK_Device);
+					}
+				}
+				if( 0 == listDevices.size() && NULL != pDevice->m_pRoom ) // still no extension -- just send to all phones in the same room
+				{
+					for(list<class DeviceData_Router *>::iterator it=pDevice->m_pRoom->m_listDevices.begin();it!=pDevice->m_pRoom->m_listDevices.end();++it)
+					{
+						DeviceData_Router *pDeviceData_Router = *it;
+						string sExtension = pDeviceData_Router->m_mapParameters_Find(DEVICEDATA_PhoneNumber_CONST);
+						if( sExtension.empty()==false ) // got one
+						{
+							listSlavesExtensions.push_back(sExtension);
+							listDevices.push_back(pDeviceData_Router->m_dwPK_Device);
+						}
+					}
+				}
+
+				if( listDevices.size() != 0 )  // We have a valid one
+				{
+					listDevices.remove(dwDevice_Caller);
+					listDevices.push_front(dwDevice_Caller); 
+					for(list<int>::iterator it = listDevices.begin(); it != listDevices.end(); ++it)
+					{
+						//is this an embedded phone?
+						if(FindValueInMap(map_embedphone2orbiter, *it, 0))
+						{
+							// all of us will call 997
+							LoggerWrapper::GetInstance()->Write(LV_STATUS,"Doing a speak in house with %d", *it);
+							DCE::CMD_Phone_Initiate cmd(m_dwPK_Device, *it, 0, SPEAKINTHEHOUSE_CONFERENCE_IVR);
+							SendCommand(cmd);
+						}
+					}
+					
+					return;
+				}
+			}
+
+			// If we got here there was a problem
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Doing a speak in house no phone relates to %d",iPK_Device_Related);
+		}
+	}
+
+	if(sPhoneNumber.empty() == false)
+	{
+		//get all embedded orbiter devices from the house
+		ListDeviceData_Router *pListDeviceData = m_pRouter->m_mapDeviceByTemplate_Find(DEVICETEMPLATE_Orbiter_Embedded_Phone_CONST);
+		if(NULL != pListDeviceData)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Doing a speak in ALL house with master %s", sPhoneNumber.c_str());
+			
+			list<int> listDevices;
+			list<string> listSlavesExtensions;
+			for(ListDeviceData_Router::iterator it = pListDeviceData->begin(); it != pListDeviceData->end(); ++it)
+			{
+				DeviceData_Router *pDeviceData_Router = *it;
+				if(NULL != pDeviceData_Router)
+				{
+					string sExtension = pDeviceData_Router->m_mapParameters_Find(DEVICEDATA_PhoneNumber_CONST);
+					if(sExtension.empty() == false && sExtension != sPhoneNumber) //all except the master
+					{
+						LoggerWrapper::GetInstance()->Write(LV_STATUS,"Doing a speak in ALL house with slave %s", sExtension.c_str());
+						listSlavesExtensions.push_back(sExtension);
+						listDevices.push_back(pDeviceData_Router->m_dwPK_Device);
+					}
+				}
+			}
+			
+			listDevices.remove(dwDevice_Caller);
+			listDevices.push_front(dwDevice_Caller); 
+			for(list<int>::iterator it = listDevices.begin(); it != listDevices.end(); ++it)
+			{
+				//is this an embedded phone?
+				if(FindValueInMap(map_embedphone2orbiter, *it, 0))
+				{
+					// all of us will call 997
+					LoggerWrapper::GetInstance()->Write(LV_STATUS,"Doing a speak in house with %d", *it);
+					DCE::CMD_Phone_Initiate cmd(m_dwPK_Device, *it, 0, SPEAKINTHEHOUSE_CONFERENCE_IVR);
+					SendCommand(cmd);
+					DCE::CMD_Set_Volume volCmd(m_dwPK_Device, *it, "0");
+					SendCommand(volCmd);
+				}
+			}
+			
+			// Finally, Flip the baby monitor station (specified by PK_Device), unmute.
+			DCE::CMD_Set_Volume volCmd2(m_dwPK_Device, dwPK_Device_Master_SimplePhone, "100");
+			SendCommand(volCmd2);
+
+		}
+		else
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Telecom_Plugin::CMD_Speak_in_house: failed to "
+				"get the list with embedded phones from the house");
+		}
+	}
+	else
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Telecom_Plugin::CMD_Speak_in_house: ain't got "
+			"the extension/phone number of the caller");
+	}
+
 }
