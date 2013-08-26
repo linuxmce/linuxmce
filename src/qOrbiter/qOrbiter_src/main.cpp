@@ -697,7 +697,7 @@ int main(int argc, char* argv[])
         //   QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &pqOrbiter, SLOT(setdceIP(QString)));
         dceThread.start();
 
-        orbiterWin.initView();
+
         // tcThread->start();
 #ifndef QT5
         //mediaThread->start();
@@ -712,23 +712,43 @@ int main(int argc, char* argv[])
         //        system_info.append(QString("; RAM: %1 MB").arg(memory.toLong() / 1024));
         //        p.close();
         //#endif
+
+
         if(sRouter_IP!="")
         {
             qDebug()<< "Command Line override. Using command line settings";
-
 
         }else if(sRouter_IP =="" && w.getInternalIp() != ""){
             qDebug() << "No Command line opt set but config file located";
             sRouter_IP = w.getInternalIp().toStdString();
             if(PK_Device == -1){
-                PK_Device = w.getDeviceNumber();            }
-
+                PK_Device = w.getDeviceNumber();
+            }
             orbiterWin.setDeviceNumber(PK_Device); orbiterWin.setRouterAddress(w.getInternalIp());
         }
         else{
-            qDebug() << "Nothing set, waiting for gui input.";
+            qDebug() << "Nothing set, using defaults.";
+            orbiterWin.setDeviceNumber(PK_Device); orbiterWin.setRouterAddress(w.getInternalIp());
         }
 
+        QList<QString*> myHosts;
+        QString badMatch = orbiterWin.getRouterAddress();
+        int f = badMatch.lastIndexOf(".");
+        qDebug() << badMatch.length() - f ;
+        badMatch.remove(f, badMatch.length() - f);
+
+        foreach (const QHostAddress &address, QNetworkInterface::allAddresses()) {
+            if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost)){
+                if(address.toString().contains(badMatch)){
+                    qDebug() << "My Ip's" << address.toString() << ":: badMatch==>"<<badMatch;
+                    w.setLocalAddress(address.toString());
+                    pqOrbiter.setLocalIp(address.toString());
+                }
+            }
+
+        }
+
+        orbiterWin.initView();
         pqOrbiter.qmlSetup(PK_Device, QString::fromStdString(sRouter_IP));
         a.exec();
 

@@ -5,7 +5,7 @@ TEMPLATE = lib
 contains(QT_VERSION,4.*.*){
 
 message("$$QT_VERSION DCE-Av-Plugin")
-	QT += declarative phonon network
+        QT += declarative phonon network opengl
 	DEFINES+=QT4
 }
 

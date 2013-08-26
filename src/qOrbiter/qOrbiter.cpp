@@ -1061,10 +1061,11 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     {
         if(iPK_MediaType !=18)
         {
-            checkTimeCode();
+
 
             QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
-            qWarning() << "Device Ip Address ==>" << port;
+            qWarning() << "Device port==>" << port;
+            checkTimeCode(m_dwPK_Device_NowPlaying);
             emit newTCport(port.toInt());
         }
 
@@ -1788,6 +1789,13 @@ void qOrbiter::CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,strin
     cout << "Parm #263 - PK_Device_To=" << iPK_Device_To << endl;
 }
 
+bool DCE::qOrbiter::initDceVars(){
+
+
+    return true;
+
+}
+
 bool DCE::qOrbiter::initialize()
 {
 
@@ -1808,6 +1816,10 @@ bool DCE::qOrbiter::initialize()
         emit deviceValid(true);
         emit commandResponseChanged("Starting Manager");
         emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sIPAddress));
+
+        if(!initDceVars()){
+            exit(99);
+        }
 
         CreateChildren();
         return true;
@@ -2987,23 +2999,25 @@ void DCE::qOrbiter::requestMediaPlaylist()
     }
 }
 
-void qOrbiter::checkTimeCode()
+void qOrbiter::checkTimeCode(int npDevice)
 {
-    qWarning() << "Searching for ip address of media player";
-    emit setMyIp(QString::fromStdString(m_sIPAddress));
+    qWarning() << "Searching for ip address of media player, device " << npDevice;
+    //  emit setMyIp(QString::fromStdString(m_sIPAddress));
 
-    DeviceData_Base *pDevice = m_dwPK_Device_NowPlaying ? m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_dwPK_Device_NowPlaying) : NULL;
-
-    string sIPAddress = pDevice->m_sIPAddress;
+    DeviceData_Base *pDevice =m_pData->m_AllDevices.m_mapDeviceData_Base_Find((long)npDevice) ;
+    qWarning() << pDevice->m_dwPK_DeviceTemplate;
+    string sIPAddress ="";
     qWarning() << "1st pass result is ==>" << sIPAddress.c_str();
     if( sIPAddress.empty() )
     {
-        if( pDevice->m_pDevice_MD && !pDevice->m_pDevice_MD->m_sIPAddress.empty() )
+        if( pDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Generic_PC_as_MD_CONST && !pDevice->m_pDevice_MD->m_sIPAddress.empty() ){
+            qWarning("MD address?");
             sIPAddress = pDevice->m_pDevice_MD->m_sIPAddress;
-        else if( pDevice->m_pDevice_Core && !pDevice->m_pDevice_Core->m_sIPAddress.empty() )
+        }else if(pDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Xine_Player_CONST  ) {
+            qWarning("XINE Ip Address set!");
             sIPAddress = pDevice->m_pDevice_Core->m_sIPAddress;
-        else if( pDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_qMediaPlayer_CONST ){
-            sIPAddress = pDevice->m_sIPAddress;
+        } else if(pDevice->m_dwPK_DeviceTemplate == 2205 ){
+           sIPAddress = GetCurrentDeviceData(m_dwPK_Device_NowPlaying, DEVICEDATA_TCP_Address_CONST);
         }
         else
         { qWarning() << "Could not find ip address";
@@ -4763,7 +4777,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
     else
     {
         qDebug() << currentScreen;
-     }
+    }
 
     qDebug() << "Preparing file list, mediatype==>" << iPK_MediaType;
     q_mediaType = QString::number(iPK_MediaType);
@@ -4957,7 +4971,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
                 pMediaGridTable = NULL;
                 if(b_cancelRequest)
                     b_cancelRequest=false;{
-                     requestPage(0);
+                    requestPage(0);
                 }
 
                 //requestGenres(iPK_MediaType);

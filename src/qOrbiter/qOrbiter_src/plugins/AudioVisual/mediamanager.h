@@ -61,6 +61,7 @@ public:
     QString filepath;
     QList <Phonon::AudioOutputDevice> outputs;
 
+
     int mediaBuffer;
 
     bool mediaPlaying;

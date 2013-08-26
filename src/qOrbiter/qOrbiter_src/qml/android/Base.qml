@@ -70,7 +70,6 @@ Rectangle {
         width: 400
 
         Rectangle{
-
             anchors.fill: parent
             color:"green"
             border.color: "white"

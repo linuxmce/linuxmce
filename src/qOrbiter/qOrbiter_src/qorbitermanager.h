@@ -201,6 +201,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY(QString currentSkin READ getCurrentSkin WRITE setConfigSkin NOTIFY currentSkinChanged)
     Q_PROPERTY(QString routerPort READ getRouterPort WRITE setRouterPort NOTIFY routerPortChanged)
     Q_PROPERTY(int isPhone READ getFormFactor WRITE setFormFactor NOTIFY formFactorChanged)
+    Q_PROPERTY(QString m_localAddress  READ getLocalAddress WRITE setLocalAddress NOTIFY localAddressChanged)
 
     /*!
      * \warning enablescreensavermode - currently unused, should be built anyways
@@ -443,6 +444,7 @@ Param 10 - pk_attribute
 
     std::string s_RouterIP;               // string of the router ip
     QString m_ipAddress;
+    QString m_localAddress;
     QString qs_routerip;
     QString internalHost;
     QString externalip;
@@ -487,6 +489,7 @@ Param 10 - pk_attribute
 signals:
     void skinMessage(QString s);
     void qtMessage(QString s);
+    void localAddressChanged();
 
     /*child devices */
     void mediaPlayerConnected(bool connect);
@@ -670,6 +673,8 @@ signals:
 
 public slots:
 
+    void setLocalAddress(QString l){m_localAddress = l; emit localAddressChanged(); }
+    QString getLocalAddress() {return m_localAddress; }
     void setRouterPort(QString p){routerPort = p; emit routerPortChanged();}
     QString getRouterPort(){return routerPort;}
 

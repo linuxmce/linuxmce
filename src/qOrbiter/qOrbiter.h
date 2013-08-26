@@ -149,6 +149,7 @@ public:
     QString dceIP; /**< The ip address of the router  */
     QString DCEHost; /**< The hostname of the router */
     string m_sExternalIP; /**< The external ip address of the router as seen from a WAN */
+    QString m_localIp;
     //@}
 
     /*! @name Device Id Member Variables */
@@ -1518,7 +1519,17 @@ signals:
 
 
 public slots:
+    /*!
+     * \brief setLocalIp Set the local ip address for this device.
+     * \param l
+     */
+    void setLocalIp(QString l) { m_localIp = l; }
 
+    /*!
+     * \brief initDceVars
+     * \return
+     */
+    bool initDceVars();
 
     /*Special*/
     void setVariable(int pkvar, QString val);
@@ -1678,7 +1689,7 @@ public slots:
     void FfMedia();
     void PauseMedia();
     void requestMediaPlaylist();
-    void checkTimeCode();
+    void checkTimeCode(int npDevice);
     void getStreamingVideo();
 
     void changedPlaylistPosition(QString pos);

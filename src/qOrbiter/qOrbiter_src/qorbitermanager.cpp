@@ -1457,9 +1457,11 @@ bool qorbiterManager::readLocalConfig()
                 setInternalIp("192.168.80.1");
 
             }
-
+#ifdef QT5
+            QString configSkin = configVariables.namedItem("qt5skin").attributes().namedItem("id").nodeValue();
+#else
             QString configSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
-
+#endif
             if (configSkin.isEmpty()){
 #ifdef __ANDROID__
                 currentSkin = "default";
@@ -1550,9 +1552,14 @@ bool qorbiterManager::writeConfig()
             QDomElement configVariables = localConfig.documentElement().toElement();
             configVariables.namedItem("routerip").attributes().namedItem("id").setNodeValue(m_ipAddress);           //internal ip
             configVariables.namedItem("routeraddress").attributes().namedItem("id").setNodeValue(internalHost);     //internal hostname
-            configVariables.namedItem("skin").attributes().namedItem("id").setNodeValue(currentSkin);              //curent skin
+#ifdef QT5
+            configVariables.namedItem("qt5skin").attributes().namedItem("id").setNodeValue(currentSkin);
+#else
+            configVariables.namedItem("skin").attributes().namedItem("id").setNodeValue(currentSkin);
+#endif
+            //current skin
+            configVariables.namedItem("qt5skin").attributes().namedItem("id").setNodeValue(currentSkin);
             configVariables.namedItem("routerport").attributes().namedItem("id").setNodeValue(routerPort);
-
             configVariables.namedItem("externalip").attributes().namedItem("id").setNodeValue(qs_ext_routerip);     //externalip
             configVariables.namedItem("externalHost").attributes().namedItem("id").setNodeValue(externalHost);      //external host
 

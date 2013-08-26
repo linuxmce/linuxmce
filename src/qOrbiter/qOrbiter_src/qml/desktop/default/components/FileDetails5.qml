@@ -45,7 +45,7 @@ Item {
     Image{
         id:imdb
         anchors.fill: parent
-        source:"http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=imdb&file="+filedetailsclass.file+"&val="+bgImageProp
+        source:"http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=atr&file="+filedetailsclass.file+"&val="+bgImageProp
        // onStatusChanged: imdb.status == Image.Ready ? filedetailrect.height = scaleY(100) : ""
     }   
 

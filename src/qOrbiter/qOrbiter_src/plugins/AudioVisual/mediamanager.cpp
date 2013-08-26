@@ -16,8 +16,6 @@ using namespace DCE;
 MediaManager::MediaManager(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
 {
-
-
     setFlag(ItemHasNoContents, false);
     serverAddress = "";
     deviceNumber = -1;
@@ -50,6 +48,8 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     totalTime=0;
     setMediaBuffer(0);
     setMediaPlaying(false);
+
+
 }
 
 void MediaManager::initializePlayer()
@@ -147,17 +147,15 @@ void MediaManager::newClientConnected()
 
 void MediaManager::startTimeCodeServer()
 {
+
     setCurrentStatus("Staring timecode server on port 12000");
     timeCodeServer->listen(QHostAddress::Any,12000);
     QObject::connect(timeCodeServer, SIGNAL(newConnection()), this , SLOT(newClientConnected()));
-#ifdef QT4
+
     if(mediaObject->errorString() =="")
     {
 
     }
-#elif QT5
-
-#endif
 
 }
 
@@ -184,11 +182,9 @@ void MediaManager::setAspectRatio(QString aspect)
 
 void MediaManager::getScreenShot()
 {
-#ifdef QT4
-    QImage screenShot =  videoSurface->snapshot();
-#elif QT5
 
-#endif
+    QImage screenShot =  videoSurface->snapshot();
+
 
 }
 
@@ -197,19 +193,18 @@ void MediaManager::setMediaUrl(QString url)
 {
     setCurrentStatus("Got New Media Url::"+url);
     filepath=url;
-#ifndef QT5
+
     mediaObject->setCurrentSource(Phonon::MediaSource(url));
     setCurrentStatus(QString("MediaObject Source::"+mediaObject->currentSource().fileName()));
     qDebug() <<"Media Object Source::"<< mediaObject->currentSource().type();
     qDebug() <<"Media Object Source::"<< mediaObject->currentSource().fileName();
 
-#elif QT5
 
-#endif
     mediaObject->play();
     qDebug() <<"Item is playing? " << mediaObject->state();
     qDebug() << "Errors " << mediaObject->errorString();
     qDebug() << discController->currentTitle();
+
 }
 
 
@@ -287,7 +282,8 @@ void MediaManager::mountDrive(int device)
 
 bool MediaManager::initViews(bool flipped)
 {
- QGraphicsScene * mp_parent = new QGraphicsScene(this);
+
+
     if(mediaObject->state() == Phonon::PlayingState){
         tempTime = mediaObject->currentTime();
         mediaObject->stop();
@@ -300,12 +296,10 @@ bool MediaManager::initViews(bool flipped)
     else{
         filterProxy = new QGraphicsProxyWidget(this);
     }
-    QGraphicsView *qgv_view = new QGraphicsView(mp_parent);
-    qgv_view->setViewport(new QGLWidget);
-
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
     filterProxy->hide();
+
 
     return true;
 
