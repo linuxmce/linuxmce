@@ -268,6 +268,7 @@ public:
 	void EVENT_Incoming_Call(string sPhoneCallerID) { GetEvents()->Incoming_Call(sPhoneCallerID.c_str()); }
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Set_Volume(string sLevel,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Phone_Initiate(int iPK_Device,string sPhoneExtension,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Phone_Answer(string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Phone_Drop(string &sCMD_Result,class Message *pMessage) {};
@@ -327,6 +328,32 @@ public:
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
 								CMD_Simulate_Keypress(sPK_Button.c_str(),iStreamID,sName.c_str(),sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Set_Volume_CONST:
+					{
+						string sCMD_Result="OK";
+						string sLevel=pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST];
+						CMD_Set_Volume(sLevel.c_str(),sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Set_Volume(sLevel.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;

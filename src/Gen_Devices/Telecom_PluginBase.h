@@ -128,6 +128,14 @@ public:
 			return atoi(m_mapParameters[DEVICEDATA_Emergency_phoneline_CONST].c_str());
 	}
 
+	int Get_PK_Device_Phone_Baby_Monitor()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PK_Device_Phone_Baby_Monitor_CONST).c_str());
+		else
+			return atoi(m_mapParameters[DEVICEDATA_PK_Device_Phone_Baby_Monitor_CONST].c_str());
+	}
+
 };
 
 
@@ -238,12 +246,14 @@ public:
 	int DATA_Get_No_of_sec_to_ring_before_IVR() { return GetData()->Get_No_of_sec_to_ring_before_IVR(); }
 	string DATA_Get_Emergency_numbers() { return GetData()->Get_Emergency_numbers(); }
 	int DATA_Get_Emergency_phoneline() { return GetData()->Get_Emergency_phoneline(); }
+	int DATA_Get_PK_Device_Phone_Baby_Monitor() { return GetData()->Get_PK_Device_Phone_Baby_Monitor(); }
 	//Event accessors
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_PL_Originate(int iPK_Device,string sPhoneExtension,string sPhoneCallerID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_PL_Transfer(int iPK_Device,int iPK_Users,string sPhoneExtension,string sChannel_1,string sChannel_2,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_PL_Cancel(int iPK_Device,string sChannel,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Set_Volume(string sLevel,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Phone_Initiate(int iPK_Device,string sPhoneExtension,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Phone_Answer(string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Phone_Drop(string &sCMD_Result,class Message *pMessage) {};
@@ -260,6 +270,7 @@ public:
 	virtual void CMD_Add_Extensions_To_Call(string sPhoneCallID,string sExtensions,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Get_Associated_Picture_For_Channel(string sChannel,char **pData,int *iData_Size,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Add_To_Speed_Dial(int iPK_Device,string sCallerID,string sPhoneExtension,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Phone_to_Baby_Monitor(int iPK_Device,string sPhoneNumber,string sList_PK_Device,int iPK_Device_Related,string &sCMD_Result,class Message *pMessage) {};
 
 	//This distributes a received message to your handler.
 	virtual ReceivedMessageResult ReceivedMessage(class Message *pMessageOriginal)
@@ -401,6 +412,32 @@ public:
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
 								CMD_PL_Cancel(iPK_Device,sChannel.c_str(),sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Set_Volume_CONST:
+					{
+						string sCMD_Result="OK";
+						string sLevel=pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST];
+						CMD_Set_Volume(sLevel.c_str(),sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Set_Volume(sLevel.c_str(),sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
@@ -845,6 +882,35 @@ public:
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
 								CMD_Add_To_Speed_Dial(iPK_Device,sCallerID.c_str(),sPhoneExtension.c_str(),sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Phone_to_Baby_Monitor_CONST:
+					{
+						string sCMD_Result="OK";
+						int iPK_Device=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_PK_Device_CONST].c_str());
+						string sPhoneNumber=pMessage->m_mapParameters[COMMANDPARAMETER_PhoneNumber_CONST];
+						string sList_PK_Device=pMessage->m_mapParameters[COMMANDPARAMETER_List_PK_Device_CONST];
+						int iPK_Device_Related=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_PK_Device_Related_CONST].c_str());
+						CMD_Phone_to_Baby_Monitor(iPK_Device,sPhoneNumber.c_str(),sList_PK_Device.c_str(),iPK_Device_Related,sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Phone_to_Baby_Monitor(iPK_Device,sPhoneNumber.c_str(),sList_PK_Device.c_str(),iPK_Device_Related,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
