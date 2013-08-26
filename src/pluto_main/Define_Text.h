@@ -1285,6 +1285,9 @@
 #define TEXT_Rew_2_sec_CONST 2228
 #define TEXT_Fwd_2_sec_CONST 2229
 #define TEXT_Confirm_Voicemail_Delete_CONST 2230
+#define TEXT_Confirm_Delete_All_Voicemail_CONST 2231
+#define TEXT_Baby_Monitor_On_CONST 2232
+#define TEXT_Baby_Monitor_Off_CONST 2233
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

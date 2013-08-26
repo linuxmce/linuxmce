@@ -2884,13 +2884,13 @@
 #define DESIGNOBJ_icoWeather16day_CONST 6282
 #define DESIGNOBJ_icoWeather26day_CONST 6283
 #define DESIGNOBJ_icoWeather36day_CONST 6284
-#define DESIGNOBJ_cellVoiceMail_CONST 6286
-#define DESIGNOBJ_butDeleteAll_CONST 6287
-#define DESIGNOBJ_icoDeleteAll_CONST 6288
-#define DESIGNOBJ_butPlayAllVoicemail_CONST 6289
-#define DESIGNOBJ_butBack2sec_CONST 6290
-#define DESIGNOBJ_butFwd2sec_CONST 6291
-#define DESIGNOBJ_icoDeleteVoicemail_CONST 6292
+#define DESIGNOBJ_cellVoiceMail_CONST 6285
+#define DESIGNOBJ_butDeleteAll_CONST 6286
+#define DESIGNOBJ_icoDeleteAll_CONST 6287
+#define DESIGNOBJ_butPlayAllVoicemail_CONST 6288
+#define DESIGNOBJ_butBack2sec_CONST 6289
+#define DESIGNOBJ_butFwd2sec_CONST 6290
+#define DESIGNOBJ_icoDeleteVoicemail_CONST 6291
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"
