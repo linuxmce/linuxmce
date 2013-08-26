@@ -91,6 +91,7 @@ int UniqueColors[MAX_TELECOM_COLORS];
 #define SPEAKINTHEHOUSE_INVALID_EXT "555"
 #define SPEAKINTHEHOUSE_CONFERENCE_IVR "997"
 #define SPEAKINTHEHOUSE_CONFERENCE_ALL "998"
+#define BABYMONITOR_CONFERENCE "9999"
 
 #define VOICEMAIL_EVENT "/usr/pluto/bin/SendVoiceMailEvent.sh"
 #define VOICEMAIL_URL_PARAM "/usr/pluto/bin/Voicemail_URL_Parm.php"
@@ -123,6 +124,7 @@ Telecom_Plugin::Telecom_Plugin(int DeviceID, string ServerAddress,bool bConnectE
 
 	m_sDestChannel = "";
 	m_bReplacedChannel = false;
+	m_bBabyMonitorActive=false;
 }
 
 //<-dceag-getconfig-b->
@@ -4543,8 +4545,9 @@ void Telecom_Plugin::CMD_Delete_File(string sFilename,string &sCMD_Result,Messag
 
 void Telecom_Plugin::CMD_Set_Volume(string sLevel,string &sCMD_Result,Message *pMessage)
 {
-	// Not implemented.
+	// Not implemented, don't even ask.
 }
+
 //<-dceag-c313-e->
 //<-dceag-c1118-b->
 
@@ -4564,7 +4567,6 @@ void Telecom_Plugin::CMD_Phone_to_Baby_Monitor(int iPK_Device,string sPhoneNumbe
 {
 	// If there's no phone number, fine one associated with the device
 
-  long dwPK_Device_Master_SimplePhone;
 	int dwDevice_Caller = 0;
 	bool bEmbeddedPhone = false;
 	if( sPhoneNumber.empty() )
@@ -4607,7 +4609,6 @@ void Telecom_Plugin::CMD_Phone_to_Baby_Monitor(int iPK_Device,string sPhoneNumbe
 					bEmbeddedPhone = pDeviceData_Router->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Orbiter_Embedded_Phone_CONST;
 
 					LoggerWrapper::GetInstance()->Write(LV_STATUS,"Telecom_Plugin::CMD_Speak_in_house : found device %d", pDeviceData_Router->m_dwPK_Device);
-					dwPK_Device_Master_SimplePhone=pDeviceData_Router->m_dwPK_Device;
 					sPhoneNumber = pDeviceData_Router->m_mapParameters_Find(DEVICEDATA_PhoneNumber_CONST);
 					LoggerWrapper::GetInstance()->Write(LV_STATUS,"Telecom_Plugin::CMD_Speak_in_house : found phone number of embedded phone %s", sPhoneNumber.c_str());
 				}
@@ -4623,7 +4624,7 @@ void Telecom_Plugin::CMD_Phone_to_Baby_Monitor(int iPK_Device,string sPhoneNumbe
 
 			int nMasterDevice = FindValueInMap(map_ext2device, sPhoneNumber, 0); 
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Doing a speak in house from a non-osd orbiter with %d", nMasterDevice);
-			DCE::CMD_Phone_Initiate cmd(m_dwPK_Device, nMasterDevice, 0, SPEAKINTHEHOUSE_CONFERENCE_IVR);
+			DCE::CMD_Phone_Initiate cmd(m_dwPK_Device, nMasterDevice, 0, BABYMONITOR_CONFERENCE);
 			SendCommand(cmd);
 		}
 
@@ -4639,7 +4640,7 @@ void Telecom_Plugin::CMD_Phone_to_Baby_Monitor(int iPK_Device,string sPhoneNumbe
 	{
 		// 555 = bogus call id, 998 = all speaker phones in house conf room
 	  // The false causes pause to not trigger.
-	  if( !InternalMakeCall(0, SPEAKINTHEHOUSE_INVALID_EXT, SPEAKINTHEHOUSE_CONFERENCE_ALL, pMessage, false) )
+	  if( !InternalMakeCall(0, SPEAKINTHEHOUSE_INVALID_EXT, BABYMONITOR_CONFERENCE, pMessage, false) )
 		{
 			sCMD_Result = string("ERROR : couldn't make a call from") + SPEAKINTHEHOUSE_INVALID_EXT + "to" + SPEAKINTHEHOUSE_CONFERENCE_ALL;
 		}
@@ -4692,7 +4693,7 @@ void Telecom_Plugin::CMD_Phone_to_Baby_Monitor(int iPK_Device,string sPhoneNumbe
 						{
 							// all of us will call 997
 							LoggerWrapper::GetInstance()->Write(LV_STATUS,"Doing a speak in house with %d", *it);
-							DCE::CMD_Phone_Initiate cmd(m_dwPK_Device, *it, 0, SPEAKINTHEHOUSE_CONFERENCE_IVR);
+							DCE::CMD_Phone_Initiate cmd(m_dwPK_Device, *it, 0, BABYMONITOR_CONFERENCE);
 							SendCommand(cmd);
 						}
 					}
@@ -4739,17 +4740,37 @@ void Telecom_Plugin::CMD_Phone_to_Baby_Monitor(int iPK_Device,string sPhoneNumbe
 				if(FindValueInMap(map_embedphone2orbiter, *it, 0))
 				{
 					// all of us will call 997
-					LoggerWrapper::GetInstance()->Write(LV_STATUS,"Doing a speak in house with %d", *it);
-					DCE::CMD_Phone_Initiate cmd(m_dwPK_Device, *it, 0, SPEAKINTHEHOUSE_CONFERENCE_IVR);
-					SendCommand(cmd);
-					DCE::CMD_Set_Volume volCmd(m_dwPK_Device, *it, "0");
-					SendCommand(volCmd);
+				  if (!m_bBabyMonitorActive)
+				    {
+				      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Activating Baby Monitor with phone ext %d", *it);
+				      DCE::CMD_Phone_Initiate cmd(m_dwPK_Device, *it, 0, BABYMONITOR_CONFERENCE);
+				      SendCommand(cmd);
+				      DCE::CMD_Set_Volume volCmd(m_dwPK_Device, *it, "0");
+				      SendCommand(volCmd);
+				    }
+				  else
+				    {
+				      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Deactivating Baby Monitor with phone ext %d",*it);
+				      DCE::CMD_Phone_Drop cmd(m_dwPK_Device, *it);
+				      SendCommand(cmd);
+				      Sleep(500); // Prevent Asterisk from losing its mind from hanging up exts too fast.
+				      DCE::CMD_Set_Volume volCmd(m_dwPK_Device, *it, "100");
+				      SendCommand(volCmd);
+				    }
 				}
 			}
 			
-			// Finally, Flip the baby monitor station (specified by PK_Device), unmute.
-			DCE::CMD_Set_Volume volCmd2(m_dwPK_Device, dwPK_Device_Master_SimplePhone, "100");
-			SendCommand(volCmd2);
+			if (!m_bBabyMonitorActive)
+			  {
+			    // Finally, Flip the baby monitor station (specified by PK_Device), unmute.
+			    DCE::CMD_Set_Volume volCmd2(m_dwPK_Device, DATA_Get_PK_Device_Phone_Baby_Monitor(), "100");
+			    SendCommand(volCmd2);
+			  }
+
+			m_bBabyMonitorActive=!m_bBabyMonitorActive;
+			int iText=(m_bBabyMonitorActive ? TEXT_Baby_Monitor_On_CONST : TEXT_Baby_Monitor_Off_CONST);
+			m_pOrbiter_Plugin->DisplayMessageOnOrbiter(dwDevice_Caller,
+								   "<%=T"+StringUtils::itos(iText)+"%>");
 
 		}
 		else

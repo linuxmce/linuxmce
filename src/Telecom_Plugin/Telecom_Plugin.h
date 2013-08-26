@@ -68,6 +68,8 @@ namespace DCE
 	string m_sDestChannel;
 	bool m_bReplacedChannel;
 
+	bool m_bBabyMonitorActive;
+
 	// adding orbiter to LiveAV mapping, so we can save it and flip back and forth appropriately.
 	std::map<int, bool> m_mapOrbiter_IsUsingLiveAV;
 
@@ -173,6 +175,7 @@ public:
 	int DATA_Get_No_of_sec_to_ring_before_IVR();
 	string DATA_Get_Emergency_numbers();
 	int DATA_Get_Emergency_phoneline();
+	int DATA_Get_PK_Device_Phone_Baby_Monitor();
 
 			*****EVENT***** accessors inherited from base class
 
