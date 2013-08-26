@@ -190,6 +190,13 @@ namespace DCE
   bool X11EmulatorController::doAction(string sAction) // from EmulatorController
   {
 
+    // TODO: Do we rethink doAction as a virtual instead of a pure virtual?
+    if (sAction=="NOP") // NOP = no operation for those who don't speak 6502 assembler :P
+      {
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"X11EmulatorController::doAction(NOP)");
+	return true;
+      }
+
     int iKeysym, iKeysym_modifier;
     pair<int, int> pairKeysyms = m_pEmulatorModel->m_mapActionsToKeysyms_Find(sAction);
 

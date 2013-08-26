@@ -188,6 +188,8 @@ namespace DCE
 
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"EmulatorController::run() - Launching %s with args %s",m_pEmulatorModel->m_sEmulatorBinary.c_str(),m_pEmulatorModel->m_sArgs.c_str());
 
+    m_pEmulatorModel->coldReset();
+
     if (m_pEmulatorModel->m_bRunning && m_pEmulatorModel->m_bChangeRequiresRestart)
       {
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Emulator is running, and we need to restart.");
@@ -302,8 +304,9 @@ namespace DCE
     else
       {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"EmulatorController::pause() - called while already paused.");
+        sAction="NOP";
       }
-	return doAction(sAction);
+    return doAction(sAction);
   }
 
   bool EmulatorController::unpause()
@@ -317,7 +320,7 @@ namespace DCE
     else
       {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"EmulatorController::unpause() - called while already resumed.");
-	sAction="";
+	sAction="NOP";
       }
     return doAction(sAction);
   }

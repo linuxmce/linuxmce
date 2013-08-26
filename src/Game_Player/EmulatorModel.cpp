@@ -59,4 +59,16 @@ namespace DCE
     m_iExit_Code=-1;
   }
 
+  void EmulatorModel::coldReset()
+  {
+    m_bRunning_set(false);
+    m_bIsPaused=false;
+    m_iSpeed=1000; // 1x speed when initialized.
+    m_iActiveMenu=0;
+    m_iStreamID=0;
+    m_bIsStreaming=false;
+    m_bIsStreamingSource=false;
+    m_bIsRecording=false;
+  }
+
 }

@@ -81,6 +81,9 @@ namespace DCE
 
     EmulatorModel();
     ~EmulatorModel();
+
+    void coldReset(); // Wipe everything before a run();
+
   };
 
 }
