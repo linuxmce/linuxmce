@@ -343,8 +343,11 @@ int LMCERenderer::GetMediaType(HObject *metadata, QUrl& url)
 		}
 		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::GetMediaType() metadata->type = %d, mediaType = %d", metadata->type(), mediaType);
 	} else {
+		// If the upnp media server does not provide metadata, guess media type from url extension
 		if (StringUtils::EndsWith(url.toString().toStdString(), "flac") ||
-		    StringUtils::EndsWith(url.toString().toStdString(), "flc"))
+		    StringUtils::EndsWith(url.toString().toStdString(), "flc") ||
+		    StringUtils::EndsWith(url.toString().toStdString(), "mp3") ||
+		    StringUtils::EndsWith(url.toString().toStdString(), "wav"))
 		{
 			mediaType = MEDIATYPE_lmce_StreamedAudio_CONST;
 		}

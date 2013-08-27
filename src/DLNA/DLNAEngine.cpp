@@ -98,8 +98,8 @@ int DLNAEngine::Init()
 
 	if (!m_pDeviceHost->init(hostConf)) 
 	{
-		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNAEngine::Run(): devicehost init failed:");
-		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNAEngine::Run(): Error: %s", m_pDeviceHost->errorDescription().toStdString().c_str());
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "DLNAEngine::Run(): devicehost init failed:");
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "DLNAEngine::Run(): Error: %s", m_pDeviceHost->errorDescription().toStdString().c_str());
 	}
 	
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNAEngine::Run(): rootDevices: %d", m_pDeviceHost->rootDevices().size());
