@@ -75,3 +75,7 @@ ScenarioSelector ScenarioSelector.qml
 GenericAttributeFilter GenericAttributeFilter.qml
 StyledText StyledText.qml
 HomeOptions HomeOptions.qml
+TemplatePlaylist TemplatePlaylist.qml
+Metadata_4 Metadata_4.qml
+NowPlayingRemoteImage NowPlayingRemoteImage.qml
+MediaPlaybackTemplate MediaPlaybackTemplate.qml

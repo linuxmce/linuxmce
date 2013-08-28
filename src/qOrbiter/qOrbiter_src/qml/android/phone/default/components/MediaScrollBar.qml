@@ -1,11 +1,10 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
 
-Rectangle {
+Item {
     id:scroller
     width: scaleX(55)
-    height: scaleY(4)
-    color: "transparent"
+    height: scaleY(4)   
     property int slidertimer: (scroll_tab.x / scroller_transit.width) * dceTimecode.tcTotalTime
 
     Rectangle{
@@ -66,5 +65,15 @@ Rectangle {
         }
     }
 
+    Text {
+        id: np
+        text:dceTimecode.qsCurrentTime
+        font.pixelSize: scaleY(2.5)
+        anchors.bottom: media_scroller.top
+        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        anchors.horizontalCenter: media_scroller.horizontalCenter
+        color: "white"
+        visible:  dceTimecode.qsCurrentTime ==="0" ? false: true
+    }
 
 }
