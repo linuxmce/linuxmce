@@ -164,11 +164,14 @@ void RomFileHandler::getMAMEData(string sRomName)
 		vector<string> vectOutput_Rows;
 		vector<string>::iterator it;
 		StringUtils::Tokenize(sOutput,"\n",vectOutput_Rows);
-		m_sROMTitle = vectOutput_Rows[0];
-		m_sROMYear = vectOutput_Rows[1];
-		m_sROMManufacturer = vectOutput_Rows[2];
-		m_sROMGenre = vectOutput_Rows[3];
-		m_sROMSystem = "Arcade"; // FIXME: deal with this?
+		if (vectOutput_Rows.size() == 4)
+		{
+			m_sROMTitle = vectOutput_Rows[0];
+			m_sROMYear = vectOutput_Rows[1];
+			m_sROMManufacturer = vectOutput_Rows[2];
+			m_sROMGenre = vectOutput_Rows[3];
+			m_sROMSystem = "Arcade"; // FIXME: deal with this?
+		}
 	}
 
 }
