@@ -40,8 +40,17 @@
 
 			rm -f "$logfile"
 		done
+		
+		/usr/pluto/bin/UpdateMediaDaemonControl.sh -status | grep stopped && touch /tmp/UpdateMediaDaemonControlStopped
+		if ! [ -f /tmp/UpdateMediaDaemonControlStopped ]; then 
+			/usr/pluto/bin/UpdateMediaDaemonControl.sh -disable
+		fi
 	endscript
 	postrotate
+		if ! [ -f /tmp/UpdateMediaDaemonControlStopped ] ; then
+			/usr/pluto/bin/UpdateMediaDaemonControl.sh -enable
+			rm /tmp/UpdateMediaDaemonControlStopped -f
+		fi
 		/usr/pluto/bin/MessageSend dcerouter 0 -1000 7 10 || :
 		killall -USR1 tee-pluto || :
 
