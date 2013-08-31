@@ -67,10 +67,10 @@ Item {
         id: newOrbiterButton
     }
 
-//    FirstRunOptions{
-//        anchors.bottom: parent.bottom
-//        visible: manager.first_run
-//    }
+    FirstRunOptions{
+        anchors.bottom: parent.bottom
+        visible: manager.first_run
+    }
 
     Text {
         id: loadingStatus

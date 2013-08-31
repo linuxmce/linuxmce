@@ -1,12 +1,16 @@
-import QtQuick 1.0
+import QtQuick 1.1
 import "../../lib/handlers"
 Item {
     id:nonepgplaylist
-    width: scaleX(80)
-    height: scaleY(75)
+    width: manager.appWidth
+    height: manager.appHeight
     clip:true
-    Component.onCompleted: mediaplaylist.populate()
-    state:"view"
+
+    property double spacetracker: ((phantom_spaceman.x+(manager.appWidth)) / manager.appWidth)
+     Component.onCompleted: mediaplaylist.populate()
+    property alias psPos:phantom_spaceman.x
+
+
     Connections{
         target: mediaplaylist
         onActiveItemChanged:{
@@ -14,14 +18,7 @@ Item {
         }
     }
 
-    Rectangle{
-        anchors.fill: parent
-        color: "black"
-        border.color: "orange"
-        border.width: 1
-    }
-
-  /*  BorderImage {
+    /*  BorderImage {
         id: borderimg
         verticalTileMode: BorderImage.Round
         horizontalTileMode: BorderImage.Repeat
@@ -35,38 +32,43 @@ Item {
 
     ListView{
         id:nonepgplaylistview
-        width: scaleX(80)
-        height: scaleY(75)
-        highlightFollowsCurrentItem: true
-        highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
+        width:parent.width - 20
+        height: parent.height - 20
         clip: true
+        //  opacity: parent.opacity
+        anchors.centerIn: parent
         interactive: true
         flickableDirection: "VerticalFlick"
         model: mediaplaylist
-
+        spacing:scaleX(2)
         delegate:
-            Rectangle {
-            border.color: "silver"
-            border.width: 1
-            width:scaleX(80)
+            Item
+        {
+            width:manager.appWidth-20
             height: scaleY(20)
-            color:"transparent"
-
             clip: true
+
+            Rectangle{
+                anchors.fill: parent
+                color: "black"
+                opacity: .85
+                radius:5
+                border.color: "white"
+            }
+
             Image {
                 id: playlistimage
                 fillMode: Image.PreserveAspectCrop
                 source:  index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: ""
                 anchors.fill: parent
-                opacity: 1
+                opacity: source ==="" ? 0 : 1
             }
+
             Text {
                 id: position
                 text: qsTr("#") + dceindex
-                font.family: "DroidSans"
-                color: "silver"
+                color: "White"
                 font.pixelSize: scaleY(4)
-                font.bold: true
                 anchors.bottom: parent.bottom
                 opacity: .75
                 anchors.right: parent.right
@@ -74,43 +76,36 @@ Item {
 
             Text {
                 text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
-                font.family: "DroidSans"
-                color: "silver"
+                color: "white"
                 width: parent.width
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                font.pixelSize: scaleY(2)
-                font.bold: true
+                font.pixelSize: scaleY(5)
+                font.bold: false
             }
 
-           Image {
-                id: overlay
-                fillMode: Image.PreserveAspectCrop
-                source: "../img/transparencymask.png"
+            PlaylistClickedHandler{
+                id:ps
                 anchors.fill: parent
-                opacity: .50
+                drag.target: phantom_spaceman
+                drag.axis: Drag.XAxis
+                drag.filterChildren: true
+                onReleased: {
+                        phantom_spaceman.x=0
+                }
             }
 
-           PlaylistClickedHandler{
-               onPressed: border.color = "orange"
-               onReleased: border.color="silver"
-           }
+        }
+}
+
+        Item{
+            id:phantom_spaceman
+            height:manager.appHeight
+            width: manager.appWidth
+            onXChanged:{
+                metadataContainer.x =( phantom_spaceman.x + metadataContainer.width)
+                  if  (phantom_spaceman.x < manager.appWidth *(-.75) ) {
+                    mediaPlaybackBase.state = "controls"
+                }
+            }
         }
     }
-
-    states: [
-        State {
-            name: "view"
-            PropertyChanges {
-                target: nonepgplaylistview
-                visible:true
-            }
-        },
-        State {
-            name: "edit"
-            PropertyChanges {
-                target: nonepgplaylistview
-                visible:false
-            }
-        }
-    ]
-}

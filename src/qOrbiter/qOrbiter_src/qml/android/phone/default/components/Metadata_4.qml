@@ -4,47 +4,54 @@ import "../components"
 Column{
     id:textcol
     spacing: scaleY(1.5)
-    width: scaleX(80)
-    height: childrenRect.height
-    anchors.top: nowplayingimage.bottom
-    anchors.topMargin: scaleY(4)
-    anchors.horizontalCenter: parent.horizontalCenter
+    width: scaleX(100)
+    height: childrenRect.height+(scaleY(2))
+
+    Text {
+        id: performer
+        width: parent.width
+        text: qsTr("Artist: ")+ dcenowplaying.performerlist
+        wrapMode: "WrapAtWordBoundaryOrAnywhere"
+        elide: Text.ElideRight
+        smooth: true
+        font.pixelSize: scaleY(5)
+        visible:  dcenowplaying.performerlist =="" ? false: true
+        color: "white"
+    }
     
     Text {
         id: generaltitle
         width: parent.width
         text:  dcenowplaying.qs_mainTitle
-        font.family: "Droid Sans"
-        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-        font.bold: true
+         elide: Text.ElideRight
+        wrapMode: "WrapAtWordBoundaryOrAnywhere"        
         smooth: true
-        font.pixelSize: scaleY(4)
+        font.pixelSize: scaleY(5)
         visible:  dcenowplaying.qs_mainTitle =="" ? false: true
-        color: "orange"
+        color: "white"
     }
+
     Text {
         id: tracktitle
         width: parent.width
-        text:  dcenowplaying.mediatitle
-        font.family: "Droid Sans"
-        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-        smooth: true
-        font.bold: true
-        font.pixelSize: scaleY(3)
+         elide: Text.ElideRight
+        text: qsTr("Title: ") + dcenowplaying.mediatitle
+        wrapMode: "WrapAtWordBoundaryOrAnywhere"       
+        font.pixelSize: scaleY(4)
         visible:  dcenowplaying.mediatitle =="" ? false: true
-        color: "silver"
+        color: "white"
     }
     
     Text {
         id: album
         width: parent.width
-        text:  dcenowplaying.album + "|" + dcenowplaying.releasedate
-        wrapMode: "WrapAtWordBoundaryOrAnywhere"
-        font.bold: true
+        text: qsTr("Album: ")+ dcenowplaying.album + " | " + dcenowplaying.releasedate
+         elide: Text.ElideRight
+        wrapMode: "WrapAtWordBoundaryOrAnywhere"      
         smooth: true
-        font.pixelSize: scaleY(2)
+        font.pixelSize: scaleY(4)
         visible:  dcenowplaying.album =="" ? false: true
-        color: "silver"
+        color: "white"
     }
     
     
@@ -53,12 +60,11 @@ Column{
         width: parent.width
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
         text: qsTr("Genre(s): ") + dcenowplaying.genre
-        font.family: "Droid Sans"
-        font.bold: true
+         elide: Text.ElideRight
         smooth: true
-        font.pixelSize: scaleY(2)
+        font.pixelSize: scaleY(4)
         visible:  dcenowplaying.genre =="" ? false: true
-        color:"silver"
+        color:"white"
         MouseArea{
             anchors.fill: genre
             hoverEnabled: true
@@ -68,17 +74,14 @@ Column{
     }
     
     Text {
-        id: track
-        
+        id: track        
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
         anchors.bottom:controls.top
         anchors.left: ha.right
         text: qsTr("Track: ") + dcenowplaying.track
-        font.family: "Droid Sans"
-        font.bold: true
         //font.italic: true
         smooth: true
-        font.pixelSize: scaleY(3)
+        font.pixelSize: scaleY(5)
         visible:  dcenowplaying.track =="" ? false: true
         color: "orange"
         opacity: .50

@@ -5,7 +5,7 @@ Item{
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.verticalCenterOffset:-10
     width: parent.width -10
-    height: scaleY(55)
+    height:  scaleY(35)
     Rectangle {
         anchors.fill: parent
         radius: 7
@@ -40,7 +40,7 @@ Item{
         id:connectionVars
         anchors.top: connectionlabel.bottom
         spacing: 10
-        height: parent.height*.65
+        height: childrenRect.height
         width: childrenRect.width
 
         Column{
@@ -61,15 +61,6 @@ Item{
                 color:"white"
             }
 
-            Text {
-                text: qsTr("External Ip:")
-                font.pointSize: infoTextSize
-                font.family: myFont.name
-                anchors.verticalCenter: parent.verticalCenter
-                color:"white"
-                visible:ext_routerip.visible
-                height: visible ? paintedHeight :0
-            }
         }
 
 

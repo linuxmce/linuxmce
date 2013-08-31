@@ -8,7 +8,6 @@ Item {
     state:"controls"
     property Item controlSourceItem:AudioRemote{id:remote}
     property double conversionRate:metadataContainer.x/manager.appWidth
-    onConversionRateChanged: console.log(conversionRate)
 
     Component.onCompleted:{
         manager.setBoundStatus(true)
@@ -34,6 +33,8 @@ Item {
         focus:true
         property int trigger: x+width/2
 
+
+
         Keys.onReleased: {
             switch(event.key){
             case Qt.Key_VolumeDown:
@@ -53,9 +54,7 @@ Item {
         }
 
         onXChanged:{
-            if (x >  width*.90 ){
-                console.log(trigger)
-                console.log("Playlist Mode")
+            if (x >  width*.65 ){
                 mediaPlaybackBase.state = "playlist"
             }else if ( x+width < ( width *.20) ){
                 console.log("Advanced Mode")
@@ -64,7 +63,7 @@ Item {
 
         Column{
             id:md_layout
-            height: scaleY(65)
+            height: childrenRect.height
             width: parent.width
             spacing:scaleY(4)
 
@@ -83,15 +82,17 @@ Item {
             anchors.fill: parent
             drag.target: metadataContainer
             drag.axis: Drag.XAxis
+            drag.filterChildren: true
             onReleased: if(enabled){
                             mediaPlaybackBase.state="controls"
                         }
 
         }
 
-        MediaScrollBar{id:media_scroller;
-            anchors.top: metadataContainer.bottom
-            anchors.horizontalCenter: metadataContainer.horizontalCenter
+        MediaScrollBar{
+            id:media_scroller;
+            anchors.top: md_layout.bottom
+            anchors.horizontalCenter: md_layout.horizontalCenter
             anchors.topMargin: scaleY(2)
         }
 
@@ -99,6 +100,11 @@ Item {
             id:controlsTarget
             anchors.bottom: parent.bottom
             sourceComponent:AudioRemote{}
+        }
+        HomeButton{
+            id:home
+            anchors.left:parent.left;
+            anchors.top:parent.top
         }
     }
 
@@ -119,6 +125,13 @@ Item {
             }
 
             PropertyChanges{
+                target:templatePlaylist
+                scale:conversionRate
+                opacity: scale
+                enabled:false
+            }
+
+            PropertyChanges{
                 target:volIndicator
                 height: 0
                 width: 0
@@ -130,15 +143,18 @@ Item {
             name:"playlist"
             PropertyChanges{
                 target:templatePlaylist
-                opacity:1
-                scale:1
+                spacetracker:1
+                scale:conversionRate
+                opacity: scale
+                psPos:0
+
             }
             PropertyChanges {
                 target: metadataContainer
-                visible:false
+//                visible:false
                 enabled:false
                 focus:false
-                 x:parent.x
+                x:templatePlaylist.psPos+manager.appWidth
             }
         },
         State{
@@ -169,7 +185,7 @@ Item {
 
     transitions: [
         Transition {
-            from: "dragging"
+            from: "*"
             to: "controls"
             PropertyAnimation{
                 target:metadataContainer
@@ -195,11 +211,7 @@ Item {
 
         }
     ]
-    HomeButton{
-        id:home
-        anchors.left:parent.left;
-        anchors.top:parent.top
-    }
+
 
     Item{
         id:volIndicator

@@ -4,12 +4,12 @@ import QtQuick 1.1
 Item {
     id:scroller
     width: scaleX(55)
-    height: scaleY(4)   
+    height: scaleY(8)
     property int slidertimer: (scroll_tab.x / scroller_transit.width) * dceTimecode.tcTotalTime
 
     Rectangle{
         id:drag_indicator
-        height: scaleY(5)
+        height: scaleY(8)
         width: scaleY(10)
         opacity: 0
         Text {
@@ -42,7 +42,7 @@ Item {
     Image {
         id: scroll_tab
         source: "../img/scroller.png"
-        height: scaleY(6)
+        height: scaleY(9)
         width: scaleX(3)
         anchors.verticalCenter: scroller_transit.verticalCenter
         x: ( dceTimecode.runningTimer / dceTimecode.tcTotalTime) * scroller.width
