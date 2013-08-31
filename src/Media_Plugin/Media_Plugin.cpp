@@ -3641,6 +3641,26 @@ void Media_Plugin::CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_Med
 			while ( itFileName != allFilesList.end() )
 				dequeMediaFile.push_back(new MediaFile(m_pMediaAttributes->m_pMediaAttributes_LowLevel, *itFileName++));
 		}
+		else if ( sFilename.size()>2 && sFilename[0]=='!' && (sFilename[1] == 'v' || sFilename[1] == 'V')) // Special case, means play all the voicemails of the current user.
+		  {
+		    string sDataGridID="Voicemail_"+sFilename.substr(2);
+		    DataGridTable *pDataGridTable = m_pDatagrid_Plugin->DataGridTable_get(sDataGridID);
+		    if (pDataGridTable)
+		      {
+			for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+			  {
+			    DataGridCell *pCell = it->second;
+			    const char *pValue = pCell->GetValue();
+			    LoggerWrapper::GetInstance()->Write(LV_WARNING,"XXXXXX Reading Cell value of %s",pValue);
+			    if ( pCell && pValue && FileUtils::FileExists(string(pValue)))
+			      {
+				MediaFile *pMediaFile = new MediaFile(string(pValue));
+				dequeMediaFile.push_back(pMediaFile);
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXX Added %s to MediaFile Deque",pValue);
+			      }
+			  }
+		      }
+		  }
 		else if( sFilename.size()>2 && sFilename[0]=='!' && (sFilename[1] == 'g' || sFilename[1] == 'G') )  // Special case, means use all the files in this grid
 		{
 			string sDataGridID = "MediaFile_" + sFilename.substr(2);
