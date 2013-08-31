@@ -42,6 +42,7 @@ id:btnBase
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
         anchors.margins: 5
+        font.weight: Font.Light
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
         color:"black"
     }

@@ -20,9 +20,59 @@ Item {
         }
     }
 
+
+    ListView{
+        id:filterlist
+        height: scaleY(75)
+        width:scaleX(95)
+        model:currentModel
+        anchors.top: heading.bottom
+        anchors.left: heading.left
+        delegate:Item{
+            height:scaleY(18)
+            width: parent.width
+
+            Rectangle{
+                anchors.fill: parent
+                color: "black"
+                border.color: "orange"
+                border.width: 1
+            }
+
+            Row{
+                anchors.fill: parent
+
+                StyledText{
+                    text: name
+                    color: "white"
+                    elide: Text.ElideRight
+                    width:parent.width *.75
+                    font.pointSize:scaleY(4)
+                    font.bold: false
+                    font.weight: Font.Light
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                Rectangle{
+                    height: scaleY(14)
+                    width: height
+                    radius:5
+                    color: ms.itemActive ? androidSystem.greenHighlight : androidSystem.redHighlight
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                MouseArea{
+                    id:ms
+                    anchors.fill: parent
+                    property bool itemActive:model.status
+                    onClicked:{filterlist.model.setSelectionStatus(name); itemActive =  filterlist.model.getSelectionStatus(name)}
+
+                }
+            }
+        }
+    }
     Item{
         id:heading
-        anchors.top: generic_filter_view.top
+        anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         width: filterlist.width
         height: scaleY(8)
@@ -34,52 +84,13 @@ Item {
         StyledText{
             text: "Click to Close"
             color:"black"
-            font.pixelSize: 22
+            font.bold: false
+            anchors.verticalCenter: parent.verticalCenter
+            fontSize: scaleY(3)
         }
         MouseArea{
             anchors.fill: parent
             onClicked: generic_filter_view.currentModel=""
-        }
-    }
-    ListView{
-        id:filterlist
-        height: scaleY(65)
-        width:scaleX(55)
-        model:currentModel
-        anchors.top: heading.bottom
-        anchors.left: heading.left
-        delegate:Item{
-            height:scaleY(15)
-            width: scaleX(55)
-            Rectangle{
-                anchors.fill: parent
-                color: "black"
-                border.color: "orange"
-                border.width: 1
-                Row{
-                    anchors.fill: parent
-                    StyledText{
-                        text: name
-                        color: "white"
-                        width:parent.width *.75
-                        font.pointSize:scaleY(4)
-                    }
-
-                    Rectangle{
-                        height: 45
-                        width: 45
-                        radius:5
-                        color: status ? "green" : "red"
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked:filterlist.model.setSelectionStatus(name)
-
-                        }
-                    }
-                }
-            }
         }
     }
 

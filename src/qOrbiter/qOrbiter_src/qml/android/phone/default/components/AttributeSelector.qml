@@ -21,26 +21,28 @@ Item {
         height: parent.height * .95
         width: parent.width*.85
         spacing: 5
-
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
         ButtonSq{
             buttontext: "Play All"
+            buttontextfontsize: scaleY(5)
             height: style.stdbuttonh
             width: parent.width
-            buttontextbold: true
+            buttontextbold: false
             imgSource: ""
-            color: "black"
+            color: androidSystem.orangeHighlight
             onActivated: manager.playMedia("!G"+iPK_Device)
-
         }
 
 
         ButtonSq{
             buttontext: "Attribute Sort"
             buttonsqradius: 7
+             buttontextfontsize: scaleY(5)
             height: style.stdbuttonh
             width: parent.width
             imgSource: ""
-            color: androidSystem.orangeStandard
+            color: androidSystem.orangeHighlight
             onActivated:{filterTarget.currentModel = attribfilter; attributeSelector.state="hidden"}
         }
 
@@ -48,10 +50,11 @@ Item {
         ButtonSq{
             buttontext: "Genre"
             buttonsqradius: 7
+             buttontextfontsize: scaleY(5)
             height: style.stdbuttonh
             width: parent.width
             imgSource: ""
-            color: androidSystem.orangeStandard
+            color: androidSystem.orangeHighlight
             onActivated:{filterTarget.currentModel = genrefilter; attributeSelector.state="hidden"}
         }
 
@@ -59,16 +62,18 @@ Item {
         ButtonSq{
             buttontext: "Sources"
             buttonsqradius: 7
+             buttontextfontsize: scaleY(5)
             height: style.stdbuttonh
             width: parent.width
             imgSource: ""
-            color: androidSystem.orangeStandard
+            color: androidSystem.greenStandard
             onActivated:{ filterTarget.currentModel = mediasourcelist;attributeSelector.state="hidden"}
         }
 
         ButtonSq{
             buttontext: "Resolution"
             buttonsqradius: 7
+             buttontextfontsize: scaleY(5)
             height: style.stdbuttonh
             width: parent.width
             imgSource: ""
@@ -80,6 +85,7 @@ Item {
         ButtonSq{
             buttontext: "Mediatypes"
             buttonsqradius: 7
+             buttontextfontsize: scaleY(5)
             height: style.stdbuttonh
             width: parent.width
             imgSource: ""
@@ -91,10 +97,11 @@ Item {
         ButtonSq{
             buttontext: "Home"
             buttonsqradius: 7
+             buttontextfontsize: scaleY(5)
             height: style.stdbuttonh
             width: parent.width
             imgSource: ""
-            color: androidSystem.orangeStandard
+            color: androidSystem.blueHighlight
             onActivated:{manager.gotoQScreen("Screen_1.qml");attributeSelector.state="hidden"}
 
         }

@@ -104,7 +104,6 @@ Item {
             height: scaleY(15)
             clip:true
 
-
             Image  {
                 id: imagerect;
                 fillMode: Image.PreserveAspectCrop
@@ -116,7 +115,8 @@ Item {
                 color: mouseclick.pressed ? "white":"black"
                 anchors.fill: parent
                 opacity: mouseclick.pressed ? 1 : .65
-
+                radius: 5
+                border.color: mouseclick.pressed ? "green":"white"
                 Behavior on color {
                     PropertyAnimation{
                         duration:250
@@ -162,10 +162,15 @@ Item {
         width: scaleX(10)
         model: dataModel.totalPages
         anchors.left: list_view1.right
-        delegate: Rectangle{
+        delegate: Item{
             height: scaleY(10)
             width: scaleX(10)
-            color: "transparent"
+
+            Rectangle{
+                anchors.fill: parent
+                radius: 5
+                color: "transparent"
+            }
             Text {
                 id:page_label
                 text: index

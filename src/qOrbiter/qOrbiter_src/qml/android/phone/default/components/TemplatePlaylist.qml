@@ -7,7 +7,7 @@ Item {
     clip:true
 
     property double spacetracker: ((phantom_spaceman.x+(manager.appWidth)) / manager.appWidth)
-     Component.onCompleted: mediaplaylist.populate()
+    Component.onCompleted: mediaplaylist.populate()
     property alias psPos:phantom_spaceman.x
 
 
