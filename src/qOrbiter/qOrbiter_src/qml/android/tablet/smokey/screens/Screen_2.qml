@@ -64,7 +64,6 @@ Item {
                 console.log("sucess")
             }
         }
-
     }
 
     Keys.onEscapePressed: manager.gotoQScreen("Screen_1.qml")

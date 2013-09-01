@@ -17,90 +17,85 @@ import "../components"
  Param:  253  Value:  0
   */
 
-   Rectangle {
+Item {
     id:asktoresume
-    width: appW
-    height: appH
-    color: "transparent"
+    width: manager.appWidth
+    height: manager.appHeight
 
-    Image {
-        id: bg
-        source: "../img/bkg.png"
-        anchors.fill: asktoresume
+    Rectangle {
+        id:containerrect
+        anchors.fill: parent
+        color: style.bgcolor
+        clip: true
+        border.color: style.highlight1
+        border.width: 2
+        anchors.centerIn: parent
+        radius: 10
+        opacity:.85
     }
 
-            Rectangle {
-            id:containerrect
-            height:scaleY(50)
-            width: scaleX(60)
-            color: style.bgcolor
-            clip: true
-            border.color: style.highlight1
-            border.width: 2
-            anchors.centerIn: parent
-            radius: 10
+    Row
+    {
+        height: childrenRect.height + scaleY(1)
+        width: childrenRect.width
+        spacing: scaleX(1)
 
-            Text {
-                id: text1
-                width: parent.width -10
-                height: scaleY(5)
-                text: "Would you Like to Auto resume your media?"
-                z: 2
-                font.family: "Droid Sans"
-                font.italic: false
-                horizontalAlignment: Text.AlignHCenter
-                font.bold: false
-                color: "aliceblue"
-                wrapMode: Text.WrapAnywhere
-                font.pixelSize: 18
-                anchors.centerIn: containerrect
+        anchors.centerIn: parent
+
+        ButtonSq{
+            buttontext: "Yes Resume"
+            buttonsqradius: 10
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {manager.setPosition(screenparams.getParam(188)) ;gotoQScreen("Screen_"+screenparams.getParam(226)+".qml") }
             }
-
-            Row
-            {
-                height: childrenRect.height + scaleY(1)
-                width: childrenRect.width
-                spacing: scaleX(1)
-                anchors.top: text1.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-                ButtonSq{
-                    buttontext: "Yes Resume"
-                    buttonsqradius: 10
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: {manager.setPosition(screenparams.getParam(188)) ;gotoQScreen("Screen_"+screenparams.getParam(226)+".qml") }
-                    }
-                }
-                ButtonSq{
-                    buttontext: "No thank you"
-                    buttonsqradius: 10
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: gotoQScreen("Screen_"+screenparams.getParam(226)+".qml")
-                    }
-                }
-
-                ButtonSq{
-                    buttontext: "Yes Always Resume"
-                    buttonsqradius: 10
-                    MouseArea{
-                        anchors.fill: parent
-                       // onClicked: gotoQScreen()
-                    }
-                }
-
-                ButtonSq{
-                    buttontext: "No thank you, Never resume"
-                    buttonsqradius: 10
-                    MouseArea{
-                        anchors.fill: parent
-                        //onClicked: gotoQScreen()
-                    }
-                }
-
-            }
-            }
-
-            HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
         }
+        ButtonSq{
+            buttontext: "No thank you"
+            buttonsqradius: 10
+            MouseArea{
+                anchors.fill: parent
+                onClicked: gotoQScreen("Screen_"+screenparams.getParam(226)+".qml")
+            }
+        }
+
+        ButtonSq{
+            buttontext: "Yes Always Resume"
+            buttonsqradius: 10
+            MouseArea{
+                anchors.fill: parent
+                // onClicked: gotoQScreen()
+            }
+        }
+
+        ButtonSq{
+            buttontext: "No thank you, Never resume"
+            buttonsqradius: 10
+            MouseArea{
+                anchors.fill: parent
+                //onClicked: gotoQScreen()
+            }
+        }
+
+    }
+
+    Text {
+        id: text1
+        width: parent.width -10
+        height: scaleY(5)
+        text: "Would you Like to Auto resume your media?"
+        z: 2
+        font.family: "Droid Sans"
+        font.italic: false
+        horizontalAlignment: Text.AlignHCenter
+        font.bold: false
+        color: "aliceblue"
+        wrapMode: Text.WrapAnywhere
+        font.pixelSize: 18
+        anchors.centerIn: containerrect
+        anchors.verticalCenterOffset: 50
+    }
+
+    HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
+}
 
