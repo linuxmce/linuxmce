@@ -1,17 +1,44 @@
 import QtQuick 1.0
 
 
-Rectangle {
-    width: appW
-    height: appH
+Item {
+    width: manager.appWidth
+    height:  manager.appHeight
+    Component.onCompleted: {
+        updateQorbiter()
+    }
 
+    Rectangle{
+        anchors.fill: parent
+        color:"black"
+        opacity: .85
+    }
+
+ property string requestUrl: ("http://"+manager.m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?d="+manager.m_dwPK_Device)
     Text {
         id: label
         text: qsTr("Regenerating your Configuration data...")
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        font.bold: true
-        font.pixelSize: scaleY(3)
+        anchors.centerIn: parent
+        font.bold: false
+        color:"white"
+        font.weight: Font.Light
+        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        width: parent.width
+        font.pixelSize: scaleY(8)
+    }
+
+    function updateQorbiter(){
+
+        var paramsRequest = new XMLHttpRequest();
+        paramsRequest.onreadystatechange = function(){
+            if(paramsRequest.readyState===XMLHttpRequest.DONE){
+                label.text = "Finished"
+                manager.initiateRestart()
+            }
+        }
+
+        paramsRequest.open("POST",requestUrl)
+        paramsRequest.send();
     }
 
 }

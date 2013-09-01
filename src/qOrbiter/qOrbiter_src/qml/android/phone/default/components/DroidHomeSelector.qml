@@ -24,7 +24,7 @@ Rectangle{
             smooth:true
             MouseArea{
                 anchors.fill: parent
-                onClicked:scenarioPopup.currentModel =currentRoomLights
+                onClicked:{scenarioPopup.currentModel =currentRoomLights; scenarioPopup.floorplanType = 2}
             }
         }
 
@@ -36,7 +36,7 @@ Rectangle{
             smooth:true
             MouseArea{
                 anchors.fill: parent
-                onClicked:  scenarioPopup.currentModel = currentRoomMedia
+                onClicked: { scenarioPopup.currentModel = currentRoomMedia; scenarioPopup.floorplanType = 5}
             }
         }
 
@@ -48,7 +48,7 @@ Rectangle{
             smooth:true
             MouseArea{
                 anchors.fill: parent
-                onClicked:  scenarioPopup.currentModel = currentRoomClimate
+                onClicked:  {scenarioPopup.currentModel = currentRoomClimate; scenarioPopup.floorplanType  = 3}
             }
         }
     }
@@ -68,7 +68,7 @@ Rectangle{
             smooth:true
             MouseArea{
                 anchors.fill: parent
-                onClicked:  scenarioPopup.currentModel = currentRoomSecurity
+                onClicked:  {scenarioPopup.currentModel = currentRoomSecurity; scenarioPopup.floorplanType = 4} //can also be 1?
             }
         }
 
@@ -80,7 +80,7 @@ Rectangle{
             smooth:true
             MouseArea{
                 anchors.fill: parent
-                onClicked:  scenarioPopup.currentModel = currentRoomTelecom
+                onClicked:  {scenarioPopup.currentModel = currentRoomTelecom; scenarioPopup.floorplanType = 7}
             }
         }
 
@@ -92,7 +92,7 @@ Rectangle{
             smooth:true
             MouseArea{
                 anchors.fill: parent
-                onClicked:  manager.gotoQScreen("Screen_44.qml")
+                onClicked:  {manager.gotoQScreen("Screen_44.qml"); scenarioPopup.floorplanType = -1}
             }
         }
     }

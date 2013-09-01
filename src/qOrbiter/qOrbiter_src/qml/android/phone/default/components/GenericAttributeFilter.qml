@@ -15,6 +15,7 @@ Item {
     Rectangle{
         anchors.fill: parent
         color: "black"
+        opacity: .65
         MouseArea{
             anchors.fill: parent
         }
@@ -28,6 +29,7 @@ Item {
         model:currentModel
         anchors.top: heading.bottom
         anchors.left: heading.left
+        spacing:scaleY(2)
         delegate:Item{
             height:scaleY(18)
             width: parent.width
@@ -35,12 +37,14 @@ Item {
             Rectangle{
                 anchors.fill: parent
                 color: "black"
-                border.color: "orange"
+                border.color: "white"
                 border.width: 1
+                radius: 5
             }
 
             Row{
-                anchors.fill: parent
+                height: parent.height
+                width: parent.width
 
                 StyledText{
                     text: name

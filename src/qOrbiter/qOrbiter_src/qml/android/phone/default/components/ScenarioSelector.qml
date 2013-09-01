@@ -1,13 +1,14 @@
 import QtQuick 1.1
 
-
 Item {
     id:generic_model_display
     width: generic_view.width
-    height: generic_view.height + listClose.height
+    height: generic_view.height + listClose.height + 10
     property variant currentModel:dummy
+    property int floorplanType:2
     state:"inactive"
     onStateChanged:console.log("ScenarioView State Change");
+
 
 
     Behavior on opacity{
@@ -19,8 +20,8 @@ Item {
             ScriptAction{ script:
                     if(state==="inactive"){
                         console.log("destroying")
-                    componentLoader.source=""
-                }
+                        componentLoader.source=""
+                    }
             }
         }
 
@@ -30,6 +31,7 @@ Item {
     Rectangle{
         anchors.fill: parent
         color: "black"
+        radius: 5
     }
 
 
@@ -41,12 +43,13 @@ Item {
     Item{
         id:listClose
         height: scaleY(8)
-        width: scaleX(61)
+        width: generic_view.width
         anchors.top: parent.top
 
         Rectangle{
             anchors.fill: parent
             color:androidSystem.orangeStandard
+            radius:5
         }
 
         Rectangle{
@@ -73,7 +76,7 @@ Item {
 
         Rectangle{
             height: parent.height - 5
-            width: height
+            width: parent.width *.35
             color: "black"
             opacity: .65
             anchors.right: parent.right
@@ -84,6 +87,10 @@ Item {
                 font.weight: Font.DemiBold
                 fontSize: scaleY(5)
                 color: "white"
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked:  manager.showfloorplan(floorplanType)
             }
         }
     }
@@ -106,7 +113,7 @@ Item {
             name: "active"
             PropertyChanges {
                 target: generic_model_display
-               opacity:1
+                opacity:1
 
             }
         },
@@ -115,7 +122,7 @@ Item {
             PropertyChanges {
                 target: generic_model_display
                 opacity:0
-            }           
+            }
         }
     ]
 }
