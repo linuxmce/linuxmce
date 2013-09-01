@@ -212,58 +212,6 @@ macx{
         DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
 }
 
-#android deployment
- android-g++{
-#nfs mount to work with skins on core directly
-#folder_01.source = /mnt/remote/android-qml/
-#folder_01.source = qml/android/
-#folder_01.target = qml
-
-        contains(QT_VERSION,4.*.*){
-        base.source = qml/android/Base.qml
-        base.target = qml/
-
-        x86 {
-                qmlplugins.files = ../platforms/Android/androidPlugins/x86/libqmlshadersplugin.so
-                qmlplugins.files += ../platforms/Android/androidPlugins/x86/libandroidplugin_1_1.so
-                qmlplugins.path = /libs/x86
-
-        } else: armeabi-v7a {
-        qmlplugins.files = ../platforms/Android/androidPlugins/armeabi-v7a/libqmlshadersplugin.so
-        qmlplugins.files += ../platforms/Android/androidPlugins/armeabi-v7a/libandroidplugin_1_1.so
-                qmlplugins.path = /libs/armeabi-v7a
-
-        } else {
-        qmlplugins.files = ../platforms/Android/androidPlugins/armeabi/libqmlshadersplugin.so
-        qmlplugins.files += ../platforms/Android/androidPlugins/armeabi/libandroidplugin_1_1.so
-                qmlplugins.path = /libs/armeabi
-
-        INSTALLS+= qmlplugins
-        }
-
-        }
-        else:contains(QT_VERSION,5.0.*){
-        base.source = qml/android/Welcome.qml
-        base.target = qml/
-        }
-
-        folder_03.source = config.xml
-        folder_03.target = $$DESTDIR
-
-        qmlcomponents.source = ../platforms/Android/androidComponents
-        qmlcomponents.target = imports
-
-        DEFINES+=ANDROID
-
-        DEPLOYMENTFOLDERS = qmlcomponents base
-        QML_IMPORT_PATH = "androidComponents"
-
-        QT+=network script
-
-        HEADERS += plugins/AndroidInfo/androidsystem.h
-        SOURCES += plugins/AndroidInfo/androidsystem.cpp
-}
-
 linux-rasp-pi-g++{
 
         folder_01.source= qml/rpi
@@ -447,16 +395,6 @@ SOURCES += main.cpp \
     datamodels/listitembase.cpp
 
 
-
-#!ANDROID|!QT5{
-# SOURCES+= ../../qMediaPlayer/AudioVisual/audiovisual.cpp \
-#    ../../qMediaPlayer/AudioVisual/videowidgetplayer.cpp \
-#../../qMediaPlayer/AudioVisual/audiowidget.cpp \
-#../../qMediaPlayer/qMediaPlayer.cpp
-
-#}
-
-
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
 qtcAddDeployment()
@@ -562,88 +500,9 @@ HEADERS += \
 
 
 
-#!ANDROID||!QT5{
-# HEADERS+=   ../../qMediaPlayer/AudioVisual/audiovisual.h \
-#../../qMediaPlayer/AudioVisual/videowidgetplayer.h \
-#../../qMediaPlayer/AudioVisual/audiowidget.h\
-#../../qMediaPlayer/qMediaPlayer.h
-#}
-
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
-        qml/desktop/lib/effects/qmldir \
-    qml/android/Welcome.qml \
-    qml/android/phone/qt5default/main.qml \
-    qml/android/phone/qt5default/Style.qml \
-    qml/android/phone/qt5default/Screens/Screen_1.qml \
-    qml/android/tablet/qt5default/main.qml \
-    qml/android/tablet/qt5default/Style.qml \
-    qml/android/tablet/qt5default/Screens/Screen_1.qml \
-    qml/desktop/STB/components/FileDetails.qml \
-    android/src/org/kde/necessitas/origo/QtActivity.java \
-    android/src/org/kde/necessitas/origo/QtApplication.java \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl
-
-android-g++{
-
-OTHER_FILES+= \
-        android/version.xml \
-    android/res/values-et/strings.xml \
-    android/res/values-fa/strings.xml \
-    android/res/values-pl/strings.xml \
-    android/res/values-el/strings.xml \
-    android/res/values-zh-rTW/strings.xml \
-    android/res/values-ro/strings.xml \
-    android/res/values-de/strings.xml \
-    android/res/values-fr/strings.xml \
-    android/res/values-ms/strings.xml \
-    android/res/values-es/strings.xml \
-    android/res/values-rs/strings.xml \
-    android/res/values-zh-rCN/strings.xml \
-    android/res/values-ru/strings.xml \
-    android/res/values/strings.xml \
-    android/res/values-nl/strings.xml \
-    android/res/values-nb/strings.xml \
-    android/res/values-ja/strings.xml \
-    android/res/values-it/strings.xml \
-    android/res/values-pt-rBR/strings.xml \
-    android/res/layout/splash.xml \
-    android/res/values-id/strings.xml \
-    android/res/drawable/logo.png \
-    android/res/drawable/icon.png \
-    android/res/drawable-mdpi/icon.png \
-    android/res/values/libs.xml \
-    android/res/drawable-hdpi/icon.png \
-    android/res/drawable-ldpi/icon.png \
-    android/AndroidManifest.xml \
-    android/READ-THIS-BEFORE-MANUALLY-ADDING-FILES-TO-PACKAGE.txt \
-    android/libjava.so \
-    android/Makefile \
-    android/java.pro
-
-
-!QT5{
-OTHER_FILES+= \
-  #  android/src/org/kde/necessitas/origo/QtActivity.java \
-  #  android/src/org/kde/necessitas/origo/QtApplication.java \
-  #  android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-  # android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl
-}
-
-QT5{
-OTHER_FILES+= \
-   android/src/org/kde/necessitas/ministro/IMinistro.aidl \
- android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
-    android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
-   ../platforms/Android/androidPlugins/--Managed_by_Qt_Creator--QtAndroid-bundled.jar
-}
-
-}
-
-
 
 
 

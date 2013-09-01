@@ -463,6 +463,18 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 #endif
 }
 
+void qorbiterManager::initiateRestart()
+{
+    emit restartOrbiter();
+
+#ifdef Q_OS_ANDROID
+    gotoQScreen("../../../Splash.qml");
+#else
+    gotoQScreen("../../Splash.qml");
+#endif
+
+}
+
 //this functions purpose is to change the UI to the new skin pointed to. It will evolve to encompass orbiter regen to some extent
 /*!
  * \brief qorbiterManager::refreshUI: This function re-initializes the qml engines skin.
@@ -1677,10 +1689,37 @@ void qorbiterManager::requestSecurityPic(int i_pk_camera_device, int h, int w)
 
 void qorbiterManager::showfloorplan(int fptype)
 {
-    setFloorplanType(fptype);
-    QString Screen = QString("Screen_").append(QString::number(fptype).append(".qml"));
-    gotoQScreen(Screen);
+    QString Screen ;
+    switch(fptype){
+    case 5: // - entertainment floorplan. screen 4
+        setFloorplanType(fptype);
+       Screen = QString("Screen_3.qml");
+        break;
+    case 6: // -general av equipment - piped to misc screen 7
+        setFloorplanType(fptype);
+        Screen = QString("Screen_7.qml");
+        break;
+    case 3: //climate screen 4
+        setFloorplanType(fptype);
+        Screen = QString("Screen_4.qml");
+        break;
+    case 4: //climate screen5
+        setFloorplanType(fptype);
+        Screen = QString("Screen_5.qml");
+        break;
+    case 7: //telecom
+        setFloorplanType(fptype);
+        Screen = QString("Screen_6.qml");
+        break;
+    default:
+        setFloorplanType(fptype);
+        Screen = QString("Screen_").append(QString::number(fptype).append(".qml"));
 
+        break;
+    }
+
+
+ gotoQScreen(Screen);
     //pqOrbiter->ShowFloorPlan(fptype);
 }
 

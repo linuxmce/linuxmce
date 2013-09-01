@@ -525,7 +525,7 @@ signals:
     void moveArrowDirection(int d);
     void signalGoBack();
     void currentSkinChanged();
-
+    void restartOrbiter();
 
 
     void redButton();
@@ -673,6 +673,7 @@ signals:
 
 public slots:
 
+    void initiateRestart();
     void setLocalAddress(QString l){m_localAddress = l; emit localAddressChanged(); }
     QString getLocalAddress() {return m_localAddress; }
     void setRouterPort(QString p){routerPort = p; emit routerPortChanged();}

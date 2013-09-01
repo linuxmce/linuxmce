@@ -5483,3 +5483,11 @@ void qOrbiter::setVariable(int pkvar ,QString val)
         qWarning("CMD_Set_Variable Failed!");
     }
 }
+
+void qOrbiter::reInitialize(){
+
+  Disconnect();
+  initializeGrid();
+  initialize();
+
+}

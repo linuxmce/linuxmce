@@ -1519,6 +1519,12 @@ signals:
 
 
 public slots:
+
+    /*!
+     * \brief reInitialize - Restarts the orbiter without doing a full reload.
+     */
+    void reInitialize();
+
     /*!
      * \brief setLocalIp Set the local ip address for this device.
      * \param l
