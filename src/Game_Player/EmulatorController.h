@@ -53,6 +53,7 @@ namespace DCE
     virtual void setSystemConfiguration(string sSystemConfiguration);
     // Pure virtuals
     virtual bool doAction(string sAction) = 0;
+    virtual void pleaseResend() = 0;
     // actions
     virtual bool P1Start();
     virtual bool P2Start();

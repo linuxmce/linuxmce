@@ -16,15 +16,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-/**
- * This is a castrated window handler so that the program will keep running.
- * This is okay, because any failed X requests will be retried until timeout.
- */
-int _defaultWindowHandler(Display *disp, XErrorEvent *err)
-{
-  DCE::LoggerWrapper::GetInstance()->Write(LV_STATUS,"_defaultWindowHandler - we got called.");
-  return 0;
-}
 
 /**
  * The Window ID Thread. Called from X11EmulatorController::run().
@@ -46,10 +37,23 @@ namespace DCE
     m_pGame_Player = pGame_Player;
     m_pEmulatorModel = pEmulatorModel;
     m_windowIdThread = 0;
+    m_pAlarmManager=NULL;
+    m_sLastAction = "NOP";
   }
 
   X11EmulatorController::~X11EmulatorController()
   {
+  }
+
+  /**
+   * Set the m_bResend flag, so that we can try sending a keypress one more time, 
+   * if it failed.
+   */
+
+  void X11EmulatorController::pleaseResend()
+  {
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Asking parent to please re-send the key.");
+    m_bResend=true;
   }
 
   /**
@@ -63,8 +67,6 @@ namespace DCE
   {
     // If we're being called, we need to make double sure that we find the new window,
     // so zero out the old one.
-
-    XSetErrorHandler(_defaultWindowHandler);
 
     bool bRunLoop=true;
     int iRetry=0; // number of times to retry despite a duplicate window returned.
@@ -96,7 +98,7 @@ namespace DCE
 	if (m_pEmulatorModel->m_iWindowId == m_pEmulatorModel->m_iPreviousWindowId)
 	  {
 	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Got Same Window ID %x as last time. Waiting a bit, and trying again!",m_pEmulatorModel->m_iWindowId);
-	    if (iRetry>10)
+	    if (iRetry>20)
 	      {
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Apparently got the same Window # again, ok. Let's use it.");
 		bRunLoop=false;
@@ -119,19 +121,21 @@ namespace DCE
     // once the window is present and acquired.
     usleep(100000);
     m_pGame_Player->EVENT_Menu_Onscreen(m_pEmulatorModel->m_iStreamID,false);
-    XSetErrorHandler(NULL);  // put everything back.
   }
 
   bool X11EmulatorController::init()
   {
-    // Not much going on here.
+    // Not much going on here. We set a global pointer to this class for our window handler
+    // and then we call the base class.
     return EmulatorController::init();
   }
 
   bool X11EmulatorController::run()
   {
     EmulatorController::run(); // superclass, sets running flag.
-
+    m_sLastAction="NOP";
+    m_pAlarmManager=new AlarmManager();
+    m_pAlarmManager->Start();
     // grab display.
     m_pEmulatorModel->m_pDisplay = XOpenDisplay(getenv("DISPLAY"));
     if (!m_pEmulatorModel->m_pDisplay)
@@ -162,6 +166,8 @@ namespace DCE
 	return false;
       }
     
+    m_pAlarmManager->AddRelativeAlarm(1,this,CHECK_RESEND,NULL);
+
     return true;
 
   }
@@ -177,8 +183,30 @@ namespace DCE
 	//XCloseDisplay(m_pEmulatorModel->m_pDisplay);
       }
 
+    m_pAlarmManager->CancelAlarmByType(CHECK_RESEND);
+    m_pAlarmManager->Stop();
+    delete m_pAlarmManager;
+    m_pAlarmManager=NULL;
+
     return EmulatorController::stop(); // superclass, unsets running flag.
 
+  }
+
+  void X11EmulatorController::AlarmCallback(int id, void* param)
+  {
+    checkResend();
+  }
+
+  void X11EmulatorController::checkResend()
+  {
+    if (m_bResend)
+      {
+	findWindow();
+	doAction(m_sLastAction);
+      }
+
+    m_pAlarmManager->CancelAlarmByType(CHECK_RESEND);
+    m_pAlarmManager->AddRelativeAlarm(5, this, CHECK_RESEND, NULL);
   }
 
   void X11EmulatorController::EmulatorHasExited(int iExit_Code)
@@ -189,11 +217,13 @@ namespace DCE
 
   bool X11EmulatorController::doAction(string sAction) // from EmulatorController
   {
+    m_bResend=false;
 
     // TODO: Do we rethink doAction as a virtual instead of a pure virtual?
     if (sAction=="NOP") // NOP = no operation for those who don't speak 6502 assembler :P
       {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"X11EmulatorController::doAction(NOP)");
+	m_sLastAction="NOP";
 	return true;
       }
 
@@ -227,7 +257,9 @@ namespace DCE
     if (m_pEmulatorModel->m_bRunning)
       {
 
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorController::doAction(%s) - Sending %d to window %x",sAction.c_str(),iKeysym,m_pEmulatorModel->m_iWindowId);
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"X11EmulatorController::doAction(%s) - Sending %d to window %x",sAction.c_str(),iKeysym,m_pEmulatorModel->m_iWindowId);
+
+	m_sLastAction=sAction; // For the resend handler.
 
 	if (iKeysym_modifier != 0)
 	  {
@@ -244,6 +276,11 @@ namespace DCE
 					 iKeysym,
 					 m_pEmulatorModel->m_iEventSerialNum++);      
 	  }
+
+	// At this point, if the window ID was invalid, our window handler would have caught it,
+	// and attempted to re-acquire the target window (e.g. when a game is switched)
+	// This attempts to see if a resend is required, and does so.
+
 	return true; // no way to tell if a key was sent successfully.
       }
     else
@@ -284,10 +321,10 @@ namespace DCE
 	m_pEmulatorModel->m_iCurrentKeyModifier = XK_Shift_R;
 	break;
       default:
-        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Mapped to %d",m_pEmulatorModel->m_mapButtonToKeysyms_Find(iPK_Button));
+        LoggerWrapper::GetInstance()->Write(LV_STATUS,"Mapped to %d",m_pEmulatorModel->m_mapButtonToKeysyms_Find(iPK_Button));
 	if (m_pEmulatorModel->m_mapButtonToKeysyms_Exists(iPK_Button) && m_pEmulatorModel->m_bRunning)
 	  {
-	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Sending key %d, modifier %d, to window %x",m_pEmulatorModel->m_mapButtonToKeysyms_Find(iPK_Button),
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Sending key %d, modifier %d, to window %x",m_pEmulatorModel->m_mapButtonToKeysyms_Find(iPK_Button),
 													m_pEmulatorModel->m_iCurrentKeyModifier,
 													m_pEmulatorModel->m_iWindowId);
 	    
@@ -297,6 +334,7 @@ namespace DCE
 					 m_pEmulatorModel->m_mapButtonToKeysyms_Find(iPK_Button),
 					 m_pEmulatorModel->m_iCurrentKeyModifier);
 	    XTestFakeKeyEvent( m_pEmulatorModel->m_pDisplay, XKeysymToKeycode( m_pEmulatorModel->m_pDisplay, m_pEmulatorModel->m_iCurrentKeyModifier),False, CurrentTime );
+
 	    m_pEmulatorModel->m_iCurrentKeyModifier=0; // unpress modifier after use.
 	  }
 	else

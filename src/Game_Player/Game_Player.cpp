@@ -44,6 +44,24 @@ using namespace DCE;
 
 #include <X11/Xlib.h>
 
+Game_Player *g_pGame_Player = NULL;
+
+/**
+ * This is a castrated window handler so that the program will keep running.
+ * This is okay, because any failed X requests will be retried until timeout.
+ */
+int _defaultWindowHandler(Display *disp, XErrorEvent *err)
+{
+  char msg[80];
+  XGetErrorText(disp, err->error_code, msg, 80);
+  fprintf(stderr, "Error code %s\n", msg);
+  if (g_pGame_Player)
+    {
+      g_pGame_Player->pleaseResend();
+    }
+  return 0;
+}
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Game_Player::Game_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -52,7 +70,7 @@ Game_Player::Game_Player(int DeviceID, string ServerAddress,bool bConnectEventHa
 ,
 m_GameMutex ("game_player")
 {
-
+  g_pGame_Player = this;
   m_GameMutex.Init (NULL);
   m_pAlarmManager = NULL;
   m_pDevice_App_Server = NULL;
@@ -77,6 +95,12 @@ Game_Player::~Game_Player()
 
 }
 
+void Game_Player::pleaseResend()
+{
+  if (m_pEmulatorController)
+    m_pEmulatorController->pleaseResend();
+}
+
 bool Game_Player::Connect (int iPK_DeviceTemplate)
 {
   if (!Command_Impl::Connect (iPK_DeviceTemplate))
@@ -97,6 +121,7 @@ Game_Player::PrepareToDelete ()
   m_pAlarmManager = NULL;
   m_pDevice_App_Server = NULL;
   m_iPK_MediaType = 0;
+  XSetErrorHandler(NULL);
 }
 
 //<-dceag-getconfig-b->
@@ -109,8 +134,8 @@ bool Game_Player::GetConfig()
   // Put your code here to initialize the data in this class
   // The configuration parameters DATA_ are now populated
 
-  m_pAlarmManager = new AlarmManager ();
-  m_pAlarmManager->Start (2);	//4 = number of worker threads
+  XInitThreads();
+  XSetErrorHandler(_defaultWindowHandler);
 
   m_pDevice_Game_Plugin =
     m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate

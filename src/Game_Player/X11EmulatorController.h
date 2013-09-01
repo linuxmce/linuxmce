@@ -16,11 +16,13 @@
 /* STL includes */
 #include <map>
 
+#define CHECK_RESEND 1
+
 using namespace std;
 
 namespace DCE
 {
-  class X11EmulatorController : public EmulatorController
+  class X11EmulatorController : public EmulatorController, public AlarmEvent
   {
   public:
 
@@ -33,6 +35,9 @@ namespace DCE
     virtual void EmulatorHasExited(int iExit_Code);
     
     void findWindow();
+    virtual void pleaseResend();
+
+    void checkResend();
 
     virtual bool doAction(string sAction);
     virtual bool pressButton(int iPK_Button, Message *pMessage);
@@ -43,10 +48,15 @@ namespace DCE
     virtual bool saveState(string& sPosition, string& sText, bool bAutoSave=false, string sAutoSaveName="");
     virtual bool loadState(string sPosition);
 
+    class AlarmManager *m_pAlarmManager;
+    void AlarmCallback(int id, void* param);
+
   protected:
     X11EmulatorModel *m_pEmulatorModel;
   private:
     pthread_t m_windowIdThread;
+    string m_sLastAction;
+    bool m_bResend; // Resend keystroke if needed. Set by default window handler.
   };
 }
 

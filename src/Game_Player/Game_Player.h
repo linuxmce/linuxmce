@@ -86,6 +86,7 @@ namespace DCE
     virtual void PrepareToDelete ();
     virtual void CreateChildren();
     bool Connect (int iPK_DeviceTemplate);
+    void pleaseResend();
 
     int m_iPK_MediaType;	// Used by the stop media method.
     int m_iModifier;		// The current button modifier.
