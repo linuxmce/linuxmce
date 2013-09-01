@@ -49,7 +49,23 @@ for(deploymentfolder, DEPLOYMENTFOLDERS) {
 
 MAINPROFILEPWD = $$PWD
 
-android {
+android-no-sdk {
+    for(deploymentfolder, DEPLOYMENTFOLDERS) {
+        item = item$${deploymentfolder}
+        itemfiles = $${item}.files
+        $$itemfiles = $$eval($${deploymentfolder}.source)
+        itempath = $${item}.path
+        $$itempath = /data/user/qt/$$eval($${deploymentfolder}.target)
+        export($$itemfiles)
+        export($$itempath)
+        INSTALLS += $$item
+    }
+
+    target.path = /data/user/qt
+
+    export(target.path)
+    INSTALLS += target
+} else:android {
     for(deploymentfolder, DEPLOYMENTFOLDERS) {
         item = item$${deploymentfolder}
         itemfiles = $${item}.files
@@ -140,7 +156,11 @@ android {
             QMAKE_EXTRA_TARGETS += first copydeploymentfolders
         }
     }
-    installPrefix = /opt/$${TARGET}
+    !isEmpty(target.path) {
+        installPrefix = $${target.path}
+    } else {
+        installPrefix = /opt/$${TARGET}
+    }
     for(deploymentfolder, DEPLOYMENTFOLDERS) {
         item = item$${deploymentfolder}
         itemfiles = $${item}.files
@@ -160,16 +180,16 @@ android {
         INSTALLS += icon desktopfile
     }
 
-    target.path = $${installPrefix}/bin
-    export(target.path)
+    isEmpty(target.path) {
+        target.path = $${installPrefix}/bin
+        export(target.path)
+    }
     INSTALLS += target
 }
 
 export (ICON)
 export (INSTALLS)
 export (DEPLOYMENT)
-export (TARGET.EPOCHEAPSIZE)
-export (TARGET.CAPABILITY)
 export (LIBS)
 export (QMAKE_EXTRA_TARGETS)
 }
