@@ -39,6 +39,7 @@ namespace DCE
     m_windowIdThread = 0;
     m_pAlarmManager=NULL;
     m_sLastAction = "NOP";
+    m_bResend=false;
   }
 
   X11EmulatorController::~X11EmulatorController()
@@ -67,7 +68,7 @@ namespace DCE
   {
     // If we're being called, we need to make double sure that we find the new window,
     // so zero out the old one.
-
+    LoggerWrapper::GetInstance()->Write(LV_WARNING,"X11EmulatorController::findWindow() - pleaseResend %d",m_bResend);
     bool bRunLoop=true;
     int iRetry=0; // number of times to retry despite a duplicate window returned.
     while (bRunLoop==true)
@@ -121,6 +122,7 @@ namespace DCE
     // once the window is present and acquired.
     usleep(100000);
     m_pGame_Player->EVENT_Menu_Onscreen(m_pEmulatorModel->m_iStreamID,false);
+    LoggerWrapper::GetInstance()->Write(LV_WARNING,"X11EmulatorController::findWindow() - new window is %x",m_pEmulatorModel->m_iWindowId);
   }
 
   bool X11EmulatorController::init()
@@ -135,7 +137,7 @@ namespace DCE
     EmulatorController::run(); // superclass, sets running flag.
     m_sLastAction="NOP";
     m_pAlarmManager=new AlarmManager();
-    m_pAlarmManager->Start();
+    m_pAlarmManager->Start(1);
     // grab display.
     m_pEmulatorModel->m_pDisplay = XOpenDisplay(getenv("DISPLAY"));
     if (!m_pEmulatorModel->m_pDisplay)
@@ -205,7 +207,6 @@ namespace DCE
 	doAction(m_sLastAction);
       }
 
-    m_pAlarmManager->CancelAlarmByType(CHECK_RESEND);
     m_pAlarmManager->AddRelativeAlarm(5, this, CHECK_RESEND, NULL);
   }
 

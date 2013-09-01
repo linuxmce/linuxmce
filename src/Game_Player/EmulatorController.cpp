@@ -49,7 +49,7 @@ namespace DCE
    */
   void EmulatorController::insertMediaNamed(string sMediaFile, string sSlot)
   {
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Inserting media %s into slot %s",sMediaFile.c_str(),sSlot.c_str());
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Inserting media %s into slot %s",sMediaFile.c_str(),sSlot.c_str());
     m_pEmulatorModel->m_mapMedia[sSlot] = sMediaFile;
   }
 

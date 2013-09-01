@@ -316,6 +316,8 @@ void Game_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string s
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #50 - Name=" << sName << endl;
 
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
+
   int iPK_Button = atoi(sPK_Button.c_str());
 
   if (!m_pEmulatorController)
@@ -346,6 +348,8 @@ void Game_Player::CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int i
   cout << "Parm #11 - Position_X=" << iPosition_X << endl;
   cout << "Parm #12 - Position_Y=" << iPosition_Y << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
 
 }
 
@@ -530,6 +534,8 @@ void Game_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMe
 {
   cout << "Need to implement command #39 - Pause Media" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
 
   if (m_pEmulatorController)
     m_pEmulatorController->pause();
@@ -548,6 +554,8 @@ void Game_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *p
 {
   cout << "Need to implement command #40 - Restart Media" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
 
   if (m_pEmulatorController)
     m_pEmulatorController->unpause();
@@ -572,6 +580,8 @@ void Game_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpee
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
   cout << "Parm #220 - Report=" << bReport << endl;
+
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
 
   if (m_pEmulatorController)
     m_pEmulatorController->setSpeed(iMediaPlaybackSpeed);
@@ -641,6 +651,8 @@ void Game_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStr
   cout << "Need to implement command #65 - Jump Position In Playlist" << endl;
   cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
 
   // Ironically, this is here to implement the save game stuff.
   if (sValue_To_Assign == "0")
@@ -741,6 +753,8 @@ void Game_Player::CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_R
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #64 - MenuType=" << iMenuType << endl;
 
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
+
   m_pEmulatorController->gotoMenu(iMenuType);
 
   if (iMenuType > 0)
@@ -822,6 +836,7 @@ void Game_Player::CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c190-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #190 - Enter/Go" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   m_pEmulatorController->uiOK();
@@ -837,6 +852,7 @@ void Game_Player::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessag
 void Game_Player::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c200-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #200 - Move Up" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   m_pEmulatorController->uiUp();
@@ -852,6 +868,7 @@ void Game_Player::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessag
 void Game_Player::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c201-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #201 - Move Down" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   m_pEmulatorController->uiDown();
@@ -867,6 +884,7 @@ void Game_Player::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMess
 void Game_Player::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c202-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #202 - Move Left" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   m_pEmulatorController->uiLeft();
@@ -882,6 +900,7 @@ void Game_Player::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMess
 void Game_Player::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c203-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #203 - Move Right" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   m_pEmulatorController->uiRight();
@@ -895,6 +914,7 @@ void Game_Player::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMes
 void Game_Player::CMD_0(string &sCMD_Result,Message *pMessage)
 //<-dceag-c204-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #204 - 0" << endl;
   m_pEmulatorController->press0(pMessage);
 }
@@ -907,6 +927,7 @@ void Game_Player::CMD_0(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_1(string &sCMD_Result,Message *pMessage)
 //<-dceag-c205-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #205 - 1" << endl;
   m_pEmulatorController->press1(pMessage);
 }
@@ -919,6 +940,7 @@ void Game_Player::CMD_1(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_2(string &sCMD_Result,Message *pMessage)
 //<-dceag-c206-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #206 - 2" << endl;
   m_pEmulatorController->press2(pMessage);
 }
@@ -931,6 +953,7 @@ void Game_Player::CMD_2(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_3(string &sCMD_Result,Message *pMessage)
 //<-dceag-c207-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #207 - 3" << endl;
   m_pEmulatorController->press3(pMessage);
 }
@@ -943,6 +966,7 @@ void Game_Player::CMD_3(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_4(string &sCMD_Result,Message *pMessage)
 //<-dceag-c208-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #208 - 4" << endl;
   m_pEmulatorController->press4(pMessage);
 }
@@ -955,6 +979,7 @@ void Game_Player::CMD_4(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_5(string &sCMD_Result,Message *pMessage)
 //<-dceag-c209-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #209 - 5" << endl;
   m_pEmulatorController->press5(pMessage);
 }
@@ -967,6 +992,7 @@ void Game_Player::CMD_5(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_6(string &sCMD_Result,Message *pMessage)
 //<-dceag-c210-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #210 - 6" << endl;
   m_pEmulatorController->press6(pMessage);
 }
@@ -979,6 +1005,7 @@ void Game_Player::CMD_6(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_7(string &sCMD_Result,Message *pMessage)
 //<-dceag-c211-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #211 - 7" << endl;
   m_pEmulatorController->press7(pMessage);
 }
@@ -991,6 +1018,7 @@ void Game_Player::CMD_7(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_8(string &sCMD_Result,Message *pMessage)
 //<-dceag-c212-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #212 - 8" << endl;
   m_pEmulatorController->press8(pMessage);
 }
@@ -1003,6 +1031,7 @@ void Game_Player::CMD_8(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_9(string &sCMD_Result,Message *pMessage)
 //<-dceag-c213-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #213 - 9" << endl;
   m_pEmulatorController->press9(pMessage);
 }
@@ -1017,6 +1046,7 @@ void Game_Player::CMD_9(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c240-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #240 - Back / Prior Menu" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   m_pEmulatorController->uiBack();
@@ -1100,6 +1130,7 @@ void Game_Player::CMD_Report_Playback_Position(int iStreamID,string *sText,strin
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   if (m_pEmulatorController->canSaveState())
     {
       string sSavePosition, sSaveText;
@@ -1134,6 +1165,7 @@ void Game_Player::CMD_Report_Playback_Position(int iStreamID,string *sText,strin
 void Game_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,string &sCMD_Result,Message *pMessage)
 //<-dceag-c412-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #412 - Set Media Position" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
@@ -1274,6 +1306,7 @@ void Game_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,
 void Game_Player::CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c943-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   m_pEmulatorController->P1Start();
 }
 
@@ -1285,6 +1318,7 @@ void Game_Player::CMD_Game_1P_Start(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Game_2P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c944-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #944 - Game 2P Start" << endl;
   m_pEmulatorController->P2Start();
 }
@@ -1297,6 +1331,7 @@ void Game_Player::CMD_Game_2P_Start(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Game_3P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c945-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #945 - Game 3P Start" << endl;
   m_pEmulatorController->P3Start();
 }
@@ -1309,6 +1344,7 @@ void Game_Player::CMD_Game_3P_Start(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Game_4P_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c946-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #946 - Game 4P Start" << endl;
   m_pEmulatorController->P4Start();
 }
@@ -1321,6 +1357,7 @@ void Game_Player::CMD_Game_4P_Start(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Game_Insert_Coin(string &sCMD_Result,Message *pMessage)
 //<-dceag-c947-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #947 - Game Insert Coin" << endl;
   m_pEmulatorController->coin1();
 }
@@ -1333,6 +1370,7 @@ void Game_Player::CMD_Game_Insert_Coin(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Game_Service(string &sCMD_Result,Message *pMessage)
 //<-dceag-c948-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #948 - Game Service" << endl;
   m_pEmulatorController->service1();
 }
@@ -1345,6 +1383,7 @@ void Game_Player::CMD_Game_Service(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Game_Start(string &sCMD_Result,Message *pMessage)
 //<-dceag-c949-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #949 - Game Start" << endl;
   m_pEmulatorController->start();
 }
@@ -1357,6 +1396,7 @@ void Game_Player::CMD_Game_Start(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Game_Select(string &sCMD_Result,Message *pMessage)
 //<-dceag-c950-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   m_pEmulatorController->select();
 }
 
@@ -1368,6 +1408,7 @@ void Game_Player::CMD_Game_Select(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Game_Option(string &sCMD_Result,Message *pMessage)
 //<-dceag-c951-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   cout << "Need to implement command #951 - Game Option" << endl;
   m_pEmulatorController->option();
 }
@@ -1396,6 +1437,7 @@ void Game_Player::CMD_Get_Ripping_Status(string *sStatus,string &sCMD_Result,Mes
 void Game_Player::CMD_Set_Game_Options(string sValue_To_Assign,string sPath,string &sCMD_Result,Message *pMessage)
 //<-dceag-c982-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   if (m_pEmulatorController)
     {
       m_pEmulatorController->setOption(sPath,sValue_To_Assign,pMessage);
@@ -1414,6 +1456,7 @@ void Game_Player::CMD_Set_Game_Options(string sValue_To_Assign,string sPath,stri
 void Game_Player::CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c983-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   string sTmpValue;
   if (m_pEmulatorController)
     {
@@ -1430,6 +1473,7 @@ void Game_Player::CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,str
 void Game_Player::CMD_Game_Reset(string &sCMD_Result,Message *pMessage)
 //<-dceag-c952-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   m_pEmulatorController->reset();
 }
 
@@ -1480,6 +1524,7 @@ void Game_Player::TranscodeAfterRecord(string sPath,string sFilename, long int d
 void Game_Player::CMD_Record(string &sCMD_Result,Message *pMessage)
 //<-dceag-c102-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   m_bIsRecording = !m_bIsRecording;
   // This is simply a toggle, the EmulatorController will do the right thing.
   m_pEmulatorController->setOrbiter(pMessage->m_dwPK_Device_From);
@@ -1493,6 +1538,7 @@ void Game_Player::CMD_Record(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Select_A(string &sCMD_Result,Message *pMessage)
 //<-dceag-c616-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   if (m_pEmulatorController)
     {
       m_pEmulatorController->selectA();
@@ -1506,6 +1552,7 @@ void Game_Player::CMD_Select_A(string &sCMD_Result,Message *pMessage)
 void Game_Player::CMD_Select_B(string &sCMD_Result,Message *pMessage)
 //<-dceag-c617-e->
 {
+  PLUTO_SAFETY_LOCK (gm, m_GameMutex);
   if (m_pEmulatorController)
     {
       m_pEmulatorController->selectB();

@@ -126,7 +126,7 @@ namespace DCE
 	    // do not change.
 	  }
 	
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Inserting %s into slot %s",sSlot.c_str(),sMediaFile.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Inserting %s into slot %s",sSlot.c_str(),sMediaFile.c_str());
 	
 	sRet += "-" + sSlot + "\t" +
 	  sMediaFile;

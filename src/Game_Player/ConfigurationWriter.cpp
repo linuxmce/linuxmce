@@ -85,12 +85,12 @@ namespace DCE
       }
 
     // Substitute template variables, as needed.
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ConfigurationWriter::process() - template file %s - %d config items found.",m_sTemplateFilename.c_str(),m_mapConfigurationItems.size());
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"ConfigurationWriter::process() - template file %s - %d config items found.",m_sTemplateFilename.c_str(),m_mapConfigurationItems.size());
     for (map<string, string>::iterator it=m_mapConfigurationItems.begin();
 	 it != m_mapConfigurationItems.end();
 	 ++it)
       {
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ConfigurationWriter::process() Replacing %s, with %s",it->first.c_str(), it->second.c_str());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ConfigurationWriter::process() Replacing %s, with %s",it->first.c_str(), it->second.c_str());
 	sBuffer = StringUtils::Replace(sBuffer,it->first, it->second);
       }
 
