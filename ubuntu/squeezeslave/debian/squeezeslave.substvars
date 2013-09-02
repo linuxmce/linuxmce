@@ -1,1 +1,0 @@
-shlibs:Depends=libasound2 (>> 1.0.17), libc6 (>= 2.7)
