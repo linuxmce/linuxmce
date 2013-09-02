@@ -57,10 +57,7 @@ function Create_Diskless_Debootstrap_Archive {
 	chroot $temp_dir apt-get update
 
 	if [ -e "$temp_dir/etc/default/resolveconf/resolv.conf.d/original" ]; then
-		rm -f "$temp_dir/etc/default/resolveconf/resolv.conf.d/original"
-	fi
-	if [ -e "$temp_dir/etc/default/resolveconf/resolv.conf.d/tail" ]; then
-		rm -f "$temp_dir/etc/default/resolveconf/resolv.conf.d/tail"
+		echo "nameserver 192.168.80.1" > "$temp_dir/etc/default/resolveconf/resolv.conf.d/original"
 	fi
 
 	# Pack the diskless image in the right dir
