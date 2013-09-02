@@ -10,6 +10,9 @@ DEVICEDATA_Architecture=112
 #TARGET_TYPES="raspbian-armhf"
 TARGET_TYPES="ubuntu-i386"
 
+INSTALL_KUBUNTU_DESKTOP="yes"
+#INSTALL_KUBUNTU_DESKTOP="no"
+
 HOST_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
 HOST_RELEASE=$(lsb_release -c -s)
 HOST_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
@@ -499,10 +502,10 @@ echo > "$TEMP_DIR"/sbin/discover
 ## FIXME: get this list from the database 
 case "$TARGET_DISTRO" in
 	"ubuntu")
-		DEVICE_LIST="28 62 1759 5 11 1825 26 1808 1901"
+		DEVICE_LIST="28 62 1759 5 11 1825 26 1808 1901 2122"
 		;;
 	"raspbian")
-		DEVICE_LIST="2216 62 1759 2259 11 1825 26 1808 1901"
+		DEVICE_LIST="2216 62 1759 2259 11 1825 26 1808 2122"
 		;;
 esac
 
