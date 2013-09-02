@@ -87,7 +87,7 @@ void FloorPlanModel::setDeviceSelection(int devNo)
     for (int i =0; i < m_list.count(); i++){
         if (m_list.at(i)->deviceNum() == devNo){
             if(m_list.at(i)->status == false){
-               selectedDevices.insert(QString::number(devNo), m_list.at(i)->id() );
+               selectedDevices.insert(QString::number(devNo), m_list.at(i)->id() );              
             }
             else
             {
@@ -106,6 +106,7 @@ void FloorPlanModel::setDeviceSelection(int devNo)
         setStatus(false);
     }
     qDebug()<< selectedDevices.count();
+    emit selectedDevicesChanged();
  emit selectedDeviceChanged();
 }
 
@@ -163,6 +164,7 @@ void FloorPlanModel::handleStatusChange(int device)
 //        else
 //            ++dev;
 //    }
+    emit selectedDevicesChanged();
 
 }
 

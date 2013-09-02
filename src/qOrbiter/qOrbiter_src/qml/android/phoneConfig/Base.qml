@@ -51,12 +51,21 @@ Rectangle {
         font.weight: Font.Light
     }
 
+    Rectangle{
+        height: 50
+        width: 120
+        radius:5
+        color: androidSystem.orangeHighlight
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+    }
+
     Text {
         id: splashtxt
-        text: qsTr("LinuxMCE for your " + androidSystem.deviceName )
+        text: qsTr("LinuxMCE for your \n " + androidSystem.deviceName )
         anchors.bottom: parent.bottom
         font.pixelSize: 28
-        width: parent.width
+
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         color: "green"
         anchors.horizontalCenter: parent.horizontalCenter
@@ -97,30 +106,6 @@ Rectangle {
         }
     }
 
-
-        //    Row{
-        //        anchors.bottom: parent.bottom
-        //        width: parent.width/2
-        //        height: childrenRect.height
-        //        Text{
-        //            text: "Api Level:"+ android.apiLevel
-        //            font.pixelSize: 16
-        //            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        //            color: "white"
-        //            opacity: .85
-        //        }
-
-        //        Text{
-        //            text: "Api Level:"+ android.externalStorageLocation
-        //            font.pixelSize: 16
-        //            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        //            color: "white"
-        //            opacity: .85
-        //        }
-        //    }
-
-
-
         Loader{
             id:mainContent
             height: manager.appHeight
@@ -130,23 +115,20 @@ Rectangle {
             onOpacityChanged: PropertyAnimation {target:mainContent; property: "opacity"; to:1 ; duration: 1500}
             onStatusChanged: if(mainContent.status === Loader.Error){
                                  loading.text = qsTr("Im Sorry I couldnt connect to a LinuxMCE Server at "+window.router+" Please ensure you can reach your core. \n I will continue trying. \n"+ mainContent.sourceComponent.errorString())
-                                 console.log(mainContent.sourceComponent.errorString())
-                                 wait.restart()
-                                 s
-                             }
-            //                         else if (mainContent.status != Loader.Loading){
-            //                             loading.text = "Loading, please wait \n" + progress +"% \n"+sourceComponent.errorString()
-
-            //                         }
+                                 console.log(mainContent.sourceComponent.errorString())                               
+                                 wait.stop()
+                                 configOptions.state = "editing"
+                             }         
                              else  if (mainContent.status === Loader.Ready){
                                  mainContent.opacity = .01
                                  loading.visible= false
                                  loading.text = "Content Loaded, one moment"
-                                 wait.stop()
                              }
 
         }
 
+        FirstRunOptions{
+            id:configOptions
 
-
+        }
     }

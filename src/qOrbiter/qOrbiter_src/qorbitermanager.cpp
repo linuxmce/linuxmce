@@ -1392,6 +1392,7 @@ bool qorbiterManager::readLocalConfig()
 #elif QT5 && ANDROID
     if(setupMobileStorage(androidHelper->externalStorageLocation)){
         xmlPath = mobileStorageLocation+"/config.xml" ;
+        qCritical() <<xmlPath;
     }
 #endif
 
@@ -2143,7 +2144,7 @@ bool qorbiterManager::setupMobileStorage(QString externalStorage)
 
     extLocation.setPath(externalStorage+"/LinuxMCE/");
 
-    if(extLocation.isReadable()){
+    if(extLocation.exists() && extLocation.isReadable()){
         setMobileStorage(extLocation.path());
         return true;
     }
