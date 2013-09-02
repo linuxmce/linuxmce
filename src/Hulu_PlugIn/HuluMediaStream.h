@@ -9,8 +9,8 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
-#ifndef DCEGAMEMEDIASTREAM_H
-#define DCEGAMEMEDIASTREAM_H
+#ifndef DCEHULUMEDIASTREAM_H
+#define DCEHULUMEDIASTREAM_H
 
 #include "../Media_Plugin/MediaHandlerInfo.h"
 #include "../Media_Plugin/MediaStream.h"
