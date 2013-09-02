@@ -811,10 +811,10 @@ void Xine_Stream_Factory::IdentifyXineStuff()
 {
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "Checking installed xine-lib capabilities" );
 	// check if we have xine library with xine_seek support or not (reusing the loaded libxine)
-	void *handle = dlopen("libxine.so.1", RTLD_LAZY | RTLD_NOLOAD);
+	void *handle = dlopen("libxine.so.2", RTLD_LAZY | RTLD_NOLOAD);
 	if (handle)
 	{
-		LoggerWrapper::GetInstance()->Write( LV_STATUS, "OK, libxine.so.1 already loaded" );
+		LoggerWrapper::GetInstance()->Write( LV_STATUS, "OK, libxine.so.2 already loaded" );
 		*(void**)(&custom_xine_seek) = dlsym(handle, "xine_seek");
 		*(void**)(&custom_xine_start_trick_play) = dlsym(handle, "xine_start_trick_play");
 		*(void**)(&custom_xine_stop_trick_play) = dlsym(handle, "xine_stop_trick_play");
@@ -822,7 +822,7 @@ void Xine_Stream_Factory::IdentifyXineStuff()
 	}
 	else
 	{
-		LoggerWrapper::GetInstance()->Write( LV_WARNING, "Warning: libxine.so.1 is not loaded yet (?)" );
+		LoggerWrapper::GetInstance()->Write( LV_WARNING, "Warning: libxine.so.2 is not loaded yet (?)" );
 	}
 	
 	LoggerWrapper::GetInstance()->Write( LV_WARNING, "Custom xine functions status:  xine_seek=%p, xine_start_trick_play=%p, xine_stop_trick_play=%p. Trickplay and seeking support: %s", 
