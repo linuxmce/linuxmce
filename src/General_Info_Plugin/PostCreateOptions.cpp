@@ -155,7 +155,7 @@ void PostCreateOptions::PostCreateDevice_DisklessMD(Row_Device *pRow_Device, OH_
 		pRow_Device->PK_Device_get(),pRow_Device->FK_DeviceTemplate_get());
 #endif
 	string sPK_Device = StringUtils::itos(pRow_Device->PK_Device_get());
-	char * args[] = { "/usr/pluto/bin/New_PnP_MD.sh", (char *)(pRow_Device->IPaddress_get().c_str()), (char *)(pRow_Device->MACaddress_get().c_str()),
+	char * args[] = { (char *)("/usr/pluto/bin/New_PnP_MD.sh"), (char *)(pRow_Device->IPaddress_get().c_str()), (char *)(pRow_Device->MACaddress_get().c_str()),
 		(char *)(sPK_Device.c_str()), NULL };
 	ProcessUtils::SpawnDaemon(args[0], args);
 }

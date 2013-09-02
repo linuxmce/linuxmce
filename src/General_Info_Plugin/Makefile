@@ -20,7 +20,7 @@ sources = Main.cpp General_Info_Plugin.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS += -I/usr/include/mysql $(SNR_CPPFLAGS) #-DWEB_QUERY_DEBUG -DDEBUG
+CPPFLAGS += -I/usr/include/mysql #-DWEB_QUERY_DEBUG -DDEBUG
 LDFLAGS +=
 XTRALDLIBS = -lpluto_main -lmysqlclient_r
 

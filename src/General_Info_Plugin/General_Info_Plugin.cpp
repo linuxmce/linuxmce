@@ -577,7 +577,7 @@ void General_Info_Plugin::CMD_Wake_Device(int iPK_Device,string &sCMD_Result,Mes
 //<-dceag-c322-e->
 {
 	string sPK_Device = StringUtils::itos(iPK_Device);
-	char * cmd[] = { "/usr/pluto/bin/WakeMD.sh", "--dev", (char *) sPK_Device.c_str(), NULL };
+	char * cmd[] = { (char *)("/usr/pluto/bin/WakeMD.sh"), (char *)("--dev"), (char *) sPK_Device.c_str(), NULL };
 	ProcessUtils::SpawnDaemon(cmd[0], cmd);
 }
 
@@ -3369,7 +3369,7 @@ void General_Info_Plugin::CMD_Force_Update_Packages(string &sCMD_Result,Message 
 //<-dceag-c789-e->
 {
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Forcing package update");
-	char * args[] = { "/usr/pluto/bin/ForceUpdates.sh", NULL };
+	char * args[] = { (char *)("/usr/pluto/bin/ForceUpdates.sh"), NULL };
 	ProcessUtils::SpawnDaemon(args[0], args);
 }
 
@@ -3897,7 +3897,7 @@ void General_Info_Plugin::CMD_RemoteAssistance_SetStatus(bool bEnable,string &sC
 //<-dceag-c843-e->
 {
 	string sParm = bEnable ? "--enable" : "--disable";
-	char * args[] = { "/usr/pluto/bin/RA-handler.sh", (char *) sParm.c_str() };
+	char * args[] = { (char *)("/usr/pluto/bin/RA-handler.sh"), (char *) sParm.c_str() };
 	ProcessUtils::SpawnDaemon(args[0], args);
 }
 //<-dceag-c844-b->
@@ -4148,7 +4148,7 @@ void General_Info_Plugin::CMD_Update_Device(int iPK_Device,string sMac_address,i
 	StringUtils::Tokenize(sData_String,"|",vectDeviceDataBuff);
 	
 	// Iterate over the device data tokens in pairs
-	for (int i=0; i<vectDeviceDataBuff.size(); i=i+2) {
+	for (unsigned int i=0; i<vectDeviceDataBuff.size(); i=i+2) {
 		// Get the device data and convert it to an int
 		string sPK_DeviceData = vectDeviceDataBuff[i];
 		int iPK_DeviceData = atoi(sPK_DeviceData.c_str());
