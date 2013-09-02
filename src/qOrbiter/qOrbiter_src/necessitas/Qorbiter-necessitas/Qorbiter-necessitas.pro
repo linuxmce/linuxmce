@@ -60,8 +60,10 @@ TARGET=qorbiter-$$QT_VERSION
         qmlplugins.path = /libs/armeabi
         }
 
-        base.source = ../../qml/android/phoneConfig/
-        base.target = qml
+        base.source = ../../qml/android/phoneConfig/Base.qml
+        base.source += ../../qml/android/phoneConfig/FirstRunOptions.qml
+        base.source += ../../qml/android/phoneConfig/PropAndValDisplay.qml
+        base.target = qml/
 
         #The Configuration file read on startup and used subsequently.
         #Scheduled for replacement using sqlite.

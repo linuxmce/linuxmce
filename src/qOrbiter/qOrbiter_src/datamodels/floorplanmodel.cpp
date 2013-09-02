@@ -74,7 +74,6 @@ void FloorPlanModel::insertRow(int row, FloorplanDevice *item)
 
 void FloorPlanModel::setDeviceParams(QVariantList p, int device)
 {
-
     FloorplanDevice *d = find(device);
     if(d){
         d->setParams(p);
@@ -294,6 +293,13 @@ void FloorPlanModel::sortModel(int column, Qt::SortOrder order)
 {
 }
 
+void FloorPlanModel::clearAllSelections()
+{
+    foreach(FloorplanDevice* item, m_list) {
+        item->setStatus(false);
+    }
+}
+
 QImage FloorPlanModel::getPageImage(QString &id)
 {
     return currentImage;
@@ -344,7 +350,6 @@ void FloorPlanModel::finishSprite()
 
 void FloorPlanModel::setCurrentPage(QString currentPageId)
 {
-
     currentPage = currentPageId;
     setCurrentIntPage( currentPage.toInt());
     QString s = getCurrentImagePath();

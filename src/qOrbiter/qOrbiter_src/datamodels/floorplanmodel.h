@@ -115,6 +115,7 @@ signals:
 
 
 public slots:
+    void clearAllSelections();
     void clear();
     void handleItemChange();
     void handleStatusChange(int device);
