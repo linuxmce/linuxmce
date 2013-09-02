@@ -351,6 +351,15 @@ void Game_Player::CMD_Simulate_Mouse_Click(int iPosition_X,int iPosition_Y,int i
 
   PLUTO_SAFETY_LOCK (gm, m_GameMutex);
 
+  if (!m_pEmulatorController)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CMD_Simulate_Keypress called, but no emulator controlelr! Bailing!");
+    }
+  else
+    {
+      m_pEmulatorController->pressClick(iPosition_X,iPosition_Y,pMessage);
+    }
+
 }
 
 //<-dceag-c32-b->

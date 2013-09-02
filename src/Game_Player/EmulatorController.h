@@ -64,7 +64,7 @@ namespace DCE
     virtual bool pause();
     virtual bool unpause();
     virtual bool pressButton(int iPK_Button, Message *pMessage) = 0;
-    virtual bool pressClick(int iPositionX, int iPositionY, int iButtons) = 0;
+    virtual bool pressClick(int iPositionX, int iPositionY, Message *pMessage) = 0;
     virtual bool setSpeed(int iSpeed);
     virtual bool getSnap(long int iPK_Device, int iWidth, int iHeight, char **pData, int& iData_Size) = 0;
     virtual bool gotoMenu(int iMenu);

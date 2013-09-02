@@ -15,7 +15,7 @@
 #include <X11/keysym.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-
+#include <math.h>
 
 /**
  * The Window ID Thread. Called from X11EmulatorController::run().
@@ -346,9 +346,44 @@ namespace DCE
     return true;
   }
 
-  bool X11EmulatorController::pressClick(int iPositionX, int iPositionY, int iButtons)
+  bool X11EmulatorController::pressClick(int iPositionX, int iPositionY, Message *pMessage)
   {
-    // TODO: Come back here.
+    if (!pMessage)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorController::pressClick(%d,%d) - malformed Message sent. aborting. ");
+	return false;
+      }
+
+    pair<int, int> currentGeometry = m_pEmulatorModel->getVideoFrameGeometry(pMessage->m_dwPK_Device_From);
+    int iWidth = currentGeometry.first;
+    int iHeight = currentGeometry.second;
+    if (iWidth == -1 || iHeight == -1)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorController::pressClick(%d,%d) - Could not fetch VideoFrameGeometry for device %d. Aborting.",iPositionX,iPositionY,pMessage->m_dwPK_Device_From);
+	return false;
+      }
+    else
+      {
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"X11EmulatorController::pressClick(%d,%d) - VideoFrameGeometry for orbiter %d is %dx%d",iPositionX,iPositionY,pMessage->m_dwPK_Device_From,iWidth,iHeight);
+      }
+
+    int iWindowX, iWindowY, iWindowW, iWindowH;
+    if (WindowUtils::GetWindowGeometry(m_pEmulatorModel->m_pDisplay, m_pEmulatorModel->m_iWindowId, iWindowX, iWindowY, iWindowW, iWindowH))
+      {
+	double iScaleW, iScaleH = 0;
+	int iScaledX, iScaledY = 0;
+	iScaleW = (double)iWindowW / (double)iWidth;
+	iScaleH = (double)iWindowH / (double)iHeight;
+	iScaledX = floor(((double)iPositionX * iScaleW)) + floor(((double)iWindowX * iScaleW));
+	iScaledY = floor(((double)iPositionY * iScaleH)) + floor(((double)iWindowY * iScaleH));
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorController::pressClick(%d, %d) - iScaleW %d iScaleH %d iScaledX %d iScaledY %d",iPositionX,iPositionY,iScaleW,iScaleH,iScaledX,iScaledY);
+	WindowUtils::SendClickToWindow(m_pEmulatorModel->m_pDisplay, m_pEmulatorModel->m_iWindowId, 0, iScaledX, iScaledY);
+      }
+    else
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorController::pressClick(%d, %d) - Could not get window geometry to scale click to window 0x%x",iPositionX, iPositionY, m_pEmulatorModel->m_iWindowId);
+	return false;
+      }
     return true;
   }
 
