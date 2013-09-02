@@ -2,7 +2,7 @@ ROOT=..
 
 CXX?=g++
 CC=$(CXX)
-CPPFLAGS+=-W -Wall -pipe -ggdb3
+CPPFLAGS+=-W -Wall -pipe -ggdb3 $(SNR_CPPFLAGS)
 CXXFLAGS+=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE
 LDFLAGS+=-L$(ROOT)/lib
 LDLIBS+=-lDCECommon -lSerializeClass -lPlutoUtils

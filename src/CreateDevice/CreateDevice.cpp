@@ -47,6 +47,7 @@
 #include "pluto_main/Table_DeviceData.h"
 #include "pluto_main/Table_DeviceCategory.h"
 #include "pluto_main/Table_DeviceTemplate.h"
+#include "pluto_main/Define_Distro.h"
 #include "pluto_main/Define_Command.h"
 #include "pluto_main/Define_CommandParameter.h"
 #include "DCEConfig.h"
@@ -138,7 +139,7 @@ int CreateDevice::DoIt(int iPK_DHCPDevice,int iPK_DeviceTemplate,string sDescrip
 	if( row[5] && atoi(row[5]) )  // Only ask for the i/r codes if there is an infrared group
 	{
 		string sPK_DeviceTemplate = StringUtils::itos(iPK_DeviceTemplate);
-		char * args[] = { "/usr/pluto/bin/WebDB_GetIR.sh", "0", (char *)(sPK_DeviceTemplate.c_str()), NULL };
+		char * args[] = { (char *)("/usr/pluto/bin/WebDB_GetIR.sh"), (char *)("0"), (char *)(sPK_DeviceTemplate.c_str()), NULL };
 		ProcessUtils::SpawnDaemon(args[0], args);
 	}
 	
@@ -191,7 +192,7 @@ int CreateDevice::DoIt(int iPK_DHCPDevice,int iPK_DeviceTemplate,string sDescrip
 	}
 	else if( sIPAddress.empty()==false )
 	{
-		char * args[] = { "/usr/pluto/bin/PlutoDHCP.sh", NULL };
+		char * args[] = { (char * )("/usr/pluto/bin/PlutoDHCP.sh"), NULL };
 		ProcessUtils::SpawnDaemon(args[0], args);
 	}
 
@@ -323,45 +324,63 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Found %d rows 
 
 	if( iPK_DeviceCategory==DEVICECATEGORY_Core_CONST )
 	{
-		string SQL = "SELECT FK_DeviceTemplate FROM InstallWizard WHERE `Default`=1 AND Step=5"; // Get the default items to add if this is a Core
-		PlutoSqlResult result_child_dev;
-		if( ( result_child_dev.r=db_wrapper_query_result( SQL ) ) )
+		// Get Distro and OS from Device
+		string SQL = "SELECT IK_DeviceData as FK_Distro, FK_OperatingSystem FROM Device LEFT JOIN Device_DeviceData ON FK_Device=PK_Device LEFT JOIN Distro ON IK_DeviceData=PK_Distro WHERE PK_Device=" + StringUtils::itos(PK_Device) + " AND FK_DeviceData=7";
+
+		PlutoSqlResult osdistro;
+		if( ( osdistro.r=db_wrapper_query_result ( SQL ) ) && ( row=db_wrapper_fetch_row( osdistro.r ) ) )
 		{
-			while( (row=db_wrapper_fetch_row( result_child_dev.r )) )
+			string SQL = string("SELECT FK_DeviceTemplate, FK_OperatingSystem, FK_Distro FROM InstallWizard RIGHT JOIN InstallWizard_Distro ON FK_InstallWizard=PK_InstallWizard WHERE InstallWizard.Default=1 AND InstallWizard.Step=5 AND ((FK_Distro=") + row[0] + ") OR (FK_OperatingSystem=" + row[1] + " AND FK_Distro IS NULL) OR (FK_OperatingSystem IS NULL AND FK_Distro IS NULL))";
+			PlutoSqlResult result_child_dev;
+			if( ( result_child_dev.r=db_wrapper_query_result( SQL ) ) )
 			{
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Found install wizard %d",atoi(row[0]));
-				DoIt(0,atoi(row[0]),"","","",0,"",PK_Device);
+				while( (row=db_wrapper_fetch_row( result_child_dev.r )) )
+				{
+					LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Found install wizard %d",atoi(row[0]));
+					DoIt(0,atoi(row[0]),"","","",0,"",PK_Device);
+				}
 			}
 		}
 	}
 	else if( iPK_DeviceCategory==DEVICECATEGORY_Media_Director_CONST )
 	{
-		string SQL = "SELECT FK_DeviceTemplate FROM InstallWizard WHERE `Default`=1 AND Step=6"; // Get the default items to add if this is a Core
-		PlutoSqlResult result_child_dev;
-		if( ( result_child_dev.r=db_wrapper_query_result( SQL ) ) )
+		int PK_Distro=-1;
+		// Get Distro and OS from Device
+                string SQL = "SELECT IK_DeviceData as FK_Distro, FK_OperatingSystem FROM Device LEFT JOIN Device_DeviceData ON FK_Device=PK_Device LEFT JOIN Distro ON IK_DeviceData=PK_Distro WHERE FK_DeviceData=" TOSTRING(DEVICEDATA_PK_Distro_CONST) " AND PK_Device=" + StringUtils::itos(PK_Device);
+
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt -- %s",SQL.c_str());
+
+                PlutoSqlResult osdistro;
+		if( ( osdistro.r=db_wrapper_query_result ( SQL ) ) && ( row=db_wrapper_fetch_row( osdistro.r ) ) )
 		{
-			while( (row=db_wrapper_fetch_row( result_child_dev.r )) )
+			PK_Distro=atoi( row[0] );
+			string SQL = string("SELECT FK_DeviceTemplate, FK_OperatingSystem, FK_Distro FROM InstallWizard RIGHT JOIN InstallWizard_Distro ON FK_InstallWizard=PK_InstallWizard WHERE InstallWizard.Default=1 AND InstallWizard.Step=6 AND ((FK_Distro=") + row[0] + ") OR (FK_OperatingSystem=" + row[1] + " AND FK_Distro IS NULL) OR (FK_OperatingSystem IS NULL AND FK_Distro IS NULL))";
+			PlutoSqlResult result_child_dev;
+			if( ( result_child_dev.r=db_wrapper_query_result( SQL ) ) )
 			{
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Found install wizard %d",atoi(row[0]));
-				DoIt(0,atoi(row[0]),"","","",0,"",PK_Device);
+				while( (row=db_wrapper_fetch_row( result_child_dev.r )) )
+				{
+					LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Found install wizard %d",atoi(row[0]));
+					DoIt(0,atoi(row[0]),"","","",0,"",PK_Device);
+				}
 			}
 		}
-
-		if (!PK_Device_ControlledVia)
+		if ( ( !PK_Device_ControlledVia ) && ( PK_Distro != -1 ) && ( PK_Distro != DISTRO_Raspian_Wheezy_CONST ) )
 		{
 			// See what PVR software this uses
-			SQL = "SELECT IK_DeviceData FROM Device_DeviceData JOIN Device ON FK_Device=PK_Device WHERE FK_DeviceData=" TOSTRING(DEVICEDATA_TV_Standard_CONST) 
+			string SQL = "SELECT IK_DeviceData FROM Device_DeviceData JOIN Device ON FK_Device=PK_Device WHERE FK_DeviceData=" TOSTRING(DEVICEDATA_TV_Standard_CONST) 
 				" AND FK_DeviceTemplate=" TOSTRING(DEVICETEMPLATE_Generic_PC_as_Core_CONST) " AND FK_Installation=" + StringUtils::itos(m_iPK_Installation);
 
-			char cPVR='M'; // Default to MythTV
+			char cPVR; //='M'; // Default to MythTV
 			PlutoSqlResult result_pvr;
 			if( ( result_pvr.r=db_wrapper_query_result( SQL ) ) && (row=db_wrapper_fetch_row( result_pvr.r )) && row[0] )
+			{
 				cPVR = row[0][0];
-
-			if( cPVR=='V' )
-				DoIt(0,DEVICETEMPLATE_VDR_CONST,"","","",0,"",PK_Device);
-			else
-				DoIt(0,DEVICETEMPLATE_MythTV_Player_CONST,"","","",0,"",PK_Device);
+				if( cPVR=='V' )
+					DoIt(0,DEVICETEMPLATE_VDR_CONST,"","","",0,"",PK_Device);
+				else if ( cPVR=='M' )
+					DoIt(0,DEVICETEMPLATE_MythTV_Player_CONST,"","","",0,"",PK_Device);
+			}
 		}
 	}
 
@@ -476,7 +495,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Found %d rows 
 					LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Executing /usr/pluto/bin/InstallNewDevice.sh %d %s",
 						PK_Device,(row[0] ? row[0] : ""));
 					string sPK_Device = StringUtils::itos(PK_Device);
-					char * args[] = { "/usr/pluto/bin/InstallNewDevice.sh", (char *)(sPK_Device.c_str()), (char *)(row[0] ? row[0] : ""), NULL };
+					char * args[] = { (char *)("/usr/pluto/bin/InstallNewDevice.sh"), (char *)(sPK_Device.c_str()), (char *)(row[0] ? row[0] : ""), NULL };
 					ProcessUtils::SpawnDaemon(args[0], args);
 				}
 				else
