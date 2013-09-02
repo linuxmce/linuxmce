@@ -5,8 +5,49 @@ Item{
     id:phoneFloorplanLayout
     height: manager.appHeight
     width:manager.appWidth
+    focus:true
     property bool rotated:manager.b_orientation
     property string imageDir:""
+    Component.onCompleted: {
+        forceActiveFocus();
+        processSelectedDevices()
+    }
+
+    Keys.onReleased: {
+        switch(event.key){
+        case Qt.Key_Menu:
+            phoneFloorplanLayout.state="commandView"
+            event.accepted=true
+            break;
+        default:
+            console.log("Recieved key ==>"+event.key+" but not accepting")
+            break;
+        }
+
+    }
+
+    ListModel{
+        id:selections
+    }
+
+    function processSelectedDevices(){
+        selections.clear()
+
+
+        for (var prop in floorplan_devices.selectedDevices){
+            console.log(prop)
+            console.log(floorplan_devices.selectedDevices[prop])
+            selections.append({"device":prop, "name":floorplan_devices.selectedDevices[prop]})
+        }
+    }
+
+
+    Connections{
+        target:floorplan_devices
+        onSelectedDevicesChanged:processSelectedDevices()
+    }
+
+
 
     Rectangle{
         color: "black"
@@ -21,7 +62,74 @@ Item{
     FloorPlandisplayTemplate{
         id:floorplanPic
     }
-    
+
+    ListView{
+        width: parent.width
+        height: scaleY(10)
+        anchors.bottom: parent.bottom
+        orientation: ListView.Horizontal
+        model:selections
+        delegate: StyledText{
+            width: 150
+            height: 50
+            text:name
+            color:"white"
+            MouseArea{
+                anchors.fill: parent
+                onReleased:floorplan_devices.setDeviceSelection(device)
+            }
+        }
+    }
+
+    SendCommandBox {
+        id: sendCommandBox
+    }
     
     HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
+
+    states: [
+        State {
+            name: "floorplanView"
+            PropertyChanges {
+                target: floorplanPic
+                visible:true
+                opacity:1
+            }
+            PropertyChanges{
+                target: sendCommandBox
+                opacity:0
+                visible:false
+            }
+        },
+        State {
+            name: "commandView"
+            PropertyChanges {
+                target: floorplanPic
+                opacity:0
+                visible:false
+            }
+            PropertyChanges{
+                target: sendCommandBox
+                visible:true
+                opacity:1
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "floorplanView"
+            to: "commandView"
+            ScriptAction{
+                script: sendCommandBox.forceActiveFocus()
+            }
+        },
+        Transition {
+            from: "commandView"
+            to: "floorplanView"
+            ScriptAction{
+                script:phoneFloorplanLayout.forceActiveFocus()
+            }
+        }
+    ]
 }

@@ -80,3 +80,4 @@ Metadata_4 Metadata_4.qml
 NowPlayingRemoteImage NowPlayingRemoteImage.qml
 MediaPlaybackTemplate MediaPlaybackTemplate.qml
 PhoneFloorplanLayout PhoneFloorplanLayout.qml
+SendCommandBox SendCommandBox.qml
