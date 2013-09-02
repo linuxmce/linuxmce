@@ -1,11 +1,14 @@
 #!/bin/bash
 
+. /etc/lmce-build/builder.conf
+
 if [ "$KVER" ]
 then
 	Moon_KernelVersion=$KVER
 else
 	Moon_KernelVersion=$(uname -r)
 fi
+#Moon_KernelArch="i386"
 Moon_KernelArch=$(apt-config dump | grep 'APT::Architecture ' | sed 's/APT::Architecture "\(.*\)".*/\1/g')
 Moon_RootLocation='package/'
 # Remove old kernel images from package dir
