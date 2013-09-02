@@ -303,8 +303,19 @@ void qorbiterManager::gotoQScreen(QString s)
     if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
         setDceResponse("Done call to screenchange()");
         setCurrentScreen(s);
-        if(!currentScreen.contains("187"))
-            gotoScreenList->append(currentScreen);
+        if(!currentScreen.contains("187")){
+
+            if(gotoScreenList->count() !=0){
+
+                qWarning()<< gotoScreenList->count();
+                if(!gotoScreenList->at(gotoScreenList->count()-1).contains(currentScreen)){
+                    gotoScreenList->append(currentScreen);
+                }
+            }else{
+                 gotoScreenList->append(currentScreen);
+            }
+
+        }
 
     } else {
         setDceResponse("screenchange() FAILED");
@@ -1169,6 +1180,9 @@ void qorbiterManager::mountMediaDevices()
             mkPath->start(dirCmd, dArgs);
             mkPath->waitForFinished(10000);
 
+        }
+        else{
+            return;
         }
 
 

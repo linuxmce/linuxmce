@@ -3017,7 +3017,7 @@ void qOrbiter::checkTimeCode(int npDevice)
             qWarning("XINE Ip Address set!");
             sIPAddress = pDevice->m_pDevice_Core->m_sIPAddress;
         } else if(pDevice->m_dwPK_DeviceTemplate == 2205 ){
-           sIPAddress = GetCurrentDeviceData(m_dwPK_Device_NowPlaying, DEVICEDATA_TCP_Address_CONST);
+            sIPAddress = GetCurrentDeviceData(m_dwPK_Device_NowPlaying, DEVICEDATA_TCP_Address_CONST);
         }
         else
         { qWarning() << "Could not find ip address";
@@ -4903,9 +4903,10 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
     if(backwards == false)
     {
         q_mediaType = QString::number(iPK_MediaType);
-        if(goBack.last() != s)
+        if(!goBack.at(goBack.count()-1).contains(s)){
             emit updateSelectedAttributes(s);
-        goBack<< s;
+            goBack<< s;
+        }
     }
 #ifdef QT5
     //QApplication::processEvents(QEventLoop::AllEvents);
@@ -5486,8 +5487,8 @@ void qOrbiter::setVariable(int pkvar ,QString val)
 
 void qOrbiter::reInitialize(){
 
-  Disconnect();
-  initializeGrid();
-  initialize();
+    Disconnect();
+    initializeGrid();
+    initialize();
 
 }
