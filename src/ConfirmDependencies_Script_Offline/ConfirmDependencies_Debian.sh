@@ -86,26 +86,27 @@ case "$URL_TYPE" in
 			echo "$0: Blank repository entry" >&2
 			exit $ERR_APT
 		fi
-		
+
 		TMP_SECT=$(echo -n "$REPOS" | cut -d' ' -sf2-)
 		if [ -n "$TMP_SECT" ]; then
 			SECTIONS="$TMP_SECT"
 			REPOS=$(echo -n "$REPOS" | cut -d' ' -f1)
 		fi
-		
+
+		lsbrelease=$(lsb_release -c -s)
+		if [ "$REPOS" = "20dev_ubuntu" ]; then 
+			REPOS="$lsbrelease"
+		fi
+
 		SingleEndSlash='s!//*!/!g; s!/*$!/!g; s!^http:/!http://!g; s!^ftp:/!ftp://!g'
 		FilteredRepos=$(echo "$REPOS_SRC" | sed 's/[^A-Za-z0-9_./+=:-]/-/g; '"$SingleEndSlash")
 		EndSlashRepos=$(echo "$REPOS_SRC" | sed "$SingleEndSlash")
 
-#		echo "Repository test string: '$FilteredRepos.+$REPOS.+$SECTIONS'"
+		echo "Repository test string: '$FilteredRepos.+$REPOS.+$SECTIONS'"
 		results=$(cat /etc/apt/sources.list | sed "$SPACE_SED" | egrep -v "^#" | egrep -c -- "$FilteredRepos.+$REPOS.+$SECTIONS" 2>/dev/null)
-		lsbrelease=$(lsb_release -c -s)
 		if [ "$results" -eq 0 ]; then
-			AptSrc_ParseSourcesList
-			if [ "$REPOS" = "$lsbrelease" ] || [ "$REPOS" = "20dev_ubuntu" ]; then
-				if [ "$REPOS" = "20dev_ubuntu" ]; then 
-					REPOS="$lsbrelease"
-				fi
+			if [ "$REPOS" = "$lsbrelease" ]; then
+				AptSrc_ParseSourcesList
 				if AptSrc_AddSource "deb $EndSlashRepos $REPOS $SECTIONS"; then
 					if ! BlacklistConfFiles '/etc/apt/sources.list' ;then
 						AptSrc_WriteSourcesList >/etc/apt/sources.list
