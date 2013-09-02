@@ -1,5 +1,6 @@
 import QtQuick 1.1
 
+
 Item{
     id:firstRunOptions
     state:"hidden"
@@ -12,7 +13,7 @@ Item{
     Rectangle{
         id:phil
         anchors.fill: parent
-        color:"black"
+        color:"grey"
         opacity: .65
 
         Behavior on opacity {
@@ -45,10 +46,64 @@ Item{
         }
     }
 
+
+
+    Flickable{
+        id:selectionFlick
+        width: optionCol.width
+
+        anchors.centerIn: parent
+        contentHeight: optionCol.height +( manager.appHeight*.65)
+        Column{
+            id:optionCol
+            height: childrenRect.height
+            width: manager.appWidth*.95
+            spacing:manager.appHeight*.02
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+
+            PropAndValDisplay {
+                id:routerAddress
+                title:"Home Ip / Host"
+                value: manager.m_ipAddress
+                onSet: {manager.m_ipAddress = editedValue}
+
+            }
+            PropAndValDisplay {
+                id:routerPort
+                title:"Web Port"
+                value: manager.routerPort
+                onSet: manager.routerPort = editedValue
+            }
+            PropAndValDisplay {
+                id:awayIp
+                title:"Away Ip / Host "
+                value: manager.externalip
+                onSet: manager.externalip = editedValue
+            }
+
+            PropAndValDisplay {
+                id:skin
+                title:"Skin"
+                value: manager.currentSkin
+                onSet: manager.currentSkin = editedValue
+            }
+
+            PropAndValDisplay {
+                id:deviceType
+                useText: true
+                title:"Type of Device"
+                value: manager.isPhone
+                onSet: manager.isPhone = editedValue
+            }
+        }
+    }
+
     Item {
         id:closeBtn
-        height: scaleY(10)
-        width: scaleX(10)
+        height: 50
+        width: 120
         anchors.top: parent.top
         anchors.right: parent.right
 
@@ -58,12 +113,13 @@ Item{
             color:"darkgreen"
             border.color: "white"
             border.width: 2
+
         }
 
         Text{
             text:"Close"
             anchors.centerIn: parent
-            font.pointSize: 18
+            font.pointSize: 16
         }
 
         MouseArea{
@@ -71,52 +127,11 @@ Item{
             onClicked: {
                 manager.writeConfig()
                 firstRunOptions.state = "hidden"
+                rootItem.forceActiveFocus()
+                rootItem.routerAddress = manager.m_ipAddress
+                wait.start()
             }
         }
-    }
-
-    Column{
-        id:optionCol
-        height: childrenRect.height
-        width: parent.width*.75
-        spacing:scaleY(1)
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-
-        PropAndValDisplay {
-            id:routerAddress
-            title:"Home Router Address"
-            value: manager.m_ipAddress
-            onSet: {manager.m_ipAddress = editedValue}
-        }
-        PropAndValDisplay {
-            id:routerPort
-            title:"Home Router Port"
-            value: manager.routerPort
-            onSet: manager.routerPort = editedValue
-        }
-        PropAndValDisplay {
-            id:awayIp
-            title:"Away Ip Address"
-            value: manager.externalip
-            onSet: manager.externalip = editedValue
-        }
-
-        PropAndValDisplay {
-            id:skin
-            title:"Skin"
-            value: manager.currentSkin
-            onSet: manager.currentSkin = editedValue
-        }
-
-        PropAndValDisplay {
-            id:deviceType
-            title:"Type of Device"
-            value: manager.isPhone
-            onSet: manager.isPhone = editedValue
-        }
-
-
     }
 
 
@@ -144,12 +159,16 @@ Item{
                 target:optionCol
                 visible:false
             }
+            PropertyChanges{
+                target:selectionFlick
+                height:0
+            }
         },
         State {
             name: "editing"
             PropertyChanges {
                 target: firstRunOptions
-                height:parent.height
+                height:manager.appHeight
                 width:manager.appWidth
             }
             PropertyChanges{
@@ -163,6 +182,10 @@ Item{
             PropertyChanges{
                 target:optionsRect
                 visible:false
+            }
+            PropertyChanges {
+                target: selectionFlick
+                height: parent.height
             }
             PropertyChanges{
                 target:optionCol

@@ -2,20 +2,21 @@ import QtQuick 1.1
 
 
 Rectangle {
+    id:rootItem
     anchors.fill: parent
     color: "black"
     focus:true
-    Component.onCompleted: {forceActiveFocus();
-         wait.start()
+    property string routerAddress:window.router
+    Component.onCompleted: {
+        forceActiveFocus();
         if(androidSystem.updateBuildInformation() && androidSystem.updateExternalStorageLocation()){
-
             logger.setLogLocation(androidSystem.externalStorageLocation)
+            wait.start()
         }
     }
 
 
     Keys.onReleased: {
-
         switch(event.key){
         case Qt.Key_Back:
             manager.exitApp()
@@ -34,16 +35,16 @@ Rectangle {
     Timer{
         id:wait
         interval: 3500
-        onTriggered: {mainContent.source = "http://"+window.router+"/lmce-admin/skins/android/Splash.qml"; console.log("conecting")}
+        onTriggered: {mainContent.source = "http://"+routerAddress+"/lmce-admin/skins/android/Splash.qml"; console.log("conecting")}
         running:false
         repeat:true
     }
 
     Text {
         id: loading
-        text: qsTr("Connecting to "+window.router+", please be patient \n" )
+        text: qsTr("Connecting to "+routerAddress+", please be patient \n" )
         anchors.top: parent.top
-        font.pixelSize: 28
+        font.pixelSize: 22
         width: parent.width
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         color: "white"
@@ -51,26 +52,9 @@ Rectangle {
         font.weight: Font.Light
     }
 
-    Rectangle{
-        height: 50
-        width: 120
-        radius:5
-        color: androidSystem.orangeHighlight
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-    }
 
-    Text {
-        id: splashtxt
-        text: qsTr("LinuxMCE for your \n " + androidSystem.deviceName )
-        anchors.bottom: parent.bottom
-        font.pixelSize: 28
 
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        color: "green"
-        anchors.horizontalCenter: parent.horizontalCenter
-        font.weight: Font.Light
-    }
+
 
     Item{
         id:fil
@@ -86,6 +70,16 @@ Rectangle {
             radius:5
             opacity:switched ? 1 : 0
             property bool switched:false
+                Text {
+                    id: splashtxt
+                    text:  androidSystem.deviceName
+                    anchors.bottom: parent.bottom
+                    font.pixelSize: 28
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    color: "white"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    font.weight: Font.Light
+                }
 
             Timer{
                 id:sw
