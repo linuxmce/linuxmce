@@ -13,13 +13,11 @@ Item{
         target:floorplan_devices
         onDeviceCommandsChanged:{
             console.log(JSON.stringify(floorplan_devices.getDeviceCommands(trackedInt)))
-           availbleCommands.clear()
+            availbleCommands.clear()
             var cl = floorplan_devices.getDeviceCommands(trackedInt).commands
             for(var c in cl){
                 availbleCommands.append(cl[c])
             }
-
-
         }
     }
 
@@ -85,20 +83,176 @@ Item{
         height: controlsContainer.height - cmdsPrmoptText.height - 10
         anchors.horizontalCenter: controlsContainer.horizontalCenter
         model:availbleCommands
+        clip:true
         spacing:scaleY(2)
         delegate: Rectangle{
+            id:cmdEntry
             height: 75
-            width: parent.width
+            width: cmdView.width
+            state:"preselect"
             color: "black"
             border.color: "white"
             border.width: 1
             radius:5
-            StyledText{
-                text:command_name
-                fontSize: 22
-                color:"white"
-                anchors.centerIn: parent
+
+            function sendCommand(){
+                var commandObj = {};
+                var t = paramCache
+                commandObj.command = command_number
+                var tParams = new Array
+                for (var pp in t){
+                    var tpObj = {}
+                    tpObj.paramno=t[pp].CommandParameter
+                    tpObj.val=t[pp].value
+                    tParams.push(tpObj)
+                }
+                commandObj.params = tParams;
+                commandObj.count= t.length
+                commandObj.to = floorplan_devices.selectedDevices
+                manager.sendDceMessage(commandObj)
             }
+
+            Connections{
+                target:floorplan_devices
+
+                onDeviceParamsChanged:{
+                    if(cmdEntry.state==="selected"){
+                        paramCache.clear()
+                        console.log("Command Params updated")
+                        var cl = floorplan_devices.getCommandParams(trackedInt)
+                        for(var c in cl){
+                            console.log(cl[c].Command+"::"+command_number)
+                            if(cl[c].Command==command_number){
+                                console.log(JSON.stringify(cl[c]))
+                                paramCache.append(cl[c])
+                            }
+                        }
+                    }
+                }
+            }
+            ListModel{
+                id:paramCache
+            }
+
+            Timer{
+                id:entry_timeout
+                running:false
+                repeat: false
+                interval:5000
+                onTriggered: parent.state="preselect"
+            }
+
+            StyledText{
+                id:lbl
+                text:command_name
+                fontSize: 24
+                color:"white"
+
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {requestParamManager.getParams(command_number, trackedInt); cmdEntry.state="selected";entry_timeout.start() }
+            }
+
+            ListView{
+                id:params
+                model:paramCache
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                clip:true
+                delegate: Item{
+                    id:cmdDelegate
+                    clip:false
+
+                    Component.onCompleted: {
+                        if(Command==="192"){
+                            setParam(0)
+                        }
+                        else if(Command==="193"){
+                            setParam(0)
+                        }
+                    }
+
+                    function setParam(val){
+                        paramCache.set(index, {"value":val})
+                    }
+
+
+                    height: parent.height !==0 ? 60 : 0
+                    width: parent .height !==0 ? 120 : 0
+                    Column{
+                        spacing:5
+                        width: parent.width
+                        height: parent.height
+                        StyledText{
+                            text:CommandDescription
+                            color:"white"
+                        }
+                        Loader{
+                            id:controls_loader
+                        }
+
+                    }
+                }
+            }
+
+            Button{
+                text: "Send"
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                onClicked: cmdEntry.sendCommand()
+            }
+
+            states: [
+                State {
+                    name: "preselect"
+
+                    PropertyChanges {
+                        target: cmdEntry
+                        height:75
+                    }
+                    AnchorChanges {
+                        target: lbl
+                        anchors.left: undefined
+                        anchors.verticalCenter:cmdEntry.verticalCenter
+                        anchors.horizontalCenter: cmdEntry.horizontalCenter
+                    }
+                    PropertyChanges {
+                        target: params
+                        height:0
+                        width:0
+                    }
+                    PropertyChanges {
+                        target: entry_timeout
+                        running:false
+                    }
+                },
+                State{
+                    name:"selected"
+                    PropertyChanges {
+                        target: cmdEntry
+                        height:childrenRect.height
+                    }
+                    AnchorChanges {
+                        target: lbl
+                        anchors.verticalCenter:undefined
+                        anchors.horizontalCenter: undefined
+                        anchors.left: cmdEntry.left
+
+                    }
+                    PropertyChanges {
+                        target: params
+                        height:(params.count+1)*60
+                        width:cmdEntry.width*.65
+                    }
+                    PropertyChanges {
+                        target: entry_timeout
+                        running:true
+                    }
+                }
+
+            ]
         }
     }
 
