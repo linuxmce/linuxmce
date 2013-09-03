@@ -8,16 +8,18 @@ Item{
     focus:true
     property bool rotated:manager.b_orientation
     property string imageDir:""
+    state:"floorplanView"
     Component.onCompleted: {
         forceActiveFocus();
         processSelectedDevices()
     }
 
     Keys.onReleased: {
+        event.accepted=true
         switch(event.key){
         case Qt.Key_Menu:
             phoneFloorplanLayout.state="commandView"
-            event.accepted=true
+
             break;
         default:
             console.log("Recieved key ==>"+event.key+" but not accepting")
@@ -118,14 +120,14 @@ Item{
 
     transitions: [
         Transition {
-            from: "floorplanView"
+            from: "*"
             to: "commandView"
             ScriptAction{
                 script: sendCommandBox.forceActiveFocus()
             }
         },
         Transition {
-            from: "commandView"
+            from: "*"
             to: "floorplanView"
             ScriptAction{
                 script:phoneFloorplanLayout.forceActiveFocus()
