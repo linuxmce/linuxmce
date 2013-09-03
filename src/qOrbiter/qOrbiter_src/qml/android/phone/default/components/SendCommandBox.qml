@@ -97,17 +97,20 @@ Item{
 
             function sendCommand(){
                 var commandObj = {};
-                var t = paramCache
+
                 commandObj.command = command_number
+
                 var tParams = new Array
-                for (var pp in t){
+                for (var i = 0; i < paramCache.count; i++){
+                    var t = paramCache.get(i)
+
                     var tpObj = {}
-                    tpObj.paramno=t[pp].CommandParameter
-                    tpObj.val=t[pp].value
+                    tpObj.paramno=t.CommandParameter
+                    tpObj.val=t.value
                     tParams.push(tpObj)
                 }
                 commandObj.params = tParams;
-                commandObj.count= t.length
+                commandObj.count= paramCache.count
                 commandObj.to = floorplan_devices.selectedDevices
                 manager.sendDceMessage(commandObj)
             }
@@ -124,7 +127,14 @@ Item{
                             console.log(cl[c].Command+"::"+command_number)
                             if(cl[c].Command==command_number){
                                 console.log(JSON.stringify(cl[c]))
-                                paramCache.append(cl[c])
+                                paramCache.append({
+                                                      "Command":cl[c].Command,
+                                                      "CommandDescription":cl[c].CommandDescription,
+                                                      "CommandHint":cl[c].CommandHint,
+                                                      "CommandParameter":cl[c].CommandParameter,
+                                                      "type":cl[c].type,
+                                                      "value":""
+                                                  } )
                             }
                         }
                     }
@@ -172,10 +182,14 @@ Item{
                         else if(Command==="193"){
                             setParam(0)
                         }
+                        else if(Command==="184"){
+                            controls_loader.source = "Slider.qml"
+                            setParam(0)
+                        }
                     }
 
                     function setParam(val){
-                        paramCache.set(index, {"value":val})
+                        paramCache.set(model.index, {"value":val})
                     }
 
 
@@ -191,8 +205,9 @@ Item{
                         }
                         Loader{
                             id:controls_loader
+                            property int val
+                            onValChanged: setParam(String(val))
                         }
-
                     }
                 }
             }
