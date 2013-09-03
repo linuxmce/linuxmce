@@ -12,11 +12,6 @@ VIDEO_DIR="/home/public/data/pvr"
 # If the user already overwrote the default, get it.
 . /etc/default/vdr
 
-# If we have an entry for svdrpservice already, we don't touch the setup.conf
-if grep -q "^svdrpservice" /var/lib/vdr/setup.conf; then
-	exit 0
-fi
-
 # Disable shutdown by VDR
 if ! grep -q "^ENABLE_SHUTDOWN=0" /etc/default/vdr; then
 	echo "ENABLE_SHUTDOWN=0" >> /etc/default/vdr
@@ -29,6 +24,12 @@ fi
                                                                 
 # We can't have VDR running during setup file edit
 invoke-rc.d vdr stop
+
+# If we have an entry for svdrpservice already, we don't touch the setup.conf
+if grep -q "^svdrpservice" /var/lib/vdr/setup.conf; then
+	exit 0
+fi
+
 
 #
 # Make a backup copy of the existing setup.conf
