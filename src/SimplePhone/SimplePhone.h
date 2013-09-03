@@ -79,6 +79,7 @@ public:
 	string DATA_Get_PhoneNumber();
 	bool DATA_Get_Speak_in_the_House();
 	string DATA_Get_Password();
+	int DATA_Get_Volume_Level();
 	string DATA_Get_Server_IP();
 	string DATA_Get_Sound_Card();
 	bool DATA_Get_Ignore_Video_Pipes();

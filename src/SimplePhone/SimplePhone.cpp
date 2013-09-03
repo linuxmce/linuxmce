@@ -536,14 +536,14 @@ void SimplePhone::CMD_Set_Volume(string sLevel,string &sCMD_Result,Message *pMes
 {
   // This can be expanded upon later, but for now, this will at least get things started!
   string sCmd;
-  if (sLevel=="0")
+  if (sLevel=="*")
     {
-      system("alsactl store"); // So it can be restored
       sCmd = "amixer -c "+m_sSoundCardNumber+" set Mic 0 capture mute";
       system(sCmd.c_str());
     }
-  else if (sLevel=="100")
+  else if (sLevel=="#")
     {
-      system("alsactl restore");
+      sCmd = "amixer -c "+m_sSoundCardNumber+" set Mic "+StringUtils::itos(DATA_Get_Volume_Level())+" capture mute";
+      system(sCmd.c_str());
     }
 }
