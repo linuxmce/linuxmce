@@ -25,6 +25,7 @@ namespace DCE {
 	{
 		m_iPK_DesignObj_Remote_After_Menu=m_iPK_DesignObj_RemoteOSD_After_Menu=m_iPK_DesignObj_Remote_Popup_After_Menu=0;
 		// m_bPlugInWillSetDescription = true;  // No longer needed.
+		m_sKeypadOverlayPath="";
 	}
 
 	GameMediaStream::~GameMediaStream()

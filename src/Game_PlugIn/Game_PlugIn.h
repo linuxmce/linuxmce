@@ -40,7 +40,7 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-	class Game_PlugIn : public Game_PlugIn_Command, public MediaHandlerBase, public AlarmEvent
+  class Game_PlugIn : public Game_PlugIn_Command, public MediaHandlerBase, public AlarmEvent
 	{
 //<-dceag-decl-e->
 		// Private member variables
@@ -129,6 +129,17 @@ public:
 
 			*****COMMANDS***** we need to implement
 	*/
+
+
+	/** @brief COMMAND: #1119 - Bind Keypad */
+	/** Used on Remotes that have keypads to update the Keypad overlay, if available. */
+		/** @param #3 PK_DesignObj */
+			/** The designobj of the keypad overlay. */
+		/** @param #45 PK_EntertainArea */
+			/** The Entertainment area of the stream.  */
+
+	virtual void CMD_Bind_Keypad(string sPK_DesignObj,string sPK_EntertainArea) { string sCMD_Result; CMD_Bind_Keypad(sPK_DesignObj.c_str(),sPK_EntertainArea.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Bind_Keypad(string sPK_DesignObj,string sPK_EntertainArea,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 	};

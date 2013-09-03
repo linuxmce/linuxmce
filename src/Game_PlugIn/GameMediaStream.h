@@ -33,6 +33,7 @@ namespace DCE
 			int 	m_iPK_DesignObj_Remote_After_Menu; 		/** Store the real value if we're switching to a menu */
 			int 	m_iPK_DesignObj_RemoteOSD_After_Menu;
 	        int 	m_iPK_DesignObj_Remote_Popup_After_Menu;
+		string m_sKeypadOverlayPath; /** Path to a keypad overlay, if used. */
 
 			GameMediaStream(class Game_PlugIn *pGamePlugIn, class MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider,MediaDevice *pMediaDevice, int PK_Users,enum SourceType sourceType,int iStreamID);
 

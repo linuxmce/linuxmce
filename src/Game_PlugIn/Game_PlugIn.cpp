@@ -146,7 +146,7 @@ bool Game_PlugIn::Register()
 //<-dceag-createinst-b->
 Game_PlugIn_Command *Create_Game_PlugIn(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 {
-        return new Game_PlugIn(pPrimaryDeviceCommand, pData, pEvent, pRouter);
+	return new Game_PlugIn(pPrimaryDeviceCommand, pData, pEvent, pRouter);
 }
 //<-dceag-createinst-e->
 
@@ -388,6 +388,7 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 	{
 		pGameMediaStream->m_sAppName = "mess.mess";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_a5200_CONST;
+		pGameMediaStream->m_sKeypadOverlayPath = "/home/snap/a5200/keypads/";
 	}
 
 	if (mediaURL.find("/a7800") != string::npos || StringUtils::ToLower(mediaURL).find(".a78") != string::npos)
@@ -406,6 +407,7 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 	{
 		pGameMediaStream->m_sAppName = "mess.mess";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_intv_CONST;
+		pGameMediaStream->m_sKeypadOverlayPath = "/home/name/intv/keypads/";
 	}
 
 	if (mediaURL.find("/sg1000") != string::npos || StringUtils::ToLower(mediaURL).find(".sg") != string::npos)
@@ -798,4 +800,75 @@ bool Game_PlugIn::MenuOnScreen( class Socket *pSocket, class Message *pMessage, 
 	}
 
 	return false;
+}
+//<-dceag-c1119-b->
+
+	/** @brief COMMAND: #1119 - Bind Keypad */
+	/** Used on Remotes that have keypads to update the Keypad overlay, if available. */
+		/** @param #3 PK_DesignObj */
+			/** The designobj of the keypad overlay. */
+		/** @param #45 PK_EntertainArea */
+			/** The Entertainment area of the stream.  */
+
+void Game_PlugIn::CMD_Bind_Keypad(string sPK_DesignObj,string sPK_EntertainArea,string &sCMD_Result,Message *pMessage)
+//<-dceag-c1119-e->
+{
+  if (!m_pMedia_Plugin)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_PlugIn::CMD_Bind_Keypad - Could not find media plugin. Bailing!");
+    }
+
+  OH_Orbiter *pOH_Orbiter = m_pOrbiter_Plugin->m_mapOH_Orbiter_Find(pMessage->m_dwPK_Device_From);
+  vector<EntertainArea *> vectEntertainArea;
+  m_pMedia_Plugin->DetermineEntArea(pMessage->m_dwPK_Device_From, 0, sPK_EntertainArea, vectEntertainArea);
+  
+  if (vectEntertainArea.size()!= 1 || !pOH_Orbiter)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_PlugIn::CMD_Bind_Keypad - Could not determine EA.");
+      sCMD_Result="Can't find ent area/orbiter";
+      return;
+    }
+
+  EntertainArea *pEntertainArea = vectEntertainArea[0];
+
+  if (!pEntertainArea->m_pMediaStream)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_PlugIn::CMD_Bind_Keypad - Could not determine media stream");
+      sCMD_Result="No media stream";
+      return;
+    }
+  
+  GameMediaStream *pGameMediaStream = ConvertToGameMediaStream(pEntertainArea->m_pMediaStream, "Game_Plugin::Bind_Keypad(): ");
+  if (!pGameMediaStream)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_PlugIn::CMD_Bind_Keypad - Could not get GameMediaStream.");
+      sCMD_Result="Could not derive Game Media Stream";
+      return;
+    }
+
+  MediaFile *pMediaFile = pGameMediaStream->GetCurrentMediaFile();
+
+  if (!pMediaFile)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_PlugIn::CMD_Bind_Keypad - Could not retrieve the MediaFile.");
+      sCMD_Result="No media file";
+      return;
+    }
+
+  string sKeypadPath = pGameMediaStream->m_sKeypadOverlayPath + "/" + pMediaFile->m_sTitle + ".png";
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_PlugIn::CMD_Bind_Keypad - sKeypadPath is %s",sKeypadPath.c_str());
+      
+  if (FileUtils::FileExists(sKeypadPath))
+    {
+      size_t iData_Size;
+      char *pData = FileUtils::ReadFileIntoBuffer(sKeypadPath,iData_Size);
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_PlugIn::CMD_Bind_Keypad - Updating Keypad overlay designobj %s with png image size %d",sPK_DesignObj.c_str(),iData_Size);
+      DCE::CMD_Update_Object_Image Update_Object_Image(m_dwPK_Device,pMessage->m_dwPK_Device_From,sPK_DesignObj,"3",pData,iData_Size,"1");
+      SendCommand(Update_Object_Image);
+    }
+  else
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_PlugIn::CMD_Bind_Keypad - Could not find a keypad, path %s.",sKeypadPath.c_str());
+    }
+
 }
