@@ -81,3 +81,4 @@ NowPlayingRemoteImage NowPlayingRemoteImage.qml
 MediaPlaybackTemplate MediaPlaybackTemplate.qml
 PhoneFloorplanLayout PhoneFloorplanLayout.qml
 SendCommandBox SendCommandBox.qml
+Slider Slider.qml

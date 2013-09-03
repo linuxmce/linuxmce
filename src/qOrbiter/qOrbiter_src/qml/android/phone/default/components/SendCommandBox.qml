@@ -198,7 +198,10 @@ Item{
             }
 
             Button{
+                id:sndButton
                 text: "Send"
+                height:60
+                width: 120
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 onClicked: cmdEntry.sendCommand()
@@ -211,6 +214,10 @@ Item{
                     PropertyChanges {
                         target: cmdEntry
                         height:75
+                    }
+                    PropertyChanges {
+                        target: sndButton
+                        visible:false
                     }
                     AnchorChanges {
                         target: lbl
@@ -233,6 +240,10 @@ Item{
                     PropertyChanges {
                         target: cmdEntry
                         height:childrenRect.height
+                    }
+                    PropertyChanges {
+                        target: sndButton
+                        visible:true
                     }
                     AnchorChanges {
                         target: lbl
