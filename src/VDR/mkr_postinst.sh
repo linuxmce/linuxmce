@@ -21,6 +21,11 @@ fi
 if ! grep -q "^ENABLE_SHUTDOWN=0" /etc/default/vdr; then
 	echo "ENABLE_SHUTDOWN=0" >> /etc/default/vdr
 fi
+
+# Set default SVDRP port to 2001
+if ! grep -q "^SVDRP_PORT=2001" /etc/default/vdr; then
+	echo "SVDRP_PORT=2001" >> /etc/default/vdr
+fi
                                                                 
 # We can't have VDR running during setup file edit
 invoke-rc.d vdr stop
