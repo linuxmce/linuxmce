@@ -30524,5 +30524,37 @@ namespace DCE
 			COMMANDPARAMETER_List_PK_Device_CONST, sList_PK_Device.c_str(),
 			COMMANDPARAMETER_PK_Device_Related_CONST, StringUtils::itos(iPK_Device_Related).c_str()); }
 	};
+	class CMD_Bind_Keypad : public PreformedCommand {
+	public:
+		CMD_Bind_Keypad(long DeviceIDFrom, long DeviceIDTo,string sPK_DesignObj,string sPK_EntertainArea) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL, 
+			COMMAND_Bind_Keypad_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_PK_DesignObj_CONST, sPK_DesignObj.c_str(),
+			COMMANDPARAMETER_PK_EntertainArea_CONST, sPK_EntertainArea.c_str()); }
+	};
+	class CMD_Bind_Keypad_DL : public PreformedCommand {
+	public:
+		CMD_Bind_Keypad_DL(long DeviceIDFrom, string DeviceIDTo,string sPK_DesignObj,string sPK_EntertainArea) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Bind_Keypad_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_PK_DesignObj_CONST, sPK_DesignObj.c_str(),
+			COMMANDPARAMETER_PK_EntertainArea_CONST, sPK_EntertainArea.c_str()); }
+	};
+	class CMD_Bind_Keypad_DT : public PreformedCommand {
+	public:
+		CMD_Bind_Keypad_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sPK_DesignObj,string sPK_EntertainArea) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Bind_Keypad_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_PK_DesignObj_CONST, sPK_DesignObj.c_str(),
+			COMMANDPARAMETER_PK_EntertainArea_CONST, sPK_EntertainArea.c_str()); }
+	};
+	class CMD_Bind_Keypad_Cat : public PreformedCommand {
+	public:
+		CMD_Bind_Keypad_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sPK_DesignObj,string sPK_EntertainArea) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, MESSAGETYPE_COMMAND, PRIORITY_NORMAL,
+			COMMAND_Bind_Keypad_CONST,
+			2 /* number of parameters */,
+			COMMANDPARAMETER_PK_DesignObj_CONST, sPK_DesignObj.c_str(),
+			COMMANDPARAMETER_PK_EntertainArea_CONST, sPK_EntertainArea.c_str()); }
+	};
 }
 #endif

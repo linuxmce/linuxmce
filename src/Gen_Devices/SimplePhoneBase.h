@@ -128,6 +128,14 @@ public:
 			return m_mapParameters[DEVICEDATA_Password_CONST];
 	}
 
+	int Get_Volume_Level()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return atoi(m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Volume_Level_CONST).c_str());
+		else
+			return atoi(m_mapParameters[DEVICEDATA_Volume_Level_CONST].c_str());
+	}
+
 	string Get_Server_IP()
 	{
 		if( m_bRunningWithoutDeviceData )
@@ -261,6 +269,7 @@ public:
 	string DATA_Get_PhoneNumber() { return GetData()->Get_PhoneNumber(); }
 	bool DATA_Get_Speak_in_the_House() { return GetData()->Get_Speak_in_the_House(); }
 	string DATA_Get_Password() { return GetData()->Get_Password(); }
+	int DATA_Get_Volume_Level() { return GetData()->Get_Volume_Level(); }
 	string DATA_Get_Server_IP() { return GetData()->Get_Server_IP(); }
 	string DATA_Get_Sound_Card() { return GetData()->Get_Sound_Card(); }
 	bool DATA_Get_Ignore_Video_Pipes() { return GetData()->Get_Ignore_Video_Pipes(); }
