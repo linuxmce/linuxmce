@@ -1013,6 +1013,7 @@
 #define COMMAND_Get_Weather_Text_CONST 1116
 #define COMMAND_Get_Weather_Value_CONST 1117
 #define COMMAND_Phone_to_Baby_Monitor_CONST 1118
+#define COMMAND_Bind_Keypad_CONST 1119
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"

@@ -2891,6 +2891,7 @@
 #define DESIGNOBJ_butBack2sec_CONST 6289
 #define DESIGNOBJ_butFwd2sec_CONST 6290
 #define DESIGNOBJ_icoDeleteVoicemail_CONST 6291
+#define DESIGNOBJ_objKeypadOverlay_CONST 6292
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"
