@@ -1,5 +1,5 @@
 import QtQuick 1.0
-import com.nokia.android 1.1
+
 //import "../androidComponents"
 import "../components"
 
@@ -32,25 +32,25 @@ Item
         ScenarioTemplate{
             id:mediaRow
             scenariomodel: currentRoomMedia
-            floorplantype: 3
+            floorplantype: 5
             bgimgSource: "../img/ui3/mediabig.png"
         }
         ScenarioTemplate{
             id:climateRow
             scenariomodel: currentRoomClimate
-            floorplantype: 4
+            floorplantype:3
             bgimgSource: "../img/ui3/climatebig.png"
         }
         ScenarioTemplate{
             id:telecomRow
             scenariomodel: currentRoomTelecom
-            floorplantype: 6
+            floorplantype: 7
             bgimgSource: "../img/ui3/telephonebig.png"
         }
         ScenarioTemplate{
             id:securityRow
             scenariomodel: currentRoomSecurity
-            floorplantype: 7
+            floorplantype: 1
             bgimgSource: "../img/ui3/securitybig.png"
 
         }

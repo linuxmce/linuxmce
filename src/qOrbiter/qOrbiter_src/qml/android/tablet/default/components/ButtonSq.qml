@@ -11,7 +11,7 @@ Item{
     property alias buttontextzindex: buttonLabel.z
     property alias buttonsqradius:  buttonBase.radius
     clip:true
-
+    signal activated()
     Rectangle {
         id:buttonBase
         color:ms.pressed ? "white": "darkblue"
@@ -49,18 +49,8 @@ Item{
         MouseArea{
             id:ms
             anchors.fill: buttonLabel
-            hoverEnabled: true
-            onEntered: {
-                buttonBase.color = style.button_system_color_hover
-                buttonLabel.color = style.lighttext
-                buttonLabel.font.capitalization = Font.AllUppercase
-            }
+            onReleased:activated()
 
-            onExited: {
-                buttonBase.color = style.button_system_color
-                buttonLabel.font.capitalization = Font.Normal
-                buttonLabel.color = "black"
-            }
         }
     }
 

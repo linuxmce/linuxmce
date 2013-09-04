@@ -88,3 +88,5 @@ FileDetailsButtons FileDetailsButtons.qml
 FileDetailsButton FileDetailsButton.qml
 GenericAttributeSelector GenericAttributeSelector.qml
 MediaPositionHeader MediaPositionHeader.qml
+TableFloorplanLayout TabletFloorplanLayout.qml
+SendCommandBox SendCommandBox.qml

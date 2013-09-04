@@ -1,5 +1,4 @@
 import QtQuick 1.0
-import com.nokia.android 1.1
 import "../../lib/effects"
 
 Rectangle{
@@ -48,7 +47,7 @@ Rectangle{
     Loader{
         id:popupButton
         anchors.verticalCenter: parent.verticalCenter
-        source:floorplantype===3 ? "NowPlayingButton.qml" :""
+        source:floorplantype===5 ? "NowPlayingButton.qml" :""
         anchors.left:templatefloorplan.right
     }
 
