@@ -20,7 +20,7 @@ Item{
     Rectangle{
         id:phil
         width: 240
-        height: 25
+        height: 15
         color:androidSystem.greenHighlight
         radius: 5
         border.color: borderColor
@@ -34,7 +34,7 @@ Item{
         anchors.verticalCenter:phil.verticalCenter
         radius:65
         color:"green"
-        opacity: .85
+        opacity: 1
 
         MouseArea{
             id:ms
@@ -43,7 +43,14 @@ Item{
             drag.axis: Drag.XAxis
             drag.minimumX:(phil.x-(handle.width/2))
             drag.maximumX: phil.width - (handle.width/2)
-            onReleased: cmdEntry.sendCommand()
+            onReleased: {cmdEntry.sendCommand(); cmdEntry.active=false }
+            onPressed:{ cmdEntry.active = true; console.log("pressed")}
+            onDragChanged: {
+                if(drag.active)
+                { cmdEntry.active=true; console.log("dragging")}
+                else
+                {  cmdEntry.active=false; console.log("not dragging")}
+            }
         }
     }
     StyledText{

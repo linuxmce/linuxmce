@@ -49,13 +49,6 @@ Item{
     }
 
 
-
-    Rectangle{
-        color: "black"
-        anchors.fill: parent
-        opacity: .35
-    }
-
     ParamManager{
         id:requestParamManager
     }

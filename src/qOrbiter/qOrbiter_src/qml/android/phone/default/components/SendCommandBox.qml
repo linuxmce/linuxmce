@@ -60,7 +60,7 @@ Item{
         id:controlsContainer
         height: parent.height*.75
         width: parent.width*.95
-        color: androidSystem.greenStandard
+        color: androidSystem.blueStandard
         radius: 5
         border.color: "white"
         anchors.centerIn: parent
@@ -94,6 +94,8 @@ Item{
             border.color: "white"
             border.width: 1
             radius:5
+            property bool isActive:false
+            onIsActiveChanged: console.log("feu")
 
             function sendCommand(){
                 var commandObj = {};
@@ -148,8 +150,8 @@ Item{
                 id:entry_timeout
                 running:false
                 repeat: false
-                interval:5000
-                onTriggered: parent.state="preselect"
+                interval:30000
+                onTriggered: if(!cmdEntry.active){ parent.state="preselect"} else {restart()}
             }
 
             Text{
@@ -157,7 +159,6 @@ Item{
                 text:command_name
                 font.pointSize: 24
                 color:"white"
-
             }
 
             MouseArea{
@@ -191,6 +192,9 @@ Item{
                     function setParam(val){
                         paramCache.set(model.index, {"value":val})
                     }
+                    function setActive(b){
+                        cmdEntry.isActive= b
+                    }
 
 
                     height: parent.height !==0 ? 60 : 0
@@ -205,8 +209,7 @@ Item{
                         }
                         Loader{
                             id:controls_loader
-                            property int val
-                            onValChanged: setParam(String(val))
+
                         }
                     }
                 }
