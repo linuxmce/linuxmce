@@ -67,10 +67,10 @@ Item{
         visible:parent.visible
     }
 
-    StyledText {
+    Text {
         id: cmdsPrmoptText
         text: qsTr("Availible Commands")
-        fontSize: scaleY(3)
+        font.pointSize: scaleY(3)
         color: "Black"
         anchors.top: controlsContainer.top
         anchors.horizontalCenter: controlsContainer.horizontalCenter
@@ -152,10 +152,10 @@ Item{
                 onTriggered: parent.state="preselect"
             }
 
-            StyledText{
+            Text{
                 id:lbl
                 text:command_name
-                fontSize: 24
+                font.pointSize:24
                 color:"white"
 
             }
@@ -199,7 +199,7 @@ Item{
                         spacing:5
                         width: parent.width
                         height: parent.height
-                        StyledText{
+                        Text{
                             text:CommandDescription
                             color:"white"
                         }

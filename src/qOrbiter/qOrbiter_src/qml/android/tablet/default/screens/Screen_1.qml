@@ -50,7 +50,7 @@ Item
         ScenarioTemplate{
             id:securityRow
             scenariomodel: currentRoomSecurity
-            floorplantype: 1
+            floorplantype: 4
             bgimgSource: "../img/ui3/securitybig.png"
 
         }

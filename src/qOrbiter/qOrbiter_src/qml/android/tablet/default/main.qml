@@ -7,6 +7,26 @@ Item {
     width:manager.appWidth
     height:manager.appHeight
     focus:true
+    Rectangle{
+          id:canary
+          height: 1
+          width: 1
+          color:"white"
+      }
+
+      Timer{
+          id:refresh
+          interval: 500
+          running:true
+          repeat: true
+          onTriggered: {
+              if(canary.rotation===360)
+                  canary.rotation =1
+              else
+                  canary.rotation=(canary.rotation+1)
+          }
+      }
+
     Component.onCompleted: forceActiveFocus()
     Connections{
         target:manager
@@ -18,17 +38,19 @@ Item {
         case Qt.Key_Menu:
             console.log("menu button caught in root!")
             break;
-        case Qt.Key_VolumeUp:
-            console.log("Vol up")
-            break;
-        case Qt.Key_VolumeDown:
-            console.log("vol down")
-            break;
+//        case Qt.Key_VolumeUp:
+//            console.log("Vol up")
+//            break;
+//        case Qt.Key_VolumeDown:
+//            console.log("vol down")
+//            break;
            case Qt.Key_MediaPrevious:
                console.log("Caught back button! Phew!")
+               manager.goBacktoQScreen()
                break;
            case Qt.Key_Back:
                console.log("Caught Back again! Tricky...")
+               manager.goBacktoQScreen()
                break;
            default:
                console.log("I have no idea what key " + event.key + " is. ")

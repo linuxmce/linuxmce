@@ -22,7 +22,7 @@ Item {
 
     Timer{
         id:refresh
-        interval: 500
+        interval: 750
         running:true
         repeat: true
         onTriggered: {

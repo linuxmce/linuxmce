@@ -152,10 +152,10 @@ Item{
                 onTriggered: parent.state="preselect"
             }
 
-            StyledText{
+            Text{
                 id:lbl
                 text:command_name
-                fontSize: 24
+                font.pointSize: 24
                 color:"white"
 
             }

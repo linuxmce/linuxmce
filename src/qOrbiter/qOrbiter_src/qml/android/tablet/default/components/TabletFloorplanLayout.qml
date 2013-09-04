@@ -53,7 +53,7 @@ Item{
     Rectangle{
         color: "black"
         anchors.fill: parent
-        opacity: .65
+        opacity: .35
     }
 
     ParamManager{
