@@ -215,6 +215,7 @@ int main(int argc, char* argv[])
 #ifdef ANDROID
     AndroidSystem androidHelper;
 
+
 #endif
 
     QOrbiterLogger localLogger;
@@ -225,9 +226,6 @@ int main(int argc, char* argv[])
     }
 
 #endif
-
-
-
 
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
     g_sBinaryPath = FileUtils::BasePath(argv[0]);

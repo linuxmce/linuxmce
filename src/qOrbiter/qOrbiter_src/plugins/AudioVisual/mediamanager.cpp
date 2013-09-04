@@ -238,7 +238,7 @@ void MediaManager::processTimeCode(qint64 f)
     if(min.length()==1)
         min.prepend("0");
 
-    QString sec = QString::number(remainder);
+    QString sec = QString::number(forseconds);
     if(sec.length()==1)
         sec.prepend("0");
 

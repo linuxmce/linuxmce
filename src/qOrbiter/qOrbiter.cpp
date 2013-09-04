@@ -2211,8 +2211,6 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
 
     emit addFloorplanDeviceCommand(t) ;
 
-
-
 }
 
 void qOrbiter::shutdown()

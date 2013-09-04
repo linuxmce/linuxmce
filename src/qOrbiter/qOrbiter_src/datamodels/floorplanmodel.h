@@ -63,10 +63,10 @@ typedef QMap <int, QString> myMap;
     bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex());
     FloorplanDevice* takeRow(int row);
     FloorplanDevice* find(const QString &id) const;
-    FloorplanDevice* find(int device) const;
+
     QModelIndex indexFromItem( const FloorplanDevice* item) const;
     FloorplanDevice* currentRow();
-    FloorplanDevice *get(int idx);
+
 
 
     void sortModel(int column, Qt::SortOrder order);
@@ -99,6 +99,7 @@ typedef QMap <int, QString> myMap;
    //int columnCount(const QModelIndex &parent) const;
 
 signals:
+
     void pageChanged(QString s);
     void floorPlanImageChanged();
     void floorPlanStatus(QString s);
@@ -112,9 +113,13 @@ signals:
     void selectedDevicesChanged();
     void adjustLevel(int, myMap);
     void sendCommandMessage(QVariantMap cmdMsg);
+    void deviceCommandsChanged();
+    void deviceParamsChanged();
 
 
 public slots:
+    FloorplanDevice* find(int device) const;
+    FloorplanDevice *get(int idx);
     void clearAllSelections();
     void clear();
     void handleItemChange();
@@ -157,6 +162,10 @@ public slots:
  void setDeviceParams(QVariantList p, int device);
 
 QVariantMap getSelectedDevices(){return selectedDevices;}
+
+QVariantMap getDeviceCommands(int d);
+
+QVariantList getCommandParams(int device);
 
 private:
     FloorplanDevice* m_prototype;

@@ -91,6 +91,12 @@ void FloorplanDevice::setupFloorplanPositions()
         }
     }
 }
+
+void FloorplanDevice::getCommandParameters()
+{
+    //  QString address = "http://"+manager.m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?c=";
+
+}
 /*!
  * \brief FloorplanDevice::getPagePosition
  * \param page

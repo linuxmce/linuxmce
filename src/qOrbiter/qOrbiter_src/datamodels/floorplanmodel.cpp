@@ -50,6 +50,8 @@ void FloorPlanModel::appendRows(const QList<FloorplanDevice *> &items)
 
         QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
         QObject::connect(this, SIGNAL(changePage(int)), item, SLOT(setCurrentPage(int)));
+        QObject::connect(item, SIGNAL(deviceCommandsChanged()), this, SIGNAL(deviceCommandsChanged()));
+        QObject::connect(item, SIGNAL(commandParamsChanged()), this, SIGNAL(deviceParamsChanged()));
         m_list.append(item);
 
     }
@@ -67,6 +69,7 @@ void FloorPlanModel::insertRow(int row, FloorplanDevice *item)
 {
     beginInsertRows(QModelIndex(), row, row);
     connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
+
     //qDebug() << "Inserting at:" << row;
     m_list.insert(row, item);
     endInsertRows();
@@ -77,6 +80,22 @@ void FloorPlanModel::setDeviceParams(QVariantList p, int device)
     FloorplanDevice *d = find(device);
     if(d){
         d->setParams(p);
+    }
+}
+
+QVariantMap FloorPlanModel::getDeviceCommands(int d)
+{
+    FloorplanDevice * t = find(d);
+    if(t!=0){
+        return t->getDeviceCommands();
+    }
+}
+
+QVariantList FloorPlanModel::getCommandParams(int device)
+{
+    FloorplanDevice * t = find(device);
+    if(t!=0){
+        return t->getParams();
     }
 }
 

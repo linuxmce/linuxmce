@@ -257,6 +257,7 @@ public slots:
 
 
     void setMediaPosition(int msec) {
+        qDebug() << msec;
 #ifdef QT4
         mediaObject->seek((qint64)msec);
 #elif QT5

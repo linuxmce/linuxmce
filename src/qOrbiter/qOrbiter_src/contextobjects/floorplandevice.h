@@ -23,6 +23,7 @@
   */
 
 #include <QObject>
+
 #include <QVariant>
 #include <QImage>
 #include <QMap>
@@ -160,7 +161,11 @@ public slots:
      * \param p
      * Sets an a formatted device command to the QVariantMap that will be returned to the qml caller.
      */
-    void setDeviceCommand(QVariantMap p){ deviceCommands= p; emit deviceCommandsChanged(); emit dataChanged();}
+    void setDeviceCommand(QVariantMap p){
+        deviceCommands= p;
+        emit deviceCommandsChanged();
+        emit dataChanged();
+    }
 
     /*!
      * \brief getDeviceCommands
@@ -169,13 +174,14 @@ public slots:
      */
     Q_INVOKABLE inline QVariantMap getDeviceCommands () const {return deviceCommands;}
 
-    Q_INVOKABLE inline void setParams(QVariantList p) {commandParams = p; emit commandParamsChanged(); emit dataChanged(); }
+    Q_INVOKABLE inline void setParams(QVariantList p) {commandParams = p; emit commandParamsChanged(); getCommandParameters(); emit dataChanged(); }
 
     Q_INVOKABLE inline QVariantList getParams() const {return commandParams;}
 
 
 private:
     void setupFloorplanPositions();
+    void getCommandParameters();
 
 };
 
