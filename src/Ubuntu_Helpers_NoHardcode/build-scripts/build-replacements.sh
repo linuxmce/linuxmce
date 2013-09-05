@@ -288,7 +288,7 @@ function Build_Replacements_Lucid
 	# lmce-asterisk
 	Build_Replacement_Package lmce-asterisk src/lmce-asterisk
         cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir}
-        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan_sccp_v4                
+        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1
 	#Package: zaptel-modules
 	DisplayMessage "NOT Building zaptel-modules"
 #	m-a --non-inter -ft -l $KVER a-b zaptel
@@ -310,9 +310,10 @@ function Build_Replacements_Precise
 	mkdir -pv "$replacements_dir"
 
 #	#Package: lirc
-	Build_Replacement_Package lirc ubuntu/lirc-0.8.6+lmce1
+	Build_Replacement_Package lirc ubuntu/lirc-0.9.0-0ubuntu1+lmce1
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-x*.deb ${replacements_dir}
-	cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-modules*.deb ${replacements_dir}
+	# We have no lirc-modules for 0.9
+#	cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-modules*.deb ${replacements_dir}
 
         apt-get install -y liblinphone-dev
 
@@ -328,7 +329,10 @@ function Build_Replacements_Precise
 	# lmce-asterisk
 	Build_Replacement_Package lmce-asterisk src/lmce-asterisk
         cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir}
-        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan_sccp_v4
+	# qOrbiter doesn't have compatibility record yet.
+	Build_Replacement_Package qorbiter src/qOrbiter
+        cp ${svn_dir}/${svn_branch_name}/src/qorbiter*.deb ${replacements_dir}
+        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1
 	#Package: zaptel-modules
 
 	Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2

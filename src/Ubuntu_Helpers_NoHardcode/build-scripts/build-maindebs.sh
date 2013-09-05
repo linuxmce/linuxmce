@@ -111,7 +111,7 @@ function build_main_debs() {
 					RepositorySource=25
 					Main_Version='2.0.0.46.'
 					# mame - excluded due to long time for compilation.
-					exclude_list=$exclude_list,682,683
+					#exclude_list=$exclude_list,682,683
                        			# videolan client
 #		                         exlucde_list=$exclude_list,431,432
                        	                exclude_list=$exclude_list,$mkr_tira
