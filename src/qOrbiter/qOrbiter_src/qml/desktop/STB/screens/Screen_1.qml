@@ -27,11 +27,4 @@ Item {
         opacity: parent.activeFocus ? .65 : .25
     }
 
-    StyledText{
-        anchors.centerIn: parent
-        text:"Screen 1"
-        font.pixelSize: 32
-        color:"white"
-    }
-
 }

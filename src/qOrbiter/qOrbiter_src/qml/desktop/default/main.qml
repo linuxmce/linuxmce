@@ -171,8 +171,6 @@ Item {
         onOrientationChanged: checkLayout()
     }
 
-
-
     FocusScope{
         id:mainScope
         height: manager.appHeight
@@ -218,7 +216,6 @@ Item {
         DataHeader {
             id: data_header
             z:6
-
         }
 
 

@@ -60,7 +60,7 @@ Item {
     FontLoader{
         id:myFont
         name:"Sawasdee"
-        source: "fonts/Sawasdee.ttf"
+        source: "../default/fonts/Sawasdee.ttf"
     }
 
     ListModel{
@@ -505,9 +505,6 @@ Item {
     STBFooter {
         id: ftr
     }
-
-
-
 
     Style{
         id:appStyle
