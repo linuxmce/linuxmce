@@ -200,7 +200,7 @@ Item {
 
     FontLoader{
         id:appFont
-        name:"Roboto"
+        source:"../lib/fonts/Sawasdee.ttf"
     }
 
     //=================Components==================================================//

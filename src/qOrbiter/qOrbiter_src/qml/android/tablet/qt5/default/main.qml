@@ -41,9 +41,11 @@ Item {
                 break;
                case Qt.Key_MediaPrevious:
                    console.log("Caught back button! Phew!")
+                   manager.goBacktoQScreen()
                    break;
                case Qt.Key_Back:
                    console.log("Caught Back again! Tricky...")
+                   manager.goBacktoQScreen()
                    break;
                default:
                    console.log("I have no idea what key " + event.key + " is. ")

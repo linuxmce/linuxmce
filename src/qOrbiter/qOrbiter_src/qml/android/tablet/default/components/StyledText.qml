@@ -11,10 +11,7 @@ import "../../lib/effects"
         property int paraText:scaleY(6)
         property int listViewText:scaleY(7)
         id:labelelement
-        text: textLabel
-        font.bold: isBold
-        font.italic: isItalic
-        font.pixelSize: fontSize
+        text: textLabel       
         font.family: myFont.name
         font.weight: Font.Light
     }
