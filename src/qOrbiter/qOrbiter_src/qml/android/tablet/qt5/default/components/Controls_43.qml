@@ -56,6 +56,4 @@ Item {
             hitArea.onReleased: manager.adjustVolume(-5)
         }
     }
-
-
 }

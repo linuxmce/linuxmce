@@ -1,14 +1,21 @@
 import QtQuick 2.0
 Item{
     id:media_playback_base
-    height: manager.appHeight
+    height: parent.height
     width: manager.appWidth
     state:"metadata"
 
-    Component.onCompleted: manager.setBoundStatus(true)
+    Component.onCompleted: {
+        manager.setBoundStatus(true);
+        nav_row.navSource="NavOptions5.qml";
+        info_panel.state="hidden";
+        controlComponent = "Controls_5.qml" //controlsLoader.sourceComponent
+    }
+
+
     property string metadataComponent:"Metadata_"+manager.i_current_mediaType+".qml"
     property alias scrollBarComponent:mediaScrollerTarget.sourceComponent
-    property string controlComponent: "Controls_"+manager.i_current_mediaType+".qml" //controlsLoader.sourceComponent
+    property string controlComponent: ""
     property alias playlistSource:playlist.model
     property alias playlistDelegate:playlist.delegate
     property bool enableScrollbar:true
@@ -42,35 +49,14 @@ Item{
         }
     }
 
+
+
     Item{
         id:metaDataPanel
         height: parent.height
         width: parent.width
         clip:true
-        MouseArea{
-            id:dragHandler
-            anchors.fill: parent
-            drag.target: hiddenDrag
-            drag.axis: Drag.XAxis
-            drag.minimumX: 0
-            drag.maximumX: parent.width
 
-            onReleased:  {
-
-                console.log(hiddenDrag.x)
-
-                if(hiddenDrag.x  < parent.width /2 ){
-                    console.log("playlist") ;
-                   media_playback_base.state = "playlist"
-                }
-                else {
-                    media_playback_base.state = "controls";
-                    console.log("controls")
-                }
-            }
-
-           // onReleased: media_playback_base.state="playlist"
-        }
 
         NowPlayingImage{
             id:npImage
@@ -104,8 +90,6 @@ Item{
             width: parent.width/2
             x:parent.width /2
         }
-
-
     }
 
     Item{
@@ -135,17 +119,15 @@ Item{
         }
     }
 
-
-
-
     states: [
         State {
             name: "metadata"
             AnchorChanges{
                 target:metaDataPanel
-                    anchors.right: undefined
+                anchors.right: undefined
                 anchors.left: media_playback_base.left
             }
+
             PropertyChanges {
                 target: hiddenDrag
                 x:media_playback_base.x / 2
@@ -158,15 +140,16 @@ Item{
                 target: metaDataPanel
                 anchors.left: undefined
                 anchors.right:media_playback_base.left
-           }
+            }
         },
         State {
             name: "controls"
             AnchorChanges{
                 target: metaDataPanel
-                 anchors.right: undefined
+                anchors.right: undefined
                 anchors.left: media_playback_base.right
             }
+
         }
     ]
 
@@ -175,9 +158,9 @@ Item{
             from: "*"
             to: "*"
             AnchorAnimation{
-                duration: 500
-                easing.type: Easing.SineCurve
-                easing.amplitude: 1
+                duration: 750
+
+
             }
         }
     ]

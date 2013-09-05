@@ -10,7 +10,7 @@ Item{
     Connections{
         target: mediaplaylist
         onActiveItemChanged:{
-            nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
+            playlist_data.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
         }
     }
 

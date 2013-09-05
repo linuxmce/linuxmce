@@ -1,15 +1,24 @@
 import QtQuick 2.0
 import "../components"
-import "../../../lib/handlers"
+import "../../lib/handlers"
 
 Item{
     id:info_panel
     width:parent.width
     anchors.left:parent.left
     anchors.bottom: parent.bottom
-    Component.onCompleted: info_panel.state="retracted"
+    Component.onCompleted:{ info_panel.state="retracted"; statusTimer.start() }
 
-    
+    Timer{
+        id:statusTimer
+        interval: 5000
+        triggeredOnStart: false
+        onTriggered: {
+            orbiter_status_text.opacity = 0;
+        }
+
+    }
+
     Rectangle{
         id:info_fill
         anchors.fill: info_panel
@@ -25,8 +34,28 @@ Item{
         font.pixelSize:36
         font.bold: true
         color:"green"
+        Behavior on opacity {
 
+            SequentialAnimation{
+                PropertyAnimation{
+                    duration: 250
+                }
+                ScriptAction{
+                    script: homeContent.source = "HomeScreenContent.qml"
+                }
+            }
+
+
+        }
     }
+
+    Loader{
+        id:homeContent
+        anchors.top: parent.top
+        anchors.left: parent.left
+        source:""
+    }
+
     Clock{
         id:time_keeper
         anchors.top: orbiter_status_text.bottom
@@ -170,10 +199,10 @@ Item{
                 visible:false
             }
 
-        },      
+        },
         State {
             name: "hidden"
-         //   when: screenfile !=="Screen_1.qml"
+            //   when: screenfile !=="Screen_1.qml"
             PropertyChanges {
                 target: time_keeper
                 visible:false

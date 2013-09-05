@@ -18,9 +18,9 @@ Item{
             id:mediaViewDelegate
             height: scaleY(25)
             width: parent.width
+            clip:true
 
             Image{
-                id:img
                 source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
                 anchors.left: parent.left
                 anchors.fill: parent
@@ -32,15 +32,14 @@ Item{
                 anchors.fill: parent
                 opacity: .65
                 color:trap.pressed ? "darkgreen" : "black"
+
             }
+
             StyledText{
                 text: name
                 anchors.centerIn: parent
                 fontSize: 36
                 color: "White"
-                fontWeight: Font.Normal
-                width: parent.width - img.width
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             }
 
             MouseArea{

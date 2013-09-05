@@ -7,15 +7,10 @@ import QtQuick 2.0
         property bool isBold:false
         property bool isItalic:false
         property double fontSize:scaleY(2.5)
-        property int fontWeight:Font.Light
         id:labelelement
-        text: textLabel
-        font.bold: isBold
-        font.italic: isItalic
+        text: textLabel       
         font.pixelSize: fontSize
-        font.family: "Roboto"
-        font.weight: fontWeight
-        height: paintedHeight
-        width: paintedWidth
+        font.weight: Font.Light
+        font.family: appFont.name
         color:"white"
     }

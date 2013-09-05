@@ -67,7 +67,7 @@ Item {
             id: filedetailsimage
             width: filedetailsclass.aspect=="wide"? scaleX(30) : scaleX(23)
             height:filedetailsclass.aspect=="wide"?scaleY(40) : scaleY(55)
-           source:"http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=imdb&file="+filedetailsclass.file+"&val="+13
+           source:"http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=imdb&file="+filedetailsclass.file+"&val="+13
             smooth: true
         }
 

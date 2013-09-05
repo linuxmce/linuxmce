@@ -1,19 +1,13 @@
 import QtQuick 2.0
-import QtGraphicalEffects 1.0
-import "../../lib/handlers"
+import "../lib/handlers"
 import "components"
 
 Item {
     id: qml_root
 
     onWidthChanged: console.log(width+"::"+height)
-    height:parent.height
-    width:parent.width
-    focus:true
-    Component.onCompleted: {
-        forceActiveFocus()
-        androidSystem.updateBuildInformation()
-    }
+    height:manager.appHeight
+    width:manager.appWidth
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
@@ -26,35 +20,38 @@ Item {
     property string dynamic_height
     property string dynamic_width
 
-
-    Keys.onReleased: {
-        console.log(event.key)
-        switch(event.key){
-        case Qt.Key_Back:
-            event.accepted=true
-            console.log("Back triggered in switch statement")
-            break;
-        case Qt.Key_VolumeUp:
-            console.log("Switch Caught Vol Up")
-            break;
-        case Qt.Key_VolumeDown:
-            console.log("Switch Caught Vol Down")
-            break;
-        case Qt.Key_Menu:
-            console.log("Switch caught Menu")
-            break;
-        default:
-            console.log("Key outside range==>"+event.key)
-        }
-    }
-
     function scaleX(x){
         return x/100*qml_root.width
     }
     function scaleY(y){
         return y/100*qml_root.height
     }
+    focus:true
+    Keys.onReleased:{
 
+            switch(event.key){
+            case Qt.Key_Menu:
+                console.log("menu button caught in root!")
+                break;
+            case Qt.Key_VolumeUp:
+                console.log("Vol up")
+                break;
+            case Qt.Key_VolumeDown:
+                console.log("vol down")
+                break;
+               case Qt.Key_MediaPrevious:
+                   console.log("Caught back button! Phew!")
+                   break;
+               case Qt.Key_Back:
+                   console.log("Caught Back again! Tricky...")
+                   break;
+               default:
+                   console.log("I have no idea what key " + event.key + " is. ")
+                   break;
+            }
+
+            event.accepted= true
+        }
     Rectangle{
         anchors.fill: parent
         id:bgFill
@@ -132,14 +129,14 @@ Item {
             id:mini_screen_saver_image
             height: mini_screen_saver.height
             width: mini_screen_saver.width
-            source: "http://"+manager.m_ipAddress+"/lmce-admin/imdbIMage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
+            source: "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
         }
     }
 
     Loader {
         id:pageLoader
         objectName: "loadbot"
-
+        focus: true
         height: qml_root.height-nav_row.height-info_panel.height
         anchors.top: nav_row.bottom
         Keys.onBackPressed: console.log("back")
@@ -188,7 +185,7 @@ Item {
     }
 
 
-    function screenchange(screenname)
+    function screenchange(screenname )
     {
         pageLoader.source = "screens/"+screenname
 
@@ -203,12 +200,8 @@ Item {
 
     FontLoader{
         id:appFont
-        name:"Sawasdee"
-        source:"../../../fonts/Sawasdee.ttf"
+         source:"../lib/fonts/Sawasdee.ttf"
     }
-
-
-
 
     //=================Components==================================================//
     function loadComponent(componentName)

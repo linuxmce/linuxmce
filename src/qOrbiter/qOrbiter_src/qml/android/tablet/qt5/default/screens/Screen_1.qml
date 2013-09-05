@@ -1,11 +1,11 @@
 import QtQuick 2.0
 import "../components"
-import "../../../lib/handlers"
+import "../../lib/handlers"
 
 Item {
     height:manager.appHeight
     width:manager.appWidth
-    Component.onCompleted:{ current_header_model=scenarios;manager.setBoundStatus(true) }
+    Component.onCompleted:{ current_header_model=scenarios;manager.setBoundStatus(true); info_panel.state="retracted"; nav_row.navSource=nav_row.defaultSource }
     Item{
         id:home_panel
         height: parent.height - info_panel.height - nav_row.height
@@ -30,6 +30,7 @@ Item {
                     id:button
                     buttonText.text: title
                     textSize: 38
+
                     hitArea.onReleased: manager.execGrp(params)
                 }
             }
