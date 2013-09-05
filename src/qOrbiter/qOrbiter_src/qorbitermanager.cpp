@@ -1581,11 +1581,9 @@ bool qorbiterManager::writeConfig()
             configVariables.namedItem("routeraddress").attributes().namedItem("id").setNodeValue(internalHost);     //internal hostname
 #ifdef QT5
             configVariables.namedItem("qt5skin").attributes().namedItem("id").setNodeValue(currentSkin);
-#else
+#elif NECESSITAS
             configVariables.namedItem("skin").attributes().namedItem("id").setNodeValue(currentSkin);
 #endif
-            //current skin
-            configVariables.namedItem("qt5skin").attributes().namedItem("id").setNodeValue(currentSkin);
             configVariables.namedItem("routerport").attributes().namedItem("id").setNodeValue(routerPort);
             configVariables.namedItem("externalip").attributes().namedItem("id").setNodeValue(qs_ext_routerip);     //externalip
             configVariables.namedItem("externalHost").attributes().namedItem("id").setNodeValue(externalHost);      //external host
@@ -1594,7 +1592,10 @@ bool qorbiterManager::writeConfig()
             configVariables.namedItem("firstrun").attributes().namedItem("id").setNodeValue(QString("false"));
             configVariables.namedItem("debug").attributes().namedItem("id").setNodeValue(debugMode ==true? "true" : "false");
             configVariables.namedItem("phone").attributes().namedItem("id").setNodeValue(QString::number(isPhone));
-            configVariables.namedItem("mobile_storage").attributes().namedItem("id").setNodeValue(QString::number(isPhone));
+            if(!mobileStorageLocation.isEmpty()){
+                  configVariables.namedItem("mobile_storage").attributes().namedItem("id").setNodeValue(mobileStorageLocation);
+            }
+
             QByteArray output = localConfig.toByteArray();
             localConfigFile.open(QFile::ReadWrite);
             if (!localConfigFile.write(output))
