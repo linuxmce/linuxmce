@@ -122,58 +122,47 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 		uint32 homeId = m_pZWInterface->GetHomeId();
 		switch (pMessage->m_dwID) {
 			case COMMAND_Generic_On_CONST:
-			{
-			        LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ON RECEIVED FOR CHILD %d/%d",node_id, instance_id);
-				m_pZWInterface->Lock();
-				OpenZWave::ValueID* valueID = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, "Basic");
-				if (valueID != NULL)
-				{
-					if (OpenZWave::Manager::Get()->SetValue(*valueID, (uint8)100)) {
-						LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Value set to ON (level 100) successful");
-					} else {
-						LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Value Set FAILED!");
-					}
-				} else {
-					OpenZWave::Manager::Get()->SetNodeOn(homeId,node_id);
-				}
-				m_pZWInterface->UnLock();
-				break;
-				;;
-			}
+			case COMMAND_Set_Level_CONST:
 			case COMMAND_Generic_Off_CONST:
 			{
-				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"OFF RECEIVED FOR CHILD %d/%d",node_id, instance_id);
-				m_pZWInterface->Lock();
-				OpenZWave::ValueID* valueID = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, "Basic");
-				if (valueID != NULL)
-				{
-					if (OpenZWave::Manager::Get()->SetValue(*valueID, (uint8)0)) {
-						LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Value set to OFF (level 0) successful");
-					} else {
-						LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Value Set FAILED!");
-					}
-				} else {
-					OpenZWave::Manager::Get()->SetNodeOff(homeId,node_id);
+				// We can get On/Off/Set Level regardless of node type, so we handle all here and use the correct
+				// ValueID for the node type
+				bool state = false;
+				level = 0;
+				if (pMessage->m_dwID == COMMAND_Set_Level_CONST) {
+					level = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str());
+					state = level>99;
+				} else if (pMessage->m_dwID == COMMAND_Generic_On_CONST) {
+					state = true;
+					level = 100;
 				}
-				m_pZWInterface->UnLock();
-				break;
-				;;
-			}
-			case COMMAND_Set_Level_CONST:
-			{
-				level = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str());
-				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET LEVEL RECEIVED FOR CHILD %d, level: %d",node_id,level);
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET ON/OFF/LEVEL RECEIVED FOR CHILD %d, level: %d",node_id,level);
 				m_pZWInterface->Lock();
-				OpenZWave::ValueID* valueID = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, "Level");
-				if (valueID != NULL)
-				{
-					if (OpenZWave::Manager::Get()->SetValue(*valueID, (uint8)(level>99?99:level))) {
-						LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Set Level successful");
-					} else {
-						LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Set Level FAILED!");
-					}
+				// check if this is a binary switch, if so, look for the "Switch" label instead and handle accordingly
+				if (OpenZWave::Manager::Get()->GetNodeGeneric(homeId, node_id) == 0x10) {
+					LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Node is a binary switch");
+					OpenZWave::ValueID* valueID = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, "Switch");
+					if (valueID != NULL)
+					{
+						if (OpenZWave::Manager::Get()->SetValue(*valueID, state)) {
+							LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Set Switch successful");
+						} else {
+							LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Set Switch FAILED!");
+						}
+					}					
 				} else {
-					OpenZWave::Manager::Get()->SetNodeLevel(homeId,node_id,level>99?99:level);
+					LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Assuming node is a multilevel switch");
+					OpenZWave::ValueID* valueID = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, "Level");
+					if (valueID != NULL)
+					{
+						if (OpenZWave::Manager::Get()->SetValue(*valueID, (uint8)(level>99?99:level))) {
+							LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Set Level successful");
+						} else {
+							LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Set Level FAILED!");
+						}
+					} else {
+						OpenZWave::Manager::Get()->SetNodeLevel(homeId,node_id,level>99?99:level);
+					}
 				}
 				m_pZWInterface->UnLock();
 				break;
@@ -698,7 +687,7 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			// Do we want this value polled
 			OpenZWave::ValueID id = _notification->GetValueID();
 			string label = OpenZWave::Manager::Get()->GetValueLabel(id);
-			if ( label == "Battery Level" || label == "Temperature" || label == "Luminance" || label == "Power" || label == "Voltage" )
+			if ( label == "Switch" || label == "Battery Level" || label == "Temperature" || label == "Luminance" || label == "Power" || label == "Voltage" )
 			{
 				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() ValueAdded: Set polling for node %d/%d/%d, value label %s", _notification->GetNodeId(), id.GetCommandClassId(), id.GetInstance(), label.c_str());
 				OpenZWave::Manager::Get()->EnablePoll(id);
@@ -741,6 +730,11 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 					OpenZWave::Manager::Get()->GetValueAsByte(id, &level);
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed event");
 					SendLightChangedEvents (PKDevice, level);
+				} else if ( label == "Switch" ) {
+					bool state=false;
+					OpenZWave::Manager::Get()->GetValueAsBool(id, &state);
+					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed event");
+					SendLightChangedEvents (PKDevice, state ? 100 : 0);
 				} else if ( label == "Luminance" ) {
 					float level = 0;
 					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
