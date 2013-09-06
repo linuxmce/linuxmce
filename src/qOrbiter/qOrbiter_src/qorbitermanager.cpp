@@ -920,6 +920,8 @@ bool qorbiterManager::OrbiterGen()
 void qorbiterManager::swapSkins(QString incSkin)
 {
     emit skinMessage("swapping sking to::" + incSkin);
+
+
 #ifdef WIN32
     incSkin = "default";
 #endif
@@ -934,7 +936,7 @@ void qorbiterManager::swapSkins(QString incSkin)
         emit skinMessage("Got it from the model : " + tskinModel->m_baseUrl.toString());
         setImagePath(tskinModel->m_baseUrl.toString()+"/"+incSkin+"/img/");
         //load the actual skin entry point
-        qDebug() << "skin break";;
+        qDebug() << "skin break";
         currentSkin = incSkin;
 #ifdef __ANDROID__
         qorbiterUIwin->engine()->rootContext()->setContextProperty("style", tskinModel->currentItem);
@@ -948,6 +950,12 @@ void qorbiterManager::swapSkins(QString incSkin)
 #else
         QObject::connect(qorbiterUIwin, SIGNAL(statusChanged(QDeclarativeView::Status)),
                          this, SLOT(skinLoaded(QDeclarativeView::Status)));
+#endif
+
+#ifdef QT4
+//qorbiterUIwin->engine()->clearComponentCache();
+#elif QT5
+
 #endif
         QMetaObject::invokeMethod(this, "refreshUI", Qt::QueuedConnection, Q_ARG(QUrl, tskinModel->m_entryUrl));
     }

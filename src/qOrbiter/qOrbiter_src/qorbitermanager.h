@@ -906,7 +906,7 @@ public slots:
     /*!
      * \brief getLiveTVPlaylist
      */
-    void getLiveTVPlaylist() { }
+    void getLiveTVPlaylist() {  }
     /*!
      * \brief This requests the current playlist of stored media.
      * \ingroup qorbiter_properties
