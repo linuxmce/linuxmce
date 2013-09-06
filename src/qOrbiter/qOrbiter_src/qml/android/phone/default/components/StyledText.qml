@@ -13,7 +13,7 @@ import "../../lib/effects"
         font.italic: isItalic
         font.pixelSize: fontSize
         font.weight: Font.Light
-
+        font.family:appFont.name
 
     }
 

@@ -27,7 +27,7 @@ Item {
             MouseArea{
                 anchors.fill:parent
                 z:5
-                onClicked: regenOrbiter(35)
+                onClicked: regenOrbiter(manager.m_dwPK_Device)
             }
         }
 

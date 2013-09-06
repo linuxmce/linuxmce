@@ -172,7 +172,6 @@ Item {
     }
     MediaPopup{
     id:media_notification
-
     }
 
     InformationPanel {

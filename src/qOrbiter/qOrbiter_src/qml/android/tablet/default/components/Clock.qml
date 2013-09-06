@@ -5,7 +5,7 @@ Item {
     property bool verticalMirror: false
     function getDate(){
         var d = new Date();
-        return Qt.formatDateTime(d, "dddd ,MMMM d| hh:mm ");
+        return Qt.formatDateTime(d, "dddd \n MMMM d  hh:mm ");
     }
     Timer { // Update the clock element periodically
         interval: 5; running: true; repeat: true
@@ -19,7 +19,8 @@ Item {
         font.letterSpacing: 2
         smooth: true
         anchors.centerIn: parent
-        fontSize: scaleY(5)
+        fontSize: scaleY(3)
+
 
     }
 }

@@ -87,7 +87,7 @@ Item {
 
     FontLoader{
         id:myFont
-        source:"../lib/fonts/Roboto-Thin.ttf"
+        source:"../lib/fonts/RobotoCondensed-Light.ttf"
     }
 
     Rectangle{

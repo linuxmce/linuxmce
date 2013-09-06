@@ -20,6 +20,11 @@ Item {
         color:"white"
     }
 
+    FontLoader{
+        id:appFont
+        source: "../lib/fonts/scoutlight.ttf"
+    }
+
     Timer{
         id:refresh
         interval: 750

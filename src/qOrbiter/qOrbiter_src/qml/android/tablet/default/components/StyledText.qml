@@ -12,6 +12,7 @@ import "../../lib/effects"
         property int listViewText:scaleY(7)
         id:labelelement
         text: textLabel       
+        font.pointSize: fontSize
         font.family: myFont.name
         font.weight: Font.Light
     }

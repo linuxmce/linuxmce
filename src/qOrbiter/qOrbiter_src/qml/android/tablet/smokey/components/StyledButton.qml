@@ -8,6 +8,7 @@ Item{
     property int textSize:28
     property alias buttonText:button_label
     property alias hitArea:fly_trap
+    signal activated()
     Behavior on opacity{
         PropertyAnimation{
             duration: 500
@@ -39,6 +40,7 @@ Item{
     MouseArea{
         id:fly_trap
         anchors.fill: styled_button
+        onReleased: activated()
     }
 
 }

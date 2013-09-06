@@ -7,6 +7,7 @@ Item {
     height: manager.appHeight
     width: manager.appWidth
     id: advancedscreen
+property int localFontSize:22
 
     HomeButton{}
 
@@ -44,8 +45,9 @@ Item {
                 MouseArea{
                     anchors.fill:parent
                     z:5
-                    onClicked: manager.regenOrbiter(35)
+                    onClicked: manager.regenOrbiter(manager.m_dwPK_Device)
                 }
+                       buttontextfontsize:localFontSize
             }
 
             AdvancedButton{
@@ -54,6 +56,7 @@ Item {
                width: style.stdbuttonw
                 buttontext: qsTr("Regen All Orbiters")
                 buttonsqradius: 5
+                       buttontextfontsize:localFontSize
             }
 
             AdvancedButton{
@@ -62,6 +65,7 @@ Item {
                width: style.stdbuttonw
                 buttontext: qsTr("Reload and Regen")
                 buttonsqradius: 5
+                       buttontextfontsize:localFontSize
             }
 
             AdvancedButton{
@@ -70,6 +74,7 @@ Item {
                width: style.stdbuttonw
                 buttontext: qsTr("Quick Reload")
                 buttonsqradius: 5
+                       buttontextfontsize:localFontSize
                 MouseArea{
                     anchors.fill: parent
                     z:10
@@ -83,6 +88,7 @@ Item {
                width: style.stdbuttonw
                 buttontext: qsTr("Network Settings")
                 buttonsqradius: 5
+                       buttontextfontsize:localFontSize
             }
 
             AdvancedButton{
@@ -91,6 +97,7 @@ Item {
                width: style.stdbuttonw
                 buttontext: qsTr("Av wizard")
                 buttonsqradius: 5
+                       buttontextfontsize:localFontSize
             }
 
             AdvancedButton{
@@ -99,6 +106,7 @@ Item {
                width: style.stdbuttonw
                 buttontext: qsTr("Pending Tasks")
                 buttonsqradius: 5
+                       buttontextfontsize:localFontSize
             }
 
             AdvancedButton{
@@ -107,6 +115,7 @@ Item {
                width: style.stdbuttonw
                 buttontext: qsTr("Remote Assistance")
                 buttonsqradius: 5
+                       buttontextfontsize:localFontSize
                 MouseArea{
                     anchors.fill: parent
                     z:10
@@ -119,6 +128,7 @@ Item {
                width: style.stdbuttonw
                 buttontext: qsTr("Add Software")
                 buttonsqradius: 5
+                       buttontextfontsize:localFontSize
             }
 
             AdvancedButton{
@@ -127,6 +137,7 @@ Item {
                width: style.stdbuttonw
                 buttontext: qsTr("Change Styles")
                 buttonsqradius: 5
+                       buttontextfontsize:localFontSize
                 MouseArea{
                     anchors.fill: parent
                     onClicked: MyJs.createStageComponent("SkinSelector.qml", advancedscreen)
@@ -139,6 +150,7 @@ Item {
                width: style.stdbuttonw
                 buttontext: qsTr("Add GC100")
                 buttonsqradius: 5
+                       buttontextfontsize:localFontSize
             }
 
             AdvancedButton{
@@ -147,6 +159,7 @@ Item {
                width: style.stdbuttonw
                 buttontext: qsTr("Ping Test")
                 buttonsqradius: 5
+                       buttontextfontsize:localFontSize
             }
 
             AdvancedButton{
@@ -155,6 +168,7 @@ Item {
                width: style.stdbuttonw
                 buttontext: qsTr("IR Codes")
                 buttonsqradius: 5
+                       buttontextfontsize:localFontSize
             }
 
             AdvancedButton{
@@ -163,40 +177,16 @@ Item {
                width: style.stdbuttonw
                 buttontext: qsTr("Local Config")
                 buttonsqradius: 5
+                buttontextfontsize:localFontSize
                 MouseArea{
                     id:showConfig
                     anchors.fill: parent
                     onClicked: localConfigPanel.state="showing"
                 }
-            }
-
-            AdvancedButton{
-                id:html5
-               height: style.stdbuttonh
-               width: style.stdbuttonw
-                buttontext: qsTr("HTML 5 video test")
-                buttonsqradius: 5
-                MouseArea{
-                    id:html5test
-                    anchors.fill: parent
-                    onClicked: htmltestsurface.visible = !htmltestsurface.visible
-                }
-            }
+            }          
         }
 
     }
-    //    ConfigPanel{
-    //        id:localConfigPanel
-    //    }
 
-    WebView{
-        id:htmltestsurface
-        anchors.top: parent.top
-        height: 300
-        width: parent.width
-        url: "http://www.w3schools.com/html/tryit.asp?filename=tryhtml5_video_all"
-        visible: false
-
-    }
 }
 

@@ -30,3 +30,5 @@ MediaOptions4 MediaOptions4.qml
 MediaOptions5 MediaOptions5.qml
 FloorplanDisplay FloorplanDisplay.qml
 FloorPlanOptions FloorPlanOptions.qml
+SkinSelector SkinSelector.qml
+SkinListDelegate SkinListDelegate.qml

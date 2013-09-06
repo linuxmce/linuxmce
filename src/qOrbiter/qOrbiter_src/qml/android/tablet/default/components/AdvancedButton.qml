@@ -4,7 +4,7 @@ Item{
     id:advancedRoot
     property string color: "transparent"
     height: style.stdbuttonh
-    width: style.stdbuttonw
+    width: style.stdbuttonw+30
     property alias buttontext: buttonLabel.text
     property alias buttontextcolor: buttonLabel.color
     property alias buttontextfontsize: buttonLabel.font.pointSize
@@ -13,6 +13,7 @@ Item{
     property alias buttontextzindex: buttonLabel.z
     property alias buttonsqradius:  buttonBase.radius
     property string imgSource:""
+    clip:true
     signal btnPress()
     Rectangle {
         id:buttonBase

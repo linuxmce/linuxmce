@@ -20,6 +20,7 @@ Row{
     StyledButton{
         buttonText.text:"Advanced"
         opacity: manager.currentScreen === "Screen_1.qml" ? 1 : 0
+        onActivated: manager.gotoQScreen("Screen_44.qml")
 
     }
     StyledButton {
