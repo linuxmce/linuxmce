@@ -2,7 +2,7 @@ import QtQuick 1.1
 import "../components"
 
 TabletFloorplanLayout{
-    id: mediaFloorplan
+    id: telecom
     Component.onCompleted: {
         hideInfoPanel();
         setNavigation("FloorplanNav.qml");

@@ -63,22 +63,27 @@ Item {
         ListElement{
             name:"Lights"
             modelName:"currentRoomLights"
+            floorplantype:2
         }
         ListElement{
             name:"Media"
             modelName:"currentRoomMedia"
+            floorplantype:5
         }
         ListElement{
             name:"Climate"
             modelName:"currentRoomClimate"
+            floorplantype:3
         }
         ListElement{
             name:"Telecom"
             modelName:"currentRoomTelecom"
+            floorplantype:6
         }
         ListElement{
             name:"Security"
             modelName:"currentRoomSecurity"
+            floorplantype:4
         }
     }
 
@@ -176,6 +181,18 @@ Item {
 
     InformationPanel {
         id: info_panel
+    }
+
+    function hideInfoPanel(){
+        info_panel.state = "hidden"
+    }
+
+    function showInfoPanel(){
+        info_panel.state = "retracted"
+    }
+
+    function setNavigation(n){
+        nav_row.navSource = n
     }
 
     function updateBackground(portait, wide){

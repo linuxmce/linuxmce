@@ -32,3 +32,4 @@ FloorplanDisplay FloorplanDisplay.qml
 FloorPlanOptions FloorPlanOptions.qml
 SkinSelector SkinSelector.qml
 SkinListDelegate SkinListDelegate.qml
+TabletFloorplanLayout TabletFloorplanLayout.qml

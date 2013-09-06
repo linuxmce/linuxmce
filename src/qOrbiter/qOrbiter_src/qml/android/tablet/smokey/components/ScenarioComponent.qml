@@ -1,5 +1,4 @@
 import QtQuick 1.0
-
 import "../../lib/handlers"
 
 
@@ -20,7 +19,11 @@ ListView{
             id:dummy
             buttonText.text: name
             buttonText.color: "antiquewhite"
-            hitArea.onPressAndHold: manager.showfloorplan(index+2)
+            hitArea.onPressAndHold:{
+                manager.showfloorplan(floorplantype)
+                manager.setFloorplanType(floorplantype)
+            }
+
             hitArea.onReleased: {
                 if(manager.currentScreen==="Screen_1.qml"){
                     if(modelName==="currentRoomLights")
@@ -33,7 +36,7 @@ ListView{
                         current_scenario_model=currentRoomTelecom
                     else if(modelName==="currentRoomSecurity")
                         current_scenario_model = currentRoomSecurity
-                }else if (manager.currentScreen==="Screen_47"){                        
+                }else if (manager.currentScreen==="Screen_47"){
                     if(name==="Attribute")
                         console.log("attribute selected")
                 }
