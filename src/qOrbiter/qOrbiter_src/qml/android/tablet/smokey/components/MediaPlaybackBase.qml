@@ -6,7 +6,7 @@ Item{
     state:"metadata"
 
     Component.onCompleted: {
-        manager.setBoundStatus(true);
+
         nav_row.navSource="NavOptions5.qml";
         info_panel.state="hidden";
         controlComponent = "Controls_5.qml" //controlsLoader.sourceComponent
@@ -16,9 +16,10 @@ Item{
     property string metadataComponent:"Metadata_"+manager.i_current_mediaType+".qml"
     property alias scrollBarComponent:mediaScrollerTarget.sourceComponent
     property string controlComponent: ""
-    property alias playlistSource:playlist.model
-    property alias playlistDelegate:playlist.delegate
+    property Item playlistSource
+    property Item playlistDelegate
     property bool enableScrollbar:true
+    property alias playListComponent:playlist.sourceComponent
 
     Item{
         id: options_display
@@ -48,7 +49,6 @@ Item{
             onReleased: media_playback_base.state="metadata"
         }
     }
-
 
 
     Item{
@@ -99,24 +99,12 @@ Item{
         clip: true
         anchors.left: metaDataPanel.right
 
-        PlaylistView{
+        Loader{
             id:playlist
-            anchors.left: parent.left
-            delegate: Item{
-                width: parent.width
-                height: scaleY(12)
-                Rectangle{
-                    anchors.fill: parent
-                    color: "black"
-                    opacity: .65
-                }
-                StyledText{
-                    text:name
-                    color:"white"
-                    fontSize: 36
-                }
-            }
+            sourceComponent: PlaylistView{}
+
         }
+
     }
 
     states: [

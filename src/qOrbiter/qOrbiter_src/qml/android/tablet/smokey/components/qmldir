@@ -33,3 +33,4 @@ FloorPlanOptions FloorPlanOptions.qml
 SkinSelector SkinSelector.qml
 SkinListDelegate SkinListDelegate.qml
 TabletFloorplanLayout TabletFloorplanLayout.qml
+TvChannelView TvChannelView.qml
