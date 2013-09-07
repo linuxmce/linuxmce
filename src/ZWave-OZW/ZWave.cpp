@@ -127,24 +127,31 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 			{
 				// We can get On/Off/Set Level regardless of node type, so we handle all here and use the correct
 				// ValueID for the node type
+				bool onOffCmd = false;
 				bool state = false;
 				level = 0;
 				if (pMessage->m_dwID == COMMAND_Set_Level_CONST) {
 					level = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str());
 					state = level>99;
 				} else if (pMessage->m_dwID == COMMAND_Generic_On_CONST) {
+					onOffCmd = true;
 					state = true;
 					level = 100;
+				} else if (pMessage->m_dwID == COMMAND_Generic_Off_CONST) {
+					onOffCmd = true;
 				}
 				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET ON/OFF/LEVEL RECEIVED FOR CHILD %d, level: %d",node_id,level);
+
 				m_pZWInterface->Lock();
-				// check if this is a binary switch, if so, look for the "Switch" label instead and handle accordingly
-				if (OpenZWave::Manager::Get()->GetNodeGeneric(homeId, node_id) == 0x10) {
-					LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Node is a binary switch");
-					OpenZWave::ValueID* valueID = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, "Switch");
-					if (valueID != NULL)
+				// Look for a Switch value for both binary and multilevel switches
+				OpenZWave::ValueID* valueIDSwitch = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, "Switch");
+				uint8 genericType = OpenZWave::Manager::Get()->GetNodeGeneric(homeId, node_id);
+				// if this is a binary switch, or we got a OnOffCmd to a dimmer, use the "Switch" ValueID
+				if (genericType == 0x10 || (onOffCmd && valueIDSwitch != NULL)) {
+					LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Using Switch ValueID");
+					if (valueIDSwitch != NULL)
 					{
-						if (OpenZWave::Manager::Get()->SetValue(*valueID, state)) {
+						if (OpenZWave::Manager::Get()->SetValue(*valueIDSwitch, state)) {
 							LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Set Switch successful");
 						} else {
 							LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Set Switch FAILED!");
