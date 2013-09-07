@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 /*!
  *\class ScenarioButtonHandler
  *\brief Handler Component for Scenario Buttons.

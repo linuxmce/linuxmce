@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 /*!
  *\class PlaylistRemoveItemHandler
  *\brief Handler Component for removing a playlist item.

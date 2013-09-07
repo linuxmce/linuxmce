@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 /*!
  *\class ScreenBackHandler
  *\brief Handler Component for going back to the previous screen.

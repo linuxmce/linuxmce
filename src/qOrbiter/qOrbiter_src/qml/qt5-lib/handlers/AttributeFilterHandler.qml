@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.0
 /*!
  *\class AttributeFilterHandler
  *\brief Handler for filtering through a datagrid via various attributes.
