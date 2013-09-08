@@ -1,8 +1,8 @@
 import QtQuick 1.1
 import Qt.labs.shaders 1.0
 import "../components"
-import "../../lib/effects"
-import "../../lib/handlers"
+import "../../../skins-common/lib/effects"
+import "../../../skins-common/lib/handlers"
 /*!
  *
  *\brief The Data Header Component

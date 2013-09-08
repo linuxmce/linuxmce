@@ -1,5 +1,5 @@
 import QtQuick 1.1
-import "../../lib/effects"
+import "../../../skins-common/lib/effects"
 
 Rectangle{
     id:optionsDisplay

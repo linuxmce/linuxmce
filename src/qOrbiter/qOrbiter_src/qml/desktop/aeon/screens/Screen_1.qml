@@ -2,7 +2,7 @@ import QtQuick 1.1
 
 import "../components"
 import "../js/ComponentLoader.js" as JsLib
-import "../../lib/handlers"
+import "../../../skins-common/lib/handlers"
 
 Item
 {

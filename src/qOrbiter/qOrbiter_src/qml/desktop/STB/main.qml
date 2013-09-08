@@ -10,7 +10,8 @@
 import QtQuick 1.1
 import Qt.labs.shaders 1.0
 import AudioVisual 1.0
-import "../lib/components"
+import "../../skins-common/lib/components"
+import "../../skins-common/lib/handlers"
 import "components"
 
 Item {

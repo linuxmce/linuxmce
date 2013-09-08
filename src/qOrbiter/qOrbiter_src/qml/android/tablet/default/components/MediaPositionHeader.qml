@@ -1,7 +1,7 @@
 import QtQuick 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
-import "../../lib/effects"
+import "../../../skins-common/lib/effects"
 
 Rectangle{
     id: pos_label

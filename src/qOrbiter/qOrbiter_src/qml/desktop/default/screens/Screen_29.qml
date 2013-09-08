@@ -1,6 +1,6 @@
 import QtQuick 1.1
 import "../components"
-import "../../lib/handlers"
+import "../../../skins-common/lib/handlers"
 Item{
     id:sleepingmenu
 

@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
-import "../../lib/handlers"
+import "../../../skins-common/lib/handlers"
 
 Item {
     id:fileviewscreen

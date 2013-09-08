@@ -93,6 +93,11 @@ symbian {
 TRANSLATIONS += app_de.ts
 # Add more folders to ship with the application, here
 #linux deploy configuration
+
+common-folder.source = qml/skins-common
+common-folder.target = $$DESTDIR/qml
+DEPLOYMENTFOLDERS+=common-folder
+
 linux-g++{
         contains(QT_VERSION,4.*.*){
 		QT += script

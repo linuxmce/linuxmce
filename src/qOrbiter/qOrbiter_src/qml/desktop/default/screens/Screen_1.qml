@@ -1,6 +1,6 @@
 import QtQuick 1.1
 import "../components"
-import "../../lib/effects"
+import "../../../skins-common/lib/effects"
 
 /*!
  *\class Screen_1

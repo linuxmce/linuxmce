@@ -2,7 +2,7 @@ import QtQuick 1.1
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 import "../effects"
-import "../../lib/handlers"
+import "../../../skins-common/lib/handlers"
 import Qt.labs.shaders 1.0
 
 Row{

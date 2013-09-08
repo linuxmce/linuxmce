@@ -1,6 +1,6 @@
 import QtQuick 1.1
 import "../js/ComponentLoader.js" as MyJs
-import "../../lib/handlers"
+import "../../../skins-common/lib/handlers"
 
 Rectangle {
             id: attributeitem

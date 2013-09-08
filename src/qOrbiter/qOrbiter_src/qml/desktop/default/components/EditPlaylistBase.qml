@@ -1,5 +1,5 @@
 import QtQuick 1.1
-import "../../lib/handlers"
+import "../../../skins-common/lib/handlers"
 Rectangle {
     id:editPlaylistBase
     color: "transparent"

@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import "../../lib/handlers"
+import "../../../skins-common/lib/handlers"
 
 Rectangle {
     width: manager.appWidth

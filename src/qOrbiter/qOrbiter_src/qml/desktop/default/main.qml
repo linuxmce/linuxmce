@@ -1,13 +1,12 @@
 import QtQuick 1.1
 import Qt.labs.shaders 1.0
 import AudioVisual 1.0
-import Linuxmce.UIElements 1.0
 
 import "effects"
 import "components"
-import "../lib/components"
+import "../../skins-common/lib/components"
 import "js/ComponentLoader.js" as MyJs
-import "../lib/handlers"
+import "../../skins-common/lib/handlers"
 
 /*!
  *
@@ -41,7 +40,7 @@ Item {
     FontLoader{
         id:myFont
         name:"Sawasdee"
-        source: "fonts/Sawasdee.ttf"
+        source: "../../skins-common/fonts/Sawasdee.ttf"
     }
 
     Rectangle{

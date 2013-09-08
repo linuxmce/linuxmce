@@ -1,5 +1,5 @@
 import QtQuick 1.0
-import "../../lib/handlers"
+import "../../../skins-common/lib/handlers"
 Item{
     id:standard_playlist
     height:manager.appHeight

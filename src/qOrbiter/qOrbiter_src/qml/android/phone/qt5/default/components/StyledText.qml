@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import "../../lib/effects"
+import "../../../skins-common/lib/effects"
     Text {
         property string textLabel:"ipsum"
         property int textHeight

@@ -1,10 +1,10 @@
 import QtQuick 1.1
 import Qt.labs.shaders 1.0
 import AudioVisual 1.0
-import "../../lib/effects"
+import "../../../skins-common/lib/effects"
 import "../components"
 import "../animation"
-import "../../lib/handlers"
+import "../../../skins-common/lib/handlers"
 import "../js/ComponentLoader.js" as MyJs
 
 

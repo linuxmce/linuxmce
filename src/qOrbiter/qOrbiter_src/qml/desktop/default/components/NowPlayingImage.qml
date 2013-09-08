@@ -2,7 +2,7 @@ import QtQuick 1.1
 import Qt.labs.shaders 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
-import "../../lib/effects"
+import "../../../skins-common/lib/effects"
 
 Rectangle{
     id:imageholder

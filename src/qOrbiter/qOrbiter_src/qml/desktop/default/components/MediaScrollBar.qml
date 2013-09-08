@@ -1,6 +1,6 @@
 // import QtQuick 1.1 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
-import "../../lib/effects"
+import "../../../skins-common/lib/effects"
 /*!
   \class MediaScrollBar
   \brief This is a basic component for scrolling through time in media.

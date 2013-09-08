@@ -1,6 +1,6 @@
 import QtQuick 1.1
 import Linuxmce.UIElements 1.0
-import "../../lib/effects"
+import "../../../skins-common/lib/effects"
 
 Rectangle {
     id:display

@@ -1,7 +1,7 @@
 import QtQuick 1.0
 
 import "../components"
-import "../../lib/handlers"
+import "../../../skins-common/lib/handlers"
 import "../js/ComponentLoader.js" as MyJs
 
 
