@@ -1623,6 +1623,10 @@ public slots:
     void greenButton();
     void yellowButton();
     void blueButton();
+    void mediaRecord();
+    void showRecordedTv();
+
+
     //buttons from the more screen
     void extraButtons(QString button);
     void newOrbiter();

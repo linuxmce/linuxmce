@@ -532,6 +532,8 @@ signals:
     void blueButton();
     void greenButton();
     void yellowButton();
+    void tvRecord();
+    void showRecordings();
 
     /*Dvd Specific*/
     void show_dvdMenu();
@@ -1123,6 +1125,8 @@ public slots:
     void blueButtonPress(){emit blueButton();}
     void greenButtonPress(){emit greenButton();}
     void yellowButtonPress(){emit yellowButton();}
+    void startRecordingPress(){emit tvRecord();}
+    void showRecordingsPress(){emit showRecordings();}
     void mute(){emit muteSound();}
 
     void movePlaylistEntry(QString d, int index) {emit movePlistEntry(d, index); }

@@ -1181,7 +1181,7 @@ void qorbiterManager::mountMediaDevices()
         QDir mntDir;
         mntDir.setPath("/mnt/remote/"+QString::number(d));
         qDebug() << mntDir.exists();
-        if(!mntDir.exists() || mntDir.entryList(QDir::NoDotAndDotDot).isEmpty()){
+        if(!mntDir.exists()){
             QProcess *mkPath = new QProcess(this);
             QStringList dArgs;
             dArgs.append("mkdir -p /mnt/remote/"+QString::number(d));

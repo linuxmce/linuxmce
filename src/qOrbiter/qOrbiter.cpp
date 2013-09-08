@@ -2112,7 +2112,9 @@ void qOrbiter::requestTypes(int type)
 
     if(SendCommand(getTypesCmd, &pResponse) && pResponse=="OK"){
         emit commandResponseChanged("Got types for attribute");
-        emit newAttributeSort( new AttributeSortItem( "Recent","-1", "",false,  0));
+        emit newAttributeSort( new AttributeSortItem( "Recently Viewed","-1", "",false,  0));
+      //  emit newAttributeSort( new AttributeSortItem( "Just Added","-2", "",false,  0));
+        emit newAttributeSort( new AttributeSortItem( "File","0", "",false,  0));
         QStringList data;
         data = QString::fromStdString(sText.c_str()).split("\n");
         if(data.count() < 1)
@@ -2127,8 +2129,7 @@ void qOrbiter::requestTypes(int type)
 
         }
     }
-    else
-    {
+    else{
         emit commandResponseChanged("Command to get types for attribute failed!");
     }
     requestMediaSubtypes(type);
@@ -2315,15 +2316,19 @@ void qOrbiter::initializeGrid()
     q_fileFormat="";          //3
     q_attribute_genres="";    //4
     q_mediaSources ="1,2";         //5 need comma delineation
-    q_usersPrivate = "0";        //6
+    q_usersPrivate = "";        //6
     q_attributetype_sort="";  //7
-    q_pk_users="0";             //8
-    q_last_viewed="2";        //9
+    q_pk_users="";             //8
+    q_last_viewed=" 2 ";        //9
     q_pk_attribute="";        //10
     qs_seek ="";
+    // 4||||1,2|0|3|0 | 2 |
+
+    // 4||||1,2|0 |2|0|2|
+
+    // 5||||1,2|0|0|0 | 2 |
 
     datagridVariableString.append(q_mediaType).append("|").append(q_subType).append("|").append(q_fileFormat).append("|").append(q_attribute_genres).append("|").append(q_mediaSources).append("|").append(q_usersPrivate).append("|").append(q_attributetype_sort).append("|").append(q_pk_users).append("|").append(q_last_viewed).append("|").append(q_pk_attribute);
-
     goBack.append(datagridVariableString);
     emit commandResponseChanged("Dg Variables Reset");
 }
@@ -2378,8 +2383,8 @@ void qOrbiter::setStringParam(int paramType, QString param)
         break;
 
     case 4:
-        if (q_mediaSources != param.remove("!D"))
-        {
+        if (!param.contains("!D")){
+            qDebug() << "Browse by file not engaged.";
             if(param.contains("!F"))
             {
                 emit showFileInfo(true);
@@ -2402,11 +2407,23 @@ void qOrbiter::setStringParam(int paramType, QString param)
                 emit clearAndContinue(q_mediaType.toInt());;
             }
         }
+        else{ // 5||||1,2	!D'/home/public/data/videos/1.82 TB (sdd1) ST2000DL003-9VT [51]'|0|0|0 | 2 |
+            qDebug() << "Browsing by file";
+            int t = param.indexOf("\t");
+
+            QString apnd = param.mid(t);
+            qDebug()<< apnd;
+            q_mediaSources.append(apnd);
+            qDebug() << q_mediaSources;
+            longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
+            datagridVariableString = longassstring.join("|");
+            qDebug() << datagridVariableString;
+            emit clearAndContinue(q_mediaType.toInt());;
+        }
         break;
 
     case 5:
         q_usersPrivate = param;
-
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
         emit clearAndContinue(q_mediaType.toInt());;
@@ -2459,9 +2476,7 @@ void qOrbiter::setStringParam(int paramType, QString param)
             emit setFocusFile(param);
             break;
         }
-
-        else
-        {
+        else{
             q_pk_attribute = param.remove("!A");
             longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
             datagridVariableString = longassstring.join("|");
@@ -3640,6 +3655,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
                           cellTitle = QString::fromUtf8(pCell->m_Text);
 
+
                           //            if(fk_file.contains("!A"))
                           //            {
                           //                string sText = "";
@@ -3656,11 +3672,10 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
                           if(!b_cancelRequest){
                               emit addItem(new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index, this));
-
                               QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef rpi
                               Sleep(60);
-#elif ANDROID
+#elif NECESSITAS
                               Sleep(40);
 #else
                               // Sleep(10);
@@ -4286,8 +4301,21 @@ void DCE::qOrbiter::blueButton()
     SendCommand(pressBlue);
 }
 
+void qOrbiter::mediaRecord()
+{
+    CMD_Record startRecording(this->m_dwPK_Device, iMediaPluginID);
+    SendCommand(startRecording);
+}
+
+void qOrbiter::showRecordedTv()
+{
+    CMD_Recorded_TV_Menu recordedTv(this->m_dwPK_Device, iMediaPluginID);
+}
+
+
 void DCE::qOrbiter::powerOff(QString deviceType)
 {
+
 }
 
 void DCE::qOrbiter::CopyDisc()
@@ -4850,19 +4878,18 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             }
             else if (q_pk_attribute !=""){
                 q_attributetype_sort = "13";
-            } else if(q_subType == "1" ){
+            }
+            else if(q_subType == "1" ){
                 if(q_attributetype_sort ==""||"13"){
                     q_attributetype_sort = "12";
                 }
 
-            }else if(q_subType == "2"){
+            }
+            else if(q_subType == "2"){
                 if(q_attributetype_sort ==""){
                     q_attributetype_sort ="13";
                 }
-
             }
-
-
         }
 
         //audio
@@ -4896,7 +4923,13 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 
     }
 
-    params = "|"+q_subType +"|"+q_fileFormat+"|"+q_attribute_genres+"|"+q_mediaSources+"||"+q_attributetype_sort+"||2|"+q_pk_attribute+"";
+    if(q_attributetype_sort=="0"){
+        q_usersPrivate = "0";
+
+    }
+
+
+    params = "|"+q_subType +"|"+q_fileFormat+"|"+q_attribute_genres+"|"+q_mediaSources+"|"+q_usersPrivate +"|"+q_attributetype_sort+"|"+q_pk_users+"|"+q_last_viewed+"|"+q_pk_attribute+"";
     s = q_mediaType + params;
     if(backwards == false)
     {

@@ -61,6 +61,7 @@ Item {
     MediaListGridDelagate {
         id: contactDelegate
        visible: false
+
     }
 
         GridView {

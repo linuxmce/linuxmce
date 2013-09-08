@@ -13,7 +13,7 @@ Item
     id: contactDelegate
     height: childrenRect.height
     width: childrenRect.width
-
+    visible:name!=="back (..)"
     Rectangle
     {
         id:mainItem
@@ -60,6 +60,7 @@ Item
             color: "transparent"
             
             MediaListClickHandler {
+              //  onActivated: console.log(id)
             }
             
             BorderImage {
