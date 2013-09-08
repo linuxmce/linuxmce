@@ -22,7 +22,7 @@ Item {
 
     FontLoader{
         id:appFont
-        source: "../lib/fonts/scoutlight.ttf"
+        source: "../../../skins-common/fonts/scoutlight.ttf"
     }
 
     Timer{

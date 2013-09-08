@@ -1,6 +1,6 @@
 import QtQuick 1.0
 import com.nokia.android 1.1
-import "../../../skins-common/lib/handlers"
+import "../../../../skins-common/lib/handlers"
 
 Rectangle {
     id:nonepgplaylist

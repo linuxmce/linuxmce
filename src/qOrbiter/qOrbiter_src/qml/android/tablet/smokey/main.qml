@@ -1,5 +1,5 @@
 import QtQuick 1.0
-import "../lib/handlers"
+import "../../../skins-common/lib/handlers"
 import "components"
 
 Item {
@@ -216,7 +216,7 @@ Item {
 
     FontLoader{
         id:appFont
-        source:"../lib/fonts/Sawasdee.ttf"
+        source:"./../../../skins-common/fonts/Sawasdee.ttf"
     }
 
     //=================Components==================================================//

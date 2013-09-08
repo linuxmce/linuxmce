@@ -1,5 +1,5 @@
 import QtQuick 1.0
-import "../../../skins-common/lib/effects"
+import "../../../../skins-common/lib/effects"
 
 Rectangle{
     id:templateRow

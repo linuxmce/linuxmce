@@ -87,7 +87,7 @@ Item {
 
     FontLoader{
         id:myFont
-        source:"../lib/fonts/RobotoCondensed-Light.ttf"
+        source:"../../../skins-common/fonts/RobotoCondensed-Light.ttf"
     }
 
     Rectangle{

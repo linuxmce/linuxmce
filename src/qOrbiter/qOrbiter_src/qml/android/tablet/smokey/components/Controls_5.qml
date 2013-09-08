@@ -1,5 +1,5 @@
 import QtQuick 1.0
-import "../../../skins-common/lib/handlers"
+import "../../../../skins-common/lib/handlers"
 Item {
     width: childrenRect.width
     height: childrenRect.height

@@ -1,6 +1,6 @@
 import QtQuick 1.0
-import "../components"
-import "../../../skins-common/lib/handlers"
+
+import "../../../../skins-common/lib/handlers"
 
 Item{
     id:info_panel
