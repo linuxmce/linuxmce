@@ -6,7 +6,7 @@ Item {
     height: pageLoader.height
     width:manager.appWidth
     property int current_view_type:1
-    Component.onCompleted: {current_header_model=media_filters; }
+    Component.onCompleted: {current_header_model=media_filters; hideInfoPanel() }
     state: manager.i_current_mediaType === 5 ? "selection" : "viewing"
     Connections
     {
@@ -126,5 +126,9 @@ Item {
         }
 
     ]
+
+//    GenericAttributeSelector{
+//        id:attributeSelector
+//    }
 
 }
