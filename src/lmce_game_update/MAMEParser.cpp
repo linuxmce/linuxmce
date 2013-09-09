@@ -138,7 +138,7 @@ void MAMEParser::ProcessDescription(string sDescription)
   size_t iSubtitleBegPos=sDescription.find('(');
   if (iSubtitleBegPos != string::npos)
     {
-      size_t iSubtitleEndPos=sDescription.find(')');
+      size_t iSubtitleEndPos=sDescription.rfind(')');
       string sTitleTmp=sDescription.substr(0,iSubtitleBegPos-1);
       string sSubtitleTmp=sDescription.substr(iSubtitleBegPos+1,
 					      (iSubtitleEndPos-1)-iSubtitleBegPos);
