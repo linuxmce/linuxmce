@@ -38,19 +38,17 @@ Row{
     StyledButton{
         id:media_goback
         buttonText.text: "Back"
-        hitArea.onReleased:
-        {
-            if(manager.i_current_mediaType !== 5){
+        hitArea.onReleased:{
+
+
                 manager.goBackGrid();
-            }
-            else{
-                
-                pageLoader.item.state="selection"
-                manager.goBackGrid()
-                mediatypefilter.reset()
-            }
-            
-            
+
+//            else{
+
+//                pageLoader.item.state="selection"
+//                manager.goBackGrid()
+//                mediatypefilter.reset()
+//            }
         }
         visible: manager.currentScreen==="Screen_47.qml"
     }

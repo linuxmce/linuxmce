@@ -45,7 +45,7 @@ Item{
             MouseArea{
                 id:trap
                 anchors.fill: parent
-                onReleased: manager.setStringParam(4, id);
+                onReleased: {manager.setStringParam(4, id); depth++ }
             }
         }
     }

@@ -1,5 +1,5 @@
 import QtQuick 1.0
-import "../../lib/components"
+import "../../../../skins-common/lib/components"
 Item{
     id:phoneFloorplanLayout
     height: manager.appHeight

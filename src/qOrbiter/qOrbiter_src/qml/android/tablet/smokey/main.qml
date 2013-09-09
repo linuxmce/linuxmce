@@ -225,16 +225,16 @@ Item {
         componentLoader.source = "components/"+componentName
         if (componentLoader.status == Component.Ready)
         {
-            manager.setDceResponse("Command to change to:" + componentName+ " was successfull")
+            manager.setDceResponse("Command to load:" + componentName+ " was successfull")
         }
         else if (componentLoader.status == Component.Loading)
         {
-            console.log("loading page from network")
+            console.log("loading item from network")
             finishLoadingComponent(componentName)
         }
         else
         {
-            console.log("Command to add: " + componentName + " failed!")
+            console.log("Command to load: " + componentName + " failed!")
             componentFile = componentName
         }
     }
@@ -245,7 +245,7 @@ Item {
         {
             console.log("finishing network load")
             componentLoader.source = "components/"+comp
-            console.log("screen" + comp + " loaded.")
+            console.log("item " + comp + " loaded.")
         }
         else
         {
@@ -253,6 +253,9 @@ Item {
         }
     }
 
+    GenericAttributeSelector{
+        id:attributeSelector
+    }
 
     Loader{
         id:componentLoader
@@ -261,7 +264,6 @@ Item {
         objectName: "componentbot"
         onLoaded: {console.log("Component is loaded")}
     }
-
 
     SequentialAnimation{
         id:loadin

@@ -29,6 +29,7 @@ Metadata_5 Metadata_5.qml
 Metadata_43 Metadata_43.qml
 MediaOptions4 MediaOptions4.qml
 MediaOptions5 MediaOptions5.qml
+MedialistNav MedialistNav.qml
 FloorplanDisplay FloorplanDisplay.qml
 FloorPlanOptions FloorPlanOptions.qml
 SkinSelector SkinSelector.qml

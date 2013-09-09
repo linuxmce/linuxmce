@@ -1,15 +1,29 @@
 import QtQuick 1.1
 
 Item {
-    id:attributeSelector
-    width: manager.appWidth
-    height:manager.appHeight
-    property variant currentModel
+    id:attributeSelector  
+    property variant currentModel:undefined
     property int modelCount: filterlist.count
-    state:"opening"
+    state:"inactive"
+
+    onCurrentModelChanged: {
+        if(currentModel!==undefined){
+            open()
+        }
+        else
+        {
+            close()
+        }
+    }
+
+
+
+    function open(){
+        attributeSelector.state = "active"
+    }
 
     function close(){
-
+        attributeSelector.state = "inactive"
     }
 
     Rectangle{
@@ -80,27 +94,30 @@ Item {
 
     states: [
         State {
-            name: "opening"
+            name: "inactive"
             PropertyChanges{
                 target:phil
                 opacity:0
+            }       
+            PropertyChanges{
+                target: attributeSelector
+                width: 0
+                height:0
             }
 
         },
         State {
             name: "active"
             PropertyChanges{
+                target: attributeSelector
+                width: manager.appWidth
+                height:manager.appHeight
+            }
+            PropertyChanges{
                 target:phil
                 opacity:.65
             }
 
-        },
-        State {
-            name: "closing"
-            PropertyChanges{
-                target:phil
-                opacity:0
-            }
         }
     ]
 
