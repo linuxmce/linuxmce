@@ -3587,7 +3587,8 @@ void DCE::qOrbiter::changedTrack(QString direction)
 }
 
 void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that populates after the initial request to break out the threading and allow for a checkpoint across threads
-{    backwards=false;
+{
+    backwards=false;
      //emit commandResponseChanged("requesting additional media");
  #ifdef QT5
      //QApplication::processEvents(QEventLoop::AllEvents);
@@ -3614,7 +3615,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                pData = "NULL";
                 //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
 
-                DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    gHeight,    gWidth,                  false,                 false,                                 true, m_sSeek,   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+                DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    media_pageSeperator,    gWidth,                  false,                 false,                                 true, m_sSeek,   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
                  std::string pResponse ="";
                   if(SendCommand(req_data_grid_pics, &pResponse) && pResponse == "OK")
                   {
@@ -3670,7 +3671,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                           //            }
                           index = pMediaGridTable->CovertColRowType(it->first).first;
 
-                          if(!b_cancelRequest){
+                          if(!b_cancelRequest && requestMore){
                               emit addItem(new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index, this));
                               QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef rpi
@@ -3681,6 +3682,10 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                               // Sleep(10);
 #endif
 
+                          }
+                          else if(!requestMore){
+                              qDebug() << "Pausing";
+                              return;
                           }
                           else
                           {

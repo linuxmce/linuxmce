@@ -1190,7 +1190,7 @@ void qorbiterManager::mountMediaDevices()
 
         }
         else{
-            return;
+
         }
 
 
