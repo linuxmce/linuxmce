@@ -1,19 +1,71 @@
 import QtQuick 1.0
 import com.nokia.android 1.1
 
-Rectangle {
+Item {
     id:rect
-    width: childrenRect.width
-    height: heading.height + genericAttributeView.height
-    color: "transparent"
+    width: manager.appWidth
+    height: manager.appHeight
     anchors.centerIn: parent
     clip: true
     property variant activeModel
+
     onActiveModelChanged: console.log("activeModel changed")
     visible: activeModel !=="NULL" ? true : false
+
+    onVisibleChanged: {
+        if(visible)
+          manager.setGridStatus(false)
+    }
+
+    Rectangle{
+        anchors.fill: parent
+        color:"black"
+        opacity: .85
+    }
+
+
+    ListView{
+        id:genericAttributeView
+        height: scaleY(65)
+        width: scaleX(55)
+        model: activeModel
+        spacing:scaleY(1)
+        anchors.top: heading.bottom
+        anchors.horizontalCenter: heading.horizontalCenter
+
+        delegate:ListItem{
+            height:scaleY(15)
+            width:parent.width
+
+            Rectangle{
+                anchors.fill: parent
+                color: "black"
+                border.color: "white"
+                border.width: 1
+                radius:5
+            }
+            Row{
+                anchors.fill: parent
+                StyledText{
+                    text: name
+
+                    color: "white"
+                    width: parent.width *.75
+                }
+
+                CheckBox{
+                    onClicked: activeModel.setSelectionStatus(name)
+                    checked: status
+                    height:parent.height /2
+                    width:height
+                }
+            }
+        }
+    }
     ListHeading{
         id:heading
         anchors.top: rect.top
+        anchors.horizontalCenter: parent.horizontalCenter
         width: genericAttributeView.width
         height: scaleY(8)
         Label{
@@ -22,40 +74,6 @@ Rectangle {
         MouseArea{
             anchors.fill: parent
             onClicked: activeModel="NULL"
-        }
-    }
-    ListView{
-        id:genericAttributeView
-        height: scaleY(65)
-        width: scaleX(35)
-        model: activeModel
-        anchors.top: heading.bottom
-
-
-        //            cellHeight: 150
-        //            cellWidth: 150
-
-        delegate:ListItem{
-
-            Rectangle{
-                anchors.fill: parent
-                color: "black"
-                border.color: "yellow"
-                border.width: 1
-                Row{
-                    anchors.fill: parent
-                    ListItemText{
-                        text: name
-                        color: "white"
-                        font.family: "Droid Sans"
-                    }
-
-                    CheckBox{
-                        onClicked: activeModel.setSelectionStatus(name)
-                        checked: status
-                    }
-                }
-            }
         }
     }
 }

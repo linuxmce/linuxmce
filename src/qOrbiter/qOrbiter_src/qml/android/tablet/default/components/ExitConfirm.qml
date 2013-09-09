@@ -8,10 +8,11 @@ Item {
         anchors.fill: parent
         color:"black"
         opacity:.65
+
     }
     MouseArea{
         anchors.fill: parent
-
+      onReleased: {}
     }
 
     Item{
@@ -22,12 +23,16 @@ Item {
             anchors.fill: parent
             color:"darkred"
             opacity: .65
+            radius:5
+            border.color: "white"
+            border.width: 1
         }
         StyledText{
             id:confirmLabel
             text: qsTr("Confirm Exit?")
             fontSize: listViewText
             anchors.top:parent.top
+            color:"white"
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
@@ -36,10 +41,12 @@ Item {
             height: childrenRect.height
             width: childrenRect.width
             anchors.centerIn: parent
+            spacing:scaleX(2)
             AdvancedButton{
                 id:confirm
                 buttontext: qsTr("Exit")
                 onBtnPress: manager.closeOrbiter()
+
             }
 
             AdvancedButton{

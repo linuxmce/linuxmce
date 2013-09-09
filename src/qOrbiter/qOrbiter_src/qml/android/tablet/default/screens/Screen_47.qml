@@ -10,13 +10,28 @@ Item {
     focus:true
     state:"gridbrowsing"
     Component.onCompleted: forceActiveFocus()
-    Keys.onMenuPressed: {
-        if(fileviewscreen.state!=="sorting")
-        fileviewscreen.state = "sorting"
-        else
-            fileviewscreen.state = "gridbrowsing"
+
+    Keys.onReleased:{
+        event.accepted = true
+        switch(event.key){
+        case Qt.Key_MediaPrevious:
+            manager.goBackGrid()
+            event.accepted=true
+            break;
+        case Qt.Key_Menu:
+            if(fileviewscreen.state!=="sorting")
+            fileviewscreen.state = "sorting"
+            else{
+                fileviewscreen.state = "gridbrowsing"
+            }
+            event.accepted=true
+            break;
+
+        default:
+            console.log("Key not accepted! ==>" + event.key)
+
+        }
     }
-    Keys.onPressed: if(event.key===Qt.Key_MediaPrevious){manager.goBackGrid()}
     clip: true
     property int mouselocY: 0
     property int mouselocX: 0
@@ -172,8 +187,8 @@ Item {
 
             MouseArea{
                 anchors.fill: parent
-                onReleased: {  page_label.font.italic = true ; manager.requestPage(index);  }
-                onPressed: page_label.font.italic = false
+                onReleased: {   manager.requestPage(index);  }
+
             }
 
         }

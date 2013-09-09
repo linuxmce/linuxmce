@@ -10,6 +10,7 @@ Item
     id: contactDelegate
     height: childrenRect.height
     width: childrenRect.width
+    visible: name !=="back (..)"
 
     Rectangle
     {
