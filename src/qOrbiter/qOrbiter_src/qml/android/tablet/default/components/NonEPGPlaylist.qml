@@ -1,5 +1,4 @@
 import QtQuick 1.0
-import com.nokia.android 1.1
 import "../../../../skins-common/lib/handlers"
 
 Rectangle {
@@ -49,7 +48,7 @@ Rectangle {
         model: mediaplaylist
 
         delegate:
-            ListItem {
+            Item {
             width:scaleX(25)
             height: scaleY(12)
             clip: true
@@ -61,7 +60,7 @@ Rectangle {
                 opacity: .5
 
             }
-            ListItemText {
+            StyledText {
                 id: position
                 text: qsTr("Item #") + index
                 font.family: "DroidSans"
@@ -72,7 +71,7 @@ Rectangle {
                 opacity: .75
             }
 
-            ListItemText {
+            StyledText {
                 text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
                 font.family: "DroidSans"
                 color: "aliceblue"
