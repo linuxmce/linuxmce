@@ -70,8 +70,8 @@ namespace DCE
 
 	bool m_bBabyMonitorActive;
 
-	// adding orbiter to LiveAV mapping, so we can save it and flip back and forth appropriately.
-	std::map<int, bool> m_mapOrbiter_IsUsingLiveAV;
+	std::map<int, bool> m_mapOrbiter_IsUsingLiveAV; // Is the Orbiter this SimplePhone is attached to, using LiveAV?
+	std::map<int, bool> m_mapOrbiter_WasPaused;     // Is the Orbiter this SimplePHone is attached to, currently paused by the user, and not the Telecom Plugin?
 
 	// Los93soL
 	std::map<string,string> m_mapChannel2CallerID;

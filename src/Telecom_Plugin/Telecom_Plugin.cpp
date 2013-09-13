@@ -748,10 +748,19 @@ Telecom_Plugin::PlaybackStarted( class Socket *pSocket, class Message *pMessage,
       string sOldPath = FileUtils::BasePath(sMRL);
       string sOldFilename = sOldPath+"/"+sFilename;
       string sNewFilename = sOldPath + "/Old/" + sFilename;
+      vector<string> vectPath;
+      string sExtension;
+      string sCmd;
       FileUtils::MoveFile(sOldFilename+"wav",sNewFilename+"wav");
       FileUtils::MoveFile(sOldFilename+"mp3",sNewFilename+"mp3");
       FileUtils::MoveFile(sOldFilename+"gsm",sNewFilename+"gsm");
       FileUtils::MoveFile(sOldFilename+"txt",sNewFilename+"txt");
+
+      // And update the voicemail counter.
+      StringUtils::Tokenize(sMRL,"/",vectPath);
+      sExtension=vectPath[6];
+      sCmd="/usr/pluto/bin/SendVoiceMailEvent.sh "+sExtension;
+      system(sCmd.c_str());
     }
 
   // FIXME: come back here and change this map to only deal with orbiters in the same target EA
@@ -897,9 +906,19 @@ Telecom_Plugin::Ring( class Socket *pSocket, class Message *pMessage, class Devi
 			      }
 			    else
 			      {
+				// Get if we are using live AV path, and determine if we actually need to pause
 				bool bViewingLiveAVPath = pEntertainArea->m_bViewingLiveAVPath;
-				LoggerWrapper::GetInstance()->Write(LV_WARNING,"Telecom_Plugin::Ring() EA for Orbiter %d ViewingLiveAVPath %d",nOrbiterDeviceID, bViewingLiveAVPath);
+				LoggerWrapper::GetInstance()->Write(LV_STATUS,"Telecom_Plugin::Ring() EA for Orbiter %d ViewingLiveAVPath %d",nOrbiterDeviceID, bViewingLiveAVPath);
 				m_mapOrbiter_IsUsingLiveAV[nOrbiterDeviceID]=bViewingLiveAVPath;
+				if (pEntertainArea->m_pMediaDevice_ActiveDest)
+				  {
+				    // set waspaused, depending on the last playback speed.
+				    m_mapOrbiter_WasPaused[nOrbiterDeviceID] = ( pEntertainArea->m_pMediaDevice_ActiveDest->m_iLastPlaybackSpeed == 0 ? true : false ); 
+				  }
+				else
+				  {
+				    LoggerWrapper::GetInstance()->Write(LV_WARNING,"Telecom_Plugin::Ring() - No Active MediaDevice destination in EA! Ignoring.");
+				  }
 			      }
 			  }
 
@@ -911,8 +930,13 @@ Telecom_Plugin::Ring( class Socket *pSocket, class Message *pMessage, class Devi
 				// Since we are not trying to emulate toggle Pause behaviour, and we should _ALWAYS_ pause in any case, when the 
 				// phone rings, we explicitly change playback speed here, instead of sending a Pause Media, why? because
 				// Pause Media is transformed in Media Plugin's ReceivedMessage.
-				DCE::CMD_Change_Playback_Speed cmd_Change_Playback_Speed(nOrbiterDeviceID, pMediaPlugin->m_dwPK_Device, 0, 0, 0);
-				SendCommand(cmd_Change_Playback_Speed);
+
+			  // Only pause _IF_ the user didn't explicitly pause first.
+			  if (m_mapOrbiter_WasPaused[nOrbiterDeviceID] == false)
+			    {
+			      DCE::CMD_Change_Playback_Speed cmd_Change_Playback_Speed(nOrbiterDeviceID, pMediaPlugin->m_dwPK_Device, 0, 0, 0);
+			      SendCommand(cmd_Change_Playback_Speed);
+			    }
 			}
 			else
 			{
@@ -1159,6 +1183,23 @@ bool Telecom_Plugin::Hangup( class Socket *pSocket, class Message *pMessage, cla
 
 		if(ConcurrentAccessToSoundCardAllowed(nOrbiterDeviceID))
 		{
+		  // If possible, unmute the microphones attached to this orbiter, if there are any, and if the
+		  // baby monitor was being used.
+		  DeviceData_Router *pDevice = m_pRouter->m_mapDeviceData_Router_Find(nOrbiterDeviceID);
+		  vector<DeviceData_Router *> vectDeviceData_Router;
+		  pDevice->FindChildrenWithinCategory(DEVICECATEGORY_Soft_Phones_CONST, vectDeviceData_Router);
+		  if (vectDeviceData_Router.size() >= 1)
+		    {
+		      DeviceData_Router *pDeviceData_Router = *vectDeviceData_Router.begin();
+		      long dwDevice_Phone = pDeviceData_Router->m_dwPK_Device;
+		      bool bEmbeddedPhone = pDeviceData_Router->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Orbiter_Embedded_Phone_CONST;
+		      if (bEmbeddedPhone)
+			{
+			  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Setting Microphone volume for device %d to original level.",dwDevice_Phone);
+			  DCE::CMD_Set_Volume CMD_Set_Volume(m_dwPK_Device,dwDevice_Phone,"#"); // Reset to original levels.
+			  SendCommand(CMD_Set_Volume);
+			}
+		    }
 			Media_Plugin * pMediaPlugin = (Media_Plugin *)m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
 			if( pMediaPlugin != NULL )
 			{
@@ -1188,8 +1229,12 @@ bool Telecom_Plugin::Hangup( class Socket *pSocket, class Message *pMessage, cla
 					      }
 					    
 					  }
-					DCE::CMD_Change_Playback_Speed cmd_Change_Playback_Speed(nOrbiterDeviceID, pMediaPlugin->m_dwPK_Device, 0, 1000, 0);
-					SendCommand(cmd_Change_Playback_Speed);
+					// Only unpause _IF_ the user didn't explicitly pause it! -tschak
+					if (m_mapOrbiter_WasPaused[nOrbiterDeviceID]==false)
+					  {
+					    DCE::CMD_Change_Playback_Speed cmd_Change_Playback_Speed(nOrbiterDeviceID, pMediaPlugin->m_dwPK_Device, 0, 1000, 0);
+					    SendCommand(cmd_Change_Playback_Speed);
+					  }
 			}
 			else
 			{
@@ -4430,8 +4475,8 @@ void Telecom_Plugin::CMD_Delete_File(string sFilename,string &sCMD_Result,Messag
   bool bIsVoicemail = ((sFilename.find("/var/spool/asterisk/voicemail/") != string::npos) || bDeleteAll);
   bool bError=false;
   vector<string> vectVoicemailsToDelete; // used by delete all
-
-  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Telecom_Plugin::CMD_Delete_File() - Are we even making it in here?");
+  string sExtension;
+  vector<string> vectPath;
 
   if (!bIsVoicemail)
     {
@@ -4459,6 +4504,12 @@ void Telecom_Plugin::CMD_Delete_File(string sFilename,string &sCMD_Result,Messag
 		      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Telecom_Plugin::CMD_Delete_File() - Selecting Voicemail %s to delete.",sCurrentFilename.c_str());
 		    }
 		  vectVoicemailsToDelete.push_back(sCurrentFilename);
+		  if (sExtension.empty())
+		    {
+		      // Grab extension if we don't already have it.
+		      StringUtils::Tokenize(sCurrentFilename,"/",vectPath);
+		      sExtension=vectPath[6];
+		    }
 		}
 	      else
 		{
@@ -4490,6 +4541,7 @@ void Telecom_Plugin::CMD_Delete_File(string sFilename,string &sCMD_Result,Messag
 	{
 	  // Come back here and implement this.
 	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXX DELETING ALL VOICEMAILS!");
+	  string sCmd;
 	  for (vector<string>::iterator it=vectVoicemailsToDelete.begin(); it!=vectVoicemailsToDelete.end(); ++it)
 	    {
 	      string sCurrentFilename = *it;
@@ -4500,6 +4552,10 @@ void Telecom_Plugin::CMD_Delete_File(string sFilename,string &sCMD_Result,Messag
 	      FileUtils::DelFile(sFilenameSansExt+"gsm");
 	      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXX DELETING THIS VOICEMAIL!");
 	    }
+
+	  // Update voicemail indicator.
+	  sCmd = "/usr/pluto/bin/SendVoiceMailEvent.sh "+sExtension;
+	  system(sCmd.c_str());
 
 	  // Now go back to the voicemail screen and refresh the datagrids.
 	  SCREEN_UserStatus SCREEN_UserStatus(m_dwPK_Device, pMessage->m_dwPK_Device_From);
@@ -4521,7 +4577,14 @@ void Telecom_Plugin::CMD_Delete_File(string sFilename,string &sCMD_Result,Messag
 	  FileUtils::DelFile(sFilenameSansExt+"wav");
 	  FileUtils::DelFile(sFilenameSansExt+"mp3");
 	  FileUtils::DelFile(sFilenameSansExt+"gsm");
-
+	  
+	  if (sExtension.empty())
+	    {
+	      // Grab extension if we don't already have it.
+	      StringUtils::Tokenize(sFilename,"/",vectPath);
+	      sExtension=vectPath[6];
+	    }
+	  
 	  SCREEN_UserStatus SCREEN_UserStatus(m_dwPK_Device, pMessage->m_dwPK_Device_From);
 	  SendCommand(SCREEN_UserStatus);
 
@@ -4626,6 +4689,8 @@ void Telecom_Plugin::CMD_Phone_to_Baby_Monitor(int iPK_Device,string sPhoneNumbe
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Doing a speak in house from a non-osd orbiter with %d", nMasterDevice);
 			DCE::CMD_Phone_Initiate cmd(m_dwPK_Device, nMasterDevice, 0, BABYMONITOR_CONFERENCE);
 			SendCommand(cmd);
+			DCE::CMD_Set_Volume cmd2(m_dwPK_Device, nMasterDevice, "*");
+			SendCommand(cmd2);
 		}
 
 		if( sPhoneNumber.empty() )
@@ -4644,6 +4709,8 @@ void Telecom_Plugin::CMD_Phone_to_Baby_Monitor(int iPK_Device,string sPhoneNumbe
 		{
 			sCMD_Result = string("ERROR : couldn't make a call from") + SPEAKINTHEHOUSE_INVALID_EXT + "to" + SPEAKINTHEHOUSE_CONFERENCE_ALL;
 		}
+		DCE::CMD_Set_Volume cmd2(m_dwPK_Device, pMessage->m_dwPK_Device_To, "*");
+		SendCommand(cmd2);
 		return;
 	}
 
@@ -4695,6 +4762,8 @@ void Telecom_Plugin::CMD_Phone_to_Baby_Monitor(int iPK_Device,string sPhoneNumbe
 							LoggerWrapper::GetInstance()->Write(LV_STATUS,"Doing a speak in house with %d", *it);
 							DCE::CMD_Phone_Initiate cmd(m_dwPK_Device, *it, 0, BABYMONITOR_CONFERENCE);
 							SendCommand(cmd);
+							DCE::CMD_Set_Volume cmd2(m_dwPK_Device, *it, "*");
+							SendCommand(cmd2);
 						}
 					}
 					
@@ -4736,25 +4805,26 @@ void Telecom_Plugin::CMD_Phone_to_Baby_Monitor(int iPK_Device,string sPhoneNumbe
 			listDevices.push_front(dwDevice_Caller); 
 			for(list<int>::iterator it = listDevices.begin(); it != listDevices.end(); ++it)
 			{
+                                LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX Device %d",*it);
 				//is this an embedded phone?
 				if(FindValueInMap(map_embedphone2orbiter, *it, 0))
 				{
 					// all of us will call 997
 				  if (!m_bBabyMonitorActive)
 				    {
-				      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Activating Baby Monitor with phone ext %d", *it);
+				      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Activating Baby Monitor with phone ext %d", *it);
 				      DCE::CMD_Phone_Initiate cmd(m_dwPK_Device, *it, 0, BABYMONITOR_CONFERENCE);
 				      SendCommand(cmd);
-				      DCE::CMD_Set_Volume volCmd(m_dwPK_Device, *it, "0");
+				      DCE::CMD_Set_Volume volCmd(m_dwPK_Device, *it, "*");
 				      SendCommand(volCmd);
 				    }
 				  else
 				    {
-				      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Deactivating Baby Monitor with phone ext %d",*it);
+				      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Deactivating Baby Monitor with phone ext %d",*it);
 				      DCE::CMD_Phone_Drop cmd(m_dwPK_Device, *it);
 				      SendCommand(cmd);
-				      Sleep(500); // Prevent Asterisk from losing its mind from hanging up exts too fast.
-				      DCE::CMD_Set_Volume volCmd(m_dwPK_Device, *it, "100");
+				      Sleep(10); // Prevent Asterisk from losing its mind from hanging up exts too fast.
+				      DCE::CMD_Set_Volume volCmd(m_dwPK_Device, *it, "#");
 				      SendCommand(volCmd);
 				    }
 				}
@@ -4762,8 +4832,9 @@ void Telecom_Plugin::CMD_Phone_to_Baby_Monitor(int iPK_Device,string sPhoneNumbe
 			
 			if (!m_bBabyMonitorActive)
 			  {
+			    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Unmuting Baby Monitor device: "+DATA_Get_PK_Device_Phone_Baby_Monitor());
 			    // Finally, Flip the baby monitor station (specified by PK_Device), unmute.
-			    DCE::CMD_Set_Volume volCmd2(m_dwPK_Device, DATA_Get_PK_Device_Phone_Baby_Monitor(), "100");
+			    DCE::CMD_Set_Volume volCmd2(m_dwPK_Device, DATA_Get_PK_Device_Phone_Baby_Monitor(), "#");
 			    SendCommand(volCmd2);
 			  }
 
