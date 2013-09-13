@@ -51,7 +51,7 @@ OMX_Player::OMX_Player(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pDa
 OMX_Player::~OMX_Player()
 //<-dceag-dest-e->
 {
-//	EVENT_Playback_Completed("",0,false);
+	EVENT_Playback_Completed("",0,false);
 }
 
 void
@@ -266,36 +266,12 @@ void OMX_Player::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char 
 	cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
 }
 
-void OMX_Player::ProcessNotification(void *pObject, int event)
-{
-//	void EVENT_Playback_Completed(string sMRL,int iStream_ID,bool bWith_Errors) { GetEvents()->Playback_Completed(sMRL.c_str(),iStream_ID,bWith_Errors); }
-//	void EVENT_Playback_Started(string sMRL,int iStream_ID,string sSectionDescription,string sAudio,string sVideo) { GetEvents()->Playback_Started(sMRL.c_str(),iStream_ID,sSectionDescription.c_str(),sAudio.c_str(),sVideo.c_str()); }
-
-        cout << "PROCESS NOTIFICATION FUNCTION CALLED!!!  " << event << endl;
-
-
-if (m_pEvent == NULL)
-	cout << "SHITTTTTTTTTYYY!!!!" << endl;
-else
-	cout << "m_pEvent is not NULL." << endl;
-
-//	OMX_Player* pThis = (OMX_Player*) pObject;
-//	pThis->EVENT_Playback_Completed(pThis->m_filename,pThis->m_iStreamID,false);
-
-//if (pThis == this)
-//	cout << "pThis == this! Okay." << endl;
-//else
-//	cout << "pThis != this! Argh!" << endl;
-
-}
-
-
 void OMX_Player::NotifierCallback(void *pObject, int event)
 {
         cout << "CALLBACK FUNCTION CALLED!!!  " << event << endl;
+
 	OMX_Player* pThis = (OMX_Player*) pObject;
-//	pThis->EVENT_Playback_Completed(pThis->m_filename,pThis->m_iStreamID,false);
-	pThis->ProcessNotification(pObject, event);
+	pThis->EVENT_Playback_Completed(pThis->m_filename,pThis->m_iStreamID,false);
 }
 
 //<-dceag-c37-b->
@@ -346,7 +322,7 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 	m_bOMXIsRunning = true;
 
 //	void EVENT_Playback_Started(string sMRL,int iStream_ID,string sSectionDescription,string sAudio,string sVideo) { GetEvents()->Playback_Started(sMRL.c_str(),iStream_ID,sSectionDescription.c_str(),sAudio.c_str(),sVideo.c_str()); }
-//	EVENT_Playback_Started(sMediaURL,m_iStreamID,"","","");
+	EVENT_Playback_Started(sMediaURL,m_iStreamID,"","","");
 
 	sCMD_Result = "OK";
 /*

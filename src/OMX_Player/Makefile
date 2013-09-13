@@ -54,7 +54,7 @@ OMX_Player.so: $(sources:.cpp=.o)
 #	./post_make.sh $@
 		
 OMX_Player: $(sources:.cpp=.o)
-	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	$(CXX) -g -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	mkdir -p ../bin
 	cp $@ ../bin
 #	./post_make.sh $@

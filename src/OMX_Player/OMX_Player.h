@@ -21,7 +21,7 @@
 //<-dceag-d-e->
 
 #include "omxcommands.h"
-#include "CLibOMX.h"
+#include "omxplayer/CLibOMX.h"
 
 //<-dceag-decl-b->
 namespace DCE
