@@ -62,7 +62,7 @@ Item {
     Connections
     {
         target: dataModel
-        onProgressChanged:{progress_bar_fill.height = progress_bar.height* ((dataModel.currentCells / dataModel.totalcells)); console.log(dataModel.progress)}
+        onProgressChanged:{progress_bar_fill.height = progress_bar.height* ((dataModel.currentCells / manager.media_pageSeperator)); }
         onReady:progress_bar_fill.height = 0
         onLoadingStatusChanged:progress_bar_fill.color = dataModel.loadingStatus ? "green" : "red"
     }
@@ -97,7 +97,7 @@ Item {
 
         StyledText {
             id: total_cells
-            text: dataModel.totalcells
+            text:  manager.media_pageSeperator
             color: "white"
             font.bold: true
             font.pixelSize: scaleY(5)
@@ -168,10 +168,11 @@ Item {
 
     ListView{
         id:model_pages
-        height: manager.appHeight
+        height: scaleY(65)
         width: scaleX(10)
         model: dataModel.totalPages
         anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
         delegate: Rectangle{
             height: scaleY(10)
             width: scaleX(10)
@@ -196,10 +197,11 @@ Item {
     }
     ListView{
         id:alphalist
-        height: grid_view1.height
+        height: scaleY(65)
         width: scaleX(5)
         clip:true
         anchors.left: grid_view1.right
+        anchors.verticalCenter: parent.verticalCenter
         model:alphabetlist
 
         delegate:

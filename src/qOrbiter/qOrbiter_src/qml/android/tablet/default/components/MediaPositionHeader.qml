@@ -3,44 +3,68 @@ import "../components"
 import "../js/ComponentLoader.js" as MyJs
 import "../../../../skins-common/lib/effects"
 
-Rectangle{
+Item{
     id: pos_label
     anchors.top: fileviewscreen.top
     anchors.horizontalCenter: fileviewscreen.horizontalCenter
-    radius:5
+    width: scaleX(95)
+    height: label_row.height
     focus:true
-    color:style.darkhighlight
-    width: scaleX(75)
-    height: scaleY(5)
+
+
+    Rectangle{
+        radius:5
+        focus:true
+        color:"red"
+        opacity: .25
+        anchors.fill: parent
+    }
+
+
     Row{
         id:label_row
         width: childrenRect.width
-        height: scaleY(5)
+        height: childrenRect.height
         anchors.centerIn: pos_label
         spacing: scaleX(1)
-        Text {
+        StyledText {
             id: grid_position_label
-            text: qsTr("You are browsing by:") + manager.i_current_mediaType
+            text: manager.translateMediaType(manager.q_mediaType)
+            color:"white"
         }
-        Text {
+
+        StyledText{
+            text:"|"
+            color:"white"
+        }
+
+        StyledText {
             id: grid_attritbute_label
-            text: qsTr("Attribute Type Sort") + manager.q_attributetype_sort
+            text:  manager.q_attributetype_sort
+            color:"white"
         }
-        Text {
+        StyledText {
+            id: sub_attritbute_label
+            text: " | " + manager.q_subType
+            color:"white"
+        }
+        StyledText {
             id: page_label
-            text: qsTr("Current Page") + manager.media_currentPage
+            text: qsTr("Current Page:") + manager.media_currentPage
+            color:"white"
+            visible:dataModel.totalPages !==1
+
         }
-        TextInput{
-            id:seperationSetter
-            width: page_label.width
-            text: manager.media_pageSeperator
-            
-        }
+
         Rectangle{
-            height: parent.height-1
-            width: childrenRect.width + 10
+            height: parent.height-5
+            width: scaleX(15)
+            color: "blue"
+            opacity:.65
+            anchors.verticalCenter: parent.verticalCenter
             StyledText{
-                text: qsTr("Set")
+                text: qsTr("Set Paging")
+                color:"white"
             }
             MouseArea{
                 anchors.fill: parent
@@ -48,7 +72,8 @@ Rectangle{
                     pos_label.forceActiveFocus()
                     if(!seperationSetter.text.match("\d")){
                         manager.setDceGridSep(seperationSetter.text)
-                        manager.requestPage(0)
+
+                        // fileviewscreen.forceActiveFocus()
                     }
                     else
                     {
@@ -56,6 +81,47 @@ Rectangle{
                     }
                 }
             }
+        }
+
+        TextInput{
+            id:seperationSetter
+            width: page_label.width
+            text:  manager.media_pageSeperator
+            anchors.verticalCenter: parent.verticalCenter
+            color:"white"
+            font.pointSize: scaleY(3.5)
+            onActiveFocusChanged: {
+                if(activeFocus)
+                { text=""}
+                else
+                {  manager.media_pageSeperator}
+            }
+            Keys.onReleased: {
+                event.accepted=true
+                switch(event.key){
+                case Qt.Key_Enter:
+                    console.log("enter");
+                    break;
+                case Qt.Key_Return:
+                    seperationSetter.closeSoftwareInputPanel()
+                    console.log("return pressed on page split")
+
+                    if(!seperationSetter.text.match("\d")){
+                        manager.setDceGridSep(seperationSetter.text)
+
+                        closeSoftwareInputPanel();
+
+                    }
+                    else
+                    {
+                        console.log("no match?")
+                        seperationSetter.text.color = red
+                    }
+                    break;
+
+                }
+            }
+
         }
     }
     

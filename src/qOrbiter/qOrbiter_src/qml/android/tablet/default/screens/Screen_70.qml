@@ -1,9 +1,6 @@
 import QtQuick 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
-import com.nokia.android 1.1
-
-
 MediaPlaybackBase{
     id:storedVideoRemote
     metadataComponent: ProgramData{id:textRect}
