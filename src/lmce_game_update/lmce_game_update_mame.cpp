@@ -116,22 +116,36 @@ int LMCE_Game_Update_MAME::Run()
   return 0;
 }
 
-void LMCE_Game_Update_MAME::ProcessEntry(string sRomName, MAMERom* pCurrentRom)
+bool LMCE_Game_Update_MAME::UpdateRom(MAMERom *pCurrentRom, string sRomFile, string sRomName)
 {
-  string sRomFile=sRomName+".zip";
-  if (!pCurrentRom)
+  long int iPK_Rom = m_pGameDatabase->GetPK_Rom(sRomFile);
+  string sTitle;
+
+  if (iPK_Rom > 0)
     {
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ProcessEntry(%s) - MAMERom = NULL.",sRomName.c_str());
-      return;
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"LMCE_Game_Update_MAME::UpdateRom(%s) - Could not fetch PK_Rom entry for Rom File.",sRomFile.c_str());
+      return false;
     }
 
-  if (m_pGameDatabase->RomExists(sRomFile))
+  if (!m_pGameDatabase->GetTitleForHash(pCurrentRom->TitleHash_get(), sTitle))
     {
-      LoggerWrapper::GetInstance()->Write(LV_WARNING,"ProcessEntry(%s) - ROM Exists.",sRomName.c_str());
-      return;
+      m_pGameDatabase->AddTitleHash(pCurrentRom->RomTitle_get(),pCurrentRom->TitleHash_get());
+      m_pGameDatabase->UpdateRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_title_CONST,pCurrentRom->RomTitle_get());
     }
+  else
+    {
+      m_pGameDatabase->UpdateRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_title_CONST,sTitle);
+    }
+  m_pGameDatabase->UpdateRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_subtitle_CONST,pCurrentRom->RomSubtitle_get());
+  m_pGameDatabase->UpdateRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_manufacturer_CONST,pCurrentRom->RomManufacturer_get());
+  m_pGameDatabase->UpdateRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_genre_CONST,m_pMAMECategory->m_mapRomToCategory_Find(sRomName));
+  m_pGameDatabase->UpdateRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_year_CONST,pCurrentRom->RomYear_get());
+  return true;
+}
 
-  int iPK_Rom = m_pGameDatabase->AddRom(sRomFile);
+bool LMCE_Game_Update_MAME::AddRom(MAMERom *pCurrentRom, string sRomFile, string sRomName)
+{
+  long iPK_Rom = m_pGameDatabase->AddRom(sRomFile);
 
   if (iPK_Rom == 0)
     {
@@ -154,7 +168,44 @@ void LMCE_Game_Update_MAME::ProcessEntry(string sRomName, MAMERom* pCurrentRom)
       m_pGameDatabase->AddRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_genre_CONST,m_pMAMECategory->m_mapRomToCategory_Find(sRomName));
       m_pGameDatabase->AddRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_year_CONST,pCurrentRom->RomYear_get());
     }
+  return true;
+}
 
+void LMCE_Game_Update_MAME::ProcessEntry(string sRomName, MAMERom* pCurrentRom)
+{
+  string sRomFile=sRomName+".zip";
+  if (!pCurrentRom)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ProcessEntry(%s) - MAMERom = NULL.",sRomName.c_str());
+      return;
+    }
+
+  if (m_pGameDatabase->RomExists(sRomFile))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"ProcessEntry(%s) - ROM Exists. Attempting to update.",sRomName.c_str());
+      if (!UpdateRom(pCurrentRom, sRomFile, sRomName))
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_WARNING,"ProcessEntry(%s) - Could not update ROM entry.",sRomFile.c_str());
+	  return;
+	}
+      else
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"ProcessEntry(%s) - Processed existing ROM",sRomFile.c_str());
+	  return;
+	}
+    }
+  else
+    {
+      if (!AddRom(pCurrentRom, sRomFile, sRomName))
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_WARNING,"ProcessEntry(%s) - Could not process ROM entry.",sRomFile.c_str());
+	  return;
+	}
+      else
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"ProcessEntry(%s) - Processed new ROM.",sRomFile.c_str());
+	}
+    }
 
 }
 

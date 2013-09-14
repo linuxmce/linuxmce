@@ -49,4 +49,7 @@ class LMCE_Game_Update_MAME
 
   bool GetMAMEOutput(string &sMameOutput);
   void ProcessEntry(string sRomName, MAMERom *pCurrentRom);
+  bool AddRom(MAMERom *pCurrentRom, string sRomFile, string sRomName);
+  bool UpdateRom(MAMERom *pCurrentRom, string sRomFile, string sRomName);
+
 };
