@@ -41,6 +41,7 @@ ListModel::ListModel(gridItem* prototype, QObject* parent) :
     loadingStatus = false;
     progress = 0;
     clearing = false;
+    gridType=-1;
     clear();
     setTotalPages(0);
 }

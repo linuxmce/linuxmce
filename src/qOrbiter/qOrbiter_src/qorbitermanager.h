@@ -419,6 +419,8 @@ Param 10 - pk_attribute
     QMap <int, TelecomScenarioModel*> roomTelecomScenarios;
     QMap <int, SecurityScenarioModel*> roomSecurityScenarios;
     QMap <int, int> *defaultSort;
+    QMap <int, QString*> * subtypeTranslation;
+    QMap <int, QString*> * mediatypeTranslation;
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
@@ -732,8 +734,16 @@ public slots:
      * \param a
      * \return
      */
-    QString translateAttribute(QString a){
-        return a;
+    QString translateAttribute(int a){
+        QString rVal;
+                switch (a) {
+            case 1:
+
+                break;
+            default:
+                break;
+        }
+        return rVal;
     }
 
 
@@ -1241,6 +1251,7 @@ public slots:
     void setDceGridSep(int sep) {emit dceGridSepChanged(sep);}
     void setGridSeperator(int sep) { media_pageSeperator = sep; emit newPageSeperator(sep);}
     int getGridSeperator() { return media_pageSeperator; }
+    QString translateMediaType(int mediaType);
 
     void setCurrentPage(int page) {media_currentPage = page;   emit mediaPageChanged();  }
     int getCurrentPage() {return media_currentPage;}

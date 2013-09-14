@@ -83,10 +83,10 @@ signals:
 public slots:
 
     void objectDestroyed(QObject*){
-     //   qDebug()<< "Model item deleted";
-}
+        //   qDebug()<< "Model item deleted";
+    }
     void itemDeleted(){
-      //  qDebug() << "Model Item Destroyed Signal emitted.";
+        //  qDebug() << "Model Item Destroyed Signal emitted.";
     }
 
 
@@ -94,8 +94,8 @@ public slots:
     int setSection(QString s){
 
         foreach(gridItem* item, m_list) {
-            if(item->name().startsWith(s)) {              
-               return indexFromItem(item).row();
+            if(item->name().startsWith(s)) {
+                return indexFromItem(item).row();
             }
         }
     }
@@ -106,12 +106,16 @@ public slots:
         QString t = seq.toString();
         foreach(gridItem* item, m_list) {
             if(item->name().startsWith(t)) {
-               return indexFromItem(item).row();
+                return indexFromItem(item).row();
             }
         }
     }
 
-    void setTotalPages(int p){totalPages = p;qDebug() << "New page count " << totalPages; emit totalPagesChanged();}
+    void setTotalPages(int p){totalPages = p;
+                              qDebug() << "New page count " << totalPages;
+                                                    emit totalPagesChanged();
+
+                             }
     int  getTotalPages() {return totalPages;}
     void setSeperator(int s) {seperator = s;}
     void checkForMore();

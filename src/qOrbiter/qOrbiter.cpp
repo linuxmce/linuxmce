@@ -1813,6 +1813,8 @@ bool DCE::qOrbiter::initialize()
         m_bRouterReloading = false;
         m_bReload = false;
         m_bOrbiterConnected = true;
+
+
         emit deviceValid(true);
         emit commandResponseChanged("Starting Manager");
         emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sIPAddress));
@@ -2224,6 +2226,9 @@ void qOrbiter::shutdown()
 
 void qOrbiter::beginSetup()
 {
+    i_ea = 0;
+    i_room = 0;
+    i_user = 0;
     iPK_Device_DatagridPlugIn =  long(6);
     iPK_Device_OrbiterPlugin = long(9);
     iPK_Device_GeneralInfoPlugin = long(4);
@@ -2528,6 +2533,10 @@ void qOrbiter::goBackGrid()
 void qOrbiter::requestPage(int page)
 {
     media_pos = page * media_pageSeperator;
+
+    b_cancelRequest = false;
+    requestMore = true;
+
     setGridStatus(true);
     emit clearPageGrid();
 }
@@ -3027,8 +3036,22 @@ void qOrbiter::checkTimeCode(int npDevice)
             qWarning("MD address?");
             sIPAddress = pDevice->m_pDevice_MD->m_sIPAddress;
         }else if(pDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Xine_Player_CONST  ) {
-            qWarning("XINE Ip Address set!");
-            sIPAddress = pDevice->m_pDevice_Core->m_sIPAddress;
+            qWarning("On Screen Orbiter, looking up XINE Ip Address set!");
+            sIPAddress =  pDevice->m_sIPAddress;
+
+            if( sIPAddress.empty() )
+            {
+                if( pDevice->m_pDevice_MD && !pDevice->m_pDevice_MD->m_sIPAddress.empty() )
+                    sIPAddress = pDevice->m_pDevice_MD->m_sIPAddress;
+                else if( pDevice->m_pDevice_Core && !pDevice->m_pDevice_Core->m_sIPAddress.empty() )
+                    sIPAddress = pDevice->m_pDevice_Core->m_sIPAddress;
+                else
+                {
+                    LoggerWrapper::GetInstance()->Write(LV_WARNING,"Orbiter::CMD_Set_Now_Playing  Xine has no IP address");
+                    return;
+                }
+            }
+
         } else if(pDevice->m_dwPK_DeviceTemplate == 2205 ){
             sIPAddress = GetCurrentDeviceData(m_dwPK_Device_NowPlaying, DEVICEDATA_TCP_Address_CONST);
         }
@@ -3153,8 +3176,8 @@ void DCE::qOrbiter::BindMediaRemote(bool onoff)
     {
         status = "0";
     }
-    string designobj = "2355";
-    CMD_Bind_to_Media_Remote bind_remote(m_dwPK_Device, iMediaPluginID, m_dwPK_Device,string("2355") ,status, string(""), StringUtils::itos(i_ea), 0, 0);
+int killer;
+    CMD_Bind_to_Media_Remote bind_remote(m_dwPK_Device, iMediaPluginID, this->m_dwPK_Device,string("2355") ,status, string(""), StringUtils::itos(i_ea), 0, 0);
     SendCommand(bind_remote);
 }
 
@@ -3489,6 +3512,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 EPGItemClass *t = new EPGItemClass(channelName, channelNumber, channelIndex, program, index, QString("na"), QString("na"));
                 emit addChannel(t);
                 index++;
+                QApplication::processEvents(QEventLoop::AllEvents);
             }
 
 
@@ -3719,7 +3743,7 @@ void DCE::qOrbiter::setLocation(int location, int ea) // sets the ea and room
     i_room = location;
     i_ea = ea;
 
-    //    DATA_Set_FK_EntertainArea(StringUtils::itos(i_ea));
+        DATA_Set_FK_EntertainArea(StringUtils::itos(i_ea));
 
     CMD_Set_Entertainment_Area_DL set_entertain_area(m_dwPK_Device, StringUtils::itos(iOrbiterPluginID), StringUtils::itos(ea));
     SendCommand(set_entertain_area);
@@ -5148,10 +5172,16 @@ void qOrbiter::sendStringMessage(QString msg)
 void DCE::qOrbiter::setGridSeperator(int sep)
 {
     media_pageSeperator = sep;
-
     media_totalPages = (i_mediaModelRows / media_pageSeperator); //16 being the items per page.
+    b_cancelRequest = true;
+    requestMore = false;
+
     setModelPages(media_totalPages);
     emit pageSeperatorChanged(media_pageSeperator);
+
+
+
+
 }
 
 //<-dceag-c190-b->

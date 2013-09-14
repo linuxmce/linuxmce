@@ -312,7 +312,7 @@ void qorbiterManager::gotoQScreen(QString s)
                     gotoScreenList->append(currentScreen);
                 }
             }else{
-                 gotoScreenList->append(currentScreen);
+                gotoScreenList->append(currentScreen);
             }
 
         }
@@ -953,7 +953,7 @@ void qorbiterManager::swapSkins(QString incSkin)
 #endif
 
 #ifdef QT4
-//qorbiterUIwin->engine()->clearComponentCache();
+        //qorbiterUIwin->engine()->clearComponentCache();
 #elif QT5
 
 #endif
@@ -1035,6 +1035,113 @@ bool qorbiterManager::requestDataGrid()
 {
     m_dwIDataGridRequestCounter++;
     return true;
+}
+
+QString qorbiterManager::translateMediaType(int mediaType)
+{
+    QString rVal = "";
+    switch(mediaType){
+    case 1:
+        rVal="LinuxMCE LiveTV";
+        break;
+    case 2:
+        rVal="LinuxMCE CD";
+        break;
+    case 3:
+        rVal="LinuxMCE DVD";
+        break;
+    case 4:
+        rVal="LinuxMCE Stored Audio";
+        break;
+    case 5:
+        rVal="LinuxMCE Stored Video";
+        break;
+    case 6:
+        rVal="LinuxMCE Live Radio";
+        break;
+    case 7:
+        rVal="LinuxMCE Pictures";
+        break;
+    case 11:
+        rVal="LiveTv";
+        break;
+    case 12:
+        rVal="DVD";
+        break;
+    case 13:
+        rVal="OTA-Radio";
+        break;
+    case 14:
+        rVal="Satellite Radio";
+        break;
+    case 15:
+        rVal="Cable Raio";
+        break;
+    case 16:
+        rVal="VideoTape";
+        break;
+    case 17:
+        rVal="LaserDisc";
+        break;
+    case 18:
+        rVal="Game";
+        break;
+    case 19:
+        rVal="CD";
+        break;
+    case 20:
+        rVal="Burning";
+        break;
+    case 21:
+        rVal="Playlist";
+        break;
+    case 22:
+        rVal="Edit Playlist";
+        break;
+    case 23:
+        rVal="Blank Media";
+        break;
+    case 24:
+        rVal="Doc Viewer";
+        break;
+    case 25:
+        rVal="Cassette";
+        break;
+    case 26:
+        rVal="LinuxMCE CD";
+        break;
+    case 27:
+        rVal="LinuxMCE HD-DVD";
+                break;
+    case 28:
+        rVal="LinuxMCE Blu-ray Disc";
+        break;
+    case 29:
+        rVal="LinuxMCE Game";
+        break;
+    case 30:
+        rVal="Atari 2600";
+        break;
+    case 31:
+        rVal="Blu-Ray";
+        break;
+    case 32:
+        rVal="LinuxMCE Atari 5200";
+        break;
+    case 33:
+        rVal="LinuxMCE Atari 7800";
+        break;
+    case 63:
+        rVal="YouTube";
+        break;
+    case 64:
+        rVal="Internet Media";
+        break;
+    default:
+        rVal = "Unknown.";
+        break;
+    }
+    return rVal;
 }
 
 void qorbiterManager::setActiveRoom(int room,int ea)
@@ -1601,7 +1708,7 @@ bool qorbiterManager::writeConfig()
             configVariables.namedItem("debug").attributes().namedItem("id").setNodeValue(debugMode ==true? "true" : "false");
             configVariables.namedItem("phone").attributes().namedItem("id").setNodeValue(QString::number(isPhone));
             if(!mobileStorageLocation.isEmpty()){
-                  configVariables.namedItem("mobile_storage").attributes().namedItem("id").setNodeValue(mobileStorageLocation);
+                configVariables.namedItem("mobile_storage").attributes().namedItem("id").setNodeValue(mobileStorageLocation);
             }
 
             QByteArray output = localConfig.toByteArray();
@@ -1717,7 +1824,7 @@ void qorbiterManager::showfloorplan(int fptype)
     switch(fptype){
     case 5: // - entertainment floorplan. screen 4
         setFloorplanType(fptype);
-       Screen = QString("Screen_3.qml");
+        Screen = QString("Screen_3.qml");
         break;
     case 6: // -general av equipment - piped to misc screen 7
         setFloorplanType(fptype);
@@ -1743,7 +1850,7 @@ void qorbiterManager::showfloorplan(int fptype)
     }
 
 
- gotoQScreen(Screen);
+    gotoQScreen(Screen);
     //pqOrbiter->ShowFloorPlan(fptype);
 }
 
