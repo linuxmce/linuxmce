@@ -32,6 +32,13 @@
 	$dbPlutoSecurityServer = $DB_HOST;
 	$dbPlutoSecurityDatabase = "pluto_security";
 
+	// Transmission
+	$dbTransmissionType = "mysql";
+	$dbTransmissionUser = "transmission";
+	$dbTransmissionPass = "";
+	$dbTransmissionServer = $DB_HOST;
+	$dbTransmissionDatabase = "transmission_links";
+
 function LoadConfig($configFile,$configKey) {
 	//LoadConfig()
 	//Looks for the assigned value of $configKey within $configFile,

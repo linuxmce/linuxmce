@@ -26,6 +26,10 @@
   $securityADO = &ADONewConnection($dbPlutoSecurityType);
   $securityADO->NConnect($dbPlutoSecurityServer,urlencode($dbPlutoSecurityUser),urlencode($dbPlutoSecurityPass),urlencode($dbPlutoSecurityDatabase)); 
 
+	// TransmissionADO connection
+	$transmissionADO = &ADONewConnection($dbTransmissionType);
+	$transmissionADO->NConnect($dbTransmissionServer,urlencode($dbTransmissionUser),urlencode($dbTransmissionPass),urlencode($dbTransmissionDatabase));
+
   //for sqlite
   //$db = &ADONewConnection('sqlite');
   //$db->NConnect($GLOBALS['appRoot'].'sqlite.db'); # sqlite will create if does not exist

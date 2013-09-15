@@ -1830,6 +1830,20 @@ switch ($section) {
 	    include_once('operations/others/upnpServer.php');
 	    upnpServer($output,$dbADO);	    
 	break;		
+	case 'transmission-daemon':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+		include_once('operations/others/transmissionDaemon.php');
+		transmissionDaemon($output,$dbADO,$transmissionADO);
+		//transmissionDaemon($output,$dbADO,"");
+	break;
+	case 'transmissionLink':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('small');
+		include_once('operations/others/transmissionLink.php');
+		transmissionLink($output,$dbADO,$transmissionADO);
+		//transmissionLink($output,$dbADO,"");
+	break;
 	case 'slimServer':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
