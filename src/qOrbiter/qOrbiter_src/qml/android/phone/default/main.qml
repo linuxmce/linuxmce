@@ -40,6 +40,7 @@ Item {
 
     Component.onCompleted: {
         androidSystem.updateBuildInformation()
+          manager.setDceGridSep(100)
     }
 
     Keys.onReleased: {

@@ -62,7 +62,7 @@ Item {
     Connections
     {
         target: dataModel
-        onProgressChanged:{progress_bar_fill.height = progress_bar.height* ((dataModel.currentCells / manager.media_pageSeperator)); }
+        onProgressChanged:{progress_bar_fill.height = progress_bar.height* ((dataModel.currentCells /dataModel.totalcells)); }
         onReady:progress_bar_fill.height = 0
         onLoadingStatusChanged:progress_bar_fill.color = dataModel.loadingStatus ? "green" : "red"
     }
@@ -97,7 +97,7 @@ Item {
 
         StyledText {
             id: total_cells
-            text:  manager.media_pageSeperator
+            text: dataModel.totalcells
             color: "white"
             font.bold: true
             font.pixelSize: scaleY(5)
@@ -221,7 +221,7 @@ Item {
             }
             MouseArea{
                 anchors.fill: parent
-                hoverEnabled: true
+
                 onEntered: {
                     alphabetrect.scale = 1.5
                 }
@@ -229,10 +229,11 @@ Item {
 
                     alphabetrect.scale = 1
                 }
-                onPressed: { if(dataModel.totalPages===1){
+                onReleased: { if(dataModel.totalPages===1){
                         grid_view1.maingrid.positionViewAtIndex(dataModel.setSection(name), ListView.Beginning)
 
                     }else{
+
                         manager.setSeekLetter(name)
                     }
                 }

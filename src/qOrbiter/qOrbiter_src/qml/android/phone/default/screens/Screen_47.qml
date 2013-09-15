@@ -9,8 +9,127 @@ Item {
     height: manager.appHeight
     clip: true
     focus:true
+    state:"browsing"
+    property string currentSeekLetter:"A"
     Component.onCompleted: {
         forceActiveFocus()
+
+    }
+
+    //    Connections{
+    //        target:manager
+    //        onDceGridSepChanged:manager.requestPage(0)
+    //    }
+
+    ListModel{
+        id:alphabetlist
+
+        ListElement{
+            name:"0"
+        }
+
+        ListElement{
+            name:"A"
+        }
+
+        ListElement{
+            name:"B"
+        }
+
+        ListElement{
+            name:"C"
+        }
+
+        ListElement{
+            name:"D"
+        }
+
+        ListElement{
+            name:"E"
+        }
+
+        ListElement{
+            name:"F"
+        }
+
+        ListElement{
+            name:"G"
+        }
+
+        ListElement{
+            name:"H"
+        }
+
+        ListElement{
+            name:"I"
+        }
+
+        ListElement{
+            name:"J"
+        }
+
+        ListElement{
+            name:"K"
+        }
+
+        ListElement{
+            name:"L"
+        }
+
+        ListElement{
+            name:"M"
+        }
+        ListElement{
+            name:"N"
+        }
+
+        ListElement{
+            name:"O"
+        }
+
+        ListElement{
+            name:"P"
+        }
+
+        ListElement{
+            name:"Q"
+        }
+
+        ListElement{
+            name:"R"
+        }
+
+        ListElement{
+            name:"S"
+        }
+
+        ListElement{
+            name:"T"
+        }
+
+        ListElement{
+            name:"U"
+        }
+
+        ListElement{
+            name:"V"
+        }
+
+        ListElement{
+            name:"W"
+        }
+
+        ListElement{
+            name:"X"
+        }
+
+        ListElement{
+            name:"Y"
+        }
+
+        ListElement{
+            name:"Z"
+        }
     }
 
     Keys.onReleased: {
@@ -26,13 +145,13 @@ Item {
             if(selector.state === "hidden")
                 selector.state ="atrselect"
             else
-            selector.state ="hidden"
+                selector.state ="hidden"
             break;
         case Qt.Key_M:
             if(selector.state === "hidden")
                 selector.state ="atrselect"
             else
-            selector.state ="hidden"
+                selector.state ="hidden"
             break;
         default:
             console.log(event.key)
@@ -40,48 +159,48 @@ Item {
         }
     }
 
-    Connections
-    {
-        target: dataModel
-        onProgressChanged:progress_bar_fill.width = progress_bar.width* ((dataModel.currentCells / dataModel.totalcells))
-        onReady:progress_bar_fill.width = 0
-    }
+    //    Connections
+    //    {
+    //        target: dataModel
+    //        onProgressChanged:progress_bar_fill.width = progress_bar.width* ((dataModel.currentCells / dataModel.totalcells))
+    //        onReady:progress_bar_fill.width = 0
+    //    }
 
-    Rectangle
-    {
-        id:progress_bar
-        height: scaleY(3)
-        width: scaleX(50)
-        color: "transparent"
-        radius:5
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: list_view1.horizontalCenter
-        Text {
-            id: total_cells
-            text: dataModel.totalcells
-            color: "yellow"
-            font.pixelSize: scaleY(3)
-            anchors.left: progress_bar.right
-        }
+    //    Rectangle
+    //    {
+    //        id:progress_bar
+    //        height: scaleY(3)
+    //        width: scaleX(50)
+    //        color: "transparent"
+    //        radius:5
+    //        anchors.bottom: parent.bottom
+    //        anchors.horizontalCenter: list_view1.horizontalCenter
+    //        Text {
+    //            id: total_cells
+    //            text: dataModel.totalcells
+    //            color: "yellow"
+    //            font.pixelSize: scaleY(3)
+    //            anchors.left: progress_bar.right
+    //        }
 
-        Text {
-            id: current_cells
-            text: dataModel.currentCells
-            color: "green"
-            font.pixelSize: scaleY(3)
-            anchors.left: progress_bar_fill.right
-        }
+    //        Text {
+    //            id: current_cells
+    //            text: dataModel.currentCells
+    //            color: "green"
+    //            font.pixelSize: scaleY(3)
+    //            anchors.left: progress_bar_fill.right
+    //        }
 
-        Rectangle{
-            id:progress_bar_fill
-            height: parent.height
-            width: 0
-            color: androidSystem.orangeHighlight
-            anchors.bottom: parent.bottom
-            clip:true
-            radius:5
-        }
-    }
+    //        Rectangle{
+    //            id:progress_bar_fill
+    //            height: parent.height
+    //            width: 0
+    //            color: androidSystem.orangeHighlight
+    //            anchors.bottom: parent.bottom
+    //            clip:true
+    //            radius:5
+    //        }
+    //    }
 
     Connections
     {
@@ -142,11 +261,30 @@ Item {
 
         }
     }
+    Rectangle{
+        id:up_arrow
+        width: list_view1.width
+        height: childrenRect.height
+        anchors.bottom: list_view1.top
+        color: "black"
+        opacity:.85
+        anchors.left: list_view1.left
+        StyledText{
+            anchors.centerIn: parent
+            text:"up"
+            fontSize: 43
+            color:"white"
 
+        }
+        MouseArea{
+            anchors.fill: parent
+            onReleased:{ if(manager.media_currentPage !==0) manager.requestPage( manager.media_currentPage-1) }
+        }
+    }
 
     ListView {
         id: list_view1
-        width: scaleX(95)
+
         height:scaleY(85)
         model:dataModel
         delegate: contactDelegateList
@@ -156,7 +294,68 @@ Item {
         spacing:scaleY(1)
 
     }
+    Rectangle{
+        id:dwn_arrow
+        width: list_view1.width
+        height: childrenRect.height
+        anchors.top: list_view1.bottom
+        color: "black"
+        opacity:.85
+        anchors.left: list_view1.left
+        StyledText{
+            anchors.centerIn: parent
+            text:"Down"
+            fontSize: 43
+            color:"white"
+
+        }
+        MouseArea{
+            anchors.fill: parent
+            onPressed: manager.requestPage( manager.media_currentPage+1)
+        }
+    }
+
     ListView{
+        id:alpha_list
+        height: manager.appHeight
+        width: scaleX(10)
+        model: alphabetlist
+        anchors.left: list_view1.right
+        delegate: Item{
+            height: scaleY(10)
+            width: scaleX(10)
+
+            StyledText {
+                id:alpha_label
+                text: name
+                font.pixelSize: scaleY(2)
+                anchors.centerIn: parent
+                color: "white"
+                font.bold: true
+                fontSize: 42
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onPressed:  {
+                    fileviewscreen.state="browsing"
+                    currentSeekLetter = name
+                                        if(dataModel.totalPages==1){
+                                            list_view1.maingrid.positionViewAtIndex(dataModel.setSection(name), ListView.Beginning)
+                                        }else{
+                                             manager.setGridStatus(false)
+                                            manager.setSeekLetter(name)
+
+                                        }
+
+                }
+            }
+        }
+    }
+
+
+
+  /*  ListView{
         id:model_pages
         height: manager.appHeight
         width: scaleX(10)
@@ -173,7 +372,7 @@ Item {
             }
             Text {
                 id:page_label
-                text: index
+                text: name
                 font.pixelSize: scaleY(2)
                 anchors.centerIn: parent
                 color: "orange"
@@ -189,14 +388,86 @@ Item {
 
         }
 
-    }
+    }*/
+
+
     AttributeSelector {
         id:selector
-
     }
 
     GenericAttributeFilter{
         id:filterTarget
         anchors.centerIn: parent
     }
+
+    Item{
+        id:navInfo
+        width: parent.width
+        height: parent.height*.15
+        anchors.top:parent.top
+
+        Row{
+            height: parent.height
+            width: parent.width
+            spacing:scaleX(2)
+
+            StyledText{
+                id:pageSplit
+                text:"Items per Page: "+ manager.media_pageSeperator
+                color:"white"
+                fontSize:24
+            }
+
+            //            StyledText{
+            //                id:pageNo
+            //                text:"Current Page:"+ manager.media_currentPage
+            //                color:"white"
+            //                fontSize:24
+            //            }
+
+            StyledText{
+                id:itemCount
+                text:dataModel.currentCells + " of " + dataModel.totalcells
+                color:"white"
+                fontSize:24
+            }
+
+            StyledText{
+                id:letterSort
+                text:"Jump to :"+currentSeekLetter
+                color:"white"
+                fontSize:24
+                MouseArea{
+                    anchors.fill: parent
+                    onReleased: fileviewscreen.state="alphabets"
+                }
+            }
+        }
+    }
+
+    states: [
+        State {
+            name: "browsing"
+            PropertyChanges {
+                target: list_view1
+                width:  scaleX(95)
+            }
+
+            PropertyChanges {
+                target: alpha_list
+                width:scaleX(0)
+            }
+        },
+        State {
+            name: "alphabets"
+            PropertyChanges {
+                target: list_view1
+                width:scaleX(70)
+            }
+            PropertyChanges {
+                target: alpha_list
+                width:scaleX(15)
+            }
+        }
+    ]
 }
