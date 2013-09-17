@@ -1300,24 +1300,39 @@ void qorbiterManager::mountMediaDevices()
 
         }
 
+        if(mntDir.entryList(QDir::NoDotAndDotDot).count() == 0){
+            qDebug() << mntDir.entryList(QDir::NoDotAndDotDot).count();
+            QString mountProg = "gksudo";
+            QStringList args;
 
-        QString mountProg = "gksudo";
-        QStringList args;
-        args.append(QString("mount -t nfs "+m_ipAddress+":/mnt/device/"+QString::number(d) + " /mnt/remote/"+QString::number(d)) +" -o vers=3" );
-        QProcess *mountProcess = new QProcess(this);
-        mountProcess->start(mountProg, args);
-        mountProcess->waitForFinished(10000);
-        qDebug() << "Process Status ::" <<mountProcess->state();
-        if(mountProcess->state()== QProcess::FailedToStart){
-            qWarning() << "command failed to start!";
-            qDebug() << mountProcess->readAllStandardError();
-            qDebug() << mountProcess->errorString();
+            args.append(QString("mount -t nfs "+m_ipAddress+":/mnt/device/"+QString::number(d) + " /mnt/remote/"+QString::number(d)) +" -o vers=3" );
+            QProcess *mountProcess = new QProcess(this);
+            mountProcess->start(mountProg, args);
+            mountProcess->waitForFinished(10000);
+            qDebug() << "Process Status ::" <<mountProcess->state();
+            if(mountProcess->state()== QProcess::FailedToStart){
+                qWarning() << "command failed to start!";
+                qDebug() << mountProcess->readAllStandardError();
+                qDebug() << mountProcess->errorString();
+            }
+            qWarning() << "QProcess Exiting, state is :"<< mountProcess->state();
+            qWarning() << "Process exited with::"<< mountProcess->exitCode();
         }
-
-
-        qWarning() << "QProcess Exiting, state is :"<< mountProcess->state();
-        qWarning() << "Process exited with::"<< mountProcess->exitCode();
     }
+
+    QString dirCmd = "gksudo";
+    QDir mntDir;
+    mntDir.setPath("/mnt/remote/dvd");
+    qDebug() << mntDir.exists();
+    if(!mntDir.exists()){
+        QProcess *mkPath = new QProcess(this);
+        QStringList dArgs;
+        dArgs.append("mkdir -p /mnt/remote/dvd");
+        mkPath->start(dirCmd, dArgs);
+        mkPath->waitForFinished(10000);
+    }
+
+
 }
 
 void qorbiterManager::getMediaDevices()

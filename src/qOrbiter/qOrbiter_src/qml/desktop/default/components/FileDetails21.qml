@@ -40,12 +40,6 @@ Rectangle {
         }
     }
 
-
-//    Connections{
-//        target:filedetailsclass
-//        onImageChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
-//    }
-
     Rectangle{
         id:titlerect
         height: childrenRect.height + 5

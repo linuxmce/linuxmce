@@ -2586,6 +2586,7 @@ void qOrbiter::getGridView(bool direction)
 void qOrbiter::seekToGridPosition(QString s)
 {
     media_seek=s.toStdString();
+
     emit clearPageGrid();
 }
 

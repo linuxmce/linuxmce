@@ -163,7 +163,7 @@ bool ListModel::resetInternalData()
     if(m_list.empty()){
         qDebug() << "Cleaned list," << m_list.size() << "remain.";
     }
- QApplication::processEvents(QEventLoop::AllEvents);
+
     return true;
 }
 
@@ -368,16 +368,14 @@ void ListModel::clearAndRequest(int type)
 void ListModel::clearForPaging()
 {
     if(m_list.size() > 0){
-        QApplication::processEvents(QEventLoop::AllEvents);
-        emit modelAboutToBeReset();
-        beginResetModel();
-        if(resetInternalData()){
-            setProgress(0.0);
-            QApplication::processEvents(QEventLoop::AllEvents);
-            endResetModel();
-            emit modelReset();
 
-            QApplication::processEvents(QEventLoop::AllEvents);
+
+        if(resetInternalData()){
+            emit modelAboutToBeReset();
+            beginResetModel();
+            setProgress(0.0);           
+            endResetModel();
+            emit modelReset();         
         }
     }
     emit pagingCleared();
