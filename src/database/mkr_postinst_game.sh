@@ -2,8 +2,9 @@ echo
 . /usr/pluto/bin/Config_Ops.sh || :
 /usr/pluto/bin/Debug_LogKernelModules.sh "$0" || :
 PROCESS="upgrade"
-# Check if we have an existing install, by verifying the DeviceTemplate table exists
-mysql $MYSQL_DB_CRED lmce_game -e "Select 1"||PROCESS="install"
+# Check if we have an existing install, by verifying the RomTitles table exists. This also takes care
+# of installs where the old schema is used, because this table does not exist there.
+mysql $MYSQL_DB_CRED lmce_game -e "SELECT * from RomTitles LIMIT 1"||PROCESS="install"
 if [ $PROCESS = "install" ]; then
 	(
 		cd /usr/pluto/database
