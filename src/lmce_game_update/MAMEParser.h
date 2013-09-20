@@ -22,6 +22,7 @@ class MAMERom
   string m_sRomManufacturer;
   string m_sRomYear;
   string m_sRomStatus;
+  string m_sRomCloneOf;
 
  public:
   MAMERom(string sRomTitle,
@@ -29,7 +30,8 @@ class MAMERom
 	  string sRomSubtitle, 
 	  string sRomManufacturer, 
 	  string sRomYear, 
-	  string sRomStatus);
+	  string sRomStatus,
+	  string sRomCloneOf);
 
   virtual ~MAMERom();
 
@@ -39,6 +41,7 @@ class MAMERom
   string RomManufacturer_get() {return m_sRomManufacturer;}
   string RomYear_get() {return m_sRomYear;}
   string RomStatus_get() {return m_sRomStatus;}
+  string RomCloneOf_get() {return m_sRomCloneOf;}
 
 };
 
@@ -49,7 +52,7 @@ class MAMEParser : public xmlpp::SaxParser
   bool GetMAMEOutput(string &sMameOutput);
   string m_sMamePath;
   MAMERom *m_pMAMERom;
-  string m_sRomName, m_sDescription, m_sTitleHash, m_sRomTitle, m_sRomSubtitle, m_sRomManufacturer,m_sRomYear,m_sRomStatus;
+  string m_sRomName, m_sDescription, m_sTitleHash, m_sRomTitle, m_sRomSubtitle, m_sRomManufacturer,m_sRomYear,m_sRomStatus,m_sRomCloneOf;
 
   enum CurrentTag { GAME=0, DESCRIPTION, YEAR, MANUFACTURER, DRIVER };
   CurrentTag m_eCurrentTag;

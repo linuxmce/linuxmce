@@ -19,7 +19,8 @@ MAMERom::MAMERom(string sRomTitle,
 		 string sRomSubtitle,
 		 string sRomManufacturer,
 		 string sRomYear,
-		 string sRomStatus)
+		 string sRomStatus,
+		 string sRomCloneOf)
 {
   m_sRomTitle=sRomTitle;
   m_sTitleHash=sTitleHash;
@@ -27,6 +28,7 @@ MAMERom::MAMERom(string sRomTitle,
   m_sRomManufacturer=sRomManufacturer;
   m_sRomYear=sRomYear;
   m_sRomStatus=sRomStatus;
+  m_sRomCloneOf=sRomCloneOf;
 }
 
 MAMERom::~MAMERom()
@@ -55,6 +57,10 @@ void MAMEParser::on_start_element(const Glib::ustring& name,
 	  if (iter->name == "name")
 	    {
 	      m_sRomName = iter->value;
+	    }
+	  if (iter->name == "cloneof")
+	    {
+	      m_sRomCloneOf = iter->value;
 	    }
 	}
     }
@@ -102,9 +108,10 @@ void MAMEParser::on_end_element(const Glib::ustring& name)
 						m_sRomSubtitle,
 						m_sRomManufacturer,
 						m_sRomYear,
-						m_sRomStatus);
+						m_sRomStatus,
+						m_sRomCloneOf);
       m_sRomTitle=""; m_sDescription=""; m_sTitleHash=""; m_sRomSubtitle=""; m_sRomManufacturer=""; m_sRomYear="";
-      m_sRomStatus="";
+      m_sRomStatus=""; m_sRomCloneOf="";
     }
 }
 
@@ -142,6 +149,8 @@ void MAMEParser::ProcessDescription(string sDescription)
       string sTitleTmp=sDescription.substr(0,iSubtitleBegPos-1);
       string sSubtitleTmp=sDescription.substr(iSubtitleBegPos+1,
 					      (iSubtitleEndPos-1)-iSubtitleBegPos);
+      sSubtitleTmp=StringUtils::Replace(sSubtitleTmp,"(","");
+      sSubtitleTmp=StringUtils::Replace(sSubtitleTmp,")","");
       m_sRomTitle=StringUtils::TrimSpaces(sTitleTmp);
       m_sRomSubtitle=StringUtils::TrimSpaces(sSubtitleTmp);
     }

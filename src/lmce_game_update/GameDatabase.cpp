@@ -84,7 +84,7 @@ long int GameDatabase::AddRom(string sRomName)
 
 long int GameDatabase::GetPK_Rom(string sRomName)
 {
-  string sWhereQuery = "WHERE Romname = '"+sRomName+".zip'";
+  string sWhereQuery = "Romname = '"+StringUtils::SQLEscape(sRomName)+"'";
   vector<class Row_Rom *> vectRows;
   if (!m_pDatabase->Rom_get()->GetRows(sWhereQuery, &vectRows))
     {
@@ -129,7 +129,7 @@ bool GameDatabase::AddTitleHash(string sTitle, string sTitleHash)
 bool GameDatabase::GetTitleForHash(string sTitleHash, string &sTitle)
 {
   vector<class Row_RomTitles *> vectRowRomTitles;
-  string sWhereQuery = "WHERE TitleHash = '"+sTitleHash+"'";
+  string sWhereQuery = "TitleHash = '"+sTitleHash+"'";
   
   if (!m_pDatabase->RomTitles_get()->GetRows(sWhereQuery,&vectRowRomTitles))
     {
@@ -167,7 +167,7 @@ bool GameDatabase::UpdateRomAttribute(long int iPK_Rom, int iRomAttributeType, s
 
   string sRomFile = pRow_Rom->Romname_get();
 
-  m_pDatabase->RomAttribute_get()->GetRows("WHERE Name = '"+StringUtils::SQLEscape(sName)+"' AND FK_RomAttributeType = '"+StringUtils::itos(iRomAttributeType)+"'",&vectRow_RomAttributes);
+  m_pDatabase->RomAttribute_get()->GetRows("Name = '"+StringUtils::SQLEscape(sName)+"' AND FK_RomAttributeType = '"+StringUtils::itos(iRomAttributeType)+"'",&vectRow_RomAttributes);
 
   // If Attribute Row does not exist.
   if (vectRow_RomAttributes.size() == 0)

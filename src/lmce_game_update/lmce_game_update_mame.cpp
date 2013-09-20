@@ -121,7 +121,7 @@ bool LMCE_Game_Update_MAME::UpdateRom(MAMERom *pCurrentRom, string sRomFile, str
   long int iPK_Rom = m_pGameDatabase->GetPK_Rom(sRomFile);
   string sTitle;
 
-  if (iPK_Rom > 0)
+  if (iPK_Rom < 0)
     {
       LoggerWrapper::GetInstance()->Write(LV_WARNING,"LMCE_Game_Update_MAME::UpdateRom(%s) - Could not fetch PK_Rom entry for Rom File.",sRomFile.c_str());
       return false;
@@ -138,7 +138,28 @@ bool LMCE_Game_Update_MAME::UpdateRom(MAMERom *pCurrentRom, string sRomFile, str
     }
   m_pGameDatabase->UpdateRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_subtitle_CONST,pCurrentRom->RomSubtitle_get());
   m_pGameDatabase->UpdateRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_manufacturer_CONST,pCurrentRom->RomManufacturer_get());
-  m_pGameDatabase->UpdateRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_genre_CONST,m_pMAMECategory->m_mapRomToCategory_Find(sRomName));
+  
+  string sTmpCategory;
+  if (m_pMAMECategory->m_mapRomToCategory_Find(sRomName).empty())
+    {
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"No Genre found for Game %s, trying clone %s",sRomName.c_str(), pCurrentRom->RomCloneOf_get().c_str());
+      if (m_pMAMECategory->m_mapRomToCategory_Find(pCurrentRom->RomCloneOf_get()).empty())
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_WARNING,"No Genre found for Clone of Game %s, Setting to Unknown.",pCurrentRom->RomCloneOf_get().c_str());
+	  sTmpCategory="Unknown";
+	}
+      else
+	{
+	  sTmpCategory=m_pMAMECategory->m_mapRomToCategory_Find(pCurrentRom->RomCloneOf_get());
+	}
+    }
+  else
+    {
+      sTmpCategory=m_pMAMECategory->m_mapRomToCategory_Find(sRomName);
+    }
+
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Genre is %s",sTmpCategory.c_str());
+  m_pGameDatabase->UpdateRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_genre_CONST,sTmpCategory);
   m_pGameDatabase->UpdateRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_year_CONST,pCurrentRom->RomYear_get());
   return true;
 }
@@ -165,7 +186,27 @@ bool LMCE_Game_Update_MAME::AddRom(MAMERom *pCurrentRom, string sRomFile, string
 	}
       m_pGameDatabase->AddRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_subtitle_CONST,pCurrentRom->RomSubtitle_get());
       m_pGameDatabase->AddRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_manufacturer_CONST,pCurrentRom->RomManufacturer_get());
-      m_pGameDatabase->AddRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_genre_CONST,m_pMAMECategory->m_mapRomToCategory_Find(sRomName));
+
+      string sTmpCategory;
+      if (m_pMAMECategory->m_mapRomToCategory_Find(sRomName).empty())
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_WARNING,"No Genre found for Game %s, trying clone %s",sRomName.c_str(), pCurrentRom->RomCloneOf_get().c_str());
+	  if (m_pMAMECategory->m_mapRomToCategory_Find(pCurrentRom->RomCloneOf_get()).empty())
+	    {
+	      LoggerWrapper::GetInstance()->Write(LV_WARNING,"No Genre found for Clone of Game %s, Setting to Unknown.",pCurrentRom->RomCloneOf_get().c_str());
+	      sTmpCategory="Unknown";
+	    }
+	  else
+	    {
+	      sTmpCategory=m_pMAMECategory->m_mapRomToCategory_Find(pCurrentRom->RomCloneOf_get());
+	    }
+	}
+      else
+	{
+	  sTmpCategory=m_pMAMECategory->m_mapRomToCategory_Find(sRomName);
+	}
+
+      m_pGameDatabase->AddRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_genre_CONST,sTmpCategory);
       m_pGameDatabase->AddRomAttribute(iPK_Rom,ROMATTRIBUTETYPE_year_CONST,pCurrentRom->RomYear_get());
     }
   return true;
