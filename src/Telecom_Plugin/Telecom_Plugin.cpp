@@ -4758,12 +4758,24 @@ void Telecom_Plugin::CMD_Phone_to_Baby_Monitor(int iPK_Device,string sPhoneNumbe
 						//is this an embedded phone?
 						if(FindValueInMap(map_embedphone2orbiter, *it, 0))
 						{
-							// all of us will call 997
-							LoggerWrapper::GetInstance()->Write(LV_STATUS,"Doing a speak in house with %d", *it);
-							DCE::CMD_Phone_Initiate cmd(m_dwPK_Device, *it, 0, BABYMONITOR_CONFERENCE);
-							SendCommand(cmd);
-							DCE::CMD_Set_Volume cmd2(m_dwPK_Device, *it, "*");
-							SendCommand(cmd2);
+							if (m_bBabyMonitorActive)
+							{
+	                                      			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Deactivating Baby Monitor with phone ext %d",*it);
+        	                              			DCE::CMD_Phone_Drop cmd(m_dwPK_Device, *it);
+                	                      			SendCommand(cmd);
+                        	              			Sleep(10); // Prevent Asterisk from losing its mind from hanging up exts too fast.
+                                	      			DCE::CMD_Set_Volume volCmd(m_dwPK_Device, *it, "#");
+                                      				SendCommand(volCmd);
+							}
+							else
+							{
+								// all of us will call 997
+								LoggerWrapper::GetInstance()->Write(LV_STATUS,"Doing a speak in house with %d", *it);
+								DCE::CMD_Phone_Initiate cmd(m_dwPK_Device, *it, 0, BABYMONITOR_CONFERENCE);
+								SendCommand(cmd);
+								DCE::CMD_Set_Volume cmd2(m_dwPK_Device, *it, "*");
+								SendCommand(cmd2);
+							}
 						}
 					}
 					
@@ -4805,7 +4817,6 @@ void Telecom_Plugin::CMD_Phone_to_Baby_Monitor(int iPK_Device,string sPhoneNumbe
 			listDevices.push_front(dwDevice_Caller); 
 			for(list<int>::iterator it = listDevices.begin(); it != listDevices.end(); ++it)
 			{
-                                LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXX Device %d",*it);
 				//is this an embedded phone?
 				if(FindValueInMap(map_embedphone2orbiter, *it, 0))
 				{
