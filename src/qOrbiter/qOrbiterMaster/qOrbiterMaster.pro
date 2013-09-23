@@ -25,6 +25,7 @@ SUBDIRS += ../qOrbiter_src
 folder_05.source = ../qOrbiter_src/import
 folder_05.target = $$DESTDIR/import
 DEPLOYMENTFOLDERS += folder_05
+
 INSTALLS=$HOME
 # SUBDIRS = plugins/AudioVisual
 

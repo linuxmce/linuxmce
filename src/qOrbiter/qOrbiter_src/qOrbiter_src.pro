@@ -99,8 +99,13 @@ common-folder.target = $$DESTDIR/qml
 DEPLOYMENTFOLDERS+=common-folder
 
 linux-g++{
-CONFIG+=opengl
+
         contains(QT_VERSION,4.*.*){
+        TARGET = qorbiter-$$QT_VERSION-core-gl
+        DEFINES+=GLENABLED
+        glmsg= yes
+        QT+= opengl
+
 		QT += script
                 folder_01.source = qml/desktop
                 folder_01.target = $$DESTDIR/qml
