@@ -12,6 +12,8 @@
 #include <phonon>
 #include <QDeclarativeItem>
 #include <QKeyEvent>
+#include <QGLWidget>
+#include <QHBoxLayout>
 
 #endif
 
@@ -105,6 +107,7 @@ public:
     Phonon::AudioOutput *audioSink;
     Phonon::MediaObject *mediaObject;
     Phonon::MediaController * discController;
+    QGLWidget *accel;
 #else
     QAbstractAudioOutput *audioSink;
     QMediaObject *mediaObject;
@@ -310,7 +313,7 @@ private:
     void shutdownDevice();
     void mountDrive(int device);
 
-    QGraphicsScene *mp_parent;
+
 
 
 private slots:

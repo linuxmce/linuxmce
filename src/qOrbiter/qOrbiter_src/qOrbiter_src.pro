@@ -99,6 +99,7 @@ common-folder.target = $$DESTDIR/qml
 DEPLOYMENTFOLDERS+=common-folder
 
 linux-g++{
+CONFIG+=opengl
         contains(QT_VERSION,4.*.*){
 		QT += script
                 folder_01.source = qml/desktop

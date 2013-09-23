@@ -32,6 +32,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     audioSink = new Phonon::AudioOutput();
     discController = new Phonon::MediaController(mediaObject);
 
+
     Phonon::createPath(mediaObject, audioSink);
     setCurrentStatus("Audio Sink Initialized");
     Phonon::createPath(mediaObject, videoSurface);
@@ -39,6 +40,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
 
     videoSurface->setAspectRatio(Phonon::VideoWidget::AspectRatioAuto);
     videoSurface->setScaleMode(Phonon::VideoWidget::FitInView);
+
 
     if(initViews(true))
         setCurrentStatus("Color Filter Applied.");
@@ -48,8 +50,6 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     totalTime=0;
     setMediaBuffer(0);
     setMediaPlaying(false);
-
-
 }
 
 void MediaManager::initializePlayer()
@@ -79,7 +79,7 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaPlayer,SIGNAL(streamIdChanged(int)), this , SLOT(setStreamId(int)));
     QObject::connect(mediaPlayer, SIGNAL(mediaIdChanged(QString)), this, SLOT(setFileReference(QString)));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()));
-    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(showMaximized()));
+    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(showFullScreen()));
 
 
 
@@ -317,11 +317,10 @@ bool MediaManager::initViews(bool flipped)
     else{
         filterProxy = new QGraphicsProxyWidget(this);
     }
+
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
     filterProxy->hide();
-
-
     return true;
 
 }
