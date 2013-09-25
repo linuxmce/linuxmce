@@ -45,15 +45,14 @@ void DceScreenSaver::setImageList(QStringList l)
     if(!urlList.isEmpty()){
         emit urlListReady();
         pictureCount = l.count();
-        setInterval(interval);
+        getNextImage();
         setRunning(true);
         setReady(true);
         setActive(true);
-
         qWarning() << "Screen Saver images loaded.";
     }
     else {
-        qDebug() << "image list error.";
+
     }
 
 }
@@ -62,7 +61,6 @@ void DceScreenSaver::requestImage(QString img)
 {
     QNetworkRequest req;
     req.setUrl("http://"+requestUrl+"/lmce-admin/imdbImage.php?type=screensaver&val="+img);
-    qDebug() << req.url().toString();
     QObject::connect(requestManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processImageData(QNetworkReply*)));
     requestManager->get(req);
 
@@ -88,7 +86,7 @@ void DceScreenSaver::processImageData(QNetworkReply *r)
     else{
         currentImage = t;
     }
-    qDebug() << currentImage.size();
+
 
 }
 
@@ -105,9 +103,7 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    QBrush brush(QColor("#007430"));
-
-    p->setBrush(brush);
+    p->setBrush(Qt::NoBrush);
     p->setPen(Qt::NoPen);
     p->setRenderHint(QPainter::Antialiasing);
     p->drawRoundedRect(0, 0, boundingRect().width(), boundingRect().height() - 10, 10,10);
