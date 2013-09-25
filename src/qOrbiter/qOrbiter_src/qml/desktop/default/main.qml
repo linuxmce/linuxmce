@@ -25,7 +25,8 @@ Item {
     id: qmlroot
     width:manager.appWidth
     height:manager.appHeight
-
+    focus:true
+   Keys.onTabPressed: if(activeFocus)hideUI()
 
     property string locationinfo: "standby"
     property string screenfile
@@ -36,7 +37,10 @@ Item {
     signal changeScreen(string s)
     signal setupStart(int x, string y)
 
-    Component.onCompleted: {logger.userLogMsg = "Main.qml loaded in default skin"; manager.setBoundStatus(true);  dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)}
+    Component.onCompleted: {logger.userLogMsg = "Main.qml loaded in default skin";
+        manager.setBoundStatus(true);
+        dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+    }
 
     FontLoader{
         id:myFont
@@ -122,18 +126,17 @@ Item {
         console.log("Ui visibility check")
         if(dceplayer.mediaPlaying)
         {
-            if(dceplayer.focus){
-                dceplayer.focus = false
-                pageLoader.forceActiveFocus()
+            if(dceplayer.activeFocus){
+                 pageLoader.forceActiveFocus()
                 console.log("PageLoader item focus::"+pageLoader.focus)
             } else{
-                dceplayer.forceActiveFocus()
-                pageLoader.focus = false
+                dceplayer.forceActiveFocus()               
                 console.log("Dceplayer focus::"+dceplayer.focus)
             }
         }
         else{
             console.log("No local media playing.")
+            pageLoader.forceActiveFocus()
         }
     }
 
@@ -159,105 +162,31 @@ Item {
         }
     }
 
-    //    DebugPanel{
-    //        id:dcemessages
-    //        debugMessage: dcemessage
-    //        z:2
-    //        anchors.top: parent.top
-    //    }
-
-    //    DebugPanel{
-    //        id:mediaMessages
-    //        debugMessage: manager.mediaResponse
-    //        z:2
-    //        anchors.top: dcemessages.bottom
-    //    }
-
-    //    DebugPanel{
-    //        id:commandmessages
-    //        debugMessage: manager.commandResponse
-    //        z:2
-    //        anchors.top: mediaMessages.bottom
-    //    }
-
-    //    DebugPanel{
-    //        id:mediaplayerMessages
-    //        debugMessage: dceplayer.currentStatus
-    //        anchors.top: commandmessages.bottom
-    //        z:2
-    //        color: dceplayer.connected ? "green" : "red"
-    //    }
 
     Connections{
         target: manager
         onOrientationChanged: checkLayout()
     }
 
-    FocusScope{
-        id:mainScope
-        height: manager.appHeight
-        width: manager.appWidth
-        focus:true
-        Keys.onTabPressed: hideUI()
-
-
-        //        ScreenSaver
-        //        {   id:ss
-        //            height: manager.appHeight
-        //            width: manager.appWidth
-        //            anchors.centerIn: parent
-        //            Component.onCompleted: screensaver.setActive(true)
-        //            MouseArea{
-        //                anchors.fill: ss
-        //                acceptedButtons: Qt.LeftButton | Qt.RightButton
-        //                onClicked:  Qt.RightButton ? pageLoader.visible = !pageLoader.visible: ""
-        //            }
-        //        }
-
-        //        GlScreenSaver{
-        //            id:ss
-        //            height: parent.height
-        //            width: parent.width
-        //            onRequestNewImage: ss.newImageUrl = "http://"+manager.m_ipAddress+"/lmce-admin/MediaImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(ss.currentImage)
-        //          //  onNewImageUrlChanged:console.log("New Url::"+ss.newImageUrl)
-
-        //            Connections{
-        //                target:manager
-        //                onScreenSaverImagesReady:{ss.setActive(true); ss.setInterval(8000); console.log("Screen Saver is activated")}
-        //            }
-        //        }
-
         Image {
             id: appbackground
             source: manager.imagePath+"ui3/light_gray_texture-wallpaper-1920x1080.jpg"
             anchors.fill: parent
             opacity: 1
-
         }
 
+        //==========Visual Elements
         DataHeader {
             id: data_header
             z:6
         }
 
 
-
-        //        Rectangle{
-        //            id:alternate_background
-        //            anchors.fill: parent
-        //            gradient: Gradient{
-        //                GradientStop { position: 0.0; color: "darkslategrey" }
-        //                GradientStop { position: 0.33; color: "slategrey" }
-        //                GradientStop { position: 1.0; color: "black" }
-        //            }
-
-        //            focus:false
-        //        }
-
         MediaManager{
             id:dceplayer
             anchors.top: parent.top
             anchors.left:parent.left
+            focus:true
 
             onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
             z:dceplayer.mediaPlaying ==false ? -5 : 0
@@ -277,7 +206,84 @@ Item {
 
             onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
             onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
-            onMediaPlayingChanged: console.log("Media Playback status changed locally "+dceplayer.mediaBuffer)
+            onMediaPlayingChanged: {
+                console.log("Media Playback status changed locally "+dceplayer.mediaBuffer);
+                if(dceplayer.mediaPlaying){
+                    hideUI()
+                    forceActiveFocus()
+                }
+                else{
+                    hideUI()
+
+                }
+            }
+
+            Keys.onPressed: {
+
+                switch(event.key){
+                case Qt.Key_Back:
+                    manager.changedPlaylistPosition((mediaplaylist.currentIndex-++1));
+                    break;
+                case Qt.Key_Forward:
+                    manager.changedPlaylistPosition((mediaplaylist.currentIndex+1))
+                    break;
+                case 16777347: /* Keycode Track forward */
+                    manager.changedPlaylistPosition((mediaplaylist.currentIndex+1));
+                    break;
+                case 16777346: /* Keycode Track Backwards */
+                    manager.changedPlaylistPosition((mediaplaylist.currentIndex-1))
+                    break;
+                case Qt.Key_Plus: /*Plus sign */
+                    manager.adjustVolume(+1)
+                    break;
+                case Qt.Key_Tab:
+                    hideUI()
+                    break;
+
+                case Qt.Key_VolumeMute:
+                    manager.mute()
+                    break;
+
+                case Qt.Key_M:
+                    manager.mute()
+                    break;
+
+                case Qt.Key_Minus: /* Minus Sign */
+                    manager.adjustVolume(-1)
+                    break;
+                case Qt.Key_T:
+                    if(playlist.state==="showing")
+                        playlist.state="hidden"
+                    else
+                        playlist.state = "showing"
+                    break;
+                case Qt.Key_Delete:
+                       dceplayer.flipColors = !dceplayer.flipColors
+                    break;
+
+                case Qt.Key_S:
+                    manager.stopMedia()
+                    break;
+
+                case Qt.Key_Pause:
+                    manager.pauseMedia()
+                    break;
+                case Qt.Key_P:
+                    manager.pauseMedia()
+                    break;
+
+                case Qt.Key_PageUp:
+                    manager.changedPlaylistPosition(mediaplaylist.currentIndex-1)
+                    break;
+
+                case Qt.Key_PageDown:
+                    manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
+                    break;
+                default:
+                    console.log(event.key)
+                    break
+                }
+            }
         }
 
         Loader {
@@ -293,7 +299,7 @@ Item {
             }
             visible: !dceplayer.focus
             z:5
-
+            Keys.onTabPressed: hideUI()
         }
 
 
@@ -309,28 +315,8 @@ Item {
             z:5
             focus:false
         }
-    }
-
-    SequentialAnimation{
-        id:loadin
-
-        PropertyAnimation{
-            id:fadeout
-            target:pageLoader
-            properties: "opacity"; to: "0"; duration: 5000
-
-        }
-        PropertyAnimation{
-            id: fadein
-            target:pageLoader
-            properties: "opacity"; to: "1"; duration: 5000
-        }
-    }
-
-    //-----------------------------shader related---------------------------//
 
 
-    //floorplans
 
 
 }

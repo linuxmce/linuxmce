@@ -44,7 +44,7 @@ class MediaManager : public QDeclarativeItem
     Q_PROPERTY(int mediaBuffer READ getMediaBuffer WRITE setMediaBuffer NOTIFY mediaBufferChanged)
     Q_PROPERTY(qreal volume READ getVolume NOTIFY volumeChanged)
     Q_PROPERTY(bool muted READ getMuted WRITE setMuted NOTIFY mutedChanged)
-    Q_PROPERTY(bool flipColors READ getColorFlip() WRITE setColorFlip NOTIFY colorFlipChanged)
+    Q_PROPERTY(bool flipColors READ getColorFlip WRITE setColorFlip NOTIFY colorFlipChanged)
     Q_PROPERTY(QList <Phonon::AudioOutputDevice> outputs READ getAvailibleOutputs NOTIFY availibleAudioOutputsChanged())
 
     Q_PROPERTY(QString serverAddress READ getServerAddress WRITE setServerAddress NOTIFY serverAddressChanged)
@@ -87,7 +87,8 @@ public:
     QVBoxLayout *layout;
     qMediaPlayer *mediaPlayer;
 
-    QGraphicsProxyWidget *filterProxy;
+    ColorFilterProxyWidget *filterProxy;
+
     QList<QTcpSocket*> clientList;
     QProcess *mountProcess;
 
@@ -142,7 +143,7 @@ public slots:
 
     void setColorFlip(bool f){
         flipColors = f;
-        if(initViews(f) )
+        filterProxy->invert = f;
             emit colorFlipChanged();
     }
     bool getColorFlip() { return flipColors;}

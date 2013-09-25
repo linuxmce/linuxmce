@@ -20,6 +20,8 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     serverAddress = "";
     deviceNumber = -1;
     timeCodeServer = new QTcpServer();
+    flipColors = false;
+
     setCurrentStatus("Media Manager defaults set, initializing media engines");
 #ifdef QT4
 
@@ -303,19 +305,13 @@ void MediaManager::mountDrive(int device)
 
 bool MediaManager::initViews(bool flipped)
 {
+    filterProxy = new ColorFilterProxyWidget(this);
 
-
-    if(mediaObject->state() == Phonon::PlayingState){
-        tempTime = mediaObject->currentTime();
-        mediaObject->stop();
-        filterProxy = NULL;
-    }
-
-    if(flipped){
-        filterProxy = new ColorFilterProxyWidget(this);
+    if(flipColors){
+        filterProxy->invert = true;
     }
     else{
-        filterProxy = new QGraphicsProxyWidget(this);
+        filterProxy->invert = false;
     }
 
     filterProxy->setWidget(videoSurface);
