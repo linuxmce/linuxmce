@@ -72,7 +72,7 @@ public:
 
     QString buildType;
     QString qrcPath;
-   QString router;
+    QString router;
     QList<ExistingOrbiter*> orbiterList;
     QList<QObject*> userList;
     QList<QObject*> roomList;

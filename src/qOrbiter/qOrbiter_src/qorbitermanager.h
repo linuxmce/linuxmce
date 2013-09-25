@@ -202,6 +202,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY(QString routerPort READ getRouterPort WRITE setRouterPort NOTIFY routerPortChanged)
     Q_PROPERTY(int isPhone READ getFormFactor WRITE setFormFactor NOTIFY formFactorChanged)
     Q_PROPERTY(QString m_localAddress  READ getLocalAddress WRITE setLocalAddress NOTIFY localAddressChanged)
+    Q_PROPERTY(QStringList screensaverImages READ getScreensaverImages NOTIFY screenSaverImagesReady )
 
     /*!
      * \warning enablescreensavermode - currently unused, should be built anyways
@@ -1166,6 +1167,10 @@ public slots:
         }
         emit screenSaverImagesReady();
         ScreenSaver->setActive(true);
+    }
+
+    QStringList getScreensaverImages(){
+        return screensaverImages;
     }
 
 

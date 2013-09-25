@@ -1300,7 +1300,7 @@ void qorbiterManager::mountMediaDevices()
 
         }
 
-        if(mntDir.entryList(QDir::NoDotAndDotDot).count() == 0){
+        if(mntDir.entryList(QDir::NoDotAndDotDot).count() == 2){
             qDebug() << mntDir.entryList(QDir::NoDotAndDotDot).count();
             QString mountProg = "gksudo";
             QStringList args;

@@ -65,6 +65,11 @@ Item{
         anchors.right: parent.right
         anchors.rightMargin: 25
 
+        StyledText{
+            id:screensaverStatus
+            text:"Screen saver is "+glScreenSaver.running + " with " + glScreenSaver.pictureCount + " Pics"
+        }
+
         MediaListInfoBar{
             id:mediaInfo
             visible:false
