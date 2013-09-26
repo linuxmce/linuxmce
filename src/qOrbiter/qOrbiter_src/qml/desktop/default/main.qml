@@ -59,7 +59,7 @@ Item {
         id:glScreenSaver
         height: parent.height
         width: parent.width
-        interval:30000
+        interval:8000
         anchors.centerIn: parent
         requestUrl:manager.m_ipAddress
         Connections{

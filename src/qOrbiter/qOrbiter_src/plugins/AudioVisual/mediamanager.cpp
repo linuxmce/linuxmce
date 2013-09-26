@@ -31,6 +31,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
 
     mediaObject = new Phonon::MediaObject();
     videoSurface = new Phonon::VideoWidget();
+
     audioSink = new Phonon::AudioOutput();
     discController = new Phonon::MediaController(mediaObject);
 
@@ -42,6 +43,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
 
     videoSurface->setAspectRatio(Phonon::VideoWidget::AspectRatioAuto);
     videoSurface->setScaleMode(Phonon::VideoWidget::FitInView);
+
 
 
     if(initViews(true))
@@ -83,8 +85,6 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(showFullScreen()));
 
-
-
     QObject::connect(mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(setState(Phonon::State,Phonon::State)));
 
     QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
@@ -99,8 +99,6 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaObject, SIGNAL(aboutToFinish()), this, SIGNAL(mediaAboutToFinish()));
     QObject::connect(mediaObject, SIGNAL(prefinishMarkReached(qint32)), this ,SLOT(setPrefinishMarkHit(qint32)));
     QObject::connect(mediaObject,SIGNAL(metaDataChanged()), this, SLOT(updateMetaData()));
-
-
 
     /*internals*/
     QObject::connect(audioSink, SIGNAL(volumeChanged(qreal)), this, SLOT(setVolume(qreal)));
@@ -182,12 +180,12 @@ void MediaManager::setAspectRatio(QString aspect)
 
 }
 
-void MediaManager::getScreenShot()
+QImage MediaManager::getScreenShot()
 {
-
-    QImage screenShot =  videoSurface->snapshot();
-
-
+    QImage screenShot(videoSurface->height(), videoSurface->width(), QImage::Format_ARGB32_Premultiplied );
+    screenShot.fill(Qt::black);
+    videoSurface->window()->render(&screenShot);
+    return screenShot;
 }
 
 
@@ -214,7 +212,7 @@ void MediaManager::setMediaUrl(QString url)
 
         mediaObject->setCurrentSource(Phonon::MediaSource(Phonon::Dvd, "/mnt/remote/dvd/VIDEO_TS"));
     }else{
-          mediaObject->setCurrentSource(Phonon::MediaSource(url));
+        mediaObject->setCurrentSource(Phonon::MediaSource(url));
     }
 
 

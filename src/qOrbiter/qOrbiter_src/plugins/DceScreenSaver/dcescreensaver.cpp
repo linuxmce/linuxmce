@@ -105,7 +105,8 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
 
     p->setBrush(Qt::NoBrush);
     p->setPen(Qt::NoPen);
-    p->setRenderHint(QPainter::Antialiasing);
+    p->setRenderHint(QPainter::SmoothPixmapTransform, 1);
+    p->setRenderHint(QPainter::Antialiasing, 1);
     p->drawRoundedRect(0, 0, boundingRect().width(), boundingRect().height() - 10, 10,10);
     p->drawImage(boundingRect(), currentImage );
 

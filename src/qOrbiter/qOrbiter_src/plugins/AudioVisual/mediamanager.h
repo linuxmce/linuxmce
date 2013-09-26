@@ -271,7 +271,7 @@ public slots:
     }
     void setZoomLevel(QString zoom);
     void setAspectRatio(QString aspect);
-    void getScreenShot();
+    QImage getScreenShot();
 
     void setVideoSize(int h, int w) {
 #ifdef QT4
