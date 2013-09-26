@@ -34,12 +34,6 @@ Rectangle {
         }
     }
 
-
-    Connections{
-        target:filedetailsclass
-        onImageChanged:filedetailsimage.source = "image://listprovider/filedetailsprovider/"+securityvideo.timestamp
-    }
-
     Rectangle{
         id:titlerect
         height: childrenRect.height + 5
@@ -89,7 +83,7 @@ Rectangle {
             id: filedetailsimage
             width: filedetailsclass.aspect=="wide"? scaleX(42.5) : scaleX(23)
             height:filedetailsclass.aspect=="wide"?scaleY(42.5) : scaleY(55)
-            source: "../img/icons/mediatime.png"
+            source: "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?img="+filedetailsclass.screenshot
             smooth: true
         }
 

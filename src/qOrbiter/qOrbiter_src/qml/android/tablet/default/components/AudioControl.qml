@@ -1,10 +1,10 @@
 import QtQuick 1.1
 
-Rectangle {
+Item {
     id:audioControl
     width: 75
     height: 75
-    color:"transparent"
+
     state:"inactive"
 
     Timer{
@@ -39,7 +39,7 @@ Rectangle {
 
     Rectangle{
         id:dragbar
-        height: 10
+        height: 15
         width: 0
         color: "green"
         opacity: 0
@@ -65,7 +65,7 @@ Rectangle {
             name: "active"
             PropertyChanges {
                 target: audioControl
-                width:400
+                width:scaleX(20)
             }
             PropertyChanges {
                 target: inactivity_timer
@@ -74,7 +74,7 @@ Rectangle {
             PropertyChanges {
                 target: dragbar
                 opacity:1
-                width:150
+                width:scaleX(18)
             }
         }
     ]

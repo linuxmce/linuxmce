@@ -1,53 +1,40 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
-Rectangle {
+Item {
     id:mediaPlaybackBase
     width: manager.appWidth
     height: manager.appHeight
-    color: "transparent"
+    state:"metadata"
     Component.onCompleted: manager.setBoundStatus(true)
     property alias metadataComponent:mediaTypeMetaData.sourceComponent
     property alias scrollBarComponent:mediaScrollerTarget.sourceComponent
     property alias controlComponent: controlsLoader.sourceComponent
-    property alias playlistSource:playlist.model
-    property alias playlistDelegate:playlist.delegate
-    Rectangle{
+
+    property alias playlistDelegate:playlist.customDelegate
+
+    Item{
         id:metadataSection
         width: manager.appWidth
         height: scaleY(30)
-        color: "transparent"
+
         anchors.verticalCenter: parent.verticalCenter
 
         Rectangle{
             id:opacityMask
             anchors.fill: parent
-            color: "darkgrey"
-            opacity: .50
+            color: "maroon"
+            opacity: .75
         }
 
-        PlaylistTemplateCoverFlow{
-            id:playlist          
-            anchors.centerIn: parent
-        }
-
-        StyledText {
-            id: updating_time
-            text: dceTimecode.qsCurrentTime
-            fontSize:32
-            anchors.left: parent.left
-             anchors.bottom: metadataSection.bottom
-        }
-
-        NowPlayingImage{
-            id:npImage
-            anchors.centerIn: metadataSection
-            anchors.horizontalCenterOffset: scaleX(-3)
-        }
+        //        PlaylistTemplateCoverFlow{
+        //            id:playlist
+        //            anchors.centerIn: parent
+        //        }
 
         Image{
             id:contextImage
             anchors.fill: parent
-            source: "http"
+            source: ""
         }
 
         Loader{
@@ -57,20 +44,44 @@ Rectangle {
         }
 
         StyledText {
+            id: updating_time
+            text: dceTimecode.qsCurrentTime
+            fontSize:32
+            anchors.right: parent.right
+            anchors.top: parent.top
+            color: "white"
+        }
+
+        StyledText {
             id: totalTime
             text: dceTimecode.qsTotalTime
             fontSize:32
             anchors.right: parent.right
 
             anchors.bottom: metadataSection.bottom
+            color:"white"
         }
+    }
 
+    NowPlayingImage{
+        id:npImage
+        anchors.verticalCenter: parent.verticalCenter
+        MouseArea{
+            anchors.fill: parent
+            drag.target: npImage
 
+        }
+    }
+
+    NonEPGPlaylist{
+        id:playlist
+        anchors.top: parent.top
     }
 
     Loader{
         id:mediaScrollerTarget
-        anchors.top: metadataSection.bottom
+        anchors.bottom: bottomControls.top
+        anchors.bottomMargin: scaleX(5)
         anchors.horizontalCenter: parent.horizontalCenter
     }
 
@@ -78,11 +89,12 @@ Rectangle {
     Rectangle{
         id:bottomControls
         width: manager.appWidth
-        height: controlsLoader.height
+        height: 50
+        anchors.bottomMargin: 20
         color: "transparent"
-        anchors.bottom: parent.bottom
+        anchors.bottom: mediaPlaybackBase.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-          Loader{
+        Loader{
             id:controlsLoader
             sourceComponent:VideoControls{}
             anchors.centerIn: parent
@@ -100,4 +112,39 @@ Rectangle {
             id:audio_controls
         }
     }
+
+    states: [
+        State {
+            name: "metadata"
+            PropertyChanges {
+                target: metadataSection
+                visible:true
+            }
+            AnchorChanges{
+                target:npImage
+                anchors.right: undefined
+                anchors.left: playlist.right
+            }
+
+            AnchorChanges{
+                target:playlist
+                anchors.left: mediaPlaybackBase.left
+            }
+        },
+        State {
+            name: "playlistview"
+            PropertyChanges {
+                target: playlist
+                width:scaleX(50)
+            }
+        },
+        State {
+            name: "imgDrag"
+            AnchorChanges {
+                target: npImage
+                anchors.left: undefined
+                anchors.right: undefined
+            }
+        }
+    ]
 }

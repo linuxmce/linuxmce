@@ -1,37 +1,66 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
 
-Rectangle {
+Item {
     id:scroller
     width: scaleX(44)
     height: scaleY(3)
-    color: "transparent"
 
-    property int slidertimer: (scroll_tab.x / scroller_transit.width) * dceTimecode.tcTotalTime
+
+    property int slidertimer: (scroll_tab.x / (scroller_transit.width - scroll_tab.width/2)) * dceTimecode.tcTotalTime
 
 
 
     Rectangle{
         id:drag_indicator
-        height: scaleY(6)
-        width: scaleY(12)
+        height: scaleY(5)
+        width: scaleX(12)
+        color:"maroon"
+        radius:5
+        border.color: "white"
+        border.width: 1
         opacity: 0
-        Text {
+        StyledText {
             id: drag_label
             text: dceTimecode.dragTime
             anchors.centerIn: parent
+            color:"white"
         }
         anchors.bottom: scroll_tab.top
         anchors.topMargin: scaleY(1)
     }
 
-    Image {
+    Item {
         id: scroller_transit
-        source: "../img/icons/blue.png"
+
         width: scaleX(44)
         height: scaleY(3)
         anchors.centerIn: parent
 
+        Rectangle{
+            anchors.fill: parent
+            color:"maroon"
+            opacity:.25
+            border.color: "white"
+            border.width: 1
+            radius:5
+        }
+    }
+
+    Item {
+        id: scroller_transit_fill
+
+        width: scroller_transit.x +scroll_tab.x+scroll_tab.width/2
+        height: scaleY(3)
+        anchors.verticalCenter: scroller_transit.verticalCenter
+        anchors.left: scroller_transit.left
+
+        Rectangle{
+            anchors.fill: parent
+            color:"blue"
+            opacity:.25
+            radius:5
+        }
     }
     Image {
         id: scroll_tab
@@ -49,12 +78,18 @@ Rectangle {
             drag.axis: Drag.XAxis
             drag.minimumX: 0
             drag.maximumX:  scroller.width
+            onPressed: {
+                drag_indicator.opacity = 1
+            }
+
             onPositionChanged: if(drag.active)
-                               { drag_indicator.opacity = .75
-                                   dceTimecode.showDragTime(slidertimer)  }
+                               { drag_indicator.opacity = 1
+                                   dceTimecode.showDragTime(slidertimer)
+                               }
                                else
-                               {drag_indicator.opacity = 0
-                                   }
+                               {
+                                   drag_indicator.opacity = 0
+                               }
             onReleased: {
                 drag_indicator.opacity =0
                 dceTimecode.finishDragging()

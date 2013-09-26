@@ -20,8 +20,8 @@ Rectangle{
     }
     Image {
         id: nowplayingimage
-        width: dcenowplaying.aspect=="wide"? scaleX(40) : scaleX(18)
-        height:dcenowplaying.aspect=="wide"? scaleY(55) : scaleY(45)
+        width: dcenowplaying.aspect=="wide"? scaleX(40) : scaleX(40)
+        height:dcenowplaying.aspect=="wide"? scaleY(55) : scaleY(50)
         source:nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
         anchors.horizontalCenter: parent.horizontalCenter
         smooth: true

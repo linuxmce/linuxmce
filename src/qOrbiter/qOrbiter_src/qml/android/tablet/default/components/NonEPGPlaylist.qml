@@ -1,27 +1,36 @@
 import QtQuick 1.0
 import "../../../../skins-common/lib/handlers"
 
-Rectangle {
+Item {
     id:nonepgplaylist
     width: scaleX(25)
-    height: scaleY(55)
-    color: "transparent"
-    clip:false
+    height: scaleY(75)
     property bool optionVisible: false
+    property Component customDelegate:nonepgplaylistview.delegate
+
+    Rectangle{
+        id:phil
+        anchors.fill: parent
+        color:"blue"
+        opacity: .15
+        border.width: 2
+        border.color: "white"
+    }
     Connections{
         target: mediaplaylist
         onActiveItemChanged: indexUpdate.start()
-}
-        Timer{
-            id:indexUpdate
-            interval: mediaplaylist.count()*10
-            running: false
-            onTriggered: {
-                console.log("interval is" + interval)
-                nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
-                console.log("Current index is " + mediaplaylist.currentIndex)
-            }
+    }
+
+    Timer{
+        id:indexUpdate
+        interval: mediaplaylist.count()*100
+        running: false
+        onTriggered: {
+            console.log("interval is" + interval)
+            nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
+            console.log("Current index is " + mediaplaylist.currentIndex)
         }
+    }
 
 
 
@@ -39,14 +48,13 @@ Rectangle {
 */
     ListView{
         id:nonepgplaylistview
-        width: scaleX(25)
-        height: scaleY(55)
+        width: parent.width
+        height: parent.height
         anchors.centerIn: parent
         clip: true
         interactive: true
         flickableDirection: "VerticalFlick"
         model: mediaplaylist
-
         delegate:
             Item {
             width:scaleX(25)
@@ -117,7 +125,7 @@ Rectangle {
                     height: scaleX(1)
                     width:scaleX(1)
                     color:"yellow"
-                  PlaylistRemoveItemHandler{}
+                    PlaylistRemoveItemHandler{}
                 }
 
                 Rectangle{

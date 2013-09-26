@@ -6,7 +6,7 @@ MediaPlaybackBase{
     metadataComponent: ProgramData{id:textRect}
     scrollBarComponent: MediaScrollBar{}
     controlComponent: VideoControls{}
-    playlistSource:mediaplaylist
+
     playlistDelegate: Rectangle{
         height: scaleY(35)
         width: scaleX(25)
@@ -21,8 +21,7 @@ MediaPlaybackBase{
         }
         Text {
             id: position
-            text: qsTr("Item #") + index
-            font.family: "DroidSans"
+            text: qsTr("Item #") + index           
             color: "aliceblue"
             font.pixelSize: scaleY(2.25)
             font.bold: true

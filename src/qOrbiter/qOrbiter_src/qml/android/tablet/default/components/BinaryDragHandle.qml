@@ -3,9 +3,9 @@ import QtQuick 1.1
 
 Rectangle{
     id:dragHandle
-    height: 60
-    width: 30
-    radius: 30
+    height: 75
+    width: 75
+    radius: 75
     color:"grey"
     smooth:true
     anchors.verticalCenter: dragbar.verticalCenter

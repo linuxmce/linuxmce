@@ -90,3 +90,5 @@ GenericAttributeSelector GenericAttributeSelector.qml
 MediaPositionHeader MediaPositionHeader.qml
 TabletFloorplanLayout TabletFloorplanLayout.qml
 SendCommandBox SendCommandBox.qml
+StyledButton StyledButton.qml
+DefaultPlaylistDelegate DefaultPlaylistDelegate.qml
