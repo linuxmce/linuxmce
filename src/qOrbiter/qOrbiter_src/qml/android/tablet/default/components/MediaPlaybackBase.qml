@@ -10,7 +10,7 @@ Item {
     property alias scrollBarComponent:mediaScrollerTarget.sourceComponent
     property alias controlComponent: controlsLoader.sourceComponent
 
-    property alias playlistDelegate:playlist.customDelegate
+    property alias delegateForPlaylist:playlist.playlistDelegate
 
     Item{
         id:metadataSection
@@ -35,6 +35,7 @@ Item {
             id:contextImage
             anchors.fill: parent
             source: ""
+
         }
 
         Loader{
@@ -69,7 +70,11 @@ Item {
         MouseArea{
             anchors.fill: parent
             drag.target: npImage
-
+            drag.axis: Drag.XAxis
+            drag.maximumX: scaleX(85)
+            drag.minimumX: 0
+            onPressed: mediaPlaybackBase.state = "imgDrag"
+            onReleased: mediaPlaybackBase.state = "metadata"
         }
     }
 

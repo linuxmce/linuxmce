@@ -18,7 +18,7 @@ Item {
 
     clip: true
 
-    property int bgImageProp:manager.q_subType ==="1" ? 43 : manager.q_attributetype_sort===53 ? 43 :36
+    property int bgImageProp:manager.q_subType ==="1" ? 43 : manager.q_attributetype_sort===53 ? 43 : manager.q_subType === "13" ? 13: 36
 
     Behavior on height{
         PropertyAnimation{
@@ -34,9 +34,17 @@ Item {
     Image{
         id:imdb
         anchors.fill: parent
-        source:"http://"+m_ipAddress+"/lmce-admin/MediaImage.php?type=imdb&file="+filedetailsclass.file+"&val="+bgImageProp
+        source:"http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=atr&file="+filedetailsclass.file+"&val="+bgImageProp
         onStatusChanged: imdb.status == Image.Ready ? filedetailrect.height = scaleY(100) : ""
     }
+            Image {
+                id: filedetailsimage
+                property bool profile : filedetailsimage.sourceSize.height > filedetailsimage.sourceSize.width ? true : false
+             anchors.fill: parent
+                source:filedetailsclass.screenshot !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot : ""
+                smooth: true
+                visible:imdb.status===Image.Error ? true : false
+            }
 
     //    Connections{
     //        target:filedetailsclass

@@ -3,11 +3,11 @@ import "../components"
 import "../js/ComponentLoader.js" as MyJs
 
 
-Rectangle{
+Item{
     id:imageholder
     height:nowplayingimage.height
     width:nowplayingimage.width
-    color: "transparent"   
+
     
     BorderImage {
         id: borderimg

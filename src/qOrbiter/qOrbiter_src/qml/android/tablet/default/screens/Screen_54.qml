@@ -5,6 +5,6 @@ import "../components"
 MediaPlaybackBase{
     id:storedAudioRemote
     anchors.fill: parent
-    playlistDelegate: DefaultPlaylistDelegate{}
+
     scrollBarComponent: MediaScrollBar{}
 }

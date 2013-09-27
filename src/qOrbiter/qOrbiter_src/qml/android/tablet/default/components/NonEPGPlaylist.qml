@@ -6,7 +6,7 @@ Item {
     width: scaleX(25)
     height: scaleY(75)
     property bool optionVisible: false
-    property Component customDelegate:nonepgplaylistview.delegate
+    property alias playlistDelegate:nonepgplaylistview.delegate
 
     Rectangle{
         id:phil
@@ -55,94 +55,12 @@ Item {
         interactive: true
         flickableDirection: "VerticalFlick"
         model: mediaplaylist
-        delegate:
-            Item {
-            width:scaleX(25)
-            height: scaleY(12)
-            clip: true
-            Image {
-                id: playlistimage
-                fillMode: Image.PreserveAspectCrop
-                source:  index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: ""
-                anchors.fill: parent
-                opacity: .5
+        onContentYChanged:console.log(contentY)
+        delegate:DefaultPlaylistDelegate{
+            moving:nonepgplaylistview.movingVertically
 
-            }
-            StyledText {
-                id: position
-                text: qsTr("Item #") + index
-                font.family: "DroidSans"
-                color: "aliceblue"
-                font.pixelSize: scaleY(2.25)
-                font.bold: true
-                anchors.bottom: parent.bottom
-                opacity: .75
-            }
-
-            StyledText {
-                text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
-                font.family: "DroidSans"
-                color: "aliceblue"
-                width: parent.width
-                wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                font.pixelSize: scaleY(2.15)
-                //font.bold: true
-
-            }
-
-            Image {
-                id: overlay
-                fillMode: Image.PreserveAspectCrop
-                source: "../img/icons/header.png"
-                anchors.fill: parent
-                opacity:index === dcenowplaying.m_iplaylistPosition ? .25 :  .15
-            }
-
-            PlaylistClickedHandler{}
-
-
-            Column{
-                id:options
-                visible: optionVisible
-                height: scaleY(12)
-                anchors.right: parent.right
-                spacing: scaleY(2)
-
-                Rectangle{
-                    id:move_up
-                    height: scaleX(1)
-                    width: scaleX(1)
-                    color:"green"
-                    Text {
-                        id: up
-                        text: qsTr("Up")
-                    }
-                    PlaylistMoveHandler{direction: "-"}
-                }
-
-                Rectangle{
-                    id:remove_box
-                    height: scaleX(1)
-                    width:scaleX(1)
-                    color:"yellow"
-                    PlaylistRemoveItemHandler{}
-                }
-
-                Rectangle{
-                    id:move_dwn
-                    height: scaleX(1)
-                    width: scaleX(1)
-                    color:"blue"
-                    Text {
-                        id: down
-                        text: qsTr("down")
-                    }
-                    PlaylistMoveHandler{
-                        direction:"+"
-                    }
-                }
-            }
         }
+
     }
 
     Rectangle{
