@@ -57,8 +57,7 @@ Item {
 
     DceScreenSaver{
         id:glScreenSaver
-        height: parent.height
-        width: parent.width
+        anchors.fill: parent
         interval:8000
         anchors.centerIn: parent
         requestUrl:manager.m_ipAddress
