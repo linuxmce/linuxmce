@@ -1173,7 +1173,6 @@ public slots:
         return screensaverImages;
     }
 
-
     QString getNextScreenSaverImage(QString current){
 
         if(screensaverImages.isEmpty()){

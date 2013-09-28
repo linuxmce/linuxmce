@@ -3,9 +3,7 @@
 
 #include <QDeclarativeItem>
 #include <QTimer>
-#include <QtOpenGL>
 #include <QtNetwork/QNetworkAccessManager>
-
 #include <QPixmap>
 #include <QPropertyAnimation>
 
@@ -91,7 +89,11 @@ public slots:
 
     void setReady(bool r){ready = r; readyChanged();}
     bool getReady() {return ready;}
-
+    void forceUpdate(){
+       currentImage.scaled(width(), height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        update(0,0,width(), height());
+        qWarning() << "Update forced";
+    }
     Q_INVOKABLE  void setImageList(QStringList l);
 private:
     void requestImage(QString img);
@@ -101,15 +103,18 @@ private:
     int scaleFactor();
     QString currentUrl;
 
+private slots:
+
 
 protected:
 
     void startFadeTimer(int time);
     void stopFadeTimer();
 
-    void paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget);
 
+    void paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget);
     void timerEvent(QTimerEvent *event);
+
 };
 
 QML_DECLARE_TYPE(DceScreenSaver)

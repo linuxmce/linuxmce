@@ -210,7 +210,7 @@ void MediaManager::setMediaUrl(QString url)
             qDebug() << mountProcess->errorString();
         }
 
-        mediaObject->setCurrentSource(Phonon::MediaSource(Phonon::Dvd, "/mnt/remote/dvd/VIDEO_TS"));
+        mediaObject->setCurrentSource(Phonon::MediaSource(Phonon::Dvd, "/mnt/remote/dvd/"));
     }else{
         mediaObject->setCurrentSource(Phonon::MediaSource(url));
     }

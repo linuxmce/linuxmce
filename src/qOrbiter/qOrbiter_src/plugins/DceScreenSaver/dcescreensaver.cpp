@@ -1,15 +1,14 @@
 #include "dcescreensaver.h"
-#include <QtOpenGL>
 #include <qdeclarative.h>
 #include <qtimer.h>
 #include <QDebug>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
-#include <QImage>
 #include <QPainter>
-#include <QTime>
+#include <QTimerEvent>
 
-const int animationInterval = 15; // should be 60fps
+
+const int animationInterval = 30; // should be 60fps
 
 DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     QDeclarativeItem(parent)
@@ -19,7 +18,7 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     // following line:
     m_animationTimer = startTimer(animationInterval);
 
-    opacity = 100;
+    fadeOpacity = 1;
     setFlag(ItemHasNoContents, false);
     currentUrl = "";
     active = false;
@@ -38,6 +37,8 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     fadeAnimation->setStartValue(0.0);
     fadeAnimation->setEndValue(1.0);
     surface.fill(Qt::black);
+    QObject::connect(this, SIGNAL(heightChanged()), this, SLOT(forceUpdate()));
+    QObject::connect(this, SIGNAL(widthChanged()), this, SLOT(forceUpdate()));
 
 }
 
@@ -69,6 +70,7 @@ void DceScreenSaver::setImageList(QStringList l)
 
 void DceScreenSaver::requestImage(QString img)
 {
+
     QNetworkRequest req;
     req.setUrl("http://"+requestUrl+"/lmce-admin/imdbImage.php?type=screensaver&val="+img);
     QObject::connect(requestManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processImageData(QNetworkReply*)));
@@ -95,14 +97,24 @@ void DceScreenSaver::processImageData(QNetworkReply *r)
     }
     else{
         surface =currentImage;
-        currentImage= t.scaled(boundingRect().width(), boundingRect().height());
+        currentImage= t.scaled(width(),height());
     }
-    startFadeTimer(2500);
+
+
+  startFadeTimer(2500);
 }
 
 void DceScreenSaver::getNextImage()
 {
+    if(urlList.isEmpty()){
+        return;
+    }
+    qWarning("Foo!");
+#ifdef ANDROID
     requestImage(urlList.at(rand()%urlList.count()));
+#else
+     requestImage(urlList.at(rand()%urlList.count()));
+#endif
 }
 
 
@@ -110,22 +122,24 @@ void DceScreenSaver::getNextImage()
 
 void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
-
+    qWarning("Bar!!!!!!");
     Q_UNUSED(option); //mark unused options
     Q_UNUSED(widget);
     p->setBrush(Qt::NoBrush);
     p->setPen(Qt::NoPen);
+#ifdef ANDROID
     p->setRenderHint(QPainter::HighQualityAntialiasing, 1);
+#endif
 
     //draw old frame first
-    p->drawPixmap(boundingRect(), surface, boundingRect());
+    QRectF tgtRect(0,0,width(), height());
+    p->drawPixmap(tgtRect, surface, tgtRect);
 
     //setup and new pix map over it
     p->setOpacity(fadeOpacity);
 
     //create 'composed image'
-    p->drawPixmap(boundingRect(), currentImage, boundingRect());
-
+    p->drawPixmap(tgtRect, currentImage, tgtRect);
 }
 
 
@@ -135,12 +149,8 @@ void DceScreenSaver::timerEvent(QTimerEvent *event)
     if(event->timerId()==m_animationTimer){
         if(fadeOpacity!=1 && !currentImage.isNull() ){
             this->update();
-
         }
-
     }
-
-
 }
 
 
