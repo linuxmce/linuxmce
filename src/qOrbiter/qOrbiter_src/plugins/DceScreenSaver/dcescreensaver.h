@@ -7,6 +7,7 @@
 #include <QtNetwork/QNetworkAccessManager>
 
 #include <QPixmap>
+#include <QPropertyAnimation>
 
 class DceScreenSaver : public QDeclarativeItem
 {
@@ -18,6 +19,7 @@ class DceScreenSaver : public QDeclarativeItem
     Q_PROPERTY(bool ready READ getReady NOTIFY readyChanged)
     Q_PROPERTY(int interval READ getInterval WRITE setInterval NOTIFY intervalChanged)
     Q_PROPERTY(int pictureCount READ getPictureCount NOTIFY pictureCountChanged)
+    Q_PROPERTY(double fadeOpacity READ getFadeOpacity WRITE setFadeOpacity NOTIFY fadeOpacityChanged)
 
 public:
     DceScreenSaver(QDeclarativeItem *parent = 0);
@@ -29,13 +31,15 @@ public:
     bool running;
     bool ready;
     int interval;
+    double fadeOpacity;
+
     QString requestUrl;
     int pictureCount;
     QStringList urlList;
 
-    QImage currentImage;
+    QPixmap currentImage;
     QPixmap surface;
-
+    QPropertyAnimation *fadeAnimation;
     int m_animationTimer;
     int tick;
 
@@ -51,10 +55,16 @@ signals:
     void readyChanged();
     void pictureCountChanged();
     void urlListReady();
+    void fadeOpacityChanged();
+
 
 public slots:
-void getNextImage();
-void processImageData(QNetworkReply*r);
+
+    void setFadeOpacity(double d){ fadeOpacity = d; emit fadeOpacityChanged();}
+    double getFadeOpacity(){return fadeOpacity;}
+
+    void getNextImage();
+    void processImageData(QNetworkReply*r);
 
     void setPictureCount(int p){ pictureCount = p; emit pictureCountChanged();}
     int getPictureCount () {return pictureCount;}
@@ -69,7 +79,7 @@ void processImageData(QNetworkReply*r);
                                setRunning(true);
                                intervalTimer->start(interval);
                            }
-                           emit activeChanged();
+                                              emit activeChanged();
                           }
     bool getActive(){return active;}
 
@@ -82,7 +92,7 @@ void processImageData(QNetworkReply*r);
     void setReady(bool r){ready = r; readyChanged();}
     bool getReady() {return ready;}
 
-  Q_INVOKABLE  void setImageList(QStringList l);
+    Q_INVOKABLE  void setImageList(QStringList l);
 private:
     void requestImage(QString img);
     QNetworkAccessManager *requestManager;
@@ -93,6 +103,9 @@ private:
 
 
 protected:
+
+    void startFadeTimer(int time);
+    void stopFadeTimer();
 
     void paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget);
 

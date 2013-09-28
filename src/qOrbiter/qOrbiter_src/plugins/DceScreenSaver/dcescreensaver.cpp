@@ -32,7 +32,12 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     intervalTimer->stop();
     QObject::connect(intervalTimer, SIGNAL(timeout()), this, SLOT(getNextImage()));
     qDebug() << "Screensaver ctor";
-    currentImage = QImage();
+    currentImage.fill(Qt::black);
+    fadeAnimation = new QPropertyAnimation(this, "fadeOpacity");
+    fadeAnimation->setDuration(2500);
+    fadeAnimation->setStartValue(0.0);
+    fadeAnimation->setEndValue(1.0);
+    surface.fill(Qt::black);
 
 }
 
@@ -82,15 +87,17 @@ void DceScreenSaver::processImageData(QNetworkReply *r)
         return;
     }
 
-    QImage t;
+    QPixmap t;
     t.loadFromData(p);
 
     if(t.isNull()){
         intervalTimer->start(interval);
     }
     else{
+        surface =currentImage;
         currentImage= t.scaled(boundingRect().width(), boundingRect().height());
     }
+    startFadeTimer(2500);
 }
 
 void DceScreenSaver::getNextImage()
@@ -103,19 +110,21 @@ void DceScreenSaver::getNextImage()
 
 void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
-    Q_UNUSED(option);
+
+    Q_UNUSED(option); //mark unused options
     Q_UNUSED(widget);
-
-
-    surface.convertFromImage(currentImage);
-
     p->setBrush(Qt::NoBrush);
     p->setPen(Qt::NoPen);
-    p->setOpacity(opacity);
     p->setRenderHint(QPainter::HighQualityAntialiasing, 1);
 
-    p->drawPixmap(boundingRect(), surface, boundingRect() );
+    //draw old frame first
+    p->drawPixmap(boundingRect(), surface, boundingRect());
 
+    //setup and new pix map over it
+    p->setOpacity(fadeOpacity);
+
+    //create 'composed image'
+    p->drawPixmap(boundingRect(), currentImage, boundingRect());
 
 }
 
@@ -124,13 +133,11 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
 void DceScreenSaver::timerEvent(QTimerEvent *event)
 {
     if(event->timerId()==m_animationTimer){
-//        if(opacity!=100){
-//         opacity++ ;
-//        }
-//        else{
-//            opacity=0;
-//        }
-//        this->update();
+        if(fadeOpacity!=1 && !currentImage.isNull() ){
+            this->update();
+
+        }
+
     }
 
 
@@ -141,4 +148,10 @@ void DceScreenSaver::timerEvent(QTimerEvent *event)
 void DceScreenSaver::beginZoom()
 {
 
+}
+
+void DceScreenSaver::startFadeTimer(int time)
+{
+    fadeAnimation->setDuration(time);
+    fadeAnimation->start();
 }
