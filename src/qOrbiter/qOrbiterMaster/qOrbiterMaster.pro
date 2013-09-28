@@ -12,7 +12,7 @@ OTHER_FILES += \
 
 
 SUBDIRS += ../qOrbiter_src/plugins/AudioVisual \
-    ../qOrbiter_src/plugins/DceScreenSaver/
+             ../qOrbiter_src/plugins/DceScreenSaver/dcescreensaver.pro
 SUBDIRS += ../qOrbiter_src
 
 #folder_01.source = ../qOrbiter_src/qml/desktop
@@ -23,8 +23,8 @@ SUBDIRS += ../qOrbiter_src
 #folder_03.target = $$DESTDIR/qml
 #folder_04.source = ../qOrbiter_src/config.xml
 #folder_04.target = $$DESTDIR
-folder_05.source = ../qOrbiter_src/import
-folder_05.target = $$DESTDIR/import
+folder_05.source = ../qOrbiter_src/imports
+folder_05.target = $$DESTDIR/imports
 DEPLOYMENTFOLDERS += folder_05
 
 INSTALLS=$HOME
