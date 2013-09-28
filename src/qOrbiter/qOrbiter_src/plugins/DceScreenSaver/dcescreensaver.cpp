@@ -7,6 +7,9 @@
 #include <QtNetwork/QNetworkReply>
 #include <QImage>
 #include <QPainter>
+#include <QTime>
+
+const int animationInterval = 15; // should be 60fps
 
 DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     QDeclarativeItem(parent)
@@ -14,7 +17,9 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     // By default, QDeclarativeItem does not draw anything. If you subclass
     // QDeclarativeItem to create a visual item, you will need to uncomment the
     // following line:
-    glEnable(GL_MULTISAMPLE);
+    m_animationTimer = startTimer(animationInterval);
+
+    opacity = 100;
     setFlag(ItemHasNoContents, false);
     currentUrl = "";
     active = false;
@@ -84,10 +89,8 @@ void DceScreenSaver::processImageData(QNetworkReply *r)
         intervalTimer->start(interval);
     }
     else{
-        currentImage = t;
+        currentImage= t.scaled(boundingRect().width(), boundingRect().height());
     }
-
-
 }
 
 void DceScreenSaver::getNextImage()
@@ -103,17 +106,39 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
+
+    surface.convertFromImage(currentImage);
+
     p->setBrush(Qt::NoBrush);
     p->setPen(Qt::NoPen);
-    p->setRenderHint(QPainter::SmoothPixmapTransform, 1);
-    p->setRenderHint(QPainter::Antialiasing, 1);
-    p->drawRoundedRect(0, 0, boundingRect().width(), boundingRect().height() - 10, 10,10);
-    p->drawImage(boundingRect(), currentImage );
+    p->setOpacity(opacity);
+    p->setRenderHint(QPainter::HighQualityAntialiasing, 1);
+
+    p->drawPixmap(boundingRect(), surface, boundingRect() );
+
 
 }
 
-void DceScreenSaver::update()
+
+
+void DceScreenSaver::timerEvent(QTimerEvent *event)
+{
+    if(event->timerId()==m_animationTimer){
+//        if(opacity!=100){
+//         opacity++ ;
+//        }
+//        else{
+//            opacity=0;
+//        }
+//        this->update();
+    }
+
+
+}
+
+
+
+void DceScreenSaver::beginZoom()
 {
 
 }
-

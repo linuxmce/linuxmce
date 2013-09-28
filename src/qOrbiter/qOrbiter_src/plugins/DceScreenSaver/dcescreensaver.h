@@ -6,6 +6,8 @@
 #include <QtOpenGL>
 #include <QtNetwork/QNetworkAccessManager>
 
+#include <QPixmap>
+
 class DceScreenSaver : public QDeclarativeItem
 {
     Q_OBJECT
@@ -22,6 +24,7 @@ public:
     ~DceScreenSaver();
 
 
+    int opacity;
     bool active;
     bool running;
     bool ready;
@@ -31,6 +34,11 @@ public:
     QStringList urlList;
 
     QImage currentImage;
+    QPixmap surface;
+
+    int m_animationTimer;
+    int tick;
+
 
 signals:
     void paintedFrame();
@@ -79,16 +87,16 @@ private:
     void requestImage(QString img);
     QNetworkAccessManager *requestManager;
     QTimer *intervalTimer;
-
-
-
+    void beginZoom();
+    int scaleFactor();
     QString currentUrl;
 
 
 protected:
 
     void paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget);
-    void update();
+
+    void timerEvent(QTimerEvent *event);
 };
 
 QML_DECLARE_TYPE(DceScreenSaver)

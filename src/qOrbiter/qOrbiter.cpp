@@ -5365,6 +5365,7 @@ void qOrbiter::checkInstall()
     connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(verifyInstall(QNetworkReply*)));
     QNetworkRequest s;
     QNetworkReply *badReply = pingManager->get(QNetworkRequest(url));
+
 }
 
 void qOrbiter::verifyInstall(QNetworkReply *r)
