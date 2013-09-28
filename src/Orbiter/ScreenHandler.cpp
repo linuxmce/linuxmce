@@ -863,8 +863,11 @@ bool ScreenHandler::MediaBrowser_DatagridSelected(CallBackData *pData)
 			SelectedExternalDirectory(pCell_List);
 			return true;
 		}
-
-		GetAttributesForMediaFile(pCell_List->m_Value);
+		
+		// Previously, this was getting called each and every time a cell was being selected, causing severe slow-down on large
+		// data grids! This should only be called for !Fxxxx items! -tschak
+		if (cActionItem=='F')
+			GetAttributesForMediaFile(pCell_List->m_Value);
 
 		if( cActionItem=='A' )
 		{
