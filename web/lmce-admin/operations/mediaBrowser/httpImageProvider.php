@@ -12,6 +12,7 @@ print_r($connMessage);
 	};
 
 
+
 $test = $_GET['type'];
 $val = $_GET['val'];
 
@@ -20,9 +21,10 @@ $val = $_GET['val'];
 	mediaPicsImage($val);
 	}
 else if ($test=="atr"){
-      imdbImage($_GET['file'], $val );
+      imdbImage($_GET['file'], 43 /* $val */ );
 	}
 else if($test=="imdb"){
+
 	imdbImage($_GET['file'],36);
 	} 
 	else if ($test==="screensaver"){
@@ -46,6 +48,7 @@ function attributeImage($fileName, $atr){
 }
 
 function imdbImage($imdbID, $type ){
+
 $filemarker = substr_replace($imdbID, "", 0, 2);
 
 $sql ="SELECT File_Attribute.FK_File, Picture.PK_Picture, Picture.Extension, File_Attribute.FK_Attribute, Picture_Attribute.FK_Picture, Picture_Attribute.FK_Attribute "
@@ -67,6 +70,7 @@ $res=mysql_query($cleansql) or die("mysql error");
 
 	while($row = mysql_fetch_array($res)){
 	$file=$row['PK_Picture'].".".$row['Extension'];
+
 	} 
 
 echo file_get_contents("mediapics/".$file);
