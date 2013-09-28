@@ -1,5 +1,5 @@
 import QtQuick 1.1
-import QtWebKit 1.0
+
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 
@@ -194,14 +194,6 @@ Rectangle {
     ConfigPanel{
         id:localConfigPanel
     }
-    WebView{
-        id:htmltestsurface
-        anchors.top: parent.top
-        height: 300
-        width: parent.width
-        url: "http://www.w3schools.com/html/tryit.asp?filename=tryhtml5_video_all"
-        visible: false
 
-    }
 }
 
