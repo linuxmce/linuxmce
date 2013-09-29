@@ -7,10 +7,28 @@ Item {
     width:manager.appWidth
     property int current_view_type:1
     property int depth:0
+    focus:true
+    Keys.onReleased: {
+        switch(event.key){
+        case Qt.Key_MediaPrevious:
+
+            manager.initializeSortString()
+            if(manager.q_mediaType===5){
+                files_view_screen.state="selection"
+                 manager.setGridStatus(false)
+            }
+            break;
+        }
+    }
+
     Component.onCompleted: {
+        if(manager.q_mediaType===5 ){
+         manager.setGridStatus(false)
+        }
         setNavigation("MedialistNav.qml")
         hideInfoPanel();
-        manager.setGridStatus(false)
+
+        forceActiveFocus()
     }
     state: manager.i_current_mediaType === 5 ? "selection" : "viewing"
     Connections

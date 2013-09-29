@@ -1,4 +1,5 @@
 import QtQuick 1.0
+import DceScreenSaver 1.0
 import "../../../skins-common/lib/handlers"
 import "components"
 
@@ -116,27 +117,47 @@ Item {
         }
     }
 
+    DceScreenSaver{
+         id:glScreenSaver
+         height:parent.height
+         width: parent.width
+         interval:30000
+         anchors.centerIn: parent
+         requestUrl:manager.m_ipAddress
+         Component.onCompleted: {
+            glScreenSaver.setImageList(manager.screensaverImages)
+         }
 
-    Item{
-        id:mini_screen_saver
-        anchors.fill: qml_root
+         Connections{
+             target:manager
+             onScreenSaverImagesReady:{
+                 glScreenSaver.setImageList(manager.screensaverImages)
+                 console.log("Orbiter Consume Screensaver images")
+                 console.log("Orbiter counts " + glScreenSaver.pictureCount)
+             }
+         }
 
-        Timer{
-            id:mini_ss_timer
-            interval:10000
-            running: true // screensaver.active
-            triggeredOnStart: true
-            onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
-            repeat: true
-        }
+     }
+//    Item{
+//        id:mini_screen_saver
+//        anchors.fill: qml_root
 
-        Image{
-            id:mini_screen_saver_image
-            height: mini_screen_saver.height
-            width: mini_screen_saver.width
-            source: "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
-        }
-    }
+//        Timer{
+//            id:mini_ss_timer
+//            interval:10000
+//            running: true // screensaver.active
+//            triggeredOnStart: true
+//            onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
+//            repeat: true
+//        }
+
+//        Image{
+//            id:mini_screen_saver_image
+//            height: mini_screen_saver.height
+//            width: mini_screen_saver.width
+//            source: "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
+//        }
+//    }
 
     Loader {
         id:pageLoader

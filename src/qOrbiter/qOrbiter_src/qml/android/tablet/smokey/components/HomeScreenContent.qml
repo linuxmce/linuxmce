@@ -12,9 +12,11 @@ Item{
 
         StyledButton{
             buttonText.text: "Power"
+
         }
         StyledButton{
             buttonText.text: "Sleeping Menu"
+            onActivated: manager.gotoQScreen("Screen_29.qml")
         }
 
     }

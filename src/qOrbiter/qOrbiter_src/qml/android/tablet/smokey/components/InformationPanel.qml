@@ -7,7 +7,9 @@ Item{
     width:parent.width
     anchors.left:parent.left
     anchors.bottom: parent.bottom
-    Component.onCompleted:{ info_panel.state="retracted"; statusTimer.start() }
+    Component.onCompleted:{ info_panel.state="retracted";
+        statusTimer.start()
+    }
 
     Timer{
         id:statusTimer
@@ -28,7 +30,7 @@ Item{
     
     StyledText{
         id:orbiter_status_text
-        text:"LinuxMCE Orbiter "+manager.m_dwPK_Device + " connected."
+        text:"LinuxMCE Orbiter "+manager.m_dwPK_Device + " is connected."
         anchors.top: parent.top
         anchors.left: parent.left
         font.pixelSize:36
@@ -40,12 +42,7 @@ Item{
                 PropertyAnimation{
                     duration: 250
                 }
-                ScriptAction{
-                    script: homeContent.source = "HomeScreenContent.qml"
-                }
             }
-
-
         }
     }
 
@@ -53,7 +50,8 @@ Item{
         id:homeContent
         anchors.top: parent.top
         anchors.left: parent.left
-        source:""
+        source:"HomeScreenContent.qml"
+        visible:(info_panel.state === "hidden" || info_panel.state==="retracted" ) && orbiter_status_text.opacity === 0
     }
 
     Clock{
@@ -102,7 +100,7 @@ Item{
             }
             PropertyChanges{
                 target: orbiter_status_text
-                visible:true
+                opacity:1
             }
             PropertyChanges{
                 target:close
@@ -141,7 +139,7 @@ Item{
             }
             PropertyChanges{
                 target: orbiter_status_text
-                visible:false
+                opacity:0
             }
             PropertyChanges{
                 target:close
@@ -166,9 +164,17 @@ Item{
                 target: info_panel
                 height:scaleY(92)
             }
+            PropertyChanges{
+                target:homeContent
+                source:""
+            }
             PropertyChanges {
                 target: time_keeper
                 visible:false
+            }
+            PropertyChanges{
+                target: orbiter_status_text
+                opacity:0
             }
             PropertyChanges{
                 target: orbiter_status_text
@@ -233,7 +239,6 @@ Item{
                 target:pageLoader
                 visible:true
             }
-
         }
         
     ]
@@ -258,6 +263,12 @@ Item{
                 duration:1000
                 easing.type: Easing.OutElastic
             }
+            ScriptAction{
+                script: {
+                    statusTimer.restart()
+                }
+            }
+
         }
     ]
 }

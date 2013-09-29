@@ -1,6 +1,7 @@
 Screen_X Screen_X.qml       #Error for screen loading screen.
 Screen_1 Screen_1.qml       #home screen
 Screen_2 Screen_2.qml       #??
+Screen_29 Screen_29.qml     #the alarms screen.
 Screen_47 Screen_47.qml     #This is the media view screen. its called by anything that shows a list of media files.
 Screen_54 Screen_54.qml     #This is the stored audio remote screen.
 Screen_63 Screen_63.qml     #this is the cable/satbox remote screen.
