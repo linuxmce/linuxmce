@@ -12,7 +12,9 @@ import "."
  */
 MouseArea{
     anchors.fill: parent
+    signal activated()
     onClicked: {
         manager.updateAlarm(!status, handler)
+        activated()
     }
 }
