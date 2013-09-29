@@ -6,4 +6,5 @@ Screen_47 Screen_47.qml     #This is the media view screen. its called by anythi
 Screen_54 Screen_54.qml     #This is the stored audio remote screen.
 Screen_63 Screen_63.qml     #this is the cable/satbox remote screen.
 Screen_70 Screen_70.qml     #this is the stored video remote screen.
+Screen_77 Screen_77.qml     #this is the OTar Radio screen
 Screen_187 Screen_187.qml   #this is the resume media screen.

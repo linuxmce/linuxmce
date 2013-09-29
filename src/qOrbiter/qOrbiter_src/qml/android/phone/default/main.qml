@@ -1,7 +1,7 @@
 import QtQuick 1.1
 import "components"
 import "js/ComponentLoader.js" as MyJs
-
+import DceScreenSaver 1.0
 
 Item {
     id: qmlroot
@@ -91,14 +91,36 @@ Item {
     //        }
     //    }
 
-    Image {
-        id: appBackground
-        source: "img/bg.jpg"
-        anchors.fill: parent
-        property string pSource:""
-        property string wSource:""
+//    Image {
+//        id: appBackground
+//        source: "img/bg.jpg"
+//        anchors.fill: parent
+//        property string pSource:""
+//        property string wSource:""
 
-    }
+//    }
+
+    DceScreenSaver{
+         id:glScreenSaver
+         height:parent.height
+         width: parent.width
+         interval:30000
+         anchors.centerIn: parent
+         requestUrl:manager.m_ipAddress
+         Component.onCompleted: {
+            glScreenSaver.setImageList(manager.screensaverImages)
+         }
+
+         Connections{
+             target:manager
+             onScreenSaverImagesReady:{
+                 glScreenSaver.setImageList(manager.screensaverImages)
+                 console.log("Orbiter Consume Screensaver images")
+                 console.log("Orbiter counts " + glScreenSaver.pictureCount)
+             }
+         }
+
+     }
 
     //    function updateBackground(portait, wide){
     //        appBackground.pSource = portait
