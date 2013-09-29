@@ -31,9 +31,13 @@ Item {
         height: parent.height
         width: parent.width
         focus:true
+        Rectangle{
+            anchors.fill: parent
+            color: "black"
+            opacity: .55
+        }
+
         property int trigger: x+width/2
-
-
 
         Keys.onReleased: {
             switch(event.key){

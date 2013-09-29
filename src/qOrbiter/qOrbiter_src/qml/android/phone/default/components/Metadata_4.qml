@@ -18,13 +18,13 @@ Column{
         visible:  dcenowplaying.performerlist =="" ? false: true
         color: "white"
     }
-    
+
     Text {
         id: generaltitle
         width: parent.width
         text:  dcenowplaying.qs_mainTitle
          elide: Text.ElideRight
-        wrapMode: "WrapAtWordBoundaryOrAnywhere"        
+        wrapMode: "WrapAtWordBoundaryOrAnywhere"
         smooth: true
         font.pixelSize: scaleY(5)
         visible:  dcenowplaying.qs_mainTitle =="" ? false: true
@@ -36,25 +36,25 @@ Column{
         width: parent.width
          elide: Text.ElideRight
         text: qsTr("Title: ") + dcenowplaying.mediatitle
-        wrapMode: "WrapAtWordBoundaryOrAnywhere"       
+        wrapMode: "WrapAtWordBoundaryOrAnywhere"
         font.pixelSize: scaleY(4)
         visible:  dcenowplaying.mediatitle =="" ? false: true
         color: "white"
     }
-    
+
     Text {
         id: album
         width: parent.width
         text: qsTr("Album: ")+ dcenowplaying.album + " | " + dcenowplaying.releasedate
          elide: Text.ElideRight
-        wrapMode: "WrapAtWordBoundaryOrAnywhere"      
+        wrapMode: "WrapAtWordBoundaryOrAnywhere"
         smooth: true
         font.pixelSize: scaleY(4)
         visible:  dcenowplaying.album =="" ? false: true
         color: "white"
     }
-    
-    
+
+
     Text {
         id: genre
         width: parent.width
@@ -72,9 +72,9 @@ Column{
             onExited: {genre.elide = "ElideRight"; }
         }
     }
-    
+
     Text {
-        id: track        
+        id: track
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
         anchors.bottom:controls.top
         anchors.left: ha.right

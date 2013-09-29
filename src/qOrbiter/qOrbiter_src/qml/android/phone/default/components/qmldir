@@ -65,20 +65,21 @@ SortingSelector SortingSelector.qml
 AudioRemote AudioRemote.qml
 FileFormat FileFormat.qml
 Splash Splash.qml
-SecurityPad SecurityPad.qml
+SecurityPad SecurityPad.qml                         #the security pad
 ControlRow ControlRow.qml
-DroidHomeSelector DroidHomeSelector.qml
-NowPlayingButton NowPlayingButton.qml
-MediaScrollBar MediaScrollBar.qml
-NullComponent NullComponent.qml
-ScenarioSelector ScenarioSelector.qml
-GenericAttributeFilter GenericAttributeFilter.qml
-StyledText StyledText.qml
+DroidHomeSelector DroidHomeSelector.qml             #the main screen_1 component
+NowPlayingButton NowPlayingButton.qml               #Button representing nowplaying information / link to remote screen.
+MediaScrollBar MediaScrollBar.qml                   #scrollbar component
+NullComponent NullComponent.qml                     #depreciated
+ScenarioSelector ScenarioSelector.qml               #popup component for selecting scenarios
+GenericAttributeFilter GenericAttributeFilter.qml   #filter used for selecting attributes
+StyledText StyledText.qml                           #prestyled text element
 HomeOptions HomeOptions.qml
-TemplatePlaylist TemplatePlaylist.qml
-Metadata_4 Metadata_4.qml
-NowPlayingRemoteImage NowPlayingRemoteImage.qml
-MediaPlaybackTemplate MediaPlaybackTemplate.qml
+TemplatePlaylist TemplatePlaylist.qml               #playlist used in template
+Metadata_4 Metadata_4.qml                           #stored audio metadata
+Metadata_13 Metadata_13.qml                         #otar metadata
+NowPlayingRemoteImage NowPlayingRemoteImage.qml     #the image used in now playing screens.
+MediaPlaybackTemplate MediaPlaybackTemplate.qml     #floorplan
 PhoneFloorplanLayout PhoneFloorplanLayout.qml
 SendCommandBox SendCommandBox.qml
 Slider Slider.qml
