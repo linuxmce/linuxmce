@@ -45,9 +45,8 @@ public:
 
 signals:  
     void dataChanged();
-
 public slots:
-
+    void updateStatus(bool s);
 
 };
 

@@ -3680,6 +3680,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                           fk_file = pCell->GetValue();
 
                           cellTitle = QString::fromUtf8(pCell->m_Text);
+                          qDebug() <<fk_file;
 
 
                           //            if(fk_file.contains("!A"))
@@ -3700,13 +3701,12 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                               emit addItem(new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index, this));
                               QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef rpi
-                              Sleep(60);
+                              Sleep(15);
 #elif NECESSITAS
-                              Sleep(40);
+                             Sleep(15);
 #else
-                              // Sleep(10);
+                               Sleep(15);
 #endif
-
                           }
                           else if(!requestMore){
                               qDebug() << "Pausing";

@@ -20,6 +20,12 @@ QHash<int, QByteArray> SleepingAlarm::roleNames() const
     return names;
 }
 
+void SleepingAlarm::updateStatus(bool s)
+{
+    b_state=s;
+    emit dataChanged();
+}
+
 QVariant SleepingAlarm::data(int role) const
 {
     switch(role) {

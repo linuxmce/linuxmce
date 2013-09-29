@@ -109,7 +109,7 @@ void DceScreenSaver::getNextImage()
     if(urlList.isEmpty()){
         return;
     }
-    qWarning("Foo!");
+
 #ifdef ANDROID
     requestImage(urlList.at(rand()%urlList.count()));
 #else
@@ -122,7 +122,7 @@ void DceScreenSaver::getNextImage()
 
 void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
-    qWarning("Bar!!!!!!");
+
     Q_UNUSED(option); //mark unused options
     Q_UNUSED(widget);
     p->setBrush(Qt::NoBrush);

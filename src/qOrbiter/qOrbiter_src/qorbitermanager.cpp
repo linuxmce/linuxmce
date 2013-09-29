@@ -1963,13 +1963,18 @@ bool qorbiterManager::getRequestMore()
 
 void qorbiterManager::updateAlarm(bool toggle, int grp)
 {
-    sleeping_alarms->clear();
+  //  sleeping_alarms->clear();
     emit setAlarm(toggle, grp);
 
 }
 
 void qorbiterManager::showSleepingAlarms(SleepingAlarm *s)
 {
+    SleepingAlarm *t = sleeping_alarms->find(s->id());
+
+    if(t)
+        t->updateStatus(s->currentState());
+    else
     sleeping_alarms->appendRow(new SleepingAlarm(s->eventHandler, s->name, s->alarmTime, s->b_state, s->timeLeft, s->activeDays));
 }
 

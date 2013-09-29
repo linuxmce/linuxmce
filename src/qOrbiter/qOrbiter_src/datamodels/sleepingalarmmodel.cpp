@@ -57,6 +57,8 @@ void SleepingAlarmModel::handleItemChange()
   QModelIndex index = indexFromItem(item);
   if(index.isValid())
       emit dataChanged(index, index);
+
+  qDebug()<< "Sleeping alarms model changed";
 }
 
 bool SleepingAlarmModel::resetInternalData()

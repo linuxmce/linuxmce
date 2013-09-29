@@ -212,7 +212,7 @@ void ListModel::clear()
     if(resetInternalData()){
         setProgress(0.0);        
         setTotalCells(0);
-        loadingStatus = false;
+        setLoadingStatus(false);
         progress = 0;
         setTotalPages(0);
         QApplication::processEvents(QEventLoop::AllEvents);
@@ -282,11 +282,11 @@ void ListModel::setTotalCells(int cells)
     emit statusMessage("Size Changed to" + QString::number(totalcells));
     if ( m_list.size() < totalcells)
     {
-       // setLoadingStatus(true);
+        setLoadingStatus(true);
     }
     else
     {
-      //  setLoadingStatus(false);
+       setLoadingStatus(false);
 
     }
     emit sizeChanged(cells);
