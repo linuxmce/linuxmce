@@ -21,7 +21,7 @@ $val = $_GET['val'];
 	mediaPicsImage($val);
 	}
 else if ($test=="atr"){
-      imdbImage($_GET['file'], 43 /* $val */ );
+      imdbImage($_GET['file'], $val  );
 	}
 else if($test=="imdb"){
 
