@@ -271,6 +271,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     gotoScreenList = new QStringList();
     ScreenSaver = new ScreenSaverClass(this);
     qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
+    screenSaverTimeout = 60;
+    screenPowerOffTimeout = 60;
     /*!
      * \todo move filters to their own initialization function, possibly multiple to account for dynamic setting of each one later.
      */

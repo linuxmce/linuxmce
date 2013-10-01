@@ -32,6 +32,7 @@ Item {
     property string screenfile
     property string dynamic_height
     property string dynamic_width
+   property int screensaverTimer:manager.screenSaverTimeout*1000
 
     signal close()
     signal changeScreen(string s)
@@ -161,6 +162,13 @@ Item {
         }
     }
 
+    Timer{
+        id:hideUiTimer
+        interval: screensaverTimer
+        running: true
+        repeat: true
+        onTriggered: hideUI()
+    }
 
     Connections{
         target: manager
@@ -178,6 +186,7 @@ Item {
         DataHeader {
             id: data_header
             z:6
+            visible:pageLoader.visible
         }
 
 

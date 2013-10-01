@@ -90,10 +90,7 @@
 #include <datamodels/floorplanmodel.h>
 
 #include <contextobjects/screensaverclass.h>
-
-
 #include <datamodels/attributesortmodel.h>
-
 
 #include <contextobjects/filedetailsclass.h>
 #include <contextobjects/nowplayingclass.h>
@@ -203,6 +200,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY(int isPhone READ getFormFactor WRITE setFormFactor NOTIFY formFactorChanged)
     Q_PROPERTY(QString m_localAddress  READ getLocalAddress WRITE setLocalAddress NOTIFY localAddressChanged)
     Q_PROPERTY(QStringList screensaverImages READ getScreensaverImages NOTIFY screenSaverImagesReady )
+    Q_PROPERTY(int screenSaverTimeout READ getScreenSaverTimeout WRITE setScreensaverTimerout NOTIFY screenSaverTimeoutChanged)
 
     /*!
      * \warning enablescreensavermode - currently unused, should be built anyways
@@ -278,6 +276,10 @@ public:
     QDir skinsDir;
     QString m_SkinsDirectoryPath;
     QVariantList storageDevices;
+
+    //-----------ScreenSaver
+    int screenSaverTimeout;
+    int screenPowerOffTimeout;
 
 
     //ui
@@ -490,6 +492,14 @@ Param 10 - pk_attribute
     int communicatorID;
 
 signals:
+
+    /*ScreenSaver*/
+    void screenSaverTimeoutChanged();
+    void updateDceScreenSaverTimeout(int t);
+    void screenPowerTimeoutChanged();
+    void updateDceScreenPowerTimeout(int t);
+
+
     void skinMessage(QString s);
     void qtMessage(QString s);
     void localAddressChanged();
@@ -677,6 +687,14 @@ signals:
 #endif
 
 public slots:
+    void updateScreenSaverTimeout(int t){ screenSaverTimeout = t; }
+    void setScreensaverTimerout(int t ){screenSaverTimeout = t; emit screenSaverTimeoutChanged();  }
+    int getScreenSaverTimeout() {return screenSaverTimeout; }
+
+    void setScreenPowerTimeout(int t){screenPowerOffTimeout = t; emit screenPowerTimeoutChanged();}
+    int getScreenPowerTimeout(){return screenPowerOffTimeout;}
+    void updateScreenPowerTimeout(int t){ screenPowerOffTimeout = t; emit updateScreenPowerTimeout(screenPowerOffTimeout); }
+
 
     void initiateRestart();
     void setLocalAddress(QString l){m_localAddress = l; emit localAddressChanged(); }

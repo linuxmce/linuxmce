@@ -1332,6 +1332,7 @@ signals:
     void  deviceValid(bool s);
     void deviceIdChanged();
     void setEa(int room, int ea);
+    void screenSaverTimerOutChanged(int t);
 
 
 
@@ -1558,6 +1559,8 @@ public slots:
     void setAlarm(bool toggle, int grp);
 
     void beginSetup();
+
+    void updateScreenSaverTimeout(int t) ;
 
 
     void setdceIP(QString ip) {dceIP = ip; m_sIPAddress = ip.toStdString(); m_sHostName = m_sIPAddress; qDebug() << "DCE got IP"; emit dceIPChanged();}

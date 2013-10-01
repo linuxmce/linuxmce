@@ -67,7 +67,7 @@ Item{
 
         StyledText{
             id:screensaverStatus
-            text:"Screen saver is "+glScreenSaver.running + " with " + glScreenSaver.pictureCount + " Pics"
+            text:"Screen saver is "+glScreenSaver.running + " with " + glScreenSaver.pictureCount + " Pics. Timeout set to "+manager.screenSaverTimeout
         }
 
         MediaListInfoBar{
