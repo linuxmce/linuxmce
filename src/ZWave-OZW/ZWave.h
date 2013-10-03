@@ -66,6 +66,11 @@ public:
 		void MapNodeToDevices(NodeInfo* node);
 		int GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_Parent_Device);
 
+		// Internal helper methods
+		bool SetThermostatMode(uint8 node_id, uint8 instance_id, string mode);
+		bool SetThermostatSetpoint(uint8 node_id, uint8 instance_id, string setpoint, float val);
+
+		// Event reporting methods
 		void ReportBatteryStatus(int iNodeId, int status);
 		void SendTemperatureChangedEvent(unsigned int PK_Device, float value);
 		void SendSensorTrippedEvent(unsigned int PK_Device, bool state);
@@ -74,6 +79,7 @@ public:
 		void SendVoltageChangedEvent(unsigned int PK_Device, int value);
 		void SendLightChangedEvents(unsigned int PK_Device, int value);
 		void SendBrightnessChangedEvent(unsigned int PK_Device, int value);
+		void SendSetpointChangedEvent(unsigned int PK_Device, float value);
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor

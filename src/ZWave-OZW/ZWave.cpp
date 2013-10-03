@@ -23,6 +23,7 @@ using namespace DCE;
 //<-dceag-d-e->
 #include "PlutoUtils/LinuxSerialUSB.h"
 #include "ZWInterface.h"
+#include <math.h>
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -105,6 +106,7 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 	string nodeInstance = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 	int node_id;
 	int instance_id;
+	// TODO handle nodeid/cc/instance
 	if (nodeInstance.find("/") != string::npos) {
 	        vector<string> vectNI;
 		StringUtils::Tokenize(nodeInstance, "/", vectNI);
@@ -156,7 +158,14 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 						} else {
 							LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Set Switch FAILED!");
 						}
-					}					
+					}
+				} else if (genericType == GENERIC_TYPE_THERMOSTAT) {
+					LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Using Thermostat Mode");
+					if (state) {
+						SetThermostatMode(node_id, instance_id, "Resume");
+					} else {
+						SetThermostatMode(node_id, instance_id, "Off");
+					}
 				} else {
 					LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Assuming node is a multilevel switch");
 					OpenZWave::ValueID* valueID = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, "Level");
@@ -176,18 +185,38 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 				;;
 			}
 			case COMMAND_Set_Temperature_CONST:
+			{
 				temp = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST].c_str());
-				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET TEMPERATURE RECEIVED FOR CHILD %d, level: %d",node_id,temp);
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET TEMPERATURE RECEIVED FOR CHILD %d, temperature: %d",node_id,temp);
 /*				// tempf = (int)( (9.0/5.0) * (float)temp + 32.0 );
 				myZWApi->zwThermostatSetpointSet(node_id,1,temp); // heating
 				myZWApi->zwThermostatSetpointSet(node_id,2,temp); // cooling
 				myZWApi->zwThermostatSetpointSet(node_id,10,temp); // auto changeover
-				SendSetpointChangedEvent(node_id, instance_id, (float)temp);
-*/				break;
+*/
+	// TODO: need to set temperature for a specific setpoint/mode. Setting it for the current operating mode might work,
+	// except when we receive a Set_HeatCool command just after the Set_Temperature command, which might be the usual LMCE way
+	// Set temperature for current operating mode, copy temperature to new mode if changed in Set_HeatCool
+				OpenZWave::ValueID* valueIDMode = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, "Mode");
+				string mode = "Heat";
+				if ( valueIDMode != NULL ) {
+					OpenZWave::Manager::Get()->GetValueListSelection(*valueIDMode, &mode);
+				}
+				if ( mode == "Heat" )
+					SetThermostatSetpoint(node_id, instance_id, "Heating 1", (float)temp);
+				else if ( mode == "Cool" )
+					SetThermostatSetpoint(node_id, instance_id, "Cooling 1", (float)temp);
+				else if ( mode == "Auto Changeover" ) 
+					SetThermostatSetpoint(node_id, instance_id, "Auto Changeover", (float)temp);
+				break;
 				;;
+			}
 			case COMMAND_Set_Fan_CONST:
+			{
 				fan = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST].c_str());
 				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET FAN RECEIVED FOR CHILD %d, level: %d",node_id,fan);
+				m_pZWInterface->Lock();
+				OpenZWave::ValueID* valueIDFan = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, "Fan Mode");
+				// Auto Low, On Low, Auto High, On High, Unknown 4, Unknown 5, Circulate
 /*				if (fan == 1) {
 					myZWApi->zwThermostatFanModeSet(node_id,3); // on high
 					myZWApi->zwThermostatModeSet(node_id,6); // fan only
@@ -195,41 +224,90 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 					myZWApi->zwThermostatFanModeSet(node_id,0); // auto 
 					myZWApi->zwThermostatModeSet(node_id,10); // auto changeover
 				}
-*/				break;
-				;;	
+*/
+				m_pZWInterface->UnLock();
+				break;
+				;;
+			}
+			case COMMAND_Set_HeatCool_CONST:
+			{
+				string mode = pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST];
+				char mode_tmp = '_';
+				if (mode.size() == 1) {
+					mode_tmp = mode.c_str()[0];
+				}
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET HEAT/COOL RECEIVED FOR CHILD %d, string: %s",node_id,mode.c_str());
+				// A - auto changeover; H - heat; C - cool; F - fan; 
+				// ZWave supported modes: Off, Heat, Cool, Auto, Aux Heat, Resume, Fan Only, Furnace, Dry Air, Moist Air, Auto changeover, Heat Econ, Cool Econ, Away
+				// Map LMCE modes to ZWave modes		
+				switch(mode_tmp) {
+					case 'A':
+						mode = "Auto Changeover";
+						break;
+					case 'H':
+						mode = "Heat";
+						break;
+					case 'C':
+						mode = "Cool";
+						break;
+					case 'F':
+						mode = "Fan Only";
+						break;
+				}
+				SetThermostatMode(node_id, instance_id, mode);
+				break;
+				;;
+			}
 			case COMMAND_Play_Media_CONST:
 //				myZWApi->zwAVControlSet(node_id,sequence,3); // vol up
 				break;
-				;;
-			case COMMAND_Set_HeatCool_CONST:
-				heat = pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST];
-				char mode_tmp = 'A';
-				if (heat.size()>0) {
-					mode_tmp = heat.c_str()[0];
-				}
-				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET HEAT/COOL RECEIVED FOR CHILD %d, string: %s",node_id,heat.c_str());
-/*				// A - auto changeover; H - heat; C - cool; F - fan; 
-				switch(mode_tmp) {
-					default:
-					case 'A':
-						myZWApi->zwThermostatModeSet(node_id,10); // auto changeover
-						break;
-					case 'H':
-						myZWApi->zwThermostatModeSet(node_id,1); // heat
-						break;
-					case 'C':
-						myZWApi->zwThermostatModeSet(node_id,2); // cool
-						break;
-					case 'F':
-						myZWApi->zwThermostatModeSet(node_id,6); // fan only
-						break;
-				}
-*/				break;
 				;;
 		}
 	} else {
 		sCMD_Result = "UNHANDLED CHILD";
 	}
+}
+
+bool ZWave::SetThermostatMode(uint8 node_id, uint8 instance_id, string mode) 
+{
+	bool res = false;
+
+	m_pZWInterface->Lock();
+	OpenZWave::ValueID* valueIDMode = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, "Mode");
+	if ( valueIDMode != NULL )
+	{
+		bool res = OpenZWave::Manager::Get()->SetValueListSelection(*valueIDMode,mode);
+		if ( res ) {
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Mode set to '%s' succesfully", mode.c_str());
+		} else {
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"MODE NOT SET (unsupported mode?) mode = '%s'", mode.c_str());
+		}
+	} else {
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"No such value 'Mode' for this node, unable to set mode!");
+	}
+	m_pZWInterface->UnLock();
+	return res;
+}
+
+bool ZWave::SetThermostatSetpoint(uint8 node_id, uint8 instance_id, string setpoint, float val) 
+{
+	bool res = false;
+
+	m_pZWInterface->Lock();
+	OpenZWave::ValueID* valueIDSetpoint = m_pZWInterface->GetValueIdByNodeInstanceLabel(node_id, instance_id, setpoint);
+	if ( valueIDSetpoint != NULL )
+	{
+		res = OpenZWave::Manager::Get()->SetValue(*valueIDSetpoint,(float)val);
+		if ( res ) {
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Setpoint '%s' set to %f succesfully", setpoint.c_str(), val);
+		} else {
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Setpoint '%s' to %f failed!", setpoint.c_str(), val);
+		}
+	} else {
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"No such setpoint '%s' found!", setpoint.c_str());
+	}
+	m_pZWInterface->UnLock();
+	return res;
 }
 
 /*
@@ -598,7 +676,7 @@ void ZWave::CMD_Add_Node(string sOptions,int iValue,string sTimeout,bool bMultip
 	{
 		OpenZWave::Manager::Get()->CancelControllerCommand(m_pZWInterface->GetHomeId());
 	} else {
-		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_AddDevice, controller_update, NULL, sOptions == "H", 0, 0);
+		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_AddDevice, controller_update, NULL, sOptions == "H");
 	}
 	m_pZWInterface->UnLock();
 }
@@ -694,10 +772,23 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			// Do we want this value polled
 			OpenZWave::ValueID id = _notification->GetValueID();
 			string label = OpenZWave::Manager::Get()->GetValueLabel(id);
-			if ( label == "Switch" || label == "Battery Level" || label == "Temperature" || label == "Luminance" || label == "Power" || label == "Voltage" )
+			if ( label == "Switch" || label == "Battery Level" || label == "Temperature" || label == "Luminance" ||
+			     label == "Power" || label == "Voltage" ||
+			     label == "Setpoint" || label == "Heating 1" || label == "Cooling 1" || label == "Auto Changeover" ||
+			     label == "Mode" )
 			{
-				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() ValueAdded: Set polling for node %d/%d/%d, value label %s", _notification->GetNodeId(), id.GetCommandClassId(), id.GetInstance(), label.c_str());
-				OpenZWave::Manager::Get()->EnablePoll(id);
+				// intensity = poll this value every X poll cycle/interval
+				// When polling interval is 60000 (60 seconds), this value effectively becomes every X second
+				uint8 intensity = 1;
+				if ( label == "Battery Level" ) {
+					intensity = 255; // battery level does not change very often
+				} else if ( label == "Temperature" || label == "Mode" ) {
+					intensity = 5; // neither does temperature
+				} else if ( label == "Setpoint" || label == "Heating 1" || label == "Cooling 1" || label == "Auto Changeover" ) {
+					intensity = 15;
+				}
+				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() ValueAdded: Set polling for node %d/%d/%d, value label %s, intensity %d", _notification->GetNodeId(), id.GetCommandClassId(), id.GetInstance(), label.c_str(), intensity);
+				OpenZWave::Manager::Get()->EnablePoll(id, intensity);
 			}
 		}
 		break;
@@ -754,6 +845,10 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 					float level = 0;
 					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
 					SendVoltageChangedEvent(PKDevice, level);
+				} else if ( label == "Setpoint" || label == "Heating 1" || label == "Cooling 1" || label == "Auto Changeover") {
+					float level = 0;
+					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
+					SendSetpointChangedEvent(PKDevice, level);
 				}
 			}
 		}
@@ -1023,7 +1118,7 @@ int ZWave::GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_D
 			break;
 		case GENERIC_TYPE_THERMOSTAT:
 			devicetemplate = DEVICETEMPLATE_Standard_Thermostat_CONST;
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Standard_Themostat");
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Standard_Thermostat");
 			break;
 		case GENERIC_TYPE_SWITCH_MULTILEVEL:
 			switch (specific) {
@@ -1258,5 +1353,20 @@ void ZWave::SendBrightnessChangedEvent(unsigned int PK_Device, int value)
 					   MESSAGETYPE_EVENT,
 					   EVENT_Brightness_Changed_CONST, 1, 
 					   EVENTPARAMETER_Value_CONST, StringUtils::itos(value).c_str())
+		);
+}
+
+void ZWave::SendSetpointChangedEvent(unsigned int PK_Device, float value)
+{
+	char tempstr[512];
+	int iValue = round(value);
+	sprintf(tempstr, "%d", iValue);
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending setpoint changed event from PK_Device %d, value %d",PK_Device, iValue);
+	m_pEvent->SendMessage( new Message(PK_Device,
+					   DEVICEID_EVENTMANAGER,
+					   PRIORITY_NORMAL,
+					   MESSAGETYPE_EVENT,
+					   EVENT_Thermostat_Set_Point_Chan_CONST, 1, 
+					   EVENTPARAMETER_Value_CONST, tempstr)
 		);
 }

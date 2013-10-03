@@ -219,7 +219,13 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 			// Add the new value to our list
 			nodeInfo->m_values.push_back( _notification->GetValueID() );
 			OpenZWave::ValueID id = _notification->GetValueID();
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Value Added Home 0x%08x Node %d Genre %d Class %d Instance %d Index %d Type %d\n", _notification->GetHomeId(), _notification->GetNodeId(), id.GetGenre(), id.GetCommandClassId(), id.GetInstance(), id.GetIndex(), id.GetType());
+			string label = OpenZWave::Manager::Get()->GetValueLabel(id);
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Value Added Home 0x%08x Node %d Genre %d Class %d Instance %d Index %d Type %d, label = %s\n", _notification->GetHomeId(), _notification->GetNodeId(), id.GetGenre(), id.GetCommandClassId(), id.GetInstance(), id.GetIndex(), id.GetType(), label.c_str());
+
+			// Write config if we get new values after first init is done
+			if ( m_bInitDone && !g_initFailed )
+				OpenZWave::Manager::Get()->WriteConfig( g_homeId );
+
 		}
 		break;
 	}
