@@ -15,7 +15,7 @@
 #ifndef DIAL_h
 #define DIAL_h
 
-//	DCE Implemenation for #2268 DIAL
+//	DCE Implemenation for #2269 DIAL
 
 #include "Gen_Devices/DIALBase.h"
 //<-dceag-d-e->

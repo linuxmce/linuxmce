@@ -13,7 +13,7 @@ BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = DIAL
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 2268mplateID
+MYDEVTEMPLATEID = 2269mplateID
 
 Gen_Dev_Files = $(GENDEV)/DIALBase.cpp
 sources = Main.cpp DIAL.cpp $(Gen_Dev_Files)
