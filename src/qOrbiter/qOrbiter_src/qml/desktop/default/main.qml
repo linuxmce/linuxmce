@@ -26,13 +26,14 @@ Item {
     width:manager.appWidth
     height:manager.appHeight
     focus:true
-   Keys.onTabPressed: if(activeFocus)hideUI()
+    Keys.onTabPressed: if(activeFocus)hideUI()
 
     property string locationinfo: "standby"
     property string screenfile
     property string dynamic_height
     property string dynamic_width
-   property int screensaverTimer:manager.screenSaverTimeout*1000
+    property int screensaverTimer:manager.screenSaverTimeout*1000
+    property bool hideUiElements:false
 
     signal close()
     signal changeScreen(string s)
@@ -129,10 +130,10 @@ Item {
         if(dceplayer.mediaPlaying)
         {
             if(dceplayer.activeFocus){
-                 pageLoader.forceActiveFocus()
+                pageLoader.forceActiveFocus()
                 console.log("PageLoader item focus::"+pageLoader.focus)
             } else{
-                dceplayer.forceActiveFocus()               
+                dceplayer.forceActiveFocus()
                 console.log("Dceplayer focus::"+dceplayer.focus)
             }
         }
@@ -166,7 +167,7 @@ Item {
 
     Timer{
         id:hideUiTimer
-        interval: screensaverTimer
+        interval:10000  //screensaverTimer
         running: true
         repeat: true
         onTriggered: hideUI()
@@ -177,154 +178,154 @@ Item {
         onOrientationChanged: checkLayout()
     }
 
-        Image {
-            id: appbackground
-            source: manager.imagePath+"ui3/light_gray_texture-wallpaper-1920x1080.jpg"
-            anchors.fill: parent
-            opacity: 1
+    Image {
+        id: appbackground
+        source: manager.imagePath+"ui3/light_gray_texture-wallpaper-1920x1080.jpg"
+        anchors.fill: parent
+        opacity: 1
+    }
+
+    //==========Visual Elements
+    DataHeader {
+        id: data_header
+        z:6
+        visible:pageLoader.visible
+    }
+
+
+    MediaManager{
+        id:dceplayer
+        anchors.top: parent.top
+        anchors.left:parent.left
+        focus:true
+
+        onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
+        z:dceplayer.mediaPlaying ==false ? -5 : 0
+        Component.onCompleted: {
+            setWindowSize(manager.appHeight, manager.appWidth);
+
         }
 
-        //==========Visual Elements
-        DataHeader {
-            id: data_header
-            z:6
-            visible:pageLoader.visible
-        }
-
-
-        MediaManager{
-            id:dceplayer
-            anchors.top: parent.top
-            anchors.left:parent.left
-            focus:true
-
-            onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
-            z:dceplayer.mediaPlaying ==false ? -5 : 0
-            Component.onCompleted: {
-                setWindowSize(manager.appHeight, manager.appWidth);
-
-            }
-
-            Connections{
-                target:manager
-                onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
-                onMediaPlayerIdChanged:{
-                    console.log("initializing media player"+manager.mediaPlayerID)
-                    dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-                }
-            }
-
-            onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
-            onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
-            onMediaPlayingChanged: {
-                console.log("Media Playback status changed locally "+dceplayer.mediaBuffer);
-                if(dceplayer.mediaPlaying){
-                    hideUI()
-                    forceActiveFocus()
-                }
-                else{
-                    hideUI()
-
-                }
-            }
-
-            Keys.onPressed: {
-
-                switch(event.key){
-                case Qt.Key_Back:
-                    manager.changedPlaylistPosition((mediaplaylist.currentIndex-++1));
-                    break;
-                case Qt.Key_Forward:
-                    manager.changedPlaylistPosition((mediaplaylist.currentIndex+1))
-                    break;
-                case 16777347: /* Keycode Track forward */
-                    manager.changedPlaylistPosition((mediaplaylist.currentIndex+1));
-                    break;
-                case 16777346: /* Keycode Track Backwards */
-                    manager.changedPlaylistPosition((mediaplaylist.currentIndex-1))
-                    break;
-                case Qt.Key_Plus: /*Plus sign */
-                    manager.adjustVolume(+1)
-                    break;
-                case Qt.Key_Tab:
-                    hideUI()
-                    break;
-
-                case Qt.Key_VolumeMute:
-                    manager.mute()
-                    break;
-
-                case Qt.Key_M:
-                    manager.mute()
-                    break;
-
-                case Qt.Key_Minus: /* Minus Sign */
-                    manager.adjustVolume(-1)
-                    break;
-                case Qt.Key_T:
-                    if(playlist.state==="showing")
-                        playlist.state="hidden"
-                    else
-                        playlist.state = "showing"
-                    break;
-                case Qt.Key_Delete:
-                       dceplayer.flipColors = !dceplayer.flipColors
-                    break;
-
-                case Qt.Key_S:
-                    manager.stopMedia()
-                    break;
-
-                case Qt.Key_Pause:
-                    manager.pauseMedia()
-                    break;
-                case Qt.Key_P:
-                    manager.pauseMedia()
-                    break;
-
-                case Qt.Key_PageUp:
-                    manager.changedPlaylistPosition(mediaplaylist.currentIndex-1)
-                    break;
-
-                case Qt.Key_PageDown:
-                    manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
-                    break;
-                default:
-                    console.log(event.key)
-                    break
-                }
+        Connections{
+            target:manager
+            onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
+            onMediaPlayerIdChanged:{
+                console.log("initializing media player"+manager.mediaPlayerID)
+                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
             }
         }
 
-        Loader {
-            id:pageLoader
-            objectName: "loadbot"
-            focus:true
-            height: manager.appHeight - data_header.height
-            width: manager.appWidth
-            anchors.top: data_header.bottom
-            onSourceChanged:  loadin
-            onLoaded: {
-                console.log("Screen Changed:" + pageLoader.source)
+        onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
+        onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
+        onMediaPlayingChanged: {
+            console.log("Media Playback status changed locally "+dceplayer.mediaBuffer);
+            if(dceplayer.mediaPlaying){
+                hideUI()
+                forceActiveFocus()
             }
-            visible: !dceplayer.focus
-            z:5
-            Keys.onTabPressed: hideUI()
+            else{
+                hideUI()
+
+            }
         }
 
+        Keys.onPressed: {
 
-        Loader{
-            id:componentLoader
-            height: parent.height
-            width: parent.width
-            objectName: "componentbot"
-            onLoaded: {
-                console.log("Component is loaded")
-                componentLoader.z = 5
+            switch(event.key){
+            case Qt.Key_Back:
+                manager.changedPlaylistPosition((mediaplaylist.currentIndex-++1));
+                break;
+            case Qt.Key_Forward:
+                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1))
+                break;
+            case 16777347: /* Keycode Track forward */
+                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1));
+                break;
+            case 16777346: /* Keycode Track Backwards */
+                manager.changedPlaylistPosition((mediaplaylist.currentIndex-1))
+                break;
+            case Qt.Key_Plus: /*Plus sign */
+                manager.adjustVolume(+1)
+                break;
+            case Qt.Key_Tab:
+                hideUI()
+                break;
+
+            case Qt.Key_VolumeMute:
+                manager.mute()
+                break;
+
+            case Qt.Key_M:
+                manager.mute()
+                break;
+
+            case Qt.Key_Minus: /* Minus Sign */
+                manager.adjustVolume(-1)
+                break;
+            case Qt.Key_T:
+                if(playlist.state==="showing")
+                    playlist.state="hidden"
+                else
+                    playlist.state = "showing"
+                break;
+            case Qt.Key_Delete:
+                dceplayer.flipColors = !dceplayer.flipColors
+                break;
+
+            case Qt.Key_S:
+                manager.stopMedia()
+                break;
+
+            case Qt.Key_Pause:
+                manager.pauseMedia()
+                break;
+            case Qt.Key_P:
+                manager.pauseMedia()
+                break;
+
+            case Qt.Key_PageUp:
+                manager.changedPlaylistPosition(mediaplaylist.currentIndex-1)
+                break;
+
+            case Qt.Key_PageDown:
+                manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
+                break;
+            default:
+                console.log(event.key)
+                break
             }
-            z:5
-            focus:false
         }
+    }
+
+    Loader {
+        id:pageLoader
+        objectName: "loadbot"
+        focus:true
+        height: manager.appHeight - data_header.height
+        width: manager.appWidth
+        anchors.top: data_header.bottom
+        onSourceChanged:  loadin
+        onLoaded: {
+            console.log("Screen Changed:" + pageLoader.source)
+        }
+        visible: !dceplayer.focus
+        z:5
+        Keys.onTabPressed: hideUI()
+    }
+
+
+    Loader{
+        id:componentLoader
+        height: parent.height
+        width: parent.width
+        objectName: "componentbot"
+        onLoaded: {
+            console.log("Component is loaded")
+            componentLoader.z = 5
+        }
+        z:5
+        focus:false
+    }
 
 
 
