@@ -90,9 +90,13 @@ public slots:
     void setReady(bool r){ready = r; readyChanged();}
     bool getReady() {return ready;}
     void forceUpdate(){
-       currentImage.scaled(width(), height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        QPixmap t = currentImage.scaled(width(), height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        if(!t.isNull()){
+            currentImage = t;
+        }
         update(0,0,width(), height());
         qWarning() << "Update forced";
+        delete t;
     }
     Q_INVOKABLE  void setImageList(QStringList l);
 private:

@@ -12,7 +12,7 @@ OTHER_FILES += \
 
 
 SUBDIRS += ../qOrbiter_src/plugins/AudioVisual \
-             ../qOrbiter_src/plugins/DceScreenSaver/dcescreensaver.pro
+             ../qOrbiter_src/plugins/DceScreenSaver
 SUBDIRS += ../qOrbiter_src
 
 #folder_01.source = ../qOrbiter_src/qml/desktop
