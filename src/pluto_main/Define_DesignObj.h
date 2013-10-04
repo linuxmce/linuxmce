@@ -2892,6 +2892,9 @@
 #define DESIGNOBJ_butFwd2sec_CONST 6290
 #define DESIGNOBJ_icoDeleteVoicemail_CONST 6291
 #define DESIGNOBJ_objKeypadOverlay_CONST 6292
+#define DESIGNOBJ_mnuWDTVLive_CONST 6293
+#define DESIGNOBJ_butEscape_CONST 6294
+#define DESIGNOBJ_mnuGamesOptions_MAMEMESS_CONST 6295
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"

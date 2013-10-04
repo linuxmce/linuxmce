@@ -291,6 +291,7 @@
 #define SCREEN_Weather_3day_CONST 305
 #define SCREEN_Weather_6day_CONST 306
 #define SCREEN_Weather_Radar_CONST 307
+#define SCREEN_WD_HDTVLive_Remote_CONST 308
 
 #define SCREEN_TABLE "Screen"
 #define SCREEN_PK_SCREEN_FIELD "PK_Screen"
