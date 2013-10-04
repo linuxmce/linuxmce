@@ -866,7 +866,7 @@ bool ScreenHandler::MediaBrowser_DatagridSelected(CallBackData *pData)
 		
 		// Previously, this was getting called each and every time a cell was being selected, causing severe slow-down on large
 		// data grids! This should only be called for !Fxxxx items! -tschak
-		if (cActionItem=='F')
+		if (cActionItem!='A') // Actually, this should only be called for everything NOT an attribute. -tschak
 			GetAttributesForMediaFile(pCell_List->m_Value);
 
 		if( cActionItem=='A' )
