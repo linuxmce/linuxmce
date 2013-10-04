@@ -90,7 +90,12 @@ public slots:
     void setReady(bool r){ready = r; readyChanged();}
     bool getReady() {return ready;}
     void forceUpdate(){
-        QPixmap t = currentImage.scaled(width(), height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+#ifdef __ANDROID__
+        QPixmap t = currentImage.scaled(width(), height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+#else
+         QPixmap t = currentImage.scaled(width(), height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+#endif
+
         if(!t.isNull()){
             currentImage = t;
         }
