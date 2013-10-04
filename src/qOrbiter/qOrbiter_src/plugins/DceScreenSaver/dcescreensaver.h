@@ -96,7 +96,7 @@ public slots:
         }
         update(0,0,width(), height());
         qWarning() << "Update forced";
-        delete t;
+        t=NULL;
     }
     Q_INVOKABLE  void setImageList(QStringList l);
 private:

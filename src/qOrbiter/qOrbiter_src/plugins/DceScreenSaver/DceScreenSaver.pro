@@ -77,7 +77,13 @@ OTHER_FILES+= android/res/values-rs/strings.xml \
 }
 
 !equals(_PRO_FILE_PWD_, $$DESTDIR) {
-    copy_qmldir.target = ../../../platforms/Android/androidComponents/DceScreenSaver/qmldir
+
+QMLDIR_TARGET=../../../platforms/Android/androidComponents/DceScreenSaver/qmldir
+linux-g++{
+   QMLDIR_TARGET=$DESTDIR
+}
+
+
     copy_qmldir.depends = $$_PRO_FILE_PWD_/qmldir
     copy_qmldir.commands = $(COPY_FILE) \"$$replace(copy_qmldir.depends, /, $$QMAKE_DIR_SEP)\" \"$$replace(copy_qmldir.target, /, $$QMAKE_DIR_SEP)\"
     QMAKE_EXTRA_TARGETS += copy_qmldir
