@@ -14,7 +14,7 @@ DeviceData_Impl *DIAL_Data::CreateData(DeviceData_Impl *Parent,char *pDataBlock,
 	int iPK_Installation = b.Read_unsigned_long();
 	int iPK_DeviceTemplate = b.Read_unsigned_long();
 	switch(iPK_DeviceTemplate) {
-		case 2268:
+		case 2269:
 			return new DIAL_Data();
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateData for unknown type %d.", iPK_DeviceTemplate);
@@ -24,7 +24,7 @@ DeviceData_Impl *DIAL_Data::CreateData(DeviceData_Impl *Parent,char *pDataBlock,
 Event_Impl *DIAL_Event::CreateEvent( unsigned long dwPK_DeviceTemplate, ClientSocket *pOCClientSocket, unsigned long dwDevice )
 {
 	switch(dwPK_DeviceTemplate) {
-		case 2268:
+		case 2269:
 			return (Event_Impl *) new DIAL_Event(pOCClientSocket, dwDevice);
 	};
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got CreateEvent for unknown type %d.", dwPK_DeviceTemplate);
