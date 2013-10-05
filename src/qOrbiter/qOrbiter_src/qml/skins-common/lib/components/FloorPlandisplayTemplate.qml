@@ -3,9 +3,11 @@ import QtQuick 1.1
 Item {
     objectName: "floorplan_display"
     id:floorplandisplay
-    width:manager.appWidth
-    height: manager.appHeight
-    Component.onCompleted:{ floorplan_devices.setCurrentPage(1)}
+    width:pageLoader.width
+    height: pageLoader.height
+    Component.onCompleted:{
+        floorplan_devices.setCurrentPage(1)
+    }
     property int scaleFactor:floorplanimage.scale
     property alias bg:phil
     property bool useList:true
@@ -78,13 +80,13 @@ Item {
             fillMode: Image.PreserveAspectCrop
             source: ""
             anchors.centerIn: parent
-            scale: floorplanimage.height > floorplanimage.width ? .65 : .65
+            scale: floorplanimage.height > floorplanimage.width ? .60 : .65
         }
 
     }
 
     Item{
-        height: childrenRect.height + 5
+        height: scaleY(10) + 5
         width: scaleX(35)
         anchors.right: parent.right
         Text{
@@ -96,13 +98,12 @@ Item {
 
         ListView{
             id:floorplanlist
-            height: scaleY(10)
+           anchors { top: parent.top; bottom: parent.bottom; left: parent.left; right: parent.right }
             width: scaleX(35)
             model:floorplan_pages
             clip:true
             visible: floorplan_pages.count !==0 ? useList ? true : false : false
-            anchors.top: fplabel.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
+
 
             delegate:Rectangle{
                 height: scaleY(9)
