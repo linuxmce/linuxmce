@@ -69,22 +69,7 @@ QHash<int, QByteArray> ListModel::roleNames() const
     return m_prototype->roleNames();
 }
 
-ListModel::~ListModel() {
-    beginResetModel();
-    if(resetInternalData()){
-        setProgress(0.0);
-        totalcells = 0;
-        loadingStatus = false;
-        progress = 0;
-        setTotalPages(0);
-        QApplication::processEvents(QEventLoop::AllEvents);
-        endResetModel();
-        emit modelReset();
-        QApplication::processEvents(QEventLoop::AllEvents);
-        delete m_prototype;
-    }
 
-}
 
 void ListModel::appendRow(gridItem *item)
 {

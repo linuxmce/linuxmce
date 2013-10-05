@@ -336,9 +336,6 @@ int main(int argc, char* argv[])
             fm=true;
         }
 
-        // orbiterWin.mainView.rootContext()->setContextProperty("dcerouter", &pqOrbiter); //dcecontext object bad!
-        typedef QMap <int, QString> myMap;
-        int throwaway = qRegisterMetaType<myMap>("myMap");
         QThread dceThread;
         qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
 
@@ -359,34 +356,14 @@ int main(int argc, char* argv[])
         orbiterWin.mainView.engine()->addImageProvider("listprovider", &modelimageprovider);
         pqOrbiter.moveToThread(&dceThread);
         QObject::connect(&dceThread, SIGNAL(started()), &pqOrbiter, SLOT(beginSetup()));
-#ifndef QT5
-        QThread *epgThread = new QThread; //for playlists and epg of all types. only one will be active a given time inthe app
-#endif
+
         //stored video playlist for managing any media that isnt live broacast essentially
         PlaylistClass *storedVideoPlaylist = new PlaylistClass (new PlaylistItemClass);
 
         //epg listmodel, no imageprovider as of yet
         EPGChannelList *simpleEPGmodel = new EPGChannelList(new EPGItemClass);
-#ifndef QT5
-        //  simpleEPGmodel->moveToThread(dceThread);
-#endif
-
-#ifndef QT5
-        QThread * mediaThread = new QThread();
-#endif
 
         ListModel *mediaModel = new ListModel(new gridItem);
-        mediaModel->moveToThread(w.thread());
-        storedVideoPlaylist->moveToThread(w.thread());
-        simpleEPGmodel->moveToThread(w.thread());
-#ifndef QT5
-        //   mediaModel->moveToThread(mediaThread);
-#endif
-
-
-#ifndef QT5
-        //advancedProvider->moveToThread(mediaThread);
-#endif
 
         TimeCodeManager *timecode = new TimeCodeManager();
         orbiterWin.mainView.rootContext()->setContextProperty("logger", &localLogger);
@@ -418,7 +395,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(destroyed()), &dceThread, SLOT(quit()), Qt::QueuedConnection);
         QObject::connect(&dceThread, SIGNAL(finished()), &dceThread, SLOT(deleteLater()));
         QObject::connect(&a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()));
-        QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));
+       // QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));
 
 
         QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
@@ -699,13 +676,6 @@ int main(int argc, char* argv[])
         //   QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &pqOrbiter, SLOT(setdceIP(QString)));
         dceThread.start();
 
-
-        // tcThread->start();
-#ifndef QT5
-        //mediaThread->start();
-        //epgThread->start();
-#endif
-
         //#ifdef Q_OS_LINUX
         //        QProcess p;
         //        p.start("awk", QStringList() << "/MemTotal/ { print $2 }" << "/proc/meminfo");
@@ -754,11 +724,11 @@ int main(int argc, char* argv[])
         pqOrbiter.qmlSetup(PK_Device, QString::fromStdString(sRouter_IP));
         a.exec();
 
-        localLogger.deleteLater();
-        timecode->deleteLater();
-        mediaModel->deleteLater();
-        storedVideoPlaylist->deleteLater();
-        simpleEPGmodel->deleteLater();
+//        localLogger.deleteLater();
+//        timecode->deleteLater();
+//        mediaModel->deleteLater();
+//        storedVideoPlaylist->deleteLater();
+//        simpleEPGmodel->deleteLater();
     }
 
 

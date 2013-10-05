@@ -29,7 +29,7 @@ class ListModel : public QAbstractListModel
 
 public:
     explicit ListModel(gridItem* prototype, QObject* parent = 0);
-    ~ListModel();
+
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     //int columnCount(const QModelIndex &parent) const {return 1;}
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;

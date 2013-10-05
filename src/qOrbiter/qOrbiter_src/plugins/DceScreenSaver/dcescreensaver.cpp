@@ -19,6 +19,7 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     m_animationTimer = startTimer(animationInterval);
 
     fadeOpacity = 1;
+    currentScale = 1;
     setFlag(ItemHasNoContents, false);
     currentUrl = "";
     active = false;
@@ -33,9 +34,16 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     qDebug() << "Screensaver ctor";
     currentImage.fill(Qt::black);
     fadeAnimation = new QPropertyAnimation(this, "fadeOpacity");
+
     fadeAnimation->setDuration(2500);
     fadeAnimation->setStartValue(0.0);
     fadeAnimation->setEndValue(1.0);
+
+    zoomAnimation = new QPropertyAnimation(this, "currentScale");
+    zoomAnimation->setStartValue(1);
+    zoomAnimation->setEndValue(1.25);
+    zoomAnimation->setDuration(interval);
+
     surface.fill(Qt::black);
     QObject::connect(this, SIGNAL(heightChanged()), this, SLOT(forceUpdate()));
     QObject::connect(this, SIGNAL(widthChanged()), this, SLOT(forceUpdate()));
@@ -102,6 +110,8 @@ void DceScreenSaver::processImageData(QNetworkReply *r)
 
 
   startFadeTimer(2500);
+  beginZoom();
+
 }
 
 void DceScreenSaver::getNextImage()
@@ -133,11 +143,15 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
 
     //draw old frame first
     QRectF tgtRect(0,0,width(), height());
+    QSize scaledSize;
+    scaledSize.setHeight(height()*currentScale);
+    scaledSize.setWidth(width()*currentScale);
+
     p->drawPixmap(tgtRect, surface, tgtRect);
 
     //setup and new pix map over it
     p->setOpacity(fadeOpacity);
-
+    //p->scale();
     //create 'composed image'
     p->drawPixmap(tgtRect, currentImage, tgtRect);
 }
@@ -157,7 +171,7 @@ void DceScreenSaver::timerEvent(QTimerEvent *event)
 
 void DceScreenSaver::beginZoom()
 {
-
+//zoomAnimation->start();
 }
 
 void DceScreenSaver::startFadeTimer(int time)

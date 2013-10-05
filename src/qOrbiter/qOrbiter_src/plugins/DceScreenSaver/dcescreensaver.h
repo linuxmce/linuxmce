@@ -18,6 +18,7 @@ class DceScreenSaver : public QDeclarativeItem
     Q_PROPERTY(int interval READ getInterval WRITE setInterval NOTIFY intervalChanged)
     Q_PROPERTY(int pictureCount READ getPictureCount NOTIFY pictureCountChanged)
     Q_PROPERTY(double fadeOpacity READ getFadeOpacity WRITE setFadeOpacity NOTIFY fadeOpacityChanged)
+    Q_PROPERTY(double currentScale READ getCurrentScale WRITE setCurrentScale NOTIFY currentScaleChanged)
 
 public:
     DceScreenSaver(QDeclarativeItem *parent = 0);
@@ -30,7 +31,7 @@ public:
     bool ready;
     int interval;
     double fadeOpacity;
-
+    double currentScale;
     QString requestUrl;
     int pictureCount;
     QStringList urlList;
@@ -38,6 +39,8 @@ public:
     QPixmap currentImage;
     QPixmap surface;
     QPropertyAnimation *fadeAnimation;
+    QPropertyAnimation *panAnimation;
+    QPropertyAnimation *zoomAnimation;
     int m_animationTimer;
     int tick;
 
@@ -54,9 +57,14 @@ signals:
     void pictureCountChanged();
     void urlListReady();
     void fadeOpacityChanged();
+    void currentScaleChanged();
+
 
 
 public slots:
+
+    void setCurrentScale(double d){ currentScale =d;}
+    double getCurrentScale(){return currentScale;}
 
     void setFadeOpacity(double d){ fadeOpacity = d; emit fadeOpacityChanged();}
     double getFadeOpacity(){return fadeOpacity;}
