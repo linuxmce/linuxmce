@@ -314,3 +314,4 @@ void MediaAttributes::LoadStreamAttributesForDisc(MediaStream *pMediaStream)
 		}
 	}
 }
+

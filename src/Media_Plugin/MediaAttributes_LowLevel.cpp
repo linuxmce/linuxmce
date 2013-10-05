@@ -1787,3 +1787,24 @@ int MediaAttributes_LowLevel::GetOwnerForPath(string sPath)
 
 	return nEK_Users_Private;
 }
+
+void MediaAttributes_LowLevel::UpdateAttributeCache()
+{
+  string sSQL = "SELECT File_Attribute.FK_File, Attribute.FK_AttributeType, Attribute.Name FROM Attribute JOIN File_Attribute ON FK_Attribute = PK_Attribute";
+  PlutoSqlResult result;
+  DB_ROW row;
+  
+  if ( (result.r = m_pDatabase_pluto_media->db_wrapper_query_result(sSQL)) )
+    {
+      m_mapAttributeCache.clear();
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT UpdateAttributeCache begin");
+      while ( (row = db_wrapper_fetch_row( result.r )) )
+	{
+	  int FK_File = atoi(row[0]);
+	  int FK_AttributeType = atoi(row[1]);
+	  string sName = row[2];
+	  m_mapAttributeCache[make_pair(FK_File,FK_AttributeType)] = sName;
+	}
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT UpdateAttributeCache end");
+    }  
+}

@@ -232,22 +232,28 @@ public:
 	{
 		if( m_dwPK_File )
 		{
-			vector<Row_Attribute *> vectRow_Attribute;
-			pMediaAttributes_LowLevel->m_pDatabase_pluto_media->Attribute_get()->GetRows(
-				"JOIN File_Attribute ON FK_Attribute = PK_Attribute "
-				"WHERE FK_File = " + StringUtils::ltos(m_dwPK_File) + " AND "
-				"FK_AttributeType = " + StringUtils::ltos(nAttributeType),
-				&vectRow_Attribute
-			);
-
-			if(!vectRow_Attribute.empty())
+		  map<pair<int, int>, string>::iterator it = pMediaAttributes_LowLevel->m_mapAttributeCache.find(make_pair(m_dwPK_File, nAttributeType));
+		  if (it!=pMediaAttributes_LowLevel->m_mapAttributeCache.end()) // cache hit
+		    {
+		      return it->second;
+		    }
+		  else // cache miss
+		    {
+		      vector<Row_Attribute *> vectRow_Attribute;
+		      pMediaAttributes_LowLevel->m_pDatabase_pluto_media->Attribute_get()->GetRows(
+												   "JOIN File_Attribute ON FK_Attribute = PK_Attribute "
+												   "WHERE FK_File = " + StringUtils::ltos(m_dwPK_File) + " AND "
+												   "FK_AttributeType = " + StringUtils::ltos(nAttributeType),
+												   &vectRow_Attribute
+												   );
+		      if(!vectRow_Attribute.empty())
 			{
-				Row_Attribute *pRow_Attribute = vectRow_Attribute[0];
-				return pRow_Attribute->Name_get();
+			  Row_Attribute *pRow_Attribute = vectRow_Attribute[0];
+			  return pRow_Attribute->Name_get();
 			}
+		      return "";
+		    }
 		}
-
-		return "";
 	}
 };
 

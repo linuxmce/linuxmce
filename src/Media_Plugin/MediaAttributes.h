@@ -84,6 +84,7 @@ public:
 	void AddAttributeToStream(MediaStream *pMediaStream,Row_Attribute *pRow_Attribute,int File,int Track,int Section);
 	void LoadStreamAttributes(MediaStream *pMediaStream);
 	void LoadStreamAttributesForDisc(MediaStream *pMediaStream);
+	void UpdateAttributeCache();
 };
 
 #endif

@@ -105,7 +105,7 @@ extern int UniqueColors[MAX_MEDIA_COLORS];
 class DataGridTable *Media_Plugin::MediaBrowser( string GridID, string Parms, void *ExtraData, int *iPK_Variable, string *sValue_To_Assign, class Message *pMessage )
 {
 	string::size_type pos=0;
-
+	cout << "MediaBrowser Begin" << endl;
 	int PK_MediaType = atoi(StringUtils::Tokenize( Parms,"|",pos ).c_str());
 	string sPK_MediaSubType = StringUtils::Tokenize( Parms,"|",pos );
 	string sPK_FileFormat = StringUtils::Tokenize( Parms,"|",pos );
@@ -139,10 +139,11 @@ class DataGridTable *Media_Plugin::MediaBrowser( string GridID, string Parms, vo
 	g_bInclFiles=g_bInclDiscs=g_bInclDownload=true;
 #endif
 
+	cout << "XXX Before MediaListGrid initialize" << endl;
 	MediaListGrid *pMediaListGrid = new MediaListGrid(m_pDatagrid_Plugin,this,PK_MediaType);
 	if( sPK_Sources.size()==0 || !PK_MediaType )
 		return pMediaListGrid;
-
+	cout << "XXX After MediaListGrid Initialize" << endl;
 	bool bIdentifiesFile = true;
 	if( PK_AttributeType_Sort>0 )
 		if( m_mapMediaType_AttributeType_Identifier.find( make_pair<int,int> ( PK_MediaType,PK_AttributeType_Sort ) )==m_mapMediaType_AttributeType_Identifier.end() )
@@ -158,11 +159,11 @@ class DataGridTable *Media_Plugin::MediaBrowser( string GridID, string Parms, vo
 	else
 		pMediaListGrid->m_listFileBrowserInfo.sort(FileBrowserInfoComparer); 
 
-for(list<FileBrowserInfo *>::iterator ittemp=pMediaListGrid->m_listFileBrowserInfo.begin();ittemp!=pMediaListGrid->m_listFileBrowserInfo.end();++ittemp)
-{
-	FileBrowserInfo *pf = *ittemp;
-LoggerWrapper::GetInstance()->Write(LV_WARNING, "list %s : %s date: %d", pf->m_sDisplayGroup.c_str(), pf->m_sDisplayName.c_str(), (int) pf->m_tLastViewed);
-}
+//for(list<FileBrowserInfo *>::iterator ittemp=pMediaListGrid->m_listFileBrowserInfo.begin();ittemp!=pMediaListGrid->m_listFileBrowserInfo.end();++ittemp)
+//{
+//	FileBrowserInfo *pf = *ittemp;
+//LoggerWrapper::GetInstance()->Write(LV_WARNING, "list %s : %s date: %d", pf->m_sDisplayGroup.c_str(), pf->m_sDisplayName.c_str(), (int) pf->m_tLastViewed);
+//}
 
 	pMediaListGrid->m_pFileBrowserInfoPtr = new FileBrowserInfoPtr[ pMediaListGrid->m_listFileBrowserInfo.size() ];
 
@@ -220,7 +221,7 @@ LoggerWrapper::GetInstance()->Write(LV_WARNING, "list %s : %s date: %d", pf->m_s
 	if( itdg!=m_pDatagrid_Plugin->m_DataGrids.end() )
 		delete itdg->second;
 	m_pDatagrid_Plugin->m_DataGrids["_" + GridID]=pMediaListGrid_CoverArt;  // The same grid is used for both icons and lists.  If the name starts with an _, it is assumed to be an icon grid
-
+	cout << "End MediaBrowser" << endl;
 	return pMediaListGrid;
 }
 
@@ -292,7 +293,6 @@ void Media_Plugin::AttributesBrowser( MediaListGrid *pMediaListGrid,int PK_Media
 	bool bFile=false,bDiscs=false,bSubDirectory=false,bBookmarks=false,bDownload=false;
 	string sPath,sPath_Back;
 	string::size_type pos=0;
-
 	bool bUsingDirectory=false;
 	if( sPK_Sources.find("\t!D")!=string::npos )  // The user is drilling down into a directory
 	{
@@ -705,7 +705,6 @@ void Media_Plugin::PopulateFileBrowserInfoForFile(MediaListGrid *pMediaListGrid,
 			{
 					// I have to fix the case where lack of title attribute no longer returns null.
 
-					LoggerWrapper::GetInstance()->Write(LV_STATUS,"row[2] = %s",row[2]);
 					if (row[2] != NULL && string(row[2]).empty()) {
 						row[2] = NULL;					
 					}

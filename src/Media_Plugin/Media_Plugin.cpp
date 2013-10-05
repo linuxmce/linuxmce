@@ -23,6 +23,10 @@
 #include "PlutoUtils/Other.h"
 
 #include <iostream>
+#include <sstream>
+#include <iterator>     // std::ostream_iterator
+#include <algorithm>    // std::copy
+
 using namespace std;
 using namespace DCE;
 
@@ -113,6 +117,7 @@ using namespace DCE;
 #define WAITING_FOR_JUKEBOX						3
 #define UPDATE_VIEW_DATE						4
 #define UPDATE_SEARCH_TOKENS					5
+#define UPDATE_ATTRIBUTE_CACHE 6
 
 #define TIMEOUT_JUKEBOX							60
 
@@ -1117,6 +1122,7 @@ continue;
 	CMD_Refresh_List_of_Online_Devices();
 	m_pAlarmManager->AddRelativeAlarm(15,this,CHECK_FOR_NEW_FILES,NULL);
 	m_pAlarmManager->AddRelativeAlarm(600,this,UPDATE_SEARCH_TOKENS,NULL);
+	m_pAlarmManager->AddRelativeAlarm(30,this,UPDATE_ATTRIBUTE_CACHE,NULL);
 
 	// and finally, start the Job Handler thread.
 	bool bResult = m_pJobHandler->StartThread();
@@ -1814,6 +1820,7 @@ void Media_Plugin::HandleAVAdjustments(MediaStream *pMediaStream,string sAudio,s
 
 void Media_Plugin::StartMedia( int iPK_MediaType, int iPK_MediaProvider, unsigned int iPK_Device_Orbiter, vector<EntertainArea *>  &vectEntertainArea, int iPK_Device, int iPK_DeviceTemplate, deque<MediaFile *> *p_dequeMediaFile, bool bQueue, bool bResume, int iRepeat, string sStartingPosition, vector<MediaStream *> *p_vectMediaStream)
 {
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT StartMedia - Main function start");
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::StartMedia iPK_MediaType %d iPK_MediaProvider %d iPK_Device_Orbiter %d vectEntertainArea %d iPK_Device %d iPK_DeviceTemplate %d p_dequeMediaFile %p bResume %d iRepeat %d sStartingPosition %s p_vectMediaStream %p",
 		iPK_MediaType, iPK_MediaProvider, iPK_Device_Orbiter, (int) vectEntertainArea.size(), iPK_Device, iPK_DeviceTemplate, p_dequeMediaFile, (int) bResume, iRepeat, sStartingPosition.c_str(), p_vectMediaStream);
 
@@ -1913,6 +1920,7 @@ void Media_Plugin::StartMedia( int iPK_MediaType, int iPK_MediaProvider, unsigne
 	if( p_dequeMediaFile_Copy )
 		for(size_t s=0;s<p_dequeMediaFile_Copy->size();++s)
 			delete (*p_dequeMediaFile_Copy)[s];
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT StartMedia main constructor end.");
 }
 
 int Media_Plugin::GetMediaTypeForFile(deque<MediaFile *> *p_dequeMediaFile,vector<EntertainArea *>  &vectEntertainArea)
@@ -1970,7 +1978,7 @@ int Media_Plugin::GetMediaTypeForFile(deque<MediaFile *> *p_dequeMediaFile,vecto
 MediaStream *Media_Plugin::StartMedia( MediaHandlerInfo *pMediaHandlerInfo, int iPK_MediaProvider, unsigned int PK_Device_Orbiter, vector<EntertainArea *> &vectEntertainArea, int PK_Device_Source, deque<MediaFile *> *dequeMediaFile, bool bQueue, bool bResume,int iRepeat, string sStartingPosition, int iPK_Playlist,map<int, pair<MediaDevice *,MediaDevice *> > *p_mapEntertainmentArea_OutputZone)
 {
     PLUTO_SAFETY_LOCK(mm,m_MediaMutex);
-
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT StartMedia OutputZone begin.");
 	// Be sure all the files are in the database
 	for(size_t s=0;s<dequeMediaFile->size();++s)
 	{
@@ -2119,6 +2127,8 @@ dequeMediaFile->size() ? (*dequeMediaFile)[0]->m_sPath.c_str() : "NO",
 		pMediaStream->m_iStreamID_get(),pMediaStream->m_pOH_Orbiter_StartedMedia ? pMediaStream->m_pOH_Orbiter_StartedMedia->m_pDeviceData_Router->m_dwPK_Device : 0,
 		pMediaStream->m_iPK_Users,pMediaStream->m_dwPK_Device_Remote);
 
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT StartMedia OutputZone end.");
+
 	if( StartMedia(pMediaStream,p_mapEntertainmentArea_OutputZone) )
 		return pMediaStream;
 	// delete pMediaStream; // can't do this here because I'm not sure we always still own the pointer at this point
@@ -2127,6 +2137,7 @@ dequeMediaFile->size() ? (*dequeMediaFile)[0]->m_sPath.c_str() : "NO",
 
 bool Media_Plugin::StartMedia(MediaStream *pMediaStream,map<int, pair<MediaDevice *,MediaDevice *> > *p_mapEntertainmentArea_OutputZone)
 {
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT StartMedia OutputZone - MediaStream - Begin");
 	if( !pMediaStream->m_pMediaDevice_Source )
 	{
 		if( pMediaStream->m_pOH_Orbiter_StartedMedia )
@@ -2222,11 +2233,13 @@ bool Media_Plugin::StartMedia(MediaStream *pMediaStream,map<int, pair<MediaDevic
 		}
 	}
 
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT StartMedia - OutputZone - MediaStream - end.");
 	return StartMedia(pMediaStream);
 }
 
 bool Media_Plugin::StartMedia(MediaStream *pMediaStream)
 {
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT StartMedia pMediaStream Start");
 #ifdef SIM_JUKEBOX
 	static bool bToggle=false;
 	MediaFile *pMediaFile = pMediaStream->GetCurrentMediaFile();
@@ -2261,7 +2274,9 @@ bool Media_Plugin::StartMedia(MediaStream *pMediaStream)
 			pMediaStream->m_iDequeMediaFile_Pos=pos;
 	}
 
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT StartMedia - pMediaStream - LoadStreamAttributes begin");
 	m_pMediaAttributes->LoadStreamAttributes(pMediaStream);
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT StartMedia - pMediaStream - LoadStreamAttributes end");
 
 	string sError;
 	if( pMediaStream->m_pMediaHandlerInfo->m_pMediaHandlerBase->StartMedia(pMediaStream,sError) )
@@ -2382,7 +2397,7 @@ bool Media_Plugin::StartMedia(MediaStream *pMediaStream)
 	}
 
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Media_Plugin::StartMedia() function call completed with honors!");
-
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT StartMedia - pMediaStream - end.");
 	return true;
 }
 
@@ -3665,76 +3680,84 @@ void Media_Plugin::CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_Med
 		{
 			string sDataGridID = "MediaFile_" + sFilename.substr(2);
 			DataGridTable *pDataGridTable = m_pDatagrid_Plugin->DataGridTable_get(sDataGridID);
+			vector<int> vectFiles;
+			vector<int> vectAttributes;
+
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT !G BEGIN!");
+
+			// This is so there is always at least one entry in here, so the queries won't fail. It will not affect the overall query at all.
+			vectFiles.push_back(0);
+			vectAttributes.push_back(0);
+
 			if( pDataGridTable )
 			{
-				for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+			  // This whole block of code has been rewritten, replacing the sql2cpp calls, with something
+			  // far more optimized for this case. If it sucks, make it better! -tschak
+			  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT DataGridTable suck begin!");
+			  for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
+			    {
+			      // Traverse the datagrid, grabbing all the cell values, and shoving them into file or attribute vectors
+			      // respectively.
+			      DataGridCell *pCell = it->second;
+			      const char *pValue = pCell->GetValue();
+			      if ( pCell && pValue )
 				{
-					DataGridCell *pCell = it->second;
-					const char *pValue = pCell->GetValue();
-					if( pCell && pValue )
-					{
-						if( pValue[0]=='!' && pValue[1]=='F' )
-						{
-							int PK_File = atoi(&pValue[2]);
-							Row_File *pRow_File = m_pDatabase_pluto_media->File_get()->GetRow(PK_File);
-							bool bIsMissing=1;
-							if (pRow_File)
-							  {
-							    bIsMissing=pRow_File->Missing_get();
-							  }
-							else
-							  {
-							    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not get File row for PK_File %d",PK_File);
-							  }
-							int PK_MediaType=0;
-							string sFilename = m_pMediaAttributes->m_pMediaAttributes_LowLevel->GetFilePathFromFileID(PK_File,&PK_MediaType);
-							if( sFilename.empty()==false && !IgnoreFileForMediaType(sFilename, PK_MediaType) && !bIsMissing)
-							{
-								MediaFile *pMediaFile = new MediaFile(m_pMediaAttributes->m_pMediaAttributes_LowLevel,
-									PK_File,
-									sFilename);
-								pMediaFile->m_dwPK_MediaType=PK_MediaType;
-								dequeMediaFile.push_back(pMediaFile);
-							}
-						}
-						else if( pValue[0]=='!' && pValue[1]=='A' )
-						{
-							Row_Attribute *pRow_Attribute = m_pDatabase_pluto_media->Attribute_get()->GetRow( atoi(&pValue[2]) );
-							if( !pRow_Attribute )
-							{
-								LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::CMD_MH_Play_Media Attribute lookup on %s is invalid",pValue);
-								return;
-							}
-
-							vector<Row_File_Attribute *> vectRow_File_Attribute;
-							pRow_Attribute->File_Attribute_FK_Attribute_getrows(&vectRow_File_Attribute);
-							for(size_t s=0;s<vectRow_File_Attribute.size();++s)
-							{
-								Row_File_Attribute *pRow_File_Attribute = vectRow_File_Attribute[s];
-								Row_File *pRow_File = pRow_File_Attribute->FK_File_getrow();
-								bool bIsMissing=1;
-								if( pRow_File )
-								{
-								  bIsMissing=pRow_File->Missing_get();
-								  if (!bIsMissing && !IgnoreFileForMediaType(pRow_File->Path_get() + "/" + pRow_File->Filename_get(),pRow_File->EK_MediaType_get()))
-									{
-										MediaFile *pMediaFile = new MediaFile(m_pMediaAttributes->m_pMediaAttributes_LowLevel,pRow_File->PK_File_get(),pRow_File->Path_get() + "/" + pRow_File->Filename_get());
-										pMediaFile->m_dwPK_MediaType=pRow_File->EK_MediaType_get();
-										dequeMediaFile.push_back(pMediaFile);
-									}
-								}
-							}
-						} else if ( pValue[0]=='/' )
-						{
-						        // Assume file name
-						        MediaFile *pMediaFile = new MediaFile(string(pValue));
-							dequeMediaFile.push_back(pMediaFile);
-						}
-					}
+				  if ( pValue[0]=='!' && pValue[1]=='F' )
+				    {
+				      int PK_File = atoi(&pValue[2]);
+				      vectFiles.push_back(PK_File);
+				    }
+				  else if ( pValue[0]=='!' && pValue[1]=='A' )
+				    {
+				      int PK_Attribute = atoi(&pValue[2]);
+				      vectAttributes.push_back(PK_Attribute);
+				    }
 				}
+			    }
+			 
+			    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT DataGridTable suck end!");
+ 
+			  // At this point, we should have two vectors of files and attributes, that we can literally just plop right into
+			  // an IN() set.
+
+			  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT vector to string begin!");
+			  stringstream ssFiles, ssAttributes;
+			  copy(vectFiles.begin(), vectFiles.end(), ostream_iterator<int>(ssFiles, ",")); // both of these have a trailing comma.
+			  copy(vectAttributes.begin(), vectAttributes.end(), ostream_iterator<int>(ssAttributes, ","));
+			  string sFiles = ssFiles.str();
+			  string sAttributes = ssAttributes.str();
+
+			  sFiles = sFiles.substr(0, sFiles.length()-1); // Get rid of the trailing comma.
+			  sAttributes = sAttributes.substr(0, sAttributes.length()-1); // huzzah!
+			  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT vector to string end!");
+			  
+			  string sSQL = "SELECT File.PK_File, CONCAT(File.Path, '/', File.Filename), File.EK_MediaType from File, File_Attribute "
+			    "WHERE File.PK_File = File_Attribute.FK_File AND FK_Attribute IN (" + sAttributes  +") AND IsDirectory=0 AND Missing=0 "
+			    "UNION "
+			    "SELECT File.PK_File, CONCAT(File.Path, '/', File.Filename), EK_MediaType from File "
+			    "WHERE File.PK_File IN (" + sFiles + ") AND IsDirectory=0 AND Missing=0";
+
+			  PlutoSqlResult result;
+			  DB_ROW row;
+
+			  if ( (result.r = m_pDatabase_pluto_media->db_wrapper_query_result(sSQL)) )
+			    {
+			      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT populate dequeMediaFile begin");
+			      while ( (row = db_wrapper_fetch_row( result.r )) )
+				{
+				  int PK_File = atoi(row[0]);
+				  string sFilename = row[1];
+				  int PK_MediaType = atoi(row[2]);
+				  MediaFile *pMediaFile = new MediaFile(m_pMediaAttributes->m_pMediaAttributes_LowLevel, PK_File, sFilename);
+				  pMediaFile->m_dwPK_MediaType=PK_MediaType;
+				  dequeMediaFile.push_back(pMediaFile);
+				}
+			      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT populate dequeMediaFile end");
+			    }
 			}
 			if( dequeMediaFile.empty() )
 				return; // Nothing to do; the grid was empty
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT !G END!");
 		}
 		else
 			TransformFilenameToDeque(sFilename, dequeMediaFile);  // This will convert any !A, !F, !B etc.
@@ -3816,8 +3839,10 @@ void Media_Plugin::CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_Med
 		}
 	}
 
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT Final Sort!");
 	//sort them by album, track, filename
 	std::sort(dequeMediaFile.begin(), dequeMediaFile.end(), MediaFileComparer);
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT Final Sort End!");
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_MH_Play_Media playing MediaType: %d Provider %d Orbiter %d Device %d Template %d",
 		iPK_MediaType,iPK_MediaProvider,iPK_Device_Orbiter,iPK_Device,iPK_DeviceTemplate);
@@ -6676,6 +6701,8 @@ void Media_Plugin::AlarmCallback(int id, void* param)
 	}
 	else if( id==CHECK_FOR_NEW_FILES )
 		CMD_Check_For_New_Files();
+	else if( id==UPDATE_ATTRIBUTE_CACHE )
+	  m_pMediaAttributes->m_pMediaAttributes_LowLevel->UpdateAttributeCache();
 	else if( id==WAITING_FOR_JUKEBOX )
 	{
 		MediaStream *pMediaStream = m_mapMediaStream_Find((int)(long) param,0);

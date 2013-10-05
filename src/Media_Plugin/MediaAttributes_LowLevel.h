@@ -107,6 +107,7 @@ class MediaAttributes_LowLevel
 
 private:
     Database_pluto_media *m_pDatabase_pluto_media;
+    map<pair<int, int>,string> m_mapAttributeCache;
 
 public:
     /** @brief constructor */
@@ -198,6 +199,8 @@ public:
 			delete *it;
 		listMediaAttribute_.clear();
 	}
+
+	void UpdateAttributeCache();
 
 	static int GetOwnerForPath(string sPath);
 };
