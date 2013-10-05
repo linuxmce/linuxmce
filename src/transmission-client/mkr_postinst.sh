@@ -74,6 +74,7 @@ changeSetting "incomplete-dir" "$incompleteDir"
 changeSetting "incomplete-dir-enabled" "true"
 changeSetting "script-torrent-done-enabled" "true"
 changeSetting "script-torrent-done-filename" "/usr/pluto/bin/transmission-settings.sh torrentComplete \$TR_TORRENT_NAME"
+changeSetting "rpc-whitelist" "127.0.0.1,192.168.80.*"
 
 #Re-start the transmission-daemon service
 service transmission-daemon start
