@@ -8,32 +8,31 @@
 # Initial Release
 # Author - Rob Woodward
 # Changes - phenigma (phenigma@hotmail.com)
-#	integrated into lmce, pakcaged, installation common to lmce
+#       integrated into lmce, pakcaged, installation common to lmce
 
 transmissionSettings="/etc/transmission-daemon/settings.json"
 apachesettings="/etc/apache2/sites-available/LinuxMCE-ssl"
 
-changeSetting()
-{
-        #create a back-up of the current settings file
-        backup="_"`date '+%Y%m%d%k%M%S'`".bak"
-        oldSetting=$(grep "\"$1\":" $transmissionSettings|awk -F\: '{print $2}'|sed -e 's|\,||g' -e 's|^ *||g' -e 's| *$||g' -e 's|"|\\"|g')
-
-        if [ `echo ${oldSetting:1:1}` == '"' ]
-        then
-                sed -i$backup "s|\"$1\": $oldSetting,|\"$1\": \"$2\",|" $transmissionSettings
-        else
-                sed -i$backup "s|\"$1\": $oldSetting,|\"$1\": $2,|" $transmissionSettings
-        fi
-
-        echo $transmissionSettings$backup
-}
-
 addline()
 {
- sed -i "/$1/i$2" $3
+ sed -i "/$1/i$2" "$3"
 }
 
+changeSetting()
+{
+	if [ $(grep -c "$1" "$transmissionSettings") -gt 0 ]; then
+		# if setting exists, we change it
+		oldSetting=$(grep "\"$1\":" "$transmissionSettings"|awk -F\: '{print $2}'|sed -e 's|\,||g' -e 's|^ *||g' -e 's| *$||g' -e 's|"|\\"|g')
+		if [ $(echo ${oldSetting:1:1}) == '"' ]; then
+			sed -i "s|\"$1\": $oldSetting,|\"$1\": \"$2\",|" "$transmissionSettings"
+		else
+			sed -i "s|\"$1\": $oldSetting,|\"$1\": $2,|" "$transmissionSettings"
+		fi
+	else
+		# add the line if the setting does not already exist
+		addline "}" "\ \ \ \ \"$1\": $2" "$transmissionSettings"
+	fi
+}
 
 DBName='transmission_links'
 
@@ -42,9 +41,9 @@ mysql -e "CREATE DATABASE IF NOT EXISTS $DBName;"
 mysql -e "CREATE TABLE IF NOT EXISTS Torrent_Links (Link_ID int NOT NULL AUTO_INCREMENT, Torrent_Location TEXT NOT NULL, Rar_File VARCHAR(250) NULL, Link_Location TEXT NOT NULL, Link_Name VARCHAR(100), Link_Type VARCHAR(10) NOT NULL, Link_Status VARCHAR(10) NULL, PRIMARY KEY (Link_ID));" $DBName
 
 #Adding the user
-mysql -e "GRANT SELECT, INSERT, UPDATE, DELETE ON transmission_links.* TO 'transmission'@'localhost' IDENTIFIED BY '';"
-mysql -e "GRANT SELECT, INSERT, UPDATE, DELETE ON transmission_links.* TO 'transmission'@'127.0.0.1' IDENTIFIED BY '';"
-mysql -e "GRANT SELECT, INSERT, UPDATE, DELETE ON transmission_links.* TO 'transmission'@'192.168.80.*' IDENTIFIED BY '';"
+mysql -e "GRANT SELECT, INSERT, UPDATE, DELETE ON $DBName.* TO 'transmission'@'localhost' IDENTIFIED BY '';"
+mysql -e "GRANT SELECT, INSERT, UPDATE, DELETE ON $DBName.* TO 'transmission'@'127.0.0.1' IDENTIFIED BY '';"
+mysql -e "GRANT SELECT, INSERT, UPDATE, DELETE ON $DBName.* TO 'transmission'@'192.168.80.%' IDENTIFIED BY '';"
 mysql -e "FLUSH PRIVILEGES;"
 
 
@@ -55,48 +54,31 @@ usermod -a -G public debian-transmission
 
 completeDir="/home/public/torrents/complete"
 incompleteDir="/home/public/torrents/incomplete"
-mkdir -p $completeDir
-mkdir -p $incompleteDir
+mkdir -p "$completeDir"
+mkdir -p "$incompleteDir"
 
-chown debian-transmission:debian-transmission $completeDir
-chown debian-transmission:debian-transmission $incompleteDir
+chown debian-transmission:debian-transmission "$completeDir"
+chown debian-transmission:debian-transmission "$incompleteDir"
 
 #Now edit the transmission settings file to complete installation
 service transmission-daemon stop
 
+#create a back-up of the current settings file
+if [[ -e "$transmissionSettings" ]]; then
+	cp -a "$transmissionSettings" "$transmissionSettings".lmcebackup
+fi
+
 #Change each of the settings
 changeSetting "download-dir" "$completeDir"
-#Add a slight pause to make sure we don't overwrite the original back-up file, then followinf aren't important to back-up
-sleep 2
-backup=$(changeSetting "incomplete-dir" "$incompleteDir")
-rm $backup
-
-sleep 2
-backup=$(changeSetting "incomplete-dir-enabled" true)
-rm $backup
-
-if [ `grep -c "script-torrent-done-enabled" "$transmissionSettings"` -gt 0 ]
-then
-	sleep 2
-	backup=$(changeSetting "script-torrent-done-enabled" true)
-	rm $backup
-else
-	addline "}" "\ \ \ \ \"script-torrent-done-enabled\": true" "$transmissionSettings"
-fi
-
-if [ `grep -c "script-torrent-done-filename" "$transmissionSettings"` -gt 0 ]
-then
-	sleep 2
-	backup=$(changeSetting "script-torrent-done-filename" "/usr/pluto/bin/transmission-settings.sh torrentComplete \$TR_TORRENT_NAME")
-	rm $backup
-else
-	addline "}" "\ \ \ \ \"script-torrent-done-filename\": \"/usr/pluto/bin/transmission-settings.sh torrentComplete \$TR_TORRENT_NAME\"" "$transmissionSettings"
-fi
+changeSetting "incomplete-dir" "$incompleteDir"
+changeSetting "incomplete-dir-enabled" "true"
+changeSetting "script-torrent-done-enabled" "true"
+changeSetting "script-torrent-done-filename" "/usr/pluto/bin/transmission-settings.sh torrentComplete \$TR_TORRENT_NAME"
 
 #Re-start the transmission-daemon service
 service transmission-daemon start
 
-if [ ! `grep -c "$apachesettings" "#####  Transmission-daemon lines #####"` ]
+if [ ! $(grep -c "#####  Transmission-daemon lines #####" "$apachesettings") ]
 then
 	#Finally, sort out the Apache Settings
 	addline "<\/VirtualHost>" "\ \ \ \ \ \ \ \ #################################################################" "$apachesettings"
@@ -129,3 +111,4 @@ then
 fi
 
 exit 0
+
