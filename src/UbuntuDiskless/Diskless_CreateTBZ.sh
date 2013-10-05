@@ -595,6 +595,10 @@ case "$TARGET_DISTRO" in
 		VerifyExitCode "xserver-xorg$TARGET_KVER_LTS_HES install failed"
 		LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all"$TARGET_KVER_LTS_HES" linux-firmware
 		VerifyExitCode "Ancillary programs install failed"
+
+		# Install plymouth theme on MD in Ubuntu
+		LC_ALL=C chroot $TEMP_DIR apt-get -y install lmce-plymouth-theme
+		VerifyExitCode "MCE plymouth theme install failed"
 		;;
 	"raspbian")
 		#Install nfs-common and openssh-server
@@ -612,12 +616,6 @@ esac
 
 #implement external_media_identifier fix
 LC_ALL=C chroot $TEMP_DIR ln -s /usr/lib/libdvdread.so.4 /usr/lib/libdvdread.so.3
-
-# Install plymouth theme on MD in Lucid
-if [[ "$TARGET_RELEASE" == "lucid" ]]; then
-	LC_ALL=C chroot $TEMP_DIR apt-get -y install lmce-plymouth-theme
-	VerifyExitCode "MCE plymouth theme install failed"
-fi
 
 }
 
