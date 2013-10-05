@@ -19,7 +19,7 @@ Item{
     width: manager.appWidth
     anchors.top: parent.top
     anchors.horizontalCenter: parent.horizontalCenter
-    visible: height=== 0 ? false: true //manager.currentScreen === "Screen_1.qml" ? true : false
+   // visible: height=== 0 ? false: true //manager.currentScreen === "Screen_1.qml" ? true : false
 
     Behavior on height{
         PropertyAnimation{
@@ -69,6 +69,7 @@ Item{
             id:screensaverStatus
             text:"Screen saver is "+glScreenSaver.running + " with " + glScreenSaver.pictureCount + " Pics. Timeout set to "+manager.screenSaverTimeout
             visible: dataheader.visible && manager.currentScreen==="Screen_1.qml"
+            fontSize: manager.currentScreen === "Screen_1.qml" ? 20 : 0
         }
 
         MediaListInfoBar{

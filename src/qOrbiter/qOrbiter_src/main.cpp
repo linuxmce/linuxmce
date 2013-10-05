@@ -212,6 +212,8 @@ int main(int argc, char* argv[])
 #endif
 
     QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
+    QCoreApplication::setOrganizationDomain("org.linuxmce");
+    QCoreApplication::setOrganizationName("LinuxMCE");
 #ifdef ANDROID
     AndroidSystem androidHelper;
 

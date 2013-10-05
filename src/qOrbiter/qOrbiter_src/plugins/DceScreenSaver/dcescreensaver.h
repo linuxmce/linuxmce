@@ -120,7 +120,6 @@ protected:
     void startFadeTimer(int time);
     void stopFadeTimer();
 
-
     void paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget);
     void timerEvent(QTimerEvent *event);
 

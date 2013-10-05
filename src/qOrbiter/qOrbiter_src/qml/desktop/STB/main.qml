@@ -61,7 +61,7 @@ Item {
     FontLoader{
         id:myFont
         name:"Sawasdee"
-        source: "../default/fonts/Sawasdee.ttf"
+        source: "../../skins-common/fonts/Sawasdee.ttf"
     }
 
     ListModel{

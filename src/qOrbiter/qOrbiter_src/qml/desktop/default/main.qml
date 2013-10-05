@@ -61,13 +61,19 @@ Item {
         id:glScreenSaver
         height: manager.appHeight
         width: manager.appWidth
-
+        focus:true
         interval:8000
         anchors.centerIn: parent
         requestUrl:manager.m_ipAddress
         Connections{
             target:manager
             onScreenSaverImagesReady:glScreenSaver.setImageList(manager.screensaverImages)
+        }
+        MouseArea{
+            anchors.fill: parent
+            hoverEnabled: true
+            onPressed:if(glScreenSaver.activeFocus) hideUI()
+            onMousePositionChanged: if(glScreenSaver.activeFocus) hideUI()
         }
 
     }
@@ -129,17 +135,32 @@ Item {
         console.log("Ui visibility check")
         if(dceplayer.mediaPlaying)
         {
+            hideUiTimer.stop()
+
             if(dceplayer.activeFocus){
+                hideUiElements = false
                 pageLoader.forceActiveFocus()
                 console.log("PageLoader item focus::"+pageLoader.focus)
+                hideUiTimer.start()
             } else{
                 dceplayer.forceActiveFocus()
                 console.log("Dceplayer focus::"+dceplayer.focus)
+                hideUiElements = true
+
             }
         }
         else{
             console.log("No local media playing.")
-            pageLoader.forceActiveFocus()
+            if(pageLoader.activeFocus){
+               glScreenSaver.forceActiveFocus()
+                hideUiTimer.stop()
+                hideUiElements = true
+            }else{
+              pageLoader.forceActiveFocus()
+                hideUiElements = false
+                hideUiTimer.start()
+            }
+
         }
     }
 
@@ -189,7 +210,7 @@ Item {
     DataHeader {
         id: data_header
         z:6
-        visible:pageLoader.visible
+       opacity: pageLoader.opacity
     }
 
 
@@ -225,7 +246,6 @@ Item {
             }
             else{
                 hideUI()
-
             }
         }
 
@@ -308,7 +328,14 @@ Item {
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
         }
-        visible: !dceplayer.focus
+        opacity: hideUiElements ? 0 : 1
+        Behavior on opacity {
+            PropertyAnimation{
+                duration: 350
+
+            }
+        }
+
         z:5
         Keys.onTabPressed: hideUI()
     }
