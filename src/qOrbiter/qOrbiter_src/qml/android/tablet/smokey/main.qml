@@ -1,14 +1,20 @@
-import QtQuick 1.0
+import QtQuick 1.1
 import DceScreenSaver 1.0
 import "../../../skins-common/lib/handlers"
 import "components"
 
 Item {
     id: qml_root
-
-    onWidthChanged: console.log(width+"::"+height)
     height:manager.appHeight
     width:manager.appWidth
+
+    //    anchors{
+//        top:parent.top
+//        bottom: parent.bottom
+//        left: parent.left
+//        right:parent.right
+//    }
+
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
@@ -18,8 +24,6 @@ Item {
 
     property string locationinfo: "standby"
     property string screenfile
-    property string dynamic_height
-    property string dynamic_width
 
     function scaleX(x){
         return x/100*qml_root.width
@@ -27,32 +31,33 @@ Item {
     function scaleY(y){
         return y/100*qml_root.height
     }
+
     focus:true
     Keys.onReleased:{
 
-            switch(event.key){
-            case Qt.Key_Menu:
-                console.log("menu button caught in root!")
-                break;
-            case Qt.Key_VolumeUp:
-                console.log("Vol up")
-                break;
-            case Qt.Key_VolumeDown:
-                console.log("vol down")
-                break;
-               case Qt.Key_MediaPrevious:
-                   console.log("Caught back button! Phew!")
-                   break;
-               case Qt.Key_Back:
-                   console.log("Caught Back again! Tricky...")
-                   break;
-               default:
-                   console.log("I have no idea what key " + event.key + " is. ")
-                   break;
-            }
-
-            event.accepted= true
+        switch(event.key){
+        case Qt.Key_Menu:
+            console.log("menu button caught in root!")
+            break;
+        case Qt.Key_VolumeUp:
+            console.log("Vol up")
+            break;
+        case Qt.Key_VolumeDown:
+            console.log("vol down")
+            break;
+        case Qt.Key_MediaPrevious:
+            console.log("Caught back button! Phew!")
+            break;
+        case Qt.Key_Back:
+            console.log("Caught Back again! Tricky...")
+            break;
+        default:
+            console.log("I have no idea what key " + event.key + " is. ")
+            break;
         }
+
+        event.accepted= true
+    }
     Rectangle{
         anchors.fill: parent
         id:bgFill
@@ -118,53 +123,62 @@ Item {
     }
 
     DceScreenSaver{
-         id:glScreenSaver
-         height:parent.height
-         width: parent.width
-         interval:30000
-         anchors.centerIn: parent
-         requestUrl:manager.m_ipAddress
-         Component.onCompleted: {
+        id:glScreenSaver
+        anchors{
+            top:qml_root.top
+            bottom:qml_root.bottom
+            left: qml_root.left
+            right: qml_root.right
+        }
+        interval:30000
+
+        requestUrl:manager.m_ipAddress
+        Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)
-         }
+        }
 
-         Connections{
-             target:manager
-             onScreenSaverImagesReady:{
-                 glScreenSaver.setImageList(manager.screensaverImages)
-                 console.log("Orbiter Consume Screensaver images")
-                 console.log("Orbiter counts " + glScreenSaver.pictureCount)
-             }
-         }
+        Connections{
+            target:manager
+            onScreenSaverImagesReady:{
+                glScreenSaver.setImageList(manager.screensaverImages)
+                console.log("Orbiter Consume Screensaver images")
+                console.log("Orbiter counts " + glScreenSaver.pictureCount)
+            }
+        }
 
-     }
-//    Item{
-//        id:mini_screen_saver
-//        anchors.fill: qml_root
+    }
+    //    Item{
+    //        id:mini_screen_saver
+    //        anchors.fill: qml_root
 
-//        Timer{
-//            id:mini_ss_timer
-//            interval:10000
-//            running: true // screensaver.active
-//            triggeredOnStart: true
-//            onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
-//            repeat: true
-//        }
+    //        Timer{
+    //            id:mini_ss_timer
+    //            interval:10000
+    //            running: true // screensaver.active
+    //            triggeredOnStart: true
+    //            onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
+    //            repeat: true
+    //        }
 
-//        Image{
-//            id:mini_screen_saver_image
-//            height: mini_screen_saver.height
-//            width: mini_screen_saver.width
-//            source: "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
-//        }
-//    }
+    //        Image{
+    //            id:mini_screen_saver_image
+    //            height: mini_screen_saver.height
+    //            width: mini_screen_saver.width
+    //            source: "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
+    //        }
+    //    }
 
     Loader {
         id:pageLoader
         objectName: "loadbot"
         focus: true
-        height: qml_root.height-nav_row.height-info_panel.height
-        anchors.top: nav_row.bottom
+        anchors{
+            top: nav_row.bottom
+            bottom:info_panel.top
+            left:qml_root.left
+            right:qml_root.right
+        }
+
         Keys.onBackPressed: console.log("back")
         onSourceChanged:  loadin
         onLoaded: {
@@ -188,6 +202,7 @@ Item {
                           }
     }
     Rectangle{
+        id:nav_fill
         anchors.fill: nav_row
         color: "black"
         opacity: .65
@@ -197,7 +212,7 @@ Item {
         id: nav_row
     }
     MediaPopup{
-    id:media_notification
+        id:media_notification
     }
 
     InformationPanel {

@@ -2,8 +2,11 @@ import QtQuick 1.0
 import "../../../../skins-common/lib/components"
 Item{
     id:phoneFloorplanLayout
-    height: manager.appHeight
-    width:manager.appWidth
+  anchors{
+   top:parent.top
+bottom: parent.bottom
+  }
+  width: manager.appWidth
     focus:true
     property bool rotated:manager.b_orientation
     property string imageDir:""

@@ -4,6 +4,14 @@ Item{
     id:styled_button
     height: button_label.paintedHeight < scaleY(5) ? scaleY(5) : button_label.paintedHeight+(button_label.paintedHeight*.02)
     width:opacity ? button_label.paintedWidth < scaleX(10) ? scaleX(10) : (button_label.paintedWidth) + (button_label.paintedWidth*.02) :0
+
+//    anchors{
+//        left: button_label.left
+//        right: button_label.right
+//        top:button_label.top
+//        bottom:button_label.bottom
+//    }
+
     property string phil:fly_trap.pressed ? "green": "black"
     property int textSize:28
     property alias buttonText:button_label
