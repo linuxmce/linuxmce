@@ -254,7 +254,7 @@ Setup_AsoundConf()
 			;;
 		*)
 			CardDevice="0"
-			SoundOut="plug:dmix:"
+			SoundOut="dmix:"
 			ConnectType="analog"
 			;;
 	esac
