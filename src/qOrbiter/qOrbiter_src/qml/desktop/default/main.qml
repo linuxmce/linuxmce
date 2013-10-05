@@ -188,7 +188,7 @@ Item {
 
     Timer{
         id:hideUiTimer
-        interval:10000  //screensaverTimer
+        interval:screensaverTimer*1000
         running: true
         repeat: true
         onTriggered: hideUI()
