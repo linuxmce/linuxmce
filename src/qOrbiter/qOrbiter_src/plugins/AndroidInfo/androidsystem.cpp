@@ -30,6 +30,7 @@ static jmethodID displayID = 0;
 static jmethodID s_qtactivity_field =0;
 static jclass s_qtactivity = 0;
 static jmethodID s_qtActivity_PlayMediaMethod=0;
+static jclass s_mediaPlayerCLass = 0;
 
 
 AndroidSystem::AndroidSystem(QObject *parent) :
@@ -128,7 +129,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 
     s_qtactivity = (jclass)env->NewGlobalRef(env->FindClass("org/kde/necessitas/origo/QtActivity"));
     s_qtactivity_field = env->GetStaticMethodID(s_qtactivity, "getActivity", "()Lorg/kde/necessitas/origo/QtActivity;");
-
+    s_mediaPlayerCLass = (jclass)env->NewGlobalRef(env->FindClass("org/kde/necessitas/origo/VideoActivity"));
     env->DeleteLocalRef(lesc);
     env->DeleteLocalRef(lfpid);
 
