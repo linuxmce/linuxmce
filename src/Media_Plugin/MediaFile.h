@@ -235,6 +235,7 @@ public:
 		  map<pair<int, int>, string>::iterator it = pMediaAttributes_LowLevel->m_mapAttributeCache.find(make_pair(m_dwPK_File, nAttributeType));
 		  if (it!=pMediaAttributes_LowLevel->m_mapAttributeCache.end()) // cache hit
 		    {
+		      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"WWWW GetAttributeValue - Cache Hit - %s",it->second.c_str());
 		      return it->second;
 		    }
 		  else // cache miss
@@ -249,11 +250,14 @@ public:
 		      if(!vectRow_Attribute.empty())
 			{
 			  Row_Attribute *pRow_Attribute = vectRow_Attribute[0];
+			  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"WWWW GetAttributeValue - Cache Miss - %s",pRow_Attribute->Name_get().c_str());
 			  return pRow_Attribute->Name_get();
 			}
+		      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"WWWW GetAttributeValue - NULL Value!");
 		      return "";
 		    }
 		}
+		return ""; // We need one here now, because of the cache. -tschak
 	}
 };
 
