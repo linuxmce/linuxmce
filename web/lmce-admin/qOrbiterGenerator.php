@@ -10,14 +10,24 @@
 //initialization area
 if (isset($_GET["d"])) {
   $deviceID = $_GET['d'];
-} else if( isset($_GET["m"]) ){
+exit;
+} 
+else if( isset($_GET["m"]) ){
 	echo getMountPounts();
 	exit;
-}else if(isset($_GET['c']) ) {
-echo getCommandParameters($_GET['c']);
+}
+else if(isset($_GET["c"]) ) {
+echo getCommandParameters($_GET["c"]);
 exit;
-} else
-{
+}
+
+else if( isset($_GET["id"]) ) {
+
+sendMedia($_GET["id"]);
+exit;
+}
+
+else{
    die("Please specify the device ID with d=xxxx");
 }
 $server = "localhost";
@@ -856,5 +866,33 @@ $p1Array = array();
 $paramArray["params"] = $p1Array;
  return json_encode($paramArray);
 
-}	
+}
+
+
+function sendMedia($fkFile){
+$server = "localhost";
+$mysqlUser = "root";
+$mysqlPass = "";
+
+$conn = mysql_connect($server, $mysqlUser, $mysqlPass);
+mysql_select_db("pluto_media", $conn);
+
+$file = "";
+
+$sql = "SELECT * FROM `File` WHERE `PK_File` =".$fkFile.";";
+$res = mysql_query(mysql_real_escape_string($sql), $conn) or die(mysql_error($conn));
+
+while ($row = mysql_fetch_array($res)){
+
+$file=$row["Path"]."/".$row["Filename"];
+};
+
+
+
+
+$tr = file_get_contents($file);
+
+echo $tr;
+}
+	
 ?>
