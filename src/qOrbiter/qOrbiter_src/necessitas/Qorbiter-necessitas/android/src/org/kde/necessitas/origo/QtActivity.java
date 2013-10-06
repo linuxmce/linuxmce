@@ -136,6 +136,12 @@ public class QtActivity extends Activity
 
         startActivity(new Intent(this, VideoActivity.class));
     }
+    
+    
+    public void startAudioService(String url){    	
+		Intent i = new Intent(this , LinuxmceAudioService.class);
+    	startService(i);
+    }
 
   //This version sends an implicit intent that android will handle for us.
 //    public void playMedia(String url) {

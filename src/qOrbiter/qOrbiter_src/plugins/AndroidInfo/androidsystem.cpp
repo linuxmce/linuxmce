@@ -31,6 +31,7 @@ static jmethodID s_qtactivity_field =0;
 static jclass s_qtactivity = 0;
 static jmethodID s_qtActivity_PlayMediaMethod=0;
 static jclass s_mediaPlayerCLass = 0;
+static jmethodID s_serviceStart = 0;
 
 
 AndroidSystem::AndroidSystem(QObject *parent) :
@@ -84,12 +85,17 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
     s_qtactivity = (jclass)env->NewGlobalRef(env->FindClass("org/kde/necessitas/origo/QtActivity"));
     s_qtactivity_field = env->GetStaticMethodID(s_qtactivity, "getActivity", "()Lorg/kde/necessitas/origo/QtActivity;");
     s_qtActivity_PlayMediaMethod = env->GetMethodID(s_qtactivity, "playMedia", "(Ljava/lang/String;)V");
+    s_serviceStart = env->GetMethodID(s_qtactivity, "startAudioService", "(Ljava/lang/String;)V");
 
-    if (!s_qtActivity_PlayMediaMethod)
+    if (!s_serviceStart)
        {
            qCritical()<<"Can't find playMedia method";
 
        }
+    else{
+
+
+    }
 
     jclass localBuildClass = env->FindClass("android/os/Build");
     buildVersionClass = reinterpret_cast<jclass>(env->NewGlobalRef(localBuildClass));
@@ -151,6 +157,8 @@ bool AndroidSystem::findClassIdents()
         return false;
     }
 
+
+
     m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
     setStatusMessage("Device info Gather complete.");
     m_pvm->DetachCurrentThread();
@@ -197,6 +205,10 @@ bool AndroidSystem::updateExternalStorageLocation()
         qCritical()<<"AttachCurrentThread failed";
         return false;
     }
+
+    QString url = "http://fr.ahfm.com:9000";
+    jstring str = env->NewString(reinterpret_cast<const jchar*>(url.constData()), url.length());
+    jboolean res = env->CallBooleanMethod(m_qtActivity, s_serviceStart, str);
     qCritical("Storage Searching..");
 
     if(externalStorageClass!=0){
