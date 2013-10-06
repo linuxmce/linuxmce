@@ -73,7 +73,7 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             onPressed:if(glScreenSaver.activeFocus) hideUI()
-            onMousePositionChanged: if(glScreenSaver.activeFocus) hideUI()
+
         }
 
     }
