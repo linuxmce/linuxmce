@@ -10,7 +10,7 @@
 //initialization area
 if (isset($_GET["d"])) {
   $deviceID = $_GET['d'];
-exit;
+
 } 
 else if( isset($_GET["m"]) ){
 	echo getMountPounts();
@@ -20,16 +20,16 @@ else if(isset($_GET["c"]) ) {
 echo getCommandParameters($_GET["c"]);
 exit;
 }
-
 else if( isset($_GET["id"]) ) {
 
 sendMedia($_GET["id"]);
 exit;
 }
-
 else{
    die("Please specify the device ID with d=xxxx");
 }
+
+
 $server = "localhost";
 $mysqlUser = "root";
 $mysqlPass = "";
