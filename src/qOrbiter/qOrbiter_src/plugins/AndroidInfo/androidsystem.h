@@ -132,10 +132,11 @@ public slots:
     bool playMedia(QString url);
 
 private:
-
+    bool startAudioService();
     bool findClassIdents();
     bool getDisplayInfo();
     jobject m_qtActivity;
+    jobject m_audioService;
 
 };
 

@@ -3,10 +3,10 @@
  */
 package org.kde.necessitas.origo;
 
+import android.os.Binder;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-
 import android.media.MediaPlayer;
 import android.util.Log;
 import java.io.IOException;
@@ -19,84 +19,101 @@ import android.media.MediaPlayer.OnPreparedListener;
  *
  */
 public class LinuxmceAudioService extends Service implements
-		 Runnable, OnBufferingUpdateListener, OnErrorListener, OnCompletionListener, OnPreparedListener {
-	
-	 private static final String TAG = "LinuxMCE Audio Service";
-	  private MediaPlayer mp;
-	  private String current;
-	  
-	  private void playAudio(String url) {
-		    try {
-		      //      final String path = mPath.getText().toString();
-		      final String path = url; //"http://192.168.80.1/lmce-admin/qOrbiterGenerator.php?id=20818";
+OnBufferingUpdateListener, OnErrorListener, OnCompletionListener, 
+OnPreparedListener {
 
-		      Log.v(TAG, "path: " + path);
-
-		      // If the path has not changed, just start the media player
-		      if (path.equals(current) && mp != null) {
-		        mp.start();
-		        return;
-		      }
-		      current = path;
-
-		      // Create a new media player and set the listeners
-		      mp = new MediaPlayer();
-		      mp.setOnErrorListener(this);
-		      mp.setOnBufferingUpdateListener(this);
-		      mp.setOnCompletionListener(this);
-		      mp.setOnPreparedListener(this);
-		      mp.setAudioStreamType(2);
-
-		      // Set the surface for the video output
-		     // mp.setDisplay(holder);
-
-		      // Set the data source in another thread
-		      // which actually downloads the mp3 or videos
-		      // to a temporary location
-		      Runnable r = new Runnable() {
-		        public void run() {
-		          try {
-		            mp.setDataSource(path);
-		            mp.prepare();
-		          } catch (IOException e) {
-		            Log.e(TAG, e.getMessage(), e);
-		          }
-		          Log.v(TAG, "Duration:  ===>" + mp.getDuration());
-		          mp.start();
-		        }
-		      };
-		      new Thread(r).start();
-		    } catch (Exception e) {
-		        Log.e(TAG, "error: " + e.getMessage(), e);
-		        if (mp != null) {
-		            mp.stop();
-		            mp.release();
-		        }
-		    }
-		  }
-	  
-	/* (non-Javadoc)
-	 * @see java.lang.Runnable#run()
-	 */
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-
-	}
-
-	/* (non-Javadoc)
-	 * @see android.widget.MediaController.MediaPlayerControl#canPause()
-	 */
+	private final IBinder mBinder = new LocalBinder();
+	private static final String TAG = "LinuxMCE Audio Service";
+	private MediaPlayer mp;
+	private String current;
 
 
-	/* (non-Javadoc)
-	 * @see android.app.Service#onBind(android.content.Intent)
-	 */
+	public class LocalBinder extends Binder {
+		LinuxmceAudioService getService() {
+			// Return this instance of LocalService so clients can call public methods
+			return LinuxmceAudioService.this;
+		}
+	}	  
+
 	@Override
 	public IBinder onBind(Intent arg0) {
-		// TODO Auto-generated method stub
-		return null;
+		//
+		return mBinder;
 	}
+
+	public void onCreate(){
+		// Create a new media player and set the listeners
+		mp = new MediaPlayer();
+		mp.setOnErrorListener(this);
+		mp.setOnBufferingUpdateListener(this);
+		mp.setOnCompletionListener(this);
+		mp.setOnPreparedListener(this);
+		mp.setAudioStreamType(2);
+		Log.d(TAG, "Created Linuxmce Audio Service");	
+
+	}
+
+	public void onDestroy(){
+
+	}
+
+	@Override 
+	public int onStartCommand(Intent intent , int flags, int startId){
+		Log.d(TAG, "Started Linuxmce Audio Service");
+
+		return Service.START_NOT_STICKY;
+	}
+
+	public void setIntentRedeliver(boolean enabled){
+
+	}
+
+
+	public void playAudio(String url) {
+		try {
+			//      final String path = mPath.getText().toString();
+			final String path = url; //"http://192.168.80.1/lmce-admin/qOrbiterGenerator.php?id=20818";
+
+			Log.v(TAG, "path: " + path);
+
+			// If the path has not changed, just start the media player
+			if (path.equals(current) && mp != null) {
+				mp.start();
+				return;
+			}
+			current = path;
+
+			// Set the data source in another thread
+			// which actually downloads the mp3 or videos
+			// to a temporary location
+			Runnable r = new Runnable() {
+				public void run() {
+					try {
+						mp.setDataSource(path);
+						mp.prepare();
+					} catch (IOException e) {
+						Log.e(TAG, e.getMessage(), e);
+					}
+					Log.v(TAG, "Duration:  ===>" + mp.getDuration());
+					mp.start();
+				}
+			};
+			new Thread(r).start();
+		} catch (Exception e) {
+			Log.e(TAG, "error: " + e.getMessage(), e);
+			if (mp != null) {
+				mp.stop();
+				mp.release();
+			}
+		}
+	}
+
+	public void stop(){
+		mp.stop();
+		mp.release();		  
+	}
+
+
 
 	/**
 	 * @param args
@@ -105,33 +122,31 @@ public class LinuxmceAudioService extends Service implements
 		// TODO Auto-generated method stub
 
 	}
-	
-	@Override 
-	public int onStartCommand(Intent intent , int flags, int startId){
-		Log.d(TAG, "Started Linuxmce Audio Service");
-		return Service.START_NOT_STICKY;
-	}
-	
+
+
+
+
 	public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
 		Log.e(TAG, "onError--->   what:" + what + "    extra:" + extra);
 		if (mediaPlayer != null) {
-		mediaPlayer.stop();
-		mediaPlayer.release();
+			mediaPlayer.stop();
+			mediaPlayer.release();
 		}
 		return true;
-		}
+	}
 
-		public void onBufferingUpdate(MediaPlayer arg0, int percent) {
+	public void onBufferingUpdate(MediaPlayer arg0, int percent) {
 		Log.d(TAG, "onBufferingUpdate called --->   percent:" + percent);
-		}
+	}
 
-		public void onCompletion(MediaPlayer arg0) {
+	public void onCompletion(MediaPlayer arg0) {
 		Log.d(TAG, "onCompletion called");
-		}
+	}
 
-		public void onPrepared(MediaPlayer mediaplayer) {
+	public void onPrepared(MediaPlayer mediaplayer) {
 		Log.d(TAG, "onPrepared called");
-		}
+	}
+
 
 
 }

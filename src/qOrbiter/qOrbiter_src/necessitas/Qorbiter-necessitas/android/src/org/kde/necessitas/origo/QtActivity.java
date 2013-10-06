@@ -35,6 +35,8 @@ import java.util.Arrays;
 
 import org.kde.necessitas.ministro.IMinistro;
 import org.kde.necessitas.ministro.IMinistroCallback;
+import org.kde.necessitas.origo.LinuxmceAudioService;
+import org.kde.necessitas.origo.LinuxmceAudioService.LocalBinder;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -52,6 +54,7 @@ import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -69,13 +72,14 @@ import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import dalvik.system.DexClassLoader;
 
+
 //@ANDROID-11
 //QtCreator import android.app.Fragment;
 //QtCreator import android.view.ActionMode;
 //QtCreator import android.view.ActionMode.Callback;
 //@ANDROID-11
 
-public class QtActivity extends Activity
+public class QtActivity<LocalBinder> extends Activity
 {
     private final static int MINISTRO_INSTALL_REQUEST_CODE = 0xf3ee; // request code used to know when Ministro instalation is finished
     private static final int MINISTRO_API_LEVEL=2; // Ministro api level (check IMinistro.aidl file)
@@ -126,22 +130,51 @@ public class QtActivity extends Activity
 
 
     public static QtActivity qtactivity;
+    
+    LinuxmceAudioService mService;
+    boolean mBound = false;
 
     public static QtActivity getActivity() {
       return qtactivity;
     }
 
     public void playMedia(String url) {
-        Uri uri = Uri.parse(url);
+    	mService.playAudio(url);
+       
+       
+    }
+    
+    
+    public void startAudioService(String url){ 
+    
+    }
+    
+    public void playAudioFile(String file){
+   	mService.playAudio(file);  	
+    	
+    }
+    
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
 
-        startActivity(new Intent(this, VideoActivity.class));
-    }
+        @Override
+        public void onServiceConnected(ComponentName className,
+                IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            LocalBinder binder = (LocalBinder) service;
+            mService = ((LinuxmceAudioService.LocalBinder)service).getService();
+            mBound = true;
+            
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
     
     
-    public void startAudioService(String url){    	
-		Intent i = new Intent(this , LinuxmceAudioService.class);
-    	startService(i);
-    }
+    
 
   //This version sends an implicit intent that android will handle for us.
 //    public void playMedia(String url) {
@@ -592,6 +625,11 @@ public class QtActivity extends Activity
                 setContentView(m_activityInfo.metaData.getInt("android.app.splash_screen"));
             startApp(true);
         }
+        
+    	Log.d("Linuxmce Audio Service", "Trying to start Linuxmce Audio Service");
+		Intent i = new Intent(this , LinuxmceAudioService.class);		
+		bindService(i, mConnection, this.BIND_AUTO_CREATE);
+        
     }
     //---------------------------------------------------------------------------
 

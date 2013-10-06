@@ -93,7 +93,7 @@ Item {
       */
     function checkLayout()
     {
-        console.log("c++ slot orientation changed")
+      //  console.log("c++ slot orientation changed")
     }
 
     //! Returns the value of the param value passed in scaled to a percentage of the current width value of the application window.
@@ -119,7 +119,7 @@ Item {
         {
             var s = String(screenname)
             manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-            console.log("eggs")
+            //console.log("eggs")
             manager.setCurrentScreen(screenname)
         }
         else if (pageLoader.status==Component.Error)
@@ -132,7 +132,7 @@ Item {
     }
 
     function hideUI(){
-        console.log("Ui visibility check")
+      //  console.log("Ui visibility check")
         if(dceplayer.mediaPlaying)
         {
             hideUiTimer.stop()
@@ -140,17 +140,17 @@ Item {
             if(dceplayer.activeFocus){
                 hideUiElements = false
                 pageLoader.forceActiveFocus()
-                console.log("PageLoader item focus::"+pageLoader.focus)
+               // console.log("PageLoader item focus::"+pageLoader.focus)
                 hideUiTimer.start()
             } else{
                 dceplayer.forceActiveFocus()
-                console.log("Dceplayer focus::"+dceplayer.focus)
+              //  console.log("Dceplayer focus::"+dceplayer.focus)
                 hideUiElements = true
 
             }
         }
         else{
-            console.log("No local media playing.")
+          //  console.log("No local media playing.")
             if(pageLoader.activeFocus){
                glScreenSaver.forceActiveFocus()
                 hideUiTimer.stop()
@@ -172,7 +172,7 @@ Item {
     {
         componentLoader.source = "components/"+componentName
         while(componentLoader.status === Component.Loading){
-            console.log(componentLoader.progress)
+          //  console.log(componentLoader.progress)
         }
 
         if (componentLoader.status == Component.Ready)
@@ -220,7 +220,7 @@ Item {
         anchors.left:parent.left
         focus:true
 
-        onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
+      //  onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
         z:dceplayer.mediaPlaying ==false ? -5 : 0
         Component.onCompleted: {
             setWindowSize(manager.appHeight, manager.appWidth);
@@ -239,7 +239,7 @@ Item {
         onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
         onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
         onMediaPlayingChanged: {
-            console.log("Media Playback status changed locally "+dceplayer.mediaBuffer);
+           // console.log("Media Playback status changed locally "+dceplayer.mediaBuffer);
             if(dceplayer.mediaPlaying){
                 hideUI()
                 forceActiveFocus()
@@ -347,7 +347,7 @@ Item {
         width: parent.width
         objectName: "componentbot"
         onLoaded: {
-            console.log("Component is loaded")
+          //  console.log("Component is loaded")
             componentLoader.z = 5
         }
         z:5

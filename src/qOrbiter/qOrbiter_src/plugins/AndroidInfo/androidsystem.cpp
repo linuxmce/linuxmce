@@ -30,7 +30,7 @@ static jmethodID displayID = 0;
 static jmethodID s_qtactivity_field =0;
 static jclass s_qtactivity = 0;
 static jmethodID s_qtActivity_PlayMediaMethod=0;
-static jclass s_mediaPlayerCLass = 0;
+
 static jmethodID s_serviceStart = 0;
 
 
@@ -89,7 +89,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 
     if (!s_serviceStart)
        {
-           qCritical()<<"Can't find playMedia method";
+           qCritical()<<"Can't findbackground audio service.";
 
        }
     else{
@@ -135,7 +135,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 
     s_qtactivity = (jclass)env->NewGlobalRef(env->FindClass("org/kde/necessitas/origo/QtActivity"));
     s_qtactivity_field = env->GetStaticMethodID(s_qtactivity, "getActivity", "()Lorg/kde/necessitas/origo/QtActivity;");
-    s_mediaPlayerCLass = (jclass)env->NewGlobalRef(env->FindClass("org/kde/necessitas/origo/VideoActivity"));
+
     env->DeleteLocalRef(lesc);
     env->DeleteLocalRef(lfpid);
 
@@ -156,8 +156,6 @@ bool AndroidSystem::findClassIdents()
         qCritical()<<"AttachCurrentThread failed";
         return false;
     }
-
-
 
     m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
     setStatusMessage("Device info Gather complete.");
@@ -206,9 +204,7 @@ bool AndroidSystem::updateExternalStorageLocation()
         return false;
     }
 
-    QString url = "http://fr.ahfm.com:9000";
-    jstring str = env->NewString(reinterpret_cast<const jchar*>(url.constData()), url.length());
-    jboolean res = env->CallBooleanMethod(m_qtActivity, s_serviceStart, str);
+
     qCritical("Storage Searching..");
 
     if(externalStorageClass!=0){
@@ -320,8 +316,6 @@ bool AndroidSystem::playMedia(QString url)
 
     qWarning("Settin url.");
 
-    url = "http://fr.ahfm.com:9000";
-
     jstring str = env->NewString(reinterpret_cast<const jchar*>(url.constData()), url.length());
 
       qWarning("Calling bool JNI method.");
@@ -330,4 +324,20 @@ bool AndroidSystem::playMedia(QString url)
     m_pvm->DetachCurrentThread();
     qWarning() << "Media Player success::" << res;
     return res;
+}
+
+bool AndroidSystem::startAudioService()
+{
+    JNIEnv* env;
+    if (m_pvm->AttachCurrentThread(&env, NULL)<0)
+    {
+        qCritical()<<"AttachCurrentThread failed";
+        return false;
+    }
+
+    qCritical("Initializing Audio Service");
+    QString url = "http://fr.ahfm.com:9000";
+    jstring str = env->NewString(reinterpret_cast<const jchar*>(url.constData()), url.length());
+    jboolean res = env->CallBooleanMethod(m_qtActivity, s_serviceStart, str);
+
 }
