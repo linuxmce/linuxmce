@@ -30,8 +30,11 @@ static jmethodID displayID = 0;
 static jmethodID s_qtactivity_field =0;
 static jclass s_qtactivity = 0;
 static jmethodID s_qtActivity_PlayMediaMethod=0;
+static jmethodID s_qtActivity_StopMediaMethod=0;
+static jmethodID s_qtActivity_SeekMediaMethod=0;
+static jmethodID s_qtActivity_MediaControlMethod=0;
 
-static jmethodID s_serviceStart = 0;
+
 
 
 AndroidSystem::AndroidSystem(QObject *parent) :
@@ -84,18 +87,8 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
     m_pvm = vm;
     s_qtactivity = (jclass)env->NewGlobalRef(env->FindClass("org/kde/necessitas/origo/QtActivity"));
     s_qtactivity_field = env->GetStaticMethodID(s_qtactivity, "getActivity", "()Lorg/kde/necessitas/origo/QtActivity;");
-    s_qtActivity_PlayMediaMethod = env->GetMethodID(s_qtactivity, "playMedia", "(Ljava/lang/String;)V");
-    s_serviceStart = env->GetMethodID(s_qtactivity, "startAudioService", "(Ljava/lang/String;)V");
-
-    if (!s_serviceStart)
-       {
-           qCritical()<<"Can't findbackground audio service.";
-
-       }
-    else{
-
-
-    }
+  //  s_qtActivity_PlayMediaMethod = env->GetMethodID(s_qtactivity, "playMedia", "(Ljava/lang/String;)V");
+    s_qtActivity_MediaControlMethod = env->GetMethodID(s_qtactivity, "SendMediaCommand", "(Ljava/lang/String;IZLjava/lang/String;)Z");
 
     jclass localBuildClass = env->FindClass("android/os/Build");
     buildVersionClass = reinterpret_cast<jclass>(env->NewGlobalRef(localBuildClass));
@@ -316,14 +309,57 @@ bool AndroidSystem::playMedia(QString url)
 
     qWarning("Settin url.");
 
-    jstring str = env->NewString(reinterpret_cast<const jchar*>(url.constData()), url.length());
+    QString str = url;
+    int mSeek = 0;
+    bool p = false;
+    QString command = "play";
 
-      qWarning("Calling bool JNI method.");
-    jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_PlayMediaMethod, str);
-    env->DeleteLocalRef(str);
+    jstring jstr = env->NewString(reinterpret_cast<const jchar*>(url.constData()), url.length());
+    jstring jcom = env->NewString(reinterpret_cast<const jchar*>(command.constData()), command.length());
+
+    jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_MediaControlMethod,jcom, mSeek, p, jstr);
+    env->DeleteLocalRef(jstr);
+    env->DeleteLocalRef(jcom);
     m_pvm->DetachCurrentThread();
-    qWarning() << "Media Player success::" << res;
-    return res;
+    return true;
+}
+
+bool AndroidSystem::stopMedia()
+{
+    JNIEnv* env;
+    if (m_pvm->AttachCurrentThread(&env, NULL)<0)
+    {
+        qCritical()<<"AttachCurrentThread failed";
+        return false;
+    }
+    qWarning("Tryin media player");
+
+    m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
+
+    if (!m_qtActivity){
+
+        qWarning("Cant find activity!!");
+        return false;
+    }
+
+    qWarning("Settin url.");
+
+
+
+    qWarning("Calling bool JNI method.");
+    QString str = "";
+    int mSeek = 0;
+    bool p = false;
+    QString command = "stop";
+
+    jstring jstr = env->NewString(reinterpret_cast<const jchar*>(str.constData()), str.length());
+    jstring jcom = env->NewString(reinterpret_cast<const jchar*>(command.constData()), command.length());
+
+    jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_MediaControlMethod,jcom, mSeek, p, jstr);
+    env->DeleteLocalRef(jstr);
+    env->DeleteLocalRef(jcom);
+    m_pvm->DetachCurrentThread();
+    return true;
 }
 
 bool AndroidSystem::startAudioService()
@@ -335,9 +371,9 @@ bool AndroidSystem::startAudioService()
         return false;
     }
 
-    qCritical("Initializing Audio Service");
-    QString url = "http://fr.ahfm.com:9000";
-    jstring str = env->NewString(reinterpret_cast<const jchar*>(url.constData()), url.length());
-    jboolean res = env->CallBooleanMethod(m_qtActivity, s_serviceStart, str);
+//    qCritical("Initializing Audio Service");
+//    QString url = "http://fr.ahfm.com:9000";
+//    jstring str = env->NewString(reinterpret_cast<const jchar*>(url.constData()), url.length());
+//    jboolean res = env->CallBooleanMethod(m_qtActivity, s_serviceStart, str);
 
 }

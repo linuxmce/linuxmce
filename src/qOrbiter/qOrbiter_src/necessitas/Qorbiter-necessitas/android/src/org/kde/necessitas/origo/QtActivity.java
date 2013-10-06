@@ -138,10 +138,23 @@ public class QtActivity<LocalBinder> extends Activity
       return qtactivity;
     }
 
-    public void playMedia(String url) {
-    	mService.playAudio(url);
-       
-       
+    public void PlayMedia(String url) {
+    	mService.playAudio(url);    
+    }
+   
+    public boolean SendMediaCommand(String Command, int mSeek, boolean pause, String file){
+    	boolean res = false;
+    	
+    	if(Command.contentEquals("play")){
+    		mService.playAudio(file);
+    		res = true;
+    	} 
+    	else if(Command.contentEquals("stop")){
+    	mService.stop();
+    	res = true;
+    	}   	
+    	
+    	return res;
     }
     
     
@@ -163,8 +176,7 @@ public class QtActivity<LocalBinder> extends Activity
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             LocalBinder binder = (LocalBinder) service;
             mService = ((LinuxmceAudioService.LocalBinder)service).getService();
-            mBound = true;
-            
+            mBound = true;            
         }
 
         @Override
