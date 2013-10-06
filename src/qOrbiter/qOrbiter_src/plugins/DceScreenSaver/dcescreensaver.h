@@ -41,6 +41,7 @@ public:
     QPropertyAnimation *fadeAnimation;
     QPropertyAnimation *panAnimation;
     QPropertyAnimation *zoomAnimation;
+    QSize endSize;
     int m_animationTimer;
     int tick;
 
@@ -58,8 +59,6 @@ signals:
     void urlListReady();
     void fadeOpacityChanged();
     void currentScaleChanged();
-
-
 
 public slots:
 
@@ -121,7 +120,7 @@ private:
     QString currentUrl;
 
 private slots:
-
+    void resetPicture() {endSize = currentImage.size(); }
 
 protected:
 

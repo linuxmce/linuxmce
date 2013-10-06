@@ -20,6 +20,8 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
 
     fadeOpacity = 1;
     currentScale = 1;
+    endSize.setHeight(0);
+    endSize.setWidth(0);
     setFlag(ItemHasNoContents, false);
     currentUrl = "";
     active = false;
@@ -41,12 +43,13 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
 
     zoomAnimation = new QPropertyAnimation(this, "currentScale");
     zoomAnimation->setStartValue(1);
-    zoomAnimation->setEndValue(1.25);
+    zoomAnimation->setEndValue(1.05);
     zoomAnimation->setDuration(interval);
 
     surface.fill(Qt::black);
     QObject::connect(this, SIGNAL(heightChanged()), this, SLOT(forceUpdate()));
     QObject::connect(this, SIGNAL(widthChanged()), this, SLOT(forceUpdate()));
+  //  QObject::connect(zoomAnimation, SIGNAL(finished()), this, SLOT(resetPicture()));
 
 }
 
@@ -105,12 +108,14 @@ void DceScreenSaver::processImageData(QNetworkReply *r)
     }
     else{
         surface =currentImage;
+
         currentImage= t.scaled(width(),height());
+
     }
 
 
-  startFadeTimer(2500);
-  beginZoom();
+    startFadeTimer(2500);
+  //  beginZoom();
 
 }
 
@@ -123,7 +128,7 @@ void DceScreenSaver::getNextImage()
 #ifdef ANDROID
     requestImage(urlList.at(rand()%urlList.count()));
 #else
-     requestImage(urlList.at(rand()%urlList.count()));
+    requestImage(urlList.at(rand()%urlList.count()));
 #endif
 }
 
@@ -151,7 +156,7 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
 
     //setup and new pix map over it
     p->setOpacity(fadeOpacity);
-    //p->scale();
+
     //create 'composed image'
     p->drawPixmap(tgtRect, currentImage, tgtRect);
 }
@@ -171,7 +176,8 @@ void DceScreenSaver::timerEvent(QTimerEvent *event)
 
 void DceScreenSaver::beginZoom()
 {
-//zoomAnimation->start();
+//    zoomAnimation->setDuration(interval);
+//    zoomAnimation->start();
 }
 
 void DceScreenSaver::startFadeTimer(int time)
