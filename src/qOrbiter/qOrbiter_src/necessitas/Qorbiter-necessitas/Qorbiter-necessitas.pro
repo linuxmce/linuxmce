@@ -84,8 +84,10 @@ TARGET=qorbiter-$$QT_VERSION
  #       DEPLOYMENTFOLDERS+=folder_01
 
         INSTALLS+= qmlplugins
-        HEADERS += ../../plugins/AndroidInfo/androidsystem.h
-        SOURCES += ../../plugins/AndroidInfo/androidsystem.cpp
+        HEADERS += ../../plugins/AndroidInfo/androidsystem.h \
+    androidmediaplayer.h
+        SOURCES += ../../plugins/AndroidInfo/androidsystem.cpp \
+    androidmediaplayer.cpp
 
 
 # Additional import path used to resolve QML modules in Creator's code model
@@ -342,7 +344,8 @@ OTHER_FILES += ../../Readme.txt \
     android/src/org/kde/necessitas/origo/QtActivity.java \
     android/src/org/kde/necessitas/origo/QtApplication.java \
     android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl
+    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
+    android/src/org/kde/necessitas/origo/VideoActivity.java
 
 RESOURCES += \
     ../../skinData.qrc

@@ -27,6 +27,7 @@
 
 package org.kde.necessitas.origo;
 
+
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -122,6 +123,26 @@ public class QtActivity extends Activity
     private ActivityInfo m_activityInfo = null; // activity info object, used to access the libs and the strings
     private DexClassLoader m_classLoader = null; // loader object
     private String[] m_qtLibs = null; // required qt libs
+
+
+    public static QtActivity qtactivity;
+
+    public static QtActivity getActivity() {
+      return qtactivity;
+    }
+
+    public void playMedia(String url) {
+        Uri uri = Uri.parse(url);
+
+        startActivity(new Intent(this, VideoActivity.class));
+    }
+
+  //This version sends an implicit intent that android will handle for us.
+//    public void playMedia(String url) {
+//        Uri uri = Uri.parse(url);
+
+//        startActivity(new Intent(Intent.ACTION_VIEW, uri));
+//    }
 
     // this function is used to load and start the loader
     private void loadApplication(Bundle loaderParams)
@@ -543,6 +564,7 @@ public class QtActivity extends Activity
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
+        qtactivity = this;
         super.onCreate(savedInstanceState);
         if (QtApplication.m_delegateObject != null && QtApplication.onCreate != null)
         {
@@ -1185,7 +1207,7 @@ QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
 //QtCreator         return super.dispatchKeyShortcutEvent(event);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator 
+//QtCreator
 //QtCreator     @Override
 //QtCreator     public void onActionModeFinished(ActionMode mode)
 //QtCreator     {
@@ -1197,7 +1219,7 @@ QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
 //QtCreator         super.onActionModeFinished(mode);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator 
+//QtCreator
 //QtCreator     @Override
 //QtCreator     public void onActionModeStarted(ActionMode mode)
 //QtCreator     {
@@ -1209,7 +1231,7 @@ QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
 //QtCreator         super.onActionModeStarted(mode);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator 
+//QtCreator
 //QtCreator     @Override
 //QtCreator     public void onAttachFragment(Fragment fragment)
 //QtCreator     {
@@ -1221,7 +1243,7 @@ QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
 //QtCreator         super.onAttachFragment(fragment);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator 
+//QtCreator
 //QtCreator     @Override
 //QtCreator     public View onCreateView(View parent, String name, Context context, AttributeSet attrs)
 //QtCreator     {
@@ -1236,7 +1258,7 @@ QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
 //QtCreator         return super.onCreateView(parent, name, context, attrs);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator 
+//QtCreator
 //QtCreator     @Override
 //QtCreator     public boolean onKeyShortcut(int keyCode, KeyEvent event)
 //QtCreator     {
@@ -1250,7 +1272,7 @@ QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
 //QtCreator         return super.onKeyShortcut(keyCode, event);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator 
+//QtCreator
 //QtCreator     @Override
 //QtCreator     public ActionMode onWindowStartingActionMode(Callback callback)
 //QtCreator     {
@@ -1282,7 +1304,7 @@ QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
 //QtCreator         return super.dispatchGenericMotionEvent(event);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator 
+//QtCreator
 //QtCreator     @Override
 //QtCreator     public boolean onGenericMotionEvent(MotionEvent event)
 //QtCreator     {

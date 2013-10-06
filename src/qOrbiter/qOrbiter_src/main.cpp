@@ -213,7 +213,7 @@ int main(int argc, char* argv[])
 
     QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
     QCoreApplication::setOrganizationDomain("org.linuxmce.QOrbiter");
-    QCoreApplication::setOrganizationName("LinuxMCE");
+    QCoreApplication::setOrganizationName("www.linuxMCE.org");
 #ifdef ANDROID
     AndroidSystem androidHelper;
 
@@ -531,7 +531,7 @@ int main(int argc, char* argv[])
         QObject::connect(w.floorplans, SIGNAL(pageChanged(QString)), &pqOrbiter, SLOT(getFloorPlanImage(QString)), Qt::QueuedConnection);
         QObject::connect(w.floorplans, SIGNAL(requestNewFloorPlanData(QString)), &pqOrbiter, SLOT(updateFloorPlan(QString)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(floorplanTypeChanged(int)), w.floorplans, SLOT(setCurrentFloorPlanType(int)),Qt::QueuedConnection);
-        QObject::connect(w.floorplans, SIGNAL(adjustLevel(int,myMap)), &pqOrbiter, SLOT(adjustLighting(int,myMap)),Qt::QueuedConnection);
+
         QObject::connect(&w, SIGNAL(populate_floorplan_device_commands(int)), &pqOrbiter, SLOT(getFloorplanDeviceCommand(int)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(addFloorplanDeviceCommand(QVariantMap)), &w, SLOT(setFloorPlanCommand(QVariantMap)), Qt::QueuedConnection);
         //mediagrid

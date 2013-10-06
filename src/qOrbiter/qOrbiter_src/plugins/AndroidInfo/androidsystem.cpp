@@ -25,6 +25,12 @@ static jmethodID getWindowManagerID=0;
 static jmethodID contextMethodID =0;
 static jmethodID displayID = 0;
 
+/* Media Player */
+//Used to obtain the reference to the QtActivity, via the crappy static
+static jmethodID s_qtactivity_field =0;
+static jclass s_qtactivity = 0;
+static jmethodID s_qtActivity_PlayMediaMethod=0;
+
 
 AndroidSystem::AndroidSystem(QObject *parent) :
     QObject(parent)
@@ -45,6 +51,7 @@ AndroidSystem::AndroidSystem(QObject *parent) :
     if(m_pvm)
     {
         setStatusMessage("Android Plugin Connected");
+
         if(findClassIdents()){
             setStatusMessage("Found Class ID's.");
         }
@@ -54,6 +61,7 @@ AndroidSystem::AndroidSystem(QObject *parent) :
         }
 
         setReadyStatus(true);
+        qCritical("Initializing media player");
 
     }
     else
@@ -72,6 +80,15 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
         return -1;
     }
     m_pvm = vm;
+    s_qtactivity = (jclass)env->NewGlobalRef(env->FindClass("org/kde/necessitas/origo/QtActivity"));
+    s_qtactivity_field = env->GetStaticMethodID(s_qtactivity, "getActivity", "()Lorg/kde/necessitas/origo/QtActivity;");
+    s_qtActivity_PlayMediaMethod = env->GetMethodID(s_qtactivity, "playMedia", "(Ljava/lang/String;)V");
+
+    if (!s_qtActivity_PlayMediaMethod)
+       {
+           qCritical()<<"Can't find playMedia method";
+
+       }
 
     jclass localBuildClass = env->FindClass("android/os/Build");
     buildVersionClass = reinterpret_cast<jclass>(env->NewGlobalRef(localBuildClass));
@@ -87,18 +104,18 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 
     findPathID=env->GetMethodID(fileClass, "getPath", "()Ljava/lang/String;");
 
-//    jclass localActivityClass = env->FindClass("android/app/NativeActivity");
-//    activityClass = reinterpret_cast<jclass>(env->NewGlobalRef(localActivityClass));
-//    getWindowManagerID = env->GetMethodID(localActivityClass, "getWindowManager", "()Landroid/view/WindowManager;");
+    //    jclass localActivityClass = env->FindClass("android/app/NativeActivity");
+    //    activityClass = reinterpret_cast<jclass>(env->NewGlobalRef(localActivityClass));
+    //    getWindowManagerID = env->GetMethodID(localActivityClass, "getWindowManager", "()Landroid/view/WindowManager;");
 
-//    jclass localDisplayContextClassID= env->FindClass("android/content/Context");
-//   displayContextClass = reinterpret_cast<jclass>(env->NewGlobalRef(localDisplayContextClassID));
-//    contextMethodID = env->GetStaticMethodID(displayContextClass, "getSystemService", "()Ljava/lang/String;");
+    //    jclass localDisplayContextClassID= env->FindClass("android/content/Context");
+    //   displayContextClass = reinterpret_cast<jclass>(env->NewGlobalRef(localDisplayContextClassID));
+    //    contextMethodID = env->GetStaticMethodID(displayContextClass, "getSystemService", "()Ljava/lang/String;");
 
- //   jclass localDisplayObjClass = env->FindClass("android/view/Display;");
-   // displayObjClass = reinterpret_cast<jclass>(env->NewGlobalRef(localDisplayObjClass));
+    //   jclass localDisplayObjClass = env->FindClass("android/view/Display;");
+    // displayObjClass = reinterpret_cast<jclass>(env->NewGlobalRef(localDisplayObjClass));
 
-   // displayID = env->GetMethodID(displayObjClass, "getDisplay", "I");
+    // displayID = env->GetMethodID(displayObjClass, "getDisplay", "I");
 
 
     //    jclass localWSclass =  env->FindClass("android/hardware/display/DisplayManager");
@@ -109,13 +126,17 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
     //    env->DeleteLocalRef(localActivityClass);
     //    env->DeleteLocalRef(localDisplayObjClass);
 
+    s_qtactivity = (jclass)env->NewGlobalRef(env->FindClass("org/kde/necessitas/origo/QtActivity"));
+    s_qtactivity_field = env->GetStaticMethodID(s_qtactivity, "getActivity", "()Lorg/kde/necessitas/origo/QtActivity;");
 
     env->DeleteLocalRef(lesc);
     env->DeleteLocalRef(lfpid);
-//    env->DeleteLocalRef(localActivityClass);
-//   env->DeleteLocalRef(localDisplayContextClassID);
-  //  env->DeleteLocalRef(localDisplayObjClass);
+
+    //    env->DeleteLocalRef(localActivityClass);
+    //   env->DeleteLocalRef(localDisplayContextClassID);
+    //  env->DeleteLocalRef(localDisplayObjClass);
     qCritical() << "Exiting JNI onLoad";
+
 
     return JNI_VERSION_1_6;
 }
@@ -129,8 +150,9 @@ bool AndroidSystem::findClassIdents()
         return false;
     }
 
-
+    m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
     setStatusMessage("Device info Gather complete.");
+    m_pvm->DetachCurrentThread();
     return true;
 }
 
@@ -263,4 +285,36 @@ bool AndroidSystem::updateBuildInformation()
     m_pvm->DetachCurrentThread();
     return true;
 
+}
+
+bool AndroidSystem::playMedia(QString url)
+{
+    JNIEnv* env;
+    if (m_pvm->AttachCurrentThread(&env, NULL)<0)
+    {
+        qCritical()<<"AttachCurrentThread failed";
+        return false;
+    }
+    qWarning("Tryin media player");
+
+    m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
+
+    if (!m_qtActivity){
+
+        qWarning("Cant find activity!!");
+        return false;
+    }
+
+    qWarning("Settin url.");
+
+    url = "http://fr.ahfm.com:9000";
+
+    jstring str = env->NewString(reinterpret_cast<const jchar*>(url.constData()), url.length());
+
+      qWarning("Calling bool JNI method.");
+    jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_PlayMediaMethod, str);
+    env->DeleteLocalRef(str);
+    m_pvm->DetachCurrentThread();
+    qWarning() << "Media Player success::" << res;
+    return res;
 }

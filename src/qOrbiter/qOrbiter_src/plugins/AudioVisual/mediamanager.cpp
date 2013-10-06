@@ -195,12 +195,12 @@ void MediaManager::setMediaUrl(QString url)
     setCurrentStatus("Got New Media Url::"+url);
     filepath=url;
 
-    if(url.endsWith(".ISO")){
+    if(url.toLower().endsWith(".ISO")){
 
         QString mountProg = "gksudo";
         QStringList args;
 
-        args.append(QString("mount -o loop "+url+" /mnt/remote/dvd"));
+        args.append(QString("mount -t nfs -o loop "+url+" /mnt/remote/dvd/"));
         QProcess *mountProcess = new QProcess(this);
         mountProcess->start(mountProg, args);
         mountProcess->waitForFinished(10000);
@@ -213,10 +213,10 @@ void MediaManager::setMediaUrl(QString url)
 
         mediaObject->setCurrentSource(Phonon::MediaSource(Phonon::Dvd, "/mnt/remote/dvd/"));
     }else{
-        mediaObject->setCurrentSource(Phonon::MediaSource(url));
+
     }
 
-
+ mediaObject->setCurrentSource(Phonon::MediaSource(url));
     setCurrentStatus(QString("MediaObject Source::"+mediaObject->currentSource().fileName()));
     qDebug() <<"Media Object Source::"<< mediaObject->currentSource().type();
     qDebug() <<"Media Object Source::"<< mediaObject->currentSource().fileName();

@@ -6,6 +6,7 @@
 
 #ifndef QT5
 #include <QPlatformNativeInterface>
+#include <../../Qorbiter-necessitas/androidmediaplayer.h>
 #endif
 #include <QColor>
 
@@ -58,6 +59,8 @@ public:
     QColor orangeHighlight;
     QColor redStandard;
     QColor redHighlight;
+
+    androidMediaPlayer *mediaPlayer;
 
 
 signals:
@@ -126,11 +129,13 @@ public slots:
     Q_INVOKABLE bool updateExternalStorageLocation();
     Q_INVOKABLE bool updateBuildInformation();
 
+    bool playMedia(QString url);
+
 private:
 
     bool findClassIdents();
     bool getDisplayInfo();
-
+    jobject m_qtActivity;
 
 };
 
