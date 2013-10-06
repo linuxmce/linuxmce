@@ -8,6 +8,11 @@ Item {
     Component.onCompleted:{
         floorplan_devices.setCurrentPage(1)
     }
+    Connections{
+        target:manager
+        onOrientationChanged:floorplan_devices.setCurrentPage(1)
+    }
+
     property int scaleFactor:floorplanimage.scale
     property alias bg:phil
     property bool useList:true
