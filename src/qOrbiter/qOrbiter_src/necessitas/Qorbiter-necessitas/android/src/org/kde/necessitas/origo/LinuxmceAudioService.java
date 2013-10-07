@@ -44,18 +44,13 @@ OnPreparedListener {
 
 	public void onCreate(){
 		// Create a new media player and set the listeners
-		mp = new MediaPlayer();
-		mp.setOnErrorListener(this);
-		mp.setOnBufferingUpdateListener(this);
-		mp.setOnCompletionListener(this);
-		mp.setOnPreparedListener(this);
-		mp.setAudioStreamType(2);
+		
 		Log.d(TAG, "Created Linuxmce Audio Service");	
 
 	}
 
 	public void onDestroy(){
-mp.release();
+			mp.release();
 	}
 
 	@Override 
@@ -74,12 +69,16 @@ mp.release();
 		try {
 			//      final String path = mPath.getText().toString();
 			final String path = url; //"http://192.168.80.1/lmce-admin/qOrbiterGenerator.php?id=20818";
-
-			Log.v(TAG, "path: " + path);
-
-			
+			Log.v(TAG, "path: " + path);			
 			current = path;
 
+			mp = new MediaPlayer();
+			mp.setOnErrorListener(this);
+			mp.setOnBufferingUpdateListener(this);
+			mp.setOnCompletionListener(this);
+			mp.setOnPreparedListener(this);
+			mp.setAudioStreamType(2);
+			
 			// Set the data source in another thread
 			// which actually downloads the mp3 or videos
 			// to a temporary location
@@ -108,7 +107,8 @@ mp.release();
 
 	public void stop(){
 		mp.stop();
-		mp.reset();
+		mp.release();
+		mp.reset();		
 	}
 
 

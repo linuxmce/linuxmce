@@ -17,7 +17,11 @@ using namespace DCE;
 MediaManager::MediaManager(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
 {
-    setFlag(ItemHasNoContents, false);
+#ifdef __ANDROID__
+    setFlag(ItemHasNoContents, true);
+#else
+     setFlag(ItemHasNoContents, false);
+#endif
     serverAddress = "";
     deviceNumber = -1;
     timeCodeServer = new QTcpServer();
@@ -26,6 +30,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     setCurrentStatus("Media Manager defaults set, initializing media engines");
 #ifdef QT4
 
+    #ifndef __ANDROID__
     setAvailibleOutputs(Phonon::BackendCapabilities::availableAudioOutputDevices());
     qDebug() << outputs;
     qDebug() << Phonon::BackendCapabilities::availableMimeTypes();
@@ -49,9 +54,10 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
 
     if(initViews(true))
         setCurrentStatus("Color Filter Applied.");
-
+    #endif
+setCurrentStatus("Window Initialized");
 #endif
-    setCurrentStatus("Window Initialized");
+
     totalTime=0;
     setMediaBuffer(0);
     setMediaPlaying(false);
@@ -73,6 +79,7 @@ void MediaManager::initializeConnections()
 
 
     /*From Dce MediaPlayer*/
+#ifndef __ANDROID__
     QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)));
     QObject::connect(mediaPlayer,SIGNAL(startPlayback()), mediaObject, SLOT(play()));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(mediaStarted()));
@@ -85,13 +92,15 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaPlayer, SIGNAL(mediaIdChanged(QString)), this, SLOT(setFileReference(QString)));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(showFullScreen()));
+#endif
 
-    QObject::connect(mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(setState(Phonon::State,Phonon::State)));
 
     QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
     QObject::connect(mediaPlayer,SIGNAL(jumpToStreamPosition(int)), this, SLOT(setMediaPosition(int)));
 
+#ifndef __ANDROID__
     /*From internal plugin*/
+     QObject::connect(mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(setState(Phonon::State,Phonon::State)));
     QObject::connect(mediaObject, SIGNAL(finished()), mediaPlayer, SLOT(mediaEnded()));
     QObject::connect(mediaObject, SIGNAL(tick(qint64)), this, SLOT(processTimeCode(qint64)));
     QObject::connect(mediaObject, SIGNAL(finished()), videoSurface, SLOT(lower()));
@@ -101,16 +110,17 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaObject, SIGNAL(prefinishMarkReached(qint32)), this ,SLOT(setPrefinishMarkHit(qint32)));
     QObject::connect(mediaObject,SIGNAL(metaDataChanged()), this, SLOT(updateMetaData()));
 
+
     /*internals*/
     QObject::connect(audioSink, SIGNAL(volumeChanged(qreal)), this, SLOT(setVolume(qreal)));
     QObject::connect(audioSink, SIGNAL(mutedChanged(bool)), this, SLOT(setMuted(bool)));
 
-#ifdef QT4
+    #ifdef QT4
     mediaObject->setTickInterval(quint32(1000));
-#elif QT5
+    #elif QT5
 
+    #endif
 #endif
-
 }
 
 void MediaManager::setConnectionDetails(int r, QString s)
@@ -181,6 +191,7 @@ void MediaManager::setAspectRatio(QString aspect)
 
 }
 
+#ifndef __ANDROID__
 QImage MediaManager::getScreenShot()
 {
     QImage screenShot(videoSurface->height(), videoSurface->width(), QImage::Format_ARGB32_Premultiplied );
@@ -188,13 +199,14 @@ QImage MediaManager::getScreenShot()
     videoSurface->window()->render(&screenShot);
     return screenShot;
 }
-
+#endif
 
 void MediaManager::setMediaUrl(QString url)
 {
     setCurrentStatus("Got New Media Url::"+url);
     filepath=url;
 
+#ifndef __ANDROID__
     if(url.toLower().endsWith(".ISO")){
 
         QString mountProg = "gksudo";
@@ -226,6 +238,7 @@ void MediaManager::setMediaUrl(QString url)
     qDebug() <<"Item is playing? " << mediaObject->state();
     qDebug() << "Errors " << mediaObject->errorString();
     qDebug() << discController->currentTitle();
+ #endif
 
 }
 
@@ -302,6 +315,8 @@ void MediaManager::mountDrive(int device)
     qDebug() << mountProcess->state();
 }
 
+#ifndef __ANDROID__
+
 bool MediaManager::initViews(bool flipped)
 {
     filterProxy = new ColorFilterProxyWidget(this);
@@ -319,3 +334,4 @@ bool MediaManager::initViews(bool flipped)
     return true;
 
 }
+#endif

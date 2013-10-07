@@ -7,6 +7,8 @@
 #ifndef QT5
 #include <QPlatformNativeInterface>
 #include <../../Qorbiter-necessitas/androidmediaplayer.h>
+#include <../../plugins/AudioVisual/mediamanager.h>
+
 #endif
 #include <QColor>
 
@@ -61,6 +63,7 @@ public:
     QColor redHighlight;
 
     androidMediaPlayer *mediaPlayer;
+    MediaManager *mediaManager;
 
 
 signals:

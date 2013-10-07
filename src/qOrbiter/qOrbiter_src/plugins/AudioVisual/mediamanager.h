@@ -8,20 +8,23 @@
 #include <QtMultimedia>
 
 #else
+
+    #ifndef __ANDROID__
 #include <QBoxLayout>
 #include <phonon>
+#include <QHBoxLayout>
+#include <colorfilterproxywidget.h>
+    #endif
+
 #include <QDeclarativeItem>
 #include <QKeyEvent>
 #include <QGLWidget>
-#include <QHBoxLayout>
-
 #endif
 
 #include <QObject>
 #include <QProcess>
-
 #include <qMediaPlayer/qMediaPlayer.h>
-#include <colorfilterproxywidget.h>
+
 #include <QTime>
 #include <QTcpServer>
 
@@ -44,9 +47,10 @@ class MediaManager : public QDeclarativeItem
     Q_PROPERTY(int mediaBuffer READ getMediaBuffer WRITE setMediaBuffer NOTIFY mediaBufferChanged)
     Q_PROPERTY(qreal volume READ getVolume NOTIFY volumeChanged)
     Q_PROPERTY(bool muted READ getMuted WRITE setMuted NOTIFY mutedChanged)
+  #ifndef __ANDROID__
     Q_PROPERTY(bool flipColors READ getColorFlip WRITE setColorFlip NOTIFY colorFlipChanged)
     Q_PROPERTY(QList <Phonon::AudioOutputDevice> outputs READ getAvailibleOutputs NOTIFY availibleAudioOutputsChanged())
-
+#endif
     Q_PROPERTY(QString serverAddress READ getServerAddress WRITE setServerAddress NOTIFY serverAddressChanged)
     Q_PROPERTY(int deviceNumber READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
 
@@ -61,7 +65,7 @@ public:
     QString fileReference;
     int fileno;
     QString filepath;
-    QList <Phonon::AudioOutputDevice> outputs;
+
 
 
     int mediaBuffer;
@@ -84,10 +88,16 @@ public:
     int iCurrent_Position;
 
     QWidget *window;
+
+#ifndef __ANDROID__
+    QList <Phonon::AudioOutputDevice> outputs;
     QVBoxLayout *layout;
+    ColorFilterProxyWidget *filterProxy;
+#endif
+
     qMediaPlayer *mediaPlayer;
 
-    ColorFilterProxyWidget *filterProxy;
+
 
     QList<QTcpSocket*> clientList;
     QProcess *mountProcess;
@@ -104,11 +114,14 @@ public:
     quint64 tempTime;
 
 #ifdef QT4
+
+    #ifndef __ANDROID__
     Phonon::VideoWidget *videoSurface;
     Phonon::AudioOutput *audioSink;
     Phonon::MediaObject *mediaObject;
     Phonon::MediaController * discController;
     QGLWidget *accel;
+    #endif
 #else
     QAbstractAudioOutput *audioSink;
     QMediaObject *mediaObject;
@@ -140,7 +153,7 @@ signals:
     void availibleAudioOutputsChanged();
 
 public slots:
-
+#ifndef __ANDROID__
     void setColorFlip(bool f){
         flipColors = f;
         filterProxy->invert = f;
@@ -148,8 +161,10 @@ public slots:
     }
     bool getColorFlip() { return flipColors;}
 
+
     void setAvailibleOutputs(QList<Phonon::AudioOutputDevice> l){outputs.clear(); outputs = l; emit availibleAudioOutputsChanged(); }
     QList <Phonon::AudioOutputDevice> getAvailibleOutputs(){ return outputs;}
+#endif
 
     void setMuted(bool m){muted = m; emit mutedChanged();}
     bool getMuted(){ return muted;}
@@ -190,16 +205,23 @@ public slots:
         qDebug() << "media playback changed in plugin!" << s;
         if (mediaPlaying==false)
         {
+#ifndef __ANDROID__
             filterProxy->hide();
+#endif
         }
         else
         {
+#ifndef __ANDROID__
             filterProxy->show();
+#endif
         }
         emit mediaPlayingChanged();
+#ifndef __ANDROID__
         qDebug() << "Titles ==>" << discController->availableTitles();
         qDebug() << "subTitles==>" << discController->availableSubtitles();
         qDebug() << "Availible titles ==>" << discController->availableTitles();
+#endif
+
     }
     bool getMediaPlaying() {return mediaPlaying;}
 
@@ -224,7 +246,9 @@ public slots:
     void setWindowSize(int h, int w) {
 
 #ifdef QT4
+    #ifndef __ANDROID__
         videoSurface->setFixedSize(w, h);
+    #endif
 #elif QT5
 
 #endif
@@ -238,6 +262,7 @@ public slots:
 
     }
 
+#ifndef __ANDROID__
     void setState(Phonon::State,Phonon::State){
         qDebug() << mediaObject->state();
         int i =  mediaObject->errorType();
@@ -258,12 +283,17 @@ public slots:
             qWarning("Media could not start.");
         }
     }
+#endif
 
 
     void setMediaPosition(int msec) {
         qDebug() << msec;
 #ifdef QT4
+
+#ifndef __ANDROID__
         mediaObject->seek((qint64)msec);
+#endif
+
 #elif QT5
 
 #endif
@@ -271,11 +301,17 @@ public slots:
     }
     void setZoomLevel(QString zoom);
     void setAspectRatio(QString aspect);
+
+#ifndef __ANDROID__
     QImage getScreenShot();
+#endif
+
 
     void setVideoSize(int h, int w) {
 #ifdef QT4
+#ifndef __ANDROID__
         videoSurface->setFixedSize(w, h);
+#endif
 #elif QT5
 
 #endif
@@ -312,14 +348,16 @@ private:
     void initializePlayer();
     void initializeConnections();
     void shutdownDevice();
+
     void mountDrive(int device);
 
 
 
 
 private slots:
+#ifndef __ANDROID__
     bool initViews(bool flipped);
-
+#endif
 };
 
 #endif // MEDIAMANAGER_H
