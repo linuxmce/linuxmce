@@ -178,9 +178,23 @@ bool DataLogger_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessa
 			;;
 			break;
 		case EVENT_Power_Usage_Changed_CONST:
-                        unit = 7;
+			// This is an event that contain several bits of data, we need to check which one to handle
                         sValue = pMessage->m_mapParameters[EVENTPARAMETER_Watts_CONST];
-                        sscanf(sValue.c_str(),"%f",&fValue);
+			if ( sValue != "" )
+			{
+				unit = 7;
+				sscanf(sValue.c_str(),"%f",&fValue);
+			} else {
+				sValue = pMessage->m_mapParameters[EVENTPARAMETER_WattsMTD_CONST];
+				if ( sValue != "" )
+				{
+					unit = 10;
+					sscanf(sValue.c_str(),"%i",&iValue);
+					fValue = iValue;
+				} else {
+					handled = false;
+				}
+			}
                         ;;
 			break;
 		case EVENT_Energy_Cost_Changed_CONST:
