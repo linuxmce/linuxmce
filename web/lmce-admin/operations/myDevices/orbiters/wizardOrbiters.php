@@ -142,6 +142,7 @@ function wizardOrbiters($output,$dbADO) {
 			$orbiterDD[]=150;		// Spacing - Reduce image by
 			$orbiterDD[]=169;		// Use alpha blended UI
 			$orbiterDD[]=172;		// Use Open GL effects
+			$orbiterDD[]=282;		// Queue instead of Instant Play
 
 			$excludedData['standard_roaming_orbiters']=array('state',84,150,169,172);
 			$excludedData['mobile_orbiters']=array(84,20,'room','wifi',56,150,169,172);
