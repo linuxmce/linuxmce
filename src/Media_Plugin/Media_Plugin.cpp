@@ -3844,6 +3844,14 @@ void Media_Plugin::CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_Med
 	std::sort(dequeMediaFile.begin(), dequeMediaFile.end(), MediaFileComparer);
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT Final Sort End!");
 
+	if (bQueue)
+	  {
+	    size_t iNumFiles = dequeMediaFile.size();
+	    DCE::CMD_Display_Alert CMD_Display_Alert(m_dwPK_Device, pMessage->m_dwPK_Device_From,
+						     StringUtils::itos(iNumFiles) + " file(s) added to queue.","queue added","5",interuptAlways);
+	    SendCommand(CMD_Display_Alert);
+	  }
+
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Media_Plugin::CMD_MH_Play_Media playing MediaType: %d Provider %d Orbiter %d Device %d Template %d",
 		iPK_MediaType,iPK_MediaProvider,iPK_Device_Orbiter,iPK_Device,iPK_DeviceTemplate);
 	StartMedia(iPK_MediaType,iPK_MediaProvider,iPK_Device_Orbiter,vectEntertainArea,iPK_Device,iPK_DeviceTemplate,&dequeMediaFile,bQueue,bResume,iRepeat,"");  // We'll let the plug-in figure out the source, and we'll use the default remote
