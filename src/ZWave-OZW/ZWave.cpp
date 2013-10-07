@@ -773,7 +773,7 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			OpenZWave::ValueID id = _notification->GetValueID();
 			string label = OpenZWave::Manager::Get()->GetValueLabel(id);
 			if ( label == "Switch" || label == "Battery Level" || label == "Temperature" || label == "Luminance" ||
-			     label == "Power" || label == "Voltage" ||
+			     label == "Power" || label == "Voltage" || label == "Energy" ||
 			     label == "Setpoint" || label == "Heating 1" || label == "Cooling 1" || label == "Auto Changeover" ||
 			     label == "Mode" )
 			{
@@ -782,8 +782,8 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 				uint8 intensity = 1;
 				if ( label == "Battery Level" ) {
 					intensity = 255; // battery level does not change very often
-				} else if ( label == "Temperature" || label == "Mode" ) {
-					intensity = 5; // neither does temperature
+				} else if ( label == "Temperature" || label == "Mode" || label == "Energy" || label == "Power") {
+					intensity = 10; // neither does temperature
 				} else if ( label == "Setpoint" || label == "Heating 1" || label == "Cooling 1" || label == "Auto Changeover" ) {
 					intensity = 15;
 				}
@@ -841,6 +841,10 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 					float level = 0;
 					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
 					SendPowerUsageChangedEvent(PKDevice, level);
+				} else if ( label == "Energy" ) {
+					float level = 0;
+					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
+					SendPowerUsageCumulativeChangedEvent(PKDevice, level);
 				} else if ( label == "Voltage" ) {
 					float level = 0;
 					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
@@ -1174,6 +1178,11 @@ int ZWave::GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_D
 			devicetemplate = DEVICETEMPLATE_Generic_Tuner_CONST;
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Generic_Tuner");
 			break;
+	        case GENERIC_TYPE_METER:
+			// TODO support other types of meters
+			devicetemplate = DEVICETEMPLATE_Standard_Energy_Meter_CONST;
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Standard Energy Meter");
+			break;
 	}
 	return devicetemplate;
 }
@@ -1315,6 +1324,21 @@ void ZWave::SendPowerUsageChangedEvent(unsigned int PK_Device, int value)
 					   1,
 					   EVENTPARAMETER_Watts_CONST,
 					   svalue.c_str())
+		);
+}
+void ZWave::SendPowerUsageCumulativeChangedEvent(unsigned int PK_Device,float value)
+{
+	char tempstr[512];
+	sprintf(tempstr, "%.3f", value);
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending EVENT_Power_Usage_Changed_CONST event from PK_Device %d, cumulated kWh %s kWh",PK_Device, tempstr);
+	m_pEvent->SendMessage( new Message(PK_Device,
+					   DEVICEID_EVENTMANAGER,
+					   PRIORITY_NORMAL,
+					   MESSAGETYPE_EVENT,
+					   EVENT_Power_Usage_Changed_CONST,
+					   1,
+					   EVENTPARAMETER_WattsMTD_CONST,
+					   tempstr)
 		);
 }
 
