@@ -71,7 +71,7 @@ OnPreparedListener {
 	public void playAudio(String url) {
 		try {
 			//      final String path = mPath.getText().toString();
-			final String path = "http://192.168.80.1/lmce-admin/qOrbiterGenerator.php?id=7802";
+			final String path = url; //"http://192.168.80.1/lmce-admin/qOrbiterGenerator.php?id=7802";
 			Log.d(TAG, path);
 			current = path.toString();			
 			mp = new MediaPlayer();
@@ -91,13 +91,19 @@ OnPreparedListener {
 				public void run() {
 					try {
 						mp.setDataSource(current);					
-						mp.prepare();
+						 mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {            
+					            @Override
+					            public void onPrepared(MediaPlayer mlp) {
+					                mlp.start();
+					            }
+					        });
+					    mp.prepareAsync();
 
 					} catch (IOException e) {
 						Log.e(TAG, e.getMessage(), e);	
 					}
 					//Log.v(TAG, "Duration:  ===>" + mp.getDuration());
-					mp.start();
+					
 				}
 			};
 			new Thread(r).start();
