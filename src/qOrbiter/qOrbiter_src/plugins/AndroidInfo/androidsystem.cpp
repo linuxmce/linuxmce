@@ -1,6 +1,7 @@
 #include "androidsystem.h"
 #include <QDebug>
 #include <QApplication>
+#include <QUrl>
 
 static JavaVM *m_pvm = 0;
 
@@ -308,10 +309,14 @@ bool AndroidSystem::playMedia(QString url)
     }
 
     QString str = url;
+    if(url.length() < 4){
+        qDebug() << url;
+        return false;
+    }
     int mSeek = 0;
     bool p = false;
     QString command = "play";
-
+    qDebug() << url;
     jstring jstr = env->NewString(reinterpret_cast<const jchar*>(url.constData()), url.length());
     jstring jcom = env->NewString(reinterpret_cast<const jchar*>(command.constData()), command.length());
 

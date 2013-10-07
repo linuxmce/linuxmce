@@ -9,12 +9,12 @@
 
 #else
 
-    #ifndef __ANDROID__
+#ifndef __ANDROID__
 #include <QBoxLayout>
 #include <phonon>
 #include <QHBoxLayout>
 #include <colorfilterproxywidget.h>
-    #endif
+#endif
 
 #include <QDeclarativeItem>
 #include <QKeyEvent>
@@ -38,8 +38,9 @@ using namespace Qt;
  */
 class MediaManager : public QDeclarativeItem
 {
-    Q_OBJECT
+
     Q_PROPERTY(bool connected READ getConnectionStatus WRITE setConnectionStatus NOTIFY connectedChanged)
+    Q_PROPERTY(QString androidUrl READ getAndroidUrl NOTIFY androidUrlUpdated)
     Q_PROPERTY(QString currentStatus READ getCurrentStatus WRITE setCurrentStatus NOTIFY currentStatusChanged)
     Q_PROPERTY(bool mediaPlaying READ getMediaPlaying WRITE setMediaPlaying NOTIFY mediaPlayingChanged)
     Q_PROPERTY(bool hasError READ getErrorStatus WRITE setErrorStatus NOTIFY hasErrorChanged)
@@ -47,12 +48,14 @@ class MediaManager : public QDeclarativeItem
     Q_PROPERTY(int mediaBuffer READ getMediaBuffer WRITE setMediaBuffer NOTIFY mediaBufferChanged)
     Q_PROPERTY(qreal volume READ getVolume NOTIFY volumeChanged)
     Q_PROPERTY(bool muted READ getMuted WRITE setMuted NOTIFY mutedChanged)
-  #ifndef __ANDROID__
+
     Q_PROPERTY(bool flipColors READ getColorFlip WRITE setColorFlip NOTIFY colorFlipChanged)
-    Q_PROPERTY(QList <Phonon::AudioOutputDevice> outputs READ getAvailibleOutputs NOTIFY availibleAudioOutputsChanged())
+  #ifndef __ANDROID__
+  //  Q_PROPERTY(QList <Phonon::AudioOutputDevice> outputs READ getAvailibleOutputs NOTIFY availibleAudioOutputsChanged())
 #endif
     Q_PROPERTY(QString serverAddress READ getServerAddress WRITE setServerAddress NOTIFY serverAddressChanged)
     Q_PROPERTY(int deviceNumber READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
+    Q_OBJECT
 
 public:
     explicit MediaManager(QDeclarativeItem *parent = 0);
@@ -65,9 +68,6 @@ public:
     QString fileReference;
     int fileno;
     QString filepath;
-
-
-
     int mediaBuffer;
 
     bool mediaPlaying;
@@ -87,9 +87,10 @@ public:
     QString current_position;
     int iCurrent_Position;
 
-    QWidget *window;
+
 
 #ifndef __ANDROID__
+    QWidget *window;
     QList <Phonon::AudioOutputDevice> outputs;
     QVBoxLayout *layout;
     ColorFilterProxyWidget *filterProxy;
@@ -97,13 +98,13 @@ public:
 
     qMediaPlayer *mediaPlayer;
 
-
-
     QList<QTcpSocket*> clientList;
     QProcess *mountProcess;
 
     QString serverAddress;
     int deviceNumber;
+
+    QString androidUrl;
 
     bool connected;
 
@@ -115,13 +116,13 @@ public:
 
 #ifdef QT4
 
-    #ifndef __ANDROID__
+#ifndef __ANDROID__
     Phonon::VideoWidget *videoSurface;
     Phonon::AudioOutput *audioSink;
     Phonon::MediaObject *mediaObject;
     Phonon::MediaController * discController;
     QGLWidget *accel;
-    #endif
+#endif
 #else
     QAbstractAudioOutput *audioSink;
     QMediaObject *mediaObject;
@@ -152,18 +153,30 @@ signals:
 
     void availibleAudioOutputsChanged();
 
+    void androidUrlUpdated();
+    void asyncStop();
+    void asyncPositionRequest(int r);
+
 public slots:
-#ifndef __ANDROID__
+
+    QString getAndroidUrl(){ return androidUrl;}
+
+    void stopAndroidMedia(){
+        setMediaPlaying(false);
+    }
+
     void setColorFlip(bool f){
         flipColors = f;
+#ifndef __ANDROID__
         filterProxy->invert = f;
-            emit colorFlipChanged();
+#endif
+        emit colorFlipChanged();
     }
     bool getColorFlip() { return flipColors;}
 
-
-    void setAvailibleOutputs(QList<Phonon::AudioOutputDevice> l){outputs.clear(); outputs = l; emit availibleAudioOutputsChanged(); }
-    QList <Phonon::AudioOutputDevice> getAvailibleOutputs(){ return outputs;}
+#ifndef __ANDROID__
+  //  void setAvailibleOutputs(QList<Phonon::AudioOutputDevice> l){outputs.clear(); outputs = l; emit availibleAudioOutputsChanged(); }
+  //  QList <Phonon::AudioOutputDevice> getAvailibleOutputs(){ return outputs;}
 #endif
 
     void setMuted(bool m){muted = m; emit mutedChanged();}
@@ -225,7 +238,11 @@ public slots:
     }
     bool getMediaPlaying() {return mediaPlaying;}
 
-    void setFileReference(QString f){fileReference = f.at(0); setFileNumber(f.remove(0,1).toInt()); }
+    void setFileReference(QString f){
+            fileReference = f;
+            androidUrl = fileReference;
+            emit androidUrlUpdated();
+    }
     QString getFileReference() {return fileReference; }
 
     void setFileNumber(int n) {fileno = n;}
@@ -246,9 +263,9 @@ public slots:
     void setWindowSize(int h, int w) {
 
 #ifdef QT4
-    #ifndef __ANDROID__
+#ifndef __ANDROID__
         videoSurface->setFixedSize(w, h);
-    #endif
+#endif
 #elif QT5
 
 #endif
@@ -262,8 +279,10 @@ public slots:
 
     }
 
-#ifndef __ANDROID__
-    void setState(Phonon::State,Phonon::State){
+
+    void setState(){
+      #ifndef __ANDROID__
+
         qDebug() << mediaObject->state();
         int i =  mediaObject->errorType();
         if(i==0){
@@ -282,8 +301,9 @@ public slots:
             mediaPlayer->EVENT_Playback_Completed(mediaPlayer->currentMediaUrl.toStdString(), mediaPlayer->i_StreamId, false);
             qWarning("Media could not start.");
         }
+     #endif
     }
-#endif
+
 
 
     void setMediaPosition(int msec) {
@@ -302,10 +322,7 @@ public slots:
     void setZoomLevel(QString zoom);
     void setAspectRatio(QString aspect);
 
-#ifndef __ANDROID__
     QImage getScreenShot();
-#endif
-
 
     void setVideoSize(int h, int w) {
 #ifdef QT4
@@ -355,9 +372,9 @@ private:
 
 
 private slots:
-#ifndef __ANDROID__
+
     bool initViews(bool flipped);
-#endif
+
 };
 
 #endif // MEDIAMANAGER_H

@@ -53,6 +53,7 @@ TARGET=qorbiter-$$QT_VERSION
         qmlplugins.files = ../../../platforms/Android/androidPlugins/armeabi-v7a/libqmlshadersplugin.so
         qmlplugins.files += ../../../platforms/Android/androidPlugins/armeabi-v7a/libandroidplugin_1_1.so
         qmlplugins.files += ../../../platforms/Android/androidPlugins/armeabi-v7a/libDceScreenSaver.so
+        qmlplugins.files += ../../../platforms/Android/androidPlugins/armeabi-v7a/libAudioVisual.so
         qmlplugins.path = /libs/armeabi-v7a
 
         } else {

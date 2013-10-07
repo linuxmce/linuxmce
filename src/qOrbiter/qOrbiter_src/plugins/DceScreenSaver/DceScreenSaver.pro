@@ -1,6 +1,6 @@
 TEMPLATE = lib
 TARGET = DceScreenSaver
-QT += declarative
+
 CONFIG += qt plugin
 
 contains(QT_VERSION,4.*.*){
@@ -17,7 +17,6 @@ contains(QT_VERSION,5.0.*){
 }
 
 uri = DceScreenSaver
-
 TARGET = $$qtLibraryTarget($$TARGET)
 
 linux-g++{
@@ -82,8 +81,7 @@ QMLDIR_TARGET=../../../platforms/Android/androidComponents/DceScreenSaver/qmldir
 linux-g++{
    QMLDIR_TARGET=$DESTDIR
 }
-
-
+copy_qmldir.target=$$QMLDIR_TARGET
     copy_qmldir.depends = $$_PRO_FILE_PWD_/qmldir
     copy_qmldir.commands = $(COPY_FILE) \"$$replace(copy_qmldir.depends, /, $$QMAKE_DIR_SEP)\" \"$$replace(copy_qmldir.target, /, $$QMAKE_DIR_SEP)\"
     QMAKE_EXTRA_TARGETS += copy_qmldir

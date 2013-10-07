@@ -1,11 +1,17 @@
 TEMPLATE = lib
 # This does not seem to do anything
-#TARGET = AudioVisual
+TARGET = AudioVisual
 
 contains(QT_VERSION,4.*.*){
 
 message("$$QT_VERSION DCE-Av-Plugin")
-        QT += declarative phonon network opengl
+
+         QT += declarative phonon network opengl
+ android-g++{
+       QT-=phonon
+        message("For Android")
+  }
+
 	DEFINES+=QT4
 }
 
@@ -14,17 +20,27 @@ contains(QT_VERSION,5.0.*){
         QT += quick1 multimedia network opengl
 	DEFINES+=QT5
 }
+uri = AudioVisual
+TARGET = $$qtLibraryTarget($$TARGET)
 
 CONFIG += qt plugin
 CONFIG += warn_off
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
-INCLUDEPATH += ../../../../ ../../../../DCE/ $$[QT_INSTALL_PREFIX]/include/phonon/Phonon
+INCLUDEPATH += ../../../../ ../../../../DCE/
+linux-g++{
+INCLUDEPATH+=$$[QT_INSTALL_PREFIX]/include/phonon/Phonon
+}
 
-TARGET = $$qtLibraryTarget($$TARGET)
-
+linux-g++{
 DESTDIR=../../imports/AudioVisual
+}
 
-uri = AudioVisual
+android-g++{
+DESTDIR=../../../platforms/Android/androidPlugins/armeabi-v7a/
+}
+
+OTHER_FILES = qmldir
+
 # Input
 SOURCES += \
 	audiovisual_plugin.cpp \   
@@ -89,18 +105,23 @@ HEADERS += \
 	../../../../Gen_Devices/qMediaPlayerBase.h \
 	../../../../Gen_Devices/qOrbiterBase.h
 
-OTHER_FILES = qmldir
+
 
 !equals(_PRO_FILE_PWD_, $$DESTDIR) {
-        copy_qmldir.target = $$DESTDIR/qmldir
-	copy_qmldir.depends = $$_PRO_FILE_PWD_/qmldir
-	copy_qmldir.commands = $(COPY_FILE) \"$$replace(copy_qmldir.depends, /, $$QMAKE_DIR_SEP)\" \"$$replace(copy_qmldir.target, /, $$QMAKE_DIR_SEP)\"
-	QMAKE_EXTRA_TARGETS += copy_qmldir
-	PRE_TARGETDEPS += $$copy_qmldir.target
+
+QMLDIR_TARGET=../../../platforms/Android/androidComponents/AudioVisual/qmldir
+
+linux-g++{
+   QMLDIR_TARGET=$DESTDIR
+}
+copy_qmldir.target=$$QMLDIR_TARGET
+    copy_qmldir.depends = $$_PRO_FILE_PWD_/qmldir
+    copy_qmldir.commands = $(COPY_FILE) \"$$replace(copy_qmldir.depends, /, $$QMAKE_DIR_SEP)\" \"$$replace(copy_qmldir.target, /, $$QMAKE_DIR_SEP)\"
+    QMAKE_EXTRA_TARGETS += copy_qmldir
+    PRE_TARGETDEPS += $$copy_qmldir.target
 }
 
 qmldir.files = qmldir
-
 symbian {
 	TARGET.EPOCALLOWDLLDATA = 1
 } else:unix {
@@ -113,3 +134,38 @@ symbian {
 	target.path = $$installPath
 	INSTALLS += target qmldir
 }
+
+OTHER_FILES += \
+    android/res/values-rs/strings.xml \
+    android/res/values-de/strings.xml \
+    android/res/values-ro/strings.xml \
+    android/res/values-zh-rTW/strings.xml \
+    android/res/values-ru/strings.xml \
+    android/res/values-fa/strings.xml \
+    android/res/values-ja/strings.xml \
+    android/res/layout/splash.xml \
+    android/res/values-it/strings.xml \
+    android/res/values-nl/strings.xml \
+    android/res/values-fr/strings.xml \
+    android/res/values-pl/strings.xml \
+    android/res/values-el/strings.xml \
+    android/res/values-nb/strings.xml \
+    android/res/values-es/strings.xml \
+    android/res/values-id/strings.xml \
+    android/res/values-zh-rCN/strings.xml \
+    android/res/values-pt-rBR/strings.xml \
+    android/res/values-ms/strings.xml \
+    android/res/values/strings.xml \
+    android/res/values-et/strings.xml \
+    android/version.xml \
+    android/src/org/kde/necessitas/origo/QtActivity.java \
+    android/src/org/kde/necessitas/origo/QtApplication.java \
+    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
+    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
+    android/AndroidManifest.xml \
+    android/res/drawable-ldpi/icon.png \
+    android/res/drawable/icon.png \
+    android/res/drawable/logo.png \
+    android/res/drawable-mdpi/icon.png \
+    android/res/values/libs.xml \
+    android/res/drawable-hdpi/icon.png

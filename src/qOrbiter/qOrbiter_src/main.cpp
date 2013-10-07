@@ -342,6 +342,7 @@ int main(int argc, char* argv[])
         orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm);
 #ifdef __ANDROID__
         orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
+
 #endif
         orbiterWin.setMessage("Setting up Lmce");
 

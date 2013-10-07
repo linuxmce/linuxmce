@@ -3,6 +3,7 @@
  */
 package org.kde.necessitas.origo;
 
+import android.net.Uri;
 import android.os.Binder;
 import android.app.Service;
 import android.content.Intent;
@@ -10,6 +11,8 @@ import android.os.IBinder;
 import android.media.MediaPlayer;
 import android.util.Log;
 import java.io.IOException;
+
+import android.media.AudioManager;
 import android.media.MediaPlayer.OnBufferingUpdateListener;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
@@ -44,13 +47,13 @@ OnPreparedListener {
 
 	public void onCreate(){
 		// Create a new media player and set the listeners
-		
+		mp = new MediaPlayer();	
 		Log.d(TAG, "Created Linuxmce Audio Service");	
 
 	}
 
 	public void onDestroy(){
-			mp.release();
+		mp.release();
 	}
 
 	@Override 
@@ -68,30 +71,32 @@ OnPreparedListener {
 	public void playAudio(String url) {
 		try {
 			//      final String path = mPath.getText().toString();
-			final String path = url; //"http://192.168.80.1/lmce-admin/qOrbiterGenerator.php?id=20818";
-			Log.v(TAG, "path: " + path);			
-			current = path;
-
+			final String path = "http://192.168.80.1/lmce-admin/qOrbiterGenerator.php?id=7802";
+			Log.d(TAG, path);
+			current = path.toString();			
 			mp = new MediaPlayer();
+
 			mp.setOnErrorListener(this);
 			mp.setOnBufferingUpdateListener(this);
 			mp.setOnCompletionListener(this);
 			mp.setOnPreparedListener(this);
 			mp.setAudioStreamType(2);
-			
+
 			// Set the data source in another thread
 			// which actually downloads the mp3 or videos
 			// to a temporary location
+			Log.v(TAG, "Preparing: " + path);
+
 			Runnable r = new Runnable() {
 				public void run() {
 					try {
-						mp.setDataSource(current);
-						Log.v(TAG, "Preparing: " + path);
+						mp.setDataSource(current);					
 						mp.prepare();
+
 					} catch (IOException e) {
-						Log.e(TAG, e.getMessage(), e);
+						Log.e(TAG, e.getMessage(), e);	
 					}
-					Log.v(TAG, "Duration:  ===>" + mp.getDuration());
+					//Log.v(TAG, "Duration:  ===>" + mp.getDuration());
 					mp.start();
 				}
 			};
@@ -101,14 +106,20 @@ OnPreparedListener {
 			if (mp != null) {
 				mp.stop();
 				mp.release();
+				mp=null;
 			}
 		}
 	}
 
 	public void stop(){
-		mp.stop();
-		mp.release();
-		mp.reset();		
+		if(mp!=null){
+
+			if(mp.isPlaying()){
+				mp.stop();
+				mp.release();
+				mp=null;
+			}
+		}
 	}
 
 
@@ -122,13 +133,10 @@ OnPreparedListener {
 	}
 
 
-
-
 	public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
 		Log.e(TAG, "onError--->   what:" + what + "    extra:" + extra);
-		if (mp != null) {
-			mp.stop();
-			mp.release();
+		if (mp != null) {			
+
 		}
 		return true;
 	}
@@ -139,7 +147,7 @@ OnPreparedListener {
 
 	public void onCompletion(MediaPlayer arg0) {
 		Log.d(TAG, "onCompletion called");
-		
+
 	}
 
 	public void onPrepared(MediaPlayer mediaplayer) {

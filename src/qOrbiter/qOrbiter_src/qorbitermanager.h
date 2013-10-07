@@ -301,8 +301,6 @@ public:
 
 #if QANDROID || defined(ANDROID)
     AndroidSystem *androidHelper;
-
-
 #endif
 
 
