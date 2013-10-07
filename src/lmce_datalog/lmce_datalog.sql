@@ -63,7 +63,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `Unit` WRITE;
 /*!40000 ALTER TABLE `Unit` DISABLE KEYS */;
-INSERT INTO `Unit` VALUES (1,'CO2 level','ppm',0),(2,'Temperature','degC',1),(3,'Humidity','%',0),(4,'Brightness','Lux',0),(5,'State Changed','State',0),(6,'Voltage','Volts',0),(7,'Power Usage','Kilo-Watts',0),(8,'Energy Cost','$/Hour',0),(9,'Sensor','Tripped',1);
+INSERT INTO `Unit` VALUES (1,'CO2 level','ppm',0),(2,'Temperature','degC',1),(3,'Humidity','%',0),(4,'Brightness','Lux',0),(5,'State Changed','State',0),(6,'Voltage','Volts',0),(7,'Power Usage','Kilo-Watts',0),(8,'Energy Cost','$/Hour',0),(9,'Sensor','Tripped',1),(10, 'Cumulated Energy', 'kWh', 0);
 /*!40000 ALTER TABLE `Unit` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
