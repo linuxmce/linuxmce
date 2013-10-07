@@ -870,29 +870,30 @@ $paramArray["params"] = $p1Array;
 
 
 function sendMedia($fkFile){
-$server = "localhost";
-$mysqlUser = "root";
-$mysqlPass = "";
 
-$conn = mysql_connect($server, $mysqlUser, $mysqlPass);
-mysql_select_db("pluto_media", $conn);
-
-$file = "";
-
-$sql = "SELECT * FROM `File` WHERE `PK_File` =".$fkFile.";";
-$res = mysql_query(mysql_real_escape_string($sql), $conn) or die(mysql_error($conn));
-
-while ($row = mysql_fetch_array($res)){
-
-$file=$row["Path"]."/".$row["Filename"];
-};
-
-
-
-
-$tr = file_get_contents($file);
-
-echo $tr;
+/*
+if(!StartsWith($fkFile, "/home/"){
+header("HTTP/1.0 404 Not Found");
+return ;
 }
-	
+*/
+
+//header("Cache-Control: no-cache, must-revalidate");
+//header("Content-Type: application/octet-stream");
+//echo filesize($fkFile);
+
+header("Content-Disposition:inline; filename=".$fkFile."");
+header("Content-length:".filesize($fkFile)."");
+header("Content-Transfer-Encoding: binary"); 
+header("Content-Type: audio/mpeg, audio/x-mpeg, audio/x-mpeg-3, audio/mpeg3");
+header("Accept-Ranges: bytes");
+readFile($fkFile);
+
+}
+
+function StartsWith($Haystack, $Needle){
+    // Recommended version, using strpos
+    return strpos($Haystack, $Needle) === 0;
+}
+
 ?>
