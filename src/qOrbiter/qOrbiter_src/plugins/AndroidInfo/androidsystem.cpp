@@ -297,7 +297,7 @@ bool AndroidSystem::playMedia(QString url)
         qCritical()<<"AttachCurrentThread failed";
         return false;
     }
-    qWarning("Tryin media player");
+
 
     m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
 
@@ -306,8 +306,6 @@ bool AndroidSystem::playMedia(QString url)
         qWarning("Cant find activity!!");
         return false;
     }
-
-    qWarning("Settin url.");
 
     QString str = url;
     int mSeek = 0;
@@ -332,7 +330,7 @@ bool AndroidSystem::stopMedia()
         qCritical()<<"AttachCurrentThread failed";
         return false;
     }
-    qWarning("Tryin media player");
+
 
     m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
 
@@ -342,11 +340,6 @@ bool AndroidSystem::stopMedia()
         return false;
     }
 
-    qWarning("Settin url.");
-
-
-
-    qWarning("Calling bool JNI method.");
     QString str = "";
     int mSeek = 0;
     bool p = false;

@@ -28,6 +28,7 @@ OnPreparedListener {
 	private String current;
 
 
+
 	public class LocalBinder extends Binder {
 		LinuxmceAudioService getService() {
 			// Return this instance of LocalService so clients can call public methods
@@ -54,7 +55,7 @@ OnPreparedListener {
 	}
 
 	public void onDestroy(){
-
+mp.release();
 	}
 
 	@Override 
@@ -76,11 +77,7 @@ OnPreparedListener {
 
 			Log.v(TAG, "path: " + path);
 
-			// If the path has not changed, just start the media player
-			if (path.equals(current) && mp != null) {
-				mp.start();
-				return;
-			}
+			
 			current = path;
 
 			// Set the data source in another thread
@@ -89,7 +86,8 @@ OnPreparedListener {
 			Runnable r = new Runnable() {
 				public void run() {
 					try {
-						mp.setDataSource(path);
+						mp.setDataSource(current);
+						Log.v(TAG, "Preparing: " + path);
 						mp.prepare();
 					} catch (IOException e) {
 						Log.e(TAG, e.getMessage(), e);
@@ -110,7 +108,7 @@ OnPreparedListener {
 
 	public void stop(){
 		mp.stop();
-		mp.release();		  
+		mp.reset();
 	}
 
 
@@ -128,9 +126,9 @@ OnPreparedListener {
 
 	public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
 		Log.e(TAG, "onError--->   what:" + what + "    extra:" + extra);
-		if (mediaPlayer != null) {
-			mediaPlayer.stop();
-			mediaPlayer.release();
+		if (mp != null) {
+			mp.stop();
+			mp.release();
 		}
 		return true;
 	}
@@ -141,6 +139,7 @@ OnPreparedListener {
 
 	public void onCompletion(MediaPlayer arg0) {
 		Log.d(TAG, "onCompletion called");
+		
 	}
 
 	public void onPrepared(MediaPlayer mediaplayer) {
