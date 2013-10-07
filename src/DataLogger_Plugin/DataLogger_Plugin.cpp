@@ -189,8 +189,7 @@ bool DataLogger_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessa
 				if ( sValue != "" )
 				{
 					unit = 10;
-					sscanf(sValue.c_str(),"%i",&iValue);
-					fValue = iValue;
+					sscanf(sValue.c_str(),"%f",&fValue);
 				} else {
 					handled = false;
 				}
