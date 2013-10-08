@@ -14,7 +14,7 @@ $days = mysql_real_escape_string($_GET['days']);
 $color = mysql_real_escape_string($_GET['color']);
 $name = mysql_real_escape_string($_GET['name']);
 $unit = mysql_real_escape_string($_GET['unit']); 
-$keepValue = array(5,9); // Units that have the same value until new value i reported
+$keepValue = array(5,9,10); // Units that have the same value until new value i reported
 $startTime = mysql_real_escape_string($_GET['startTime']);
 $endTime = mysql_real_escape_string($_GET['endTime']);
 
@@ -89,37 +89,58 @@ $Yminvalue = 100000000;
 
 // Create the datapoints for the Dataset and the lables ofr x-axis
 $t=0; //Counter
+$skipFirst = ($unit == 10); // Some data require two value to start of (cumulated energy, for instance, where we display the diff between two values)
 while ($datapoint = mysql_fetch_array($query)){
      if ($AxisYName == "") {
-          $AxisYName = $datapoint[3];
+          if ( $unit == 10 ) {
+	       $AxisYName = "kW";
+	  } else {
+               $AxisYName = $datapoint[3];
+          }
      }
+     // Find previous data point (before the current one)
      if ($t==0){
           $firstDate=date ("Y-m-d H:i:s", strtotime('-'.$days.'days'));
           $queryLast = mysql_query('SELECT PK_Datapoints, Datapoint, timestamp FROM Datapoints 
-	       WHERE EK_Device = '.$device.' AND timestamp < DATE_SUB(NOW(), INTERVAL '.$days.' DAY) AND `FK_Unit` = '.$unit.' ORDER BY timestamp DESC LIMIT 1');
-	  if (mysql_numrows($queryLast)==0){
-	       $prevDatapoint=0;
-	  }
-	  else {     
+	       WHERE EK_Device = '.$device.' AND timestamp < "'.$startTime.'" AND `FK_Unit` = '.$unit.' ORDER BY timestamp DESC LIMIT 1');
+	  if (mysql_numrows($queryLast)==0) {
+	       $prevDatapoint = 0;
+	       $prevDataTime = $startTime;
+	  } else {     
 	       $datapointLast = mysql_fetch_row($queryLast);
-	       $prevDatapoint=$datapointLast[1];
+	       $prevDatapoint = $datapointLast[1];
 
-	       //$out.='$datapointLast = '.$datapointLast[1].' - '.$prevDatapoint.'<br>';
+	       $prevDataTime = $datapointLast[2];
 	  }
-	  $Dataset->addPoint(strtotime($startTime)/*strtotime('-'.$days.'days')*/, $datapointLast[1]);
+	  if (!$skipFirst) {
+              $Dataset->addPoint(strtotime($startTime)/*strtotime('-'.$days.'days')*/, $datapointLast[1]);
+	  }
      }
+     $dataTime = $datapoint[1];
+     $dataValue = $datapoint[2];
+     
+     // If this is unit = 10, accumulated energy, it makes more sense to display the diff between the two data points
+     if ($unit == 10) {
+     	  $timeSpan = (strtotime($dataTime)-strtotime($prevDataTime))/3600;
+          $dataValue = ($dataValue - $prevDatapoint) / $timeSpan;
+     }
+
+     ++$t;
      // If the device is reporting "state change" asume the device will have the same state until new state is reported
      if (in_array($unit, $keepValue)){
-      $Dataset->addPoint((strtotime($datapoint[1])-1), $prevDatapoint);
-      $prevDatapoint=$datapoint['Datapoint'];
+         $Dataset->addPoint(strtotime($prevDataTime), $dataValue);
      }
-     $Dataset->addPoint(strtotime($datapoint[1]), $datapoint[2]);
-  if ($Yminvalue > $datapoint[2]) { $Yminvalue = $datapoint[2]; }
-     ++$t;
+
+     $Dataset->addPoint(strtotime($dataTime), $dataValue);
+     if ($Yminvalue > $datapoint[2]) { $Yminvalue = $dataValue; }
      if ($t==$num){
-          $last=strtotime($datapoint[1]);
-	  $Dataset->addPoint(strtotime($endTime), $datapoint[2]);
+         $last=strtotime($datapoint[1]);
+	 $Dataset->addPoint(strtotime($endTime), $dataValue);
      }
+
+     $prevDataTime = $datapoint[1];
+     $prevDatapoint = $datapoint[2];
+     $prevDataValue = $dataValue;
 }
 
 
