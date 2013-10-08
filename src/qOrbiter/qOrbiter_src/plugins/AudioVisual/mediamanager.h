@@ -28,6 +28,10 @@
 #include <QTime>
 #include <QTcpServer>
 
+#ifdef __ANDROID__
+#include <qtmediacallbacks.h>
+#endif
+
 
 using namespace DCE;
 using namespace Qt;
@@ -50,8 +54,8 @@ class MediaManager : public QDeclarativeItem
     Q_PROPERTY(bool muted READ getMuted WRITE setMuted NOTIFY mutedChanged)
 
     Q_PROPERTY(bool flipColors READ getColorFlip WRITE setColorFlip NOTIFY colorFlipChanged)
-  #ifndef __ANDROID__
-  //  Q_PROPERTY(QList <Phonon::AudioOutputDevice> outputs READ getAvailibleOutputs NOTIFY availibleAudioOutputsChanged())
+#ifndef __ANDROID__
+    //  Q_PROPERTY(QList <Phonon::AudioOutputDevice> outputs READ getAvailibleOutputs NOTIFY availibleAudioOutputsChanged())
 #endif
     Q_PROPERTY(QString serverAddress READ getServerAddress WRITE setServerAddress NOTIFY serverAddressChanged)
     Q_PROPERTY(int deviceNumber READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
@@ -78,6 +82,9 @@ public:
     qreal volume;
     bool muted;
 
+#ifdef __ANDROID__
+    QtMediaCallbacks *mediaCallback;
+#endif
 
     QString currentStatus;
     QString qs_totalTime;
@@ -165,6 +172,13 @@ public slots:
         setMediaPlaying(false);
     }
 
+    void androidPlaybackEnded(bool ended){
+        if(ended)
+            mediaPlayer->mediaEnded();
+    }
+
+
+
     void setColorFlip(bool f){
         flipColors = f;
 #ifndef __ANDROID__
@@ -175,14 +189,26 @@ public slots:
     bool getColorFlip() { return flipColors;}
 
 #ifndef __ANDROID__
-  //  void setAvailibleOutputs(QList<Phonon::AudioOutputDevice> l){outputs.clear(); outputs = l; emit availibleAudioOutputsChanged(); }
-  //  QList <Phonon::AudioOutputDevice> getAvailibleOutputs(){ return outputs;}
+    //  void setAvailibleOutputs(QList<Phonon::AudioOutputDevice> l){outputs.clear(); outputs = l; emit availibleAudioOutputsChanged(); }
+    //  QList <Phonon::AudioOutputDevice> getAvailibleOutputs(){ return outputs;}
 #endif
 
     void setMuted(bool m){muted = m; emit mutedChanged();}
     bool getMuted(){ return muted;}
 
+    void triggerVolumeChange(){
+
+
+    }
+
     void setVolume(qreal vol){
+
+#ifdef LINUX
+        qreal c = audioSink->volume();
+        qWarning() << "Current volume" << c;
+        qreal d = c+0.01;
+        audioSink->setVolume(d);
+#endif
         qDebug() << vol;
         volume = vol;
         emit volumeChanged();
@@ -239,9 +265,9 @@ public slots:
     bool getMediaPlaying() {return mediaPlaying;}
 
     void setFileReference(QString f){
-            fileReference = f;
-            androidUrl = fileReference;
-            emit androidUrlUpdated();
+        fileReference = f;
+        androidUrl = fileReference;
+        emit androidUrlUpdated();
     }
     QString getFileReference() {return fileReference; }
 
@@ -281,7 +307,7 @@ public slots:
 
 
     void setState(){
-      #ifndef __ANDROID__
+#ifndef __ANDROID__
 
         qDebug() << mediaObject->state();
         int i =  mediaObject->errorType();
@@ -301,7 +327,7 @@ public slots:
             mediaPlayer->EVENT_Playback_Completed(mediaPlayer->currentMediaUrl.toStdString(), mediaPlayer->i_StreamId, false);
             qWarning("Media could not start.");
         }
-     #endif
+#endif
     }
 
 
@@ -332,6 +358,31 @@ public slots:
 #elif QT5
 
 #endif
+    }
+
+    void setAndroidTotalTime(int inSec){
+        int s = inSec *1000;
+
+        int seconds = s / 1000;
+        int displayHours = seconds / (3600);
+        int remainder = seconds % 3600;
+        int minutes = remainder / 60;
+        int forseconds = remainder % 60;
+        QString hrs = QString::number(displayHours);
+        if(hrs.length()==1)
+            hrs.prepend("0");
+
+        QString min = QString::number(minutes);
+        if(min.length()==1)
+            min.prepend("0");
+
+        QString sec = QString::number(forseconds);
+        if(sec.length()==1)
+            sec.prepend("0");
+
+        qs_totalTime =hrs + ":" + min + ":" +sec;
+        totalTime = s;
+        emit totalTimeChanged();
     }
 
     void setTotalTime(qint64 t) {

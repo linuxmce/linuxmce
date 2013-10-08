@@ -6,6 +6,7 @@
 
 #ifndef QT5
 #include <QPlatformNativeInterface>
+
 #endif
 #include <QColor>
 
@@ -58,6 +59,8 @@ public:
     QColor orangeHighlight;
     QColor redStandard;
     QColor redHighlight;
+
+
 
 
 
@@ -128,9 +131,10 @@ public slots:
 
     bool playMedia(QString url);
     bool stopMedia();
+  bool startAudioService();
 
 private:
-    bool startAudioService();
+
     bool findClassIdents();
     bool getDisplayInfo();
     jobject m_qtActivity;

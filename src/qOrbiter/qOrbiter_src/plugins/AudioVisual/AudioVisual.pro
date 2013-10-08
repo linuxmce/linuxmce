@@ -105,7 +105,9 @@ HEADERS += \
 	../../../../Gen_Devices/qMediaPlayerBase.h \
 	../../../../Gen_Devices/qOrbiterBase.h
 
-
+android-g++{
+HEADERS+=org_kde_necessitas_origo_MediaCallbackInterface.h
+}
 
 !equals(_PRO_FILE_PWD_, $$DESTDIR) {
 
@@ -169,3 +171,9 @@ OTHER_FILES += \
     android/res/drawable-mdpi/icon.png \
     android/res/values/libs.xml \
     android/res/drawable-hdpi/icon.png
+
+android-g++{
+LIBS += -L$$PWD/../../../platforms/Android/androidPlugins/armeabi-v7a/ -lQtMediaCallbacks
+INCLUDEPATH += $$PWD/../../necessitas/Qorbiter-necessitas/QtMediaCallbacks
+DEPENDPATH += $$PWD/../../../platforms/Android/androidPlugins/armeabi-v7a/
+}

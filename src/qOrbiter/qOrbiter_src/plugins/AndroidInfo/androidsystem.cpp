@@ -30,18 +30,15 @@ static jmethodID displayID = 0;
 //Used to obtain the reference to the QtActivity, via the crappy static
 static jmethodID s_qtactivity_field =0;
 static jclass s_qtactivity = 0;
-static jmethodID s_qtActivity_PlayMediaMethod=0;
+static jmethodID s_qtActivity_StartMethod=0;
 static jmethodID s_qtActivity_StopMediaMethod=0;
 static jmethodID s_qtActivity_SeekMediaMethod=0;
 static jmethodID s_qtActivity_MediaControlMethod=0;
 
 
-
-
 AndroidSystem::AndroidSystem(QObject *parent) :
     QObject(parent)
 {
-
     blueStandard = "#33B5E5";
     blueHighlight= "#0099CC";
     purpleStandard ="#AA66CC";
@@ -53,6 +50,7 @@ AndroidSystem::AndroidSystem(QObject *parent) :
     redStandard="#FF4444";
     redHighlight="#CC0000";
     externalStorageLocation = "";
+
 
     if(m_pvm)
     {
@@ -88,8 +86,9 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
     m_pvm = vm;
     s_qtactivity = (jclass)env->NewGlobalRef(env->FindClass("org/kde/necessitas/origo/QtActivity"));
     s_qtactivity_field = env->GetStaticMethodID(s_qtactivity, "getActivity", "()Lorg/kde/necessitas/origo/QtActivity;");
-  //  s_qtActivity_PlayMediaMethod = env->GetMethodID(s_qtactivity, "playMedia", "(Ljava/lang/String;)V");
+    //  s_qtActivity_PlayMediaMethod = env->GetMethodID(s_qtactivity, "playMedia", "(Ljava/lang/String;)V");
     s_qtActivity_MediaControlMethod = env->GetMethodID(s_qtactivity, "SendMediaCommand", "(Ljava/lang/String;IZLjava/lang/String;)Z");
+    s_qtActivity_StartMethod = env->GetMethodID(s_qtactivity, "startAudioService", "()V");
 
     jclass localBuildClass = env->FindClass("android/os/Build");
     buildVersionClass = reinterpret_cast<jclass>(env->NewGlobalRef(localBuildClass));
@@ -151,7 +150,7 @@ bool AndroidSystem::findClassIdents()
         return false;
     }
 
-    m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
+
     setStatusMessage("Device info Gather complete.");
     m_pvm->DetachCurrentThread();
     return true;
@@ -298,12 +297,8 @@ bool AndroidSystem::playMedia(QString url)
         qCritical()<<"AttachCurrentThread failed";
         return false;
     }
-
-
     m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
-
     if (!m_qtActivity){
-
         qWarning("Cant find activity!!");
         return false;
     }
@@ -319,7 +314,6 @@ bool AndroidSystem::playMedia(QString url)
     qDebug() << url;
     jstring jstr = env->NewString(reinterpret_cast<const jchar*>(url.constData()), url.length());
     jstring jcom = env->NewString(reinterpret_cast<const jchar*>(command.constData()), command.length());
-
     jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_MediaControlMethod,jcom, mSeek, p, jstr);
     env->DeleteLocalRef(jstr);
     env->DeleteLocalRef(jcom);
@@ -335,7 +329,6 @@ bool AndroidSystem::stopMedia()
         qCritical()<<"AttachCurrentThread failed";
         return false;
     }
-
 
     m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
 
@@ -368,10 +361,9 @@ bool AndroidSystem::startAudioService()
         qCritical()<<"AttachCurrentThread failed";
         return false;
     }
+    qCritical("Initializing Audio Service");
+    m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
+    env->CallBooleanMethod(m_qtActivity, s_qtActivity_StartMethod);
 
-//    qCritical("Initializing Audio Service");
-//    QString url = "http://fr.ahfm.com:9000";
-//    jstring str = env->NewString(reinterpret_cast<const jchar*>(url.constData()), url.length());
-//    jboolean res = env->CallBooleanMethod(m_qtActivity, s_serviceStart, str);
 
 }

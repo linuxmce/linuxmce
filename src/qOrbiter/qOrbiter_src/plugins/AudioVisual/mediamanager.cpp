@@ -9,6 +9,8 @@
 #include <QGraphicsView>
 #endif
 
+
+
 using namespace DCE;
 
 
@@ -22,6 +24,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
 {
 #ifdef __ANDROID__
     setFlag(ItemHasNoContents, true);
+    QtMediaCallbacks *mediaCallback = new QtMediaCallbacks();
 #else
      setFlag(ItemHasNoContents, false);
 #endif
@@ -96,15 +99,12 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(showFullScreen()));
 #elif defined __ANDROID__
-    QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString)));
+    QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString))); //effectively play for android.
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopAndroidMedia()));
 
 #endif
-
-
     QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
     QObject::connect(mediaPlayer,SIGNAL(jumpToStreamPosition(int)), this, SLOT(setMediaPosition(int)));
-
 #ifndef __ANDROID__
     /*From internal plugin*/
     QObject::connect(mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(setState()));
@@ -133,7 +133,6 @@ void MediaManager::setConnectionDetails(int r, QString s)
 {
     setServerAddress(s);
     setDeviceNumber(r);
-
 
     if(!serverAddress.isEmpty() && deviceNumber > 1)
     {
@@ -342,4 +341,6 @@ bool MediaManager::initViews(bool flipped)
     return true;
 
 }
+
+
 

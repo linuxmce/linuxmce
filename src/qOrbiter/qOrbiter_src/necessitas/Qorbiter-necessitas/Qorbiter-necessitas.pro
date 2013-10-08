@@ -47,19 +47,18 @@ TARGET=qorbiter-$$QT_VERSION
     x86 {
         qmlplugins.files = ../../../platforms/Android/androidPlugins/x86/libqmlshadersplugin.so
         qmlplugins.files += ../../../platforms/Android/androidPlugins/x86/libandroidplugin_1_1.so
-        qmlplugins.path = /libs/x86
+        qmlplugins.path = /lib/x86
 
         } else: armeabi-v7a {
-        qmlplugins.files = ../../../platforms/Android/androidPlugins/armeabi-v7a/libqmlshadersplugin.so
-        qmlplugins.files += ../../../platforms/Android/androidPlugins/armeabi-v7a/libandroidplugin_1_1.so
-        qmlplugins.files += ../../../platforms/Android/androidPlugins/armeabi-v7a/libDceScreenSaver.so
-        qmlplugins.files += ../../../platforms/Android/androidPlugins/armeabi-v7a/libAudioVisual.so
-        qmlplugins.path = /libs/armeabi-v7a
+        qmlplugins.files=../../../platforms/Android/androidPlugins/armeabi-v7a/*.so
+        qmlplugins.path=/libs/armeabi-v7a
+
+
 
         } else {
         qmlplugins.files = ../../../platforms/Android/androidPlugins/armeabi/libqmlshadersplugin.so
         qmlplugins.files += ../../../platforms/Android/androidPlugins/armeabi/libandroidplugin_1_1.so
-        qmlplugins.path = /libs/armeabi
+        qmlplugins.path = /lib/armeabi
         }
 
         base.source = ../../qml/android/phoneConfig/Base.qml
@@ -88,7 +87,8 @@ TARGET=qorbiter-$$QT_VERSION
         HEADERS += ../../plugins/AndroidInfo/androidsystem.h \
     androidmediaplayer.h
         SOURCES += ../../plugins/AndroidInfo/androidsystem.cpp \
-    androidmediaplayer.cpp
+    androidmediaplayer.cpp \
+    ../../plugins/AndroidInfo/MediaCallbacks.cpp
 
 
 # Additional import path used to resolve QML modules in Creator's code model
@@ -98,6 +98,7 @@ QML_IMPORT_PATH = imports
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 #LinuxMCE Specific include path. Linking in the app instead of against dce libs for multi-platform expediency.
 INCLUDEPATH += ../../../../ ../../../../DCE/ ../../
+
 
 CONFIG +=warn_off
 
@@ -210,6 +211,8 @@ SOURCES += \
     ../../datamodels/genericflatlistmodel.cpp \
     ../../datamodels/genericmodelitem.cpp \
     ../../datamodels/listitembase.cpp
+
+
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -350,7 +353,5 @@ OTHER_FILES += ../../Readme.txt \
 
 RESOURCES += \
     ../../skinData.qrc
-
-
 
 
