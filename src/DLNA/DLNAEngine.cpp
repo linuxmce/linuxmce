@@ -33,7 +33,7 @@ DLNAEngine::DLNAEngine(DLNA* pDlna)
 
 DLNAEngine::~DLNAEngine()
 {
-	//TODO: delete files
+	//TODO: delete files ?
 	delete m_pDeviceHost;
 }
 
@@ -49,51 +49,67 @@ int DLNAEngine::Init()
 	HDeviceHostConfiguration hostConf;
 	QList<QHostAddress> list;
 	// TODO: get internal network address
-	list.append(QHostAddress("192.168.0.50"));
+	string sCoreIP = m_pDLNA->GetIpAddress(1);
+	LoggerWrapper::GetInstance ()->Write (LV_WARNING, "DLNAEngine() binding DLNA devices to IP %s", sCoreIP.c_str());
+	list.append(QHostAddress(sCoreIP.c_str()));
 	hostConf.setNetworkAddressesToUse(list);
 
-	// Set up device creator and configuration manager
-	HAvDeviceModelCreator creator;
-//	LMCEDeviceModelCreator creator;
-	
-	HMediaRendererDeviceConfiguration mrConf;
-//	LMCEMediaRendererDeviceConfiguration mrConf;
-	LMCERendererConnectionManager* pRcm = new LMCERendererConnectionManager(m_pDLNA);
+	// Set up Media Renderer devices (if enabled)
+	if ( m_pDLNA->m_bEnableMediaRenderer ) {
+		LoggerWrapper::GetInstance ()->Write (LV_WARNING, "DLNAEngine() starting Media Renderers");
 
-	mrConf.setRendererConnectionManager(pRcm, true);
-	creator.setMediaRendererConfiguration(mrConf);
+		// Set up device creator and configuration manager
+		HAvDeviceModelCreator creator;
+		HMediaRendererDeviceConfiguration mrConf;
+		LMCERendererConnectionManager* pRcm = new LMCERendererConnectionManager(m_pDLNA);
 
-	hostConf.setDeviceModelCreator(creator);
+		mrConf.setRendererConnectionManager(pRcm, true);
+		creator.setMediaRendererConfiguration(mrConf);
 
+		hostConf.setDeviceModelCreator(creator);
 
-	// Write a xml file representing a DLNA device for each entertainment areas
-	map<int, EntertainArea*> *pMapEntertainAreas = m_pDLNA->GetEntertainAreas();
-	string path = "./xml/lmceDlnaDevice_";
-	string templateFile = "./xml/lmceDlnaDevice_tmpl.xml";
-	string data;
-	FileUtils::ReadTextFile(templateFile, data);
-	for(map<int,EntertainArea *>::iterator it=pMapEntertainAreas->begin();it!=pMapEntertainAreas->end();++it)
-	{
-		int PK_EntArea = (*it).first;
-		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNAEngine() writing device description xml file for ent area %d", (unsigned int)PK_EntArea);
-		string file = path + StringUtils::itos(PK_EntArea) + ".xml";
-		QString deviceFile(file.c_str());
-		
-		string sConfigData;
-		sConfigData += data;
- 
-		// Replace the template tags
-		sConfigData=StringUtils::Replace(sConfigData, "%SERIALNUMBER%", StringUtils::itos(PK_EntArea));
-		sConfigData=StringUtils::Replace(sConfigData, "%DEVICE_NAME%", "LinuxMCE " + (*it).second->m_sDescription);
-		sConfigData=StringUtils::Replace(sConfigData, "%UUID%", "3a75ea42-1a88-7e1d-30aa-4b87ae459" + StringUtils::itos(100+PK_EntArea));
+		// Write a xml file representing a DLNA device for each entertainment areas
+		map<int, EntertainArea*> *pMapEntertainAreas = m_pDLNA->GetEntertainAreas();
+		string path = "./xml/lmceDlnaDevice_";
+		string templateFile = "./xml/lmceDlnaDevice_tmpl.xml";
+		string data;
+		FileUtils::ReadTextFile(templateFile, data);
+		for(map<int,EntertainArea *>::iterator it=pMapEntertainAreas->begin();it!=pMapEntertainAreas->end();++it)
+		{
+			int PK_EntArea = (*it).first;
+			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "DLNAEngine() writing device description xml file for ent area %d", (unsigned int)PK_EntArea);
+			string file = path + StringUtils::itos(PK_EntArea) + ".xml";
+			QString deviceFile(file.c_str());
+			
+			string sConfigData;
+			sConfigData += data;
+			
+			// Replace the template tags
+			sConfigData=StringUtils::Replace(sConfigData, "%SERIALNUMBER%", StringUtils::itos(PK_EntArea));
+			sConfigData=StringUtils::Replace(sConfigData, "%DEVICE_NAME%", "LinuxMCE " + (*it).second->m_sDescription);
+			sConfigData=StringUtils::Replace(sConfigData, "%UUID%", "3a75ea42-1a88-7e1d-30aa-4b87ae459" + StringUtils::itos(100+PK_EntArea));
+			
+			FileUtils::WriteTextFile(file, sConfigData);
+			
+			// Add device to host configuration
+			HDeviceConfiguration deviceConf;
+			deviceConf.setPathToDeviceDescription(deviceFile);
+			deviceConf.setCacheControlMaxAge(1800);
+			hostConf.add(deviceConf);
+		}
+	}
 
-		FileUtils::WriteTextFile(file, sConfigData);
+	// Set up Media Server (if enabled)
+	if ( m_pDLNA->m_bEnableMediaServer ) {
+//		LoggerWrapper::GetInstance ()->Write (LV_WARNING, "DLNAEngine() starting Media Server");
+		// TODO:
+	}
 
-		// Add device to host configuration
-		HDeviceConfiguration deviceConf;
-		deviceConf.setPathToDeviceDescription(deviceFile);
-		deviceConf.setCacheControlMaxAge(1800);
-		hostConf.add(deviceConf);
+	// Set up Media Controller (if enabled)
+	if ( m_pDLNA->m_bEnableMediaController ) {
+//		LoggerWrapper::GetInstance ()->Write (LV_WARNING, "DLNAEngine() starting Media Controllers");
+
+		// TODO:
 	}
 
 	if (!m_pDeviceHost->init(hostConf)) 
@@ -107,6 +123,7 @@ int DLNAEngine::Init()
 	{
 		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "isStarted %i", m_pDeviceHost->isStarted());
 	}
-	
+
+	return 0;
 }
 

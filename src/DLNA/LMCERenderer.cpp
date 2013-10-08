@@ -224,6 +224,9 @@ void LMCERenderer::MediaCommandIntercepted(Message *pMessage, long PK_Device)
 			info->setCurrentPlayMode(HPlayMode::Normal);
 			// TODO depends on mediatype
 			info->setCurrentMediaCategory(HMediaInfo::TrackAware);
+			// TODO: set number of tracks from playlist
+			// TODO: check URL/source first
+			info->setPlaybackStorageMedium(HStorageMedium::HDD);
 			UpdateNowPlaying();
 		}
 
@@ -268,7 +271,10 @@ void LMCERenderer::MediaPositionChanged(int MediaType, string currentTime, strin
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::MediaPositionChanged() currentTime = %s", currentTime.c_str());
 	HRendererConnectionInfo *info = writableRendererConnectionInfo();
 	writableRendererConnectionInfo()->setRelativeTimePosition(HDuration(QString(currentTime.c_str())));
+	writableRendererConnectionInfo()->setAbsoluteTimePosition(HDuration(QString(currentTime.c_str())));
 	writableRendererConnectionInfo()->setCurrentTrackDuration(HDuration(QString(totalTime.c_str())));
+	// TODO: media = all tracks, track = this track
+	writableRendererConnectionInfo()->setCurrentMediaDuration(HDuration(QString(totalTime.c_str())));
 	// TODO: use UPnP accessible URL (http-something)
 	writableRendererConnectionInfo()->setCurrentTrackUri(QString(mrl.c_str()));
 	info->setTransportPlaySpeed(QString(StringUtils::itos(speed/1000).c_str()));
@@ -335,6 +341,7 @@ int LMCERenderer::GetMediaType(HObject *metadata, QUrl& url)
 	if (metadata != NULL)
 	{
 		if (metadata->type() == HObject::AudioItem || metadata->type() == HObject::MusicTrack) {
+			LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::GetMediaType() metadata->title = %s", metadata->title().toStdString().c_str());
 			mediaType = MEDIATYPE_lmce_StreamedAudio_CONST;
 		} else if (metadata->type() == HObject::ImageItem) {
 			mediaType = MEDIATYPE_pluto_Pictures_CONST;
@@ -343,6 +350,7 @@ int LMCERenderer::GetMediaType(HObject *metadata, QUrl& url)
 		}
 		LoggerWrapper::GetInstance ()->Write (LV_STATUS, "LMCERenderer::GetMediaType() metadata->type = %d, mediaType = %d", metadata->type(), mediaType);
 	} else {
+		LoggerWrapper::GetInstance ()->Write (LV_WARNING, "LMCERenderer::GetMediaType() no metadata provided by media server");
 		// If the upnp media server does not provide metadata, guess media type from url extension
 		if (StringUtils::EndsWith(url.toString().toStdString(), "flac") ||
 		    StringUtils::EndsWith(url.toString().toStdString(), "flc") ||

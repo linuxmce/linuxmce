@@ -71,6 +71,9 @@ bool DLNA::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+	m_bEnableMediaRenderer = true; //DATA_Get_();
+	m_bEnableMediaServer = true;
+	m_bEnableMediaController = true;
 
 	LoadEntertainAreas();
 
