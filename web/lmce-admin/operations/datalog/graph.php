@@ -83,10 +83,6 @@ $Graph->setFont($Font);
 // Create a dataset for the graph
 $Dataset =& Image_Graph::factory('dataset'); 
 
-
-// minimum value
-$Yminvalue = 100000000;
-
 // Create the datapoints for the Dataset and the lables ofr x-axis
 $t=0; //Counter
 $skipFirst = ($unit == 10); // Some data require two value to start of (cumulated energy, for instance, where we display the diff between two values)
@@ -132,7 +128,6 @@ while ($datapoint = mysql_fetch_array($query)){
      }
 
      $Dataset->addPoint(strtotime($dataTime), $dataValue);
-     if ($Yminvalue > $datapoint[2]) { $Yminvalue = $dataValue; }
      if ($t==$num){
          $last=strtotime($datapoint[1]);
 	 $Dataset->addPoint(strtotime($endTime), $dataValue);
@@ -169,7 +164,8 @@ $AxisY =& $Plotarea->getAxis(IMAGE_GRAPH_AXIS_Y);
 $AxisY->setTitle($AxisYName, "vertical");
 
 // Set minimum value on Y-axis
-$AxisY->forceMinimum($Yminvalue); 
+$paddingY = ($Dataset->maximumY()-$Dataset->minimumY())/10;
+$AxisY->forceMinimum($Dataset->minimumY()-$paddingY);
 
 // x-axis Name
 $AxisX =& $Plotarea->getAxis(IMAGE_GRAPH_AXIS_X);
