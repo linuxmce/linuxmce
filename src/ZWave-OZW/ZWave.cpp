@@ -492,9 +492,15 @@ NOEMON or CANBUS */
 void ZWave::CMD_Reset(string sArguments,string &sCMD_Result,Message *pMessage)
 //<-dceag-c776-e->
 {
-	m_pZWInterface->Lock();
-	OpenZWave::Manager::Get()->SoftReset(m_pZWInterface->GetHomeId());
-	m_pZWInterface->UnLock();
+	if (sArguments == "ResetController") {
+		m_pZWInterface->Lock();
+		OpenZWave::Manager::Get()->ResetController(m_pZWInterface->GetHomeId());
+		m_pZWInterface->UnLock();
+	} else {
+		m_pZWInterface->Lock();
+		OpenZWave::Manager::Get()->SoftReset(m_pZWInterface->GetHomeId());
+		m_pZWInterface->UnLock();
+	}
 }
 
 //<-dceag-c788-b->
