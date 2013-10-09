@@ -69,6 +69,7 @@ public:
 	bool m_bConnected;
 	string m_sDBHost,m_sDBUser,m_sDBPass,m_sDBDBName;
 	int m_iDBPort;
+	string m_sCharset;
 
     /** Default constructor.
     */
@@ -77,6 +78,7 @@ public:
 	{
 		m_pDB=NULL;
 		m_bConnected=false;
+		m_sCharset="utf8";
 
 		pthread_mutexattr_init( &m_MutexAttr );
 		pthread_mutexattr_settype( &m_MutexAttr, PTHREAD_MUTEX_RECURSIVE_NP );
@@ -91,7 +93,7 @@ public:
     @param db_name is the database name.
     @param port is the database port (default 3306).
     */
-	DBHelper(string host, string user, string pass, string db_name, int port=3306)
+	DBHelper(string host, string user, string pass, string db_name, int port=3306, string charset="utf8")
 		: m_DBMutex("db_wrapper")
 	{
 		pthread_mutexattr_init( &m_MutexAttr );
@@ -104,6 +106,7 @@ public:
 		m_sDBPass=pass;
 		m_sDBDBName=db_name;
 		m_iDBPort=port;
+		m_sCharset = charset;
 		m_bConnectFromConstructor = true;
 		DBConnect();
 	}
@@ -160,7 +163,10 @@ public:
 		}
 		else
 			m_bConnected=true;
-
+		if (db_wrapper_set_character_set(m_pDB, m_sCharset.c_str())) 
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Failed to set character set to '%s': %s",m_sCharset.c_str(), db_wrapper_error(m_pDB));			
+		}
 		m_bConnectFromConstructor = false;
 		return m_bConnected;
 	}
