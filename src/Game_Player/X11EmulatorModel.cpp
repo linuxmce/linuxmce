@@ -22,6 +22,7 @@ namespace DCE
     m_iWindowId = 0;
     m_iEventSerialNum = 0;
     m_iCurrentKeyModifier=0;
+    m_iScreenWidth=m_iScreenHeight=m_iRefreshRate=0;
     initializeButtontoKeysyms();
   }
 

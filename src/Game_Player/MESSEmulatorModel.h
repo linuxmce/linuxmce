@@ -34,6 +34,7 @@ namespace DCE
     virtual void initializeActionstoKeysyms(); // set key mappings for MESS.
     virtual bool updateConfig();
     virtual string getVideoAccelleration();
+    virtual string getResolution();
     
   };
 }

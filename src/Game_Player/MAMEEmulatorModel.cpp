@@ -34,6 +34,14 @@ namespace DCE
     return "opengl";
   }
 
+  string MAMEEmulatorModel::getResolution()
+  {
+    string sRet = StringUtils::itos(m_iScreenWidth) + "x" +
+      StringUtils::itos(m_iScreenHeight) + "@" +
+      StringUtils::itos(m_iRefreshRate);
+    return sRet;
+  }
+
   /**
    * Update the /root/.mame/mame.ini file as needed.
    */
@@ -44,6 +52,7 @@ namespace DCE
     config.Add("###VIDEO###",getVideoAccelleration());
     config.Add("###AVIWRITE###",(m_bIsRecording ? "recorded.avi" : ""));
     config.Add("###STATE###",m_sState);
+    config.Add("###RESOLUTION###",getResolution());
     return config.Write();
   }
 

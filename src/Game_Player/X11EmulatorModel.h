@@ -35,6 +35,9 @@ namespace DCE
     string m_sWindowName;
     int m_iEventSerialNum;
 
+    // The screen geometry of the TV connected to media director.
+    int m_iScreenWidth, m_iScreenHeight, m_iRefreshRate;
+
     enum eKeyModifier 
     {
       SHIFT_LEFT     = 1,

@@ -11,6 +11,7 @@
 #include "X11EmulatorController.h"
 #include "WindowUtils/WindowUtils.h"
 #include "pluto_main/Define_Button.h"
+#include "pluto_main/Define_DeviceData.h"
 
 #include <X11/keysym.h>
 #include <X11/Xlib.h>
@@ -129,6 +130,35 @@ namespace DCE
   {
     // Not much going on here. We set a global pointer to this class for our window handler
     // and then we call the base class.
+
+    if (m_pGame_Player)
+      {
+	if (m_pGame_Player->m_pData)
+	  {
+	    string::size_type pos=0;
+	    int PK_MD = m_pGame_Player->m_pData->m_dwPK_Device_MD;
+	    string sVideoSettings = m_pGame_Player->m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(PK_MD,DEVICEDATA_Video_settings_CONST); // 1920 1080/60
+	    int iScreenWidth = atoi(StringUtils::Tokenize(sVideoSettings," ",pos).c_str());
+	    int iScreenHeight = atoi(StringUtils::Tokenize(sVideoSettings,"/",pos).c_str());
+	    int iRefreshRate = atoi(StringUtils::Tokenize(sVideoSettings,"/",pos).c_str()); // There shouldn't be a /, but this will get the rest of the string.
+	    if (iScreenWidth!=0 && iScreenHeight!=0 && iRefreshRate!=0)
+	      {
+		m_pEmulatorModel->m_iScreenWidth=iScreenWidth;
+		m_pEmulatorModel->m_iScreenHeight=iScreenHeight;
+		m_pEmulatorModel->m_iRefreshRate=iRefreshRate;
+	      }
+	  }
+	else
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorController::init - m_pData is NULL");
+	  }
+      }
+    else
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorController::init() - m_pGamePlayer is NULL, WTF?");
+	return false;
+      }
+
     return EmulatorController::init();
   }
 
@@ -377,7 +407,7 @@ namespace DCE
 	iScaledX = floor(((double)iPositionX * iScaleW)) + floor(((double)iWindowX * iScaleW));
 	iScaledY = floor(((double)iPositionY * iScaleH)) + floor(((double)iWindowY * iScaleH));
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorController::pressClick(%d, %d) - iScaleW %d iScaleH %d iScaledX %d iScaledY %d",iPositionX,iPositionY,iScaleW,iScaleH,iScaledX,iScaledY);
-	WindowUtils::SendClickToWindow(m_pEmulatorModel->m_pDisplay, m_pEmulatorModel->m_iWindowId, 0, iScaledX, iScaledY);
+	WindowUtils::SendClickToWindow(m_pEmulatorModel->m_pDisplay, m_pEmulatorModel->m_iWindowId, 1, iScaledX, iScaledY);
       }
     else
       {

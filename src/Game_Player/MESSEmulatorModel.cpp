@@ -36,6 +36,14 @@ namespace DCE
     return "opengl";
   }
 
+  string MESSEmulatorModel::getResolution()
+  {
+    string sRet = StringUtils::itos(m_iScreenWidth) + "x" +
+      StringUtils::itos(m_iScreenHeight) + "@" +
+      StringUtils::itos(m_iRefreshRate);
+    return sRet;
+  }
+
   /**
    * Update the /root/.mame/mame.ini file as needed.
    */
@@ -46,6 +54,7 @@ namespace DCE
     config.Add("###AVIWRITE###",(m_bIsRecording ? "recorded.avi" : ""));
     config.Add("###STATE###",m_sState);
     config.Add("###ROMPATH###",m_sRomPath);
+    config.Add("###RESOLUTION###",getResolution());
     return config.Write();
   }
 
