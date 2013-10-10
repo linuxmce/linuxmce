@@ -1,3 +1,10 @@
+openzwave (1.0-635lmce1) UNRELEASED; urgency=low
+
+  [ sambuca ]
+  * multiple fixed
+
+ -- Peer Oliver Schmidt <developer@linuxmce.org>  Thu, 10 Oct 2013 20:40:00 +0000
+
 openzwave (1.0-635) UNRELEASED; urgency=low
 
   [ hari ]
