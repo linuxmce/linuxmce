@@ -200,6 +200,7 @@ public class QtActivity<LocalBinder> extends Activity
     // this function is used to load and start the loader
     private void loadApplication(Bundle loaderParams)
     {
+    		
         try
         {
             final int errorCode = loaderParams.getInt(ERROR_CODE_KEY);
@@ -275,8 +276,9 @@ public class QtActivity<LocalBinder> extends Activity
                 }
             });
             errorDialog.show();
-        }       
-       
+        }   
+        //hack to make AudioVisual capable of finding the additional libs.
+        System.loadLibrary("MediaHandlers");
     }
 
     private ServiceConnection m_ministroConnection=new ServiceConnection() {

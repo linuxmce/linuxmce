@@ -174,6 +174,7 @@ OTHER_FILES += \
 
 android-g++{
 LIBS += -L$$PWD/../../../platforms/Android/androidPlugins/armeabi-v7a/ -lMediaHandlers
+
 INCLUDEPATH += $$PWD/../../necessitas/Qorbiter-necessitas/MediaHandlers
 DEPENDPATH += $$PWD/../../../platforms/Android/androidPlugins/armeabi-v7a/
 }

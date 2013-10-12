@@ -99,6 +99,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     roomList.append(new PromptData("No Rooms",0));
 
     mainView.engine()->addImportPath("imports");
+    mainView.engine()->addPluginPath("lib");
 
     mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
     mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
@@ -227,6 +228,10 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #ifdef ANDROID
     mainView.engine()->addImportPath("assets:/imports/androidComponents");
     mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
+    mainView.engine()->addPluginPath("assets:/lib");
+
+    qDebug() << "Plugin path list"; mainView.engine()->pluginPathList().join("\n");
+
     mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
 
 #ifdef QT5

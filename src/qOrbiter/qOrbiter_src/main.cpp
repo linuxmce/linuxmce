@@ -721,6 +721,10 @@ int main(int argc, char* argv[])
 
         }
 
+#ifdef __ANDROID__
+        qDebug() << orbiterWin.mainView.engine()->pluginPathList().join("\n");
+#endif
+
         orbiterWin.initView();
         pqOrbiter.qmlSetup(PK_Device, QString::fromStdString(sRouter_IP));
         a.exec();
