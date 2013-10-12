@@ -13,7 +13,7 @@ DEFINES += QTMEDIACALLBACKS_LIBRARY
 
 SOURCES += qtmediacallbacks.cpp
 
-HEADERS += qtmediacallbacks.h\
+HEADERS +=\
         QtMediaCallbacks_global.h \
     org_kde_necessitas_origo_MediaCallbackInterface.h
 
@@ -68,3 +68,9 @@ OTHER_FILES += \
     android/src/org/kde/necessitas/origo/QtApplication.java \
     android/src/org/kde/necessitas/ministro/IMinistro.aidl \
     android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl
+
+android-g++{
+LIBS += -L$$PWD/../../../../platforms/Android/androidPlugins/armeabi-v7a/ -lMediaHandlers
+INCLUDEPATH += $$PWD/../MediaHandlers
+DEPENDPATH += $$PWD/../../../platforms/Android/androidPlugins/armeabi-v7a/
+}

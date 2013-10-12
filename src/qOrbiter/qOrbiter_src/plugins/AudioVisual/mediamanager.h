@@ -29,7 +29,7 @@
 #include <QTcpServer>
 
 #ifdef __ANDROID__
-#include <qtmediacallbacks.h>
+#include <mediahandlers.h>
 #endif
 
 
@@ -83,7 +83,7 @@ public:
     bool muted;
 
 #ifdef __ANDROID__
-    QtMediaCallbacks *mediaCallback;
+    MediaHandlers *mediaCallback;
 #endif
 
     QString currentStatus;
@@ -218,7 +218,12 @@ public slots:
         return volume;
     }
 
-    void mediaStarted(){setMediaPlaying(true);  }
+    void mediaStarted(){setMediaPlaying(true);
+                #ifdef __ANDROID__
+                        qDebug() << mediaCallback->jniActive;
+                                        qDebug() << mediaCallback->androidTotalTime;
+                #endif
+                       }
 
     void setServerAddress(QString a) {if(serverAddress !=a) {serverAddress = a;emit serverAddressChanged();}}
     QString getServerAddress(){return serverAddress;}
@@ -242,6 +247,10 @@ public slots:
     void setMediaPlaying(bool s) {
         mediaPlaying = s;
         qDebug() << "media playback changed in plugin!" << s;
+#ifdef __ANDROID__
+   qDebug() << mediaCallback->androidTotalTime;
+#endif
+
         if (mediaPlaying==false)
         {
 #ifndef __ANDROID__
@@ -267,7 +276,11 @@ public slots:
     void setFileReference(QString f){
         fileReference = f;
         androidUrl = fileReference;
+#ifdef __ANDROID__
         emit androidUrlUpdated();
+        mediaCallback->cppActive = true;
+        qDebug() << mediaCallback->cppActive;
+#endif
     }
     QString getFileReference() {return fileReference; }
 
@@ -361,6 +374,7 @@ public slots:
     }
 
     void setAndroidTotalTime(int inSec){
+        qDebug("Android Time call in Audio Visual Plugin!");
         int s = inSec *1000;
 
         int seconds = s / 1000;

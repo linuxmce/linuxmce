@@ -239,7 +239,7 @@ Item {
         onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
         onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
         onMediaPlayingChanged: {
-           // console.log("Media Playback status changed locally "+dceplayer.mediaBuffer);
+            console.log("Media Playback status changed locally "+dceplayer.mediaBuffer);
             if(dceplayer.mediaPlaying){
                 hideUI()
                 forceActiveFocus()
@@ -347,7 +347,7 @@ Item {
         width: parent.width
         objectName: "componentbot"
         onLoaded: {
-          //  console.log("Component is loaded")
+            console.log("Component is loaded")
             componentLoader.z = 5
         }
         z:5

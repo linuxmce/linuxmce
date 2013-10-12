@@ -85,10 +85,11 @@ TARGET=qorbiter-$$QT_VERSION
 
         INSTALLS+= qmlplugins
         HEADERS += ../../plugins/AndroidInfo/androidsystem.h \
-    androidmediaplayer.h
+        androidmediaplayer.h
+
         SOURCES += ../../plugins/AndroidInfo/androidsystem.cpp \
-    androidmediaplayer.cpp \
-    ../../plugins/AndroidInfo/MediaCallbacks.cpp
+        androidmediaplayer.cpp \
+
 
 
 # Additional import path used to resolve QML modules in Creator's code model

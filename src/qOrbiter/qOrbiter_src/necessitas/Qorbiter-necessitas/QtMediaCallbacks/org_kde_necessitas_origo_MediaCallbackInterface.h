@@ -5,6 +5,7 @@
 #ifndef _Included_org_kde_necessitas_origo_MediaCallbackInterface
 #define _Included_org_kde_necessitas_origo_MediaCallbackInterface
 #ifdef __cplusplus
+class QtMediaCallbacks;
 extern "C" {
 #endif
 /*
@@ -54,6 +55,10 @@ JNIEXPORT void JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_setA
  */
 JNIEXPORT void JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_setCurrentStatus
   (JNIEnv *, jobject, jstring);
+
+
+
+
 
 #ifdef __cplusplus
 }

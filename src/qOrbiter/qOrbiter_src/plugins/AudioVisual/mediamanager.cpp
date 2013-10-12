@@ -24,7 +24,9 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
 {
 #ifdef __ANDROID__
     setFlag(ItemHasNoContents, true);
-    QtMediaCallbacks *mediaCallback = new QtMediaCallbacks();
+    mediaCallback = new  MediaHandlers();
+    qDebug() << "AudioVisual::address" << &mediaCallback;
+
 #else
      setFlag(ItemHasNoContents, false);
 #endif
@@ -101,6 +103,10 @@ void MediaManager::initializeConnections()
 #elif defined __ANDROID__
     QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString))); //effectively play for android.
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopAndroidMedia()));
+    QObject::connect(mediaCallback, SIGNAL(totalTimeChanged(int)), this, SLOT(setAndroidTotalTime(int)));
+    QObject::connect(mediaCallback, SIGNAL(mediaCompleted()), mediaPlayer, SLOT(mediaEnded()));
+    QObject::connect(mediaCallback, SIGNAL(mediaStarted()), this, SLOT(mediaStarted()));
+    QObject::connect(mediaCallback, SIGNAL(mediaStopped()), this, SLOT(stopAndroidMedia()));
 
 #endif
     QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));

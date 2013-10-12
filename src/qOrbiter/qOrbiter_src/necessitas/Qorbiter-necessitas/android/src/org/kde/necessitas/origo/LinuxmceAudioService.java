@@ -58,7 +58,7 @@ OnPreparedListener {
 		mediaBridge = new MediaCallbackInterface();
 
 		if(mediaBridge!= null){
-			mediaBridge.setCurrentStatus("Online");
+			
 		} else{
 			Log.d(TAG,"Couldnt initialize Audio Service bridge!");
 		}

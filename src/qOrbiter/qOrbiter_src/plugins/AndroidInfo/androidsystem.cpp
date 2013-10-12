@@ -104,31 +104,6 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 
     findPathID=env->GetMethodID(fileClass, "getPath", "()Ljava/lang/String;");
 
-    //    jclass localActivityClass = env->FindClass("android/app/NativeActivity");
-    //    activityClass = reinterpret_cast<jclass>(env->NewGlobalRef(localActivityClass));
-    //    getWindowManagerID = env->GetMethodID(localActivityClass, "getWindowManager", "()Landroid/view/WindowManager;");
-
-    //    jclass localDisplayContextClassID= env->FindClass("android/content/Context");
-    //   displayContextClass = reinterpret_cast<jclass>(env->NewGlobalRef(localDisplayContextClassID));
-    //    contextMethodID = env->GetStaticMethodID(displayContextClass, "getSystemService", "()Ljava/lang/String;");
-
-    //   jclass localDisplayObjClass = env->FindClass("android/view/Display;");
-    // displayObjClass = reinterpret_cast<jclass>(env->NewGlobalRef(localDisplayObjClass));
-
-    // displayID = env->GetMethodID(displayObjClass, "getDisplay", "I");
-
-
-    //    jclass localWSclass =  env->FindClass("android/hardware/display/DisplayManager");
-    //    window_service_class = reinterpret_cast<jclass>(env->NewGlobalRef(localWSclass));
-
-    //    env->DeleteLocalRef(localDisplayContextClassID);
-    //    env->DeleteLocalRef(localWSclass);
-    //    env->DeleteLocalRef(localActivityClass);
-    //    env->DeleteLocalRef(localDisplayObjClass);
-
-    s_qtactivity = (jclass)env->NewGlobalRef(env->FindClass("org/kde/necessitas/origo/QtActivity"));
-    s_qtactivity_field = env->GetStaticMethodID(s_qtactivity, "getActivity", "()Lorg/kde/necessitas/origo/QtActivity;");
-
     env->DeleteLocalRef(lesc);
     env->DeleteLocalRef(lfpid);
 
