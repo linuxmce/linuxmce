@@ -170,22 +170,15 @@ signals:
 
 public slots:
 
-
-
     QString getAndroidUrl(){ return androidUrl;}
 
     void stopAndroidMedia(){
         setMediaPlaying(false);
-
     }
 
     void androidPlaybackEnded(bool ended){
-        if(ended)
-            mediaPlayer->mediaEnded();
-        else
-            setMediaPlaying(true);
+         mediaPlayer->mediaEnded();
     }
-
 
 
     void setColorFlip(bool f){

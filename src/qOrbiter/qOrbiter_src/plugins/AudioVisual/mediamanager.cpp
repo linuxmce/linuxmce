@@ -335,6 +335,7 @@ void MediaManager::processSocketdata()
         }
         else if(eventT=="completed"){
             androidPlaybackEnded(true);
+
         }
     }
 }
