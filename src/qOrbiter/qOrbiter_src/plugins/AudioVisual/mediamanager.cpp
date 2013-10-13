@@ -316,15 +316,22 @@ void MediaManager::processSocketdata()
         setAndroidTotalTime(i);
     }
 
+    if(cmd=="error"){
+        stopAndroidMedia();
+        mediaPlayer->mediaEnded();
+    }
+
     else if(cmd=="event"){
        QString eventT = cmd.at(1);
+       qDebug() << eventT;
        if(eventT=="stop"){
-           stopAndroidMedia();
+          androidPlaybackEnded(true);
+
        }else if(eventT=="play"){
-            setMediaPlaying(true);
+            androidPlaybackEnded(false);
        }
        else if(eventT=="completed"){
-           stopAndroidMedia();
+          androidPlaybackEnded(true);
        }
     }
 }

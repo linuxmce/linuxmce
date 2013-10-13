@@ -176,11 +176,14 @@ public slots:
 
     void stopAndroidMedia(){
         setMediaPlaying(false);
+
     }
 
     void androidPlaybackEnded(bool ended){
         if(ended)
             mediaPlayer->mediaEnded();
+        else
+            setMediaPlaying(true);
     }
 
 
