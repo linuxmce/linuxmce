@@ -131,7 +131,7 @@ public slots:
 
     bool playMedia(QString url);
     bool stopMedia();
-  bool startAudioService();
+    bool startAudioService(long addr);
 
 private:
 

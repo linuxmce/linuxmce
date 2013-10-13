@@ -88,7 +88,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
     s_qtactivity_field = env->GetStaticMethodID(s_qtactivity, "getActivity", "()Lorg/kde/necessitas/origo/QtActivity;");
     //  s_qtActivity_PlayMediaMethod = env->GetMethodID(s_qtactivity, "playMedia", "(Ljava/lang/String;)V");
     s_qtActivity_MediaControlMethod = env->GetMethodID(s_qtactivity, "SendMediaCommand", "(Ljava/lang/String;IZLjava/lang/String;)Z");
-    s_qtActivity_StartMethod = env->GetMethodID(s_qtactivity, "startAudioService", "()V");
+    s_qtActivity_StartMethod = env->GetMethodID(s_qtactivity, "startAudioService", "(J)V");
 
     jclass localBuildClass = env->FindClass("android/os/Build");
     buildVersionClass = reinterpret_cast<jclass>(env->NewGlobalRef(localBuildClass));
@@ -328,7 +328,7 @@ bool AndroidSystem::stopMedia()
     return true;
 }
 
-bool AndroidSystem::startAudioService()
+bool AndroidSystem::startAudioService(long addr)
 {
     JNIEnv* env;
     if (m_pvm->AttachCurrentThread(&env, NULL)<0)
@@ -337,7 +337,8 @@ bool AndroidSystem::startAudioService()
         return false;
     }
     qCritical("Initializing Audio Service");
-    m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
+    jint cbAddr = addr;
+    m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field, cbAddr));
     env->CallBooleanMethod(m_qtActivity, s_qtActivity_StartMethod);
 
 

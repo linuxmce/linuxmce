@@ -28,9 +28,7 @@
 #include <QTime>
 #include <QTcpServer>
 
-#ifdef __ANDROID__
-#include <mediahandlers.h>
-#endif
+
 
 
 using namespace DCE;
@@ -52,6 +50,7 @@ class MediaManager : public QDeclarativeItem
     Q_PROPERTY(int mediaBuffer READ getMediaBuffer WRITE setMediaBuffer NOTIFY mediaBufferChanged)
     Q_PROPERTY(qreal volume READ getVolume NOTIFY volumeChanged)
     Q_PROPERTY(bool muted READ getMuted WRITE setMuted NOTIFY mutedChanged)
+
 
     Q_PROPERTY(bool flipColors READ getColorFlip WRITE setColorFlip NOTIFY colorFlipChanged)
 #ifndef __ANDROID__
@@ -83,7 +82,8 @@ public:
     bool muted;
 
 #ifdef __ANDROID__
-    MediaHandlers *mediaCallback;
+
+    long callbackAddress;
 #endif
 
     QString currentStatus;
@@ -91,6 +91,7 @@ public:
 
 
     QTcpServer *timeCodeServer;
+    QTcpServer *infoSocket;
     QString current_position;
     int iCurrent_Position;
 
@@ -106,6 +107,8 @@ public:
     qMediaPlayer *mediaPlayer;
 
     QList<QTcpSocket*> clientList;
+    QTcpSocket*lastClient;
+
     QProcess *mountProcess;
 
     QString serverAddress;
@@ -163,8 +166,11 @@ signals:
     void androidUrlUpdated();
     void asyncStop();
     void asyncPositionRequest(int r);
+    void callbackChanged();
 
 public slots:
+
+
 
     QString getAndroidUrl(){ return androidUrl;}
 
@@ -198,7 +204,6 @@ public slots:
 
     void triggerVolumeChange(){
 
-
     }
 
     void setVolume(qreal vol){
@@ -218,12 +223,10 @@ public slots:
         return volume;
     }
 
-    void mediaStarted(){setMediaPlaying(true);
-                #ifdef __ANDROID__
-                        qDebug() << mediaCallback->jniActive;
-                                        qDebug() << mediaCallback->androidTotalTime;
-                #endif
-                       }
+    void mediaStarted(){
+        setMediaPlaying(true);
+
+    }
 
     void setServerAddress(QString a) {if(serverAddress !=a) {serverAddress = a;emit serverAddressChanged();}}
     QString getServerAddress(){return serverAddress;}
@@ -247,9 +250,7 @@ public slots:
     void setMediaPlaying(bool s) {
         mediaPlaying = s;
         qDebug() << "media playback changed in plugin!" << s;
-#ifdef __ANDROID__
-   qDebug() << mediaCallback->androidTotalTime;
-#endif
+
 
         if (mediaPlaying==false)
         {
@@ -278,8 +279,8 @@ public slots:
         androidUrl = fileReference;
 #ifdef __ANDROID__
         emit androidUrlUpdated();
-        mediaCallback->cppActive = true;
-        qDebug() << mediaCallback->cppActive;
+        connectInfoSocket();
+        qDebug() << "CPP Url Updated";
 #endif
     }
     QString getFileReference() {return fileReference; }
@@ -314,10 +315,7 @@ public slots:
     void startTimeCodeServer();
     void stopTimeCodeServer();
     void handleError(){
-
-
     }
-
 
     void setState(){
 #ifndef __ANDROID__
@@ -425,6 +423,7 @@ public slots:
     QString getTotalTime() {return qs_totalTime;}
 
     void processTimeCode(qint64 f);
+    void processSocketdata();
 
 private:
     void initializePlayer();
@@ -437,6 +436,10 @@ private:
 
 
 private slots:
+    void infoConnectHandler();
+    void connectInfoSocket();
+    void disconnectInfoSocket();
+
 
     bool initViews(bool flipped);
 

@@ -132,6 +132,8 @@ public class QtActivity<LocalBinder> extends Activity
     public static QtActivity qtactivity;
     
     LinuxmceAudioService mService;
+    public long myobj;
+    
     boolean mBound = false;
 
     public static QtActivity getActivity() {
@@ -158,10 +160,13 @@ public class QtActivity<LocalBinder> extends Activity
     }
     
     
-    public void startAudioService(){ 
+    public void startAudioService(long t){ 
     	Log.d("Linuxmce Audio Service", "Trying to start Linuxmce Audio Service");
 		Intent i = new Intent(this , LinuxmceAudioService.class);		
-		bindService(i, mConnection, this.BIND_AUTO_CREATE);    
+		if(bindService(i, mConnection, this.BIND_AUTO_CREATE)){
+			
+		}
+		
     }
     
     public void playAudioFile(String file){
@@ -178,7 +183,8 @@ public class QtActivity<LocalBinder> extends Activity
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             LocalBinder binder = (LocalBinder) service;
             mService = ((LinuxmceAudioService.LocalBinder)service).getService();
-            mBound = true;            
+            mBound = true;   
+           
         }
 
         @Override
@@ -277,8 +283,7 @@ public class QtActivity<LocalBinder> extends Activity
             });
             errorDialog.show();
         }   
-        //hack to make AudioVisual capable of finding the additional libs.
-        System.loadLibrary("MediaHandlers");
+       
     }
 
     private ServiceConnection m_ministroConnection=new ServiceConnection() {

@@ -24,11 +24,9 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
 {
 #ifdef __ANDROID__
     setFlag(ItemHasNoContents, true);
-    mediaCallback = new  MediaHandlers();
-    qDebug() << "AudioVisual::address" << &mediaCallback;
 
 #else
-     setFlag(ItemHasNoContents, false);
+    setFlag(ItemHasNoContents, false);
 #endif
     serverAddress = "";
     deviceNumber = -1;
@@ -38,8 +36,8 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     setCurrentStatus("Media Manager defaults set, initializing media engines");
 #ifdef QT4
 
-    #ifndef __ANDROID__
-   // setAvailibleOutputs(Phonon::BackendCapabilities::availableAudioOutputDevices());
+#ifndef __ANDROID__
+    // setAvailibleOutputs(Phonon::BackendCapabilities::availableAudioOutputDevices());
     qDebug() << outputs;
     qDebug() << Phonon::BackendCapabilities::availableMimeTypes();
 
@@ -62,8 +60,8 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
 
     if(initViews(true))
         setCurrentStatus("Color Filter Applied.");
-    #endif
-setCurrentStatus("Window Initialized");
+#endif
+    setCurrentStatus("Window Initialized");
 #endif
 
     totalTime=0;
@@ -103,10 +101,7 @@ void MediaManager::initializeConnections()
 #elif defined __ANDROID__
     QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString))); //effectively play for android.
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopAndroidMedia()));
-    QObject::connect(mediaCallback, SIGNAL(totalTimeChanged(int)), this, SLOT(setAndroidTotalTime(int)));
-    QObject::connect(mediaCallback, SIGNAL(mediaCompleted()), mediaPlayer, SLOT(mediaEnded()));
-    QObject::connect(mediaCallback, SIGNAL(mediaStarted()), this, SLOT(mediaStarted()));
-    QObject::connect(mediaCallback, SIGNAL(mediaStopped()), this, SLOT(stopAndroidMedia()));
+
 
 #endif
     QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
@@ -127,11 +122,11 @@ void MediaManager::initializeConnections()
     QObject::connect(audioSink, SIGNAL(volumeChanged(qreal)), this, SLOT(setVolume(qreal)));
     QObject::connect(audioSink, SIGNAL(mutedChanged(bool)), this, SLOT(setMuted(bool)));
 
-    #ifdef QT4
+#ifdef QT4
     mediaObject->setTickInterval(quint32(1000));
-    #elif QT5
+#elif QT5
 
-    #endif
+#endif
 #endif
 }
 
@@ -157,7 +152,7 @@ void MediaManager::setConnectionDetails(int r, QString s)
 
 void MediaManager::newClientConnected()
 {
-    setCurrentStatus("New Client Connected::");
+    setCurrentStatus("New Client Connected.");
     if(timeCodeServer->hasPendingConnections()){
         QTcpSocket *lastSocket=timeCodeServer->nextPendingConnection();
         if(lastSocket->isValid()){
@@ -173,8 +168,6 @@ void MediaManager::startTimeCodeServer()
     setCurrentStatus("Staring timecode server on port 12000");
     timeCodeServer->listen(QHostAddress::Any,12000);
     QObject::connect(timeCodeServer, SIGNAL(newConnection()), this , SLOT(newClientConnected()));
-
-
 }
 
 void MediaManager::stopTimeCodeServer()
@@ -239,7 +232,7 @@ void MediaManager::setMediaUrl(QString url)
 
     }
 
- mediaObject->setCurrentSource(Phonon::MediaSource(url));
+    mediaObject->setCurrentSource(Phonon::MediaSource(url));
     setCurrentStatus(QString("MediaObject Source::"+mediaObject->currentSource().fileName()));
     qDebug() <<"Media Object Source::"<< mediaObject->currentSource().type();
     qDebug() <<"Media Object Source::"<< mediaObject->currentSource().fileName();
@@ -249,7 +242,7 @@ void MediaManager::setMediaUrl(QString url)
     qDebug() <<"Item is playing? " << mediaObject->state();
     qDebug() << "Errors " << mediaObject->errorString();
     qDebug() << discController->currentTitle();
- #endif
+#endif
 
 }
 
@@ -297,6 +290,45 @@ void MediaManager::processTimeCode(qint64 f)
     //  setCurrentStatus("Current position::" +QString::number(displayHours) + ":" + QString::number(minutes) + ":" +QString::number(forseconds));
 }
 
+void MediaManager::processSocketdata()
+{
+
+    QString tmp;
+    while(lastClient->bytesAvailable()){
+        tmp.append(lastClient->read(1));
+    }
+
+    QString f = QString::fromAscii(tmp.toLocal8Bit());
+    int front = f.indexOf("\n{");
+    int back  = f.indexOf("}\n");
+    QString final=f.remove(0, front);
+    final.remove(back, f.length());
+    qWarning() << "Socket Data!! " <<final;
+    final.remove("\n{"); final.remove("}\n");
+
+    QStringList cmdList = final.split(":");
+    QString cmd = cmdList.at(0);
+
+    qDebug() << "Cat::" << cmd;
+
+    if(cmd=="time"){
+        int i = QString(cmd.at(1)).toInt();
+        setAndroidTotalTime(i);
+    }
+
+    else if(cmd=="event"){
+       QString eventT = cmd.at(1);
+       if(eventT=="stop"){
+           stopAndroidMedia();
+       }else if(eventT=="play"){
+            setMediaPlaying(true);
+       }
+       else if(eventT=="completed"){
+           stopAndroidMedia();
+       }
+    }
+}
+
 
 void MediaManager::transmit(QString d)
 {
@@ -326,6 +358,35 @@ void MediaManager::mountDrive(int device)
     qDebug() << mountProcess->state();
 }
 
+void MediaManager::infoConnectHandler()
+{
+    setCurrentStatus("IPC Client Connected::");
+    if(infoSocket->hasPendingConnections()){
+        lastClient=infoSocket->nextPendingConnection();
+        if(lastClient->isValid()){
+            QObject::connect(lastClient,SIGNAL(readyRead()), this, SLOT(processSocketdata()));
+        }
+    }
+}
+
+void MediaManager::connectInfoSocket()
+{
+    if(!infoSocket){
+        infoSocket = new QTcpServer();
+    }
+
+    infoSocket->listen(QHostAddress::Any, 12001);
+    QObject::connect(infoSocket, SIGNAL(newConnection()), this, SLOT(infoConnectHandler()));
+
+
+}
+
+void MediaManager::disconnectInfoSocket()
+{
+    // infoSocket->disconnect();
+    // infoSocket->deleteLater();
+}
+
 
 
 bool MediaManager::initViews(bool flipped)
@@ -343,7 +404,7 @@ bool MediaManager::initViews(bool flipped)
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
     filterProxy->hide();
-    #endif
+#endif
     return true;
 
 }

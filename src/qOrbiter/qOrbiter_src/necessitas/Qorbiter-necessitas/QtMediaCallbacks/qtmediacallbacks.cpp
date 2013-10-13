@@ -16,44 +16,45 @@ extern "C" {
 
 
 JNIEXPORT void JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_setCurrentStatus
-(JNIEnv *env, jobject obj, jstring str ){
+(JNIEnv *env, jobject obj, jstring str, jlong callback ){
 
     qDebug() << "JNI-LIB::setCurrentStatus(String)";
 }
 
 JNIEXPORT jboolean JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_androidPlaybackEnded
-(JNIEnv *env, jobject obj, jboolean bl){
+(JNIEnv *env, jobject obj, jboolean bl, jlong callback){
 
-      qDebug() << "JNI-LIB::playbackEnded(bool)";
+    qDebug() << "JNI-LIB::playbackEnded(bool)";
 }
 
 JNIEXPORT void JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_setMediaPlaying
-(JNIEnv *env, jobject obj, jboolean jbool){
+(JNIEnv *env, jobject obj, jboolean jbool, jlong callback){
 
-      qDebug() << "JNI-LIB::setMediaPlaying(bool)";
+    qDebug() << "JNI-LIB::setMediaPlaying(bool)";
 
 }
 
 JNIEXPORT void JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_setMediaError
-(JNIEnv *env, jobject obj, jstring str){
-      qDebug() << "JNI-LIB::setMediaError(String)";
+(JNIEnv *env, jobject obj, jstring str, jlong callback){
+    qDebug() << "JNI-LIB::setMediaError(String)";
 
 }
 
 JNIEXPORT jint JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_setMediaPosition
-(JNIEnv *env, jobject obj, jint i){
-      qDebug() << "JNI-LIB::setMediaPosition(int)";
+(JNIEnv *env, jobject obj, jint i, jlong callback){
+    qDebug() << "JNI-LIB::setMediaPosition(int)";
 }
 
 JNIEXPORT void JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_setAndroidTotalTime
-(JNIEnv *env, jobject obj, jint i){
+(JNIEnv *env, jobject obj, jint i, jlong callback){
     int tInt = i;
- qDebug() << "JNI-LIB::setAndroidTotalTime(int)";
+    long adr = callback;
+    qDebug() << "JNI-LIB::setAndroidTotalTime(int)";
     MediaHandlers *t = new MediaHandlers();
+    t = (MediaHandlers*)&adr;
     qDebug() << "mediacallbacks::invoked::address" << &t;
     t->setAndroidTotalTime(tInt);
     t->squawk("Jni sent android time");
-
 }
 }
 

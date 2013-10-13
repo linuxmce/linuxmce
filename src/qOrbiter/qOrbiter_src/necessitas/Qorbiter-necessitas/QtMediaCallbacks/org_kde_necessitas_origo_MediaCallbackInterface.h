@@ -14,7 +14,7 @@ extern "C" {
  * Signature: (Z)V
  */
 JNIEXPORT void JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_setMediaPlaying
-  (JNIEnv *, jobject, jboolean);
+  (JNIEnv *, jobject, jboolean, jlong);
 
 /*
  * Class:     org_kde_necessitas_origo_MediaCallbackInterface
@@ -22,7 +22,7 @@ JNIEXPORT void JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_setM
  * Signature: (Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_setMediaError
-  (JNIEnv *, jobject, jstring);
+  (JNIEnv *, jobject, jstring, jlong);
 
 /*
  * Class:     org_kde_necessitas_origo_MediaCallbackInterface
@@ -30,7 +30,7 @@ JNIEXPORT void JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_setM
  * Signature: (Z)Z
  */
 JNIEXPORT jboolean JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_androidPlaybackEnded
-  (JNIEnv *, jobject, jboolean);
+  (JNIEnv *, jobject, jboolean, jlong);
 
 /*
  * Class:     org_kde_necessitas_origo_MediaCallbackInterface
@@ -38,7 +38,7 @@ JNIEXPORT jboolean JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_setMediaPosition
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jobject, jint, jlong);
 
 /*
  * Class:     org_kde_necessitas_origo_MediaCallbackInterface
@@ -46,7 +46,7 @@ JNIEXPORT jint JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_setM
  * Signature: (I)V
  */
 JNIEXPORT void JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_setAndroidTotalTime
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jobject, jint, jlong);
 
 /*
  * Class:     org_kde_necessitas_origo_MediaCallbackInterface
@@ -54,7 +54,7 @@ JNIEXPORT void JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_setA
  * Signature: (Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_org_kde_necessitas_origo_MediaCallbackInterface_setCurrentStatus
-  (JNIEnv *, jobject, jstring);
+  (JNIEnv *, jobject, jstring, jlong);
 
 
 
