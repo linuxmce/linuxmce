@@ -59,7 +59,7 @@ DD_FILESYSTEM=159
 DD_UUID=267
 DD_BLOCK_DEV=152
 
-NFS_MOUNT_OPTS="-fstype=nfs,udp,proto=udp,soft,timeo=7,retrans=3,retry=2,rsize=32768,wsize=32768"
+NFS_MOUNT_OPTS="-fstype=nfs,vers=3,udp,proto=udp,soft,timeo=7,retrans=3,retry=2,rsize=32768,wsize=32768"
 
 case "$Template" in
 	## Software Raid Array
