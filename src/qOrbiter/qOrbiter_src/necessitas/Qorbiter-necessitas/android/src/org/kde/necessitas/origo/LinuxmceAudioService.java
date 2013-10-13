@@ -86,8 +86,7 @@ OnPreparedListener {
 			ObjectOutputStream objOut = new ObjectOutputStream(sender.getOutputStream());
     		objOut.write(message.getBytes());
     		objOut.flush(); 
-    		showNotification("Message::"+message);
-    		handler.post(new NotificationRunnable(message) { } );
+    		showNotification("Message::"+message);    		
 		} catch (IOException e) {
             Log.e(getClass().getName(), e.getMessage());
         }
@@ -184,8 +183,10 @@ OnPreparedListener {
 				mp.stop();
 				mp.release();
 				mp=null;
-				connect("\n{event:play}\n");
+				
 			}
+			
+			connect("\n{event:play}\n");
 		}
 	}
 
@@ -197,8 +198,9 @@ OnPreparedListener {
 				mp.stop();
 				mp.release();
 				mp=null;
-				connect("\n{event:stop}\n");
+				
 			}
+			connect("\n{event:stop}\n");
 		}
 	}
 

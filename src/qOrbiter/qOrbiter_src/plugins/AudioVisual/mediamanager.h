@@ -283,6 +283,7 @@ public slots:
 #ifdef __ANDROID__
         emit androidUrlUpdated();
         connectInfoSocket();
+        startTimeCodeServer();
         qDebug() << "CPP Url Updated";
 #endif
     }
@@ -375,8 +376,8 @@ public slots:
     }
 
     void setAndroidTotalTime(int inSec){
-        qDebug("Android Time call in Audio Visual Plugin!");
-        int s = inSec *1000;
+        qDebug("Android Time call in Audio Visual Plugin::"+inSec);
+        int s = inSec ;
 
         int seconds = s / 1000;
         int displayHours = seconds / (3600);
@@ -397,6 +398,7 @@ public slots:
 
         qs_totalTime =hrs + ":" + min + ":" +sec;
         totalTime = s;
+        qDebug() << qs_totalTime;
         emit totalTimeChanged();
     }
 

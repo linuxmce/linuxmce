@@ -294,25 +294,28 @@ void MediaManager::processSocketdata()
 {
 
     QString tmp;
-    while(lastClient->bytesAvailable()){
+    while(lastClient->bytesAvailable()!=0){
         tmp.append(lastClient->read(1));
+    }
+
+    if(!tmp.contains("\n{")){
+        tmp="";
+        return ;
     }
 
     QString f = QString::fromAscii(tmp.toLocal8Bit());
     int front = f.indexOf("\n{");
     int back  = f.indexOf("}\n");
     QString final=f.remove(0, front);
-    final.remove(back, f.length());
-    qWarning() << "Socket Data!! " <<final;
     final.remove("\n{"); final.remove("}\n");
+    qWarning() << "Socket Data!! " <<final;
+
 
     QStringList cmdList = final.split(":");
     QString cmd = cmdList.at(0);
 
-    qDebug() << "Cat::" << cmd;
-
     if(cmd=="time"){
-        int i = QString(cmd.at(1)).toInt();
+        int i = QString(cmdList.last()).toInt();
         setAndroidTotalTime(i);
     }
 
@@ -322,17 +325,17 @@ void MediaManager::processSocketdata()
     }
 
     else if(cmd=="event"){
-       QString eventT = cmd.at(1);
-       qDebug() << eventT;
-       if(eventT=="stop"){
-          androidPlaybackEnded(true);
+        QString eventT = cmdList.last();
+        qDebug() << eventT;
+        if(eventT=="stop"){
+            setMediaPlaying(false);
 
-       }else if(eventT=="play"){
+        }else if(eventT=="play"){
             androidPlaybackEnded(false);
-       }
-       else if(eventT=="completed"){
-          androidPlaybackEnded(true);
-       }
+        }
+        else if(eventT=="completed"){
+            androidPlaybackEnded(true);
+        }
     }
 }
 

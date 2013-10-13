@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 <manifest android:versionCode="26" package="org.linuxmce.qorbiter" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="qt4b1-gl">
-    <application android:name="org.kde.necessitas.origo.QtApplication" android:icon="@drawable/icon" android:label="@string/app_name" android:persistent="true" android:allowBackup="true">
-       <service android:name="org.kde.necessitas.origo.LinuxmceAudioService" android:icon="@drawable/icon"  />
-       <activity android:name="org.kde.necessitas.origo.QtActivity" android:configChanges="orientation|locale|fontScale|keyboard|keyboardHidden" android:launchMode="singleInstance" android:label="@string/app_name">
-          <intent-filter>
+    <application android:name="org.kde.necessitas.origo.QtApplication" android:icon="@drawable/icon" android:persistent="true" android:allowBackup="true" android:label="@string/app_name">
+        <service android:name="org.kde.necessitas.origo.LinuxmceAudioService" android:icon="@drawable/icon"/>
+        <activity android:name="org.kde.necessitas.origo.QtActivity" android:configChanges="orientation|locale|fontScale|keyboard|keyboardHidden" android:launchMode="singleInstance" android:label="@string/app_name">
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
@@ -27,7 +27,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.READ_FRAME_BUFFER"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.SIGNAL_PERSISTENT_PROCESSES"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
