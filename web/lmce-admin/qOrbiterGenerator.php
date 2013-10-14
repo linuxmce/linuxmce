@@ -871,23 +871,19 @@ $paramArray["params"] = $p1Array;
 
 function sendMedia($fkFile){
 
-/*
-if(!StartsWith($fkFile, "/home/"){
-header("HTTP/1.0 404 Not Found");
-return ;
-}
-*/
+$size=filesize($fkFile);
+$length=$size;
+$start=0;
+$end=$size-1;
 
-//header("Cache-Control: no-cache, must-revalidate");
-//header("Content-Type: application/octet-stream");
-//echo filesize($fkFile);
 
 header("Content-Disposition:inline; filename=".$fkFile."");
-header("Content-length:".filesize($fkFile)."");
+header("Content-length:".$size."");
 header("Content-Transfer-Encoding: binary"); 
-header("Content-Type: audio/mpeg, audio/x-mpeg, audio/x-mpeg-3, audio/mpeg3");
-header("Accept-Ranges: bytes");
-readFile($fkFile);
+header("Content-Type: audio/mpeg");
+header("Accept-Ranges:0-".$length);
+header("Content-Range: bytes".$start."-".$end/$size."");
+echo file_get_contents($fkFile);
 
 }
 
