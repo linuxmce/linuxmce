@@ -79,8 +79,7 @@ OnPreparedListener {
 
 			ObjectOutputStream objOut = new ObjectOutputStream(sender.getOutputStream());
 			objOut.write(message.getBytes());
-			objOut.flush(); 
-			showNotification("Message::"+message);    		
+			objOut.flush(); 			
 		} catch (IOException e) {
 			Log.e(getClass().getName(), e.getMessage());
 		}

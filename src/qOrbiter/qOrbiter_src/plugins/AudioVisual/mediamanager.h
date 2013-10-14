@@ -278,6 +278,7 @@ public slots:
         connectInfoSocket();
         startTimeCodeServer();
         qDebug() << "CPP Url Updated";
+
 #endif
     }
     QString getFileReference() {return fileReference; }
@@ -393,6 +394,7 @@ public slots:
         totalTime = s;
         qDebug() << qs_totalTime;
         emit totalTimeChanged();
+        processTimeCode(0);
     }
 
     void setTotalTime(qint64 t) {

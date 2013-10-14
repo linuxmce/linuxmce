@@ -150,20 +150,19 @@ void MediaManager::setConnectionDetails(int r, QString s)
 
 }
 
-void MediaManager::newClientConnected()
-{
-    setCurrentStatus("New Client Connected.");
+void MediaManager::newClientConnected(){
+
     if(timeCodeServer->hasPendingConnections()){
         QTcpSocket *lastSocket=timeCodeServer->nextPendingConnection();
         if(lastSocket->isValid()){
+            setCurrentStatus("New Client Connected."+lastSocket->peerAddress().toString());
             clientList.append(lastSocket);
         }
     }
 
 }
 
-void MediaManager::startTimeCodeServer()
-{
+void MediaManager::startTimeCodeServer(){
 
     setCurrentStatus("Staring timecode server on port 12000");
     timeCodeServer->listen(QHostAddress::Any,12000);
