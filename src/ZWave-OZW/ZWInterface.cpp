@@ -124,7 +124,7 @@ bool ZWInterface::Init(ZWConfigData* data) {
 		
 		// int ourNodeId = Manager::Get()->GetControllerNodeId(g_homeId);
 
-		OpenZWave::Manager::Get()->SetPollInterval(60000, false);
+		OpenZWave::Manager::Get()->SetPollInterval(2000, true);
 
 		return true;
 	}

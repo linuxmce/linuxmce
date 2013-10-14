@@ -784,7 +784,6 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			     label == "Mode" )
 			{
 				// intensity = poll this value every X poll cycle/interval
-				// When polling interval is 60000 (60 seconds), this value effectively becomes every X second
 				uint8 intensity = 1;
 				if ( label == "Battery Level" ) {
 					intensity = 255; // battery level does not change very often
@@ -796,6 +795,12 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() ValueAdded: Set polling for node %d/%d/%d, value label %s, intensity %d", _notification->GetNodeId(), id.GetCommandClassId(), id.GetInstance(), label.c_str(), intensity);
 				OpenZWave::Manager::Get()->EnablePoll(id, intensity);
 			}
+		}
+		if (m_pZWInterface->IsReady() && nodeInfo != NULL) 
+		{
+			// After initialization is complete, ValueAdded is emitted when a new value is added - so we should check if we need to add new devices
+                        // also see NodeAdded below
+			MapNodeToDevices(nodeInfo);
 		}
 		break;
 	}
@@ -898,7 +903,12 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 	}
 	case OpenZWave::Notification::Type_NodeAdded:
 	{
-
+		if (m_pZWInterface->IsReady() && nodeInfo != NULL) 
+		{
+			// After initialization is complete, NodeAdded is emitted when a new node is added - so we should check if we need to add new devices
+			// also see ValueAdded above
+			MapNodeToDevices(nodeInfo);
+		}
 		break;
 	}	
 	case OpenZWave::Notification::Type_NodeRemoved:
