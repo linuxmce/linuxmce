@@ -18,7 +18,7 @@ int isLogging;
 int main(int argc, char *argv[])        //main loop
 {
 
-    bool loggerPresent = freopen ("/var/log/pluto/linuxmcetag.log","a+",stdout); //open the log
+   // bool loggerPresent = freopen ("/var/log/pluto/linuxmcetag.log","a+",stdout); //open the log
 
 
     QTime scanStart = QTime::currentTime ();
@@ -237,6 +237,10 @@ int main(int argc, char *argv[])        //main loop
             }
             else
             {
+                if(!workingPrint.dlData()){
+                    exit(9);
+                }
+
                 //begins sql portion
                 cout << "-----------------------------Mysql Interaction-------------------" << endl;
 
@@ -593,7 +597,7 @@ int main(int argc, char *argv[])        //main loop
 
     metaDataDB.closeDB();
     cout << "                    Finished with batch" << endl;
-    fclose (stdout); //close the log
+   // fclose (stdout); //close the log
 
     //return a.exec(); //maintains loop
     return 0;           //exits script

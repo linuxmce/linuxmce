@@ -4,12 +4,12 @@
 #
 #-------------------------------------------------
 
-QT       += core
-QT       += network
-QT       += xml
-QT       += sql
+QT       += core network xml sql
 
-INCLUDEPATH = /usr/include/mysql/
+INCLUDEPATH = /usr/include/mysql/ /usr/include/qjson/
+
+LIBS += -lqjson
+
 TARGET = ../bin/linuxmceTag
 #target.path = /usr/pluto/bin
 CONFIG   +=sharedlib

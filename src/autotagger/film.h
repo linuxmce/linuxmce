@@ -12,11 +12,14 @@
 #ifndef FILM_H
 #define FILM_H
 #include <autotagger.h>
+#include <QVariant>
 
 class film : public QObject
 {
     Q_OBJECT
 public:
+   film(QObject *parent=0);
+
     QFile resultFile;
     QNetworkReply *iReply;
     QNetworkReply *sReply;
@@ -37,8 +40,7 @@ public:
     QStringList bgUrl;
     QStringList bgID;
 
-    void searchMovie();
-    void dlData();
+
     QString m_rez;
     QString mfileID;                        //linuxmce file number in pluto_media
     QString movieID;                        //The MovieDB.com id
@@ -52,16 +54,36 @@ public:
     QString studio;
     QString mIMDB;                          //imdb. this is used as the unique attribute for movie files.
     QString rating;
+    QString trailers;
     QByteArray dataLookup(QString *title, int releaseDate);
     void setIdent(QString &n);
+    QVariantMap configData;
 
 protected:
-    QString movieApiKey ;
+    QString movieApiKey;
     QString apiUrl;
     QString dataUrl;
     QString mFilename;
+    int movieId;
+
+     QString searchUrlPath;
+     QString configurationUrlPath;
+     QString imagesUrlPath;      /* note, must do string replace on MOVIE_ID with actual numerical ID; */
+     QString castUrlPath;        /* note, must do string replace on MOVIE_ID with actual numerical ID; */
+     QString trailersUrlPath; /* note, must do string replace on MOVIE_ID with actual numerical ID; */
+     QString movieUrl;
+     QString backdropPath;
+     QString posterPath;
+     QString configurationUrl;
+     QString imageBaseUrl;
+
 public slots:
-  void searchReply(QNetworkReply *);
-   void dataReply(QNetworkReply *);
+    void searchReply(QNetworkReply *);
+    void dataReply(QNetworkReply *);
+    void searchMovie();
+    bool dlData();
+    void getConfiguration();
+    void setConfiguration(QNetworkReply *r);
+
 };
 #endif // FILM_H
