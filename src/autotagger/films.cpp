@@ -273,81 +273,15 @@ void film::dataReply(QNetworkReply *)                                           
 
     genre="";
    foreach(QVariant gr, genres){
-
-       // genre.append(genres[gr]["name"]);
+       QVariantMap innerGr = gr.toMap();
+       genre.append(innerGr["name"].toString()+"|");
     }
 
-    QDomDocument searchResult("movieInfo");
-    searchResult.setContent(mBytes);
-
-    QDomElement root = searchResult.documentElement();
-    QDomElement curElement = root.firstChildElement("movies").firstChildElement("movie").firstChildElement("cast").toElement();
-    QDomElement gElement = root.firstChildElement("movies").firstChildElement("movie").firstChildElement("categories").toElement();
-    QDomElement sElement = root.firstChildElement("movies").firstChildElement("movie").firstChildElement("studios").toElement();
-    QDomElement pRoot = root.firstChildElement("movies").firstChildElement("movie").firstChildElement("images").toElement();
-
-    QDomNodeList posters = root.firstChildElement("movies").firstChildElement("movie").firstChildElement("images").toElement ().childNodes ();
-    pUrl.append(root.firstChildElement("movies").firstChildElement("movie").firstChildElement("images").firstChild().toElement().attribute("url"));
-    //bgUrl.append();
-    QDomNodeList persons = curElement.childNodes();
-    QDomNodeList categories = gElement.childNodes();
-    QDomNodeList studios = sElement.childNodes();
-
-    int z = 0;
-    while
-            (!posters.at(z).isNull())                                                   //this loop iterates through the 'persons' extracting director(s) | actor(s)
-    {
-
-        if
-                (posters.at(z).toElement().attribute("type") == "poster" && posters.at(z).toElement().attribute("url").contains("original"))
-        {
-            picUrl.append (posters.at (z).toElement ().attribute ("url"));
-
-            picID.append(posters.at(z).toElement().attribute("id"));
-        }
-        else if
-                (posters.at(z).toElement().attribute("type")=="backdrop" && posters.at(z).toElement().attribute("url").contains("original"))
-        {
-
-            bgUrl.append(posters.at(z).toElement().attribute("url"));
-            bgID.append(posters.at(z).toElement().attribute("id"));
-        }
-        z++;
+   foreach(QVariant prd, studiosList){
+       QVariantMap innerPrd = prd.toMap();
+       studio.append(innerPrd["name"].toString()+"|");
     }
 
-    z =0;
-    while
-            (!persons.at(z).isNull())                                                   //this loop iterates through the 'persons' extracting director(s) | actor(s)
-    {
-
-        if
-                (persons.at(z).toElement().attribute("job") == "Director")
-        {
-            director.append(persons.at(z).toElement().attribute("name")+"|");
-        }
-        else if
-                (persons.at(z).toElement().attribute("job")=="Actor")
-        {
-            actor.append(persons.at(z).toElement().attribute("name")+"|");
-        }
-        z++;
-    }
-
-    z= 0;
-    while
-            (!categories.at(z).isNull())                                                   //this loop iterates through the 'categories' extracting genre(s)
-    {                                                                                   //there is no need to selectively get the attributes as we want all the genres
-        genre.append(categories.at(z).toElement().attribute("name")+"|");
-        z++;
-    }
-
-    z=0;
-    while
-            (!studios.at(z).isNull())                                                   //this loop iterates through the 'studios' extracting studios
-    {                                                                                   //there is no need to selectively get the attributes as we want all the studios
-        studio.append(studios.at(z).toElement().attribute("name")+"|");
-        z++;
-    }
 
     cout << "|====Attributes===|" << endl;                                                                         //console output for debugging.
     cout << "Movie: " << qPrintable(mTitle) << " - " << qPrintable(releaseYear) << endl;
