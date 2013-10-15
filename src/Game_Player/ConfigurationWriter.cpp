@@ -95,7 +95,13 @@ namespace DCE
       }
 
     // Finally, write out the file.
-
+    if (!FileUtils::DirExists(FileUtils::BasePath(m_sTargetFilename)))
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ConfigurationWriter::process() - Configuration File Path %s does not exist, creating.",FileUtils::BasePath(m_sTargetFilename).c_str());
+	string sCmd = "mkdir -p "+FileUtils::BasePath(m_sTargetFilename);
+	system(sCmd.c_str());
+      }
+   
     if (!FileUtils::WriteTextFile(m_sTargetFilename, sBuffer))
       {
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ConfigurationWriter::process() - Could not write text file %s",m_sTargetFilename.c_str());
