@@ -12,7 +12,7 @@ Item{
 
         StyledButton{
             buttonText.text: "Power"
-
+            onActivated: info_panel.state="power"
         }
         StyledButton{
             buttonText.text: "Sleeping Menu"

@@ -69,12 +69,12 @@ Item{
         height: parent.height
         anchors.right: parent.right
         StyledButton{
-            buttonText.text: "User: "+manager.sPK_User
+            buttonText.text: manager.sPK_User
             hitArea.onReleased: info_panel.state="user"
         }
         StyledButton{
             id:location_info
-            buttonText.text: "Location: "+roomList.currentRoom+"::"+roomList.currentEA
+            buttonText.text: roomList.currentRoom+"::"+roomList.currentEA
             hitArea.onReleased: info_panel.state="room"
         }
     }
@@ -85,6 +85,7 @@ Item{
 
     PowerControl {
         id: powerControl
+        visible: info_panel.state==="power"
     }
 
     StyledButton{

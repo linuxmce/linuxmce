@@ -4,7 +4,7 @@ Item {
 property bool verticalMirror: false
     function getDate(){
         var d = new Date();
-        return Qt.formatDateTime(d, "dddd ,MMMM d| hh:mm ");
+        return Qt.formatDateTime(d, "dddd ,MMMM d || hh:mm ");
     }
     Timer { // Update the clock element periodically
         interval: 5; running: true; repeat: true
@@ -15,7 +15,7 @@ width: childrenRect.width
     StyledText{
         id: txtDate
         text: getDate()
-        color: "aliceblue"
+        color: "white"
         font.letterSpacing: 2
         font.family: appFont.name
         smooth: true

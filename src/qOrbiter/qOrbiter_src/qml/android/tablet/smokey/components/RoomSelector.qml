@@ -14,6 +14,7 @@ Item{
         fontSize: 42
     }
 
+
     GridView{
         id:entertainArea_list
         anchors.top:select_room_label.bottom
@@ -55,10 +56,19 @@ Item{
                 height: scaleY(16)
                 width: scaleX(18)
                 buttonText.text: name
+
                 hitArea.onReleased: {
-                    if(ea_list.count!==0){
+                    console.log(ea_list[0].ea_number!==0)
+
+                    if(ea_list[0].ea_number!==0){
                         entertainArea_list.model = ea_list
                         room_selection_component.state="easelect"
+                    }
+                    else{
+                         manager.setActiveRoom(intRoom,0);
+                        info_panel.state="retracted"
+                        manager.setBoundStatus(true)
+                        room_selection_component.state = "roomselect"
                     }
                 }
             }
