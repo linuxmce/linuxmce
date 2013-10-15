@@ -9,7 +9,10 @@ import QtQuick 1.1
 MouseArea{
     property int mode /*! 0=Off / 1=On  */
     anchors.fill: parent
-    onClicked: {
+    signal activated();
+    onReleased: {
+        activated()
         manager.toggleDisplay(mode)
+        console.log("clicked")
     }
 }
