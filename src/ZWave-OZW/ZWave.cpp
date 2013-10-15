@@ -69,6 +69,7 @@ bool ZWave::GetConfig()
 	pDevice = m_pData->FindSelfOrChildWithinCategory( DEVICECATEGORY_Security_Interface_CONST );
 	if ( pDevice != NULL )
 		m_dwPK_SecurityInterface = pDevice->m_dwPK_Device;
+	m_bPollingEnabled = DATA_Get_Polling_Enabled();
 	return true;
 }
 
@@ -783,17 +784,23 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			     label == "Setpoint" || label == "Heating 1" || label == "Cooling 1" || label == "Auto Changeover" ||
 			     label == "Mode" )
 			{
-				// intensity = poll this value every X poll cycle/interval
-				uint8 intensity = 1;
-				if ( label == "Battery Level" ) {
-					intensity = 255; // battery level does not change very often
-				} else if ( label == "Temperature" || label == "Mode" || label == "Energy" || label == "Power") {
-					intensity = 10; // neither does temperature
-				} else if ( label == "Setpoint" || label == "Heating 1" || label == "Cooling 1" || label == "Auto Changeover" ) {
-					intensity = 15;
+				if (m_bPollingEnabled)
+				{
+					// We automatically poll interesting values
+					// intensity = poll this value every X poll cycle/interval
+					uint8 intensity = 1;
+					if ( label == "Battery Level" ) {
+						intensity = 255; // battery level does not change very often
+					} else if ( label == "Temperature" || label == "Mode" || label == "Energy" || label == "Power") {
+						intensity = 10; // neither does temperature
+					} else if ( label == "Setpoint" || label == "Heating 1" || label == "Cooling 1" || label == "Auto Changeover" ) {
+						intensity = 15;
+					}
+					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() ValueAdded: Set polling for node %d/%d/%d, value label %s, intensity %d", _notification->GetNodeId(), id.GetCommandClassId(), id.GetInstance(), label.c_str(), intensity);
+					OpenZWave::Manager::Get()->EnablePoll(id, intensity);
+				} else if (!OpenZWave::Manager::Get()->isPolled(id)) {
+					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"ZWave::OnNotification() ValueAdded: Polling not enabled, ignoring node %d/%d/%d, value label %s, You might consider manually setting polling for this value.", _notification->GetNodeId(), id.GetCommandClassId(), id.GetInstance(), label.c_str());
 				}
-				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() ValueAdded: Set polling for node %d/%d/%d, value label %s, intensity %d", _notification->GetNodeId(), id.GetCommandClassId(), id.GetInstance(), label.c_str(), intensity);
-				OpenZWave::Manager::Get()->EnablePoll(id, intensity);
 			}
 		}
 		if (m_pZWInterface->IsReady() && nodeInfo != NULL) 
@@ -818,8 +825,8 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			{
 				if ( label == "Battery Level" )
 				{
-					int level = 0;
-					OpenZWave::Manager::Get()->GetValueAsInt(id, &level);
+					uint8 level = 0;
+					OpenZWave::Manager::Get()->GetValueAsByte(id, &level);
 					ReportBatteryStatus(PKDevice, level);
 				} else if ( label == "Temperature" ) {
 					float level = 0;
@@ -936,7 +943,7 @@ void ZWave::SetInterface(ZWInterface* pZWInterface)
 ZWConfigData* ZWave::GetConfigData()
 {
 	string port = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
-
+	
 	return new ZWConfigData(port);
 }
 
@@ -1277,9 +1284,9 @@ bool ZWave::DeleteDevicesForNode(int iNodeId) {
 	return bDeleted;
 }
 
-void ZWave::ReportBatteryStatus(int PK_Device, int status)
+void ZWave::ReportBatteryStatus(int PK_Device, uint8 status)
 {
-        LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::ReportBatteryStatus(): PK_Device %d", PK_Device);
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::ReportBatteryStatus(): PK_Device %d, level = %d", PK_Device, status);
 	CMD_Set_Device_Data cmd_Set_Device_Data(m_dwPK_Device, 4, PK_Device, StringUtils::itos(status), DEVICEDATA_Battery_state_CONST);
 	SendCommand(cmd_Set_Device_Data);
 }

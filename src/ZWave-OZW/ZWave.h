@@ -42,6 +42,7 @@ namespace DCE
 	        ZWInterface* m_pZWInterface;
 		bool m_bReady; // set when all DCE initialization has been done
 		set<string> m_setRecentlyAddedDevices;
+		bool m_bPollingEnabled; // Enable automatic polling of values
 		long m_dwPK_ClimateInterface;
 		long m_dwPK_SecurityInterface;
 		// Private methods
@@ -71,7 +72,7 @@ public:
 		bool SetThermostatSetpoint(uint8 node_id, uint8 instance_id, string setpoint, float val);
 
 		// Event reporting methods
-		void ReportBatteryStatus(int iNodeId, int status);
+		void ReportBatteryStatus(int iNodeId, uint8 status);
 		void SendTemperatureChangedEvent(unsigned int PK_Device, float value);
 		void SendSensorTrippedEvent(unsigned int PK_Device, bool state);
 		void SendOnOffEvent(unsigned int PK_Device, int value);
