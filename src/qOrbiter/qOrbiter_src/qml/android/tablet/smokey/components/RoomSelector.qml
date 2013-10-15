@@ -61,8 +61,19 @@ Item{
                     console.log(ea_list[0].ea_number!==0)
 
                     if(ea_list[0].ea_number!==0){
-                        entertainArea_list.model = ea_list
-                        room_selection_component.state="easelect"
+
+                        if(ea_list.length > 1){
+                            console.log(ea_list.length)
+                            entertainArea_list.model = ea_list
+                            room_selection_component.state="easelect"
+                        }
+                        else{
+                            manager.setActiveRoom(intRoom,ea_list[0].ea_number);
+                           info_panel.state="retracted"
+                           manager.setBoundStatus(true)
+                           room_selection_component.state = "roomselect"
+                        }
+
                     }
                     else{
                          manager.setActiveRoom(intRoom,0);
