@@ -134,6 +134,14 @@ public:
 			return (m_mapParameters[DEVICEDATA_Autoassign_to_parents_room_CONST]=="1" ? true : false);
 	}
 
+	bool Get_Polling_Enabled()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return (m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Polling_Enabled_CONST)=="1" ? true : false);
+		else
+			return (m_mapParameters[DEVICEDATA_Polling_Enabled_CONST]=="1" ? true : false);
+	}
+
 };
 
 
@@ -241,6 +249,7 @@ public:
 	string DATA_Get_COM_Port_on_PC() { return GetData()->Get_COM_Port_on_PC(); }
 	bool DATA_Get_Only_One_Per_PC() { return GetData()->Get_Only_One_Per_PC(); }
 	bool DATA_Get_Autoassign_to_parents_room() { return GetData()->Get_Autoassign_to_parents_room(); }
+	bool DATA_Get_Polling_Enabled() { return GetData()->Get_Polling_Enabled(); }
 	//Event accessors
 	void EVENT_Sensor_Tripped(bool bTripped) { GetEvents()->Sensor_Tripped(bTripped); }
 	void EVENT_Device_OnOff(bool bOnOff) { GetEvents()->Device_OnOff(bOnOff); }
