@@ -266,6 +266,7 @@
 #define DEVICEDATA_Firmware_CONST 313
 #define DEVICEDATA_Ignore_Video_Pipes_CONST 314
 #define DEVICEDATA_PK_Device_Phone_Baby_Monitor_CONST 315
+#define DEVICEDATA_Polling_Enabled_CONST 316
 
 #define DEVICEDATA_TABLE "DeviceData"
 #define DEVICEDATA_PK_DEVICEDATA_FIELD "PK_DeviceData"
