@@ -1,6 +1,6 @@
 import QtQuick 1.1
 import "../components"
-
+//"http://192.168.80.1/lmce-admin/qOrbiterGenerator.php?id=20818"
 Item {
     id:files_view_screen
     height: pageLoader.height

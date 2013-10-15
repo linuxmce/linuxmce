@@ -4,9 +4,13 @@ import "../../../../skins-common/lib/handlers"
 
 Item{
     id:info_panel
-    width:parent.width
-    anchors.left:parent.left
-    anchors.bottom: parent.bottom
+    anchors{
+        top:undefined
+        left:parent.left
+        right:parent.right
+        bottom:parent.bottom
+    }
+
     Component.onCompleted:{ info_panel.state="retracted";
         statusTimer.start()
     }
@@ -77,6 +81,10 @@ Item{
 
     RoomSelector{
         visible: info_panel.state==="room"
+    }
+
+    PowerControl {
+        id: powerControl
     }
 
     StyledButton{
@@ -205,6 +213,41 @@ Item{
                 visible:false
             }
 
+        },
+        State {
+            name: "power"
+            PropertyChanges {
+                target: info_panel
+                height:scaleY(92)
+            }
+            PropertyChanges {
+                target: time_keeper
+                visible:false
+            }
+            PropertyChanges {
+                target: info_fill
+                color:"green"
+            }
+            PropertyChanges{
+                target: orbiter_status_text
+                opacity:0
+            }
+            PropertyChanges{
+                target:close
+                visible:true
+            }
+            PropertyChanges{
+                target:pageLoader
+                visible:false
+            }
+            PropertyChanges{
+                target:location_info
+                visible:false
+            }
+            PropertyChanges{
+                target:user_info
+                visible:false
+            }
         },
         State {
             name: "hidden"

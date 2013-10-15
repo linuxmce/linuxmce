@@ -17,6 +17,7 @@ NowPlayingImage NowPlayingImage.qml
 MediaListProgressBar MediaListProgressBar.qml
 MultiViewMediaList MultiViewMediaList.qml
 PlaylistView PlaylistView.qml
+PowerControl PowerControl.qml
 RoomSelector RoomSelector.qml
 ScenarioComponent ScenarioComponent.qml
 StyledText StyledText.qml

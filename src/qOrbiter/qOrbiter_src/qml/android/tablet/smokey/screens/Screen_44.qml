@@ -14,6 +14,7 @@ Item {
     Flow{
         anchors.centerIn: parent
         anchors.fill: parent
+        spacing: 25
 
         StyledButton{
             buttonText.text: qsTr("Regen this Orbiter")
@@ -30,6 +31,19 @@ Item {
             onActivated: loadComponent("SkinSelector.qml")
         }
 
+
+        StyledButton{
+            buttonText.text: buttonText.text === "Media Test" ? "Stop Media" : qsTr("Media Test")
+            onActivated:{
+                if(buttonText.text !=="Media Test"){
+                    androidSystem.stopMedia(); buttonText.text = "Media Test"
+                }else
+                {
+                    androidSystem.playMedia("http://www.virginmegastore.me/Library/Music/CD_001214/Tracks/Track1.mp3");
+                    buttonText.text = "Stop Media"
+                }
+            }
+        }
 
     }
 }
