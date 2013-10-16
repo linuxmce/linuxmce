@@ -105,19 +105,9 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 {
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Received command for child");
 	string nodeInstance = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
-	int node_id;
-	int instance_id;
-	// TODO handle nodeid/cc/instance
-	if (nodeInstance.find("/") != string::npos) {
-	        vector<string> vectNI;
-		StringUtils::Tokenize(nodeInstance, "/", vectNI);
-		node_id = atoi(vectNI[0].c_str());
-		instance_id = atoi(vectNI[1].c_str());
-	} else {
-	        node_id = atoi(nodeInstance.c_str());
-		instance_id = 1;
-	}
-	// TODO: use instance id in commands below
+	uint8 node_id;
+	uint8 instance_id, commandClass;
+	PortChannelToNodeCCInstance(nodeInstance, node_id, commandClass, instance_id);
 	if (node_id > 0 && node_id <= 233) {
 		sCMD_Result = "OK";
 		int level,duration,temp,fan;
@@ -653,12 +643,39 @@ void ZWave::CMD_Set_Association(int iNodeID,int iGroup_ID,string sNodes_List,str
 void ZWave::CMD_Set_Polling_State(int iPK_Device,string sValue_To_Assign,bool bReport,bool bAlways,int iNodeID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c966-e->
 {
-	cout << "Need to implement command #966 - Set Polling State" << endl;
-	cout << "Parm #2 - PK_Device=" << iPK_Device << endl;
-	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
-	cout << "Parm #220 - Report=" << bReport << endl;
-	cout << "Parm #225 - Always=" << bAlways << endl;
-	cout << "Parm #239 - NodeID=" << iNodeID << endl;
+	if (iPK_Device <= 0 || sValue_To_Assign == "")
+	{
+		DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"ZWave::CMD_Set_Polling_State(): Need to specify both PK_Device and sValue_To_Assign");
+	} else {
+		uint8 nodeId = 0;
+		if (iPK_Device > 0)
+		{
+			uint8 iInstance = 1, iCC = 0;
+			DeviceData_Impl* pChildDevice = m_pData->FindChild(iPK_Device);
+		        string tmp_node_id = pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+			PortChannelToNodeCCInstance(tmp_node_id, nodeId, iCC, iInstance);
+			OpenZWave::ValueID* valueId = m_pZWInterface->GetValueIdByNodeInstanceLabel(nodeId, iInstance, sValue_To_Assign);
+			if (valueId != NULL)
+			{
+				int intensity = 1;
+				m_pZWInterface->Lock();
+				if (bReport)
+					OpenZWave::Manager::Get()->EnablePoll(*valueId, intensity);
+				else
+					OpenZWave::Manager::Get()->DisablePoll(*valueId);
+				m_pZWInterface->UnLock();
+
+				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::CMD_Set_Polling_State(): Set polling for node %d/%d/%d, value label %s, intensity %d", nodeId, valueId->GetCommandClassId(), valueId->GetInstance(), sValue_To_Assign.c_str(), intensity);
+				if (bAlways)
+				{
+					// Store config for next time - will store all config, not just this one
+					OpenZWave::Manager::Get()->WriteConfig( m_pZWInterface->GetHomeId() );
+				}
+			} else {
+				DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"ZWave::CMD_Set_Polling_State(): No such ValueId for node %d, instance %d, label %s", nodeId, iInstance, sValue_To_Assign.c_str());
+			}
+		}
+	}
 }
 
 //<-dceag-c967-b->
@@ -945,6 +962,27 @@ ZWConfigData* ZWave::GetConfigData()
 	string port = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
 	
 	return new ZWConfigData(port);
+}
+
+void ZWave::PortChannelToNodeCCInstance(string pc, uint8 &iNodeId, uint8 &iCC, uint8 &iInstance)
+{
+	// handle nodeid/cc/instance
+	if (pc.find("/") != string::npos) {
+	        vector<string> vectNI;
+		StringUtils::Tokenize(pc, "/", vectNI);
+		iNodeId = atoi(vectNI[0].c_str());
+		int i = 1;
+		if (vectNI.size() > 2)
+		{
+			iCC = atoi(vectNI[i].c_str());
+			i++;
+		}
+		iInstance = atoi(vectNI[i].c_str());
+	} else {
+	        iNodeId = atoi(pc.c_str());
+		iInstance = 1;
+	}
+
 }
 
 DeviceData_Impl *ZWave::GetDevice(int iNodeId, uint8 iCommandClass, int iInstanceID) {
@@ -1284,136 +1322,73 @@ bool ZWave::DeleteDevicesForNode(int iNodeId) {
 	return bDeleted;
 }
 
+void ZWave::SendEvent(long dwPK_Device_From, long dwEvent, long dwEventParameterID, string sParameter) 
+{
+	m_pEvent->SendMessage( new Message(dwPK_Device_From, DEVICEID_EVENTMANAGER,
+					   PRIORITY_NORMAL, MESSAGETYPE_EVENT, dwEvent,
+					   1, dwEventParameterID, sParameter.c_str()) );
+}
+
 void ZWave::ReportBatteryStatus(int PK_Device, uint8 status)
 {
         LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::ReportBatteryStatus(): PK_Device %d, level = %d", PK_Device, status);
 	CMD_Set_Device_Data cmd_Set_Device_Data(m_dwPK_Device, 4, PK_Device, StringUtils::itos(status), DEVICEDATA_Battery_state_CONST);
 	SendCommand(cmd_Set_Device_Data);
+	SendEvent(PK_Device, EVENT_Battery_Level_Changed_CONST, EVENTPARAMETER_Value_CONST, StringUtils::itos(status));
 }
 
 void ZWave::SendTemperatureChangedEvent(unsigned int PK_Device, float value)
 {
-        LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::SendTemperatureChangedEvent(): PK_Device %d", PK_Device);
-	char tempstr[512];
-	sprintf(tempstr, "%.2f", value);
-	m_pEvent->SendMessage( new Message(PK_Device,
-			DEVICEID_EVENTMANAGER,
-			PRIORITY_NORMAL,
-			MESSAGETYPE_EVENT,
-			EVENT_Temperature_Changed_CONST, 1, 
-			EVENTPARAMETER_Value_CONST, tempstr)
-		);
-
+	string sVal = StringUtils::Format("%.2f", value);
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::SendTemperatureChangedEvent(): PK_Device %d, value %s", PK_Device, sVal.c_str());
+	SendEvent(PK_Device, EVENT_Temperature_Changed_CONST, EVENTPARAMETER_Value_CONST, sVal);
 }
 
 void ZWave::SendSensorTrippedEvent(unsigned int PK_Device, bool value)
 {
 	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending sensor tripped event from PK_Device %d, value %s", PK_Device, (value ? "true" : "false"));
-	m_pEvent->SendMessage( new Message(PK_Device,
-					   DEVICEID_EVENTMANAGER,
-					   PRIORITY_NORMAL,
-					   MESSAGETYPE_EVENT,
-					   EVENT_Sensor_Tripped_CONST,
-					   1,
-					   EVENTPARAMETER_Tripped_CONST,
-					   value ? "1" : "0")
-		);
+	SendEvent(PK_Device, EVENT_Sensor_Tripped_CONST, EVENTPARAMETER_Tripped_CONST, value ? "1" : "0");
 }
 
 void ZWave::SendLightChangedEvents(unsigned int PK_Device, int value)
 {
-	string svalue = StringUtils::itos(value);
-	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending EVENT_State_Changed_CONST event from PK_Device %d, level %s",PK_Device,svalue.c_str());
-	m_pEvent->SendMessage( new Message(PK_Device,
-					   DEVICEID_EVENTMANAGER,
-					   PRIORITY_NORMAL,
-					   MESSAGETYPE_EVENT,
-					   EVENT_State_Changed_CONST,
-					   1,
-					   EVENTPARAMETER_State_CONST,
-					   svalue.c_str())
-		);
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending EVENT_State_Changed_CONST event from PK_Device %d, level %d",PK_Device, value);
+	SendEvent(PK_Device, EVENT_State_Changed_CONST, EVENTPARAMETER_State_CONST, StringUtils::itos(value));
 }
 
 void ZWave::SendPowerUsageChangedEvent(unsigned int PK_Device, int value)
 {
-	string svalue = StringUtils::itos(value);
-	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending EVENT_Power_Usage_Changed_CONST event from PK_Device %d, value %s W",PK_Device,svalue.c_str());
-	m_pEvent->SendMessage( new Message(PK_Device,
-					   DEVICEID_EVENTMANAGER,
-					   PRIORITY_NORMAL,
-					   MESSAGETYPE_EVENT,
-					   EVENT_Power_Usage_Changed_CONST,
-					   1,
-					   EVENTPARAMETER_Watts_CONST,
-					   svalue.c_str())
-		);
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending EVENT_Power_Usage_Changed_CONST event from PK_Device %d, value %d W",PK_Device, value);
+	SendEvent(PK_Device, EVENT_Power_Usage_Changed_CONST, EVENTPARAMETER_Watts_CONST, StringUtils::itos(value));
 }
+
 void ZWave::SendPowerUsageCumulativeChangedEvent(unsigned int PK_Device,float value)
 {
-	char tempstr[512];
-	sprintf(tempstr, "%.3f", value);
-	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending EVENT_Power_Usage_Changed_CONST event from PK_Device %d, cumulated kWh %s kWh",PK_Device, tempstr);
-	m_pEvent->SendMessage( new Message(PK_Device,
-					   DEVICEID_EVENTMANAGER,
-					   PRIORITY_NORMAL,
-					   MESSAGETYPE_EVENT,
-					   EVENT_Power_Usage_Changed_CONST,
-					   1,
-					   EVENTPARAMETER_WattsMTD_CONST,
-					   tempstr)
-		);
+	string sVal = StringUtils::Format("%.3f", value);
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending EVENT_Power_Usage_Changed_CONST event from PK_Device %d, cumulated kWh %s kWh",PK_Device, sVal.c_str());
+	SendEvent(PK_Device, EVENT_Power_Usage_Changed_CONST, EVENTPARAMETER_WattsMTD_CONST, sVal);
 }
 
 void ZWave::SendVoltageChangedEvent(unsigned int PK_Device, int value)
 {
-	string svalue = StringUtils::itos(value);
-	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending EVENT_Voltage_Changed_CONST event from PK_Device %d, value %s V",PK_Device,svalue.c_str());
-	m_pEvent->SendMessage( new Message(PK_Device,
-					   DEVICEID_EVENTMANAGER,
-					   PRIORITY_NORMAL,
-					   MESSAGETYPE_EVENT,
-					   EVENT_Voltage_Changed_CONST,
-					   1,
-					   EVENTPARAMETER_Voltage_CONST,
-					   svalue.c_str())
-		);
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending EVENT_Voltage_Changed_CONST event from PK_Device %d, value %d V",PK_Device, value);
+	SendEvent(PK_Device, EVENT_Voltage_Changed_CONST, EVENTPARAMETER_Voltage_CONST, StringUtils::itos(value));
 }
 
 void ZWave::SendOnOffEvent(unsigned int PK_Device, int value) {
 	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending EVENT_OnOff_CONST event from PK_Device %d, value %d",PK_Device, value);
-	m_pEvent->SendMessage( new Message(PK_Device,
-					   DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
-					   EVENT_Device_OnOff_CONST,
-					   1,
-					   EVENTPARAMETER_OnOff_CONST,
-					   (value == 0) ? "0" : "1")
-		);
+	SendEvent(PK_Device, EVENT_Device_OnOff_CONST, EVENTPARAMETER_OnOff_CONST, value == 0 ? "0" : "1");
 }
 
 void ZWave::SendBrightnessChangedEvent(unsigned int PK_Device, int value)
 {
 	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending brightness level changed event from PK_Device %d, value %d",PK_Device, value);
-	m_pEvent->SendMessage( new Message(PK_Device,
-					   DEVICEID_EVENTMANAGER,
-					   PRIORITY_NORMAL,
-					   MESSAGETYPE_EVENT,
-					   EVENT_Brightness_Changed_CONST, 1, 
-					   EVENTPARAMETER_Value_CONST, StringUtils::itos(value).c_str())
-		);
+	SendEvent(PK_Device, EVENT_Brightness_Changed_CONST, EVENTPARAMETER_Value_CONST, StringUtils::itos(value));
 }
 
 void ZWave::SendSetpointChangedEvent(unsigned int PK_Device, float value)
 {
-	char tempstr[512];
-	int iValue = round(value);
-	sprintf(tempstr, "%d", iValue);
-	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending setpoint changed event from PK_Device %d, value %d",PK_Device, iValue);
-	m_pEvent->SendMessage( new Message(PK_Device,
-					   DEVICEID_EVENTMANAGER,
-					   PRIORITY_NORMAL,
-					   MESSAGETYPE_EVENT,
-					   EVENT_Thermostat_Set_Point_Chan_CONST, 1, 
-					   EVENTPARAMETER_Value_CONST, tempstr)
-		);
+	string sVal = StringUtils::Format("%d", value);
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending setpoint changed event from PK_Device %d, value %s",PK_Device, sVal.c_str());
+	SendEvent(PK_Device, EVENT_Thermostat_Set_Point_Chan_CONST, EVENTPARAMETER_Value_CONST, sVal.c_str());
 }

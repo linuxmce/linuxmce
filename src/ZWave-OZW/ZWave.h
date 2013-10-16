@@ -66,12 +66,14 @@ public:
 		void DoNodeToDeviceMapping();
 		void MapNodeToDevices(NodeInfo* node);
 		int GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_Parent_Device);
+		void PortChannelToNodeCCInstance(string pc, uint8 &nodeId, uint8 &cc, uint8 &instance);
 
 		// Internal helper methods
 		bool SetThermostatMode(uint8 node_id, uint8 instance_id, string mode);
 		bool SetThermostatSetpoint(uint8 node_id, uint8 instance_id, string setpoint, float val);
 
 		// Event reporting methods
+		void SendEvent(long dwPK_Device_From, long dwEvent, long dwEventParameterID, string sParameter);
 		void ReportBatteryStatus(int iNodeId, uint8 status);
 		void SendTemperatureChangedEvent(unsigned int PK_Device, float value);
 		void SendSensorTrippedEvent(unsigned int PK_Device, bool state);
