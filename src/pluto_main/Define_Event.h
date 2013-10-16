@@ -98,6 +98,7 @@
 #define EVENT_Outside_Visibility_Change_CONST 97
 #define EVENT_Outside_Feels_Like_Change_CONST 98
 #define EVENT_Radar_Images_Changed_CONST 99
+#define EVENT_Battery_Level_Changed_CONST 100
 
 #define EVENT_TABLE "Event"
 #define EVENT_PK_EVENT_FIELD "PK_Event"
