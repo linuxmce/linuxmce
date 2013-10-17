@@ -307,7 +307,7 @@ function getSeriesData($sID, $lang, $xmlPath, $mediadbADO, $dbADO, $output, $fil
 						}
 				}
 				$numEp = count($EpCount);
-			$sp = array_values($seriesImg[1]['Season'.$seasonNo]);
+			$sp = array_values($seriesImg[1]['Season'.$sesasonNo]);
 			$Ph= $sp[0]['bannerpath'];
 			$showPoster = $Ph;
 
@@ -614,7 +614,7 @@ if	(preg_match("/(?<=e[0])\d/", $lower, $ematch) )		//pattern matching episode e
 	{	$guessArray['ep'] = $ematch ;
 	}
 	elseif
-   (preg_match("/(?<=ep)\d\d/", $lower, $ematch) )
+	(preg_match("/(?<=ep)\d\d/", $lower, $ematch) )
 	{	$guessArray['ep'] = $ematch ;
 	}
 	elseif
@@ -630,27 +630,27 @@ if	(preg_match("/(?<=e[0])\d/", $lower, $ematch) )		//pattern matching episode e
 	{	$guessArray['ep'] = $ematch ;
 	}
 	elseif
-	(preg_match("/\S(?<=\d\d)[1-9][1-9]/", $lower, $ematch) )
+	(preg_match("/\S(?<=\d\d)[1-9][1-9]/", $lower, $ematch) )  	// " 0018"
 	{
 	$guessArray['ep'] = $ematch ;
 	}
 	elseif
-	(preg_match("/(?<=\s\d\d)[1-9][1-9]/", $lower, $ematch) )
+	(preg_match("/(?<=\s\d\d)[1-9][1-9]/", $lower, $ematch) )	// " 0028"
 	{
 	$guessArray['ep'] = $ematch ;
 	}
 	elseif
-	(preg_match("/(?<=-s\d-e)\d\d-/", $lower, $ematch) )
+	(preg_match("/(?<=-s\d-e)\d\d-/", $lower, $ematch) )		// "- 0-e19-"
 	{
 	$guessArray['ep'] = $ematch ;
 	}
 	elseif
-	(preg_match("/(?<=-s\d-e)\d(?=-)/", $lower, $ematch) )
+	(preg_match("/(?<=-s\d-e)\d(?=-)/", $lower, $ematch) )		// "- 0-e4-"
 	{
 	$guessArray['ep'] = $ematch ;
 	}
 	elseif
-	(preg_match("/\d(?=of\d)/", $lower, $ematch) )
+	(preg_match("/\d(?=of\d)/", $lower, $ematch) )			// "0of9"
 	{
 	$guessArray['ep'] = $ematch ;
 	}
@@ -670,8 +670,11 @@ elseif
 	$guessArray['ep'] =  $ematch;
 	}
 	elseif
-	 (preg_match("/(?<=\s0)[1-9]/", $lower, $ematch) )	//pattern match season with digit notation dxdd
+	 (preg_match("/(?<=episode\s0)[1-9]/", $lower, $ematch) )	//pattern match season with digit notation
 	{
+	$guessArray['ep'] =  $ematch;
+	}
+	elseif( preg_match("/(?<=Episode.0)[1-9]/", $lower, $ematch) ) {
 	$guessArray['ep'] =  $ematch;
 	}
 	elseif
