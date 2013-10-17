@@ -692,23 +692,23 @@ void Roku_LTHDXDXS_Streaming_Pla::CMD_Change_Playback_Speed(int iStreamID,int iM
   if (iMediaPlaybackSpeed<0)
     {
       m_bIsPaused=false;
-      CMD_Scan_BackRewind();
+      m_pRokuDevice->SendToRoku("POST /keypress/Rev HTTP/1.1\r\n\r\n");
     }
   else if (iMediaPlaybackSpeed>1000)
     {
       m_bIsPaused=false;
-      CMD_Scan_FwdFast_Fwd();
+      m_pRokuDevice->SendToRoku("POST /keypress/Fwd HTTP/1.1\r\n\r\n");
     }
   else if (iMediaPlaybackSpeed==0)
     {
       m_bIsPaused=true;
-      CMD_Pause(iStreamID);
+      m_pRokuDevice->SendToRoku("POST /keypress/Play HTTP/1.1\r\n\r\n");
     }
   else if (iMediaPlaybackSpeed==1000)
     {
       if (m_bIsPaused)
 	{
-	  CMD_Play(iStreamID);
+	  m_pRokuDevice->SendToRoku("POST /keypress/Play HTTP/1.1\r\n\r\n");
 	  m_bIsPaused=false;
 	}
     }
