@@ -2,10 +2,10 @@ ROOT=..
 
 CXX=g++
 CC=$(CXX)
-CPPFLAGS=-W -Wall -pipe -ggdb3 -DUPDATE_MEDIA
-CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/taglib
+CPPFLAGS=-W -Wall -pipe -ggdb3 -DUPDATE_MEDIA -DUPDATEMEDIA_STATUS
+CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/taglib -I/usr/include/exiv2
 LDFLAGS=-L$(ROOT)/lib -L/usr/local/lib
-LDLIBS= -lpluto_media -lpluto_main -lDCECommon -lSerializeClass -lPlutoUtils -lpthread -lid3 -ltag
+LDLIBS= -lpluto_media -lpluto_main -lDCECommon -lSerializeClass -lPlutoUtils -lpthread -lid3 -ltag -lexiv2
 
 #<-mkr_B_use_mysql_wrapper_b->
 CPPFLAGS += -I/usr/include/mysql
@@ -27,6 +27,7 @@ VDRInfoFileHandler.cpp \
 FileHandlerFactory.cpp \
 TagFileHandler.cpp \
 RomFileHandler.cpp \
+PhotoFileHandler.cpp \
 FileUtils/file_utils.cpp \
 id3info/id3info.cpp \
 $(ROOT)/Media_Plugin/MediaAttributes_LowLevel.cpp \

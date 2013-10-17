@@ -520,7 +520,7 @@ bool UpdateMedia::ScanFiles(string sDirectory)
 
 		if(FileStatusObserver::IsFileOpen(sDirectory + "/" + sFile))
 		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "File %s/%s is opened for writting. Adding to file status observer's thread...",
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "File %s/%s is opened for writing. Adding to file status observer's thread...",
 				sDirectory.c_str(), sFile.c_str());
 
 			FileStatusObserver::Instance().Observe(sDirectory + "/" + sFile);

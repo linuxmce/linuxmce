@@ -5,6 +5,7 @@
 #include "ID3FileHandler.h"
 #include "TagFileHandler.h"
 #include "RomFileHandler.h"
+#include "PhotoFileHandler.h"
 #include "PlutoUtils/FileUtils.h"
 #include "FileUtils/file_utils.h"
 //-----------------------------------------------------------------------------------------------------
@@ -66,6 +67,10 @@ FileHandlerFactory::~FileHandlerFactory(void)
 			pFileHandler = new ID3FileHandler(sDirectory, sFile);
 			break;
 
+		case fhtImage:
+			pFileHandler = new PhotoFileHandler(sDirectory, sFile);
+			break;
+
 		default:
 			pFileHandler = new GenericFileHandler(sDirectory, sFile);
 			break;
@@ -93,6 +98,11 @@ FileHandlerFactory::~FileHandlerFactory(void)
 	        LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Filehandler::GetFileHandlerType: File %s in %s is ROM file!", sFile.c_str(),  sDirectory.c_str());
 #endif
 		type = fhtRom;
+	} else if(IsValidImageFile(sDirectory, sFile)) {
+#ifdef UPDATEMEDIA_DEBUG
+	        LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Filehandler::GetFileHandlerType: File %s in %s is image file!", sFile.c_str(),  sDirectory.c_str());
+#endif
+		type = fhtImage;
 	} else { 
 #ifdef UPDATEMEDIA_DEBUG
 	        LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Filehandler::GetFileHandlerType: File %s in %s is id3 file!", sFile.c_str(),  sDirectory.c_str());
@@ -175,5 +185,11 @@ FileHandlerFactory::~FileHandlerFactory(void)
 {
 	string sExtension = FileUtils::FindExtension(sFile);
 	return sExtension == "ogg" || sExtension == "flac";
+}
+//-----------------------------------------------------------------------------------------------------
+/*static*/ bool FileHandlerFactory::IsValidImageFile(string sDirectory, string sFile)
+{
+	string sExtension = FileUtils::FindExtension(sFile);
+	return sExtension == "jpg";
 }
 //-----------------------------------------------------------------------------------------------------

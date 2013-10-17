@@ -12,7 +12,8 @@ enum FileHandlerType
 	fhtTag,
 	fhtId3,
 	fhtVdr,
-	fhtRom
+	fhtRom,
+	fhtImage
 };
 //-----------------------------------------------------------------------------------------------------
 class FileHandlerFactory
@@ -29,6 +30,7 @@ private:
 	static bool IsValidVDRFile(string sDirectory, string sFile);
 	static bool IsValidTagFile(string sDirectory, string sFile);
 	static bool IsValidRomFile(string sDirectory, string sFile);
+	static bool IsValidImageFile(string sDirectory, string sFile);
 };
 //-----------------------------------------------------------------------------------------------------
 #endif //__FILE_HANDLER_FACTORY_H__
