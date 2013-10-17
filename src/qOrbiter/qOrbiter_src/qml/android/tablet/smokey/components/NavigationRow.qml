@@ -4,29 +4,37 @@ import "../../../../skins-common/lib/handlers"
 Row{
     id:nav_row
     height: scaleY(8)
+    state:"extended"
 
     anchors{
-        left:parent.left
-        right:parent.right    }
+        left:qml_root.left
+        right:qml_root.right
+    }
 
     property alias navigation:nav
     property string defaultSource:"ScenarioComponent.qml"
     property string navSource:"ScenarioComponent.qml"
+
     spacing:scaleX(2)
 
     Loader{
         id:nav
         source:navSource
-        height: parent.height
-        width: parent.width*.75
+        anchors{
+            top:parent.top
+            bottom:parent.bottom
+            left: parent.left
+            right:parent.right
+        }
+        anchors.rightMargin: parent.width*.25
     }
 
     StyledButton{
         buttonText.text:"Advanced"
         opacity: manager.currentScreen === "Screen_1.qml" ? 1 : 0
         onActivated: manager.gotoQScreen("Screen_44.qml")
-
     }
+
     StyledButton {
         id: exit_label
         buttonText.text: qsTr("Exit")
@@ -43,17 +51,34 @@ Row{
         id:media_goback
         buttonText.text: "Back"
         hitArea.onReleased:{
+            manager.goBackGrid();
 
+            //            else{
 
-                manager.goBackGrid();
-
-//            else{
-
-//                pageLoader.item.state="selection"
-//                manager.goBackGrid()
-//                mediatypefilter.reset()
-//            }
+            //                pageLoader.item.state="selection"
+            //                manager.goBackGrid()
+            //                mediatypefilter.reset()
+            //            }
         }
         visible: manager.currentScreen==="Screen_47.qml"
     }
+
+    states: [
+        State {
+            name: "extended"
+            when:uiOn
+            PropertyChanges {
+                target: nav_row
+                height:scaleY(8)
+            }
+        },
+        State {
+            when:!uiOn
+            name: "retracted"
+            PropertyChanges {
+                target: nav_row
+                height:0
+            }
+        }
+    ]
 }

@@ -8,13 +8,46 @@ Item {
     id: qml_root
     height:manager.appHeight
     width:manager.appWidth
-
+    property int screensaverTimer:15000 // manager.screenSaverTimeout*1000
+    property bool uiOn:true
     //    anchors{
     //        top:parent.top
     //        bottom: parent.bottom
     //        left: parent.left
     //        right:parent.right
     //    }
+
+    Timer{
+        id:hideUiTimer
+        interval:screensaverTimer
+        running: false
+        repeat: false
+        onTriggered: hideUi()
+    }
+
+    function hideUi(){
+
+    }
+
+    Rectangle{
+        id:canary
+        height: 1
+        width: 1
+        color:"white"
+    }
+
+    Timer{
+        id:refresh
+        interval: 500
+        running:true
+        repeat: true
+        onTriggered: {
+            if(canary.rotation===360)
+                canary.rotation =1
+            else
+               canary.rotation=(canary.rotation+1)
+        }
+    }
 
     MediaManager{
         id:dceplayer
@@ -45,7 +78,7 @@ Item {
 
         Component.onCompleted: {
             if(manager.mediaPlayerID !== -1){
-                  dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
                 androidSystem.startAudioService(dceplayer.callbackAddress);
                 console.log("initializing qml media player::"+manager.mediaPlayerID)
 
@@ -193,32 +226,24 @@ Item {
             }
         }
 
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                if(!uiOn){
+                    console.log("screensaver revive")
+                    hideUi()
+                }
+            }
+        }
+
     }
-    //    Item{
-    //        id:mini_screen_saver
-    //        anchors.fill: qml_root
 
-    //        Timer{
-    //            id:mini_ss_timer
-    //            interval:10000
-    //            running: true // screensaver.active
-    //            triggeredOnStart: true
-    //            onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
-    //            repeat: true
-    //        }
-
-    //        Image{
-    //            id:mini_screen_saver_image
-    //            height: mini_screen_saver.height
-    //            width: mini_screen_saver.width
-    //            source: "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
-    //        }
-    //    }
 
     Loader {
         id:pageLoader
         objectName: "loadbot"
         focus: true
+        visible:qml_root.uiOn
         anchors{
             top: nav_row.bottom
             bottom:info_panel.top
@@ -257,6 +282,7 @@ Item {
 
     NavigationRow {
         id: nav_row
+
     }
     MediaPopup{
         id:media_notification

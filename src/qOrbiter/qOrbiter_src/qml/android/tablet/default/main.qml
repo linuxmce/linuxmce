@@ -7,6 +7,7 @@ Item {
     width:manager.appWidth
     height:manager.appHeight
     focus:true
+    property int screensaverTimer:manager.screenSaverTimeout*1000
     Rectangle{
           id:canary
           height: 1

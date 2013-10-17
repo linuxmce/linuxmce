@@ -6,16 +6,14 @@ Item {
     height: scaleY(10)
     state:"hidden"
 
-    Connections{
-        target:dcenowplaying
-        onB_mediaPlayingChanged:dcenowplaying.b_mediaPlaying && manager.currentScreen === "Screen_1.qml" ? media_notificaton_header.state ="active"  : media_notificaton_header.state = "hidden"
-
-    }
+    //    Connections{
+    //        target:dcenowplaying
+    //        onB_mediaPlayingChanged:dcenowplaying.b_mediaPlaying && manager.currentScreen === "Screen_1.qml" ? media_notificaton_header.state ="active"  : media_notificaton_header.state = "hidden"
+    //    }
 
     Connections{
         target:manager
         onCurrentScreenChanged:dcenowplaying.b_mediaPlaying && manager.currentScreen === "Screen_1.qml" ? media_notificaton_header.state ="active"  : media_notificaton_header.state = "hidden"
-
     }
 
     Rectangle{
@@ -23,6 +21,14 @@ Item {
         color:"green"
         anchors.fill:parent
         opacity: .65
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                if(!uiOn){
+                    hideUi()
+                }
+            }
+        }
     }
 
     Image {
@@ -73,17 +79,17 @@ Item {
         color: "white"
         anchors.left: nowplayingimage.right
         anchors.bottom: nowplayingimage.bottom
-
     }
 
     states: [
         State {
             name: "active"
-         //   when:dcenowplaying.b_mediaPlaying ===true && manager.currentScreen ==="Screen_1.qml"
+            when:dcenowplaying.b_mediaPlaying && manager.currentScreen === "Screen_1.qml" && uiOn
+            //   when:dcenowplaying.b_mediaPlaying ===true && manager.currentScreen ==="Screen_1.qml"
 
             PropertyChanges {
                 target: media_notificaton_header
-               height:scaleY(10)
+                height:scaleY(10)
             }
             AnchorChanges{
                 target:media_notificaton_header
@@ -92,7 +98,8 @@ Item {
         },
         State {
             name:"hidden"
-         //   when:dcenowplaying.b_mediaPlaying ===false && manager.currentScreen !=="Screen_1.qml"
+            when:(manager.currentScreen !== "Screen_1.qml" || dcenowplaying.b_mediaPlaying ===false ) && uiOn
+            //   when:dcenowplaying.b_mediaPlaying ===false && manager.currentScreen !=="Screen_1.qml"
 
             PropertyChanges {
                 target: media_notificaton_header
@@ -102,8 +109,27 @@ Item {
                 target:media_notificaton_header
                 anchors.top: qml_root.top
             }
+        },
+        State{
+            name:"screensaver"
+            when:!uiOn
+            PropertyChanges {
+                target: media_notificaton_header
+                height:qml_root.height
+            }
+            PropertyChanges {
+                target: bg
+                opacity:.25
+                color:"black"
+            }
 
+            AnchorChanges{
+                target:media_notificaton_header
+                anchors.top: qml_root.top
+                anchors.bottom: qml_root.bottom
+            }
         }
+
     ]
 
 

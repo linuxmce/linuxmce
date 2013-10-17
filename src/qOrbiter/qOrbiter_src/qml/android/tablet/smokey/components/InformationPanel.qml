@@ -82,6 +82,9 @@ Item{
     RoomSelector{
         visible: info_panel.state==="room"
     }
+    UserSelector{
+        visible: info_panel.state==="user"
+    }
 
     PowerControl {
         id: powerControl
@@ -252,7 +255,7 @@ Item{
         },
         State {
             name: "hidden"
-            //   when: screenfile !=="Screen_1.qml"
+             when: manager.currentScreen !=="Screen_1.qml" || !uiOn
             PropertyChanges {
                 target: time_keeper
                 visible:false
