@@ -3685,6 +3685,10 @@ void Media_Plugin::CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_Med
 
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT !G BEGIN!");
 
+			DCE::CMD_Display_Alert pleasewait(m_dwPK_Device, pMessage->m_dwPK_Device_From,
+							  string("Adding all of these files to playlist."),string("queue start"),string("5"),interuptAlways);
+			SendCommand(pleasewait);
+
 			// This is so there is always at least one entry in here, so the queries won't fail. It will not affect the overall query at all.
 			vectFiles.push_back(0);
 			vectAttributes.push_back(0);
@@ -7540,6 +7544,20 @@ void Media_Plugin::CMD_Delete_File(string sFilename,string &sCMD_Result,Message 
 
 
 	}
+	else if (sFilename.size()>2 && sFilename[0]=='!' && sFilename[1]=='P')
+	  {
+	    // Request to delete a playlist.
+	    string sPK_Playlist = sFilename.substr(2);
+	    string sEntriesSQL="DELETE FROM PlaylistEntry WHERE FK_Playlist = '"+sPK_Playlist+"'";
+	    string sPlaylistSQL="DELETE FROM Playlist WHERE PK_Playlist = '"+sPK_Playlist+"'";
+
+	    LoggerWrapper::GetInstance()->Write(LV_WARNING,"Deleting Playlist entries for PK_Playlist %s",sPK_Playlist.c_str());
+	    m_pDatabase_pluto_media->threaded_db_wrapper_query(sEntriesSQL);
+	    Sleep(100);
+	    LoggerWrapper::GetInstance()->Write(LV_WARNING,"Deleting Playlist %s",sPK_Playlist.c_str());
+	    m_pDatabase_pluto_media->threaded_db_wrapper_query(sPlaylistSQL);
+	    Sleep(100);
+	  }
 	else
 	{
 		// It is none of these things, error out and ignore the request.
