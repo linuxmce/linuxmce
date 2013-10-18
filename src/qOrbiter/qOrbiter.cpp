@@ -2250,7 +2250,7 @@ void qOrbiter::beginSetup()
     internal_streamID = 0;
     videoDefaultSort = "13";
     audioDefaultSort = "2";
-    photoDefaultSort = "13";
+    photoDefaultSort = "29";
     gamesDefaultSort = "49";
     backwards = false;
     i_current_mediaType = 0;
@@ -4961,7 +4961,25 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 
         }
         //photos
-
+        if (iPK_MediaType == 7)
+        {
+            if (q_attributetype_sort == "" )
+            {
+		    q_attributetype_sort = photoDefaultSort; // keyword
+            }
+	}
+        //radio (streaming)
+        if (iPK_MediaType == 43)
+        {
+            if (q_attributetype_sort == "" )
+            {
+		    q_attributetype_sort = "8"; // first genre
+            }
+            else if(q_attributetype_sort == "8" && q_pk_attribute !="" ) // genre -> channel
+            {
+                q_attributetype_sort= "10";
+            }
+	}
 
         //playlists
 
