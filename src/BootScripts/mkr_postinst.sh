@@ -38,7 +38,7 @@ fi
 if ! BlacklistConfFiles '/etc/apt/apt.conf.d/30pluto' ;then
 	rm -rf /var/cache/polipo/*
 	pluto_apt_conf='// Pluto apt conf add-on
-APT::Cache-Limit "33554432";
+APT::Cache-Limit "43554432";
 Dpkg::Options { "--force-confold"; };
 Acquire::http::timeout "10";
 Acquire::ftp::timeout "10";
