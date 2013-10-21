@@ -9,21 +9,20 @@ import "../../../skins-common/lib/effects"
  *\ingroup qml_desktop_default
  *In default, this screen is used a place to have all scenarios set in horizontal rows.
  */
-Item
-{
-    anchors.centerIn: parent
-    anchors.fill: parent
-
-    Component.onCompleted:{
-        qmlroot.updateBackground("light_gray_texture-wallpaper-1920x1080.jpg")
+Item{
+    id:screen_1
+    anchors{
+        top:parent.top
+        left:parent.left
+        right:parent.right
+        bottom:parent.bottom
     }
 
-    Rectangle {
+    Item {
         id:stage
-
         signal swapStyle()
-      anchors.fill: parent
-        color: "transparent"
+        anchors.fill: parent
+
         Column{
             id:maindisplay
 
@@ -35,7 +34,10 @@ Item
             HomeTelecomRow{id: telecomRow}
             HomeSecurityRow{id: securityRom}
         }
-        BottomPanel{id: advanced; anchors.top: maindisplay.bottom}
+        BottomPanel{
+            id: advanced;
+            anchors.bottom: parent.bottom
+        }
     }
 }
 

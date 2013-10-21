@@ -7,7 +7,7 @@ UserModel::UserModel(UserItem* prototype, QObject *parent) :
  #ifndef QT5
     setRoleNames(m_prototype->roleNames());
 #endif
-
+currentPrivateUser = -1;
 }
 
 #ifdef QT5

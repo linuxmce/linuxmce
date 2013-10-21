@@ -15,10 +15,13 @@ The data header is a persistent qml header that displays state full information 
  */
 Item{
     id:dataheader
-    height: manager.currentScreen === "Screen_1.qml" ? scaleY(5) : 0
-    width: manager.appWidth
-    anchors.top: parent.top
-    anchors.horizontalCenter: parent.horizontalCenter
+    height: scaleY(5)
+    anchors{
+        top:parent.top
+        left:parent.left
+        right:parent.right
+
+    }
    // visible: height=== 0 ? false: true //manager.currentScreen === "Screen_1.qml" ? true : false
 
     Behavior on height{
@@ -65,12 +68,12 @@ Item{
         anchors.right: parent.right
         anchors.rightMargin: 25
 
-        StyledText{
-            id:screensaverStatus
-            text:"Screen saver is "+glScreenSaver.running + " with " + glScreenSaver.pictureCount + " Pics. Timeout set to "+manager.screenSaverTimeout
-            visible: dataheader.visible && manager.currentScreen==="Screen_1.qml"
-            fontSize: manager.currentScreen === "Screen_1.qml" ? 20 : 0
-        }
+//        StyledText{
+//            id:screensaverStatus
+//            text:"Screen saver is "+glScreenSaver.running + " with " + glScreenSaver.pictureCount + " Pics. Timeout set to "+manager.screenSaverTimeout
+//            visible: dataheader.visible && manager.currentScreen==="Screen_1.qml"
+//            fontSize: manager.currentScreen === "Screen_1.qml" ? 20 : 0
+//        }
 
         MediaListInfoBar{
             id:mediaInfo
@@ -155,7 +158,7 @@ Item{
         },
         State {
             name: "videos"
-            when: manager.currentScreen==="Screen_47.qml" && manager.q_mediaType==="5"
+            when: manager.currentScreen==="Screen_47.qml"
             PropertyChanges {
                 target: data_row
                 spacing:scaleX(2)
@@ -171,7 +174,7 @@ Item{
         },
         State {
             name: "audio"
-            when: manager.currentScreen==="Screen_47.qml" && manager.q_mediaType==="4"
+            when: manager.currentScreen==="Screen_47.qml"
             PropertyChanges {
                 target: data_row
                 spacing:scaleX(2)

@@ -4,13 +4,10 @@ import "../../../skins-common/lib/effects"
 import "../js/ComponentLoader.js" as MyJs
 
 
-Rectangle {
+Item {
     id:advanced_panel
     width: manager.appWidth - scaleX(1)
-    height: skinStyle.widebuttonh + scaleY(4)
-    anchors.horizontalCenter: parent.horizontalCenter
-    color:"transparent"
-
+    height: skinStyle.widebuttonh + scaleY(4)  
 
     DropShadow{
         id:headerDrop
@@ -49,9 +46,7 @@ Rectangle {
         }
 
         AdvancedButton {
-            id: buttonsq2
-            x: 63
-            y: 1
+            id: buttonsq2           
             width: skinStyle.widebuttonw
             height: skinStyle.widebuttonh
             buttontext: "Power"
@@ -62,11 +57,8 @@ Rectangle {
             }
         }
 
-
         AdvancedButton {
-            id: buttonsq3
-            x: 125
-            y: 1
+            id: buttonsq3            
             width: skinStyle.widebuttonw
             height: skinStyle.widebuttonh
             buttontext: "Sleeping Menu"

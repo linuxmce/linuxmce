@@ -48,7 +48,6 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
 {
     qDebug() << "Constructing";
     QObject::connect(this, SIGNAL(dceIPChanged()), this, SLOT(pingCore()));
-
 }
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
@@ -2338,9 +2337,9 @@ void qOrbiter::initializeGrid()
     q_fileFormat="";          //3
     q_attribute_genres="";    //4
     q_mediaSources ="1,2";         //5 need comma delineation
-    q_usersPrivate = "";        //6
+    q_usersPrivate = "0";        //6
     q_attributetype_sort="";  //7
-    q_pk_users="";             //8
+    q_pk_users="0";             //8
     q_last_viewed=" 2 ";        //9
     q_pk_attribute="";        //10
     qs_seek ="";

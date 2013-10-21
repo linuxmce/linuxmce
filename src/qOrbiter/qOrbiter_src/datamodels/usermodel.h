@@ -21,6 +21,7 @@ public:
 #ifdef QT5
    QHash<int, QByteArray> roleNames() const;
 #endif
+   int currentPrivateUser;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     void appendRow(UserItem* item);
@@ -37,6 +38,16 @@ public:
 
     int defaultUser;           //when properly set, it will contain the default user for this orbiter / location
     QString defaultUzer;
+
+signals:
+    void privateUserChanged(int u);
+
+public slots:
+    Q_INVOKABLE void setSelectionStatus(QString format){
+        currentPrivateUser = format.toInt();
+        emit privateUserChanged(currentPrivateUser);
+    }
+
 private slots:
     void handleItemChange();
 

@@ -1,11 +1,9 @@
 import QtQuick 1.1
 
 
-Rectangle{
+Item{
     id:titlerect
-    height: childrenRect.height + 5
-    width: parent.width
-    color:"transparent"
+    anchors.fill: parent
 
     Rectangle{
         color:"black"
@@ -25,7 +23,6 @@ Rectangle{
 
     StyledText {
         id: storageDeviceText
-
         text: qsTr("Located on storage device: ") + filedetailsclass.qs_storageDevice
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
         smooth: true

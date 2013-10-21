@@ -2,12 +2,12 @@
 import QtQuick 1.1
 import "../../../skins-common/lib/handlers"
 
-Rectangle {
+Item {
     id:filterView
     width: scaleX(35)
-    height: scaleY(15)
-    color: "transparent"
+    height: scaleY(15)  
     state: "inactive"
+    property bool selectingUser;
 
     property alias currentFilterModel:filterList.model
     onCurrentFilterModelChanged: filterList.count===0 ? state = "inactive" : state = "active"
@@ -24,7 +24,7 @@ Rectangle {
             height: scaleY(10)
             width: scaleX(10)
             color: "transparent"
-            property bool currentState:status
+            property bool currentState:selectingUser ? false : status
             onCurrentStateChanged: console.log("Qml sort item status change"+status)
             Image {
                 source: currentState ? manager.imagePath+"ui3/green_button.png" :  manager.imagePath+"ui3/red_button.png"
@@ -32,13 +32,20 @@ Rectangle {
             }
 
             StyledText{
-                text:name
+                text:selectingUser ? username : name
                 anchors.centerIn: parent
                 font.bold: true
                 font.pointSize: scaleY(3)
 
             }
-            AttributeFilterHandler{onClicked: {filterView.state = "inactive";filterList.model=""}}
+            AttributeFilterHandler{
+                enabled:!selectingUser
+                onClicked:{
+                    filterView.state = "inactive";
+                    filterList.model="";
+                    selectingUser = false
+                }
+            }
         }
     }
 

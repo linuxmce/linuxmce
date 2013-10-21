@@ -1,13 +1,12 @@
 import QtQuick 1.1
 
 // File info screen (movies/videos)
-Rectangle{
+Item{
     id: details
-   anchors.fill: parent
-    //visible: false
+
     opacity: 0
     Behavior on opacity {
-        PropertyAnimation{duration:250}
+        PropertyAnimation{duration:350}
     }
     Component.onCompleted: {
         details.opacity=1
@@ -24,7 +23,7 @@ Rectangle{
             castList.model = filedetailsclass.performers
         }
     }
-    color: "transparent"
+
     MouseArea{
         anchors.fill: details
     }
@@ -36,7 +35,7 @@ Rectangle{
         color: "black"
         Image{
             id: coverArt
-           height:parent.height
+            height:parent.height
             fillMode: Image.PreserveAspectFit;
             source: ""
             smooth: true
@@ -195,14 +194,14 @@ Rectangle{
                 id: castList
                 anchors.fill: parent
                 model: filedetailsclass.performers
-//                model:ListModel {
-//                    ListElement {
-//                        pkattribute: "douchebag one"
-//                    }
-//                    ListElement{
-//                        pkattribute: "douchebag two"
-//                    }
-//                }
+                //                model:ListModel {
+                //                    ListElement {
+                //                        pkattribute: "douchebag one"
+                //                    }
+                //                    ListElement{
+                //                        pkattribute: "douchebag two"
+                //                    }
+                //                }
                 delegate: Item {
                     width: castList.width;
                     height: castList.height/5

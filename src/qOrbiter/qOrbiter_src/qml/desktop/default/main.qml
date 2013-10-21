@@ -79,23 +79,6 @@ Item {
     }
 
 
-    //    PropertyAnimation{
-    //        target:glScreenSaver
-    //        property:"rotation"
-    //        loops: Animation.Infinite
-    //        to:360
-    //        duration: 1000
-    //        running:true
-    //    }
-
-    /*! Depreciated function.
-      Was previously used to deal with orientation changes.
-      */
-    function checkLayout()
-    {
-      //  console.log("c++ slot orientation changed")
-    }
-
     //! Returns the value of the param value passed in scaled to a percentage of the current width value of the application window.
     function scaleX(x){
         return x/100*manager.appWidth
@@ -107,23 +90,17 @@ Item {
 
     //! \warn This function is required by the qml engine.
     //! this function load pages as called from other threads or in response to user events.
-    function screenchange(screenname )
-    {
+    function screenchange(screenname ){
         pageLoader.source = "screens/"+screenname
-        while(pageLoader.status == Component.Loading)
-        {
-            console.log(pageLoader.progress)
+        while(pageLoader.status == Component.Loading){
+            console.log("Screenchange::"+pageLoader.progress)
         }
 
-        if (pageLoader.status == Component.Ready)
-        {
+        if (pageLoader.status == Component.Ready){
             var s = String(screenname)
             manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-            //console.log("eggs")
             manager.setCurrentScreen(screenname)
-        }
-        else if (pageLoader.status==Component.Error)
-        {
+        }else if (pageLoader.status==Component.Error){
             logger.userLogMsg ="Command to change to:" + screenname + " failed!"
             logger.userLogMsg = pageLoader.sourceComponent.errorString()
             screenfile = screenname
@@ -132,35 +109,30 @@ Item {
     }
 
     function hideUI(){
-      //  console.log("Ui visibility check")
-        if(dceplayer.mediaPlaying)
-        {
+        //  console.log("Ui visibility check")
+        if(dceplayer.mediaPlaying){
             hideUiTimer.stop()
-
             if(dceplayer.activeFocus){
                 hideUiElements = false
                 pageLoader.forceActiveFocus()
-               // console.log("PageLoader item focus::"+pageLoader.focus)
+                // console.log("PageLoader item focus::"+pageLoader.focus)
                 hideUiTimer.start()
             } else{
                 dceplayer.forceActiveFocus()
-              //  console.log("Dceplayer focus::"+dceplayer.focus)
+                //  console.log("Dceplayer focus::"+dceplayer.focus)
                 hideUiElements = true
-
             }
-        }
-        else{
-          //  console.log("No local media playing.")
+        }else{
+            //  console.log("No local media playing.")
             if(pageLoader.activeFocus){
-               glScreenSaver.forceActiveFocus()
+                glScreenSaver.forceActiveFocus()
                 hideUiTimer.stop()
                 hideUiElements = true
             }else{
-              pageLoader.forceActiveFocus()
+                pageLoader.forceActiveFocus()
                 hideUiElements = false
                 hideUiTimer.start()
             }
-
         }
     }
 
@@ -168,19 +140,19 @@ Item {
         appbackground.source=manager.imagePath+"ui3/"+newImage
     }
 
-    function loadComponent(componentName )
-    {
+    /*! Loads component into the component popup loader
+
+    @param componetName: String location of the component relative to main.qml
+    */
+    function loadComponent(componentName ){
         componentLoader.source = "components/"+componentName
         while(componentLoader.status === Component.Loading){
-          //  console.log(componentLoader.progress)
+            //  console.log(componentLoader.progress)
         }
 
-        if (componentLoader.status == Component.Ready)
-        {
+        if (componentLoader.status == Component.Ready){
             logger.userLogMsg ="Command to change to:" + componentName+ " was successfull"
-        }
-        else
-        {
+        }else{
             logger.userLogMsg = "Command to add: " + componentName + " failed!"
             logger.userLogMsg = componentLoader.Error.toString()
         }
@@ -194,10 +166,6 @@ Item {
         onTriggered: hideUI()
     }
 
-    Connections{
-        target: manager
-        onOrientationChanged: checkLayout()
-    }
 
     Image {
         id: appbackground
@@ -207,24 +175,24 @@ Item {
     }
 
     //==========Visual Elements
+    /*Header Element*/
     DataHeader {
         id: data_header
         z:6
-       opacity: pageLoader.opacity
+        opacity: pageLoader.opacity
     }
 
-
+    /* c++ Phonon based Media Player*/
     MediaManager{
         id:dceplayer
         anchors.top: parent.top
         anchors.left:parent.left
         focus:true
 
-      //  onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
+        //  onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
         z:dceplayer.mediaPlaying ==false ? -5 : 0
         Component.onCompleted: {
             setWindowSize(manager.appHeight, manager.appWidth);
-
         }
 
         Connections{
@@ -243,8 +211,7 @@ Item {
             if(dceplayer.mediaPlaying){
                 hideUI()
                 forceActiveFocus()
-            }
-            else{
+            }else{
                 hideUI()
             }
         }
@@ -321,40 +288,39 @@ Item {
         id:pageLoader
         objectName: "loadbot"
         focus:true
-        height: manager.appHeight - data_header.height
-        width: manager.appWidth
-        anchors.top: data_header.bottom
-        onSourceChanged:  loadin
-        onLoaded: {
-            console.log("Screen Changed:" + pageLoader.source)
+        z:5
+        anchors{
+            top:data_header.bottom
+            bottom:qmlroot.bottom
+            left:qmlroot.left
+            right:qmlroot.right
         }
+        onSourceChanged:  loadin
+        onLoaded: {console.log("Screen Changed:" + pageLoader.source) }
+
         opacity: hideUiElements ? 0 : 1
         Behavior on opacity {
             PropertyAnimation{
                 duration: 350
-
             }
         }
-
-        z:5
         Keys.onTabPressed: hideUI()
     }
 
-
     Loader{
         id:componentLoader
-        height: parent.height
-        width: parent.width
+        anchors{
+            top:qmlroot.top
+            bottom:qmlroot.bottom
+            left:qmlroot.left
+            right:qmlroot.right
+        }
+        z:5
+        focus:false
         objectName: "componentbot"
         onLoaded: {
             console.log("Component is loaded")
             componentLoader.z = 5
         }
-        z:5
-        focus:false
     }
-
-
-
-
 }

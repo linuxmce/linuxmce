@@ -22,23 +22,19 @@ Item {
     //        onNewGrid:{manager.requestPage(0); console.log("New Orbiter Grid Ready")}
     //    }
 
-    Component.onCompleted: {
-        qmlroot.updateBackground("media_center_living_room-wallpaper-1920x1080.jpg")
-    }
 
-    function runEffects()
-    {
+
+    function runEffects(){
         MyJs.createStageComponent("FileDetails"+manager.q_mediaType+".qml" , fileviewscreen)
     }
 
-    Connections
-    {
+    Connections{
         target: filedetailsclass
-        onShowDetailsChanged:
-        {
+        onShowDetailsChanged:{
             runEffects()
         }
     }
+
     Rectangle{
         id: pos_label
         anchors.top: fileviewscreen.top
@@ -56,12 +52,9 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
     }
 
-
-
     MediaListGridDelagate {
         id: contactDelegate
        visible: false
-
     }
 
         GridView {
@@ -84,21 +77,20 @@ Item {
             scale:1
             cacheBuffer: 15
             interactive:true
+            highlightFollowsCurrentItem:true
+            Component.onCompleted:forceActiveFocus()
 
             Keys.onPressed: {
-                if(event.key !==Qt.Key_Enter && event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235)
-                {
+                if(event.key !==Qt.Key_Enter && event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235){
                     gridView.currentIndex = dataModel.setSection(event.key)
                     gridView.positionViewAtIndex(currentIndex,ListView.Beginning)
                 }
-
             }
+
             Keys.onEnterPressed: {
                 manager.setStringParam(4, dataModel.get(currentIndex, "id"))
                 gridView.positionViewAtIndex(0, ListView.Beginning)
             }
-            highlightFollowsCurrentItem:true
-            Component.onCompleted:forceActiveFocus()
 
             highlight:Rectangle{
                 color:"white"
@@ -115,7 +107,6 @@ Item {
                     smooth: true
                 }
             }
-
         }
 
 
@@ -145,10 +136,18 @@ Item {
                     onClicked: {myFilters.y = asort.y; myFilters.currentFilterModel=attribfilter}
                 }
             }
-//            MoonButton {
-//                id: sources
-//                text: "Sources"
-//            }
+            MoonButton {
+                id: sources
+                text: "Sources"
+            }
+            MoonButton {
+                id: users
+                text: "Users"
+                MouseArea{
+                    anchors.fill:parent
+                    onClicked: {myFilters.y = rez.y; myFilters.selectingUser = true; myFilters.currentFilterModel=userList}
+                    }
+            }
             MoonButton {
                 id: rez
                 text: "Resolution"

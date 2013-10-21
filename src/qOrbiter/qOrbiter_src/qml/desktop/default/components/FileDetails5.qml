@@ -3,16 +3,21 @@ import QtQuick 1.1
 
 Item {
     id: filedetailrect
-    width: scaleX(100)
-    height:0
-    anchors.centerIn: parent 
+    anchors{
+        left:parent.left
+        right:parent.right
+        top:parent.top
+    }
+
+    state: "closed"
+
     clip: true       
     property int bgImageProp:manager.q_subType ==="1" ? 43 : manager.q_attributetype_sort===53 ? 43 :36
 
     Timer{
         id:poptimer
         interval: 1500
-        onTriggered: filedetailrect.height = scaleY(100)
+        onTriggered: filedetailrect.state="open"
         running:true
     }
 
@@ -200,8 +205,6 @@ Item {
                     font.pixelSize: scaleY(3)
                    // elide: "ElideRight"
                     visible:  filedetailsclass.synop =="" ? false: true
-
-
                 }
             }
     }
@@ -209,12 +212,30 @@ Item {
 
     FileDetailsActions {
         id: controlrow
-        anchors.bottom: filedetailrect.bottom
-        anchors.bottomMargin:  scaleY(3)
+        anchors.bottom: parent.bottom
         anchors.horizontalCenter: rectangle1.horizontalCenter
+        anchors.baselineOffset: scaleY(5)
         width: rectangle1.width
     }
 
+    states: [
+        State {
+            name: "open"
+            PropertyChanges{
+                target: filedetailrect
+                anchors.top: filedetailrect.parent.top
+                anchors.bottom: filedetailrect.parent.bottom
+            }
+        },
+        State {
+            name: "closed"
+            AnchorChanges{
+             target: filedetailrect
+             anchors.top: filedetailrect.parent.verticalCenter
+             anchors.bottom: filedetailrect.parent.verticaCenter
+            }
+        }
+    ]
 
 }
 
