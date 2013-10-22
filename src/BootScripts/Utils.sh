@@ -627,7 +627,7 @@ FindVideoDriver () {
 	prop_driver="fbdev"
 
 	# 1002=ATI, 1106=VIA, 10de=nVidia, 8086=Intel 1013=cirrus
-	chip_man=$(echo "$vga_info" | grep -Ewo '(\[1002|\[1106|\[10de|\[8086|\[1013)')
+	chip_man=$(echo "$vga_info" | grep -Ewo '(\[1002|\[1106|\[10de|\[8086|\[1013|\[80ee)')
  
 	case "$chip_man" in 
 		*10de)
