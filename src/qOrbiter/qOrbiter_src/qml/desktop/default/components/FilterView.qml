@@ -36,10 +36,11 @@ Item {
                 anchors.centerIn: parent
                 font.bold: true
                 font.pointSize: scaleY(3)
-
             }
+
+            /* need special handler here to insert pass before sending request to change */
+
             AttributeFilterHandler{
-                enabled:!selectingUser
                 onClicked:{
                     filterView.state = "inactive";
                     filterList.model="";

@@ -2444,7 +2444,8 @@ void qOrbiter::setStringParam(int paramType, QString param)
         break;
 
     case 5:
-        q_usersPrivate = param;
+       q_usersPrivate = param+",0";
+
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
         emit clearAndContinue(q_mediaType.toInt());;

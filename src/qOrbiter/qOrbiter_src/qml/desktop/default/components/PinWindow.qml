@@ -1,0 +1,237 @@
+import QtQuick 1.1
+
+Item {
+    id:pinWindow
+    height: manager.appHeight
+    width: manager.appWidth
+    state:"loaded"
+    MouseArea{
+        anchors.fill: parent
+        hoverEnabled: true
+        onClicked: {
+
+        }
+    }
+
+    Component.onCompleted: {
+        state="ready"
+    }
+
+
+
+    Rectangle{
+        id:phil
+        anchors{
+            top:pinWindow.top
+            left:pinWindow.left
+            bottom:pinWindow.bottom
+            right:pinWindow.right
+        }
+        color:"black"
+    }
+
+    Rectangle{
+        id:buttonContainer
+        height: scaleY(65)+50
+        width: scaleX(40)
+        color:"black"
+        border.color:"white"
+        border.width:1
+
+        anchors{
+            verticalCenter: parent.verticalCenter
+            horizontalCenter: parent.horizontalCenter
+        }
+
+        Item{
+            id:inputDisplay
+            height: scaleY(10)
+            anchors{
+                left:parent.left
+                right:parent.right
+                top:parent.top
+            }
+
+//            Rectangle{
+//                id:inputPhil
+//                anchors.fill: parent
+//                color: "yellow"
+//                radius:10
+//            }
+
+            TextInput{
+                font.pointSize: inputDisplay.height*(.6)
+                color: "White"
+                echoMode: TextInput.Password
+                anchors{
+                    left:parent.left
+                    right:parent.right
+                    top:parent.top
+                    bottom:parent.bottom
+                }
+            }
+        }
+
+        Item{
+            id:buttonLayout
+            anchors{
+                top:inputDisplay.bottom
+                left:parent.left
+                right:parent.right
+                bottom:parent.bottom
+            }
+//            Rectangle{
+//                anchors.fill: parent
+//                color:"blue"
+//            }
+
+            Column{
+                id:verticalButtonLayout
+                spacing: 10
+                anchors{
+                    top:parent.top
+                    left:parent.left
+                    right:parent.right
+                    bottom:parent.bottom
+                    bottomMargin: 40
+                }
+
+                Row{
+                    id:topRow
+                    height: parent.height /4
+                    spacing:10
+                    anchors{
+                        left:parent.left
+                        right:parent.right
+                    }
+
+                    Repeater{
+                        model: ["1", "2", "3"]
+                        delegate:PinButton{}
+                    }
+                }
+                Row{
+                    id:secondRow
+                    height: parent.height /4
+                    spacing:10
+                    anchors{
+                        left:parent.left
+                        right:parent.right
+                    }
+
+                    Repeater{
+                        model: ["4", "5", "6"]
+                        delegate:PinButton{}
+                    }
+                }
+
+                Row{
+                    id:thirdRow
+                    height: parent.height /4
+                    spacing:10
+                    anchors{
+                        left:parent.left
+                        right:parent.right
+                    }
+                    Repeater{
+                        model: ["7", "8", "9"]
+                        delegate:PinButton{}
+                    }
+                }
+
+                Row{
+                    id:fourthRow
+                    height: parent.height /4
+                    spacing: 10
+                    anchors{
+                        left:parent.left
+                        right:parent.right
+                    }
+                    Repeater{
+                        model: ["X", "0", "GO"]
+                        delegate: PinButton{}
+                    }
+                }
+            }
+        }
+
+    }
+
+    Rectangle{
+        height:75
+        width: height
+        color:"white"
+        StyledText{
+            text:"X"
+            anchors.centerIn: parent
+            color:"black"
+        }
+        anchors.left: parent.left
+        anchors.top: buttonContainer.top
+        MouseArea{
+            anchors.fill: parent
+            onClicked: pinWindow.state = "closed"
+        }
+    }
+
+    states: [
+        State {
+            name: "loaded"
+            PropertyChanges {
+                target: phil
+                opacity:0
+            }
+            PropertyChanges {
+                target: buttonContainer
+                opacity:0
+            }
+
+        },
+        State {
+            name: "ready"
+            PropertyChanges {
+                target: phil
+                opacity:.65
+            }
+            PropertyChanges {
+                target: buttonContainer
+                opacity:1
+            }
+
+        },
+        State {
+            name: "closed"
+            PropertyChanges {
+                target: phil
+                opacity:0
+            }
+            PropertyChanges {
+                target: buttonContainer
+                opacity:0
+            }
+
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "loaded"
+            to: "ready"
+            PropertyAnimation{
+                properties:"opacity"; duration: 350
+            }
+        },
+        Transition {
+            from: "ready"
+            to: "closed"
+            SequentialAnimation{
+                PropertyAnimation{properties: "opacity"; duration:350}
+                ScriptAction{script:{loadComponent("")}}
+            }
+        }
+    ]
+
+
+
+
+}

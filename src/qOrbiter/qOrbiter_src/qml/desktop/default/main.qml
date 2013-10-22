@@ -145,6 +145,12 @@ Item {
     @param componetName: String location of the component relative to main.qml
     */
     function loadComponent(componentName ){
+
+        if(componentName===""){
+            componentLoader.source=""
+            return
+        }
+
         componentLoader.source = "components/"+componentName
         while(componentLoader.status === Component.Loading){
             //  console.log(componentLoader.progress)

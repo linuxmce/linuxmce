@@ -5,6 +5,7 @@
 #include <datamodels/useritem.h>
 #include <QList>
 #include <QVariant>
+#include <QDebug>
 /*
   The function of this class is to provide a list of users to the user interface. Ita based on QAsbstractItem
   model as well as a custom class. The way it works is two parts.
@@ -19,9 +20,9 @@ public:
     ~UserModel();
 
 #ifdef QT5
-   QHash<int, QByteArray> roleNames() const;
+    QHash<int, QByteArray> roleNames() const;
 #endif
-   int currentPrivateUser;
+    int currentPrivateUser;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     void appendRow(UserItem* item);
@@ -40,18 +41,27 @@ public:
     QString defaultUzer;
 
 signals:
-    void privateUserChanged(int u);
+    void privateUserChanged(int u, QString b);
+    void verifyPinForMedia(int userToValidate);
+
 
 public slots:
     Q_INVOKABLE void setSelectionStatus(QString format){
-        currentPrivateUser = format.toInt();
-        emit privateUserChanged(currentPrivateUser);
+        qDebug() << "Setting selection status" << format;
+        emit verifyPinForMedia(format.toInt());
+        //   currentPrivateUser = format.toInt();
+        //   emit privateUserChanged(5, QString::number(currentPrivateUser));
+    }
+
+    void unsetPrivate(){
+        currentPrivateUser= -1;
+        emit privateUserChanged(5, QString::number(currentPrivateUser));
     }
 
 private slots:
     void handleItemChange();
 
-  private:
+private:
     UserItem* m_prototype;
     QList<UserItem*> m_list;
 

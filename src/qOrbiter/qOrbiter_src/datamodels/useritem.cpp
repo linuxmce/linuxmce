@@ -17,6 +17,7 @@ QHash<int, QByteArray> UserItem::roleNames() const
   names[RequirePinRole] = "pinRequired";
   names[PhoneExtensionRole] = "phoneExtension";
   names[ImageRole] = "image";
+  names[CompatRole] = "name";
   names[DefaultRole] = "default";
   return names;
 }
@@ -42,6 +43,8 @@ QVariant UserItem::data(int role) const
     return image_user();
   case DefaultRole:
     return default_user();
+  case CompatRole:
+      return pk_user_get();
   default:
     return QVariant();
   }

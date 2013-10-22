@@ -22,6 +22,14 @@ Item {
     //        onNewGrid:{manager.requestPage(0); console.log("New Orbiter Grid Ready")}
     //    }
 
+    Connections{
+        target:userList
+        onVerifyPinForMedia:{
+            // show pin box to auth user with userToValidate
+            console.log("user to validate::"+userToValidate)
+            loadComponent("../components/PinWindow.qml")
+        }
+    }
 
 
     function runEffects(){

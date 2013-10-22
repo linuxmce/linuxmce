@@ -278,6 +278,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     /*!
      * \todo move filters to their own initialization function, possibly multiple to account for dynamic setting of each one later.
      */
+
+
+    /*Needs Doin at construction */
+     userList = new UserModel( new UserItem, this);
 }
 
 
@@ -619,7 +623,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
 
     //-USERS-----------------------------------------------------------------------------------------------------
     QDomElement userXml = root.firstChildElement("Users");
-    userList = new UserModel( new UserItem, this);
+
     QDomNodeList userXmlList = userXml.childNodes();
     for(int index = 0; index < userXmlList.count(); index++)
     {
