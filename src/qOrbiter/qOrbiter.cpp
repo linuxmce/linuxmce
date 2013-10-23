@@ -2444,7 +2444,7 @@ void qOrbiter::setStringParam(int paramType, QString param)
         break;
 
     case 5:
-       q_usersPrivate = param+",0";
+        q_usersPrivate = param+",0";
 
         longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
         datagridVariableString = longassstring.join("|");
@@ -4965,21 +4965,21 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
         {
             if (q_attributetype_sort == "" )
             {
-		    q_attributetype_sort = photoDefaultSort; // keyword
+                q_attributetype_sort = photoDefaultSort; // keyword
             }
-	}
+        }
         //radio (streaming)
         if (iPK_MediaType == 43)
         {
             if (q_attributetype_sort == "" )
             {
-		    q_attributetype_sort = "8"; // first genre
+                q_attributetype_sort = "8"; // first genre
             }
             else if(q_attributetype_sort == "8" && q_pk_attribute !="" ) // genre -> channel
             {
                 q_attributetype_sort= "10";
             }
-	}
+        }
 
         //playlists
 
@@ -5593,5 +5593,20 @@ void qOrbiter::reInitialize(){
     Disconnect();
     initializeGrid();
     initialize();
+
+}
+
+void qOrbiter::authorizePrivateMedia(int mediaType, QString pin, int user){
+    bool valid;
+    string pResp = "";
+    DCE::CMD_Verify_PIN checkPin(m_dwPK_Device, iPK_Device_SecurityPlugin,  user, pin.toStdString(), &valid );
+    if(SendCommand(checkPin, &pResp) && pResp=="OK"){
+        if(valid){
+            qDebug() << "Valid";
+       setStringParam(5, QString::number(user));
+        }else{
+            qDebug() << "invalid";
+        }
+    }
 
 }

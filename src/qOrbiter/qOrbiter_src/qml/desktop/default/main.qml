@@ -100,6 +100,7 @@ Item {
             var s = String(screenname)
             manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
             manager.setCurrentScreen(screenname)
+            componentLoader.source= ""
         }else if (pageLoader.status==Component.Error){
             logger.userLogMsg ="Command to change to:" + screenname + " failed!"
             logger.userLogMsg = pageLoader.sourceComponent.errorString()
@@ -144,7 +145,7 @@ Item {
 
     @param componetName: String location of the component relative to main.qml
     */
-    function loadComponent(componentName ){
+    function loadComponent(componentName, paramObj ){
 
         if(componentName===""){
             componentLoader.source=""
@@ -157,6 +158,15 @@ Item {
         }
 
         if (componentLoader.status == Component.Ready){
+            if(paramObj){
+                var i = componentLoader.item
+                for(var p in paramObj){
+                    console.log(JSON.stringify(paramObj))
+                    console.log(JSON.stringify(p))
+                    i[p] =paramObj[p]
+                }
+            }
+
             logger.userLogMsg ="Command to change to:" + componentName+ " was successfull"
         }else{
             logger.userLogMsg = "Command to add: " + componentName + " failed!"

@@ -553,7 +553,7 @@ int main(int argc, char* argv[])
         QObject::connect(mediaModel,SIGNAL(ready(int)), &pqOrbiter, SLOT(prepareFileList(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(setDceGridParam(int,QString)), &pqOrbiter, SLOT(setStringParam(int,QString)),Qt::QueuedConnection);
-
+        QObject::connect(&w, SIGNAL(authUserMedia(int,QString,int)), &pqOrbiter, SLOT(authorizePrivateMedia(int,QString,int)), Qt::QueuedConnection);
         QObject::connect(w.userList, SIGNAL(privateUserChanged(int, QString)), &pqOrbiter, SLOT(setStringParam(int,QString)),Qt::QueuedConnection);
         QObject::connect(mediaModel,SIGNAL(gridTypeChanged(int)), w.userList, SLOT(unsetPrivate()));
 

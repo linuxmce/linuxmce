@@ -27,7 +27,7 @@ Item {
         onVerifyPinForMedia:{
             // show pin box to auth user with userToValidate
             console.log("user to validate::"+userToValidate)
-            loadComponent("../components/PinWindow.qml")
+            loadComponent("../components/PinWindow.qml", {"requestedUser":userToValidate})
         }
     }
 

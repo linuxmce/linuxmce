@@ -1386,6 +1386,7 @@ signals:
     void newFileFormatSort(AttributeSortItem*);
     void attributeSortFinished();
     void updateSelectedAttributes(QString attributeString);
+    void invalidMediaAuth();
 
 
     //now playing signals
@@ -1520,6 +1521,14 @@ signals:
 
 
 public slots:
+    /*!
+     * \brief authorizePrivateMedia
+     * \param mediaType
+     * \param pin
+     * \param user
+     */
+    void authorizePrivateMedia(int mediaType, QString pin, int user);
+
 
     /*!
      * \brief reInitialize - Restarts the orbiter without doing a full reload.
@@ -1528,7 +1537,7 @@ public slots:
 
     /*!
      * \brief setLocalIp Set the local ip address for this device.
-     * \param l
+     * \param l :QString Local IP address
      */
     void setLocalIp(QString l) { m_localIp = l; }
 

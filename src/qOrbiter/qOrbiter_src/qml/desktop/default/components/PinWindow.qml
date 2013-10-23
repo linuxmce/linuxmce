@@ -4,6 +4,7 @@ Item {
     id:pinWindow
     height: manager.appHeight
     width: manager.appWidth
+    property int requestedUser:-1
     state:"loaded"
     MouseArea{
         anchors.fill: parent
@@ -29,14 +30,23 @@ Item {
         }
         color:"black"
     }
-
-    Rectangle{
+    StyledText{
+        id:user_ident
+        text:"Enter PIN to Authorize user : "+requestedUser
+        color:"White"
+        fontSize: 24
+        anchors{
+            bottom:buttonContainer.top
+            horizontalCenter: parent.horizontalCenter
+        }
+    }
+    Item{
         id:buttonContainer
         height: scaleY(65)+50
-        width: scaleX(40)
-        color:"black"
-        border.color:"white"
-        border.width:1
+        width: scaleX(50)
+        //        color:"black"
+        //        border.color:"white"
+        //        border.width:1
 
         anchors{
             verticalCenter: parent.verticalCenter
@@ -52,22 +62,28 @@ Item {
                 top:parent.top
             }
 
-//            Rectangle{
-//                id:inputPhil
-//                anchors.fill: parent
-//                color: "yellow"
-//                radius:10
-//            }
+            Rectangle{
+                id:inputPhil
+                anchors.fill: userPass
+                color: "yellow"
+                opacity: .25
+                radius:10
+            }
 
             TextInput{
-                font.pointSize: inputDisplay.height*(.6)
-                color: "White"
+                id:userPass
+                font.pointSize: inputDisplay.height*(.8)
+                color: "black"
                 echoMode: TextInput.Password
+                fillColor: "transparent"
+
                 anchors{
                     left:parent.left
                     right:parent.right
                     top:parent.top
                     bottom:parent.bottom
+                    rightMargin: parent.width*.22
+                    leftMargin: parent.width*.25
                 }
             }
         }
@@ -79,21 +95,25 @@ Item {
                 left:parent.left
                 right:parent.right
                 bottom:parent.bottom
+                topMargin: scaleY(1)
+
             }
-//            Rectangle{
-//                anchors.fill: parent
-//                color:"blue"
-//            }
+            //            Rectangle{
+            //                anchors.fill: parent
+            //                color:"blue"
+            //            }
 
             Column{
                 id:verticalButtonLayout
                 spacing: 10
                 anchors{
                     top:parent.top
-                    left:parent.left
-                    right:parent.right
+                    left:buttonLayout.left
+                    right:buttonLayout.right
                     bottom:parent.bottom
                     bottomMargin: 40
+                    rightMargin: buttonLayout.width*.25
+                    leftMargin: buttonLayout.width*.25
                 }
 
                 Row{
@@ -106,7 +126,7 @@ Item {
                     }
 
                     Repeater{
-                        model: ["1", "2", "3"]
+                        model: [1, 2, 3]
                         delegate:PinButton{}
                     }
                 }
@@ -120,7 +140,7 @@ Item {
                     }
 
                     Repeater{
-                        model: ["4", "5", "6"]
+                        model: [4, 5, 6]
                         delegate:PinButton{}
                     }
                 }
@@ -134,7 +154,7 @@ Item {
                         right:parent.right
                     }
                     Repeater{
-                        model: ["7", "8", "9"]
+                        model: [7, 8, 9]
                         delegate:PinButton{}
                     }
                 }
@@ -148,7 +168,7 @@ Item {
                         right:parent.right
                     }
                     Repeater{
-                        model: ["X", "0", "GO"]
+                        model: ["X", 0, "GO"]
                         delegate: PinButton{}
                     }
                 }
@@ -191,7 +211,7 @@ Item {
             name: "ready"
             PropertyChanges {
                 target: phil
-                opacity:.65
+                opacity:.85
             }
             PropertyChanges {
                 target: buttonContainer

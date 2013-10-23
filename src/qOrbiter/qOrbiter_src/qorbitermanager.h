@@ -566,6 +566,7 @@ signals:
     void movePlistEntry(QString , int);
     void removePlistEntry(int);
     void savePlist(QString, bool);
+    void authUserMedia(int media_type, QString userPin, int theUser);
 
 
     /*Datagrid Signals*/
@@ -1276,6 +1277,8 @@ public slots:
     void setGridSeperator(int sep) { media_pageSeperator = sep; emit newPageSeperator(sep);}
     int getGridSeperator() { return media_pageSeperator; }
     QString translateMediaType(int mediaType);
+
+    void requestUserMediaAuth(int mediaType, QString pass, int user) { emit authUserMedia(mediaType, pass, user); }
 
     void setCurrentPage(int page) {media_currentPage = page;   emit mediaPageChanged();  }
     int getCurrentPage() {return media_currentPage;}
