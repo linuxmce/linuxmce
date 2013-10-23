@@ -18,6 +18,17 @@ Item {
         state="ready"
     }
 
+    Connections{
+        target:userList
+        onPrivateUserChanged:{
+            if(userList.currentPrivateUser===-1){
+                inputPhil.color="red"
+            }else{
+                inputPhil.color="green"
+                pinWindow.state="closed"
+            }
+        }
+    }
 
 
     Rectangle{
@@ -65,7 +76,7 @@ Item {
             Rectangle{
                 id:inputPhil
                 anchors.fill: userPass
-                color: "yellow"
+                color:userList.currentPrivatUser === -1 ? "yellow" : "green"
                 opacity: .25
                 radius:10
             }

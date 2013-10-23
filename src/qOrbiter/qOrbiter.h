@@ -1386,8 +1386,7 @@ signals:
     void newFileFormatSort(AttributeSortItem*);
     void attributeSortFinished();
     void updateSelectedAttributes(QString attributeString);
-    void invalidMediaAuth();
-
+    void mediaAuthChanged(int user); /*!< For invalid private media authorization. Anything besides -1 correlates to the user associated with that number being set.*/
 
     //now playing signals
     void setNowPlaying(bool status);

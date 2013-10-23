@@ -14,6 +14,7 @@
   */
 class UserModel : public QAbstractListModel
 {
+    Q_PROPERTY(int currentPrivateUser READ getCurrentPrivateUser WRITE setCurrentPrivateUser NOTIFY privateUserChanged)
     Q_OBJECT
 public:
     explicit UserModel(UserItem* prototype, QObject* parent = 0);
@@ -41,9 +42,8 @@ public:
     QString defaultUzer;
 
 signals:
-    void privateUserChanged(int u, QString b);
+    void privateUserChanged();
     void verifyPinForMedia(int userToValidate);
-
 
 public slots:
     Q_INVOKABLE void setSelectionStatus(QString format){
@@ -54,9 +54,11 @@ public slots:
     }
 
     void unsetPrivate(){
-        currentPrivateUser= -1;
-        emit privateUserChanged(5, QString::number(currentPrivateUser));
+        currentPrivateUser= -1;    
     }
+
+    void setCurrentPrivateUser(int p){  currentPrivateUser = p; emit privateUserChanged();}
+    int getCurrentPrivateUser(){return currentPrivateUser;}
 
 private slots:
     void handleItemChange();
