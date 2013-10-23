@@ -3720,7 +3720,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 #ifdef rpi
                 Sleep(15);
 #elif NECESSITAS
-                Sleep(15);
+                Sleep(30);
 #else
                 //Sleep(15);
 #endif
