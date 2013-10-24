@@ -82,7 +82,7 @@ public:
 		void SendPowerUsageCumulativeChangedEvent(unsigned int PK_Device, float value);
 		void SendVoltageChangedEvent(unsigned int PK_Device, int value);
 		void SendLightChangedEvents(unsigned int PK_Device, int value);
-		void SendBrightnessChangedEvent(unsigned int PK_Device, int value);
+		void SendBrightnessChangedEvent(unsigned int PK_Device, float value);
 		void SendSetpointChangedEvent(unsigned int PK_Device, float value);
 //<-dceag-const-b->
 public:

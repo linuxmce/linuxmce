@@ -1380,10 +1380,11 @@ void ZWave::SendOnOffEvent(unsigned int PK_Device, int value) {
 	SendEvent(PK_Device, EVENT_Device_OnOff_CONST, EVENTPARAMETER_OnOff_CONST, value == 0 ? "0" : "1");
 }
 
-void ZWave::SendBrightnessChangedEvent(unsigned int PK_Device, int value)
+void ZWave::SendBrightnessChangedEvent(unsigned int PK_Device, float value)
 {
-	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending brightness level changed event from PK_Device %d, value %d",PK_Device, value);
-	SendEvent(PK_Device, EVENT_Brightness_Changed_CONST, EVENTPARAMETER_Value_CONST, StringUtils::itos(value));
+	string sVal = StringUtils::Format("%.1f", value);
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending brightness level changed event from PK_Device %d, value %d",PK_Device, sVal.c_str());
+	SendEvent(PK_Device, EVENT_Brightness_Changed_CONST, EVENTPARAMETER_Value_CONST, sVal.c_str());
 }
 
 void ZWave::SendSetpointChangedEvent(unsigned int PK_Device, float value)
