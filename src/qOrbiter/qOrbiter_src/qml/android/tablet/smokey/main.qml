@@ -22,12 +22,10 @@ Item {
         interval:screensaverTimer
         running: false
         repeat: false
-        onTriggered: hideUi()
+        onTriggered: {}
     }
 
-    function hideUi(){
 
-    }
 
     Rectangle{
         id:canary
