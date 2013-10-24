@@ -1,6 +1,6 @@
 import QtQuick 1.1
 import DceScreenSaver 1.0
-import AudioVisual 1.0
+//import AudioVisual 1.0
 import "../../../skins-common/lib/handlers"
 import "components"
 
