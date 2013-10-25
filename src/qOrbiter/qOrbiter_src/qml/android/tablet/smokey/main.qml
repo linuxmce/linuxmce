@@ -1,6 +1,6 @@
 import QtQuick 1.1
 import DceScreenSaver 1.0
-//import AudioVisual 1.0
+import AudioVisual 1.0
 import "../../../skins-common/lib/handlers"
 import "components"
 
@@ -47,51 +47,51 @@ Item {
         }
     }
 
-//    MediaManager{
-//        id:dceplayer
-//        anchors.top: parent.top
-//        anchors.left:parent.left
-//        focus:true
-//        onMediaPlayingChanged: {
-//            if(!mediaPlaying)
-//                androidSystem.stopMedia()
-//        }
+    MediaManager{
+        id:dceplayer
+        anchors.top: parent.top
+        anchors.left:parent.left
+        focus:true
+        onMediaPlayingChanged: {
+            if(!mediaPlaying)
+                androidSystem.stopMedia()
+        }
 
 
-//        onAndroidUrlUpdated:{
-//            console.log("NEW ANDROID URL")
-//            if(androidUrl.length > 4){
-//                console.log("URL ok!")
+        onAndroidUrlUpdated:{
+            console.log("NEW ANDROID URL")
+            if(androidUrl.length > 4){
+                console.log("URL ok!")
 
-//                androidSystem.playMedia(dceplayer.androidUrl)
-//            }
-//            else{
-//                console.log("Url Malformed!")
-//                console.log("Url::"+androidUrl)
-//            }
-//        }
+                androidSystem.playMedia(dceplayer.androidUrl)
+            }
+            else{
+                console.log("Url Malformed!")
+                console.log("Url::"+androidUrl)
+            }
+        }
 
-//        //  onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
+        //  onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
 
 
-//        Component.onCompleted: {
-//            if(manager.mediaPlayerID !== -1){
-//                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-//                androidSystem.startAudioService(dceplayer.callbackAddress);
-//                console.log("initializing qml media player::"+manager.mediaPlayerID)
+        Component.onCompleted: {
+            if(manager.mediaPlayerID !== -1){
+                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                androidSystem.startAudioService(dceplayer.callbackAddress);
+                console.log("initializing qml media player::"+manager.mediaPlayerID)
 
-//            }
-//        }
+            }
+        }
 
-//        Connections{
-//            target:manager
-//            onMediaPlayerIdChanged:{
-//                console.log("initializing qml media player::"+manager.mediaPlayerID)
-//                dcePlayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-//            }
-//        }
+        Connections{
+            target:manager
+            onMediaPlayerIdChanged:{
+                console.log("initializing qml media player::"+manager.mediaPlayerID)
+                dcePlayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+            }
+        }
 
-//    }
+    }
 
     signal close()
     signal changeScreen(string s)
