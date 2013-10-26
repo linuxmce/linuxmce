@@ -19,12 +19,11 @@ function createStageComponent(incavcomponent, inscreen) {
         console.log("Error in stage component object")
         console.log("Component Status::"+component.status)
         console.log("Component Status::"+component.errorString())
-        return
-        component=Qt.createComponent("../components/GenericFileDetails.qml")
+         console.log("Component Screen::"+inscreen)
     }
     else {
 
-      component.statusChanged.connect(finishStageCreation)
+        component.statusChanged.connect(finishStageCreation)
     }
 
 }
@@ -36,7 +35,7 @@ function finishStageCreation()
     if (component.status === Component.Ready)
     {
         console.log("component is ready")
-     component_sprite = component.createObject(screen, {"x":0, "y": 0});
+        component_sprite = component.createObject(screen, {"x":0, "y": 0});
 
         if(component_sprite === null){
             console.log("Component Load Error")
@@ -48,12 +47,13 @@ function finishStageCreation()
     else if (component.status === Component.Error)
     {   console.log("Component is not ready")
         console.log("Component Error::"+component.errorString())
+
     }
     else if (component.status===Component.Loading){
 
         console.log("Still loading"+component.progress)
         if (component.progress !== 0)
-        finishStageCreation()
+            finishStageCreation()
     }
 }
 

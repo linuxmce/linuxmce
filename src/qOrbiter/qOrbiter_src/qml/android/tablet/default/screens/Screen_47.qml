@@ -20,7 +20,7 @@ Item {
             break;
         case Qt.Key_Menu:
             if(fileviewscreen.state!=="sorting")
-            fileviewscreen.state = "sorting"
+                fileviewscreen.state = "sorting"
             else{
                 fileviewscreen.state = "gridbrowsing"
             }
@@ -37,17 +37,10 @@ Item {
     property int mouselocX: 0
     // Component.onCompleted: manager.requestTypes(manager.i_current_mediaType)
 
-    function runEffects()
-    {
-        MyJs.createStageComponent("FileDetails"+manager.q_mediaType+".qml" , parent)
-    }
-
-    Connections
-    {
+    Connections{
         target: filedetailsclass
-        onShowDetailsChanged:
-        {
-            runEffects()
+        onShowDetailsChanged:{
+            fileviewscreen.state = "detail"
         }
     }
 
@@ -384,6 +377,13 @@ Item {
                 visible:false
                 z:0
             }
+            AnchorChanges{
+                target: file_details_loader
+                anchors.left: parent.right
+            }
+            StateChangeScript{
+               // script: {manager.resetModelAttributes; mediatypefilter.resetStates(); attribfilter.resetStates(); }
+            }
         },
         State{
             name:"sorting"
@@ -393,10 +393,56 @@ Item {
                 visible:true
                 z:5
             }
+            AnchorChanges{
+                target: file_details_loader
+                anchors.left: parent.right
+            }
         },
         State{
             name:"menu"
+        },
+        State {
+            name: "detail"
+            PropertyChanges {
+                target: progress_bar
+                visible:false
+            }
+            PropertyChanges {
+                target: sortingOptions
+                height:0
+                visible:false
+                z:0
+            }
+            PropertyChanges {
+                target: media_view
+                visible:false
+            }
+            PropertyChanges{
+                target:typeSelection
+                visible:false
+            }
+            AnchorChanges{
+                target: file_details_loader
+                anchors.left: parent.left
+            }
+            PropertyChanges {
+                target: file_details_loader
+                source:"../components/FileDetails_"+manager.i_current_mediaType+".qml"
+            }
         }
     ]
+
+    Loader{
+        id:file_details_loader
+        height: parent.height
+        width: parent.width
+        anchors.left: files_view_screen.right
+        onStatusChanged: {
+            console.log("Status in details loader changed")
+            if(file_details_loader.status===Loader.Error){
+                file_details_loader.source = "../components/GenericFileDetails.qml"
+            }
+        }
+    }
 }
 
