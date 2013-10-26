@@ -23,6 +23,7 @@ function mainScreenSaver($output,$mediadbADO,$dbADO) {
 			$physicalFiles=grabFiles($path,'');
 			
 			$out.='
+			<script src="javascript/prototype.js" type="text/javascript" language="JavaScript"></script>
 			<script>
 			function windowOpen(locationA,attributes) 
 			{
@@ -47,8 +48,153 @@ function mainScreenSaver($output,$mediadbADO,$dbADO) {
 		     }
 		   }
 		}			
+
+		function updateScreenSaver(event) {
+		         var element = this;
+			 element.disabled = true;
+			        new Ajax.Request("index.php?section=mainScreenSaver", {
+				  method:"post",
+				  parameters:{section: "mainScreenSaver", action:"ajax", setScreenSaver: (this.checked?1:0), pkFile: this.name.substr(5) },
+				  onSuccess: function(transport) {
+				        element.disabled = false;  
+				  	var response = transport.responseText || "";
+					var o = eval("("+response+")");
+				  }
+				});
+		}
+		function addKeywordEvent(e) {
+		       var el = Event.element(e);
+		       var fileID = el.name.substr(6);
+		       var lookupEl = $("newkw_lookup");
+		       if (e.keyCode == Event.KEY_RETURN) {
+		           var pkAttr = 0;
+		           if (!e.shiftKey && lookupEl.selectedIndex >= 0) {
+			      pkAttr = lookupEl.options[lookupEl.selectedIndex].value;
+			   }
+		           if (pkAttr > 0 || el.getValue() != "") {
+			        new Ajax.Request("index.php?section=mainScreenSaver", {
+				  method:"post",
+				  parameters:{section: "mainScreenSaver", action:"ajax", addAttribute:1, pkFile: fileID, pkAttribute: pkAttr, Name:el.getValue() },
+				  onSuccess: function(transport) {
+				        el.value = ""; 
+				  	var response = transport.responseText || "";
+					var o = eval("("+response+")");
+					if (o.result) {
+					    clearLookup();
+					    loadKeywords(fileID);
+					}
+				  }
+				});
+			   }
+			   e.preventDefault();
+		       } else if (e.keyCode == Event.KEY_DOWN) {
+		       	      if (lookupEl.selectedIndex < lookupEl.options.length-1) {
+		               	      lookupEl.selectedIndex++;
+			      }
+		       } else if (e.keyCode == Event.KEY_UP) {
+		              if(lookupEl.selectedIndex > 0) {
+		              	      lookupEl.selectedIndex--;
+			      }
+		       } else {
+			       loadLookup(el);
+		       }
+		}
+		function loadLookup(el) {
+		   	var lookupEl = $("newkw_lookup");
+		        lookupEl.show();
+			var fileID = el.name.substr(6);
+		        new Ajax.Request("index.php?section=mainScreenSaver", {
+			  method:"get",
+			  parameters:{section: "mainScreenSaver", action:"ajax", loadAttributes: 1, Name:el.value },
+			  onSuccess: function(transport) {
+			  	var response = transport.responseText || "";
+				var o = eval("("+response+")");
+				if (o.result) {
+				   var elPos = el.cumulativeOffset();
+				   lookupEl.setStyle({left: elPos[0]+"px", top: (elPos[1]+20)+"px"});
+				   lookupEl.options.length = 0;
+				   for (var i = 0; i < o.data.length; i++) {
+				       for (var key in o.data[i]) {
+				              var optEl = new Element("option", {value:key});
+					      optEl.text = o.data[i][key];
+					      lookupEl.options.add(optEl);
+				       }
+				   }
+				   if (lookupEl.options.length > 0) {
+				            lookupEl.options[0].selected = true;
+				   }
+				}
+			  }
+			});		
+		}
+		function clearLookup(el) {
+			 $("newkw_lookup").hide();
+			 $("newkw_lookup").blur();
+		}
+		function loadKeywords(file) {
+			 var fileID = file;
+			 new Ajax.Request("index.php", {
+				  method:"get",
+				  parameters:{section: "mainScreenSaver", action:"ajax", loadKeywords: fileID },
+				  onSuccess: function(transport) {
+				  	var response = transport.responseText || "";
+				  	$(\'keywords_\'+fileID).update(response);
+				  }
+		  	 });
+		}
+		function removeAttributeSpan(e, el) {
+			 if (!e) e = window.event;
+			 if (e.shiftKey) {
+	 			 var id = el.id.substring(8);
+	 			 var fileID = id.substring(0, id.indexOf("_"));
+				 var attrID = id.substring(id.indexOf("_")+1);
+			         new Ajax.Request("index.php?section=mainScreenSaver", {
+				     method:"post",
+				      parameters:{section: "mainScreenSaver", action:"ajax", removeAttribute: attrID, pkFile: fileID },
+				      onSuccess: function(transport) {
+				  	  var response = transport.responseText || "";
+					  var o = eval("("+response+")");
+					  if (o.result) {
+					      $("keyword_"+fileID+"_"+attrID).remove();
+					  }
+				  }
+				});
+			}
+		}
+
+		document.observe("dom:loaded", function() {
+		        $$(\'input[type="checkbox"]\').invoke("observe", "click", updateScreenSaver);
+		        $$(\'input[class="newkw"]\').invoke("observe", "keyup", addKeywordEvent);
+		        $$(\'input[class="newkw"]\').invoke("observe", "keydown", function(event) { if (event.keyCode == Event.KEY_RETURN) event.preventDefault();});
+			$$(\'td[class="keywords"]\').each(function(e) { loadKeywords(e.id.substring(9)); });
+		});
 			</script>
-			
+			<style type="text/css">
+td.imageData {
+vertical-align: top;
+}
+table select {
+width: 260px;
+}
+td.imageData table td {
+padding: 0px;
+}
+.kwSpan {
+   background-color: gray;
+   padding:1px;
+   margin-right: 4px;
+}<
+.kwHover {
+   background-color: light-red;
+   padding:2px;
+   margin-right: 4px;
+}
+#newkw_lookup {
+  position: absolute;
+  width: 240px;
+}
+
+</style>			
 			<a href="javascript:syncPath(\''.substr($path,0,strrpos($path,'/')).'\')">Up one level</a>
 			
 			<div align="center" class="confirm"><B>'.@$_REQUEST['msg'].'</B></div><br>
@@ -58,7 +204,8 @@ function mainScreenSaver($output,$mediadbADO,$dbADO) {
 			<input type="hidden" name="action" value="update">
 			<input type="hidden" name="path" value="'.$path.'">
 			<input type="hidden" name="page" value="'.$page.'">
-			';
+			<select id="newkw_lookup" size="8" style="display: none;"><option value="0"></option></select>
+';
 			
 			$out.='
 				<input type="hidden" name="flikr" value="'.(($flickerEnabled==0)?1:0).'">
@@ -88,6 +235,44 @@ function mainScreenSaver($output,$mediadbADO,$dbADO) {
 	';
 
 	}else{
+
+		// Ajax
+		if (isset($_POST['setScreenSaver'])) {
+		       $pkFile = $_POST['pkFile'];
+		       $setScreenSaver = $_POST['setScreenSaver'];
+		       setScreenSaverState($pkFile, $setScreenSaver == 1, $mediadbADO, $screenSaverAttribute, $screenSaverDisabledAttribute);
+		       header('Content-type: application/json');
+                       print("{result: 1}\n");
+		       exit();
+		}
+		if (isset($_POST['removeAttribute'])) {
+		       $pkFile = $_POST['pkFile'];
+		       $pkAttr = $_POST['removeAttribute'];
+		       $result = removeAttributeFromFile($pkFile, $pkAttr, $mediadbADO) ? 1 : 0;
+		       header('Content-type: application/json');
+                       print("{result: ".$result."}\n");
+		       exit();
+		}
+		if (isset($_POST['addAttribute'])) {
+		       $pkFile = $_POST['pkFile'];
+		       $pkAttr = $_POST['pkAttribute'];
+		       $Name = $_POST['Name'];
+		       $result = addAttributeToFile($pkFile, $pkAttr, 29, $Name, $mediadbADO) ? 1 : 0;
+		       header('Content-type: application/json');
+                       print("{result: ".$result."}\n");
+		       exit();
+		}
+		if (isset($_REQUEST['loadKeywords'])) {
+		       $pkFile = $_REQUEST['loadKeywords'];
+                       print(loadKeywords($pkFile, $mediadbADO));
+		       exit();
+		}
+		if (isset($_REQUEST['loadAttributes'])) {
+		       $Name = $_REQUEST['Name'];
+                       print(loadAttributes($Name, $mediadbADO));
+		       exit();
+		}
+
 		if(isset($_POST['reload'])){
 			$cmd='/usr/pluto/bin/MessageSend localhost -targetType template -o 0 '.$GLOBALS['PhotoScreenSaver'].' 1 606';
 			exec_batch_command($cmd);
@@ -181,7 +366,6 @@ function getScreensaverFiles($path,$screenSaverAttribute,$screenSaverDisabledAtt
 		<table celspacing="0" cellpadding="3" align="center" width="650">
 			<tr class="tablehead">
 				<td width="20">&nbsp;</td>
-				<td width="20">&nbsp;</td>
 				<td><B>'.$TEXT_IMAGE_CONST.'</B></td>
 			</tr>';
 	$pos=0;
@@ -191,23 +375,29 @@ function getScreensaverFiles($path,$screenSaverAttribute,$screenSaverDisabledAtt
 		$pos++;
 		$class=($pos%2==0)?'alternate_back':'';
 		$picUrl='include/image.php?imagepath='.htmlentities(urlencode($row['Path'].'/'.$row['Filename']));
-		$filePic=(!file_exists($row['Path'].'/'.$row['Filename'].'.tnj'))?'&nbsp;':'<a href="'.$picUrl.'" target="_blank"><img src="include/image.php?imagepath='.htmlentities(urlencode($row['Path'].'/'.$row['Filename'])).'.tnj" border="0"></a>';
+		$filePic=(!file_exists($row['Path'].'/'.$row['Filename'].'.tnj'))?'&nbsp;':'<a href="'.$picUrl.'" target="_blank" tabindex="0"><img src="include/image.php?imagepath='.htmlentities(urlencode($row['Path'].'/'.$row['Filename'])).'.tnj" border="0"></a>';
 		$out.='
 			<tr class="'.$class.'">
-				<td><input type="checkbox" name="file_'.$row['PK_File'].'" value="1" '.((is_null($row['FK_Attribute']) || (!is_null($row['FK_Attribute']) && !is_null($row['AttributeDisabled'])))?'':'checked').'></td>
 				<td>'.$filePic.'</td>
-				<td><a href="'.$picUrl.'" target="_blank">'.$row['Filename'].'</a></td>
+				<td class="imageData">
+				  <table><tr><td>File: <a href="'.$picUrl.'" target="_blank" tabindex="0">'.$row['Filename'].'</td></tr>
+				    <tr><td>Screensaver: <input type="checkbox" name="file_'.$row['PK_File'].'" value="1" '.((is_null($row['FK_Attribute']) || (!is_null($row['FK_Attribute']) && !is_null($row['AttributeDisabled'])))?'':'checked').' tabindex="1"></td></tr>
+				    <tr><td>Keywords:</td></tr>
+				    <tr><td id="keywords_'.$row['PK_File'].'" class="keywords"></td></tr>
+				    <tr><td>Add keyword: <input class="newkw" name="newkw_'.$row['PK_File'].'" id="kw_'.$row['PK_File'].'" type="text" size="30" value="" title="Enter to add single existing attribute, Shift+Enter to add new attribute" onfocus="loadLookup(this);" onblur="clearLookup(this);" tabindex="1"/></td></tr>
+				    </table>
+				</td>
 			</tr>		
 		';
 	}
 	$out.='
 			<tr>
-				<td colspan="3"><input type="checkbox" name="sel_all" value="1" onClick="set_checkboxes();"> Select/unselect all<br>
+				<td colspan="2"><input type="checkbox" name="sel_all" value="1" onClick="set_checkboxes();"> Select/unselect all<br>
 				<input type="submit" class="button" name="save" value="Save">	
 			</td>
 			</tr>
 			<tr>
-				<td colspan="3" align="right">'.$pageLinks.'</td>
+				<td colspan="2" align="right">'.$pageLinks.'</td>
 			</tr>		
 	
 	</table>
@@ -252,4 +442,61 @@ function file_attribute_exist($fileID,$attributeID,$mediadbADO){
 	
 	return false;
 }
+
+function setScreenSaverState($fileID, $enable, $mediadbADO, $screenSaverAttribute, $screenSaverDisabledAttribute) {
+	if(!$enable){
+		if(file_attribute_exist($fileID,$screenSaverAttribute,$mediadbADO)){
+			$mediadbADO->Execute('INSERT IGNORE INTO File_Attribute (FK_Attribute,FK_File) VALUES (?,?)',array($screenSaverDisabledAttribute,$fileID));
+		}
+	}else{
+		$mediadbADO->Execute('DELETE File_Attribute.* FROM File_Attribute INNER JOIN Attribute ON FK_Attribute=PK_Attribute WHERE FK_AttributeType=46 AND FK_File=?',array($fileID));		
+		$mediadbADO->Execute('INSERT IGNORE INTO File_Attribute (FK_Attribute,FK_File) VALUES (?,?)',array($screenSaverAttribute,$fileID));
+	}
+}
+
+function loadKeywords($pkFile, $mediadbADO) {
+	$h = "";
+	$query='SELECT PK_Attribute, Name
+		FROM File_Attribute INNER JOIN Attribute ON File_Attribute.FK_Attribute=Attribute.PK_Attribute 
+		WHERE FK_File = ? AND FK_AttributeType = ?';
+	$res=$mediadbADO->Execute($query,array($pkFile, 29));
+	while($row=$res->FetchRow()){
+	        $h.='<span class="kwSpan" id="keyword_'.$pkFile.'_'.$row['PK_Attribute'].'" title="Shift+Click to remove" onclick="removeAttributeSpan(event, this);">'.$row['Name'].'</span>';
+	}
+	return $h;
+}
+function loadAttributes($Name, $mediadbADO) {
+	$h = "{ result: 1, data: [";
+	$query='SELECT DISTINCT PK_Attribute, Name
+		FROM File_Attribute INNER JOIN File ON File.PK_File=File_Attribute.FK_Attribute 
+		INNER JOIN Attribute ON File_Attribute.FK_Attribute=Attribute.PK_Attribute
+		WHERE EK_MediaType = ? AND FK_AttributeType = ? AND Name LIKE ? ORDER BY Name';
+	$res=$mediadbADO->Execute($query,array(7, 29, $Name."%"));
+	$first = true;
+	while($row=$res->FetchRow()){
+		if (!$first)
+		   $h.=",";
+	        $h.="{".$row['PK_Attribute'].":'".$row['Name']."'}";
+		$first = false;
+	}
+	$h.="]}";
+	return $h;
+}
+function removeAttributeFromFile($pkFile, $pkAttr, $mediadbADO) {
+	return $mediadbADO->Execute('DELETE FROM File_Attribute WHERE FK_Attribute=? AND FK_File=?',array($pkAttr, $pkFile));
+}
+
+function addAttributeToFile($pkFile, $pkAttr, $pkAttrType, $Name, $mediadbADO) {
+	// If new attribute, add it
+	$newPKAttr = $pkAttr;
+	if (!$newPKAttr) {
+		$result = $mediadbADO->Execute('INSERT INTO Attribute (FK_AttributeType,Name) SELECT PK_AttributeType,? FROM AttributeType WHERE PK_AttributeType=?',array($Name,$pkAttrType));
+		if (!result)
+		   return false;
+		$newPKAttr = $mediadbADO->Insert_id();
+	}
+	// Connect attribute to file
+	return $mediadbADO->Execute('INSERT INTO File_Attribute (FK_Attribute,FK_File) VALUES (?,?)',array($newPKAttr,$pkFile));
+}
+
 ?>
