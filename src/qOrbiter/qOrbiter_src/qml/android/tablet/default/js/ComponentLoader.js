@@ -13,16 +13,15 @@ function createStageComponent(incavcomponent, inscreen) {
 
     if(component.status === Component.Ready)
     {
-
         component_sprite = component.createObject(screen, {"x":0, "y": 0});
     }
-//    else if (component.status === Component.Error)
-//    {
-//        console.log("Error in stage component object")
-//        console.log("Component Status::"+component.status)
-//        console.log("Component Status::"+component.errorString())
-//        return
-//    }
+    else if (component.status === Component.Error){
+        console.log("Error in stage component object")
+        console.log("Component Status::"+component.status)
+        console.log("Component Status::"+component.errorString())
+        return
+        component=Qt.createComponent("../components/GenericFileDetails.qml")
+    }
     else {
 
       component.statusChanged.connect(finishStageCreation)

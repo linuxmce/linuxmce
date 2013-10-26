@@ -36,6 +36,7 @@ ImgButton ImgButton.qml
 Animations Animations.qml
 ZoomAspect ZoomAspect.qml
 Stage Stage.qml
+GenericFileDetails GenericFileDetails.qml
 Remote_lighting_controls Remote_lighting_controls.qml
 HomeButton HomeButton.qml
 UserListComponent UserListComponent.qml

@@ -90,6 +90,11 @@ Item {
         height: parent.height
         width: parent.width
         anchors.left: files_view_screen.right
+        onStatusChanged: {
+            if(file_details_loader.status===Loader.Error){
+                file_details_loader.source = "../components/GenericFileDetails.qml"
+            }
+        }
     }
 
     states: [
