@@ -9,23 +9,12 @@ Item {
         anchors.fill: filedetailrect
         hoverEnabled: true
     }
-    Image {
-        id: fdbg
-        source: "../img/icons/nowplaying.png"
-        anchors.fill: filedetailrect
-    }
-
-
-    //    Connections{
-    //        target:filedetailsclass
-    //        onImageChanged:filedetailsimage.source = "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?img="+filedetailsclass.screenshot
-    //    }
 
     Rectangle{
         id:bg_mask
         anchors.fill: parent
         color:"black"
-        opacity:.65
+        opacity:.85
     }
 
     Rectangle{
@@ -42,48 +31,12 @@ Item {
             font.bold: true
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         }
-
-    }
-
-    Rectangle{
-        id:imageholder
-        height:childrenRect.height
-        width:childrenRect.width
-        color: "transparent"
-
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
-        anchors.leftMargin: scaleX(2)
-        BorderImage {
-            id: borderimg
-            horizontalTileMode: BorderImage.Repeat
-            source: "../img/icons/drpshadow.png"
-            anchors.fill: filedetailsimage
-            anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
-            border { left: 10; top: 10; right: 10; bottom: 10 }
-            smooth: true
-        }
-        Image {
-            id: filedetailsimage
-            width: filedetailsclass.aspect=="wide"? scaleX(30) : scaleX(23)
-            height:filedetailsclass.aspect=="wide"?scaleY(40) : scaleY(55)
-            source:"http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=imdb&file="+filedetailsclass.file+"&val="+13
-            smooth: true
-        }
-
-        Image {
-            id: npmask
-            source: "../img/icons/transparencymask.png"
-            anchors.fill: filedetailsimage
-            opacity: .5
-
-        }
     }
 
 
     Rectangle {
         id: rectangle1
-        anchors.verticalCenter: imageholder.verticalCenter
+        anchors.verticalCenter: parent.verticalCenter
 
         width:  parent.width *.40
         height: childrenRect.height
@@ -127,7 +80,7 @@ Item {
 
         StyledButton{
             buttonText: "Close"
-            hitArea.onReleased: {files_view_screen.state="viewing"; filedetailsclass.clear()}
+            hitArea.onReleased: {fileviewscreen.state="gridbrowsing"; filedetailsclass.clear(); }
         }
     }
 }

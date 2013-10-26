@@ -377,6 +377,14 @@ Item {
                 visible:false
                 z:0
             }
+            PropertyChanges {
+                target: loadBot
+                visible:false
+            }
+            PropertyChanges {
+                target: file_details_loader
+                source:""
+            }
             AnchorChanges{
                 target: file_details_loader
                 anchors.left: parent.right
@@ -413,12 +421,9 @@ Item {
                 visible:false
                 z:0
             }
+
             PropertyChanges {
-                target: media_view
-                visible:false
-            }
-            PropertyChanges{
-                target:typeSelection
+                target: loadBot
                 visible:false
             }
             AnchorChanges{
