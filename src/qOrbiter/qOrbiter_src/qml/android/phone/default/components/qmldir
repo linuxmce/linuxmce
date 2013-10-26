@@ -83,3 +83,4 @@ MediaPlaybackTemplate MediaPlaybackTemplate.qml     #floorplan
 PhoneFloorplanLayout PhoneFloorplanLayout.qml
 SendCommandBox SendCommandBox.qml
 Slider Slider.qml
+StyledButton StyledButton.qml		            
