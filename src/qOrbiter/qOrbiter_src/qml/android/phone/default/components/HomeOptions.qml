@@ -7,10 +7,11 @@ Item{
     id:optionPanel
     width: parent.width
     height: parent.height
-
+    property int buttonH:optionPanel.height / advancedrow.children.length -10
     Rectangle{
         anchors.fill: parent
         color: "black"
+        opacity: .85
     }
 
     opacity: showOptions ? 1 : 0
@@ -21,61 +22,69 @@ Item{
         }
     }
 
-    Column {
+    Flow {
         id:advancedrow
-        height: childrenRect.height
-        width: childrenRect.width
-        anchors.centerIn: parent
-        spacing: manager.b_orientation ? scaleX(10) : scaleX(12)
+        anchors{
+            top:parent.top
+            left:parent.left
+            right:parent.right
+            bottom:parent.bottom
+        }
+        spacing:5
 
-        ButtonSq{
+        StyledButton{
             id:leader
-            height: style.stdbuttonh
-            width: optionPanel.width*.85
-            buttontext: qsTr("Power")
-            buttontextcolor: "White"
-            buttontextfontsize: scaleY(4)
-            imgSource: ""
-            color:"orange"
-            activatedColor:androidSystem.blueStandard
+            height: buttonH
+            anchors{
+            left:parent.left
+            right:parent.right
+            leftMargin: 15
+            rightMargin: 15
+            }
+
+            buttonText.text: qsTr("Power")
             onActivated: {loadComponent("Power.qml");showOptions = !showOptions}
         }
 
-        ButtonSq{
-            height: scaleY(10)
+        StyledButton{
             width: leader.width
-            buttontext:manager.sPK_User
-            buttontextcolor: "White"
-            buttontextfontsize: scaleY(4)
-            imgSource: ""
-            color:"orange"
+            buttonText.text:manager.sPK_User
+            height: buttonH
+            anchors{
+            left:parent.left
+            right:parent.right
+            leftMargin: 15
+            rightMargin: 15
+            }
             onActivated:  {loadComponent("UserSelector.qml");showOptions = !showOptions}
         }
 
-        ButtonSq{
+        StyledButton{
             id:roombutton
-            height: style.stdbuttonh
-            width: leader.width
-            imgSource: ""
-            color:"orange"
-            buttontextcolor: "White"
-            buttontextfontsize: scaleY(4)
-            buttontext:roomList.currentEA
+            height: buttonH
+            anchors{
+            left:parent.left
+            right:parent.right
+            leftMargin: 15
+            rightMargin: 15
+            }
+            buttonText.text:roomList.currentEA
             onActivated: {
-loadComponent("RoomSelector.qml")
+                loadComponent("RoomSelector.qml")
                 showOptions = !showOptions
-}
+            }
 
         }
 
-        ButtonSq{
-            height: style.stdbuttonh
-            width: leader.width
-            imgSource: ""
-            color:"orange"
-            buttontextcolor: "White"
-            buttontextfontsize: scaleY(4)
-            buttontext: qsTr("Exit")
+        StyledButton{
+            height: buttonH
+            anchors{
+            left:parent.left
+            right:parent.right
+            leftMargin: 15
+            rightMargin: 15
+            }
+            buttonText.text: qsTr("Exit")
             onActivated:  {closeOrbiter(); showOptions = !showOptions }
         }
 

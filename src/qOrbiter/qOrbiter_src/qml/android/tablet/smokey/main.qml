@@ -3,7 +3,7 @@ import DceScreenSaver 1.0
 import AudioVisual 1.0
 import "../../../skins-common/lib/handlers"
 import "components"
-
+//Tablet - Smokey
 Item {
     id: qml_root
     height:manager.appHeight

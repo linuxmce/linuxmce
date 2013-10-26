@@ -3,7 +3,7 @@ import "components"
 import "js/ComponentLoader.js" as MyJs
 import DceScreenSaver 1.0
 import AudioVisual 1.0
-
+//phone - default
 Item {
     id: qmlroot
     width:manager.appWidth
@@ -128,24 +128,73 @@ Item {
         return y/100*manager.appHeight
     }
 
-    //    Rectangle{
-    //        anchors.fill: parent
-    //        id:bgFill
-    //        gradient: Gradient{
-    //            GradientStop{position: 0.0; color: "Black"}
-    //            GradientStop{position: .45; color: "darkgrey"}
-    //            GradientStop{position: .65; color: "black"}
-    //        }
-    //    }
+    ListModel{
+        id:scenarios
 
-//    Image {
-//        id: appBackground
-//        source: "img/bg.jpg"
-//        anchors.fill: parent
-//        property string pSource:""
-//        property string wSource:""
+        function returncount(){
+            return scenarios.count
+        }
 
-//    }
+        ListElement{
+            name:"Lights"
+            modelName:"currentRoomLights"
+            floorplantype:2
+        }
+        ListElement{
+            name:"Media"
+            modelName:"currentRoomMedia"
+            floorplantype:5
+        }
+        ListElement{
+            name:"Climate"
+            modelName:"currentRoomClimate"
+            floorplantype:3
+        }
+        ListElement{
+            name:"Telecom"
+            modelName:"currentRoomTelecom"
+            floorplantype:6
+        }
+        ListElement{
+            name:"Security"
+            modelName:"currentRoomSecurity"
+            floorplantype:4
+        }
+        ListElement{
+            name:"Advanced"
+            modelName:"advanced"
+            floorplantype:-1
+        }
+    }
+
+    ListModel{
+        id:media_filters
+        ListElement{
+            name:"Attribute"
+            pksort:10
+        }
+        ListElement{
+            name:"Genre"
+            pksort:4
+        }
+        ListElement{
+            name:"MediaType"
+            pksort:7
+
+        }
+        ListElement{
+            name:"Resolution"
+            pksort:-1
+        }
+        ListElement{
+            name:"Source"
+            pksort:5
+        }
+        ListElement{
+            name:"View"
+            pksort:-1
+        }
+    }
 
     DceScreenSaver{
          id:glScreenSaver
@@ -169,10 +218,6 @@ Item {
 
      }
 
-    //    function updateBackground(portait, wide){
-    //        appBackground.pSource = portait
-    //        appBackground.wSource = wide
-    //    }
 
     function showExitConfirm(){
 

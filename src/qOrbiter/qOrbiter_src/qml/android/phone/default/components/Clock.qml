@@ -1,22 +1,21 @@
-import QtQuick 1.0
+import QtQuick 1.1
 Item {
-property bool verticalMirror: false
+height: txtDate.paintedHeight
+width: txtDate.paintedWidth
     function getDate(){
         var d = new Date();
-        return Qt.formatDateTime(d, "dddd ,MMMM d| hh:mm ");
+        return Qt.formatDateTime(d, "dddd ,MMMM d - hh:mm ");
     }
     Timer { // Update the clock element periodically
         interval: 5; running: true; repeat: true
         onTriggered: txtDate.text = getDate()
     }
 
-    Text{
+    StyledText{
         id: txtDate
-        text: getDate()
-        color: "aliceblue"
-        font.letterSpacing: 2
+        text: getDate()      
         smooth: true
-        anchors.centerIn: parent
-
+        color:"white"
+        fontSize: scaleY(3)
     }
 }
