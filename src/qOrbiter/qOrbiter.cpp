@@ -4965,8 +4965,12 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
         {
             if (q_attributetype_sort == "" )
             {
-                q_attributetype_sort = photoDefaultSort; // keyword
+                qDebug() << "Browsing by PhotoDefaultSort ;"<<photoDefaultSort;
+                q_attributetype_sort = photoDefaultSort;
+            } else if (q_attributetype_sort != "" && q_pk_attribute !="") {
+                q_attributetype_sort = 13 ;
             }
+
         }
         //radio (streaming)
         if (iPK_MediaType == 43)

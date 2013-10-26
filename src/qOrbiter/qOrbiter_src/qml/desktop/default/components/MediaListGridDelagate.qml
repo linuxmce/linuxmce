@@ -14,6 +14,7 @@ Item
     height: childrenRect.height
     width: childrenRect.width
     visible:name!=="back (..)"
+    property string imgAttributeType:manager.q_mediaType === "7" ? "photo" : "img"
     Rectangle
     {
         id:mainItem
@@ -22,14 +23,14 @@ Item
         rotation: 0
         state:'unsorted'
         color:"transparent"
-      //  onStateChanged: console.log("State changed in DG delegate to "+ state)
+        //  onStateChanged: console.log("State changed in DG delegate to "+ state)
         MouseArea{
             anchors.fill: mainItem
             hoverEnabled: true
             onEntered: {
                 mainItem.color = skinStyle.darkhighlight
                 mainItem.scale = 1.25
-                mainItem.z = 10                
+                mainItem.z = 10
             }
             onExited: {
                 mainItem.color = "transparent"
@@ -43,7 +44,7 @@ Item
             running: false
             PropertyAnimation { target: mainItem; property: "opacity"; to: 1; duration: 1000}
             PropertyAnimation { target: mainItem; property: "scale"; to: 1; duration: 500}
-         //   PropertyAnimation { target: mainItem; property: "rotation"; to: 0; duration: 500}
+            //   PropertyAnimation { target: mainItem; property: "rotation"; to: 0; duration: 500}
             
         }
         
@@ -60,7 +61,7 @@ Item
             color: "transparent"
             
             MediaListClickHandler {
-              //  onActivated: console.log(id)
+                //  onActivated: console.log(id)
             }
             
             BorderImage {
@@ -76,7 +77,7 @@ Item
             Image
             {
                 id: imagerect;
-                source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
+                source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type="+imgAttributeType+"&val="+path : ""
                 anchors.centerIn: parent;
                 fillMode: Image.PreserveAspectFit
                 smooth: true
@@ -129,6 +130,20 @@ Item
                     color: "transparent"
                 }
 
+            },
+            State {
+                name: "photos"
+                when:manager.q_mediaType==="7"
+                PropertyChanges {
+                    target: mainItem
+                    width: scaleX(21);
+                    height: scaleY(21)
+                    color: "transparent"
+                }
+               PropertyChanges{
+                   target:contactDelegate
+                   imgAttributeType:"photo"
+               }
             },
             State {
                 name: "movies"
