@@ -7,6 +7,7 @@ Item {
     id:stage
     signal swapStyle()
     property bool showOptions:false
+    property bool showSecondary:false
     width:manager.appWidth
     height:manager.appHeight
     Component.onCompleted: forceActiveFocus()
@@ -39,7 +40,7 @@ Item {
 
     Flow{
         id:homeSelectionLayout
-        visible: !showOptions
+ visible: !showSecondary
         anchors{
             top: fs_npButton.bottom
             left:parent.left
@@ -50,6 +51,7 @@ Item {
 
         Repeater{
             model:scenarios
+
             delegate:
                 StyledButton{
                 id:btn
@@ -72,8 +74,38 @@ Item {
                         else if (modelName==="advanced"){ manager.gotoQScreen("Screen_44.qml") }
 
                     }
-
+                    showSecondary = true
                 }
+            }
+        }
+    }
+
+    GridView{
+        id:secondaryModel
+        visible:showSecondary
+        property int floorplanType: scenarioPopup.floorplanType = 4
+
+        anchors{
+            top: fs_npButton.bottom
+            left:parent.left
+            right:parent.right
+            bottom:ftr.top
+            leftMargin: 10
+        }
+            cellHeight: itemH-10
+            cellWidth: itemW-10
+        model:scenarioPopup.currentModel
+        delegate:
+            StyledButton{
+            id:gridBtn
+            height: itemH -10
+            width: itemW - 10
+            buttonText.text:title
+            textSize: 38
+            onActivated: {
+              manager.execGrp(params)
+                showSecondary = false
+
             }
         }
     }
@@ -98,14 +130,14 @@ Item {
             color: "black"
             opacity: .75
         }
-       StyledButton{
-           buttonText.text: manager.sPK_User
-           anchors{
-               left:parent.left
-               verticalCenter: parent.verticalCenter
-           }
+        StyledButton{
+            buttonText.text: manager.sPK_User
+            anchors{
+                left:parent.left
+                verticalCenter: parent.verticalCenter
+            }
 
-       }
+        }
 
         Clock{
             anchors.right: parent.right

@@ -19,22 +19,25 @@ Item {
 
     Rectangle{
         anchors.fill: parent
-        color: "black"
-        opacity:.35
+        color: "green"
+        opacity:.65
     }
     Text {
         id: media_title
         anchors{
             left:parent.left
             verticalCenter: parent.verticalCenter
-        }
+            right:np.left
 
-        text:dcenowplaying.mediatitle
+        }
+        elide:Text.ElideRight
+        text:dcenowplaying.qs_mainTitle
         font.pixelSize: scaleY(4)
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        font.weight:Font.Light
+        font.weight:Font.DemiBold
         color: "white"
         visible:  dceTimecode.qsCurrentTime ==="00:00:00" && manager.i_current_mediaType ==4 ? false: true
+
     }
 
 

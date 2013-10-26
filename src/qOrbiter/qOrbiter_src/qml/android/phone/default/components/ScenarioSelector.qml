@@ -35,7 +35,7 @@ Item {
     }
 
 
-    onCurrentModelChanged: currentModel !==dummy ? state = "active" : state = "inactive"
+   // onCurrentModelChanged: currentModel !==dummy ? state = "active" : state = "inactive"
     ListModel{
         id:dummy
     }
