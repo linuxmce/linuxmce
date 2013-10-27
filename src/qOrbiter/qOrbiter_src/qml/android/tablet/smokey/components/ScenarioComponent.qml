@@ -17,8 +17,8 @@ ListView{
         width: childrenRect.width
         StyledButton{
             id:dummy
-            buttonText.text: name
-            buttonText.color: "antiquewhite"
+            buttonText: name
+            txtObj.color: "antiquewhite"
             hitArea.onPressAndHold:{
                 manager.showfloorplan(floorplantype)
                 manager.setFloorplanType(floorplantype)

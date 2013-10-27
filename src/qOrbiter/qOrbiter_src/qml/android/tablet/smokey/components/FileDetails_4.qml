@@ -193,12 +193,12 @@ Item {
         width: parent.width
 
         StyledButton{
-            buttonText.text: "Play"
+            buttonText: "Play"
             hitArea.onReleased: manager.playMedia(filedetailsclass.file)
         }
 
         StyledButton{
-            buttonText.text: "Close"
+            buttonText: "Close"
             hitArea.onReleased: {files_view_screen.state="viewing"; filedetailsclass.clear()}
         }
     }

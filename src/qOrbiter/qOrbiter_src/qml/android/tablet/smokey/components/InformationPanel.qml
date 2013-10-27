@@ -69,12 +69,12 @@ Item{
         height: parent.height
         anchors.right: parent.right
         StyledButton{
-            buttonText.text: manager.sPK_User
+            buttonText: manager.sPK_User
             hitArea.onReleased: info_panel.state="user"
         }
         StyledButton{
             id:location_info
-            buttonText.text: roomList.currentRoom+"::"+roomList.currentEA
+            buttonText: roomList.currentRoom+"::"+roomList.currentEA
             hitArea.onReleased: info_panel.state="room"
         }
     }
@@ -93,7 +93,7 @@ Item{
 
     StyledButton{
         id:close
-        buttonText.text: "Close"
+        buttonText: "Close"
         hitArea.onReleased: info_panel.state="retracted"
         anchors.right: parent.right
     }

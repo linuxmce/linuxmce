@@ -11,11 +11,11 @@ Item{
         spacing:scaleX(2)
 
         StyledButton{
-            buttonText.text: "Power"
+            buttonText: "Power"
             onActivated: info_panel.state="power"
         }
         StyledButton{
-            buttonText.text: "Sleeping Menu"
+            buttonText: "Sleeping Menu"
             onActivated: manager.gotoQScreen("Screen_29.qml")
         }
 

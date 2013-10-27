@@ -29,7 +29,7 @@ Item{
             StyledButton{
                 height: scaleY(16)
                 width: scaleX(18)
-                buttonText.text: entertainArea_list.model[index].ea_name
+                buttonText: entertainArea_list.model[index].ea_name
                 hitArea.onReleased: {
                     manager.setActiveRoom(entertainArea_list.model[index].room, entertainArea_list.model[index].ea_number);
                     info_panel.state="retracted"
@@ -55,7 +55,7 @@ Item{
             StyledButton{
                 height: scaleY(16)
                 width: scaleX(18)
-                buttonText.text: name
+                buttonText: name
 
                 hitArea.onReleased: {
                     console.log(ea_list[0].ea_number!==0)

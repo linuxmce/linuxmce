@@ -14,32 +14,32 @@ Item {
         spacing: 5
         height: childrenRect.height
         StyledButton{
-            buttonText.text: "Back"
+            buttonText: "Back"
             hitArea.onReleased: manager.newTrack("-1")
         }
 
         StyledButton{
-            buttonText.text: "RW"
+            buttonText: "RW"
             hitArea.onReleased: manager.setPlaybackSpeed(-1)
         }
 
         StyledButton{
-            buttonText.text:dceTimecode.playbackSpeed === 0 ? "Play" : "Pause"
+            buttonText:dceTimecode.playbackSpeed === 0 ? "Play" : "Pause"
             hitArea.onReleased: manager.pauseMedia()
         }
 
         StyledButton{
-            buttonText.text: "FF"
+            buttonText: "FF"
             hitArea.onReleased: manager.setPlaybackSpeed(+2)
         }
 
         StyledButton{
-            buttonText.text: "Next"
+            buttonText: "Next"
             hitArea.onReleased: manager.newTrack("+1")
         }
 
         StyledButton{
-            buttonText.text: "Stop"
+            buttonText: "Stop"
             hitArea.onReleased: manager.stopMedia()
         }
     }

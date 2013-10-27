@@ -17,30 +17,30 @@ Item {
         spacing: 25
 
         StyledButton{
-            buttonText.text: qsTr("Regen this Orbiter")
+            buttonText: qsTr("Regen this Orbiter")
             onActivated: manager.regenOrbiter(manager.m_dwPK_Device)
         }
 
         StyledButton{
-            buttonText.text: qsTr("Quick Reload")
+            buttonText: qsTr("Quick Reload")
             onActivated: manager.quickReload()
         }
 
         StyledButton{
-            buttonText.text: qsTr("Change Styles")
+            buttonText: qsTr("Change Styles")
             onActivated: loadComponent("SkinSelector.qml")
         }
 
 
         StyledButton{
-            buttonText.text: buttonText.text === "Media Test" ? "Stop Media" : qsTr("Media Test")
+            buttonText: buttonText === "Media Test" ? "Stop Media" : qsTr("Media Test")
             onActivated:{
-                if(buttonText.text !=="Media Test"){
-                    androidSystem.stopMedia(); buttonText.text = "Media Test"
+                if(buttonText !=="Media Test"){
+                    androidSystem.stopMedia(); buttonText = "Media Test"
                 }else
                 {
                     androidSystem.playMedia("http://www.virginmegastore.me/Library/Music/CD_001214/Tracks/Track1.mp3");
-                    buttonText.text = "Stop Media"
+                    buttonText = "Stop Media"
                 }
             }
         }

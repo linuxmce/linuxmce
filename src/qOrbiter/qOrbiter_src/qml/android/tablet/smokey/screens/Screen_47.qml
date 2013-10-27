@@ -58,7 +58,7 @@ Item {
             width: childrenRect.width
 
             StyledButton{
-              buttonText.text: name
+              buttonText: name
              textSize: 48
               hitArea.onReleased:{ mediatypefilter.setSelectionStatus(name); files_view_screen.state="viewing"}
             }
@@ -67,7 +67,7 @@ Item {
 
     StyledButton{
         id:fileBtn
-        buttonText.text: "Filename Sort"
+        buttonText: "Filename Sort"
         height: childrenRect.height+10
        textSize:scaleY(4)
         anchors.top: typeSelection.bottom

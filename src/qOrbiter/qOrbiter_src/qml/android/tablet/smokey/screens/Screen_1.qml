@@ -28,7 +28,7 @@ Item {
                 width: childrenRect.width
                 StyledButton{
                     id:button
-                    buttonText.text: title
+                    buttonText: title
                     textSize: 38
                     hitArea.onReleased: manager.execGrp(params)
                 }

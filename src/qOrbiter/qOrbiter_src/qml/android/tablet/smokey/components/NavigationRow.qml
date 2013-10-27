@@ -30,26 +30,26 @@ Row{
     }
 
     StyledButton{
-        buttonText.text:"Advanced"
+        buttonText:"Advanced"
         opacity: manager.currentScreen === "Screen_1.qml" ? 1 : 0
         onActivated: manager.gotoQScreen("Screen_44.qml")
     }
 
     StyledButton {
         id: exit_label
-        buttonText.text: qsTr("Exit")
+        buttonText: qsTr("Exit")
         hitArea.onReleased: manager.exitApp()
         opacity:manager.currentScreen ==="Screen_1.qml" ? 1 : 0
     }
     StyledButton {
         id: home_label
-        buttonText.text: qsTr("Home")
+        buttonText: qsTr("Home")
         hitArea.onReleased: manager.gotoQScreen("Screen_1.qml")
         opacity: manager.currentScreen !=="Screen_1.qml" ? 1 : 0
     }
     StyledButton{
         id:media_goback
-        buttonText.text: "Back"
+        buttonText: "Back"
         hitArea.onReleased:{
             manager.goBackGrid();
 

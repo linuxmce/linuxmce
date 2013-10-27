@@ -11,7 +11,7 @@ ListView{
     anchors.verticalCenter: parent.verticalCenter
     property string currentModelName:""
     delegate: StyledButton{
-        buttonText.text: m_description
+        buttonText: m_description
         onActivated: {
             floorplan_devices.clearAllSelections()
             floorplan_devices.setCurrentPage(m_page)

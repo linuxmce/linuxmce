@@ -31,7 +31,7 @@ Item{
         anchors.leftMargin: 50
 
         StyledButton{
-            buttonText.text: qsTr("Display On")
+            buttonText: qsTr("Display On")
             height: 120
             width: 200
             handler:PowerToggleHandler{mode:1}
@@ -39,7 +39,7 @@ Item{
         }
 
         StyledButton{
-            buttonText.text: qsTr("Display Off")
+            buttonText: qsTr("Display Off")
             height: 120
             width: 200
             handler:PowerToggleHandler{mode:0}
@@ -55,14 +55,14 @@ Item{
         spacing:scaleX(10)
         height: 140
         StyledButton{
-            buttonText.text: qsTr("Turn Off MD")
+            buttonText: qsTr("Turn Off MD")
             height: 120
             width: 200
 //            handler:PowerToggleHandler{mode:0}
 //            useHandler: true
         }
         StyledButton{
-            buttonText.text: qsTr("Turn On MD")
+            buttonText: qsTr("Turn On MD")
             height: 120
             width: 200
 //            handler:PowerToggleHandler{mode:0}

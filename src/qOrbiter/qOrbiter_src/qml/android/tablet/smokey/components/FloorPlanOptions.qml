@@ -9,11 +9,11 @@ Item{
         anchors.fill: parent
         spacing:scaleX(10)
         StyledButton{
-            buttonText.text: "List"
+            buttonText: "List"
             hitArea.onReleased: pageLoader.item.state="list"
         }
         StyledButton{
-            buttonText.text: "Image"
+            buttonText: "Image"
              hitArea.onReleased: pageLoader.item.state="floorplan"
         }
     }

@@ -34,7 +34,7 @@ Item{
             StyledButton{
                 height: scaleY(16)
                 width: scaleX(18)
-                buttonText.text: username
+                buttonText: username
                 hitArea.onReleased: {
                     manager.setCurrentUser(index+1)
                     info_panel.state="retracted"
