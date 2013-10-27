@@ -31,17 +31,10 @@ Item {
             onActivated: loadComponent("SkinSelector.qml")
         }
 
-
         StyledButton{
             buttonText: buttonText === "Media Test" ? "Stop Media" : qsTr("Media Test")
             onActivated:{
-                if(buttonText !=="Media Test"){
-                    androidSystem.stopMedia(); buttonText = "Media Test"
-                }else
-                {
-                    androidSystem.playMedia("http://www.virginmegastore.me/Library/Music/CD_001214/Tracks/Track1.mp3");
-                    buttonText = "Stop Media"
-                }
+
             }
         }
 
