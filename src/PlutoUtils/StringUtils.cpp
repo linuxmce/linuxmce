@@ -802,6 +802,53 @@ string StringUtils::HourMinute(time_t t,bool b24Hour)
     return acDateTime;
 }
 
+string StringUtils::Hour(time_t t)
+{
+  char acDateTime[100];
+  struct tm tm;
+  
+  localtime_r(&t,&tm);
+  sprintf( acDateTime, "%d", tm.tm_hour);
+  return acDateTime;
+}
+
+string StringUtils::Minute(time_t t)
+{
+  char acDateTime[100];
+  struct tm tm;
+  
+  localtime_r(&t,&tm);	
+  sprintf( acDateTime, "%d", tm.tm_min);
+  return acDateTime;
+}
+
+string StringUtils::DayOfWeek(time_t t)
+{
+  char acDateTime[100];
+  
+  struct tm *tm=localtime(&t);
+  strftime(acDateTime,100,"%a",tm);
+  return acDateTime;
+}
+
+string StringUtils::DayOfMonth(time_t t)
+{
+  char acDateTime[100];
+  
+  struct tm *tm=localtime(&t);
+  strftime(acDateTime,100,"%e",tm);
+  return acDateTime;
+}
+
+string StringUtils::Month(time_t t)
+{
+  char acDateTime[100];
+  
+  struct tm *tm=localtime(&t);
+  strftime(acDateTime,100,"%b",tm);
+  return acDateTime;
+}
+
 string StringUtils::SQLDateTime(time_t t)
 {
     char acDateTime[100];

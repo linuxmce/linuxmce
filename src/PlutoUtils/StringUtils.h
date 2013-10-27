@@ -222,6 +222,13 @@ namespace StringUtils
     string SQLEscape( string sInput, bool bForLikeStatement = false); /** < convert a escape sequence so that it can be understood by sql */
 	string HourMinute(time_t t=0,bool b24Hour=true); /** < converts a time_t structure into a HH:MM formatted date time */
 
+	/** Time Conversion functions for clock display */
+	string Hour(time_t t);
+	string Minute(time_t t);
+	string DayOfWeek(time_t t);
+	string DayOfMonth(time_t t);
+	string Month(time_t t);
+
 	string GetStringFromConsole(); /** < Let's the user enter a string terminated by a carriage return */
 
 	/** < Convert space delimited string to arguments, like on a command line.  Use " to include spaces
