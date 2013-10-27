@@ -337,6 +337,7 @@ void MediaManager::processSocketdata()
 
         }
     }
+    lastClient->disconnectFromHost();
 }
 
 
@@ -370,9 +371,10 @@ void MediaManager::mountDrive(int device)
 
 void MediaManager::infoConnectHandler()
 {
-    setCurrentStatus("IPC Client Connected::");
+
     if(infoSocket->hasPendingConnections()){
         lastClient=infoSocket->nextPendingConnection();
+        setCurrentStatus("IPC Client Connected::"+lastClient->localAddress().toString());
         if(lastClient->isValid()){
             QObject::connect(lastClient,SIGNAL(readyRead()), this, SLOT(processSocketdata()));
         }

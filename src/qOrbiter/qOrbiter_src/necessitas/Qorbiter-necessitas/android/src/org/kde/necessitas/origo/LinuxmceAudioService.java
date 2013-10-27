@@ -12,6 +12,8 @@ import android.os.IBinder;
 import android.media.MediaPlayer;
 import android.util.Log;
 import java.io.IOException;
+import java.lang.IllegalStateException;
+import java.lang.NullPointerException;
 
 import java.io.ObjectOutputStream;
 
@@ -73,9 +75,9 @@ OnPreparedListener {
 	}
 
 	private void connect(String message){
-		Socket	sender = null;
+	
 		try{
-			sender = new Socket("127.0.0.1", 12001);
+			Socket sender = new Socket("127.0.0.1", 12001);
 
 			ObjectOutputStream objOut = new ObjectOutputStream(sender.getOutputStream());
 			objOut.write(message.getBytes());
@@ -83,13 +85,7 @@ OnPreparedListener {
 		} catch (IOException e) {
 			Log.e(getClass().getName(), e.getMessage());
 		}
-		try {
-			sender.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		sender = null;
+		
 	}
 
 	public class LocalBinder extends Binder {
@@ -168,10 +164,21 @@ OnPreparedListener {
 					} catch (IOException e) {
 						Log.e(TAG, e.getMessage(), e);	
 						mp.reset();
+						mp.release();
 						mp=null;
 					}
 					catch (IllegalArgumentException a) {
 						
+					}
+					catch(IllegalStateException s){
+						mp.reset();
+						mp.release();
+						mp=null;
+					}
+					catch (NullPointerException n){
+						mp.reset();
+						mp.release();
+						mp=null;
 					}
 				}
 			};
@@ -215,10 +222,9 @@ public static void main(String[] args) {
 
 public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
 	Log.e(TAG, "onError--->   what:" + what + "    extra:" + extra);
-
+	mp.reset();
 	mp.release();
-	mp = null;
-
+	mp=null;
 	connect("\n{event:completed}\n");
 	connect("\n{error:mediaplayer error.}\n");
 	return true;
