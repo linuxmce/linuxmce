@@ -31,7 +31,7 @@ sources += \
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo:
+whattodo: all
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -42,21 +42,27 @@ so: qMediaPlayer_Plugin.so
 
 qMediaPlayer_Plugin.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
-	chmod +x post_make.sh
-	./post_make.sh $@
+#	chmod +x post_make.sh
+#	./post_make.sh $@
 		
 qMediaPlayer_Plugin: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
-	./post_make.sh $@
+#	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) qMediaPlayer_Plugin.bin qMediaPlayer_Plugin.so >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) qMediaPlayer_Plugin qMediaPlayer_Plugin.so >/dev/null
 
 package:
 	chmod +x make_package.sh
 	./make_package.sh $(MYNAME) $(VERSION) $(MYDEVTEMPLATEID)
+
+install:
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp qMediaPlayer_Plugin $(DESTDIR)/usr/pluto/bin
 
 include $(ROOT)/PlutoUtils/make.rules
 ifeq (,$(findstring clean, $(MAKECMDGOALS)))

@@ -22,7 +22,7 @@
 #include "Gen_Devices/qMediaPlayer_PluginBase.h"
 //<-dceag-d-e->
 
-#include "DCE/Command_Impl.h"
+//#include "DCE/Command_Impl.h"
 #include "../Media_Plugin/Media_Plugin.h"
 #include "../Media_Plugin/MediaStream.h"
 #include "../Media_Plugin/MediaHandlerBase.h"
@@ -31,11 +31,13 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-	class qMediaPlayer_Plugin : public qMediaPlayer_Plugin_Command
+        class qMediaPlayer_Plugin : public qMediaPlayer_Plugin_Command, public MediaHandlerBase
 	{
 //<-dceag-decl-e->
         pluto_pthread_mutex_t m_QMediaMediaMutex; //protect us from ourselves --holdover from pluto because we are in their ecosystem
-		// Private member variables
+        map<int, int> m_mapDevicesToStreams;
+        int m_iPriority;
+        // Private member variables
 protected:
         class Orbiter_Plugin *m_pOrbiter_Plugin;
 		// Private methods
