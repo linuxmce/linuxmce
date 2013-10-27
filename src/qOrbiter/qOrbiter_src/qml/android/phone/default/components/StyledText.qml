@@ -6,7 +6,7 @@ import "../../../../skins-common/lib/effects"
         property int textWidth
         property bool isBold:false
         property bool isItalic:false
-        property double fontSize:scaleY(2.5)
+        property double fontSize:manager.b_orientation ? scaleY(2.5) : scaleX(2.5)
         id:labelelement
         text: textLabel
         font.bold: isBold

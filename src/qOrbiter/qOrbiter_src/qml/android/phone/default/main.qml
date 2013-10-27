@@ -319,9 +319,15 @@ Item {
         width: parent.width
         color: "black"
         opacity:0
+        Behavior on opacity{
+            PropertyAnimation{
+                duration: 250
+            }
+        }
+
         MouseArea{
             anchors.fill: parent
-            onClicked: {}
+            onClicked: {loadComponent("NullComponent.qml")}
         }
 
     }
@@ -337,7 +343,7 @@ Item {
             if(!source.toString().match("NullComponent.qml")){
                 mask.opacity = .65
                 console.log( source.toString()+ " is loaded")
-            }else  {
+            }else{
                 console.log("hiding mask")
                 mask.opacity =0
             }

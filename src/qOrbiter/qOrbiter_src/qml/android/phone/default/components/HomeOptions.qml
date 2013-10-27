@@ -42,13 +42,13 @@ Item{
             rightMargin: 15
             }
 
-            buttonText.text: qsTr("Power")
+            buttonText: qsTr("Power")
             onActivated: {loadComponent("Power.qml");showOptions = !showOptions}
         }
 
         StyledButton{
             width: leader.width
-            buttonText.text:manager.sPK_User
+            buttonText:manager.sPK_User
             height: buttonH
             anchors{
             left:parent.left
@@ -68,7 +68,7 @@ Item{
             leftMargin: 15
             rightMargin: 15
             }
-            buttonText.text:roomList.currentEA
+            buttonText:roomList.currentEA
             onActivated: {
                 loadComponent("RoomSelector.qml")
                 showOptions = !showOptions
@@ -84,7 +84,7 @@ Item{
             leftMargin: 15
             rightMargin: 15
             }
-            buttonText.text: qsTr("Exit")
+            buttonText: qsTr("Exit")
             onActivated:  {closeOrbiter(); showOptions = !showOptions }
         }
 

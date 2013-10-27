@@ -1,38 +1,36 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
 
-Rectangle {
+Item {
     id:genericlist
-    height: childrenRect.height
-    width: genericview.width
-    border.color: "orange"
-    border.width: 1
-    clip: true
-    color:"transparent"
-    anchors.centerIn: parent
-
-    Image {
-        id: bg
-        source: "../img/bkg.png"
-        anchors.fill: genericview
+    height:scaleY(80)
+    width:manager.appWidth -10
+    property int itemH:manager.appHeight /3 - exit_button.height
+    property int itemW:genericlist.width / 2
+    anchors{
+        horizontalCenter: parent.horizontalCenter
+        verticalCenter: parent.verticalCenter
     }
+
+
+
     Rectangle{
         id:exit_button
-        height: scaleY(8)
-        width: scaleX(61)
-        anchors.top: generic_list.top
-        color: "transparent"
-        Image {
-            id: headerbg
-            source: "../img/widegreyshape.png"
-            anchors.fill: exit_button
-        }
+        height: scaleY(12)
 
-        Text {
+        anchors{
+            left:parent.left
+            right:parent.right
+            top:parent.top
+        }
+        color: "darkgreen"
+
+        StyledText {
             id: exit
             text: qsTr("Exit")
-            font.pixelSize: scaleY(3)
+            font.pixelSize: manager.b_orientation ? scaleY(3) :scaleY(5)
             anchors.centerIn: parent
+            color: "white"
         }
         MouseArea{
             anchors.fill: parent
@@ -40,55 +38,36 @@ Rectangle {
         }
     }
 
-    Component{
-        id:delegatemenu
 
-
-        Item{
+    GridView{
+        id: genericview
+        anchors{
+            top:exit_button.bottom
+            bottom: parent.bottom
+            left:parent.left
+            right:parent.right
+        }
+        model: userList
+        cellHeight:itemH
+        cellWidth: itemW
+        interactive: true
+        clip:true
+        delegate:
+            Item{
             id:generic_item
-            //important!! these need to be set on an imported component otherwise its appears all wrong!
-            height:  container.height
-            width: container.width
+            height:  itemH- 15
+            width: itemW -15
 
-            Rectangle{
-                id:container
-                width: scaleX(61)
-                height: scaleY(15)
-                border.color: "silver"
-                border.width: 1
-                color:"transparent"
-                Text {
-                    id: generic_label
-                    text:  username
-                    color: "white"
-                    font.pixelSize: scaleY(3)
-                    anchors.centerIn: container
-                    font.family: "Droid Sans"
-                }
-
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked: {
-                        setCurrentUser(index+1)
-                        loadComponent("NullComponent.qml")
-                    }
+            StyledButton{
+                anchors.fill: parent
+                buttonText:username
+                onActivated: {
+                    setCurrentUser(index+1)
+                    loadComponent("NullComponent.qml")
                 }
             }
         }
     }
-
-    ListView{
-        id: genericview
-        width: scaleX(61)
-        height: scaleY(50)
-        anchors.top: exit_button.bottom
-        model: userList
-        spacing:1
-        orientation:ListView.Vertical
-        delegate:  delegatemenu
-        interactive: true
-        clip:true
-        // contentHeight: (roomList.count +1) * scaleY(5)
-
-    }
 }
+
+

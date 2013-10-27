@@ -13,23 +13,29 @@ Item {
     Component.onCompleted: forceActiveFocus()
     property int itemH:manager.b_orientation ? homeSelectionLayout.height /3 :homeSelectionLayout.height /3
     property int itemW:manager.b_orientation ? homeSelectionLayout.width/ 2 : homeSelectionLayout.width / 2
-
-
-    focus:true
+focus:true
     Keys.onReleased: {
         event.accepted=true
         switch(event.key){
         case Qt.Key_Back:
-            console.log("show exit")
+            if(showSecondary){
+                showSecondary = !showSecondary
+            }else{
+                console.log("show exit")
+            }
             break;
         case Qt.Key_Menu :
             showOptions = !showOptions
             break;
         case Qt.Key_MediaPrevious:
-            console.log("Media previous")
+            if(secondaryModel.visible){
+                showSecondary = false
+            }
+             console.log("Media previous")
             break;
         default:
             console.log(event.key)
+
             break;
         }
     }
@@ -40,7 +46,7 @@ Item {
 
     Flow{
         id:homeSelectionLayout
- visible: !showSecondary
+        visible: !showSecondary
         anchors{
             top: fs_npButton.bottom
             left:parent.left
@@ -57,7 +63,7 @@ Item {
                 id:btn
                 height: itemH -10
                 width: itemW - 10
-                buttonText.text:name
+                buttonText:name
                 textSize: 38
                 onActivated: {
                     if(manager.currentScreen==="Screen_1.qml"){
@@ -80,11 +86,12 @@ Item {
         }
     }
 
+
     GridView{
         id:secondaryModel
         visible:showSecondary
         property int floorplanType: scenarioPopup.floorplanType = 4
-
+        clip:true
         anchors{
             top: fs_npButton.bottom
             left:parent.left
@@ -92,18 +99,18 @@ Item {
             bottom:ftr.top
             leftMargin: 10
         }
-            cellHeight: itemH-10
-            cellWidth: itemW-10
+        cellHeight: itemH-10
+        cellWidth: itemW-10
         model:scenarioPopup.currentModel
         delegate:
             StyledButton{
             id:gridBtn
             height: itemH -10
             width: itemW - 10
-            buttonText.text:title
+            buttonText:title
             textSize: 38
             onActivated: {
-              manager.execGrp(params)
+                manager.execGrp(params)
                 showSecondary = false
 
             }
@@ -131,11 +138,12 @@ Item {
             opacity: .75
         }
         StyledButton{
-            buttonText.text: manager.sPK_User
+            buttonText: manager.sPK_User
             anchors{
                 left:parent.left
                 verticalCenter: parent.verticalCenter
             }
+            onActivated: {loadComponent("UserSelector.qml");}
 
         }
 

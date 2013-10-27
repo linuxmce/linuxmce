@@ -22,7 +22,7 @@ Item{
 
     property string phil:useHandler ? dceHandler.item.pressed ? "yellow" : "black" :  fly_trap.pressed ? "green": "black"
     property int textSize:28
-    property alias buttonText:button_label
+    property alias buttonText:button_label.text
     property alias hitArea:fly_trap
     property alias handler:dceHandler.sourceComponent
     property bool useHandler:false
