@@ -5,6 +5,7 @@ Item {
     height: parent.height
 
     Component.onCompleted: {
+        manager.cleanupScreenie()
         manager.grabFileImage()
     }
 
@@ -20,18 +21,16 @@ Item {
             bottom:parent.bottom
             left: propertyList.right
             right:parent.right
-
+}
             Image {
                 id: screenshotImage
                 anchors.fill: parent
                 source: ""
-                height: parent.height *.65
                 fillMode: Image.PreserveAspectFit
-                width: parent.width*.50
                 onSourceChanged: console.log("image updated")
             }
         }
-    }
+
 
     Rectangle{
         id:propertyList
@@ -52,6 +51,7 @@ Item {
 
         ListView{
             id:propView
+            spacing:scaleY(2)
             anchors{
                 top:propLabel.bottom
                 left:parent.left
@@ -61,10 +61,15 @@ Item {
             model:screenshotAttributes
             delegate: StyledButton{
                 buttonText: attributeType
+                anchors{
+                    left:parent.left
+                    right:parent.right
+                }
+
                 onActivated: {
                     manager.saveScreenShot(attributeNo)
-                    // manager.cleanupScreenie()
-                    // assignscreenshot.destroy()
+                    manager.cleanupScreenie()
+                    slideOut.source=""
                 }
             }
         }

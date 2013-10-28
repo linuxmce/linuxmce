@@ -6,7 +6,7 @@ Item{
     state:"metadata"
 
     Component.onCompleted: {
-
+        manager.getStoredPlaylist()
         nav_row.navSource="NavOptions5.qml";
         info_panel.state="hidden";
         controlComponent = "Controls_5.qml" //controlsLoader.sourceComponent

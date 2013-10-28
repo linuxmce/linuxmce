@@ -1,11 +1,10 @@
 import QtQuick 1.1
-
+import "../components"
 Item {
     anchors.fill: parent
     StyledText{
         anchors.centerIn: parent
-        text:" Media Bookmarks \n Coming Soon"
-        color:"white"
-        fontSize: scaleY(10)
+        text:"Router is Reloading \n please be patient."
     }
+
 }
