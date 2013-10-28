@@ -4,6 +4,7 @@ Item{
     height: parent.height
     width: parent.width
     clip:true
+    visible:state!=="unloaded"
     anchors.right: metaDataPanel.left
     state:"unloaded"
     MouseArea{
@@ -17,7 +18,36 @@ Item{
         color: "darkgreen"
     }
 
+    Loader{
+        id:slideOut
+        anchors{
+            left:optionContainer.right
+            right:parent.right
+            top:parent.top
+            bottom:parent.bottom
+        }
+        source: ""
+
+        onStatusChanged:{
+            if(slideOut.source ===""){
+                slideOut.anchors.right = undefined
+                slideOut.anchors.right = slideOut.left
+            } else if (slideOut.source !=="" && slideOut.status===Component.Ready){
+                slideOut.anchors.right =undefined
+                slideOut.anchors.right = parent.right
+            }
+        }
+
+        Behavior on anchors{
+            AnchorAnimation{
+                duration: 350
+                easing.type: Easing.InCubic
+            }
+        }
+    }
+
     Rectangle{
+        id:optionContainer
         anchors{
             top:parent.top
             left:parent.left
@@ -37,6 +67,7 @@ Item{
                     right:parent.right
                 }
                 height:scaleY(20)
+                onActivated: slideOut.source = control
             }
         }
     }
@@ -47,25 +78,25 @@ Item{
 
         ListElement{
             name:"Zoom & Aspect"
-            control:"zm"
+            control:"Zoom.qml"
         }
         ListElement{
             name:"Bookmarks"
-            control:"bm"
+            control:"Bookmarks.qml"
         }
 
         ListElement{
             name:"Manage Playlist"
-            control:"pl"
+            control:"PlaylistEditor.qml"
         }
 
         ListElement{
             name:"Thumbnail"
-            control:"tm"
+            control:"Thumbnail.qml"
         }
         ListElement{
             name:"Jog"
-            control:"jg"
+            control:"Jog.qml"
         }
     }
 

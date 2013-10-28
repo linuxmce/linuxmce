@@ -39,3 +39,4 @@ SkinSelector SkinSelector.qml
 SkinListDelegate SkinListDelegate.qml
 TabletFloorplanLayout TabletFloorplanLayout.qml
 TvChannelView TvChannelView.qml
+Zoom Zoom.qml
