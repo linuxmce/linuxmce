@@ -1,36 +1,42 @@
 import QtQuick 1.1
 
-Rectangle{
+Item{
     id:codelistrect
     anchors.fill: parent
 
-    border.width: 2
-    color: "black"
+
+    Rectangle{
+        id:labelHeader
+        width: parent.width
+        height: scaleY(8)
+        anchors.top:parent.top
+     //   anchors.topMargin: 10
+        color:"black"
+        StyledText{
+            text:"Zoom & Aspect"
+            anchors.centerIn: parent
+            fontSize: scaleY(8)
+        }
+    }
 
     Column{
         id:smallzoom
         width: manager.appWidth * .20
 
-        anchors.top:parent.top
+        anchors.top:labelHeader.bottom
         anchors.left:parent.left
         anchors.leftMargin: scaleX(15)
         anchors.bottom:parent.bottom
-
         spacing:scaleY(2)
 
-
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "-7%"
-            MouseArea{
-                anchors.fill: parent
-                onClicked:manager.setZoomLevel("-7")
-            }
+            onActivated: manager.setZoomLevel("-7")
+
         }
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "-5%"
             MouseArea{
                 anchors.fill: parent
@@ -39,8 +45,7 @@ Rectangle{
         }
 
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "-4%"
             MouseArea{
                 anchors.fill: parent
@@ -48,8 +53,7 @@ Rectangle{
             }
         }
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "-2%"
             MouseArea{
                 anchors.fill: parent
@@ -57,8 +61,7 @@ Rectangle{
             }
         }
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "-1%"
             MouseArea{
                 anchors.fill: parent
@@ -67,8 +70,7 @@ Rectangle{
         }
 
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "+1%"
             MouseArea{
                 anchors.fill: parent
@@ -76,8 +78,7 @@ Rectangle{
             }
         }
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "+2%"
             MouseArea{
                 anchors.fill: parent
@@ -86,8 +87,7 @@ Rectangle{
         }
 
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "+4%"
             MouseArea{
                 anchors.fill: parent
@@ -95,8 +95,7 @@ Rectangle{
             }
         }
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "+5%"
             MouseArea{
                 anchors.fill: parent
@@ -104,8 +103,7 @@ Rectangle{
             }
         }
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "+7%"
             MouseArea{
                 anchors.fill: parent
@@ -118,15 +116,14 @@ Rectangle{
         id:largezoom
         anchors{
             horizontalCenter: parent.horizontalCenter
-            top: parent.top
+            top: labelHeader.bottom
             bottom: parent.bottom
         }
         width: manager.appWidth * .20
         spacing:scaleY(2)
 
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "90%"
             MouseArea{
                 anchors.fill: parent
@@ -135,8 +132,7 @@ Rectangle{
         }
 
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "95%"
             MouseArea{
                 anchors.fill: parent
@@ -144,8 +140,7 @@ Rectangle{
             }
         }
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "100%"
             MouseArea{
                 anchors.fill: parent
@@ -153,8 +148,7 @@ Rectangle{
             }
         }
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "105%"
             MouseArea{
                 anchors.fill: parent
@@ -163,8 +157,7 @@ Rectangle{
         }
 
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "110%"
             MouseArea{
                 anchors.fill: parent
@@ -172,8 +165,7 @@ Rectangle{
             }
         }
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "115%"
             MouseArea{
                 anchors.fill: parent
@@ -182,8 +174,7 @@ Rectangle{
         }
 
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "120%"
             MouseArea{
                 anchors.fill: parent
@@ -191,8 +182,7 @@ Rectangle{
             }
         }
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "125%"
             MouseArea{
                 anchors.fill: parent
@@ -200,8 +190,7 @@ Rectangle{
             }
         }
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "130%"
             MouseArea{
                 anchors.fill: parent
@@ -216,24 +205,22 @@ Rectangle{
         anchors{
             right:parent.right
             rightMargin: scaleX(15)
-            top: parent.top
+            top: labelHeader.bottom
             bottom: parent.bottom
         }
         width: manager.appWidth * .20
         spacing:scaleY(2)
 
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
             buttonText: "Auto"
+           textSize:scaleY(8)
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setAspectRatio("auto")
             }
         }
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "1:1"
             MouseArea{
                 anchors.fill: parent
@@ -242,8 +229,7 @@ Rectangle{
         }
 
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "4:3"
             MouseArea{
                 anchors.fill: parent
@@ -252,8 +238,7 @@ Rectangle{
         }
 
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "16:9"
             MouseArea{
                 anchors.fill: parent
@@ -261,8 +246,7 @@ Rectangle{
             }
         }
         StyledButton{
-            height: scaleY(4)
-            width: scaleX(9)
+
             buttonText: "2.11:1"
             MouseArea{
                 anchors.fill: parent

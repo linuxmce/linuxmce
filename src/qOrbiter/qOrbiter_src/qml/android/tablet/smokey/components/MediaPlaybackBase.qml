@@ -40,7 +40,6 @@ Item{
         width: parent.width
         clip:true
 
-
         NowPlayingImage{
             id:npImage
             anchors.top:parent.top
@@ -52,12 +51,10 @@ Item{
             source: metadataComponent
             anchors.right: metaDataPanel.right
             anchors.top: npImage.top
-
         }
 
         Loader{
             id:mediaScrollerTarget
-
         }
 
         Loader{
@@ -85,7 +82,6 @@ Item{
         Loader{
             id:playlist
             sourceComponent: PlaylistView{}
-
         }
 
     }
@@ -106,7 +102,6 @@ Item{
             PropertyChanges {
                 target: hiddenDrag
                 x:media_playback_base.x / 2
-
             }
         },
         State {
@@ -120,6 +115,7 @@ Item{
                 target:controlPanel
                 state:"unloaded"
             }
+
         },
         State {
             name: "controls"

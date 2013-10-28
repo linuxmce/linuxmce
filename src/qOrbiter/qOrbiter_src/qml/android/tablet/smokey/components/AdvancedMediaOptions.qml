@@ -15,14 +15,14 @@ Item{
     Rectangle{
         id:fil
         anchors.fill: parent
-        color: "darkgreen"
+        color: "black"
     }
 
     Loader{
         id:slideOut
         anchors{
             left:optionContainer.right
-            right:parent.right
+            right:optionContainer.right
             top:parent.top
             bottom:parent.bottom
         }
@@ -31,7 +31,7 @@ Item{
         onStatusChanged:{
             if(slideOut.source ===""){
                 slideOut.anchors.right = undefined
-                slideOut.anchors.right = slideOut.left
+                slideOut.anchors.right = optionContainer.right
             } else if (slideOut.source !=="" && slideOut.status===Component.Ready){
                 slideOut.anchors.right =undefined
                 slideOut.anchors.right = parent.right
@@ -113,7 +113,7 @@ Item{
             name: "loaded"
             PropertyChanges {
                 target: fil
-                opacity:1
+                opacity:.85
             }
         }
     ]
