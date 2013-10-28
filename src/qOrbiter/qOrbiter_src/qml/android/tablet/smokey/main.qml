@@ -25,8 +25,6 @@ Item {
         onTriggered: {}
     }
 
-
-
     Rectangle{
         id:canary
         height: 1

@@ -6,6 +6,7 @@ FileDetails_5 FileDetails_5.qml
 FileDetails_4 FileDetails_4.qml
 FileDetails_21 FileDetails_21.qml
 FpSprite FpSprite.qml
+AdvancedMediaOptions AdvancedMediaOptions.qml
 GenericAttributeSelector GenericAttributeSelector.qml
 GenericFileDetails GenericFileDetails.qml
 HomeScreenContent HomeScreenContent.qml

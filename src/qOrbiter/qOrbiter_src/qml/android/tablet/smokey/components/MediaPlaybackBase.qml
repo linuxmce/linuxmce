@@ -29,25 +29,8 @@ Item{
         id:now_playing_image_container
     }
 
-    Item{
-        id:controlPanel
-        height: parent.height
-        width: parent.width
-        clip:true
-        anchors.right: metaDataPanel.left
-
-        StyledText{
-            id:ct
-            text:"Controls go here!"
-            anchors.centerIn: parent
-            fontSize: 48
-            color:"white"
-        }
-
-        MouseArea{
-            anchors.fill: parent
-            onReleased: media_playback_base.state="metadata"
-        }
+    AdvancedMediaOptions {
+        id: controlPanel
     }
 
 
@@ -115,6 +98,10 @@ Item{
                 anchors.right: undefined
                 anchors.left: media_playback_base.left
             }
+            PropertyChanges{
+                target:controlPanel
+                state:"unloaded"
+            }
 
             PropertyChanges {
                 target: hiddenDrag
@@ -129,6 +116,10 @@ Item{
                 anchors.left: undefined
                 anchors.right:media_playback_base.left
             }
+            PropertyChanges{
+                target:controlPanel
+                state:"unloaded"
+            }
         },
         State {
             name: "controls"
@@ -136,6 +127,10 @@ Item{
                 target: metaDataPanel
                 anchors.right: undefined
                 anchors.left: media_playback_base.right
+            }
+            PropertyChanges{
+                target:controlPanel
+                state:"loaded"
             }
 
         }
