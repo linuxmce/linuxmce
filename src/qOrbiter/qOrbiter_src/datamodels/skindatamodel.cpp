@@ -53,8 +53,9 @@ QVariant SkinDataModel::data(const QModelIndex &index, int role) const
 }
 
 SkinDataModel::~SkinDataModel() {
+     clear();
     delete m_prototype;
-    clear();
+
 }
 
 void SkinDataModel::appendRow(SkinDataItem *item)

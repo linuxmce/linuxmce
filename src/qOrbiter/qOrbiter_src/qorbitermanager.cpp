@@ -1380,6 +1380,7 @@ void qorbiterManager::setMediaDevices(QNetworkReply *d)
 
 bool qorbiterManager::loadSkins(QUrl base)
 {
+
     emit skinMessage("Local Skins path" +base.toString());
 
 
@@ -1452,8 +1453,8 @@ void qorbiterManager::showUI(bool b)
 
     if( b_orbiterReady && b_skinReady )
     {
-        setActiveSkin(currentSkin);
 
+        setActiveSkin(currentSkin);
     }
     else
     {
