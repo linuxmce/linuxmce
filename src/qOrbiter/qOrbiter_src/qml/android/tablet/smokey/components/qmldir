@@ -40,3 +40,6 @@ SkinListDelegate SkinListDelegate.qml
 TabletFloorplanLayout TabletFloorplanLayout.qml
 TvChannelView TvChannelView.qml
 Zoom Zoom.qml
+PlaylistEditor PlaylistEditor.qml
+Bookmarks Bookmarks.qml
+Jog Jog.qml

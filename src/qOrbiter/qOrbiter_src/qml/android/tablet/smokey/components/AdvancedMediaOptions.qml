@@ -84,6 +84,10 @@ Item{
             name:"Bookmarks"
             control:"Bookmarks.qml"
         }
+        ListElement{
+            name:"Resend Command"
+            control:"Resend.qml"
+        }
 
         ListElement{
             name:"Manage Playlist"
