@@ -828,6 +828,7 @@ bool qMediaPlayer_Plugin::ConfirmSourceIsADestination(string &sMRL, QMediaStream
         }
     return false;
     }
+
 }
 
 
