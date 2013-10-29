@@ -129,7 +129,7 @@ void qMediaPlayer_Plugin::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_I
 void qMediaPlayer_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
-	sCMD_Result = "UNKNOWN COMMAND";
+    sCMD_Result = "FOOOBAAAAAR";
 }
 
 //<-dceag-sample-b->
@@ -244,7 +244,7 @@ MediaStream *qMediaPlayer_Plugin::CreateMediaStream(MediaHandlerInfo *pMediaHand
     }
 
     if ( pMediaDevice != NULL  && // test the media device only if it set
-         pMediaDevice->m_pDeviceData_Router->m_dwPK_DeviceTemplate != DEVICETEMPLATE_qMediaPlayer_Plugin_CONST &&
+         pMediaDevice->m_pDeviceData_Router->m_dwPK_DeviceTemplate != DEVICETEMPLATE_qMediaPlayer_CONST &&
          pMediaDevice->m_pDeviceData_Router->m_dwPK_DeviceTemplate != DEVICETEMPLATE_SqueezeBox_Player_CONST )
     {
         pMediaDevice_PassedIn = pMediaDevice;
@@ -749,7 +749,43 @@ MediaDevice *qMediaPlayer_Plugin::FindMediaDeviceForEntertainArea(EntertainArea 
 
 bool qMediaPlayer_Plugin::MenuOnScreen(Socket *pSocket, Message *pMessage, DeviceData_Base *pDeviceFrom, DeviceData_Base *pDeviceTo)
 {
+    PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
 
+    /** Confirm this is from one of ours */
+    if( !pDeviceFrom || pDeviceFrom->m_dwPK_DeviceTemplate != DEVICETEMPLATE_Xine_Player_CONST )
+        return false; /** Some other media player. We only know xine's menu handling */
+
+    int StreamID = atoi( pMessage->m_mapParameters[EVENTPARAMETER_Stream_ID_CONST].c_str( ) );
+    bool bOnOff = pMessage->m_mapParameters[EVENTPARAMETER_OnOff_CONST]=="1";
+
+    /** Find the stream */
+    XineMediaStream *pXineMediaStream = NULL;
+    MediaStream *pMediaStream = m_pMedia_Plugin->m_mapMediaStream_Find( StreamID,pMessage->m_dwPK_Device_From );
+    if( !pMediaStream || (pXineMediaStream = ConvertToXineMediaStream(pMediaStream, "Xine_Plugin::MenuOnScreen(): ")) == NULL )
+        return false;
+
+    pXineMediaStream->m_bUseAltScreens=bOnOff;
+
+    LoggerWrapper::GetInstance()->Write( LV_STATUS, "MediaStream %p with id %d and type %d reached an OnScreen Menu.", pXineMediaStream, pXineMediaStream->m_iStreamID_get( ), pXineMediaStream->m_iPK_MediaType );
+    LoggerWrapper::GetInstance()->Write( LV_STATUS, "MediaStream m_mapEntertainArea.size( ) %d", pXineMediaStream->m_mapEntertainArea.size( ) );
+
+
+    /** We're going to send a message to all the orbiters in this area so they know what the remote is,
+    and we will send all bound remotes to the new screen */
+    for( MapEntertainArea::iterator itEA = pXineMediaStream->m_mapEntertainArea.begin( );itEA != pXineMediaStream->m_mapEntertainArea.end( );++itEA )
+    {
+        EntertainArea *pEntertainArea = ( *itEA ).second;
+        LoggerWrapper::GetInstance()->Write( LV_STATUS, "Looking into the ent area (%p) with id %d and %d remotes", pEntertainArea, pEntertainArea->m_iPK_EntertainArea, (int) pEntertainArea->m_mapBoundRemote.size() );
+        for(map<int,OH_Orbiter *>::iterator it=m_pOrbiter_Plugin->m_mapOH_Orbiter.begin();it!=m_pOrbiter_Plugin->m_mapOH_Orbiter.end();++it)
+        {
+            OH_Orbiter *pOH_Orbiter = (*it).second;
+            if( pOH_Orbiter->m_pEntertainArea!=pEntertainArea )
+                continue;
+            LoggerWrapper::GetInstance()->Write(LV_STATUS, "Processing remote: for orbiter: %d", pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device);
+            bool bBound = pEntertainArea->m_mapBoundRemote.find(pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device)!=pEntertainArea->m_mapBoundRemote.end();
+            pXineMediaStream->SetNowPlaying(pOH_Orbiter,false,bBound);
+        }
+    }
 
     return false;
 }
@@ -775,6 +811,21 @@ QMediaStream *qMediaPlayer_Plugin::ConvertToQtMediaStream(MediaStream *pMediaStr
 
 bool qMediaPlayer_Plugin::ConfirmSourceIsADestination(string &sMRL, QMediaStream *pQMediaStream, int PK_Device_Drive)
 {
+    MediaDevice *pQMediaPlayer = NULL; // Any qMediaplayer that's in the destination
+    for( MapEntertainArea::iterator itEA = pQMediaStream->m_mapEntertainArea.begin( );itEA != pQMediaStream->m_mapEntertainArea.end( );++itEA )
+    {
+        EntertainArea *pEntertainArea = ( *itEA ).second;
+        ListMediaDevice *pListMediaDevice = pEntertainArea->m_mapMediaDeviceByTemplate_Find(DEVICETEMPLATE_qMediaPlayer_CONST);
+        if( !pListMediaDevice )
+            continue;
+        for(ListMediaDevice::iterator it=pListMediaDevice->begin();it!=pListMediaDevice->end();++it)
+        {
+            MediaDevice *pMediaDevice = *it;
+            if( pQMediaStream->m_pMediaDevice_Source->IsInEntertainArea( pEntertainArea ) )
+                return true; // We're good.  The source is one of the destinations
+            if( !pQMediaPlayer )
+                pQMediaPlayer = pMediaDevice;
+        }
     return false;
 }
 
