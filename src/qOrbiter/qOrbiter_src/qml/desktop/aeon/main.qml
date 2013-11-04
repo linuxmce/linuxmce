@@ -1,4 +1,7 @@
 import QtQuick 1.1
+import Qt.labs.shaders 1.0
+import AudioVisual 1.0
+import DceScreenSaver 1.0
 import "components"
 //import "../js/ComponentLoader.js" as MyJs
 import "js/dateFormat.js" as DateFunctions
@@ -79,13 +82,7 @@ Item {
         id: aeonSettings
         source: "../aeon/fonts/aeon_settings.ttf"
     }
-    Timer { // Simulate a simple PhotoScreensaver
-        id: ssTimer;
-        interval: zoomTime;
-        running: false;
-        repeat: true
-        onTriggered: changeBGimage()
-    }
+
     Rectangle {
         id:stage
 
@@ -93,12 +90,28 @@ Item {
         signal swapStyle()
         height: manager.appHeight
         width: manager.appWidth
-        opacity: 1
+        color:"transparent"
 
-        ScreenSaver{
-            anchors.fill: parent
-            id:ss
-         }
+        DceScreenSaver{
+            id:glScreenSaver
+            height: manager.appHeight
+            width: manager.appWidth
+            focus:true
+            interval:8000
+            anchors.centerIn: parent
+            requestUrl:manager.m_ipAddress
+            Connections{
+                target:manager
+                onScreenSaverImagesReady:glScreenSaver.setImageList(manager.screensaverImages)
+            }
+            MouseArea{
+                anchors.fill: parent
+                hoverEnabled: true
+                onPressed:if(glScreenSaver.activeFocus) hideUI()
+
+            }
+
+        }
         Loader {
             id:pageLoader
             anchors.fill: parent

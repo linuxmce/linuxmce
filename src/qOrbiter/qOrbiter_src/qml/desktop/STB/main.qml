@@ -10,6 +10,7 @@
 import QtQuick 1.1
 import Qt.labs.shaders 1.0
 import AudioVisual 1.0
+import DceScreenSaver 1.0
 import "../../skins-common/lib/components"
 import "../../skins-common/lib/handlers"
 import "components"
@@ -303,31 +304,28 @@ Item {
         ftr.currentItem = -1
     }
 
-    Item{
-        id:mini_screen_saver
-        anchors.fill: qmlroot
 
-        Timer{
-            id:mini_ss_timer
-            interval:60000
-            running: screensaver.active
-            triggeredOnStart: true
-            onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
-            repeat: true
+    DceScreenSaver{
+        id:glScreenSaver
+        height: manager.appHeight
+        width: manager.appWidth
+        focus:true
+        interval:8000
+        anchors.centerIn: parent
+        requestUrl:manager.m_ipAddress
+        Connections{
+            target:manager
+            onScreenSaverImagesReady:glScreenSaver.setImageList(manager.screensaverImages)
         }
-
-        Image{
-            id:mini_screen_saver_image
-            height: mini_screen_saver.height
-            width: mini_screen_saver.width
-              source: "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
-        }
-        Rectangle{
+        MouseArea{
             anchors.fill: parent
-            color:"black"
-            opacity: pageLoader .activeFocus ? .65 : .25
+            hoverEnabled: true
+            onPressed:if(glScreenSaver.activeFocus) hideUI()
+
         }
+
     }
+
     MediaManager{
         id:dceplayer
         anchors.top: parent.top
