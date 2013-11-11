@@ -252,68 +252,68 @@ Rectangle {
 
         }
 
-//        Column{
-//            id:confirmCol
-//            anchors.bottom: parent.bottom
-//            anchors.left: parent.left
-//            height: parent.height *.15
-//            width: parent.width / 3
-//            spacing:5
+        Column{
+            id:confirmCol
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            height: parent.height *.15
+            width: parent.width / 3
+            spacing:5
 
-//                Text {
-//                    id: selectedUser
-//                    text: qsTr("Please Select a Default User")
-//                    font.bold: true
-//                    color: deYork
-//                    font.pixelSize: 14
-//                    font.family: myFont.name
-//                    x:0
-//                    onTextChanged: {
-//                        x = -50
-//                        userSelected.restart()
-//                    }
-//                }
-//                ParallelAnimation{
-//                    id:userSelected
+                Text {
+                    id: selectedUser
+                    text: qsTr("Please Select a Default User")
+                    font.bold: true
+                    color: deYork
+                    font.pixelSize: 14
+                    font.family: myFont.name
+                    x:0
+                    onTextChanged: {
+                        x = -50
+                        userSelected.restart()
+                    }
+                }
+                ParallelAnimation{
+                    id:userSelected
 
-//                    PropertyAnimation{
-//                        target: selectedUser
-//                        property:"x"
-//                        to:confirmCol.width
-//                        duration: 2500
-//                    }
+                    PropertyAnimation{
+                        target: selectedUser
+                        property:"x"
+                        to:confirmCol.width
+                        duration: 2500
+                    }
 
-//                    PropertyAnimation{
-//                        target:selectedUser
-//                        property: "opacity"
-//                        from:0
-//                        to:1
-//                        duration:1000
-//                    }
-//                }
-
-
-//                Text {
-//                    id: selectedRoom
-//                    text: qsTr("Please Select A Default Room")
-//                    font.family: myFont.name
-//                }
+                    PropertyAnimation{
+                        target:selectedUser
+                        property: "opacity"
+                        from:0
+                        to:1
+                        duration:1000
+                    }
+                }
 
 
+                Text {
+                    id: selectedRoom
+                    text: qsTr("Please Select A Default Room")
+                    font.family: myFont.name
+                }
 
-//                Text{
-//                    id:selectedLang
-//                    text:qsTr("Please Select a Default Language")
-//                    font.family: myFont.name
-//                }
 
 
-//                Text {
-//                    id: selectedResolution
-//                    text:"Size "+newOrbiterSetupContainer.height
-//                    font.family: myFont.name
-//                }
-//        }
+                Text{
+                    id:selectedLang
+                    text:qsTr("Please Select a Default Language")
+                    font.family: myFont.name
+                }
+
+
+                Text {
+                    id: selectedResolution
+                    text:"Size "+newOrbiterSetupContainer.height
+                    font.family: myFont.name
+                }
+        }
 
     }
 }

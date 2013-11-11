@@ -194,7 +194,7 @@ signals:
     void checkRes();
     void showList();
     void showExternal();
-    void setupNewOrbiter();
+    void beginSetupNewOrbiter();
     void reloadStatusChanged();
     void newOrbiterData(int u, int r, int s, int l, int h, int w);
     void pageChanged();

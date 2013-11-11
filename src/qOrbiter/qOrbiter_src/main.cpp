@@ -52,7 +52,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <QtGlobal>
 #ifdef QT5
 #include <QtWidgets/QApplication>
-#include <QQmlContext>
+#include <QtQuick/QQmlContext>
 #include <QQmlEngine>
 #include <QtQuick/QQuickView>
 #include <QtCore/QThread>
@@ -489,8 +489,8 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(updateDceScreenSaverTimeout(int)), &pqOrbiter, SLOT(updateScreenSaverTimeout(int)));
 
         QObject::connect(&pqOrbiter, SIGNAL(setMyIp(QString)), &w, SLOT(setInternalIp(QString)),Qt::QueuedConnection);
-        QObject::connect(&orbiterWin, SIGNAL(setupNewOrbiter()), &pqOrbiter,SLOT(populateSetupInformation()));
-        QObject::connect(&pqOrbiter,SIGNAL(promptResponse(int,QList<QObject*>)), &orbiterWin, SLOT(displayPromptResponse(int, QList<QObject*> )));
+        QObject::connect(&orbiterWin, SIGNAL(beginSetupNewOrbiter()), &pqOrbiter,SLOT(populateSetupInformation()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(promptResponse(int,QList<QObject*>)), &orbiterWin, SLOT(displayPromptResponse(int, QList<QObject*> )), Qt::QueuedConnection);
         QObject::connect(&orbiterWin, SIGNAL(newOrbiterData(int , int , int , int , int , int )), &pqOrbiter, SLOT(setOrbiterSetupVars(int,int,int,int,int,int)), Qt::QueuedConnection);
 
         /*CHild Devices*/

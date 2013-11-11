@@ -28,9 +28,6 @@
 #include <QTime>
 #include <QTcpServer>
 
-
-
-
 using namespace DCE;
 using namespace Qt;
 /*!
@@ -76,6 +73,7 @@ public:
     bool mediaPlaying;
     bool hasError;
     QString lastError;
+    QString lastTick;
 
     //--------------------------
     qreal volume;

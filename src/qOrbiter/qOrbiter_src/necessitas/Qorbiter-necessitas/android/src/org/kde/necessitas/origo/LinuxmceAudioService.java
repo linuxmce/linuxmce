@@ -130,9 +130,8 @@ OnPreparedListener {
 		try {
 			//      final String path = mPath.getText().toString();
 			final String path = url; //"http://192.168.80.1/lmce-admin/qOrbiterGenerator.php?id=7802";
-			Log.d(TAG, "Playing::" + path);
 
-
+                        Log.d(TAG, "Playing::" + path);
 			if(mp==null){
 				mp= new MediaPlayer();
 				mp.reset();

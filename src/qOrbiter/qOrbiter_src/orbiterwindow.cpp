@@ -345,7 +345,8 @@ void orbiterWindow::setOrbiterState(bool state)
 
 void orbiterWindow::showSetup()
 {
-    emit setupNewOrbiter();
+    emit beginSetupNewOrbiter();
+    emit showList();
 }
 
 void orbiterWindow::setConnectionState(bool b)
@@ -383,6 +384,7 @@ void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)
         roomList = pList;
         mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
     }
+   emit showList();
 }
 
 void orbiterWindow::setupNewOrbiter(int user, int room, int skin, int lang, int height, int w)

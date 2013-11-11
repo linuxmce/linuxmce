@@ -11,6 +11,7 @@ class DceScreenSaver : public QDeclarativeItem
 {
     Q_OBJECT
     Q_DISABLE_COPY(DceScreenSaver)
+
     Q_PROPERTY(QString requestUrl READ getRequestUrl WRITE setRequestUrl NOTIFY requestUrlChanged)
     Q_PROPERTY(bool active READ getActive WRITE setActive NOTIFY activeChanged)
     Q_PROPERTY(bool running READ getRunning NOTIFY runningChanged)

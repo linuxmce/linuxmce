@@ -1946,13 +1946,36 @@ void DCE::qOrbiter::deinitialize()
 bool qOrbiter::getConfiguration()
 {
 
+    /*------ScreenSaver-----------*/
     QStringList *t = new QStringList(QString::fromStdString(DATA_Get_Timeout().c_str()).split(","));
-
-    int screenSaverTimeout;
     if(!t->isEmpty()){
         QString ik(t->at(0));
         emit screenSaverTimerOutChanged(ik.toInt());
     }
+
+    /*------Skin-------------------*/
+
+
+    /*Screen Size*/
+
+
+    /* Type */
+#ifdef for_desktop
+    //set model here for desktop
+#elif for_ios
+    //set ios label here
+#elif ANDROID
+    //set android label
+#elif for_windows
+    // set windows label
+#elif for_mac
+    //set mac label here
+#else
+    //set unknown
+#endif
+
+    /* Video Support */
+
     return true;
 }
 
@@ -2026,7 +2049,7 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
             emit commandResponseChanged("New Device ID:" +QString::number(t));
             m_dwPK_Device = t ;
             emit commandResponseChanged("setting ea");
-            httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d="+QString::number(t)+"&r="+QString::number(sPK_Room)));
+            httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d="));
             // qDebug() << "Ea url::" <<httpSettingsRequest->url();
             httpSettingsReply = httpOrbiterSettings->get(*httpSettingsRequest);
             QObject::connect(httpSettingsReply, SIGNAL(finished()), this, SLOT(finishSetup()));
@@ -2048,8 +2071,17 @@ void qOrbiter::finishSetup()
     httpSettingsRequest->setUrl(settingsUrl);
     // qDebug() << "Settings url :: " << httpSettingsRequest->url();
     httpSettingsReply = httpOrbiterSettings->get(*httpSettingsRequest);
-    QObject::connect(httpSettingsReply,SIGNAL(finished()), this, SLOT(initialize()));
+    QObject::connect(httpSettingsReply,SIGNAL(finished()), this, SLOT(setupEa())); //server side code should be set to spit out JSON to provide proper replies.
     emit commandResponseChanged("Setup Complete, restarting");
+}
+
+void qOrbiter::setupEa()
+{
+    httpSettingsReply->disconnect(this,SLOT(setupEa()));
+    httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d="));
+    // qDebug() << "Ea url::" <<httpSettingsRequest->url();
+    httpSettingsReply = httpOrbiterSettings->get(*httpSettingsRequest);
+    QObject::connect(httpSettingsReply, SIGNAL(finished()), this, SLOT(initialize()));
 }
 
 void qOrbiter::getMountDevices()
@@ -4791,10 +4823,6 @@ void qOrbiter::CreateChildren()
     emit commandResponseChanged("Finished spawning children!");
 }
 
-qOrbiter::~qOrbiter()
-{
-    this->deleteLater();
-}
 
 
 void qOrbiter::populateSetupInformation()
@@ -5498,9 +5526,6 @@ void qOrbiter::executeMessageSend(QVariantMap outGoing)
         map_params.insert((long)f, a);
     }
 
-
-
-
     int cmd = outGoing["command"].toInt();
     long paramCount = outGoing["count"].toInt();
     //  long deviceTo = outGoing["to"].toInt();
@@ -5535,7 +5560,6 @@ void qOrbiter::executeMessageSend(QVariantMap outGoing)
 
     if(m->m_dwPK_Device_To != -1 && m->m_dwPK_Device_Template != -1 && m->m_dwPK_Device_Category_To !=-1)
         this->m_pPrimaryDeviceCommand->SendMessageToRouter(m);
-
 }
 
 
@@ -5607,8 +5631,8 @@ void qOrbiter::authorizePrivateMedia(int mediaType, QString pin, int user){
     if(SendCommand(checkPin, &pResp) && pResp=="OK"){
         if(valid){
             qDebug() << "Valid";
-       setStringParam(5, QString::number(user));
-       emit mediaAuthChanged(user);
+            setStringParam(5, QString::number(user));
+            emit mediaAuthChanged(user);
         }else{
             emit mediaAuthChanged(-1);
             qDebug() << "invalid";

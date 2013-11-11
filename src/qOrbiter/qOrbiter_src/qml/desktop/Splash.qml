@@ -5,13 +5,17 @@ import QtQuick 1.1
 
 Item {
     id: splashLogic
-    height:appH
-    width:appW
+
+  height: appH
+  width: appW
+
+
     property bool orbiterSetup:false
     property string router_ip: ""
 
     onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true; newOrbiterOptionContainer.visible=true; window.showSetup()}
     onWidthChanged: console.log("detected size change")
+
     Image {
         id: splash
         anchors.centerIn: parent

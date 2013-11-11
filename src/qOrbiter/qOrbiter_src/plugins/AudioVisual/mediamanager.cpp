@@ -32,6 +32,7 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
     deviceNumber = -1;
     timeCodeServer = new QTcpServer();
     flipColors = false;
+    lastTick = "";
 
     setCurrentStatus("Media Manager defaults set, initializing media engines");
 #ifdef QT4
@@ -171,6 +172,7 @@ void MediaManager::startTimeCodeServer(){
 
 void MediaManager::stopTimeCodeServer()
 {
+    lastTick="";
     for(int d = 0; d<clientList.length(); d++){
         QTcpSocket *c = clientList.at(d);
         c->disconnectFromHost();
@@ -343,6 +345,7 @@ void MediaManager::processSocketdata()
 
 void MediaManager::transmit(QString d)
 {
+    lastTick =d;
     QByteArray chunk;
     QDataStream out(&chunk, QIODevice::WriteOnly);
     //out << (quint16)0;
@@ -357,7 +360,6 @@ void MediaManager::transmit(QString d)
             tr->write(chunk);
         }
     }
-
 }
 
 

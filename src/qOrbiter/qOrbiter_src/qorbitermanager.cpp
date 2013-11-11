@@ -507,11 +507,8 @@ void qorbiterManager::refreshUI(QUrl url)
 #else
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
-
-
     qorbiterUIwin->rootContext()->setBaseUrl(url);
     qorbiterUIwin->setSource(url);
-
     emit currentSkinChanged();
 
 }
@@ -937,9 +934,7 @@ void qorbiterManager::swapSkins(QString incSkin)
     qDebug() << tskinModel->rowCount();
 #endif
     checkOrientation(qorbiterUIwin->size());
-    if (tskinModel->rowCount() > 0)
-    {
-
+    if (tskinModel->rowCount() > 0){
         emit skinMessage("Setting Skin to:" +incSkin);
         emit skinMessage("Got it from the model : " + tskinModel->m_baseUrl.toString());
         setImagePath(tskinModel->m_baseUrl.toString()+"/"+incSkin+"/img/");

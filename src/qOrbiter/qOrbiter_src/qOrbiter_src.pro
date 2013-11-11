@@ -239,6 +239,7 @@ linux-rasp-pi-g++{
         DEFINES+=RPI GLENABLED
         DEPLOYMENTFOLDERS += folder_01 folder_02
         QT+= qml
+        QT-=declarative
 QML_IMPORT_PATH=imports
 }
 
@@ -407,8 +408,14 @@ SOURCES += main.cpp \
 
 
 # Please do not modify the following two lines. Required for deployment.
+linux-rasp-pi-g++{
+
+} else {
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
 qtcAddDeployment()
+}
+
+
 
 #    ../../DCE/*.h \
 #    ../../PlutoUtils/*.h \

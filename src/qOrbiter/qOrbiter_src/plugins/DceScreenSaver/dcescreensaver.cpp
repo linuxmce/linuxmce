@@ -33,7 +33,7 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     intervalTimer->setSingleShot(false);
     intervalTimer->stop();
     QObject::connect(intervalTimer, SIGNAL(timeout()), this, SLOT(getNextImage()));
-    qDebug() << "Screensaver ctor";
+
     currentImage.fill(Qt::black);
     fadeAnimation = new QPropertyAnimation(this, "fadeOpacity");
 
@@ -50,7 +50,7 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     QObject::connect(this, SIGNAL(heightChanged()), this, SLOT(forceUpdate()));
     QObject::connect(this, SIGNAL(widthChanged()), this, SLOT(forceUpdate()));
   //  QObject::connect(zoomAnimation, SIGNAL(finished()), this, SLOT(resetPicture()));
-
+ qDebug() << "Screensaver ctor";
 }
 
 DceScreenSaver::~DceScreenSaver()
@@ -95,8 +95,7 @@ void DceScreenSaver::processImageData(QNetworkReply *r)
 
     if(r->bytesAvailable()){
         p = r->readAll();
-    }
-    else{
+    }    else{
         return;
     }
 
@@ -105,14 +104,10 @@ void DceScreenSaver::processImageData(QNetworkReply *r)
 
     if(t.isNull()){
         intervalTimer->start(interval);
-    }
-    else{
+    }else{
         surface =currentImage;
-
         currentImage= t.scaled(width(),height());
-
     }
-
 
     startFadeTimer(2500);
   //  beginZoom();

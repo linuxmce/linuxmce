@@ -60,7 +60,6 @@ Item {
             console.log("NEW ANDROID URL")
             if(androidUrl.length > 4){
                 console.log("URL ok!")
-
                 androidSystem.playMedia(dceplayer.androidUrl)
             }
             else{

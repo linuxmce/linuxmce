@@ -14,7 +14,7 @@ Rectangle {
         onShowList:{
 
             if(existing_orbiters.count === 0){
-                screenChange("NewOrbiterSetup.qml")
+                screenchange("SetupNewOrbiter.qml")
             }
             else{
                 existing_orbiters.state="showing"

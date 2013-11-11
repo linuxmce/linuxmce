@@ -236,7 +236,7 @@ public:
 public:
 		// Constructors/Destructor
         qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject *parent = 0);
-		virtual ~qOrbiter();
+
         //virtual bool GetConfig();
 
 //<-dceag-const-e->
@@ -1608,6 +1608,7 @@ public slots:
     void setCurrentScreen(QString s);
     void setOrbiterSetupVars(int users, int room, int skin, int lang, int height, int width);
     void finishSetup();
+    void setupEa();
     void getMountDevices();
 
     void pingCore();
