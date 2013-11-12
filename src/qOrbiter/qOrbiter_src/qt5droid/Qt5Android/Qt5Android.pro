@@ -22,7 +22,7 @@ CONFIG += thread
 
 
 # define deployment destination and target executable name
-TARGET=qorbiter-$$QT_VERSION
+#TARGET=qorbiter-$$QT_VERSION
         DEFINES+=GLENABLED ANDROID QT5 QANDROID
         QT+= opengl script  widgets network xml
         glmsg= yes
@@ -403,5 +403,7 @@ OTHER_FILES+= \
 
 RESOURCES += \
         ../../skinData.qrc
+
+ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
 

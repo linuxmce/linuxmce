@@ -67,7 +67,7 @@
 
 #ifdef ANDROID
 #include "plugins/AndroidInfo/androidsystem.h"
-#include "androidmediaplayer.h"
+
 #endif
 
 #if GLENABLED
@@ -247,9 +247,7 @@ public:
     bool monitorAvailible;
 
     //------------------------------------------------------playlist classes
-#ifdef __ANDROID__
- androidMediaPlayer *androidPlayer;
-#endif
+
 
 
     //------CUSTOM QML TYPES------------------------------------------------------------------------------------

@@ -52,7 +52,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <QtGlobal>
 #ifdef QT5
 #include <QtWidgets/QApplication>
-#include <QtQuick/QQmlContext>
+#include <QQmlContext>
 #include <QQmlEngine>
 #include <QtQuick/QQuickView>
 #include <QtCore/QThread>
