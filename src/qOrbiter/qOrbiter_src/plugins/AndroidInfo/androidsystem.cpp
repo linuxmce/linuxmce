@@ -51,7 +51,7 @@ AndroidSystem::AndroidSystem(QObject *parent) :
     redHighlight="#CC0000";
     externalStorageLocation = "";
 
-
+#ifndef QT5
     if(m_pvm)
     {
         setStatusMessage("Android Plugin Connected");
@@ -73,8 +73,10 @@ AndroidSystem::AndroidSystem(QObject *parent) :
         setReadyStatus(false);
         setStatusMessage("Android Plugin malfunction. Unable to get env.");
     }
+#endif
 }
 
+#ifndef QT5
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 {
     JNIEnv* env;
@@ -116,9 +118,11 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
     return JNI_VERSION_1_6;
 }
 
+#endif
 
 bool AndroidSystem::findClassIdents()
 {
+#ifndef QT5
     JNIEnv *env;
     if(m_pvm->AttachCurrentThread(&env, NULL)<0){
         qCritical()<<"AttachCurrentThread failed";
@@ -128,11 +132,13 @@ bool AndroidSystem::findClassIdents()
 
     setStatusMessage("Device info Gather complete.");
     m_pvm->DetachCurrentThread();
+#endif
     return true;
 }
 
 bool AndroidSystem::getDisplayInfo()
 {
+#ifndef QT5
     JNIEnv *env;
     if(m_pvm->AttachCurrentThread(&env, NULL)<0){
         qCritical()<<"AttachCurrentThread failed";
@@ -158,6 +164,7 @@ bool AndroidSystem::getDisplayInfo()
 
 
     m_pvm->DetachCurrentThread();
+#endif
     return true;
 
 }
@@ -166,6 +173,7 @@ bool AndroidSystem::getDisplayInfo()
 bool AndroidSystem::updateExternalStorageLocation()
 {
 
+#ifndef QT5
     JNIEnv *env;
     if(m_pvm->AttachCurrentThread(&env, NULL)<0){
         qCritical()<<"AttachCurrentThread failed";
@@ -211,12 +219,14 @@ bool AndroidSystem::updateExternalStorageLocation()
 
     qCritical("Storage Search Complete");
     m_pvm->DetachCurrentThread();
+#endif
     return true;
 
 }
 
 bool AndroidSystem::updateBuildInformation()
 {
+#ifndef QT5
     JNIEnv *env;
     if(m_pvm->AttachCurrentThread(&env, NULL)<0){
         qCritical()<<"AttachCurrentThread failed";
@@ -260,12 +270,14 @@ bool AndroidSystem::updateBuildInformation()
 
 
     m_pvm->DetachCurrentThread();
+#endif
     return true;
 
 }
 
 bool AndroidSystem::playMedia(QString url)
 {
+#ifndef QT5
     JNIEnv* env;
     if (m_pvm->AttachCurrentThread(&env, NULL)<0)
     {
@@ -292,12 +304,17 @@ bool AndroidSystem::playMedia(QString url)
     jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_MediaControlMethod,jcom, mSeek, p, jstr);
     env->DeleteLocalRef(jstr);
     env->DeleteLocalRef(jcom);
-    m_pvm->DetachCurrentThread();
+    m_pvm->DetachCurrentThread();    
     return true;
+#else
+    return false;
+#endif
+
 }
 
 bool AndroidSystem::stopMedia()
 {
+#ifndef QT5
     JNIEnv* env;
     if (m_pvm->AttachCurrentThread(&env, NULL)<0)
     {
@@ -326,10 +343,14 @@ bool AndroidSystem::stopMedia()
     env->DeleteLocalRef(jcom);
     m_pvm->DetachCurrentThread();
     return true;
+#else
+return false;
+#endif
 }
 
 bool AndroidSystem::startAudioService(long addr)
 {
+#ifndef QT5
     JNIEnv* env;
     if (m_pvm->AttachCurrentThread(&env, NULL)<0)
     {
@@ -340,6 +361,9 @@ bool AndroidSystem::startAudioService(long addr)
     jint cbAddr = addr;
     m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field, cbAddr));
     env->CallBooleanMethod(m_qtActivity, s_qtActivity_StartMethod);
-
+    return true;
+#else
+    return false;
+#endif
 
 }
