@@ -48,7 +48,16 @@ function mainScreenSaver($output,$mediadbADO,$dbADO) {
 		     }
 		   }
 		}			
-
+		function scrollToImage(element) {
+		   	 var fileID = element.name.substring(element.name.indexOf("_")+1);
+//			 alert($("row_"+fileID).cumulativeOffset().top + " - " + document.viewport.getScrollOffsets().top);
+//			 alert(($("row_"+fileID).cumulativeOffset().top+$("row_"+fileID).getHeight()) + " " + (document.viewport.getScrollOffsets().top+window.parent.document.viewport.getHeight()));
+			 if ($("row_"+fileID).cumulativeOffset().top+$("row_"+fileID).getHeight() > document.viewport.getScrollOffsets().top+window.parent.document.viewport.getHeight()) {
+			     $("row_"+fileID).scrollIntoView(false);
+			 } else if ($("row_"+fileID).cumulativeOffset().top < document.viewport.getScrollOffsets().top) {
+			     $("row_"+fileID).scrollIntoView();
+			 }
+		}
 		function updateScreenSaver(event) {
 		         var element = this;
 			 element.disabled = true;
@@ -147,6 +156,7 @@ function mainScreenSaver($output,$mediadbADO,$dbADO) {
 			 if (e.shiftKey) {
 	 			 var id = el.id.substring(8);
 	 			 var fileID = id.substring(0, id.indexOf("_"));
+				 $("kw_"+fileID).focus();
 				 var attrID = id.substring(id.indexOf("_")+1);
 			         new Ajax.Request("index.php?section=mainScreenSaver", {
 				     method:"post",
@@ -161,12 +171,64 @@ function mainScreenSaver($output,$mediadbADO,$dbADO) {
 				});
 			}
 		}
-
+		function changeOrientation(event) {
+		         var el = this;
+			 var fileID = el.name.substring(12);
+			 var imgEl = $("img_"+fileID);
+			 var orient = "1";
+			 var height = imgEl.height;
+			 var width = imgEl.width;
+			 if (imgEl.className != "" && imgEl.className.substring(0,7) == "orient_") {
+			      orient = imgEl.className.substring(7);
+			 }
+			 if (event.keyCode == Event.KEY_RIGHT || event.keyCode == Event.KEY_LEFT) {
+			     if (event.keyCode == Event.KEY_RIGHT) {
+			         if (orient == "1") {
+			             orient = "6";
+				     height = width;
+		 	     	 } else if (orient == "6") {
+			             orient = 3;
+		 	         } else if (orient == "3") {
+			             orient = 8;
+				     height = width;
+		 	         } else if (orient == "8") {
+			             orient = 1;
+			         }
+			     } else if (event.keyCode == Event.KEY_LEFT) {
+			         if (orient == "1") {
+			             orient = "8";
+				     height = width;
+		 	         } else if (orient == "8") {
+			             orient = 3;
+		 	         } else if (orient == "3") {
+			             orient = 6;
+				     height = width;
+		 	         } else if (orient == "6") {
+			             orient = 1;
+			         }
+		             }
+		             new Ajax.Request("index.php?section=mainScreenSaver", {
+			     method:"post",
+			     parameters:{section: "mainScreenSaver", action:"ajax", changeOrientation: orient, pkFile: fileID },
+			     onSuccess: function(transport) {
+			  	  var response = transport.responseText || "";
+				  var o = eval("("+response+")");
+				  if (o.result) {
+				  	 el.value = orient;
+			 		 imgEl.className = "orient_"+orient;
+			 		 $("imgcell_"+fileID).height = height+"px";
+				  }
+			     }
+			 });
+		    }
+		}
 		document.observe("dom:loaded", function() {
 		        $$(\'input[type="checkbox"]\').invoke("observe", "click", updateScreenSaver);
+		        $$(\'input[class="orientation"]\').invoke("observe", "focus", function() { scrollToImage(this); });
 		        $$(\'input[class="newkw"]\').invoke("observe", "keyup", addKeywordEvent);
 		        $$(\'input[class="newkw"]\').invoke("observe", "keydown", function(event) { if (event.keyCode == Event.KEY_RETURN) event.preventDefault();});
 			$$(\'td[class="keywords"]\').each(function(e) { loadKeywords(e.id.substring(9)); });
+		        $$(\'input[class="orientation"]\').invoke("observe", "keydown", changeOrientation);
 		});
 			</script>
 			<style type="text/css">
@@ -193,7 +255,21 @@ padding: 0px;
   position: absolute;
   width: 240px;
 }
-
+.orient_6 {
+  transform:rotate(90deg);
+  -ms-transform:rotate(90deg);
+  -webkit-transform:rotate(90deg);
+}
+.orient_3 {
+  transform:rotate(180deg);
+  -ms-transform:rotate(180deg);
+  -webkit-transform:rotate(180deg);
+}
+.orient_8 {
+  transform:rotate(-90deg);
+  -ms-transform:rotate(-90deg);
+  -webkit-transform:rotate(-90deg);
+}
 </style>			
 			<a href="javascript:syncPath(\''.substr($path,0,strrpos($path,'/')).'\')">Up one level</a>
 			
@@ -270,6 +346,11 @@ padding: 0px;
 		if (isset($_REQUEST['loadAttributes'])) {
 		       $Name = $_REQUEST['Name'];
                        print(loadAttributes($Name, $mediadbADO));
+		       exit();
+		}
+		if (isset($_REQUEST['changeOrientation'])) {
+		       $pkFile = $_REQUEST['pkFile'];
+                       print(changeOrientation($pkFile, $_REQUEST['changeOrientation'], $mediadbADO));
 		       exit();
 		}
 
@@ -374,17 +455,30 @@ function getScreensaverFiles($path,$screenSaverAttribute,$screenSaverDisabledAtt
 		$displayedFiles[]=$row['PK_File'];
 		$pos++;
 		$class=($pos%2==0)?'alternate_back':'';
+		$thumbPath = $row['Path'].'/'.$row['Filename'].'.tnj';
+		$exif = exif_read_data($row['Path'].'/'.$row['Filename'], "IFD0", 0);
+		$orientClass = "";
+		$height = 0;
+		if ($exif['Orientation'] == 6 || $exif['Orientation'] == 8) {
+		    $orientClass = "orient_".$exif['Orientation'];
+		    if (file_exists($thumbPath)) {
+		        $size = getimagesize($thumbPath);
+			$height = $size[0]; // rotated 90 degs, width becomes height
+		    }
+		}
+		$dateTime = $exif['DateTime'];
 		$picUrl='include/image.php?imagepath='.htmlentities(urlencode($row['Path'].'/'.$row['Filename']));
-		$filePic=(!file_exists($row['Path'].'/'.$row['Filename'].'.tnj'))?'&nbsp;':'<a href="'.$picUrl.'" target="_blank" tabindex="0"><img src="include/image.php?imagepath='.htmlentities(urlencode($row['Path'].'/'.$row['Filename'])).'.tnj" border="0"></a>';
+		$filePic=(!file_exists($thumbPath))?'&nbsp;':'<a href="'.$picUrl.'" target="_blank" tabindex="0"><img src="include/image.php?imagepath='.htmlentities(urlencode($row['Path'].'/'.$row['Filename'])).'.tnj" border="0" class="'.$orientClass.'" id="img_'.$row['PK_File'].'" /></a>';
 		$out.='
-			<tr class="'.$class.'">
-				<td>'.$filePic.'</td>
+			<tr class="'.$class.'" id="row_'.$row['PK_File'].'">
+				<td id="imgcell_'.$row['PK_File'].'" '.($height > 0 ? 'height="'.$height.'px"' : '').'>'.$filePic.'</td>
 				<td class="imageData">
-				  <table><tr><td>File: <a href="'.$picUrl.'" target="_blank" tabindex="0">'.$row['Filename'].'</td></tr>
+				  <table><tr><td>File: <a href="'.$picUrl.'" target="_blank" tabindex="0">'.$row['Filename'].'</a> Date:'.$dateTime.'</td></tr>
+				    <tr><td>Orientation: <input type="text" name="orientation_'.$row['PK_File'].'" value="'.$exif['Orientation'].'" size="1" class="orientation" tabindex="1" /></td></tr>
 				    <tr><td>Screensaver: <input type="checkbox" name="file_'.$row['PK_File'].'" value="1" '.((is_null($row['FK_Attribute']) || (!is_null($row['FK_Attribute']) && !is_null($row['AttributeDisabled'])))?'':'checked').' tabindex="1"></td></tr>
 				    <tr><td>Keywords:</td></tr>
 				    <tr><td id="keywords_'.$row['PK_File'].'" class="keywords"></td></tr>
-				    <tr><td>Add keyword: <input class="newkw" name="newkw_'.$row['PK_File'].'" id="kw_'.$row['PK_File'].'" type="text" size="30" value="" title="Enter to add single existing attribute, Shift+Enter to add new attribute" onfocus="loadLookup(this);" onblur="clearLookup(this);" tabindex="1"/></td></tr>
+				    <tr><td>Add keyword: <input class="newkw" name="newkw_'.$row['PK_File'].'" id="kw_'.$row['PK_File'].'" type="text" size="30" value="" title="Enter to add single existing attribute, Shift+Enter to add new attribute" onfocus="scrollToImage(this); loadLookup(this);" onblur="clearLookup(this);" tabindex="1"/></td></tr>
 				    </table>
 				</td>
 			</tr>		
@@ -499,4 +593,21 @@ function addAttributeToFile($pkFile, $pkAttr, $pkAttrType, $Name, $mediadbADO) {
 	return $mediadbADO->Execute('INSERT INTO File_Attribute (FK_Attribute,FK_File) VALUES (?,?)',array($newPKAttr,$pkFile));
 }
 
+function changeOrientation($pkFile, $orientation, $mediadbADO) {
+	$query='
+		SELECT PK_File,Filename,Path
+		FROM File 
+		WHERE EK_MediaType IN (7,26) AND IsDirectory=0 AND Missing=0 AND PK_File = ?';
+	$res=$mediadbADO->Execute($query,array($pkFile));
+	while($row=$res->FetchRow()){
+		$file = $row['Path'].'/'.$row['Filename'];
+	}
+	if ($orientation == "1" || $orientation == "3" || $orientation == "6" || $orientation == "8") {
+		$cmd = 'sudo -u root /usr/pluto/bin/exivOrientation.sh "'.$file.'" '.$orientation.' && echo "1"';
+		$result = exec_batch_command($cmd,1);
+		if ($result)
+		    return "{ result: 1 }";
+	}
+	return "{result : 0}";
+}
 ?>
