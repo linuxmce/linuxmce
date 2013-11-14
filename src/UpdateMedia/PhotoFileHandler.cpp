@@ -74,7 +74,7 @@ bool PhotoFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttribute
 		string sValue = it->second;
 
 		MapPlutoMediaAttributes::iterator itm = pPlutoMediaAttributes->m_mapAttributes.find(nType);
-		if(itm == pPlutoMediaAttributes->m_mapAttributes.end())
+		if(itm == pPlutoMediaAttributes->m_mapAttributes.end() || itm->second->m_sName != sValue)
 			pPlutoMediaAttributes->m_mapAttributes.insert(
 				std::make_pair(
 					nType, 
