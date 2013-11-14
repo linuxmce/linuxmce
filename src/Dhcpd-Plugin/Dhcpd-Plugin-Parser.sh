@@ -16,6 +16,9 @@
 #May 22 20:59:21 dcerouter dhclient: DHCPACK from 10.0.0.150
 #May 22 20:59:21 dcerouter dhclient: bound to 10.0.0.84 -- renewal in 31 seconds.
 
+# A case of DHCPACK, with a format different to the ACK for REQUEST
+#Nov 13 08:12:16 dcerouter dhcpd: DHCPINFORM from 192.168.80.241 via eth1
+#Nov 13 08:12:16 dcerouter dhcpd: DHCPACK to 192.168.80.241 (00:15:60:c8:0b:fa) via eth1
 
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/SQL_Ops.sh
@@ -75,6 +78,12 @@ while :; do
 
 			case "$op" in
 				"DHCPACK")
+					#DHCPACK on 192.168.80.249 to bc:0f:2b:a1:25:04 (android-d166338fe3c731cc) via eth1
+					#not DHCPACK to 192.168.80.241 (00:15:60:c8:0b:fa) via eth1
+					if [[ "$(extract_field 7 "$line")" != "on" ]]; then
+						continue
+					fi
+
 					log_plugin log "DHCP : MAC '$mac_found' IP '$ip_sent'"
 
 					Q="SELECT PK_Device FROM Device WHERE MACaddress='$mac_found' AND IPaddress='$ip_sent'"
