@@ -146,12 +146,23 @@ void film::searchMovie()                                                        
 void film::searchReply(QNetworkReply *)                                                                          //recieve reply, and then retrieve extended data.
 {                                                                                                             //needs a clause to die if no result
     qWarning() << "Search Reply \n";
-    QByteArray iBytes = iReply->readAll();    
 
+    QByteArray iBytes = iReply->readAll();    
+    if(iBytes.isNull()){
+        qWarning() << "Empty Search reply!!";
+        qWarning() << "No title found.";
+        return;
+    }
     QJson::Parser pr;
     QVariantMap p = pr.parse(iBytes).toMap();
 
+
     QVariantList top = p["results"].toList(); 
+
+    if(top.isEmpty()){
+        qWarning() << "No title found.";
+        return;
+    }
     QVariantMap topChoice = top.at(0).toMap();
 
     QDomDocument searchResult("films");
@@ -171,10 +182,6 @@ void film::searchReply(QNetworkReply *)                                         
     //synopsis =root.firstChildElement("movies").firstChild().firstChildElement("overview").toElement().text();
     //mIMDB=root.firstChildElement("movies").firstChild().firstChildElement("imdb_id").toElement().text();
     //rating=root.firstChildElement("movies").firstChild().firstChildElement("certification").toElement().text();
-
-
-
-    cout << "Getting Extended Data" << endl;
 
 }
 
@@ -230,13 +237,7 @@ bool film::dlData()                                                             
         }else if(dept == "Writing"){
 
         }
-
-
     }
-
-
-
-
 
     dlUrl = movieUrl.replace("MOVIE_ID", movieID);
      sRequest.setUrl(dlUrl);
@@ -256,7 +257,6 @@ void film::dataReply(QNetworkReply *)                                           
 {
     cout << "Response Recieved" << endl;
     QByteArray mBytes = sReply->readAll();
-
 
     QJson::Parser ps;
     QVariantMap movieInfo = ps.parse(mBytes).toMap();

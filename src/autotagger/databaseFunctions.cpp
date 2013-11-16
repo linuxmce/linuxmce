@@ -130,7 +130,7 @@ QString databaseFunctions::checkAttribute(QString attribute, QString fileNo, int
         }
         else
         {
-            //cout << "Mysql Error" << qPrintable(chkAttribExist.lastError().text()) << endl;
+            cout << "Mysql Error" << qPrintable(chkAttribExist.lastError().text()) << endl;
             return chkVal.toString();
         }
     }
