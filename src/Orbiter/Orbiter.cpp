@@ -4372,6 +4372,16 @@ string Orbiter::SubstituteVariables( string Input,  DesignObj_Orbiter *pObj,  in
 			Output += string(VERSION) + "(" + g_szCompile_Date + ")";
 		else if(  Variable=="CLOCK" )
 			Output += StringUtils::HourMinute(time(NULL),true);
+		else if ( Variable=="CL:H")
+			Output += StringUtils::Hour(time(NULL));
+		else if ( Variable=="CL:M")
+			Output += StringUtils::Minute(time(NULL));
+		else if ( Variable=="CL:DOW")
+			Output += StringUtils::DayOfWeek(time(NULL));
+		else if ( Variable=="CL:DOM")
+			Output += StringUtils::DayOfMonth(time(NULL));
+		else if ( Variable=="CL:MON")
+			Output += StringUtils::Month(time(NULL));
 		else if(  Variable=="MT" )
 		{
 			Output += StringUtils::itos(m_iPK_MediaType);
