@@ -387,7 +387,7 @@ LC_ALL=C chroot $TEMP_DIR apt-get -y -qq update
 VerifyExitCode "apt update"
 
 # Setup the vlc repo key
-if [ ! wget -O $TEMP_DIR/root/videolan-apt.asc http://download.videolan.org/pub/debian/videolan-apt.asc ]; then
+if [ ! $(wget -O $TEMP_DIR/root/videolan-apt.asc http://download.videolan.org/pub/debian/videolan-apt.asc) ]; then
 	wget --no-proxy -O $TEMP_DIR/root/videolan-apt.asc http://download.videolan.org/pub/debian/videolan-apt.asc
 fi
 LC_ALL=C chroot $TEMP_DIR apt-key add /root/videolan-apt.asc
