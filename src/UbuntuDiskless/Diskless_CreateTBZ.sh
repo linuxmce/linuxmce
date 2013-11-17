@@ -283,7 +283,7 @@ deb-src http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restric
 deb http://deb.linuxmce.org/ubuntu/ $TARGET_RELEASE $TARGET_REPO_NAME
 deb http://debian.slimdevices.com/ stable  main
 deb http://archive.canonical.com/ubuntu $TARGET_RELEASE partner
-deb http://packages.medibuntu.org/ $TARGET_RELEASE free non-free
+deb http://download.videolan.org/pub/debian/stable/ /
 " > $TEMP_DIR/etc/apt/sources.list
 		;;
 	"raspbian")
@@ -386,11 +386,12 @@ StatsMessage "PreSeeding package installation preferences"
 LC_ALL=C chroot $TEMP_DIR apt-get -y -qq update
 VerifyExitCode "apt update"
 
-if [[ "$TARGET_DISTRO" == "ubuntu" ]]; then
-	#Setup the medibuntu repo
-	LC_ALL=C chroot $TEMP_DIR apt-get -y --force-yes install medibuntu-keyring 
-	VerifyExitCode "medibuntu apt add keyring"
+# Setup the vlc repo key
+if [ ! wget -O $TEMP_DIR/root/videolan-apt.asc http://download.videolan.org/pub/debian/videolan-apt.asc ]; then
+	wget --no-proxy -O $TEMP_DIR/root/videolan-apt.asc http://download.videolan.org/pub/debian/videolan-apt.asc
 fi
+LC_ALL=C chroot $TEMP_DIR apt-key add /root/videolan-apt.asc
+VerifyExitCode "videolan repository apt-key add"
 
 LC_ALL=C chroot $TEMP_DIR apt-get -y --force-yes install debconf-utils
 VerifyExitCode "install of debconf-utils"
