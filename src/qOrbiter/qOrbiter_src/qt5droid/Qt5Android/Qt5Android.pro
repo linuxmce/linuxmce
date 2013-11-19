@@ -22,7 +22,8 @@ CONFIG += thread
 
 
 # define deployment destination and target executable name
-#TARGET=qorbiter-$$QT_VERSION
+TARGET=qorbiterqt5
+
         DEFINES+=GLENABLED ANDROID QT5 QANDROID
         QT+= opengl script  widgets network xml
         glmsg= yes
@@ -320,90 +321,9 @@ HEADERS += \
     ../../datamodels/genericmodelitem.h \
     ../../datamodels/listitembase.h
 
-
-#OTHER_FILES+= \
-#         ../../Readme.txt \
-#        ../../OrbiterVariables.txt \
-#        ../../config.xml \
-#        ../../qml/desktop/lib/effects/qmldir \
-#    android/res/values-rs/strings.xml \
-#    android/res/values-de/strings.xml \
-#    android/res/values-ro/strings.xml \
-#    android/res/values-zh-rTW/strings.xml \
-#    android/res/values-ru/strings.xml \
-#    android/res/values-fa/strings.xml \
-#    android/res/values-ja/strings.xml \
-#    android/res/layout/splash.xml \
-#    android/res/values-it/strings.xml \
-#    android/res/values-nl/strings.xml \
-#    android/res/values-fr/strings.xml \
-#    android/res/values-pl/strings.xml \
-#    android/res/values-el/strings.xml \
-#    android/res/values-nb/strings.xml \
-#    android/res/values-es/strings.xml \
-#    android/res/values-id/strings.xml \
-#    android/res/values-zh-rCN/strings.xml \
-#    android/res/values-pt-rBR/strings.xml \
-#    android/res/values-ms/strings.xml \
-#    android/res/values/strings.xml \
-#    android/res/values-et/strings.xml \
-#    android/version.xml \
-#    android/src/org/kde/necessitas/origo/QtActivity.java \
-#    android/src/org/kde/necessitas/origo/QtApplication.java \
-#    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-#    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-#    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
-#    android/src/org/qtproject/qt5/android/bindings/QtApplication.java
-
-OTHER_FILES+= \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
-    android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
-    android/version.xml \
-    ../../android/res/values-et/strings.xml \
-    ../../android/res/values-fa/strings.xml \
-    ../../android/res/values-pl/strings.xml \
-    ../../android/res/drawable/logo.png \
-    ../../android/res/drawable/icon.png \
-    ../../android/res/values-el/strings.xml \
-    ../../android/res/values-zh-rTW/strings.xml \
-    ../../android/res/values-ro/strings.xml \
-    ../../android/res/values-de/strings.xml \
-    ../../android/res/values-fr/strings.xml \
-    ../../android/res/values-ms/strings.xml \
-    ../../android/res/drawable-mdpi/icon.png \
-    ../../android/res/values-es/strings.xml \
-    ../../android/res/values-rs/strings.xml \
-    ../../android/res/values-zh-rCN/strings.xml \
-    ../../android/res/values-ru/strings.xml \
-    ../../android/res/values/strings.xml \
-    ../../android/res/values/libs.xml \
-    ../../android/res/values-nl/strings.xml \
-    ../../android/res/values-nb/strings.xml \
-    ../../android/res/drawable-hdpi/icon.png \
-    ../../android/res/values-ja/strings.xml \
-    ../../android/res/values-it/strings.xml \
-    ../../android/res/values-pt-rBR/strings.xml \
-    ../../android/res/layout/splash.xml \
-    ../../android/res/values-id/strings.xml \
-    ../../android/res/drawable-ldpi/icon.png \
-    android/AndroidManifest.xml \
-    android/READ-THIS-BEFORE-MANUALLY-ADDING-FILES-TO-PACKAGE.txt \
-    android/libjava.so \
-    android/Makefile \
-    android/java.pro \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/src/org/qtproject/qt5/android/bindings/QtActivity.java \
-    android/src/org/qtproject/qt5/android/bindings/QtApplication.java \
-    android/AndroidManifest.xml \
-    android/res/values/libs.xml \
-    android/AndroidManifest.xml
-
 RESOURCES += \
         ../../skinData.qrc
 
-ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
+ANDROID_PACKAGE_SOURCE_DIR = $$PWD/../../../platforms/Android/qt5-pkg-src
 
 
