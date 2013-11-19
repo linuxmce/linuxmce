@@ -2,6 +2,7 @@
 #define ANDROIDSYSTEM_H
 
 #include <QObject>
+
 #include <jni.h>
 
 #ifndef QT5

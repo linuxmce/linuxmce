@@ -2079,7 +2079,7 @@ void qOrbiter::setupEa()
 {
     httpSettingsReply->disconnect(this,SLOT(setupEa()));
     httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d="));
-    // qDebug() << "Ea url::" <<httpSettingsRequest->url();
+    qDebug() << "Ea url::" <<httpSettingsRequest->url();
     httpSettingsReply = httpOrbiterSettings->get(*httpSettingsRequest);
     QObject::connect(httpSettingsReply, SIGNAL(finished()), this, SLOT(initialize()));
 }
@@ -2617,7 +2617,8 @@ void qOrbiter::displayToggle(bool t)
         state=0;
 
     // qDebug() << m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device;
-    DCE::CMD_Display_OnOff display(m_dwPK_Device, m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device, StringUtils::itos(state), false );
+
+    DCE::CMD_Display_OnOff display(m_dwPK_Device, m_pData->m_pDevice_MD->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device, StringUtils::itos(state), false );
     SendCommand(display);
     emit commandResponseChanged("Attempting to toggle the display" );
 }
