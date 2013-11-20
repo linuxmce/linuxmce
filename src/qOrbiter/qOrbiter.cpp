@@ -1058,9 +1058,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     }
     else
     {
-        if(iPK_MediaType !=18)
+        if(iPK_MediaType !=(18||66))
         {
-
 
             QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
             qWarning() << "Device port==>" << port;
@@ -1148,7 +1147,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
 
     }
-    else if(iPK_MediaType != 18)
+    else if(iPK_MediaType != (18||66))
     {
         GetNowPlayingAttributes();
         emit playlistPositionChanged(iValue);
@@ -3007,6 +3006,10 @@ void DCE::qOrbiter::PauseMedia()
 
 void DCE::qOrbiter::requestMediaPlaylist()
 {
+    if(i_current_mediaType==66  ){
+        qDebug() << "not getting network media playlist";
+        return ;
+    }
 
     //  qDebug("Fetching Playlist");
     int gHeight = 0;

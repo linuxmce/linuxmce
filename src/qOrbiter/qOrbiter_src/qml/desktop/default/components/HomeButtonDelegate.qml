@@ -1,66 +1,65 @@
 import QtQuick 1.1
 
-Component{
+Item{
+    id:homeBtnDelegate
+    //important!! these need to be set on an imported component otherwise its appears all wrong!
+    height: scaleY(13)
+    width: scaleX(8)
 
-    Item{
-        //important!! these need to be set on an imported component otherwise its appears all wrong!
-        height: scaleY(13)
-        width: scaleX(8)
-
-        /*
+    /*
         //this image displays a second button-image beneath the buttons
         //from the Climate-, Lighting-, Media-, Security- and Telecom-Rows;
         //if it has no purpose it can be deleted
         */
-        Image {
-            id: overlay
-            fillMode: Image.PreserveAspectFit
-            source: "../img/ui3/linuxmcewidebutton.png"
-            anchors.fill: parent
-        }
-        Image {
-            id: overlay_hover
-            fillMode: Image.PreserveAspectFit
-            source: "../img/ui3/linuxmcewidebuttongrn.png"
-            height: parent.height
-            width: parent.width
-            visible:false
-        }
-
-
-        ImgButton
-        {       id:delegateButton
-            anchors.top: parent.top
-            anchors.topMargin: scaleY(2)
-            color:"transparent"
+    Image {
+        id: overlay
+        fillMode: Image.PreserveAspectFit
+        source: "../img/ui3/linuxmcewidebutton.png"
         anchors.fill: parent
-            buttontext: title
+    }
+    Image {
+        id: overlay_hover
+        fillMode: Image.PreserveAspectFit
+        source: "../img/ui3/linuxmcewidebuttongrn.png"
+        height: parent.height
+        width: parent.width
+        visible:false
+    }
 
-            buttontextcolor: "black"
-            buttonopacity: .85
+
+    ImgButton
+    {       id:delegateButton
+        anchors.top: parent.top
+        anchors.topMargin: scaleY(2)
+        color:"transparent"
+        anchors.fill: parent
+        buttontext: title
+
+        buttontextcolor: "black"
+        buttonopacity: .85
 
 
-            MouseArea{
-                anchors.fill: delegateButton
-                onClicked: manager.execGrp(params);
-                onPressed: overlay_hover.visible = true
-                onReleased: overlay_hover.visible= false
-                hoverEnabled: true
+        MouseArea{
+            anchors.fill: delegateButton
+            onClicked: manager.execGrp(params);
+            onPressed: overlay_hover.visible = true
+            onReleased: overlay_hover.visible= false
+            hoverEnabled: true
 
-                onEntered: {
-                    delegateButton.buttontextcolor = "white"
-                    delegateButton.buttonopacity = 1
+            onEntered: {
+                delegateButton.buttontextcolor = "white"
+                delegateButton.buttonopacity = 1
 
-                }
-                onExited: {
-                    delegateButton.buttontextcolor = "black"
-                    delegateButton.buttonopacity = .85
-
-                }
             }
+            onExited: {
+                delegateButton.buttontextcolor = "black"
+                delegateButton.buttonopacity = .85
 
+            }
         }
-        /*
+
+    }
+    /*
         Text {
             id: daslabel
             text: label
@@ -73,6 +72,6 @@ Component{
             font.family: "Droid Sans"
         }
         */
-    }
 }
+
 

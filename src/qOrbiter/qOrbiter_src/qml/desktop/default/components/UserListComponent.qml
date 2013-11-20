@@ -32,11 +32,10 @@ Rectangle {
             model: userList
             anchors.top: parent.top
             anchors.topMargin: scaleY(2)
-            delegate:  Rectangle
-            {
+            delegate:  Item{
+                id:userlistComponentDelegate
             height:scaleY(4)
-            width:parent.width
-            color:"transparent"
+            width:parent.width         
             clip:true
             Image {
                 id: bg

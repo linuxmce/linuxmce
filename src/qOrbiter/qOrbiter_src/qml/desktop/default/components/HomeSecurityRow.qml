@@ -10,7 +10,7 @@ Rectangle{
     color:"transparent"
     radius: 20
 
-    HomeButtonDelegate{id:securityDelegate}
+
 
     Row {
         id: guide
@@ -62,7 +62,7 @@ Rectangle{
                 orientation:ListView.Horizontal
                 spacing: 5
 
-                delegate: securityDelegate
+                delegate:    HomeButtonDelegate{id:securityDelegate}
                 interactive: false
             }
         }

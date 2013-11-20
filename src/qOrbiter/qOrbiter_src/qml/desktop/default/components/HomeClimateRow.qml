@@ -10,7 +10,7 @@ import QtQuick 1.1
 color:"transparent"
         radius: 20
 
-        HomeButtonDelegate{id:climateDelegate}
+
 
         Row {
             id: guide
@@ -63,7 +63,7 @@ color:"transparent"
                     spacing: 5
                     orientation:ListView.Horizontal
                     interactive:false
-                    delegate: climateDelegate
+                    delegate: HomeButtonDelegate{id:climateDelegate}
                 }
 
             }

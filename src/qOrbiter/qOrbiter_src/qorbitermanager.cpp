@@ -93,8 +93,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     b_localLoading = false;
     if(androidHelper->updateExternalStorageLocation()){
         androidHelper->updateBuildInformation();
-
-
     }
 #endif
 

@@ -5,9 +5,7 @@ Rectangle{
     width: scaleX(100)
     clip:true
     color:"transparent"
-    radius: 20
-
-    HomeButtonDelegate{id:telecomDelegate}
+    radius: 20    
 
     Row {
         id: telecomRow
@@ -57,7 +55,7 @@ Rectangle{
                 spacing: 5
                 interactive: false
                 orientation:ListView.Horizontal
-                delegate: telecomDelegate
+                delegate: HomeButtonDelegate{}
             }
         }
     }

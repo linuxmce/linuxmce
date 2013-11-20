@@ -1,13 +1,10 @@
 import QtQuick 1.1
 
 
-Rectangle{
+Item{
     height: scaleY(15)
     width: scaleX(100)
     clip:false
-    color:"transparent"
-
-    HomeButtonDelegate{id:mediaDelegate}
 
     Row {
         id: guide
@@ -75,7 +72,7 @@ Rectangle{
                 model: currentRoomMedia
                 orientation:ListView.Horizontal
                 spacing:5
-                delegate: mediaDelegate
+                delegate:   HomeButtonDelegate{id:mediaDelegate}
                 interactive: false
 
             }
