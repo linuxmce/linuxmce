@@ -319,12 +319,13 @@ int databaseFunctions::savePic(QString picUrl, QString pic_Attribute, QString fi
     QSqlQuery pic_chk;
     pic_chk.prepare("SELECT * FROM Picture_File WHERE FK_File = (:fk_fileNo)  LIMIT 1");
     pic_chk.bindValue("(:fk_File)", file_num);
+    qDebug() << pic_chk.boundValues() << endl;
     pic_chk.exec();
     pic_chk.next();
     QSqlRecord pic_chk_resp = pic_chk.record();
     QString picChkVal = pic_chk_resp.field("FK_File").value().toString();
-
-    if ( picChkVal== "")
+    qDebug() << picChkVal << endl;
+    if ( picChkVal== "" || picChkVal=="0" )
     {
         QFile mediaPic;
         mediaPic.setFileName("/var/tmp/"+pic_Attribute+".jpg");
@@ -439,7 +440,7 @@ int databaseFunctions::saveAttributePic(QString picUrl, QString attribute)      
     QSqlRecord pic_chk_resp = pic_chk.record();
     QString picChkVal = pic_chk_resp.field("FK_Attribute").value().toString();
 
-    if ( picChkVal== "")
+    if ( picChkVal== "" || picChkVal=="0" )
     {
         cout << "Picture for Attribute will be saved. Downloading image...";
         QFile mediaPic;
