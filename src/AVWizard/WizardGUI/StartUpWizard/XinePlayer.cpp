@@ -32,7 +32,7 @@
 #include <stdio.h>
 #include <string>
 #include <pthread.h>
-
+#include <unistd.h>
 #include <iostream>
 
 #include "SafetyLock.h"

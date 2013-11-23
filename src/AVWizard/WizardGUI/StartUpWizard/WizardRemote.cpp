@@ -21,6 +21,7 @@
 #include "signal.h"
 #include <cstdlib>
 #include <iostream>
+#include <unistd.h>
 using namespace std;
 
 RemoteProcess::RemoteProcess()
