@@ -23,7 +23,7 @@ CXXFLAGS +=
 CPPFLAGS +=
 LDFLAGS += -L/usr/X11R6/lib
 INTERNAL_LIBS_NAMES +=
-EXTERNAL_LIBS_NAMES += Xtst
+EXTERNAL_LIBS_NAMES += Xtst X11
 
 Gen_Dev_Files +=
 sources += \
