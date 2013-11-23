@@ -9,7 +9,7 @@ CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
 CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
-BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread -lqpidmessaging
+BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread -lqpidmessaging -lqpidtypes
 
 MYNAME = agocontrol_Bridge
 VERSION = 2.0.0
