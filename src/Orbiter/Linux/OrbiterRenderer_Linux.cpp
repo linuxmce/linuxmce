@@ -77,7 +77,7 @@
 
 using namespace DCE;
 
-#include "ProgressBarConfig.h"
+#include "../ProgressBarConfig.h"
 
 OrbiterRenderer_Linux::OrbiterRenderer_Linux(Orbiter *pOrbiter) : BASE_CLASS(pOrbiter), 
 #ifndef DIRECTFB
