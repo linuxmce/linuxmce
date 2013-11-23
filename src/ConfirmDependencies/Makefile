@@ -4,7 +4,7 @@ CXX=g++
 CPPFLAGS=-I$(ROOT)/CreateDevice
 CXXFLAGS=-I. -I.. -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql -ggdb3
 LDFLAGS=-L$(ROOT)/lib
-LDLIBS=-lpluto_main -lPlutoUtils -lSerializeClass -lDCECommon -lmysqlclient_r -lDCECommon
+LDLIBS=-lpluto_main -lPlutoUtils -lSerializeClass -lDCECommon -lmysqlclient_r -lDCECommon -lpthread
 
 OBJECTS=ConfirmDependencies.o ../CreateDevice/CreateDevice.o
 
