@@ -20,9 +20,9 @@ sources = Main.cpp Photo_Screen_Saver.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS += -I/usr/include/SDL `pkg-config --cflags --libs glib-2.0`
-LDFLAGS += -lGL -lGLU -lSDL -lSDL_image -lSDL_ttf -lXrender -lglib-2.0 -lXmu -lSDL_gfx
-XTRALDLIBS =
+CPPFLAGS += -I/usr/include/SDL `pkg-config --cflags glib-2.0`
+LDFLAGS +=
+XTRALDLIBS = -lGL -lGLU -lSDL -lSDL_image -lSDL_ttf -lXrender `pkg-config --libs glib-2.0` -lXmu -lSDL_gfx -lX11
 
 Gen_Dev_Files +=
 sources += AnimatedPicture.cpp \
