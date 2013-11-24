@@ -2584,11 +2584,7 @@ void qOrbiter::displayToggle(bool t)
             DCE::CMD_Display_OnOff display(m_dwPK_Device, dparam, StringUtils::itos(state), false );
             SendCommand(display);
        }
-
-        // ScreenParameters->addParam( QString::fromStdString(dparam2), dparam );
-        //emit addScreenParam(QString::fromStdString(dparam2), dparam );
     }
-
 
   //  emit commandResponseChanged("Attempting to toggle the display" );
 }
