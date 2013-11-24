@@ -989,8 +989,6 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     // it should unify the current location and media data in to one easily accesible item that update automatically on changes.
     map <int, string> mds;
     GetDevicesByTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST, &mds);
-
-
     setMediaType(iPK_MediaType);
     /* string::size_type pos=0;
     m_dwPK_Device_NowPlaying = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
@@ -1024,9 +1022,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     m_bUsingLiveAVPath = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str())==1;
     emit liveAvPath(m_bUsingLiveAVPath);
     getVolume();
-#ifdef debug
-    qDebug() << m_bUsingLiveAVPath;
-#endif
+    qDebug() << "Device is using live av path? " << m_bUsingLiveAVPath;
     pos=0;
     /*
     m_iPK_Screen_Remote=atoi(StringUtils::Tokenize(sPK_DesignObj,",",pos).c_str());
@@ -1042,25 +1038,19 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
     internal_streamID = iStreamID;
     emit np_playlistIndexChanged(iValue);
-    if (iPK_MediaType == 0)
-    {
+    if (iPK_MediaType == 0){                            //Tell the gui media has stopped on our side.
         emit resetNowPlaying();
         emit setNowPlaying(false);
         emit gotoQml("Screen_1.qml");
         b_mediaPlaying = false;
-
         emit currentScreenChanged("Screen_1.qml");
         currentScreen = "Screen_1.qml";
         internal_streamID = iStreamID;
         emit streamIdChanged(iStreamID);
         emit mediaTypeChanged(iPK_MediaType);
         emit stopTimeCode();
-    }
-    else
-    {
-        if(iPK_MediaType !=(18||66))
-        {
-
+    } else {
+        if(iPK_MediaType ==(4||5)){
             QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
             qWarning() << "Device port==>" << port;
             checkTimeCode(m_dwPK_Device_NowPlaying);
@@ -1080,25 +1070,18 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         QStringList mdlist;
         mdlist= md1.split(QRegExp("\\n"), QString::SkipEmptyParts);
 
-
-
-        if (mdlist.count() == 2)
-        {
+        if (mdlist.count() == 2){
             emit np_title1Changed(mdlist.at(0));
             emit np_title2Changed(mdlist.at(1));
             //nowPlayingButton->setTitle(mdlist.at(0));
             // nowPlayingButton->setTitle2(mdlist.at(1));
-        }
-        else
-        {
+        } else {
             emit np_title1Changed(QString::fromStdString(sValue_To_Assign));
             emit np_title2Changed("");
         }
-
     }
 
-    if(iPK_MediaType ==1)
-    {
+    if(iPK_MediaType ==1){
         //channel ID will be sent to the playlist parser to find our position of the current data
         emit np_channelID(QString::number(iValue));
         emit np_network(QString::fromStdString(sValue_To_Assign));
@@ -1106,27 +1089,20 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit np_program(QString::fromStdString(sText));
         emit mythTvUpdate("i"+QString::number(iValue));
 
-        if(bRetransmit == 0 )
-        {
+        if(bRetransmit == 0 ){
             emit epgDone();
         }
         b_mediaPlaying = true;
     }
     //todo - fix livetv playlist to adjust position from clicking on the grid.
-    else if(iPK_MediaType== 11)
-    {
+    else if(iPK_MediaType== 11){
         emit np_channelID(QString::number(iValue));
         emit np_network(QString::fromStdString(sValue_To_Assign));
-        if(bRetransmit == 0)
-        {
+        if(bRetransmit == 0){
 
         }
         b_mediaPlaying = true;
-
-    }
-    else if(iPK_MediaType == 5)
-    {
-
+    }  else if(iPK_MediaType == 5) {
         b_mediaPlaying = true;
         //  emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
         //  emit np_title2Changed(QString::fromStdString(sText));
@@ -1135,30 +1111,11 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         if(bRetransmit==1){
             emit clearPlaylist();
         }
-
-    }
-    else if(iPK_MediaType == 4)
-    {
+    }  else if(iPK_MediaType == 4) {
         b_mediaPlaying = true;
         emit playlistPositionChanged(iValue);
         GetNowPlayingAttributes();
-
         emit clearPlaylist();
-
-
-    }
-    else if(iPK_MediaType != (18||66))
-    {
-        GetNowPlayingAttributes();
-        emit playlistPositionChanged(iValue);
-        if(bRetransmit == 0)
-        {
-            emit clearPlaylist();
-        }
-    }
-    else
-    {
-
     }
 
 }
@@ -1385,8 +1342,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
     setMediaType(iPK_MediaType);
 
-    if (iPK_MediaType != q_mediaType.toInt())
-    {
+    if (iPK_MediaType != q_mediaType.toInt()){
         initializeGrid();
         media_currentRow = 0;
         i_mediaModelRows = 0;
@@ -1402,7 +1358,6 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
     prepareFileList(iPK_MediaType);
     requestTypes(iPK_MediaType);
     emit commandComplete();
-
     emit commandResponseChanged("Show File List Complete, Calling request Media Grid");
 }
 
@@ -1614,8 +1569,6 @@ void qOrbiter::CMD_Goto_Screen(string sID,int iPK_Screen,int iInterruption,bool 
         // ScreenParameters->addParam( QString::fromStdString(dparam2), dparam );
         emit addScreenParam(QString::fromStdString(dparam2), dparam );
     }
-
-
 }
 
 //<-dceag-c795-b->
@@ -2616,10 +2569,28 @@ void qOrbiter::displayToggle(bool t)
         state=0;
 
     // qDebug() << m_pData->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device;
+    map <int, string> dvcMap;
+    GetDevicesByTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST, &dvcMap);
 
-    DCE::CMD_Display_OnOff display(m_dwPK_Device, m_pData->m_pDevice_MD->FindFirstRelatedDeviceOfTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST)->m_dwPK_Device, StringUtils::itos(state), false );
-    SendCommand(display);
-    emit commandResponseChanged("Attempting to toggle the display" );
+
+   // map<long, string >::const_iterator end = pMessage->m_mapParameters.end();
+    for (map<int, string >::const_iterator it = dvcMap.begin(); it != dvcMap.end(); ++it)
+    {
+        int dparam = it->first;
+        string dparam2 = it->second;
+        qWarning()<< QString::number(dparam) << "::" << dparam2.c_str();
+       DeviceData_Base *pDevice= m_pData->m_AllDevices.m_mapDeviceData_Base_Find((long)dparam);
+       if(pDevice->m_dwPK_Room == this->i_room){
+            DCE::CMD_Display_OnOff display(m_dwPK_Device, dparam, StringUtils::itos(state), false );
+            SendCommand(display);
+       }
+
+        // ScreenParameters->addParam( QString::fromStdString(dparam2), dparam );
+        //emit addScreenParam(QString::fromStdString(dparam2), dparam );
+    }
+
+
+  //  emit commandResponseChanged("Attempting to toggle the display" );
 }
 
 void qOrbiter::setMediaSpeed(int s)
@@ -3006,12 +2977,12 @@ void DCE::qOrbiter::PauseMedia()
 
 void DCE::qOrbiter::requestMediaPlaylist()
 {
-    if(i_current_mediaType==66  ){
-        qDebug() << "not getting network media playlist";
+    if(i_current_mediaType !=(4||5)  ){
+        qDebug() << "not getting media playlist";
         return ;
     }
 
-    //  qDebug("Fetching Playlist");
+    qDebug("Fetching Playlist");
     int gHeight = 0;
     int gWidth = 1;
     int pkVar = 0;
@@ -3116,12 +3087,13 @@ void qOrbiter::checkTimeCode(int npDevice)
         }
     }
 
-    if(i_current_mediaType!=11 && !sIPAddress.empty() ){
+    if(i_current_mediaType==(4||5) && !sIPAddress.empty() ){
         emit updateTimeCode(QString::fromStdString(sIPAddress), 12000);
     }
     else
     {
         emit stopTimeCode();
+        qDebug() <<"Not Getting timecode";
     }
     qWarning() << " New ip :: " << sIPAddress.c_str();
 }
