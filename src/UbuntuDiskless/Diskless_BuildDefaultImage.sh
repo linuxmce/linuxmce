@@ -5,6 +5,7 @@ mkdir -p /tftpboot/default
 cd /lib/modules
 KERNEL=`find * -type d |head -1`             
 cp /boot/vmlinuz-$KERNEL /tftpboot/default/vmlinuz
+chmod +r /tftpboot/default/vmlinuz
 mkinitramfs -d /etc/initramfs-tools-interactor/ -o /tftpboot/default/initrd $KERNEL
 
 ## Setup the debfault boot file
