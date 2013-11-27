@@ -120,6 +120,7 @@ Item {
     property string screenfile
     property string dynamic_height
     property string dynamic_width
+    property bool showOptions:false
 
     function scaleX(x){
         return x/100*manager.appWidth
@@ -270,7 +271,6 @@ Item {
         id: hdr
     }
 
-
     Loader {
         id:pageLoader
         objectName: "loadbot"
@@ -288,14 +288,19 @@ Item {
             console.log("Screen Changed:" + pageLoader.source)
         }
     }
+    HomeOptions {
+        id: advancedrow
+        anchors{
+            top:hdr.bottom
+            right:parent.right
+        }
+    }
 
     DefaultFooter {
         id: ftr
     }
 
-//    HomeOptions {
-//        id: advancedrow
-//    }
+
 
     //=================Components==================================================//
     function loadComponent(componentName)

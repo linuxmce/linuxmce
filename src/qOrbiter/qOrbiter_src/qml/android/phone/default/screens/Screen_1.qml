@@ -5,7 +5,7 @@ import "../js/ComponentLoader.js" as MyJs
 Item {
     id:stage
     signal swapStyle()
-    property bool showOptions:false
+
     property bool showSecondary:false
     anchors{
         top:parent.top
@@ -103,7 +103,7 @@ Item {
             top: fs_npButton.bottom
             left:parent.left
             right:parent.right
-            bottom:ftr.top
+            bottom:parent.bottom
             leftMargin: 10
         }
         cellHeight: itemH-10

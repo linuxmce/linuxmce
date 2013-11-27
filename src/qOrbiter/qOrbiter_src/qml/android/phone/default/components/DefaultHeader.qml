@@ -20,7 +20,7 @@ Item{
         id:hdrLayout
         anchors{
             left:parent.left
-            right:optionCol.left
+            right:optionContainer.left
             top:parent.top
             bottom:parent.bottom
         }
@@ -29,30 +29,56 @@ Item{
         }
     }
 
-    Column{
-        id:optionCol
+    Item{
+        id:optionContainer
         width: manager.b_orientation ? scaleX(5) : scaleX(8)
-        spacing:2
+
         anchors{
             right: parent.right
             top:parent.top
             bottom:parent.bottom
         }
-
-        Rectangle{
-            color: "green"
-            height: hdr.height /4
-            width: height
+        Column{
+            id:optionCol
+            spacing:2
+            anchors.fill: parent
+            Rectangle{
+                color: "green"
+                height: hdr.height /4
+                width: height
+            }
+            Rectangle{
+                color: "green"
+                height: hdr.height /4
+                width: height
+            }
+            Rectangle{
+                color: "green"
+                height: hdr.height /4
+                width: height
+            }
         }
-        Rectangle{
-            color: "green"
-            height: hdr.height /4
-            width: height
-        }
-        Rectangle{
-            color: "green"
-            height: hdr.height /4
-            width: height
+        MouseArea{
+            anchors.fill: parent
+            onReleased: showOptions =! showOptions
         }
     }
+
+    states: [
+        State {
+            name: "open"
+            PropertyChanges {
+                target: hdr
+                 height: manager.b_orientation ? scaleY(8) : scaleY(12)
+            }
+        },
+        State {
+            name: "closed"
+            PropertyChanges {
+                target: hdr
+                 height:0
+            }
+        }
+    ]
+
 }

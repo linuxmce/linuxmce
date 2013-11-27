@@ -11,9 +11,6 @@ Item {
         horizontalCenter: parent.horizontalCenter
         verticalCenter: parent.verticalCenter
     }
-
-
-
     Rectangle{
         id:exit_button
         height: scaleY(12)

@@ -5,8 +5,8 @@ import "../components"
 import "../js/ComponentLoader.js" as MyJs
 Item{
     id:optionPanel
-    width: parent.width
-    height: parent.height
+    width: parent.width /2
+    height:scaleY(25)
     property int buttonH:optionPanel.height / advancedrow.children.length -10
     Rectangle{
         anchors.fill: parent
@@ -41,14 +41,42 @@ Item{
             leftMargin: 15
             rightMargin: 15
             }
-
-            buttonText: qsTr("Power")
+            useBorder: false
+            buttonText: qsTr("Sleeping Alarms")
             onActivated: {loadComponent("Power.qml");showOptions = !showOptions}
         }
 
+//        StyledButton{
+//            width: leader.width
+//            buttonText:manager.sPK_User
+//            height: buttonH
+//            anchors{
+//            left:parent.left
+//            right:parent.right
+//            leftMargin: 15
+//            rightMargin: 15
+//            }
+//            onActivated:  {loadComponent("UserSelector.qml");showOptions = !showOptions}
+//        }
+
+//        StyledButton{
+//            id:roombutton
+//            height: buttonH
+//            anchors{
+//            left:parent.left
+//            right:parent.right
+//            leftMargin: 15
+//            rightMargin: 15
+//            }
+//            buttonText:roomList.currentEA
+//            onActivated: {
+//                loadComponent("RoomSelector.qml")
+//                showOptions = !showOptions
+//            }
+
+//        }
+
         StyledButton{
-            width: leader.width
-            buttonText:manager.sPK_User
             height: buttonH
             anchors{
             left:parent.left
@@ -56,34 +84,7 @@ Item{
             leftMargin: 15
             rightMargin: 15
             }
-            onActivated:  {loadComponent("UserSelector.qml");showOptions = !showOptions}
-        }
-
-        StyledButton{
-            id:roombutton
-            height: buttonH
-            anchors{
-            left:parent.left
-            right:parent.right
-            leftMargin: 15
-            rightMargin: 15
-            }
-            buttonText:roomList.currentEA
-            onActivated: {
-                loadComponent("RoomSelector.qml")
-                showOptions = !showOptions
-            }
-
-        }
-
-        StyledButton{
-            height: buttonH
-            anchors{
-            left:parent.left
-            right:parent.right
-            leftMargin: 15
-            rightMargin: 15
-            }
+            useBorder: false
             buttonText: qsTr("Exit")
             onActivated:  {closeOrbiter(); showOptions = !showOptions }
         }

@@ -26,6 +26,7 @@ Item{
     property alias hitArea:fly_trap
     property alias handler:dceHandler.sourceComponent
     property bool useHandler:false
+    property bool useBorder:true
     signal activated()
     Behavior on opacity{
         PropertyAnimation{
@@ -38,7 +39,7 @@ Item{
         anchors.fill: parent
         color:phil
         border.color: "white"
-        border.width: 1
+        border.width: useBorder ? 1 : 0
         radius: 5
         opacity:useHandler ? dceHandler.item.pressed ? 1 : .65 :  fly_trap.pressed ? 1 : .65
 
