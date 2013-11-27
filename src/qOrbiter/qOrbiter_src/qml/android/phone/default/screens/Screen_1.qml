@@ -58,7 +58,7 @@ Item {
             top: fs_npButton.bottom
             left:parent.left
             right:parent.right
-            bottom:ftr.top
+            bottom:parent.bottom
             leftMargin: 10
         }
 
@@ -122,6 +122,11 @@ Item {
 
             }
         }
+    }
+    ScenarioSelector{
+        id:scenarioPopup
+        currentModel:undefined
+        anchors.centerIn: parent
     }
 }
 

@@ -266,10 +266,21 @@ Item {
         console.log(component.progress)
     }
 
+    DefaultHeader {
+        id: hdr
+    }
+
 
     Loader {
         id:pageLoader
         objectName: "loadbot"
+        anchors{
+            top:hdr.bottom
+            left:parent.left
+            right:parent.right
+            bottom:ftr.top
+        }
+
         focus: true
         Keys.onBackPressed: console.log("back")
         onSourceChanged:  loadin
@@ -277,6 +288,14 @@ Item {
             console.log("Screen Changed:" + pageLoader.source)
         }
     }
+
+    DefaultFooter {
+        id: ftr
+    }
+
+//    HomeOptions {
+//        id: advancedrow
+//    }
 
     //=================Components==================================================//
     function loadComponent(componentName)

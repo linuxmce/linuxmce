@@ -1,4 +1,5 @@
 DefaultFooter DefaultFooter.qml                 #Footer
+DefaultHeader DefaultHeader.qml                 #Header
 NavigationArrows NavigationArrows.qml
 RoomSelectorDelegate RoomSelectorDelegate.qml
 HomeSecurityRow HomeSecurityRow.qml
