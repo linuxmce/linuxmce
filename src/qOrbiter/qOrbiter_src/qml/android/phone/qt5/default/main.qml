@@ -1,4 +1,5 @@
 import QtQuick 2.0
+
 import "components"
 import "js/ComponentLoader.js" as MyJs
 
@@ -14,7 +15,7 @@ Item {
     FontLoader{
         id:appFont
         name: "Sawasdee"
-        source:"../../../fonts/Sawasdee.ttf"
+        source:"../../../../skins-common/fonts/Sawasdee.ttf"
     }
 
 
@@ -209,11 +210,7 @@ Item {
              //   mask.opacity=0
             }
         }
-
     }
-
-
-
 
     SequentialAnimation{
         id:loadin
@@ -229,8 +226,5 @@ Item {
             target:pageLoader
             properties: "opacity"; to: "1"; duration: 5000
         }
-
     }
-
-
 }

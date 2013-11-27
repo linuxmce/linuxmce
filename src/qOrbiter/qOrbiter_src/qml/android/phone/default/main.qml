@@ -133,7 +133,7 @@ Item {
 
         function returncount(){
             return scenarios.count
-        }
+        }    
 
         ListElement{
             name:"Lights"
@@ -165,6 +165,7 @@ Item {
             modelName:"advanced"
             floorplantype:-1
         }
+
     }
 
     ListModel{

@@ -9,8 +9,6 @@ Item {
     state:"inactive"
     onStateChanged:console.log("ScenarioView State Change");
 
-
-
     Behavior on opacity{
 
         SequentialAnimation{
@@ -24,8 +22,6 @@ Item {
                     }
             }
         }
-
-
     }
 
     Rectangle{

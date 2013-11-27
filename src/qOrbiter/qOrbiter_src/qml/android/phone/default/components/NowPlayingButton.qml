@@ -14,7 +14,6 @@ Item {
     property real textSize:style.buttonLabelText
     property variant propertyModel:{
         "title":dcenowplaying.mediatitle,
-
     }
 
     Rectangle{

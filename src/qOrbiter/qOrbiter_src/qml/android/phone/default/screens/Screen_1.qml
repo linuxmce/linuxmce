@@ -2,18 +2,22 @@ import QtQuick 1.1
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 
-
 Item {
     id:stage
     signal swapStyle()
     property bool showOptions:false
     property bool showSecondary:false
-    width:manager.appWidth
-    height:manager.appHeight
+    anchors{
+        top:parent.top
+        left:parent.left
+        right:parent.right
+        bottom:parent.bottom
+    }
+
     Component.onCompleted: forceActiveFocus()
     property int itemH:manager.b_orientation ? homeSelectionLayout.height /3 :homeSelectionLayout.height /3
     property int itemW:manager.b_orientation ? homeSelectionLayout.width/ 2 : homeSelectionLayout.width / 2
-focus:true
+    focus:true
     Keys.onReleased: {
         event.accepted=true
         switch(event.key){
@@ -30,8 +34,11 @@ focus:true
         case Qt.Key_MediaPrevious:
             if(secondaryModel.visible){
                 showSecondary = false
+            } else {
+                console.log("show exit")
             }
-             console.log("Media previous")
+
+            console.log("Media previous")
             break;
         default:
             console.log(event.key)
@@ -115,52 +122,6 @@ focus:true
 
             }
         }
-    }
-
-    //    DroidHomeSelector{
-    //        id:home_selector;
-    //        anchors.top: manager.b_orientation ? fs_npButton.bottom : spaceholder.bottom
-    //        anchors.left: manager.b_orientation ? stage.left : fs_npButton.right
-    //        anchors.leftMargin: manager.b_orientation ? scaleX(15) : scaleX(1)
-    //    }
-
-    Row{
-        id:ftr
-        height: manager.b_orientation ? scaleY(8) : scaleY(12)
-        anchors{
-            bottom:parent.bottom
-            left:parent.left
-            right:parent.right
-        }
-        Rectangle{
-            anchors.fill: parent
-            color: "black"
-            opacity: .75
-        }
-        StyledButton{
-            buttonText: manager.sPK_User
-            anchors{
-                left:parent.left
-                verticalCenter: parent.verticalCenter
-            }
-            onActivated: {loadComponent("UserSelector.qml");}
-
-        }
-
-        Clock{
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-        }
-    }
-
-    ScenarioSelector{
-        id:scenarioPopup
-        currentModel:undefined
-        anchors.centerIn: parent
-    }
-
-    HomeOptions {
-        id: advancedrow
     }
 }
 

@@ -1,3 +1,4 @@
+DefaultFooter DefaultFooter.qml                 #Footer
 NavigationArrows NavigationArrows.qml
 RoomSelectorDelegate RoomSelectorDelegate.qml
 HomeSecurityRow HomeSecurityRow.qml

@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import "../components"
-import "../../../skins-common/lib/handlers"
+import "../../../../../skins-common/lib/handlers"
 
 Item {
     height:manager.appHeight

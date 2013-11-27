@@ -2,7 +2,6 @@ import QtQuick 2.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 
-
 Item {
     id:stage
     anchors.centerIn: parent
