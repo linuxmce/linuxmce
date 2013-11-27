@@ -986,11 +986,12 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
 
     i_current_mediaType=iPK_MediaType;
+    setMediaType(iPK_MediaType);
     //**TODO - create a function that keeps a running track of the current room. like, the location info class or something.
     // it should unify the current location and media data in to one easily accesible item that update automatically on changes.
     map <int, string> mds;
     GetDevicesByTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST, &mds);
-    setMediaType(iPK_MediaType);
+
     /* string::size_type pos=0;
     m_dwPK_Device_NowPlaying = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_NowPlaying_Video = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
@@ -2975,8 +2976,8 @@ void DCE::qOrbiter::PauseMedia()
 
 void DCE::qOrbiter::requestMediaPlaylist()
 {
-    if(i_current_mediaType !=4||i_current_mediaType !=5  ){
-        qDebug() << "not getting media playlist";
+    if(i_current_mediaType > 31 ){
+        qDebug() << "not getting media playlist because mediatype is " << i_current_mediaType;
         return ;
     }
 
