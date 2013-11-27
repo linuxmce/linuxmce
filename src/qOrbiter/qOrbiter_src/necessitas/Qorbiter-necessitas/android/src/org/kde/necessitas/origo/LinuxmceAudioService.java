@@ -104,8 +104,8 @@ OnPreparedListener {
 	public void onCreate(){
 		// Create a new media player and set the listeners
 		mp=null;
-		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-		StrictMode.setThreadPolicy(policy);
+                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                StrictMode.setThreadPolicy(policy);
 		Log.d(TAG, "Created Linuxmce Audio Service");	
 		showNotification("Starting Up Audio Service");
 	}

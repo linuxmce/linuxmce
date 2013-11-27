@@ -985,6 +985,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
 
+    i_current_mediaType=iPK_MediaType;
     //**TODO - create a function that keeps a running track of the current room. like, the location info class or something.
     // it should unify the current location and media data in to one easily accesible item that update automatically on changes.
     map <int, string> mds;
@@ -1050,7 +1051,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit mediaTypeChanged(iPK_MediaType);
         emit stopTimeCode();
     } else {
-        if(iPK_MediaType ==(4||5)){
+
+        if(iPK_MediaType ==4|| iPK_MediaType==5){
             QString port = QString::fromStdString(GetCurrentDeviceData(m_dwPK_Device_NowPlaying, 171));
             qWarning() << "Device port==>" << port;
             checkTimeCode(m_dwPK_Device_NowPlaying);
@@ -2973,7 +2975,7 @@ void DCE::qOrbiter::PauseMedia()
 
 void DCE::qOrbiter::requestMediaPlaylist()
 {
-    if(i_current_mediaType !=(4||5)  ){
+    if(i_current_mediaType !=4||i_current_mediaType !=5  ){
         qDebug() << "not getting media playlist";
         return ;
     }
@@ -3083,7 +3085,7 @@ void qOrbiter::checkTimeCode(int npDevice)
         }
     }
 
-    if(i_current_mediaType==(4||5) && !sIPAddress.empty() ){
+    if((i_current_mediaType==4||i_current_mediaType==5) && !sIPAddress.empty() ){
         emit updateTimeCode(QString::fromStdString(sIPAddress), 12000);
     }
     else
