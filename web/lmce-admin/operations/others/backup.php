@@ -78,12 +78,12 @@ function backup($output,$dbADO) {
 			
 			
 			if(ereg('Restore point created.',$result)){
-				$backupFile='/home/backup/download/backup-'.date('Y-m-d').'.tar.bz2';
+				$backupFile='/home/backup/download/backup-'.date('Y-m-d-H-i').'.tar.gz';
 				if(file_exists($backupFile)){
 					header("Location: index.php?section=backup&msg=".urlencode($result));
 					exit();
 				}else{
-					header("Location: index.php?section=backup&error=".urlencode($TEXT_BACKUP_FILE_NOT_FOUND_CONST));
+					header("Location: index.php?section=backup&error=".urlencode($TEXT_BACKUP_FILE_NOT_FOUND_CONST." - ".$backupFile));
 					exit();
 				}
 			}else{
