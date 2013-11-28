@@ -17,7 +17,7 @@ Item {
 
     Image {
         id: media_button_image
-        source: "../img/chkbxempty.png"
+        source: ""
         anchors.fill: parent
     }
 

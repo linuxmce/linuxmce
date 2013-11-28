@@ -72,6 +72,23 @@ Item {
                 width: itemW - 10
                 buttonText:name
                 textSize: 38
+                onHeld: {
+                    if(modelName==="currentRoomLights")
+                    {scenarioPopup.floorplanType = 2}
+                    else if(modelName==="currentRoomMedia")
+                    { scenarioPopup.floorplanType = 5}
+                    else if(modelName==="currentRoomClimate")
+                    {scenarioPopup.floorplanType  = 3}
+                    else if(modelName==="currentRoomTelecom")
+                    { scenarioPopup.floorplanType = 7}
+                    else if(modelName==="currentRoomSecurity")
+                    {scenarioPopup.floorplanType = 4} //can also be 1?
+                    else if (modelName==="advanced"){ manager.gotoQScreen("Screen_44.qml") }
+                    manager.showfloorplan(floorplantype)
+                    manager.setFloorplanType(floorplantype)
+                  //  manager.gotoQScreen("Screen_"+scenarioPopup.floorplanType+".qml")
+                }
+
                 onActivated: {
                     if(manager.currentScreen==="Screen_1.qml"){
                         if(modelName==="currentRoomLights")

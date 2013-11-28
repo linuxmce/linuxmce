@@ -2,8 +2,12 @@ import QtQuick 1.1
 import "../../../../skins-common/lib/handlers"
 Item {
     id:mediaPlaybackBase
-    width: manager.appWidth
-    height: manager.appHeight
+    anchors{
+        top:parent.top
+        left:parent.left
+        right:parent.right
+        bottom:parent.Bottom
+    }
     focus:false
     state:"controls"
     property Item controlSourceItem:AudioRemote{id:remote}
@@ -125,7 +129,7 @@ Item {
                 target: metadataContainer
                 visible:true
                 focus:true
-                  x:0
+                x:0
             }
 
             PropertyChanges{
@@ -155,7 +159,7 @@ Item {
             }
             PropertyChanges {
                 target: metadataContainer
-//                visible:false
+                //                visible:false
                 enabled:false
                 focus:false
                 x:templatePlaylist.psPos+manager.appWidth

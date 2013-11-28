@@ -3,8 +3,12 @@ import "../components"
 import "../../../../skins-common/lib/components"
 Item{
     id:phoneFloorplanLayout
-    height: manager.appHeight
-    width:manager.appWidth
+   anchors{
+    top:parent.top
+    bottom:parent.bottom
+    left:parent.left
+    right:parent.right
+   }
     focus:true
     property bool rotated:manager.b_orientation
     property string imageDir:""

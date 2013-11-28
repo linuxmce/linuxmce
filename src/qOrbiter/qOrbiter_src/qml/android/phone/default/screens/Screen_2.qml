@@ -3,5 +3,5 @@ import "../components"
 
 PhoneFloorplanLayout{
     id:lights
-
+Component.onCompleted: floorplan_devices.clearAllSelections()
 }

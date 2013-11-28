@@ -3,6 +3,7 @@ import "../components"
 
 MediaPlaybackTemplate {
     id: storedAudioRemote
+    objectName: "screen_54"
 
 //    ButtonSq {
 //        id: buttonsq1

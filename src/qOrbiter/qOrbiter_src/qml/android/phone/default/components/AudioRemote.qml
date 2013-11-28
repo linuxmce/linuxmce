@@ -1,89 +1,68 @@
 import QtQuick 1.0
 import "../../../../skins-common/lib/handlers"
 
-Rectangle {
-    width: childrenRect.width
-    height: childrenRect.height
-    color: "transparent"
-
-    Image {
-        id: overlay
-        source: "../img/widegreyshape.png"
-        width: manager.appWidth
-        height: style.stdbuttonh
-        anchors.centerIn: parent
-
+Item {
+    id:audio_remote
+    width: manager.appWidth
+    height: manager.b_orientation ? scaleY(8) : scaleY(12)
+    Rectangle{
+        anchors.fill: parent
+        color: "green"
+        opacity: .25
     }
 
-    Row
-    {
+    Row{
         spacing: scaleX(2)
-        width: manager.appWidth
-        height: overlay.height
-        anchors.verticalCenter: overlay.verticalCenter
-        anchors.horizontalCenter: overlay.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        anchors{
+            left:parent.left
+            right:parent.right
+        }
+        height: parent.height
 
-        MediaButton {
+        StyledButton {
             id:back
-            color: "transparent"
-            media_but_txt: "back"
-
+            buttonText: "back"
             anchors.verticalCenter: parent.verticalCenter
-            ChangeTrackHandler{
-                trackDirection: "-1"
-            }
-
+            onActivated: {manager.newTrack("-1")}
         }
 
-        MediaButton {id:rw ;
-            color: "transparent"
-            media_but_txt: "RW"
-
+        StyledButton {
+            id:rewind
+            buttonText: "RW"
             anchors.verticalCenter: parent.verticalCenter
-            PlaybackSpeedHandler {
-                speed:-2
+            onActivated: {
+                manager.setPlaybackSpeed(-2)
             }
         }
 
-        MediaButton {
+        StyledButton {
             id:play ;
-            color: "transparent"
-            media_but_txt: "Play"
-
             anchors.verticalCenter: parent.verticalCenter
-            PauseButtonHandler {
-            }
+            buttonText:dceTimecode.playbackSpeed !==0 ? qsTr("Pause") : qsTr("Play")
+            onActivated: manager.pauseMedia()
+
         }
 
-        MediaButton {id:ff ;
-            color: "transparent"
-            media_but_txt: "FF"
-
+        StyledButton {
+            id:ff ;
+            buttonText: "FF"
             anchors.verticalCenter: parent.verticalCenter
-            PlaybackSpeedHandler{
-                speed:2
-            }
-
-        }
-        MediaButton {id:next ;
-            color: "transparent"
-            media_but_txt: "Next";
-
-            anchors.verticalCenter: parent.verticalCenter
-            ChangeTrackHandler {
-                trackDirection: "+1"
-            }
+            onActivated: manager.setPlaybackSpeed(2)
         }
 
+        StyledButton {
+            id:next ;
+            buttonText: "Next";
+            anchors.verticalCenter: parent.verticalCenter
+            onActivated: manager.changedPlaylistPosition("+1")
+        }
 
-        MediaButton {
+        StyledButton {
             id: stop
-            color: "transparent"
-            media_but_txt: "stop"
-
+            buttonText: "stop"
             anchors.verticalCenter: parent.verticalCenter
-            StopMediaHandler {
-            }
+            onActivated: manager.stopMedia()
         }
     }
 }

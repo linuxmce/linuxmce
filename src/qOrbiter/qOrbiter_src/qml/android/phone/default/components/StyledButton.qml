@@ -28,6 +28,7 @@ Item{
     property bool useHandler:false
     property bool useBorder:true
     signal activated()
+    signal held()
     Behavior on opacity{
         PropertyAnimation{
             duration: 500
@@ -60,6 +61,7 @@ Item{
         id:fly_trap
         anchors.fill: styled_button
         onReleased: activated()
+        onPressAndHold: held()
     }
 
     Loader{
