@@ -1241,41 +1241,10 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 					int PK_Parent_Device = 0;
 					int deviceTemplate = GetDeviceTemplate(node, value, PK_Parent_Device);
 					LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> NOT FOUND! Adding new device: id = %s, dt = %d", sId.c_str(), deviceTemplate);
-/*					AddDevice(PK_Parent_Device, sId, deviceTemplate); */
+					AddDevice(PK_Parent_Device, sId, deviceTemplate);
 
 				}
 			}
-/*			// TODO : create correct ID, also see TODO below
-			string sId = StringUtils::itos(node->m_nodeId);
-			if ( value.GetInstance() > 1 ) {
-				sId += "/" + StringUtils::itos(value.GetInstance());
-			}
-			// Check that this device has not been added since the last reload
-			// (in which case it wont be returned from GetDeviceForPortChannel)
-			if ( m_setRecentlyAddedDevices.find(sId) != m_setRecentlyAddedDevices.end() )
-			{
-				LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Has been added since last reload - reload required!");
-			} else {
-				if (pDevice_Inst == NULL)
-				{
-					int PK_Parent_Device = 0;
-					LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> NOT FOUND! Adding new device!");
-					int deviceTemplate = GetDeviceTemplate(node, value, PK_Parent_Device);
-*/			/** TODO: Should ideally add devices for every value we are interested in, but there are some problems:
-			 * Some devices have duplicate instance numbers for a second command class 
-			 * (Fibaro universal sensor, for instance, has instance 1 and 2 for both binary sensor and for temperature sensor)
-			 * This is solved by adding the command class to the port/channel id string.
-			 * But we dont want to add all values in a device, only the ones that are interesting for us
-			 * There are several command classes for the first instance(main instance) - this is still to be considered only one device, so how to
-			 * tell the difference between those ccs and the ccs we need to add several devices for?
-			 * - probably using the CC itself, binary and multilevel sensor is likely separate devices
-			 * In some cases there are two CCs on instance 1 that still belongs to the same device
-			 * (HSM100 has a binary sensor CC and a multilevel sensor on instance 1, and they belong to the same device, motion detector)
-			 * So in that case the above does not fully apply.
-			 */
-/*					AddDevice(PK_Parent_Device, sId, deviceTemplate);
-				}
-				}*/
 		}
 	}
 }
