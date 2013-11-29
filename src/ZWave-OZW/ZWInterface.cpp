@@ -18,6 +18,7 @@ ZWInterface::ZWInterface()
 {
 	m_pZWave = NULL;
 	g_homeId = 0;
+	m_iPolledValues = 0;
 	g_initFailed = false;
 	m_bInitDone = false;
 	m_sLogFile = "";
@@ -124,8 +125,6 @@ bool ZWInterface::Init(ZWConfigData* data) {
 		
 		// int ourNodeId = Manager::Get()->GetControllerNodeId(g_homeId);
 
-		OpenZWave::Manager::Get()->SetPollInterval(2000, true);
-
 		return true;
 	}
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::Init() init failed!");
@@ -147,6 +146,15 @@ bool ZWInterface::IsReady() {
 	bool ready = m_bInitDone && !g_initFailed;
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::IsReady() returns %s", ready ? "true" : "false");
 	return ready;
+}
+
+void ZWInterface::UpdatePolling() {
+	// Set the poll interval
+	int32 interval = m_iPolledValues * 5000; // make sure we don't poll a value more often than every 5 second.
+	if (interval < 60000) {
+		interval = 60000; // don't do a polling cycle more often than once a minute
+	}
+	OpenZWave::Manager::Get()->SetPollInterval(interval, false);
 }
 
 void ZWInterface::OnNotification_static(OpenZWave::Notification const* _notification, void* _context) {
@@ -275,6 +283,11 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 	{
 		if( NodeInfo* nodeInfo = GetNodeInfo( _notification ) )
 		{
+			if (m_iPolledValues > 0) {
+				m_iPolledValues--;
+			}
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Now polling %d values", m_iPolledValues);
+			UpdatePolling();
 			nodeInfo->m_polled = false;
 		}
 		break;
@@ -284,6 +297,9 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 	{
 		if( NodeInfo* nodeInfo = GetNodeInfo( _notification ) )
 		{
+			m_iPolledValues++;
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Now polling %d values", m_iPolledValues);
+			UpdatePolling();
 			nodeInfo->m_polled = true;
 		}
 		break;

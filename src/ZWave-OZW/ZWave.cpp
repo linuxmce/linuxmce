@@ -37,6 +37,21 @@ ZWave::ZWave(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool b
 	
 	m_dwPK_ClimateInterface = 0;
 	m_dwPK_SecurityInterface = 0;
+
+	// Value labels we are interested in and their polling intensities
+	m_mapLabels["Switch"] = 1;
+	m_mapLabels["Voltage"] = 5;
+	m_mapLabels["Temperature"] = 10;
+	m_mapLabels["Luminance"] = 10;
+	m_mapLabels["Mode"] = 10;
+	m_mapLabels["Energy"] = 10;
+	m_mapLabels["Power"] = 10;
+	m_mapLabels["Relative Humidity"] = 10;
+	m_mapLabels["Setpoint"] = 20;
+	m_mapLabels["Heating 1"] = 20;
+	m_mapLabels["Cooling 1"] = 20;
+	m_mapLabels["Auto Changeover"] = 20;
+	m_mapLabels["Battery Level"] = 255;
 }
 
 //<-dceag-const2-b->
@@ -106,8 +121,8 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Received command for child");
 	string nodeInstance = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 	uint8 node_id;
-	uint8 instance_id, commandClass;
-	PortChannelToNodeCCInstance(nodeInstance, node_id, commandClass, instance_id);
+	uint8 instance_id, commandClass, iIndex;
+	PortChannelToNodeCCInstance(nodeInstance, node_id, commandClass, instance_id, iIndex);
 	if (node_id > 0 && node_id <= 233) {
 		sCMD_Result = "OK";
 		int level,duration,temp,fan;
@@ -650,10 +665,10 @@ void ZWave::CMD_Set_Polling_State(int iPK_Device,string sValue_To_Assign,bool bR
 		uint8 nodeId = 0;
 		if (iPK_Device > 0)
 		{
-			uint8 iInstance = 1, iCC = 0;
+		  uint8 iInstance = 1, iCC = 0, iIndex;
 			DeviceData_Impl* pChildDevice = m_pData->FindChild(iPK_Device);
 		        string tmp_node_id = pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
-			PortChannelToNodeCCInstance(tmp_node_id, nodeId, iCC, iInstance);
+			PortChannelToNodeCCInstance(tmp_node_id, nodeId, iCC, iInstance, iIndex);
 			OpenZWave::ValueID* valueId = m_pZWInterface->GetValueIdByNodeInstanceLabel(nodeId, iInstance, sValue_To_Assign);
 			if (valueId != NULL)
 			{
@@ -796,23 +811,12 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			// Do we want this value polled
 			OpenZWave::ValueID id = _notification->GetValueID();
 			string label = OpenZWave::Manager::Get()->GetValueLabel(id);
-			if ( label == "Switch" || label == "Battery Level" || label == "Temperature" || label == "Luminance" ||
-			     label == "Power" || label == "Voltage" || label == "Energy" ||
-			     label == "Setpoint" || label == "Heating 1" || label == "Cooling 1" || label == "Auto Changeover" ||
-			     label == "Mode" )
-			{
+			if (m_mapLabels.find(label) != m_mapLabels.end()) {
 				if (m_bPollingEnabled)
 				{
 					// We automatically poll interesting values
 					// intensity = poll this value every X poll cycle/interval
-					uint8 intensity = 1;
-					if ( label == "Battery Level" ) {
-						intensity = 255; // battery level does not change very often
-					} else if ( label == "Temperature" || label == "Mode" || label == "Energy" || label == "Power") {
-						intensity = 10; // neither does temperature
-					} else if ( label == "Setpoint" || label == "Heating 1" || label == "Cooling 1" || label == "Auto Changeover" ) {
-						intensity = 15;
-					}
+					uint8 intensity = m_mapLabels.find(label)->second;
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() ValueAdded: Set polling for node %d/%d/%d, value label %s, intensity %d", _notification->GetNodeId(), id.GetCommandClassId(), id.GetInstance(), label.c_str(), intensity);
 					OpenZWave::Manager::Get()->EnablePoll(id, intensity);
 				} else if (!OpenZWave::Manager::Get()->isPolled(id)) {
@@ -837,7 +841,7 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			OpenZWave::ValueID id = _notification->GetValueID();
 			string label = OpenZWave::Manager::Get()->GetValueLabel(id);
 
-			int PKDevice = GetPKDevice(nodeInfo->m_nodeId, id.GetCommandClassId(), id.GetInstance());
+			int PKDevice = GetPKDevice(nodeInfo->m_nodeId, id.GetCommandClassId(), id.GetInstance(), id.GetIndex());
 			if (PKDevice > 0)
 			{
 				if ( label == "Battery Level" )
@@ -872,6 +876,10 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 					float level = 0;
 					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
 					SendBrightnessChangedEvent(PKDevice, level);
+				} else if ( label == "Relative Humidity" ) {
+					float level = 0;
+					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
+					SendRelativeHumidityChangedEvent(PKDevice, level);
 				} else if ( label == "Power" ) {
 					float level = 0;
 					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
@@ -905,7 +913,7 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			string label = OpenZWave::Manager::Get()->GetValueLabel(id);
 			uint8 value = _notification->GetEvent();
 
-			int PKDevice = GetPKDevice(nodeInfo->m_nodeId, id.GetCommandClassId(), id.GetInstance());
+			int PKDevice = GetPKDevice(nodeInfo->m_nodeId, id.GetCommandClassId(), id.GetInstance(), id.GetIndex());
 			if (PKDevice > 0)
 			{
 				uint8 typeGeneric = OpenZWave::Manager::Get()->GetNodeGeneric(_notification->GetHomeId(), _notification->GetNodeId());
@@ -964,7 +972,7 @@ ZWConfigData* ZWave::GetConfigData()
 	return new ZWConfigData(port);
 }
 
-void ZWave::PortChannelToNodeCCInstance(string pc, uint8 &iNodeId, uint8 &iCC, uint8 &iInstance)
+void ZWave::PortChannelToNodeCCInstance(string pc, uint8 &iNodeId, uint8 &iCC, uint8 &iInstance, uint8 &iIndex)
 {
 	// handle nodeid/cc/instance
 	if (pc.find("/") != string::npos) {
@@ -978,6 +986,12 @@ void ZWave::PortChannelToNodeCCInstance(string pc, uint8 &iNodeId, uint8 &iCC, u
 			i++;
 		}
 		iInstance = atoi(vectNI[i].c_str());
+		i++;
+		if (vectNI.size() > 3)
+		{
+			iIndex = atoi(vectNI[i].c_str());
+			i++;
+		}
 	} else {
 	        iNodeId = atoi(pc.c_str());
 		iInstance = 1;
@@ -985,13 +999,18 @@ void ZWave::PortChannelToNodeCCInstance(string pc, uint8 &iNodeId, uint8 &iCC, u
 
 }
 
-DeviceData_Impl *ZWave::GetDevice(int iNodeId, uint8 iCommandClass, int iInstanceID) {
+DeviceData_Impl *ZWave::GetDevice(int iNodeId, uint8 iCommandClass, int iInstanceID, uint8 iIndex) {
         DeviceData_Impl *pChildDevice = NULL;
 
 	if ( iNodeId <= 0 ) return NULL;
 	string sInternalIDInst = StringUtils::itos(iNodeId);
 	if (iInstanceID > 0) {
-	        sInternalIDInst += "/" + StringUtils::itos(iCommandClass) + "/" + StringUtils::itos(iInstanceID);
+	  sInternalIDInst += "/" + StringUtils::itos(iCommandClass) + "/" + StringUtils::itos(iInstanceID) + "/" + StringUtils::itos(iIndex);
+	}
+	// try with all ids first, then without iIndex
+	pChildDevice = GetDeviceForPortChannel(sInternalIDInst);
+	if (pChildDevice == NULL) {
+		sInternalIDInst += "/" + StringUtils::itos(iCommandClass) + "/" + StringUtils::itos(iInstanceID);
 	}
 	pChildDevice = GetDeviceForPortChannel(sInternalIDInst);
 	// if not found with instance id, look up without command class first, then try without instance id
@@ -1046,8 +1065,8 @@ DeviceData_Impl *ZWave::GetDeviceForPortChannel(string sPortChannel) {
 	return NULL;
 }
 
-int ZWave::GetPKDevice(int iNodeId, uint8 iCommandClass, int iInstanceID) {
-	DeviceData_Impl *pDevice = GetDevice(iNodeId, iCommandClass, iInstanceID);
+int ZWave::GetPKDevice(int iNodeId, uint8 iCommandClass, int iInstanceID, uint8 iIndex) {
+	DeviceData_Impl *pDevice = GetDevice(iNodeId, iCommandClass, iInstanceID, iIndex);
 	if (pDevice != NULL)
 		return pDevice->m_dwPK_Device;
 	else
@@ -1123,8 +1142,8 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 		{	
 			OpenZWave::ValueID value = *valIt;
 			string label = OpenZWave::Manager::Get()->GetValueLabel(value);
-			DeviceData_Impl* pDevice_Inst = GetDevice(node->m_nodeId, value.GetCommandClassId(), value.GetInstance());
-			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "   - Instance=%d, class=%d, label=%s, type=%s (PK_Device=%d)", value.GetInstance(), value.GetCommandClassId(), label.c_str(), OpenZWave::Value::GetTypeNameFromEnum(value.GetType()), pDevice_Inst != NULL ? pDevice_Inst->m_dwPK_Device : 0);
+			DeviceData_Impl* pDevice_Inst = GetDevice(node->m_nodeId, value.GetCommandClassId(), value.GetInstance(), value.GetIndex());
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "   - Instance=%d, class=%d, index=%d, label=%s, type=%s (PK_Device=%d)", value.GetInstance(), value.GetCommandClassId(), value.GetIndex(), label.c_str(), OpenZWave::Value::GetTypeNameFromEnum(value.GetType()), pDevice_Inst != NULL ? pDevice_Inst->m_dwPK_Device : 0);
 
 			// TODO : create correct ID, also see TODO below
 			string sId = StringUtils::itos(node->m_nodeId);
@@ -1392,4 +1411,11 @@ void ZWave::SendSetpointChangedEvent(unsigned int PK_Device, float value)
 	string sVal = StringUtils::Format("%d", value);
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending setpoint changed event from PK_Device %d, value %s",PK_Device, sVal.c_str());
 	SendEvent(PK_Device, EVENT_Thermostat_Set_Point_Chan_CONST, EVENTPARAMETER_Value_CONST, sVal.c_str());
+}
+
+void ZWave::SendRelativeHumidityChangedEvent(unsigned int PK_Device, float value)
+{
+	string sVal = StringUtils::Format("%d", value);
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending  Humidity Changed event from PK_Device %d, value %s",PK_Device, sVal.c_str());
+	SendEvent(PK_Device, EVENT_Humidity_Changed_CONST, EVENTPARAMETER_Value_CONST, sVal.c_str());
 }

@@ -58,6 +58,7 @@ namespace DCE
 		pthread_mutex_t g_criticalSection;
 
 		list<NodeInfo*> g_nodes;
+		uint32 m_iPolledValues;
 
 		ZWave* m_pZWave;
 		string m_sLogFile;
@@ -77,7 +78,7 @@ namespace DCE
 		bool RequireRestart(ZWConfigData* data);
 		bool IsReady();
 		void SetLogFileName(string sFileName) { m_sLogFile = sFileName; };
-
+		void UpdatePolling();
 		static void OnNotification_static(OpenZWave::Notification const* _notification, void* _context);
 		void OnNotification(OpenZWave::Notification const* _notification);
 

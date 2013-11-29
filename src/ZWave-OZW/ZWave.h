@@ -45,6 +45,7 @@ namespace DCE
 		bool m_bPollingEnabled; // Enable automatic polling of values
 		long m_dwPK_ClimateInterface;
 		long m_dwPK_SecurityInterface;
+		map<string, int> m_mapLabels;
 		// Private methods
 
 		static void controller_update(OpenZWave::Driver::ControllerState state, OpenZWave::Driver::ControllerError error, void *context);
@@ -57,16 +58,16 @@ public:
 		void SetInterface(ZWInterface* pZWInterface);
 		void SetReady(bool ready) { m_bReady = ready; }
 		bool IsReady() { return m_bReady; }
-		DeviceData_Impl* GetDevice(int iNodeId, uint8 iCommandClass, int iInstanceID);
+		DeviceData_Impl* GetDevice(int iNodeId, uint8 iCommandClass, int iInstanceID, uint8 iIndex);
 		DeviceData_Impl *GetDeviceForPortChannel(string sPortChannel);
-		int GetPKDevice(int iNodeId, uint8 iCommandClass, int iInstanceID);
+		int GetPKDevice(int iNodeId, uint8 iCommandClass, int iInstanceID, uint8 iIndex);
 		int AddDevice(int parent, string sId, int PK_DeviceTemplate);
 		void DeleteDevice(unsigned long PK_Device);
 		bool DeleteDevicesForNode(int iNodeId);
 		void DoNodeToDeviceMapping();
 		void MapNodeToDevices(NodeInfo* node);
 		int GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_Parent_Device);
-		void PortChannelToNodeCCInstance(string pc, uint8 &nodeId, uint8 &cc, uint8 &instance);
+		void PortChannelToNodeCCInstance(string pc, uint8 &nodeId, uint8 &cc, uint8 &instance, uint8 &iIndex);
 
 		// Internal helper methods
 		bool SetThermostatMode(uint8 node_id, uint8 instance_id, string mode);
@@ -83,6 +84,7 @@ public:
 		void SendVoltageChangedEvent(unsigned int PK_Device, int value);
 		void SendLightChangedEvents(unsigned int PK_Device, int value);
 		void SendBrightnessChangedEvent(unsigned int PK_Device, float value);
+		void SendRelativeHumidityChangedEvent(unsigned int PK_Device, float value);
 		void SendSetpointChangedEvent(unsigned int PK_Device, float value);
 //<-dceag-const-b->
 public:
