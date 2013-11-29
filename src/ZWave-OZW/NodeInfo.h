@@ -17,6 +17,8 @@ namespace DCE {
 	public:
 		uint32			m_homeId;
 		uint8			m_nodeId;
+		uint8			m_generic;
+		uint8			m_specific;
 		bool			m_polled;
 		list<OpenZWave::ValueID>	m_values;
 	};

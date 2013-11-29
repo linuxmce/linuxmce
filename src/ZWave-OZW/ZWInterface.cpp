@@ -195,6 +195,8 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 		NodeInfo* nodeInfo = new NodeInfo();
 		nodeInfo->m_homeId = _notification->GetHomeId();
 		nodeInfo->m_nodeId = _notification->GetNodeId();
+		nodeInfo->m_generic = OpenZWave::Manager::Get()->GetNodeGeneric(nodeInfo->m_homeId, nodeInfo->m_nodeId);
+		nodeInfo->m_specific = OpenZWave::Manager::Get()->GetNodeSpecific(nodeInfo->m_homeId, nodeInfo->m_nodeId);
 		nodeInfo->m_polled = false;		
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Node Added nodeId = %d", nodeInfo->m_nodeId);
 		g_nodes.push_back( nodeInfo );
@@ -315,6 +317,21 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : m_pZWave == NULL or m_pZWave->IsReady == false, possible lost notification");
 	
 	UnLock();
+}
+
+OpenZWave::ValueID* ZWInterface::GetValueIdByNodeInstanceCCIndex(int iNodeId, int iInstance, int iCC, int iIndex)
+{
+	NodeInfo* pNodeInfo = GetNodeInfo(g_homeId, iNodeId);
+	if ( pNodeInfo != NULL )
+	{
+		for( list<OpenZWave::ValueID>::iterator it = pNodeInfo->m_values.begin(); it != pNodeInfo->m_values.end(); ++it )
+		{
+			string lab = OpenZWave::Manager::Get()->GetValueLabel((*it));
+			if ( iInstance == (*it).GetInstance() && iCC == (*it).GetCommandClassId() && iIndex == (*it).GetIndex() )
+				return &(*it);
+		}
+	}
+	return NULL;
 }
 
 OpenZWave::ValueID* ZWInterface::GetValueIdByNodeInstanceLabel(int iNodeId, int iInstance, string label)

@@ -40,6 +40,8 @@ ZWave::ZWave(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool b
 
 	// Value labels we are interested in and their polling intensities
 	m_mapLabels["Switch"] = 1;
+	m_mapLabels["Level"] = 1;
+	m_mapLabels["Sensor"] = -1; // Don't poll, these will send events by themselves (or so they should)
 	m_mapLabels["Voltage"] = 5;
 	m_mapLabels["Temperature"] = 10;
 	m_mapLabels["Luminance"] = 10;
@@ -816,9 +818,12 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 				{
 					// We automatically poll interesting values
 					// intensity = poll this value every X poll cycle/interval
-					uint8 intensity = m_mapLabels.find(label)->second;
-					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() ValueAdded: Set polling for node %d/%d/%d, value label %s, intensity %d", _notification->GetNodeId(), id.GetCommandClassId(), id.GetInstance(), label.c_str(), intensity);
-					OpenZWave::Manager::Get()->EnablePoll(id, intensity);
+					int intensity = m_mapLabels.find(label)->second;
+					if (intensity > 0)
+					{
+						DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::OnNotification() ValueAdded: Set polling for node %d/%d/%d, value label %s, intensity %d", _notification->GetNodeId(), id.GetCommandClassId(), id.GetInstance(), label.c_str(), intensity);
+						OpenZWave::Manager::Get()->EnablePoll(id, intensity);
+					}
 				} else if (!OpenZWave::Manager::Get()->isPolled(id)) {
 					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"ZWave::OnNotification() ValueAdded: Polling not enabled, ignoring node %d/%d/%d, value label %s, You might consider manually setting polling for this value.", _notification->GetNodeId(), id.GetCommandClassId(), id.GetInstance(), label.c_str());
 				}
@@ -916,16 +921,15 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			int PKDevice = GetPKDevice(nodeInfo->m_nodeId, id.GetCommandClassId(), id.GetInstance(), id.GetIndex());
 			if (PKDevice > 0)
 			{
-				uint8 typeGeneric = OpenZWave::Manager::Get()->GetNodeGeneric(_notification->GetHomeId(), _notification->GetNodeId());
 				uint8 typeBasic = OpenZWave::Manager::Get()->GetNodeBasic(_notification->GetHomeId(), _notification->GetNodeId());
-				if  ( typeGeneric == GENERIC_TYPE_SWITCH_REMOTE || typeBasic == BASIC_TYPE_CONTROLLER ) {
+				if  ( nodeInfo->m_generic == GENERIC_TYPE_SWITCH_REMOTE || typeBasic == BASIC_TYPE_CONTROLLER ) {
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed: level = %d", value);
 					SendOnOffEvent (PKDevice, value);
 					
-				} else if (typeGeneric == GENERIC_TYPE_SENSOR_BINARY || typeGeneric == GENERIC_TYPE_SENSOR_MULTILEVEL) {
+				} else if (nodeInfo->m_generic == GENERIC_TYPE_SENSOR_BINARY || nodeInfo->m_generic == GENERIC_TYPE_SENSOR_MULTILEVEL) {
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"This is a binary sensor, so we send sensor tripped event: value = %d", value);
 					SendSensorTrippedEvent(PKDevice, value);
-				} else if (typeGeneric == GENERIC_TYPE_SWITCH_BINARY || typeGeneric == GENERIC_TYPE_SWITCH_MULTILEVEL) {
+				} else if (nodeInfo->m_generic == GENERIC_TYPE_SWITCH_BINARY || nodeInfo->m_generic == GENERIC_TYPE_SWITCH_MULTILEVEL) {
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed event: value = %d", value);
 					SendLightChangedEvents (PKDevice, value);
 				}
@@ -1003,14 +1007,12 @@ DeviceData_Impl *ZWave::GetDevice(int iNodeId, uint8 iCommandClass, int iInstanc
         DeviceData_Impl *pChildDevice = NULL;
 
 	if ( iNodeId <= 0 ) return NULL;
-	string sInternalIDInst = StringUtils::itos(iNodeId);
-	if (iInstanceID > 0) {
-	  sInternalIDInst += "/" + StringUtils::itos(iCommandClass) + "/" + StringUtils::itos(iInstanceID) + "/" + StringUtils::itos(iIndex);
-	}
+	string sInternalIDInst = "";
 	// try with all ids first, then without iIndex
+	sInternalIDInst = StringUtils::itos(iNodeId) + "/" + StringUtils::itos(iCommandClass) + "/" + StringUtils::itos(iInstanceID) + "/" + StringUtils::itos(iIndex);
 	pChildDevice = GetDeviceForPortChannel(sInternalIDInst);
 	if (pChildDevice == NULL) {
-		sInternalIDInst += "/" + StringUtils::itos(iCommandClass) + "/" + StringUtils::itos(iInstanceID);
+		sInternalIDInst = StringUtils::itos(iNodeId) + "/" + StringUtils::itos(iCommandClass) + "/" + StringUtils::itos(iInstanceID);
 	}
 	pChildDevice = GetDeviceForPortChannel(sInternalIDInst);
 	// if not found with instance id, look up without command class first, then try without instance id
@@ -1142,10 +1144,108 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 		{	
 			OpenZWave::ValueID value = *valIt;
 			string label = OpenZWave::Manager::Get()->GetValueLabel(value);
+			// This will get a device that matches any part of the ID string, so it will match the node most close in terms
+			// of CC, instance and index. And it will default to the main device with only nodeID in its ID
 			DeviceData_Impl* pDevice_Inst = GetDevice(node->m_nodeId, value.GetCommandClassId(), value.GetInstance(), value.GetIndex());
-			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "   - Instance=%d, class=%d, index=%d, label=%s, type=%s (PK_Device=%d)", value.GetInstance(), value.GetCommandClassId(), value.GetIndex(), label.c_str(), OpenZWave::Value::GetTypeNameFromEnum(value.GetType()), pDevice_Inst != NULL ? pDevice_Inst->m_dwPK_Device : 0);
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "   - Instance=%d, class=%d, index=%d, label=%s, type=%s", value.GetInstance(), value.GetCommandClassId(), value.GetIndex(), label.c_str(), OpenZWave::Value::GetTypeNameFromEnum(value.GetType()));
 
-			// TODO : create correct ID, also see TODO below
+			bool bAddDevice = false;
+			string sId = "";
+			// Did we find a device?  
+			if (pDevice_Inst == NULL && m_setRecentlyAddedDevices.find(StringUtils::itos(node->m_nodeId)) == m_setRecentlyAddedDevices.end() )
+			{
+				// None found and none added recently, that means that there are no main device for this node and we need to add one
+				bAddDevice = true;
+				sId = StringUtils::itos(node->m_nodeId); // add using main node ID
+			} else {
+				// some device found or has been added recently (since last reload)
+				string foundId = "";
+				if (pDevice_Inst != NULL) {
+					LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "    => Found Device = %d", pDevice_Inst->m_dwPK_Device);
+					foundId = pDevice_Inst->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+				}
+
+				// Is the value mapped to this valueid
+				sId = StringUtils::itos(node->m_nodeId) + "/" + StringUtils::itos(value.GetCommandClassId()) +
+					(value.GetInstance() > 0 ? "/" + StringUtils::itos(value.GetInstance()) : "") + 
+					(value.GetIndex() > 0 ? "/" + StringUtils::itos(value.GetIndex()) : "");
+				if (foundId != sId)
+				{
+					// found device is not equal to this value, do we need to add it?
+					// check if this value is interesting
+					if (m_mapLabels.find(label) != m_mapLabels.end())
+					{
+						// value is interesting, check if it can be added to the main device or add it as a separate device
+						// By default, all values are connected to main device, but we must check to see if this value
+						// should be a new device. I.e. a Luminance value should not be the same device as a Temperature value
+						if (label == "Temperature" || label  == "Luminance" || label == "Relative Humidity" || label == "Switch" || label == "Level" || label == "Sensor")
+						{
+							// All should be separate devices if instance > 1
+							if (value.GetInstance() > 1)
+							{
+								LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "     * Adding new device as this value has instance > 1");
+								bAddDevice = true;
+							} else
+							{
+								// Temperature should be a separate device if found device is not a thermostat
+								// Luminance, Relative Humidity should be separate if instance > 1 OR found device has a different type/label/DT (found device is the closest one in terms of id string)
+								// Sensor, Level should be separate if instance > 1 : handled above
+								if (label == "Temperature" && node->m_generic != GENERIC_TYPE_THERMOSTAT)
+								{
+									LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "     * Adding new device as this value label is Temperature and the node is not a thermostat");
+									bAddDevice = true;
+								} else {
+									// must also handle adding of nodes, when no device exist - should add all devices at once
+									// and thus we need to also look up in the recentlyaddeddevices set
+									if (pDevice_Inst == NULL)
+									{
+										// Use m_setRecentlyAddedDevices
+										foundId = StringUtils::itos(node->m_nodeId) + "/" + StringUtils::itos(value.GetCommandClassId()) + "/" + StringUtils::itos(value.GetInstance()) + "/" + StringUtils::itos(value.GetIndex());
+										if ( m_setRecentlyAddedDevices.find(foundId) != m_setRecentlyAddedDevices.end() )
+										{
+											foundId = StringUtils::itos(node->m_nodeId) + "/" + StringUtils::itos(value.GetCommandClassId()) + "/" + StringUtils::itos(value.GetInstance());
+											if ( m_setRecentlyAddedDevices.find(foundId) != m_setRecentlyAddedDevices.end() )
+											{
+												foundId = StringUtils::itos(node->m_nodeId) + "/" + StringUtils::itos(value.GetInstance());
+												if ( m_setRecentlyAddedDevices.find(foundId) != m_setRecentlyAddedDevices.end() )
+												{
+													foundId = StringUtils::itos(node->m_nodeId);
+												}
+											}
+										}
+									}
+									uint8 iNodeID, iInstance, iCC, iIndex;
+									PortChannelToNodeCCInstance(foundId, iNodeID, iCC, iInstance, iIndex);
+									OpenZWave::ValueID* foundVal = m_pZWInterface->GetValueIdByNodeInstanceCCIndex(iNodeID, iInstance, iCC, iIndex);
+									if (foundVal != NULL)
+									{
+										string foundLabel = OpenZWave::Manager::Get()->GetValueLabel(*foundVal);
+										if (foundLabel != label)
+										{
+											LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "     * Adding new device as this value label is different from the found one");
+											bAddDevice = true;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			if (bAddDevice)
+			{
+				if ( m_setRecentlyAddedDevices.find(sId) != m_setRecentlyAddedDevices.end() )
+				{
+					LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> id = %s has been added since last reload - reload required!", sId.c_str());
+				} else {
+					int PK_Parent_Device = 0;
+					int deviceTemplate = GetDeviceTemplate(node, value, PK_Parent_Device);
+					LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> NOT FOUND! Adding new device: id = %s, dt = %d", sId.c_str(), deviceTemplate);
+/*					AddDevice(PK_Parent_Device, sId, deviceTemplate); */
+
+				}
+			}
+/*			// TODO : create correct ID, also see TODO below
 			string sId = StringUtils::itos(node->m_nodeId);
 			if ( value.GetInstance() > 1 ) {
 				sId += "/" + StringUtils::itos(value.GetInstance());
@@ -1161,7 +1261,7 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 					int PK_Parent_Device = 0;
 					LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> NOT FOUND! Adding new device!");
 					int deviceTemplate = GetDeviceTemplate(node, value, PK_Parent_Device);
-			/** TODO: Should ideally add devices for every value we are interested in, but there are some problems:
+*/			/** TODO: Should ideally add devices for every value we are interested in, but there are some problems:
 			 * Some devices have duplicate instance numbers for a second command class 
 			 * (Fibaro universal sensor, for instance, has instance 1 and 2 for both binary sensor and for temperature sensor)
 			 * This is solved by adding the command class to the port/channel id string.
@@ -1173,17 +1273,15 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 			 * (HSM100 has a binary sensor CC and a multilevel sensor on instance 1, and they belong to the same device, motion detector)
 			 * So in that case the above does not fully apply.
 			 */
-					AddDevice(PK_Parent_Device, sId, deviceTemplate);
+/*					AddDevice(PK_Parent_Device, sId, deviceTemplate);
 				}
-			}
+				}*/
 		}
 	}
 }
 
 int ZWave::GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_Device_Parent) {
 	int devicetemplate = 0;
-	uint8 generic = OpenZWave::Manager::Get()->GetNodeGeneric(node->m_homeId, node->m_nodeId);
-	uint8 specific = OpenZWave::Manager::Get()->GetNodeSpecific(node->m_homeId, node->m_nodeId);
 	string label = OpenZWave::Manager::Get()->GetValueLabel(value);
 	
 	if ( label == "Temperature" )
@@ -1194,7 +1292,7 @@ int ZWave::GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_D
 		return devicetemplate;
 	}
 
-	switch(generic) {
+	switch(node->m_generic) {
 		case GENERIC_TYPE_GENERIC_CONTROLLER:
 		case GENERIC_TYPE_STATIC_CONTROLLER:
 			devicetemplate = DEVICETEMPLATE_ZWave_Controller_CONST;
@@ -1205,7 +1303,7 @@ int ZWave::GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_D
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Standard_Thermostat");
 			break;
 		case GENERIC_TYPE_SWITCH_MULTILEVEL:
-			switch (specific) {
+			switch (node->m_specific) {
 				case SPECIFIC_TYPE_MOTOR_MULTIPOSITION:
 				case SPECIFIC_TYPE_CLASS_A_MOTOR_CONTROL:
 				case SPECIFIC_TYPE_CLASS_B_MOTOR_CONTROL:
@@ -1244,7 +1342,7 @@ int ZWave::GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_D
 			break;
 		case GENERIC_TYPE_SENSOR_ALARM:
 			// DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "alarm sensor found, specific: %i",specific);
-			switch(specific) {
+			switch(node->m_specific) {
 				case SPECIFIC_TYPE_BASIC_ROUTING_SMOKE_SENSOR:
 				case SPECIFIC_TYPE_ROUTING_SMOKE_SENSOR:
 				case SPECIFIC_TYPE_BASIC_ZENSOR_NET_SMOKE_SENSOR:
