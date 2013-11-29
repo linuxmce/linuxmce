@@ -16,6 +16,7 @@ if [ ! -e /etc/apt/30pluto.pbackup ] ;then
 	fi
 fi
 
+# Apt complains if the .pbackup file is in conf.d
 if [ -e /etc/apt/apt.conf.d/30pluto.pbackup ] ;then
 	rm /etc/apt/apt.conf.d/30pluto.pbackup
 fi
@@ -37,17 +38,17 @@ fi
 ## Generate the /etc/apt/apt.conf.d/30pluto file
 if ! BlacklistConfFiles '/etc/apt/apt.conf.d/30pluto' ;then
 	rm -rf /var/cache/polipo/*
-	pluto_apt_conf='// Pluto apt conf add-on
-APT::Cache-Limit "43554432";
-Dpkg::Options { "--force-confold"; };
-Acquire::http::timeout "10";
-Acquire::ftp::timeout "10";
-APT::Get::AllowUnauthenticated "true";
-'
-	echo -n "$pluto_apt_conf" >/etc/apt/apt.conf.d/30pluto
+	cat <<-EOF >/etc/apt/apt.conf.d/30pluto
+		// Pluto apt conf add-on
+		APT::Cache-Limit "43554432";
+		Dpkg::Options { "--force-confold"; };
+		Acquire::http::timeout "10";
+		Acquire::ftp::timeout "10";
+		APT::Get::AllowUnauthenticated "true";
+		EOF
 fi
 
-## Ouch 
+## Ouch
 chmod 777 /usr/pluto/locks
 
 
@@ -96,7 +97,7 @@ if ! grep -qF 'LogLevels = 1,5,7,8' /etc/pluto.conf ;then
 	echo "LogLevels = 1,5,7,8" >> /etc/pluto.conf
 fi
 
-## Remove dash divertion of /bin/sh
+## Remove dash diversion of /bin/sh
 if [[ -f /bin/sh.distrib ]] ;then
 	mv /bin/sh.distrib /bin/sh || :
 	dpkg-divert --remove /bin/sh || :
@@ -104,19 +105,37 @@ fi
 
 ## Add shortcut to the desktop to get back to LinuxMCE orbiter
 mkdir -p /etc/skel/Desktop
-cat <<eol >/etc/skel/Desktop/LinuxMCE
-[Desktop Entry]
-Encoding=UTF-8
-Version=8.10
-Type=Application
-Exec=/usr/pluto/bin/ActivateOrbiterFromKDE.sh
-Path=/usr/pluto/bin
-Name=Back To LinuxMCE Orbiter
-Icon=gnome-panel-launcher
-eol
+cat <<-EOF >/etc/skel/Desktop/LinuxMCE
+	[Desktop Entry]
+	Encoding=UTF-8
+	Version=8.10
+	Type=Application
+	Exec=/usr/pluto/bin/ActivateOrbiterFromKDE.sh
+	Path=/usr/pluto/bin
+	Name=Back To LinuxMCE Orbiter
+	Icon=gnome-panel-launcher
+	EOF
 
 if [[ -f /root/Desktop ]] ; then
 	rm -f /root/Desktop
 fi
 mkdir -p /root/Desktop
 cp -r /etc/skel/Desktop/* /root/Desktop
+
+# Make sure the old startup scripts no longer exists
+#rm -f /etc/rc{2,3,4,5}.d/{S30Start_X.sh,S93startup-script.sh,S99lmce_launch_manager.sh,S93linuxmce,S99core,S99launch-manager}
+#rm -f /etc/rc2.d/S99kdm
+update-rc.d -f Start_X.sh remove
+update-rc.d -f startup-script.sh remove
+update-rc.d -f lmce_launch_manager.sh remove
+update-rc.d -f core remove
+update-rc.d -f launch-manager remove
+
+# Add a single new startup script.
+#ln -sfv /etc/init.d/linuxmce /etc/rc2.d/S99linuxmce
+#ln -sfv /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
+update-rc.d -f linuxmce remove
+update-rc.d -f linuxmce defaults 99
+
+
+

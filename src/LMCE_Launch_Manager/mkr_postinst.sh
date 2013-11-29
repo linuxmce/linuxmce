@@ -7,7 +7,7 @@ for dir in /home/* ;do
 		if [ -f "$dir/Desktop/lmce_launch_manager.desktop" ]; then
 			# The current lmce_launch_manager is a CLI app.
 			rm "$dir/Desktop/lmce_launch_manager.desktop"
-		fi 
+		fi
 #		ln -s /usr/share/applications/lmce_launch_manager.desktop "$dir/Desktop/lmce_launch_manager.desktop" || :
 #		chmod 666 "$dir/Desktop/lmce_launch_manager.desktop" || :
 	fi
@@ -21,11 +21,3 @@ update-rc.d -f startup-script.sh remove
 update-rc.d -f lmce_launch_manager.sh remove
 update-rc.d -f core remove
 update-rc.d -f launch-manager remove
-update-rc.d -f linuxmce remove
-
-
-# Add a single new startup script.
-#ln -sfv /etc/init.d/linuxmce /etc/rc2.d/S99linuxmce
-#ln -sfv /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
-update-rc.d -f linuxmce remove
-update-rc.d -f linuxmce defaults 99
