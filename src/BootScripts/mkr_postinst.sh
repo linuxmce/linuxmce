@@ -125,17 +125,17 @@ cp -r /etc/skel/Desktop/* /root/Desktop
 # Make sure the old startup scripts no longer exists
 #rm -f /etc/rc{2,3,4,5}.d/{S30Start_X.sh,S93startup-script.sh,S99lmce_launch_manager.sh,S93linuxmce,S99core,S99launch-manager}
 #rm -f /etc/rc2.d/S99kdm
-update-rc.d -f Start_X.sh remove
-update-rc.d -f startup-script.sh remove
-update-rc.d -f lmce_launch_manager.sh remove
-update-rc.d -f core remove
-update-rc.d -f launch-manager remove
+update-rc.d -f Start_X.sh remove >/dev/null
+update-rc.d -f startup-script.sh remove >/dev/null
+update-rc.d -f lmce_launch_manager.sh remove >/dev/null
+update-rc.d -f core remove >/dev/null
+update-rc.d -f launch-manager remove >/dev/null
 
 # Add a single new startup script.
 #ln -sfv /etc/init.d/linuxmce /etc/rc2.d/S99linuxmce
 #ln -sfv /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
 update-rc.d -f linuxmce remove
-update-rc.d -f linuxmce defaults 99
+update-rc.d -f linuxmce start 99 2 3 4 5 .
 
 
 
