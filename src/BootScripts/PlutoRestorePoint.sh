@@ -46,7 +46,7 @@ Restore() {
 		BackupFiles=$(ls $thisDatabase)
 		for thisFile in $BackupFiles
 		do
-			/usr/bin/mysql -u root -D $thisDatabase < $thisFile
+			/usr/bin/mysql -u root -D $thisDatabase < $thisDatabase/$thisFile
 		done
 	done
 
