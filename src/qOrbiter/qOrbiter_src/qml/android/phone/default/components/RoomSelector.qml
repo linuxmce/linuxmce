@@ -1,101 +1,135 @@
 // import QtQuick 1.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
 
-Rectangle {
-    id:genericlist
-    height: childrenRect.height
-    width: genericview.width
-    border.color: "orange"
-    border.width: 1
-    clip: true
-    color:"black"
-    anchors.centerIn: parent
-    property bool subMenu:false
-    property variant subModel
+Item {
+    id:room_selector
+    height: scaleY(80)
+    width: manager.appWidth-10
+
+    Component.onCompleted: {
+        console.log("My active focus is " + activeFocus)
+        forceActiveFocus()
+
+    }
+    Keys.onPressed: {
+        switch(event.key){
+        case Qt.Key_MediaPrevious:
+            if(subMenu){
+            subMenu = false;
+            subModel=[]
+            } else {
+                loadComponent("NullComponent.qml")
+            }
+
+            break;
+
+
+        }
+    }
+
+    property int itemH:manager.appHeight /3 - exit_button.height
+    property int itemW:width / 2
 
     Rectangle{
         id:exit_button
-        height: scaleY(8)
-        width: scaleX(61)
-        anchors.top: genericlist.top
-        color: "transparent"
-        Image {
-            id: headerbg
-            source: "../img/widegreyshape.png"
-            anchors.fill: exit_button
-        }
+        height: scaleY(12)
 
-        Text {
+        anchors{
+            left:parent.left
+            right:parent.right
+            top:parent.top
+        }
+        color: "darkgreen"
+
+        StyledText {
             id: exit
-            text: qsTr("Exit")
-            font.pixelSize: scaleY(3)
+            text: subMenu ? qsTr("Back") : qsTr("Exit")
+            font.pixelSize: manager.b_orientation ? scaleY(3) :scaleY(5)
             anchors.centerIn: parent
+            color: "white"
         }
         MouseArea{
             anchors.fill: parent
-            onClicked:loadComponent("NullComponent.qml")
+            onClicked: subMenu ? subMenu = false : loadComponent("NullComponent.qml")
         }
     }
+    clip: true
 
-    Component{
-        id:delegatemenu
+    anchors.centerIn: parent
+    property bool subMenu:false
+    property variant subModel:[]
 
-
-        Item{
+    GridView{
+        id: genericview
+        visible: !subMenu
+        anchors{
+            top:exit_button.bottom
+            bottom: parent.bottom
+            left:parent.left
+            right:parent.right
+        }
+        model: roomList
+        cellHeight:itemH
+        cellWidth: itemW
+        interactive: true
+        clip:true
+        delegate:
+            Item{
             id:generic_item
-            //important!! these need to be set on an imported component otherwise its appears all wrong!
-            height:  container.height
-            width: container.width
+            height:  itemH- 15
+            width: itemW -15
 
-            Rectangle{
-                id:container
-                width: scaleX(61)
-                height: scaleY(15)
-                border.color: "silver"
-                border.width: 1
-                color:"transparent"
-                Text {
-                    id: generic_label
-                    text:subMenu ? subModel[index].ea_name : name
-                    color: "white"
-                    font.pixelSize: scaleY(5)
-                    anchors.centerIn: container
-                }
-
-
-            }
-
-            MouseArea{
+            StyledButton{
                 anchors.fill: parent
-                onClicked: {
-                    if(subMenu){
-
-                        manager.setActiveRoom(genericview.model[index].room, genericview.model[index].ea_number);
+                buttonText:name
+                onActivated: {
+                    if(ea_list.length===1){
+                        room_selector.subModel = ea_list
+                        manager.setActiveRoom(ea_list[0].room, ea_list[0].ea_number);
                         manager.setBoundStatus(true)
                         loadComponent("NullComponent.qml")
                     }
-                    else
-                    {
-                        genericlist.subModel = ea_list
-                        subMenu = true
+                    else{
+                        room_selector.subModel = ea_list
+                        room_selector.subMenu = true
                     }
                 }
             }
         }
     }
 
-    ListView{
-        id: genericview
-        width: scaleX(61)
-        height: scaleY(50)
-        anchors.top: exit_button.bottom
-        model:subMenu ?  subModel :roomList
-        spacing:1
-        orientation:ListView.Vertical
-        delegate:  delegatemenu
+    GridView{
+        id: ea_display
+        anchors{
+            top:exit_button.bottom
+            bottom: parent.bottom
+            left:parent.left
+            right:parent.right
+        }
+        visible:subMenu
+        model: subModel
+        cellHeight:itemH
+        cellWidth: itemW
         interactive: true
         clip:true
-        // contentHeight: (roomList.count +1) * scaleY(5)
+        delegate:
+            Item{
+            id:generic_room_item
+            height:  itemH- 15
+            width: itemW -15
 
+            StyledButton{
+                anchors.fill: parent
+                buttonText:subModel[index].ea_name
+                onActivated: {
+                    if(subMenu){
+                        manager.setActiveRoom(subModel[index].room, subModel[index].ea_number);
+                        manager.setBoundStatus(true)
+                        loadComponent("NullComponent.qml")
+                    }
+
+                }
+            }
+        }
     }
 }

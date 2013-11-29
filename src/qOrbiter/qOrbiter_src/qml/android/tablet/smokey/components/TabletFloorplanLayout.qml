@@ -2,11 +2,11 @@ import QtQuick 1.0
 import "../../../../skins-common/lib/components"
 Item{
     id:phoneFloorplanLayout
-  anchors{
-   top:parent.top
-bottom: parent.bottom
-  }
-  width: manager.appWidth
+    anchors{
+        top:parent.top
+        bottom: parent.bottom
+    }
+    width: manager.appWidth
     focus:true
     property bool rotated:manager.b_orientation
     property string imageDir:""
@@ -39,8 +39,8 @@ bottom: parent.bottom
 
 
         for (var prop in floorplan_devices.selectedDevices){
-//            console.log(prop)
-//            console.log(floorplan_devices.selectedDevices[prop])
+            //            console.log(prop)
+            //            console.log(floorplan_devices.selectedDevices[prop])
             selections.append({"device":prop, "name":floorplan_devices.selectedDevices[prop]})
         }
     }
