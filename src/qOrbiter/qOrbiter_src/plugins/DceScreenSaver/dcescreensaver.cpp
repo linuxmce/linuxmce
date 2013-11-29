@@ -106,7 +106,7 @@ void DceScreenSaver::processImageData(QNetworkReply *r)
         intervalTimer->start(interval);
     }else{
         surface =currentImage;
-        currentImage= t.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::FastTransformation);
+        currentImage= t.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
     }
 
     startFadeTimer(2500);
