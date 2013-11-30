@@ -20,13 +20,16 @@ contains(QT_VERSION,5.0.*){
         QT += quick1 multimedia network opengl
 	DEFINES+=QT5
 }
+
+
 uri = AudioVisual
-TARGET = $$qtLibraryTarget($$TARGET)
+#TARGET = $$qtLibraryTarget($$TARGET)
 
 CONFIG += qt plugin
 CONFIG += warn_off
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 INCLUDEPATH += ../../../../ ../../../../DCE/
+
 linux-g++{
 INCLUDEPATH+=$$[QT_INSTALL_PREFIX]/include/phonon/Phonon
 }
@@ -111,11 +114,18 @@ android-g++{
 
 !equals(_PRO_FILE_PWD_, $$DESTDIR) {
 
-QMLDIR_TARGET=../../../platforms/Android/androidComponents/AudioVisual/qmldir
+android-g++{
+   QMLDIR_TARGET=../../../platforms/Android/androidComponents/Qt5/AudioVisual/qmldir
+    QT5{
+    } else{
+    QMLDIR_TARGET=../../../platforms/Android/androidComponents/AudioVisual/qmldir
+    }
+}
 
 linux-g++{
    QMLDIR_TARGET=$DESTDIR
 }
+
 copy_qmldir.target=$$QMLDIR_TARGET
     copy_qmldir.depends = $$_PRO_FILE_PWD_/qmldir
     copy_qmldir.commands = $(COPY_FILE) \"$$replace(copy_qmldir.depends, /, $$QMAKE_DIR_SEP)\" \"$$replace(copy_qmldir.target, /, $$QMAKE_DIR_SEP)\"
@@ -124,9 +134,7 @@ copy_qmldir.target=$$QMLDIR_TARGET
 }
 
 qmldir.files = qmldir
-symbian {
-	TARGET.EPOCALLOWDLLDATA = 1
-} else:unix {
+unix {
 	maemo5 | !isEmpty(MEEGO_VERSION_MAJOR) {
 		installPath = /usr/lib/qt4/imports/$$replace(uri, \\., /)
 	} else {

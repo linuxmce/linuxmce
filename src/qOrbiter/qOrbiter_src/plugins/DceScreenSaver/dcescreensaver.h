@@ -1,13 +1,24 @@
 #ifndef DCESCREENSAVER_H
 #define DCESCREENSAVER_H
 
+#ifdef QT5
+#include <QQuickItem>
+#include <QSGNode>
+#else
 #include <QDeclarativeItem>
+#endif
+
 #include <QTimer>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QPixmap>
 #include <QPropertyAnimation>
 
-class DceScreenSaver : public QDeclarativeItem
+class DceScreenSaver :
+        #ifdef QT5
+        public QQuickItem
+        #else
+        public QDeclarativeItem
+        #endif
 {
     Q_OBJECT
     Q_DISABLE_COPY(DceScreenSaver)
@@ -22,7 +33,11 @@ class DceScreenSaver : public QDeclarativeItem
     Q_PROPERTY(double currentScale READ getCurrentScale WRITE setCurrentScale NOTIFY currentScaleChanged)
 
 public:
+#ifdef QT5
+    DceScreenSaver(QQuickItem *parent=0);
+#else
     DceScreenSaver(QDeclarativeItem *parent = 0);
+#endif
     ~DceScreenSaver();
 
 
@@ -107,9 +122,12 @@ public slots:
         if(!t.isNull()){
             currentImage = t;
         }
+       #ifdef QT5
+#else
         update(0,0,width(), height());
         qWarning() << "Update forced";
         t=NULL;
+#endif
     }
     Q_INVOKABLE  void setImageList(QStringList l);
 private:
@@ -121,15 +139,20 @@ private:
     QString currentUrl;
 
 private slots:
-    void resetPicture() {endSize = currentImage.size(); }
+    void resetPicture() {endSize = currentImage.size();  }
 
 protected:
 
     void startFadeTimer(int time);
     void stopFadeTimer();
 
+#ifdef QT5
+QSGNode * updatePaintNode(QSGNode *, UpdatePaintNodeData *);
+#else
     void paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget);
     void timerEvent(QTimerEvent *event);
+ #endif
+
 
 };
 

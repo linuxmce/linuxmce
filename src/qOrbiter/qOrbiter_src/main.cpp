@@ -214,15 +214,13 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
     QCoreApplication::setOrganizationDomain("org.linuxmce.QOrbiter");
     QCoreApplication::setOrganizationName("www.linuxMCE.org");
-#ifdef ANDROID
+#ifdef __ANDROID__
     AndroidSystem androidHelper;
-
-
 #endif
 
     QOrbiterLogger localLogger;
 
-#ifdef ANDROID
+#ifdef __ANDROID__
     if(androidHelper.updateExternalStorageLocation()){
         localLogger.setLogLocation(QString(androidHelper.externalStorageLocation+"/LinuxMCE/"));
     }

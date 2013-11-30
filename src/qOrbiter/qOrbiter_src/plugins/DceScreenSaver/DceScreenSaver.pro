@@ -12,9 +12,10 @@ message("$$QT_VERSION DCE-ScreenSaver-Plugin")
 
 contains(QT_VERSION,5.*.*){
         message("$$QT_VERSION DCE-ScreenSaver-Plugin")
-        QT += qtquick multimedia network
+        QT += quick multimedia network
         DEFINES+=QT5
 }
+
 
 uri = DceScreenSaver
 TARGET = $$qtLibraryTarget($$TARGET)
@@ -22,15 +23,19 @@ TARGET = $$qtLibraryTarget($$TARGET)
 linux-g++{
 DESTDIR=../../imports/DceScreenSaver
 }
+linux-rasp-pi-g++{
+DESTDIR=../../imports/DceScreenSaver
+}
+
 
 android-g++{
 
 QT5{
+
 DESTDIR=../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
     } else {
 DESTDIR=../../../platforms/Android/androidPlugins/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
     }
-
 }
 
 
@@ -57,6 +62,10 @@ android-g++{
 
 linux-g++{
    QMLDIR_TARGET=$DESTDIR
+}
+
+linux-rasp-pi-g++{
+QMLDIR_TARGET=$DESTDIR
 }
 
 copy_qmldir.target=$$QMLDIR_TARGET

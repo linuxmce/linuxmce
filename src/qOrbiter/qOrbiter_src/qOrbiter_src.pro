@@ -39,12 +39,16 @@ contains(QT_VERSION,4.8.*){
 !android-g++{
         QT+= webkit declarative phonon
 }
+    include(qmlapplicationviewer/qmlapplicationviewer.pri)
+
 }
 
 contains(QT_VERSION,4.7.*){
         message("$$QT_VERSION Core")
         DEFINES+=QT4_7
         QT+= webkit declarative phonon
+    include(qmlapplicationviewer/qmlapplicationviewer.pri)
+
 }
 
 
@@ -53,6 +57,9 @@ contains(QT_VERSION,5.*.*){
         DEFINES+=QT5
         DEFINES+=GLENABLED
         QT+= opengl script  widgets
+
+    include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
+
 }
 
 
@@ -95,7 +102,7 @@ TRANSLATIONS += app_de.ts
 #linux deploy configuration
 
 common-folder.source = qml/skins-common
-common-folder.target = $$DESTDIR/qml
+common-folder.target = qml
 DEPLOYMENTFOLDERS+=common-folder
 
 linux-g++{
@@ -240,7 +247,10 @@ linux-rasp-pi-g++{
         DEPLOYMENTFOLDERS += folder_01 folder_02
         QT+= qml
         QT-=declarative
-QML_IMPORT_PATH=imports
+
+        target.path=/opt/QOrbiter
+        QML_IMPORT_PATH=$$[QT_INSTALL_IMPORTS]../imports
+        INSTALLS+=target
 }
 
 # Additional import path used to resolve QML modules in Creator's code model
@@ -408,12 +418,7 @@ SOURCES += main.cpp \
 
 
 # Please do not modify the following two lines. Required for deployment.
-linux-rasp-pi-g++{
-
-} else {
-include(qmlapplicationviewer/qmlapplicationviewer.pri)
-qtcAddDeployment()
-}
+ qtcAddDeployment()
 
 
 

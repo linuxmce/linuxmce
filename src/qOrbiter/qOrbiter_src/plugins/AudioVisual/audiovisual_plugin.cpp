@@ -1,8 +1,9 @@
 #include "audiovisual_plugin.h"
 #include "mediamanager.h"
 
-
+#ifndef QT5
 #include <qdeclarative.h>
+#endif
 
 void AudioVisualPlugin::registerTypes(const char *uri)
 {

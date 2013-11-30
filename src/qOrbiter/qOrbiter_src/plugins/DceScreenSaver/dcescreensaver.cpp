@@ -1,5 +1,11 @@
 #include "dcescreensaver.h"
+#ifdef QT5
+#include <qqml.h>
+#else
 #include <qdeclarative.h>
+#endif
+
+
 #include <qtimer.h>
 #include <QDebug>
 #include <QtNetwork/QNetworkRequest>
@@ -10,19 +16,30 @@
 
 const int animationInterval = 30; // should be 60fps
 
+#ifdef QT5
+DceScreenSaver::DceScreenSaver(QQuickItem *parent):
+    QQuickItem(parent)
+#else
 DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     QDeclarativeItem(parent)
+  #endif
 {
+#ifdef QT5
+    setFlag(QQuickItem::ItemHasContents, false);
+#else
     // By default, QDeclarativeItem does not draw anything. If you subclass
     // QDeclarativeItem to create a visual item, you will need to uncomment the
     // following line:
+    setFlag(ItemHasNoContents, false);
+ #endif
     m_animationTimer = startTimer(animationInterval);
 
     fadeOpacity = 1;
     currentScale = 1;
     endSize.setHeight(0);
     endSize.setWidth(0);
-    setFlag(ItemHasNoContents, false);
+
+
     currentUrl = "";
     active = false;
     running = false;
@@ -129,7 +146,7 @@ void DceScreenSaver::getNextImage()
 
 
 
-
+#ifndef QT5
 void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
 
@@ -166,7 +183,7 @@ void DceScreenSaver::timerEvent(QTimerEvent *event)
         }
     }
 }
-
+#endif
 
 
 void DceScreenSaver::beginZoom()
@@ -180,3 +197,12 @@ void DceScreenSaver::startFadeTimer(int time)
     fadeAnimation->setDuration(time);
     fadeAnimation->start();
 }
+
+#ifdef QT5
+
+QSGNode *DceScreenSaver::updatePaintNode(QSGNode *, QQuickItem::UpdatePaintNodeData *)
+{
+
+}
+
+#endif

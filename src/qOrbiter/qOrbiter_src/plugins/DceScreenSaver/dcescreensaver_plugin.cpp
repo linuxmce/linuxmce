@@ -1,7 +1,11 @@
 #include "dcescreensaver_plugin.h"
 #include "dcescreensaver.h"
 
+#ifdef QT5
+
+#else
 #include <qdeclarative.h>
+#endif
 
 void DceScreenSaverPlugin::registerTypes(const char *uri)
 {

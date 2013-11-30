@@ -98,8 +98,18 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     userList.append(new PromptData("No Users",0));
     roomList.append(new PromptData("No Rooms",0));
 
+
+    mainView.engine()->addImportPath("./imports");
     mainView.engine()->addImportPath("imports");
+
     mainView.engine()->addPluginPath("lib");
+    mainView.engine()->addPluginPath("imports");
+    //mainView.engine()->addPluginPath(QT_INSTALL_DIR);
+
+    qDebug() << mainView.engine()->importPathList();
+    qDebug() << mainView.engine()->pluginPathList();
+
+
 
     mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
     mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
@@ -237,7 +247,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #ifdef QT5
     mainView.setSource(QString("assets:/qml/Welcome.qml"));
 #else
-      mainView.setSource(QString("assets:/qml/Base.qml"));
+    mainView.setSource(QString("assets:/qml/Base.qml"));
 #endif
 #elif !for_harmattan
     mainView.setSource(QApplication::applicationDirPath().remove("/bin")+buildType+"/Splash.qml");
@@ -384,7 +394,7 @@ void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)
         roomList = pList;
         mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
     }
-   emit showList();
+    emit showList();
 }
 
 void orbiterWindow::setupNewOrbiter(int user, int room, int skin, int lang, int height, int w)
