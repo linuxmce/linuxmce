@@ -1,5 +1,5 @@
-import QtQuick 1.1
-import Qt.labs.shaders 1.0
+import QtQuick 2.0
+import QtGraphicalEffects 1.0
 import "../components"
 import "../../../skins-common/lib/effects"
 

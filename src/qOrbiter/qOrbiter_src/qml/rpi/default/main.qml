@@ -7,12 +7,10 @@
  *This is a common component used to implement consistent persistent logic.
  */
 
-import QtQuick 1.1
-import Qt.labs.shaders 1.0
-import AudioVisual 1.0
+import QtQuick 2.0
+
+import QtGraphicalEffects 1.0
 import DceScreenSaver 1.0
-import "../../skins-common/lib/components"
-import "../../skins-common/lib/handlers"
 import "components"
 
 Item {
@@ -352,10 +350,10 @@ Item {
             }
         }
 
-        onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
-        onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
-        onMediaPlayingChanged: console.log("Media Playback status changed locally "+dceplayer.mediaBuffer)
-        onVolumeChanged:console.log(volume)
+//        onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
+//        onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
+//        onMediaPlayingChanged: console.log("Media Playback status changed locally "+dceplayer.mediaBuffer)
+//        onVolumeChanged:console.log(volume)
         Keys.onVolumeDownPressed: manager.adjustVolume("-1")
         Keys.onVolumeUpPressed:  manager.adjustVolume("+1")
         Keys.onTabPressed: ftr.forceActiveFocus()
