@@ -2,7 +2,7 @@
 #define DCESCREENSAVER_H
 
 #ifdef QT5
-#include <QQuickItem>
+#include <QQuickPaintedItem>
 #include <QSGNode>
 #else
 #include <QDeclarativeItem>
@@ -15,7 +15,7 @@
 
 class DceScreenSaver :
         #ifdef QT5
-        public QQuickItem
+        public QQuickPaintedItem
         #else
         public QDeclarativeItem
         #endif
@@ -34,7 +34,7 @@ class DceScreenSaver :
 
 public:
 #ifdef QT5
-    DceScreenSaver(QQuickItem *parent=0);
+    DceScreenSaver(QQuickPaintedItem *parent=0);
 #else
     DceScreenSaver(QDeclarativeItem *parent = 0);
 #endif
@@ -123,6 +123,7 @@ public slots:
             currentImage = t;
         }
        #ifdef QT5
+        update();
 #else
         update(0,0,width(), height());
         qWarning() << "Update forced";
@@ -146,12 +147,10 @@ protected:
     void startFadeTimer(int time);
     void stopFadeTimer();
 
-#ifdef QT5
-QSGNode * updatePaintNode(QSGNode *, UpdatePaintNodeData *);
-#else
-    void paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+    void paint(QPainter *painter);
     void timerEvent(QTimerEvent *event);
- #endif
+
 
 
 };

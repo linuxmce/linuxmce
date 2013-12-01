@@ -1,6 +1,7 @@
 #include "dcescreensaver.h"
 #ifdef QT5
 #include <qqml.h>
+#include <QSGSimpleRectNode>
 #else
 #include <qdeclarative.h>
 #endif
@@ -17,15 +18,15 @@
 const int animationInterval = 30; // should be 60fps
 
 #ifdef QT5
-DceScreenSaver::DceScreenSaver(QQuickItem *parent):
-    QQuickItem(parent)
+DceScreenSaver::DceScreenSaver(QQuickPaintedItem *parent):
+    QQuickPaintedItem(parent)
 #else
 DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     QDeclarativeItem(parent)
   #endif
 {
 #ifdef QT5
-    setFlag(QQuickItem::ItemHasContents, false);
+    setFlag(QQuickItem::ItemHasContents, true);
 #else
     // By default, QDeclarativeItem does not draw anything. If you subclass
     // QDeclarativeItem to create a visual item, you will need to uncomment the
@@ -125,8 +126,13 @@ void DceScreenSaver::processImageData(QNetworkReply *r)
         surface =currentImage;
         currentImage= t.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
     }
-
+    qWarning("Image Tick");
+#ifndef RPI
     startFadeTimer(2500);
+#else
+    update();
+#endif
+
   //  beginZoom();
 
 }
@@ -146,12 +152,10 @@ void DceScreenSaver::getNextImage()
 
 
 
-#ifndef QT5
-void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget )
+
+void DceScreenSaver::paint(QPainter *p  )
 {
 
-    Q_UNUSED(option); //mark unused options
-    Q_UNUSED(widget);
     p->setBrush(Qt::NoBrush);
     p->setPen(Qt::NoPen);
 #ifdef ANDROID
@@ -167,8 +171,11 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
     p->drawPixmap(tgtRect, surface, tgtRect);
 
     //setup and new pix map over it
+#ifdef RPI
+    p->setOpacity(1);
+#else
     p->setOpacity(fadeOpacity);
-
+#endif
     //create 'composed image'
     p->drawPixmap(tgtRect, currentImage, tgtRect);
 }
@@ -177,13 +184,15 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
 
 void DceScreenSaver::timerEvent(QTimerEvent *event)
 {
+
     if(event->timerId()==m_animationTimer){
         if(fadeOpacity!=1 && !currentImage.isNull() ){
             this->update();
         }
     }
+
 }
-#endif
+
 
 
 void DceScreenSaver::beginZoom()
@@ -194,15 +203,10 @@ void DceScreenSaver::beginZoom()
 
 void DceScreenSaver::startFadeTimer(int time)
 {
+#ifndef RPI
     fadeAnimation->setDuration(time);
     fadeAnimation->start();
-}
-
-#ifdef QT5
-
-QSGNode *DceScreenSaver::updatePaintNode(QSGNode *, QQuickItem::UpdatePaintNodeData *)
-{
-
-}
-
 #endif
+}
+
+

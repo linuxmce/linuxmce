@@ -25,6 +25,7 @@ DESTDIR=../../imports/DceScreenSaver
 }
 linux-rasp-pi-g++{
 DESTDIR=../../imports/DceScreenSaver
+DEFINES+=RPI
 }
 
 

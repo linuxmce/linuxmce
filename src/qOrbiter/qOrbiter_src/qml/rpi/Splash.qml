@@ -5,8 +5,9 @@ import QtQuick 2.0
 
 Item {
     id: splashLogic
-    height:appH
-    width:appW
+    height: scaleY(100)
+    width: scaleX(100)
+
     property bool orbiterSetup:false
     property string router_ip: ""
 
@@ -22,14 +23,14 @@ Item {
     FontLoader{
         id:myFont
         name:"Sawasdee"
-        source: "default/fonts/Sawasdee.ttf"
+        source: "../skins-common/fonts/Sawasdee.ttf"
     }
 
     function scaleX(x){
-        return x/100*appH
+        return x/100*appW
     }
     function scaleY(y){
-        return y/100*appW
+        return y/100*appH
     }
 
 

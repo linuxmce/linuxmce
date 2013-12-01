@@ -8,7 +8,6 @@
  */
 
 import QtQuick 2.0
-
 import QtGraphicalEffects 1.0
 import DceScreenSaver 1.0
 import "components"
@@ -308,7 +307,7 @@ Item {
         height: manager.appHeight
         width: manager.appWidth
         focus:true
-        interval:8000
+        interval:15000
         anchors.centerIn: parent
         requestUrl:manager.m_ipAddress
         Connections{
@@ -319,7 +318,6 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             onPressed:if(glScreenSaver.activeFocus) hideUI()
-
         }
 
     }

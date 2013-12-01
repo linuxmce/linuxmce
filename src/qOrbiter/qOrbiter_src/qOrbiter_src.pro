@@ -124,6 +124,7 @@ linux-g++{
                 folder_01.target = $$DESTDIR/qml
                  plugins_folder.source = imports/
         }
+
         folder_03.source = config.xml
         folder_03.target = $$DESTDIR
         DEFINES += for_desktop
