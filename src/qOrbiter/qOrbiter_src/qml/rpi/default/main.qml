@@ -307,7 +307,7 @@ Item {
         height: manager.appHeight
         width: manager.appWidth
         focus:true
-        interval:15000
+        interval:60000
         anchors.centerIn: parent
         requestUrl:manager.m_ipAddress
         Connections{

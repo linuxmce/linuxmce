@@ -148,7 +148,11 @@ protected:
     void stopFadeTimer();
 
 
+#ifdef QT4
+    void paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget );
+#elif QT5
     void paint(QPainter *painter);
+#endif
     void timerEvent(QTimerEvent *event);
 
 

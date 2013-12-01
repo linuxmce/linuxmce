@@ -28,6 +28,7 @@ CONFIG += thread
  android-g++{
         DESTDIR = ../QOrbiter-Android-Arm-$$QT_VERSION
 } else {
+
         !linux-rasp-pi-g++{
                 DESTDIR = ../QOrbiter-build-$$QT_VERSION
         }
@@ -120,14 +121,20 @@ linux-g++{
 		plugins_folder.target = $$DESTDIR
         }
         else:contains(QT_VERSION,5.0.*){
+!linux-rasp-pi-g++{
                 folder_01.source = qml/rpi
                 folder_01.target = $$DESTDIR/qml
-                 plugins_folder.source = imports/
+                plugins_folder.source = imports/
+    }
         }
 
         folder_03.source = config.xml
         folder_03.target = $$DESTDIR
+
+         !linux-rasp-pi-g++{
         DEFINES += for_desktop
+        }
+
 
         DEPLOYMENTFOLDERS+= plugins_folder
         DEPLOYMENTFOLDERS += folder_01  folder_03
@@ -245,6 +252,7 @@ linux-rasp-pi-g++{
         DEPLOYMENTFOLDERS+= plugins_folder
 
         DEFINES+=RPI GLENABLED
+        DEFINES-=for_desktop
         DEPLOYMENTFOLDERS += folder_01 folder_02
         QT+= qml
         QT-=declarative

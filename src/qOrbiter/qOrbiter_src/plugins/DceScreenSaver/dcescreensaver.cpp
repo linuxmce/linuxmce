@@ -126,11 +126,12 @@ void DceScreenSaver::processImageData(QNetworkReply *r)
         surface =currentImage;
         currentImage= t.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
     }
-    qWarning("Image Tick");
-#ifndef RPI
+
+#ifdef QT4
     startFadeTimer(2500);
 #else
     update();
+
 #endif
 
   //  beginZoom();
@@ -153,8 +154,13 @@ void DceScreenSaver::getNextImage()
 
 
 
-void DceScreenSaver::paint(QPainter *p  )
+void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
+
+#ifdef QT4
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+#endif
 
     p->setBrush(Qt::NoBrush);
     p->setPen(Qt::NoPen);
@@ -203,7 +209,7 @@ void DceScreenSaver::beginZoom()
 
 void DceScreenSaver::startFadeTimer(int time)
 {
-#ifndef RPI
+#ifdef QT4
     fadeAnimation->setDuration(time);
     fadeAnimation->start();
 #endif

@@ -3,8 +3,8 @@ import QtQuick 2.0
 
 import "noir/components"
 Item {
-  height: 720
-  width: 1280
+  height: appH
+  width: appW
 
     id:splashPage
 

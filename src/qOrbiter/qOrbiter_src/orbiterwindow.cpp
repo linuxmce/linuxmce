@@ -129,53 +129,64 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.rootContext()->setContextProperty("window", this);
 
 #ifndef QT5
-    mainView.setWindowTitle("LinuxMCE Orbiter ");
+    mainView.setWindowTitle("LinuxMCE QOrbiter ");
 #else
-    mainView.setTitle("LinuxMCE Orbiter");
+    mainView.setTitle("LinuxMCE QOrbiter");
 #endif
     //  mainView.rootContext()->setContextProperty("orbiterList" , "");
 
+
 #ifdef GLENABLED
 
-#ifdef for_desktop
+    #ifdef for_desktop
 
-#ifndef QT5
-    QGLFormat format= QGLFormat::defaultFormat();
-    glWidget = new QGLWidget(format);
-    glWidget->setAutoFillBackground(false);
-    mainView.setViewport(glWidget);
-    mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-#endif
+        #ifdef QT4_8
+        QGLFormat format= QGLFormat::defaultFormat();
+        glWidget = new QGLWidget(format);
+        glWidget->setAutoFillBackground(false);
+        mainView.setViewport(glWidget);
+        mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+        #endif
+    #endif
 
-#elif RPI
+    #endif
 
-    mainView.setSurfaceType(QSurface::OpenGLSurface);
-    qDebug() << "Surface id " <<mainView.OpenGLSurface;
-    qDebug() << "is opengl? " << mainView.openglContext();
-    qDebug() << "surface type " << mainView.surfaceType();
-    //mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-#elif ANDROID && QT4_8
-    QGLFormat format= QGLFormat::defaultFormat();
-    glWidget = new QGLWidget();
-    glWidget->setAutoFillBackground(false);
-    mainView.setViewport(glWidget);
-    mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-#endif
+    #ifdef RPI
+        mainView.setSurfaceType(QSurface::OpenGLSurface);
+        qDebug() << "Surface id " <<mainView.OpenGLSurface;
+        qDebug() << "is opengl? " << mainView.openglContext();
+        qDebug() << "surface type " << mainView.surfaceType();
+        //mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    #endif
 
-#endif
+    #ifdef ANDROID && QT4_8
+        QGLFormat format= QGLFormat::defaultFormat();
+        glWidget = new QGLWidget();
+        glWidget->setAutoFillBackground(false);
+        mainView.setViewport(glWidget);
+        mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    #endif
+
+
+
     // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
 
+        //window sizing
 #ifdef ANDROID
 
-#ifndef QT5
+    #ifdef QT4_8
     mainView.rootContext()->setContextProperty("appW", (mainView.window()->width()/ 2));//this is done because android reports the desktop width as 2x what it is.at least on my phone
     mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
-#endif
+    #endif
 
-#elif for_android
+    #ifdef for_android && QT4_8
     mainView.rootContext()->setContextProperty("appW", 1280);
     mainView.rootContext()->setContextProperty("appH", 720);
-#elif for_desktop
+    #endif
+
+#endif
+
+#ifdef for_desktop
     if(fullScreen==true){
         mainView.rootContext()->setContextProperty("appW", 800);
         mainView.rootContext()->setContextProperty("appH", 600);
