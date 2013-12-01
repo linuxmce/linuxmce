@@ -27,11 +27,11 @@ Item {
     onActiveFocusChanged: {
         pageLoader.forceActiveFocus()
     }
-    Rectangle{
-        id:filler
-        anchors.fill: qmlroot
-        color: "black"
-    }
+    //    Rectangle{
+    //        id:filler
+    //        anchors.fill: qmlroot
+    //        color: "black"
+    //    }
 
     Connections{
         target: manager

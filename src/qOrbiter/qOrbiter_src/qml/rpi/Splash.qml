@@ -5,8 +5,8 @@ import QtQuick 2.0
 
 Item {
     id: splashLogic
-    height: scaleY(100)
-    width: scaleX(100)
+    height: 720
+    width: 1280
 
     property bool orbiterSetup:false
     property string router_ip: ""

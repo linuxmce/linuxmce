@@ -2,7 +2,7 @@ import QtQuick 2.0
 
 ListView{
     id:existing_orbiters
-    height: scaleY(35)
+    height: scaleY(65)
     width: scaleX(55)
     clip: true
     anchors.left: parent.right

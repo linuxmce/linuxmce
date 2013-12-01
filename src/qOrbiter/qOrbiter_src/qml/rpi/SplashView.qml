@@ -2,11 +2,12 @@
 import QtQuick 2.0
 
 import "noir/components"
-Rectangle {
-    height:appH
-    width:appW
+Item {
+  height: 720
+  width: 1280
+
     id:splashPage
-    color: "transparent"
+
     signal setupStart(string x, string y)
     signal splashLoaded()
 

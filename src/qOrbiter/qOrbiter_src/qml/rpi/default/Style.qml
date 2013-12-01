@@ -42,9 +42,9 @@ Item{
     property int orbiterW: 800
 
     //main colors http://colorschemedesigner.com/#3JB1Tw0w0l7l7
-    property color mainColor: "#1B5898"
-    property color darkHighlightColor: "#FF6000"
-    property color lightHighlightColor:"#F0C73C"
+    property color mainColor: "black"
+    property color darkHighlightColor: "darkgreen"
+    property color lightHighlightColor:"yellow"
 
     property color lighttext: "slategrey"
 

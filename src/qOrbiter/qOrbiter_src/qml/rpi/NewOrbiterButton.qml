@@ -6,7 +6,7 @@ Rectangle{
     width:scaleX(55)
     opacity: 0
     border.color: "#99CC99"
-    anchors.verticalCenter: parent.verticalCenter
+    anchors.bottom: parent.bottom
     Component.onCompleted: state="hidden"
     gradient: Gradient {
         GradientStop {

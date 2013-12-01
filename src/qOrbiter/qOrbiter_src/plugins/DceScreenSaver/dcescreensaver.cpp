@@ -158,9 +158,9 @@ void DceScreenSaver::paint(QPainter *p  )
 
     p->setBrush(Qt::NoBrush);
     p->setPen(Qt::NoPen);
-#ifdef ANDROID
+
     p->setRenderHint(QPainter::HighQualityAntialiasing, 1);
-#endif
+
 
     //draw old frame first
     QRectF tgtRect(0,0,width(), height());
