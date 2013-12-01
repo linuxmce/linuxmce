@@ -2,8 +2,12 @@ import QtQuick 2.0
 import "../../../skins-common/lib/handlers"
 Item {
     id:template
-    height: scaleY(100)
-    width: scaleX(100)
+    anchors{
+        top:parent.top
+        left:parent.left
+        right:parent.right
+        bottom:parent.bottom
+    }
     focus:true
     onActiveFocusChanged: {
         if(activeFocus){
@@ -30,7 +34,7 @@ Item {
 
             Behavior on x {
                 PropertyAnimation{
-                    duration: 750                   
+                    duration: 750
                 }
             }
 
@@ -120,7 +124,7 @@ Item {
             break;
 
         case Qt.Key_Pause:
-                manager.pauseMedia()
+            manager.pauseMedia()
             break;
         case Qt.Key_P:
             manager.pauseMedia()
@@ -131,7 +135,7 @@ Item {
             break;
 
         case Qt.Key_PageDown:
-             manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
+            manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
             break;
         default:
             console.log(event.key)

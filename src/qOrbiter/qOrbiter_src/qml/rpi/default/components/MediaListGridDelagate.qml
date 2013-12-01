@@ -1,52 +1,16 @@
-import QtQuick 1.0
+import QtQuick 2.0
 import "../../../skins-common/lib/handlers"
-
-
-
-Item
-{
+Item{
     id: contactDelegate
     height: childrenRect.height
     width: childrenRect.width
 
-    Rectangle
-    {
+    Item{
         id:mainItem
-        opacity: 0
-        scale:0
-        rotation: 0
         state:'unsorted'
-        color:"transparent"
-      //  onStateChanged: console.log("State changed in DG delegate to "+ state)
-        MouseArea{
-            anchors.fill: mainItem
-            hoverEnabled: true
-            onEntered: {
-                mainItem.color = appStyle.mainColor
-                mainItem.scale = 1.25
-                mainItem.z = 10                
-            }
-            onExited: {
-                mainItem.color = "transparent"
-                mainItem.scale = 1
-                mainItem.z = 1
-            }
-        }
+        //  onStateChanged: console.log("State changed in DG delegate to "+ state)
 
-        ParallelAnimation {
-            id:fade_and_scale
-            running: false
-            PropertyAnimation { target: mainItem; property: "opacity"; to: 1; duration: 1000}
-            PropertyAnimation { target: mainItem; property: "scale"; to: 1; duration: 500}
-         //   PropertyAnimation { target: mainItem; property: "rotation"; to: 0; duration: 500}
-            
-        }
-        
-        Component.onCompleted: {fade_and_scale.running = true}
-
-
-        Rectangle
-        {
+        Rectangle{
             id:frame
             height: parent.height-5
             width: parent.width -5
@@ -54,8 +18,11 @@ Item
             clip:true
             color: "transparent"
             
-            MediaListClickHandler {
+            MouseArea{
+                anchors.fill: parent
+
                 onClicked: {
+                    manager.setStringParam(4, id)
                     if(indexStack.count !==0 && indexStack.get(indexStack.count).idx !==mediaList.currentIndex){
                         indexStack.append({"idx":mediaList.currentIndex})
                     }
@@ -64,11 +31,9 @@ Item
 
                 }
             }
-            
 
             
-            Image
-            {
+            Image{
                 id: imagerect;
                 source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
                 anchors.centerIn: parent;
@@ -109,7 +74,7 @@ Item
                     target: mainItem
                     width: scaleX(33);
                     height: scaleY(33)
-                    color: "transparent"
+
                 }
             },
             State {
@@ -119,7 +84,7 @@ Item
                     target: mainItem
                     width: scaleX(21);
                     height: scaleY(21)
-                    color: "transparent"
+
                 }
 
             },
@@ -128,9 +93,9 @@ Item
                 when:manager.q_subType === "2"
                 PropertyChanges {
                     target: mainItem
-                    width: scaleX(16);
-                    height: scaleY(42)
-                    color: "transparent"
+                    width: scaleX(34);
+                    height: scaleY(75)
+
                 }
                 PropertyChanges {
                     target: celllabel
@@ -149,7 +114,7 @@ Item
                     target: mainItem
                     width: scaleX(14);
                     height: scaleY(38)
-                    color: "transparent"
+
                 }
             },
             State {
@@ -159,7 +124,7 @@ Item
                     target: mainItem
                     width: scaleX(17);
                     height: scaleY(28)
-                    color: "transparent"
+
                 }
             }
         ]

@@ -1,37 +1,20 @@
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
 import "../components"
-import "../../../skins-common/lib/effects"
 
-Rectangle{
+
+Item{
     id:imageholder
     height: playlist.state==="showing" ? childrenRect.height : 0
     width: playlist.state === "showing" ? scaleX(30) :0
-    color: "transparent"
+
     Connections{
         target: dcenowplaying
         onImageChanged: refreshtimer.restart()
     }
-    
-    //    BorderImage {
-    //        id: borderimg
-    //        horizontalTileMode: BorderImage.Repeat
-    //        source: "../img/icons/drpshadow.png"
-    //        height: nowplayingimage.paintedHeight
-    //        width: nowplayingimage.paintedWidth
-    //        anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
-    //        border { left: 10; top: 10; right: 10; bottom: 10 }
-    //        smooth: true
-    //    }
-    
-    
-    DropShadow{
-        sourceItem: nowplayingimage
-        distance: 4
-        color:"black"
-        anchors.fill: sourceItem
-        visible:nowplayingimage.visible
-    }
+
+
+
     Image {
         id: nowplayingimage
         width: dcenowplaying.aspect=="wide"? scaleX(30) : scaleX(25)
@@ -41,6 +24,16 @@ Rectangle{
         anchors.horizontalCenter: parent.horizontalCenter
         smooth: true
         visible: playlist.state ==="showing" ? source == undefined ? false : true :false
+    }
+
+    DropShadow{
+    anchors.fill: nowplayingimage
+    horizontalOffset: 3
+           verticalOffset: 3
+           radius: 8.0
+           samples: 16
+           color: "#80000000"
+           source:nowplayingimage
     }
     Timer{
         id:refreshtimer

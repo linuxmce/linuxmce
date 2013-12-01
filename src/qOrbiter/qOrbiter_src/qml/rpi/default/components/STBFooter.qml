@@ -96,7 +96,10 @@ Item{
             }
             Keys.onTabPressed: {swapFocus();ftr.state="hidden"}
             Keys.onDownPressed: {
-                if(submodel.currentIndex !==0){
+                if(submodel.count===0){
+                    metarow.forceActiveFocus()
+                    submodel.currentIndex = -1
+                } else if(submodel.currentIndex !==0){
                     submodel.decrementCurrentIndex()
                 }
                 else{

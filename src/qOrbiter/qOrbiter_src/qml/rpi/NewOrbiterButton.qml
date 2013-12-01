@@ -8,16 +8,8 @@ Rectangle{
     border.color: "#99CC99"
     anchors.bottom: parent.bottom
     Component.onCompleted: state="hidden"
-    gradient: Gradient {
-        GradientStop {
-            position: 0
-            color: "transparent"
-        }
-        GradientStop {
-            position: 1
-            color: "#000000"
-        }
-    }
+    anchors.horizontalCenter: parent.horizontalCenter
+    color:"black"
     Behavior on opacity{
         PropertyAnimation{duration: 1000}
     }
@@ -49,7 +41,7 @@ Rectangle{
             }
             AnchorChanges{
                 anchors.top: parent.bottom
-                anchors.right: parent.left
+
             }
         },
         State {
@@ -61,10 +53,8 @@ Rectangle{
             }
             AnchorChanges{
                 target: newOrbiterButton
-                anchors.top: undefined
-                anchors.right: undefined
-                anchors.horizontalCenter: splashPage.horizontalCenter
-                anchors.verticalCenter: splashPage.verticalCenter
+                anchors.top: existing_orbiters.bottom
+
             }
         }
     ]

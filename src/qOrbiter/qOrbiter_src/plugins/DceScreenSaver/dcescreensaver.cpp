@@ -153,14 +153,13 @@ void DceScreenSaver::getNextImage()
 
 
 
-
+#ifdef QT4
 void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
 
-#ifdef QT4
-    Q_UNUSED(option);
-    Q_UNUSED(widget);
-#endif
+   Q_UNUSED(option);
+   Q_UNUSED(widget);
+
 
     p->setBrush(Qt::NoBrush);
     p->setPen(Qt::NoPen);
@@ -177,14 +176,36 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
     p->drawPixmap(tgtRect, surface, tgtRect);
 
     //setup and new pix map over it
-#ifdef RPI
-    p->setOpacity(1);
-#else
+
     p->setOpacity(fadeOpacity);
-#endif
+
     //create 'composed image'
     p->drawPixmap(tgtRect, currentImage, tgtRect);
 }
+#endif
+
+#ifdef QT5
+
+void DceScreenSaver::paint(QPainter *painter  )
+{
+
+
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen(Qt::NoPen);
+
+    painter->setRenderHint(QPainter::HighQualityAntialiasing, 1);
+
+
+    //draw old frame first
+    QRectF tgtRect(0,0,width(), height());
+    QSize scaledSize;
+    scaledSize.setHeight(height()*currentScale);
+    scaledSize.setWidth(width()*currentScale);
+
+    painter->drawPixmap(tgtRect, surface, tgtRect);
+    painter->drawPixmap(tgtRect, currentImage, tgtRect);
+}
+#endif
 
 
 

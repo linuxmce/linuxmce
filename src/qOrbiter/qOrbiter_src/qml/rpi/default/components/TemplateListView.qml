@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import "../../../skins-common/lib/handlers"
+
 ListView{
     id:playlist
     height: scaleY(65)
@@ -72,7 +72,9 @@ ListView{
             font.bold: true
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         }
-        PlaylistClickedHandler {
+        MouseArea{
+            anchors.fill: parent
+            onClicked: manager.changedPlaylistPosition(index)
         }
     }
     

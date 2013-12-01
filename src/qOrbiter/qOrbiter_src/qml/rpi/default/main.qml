@@ -442,7 +442,7 @@ Item {
             id:volLevel
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            text:dceplayer.volume
+            text:""//dceplayer.volume
             color: "white"
             fontSize: 42
             font.bold: true

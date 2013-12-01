@@ -2,8 +2,13 @@ import QtQuick 2.0
 import "../components"
 Item {
     id:screen_forty_seven_of_nine
-    height: scaleY(100)
-    width: scaleX(100)
+    anchors{
+        top:parent.top
+        left:parent.left
+        right:parent.right
+        bottom:parent.bottom
+    }
+
     state: "browsing"
     property int depth:0
 
@@ -43,6 +48,7 @@ Item {
         contentWidth: scaleX(25)
         anchors.top: parent.top
         model: dataModel
+       flow:GridView.LeftToRight
         focus:true
         clip:true
         onCurrentIndexChanged: console.log("Current index changed: ==> " +currentIndex)
