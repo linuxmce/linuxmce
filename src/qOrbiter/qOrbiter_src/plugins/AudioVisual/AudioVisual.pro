@@ -148,11 +148,11 @@ unix {
 		installPath = $$[QT_INSTALL_IMPORTS]/$$replace(uri, \\., /)
         }
     linux-rasp-pi-g++{
-    installPath= installPath=/opt/QOrbiter/imports/$$replace(uri, \\., /)#$$RASP_INSTALL_TARGET/$$replace(uri, \\., /)
+    installPath=/opt/qt5.2-rpi/qml/$$replace(uri, \\., /) #$$RASP_INSTALL_TARGET/$$replace(uri, \\., /)
 }
 	qmldir.path = $$installPath
 	target.path = $$installPath
-        #INSTALLS += target qmldir
+        INSTALLS += target qmldir
 }
 
 message("Plugin install path at" $$RASP_INSTALL_TARGET)
