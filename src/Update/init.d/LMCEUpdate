@@ -4,37 +4,41 @@
 # Required-Start:    $remote_fs $syslog
 # Required-Stop:     $remote_fs $syslog
 # Should-Start:
-# Default-Start:     2
-# Default-Stop:      1
+# Default-Start:     2 3 4 5
+# Default-Stop:      1 6
 # Short-Description: LMCEUpdate
 # Description:       This script updates the LMCE MD
 ### END INIT INFO #
 
+# Source fuction library
+. /lib/lsb/init-functions
+
+start() {
+	/usr/pluto/bin/LMCEUpdate_Apply.sh
+}
+
+### main logic ###
 case "$1" in
-	start)
-        	if [ -x /bin/plymouth ]; then
-                	/bin/plymouth update --status="Starting LinuxMCE update"
-        	fi
-                if [ -x /sbin/usplash_write ]; then
-			usplash_write TEXT "Starting Linux MCE Update"
-		fi
-
-		/usr/pluto/bin/LMCEUpdate_Apply.sh
-
-                if [ -x /bin/plymouth ]; then
-                        /bin/plymouth update --status="Finished LinuxMCE update"
-                fi
-                if [ -x /sbin/usplash_write ]; then
-			usplash_write TEXT "Finished Linux MCE Update"
-		fi
-		;;
-	
-	stop|restart|reload|force-reload)
-        	echo "Error: argument '$1' not supported" >&2
-	        exit 3
-		;;
-	*)
-		echo "Usage: $0 start" >&2
-		exit 3
-		;;
+  start)
+        log_daemon_msg "Starting LMCEUpdate" "LMCEUpdate_Apply.sh"
+	$1
+        retval=0
+        log_end_msg $retval
+        ;;
+  stop)
+        : # noop
+        retval=0
+        ;;
+  status)
+        status_of_proc LMCEUpdate_Apply.sh LMCEUpdate
+        retval=$?
+        ;;
+  restart|reload|force-reload)
+        : # noop
+        retval=0
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|restart|reload|status}"
+        retval=1
 esac
+exit $retval
