@@ -1,22 +1,19 @@
 #!/bin/bash
-### BEGIN INIT INFO 
+### BEGIN INIT INFO
 # Provides:          linuxmce
-# Required-Start:    $remote_fs $syslog 
-# Required-Stop:     $remote_fs $syslog 
-# Should-Start:      $named 
-# Default-Start:     2 
-# Default-Stop:      1 
-# Short-Description: LinuxMCE 
+# Required-Start:    $remote_fs $syslog $avwizard
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      $named
+# Default-Start:     2 3 4 5
+# Default-Stop:      1 6
+# Short-Description: LinuxMCE
 # Description:       This script is the entry point to start the LinuxMCE core
 #                    It starts a couple of needed services and daemons, loads X (if running with AutoStartMedia)
 #                    and executes LMCE_Launch_Manager to start devices and taking care of the rest.
 ### END INIT INFO #
-if [[ "$1" == "status" ]]; then
-	if pidof DCERouter &>/dev/null ; then
-		echo "* DCERouter is running"
-	fi
-	exit 0
-fi
+
+# Source fuction library
+. /lib/lsb/init-functions
 
 Message() {
     echo -en "\033[1m# $*"
@@ -29,22 +26,25 @@ StartService() {
 	ServiceBkg=$3
 
 	if [[ -x $(echo $ServiceCmd | cut -d ' ' -f1) ]] ;then
-                if [[ -x /bin/plymouth ]]; then
-                        /bin/plymouth update --status="$ServiceDescription ... " || :
-                fi
-		echo -n "$ServiceDescription ... "
+		#if [[ -x /bin/plymouth ]]; then
+		#	/bin/plymouth update --status="$ServiceDescription ... " || :
+		#fi
+		#echo -n "$ServiceDescription ... "
+
+	        log_daemon_msg "$ServiceDescription" "$ServiceCmd"
 		if [[ "$ServiceBkg" == "&" ]] ;then
 			$ServiceCmd 1>/dev/null 2>/dev/null &
 		else
-			$ServiceCmd 1>/dev/null 2>/dev/null	
+			$ServiceCmd 1>/dev/null 2>/dev/null
 		fi
 		err=$?
+		log_end_msg $err
 
-		if [[ "$err" == "0" ]] ;then
-			echo "ok"
-		else
-			echo "fail"
-		fi
+		#if [[ "$err" == "0" ]] ;then
+		#	echo "ok"
+		#else
+		#	echo "fail"
+		#fi
 	fi
 
 	return $err
@@ -56,18 +56,21 @@ StartDaemon() {
 	ServiceScreen=$3
 
 	if [[ -x $(echo $ServiceCmd | cut -d ' ' -f1) ]] ;then
-                if [[ -x /bin/plymouth ]]; then
-                        /bin/plymouth update --status="$ServiceDescription ... " || :
-                fi
-		echo -n "$ServiceDescription ... "
-		screen -d -m -S "$ServiceScreen" $ServiceCmd 
-		err=$?
+                #if [[ -x /bin/plymouth ]]; then
+                #        /bin/plymouth update --status="$ServiceDescription ... " || :
+                #fi
+		#echo -n "$ServiceDescription ... "
 
-		if [[ "$err" == "0" ]] ;then
-			echo "ok"
-		else
-			echo "fail"
-		fi
+	        log_daemon_msg "$ServiceDescription" "$ServiceCmd"
+		screen -d -m -S "$ServiceScreen" $ServiceCmd
+		err=$?
+		log_end_msg $err
+
+		#if [[ "$err" == "0" ]] ;then
+		#	echo "ok"
+		#else
+		#	echo "fail"
+		#fi
 	fi
 
 	return $err
@@ -96,7 +99,7 @@ function assureXorgSane()
 		Q="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device='$ComputerDev' AND FK_DeviceData='$DEVICEDATA_Video_settings' LIMIT 1"
 		VideoSetting=$(RunSQL "$Q")
 		VideoSetting=$(Field "1" "$VideoSetting")
-		
+
 		refresh=$(echo $VideoSetting | cut -d '/' -f2)
 		resolution=$(echo $VideoSetting | cut -d '/' -f1)
 		width=$(echo $resolution | cut -d' ' -f1)
@@ -106,208 +109,251 @@ function assureXorgSane()
 	fi
 }
 
-if [[ -x /bin/plymouth ]]; then
-        /bin/plymouth message --text="Starting up LinuxMCE..." || :
-fi
+start() {
+#	if [[ -x /bin/plymouth ]]; then
+#	        /bin/plymouth message --text="Starting up LinuxMCE..." || :
+#	fi
+        log_daemon_msg "Starting up LinuxMCE" "linuxmce"
 
-setterm -blank >/dev/console             # disable console blanking
-chmod 777 /etc/pluto.conf 2>/dev/null    # ensure access rights on pluto.conf
-rm -f /var/log/pluto/running.pids 2>/dev/null
-chmod 777 /var/log/pluto 2>/dev/null
-rm -f /dev/ttyS_*                        # remove all ttyS_* (created by gc100s) entries from /dev
-mkdir -p /usr/pluto/locks                # clean up locks
-rm -f /usr/pluto/locks/*                 # clean up locks
-rm -f /var/run/plutoX*.pid		 # clean up x11 locks
-rm -f /mnt/optical/*.checksum
-if [[ -f /etc/logrotate.d/linuxmce ]]; then 
-        rm -f /etc/logrotate.d/pluto*     # make sure there are not leftover logrotate configuration files 
-fi 
-rm -f /etc/rc{0,6}.d/S*{umountnfs.sh,portmap,networking}
-service nis start
+	setterm -blank >/dev/console             # disable console blanking
+	chmod 777 /etc/pluto.conf 2>/dev/null    # ensure access rights on pluto.conf
+	rm -f /var/log/pluto/running.pids 2>/dev/null
+	chmod 777 /var/log/pluto 2>/dev/null
+	rm -f /dev/ttyS_*                        # remove all ttyS_* (created by gc100s) entries from /dev
+	mkdir -p /usr/pluto/locks                # clean up locks
+	rm -f /usr/pluto/locks/*                 # clean up locks
+	rm -f /var/run/plutoX*.pid		 # clean up x11 locks
+	rm -f /mnt/optical/*.checksum
+	if [[ -f /etc/logrotate.d/linuxmce ]]; then
+	        rm -f /etc/logrotate.d/pluto*     # make sure there are not leftover logrotate configuration files
+	fi
+	rm -f /etc/rc{0,6}.d/S*{umountnfs.sh,portmap,networking}
+	service nis start
 
-## workaround for gutsy bug #139155
-if [[ ! -f /var/cache/hald/fdi-cache ]] ;then
-	/usr/lib/hal/hald-generate-fdi-cache
-	service hal restart
-fi
-
-if [[ -f /usr/pluto/bin/Config_Ops.sh ]]; then
-	 . /usr/pluto/bin/Config_Ops.sh
-fi
-if [[ -f /usr/pluto/bin/pluto.func ]] ;then
-	. /usr/pluto/bin/pluto.func
-fi
-if [[ -f /usr/pluto/bin/SQL_Ops.sh ]] ;then
-	. /usr/pluto/bin/SQL_Ops.sh
-fi
-if [[ -f /usr/pluto/bin/Utils.sh ]] ;then
-	. /usr/pluto/bin/Utils.sh
-fi
-
-ConfEval
-
-# We still need hal for device detection
-StartService "Starting HAL daemon" "/usr/sbin/hald --daemon=yes --use-syslog"
-
-# Start core services
-if [[ "$AutostartCore" -eq "1" ]] ; then
-	StartService "Starting MySQL Server" "service mysql start"
-
-	if [[ -f /usr/pluto/bin/SQL_Ops.sh  && -f /usr/pluto/bin/Config_Ops.sh ]] ;then
-		Q="SELECT FK_Installation FROM Device WHERE PK_Device='$PK_Device'"
-		R="$(RunSQL "$Q")"
-		ConfSet PK_Installation "$R"
-	
-		Q="SELECT PK_Users FROM Users LIMIT 1"
-		R="$(RunSQL "$Q")"
-		ConfSet PK_Users "$R"
+	## workaround for gutsy bug #139155
+	if [[ ! -f /var/cache/hald/fdi-cache ]] ;then
+		/usr/lib/hal/hald-generate-fdi-cache
+		service hal stop
 	fi
 
-	RunSQL "UPDATE Orbiter set Regen=2,RegenInProgress=0 where RegenInProgress=1"
-
-	StartService "Starting DHCP Server" "service isc-dhcp-server start"
-	StartService "Starting DNS Server" "service bind9 start"
-	StartService "Configuring Network Firewall" "/usr/pluto/bin/Network_Firewall.sh"
-	StartService "Confirm Installation" "/usr/pluto/bin/ConfirmInstallation.sh"
-	StartDaemon  "Starting Dhcp Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
-	StartDaemon  "Start PNP MD Plugin" "/usr/pluto/bin/Start_NewMD_interactor.sh" "NewMDinteractor"
-	StartDaemon  "Start Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
-         
-fi
-if [[ "$AutostartMedia" -eq "1" ]] ; then
-        # Load MD modules early in case they are needed for something to work later on
-        StartService "Loading Kernel Modules" "/usr/pluto/bin/LoadMDModules.sh"
-fi
-StartService "Reporting Machine Status" "/usr/pluto/bin/Report_Machine_Status.sh" "&"
-
-if [[ "$FirstBoot" != "false" && ! -f /usr/pluto/install/.notdone ]] ;then
-	#StartService "Updating Software Database" "/usr/pluto/bin/getxmls" "&"
-	/usr/pluto/bin/getxmls &> /var/log/pluto/add_software_debug.log &
-	ConfSet "FirstBoot" "false" 2>/dev/null 1>/dev/null
-fi
-
-StartService "Setting SSH Keys" "/usr/pluto/bin/SSH_Keys.sh" "&"
-StartService "Setting Coredump Location" "/usr/pluto/bin/corefile.sh"
-StartService "Creating Firewire 2 Video4Linux Pipes" "/usr/pluto/bin/Firewire2Video4Linux.sh"
-StartService "Configuring Pluto Storage Devices" "/usr/pluto/bin/StorageDevices_Setup.sh" "&"
-StartService "Detecting Timezone" "/usr/pluto/bin/Timezone_Detect.sh" "&"
-StartService "Status Radar" "/usr/pluto/bin/StorageDevices_StatusRadar.sh"
-StartService "Samba Radar" "/usr/pluto/bin/StorageDevices_SambaRadar.sh"
-StartService "NFS Radar" "/usr/pluto/bin/StorageDevices_NFSRadar.sh"
-StartService "Gamepad Radar" "/usr/pluto/bin/Gamepad_Detect.sh"
-StartService "PVR-250 tuner restore" "/usr/pluto/bin/CaptureCards_BootConfig_PVR-250.sh"
-StartService "Enable wake-on-LAN" "/usr/pluto/bin/enable_wol.sh"
-## Setup ALSA mixers
-#amixer sset Capture 90%
-#amixer sset 'Mic Boost (+20dB)' unmute
-#alsactl store
-
-export DISPLAY=":${Display}"
-#StartService "Configure Device Changes" "/usr/pluto/bin/Config_Device_Changes.sh"
-
-# hack: cleaning lockfile on M/D start to allow
-# local devices to start
-# TODO: remove this when correct locking will be implemented
-rm -f /usr/pluto/locks/pluto_spawned_local_devices.txt
-if [[ "$AutostartMedia" -eq "1" ]] ; then
-	# Only start X if we want to autostart the media.
-	if [[ "$Display" == "" ]] ;then
-		if [[ "$DISPLAY" == "" ]] ;then
-			export DISPLAY=:0
-		fi
-	else
-		export DISPLAY=":${Display}"
+	if [[ -f /usr/pluto/bin/Config_Ops.sh ]]; then
+		 . /usr/pluto/bin/Config_Ops.sh
 	fi
-	if [[ -r /var/run/plutoX${Display}.pid ]]; then
-		XPID=$(</var/run/plutoX${Display}.pid)
-	else
-		XPID=""
+	if [[ -f /usr/pluto/bin/pluto.func ]] ;then
+		. /usr/pluto/bin/pluto.func
+	fi
+	if [[ -f /usr/pluto/bin/SQL_Ops.sh ]] ;then
+		. /usr/pluto/bin/SQL_Ops.sh
+	fi
+	if [[ -f /usr/pluto/bin/Utils.sh ]] ;then
+		. /usr/pluto/bin/Utils.sh
 	fi
 
-	if [ -z "$XPID" -o ! -d /proc/"$XPID" ]; then
-		AlphaBlending=$(AlphaBlendingEnabled)
+	# This is done in /usr/pluto/bin/Utils simply by inclusion
+	#ConfEval
 
-		#XClient=/usr/pluto/bin/Start_IceWM.sh
-		if [[ -e /usr/bin/xfwm4 ]] ;then 
-			XClient=/usr/bin/xfwm4
-		else 
-			XClient=/usr/bin/kwin
+	# We still need hal for device detection
+	StartService "Starting HAL daemon" "/usr/sbin/hald --daemon=yes --use-syslog"
+
+	# Start core services
+	if [[ "$AutostartCore" -eq "1" ]] ; then
+		StartService "Starting DHCP Server" "service isc-dhcp-server start" "&"
+		StartService "Starting DNS Server" "service bind9 start" "&"
+		StartService "Configuring Network Firewall" "/usr/pluto/bin/Network_Firewall.sh" "&"
+		StartService "Confirm Installation" "/usr/pluto/bin/ConfirmInstallation.sh" "&"
+		StartService "Starting MySQL Server" "service mysql start"
+
+		if [[ -f /usr/pluto/bin/SQL_Ops.sh  && -f /usr/pluto/bin/Config_Ops.sh ]] ;then
+			Q="SELECT FK_Installation FROM Device WHERE PK_Device='$PK_Device'"
+			R="$(RunSQL "$Q")"
+			ConfSet PK_Installation "$R"
+
+			Q="SELECT PK_Users FROM Users LIMIT 1"
+			R="$(RunSQL "$Q")"
+			ConfSet PK_Users "$R"
 		fi
-		XClientParm=()
-		XOrgConf="/etc/X11/xorg.conf"
 
-		XServerParm=(-logverbose 9 -br)
-		Background=y
-		XDisplay=":$Display"
+		RunSQL "UPDATE Orbiter set Regen=2,RegenInProgress=0 where RegenInProgress=1"
 
-		Xcompmgr=/bin/true
-		if [[ "$AlphaBlending" != 1 && "$XClient" != "/usr/bin/kwin" ]]; then
-			XClientParm=(--compositor=off)
-		fi
+		StartDaemon  "Starting Dhcp Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
+		StartDaemon  "Start PNP MD Plugin" "/usr/pluto/bin/Start_NewMD_interactor.sh" "NewMDinteractor"
+		StartDaemon  "Start Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
+	fi
 
-		for ((i = 1; i <= "$#"; i++)); do
-			case "${!i}" in
-				-client) ((i++)); XClient="${!i}" ;;
-				-parm) ((i++)); XClientParm=("${XClientParm[@]}" "${!i}") ;;
-				-fg) Background=n ;;
-				-srvparm) ((i++)); XServerParm=("${XServerParm[@]}" "${!i}") ;;
-				-display) ((i++)); XDisplay="${!i}" ;;
-				-flags) ((i++)); WrapperFlags=("${WrapperFlags[@]}" "${!i}") ;;
-				-config) ((i++)); XOrgConf=${!i} ;;
-			esac
-		done
+	if [[ "$AutostartMedia" -eq "1" ]] ; then
+	        # Load MD modules early in case they are needed for something to work later on
+	        StartService "Loading Kernel Modules" "/usr/pluto/bin/LoadMDModules.sh"
+	fi
 
-		Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Starting X server (client: $XClient; parms: ${XClientParm[*]})"
+	if [[ "$FirstBoot" != "false" && ! -f /usr/pluto/install/.notdone ]] ;then
+		#StartService "Updating Software Database" "/usr/pluto/bin/getxmls" "&"
+		#/usr/pluto/bin/getxmls &> /var/log/pluto/add_software_debug.log &
+		ConfSet "FirstBoot" "false" 2>/dev/null 1>/dev/null
+	fi
 
-		VT=${XDisplay#:}
-		VT=vt"$((7+VT))"
+	StartService "Setting SSH Keys" "/usr/pluto/bin/SSH_Keys.sh" "&"
+	StartService "Setting Coredump Location" "/usr/pluto/bin/corefile.sh" "&"
+	StartService "Creating Firewire 2 Video4Linux Pipes" "/usr/pluto/bin/Firewire2Video4Linux.sh" "&"
+	StartService "Configuring Pluto Storage Devices" "/usr/pluto/bin/StorageDevices_Setup.sh" "&"
+	StartService "Detecting Timezone" "/usr/pluto/bin/Timezone_Detect.sh" "&"
+	StartService "Status Radar" "/usr/pluto/bin/StorageDevices_StatusRadar.sh" "&"
+	StartService "Samba Radar" "/usr/pluto/bin/StorageDevices_SambaRadar.sh" "&"
+	StartService "NFS Radar" "/usr/pluto/bin/StorageDevices_NFSRadar.sh" "&"
+	StartService "Gamepad Radar" "/usr/pluto/bin/Gamepad_Detect.sh" "&"
+	StartService "PVR-250 tuner restore" "/usr/pluto/bin/CaptureCards_BootConfig_PVR-250.sh" "&"
+	StartService "Enable wake-on-LAN" "/usr/pluto/bin/enable_wol.sh" "&"
 
-		# Start X11
-		if [[ 19 -eq "$PK_Distro" ]] ;then
-			# Raspbian does not get an xorg.conf
-			Xcmd=(/usr/pluto/bin/Start_X_Wrapper.sh --parms "$@" --client "$XClient" "${XClientParm[@]}" --server "$XDisplay" -ignoreABI -ac -allowMouseOpenFail "$VT" "${XServerParm[@]}" --flags "${WrapperFlags[@]}")
-		else
-			Xcmd=(/usr/pluto/bin/Start_X_Wrapper.sh --parms "$@" --client "$XClient" "${XClientParm[@]}" --server "$XDisplay" -ignoreABI -ac -allowMouseOpenFail "$VT" "${XServerParm[@]}" --flags "${WrapperFlags[@]}" -config "${XOrgConf}")
-		fi
-		if [[ "$Background" == y ]]; then
-			screen -d -m -S XWindowSystem "${Xcmd[@]}"
-			# Start everouter for gyration mouse
-			#if [[ -x /usr/pluto/bin/StartGyrationEvrouter.sh ]]; then
-			#	screen -d -m -S GyrationMouse /usr/pluto/bin/StartGyrationEvrouter.sh
-			#fi
-			sleep 1
+	StartService "Reporting Machine Status" "/usr/pluto/bin/Report_Machine_Status.sh" "&"
 
-			Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "X server: backround; AlphaBlending: $AlphaBlending"
-			if [[ "$AlphaBlending" == 1 ]]; then
-				DISPLAY=:0 "$Xcompmgr" &>/dev/null </dev/null &
-				disown -a
+	## Setup ALSA mixers
+	#amixer sset Capture 90%
+	#amixer sset 'Mic Boost (+20dB)' unmute
+	#alsactl store
+
+	export DISPLAY=":${Display}"
+	#StartService "Configure Device Changes" "/usr/pluto/bin/Config_Device_Changes.sh"
+
+	# hack: cleaning lockfile on M/D start to allow
+	# local devices to start
+	# TODO: remove this when correct locking will be implemented
+	rm -f /usr/pluto/locks/pluto_spawned_local_devices.txt
+	if [[ "$AutostartMedia" -eq "1" ]] ; then
+		# Only start X if we want to autostart the media.
+		if [[ "$Display" == "" ]] ;then
+			if [[ "$DISPLAY" == "" ]] ;then
+				export DISPLAY=:0
 			fi
 		else
-			Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "X server: foreground"
-			"${Xcmd[@]}"
+			export DISPLAY=":${Display}"
+		fi
+		if [[ -r /var/run/plutoX${Display}.pid ]]; then
+			XPID=$(</var/run/plutoX${Display}.pid)
+		else
+			XPID=""
+		fi
+
+		if [ -z "$XPID" -o ! -d /proc/"$XPID" ]; then
+			AlphaBlending=$(AlphaBlendingEnabled)
+
+			#XClient=/usr/pluto/bin/Start_IceWM.sh
+			if [[ -e /usr/bin/xfwm4 ]] ;then
+				XClient=/usr/bin/xfwm4
+			else
+				XClient=/usr/bin/kwin
+			fi
+			XClientParm=()
+			XOrgConf="/etc/X11/xorg.conf"
+
+			XServerParm=(-logverbose 9 -br)
+			Background=y
+			XDisplay=":$Display"
+
+			Xcompmgr=/bin/true
+			if [[ "$AlphaBlending" != 1 && "$XClient" != "/usr/bin/kwin" ]]; then
+				XClientParm=(--compositor=off)
+			fi
+
+			for ((i = 1; i <= "$#"; i++)); do
+				case "${!i}" in
+					-client) ((i++)); XClient="${!i}" ;;
+					-parm) ((i++)); XClientParm=("${XClientParm[@]}" "${!i}") ;;
+					-fg) Background=n ;;
+					-srvparm) ((i++)); XServerParm=("${XServerParm[@]}" "${!i}") ;;
+					-display) ((i++)); XDisplay="${!i}" ;;
+					-flags) ((i++)); WrapperFlags=("${WrapperFlags[@]}" "${!i}") ;;
+					-config) ((i++)); XOrgConf=${!i} ;;
+				esac
+			done
+
+			Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "Starting X server (client: $XClient; parms: ${XClientParm[*]})"
+
+			VT=${XDisplay#:}
+			VT=vt"$((7+VT))"
+
+			# Start X11
+			if [[ 19 -eq "$PK_Distro" ]] ;then
+				# Raspbian does not get an xorg.conf
+				Xcmd=(/usr/pluto/bin/Start_X_Wrapper.sh --parms "$@" --client "$XClient" "${XClientParm[@]}" --server "$XDisplay" -ignoreABI -ac -allowMouseOpenFail "$VT" "${XServerParm[@]}" --flags "${WrapperFlags[@]}")
+			else
+				Xcmd=(/usr/pluto/bin/Start_X_Wrapper.sh --parms "$@" --client "$XClient" "${XClientParm[@]}" --server "$XDisplay" -ignoreABI -ac -allowMouseOpenFail "$VT" "${XServerParm[@]}" --flags "${WrapperFlags[@]}" -config "${XOrgConf}")
+			fi
+			if [[ "$Background" == y ]]; then
+				screen -d -m -S XWindowSystem "${Xcmd[@]}"
+				# Start everouter for gyration mouse
+				#if [[ -x /usr/pluto/bin/StartGyrationEvrouter.sh ]]; then
+				#	screen -d -m -S GyrationMouse /usr/pluto/bin/StartGyrationEvrouter.sh
+				#fi
+				sleep 1
+
+				Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "X server: backround; AlphaBlending: $AlphaBlending"
+				if [[ "$AlphaBlending" == 1 ]]; then
+					DISPLAY=:0 "$Xcompmgr" &>/dev/null </dev/null &
+					disown -a
+				fi
+			else
+				Logging "$TYPE" "$SEVERITY_NORMAL" "$0" "X server: foreground"
+				"${Xcmd[@]}"
+			fi
 		fi
 	fi
 
-fi
-# If we are using VDR as our PVR, make sure the video dir is available, and restart VDR 
-# if needed.
-if VDRInstalled ; then
-	if [[ -f /etc/default/vdr ]]; then
-		. /etc/default/vdr
-	fi
-	cd $VIDEO_DIR
-	if ! pidof vdr ; then
-		# If we are running on the cure, we need to restart VDR after mounting the relevant devices
-		if [[ "$AutostartCore" -eq "1" ]] ; then
-			service vdr restart
+	# If we are using VDR as our PVR, make sure the video dir is available, and restart VDR
+	# if needed.
+	if VDRInstalled ; then
+		if [[ -f /etc/default/vdr ]]; then
+			. /etc/default/vdr
+		fi
+		cd $VIDEO_DIR
+		if ! pidof vdr ; then
+			# If we are running on the cure, we need to restart VDR after mounting the relevant devices
+			if [[ "$AutostartCore" -eq "1" ]] ; then
+				service vdr restart
+			fi
 		fi
 	fi
-fi
-StartDaemon  "Starting LinuxMCE Launch Manager" "/usr/pluto/bin/LaunchManagerDaemon.sh" "LMCE_Launch_Manager"
-if [[ -x /bin/plymouth ]]; then 
-        /bin/plymouth --hide-splash || :
-fi
 
-/usr/pluto/bin/SetupAudioVideo.sh
-exit 0
+	StartDaemon  "Starting LinuxMCE Launch Manager" "/usr/pluto/bin/LaunchManagerDaemon.sh" "LMCE_Launch_Manager"
 
+	if [[ -x /bin/plymouth ]]; then
+	        /bin/plymouth --hide-splash || :
+	fi
+
+	/usr/pluto/bin/SetupAudioVideo.sh
+
+	:
+	return $?
+}
+
+stop() {
+	StartService "Enable wake-on-LAN" "/usr/pluto/bin/enable_wol.sh"
+	return $?
+}
+
+status() {
+	status_of_proc linuxmce LinuxMCE
+	return $?
+}
+
+### main logic ###
+case "$1" in
+	start)
+		$1
+		retval=$?
+		;;
+	stop)
+		$1
+		retval=$?
+		;;
+	status)
+		$1
+		retval=$?
+		;;
+	restart|reload)
+		: # noop
+		retval=$?
+		;;
+	*)
+		echo $"Usage: $0 {start|stop|restart|reload|status}"
+		retval=1
+esac
+exit $retval
