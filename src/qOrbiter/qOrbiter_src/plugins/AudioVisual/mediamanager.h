@@ -1,26 +1,25 @@
 #ifndef MEDIAMANAGER_H
 #define MEDIAMANAGER_H
 
-#ifdef QT5
+#ifdef QT4
 #include <qdeclarative.h>
 #include <QDeclarativeItem>
-#include <QtWidgets/QBoxLayout>
-#include <QtMultimedia>
-
-#else
-
-#ifndef __ANDROID__
-#include <QBoxLayout>
-#include <phonon>
-#include <QHBoxLayout>
-#include <colorfilterproxywidget.h>
-#endif
-
-#include <QDeclarativeItem>
-#include <QKeyEvent>
 #include <QGLWidget>
+
+    #ifndef __ANDROID__
+        #include <QBoxLayout>
+        #include <phonon>
+        #include <QHBoxLayout>
+        #include <colorfilterproxywidget.h>
+    #endif
+
+#elif QT5
+#include <QQuickItem>
+#include <QImage>
+
 #endif
 
+#include <QKeyEvent>
 #include <QObject>
 #include <QProcess>
 #include <qMediaPlayer/qMediaPlayer.h>
@@ -35,7 +34,12 @@ using namespace Qt;
  * This class represents a network media player embedded into the application. It runs as a plugin
  * as opposed to being directly instantiated by the Application to allow for modularity.
  */
-class MediaManager : public QDeclarativeItem
+class MediaManager :
+        #ifdef QT4
+        public QDeclarativeItem
+        #elif QT5
+        public QQuickItem
+        #endif
 {
 
     Q_PROPERTY(bool connected READ getConnectionStatus WRITE setConnectionStatus NOTIFY connectedChanged)
@@ -45,6 +49,7 @@ class MediaManager : public QDeclarativeItem
     Q_PROPERTY(bool hasError READ getErrorStatus WRITE setErrorStatus NOTIFY hasErrorChanged)
     Q_PROPERTY(QString lastError READ getMediaError WRITE setMediaError NOTIFY lastErrorChanged)
     Q_PROPERTY(int mediaBuffer READ getMediaBuffer WRITE setMediaBuffer NOTIFY mediaBufferChanged)
+    Q_PROPERTY(QString fileReference READ getFileReference NOTIFY fileReferenceChanged)
     Q_PROPERTY(qreal volume READ getVolume NOTIFY volumeChanged)
     Q_PROPERTY(bool muted READ getMuted WRITE setMuted NOTIFY mutedChanged)
 
@@ -58,7 +63,11 @@ class MediaManager : public QDeclarativeItem
     Q_OBJECT
 
 public:
+#ifdef QT4
     explicit MediaManager(QDeclarativeItem *parent = 0);
+#elif QT5
+    explicit MediaManager(QQuickItem *parent = 0);
+#endif
 
     //media info
     int currentTime;
@@ -68,6 +77,7 @@ public:
     QString fileReference;
     int fileno;
     QString filepath;
+    QString fileUrl;
     int mediaBuffer;
 
     bool mediaPlaying;
@@ -96,10 +106,18 @@ public:
 
 
 #ifndef __ANDROID__
-    QWidget *window;
-    QList <Phonon::AudioOutputDevice> outputs;
-    QVBoxLayout *layout;
-    ColorFilterProxyWidget *filterProxy;
+    #ifdef QT4
+        QWidget *window;
+        QList <Phonon::AudioOutputDevice> outputs;
+        QVBoxLayout *layout;
+        ColorFilterProxyWidget *filterProxy;
+    #elif QT5
+    /*
+     *In Qt5
+     *We dont need to do any painting of the operations normally
+     *This may change with raspberry pi
+     */
+    #endif
 #endif
 
     qMediaPlayer *mediaPlayer;
@@ -124,17 +142,14 @@ public:
 
 #ifdef QT4
 
-#ifndef __ANDROID__
-    Phonon::VideoWidget *videoSurface;
-    Phonon::AudioOutput *audioSink;
-    Phonon::MediaObject *mediaObject;
-    Phonon::MediaController * discController;
-    QGLWidget *accel;
-#endif
-#else
-    QAbstractAudioOutput *audioSink;
-    QMediaObject *mediaObject;
-    QAbstractVideoSurface * videoSurface;
+    #ifndef __ANDROID__
+        Phonon::VideoWidget *videoSurface;
+        Phonon::AudioOutput *audioSink;
+        Phonon::MediaObject *mediaObject;
+        Phonon::MediaController * discController;
+        QGLWidget *accel;
+    #endif
+
 #endif
 
 signals:
@@ -165,6 +180,7 @@ signals:
     void asyncStop();
     void asyncPositionRequest(int r);
     void callbackChanged();
+    void fileReferenceChanged();
 
 public slots:
 
@@ -182,7 +198,9 @@ public slots:
     void setColorFlip(bool f){
         flipColors = f;
 #ifndef __ANDROID__
+#ifndef QT5
         filterProxy->invert = f;
+#endif
 #endif
         emit colorFlipChanged();
     }
@@ -249,20 +267,26 @@ public slots:
         if (mediaPlaying==false)
         {
 #ifndef __ANDROID__
+    #ifndef QT5
             filterProxy->hide();
+    #endif
 #endif
         }
         else
         {
 #ifndef __ANDROID__
+    #ifdef QT4
             filterProxy->show();
+    #endif
 #endif
         }
         emit mediaPlayingChanged();
 #ifndef __ANDROID__
+    #ifdef QT4
         qDebug() << "Titles ==>" << discController->availableTitles();
         qDebug() << "subTitles==>" << discController->availableSubtitles();
         qDebug() << "Availible titles ==>" << discController->availableTitles();
+    #endif
 #endif
 
     }
@@ -315,7 +339,7 @@ public slots:
 
     void setState(){
 #ifndef __ANDROID__
-
+    #ifdef QT4
         qDebug() << mediaObject->state();
         int i =  mediaObject->errorType();
         if(i==0){
@@ -334,6 +358,7 @@ public slots:
             mediaPlayer->EVENT_Playback_Completed(mediaPlayer->currentMediaUrl.toStdString(), mediaPlayer->i_StreamId, false);
             qWarning("Media could not start.");
         }
+    #endif
 #endif
     }
 
@@ -442,5 +467,8 @@ private slots:
     bool initViews(bool flipped);
 
 };
+
+
+QML_DECLARE_TYPE(MediaManager)
 
 #endif // MEDIAMANAGER_H

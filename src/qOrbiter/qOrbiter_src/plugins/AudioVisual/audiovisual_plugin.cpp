@@ -7,16 +7,10 @@
 
 void AudioVisualPlugin::registerTypes(const char *uri)
 {
-
-#ifdef QT5
-
-#else
     // @uri AudioVisual
     qmlRegisterType<MediaManager>(uri, 1, 0, "MediaManager");
-#endif
-
 }
-
+#if QT_VERSION < 0x050000
 Q_EXPORT_PLUGIN2(AudioVisual, AudioVisualPlugin)
-
+#endif
 

@@ -3,13 +3,16 @@
 #include <QTcpSocket>
 #include <QProcess>
 
-#ifdef Q_OS_LINUX
+#ifndef __ANDROID
+#ifdef QT4
 #include <QGraphicsScene>
 #include <QtOpenGL/QGLWidget>
 #include <QGraphicsView>
+#elif QT5
+#include <QQuickItem>
+#include <QImage>
 #endif
-
-
+#endif
 
 using namespace DCE;
 
@@ -19,14 +22,21 @@ using namespace DCE;
  * \param parent
  * \ingroup audio_visual
  */
+#ifdef QT4
 MediaManager::MediaManager(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
+  #else QT5
+MediaManager::MediaManager(QQuickItem *parent):
+    QQuickItem(parent)
+  #endif
 {
 #ifdef __ANDROID__
     setFlag(ItemHasNoContents, true);
 
-#else
+#elif QT4
     setFlag(ItemHasNoContents, false);
+#elif QT5
+    setFlag(QQuickItem::ItemHasContents, false);
 #endif
     serverAddress = "";
     deviceNumber = -1;
@@ -56,9 +66,6 @@ MediaManager::MediaManager(QDeclarativeItem *parent) :
 
     videoSurface->setAspectRatio(Phonon::VideoWidget::AspectRatioAuto);
     videoSurface->setScaleMode(Phonon::VideoWidget::FitInView);
-
-
-
     if(initViews(true))
         setCurrentStatus("Color Filter Applied.");
 #endif
@@ -88,17 +95,25 @@ void MediaManager::initializeConnections()
     /*From Dce MediaPlayer*/
 #ifndef __ANDROID__
     QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)));
+
+#ifdef QT4
     QObject::connect(mediaPlayer,SIGNAL(startPlayback()), mediaObject, SLOT(play()));
-    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(mediaStarted()));
+    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(showFullScreen()));
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), mediaObject, SLOT(stop()));
-    QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopTimeCodeServer()));
     QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), mediaObject, SLOT(pause()));
+#elif QT5
+
+#endif
+
+    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(mediaStarted()));
+    QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopTimeCodeServer()));
     QObject::connect(mediaPlayer,SIGNAL(commandResponseChanged(QString)), this ,SLOT(setCurrentStatus(QString)));
     QObject::connect(mediaPlayer,SIGNAL(setZoomLevel(QString)), this, SLOT(setZoomLevel(QString)));
     QObject::connect(mediaPlayer,SIGNAL(streamIdChanged(int)), this , SLOT(setStreamId(int)));
     QObject::connect(mediaPlayer, SIGNAL(mediaIdChanged(QString)), this, SLOT(setFileReference(QString)));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()));
-    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(showFullScreen()));
+
+
 #elif defined __ANDROID__
     QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString))); //effectively play for android.
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopAndroidMedia()));
@@ -107,8 +122,10 @@ void MediaManager::initializeConnections()
 #endif
     QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
     QObject::connect(mediaPlayer,SIGNAL(jumpToStreamPosition(int)), this, SLOT(setMediaPosition(int)));
+
 #ifndef __ANDROID__
     /*From internal plugin*/
+#ifdef QT4
     QObject::connect(mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(setState()));
     QObject::connect(mediaObject, SIGNAL(finished()), mediaPlayer, SLOT(mediaEnded()));
     QObject::connect(mediaObject, SIGNAL(tick(qint64)), this, SLOT(processTimeCode(qint64)));
@@ -118,12 +135,9 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaObject, SIGNAL(aboutToFinish()), this, SIGNAL(mediaAboutToFinish()));
     QObject::connect(mediaObject, SIGNAL(prefinishMarkReached(qint32)), this ,SLOT(setPrefinishMarkHit(qint32)));
     QObject::connect(mediaObject,SIGNAL(metaDataChanged()), this, SLOT(updateMetaData()));
-
     /*internals*/
     QObject::connect(audioSink, SIGNAL(volumeChanged(qreal)), this, SLOT(setVolume(qreal)));
     QObject::connect(audioSink, SIGNAL(mutedChanged(bool)), this, SLOT(setMuted(bool)));
-
-#ifdef QT4
     mediaObject->setTickInterval(quint32(1000));
 #elif QT5
 
@@ -193,9 +207,8 @@ void MediaManager::setAspectRatio(QString aspect)
 }
 
 
-QImage MediaManager::getScreenShot()
-{
-#ifndef __ANDROID__
+QImage MediaManager::getScreenShot(){
+#ifdef QT4 && !__ANDROID__
     QImage screenShot(videoSurface->height(), videoSurface->width(), QImage::Format_ARGB32_Premultiplied );
     screenShot.fill(Qt::black);
     videoSurface->window()->render(&screenShot);
@@ -203,6 +216,7 @@ QImage MediaManager::getScreenShot()
     QImage screenShot;
 #endif
     return screenShot;
+
 }
 
 
@@ -211,7 +225,7 @@ void MediaManager::setMediaUrl(QString url)
     setCurrentStatus("Got New Media Url::"+url);
     filepath=url;
 
-#ifndef __ANDROID__
+#if defined (QT4) && ! defined (__ANDROID__) //only for non android qt4
     if(url.toLower().endsWith(".ISO")){
 
         QString mountProg = "gksudo";
@@ -243,6 +257,8 @@ void MediaManager::setMediaUrl(QString url)
     qDebug() <<"Item is playing? " << mediaObject->state();
     qDebug() << "Errors " << mediaObject->errorString();
     qDebug() << discController->currentTitle();
+#else if defined(QT5) && ! defined (__ANDROID__)
+setFileReference(url);
 #endif
 
 }
@@ -304,7 +320,7 @@ void MediaManager::processSocketdata()
         return ;
     }
 
-    QString f = QString::fromAscii(tmp.toLocal8Bit());
+    QString f = QString::fromLocal8Bit(tmp.toLocal8Bit());
     int front = f.indexOf("\n{");
     int back  = f.indexOf("}\n");
     QString final=f.remove(0, front);
@@ -349,7 +365,7 @@ void MediaManager::transmit(QString d)
     QByteArray chunk;
     QDataStream out(&chunk, QIODevice::WriteOnly);
     //out << (quint16)0;
-    out << d.toAscii(); //.toStdString().c_str();
+    out << d.toLocal8Bit(); //.toStdString().c_str();
     out.device()->reset();
     out << (quint16)(chunk.size() -sizeof(quint16));
 
@@ -405,7 +421,7 @@ void MediaManager::disconnectInfoSocket()
 
 bool MediaManager::initViews(bool flipped)
 {
-#ifndef __ANDROID__
+#if defined (QT4) && ! defined (__ANDROID__)
     filterProxy = new ColorFilterProxyWidget(this);
 
     if(flipColors){

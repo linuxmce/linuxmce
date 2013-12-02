@@ -14,7 +14,9 @@ class AudioVisualPlugin : public QDeclarativeExtensionPlugin
  #endif
 {
     Q_OBJECT
-    
+#if QT_VERSION >= 0x050000
+    Q_PLUGIN_METADATA(IID "AudioVisual")
+#endif
 public:
     void registerTypes(const char *uri);
 };

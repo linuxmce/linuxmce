@@ -26,6 +26,7 @@ DESTDIR=../../imports/DceScreenSaver
 linux-rasp-pi-g++{
 DESTDIR=../../imports/DceScreenSaver
 DEFINES+=RPI
+RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
 }
 
 
@@ -83,9 +84,11 @@ unix {
     } else {
         installPath = $$[QT_INSTALL_IMPORTS]/$$replace(uri, \\., /)
     }
-
+    linux-rasp-pi-g++{
+    installPath=/opt/QOrbiter/imports/$$replace(uri, \\., /) #$$RASP_INSTALL_TARGET/$$replace(uri, \\., /)
+}
     qmldir.path = $$installPath
     target.path = $$installPath
-    INSTALLS += target qmldir
+   INSTALLS += target qmldir
 }
 

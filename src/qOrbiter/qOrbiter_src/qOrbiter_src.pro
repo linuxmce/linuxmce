@@ -246,10 +246,10 @@ linux-rasp-pi-g++{
         folder_02.source = config.xml
         folder_02.target = config
 
-        plugins_folder.source = imports/
-        plugins_folder.target = $$DESTDIR
+      #  plugins_folder.source = imports/
+      # plugins_folder.target = $$DESTDIR
 
-        DEPLOYMENTFOLDERS+= plugins_folder
+       # DEPLOYMENTFOLDERS+= plugins_folder
 
         DEFINES+=RPI GLENABLED
         DEFINES-=for_desktop
@@ -258,7 +258,7 @@ linux-rasp-pi-g++{
         QT-=declarative
 
         target.path=/opt/QOrbiter
-        QML_IMPORT_PATH=$$[QT_INSTALL_IMPORTS]../imports
+        QML_IMPORT_PATH=imports
         INSTALLS+=target
 }
 
@@ -535,6 +535,7 @@ HEADERS += \
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
+    qml/rpi/default/components/DceMedia.qml
 
 
 

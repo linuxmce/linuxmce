@@ -126,12 +126,11 @@ void DceScreenSaver::processImageData(QNetworkReply *r)
         surface =currentImage;
         currentImage= t.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
     }
-
-#ifdef QT4
+    qWarning("Image Tick");
+#ifndef RPI
     startFadeTimer(2500);
 #else
     update();
-
 #endif
 
   //  beginZoom();
@@ -230,7 +229,7 @@ void DceScreenSaver::beginZoom()
 
 void DceScreenSaver::startFadeTimer(int time)
 {
-#ifdef QT4
+#ifndef RPI
     fadeAnimation->setDuration(time);
     fadeAnimation->start();
 #endif

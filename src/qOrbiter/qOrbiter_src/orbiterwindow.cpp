@@ -40,17 +40,12 @@
 #include <QApplication>
 #endif
 
-
 #include <QDebug>
-
-
 #include "orbiterwindow.h"
 
 #ifdef IOS
 #include "../iOS/qOrbiter/ioshelpers.h"
 #endif
-
-
 
 orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen, bool frameless, QObject *parent) :
     QObject(parent), deviceno(deviceid)
@@ -93,23 +88,16 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 
     //qDebug() << mainView.size();
 
-
-
     userList.append(new PromptData("No Users",0));
     roomList.append(new PromptData("No Rooms",0));
 
-
-    mainView.engine()->addImportPath("./imports");
     mainView.engine()->addImportPath("imports");
+    qDebug() << mainView.engine()->importPathList();
 
     mainView.engine()->addPluginPath("lib");
     mainView.engine()->addPluginPath("imports");
-    //mainView.engine()->addPluginPath(QT_INSTALL_DIR);
 
-    qDebug() << mainView.engine()->importPathList();
     qDebug() << mainView.engine()->pluginPathList();
-
-
 
     mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
     mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
@@ -134,7 +122,6 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.setTitle("LinuxMCE QOrbiter");
 #endif
     //  mainView.rootContext()->setContextProperty("orbiterList" , "");
-
 
 #ifdef GLENABLED
 

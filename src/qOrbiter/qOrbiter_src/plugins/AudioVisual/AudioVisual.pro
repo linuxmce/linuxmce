@@ -15,10 +15,11 @@ message("$$QT_VERSION DCE-Av-Plugin")
 	DEFINES+=QT4
 }
 
-contains(QT_VERSION,5.0.*){
+contains(QT_VERSION,5.*.*){
 	message("$$QT_VERSION DCE-Av-Plugin")
-        QT += quick1 multimedia network opengl
+        QT += quick multimedia network opengl
 	DEFINES+=QT5
+        DEFINES-=QT4
 }
 
 
@@ -32,10 +33,14 @@ INCLUDEPATH += ../../../../ ../../../../DCE/
 
 linux-g++{
 INCLUDEPATH+=$$[QT_INSTALL_PREFIX]/include/phonon/Phonon
+DESTDIR=../../imports/AudioVisual
+
 }
 
-linux-g++{
+linux-rasp-pi-g++{
 DESTDIR=../../imports/AudioVisual
+DEFINES+=RPI
+RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
 }
 
 android-g++{
@@ -137,13 +142,20 @@ qmldir.files = qmldir
 unix {
 	maemo5 | !isEmpty(MEEGO_VERSION_MAJOR) {
 		installPath = /usr/lib/qt4/imports/$$replace(uri, \\., /)
-	} else {
+        } RPI {
+                installPath = $$RASP_INSTALL_TARGET$$replace(uri, \\., /)
+        }else {
 		installPath = $$[QT_INSTALL_IMPORTS]/$$replace(uri, \\., /)
-	}
+        }
+    linux-rasp-pi-g++{
+    installPath= installPath=/opt/QOrbiter/imports/$$replace(uri, \\., /)#$$RASP_INSTALL_TARGET/$$replace(uri, \\., /)
+}
 	qmldir.path = $$installPath
 	target.path = $$installPath
-	INSTALLS += target qmldir
+        #INSTALLS += target qmldir
 }
+
+message("Plugin install path at" $$RASP_INSTALL_TARGET)
 
 OTHER_FILES += \
     android/res/values-rs/strings.xml \
