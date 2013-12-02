@@ -1,38 +1,62 @@
 #!/bin/bash
-### BEGIN INIT INFO 
+### BEGIN INIT INFO
 # Provides:          avwizard
 # Required-Start:    check_avwizard
-# Required-Stop:     
-# Should-Start:      
+# Required-Stop:
+# Should-Start
 # Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
+# Default-Stop:      1 6
 # Short-Description: AVWizard
 # Description:       This script starts the AV Wizard
 ### END INIT INFO #
 
-if [ "$1" == "status" ] ; then
-	if [ `pidof AVWizard_Run.sh` ] ; then
-		echo "* AVWizard is running"
-	else
-		echo "* AVWizard is not running"
-	fi
-	exit 0
-fi
-
-. /usr/pluto/bin/Utils.sh
+# Source fuction library
+. /lib/lsb/init-functions
 
 CheckAVWizard () {
-if [[ "1" == "$AVWizardOverride" || "1" != "$AVWizardDone" ]] && [[ "1" == "$AutostartMedia" ]] ;then
-	## Install driver based on the type of video card used
-	CheckVideoDriver
+	if [[ "1" == "$AVWizardOverride" || "1" != "$AVWizardDone" ]] && [[ "1" == "$AutostartMedia" ]] ;then
+		## Install driver based on the type of video card used
+		CheckVideoDriver
 
-	## Run the AVWizard
-	/usr/pluto/bin/AVWizard_Run.sh 1>/dev/null 2>/dev/null </dev/null
-	ConfSet "AVWizardOverride" "0"
-else
-	beep -l 50 -f 1000 -n -l 50 -f 1200 -n -l 50 -f 1400 -n -l 50 -f 1600 -n -l 50 -f 1800 -n -l 50 -f 2000 -n -l 50 -f 2200 &
-fi
+		## Run the AVWizard
+		/usr/pluto/bin/AVWizard_Run.sh 1>/dev/null 2>/dev/null </dev/null
+		ConfSet "AVWizardOverride" "0"
+	else
+		beep -l 50 -f 1000 -n -l 50 -f 1200 -n -l 50 -f 1400 -n -l 50 -f 1600 -n -l 50 -f 1800 -n -l 50 -f 2000 -n -l 50 -f 2200 &
+	fi
 }
 
-CheckAVWizard
-killall WatchGyroRemote 2>/dev/null
+start() {
+	. /usr/pluto/bin/Utils.sh
+
+	CheckAVWizard
+	killall WatchGyroRemote 2>/dev/null
+}
+
+
+### main logic ###
+case "$1" in
+  start)
+	log_daemon_msg "Starting AVWizard" "AVWizard_Run.sh"
+        $1
+	log_end_msg 0
+	retval=0
+        ;;
+  stop)
+        : # noop
+	retval=0
+        ;;
+  status)
+        status_of_proc AVWizard_Run.sh AVWizard
+	retval=$?
+        ;;
+  restart|reload)
+        : # noop
+	retval=0
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|restart|reload|status}"
+        retval=1
+esac
+exit $retval
+
