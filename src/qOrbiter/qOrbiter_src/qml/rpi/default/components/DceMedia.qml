@@ -6,27 +6,45 @@ Item {
     width: 100
     height: 62
     //   property alias videoPlayer:vplayer
+    property string currentMediaUrl:dceMediaController.fileUrl
 
     MediaManager{
         id:dceMediaController
+        incomingTime:player.position
+         onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceMediaController.currentStatus)
+         onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
+         onMediaPlayingChanged: console.log("Media Playback status changed locally "+mediaBuffer)
+        Component.onCompleted: {
+                                   console.log("initializing media player "+manager.mediaPlayerID)
+                                   dceMediaController.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                               }
 
     }
+
+
+
     Connections{
         target:manager
-        onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
+        // onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
         onMediaPlayerIdChanged:{
             console.log("initializing media player"+manager.mediaPlayerID)
-            dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+            dceMediaController.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
         }
     }
 
-       VideoOutput{
-        id:videoPlane
-       }
+    MediaPlayer{
+        id:player
+        source: dceMediaController.fileUrl
+        onSourceChanged: if(source !==""){play()}
+    }
 
-       Audio{
-           id:audioPlayer
-       }
+    VideoOutput{
+        id:videoPlane
+    }
+
+    Audio{
+        id:audioPlayer
+    }
 
 
 }

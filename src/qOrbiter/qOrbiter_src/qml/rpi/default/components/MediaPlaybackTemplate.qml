@@ -147,6 +147,30 @@ Item {
         id: playlist
     }
 
+    Item{
+        id:debugBox
+        anchors{
+            left:parent.left
+            right:parent.right
+            bottom:parent.bottom
+        }
+        height:parent.height*.08
+        Rectangle{
+            color:"black"
+            anchors.fill: parent
+        }
+
+        Row{
+            anchors.fill: parent
+            StyledText{
+                text: "Media Url: "+ dceplayer.currentMediaUrl
+                color: "green"
+                fontSize: 18
+            }
+        }
+
+    }
+
     states: [
         State {
             name: "video_playback"

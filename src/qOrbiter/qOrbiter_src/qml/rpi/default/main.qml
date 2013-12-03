@@ -52,9 +52,7 @@ Item {
         }
     }
 
-    Component.onCompleted: {
-        dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-    }
+
 
 
     FontLoader{
@@ -336,22 +334,6 @@ Item {
             }
         }
 
-        Component.onCompleted: {
-            setWindowSize(manager.appHeight, manager.appWidth);
-        }
-
-        Connections{
-            target:manager
-            onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
-            onMediaPlayerIdChanged:{
-                console.log("initializing media player"+manager.mediaPlayerID)
-                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-            }
-        }
-
-//        onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
-//        onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
-//        onMediaPlayingChanged: console.log("Media Playback status changed locally "+dceplayer.mediaBuffer)
 //        onVolumeChanged:console.log(volume)
         Keys.onVolumeDownPressed: manager.adjustVolume("-1")
         Keys.onVolumeUpPressed:  manager.adjustVolume("+1")

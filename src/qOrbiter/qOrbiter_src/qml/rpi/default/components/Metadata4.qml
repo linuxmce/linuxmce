@@ -51,7 +51,7 @@ Column{
         smooth: true
         font.bold: true
         fontSize: 32
-        color:style.maincolor
+        color:skinStyle.maincolor
     }
     
     StyledText {

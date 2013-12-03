@@ -10,6 +10,7 @@ PlaylistClass::PlaylistClass(PlaylistItemClass* prototype, QObject *parent) :
 #endif
     qRegisterMetaType<QModelIndex>("QModelIndex");
 
+    totalSize=0;
 }
 
 int PlaylistClass::rowCount(const QModelIndex &parent) const
@@ -30,8 +31,9 @@ QVariant PlaylistClass::data(const QModelIndex &index, int role) const
 }
 
 PlaylistClass::~PlaylistClass() {
+    if(resetInternalData())
     delete m_prototype;
-    clear();
+
 }
 #ifdef QT5
 QHash<int, QByteArray> PlaylistClass::roleNames() const
@@ -69,7 +71,6 @@ void PlaylistClass::appendRows(const QList<PlaylistItemClass *> &items)
             m_list.append(item);
             QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
             QObject::connect(item, SIGNAL(destroyed()), this, SLOT(itemDeletion()));
-
         }
 
     }
@@ -77,7 +78,7 @@ void PlaylistClass::appendRows(const QList<PlaylistItemClass *> &items)
     endInsertRows();
     QModelIndex index = indexFromItem(m_list.last());
     QModelIndex index2 = indexFromItem(m_list.first());
-    int currentRows= m_list.count();
+    int currentRows= m_list.size();
     emit dataChanged(index2, index, currentRows);
 
 }
@@ -149,7 +150,7 @@ bool PlaylistClass::removeRows(int row, int count, const QModelIndex &parent)
     Q_UNUSED(parent);
     if(row < 0 || (row+count) >= m_list.size()) return false;
     beginRemoveRows(QModelIndex(), row, row+count-1);
-    for(int i=0; i<count; ++i) {
+    for(int i=0; i < count ; ++i) {
         delete m_list.takeAt(row);
     }
     endRemoveRows();
@@ -232,6 +233,9 @@ bool PlaylistClass::checkDupe(QString name, int position)
 
 bool PlaylistClass::resetInternalData()
 {  
+    if(m_list.empty()){
+    return true;
+}
     qDebug("Resetting Playlist data");
     int total = m_list.size();
     int counter=0;
@@ -243,7 +247,7 @@ bool PlaylistClass::resetInternalData()
         pItem->destruct();
         counter++;
     }
-//    qDebug() << counter << "::Items cleared. Remaining Count:: "<< m_list.size();
+    qDebug() << counter << "::Items cleared. Remaining Count:: "<< m_list.size();
 
     return true;
 }

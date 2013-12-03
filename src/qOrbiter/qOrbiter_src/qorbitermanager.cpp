@@ -279,7 +279,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
 
     /*Needs Doin at construction */
-     userList = new UserModel( new UserItem, this);
+    userList = new UserModel( new UserItem, this);
 }
 
 
@@ -1113,7 +1113,7 @@ QString qorbiterManager::translateMediaType(int mediaType)
         break;
     case 27:
         rVal="LinuxMCE HD-DVD";
-                break;
+        break;
     case 28:
         rVal="LinuxMCE Blu-ray Disc";
         break;
@@ -1284,8 +1284,10 @@ void qorbiterManager::mountMediaDevices()
     for(int dc =0; dc < storageDevices.count(); dc++){
         qDebug()<< "Starting process for device " << storageDevices.at(dc).toMap()["Description"].toString() << " #"<<storageDevices.at(dc).toMap()["Device"].toString();
         int d = storageDevices.at(dc).toMap()["Device"].toInt();
-
-        QString dirCmd = "gksudo";
+        QString dirCmd = "";
+#ifndef RPI
+        dirCmd  = "gksudo";
+#endif
         QDir mntDir;
         mntDir.setPath("/mnt/remote/"+QString::number(d));
         qDebug() << mntDir.exists();
@@ -1302,8 +1304,11 @@ void qorbiterManager::mountMediaDevices()
         }
 
         if(mntDir.entryList(QDir::NoDotAndDotDot).count() == 0){
-            qDebug() << mntDir.entryList(QDir::NoDotAndDotDot).count();
+            qDebug() << "Existing files in path" << mntDir.entryList(QDir::NoDotAndDotDot).count();
             QString mountProg = "gksudo";
+#ifdef RPI
+            mountProg="";
+#endif
             QStringList args;
 
             args.append(QString("mount -t nfs "+m_ipAddress+":/mnt/device/"+QString::number(d) + " /mnt/remote/"+QString::number(d)) +" -o vers=3" );
@@ -1325,6 +1330,9 @@ void qorbiterManager::mountMediaDevices()
     QDir mntDir;
     mntDir.setPath("/mnt/remote/dvd");
     qDebug() << mntDir.exists();
+#ifdef RPI
+    dirCmd="";
+#endif
     if(!mntDir.exists()){
         QProcess *mkPath = new QProcess(this);
         QStringList dArgs;
@@ -1546,7 +1554,7 @@ bool qorbiterManager::readLocalConfig()
 #elif WIN32
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #elif RPI
-    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("/bin").toStdString())+"/config/config.xml";
+    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #else
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #endif
@@ -1965,7 +1973,7 @@ bool qorbiterManager::getRequestMore()
 
 void qorbiterManager::updateAlarm(bool toggle, int grp)
 {
-  //  sleeping_alarms->clear();
+    //  sleeping_alarms->clear();
     emit setAlarm(toggle, grp);
 
 }
@@ -1977,7 +1985,7 @@ void qorbiterManager::showSleepingAlarms(SleepingAlarm *s)
     if(t)
         t->updateStatus(s->currentState());
     else
-    sleeping_alarms->appendRow(new SleepingAlarm(s->eventHandler, s->name, s->alarmTime, s->b_state, s->timeLeft, s->activeDays));
+        sleeping_alarms->appendRow(new SleepingAlarm(s->eventHandler, s->name, s->alarmTime, s->b_state, s->timeLeft, s->activeDays));
 }
 
 

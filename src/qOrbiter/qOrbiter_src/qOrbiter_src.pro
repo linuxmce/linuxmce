@@ -244,7 +244,7 @@ linux-rasp-pi-g++{
         folder_01.target= qml
 
         folder_02.source = config.xml
-        folder_02.target = config
+        folder_02.target =
 
       #  plugins_folder.source = imports/
       # plugins_folder.target = $$DESTDIR

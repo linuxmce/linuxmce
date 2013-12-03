@@ -51,7 +51,7 @@ ListView{
             }
             Timer{
                 id:indexUpdate
-                interval: mediaplaylist.count()*10
+                interval: mediaplaylist.count()*100
                 running: false
                 onTriggered: {
                     console.log("interval is" + interval)

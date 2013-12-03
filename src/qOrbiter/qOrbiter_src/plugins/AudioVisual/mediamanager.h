@@ -52,6 +52,8 @@ class MediaManager :
     Q_PROPERTY(QString fileReference READ getFileReference NOTIFY fileReferenceChanged)
     Q_PROPERTY(qreal volume READ getVolume NOTIFY volumeChanged)
     Q_PROPERTY(bool muted READ getMuted WRITE setMuted NOTIFY mutedChanged)
+    Q_PROPERTY(QString fileUrl READ getMediaUrl NOTIFY fileUrlChanged)
+    Q_PROPERTY(int incomingTime READ getIncomingTime WRITE setIncomingTime NOTIFY incomingTimeChanged)
 
 
     Q_PROPERTY(bool flipColors READ getColorFlip WRITE setColorFlip NOTIFY colorFlipChanged)
@@ -140,6 +142,8 @@ public:
     bool flipColors;
     quint64 tempTime;
 
+    int incomingTime;
+
 #ifdef QT4
 
     #ifndef __ANDROID__
@@ -181,8 +185,16 @@ signals:
     void asyncPositionRequest(int r);
     void callbackChanged();
     void fileReferenceChanged();
+    void fileUrlChanged();
+    void fileNumberChanged();
+    void incomingTimeChanged();
+    void incomingTick(quint64);
+    void updatePluginSeek(int);
 
 public slots:
+
+    void setIncomingTime(int i){ incomingTime = i; emit incomingTimeChanged();}
+    int getIncomingTime() { return incomingTime;}
 
     QString getAndroidUrl(){ return androidUrl;}
 
@@ -302,15 +314,17 @@ public slots:
         qDebug() << "CPP Url Updated";
 
 #endif
+        emit fileReferenceChanged();
     }
     QString getFileReference() {return fileReference; }
 
-    void setFileNumber(int n) {fileno = n;}
+    void setFileNumber(int n) {fileno = n; fileNumberChanged();}
 
     void transmit(QString d);
     void setStreamId(int id) {streamId = id; }
 
     void setMediaUrl(QString url);
+    QString getMediaUrl(){ return fileUrl;}
 
     void setCurrentStatus(QString s) {currentStatus = QTime::currentTime().toString()+"::"+s; emit currentStatusChanged(); qDebug() <<currentStatus; }
     QString getCurrentStatus() {return currentStatus;}
@@ -373,7 +387,7 @@ public slots:
 #endif
 
 #elif QT5
-
+        updatePluginSeek(msec);
 #endif
 
     }

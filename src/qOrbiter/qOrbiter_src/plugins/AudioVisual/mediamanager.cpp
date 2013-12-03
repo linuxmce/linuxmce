@@ -117,8 +117,6 @@ void MediaManager::initializeConnections()
 #elif defined __ANDROID__
     QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString))); //effectively play for android.
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopAndroidMedia()));
-
-
 #endif
     QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
     QObject::connect(mediaPlayer,SIGNAL(jumpToStreamPosition(int)), this, SLOT(setMediaPosition(int)));
@@ -140,7 +138,7 @@ void MediaManager::initializeConnections()
     QObject::connect(audioSink, SIGNAL(mutedChanged(bool)), this, SLOT(setMuted(bool)));
     mediaObject->setTickInterval(quint32(1000));
 #elif QT5
-
+    QObject::connect(this, SIGNAL(incomingTick(quint64)), this, SLOT(processTimeCode(qint64)));
 #endif
 #endif
 }
@@ -193,11 +191,13 @@ void MediaManager::stopTimeCodeServer()
     }
     timeCodeServer->close();
     setMediaPlaying(false);
+    incomingTime=0;
 }
 
 void MediaManager::setZoomLevel(QString zoom)
 {
     setCurrentStatus("Implement zoom level-template::"+zoom);
+
 }
 
 void MediaManager::setAspectRatio(QString aspect)
@@ -224,6 +224,8 @@ void MediaManager::setMediaUrl(QString url)
 {
     setCurrentStatus("Got New Media Url::"+url);
     filepath=url;
+    fileUrl=url;
+    emit fileUrlChanged();
 
 #if defined (QT4) && ! defined (__ANDROID__) //only for non android qt4
     if(url.toLower().endsWith(".ISO")){
@@ -257,8 +259,6 @@ void MediaManager::setMediaUrl(QString url)
     qDebug() <<"Item is playing? " << mediaObject->state();
     qDebug() << "Errors " << mediaObject->errorString();
     qDebug() << discController->currentTitle();
-#else if defined(QT5) && ! defined (__ANDROID__)
-setFileReference(url);
 #endif
 
 }
