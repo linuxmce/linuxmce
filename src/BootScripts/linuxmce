@@ -149,7 +149,7 @@ start() {
 		. /usr/pluto/bin/Utils.sh
 	fi
 
-	# This is done in /usr/pluto/bin/Utils simply by inclusion
+	# This is done in /usr/pluto/bin/Config_Ops.sh simply by inclusion
 	#ConfEval
 
 	# We still need hal for device detection
