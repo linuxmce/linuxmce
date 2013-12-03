@@ -14,6 +14,10 @@
 . /lib/lsb/init-functions
 
 CheckAVWizard () {
+	log_daemon_msg "Starting AVWizard" "AVWizard_Run.sh"
+
+	. /usr/pluto/bin/Utils.sh
+
 	if [[ "1" == "$AVWizardOverride" || "1" != "$AVWizardDone" ]] && [[ "1" == "$AutostartMedia" ]] ;then
 		## Install driver based on the type of video card used
 		CheckVideoDriver
@@ -24,39 +28,49 @@ CheckAVWizard () {
 	else
 		beep -l 50 -f 1000 -n -l 50 -f 1200 -n -l 50 -f 1400 -n -l 50 -f 1600 -n -l 50 -f 1800 -n -l 50 -f 2000 -n -l 50 -f 2200 &
 	fi
+	killall WatchGyroRemote 2>/dev/null
+
+	err=0
+	log_end_msg $err
+	return $err
 }
 
 start() {
-	. /usr/pluto/bin/Utils.sh
-
 	CheckAVWizard
-	killall WatchGyroRemote 2>/dev/null
+	return $?
 }
 
+stop() {
+	: # noop
+	return $?
+}
+
+status() {
+	status_of_proc AVWizard_Run.sh AVWizard
+	return $?
+}
 
 ### main logic ###
 case "$1" in
-  start)
-	log_daemon_msg "Starting AVWizard" "AVWizard_Run.sh"
-        $1
-	log_end_msg 0
-	retval=0
-        ;;
-  stop)
-        : # noop
-	retval=0
-        ;;
-  status)
-        status_of_proc AVWizard_Run.sh AVWizard
-	retval=$?
-        ;;
-  restart|reload)
-        : # noop
-	retval=0
-        ;;
-  *)
-        echo $"Usage: $0 {start|stop|restart|reload|status}"
-        retval=1
+	start)
+		$1
+		retval=$?
+		;;
+	stop)
+		$1
+		retval=$?
+	        ;;
+	status)
+		$1
+		retval=$?
+		;;
+	restart|reload)
+		: # noop
+		retval=$?
+		;;
+	*)
+		echo $"Usage: $0 {start|stop|restart|reload|status}"
+		retval=1
 esac
 exit $retval
 
