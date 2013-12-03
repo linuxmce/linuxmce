@@ -46,33 +46,47 @@ workaround_msi() {
 }
 
 start() {
+        log_daemon_msg "Starting CheckAVWizard" "check_avwizard"
+
 	check_shift_state
 	workaround_msi
+
+        err=0
+        log_end_msg $err
+	return $err
+}
+
+stop() {
+	:
+	return $?
+}
+
+status() {
+        status_of_proc check_avwizard CheckAVWizard
+	return $?
 }
 
 ### main logic ###
 case "$1" in
-  start)
-        log_daemon_msg "Starting AVWizard" "AVWizard_Run.sh"
-        $1
-        retval=0
-        log_end_msg $retval
-        ;;
-  stop)
-        : # noop
-        retval=0
-        ;;
-  status)
-        status_of_proc check_avwizard CheckAVWizard
-        retval=$?
-        ;;
-  restart|reload)
-        : # noop
-        retval=0
-        ;;
-  *)
-        echo $"Usage: $0 {start|stop|restart|reload|status}"
-        retval=1
+	start)
+		$1
+		retval=$?
+		;;
+	stop)
+		$1
+	        retval=$?
+		;;
+	status)
+		$1
+	        retval=$?
+		;;
+	restart|reload)
+		: # noop
+		retval=$?
+		;;
+	*)
+		echo $"Usage: $0 {start|stop|restart|reload|status}"
+		retval=1
 esac
 exit $retval
 
