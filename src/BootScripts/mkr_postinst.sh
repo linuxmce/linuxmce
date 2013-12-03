@@ -135,7 +135,7 @@ update-rc.d -f launch-manager remove >/dev/null
 #ln -sfv /etc/init.d/linuxmce /etc/rc2.d/S99linuxmce
 #ln -sfv /etc/init.d/linuxmce /etc/rc5.d/S99linuxmce
 update-rc.d -f linuxmce remove
-update-rc.d -f linuxmce start 99 2 3 4 5 .
+update-rc.d -f linuxmce defaults 99
 
 
 
