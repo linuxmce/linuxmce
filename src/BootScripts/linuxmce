@@ -175,9 +175,9 @@ start() {
 
 		RunSQL "UPDATE Orbiter set Regen=2,RegenInProgress=0 where RegenInProgress=1"
 
-		StartDaemon  "Starting Dhcp Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
-		StartDaemon  "Start PNP MD Plugin" "/usr/pluto/bin/Start_NewMD_interactor.sh" "NewMDinteractor"
-		StartDaemon  "Start Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
+		StartDaemon "Starting Dhcp Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
+		StartDaemon "Start PNP MD Plugin (interactor)" "/usr/pluto/bin/Start_NewMD_interactor.sh" "NewMDinteractor"
+		StartDaemon "Start Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
 	fi
 
 	if [[ "$AutostartMedia" -eq "1" ]] ; then
@@ -196,12 +196,12 @@ start() {
 	StartService "Creating Firewire 2 Video4Linux Pipes" "/usr/pluto/bin/Firewire2Video4Linux.sh" "&"
 	StartService "Configuring Pluto Storage Devices" "/usr/pluto/bin/StorageDevices_Setup.sh" "&"
 	StartService "Detecting Timezone" "/usr/pluto/bin/Timezone_Detect.sh" "&"
-	StartService "Status Radar" "/usr/pluto/bin/StorageDevices_StatusRadar.sh" "&"
-	StartService "Samba Radar" "/usr/pluto/bin/StorageDevices_SambaRadar.sh" "&"
-	StartService "NFS Radar" "/usr/pluto/bin/StorageDevices_NFSRadar.sh" "&"
-	StartService "Gamepad Radar" "/usr/pluto/bin/Gamepad_Detect.sh" "&"
+	StartService "Starting Status Radar" "/usr/pluto/bin/StorageDevices_StatusRadar.sh" "&"
+	StartService "Starting Samba Radar" "/usr/pluto/bin/StorageDevices_SambaRadar.sh" "&"
+	StartService "Starting NFS Radar" "/usr/pluto/bin/StorageDevices_NFSRadar.sh" "&"
+	StartService "Starting Gamepad Radar" "/usr/pluto/bin/Gamepad_Detect.sh" "&"
 	StartService "PVR-250 tuner restore" "/usr/pluto/bin/CaptureCards_BootConfig_PVR-250.sh" "&"
-	StartService "Enable wake-on-LAN" "/usr/pluto/bin/enable_wol.sh" "&"
+	StartService "Enable Wake-on-LAN" "/usr/pluto/bin/enable_wol.sh" "&"
 
 	StartService "Reporting Machine Status" "/usr/pluto/bin/Report_Machine_Status.sh" "&"
 
@@ -324,8 +324,48 @@ start() {
 	return $?
 }
 
+StopService() {
+	ServiceDescription=$1
+	ServiceCmd=$2
+	ServiceName=$3
+
+        log_daemon_msg "$ServiceDescription" "$ServiceCmd"
+
+	screenpid=$(basename $(find /var/run/screen | grep "$ServiceName") 2>/dev/null)
+	err=$?
+	if [[ "$err" == "0" ]]; then
+		pid=$(echo $screenpid | cut -d '.' -f1)
+		kill $pid
+		err=$?
+		if [[ "$err" != "0" ]]; then
+			kill -9 $pid
+			err=$?
+		fi
+	fi
+	log_end_msg $err
+	return $err
+}
+
 stop() {
-	StartService "Enable wake-on-LAN" "/usr/pluto/bin/enable_wol.sh"
+        log_daemon_msg "Stopping LinuxMCE" "linuxmce"
+	StopService "Stopping Restart_Myth_Backend" "/usr/pluto/bin/Restart_Myth_Backend.sh" "Restart_Myth_Backend"
+	StopService "Stopping discovery" "/usr/pluto/bin/discovery.py" "discovery"
+	StopService "Stopping Orbiter" "/usr/pluto/bin/Spawn_Device.sh" "OnScreen_Orbiter"
+	StopService "Stopping LMCE Launch Manager" "/usr/pluto/bin/LaunchManagerDaemon.sh" "LMCE_Launch_Manager"
+	StopService "Stopping DCERouter" "/usr/pluto/bin/Spawn_DCERouter.sh" "DCERouter"
+	StopService "Stopping XWindowSystem" "/usr/pluto/bin/Start_X_Wrapper.sh" "XWindowSystem"
+
+	StopService "Stopping Gamepad Radar" "/usr/pluto/bin/Gamepad_Detect.sh" "GamepadRadar"
+	StopService "Stopping NFS Radar" "/usr/pluto/bin/StorageDevices_NFSRadar.sh" "NFSRadar"
+	StopService "Stopping Samba Radar" "/usr/pluto/bin/StorageDevices_SambaRadar.sh" "SambaRadar"
+	StopService "Stopping Storage Status Radar" "/usr/pluto/bin/StorageDevices_StatusRadar.sh" "StorageStatusRadar"
+	StopService "Stopping Voicemail Monitor" "/usr/pluto/bin/VoiceMailMonitor.sh" "VoiceMailMonitor"
+	StopService "Stopping PNP MD Plugin (interactor)" "/usr/pluto/bin/Start_NewMD_interactor.sh" "NewMDinteractor"
+	StopService "Stopping Dhcpd Plugin" "/usr/pluto/bin/Dhcpd-Plugin.sh" "DhcpdPlugin"
+
+	StartService "Enable Wake-on-LAN" "/usr/pluto/bin/enable_wol.sh"
+
+	:
 	return $?
 }
 
