@@ -101,8 +101,26 @@ function mainScreenSaver($output,$mediadbADO,$dbADO) {
 		               	      lookupEl.selectedIndex++;
 			      }
 		       } else if (e.keyCode == Event.KEY_UP) {
-		              if(lookupEl.selectedIndex > 0) {
-		              	      lookupEl.selectedIndex--;
+		       	      if (e.shiftKey) {
+			      	 	var prevRow = $("row_"+fileID).previous();
+					var fromFile = prevRow.id.substring(4);
+			      	        new Ajax.Request("index.php?section=mainScreenSaver", {
+					method:"post",
+				  	parameters:{section: "mainScreenSaver", action:"ajax", copyAttribute:1, pkFile: fileID, fromPkFile: fromFile },
+					onSuccess: function(transport) {
+				        	   el.value = ""; 
+				  		   var response = transport.responseText || "";
+						   var o = eval("("+response+")");
+						   if (o.result) {
+					    	      clearLookup();
+					    	      loadKeywords(fileID);
+						   }
+				  	}
+					});
+			      } else {
+			      	     if(lookupEl.selectedIndex > 0) {
+		              	     	      lookupEl.selectedIndex--;
+			      	     }
 			      }
 		       } else {
 			       loadLookup(el);
@@ -353,7 +371,12 @@ padding: 0px;
                        print(changeOrientation($pkFile, $_REQUEST['changeOrientation'], $mediadbADO));
 		       exit();
 		}
-
+		if (isset($_POST['copyAttribute'])) {
+		       $toFile = $_REQUEST['pkFile'];
+		       $fromFile = $_REQUEST['fromPkFile'];
+		       print(copyAttributes($toFile, $fromFile, $mediadbADO));
+		       exit();
+		}
 		if(isset($_POST['reload'])){
 			$cmd='/usr/pluto/bin/MessageSend localhost -targetType template -o 0 '.$GLOBALS['PhotoScreenSaver'].' 1 606';
 			exec_batch_command($cmd);
@@ -591,6 +614,17 @@ function addAttributeToFile($pkFile, $pkAttr, $pkAttrType, $Name, $mediadbADO) {
 	}
 	// Connect attribute to file
 	return $mediadbADO->Execute('INSERT INTO File_Attribute (FK_Attribute,FK_File) VALUES (?,?)',array($newPKAttr,$pkFile));
+}
+
+function copyAttributes($toFile, $fromFile, $mediadbADO) {
+	$query='SELECT PK_Attribute, Name
+		FROM File_Attribute INNER JOIN Attribute ON File_Attribute.FK_Attribute=Attribute.PK_Attribute 
+		WHERE FK_File = ? AND FK_AttributeType = ?';
+	$res=$mediadbADO->Execute($query,array($fromFile, 29));
+	while($row=$res->FetchRow()){
+		$result = $mediadbADO->Execute('INSERT INTO File_Attribute (FK_Attribute,FK_File) VALUES (?,?)',array($row['PK_Attribute'],$toFile));
+	}
+	return "{result:1}";
 }
 
 function changeOrientation($pkFile, $orientation, $mediadbADO) {
