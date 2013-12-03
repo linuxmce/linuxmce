@@ -486,6 +486,36 @@ ServiceBkg="$3"
 		return $err
 }
 
+StartService() {
+        ServiceDescription=$1
+        ServiceCmd=$2
+        ServiceBkg=$3
+
+        if [[ -x $(echo $ServiceCmd | cut -d ' ' -f1) ]] ;then
+                #if [[ -x /bin/plymouth ]]; then
+                #       /bin/plymouth update --status="$ServiceDescription ... " || :
+                #fi
+                #echo -n "$ServiceDescription ... "
+
+                log_daemon_msg "$ServiceDescription" "$ServiceCmd"
+                if [[ "$ServiceBkg" == "&" ]] ;then
+                        $ServiceCmd 1>/dev/null 2>/dev/null &
+                else
+                        $ServiceCmd 1>/dev/null 2>/dev/null
+                fi
+                err=$?
+                log_end_msg $err
+
+                #if [[ "$err" == "0" ]] ;then
+                #       echo "ok"
+                #else
+                #       echo "fail"
+                #fi
+        fi
+
+        return $err
+}
+
 VerifyExitCode () {
 	local EXITCODE=$?
 	if [ "$EXITCODE" != "0" ] ; then
