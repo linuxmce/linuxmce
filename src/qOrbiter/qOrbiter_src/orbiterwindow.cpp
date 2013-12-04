@@ -146,7 +146,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
         //mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     #endif
 
-    #ifdef ANDROID && QT4_8
+    #if defined (QT4) && defined (ANDROID)
         QGLFormat format= QGLFormat::defaultFormat();
         glWidget = new QGLWidget();
         glWidget->setAutoFillBackground(false);
@@ -164,11 +164,6 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     #ifdef QT4_8
     mainView.rootContext()->setContextProperty("appW", (mainView.window()->width()/ 2));//this is done because android reports the desktop width as 2x what it is.at least on my phone
     mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
-    #endif
-
-    #ifdef for_android && QT4_8
-    mainView.rootContext()->setContextProperty("appW", 1280);
-    mainView.rootContext()->setContextProperty("appH", 720);
     #endif
 
 #endif

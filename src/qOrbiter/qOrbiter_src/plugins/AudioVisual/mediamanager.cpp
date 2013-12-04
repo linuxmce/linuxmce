@@ -25,7 +25,7 @@ using namespace DCE;
 #ifdef QT4
 MediaManager::MediaManager(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)
-  #else QT5
+  #elif defined (QT5)
 MediaManager::MediaManager(QQuickItem *parent):
     QQuickItem(parent)
   #endif
@@ -208,7 +208,7 @@ void MediaManager::setAspectRatio(QString aspect)
 
 
 QImage MediaManager::getScreenShot(){
-#ifdef QT4 && !__ANDROID__
+#if defined (QT4) && ! defined (ANDROID)
     QImage screenShot(videoSurface->height(), videoSurface->width(), QImage::Format_ARGB32_Premultiplied );
     screenShot.fill(Qt::black);
     videoSurface->window()->render(&screenShot);
