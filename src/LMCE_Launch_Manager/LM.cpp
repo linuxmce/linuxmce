@@ -322,11 +322,6 @@ bool LM::checkMySQL(bool showMessage)
 		bResult = true;
 	}
 
-	if (showMessage)
-	{
-		writeLog("Checking for core services...",true,LV_STATUS);	
-	}
-	
 	return bResult;
 }
 //COMPLETE
@@ -1156,11 +1151,11 @@ void LM::updateScripts()
 	writeOSD("Detecting Serial Ports. Please Wait.");
 	writeLog("Running UpdateAvailableSerialPorts.sh", true, LV_STATUS);
 	string sCmd = "/usr/pluto/bin/UpdateAvailableSerialPorts.sh";
-	exec_system(sCmd,true);
+	exec_system(sCmd,false);
 	writeOSD("Detecting Sound Cards. Please Wait.");
 	writeLog("Running UpdateAvailableSoundCards.sh", true, LV_STATUS);
 	string sCmd2="/usr/pluto/bin/UpdateAvailableSoundCards.sh";
-	exec_system(sCmd,true);
+	exec_system(sCmd,false);
 	writeLog("Process completed.");
 
 		
@@ -1319,11 +1314,11 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 							string sCmd = "/usr/bin/screen -d -m -S " + screenName;
 							sCmd += " /usr/pluto/bin/Spawn_Device.sh " + dbrCoreDevices.value(0) + " " + m_sCoreIP + " " + deviceCommand;
 							//writeLog("Command string: " + sCmd,true);//TODO REMOVE DEBUG
-							exec_system(sCmd);
+							exec_system(sCmd,false);
 							writeLog("Starting device " +  dbrCoreDevices.value(0) + " " + dbrCoreDevices.value(1),true);// + ": " + args.join(" "));//TODO make a join method for custom list type
 							writeOSD("Starting device " +  dbrCoreDevices.value(0) + " " + dbrCoreDevices.value(1));
 							// wait for the device to register
-							waitForDevice(atoi(dbrCoreDevices.value(0).c_str()));
+//							waitForDevice(atoi(dbrCoreDevices.value(0).c_str()));
 							
 							// recording device in list
 							m_vCoreDevices.push_back(dbrCoreDevices.value(0));
@@ -1434,12 +1429,12 @@ void LM::startMediaDevices(bool checkForAlreadyRunning)
 							string sCmd = "/usr/bin/screen -d -m -S " + screenName;
 							sCmd += " /usr/pluto/bin/Spawn_Device.sh " + dbrMediaDevices.value(0) + " " + m_sCoreIP + " " + deviceCommand;
 							//writeLog("Command string: " + sCmd,true);//TODO REMOVE DEBUG
-							exec_system(sCmd,true);
+							exec_system(sCmd,false);
 
 							writeLog("Starting device " +  dbrMediaDevices.value(0) + " " + dbrMediaDevices.value(1),true);// + ": " + args.join(" "));
 							writeOSD("Starting device " +  dbrMediaDevices.value(0) + " " + dbrMediaDevices.value(1));
 							// wait for device to register
-							waitForDevice(atoi(dbrMediaDevices.value(0).c_str()));
+//							waitForDevice(atoi(dbrMediaDevices.value(0).c_str()));
 							
 							// recording device in list
 							m_vMediaDevices.push_back(dbrMediaDevices.value(0));
@@ -1635,7 +1630,7 @@ bool LM::startCoreServices()
 		writeLog("Failed to open file :" + string( LM_PROGRESS_LOG), false, LV_WARNING);
 	}
 
-	int startCoreScript = exec_system(START_CORE_SCRIPT,false);	
+	int startCoreScript = exec_system(START_CORE_SCRIPT,false);
 
 	if ( started(startCoreScript) )
 	{
@@ -2057,9 +2052,9 @@ int LM::exec_system(std::string cmd, bool wait) {
 	args[arg_count]=0; // NULL terminte the arg list
 
         //writeLog("exec_system: args parsed like this:",false,LV_STATUS);
-	for (int i=0; i<arg_count; i++) {
+//	for (int i=0; i<arg_count; i++) {
              //writeLog("exec_system: arg " + StringUtils::itos(i) +  " is " + args[i]);
-	}
+//	}
 
         fork_res=fork();
 
