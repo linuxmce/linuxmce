@@ -319,22 +319,7 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 	UnLock();
 }
 
-OpenZWave::ValueID* ZWInterface::GetValueIdByNodeInstanceCCIndex(int iNodeId, int iInstance, int iCC, int iIndex)
-{
-	NodeInfo* pNodeInfo = GetNodeInfo(g_homeId, iNodeId);
-	if ( pNodeInfo != NULL )
-	{
-		for( list<OpenZWave::ValueID>::iterator it = pNodeInfo->m_values.begin(); it != pNodeInfo->m_values.end(); ++it )
-		{
-			string lab = OpenZWave::Manager::Get()->GetValueLabel((*it));
-			if ( iInstance == (*it).GetInstance() && iCC == (*it).GetCommandClassId() && iIndex == (*it).GetIndex() )
-				return &(*it);
-		}
-	}
-	return NULL;
-}
-
-OpenZWave::ValueID* ZWInterface::GetValueIdByNodeInstanceLabel(int iNodeId, int iInstance, string label)
+OpenZWave::ValueID* ZWInterface::GetValueIdByNodeInstanceLabel(int iNodeId, unsigned int iInstance, string label)
 {
 	NodeInfo* pNodeInfo = GetNodeInfo(g_homeId, iNodeId);
 	if ( pNodeInfo != NULL )
@@ -344,13 +329,22 @@ OpenZWave::ValueID* ZWInterface::GetValueIdByNodeInstanceLabel(int iNodeId, int 
 	return NULL;
 }
 
-OpenZWave::ValueID* ZWInterface::GetValueIdByLabel(NodeInfo* pNodeInfo, int iInstance, string label)
+OpenZWave::ValueID* ZWInterface::GetValueIdByLabel(NodeInfo* pNodeInfo, unsigned int iInstance, string label)
 {
 	for( list<OpenZWave::ValueID>::iterator it = pNodeInfo->m_values.begin(); it != pNodeInfo->m_values.end(); ++it )
 	{
-		string lab = OpenZWave::Manager::Get()->GetValueLabel((*it));
-		if ( iInstance == (*it).GetInstance() && lab == label )
-			return &(*it);
+		LMCEDevice* pDevice = NULL;
+		if (iInstance < pNodeInfo->m_vectDevices.size())
+			pDevice = pNodeInfo->m_vectDevices[iInstance];
+		if (pDevice != NULL)
+		{
+			for( vector<OpenZWave::ValueID>::iterator it = pDevice->m_vectValues.begin(); it != pDevice->m_vectValues.end(); ++it )
+			{
+				string lab = OpenZWave::Manager::Get()->GetValueLabel((*it));
+				if ( lab == label )
+					return &(*it);
+			}
+		}
 	}
 	return NULL;
 }

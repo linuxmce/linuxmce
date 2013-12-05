@@ -58,16 +58,14 @@ public:
 		void SetInterface(ZWInterface* pZWInterface);
 		void SetReady(bool ready) { m_bReady = ready; }
 		bool IsReady() { return m_bReady; }
-		DeviceData_Impl* GetDevice(int iNodeId, uint8 iCommandClass, int iInstanceID, uint8 iIndex);
 		DeviceData_Impl *GetDeviceForPortChannel(string sPortChannel);
-		int GetPKDevice(int iNodeId, uint8 iCommandClass, int iInstanceID, uint8 iIndex);
 		int AddDevice(int parent, string sId, int PK_DeviceTemplate);
 		void DeleteDevice(unsigned long PK_Device);
 		bool DeleteDevicesForNode(int iNodeId);
 		void DoNodeToDeviceMapping();
 		void MapNodeToDevices(NodeInfo* node);
 		int GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_Parent_Device);
-		void PortChannelToNodeCCInstance(string pc, uint8 &nodeId, uint8 &cc, uint8 &instance, uint8 &iIndex);
+		void PortChannelToNodeInstance(string pc, uint8 &nodeId, uint8 &instance);
 
 		// Internal helper methods
 		bool SetThermostatMode(uint8 node_id, uint8 instance_id, string mode);
