@@ -8,7 +8,14 @@ fi
 
 set -x
 
-SECTIONS="main non-free contrib"
+DISTRO=$(lsb_release -is)
+case "$DISTRO" in
+	Debian)
+		SECTIONS="main non-free contrib"
+		;;
+	Ubuntu)
+		SECTIONS="main restricted universe multiverse"
+esac
 
 #status=$(dpkg -l "$PKG_NAME" | grep '^ii' | awk '{print $1}') #| while read status; do break; done
 #if [ "$status" == "ii" ]; then
@@ -33,16 +40,16 @@ AddPackageDevice()
 case "$REPOS_TYPE" in
 	# Package (APT, http/ftp: .deb)
 	1) ;;
-	
+
 	# CVS (Concurrent Versioning System)
 	3) URL_TYPE=cvs ;;
-	
+
 	# SVN (SubVersioN)
 	4) URL_TYPE=svn ;;
-	
+
 	# HTTP/FTP download (archives: .tar.gz, .zip)
 	6) ;;
-	
+
 	# Other (not supported)
 	*)
 		echo "TODO: implement repository type $REPOS_TYPE handling"
@@ -93,20 +100,23 @@ case "$URL_TYPE" in
 			REPOS=$(echo -n "$REPOS" | cut -d' ' -f1)
 		fi
 
-		lsbrelease=$(lsb_release -c -s)
-		if [ "$REPOS" = "20dev_ubuntu" ]; then 
+		lsbrelease=$(lsb_release -cs)
+		if [ "$REPOS" = "20dev_ubuntu" ] || [ "$REPOS" = "20dev_debian" ]; then 
 			REPOS="$lsbrelease"
 		fi
 
 		SingleEndSlash='s!//*!/!g; s!/*$!/!g; s!^http:/!http://!g; s!^ftp:/!ftp://!g'
-		FilteredRepos=$(echo "$REPOS_SRC" | sed 's/[^A-Za-z0-9_./+=:-]/-/g; '"$SingleEndSlash")
+#		FilteredRepos=$(echo "$REPOS_SRC" | sed 's/[^A-Za-z0-9_./+=:-]/-/g; '"$SingleEndSlash")
 		EndSlashRepos=$(echo "$REPOS_SRC" | sed "$SingleEndSlash")
 
-		echo "Repository test string: '$FilteredRepos.+$REPOS.+$SECTIONS'"
-		results=$(cat /etc/apt/sources.list | sed "$SPACE_SED" | egrep -v "^#" | egrep -c -- "$FilteredRepos.+$REPOS.+$SECTIONS" 2>/dev/null)
-		if [ "$results" -eq 0 ]; then
+#		echo "Repository test string: '$FilteredRepos.+$REPOS.+$SECTIONS'"
+#		results=$(cat /etc/apt/sources.list | sed "$SPACE_SED" | egrep -v "^#" | egrep -c -- "$FilteredRepos.+$REPOS.+$SECTIONS" 2>/dev/null)
+
+		AptSrc_ParseSourcesList
+		AptSrc_SourceExists "deb $EndSlashRepos $REPOS $SECTIONS"
+		retval=$?
+		if [ "$retval" -ne 0 ]; then
 			if [ "$REPOS" = "$lsbrelease" ]; then
-				AptSrc_ParseSourcesList
 				if AptSrc_AddSource "deb $EndSlashRepos $REPOS $SECTIONS"; then
 					if ! BlacklistConfFiles '/etc/apt/sources.list' ;then
 						AptSrc_WriteSourcesList >/etc/apt/sources.list
@@ -116,7 +126,7 @@ case "$URL_TYPE" in
 					fi
 				fi
 			else
-				echo "Repositories do not match - skipping update of the sources.list file"
+				echo "Repository does not match current distro - skipping update of the sources.list file"
 			fi
 		else
 			echo "Repository already exists in sources.list file."
@@ -125,7 +135,7 @@ case "$URL_TYPE" in
 		if ! PackageIsInstalled "$PKG_NAME"; then
 
 			apt-get -y install "$PKG_NAME"
-			apt_err=$?			
+			apt_err=$?
 
 			## If fails the first time try once more
 			if [[ "$apt_err" != "0" ]] ;then
@@ -134,26 +144,26 @@ case "$URL_TYPE" in
                                 apt_err=$?
 			fi
 
-	
+
 			if [[ "$apt_err" != "0" ]] ;then
 				echo "Problem installing $PKG_NAME ($apt_err)"
 				exit $apt_err
 			fi
 
 			#unset http_proxy
-#			apt-get clean
+			#apt-get clean
 		fi
-		
+
 		AddPackageDevice "$PK_Device" "$PK_PACKAGE"
 	;;
-	
+
 	direct)
 		if [ "$REPOS_TYPE" -eq 1 ] && PackageIsInstalled "${PKG_NAME/_*}"; then
 			true
 		else
 			mkdir -p /usr/pluto/download
 			/usr/pluto/install/Download_Direct.sh "$@" || exit $ERR_DOWNLOAD
-		
+
 			if [ "$REPOS_TYPE" -eq 1 ]; then
 				#export http_proxy="http://dcerouter:8123"
 				keep_sending_enters | dpkg -i /usr/pluto/download/"$PKG_NAME" || exit $ERR_DPKG_INSTALL
@@ -176,7 +186,7 @@ case "$URL_TYPE" in
 					echo "Unknown parameter: '$PARAMETER'"
 				fi
 				popd
-		
+
 				if [ "$REPOS_TYPE" -eq 6 ]; then
 					# source code ; how do I know where it unpacked?
 					true

@@ -21,7 +21,6 @@ AptSrc_AddSource()
 	if [[ -z "$type" ]]; then
 		return 1
 	fi
-#
 
 	uri="${uri%/}/" # make sure URI ends with a slash
 	id=$(echo "$type $uri $distribution" | md5sum | cut -d' ' -f1)
@@ -42,6 +41,36 @@ AptSrc_AddSource()
 	done
 
 	return $ret
+}
+
+# Check is a source exists in sources.list entries
+AptSrc_SourceExists()
+{
+	local Source="$*"
+	local type uri distribution components
+	local id
+
+	read type uri distribution components < <(echo "$Source")
+	if [[ -z "$type" ]]; then
+		return 1
+	fi
+
+	uri="${uri%/}/" # make sure URI ends with a slash
+	id=$(echo "$type $uri $distribution" | md5sum | cut -d' ' -f1)
+
+	if [[ "$AptSrc_id_list" != *" $id "* ]]; then
+		# Source does not exist
+		return 2
+	fi
+	for comp in $components; do
+		Var="AptSrc_comp_${id}"
+		if [[ "${!Var}" == *" $comp "* ]]; then # AptSrc_comp_* is bound and separated by spaces
+			continue
+		fi
+		return 3
+	done
+
+	return 0
 }
 
 # Description: Clear internal state
