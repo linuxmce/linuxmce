@@ -322,6 +322,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Found %d rows 
 	list<int> listSisterDevices;
 	ConfirmRelations(PK_Device,iPK_Device_RelatedTo,&listSisterDevices);
 
+	int PK_Distro=-1;
 	if( iPK_DeviceCategory==DEVICECATEGORY_Core_CONST )
 	{
 		// Get Distro and OS from Device
@@ -330,6 +331,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Found %d rows 
 		PlutoSqlResult osdistro;
 		if( ( osdistro.r=db_wrapper_query_result ( SQL ) ) && ( row=db_wrapper_fetch_row( osdistro.r ) ) )
 		{
+			PK_Distro=atoi( row[0] );
 			string SQL = string("SELECT FK_DeviceTemplate, FK_OperatingSystem, FK_Distro FROM InstallWizard RIGHT JOIN InstallWizard_Distro ON FK_InstallWizard=PK_InstallWizard WHERE InstallWizard.Default=1 AND InstallWizard.Step=5 AND ((FK_Distro=") + row[0] + ") OR (FK_OperatingSystem=" + row[1] + " AND FK_Distro IS NULL) OR (FK_OperatingSystem IS NULL AND FK_Distro IS NULL))";
 			PlutoSqlResult result_child_dev;
 			if( ( result_child_dev.r=db_wrapper_query_result( SQL ) ) )
@@ -344,7 +346,6 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Found %d rows 
 	}
 	else if( iPK_DeviceCategory==DEVICECATEGORY_Media_Director_CONST )
 	{
-		int PK_Distro=-1;
 		// Get Distro and OS from Device
                 string SQL = "SELECT IK_DeviceData as FK_Distro, FK_OperatingSystem FROM Device LEFT JOIN Device_DeviceData ON FK_Device=PK_Device LEFT JOIN Distro ON IK_DeviceData=PK_Distro WHERE FK_DeviceData=" TOSTRING(DEVICEDATA_PK_Distro_CONST) " AND PK_Device=" + StringUtils::itos(PK_Device);
 
@@ -486,7 +487,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Found %d rows 
 		int PK_Device_TopMost=DatabaseUtils::GetTopMostDevice(this,PK_Device);
 		if( PK_Device_TopMost==dceConfig.m_iPK_Device_Computer )
 		{
-			SQL = "SELECT Name FROM Package_Source JOIN RepositorySource ON FK_RepositorySource=PK_RepositorySource WHERE FK_RepositoryType=1 and FK_Package=" + StringUtils::itos(iPK_Package);
+			SQL = "SELECT Name FROM Package_Source RIGHT JOIN Package_Source_Compat AS PSC ON FK_Package_Source=PK_Package_Source LEFT JOIN RepositorySource ON FK_RepositorySource=PK_RepositorySource WHERE FK_RepositoryType=1 and FK_Package=" + StringUtils::itos(iPK_Package) + " AND PSC.FK_Distro=" + StringUtils::itos(PK_Distro);
 			PlutoSqlResult result;
 			if( ( result.r=db_wrapper_query_result( SQL ) ) && ( row=db_wrapper_fetch_row( result.r ) ) )
 			{
