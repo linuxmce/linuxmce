@@ -442,11 +442,21 @@ Item {
         }
     }
 
+    STBHeader {
+        id: hdr
 
+    }
 
     Loader {
         id:pageLoader
         objectName: "loadbot"
+        anchors{
+            left:parent.left
+            bottom: ftr.top
+            right:parent.right
+            top:hdr.bottom
+        }
+
         onSourceChanged:  loadin
         focus:true
         onLoaded: {
@@ -474,12 +484,6 @@ Item {
         }
     }
 
-
-
-    STBHeader {
-        id: hdr
-
-    }
     STBFooter {
         id: ftr
     }

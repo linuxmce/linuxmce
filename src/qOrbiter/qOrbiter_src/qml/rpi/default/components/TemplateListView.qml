@@ -2,11 +2,14 @@ import QtQuick 2.0
 
 ListView{
     id:playlist
-    height: scaleY(65)
-    width: scaleX(38)
-    anchors.left: parent.left
+    anchors{
+        top:npHeader.bottom
+        bottom:parent.bottom
+        left:parent.left
+    }
+    width:parent.width *.25
     spacing:scaleY(1)
-    anchors.verticalCenter: parent.verticalCenter
+
     Component.onCompleted: manager.setBoundStatus(true)
     highlightFollowsCurrentItem: true
     model: dcenowplaying.qs_screen==="Screen_63.qml" ? simpleepg : mediaplaylist

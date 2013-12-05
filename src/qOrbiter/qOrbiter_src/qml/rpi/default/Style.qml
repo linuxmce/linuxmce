@@ -41,6 +41,9 @@ Item{
     property int orbiterH: 600
     property int orbiterW: 800
 
+    property bool useOpacity:false
+    property double appOpacity: .45
+
     //main colors http://colorschemedesigner.com/#3JB1Tw0w0l7l7
     property color mainColor: "black"
     property color darkHighlightColor: "darkgreen"

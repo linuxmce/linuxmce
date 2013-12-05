@@ -22,20 +22,14 @@ Item{
         height: parent.height
         width: parent.width
         spacing: 5
+
         StyledText {
             id: name
             text: "Orbiter "+ manager.m_dwPK_Device + " is connected to "+ manager.m_ipAddress
             fontSize: mediumText
             color: "white"
-        }
-        
-        StyledText{
-            id:timecodeDisplay
-            text:dceTimecode.qsCurrentTime
-            visible: dcenowplaying.b_mediaPlaying
-            color:"white"
-            fontSize: headerText
-        }
+        }        
+
     }
 
 
