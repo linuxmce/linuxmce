@@ -462,9 +462,6 @@ function addPackageToMasterDevice($output,$dbADO) {
 				$compatDistro=(cleanInteger(@$_POST['distro_'.$value]))?@$_POST['distro_'.$value]:NULL;
 				$compatMustBuild=@$_POST['mustBuild_'.$value];
 				$compatComments=cleanString(@$_POST['comments_'.$value]);
-				$compatReplaces=cleanString(@$_POST['replaces_'.$value]);
-				$compatConflicts=cleanString(@$_POST['conflicts_'.$value]);
-				$compatProvides=cleanString(@$_POST['provides_'.$value]);
 				if(isset($_POST['deleteCompatibility_'.$value])){
 					$deletePackageSourceCompat='DELETE FROM Package_Source_Compat WHERE PK_Package_Source_Compat=?';
 					$dbADO->Execute($deletePackageSourceCompat,$value);
@@ -475,11 +472,8 @@ function addPackageToMasterDevice($output,$dbADO) {
 							FK_Distro=?,
 							MustBuildFromSource=?,
 							Comments=?,
-							Replaces=?,
-							Conflicts=?,
-							Provides=?
 						WHERE PK_Package_Source_Compat=?';
-					$dbADO->Execute($updatePackageSourceCompat,array($compatOperatingSystem,$compatDistro,$compatMustBuild,$compatComments,$compatReplaces,$compatConflicts,$compatProvides,$value));
+					$dbADO->Execute($updatePackageSourceCompat,array($compatOperatingSystem,$compatDistro,$compatMustBuild,$compatComments,$value));
 				}
 			}
 			
@@ -489,15 +483,21 @@ function addPackageToMasterDevice($output,$dbADO) {
 				$sourceRepository=@$_POST['repository_'.$value];
 				$sourceVersion=@$_POST['version_'.$value];
 				$sourceParms=@$_POST['parms_'.$value];
+				$sourceReplaces=cleanString(@$_POST['replaces_'.$value]);
+				$sourceConflicts=cleanString(@$_POST['conflicts_'.$value]);
+				$sourceProvides=cleanString(@$_POST['provides_'.$value]);
 				$updatePackageSource='
 					UPDATE Package_Source SET
 						Name=?,
 						FK_RepositorySource=?,
 						Repository=?,
 						Version=?,
-						Parms=?
+						Parms=?,
+						Replaces=?,
+						Conflicts=?,
+						Provides=?
 					WHERE PK_Package_Source=?';
-				$dbADO->Execute($updatePackageSource,array($sourceName,$sourceRepositorySource,$sourceRepository,$sourceVersion,$sourceParms,$value));
+				$dbADO->Execute($updatePackageSource,array($sourceName,$sourceRepositorySource,$sourceRepository,$sourceVersion,$sourceParms,$sourceReplaces,$sourceConflicts,$sourceProvides,$value));
 				
 				if(isset($_POST['deleteSource_'.$value])){
 					$deletePackageSourceCompat='DELETE FROM Package_Source_Compat WHERE FK_Package_Source=?';
