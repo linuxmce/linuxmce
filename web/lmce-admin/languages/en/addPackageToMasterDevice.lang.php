@@ -25,4 +25,8 @@ $TEXT_ADD_FILE_CONST='Add file';
 $TEXT_ADD_DIRECTORY_CONST='Add Directory';
 $TEXT_PACKAGE_DESCRIPTION_REQUIRED_CONST='Please enter a description for package name';
 $TEXT_EDIT_PACKAGE_CONST='Edit package';
+$TEXT_COMMA_DELIMITED_CONST='The following are comma delimited lists of package names';
+$TEXT_REPLACES_CONST='Replaces';
+$TEXT_CONFLICTS_CONST='Conflicts';
+$TEXT_PROVIDES_CONST='Provides';
 ?>

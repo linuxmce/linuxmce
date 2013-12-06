@@ -231,6 +231,7 @@ function addPackageToMasterDevice($output,$dbADO) {
 								<td>'.$TEXT_VERSION_CONST.'</td>
 								<td>'.$TEXT_PARAMETERS_CONST.'</td>
 								<td>&nbsp;</td>
+								<td>&nbsp;</td>
 							</tr>
 							<tr bgcolor="#F0F3F8">
 								<td><input type="text" name="source_'.$rowSource['PK_Package_Source'].'" value="'.$rowSource['Name'].'"></td>
@@ -245,6 +246,19 @@ function addPackageToMasterDevice($output,$dbADO) {
 								<td><input type="text" name="version_'.$rowSource['PK_Package_Source'].'" value="'.$rowSource['Version'].'"></td>
 								<td><input type="text" name="parms_'.$rowSource['PK_Package_Source'].'" value="'.$rowSource['Parms'].'"></td>
 								<td><input type="submit" class="button" name="deleteSource_'.$rowSource['PK_Package_Source'].'" value="'.$TEXT_DELETE_SOURCE_CONST.'"></td>
+								<td>&nbsp;</td>
+							</tr>
+							<tr>
+								<td>&nbsp;</td>
+								<td>'.$TEXT_REPLACES_CONST.'</td>
+								<td>'.$TEXT_CONFLICTS_CONST.'</td>
+								<td>'.$TEXT_PROVIDES_CONST.'</td>
+							</tr>
+							<tr>
+								<td>&nbsp;</td>
+								<td><input type="text" name="replaces_'.$rowSource['PK_Package_Source'].'" value="'.$rowSource['Replaces'].'"></td>
+								<td><input type="text" name="conflicts_'.$rowSource['PK_Package_Source'].'" value="'.$rowSource['Conflicts'].'"></td>
+								<td><input type="text" name="provides_'.$rowSource['PK_Package_Source'].'" value="'.$rowSource['Provides'].'"></td>
 							</tr>
 						<input type="hidden" name="displayedSources" value="'.join(",",$displayedSources).'">
 						';
@@ -253,6 +267,11 @@ function addPackageToMasterDevice($output,$dbADO) {
 					while($rowCompatibility=$resSourceCompatibility->fetchRow()){
 						$compatArray[]=$rowCompatibility['PK_Package_Source_Compat'];
 						$out.='
+							<tr>
+								<td>&nbsp;</td>
+								<td align=center>'.$TEXT_OPERATING_SYSTEM_CONST.'</td>
+								<td align=center>'.$TEXT_DISTRIBUTION_CONST.'</td>
+							</tr>
 							<tr>
 								<td>&nbsp;</td>
 								<td><select name="OperatingSystem_'.$rowCompatibility['PK_Package_Source_Compat'].'">
@@ -269,7 +288,7 @@ function addPackageToMasterDevice($output,$dbADO) {
 
 						$out.='	</select></td>
 								<td><input type="checkbox" name="mustBuild_'.$rowCompatibility['PK_Package_Source_Compat'].'" '.(($rowCompatibility['MustBuildFromSource']==1)?'checked':'').' value="1">'.$TEXT_MUST_BUILD_FROM_SOURCE_CONST.'</td>
-								<td colspan="2"><textarea name="comments_'.$rowCompatibility['PK_Package_Source_Compat'].'">'.$rowCompatibility['Comments'].'</textarea></td>
+								<td colspan=2><textarea cols="60" name="comments_'.$rowCompatibility['PK_Package_Source_Compat'].'">'.$rowCompatibility['Comments'].'</textarea></td>
 								<td><input type="submit" class="button" name="deleteCompatibility_'.$rowCompatibility['PK_Package_Source_Compat'].'" value="'.$TEXT_DELETE_COMPATIBILITY_CONST.'"></td>
 							</tr>
 						';
@@ -443,6 +462,9 @@ function addPackageToMasterDevice($output,$dbADO) {
 				$compatDistro=(cleanInteger(@$_POST['distro_'.$value]))?@$_POST['distro_'.$value]:NULL;
 				$compatMustBuild=@$_POST['mustBuild_'.$value];
 				$compatComments=cleanString(@$_POST['comments_'.$value]);
+				$compatReplaces=cleanString(@$_POST['replaces_'.$value]);
+				$compatConflicts=cleanString(@$_POST['conflicts_'.$value]);
+				$compatProvides=cleanString(@$_POST['provides_'.$value]);
 				if(isset($_POST['deleteCompatibility_'.$value])){
 					$deletePackageSourceCompat='DELETE FROM Package_Source_Compat WHERE PK_Package_Source_Compat=?';
 					$dbADO->Execute($deletePackageSourceCompat,$value);
@@ -452,9 +474,12 @@ function addPackageToMasterDevice($output,$dbADO) {
 							FK_OperatingSystem=?,
 							FK_Distro=?,
 							MustBuildFromSource=?,
-							Comments=?
+							Comments=?,
+							Replaces=?,
+							Conflicts=?,
+							Provides=?
 						WHERE PK_Package_Source_Compat=?';
-					$dbADO->Execute($updatePackageSourceCompat,array($compatOperatingSystem,$compatDistro,$compatMustBuild,$compatComments,$value));
+					$dbADO->Execute($updatePackageSourceCompat,array($compatOperatingSystem,$compatDistro,$compatMustBuild,$compatComments,$compatReplaces,$compatConflicts,$compatProvides,$value));
 				}
 			}
 			
