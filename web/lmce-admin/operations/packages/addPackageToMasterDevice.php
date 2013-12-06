@@ -269,11 +269,6 @@ function addPackageToMasterDevice($output,$dbADO) {
 						$out.='
 							<tr>
 								<td>&nbsp;</td>
-								<td align=center>'.$TEXT_OPERATING_SYSTEM_CONST.'</td>
-								<td align=center>'.$TEXT_DISTRIBUTION_CONST.'</td>
-							</tr>
-							<tr>
-								<td>&nbsp;</td>
 								<td><select name="OperatingSystem_'.$rowCompatibility['PK_Package_Source_Compat'].'">
 									<option value="0">-'.$TEXT_ANY_CONST.'-</option>';
 						foreach($arrayDescriptionOperatingSystem as $key => $value){
