@@ -13,6 +13,8 @@ if [[ -z "$gc100_PK_Device" ]]; then
 	Logging "$TYPE" "$SEVERITY_CRITICAL" "gc100" "No Device number specified"
 fi
 
+chmod 660 /dev/ttyS_"$gc100_PK_Device"_*
+
 /usr/pluto/bin/gc100 "$@"
 Ret=$?
 
