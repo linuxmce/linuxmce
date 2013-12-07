@@ -2605,7 +2605,6 @@ void qOrbiter::getGridView(bool direction)
 void qOrbiter::seekToGridPosition(QString s)
 {
     media_seek=s.toStdString();
-
     emit clearPageGrid();
 }
 
@@ -3671,6 +3670,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
     string m_sSeek=media_seek;
     if(m_sSeek !=""){
         qDebug() << "seeking to " << m_sSeek.c_str();
+        requestMore=true;
         GridCurRow = 0;
         GridCurCol =0;
         imgDG = "MediaFile_"+QString::number(m_dwPK_Device).toStdString();
@@ -3690,8 +3690,6 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         DataGridTable* pMediaGridTable = new DataGridTable(iData_Size,pData,false);
 
         emit mediaResponseChanged("grid request ok");
-
-
         // LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Pic Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
         DataGridCell *pCell;
         QString cellTitle;
@@ -3741,10 +3739,10 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             //                    // cellTitle = QString::fromStdString(sText);
             //                }
             //            }
-            index = pMediaGridTable->CovertColRowType(it->first).first;
+            index = pMediaGridTable->CovertColRowType(it->first).second;
 
             if(!b_cancelRequest && requestMore){
-                emit addItem(new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index, this));
+                emit addItem(new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), (index+1), this));
                 QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef RPI
                 msleep(45);
@@ -3754,9 +3752,8 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 msleep(15);
 #endif
             }
-            else if(!requestMore){
+            else if(!requestMore ){
                 qDebug() << "Pausing";
-                clearAndContinue(q_mediaType.toInt());
                 return;
             }
             else{

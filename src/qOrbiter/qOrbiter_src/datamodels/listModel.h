@@ -24,7 +24,7 @@ class ListModel : public QAbstractListModel
     Q_PROPERTY (int totalcells READ getTotalCells WRITE setTotalCells NOTIFY sizeChanged)
     Q_PROPERTY (int currentCells READ getCurrentCells WRITE setCurrentCells NOTIFY cellsChanged)
     Q_PROPERTY (int totalPages READ getTotalPages WRITE setTotalPages NOTIFY totalPagesChanged)
-
+    Q_PROPERTY (int currentItemIndex READ getCurrentItemIndex NOTIFY currentItemIndexChanged)
 
 
 public:
@@ -57,9 +57,11 @@ public:
     int currentCells;
     bool clearing;
     int totalPages;
+    int currentItemIndex;
 
 
 signals:
+    void currentItemIndexChanged();
     void itemAdded(int row);
     void gimmieData(int type);
     void loadingStatusChanged(bool state);
@@ -81,6 +83,9 @@ signals:
 
 
 public slots:
+
+    void setCurrentItemIndex(int i){currentItemIndex = i; emit currentItemIndexChanged();}
+    int getCurrentItemIndex(){return currentItemIndex;}
 
     void objectDestroyed(QObject*){
         //   qDebug()<< "Model item deleted";

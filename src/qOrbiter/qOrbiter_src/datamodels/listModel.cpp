@@ -35,7 +35,7 @@ ListModel::ListModel(gridItem* prototype, QObject* parent) :
     setRoleNames(m_prototype->roleNames());
 #endif
     qRegisterMetaType<QModelIndex>("QModelIndex");
-
+    currentItemIndex=0;
     totalcells = 0;
     seperator = 16;
     loadingStatus = false;
@@ -73,10 +73,9 @@ QHash<int, QByteArray> ListModel::roleNames() const
 
 void ListModel::appendRow(gridItem *item)
 {
-    setLoadingStatus(true);
-    // qDebug() << "adding" << m_list.count()+1;
-    //    gridItem * copiedItem = new gridItem(item->id(), item->name(), item->path(), item->index(), this );
+    setLoadingStatus(true);   
     appendRows(QList<gridItem*>() << new gridItem(item->id(), item->name(), item->path(), item->index(), this ));
+
     //  item->destruct();
 }
 
@@ -84,6 +83,8 @@ void ListModel::appendRows(const QList<gridItem *> &items)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(gridItem *item, items) {
+        qWarning() << item->index();
+        setCurrentItemIndex(item->index());
         QObject::connect(item, SIGNAL(destroyed()), this, SLOT(itemDeleted()),Qt::QueuedConnection);
         QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
         m_list.append(item);
@@ -137,7 +138,7 @@ void ListModel::reset()
         emit modelReset();
         clearing = false;
     }
- QApplication::processEvents(QEventLoop::AllEvents);
+    QApplication::processEvents(QEventLoop::AllEvents);
 }
 
 bool ListModel::resetInternalData()
@@ -195,7 +196,7 @@ void ListModel::clear()
     emit modelAboutToBeReset();
     beginResetModel();
     if(resetInternalData()){
-        setProgress(0.0);        
+        setProgress(0.0);
         setTotalCells(0);
         setLoadingStatus(false);
         progress = 0;
@@ -271,7 +272,7 @@ void ListModel::setTotalCells(int cells)
     }
     else
     {
-       setLoadingStatus(false);
+        setLoadingStatus(false);
 
     }
     emit sizeChanged(cells);
@@ -358,9 +359,9 @@ void ListModel::clearForPaging()
         if(resetInternalData()){
             emit modelAboutToBeReset();
             beginResetModel();
-            setProgress(0.0);           
+            setProgress(0.0);
             endResetModel();
-            emit modelReset();         
+            emit modelReset();
         }
     }
     emit pagingCleared();
