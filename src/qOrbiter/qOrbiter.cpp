@@ -2576,20 +2576,20 @@ void qOrbiter::displayToggle(bool t)
     GetDevicesByTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST, &dvcMap);
 
 
-   // map<long, string >::const_iterator end = pMessage->m_mapParameters.end();
+    // map<long, string >::const_iterator end = pMessage->m_mapParameters.end();
     for (map<int, string >::const_iterator it = dvcMap.begin(); it != dvcMap.end(); ++it)
     {
         int dparam = it->first;
         string dparam2 = it->second;
         qWarning()<< QString::number(dparam) << "::" << dparam2.c_str();
-       DeviceData_Base *pDevice= m_pData->m_AllDevices.m_mapDeviceData_Base_Find((long)dparam);
-       if(pDevice->m_dwPK_Room == this->i_room){
+        DeviceData_Base *pDevice= m_pData->m_AllDevices.m_mapDeviceData_Base_Find((long)dparam);
+        if(pDevice->m_dwPK_Room == this->i_room){
             DCE::CMD_Display_OnOff display(m_dwPK_Device, dparam, StringUtils::itos(state), false );
             SendCommand(display);
-       }
+        }
     }
 
-  //  emit commandResponseChanged("Attempting to toggle the display" );
+    //  emit commandResponseChanged("Attempting to toggle the display" );
 }
 
 void qOrbiter::setMediaSpeed(int s)
@@ -3015,7 +3015,12 @@ void DCE::qOrbiter::requestMediaPlaylist()
             QString qs_plsIndex;
             QString fk_file;
             int index = 0;
-            emit playlistSize(pDataGridTable->GetRows());
+
+            if(mediaPlaylistSize == pDataGridTable->GetRows()){
+                qDebug() << "Playlist length the same, not re grabbing";
+            } else {
+                setPlaylistSize(pDataGridTable->GetRows());
+            }
 
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
@@ -3027,8 +3032,21 @@ void DCE::qOrbiter::requestMediaPlaylist()
                 index = qs_plsIndex.toInt();
                 fk_file = pCell->GetValue();
                 emit playlistItemAdded(new PlaylistItemClass(cellTitle, fk_file, index));
+#ifdef QT5
+QCoreApplication::processEvents(QEventLoop::AllEvents);
+#endif
+
+#ifdef RPI
+         //   msleep(100);
+#elif ANDROID
+                msleep(20);
+               #else
+                msleep(10);
+#endif
                 index++;
+
             }
+
 
             emit playlistDone();
             pDataGridTable->ClearData();
@@ -3700,7 +3718,11 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
         {
             pCell= it->second;
             const char *pPath = pCell->GetImagePath();
-            filePath = QString::fromUtf8(pPath).remove(".tnj");
+#ifdef RPI
+       filePath = QString::fromUtf8(pPath);
+#else
+       filePath = QString::fromUtf8(pPath).remove(".tnj");
+#endif
             fk_file = pCell->GetValue();
 
             cellTitle = QString::fromUtf8(pCell->m_Text);
@@ -3724,12 +3746,12 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             if(!b_cancelRequest && requestMore){
                 emit addItem(new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), index, this));
                 QApplication::processEvents(QEventLoop::AllEvents);
-#ifdef rpi
-                Sleep(15);
-#elif NECESSITAS
-                Sleep(30);
+#ifdef RPI
+                msleep(45);
+#elif ANDROID
+                msleep(30);
 #else
-                //Sleep(15);
+                msleep(15);
 #endif
             }
             else if(!requestMore){

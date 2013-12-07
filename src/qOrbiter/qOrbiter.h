@@ -95,6 +95,7 @@ public:
     QString streamingVideoIp;/*!< \brief Contains the ip address with port if included of streamed video. */
     QString streamingAudioIp;/*!< \brief Contains the ip address with port if included of stremed audio */
     QString mediaPlayerTimeCode;/*!< \brief Contains the timecode for the local media player (QMediaPlayer)  */
+    int mediaPlaylistSize; /*!< \brief Contains the current media player playlist length, if possible */
     //@}
 
     /*! @name Misc Member Variables */
@@ -1638,6 +1639,8 @@ public slots:
 
     void updateScreenSaverTimeout(int t) ;
 
+    void setPlaylistSize(int s){ mediaPlaylistSize = s; emit playlistSize(mediaPlaylistSize);}
+    int getMediaPlaylistSize() {return mediaPlaylistSize;}
 
     void setdceIP(QString ip) {dceIP = ip; m_sIPAddress = ip.toStdString(); m_sHostName = m_sIPAddress; qDebug() << "DCE got IP"; emit dceIPChanged();}
     QString getdceIP() {return dceIP;}
