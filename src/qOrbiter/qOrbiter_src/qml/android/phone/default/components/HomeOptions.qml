@@ -23,11 +23,20 @@ Item{
     }
 
     Loader{
+        id:optionLoader
+        anchors.fill: parent
 
-        source:"HomeOptions_1.qml"
     }
 
-    HomeOptions_1 {
-        id: advancedrow
-    }
+    states: [
+        State {
+            name: "home"
+            when: manager.currentScreen==="Screen_1.qml"
+            PropertyChanges {
+                target: optionLoader
+                source:"HomeOptions_1.qml"
+            }
+        }
+    ]
+
 }
