@@ -3756,10 +3756,10 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             }
             else if(!requestMore){
                 qDebug() << "Pausing";
+                clearAndContinue(q_mediaType.toInt());
                 return;
             }
-            else
-            {
+            else{
                 qDebug() << "Stopping";
                 pMediaGridTable->ClearData();
                 delete pMediaGridTable;

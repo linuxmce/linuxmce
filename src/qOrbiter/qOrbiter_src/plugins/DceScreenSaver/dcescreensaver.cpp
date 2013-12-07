@@ -126,7 +126,7 @@ void DceScreenSaver::processImageData(QNetworkReply *r)
         surface =currentImage;
         currentImage= t.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
     }
-    qWarning("Image Tick");
+
 #ifndef RPI
     startFadeTimer(2500);
 #else
