@@ -31,6 +31,7 @@ class PlaylistClass: public QAbstractListModel
     Q_OBJECT
 
     Q_PROPERTY(int currentIndex READ getCurrentIndex WRITE setCurrentIndex NOTIFY activeItemChanged)
+    Q_PROPERTY(int currentPosition READ getCurrentPosition NOTIFY currentPositionChanged)
 
 public:
 
@@ -54,6 +55,7 @@ public:
     PlaylistItemClass* currentRow();
     int currentIndex;
     int totalSize;
+    int currentPosition;
     void sortModel(int column, Qt::SortOrder order);
 
 
@@ -64,6 +66,7 @@ signals:
     void activeItemChanged();
     void modelAboutToBeReset();
     void modelReset();
+    void currentPositionChanged();
 
 public slots:
     bool checkDupe(QString name, int position);
@@ -76,7 +79,9 @@ public slots:
 
     void appendRow(PlaylistItemClass *item);
     void populate();
+    int getCurrentPosition(){return currentPosition;}
 private slots:
+    void setCurrentPosition(int t){currentPosition = t; emit currentPositionChanged();}
     void handleItemChange();
     void itemDeletion() { /*qDebug() << "Playlist Item Destroyed::" << m_list.size();*/ }
 

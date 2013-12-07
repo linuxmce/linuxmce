@@ -48,6 +48,7 @@ QHash<int, QByteArray> PlaylistClass::roleNames() const
 void PlaylistClass::appendRow( PlaylistItemClass *item)
 {
     appendRows(QList<PlaylistItemClass*>() << new PlaylistItemClass(item->name(), item->path(), item->index()));
+    setCurrentIndex(item->index());
 #ifdef QT5
 QCoreApplication::processEvents(QEventLoop::AllEvents);
 #endif
