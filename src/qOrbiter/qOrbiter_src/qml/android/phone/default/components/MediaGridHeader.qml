@@ -3,8 +3,8 @@ import QtQuick 1.1
 Item{
     id:navInfo
     width: parent.width
-    height: parent.height*.15
-    anchors.top:parent.top
+    height: parent.height
+
     
     Row{
         height: parent.height
@@ -16,6 +16,8 @@ Item{
             text:"Items per Page: "+ manager.media_pageSeperator
             color:"white"
             fontSize:24
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
         }
         
         //            StyledText{
@@ -27,20 +29,22 @@ Item{
         
         StyledText{
             id:itemCount
-            text:dataModel.currentCells + " of " + dataModel.totalcells
+            text:dataModel.currentCells + "/" + manager.media_pageSeperator
             color:"white"
             fontSize:24
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
         }
         
-        StyledText{
-            id:letterSort
-            text:"Jump to :"+currentSeekLetter
-            color:"white"
-            fontSize:24
-            MouseArea{
-                anchors.fill: parent
-                onReleased: fileviewscreen.state="alphabets"
-            }
-        }
+//        StyledText{
+//            id:letterSort
+//            text:"Jump to :"+manager.qs_seek
+//            color:"white"
+//            fontSize:24
+//            MouseArea{
+//                anchors.fill: parent
+//                onReleased: fileviewscreen.state="alphabets"
+//            }
+//        }
     }
 }

@@ -376,9 +376,6 @@ Item {
 
     }
 
-
-
-
     SequentialAnimation{
         id:loadin
 

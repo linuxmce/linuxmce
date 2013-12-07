@@ -5,7 +5,13 @@ import "../../../../skins-common/lib/handlers"
 
 Item {
     id:fileviewscreen
-    anchors.fill: parent
+    anchors{
+        top:parent.top
+        bottom: parent.bottom
+        left:parent.left
+        right:parent.right
+    }
+
     clip: true
     focus:true
     state:"browsing"
@@ -15,10 +21,10 @@ Item {
         forceActiveFocus()
     }
 
-        Connections{
-            target:manager
-            onDceGridSepChanged:manager.requestPage(0)
-        }
+    Connections{
+        target:manager
+        onDceGridSepChanged:manager.requestPage(0)
+    }
 
     ListModel{
         id:alphabetlist
@@ -211,11 +217,7 @@ Item {
         }
     }
 
-
-
-
-    Component
-    {
+    Component{
         id: contactDelegateList
         Item {
             width: scaleX(95)
@@ -257,17 +259,19 @@ Item {
             MediaListClickHandler{
                 id:mouseclick
             }
-
         }
     }
+
     Rectangle{
         id:up_arrow
-        width: list_view1.width
-        height: childrenRect.height
-        anchors.bottom: list_view1.top
+        height: manager.appHeight*.07
         color: "black"
         opacity:.85
-        anchors.left: list_view1.left
+        anchors{
+            top:parent.top
+            left:parent.left
+            right:parent.right
+        }
         StyledText{
             anchors.centerIn: parent
             text:"up"
@@ -283,30 +287,35 @@ Item {
 
     ListView {
         id: list_view1
-
-        height:scaleY(85)
         model:dataModel
         delegate: contactDelegateList
         clip: true
         cacheBuffer: 15
-        anchors.centerIn: parent
         spacing:scaleY(1)
+        width: parent.width
+        anchors{
+            top:up_arrow.bottom
+            left:parent.left
+            bottom:dwn_arrow.top
+        }
 
     }
     Rectangle{
         id:dwn_arrow
-        width: list_view1.width
-        height: childrenRect.height
-        anchors.top: list_view1.bottom
+        height: manager.appHeight*.07
         color: "black"
         opacity:.85
-        anchors.left: list_view1.left
+
+        anchors{
+            left:parent.left
+            right:parent.right
+            bottom: parent.bottom
+        }
         StyledText{
             anchors.centerIn: parent
             text:"Down"
             fontSize: 43
             color:"white"
-
         }
         MouseArea{
             anchors.fill: parent
@@ -319,7 +328,14 @@ Item {
         height: manager.appHeight
         width: scaleX(10)
         model: alphabetlist
-        anchors.left: list_view1.right
+
+        anchors{
+            top:fileviewscreen.top
+            left:list_view1.right
+            bottom:fileviewscreen.bottom
+            right:fileviewscreen.right
+        }
+
         delegate: Item{
             height: scaleY(10)
             width: scaleX(10)
@@ -405,12 +421,7 @@ Item {
             name: "browsing"
             PropertyChanges {
                 target: list_view1
-                width:  scaleX(95)
-            }
-
-            PropertyChanges {
-                target: alpha_list
-                width:scaleX(0)
+                width:  scaleX(100)
             }
         },
         State {
@@ -418,10 +429,6 @@ Item {
             PropertyChanges {
                 target: list_view1
                 width:scaleX(70)
-            }
-            PropertyChanges {
-                target: alpha_list
-                width:scaleX(15)
             }
         }
     ]

@@ -79,6 +79,10 @@ Item{
                 target: hdr
                 height: manager.b_orientation ? scaleY(8) : scaleY(12)
             }
+            PropertyChanges{
+                target:hdrContent
+                source:"Clock.qml"
+            }
         },
         State {
             name: "closed"
@@ -86,6 +90,7 @@ Item{
                 target: hdr
                 height:0
             }
+
         },
         State {
             name: "grid"

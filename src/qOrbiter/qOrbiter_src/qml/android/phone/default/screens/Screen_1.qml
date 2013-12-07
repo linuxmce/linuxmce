@@ -14,7 +14,7 @@ Item {
         bottom:parent.bottom
     }
 
-    Component.onCompleted: forceActiveFocus()
+    Component.onCompleted:{ forceActiveFocus() ; hdr.state="open"}
     property int itemH:manager.b_orientation ? homeSelectionLayout.height /3 :homeSelectionLayout.height /3
     property int itemW:manager.b_orientation ? homeSelectionLayout.width/ 2 : homeSelectionLayout.width / 2
     focus:true

@@ -86,4 +86,5 @@ MediaPlaybackTemplate MediaPlaybackTemplate.qml     #floorplan
 PhoneFloorplanLayout PhoneFloorplanLayout.qml
 SendCommandBox SendCommandBox.qml
 Slider Slider.qml
-StyledButton StyledButton.qml		            
+StyledButton StyledButton.qml
+HomeOptions_1 HomeOptions_1.qml                     #options for the home screen
