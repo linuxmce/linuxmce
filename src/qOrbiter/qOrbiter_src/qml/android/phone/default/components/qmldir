@@ -20,6 +20,7 @@ HomeTelecomRow HomeTelecomRow.qml
 AdvancedButton AdvancedButton.qml
 Alphabet Alphabet.qml
 Clock Clock.qml
+MediaGridHeader     MediaGridHeader.qml         #Custom navigation for the media grid.
 MultiSelectDelegate MultiSelectDelegate.qml
 GenreSelector GenreSelector.qml
 HomeButtonDelegate HomeButtonDelegate.qml

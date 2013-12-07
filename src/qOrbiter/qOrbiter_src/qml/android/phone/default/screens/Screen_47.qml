@@ -5,21 +5,20 @@ import "../../../../skins-common/lib/handlers"
 
 Item {
     id:fileviewscreen
-    width: manager.appWidth
-    height: manager.appHeight
+    anchors.fill: parent
     clip: true
     focus:true
     state:"browsing"
     property string currentSeekLetter:"A"
     Component.onCompleted: {
+        hdr.state="grid"
         forceActiveFocus()
-
     }
 
-    //    Connections{
-    //        target:manager
-    //        onDceGridSepChanged:manager.requestPage(0)
-    //    }
+        Connections{
+            target:manager
+            onDceGridSepChanged:manager.requestPage(0)
+        }
 
     ListModel{
         id:alphabetlist
@@ -340,13 +339,13 @@ Item {
                 onPressed:  {
                     fileviewscreen.state="browsing"
                     currentSeekLetter = name
-                                        if(dataModel.totalPages==1){
-                                            list_view1.maingrid.positionViewAtIndex(dataModel.setSection(name), ListView.Beginning)
-                                        }else{
-                                             manager.setGridStatus(false)
-                                            manager.setSeekLetter(name)
+                    if(dataModel.totalPages==1){
+                        list_view1.maingrid.positionViewAtIndex(dataModel.setSection(name), ListView.Beginning)
+                    }else{
+                        manager.setGridStatus(false)
+                        manager.setSeekLetter(name)
 
-                                        }
+                    }
 
                 }
             }
@@ -355,7 +354,7 @@ Item {
 
 
 
-  /*  ListView{
+    /*  ListView{
         id:model_pages
         height: manager.appHeight
         width: scaleX(10)
@@ -400,50 +399,6 @@ Item {
         anchors.centerIn: parent
     }
 
-    Item{
-        id:navInfo
-        width: parent.width
-        height: parent.height*.15
-        anchors.top:parent.top
-
-        Row{
-            height: parent.height
-            width: parent.width
-            spacing:scaleX(2)
-
-            StyledText{
-                id:pageSplit
-                text:"Items per Page: "+ manager.media_pageSeperator
-                color:"white"
-                fontSize:24
-            }
-
-            //            StyledText{
-            //                id:pageNo
-            //                text:"Current Page:"+ manager.media_currentPage
-            //                color:"white"
-            //                fontSize:24
-            //            }
-
-            StyledText{
-                id:itemCount
-                text:dataModel.currentCells + " of " + dataModel.totalcells
-                color:"white"
-                fontSize:24
-            }
-
-            StyledText{
-                id:letterSort
-                text:"Jump to :"+currentSeekLetter
-                color:"white"
-                fontSize:24
-                MouseArea{
-                    anchors.fill: parent
-                    onReleased: fileviewscreen.state="alphabets"
-                }
-            }
-        }
-    }
 
     states: [
         State {

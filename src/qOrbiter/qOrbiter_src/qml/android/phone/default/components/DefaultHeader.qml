@@ -24,8 +24,16 @@ Item{
             top:parent.top
             bottom:parent.bottom
         }
-        Clock{
 
+        Loader{
+            id:hdrContent
+            anchors{
+                left:parent.left
+                top:parent.top
+                right:parent.right
+                bottom:parent.bottom
+            }
+            source: "Clock.qml"
         }
     }
 
@@ -69,14 +77,21 @@ Item{
             name: "open"
             PropertyChanges {
                 target: hdr
-                 height: manager.b_orientation ? scaleY(8) : scaleY(12)
+                height: manager.b_orientation ? scaleY(8) : scaleY(12)
             }
         },
         State {
             name: "closed"
             PropertyChanges {
                 target: hdr
-                 height:0
+                height:0
+            }
+        },
+        State {
+            name: "grid"
+            PropertyChanges{
+                target:hdrContent
+                source:"MediaGridHeader.qml"
             }
         }
     ]

@@ -31,7 +31,7 @@ Item {
             buttontextbold: false
             imgSource: ""
             color: androidSystem.orangeHighlight
-            onActivated: manager.playMedia("!G"+iPK_Device)
+            onActivated: {manager.playMedia("!G"+iPK_Device); attributeSelector.state="hidden"}
         }
 
 
