@@ -478,8 +478,13 @@ Item {
         Keys.onPressed: {
             if(event.key === Qt.Key_M){
                 console.log("Show Menu")
+                event.accepted===true
             } else if (event.key === Qt.Key_H){
                 console.log("Show Header")
+                event.accepted===true
+            } else {
+                console.log("Caught unhandled key. phew!")
+                event.accepted===true
             }
         }
     }

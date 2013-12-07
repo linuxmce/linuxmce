@@ -64,8 +64,10 @@ Item{
 
     //textStyles
 
+
     property int title_size: 18
-    property color tile_color: "white"
+    property color title_color: "white"
+    property color sub_title_color:"green"
 
     property int t_but_size: 16
     property color t_but_color: "darkgrey"

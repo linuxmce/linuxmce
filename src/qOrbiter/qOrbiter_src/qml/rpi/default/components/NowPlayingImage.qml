@@ -12,9 +12,6 @@ Item{
         target: dcenowplaying
         onImageChanged: refreshtimer.restart()
     }
-
-
-
     Image {
         id: nowplayingimage
         width: dcenowplaying.aspect=="wide"? scaleX(30) : scaleX(25)

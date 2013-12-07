@@ -23,72 +23,70 @@ Item {
     Item{
         id:mediaInformation
         height: imageholder.height *.95
-        width:  manager.appWidth
-        anchors.centerIn: template
+        anchors{
+            verticalCenter: parent.verticalCenter
+            left: playlist.right
+            right: parent.right
+        }
+
         clip:false
         Rectangle{
             id:phil
             color: skinStyle.mainColor
-            height: parent.height
-            width: playlist.state === "showing" ? (appW) : 0
-            x: playlist.state === "showing"? 0: imageholder.x
+            anchors.fill: parent
             clip:false
-            opacity: playlist.state === "showing" ? .95 : 0
-
-            Behavior on x {
+            opacity: playlist.state === "showing" ? .75 : 0
+            Behavior on opacity {
                 PropertyAnimation{
-                    duration: 750
-                }
-            }
+                    duration:350
 
-            Loader{
-                id:textCol
-                source:"Metadata"+manager.i_current_mediaType+".qml"
-                visible:playlist.state === "showing"
-            }
-
-            Row{
-                id:temporalData
-                height: childrenRect.height
-                width: childrenRect.width
-                anchors.bottom: parent.bottom
-                anchors.right: parent.right
-                anchors.rightMargin: scaleX(15)
-                visible: playlist.state === "showing"
-                spacing:scaleX(2)
-                StyledText {
-                    id: updating_time
-                    text: dceTimecode.qsCurrentTime
-                    fontSize:32
-                    color:"white"
-                }
-
-                StyledText {
-                    text: qsTr("Of")
-                    fontSize:32
-                    color:"white"
-                    font.bold: true
-                }
-
-                StyledText {
-                    id: totalTime
-                    text: dceTimecode.qsTotalTime
-                    fontSize:32
-                    color:"white"
                 }
             }
         }
+
+        Loader{
+            id:textCol
+            source:"Metadata"+manager.i_current_mediaType+".qml"
+            visible:playlist.state==="showing" ? true : false
+            anchors{
+                top:parent.top
+                bottom:parent.bottom
+                left:parent.left
+            }
+        }
+
+        Row{
+            id:temporalData
+            height: childrenRect.height
+            width: childrenRect.width
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            anchors.rightMargin: scaleX(15)
+            visible: playlist.state === "showing"
+            spacing:scaleX(2)
+            StyledText {
+                id: updating_time
+                text: dceTimecode.qsCurrentTime
+                fontSize:32
+                color:"white"
+            }
+
+            StyledText {
+                text: qsTr("Of")
+                fontSize:32
+                color:"white"
+                font.bold: true
+            }
+
+            StyledText {
+                id: totalTime
+                text: dceTimecode.qsTotalTime
+                fontSize:32
+                color:"white"
+            }
+        }
+
     }
-
-    NowPlayingImage {
-        id: imageholder
-        anchors.top: parent.top
-        anchors.topMargin: scaleY(20)
-        anchors.right: parent.right
-        anchors.rightMargin: scaleX(15)
-    }
-
-
     Keys.onVolumeDownPressed: manager.adjustVolume("-1")
     Keys.onVolumeUpPressed:  manager.adjustVolume("+1")
 
@@ -144,11 +142,13 @@ Item {
             console.log(event.key)
             break
         }
+
     }
 
     TemplateListView {
         id: playlist
     }
+
 
     states: [
         State {
@@ -177,6 +177,17 @@ Item {
 
         }
     ]
+
+    NowPlayingImage {
+        id: imageholder
+        anchors{
+            verticalCenter:template.verticalCenter
+            right:template.right
+        }
+
+        // anchors.topMargin: scaleY(20)
+        // anchors.rightMargin: scaleX(15)
+    }
 
     MouseArea{
         anchors.fill: parent

@@ -2,8 +2,7 @@ import QtQuick 2.0
 import "../components"
 MediaPlaybackTemplate {
     id:screen_fiddy_fo
-    height: scaleY(100)
-    width: scaleX(100)
+
     Component.onCompleted: {
         forceActiveFocus()
     }

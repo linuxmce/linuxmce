@@ -3,7 +3,6 @@ import QtGraphicalEffects 1.0
 import "../../../skins-common/lib/components"
 Item{
     id:ftr
-
     width: qmlroot.width
     height:scaleY(14)
     anchors.top: parent.bottom

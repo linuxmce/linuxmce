@@ -1,3 +1,7 @@
+#ifdef QT5
+#include <QCoreApplication>
+#endif
+
 #include "playlistclass.h"
 #include <QDebug>
 
@@ -44,7 +48,15 @@ QHash<int, QByteArray> PlaylistClass::roleNames() const
 void PlaylistClass::appendRow( PlaylistItemClass *item)
 {
     appendRows(QList<PlaylistItemClass*>() << new PlaylistItemClass(item->name(), item->path(), item->index()));
+#ifdef QT5
+QCoreApplication::processEvents(QEventLoop::AllEvents);
+#endif
+
     item->destruct();
+
+#ifdef QT5
+QCoreApplication::processEvents(QEventLoop::AllEvents);
+#endif
 }
 //the purpose of this function is to first clear the existing playlist data out, and add the new data in due to the way the dce router send the updated playlist to us
 void PlaylistClass::populate()
