@@ -60,7 +60,7 @@ Item{
     MouseArea{
         id:fly_trap
         anchors.fill: styled_button
-        onReleased: activated()
+        onClicked: activated()
         onPressAndHold: held()
     }
 

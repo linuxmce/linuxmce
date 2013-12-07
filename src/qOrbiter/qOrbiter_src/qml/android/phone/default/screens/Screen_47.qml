@@ -256,9 +256,12 @@ Item {
             }
 
 
-            MediaListClickHandler{
-                id:mouseclick
-            }
+           MouseArea{
+               id:mouseclick
+               anchors.fill: parent
+               onClicked:manager.setStringParam(4, id);
+               onPressAndHold: fileviewscreen.state="alphabets"
+           }
         }
     }
 
@@ -343,7 +346,6 @@ Item {
             StyledText {
                 id:alpha_label
                 text: name
-                font.pixelSize: scaleY(2)
                 anchors.centerIn: parent
                 color: "white"
                 font.bold: true
@@ -352,7 +354,7 @@ Item {
 
             MouseArea{
                 anchors.fill: parent
-                onPressed:  {
+                onClicked: {
                     fileviewscreen.state="browsing"
                     currentSeekLetter = name
                     if(dataModel.totalPages==1){
@@ -362,7 +364,9 @@ Item {
                         manager.setSeekLetter(name)
 
                     }
-
+                }
+                onPressAndHold: {
+                    fileviewscreen.state="browsing"
                 }
             }
         }
@@ -410,10 +414,7 @@ Item {
         id:selector
     }
 
-    GenericAttributeFilter{
-        id:filterTarget
-        anchors.centerIn: parent
-    }
+
 
 
     states: [

@@ -29,12 +29,14 @@ Item{
         
         StyledText{
             id:itemCount
-            text:dataModel.currentCells + "/" + manager.media_pageSeperator
+            text:dataModel.currentItemIndex + "/" + dataModel.totalcells
             color:"white"
             fontSize:24
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
         }
+
+
         
 //        StyledText{
 //            id:letterSort

@@ -39,7 +39,7 @@ Item{
 
     Item{
         id:optionContainer
-        width: manager.b_orientation ? scaleX(5) : scaleX(8)
+        width: manager.b_orientation ? scaleX(6) : scaleX(8)
 
         anchors{
             right: parent.right

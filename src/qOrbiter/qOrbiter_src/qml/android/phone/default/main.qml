@@ -293,6 +293,7 @@ Item {
         anchors{
             top:hdr.bottom
             right:parent.right
+            bottom:ftr.top
         }
     }
 
@@ -374,6 +375,11 @@ Item {
             }
         }
 
+    }
+
+    GenericAttributeFilter{
+        id:filterTarget
+        anchors.centerIn: parent
     }
 
     SequentialAnimation{

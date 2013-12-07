@@ -1,73 +1,62 @@
 import QtQuick 1.1
-//
-
 import "../components"
-import "../js/ComponentLoader.js" as MyJs
-Flow {
+
+Item{
     id:advancedrow
+    property int localButtonH:scaleY(15)
+    height: (buttons.count)*localButtonH
     anchors{
         top:parent.top
         left:parent.left
         right:parent.right
-        bottom:parent.bottom
     }
-    spacing:5
-    
-    StyledButton{
-        id:leader
-        height: buttonH
-        anchors{
-            left:parent.left
-            right:parent.right
-            leftMargin: 15
-            rightMargin: 15
+
+    Rectangle{
+        anchors.fill: btnDisplay
+        color: "green"
+        opacity: .85
+    }
+
+    VisualItemModel {
+        id:buttons
+
+        StyledButton{
+            height: localButtonH
+            width:advancedrow.width-10
+//            anchors{
+//                left:parent.left
+//                right:parent.right
+//                leftMargin: 15
+//                rightMargin: 15
+//            }
+            useBorder: false
+            buttonText: qsTr("Exit")
+            onActivated:  {closeOrbiter(); showOptions = !showOptions }
         }
-        useBorder: false
-        buttonText: qsTr("Sleeping Alarms")
-        onActivated: {loadComponent("Power.qml");showOptions = !showOptions}
-    }
-    
-    //        StyledButton{
-    //            width: leader.width
-    //            buttonText:manager.sPK_User
-    //            height: buttonH
-    //            anchors{
-    //            left:parent.left
-    //            right:parent.right
-    //            leftMargin: 15
-    //            rightMargin: 15
-    //            }
-    //            onActivated:  {loadComponent("UserSelector.qml");showOptions = !showOptions}
-    //        }
-    
-    //        StyledButton{
-    //            id:roombutton
-    //            height: buttonH
-    //            anchors{
-    //            left:parent.left
-    //            right:parent.right
-    //            leftMargin: 15
-    //            rightMargin: 15
-    //            }
-    //            buttonText:roomList.currentEA
-    //            onActivated: {
-    //                loadComponent("RoomSelector.qml")
-    //                showOptions = !showOptions
-    //            }
-    
-    //        }
-    
-    StyledButton{
-        height: buttonH
-        anchors{
-            left:parent.left
-            right:parent.right
-            leftMargin: 15
-            rightMargin: 15
+
+        StyledButton{
+            height: localButtonH
+            width:advancedrow.width-10
+//            anchors{
+//                left:parent.left
+//                right:parent.right
+//                leftMargin: 15
+//                rightMargin: 15
+//            }
+            useBorder: false
+            buttonText: qsTr("Sleeping Alarms")
+            onActivated:  {manager.gotoQScreen("Screen_29.qml"); showOptions = !showOptions }
         }
-        useBorder: false
-        buttonText: qsTr("Exit")
-        onActivated:  {closeOrbiter(); showOptions = !showOptions }
+
     }
-    
+
+    ListView{
+        id:btnDisplay
+        model:buttons
+        height:advancedrow.height
+
+    }
+
+
+
 }

@@ -88,3 +88,5 @@ SendCommandBox SendCommandBox.qml
 Slider Slider.qml
 StyledButton StyledButton.qml
 HomeOptions_1 HomeOptions_1.qml                     #options for the home screen
+HomeOptions_47 HomeOptions_47.qml                   #options for the media grid screen
+HomeOptionsGeneric HomeOptionsGeneric.qml           #options for generic pages
