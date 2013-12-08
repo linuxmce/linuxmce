@@ -490,7 +490,8 @@ EOL
 
 echo "$CardNumbers" | while read each; do 
 	DevPath=$(udevadm info -a -p /sys/class/sound/card${each} | grep -wo "/devices.*card${each}")
-	echo "DEVPATH==\"${DevPath}\", ATTR{id}=\"Card_${each}\"" >> "$AudioRules"
+	CardType=$(cat /sys/class/sound/card${each}/id)
+	echo "DEVPATH==\"${DevPath}\", ATTR{id}=\"Card_${each} $CardType\"" >> "$AudioRules"
 done
 
 cat <<EOL>> "$AudioRules"
