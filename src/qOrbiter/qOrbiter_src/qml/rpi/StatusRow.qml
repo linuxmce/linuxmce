@@ -1,12 +1,24 @@
 import QtQuick 2.0
 Item{
+    anchors{
+        left:parent.left
+        right:parent.right
+    }
 
-
+    Rectangle{
+        color:"black"
+        anchors.fill: parent
+        opacity:.85
+    }
 
     Row{
         id:statusRow
-        height: childrenRect.height
-        width: scaleX(85)
+        height: scaleX(10)
+        anchors{
+            left:parent.left
+            right:parent.right
+        }
+
         spacing: scaleX(10)
 
         Rectangle{

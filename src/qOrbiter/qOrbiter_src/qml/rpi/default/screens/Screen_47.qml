@@ -48,7 +48,7 @@ Item {
         contentWidth: scaleX(25)
         anchors.top: parent.top
         model: dataModel
-       flow:GridView.LeftToRight
+       flickableDirection:GridView.HorizontalFlick
         focus:true
         clip:true
         onCurrentIndexChanged: console.log("Current index changed: ==> " +currentIndex)

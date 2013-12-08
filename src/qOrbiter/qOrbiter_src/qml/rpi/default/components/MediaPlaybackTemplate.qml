@@ -14,6 +14,7 @@ Item {
             console.log("Template recieved active focus")
             console.log(dcenowplaying.qs_screen)
             playlist.forceActiveFocus()
+            manager.setGridStatus(false)
         }
     }
     MediaPlaybackHeader {

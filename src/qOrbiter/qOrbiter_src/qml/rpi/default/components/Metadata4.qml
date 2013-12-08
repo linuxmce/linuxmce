@@ -8,7 +8,7 @@ Column{
         id: generaltitle
         width: scaleX(45)
         text:  dcenowplaying.mediatitle
-        font.bold: true
+        font.bold: false
         //  wrapMode: "WrapAtWordBoundaryOrAnywhere"
         elide: "ElideRight"
         smooth: true
@@ -21,7 +21,7 @@ Column{
         width: scaleX(45)
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
         text: dcenowplaying.qs_mainTitle
-        font.bold: true
+        font.bold: false
         font.italic: true
         smooth: true
         fontSize: 32

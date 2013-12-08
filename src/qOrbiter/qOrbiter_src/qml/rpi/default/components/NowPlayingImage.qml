@@ -5,8 +5,8 @@ import "../components"
 
 Item{
     id:imageholder
-    height: playlist.state==="showing" ? childrenRect.height : 0
-    width: playlist.state === "showing" ? scaleX(30) :0
+    height:childrenRect.height
+    width: childrenRect.height
 
     Connections{
         target: dcenowplaying

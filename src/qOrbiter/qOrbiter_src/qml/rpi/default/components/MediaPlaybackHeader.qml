@@ -87,6 +87,13 @@ Item {
                 target: npHeader
                 anchors.bottom: undefined
                 anchors.top:template.top
+
+            }
+            PropertyChanges {
+                target: npHeader
+                anchors.bottomMargin: 0
+                opacity:1
+
             }
         },
         State {
@@ -96,6 +103,11 @@ Item {
                 target: npHeader
                 anchors.top: undefined
                 anchors.bottom: template.top
+            }
+            PropertyChanges {
+                target: npHeader
+                anchors.bottomMargin: 20
+                opacity:0
             }
         }
     ]

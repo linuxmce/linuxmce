@@ -54,7 +54,7 @@ Item{
         delegate: Item{
             id:scenarioParent
             height: parent.height
-            width: scaleX(18)
+            width: scaleX(15)
             onActiveFocusChanged: {
                 if(activeFocus){
                     currentItem= index

@@ -17,7 +17,7 @@ Item {
         id: splash
         anchors.centerIn: parent
         fillMode: Image.PreserveAspectFit
-        source: "rpi/img/icons/backgrounds/bedroom.png"
+        source: "noir/img/icons/bedroom.jpg"
         anchors.fill: parent
     }
     FontLoader{

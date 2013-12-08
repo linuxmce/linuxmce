@@ -3032,15 +3032,15 @@ void DCE::qOrbiter::requestMediaPlaylist()
                 fk_file = pCell->GetValue();
                 emit playlistItemAdded(new PlaylistItemClass(cellTitle, fk_file, index));
 #ifdef QT5
-QCoreApplication::processEvents(QEventLoop::AllEvents);
+                QCoreApplication::processEvents(QEventLoop::AllEvents);
 #endif
 
 #ifdef RPI
-           msleep(45);
+                msleep(45);
 #elif ANDROID
-               // msleep(20);
-               #else
-               // msleep(10);
+                // msleep(20);
+#else
+                // msleep(10);
 #endif
                 index++;
 
@@ -3657,7 +3657,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
     backwards=false;
     //emit commandResponseChanged("requesting additional media");
 #ifdef QT5
-    //QApplication::processEvents(QEventLoop::AllEvents);
+    QApplication::processEvents(QEventLoop::AllEvents);
 #endif
 
     int gHeight = media_pageSeperator;            //how many rows we want
@@ -3717,9 +3717,9 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             pCell= it->second;
             const char *pPath = pCell->GetImagePath();
 #ifdef RPI
-       filePath = QString::fromUtf8(pPath);
+            filePath = QString::fromUtf8(pPath).remove(".tnj");
 #else
-       filePath = QString::fromUtf8(pPath).remove(".tnj");
+            filePath = QString::fromUtf8(pPath).remove(".tnj");
 #endif
             fk_file = pCell->GetValue();
 
@@ -3754,6 +3754,13 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             }
             else if(!requestMore ){
                 qDebug() << "Pausing";
+                return;
+            } else if(currentScreen!="Screen_47.qml"){
+                qDebug() << "Stopping, no longer on screen 47";
+                pMediaGridTable->ClearData();
+                delete pMediaGridTable;
+                pMediaGridTable=NULL;
+                delete []pData; pData=NULL;
                 return;
             }
             else{
@@ -4865,8 +4872,10 @@ void qOrbiter::adjustRoomLights(QString level)
 
 void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 {
-    if(currentScreen == "Screen_1.qml"){
-        qDebug() << "Current screen error!"   ;
+    if(currentScreen != "Screen_47.qml"){
+        qDebug() << "Cancelling request, screen is not file view screen" ;
+        b_cancelRequest = true;
+        requestMore=false;
         return;
     }
     else

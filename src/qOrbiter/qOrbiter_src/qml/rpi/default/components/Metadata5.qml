@@ -10,10 +10,10 @@ Column{
         width: scaleX(35)
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
         text:dcenowplaying.episode =="" ? qsTr("Title: ")+ dcenowplaying.qs_mainTitle :qsTr("Program: ")+ dcenowplaying.tvProgram
-        font.bold: true
+        font.bold: false
         font.italic: false
         smooth: true
-        fontSize: scaleY(5)
+        fontSize: scaleY(6)
         visible:  dcenowplaying.qs_mainTitle =="" ? false: true
         color:"white"
 
@@ -22,7 +22,7 @@ Column{
         id: episode_title
         width: scaleX(35)
         text: qsTr("Episode: ")+ dcenowplaying.episode
-        font.bold: true
+        font.bold: false
         //  wrapMode: "WrapAtWordBoundaryOrAnywhere"
         elide: "ElideRight"
         smooth: true
