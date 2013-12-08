@@ -295,9 +295,9 @@ Setup_AsoundConf()
 
 	/usr/pluto/bin/RestartALSA.sh
 
-	if pgrep AVWizard_Run.sh > /dev/null; then 
-		#Enable_Audio_Channels
-	fi
+#	if pgrep AVWizard_Run.sh > /dev/null; then 
+#		Enable_Audio_Channels
+#	fi
 }
 
 Setup_XineConf()
