@@ -113,9 +113,6 @@ HEADERS += \
 	../../../../Gen_Devices/qMediaPlayerBase.h \
 	../../../../Gen_Devices/qOrbiterBase.h
 
-android-g++{
-
-}
 
 !equals(_PRO_FILE_PWD_, $$DESTDIR) {
 
@@ -147,6 +144,7 @@ unix {
         }else {
 		installPath = $$[QT_INSTALL_IMPORTS]/$$replace(uri, \\., /)
         }
+
     linux-rasp-pi-g++{
     installPath=/opt/qt5.2-rpi/qml/$$replace(uri, \\., /) #$$RASP_INSTALL_TARGET/$$replace(uri, \\., /)
 }

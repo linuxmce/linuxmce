@@ -58,8 +58,7 @@ contains(QT_VERSION,5.*.*){
         DEFINES+=QT5
         DEFINES+=GLENABLED
         QT+= opengl script  widgets
-
-    include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
+        include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
 
 }
 
@@ -107,25 +106,25 @@ common-folder.target = qml
 DEPLOYMENTFOLDERS+=common-folder
 
 linux-g++{
+        TARGET = qorbiter-$$QT_VERSION-core-gl
 
         contains(QT_VERSION,4.*.*){
-        TARGET = qorbiter-$$QT_VERSION-core-gl
         DEFINES+=GLENABLED
         glmsg= yes
         QT+= opengl
-
-		QT += script
-                folder_01.source = qml/desktop
-                folder_01.target = $$DESTDIR/qml
-		plugins_folder.source = imports/
-		plugins_folder.target = $$DESTDIR
+        QT += script
+        folder_01.source = qml/desktop
+        folder_01.target = $$DESTDIR/qml
+        plugins_folder.source = imports/
+        plugins_folder.target = $$DESTDIR
         }
-        else:contains(QT_VERSION,5.0.*){
-!linux-rasp-pi-g++{
+
+        contains(QT_VERSION,5.*.*){
                 folder_01.source = qml/rpi
                 folder_01.target = $$DESTDIR/qml
                 plugins_folder.source = imports/
-    }
+                plugins_folder.target = $$DESTDIR
+                glmsg=yes
         }
 
         folder_03.source = config.xml
@@ -135,10 +134,9 @@ linux-g++{
         DEFINES += for_desktop
         }
 
-
         DEPLOYMENTFOLDERS+= plugins_folder
         DEPLOYMENTFOLDERS += folder_01  folder_03
-	QML_IMPORT_PATH=imports
+        QML_IMPORT_PATH=imports
 }
 
 #windows deployment and module config
@@ -535,9 +533,6 @@ HEADERS += \
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
-    qml/rpi/default/components/DceMedia.qml
-
-
 
 for_harmattan{
         OTHER_FILES= \
@@ -553,9 +548,5 @@ for_harmattan{
 RESOURCES += \
         skinData.qrc
 
-contains(MEEGO_EDITION,harmattan) {
-        desktopfile.files = $${TARGET}.desktop
-        desktopfile.path = /usr/share/applications
-        INSTALLS += desktopfile
-}
+
 

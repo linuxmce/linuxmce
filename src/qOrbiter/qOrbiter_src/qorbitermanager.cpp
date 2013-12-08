@@ -2079,10 +2079,15 @@ void qorbiterManager::processError(QString msg)
 
 void qorbiterManager::setActiveSkin(QString name)
 {
-#ifdef QT_DEBUG
+
+    if(name=="splash_fallback"){
+
+    }
+    else {
+         tskinModel->setActiveSkin(name);
+    }
     qDebug("Setting Skin");
-#endif
-    tskinModel->setActiveSkin(name);
+
 
 }
 
@@ -2113,8 +2118,8 @@ void qorbiterManager::reloadHandler()
 
 void qorbiterManager::disconnectHandler()
 {
-
     gotoQScreen("Splash.qml");
+
 }
 
 void qorbiterManager::replaceHandler()

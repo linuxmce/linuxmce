@@ -3036,11 +3036,11 @@ QCoreApplication::processEvents(QEventLoop::AllEvents);
 #endif
 
 #ifdef RPI
-         //   msleep(100);
+           msleep(45);
 #elif ANDROID
-                msleep(20);
+               // msleep(20);
                #else
-                msleep(10);
+               // msleep(10);
 #endif
                 index++;
 

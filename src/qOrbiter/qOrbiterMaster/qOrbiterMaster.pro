@@ -28,7 +28,6 @@ folder_05.target = $$DESTDIR/imports
 DEPLOYMENTFOLDERS += folder_05
 
 linux-rasp-pi-g++{
-
 target.path=/opt/QOrbiter
 QML_IMPORT_PATH=target.path/imports
 INSTALLS +=target
