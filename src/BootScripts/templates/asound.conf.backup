@@ -37,18 +37,19 @@ pcm.analog_8 {
 }
 
 pcm_slave.%CONNECT_TYPE%_convert48k {
-	pcm "%SOUND_OUT%%MAIN_CARD%"
-	rate 48000
+        pcm "%SOUND_OUT%%MAIN_CARD%"
+        rate 48000
 }
 
 pcm.%CONNECT_TYPE%_playback {
-	type plug
-	slave %CONNECT_TYPE%_convert48k
+        type plug
+        slave %CONNECT_TYPE%_convert48k
 }
 
-pcm.!default {
-	type asym
-	playback.pcm "%PLAYBACK_PCM%"
-	capture.pcm "%SOUND_OUT%%MAIN_CARD%"
+pcm.asym_%CONNECT_TYPE% {
+   type asym
+   playback.pcm "%PLAYBACK_PCM%"
+   capture.pcm "plughw:%MAIN_CARD%"
 }
 
+pcm.!default asym_%CONNECT_TYPE%
