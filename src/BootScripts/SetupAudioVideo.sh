@@ -277,15 +277,11 @@ Setup_AsoundConf()
 			CardDevice=$(grep -i "card" <<< "$Yalpa" | grep -i "Analog" | grep -wo "device ." | awk '{print $2}' | head -1)
 			SoundOut="plug:dmix:"
 			ConnectType="analog"
-			if [[ "$AlternateSC" -ne "2" ]]; then
-				PlaybackPCM="${SoundOut}${SoundCard},${CardDevice}"
-			else
-				PlaybackPCM="${SoundOut}${SoundCard}"
-			fi
+			PlaybackPCM="${SoundOut}${SoundCard}"
 			;;
 	esac
 
-	if [[ "$AlternateSC" -ne "2" ]]; then
+	if [[ "$AlternateSC" -ne "2" && "$AudioSetting" -ne "S" ]]; then
 		SoundCard="${HWOnlyCard},${CardDevice}"
 	fi
 
