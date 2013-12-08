@@ -234,21 +234,40 @@ Setup_AsoundConf()
 			;; 
 		*H*)
 			CardDevice=$(grep -i "hdmi" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
-			if [[ $(wc -l <<< "$CardDevice") -gt "3" ]]; then
-				ELDDevice=$(grep -l "eld_valid.*1" /proc/asound/card${SoundCard}/eld* | sort -u | head -1)
-					case "$ELDDevice" in
-						*0.0)
-							CardDevice="3" ;;
-						*1.0)
-							CardDevice="7" ;;
-						*2.0)
-							CardDevice="8" ;;
-						*3.0)
-							CardDevice="9" ;;
-						*)
-							CardDevice="7" ;;
-					esac
-			fi
+				case "$ManID" in 
+  					*8086) 
+						if [[ $(wc -l <<< "$CardDevice") -gt "1" ]]; then 
+							ELDDevice=$(grep -l "eld_valid.*1" /proc/asound/card${SoundCard}/eld* | sort -u | head -1) 
+								case "$ELDDevice" in 
+									*.0) 
+										CardDevice="3" ;; 
+									*.1) 
+										CardDevice="7" ;; 
+									*.2) 
+										CardDevice="8" ;; 
+									*.3) 
+										CardDevice="9" ;; 
+									*) 
+										CardDevice="3" ;; 
+								esac 
+						fi ;; 
+					*10de) 
+						if [[ $(wc -l <<< "$CardDevice") -gt "3" ]]; then 
+							ELDDevice=$(grep -l "eld_valid.*1" /proc/asound/card${SoundCard}/eld* | sort -u | head -1) 
+								case "$ELDDevice" in 
+								       *0.0) 
+									       CardDevice="3" ;; 
+									*1.0) 
+										CardDevice="7" ;; 
+									*2.0) 
+										CardDevice="8" ;; 
+									*3.0) 
+										CardDevice="9" ;; 
+									*) 
+										CardDevice="7" ;; 
+								esac 
+						fi ;; 
+				esac 
 
 			ConnectType="hdmi"
 			;;
@@ -277,7 +296,7 @@ Setup_AsoundConf()
 	/usr/pluto/bin/RestartALSA.sh
 
 	if pgrep AVWizard_Run.sh > /dev/null; then 
-		Enable_Audio_Channels
+		#Enable_Audio_Channels
 	fi
 }
 
