@@ -3690,8 +3690,8 @@ void Media_Plugin::CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_Med
 			SendCommand(pleasewait);
 
 			// This is so there is always at least one entry in here, so the queries won't fail. It will not affect the overall query at all.
-			vectFiles.push_back(0);
-			vectAttributes.push_back(0);
+			// vectFiles.push_back(0);
+			// vectAttributes.push_back(0);
 
 			if( pDataGridTable )
 			{
@@ -3719,48 +3719,97 @@ void Media_Plugin::CMD_MH_Play_Media(int iPK_Device,string sFilename,int iPK_Med
 				}
 			    }
 			 
-			    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT DataGridTable suck end!");
- 
+			  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT DataGridTable suck end!");
+			  
 			  // At this point, we should have two vectors of files and attributes, that we can literally just plop right into
 			  // an IN() set.
 
-			  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT vector to string begin!");
+			  string sFiles, sAttributes;
 			  stringstream ssFiles, ssAttributes;
-			  copy(vectFiles.begin(), vectFiles.end(), ostream_iterator<int>(ssFiles, ",")); // both of these have a trailing comma.
-			  copy(vectAttributes.begin(), vectAttributes.end(), ostream_iterator<int>(ssAttributes, ","));
-			  string sFiles = ssFiles.str();
-			  string sAttributes = ssAttributes.str();
 
-			  sFiles = sFiles.substr(0, sFiles.length()-1); // Get rid of the trailing comma.
-			  sAttributes = sAttributes.substr(0, sAttributes.length()-1); // huzzah!
-			  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT vector to string end!");
+			  if (!vectFiles.empty())
+			    {
+			      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT Stringifying files.");
+			      copy(vectFiles.begin(), vectFiles.end(), ostream_iterator<int>(ssFiles, ",")); // both of these have a trailing comma.
+			      sFiles=ssFiles.str();
+			    }
+
+			  if (!vectAttributes.empty())
+			    {
+			      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT Stringifying Attributes.");
+			      copy(vectAttributes.begin(), vectAttributes.end(), ostream_iterator<int>(ssAttributes, ","));
+			      sAttributes=ssAttributes.str();
+			    }
+
+			  if (!sFiles.empty())
+			    {
+			      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT Making string for Files.");
+			      sFiles = sFiles.substr(0, sFiles.length()-1); // Get rid of the trailing comma.
+			    }
 			  
-			  string sSQL = "SELECT File.PK_File, CONCAT(File.Path, '/', File.Filename), File.EK_MediaType from File, File_Attribute "
-			    "WHERE File.PK_File = File_Attribute.FK_File AND FK_Attribute IN (" + sAttributes  +") AND IsDirectory=0 AND Missing=0 "
-			    "UNION "
-			    "SELECT File.PK_File, CONCAT(File.Path, '/', File.Filename), EK_MediaType from File "
-			    "WHERE File.PK_File IN (" + sFiles + ") AND IsDirectory=0 AND Missing=0";
+			  if (!sAttributes.empty())
+			    {
+			      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT Making string for attributes.");
+			      sAttributes = sAttributes.substr(0, sAttributes.length()-1); // huzzah!
+			      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT Attributes are %s",sAttributes.c_str());
+			    }
+
+			  string sSQL;
+
+			  if (!sFiles.empty() && !sAttributes.empty())
+			    {
+			      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT Files AND Attributes query!");
+			      sSQL = "SELECT File.PK_File, CONCAT(File.Path, '/', File.Filename), File.EK_MediaType from File, File_Attribute "
+				"WHERE File.PK_File = File_Attribute.FK_File AND FK_Attribute IN (" + sAttributes  +") AND IsDirectory=0 AND Missing=0 "
+				"UNION "
+				"SELECT File.PK_File, CONCAT(File.Path, '/', File.Filename), EK_MediaType from File "
+				"WHERE File.PK_File IN (" + sFiles + ") AND IsDirectory=0 AND Missing=0";
+			    }
+			  else if (!sFiles.empty() && sAttributes.empty())
+			    {
+			      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT Files Query!");
+			      sSQL = "SELECT File.PK_File, CONCAT(File.Path, '/', File.Filename), EK_MediaType from File "
+				"WHERE File.PK_File IN (" + sFiles + ") AND IsDirectory=0 AND Missing=0";
+			    }
+			  else if (sFiles.empty() && !sAttributes.empty())
+			    {
+			      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT Attributes Query!");
+			      sSQL = "SELECT File.PK_File, CONCAT(File.Path, '/', File.Filename), File.EK_MediaType from File, File_Attribute "
+				"WHERE File.PK_File = File_Attribute.FK_File AND FK_Attribute IN (" + sAttributes  +") AND IsDirectory=0 AND Missing=0 ";
+			    }
+			  else
+			    {
+			      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT Oops! This should never have happened!");
+			    }
+			    
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT Query is %s",sSQL.c_str());
 
 			  PlutoSqlResult result;
 			  DB_ROW row;
 
-			  if ( (result.r = m_pDatabase_pluto_media->db_wrapper_query_result(sSQL)) )
+			  if (!sSQL.empty())
 			    {
-			      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT populate dequeMediaFile begin");
-			      while ( (row = db_wrapper_fetch_row( result.r )) )
+			  
+			      if ( (result.r = m_pDatabase_pluto_media->db_wrapper_query_result(sSQL)) )
 				{
-				  int PK_File = atoi(row[0]);
-				  string sFilename = row[1];
-				  int PK_MediaType = atoi(row[2]);
-				  MediaFile *pMediaFile = new MediaFile(m_pMediaAttributes->m_pMediaAttributes_LowLevel, PK_File, sFilename);
-				  pMediaFile->m_dwPK_MediaType=PK_MediaType;
-				  dequeMediaFile.push_back(pMediaFile);
+				  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT populate dequeMediaFile begin");
+				  while ( (row = db_wrapper_fetch_row( result.r )) )
+				    {
+				      int PK_File = atoi(row[0]);
+				      string sFilename = row[1];
+				      int PK_MediaType = atoi(row[2]);
+				      MediaFile *pMediaFile = new MediaFile(m_pMediaAttributes->m_pMediaAttributes_LowLevel, PK_File, sFilename);
+				      pMediaFile->m_dwPK_MediaType=PK_MediaType;
+				      dequeMediaFile.push_back(pMediaFile);
+				    }
+				  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT populate dequeMediaFile end");
 				}
-			      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT populate dequeMediaFile end");
+			      
 			    }
+
 			}
 			if( dequeMediaFile.empty() )
-				return; // Nothing to do; the grid was empty
+			  return; // Nothing to do; the grid was empty
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TTTT !G END!");
 		}
 		else
