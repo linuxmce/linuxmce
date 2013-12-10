@@ -1454,14 +1454,14 @@ void ZWave::SendBrightnessChangedEvent(unsigned int PK_Device, float value)
 
 void ZWave::SendSetpointChangedEvent(unsigned int PK_Device, float value)
 {
-	string sVal = StringUtils::Format("%d", value);
+	string sVal = StringUtils::Format("%.0f", value);
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending setpoint changed event from PK_Device %d, value %s",PK_Device, sVal.c_str());
 	SendEvent(PK_Device, EVENT_Thermostat_Set_Point_Chan_CONST, EVENTPARAMETER_Value_CONST, sVal.c_str());
 }
 
 void ZWave::SendRelativeHumidityChangedEvent(unsigned int PK_Device, float value)
 {
-	string sVal = StringUtils::Format("%d", value);
+	string sVal = StringUtils::Format("%.0f", value);
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending  Humidity Changed event from PK_Device %d, value %s",PK_Device, sVal.c_str());
 	SendEvent(PK_Device, EVENT_Humidity_Changed_CONST, EVENTPARAMETER_Value_CONST, sVal.c_str());
 }
