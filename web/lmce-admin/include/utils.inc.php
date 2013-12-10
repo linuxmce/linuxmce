@@ -6400,8 +6400,10 @@ function menuChildItems($parentNode,$menuItems){
 		$menu='
 		<ul>';
 		foreach ($menuItems[$parentNode] AS $node){
+		if ($GLOBALS['labelArray'][$node]!='Phones setup') {
 			$menu.='
 			<li><a href="'.((isset($GLOBALS['urlArray'][$node]) && $GLOBALS['urlArray'][$node]!='')?@$GLOBALS['urlArray'][$node]:'javascript:void(0);').'">'.$GLOBALS['labelArray'][$node].'</a>'.menuChildItems($node,$menuItems).'</li>';
+			}
 		}
 		$menu.='
 		</ul>';
