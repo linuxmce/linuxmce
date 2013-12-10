@@ -195,14 +195,21 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 		NodeInfo* nodeInfo = new NodeInfo();
 		nodeInfo->m_homeId = _notification->GetHomeId();
 		nodeInfo->m_nodeId = _notification->GetNodeId();
-		nodeInfo->m_generic = OpenZWave::Manager::Get()->GetNodeGeneric(nodeInfo->m_homeId, nodeInfo->m_nodeId);
-		nodeInfo->m_specific = OpenZWave::Manager::Get()->GetNodeSpecific(nodeInfo->m_homeId, nodeInfo->m_nodeId);
 		nodeInfo->m_polled = false;		
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Node Added nodeId = %d", nodeInfo->m_nodeId);
 		g_nodes.push_back( nodeInfo );
 		break;
 	}
-	
+	case OpenZWave::Notification::Type_NodeProtocolInfo:
+	{
+		if( NodeInfo* nodeInfo = GetNodeInfo( _notification ) )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Node Protocol Info nodeId = %d", nodeInfo->m_nodeId);
+			nodeInfo->m_generic = OpenZWave::Manager::Get()->GetNodeGeneric(nodeInfo->m_homeId, nodeInfo->m_nodeId);
+			nodeInfo->m_specific = OpenZWave::Manager::Get()->GetNodeSpecific(nodeInfo->m_homeId, nodeInfo->m_nodeId);
+		}
+		break;
+	}
 	case OpenZWave::Notification::Type_NodeRemoved:
 	{
 		// Remove the node from our list
