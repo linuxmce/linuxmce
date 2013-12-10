@@ -64,7 +64,7 @@ public:
 		bool DeleteDevicesForNode(int iNodeId);
 		void DoNodeToDeviceMapping();
 		void MapNodeToDevices(NodeInfo* node);
-		int GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_Parent_Device);
+		unsigned long GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_Parent_Device);
 		void PortChannelToNodeInstance(string pc, uint8 &nodeId, uint8 &instance);
 
 		// Internal helper methods

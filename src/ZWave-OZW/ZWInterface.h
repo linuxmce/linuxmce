@@ -51,6 +51,7 @@ namespace DCE
 	{
 	private:
 		uint32 g_homeId;
+		uint32 m_ourNodeId;
 		bool   g_initFailed;
 		bool   m_bInitDone;
 		pthread_cond_t  initCond; 
@@ -70,6 +71,7 @@ namespace DCE
 		NodeInfo* GetNodeInfo( uint32 homeId, uint8 nodeId);
 		list<NodeInfo*> GetNodes() { return g_nodes; }
 		uint32 GetHomeId();
+		uint32 GetNodeId() { return m_ourNodeId; }
 		void Lock();
 		void UnLock();
 

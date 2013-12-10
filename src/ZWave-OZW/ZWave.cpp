@@ -1089,6 +1089,8 @@ void ZWave::DoNodeToDeviceMapping()
 void ZWave::MapNodeToDevices(NodeInfo* node)
 {
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, " * Node id=%d", node->m_nodeId);
+	if (node->m_nodeId == m_pZWInterface->GetNodeId())
+		return; // Don't do any mapping for the controller node
 
 	// clear values and devices for node before proceeding
 	node->ClearDeviceMapping();
@@ -1111,9 +1113,9 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 				// Note: it might be that we should also use the next value to determine more specific device template, in that
 				// case we must also check the next values on this node if the first value is "Basic"
 				int PK_Parent_Device = 0;
-				int deviceTemplate = GetDeviceTemplate(node, value, PK_Parent_Device);
-				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "    -> Setting this as the main value for the main device: dt = %d", deviceTemplate);
-				pMainDevice->assignValue(value);
+				unsigned long deviceTemplate = GetDeviceTemplate(node, value, PK_Parent_Device);
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "    -> Setting this as the main value for the main device: dt = %u", deviceTemplate);
+				pMainDevice->assignValue(value, false);
 				pMainDevice->m_dwFK_DeviceTemplate = deviceTemplate;
 				pMainDevice->m_dwPK_Parent_Device = PK_Parent_Device;
 			} else {
@@ -1159,19 +1161,21 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 						}
 					}
 				}
+				// override basic main value with Level, Sensor, Switch
+				bool bOverrideBasic = (label == "Level" || label == "Sensor" || label == "Switch");
 				if (mapToDevice == 0)
 				{
 					LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "    -> Mapping value to main device");
-					pMainDevice->assignValue(*valIt);
+					pMainDevice->assignValue(*valIt, bOverrideBasic);
 				} else {
 					LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "    -> Mapping value to device no %d", mapToDevice);
 					if (mapToDevice >= node->m_vectDevices.size())
 					{
 						int PK_Parent_Device = 0;
-						int deviceTemplate = GetDeviceTemplate(node, value, PK_Parent_Device);
+						unsigned long deviceTemplate = GetDeviceTemplate(node, value, PK_Parent_Device);
 						node->AddDevice(mapToDevice, deviceTemplate, PK_Parent_Device);
 					}
-					node->MapValueToDevice(mapToDevice, value);
+					node->MapValueToDevice(mapToDevice, value, bOverrideBasic);
 				}
 			}
 		}
@@ -1220,8 +1224,8 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 
 }
 
-int ZWave::GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_Device_Parent) {
-	int devicetemplate = 0;
+unsigned long ZWave::GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_Device_Parent) {
+	unsigned long devicetemplate = 0;
 	string label = OpenZWave::Manager::Get()->GetValueLabel(value);
 	
 	if ( label == "Temperature" )
@@ -1301,6 +1305,10 @@ int ZWave::GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_D
 			devicetemplate = DEVICETEMPLATE_Standard_Energy_Meter_CONST;
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Standard Energy Meter");
 			break;
+	        default:
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "    -> No device template for node with generic %d, specific %d, label %s", node->m_generic, node->m_specific, label.c_str());
+			break;
+
 	}
 	return devicetemplate;
 }

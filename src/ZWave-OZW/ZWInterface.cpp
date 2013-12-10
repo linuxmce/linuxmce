@@ -122,8 +122,8 @@ bool ZWInterface::Init(ZWConfigData* data) {
 		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "SOF: %d ACK Waiting: %d Read Aborts: %d Bad Checksums: %d\n", data.m_SOFCnt, data.m_ACKWaiting, data.m_readAborts, data.m_badChecksum);
 		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Reads: %d Writes: %d CAN: %d NAK: %d ACK: %d Out of Frame: %d\n", data.m_readCnt, data.m_writeCnt, data.m_CANCnt, data.m_NAKCnt, data.m_ACKCnt, data.m_OOFCnt);
 		LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Dropped: %d Retries: %d\n", data.m_dropped, data.m_retries);
-		
-		// int ourNodeId = Manager::Get()->GetControllerNodeId(g_homeId);
+
+		m_ourNodeId = OpenZWave::Manager::Get()->GetControllerNodeId(g_homeId);
 
 		return true;
 	}

@@ -28,10 +28,8 @@ namespace DCE {
 			m_dwFK_DeviceTemplate = 0;
 			m_iMainValue = -1;
 		}
-		void assignValue(OpenZWave::ValueID valueID) {
-			// Assign first ValueID encountered as the "main" value ID - this is used later to decide if other values are mapped to separate LMCE devices
-			// try to use another value than a "basic" as the main value
-			if (m_iMainValue == -1 || m_vectValues[m_iMainValue].GetCommandClassId() == 32)
+		void assignValue(OpenZWave::ValueID valueID, bool bOverrideBasic) {
+			if (m_iMainValue == -1 || (bOverrideBasic && m_vectValues[m_iMainValue].GetCommandClassId() == 32))
 				m_iMainValue = m_vectValues.size();
 			m_vectValues.push_back( valueID );
 		}
@@ -61,6 +59,8 @@ namespace DCE {
 		NodeInfo() {
 			// Add main device at position 0
 			m_vectDevices.push_back(new LMCEDevice());
+			m_generic = 0;
+			m_specific = 0;
 		}
 
 		~NodeInfo() {
@@ -102,9 +102,9 @@ namespace DCE {
 				m_vectDevices.push_back(pDevice);
 			}
 		}
-		void MapValueToDevice(unsigned int deviceNo, OpenZWave::ValueID value) {
+		void MapValueToDevice(unsigned int deviceNo, OpenZWave::ValueID value, bool bOverrideBasic) {
 			if (deviceNo < m_vectDevices.size()) {
-				m_vectDevices[deviceNo]->assignValue(value);
+				m_vectDevices[deviceNo]->assignValue(value, bOverrideBasic);
 			}
 		}
 		
