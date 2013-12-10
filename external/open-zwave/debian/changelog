@@ -1,3 +1,10 @@
+openzwave (1.0-635lmce5) UNRELEASED; urgency=low
+
+  [ sambuca ]
+  * try to fix SUC/SIS the last time
+
+ -- sambuca <developer@linuxmce.org>  Tue, 10 Dec 2013 20:07:00 +0100
+
 openzwave (1.0-635lmce4) UNRELEASED; urgency=low
 
   [ sambuca ]
