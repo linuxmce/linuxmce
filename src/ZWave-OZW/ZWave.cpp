@@ -829,10 +829,9 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 				}
 			}
 		}
-		if (m_pZWInterface->IsReady() && nodeInfo != NULL) 
+		if (m_pZWInterface->IsReady() && nodeInfo != NULL && nodeInfo->m_generic != 0)
 		{
 			// After initialization is complete, ValueAdded is emitted when a new value is added - so we should check if we need to add new devices
-                        // also see NodeAdded below
 			MapNodeToDevices(nodeInfo);
 		}
 		break;
@@ -937,16 +936,15 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 		}
 		break;
 	}
-	case OpenZWave::Notification::Type_NodeAdded:
+	case OpenZWave::Notification::Type_EssentialNodeQueriesComplete:
 	{
-		if (m_pZWInterface->IsReady() && nodeInfo != NULL) 
+		if( m_pZWInterface->IsReady() && nodeInfo != NULL )
 		{
-			// After initialization is complete, NodeAdded is emitted when a new node is added - so we should check if we need to add new devices
-			// also see ValueAdded above
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::OnNotification() : Type_EssentialNodeQueriesComplete nodeId = %d", nodeInfo->m_nodeId);
 			MapNodeToDevices(nodeInfo);
 		}
 		break;
-	}	
+	}
 	case OpenZWave::Notification::Type_NodeRemoved:
 	{
 		// Note: cannot use nodes list from zwinterface at this point, as the node has already been deleted
@@ -1092,6 +1090,12 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 	if (node->m_nodeId == m_pZWInterface->GetNodeId())
 		return; // Don't do any mapping for the controller node
 
+	if (node->m_generic == 0) 
+	{
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::MapNodeToDevices() : Called without generic and specific type on node. Setting these now!!");
+		node->m_generic = OpenZWave::Manager::Get()->GetNodeGeneric(node->m_homeId, node->m_nodeId);
+		node->m_specific = OpenZWave::Manager::Get()->GetNodeSpecific(node->m_homeId, node->m_nodeId);
+	}
 	// clear values and devices for node before proceeding
 	node->ClearDeviceMapping();
 	LMCEDevice* pMainDevice = node->m_vectDevices[0];
@@ -1115,7 +1119,7 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 				int PK_Parent_Device = 0;
 				unsigned long deviceTemplate = GetDeviceTemplate(node, value, PK_Parent_Device);
 				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "    -> Setting this as the main value for the main device: dt = %u", deviceTemplate);
-				pMainDevice->assignValue(value, false);
+				pMainDevice->assignValue(value, true);
 				pMainDevice->m_dwFK_DeviceTemplate = deviceTemplate;
 				pMainDevice->m_dwPK_Parent_Device = PK_Parent_Device;
 			} else {
@@ -1161,12 +1165,12 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 						}
 					}
 				}
-				// override basic main value with Level, Sensor, Switch
-				bool bOverrideBasic = (label == "Level" || label == "Sensor" || label == "Switch");
+				// set this value as main value if current is basic
+				bool bMainValue = (label == "Level" || label == "Sensor" || label == "Switch");
 				if (mapToDevice == 0)
 				{
 					LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "    -> Mapping value to main device");
-					pMainDevice->assignValue(*valIt, bOverrideBasic);
+					pMainDevice->assignValue(*valIt, bMainValue);
 				} else {
 					LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "    -> Mapping value to device no %d", mapToDevice);
 					if (mapToDevice >= node->m_vectDevices.size())
@@ -1175,7 +1179,7 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 						unsigned long deviceTemplate = GetDeviceTemplate(node, value, PK_Parent_Device);
 						node->AddDevice(mapToDevice, deviceTemplate, PK_Parent_Device);
 					}
-					node->MapValueToDevice(mapToDevice, value, bOverrideBasic);
+					node->MapValueToDevice(mapToDevice, value, bMainValue);
 				}
 			}
 		}

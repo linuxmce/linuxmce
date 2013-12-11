@@ -28,8 +28,8 @@ namespace DCE {
 			m_dwFK_DeviceTemplate = 0;
 			m_iMainValue = -1;
 		}
-		void assignValue(OpenZWave::ValueID valueID, bool bOverrideBasic) {
-			if (m_iMainValue == -1 || (bOverrideBasic && m_vectValues[m_iMainValue].GetCommandClassId() == 32))
+		void assignValue(OpenZWave::ValueID valueID, bool bMainValue) {
+			if (m_iMainValue == -1 || (bMainValue &&m_vectValues[m_iMainValue].GetCommandClassId() == 32))
 				m_iMainValue = m_vectValues.size();
 			m_vectValues.push_back( valueID );
 		}
@@ -102,9 +102,9 @@ namespace DCE {
 				m_vectDevices.push_back(pDevice);
 			}
 		}
-		void MapValueToDevice(unsigned int deviceNo, OpenZWave::ValueID value, bool bOverrideBasic) {
+		void MapValueToDevice(unsigned int deviceNo, OpenZWave::ValueID value, bool bMainValue) {
 			if (deviceNo < m_vectDevices.size()) {
-				m_vectDevices[deviceNo]->assignValue(value, bOverrideBasic);
+				m_vectDevices[deviceNo]->assignValue(value, bMainValue);
 			}
 		}
 		

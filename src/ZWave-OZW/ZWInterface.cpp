@@ -200,11 +200,11 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 		g_nodes.push_back( nodeInfo );
 		break;
 	}
-	case OpenZWave::Notification::Type_NodeProtocolInfo:
+	case OpenZWave::Notification::Type_EssentialNodeQueriesComplete:
 	{
 		if( NodeInfo* nodeInfo = GetNodeInfo( _notification ) )
 		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Node Protocol Info nodeId = %d", nodeInfo->m_nodeId);
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Type_EssentialNodeQueriesComplete nodeId = %d", nodeInfo->m_nodeId);
 			nodeInfo->m_generic = OpenZWave::Manager::Get()->GetNodeGeneric(nodeInfo->m_homeId, nodeInfo->m_nodeId);
 			nodeInfo->m_specific = OpenZWave::Manager::Get()->GetNodeSpecific(nodeInfo->m_homeId, nodeInfo->m_nodeId);
 		}
