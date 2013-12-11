@@ -28,6 +28,7 @@
 
 #include "ZWConfigData.h"
 #include "NodeInfo.h"
+#include "LMCEDevice.h"
 namespace DCE {
 class ZWInterface;
 }
@@ -64,7 +65,9 @@ public:
 		bool DeleteDevicesForNode(int iNodeId);
 		void DoNodeToDeviceMapping();
 		void MapNodeToDevices(NodeInfo* node);
-		unsigned long GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_Parent_Device);
+		void SetDeviceTemplate(LMCEDevice* pLmceDevice);
+		unsigned long GetDeviceTemplate(LMCEDevice* pLmceDevice, int& PK_Parent_Device);
+		string DTToName(unsigned long PK_DeviceTemplate);
 		void PortChannelToNodeInstance(string pc, uint8 &nodeId, uint8 &instance);
 
 		// Internal helper methods

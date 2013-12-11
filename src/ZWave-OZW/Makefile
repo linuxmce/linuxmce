@@ -25,7 +25,7 @@ LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r -lopenzwave -ludev
 
 Gen_Dev_Files +=
-sources += ZWInterface.cpp
+sources += ZWInterface.cpp NodeInfo.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)

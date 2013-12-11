@@ -1111,77 +1111,39 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "   - Instance=%d, class=%d, index=%d, label=%s, type=%s", value.GetInstance(), value.GetCommandClassId(), value.GetIndex(), label.c_str(), OpenZWave::Value::GetTypeNameFromEnum(value.GetType()));
 
 			unsigned int mapToDevice = 0;
-			if (!pMainDevice->hasMainValue())
+			bool needSeparateDevice = false;
+			if (value.GetInstance() > 1)
 			{
-				// set some basic data on main device using the first value
-				// Note: it might be that we should also use the next value to determine more specific device template, in that
-				// case we must also check the next values on this node if the first value is "Basic"
-				int PK_Parent_Device = 0;
-				unsigned long deviceTemplate = GetDeviceTemplate(node, value, PK_Parent_Device);
-				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "    -> Setting this as the main value for the main device: dt = %u", deviceTemplate);
-				pMainDevice->assignValue(value, true);
-				pMainDevice->m_dwFK_DeviceTemplate = deviceTemplate;
-				pMainDevice->m_dwPK_Parent_Device = PK_Parent_Device;
-			} else {
-				// By default, all values are connected to main device, but we must check to see if this value
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "    -> Mapping to separate device as this value has instance > 1");
+				needSeparateDevice = true;
+				mapToDevice = value.GetInstance()-1;
+			} else if (!pMainDevice->IsCompatible(value, label)) {
+				// By default, all other  values are connected to main device, but we must check to see if this value
 				// should be a new device. I.e. a Luminance value should not be the same device as a Temperature value
-
-				bool needSeparateDevice = false;
-				string mainLabel = OpenZWave::Manager::Get()->GetValueLabel(pMainDevice->GetMainValue());
-				// instance > 1 will always map value to another device
-				if (value.GetInstance() > 1)
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "    -> Mapping to separate device as this value is not compatible with main lmce device");
+				needSeparateDevice = true;
+				mapToDevice = 1;
+			}
+			if (needSeparateDevice)
+			{
+				// find first device that this value can map to
+				bool done = false;
+				while (mapToDevice < node->m_vectDevices.size() && !done)
 				{
-					LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "    -> Mapping to separate device as this value has instance > 1");
-					needSeparateDevice = true;
-					mapToDevice = value.GetInstance()-1;
-				} else if (value.GetInstance() == 1) 
-				{
-					if ((label == "Temperature" || label  == "Luminance" || label == "Relative Humidity" || label == "Switch" || label == "Level" || label == "Sensor")
-					    && (mainLabel == "Temperature" || mainLabel  == "Luminance" || mainLabel == "Relative Humidity" || mainLabel == "Switch" || mainLabel == "Level" || mainLabel == "Sensor")
-					    && !(label == "Temperature" && node->m_generic == GENERIC_TYPE_THERMOSTAT)
-					    && !(label == "Level" && mainLabel == "Switch")
-						&& mainLabel != "Basic" ) {
-						// values cannot exist on same lmce device
-						LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "    -> Mapping to separate device as this value label(%s) cannot exists on the main lmce device (%s)", label.c_str(), mainLabel.c_str() );
-						needSeparateDevice = true;
-						mapToDevice = 1;
+					if (!node->m_vectDevices[mapToDevice]->IsCompatible(value, label)) {
+						// these values can not co-exist as the same lmce device, not compatible
+						mapToDevice++;
+					} else {
+						done = true;
 					}
-				}
-				if (needSeparateDevice)
-				{
-					// find first device that this value can map to
-					bool done = false;
-					while (mapToDevice < node->m_vectDevices.size() && !done)
-					{
-						string deviceLabel = OpenZWave::Manager::Get()->GetValueLabel(node->m_vectDevices[mapToDevice]->GetMainValue());
-						if ((label == "Temperature" || label  == "Luminance" || label == "Relative Humidity" || label == "Switch" || label == "Level" || label == "Sensor")
-						    && (deviceLabel == "Temperature" || deviceLabel  == "Luminance" || deviceLabel == "Relative Humidity" || deviceLabel == "Switch" || deviceLabel == "Level" || deviceLabel == "Sensor")
-						    && !(label == "Level" && deviceLabel == "Level"))
-						{
-							// these values can not co-exist as the same lmce device, not compatible
-							mapToDevice++;
-						} else {
-							done = true;
-						}
-					}
-				}
-				// set this value as main value if current is basic
-				bool bMainValue = (label == "Level" || label == "Sensor" || label == "Switch");
-				if (mapToDevice == 0)
-				{
-					LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "    -> Mapping value to main device");
-					pMainDevice->assignValue(*valIt, bMainValue);
-				} else {
-					LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "    -> Mapping value to device no %d", mapToDevice);
-					if (mapToDevice >= node->m_vectDevices.size())
-					{
-						int PK_Parent_Device = 0;
-						unsigned long deviceTemplate = GetDeviceTemplate(node, value, PK_Parent_Device);
-						node->AddDevice(mapToDevice, deviceTemplate, PK_Parent_Device);
-					}
-					node->MapValueToDevice(mapToDevice, value, bMainValue);
 				}
 			}
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "    -> Mapping value to device no %d", mapToDevice);
+			if (mapToDevice >= node->m_vectDevices.size())
+			{
+				node->AddDevice(mapToDevice);
+			}
+			node->MapValueToDevice(mapToDevice, value);
 		}
 	}
 	// When we are done mapping values to devices, check that all devices exists in LMCE
@@ -1196,59 +1158,90 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 			// because some values were seen in a different order. Not sure if that is going to happen though...
 			sId += "/" + StringUtils::itos(deviceNo);
 		}
-		if (pLmceDevice->hasMainValue())
+
+		// Set the device template (and possibly also the main value)
+		SetDeviceTemplate(pLmceDevice);
+
+		string label = "<none>";
+		if (pLmceDevice->HasMainValue())
 		{
-			string label = OpenZWave::Manager::Get()->GetValueLabel(pLmceDevice->GetMainValue());
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, " * Device id = %s, dt = %d, main label = %s", sId.c_str(), pLmceDevice->m_dwFK_DeviceTemplate, label.c_str() );
-			if (pLmceDevice->m_dwPK_Device == 0)
+			label = OpenZWave::Manager::Get()->GetValueLabel(pLmceDevice->GetMainValue());
+		}
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, " * Device id = %s, dt = %d (%s), main label = %s, pk_parent = %d", sId.c_str(), pLmceDevice->m_dwFK_DeviceTemplate, DTToName(pLmceDevice->m_dwFK_DeviceTemplate).c_str(), label.c_str(), pLmceDevice->m_dwPK_Parent_Device );
+		if (pLmceDevice->m_dwPK_Device == 0)
+		{
+			// PK_Device == 0 means it has not been added, or it has been added since last reload
+			if ( m_setRecentlyAddedDevices.find(sId) == m_setRecentlyAddedDevices.end() )
 			{
-				// PK_Device == 0 means it has not been added, or it has been added since last reload
-				if ( m_setRecentlyAddedDevices.find(sId) == m_setRecentlyAddedDevices.end() )
+				// ok, not added since last reload
+				// Get device data from LMCE or create new device if not found
+				DeviceData_Impl* pDevice = GetDeviceForPortChannel(sId);
+				if (pDevice == NULL)
 				{
-					// ok, not added since last reload
-					// Get device data from LMCE or create new device if not found
-					DeviceData_Impl* pDevice = GetDeviceForPortChannel(sId);
-					if (pDevice == NULL)
-					{
-						LoggerWrapper::GetInstance()->Write(LV_WARNING, "  -> Device with id = %s not found, creating new device, dt = %d", sId.c_str(), pLmceDevice->m_dwFK_DeviceTemplate);
-						pLmceDevice->m_dwPK_Device = AddDevice(pLmceDevice->m_dwPK_Parent_Device, sId, pLmceDevice->m_dwFK_DeviceTemplate);
-					} else {
-						LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "  -> Device exists, PK_Device=%d", pDevice->m_dwPK_Device);
-						pLmceDevice->m_dwPK_Device = pDevice->m_dwPK_Device;
-					}
+					LoggerWrapper::GetInstance()->Write(LV_WARNING, "  -> Device with id = %s not found, creating new device, dt = %d", sId.c_str(), pLmceDevice->m_dwFK_DeviceTemplate);
+					pLmceDevice->m_dwPK_Device = AddDevice(pLmceDevice->m_dwPK_Parent_Device, sId, pLmceDevice->m_dwFK_DeviceTemplate);
 				} else {
-					LoggerWrapper::GetInstance()->Write(LV_WARNING, "  -> Device added since last reload, reload required!");
+					LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "  -> Device exists, PK_Device=%d", pDevice->m_dwPK_Device);
+					pLmceDevice->m_dwPK_Device = pDevice->m_dwPK_Device;
 				}
 			} else {
-				LoggerWrapper::GetInstance()->Write(LV_WARNING, "  -> Already mapped to device, PK_Device=%d", pLmceDevice->m_dwPK_Device);
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "  -> Device added since last reload, reload required!");
 			}
+		} else {
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "  -> Already mapped to device, PK_Device=%d", pLmceDevice->m_dwPK_Device);
 		}
 		deviceNo++;
 	}
 
 }
 
-unsigned long ZWave::GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value, int& PK_Device_Parent) {
-	unsigned long devicetemplate = 0;
-	string label = OpenZWave::Manager::Get()->GetValueLabel(value);
-	
-	if ( label == "Temperature" )
+void ZWave::SetDeviceTemplate(LMCEDevice* pLmceDevice)
+{
+	// Find the value that fits most nicely with the node type and use that as main value
+	// Not used for other devices than temperature sensors atm.
+	int i = 0;
+	for (vector<OpenZWave::ValueID>::iterator it = pLmceDevice->m_vectValues.begin(); it != pLmceDevice->m_vectValues.end(); ++it)
 	{
-		devicetemplate = DEVICETEMPLATE_Temperature_sensor_CONST;
-		PK_Device_Parent = m_dwPK_ClimateInterface;
-		LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Temperature_Sensor");
-		return devicetemplate;
+		OpenZWave::ValueID ourValue = *it;
+		string ourLabel = OpenZWave::Manager::Get()->GetValueLabel(ourValue);
+		if ((pLmceDevice->m_pNodeInfo->m_generic == GENERIC_TYPE_SENSOR_MULTILEVEL ||
+		     pLmceDevice->m_pNodeInfo->m_generic == GENERIC_TYPE_SENSOR_BINARY) &&
+		    ourLabel == "Temperature")
+		{
+			pLmceDevice->SetMainValue(i);
+		}
+		i++;
 	}
+	// then find the device template for the device
+	int PK_Parent_Device = 0;
+	unsigned long deviceTemplate = GetDeviceTemplate(pLmceDevice, PK_Parent_Device);
+	pLmceDevice->m_dwFK_DeviceTemplate = deviceTemplate;
+	pLmceDevice->m_dwPK_Parent_Device = PK_Parent_Device;
+	
+}
 
+unsigned long ZWave::GetDeviceTemplate(LMCEDevice *pLmceDevice, int& PK_Device_Parent) {
+	unsigned long devicetemplate = 0;
+	string label = "<none>";
+	if (pLmceDevice->HasMainValue())
+	{
+		label = OpenZWave::Manager::Get()->GetValueLabel(pLmceDevice->GetMainValue());
+	
+		if ( label == "Temperature" )
+		{
+			devicetemplate = DEVICETEMPLATE_Temperature_sensor_CONST;
+			PK_Device_Parent = m_dwPK_ClimateInterface;
+			return devicetemplate;
+		}
+	}
+	NodeInfo* node = pLmceDevice->m_pNodeInfo;
 	switch(node->m_generic) {
 		case GENERIC_TYPE_GENERIC_CONTROLLER:
 		case GENERIC_TYPE_STATIC_CONTROLLER:
 			devicetemplate = DEVICETEMPLATE_ZWave_Controller_CONST;
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> ZWave_Controller");
 			break;
 		case GENERIC_TYPE_THERMOSTAT:
 			devicetemplate = DEVICETEMPLATE_Standard_Thermostat_CONST;
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Standard_Thermostat");
 			break;
 		case GENERIC_TYPE_SWITCH_MULTILEVEL:
 			switch (node->m_specific) {
@@ -1257,13 +1250,11 @@ unsigned long ZWave::GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value,
 				case SPECIFIC_TYPE_CLASS_B_MOTOR_CONTROL:
 				case SPECIFIC_TYPE_CLASS_C_MOTOR_CONTROL:
 					devicetemplate = DEVICETEMPLATE_Drapes_Switch_CONST;
-					LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Drapes_Switch");
 					break;
 				case SPECIFIC_TYPE_NOT_USED:
 				case SPECIFIC_TYPE_POWER_SWITCH_MULTILEVEL:
 				case SPECIFIC_TYPE_SCENE_SWITCH_MULTILEVEL:
 					devicetemplate = DEVICETEMPLATE_Light_Switch_dimmable_CONST;
-					LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Light_Switch");
 					break;
 			}
 				
@@ -1274,19 +1265,15 @@ unsigned long ZWave::GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value,
 			break;
 		case GENERIC_TYPE_SWITCH_BINARY:
 			devicetemplate = DEVICETEMPLATE_Light_Switch_onoff_CONST;
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Light_Switch_OnOff");
 			break;
 		case GENERIC_TYPE_SENSOR_BINARY:
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Generic_Sensor");
 			devicetemplate = DEVICETEMPLATE_Generic_Sensor_CONST;
 			break;
 		case GENERIC_TYPE_WINDOW_COVERING:
 			devicetemplate = DEVICETEMPLATE_Drapes_Switch_CONST;
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Drapes_Switch");
 			break;
 		case GENERIC_TYPE_SENSOR_MULTILEVEL:
 			devicetemplate = DEVICETEMPLATE_Multilevel_Sensor_CONST;
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Multilevel_Sensor");
 			break;
 		case GENERIC_TYPE_SENSOR_ALARM:
 			// DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "alarm sensor found, specific: %i",specific);
@@ -1297,17 +1284,14 @@ unsigned long ZWave::GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value,
 				case SPECIFIC_TYPE_ZENSOR_NET_SMOKE_SENSOR:
 				case SPECIFIC_TYPE_ADV_ZENSOR_NET_SMOKE_SENSOR:
 					devicetemplate = DEVICETEMPLATE_Smoke_Detector_CONST;
-					LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Smoke_Detector");
 				break;
 			}
 		case GENERIC_TYPE_AV_CONTROL_POINT:
 			devicetemplate = DEVICETEMPLATE_Generic_Tuner_CONST;
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Generic_Tuner");
 			break;
 	        case GENERIC_TYPE_METER:
 			// TODO support other types of meters
 			devicetemplate = DEVICETEMPLATE_Standard_Energy_Meter_CONST;
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "    -> Standard Energy Meter");
 			break;
 	        default:
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "    -> No device template for node with generic %d, specific %d, label %s", node->m_generic, node->m_specific, label.c_str());
@@ -1317,9 +1301,52 @@ unsigned long ZWave::GetDeviceTemplate(NodeInfo* node, OpenZWave::ValueID value,
 	return devicetemplate;
 }
 
+string ZWave::DTToName(unsigned long PK_DeviceTemplate)
+{
+	string name = "<unknown>";
+	switch (PK_DeviceTemplate) {
+	case DEVICETEMPLATE_ZWave_Controller_CONST:
+		name = "ZWave Controller";
+		break;
+	case  DEVICETEMPLATE_Temperature_sensor_CONST:
+		name = "Temperature Sensor";
+		break;
+	case DEVICETEMPLATE_Standard_Thermostat_CONST:
+		name = "Standard Thermostat";
+		break;
+	case DEVICETEMPLATE_Drapes_Switch_CONST:
+		name = "Drapes Switch";
+		break;
+	case DEVICETEMPLATE_Light_Switch_dimmable_CONST:
+		name = "Dimmable Light Switch";
+		break;
+	case DEVICETEMPLATE_Remote_Switch_CONST:
+		name = "Remote Switch";
+		break;
+	case DEVICETEMPLATE_Light_Switch_onoff_CONST:
+		name = "Light Switch";
+		break;
+	case DEVICETEMPLATE_Generic_Sensor_CONST:
+		name = "Generic Sensor";
+		break;
+	case DEVICETEMPLATE_Multilevel_Sensor_CONST:
+		name = "Multilevel Sensor";
+		break;
+	case DEVICETEMPLATE_Smoke_Detector_CONST:
+		name = "Smoke Detector";
+		break;
+	case DEVICETEMPLATE_Generic_Tuner_CONST:
+		name = "Generic Tuner";
+		break;
+	case DEVICETEMPLATE_Standard_Energy_Meter_CONST:
+		name = "Standard Energy Meter";
+		break;
+
+	}
+	return name;
+}
 int ZWave::AddDevice(int parent, string sInternalId, int PK_DeviceTemplate) {
 	int iPK_Device = 0;
-
 	int tmp_parent = 0;
 	if (parent > 0) { tmp_parent = parent; } else { tmp_parent = m_dwPK_Device; }
 
