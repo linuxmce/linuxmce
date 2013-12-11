@@ -1206,7 +1206,7 @@ void ZWave::SetDeviceTemplate(LMCEDevice* pLmceDevice)
 		string ourLabel = OpenZWave::Manager::Get()->GetValueLabel(ourValue);
 		if ((pLmceDevice->m_pNodeInfo->m_generic == GENERIC_TYPE_SENSOR_MULTILEVEL ||
 		     pLmceDevice->m_pNodeInfo->m_generic == GENERIC_TYPE_SENSOR_BINARY) &&
-		    ourLabel == "Temperature")
+		    (ourLabel == "Temperature" || ourLabel == "Luminance"))
 		{
 			pLmceDevice->SetMainValue(i);
 		}
@@ -1217,7 +1217,6 @@ void ZWave::SetDeviceTemplate(LMCEDevice* pLmceDevice)
 	unsigned long deviceTemplate = GetDeviceTemplate(pLmceDevice, PK_Parent_Device);
 	pLmceDevice->m_dwFK_DeviceTemplate = deviceTemplate;
 	pLmceDevice->m_dwPK_Parent_Device = PK_Parent_Device;
-	
 }
 
 unsigned long ZWave::GetDeviceTemplate(LMCEDevice *pLmceDevice, int& PK_Device_Parent) {
@@ -1232,7 +1231,13 @@ unsigned long ZWave::GetDeviceTemplate(LMCEDevice *pLmceDevice, int& PK_Device_P
 			devicetemplate = DEVICETEMPLATE_Temperature_sensor_CONST;
 			PK_Device_Parent = m_dwPK_ClimateInterface;
 			return devicetemplate;
+		} else if ( label == "Luminance" )
+		{
+			devicetemplate = DEVICETEMPLATE_Brightness_sensor_CONST;
+			PK_Device_Parent = m_dwPK_ClimateInterface;
+			return devicetemplate;
 		}
+
 	}
 	NodeInfo* node = pLmceDevice->m_pNodeInfo;
 	switch(node->m_generic) {
@@ -1310,6 +1315,9 @@ string ZWave::DTToName(unsigned long PK_DeviceTemplate)
 		break;
 	case  DEVICETEMPLATE_Temperature_sensor_CONST:
 		name = "Temperature Sensor";
+		break;
+	case  DEVICETEMPLATE_Brightness_sensor_CONST:
+		name = "Brightness Sensor";
 		break;
 	case DEVICETEMPLATE_Standard_Thermostat_CONST:
 		name = "Standard Thermostat";
