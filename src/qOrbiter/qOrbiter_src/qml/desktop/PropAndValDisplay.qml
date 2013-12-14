@@ -7,6 +7,7 @@ Item{
     property string value
     property alias editedValue:input.text
     signal set()
+
     Rectangle{
         anchors.fill: parent
         color:"green"
