@@ -59,7 +59,6 @@ contains(QT_VERSION,5.*.*){
         DEFINES+=GLENABLED
         QT+= opengl script  widgets
         include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
-
 }
 
 
@@ -102,7 +101,8 @@ TRANSLATIONS += app_de.ts
 #linux deploy configuration
 
 common-folder.source = qml/skins-common
-common-folder.target = qml
+common-folder.target = $$DESTDIR/qml
+
 DEPLOYMENTFOLDERS+=common-folder
 
 linux-g++{
@@ -120,11 +120,11 @@ linux-g++{
         }
 
         contains(QT_VERSION,5.*.*){
-                folder_01.source = qml/rpi
-                folder_01.target = $$DESTDIR/qml
+                folder_01.source = qml/qt5-desktop
+                folder_01.target = $$DESTDIR/qml/
                 plugins_folder.source = imports/
                 plugins_folder.target = $$DESTDIR
-                glmsg=yes
+                glmsg=scenegraph
         }
 
         folder_03.source = config.xml

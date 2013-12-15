@@ -232,7 +232,7 @@ public slots:
 
     void setVolume(qreal vol){
 
-#ifdef LINUX
+#ifdef QT4
         qreal c = audioSink->volume();
         qWarning() << "Current volume" << c;
         qreal d = c+0.01;

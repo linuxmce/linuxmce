@@ -214,7 +214,7 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
     QCoreApplication::setOrganizationDomain("org.linuxmce.QOrbiter");
     QCoreApplication::setOrganizationName("www.linuxMCE.org");
-#ifdef __ANDROID__
+#ifdef __ANDROID__ && ! defined(QT5)
     AndroidSystem androidHelper;
 #endif
 

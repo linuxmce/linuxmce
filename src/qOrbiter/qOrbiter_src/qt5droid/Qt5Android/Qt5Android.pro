@@ -326,5 +326,5 @@ RESOURCES += \
         ../../skinData.qrc
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/../../../platforms/Android/qt5-pkg-src
-
+message ($$ANDROID_PACKAGE_SOURCE_DIR)
 

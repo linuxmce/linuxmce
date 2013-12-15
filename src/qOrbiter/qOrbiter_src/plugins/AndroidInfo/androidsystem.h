@@ -2,7 +2,6 @@
 #define ANDROIDSYSTEM_H
 
 #include <QObject>
-
 #include <jni.h>
 
 #ifndef QT5
@@ -127,8 +126,8 @@ public slots:
     void setApiLevel(int lvl){ apiLevel = lvl; emit apiLevelChanged();}
     int getApiLevel(){ return apiLevel;}
 
-    Q_INVOKABLE bool updateExternalStorageLocation();
-    Q_INVOKABLE bool updateBuildInformation();
+   /* Q_INVOKABLE*/ bool updateExternalStorageLocation();
+   /* Q_INVOKABLE*/ bool updateBuildInformation();
 
     bool playMedia(QString url);
     bool stopMedia();

@@ -157,15 +157,16 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
      */
 
 #ifdef for_desktop
-#ifdef QT4_8
-    buildType = "/qml/desktop";
-#elif QT5 && !defined ANDROID
-    buildType = "/qml/rpi";
-#endif
-    qrcPath = buildType+"/Splash.qml";
-    //mainView.setSource(QApplication::applicationDirPath()+qrcPath);
-#endif
-#ifdef  WIN32
+    #ifdef QT4_8
+          buildType = "/qml/desktop";
+    #elif QT5 && defined RPI
+           buildType = "/qml/rpi";
+    #elif QT5 && !defined RPI
+    buildType="/qml/qt5-desktop";
+
+    #endif
+     qrcPath = buildType+"/Splash.qml";
+#elif  WIN32
     buildType="/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
 #elif defined (for_freemantle)
@@ -225,7 +226,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     setApplicationPath(QApplication::applicationDirPath());
     localDir = qmlPath.append(buildType);
-
+qDebug() << "build type set to:: "<< buildType;
     initializeGridModel();  //begins setup of media grid listmodel and its properties
     initializeSortString(); //associated logic for navigating media grids
 
@@ -294,6 +295,7 @@ void qorbiterManager::gotoQScreen(QString s)
         emit clearModel();
         emit cancelRequests();
         emit resetFilter();
+
     }
 
     //send the qmlview a request to go to a screen, needs error handling
@@ -440,6 +442,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 #elif for_desktop
     if(b_localLoading == true)
     {
+
         if( !loadSkins(QUrl(localDir)))
         {
             emit skinIndexReady(false);
@@ -1433,10 +1436,7 @@ bool qorbiterManager::loadSkins(QUrl base)
     setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
     localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
 
-
-#ifdef QT_DEBUG
     qDebug()<<"inside of skins we find" << localSkins.join(",");
-#endif
     tskinModel->addSkin(localSkins.join(","));
 #endif
     return true;

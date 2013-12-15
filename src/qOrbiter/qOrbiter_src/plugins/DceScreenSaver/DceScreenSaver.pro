@@ -63,11 +63,11 @@ android-g++{
 }
 
 linux-g++{
-   QMLDIR_TARGET=$DESTDIR
+   QMLDIR_TARGET=$$DESTDIR
 }
 
 linux-rasp-pi-g++{
-QMLDIR_TARGET=$DESTDIR
+QMLDIR_TARGET=$$DESTDIR
 }
 
 copy_qmldir.target=$$QMLDIR_TARGET

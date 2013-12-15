@@ -191,10 +191,10 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #ifndef QT5
     buildType = "/qml/desktop";
 #else
-    buildType = "/qml/rpi";
+    buildType = "/qml/qt5-desktop";
 #endif
     qrcPath = buildType+"/Splash.qml";
-    localPath = "desktop/";
+    localPath = "qt5-desktop/";
 #elif defined (for_freemantle)
     buildType = "/qml/freemantle";
     qrcPath = "qrc:freemantle/Splash.qml";
@@ -240,17 +240,16 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     qDebug() << "Plugin path list"; mainView.engine()->pluginPathList().join("\n");
 
     mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
+#endif
 
 #ifdef QT5
     mainView.setSource(QString("assets:/qml/Welcome.qml"));
 #else
     mainView.setSource(QString("assets:/qml/Base.qml"));
 #endif
-#elif !for_harmattan
+
     mainView.setSource(QApplication::applicationDirPath().remove("/bin")+buildType+"/Splash.qml");
-#elif for_harmattan
-    mainView.setSource(QApplication::applicationDirPath()+"qml/Splash.qml");
-#endif
+
 
 }
 

@@ -8,7 +8,6 @@
  */
 
 import QtQuick 2.0
-import QtGraphicalEffects 1.0
 import DceScreenSaver 1.0
 
 import "components"
@@ -51,9 +50,6 @@ Item {
             manager.gotoQScreen(dcenowplaying.qs_screen)
         }
     }
-
-
-
 
     FontLoader{
         id:myFont
@@ -323,9 +319,12 @@ Item {
 
     DceMedia{
         id:dceplayer
-        anchors.top: parent.top
-        anchors.left:parent.left
-
+        anchors{
+            top:parent.top
+            bottom:parent.bottom
+            left:parent.left
+            right:parent.right
+        }
         onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
         onActiveFocusChanged: {
             if(activeFocus){
@@ -334,72 +333,10 @@ Item {
             }
         }
 
-//        onVolumeChanged:console.log(volume)
-        Keys.onVolumeDownPressed: manager.adjustVolume("-1")
-        Keys.onVolumeUpPressed:  manager.adjustVolume("+1")
-        Keys.onTabPressed: ftr.forceActiveFocus()
+//        Keys.onVolumeDownPressed: manager.adjustVolume("-1")
+//        Keys.onVolumeUpPressed:  manager.adjustVolume("+1")
+//        Keys.onTabPressed: ftr.forceActiveFocus()
 
-        Keys.onPressed: {
-
-            switch(event.key){
-            case Qt.Key_Back:
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex-++1));
-                break;
-            case Qt.Key_Forward:
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1))
-                break;
-            case 16777347: /* Keycode Track forward */
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1));
-                break;
-            case 16777346: /* Keycode Track Backwards */
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex-1))
-                break;
-            case Qt.Key_Plus: /*Plus sign */
-                manager.adjustVolume(+1)
-                break;
-
-            case Qt.Key_VolumeMute:
-                manager.mute()
-                break;
-
-            case Qt.Key_M:
-                manager.mute()
-                break;
-
-            case Qt.Key_Minus: /* Minus Sign */
-                manager.adjustVolume(-1)
-                break;
-            case Qt.Key_T:
-                if(playlist.state==="showing")
-                    playlist.state="hidden"
-                else
-                    playlist.state = "showing"
-
-                break;
-
-            case Qt.Key_S:
-                manager.stopMedia()
-                break;
-
-            case Qt.Key_Pause:
-                manager.pauseMedia()
-                break;
-            case Qt.Key_P:
-                manager.pauseMedia()
-                break;
-
-            case Qt.Key_PageUp:
-                manager.changedPlaylistPosition(mediaplaylist.currentIndex-1)
-                break;
-
-            case Qt.Key_PageDown:
-                manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
-                break;
-            default:
-                console.log(event.key)
-                break
-            }
-        }
     }
 
     Item{
