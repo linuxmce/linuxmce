@@ -7,6 +7,8 @@
 #	/usr/pluto/bin/getxmls &>/dev/null </dev/null &
 #	/usr/pluto/bin/getxmls &>/var/log/pluto/add_software_debug.log &
 #	disown -a
-#fi											
+#fi
+
+update-rc.d -f instcheck.sh remove >/dev/null
 
 exit 0
