@@ -957,6 +957,22 @@ switch ($section) {
 	    $output->setHelpSrc('/wiki/index.php/Telecom');
 	    telecomScenarios($output,$dbADO);
 	break;
+	//start webfilter &proxy
+	case 'proxy';
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/webfilter_proxy/proxy.php');
+	    //$output->setHelpSrc('/wiki/index.php/proxy_Settings');
+	    proxySettings($output,$dbADO);
+	break;
+	case 'webfilter';
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/webfilter_proxy/webfilter.php');
+	    //$output->setHelpSrc('/wiki/index.php/webfilter_Settings');
+	    webfilterSettings($output,$dbADO);
+	break;
+	//end of webfilter & proxy
 	case 'networkSettings';
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
