@@ -232,6 +232,17 @@ if [[ -n "$IntIP" ]]; then
 	fi
 fi
 
+#config webfilter AND proxy rules
+if [[ "$DisableWebfilter" == 1 ]]; then
+if [[ "$DisableProxy" == 0 ]]; then
+iptables -t nat -A PREROUTING -i $IntIf -p tcp --dport 80 -j REDIRECT --to-port 3128
+echo proxy
+fi
+else
+iptables -t nat -A PREROUTING -i $IntIf -p tcp --dport 80 -j REDIRECT --to-port 8181
+echo webfilter
+fi
+
 # Configuring all port forwards
 echo "Setting up forwarded ports"
 Q="SELECT Protocol,SourcePort,SourcePortEnd,DestinationPort,DestinationIP,SourceIP FROM Firewall WHERE RuleType='port_forward' ORDER BY PK_Firewall"
