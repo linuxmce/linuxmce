@@ -918,6 +918,9 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 			uint8 value = _notification->GetEvent();
 
 			int PKDevice = nodeInfo->GetPKDeviceForValue(id);
+			// Fall back to main device for this kind of events, as the valueid is not (always?) set
+			if (PKDevice == 0)
+				PKDevice = nodeInfo->m_vectDevices[0]->m_dwPK_Device;
 			if (PKDevice > 0)
 			{
 				uint8 typeBasic = OpenZWave::Manager::Get()->GetNodeBasic(_notification->GetHomeId(), _notification->GetNodeId());
@@ -935,7 +938,7 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"No suitable event to send for node basic = %d, generic = %d", typeBasic, nodeInfo->m_generic);
 				}
 			} else {
-				DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"No device found for this Node and value!");
+				DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"No device found for this Node and value, label = %s", label.c_str());
 			}
 		}
 		break;
