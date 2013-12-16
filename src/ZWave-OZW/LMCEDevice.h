@@ -60,7 +60,8 @@ namespace DCE {
 				string ourLabel = OpenZWave::Manager::Get()->GetValueLabel(ourValue);
 				if (IsSpecialLabel(label) && IsSpecialLabel(ourLabel) &&
 				    !(label == "Temperature" && m_pNodeInfo->m_generic == GENERIC_TYPE_THERMOSTAT) &&
-				    !(label == "Level" && ourLabel == "Switch"))
+				    !(label == "Level" && ourLabel == "Switch") &&
+				    !(label == "Switch" && ourLabel == "Level"))
 					return false;
 			}
 			return true;
