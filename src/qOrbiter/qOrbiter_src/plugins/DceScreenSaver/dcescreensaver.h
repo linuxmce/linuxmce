@@ -151,9 +151,14 @@ protected:
 #ifdef QT4
     void paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget );
 #elif QT5
+
+
     QSGNode* updatePaintNode(QSGNode *node, UpdatePaintNodeData*d) ;
 #endif
     void timerEvent(QTimerEvent *event);
+
+
+
 };
 
 QML_DECLARE_TYPE(DceScreenSaver)

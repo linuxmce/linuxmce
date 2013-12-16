@@ -185,10 +185,10 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
 #ifdef QT5
 
 QSGNode * DceScreenSaver::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *d){
-
-    QImage t = currentImage.toImage();
+    Q_UNUSED(d);
     QSGTexture *tex;
-    tex = this->window()->createTextureFromImage(t);
+
+    tex = this->window()->createTextureFromImage(currentImage.toImage());
 
     if(!node){
         node = new QSGSimpleTextureNode;
@@ -197,9 +197,10 @@ QSGNode * DceScreenSaver::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaint
 
     static_cast<QSGSimpleTextureNode*>(node)->setRect(boundingRect());
     Q_ASSERT(tex);
-
+    tex->setFiltering(QSGTexture::Nearest);
     static_cast<QSGSimpleTextureNode*>(node)->setTexture(tex);
     qDebug()<<"updatePaintNode() returning node";
+
     return node;
 }
 #endif

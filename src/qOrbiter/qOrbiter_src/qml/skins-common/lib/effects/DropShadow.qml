@@ -1,5 +1,5 @@
 import QtQuick 1.1
-import QtGraphicalEffects 5.0
+import Qt.labs.shaders 1.0
 
 Item {
     id: main
