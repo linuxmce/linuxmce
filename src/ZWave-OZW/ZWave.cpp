@@ -829,11 +829,11 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 				}
 			}
 		}
-		if (m_pZWInterface->IsReady() && nodeInfo != NULL && nodeInfo->m_generic != 0)
+/*		if (m_pZWInterface->IsReady() && nodeInfo != NULL && nodeInfo->m_generic != 0)
 		{
 			// After initialization is complete, ValueAdded is emitted when a new value is added - so we should check if we need to add new devices
 			MapNodeToDevices(nodeInfo);
-		}
+			}*/
 		break;
 	}
 
@@ -948,6 +948,15 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 		if( m_pZWInterface->IsReady() && nodeInfo != NULL )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::OnNotification() : Type_EssentialNodeQueriesComplete nodeId = %d", nodeInfo->m_nodeId);
+//			MapNodeToDevices(nodeInfo);
+		}
+		break;
+	}
+	case OpenZWave::Notification::Type_NodeQueriesComplete:
+	{
+		if( m_pZWInterface->IsReady() && nodeInfo != NULL )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::OnNotification() : Type_NodeQueriesComplete nodeId = %d", nodeInfo->m_nodeId);
 			MapNodeToDevices(nodeInfo);
 		}
 		break;
