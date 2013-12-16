@@ -931,7 +931,11 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 				} else if (nodeInfo->m_generic == GENERIC_TYPE_SWITCH_BINARY || nodeInfo->m_generic == GENERIC_TYPE_SWITCH_MULTILEVEL) {
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed event: value = %d", value);
 					SendLightChangedEvents (PKDevice, value);
+				} else {
+					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"No suitable event to send for node basic = %d, generic = %d", typeBasic, nodeInfo->m_generic);
 				}
+			} else {
+				DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"No device found for this Node and value!");
 			}
 		}
 		break;
@@ -1278,6 +1282,8 @@ unsigned long ZWave::GetDeviceTemplate(LMCEDevice *pLmceDevice, int& PK_Device_P
 			devicetemplate = DEVICETEMPLATE_Drapes_Switch_CONST;
 			break;
 		case GENERIC_TYPE_SENSOR_MULTILEVEL:
+			// TODO try to detect motion detectors
+
 			devicetemplate = DEVICETEMPLATE_Multilevel_Sensor_CONST;
 			break;
 		case GENERIC_TYPE_SENSOR_ALARM:
