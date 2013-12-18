@@ -332,16 +332,18 @@ void agocontrol_Bridge::receiveFunction() {
 		agoSender.send(inventorymessage);
 		qpid::messaging::Message response = responseReceiver.fetch();
 		decode(response,inventoryMap);
-		Variant::Map deviceMap = inventoryMap["inventory"].asMap();
-		Variant::Map roomMap = inventoryMap["rooms"].asMap();
+		Variant::Map deviceMap;
+		if (!(inventoryMap["devices"].isVoid())) deviceMap = inventoryMap["devices"].asMap();
+		Variant::Map roomMap;
+		if (!(inventoryMap["rooms"].isVoid())) roomMap = inventoryMap["rooms"].asMap();
 		for (Variant::Map::iterator it = deviceMap.begin(); it!=deviceMap.end(); it++) {
 			Variant::Map device;
 			string sRoomName = "";
+			if (it->second.isVoid()) continue;
 			device = it->second.asMap();
 
-
 			Variant::Map::iterator roomIt = roomMap.find(device["room"].asString());
-			if (roomIt != roomMap.end()) {
+			if ((roomIt != roomMap.end()) && (!(roomIt->second.isVoid()))) {
 				Variant::Map room = roomIt->second.asMap();
 				sRoomName = room["name"].asString();
 			}
