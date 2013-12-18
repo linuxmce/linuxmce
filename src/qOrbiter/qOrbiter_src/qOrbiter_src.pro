@@ -25,14 +25,20 @@
 CONFIG += thread
 # define deployment destination and target executable name
 
- android-g++{
-        DESTDIR = ../QOrbiter-Android-Arm-$$QT_VERSION
+local-development{
+    android-g++{ DESTDIR = ../QOrbiter-Android-Arm-$$QT_VERSION }
+     else  {
+        !linux-rasp-pi-g++{ DESTDIR = ../QOrbiter-build-$$QT_VERSION }
+            }
 } else {
 
-        !linux-rasp-pi-g++{
-                DESTDIR = ../QOrbiter-build-$$QT_VERSION
-        }
+    android-g++{ DESTDIR = ../build-output }
+     else  {
+        !linux-rasp-pi-g++{ DESTDIR = ../build-output }
+            }
 }
+
+
 
 contains(QT_VERSION,4.8.*){
         message("$$QT_VERSION Core")
@@ -61,16 +67,29 @@ contains(QT_VERSION,5.*.*){
         include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
 }
 
-
-opengl{
-        TARGET = qorbiter-$$QT_VERSION-core-gl
-        DEFINES+=GLENABLED
-        glmsg= yes
-        QT+= opengl
-}else{
-        TARGET =qorbiter-$$QT_VERSION
-        glmsg = no
+local-development{
+        opengl{
+                TARGET = qorbiter-$$QT_VERSION-core-gl
+                 DEFINES+=GLENABLED
+                 glmsg= yes
+                 QT+= opengl
+        }else{
+                TARGET =qorbiter
+                glmsg = no
+               }
+} else {
+        opengl{
+                TARGET = qorbiter-core-gl
+                 DEFINES+=GLENABLED
+                 glmsg= yes
+                 QT+= opengl
+        }else{
+                TARGET =qorbiter
+                glmsg = no
+               }
 }
+
+
 
  android-g++{
         TARGET=qorbiter-$$QT_VERSION
@@ -106,7 +125,7 @@ common-folder.target = $$DESTDIR/qml
 DEPLOYMENTFOLDERS+=common-folder
 
 linux-g++{
-        TARGET = qorbiter-$$QT_VERSION-core-gl
+      #  TARGET = qorbiter-$$QT_VERSION-core-gl
 
         contains(QT_VERSION,4.*.*){
         DEFINES+=GLENABLED
