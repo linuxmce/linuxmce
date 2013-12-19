@@ -1584,7 +1584,7 @@ void *ZWApi::ZWApi::receiveFunction() {
 					// read the rest of the frame
 					len2 += ReadSerialStringEx(serialPort,mybuf2+2,mybuf2[1],100);
 
-					if (len2>0) DCE::LoggerWrapper::GetInstance()->Write(LV_RECEIVE_DATA, DCE::IOUtils::FormatHexAsciiBuffer(mybuf2, len2,"33").c_str());
+					if (len2>0) DCE::LoggerWrapper::GetInstance()->Write(LV_RECEIVE_DATA, "%s", DCE::IOUtils::FormatHexAsciiBuffer(mybuf2, len2,"33").c_str());
 					// verify checksum
 					if ((unsigned char) mybuf2[len2-1] == (unsigned char) checksum(mybuf2+1,mybuf2[1])) {
 						// printf("Checksum correct - sending ACK\n");
@@ -2458,7 +2458,7 @@ void ZWApi::ZWApi::parseNodeInfo(int nodeid, char *nodeinfo, size_t length) {
 	bool manufacturerspecific = false;
 	DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Supported command classes:");
 	for (unsigned int i=0;i<length;i++) {
-		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, commandClassToString(nodeinfo[i]).c_str());
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "%s", commandClassToString(nodeinfo[i]).c_str());
 		switch ((unsigned char)nodeinfo[i]) {
 		case COMMAND_CLASS_WAKE_UP:
 			wakeup = true;
