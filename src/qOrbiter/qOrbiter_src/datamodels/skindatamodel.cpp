@@ -180,11 +180,10 @@ void SkinDataModel::setActiveSkin(QString name)
 
 #ifdef QT5
      current_style = new QQmlComponent(ui_reference->qorbiterUIwin->engine(), QUrl(skinURL));
-
 #elif __ANDROID__
      current_style = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), QUrl(skinURL));
 #else
-     current_style = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), skinURL);
+     current_style = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), QUrl(skinURL));
 #endif
 
     if (current_style->isError()) {

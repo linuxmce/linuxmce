@@ -86,7 +86,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     isPhone = 0;
 
 #ifndef __ANDROID__
-    b_localLoading = true; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
+    b_localLoading = false; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
 #elif defined QT5 && ANDROID || defined(ANDROID)
     androidHelper = jniHelper;
     //   qorbiterUIwin->rootContext()->setContextProperty("android",androidHelper);
@@ -157,15 +157,15 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
      */
 
 #ifdef for_desktop
-    #ifdef QT4_8
-          buildType = "/qml/desktop";
-    #elif QT5 && defined RPI
-           buildType = "/qml/rpi";
-    #elif QT5 && !defined RPI
+#ifdef QT4_8
+    buildType = "/qml/desktop";
+#elif QT5 && defined RPI
+    buildType = "/qml/rpi";
+#elif QT5 && !defined RPI
     buildType="/qml/qt5-desktop";
 
-    #endif
-     qrcPath = buildType+"/Splash.qml";
+#endif
+    qrcPath = buildType+"/Splash.qml";
 #elif  WIN32
     buildType="/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
@@ -226,7 +226,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     setApplicationPath(QApplication::applicationDirPath());
     localDir = qmlPath.append(buildType);
-qDebug() << "build type set to:: "<< buildType;
+    qDebug() << "build type set to:: "<< buildType;
     initializeGridModel();  //begins setup of media grid listmodel and its properties
     initializeSortString(); //associated logic for navigating media grids
 
@@ -409,8 +409,16 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 #else
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins"+qmlPath;
 #endif
+
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("bin"));
     QString localDir = qmlPath.append(buildType);
+
+    QString finalPath;
+    if(b_localLoading){
+        finalPath=localDir;
+    } else{
+        finalPath = remoteDirectoryPath;
+    }
 
 
 #ifdef __ANDROID__
@@ -422,37 +430,36 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     setDceResponse("Loading Qt Quick 1 Skins for Qt 4");
 #endif
 
-    if( !loadSkins(QUrl(remoteDirectoryPath)))
+    if( !loadSkins(QUrl(finalPath)))
     {   emit skinIndexReady(false);
         b_skinReady = false;
         return false;
     }
 #elif for_android
     setDceResponse("Loading skins");
-    if( !loadSkins(QUrl(localDir)))
+    if( !loadSkins(QUrl(finalPath)))
     {   emit skinIndexReady(false);
         return false;
     }
 #elif WIN32
     setDceResponse("Loading skins");
-    if( !loadSkins(QUrl::fromLocalFile(localDir)))
+    if( !loadSkins(QUrl::fromLocalFile(finalPath)))
     {   emit skinIndexReady(false);
         return false;
     }
 #elif for_desktop
-    if(b_localLoading == true)
-    {
 
-        if( !loadSkins(QUrl(localDir)))
+
+        if( !loadSkins(QUrl(finalPath)))
         {
             emit skinIndexReady(false);
             return false;
         }
-    }
+
 #elif for_harmattan
     if(b_localLoading == true)
     {
-        if( !loadSkins(QUrl(localDir)))
+        if( !loadSkins(QUrl(finalPath)))
         {
             emit skinIndexReady(false);
             return false;
@@ -460,7 +467,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     }
     else
     {
-        if( !loadSkins(QUrl(remoteDirectoryPath)))
+        if( !loadSkins(QUrl(finalPath)))
         {
             emit skinIndexReady(false);
             return false;
@@ -469,13 +476,13 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 
 #elif RPI
 
-    if( !loadSkins(QUrl(localDir)))
+    if( !loadSkins(QUrl(finalPath)))
     {
         emit skinIndexReady(false);
         return false;
     }
 #else
-    if( !loadSkins(QUrl(localDir)))
+    if( !loadSkins(QUrl(finalPath)))
     {
         emit skinIndexReady(false);
         return false;
@@ -1433,12 +1440,20 @@ bool qorbiterManager::loadSkins(QUrl base)
     tskinModel->addSkin("default");
 #else
     QDir desktopQmlPath(QString(base.toString()),"",QDir::Name, QDir::NoDotAndDotDot);
-    setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
+    setDceResponse("Desktop Skin Search Path:"+ desktopQmlPath.dirName());
     localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
 
+    qDebug() << localSkins.count();
     qDebug()<<"inside of skins we find" << localSkins.join(",");
+    if(localSkins.count()==0){
+        tskinModel->addSkin("default,aeon,stb");
+    } else {
     tskinModel->addSkin(localSkins.join(","));
+    }
 #endif
+
+
+
     return true;
 }
 
@@ -1649,6 +1664,11 @@ bool qorbiterManager::readLocalConfig()
                 setRouterPort(tRp);
             }
 
+            if(configVariables.namedItem("networkload").attributes().namedItem("id").nodeValue()=="true"){
+                b_localLoading=false;
+            } else {
+                b_localLoading=true;
+            }
 
             if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)
             {
@@ -1674,6 +1694,8 @@ bool qorbiterManager::readLocalConfig()
                 else
                 {setFormFactor(2);}
             }
+
+
 
         }
 
@@ -2084,7 +2106,7 @@ void qorbiterManager::setActiveSkin(QString name)
 
     }
     else {
-         tskinModel->setActiveSkin(name);
+        tskinModel->setActiveSkin(name);
     }
     qDebug("Setting Skin");
 
