@@ -38,8 +38,6 @@ local-development{
             }
 }
 
-
-
 contains(QT_VERSION,4.8.*){
         message("$$QT_VERSION Core")
         DEFINES+=QT4_8
@@ -58,40 +56,15 @@ contains(QT_VERSION,4.7.*){
 
 }
 
-
 contains(QT_VERSION,5.*.*){
         message("$$QT_VERSION Core")
         DEFINES+=QT5
-        DEFINES+=GLENABLED
-        QT+= opengl script  widgets
+	CONFIG+= opengl
+	QT+= script widgets
         include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
 }
 
-local-development{
-        opengl{
-                TARGET = qorbiter-$$QT_VERSION-core-gl
-                 DEFINES+=GLENABLED
-                 glmsg= yes
-                 QT+= opengl
-        }else{
-                TARGET =qorbiter
-                glmsg = no
-               }
-} else {
-        opengl{
-                TARGET = qorbiter-core-gl
-                 DEFINES+=GLENABLED
-                 glmsg= yes
-                 QT+= opengl
-        }else{
-                TARGET =qorbiter
-                glmsg = no
-               }
-}
-
-
-
- android-g++{
+android-g++{
         TARGET=qorbiter-$$QT_VERSION
 }
 
@@ -128,14 +101,12 @@ linux-g++{
       #  TARGET = qorbiter-$$QT_VERSION-core-gl
 
         contains(QT_VERSION,4.*.*){
-        DEFINES+=GLENABLED
-        glmsg= yes
-        QT+= opengl
-        QT += script
-        folder_01.source = qml/desktop
-        folder_01.target = $$DESTDIR/qml
-        plugins_folder.source = imports/
-        plugins_folder.target = $$DESTDIR
+		CONFIG+=opengl
+	        QT += script
+	        folder_01.source = qml/desktop
+	        folder_01.target = $$DESTDIR/qml
+	        plugins_folder.source = imports/
+	        plugins_folder.target = $$DESTDIR
         }
 
         contains(QT_VERSION,5.*.*){
@@ -156,6 +127,28 @@ linux-g++{
         DEPLOYMENTFOLDERS+= plugins_folder
         DEPLOYMENTFOLDERS += folder_01  folder_03
         QML_IMPORT_PATH=imports
+}
+
+local-development{
+        opengl{
+                TARGET = qorbiter-$$QT_VERSION-core-gl
+                 DEFINES+= GLENABLED
+                 glmsg= yes
+                 QT+= opengl
+        }else{
+                TARGET =qorbiter
+                glmsg = no
+               }
+} else {
+        opengl{
+                TARGET = qorbiter-core-gl
+                 DEFINES+= GLENABLED
+                 glmsg= yes
+                 QT+= opengl
+        }else{
+                TARGET =qorbiter
+                glmsg = no
+               }
 }
 
 #windows deployment and module config
