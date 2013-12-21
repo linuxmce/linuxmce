@@ -8,9 +8,9 @@ LC_ALL=C
 set -e
 #set -x
 
-# set NUMCORES=X in /etc/lmce-build/builder.custom.conf to enable multi-job builds
 make_jobs=""
-if [ 1 -lt "$NUM_CORES" ] ; then make_jobs="-j $NUM_CORES"; fi
+# set NUMCORES=X in /etc/lmce-build/builder.custom.conf to enable multi-job builds
+[[ -n "$NUM_CORES" ]] && [[ "$NUM_CORES" -gt 1 ]] && make_jobs="-j $NUM_CORES"
 
 PLUTO_BUILD_CRED=""
 if [ "$sql_build_host" ] ; then PLUTO_BUILD_CRED="$PLUTO_BUILD_CRED -h $sql_build_host"; fi
@@ -26,7 +26,7 @@ if [ "$sql_build_user" ] ; then MYSQL_BUILD_CRED="$MYSQL_BUILD_CRED -u$sql_build
 if [ "$sql_build_pass" ] ; then MYSQL_BUILD_CRED="$MYSQL_BUILD_CRED -p$sql_build_pass"; fi
 export MYSQL_BUILD_CRED
 
-#  export SNR_CPPFLAGS="$compile_defines"
+export SNR_CPPFLAGS="$compile_defines"
 
 function build_main_debs() {
 	export PATH=$PATH:${svn_dir}/${svn_branch_name}/src/bin
@@ -110,14 +110,6 @@ function build_main_debs() {
 					Distro_ID="20"
 					RepositorySource=25
 					Main_Version='2.0.0.46.'
-					# mame - excluded due to long time for compilation.
-					#exclude_list=$exclude_list,682,683
-                       			# videolan client
-#		                         exlucde_list=$exclude_list,431,432
-                       	                exclude_list=$exclude_list,$mkr_tira
-#                                        exclude_list=$exclude_list,$mkr_usb_uirt_0038_package
-                                        exclude_list=$exclude_list,$mkr_vloopback_driver_package
-#                                        exclude_list=$exclude_list,672,674 #
 					;;
 			esac
 			;;

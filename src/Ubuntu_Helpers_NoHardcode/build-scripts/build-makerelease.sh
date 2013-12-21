@@ -7,8 +7,9 @@
 #set -x 
 set -e
 
+make_jobs=""
 # set NUMCORES=X in /etc/lmce-build/builder.custom.conf to enable multi-job builds
-if [ "$NUM_CORES" -gt 1 ] ; then make_jobs="-j $NUM_CORES"; fi
+[[ -n "$NUM_CORES" ]] && [[ "$NUM_CORES" -gt 1 ]] && make_jobs="-j $NUM_CORES"
 
 function Precompile
 {
@@ -47,7 +48,7 @@ function Precompile
 
 		echo "SNR_CPPFLAGS=\"\" make $makefile_opt clean"
 		SNR_CPPFLAGS="" make $makefile_opt clean || Error "Failed to clean ${pkg_name} to use for MakeRelease"
-		echo "SNR_CPPFLAGS=\"\" make $makefile_opt"
+		echo "SNR_CPPFLAGS=\"\" make $make_jobs $makefile_opt"
 		SNR_CPPFLAGS="" make $make_jobs $makefile_opt || Error "Failed to precompile ${pkg_name} to use for MakeRelease"
 
 	 popd
@@ -63,13 +64,13 @@ function Build_MakeRelease {
 	Precompile LibDCE "${svn_dir}/${svn_branch_name}/src/DCE"
 	Precompile WindowUtils "${svn_dir}/${svn_branch_name}/src/WindowUtils"
 	Precompile MakeRelease "${svn_dir}/${svn_branch_name}/src/MakeRelease"
-	Precompile MakeRelease_PrepFiles "${svn_dir}/${svn_branch_name}/src/MakeRelease_PrepFiles"
+#	Precompile MakeRelease_PrepFiles "${svn_dir}/${svn_branch_name}/src/MakeRelease_PrepFiles"
 
 	DisplayMessage "Copy MakeRelease files to ${mkr_dir}"
 	mkdir -pv "${mkr_dir}"
 
 	cp -v "${svn_dir}/${svn_branch_name}/src/bin/MakeRelease" "${mkr_dir}"
-	cp -v "${svn_dir}/${svn_branch_name}/src/bin/MakeRelease_PrepFiles" "${mkr_dir}"
+#	cp -v "${svn_dir}/${svn_branch_name}/src/bin/MakeRelease_PrepFiles" "${mkr_dir}"
 	if [ -e "${svn_dir}/${svn_branch_name}/src/bin/mysql_wrapper" ]
 	then
 		cp -v "${svn_dir}/${svn_branch_name}/src/bin/mysql_wrapper" "${mkr_dir}"

@@ -5,9 +5,9 @@
 set -e
 set -x
 
-# set NUMCORES=X in /etc/lmce-build/builder.custom.conf to enable multi-job builds
 make_jobs=""
-[[ 1 -lt "$NUM_CORES" ]]  && make_jobs="-j $NUM_CORES"
+# set NUMCORES=X in /etc/lmce-build/builder.custom.conf to enable multi-job builds
+[[ -n "$NUM_CORES" ]] && [[ 1 -lt "$NUM_CORES" ]] && make_jobs="-j $NUM_CORES"
 
 case "${flavor}" in
         "ubuntu")
@@ -44,6 +44,7 @@ case "${flavor}" in
                 ;;
 esac
 
+export SNR_CPPFLAGS="$compile_defines"
 
 export PATH=$PATH:${svn_dir}/${svn_branch_name}/src/bin
 export LD_LIBRARY_PATH="$mkr_dir:${svn_dir}/${svn_branch_name}/src/lib"
