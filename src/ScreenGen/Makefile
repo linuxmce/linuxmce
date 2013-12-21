@@ -1,5 +1,5 @@
 
-CPPFLAGS=-I. -I.. -L../lib -lDCECommon -lPlutoUtils -lpluto_main -lSerializeClass
+CPPFLAGS=-I. -I.. -L../lib -lDCECommon -lPlutoUtils -lpluto_main -lSerializeClass -lmysqlclient_r
 
 ScreenGen: ScreenGen.cpp
 
