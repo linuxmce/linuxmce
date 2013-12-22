@@ -91,10 +91,11 @@ Item {
     //! \warn This function is required by the qml engine.
     //! this function load pages as called from other threads or in response to user events.
     function screenchange(screenname ){
+        console.log(screenname)
         pageLoader.source = "screens/"+screenname
-        while(pageLoader.status == Component.Loading){
-            console.log("Screenchange::"+pageLoader.progress)
-        }
+//        while(pageLoader.status == Component.Loading){
+//            console.log("Screenchange::"+pageLoader.progress)
+//        }
 
         if (pageLoader.status == Component.Ready){
             var s = String(screenname)
@@ -311,7 +312,7 @@ Item {
             left:qmlroot.left
             right:qmlroot.right
         }
-        onSourceChanged:  loadin
+
         onLoaded: {console.log("Screen Changed:" + pageLoader.source) }
 
         opacity: hideUiElements ? 0 : 1
