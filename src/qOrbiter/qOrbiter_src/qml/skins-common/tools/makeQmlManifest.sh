@@ -23,7 +23,7 @@ touch qmldir
 echo $$QMLDIR_HEADING >> qmldir
 echo "Created Missing qmldir file"
 fi
-
+svn add qmldir
 for skin in $CURRENT_SKIN_PATH/*
 	do
 	echo " Processing Item::"$skin
@@ -41,9 +41,31 @@ for skin in $CURRENT_SKIN_PATH/*
 		else
 		echo "Not a .qml file, skipping"
 		fi
-
 	else
 	echo "Not file, needs inspection"
+		
+		if [ -d "$skin" ]; then
+		echo "Directory"
+		cd $skin
+			if [ -e qmldir ];then
+			rm qmldir
+			fi
+		touch qmldir
+svn add qmldir
+		echo "$QMLDIR_HEADING" >> qmldir
+			for subFile in "$skin"/*
+			do
+			currentSubFile=$(basename "$subFile")
+			currentSubFileType="${currentSubFileName##*.}"
+        		currentSubFileName="${currentSubFile%.*}"
+        			if [ -f "$subFile" ] ; then
+	                	QMLDIR_STRING="$currentSubFileName             $currentSubFile                        #no comment"
+                		echo "$QMLDIR_STRING" >> qmldir
+                		else
+                		echo "Not a file, skipping"
+                		fi
+			done
+		fi
 	fi 
 
 done
