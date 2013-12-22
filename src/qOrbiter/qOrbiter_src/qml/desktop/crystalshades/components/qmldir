@@ -10,7 +10,5 @@ HomeButton             HomeButton.qml                        #no comment
 MediaSources             MediaSources.qml                        #no comment
 MenuBar             MenuBar.qml                        #no comment
 MultiStateFileDisplay             MultiStateFileDisplay.qml                        #no comment
-qmldir             qmldir                        #no comment
 SkinListDelegate             SkinListDelegate.qml                        #no comment
 SkinSelector             SkinSelector.qml                        #no comment
-main		main.qml			#no comment

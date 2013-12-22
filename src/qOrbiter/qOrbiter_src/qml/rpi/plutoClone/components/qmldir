@@ -71,7 +71,6 @@ NowPlayingBox             NowPlayingBox.qml                        #no comment
 NowPlayingImage             NowPlayingImage.qml                        #no comment
 NullComponent             NullComponent.qml                        #no comment
 Power             Power.qml                        #no comment
-qmldir             qmldir                        #no comment
 Remote_Audio_controls             Remote_Audio_controls.qml                        #no comment
 Remote_lighting_controls             Remote_lighting_controls.qml                        #no comment
 RemoteNumberPad             RemoteNumberPad.qml                        #no comment

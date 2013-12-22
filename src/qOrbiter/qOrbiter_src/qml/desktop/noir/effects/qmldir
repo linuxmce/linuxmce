@@ -40,7 +40,6 @@ magnify             magnify.fsh                        #no comment
 pagecurl             pagecurl.fsh                        #no comment
 pixelate             pixelate.fsh                        #no comment
 posterize             posterize.fsh                        #no comment
-qmldir             qmldir                        #no comment
 ripple             ripple.fsh                        #no comment
 selectionpanel             selectionpanel.fsh                        #no comment
 sepia             sepia.fsh                        #no comment

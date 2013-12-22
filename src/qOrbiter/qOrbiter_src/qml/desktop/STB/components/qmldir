@@ -12,11 +12,9 @@ MediaPlaybackTemplate             MediaPlaybackTemplate.qml                     
 Metadata4             Metadata4.qml                        #no comment
 Metadata5             Metadata5.qml                        #no comment
 NowPlayingImage             NowPlayingImage.qml                        #no comment
-qmldir             qmldir                        #no comment
 RoomSelector             RoomSelector.qml                        #no comment
 RowButton             RowButton.qml                        #no comment
 STBFooter             STBFooter.qml                        #no comment
 STBHeader             STBHeader.qml                        #no comment
 StyledText             StyledText.qml                        #no comment
 TemplateListView             TemplateListView.qml                        #no comment
-main		main.qml			#no comment
