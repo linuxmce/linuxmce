@@ -69,6 +69,10 @@ Item {
             target:manager
             onScreenSaverImagesReady:glScreenSaver.setImageList(manager.screensaverImages)
         }
+        Component.onCompleted: {
+            glScreenSaver.setInterval(30000)
+        }
+
         MouseArea{
             anchors.fill: parent
             hoverEnabled: true
