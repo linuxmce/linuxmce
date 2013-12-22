@@ -296,10 +296,8 @@ Item {
         console.log("Loader Focus::"+pageLoader.activeFocus)
         console.log("Footer Focus::"+ftr.activeFocus)
         console.log("Dceplayer Focus::"+dceplayer.activeFocus)
-
         ftr.currentItem = -1
     }
-
 
     DceScreenSaver{
         id:glScreenSaver
@@ -313,6 +311,11 @@ Item {
             target:manager
             onScreenSaverImagesReady:glScreenSaver.setImageList(manager.screensaverImages)
         }
+        Component.onCompleted: {
+            setInterval(30000)
+            glScreenSaver.setImageList(manager.screensaverImages)
+        }
+
         MouseArea{
             anchors.fill: parent
             hoverEnabled: true
