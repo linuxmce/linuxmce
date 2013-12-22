@@ -1733,14 +1733,23 @@ string Makefile = "none:\n"
 	cout << cmd << endl;
 	system(cmd.c_str());
 
-	// handle dh_strip
-	if (isStrippablePackage(pRow_Package_Source->FK_Package_get()))
-		sed_cmd = "s/^.*dh_strip.*$/\tdh_strip/g";
-	else
-		sed_cmd = "s/^.*dh_strip.*$/\t# dh_strip/g";
-	cmd = string("sed -i '" + sed_cmd + "' " + Dir + "/debian/rules");
-	cout << cmd << endl;
-	system(cmd.c_str());
+//	// handle dh_strip - the old dh_make way
+//	if (isStrippablePackage(pRow_Package_Source->FK_Package_get()))
+//		sed_cmd = "s/^.*dh_strip.*$/\tdh_strip/g";
+//	else
+//		sed_cmd = "s/^.*dh_strip.*$/\t# dh_strip/g";
+//	cmd = string("sed -i '" + sed_cmd + "' " + Dir + "/debian/rules");
+//	cout << cmd << endl;
+//	system(cmd.c_str());
+
+	// handle dh_strip - the new dh_make way
+	if (!isStrippablePackage(pRow_Package_Source->FK_Package_get()))
+	{
+		sed_cmd = "$ a \\\n\\noverride_dh_strip:\\n";
+		cmd = string("sed -i '" + sed_cmd + "' " + Dir + "/debian/rules");
+		cout << cmd << endl;
+		system(cmd.c_str());
+	}
 
 	cout << string(("dpkg-buildpackage -b -rfakeroot -us -uc")) << endl;
 	if (!g_bSimulate)
@@ -2120,14 +2129,23 @@ string Makefile = "none:\n"
 	cout << cmd << endl;
 	system(cmd.c_str());
 
-	// handle dh_strip
-	if (isStrippablePackage(pRow_Package_Source->FK_Package_get()))
-		sed_cmd = "s/^.*dh_strip.*$/\tdh_strip/g";
-	else
-		sed_cmd = "s/^.*dh_strip.*$/\t# dh_strip/g";
-	cmd = string("sed -i '" + sed_cmd + "' " + Dir + "/debian/rules");
-	cout << cmd << endl;
-	system(cmd.c_str());
+//	// handle dh_strip - the old dh_make way
+//	if (isStrippablePackage(pRow_Package_Source->FK_Package_get()))
+//		sed_cmd = "s/^.*dh_strip.*$/\tdh_strip/g";
+//	else
+//		sed_cmd = "s/^.*dh_strip.*$/\t# dh_strip/g";
+//	cmd = string("sed -i '" + sed_cmd + "' " + Dir + "/debian/rules");
+//	cout << cmd << endl;
+//	system(cmd.c_str());
+
+	// handle dh_strip - the new dh_make way
+	if (!isStrippablePackage(pRow_Package_Source->FK_Package_get()))
+	{
+		sed_cmd = "$ a \\\n\\noverride_dh_strip:\\n";
+		cmd = string("sed -i '" + sed_cmd + "' " + Dir + "/debian/rules");
+		cout << cmd << endl;
+		system(cmd.c_str());
+	}
 
 	cout << string(("dpkg-buildpackage -b -rfakeroot -us -uc")) << endl;
 	if (!g_bSimulate)
