@@ -1446,7 +1446,7 @@ bool qorbiterManager::loadSkins(QUrl base)
     qDebug() << localSkins.count();
     qDebug()<<"inside of skins we find" << localSkins.join(",");
     if(localSkins.count()==0){
-        tskinModel->addSkin("default,aeon,stb");
+        tskinModel->addSkin("default,aeon,STB");
     } else {
     tskinModel->addSkin(localSkins.join(","));
     }
