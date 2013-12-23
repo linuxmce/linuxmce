@@ -70,12 +70,13 @@ function import_databases () {
 	get_dbdump pluto_telecom "$dbdump_pluto_telecom"
 	get_dbdump lmce_game "$dbdump_lmce_game"
 
-#	# Run search and replace over the db dumps
-#	DisplayMessage "Running Search'n'Replace on the sqldumps (MakeRelase_PrepFiles)"
-#	export LD_LIBRARY_PATH="$mkr_dir:${svn_dir}/${svn_branch_name}/src/lib"
-#	MakeRelease_PrepFiles="${mkr_dir}/MakeRelease_PrepFiles"
-#	$MakeRelease_PrepFiles -p $(dirname $dbdump_main_sqlcvs) -e "$(basename $dbdump_main_sqlcvs),$(basename $dbdump_myth_sqlcvs),$(basename $dbdump_pluto_media),$(basename $dbdump_pluto_security),$(basename $dbdump_pluto_telecom)" -c /etc/lmce-build/${flavor}.conf
+	# Run search and replace over the db dumps
+	DisplayMessage "Running Search'n'Replace on the sqldumps (MakeRelase_PrepFiles)"
+	export LD_LIBRARY_PATH="$mkr_dir:${svn_dir}/${svn_branch_name}/src/lib"
+	MakeRelease_PrepFiles="${mkr_dir}/MakeRelease_PrepFiles"
+	$MakeRelease_PrepFiles -p $(dirname $dbdump_main_sqlcvs) -e "$(basename $dbdump_main_sqlcvs),$(basename $dbdump_myth_sqlcvs),$(basename $dbdump_pluto_media),$(basename $dbdump_pluto_security),$(basename $dbdump_pluto_telecom)" -c /etc/lmce-build/${flavor}.conf
 
+	
 	# pluto_main_build & pluto_main
 	import_dbdump pluto_main_build "$dbdump_main_sqlcvs"
 	import_dbdump pluto_main "$dbdump_main_sqlcvs"
