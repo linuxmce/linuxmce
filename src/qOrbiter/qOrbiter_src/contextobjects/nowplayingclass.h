@@ -288,8 +288,18 @@ public slots:
         if(!fileImage.isNull()){
             qDebug() << fileImage.width();
             qDebug() << fileImage.height();
+            double mi_aspect;
+            mi_aspect=(fileImage.width() / fileImage.height());
+            if(mi_aspect >= 1 && mi_aspect < 1.5){
+                setImageAspect("cover");
+            }else if (mi_aspect >= 1.5 && mi_aspect < 2){
+                setImageAspect("wide");
+            }else if (mi_aspect > 0 && mi_aspect < 1){
+                setImageAspect("poster");
+            }
+            emit imageChanged();
         }
-        emit imageChanged();
+
     }
     QImage getImage() {return fileImage;}
     /*!
