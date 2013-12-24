@@ -2903,7 +2903,7 @@ function getTopLevelParent($deviceID,$dbADO)
 			$topParent=getTopLevelParent($row['FK_Device_ControlledVia'],$dbADO);
 		}else{
 //			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceTemplate']==$GLOBALS['rootMediaDirectorsID']){
-			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceTemplate']==$GLOBALS['rootMediaDirectorsID'] || $row['FK_DeviceTemplate']==$GLOBALS['rootRPIMediaDirectorsID']){
+			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceTemplate']==$GLOBALS['rootMediaDirectorsID'] || $row['FK_DeviceTemplate']==$GLOBALS['rootRPIMediaDirectorsID'] || $row['FK_DeviceTemplate']==$GLOBALS['rootJogglersID']){
 				$topParent=$deviceID;
 			}else{
 				$topParent=0;

@@ -58,6 +58,7 @@
 	$GLOBALS['BluetoothDongle'] = 13; 			// BluetoothDongle
 	$GLOBALS['rootMediaDirectorsID'] = 28;			// Media Directors
 	$GLOBALS['rootRPIMediaDirectorsID'] = 2216; 		// Raspberry PI Media Directors
+	$GLOBALS['rootJogglersID'] = 2266;				// Jogglers
 	$GLOBALS['SecurityPlugin'] = 33;	 		// Security plugin
 	$GLOBALS['TelecomPlugin'] = 34;	 			// Telecom plugin
 	$GLOBALS['LightSwitchOnOff']=37;			// Light Switch (on/off)
