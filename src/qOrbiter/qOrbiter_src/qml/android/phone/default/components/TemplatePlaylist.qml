@@ -7,7 +7,7 @@ Item {
     clip:true
 
     property double spacetracker: ((phantom_spaceman.x+(manager.appWidth)) / manager.appWidth)
-    Component.onCompleted: mediaplaylist.populate()
+  //  Component.onCompleted: manager.setBoundStatus(true)
     property alias psPos:phantom_spaceman.x
 
 
@@ -15,6 +15,7 @@ Item {
         target: mediaplaylist
         onActiveItemChanged:{
             nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex  , ListView.Beginning)
+             playlist.currentIndex = mediaplaylist.currentIndex
         }
     }
 
@@ -42,8 +43,7 @@ Item {
         model: mediaplaylist
         spacing:scaleX(2)
         delegate:
-            Item
-        {
+            Item{
             width:manager.appWidth-20
             height: scaleY(20)
             clip: true
@@ -93,7 +93,6 @@ Item {
                         phantom_spaceman.x=0
                 }
             }
-
         }
 }
 
