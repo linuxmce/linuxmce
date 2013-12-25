@@ -39,13 +39,14 @@ for skin in $CURRENT_SKIN_PATH/*
 		echo "$QMLDIR_STRING" >> qmldir		
 		
 		else
-		echo "Not a .qml file, skipping"
+		echo $currentFileName " is Not a .qml file, skipping"
 		fi
 	else
-	echo "Not file, needs inspection"
+	echo "$skin is Not file, needs inspection"
 		
 		if [ -d "$skin" ]; then
-		echo "Directory"
+		echo "$skin is directory, processing"
+		
 		cd $skin
 			if [ -e qmldir ];then
 			rm qmldir
@@ -58,12 +59,39 @@ for skin in $CURRENT_SKIN_PATH/*
 			currentSubFile=$(basename "$subFile")
 			currentSubFileType="${currentSubFile##*.}"
         		currentSubFileName="${currentSubFile%.*}"
-			echo $currentSubFileType
+			#echo $currentSubFileType
         			if [[ -f "$subFile" && "$currentSubFileType" != "qmldir" ]]; then
 	                	QMLDIR_STRING="$currentSubFileName             $currentSubFile                        #no comment"
                 		echo "$QMLDIR_STRING" >> qmldir
+#				echo $QMLDIR_STRING
                 		else
-                		echo "Not a file, skipping"
+                		echo " $subFile not a file but likely a skin, processing"
+					if [ -d "$subFile" ]; then
+				                echo "$skin is directory, processing"
+						cd $subFile
+					
+							  if [ -e qmldir ];then
+	        	               				 rm qmldir
+                       						 fi
+               			  		 touch qmldir
+				                 svn add qmldir
+              					 echo "$QMLDIR_HEADING" >> qmldir
+                       			             for embeddedFile in "$subFile"/*
+                       				      do
+				                	 embeddedSubFile=$(basename "$embeddedFile")
+                       				    	 embeddedSubFileType="${embeddedSubFile##*.}"
+                      			             	 embeddedSubFileName="${embeddedSubFile%.*}"
+                       
+                       				        	 if [[ -f "$embeddedFile" && "$embeddedSubFileType" != "qmldir" ]]; then
+			                               		 QMLDIR_STRING="$embeddedSubFileName             $embeddedSubFile                        #no comment"
+                        			       		 echo "$QMLDIR_STRING" >> qmldir
+								#echo $QMLDIR_STRING
+                               					# else
+                               					# echo " $embeddedFile not a file but likely a skin, but this breaks organization and they will not be processed."
+								fi
+							done
+cd ..
+					fi
                 		fi
 			done
 			cd .. 
