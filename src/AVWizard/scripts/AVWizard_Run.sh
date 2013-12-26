@@ -4,6 +4,7 @@
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Utils.sh
 . /usr/pluto/bin/X-Common.sh
+. /usr/pluto/bin/VideoDetectSetup
 
 ###########################################################
 ### Setup global variables
@@ -30,14 +31,6 @@ ConfFile="/etc/X11/xorg.conf"
 UseAlternativeLibs
 #Setup Log file variable
 log_file="/var/log/pluto/AVWizard_Run_$(date +%Y%m%d_%H%M%S).log"
-
-# remove the current xorgs to start clean, and prevent toggling issues.
-#if [[ -f /etc/X11/xorg.conf ]]; then
-#       mv /etc/X11/xorg.conf /etc/X11/backup.xorg.conf
-#fi
-#if [[ -f /etc/X11/xorg.conf.pluto.avwizard ]]; then
-#       rm -f /etc/X11/xorg.conf.pluto.avwizard
-#fi
 
 ###########################################################
 ### Setup Functions - Error checking and logging
@@ -491,7 +484,7 @@ EOL
 echo "$CardNumbers" | while read each; do 
 	DevPath=$(udevadm info -a -p /sys/class/sound/card${each} | grep -wo "/devices.*card${each}")
 	CardType=$(cat /sys/class/sound/card${each}/id)
-	echo "DEVPATH==\"${DevPath}\", ATTR{id}=\"Card_${each} $CardType\"" >> "$AudioRules"
+	echo "DEVPATH==\"${DevPath}\", ATTR{id}=\"Card${each}_${CardType}\"" >> "$AudioRules"
 done
 
 cat <<EOL>> "$AudioRules"
