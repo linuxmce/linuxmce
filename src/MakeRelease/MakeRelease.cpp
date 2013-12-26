@@ -1230,22 +1230,22 @@ AsksSourceQuests:
 		}
 
 		// Replace the <=version=> in all the files
-		cout << "Deciding to do snr on: " << sSourceDirectory << endl;
-		if( !g_bSimulate && pRow_Package->FK_Package_Sourcecode_get()!=446 ) // Don't do the snr on MakeRelease itself
-		{
-			list<string> listFiles;
-			FileUtils::FindFiles(listFiles,sSourceDirectory,"*.cpp\t*.c\t*.h\t*.cs\tlogin.php",true);
-			cout << "Found " << (int) listFiles.size() << endl;
-			for(list<string>::iterator it=listFiles.begin();it!=listFiles.end();++it)
-			{
-				cout << "Doing snr on " << sSourceDirectory << "/" << *it << endl;
-				StringUtils::Replace(sSourceDirectory + "/" + *it,sSourceDirectory + "/" + *it,"<=version=>",g_pRow_Version->VersionName_get());
-				StringUtils::Replace(sSourceDirectory + "/" + *it,sSourceDirectory + "/" + *it, "<=compile_date=>", g_sCompile_Date );
-				StringUtils::Replace(sSourceDirectory + "/" + *it,sSourceDirectory + "/" + *it, "/*SVN_REVISION*/", "int g_SvnRevision=" + StringUtils::itos(g_iSVNRevision) + ";" );
-				if( g_sReplacePluto.size() )
-					StringUtils::Replace(sSourceDirectory + "/" + *it,sSourceDirectory + "/" + *it, "Pluto", g_sReplacePluto );
-			}
-		}
+//		cout << "Deciding to do snr on: " << sSourceDirectory << endl;
+//		if( !g_bSimulate && pRow_Package->FK_Package_Sourcecode_get()!=446 ) // Don't do the snr on MakeRelease itself
+//		{
+//			list<string> listFiles;
+//			FileUtils::FindFiles(listFiles,sSourceDirectory,"*.cpp\t*.c\t*.h\t*.cs\tlogin.php",true);
+//			cout << "Found " << (int) listFiles.size() << endl;
+//			for(list<string>::iterator it=listFiles.begin();it!=listFiles.end();++it)
+//			{
+//				cout << "Doing snr on " << sSourceDirectory << "/" << *it << endl;
+//				StringUtils::Replace(sSourceDirectory + "/" + *it,sSourceDirectory + "/" + *it,"<=version=>",g_pRow_Version->VersionName_get());
+//				StringUtils::Replace(sSourceDirectory + "/" + *it,sSourceDirectory + "/" + *it, "<=compile_date=>", g_sCompile_Date );
+//				StringUtils::Replace(sSourceDirectory + "/" + *it,sSourceDirectory + "/" + *it, "/*SVN_REVISION*/", "int g_SvnRevision=" + StringUtils::itos(g_iSVNRevision) + ";" );
+//				if( g_sReplacePluto.size() )
+//					StringUtils::Replace(sSourceDirectory + "/" + *it,sSourceDirectory + "/" + *it, "Pluto", g_sReplacePluto );
+//			}
+//		}
 		// Now we've got to run the make file
 		for(size_t s=0;s<vectRow_Package_Directory_File.size();++s)
 		{
@@ -1647,7 +1647,6 @@ string Makefile = "none:\n"
 		+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_Mirrors_CONST)
 		+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_Security_CONST)
 		+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_LinuxMCE_Addons_CONST)
-		+ "," + StringUtils::itos(REPOSITORYSOURCE_Medibuntu_CONST)
 		+ "," + StringUtils::itos(REPOSITORYSOURCE_Slimdevices_CONST)
 		+ ")",
 		&vect_pRow_Package_Source_Dependencies);
@@ -2016,7 +2015,6 @@ string Makefile = "none:\n"
 //		+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_Mirrors_CONST)
 //		+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_Security_CONST)
 //		+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_LinuxMCE_Addons_CONST)
-//		+ "," + StringUtils::itos(REPOSITORYSOURCE_Medibuntu_CONST)
 //		+ "," + StringUtils::itos(REPOSITORYSOURCE_Slimdevices_CONST)
 //		+ ")",
 //		&vect_pRow_Package_Source_Dependencies);
@@ -2030,7 +2028,6 @@ string Makefile = "none:\n"
 //					+ "," + StringUtils::itos(REPOSITORYSOURCE_MythTV_CONST)
 //					+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_Mirrors_CONST)
 //					+ "," + StringUtils::itos(REPOSITORYSOURCE_Ubuntu_LinuxMCE_Addons_CONST)
-//					+ "," + StringUtils::itos(REPOSITORYSOURCE_Medibuntu_CONST)
 //					+ "," + StringUtils::itos(REPOSITORYSOURCE_Slimdevices_CONST)
 //					+ ")",
 //				&vect_pRow_Package_Source_Dependencies);
