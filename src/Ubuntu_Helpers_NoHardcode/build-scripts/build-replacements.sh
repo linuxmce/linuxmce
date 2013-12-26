@@ -14,7 +14,7 @@ function Changed_Since_Last_Build
 	return $(/bin/true) #Zaerc HACK
 
 	local fs_path="$1"
-	DisplayMessage "Checking for changes '$fs_path'"
+	DisplayMessage "Checking build stamp on '$fs_path'"
 	local cache_file="${replacements_dir}/${cache_name}"
 	local url_id=$(svn info "$fs_path" | grep '^URL: ' | cut -d' ' -f2 | md5sum | cut -d' ' -f1)
 	local revision_new=$(svn info $fs_path | grep '^Revision: ' | cut -d' ' -f2)
@@ -29,10 +29,10 @@ function Changed_Since_Last_Build
 
 function Update_Changed_Since_Last_Build
 {
-	return $(/bin/true)
+#	return $(/bin/true)
 
         local fs_path="$1"
-        DisplayMessage "Updating change for '$fs_path'"
+        DisplayMessage "Updating build stamp for '$fs_path'"
         local cache_file="${replacements_dir}/${cache_name}"
         local url_id=$(svn info "$fs_path" | grep '^URL: ' | cut -d' ' -f2 | md5sum | cut -d' ' -f1)
         local revision_new=$(svn info $fs_path | grep '^Revision: ' | cut -d' ' -f2)
@@ -328,18 +328,26 @@ function Build_Replacements_Precise
 
 	# lmce-asterisk
 	Build_Replacement_Package lmce-asterisk src/lmce-asterisk
-        cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir}
+	cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir}
+
 	# qOrbiter doesn't have compatibility record yet.
-	Build_Replacement_Package qorbiter src/qOrbiter
-        cp ${svn_dir}/${svn_branch_name}/src/qorbiter*.deb ${replacements_dir}
-        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1
+	#Build_Replacement_Package qorbiter src/qOrbiter
+	#cp ${svn_dir}/${svn_branch_name}/src/qorbiter*.deb ${replacements_dir}
+
 	#Package: zaptel-modules
+        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1
 
 	Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2
 
 	# Open ZWave library
 	Build_Replacement_Package libopenzwave1.0 external/open-zwave
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb
+
+	Build_Replacement_Package libhupnp-core external/hupnp/hupnp
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-core*.deb
+
+	Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
 }
 
 function Build_Replacements_Intrepid
