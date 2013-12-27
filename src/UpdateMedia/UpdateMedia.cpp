@@ -69,7 +69,9 @@ or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more detai
 
 #include "FileStatusObserver.h"
 
-#define  VERSION "<=version=>"
+#define EXTERN_REVISION_DATE
+#include "version.h"
+
 //#define  USE_DEVEL_DATABASES 
 
 using namespace std;

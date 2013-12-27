@@ -94,7 +94,7 @@ static HEAP_ALLOC(wrkmem,LZO1X_1_MEM_COMPRESS);
 
 DCEConfig g_DCEConfig;
 
-#define  VERSION "<=version=>"
+#include "version.h"
 
 
 static bool LocationComparer(LocationInfo *x, LocationInfo *y)

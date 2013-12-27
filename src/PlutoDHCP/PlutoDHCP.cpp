@@ -52,7 +52,8 @@
 
 #include "BD/PhoneDevice.h"
 
-#define  VERSION "<=version=>" 
+#define EXTERN_REVISION_DATE
+#include "version.h"
 
 using namespace std;
 using namespace DCE;

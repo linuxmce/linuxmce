@@ -52,7 +52,8 @@
 #include "pluto_main/Define_CommandParameter.h"
 #include "DCEConfig.h"
 
-#define  VERSION "<=version=>"
+#define EXTERN_REVISION_DATE
+#include "version.h"
 
 // must be extern as the same is defined in Main.cpp 
 extern DCEConfig dceConfig;

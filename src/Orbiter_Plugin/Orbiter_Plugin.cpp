@@ -29,6 +29,9 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#define EXTERN_REVISION_DATE
+#include "version.h"
+
 #include <sstream>
 
 #include "PlutoUtils/ProcessUtils.h"
@@ -86,7 +89,6 @@ using namespace DCE;
 #include <cctype>
 #include <algorithm>
 
-#define VERSION "<=version=>"
 string g_sLatestMobilePhoneVersion="2006.11.09";
 
 #include "../Media_Plugin/EntertainArea.h"

@@ -40,7 +40,7 @@
 
 #endif
 
-#define  VERSION "<=version=>"
+#include "version.h"
 
 using namespace std;
 using namespace DCE;

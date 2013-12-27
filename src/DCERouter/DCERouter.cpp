@@ -84,7 +84,8 @@ using namespace std;
 using namespace DCE;
 extern DCEConfig g_DCEConfig;
 
-#define  VERSION "<=version=>"
+#define EXTERN_REVISION_DATE
+#include "version.h"
 
 #define	 SERIALIZE_MESSAGE_FILE		"/var/PersistentDceMessages"
 

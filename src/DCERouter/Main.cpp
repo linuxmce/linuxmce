@@ -49,9 +49,7 @@ Usage: Router [-i installation] [-d device] [-h hostname]
 #include "../pluto_main/Table_DeviceData.h"
 #include "../pluto_main/Table_DesignObj.h"
 
-#define  VERSION "<=version=>"
-const char *g_szCompile_Date="<=compile_date=>";
-/*SVN_REVISION*/
+#include "version.h"
 
 using namespace DCE;
 

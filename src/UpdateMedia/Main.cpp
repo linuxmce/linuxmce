@@ -56,7 +56,7 @@
 #include "pluto_main/Define_Command.h"
 #include "pluto_main/Define_DeviceTemplate.h"
 
-#define  VERSION "<=version=>"
+#include "version.h"
 
 using namespace std;
 using namespace DCE;

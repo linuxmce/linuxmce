@@ -45,7 +45,7 @@
 #include "../pluto_main/Table_Users.h"
 #include "../pluto_main/Table_Package.h"
 
-#define  VERSION "<=version=>"
+#include "version.h"
 
 #ifdef WIN32
 #define EOL "\r\n"
