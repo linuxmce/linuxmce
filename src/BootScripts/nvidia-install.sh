@@ -148,7 +148,7 @@ installCorrectNvidiaDriver() {
 		Installed="1"
 		tmpfile=$( /bin/mktemp -t )
 		if [[ -n "$current_driver" ]]; then
-			apt-get -y remove "$currrent_driver" --force-yes
+			apt-get -y remove "$current_driver" --force-yes
 		fi
 
 		if [[ "$preferred_driver" == "nvidia-current" ]]; then
