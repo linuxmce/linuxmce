@@ -2,10 +2,10 @@ import QtQuick 1.1
 
 Item {
     anchors{
-        top:parent.top
-        left:parent.left
-        right:parent.right
-        bottom: parent.bottom
+        top:pageLoader.top
+        left:pageLoader.left
+        right:pageLoader.right
+        bottom: pageLoader.bottom
     }
 
     Rectangle{

@@ -30,7 +30,7 @@ Item{
     Rectangle{
         anchors.fill: parent
         opacity:ftr.activeFocus ? 1 : .65
-        color:appStyle.mainColor
+        color:appStyle.primaryLightColor
         border.width: ftr.activeFocus ? 2 : 0
         border.color:  "red"
     }
@@ -38,7 +38,11 @@ Item{
     ListView{
         id:scenarioList
         height: parent.height / 2
-        width: parent.width
+        anchors{
+            top:parent.top
+            left:parent.left
+            right:parent.right
+        }
         spacing:scaleX(1)
         orientation: ListView.Horizontal
         onActiveFocusChanged:{
@@ -81,11 +85,16 @@ Item{
                 }
 
             }
-
+            Rectangle{
+                anchors.fill: parent
+                gradient: appStyle.buttonGradient
+                radius:5
+            }
             Rectangle{
                 anchors.fill: parent
                 radius:5
-                color: currentItem===index ? appStyle.lightHighlightColor : appStyle.darkHighlightColor
+                opacity: .75
+                color: currentItem===index ? appStyle.complimentColorLight : appStyle.darkHighlightColor
             }
             StyledText{
                 anchors.centerIn: parent
@@ -171,7 +180,7 @@ Item{
                             if(submodel.currentIndex === index && submodel.model !==advancedMenu){
                                 manager.execGrp(params)
                             }else{
-                               // console.log(submodel.model[index].params)
+                                // console.log(submodel.model[index].params)
                                 if(submodel.currentIndex!==index){
                                     //console.log(advancedMenu.get(index).params)
                                     return;
@@ -191,7 +200,7 @@ Item{
                                     manager.gotoQScreen("Screen_44.qml")
                                     break;
                                 case 7:
-                                     manager.exitApp()
+                                    manager.exitApp()
                                     break;
                                 default:
                                     console.log(params)
@@ -255,23 +264,27 @@ Item{
     }
     FocusRow{
         id:metarow
-        height: parent.height/3
-        width: parent.width
-        anchors.bottom: parent.bottom
+        height: parent.height/2
+        anchors{
+            top:scenarioList.bottom
+            right:parent.right
+            left:parent.left
+            bottom:parent.bottom
+            topMargin: 5
+        }
+
         Keys.onUpPressed: scenarioList.forceActiveFocus()
 
         FocusButton{
             text:manager.sPK_User
             fontSize: 22
-            height: parent.height
-
-
+            height: parent.height -5
         }
 
         FocusButton{
             text:roomList.currentRoom+"::"+roomList.currentEA
             fontSize: 22
-            height: parent.height
+            height: parent.height -5
             width:textObj.paintedWidth
             onSelect:{ overLay.source = "RoomSelector.qml"; ftr.state = "hidden" }
 
@@ -279,8 +292,12 @@ Item{
     }
     Clock{
         id:timekeeper
-        anchors.top: metarow.top
-        anchors.right: metarow.right
+        anchors{
+            top:metarow.top
+            bottom: metarow.bottom
+            right:metarow.right
+        }
+
     }
 
     Keys.onTabPressed:swapFocus()

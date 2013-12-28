@@ -51,7 +51,7 @@ Item{
         id:alrtGradient
         GradientStop{
             position: 0.0
-            color:"white"
+            color:"black"
         }
         GradientStop{
             position: 0.5

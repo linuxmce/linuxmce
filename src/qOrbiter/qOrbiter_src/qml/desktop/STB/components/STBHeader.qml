@@ -11,7 +11,7 @@ Item{
     property bool isActive: activeFocus
     Rectangle{
         anchors.fill: parent
-        color:appStyle.mainColor
+        color:appStyle.primaryLightColor
         border.width: hdr.activeFocus ? 2 : 0
         focus:false
         border.color:"red"
@@ -24,7 +24,7 @@ Item{
         spacing: 5
         StyledText {
             id: name
-            text: "Orbiter "+ manager.m_dwPK_Device + " is connected to "+ manager.m_ipAddress
+            text: "Orbiter "+ manager.m_dwPK_Device + " is connected "
             fontSize: mediumText
             color: "white"
         }

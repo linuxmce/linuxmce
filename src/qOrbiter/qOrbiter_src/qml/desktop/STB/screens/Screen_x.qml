@@ -1,18 +1,17 @@
 import QtQuick 1.1
 import "../components"
-Item {
-    anchors.fill: parent
-
+StyledScreen {
 
     Item{
         width: parent.width *.85
         height: parent.height *.65
         anchors.centerIn: parent
+
         Rectangle{
             id:hdr
             height: parent.height/3
             gradient: appStyle.alertGradient
-
+            radius:5
             anchors{
                 left:parent.left
                 right:parent.right
@@ -21,10 +20,12 @@ Item {
         }
         Rectangle{
             id:content
+
             anchors{
                 left:parent.left
                 right:parent.right
                 top:hdr.bottom
+                topMargin: -20
                 bottom: parent.bottom
             }
             gradient:appStyle.contentGradient

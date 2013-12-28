@@ -14,7 +14,11 @@ Item{
     property alias fontSize:label.fontSize
     property alias textObj:label
     onActiveFocusChanged: console.log( text+ " active focus is " + activeFocus)
-
+    Rectangle{
+        anchors.fill: parent
+        gradient: appStyle.buttonGradient
+        radius:5
+    }
     Rectangle{
         anchors.fill: parent
         color:"black"
@@ -43,5 +47,14 @@ Item{
         if(hasParentModel)
             parent.selectItem()
         else select()
+    }
+    MouseArea{
+        anchors.fill: parent
+        onClicked: {
+            if(hasParentModel)
+                parent.selectItem
+            else
+                select()
+        }
     }
 }

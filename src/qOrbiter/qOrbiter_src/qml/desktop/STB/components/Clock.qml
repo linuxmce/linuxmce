@@ -1,11 +1,10 @@
 import QtQuick 1.1
 Item {
-    height: parent.height
-    width: parent.width/3
+width: txtDate.width
     property bool verticalMirror: false
     function getDate(){
         var d = new Date();
-        return Qt.formatDateTime(d, "dddd ,MMMM d| hh:mm ");
+        return Qt.formatDateTime(d, "dddd ,MMMM d -- hh:mm:ss ");
     }
     Timer { // Update the clock element periodically
         interval: 5; running: true; repeat: true
