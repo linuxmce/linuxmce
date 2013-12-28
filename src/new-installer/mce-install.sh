@@ -887,7 +887,7 @@ CreateFirstBoot () {
 	}
 
 	VideoDriver () {
-		. /usr/pluto/bin/Utils.sh
+		. /usr/pluto/bin/VideoDetectSetup
 		CheckVideoDriver
 	}
 
