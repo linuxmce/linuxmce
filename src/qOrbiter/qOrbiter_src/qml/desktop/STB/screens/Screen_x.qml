@@ -1,13 +1,45 @@
 import QtQuick 1.1
-
+import "../components"
 Item {
-    width: scaleX(100)
-    height: scaleY(100)
+    anchors.fill: parent
 
-    Text {
-        id: name
-        text: qsTr("Page Not Found")
-        font.pointSize: 32
+
+    Item{
+        width: parent.width *.85
+        height: parent.height *.65
         anchors.centerIn: parent
+        Rectangle{
+            id:hdr
+            height: parent.height/3
+            gradient: appStyle.alertGradient
+
+            anchors{
+                left:parent.left
+                right:parent.right
+                top:parent.top
+            }
+        }
+        Rectangle{
+            id:content
+            anchors{
+                left:parent.left
+                right:parent.right
+                top:hdr.bottom
+                bottom: parent.bottom
+            }
+            gradient:appStyle.contentGradient
+
+            StyledText {
+                id: name
+                text: manager.currentScreen + qsTr(" is  Not Found. Please tell Langston to get it together already.")
+                font.pointSize: 32
+                font.bold: true
+                anchors.centerIn: parent
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                width: content.width
+            }
+        }
+
     }
+
 }

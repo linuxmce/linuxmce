@@ -167,12 +167,31 @@ Item{
                     Connections{
                         target:scenarioParent
                         onPressed:{
-                            if(submodel.currentIndex === index && submodel.model !==advancedMenu)
+
+                            if(submodel.currentIndex === index && submodel.model !==advancedMenu){
                                 manager.execGrp(params)
-                            else{
+                            }else{
+                               // console.log(submodel.model[index].params)
+                                if(submodel.currentIndex!==index){
+                                    //console.log(advancedMenu.get(index).params)
+                                    return;
+
+                                }
                                 switch(params){
+                                case 1:
+                                    manager.quickReload()
+                                    break;
+                                case 2:
+                                    manager.regenOrbiter(manager.m_dwPK_Device)
+                                    break;
+                                case 3:
+                                    console.log("Show Power!")
+                                    break;
+                                case 5:
+                                    manager.gotoQScreen("Screen_44.qml")
+                                    break;
                                 case 7:
-                                    manager.exitApp()
+                                     manager.exitApp()
                                     break;
                                 default:
                                     console.log(params)
@@ -183,7 +202,7 @@ Item{
                     }
                     MouseArea{
                         anchors.fill: parent
-                        onReleased:{
+                        onClicked:{
 
                             if(submodel.model !==advancedMenu)
                             {
@@ -194,6 +213,18 @@ Item{
                             }
                             else{
                                 switch(params){
+                                case 1:
+                                    manager.quickReload()
+                                    break;
+                                case 2:
+                                    manager.regenOrbiter(manager.m_dwPK_Device)
+                                    break;
+                                case 3:
+                                    console.log("Show Power!")
+                                    break;
+                                case 5:
+                                    manager.gotoQScreen("Screen_44.qml")
+                                    break;
                                 case 7:
                                     manager.exitApp()
                                     break;
@@ -250,7 +281,6 @@ Item{
         id:timekeeper
         anchors.top: metarow.top
         anchors.right: metarow.right
-
     }
 
     Keys.onTabPressed:swapFocus()

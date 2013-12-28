@@ -45,6 +45,32 @@ Item{
             color:"black"
         }
     }
+
+    property variant alertGradient:alrtGradient
+    Gradient{
+        id:alrtGradient
+        GradientStop{
+            position: 0.0
+            color:"white"
+        }
+        GradientStop{
+            position: 0.5
+            color:"red"
+        }
+    }
+
+    property variant contentGradient:cntGradient
+    Gradient{
+        id:cntGradient
+        GradientStop{
+            position: 0.0
+            color:"white"
+        }
+        GradientStop{
+            position: 0.5
+            color:"grey"
+        }
+    }
     /* Animation Properties */
     property int globalAnimationSpeed:750
     property int globalAnimationEasing:Easing.InOutQuad
@@ -60,6 +86,14 @@ Item{
 
     property color lighttext: "slategrey"
 
+    property color primaryLightColor:"#2F67B6"
+    property color primaryDarkColor:"#264E90"
+
+    property color secondaryLightColor:"#5056A1"
+    property color secondaryDarkColor:"#313579"
+
+    property color complimentColorLight:"#FAC23D"
+    property color complimentColorDark:"#CB670E"
 
     property int homescreenrowheight:100
     property int homescreenbuttonheight: 90

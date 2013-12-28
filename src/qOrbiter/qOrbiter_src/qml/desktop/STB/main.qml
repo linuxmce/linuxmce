@@ -463,13 +463,23 @@ Item {
         }
     }
 
+    STBHeader {
+        id: hdr
 
+    }
 
     Loader {
         id:pageLoader
         objectName: "loadbot"
         onSourceChanged:  loadin
         focus:true
+        anchors{
+            top:hdr.top
+            left:parent.left
+            bottom:ftr.top
+            right:parent.right
+        }
+
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
             pageLoader.forceActiveFocus()
@@ -497,10 +507,7 @@ Item {
 
 
 
-    STBHeader {
-        id: hdr
 
-    }
     STBFooter {
         id: ftr
     }
