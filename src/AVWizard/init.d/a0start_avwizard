@@ -16,7 +16,7 @@
 CheckAVWizard () {
 	log_daemon_msg "Starting AVWizard" "AVWizard_Run.sh"
 
-	. /usr/pluto/bin/Utils.sh
+. /usr/pluto/bin/VideoDetectSetup
 
 	if [[ "1" == "$AVWizardOverride" || "1" != "$AVWizardDone" ]] && [[ "1" == "$AutostartMedia" ]] ;then
 		## Install driver based on the type of video card used
