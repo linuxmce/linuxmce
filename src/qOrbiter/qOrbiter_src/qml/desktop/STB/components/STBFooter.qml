@@ -143,6 +143,10 @@ Item{
                     width: parent.width
                     Rectangle{
                         anchors.fill: parent
+                        gradient: appStyle.buttonGradient
+                    }
+                    Rectangle{
+                        anchors.fill: parent
                         radius:5
                         clip: true
                         color:submodel.currentIndex === index ? "darkgrey" : "black"
@@ -170,6 +174,9 @@ Item{
                                 case 7:
                                     manager.exitApp()
                                     break;
+                                default:
+                                    console.log(params)
+                                    break;
                                 }
                             }
                         }
@@ -189,6 +196,9 @@ Item{
                                 switch(params){
                                 case 7:
                                     manager.exitApp()
+                                    break;
+                                default:
+                                    console.log(params)
                                     break;
                                 }
                             }
