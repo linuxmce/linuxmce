@@ -17,10 +17,10 @@ Item{
     property alias style: stbStyle
 
     function scaleX(x){
-    return x/100*appW
+        return x/100*appW
     }
     function scaleY(y){
-    return y/100*appH
+        return y/100*appH
     }
 
     //skin description
@@ -33,6 +33,18 @@ Item{
     property string maincolor: "Black"
     property string accentcolor: "white"
 
+    property variant buttonGradient:btnGradient
+    Gradient{
+        id:btnGradient
+        GradientStop{
+            position: 0.0
+            color:"transparent"
+        }
+        GradientStop{
+            position: 0.5
+            color:"black"
+        }
+    }
     /* Animation Properties */
     property int globalAnimationSpeed:750
     property int globalAnimationEasing:Easing.InOutQuad
