@@ -8,7 +8,8 @@ Item{
     height:scaleY(14)
     anchors.top: parent.bottom
     property bool isActive: false
-    onActiveFocusChanged:{ if(activeFocus){
+    onActiveFocusChanged:{
+        if(activeFocus){
             scenarioList.forceActiveFocus()
             ftr.state="showing"
             console.log("showing state")
@@ -18,13 +19,17 @@ Item{
         else{
             currentItem = -1
             ftr.state = "hidden"
-            pageLoader.item.focus = true
         }
     }
     Component.onCompleted: ftr.state = "hidden"
 
     property int currentItem: -1
+    Connections{
+        target: manager
+        onRoomChanged:{
 
+        }
+    }
     Rectangle{
         anchors.fill: parent
         opacity:ftr.activeFocus ? 1 : .65
@@ -33,14 +38,30 @@ Item{
         border.color:  "red"
     }
 
+    Item{
+        id:npOptions
+        width: (dcenowplaying.b_mediaPlaying || dceplayer.mediaPlaying) ? scaleX(8) :0
+        anchors{
+            top:parent.top
+            bottom:parent.bottom
+            margins: 5
+            left:parent.left
+        }
+        GradientFiller {
+            opacity: .75
+        }
+    }
+
     ListView{
         id:scenarioList
         height: parent.height / 2
         anchors{
             top:parent.top
-            left:parent.left
+            left:npOptions.right
             right:parent.right
+            margins: 5
         }
+        property int itemWidth:(scenarioList.width)/6
         spacing:scaleX(1)
         orientation: ListView.Horizontal
         onActiveFocusChanged:{
@@ -57,7 +78,7 @@ Item{
         delegate: Item{
             id:scenarioParent
             height: parent.height
-            width: scaleX(18)
+            width:scenarioList.itemWidth
             onActiveFocusChanged: {
                 if(activeFocus){
                     currentItem= index
@@ -97,7 +118,7 @@ Item{
             StyledText{
                 anchors.centerIn: parent
                 text:name
-                font.pixelSize: 32
+                font.pixelSize:headerText
                 font.bold: true
                 font.capitalization: Font.SmallCaps
             }
@@ -147,7 +168,7 @@ Item{
                 delegate: Item{
                     rotation: 180
                     height:label.paintedHeight
-                    width: parent.width
+                    width: scenarioList.itemWidth
                     Rectangle{
                         anchors.fill: parent
                         gradient: appStyle.buttonGradient
@@ -183,7 +204,6 @@ Item{
                                 if(submodel.currentIndex!==index){
                                     //console.log(advancedMenu.get(index).params)
                                     return;
-
                                 }
                                 switch(params){
                                 case 1:
@@ -267,9 +287,9 @@ Item{
         anchors{
             top:scenarioList.bottom
             right:parent.right
-            left:parent.left
+            left:npOptions.right
             bottom:parent.bottom
-            topMargin: 5
+           margins: 5
         }
 
         Keys.onUpPressed: scenarioList.forceActiveFocus()
@@ -277,13 +297,13 @@ Item{
         FocusButton{
             text:manager.sPK_User
             fontSize: 22
-            height: parent.height -5
+            height: parent.height
         }
 
         FocusButton{
             text:roomList.currentRoom+"::"+roomList.currentEA
             fontSize: 22
-            height: parent.height -5
+            height: parent.height
             width:textObj.paintedWidth
             onSelect:{ overLay.source = "RoomSelector.qml"; ftr.state = "hidden" }
 

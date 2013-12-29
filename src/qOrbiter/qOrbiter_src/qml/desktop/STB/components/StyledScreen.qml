@@ -14,4 +14,22 @@ Item {
         opacity: .25
     }
 
+    MouseArea{
+        anchors.fill: parent
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: {
+            if(mouse.button===Qt.LeftButton){
+                if(pageLoader.activeFocus){
+                     ftr.forceActiveFocus()
+                }
+
+            } else if (mouse.button===Qt.RightButton){
+                if(ftr.isActive){
+                     pageLoader.forceActiveFocus()
+                }
+
+            }
+        }
+    }
+
 }

@@ -1,9 +1,8 @@
 import QtQuick 1.1
 import "../components"
-Item {
+StyledScreen {
     id:screen1
-    height: manager.appHeight
-    width: manager.appWidth
+
 
     Component.onCompleted: {
         manager.setBoundStatus(true)
@@ -19,10 +18,6 @@ Item {
         onScreenTypeChanged:manager.gotoQScreen(dcenowplaying.qs_screen)
     }
 
-    Rectangle{
-        anchors.fill: parent
-        color:"black"
-        opacity: parent.activeFocus ? .65 : .25
-    }
+
 
 }

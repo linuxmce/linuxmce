@@ -110,6 +110,17 @@ Item {
                 fontSize: headerText
             }
 
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    if(!parent.expanded){
+                        manager.setActiveRoom(innerList.model[0].room, innerList.model[0].ea_number);
+                        manager.setBoundStatus(true)
+                        close()
+                    }
+                }
+            }
+
             ListView{
                 id:innerList
                 height: scaleY(25)
@@ -158,11 +169,21 @@ Item {
                         if(event.key === Qt.Key_Enter || event.key === Qt.Key_Return){
                             manager.setActiveRoom(innerList.model[index].room, innerList.model[index].ea_number);
                             manager.setBoundStatus(true)
-
                             close()
                         }
                         else{
                             console.log(event.key)
+                        }
+                    }
+
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: {
+                            if(!parent.expanded){
+                                manager.setActiveRoom(innerList.model[index].room, innerList.model[index].ea_number);
+                                manager.setBoundStatus(true)
+                                close()
+                            }
                         }
                     }
                 }

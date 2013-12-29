@@ -55,6 +55,15 @@ Item {
         }
     }
 
+    function showMenu(yay){
+        if(yay){
+            pageLoader.focus=false
+        } else {
+            pageLoader.forceActiveFocus()
+        }
+
+    }
+
     Component.onCompleted: {
         dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
     }
@@ -172,11 +181,8 @@ Item {
             if(source !== ""){
                 z=10
                 overLay.forceActiveFocus()
-            }
-            else
-            {
+            } else {
                 z=0
-
             }
 
             if(overLay.status === Component.Ready){
@@ -469,6 +475,7 @@ Item {
         id:pageLoader
         objectName: "loadbot"
         onSourceChanged:  loadin
+        property bool isActive:item.activeFocus
         focus:true
         anchors{
             top:hdr.top
@@ -485,13 +492,18 @@ Item {
         onActiveFocusChanged: {
             if(activeFocus)
             {  console.log("Pageloader gained active focus");   }
-            else
-            { console.log("Page loader lost active focus");   }
+            else if (pageLoader.item.activeFocus){
+                 console.log("Pageloader content gained active focus");
+            }
+            else{
+                console.log("Page loader lost active focus ::"+ pageLoader.activeFocus);
+            }
         }
+        onIsActiveChanged: console.log("New pageloader content focus is "+isActive)
+
         Keys.onTabPressed:{
             console.log("Tab Focus Swap.")
             ftr.forceActiveFocus()
-            pageLoader.focus = false;
         }
         Keys.onPressed: {
             if(event.key === Qt.Key_M){
