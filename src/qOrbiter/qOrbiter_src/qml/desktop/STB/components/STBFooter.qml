@@ -19,13 +19,11 @@ Item{
             currentItem = -1
             ftr.state = "hidden"
             pageLoader.item.focus = true
-
         }
     }
     Component.onCompleted: ftr.state = "hidden"
 
     property int currentItem: -1
-
 
     Rectangle{
         anchors.fill: parent
@@ -153,6 +151,7 @@ Item{
                     Rectangle{
                         anchors.fill: parent
                         gradient: appStyle.buttonGradient
+                        radius:5
                     }
                     Rectangle{
                         anchors.fill: parent

@@ -48,7 +48,7 @@ QHash<int, QByteArray> PlaylistClass::roleNames() const
 void PlaylistClass::appendRow( PlaylistItemClass *item)
 {
     appendRows(QList<PlaylistItemClass*>() << new PlaylistItemClass(item->name(), item->path(), item->index()));
-    setCurrentIndex(item->index());
+  //  setCurrentIndex(item->index());
 #ifdef QT5
 QCoreApplication::processEvents(QEventLoop::AllEvents);
 #endif
@@ -61,8 +61,7 @@ QCoreApplication::processEvents(QEventLoop::AllEvents);
 }
 //the purpose of this function is to first clear the existing playlist data out, and add the new data in due to the way the dce router send the updated playlist to us
 void PlaylistClass::populate()
-{
-//    qDebug("Playlist Clearing");
+{    qDebug("Playlist Clearing");
     emit modelAboutToBeReset();
     beginResetModel();
     if(resetInternalData()){
@@ -76,6 +75,9 @@ void PlaylistClass::populate()
 
 void PlaylistClass::appendRows(const QList<PlaylistItemClass *> &items)
 {
+    if(m_list.size() == totalSize){
+        return;
+    }
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(PlaylistItemClass *item, items) {
 
@@ -203,6 +205,7 @@ void PlaylistClass::setCurrentIndex(int i)
       populate();
   }
   else{
+      qDebug() << " No Change in playlist size.";
       emit activeItemChanged();
   }
 
@@ -260,7 +263,7 @@ bool PlaylistClass::resetInternalData()
         pItem->destruct();
         counter++;
     }
-    qDebug() << counter << "::Items cleared. Remaining Count:: "<< m_list.size();
+    qDebug() << counter << ":: Playlist Items cleared. Remaining Count:: "<< m_list.size();
 
     return true;
 }

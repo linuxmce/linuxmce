@@ -1,6 +1,7 @@
 import QtQuick 1.1
 import "../components"
 StyledScreen {
+    Component.onCompleted: failTimeout.start()
 
     Item{
         width: parent.width *.85
@@ -41,6 +42,12 @@ StyledScreen {
             }
         }
 
+    }
+
+    Timer{
+        id:failTimeout
+        interval: 5000
+        onTriggered: manager.goBacktoQScreen()
     }
 
 }

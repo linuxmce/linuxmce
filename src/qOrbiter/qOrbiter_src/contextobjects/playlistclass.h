@@ -67,11 +67,12 @@ signals:
     void modelAboutToBeReset();
     void modelReset();
     void currentPositionChanged();
+    void totalSizeChanged();
 
 public slots:
     bool checkDupe(QString name, int position);
     void setItemStatus(int b);
-    void setDceSize(int d){totalSize=d;}
+    void setDceSize(int d){totalSize=d;emit totalSizeChanged();}
     int count() {return m_list.count();}
 
     void setCurrentIndex(int i);

@@ -10,6 +10,7 @@ NowPlayingClass::NowPlayingClass(QDeclarativeItem *parent) :
 {
     b_mediaPlaying = false;   
     fileImage.load("qrc:/icons/icon.png");
+    resetData();
 }
 
 void NowPlayingClass::resetData()
@@ -34,6 +35,8 @@ void NowPlayingClass::resetData()
     setStreamID(0);
     setProgram("");
     setRelease("");
+  //  setImageAspectRatio(0.0);
+    setImageAspect("");
 //    setImage(QImage());
 //    setStreamImage(QImage());
 

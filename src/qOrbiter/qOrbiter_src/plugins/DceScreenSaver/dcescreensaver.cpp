@@ -1,9 +1,7 @@
 #include "dcescreensaver.h"
 #ifdef QT5
 #include <qqml.h>
-#include <QSGSimpleRectNode>
-#include <QSGSimpleTextureNode>
-#include <qquickwindow.h>
+#include <QPainter>
 #else
 #include <qdeclarative.h>
 #include <QPainter>
@@ -20,8 +18,8 @@
 const int animationInterval = 30; // should be 60fps
 
 #ifdef QT5
-DceScreenSaver::DceScreenSaver(QQuickItem *parent):
-    QQuickItem(parent)
+DceScreenSaver::DceScreenSaver(QQuickPaintedItem *parent):
+    QQuickPaintedItem(parent)
   #else
 DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     QDeclarativeItem(parent)
@@ -183,25 +181,24 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
 #endif
 
 #ifdef QT5
+void DceScreenSaver::paint(QPainter *painter  )
+{
 
-QSGNode * DceScreenSaver::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *d){
-    Q_UNUSED(d);
-    QSGTexture *tex;
 
-    tex = this->window()->createTextureFromImage(currentImage.toImage());
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen(Qt::NoPen);
 
-    if(!node){
-        node = new QSGSimpleTextureNode;
-        static_cast<QSGSimpleTextureNode*>(node)->setFiltering(QSGTexture::Nearest);
-    }
+    painter->setRenderHint(QPainter::HighQualityAntialiasing, 1);
 
-    static_cast<QSGSimpleTextureNode*>(node)->setRect(boundingRect());
-    Q_ASSERT(tex);
-    tex->setFiltering(QSGTexture::Nearest);
-    static_cast<QSGSimpleTextureNode*>(node)->setTexture(tex);
-    qDebug()<<"updatePaintNode() returning node";
 
-    return node;
+    //draw old frame first
+    QRectF tgtRect(0,0,width(), height());
+    QSize scaledSize;
+    scaledSize.setHeight(height()*currentScale);
+    scaledSize.setWidth(width()*currentScale);
+
+    painter->drawPixmap(tgtRect, surface, tgtRect);
+    painter->drawPixmap(tgtRect, currentImage, tgtRect);
 }
 #endif
 

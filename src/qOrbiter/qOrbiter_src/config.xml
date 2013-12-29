@@ -7,12 +7,12 @@
 <externalhost id=""/>
 <device id="-1"/>
 <routeraddress id=""/>
-<skin id="default"/>
+<skin id="STB"/>
 <qt5skin id="default"/>
 <enablescreensavermode id="false"/>
 <defaultview id="flat"/>
 <phone id="1"/>
 <mobile_storage id=""/>
-<networkload id="true" />
+<networkload id="false" />
 <debug id="false"/>
 </orbiter>

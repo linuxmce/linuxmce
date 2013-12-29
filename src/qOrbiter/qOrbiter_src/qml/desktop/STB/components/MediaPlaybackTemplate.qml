@@ -2,92 +2,95 @@ import QtQuick 1.1
 import "../../../skins-common/lib/handlers"
 Item {
     id:template
-    height: scaleY(100)
-    width: scaleX(100)
+    state:dceplayer.mediaPlaying ? "hidden" : "info"
+    anchors{
+        top:pageLoader.top
+        left:pageLoader.left
+        right:pageLoader.right
+        bottom:pageLoader.bottom
+    }
     focus:true
     onActiveFocusChanged: {
         if(activeFocus){
-            console.log("Template recieved active focus")
-            console.log(dcenowplaying.qs_screen)
+            console.log("Media Playback Template recieved active focus for context screen "+manager.currentScreen)
+            // console.log(dcenowplaying.qs_screen)
             playlist.forceActiveFocus()
-        }
-    }
-
-    Item{
-        id:mediaInformation
-        height: imageholder.height *.95
-        width:  manager.appWidth
-        anchors.centerIn: template
-        clip:false
-        Rectangle{
-            id:phil
-            color: skinStyle.mainColor
-            height: parent.height
-            width: playlist.state === "showing" ? (appW) : 0
-            x: playlist.state === "showing"? 0: imageholder.x
-            clip:false
-            opacity: playlist.state === "showing" ? .95 : 0
-
-            Behavior on x {
-                PropertyAnimation{
-                    duration: 750                   
-                }
-            }
-
-            Loader{
-                id:textCol
-                source:"Metadata"+manager.i_current_mediaType+".qml"
-                visible:playlist.state === "showing"
-            }
-
-            Row{
-                id:temporalData
-                height: childrenRect.height
-                width: childrenRect.width
-                anchors.bottom: parent.bottom
-                anchors.right: parent.right
-                anchors.rightMargin: scaleX(15)
-                visible: playlist.state === "showing"
-                spacing:scaleX(2)
-                StyledText {
-                    id: updating_time
-                    text: dceTimecode.qsCurrentTime
-                    fontSize:32
-                    color:"white"
-                }
-
-                StyledText {
-                    text: qsTr("Of")
-                    fontSize:32
-                    color:"white"
-                    font.bold: true
-                }
-
-                StyledText {
-                    id: totalTime
-                    text: dceTimecode.qsTotalTime
-                    fontSize:32
-                    color:"white"
-                }
-            }
+            dceTimecode.restart()
         }
     }
 
     NowPlayingImage {
         id: imageholder
         anchors.top: parent.top
-        anchors.topMargin: scaleY(20)
+        anchors.topMargin: scaleY(9)
         anchors.right: parent.right
         anchors.rightMargin: scaleX(15)
     }
 
+    Item{
+        id:mediaInformation
+        width:parent.width/2
+        anchors{
+            top:imageholder.bottom
+            bottom:parent.bottom
+        }
+        Rectangle{
+            color: "black"
+            opacity: .85
+            anchors.fill: parent
+        }
+
+        Row{
+            id:temporalData
+            anchors{
+                top:mediaInformation.top
+                left:mediaInformation.left
+                right:mediaInformation.right
+            }
+            height:totalTime.height
+            visible: template.state === "info"
+            spacing:scaleX(2)
+
+            StyledText {
+                id: updating_time
+                text: dceTimecode.qsCurrentTime
+                fontSize:32
+                color:"white"
+            }
+
+            StyledText {
+                text: qsTr("Of")
+                fontSize:32
+                color:"white"
+                font.bold: true
+            }
+
+            StyledText {
+                id: totalTime
+                text: dceTimecode.qsTotalTime
+                fontSize:32
+                color:"white"
+            }
+        }
+
+        Loader{
+            id:textCol
+            anchors{
+                top:temporalData.bottom
+                left: parent.left
+                right:parent.right
+                bottom:parent.bottom
+            }
+            source:"Metadata"+manager.i_current_mediaType+".qml"
+            visible:template.state === "info"
+        }
+        clip:false
+    }
 
     Keys.onVolumeDownPressed: manager.adjustVolume("-1")
     Keys.onVolumeUpPressed:  manager.adjustVolume("+1")
 
-
     Keys.onPressed: {
-
         switch(event.key){
         case Qt.Key_Back:
             manager.changedPlaylistPosition((mediaplaylist.currentIndex-1));
@@ -109,10 +112,10 @@ Item {
             manager.adjustVolume(-1)
             break;
         case Qt.Key_T:
-            if(playlist.state==="showing")
-                playlist.state="hidden"
+            if(template.state==="info")
+                template.state="hidden"
             else
-                playlist.state = "showing"
+                template.state = "info"
             break;
 
         case Qt.Key_S:
@@ -120,7 +123,7 @@ Item {
             break;
 
         case Qt.Key_Pause:
-                manager.pauseMedia()
+            manager.pauseMedia()
             break;
         case Qt.Key_P:
             manager.pauseMedia()
@@ -131,7 +134,7 @@ Item {
             break;
 
         case Qt.Key_PageDown:
-             manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
+            manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
             break;
         default:
             console.log(event.key)
@@ -145,20 +148,8 @@ Item {
 
     states: [
         State {
-            name: "video_playback"
-            when:manager.i_current_mediaType === 5
-            PropertyChanges {
-                target: playlist
-                state:"hidden"
-            }
-            PropertyChanges {
-                target: imageholder
-                visible:true
-            }
+            name: "info"
 
-        }, State {
-            when:manager.i_current_mediaType === 4
-            name: "audio_playback"
             PropertyChanges {
                 target: playlist
                 state:"showing"
@@ -166,6 +157,28 @@ Item {
             PropertyChanges {
                 target: imageholder
                 visible:true
+            }
+            AnchorChanges{
+                target: mediaInformation
+                anchors.left:undefined
+                anchors.right:template.right
+
+            }
+
+        }, State {
+            name: "hidden"
+            PropertyChanges {
+                target: playlist
+                state:"hidden"
+            }
+            PropertyChanges {
+                target: imageholder
+                visible:false
+            }
+            AnchorChanges{
+                target: mediaInformation
+                anchors.right:undefined
+                anchors.left:template.right
             }
 
         }

@@ -354,7 +354,7 @@ Item {
 
         onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
         onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
-        onMediaPlayingChanged: console.log("Media Playback status changed locally "+dceplayer.mediaBuffer)
+        onMediaPlayingChanged: console.log("Media Playback status changed locally to "+dceplayer.mediaPlaying)
         onVolumeChanged:console.log(volume)
         Keys.onVolumeDownPressed: manager.adjustVolume("-1")
         Keys.onVolumeUpPressed:  manager.adjustVolume("+1")

@@ -3015,14 +3015,9 @@ void DCE::qOrbiter::requestMediaPlaylist()
             QString fk_file;
             int index = 0;
 
-            if(mediaPlaylistSize == pDataGridTable->GetRows()){
-                qDebug() << "Playlist length the same, not re grabbing";
-            } else {
-                setPlaylistSize(pDataGridTable->GetRows());
-            }
+            setPlaylistSize(pDataGridTable->GetRows());
 
-            for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
-            {
+            for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it){
 
                 DataGridCell *pCell;
                 pCell = it->second;
@@ -3043,7 +3038,6 @@ void DCE::qOrbiter::requestMediaPlaylist()
                 // msleep(10);
 #endif
                 index++;
-
             }
 
 
@@ -3053,8 +3047,6 @@ void DCE::qOrbiter::requestMediaPlaylist()
             delete []pData; pData=NULL;
             pDataGridTable=NULL;
         }
-
-
     }
     else
     {
@@ -3724,7 +3716,6 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             fk_file = pCell->GetValue();
 
             cellTitle = QString::fromUtf8(pCell->m_Text);
-
 
 
             //            if(fk_file.contains("!A"))

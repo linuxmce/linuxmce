@@ -15,7 +15,7 @@
 
 class DceScreenSaver :
         #ifdef QT5
-        public QQuickItem
+        public QQuickPaintedItem
         #else
         public QDeclarativeItem
         #endif
@@ -34,7 +34,7 @@ class DceScreenSaver :
 
 public:
 #ifdef QT5
-    DceScreenSaver(QQuickItem *parent=0);
+    DceScreenSaver(QQuickPaintedItem *parent=0);
 #else
     DceScreenSaver(QDeclarativeItem *parent = 0);
 #endif
@@ -151,9 +151,7 @@ protected:
 #ifdef QT4
     void paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget );
 #elif QT5
-
-
-    QSGNode* updatePaintNode(QSGNode *node, UpdatePaintNodeData*d) ;
+   void paint(QPainter *painter);
 #endif
     void timerEvent(QTimerEvent *event);
 

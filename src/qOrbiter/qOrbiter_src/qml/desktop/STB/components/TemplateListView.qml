@@ -93,7 +93,8 @@ ListView{
             }
             StateChangeScript{
                 script: {
-                    playlist.forceActiveFocus()
+                    playlist.forceActiveFocus();
+                    mediaplaylist.populate()
                 }
             }
         }

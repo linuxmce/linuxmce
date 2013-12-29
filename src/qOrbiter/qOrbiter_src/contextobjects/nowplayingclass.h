@@ -123,7 +123,7 @@ class NowPlayingClass : public QDeclarativeItem
     Q_PROPERTY(QString synop READ getSynop WRITE setSynop NOTIFY synopChanged)/*!< \brief The current media synopsis. \ingroup now_playing*/
     Q_PROPERTY (QString director READ getDirector WRITE setDirector NOTIFY directorChanged)/*!< \brief The director. \ingroup now_playing*/
     Q_PROPERTY(QString releasedate READ getRelease WRITE setRelease NOTIFY rlsChanged)/*!< \brief Release date. \ingroup now_playing*/
-
+    Q_PROPERTY(double imageAspectRatio READ getImageAspectRatio WRITE setImageAspectRatio NOTIFY imageAspectRatioChanged)
     Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged ) /*!< \brief Aspect ratio \todo Change now playing aspect to enum. \ingroup now_playing*/
 public:
 #if (QT5)
@@ -178,6 +178,8 @@ public:
     QString aspect;
     QString filename;
     QString path;
+    double imageAspectRatio;
+
 
 signals:
     //general signals
@@ -195,6 +197,7 @@ signals:
     void titleChanged2();
     void mediaTypeChanged();
     void mediaStatusChanged();
+    void imageAspectRatioChanged();
 
     void pathChanged();
     void filePathChanged();
@@ -248,6 +251,9 @@ public slots:
         emit storageDeviceChanged();
     }
 
+    void setImageAspectRatio(float r){ imageAspectRatio = r; emit imageAspectRatioChanged(); qDebug() << "Aspect Ratio" << imageAspectRatio;}
+    double getImageAspectRatio(){ return imageAspectRatio;}
+
     inline QString getFilename() {return filename;}
     inline void setFilename (QString f) {filename = f; emit fileNameChanged();}
 
@@ -275,7 +281,7 @@ public slots:
         if( t.loadFromData(b))
         {
             setImage(t);
-            emit statusMessage("Now Playing Class::Set Cover Art");
+            emit statusMessage("Now Playing Class::Set Cover Art!");
         }
         else
         {
@@ -285,11 +291,14 @@ public slots:
 
     void setImage(QImage img) {
         fileImage = img;
+
         if(!fileImage.isNull()){
-            qDebug() << fileImage.width();
-            qDebug() << fileImage.height();
-            double mi_aspect;
-            mi_aspect=(fileImage.width() / fileImage.height());
+
+            double mi_aspect=((double)fileImage.width() / (double)fileImage.height());
+            qDebug() << fileImage.width() << "w x "<< fileImage.height()<<"h.";
+            qDebug() <<((double)fileImage.width() / (double)fileImage.height());
+            setImageAspectRatio((double)mi_aspect);
+            emit statusMessage("Set aspect ratio! ");
             if(mi_aspect >= 1 && mi_aspect < 1.5){
                 setImageAspect("cover");
             }else if (mi_aspect >= 1.5 && mi_aspect < 2){
