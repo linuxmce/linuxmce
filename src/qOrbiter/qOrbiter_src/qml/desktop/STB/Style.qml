@@ -55,7 +55,7 @@ Item{
         }
         GradientStop{
             position: 0.5
-            color:"red"
+            color:lightHighlightColor
         }
     }
 
@@ -164,5 +164,8 @@ Item{
     //stage
     property color stage_bg: "darkgrey"
     property color bgcolor: "black"
+
+    //headers
+    property int  stdHdrHeight: scaleY(8)
 
 }

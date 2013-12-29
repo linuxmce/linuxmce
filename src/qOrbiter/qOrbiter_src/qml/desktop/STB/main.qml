@@ -21,6 +21,7 @@ Item {
     height:manager.appHeight
     //focus:true
     signal close()
+    signal showMetaData()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
     property string locationinfo: "standby"
@@ -160,6 +161,13 @@ Item {
     Loader{
         id:overLay
         source: ""
+        anchors{
+            top:parent.top
+            left:parent.left
+            right:parent.right
+            bottom:parent.bottom
+        }
+
         onSourceChanged: {
             if(source !== ""){
                 z=10
@@ -277,30 +285,26 @@ Item {
         if(hdr.activeFocus)
         { console.log("Header had focus, set to page loader.")
             pageLoader.forceActiveFocus()
-        }
-        else if (pageLoader.activeFocus)
-        {
+        }else if (pageLoader.activeFocus){
             console.log("Pageloader had, sending to footer menu.")
             ftr.forceActiveFocus()
-        }
-        else if(ftr.activeFocus)
-        {
+        }else if(ftr.activeFocus){
             console.log("Footer Had focus, sending to video plane.")
             dceplayer.forceActiveFocus()
-        }
-        else if(dceplayer.activeFocus)
-        {   console.log("Player had focus, sending to header.")
+        }else if(dceplayer.activeFocus){
+            console.log("Player had focus, sending to header.")
             hdr.forceActiveFocus()
-        }
-        else
+        }else {
             pageLoader.forceActiveFocus()
-
+        }
 
         console.log("Header Focus::"+hdr.activeFocus)
         console.log("Loader Focus::"+pageLoader.activeFocus)
         console.log("Footer Focus::"+ftr.activeFocus)
         console.log("Dceplayer Focus::"+dceplayer.activeFocus)
-
+        if(dceplayer.mediaPlaying && pageLoader.activeFocus){
+            dceplayer.forceActiveFocus()
+        }
         ftr.currentItem = -1
     }
 
@@ -321,7 +325,6 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             onPressed:if(glScreenSaver.activeFocus) hideUI()
-
         }
 
     }
@@ -330,12 +333,13 @@ Item {
         id:dceplayer
         anchors.top: parent.top
         anchors.left:parent.left
-
-        onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
+        flipColors: true
+        focus:true
+       // onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
         onActiveFocusChanged: {
             if(activeFocus){
                 console.log("Media Player has focus")
-                pageLoader.forceActiveFocus()
+              //  pageLoader.forceActiveFocus()
             }
         }
 
@@ -378,26 +382,21 @@ Item {
             case Qt.Key_Plus: /*Plus sign */
                 manager.adjustVolume(+1)
                 break;
-
             case Qt.Key_VolumeMute:
                 manager.mute()
                 break;
-
             case Qt.Key_M:
                 manager.mute()
                 break;
-
             case Qt.Key_Minus: /* Minus Sign */
                 manager.adjustVolume(-1)
                 break;
             case Qt.Key_T:
-                if(playlist.state==="showing")
-                    playlist.state="hidden"
-                else
-                    playlist.state = "showing"
-
+                showMetaData()
                 break;
-
+            case Qt.Key_Tab:
+                swapFocus()
+                break;
             case Qt.Key_S:
                 manager.stopMedia()
                 break;
@@ -435,7 +434,6 @@ Item {
             onTriggered: vIndicator.opacity=0
         }
 
-
         Rectangle{
             anchors.fill: parent
             color:"black"
@@ -465,7 +463,6 @@ Item {
 
     STBHeader {
         id: hdr
-
     }
 
     Loader {
@@ -483,8 +480,8 @@ Item {
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
             pageLoader.forceActiveFocus()
-
         }
+
         onActiveFocusChanged: {
             if(activeFocus)
             {  console.log("Pageloader gained active focus");   }
@@ -504,9 +501,6 @@ Item {
             }
         }
     }
-
-
-
 
     STBFooter {
         id: ftr

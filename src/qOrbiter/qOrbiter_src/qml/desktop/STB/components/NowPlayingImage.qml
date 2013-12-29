@@ -3,11 +3,10 @@ import Qt.labs.shaders 1.0
 import "../components"
 import "../../../skins-common/lib/effects"
 
-Rectangle{
+Item{
     id:imageholder
     height: playlist.state==="showing" ? childrenRect.height : 0
-    width: playlist.state === "showing" ? scaleX(30) :0
-    color: "transparent"
+    width: playlist.state === "showing" ? scaleX(30) :0   
     Connections{
         target: dcenowplaying
         onImageChanged: refreshtimer.restart()
@@ -36,7 +35,7 @@ Rectangle{
         id: nowplayingimage
         width: dcenowplaying.aspect=="wide"? scaleX(30) : scaleX(25)
         height:dcenowplaying.aspect=="wide"? scaleY(43) : scaleY(45)
-        fillMode: Image.PreserveAspectFit
+        fillMode: Image.PreserveAspectCrop
         source: "image://listprovider/updateobject/"+securityvideo.timestamp
         anchors.horizontalCenter: parent.horizontalCenter
         smooth: true

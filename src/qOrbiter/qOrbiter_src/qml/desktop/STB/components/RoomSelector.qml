@@ -2,8 +2,13 @@ import QtQuick 1.1
 
 Item {
     id:roomSelector
-    width: manager.appWidth
-    height: manager.appHeight
+    anchors{
+        top:overLay.top
+        left:overLay.left
+        right:overLay.right
+        bottom:overLay.bottom
+    }
+
     onActiveFocusChanged: if(activeFocus) room_list.forceActiveFocus()
     focus:true
     Keys.onEscapePressed: close()
@@ -20,6 +25,8 @@ Item {
         westWing.opacity = .85
     }
 
+
+
     Rectangle{
         id:westWing
         height: roomSelector.height
@@ -34,29 +41,73 @@ Item {
         }
     }
 
+    Item{
+        id:roomSelectorHdr
+        anchors{
+            left:parent.left
+            right:parent.right
+            top:parent.top
+        }
+        height: appStyle.stdHdrHeight
+        Rectangle{
+            anchors.fill: parent
+            color: appStyle.primaryLightColor
+        }
+        StyledText{
+            anchors.centerIn: parent
+            color: "white"
+            text:"Please Select a new room"
+            fontSize: headerText
+        }
+    }
+
     ListView{
         id:room_list
-        height: scaleY(85)
-        width: parent.width
+        anchors{
+            top:roomSelectorHdr.bottom
+            left: parent.left
+            right:parent.right
+            bottom:parent.bottom
+        }
+        clip:true
         model: roomList
         delegate: Item{
+            id:itm
             height: scaleY(25)
             width:parent.width
-            onActiveFocusChanged: {
-                if(activeFocus){
-                    innerList.forceActiveFocus()
-                    console.log("Room List Item Parent index ==>"+index+ " gained focus, setting to child model view.")
-                   }
+            property bool expanded:ea_list.length > 1 ? true : false
+            Rectangle{
+                anchors.fill: parent
+                gradient: appStyle.buttonGradient
+                color: "grey"
+                border.color: "white"
+                border.width: index === room_list.currentIndex ? 2 : 0
+            }
+            Keys.onPressed:{
+
+                if(event.key=== Qt.Key_Enter || event.key=== Qt.Key_Return){
+                    manager.setActiveRoom(innerList.model[0].room, innerList.model[0].ea_number);
+                    manager.setBoundStatus(true)
+                    event.accepted=true
+                    overLay.source=""
+                }
             }
 
+            onActiveFocusChanged: {
+                if(activeFocus && expanded){
+                    innerList.forceActiveFocus()
+                    console.log("Room List Item Parent index ==>"+index+ " gained focus, setting to child model view.")
+                }
+            }
             StyledText{
                 id:rm_lbl
                 height: scaleY(16)
-                width: scaleX(18)
-                anchors.left: parent.left
+                width:scaleX(18)
+                anchors.left:itm.expanded ?  parent.left : parent.horizontalCenter
                 font.bold:index === room_list.currentIndex
                 text: name
                 color:"white"
+                fontSize: headerText
             }
 
             ListView{
@@ -64,7 +115,7 @@ Item {
                 height: scaleY(25)
                 width:parent.width
                 anchors.left: rm_lbl.right
-
+                visible: parent.expanded
                 model:ea_list
                 onActiveFocusChanged: {
                     if(activeFocus){
@@ -83,6 +134,11 @@ Item {
                 delegate:Item{
                     height: scaleY(16)
                     width: scaleX(18)
+                    Rectangle{
+                        anchors.fill: parent
+                        gradient: appStyle.buttonGradient
+                    }
+
                     Rectangle{
                         anchors.fill: parent
                         color: index === innerList.currentIndex ? skinStyle.mainColor : "grey"
@@ -112,12 +168,6 @@ Item {
                 }
             }
         }
-
-
-
-
     }
-
-
 
 }
