@@ -6,6 +6,7 @@ FilterButton             FilterButton.qml                        #no comment
 FloorplanDisplay             FloorplanDisplay.qml                        #no comment
 FocusButton             FocusButton.qml                        #no comment
 FocusRow             FocusRow.qml                        #no comment
+GradientFiller             GradientFiller.qml                        #no comment
 ListDisplay             ListDisplay.qml                        #no comment
 MediaListGridDelagate             MediaListGridDelagate.qml                        #no comment
 MediaPlaybackTemplate             MediaPlaybackTemplate.qml                        #no comment
