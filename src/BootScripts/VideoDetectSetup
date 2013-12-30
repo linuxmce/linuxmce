@@ -124,7 +124,6 @@ InstallVideoDriver () {
 		# nVidia cards
 		nvidia)
 			if ! PackageIsInstalled nvidia-173 && ! PackageIsInstalled nvidia-current; then 
-				apt-get -yf install pluto-nvidia-video-drivers
 				VerifyExitCode "Install Pluto nVidia Driver"
 				nv_pid=$(pidof nvidia-install.sh)
 				if [[ -n $nv_pid ]] ; then
