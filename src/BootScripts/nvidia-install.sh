@@ -145,42 +145,13 @@ installCorrectNvidiaDriver() {
 	if [[ "$markUp" == "1" ]]; then
 		echo "installing NEW driver $preferred_driver!"
 		Log "$LogFile" "installing NEW driver $preferred_driver!"
-		Installed="1"
 		tmpfile=$( /bin/mktemp -t )
-		if [[ -n "$current_driver" ]]; then
-			apt-get -y remove "$current_driver" --force-yes
-		fi
 
 		if [[ "$preferred_driver" == "nvidia-current" ]]; then
 			apt-get install -yf "$preferred_driver" 2> >(tee "$tmpfile")
 			local param="reboot"
 		fi
 
-		CountErr="0"
-		if [[ "$?" > "0" ]] ; then
-			ERROR=$( cat $tmpfile )
-			Installed="0"
-			echo ""
-			echo -e "\e[1;31mUnable to install $preferred_driver!\e[0m"
-			echo -e "\e[1;31mRefer to the above message, which is also logged to $LogFile.\e[0m"
-			echo ""
-			Log "$LogFile" "Unable to install driver:"
-			Log "$LogFile" "$ERROR"
-			apt-get remove -yf "$preferred_driver"
-			dpkg --configure -a
-			beep -l 100 -f 500 -d 50 -r 3
-			sleep 10
-			CountErr=$(($CountErr + 1))
-			/etc/init.d/networking restart
-			apt-get update
-			apt-get install -yf "$preferred_driver" 2> >(tee "$tmpfile")
-			if [[ "$CountErr" == "3" ]]; then
-				ErrorMessage "Cannot install after 3 tries. Giving up"
-				local param="reboot"
-				return
-			fi
-		fi
-		rm "$tmpfile"
 	else
 		echo "Preferred driver $preferred_driver already installed."
 		Log "$LogFile" "Preferred driver $preferred_driver already installed."
@@ -196,7 +167,7 @@ installCorrectNvidiaDriver() {
 	Log "$LogFile" "== End NVidia driver installation ($(date)) =="
 
 	# Reboot only if requested and a new driver was installed
-	if [[ "$param" == "reboot" && "$Installed" == "1" ]];then
+	if [[ "$param" == "reboot" ]];then
 	#if [[ "$Installed" == "1" ]]; then
 		# Give the user a warning message and beep, then reboot
 		echo ""
