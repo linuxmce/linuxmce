@@ -281,7 +281,7 @@ Setup_AsoundConf()
 			;;
 	esac
 
-	if [[ "$AlternateSC" -ne "2" && ! "$AudioSetting" == "S" ]]; then
+	if [[ "$AlternateSC" -ne "2" && "$AudioSetting" != "S" ]]; then
 		SoundCard="${HWOnlyCard},${CardDevice}"
 	fi
 
