@@ -103,7 +103,7 @@ Item {
         }
     }
 
-    ListModel{
+  ListModel{
         id:advancedMenu
 
         ListElement{
@@ -478,10 +478,10 @@ Item {
         property bool isActive:item.activeFocus
         focus:true
         anchors{
-            top:hdr.top
-            left:parent.left
+            top:hdr.bottom
+            left:qmlroot.left
             bottom:ftr.top
-            right:parent.right
+            right:qmlroot.right
         }
 
         onLoaded: {

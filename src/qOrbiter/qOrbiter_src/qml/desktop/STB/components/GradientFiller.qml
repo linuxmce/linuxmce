@@ -13,7 +13,7 @@ Item{
     Rectangle{
         anchors.fill: parent
         color: fillColor
-        radius:5
+        radius:grpRadius
         opacity:parent.opacity
     }
 }

@@ -19,9 +19,120 @@ Item {
         }
     }
 
+    Item{
+        id:infoHdr
+        anchors.top: template.top
+        anchors.right: parent.right
+        anchors.left: parent.left
+        height: scaleY(8)
+        anchors.rightMargin: appStyle.margins
+        anchors.leftMargin: appStyle.margins
+
+        Rectangle{
+            id:titleRect
+            color:appStyle.primaryLightColor
+            anchors{
+                margins: 5
+                top:parent.top
+                bottom:parent.bottom
+            }
+            GradientFiller{
+                opacity: .65
+                fillColor:"black"
+            }
+
+            radius: 2
+            width: scaleX(35)
+            StyledText{
+                id:titleData
+                text: dcenowplaying.qs_mainTitle
+                anchors.centerIn: parent
+                fontSize: headerText
+                color: "white"
+                width:parent.width
+                elide:Text.ElideRight
+            }
+        }
+        Rectangle{
+            id:subTitleRect
+            color:appStyle.primaryLightColor
+            anchors{
+                margins: 5
+                top:parent.top
+                bottom:parent.bottom
+                left:titleRect.right
+            }
+            GradientFiller{
+                opacity: .65
+                fillColor:"black"
+            }
+
+            radius: 2
+            width: scaleX(35)
+            StyledText{
+                id:subTitleData
+                text: dcenowplaying.qs_subTitle
+                anchors.centerIn: parent
+                fontSize: headerText
+                color: "white"
+                width:parent.width
+                elide:Text.ElideRight
+            }
+        }
+        Rectangle{
+            id:temporalRect
+             color:appStyle.primaryLightColor
+            anchors{
+                margins: 5
+                top:parent.top
+                bottom:parent.bottom
+                right:parent.right
+                left:subTitleRect.right
+            }
+            width: scaleX(20)
+            GradientFiller{
+                opacity: .75
+                fillColor:"black"
+            }
+            Row{
+                id:temporalData
+                anchors{
+                    top:parent.top
+                    left:parent.left
+                    right:parent.right
+                }
+                height:totalTime.height
+                width: parent.width
+                spacing:scaleX(2)
+
+                StyledText {
+                    id: updating_time
+                    text: dceTimecode.qsCurrentTime
+                    fontSize:32
+                    color:"white"
+
+                }
+
+                StyledText {
+                    text: qsTr("Of")
+                    fontSize:32
+                    color:"white"
+                    font.bold: true
+                }
+
+                StyledText {
+                    id: totalTime
+                    text: dceTimecode.qsTotalTime
+                    fontSize:32
+                    color:"white"
+                }
+            }
+        }
+    }
+
     NowPlayingImage {
         id: imageholder
-        anchors.top: parent.top
+        anchors.top: infoHdr.bottom
         anchors.topMargin: scaleY(9)
         anchors.right: parent.right
         anchors.rightMargin: scaleX(15)
@@ -30,6 +141,7 @@ Item {
     Item{
         id:mediaInformation
         width:parent.width/2
+        visible:false
         anchors{
             top:imageholder.bottom
             bottom:parent.bottom
@@ -40,50 +152,17 @@ Item {
             anchors.fill: parent
         }
 
-        Row{
-            id:temporalData
-            anchors{
-                top:mediaInformation.top
-                left:mediaInformation.left
-                right:mediaInformation.right
-            }
-            height:totalTime.height
-            visible: template.state === "info"
-            spacing:scaleX(2)
-
-            StyledText {
-                id: updating_time
-                text: dceTimecode.qsCurrentTime
-                fontSize:32
-                color:"white"
-            }
-
-            StyledText {
-                text: qsTr("Of")
-                fontSize:32
-                color:"white"
-                font.bold: true
-            }
-
-            StyledText {
-                id: totalTime
-                text: dceTimecode.qsTotalTime
-                fontSize:32
-                color:"white"
-            }
-        }
-
-        Loader{
-            id:textCol
-            anchors{
-                top:temporalData.bottom
-                left: parent.left
-                right:parent.right
-                bottom:parent.bottom
-            }
-            source:"Metadata"+manager.i_current_mediaType+".qml"
-            visible:template.state === "info"
-        }
+        //        Loader{
+        //            id:textCol
+        //            anchors{
+        //                top:temporalData.bottom
+        //                left: parent.left
+        //                right:parent.right
+        //                bottom:parent.bottom
+        //            }
+        //            source:"Metadata"+manager.i_current_mediaType+".qml"
+        //            visible:template.state === "info"
+        //        }
         clip:false
     }
 
@@ -158,6 +237,10 @@ Item {
                 target: imageholder
                 visible:true
             }
+            PropertyChanges {
+                target: infoHdr
+                visible:true
+            }
             AnchorChanges{
                 target: mediaInformation
                 anchors.left:undefined
@@ -173,6 +256,10 @@ Item {
             }
             PropertyChanges {
                 target: imageholder
+                visible:false
+            }
+            PropertyChanges {
+                target: infoHdr
                 visible:false
             }
             AnchorChanges{

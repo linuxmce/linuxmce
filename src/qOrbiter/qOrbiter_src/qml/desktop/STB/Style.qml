@@ -76,6 +76,8 @@ Item{
     property int globalAnimationEasing:Easing.InOutQuad
     /* End Animation Properties */
 
+    property int margins:5
+
     property int orbiterH: 600
     property int orbiterW: 800
 

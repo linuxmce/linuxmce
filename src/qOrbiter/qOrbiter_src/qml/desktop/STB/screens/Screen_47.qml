@@ -1,9 +1,8 @@
 import QtQuick 1.1
 import "../components"
-Item {
+StyledScreen {
     id:screen_forty_seven_of_nine
-    height: scaleY(100)
-    width: scaleX(100)
+
     state: "browsing"
     property int depth:0
 
@@ -28,6 +27,8 @@ Item {
         }
     }
 
+
+
     MediaListGridDelagate {
         id: contactDelegate
         visible: false
@@ -35,13 +36,18 @@ Item {
 
     GridView{
         id:mediaList
-        height: parent.height - scaleY(15)
-        width: parent.width
+
+        anchors{
+            top:parent.top
+            left:parent.left
+            right:parent.right
+            bottom:filtering.top
+        }
+
         cellHeight: contactDelegate.height
         cellWidth: contactDelegate.width
-        contentHeight: scaleY(24)
-        contentWidth: scaleX(25)
-        anchors.top: parent.top
+        contentHeight: mediaList.height
+        contentWidth: mediaList.width
         model: dataModel
         focus:true
         clip:true
@@ -215,10 +221,10 @@ Item {
             rowindex: 4
             onActiveFocusChanged: if(activeFocus) {filter_view.currentFilterModel = "" }
             Keys.onEnterPressed: {
-                  manager.playMedia("!G"+iPK_Device)
+                manager.playMedia("!G"+iPK_Device)
             }
             Keys.onReturnPressed: {
-                  manager.playMedia("!G"+iPK_Device)
+                manager.playMedia("!G"+iPK_Device)
             }
 
             Keys.onPressed: {

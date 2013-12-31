@@ -4,8 +4,10 @@ import "../../../skins-common/lib/components"
 
 Item{
     id:hdr
-    anchors.bottom: parent.top
-    width: qmlroot.width
+    anchors{
+        left:qmlroot.left
+        right:qmlroot.right
+    }
     height:scaleY(8)
     state:"hidden"
     property bool isActive: activeFocus
@@ -19,22 +21,19 @@ Item{
     }
 
     Row{
-        height: parent.height
-        width: parent.width
+        anchors{
+            top:parent.top
+            bottom:parent.bottom
+            left:parent.left
+            right:parent.right
+            margins: appStyle.margins
+        }
         spacing: 5
         StyledText {
             id: name
             text: "Orbiter "+ manager.m_dwPK_Device + " is connected "
             fontSize: mediumText
             color: "white"
-        }
-        
-        StyledText{
-            id:timecodeDisplay
-            text:dceTimecode.qsCurrentTime
-            visible: dcenowplaying.b_mediaPlaying
-            color:"white"
-            fontSize: headerText
         }
     }
 
