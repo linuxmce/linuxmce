@@ -234,9 +234,11 @@ Setup_AsoundConf()
 			PlaybackPCM="spdif_playback"
 			;; 
 		*H*)
+			ManID=$(grep "card $HWOnlyCard" <<< "$Yalpa" | grep -Eio '(nvidia|intel)' | head -1 |  tr '[:upper:]' '[:lower:]')
+
 			CardDevice=$(grep -i "hdmi" <<< "$Yalpa" | grep -wo "device ." | awk '{print $2}')
 				case "$ManID" in 
-  					*8086) 
+  					intel) 
 						if [[ $(wc -l <<< "$CardDevice") -gt "1" ]]; then 
 							ELDDevice=$(grep -l "eld_valid.*1" /proc/asound/card${SoundCard}/eld* | sort -u | head -1) 
 								case "$ELDDevice" in 
@@ -252,7 +254,7 @@ Setup_AsoundConf()
 										CardDevice="3" ;; 
 								esac 
 						fi ;; 
-					*10de) 
+					nvidia) 
 						if [[ $(wc -l <<< "$CardDevice") -gt "3" ]]; then 
 							ELDDevice=$(grep -l "eld_valid.*1" /proc/asound/card${SoundCard}/eld* | sort -u | head -1) 
 								case "$ELDDevice" in 
