@@ -686,7 +686,7 @@ Create_Diskless_Tar () {
 	StatsMessage "Creating the compressed tar image file, this could take up to 1 hour depending on your system..."
 	mkdir -p "$ARCHIVE_DIR"
 	pushd "$TEMP_DIR" >/dev/null
-	tar -cjf "$ARCHIVE_DIR/$DisklessFS" *
+	tar -cJf "$ARCHIVE_DIR/$DisklessFS" *
 	VerifyExitCode "create tar file failed"
 	echo "$PlutoVersion" > "$ARCHIVE_DIR/$DisklessFS.version"
 	popd >/dev/null
