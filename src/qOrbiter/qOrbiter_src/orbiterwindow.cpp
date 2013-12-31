@@ -190,10 +190,11 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #ifdef for_desktop
 #ifndef QT5
     buildType = "/qml/desktop";
+     qrcPath = "qrc:desktop/Splash.qml";
 #else
     buildType = "/qml/qt5-desktop";
-#endif
-    qrcPath = buildType+"/Splash.qml";
+     qrcPath = "qrc:desktop/qt5/Splash.qml";
+#endif   
     localPath = "qt5-desktop/";
 #elif defined (for_freemantle)
     buildType = "/qml/freemantle";
@@ -232,6 +233,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     qrcPath = "qrc:desktop/Splash.qml";
 
 #endif
+
 #ifdef ANDROID
     mainView.engine()->addImportPath("assets:/imports/androidComponents");
     mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
@@ -240,15 +242,17 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     qDebug() << "Plugin path list"; mainView.engine()->pluginPathList().join("\n");
 
     mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
-#endif
+
 
 #ifdef QT5
     mainView.setSource(QString("assets:/qml/Welcome.qml"));
 #else
     mainView.setSource(QString("assets:/qml/Base.qml"));
 #endif
+  #endif
 
-    mainView.setSource(QApplication::applicationDirPath().remove("/bin")+buildType+"/Splash.qml");
+    mainView.setSource(qrcPath);
+    //mainView.setSource(QApplication::applicationDirPath().remove("/bin")+buildType+"/Splash.qml");
 
 
 }

@@ -545,6 +545,7 @@ HEADERS += \
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
+    qml/Welcome.qml
 
 for_harmattan{
         OTHER_FILES= \

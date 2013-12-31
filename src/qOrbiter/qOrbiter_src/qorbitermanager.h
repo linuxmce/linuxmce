@@ -288,6 +288,7 @@ public:
     QString currentSkin;
     QString currentSkinURL;
     QString remoteDirectoryPath;
+    QString finalPath;
     SkinDataItem* skin;
 
 #if QT5 || defined(QANDROID)

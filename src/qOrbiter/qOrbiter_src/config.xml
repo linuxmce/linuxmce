@@ -13,6 +13,6 @@
 <defaultview id="flat"/>
 <phone id="1"/>
 <mobile_storage id=""/>
-<networkload id="false" />
+<networkload id="true" />
 <debug id="false"/>
 </orbiter>

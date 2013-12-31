@@ -226,7 +226,14 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     setApplicationPath(QApplication::applicationDirPath());
     localDir = qmlPath.append(buildType);
-    qDebug() << "build type set to:: "<< buildType;
+     remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins/"+buildType.remove("/qml");
+     if(b_localLoading){
+         finalPath=localDir;
+     }else{
+         finalPath=remoteDirectoryPath;
+     }
+     qorbiterUIwin->setSource(finalPath+"/splash/Splash.qml");
+     qDebug() << "build type set to:: "<< buildType;
     initializeGridModel();  //begins setup of media grid listmodel and its properties
     initializeSortString(); //associated logic for navigating media grids
 
@@ -413,12 +420,12 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("bin"));
     QString localDir = qmlPath.append(buildType);
 
-    QString finalPath;
-    if(b_localLoading){
-        finalPath=localDir;
-    } else{
-        finalPath = remoteDirectoryPath;
-    }
+
+//    if(b_localLoading){
+//        finalPath=localDir;
+//    } else{
+//        finalPath = remoteDirectoryPath;
+//    }
 
 
 #ifdef __ANDROID__
