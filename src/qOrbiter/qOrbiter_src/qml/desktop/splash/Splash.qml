@@ -6,8 +6,8 @@ import QtQuick 1.1
 Item {
     id: splashLogic
 
-  height: appH
-  width: appW
+    height: appH
+    width: appW
 
 
     property bool orbiterSetup:false
@@ -62,9 +62,9 @@ Item {
         }
     }
 
-//    Connections{
-//        target:window
-//        onMessageChanged:loadingStatus.text = window.message
-//        //onStatusChanged: screenchange("SetupNewOrbiter.qml")
-//    }
+    //    Connections{
+    //        target:window
+    //        onMessageChanged:loadingStatus.text = window.message
+    //        //onStatusChanged: screenchange("SetupNewOrbiter.qml")
+    //    }
 }
