@@ -83,7 +83,7 @@ void ListModel::appendRows(const QList<gridItem *> &items)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(gridItem *item, items) {
-      qWarning() << "Listmodel Active Item::" << item->index();
+     // qWarning() << "Listmodel Active Item::" << item->index();
         //setCurrentItemIndex(item->index());
         QObject::connect(item, SIGNAL(destroyed()), this, SLOT(itemDeleted()),Qt::QueuedConnection);
         QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));

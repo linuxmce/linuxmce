@@ -169,6 +169,13 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString q_mediaType READ getSorting WRITE setGridMediaType NOTIFY mediaGridTypeChanged) /*!< \brief Contains the current media type of the media grid being browsed \ingroup qorbiter_properties */
     Q_PROPERTY (QString q_attributetype_sort READ getTypeSort WRITE setTypeSort NOTIFY typeSortChanged) /*!< \brief attribute type sorting */
     Q_PROPERTY (QString q_subType READ getSubType WRITE setSubType NOTIFY subTypeChanged)
+    Q_PROPERTY(QString q_fileFormat READ getGridFileFormat WRITE setGridFileFormat NOTIFY gridFileFormatChanged)
+    Q_PROPERTY(QString q_attribute_genres READ getGridAttributeGenres WRITE setGridAttributeGenres NOTIFY gridAttributeGenresChanged)
+    Q_PROPERTY(QString q_mediaSources READ getGridMediaSources WRITE setGridMediaSources NOTIFY gridMediaSourcesChanged)
+    Q_PROPERTY(QString q_usersPrivate READ getGridUsersPrivate WRITE setGridUsersPrivate NOTIFY gridPrivateUsersChanged)
+    Q_PROPERTY(QString q_pk_users READ getGridPkUsers WRITE setGridPkUsers NOTIFY gridPkUsersChanged  )
+    Q_PROPERTY(QString q_last_viewed READ getGridLastViewed WRITE setGridLastViewed NOTIFY gridLastViewedChanged)
+    Q_PROPERTY(QString q_pk_attribute READ getGridPkAttribute WRITE setGridPkAttribute NOTIFY gridPkAttributeChanged)
     /* Add properties here for missing grid values */
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)/*!< \brief Contains string of the current user \ingroup qorbiter_properties */
     Q_PROPERTY (QString currentRoom READ getCurrentRoom WRITE setCurrentRoom NOTIFY roomChanged)/*!< \brief Contains the current EA or room with the EA  \ingroup qorbiter_properties */
@@ -1256,6 +1263,9 @@ public slots:
 
     void setGridStatus(bool s) {emit gridStatus(s);}
     void setSorting(int i);
+
+    void setGridPkUsers(QString pk){q_pk_users = pk; emit gridPkUsersChanged();}
+    QString getGridPkUsers(){return q_pk_users;}
 
     void setSubType(QString t) {q_subType = t; emit subTypeChanged();}
     QString getSubType(){return q_subType;}

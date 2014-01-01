@@ -1021,6 +1021,13 @@ void qorbiterManager::updateSelectedAttributes(QString attributes)
     setTypeSort(ta.at(6));
     setSubType(ta.at(1));
     setGridMediaType(ta.at(0));
+    setGridFileFormat(ta.at(2));
+    setGridPkUsers(ta.at(7));
+    setGridMediaSources(ta.at(4));
+    setGridPkAttribute(ta.at(9));
+    setGridLastViewed(ta.at(8));
+    setGridAttributeGenres(ta.at(3));
+    setGridUsersPrivate(ta.at(5));
 }
 
 
