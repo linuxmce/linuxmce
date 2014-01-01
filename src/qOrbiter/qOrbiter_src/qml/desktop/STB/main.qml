@@ -103,7 +103,7 @@ Item {
         }
     }
 
-  ListModel{
+    ListModel{
         id:advancedMenu
 
         ListElement{
@@ -324,7 +324,7 @@ Item {
         anchors.centerIn: parent
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
-glScreenSaver.setImageList(manager.screensaverImages)
+            glScreenSaver.setImageList(manager.screensaverImages)
         }
 
         Connections{
@@ -345,11 +345,11 @@ glScreenSaver.setImageList(manager.screensaverImages)
         anchors.left:parent.left
         flipColors: true
         focus:true
-       // onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
+        // onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
         onActiveFocusChanged: {
             if(activeFocus){
                 console.log("Media Player has focus")
-              //  pageLoader.forceActiveFocus()
+                //  pageLoader.forceActiveFocus()
             }
         }
 
@@ -497,7 +497,7 @@ glScreenSaver.setImageList(manager.screensaverImages)
             if(activeFocus)
             {  console.log("Pageloader gained active focus");   }
             else if (pageLoader.item.activeFocus){
-                 console.log("Pageloader content gained active focus");
+                console.log("Pageloader content gained active focus");
             }
             else{
                 console.log("Page loader lost active focus ::"+ pageLoader.activeFocus);

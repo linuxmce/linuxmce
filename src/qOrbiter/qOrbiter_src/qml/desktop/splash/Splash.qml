@@ -6,8 +6,8 @@ import QtQuick 1.1
 Item {
     id: splashLogic
 
-    height: appH
-    width: appW
+    height: manager.appHeight
+    width: manager.appWidth
 
 
     property bool orbiterSetup:false
@@ -20,20 +20,20 @@ Item {
         id: splash
         anchors.centerIn: parent
         fillMode: Image.PreserveAspectFit
-        source: "default/img/icons/backgrounds/bedroom.png"
+        source: "../default/img/icons/backgrounds/bedroom.png"
         anchors.fill: parent
     }
     FontLoader{
         id:myFont
         name:"Sawasdee"
-        source: "../skins-common/fonts/Sawasdee.ttf"
+        source: "../../skins-common/fonts/Sawasdee.ttf"
     }
 
     function scaleX(x){
-        return x/100*appW
+        return x/100*manager.appWidth
     }
     function scaleY(y){
-        return y/100*appH
+        return y/100*manager.appHeight
     }
 
 
