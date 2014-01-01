@@ -1350,7 +1350,7 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
         media_currentRow = 0;
         i_mediaModelRows = 0;
     }
-
+gridPaused = false;
     q_mediaType = QString::number(iPK_MediaType);
 
     currentScreen= "Screen_47.qml";
