@@ -133,6 +133,7 @@ public:
 
     /*! @name Datagrid Member Variables. */
     //@{
+    bool gridPaused;
     int i_mediaModelRows; /*!< \brief The total rows in the media model */
     int media_currentRow;/*!< \brief The current row of the media model, representing a paged position */
     int media_totalPages; /*!< \brief The total pages as divided by the media_pageSeperator */
@@ -1392,6 +1393,7 @@ signals:
  */
 
     ///@{
+    void gridPauseChanged(bool g);
     void newGrid();
     void initializeSorting();
     void newPageSeperator(int seperator);
@@ -1589,6 +1591,10 @@ signals:
 
 
 public slots:
+
+    void setGridPause(bool g){ gridPaused =g; emit gridPauseChanged(gridPaused); if(!gridPaused){populateAdditionalMedia();} qDebug() << "Grid is paused ::" << gridPaused; }
+    bool getGridPause(){ return gridPaused;}
+
     /*!
      * \brief authorizePrivateMedia
      * \param mediaType

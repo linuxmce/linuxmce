@@ -2296,6 +2296,7 @@ bool qOrbiter::getRecievingStatus()
 void qOrbiter::setGridStatus(bool b)
 {
     requestMore = b;
+
 }
 
 bool qOrbiter::getGridStatus()
@@ -2316,7 +2317,7 @@ int qOrbiter::getCurrentRow()
 void qOrbiter::initializeGrid()
 {
     goBack.clear();
-
+gridPaused = false;
     QString datagridVariableString ;
     //datagrid option variables
     //  QString q_mediaType;           //1
@@ -2395,6 +2396,7 @@ void qOrbiter::setStringParam(int paramType, QString param)
             qDebug() << "Browse by file not engaged.";
             if(param.contains("!F"))
             {
+
                 emit showFileInfo(true);
                 emit setFocusFile(param);
                 GetFileInfoForQml(param);
@@ -3646,6 +3648,8 @@ void DCE::qOrbiter::changedTrack(QString direction)
 
 void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that populates after the initial request to break out the threading and allow for a checkpoint across threads
 {
+
+
     backwards=false;
     //emit commandResponseChanged("requesting additional media");
 #ifdef QT5
@@ -3732,15 +3736,15 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             //            }
             index = pMediaGridTable->CovertColRowType(it->first).second;
 
-            if(!b_cancelRequest && requestMore){
+            if(!b_cancelRequest && requestMore && !gridPaused){
                 emit addItem(new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), (index+1), this));
                 QApplication::processEvents(QEventLoop::AllEvents);
 #ifdef RPI
-                msleep(45);
+                msleep(5);
 #elif ANDROID
-                msleep(30);
+                msleep(5);
 #else
-                msleep(15);
+                msleep(5);
 #endif
             }
             else if(!requestMore ){
@@ -3752,6 +3756,11 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 delete pMediaGridTable;
                 pMediaGridTable=NULL;
                 delete []pData; pData=NULL;
+                return;
+            } else if(gridPaused){
+                qDebug() << "Grid is paused.";
+                media_pos=index;
+                qDebug() << "Stopped at" << media_pos;
                 return;
             }
             else{

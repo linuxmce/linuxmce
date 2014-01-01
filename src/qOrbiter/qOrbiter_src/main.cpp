@@ -556,6 +556,7 @@ int main(int argc, char* argv[])
       //  QObject::connect(w.userList, SIGNAL(privateUserChanged(int, QString)), &pqOrbiter, SLOT(setStringParam(int,QString)),Qt::QueuedConnection);
         QObject::connect(mediaModel,SIGNAL(gridTypeChanged(int)), w.userList, SLOT(unsetPrivate()));
 
+        QObject::connect(mediaModel, SIGNAL(pauseChanged(bool)), &pqOrbiter, SLOT(setGridPause(bool)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(keepLoading(bool)), &pqOrbiter,SLOT(setGridStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(showFileInfo(bool)), w.filedetailsclass, SLOT(setVisible(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(setFocusFile(QString)), w.filedetailsclass, SLOT(setFile(QString)),Qt::QueuedConnection);

@@ -58,6 +58,7 @@ public:
     bool clearing;
     int totalPages;
     int currentItemIndex;
+    bool paused;
 
 
 signals:
@@ -71,6 +72,7 @@ signals:
     void progressChanged(double p);
     void ready(int type);
     void statusMessage(QString msg);
+    void pauseChanged(bool p);
 
     void modelAboutToBeReset();
     void modelReset();
@@ -84,7 +86,10 @@ signals:
 
 public slots:
 
-    void setCurrentItemIndex(int i){currentItemIndex = i; emit currentItemIndexChanged();}
+    void setPause(bool p){ paused = p; emit pauseChanged(p); }
+    bool getPause(){return paused;}
+
+    void setCurrentItemIndex(int i){ if(currentItemIndex != i) {currentItemIndex = i; emit currentItemIndexChanged();} }
     int getCurrentItemIndex(){return currentItemIndex;}
 
     void objectDestroyed(QObject*){
@@ -116,7 +121,7 @@ public slots:
         }
     }
 
-    void setTotalPages(int p){totalPages = p;
+    void setTotalPages(int p){ if(totalPages ==p ) {return;} totalPages = p;
                               qDebug() << "New page count " << totalPages;
                                                     emit totalPagesChanged();
 
