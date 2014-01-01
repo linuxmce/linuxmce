@@ -169,6 +169,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString q_mediaType READ getSorting WRITE setGridMediaType NOTIFY mediaGridTypeChanged) /*!< \brief Contains the current media type of the media grid being browsed \ingroup qorbiter_properties */
     Q_PROPERTY (QString q_attributetype_sort READ getTypeSort WRITE setTypeSort NOTIFY typeSortChanged) /*!< \brief attribute type sorting */
     Q_PROPERTY (QString q_subType READ getSubType WRITE setSubType NOTIFY subTypeChanged)
+    /* Add properties here for missing grid values */
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)/*!< \brief Contains string of the current user \ingroup qorbiter_properties */
     Q_PROPERTY (QString currentRoom READ getCurrentRoom WRITE setCurrentRoom NOTIFY roomChanged)/*!< \brief Contains the current EA or room with the EA  \ingroup qorbiter_properties */
     Q_PROPERTY (QString dceResponse READ getDceResponse WRITE setDceResponse NOTIFY dceResponseChanged)
@@ -575,6 +576,16 @@ signals:
     void gridStatus(bool s);
     void gridGoBack();
     void mediaTypeChanged();
+    void gridFileFormatChanged();
+    void gridAttributeGenresChanged();
+    void gridMediaSourcesChanged();
+    void gridPrivateUsersChanged();
+    void gridUsersChanged();
+    void gridAttributeTypeSortChanged();
+    void gridPkUsersChanged();
+    void gridPkAttributeChanged();
+    void gridLastViewedChanged();
+
     void requestDcePages(int i);
     void filterChanged();
     void resetFilter();
@@ -704,11 +715,7 @@ public slots:
     void setRouterPort(QString p){routerPort = p; emit routerPortChanged();}
     QString getRouterPort(){return routerPort;}
 
-    void setSubType(QString t) {q_subType = t; emit subTypeChanged();}
-    QString getSubType(){return q_subType;}
 
-    void setTypeSort(QString t) {q_attributetype_sort = t; emit typeSortChanged();}
-    QString getTypeSort(){return q_attributetype_sort;}
 
     void setApplicationPath(QString p){applicationPath = p; emit applicationPathChanged();}
     QString getApplicationPath(){return applicationPath;}
@@ -1250,11 +1257,35 @@ public slots:
     void setGridStatus(bool s) {emit gridStatus(s);}
     void setSorting(int i);
 
+    void setSubType(QString t) {q_subType = t; emit subTypeChanged();}
+    QString getSubType(){return q_subType;}
+
+    void setTypeSort(QString t) {q_attributetype_sort = t; emit typeSortChanged();}
+    QString getTypeSort(){return q_attributetype_sort;}
+
     void setMediaType(int m) {i_current_mediaType = m; emit mediaTypeChanged();}
     int getMediaType(){return i_current_mediaType;}
 
     void setGridMediaType(QString t){q_mediaType = t; qDebug() << q_mediaType; emit mediaGridTypeChanged();}
     QString getSorting() {return q_mediaType;}
+
+    void setGridFileFormat(QString g){q_fileFormat= g; emit gridFileFormatChanged();  }
+    QString getGridFileFormat(){return q_fileFormat; }
+
+    void setGridAttributeGenres(QString a){ q_attribute_genres = a; emit gridAttributeGenresChanged();}
+    QString getGridAttributeGenres(){return q_attribute_genres;}
+
+    void setGridMediaSources(QString s){q_mediaSources =s; emit gridMediaSourcesChanged();}
+    QString getGridMediaSources(){return q_mediaSources;}
+
+    void setGridUsersPrivate(QString p){q_usersPrivate = p; emit gridPrivateUsersChanged();}
+    QString getGridUsersPrivate(){return q_usersPrivate;}
+
+    void setGridPkAttribute(QString a){q_pk_attribute = a; emit gridPkAttributeChanged();}
+    QString getGridPkAttribute(){return q_pk_attribute;}
+
+    void setGridLastViewed(QString l){q_last_viewed = l; emit gridLastViewedChanged();}
+    QString getGridLastViewed(){return q_last_viewed;}
 
     void initializeSortString();
     void clearMediaModel();
