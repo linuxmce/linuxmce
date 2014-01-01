@@ -20,8 +20,8 @@ StyledScreen {
     Connections
     {
         target: filedetailsclass
-        onShowDetailsChanged:
-        {
+        onShowDetailsChanged:{
+
             screen_forty_seven_of_nine.state = "detail"
             depth--
         }
@@ -340,6 +340,7 @@ StyledScreen {
                 script:{
                     infoPanel.forceActiveFocus()
                     console.log("Setting info panel focus to active.")
+                      dataModel.setPause(true)
                 }
             }
         }

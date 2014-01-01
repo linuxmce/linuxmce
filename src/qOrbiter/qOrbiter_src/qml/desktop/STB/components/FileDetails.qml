@@ -59,7 +59,7 @@ Item {
             id: fd_play
             actionLabel: "Play"
             rowIndex: 0
-            onExecute:  manager.playMedia(filedetailsclass.file)  //dce function
+            onExecute:  {manager.playMedia(filedetailsclass.file); }  //dce function
         }
         FdActionButton {
             id: fd_move
@@ -70,7 +70,7 @@ Item {
             id: fd_close
             actionLabel: "Close"
             rowIndex: 2
-            onExecute: { filedetailsclass.clear();screen_forty_seven_of_nine.state="browsing" }
+            onExecute: { filedetailsclass.clear();screen_forty_seven_of_nine.state="browsing"; dataModel.setPause(false)  }
         }
 
     }

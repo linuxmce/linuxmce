@@ -19,6 +19,16 @@ Item {
         }
     }
 
+    Connections{
+        target:qmlroot
+        onShowMetaData:{
+if(template.state==="hidden")
+    template.state="info"
+else
+    template.state="hidden"
+        }
+    }
+
     Item{
         id:infoHdr
         anchors.top: template.top
