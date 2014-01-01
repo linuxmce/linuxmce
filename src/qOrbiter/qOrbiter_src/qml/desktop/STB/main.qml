@@ -320,7 +320,7 @@ Item {
         height: manager.appHeight
         width: manager.appWidth
         focus:true
-        interval:8000
+        interval:30000
         anchors.centerIn: parent
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
