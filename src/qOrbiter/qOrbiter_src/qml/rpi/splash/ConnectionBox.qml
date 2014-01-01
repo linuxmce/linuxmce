@@ -1,12 +1,14 @@
 import QtQuick 2.0
-Rectangle{
+Item{
     id: connectionBox
-    anchors.verticalCenter: parent.verticalCenter
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.verticalCenterOffset:10
-    width: scaleX(65)
-    height: scaleY(20)
-    color: "transparent"
+    anchors{
+        verticalCenter: parent.verticalCenter
+        left:parent.left
+        right:parent.right
+        leftMargin: scaleX(15)
+        rightMargin: scaleX(15)
+        horizontalCenter: parent.horizontalCenter
+    }
 
 
     Rectangle {

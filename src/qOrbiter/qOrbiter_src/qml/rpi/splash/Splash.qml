@@ -5,8 +5,8 @@ import QtQuick 2.0
 
 Item {
     id: splashLogic
-    height: 720
-    width: 1280
+    height: manager.appHeight
+    width: manager.appWidth
 
     property bool orbiterSetup:false
     property string router_ip: ""
@@ -17,20 +17,20 @@ Item {
         id: splash
         anchors.centerIn: parent
         fillMode: Image.PreserveAspectFit
-        source: "noir/img/icons/bedroom.jpg"
+        source: "../noir/img/icons/bedroom.jpg"
         anchors.fill: parent
     }
     FontLoader{
         id:myFont
         name:"Sawasdee"
-        source: "../skins-common/fonts/Sawasdee.ttf"
+        source: "../../skins-common/fonts/Sawasdee.ttf"
     }
 
     function scaleX(x){
-        return x/100*appW
+        return x/100*manager.appWidth
     }
     function scaleY(y){
-        return y/100*appH
+        return y/100*manager.appHeight
     }
 
 
@@ -54,14 +54,21 @@ Item {
         id:pageLoader
         objectName: "loadbot"
         source: "SplashView.qml"
+        anchors{
+            top:parent.top
+            left:parent.left
+            right:parent.right
+            bottom:parent.bottom
+        }
+
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
         }
     }
 
-//    Connections{
-//        target:window
-//        onMessageChanged:loadingStatus.text = window.message
-//        //onStatusChanged: screenchange("SetupNewOrbiter.qml")
-//    }
+    //    Connections{
+    //        target:window
+    //        onMessageChanged:loadingStatus.text = window.message
+    //        //onStatusChanged: screenchange("SetupNewOrbiter.qml")
+    //    }
 }

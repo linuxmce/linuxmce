@@ -1,10 +1,12 @@
 // import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 2.0
-
-import "noir/components"
+import "../noir/components"
 Item {
-  height: appH
-  width: appW
+    anchors{
+        top:parent.top
+        left:parent.left
+        right:parent.right
+    }
 
     id:splashPage
 
@@ -26,22 +28,21 @@ Item {
         }
         onPageChanged:screenchange(qmlPage)
     }
-    Text {
-        id: welcome
-        text: qsTr("LinuxMCE")
-        font.family: myFont.name
-        font.pointSize: 42
-        anchors.top: parent.top
-        anchors.topMargin: scaleY(5)
-        anchors.horizontalCenter: parent.horizontalCenter
-        color:"white"
-    }
-
 
     StatusRow {
         id: statusRow
     }
 
+    Text {
+        id: welcome
+        text: qsTr("LinuxMCE\n"+manager.appWidth+" x "+manager.appHeight)
+        font.family: myFont.name
+        font.pointSize: 42
+        anchors.top: statusRow.bottom
+        anchors.topMargin: scaleY(5)
+        anchors.horizontalCenter: parent.horizontalCenter
+        color:"white"
+    }
 
     Connections{
         target:window
@@ -49,13 +50,7 @@ Item {
         //onStatusChanged: screenchange("SetupNewOrbiter.qml")
     }
 
-    Rectangle {
-        width: parent.width
-        height: scaleY(20)
-        opacity: 1
-        color: "transparent"
 
-    }
     ConnectionBox {
         id: connectionBox
     }
