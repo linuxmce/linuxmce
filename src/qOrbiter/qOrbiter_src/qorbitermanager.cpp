@@ -226,7 +226,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     setApplicationPath(QApplication::applicationDirPath());
     localDir = qmlPath.append(buildType);
-     remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins/"+buildType.remove("/qml");
+     remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins"+buildType.remove("/qml");
      if(b_localLoading){
          finalPath=localDir;
      }else{

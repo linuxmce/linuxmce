@@ -5,6 +5,7 @@
     </qresource>
     <qresource prefix="/main">
         <file alias="Welcome.qml">qml/Welcome.qml</file>
+        <file alias="Welcome2.qml">qml/Welcome2.qml</file>
     </qresource>
     <qresource prefix="/desktop"/>
     <qresource prefix="/osx"/>

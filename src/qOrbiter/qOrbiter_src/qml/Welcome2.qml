@@ -1,4 +1,4 @@
-import QtQuick 1.1
+import QtQuick 2.0
 
 Item {
    height: appH
@@ -15,6 +15,4 @@ Item {
         anchors.centerIn: parent
         font.pointSize: 32
     }
-
-
 }

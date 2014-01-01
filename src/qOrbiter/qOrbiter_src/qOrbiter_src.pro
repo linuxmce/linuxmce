@@ -95,7 +95,7 @@ TRANSLATIONS += app_de.ts
 common-folder.source = qml/skins-common
 common-folder.target = $$DESTDIR/qml
 
-DEPLOYMENTFOLDERS+=common-folder
+#DEPLOYMENTFOLDERS+=common-folder
 
 linux-g++{
       #  TARGET = qorbiter-$$QT_VERSION-core-gl
@@ -263,7 +263,7 @@ linux-rasp-pi-g++{
 
         DEFINES+=RPI GLENABLED
         DEFINES-=for_desktop
-        DEPLOYMENTFOLDERS += folder_01 folder_02
+        DEPLOYMENTFOLDERS += folder_02 #folder_01
         QT+= qml
         QT-=declarative
 
@@ -545,7 +545,8 @@ HEADERS += \
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
-    qml/Welcome.qml
+    qml/Welcome.qml \
+    qml/Welcome2.qml
 
 for_harmattan{
         OTHER_FILES= \

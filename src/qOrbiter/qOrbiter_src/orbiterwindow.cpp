@@ -178,8 +178,8 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     }
 #elif RPI
 
-    mainView.rootContext()->setContextProperty("appW", 1280);
-    mainView.rootContext()->setContextProperty("appH", 720);
+    mainView.rootContext()->setContextProperty("appW", mainView.height());
+    mainView.rootContext()->setContextProperty("appH", mainView.width());
 #else
     mainView.rootContext()->setContextProperty("appW", 800);
     mainView.rootContext()->setContextProperty("appH", 600);
@@ -190,7 +190,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #ifdef for_desktop
 #ifndef QT5
     buildType = "/qml/desktop";
-     qrcPath = "qrc:desktop/Splash.qml";
+     qrcPath = "qrc:main/Welcome.qml";
 #else
     buildType = "/qml/qt5-desktop";
      qrcPath = "qrc:desktop/qt5/Splash.qml";
@@ -226,7 +226,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     localPath = "android/";
 #elif defined RPI
     buildType = "/qml/rpi";
-    qrcPath = "qrc:android/Splash.qml";
+    qrcPath = "qrc:main/Welcome2.qml";
     localPath = "rpi/";
 #else
     buildType = "/qml/desktop";
