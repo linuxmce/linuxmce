@@ -323,6 +323,10 @@ Item {
         interval:8000
         anchors.centerIn: parent
         requestUrl:manager.m_ipAddress
+        Component.onCompleted: {
+glScreenSaver.setImageList(manager.screensaverImages)
+        }
+
         Connections{
             target:manager
             onScreenSaverImagesReady:glScreenSaver.setImageList(manager.screensaverImages)
