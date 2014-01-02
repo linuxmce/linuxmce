@@ -84,6 +84,7 @@ StyledScreen {
             }
             color:"white"
             text: qsTr("Attribute:")+ manager.q_attributetype_sort
+
         }
 
 
