@@ -118,7 +118,7 @@ FindVideoDriver () {
 }
 
 InstallVideoDriver () {
-	distro="$(lsb_release -c -s)"
+	prop_driver="$1"
 	case "$prop_driver" in
 
 		# nVidia cards
@@ -239,25 +239,20 @@ InstallRoutine() {
 		elif [[ "$prop_driver" != "$cur_driver" ]] && [[ -n $online ]]; then
 			online_mismatch="true"
 		fi
-		# Check to see that the appropriate driver is installed by type
-		# If current driver is nvidia, check that it is the correct one
 
-		if [[ "$prop_driver" == "$cur_driver" ]] && [[ "$cur_driver" == "nvidia" ]] && [[ -n "$online" ]]; then
-			StartService "Checking nVidia driver" ". /usr/pluto/bin/nvidia-install.sh"
-			current_nvidia=$(getInstalledNvidiaDriver)
-			preferred_nvidia=$(getPreferredNvidiaDriver)
-				if [[ "$current_nvidia" != "$preferred_nvidia" ]]; then 
-					cur_driver="wrongnv"
-					online_mismatch="true"
-				fi
+		if [[ "$online_mismatch" == "false" ]] && [[ "$offline_mismatch" == "false" ]]; then
+			Mismatch="false"
+		else
+			Mismatch="true"
 		fi
 
 		# Look at mismatches and handle appropriately
-		if [[ "$cur_driver" == "$prop_driver" ]]; then
+		if [[ "$cur_driver" == "$prop_driver" ]] && [[ "$Mismatch" == "false" ]]; then
 			StatusMessage "Correct driver '$prop_driver' already loaded"
 			return 0
-		# Remove fglrx via or nVidia drivers if they are installed, but do not match current requirements
-		elif ([[ "$online_mismatch" == "true" ]]) || ([[ "$offline_mismatch" == "true" ]]); then
+
+		else
+			# Remove fglrx via or nVidia drivers if they are installed, but do not match current requirements
 			ErrorMessage "Video chipset change detected !!!"
 			if [[ "$cur_driver" == "fglrx" ]]; then
 				echo ""
@@ -270,16 +265,21 @@ InstallRoutine() {
 				apt-get -y install --reinstall xserver-xorg-core --force-yes
 				reboot
 				exit 0
-			elif [[ "$cur_driver" == "wrongnv" ]]; then
-				StatusMessage "Removing old nVidia driver"
-				apt-get -yf remove --purge nvidia* --force-yes 
-				apt-get -yf remove --purge xserver-xorg-video-nouveau --force-yes 
-				reboot
+			elif [[ "$cur_driver" == "nvidia" ]]; then
+				nv_pid=$(pidof nvidia-install.sh)
+				if [[ -n $nv_pid ]] ; then
+					StatusMessage "Installing nVidia driver this may take a few minutes"
+					installCorrectNvidiaDriver
+				else StartService "Installing nVidia driver this may take a few minutes" ". /usr/pluto/bin/nvidia-install.sh"
+					installCorrectNvidiaDriver
+				fi 
+				ConfSet "AVWizardOverride" "1"
 				exit 0
 			elif [[ "$cur_driver" == "via" ]]; then
 				StatusMessage "Removing old VIA driver"
 				apt-get -yf remove --purge xserver-xorg-video-via --force-yes
-				reboot
+				InstallVideoDriver "$prop_driver"
+				#reboot
 				exit 0
 			fi
 
@@ -296,7 +296,7 @@ InstallRoutine() {
 
 			if [[ "$prop_driver" != "$cur_driver" ]]; then
 				StatusMessage "Using video driver '$prop_driver' for $card_detail"
-				InstallVideoDriver
+				InstallVideoDriver "$prop_driver"
 			fi
 		fi
 	else
@@ -312,7 +312,7 @@ InstallRoutine() {
 			esac
 		fi
 		StatusMessage "/etc/X11/xorg.conf is missing. Using video driver '$prop_driver' for $card_detail"
-		InstallVideoDriver
+		InstallVideoDriver "$prop_driver"
 	fi
 	export Best_Video_Driver="$prop_driver"
 }

@@ -147,10 +147,13 @@ installCorrectNvidiaDriver() {
 		Log "$LogFile" "installing NEW driver $preferred_driver!"
 		tmpfile=$( /bin/mktemp -t )
 
-		if [[ "$preferred_driver" == "nvidia-current" ]]; then
-			apt-get install -yf "$preferred_driver" 2> >(tee "$tmpfile")
-			local param="reboot"
+		if [[ -n "$current_driver" ]]; then
+			apt-get remove -yf "$current_driver" --force-yes
 		fi
+
+		apt-get install -yf "$preferred_driver" 2> >(tee "$tmpfile")
+		local param="reboot"
+
 
 	else
 		echo "Preferred driver $preferred_driver already installed."
