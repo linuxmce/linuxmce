@@ -1,7 +1,5 @@
 import QtQuick 1.1
-
 import "../components"
-
 
 Item{
     id:imageholder
@@ -24,13 +22,7 @@ Item{
     //    }
     
     
-//    DropShadow{
-//        sourceItem: nowplayingimage
-//        distance: 4
-//        color:"black"
-//        anchors.fill: sourceItem
-//        visible:nowplayingimage.visible
-//    }
+
     Image {
         id: nowplayingimage
         width: dcenowplaying.aspect=="wide"? scaleX(30) : scaleX(25)

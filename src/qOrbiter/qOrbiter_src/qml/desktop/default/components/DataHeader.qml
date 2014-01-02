@@ -1,5 +1,4 @@
 import QtQuick 1.1
-
 import "../components"
 
 import "../../../skins-common/lib/handlers"
@@ -32,8 +31,6 @@ Item{
             target:dataheader
         }
     }
-
-
 
     Image {
         id: headerbg
