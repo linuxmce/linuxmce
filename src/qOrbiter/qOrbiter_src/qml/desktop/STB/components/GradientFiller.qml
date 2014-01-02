@@ -1,5 +1,5 @@
 import QtQuick 1.1
-import Qt.labs.shaders 1.0
+
 Item{
     anchors.fill: parent
     property int grpRadius:parent.radius ? parent.radius : 0
