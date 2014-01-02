@@ -377,7 +377,7 @@ Item {
 
             switch(event.key){
             case Qt.Key_Back:
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex-++1));
+                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1));
                 break;
             case Qt.Key_Forward:
                 manager.changedPlaylistPosition((mediaplaylist.currentIndex+1))

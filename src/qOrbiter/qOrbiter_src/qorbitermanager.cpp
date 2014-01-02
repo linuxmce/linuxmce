@@ -1332,7 +1332,7 @@ void qorbiterManager::mountMediaDevices()
         mountProg="";
 #endif
         QStringList args;
-        args.append(QString("mount -t nfs "+m_ipAddress+":/home "+ mntDir.path()+" -o vers=3" ));
+        args.append(QString("mount -t nfs "+m_ipAddress+":/home "+ mntDir.path()+"" ));
         QProcess *mountProcess = new QProcess(this);
         mountProcess->start(mountProg, args);
         mountProcess->waitForFinished(10000);

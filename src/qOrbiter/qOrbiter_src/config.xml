@@ -7,7 +7,7 @@
 <externalhost id=""/>
 <device id="-1"/>
 <routeraddress id=""/>
-<skin id="STB"/>
+<skin id="default"/>
 <qt5skin id="default"/>
 <enablescreensavermode id="false"/>
 <defaultview id="flat"/>
