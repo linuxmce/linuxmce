@@ -900,7 +900,7 @@ public slots:
     void setFloorPlanCommand(QVariantMap t);
     //@}
 
-    void setSkinStatus(bool status) { b_skinReady = status ; emit skinDataLoaded(b_skinReady); }
+    void setSkinStatus(bool status) { b_skinReady = status ; emit skinDataLoaded(b_skinReady); if(status)getConfiguration(); }
     void setOrbiterStatus(bool status) {b_orbiterReady = status ; emit orbiterReady(b_orbiterReady);}
 
     /*Runtime Screen handling*/

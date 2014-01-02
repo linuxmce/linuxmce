@@ -1376,9 +1376,6 @@ void qorbiterManager::getMediaDevices()
     req.setUrl(QUrl("http://"+m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?m"));
     m->get(req);
     QObject::connect(m, SIGNAL(finished(QNetworkReply*)), this, SLOT(setMediaDevices(QNetworkReply*)));
-
-
-
 }
 
 void qorbiterManager::setMediaDevices(QNetworkReply *d)
@@ -1465,9 +1462,6 @@ bool qorbiterManager::loadSkins(QUrl base)
     tskinModel->addSkin(localSkins.join(","));
     }
 #endif
-
-
-
     return true;
 }
 
@@ -1538,7 +1532,8 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 
     setDceResponse("Initializing Local Manager");
     initializeManager(incrouterip.toStdString(), incdeviceid.toLong());
-    getConfiguration();
+
+  //  getConfiguration(); /* Connect to skins ready signal */
 }
 
 /*!
