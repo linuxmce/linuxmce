@@ -1305,6 +1305,8 @@ void qorbiterManager::mountMediaDevices()
 {
     qDebug() << "Mounting LinuxMCE Home Dir";
 
+
+
 //    for(int dc =0; dc < storageDevices.count(); dc++){
 //        qDebug()<< "Starting process for device " << storageDevices.at(dc).toMap()["Description"].toString() << " #"<<storageDevices.at(dc).toMap()["Device"].toString();
 //        int d = storageDevices.at(dc).toMap()["Device"].toInt();
