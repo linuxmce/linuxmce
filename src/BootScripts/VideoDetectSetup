@@ -247,6 +247,7 @@ InstallRoutine() {
 			if [[ "$current_nvidia" != "$preferred_nvidia" ]]; then  
 				online_mismatch="true" 
 			fi 
+		fi
 
 		if [[ "$online_mismatch" == "false" ]] && [[ "$offline_mismatch" == "false" ]]; then
 			Mismatch="false"
