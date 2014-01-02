@@ -1303,52 +1303,52 @@ void qorbiterManager::nowPlayingChanged(bool b)
 
 void qorbiterManager::mountMediaDevices()
 {
-    qDebug() << "Attemping to verify status of storage devices";
+    qDebug() << "Mounting LinuxMCE Home Dir";
 
-    for(int dc =0; dc < storageDevices.count(); dc++){
-        qDebug()<< "Starting process for device " << storageDevices.at(dc).toMap()["Description"].toString() << " #"<<storageDevices.at(dc).toMap()["Device"].toString();
-        int d = storageDevices.at(dc).toMap()["Device"].toInt();
-        QString dirCmd = "";
-#ifndef RPI
-        dirCmd  = "gksudo";
-#endif
-        QDir mntDir;
-        mntDir.setPath("/mnt/remote/"+QString::number(d));
-        qDebug() << mntDir.exists();
-        if(!mntDir.exists()){
-            QProcess *mkPath = new QProcess(this);
-            QStringList dArgs;
-            dArgs.append("mkdir -p /mnt/remote/"+QString::number(d));
-            mkPath->start(dirCmd, dArgs);
-            mkPath->waitForFinished(10000);
+//    for(int dc =0; dc < storageDevices.count(); dc++){
+//        qDebug()<< "Starting process for device " << storageDevices.at(dc).toMap()["Description"].toString() << " #"<<storageDevices.at(dc).toMap()["Device"].toString();
+//        int d = storageDevices.at(dc).toMap()["Device"].toInt();
+//        QString dirCmd = "";
+//#ifndef RPI
+//        dirCmd  = "gksudo";
+//#endif
+//        QDir mntDir;
+//        mntDir.setPath("/mnt/remote/"+QString::number(d));
+//        qDebug() << mntDir.exists();
+//        if(!mntDir.exists()){
+//            QProcess *mkPath = new QProcess(this);
+//            QStringList dArgs;
+//            dArgs.append("mkdir -p /mnt/remote/"+QString::number(d));
+//            mkPath->start(dirCmd, dArgs);
+//            mkPath->waitForFinished(10000);
 
-        }
-        else{
+//        }
+//        else{
 
-        }
+//        }
 
-        if(mntDir.entryList(QDir::NoDotAndDotDot).count() == 0){
-            qDebug() << "Existing files in path" << mntDir.entryList(QDir::NoDotAndDotDot).count();
-            QString mountProg = "gksudo";
-#ifdef RPI
-            mountProg="";
-#endif
-            QStringList args;
+//        if(mntDir.entryList(QDir::NoDotAndDotDot).count() == 0){
+//            qDebug() << "Existing files in path" << mntDir.entryList(QDir::NoDotAndDotDot).count();
+//            QString mountProg = "gksudo";
+//#ifdef RPI
+//            mountProg="";
+//#endif
+//            QStringList args;
 
-            args.append(QString("mount -t nfs "+m_ipAddress+":/mnt/device/"+QString::number(d) + " /mnt/remote/"+QString::number(d)) +" -o vers=3" );
-            QProcess *mountProcess = new QProcess(this);
-            mountProcess->start(mountProg, args);
-            mountProcess->waitForFinished(10000);
-            qDebug() << "Process Status ::" <<mountProcess->state();
-            if(mountProcess->state()== QProcess::FailedToStart){
-                qWarning() << "command failed to start!";
-                qDebug() << mountProcess->readAllStandardError();
-                qDebug() << mountProcess->errorString();
-            }
-            qWarning() << "QProcess Exiting, state is :"<< mountProcess->state();
-            qWarning() << "Process exited with::"<< mountProcess->exitCode();
-        }
-    }
+//            args.append(QString("mount -t nfs "+m_ipAddress+":/mnt/device/"+QString::number(d) + " /mnt/remote/"+QString::number(d)) +" -o vers=3" );
+//            QProcess *mountProcess = new QProcess(this);
+//            mountProcess->start(mountProg, args);
+//            mountProcess->waitForFinished(10000);
+//            qDebug() << "Process Status ::" <<mountProcess->state();
+//            if(mountProcess->state()== QProcess::FailedToStart){
+//                qWarning() << "command failed to start!";
+//                qDebug() << mountProcess->readAllStandardError();
+//                qDebug() << mountProcess->errorString();
+//            }
+//            qWarning() << "QProcess Exiting, state is :"<< mountProcess->state();
+//            qWarning() << "Process exited with::"<< mountProcess->exitCode();
+//        }
+//    }
 
     QString dirCmd = "gksudo";
     QDir mntDir;

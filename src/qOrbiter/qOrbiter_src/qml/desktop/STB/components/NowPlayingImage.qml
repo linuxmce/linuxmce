@@ -1,7 +1,7 @@
 import QtQuick 1.1
-import Qt.labs.shaders 1.0
+
 import "../components"
-import "../../../skins-common/lib/effects"
+
 
 Item{
     id:imageholder
@@ -24,13 +24,13 @@ Item{
     //    }
     
     
-    DropShadow{
-        sourceItem: nowplayingimage
-        distance: 4
-        color:"black"
-        anchors.fill: sourceItem
-        visible:nowplayingimage.visible
-    }
+//    DropShadow{
+//        sourceItem: nowplayingimage
+//        distance: 4
+//        color:"black"
+//        anchors.fill: sourceItem
+//        visible:nowplayingimage.visible
+//    }
     Image {
         id: nowplayingimage
         width: dcenowplaying.aspect=="wide"? scaleX(30) : scaleX(25)
