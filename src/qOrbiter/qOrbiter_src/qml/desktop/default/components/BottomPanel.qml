@@ -1,6 +1,6 @@
 import QtQuick 1.1
 import Qt.labs.shaders 1.0
-import "../../../skins-common/lib/effects"
+
 import "../js/ComponentLoader.js" as MyJs
 
 
@@ -9,14 +9,7 @@ Item {
     width: manager.appWidth - scaleX(1)
     height: skinStyle.widebuttonh + scaleY(4)  
 
-    DropShadow{
-        id:headerDrop
-        sourceItem:panelbg
-        height: panelbg.height
-        width: panelbg.width
-        distance:1
-        color:"black"
-    }
+
     Image {
         id: panelbg
         source: manager.imagePath+"ui3/bluish_fill.png"

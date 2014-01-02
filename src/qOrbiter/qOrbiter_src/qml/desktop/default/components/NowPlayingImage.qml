@@ -1,8 +1,7 @@
 import QtQuick 1.1
-import Qt.labs.shaders 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
-import "../../../skins-common/lib/effects"
+
 
 Rectangle{
     id:imageholder
@@ -29,12 +28,7 @@ Rectangle{
 //    }
 
 
-    DropShadow{
-        sourceItem: nowplayingimage
-        distance: 4
-        color:"black"
-        anchors.fill: sourceItem
-    }
+
     Image {
         id: nowplayingimage
         width: dcenowplaying.aspect=="wide"? scaleX(30) : scaleX(25)

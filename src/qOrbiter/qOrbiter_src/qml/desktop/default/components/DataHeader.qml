@@ -1,7 +1,7 @@
 import QtQuick 1.1
-import Qt.labs.shaders 1.0
+
 import "../components"
-import "../../../skins-common/lib/effects"
+
 import "../../../skins-common/lib/handlers"
 /*!
  *
@@ -33,14 +33,7 @@ Item{
         }
     }
 
-    DropShadow{
-        id:headerDrop
-        sourceItem:headerbg
-        height: headerbg.height
-        width: headerbg.width
-        distance:2
-        color:"black"
-    }
+
 
     Image {
         id: headerbg

@@ -226,14 +226,14 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     setApplicationPath(QApplication::applicationDirPath());
     localDir = qmlPath.append(buildType);
-     remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins"+buildType.remove("/qml");
-     if(b_localLoading){
-         finalPath=localDir;
-     }else{
-         finalPath=remoteDirectoryPath;
-     }
-     qorbiterUIwin->setSource(finalPath+"/splash/Splash.qml");
-     qDebug() << "build type set to:: "<< buildType;
+    remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins"+buildType.remove("/qml");
+    if(b_localLoading){
+        finalPath=localDir;
+    }else{
+        finalPath=remoteDirectoryPath;
+    }
+    qorbiterUIwin->setSource(finalPath+"/splash/Splash.qml");
+    qDebug() << "build type set to:: "<< buildType;
     initializeGridModel();  //begins setup of media grid listmodel and its properties
     initializeSortString(); //associated logic for navigating media grids
 
@@ -421,11 +421,11 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     QString localDir = qmlPath.append(buildType);
 
 
-//    if(b_localLoading){
-//        finalPath=localDir;
-//    } else{
-//        finalPath = remoteDirectoryPath;
-//    }
+    //    if(b_localLoading){
+    //        finalPath=localDir;
+    //    } else{
+    //        finalPath = remoteDirectoryPath;
+    //    }
 
 
 #ifdef __ANDROID__
@@ -457,11 +457,11 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 #elif for_desktop
 
 
-        if( !loadSkins(QUrl(finalPath)))
-        {
-            emit skinIndexReady(false);
-            return false;
-        }
+    if( !loadSkins(QUrl(finalPath)))
+    {
+        emit skinIndexReady(false);
+        return false;
+    }
 
 #elif for_harmattan
     if(b_localLoading == true)
@@ -1305,67 +1305,112 @@ void qorbiterManager::mountMediaDevices()
 {
     qDebug() << "Mounting LinuxMCE Home Dir";
 
-
-
-//    for(int dc =0; dc < storageDevices.count(); dc++){
-//        qDebug()<< "Starting process for device " << storageDevices.at(dc).toMap()["Description"].toString() << " #"<<storageDevices.at(dc).toMap()["Device"].toString();
-//        int d = storageDevices.at(dc).toMap()["Device"].toInt();
-//        QString dirCmd = "";
-//#ifndef RPI
-//        dirCmd  = "gksudo";
-//#endif
-//        QDir mntDir;
-//        mntDir.setPath("/mnt/remote/"+QString::number(d));
-//        qDebug() << mntDir.exists();
-//        if(!mntDir.exists()){
-//            QProcess *mkPath = new QProcess(this);
-//            QStringList dArgs;
-//            dArgs.append("mkdir -p /mnt/remote/"+QString::number(d));
-//            mkPath->start(dirCmd, dArgs);
-//            mkPath->waitForFinished(10000);
-
-//        }
-//        else{
-
-//        }
-
-//        if(mntDir.entryList(QDir::NoDotAndDotDot).count() == 0){
-//            qDebug() << "Existing files in path" << mntDir.entryList(QDir::NoDotAndDotDot).count();
-//            QString mountProg = "gksudo";
-//#ifdef RPI
-//            mountProg="";
-//#endif
-//            QStringList args;
-
-//            args.append(QString("mount -t nfs "+m_ipAddress+":/mnt/device/"+QString::number(d) + " /mnt/remote/"+QString::number(d)) +" -o vers=3" );
-//            QProcess *mountProcess = new QProcess(this);
-//            mountProcess->start(mountProg, args);
-//            mountProcess->waitForFinished(10000);
-//            qDebug() << "Process Status ::" <<mountProcess->state();
-//            if(mountProcess->state()== QProcess::FailedToStart){
-//                qWarning() << "command failed to start!";
-//                qDebug() << mountProcess->readAllStandardError();
-//                qDebug() << mountProcess->errorString();
-//            }
-//            qWarning() << "QProcess Exiting, state is :"<< mountProcess->state();
-//            qWarning() << "Process exited with::"<< mountProcess->exitCode();
-//        }
-//    }
-
-    QString dirCmd = "gksudo";
-    QDir mntDir;
-    mntDir.setPath("/mnt/remote/dvd");
-    qDebug() << mntDir.exists();
-#ifdef RPI
-    dirCmd="";
+    QString dirCmd = "";
+#ifndef RPI
+    dirCmd  = "gksudo";
 #endif
+    QDir mntDir;
+    mntDir.setPath("/mnt/remote/LinuxMCE");
+    qDebug() << "Mount directory exists? " << mntDir.exists();
     if(!mntDir.exists()){
         QProcess *mkPath = new QProcess(this);
         QStringList dArgs;
-        dArgs.append("mkdir -p /mnt/remote/dvd");
+        dArgs.append("mkdir -p /mnt/remote/LinuxMCE");
         mkPath->start(dirCmd, dArgs);
         mkPath->waitForFinished(10000);
+        while(mkPath->state()==QProcess::Running){
+            qDebug() << mkPath->readAllStandardOutput();
+        }
     }
+
+    qWarning() << mntDir.entryList().count();
+    if(mntDir.exists() && mntDir.entryList().length() ==2){
+       qWarning() << mntDir.path() << " is not mounted, mounting";
+
+        QString mountProg = "gksudo";
+#ifdef RPI
+        mountProg="";
+#endif
+        QStringList args;
+        args.append(QString("mount -t nfs "+m_ipAddress+":/home "+ mntDir.path()+" -o vers=3" ));
+        QProcess *mountProcess = new QProcess(this);
+        mountProcess->start(mountProg, args);
+        mountProcess->waitForFinished(10000);
+
+        qDebug() << "Process Status ::" <<mountProcess->state();
+        if(mountProcess->state()== QProcess::FailedToStart){
+            qWarning() << "command failed to start!";
+            qDebug() << mountProcess->readAllStandardError();
+            qDebug() << mountProcess->errorString();
+        }
+        qWarning() << "QProcess Exiting, state is :"<< mountProcess->state();
+        qWarning() << "Process exited with::"<< mountProcess->exitCode();
+    }
+
+    //    if(mntDir.entryList(QDir::NoDotAndDotDot).count() == 0){
+    //        qDebug() << "Existing files in path" << mntDir.entryList(QDir::NoDotAndDotDot).count();
+    //
+    //    }
+
+    //    for(int dc =0; dc < storageDevices.count(); dc++){
+    //        qDebug()<< "Starting process for device " << storageDevices.at(dc).toMap()["Description"].toString() << " #"<<storageDevices.at(dc).toMap()["Device"].toString();
+    //        int d = storageDevices.at(dc).toMap()["Device"].toInt();
+    //        QString dirCmd = "";
+    //#ifndef RPI
+    //        dirCmd  = "gksudo";
+    //#endif
+    //        QDir mntDir;
+    //        mntDir.setPath("/mnt/remote/"+QString::number(d));
+    //        qDebug() << mntDir.exists();
+    //        if(!mntDir.exists()){
+    //            QProcess *mkPath = new QProcess(this);
+    //            QStringList dArgs;
+    //            dArgs.append("mkdir -p /mnt/remote/"+QString::number(d));
+    //            mkPath->start(dirCmd, dArgs);
+    //            mkPath->waitForFinished(10000);
+
+    //        }
+    //        else{
+
+    //        }
+
+    //        if(mntDir.entryList(QDir::NoDotAndDotDot).count() == 0){
+    //            qDebug() << "Existing files in path" << mntDir.entryList(QDir::NoDotAndDotDot).count();
+    //            QString mountProg = "gksudo";
+    //#ifdef RPI
+    //            mountProg="";
+    //#endif
+    //            QStringList args;
+
+    //            args.append(QString("mount -t nfs "+m_ipAddress+":/mnt/device/"+QString::number(d) + " /mnt/remote/"+QString::number(d)) +" -o vers=3" );
+    //            QProcess *mountProcess = new QProcess(this);
+    //            mountProcess->start(mountProg, args);
+    //            mountProcess->waitForFinished(10000);
+    //            qDebug() << "Process Status ::" <<mountProcess->state();
+    //            if(mountProcess->state()== QProcess::FailedToStart){
+    //                qWarning() << "command failed to start!";
+    //                qDebug() << mountProcess->readAllStandardError();
+    //                qDebug() << mountProcess->errorString();
+    //            }
+    //            qWarning() << "QProcess Exiting, state is :"<< mountProcess->state();
+    //            qWarning() << "Process exited with::"<< mountProcess->exitCode();
+    //        }
+    //    }
+
+    //    QString dirCmd = "gksudo";
+    //    QDir mntDir;
+    //    mntDir.setPath("/mnt/remote/dvd");
+    //    qDebug() << mntDir.exists();
+    //#ifdef RPI
+    //    dirCmd="";
+    //#endif
+    //    if(!mntDir.exists()){
+    //        QProcess *mkPath = new QProcess(this);
+    //        QStringList dArgs;
+    //        dArgs.append("mkdir -p /mnt/remote/dvd");
+    //        mkPath->start(dirCmd, dArgs);
+    //        mkPath->waitForFinished(10000);
+    //    }
 
 
 }
@@ -1461,7 +1506,7 @@ bool qorbiterManager::loadSkins(QUrl base)
     if(localSkins.count()==0){
         tskinModel->addSkin("default,aeon,STB");
     } else {
-    tskinModel->addSkin(localSkins.join(","));
+        tskinModel->addSkin(localSkins.join(","));
     }
 #endif
     return true;
@@ -1535,7 +1580,7 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
     setDceResponse("Initializing Local Manager");
     initializeManager(incrouterip.toStdString(), incdeviceid.toLong());
 
-  //  getConfiguration(); /* Connect to skins ready signal */
+    //  getConfiguration(); /* Connect to skins ready signal */
 }
 
 /*!

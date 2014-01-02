@@ -1,6 +1,6 @@
 // import QtQuick 1.1 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
-import "../../../skins-common/lib/effects"
+
 
 Item {
     id:mediaPlaybackBase
@@ -38,17 +38,7 @@ Item {
 
         anchors.verticalCenter: parent.verticalCenter
         clip:false
-        DropShadow{
-            id:headerDrop
-            sourceItem:fill
-            height: fill.height
-            width: fill.width
-           // anchors.verticalCenter: opacityMask.verticalCenter
-            distance:4
-            color:"black"
-            blur:1
-            opacity: .25
-        }
+
         Rectangle{
             anchors.fill: parent
             color:"black"
@@ -87,15 +77,7 @@ Item {
             height: parent.height*.95
         }
 
-        DropShadow{
-            id:metadata_drop
-            sourceItem:mediaTypeMetaData
-            height: mediaTypeMetaData.height
-            width: mediaTypeMetaData.width
-            distance:2
-            color:"black"
-            anchors.left: mediaTypeMetaData.left
-        }
+
 
 
     }
