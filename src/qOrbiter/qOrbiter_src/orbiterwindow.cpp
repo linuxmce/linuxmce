@@ -162,13 +162,11 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #ifdef ANDROID
 
     #ifdef QT4_8
-    mainView.rootContext()->setContextProperty("appW", (mainView.window()->width()/ 2));//this is done because android reports the desktop width as 2x what it is.at least on my phone
+    mainView.rootContext()->setContextProperty("appW", (mainView.window()->width()));
     mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
     #endif
 
-#endif
-
-#ifdef for_desktop
+#elif for_desktop
     if(fullScreen==true){
         mainView.rootContext()->setContextProperty("appW", 800);
         mainView.rootContext()->setContextProperty("appH", 600);
@@ -249,9 +247,11 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #else
     mainView.setSource(QString("assets:/qml/Base.qml"));
 #endif
-  #endif
-
+  #else
     mainView.setSource(qrcPath);
+#endif
+
+
     //mainView.setSource(QApplication::applicationDirPath().remove("/bin")+buildType+"/Splash.qml");
 
 

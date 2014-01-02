@@ -193,7 +193,7 @@ int main(int argc, char* argv[])
     QApplication::setGraphicsSystem("meego");
 #elif GLENABLED
 #ifndef QT5
-    QApplication::setGraphicsSystem("raster");
+    QApplication::setGraphicsSystem("opengl");
 #endif
 #else
     QApplication::setGraphicsSystem("raster");
