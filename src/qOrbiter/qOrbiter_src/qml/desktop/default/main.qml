@@ -96,9 +96,9 @@ Item {
     function screenchange(screenname ){
         console.log(screenname)
         pageLoader.source = "screens/"+screenname
-//        while(pageLoader.status == Component.Loading){
-//            console.log("Screenchange::"+pageLoader.progress)
-//        }
+        //        while(pageLoader.status == Component.Loading){
+        //            console.log("Screenchange::"+pageLoader.progress)
+        //        }
 
         if (pageLoader.status == Component.Ready){
             var s = String(screenname)
@@ -151,15 +151,19 @@ Item {
     */
     function loadComponent(componentName, paramObj ){
 
+        console.log("Loading Component " + componentName)
         if(componentName===""){
             componentLoader.source=""
             return
         }
 
-        componentLoader.source = "components/"+componentName
-        while(componentLoader.status === Component.Loading){
-            //  console.log(componentLoader.progress)
+        if(paramObj){
+            componentLoader.currentParams = paramObj
         }
+
+        componentLoader.source = "components/"+componentName
+
+
 
         if (componentLoader.status == Component.Ready){
             if(paramObj){
@@ -169,12 +173,14 @@ Item {
                     console.log(JSON.stringify(p))
                     i[p] =paramObj[p]
                 }
+                console.log(JSON.stringify(componentLoader.item))
             }
-
             logger.userLogMsg ="Command to change to:" + componentName+ " was successfull"
-        }else{
+        }else if (componentLoader.status===Component.Error){
             logger.userLogMsg = "Command to add: " + componentName + " failed!"
             logger.userLogMsg = componentLoader.Error.toString()
+        } else if (componentLoader.status===Component.Loading){
+            console.log("Component Still loading..")
         }
     }
 
@@ -337,9 +343,24 @@ Item {
         }
         z:5
         focus:false
+        property variant currentParams:null
         objectName: "componentbot"
         onLoaded: {
             console.log("Component is loaded")
+
+            if(currentParams!==null){
+
+                var i = componentLoader.item
+
+                for(var p in currentParams){
+                    console.log(JSON.stringify(currentParams))
+                    console.log(JSON.stringify(p))
+                    i[p] =currentParams[p]
+                }
+
+                console.log("Set item parameters")
+                currentParams=null
+            }
             componentLoader.z = 5
         }
     }

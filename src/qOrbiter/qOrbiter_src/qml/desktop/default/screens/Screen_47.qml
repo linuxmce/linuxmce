@@ -1,7 +1,6 @@
 import QtQuick 1.1
 
 import AudioVisual 1.0
-import "../../../skins-common/lib/effects"
 import "../components"
 import "../animation"
 import "../../../skins-common/lib/handlers"

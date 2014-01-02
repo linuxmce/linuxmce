@@ -5,6 +5,7 @@ Item {
     height: manager.appHeight
     width: manager.appWidth
     property int requestedUser:-1
+
     state:"loaded"
     MouseArea{
         anchors.fill: parent
