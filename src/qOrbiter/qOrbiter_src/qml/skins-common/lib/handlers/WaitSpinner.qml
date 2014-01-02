@@ -1,5 +1,5 @@
 import QtQuick 1.1
-import Qt.labs.shaders 1.0
+
 /*!
  *\class WaitSpinner
  *\brief This is a spinner to display the app is waiting for a response
