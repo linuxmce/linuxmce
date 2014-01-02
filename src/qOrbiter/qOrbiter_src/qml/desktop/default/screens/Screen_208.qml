@@ -2,7 +2,7 @@ import QtQuick 1.1
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 import "../effects"
-import Qt.labs.shaders 1.0
+
 /*!
  *\brief MythTv recording playback screen.
  *

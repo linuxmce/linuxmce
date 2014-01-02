@@ -5,7 +5,7 @@ and in some cases integrated with opengl effects for various pages. The idea is 
 a wider scale than having to include them in every single page
   */
 import QtQuick 1.1
-import Qt.labs.shaders 1.0
+
 
 Item {
 

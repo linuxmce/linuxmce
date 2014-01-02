@@ -3,7 +3,7 @@ import "../components"
 import "../js/ComponentLoader.js" as MyJs
 import "../effects"
 import "../../../skins-common/lib/handlers"
-import Qt.labs.shaders 1.0
+
 
 Row{
     spacing:scaleY(1)
