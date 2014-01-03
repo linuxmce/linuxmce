@@ -2,9 +2,13 @@ import QtQuick 1.1
 import "../../../../skins-common/lib/handlers"
 Item{
     id:metadataContainer
-    height: parent.height
-    width: parent.width
+    Connections    {
+        target: dcenowplaying
+        onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+    }
+
     focus:true
+    state: dcenowplaying.aspect !=="poster" ? "nonposter": "poster"
     Rectangle{
         anchors.fill: parent
         color: "black"
@@ -41,6 +45,10 @@ Item{
     
     NowPlayingRemoteImage {
         id: nowplayingimage
+        anchors{
+            top:parent.top
+            left:parent.left
+        }
     }
     
     Loader{
@@ -77,33 +85,21 @@ Item{
     states: [
         State {
             name: "nonposter"
-            AnchorChanges{
-                target:nowplayingimage
-                anchors{
-                    top:parent.top
-                    left:parent.left
-                }
-            }
+
             AnchorChanges{
                 target: mediaMetadata
                 anchors.top: nowplayingimage.bottom
-                anchors.horizontalCenter: nowplayingimage.horizontalCenter
+                anchors.left: parent.left
             }
 
         },
         State {
             name: "poster"
-            AnchorChanges{
-                target:nowplayingimage
-                anchors{
-                    top:parent.top
-                    left:parent.left
-                }
-            }
+
             AnchorChanges{
                 target: mediaMetadata
-                anchors.top: nowplayingimage.bottom
-                anchors.horizontalCenter: nowplayingimage.horizontalCenter
+                anchors.top: manager.b_orientation ? nowplayingimage.bottom : parent.top
+                anchors.left: manager.b_orientation? parent.left : nowplayingimage.right
             }
         }
     ]

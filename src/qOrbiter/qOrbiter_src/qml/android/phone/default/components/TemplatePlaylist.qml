@@ -15,7 +15,7 @@ Item {
         target: mediaplaylist
         onActiveItemChanged:{
             nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex  , ListView.Beginning)
-             playlist.currentIndex = mediaplaylist.currentIndex
+             nonepgplaylistview.currentIndex = mediaplaylist.currentIndex
         }
     }
 

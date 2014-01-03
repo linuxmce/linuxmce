@@ -19,11 +19,6 @@ Item {
     }
 
 
-    Connections    {
-        target: dcenowplaying
-        onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-    }
-
     TemplatePlaylist {
         id: templatePlaylist
         scale:conversionRate
@@ -32,6 +27,8 @@ Item {
 
     MetadataContainer {
         id: metadataContainer
+        height: parent.height
+        width: parent.width
     }
 
     Item{

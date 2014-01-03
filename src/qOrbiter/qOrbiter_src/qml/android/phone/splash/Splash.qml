@@ -22,8 +22,8 @@ Rectangle {
     Image {
         id: splash
         anchors.centerIn: rectangle1
-        fillMode: Image.PreserveAspectFit
-        source: "qrc:/img/desktop_splash.png"
+        fillMode: Image.PreserveAspectCrop
+        source: "../default/img/background.png"
         anchors.fill: parent
     }
 

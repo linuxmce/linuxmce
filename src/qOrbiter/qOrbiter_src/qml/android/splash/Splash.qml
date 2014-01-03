@@ -27,17 +27,17 @@ Item {
         newOrbiterOptionContainer.visible=true; window.showSetup()
     }
     onWidthChanged: console.log("detected size change")
-//    Image {
-//        id: splash
-//        anchors.centerIn: parent
-//        fillMode: Image.PreserveAspectFit
-//        source: "tablet/default/img/icons/backgrounds/bedroom.png"
-//        anchors.fill: parent
-//  }
+    Image {
+        id: splash
+        anchors.centerIn: parent
+        fillMode: Image.PreserveAspectFit
+        source: "../tablet/default/img/icons/backgrounds/bedroom.png"
+        anchors.fill: parent
+  }
     FontLoader{
         id:myFont
         name:"Sawasdee"
-        source: "fonts/Sawasdee.ttf"
+        source: "../../skins-common/fonts/Sawasdee.ttf"
     }
 
     function scaleX(x){
