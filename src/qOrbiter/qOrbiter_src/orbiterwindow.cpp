@@ -162,8 +162,8 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #ifdef ANDROID
 
     #ifdef QT4_8
-    mainView.rootContext()->setContextProperty("appW", (mainView.window()->width()));
-    mainView.rootContext()->setContextProperty("appH", mainView.window()->height());
+    mainView.rootContext()->setContextProperty("appW", 800);
+    mainView.rootContext()->setContextProperty("appH", 600);
     #endif
 
 #elif for_desktop
@@ -274,7 +274,7 @@ void orbiterWindow::initView()
         mainView.show();
     }
 #elif defined(__ANDROID__)
-    mainView.showFullScreen();
+    mainView.show();
 #elif defined(for_android)
     mainView.show();
 #elif RPI

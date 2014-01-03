@@ -2,7 +2,13 @@ import QtQuick 1.1
 
 Rectangle {
     id:rootItem
-    anchors.fill: parent
+    anchors{
+        top:parent.top
+        bottom:parent.bottom
+        left:parent.left
+        right:parent.right
+    }
+
     color: "black"
     focus:true
     property string routerAddress:window.router

@@ -232,7 +232,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     }else{
         finalPath=remoteDirectoryPath;
     }
-    qorbiterUIwin->setSource(finalPath+"/splash/Splash.qml");
+#ifndef ANDROID
+    qorbiterUIwin->setSource(finalPath+"/splash/Splash.qml"); /*! We dont set android because it has its own bootstrap */
+#endif
+
     qDebug() << "build type set to:: "<< buildType;
     initializeGridModel();  //begins setup of media grid listmodel and its properties
     initializeSortString(); //associated logic for navigating media grids
