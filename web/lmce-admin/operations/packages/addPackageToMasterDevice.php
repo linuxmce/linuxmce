@@ -466,7 +466,7 @@ function addPackageToMasterDevice($output,$dbADO) {
 							FK_OperatingSystem=?,
 							FK_Distro=?,
 							MustBuildFromSource=?,
-							Comments=?,
+							Comments=?
 						WHERE PK_Package_Source_Compat=?';
 					$dbADO->Execute($updatePackageSourceCompat,array($compatOperatingSystem,$compatDistro,$compatMustBuild,$compatComments,$value));
 				}
