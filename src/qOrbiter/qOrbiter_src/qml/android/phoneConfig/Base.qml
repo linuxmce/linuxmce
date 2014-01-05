@@ -1,22 +1,36 @@
 import QtQuick 1.1
 
-Rectangle {
+Item {
     id:rootItem
-    anchors{
-        top:parent.top
-        bottom:parent.bottom
-        left:parent.left
-        right:parent.right
+    anchors.fill: parent
+    focus:true
+
+    Connections{
+        target: window
+        onBeginLoading:{
+            bootStap.source="BaseLoaded.qml"
+        }
     }
 
-    color: "black"
-    focus:true
-    property string routerAddress:window.router
-    Component.onCompleted: {
-        forceActiveFocus();
-        wait.start()
-        if(androidSystem.updateBuildInformation() && androidSystem.updateExternalStorageLocation()){
-            logger.setLogLocation(androidSystem.externalStorageLocation)
+
+
+    Rectangle{
+        anchors.fill: parent
+        color: "green"
+    }
+
+    Rectangle{
+        anchors.fill: parent
+        opacity:.85
+        gradient: Gradient{
+            GradientStop{
+                position: 0.0
+                color:"transparent"
+            }
+            GradientStop{
+                position: .56
+                color:"black"
+            }
         }
     }
 
@@ -36,97 +50,19 @@ Rectangle {
         event.accepted=true
     }
 
-    Timer{
-        id:wait
-        interval: 1000
-        onTriggered: {mainContent.source = "http://"+routerAddress+"/lmce-admin/skins/android/splash/Splash.qml"; console.log("conecting")}
-        running:false
-        repeat:true
-    }
-
-    Text {
-        id: loading
-        text: qsTr("Connecting to "+routerAddress+", please be patient \n" )
-        anchors.top: parent.top
-        font.pixelSize: 22
-        width: parent.width
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        color: "white"
-        anchors.horizontalCenter: parent.horizontalCenter
-        font.weight: Font.Light
-    }
-
-
-
-
-
-    Item{
-        id:fil
+    Text{
         anchors.centerIn: parent
-        height: 45
-        width: 400
+        font.pixelSize: 14
+        text:"width: "+rootItem.width+" X height "+rootItem.height+"\n LinuxMCE is loading"
+        font.bold: true
+        color: "white"
 
-        Rectangle{
-            anchors.fill: parent
-            color:"green"
-            border.color: "white"
-            border.width: 1
-            radius:5
-            opacity:switched ? 1 : 0
-            property bool switched:false
-            Text {
-                id: splashtxt
-                text:  androidSystem.deviceName
-                anchors.bottom: parent.bottom
-                font.pixelSize: 28
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                color: "white"
-                anchors.horizontalCenter: parent.horizontalCenter
-                font.weight: Font.Light
-            }
-
-            Timer{
-                id:sw
-                running:true
-                interval:800
-
-                onTriggered: {
-                    parent.switched = !parent.switched
-                }
-                repeat: true
-            }
-
-            Behavior on opacity{
-                PropertyAnimation{
-                    duration: 750
-                }
-            }
-        }
     }
 
     Loader{
-        id:mainContent
-        height: manager.appHeight
-        width: manager.appWidth
-        source:""
-        opacity: 0
-        onOpacityChanged: PropertyAnimation {target:mainContent; property: "opacity"; to:1 ; duration: 1500}
-        onStatusChanged: if(mainContent.status === Loader.Error){
-                             loading.text = qsTr("Im Sorry I couldnt connect to a LinuxMCE Server at "+window.router+" Please ensure you can reach your core. \n I will continue trying. \n"+ mainContent.sourceComponent.errorString())
-                             console.log(mainContent.sourceComponent.errorString())
-                             wait.stop()
-                             configOptions.state = "editing"
-                         }
-                         else  if (mainContent.status === Loader.Ready){
-                             mainContent.opacity = .01
-                             loading.visible= false
-                             loading.text = "Content Loaded, one moment"
-                         }
-
+        id:bootStap
+        anchors.fill: parent
+        source:window.orbiterInitialized ? "BaseLoaded.qml" : ""
     }
 
-    FirstRunOptions{
-        id:configOptions
-
-    }
 }

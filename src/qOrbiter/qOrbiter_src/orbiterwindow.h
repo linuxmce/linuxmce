@@ -95,6 +95,7 @@ public:
     QString localPath;
     bool phoneSize;
     bool fullScreenOrbiter;
+    bool orbiterInitialized;
 
     void initView();
 
@@ -111,6 +112,7 @@ public slots:
     Q_INVOKABLE void forceResponse (QString forced);
     void loadSetupPage();
 
+    void setOrbiterInitialized(){orbiterInitialized = true; emit beginLoading();}
 
 
 
@@ -200,6 +202,7 @@ signals:
     void pageChanged();
     void routerChanged();
     void backButtonPressed();
+    void beginLoading();
 };
 #endif
 

@@ -162,8 +162,8 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #ifdef ANDROID
 
     #ifdef QT4_8
-    mainView.rootContext()->setContextProperty("appW", 800);
-    mainView.rootContext()->setContextProperty("appH", 600);
+    mainView.rootContext()->setContextProperty("appW", mainView.width());
+    mainView.rootContext()->setContextProperty("appH", mainView.height());
     #endif
 
 #elif for_desktop
@@ -233,6 +233,14 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #endif
 
 #ifdef ANDROID
+
+
+
+    #ifdef QT4_8
+    mainView.rootContext()->setContextProperty("appW", mainView.width());
+    mainView.rootContext()->setContextProperty("appH", mainView.height());
+    #endif
+
     mainView.engine()->addImportPath("assets:/imports/androidComponents");
     mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
     mainView.engine()->addPluginPath("assets:/lib");
@@ -274,7 +282,7 @@ void orbiterWindow::initView()
         mainView.show();
     }
 #elif defined(__ANDROID__)
-    mainView.show();
+    mainView.showMaximized();
 #elif defined(for_android)
     mainView.show();
 #elif RPI

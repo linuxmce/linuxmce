@@ -98,7 +98,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
     setDceResponse("Starting...");
 
-
+#ifdef QT4
+    qDebug() << QApplication::desktop()->height();
+    qDebug() << view->width();
+#endif
     if (readLocalConfig())
     {
         emit localConfigReady(true);
@@ -134,8 +137,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
 
-    qorbiterUIwin->rootContext()->setContextProperty("appH", appHeight);
-    qorbiterUIwin->rootContext()->setContextProperty("appW", appWidth);
+#ifdef QT4
+    qorbiterUIwin->rootContext()->setContextProperty("appH", QApplication::desktop()->height());
+    qorbiterUIwin->rootContext()->setContextProperty("appW", QApplication::desktop()->width());
+#endif
 
     //Don't think we need this with Qt5 QQuickView as it resizes Object to View above
 #ifndef QT5
@@ -181,7 +186,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #elif defined (RPI)
     buildType="/qml/rpi";
 #elif defined ANDROID
-    if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
+    qDebug() << "Resolution::"<<QApplication::desktop()->width()<<"w x "<<QApplication::desktop()->height()<<"h";
+    int h = QApplication::desktop()->height();
+    int w = QApplication::desktop()->width();
+    if (w > 480 && h > 854 || h > 480 && w > 854 )
     {
         setFormFactor(2);
         buildType = "/qml/android/tablet";
@@ -291,6 +299,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
     /*Needs Doin at construction */
     userList = new UserModel( new UserItem, this);
+
+    emit orbiterInitialized();
 }
 
 

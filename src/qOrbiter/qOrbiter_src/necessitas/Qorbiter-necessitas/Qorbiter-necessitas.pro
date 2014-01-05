@@ -61,7 +61,9 @@ TARGET=qorbiter-$$QT_VERSION
 
         base.source = ../../qml/android/phoneConfig/Base.qml
         base.source += ../../qml/android/phoneConfig/FirstRunOptions.qml
-        base.source += ../../qml/android/phoneConfig/PropAndValDisplay.qml
+        base.source += ../../qml/android/phoneConfig/PropAndValDisplay.qml \
+                        ../../qml/android/phoneConfig/BaseLoaded.qml
+
         base.target = qml/
 
         #The Configuration file read on startup and used subsequently.
@@ -349,7 +351,8 @@ OTHER_FILES += ../../Readme.txt \
     android/src/org/kde/necessitas/ministro/IMinistro.aidl \
     android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
     android/src/org/kde/necessitas/origo/VideoActivity.java \
-    android/src/org/kde/necessitas/origo/LinuxmceAudioService.java
+    android/src/org/kde/necessitas/origo/LinuxmceAudioService.java \
+    ../../qml/android/phoneConfig/BaseLoaded.qml
 
 RESOURCES += \
     ../../skinData.qrc

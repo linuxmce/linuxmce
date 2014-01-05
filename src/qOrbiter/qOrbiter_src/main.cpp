@@ -463,6 +463,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(stopTimeCode()), timecode, SLOT(stop()), Qt::QueuedConnection);
 
         //setup
+        QObject::connect(&w, SIGNAL(orbiterInitialized()), &orbiterWin, SLOT(setOrbiterInitialized()));
         QObject::connect(&w, SIGNAL(registerOrbiter(int,QString,int)), &pqOrbiter,SLOT(registerDevice(int,QString,int)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(startManager(QString,QString)), &w, SLOT(qmlSetupLmce(QString,QString)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(addExistingOrbiter(ExistingOrbiter*)), w.myOrbiters, SLOT(appendRow(ExistingOrbiter*)));

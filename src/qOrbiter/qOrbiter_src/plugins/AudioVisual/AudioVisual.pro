@@ -5,7 +5,6 @@ TARGET = AudioVisual
 contains(QT_VERSION,4.*.*){
 
 message("$$QT_VERSION DCE-Av-Plugin")
-
          QT += declarative phonon network opengl
  android-g++{
        QT-=phonon
@@ -18,8 +17,7 @@ message("$$QT_VERSION DCE-Av-Plugin")
 contains(QT_VERSION,5.*.*){
 	message("$$QT_VERSION DCE-Av-Plugin")
         QT += quick multimedia network opengl
-	DEFINES+=QT5
-        DEFINES-=QT4
+        DEFINES+=QT5
 }
 
 
@@ -32,8 +30,16 @@ QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 INCLUDEPATH += ../../../../ ../../../../DCE/
 
 linux-g++{
+
+!RPI{
 INCLUDEPATH+=$$[QT_INSTALL_PREFIX]/include/phonon/Phonon
 DESTDIR=../../imports/AudioVisual
+}
+
+RPI{
+DESTDIR=../../imports/AudioVisual
+RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
+}
 
 }
 

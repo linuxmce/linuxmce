@@ -32,9 +32,12 @@ local-development{
             }
 } else {
 
-    android-g++{ DESTDIR = ../build-output }
-     else  {
-        !linux-rasp-pi-g++{ DESTDIR = ../build-output }
+    android-g++{
+    DESTDIR = ../build-output
+    }  else  {
+        !linux-rasp-pi-g++{
+            DESTDIR = ../build-output
+                            }
             }
 }
 
@@ -110,17 +113,37 @@ linux-g++{
         }
 
         contains(QT_VERSION,5.*.*){
+                RPI{
+                folder_01.source= qml/rpi
+                folder_01.target= qml
+
+                # plugins_folder.source = imports/
+                # plugins_folder.target = $$DESTDIR
+
+                # DEPLOYMENTFOLDERS+= plugins_folder
+
+                DEFINES+=RPI GLENABLED
+                DEFINES-=for_desktop
+                DEPLOYMENTFOLDERS += folder_02 #folder_01
+                QT+= qml
+                QT-=declarative
+
+                target.path=/opt/QOrbiter
+                QML_IMPORT_PATH=imports
+                INSTALLS+=target
+                }else{
                 folder_01.source = qml/qt5-desktop
                 folder_01.target = $$DESTDIR/qml/
                 plugins_folder.source = imports/
                 plugins_folder.target = $$DESTDIR
+                    }
                 glmsg=scenegraph
         }
 
         folder_03.source = config.xml
         folder_03.target = $$DESTDIR
 
-         !linux-rasp-pi-g++{
+         !linux-rasp-pi-g++|!RPI{
         DEFINES += for_desktop
         }
 

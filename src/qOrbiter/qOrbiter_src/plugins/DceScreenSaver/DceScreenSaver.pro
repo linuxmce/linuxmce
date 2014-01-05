@@ -21,7 +21,13 @@ uri = DceScreenSaver
 TARGET = $$qtLibraryTarget($$TARGET)
 
 linux-g++{
+
 DESTDIR=../../imports/DceScreenSaver
+
+RPI{
+RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
+}
+
 }
 linux-rasp-pi-g++{
 DESTDIR=../../imports/DceScreenSaver

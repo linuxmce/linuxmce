@@ -641,6 +641,7 @@ signals:
     void applicationPathChanged();
     void imagePathChanged();
     void pingTheRouter();
+    void orbiterInitialized();
 
     /*Media Device Control Signals*/
     void resendAvCodes();
