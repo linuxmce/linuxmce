@@ -985,7 +985,11 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
 
+    if(i_current_mediaType !=iPK_MediaType){
+        emit clearPlaylist();
+    }
     i_current_mediaType=iPK_MediaType;
+
     setMediaType(iPK_MediaType);
     //**TODO - create a function that keeps a running track of the current room. like, the location info class or something.
     // it should unify the current location and media data in to one easily accesible item that update automatically on changes.
@@ -1045,12 +1049,14 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit setNowPlaying(false);
         emit gotoQml("Screen_1.qml");
         b_mediaPlaying = false;
-        emit currentScreenChanged("Screen_1.qml");
+       // emit currentScreenChanged("Screen_1.qml");
         currentScreen = "Screen_1.qml";
         internal_streamID = iStreamID;
         emit streamIdChanged(iStreamID);
         emit mediaTypeChanged(iPK_MediaType);
         emit stopTimeCode();
+        emit clearPlaylist();
+        emit clearTVplaylist();
     } else {
 
         if(iPK_MediaType ==4|| iPK_MediaType==5){
