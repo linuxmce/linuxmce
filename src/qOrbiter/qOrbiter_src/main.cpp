@@ -186,7 +186,7 @@ extern "C" {
 
 int main(int argc, char* argv[])
 {
-
+ int deviceType =-1; /*!< deviceType can be 0 for osd(onscreen qorbiter), 1 for desktop(linux,mac,windows),2 for android, 3 for i0S */
 
 
 #ifdef for_harmattan
@@ -216,6 +216,7 @@ int main(int argc, char* argv[])
     QCoreApplication::setOrganizationName("www.linuxMCE.org");
 #ifdef __ANDROID__ && ! defined(QT5)
     AndroidSystem androidHelper;
+    deviceType=2;
 #endif
 
     QOrbiterLogger localLogger;
@@ -235,6 +236,7 @@ int main(int argc, char* argv[])
     string graphicsmode="raster";
     string screen = "";
     int PK_Device=-1;
+
     string sLogger="stdout";
     bool bLocalMode=false,bError=false; // An error parsing the command line
     char c;
@@ -265,6 +267,10 @@ int main(int argc, char* argv[])
             break;
         case 's':
             screen="fullscreen";
+            break;
+        case 'osd':
+            screen="fullscreen";
+            deviceType=0;
             break;
         default:
             bError=true;
@@ -298,6 +304,7 @@ int main(int argc, char* argv[])
         cerr << s << endl;
         exit(1);
     }
+    deviceType=1;
 #endif
 
     try
@@ -318,6 +325,7 @@ int main(int argc, char* argv[])
     try
     {
 #ifdef IOS
+        deviceType=3;
         //        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 #endif
 
@@ -341,7 +349,14 @@ int main(int argc, char* argv[])
 
 
         QThread dceThread;
-        qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
+
+
+        if(deviceType==0){
+              qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
+        } else {
+
+        }
+
 
         orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm);
 #ifdef __ANDROID__
