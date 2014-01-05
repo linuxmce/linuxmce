@@ -334,6 +334,12 @@ int main(int argc, char* argv[])
             fm=true;
         }
 
+        /*! Command impl based routine in here to execute needed dt determinations? */
+        /*! Only required for x11 (right?), should consider android dt creation */
+        /*! See line 4702 for idea on how to get data from router to execute selection */
+        /*! UI will need to be created to allow the device to make the selections before the device tries to connect */
+
+
         QThread dceThread;
         qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
 
@@ -372,7 +378,6 @@ int main(int argc, char* argv[])
         orbiterWin.mainView.rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
         orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
 
-
         // connnect local logger
         QObject::connect(&pqOrbiter, SIGNAL(commandResponseChanged(QString)), &localLogger, SLOT(logCommandMessage(QString)));
         QObject::connect(&pqOrbiter, SIGNAL(mediaMessage(QString)), &localLogger, SLOT(logGuiMessage(QString)));
@@ -391,10 +396,11 @@ int main(int argc, char* argv[])
         //shutdown signals
         QObject::connect(&w, SIGNAL(destroyed()), &pqOrbiter, SLOT(deinitialize()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(closeOrbiter()), &pqOrbiter, SLOT(shutdown()));
+        QObject::connect(&pqOrbiter,SIGNAL(closeOrbiter()), storedVideoPlaylist, SLOT(resetInternalData()));
         QObject::connect(&pqOrbiter, SIGNAL(destroyed()), &dceThread, SLOT(quit()), Qt::QueuedConnection);
         QObject::connect(&dceThread, SIGNAL(finished()), &dceThread, SLOT(deleteLater()));
         QObject::connect(&a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()));
-       // QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));
+        // QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));
 
 
         QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
@@ -535,7 +541,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(populate_floorplan_device_commands(int)), &pqOrbiter, SLOT(getFloorplanDeviceCommand(int)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(addFloorplanDeviceCommand(QVariantMap)), &w, SLOT(setFloorPlanCommand(QVariantMap)), Qt::QueuedConnection);
         //mediagrid
-         QObject::connect(&w, SIGNAL(gridStatus(bool)), &pqOrbiter, SLOT(setGridStatus(bool)),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(gridStatus(bool)), &pqOrbiter, SLOT(setGridStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(resetSearchParams()), &pqOrbiter, SLOT(initializeGrid()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(updateSelectedAttributes(QString)), &w, SLOT(updateSelectedAttributes(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(cancelRequests()), &pqOrbiter, SLOT(cancelAllRequests()), Qt::QueuedConnection);
@@ -554,7 +560,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(setDceGridParam(int,QString)), &pqOrbiter, SLOT(setStringParam(int,QString)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(authUserMedia(int,QString,int)), &pqOrbiter, SLOT(authorizePrivateMedia(int,QString,int)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(mediaAuthChanged(int)), w.userList, SLOT(setCurrentPrivateUser(int)), Qt::QueuedConnection);
-      //  QObject::connect(w.userList, SIGNAL(privateUserChanged(int, QString)), &pqOrbiter, SLOT(setStringParam(int,QString)),Qt::QueuedConnection);
+        //  QObject::connect(w.userList, SIGNAL(privateUserChanged(int, QString)), &pqOrbiter, SLOT(setStringParam(int,QString)),Qt::QueuedConnection);
         QObject::connect(mediaModel,SIGNAL(gridTypeChanged(int)), w.userList, SLOT(unsetPrivate()));
 
         QObject::connect(mediaModel, SIGNAL(pauseChanged(bool)), &pqOrbiter, SLOT(setGridPause(bool)), Qt::QueuedConnection);
@@ -733,11 +739,11 @@ int main(int argc, char* argv[])
         pqOrbiter.qmlSetup(PK_Device, QString::fromStdString(sRouter_IP));
         a.exec();
 
-//        localLogger.deleteLater();
-//        timecode->deleteLater();
-//        mediaModel->deleteLater();
-//        storedVideoPlaylist->deleteLater();
-//        simpleEPGmodel->deleteLater();
+        //        localLogger.deleteLater();
+        //        timecode->deleteLater();
+        //        mediaModel->deleteLater();
+        //        storedVideoPlaylist->deleteLater();
+        //        simpleEPGmodel->deleteLater();
     }
 
 
