@@ -309,7 +309,7 @@ function confirmation()
 		updateMediaType($subType, $fileFormat, $filesArray, $mediadbADO);
 		}
 		
-		if (isset($_POST['clean_value']))
+		if (isset($_POST['clean_value']) && $_POST['clean_value'] == true)  // This value is always set, must explicitly check value -tschak
 		{
 		cleanFiles($filesArray, $mediadbADO);
 			
