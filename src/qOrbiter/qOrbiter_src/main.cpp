@@ -350,9 +350,10 @@ int main(int argc, char* argv[])
 
         QThread dceThread;
 
+        qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
 
         if(deviceType==0){
-              qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
+
         } else {
 
         }
