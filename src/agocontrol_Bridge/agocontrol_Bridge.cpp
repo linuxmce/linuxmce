@@ -151,6 +151,23 @@ void agocontrol_Bridge::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Imp
 			content["command"] = "setlevel";
 			content["level"] = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST].c_str()); 
 			break;
+		case COMMAND_Set_Temperature_CONST:
+			content["command"] = "settemperature";
+			content["temperature"] = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST].c_str());
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET TEMPERATURE RECEIVED FOR CHILD %s",portChannel.c_str());
+			break;
+			;;
+		case COMMAND_Set_Fan_CONST:
+			content["command"] = "setthermostatfanmode";
+			int fan = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST].c_str());
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET FAN RECEIVED FOR CHILD %s, level: %d",portChannel.c_str(),fan);
+			if (fan == 1) {
+				content["mode"] = "onhigh";
+			} else {
+				content["mode"] = "autohigh";
+			}
+			break;
+			;;
 	}
 	encode(content, command);
 	agoSender.send(command);
