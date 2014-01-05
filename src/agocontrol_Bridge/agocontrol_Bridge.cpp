@@ -348,6 +348,7 @@ void agocontrol_Bridge::receiveFunction() {
 
 		agoSender.send(inventorymessage);
 		qpid::messaging::Message response = responseReceiver.fetch();
+		agoSession.acknowledge();
 		decode(response,inventoryMap);
 		Variant::Map deviceMap;
 		if (!(inventoryMap["devices"].isVoid())) deviceMap = inventoryMap["devices"].asMap();
@@ -384,6 +385,7 @@ void agocontrol_Bridge::receiveFunction() {
 		try{
 			Variant::Map content;
 			qpid::messaging::Message message = agoReceiver.fetch(Duration::SECOND * 3);
+			agoSession.acknowledge();
 
 			// workaround for bug qpid-3445
 			if (message.getContent().size() < 4) {
