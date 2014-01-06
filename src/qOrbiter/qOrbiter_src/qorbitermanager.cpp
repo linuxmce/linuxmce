@@ -98,10 +98,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
     setDceResponse("Starting...");
 
-#ifdef QT4
-    qDebug() << QApplication::desktop()->height();
-    qDebug() << view->width();
-#endif
     if (readLocalConfig())
     {
         emit localConfigReady(true);
@@ -111,7 +107,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     {
         emit localConfigReady(false);
     }
-
+emit orbiterInitialized();
 
     QApplication::processEvents(QEventLoop::AllEvents);
 
@@ -300,7 +296,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     /*Needs Doin at construction */
     userList = new UserModel( new UserItem, this);
 
-    emit orbiterInitialized();
+
 }
 
 

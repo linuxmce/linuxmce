@@ -73,6 +73,7 @@ AndroidSystem::AndroidSystem(QObject *parent) :
         setReadyStatus(false);
         setStatusMessage("Android Plugin malfunction. Unable to get env.");
     }
+    updateExternalStorageLocation();
 #endif
 }
 

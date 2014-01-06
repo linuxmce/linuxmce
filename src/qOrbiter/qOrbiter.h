@@ -90,20 +90,20 @@ public:
    *@name MediaPlayer
    */
     //@{
-    QString videoFileUrl;/*!< \brief Contains the full path of the video media  */
-    QString audioFileUrl;/*!< \brief Contains the full path of the audio media */
-    QString streamingVideoIp;/*!< \brief Contains the ip address with port if included of streamed video. */
-    QString streamingAudioIp;/*!< \brief Contains the ip address with port if included of stremed audio */
-    QString mediaPlayerTimeCode;/*!< \brief Contains the timecode for the local media player (QMediaPlayer)  */
-    int mediaPlaylistSize; /*!< \brief Contains the current media player playlist length, if possible */
+    QString videoFileUrl;               /*!< \brief Contains the full path of the video media  */
+    QString audioFileUrl;               /*!< \brief Contains the full path of the audio media */
+    QString streamingVideoIp;           /*!< \brief Contains the ip address with port if included of streamed video. */
+    QString streamingAudioIp;           /*!< \brief Contains the ip address with port if included of stremed audio */
+    QString mediaPlayerTimeCode;        /*!< \brief Contains the timecode for the local media player (QMediaPlayer)  */
+    int mediaPlaylistSize;              /*!< \brief Contains the current media player playlist length, if possible */
     //@}
 
     /*! @name Misc Member Variables */
     //@{
     typedef QMap <int, QString> myMap;
 
-    char *screenieData; /**< char pointer to raw screenshot data from dce socket */
-    int screenieDataSize;/**< int to size of \ref screenieData */
+    char *screenieData;                 /**< char pointer to raw screenshot data from dce socket */
+    int screenieDataSize;               /**< int to size of \ref screenieData */
     Virtual_Device_Translator coreDevices;/**< \warning not implemented */
     bool m_bOrbiterConnected;
     QString currentScreen;
@@ -117,16 +117,16 @@ public:
 
     /*! \name Now Playing Member Variables */
     //@{
-    int m_dwPK_Device_NowPlaying; /**< set by the media engine, the current media player id  */
-    int m_dwPK_Device_NowPlaying_Video;  /**< set by the media engine with the current video device id  */
-    int m_dwPK_Device_NowPlaying_Audio;/**< set by the media engine with the current audio device id  */
-    int m_dwPK_Device_CaptureCard;  /** < set by the media engine, this is whatever media device is currently playing.  Capture Card is non null if we're displaying media via this card */
-    bool m_bPK_Device_NowPlaying_Audio_DiscreteVolume; /**< set by the media engine if the audio device supports discrete audio  */
-    int m_bContainsVideo; /**< set by the media engine if the content contains video */
-    int m_bUsingLiveAVPath;/**< set by the media engine if the media is using a direct control path (DirectAV)  */
+    int m_dwPK_Device_NowPlaying;                       /**< set by the media engine, the current media player id  */
+    int m_dwPK_Device_NowPlaying_Video;                 /**< set by the media engine with the current video device id  */
+    int m_dwPK_Device_NowPlaying_Audio;                 /**< set by the media engine with the current audio device id  */
+    int m_dwPK_Device_CaptureCard;                      /** < set by the media engine, this is whatever media device is currently playing.  Capture Card is non null if we're displaying media via this card */
+    bool m_bPK_Device_NowPlaying_Audio_DiscreteVolume;  /**< set by the media engine if the audio device supports discrete audio  */
+    int m_bContainsVideo;                               /**< set by the media engine if the content contains video */
+    int m_bUsingLiveAVPath;                             /**< set by the media engine if the media is using a direct control path (DirectAV)  */
     bool retrieving;
     bool finished;
-    bool b_mediaPlaying;/**< set by the media engine   */
+    bool b_mediaPlaying;                                /**< set by the media engine   */
     int internal_streamID;
     int internal_playback_speed;
     //@}
@@ -134,34 +134,34 @@ public:
     /*! @name Datagrid Member Variables. */
     //@{
     bool gridPaused;
-    int i_mediaModelRows; /*!< \brief The total rows in the media model */
-    int media_currentRow;/*!< \brief The current row of the media model, representing a paged position */
-    int media_totalPages; /*!< \brief The total pages as divided by the media_pageSeperator */
-    int media_currentPage;/*!< \brief The current page of the grid */
-    int media_pos; /*!< \todo find out what this is */
-    int media_pageSeperator; /*!< \brief The amount of cells on a given page. Set high for infinite scrolling. */
-    string media_seek; /*!< \brief Where the grid is seeking to. */
-    int modelPages; /*!< \brief The total number of pages in the model. */
+    int i_mediaModelRows;       /*!< \brief The total rows in the media model */
+    int media_currentRow;       /*!< \brief The current row of the media model, representing a paged position */
+    int media_totalPages;       /*!< \brief The total pages as divided by the media_pageSeperator */
+    int media_currentPage;      /*!< \brief The current page of the grid */
+    int media_pos;              /*!< \todo find out what this is */
+    int media_pageSeperator;    /*!< \brief The amount of cells on a given page. Set high for infinite scrolling. */
+    string media_seek;          /*!< \brief Where the grid is seeking to. */
+    int modelPages;             /*!< \brief The total number of pages in the model. */
     bool b_cancelRequest;
     // DataGridTable *pMediaGridTable;
     //@}
 
     /*! @name Address and ip Member variables */
     //@{
-    QString dceIP; /**< The ip address of the router  */
-    QString DCEHost; /**< The hostname of the router */
-    string m_sExternalIP; /**< The external ip address of the router as seen from a WAN */
+    QString dceIP;          /**< The ip address of the router  */
+    QString DCEHost;        /**< The hostname of the router */
+    string m_sExternalIP;   /**< The external ip address of the router as seen from a WAN */
     QString m_localIp;
     //@}
 
     /*! @name Device Id Member Variables */
     //@{
-    int iPK_Device_DatagridPlugIn; /*!< \brief Datagrid plugin id. */
-    int iPK_Device_OrbiterPlugin; /*!< \brief Orbiter plugin id. */
-    int iPK_Device_GeneralInfoPlugin; /*!< \brief GeneralInfoPlugin id. */
-    int  iPK_Device_SecurityPlugin; /*!< \brief SecurityPlugin id. */
-    int  iPK_Device_LightingPlugin; /*!< \brief LightingPlugin id. */
-    int  m_dwIDataGridRequestCounter; /*!< \brief Datagrid request counter. Incremented per dg request for identifying the current grid. */
+    int iPK_Device_DatagridPlugIn;      /*!< \brief Datagrid plugin id. */
+    int iPK_Device_OrbiterPlugin;       /*!< \brief Orbiter plugin id. */
+    int iPK_Device_GeneralInfoPlugin;   /*!< \brief GeneralInfoPlugin id. */
+    int  iPK_Device_SecurityPlugin;     /*!< \brief SecurityPlugin id. */
+    int  iPK_Device_LightingPlugin;     /*!< \brief LightingPlugin id. */
+    int  m_dwIDataGridRequestCounter;   /*!< \brief Datagrid request counter. Incremented per dg request for identifying the current grid. */
     int iOrbiterPluginID;
     int  iMediaPluginID;
     int iPK_Device_eventPlugin;
@@ -221,19 +221,19 @@ public:
      * They still need to be integrated into the user interface if possible, but they relate to db tables no longer used for UI generation
      */
     //@{
-    map<int,string> m_mapTextString; /*!< Unknown use */
-    vector<int> m_vectPK_Users_RequiringPIN; /*!< Needs to be reimplemented */
-    map<int,int> m_mapDesignObj; /*!< Used to map a screen to a DesignObj */
-    map<int,int> m_mapPK_Screen_GoBackToScreen;  /*!< For screens in this map, if there's a go back */
-    map<int,int> m_mapPK_MediaType_PK_Attribute_Sort;  /*! // The default sort for each type of media
-    map<int,int> m_mapScreen_Interrupt; /*!<  Map of which scripts can be interrupted. Unknown use */
-    map<int,string> m_mapPK_MediaType_Description; /*!< The description for all the mediatypes */
-    map<int,string> m_mapPK_AttributeType_Description; /*!< Carried over from old orbter. The description for all attribute types. */
-    bool m_bIsOSD ; /*!< Tracking if this is an onscreen qOrbiter */
-    bool m_bNewOrbiter; /*!< Tracking if this is a new orbiter */
-    bool m_bUseAlphaBlending ; /*!< Carried over from old orbiter, may or may not apply */
-    bool m_bUseMask; /*!< Carried Over from old Orbiter. May or may not apply */
-    long currentDeviceTemplate; /*!< Used to track which DT we actually are: Onscreen QOrbiter, or Android, or iOS, or Desktop */
+    map<int,string> m_mapTextString;                    /*!< Unknown use */
+    vector<int> m_vectPK_Users_RequiringPIN;            /*!< Needs to be reimplemented */
+    map<int,int> m_mapDesignObj;                        /*!< Used to map a screen to a DesignObj */
+    map<int,int> m_mapPK_Screen_GoBackToScreen;         /*!< For screens in this map, if there's a go back */
+    map<int,int> m_mapPK_MediaType_PK_Attribute_Sort;   /*!  The default sort for each type of media*/
+    map<int,int> m_mapScreen_Interrupt;                 /*!<  Map of which scripts can be interrupted. Unknown use */
+    map<int,string> m_mapPK_MediaType_Description;      /*!< The description for all the mediatypes */
+    map<int,string> m_mapPK_AttributeType_Description;  /*!< Carried over from old orbter. The description for all attribute types. */
+    bool m_bIsOSD ;                                     /*!< Tracking if this is an onscreen qOrbiter */
+    bool m_bNewOrbiter;                                 /*!< Tracking if this is a new orbiter */
+    bool m_bUseAlphaBlending ;                          /*!< Carried over from old orbiter, may or may not apply */
+    bool m_bUseMask;                                    /*!< Carried Over from old Orbiter. May or may not apply */
+    long currentDeviceTemplate;                         /*!< Used to track which DT we actually are: Onscreen QOrbiter, or Android, or iOS, or Desktop */
     //@}
 
     //<-dceag-const-b->

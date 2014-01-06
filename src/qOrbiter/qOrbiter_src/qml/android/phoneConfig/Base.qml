@@ -52,8 +52,8 @@ Item {
 
     Text{
         anchors.centerIn: parent
-        font.pixelSize: 14
-        text:"width: "+rootItem.width+" X height "+rootItem.height+"\n LinuxMCE is loading"
+        font.pixelSize: 24
+        text:"width: "+rootItem.width+" X height "+rootItem.height+"\n LinuxMCE is loading\n Please Wait."
         font.bold: true
         color: "white"
 
@@ -63,6 +63,13 @@ Item {
         id:bootStap
         anchors.fill: parent
         source:window.orbiterInitialized ? "BaseLoaded.qml" : ""
+    }
+
+    Timer{
+        id:pusher
+        interval: 3000
+        onTriggered: bootStap.source="BaseLoaded.qml"
+        running:true
     }
 
 }

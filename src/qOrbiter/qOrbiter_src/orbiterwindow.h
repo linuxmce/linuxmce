@@ -37,6 +37,7 @@
 class orbiterWindow : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY (bool orbiterInitialized READ getOrbiterInitialized() NOTIFY beginLoading)
     Q_PROPERTY (QString router READ getRouterAddress WRITE setRouterAddress NOTIFY routerChanged)
     Q_PROPERTY (int deviceno READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceChanged)
     Q_PROPERTY (QString message READ getMessage WRITE setMessage NOTIFY MessageChanged)
@@ -112,7 +113,8 @@ public slots:
     Q_INVOKABLE void forceResponse (QString forced);
     void loadSetupPage();
 
-    void setOrbiterInitialized(){orbiterInitialized = true; emit beginLoading();}
+    bool getOrbiterInitialized(){return orbiterInitialized;}
+    void setOrbiterInitialized(){orbiterInitialized = true; emit beginLoading(); qWarning("Orbiter Initialized!");}
 
 
 

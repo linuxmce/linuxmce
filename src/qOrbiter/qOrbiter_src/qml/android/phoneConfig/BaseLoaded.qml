@@ -4,13 +4,17 @@ Item {
     anchors.fill: parent
     property string routerAddress:window.router
     Component.onCompleted: {
+        console.log("BaseLoaded")
         forceActiveFocus();
         wait.start()
         if(androidSystem.updateBuildInformation() && androidSystem.updateExternalStorageLocation()){
             logger.setLogLocation(androidSystem.externalStorageLocation)
         }
     }
-
+Rectangle{
+    color:"black"
+    anchors.fill: parent
+}
     Keys.onReleased: {
         switch(event.key){
         case Qt.Key_Back:
