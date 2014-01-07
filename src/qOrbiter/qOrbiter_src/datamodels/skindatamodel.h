@@ -51,14 +51,14 @@ public:
 public slots:
     void setActiveSkin(QString name);
     void checkStatus();
+    void setBaseUrl(QString url){ m_baseUrl=QUrl(url) ;emit baseUrlChanged(); }
 private slots:
     void handleItemChange();
-
 
 signals:
     void skinsFinished(bool b);
     void currentSkinReady();
-
+void baseUrlChanged();
 
 private:
     SkinLoader *m_skin_loader;

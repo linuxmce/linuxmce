@@ -43,6 +43,11 @@ Item{
             Keys.onEnterPressed: set()
             font.weight: Font.DemiBold
             horizontalAlignment: TextInput.AlignRight
+             onActiveFocusChanged: {
+                 if(!activeFocus)
+                     closeSoftwareInputPanel()
+             }
+
             Keys.onReleased: {
                 switch(event.key){
                 case Qt.Key_Return:

@@ -27,6 +27,9 @@ void QOrbiterLogger::setLogLocation(QString l)
         logLocation = l;
         qDebug() << "New Log Location! " << logLocation;
 
+        if(!logLocation.endsWith("/")){
+            logLocation.append("/");
+        }
         QDir fileLocation;
         fileLocation.setPath(logLocation);
 
@@ -246,7 +249,7 @@ bool QOrbiterLogger::writeCommandMessage(QString m)
     }
     else if(!commandFile.open(QFile::ReadWrite))
     {
-        qDebug() << "Couldnt write!";
+        qDebug() << "Couldnt write->"<<commandFile.errorString() ;
         return false;
     }
     else{

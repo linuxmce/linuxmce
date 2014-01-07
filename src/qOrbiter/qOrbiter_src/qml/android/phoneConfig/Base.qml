@@ -8,15 +8,13 @@ Item {
     Connections{
         target: window
         onBeginLoading:{
-            bootStap.source="BaseLoaded.qml"
+            bootStrap.source="BaseLoaded.qml"
         }
     }
 
-
-
-    Rectangle{
-        anchors.fill: parent
-        color: "green"
+    Image{
+        fillMode: Image.PreserveAspectCrop
+        source: "qrc:/img/Splash.png"
     }
 
     Rectangle{
@@ -42,6 +40,8 @@ Item {
         case Qt.Key_MediaPrevious:
             Qt.quit()
             break;
+        case 16777220:
+            console.log("close input panel")
         default:
             console.log(event.key)
             break;
@@ -60,7 +60,7 @@ Item {
     }
 
     Loader{
-        id:bootStap
+        id:bootStrap
         anchors.fill: parent
         source:window.orbiterInitialized ? "BaseLoaded.qml" : ""
     }
@@ -68,7 +68,7 @@ Item {
     Timer{
         id:pusher
         interval: 3000
-        onTriggered: bootStap.source="BaseLoaded.qml"
+        onTriggered: bootStrap.source="BaseLoaded.qml"
         running:true
     }
 

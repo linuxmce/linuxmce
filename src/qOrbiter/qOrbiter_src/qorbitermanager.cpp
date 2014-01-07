@@ -77,7 +77,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     #endif
     QObject(parent),qorbiterUIwin(view)
 {
-
+orbiterInit=true;
     //view.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     m_bStartingUp= true;
     // b_skinsReady = false;
@@ -100,14 +100,17 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
     if (readLocalConfig())
     {
+
         emit localConfigReady(true);
+
         // QApplication::processEvents(QEventLoop::AllEvents);
     }
     else
     {
         emit localConfigReady(false);
     }
-emit orbiterInitialized();
+
+
 
     QApplication::processEvents(QEventLoop::AllEvents);
 
@@ -150,8 +153,6 @@ emit orbiterInitialized();
     QObject::connect(this, SIGNAL(orbiterReady(bool)), this, SLOT(showUI(bool)));
     QObject::connect(this, SIGNAL(skinDataLoaded(bool)), SLOT(showUI(bool)));
     QObject::connect(view->engine(), SIGNAL(quit()), this, SLOT(closeOrbiter()));
-
-
 
     /*!
      * \todo move buildtype / qrc path code to its own function and return it here
@@ -295,8 +296,8 @@ emit orbiterInitialized();
 
     /*Needs Doin at construction */
     userList = new UserModel( new UserItem, this);
-
-
+orbiterInit=true;
+emit orbiterInitialized();
 }
 
 
@@ -386,14 +387,15 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 #ifdef __ANDROID__
     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
-        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
+        remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins/android/tablet";
         setDceResponse("Guessing Android Tablet, Loading Tablet Skins");
+        qWarning()<< remoteDirectoryPath;
         QApplication::processEvents(QEventLoop::AllEvents);
         setFormFactor(2);
     }
     else
     {
-        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/phone";
+        remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins/android/phone";
         setDceResponse("Guessing Android Phone, Loading Phone Skins");
         QApplication::processEvents(QEventLoop::AllEvents);
         setFormFactor(1);
@@ -430,11 +432,11 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     QString localDir = qmlPath.append(buildType);
 
 
-    //    if(b_localLoading){
-    //        finalPath=localDir;
-    //    } else{
-    //        finalPath = remoteDirectoryPath;
-    //    }
+        if(b_localLoading){
+            finalPath=localDir;
+        } else{
+            finalPath = remoteDirectoryPath;
+        }
 
 
 #ifdef __ANDROID__
@@ -948,7 +950,7 @@ bool qorbiterManager::OrbiterGen()
  */
 void qorbiterManager::swapSkins(QString incSkin)
 {
-    emit skinMessage("swapping sking to::" + incSkin);
+    emit skinMessage("swapping skin to::" + incSkin);
 
 
 #ifdef WIN32
@@ -1459,7 +1461,7 @@ void qorbiterManager::setMediaDevices(QNetworkReply *d)
 bool qorbiterManager::loadSkins(QUrl base)
 {
 
-    emit skinMessage("Local Skins path" +base.toString());
+    emit skinMessage("Skins path" +base.toString());
 
 
     tskinModel = new SkinDataModel(base, new SkinDataItem, this);

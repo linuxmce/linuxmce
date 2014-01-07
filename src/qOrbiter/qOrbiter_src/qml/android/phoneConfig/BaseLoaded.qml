@@ -11,10 +11,7 @@ Item {
             logger.setLogLocation(androidSystem.externalStorageLocation)
         }
     }
-Rectangle{
-    color:"black"
-    anchors.fill: parent
-}
+
     Keys.onReleased: {
         switch(event.key){
         case Qt.Key_Back:
@@ -34,7 +31,9 @@ Rectangle{
     Timer{
         id:wait
         interval: 1000
-        onTriggered: {mainContent.source = "http://"+routerAddress+"/lmce-admin/skins/android/splash/Splash.qml"; console.log("conecting")}
+        onTriggered: {mainContent.source = "http://"+routerAddress+"/lmce-admin/skins/android/splash/Splash.qml";
+            console.log("conecting")
+        }
         running:false
         repeat:true
     }

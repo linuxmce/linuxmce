@@ -225,7 +225,6 @@ int main(int argc, char* argv[])
     if(androidHelper.updateExternalStorageLocation()){
         localLogger.setLogLocation(QString(androidHelper.externalStorageLocation+"/LinuxMCE/"));
     }
-
 #endif
 
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
@@ -700,7 +699,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(routerReload()), &w, SLOT(connectionWatchdog()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(reInitialize()), &pqOrbiter, SLOT(initialize()), Qt::QueuedConnection);
         //   QObject::connect(&w, SIGNAL(deviceNumberChanged(int)), &pqOrbiter, SLOT(setDeviceId(int)));
-        //   QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &pqOrbiter, SLOT(setdceIP(QString)));
+        QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &orbiterWin, SLOT(setRouterAddress(QString)));
         dceThread.start();
 
         //#ifdef Q_OS_LINUX
@@ -752,6 +751,11 @@ int main(int argc, char* argv[])
 #endif
 
         orbiterWin.initView();
+#ifdef __ANDROID__
+        while(!w.orbiterInit){
+            QApplication::processEvents(QEventLoop::AllEvents);
+        }
+#endif
         pqOrbiter.qmlSetup(PK_Device, QString::fromStdString(sRouter_IP));
         a.exec();
 

@@ -114,7 +114,7 @@ public slots:
     void loadSetupPage();
 
     bool getOrbiterInitialized(){return orbiterInitialized;}
-    void setOrbiterInitialized(){orbiterInitialized = true; emit beginLoading(); qWarning("Orbiter Initialized!");}
+    void setOrbiterInitialized(){orbiterInitialized = true; emit beginLoading(); qDebug("Orbiter Initialized!");}
 
 
 

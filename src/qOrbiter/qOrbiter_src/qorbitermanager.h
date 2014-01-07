@@ -310,6 +310,7 @@ public:
     AndroidSystem *androidHelper;
 #endif
 
+    bool orbiterInit;
 
     ScreenSaverClass *ScreenSaver;
 

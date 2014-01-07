@@ -125,10 +125,11 @@ Item{
         MouseArea{
             anchors.fill: parent
             onClicked: {
+
+
                 manager.writeConfig()
                 firstRunOptions.state = "hidden"
                 rootItem.forceActiveFocus()
-                rootItem.routerAddress = manager.m_ipAddress
                 wait.start()
             }
         }
