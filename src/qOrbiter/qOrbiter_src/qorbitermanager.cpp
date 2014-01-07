@@ -2244,7 +2244,7 @@ int qorbiterManager::loadSplash()
 bool qorbiterManager::createAndroidConfig()
 {
 
-    QFile droidConfig(mobileStorageLocation+"config.xml");
+    QFile droidConfig(mobileStorageLocation+"/config.xml");
     setDceResponse("Config File Path::"+droidConfig.fileName());
     if (droidConfig.exists() && droidConfig.size() != 0)
     {

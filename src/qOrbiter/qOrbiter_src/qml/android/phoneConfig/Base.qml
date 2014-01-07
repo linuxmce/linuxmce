@@ -53,9 +53,10 @@ Item {
     Text{
         anchors.centerIn: parent
         font.pixelSize: 24
-        text:"width: "+rootItem.width+" X height "+rootItem.height+"\n LinuxMCE is loading\n Please Wait."
+        text:"LinuxMCE is loading\n Please Wait."
         font.bold: true
         color: "white"
+        visible:bootStrap.source===""
 
     }
 
