@@ -1353,6 +1353,15 @@ public slots:
     void showSleepingAlarms(SleepingAlarm *s);
     void getSleepingAlarms() {sleeping_alarms->clear(); emit getAlarms();}
 
+    /*! @name logging slots */
+
+    //@{
+    void logSkinMessage(QString m){ skinMessage(m); }
+    void logQtMessage(QString q){qtMessage(q); }
+
+
+    //@}
+
 private:
     void initializeConnections();
     void setupQMLview();

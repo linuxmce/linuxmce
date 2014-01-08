@@ -222,11 +222,11 @@ int main(int argc, char* argv[])
     QOrbiterLogger localLogger;
 
 #ifdef __ANDROID__
-    if(androidHelper.updateExternalStorageLocation()){
+//    if(androidHelper.updateExternalStorageLocation()){
 
-        if(androidHelper.externalStorageLocation!="")
-        localLogger.setLogLocation(QString(androidHelper.externalStorageLocation+"LinuxMCE/"));
-    }
+//        if(androidHelper.externalStorageLocation!="")
+//        localLogger.setLogLocation(QString(androidHelper.externalStorageLocation+"LinuxMCE/"));
+//    }
 #endif
 
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
@@ -406,6 +406,7 @@ int main(int argc, char* argv[])
 #endif
         QObject::connect(&w, SIGNAL(skinMessage(QString)), &localLogger, SLOT(logSkinMessage(QString)));
         QObject::connect(&w, SIGNAL(qtMessage(QString)) , &localLogger, SLOT(logQtMessage(QString)));
+        QObject::connect(&pqOrbiter, SIGNAL(newDceMessage(QString)), &localLogger, SLOT(logCommandMessage(QString)),Qt::QueuedConnection);
 #ifdef ANDROID
         QObject::connect(&w, SIGNAL(mobileStorageChanged(QString)), &localLogger, SLOT(setLogLocation(QString)));
 #endif

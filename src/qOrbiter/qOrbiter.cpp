@@ -3754,23 +3754,23 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 #endif
             }
             else if(!requestMore ){
-                qDebug() << "Pausing";
+                logMediaMessage("Datagrid Pausing");
                 return;
             } else if(currentScreen!="Screen_47.qml"){
-                qDebug() << "Stopping, no longer on screen 47";
+                logMediaMessage("Datagrid Stopping, no longer on screen 47");
                 pMediaGridTable->ClearData();
                 delete pMediaGridTable;
                 pMediaGridTable=NULL;
                 delete []pData; pData=NULL;
                 return;
             } else if(gridPaused){
-                qDebug() << "Grid is paused.";
+               logMediaMessage("Datagrid is paused.");
                 media_pos=index;
-                qDebug() << "Stopped at" << media_pos;
+                logMediaMessage("Stopped at "+QString::number(media_pos));
                 return;
             }
             else{
-                qDebug() << "Stopping";
+                logMediaMessage("Datagrid Stopping");
                 pMediaGridTable->ClearData();
                 delete pMediaGridTable;
                 pMediaGridTable=NULL;
@@ -3812,16 +3812,16 @@ void DCE::qOrbiter::setLocation(int location, int ea) // sets the ea and room
 
 void DCE::qOrbiter::setUser(int user)
 {
-    qDebug() << "user" << user;
+    logDceMessage("SetUser() to " + QString::number(user));
     CMD_Set_Device_Data userData(m_dwPK_Device, this->iPK_Device_GeneralInfoPlugin ,m_dwPK_Device,"1",3);
     string cResp="";
 
 
     if(SendCommand(userData, &cResp)){
-        qDebug() << "set user cmd " << cResp.c_str();
+       logDceMessage("set user cmd " +QString::fromStdString(cResp.c_str()));
     }
     else{
-        qDebug()<< "Set user failed! " << cResp.c_str();
+       logDceMessage("Set user failed! " +QString::fromStdString(cResp.c_str()));
     }
 }
 

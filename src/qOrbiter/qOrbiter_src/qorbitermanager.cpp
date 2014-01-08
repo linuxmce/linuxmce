@@ -241,7 +241,7 @@ orbiterInit=true;
     qorbiterUIwin->setSource(finalPath+"/splash/Splash.qml"); /*! We dont set android because it has its own bootstrap */
 #endif
 
-    qDebug() << "build type set to:: "<< buildType;
+    skinMessage("build type set to:: "+buildType);
     initializeGridModel();  //begins setup of media grid listmodel and its properties
     initializeSortString(); //associated logic for navigating media grids
 
@@ -307,7 +307,7 @@ void qorbiterManager::gotoQScreen(QString s)
 
     if(s.contains("Screen_1.qml"))
     {
-        qDebug() << "Clearing Models";
+      logQtMessage("QOrbiter clearing models because screen is 1");
         emit keepLoading(false);
         emit clearModel();
         emit cancelRequests();
@@ -2224,7 +2224,7 @@ void qorbiterManager::setDceResponse(QString response)
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
-    qDebug() << dceResponse;
+    logQtMessage(response);
 }
 
 QString qorbiterManager::getDceResponse()

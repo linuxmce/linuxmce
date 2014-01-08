@@ -1838,12 +1838,20 @@ public slots:
     void shutdown();
 
     //child devices
+
+
+
+
+
 protected:
+     /*! @name logging slots*/
+    //@{
     void logStatusMessage(QString statusM) {emit newStatusMessage(statusM); }
-    void logDceMessgae(QString dceM){ emit newDceMessage(dceM); }
+    void logDceMessage(QString dceM){ emit newDceMessage(dceM); }
     void logMediaMessage(QString mediaM){emit newMediaMessage(mediaM);}
     void logTimeCodeMessage(QString tcM){emit newTimeCodeMessage(tcM);}
     void logEntertainAreaMessage(QString eaM){emit newEntertainAreaMessage(eaM); }
+    //@}
 };
 
 //<-dceag-end-b->
