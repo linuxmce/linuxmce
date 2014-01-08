@@ -25,11 +25,15 @@ void QOrbiterLogger::setLogLocation(QString l)
 {
     if(l != ""){
         logLocation = l;
-        qDebug() << "New Log Location! " << logLocation;
+
 
         if(!logLocation.endsWith("/")){
             logLocation.append("/");
         }
+#ifdef __ANDROID__
+        logLocation.append("LinuxMCE/");
+#endif
+        qDebug() << "New Log Location! " << logLocation;
         QDir fileLocation;
         fileLocation.setPath(logLocation);
 
@@ -142,13 +146,23 @@ bool QOrbiterLogger::writeToFile(QString msg)
 
 bool QOrbiterLogger::initializeCommandFile()
 {
-    commandFile.setFileName(logLocation+"qorbiter-command.log");
+   commandFile.setFileName(logLocation+"qorbiter-command.log");
+
+
     qDebug()<< "-----------------------Attempting to open logfile " << commandFile.fileName()  ;
-    if(!commandFile.exists()){
+    if(commandFile.exists()){
+        qDebug() << commandFile.fileName() << " exists and its open state is "<<commandFile.isOpen();
+        if(commandFile.size() > 10000)
+        {
+            QDir t;
+            t.setPath(logLocation);
+            t.remove(commandFile.fileName());
+        } else {
+            qDebug() << "File size is " << commandFile.size() << " and wont be rotated";
+        }
 
 
-
-        if(commandFile.open(QFile::Append)){
+        if(commandFile.isOpen() || commandFile.open(QFile::Append)){
             commandFile.seek(commandFile.size());
             return true;
         }
@@ -160,16 +174,14 @@ bool QOrbiterLogger::initializeCommandFile()
     }
     else
     {
-        if(commandFile.size() > 10000)
-        {
-            QDir t;
-            t.setPath(logLocation);
-            t.remove(commandFile.fileName());
-            initializeCommandFile();
-            return false;
-        }else{
+        qWarning("File Doesnt Exist!");
+        commandFile.open(QFile::ReadWrite);
+        if(commandFile.exists()){
             return true;
+        } else{
+             return false;
         }
+
     }
 }
 
@@ -177,8 +189,18 @@ bool QOrbiterLogger::initializeGuiFile()
 {
     guiFile.setFileName(logLocation+"qorbiter-gui.log");
     qDebug()<< "-----------------------Attempting to open logfile " << guiFile.fileName()  ;
-    if(!guiFile.exists()){
-        if(guiFile.open(QFile::Append)){
+    if(guiFile.exists()){
+
+        if(guiFile.size() > 10000)
+        {
+            QDir t;
+            t.setPath(logLocation);
+            t.remove(guiFile.fileName());
+        } else {
+            qDebug() << "File size is " << guiFile.size() << " and wont be rotated";
+        }
+
+        if(guiFile.isOpen() || guiFile.open(QFile::Append)){
             guiFile.seek(guiFile.size());
             return true;
         }
@@ -190,17 +212,7 @@ bool QOrbiterLogger::initializeGuiFile()
     }
     else
     {
-        if(guiFile.size() > 10000)
-        {
-            QDir t;
-            t.setPath(logLocation);
-            t.remove(guiFile.fileName());
-            initializeGuiFile();
-            return false;
-        }
-        else {
-            return true;
-        }
+        qWarning("File doesnt exist!");
     }
 }
 
@@ -208,9 +220,20 @@ bool QOrbiterLogger::initializeSkinFile()
 {
     skinFile.setFileName(logLocation+"qorbiter-qml.log");
     qDebug()<< "-----------------------Attempting to open logfile " << skinFile.fileName()  ;
-    if(!skinFile.exists()){
 
-        if(skinFile.open(QFile::Append)){
+    if(skinFile.exists()){
+
+        qDebug() << skinFile.fileName() << " exists and its open state is "<<skinFile.isOpen();
+        if(skinFile.size() > 10000)
+        {
+            QDir t;
+            t.setPath(logLocation);
+            t.remove(skinFile.fileName());
+        } else {
+            qDebug() << "File size is " << skinFile.size() << " and wont be rotated";
+        }
+
+        if(skinFile.isOpen() || skinFile.open(QFile::Append)){
             skinFile.seek(skinFile.size());
             return true;
         }
@@ -222,26 +245,14 @@ bool QOrbiterLogger::initializeSkinFile()
     }
     else
     {
-        if(skinFile.size() > 10000)
-        {
-            QDir t;
-            t.setPath(logLocation);
-            t.remove(skinFile.fileName());
-             if(initializeSkinFile())
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-
-
+        qWarning("File Doesnt Exist!");
+      return false;
     }
 }
 
 bool QOrbiterLogger::writeCommandMessage(QString m)
 {
-    if(skinFile.isOpen()){
+    if(commandFile.isOpen()){
         QTextStream t(&commandFile);
 
         t<< m;
@@ -303,6 +314,7 @@ void QOrbiterLogger::initLogs()
 
     if (initializeCommandFile()){
 
+        qDebug() << "Command log was intialized";
         logCommandMessage(" Command file initialized - New log section");
         logCommandMessage("-----------------------"+QTime::currentTime().toString()+"-----------------------------");
         setCommandLogStatus(true);
@@ -314,6 +326,7 @@ void QOrbiterLogger::initLogs()
     }
 
     if(initializeGuiFile()){
+        qDebug() << "GUI log was intialized";
         logGuiMessage("GUI logfile ready - new Log Section");
         logGuiMessage("-----------------------"+QTime::currentTime().toString()+"-----------------------------");
         setGuiLogStatus(true);
@@ -324,6 +337,7 @@ void QOrbiterLogger::initLogs()
     }
 
     if (initializeSkinFile()){
+        qDebug() << "Skin log was intialized";
         logSkinMessage("Skin logfile ready New Log Section");
         logSkinMessage("-----------------------"+QTime::currentTime().toString()+"-----------------------------");
     }

@@ -3748,9 +3748,9 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 #ifdef RPI
                 msleep(5);
 #elif ANDROID
-                msleep(5);
+               msleep(5);
 #else
-                msleep(5);
+//                msleep(5);
 #endif
             }
             else if(!requestMore ){

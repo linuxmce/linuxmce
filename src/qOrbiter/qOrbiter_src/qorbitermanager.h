@@ -813,7 +813,7 @@ public slots:
      * \brief setMobileStorage
      * \param s
      */
-    void setMobileStorage(QString s){mobileStorageLocation = s; emit mobileStorageChanged(mobileStorageLocation);}
+    void setMobileStorage(QString s){  mobileStorageLocation = s; emit mobileStorageChanged(mobileStorageLocation);}
 
     /*!
      * \brief getMobileStorage

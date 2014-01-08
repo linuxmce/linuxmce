@@ -1619,8 +1619,10 @@ bool qorbiterManager::readLocalConfig()
     QString xmlPath ;
 
 #ifdef NECESSITAS
+
+    qDebug() << mobileStorageLocation;
     if(setupMobileStorage(androidHelper->externalStorageLocation)){
-        xmlPath = mobileStorageLocation+"/config.xml" ;
+        xmlPath = mobileStorageLocation+"config.xml" ;
     }
     else{
 
@@ -1779,7 +1781,7 @@ bool qorbiterManager::writeConfig()
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif __ANDROID__
-    QString xmlPath = mobileStorageLocation+"/config.xml";
+    QString xmlPath = mobileStorageLocation+"config.xml";
 #elif WIN32
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #else
@@ -2244,7 +2246,8 @@ int qorbiterManager::loadSplash()
 bool qorbiterManager::createAndroidConfig()
 {
 
-    QFile droidConfig(mobileStorageLocation+"/config.xml");
+
+    QFile droidConfig(mobileStorageLocation+"config.xml");
     setDceResponse("Config File Path::"+droidConfig.fileName());
     if (droidConfig.exists() && droidConfig.size() != 0)
     {
@@ -2257,6 +2260,7 @@ bool qorbiterManager::createAndroidConfig()
         if(filePath.mkpath(mobileStorageLocation))
         {
             setDceResponse("Made path");
+
         }
 
         QFile defaultConfig;
@@ -2270,14 +2274,14 @@ bool qorbiterManager::createAndroidConfig()
         if(defaultConfig.copy(mobileStorageLocation+"config.xml"))
         {
             setDceResponse("file copied, verifying");
-            /*
+
             droidConfig.setPermissions(QFile::WriteOther);
             setDceResponse(droidConfig.errorString());
             droidConfig.setPermissions(QFile::ReadOther);
             setDceResponse(droidConfig.errorString());
             droidConfig.setPermissions(QFile::ExeOwner);
             setDceResponse(droidConfig.errorString());
-            */
+
             if (droidConfig.exists() && droidConfig.size() !=0)
             {
                 setDceResponse("config size: "+ QString::number(droidConfig.size()));
@@ -2396,7 +2400,7 @@ bool qorbiterManager::setupMobileStorage(QString externalStorage)
 
     QDir extLocation;
 
-    extLocation.setPath(externalStorage+"/LinuxMCE/");
+    extLocation.setPath(externalStorage+"LinuxMCE/");
 
     if(extLocation.exists() && extLocation.isReadable()){
         setMobileStorage(extLocation.path());

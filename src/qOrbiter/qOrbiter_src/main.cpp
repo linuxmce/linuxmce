@@ -223,7 +223,9 @@ int main(int argc, char* argv[])
 
 #ifdef __ANDROID__
     if(androidHelper.updateExternalStorageLocation()){
-        localLogger.setLogLocation(QString(androidHelper.externalStorageLocation+"/LinuxMCE/"));
+
+        if(androidHelper.externalStorageLocation!="")
+        localLogger.setLogLocation(QString(androidHelper.externalStorageLocation+"LinuxMCE/"));
     }
 #endif
 
