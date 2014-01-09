@@ -1,7 +1,7 @@
 # -------------------------------------------------
 # Project created by QtCreator 2013-05-04T14:36:21
 # -------------------------------------------------
-QT       += core network
+QT       += core network thread
 #QT       -= gui
 
 
