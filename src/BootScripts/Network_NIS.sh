@@ -2,10 +2,10 @@
 
 . /usr/pluto/bin/Network_Parameters.sh
 
-#NIS_Domain=$(</etc/defaultdomain)
-#if [[ -z "$NIS_Domain" ]]; then
-	NIS_Domain=pluto
-#fi
+NIS_Domain=$(</etc/defaultdomain)
+if [[ -z "$NIS_Domain" ]]; then
+	NIS_Domain="LinuxMCE"
+fi
 echo "Setting NIS, with domain '$NIS_Domain'"
 domainname "$NIS_Domain"
 

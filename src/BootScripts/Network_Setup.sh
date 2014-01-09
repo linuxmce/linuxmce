@@ -485,7 +485,8 @@ if ! BlacklistConfFiles '/etc/default/isc-dhcp-server' ;then
 fi
 
 /usr/pluto/bin/DHCP_config.sh
-/etc/init.d/networking restart
+/etc/init.d/networking stop
+service networking start
 
 service isc-dhcp-server start
 
@@ -611,7 +612,7 @@ if ! BlacklistConfFiles '/etc/defaultdomain' && ! BlacklistConfFiles '/etc/defau
 	fi
 
 	## Configure NIS Server
-	echo "pluto" > /etc/defaultdomain
+	echo "$DomainName" > /etc/defaultdomain
 	cp /usr/pluto/templates/nis-server.template /etc/default/nis
 fi
 
