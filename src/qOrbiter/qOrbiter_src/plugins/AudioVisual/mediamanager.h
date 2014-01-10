@@ -141,6 +141,7 @@ public:
     quint64 tempTime;
 
     int incomingTime;
+    long currentDevice;
 
 #ifdef QT4
 
@@ -190,6 +191,8 @@ signals:
     void updatePluginSeek(int);
 
 public slots:
+
+    void setCurrentDevice(long d){currentDevice = d;mountDrive(currentDevice);}
 
     void setIncomingTime(int i){ incomingTime = i; emit incomingTimeChanged();}
     int getIncomingTime() { return incomingTime;}
@@ -464,8 +467,7 @@ private:
     void initializePlayer();
     void initializeConnections();
     void shutdownDevice();
-
-    void mountDrive(int device);
+    bool mountDrive(long device);
 
 
 
@@ -477,6 +479,7 @@ private slots:
 
 
     bool initViews(bool flipped);
+    void setupDirectories();
 
 };
 
