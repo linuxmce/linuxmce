@@ -30,13 +30,5 @@ Item {
             buttonText: qsTr("Change Styles")
             onActivated: loadComponent("SkinSelector.qml")
         }
-
-        StyledButton{
-            buttonText: buttonText === "Media Test" ? "Stop Media" : qsTr("Media Test")
-            onActivated:{
-
-            }
-        }
-
     }
 }

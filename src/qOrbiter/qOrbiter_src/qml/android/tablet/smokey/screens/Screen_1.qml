@@ -21,11 +21,11 @@ Item {
             anchors.centerIn: parent
             model:current_scenario_model
             cellWidth:scaleX(20)
-            cellHeight:scaleY(12)
+            cellHeight:scaleY(15)
 
             delegate: Item{
-                height: childrenRect.height
-                width: childrenRect.width
+                height: scaleY(15)
+                width: scaleX(20)
                 StyledButton{
                     id:button
                     buttonText: title

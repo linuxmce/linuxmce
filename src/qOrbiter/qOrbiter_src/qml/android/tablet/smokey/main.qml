@@ -232,7 +232,13 @@ Item {
         }
 
     }
+    NavigationRow {
+        id: nav_row
 
+    }
+    MediaPopup{
+        id:media_notification
+    }
 
     Loader {
         id:pageLoader
@@ -268,20 +274,7 @@ Item {
                               screenfile = source
                           }
     }
-    Rectangle{
-        id:nav_fill
-        anchors.fill: nav_row
-        color: "black"
-        opacity: .65
-    }
 
-    NavigationRow {
-        id: nav_row
-
-    }
-    MediaPopup{
-        id:media_notification
-    }
 
     InformationPanel {
         id: info_panel
@@ -296,6 +289,7 @@ Item {
     }
 
     function setNavigation(n){
+        nav_row.navSource=""
         nav_row.navSource = n
     }
 

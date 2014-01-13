@@ -37,7 +37,6 @@ Item{
     function processSelectedDevices(){
         selections.clear()
 
-
         for (var prop in floorplan_devices.selectedDevices){
             //            console.log(prop)
             //            console.log(floorplan_devices.selectedDevices[prop])
