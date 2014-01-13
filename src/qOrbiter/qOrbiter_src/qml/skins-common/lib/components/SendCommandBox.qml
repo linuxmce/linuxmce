@@ -23,7 +23,7 @@ Item{
 
     onActiveFocusChanged: {
         console.log("Cmd box  focus"+activeFocus)
-        if(activeFocus){
+        if(activeFocus && selections.count !==0){
             trackedInt = selections.get(0).device
             manager.getFloorplanDeviceCommands(trackedInt)
         }
