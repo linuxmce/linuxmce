@@ -1,7 +1,7 @@
 import QtQuick 1.1
 import "../components"
 /*!
-  This is screen 70, the stored video file remote screen.
+  This is screen 176, the stored video file remote screen.
   It has
   *Playlist
     -Playlist Manipulation controls.
@@ -12,6 +12,7 @@ import "../components"
   *Advanced Device Controls
   */
 MediaPlaybackBase{
-id:screen_70
+id:screen_176
+objectName: "InternetRadio"
 
 }
