@@ -1,0 +1,369 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>School Web Filter</title>
+ 
+<style type='text/css'>
+html, body {
+    text-align: center;
+    font-family:'Century Gothic',Futura,'URW Gothic L',sans-serif;
+    background-color: #8c0808;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    }
+ 
+#bodywrap {
+    margin: 0 auto;
+    padding: 0 10px;
+    width: 80%;
+    min-height: 100%;
+    min-width: 600px;
+    max-width: 800px;
+    text-align: left;
+    background-color: #ccb0a3;
+    border-left: 12px solid black;
+    }
+ 
+#header {
+    padding: 5px;
+    }
+ 
+#headerleft {
+    /*background-color: #99ff99;*/
+    float: left;
+    text-align: right;
+    }
+ 
+#headerleft h1 {
+    padding: 0px 8px 0px 0px;
+    margin: 0px;
+    line-height: 18pt;
+    }
+ 
+#headerleft h1 span#line1 {
+    font-size: 75%;
+    }
+ 
+#headerleft h1 span#line2 {
+    font-size: 110%;
+    }
+ 
+#headerright {
+    margin-left: 130px;
+    }
+ 
+#event h2{
+    padding: 5px;
+    margin: 0px;
+    display: inline;
+    font-size: 14pt;
+    }
+ 
+#urlbox {
+    background-color: #ffffff;
+    font-family:Arial,Helmet,Freesans,sans-serif;
+    font-style: normal;
+    font-size: 75%;
+    height: 200%;
+    white-space: pre;
+    padding: 2px 10px;
+    overflow: hidden;
+    }
+ 
+#urlbox em {
+    font-size: 150%;
+    font-style: normal;
+    background-color: #e5e51d;
+    }
+ 
+#urlbox strong {
+    font-style: bold;
+    color: #ff3333;
+    }
+ 
+#info {
+    position: relative;
+    }
+ 
+#info div {
+    margin: 10px 0px 0px 85px;
+    padding: 10px;
+    background-color: #cfdde5;
+    border: 2px solid #ffffff;
+    -webkit-border-top-left-radius: 20px;
+    -webkit-border-bottom-right-radius: 20px;
+    -moz-border-radius-topleft: 20px;
+    -moz-border-radius-bottomright: 20px;
+    border-top-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    }
+ 
+#info div h3 {
+    position: absolute;
+    left: 0px;
+    padding: 5px;
+    margin: 0px;
+    }
+ 
+#info div div {
+    margin: 10px 5px 5px 0px;
+    padding: 10px;
+    background-color: #d9d9d9;
+    border: 1px dashed #666666;
+    -webkit-border-top-left-radius: 20px;
+    -webkit-border-bottom-right-radius: 20px;
+    -moz-border-radius-topleft: 20px;
+    -moz-border-radius-bottomright: 20px;
+    border-top-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    font-size: 80%;
+    }
+ 
+span.hilite {
+    background-color: #e5e51d;
+    }
+ 
+#header div#uglyurl {
+    }
+ 
+#footer {
+    text-align: right;
+    padding-right: 15px;
+    }
+ 
+.clear {
+    clear: both;
+    height: 0px;
+    }
+ 
+#report, #details, #ad, .more {
+    display: none;
+    }
+ 
+#ad {
+    margin: 0;
+    padding: 3px;
+    height: 100%;
+    text-align: center;
+    background-color: #eeeeee;
+    }
+ 
+#ad table {
+    margin: 0 auto;
+    vertical-align: middle;
+    font-size: 8pt;
+    border:1px dashed #999999;
+    table-layout: fixed;
+    height: 95%;
+    width: 100%;
+    align: center;
+    }
+</style>
+ 
+<script language="JavaScript">
+    //Set these for your District
+    var dg_entity="EXAMPLE School District"
+    var dg_supportemail="support@EXAMPLESCHOOLS.ORG"
+    
+    //capture information from DansGuardian
+    var dg_url="-URL-";
+    var dg_reason="-REASONLOGGED-";
+    var dg_user="-USER-";
+    var dg_ip="-IP-";
+    var dg_host="-HOST-";
+    var dg_fg="-FILTERGROUP-";
+    var dg_cat="-CATEGORIES-";
+ 
+    //****DEBUG****
+    //var dg_url="http://www.icanhasinternets.com/2010/04/10-awesome-mascot-fights-caught-on-tape/";
+    //var dg_reason="Weighted phrase limit of 50 : 225 ((-article, social)+(game,  sport)+(flash, game)+(flash, game, macromedia)+(shockwave, game)+(shockwave, game, macromedia)+facebook+-security+twitter+-university)";
+    //var dg_user="teacher";
+    //var dg_ip="10.1.1.10";
+    //var dg_host="lab01.hs.exampleschools.org";
+    //var dg_fg="Staff";
+    //var dg_cat="Weighted Phrases, Games";
+ 
+    //define the report email
+    var reportlink='<a href="mailto:'+dg_supportemail+'?subject=Content Filter Request&body=Please click %22Send%22 to submit your request.   %0D%0A   %0D%0A'+dg_url+'   %0D%0A'+dg_reason+'   %0D%0A'+dg_user+', '+dg_ip+', '+dg_fg+'   %0D%0A">Click here to send a report to Tech Support!</a>'
+ 
+    //initialize prettyurl
+    var prettyurl=dg_url;
+ 
+    //parse the blocked request
+    //req_attr[full url, protocol, domain, remainder]
+    var req_attr=/^(\w{3,5})\:\/\/([\w-\.]+)(\/.*)?/i.exec(dg_url);
+ 
+    //parse the reason
+    //reason_attr[full text of reason, isolated reason, string that triggered reason]
+    var reason_attr=/^(Weighted phrase limit of|Banned site\: Blanket SSL Block|Banned site|Banned Phrase found|Banned combination phrase found|Your username is not allowed to web browse|Banned extension|Banned Regular Expression URL|Banned URL|Virus or bad content detected)\s?[\.\:]?\s?(.*)?/.exec(dg_reason);
+ 
+    //select a human explination based on reported reason
+    var nicereason="";
+    if(reason_attr)
+    {
+    switch (reason_attr[1])
+    {
+        case "Weighted phrase limit of":
+        case "Banned combination phrase found":
+        case "Banned Phrase found":
+            var nicereason="This web page has been filtered because of words or phrases that it contains. The web site <span class='hilite'>"+req_attr[2]+"</span> is not filtered, but this page is. <p> If this web page has content that changes often, such as a news site, then this may be temporary.";
+            break;
+        case "Banned site: Blanket SSL Block":
+            var nicereason="This web page has been blocked because it requires an encrypted connection and has not been approved for use.";
+            var prettyurl=prettyurl.replace(req_attr[1], "<strong>"+req_attr[1]+"</strong>");
+            break;
+        case "Banned site":
+            var nicereason="This web page has been filtered because the web site <span class='hilite'>"+reason_attr[2]+"</span> is blocked based on the appropriate use policies of the School District.";
+            if (dg_cat != "N/A") {
+                nicereason=nicereason+" It has been catagorized as containing "+dg_cat+".";
+                }
+            break;
+        case "Your username is not allowed to web browse":
+            var nicereason="The user logged into this workstation or web browser (<span class='hilite'>"+reason_attr[2]+"</span>) is not permitted to access the Internet.";
+            break;
+        case "Banned extension":
+            var nicereason="A <span class='hilite'>"+reason_attr[2].toUpperCase()+"</span> file was requested. The web site "+req_attr[2]+" is not allowed to provide this type of file.";
+            break;
+        case "Banned Regular Expression URL":
+            var nicereason="This web page has been filtered because of words or phrases found in its address.";
+            //Isolate the portion of the address that matched.
+            var urlregex = new RegExp(reason_attr[2], "i");
+            reason_attr[2] = urlregex.exec(dg_url)[0];
+            break;
+        case "Banned URL":
+            var nicereason="This web page has been filtered because this specific area of the web site <span class='hilite'>"+req_attr[2]+"</span> is blocked based on the appropriate use policies of the School District.";
+            //Identify the portion of the address that matched.
+            var prettyurl=prettyurl.replace(reason_attr[2], "<strong>"+reason_attr[2]+"</strong>");
+            break;
+        case "Virus or bad content detected":
+            var nicereason="This web page or resource has been filtered because it contains a virus or other malicious software!";
+            break;
+        default:
+    }
+    }
+    else
+    {
+        var nicereason="You know, I'm really not sure why this page has been blocked. Sorry. Filter says: <pre>"+dg_reason+"</pre>";
+    }
+    //create pretty url
+    if ( req_attr[2] ) {
+        var prettyurl=prettyurl.replace(req_attr[2], "<em>"+req_attr[2]+"</em>");
+        }
+    if ( reason_attr[2] ) {
+        var prettyurl=prettyurl.replace(reason_attr[2], "<strong>"+reason_attr[2]+"</strong>");
+        }
+ 
+function showHide(shID) {
+    if (document.getElementById(shID)) {
+        if (document.getElementById(shID+'-show').style.display != 'none') {
+            document.getElementById(shID+'-show').style.display = 'none';
+            document.getElementById(shID).style.display = 'block';
+        }
+        else {
+            document.getElementById(shID+'-show').style.display = 'inline';
+            document.getElementById(shID).style.display = 'none';
+        }
+    }
+}
+</script>
+ 
+</head>
+ 
+<body>
+<div id='bodywrap'>
+    <div id='header'>
+        <div id='headerleft'>
+            <h1><span id='line1'>School Web</span><br/><span id='line2'>Filter</span><br/><span id='line3'></span></h1>
+        </div>
+        <div id='headerright'>
+            <div id='event'><h2>This page has been filtered.</h2></div>
+            <div id='urlbox'><script>document.write(prettyurl)</script></div>
+        </div>
+        <div class='clear'> </div>
+    </div>
+    <div id='info'>
+        <div id='nicereason'>
+            <h3>Why?</h3>
+            <p><script>document.write(nicereason);</script></p>
+            <p><a href='#' id='more-why-show' class='showLink' onclick='showHide("more-why");return false;'>Why filter the web?</a></p>
+            <div id='more-why' class='more'>
+                <p>The <script>document.write(dg_entity);</script> uses the School Web Filter to
+                <ul>
+                    <li>enforce the <script>document.write(dg_entity);</script> Network Usage Agreement and Acceptable Use Policy,</li>
+                    <li>to provide a first line of defense against viruses and other malicious software,</li>
+                    <li>and to comply with the requirements of Federal law.</li>
+                </ul>
+                </p>
+                <p>The <a href='http://frwebgate.access.gpo.gov/cgi-bin/getdoc.cgi?dbname=106_cong_public_laws&docid=f:publ554.106'>Children's Internet Protection Act (CIPA)</a> requires <em>"the operation of a technology protection measure with respect to any of its computers with Internet access that protects against access through such computers to visual depictions that are-- (I) obscene; (II) child pornography; or (III) harmful to minors".</em></p>
+                <p>The <a href='https://www.ed.gov/policy/gen/guid/fpco/ferpa/index.html'>Family Educational Rights and Privacy Act (FERPA)</a> requires that no student's educational records or personally identifiable information is released without the written consent of that student's parent or guardian.</p>
+                <p><a href='#' id='more-why-hide' class='hideLink' onclick='showHide("more-why");return false;'>Okay, I see.</a></p>
+            </div>
+        </div>
+        <div id='help'>
+            <h3>Help!</h3>
+            <p>Would you like to see some suggestions on avoiding this page? <a href='#' id='more-help-show' class='showLink' onclick='showHide("more-help");return false;'>Click here!</a></p>
+            <div id='more-help' class='more'>
+                <p>There are many things that can cause a web page to be filtered.</p>
+                <ul>
+                    <li>If you typed the name of the web site into the address bar of your browser, make sure that you have spelled it correctly.</li>
+                    <li>Certain types of sites, especially news-related sites, often change very quickly. There may be some content that triggers the filter right now but that will be gone later.</li>
+                </ul>
+                <form action="http://www.google.com/search" method="get">
+                    <input name="q" value="" size="40" maxlength="255" type="text">
+                    <input name="sa" value="Google Search" type="submit">
+                </form>
+            </div>
+        </div>
+        <div id='report'>
+            <h3>Report</h3>
+            Please contact Tech Support if you think there has been an error.
+            <script>document.write(reportlink);</script>
+        </div>
+        <div id='details'>
+            <h3>Details</h3>
+            <dl>
+                <dt>Web site</dt>
+                    <dd><script>document.write(req_attr[2])</script></dd>
+                <dt>Full URL</dt>
+                    <dd><script>document.write(req_attr[0])</script></dd>
+                <dt>Rule</dt>
+                    <dd><script>document.write(reason_attr[1])</script></dd>
+                    <dd><script>document.write(reason_attr[2])</script></dd>
+            </dl>
+        </div>
+    </div>
+    <div id='footer'>
+        <script>document.write(dg_user+"@"+dg_host+' ('+dg_ip+')')</script>
+    </div>
+</div>
+<div id='ad'>
+<table cellpadding="0" cellspacing="0" border="0">
+    <tr>
+    <td align="center" valign="middle">
+    Ad Removed.
+    </td>
+    </tr>
+</table>
+</div>
+ 
+<script language="JavaScript">
+    if ((document.body.clientWidth<=350) || (document.body.clientHeight<=350))
+    {
+      document.getElementById('bodywrap').style.display = 'none';
+      document.getElementById('ad').style.display = 'block';
+    }
+    else
+    {
+      document.getElementById('bodywrap').style.display = 'block';
+      document.getElementById('ad').style.display = 'none';
+    }
+    if (dg_fg == 'Staff')
+    {
+      document.getElementById('report').style.display = 'block';
+    }
+</script>
+ 
+</body>
+</html>
