@@ -403,13 +403,15 @@ MD_Preseed () {
 	#remove preseed file, no need to clutter things up
 	rm $TEMP_DIR/tmp/preseed.cfg
 
-	# Setup the vlc repo key
-	if [ ! $(wget -O $TEMP_DIR/tmp/videolan-apt.asc http://download.videolan.org/pub/debian/videolan-apt.asc) ]; then
-		sleep 1
-		wget --no-proxy -O $TEMP_DIR/tmp/videolan-apt.asc http://download.videolan.org/pub/debian/videolan-apt.asc
+	# This does an update, while adding gpg keys for any that are missing. This is primarily for vlc
+	# but will work for any source.
+	gpgs=$(apt-get -y update |& grep -s NO_PUBKEY | awk '{ print $NF }' | cut -c 9-16);
+	if [ -n "$gpgs" ]; then
+		echo "$gpgs" | while read gpgkeys; do
+			gpg --keyserver pgp.mit.edu --recv-keys "$gpgkeys"
+			gpg --export --armor "$gpgkeys" | apt-key add -
+		done
 	fi
-	LC_ALL=C chroot $TEMP_DIR apt-key add /tmp/videolan-apt.asc
-	VerifyExitCode "videolan repository apt-key add"
 
 	StatsMessage "PreSeeding package installation preferences"
 	LC_ALL=C chroot $TEMP_DIR apt-get -y -qq update
