@@ -17,7 +17,7 @@ INCLUDEPATH += /usr/include/qjson/ \
     ../../DCE/
 
 LIBS += -lqjson
-
+DESTDIR=../../bin
 SOURCES += ../Main.cpp \
     ../../PlutoUtils/uuencode.cpp \
     ../../PlutoUtils/ThreadedClass.cpp \

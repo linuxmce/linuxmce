@@ -24,6 +24,7 @@
 #include <qjson/parser.h>
 #include <QNetworkAccessManager>
 #include <QVariant>
+#include <QTimer>
 #include <QUrl>
 #include <huecontrollerhardware.h>
 #include <huebulb.h>
@@ -39,13 +40,13 @@ namespace DCE
         bool validated;
         bool linkButton;
 
-
         QString targetIpAddress;
         QString authUser;
 
-
         QList<HueControllerHardware*> hueControllers;
         QList<HueBulb*> hueBulbs;
+
+        QTimer rTime;
 
 
         // Private methods
@@ -70,6 +71,7 @@ namespace DCE
         bool findControllers();
         bool downloadControllerConfig(QUrl deviceIp, int index);
         void getScreenSaverColor();
+        bool setupController(int controllerIndex);
 	virtual void OnReload();
 
 
@@ -196,12 +198,16 @@ NOEMON or CANBUS */
         void responseRecieved();
         void initiateConfigDownload(QUrl target);
         void testSignal();
+        void linkButtonChanged();
 
 
     public slots:
         void initResponse();      
         void downloadConfigResponse(QNetworkReply*);
         void dummySlot();
+        void setLinkButton(bool link){linkButton = link; emit linkButtonChanged();}
+        bool getLinkButton(){return linkButton;}
+        bool checkLinkButton();
 
         void processDataStore(const QByteArray data);
 
