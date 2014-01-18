@@ -46,8 +46,8 @@ SOURCES += ../Main.cpp \
     ../../DCE/DeviceData_Base.cpp \
     ../../DCE/DeviceData_Impl.cpp \
     ../../PlutoUtils/getch.cpp \
-    ../../Gen_Devices/Hue_ControllerBase.cpp \
-    ../Hue_Controller.cpp \
+    ../../Gen_Devices/HueControllerBase.cpp \
+    ../HueController.cpp \
     huecontrollerhardware.cpp \
     huebulb.cpp
 
@@ -71,7 +71,7 @@ HEADERS += ../../PlutoUtils/ThreadedClass.h \
     ../../PlutoUtils/FileUtils.h \
     ../../pluto_main/Define_DeviceCategory.h \
     ../../pluto_main/Define_DeviceTemplate.h \
-    ../../Gen_Devices/Hue_ControllerBase.h \
-    ../Hue_Controller.h \
+    ../../Gen_Devices/HueControllerBase.h \
+    ../HueController.h \
     huecontrollerhardware.h \
     huebulb.h

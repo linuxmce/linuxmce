@@ -11,7 +11,7 @@
      See the GNU General Public License for more details.
 
 */
-#include "Hue_Controller.h"
+#include "HueController.h"
 #include <QCoreApplication>
 //<-dceag-incl-b->
 
@@ -80,7 +80,7 @@ int IsRuntimePlugin()
     // Then the Router will scan for all .so or .dll files, and if found they will be registered with a temporary device number
     bool bIsRuntimePlugin=false;
     if( bIsRuntimePlugin )
-        return Hue_Controller::PK_DeviceTemplate_get_static();
+        return HueController::PK_DeviceTemplate_get_static();
     else
         return 0;
 }
@@ -94,19 +94,19 @@ class Command_Impl *RegisterAsPlugIn(class Router *pRouter,int PK_Device,Logger 
     LoggerWrapper::SetInstance(pPlutoLogger);
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d loaded as plug-in",PK_Device);
 
-    Hue_Controller *pHue_Controller = new Hue_Controller(PK_Device, "localhost",true,false,pRouter);
-    if( pHue_Controller->m_bQuit_get()|| !pHue_Controller->GetConfig() )
+    HueController *pHueController = new HueController(PK_Device, "localhost",true,false,pRouter);
+    if( pHueController->m_bQuit_get()|| !pHueController->GetConfig() )
     {
-        delete pHue_Controller;
+        delete pHueController;
         return NULL;
     }
     else
     {
-        g_pCommand_Impl=pHue_Controller;
+        g_pCommand_Impl=pHueController;
         g_pDeadlockHandler=Plugin_DeadlockHandler;
         g_pSocketCrashHandler=Plugin_SocketCrashHandler;
     }
-    return pHue_Controller;
+    return pHueController;
 }
 }
 //<-dceag-plug-e->
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
     g_sBinaryPath = FileUtils::BasePath(argv[0]);
 
-    cout << "Hue_Controller, v." << VERSION << endl
+    cout << "HueController, v." << VERSION << endl
          << "Visit www.plutohome.com for source code and license information" << endl << endl;
 
     string sRouter_IP="dcerouter";
@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
     if (bError)
     {
         cout << "A Pluto DCE Device.  See www.plutohome.com/dce for details." << endl
-             << "Usage: Hue_Controller [-r Router's IP] [-d My Device ID] [-l dcerouter|stdout|null|filename]" << endl
+             << "Usage: HueController [-r Router's IP] [-d My Device ID] [-l dcerouter|stdout|null|filename]" << endl
              << "-r -- the IP address of the DCE Router  Defaults to 'dcerouter'." << endl
              << "-d -- This device's ID number.  If not specified, it will be requested from the router based on our IP address." << endl
              << "-l -- Where to save the log files.  Specify 'dcerouter' to have the messages logged to the DCE Router.  Defaults to stdout." << endl;
@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
     try
     {
         if( sLogger=="dcerouter" )
-            LoggerWrapper::SetInstance(new ServerLogger(PK_Device, Hue_Controller::PK_DeviceTemplate_get_static(), sRouter_IP));
+            LoggerWrapper::SetInstance(new ServerLogger(PK_Device, HueController::PK_DeviceTemplate_get_static(), sRouter_IP));
         else if( sLogger=="null" )
             LoggerWrapper::SetType(LT_LOGGER_NULL);
         else if( sLogger!="stdout" )
@@ -201,18 +201,18 @@ int main(int argc, char* argv[])
     bool bAppError=false;
     bool bReload=false;
 
-    Hue_Controller *pHue_Controller = new Hue_Controller(PK_Device, sRouter_IP,true,bLocalMode);
+    HueController *pHueController = new HueController(PK_Device, sRouter_IP,true,bLocalMode);
 
-    if ( pHue_Controller->GetConfig() && pHue_Controller->Connect(pHue_Controller->PK_DeviceTemplate_get()) )
+    if ( pHueController->GetConfig() && pHueController->Connect(pHueController->PK_DeviceTemplate_get()) )
     {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
-        pHue_Controller->CreateChildren();
+        pHueController->CreateChildren();
         return a.exec();
     }
     else
     {
         bAppError = true;
-        if( pHue_Controller->m_pEvent && pHue_Controller->m_pEvent->m_pClientSocket && pHue_Controller->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
+        if( pHueController->m_pEvent && pHueController->m_pEvent->m_pClientSocket && pHueController->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
         {
             bAppError = false;
             bReload = false;
@@ -223,10 +223,10 @@ int main(int argc, char* argv[])
     }
 
 
-    if( pHue_Controller->m_bReload )
+    if( pHueController->m_bReload )
         bReload=true;
 
-    delete pHue_Controller;
+    delete pHueController;
 
 
 

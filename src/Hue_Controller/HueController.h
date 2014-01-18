@@ -12,12 +12,12 @@
 
 */
 //<-dceag-d-b->
-#ifndef Hue_Controller_h
-#define Hue_Controller_h
+#ifndef HueController_h
+#define HueController_h
 
 //	DCE Implemenation for #2256 Hue Controller
 
-#include "Gen_Devices/Hue_ControllerBase.h"
+#include "Gen_Devices/HueControllerBase.h"
 //<-dceag-d-e->
 #include <QObject>
 #include <qjson/serializer.h>
@@ -31,7 +31,7 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-    class Hue_Controller : public Hue_Controller_Command
+    class HueController : public HueController_Command
     {
         Q_OBJECT
         //<-dceag-decl-e->
@@ -57,8 +57,8 @@ namespace DCE
         //<-dceag-const-b->
     public:
         // Constructors/Destructor
-        Hue_Controller(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject*parent=0);
-        virtual ~Hue_Controller();
+        HueController(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL, QObject*parent=0);
+        virtual ~HueController();
         virtual bool GetConfig();
         virtual bool Register();
         virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
@@ -80,7 +80,7 @@ namespace DCE
         //<-dceag-const2-b->
         // The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
         // You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-        //Hue_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
+        //HueController(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
         //<-dceag-const2-e->
 
         //<-dceag-h-b->
