@@ -1288,6 +1288,12 @@
 #define TEXT_Confirm_Delete_All_Voicemail_CONST 2231
 #define TEXT_Baby_Monitor_On_CONST 2232
 #define TEXT_Baby_Monitor_Off_CONST 2233
+#define TEXT_Clock_Hr_CONST 2234
+#define TEXT_Clock_Min_CONST 2235
+#define TEXT_Clock_Colon_CONST 2236
+#define TEXT_Clock_DOW_CONST 2237
+#define TEXT_Clock_DOM_CONST 2238
+#define TEXT_Clock_Month_CONST 2239
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

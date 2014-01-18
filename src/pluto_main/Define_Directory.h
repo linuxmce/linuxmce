@@ -11,6 +11,7 @@
 #define DIRECTORY_XKBLayoutTool_CONST 8
 #define DIRECTORY_plutobin_CONST 9
 #define DIRECTORY_lmceadmin_CONST 10
+#define DIRECTORY_xml_CONST 11
 
 #define DIRECTORY_TABLE "Directory"
 #define DIRECTORY_PK_DIRECTORY_FIELD "PK_Directory"

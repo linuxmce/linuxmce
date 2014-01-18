@@ -64,6 +64,7 @@
 #define MEDIATYPE_np_InternetMedia_CONST 64
 #define MEDIATYPE_lmce_Game_amiga_CONST 65
 #define MEDIATYPE_np_NetworkMedia_CONST 66
+#define MEDIATYPE_np_XBOX360_CONST 67
 
 #define MEDIATYPE_TABLE "MediaType"
 #define MEDIATYPE_PK_MEDIATYPE_FIELD "PK_MediaType"

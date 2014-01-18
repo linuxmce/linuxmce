@@ -26,7 +26,7 @@
 #define REPOSITORYSOURCE_Raspbian_LinuxMCE_addons_CONST 23
 #define REPOSITORYSOURCE_Ubuntu_Mirrors_CONST 24
 #define REPOSITORYSOURCE_Ubuntu_LinuxMCE_Addons_CONST 25
-#define REPOSITORYSOURCE_Medibuntu_CONST 26
+#define REPOSITORYSOURCE_VideoLAN_Organization_CONST 26
 #define REPOSITORYSOURCE_Slimdevices_CONST 27
 #define REPOSITORYSOURCE_Local_debcache_CONST 28
 #define REPOSITORYSOURCE_Ubuntu_Security_CONST 29
