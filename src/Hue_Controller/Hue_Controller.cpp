@@ -49,6 +49,8 @@ Hue_Controller::Hue_Controller(int DeviceID, string ServerAddress, bool bConnect
 
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "HueController, Device %d is alive!", this->m_dwPK_Device);
     authUser ="";
+    triesLeft=5;
+    linkButton=false;
 
     // QObject::connect(this, SIGNAL(initiateConfigDownload()), this, SLOT(getHueDataStore()), Qt::DirectConnection);
     // QObject::connect(this, SIGNAL(initiateConfigDownload()), this, SLOT(dummySlot()));
@@ -57,7 +59,7 @@ Hue_Controller::Hue_Controller(int DeviceID, string ServerAddress, bool bConnect
     t->setInterval(3000);
     QObject::connect(t, SIGNAL(timeout()), this, SLOT(checkLinkButton()));
     t->setSingleShot(false);
-    //t->start();
+    t->start();
 
 }
 
@@ -76,14 +78,15 @@ Hue_Controller::~Hue_Controller()
 
 }
 bool Hue_Controller::checkLinkButton(){
-
+    qDebug() << "Checking link button";
     if(authUser==""||authUser=="linuxmceSetup"){
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device not setup, cannot check status of link button!");
         return false;
     }
 
-    QString deviceIp = QString::fromStdString(m_pData->GetIPAddress());
+    QString deviceIp = hueControllers.at(0)->m_ipAddress;
     QUrl setupUrl = "http://"+deviceIp+"/api/"+authUser;
+    qDebug()<< setupUrl.toString();
     QNetworkAccessManager *setupManager = new QNetworkAccessManager;
     QNetworkRequest setupReq(setupUrl);
     QNetworkReply * setupReply = setupManager->get(setupReq);
@@ -94,24 +97,25 @@ bool Hue_Controller::checkLinkButton(){
     QByteArray setupResponse = setupReply->readAll();   
     QJson::Parser parser;
     bool ok=false;
-    setupResponse.remove(0,1);
-    setupResponse.remove(setupResponse.length()-1, 1);
+//    setupResponse.remove(0,1);
+//    setupResponse.remove(setupResponse.length()-1, 1);
 
     QVariantMap res = parser.parse(setupResponse, &ok).toMap();
 
 
     if(!ok){
-        qDebug() << "Bad response";
+        qDebug() << "Bad Link Button Response response";
         LoggerWrapper::GetInstance()->Write(LV_WARNING, "Could not connect to %s ! Response was invalid. Please check the device ip and that it is setup.", deviceIp.toStdString().c_str());
+
         return false;
     }
 
     if(res.keys().contains("error")){
-         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Link Button Not pressed!");
-         if(linkButton)
-         {
-             this->setLinkButton(false);
-         }
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Link Button Not pressed!");
+        if(linkButton)
+        {
+            this->setLinkButton(false);
+        }
         return false;
     }
 }
@@ -119,10 +123,10 @@ bool Hue_Controller::checkLinkButton(){
 bool Hue_Controller::setupController(int controllerIndex){
 
     QString installationTag = QString::number(m_pData->m_dwPK_Installation);
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Setting up Hue Hub with LinuxMCE-%s", installationTag.toStdString().c_str());
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Setting up Hue Hub with LinuxMCE-%s ", installationTag.toStdString().c_str());
     QString deviceIp = hueControllers.at(controllerIndex)->m_ipAddress;
 
-QUrl setupUrl = "http://"+deviceIp+"/api/";
+    QUrl setupUrl = "http://"+deviceIp+"/api/";
     QVariantMap setupParams;
     installationTag.prepend("LinuxMCE-");
     setupParams.insert("devicetype",installationTag);
@@ -144,21 +148,44 @@ QUrl setupUrl = "http://"+deviceIp+"/api/";
 
     QVariantMap res = parser.parse(setupResponse, &ok).toMap();
 
-
     if(!ok){
         qDebug() << "Bad response";
         LoggerWrapper::GetInstance()->Write(LV_WARNING, "Could not connect to %s ! Response was invalid. Please check the device ip and that it is setup.", deviceIp.toStdString().c_str());
         return false;
     }
 
-    qDebug() << res.keys();
+
 
     if(res.keys().contains("error")){
-        QVariantMap errorDetails = res["error"].toMap();
+        QVariantMap errorDetails = res["error"].toMap();        
         QString error_msg= errorDetails["description"].toString();
-        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Setup command failed. Reason to follow::%s",error_msg.toStdString().c_str() );
-    }    
+        switch(errorDetails["type"].toInt()){
+        case 101:
+            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Setup command failed. Reason to follow::%s",error_msg.toStdString().c_str() );
 
+            /* Send Message to Screen somehow */
+
+            if(linkButton==true){
+                setupController(controllerIndex);
+                qDebug()<< linkButton;
+            } else {
+                return false;
+            }
+            break;
+
+        default:
+            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Setup command failed. Reason to follow::%s",error_msg.toStdString().c_str() );
+            return false;
+
+        }
+    } else {
+
+        QVariantMap sucessDetail = res["success"].toMap();     ;
+        authUser = sucessDetail["username"].toString();
+        qDebug() << authUser;
+        this->DATA_Set_Username(authUser.toStdString(), true);
+        return true;
+    }
 }
 
 
@@ -193,6 +220,8 @@ bool Hue_Controller::GetConfig()
         string cmdChk;
 
         authUser = QString::fromStdString(DATA_Get_Username());
+        qDebug() << authUser;
+
         if(authUser=="linuxmceSetup"){
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Default Username Found. Will now attempt to setup device");
 
@@ -201,6 +230,7 @@ bool Hue_Controller::GetConfig()
 
             }else{
                 LoggerWrapper::GetInstance()->Write(LV_STATUS, "Failed to setup device!");
+
                 return false;
             }
 
@@ -277,7 +307,7 @@ void Hue_Controller::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,s
     else
     {
         sCMD_Result = "Failed";
-        exit;
+
     }
     int conversion_var = ceil(65280 / 360);
 

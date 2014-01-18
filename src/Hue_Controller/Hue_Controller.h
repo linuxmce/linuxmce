@@ -39,7 +39,7 @@ namespace DCE
         bool mb_isNew;
         bool validated;
         bool linkButton;
-
+        int triesLeft;
         QString targetIpAddress;
         QString authUser;
 
