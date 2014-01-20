@@ -233,26 +233,26 @@ void MediaManager::setMediaUrl(QString url)
 
 #if defined (QT4) && ! defined (__ANDROID__) //only for non android qt4
 
-//    QString mediaPath;
-//    if(url.toLower().endsWith(".iso",Qt::CaseInsensitive)||url.toLower().endsWith(".dvd", Qt::CaseInsensitive)){
-//        mediaPath="/mnt/remote/dvd";
-//    } else {
-//        mediaPath = url+" /mnt/remote/";
-//    }
+    QString mediaPath;
+    if(url.toLower().endsWith(".iso",Qt::CaseInsensitive)||url.toLower().endsWith(".dvd", Qt::CaseInsensitive)){
+        mediaPath="/mnt/remote/dvd";
+    } else {
+        mediaPath = url+" /mnt/remote/";
+    }
 
-//    QString mountProg = "gksudo";
-//    QStringList args;
+    QString mountProg = "gksudo";
+    QStringList args;
 
-//    args.append(QString("mount -t nfs -o loop "+url+" /mnt/remote/dvd/"));
-//    QProcess *mountProcess = new QProcess(this);
-//    mountProcess->start(mountProg, args);
-//    mountProcess->waitForFinished(10000);
-//    qDebug() << "Process Status ::" <<mountProcess->state();
-//    if(mountProcess->state()== QProcess::FailedToStart){
-//        qWarning() << "command failed to start!";
-//        qDebug() << mountProcess->readAllStandardError();
-//        qDebug() << mountProcess->errorString();
-//    }
+    args.append(QString("mount -t nfs -o loop "+url+" /mnt/remote/dvd/"));
+    QProcess *mountProcess = new QProcess(this);
+    mountProcess->start(mountProg, args);
+    mountProcess->waitForFinished(10000);
+    qDebug() << "Process Status ::" <<mountProcess->state();
+    if(mountProcess->state()== QProcess::FailedToStart){
+        qWarning() << "command failed to start!";
+        qDebug() << mountProcess->readAllStandardError();
+        qDebug() << mountProcess->errorString();
+    }
 
     if(url.toLower().endsWith(".iso",Qt::CaseInsensitive)||url.toLower().endsWith(".dvd", Qt::CaseInsensitive)){
         mediaObject->setCurrentSource(Phonon::MediaSource(Phonon::Dvd, "/mnt/remote/dvd/"));

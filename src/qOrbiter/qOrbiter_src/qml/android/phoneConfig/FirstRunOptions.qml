@@ -38,7 +38,7 @@ Item{
             anchors.centerIn: parent
             color:"white"
             font.weight: Font.Light
-            font.pointSize: scaleY(2)
+            font.pointSize: firstRunOptions.parent.height*.02
         }
         MouseArea{
             anchors.fill: parent

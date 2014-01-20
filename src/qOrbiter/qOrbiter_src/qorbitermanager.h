@@ -709,6 +709,8 @@ signals:
 #endif
 
 public slots:
+    /*! @name Screen and Screen Saver */
+    //@{
     void updateScreenSaverTimeout(int t){ screenSaverTimeout = t; }
     void setScreensaverTimerout(int t ){screenSaverTimeout = t; emit screenSaverTimeoutChanged();  }
     int getScreenSaverTimeout() {return screenSaverTimeout; }
@@ -716,15 +718,16 @@ public slots:
     void setScreenPowerTimeout(int t){screenPowerOffTimeout = t; emit screenPowerTimeoutChanged();}
     int getScreenPowerTimeout(){return screenPowerOffTimeout;}
     void updateScreenPowerTimeout(int t){ screenPowerOffTimeout = t; emit updateScreenPowerTimeout(screenPowerOffTimeout); }
+    //@}
 
 
+    /*! @name Application Environment */
+    //@{
     void initiateRestart();
     void setLocalAddress(QString l){m_localAddress = l; emit localAddressChanged(); }
     QString getLocalAddress() {return m_localAddress; }
     void setRouterPort(QString p){routerPort = p; emit routerPortChanged();}
     QString getRouterPort(){return routerPort;}
-
-
 
     void setApplicationPath(QString p){applicationPath = p; emit applicationPathChanged();}
     QString getApplicationPath(){return applicationPath;}
@@ -741,47 +744,6 @@ public slots:
     int getFormFactor(){ return isPhone;}
     void sendDceMessage(QVariantMap m) {if(!m.isEmpty()) emit newMessageSend(m);}
 
-    /*!
-     * \brief Requests the media subtypes for given subtype
-     * \param subtype : int value corresponding to media subtypes
-     * -1 Tv Shows
-     * -2 Movies
-     * -3 Home Videos
-     * -4 Sports Events
-     * -5 music videos
-     * -6 Alternative - whatever that is
-     * -7 Popular music
-     * -8 Classical music - clearly not popular *boom!*
-     * -9 Learning
-     * -10 Audio Books
-     * -11 Arcade
-     * -12 Console
-     *
-     */
-    void requestMediaSubtypes(int subtype){emit requestSubtypes(subtype);}
-    void setNewSubtype(){}
-
-    /*!
-     * \brief This requests the availible attribute types.
-     */
-    void requestAttributeTypes(){}
-
-    /*!
-     * \brief translateAttribute
-     * \param a
-     * \return
-     */
-    QString translateAttribute(int a){
-        QString rVal;
-                switch (a) {
-            case 1:
-
-                break;
-            default:
-                break;
-        }
-        return rVal;
-    }
 
 
     /*!
@@ -796,10 +758,7 @@ public slots:
      */
     bool getRunStatus(){return first_run;}
 
-    /*!
-     * \brief requestGenres
-     */
-    void requestGenres(){}
+
 
     /*!
      * \brief setupMobileStorage Sets up the mobile storage location for Android devices.
@@ -820,6 +779,8 @@ public slots:
      * \return
      */
     QString getMobileStorage(){return mobileStorageLocation;}
+
+    //@}
 
     /*! @name child devices */
     //@{
@@ -1144,9 +1105,7 @@ public slots:
      * \param d
      */
     void mountMediaDevices();
-
     void getMediaDevices();
-
     void setMediaDevices(QNetworkReply* d);
     //@}
 
@@ -1181,7 +1140,7 @@ public slots:
     void saveCurrentPlaylist(QString name, bool mode) {emit savePlist(name, mode);} /*true is public, false is private*/
     //@}
 
-    /*! @nameScreenshot & Images slots*/
+    /*! @name Screenshot & Images slots*/
     //@{
     void updateImageChanged(QImage img);
     void grabStreamImage(){ if(m_bContainsVideo) emit requestStreamImage(); }/*!< \brief This slot is used for non-media devices*/
@@ -1229,6 +1188,9 @@ public slots:
         }
 
     }
+
+    //@}
+
     /*! @name Media Devices slots*/
     //@{
     void showDeviceCodes(int code) {emit populateDeviceCommands(code);}
@@ -1257,6 +1219,54 @@ public slots:
 
     /*! @name Datagrid Slots*/
     //@{
+
+    /*!
+     * \brief requestGenres
+     */
+    void requestGenres(){}
+
+    /*!
+     * \brief Requests the media subtypes for given subtype
+     * \param subtype : int value corresponding to media subtypes
+     * -1 Tv Shows
+     * -2 Movies
+     * -3 Home Videos
+     * -4 Sports Events
+     * -5 music videos
+     * -6 Alternative - whatever that is
+     * -7 Popular music
+     * -8 Classical music - clearly not popular *boom!*
+     * -9 Learning
+     * -10 Audio Books
+     * -11 Arcade
+     * -12 Console
+     *
+     */
+    void requestMediaSubtypes(int subtype){emit requestSubtypes(subtype);}
+    void setNewSubtype(){}
+
+    /*!
+     * \brief This requests the availible attribute types.
+     */
+    void requestAttributeTypes(){}
+
+    /*!
+     * \brief translateAttribute
+     * \param a
+     * \return
+     */
+    QString translateAttribute(int a){
+        QString rVal;
+                switch (a) {
+            case 1:
+
+                break;
+            default:
+                break;
+        }
+        return rVal;
+    }
+
     /*! Resets the datagrid parameters to default */
     void resetModelAttributes(){emit resetFilter(); }
 
@@ -1338,6 +1348,8 @@ public slots:
     int getDeviceNumber() {return iPK_Device;}
 
     //dce related slots
+    /*! @name DCE Control Slots */
+    //@{
     void execGrp(int grp);        //for command groups
     void closeOrbiter();
     void exitApp() { qorbiterUIwin->close();}
@@ -1347,8 +1359,9 @@ public slots:
     bool OrbiterGen();              //prelim orbter generation
     void quickReload();
     void setVariable(int variable, QString valueToAssign){ if(!valueToAssign.isEmpty())  emit setDceVar(variable, valueToAssign);  }
+//@}
 
-    /*Sleeping menu slots. */
+    /*! @name Sleeping menu slots. */
     void updateAlarm(bool toggle, int grp);
     void showSleepingAlarms(SleepingAlarm *s);
     void getSleepingAlarms() {sleeping_alarms->clear(); emit getAlarms();}

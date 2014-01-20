@@ -1314,49 +1314,52 @@ void qorbiterManager::nowPlayingChanged(bool b)
 
 void qorbiterManager::mountMediaDevices()
 {
-    qDebug() << "Mounting LinuxMCE Home Dir";
+    /* Set to be refactored */
 
-    QString dirCmd = "";
-#ifndef RPI
-    dirCmd  = "gksudo";
-#endif
-    QDir mntDir;
-    mntDir.setPath("/mnt/remote/LinuxMCE");
-    qDebug() << "Mount directory exists? " << mntDir.exists();
-    if(!mntDir.exists()){
-        QProcess *mkPath = new QProcess(this);
-        QStringList dArgs;
-        dArgs.append("mkdir -p /mnt/remote/LinuxMCE");
-        mkPath->start(dirCmd, dArgs);
-        mkPath->waitForFinished(10000);
-        while(mkPath->state()==QProcess::Running){
-            qDebug() << mkPath->readAllStandardOutput();
-        }
-    }
+    //    qDebug() << "Mounting LinuxMCE Home Dir";
 
-    qWarning() << mntDir.entryList().count();
-    if(mntDir.exists() && mntDir.entryList().length() ==2){
-       qWarning() << mntDir.path() << " is not mounted, mounting";
+    //    QString dirCmd = "";
+    //#ifndef RPI
+    //    dirCmd  = "gksudo";
+    //#endif
+    //    QDir mntDir;
+    //    mntDir.setPath("/mnt/remote/LinuxMCE");
+    //    qDebug() << "Mount directory exists? " << mntDir.exists();
+    //    if(!mntDir.exists()){
+    //        QProcess *mkPath = new QProcess(this);
+    //        QStringList dArgs;
+    //        dArgs.append("mkdir -p /mnt/remote/LinuxMCE");
+    //        mkPath->start(dirCmd, dArgs);
+    //        mkPath->waitForFinished(10000);
+    //        while(mkPath->state()==QProcess::Running){
+    //            qDebug() << mkPath->readAllStandardOutput();
+    //        }
+    //    }
 
-        QString mountProg = "gksudo";
-#ifdef RPI
-        mountProg="";
-#endif
-        QStringList args;
-        args.append(QString("mount -t nfs "+m_ipAddress+":/home "+ mntDir.path()+"" ));
-        QProcess *mountProcess = new QProcess(this);
-        mountProcess->start(mountProg, args);
-        mountProcess->waitForFinished(10000);
+    //    qWarning() << mntDir.entryList().count();
+    //    if(mntDir.exists() && mntDir.entryList().length() ==2){
+    //       qWarning() << mntDir.path() << " is not mounted, mounting";
 
-        qDebug() << "Process Status ::" <<mountProcess->state();
-        if(mountProcess->state()== QProcess::FailedToStart){
-            qWarning() << "command failed to start!";
-            qDebug() << mountProcess->readAllStandardError();
-            qDebug() << mountProcess->errorString();
-        }
-        qWarning() << "QProcess Exiting, state is :"<< mountProcess->state();
-        qWarning() << "Process exited with::"<< mountProcess->exitCode();
-    }
+    //        QString mountProg = "gksudo";
+    //#ifdef RPI
+    //        mountProg="";
+    //#endif
+    //        QStringList args;
+    //        args.append(QString("mount -t nfs "+m_ipAddress+":/home "+ mntDir.path()+"" ));
+    //        QProcess *mountProcess = new QProcess(this);
+    //        mountProcess->start(mountProg, args);
+    //        mountProcess->waitForFinished(10000);
+
+    //        qDebug() << "Process Status ::" <<mountProcess->state();
+    //        if(mountProcess->state()== QProcess::FailedToStart){
+    //            qWarning() << "command failed to start!";
+    //            qDebug() << mountProcess->readAllStandardError();
+    //            qDebug() << mountProcess->errorString();
+    //        }
+    //        qWarning() << "QProcess Exiting, state is :"<< mountProcess->state();
+    //        qWarning() << "Process exited with::"<< mountProcess->exitCode();
+    //    }
+
 
     //    if(mntDir.entryList(QDir::NoDotAndDotDot).count() == 0){
     //        qDebug() << "Existing files in path" << mntDir.entryList(QDir::NoDotAndDotDot).count();
@@ -1451,9 +1454,9 @@ void qorbiterManager::setMediaDevices(QNetworkReply *d)
     storageDevices = p;
 
 #ifndef ANDROID
-    if(!storageDevices.isEmpty()){
-        mountMediaDevices();
-    }
+//    if(!storageDevices.isEmpty()){
+//        mountMediaDevices();
+//    }
 #endif
 }
 
