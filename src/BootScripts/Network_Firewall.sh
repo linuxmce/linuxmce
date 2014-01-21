@@ -232,15 +232,25 @@ if [[ -n "$IntIP" ]]; then
 	fi
 fi
 
-#config webfilter AND proxy rules
-if [[ "$DisableWebfilter" == 1 ]]; then
-if [[ "$DisableProxy" == 0 ]]; then
-iptables -t nat -A PREROUTING -i $IntIf -p tcp --dport 80 -j REDIRECT --to-port 3128
-echo proxy
-fi
+# config webfilter AND proxy rules
+# Webfilter
+if [[ -z $DisableWebfilter ]]; then
+    #Do nothing webfilter is not installed
 else
-iptables -t nat -A PREROUTING -i $IntIf -p tcp --dport 80 -j REDIRECT --to-port 8181
-echo webfilter
+    if [ $DisableWebfilter = 0 ]; then
+        #setup webfilter route to firewall
+        iptables -t nat -A PREROUTING -i $IntIf -p tcp --dport 80 -j REDIRECT --to-port 8181
+    fi
+fi
+
+# Proxy
+if [[ -z $DisableProxy ]]; then
+    #Do nothing webfilter is not installed
+else
+    if [ $DisableProxy = 0 ]; then
+        #setup webfilter route to firewall
+        iptables -t nat -A PREROUTING -i $IntIf -p tcp --dport 80 -j REDIRECT --to-port 3128
+    fi
 fi
 
 # Configuring all port forwards
