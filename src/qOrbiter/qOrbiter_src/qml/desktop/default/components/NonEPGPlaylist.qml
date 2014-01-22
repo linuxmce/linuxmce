@@ -3,6 +3,9 @@ import "../../../skins-common/lib/handlers"
 
 Rectangle {
     id:nonepgplaylist
+    Component.onCompleted: {
+        mediaplaylist.populate()
+    }
 
     visible: nonepgplaylistview.count > 1 ? true : false
     color: "transparent"
@@ -19,6 +22,7 @@ Rectangle {
         target: mediaplaylist
         onActiveItemChanged:{
             nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
+
         }
     }
 

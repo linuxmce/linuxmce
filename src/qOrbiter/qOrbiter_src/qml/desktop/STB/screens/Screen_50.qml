@@ -1,6 +1,6 @@
 import QtQuick 1.1
 import "../components"
-MediaPlaybackTemplate {
-
+StyledScreen{
+    id:dvdMenuScreen
 
 }

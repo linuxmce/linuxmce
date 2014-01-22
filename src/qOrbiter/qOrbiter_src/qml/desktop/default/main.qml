@@ -76,7 +76,6 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             onPressed:if(glScreenSaver.activeFocus) hideUI()
-
         }
 
     }
@@ -237,8 +236,10 @@ Item {
             if(dceplayer.mediaPlaying){
                 hideUI()
                 forceActiveFocus()
+                glScreenSaver.setActive(false)
             }else{
                 hideUI()
+                glScreenSaver.setActive(true)
             }
         }
 
