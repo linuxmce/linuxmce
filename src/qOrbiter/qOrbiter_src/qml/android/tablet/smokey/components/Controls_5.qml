@@ -3,7 +3,7 @@ import "../../../../skins-common/lib/handlers"
 Item {
     width: childrenRect.width
     height: childrenRect.height
-
+    property bool useDvd:media_playback_base.state==="dvdmenu"
     Rectangle{
         anchors.fill: parent
         color: "black"

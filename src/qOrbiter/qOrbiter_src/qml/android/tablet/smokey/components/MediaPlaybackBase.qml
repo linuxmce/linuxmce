@@ -1,17 +1,43 @@
 import QtQuick 1.0
+import "../../../../skins-common/lib/handlers"
 Item{
     id:media_playback_base
     height: parent.height
     width: manager.appWidth
     state:"metadata"
 
+    property string screenLabel:"foo"
+
     Component.onCompleted: {
+        if(media_playback_base.state!=="dvdmenu"){
+
+            nav_row.navSource="NavOptions5.qml";
+            info_panel.state="hidden";
+            controlComponent = "Controls_5.qml" //controlsLoader.sourceComponent
+        } else {
+
+        }
         manager.getStoredPlaylist()
+        controlComponent = "Controls_5.qml"
         nav_row.navSource="NavOptions5.qml";
         info_panel.state="hidden";
-        controlComponent = "Controls_5.qml" //controlsLoader.sourceComponent
     }
 
+
+
+    Connections{
+        target: manager
+        onMediaScreenShotReady: dvdImage.source="image://listprovider/screenshot/"+securityvideo.timestamp
+    }
+
+    Timer{
+        id:streamtimer
+        repeat: true
+        interval: 1000
+        triggeredOnStart: true
+        running: media_playback_base.state==="dvdmenu"
+        onTriggered: manager.grabStreamImage()
+    }
 
     property string metadataComponent:"Metadata_"+manager.i_current_mediaType+".qml"
     property alias scrollBarComponent:mediaScrollerTarget.sourceComponent
@@ -33,7 +59,6 @@ Item{
         id: controlPanel
     }
 
-
     Item{
         id:metaDataPanel
         height: parent.height
@@ -43,6 +68,103 @@ Item{
         NowPlayingImage{
             id:npImage
             anchors.top:parent.top
+        }
+        Image {
+            id: dvdImage
+            width: scaleX(65)
+            height:scaleY(65)
+            fillMode: Image.PreserveAspectFit
+            source: ""
+            visible:false
+            anchors{
+                top:parent.top
+                left: parent.left
+                margins: scaleX(2)
+            }
+        }
+
+        Item{
+            id:directionDiamond
+            height: dvdImage.height/2
+            width: height
+            anchors{
+                right: parent.right
+                verticalCenter: dvdImage.verticalCenter
+                margins: scaleX(5)
+            }
+
+            Rectangle{
+                id:square
+                anchors.fill: parent
+                color: "black"
+                opacity: .50
+                rotation: 0
+                visible:true
+            }
+
+//            Rectangle{
+//                id:circle
+//                height: parent.height
+//                width: parent.width
+//                radius: height
+//                color: "black"
+//                opacity: .75
+//                border.color: "white"
+//                border.width: 2
+//                anchors.centerIn: square
+//            }
+
+            StyledButton{
+                id:up
+                anchors{
+                    horizontalCenter: square.horizontalCenter
+                    verticalCenter: square.top
+                }
+                buttonText: "Up"
+                ArrowUpHandler{
+                }
+            }
+
+            StyledButton{
+                id:dn
+                anchors{
+                    horizontalCenter: square.horizontalCenter
+                    verticalCenter: square.bottom
+                }
+                buttonText: "Down"
+                ArrowDownHandler{
+                }
+            }
+
+            StyledButton{
+                id:left
+                anchors{
+                    horizontalCenter: square.left
+                    verticalCenter: square.verticalCenter
+                }
+                buttonText: "Left"
+                ArrowLeftHandler{
+                }
+            }
+            StyledButton{
+                id:right
+                anchors{
+                    horizontalCenter: square.right
+                    verticalCenter: square.verticalCenter
+                }
+                buttonText: "Right"
+                ArrowRightHandler{
+                }
+            }
+            StyledButton{
+                id:ok
+               anchors.centerIn: square
+                buttonText: "Enter"
+                EnterButtonHandler{
+                }
+            }
+
+
         }
 
         Loader{
@@ -129,6 +251,21 @@ Item{
                 state:"loaded"
             }
 
+        }, State {
+            name: "dvdmenu"
+
+            PropertyChanges {
+                target: npImage
+                visible:false
+            }
+            PropertyChanges {
+                target: dvdImage
+                visible:true
+            }
+            PropertyChanges {
+                target: mediaTypeMetaData
+                source:""
+            }
         }
     ]
 
