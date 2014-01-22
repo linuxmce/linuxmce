@@ -41,6 +41,7 @@ ScenarioComponent             ScenarioComponent.qml                        #no c
 SkinListDelegate             SkinListDelegate.qml                        #no comment
 SkinSelector             SkinSelector.qml                        #no comment
 StyledButton             StyledButton.qml                        #no comment
+StyledScreen             StyledScreen.qml                        #no comment
 StyledText             StyledText.qml                        #no comment
 TabletFloorplanLayout             TabletFloorplanLayout.qml                        #no comment
 Thumbnail             Thumbnail.qml                        #no comment
