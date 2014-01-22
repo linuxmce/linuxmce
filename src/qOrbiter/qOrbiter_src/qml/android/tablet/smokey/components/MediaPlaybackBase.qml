@@ -87,6 +87,7 @@ Item{
             id:directionDiamond
             height: dvdImage.height/2
             width: height
+            visible:dvdImage.visible
             anchors{
                 right: parent.right
                 verticalCenter: dvdImage.verticalCenter
