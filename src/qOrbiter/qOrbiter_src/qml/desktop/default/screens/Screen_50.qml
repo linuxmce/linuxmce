@@ -1,20 +1,14 @@
 import QtQuick 1.1
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
-Rectangle {
+Item {
 
     // property alias synText:
     id: dvdmenu
     height: manager.appHeight
     width: manager.appWidth
-    radius: 0
-    opacity: 1
-    color: "transparent"
 
-    Image {
-        id: bgimage
-        source: "../img/icons/orbiterbg.png"
-    }
+
 
     Timer{
         id:streamtimer
