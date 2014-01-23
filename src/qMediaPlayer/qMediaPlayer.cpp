@@ -30,7 +30,7 @@ using namespace DCE;
 #include <QStringList>
 #include <mediamanager.h>
 #include <QDebug>
-#include <QPixmap>
+#include <QNetworkInterface>
 //<-dceag-const-b->
 
 // The primary constructor when the class is created as a stand-alone device
@@ -45,17 +45,13 @@ qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress, MediaManager *man
     if(GetConfig() && Connect(DEVICETEMPLATE_qMediaPlayer_CONST)){
         setCommandResponse("qMediaPlayer::Device "+QString::number(m_dwPK_Device)+" Connected.");
         connected = true;
-
-    }else
-    { connected = false;
+    }else{
+        connected = false;
         setCommandResponse("qMediaPlayer::Connection failed for "+QString::fromStdString(this->m_sIPAddress)+" and device number"+QString::number(m_dwPK_Device));
         setConnectionStatus(false);
     }
     mp_manager->setConnectionStatus(connected);
-
 }
-
-
 
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
@@ -63,18 +59,14 @@ qMediaPlayer::qMediaPlayer(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl 
     : qMediaPlayer_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
     //<-dceag-const2-e->
 {
-
     if(GetConfig()){
         setCommandResponse("created media player as embedded device ");
         setCommandResponse("Device:: "+ m_dwPK_Device );
         setConnectionStatus(true);
-
-    }
-    else{
+    }else{
         setCommandResponse("error getting embedded video player started");
         setConnectionStatus(false);
     }
-
 }
 
 //<-dceag-dest-b->
@@ -94,9 +86,24 @@ bool qMediaPlayer::GetConfig()
     // Put your code here to initialize the data in this class
     // The configuration parameters DATA_ are now populated
 
+
+    QString badMatch = QString::fromStdString(this->m_sIPAddress);
+    int f = badMatch.lastIndexOf(".");
+    qDebug() << "QMediaPlayer::" << badMatch.length() - f ;
+    badMatch.remove(f, badMatch.length() - f);
+
+    foreach (const QHostAddress &address, QNetworkInterface::allAddresses()) {
+        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost))
+            if(address.toString().contains(badMatch)){
+                qDebug() << "QMediaPlayer::My Ip's" << address.toString() << ":: badMatch==>"<<badMatch;
+                QString t = address.toString();
+                qDebug() <<"QMediaPlayer::"<< t;
+                DATA_Set_TCP_Address(t.toStdString(), true);
+            }
+        //CMD_Set_Device_Data setIp(this->m_dwPK_Device, 8, m_dwPK_Device, t.toStdString(), )
+    }
     m_bPaused = false;
     return true;
-
 }
 
 //<-dceag-reg-b->
@@ -329,11 +336,11 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
     setStreamID(iStreamID);
     setStartPosition(QString::fromStdString(sMediaPosition));
 
-    cout << "Need to implement command #37 - Play Media" << endl;
-    cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
-    cout << "Parm #41 - StreamID=" << iStreamID << endl;
-    cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-    cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
+    qWarning() << "Need to implement command #37 - Play Media" << endl;
+    qWarning() << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
+    qWarning() << "Parm #41 - StreamID=" << iStreamID << endl;
+    qWarning() << "Parm #42 - MediaPosition=" << sMediaPosition.c_str() << endl;
+    qWarning() << "Parm #59 - MediaURL=" << sMediaURL.c_str() << endl;
 
     QString deviceNumber;
     QString path;
@@ -350,6 +357,12 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
 
     if(QString::fromStdString(sMediaURL).contains("http")){
         finishedPath = QString::fromStdString(sMediaURL);
+    }else if(iPK_MediaType==43){
+        if(QString::fromStdString(sMediaURL).contains("http://")){
+            finishedPath = QString::fromStdString(sMediaURL);
+        }else{
+            finishedPath = "http://"+QString::fromStdString(sMediaURL);
+        }
     }
     else
     {
@@ -368,6 +381,9 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
                 f.remove("]");
                 deviceNumber = f;
                 localPath = (QString::fromStdString(sMediaURL)).split(deviceNo).at(1);
+#ifndef ANDROID
+                mp_manager->setCurrentDevice(f.toLong());
+#endif
             }
             else
             {
@@ -376,13 +392,43 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
         }
         //end ugly bit of regex. pretty because it works unless a user decides to also have [\d\d\d] type directories. I try to counter that by choosing only
         //the first match as that will be the first indexed by the regex engine.
+        QString adjPath = QString::fromStdString(sMediaURL).remove("/home");
+        adjPath.remove("//home");
+        //finishedPath="/mnt/remote/"+deviceNumber+adjPath;
         finishedPath = "/mnt/remote/"+deviceNumber+path+localPath;
     }
-    setCurrentMediaUrl(finishedPath);
 
+
+#ifdef __ANDROID__
+    QString cmp = QString::fromStdString(sMediaURL.c_str());
+
+    if(iPK_MediaType==43){
+        if(cmp.contains("http://")){
+            setCurrentMediaUrl(QString::fromStdString(sMediaURL));
+        }else{
+            setCurrentMediaUrl("http://"+QString::fromStdString(sMediaURL));
+        }
+
+    } else if(cmp.contains("http://")){
+        setCurrentMediaUrl(QString::fromStdString(sMediaURL));
+
+    }else{
+        QString androidPath = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/qOrbiterGenerator.php?id="+QString::fromStdString(sMediaURL);
+        qWarning() << "Sending android modified original MRL==>" << androidPath;
+        setCurrentMediaUrl(androidPath);
+    }
+#else
+    qWarning() << "Sending string URL::" << finishedPath;
+
+    setCurrentMediaUrl(finishedPath);
     //EVENT_Playback_Started(sMediaURL, i_StreamId, "Stored Media", "", "");
     emit startPlayback();
 
+#endif
+    emit startPlayback();
+#ifndef __ANDROID__
+    //  pthread_yield();
+#endif
 }
 
 //<-dceag-c38-b->
@@ -400,8 +446,12 @@ void qMediaPlayer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &s
     setCommandResponse("Need to implement command #38 - Stop Media");
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-    emit stopCurrentMedia();
 
+    iStreamID = this->i_StreamId;
+    string endPosition = QString::number(mp_manager->currentTime).toStdString();
+    sMediaPosition =&endPosition;
+    emit stopCurrentMedia();
+    setCurrentMediaUrl("");
 }
 
 //<-dceag-c39-b->
@@ -478,7 +528,12 @@ void qMediaPlayer::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iS
     // cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
     // cout << "Parm #41 - StreamID=" << iStreamID << endl;
     // emit jumpToStreamPosition(QString::fromStdString(sValue_To_Assign).toInt());
-    mp_manager->mediaObject->seek(QString::fromStdString(sValue_To_Assign).toInt());
+    qDebug() << sValue_To_Assign.c_str();
+    quint64 tg = QString::fromStdString(sValue_To_Assign.c_str()).toInt();
+
+#if defined (QT4) && ! defined (ANDROID)
+    mp_manager->mediaObject->seek(tg*1000);
+#endif
 }
 
 //<-dceag-c63-b->
@@ -582,9 +637,18 @@ void qMediaPlayer::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID
     cout << "Parm #60 - Width=" << iWidth << endl;
     cout << "Parm #61 - Height=" << iHeight << endl;
 
-    QImage t;
-    t.copy(0, 0, mp_manager->videoSurface->width(), mp_manager->videoSurface->height());
+#if defined QT4 && ! defined (__ANDROID)
+    QImage t = mp_manager->getScreenShot();
+    // t.copy(0, 0, mp_manager->videoSurface->width(), mp_manager->videoSurface->height());
     qWarning() << "ScreenShot Size==>" << t.size();
+
+    char **mData =(char**)t.bits();
+    int mIdata_size =  t.byteCount();
+
+    pData =mData;
+    iData_Size = &mIdata_size;
+#endif
+
 }
 
 //<-dceag-c87-b->
@@ -768,6 +832,9 @@ void qMediaPlayer::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessa
 {
     cout << "Need to implement command #200 - Move Up" << endl;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
+     #ifndef QT5
+ //this->mp_manager->p
+#endif
 }
 
 //<-dceag-c201-b->
@@ -1574,10 +1641,7 @@ void qMediaPlayer::CMD_Select_B(string &sCMD_Result,Message *pMessage){
 void qMediaPlayer::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMessage){
     cout << "Need to implement command #89 - Volume Up" << endl;
     cout << "Repeat Count=" << iRepeat_Command << endl;
-    qreal c = mp_manager->audioSink->volume();
-     qWarning() << "Current volume" << c;
-    qreal d = c+0.01;
-    mp_manager->audioSink->setVolume(d);
+    emit volumeDown(iRepeat_Command);
 }
 
 //<-dceag-c89-e->
@@ -1589,15 +1653,17 @@ void qMediaPlayer::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *p
 /** If specified, repeat the volume down this many times. */
 
 void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMessage){
+
+#if defined (QT4) && ! defined (ANDROID)
     qreal c = mp_manager->audioSink->volume();
     qWarning() << "Current volume" << c;
     qreal d = c-.01;
     if(d < 0){
         d= 0;
     }
-     mp_manager->audioSink->setVolume(d);
-     qWarning("Set audio level down.");
-
+    mp_manager->audioSink->setVolume(d);
+#endif
+    qWarning("Set audio level down.");
 
 }
 //<-dceag-c90-e->
@@ -1610,6 +1676,8 @@ void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message 
 
 void qMediaPlayer::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMessage){
     QString t = QString::fromStdString(sLevel.c_str());
+
+#if defined (QT4) && ! defined (ANDROID)
     if(t.contains("+") || t.contains("-")){
         if(t.contains("+")){
             qreal e = mp_manager->audioSink->volume();
@@ -1635,7 +1703,7 @@ void qMediaPlayer::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMes
         sCMD_Result = "OK -Level Set.";
     }
 
-
+#endif
 
 }
 //<-dceag-c184-e->

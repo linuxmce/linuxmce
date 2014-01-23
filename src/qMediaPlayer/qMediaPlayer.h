@@ -967,6 +967,10 @@ public:
 
         void connectionStatusChanged(bool);
         void jumpToStreamPosition(int);
+        void volumeUp(int repeat);
+        void volumeDown(int repeat);
+        void trackUp();
+        void trackDown();
 
 
     public slots:
