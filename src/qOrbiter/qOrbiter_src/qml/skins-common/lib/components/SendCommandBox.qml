@@ -188,12 +188,17 @@ Item{
 
                     Component.onCompleted: {
                         if(Command==="192"){
-                            setParam(0)
-                             controls_loader.source = "onButton.qml"
+                            if(CommandParameter!=98){
+                                setParam(0)
+                                 controls_loader.source = "OnButton.qml"
+                            }
                         }
                         else if(Command==="193"){
-                            setParam(0)
-                             controls_loader.source = "OffButton.qml"
+                            if(CommandParameter!=98){
+                                setParam(0)
+                                 controls_loader.source = "OffButton.qml"
+                            }
+
                         }
                         else if(Command==="184"){
                             if(CommandParameter==="76"){
