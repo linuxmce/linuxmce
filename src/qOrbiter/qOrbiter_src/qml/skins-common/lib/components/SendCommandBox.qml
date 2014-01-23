@@ -71,7 +71,8 @@ Item{
         id: cmdsPrmoptText
         text: qsTr("Availible Commands")
         font.pointSize:scaleY(3)
-        color: "white"
+        color: "black"
+        font.bold: true
         anchors.top: controlsContainer.top
         anchors.horizontalCenter: controlsContainer.horizontalCenter
         anchors.topMargin: 10
@@ -169,7 +170,10 @@ Item{
 
             MouseArea{
                 anchors.fill: parent
-                onClicked: {requestParamManager.getParams(command_number, trackedInt); cmdEntry.state="selected";entry_timeout.start() }
+                onClicked: {
+                    requestParamManager.getParams(command_number, trackedInt);
+                    cmdEntry.state="selected";entry_timeout.start()
+                }
             }
 
             ListView{
@@ -185,9 +189,11 @@ Item{
                     Component.onCompleted: {
                         if(Command==="192"){
                             setParam(0)
+                             controls_loader.source = "onButton.qml"
                         }
                         else if(Command==="193"){
                             setParam(0)
+                             controls_loader.source = "OffButton.qml"
                         }
                         else if(Command==="184"){
                             if(CommandParameter==="76"){

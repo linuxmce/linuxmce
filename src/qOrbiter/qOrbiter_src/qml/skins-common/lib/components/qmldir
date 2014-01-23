@@ -3,6 +3,8 @@ ColorSlider             ColorSlider.qml                        #no comment
 Dceplayer             Dceplayer.qml                        #no comment
 FloorPlandisplayTemplate             FloorPlandisplayTemplate.qml                        #no comment
 FpSprite             FpSprite.qml                        #no comment
+OffButton             OffButton.qml                        #no comment
+OnButton             OnButton.qml                        #no comment
 OnOffSwitch             OnOffSwitch.qml                        #no comment
 ParamManager             ParamManager.qml                        #no comment
 ScreenSaver             ScreenSaver.qml                        #no comment
