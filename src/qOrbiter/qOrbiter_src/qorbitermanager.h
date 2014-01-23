@@ -1361,10 +1361,12 @@ public slots:
     void setVariable(int variable, QString valueToAssign){ if(!valueToAssign.isEmpty())  emit setDceVar(variable, valueToAssign);  }
 //@}
 
-    /*! @name Sleeping menu slots. */
+    /*! @name Sleeping menu  */
+    //@{
     void updateAlarm(bool toggle, int grp);
     void showSleepingAlarms(SleepingAlarm *s);
     void getSleepingAlarms() {sleeping_alarms->clear(); emit getAlarms();}
+    //@}
 
     /*! @name logging slots */
 

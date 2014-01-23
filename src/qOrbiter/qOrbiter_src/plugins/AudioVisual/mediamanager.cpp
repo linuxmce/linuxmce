@@ -2,11 +2,10 @@
 #include <QThread>
 #include <QTcpSocket>
 #include <QProcess>
-
+#include <QDir>
 #ifndef __ANDROID
 #ifdef QT4
 #include <QGraphicsScene>
-#include <QDir>
 #include <QtOpenGL/QGLWidget>
 #include <QGraphicsView>
 #elif QT5
@@ -58,6 +57,8 @@ MediaManager::MediaManager(QQuickItem *parent):
 
     audioSink = new Phonon::AudioOutput();
     discController = new Phonon::MediaController(mediaObject);
+    QObject::connect(discController, SIGNAL(availableTitlesChanged(int)), this, SLOT(setAvailTitles(int)));
+    QObject::connect(discController, SIGNAL(availableSubtitlesChanged()), this, SLOT(setSubtitles()));
 
 
     Phonon::createPath(mediaObject, audioSink);
@@ -237,29 +238,30 @@ void MediaManager::setMediaUrl(QString url)
     if(url.toLower().endsWith(".iso",Qt::CaseInsensitive)||url.toLower().endsWith(".dvd", Qt::CaseInsensitive)){
         mediaPath="/mnt/remote/dvd";
     } else {
-        mediaPath = url+" /mnt/remote/";
+        mediaPath = "/mnt/remote/"+url;
     }
 
-    QString mountProg = "gksudo";
-    QStringList args;
+    qDebug() << mediaPath;
+//    QString mountProg = "gksudo";
+//    QStringList args;
 
-    args.append(QString("mount -t nfs -o loop "+url+" /mnt/remote/dvd/"));
-    QProcess *mountProcess = new QProcess(this);
-    mountProcess->start(mountProg, args);
-    mountProcess->waitForFinished(10000);
-    qDebug() << "Process Status ::" <<mountProcess->state();
-    if(mountProcess->state()== QProcess::FailedToStart){
-        qWarning() << "command failed to start!";
-        qDebug() << mountProcess->readAllStandardError();
-        qDebug() << mountProcess->errorString();
-    }
+//    args.append(QString("mount -t nfs -o loop "+url+" /mnt/remote/dvd/"));
+//    QProcess *mountProcess = new QProcess(this);
+//    mountProcess->start(mountProg, args);
+//    mountProcess->waitForFinished(10000);
+//    qDebug() << "Process Status ::" <<mountProcess->state();
+//    if(mountProcess->state()== QProcess::FailedToStart){
+//        qWarning() << "command failed to start!";
+//        qDebug() << mountProcess->readAllStandardError();
+//        qDebug() << mountProcess->errorString();
+//    }
 
     if(url.toLower().endsWith(".iso",Qt::CaseInsensitive)||url.toLower().endsWith(".dvd", Qt::CaseInsensitive)){
-        mediaObject->setCurrentSource(Phonon::MediaSource(Phonon::Dvd, "/mnt/remote/dvd/"));
+        mediaObject->setCurrentSource(Phonon::MediaSource(Phonon::Dvd, url));
         qDebug() << discController->currentTitle();
     }else{
-
         mediaObject->setCurrentSource(Phonon::MediaSource(url));
+
     }
 
     setCurrentStatus(QString("MediaObject Source::"+mediaObject->currentSource().fileName()));
@@ -269,6 +271,7 @@ void MediaManager::setMediaUrl(QString url)
     mediaObject->play();
     qDebug() <<"Item is playing? " << mediaObject->state();
     qDebug() << "Errors " << mediaObject->errorString();
+    discController->setAutoplayTitles(true);
 
 #endif
 
@@ -390,8 +393,7 @@ void MediaManager::transmit(QString d)
 }
 
 
-bool MediaManager::mountDrive(long device)
-{
+bool MediaManager::mountDrive(long device){
     qDebug() << "Mounting Media storage device==>" <<device;
 
     QString dirCmd = "";

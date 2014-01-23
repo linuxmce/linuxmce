@@ -3117,7 +3117,7 @@ void qOrbiter::checkTimeCode(int npDevice)
 void qOrbiter::getStreamingVideo()
 {
 
-    qDebug() << "STREAM IMAGE!!!";
+
 
     char *grabData;
     int grabData_size=0;
@@ -3135,7 +3135,7 @@ void qOrbiter::getStreamingVideo()
         buf.setRawData(grabData, grabData_size);
         tgrab.loadFromData(buf);
         emit  videoGrabReady(tgrab);
-        emit commandResponseChanged("Image Retrieved");
+        //emit commandResponseChanged("Image Retrieved");
     }
     else
     {

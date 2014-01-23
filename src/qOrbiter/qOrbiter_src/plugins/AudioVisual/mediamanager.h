@@ -294,13 +294,7 @@ public slots:
 #endif
         }
         emit mediaPlayingChanged();
-#ifndef __ANDROID__
-    #ifdef QT4
-        qDebug() << "Titles ==>" << discController->availableTitles();
-        qDebug() << "subTitles==>" << discController->availableSubtitles();
-        qDebug() << "Availible titles ==>" << discController->availableTitles();
-    #endif
-#endif
+
 
     }
     bool getMediaPlaying() {return mediaPlaying;}
@@ -359,6 +353,18 @@ public slots:
         int i =  mediaObject->errorType();
         if(i==0){
             setCurrentStatus("Media Player Loading");
+#ifndef __ANDROID__
+    #ifdef QT4
+        qDebug() << "Titles: \t" << discController->availableTitles();
+        qDebug() << "Chapters: \t" << discController->availableChapters();
+        qDebug() << "SubTitles: \t" << discController->availableSubtitles();
+        qDebug() << "Angles: \t" << discController->availableAngles();
+        qDebug() << "Audio Channels: \t" << discController->availableAudioChannels();
+        qDebug() << "Features: \t" << discController->supportedFeatures();
+
+
+    #endif
+#endif
         } else if( i== 1){
             setCurrentStatus("Media Player Stopped");
         } else if( i ==2) {
@@ -480,7 +486,13 @@ private slots:
 
     bool initViews(bool flipped);
     void setupDirectories();
-
+#ifdef QT4
+    void setSubtitles(){      qDebug() << "SubTitles: \t" << discController->availableSubtitles(); }
+    void setAvailTitles(int t){ qDebug() << "Titles: \t" << discController->availableTitles(); }
+    void setChapters(int c){qDebug() << "Chapters: \t" << discController->availableChapters(); }
+    void setAngles(int a) {qDebug() << "Angles: \t" << discController->availableAngles(); }
+    void setAudioChannels(){ qDebug() << "Audio Channels: \t" << discController->availableAudioChannels();}
+#endif
 };
 
 
