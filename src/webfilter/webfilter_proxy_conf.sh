@@ -125,4 +125,3 @@ elif [ $prog_array = "yes" ]; then
                 Pass_vars_to_Create_Config $program $conf
         done
 fi
-
