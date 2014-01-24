@@ -63,7 +63,7 @@ contains(QT_VERSION,5.*.*){
         message("$$QT_VERSION Core")
         DEFINES+=QT5
 	CONFIG+= opengl
-	QT+= script widgets
+        QT+= script widgets
         include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
 }
 
@@ -113,6 +113,8 @@ linux-g++{
         }
 
         contains(QT_VERSION,5.*.*){
+                QT+= qml quick script widgets
+                QT-= declarative
                 RPI{
                 folder_01.source= qml/rpi
                 folder_01.target= qml
@@ -125,8 +127,7 @@ linux-g++{
                 DEFINES+=RPI GLENABLED
                 DEFINES-=for_desktop
                 DEPLOYMENTFOLDERS += folder_02 #folder_01
-                QT+= qml
-                QT-=declarative
+
 
                 target.path=/opt/QOrbiter
                 QML_IMPORT_PATH=imports

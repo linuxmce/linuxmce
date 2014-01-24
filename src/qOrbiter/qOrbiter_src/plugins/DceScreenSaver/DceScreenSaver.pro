@@ -12,7 +12,7 @@ message("$$QT_VERSION DCE-ScreenSaver-Plugin")
 
 contains(QT_VERSION,5.*.*){
         message("$$QT_VERSION DCE-ScreenSaver-Plugin")
-        QT += quick multimedia network
+        QT += quick multimedia network declarative
         DEFINES+=QT5
 }
 
