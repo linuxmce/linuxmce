@@ -34,7 +34,7 @@ echo /etc/$program/$conf_file
 if ! BlacklistConfFiles /etc/$program/$conf_file; then
 echo "file not blacklisted"
 echo > /etc/$program/$conf_file
-SQL="SELECT var, val FROM webfilter_proxy WHERE conf='$sectie' AND conf_type='$conf'";
+SQL="SELECT var, val FROM webfilter_proxy WHERE conf=\'$sectie\' AND conf_type=\'$conf\'";
 R=$(RunSQL "$SQL")
 
 for webfilter_proxy in $R; do
@@ -72,7 +72,7 @@ declare -p program | grep -q '^declare \-a' && prog_array=yes || prog_array=no
 if [ $prog_array = "no" ]; then
         if [ $program = "webfilter" ]; then
                 if [[ -z $2 ]]; then
-                        SQL='SELECT val FROM webfilter_proxy WHERE conf="webfilter" AND conf_type="global" AND var="filtergroups"';
+                        SQL="SELECT val FROM webfilter_proxy WHERE conf=\'webfilter\' AND conf_type=\'global\' AND var=\'filtergroups\'";
                         group=$(RunSQL "$SQL")
                         conf[0]="global"
                         conf[1]="f0"
@@ -105,7 +105,7 @@ elif [ $prog_array = "yes" ]; then
          do
                 if [ $i = "webfilter" ]; then
                         if [[ -z $2 ]]; then
-                                SQL=\'SELECT val FROM webfilter_proxy WHERE conf="webfilter" AND conf_type="global" AND var="filtergroups"\';
+                                SQL="SELECT val FROM webfilter_proxy WHERE conf=\'webfilter\' AND conf_type=\'global\' AND var=\'filtergroups\'";
                                 group=$(RunSQL "$SQL")
                                 conf[0]="global"
                                 conf[1]="f0"
@@ -139,12 +139,12 @@ fi
 
 echo $Create_Config >/usr/pluto/bin/webfilter_proxy_conf.sh
 
-Alias="
+Alias='
 		Alias /dgblocknotice    /var/www/lmce-admin/operations/webfilter_proxy/webfilter/blocknotice.php
          <Directory /var/www/lmce-admin/operations/webfilter_proxy/webfilter>
         php_admin_flag safe_mode off
         </Directory>
-"
+'
 
 exit 0
 
