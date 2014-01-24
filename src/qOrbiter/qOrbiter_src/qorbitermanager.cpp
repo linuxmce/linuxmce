@@ -159,14 +159,14 @@ orbiterInit=true;
      */
 
 #ifdef for_desktop
-#ifdef QT4_8
-    buildType = "/qml/desktop";
-#elif QT5 && defined RPI
-    buildType = "/qml/rpi";
-#elif QT5 && !defined RPI
-    buildType="/qml/qt5-desktop";
 
-#endif
+    #ifdef QT4_8
+    buildType = "/qml/desktop";
+    #elif QT5 && defined RPI
+    buildType = "/qml/rpi";
+    #elif QT5 && !defined RPI && !defined ANDROID
+    buildType="/qml/qt5-desktop";
+    #endif
     qrcPath = buildType+"/Splash.qml";
 #elif  WIN32
     buildType="/qml/desktop";
@@ -183,6 +183,8 @@ orbiterInit=true;
 #elif defined (RPI)
     buildType="/qml/rpi";
 #elif defined ANDROID
+
+#ifndef QT5
     qDebug() << "Resolution::"<<QApplication::desktop()->width()<<"w x "<<QApplication::desktop()->height()<<"h";
     int h = QApplication::desktop()->height();
     int w = QApplication::desktop()->width();
@@ -198,7 +200,7 @@ orbiterInit=true;
             buildType = "/qml/android/phone";
         }
     }
-
+#endif
     qrcPath = ":android/Splash.qml";
     droidPath = "/";
 

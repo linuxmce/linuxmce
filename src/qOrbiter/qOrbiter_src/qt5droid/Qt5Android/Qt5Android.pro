@@ -25,7 +25,7 @@ CONFIG += thread
 TARGET=qorbiterqt5
 
         DEFINES+=GLENABLED ANDROID QT5 QANDROID
-        QT+= opengl script  widgets network xml
+        QT+= opengl script network xml core
         glmsg= yes
 
 
