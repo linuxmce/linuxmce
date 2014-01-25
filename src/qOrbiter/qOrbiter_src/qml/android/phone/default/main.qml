@@ -271,6 +271,10 @@ Item {
         id: hdr
     }
 
+    function setNavigation(nav){
+        hdr.setNavigaton(nav)
+    }
+
     Loader {
         id:pageLoader
         objectName: "loadbot"

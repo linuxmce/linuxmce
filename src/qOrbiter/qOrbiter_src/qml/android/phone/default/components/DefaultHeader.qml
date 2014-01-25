@@ -9,6 +9,10 @@ Item{
     }
     height: manager.b_orientation ? scaleY(8) : scaleY(12)
 
+    function setNavigaton(qmlpage){
+        hdrContent.source=qmlpage
+    }
+
     Rectangle{
         anchors.fill: parent
         color: "black"
@@ -75,6 +79,7 @@ Item{
     states: [
         State {
             name: "open"
+            when:manager.currentScreen==="Screen_1.qml"
             PropertyChanges {
                 target: hdr
                 height: manager.b_orientation ? scaleY(8) : scaleY(12)
@@ -98,6 +103,11 @@ Item{
                 target:hdrContent
                 source:"MediaGridHeader.qml"
             }
+        },
+        State {
+            name: "floorplan"
+            when:hdrContent.source==="FloorplanNav.qml"
+
         }
     ]
 

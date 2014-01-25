@@ -29,6 +29,7 @@ FileDetails4             FileDetails4.qml                        #no comment
 FileDetails             FileDetails.qml                        #no comment
 FileFormat             FileFormat.qml                        #no comment
 FloorPlanDisplay             FloorPlanDisplay.qml                        #no comment
+FloorplanNav             FloorplanNav.qml                        #no comment
 Floorplan             Floorplan.qml                        #no comment
 GenericAttributeFilter             GenericAttributeFilter.qml                        #no comment
 GenericSelector             GenericSelector.qml                        #no comment

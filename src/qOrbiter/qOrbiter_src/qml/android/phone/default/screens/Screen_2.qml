@@ -3,5 +3,8 @@ import "../components"
 
 PhoneFloorplanLayout{
     id:lights
-Component.onCompleted: floorplan_devices.clearAllSelections()
+    Component.onCompleted: {
+        floorplan_devices.clearAllSelections()
+        setNavigation("FloorplanNav.qml")
+    }
 }
