@@ -1,5 +1,7 @@
-// import QtQuick 1.1 // to target S60 5th Edition or Maemo 5
-import QtQuick 1.1
+// import QtQuick 2.2
+ // to target S60 5th Edition or Maemo 5
+import QtQuick 2.2
+
 
 Rectangle {
     height:manager.appHeight
