@@ -5,11 +5,14 @@ Item{
     anchors{
         top:parent.top
         bottom: parent.bottom
+        left:parent.left
+        right:parent.right
     }
-    width: manager.appWidth
+
     focus:true
     property bool rotated:manager.b_orientation
     property string imageDir:""
+    property alias selectedDevices:selections
     state:"floorplanView"
     Component.onCompleted: {
         forceActiveFocus();
@@ -32,6 +35,7 @@ Item{
 
     ListModel{
         id:selections
+
     }
 
     function processSelectedDevices(){
@@ -63,7 +67,7 @@ Item{
     ListView{
         width: parent.width
         height: scaleY(10)
-        anchors.bottom: parent.bottom
+        anchors.bottom:bottomControls.top
         orientation: ListView.Horizontal
         model:selections
         delegate: StyledText{
@@ -80,6 +84,48 @@ Item{
 
     SendCommandBox {
         id: sendCommandBox
+    }
+
+    Item{
+        id:bottomControls
+        anchors{
+            bottom:parent.bottom
+            left:parent.left
+            right:parent.right
+        }
+        height: scaleY(8)
+
+        Rectangle{
+            anchors.fill: parent
+            color: "green"
+        }
+
+        Image {
+            id: zoomOut
+            source: "../images/zoom_out.png"
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.topMargin: -40
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    floorplanPic.setScaleFactor(-15)
+                }
+            }
+        }
+        Image {
+            id: zoomIn
+            source: "../images/zoom_in.png"
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.topMargin: -40
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                   floorplanPic.setScaleFactor(15)
+                }
+            }
+        }
     }
 
 

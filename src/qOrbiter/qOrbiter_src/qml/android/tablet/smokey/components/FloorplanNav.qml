@@ -7,7 +7,8 @@ ListView{
     spacing: scaleY(2)
     model:floorplan_pages
     clip:true
-    orientation:ListView.Horizontal
+    orientation:ListView.Horizontal  
+
     anchors.verticalCenter: parent.verticalCenter
     property string currentModelName:""
     delegate: StyledButton{

@@ -47,6 +47,13 @@ Item{
             opacity: manager.currentScreen === "Screen_1.qml" ? 1 : 0
             onActivated: manager.gotoQScreen("Screen_44.qml")
         }
+        StyledButton {
+            id: showFloorplanCommand
+            buttonText: qsTr("Commands")
+            hitArea.onReleased: pageLoader.item.state==="commandView" ?pageLoader.item.state="floorplanView" :pageLoader.item.state="commandView"
+            visible:navSource==="FloorplanNav.qml" &&  pageLoader.item.selectedDevices.count !== 0? true : false
+            opacity: visible ? 1 : 0
+        }
 
         StyledButton {
             id: exit_label
@@ -60,6 +67,7 @@ Item{
             hitArea.onReleased: manager.gotoQScreen("Screen_1.qml")
             opacity: manager.currentScreen !=="Screen_1.qml" ? 1 : 0
         }
+
         StyledButton{
             id:media_goback
             buttonText: "Back"
