@@ -17,6 +17,14 @@ Item {
     property alias bg:phil
     property bool useList:true
 
+    function setScaleFactor(factor){
+        console.log("Updating scale")
+        var amnt = floorplanimage.scale *(factor/100)
+
+        console.log(floorplanimage.scale+amnt)
+        floorplanimage.scale = floorplanimage.scale+amnt
+    }
+
     function setCommandType(){
         if(floorplan_devices.getCurrentFloorPlanType()=== 2)
             return lightingCommands
@@ -86,6 +94,12 @@ Item {
             source: ""
             anchors.centerIn: parent
             scale: floorplanimage.height > floorplanimage.width ? .60 : .65
+            Behavior on scale {
+                PropertyAnimation{
+                    duration: 350
+                    easing.type: Easing.InBounce
+                }
+            }
         }
 
     }
@@ -94,16 +108,17 @@ Item {
         height: scaleY(10) + 5
         width: scaleX(35)
         anchors.right: parent.right
+        visible:floorplanlist.visible
         Text{
             id:fplabel
             text: qsTr("Floorplans")
             height: scaleY(5)
-            visible:floorplanlist.visible
+
         }
 
         ListView{
             id:floorplanlist
-           anchors { top: parent.top; bottom: parent.bottom; left: parent.left; right: parent.right }
+            anchors { top: parent.top; bottom: parent.bottom; left: parent.left; right: parent.right }
             width: scaleX(35)
             model:floorplan_pages
             clip:true
