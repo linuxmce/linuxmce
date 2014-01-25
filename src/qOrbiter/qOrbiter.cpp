@@ -3041,7 +3041,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
 #ifdef RPI
                 msleep(45);
 #elif ANDROID
-                // msleep(20);
+                 msleep(20);
 #else
                 // msleep(10);
 #endif
