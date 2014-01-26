@@ -14,6 +14,7 @@ Item{
         anchors.fill: parent
         color: "green"
         opacity: .85
+        border.color: "white"
     }
 
     VisualItemModel {

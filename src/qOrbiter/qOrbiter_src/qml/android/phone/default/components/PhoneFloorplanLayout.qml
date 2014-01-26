@@ -96,7 +96,47 @@ Item{
         id: sendCommandBox
     }
     
+    Item{
+        id:bottomControls
+        anchors{
+            bottom:parent.bottom
+            left:parent.left
+            right:parent.right
+        }
+        height: scaleY(8)
 
+        Rectangle{
+            anchors.fill: parent
+            color: "green"
+        }
+
+        Image {
+            id: zoomOut
+            source: "../img/zoom_out.png"
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.topMargin: -40
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    floorplanPic.setScaleFactor(-15)
+                }
+            }
+        }
+        Image {
+            id: zoomIn
+            source: "../img/zoom_in.png"
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.topMargin: -40
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                   floorplanPic.setScaleFactor(15)
+                }
+            }
+        }
+    }
 
     states: [
         State {
