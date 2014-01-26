@@ -232,13 +232,7 @@ Item {
         }
 
     }
-    NavigationRow {
-        id: nav_row
 
-    }
-    MediaPopup{
-        id:media_notification
-    }
 
     Loader {
         id:pageLoader
@@ -275,7 +269,13 @@ Item {
                           }
     }
 
+    NavigationRow {
+        id: nav_row
 
+    }
+    MediaPopup{
+        id:media_notification
+    }
     InformationPanel {
         id: info_panel
     }

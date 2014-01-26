@@ -65,22 +65,13 @@ Item{
         id:requestParamManager
     }
 
-    Flickable{
-        anchors{
-            top:parent.top
-            left:parent.left
-            right:parent.right
-            bottom:parent.bottom
-        }
-        contentHeight: floorplanPic.height
-        contentWidth: floorplanPic.width
+
 
         FloorPlandisplayTemplate{
             id:floorplanPic
             useList: false
         }
-    }
-    
+
 
 
     ListView{
