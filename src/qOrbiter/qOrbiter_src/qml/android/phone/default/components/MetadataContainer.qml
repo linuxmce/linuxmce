@@ -54,6 +54,7 @@ Item{
     Loader{
         id:mediaMetadata
         source:"Metadata_"+manager.i_current_mediaType+".qml"
+
     }
     
     

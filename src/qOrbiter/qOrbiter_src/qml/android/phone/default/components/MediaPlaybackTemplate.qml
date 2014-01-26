@@ -16,6 +16,7 @@ Item {
     Component.onCompleted:{
         manager.setBoundStatus(true)
         metadataContainer.forceActiveFocus()
+        setNavigation("MediaControl.qml")
     }
 
 

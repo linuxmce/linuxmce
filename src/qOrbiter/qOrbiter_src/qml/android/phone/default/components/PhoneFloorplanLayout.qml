@@ -64,10 +64,24 @@ Item{
     ParamManager{
         id:requestParamManager
     }
-    
-    FloorPlandisplayTemplate{
-        id:floorplanPic
+
+    Flickable{
+        anchors{
+            top:parent.top
+            left:parent.left
+            right:parent.right
+            bottom:parent.bottom
+        }
+        contentHeight: floorplanPic.height
+        contentWidth: floorplanPic.width
+
+        FloorPlandisplayTemplate{
+            id:floorplanPic
+            useList: false
+        }
     }
+    
+
 
     ListView{
         width: parent.width
@@ -91,7 +105,7 @@ Item{
         id: sendCommandBox
     }
     
-    HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
+
 
     states: [
         State {

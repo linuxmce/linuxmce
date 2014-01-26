@@ -52,6 +52,7 @@ JogPanel             JogPanel.qml                        #no comment
 LightingSelector             LightingSelector.qml                        #no comment
 MainScreenDelagate             MainScreenDelagate.qml                        #no comment
 MediaButton             MediaButton.qml                        #no comment
+MediaControl             MediaControl.qml                        #no comment
 MediaGridHeader             MediaGridHeader.qml                        #no comment
 MediaListGridDelagate             MediaListGridDelagate.qml                        #no comment
 MediaPlaybackTemplate             MediaPlaybackTemplate.qml                        #no comment
@@ -61,6 +62,7 @@ MediaSources             MediaSources.qml                        #no comment
 MediaTypes             MediaTypes.qml                        #no comment
 MetaBlock             MetaBlock.qml                        #no comment
 Metadata_13             Metadata_13.qml                        #no comment
+Metadata_43             Metadata_43.qml                        #no comment
 Metadata_4             Metadata_4.qml                        #no comment
 Metadata_5             Metadata_5.qml                        #no comment
 MetadataContainer             MetadataContainer.qml                        #no comment

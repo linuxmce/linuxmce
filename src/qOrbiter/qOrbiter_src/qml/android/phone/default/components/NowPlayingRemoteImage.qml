@@ -10,12 +10,12 @@ Image {
     opacity: 1
     scale:1
 
-    StyledText{
-        anchors.centerIn: parent
-        text:dcenowplaying.imageAspectRatio
-        fontSize: scaleY(10)
-        color:"white"
-    }
+//    StyledText{
+//        anchors.centerIn: parent
+//        text:dcenowplaying.imageAspectRatio
+//        fontSize: scaleY(10)
+//        color:"white"
+//    }
     states: [
         State {
             name: "wide"
