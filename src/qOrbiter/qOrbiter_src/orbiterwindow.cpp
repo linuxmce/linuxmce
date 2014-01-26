@@ -191,7 +191,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
      qrcPath = "qrc:main/Welcome.qml";
 #else
     buildType = "/qml/qt5-desktop";
-     qrcPath = "qrc:desktop/qt5/Splash.qml";
+     qrcPath = "qrc:qt5-desktop/Welcome2.qml";
 #endif   
     localPath = "qt5-desktop/";
 #elif defined (for_freemantle)
@@ -256,6 +256,8 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.setSource(QString("assets:/qml/Base.qml"));
 #endif
   #else
+
+    if(mainView.source().isEmpty())
     mainView.setSource(qrcPath);
 #endif
 

@@ -22,4 +22,7 @@
     <qresource prefix="/components">
         <file alias="FpSprite.qml">qml/desktop/default/components/FpSprite.qml</file>
     </qresource>
+    <qresource prefix="/qt5-desktop">
+        <file alias="Welcome2.qml">qml/Welcome2.qml</file>
+    </qresource>
 </RCC>

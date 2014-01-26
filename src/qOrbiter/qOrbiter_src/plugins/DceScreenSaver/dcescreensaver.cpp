@@ -92,7 +92,9 @@ void DceScreenSaver::setImageList(QStringList l)
         qWarning() << "Screen Saver images loaded.";
     }
     else {
-
+        setRunning(false);
+        setReady(false);
+        setActive(false);
     }
 
 }
@@ -100,6 +102,7 @@ void DceScreenSaver::setImageList(QStringList l)
 void DceScreenSaver::requestImage(QString img){
     QNetworkRequest req;
     req.setUrl("http://"+requestUrl+"/lmce-admin/imdbImage.php?type=screensaver&val="+img);
+    qDebug() << req.url().toString();
     QObject::connect(requestManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processImageData(QNetworkReply*)));
     requestManager->get(req);
 }
@@ -107,6 +110,7 @@ void DceScreenSaver::requestImage(QString img){
 void DceScreenSaver::processImageData(QNetworkReply *r){
 
     QByteArray p;
+
 
     if(r->bytesAvailable()){
         p = r->readAll();

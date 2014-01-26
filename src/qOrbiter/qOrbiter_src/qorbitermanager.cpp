@@ -406,7 +406,12 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 #elif MACOSX
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/macosx";
 #elif for_desktop
-    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
+#ifdef QT5
+      remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/qt5-desktop";
+#elif defined QT4
+   remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
+#endif
+
 #elif WIN32
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
 #elif RPI
@@ -1680,6 +1685,7 @@ bool qorbiterManager::readLocalConfig()
     }
     else
     {
+        qDebug("Reading local cfg");
         setDceResponse("Reading Local Config");
         QByteArray tDoc;
         tDoc = localConfigFile.readAll();
@@ -2226,6 +2232,7 @@ void qorbiterManager::replaceHandler()
 
 void qorbiterManager::setDceResponse(QString response)
 {
+    qDebug() << response;
     dceResponse = response;
     emit loadingMessage(dceResponse);
     emit dceResponseChanged();
