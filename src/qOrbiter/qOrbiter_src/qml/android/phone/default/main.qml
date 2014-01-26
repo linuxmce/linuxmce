@@ -267,13 +267,7 @@ Item {
         console.log(component.progress)
     }
 
-    DefaultHeader {
-        id: hdr
-    }
 
-    function setNavigation(nav){
-        hdr.setNavigaton(nav)
-    }
 
     Loader {
         id:pageLoader
@@ -301,6 +295,13 @@ Item {
         }
     }
 
+    DefaultHeader {
+        id: hdr
+    }
+
+    function setNavigation(nav){
+        hdr.setNavigaton(nav)
+    }
     DefaultFooter {
         id: ftr
     }
