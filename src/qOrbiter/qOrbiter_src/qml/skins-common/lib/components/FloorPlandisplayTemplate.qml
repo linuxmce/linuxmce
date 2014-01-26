@@ -86,18 +86,28 @@ Item {
         objectName: "main_rect"
         height: floorplandisplay.height
         width:floorplandisplay.width
+        Flickable{
+            anchors{
+                top:parent.top
+                left:parent.left
+                right:parent.right
+                bottom:parent.bottom
+            }
+            contentHeight: floorplanimage.height
+            contentWidth: floorplanimage.width
 
-        Image {
-            objectName: "floorplan_image"
-            id: floorplanimage
-            fillMode: Image.PreserveAspectCrop
-            source: ""
-            anchors.centerIn: parent
-            scale: floorplanimage.height > floorplanimage.width ? .60 : .65
-            Behavior on scale {
-                PropertyAnimation{
-                    duration: 350
-                    easing.type: Easing.InBounce
+            Image {
+                objectName: "floorplan_image"
+                id: floorplanimage
+                fillMode: Image.PreserveAspectCrop
+                source: ""
+                anchors.centerIn: parent
+                scale: floorplanimage.height > floorplanimage.width ? .60 : .65
+                Behavior on scale {
+                    PropertyAnimation{
+                        duration: 350
+                        easing.type: Easing.InBounce
+                    }
                 }
             }
         }
