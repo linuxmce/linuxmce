@@ -2,8 +2,12 @@ import QtQuick 1.0
 import "../components"
 Item{
     id:sendCommandBox
-    height: manager.appHeight
-    width: manager.appWidth
+   anchors{
+   top:parent.top
+   left:parent.left
+   right:parent.right
+   bottom:bottomControls.top
+   }
     focus:true
     clip:true
     property Item trackedDevice
