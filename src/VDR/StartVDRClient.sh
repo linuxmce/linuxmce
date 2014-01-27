@@ -6,6 +6,8 @@
 # On the MDs, we start VDR. If nmap is installed, we use it
 # to check for a running VDR. As soon as it runs, vdr-sxfe starts.
 #
+# When StartVDRClient ends, vdr-sxfe is killed, and vdr on the moon
+# is restarted
 . /usr/pluto/bin/Config_Ops.sh
 
 ConfEval
