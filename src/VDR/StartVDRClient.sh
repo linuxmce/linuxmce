@@ -3,8 +3,8 @@
 # This is called from VDR_Player when the user selects TV.
 # 
 # On the core, we just start vdr-sxfe and close it in the end.
-# On the MDs, we start VDR and vdr-sxfe after 5 seconds. The 5 seconds are needed, as 
-# it takes VDR a little bit to get the output device ready.
+# On the MDs, we start VDR. If nmap is installed, we use it
+# to check for a running VDR. As soon as it runs, vdr-sxfe starts.
 #
 . /usr/pluto/bin/Config_Ops.sh
 
