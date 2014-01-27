@@ -408,7 +408,11 @@ function wizardOrbiters($output,$dbADO) {
 			die;
 		}
 
-
+		if(isset($_POST['update_qOrbiter_skins']))
+		{
+			//added script to update qorbiter skins. Alblasco1702
+			exec_batch_command('sudo -u root /var/www/lmce-admin/skins/updateQorbiterSkins.sh');
+		}
 
 		// only devices on page are used
 		$displayedDevicesArray=explode(',',$_POST['devicesOnPage']);
@@ -580,6 +584,10 @@ function formatDDRows($rowD,$dbADO)
 					}
 
 					$ddHTML.=pulldownFromArray($GLOBALS['ddTableArray_'.$tableName],'deviceData_'.$rowD['PK_Device'].'_'.$rowD['FK_DeviceData'],$ddValue,((isset($rowD['AllowedToModify']) && $rowD['AllowedToModify']==0)?'disabled':'').' style="width:200px;"'.(($rowD['FK_DeviceData']==24)?'onChange="document.wizardOrbiters.action.value=\'form\';document.wizardOrbiters.submit();"':''),'key','- Please select -');
+					//Update button qorbiter skins. Alblasco1702
+					if ( $rowD['TemplateName'] == 'qOrbiter' && $rowD['FK_DeviceData']==24) {
+							$ddHTML.= '&nbsp;<input class="button" name="update_'.$rowD['TemplateName'].'_skins" value="update&nbsp;'.$rowD['TemplateName'].'" type="submit" />';
+							}
 				}
 				else
 					$ddHTML.='<input type="text" name="deviceData_'.$rowD['PK_Device'].'_'.$rowD['FK_DeviceData'].'" value="'.@$ddValue.'" '.((isset($rowD['AllowedToModify']) && $rowD['AllowedToModify']==0)?'disabled':'').' style="width:200px;">';
