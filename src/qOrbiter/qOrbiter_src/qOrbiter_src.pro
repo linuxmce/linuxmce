@@ -137,16 +137,13 @@ linux-g++{
                 folder_01.target = $$DESTDIR/qml/
                 plugins_folder.source = imports/
                 plugins_folder.target = $$DESTDIR
+                DEFINES += for_desktop
                     }
                 glmsg=scenegraph
         }
 
         folder_03.source = config.xml
         folder_03.target = $$DESTDIR
-
-         !linux-rasp-pi-g++|!RPI{
-        DEFINES += for_desktop
-        }
 
         DEPLOYMENTFOLDERS+= plugins_folder
         DEPLOYMENTFOLDERS += folder_01  folder_03
