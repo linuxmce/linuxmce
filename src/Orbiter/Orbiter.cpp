@@ -1140,7 +1140,7 @@ LoggerWrapper::GetInstance()->Write( LV_STATUS, "Orbiter::NeedToChangeScreens ca
 	if( m_dwPK_Device_LocalOsdIRReceiver && m_bIsOSD )
 	{
 		// Send a message to all IR transcievers
-		DCE::CMD_Set_Screen_Type_Cat CMD_Set_Screen_Type_Cat(m_dwPK_Device,DEVICECATEGORY_Infrared_Receivers_CONST,true,BL_SameComputer,m_cCurrentScreen);
+		DCE::CMD_Set_Screen_Type_Cat CMD_Set_Screen_Type_Cat(m_dwPK_Device,DEVICECATEGORY_Infrared_Receivers_CONST,true,BL_SameRoom,m_cCurrentScreen);
 		// DCE::CMD_Set_Screen_Type CMD_Set_Screen_Type(m_dwPK_Device,m_dwPK_Device_LocalOsdIRReceiver,m_cCurrentScreen);
 		SendCommand(CMD_Set_Screen_Type_Cat);
 	}
