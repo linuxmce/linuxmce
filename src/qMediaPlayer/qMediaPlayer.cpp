@@ -531,8 +531,10 @@ void qMediaPlayer::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iS
     qDebug() << sValue_To_Assign.c_str();
     quint64 tg = QString::fromStdString(sValue_To_Assign.c_str()).toInt();
 
+#ifndef RPI
 #if defined (QT4) && ! defined (ANDROID)
     mp_manager->mediaObject->seek(tg*1000);
+#endif
 #endif
 }
 
@@ -636,8 +638,8 @@ void qMediaPlayer::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     cout << "Parm #60 - Width=" << iWidth << endl;
     cout << "Parm #61 - Height=" << iHeight << endl;
-
-#if defined QT4 && ! defined (__ANDROID)
+#ifndef RPI
+#if defined QT4 && ! defined (__ANDROID__)
     QImage t = mp_manager->getScreenShot();
     // t.copy(0, 0, mp_manager->videoSurface->width(), mp_manager->videoSurface->height());
     qWarning() << "ScreenShot Size==>" << t.size();
@@ -647,6 +649,7 @@ void qMediaPlayer::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID
 
     pData =mData;
     iData_Size = &mIdata_size;
+#endif
 #endif
 
 }
@@ -1653,7 +1656,7 @@ void qMediaPlayer::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *p
 /** If specified, repeat the volume down this many times. */
 
 void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMessage){
-
+#ifndef RPI
 #if defined (QT4) && ! defined (ANDROID)
     qreal c = mp_manager->audioSink->volume();
     qWarning() << "Current volume" << c;
@@ -1662,6 +1665,7 @@ void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message 
         d= 0;
     }
     mp_manager->audioSink->setVolume(d);
+#endif
 #endif
     qWarning("Set audio level down.");
 
@@ -1676,7 +1680,7 @@ void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message 
 
 void qMediaPlayer::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMessage){
     QString t = QString::fromStdString(sLevel.c_str());
-
+#ifndef RPI
 #if defined (QT4) && ! defined (ANDROID)
     if(t.contains("+") || t.contains("-")){
         if(t.contains("+")){
@@ -1704,6 +1708,6 @@ void qMediaPlayer::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMes
     }
 
 #endif
-
+#endif
 }
 //<-dceag-c184-e->

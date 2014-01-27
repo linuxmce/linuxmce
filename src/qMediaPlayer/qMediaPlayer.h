@@ -1003,6 +1003,7 @@ public:
 
 
     private:
+
         MediaManager * mp_manager;
 
     };
