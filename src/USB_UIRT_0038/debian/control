@@ -11,5 +11,5 @@ Homepage: <insert the upstream URL, if relevant>
 Package: lmce-usbuirt
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, pluto-irbase,pluto-messagetrans
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Description: LinuxMCE device driver for USB UIRT
+ This supports the USB UIRT for sending and receiving IR codes.
