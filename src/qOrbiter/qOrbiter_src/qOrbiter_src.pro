@@ -44,6 +44,8 @@ local-development{
 contains(QT_VERSION,4.8.*){
         message("$$QT_VERSION Core")
         DEFINES+=QT4_8
+
+        QT+=opengl
 !android-g++{
         QT+= webkit declarative phonon
 }
@@ -64,7 +66,7 @@ contains(QT_VERSION,5.*.*){
         DEFINES+=QT5
 	CONFIG+= opengl
         QT+= script widgets
-        include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
+   #    include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
 }
 
 android-g++{
@@ -104,8 +106,9 @@ linux-g++{
       #  TARGET = qorbiter-$$QT_VERSION-core-gl
 
         contains(QT_VERSION,4.*.*){
-		CONFIG+=opengl
-	        QT += script
+                CONFIG+=opengl
+                DEFINES+= GLENABLED for_desktop
+                QT += script opengl
 	        folder_01.source = qml/desktop
 	        folder_01.target = $$DESTDIR/qml
 	        plugins_folder.source = imports/
@@ -115,20 +118,12 @@ linux-g++{
         contains(QT_VERSION,5.*.*){
                 QT+= qml quick script widgets
                 QT-= declarative
+
                 RPI{
                 folder_01.source= qml/rpi
                 folder_01.target= qml
-
-                # plugins_folder.source = imports/
-                # plugins_folder.target = $$DESTDIR
-
-                # DEPLOYMENTFOLDERS+= plugins_folder
-
                 DEFINES+=RPI GLENABLED
                 DEFINES-=for_desktop
-                DEPLOYMENTFOLDERS += folder_02 #folder_01
-
-
                 target.path=/opt/QOrbiter
                 QML_IMPORT_PATH=imports
                 INSTALLS+=target
@@ -138,7 +133,7 @@ linux-g++{
                 plugins_folder.source = imports/
                 plugins_folder.target = $$DESTDIR
                 DEFINES += for_desktop
-                    }
+                }
                 glmsg=scenegraph
         }
 
@@ -146,7 +141,7 @@ linux-g++{
         folder_03.target = $$DESTDIR
 
         DEPLOYMENTFOLDERS+= plugins_folder
-        DEPLOYMENTFOLDERS += folder_01  folder_03
+        DEPLOYMENTFOLDERS+= folder_03
         QML_IMPORT_PATH=imports
 }
 
