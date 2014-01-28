@@ -6,7 +6,7 @@
 # Required-Stop:     $remote_fs $syslog
 # Should-Start:      $named
 # Default-Start:     
-# Default-Stop:      1
+# Default-Stop:      0 6
 # Short-Description: UpdateMedia media tagging
 # Description:       UpdateMedia syncs media tags and the pluto_media database
 #                    This script is only needed for shutdown purposes. 
