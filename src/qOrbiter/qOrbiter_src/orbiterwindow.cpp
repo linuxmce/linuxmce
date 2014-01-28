@@ -124,9 +124,6 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     //  mainView.rootContext()->setContextProperty("orbiterList" , "");
 
 #ifdef GLENABLED
-
-    #ifdef for_desktop
-
         #ifdef QT4_8
         QGLFormat format= QGLFormat::defaultFormat();
         glWidget = new QGLWidget(format);
@@ -134,9 +131,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
         mainView.setViewport(glWidget);
         mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
         #endif
-    #endif
-
-    #endif
+#endif
 
     #ifdef RPI
         mainView.setSurfaceType(QSurface::OpenGLSurface);
@@ -262,7 +257,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #endif
 
 
-    //mainView.setSource(QApplication::applicationDirPath().remove("/bin")+buildType+"/Splash.qml");
+//   mainView.setSource(QApplication::applicationDirPath().remove("/bin")+buildType+"/Splash.qml");
 
 
 }
