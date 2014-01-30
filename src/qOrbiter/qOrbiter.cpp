@@ -4365,25 +4365,25 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
 */
 void DCE::qOrbiter::redButton()
 {
-    CMD_Red pressRed(m_dwPK_Device, iMediaPluginID);
+    CMD_Red pressRed(m_dwPK_Device, m_dwPK_Device_NowPlaying);
     SendCommand(pressRed);
 }
 
 void DCE::qOrbiter::greenButton()
 {
-    CMD_Green pressGreen(m_dwPK_Device, iMediaPluginID);
+    CMD_Green pressGreen(m_dwPK_Device, m_dwPK_Device_NowPlaying);
     SendCommand(pressGreen);
 }
 
 void DCE::qOrbiter::yellowButton()
 {
-    CMD_Yellow pressYellow(m_dwPK_Device, iMediaPluginID);
+    CMD_Yellow pressYellow(m_dwPK_Device, m_dwPK_Device_NowPlaying);
     SendCommand(pressYellow);
 }
 
 void DCE::qOrbiter::blueButton()
 {
-    CMD_Blue pressBlue(m_dwPK_Device, iMediaPluginID);
+    CMD_Blue pressBlue(m_dwPK_Device, m_dwPK_Device_NowPlaying);
     SendCommand(pressBlue);
 }
 

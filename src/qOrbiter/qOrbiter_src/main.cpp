@@ -693,6 +693,10 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(newLightLevel(QString)), &pqOrbiter, SLOT(adjustRoomLights(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(zoomLevelChanged(QString)), &pqOrbiter, SLOT(setZoom(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(aspectRatioChanged(QString)), &pqOrbiter, SLOT(setAspect(QString)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(redButton()), &pqOrbiter, SLOT(redButton()), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(greenButton()), &pqOrbiter, SLOT(greenButton()), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(yellowButton()), &pqOrbiter, SLOT(yellowButton()), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(blueButton()), &pqOrbiter, SLOT(blueButton()), Qt::QueuedConnection);
         //FIXME: below emits error: QObject::connect: Attempt to bind non-signal orbiterWindow::close()
         //QObject::connect (&w,SIGNAL, &w, SLOT(closeOrbiter()), Qt::DirectConnection);
         QObject::connect(&w, SIGNAL(reloadRouter()), &pqOrbiter, SLOT(quickReload()), Qt::QueuedConnection);
