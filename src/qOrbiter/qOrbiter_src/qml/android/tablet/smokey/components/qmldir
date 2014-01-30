@@ -18,7 +18,10 @@ HomeScreenContent             HomeScreenContent.qml                        #no c
 InformationPanel             InformationPanel.qml                        #no comment
 Jog             Jog.qml                        #no comment
 ListDisplay             ListDisplay.qml                        #no comment
+MediaListGridView             MediaListGridView.qml                        #no comment
+MediaListListView             MediaListListView.qml                        #no comment
 MedialistNav             MedialistNav.qml                        #no comment
+MediaListPathView             MediaListPathView.qml                        #no comment
 MediaListProgressBar             MediaListProgressBar.qml                        #no comment
 MediaOptions4             MediaOptions4.qml                        #no comment
 MediaOptions5             MediaOptions5.qml                        #no comment
