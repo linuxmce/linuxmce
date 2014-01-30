@@ -107,6 +107,233 @@ Rectangle {
         }
     }
 
+    Rectangle {
+        id: remote1
+        width: b_orientation ? scaleX(45) : scaleX(65)
+        height: childrenRect.height
+        anchors.top: satcableboxremote.top
+        anchors.left: home.right
+        color: "transparent"
+        visible:false
+
+	Column {
+            spacing: 1
+            Row {
+	        spacing: 1
+            ButtonSq {
+	        id: btInfo
+		
+            	buttontextfontsize: scaleY(2)
+            	buttontext: "Info"
+		imgSource: ""
+            	MouseArea{
+		    smooth: true
+                    anchors.fill: parent
+                    onClicked: manager.moveArrowDirection(3)
+            	}
+            }
+            ButtonSq {
+                id: btUp
+
+                buttontextfontsize: scaleY(2)
+                buttontext: "Up"
+		imgSource: ""
+                MouseArea{
+                    smooth: true
+                    anchors.fill: parent
+                    onClicked: manager.moveArrowDirection(1) //up
+                }
+            }
+            ButtonSq {
+                id: bt22
+
+                buttontextfontsize: scaleY(2)
+                buttontext: ""
+		imgSource: ""
+                MouseArea{
+                    smooth: true
+                    anchors.fill: parent
+                    onClicked: manager.moveArrowDirection(4)
+                }
+            }
+            ButtonSq {
+                id: btChannel
+
+                buttontextfontsize: scaleY(2)
+                buttontext: ""
+		imgSource: ""
+                MouseArea{
+                    smooth: true
+                    anchors.fill: parent
+                    onClicked: manager.changeTrack("+1")
+                }
+            }
+        }
+	Row {
+	        spacing: 1
+            ButtonSq {
+	        id: btLeft
+		
+            	buttontextfontsize: scaleY(2)
+            	buttontext: "Left"
+		imgSource: ""
+            	MouseArea{
+		    smooth: true
+                    anchors.fill: parent
+                    onClicked: manager.moveArrowDirection(3)
+            	}
+            }
+            ButtonSq {
+                id: btOk
+
+                buttontextfontsize: scaleY(2)
+                buttontext: "Ok"
+		imgSource: ""
+                MouseArea{
+                    smooth: true
+                    anchors.fill: parent
+                    onClicked: manager.moveArrowDirection(5) //ok
+                }
+            }
+            ButtonSq {
+                id: btRight
+
+                buttontextfontsize: scaleY(2)
+                buttontext: "Right"
+		imgSource: ""
+                MouseArea{
+                    smooth: true
+                    anchors.fill: parent
+                    onClicked: manager.moveArrowDirection(4)
+                }
+            }
+            ButtonSq {
+                id: btChannelUp
+
+                buttontextfontsize: scaleY(2)
+                buttontext: "Ch+"
+		imgSource: ""
+                MouseArea{
+                    smooth: true
+                    anchors.fill: parent
+                    onClicked: manager.changeTrack("+1")
+                }
+            }
+        }
+	Row {
+	        spacing: 1
+            ButtonSq {
+	        id: btExit
+		
+            	buttontextfontsize: scaleY(2)
+            	buttontext: "Exit"
+		imgSource: ""
+            	MouseArea{
+		    smooth: true
+                    anchors.fill: parent
+//                    onClicked: manager.()
+            	}
+            }
+            ButtonSq {
+                id: btDown
+
+                buttontextfontsize: scaleY(2)
+                buttontext: "Down"
+		imgSource: ""
+                MouseArea{
+                    smooth: true
+                    anchors.fill: parent
+                    onClicked: manager.moveArrowDirection(2) //down
+                }
+            }
+            ButtonSq {
+                id: btGuide
+
+                buttontextfontsize: scaleY(2)
+                buttontext: "Guide"
+		imgSource: ""
+                MouseArea{
+                    smooth: true
+                    anchors.fill: parent
+                    onClicked: manager.TvGuide()
+                }
+            }
+            ButtonSq {
+                id: btChannelDown
+
+                buttontextfontsize: scaleY(2)
+                buttontext: "Ch-"
+		imgSource: ""
+                MouseArea{
+                    smooth: true
+                    anchors.fill: parent
+                    onClicked: manager.changeTrack("-1")
+                }
+            }
+        }
+	Row {
+	        spacing: 1
+            ButtonSq {
+	        id: btRed
+		
+            	buttontextfontsize: scaleY(2)
+            	buttontext: "Red"
+	    	color: "red"
+		imgSource: ""
+		radius : style.stdbuttonw / 3
+            	MouseArea{
+		    smooth: true
+                    anchors.fill: parent
+                    onClicked: manager.redButtonPress()
+            	}
+            }
+            ButtonSq {
+                id: btGreen
+
+                buttontextfontsize: scaleY(2)
+                buttontext: "Green"
+	        color: "green"
+		imgSource: ""
+		radius : style.stdbuttonw / 3
+                MouseArea{
+                    smooth: true
+                    anchors.fill: parent
+                    onClicked: manager.greenButton()
+                }
+            }
+            ButtonSq {
+                id: btYellow
+
+                buttontextfontsize: scaleY(2)
+                buttontext: "Yellow"
+	        color: "yellow"
+		imgSource: ""
+		radius : style.stdbuttonw / 3
+                MouseArea{
+                    smooth: true
+                    anchors.fill: parent
+                    onClicked: manager.yellowButton()
+                }
+            }
+            ButtonSq {
+                id: btBlue
+
+                buttontextfontsize: scaleY(2)
+                buttontext: "Blue"
+	        color: "blue"
+		imgSource: ""
+		radius : style.stdbuttonw / 3
+                MouseArea{
+                    smooth: true
+                    anchors.fill: parent
+                    onClicked: manager.blueButton()
+                }
+            }
+        }
+    }
+}
+
+
     Row
     {
         id:extra_buttons
@@ -115,24 +342,11 @@ Rectangle {
         anchors.bottom: audioremote1.top
 
         ButtonSq {
-            id: keypad
-            width: style.stdbuttonw
-            height: style.stdbuttonh
-
-            buttontextfontsize: scaleY(2)
-            buttontext: "#"
-            MouseArea{
-                smooth: true
-                anchors.fill: parent
-                onClicked: satcableboxremote.state="NUMBERS"
-            }
-        }
-
-        ButtonSq {
             id: homebutton
-
-            visible: false
-            buttontext: "home"
+            buttontext: "Info"
+	    color: style.button_system_color_hover
+            buttontextbold: true
+	    imgSource: ""
             MouseArea{
                 anchors.fill:parent
                 onClicked: satcableboxremote.state=""
@@ -140,13 +354,35 @@ Rectangle {
         }
 
         ButtonSq {
-            id: showepg
-            visible: true
+            id: keypadSelector
+            buttontext: "#"
+	    color: style.button_system_color
+	    imgSource: ""
+            buttontextfontsize: scaleY(2)
+            MouseArea{
+                anchors.fill: parent
+                onClicked: satcableboxremote.state="NUMBERS"
+            }
+        }
 
+        ButtonSq {
+            id: showepg
             buttontext: "EPG"
+	    color: style.button_system_color
+	    imgSource: ""
             MouseArea{
                 anchors.fill:parent
                 onClicked: satcableboxremote.state="GRID"
+            }
+        }
+        ButtonSq {
+            id: remoteSelector
+            buttontext: "Remote"
+	    color: style.button_system_color
+	    imgSource: ""
+            MouseArea{
+                anchors.fill:parent
+                onClicked: satcableboxremote.state="REMOTE"
             }
         }
     }
@@ -187,6 +423,58 @@ Rectangle {
 
     states: [
         State {
+            name: ""
+
+            AnchorChanges{
+                target:remotenumberpad1
+                anchors.top: undefined
+                anchors.right: undefined
+                anchors.horizontalCenter: satcableboxremote.horizontalCenter
+            }
+
+            PropertyChanges {
+                target: homebutton
+                buttontextbold: true
+		color: style.button_system_color_hover
+            }
+            PropertyChanges {
+                target: keypadSelector
+                buttontextbold: false
+		color: style.button_system_color
+            }
+            PropertyChanges{
+                target: showepg
+                buttontextbold: false
+		color: style.button_system_color
+            }
+            PropertyChanges{
+                target: remoteSelector
+                buttontextbold: false
+		color: style.button_system_color
+            }
+            PropertyChanges {
+                target: metadatavideo
+                visible:true
+            }
+            PropertyChanges {
+                target: textcol
+                visible: false
+            }
+            PropertyChanges {
+                target: np_box
+                visible: false
+
+            }
+            PropertyChanges {
+                target: remotenumberpad1
+                visible: false
+            }
+            PropertyChanges {
+                target: remote1
+                visible: false
+            }
+        },
+        State {
             name: "NUMBERS"
 
             AnchorChanges{
@@ -212,26 +500,33 @@ Rectangle {
             }
 
             PropertyChanges {
-                target: keypad
-                visible: false
-
+                target: keypadSelector
+                buttontextbold: true
+		color: style.button_system_color_hover
             }
 
             PropertyChanges {
                 target: homebutton
-                buttontextbold: true
-                buttontext: "Display"
-                visible:true
-
+                buttontextbold: false
+		color: style.button_system_color
             }
 
             PropertyChanges{
                 target: showepg
                 visible:true
             }
+            PropertyChanges{
+                target: remoteSelector
+                buttontextbold: false
+		color: style.button_system_color
+            }
             PropertyChanges {
                 target: metadatavideo
                 visible:false
+            }
+            PropertyChanges {
+                target: remote1
+                visible: false
             }
         },
         State{
@@ -262,10 +557,6 @@ Rectangle {
                 visible:false
 
             }
-            PropertyChanges{
-                target: showepg
-                visible:false
-            }
             PropertyChanges {
                 target: np_box
                 visible: false
@@ -274,21 +565,94 @@ Rectangle {
 
             PropertyChanges{
                 target:homebutton
-                visible:true
-
+                buttontextbold: false
+		color: style.button_system_color
             }
 
             PropertyChanges {
-                target: keypad
-                visible: true
-
-
+                target: keypadSelector
+		color: style.button_system_color
+                buttontextbold: false
+            }
+            PropertyChanges{
+                target: showepg
+                buttontextbold: true
+		color: style.button_system_color_hover
+            }
+            PropertyChanges{
+                target: remoteSelector
+                buttontextbold: false
+		color: style.button_system_color
             }
             PropertyChanges {
                 target: remotenumberpad1
                 visible: false
             }
+            PropertyChanges {
+                target: remote1
+                visible: false
+            }
 
+        },
+        State{
+            name:"REMOTE"
+
+            AnchorChanges{
+                target: playlist
+                anchors.bottom: undefined
+                anchors.top: satcableboxremote.top
+            }
+
+            AnchorChanges{
+                target:remotenumberpad1
+                anchors.right: satcableboxremote.right
+                anchors.top: satcableboxremote.top
+                anchors.horizontalCenter: undefined
+            }
+
+            PropertyChanges{
+                target: showepg
+		color: style.button_system_color
+                buttontextbold: false
+            }
+            PropertyChanges{
+                target:homebutton
+                buttontextbold: false
+		color: style.button_system_color
+            }
+            PropertyChanges {
+                target: keypadSelector
+		color: style.button_system_color
+                buttontextbold: false
+            }
+            PropertyChanges{
+                target: remoteSelector
+                buttontextbold: true
+		color: style.button_system_color_hover
+            }
+            PropertyChanges {
+                target: remotenumberpad1
+		visible: false
+            }
+            PropertyChanges {
+                target: remote1
+                visible: true
+            }
+            PropertyChanges {
+                target: np_box
+                visible: false
+            }
+            PropertyChanges
+            {
+                target: playlist
+                visible:false
+            }
+
+            PropertyChanges {
+                target: metadatavideo
+                visible:false
+
+            }
         }
 
     ]

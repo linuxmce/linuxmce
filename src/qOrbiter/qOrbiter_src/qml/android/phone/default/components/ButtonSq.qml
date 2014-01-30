@@ -13,15 +13,15 @@ id:btnBase
     property alias buttontextzindex: buttonLabel.z
     property alias buttonsqradius:  buttonBase.radius
     property int textSize: style.buttonLabelText
-    property color color:"transparent"
-    property string imgSource:"../img/buttonbg.png"
-    property color activatedColor:androidSystem.blueStandard
+    property color color: style.button_system_color
+    property string imgSource:""
+    property color activatedColor:style.button_system_color_hover
     signal activated()
 
     Rectangle {
         id:buttonBase
-       anchors.fill: btnBase
-        color:ms.pressed ? activatedColor : btnBase.color
+        anchors.fill: btnBase
+        color: ms.pressed ? activatedColor : btnBase.color
         radius: btnBase.radius
         opacity:.65
         smooth:true
