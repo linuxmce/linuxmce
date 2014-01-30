@@ -22,7 +22,7 @@ trap 'export PATH=$OLDPATH' EXIT
 cd $LINUXMCE_SRC/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas
 rm -rf installdir
 mkdir installdir
-make clean
+make clean || :
 $NECESSITA_ROOT/Android/Qt/482/armeabi-v7a/bin/qmake Qorbiter-necessitas.pro -r -spec android-g++ "CONFIG+=opengl"
 make clean -j6
 make INSTALL_ROOT="android" install
