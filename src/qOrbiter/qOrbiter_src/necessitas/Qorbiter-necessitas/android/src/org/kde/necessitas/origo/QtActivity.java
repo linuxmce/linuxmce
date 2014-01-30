@@ -144,7 +144,7 @@ public class QtActivity<LocalBinder> extends Activity
     	mService.playAudio(url);    
     }
    
-    public boolean SendMediaCommand(String Command, int mSeek, boolean pause, String file){
+    public boolean SendMediaCommand(String Command, int mSeek, boolean pause, String file, float vol){
     	boolean res = false;
     	
     	if(Command.contentEquals("play")){
@@ -154,7 +154,11 @@ public class QtActivity<LocalBinder> extends Activity
     	else if(Command.contentEquals("stop")){
     	mService.stop();
     	res = true;
-    	}   	
+    	} 
+    	else if(Command.contentEquals("setVolume")){
+    		mService.setVolume(vol);
+    		res=true;
+    	}
     	
     	return res;
     }

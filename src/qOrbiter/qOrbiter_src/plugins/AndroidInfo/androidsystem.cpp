@@ -90,7 +90,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
     s_qtactivity = (jclass)env->NewGlobalRef(env->FindClass("org/kde/necessitas/origo/QtActivity"));
     s_qtactivity_field = env->GetStaticMethodID(s_qtactivity, "getActivity", "()Lorg/kde/necessitas/origo/QtActivity;");
     //  s_qtActivity_PlayMediaMethod = env->GetMethodID(s_qtactivity, "playMedia", "(Ljava/lang/String;)V");
-    s_qtActivity_MediaControlMethod = env->GetMethodID(s_qtactivity, "SendMediaCommand", "(Ljava/lang/String;IZLjava/lang/String;)Z");
+    s_qtActivity_MediaControlMethod = env->GetMethodID(s_qtactivity, "SendMediaCommand", "(Ljava/lang/String;IZLjava/lang/String;F)Z");
     s_qtActivity_StartMethod = env->GetMethodID(s_qtactivity, "startAudioService", "(J)V");
 
     jclass localBuildClass = env->FindClass("android/os/Build");
@@ -298,11 +298,12 @@ bool AndroidSystem::playMedia(QString url)
     }
     int mSeek = 0;
     bool p = false;
+    float f = 0.0;
     QString command = "play";
     qDebug() << url;
     jstring jstr = env->NewString(reinterpret_cast<const jchar*>(url.constData()), url.length());
     jstring jcom = env->NewString(reinterpret_cast<const jchar*>(command.constData()), command.length());
-    jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_MediaControlMethod,jcom, mSeek, p, jstr);
+    jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_MediaControlMethod,jcom, mSeek, p, jstr, f);
     env->DeleteLocalRef(jstr);
     env->DeleteLocalRef(jcom);
     m_pvm->DetachCurrentThread();    
@@ -338,8 +339,8 @@ bool AndroidSystem::stopMedia()
 
     jstring jstr = env->NewString(reinterpret_cast<const jchar*>(str.constData()), str.length());
     jstring jcom = env->NewString(reinterpret_cast<const jchar*>(command.constData()), command.length());
-
-    jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_MediaControlMethod,jcom, mSeek, p, jstr);
+    float f=0.0;
+    jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_MediaControlMethod,jcom, mSeek, p, jstr, f);
     env->DeleteLocalRef(jstr);
     env->DeleteLocalRef(jcom);
     m_pvm->DetachCurrentThread();
@@ -367,4 +368,41 @@ bool AndroidSystem::startAudioService(long addr)
     return false;
 #endif
 
+}
+
+bool AndroidSystem::setVolume(double vol)
+{
+
+#ifndef QT5
+    JNIEnv* env;
+    if (m_pvm->AttachCurrentThread(&env, NULL)<0)
+    {
+        qCritical()<<"AttachCurrentThread failed";
+        return false;
+    }
+
+    m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
+
+    if (!m_qtActivity){
+
+        qWarning("Cant find activity!!");
+        return false;
+    }
+    float f = float(vol);
+    QString str = "";
+    int mSeek = 0;
+    bool p = false;
+    QString command = "setVolume";
+
+    jstring jstr = env->NewString(reinterpret_cast<const jchar*>(str.constData()), str.length());
+    jstring jcom = env->NewString(reinterpret_cast<const jchar*>(command.constData()), command.length());
+
+    jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_MediaControlMethod,jcom, mSeek, p, jstr, f);
+    env->DeleteLocalRef(jstr);
+    env->DeleteLocalRef(jcom);
+    m_pvm->DetachCurrentThread();
+    return true;
+#else
+return false;
+#endif
 }

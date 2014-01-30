@@ -124,6 +124,12 @@ OnPreparedListener {
 	public void setIntentRedeliver(boolean enabled){
 
 	}
+	
+	public void setVolume(float vol){
+		if(mp!=null){
+		mp.setVolume(vol, vol);
+		}
+	}
 
 
 	public void playAudio(String url) {
@@ -233,6 +239,8 @@ public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
 public void onBufferingUpdate(MediaPlayer arg0, int percent) {
 	//	Log.d(TAG, "onBufferingUpdate called --->   percent:" + percent);
 }
+
+
 
 public void onCompletion(MediaPlayer arg0) {
 	Log.d(TAG, "onCompletion called");

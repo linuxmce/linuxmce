@@ -141,13 +141,13 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
         //mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     #endif
 
-    #if defined (QT4) && defined (ANDROID)
-        QGLFormat format= QGLFormat::defaultFormat();
-        glWidget = new QGLWidget();
-        glWidget->setAutoFillBackground(false);
-        mainView.setViewport(glWidget);
-        mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-    #endif
+//    #if defined (QT4) && defined (ANDROID)
+//        QGLFormat format= QGLFormat::defaultFormat();
+//        glWidget = new QGLWidget();
+//        glWidget->setAutoFillBackground(false);
+//        mainView.setViewport(glWidget);
+//        mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+//    #endif
 
 
 
