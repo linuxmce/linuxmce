@@ -30,6 +30,9 @@ if grep -q "^svdrpservice" /var/lib/vdr/setup.conf; then
 	exit 0
 fi
 
+# Setup a custom nosignal image
+mkdir -p /root/.xine
+ln -s /usr/pluto/share/nosignal.mpg /root/.xine/nosignal.mpg
 
 #
 # Make a backup copy of the existing setup.conf
