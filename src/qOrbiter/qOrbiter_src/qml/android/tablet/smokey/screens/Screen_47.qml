@@ -5,6 +5,7 @@ Item {
     id:files_view_screen
     height: pageLoader.height
     width:manager.appWidth
+    state:"viewing"
     property int current_view_type:1
     property int depth:0
     focus:true
@@ -30,7 +31,7 @@ Item {
 
         forceActiveFocus()
     }
-    state: manager.i_current_mediaType === 5 ? "selection" : "viewing"
+  //  state: manager.i_current_mediaType === 5 ? "selection" : "viewing"
     Connections
     {
         target: filedetailsclass
@@ -81,8 +82,44 @@ Item {
 
     MediaListProgressBar{
         id:progress_bar
-        anchors.bottom: parent.bottom
+        anchors.bottom: bottomOptions.top
         anchors.horizontalCenter: parent.horizontalCenter
+    }
+
+    Item{
+        id:bottomOptions
+        height:scaleY(8)
+        anchors{
+            left:parent.left
+            right:parent.right
+            bottom:parent.bottom
+        }
+        Rectangle{
+            anchors.fill: parent
+            color:"black"
+            opacity: .65
+        }
+
+        Row{
+            anchors{
+                left:parent.left
+                right:parent.horizontalCenter
+                bottom:parent.bottom
+                bottomMargin: 5
+            }
+            StyledButton{
+                id:viewBtn
+                buttonText: "View"
+                height: childrenRect.height+10
+               textSize:scaleY(4)
+
+//                onActivated: {
+//                    attribfilter.setSelectionStatus("File");
+//                    files_view_screen.state="viewing"
+//                }
+            }
+
+        }
     }
 
     Loader{

@@ -2,15 +2,20 @@ import QtQuick 1.0
 import "../../../../skins-common/lib/handlers"
 Item{
     id:media_playback_base
-    height: parent.height
-    width: manager.appWidth
+   anchors{
+    top:parent.top
+    left:parent.left
+    right:parent.right
+    bottom:parent.bottom
+   }
     state:"metadata"
 
     property string screenLabel:"foo"
 
-    Component.onCompleted: {
-        if(media_playback_base.state!=="dvdmenu"){
 
+    Component.onCompleted: {
+        forceActiveFocus()
+        if(media_playback_base.state!=="dvdmenu"){
             nav_row.navSource="NavOptions5.qml";
             info_panel.state="hidden";
             controlComponent = "Controls_5.qml" //controlsLoader.sourceComponent
@@ -45,7 +50,7 @@ Item{
     property Item playlistSource
     property Item playlistDelegate
     property bool enableScrollbar:true
-    property alias playListComponent:playlist.sourceComponent
+    property Component playListComponent:PlaylistView{}
 
     Item{
         id: options_display
@@ -204,7 +209,7 @@ Item{
 
         Loader{
             id:playlist
-            sourceComponent: PlaylistView{}
+            sourceComponent: playListComponent
         }
 
     }

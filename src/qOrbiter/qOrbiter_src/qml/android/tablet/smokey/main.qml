@@ -41,7 +41,7 @@ Item {
             if(canary.rotation===360)
                 canary.rotation =1
             else
-               canary.rotation=(canary.rotation+1)
+                canary.rotation=(canary.rotation+1)
         }
     }
 
@@ -116,9 +116,11 @@ Item {
             break;
         case Qt.Key_VolumeUp:
             console.log("Vol up")
+            manager.adjustVolume(5)
             break;
         case Qt.Key_VolumeDown:
             console.log("vol down")
+            manager.adjustVolume(-5)
             break;
         case Qt.Key_MediaPrevious:
             console.log("Caught back button! Phew!")

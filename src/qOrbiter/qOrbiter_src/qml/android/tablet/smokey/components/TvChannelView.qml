@@ -1,9 +1,17 @@
 import QtQuick 1.1
 
 Item {
-    width: scaleX(100)
-    height: scaleY(100)
-    Component.onCompleted: {manager.getLiveTVPlaylist(); manager.setNowPlayingTv()}
+    anchors{
+        top:parent.top
+        left:parent.left
+        right:parent.right
+        bottom:parent.bottom
+    }
+
+    Component.onCompleted: {
+      //  manager.getLiveTVPlaylist();
+        manager.setNowPlayingTv()
+    }
     clip:true
 
     Connections{
