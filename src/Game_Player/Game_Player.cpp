@@ -672,8 +672,10 @@ void Game_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStr
     }
   else
     {
+      gm.Release();
       // This is a save point, call Set Media Position.
       CMD_Set_Media_Position (m_iStreamID, sValue_To_Assign);
+      gm.Relock();
     }
 
 }
