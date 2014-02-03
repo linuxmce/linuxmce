@@ -483,8 +483,8 @@ void App_Server::CMD_Halt_Device(int iPK_Device,string sForce,string &sCMD_Resul
 		DisplayMessageOnOrbVFD("Powering off...");
 
 #ifndef WIN32
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling halt");
-		system("halt");
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Calling poweroff");
+		system("poweroff");
 #else
 		EnablePrivileges();
 		::ExitWindowsEx(EWX_POWEROFF | EWX_FORCE, 0);
