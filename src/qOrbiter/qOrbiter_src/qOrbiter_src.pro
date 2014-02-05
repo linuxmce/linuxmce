@@ -66,7 +66,7 @@ contains(QT_VERSION,5.*.*){
         DEFINES+=QT5
 	CONFIG+= opengl
         QT+= script widgets
-   #    include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
+      include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
 }
 
 android-g++{
