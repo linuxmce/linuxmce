@@ -33,9 +33,7 @@ using namespace DCE;
 //<-dceag-d-e->
 #include <QDebug>
 #include <iostream>
-#include <QtNetwork/QSslConfiguration>
 #include <pthread.h>
-#include <QSharedPointer>
 #ifdef QT5
 #include <QtWidgets/QApplication>
 #endif
@@ -3036,12 +3034,14 @@ void DCE::qOrbiter::requestMediaPlaylist()
                 emit playlistItemAdded(new PlaylistItemClass(cellTitle, fk_file, index));
 #ifdef QT5
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
+#else
+ QApplication::processEvents(QEventLoop::AllEvents);
 #endif
 
 #ifdef RPI
                 msleep(45);
 #elif ANDROID
-                 msleep(20);
+                 msleep(30);
 #else
                 // msleep(10);
 #endif
