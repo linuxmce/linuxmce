@@ -196,8 +196,7 @@ SOURCES += ../../main.cpp \
         ../../contextobjects/timecodemanager.cpp \
         ../../imageProviders/floorplandeviceprovider.cpp \
         # ../../Gen_Devices/qMediaPlayerBase.cpp \
-        ../../contextobjects/bookmarkitem.cpp \
-        ../../plugins/GoogleWeather/googleweather.cpp \
+        ../../contextobjects/bookmarkitem.cpp \      
         ../../contextobjects/promptdata.cpp \
         ../../datamodels/existingorbitermodel.cpp \
         ../../datamodels/sleepingalarmmodel.cpp \
@@ -310,8 +309,7 @@ HEADERS += \
         ../../contextobjects/timecodemanager.h \
         ../../imageProviders/floorplandeviceprovider.h \
         # ../../Gen_Devices/qMediaPlayerBase.h \
-        ../../contextobjects/bookmarkitem.h \
-        ../../plugins/GoogleWeather/googleweather.h \
+        ../../contextobjects/bookmarkitem.h \     
         ../../contextobjects/promptdata.h \
         ../../datamodels/existingorbitermodel.h \
         ../../datamodels/sleepingalarmmodel.h \
