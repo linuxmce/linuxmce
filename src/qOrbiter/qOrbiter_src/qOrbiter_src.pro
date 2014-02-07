@@ -132,6 +132,7 @@ linux-g++{
                 folder_01.target = $$DESTDIR/qml/
                 plugins_folder.source = imports/
                 plugins_folder.target = $$DESTDIR
+                DEPLOYMENTFOLDERS+= plugins_folder
                 DEFINES += for_desktop
                 }
                 glmsg=scenegraph
@@ -140,7 +141,6 @@ linux-g++{
         folder_03.source = config.xml
         folder_03.target = $$DESTDIR
 
-        DEPLOYMENTFOLDERS+= plugins_folder
         DEPLOYMENTFOLDERS+= folder_03
         QML_IMPORT_PATH=imports
 }
