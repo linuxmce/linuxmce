@@ -111,8 +111,6 @@ linux-g++{
                 QT += script opengl
 	        folder_01.source = qml/desktop
 	        folder_01.target = $$DESTDIR/qml
-	        plugins_folder.source = imports/
-	        plugins_folder.target = $$DESTDIR
         }
 
         contains(QT_VERSION,5.*.*){
@@ -130,17 +128,17 @@ linux-g++{
                 }else{
                 folder_01.source = qml/qt5-desktop
                 folder_01.target = $$DESTDIR/qml/
-                plugins_folder.source = imports/
-                plugins_folder.target = $$DESTDIR
-                DEPLOYMENTFOLDERS+= plugins_folder
                 DEFINES += for_desktop
                 }
                 glmsg=scenegraph
         }
 
+        plugins_folder.source = imports/
+        plugins_folder.target = $$DESTDIR
+        DEPLOYMENTFOLDERS+= plugins_folder
+
         folder_03.source = config.xml
         folder_03.target = $$DESTDIR
-
         DEPLOYMENTFOLDERS+= folder_03
         QML_IMPORT_PATH=imports
 }
