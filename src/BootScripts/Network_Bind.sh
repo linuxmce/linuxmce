@@ -113,6 +113,8 @@ $Domainname          IN SOA  $Hostname.$Domainname. postmaster.$Domainname. (
                                 86400         ; minimum (1 day)
                                 )
                         NS      $Hostname.$Domainname.
+			A	$Internal_IP
+			MX	10 $Hostname.$Domainname.
 \$ORIGIN $Domainname.
 $Hostname               A       $Internal_IP" > /var/cache/bind/db.linuxmce.local
 
@@ -134,7 +136,24 @@ $Reverse_IP.in-addr.arpa IN SOA  $Domainname. postmaster.$Domainname. (
                         NS      $Hostname.$Domainname.
                         PTR     $Domainname.
 \$ORIGIN $Reverse_IP.in-addr.arpa.
-1                       PTR     $Hostname.$Domainname." > /var/cache/bind/db.linuxmce.rev
+$Address_4                       PTR     $Hostname.$Domainname." > /var/cache/bind/db.linuxmce.rev
+fi
+
+# Check the zone files for valid syntax
+# Log results to syslog in case someone actually reads logs
+if [[ $(named-checkzone $Domainname /var/cache/bind/db.linuxmce.local | grep -w OK ) == "OK" ]]; then
+	logger -t lmce -p daemon.info " /var/cache/bind/db.linuxmce.local Valid Syntax"
+else
+        logger -t lmce -p daemon.err " /var/cache/bind/db.linuxmce.local Syntax Error"
+	logger -t lmce -p daemon.err "Run sudo named-checkzone $Domainname /var/cache/bind/db.linuxmce.local for more info"
+
+fi
+
+if [[ $(named-checkzone $Reverse_IP.in-addr.arpa /var/cache/bind/db.linuxmce.rev | grep -w OK ) == "OK" ]]; then
+        logger -t lmce -p daemon.info " /var/cache/bind/db.linuxmce.rev Valid Syntax"
+else
+        logger -t lmce -p daemon.err " /var/cache/bind/db.linuxmce.rev Syntax Error"
+	logger -t lmce -p daemon.err "Run sudo named-checkzone $Reverse_IP.in-addr.arpa /var/cache/bind/db.linuxmce.rev for more info."
 fi
 
 ### Check for and update named.conf files
@@ -158,15 +177,41 @@ cp /usr/pluto/templates/named.conf.linuxmce.tmpl /etc/bind/named.conf.linuxmce
 sed -i "s,%DYNAMIC_REVERSE_RANGE%,$Reverse_IP,g" /etc/bind/named.conf.linuxmce
 sed -i "s,%DOMAINNAME%,$Domainname,g" /etc/bind/named.conf.linuxmce
 
+# Log dynamic dns updates from dhcpd so we know what bind and dhcpd are up to
+echo "logging {
+
+    channel update_log {
+        syslog ;
+        severity debug;
+        print-category yes;
+        print-severity yes;
+        print-time no;
+    };
+
+    category update {
+        update_log;
+    };
+    category update-security {
+        update_log;
+    };
+
+};" > /etc/bind/named.conf.update-logs
+
+if [[ $( grep named.conf.update-logs /etc/bind/named.conf ) == "" ]] ;then
+        echo 'include "/etc/bind/named.conf.update-logs";' >> /etc/bind/named.conf
+fi
+
 # Setting right permissions after our changes
 #chown bind: /var/cache/bind/db.*
 chown -R bind: /var/cache/bind
+# chmod g+s /var/cache/bind
+# chmod 664 /var/cache/bind/*
 chown bind:dhcpd /etc/bind/rndc.key
 chmod 664 /etc/bind/rndc.key
 
 # Apparmor prevents dhcpd from reading bind conf files
 if [[ -e /etc/apparmor.d/usr.sbin.dhcpd && $( grep '/etc/bind' /etc/apparmor.d/usr.sbin.dhcpd ) == "" ]] ;then
-	sed -i "s,\},\n  # Let dhcpd read bind's config files\n  /etc/bind/\*\* r\,\n\},g" /etc/apparmor.d/usr.sbin.dhcpd
+	sed -i "s,\},\n  # Let dhcpd read bind's config files\n   /etc/bind/ r, /etc/bind/\*\* r\,\n\},g" /etc/apparmor.d/usr.sbin.dhcpd
 	service apparmor restart
 	service isc-dhcp-server restart
 fi

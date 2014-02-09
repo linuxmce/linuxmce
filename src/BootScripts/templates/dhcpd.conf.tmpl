@@ -11,6 +11,13 @@ option voip-tftp-server %CORE_INTERNAL_ADDRESS%;
 authoritative;
 
 ddns-update-style interim;
+ddns-updates on;
+ddns-domainname "%INTERNAL_DOMAIN_NAME%";
+ddns-rev-domainname "in-addr.arpa.";
+update-static-leases on;
+allow unknown-clients;
+use-host-decl-names on;
+
 
 include "/etc/bind/rndc.key";
 
