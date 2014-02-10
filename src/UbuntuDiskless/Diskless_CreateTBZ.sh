@@ -240,9 +240,15 @@ MD_System_Level_Prep () {
 		mkdir -p $TEMP_DIR/var/cache/apt
 		mount --bind /var/cache/apt $TEMP_DIR/var/cache/apt
 	fi
-	mkdir -p /usr/pluto/deb-cache/$TARGET_ARCH
+
+	DEB_CACHE_ARCH=""
+	if [[ "$HOST_ARCH" != "$TARGET_ARCH" ]]; then
+		DEB_CACHE_ARCH=$TARGET_ARCH
+	fi;
+
 	mkdir -p $TEMP_DIR/usr/pluto/deb-cache
-	mount --bind /usr/pluto/deb-cache/$TARGET_ARCH $TEMP_DIR/usr/pluto/deb-cache
+	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE_ARCH
+	mount --bind /usr/pluto/deb-cache/$DEB_CACHE_ARCH $TEMP_DIR/usr/pluto/deb-cache
 	mount none -t devpts $TEMP_DIR/dev/pts
 	mount none -t sysfs $TEMP_DIR/sys
 	mount none -t proc $TEMP_DIR/proc
@@ -662,7 +668,7 @@ MD_Cleanup () {
 
 	#Copy the packages.gz file to ensure apt-get update does not fail
 	mkdir -p $TEMP_DIR/usr/pluto/deb-cache
-	cp -p /usr/pluto/deb-cache/$TARGET_ARCH/Packages.gz $TEMP_DIR/usr/pluto/deb-cache
+	cp -p /usr/pluto/deb-cache/$DEB_CACHE_ARCH/Packages.gz $TEMP_DIR/usr/pluto/deb-cache
 
 	mv -f $TEMP_DIR/sbin/invoke-rc.d{.orig,}
 	mv -f $TEMP_DIR/sbin/start{.orig,}
