@@ -236,10 +236,13 @@ MD_System_Level_Prep () {
 	cp /etc/resolv.conf "$TEMP_DIR"/etc/resolv.conf
 
 	## Enable some needed mount points
-	mkdir -p $TEMP_DIR/var/cache/apt
+	if [[ "$TARGET_ARCH" == "$HOST_ARCH" ]]; then
+		mkdir -p $TEMP_DIR/var/cache/apt
+		mount --bind /var/cache/apt $TEMP_DIR/var/cache/apt
+	fi
+	mkdir -p /usr/pluto/deb-cache/$TARGET_ARCH
 	mkdir -p $TEMP_DIR/usr/pluto/deb-cache
-	mount --bind /var/cache/apt $TEMP_DIR/var/cache/apt
-	mount --bind /usr/pluto/deb-cache $TEMP_DIR/usr/pluto/deb-cache
+	mount --bind /usr/pluto/deb-cache/$TARGET_ARCH $TEMP_DIR/usr/pluto/deb-cache
 	mount none -t devpts $TEMP_DIR/dev/pts
 	mount none -t sysfs $TEMP_DIR/sys
 	mount none -t proc $TEMP_DIR/proc
@@ -253,22 +256,19 @@ MD_System_Level_Prep () {
 	#		;;
 		"ubuntu")
 			StatsMessage "Setting up /etc/apt/sources.list for ubuntu"
-			TARGET_REPO_NAME=main
+			TARGET_REPO_NAME="main"
 			case "$TARGET_RELEASE" in
 				lucid)
 					TARGET_REPO_NAME="beta2"
 					;;
-				precise)
-					TARGET_REPO_NAME="unstable"
-					;;
 			esac
 			cat <<-EOF > $TEMP_DIR/etc/apt/sources.list
-				deb file:/usr/pluto/deb-cache ./
+				deb file:/usr/pluto/deb-cache/ ./
+				deb http://deb.linuxmce.org/ubuntu/ $TARGET_RELEASE $TARGET_REPO_NAME
 				deb $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
 				deb $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
 				deb http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restricted universe multiverse
 				deb http://archive.canonical.com/ubuntu $TARGET_RELEASE partner
-				deb http://deb.linuxmce.org/ubuntu/ $TARGET_RELEASE $TARGET_REPO_NAME
 				deb http://debian.slimdevices.com/ stable  main
 				deb http://download.videolan.org/pub/debian/stable/ /
 				EOF
@@ -276,17 +276,11 @@ MD_System_Level_Prep () {
 		"raspbian")
 			StatsMessage "Setting up /etc/apt/sources.list for raspbian"
 			cat <<-EOF > $TEMP_DIR/etc/apt/sources.list
-				#deb file:/usr/pluto/deb-cache/armhf ./
+				#deb http://10.10.42.99/raspbian/ ./
+				deb file:/usr/pluto/deb-cache/ ./
+				deb http://deb.linuxmce.org/ precise main
 				deb $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
-				#deb-src $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
-				#deb http://deb.linuxmce.org/raspbian/ $TARGET_RELEASE main
-				deb http://deb.linuxmce.org/ precise main non-free contrib
-				EOF
-
-			mkdir -p "${TEMP_DIR}/etc/apt/sources.list.d"
-			cat <<-EOF > $TEMP_DIR/etc/apt/sources.list.d/raspi.list
-				echo "deb http://archive.raspberrypi.org/debian/ $TARGET_RELEASE main
-				deb-src http://archive.raspberrypi.org/debian/ $TARGET_RELEASE main
+				deb http://archive.raspberrypi.org/debian $TARGET_RELEASE main
 				EOF
 			;;
 	esac
@@ -367,9 +361,10 @@ MD_Seamless_Compatability () {
 }
 
 MD_Preseed () {
+	StatsMessage "PreSeeding package installation preferences"
 	## Setup debconf interface to 'noninteractive'
-	LC_ALL=C chroot $TEMP_DIR apt-get -y --force-yes install debconf-utils
-	VerifyExitCode "install of debconf-utils"
+	LC_ALL=C chroot $TEMP_DIR apt-get -y --force-yes install debconf-i18n
+	VerifyExitCode "install of debconf-i18n"
 
 	#create preseed file
 	cat <<-EOF >$TEMP_DIR/tmp/preseed.cfg
@@ -413,7 +408,6 @@ MD_Preseed () {
 		done
 	fi
 
-	StatsMessage "PreSeeding package installation preferences"
 	LC_ALL=C chroot $TEMP_DIR apt-get -y -qq update
 	VerifyExitCode "apt update"
 
@@ -421,9 +415,16 @@ MD_Preseed () {
 }
 
 MD_Install_Packages () {
+	## FIXME: Need to convert this to dpkg-divert for greater reliability
+
 	echo "Install/Upgrade service invocation packages sysv-rc and upstart"
 	# Install service invocation utilities
-	LC_ALL=C chroot $TEMP_DIR apt-get install sysv-rc upstart screen
+	LC_ALL=C chroot $TEMP_DIR apt-get -f -y install sysv-rc screen
+	case "$TARGET_DISTRO" in
+		"ubuntu")
+			LC_ALL=C chroot $TEMP_DIR apt-get -f -y install upstart
+		;;
+	esac
 
 	echo "Disable all service invocation"
 	# disable service invocation and tools
@@ -506,7 +507,7 @@ MD_Install_Packages () {
 			LC_ALL=C chroot "$TEMP_DIR" mkdir /sdcard
 
 	                LC_ALL=C chroot $TEMP_DIR apt-get -y install alsa-base alsa-utils pulseaudio
-	                VerifyExitCode "alsa-base, alsa-utils or pulseaudio packages install failed"
+			VerifyExitCode "alsa-base, alsa-utils or pulseaudio packages install failed"
 			;;
 	esac
 
@@ -531,7 +532,10 @@ MD_Install_Packages () {
 			DEVICE_LIST="28 62 1759 5 11 1825 26 1808 1901 2122"
 			;;
 		"raspbian")
-			DEVICE_LIST="2216 62 1759 2259 11 1825 26 1808 2122"
+			# Classic MD
+			DEVICE_LIST="2216 62 1759 2259 11 1825 26 1808 2122 2186"
+			# qMD
+			DEVICE_LIST="2216 2186 2259 11 26 1808 2122"
 			;;
 	esac
 
@@ -639,7 +643,7 @@ MD_Install_Packages () {
 			#VerifyExitCode "addgroup Debian-Exim failed"
 			LC_ALL=C chroot "$TEMP_DIR" sed -i '/Debian-exim/d' /var/lib/dpkg/statoverride
 
-			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install xinit
+			##LC_ALL=C chroot "$TEMP_DIR" apt-get -y install xinit
 			;;
 	esac
 
@@ -657,9 +661,8 @@ MD_Cleanup () {
 	umount $TEMP_DIR/lib/modules/${HOST_KVER}/volatile
 
 	#Copy the packages.gz file to ensure apt-get update does not fail
-	mkdir -p $TEMP_DIR/usr/pluto/deb-cache/
-	cp -p /usr/pluto/deb-cache/Packages.gz $TEMP_DIR/usr/pluto/deb-cache/
-
+	mkdir -p $TEMP_DIR/usr/pluto/deb-cache
+	cp -p /usr/pluto/deb-cache/$TARGET_ARCH/Packages.gz $TEMP_DIR/usr/pluto/deb-cache
 
 	mv -f $TEMP_DIR/sbin/invoke-rc.d{.orig,}
 	mv -f $TEMP_DIR/sbin/start{.orig,}
@@ -830,4 +833,3 @@ StatsMessage "Diskless media director images setup completed without a detected 
 
 #Exit successfully
 exit 0
-
