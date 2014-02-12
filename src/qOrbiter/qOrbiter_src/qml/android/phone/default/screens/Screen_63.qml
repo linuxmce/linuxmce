@@ -5,7 +5,7 @@ Rectangle {
 
     // property alias synText:
     id: satcableboxremote
-    height: appH
+    height: appH-hdr.height
     width: appW
     state: ""
     color: "transparent"
@@ -17,19 +17,12 @@ Rectangle {
         width: appW
     }
 
-    NowPlayingBox{id:np_box
+    NowPlayingBox{
+        id:np_box
         anchors.top: satcableboxremote.top
         anchors.horizontalCenter: parent.horizontalCenter
         visible: true
     }
-
-    HaControls{id:automation_controls; anchors.top: home.bottom; anchors.left:home.left}
-
-    AudioRemote {
-        id: audioremote1
-        anchors.bottom: satcableboxremote.bottom
-    }
-    HomeButton{id:home; anchors.leftMargin: 5; anchors.topMargin: 5;anchors.left: satcableboxremote.left; anchors.top:satcableboxremote.top}
 
     Rectangle {
         id: metadatavideo
@@ -109,289 +102,206 @@ Rectangle {
 
     Rectangle {
         id: remote1
-        width: b_orientation ? scaleX(45) : scaleX(65)
+        width: b_orientation ? scaleX(45) : scaleX(100)
         height: childrenRect.height
         anchors.top: satcableboxremote.top
-        anchors.left: home.right
+        anchors.left: satcableboxremote.left
+        anchors.leftMargin: scaleX(5)
         color: "transparent"
         visible:false
 
-	Column {
+        Column { // Info, Up, Menu, Ch+
             spacing: 1
             Row {
-	        spacing: 1
-            ButtonSq {
-	        id: btInfo
-		
-            	buttontextfontsize: scaleY(2)
-            	buttontext: "Info"
-		imgSource: ""
-            	MouseArea{
-		    smooth: true
-                    anchors.fill: parent
-                    onClicked: manager.moveArrowDirection(3)
-            	}
-            }
-            ButtonSq {
-                id: btUp
-
-                buttontextfontsize: scaleY(2)
-                buttontext: "Up"
-		imgSource: ""
-                MouseArea{
-                    smooth: true
-                    anchors.fill: parent
-                    onClicked: manager.moveArrowDirection(1) //up
+                spacing: 1
+                ButtonSq {
+                    id: btInfo
+                    buttontext: "Info"
+                    onActivated: manager.extraButton("info")
+                }
+                ButtonSq {
+                    id: btUp
+                    buttontext: "Up"
+                    onActivated: manager.moveArrowDirection(1) //up
+                }
+                ButtonSq {
+                    id: btMenu
+                    buttontext: "Menu"
+                    onActivated: manager.extraButton("menu")
+                }
+                ButtonSq {
+                    id: btChannelUp
+                    buttontext: "Ch+"
+                    onActivated: manager.changeTrack("+1")
                 }
             }
-            ButtonSq {
-                id: bt22
-
-                buttontextfontsize: scaleY(2)
-                buttontext: ""
-		imgSource: ""
-                MouseArea{
-                    smooth: true
-                    anchors.fill: parent
-                    onClicked: manager.moveArrowDirection(4)
+            Row {
+                spacing: 1
+                ButtonSq {
+                    id: btLeft
+                    buttontext: "Left"
+                    onActivated: manager.moveArrowDirection(3)
+                }
+                ButtonSq {
+                    id: btOk
+                    buttontext: "Ok"
+                    onActivated: manager.moveArrowDirection(5) //ok
+                }
+                ButtonSq {
+                    id: btRight
+                    buttontext: "Right"
+                    onActivated: manager.moveArrowDirection(4)
+                }
+                ButtonSq {
+                    id: btChannelDown
+                    buttontext: "Ch-"
+                    onActivated: manager.changeTrack("-1")
                 }
             }
-            ButtonSq {
-                id: btChannel
-
-                buttontextfontsize: scaleY(2)
-                buttontext: ""
-		imgSource: ""
-                MouseArea{
-                    smooth: true
-                    anchors.fill: parent
-                    onClicked: manager.changeTrack("+1")
+            Row { // Exit, Down, Guide, VolUp
+                spacing: 1
+                ButtonSq {
+                    id: btExit
+                    buttontext: "Exit"
+                    onActivated: manager.extraButton("exit")
+                }
+                ButtonSq {
+                    id: btDown
+                    buttontext: "Down"
+                    onActivated: manager.moveArrowDirection(2) //down
+                }
+                ButtonSq {
+                    id: btGuide
+                    buttontext: "Guide"
+                    onActivated: manager.extraButton("guide")
+                }
+                ButtonSq {
+                    id: btVolUp
+                    buttontext: "Vol+"
+                    onActivated: manager.adjustVolume(+1)
                 }
             }
-        }
-	Row {
-	        spacing: 1
-            ButtonSq {
-	        id: btLeft
-		
-            	buttontextfontsize: scaleY(2)
-            	buttontext: "Left"
-		imgSource: ""
-            	MouseArea{
-		    smooth: true
-                    anchors.fill: parent
-                    onClicked: manager.moveArrowDirection(3)
-            	}
-            }
-            ButtonSq {
-                id: btOk
-
-                buttontextfontsize: scaleY(2)
-                buttontext: "Ok"
-		imgSource: ""
-                MouseArea{
-                    smooth: true
-                    anchors.fill: parent
-                    onClicked: manager.moveArrowDirection(5) //ok
+            Row { // Stop, Pause, Play, VolDown
+                spacing: 1
+                ButtonSq {
+                    id: btStop
+                    buttontext: "Stop"
+                    onActivated: manager.extraButton("exit")
+                }
+                ButtonSq {
+                    id: btPause
+                    buttontext: "Pause"
+                    onActivated: manager.pause()
+                }
+                ButtonSq {
+                    id: btPlay
+                    buttontext: "Play"
+                    onActivated: manager.play()
+                }
+                ButtonSq {
+                    id: btVolDown
+                    buttontext: "Vol-"
+                    onActivated: manager.adjustVolume(-1)
                 }
             }
-            ButtonSq {
-                id: btRight
 
-                buttontextfontsize: scaleY(2)
-                buttontext: "Right"
-		imgSource: ""
-                MouseArea{
-                    smooth: true
-                    anchors.fill: parent
-                    onClicked: manager.moveArrowDirection(4)
+            Row { // SkipBack, Rewind, FastForward, SkipFwd
+                spacing: 1
+                ButtonSq {
+                    id: btSkipBack
+                    buttontext: "SkipBack"
+                    onActivated: manager.extraButton("exit")
+                }
+                ButtonSq {
+                    id: btRewind
+                    buttontext: "Rewind"
+                    onActivated: manager.pause()
+                }
+                ButtonSq {
+                    id: btFFwd
+                    buttontext: "FFwd"
+                    onActivated: manager.play()
+                }
+                ButtonSq {
+                    id: btSkipNext
+                    buttontext: "SkipNext"
+                    onActivated: manager.adjustVolume(-1)
                 }
             }
-            ButtonSq {
-                id: btChannelUp
-
-                buttontextfontsize: scaleY(2)
-                buttontext: "Ch+"
-		imgSource: ""
-                MouseArea{
-                    smooth: true
-                    anchors.fill: parent
-                    onClicked: manager.changeTrack("+1")
+    
+            Row { // Red, Green, Yellow, Blue
+                spacing: 1
+                ButtonSq {
+                    id: btRed
+                    buttontext: "Red"
+                    color: "red"
+                    radius : style.stdbuttonw / 3
+                    onActivated: manager.redButtonPress()
                 }
-            }
-        }
-	Row {
-	        spacing: 1
-            ButtonSq {
-	        id: btExit
-		
-            	buttontextfontsize: scaleY(2)
-            	buttontext: "Exit"
-		imgSource: ""
-            	MouseArea{
-		    smooth: true
-                    anchors.fill: parent
-//                    onClicked: manager.()
-            	}
-            }
-            ButtonSq {
-                id: btDown
-
-                buttontextfontsize: scaleY(2)
-                buttontext: "Down"
-		imgSource: ""
-                MouseArea{
-                    smooth: true
-                    anchors.fill: parent
-                    onClicked: manager.moveArrowDirection(2) //down
+                ButtonSq {
+                    id: btGreen
+                    buttontext: "Green"
+                    color: "green"
+                    radius : style.stdbuttonw / 3
+                    onActivated: manager.greenButton()
                 }
-            }
-            ButtonSq {
-                id: btGuide
-
-                buttontextfontsize: scaleY(2)
-                buttontext: "Guide"
-		imgSource: ""
-                MouseArea{
-                    smooth: true
-                    anchors.fill: parent
-                    onClicked: manager.TvGuide()
+                ButtonSq {
+                    id: btYellow
+                    buttontext: "Yellow"
+                    color: "yellow"
+                    radius : style.stdbuttonw / 3
+                    onActivated: manager.yellowButton()
                 }
-            }
-            ButtonSq {
-                id: btChannelDown
-
-                buttontextfontsize: scaleY(2)
-                buttontext: "Ch-"
-		imgSource: ""
-                MouseArea{
-                    smooth: true
-                    anchors.fill: parent
-                    onClicked: manager.changeTrack("-1")
-                }
-            }
-        }
-	Row {
-	        spacing: 1
-            ButtonSq {
-	        id: btRed
-		
-            	buttontextfontsize: scaleY(2)
-            	buttontext: "Red"
-	    	color: "red"
-		imgSource: ""
-		radius : style.stdbuttonw / 3
-            	MouseArea{
-		    smooth: true
-                    anchors.fill: parent
-                    onClicked: manager.redButtonPress()
-            	}
-            }
-            ButtonSq {
-                id: btGreen
-
-                buttontextfontsize: scaleY(2)
-                buttontext: "Green"
-	        color: "green"
-		imgSource: ""
-		radius : style.stdbuttonw / 3
-                MouseArea{
-                    smooth: true
-                    anchors.fill: parent
-                    onClicked: manager.greenButton()
-                }
-            }
-            ButtonSq {
-                id: btYellow
-
-                buttontextfontsize: scaleY(2)
-                buttontext: "Yellow"
-	        color: "yellow"
-		imgSource: ""
-		radius : style.stdbuttonw / 3
-                MouseArea{
-                    smooth: true
-                    anchors.fill: parent
-                    onClicked: manager.yellowButton()
-                }
-            }
-            ButtonSq {
-                id: btBlue
-
-                buttontextfontsize: scaleY(2)
-                buttontext: "Blue"
-	        color: "blue"
-		imgSource: ""
-		radius : style.stdbuttonw / 3
-                MouseArea{
-                    smooth: true
-                    anchors.fill: parent
-                    onClicked: manager.blueButton()
+                ButtonSq {
+                    id: btBlue
+                    buttontext: "Blue"
+                    color: "blue"
+                    radius : style.stdbuttonw / 3
+                    onActivated: manager.blueButton()
                 }
             }
         }
     }
-}
 
 
-    Row
+    Row // Info, #, EPG, Remote
     {
         id:extra_buttons
         height: childrenRect.height
         width: childrenRect.width
-        anchors.bottom: audioremote1.top
+        anchors.bottom: satcableboxremote.bottom
 
         ButtonSq {
             id: homebutton
             buttontext: "Info"
-	    color: style.button_system_color_hover
             buttontextbold: true
-	    imgSource: ""
-            MouseArea{
-                anchors.fill:parent
-                onClicked: satcableboxremote.state=""
-            }
+            color: style.button_system_color_hover
+            onActivated: satcableboxremote.state=""
         }
 
         ButtonSq {
             id: keypadSelector
             buttontext: "#"
-	    color: style.button_system_color
-	    imgSource: ""
-            buttontextfontsize: scaleY(2)
-            MouseArea{
-                anchors.fill: parent
-                onClicked: satcableboxremote.state="NUMBERS"
-            }
+            onActivated: satcableboxremote.state="NUMBERS"
         }
 
         ButtonSq {
             id: showepg
             buttontext: "EPG"
-	    color: style.button_system_color
-	    imgSource: ""
-            MouseArea{
-                anchors.fill:parent
-                onClicked: satcableboxremote.state="GRID"
-            }
+            onActivated: satcableboxremote.state="GRID"
         }
         ButtonSq {
             id: remoteSelector
             buttontext: "Remote"
-	    color: style.button_system_color
-	    imgSource: ""
-            MouseArea{
-                anchors.fill:parent
-                onClicked: satcableboxremote.state="REMOTE"
-            }
+            onActivated: satcableboxremote.state="REMOTE"
         }
     }
 
     RemoteNumberPad {
         id: remotenumberpad1
-        anchors.right: satcableboxremote.right
+        anchors.horizontalCenter: satcableboxremote.horizontalCenter
         anchors.top: satcableboxremote.top
-        anchors.topMargin: scaleY(22)
+        anchors.topMargin: scaleX(22)
         visible: false
 
         Transition {
@@ -406,11 +316,13 @@ Rectangle {
 
     EPGPlaylist{
         id:playlist;
-        anchors.bottom: satcableboxremote.top;
+        anchors.top: satcableboxremote.top
         anchors.left:satcableboxremote.left
-        anchors.leftMargin: scaleX(22)
+        anchors.leftMargin: 5
+	width: parent.width
+	height: satcableboxremote.height-extra_buttons.height
         visible: false
-       Transition {
+        Transition {
 
             to: "GRID"
             AnchorAnimation{
@@ -424,13 +336,6 @@ Rectangle {
     states: [
         State {
             name: ""
-
-            AnchorChanges{
-                target:remotenumberpad1
-                anchors.top: undefined
-                anchors.right: undefined
-                anchors.horizontalCenter: satcableboxremote.horizontalCenter
-            }
 
             PropertyChanges {
                 target: homebutton
@@ -477,13 +382,6 @@ Rectangle {
         State {
             name: "NUMBERS"
 
-            AnchorChanges{
-                target:remotenumberpad1
-                anchors.top: undefined
-                anchors.right: undefined
-                anchors.horizontalCenter: satcableboxremote.horizontalCenter
-            }
-
             PropertyChanges {
                 target: textcol
                 visible: false
@@ -491,7 +389,6 @@ Rectangle {
             PropertyChanges {
                 target: np_box
                 visible: false
-
             }
 
             PropertyChanges {
@@ -532,24 +429,10 @@ Rectangle {
         State{
             name:"GRID"
 
-            AnchorChanges{
-                target: playlist
-                anchors.bottom: undefined
-                anchors.top: satcableboxremote.top
-            }
-
-            AnchorChanges{
-                target:remotenumberpad1
-                anchors.right: satcableboxremote.right
-                anchors.top: satcableboxremote.top
-                anchors.horizontalCenter: undefined
-            }
-
             PropertyChanges
             {
                 target: playlist
                 visible:true
-                anchors.topMargin: scaleY(15)
             }
 
             PropertyChanges {
@@ -596,19 +479,6 @@ Rectangle {
         },
         State{
             name:"REMOTE"
-
-            AnchorChanges{
-                target: playlist
-                anchors.bottom: undefined
-                anchors.top: satcableboxremote.top
-            }
-
-            AnchorChanges{
-                target:remotenumberpad1
-                anchors.right: satcableboxremote.right
-                anchors.top: satcableboxremote.top
-                anchors.horizontalCenter: undefined
-            }
 
             PropertyChanges{
                 target: showepg
