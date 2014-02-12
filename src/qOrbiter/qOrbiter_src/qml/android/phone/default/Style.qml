@@ -65,8 +65,8 @@ QtObject{
     //icon sizes
     property int iconHeight: manager.b_orientation ? scaleY(17) :scaleY(16)
     property int iconWidth: manager.b_orientation ? scaleX(25) :scaleY(16)
-    property int  stdbuttonh: manager.b_orientation ? scaleY(12) :scaleY(13)
-    property int  stdbuttonw: manager.b_orientation ? scaleY(12) :scaleY(13)
+    property int  stdbuttonh: manager.b_orientation ? scaleY(13) :scaleY(13)
+    property int  stdbuttonw: manager.b_orientation ? scaleY(14) :scaleY(14)
     property int buttonLabelText : manager.b_orientation ? scaleY(3) : scaleY(2.5)
 
     //textStyles
@@ -89,8 +89,9 @@ QtObject{
     property int mediabuttonw :scaleY(12)
     property int mediabuttonh :scaleY(12)
 
-    property color button_system_color: "silver"
-    property color button_system_color_hover: "darkgrey"
+    property color button_system_color: "black"
+    property color button_system_color_hover: "green"
+    property color button_system_text_color: "antiquewhite"
 
     property color button_action_color: "lightgrey"
     property color button_action_color_hover: "darkgrey"

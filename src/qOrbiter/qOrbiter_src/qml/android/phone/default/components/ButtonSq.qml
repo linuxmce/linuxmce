@@ -14,6 +14,7 @@ id:btnBase
     property alias buttonsqradius:  buttonBase.radius
     property int textSize: style.buttonLabelText
     property color color: style.button_system_color
+    property color textColor: style.button_system_text_color
     property string imgSource:""
     property color activatedColor:style.button_system_color_hover
     signal activated()
@@ -22,6 +23,8 @@ id:btnBase
         id:buttonBase
         anchors.fill: btnBase
         color: ms.pressed ? activatedColor : btnBase.color
+	border.width:1
+	border.color: "white"
         radius: btnBase.radius
         opacity:.65
         smooth:true
@@ -44,12 +47,13 @@ id:btnBase
         anchors.margins: 5
         font.weight: Font.Light
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
-        color:"black"
+        color: textColor
     }
 
     MouseArea{
         id:ms
         anchors.fill: parent
+        hoverEnabled: true
         onReleased:activated()
     }
 }
