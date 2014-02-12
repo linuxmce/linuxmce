@@ -36,8 +36,8 @@ Rectangle {
 
         ListView{
             id:epgplaylistview
-            height:scaleY(61)
-            width: scaleX(65)
+            height: droidepg_small.height-hdr.height
+	    width: droidepg_small.width
             clip:true
             interactive: true
             flickableDirection: "VerticalFlick"
@@ -48,7 +48,7 @@ Rectangle {
                 id:delrect
                 border.color: "orange"
                 border.width: 1
-                width: scaleX(65)
+		width: droidepg_small.width
                 height: scaleY(15)
                 color: "transparent"
 
@@ -98,7 +98,7 @@ Rectangle {
                 MouseArea{
                     anchors.fill: parent
                     onClicked:{
-                        manager.TuneToChannel(channelnumber, channelid)
+                        manager.newGridChannel(channelnumber, channelid)
                         epgplaylistview.positionViewAtIndex(index, ListView.Beginning)
                     }
 
