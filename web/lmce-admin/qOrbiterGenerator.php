@@ -791,6 +791,24 @@ function getFloorPlanDevices($conn, $doc, $orbiterData)
 	 		
 		$i++;
 		}
+
+		// Get entertainment areas
+		$sql = "select PK_EntertainArea, Description, FloorplanInfo, FK_FloorplanObjectType 
+		       From EntertainArea where FloorplanInfo IS NOT NULL AND FK_FloorplanObjectType IS NOT NULL";
+		$result = mysql_query($sql);
+                $i=0;
+                while ($row = mysql_fetch_array($result))
+                {
+		        $fp = $doc->createElement("FPDevice");
+                	$att1= $fp->setAttribute("Name", $row['Description']);
+                	$att2= $fp->setAttribute("Device", $row['PK_EntertainArea']);
+                	$att3= $fp->setAttribute("Position", $row['FloorplanInfo']);
+                	$att4= $fp->setAttribute("Type", $row['FK_FloorplanObjectType']);
+                	$att5=$fp->setAttribute("fpType", 5);
+                	$floorplanDeviceElement->appendChild($fp);
+                	$i++;
+                }
+
 		
 //		echo $i." Devices with floorplan data";
 		return true;
