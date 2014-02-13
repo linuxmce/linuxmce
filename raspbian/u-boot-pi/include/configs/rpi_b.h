@@ -127,7 +127,29 @@
 		"if run loadbootscript; then " \
 			"run bootscript; " \
 		"fi; " \
-	"fi"
+	"fi; " \
+	"echo *** USB START ***; " \
+	"if usb start; then " \
+		"echo *** DHCP START ****; " \
+		"if dhcp; then " \
+			"echo *** PXE BOOT START ***; " \
+			"echo *** setting ip ***; " \
+			"set ip ip=${ipaddr}:${serverip}:${gatewayip}:${netmask}:${hostname}::off; " \
+			"echo *** setting bootargs ***; " \
+			"set bootargs bootargs=${bootargs} ${ip}; " \
+			"if pxe get; then " \
+				"echo *** BOOTING KERNEL ***; " \
+				"pxe boot; " \
+			"else; " \
+				"echo pxe get config failed! Stopping.; " \
+			"fi; " \
+		"else; " \
+			"echo dhcp failed! Stopping.; " \
+		"fi; " \
+	"else; " \
+		"echo usb failed! Stopping.; " \
+	"fi;"
+
 
 /* Shell */
 #define CONFIG_SYS_HUSH_PARSER
