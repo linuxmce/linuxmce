@@ -500,11 +500,15 @@ MD_Install_Packages () {
 		"raspbian")
 			# raspbian doesn't come with lsb-release by default???
 			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install lsb-release
+			cat <<-EOF > $TEMP_DIR/etc/lsb-release
+				DISTRIB_ID=Raspbian
+				DISTRIB_CODENAME=wheezy
+				EOF
 
 			# HACK: copy the foundation kernel.img to a normal linux kernal name with version
 			# FIXME: is there a better way to do this?  the raspbian kernels are missing the fdt.
 			#LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-image-3.6-trunk-rpi
-			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi0 raspberrypi-bootloader rpi-update
+			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi0 raspberrypi-bootloader
 			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install rpi-update
 			LC_ALL=C chroot "$TEMP_DIR" rpi-update
 			LC_ALL=C chroot "$TEMP_DIR" cp /boot/kernel.img /boot/vmlinuz-3.6-trunk-rpi
