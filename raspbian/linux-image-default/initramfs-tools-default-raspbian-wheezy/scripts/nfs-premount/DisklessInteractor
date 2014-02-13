@@ -17,6 +17,9 @@ esac
 
 exec 1>&2
 
+sleep 5
+wait_for_udev 10
+
 DT=$(/scripts/DeviceTemplate)
 
 MyIP=`ifconfig eth0 | grep "inet addr" | sed -r 's/^.* inet addr:([0-9.]*).*/\1/g'`
