@@ -209,23 +209,21 @@ Rectangle {
                 spacing: 1
                 ButtonSq {
                     id: btSkipBack
-                    buttontext: "SkipBack"
-                    onActivated: manager.extraButton("exit")
+                    buttontext: ""
                 }
                 ButtonSq {
                     id: btRewind
                     buttontext: "Rewind"
-                    onActivated: manager.pause()
+		    onActivated: manager.setPlaybackSpeed(-1)
                 }
                 ButtonSq {
                     id: btFFwd
                     buttontext: "FFwd"
-                    onActivated: manager.play()
+		    onActivated: manager.setPlaybackSpeed(1)
                 }
                 ButtonSq {
                     id: btSkipNext
-                    buttontext: "SkipNext"
-                    onActivated: manager.adjustVolume(-1)
+                    buttontext: ""
                 }
             }
     
