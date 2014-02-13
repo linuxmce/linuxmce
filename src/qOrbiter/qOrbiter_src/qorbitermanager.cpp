@@ -638,12 +638,10 @@ void qorbiterManager::processConfig(QNetworkReply *config)
 
         int fp_deviceType = floorplan_device_list.at(index).attributes().namedItem("Type").nodeValue().toInt();
         int fpType = floorplan_device_list.at(index).attributes().namedItem("fpType").nodeValue().toInt();
-        if (fpType == 7)
-        {fpType = 6;}
-        else if (fpType == 1)
-        {
-            fpType = 5;
-        }
+/*        if (fpType == 7)
+	        fpType = 6;
+        else */if (fpType == 4) // Move cameras to the security floorplan
+		fpType = 1;
         QImage icon;
         floorplans->appendRow(new FloorplanDevice( name, fp_deviceno, fp_deviceType, fpType, position, floorplans));
     }
@@ -1949,7 +1947,11 @@ void qorbiterManager::showfloorplan(int fptype)
 {
     QString Screen ;
     switch(fptype){
-    case 5: // - entertainment floorplan. screen 4
+    case 1: // - security floorplan. screen 5
+        setFloorplanType(fptype);
+        Screen = QString("Screen_5.qml");
+        break;
+    case 5: // - entertainment floorplan. screen 3
         setFloorplanType(fptype);
         Screen = QString("Screen_3.qml");
         break;
@@ -1960,10 +1962,6 @@ void qorbiterManager::showfloorplan(int fptype)
     case 3: //climate screen 4
         setFloorplanType(fptype);
         Screen = QString("Screen_4.qml");
-        break;
-    case 4: //climate screen5
-        setFloorplanType(fptype);
-        Screen = QString("Screen_5.qml");
         break;
     case 7: //telecom
         setFloorplanType(fptype);
