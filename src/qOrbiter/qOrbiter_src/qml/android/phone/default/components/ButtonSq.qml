@@ -1,7 +1,7 @@
 import QtQuick 1.0
 
 Item{
-id:btnBase
+    id:btnBase
     height: style.stdbuttonh
     width: style.stdbuttonw
     property double radius:5

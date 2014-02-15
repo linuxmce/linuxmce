@@ -82,7 +82,7 @@ Item {
                     else if(modelName==="currentRoomTelecom")
                     { scenarioPopup.floorplanType = 7}
                     else if(modelName==="currentRoomSecurity")
-                    {scenarioPopup.floorplanType = 4} //can also be 1?
+                    {scenarioPopup.floorplanType = 1} //can also be 1?
                     else if (modelName==="advanced"){ manager.gotoQScreen("Screen_44.qml") }
                     manager.showfloorplan(floorplantype)
                     manager.setFloorplanType(floorplantype)
@@ -100,7 +100,7 @@ Item {
                         else if(modelName==="currentRoomTelecom")
                         {scenarioPopup.currentModel = currentRoomTelecom; scenarioPopup.floorplanType = 7}
                         else if(modelName==="currentRoomSecurity")
-                        {scenarioPopup.currentModel = currentRoomSecurity; scenarioPopup.floorplanType = 4} //can also be 1?
+                        {scenarioPopup.currentModel = currentRoomSecurity; scenarioPopup.floorplanType = 1} //can also be 1?
                         else if (modelName==="advanced"){ manager.gotoQScreen("Screen_44.qml") }
 
                     }
@@ -114,7 +114,7 @@ Item {
     GridView{
         id:secondaryModel
         visible:showSecondary
-        property int floorplanType: scenarioPopup.floorplanType = 4
+        property int floorplanType: scenarioPopup.floorplanType = 5
         clip:true
         anchors{
             top: fs_npButton.bottom

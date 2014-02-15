@@ -16,6 +16,8 @@ Item{
     Component.onCompleted: {
         forceActiveFocus();
         processSelectedDevices()
+        floorplan_devices.clearAllSelections()
+        setNavigation("FloorplanNav.qml")
     }
 
     Keys.onReleased: {

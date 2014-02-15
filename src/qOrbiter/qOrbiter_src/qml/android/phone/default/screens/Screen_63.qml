@@ -209,7 +209,8 @@ Rectangle {
                 spacing: 1
                 ButtonSq {
                     id: btSkipBack
-                    buttontext: ""
+                    buttontext: "Off"
+		    onActivated: manager.stopMedia()
                 }
                 ButtonSq {
                     id: btRewind
@@ -223,7 +224,8 @@ Rectangle {
                 }
                 ButtonSq {
                     id: btSkipNext
-                    buttontext: ""
+                    buttontext: "Mute"
+		    onActivated: manager.muteSound()
                 }
             }
     
