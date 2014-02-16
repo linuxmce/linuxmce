@@ -241,17 +241,14 @@ MD_System_Level_Prep () {
 		mount --bind /var/cache/apt $TEMP_DIR/var/cache/apt
 	fi
 
-	DEB_CACHE_ARCH=""
-	if [[ "$HOST_ARCH" != "$TARGET_ARCH" ]]; then
-		DEB_CACHE_ARCH=$TARGET_ARCH
-	fi;
-
-	mkdir -p $TEMP_DIR/usr/pluto/deb-cache
-	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE_ARCH
-	mount --bind /usr/pluto/deb-cache/$DEB_CACHE_ARCH $TEMP_DIR/usr/pluto/deb-cache
+	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
+	mkdir -p $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
+	mount --bind /usr/pluto/deb-cache $TEMP_DIR/usr/pluto/deb-cache
 	mount none -t devpts $TEMP_DIR/dev/pts
 	mount none -t sysfs $TEMP_DIR/sys
 	mount none -t proc $TEMP_DIR/proc
+
+	/usr/pluto/bin/update-debcache.sh $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
 
 	## Setup apt in pluto style
 	case "$TARGET_DISTRO" in
@@ -263,13 +260,8 @@ MD_System_Level_Prep () {
 		"ubuntu")
 			StatsMessage "Setting up /etc/apt/sources.list for ubuntu"
 			TARGET_REPO_NAME="main"
-			case "$TARGET_RELEASE" in
-				lucid)
-					TARGET_REPO_NAME="beta2"
-					;;
-			esac
 			cat <<-EOF > $TEMP_DIR/etc/apt/sources.list
-				deb file:/usr/pluto/deb-cache/ ./
+				deb file:/usr/pluto/deb-cache/$DEB_CACHE ./
 				deb http://deb.linuxmce.org/ubuntu/ $TARGET_RELEASE $TARGET_REPO_NAME
 				deb $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
 				deb $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
@@ -283,7 +275,7 @@ MD_System_Level_Prep () {
 			StatsMessage "Setting up /etc/apt/sources.list for raspbian"
 			cat <<-EOF > $TEMP_DIR/etc/apt/sources.list
 				#deb http://10.10.42.99/raspbian/ ./
-				deb file:/usr/pluto/deb-cache/ ./
+				deb file:/usr/pluto/deb-cache/$DEB_CACHE ./
 				deb http://deb.linuxmce.org/ precise main
 				deb $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
 				deb http://archive.raspberrypi.org/debian $TARGET_RELEASE main
@@ -482,9 +474,9 @@ MD_Install_Packages () {
 			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-headers-generic"$TARGET_KVER_LTS_HES"
 			VerifyExitCode "Install linux headers package failed"
 
-			TARGET_KVER=$(ls -vd "$TEMP_DIR"/lib/modules/[0-9]* | sed 's/.*\///g' | tail -1) 
-			LC_ALL=C chroot "$TEMP_DIR" depmod -v "$TARGET_KVER" 
-			VerifyExitCode "depmod failed for $TARGET_KVER" 
+			TARGET_KVER=$(ls -vd "$TEMP_DIR"/lib/modules/[0-9]* | sed 's/.*\///g' | tail -1)
+			LC_ALL=C chroot "$TEMP_DIR" depmod -v "$TARGET_KVER"
+			VerifyExitCode "depmod failed for $TARGET_KVER"
 
 			StatsMessage "Installing kernel"
 			LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y --no-install-recommends install linux-image-generic"$TARGET_KVER_LTS_HES"
@@ -493,7 +485,7 @@ MD_Install_Packages () {
 			## Prevent lpadmin from running as it blocks the system
 			LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install cups-client
 			cp "$TEMP_DIR"/usr/sbin/lpadmin{,.disabled}
-			echo > "$TEMP_DIR"/usr/sbin/lpadmin 
+			echo > "$TEMP_DIR"/usr/sbin/lpadmin
 			LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y install cups-pdf
 			mv "$TEMP_DIR"/usr/sbin/lpadmin{.disabled,}
 			;;
@@ -502,13 +494,13 @@ MD_Install_Packages () {
 			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install lsb-release
 			cat <<-EOF > $TEMP_DIR/etc/lsb-release
 				DISTRIB_ID=Raspbian
-				DISTRIB_CODENAME=wheezy
+				DISTRIB_CODENAME=$TARGET_RELEASE
 				EOF
 
 			# HACK: copy the foundation kernel.img to a normal linux kernal name with version
 			# FIXME: is there a better way to do this?  the raspbian kernels are missing the fdt.
 			#LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-image-3.6-trunk-rpi
-			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi0 raspberrypi-bootloader
+			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi0 raspberrypi-bootloader rpi-update
 			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install rpi-update
 			LC_ALL=C chroot "$TEMP_DIR" rpi-update
 			LC_ALL=C chroot "$TEMP_DIR" cp /boot/kernel.img /boot/vmlinuz-3.6-trunk-rpi
@@ -543,9 +535,9 @@ MD_Install_Packages () {
 			;;
 		"raspbian")
 			# Classic MD
-			DEVICE_LIST="2216 62 1759 2259 11 1825 26 1808 2122 2186"
+			DEVICE_LIST="2216 62 1759 2259 11 1825 26 1808 2122"
 			# qMD
-			DEVICE_LIST="2216 2186 2259 11 26 1808 2122"
+			#DEVICE_LIST="2216 2278 2259 11 26 1808 2122"
 			;;
 	esac
 
@@ -606,6 +598,7 @@ MD_Install_Packages () {
 			;;
 	esac
 
+	disable discover as it is not being used
 	## Put back discover
 	mv "$TEMP_DIR"/sbin/discover.disabled "$TEMP_DIR"/sbin/discover
 
@@ -661,6 +654,11 @@ MD_Install_Packages () {
 	LC_ALL=C chroot $TEMP_DIR ln -s /usr/lib/libdvdread.so.4 /usr/lib/libdvdread.so.3
 }
 
+MD_Populate_Debcache () {
+	cp -aR $TEMP_DIR/var/cache/apt/archives/*.deb $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
+	/usr/pluto/bin/update-debcache.sh $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
+}
+
 MD_Cleanup () {
 	StatsMessage "Cleaning up from package installations..."
 	umount $TEMP_DIR/var/cache/apt
@@ -670,9 +668,9 @@ MD_Cleanup () {
 	umount $TEMP_DIR/proc
 	umount $TEMP_DIR/lib/modules/${HOST_KVER}/volatile
 
-	#Copy the packages.gz file to ensure apt-get update does not fail
-	mkdir -p $TEMP_DIR/usr/pluto/deb-cache
-	cp -p /usr/pluto/deb-cache/$DEB_CACHE_ARCH/Packages.gz $TEMP_DIR/usr/pluto/deb-cache
+	#Make sure there is are Packages files on the MD so apt-get update does not fail
+	mkdir -p $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
+	/usr/pluto/bin/update-debcache.sh $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
 
 	mv -f $TEMP_DIR/sbin/invoke-rc.d{.orig,}
 	mv -f $TEMP_DIR/sbin/start{.orig,}
@@ -701,7 +699,8 @@ Create_Diskless_Tar () {
 	StatsMessage "Creating the compressed tar image file, this could take up to 1 hour depending on your system..."
 	mkdir -p "$ARCHIVE_DIR"
 	pushd "$TEMP_DIR" >/dev/null
-	tar -cJf "$ARCHIVE_DIR/$DisklessFS" *
+#	tar -cJf "$ARCHIVE_DIR/$DisklessFS" *
+	tar -czf "$ARCHIVE_DIR/$DisklessFS" *
 	VerifyExitCode "create tar file failed"
 	echo "$PlutoVersion" > "$ARCHIVE_DIR/$DisklessFS.version"
 	popd >/dev/null
@@ -789,33 +788,10 @@ for TARGET in "$TARGET_TYPES"; do
 	# install cross arch utilities if target_arch is different from host_arch
 	if [ x"$TARGET_ARCH" != x"$HOST_ARCH" ]; then
 		StatsMessage "Installing cross-arch utilities for $TARGET_RELEASE"
-		apt-get -y install binfmt-support qemu debootstrap
-
-		case "$HOST_RELEASE" in 
-			"lucid")
-				apt-get -f -y install patch
-				# lucid's qemu-arm-static is buggy and missing wheezy definition, need version from precise
-				if [[ ! -d /usr/share/doc/qemu-user-static ]]; then 
-					wget http://archive.ubuntu.com/ubuntu/pool/universe/q/qemu-linaro/qemu-user-static_1.0.50-2012.03-0ubuntu2_i386.deb
-					dpkg -i qemu-user-static_1.0.50-2012.03-0ubuntu2_i386.deb
-					rm  -f qemu-user-static_1.0.50-2012.03-0ubuntu2_i386.deb
-				fi
-				# in order to handle data.tar.xz we must upgrade dpkg on lucid -- this is getting old!
-				wget http://archive.ubuntu.com/ubuntu/pool/main/d/debootstrap/debootstrap_1.0.46_all.deb
-				wget http://archive.ubuntu.com/ubuntu/pool/main/d/dpkg/dpkg_1.16.0.3ubuntu5_i386.deb
-				wget http://archive.ubuntu.com/ubuntu/pool/main/d/dpkg/dpkg-dev_1.16.0.3ubuntu5_all.deb
-				wget http://archive.ubuntu.com/ubuntu/pool/main/d/dpkg/libdpkg-perl_1.16.0.3ubuntu5_all.deb
-				dpkg -i debootstrap_1.0.46_all.deb dpkg_1.16.0.3ubuntu5_i386.deb dpkg-dev_1.16.0.3ubuntu5_all.deb libdpkg-perl_1.16.0.3ubuntu5_all.deb
-				apt-get -f -y --force-yes install
-				rm -f debootstrap_1.0.46_all.deb dpkg_1.16.0.3ubuntu5_i386.deb dpkg-dev_1.16.0.3ubuntu5_all.deb libdpkg-perl_1.16.0.3ubuntu5_all.deb
-				[[ ! -f /usr/share/debootstrap/scripts/wheezy ]] && cp /usr/share/debootstrap/scripts/squeeze /usr/share/debootstrap/scripts/wheezy
-				;;
-			"precise")
-				apt-get -y install qemu-user-static
-				;;
-		esac
-
+		apt-get -y install binfmt-support qemu debootstrap qemu-user-static
 	fi
+
+	DEB_CACHE="$TARGET_DISTRO-$TARGET_RELEASE-$TARGET_ARCH"
 
 	StatsMessage "BEGIN: Host: $HOST_DISTRO - $HOST_RELEASE - $HOST_ARCH"
 	StatsMessage "BEGIN: Target: $TARGET_DISTRO - $TARGET_RELEASE - $TARGET_ARCH"
@@ -828,6 +804,7 @@ for TARGET in "$TARGET_TYPES"; do
 	MD_Seamless_Compatability
 	MD_Preseed
 	MD_Install_Packages
+	MD_Populate_Debcache
 	MD_Cleanup
 	Create_Diskless_Tar
 	Create_PXE_Initramfs_Vmlinuz

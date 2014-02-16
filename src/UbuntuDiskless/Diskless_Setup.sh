@@ -16,6 +16,10 @@ DEVICEDATA_DisklessImages=258
 DEVICEDATA_Model=233
 DEVICEDATA_PK_Distro=7
 
+HOST_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
+HOST_RELEASE=$(lsb_release -c -s)
+HOST_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
+
 function setup_tftp_boot 
 {
 	echo "* Configuring TFTP Boot for MD #${Moon_DeviceID}"
@@ -393,16 +397,18 @@ for Row in $R; do
 
 	## Dome configuring this MD
 	RunSQL "UPDATE Device SET NeedConfigure = 0 WHERE PK_Device=$Moon_DeviceID"
-done
 
-# Handle deb-cache population
-echo "Moving the apt cache to /usr/pluto/deb-cache/"
-if [[ -n "$(find /var/cache/apt/archives/ -iname '*.deb')" ]]; then
-	find /var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache \;
-	pushd /usr/pluto/deb-cache
-	dpkg-scanpackages -m . /dev/null | tee Packages | gzip -c > Packages.gz
-	popd
-fi
+	if [[ -n "$(find ${Moon_RootLocation}/var/cache/apt/archives/ -iname '*.deb')" ]]; then
+		TARGET_DISTRO=$(LC_ALL="C" chroot ${Moon_RootLocation} lsb_release -i -s | tr '[:upper:]' '[:lower:]')
+		TARGET_RELEASE=$(LC_ALL="C" chroot ${Moon_RootLocation} lsb_release -c -s)
+		TARGET_ARCH=$(LC_ALL="C" chroot ${Moon_RootLocation} apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
+		DEB_CACHE=$TARGET_DISTRO-$TARGET_RELEASE-$TARGET_ARCH
+
+		echo "Moving this MDs apt cache to /usr/pluto/deb-cache/$DEB_CACHE"
+		find ${Moon_RootLocation}/var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/$DEB_CACHE \;
+		/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
+	fi
+done
 
 echo "Setting up hosts file"
 setup_hosts_file

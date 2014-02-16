@@ -61,7 +61,7 @@ chmod +x "${Parm_RootLocation}/${File}"
 
 DISTRO=$(LC_ALL=C chroot ${Parm_RootLocation} lsb_release -is)
 case "$DISTRO" in
-	Debian)
+	Debian|Raspbian)
 		# debian/raspbian (LSB)
                 INSSERV=$(LC_ALL=C chroot ${Parm_RootLocation} which insserv)
 		LC_ALL=C chroot "${Parm_RootLocation}" "${INSSERV}" -fv mountnfs.sh >/dev/null
