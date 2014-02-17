@@ -100,6 +100,7 @@
 #define VARIABLE_Weather_Data_16_CONST 97
 #define VARIABLE_Weather_Data_17_CONST 98
 #define VARIABLE_Weather_Data_18_CONST 99
+#define VARIABLE__CONST 100
 
 #define VARIABLE_TABLE "Variable"
 #define VARIABLE_PK_VARIABLE_FIELD "PK_Variable"

@@ -1294,6 +1294,13 @@
 #define TEXT_Clock_DOW_CONST 2237
 #define TEXT_Clock_DOM_CONST 2238
 #define TEXT_Clock_Month_CONST 2239
+#define TEXT_dvdDisplay_CONST 2240
+#define TEXT_XBOX_Menu_CONST 2241
+#define TEXT_A_Green_CONST 2242
+#define TEXT_B_Red_CONST 2243
+#define TEXT_X_Blue_CONST 2244
+#define TEXT_Y_Yellow_CONST 2245
+#define TEXT_Baby_Monitor_Status_CONST 2246
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"
