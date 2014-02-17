@@ -646,7 +646,7 @@ MD_Install_Packages () {
 			#VerifyExitCode "addgroup Debian-Exim failed"
 			LC_ALL=C chroot "$TEMP_DIR" sed -i '/Debian-exim/d' /var/lib/dpkg/statoverride
 
-			##LC_ALL=C chroot "$TEMP_DIR" apt-get -y install xinit
+			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install xinit
 			;;
 	esac
 
