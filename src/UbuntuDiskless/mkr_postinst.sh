@@ -32,7 +32,7 @@ HOST_RELEASE=$(lsb_release -c -s)
 HOST_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
 DEB_CACHE=$HOST_DISTRO-$HOST_RELEASE-$HOST_ARCH
 
-mkdir -p ${Moon_RootLocation}/usr/pluto/deb-cache/$DEB_CACHE
+mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
 
 if [[ -n "$(find /var/cache/apt/archives/ -maxdepth 1 -iname '*.deb')" ]]; then
 	echo "Moving the Core's apt cache to /usr/pluto/deb-cache/$DEB_CACHE"
