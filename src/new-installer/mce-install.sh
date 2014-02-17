@@ -5,10 +5,16 @@
 ### Setup global variables
 ###########################################################
 log_file=/var/log/LinuxMCE_Setup.log
+
+HOST_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
+HOST_RELEASE=$(lsb_release -c -s)
+HOST_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
+DEB_CACHE=$HOST_DISTRO-$HOST_RELEASE-$HOST_ARCH
+
 DISTRO="$(lsb_release -c -s)"
 COMPOS="unstable"
 DT_MEDIA_DIRECTOR=3
-LOCAL_REPO_BASE=/usr/pluto/deb-cache
+LOCAL_REPO_BASE=/usr/pluto/deb-cache/$DEB_CACHE
 LOCAL_REPO_DIR=./
 DT_CORE=1
 DT_HYBRID=2
@@ -333,7 +339,7 @@ ConfigSources () {
 	#ensure the local repo is the first in sources.list
 	#Because Ubiquity doesn't seem to allow us to control the order in sources.list
 	sed -e "/deb-cache/d" -i /etc/apt/sources.list
-	sed -e "1ideb file:/usr/pluto/deb-cache ./" -i /etc/apt/sources.list
+	sed -e "1ideb file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}" -i /etc/apt/sources.list
 
 	apt-get -qq update
 	VerifyExitCode "apt-get update"
@@ -806,7 +812,7 @@ CreateFirstBoot () {
 
 	CreatePackagesFiles () {
 		StatsMessage "Creating necessary package files"
-		pushd /usr/pluto/deb-cache
+		pushd ${LOCAL_REPO_BASE}
 		dpkg-scanpackages -m . /dev/null | tee Packages | gzip -c > Packages.gz
 		popd
 	}
