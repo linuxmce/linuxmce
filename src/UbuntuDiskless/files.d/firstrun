@@ -8,6 +8,10 @@ set -e
 ## firstrun for diskless mds
 File="/etc/init.d/firstrun"
 
+if ! [[ -d "${Parm_RootLocation}/$(dirname $File)" ]]; then
+	mkdir -p "${Parm_RootLocation}/$(dirname $File)"
+fi
+
 #echo "${Content}" > "${Parm_RootLocation}/${File}"
 cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 	#!/bin/bash
@@ -22,9 +26,7 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 	# Description:       This script is run the first time linuxmce boots
 	### END INIT INFO #
 
-	if ! [[ -d "${Parm_RootLocation}/$(dirname $File)" ]]; then
-		mkdir -p "${Parm_RootLocation}/$(dirname $File)"
-	fi
+	DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
 
 	raspbian() {
 		trap '${INSSERV} -rfv firstrun' EXIT
@@ -72,8 +74,6 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 	}
 
 	start() {
-		DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
-
 		. /usr/pluto/bin/Config_Ops.sh
 
 		case "$PK_Distro" in
