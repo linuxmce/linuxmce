@@ -23,6 +23,8 @@ DEVICEDATA_Sampling_Rate="310"
 DEVICEDATA_Distro_Raspbian="19"
 
 SettingsFile="/etc/pluto/lastaudiovideo.conf"
+mkdir -p $(dirname $SettingsFile)
+
 # don't let KDE override xorg.conf
 rm -f {/home/*,/root}/.kde/share/config/displayconfigrc
 
