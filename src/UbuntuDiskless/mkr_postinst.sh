@@ -21,6 +21,10 @@ rm -f /etc/init/md_halt.conf
 #################################################################
 ## move deb-cache to newer multi-arch friendly location
 ## update sourcs.list on core and all MDs to reflect new locations
+if [ ! -d /usr/pluto/deb-cache ]; then
+	exit 0
+fi
+
 UPDATE_CACHE=""
 # Core
 HOST_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
