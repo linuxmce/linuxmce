@@ -19,9 +19,9 @@ Gen_Dev_Files = $(GENDEV)/CEC_AdaptorBase.cpp
 sources = Main.cpp CEC_Adaptor.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
-CXXFLAGS +=
+CXXFLAGS += `pkg-config libcec --cflags`
 CPPFLAGS +=
-LDFLAGS +=
+LDFLAGS += `pkg-config libcec --libs`
 XTRALDLIBS = -lmysqlclient_r
 
 Gen_Dev_Files +=
@@ -45,7 +45,7 @@ CEC_Adaptor.so: $(sources:.cpp=.o)
 	cp $@ ../bin
 #	chmod +x post_make.sh
 #	./post_make.sh $@
-		
+
 CEC_Adaptor: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	mkdir -p ../bin

@@ -1,5 +1,5 @@
 /*
-     Copyright (C) 2013 LinuxMCE 
+     Copyright (C) 2014 LinuxMCE 
 
      www.linuxmce.org
 
@@ -20,6 +20,8 @@
 #include "Gen_Devices/CEC_AdaptorBase.h"
 //<-dceag-d-e->
 
+#include <libcec/cec.h>
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -31,6 +33,9 @@ namespace DCE
 		// Private methods
 public:
 		// Public member variables
+	  string m_sPort;   // COM Port on PC
+	  CEC::ICECAdapter *m_pParser;
+	  virtual void PrepareToDelete();
 
 //<-dceag-const-b->
 public:
