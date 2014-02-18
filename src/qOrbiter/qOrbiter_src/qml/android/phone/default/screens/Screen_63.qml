@@ -186,7 +186,8 @@ Rectangle {
                 ButtonSq {
                     id: btStop
                     buttontext: "Stop"
-                    onActivated: manager.extraButton("exit")
+		    // This is the Live TV remote, so we use the "Stop" CMD (AV control), and not the "Stop Media" CMD (DCE players)
+                    onActivated: manager.stop_AV()
                 }
                 ButtonSq {
                     id: btPause

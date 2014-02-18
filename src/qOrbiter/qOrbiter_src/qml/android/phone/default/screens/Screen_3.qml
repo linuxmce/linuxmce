@@ -9,9 +9,12 @@ PhoneFloorplanLayout{
         id: btOff
 	anchors.bottom: media.bottom.top - 30
 
-        buttontext: "Off"
-	// TODO: call stopMedia with selected EA
-        onActivated: manager.stopMedia()
+        buttontext: "Stop"
+	// call stopMedia with selected EA
+        onActivated: {
+	    console.log("manager.stopPlayback with EA = " + media.getSelections().get(0).device)
+	    manager.stopMediaInEa(media.getSelections().get(0).device)
+        }
     }
 
 }
