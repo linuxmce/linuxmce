@@ -2952,6 +2952,18 @@ void DCE::qOrbiter::StopMedia()
     SendCommand(endMedia);
 }
 
+void DCE::qOrbiter::StopMediaInEA(int PK_EntertainArea)
+{
+    CMD_MH_Stop_Media endMedia(m_dwPK_Device, iMediaPluginID,0,i_current_mediaType ,0,StringUtils::itos(PK_EntertainArea),false);
+    SendCommand(endMedia);
+}
+
+void DCE::qOrbiter::stop_AV()
+{
+    CMD_Stop endMedia(m_dwPK_Device, iMediaPluginID,false,0/*stream id*/);
+    SendCommand(endMedia);
+}
+
 void DCE::qOrbiter::RwMedia()
 {
     CMD_Change_Playback_Speed rewind_media(m_dwPK_Device, iMediaPluginID, internal_streamID , -2, true);

@@ -1786,6 +1786,8 @@ public slots:
     void mythtvPlayMedia();
 
     void StopMedia();
+    void StopMediaInEA(int PK_EntertainArea);
+    void stop_AV();
     void RwMedia();
     void FfMedia();
     void PauseMedia();

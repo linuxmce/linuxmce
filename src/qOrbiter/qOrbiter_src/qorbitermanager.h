@@ -537,6 +537,8 @@ signals:
     void newGridChannel(QString channel, QString chanid);
     void setStreamSpeed(int speed);
     void stopPlayback();
+    void stopMediaInEa(int PK_EntertainArea);
+    void stop_AV();
     void seekGrid(QString s);
     void newPlaylistPosition(int pos);
     void bindMediaRemote(bool b);
