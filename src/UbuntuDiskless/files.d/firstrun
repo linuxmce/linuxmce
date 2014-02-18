@@ -8,11 +8,10 @@ set -e
 ## firstrun for diskless mds
 File="/etc/init.d/firstrun"
 
-if ! [[ -d "${Parm_RootLocation}/$(dirname $File)" ]]; then
+if [[ ! -d "${Parm_RootLocation}/$(dirname $File)" ]]; then
 	mkdir -p "${Parm_RootLocation}/$(dirname $File)"
 fi
 
-#echo "${Content}" > "${Parm_RootLocation}/${File}"
 cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 	#!/bin/bash
 	### BEGIN INIT INFO
@@ -117,6 +116,7 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 	exit $retval
 	:
 	EOF
+chmod +x "${Parm_RootLocation}/${File}"
 
 DISTRO=$(LC_ALL=C chroot ${Parm_RootLocation} lsb_release -is)
 case "$DISTRO" in
@@ -134,4 +134,3 @@ case "$DISTRO" in
 		exit 1
                 ;;
 esac
-chmod +x "${Parm_RootLocation}/${File}"
