@@ -192,11 +192,13 @@ void Logger::Write( int iLevel, const char *pcFormat, ... )
     }
 
     string sData;
+#ifndef ANDROID
     if( iLevel == LV_CRITICAL )
         sData = string( "\x1b[31;1m" ) + string(s) + string( "\x1b[0m" ); // setting the text color to red and back to black
     else if( iLevel == LV_WARNING )
         sData = string( "\x1b[33;1m" ) + string(s) + string( "\x1b[0m" ); // setting the text color to yellow and back to black
     else
+#endif
         sData = s;
 
     Entry e( iLevel, tv, m_Name, sData, 0 ); // reating the entry
@@ -413,6 +415,36 @@ void WinOrbiterLogger::WriteEntry( Entry& entry )
 
     DWORD Result;
     ::SendMessageTimeout(m_hWndList, LB_SETTOPINDEX, Count - 1, 0L, SMTO_NORMAL, cTimeOutInterval, &Result);
+}
+
+#endif
+
+#ifdef ANDROID
+#include <QDebug>
+void QtLogger::WriteEntry( Entry& entry )
+{
+    QString s;
+
+    /*  Android/Qt provides their own timestamp
+    struct tm t;
+    localtime_r((time_t *)&entry.m_TimeStamp.tv_sec,&t);
+    char acBuff[50];
+    double dwSec = (double)(entry.m_TimeStamp.tv_usec/1E6) + t.tm_sec;
+    snprintf( acBuff, sizeof(acBuff), "%02d/%02d/%02d %d:%02d:%06.3f", (int)t.tm_mon + 1, (int)t.tm_mday, (int)t.tm_year - 100, (int)t.tm_hour, (int)t.tm_min, dwSec );
+
+    s += acBuff;*/
+    s += entry.m_sName.c_str();
+    s += entry.m_sData.c_str();
+
+    if (entry.m_iLevel == LV_CRITICAL)
+    {
+      qCritical() << s;
+    } else if (entry.m_iLevel == LV_WARNING)
+    {
+      qWarning() << s;
+    } else {
+      qDebug() << s;
+    }
 }
 
 #endif

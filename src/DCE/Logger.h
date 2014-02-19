@@ -85,6 +85,7 @@
 #define LT_LOGGER_FILE		 2
 #define LT_LOGGER_SERVER	 3
 #define LT_LOGGER_ORBITERWIN 4
+#define LT_LOGGER_QT             5
 
 namespace DCE
 {
@@ -331,6 +332,26 @@ namespace DCE
 	};
 #endif
 
+#ifdef ANDROID
+	class QtLogger : public Logger
+	{
+
+	public:
+
+		QtLogger() : Logger("")
+		{ 
+		    m_iMaxLogLevel = 10;
+		}
+
+		virtual ~QtLogger()
+		{}
+
+		virtual int GetType() { return LT_LOGGER_QT; }
+		virtual void WriteBlock(const char *pBlock, size_t sBlockLen ) {};
+		virtual void WriteEntry( class Logger::Entry& entry );
+	};
+#endif
+
 
 	typedef map<string, Logger*> NameLoggerMap;
 	typedef map<string, string> StringStringMap;
@@ -364,10 +385,14 @@ namespace DCE
 					break;
 
 				default:
+#ifdef ANDROID
+				        m_pPlutoLogger = new QtLogger();
+#else			  
 					if( m_sFilename.empty() )
 						m_pPlutoLogger = new FileLogger(stdout);
 					else
 						m_pPlutoLogger = new FileLogger(m_sFilename.c_str());
+#endif
 					break;
 				}
 			}
