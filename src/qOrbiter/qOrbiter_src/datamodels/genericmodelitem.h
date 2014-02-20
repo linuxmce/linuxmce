@@ -8,12 +8,17 @@
 class GenericModelItem : public QObject
 {
     Q_OBJECT
+
+private:
+    QHash<int, QByteArray> m_roleNames;
+protected:
+    QHash<int, QVariant> m_data;
 public:
-    GenericModelItem(){}
     explicit GenericModelItem(QObject *parent = 0);
-    QVariant data(int role) const;
+    virtual QVariant data(int role) const;
     inline QString id() const {  return ident; }
-    QHash<int, QByteArray> roleNames() const;
+    QHash<int, QByteArray> roleNames() const { return m_roleNames; }
+    void setRoleNames(QHash<int, QByteArray> roleNames) { m_roleNames = roleNames; }
 
     QString ident;
     

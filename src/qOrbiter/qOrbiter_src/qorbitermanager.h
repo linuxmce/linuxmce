@@ -55,6 +55,7 @@
 #include<datamodels/existingorbitermodel.h>
 #include<datamodels/attributeobject.h>
 #include <datamodels/sleepingalarmmodel.h>
+#include <datamodels/genericflatlistmodel.h>
 
 #include <QStringList>
 #include <QThread>
@@ -435,6 +436,8 @@ Param 10 - pk_attribute
     QMap <int, QString*> * subtypeTranslation;
     QMap <int, QString*> * mediatypeTranslation;
 
+    QMap <QString, GenericFlatListModel*> m_mapDataGridModels;
+
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
     QString currentRoom;
@@ -615,6 +618,8 @@ signals:
     void keepLoading(bool s);
     void stillLoading(bool b);
     void requestSubtypes(int subtype);
+
+    void loadDataGrid(QString dataGridId, int PK_DataGrid);
 
     /*Message and notification signals*/
     void dceResponseChanged();
@@ -1336,6 +1341,14 @@ public slots:
 
     void setCurrentPage(int page) {media_currentPage = page;   emit mediaPageChanged();  }
     int getCurrentPage() {return media_currentPage;}
+
+    /* called when a datagrid item is ready (received)*/
+    void addDataGridItem(QString dataGridID, GenericModelItem *t);
+    /* called to clear all (temp) datagrids */
+    void clearDataGrid(QString dataGridID);
+    void clearAllDataGrid();
+    Q_INVOKABLE GenericFlatListModel* getDataGridModel(QString dataGridId, int PK_DataGrid);
+
     //@}
 
     //initialization related

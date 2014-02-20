@@ -1,5 +1,8 @@
 #include "genericflatlistmodel.h"
-#include <QDebug>
+#include "DCE/Logger.h"
+
+using namespace DCE;
+
 /*!
  *\class GenericFlatListModel
  *\brief This class is a generic flat C++ listmodel for use with qml
@@ -20,6 +23,7 @@ GenericFlatListModel::GenericFlatListModel(GenericModelItem *prototypeItem, QObj
     setRoleNames(m_prototype->roleNames());
 #endif
     qRegisterMetaType<QModelIndex>("QModelIndex");
+    qRegisterMetaType<QMap<int, QString*> >("QMap");
     totalcells = 0;
     seperator = 16;
     loadingStatus = false;
@@ -31,13 +35,8 @@ GenericFlatListModel::GenericFlatListModel(GenericModelItem *prototypeItem, QObj
 
 int GenericFlatListModel::rowCount(const QModelIndex &parent) const
 {
-    if(parent.isValid()){
-        return 0;
-    }
-    else{
-        return m_list.size();
-    }
-
+    Q_UNUSED(parent);
+    return m_list.size();
 }
 
 
@@ -60,32 +59,32 @@ GenericFlatListModel::~GenericFlatListModel() {
 
 void GenericFlatListModel::appendRow(GenericModelItem *item)
 {
-    setLoadingStatus(true);
+    //    setLoadingStatus(true);
     appendRows(QList<GenericModelItem*>() << item);
-  //  qDebug() << m_list.count();
 }
 
 void GenericFlatListModel::appendRows(const QList<GenericModelItem *> &items)
 {
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "GenericFlatListModel.appendRows start");
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(GenericModelItem *item, items) {
-        m_list.append(item);
-        QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
-
+         QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
+         m_list.append(item);
     }
-
     endInsertRows();
+    
     QModelIndex index = indexFromItem(m_list.last());
     QModelIndex index2 = indexFromItem(m_list.first());
     int currentRows= m_list.count();
-    emit itemAdded(currentRows);
-    setCurrentCells(currentRows);
-    double p = (((double)m_list.size() / (double)seperator) * 100) ;
-    setProgress(p);
+    //    emit itemAdded(currentRows);
+    // setCurrentCells(currentRows);
+    // double p = (((double)m_list.size() / (double)seperator) * 100) ;
+    //setProgress(p);
     emit dataChanged(index2, index, currentRows);
-    setLoadingStatus(false);
-    QApplication::processEvents(QEventLoop::AllEvents);
+    /* setLoadingStatus(false);
+    QApplication::processEvents(QEventLoop::AllEvents);*/
 
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "GenericFlatListModel.appendRows end");
 }
 
 void GenericFlatListModel::insertRow(int row, GenericModelItem *item)
@@ -101,13 +100,13 @@ void GenericFlatListModel::insertRow(int row, GenericModelItem *item)
 
 void GenericFlatListModel::handleItemChange()
 {
-    GenericModelItem* item = static_cast<GenericModelItem*>(sender());
+  /*    GenericModelItem* item = static_cast<GenericModelItem*>(sender());
     QModelIndex index = indexFromItem(item);
     qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
         emit dataChanged(index, index, index.row() );
-    }
+	}*/
 }
 
 void GenericFlatListModel::reset()
@@ -128,12 +127,7 @@ void GenericFlatListModel::reset()
 bool GenericFlatListModel::resetInternalData()
 {
     qDebug("Resetting GenericFlatListModel data");
-    int total = m_list.count();
-    for(int i = 0; i <= m_list.count(); ++i){
-
-      //  qDebug() <<"removing::" << m_list.count() << " of " << total;
-        m_list.removeAt(i);
-    }
+    qDeleteAll(m_list);
     m_list.clear();
   //  qDebug() << "Items cleared. Count:: "<< m_list.count();
     return true;
@@ -286,8 +280,8 @@ int GenericFlatListModel::getGridType()
 
 void GenericFlatListModel::setLoadingStatus(bool b)
 {
-    loadingStatus = b;
-    emit loadingStatusChanged(loadingStatus);
+      loadingStatus = b;
+  // emit loadingStatusChanged(loadingStatus);
 }
 
 bool GenericFlatListModel::getLoadingStatus()
@@ -297,8 +291,8 @@ bool GenericFlatListModel::getLoadingStatus()
 
 void GenericFlatListModel::setProgress(double n_progress)
 {
-    progress = n_progress;
-    emit progressChanged( progress );
+  progress = n_progress;
+  // emit progressChanged( progress );
     // qDebug() << "Loading Progress:" << progress;
     // qDebug() << QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
 

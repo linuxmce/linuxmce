@@ -38,6 +38,10 @@ using namespace DCE;
 #include <QtWidgets/QApplication>
 #endif
 
+#include "pluto_main/Define_DataGrid.h"
+#include "qOrbiter/qOrbiter_src/datamodels/ActiveMediaStreams.h"
+#include "datamodels/DataGridHandler.h"
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter, QObject*parent)
@@ -2706,6 +2710,63 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
         routerReload();
     }
 
+}
+
+void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid)
+{
+    bool state;
+    string *sResponse;
+
+    emit commandResponseChanged("Getting data grid PK_DataGrid" + PK_DataGrid);
+    int cellsToRender= 0;
+    int gHeight = 0;
+    int gWidth = 0;
+    string dgName ="_dg_"+StringUtils::itos(PK_DataGrid) + "_" + StringUtils::itos(m_dwPK_Device);
+    int iData_Size=0;
+    int GridCurRow = 0;
+    int GridCurCol= 0;
+    char *pData = NULL;
+    string m_sSeek = "";
+    string option = "";
+    m_dwIDataGridRequestCounter++;
+
+    int offset = 0;
+    int pkVar  = 0;
+    int iOffset= 0;
+    string valassign = "0";
+    bool isSuccessfull;
+  
+    CMD_Populate_Datagrid populateGrid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName), PK_DataGrid, option, 0, &pkVar, &valassign,  &isSuccessfull, &gWidth, &gHeight );
+
+    if (SendCommand(populateGrid))
+    {
+        //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
+        DCE::CMD_Request_Datagrid_Contents requestGrid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+	if(SendCommand(requestGrid))
+        {
+
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
+	    // TODO: emit prepareDataGrid(dataGridId, gHeight, gWidth);
+
+	    DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
+	    cellsToRender= pDataGridTable->getTotalRowCount();
+	    int col = 0;
+	    for (int row = 0; row < pDataGridTable->GetRows(); row++)
+            {
+		DataGridCell *pCell = pDataGridTable->GetData(row,col);
+		if(!pCell){
+		    continue;
+		}
+		qDebug()<< "Row: " << row << " " << " col: " << col <<" Data: " << pCell->GetText();
+		emit addDataGridItem(dataGridId, DataGridHandler::GetModelItemForCell(PK_DataGrid, pCell));
+            }
+	    pDataGridTable->ClearData();
+	    delete pDataGridTable;
+	    pDataGridTable = NULL;
+	    delete[] pData;
+	    pData=NULL;
+        }
+    }
 }
 
 void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)

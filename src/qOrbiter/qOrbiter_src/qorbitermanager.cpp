@@ -42,6 +42,7 @@
 
 #include <contextobjects/epgchannellist.h>
 #include <datamodels/skindatamodel.h>
+#include <datamodels/DataGridHandler.h>
 
 #include "qorbitermanager.h"
 
@@ -1076,6 +1077,53 @@ bool qorbiterManager::requestDataGrid()
 {
     m_dwIDataGridRequestCounter++;
     return true;
+}
+
+void qorbiterManager::addDataGridItem(QString dataGridId, GenericModelItem *pItem)
+{
+    qDebug() <<"manager.addDataGridItem() " << dataGridId;
+    if (!m_mapDataGridModels.contains(dataGridId))
+    {
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "addDataGridItem() preparing GenericFlatListModel");
+        GenericFlatListModel* pModel = new GenericFlatListModel(pItem, this);
+	m_mapDataGridModels.insert(dataGridId, pModel);
+    }
+    m_mapDataGridModels[dataGridId]->appendRow(pItem);
+    qDebug() <<"manager.addDataGridItem() end";
+}
+
+void qorbiterManager::clearDataGrid(QString dataGridId)
+{
+    qDebug() << "manager.clearDataGrid() " << dataGridId;
+    if (m_mapDataGridModels.contains(dataGridId))
+    {
+        GenericFlatListModel* pModel = m_mapDataGridModels.take(dataGridId);
+	delete pModel;
+    }
+    qDebug() << "manager.clearDataGrid() end";
+}
+
+void qorbiterManager::clearAllDataGrid() 
+{
+    qDebug() << "manager.clearAllDataGrid()";
+    qDeleteAll(m_mapDataGridModels);
+    qDebug() << "manager.clearAllDataGrid() end";
+}
+
+GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int PK_DataGrid)
+{
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() id = %s", dataGridId.toStdString().c_str());
+
+    // We must create the model here, so that QML will get a valid model returned from this method
+    // because this method will probably be called first (at property binding) from QML (before loadDataGrid)
+    if (!m_mapDataGridModels.contains(dataGridId))
+    {
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() preparing GenericFlatListModel");
+        GenericFlatListModel* pModel = new GenericFlatListModel(DataGridHandler::GetModelItemType(PK_DataGrid), this);
+	m_mapDataGridModels.insert(dataGridId, pModel);
+    }
+    emit loadDataGrid(dataGridId, PK_DataGrid); // loads data
+    return m_mapDataGridModels[dataGridId];
 }
 
 QString qorbiterManager::translateMediaType(int mediaType)
@@ -2133,6 +2181,9 @@ bool qorbiterManager::cleanupData()
     mediaTypeFilter->clear();
     uiFileFilter->clear();
     userList->clear();
+
+    // clear any generic datagrids
+    clearAllDataGrid();
 
     m_bStartingUp=true;
     return true;

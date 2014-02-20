@@ -1,4 +1,6 @@
 #include "genericmodelitem.h"
+#include "DCE/Logger.h"
+using namespace DCE;
 /*!
  *\class GenericModelItem
  *\brief This class is a generic flat C++ listmodel item for use with qml
@@ -15,18 +17,12 @@ GenericModelItem::GenericModelItem(QObject *parent) :
 {
 }
 
-
-QHash<int, QByteArray> GenericModelItem::roleNames() const
-{
-
-  QHash<int, QByteArray> names;
-  return names;
-}
-
 QVariant GenericModelItem::data(int role) const
 {
-  switch(role) {
-   default:
-    return QVariant();
-  }
+    if (m_data.contains(role)) {
+        return m_data[role];
+    } else {
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericModelItem.data : no such data role");
+        return QVariant();
+    }
 }

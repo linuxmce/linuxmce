@@ -210,6 +210,7 @@ SOURCES += \
     ../../logger/qorbiterlogger.cpp \
     ../../datamodels/genericflatlistmodel.cpp \
     ../../datamodels/genericmodelitem.cpp \
+    ../../datamodels/ActiveMediaStreams.cpp \
     ../../datamodels/listitembase.cpp
 
 
@@ -308,6 +309,8 @@ HEADERS += \
     ../../logger/qorbiterlogger.h \
     ../../datamodels/genericflatlistmodel.h \
     ../../datamodels/genericmodelitem.h \
+    ../../datamodels/ActiveMediaStreams.h \
+    ../../datamodels/DataGridHandler.h \
     ../../datamodels/listitembase.h
 
 

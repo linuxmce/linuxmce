@@ -44,6 +44,9 @@ datamodels/DataModelItems/mediatypeitem.cpp
 datamodels/DataModelItems/mediatypeitem.h
 datamodels/DataModelItems/sleepingalarm.cpp
 datamodels/DataModelItems/sleepingalarm.h
+datamodels/ActiveMediaStreams.cpp
+datamodels/ActiveMediaStreams.h
+datamodels/DataGridHandler.h
 datamodels/attributemodel.cpp
 datamodels/attributemodel.h
 datamodels/attributesortmodel.cpp

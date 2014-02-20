@@ -32,6 +32,7 @@
 #include <contextobjects/floorplandevice.h>
 #include <contextobjects/modelpage.h>
 #include <datamodels/gridItem.h>
+#include <datamodels/genericmodelitem.h>
 #include <contextobjects/epgchannellist.h>
 #include <contextobjects/playlistitemclass.h>
 #include <datamodels/DataModelItems/attributesortitem.h>
@@ -1420,6 +1421,14 @@ signals:
     void mediaAuthChanged(int user); /*!< For invalid private media authorization. Anything besides -1 correlates to the user associated with that number being set.*/
     ///@}
 
+    /**
+     * @name Generic datagrids
+     */
+    ///@{
+    void addDataGridItem(QString dataGridID, GenericModelItem* item);
+    void prepareDataGrid(QString dataGridID, GenericModelItem* item);
+    ///@}
+
     /** @name Now Playing Signals
  * Signals for notifying of new media, getting meta data.
  */
@@ -1773,6 +1782,7 @@ public slots:
     void getGridView(bool direction);
     void seekToGridPosition(QString s);
 
+    void loadDataGrid(QString dataGridID, int PK_DataGrid);
 
     //media
     void getContextImage(int attributeNumber);
