@@ -2220,10 +2220,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
 
 void qOrbiter::shutdown()
 {
-    m_pData = NULL;
-    m_pEvent->m_pClientSocket->Disconnect();
-    m_pEvent = NULL;
-    this->deleteLater();
+    // Closing and deleting of superclass member variables are done by superclass
 }
 
 void qOrbiter::beginSetup()

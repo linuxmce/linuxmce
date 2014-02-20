@@ -1054,11 +1054,8 @@ void qorbiterManager::closeOrbiter()
     if(writeConfig()){
         setDceResponse("Shutting Down");
     }
-#ifndef __ANDROID__
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
-#endif
     //  emit unregisterOrbiter((userList->find(sPK_User)->data(4).toInt()), QString(iFK_Room), iea_area );
-
 
     if(cleanupData()){
         this->deleteLater();
