@@ -2738,7 +2738,7 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid)
     if (SendCommand(populateGrid))
     {
         //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-        DCE::CMD_Request_Datagrid_Contents requestGrid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
+        DCE::CMD_Request_Datagrid_Contents requestGrid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName),    int(gHeight), int(gWidth),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
 	if(SendCommand(requestGrid))
         {
 
@@ -2746,11 +2746,12 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid)
 	    // TODO: emit prepareDataGrid(dataGridId, gHeight, gWidth);
 
 	    DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-	    cellsToRender= pDataGridTable->getTotalRowCount();
+	    //	    cellsToRender= pDataGridTable->getTotalRowCount();
 	    int col = 0;
 	    for (int row = 0; row < pDataGridTable->GetRows(); row++)
             {
-		DataGridCell *pCell = pDataGridTable->GetData(row,col);
+	        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Row: %i, Col: %i", row, col);
+		DataGridCell *pCell = pDataGridTable->GetData(col,row);
 		if(!pCell){
 		    continue;
 		}
