@@ -303,7 +303,10 @@ orbiterInit=true;
 emit orbiterInitialized();
 }
 
-
+qorbiterManager::~qorbiterManager()
+{
+    cleanupData();
+}
 
 void qorbiterManager::gotoQScreen(QString s)
 {
@@ -1057,10 +1060,8 @@ void qorbiterManager::closeOrbiter()
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Orbiter Exiting, Unregistering 1st");
     //  emit unregisterOrbiter((userList->find(sPK_User)->data(4).toInt()), QString(iFK_Room), iea_area );
 
-    if(cleanupData()){
-        this->deleteLater();
-        emit orbiterClosing();
-    }
+    emit orbiterClosing();
+    QApplication::quit();
 }
 
 /*

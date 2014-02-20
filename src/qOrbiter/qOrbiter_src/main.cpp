@@ -374,8 +374,8 @@ int main(int argc, char* argv[])
         orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
         orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
 #endif
-        AbstractImageProvider modelimageprovider(&w);
-        orbiterWin.mainView.engine()->addImageProvider("listprovider", &modelimageprovider);
+        AbstractImageProvider* modelimageprovider = new AbstractImageProvider(&w);
+        orbiterWin.mainView.engine()->addImageProvider("listprovider", modelimageprovider);
         pqOrbiter.moveToThread(&dceThread);
         QObject::connect(&dceThread, SIGNAL(started()), &pqOrbiter, SLOT(beginSetup()));
 

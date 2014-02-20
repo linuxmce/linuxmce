@@ -127,9 +127,6 @@ void GenericFlatListModel::reset()
 bool GenericFlatListModel::resetInternalData()
 {
     qDebug("Resetting GenericFlatListModel data");
-    qDeleteAll(m_list);
-    m_list.clear();
-  //  qDebug() << "Items cleared. Count:: "<< m_list.count();
     return true;
 
 }
@@ -179,14 +176,14 @@ void GenericFlatListModel::clear()
     QApplication::processEvents(QEventLoop::AllEvents);
     emit modelAboutToBeReset();
     beginResetModel();
-    if(resetInternalData()){
+    qDeleteAll(m_list);
+    m_list.clear();
     setProgress(0.0);
     QApplication::processEvents(QEventLoop::AllEvents);
     endResetModel();
     emit modelReset();
     QApplication::processEvents(QEventLoop::AllEvents);
     clearing = false;
-    }
 
 }
 

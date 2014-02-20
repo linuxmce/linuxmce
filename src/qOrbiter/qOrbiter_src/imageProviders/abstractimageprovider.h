@@ -40,15 +40,14 @@
 #include <qorbitermanager.h>
 
 #if (QT5)
-class AbstractImageProvider: public QObject , public QQuickImageProvider
+class AbstractImageProvider: public QQuickImageProvider
 #else
-class AbstractImageProvider: public QObject , public QDeclarativeImageProvider
+class AbstractImageProvider: public QDeclarativeImageProvider
 #endif
 {
 public:
     AbstractImageProvider(qorbiterManager * manager );
-
-
+    ~AbstractImageProvider();
 
 
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize)

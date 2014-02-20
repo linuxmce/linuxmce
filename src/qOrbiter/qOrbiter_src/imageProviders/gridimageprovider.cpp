@@ -76,5 +76,4 @@ void GridIndexProvider::dataReset()
 
 GridIndexProvider::~GridIndexProvider()
 {
-    this->deleteLater();
 }

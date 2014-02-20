@@ -227,8 +227,10 @@ public:
     qorbiterManager(QDeclarativeView *view, AndroidSystem *jniHelper,  QObject *parent =0);
 #elif   QT4_8
     qorbiterManager(QDeclarativeView * view, QObject *parent=0);  //constructor
-
 #endif
+
+    ~qorbiterManager();
+
     //for Pi - for_pi now sets GLENABLED
     //FileReader * fileReader;
 

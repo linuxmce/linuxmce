@@ -12,6 +12,10 @@ AbstractImageProvider::AbstractImageProvider(qorbiterManager *manager):QDeclarat
 
 }
 
+AbstractImageProvider::~AbstractImageProvider()
+{
+}
+
 QImage AbstractImageProvider::floorplanProvider()
 {
 
