@@ -2560,9 +2560,7 @@ void qOrbiter::jumpMobileGrid(int page)
 
 void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
 {
-#ifndef ANDROID
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Executing Command Group %d", cmdGrp);
-#endif
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Executing Command Group %d", cmdGrp);
     string pResponse="";
     CMD_Execute_Command_Group execCommandGroup((long)m_dwPK_Device, (long)2, cmdGrp);
     SendCommand(execCommandGroup);
@@ -3084,9 +3082,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
         if(SendCommand(req_data_grid))
         {
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-#ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
-#endif
             QString cellTitle;
             QString qs_plsIndex;
             QString fk_file;
@@ -3456,9 +3452,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
                 DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
                 //int cellsToRender= pDataGridTable->GetRows();
-#ifndef ANDROID
                 LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
-#endif
                 QString cellTitle;
                 QString cellAttribute;
                 int index;
@@ -3944,9 +3938,7 @@ void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             cellsToRender= pDataGridTable->GetRows();
 
-#ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Advanced AV  Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
-#endif
             QString cellTitle;
             QString fk_file;
             QString filePath;
@@ -4022,9 +4014,7 @@ void DCE::qOrbiter::GetAlarms()
             cellsToRender= pSleepingDataGridTable->getTotalRowCount();
             //  qDebug() << pSleepingDataGridTable->GetCols();
             //  qDebug() << pSleepingDataGridTable->GetRows();
-#ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "sleeping menu alarms Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
-#endif
             QString name;
             QString days;
             QString timeleft;
@@ -4267,9 +4257,7 @@ void DCE::qOrbiter::showAdvancedButtons()
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             cellsToRender= pDataGridTable->GetRows();
 
-#ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Advanced AV  Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
-#endif
 
             QString cellTitle;
             QString fk_file;
@@ -4367,9 +4355,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
 
 
-#ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
-#endif
 
             QString cellTitle;
             QString cellAttribute;
@@ -4511,9 +4497,7 @@ void DCE::qOrbiter::ShowBookMarks()
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             cellsToRender= pDataGridTable->GetRows();
 
-#ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bookmark Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
-#endif
             QString cellTitle;
             QString fk_file;
             QString filePath;
@@ -5142,9 +5126,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             DataGridTable * pMediaGridTable = new DataGridTable(iData_Size,pData,false);
             cellsToRender= pMediaGridTable->GetRows();
 
-#ifndef ANDROID
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
-#endif
             if (cellsToRender == 0)
             {
                 if(q_attributetype_sort=="52" && backwards==false )
