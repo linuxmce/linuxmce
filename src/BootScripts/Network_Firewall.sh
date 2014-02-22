@@ -236,6 +236,7 @@ fi
 # Webfilter
 if [[ -z $DisableWebfilter ]]; then
     #Do nothing webfilter is not installed
+    echo "Not setting up Webfilter route."; 
 else
     if [ $DisableWebfilter = 0 ]; then
         #setup webfilter route to firewall
@@ -246,6 +247,7 @@ fi
 # Proxy
 if [[ -z $DisableProxy ]]; then
     #Do nothing webfilter is not installed
+    echo "Not setting up Webfilter route.";
 else
     if [ $DisableProxy = 0 ]; then
         #setup webfilter route to firewall
