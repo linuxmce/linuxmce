@@ -54,8 +54,8 @@ gzip -9c < /usr/pluto/deb-cache/Packages > /usr/pluto/deb-cache/Packages.gz
 sed -i "s:/deb-cache :/deb-cache/$DEB_CACHE :" /etc/apt/sources.list
 
 # MDs
-for Moon_RootLocation in /usr/pluto/diskless/*; do
-if [[ -n "$Moon_RootLocation" ]]; then
+for Moon_RootLocation in $(find /usr/pluto/diskless/* -maxdepth 0 -type d); do
+if [[ -n "$Moon_RootLocation" && -e "$Moon_RootLocation/etc/pluto.conf" ]]; then
 	TARGET_DISTRO=$(LC_ALL="C" chroot ${Moon_RootLocation} lsb_release -i -s | tr '[:upper:]' '[:lower:]')
 	TARGET_RELEASE=$(LC_ALL="C" chroot ${Moon_RootLocation} lsb_release -c -s)
 	TARGET_ARCH=$(LC_ALL="C" chroot ${Moon_RootLocation} apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
