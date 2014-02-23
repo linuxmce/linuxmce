@@ -116,6 +116,8 @@ int main(int argc, char* argv[])
 	string sRouter_IP="dcerouter";
 	int PK_Device=0;
 	string sLogger="stdout";
+	string sAVWHost;
+	int iAVWPort = 0;
 
 	bool bLocalMode=false,bError=false; // An error parsing the command line
 	char c;
@@ -142,6 +144,14 @@ int main(int argc, char* argv[])
 		case 'l':
 			sLogger = argv[++optnum];
 			break;
+		case 'P':
+		  bLocalMode = true;
+		  iAVWPort = atoi(argv[++optnum]);
+		  break;
+		case 'H':
+		  bLocalMode = true;
+		  sAVWHost = argv[++optnum];
+		  break;
 		default:
 			bError=true;
 			break;
@@ -194,6 +204,8 @@ int main(int argc, char* argv[])
 	try
 	{
 		CEC_Adaptor *pCEC_Adaptor = new CEC_Adaptor(PK_Device, sRouter_IP,true,bLocalMode);
+		pCEC_Adaptor->m_iAVWPort = iAVWPort;
+		pCEC_Adaptor->m_sAVWHost = sAVWHost;
 		if ( pCEC_Adaptor->GetConfig() && pCEC_Adaptor->Connect(pCEC_Adaptor->PK_DeviceTemplate_get()) ) 
 		{
 			g_pCommand_Impl=pCEC_Adaptor;

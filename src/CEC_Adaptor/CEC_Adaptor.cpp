@@ -57,9 +57,35 @@ int CecLogMessage(void *UNUSED(cbParam), const cec_log_message &message)
   return 0;
 }
 
-int CecKeyPress(void *UNUSED(cbParam), const cec_keypress &UNUSED(key))
+int CecKeyPress(void *cbParam, const cec_keypress &key)
 {
-  // TODO
+  CEC_Adaptor *pCEC_Adaptor=(CEC_Adaptor *)cbParam;
+  char cKey[5];
+  snprintf(cKey,5,"0x%x",key.keycode);
+  string sKey=cKey;
+
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Keypress - Duration %d - Keycode 0x%x",key.duration,key.keycode);
+
+  if (key.duration > 0) // Ignore key downs
+    {
+      map <string,pair<string,int> >::iterator it=pCEC_Adaptor->m_mapCodesToButtons.find(sKey);
+      if ( it==pCEC_Adaptor->m_mapCodesToButtons.end() )
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sKey.c_str());
+      else
+	{
+	  // Send it off to IRReceiverBase
+	  pCEC_Adaptor->ReceivedCode(it->second.second,it->second.first.c_str());
+	  
+	  // Send to AV Wizard if needed.
+	  if (pCEC_Adaptor->m_dwPK_Device==DEVICEID_MESSAGESEND)
+	    {
+	      pCEC_Adaptor->ForceKeystroke(it->second.first,pCEC_Adaptor->m_sAVWHost,pCEC_Adaptor->m_iAVWPort);
+	      return 0;
+	    }
+	  
+	}
+    }
+
   return 0;
 }
 
@@ -73,8 +99,9 @@ int CecCommand(void *UNUSED(cbParam), const cec_command &UNUSED(command))
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 CEC_Adaptor::CEC_Adaptor(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
-	: CEC_Adaptor_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+  : CEC_Adaptor_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
+  , IRReceiverBase(this)
 {
 }
 
@@ -114,9 +141,73 @@ bool CEC_Adaptor::GetConfig()
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
 
+	if ( m_dwPK_Device != DEVICEID_MESSAGESEND && !m_bLocalMode )
+	  {
+	    if ( !m_Virtual_Device_Translator.GetConfig(m_pData) )
+	      return false;
+	
+	    // Set up IRBase/IRReceiverBase
+	    IRBase::setCommandImpl(this);
+	    IRBase::setAllDevices(&(GetData()->m_AllDevices));
+	    IRReceiverBase::GetConfig(m_pData);
+	  }
+
+	if ( !m_bLocalMode )
+	  {
+	    	    DeviceData_Base *pDevice = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfCategory(DEVICECATEGORY_Infrared_Plugins_CONST);
+	    
+	    if ( pDevice )
+	      m_dwPK_Device_IRPlugin = pDevice->m_dwPK_Device;
+	    else
+	      m_dwPK_Device_IRPlugin = 0;
+	    
+	    string sResult;
+	    DCE::CMD_Get_Sibling_Remotes CMD_Get_Sibling_Remotes(m_dwPK_Device,m_dwPK_Device_IRPlugin, DEVICECATEGORY_CEC_Remote_Controls_CONST, &sResult);
+	    SendCommand(CMD_Get_Sibling_Remotes);
+	    
+	    vector<string> vectRemotes;
+	    StringUtils::Tokenize(sResult, "`",vectRemotes);
+	    size_t i;
+	    for (i=0;i<vectRemotes.size();i++)
+	      {
+		vector<string> vectRemoteConfigs;
+		StringUtils::Tokenize(vectRemotes[i],"~",vectRemoteConfigs);
+		if (vectRemoteConfigs.size() == 3)
+		  {
+		    vector<string> vectCodes;
+		    int PK_DeviceRemote = atoi(vectRemoteConfigs[0].c_str());
+		    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Adding remote ID %d, layout %s\r\n",PK_DeviceRemote,vectRemoteConfigs[1].c_str());
+		    StringUtils::Tokenize(vectRemoteConfigs[2],"\r\n",vectCodes);
+		    for (size_t s=0;s<vectCodes.size();++s)
+		      {
+			string::size_type pos=0;
+			string sButton = StringUtils::Tokenize(vectCodes[s]," ",pos);
+			while(pos<vectCodes[s].size())
+			  {
+			    string sCode = StringUtils::Tokenize(vectCodes[s]," ",pos);
+			    m_mapCodesToButtons[sCode] = make_pair<string,int> (sButton,PK_DeviceRemote);
+			    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Code: %s will fire button %s",sCode.c_str(),sButton.c_str());
+			  }
+		      }
+		  }
+	      }
+	  }
+	else
+	  {
+	    // Local Mode, hard code values to lookup.
+	    // This may be expanded later, but I merely want
+	    // to implement the bare minimum for a direction pad. -tschak
+	    m_mapCodesToButtons["0x00"] = make_pair<string,int>("ok",0);
+	    m_mapCodesToButtons["0x01"] = make_pair<string,int>("up",0);
+	    m_mapCodesToButtons["0x02"] = make_pair<string,int>("down",0);
+	    m_mapCodesToButtons["0x03"] = make_pair<string,int>("left",0);
+	    m_mapCodesToButtons["0x04"] = make_pair<string,int>("right",0);
+	    m_mapCodesToButtons["0x0D"] = make_pair<string,int>("back",0);
+	  }
+
 	g_config.Clear();
 	snprintf(g_config.strDeviceName, 13, "LinuxMCE");
-	g_config.callbackParam = NULL;
+	g_config.callbackParam = this;
 	g_config.clientVersion = CEC_CLIENT_VERSION_1_6_1;
 	g_callbacks.CBCecLogMessage = &CecLogMessage;
 	g_callbacks.CBCecKeyPress = &CecKeyPress;
@@ -124,10 +215,12 @@ bool CEC_Adaptor::GetConfig()
 	g_config.callbacks = &g_callbacks;
 
 	g_config.deviceTypes.add(CEC_DEVICE_TYPE_RECORDING_DEVICE);
+	g_config.deviceTypes.add(CEC_DEVICE_TYPE_TUNER);
+	g_config.deviceTypes.add(CEC_DEVICE_TYPE_PLAYBACK_DEVICE);
 
 	m_pParser = LibCecInitialise(&g_config);
 
-	if (m_pParser)
+	if (!m_pParser)
 	  {
 	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not load libcec.so. Bailing!");
 	    return false;
@@ -147,7 +240,7 @@ bool CEC_Adaptor::GetConfig()
 	  {
 	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not open serial port %s",m_sPort.c_str());
 	  }
-
+	
 	return true;
 }
 
@@ -181,7 +274,13 @@ CEC_Adaptor_Command *Create_CEC_Adaptor(Command_Impl *pPrimaryDeviceCommand, Dev
 void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-	sCMD_Result = "UNHANDLED CHILD";
+  if (IRBase::ProcessMessage(pMessage))
+    {
+      printf("Message Processed by IRBase");
+      sCMD_Result = "OK";
+    }
+  
+  sCMD_Result = "UNHANDLED CHILD";
 }
 
 /*
@@ -193,7 +292,18 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
 void CEC_Adaptor::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
-	sCMD_Result = "UNKNOWN COMMAND";
+	sCMD_Result = "UNKNOWN DEVICE";
+}
+
+void CEC_Adaptor::CreateChildren()
+{
+  CEC_Adaptor_Command::CreateChildren();
+  Start(); // call IRBase Start();
+}
+
+void CEC_Adaptor::SendIR(string Port, string sIRCode, int iRepeat)
+{
+  // Not used, but must be implemented as per IRBase
 }
 
 //<-dceag-sample-b->!

@@ -22,10 +22,10 @@ sources = Main.cpp CEC_Adaptor.cpp $(Gen_Dev_Files)
 CXXFLAGS += `pkg-config libcec --cflags`
 CPPFLAGS +=
 LDFLAGS += `pkg-config libcec --libs`
-XTRALDLIBS = -lmysqlclient_r
+XTRALDLIBS = -lmysqlclient_r -lMessageTranslation -lIRBase
 
 Gen_Dev_Files +=
-sources +=
+sources += ../LIRC_DCE/IRReceiverBase.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)

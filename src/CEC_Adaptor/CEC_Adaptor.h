@@ -21,11 +21,13 @@
 //<-dceag-d-e->
 
 #include <libcec/cec.h>
+#include "IRBase/IRBase.h"
+#include "../LIRC_DCE/IRReceiverBase.h"
 
 //<-dceag-decl-b->
 namespace DCE
 {
-	class CEC_Adaptor : public CEC_Adaptor_Command
+  class CEC_Adaptor : public CEC_Adaptor_Command, public IRReceiverBase, IRBase
 	{
 //<-dceag-decl-e->
 		// Private member variables
@@ -35,7 +37,11 @@ public:
 		// Public member variables
 	  string m_sPort;   // COM Port on PC
 	  CEC::ICECAdapter *m_pParser;
+	  string m_sAVWHost;
+	  int m_iAVWPort;
+	  int m_dwPK_Device_IRPlugin;
 	  virtual void PrepareToDelete();
+	  map<string,pair<string,int> > m_mapCodesToButtons;
 
 //<-dceag-const-b->
 public:
@@ -47,6 +53,10 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
+		virtual void CreateChildren();
+		virtual void SendIR(string Port, string IRCode, int iRepeat); // Required from IRBase
+		
+
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
