@@ -655,8 +655,8 @@ MD_Install_Packages () {
 }
 
 MD_Populate_Debcache () {
-	cp -aR $TEMP_DIR/var/cache/apt/archives/*.deb $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
-	/usr/pluto/bin/update-debcache.sh $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
+	find $TEMPDIR/var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/$DEB_CACHE \;
+	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
 }
 
 MD_Cleanup () {
