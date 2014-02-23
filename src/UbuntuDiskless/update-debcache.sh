@@ -4,6 +4,7 @@ HOST_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
 HOST_RELEASE=$(lsb_release -c -s)
 HOST_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
 
+
 remove_duplicate_debs() {
         local Dir="$1"
         local pkg ver arch dup_ver dup_arch
@@ -38,6 +39,7 @@ remove_duplicate_debs() {
 update_debcache() {
 	local Dir="$1"
 
+	mkdir -p "$Dir"
 	pushd "$Dir"
 	remove_duplicate_debs "./"
 	dpkg-scanpackages ./ /dev/null 2>/dev/null | tee Packages | gzip -9c > Packages.gz
