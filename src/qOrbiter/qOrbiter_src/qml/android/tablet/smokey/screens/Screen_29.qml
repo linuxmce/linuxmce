@@ -8,7 +8,6 @@ Item {
     focus:true
     Component.onCompleted: {
         forceActiveFocus()
-        manager.getSleepingAlarms()
     }
 
     StyledText{
@@ -18,10 +17,10 @@ Item {
     }
 
     ListView{
-        id:alarms_view
+        id:alarmlist
         height: scaleY(70)
         width: scaleX(75)
-        model:alarms
+        model: manager.getDataGridModel("sleepingAlarms", 29)
 
         orientation: ListView.Vertical
         anchors.centerIn: parent

@@ -11,10 +11,11 @@ import "."
  *\note Use: AlarmToggleHandler{}
  */
 MouseArea{
+    id:alarmMouseArea
     anchors.fill: parent
     signal activated()
     onClicked: {
-        manager.updateAlarm(!status, handler)
+        alarmlist.model.setData(index, "status", !status)
         activated()
     }
 }

@@ -9,7 +9,6 @@ Item{
         width: manager.appWidth
         color: "transparent"
         HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
-        Component.onCompleted: manager.getSleepingAlarms()
         Rectangle{
             id:mainsleepingrect
             height:scaleY(65)
@@ -64,7 +63,7 @@ Item{
                                 id:alarmlist
                                 height: scaleY(35)
                                 width: scaleX(25)
-                                model:alarms
+                                model: manager.getDataGridModel("sleepingAlarms", 29)
                                 anchors.centerIn: parent
                                 anchors.margins: 10
                                 delegate:

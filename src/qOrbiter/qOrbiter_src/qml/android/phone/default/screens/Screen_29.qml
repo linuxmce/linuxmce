@@ -1,3 +1,4 @@
+
 import QtQuick 1.0
 import "../components"
 import "../../../../skins-common/lib/handlers"
@@ -19,7 +20,7 @@ Item{
     ListView{
         id:alarmlist
         anchors.fill: parent
-        model:alarms
+        model: manager.getDataGridModel("sleepingAlarms", 29)
         anchors.centerIn: parent
         anchors.margins: 10
         delegate:Item{
@@ -29,7 +30,7 @@ Item{
                 left:parent.left
 
             }
-            anchors.margins: 5
+            anchors.margins: 2
             Rectangle{
                 color:skinStyle.darkhighlight
                 border.color: "black"
@@ -39,13 +40,15 @@ Item{
             }
             Row{
                 id:delegatalayoutrow
+		anchors.centerIn: parent
+                width: parent.width
                 anchors{
                     top:parent.top
                     left:parent.left
                     right:parent.right
                     bottom:parent.bottom
                 }
-                spacing: 5
+                spacing: 2
 
                 Rectangle{
                     id:indicator
@@ -89,7 +92,6 @@ Item{
 
     Component.onCompleted: {
         forceActiveFocus()
-        manager.getSleepingAlarms()
     }
 
 }

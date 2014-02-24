@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import "../components"
+import "../../../skins-common/lib/handlers"
 Item{
     id:sleepingmenu
 
@@ -8,7 +9,6 @@ Item{
         width: manager.appWidth
         color: style.darkhighlight
         HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
-        Component.onCompleted: manager.getAlarms()
         Rectangle{
             id:mainsleepingrect
             height:scaleY(65)
@@ -67,7 +67,7 @@ Item{
                                 id:alarmlist
                                 height: scaleY(20)
                                 width: scaleX(25)
-                                model:alarms
+				model: manager.getDataGridModel("sleepingAlarms", 29)
                                 anchors.centerIn: parent
                                 anchors.margins: 10
                                 delegate:
@@ -98,11 +98,7 @@ Item{
                                                 anchors.centerIn: parent
                                             }
 
-                                            MouseArea{
-                                                anchors.fill: parent
-                                                onClicked: {
-                                                    manager.updateAlarm(true, handler)
-                                                }
+					    AlarmToggleHandler{
                                             }
                                         }
                                         Column{
