@@ -598,7 +598,6 @@ MD_Install_Packages () {
 			;;
 	esac
 
-	disable discover as it is not being used
 	## Put back discover
 	mv "$TEMP_DIR"/sbin/discover.disabled "$TEMP_DIR"/sbin/discover
 
