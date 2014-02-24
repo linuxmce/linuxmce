@@ -1795,6 +1795,7 @@ public slots:
     void RwMedia();
     void FfMedia();
     void PauseMedia();
+    void moveMedia(QString eas, int streamID);
     void requestMediaPlaylist();
     void checkTimeCode(int npDevice);
     void getStreamingVideo();

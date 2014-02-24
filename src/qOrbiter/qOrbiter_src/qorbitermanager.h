@@ -546,6 +546,7 @@ signals:
     void bindMediaRemote(bool b);
     void startPlayback(QString file);
     void play();
+    void moveMedia(QString eas, int streamID);
     void zoomLevelChanged(QString zoom);
     void aspectRatioChanged(QString ratio);
     void mobileStorageChanged(QString location);
@@ -1139,6 +1140,7 @@ public slots:
     void startRecordingPress(){emit tvRecord();}
     void showRecordingsPress(){emit showRecordings();}
     void mute(){emit muteSound();}
+    void doMoveMedia(QString eas, int streamID) { emit moveMedia(eas, streamID); }
 
     void movePlaylistEntry(QString d, int index) {emit movePlistEntry(d, index); }
     void removePlaylistEntry(int index) {emit removePlistEntry(index);}
@@ -1352,6 +1354,8 @@ public slots:
     void clearDataGrid(QString dataGridID);
     void clearAllDataGrid();
     Q_INVOKABLE GenericFlatListModel* getDataGridModel(QString dataGridId, int PK_DataGrid);
+
+    void refreshDataGrid(QString dataGridId, int PK_DataGrid, QString option) { emit loadDataGrid(dataGridId, PK_DataGrid, option); }
 
     //@}
 

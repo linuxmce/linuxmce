@@ -540,6 +540,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(stopPlayback()), &pqOrbiter,SLOT(StopMedia()),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(stopMediaInEa(int)), &pqOrbiter,SLOT(StopMediaInEA(int)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(stop_AV()), &pqOrbiter,SLOT(stop_AV()),Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(moveMedia(QString,int)), &pqOrbiter,SLOT(moveMedia(QString,int)),Qt::QueuedConnection);
 
         QObject::connect(w.ScreenSaver, SIGNAL(requestNewImage(QString)), &pqOrbiter, SLOT(getScreenSaverImage(QString)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(currentScreenSaverImage(QByteArray)), w.ScreenSaver, SLOT(setImageData(QByteArray)),Qt::QueuedConnection);

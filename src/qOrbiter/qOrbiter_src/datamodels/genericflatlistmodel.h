@@ -55,8 +55,13 @@ public:
     QModelIndex indexFromItem( const GenericModelItem* item) const;
     void updateItemData(int row, int role, QVariant value);
     void setModelName(QString s) { modelName = s; }
+    void setPK_DataGrid(int PK_DataGrid) { m_PK_DataGrid = PK_DataGrid; }
+    void setOption(QString option) { m_option = option; }
 
     QString modelName;
+    int m_PK_DataGrid;
+    QString m_option;
+
     int totalcells;
     int seperator;
     bool loadingStatus;
@@ -105,6 +110,8 @@ public slots:
      void setCurrentCells (int i) {currentCells = i; emit cellsChanged();}
      int getCurrentCells () {return currentCells;}
      void clearForPaging();
+    Q_INVOKABLE void refreshData();
+
 
 private slots:
     void handleItemChange();

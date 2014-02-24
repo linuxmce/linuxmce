@@ -3042,6 +3042,20 @@ void DCE::qOrbiter::PauseMedia()
     //  nowPlayingButton->setMediaSpeed(0);
 }
 
+void DCE::qOrbiter::moveMedia(QString eas, int streamID)
+{
+    CMD_MH_Move_Media move_media(m_dwPK_Device, iMediaPluginID, streamID, eas.toStdString());
+    string pResponse;
+    if(SendCommand(move_media, &pResponse) && pResponse=="OK")
+    {
+      emit commandResponseChanged("Move media");
+    }
+    else
+    {
+        emit commandResponseChanged("Move media command failed");
+    }
+}
+
 void DCE::qOrbiter::requestMediaPlaylist()
 {
     if(i_current_mediaType > 31 ){

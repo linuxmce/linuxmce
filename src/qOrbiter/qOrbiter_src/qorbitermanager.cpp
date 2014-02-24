@@ -1159,17 +1159,19 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
 {
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() id = %s", dataGridId.toStdString().c_str());
 
+    QString option = "";
+    if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST)
+        option = QString::number(iFK_Room);
     if (!m_mapDataGridModels.contains(dataGridId))
     {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() preparing GenericFlatListModel");
         GenericFlatListModel* pModel = m_modelPool.pop();
 	pModel->setPrototype(DataGridHandler::GetModelItemType(PK_DataGrid));
 	pModel->setModelName(dataGridId);
+	pModel->setPK_DataGrid(PK_DataGrid);
+	pModel->setOption(option);
 	m_mapDataGridModels.insert(dataGridId, pModel);
     }
-    QString option = "";
-    if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST)
-        option = QString::number(iFK_Room);
 
     LoggerWrapper::GetInstance()->Write(LV_DEBUG, "getDataGridModel() emit loadDataGrid");
     emit loadDataGrid(dataGridId, PK_DataGrid, option); // loads data

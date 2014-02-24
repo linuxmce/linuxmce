@@ -1,5 +1,6 @@
 #include "genericflatlistmodel.h"
 #include "DCE/Logger.h"
+#include "../../qorbitermanager.h"
 
 using namespace DCE;
 
@@ -221,11 +222,12 @@ void GenericFlatListModel::clear()
     clearing = true;
     //    QApplication::processEvents(QEventLoop::AllEvents);
     // emit modelAboutToBeReset();
-    beginResetModel();
+    QModelIndex index;
+    beginRemoveRows(index, 0, m_list.size());
     m_list.clear();
     // setProgress(0.0);
     // QApplication::processEvents(QEventLoop::AllEvents);
-    endResetModel();
+    endRemoveRows();
     // emit modelReset();
     // QApplication::processEvents(QEventLoop::AllEvents);
     clearing = false;
@@ -393,4 +395,10 @@ void GenericFlatListModel::clearForPaging()
         QApplication::processEvents(QEventLoop::AllEvents);
     }
 
+}
+
+void GenericFlatListModel::refreshData() {
+    QObject* p = QObject::parent();
+    qorbiterManager* pManager = static_cast<qorbiterManager*>(p);
+    pManager->refreshDataGrid(modelName, m_PK_DataGrid, m_option);
 }
