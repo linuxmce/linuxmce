@@ -37,7 +37,9 @@ Item{
     ListModel{
         id:selections
     }
-
+    function getSelections() {
+        return selections
+    }
     function processSelectedDevices(){
         selections.clear()
 
