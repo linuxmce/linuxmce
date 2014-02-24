@@ -16,6 +16,10 @@ protected:
 public:
     explicit GenericModelItem(QObject *parent = 0);
     virtual QVariant data(int role) const;
+    virtual bool setData(int role, const QVariant &value);
+    virtual bool updateData(int role, const QVariant &value);
+    virtual void LoadData(QHash<int, QVariant>* data);
+
     inline QString id() const {  return ident; }
     QHash<int, QByteArray> roleNames() const { return m_roleNames; }
     void setRoleNames(QHash<int, QByteArray> roleNames) { m_roleNames = roleNames; }

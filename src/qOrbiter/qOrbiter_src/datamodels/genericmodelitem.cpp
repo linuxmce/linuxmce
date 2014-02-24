@@ -26,3 +26,27 @@ QVariant GenericModelItem::data(int role) const
         return QVariant();
     }
 }
+
+bool GenericModelItem::setData(int role, const QVariant &value)
+{
+    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericModelItem.setData");
+    m_data.insert(role, value);
+    emit dataChanged();
+    return true;
+}
+
+bool GenericModelItem::updateData(int role, const QVariant &value)
+{
+    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericModelItem.updateData");
+    m_data.insert(role, value);
+    emit dataChanged();
+    return true;
+}
+
+void GenericModelItem::LoadData(QHash<int, QVariant>* pData)
+{
+  foreach (int i, pData->keys()) {
+    m_data.insert(i, pData->value(i));
+  }
+  delete pData;
+}

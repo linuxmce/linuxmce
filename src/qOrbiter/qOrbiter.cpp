@@ -2707,9 +2707,10 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
 
 }
 
-void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid)
+void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString option)
 {
-    bool state;
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGridGrid '%s', option = %s", dataGridId.toStdString().c_str(), option.toStdString().c_str());
+
     string *sResponse;
 
     emit commandResponseChanged("Getting data grid PK_DataGrid" + PK_DataGrid);
@@ -2722,7 +2723,6 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid)
     int GridCurCol= 0;
     char *pData = NULL;
     string m_sSeek = "";
-    string option = "";
     m_dwIDataGridRequestCounter++;
 
     int offset = 0;
@@ -2731,7 +2731,7 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid)
     string valassign = "0";
     bool isSuccessfull;
   
-    CMD_Populate_Datagrid populateGrid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName), PK_DataGrid, option, 0, &pkVar, &valassign,  &isSuccessfull, &gWidth, &gHeight );
+    CMD_Populate_Datagrid populateGrid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName), PK_DataGrid, option.toStdString(), 0, &pkVar, &valassign,  &isSuccessfull, &gWidth, &gHeight );
 
     if (SendCommand(populateGrid))
     {
@@ -2740,25 +2740,19 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid)
 	if(SendCommand(requestGrid))
         {
 
-	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
-	    // TODO: emit prepareDataGrid(dataGridId, gHeight, gWidth);
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
+	    emit prepareDataGrid(dataGridId, gHeight, gWidth);
 
 	    DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
 	    //	    cellsToRender= pDataGridTable->getTotalRowCount();
-	    int col = 0;
-	    for (int row = 0; row < pDataGridTable->GetRows(); row++)
-            {
-	        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Row: %i, Col: %i", row, col);
-		DataGridCell *pCell = pDataGridTable->GetData(col,row);
-		if(!pCell){
-		    continue;
-		}
-		qDebug()<< "Row: " << row << " " << " col: " << col <<" Data: " << pCell->GetText();
-		emit addDataGridItem(dataGridId, DataGridHandler::GetModelItemForCell(PK_DataGrid, pCell));
-            }
+	    
+	    /*	    for (int row = 0; row < pDataGridTable->GetRows(); row++)
+		    {*/
+	        emit addDataGridItem(dataGridId, PK_DataGrid, pDataGridTable);
+	/*            }
 	    pDataGridTable->ClearData();
 	    delete pDataGridTable;
-	    pDataGridTable = NULL;
+	    pDataGridTable = NULL;*/
 	    delete[] pData;
 	    pData=NULL;
         }
@@ -3964,117 +3958,6 @@ void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced
             pDataGridTable=NULL;
 
         }
-    }
-}
-
-/*
-  problem function that gets dg of alarms, but i cant get traversal right and end up with one!
-  its supposed to select the alarms and present them in a dg. Dg selection works currently, parsing does not.
-  */
-
-void DCE::qOrbiter::GetAlarms()
-{
-    bool state;
-    string *sResponse;
-
-    emit commandResponseChanged("Getting alarm state");
-    int cellsToRender= 0;
-    int gHeight = 0;
-    int gWidth = 0;
-    string dgName ="Sleeping_Alarms_"+StringUtils::itos(m_dwPK_Device);
-    int iData_Size=0;
-    int GridCurRow = 0;
-    int GridCurCol= 0;
-    char *pData;
-    pData = "NULL";
-    string m_sSeek = "";
-    m_dwIDataGridRequestCounter++;
-    string option =StringUtils::itos(i_room);
-
-    int offset = 0;
-    int pkVar  = 0;
-    int iOffset= 0;
-    string valassign = "0";
-    bool isSuccessfull;
-
-    CMD_Populate_Datagrid sleepingAlarmsGrid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName), 29, option, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
-
-    if (SendCommand(sleepingAlarmsGrid))
-    {
-        /*
-              initial request to populate the text only grid as denoted by the lack of a leading "_" as in _MediaFile_43
-              this way, we can safely check empty grids and error gracefully in the case of no matching media
-              */
-
-        //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-        DCE::CMD_Request_Datagrid_Contents sleeping_alarms( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName),    int(gWidth), int(gHeight),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
-        if(SendCommand(sleeping_alarms))
-        {
-            DataGridTable *pSleepingDataGridTable = new DataGridTable(iData_Size,pData,false);
-            cellsToRender= pSleepingDataGridTable->getTotalRowCount();
-            //  qDebug() << pSleepingDataGridTable->GetCols();
-            //  qDebug() << pSleepingDataGridTable->GetRows();
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "sleeping menu alarms Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
-            QString name;
-            QString days;
-            QString timeleft;
-            QString alarmtime;
-            int eventgrp;
-            int counter = 0;
-            int col = 0;
-            int row = 0;
-            QString test;
-
-            for (int counter = 0; counter < pSleepingDataGridTable->GetCols(); counter++)
-            {
-                DataGridCell *pCell = pSleepingDataGridTable->GetData(row,col);
-                if(!pCell){
-                    return;
-                }
-                qDebug()<< "Row: " << row << " " << " col: " << col <<" Data: " << pCell->GetText();
-                test = QString::fromStdString(pCell->GetText());
-                if (test.contains("ON"))
-                {
-                    state = true;
-                }
-                else
-                {
-                    state= false;
-                }
-                qDebug() << state;
-
-                //getting the cell right under it
-                DataGridCell *pCell2 = pSleepingDataGridTable->GetData(row+1,col);
-                eventgrp = atoi(pCell2->GetValue());
-                QString data = pCell2->GetText();
-                QStringList breakerbreaker = data.split(QRegExp("\n"), QString::KeepEmptyParts );
-                name = breakerbreaker.at(0);
-                days=breakerbreaker.at(2);
-                days.remove("Day of Week");
-                if(!breakerbreaker.at(1).split(QRegExp("\n")).isEmpty())
-                {  // qDebug() << breakerbreaker.at(1).split(QRegExp(" "),QString::SkipEmptyParts);
-                    alarmtime=breakerbreaker.at(1).split(QRegExp(" "),QString::SkipEmptyParts).first();
-                    timeleft=breakerbreaker.at(1).split(QRegExp(" "),QString::SkipEmptyParts).last();
-                }
-                else
-                {
-                    alarmtime=breakerbreaker.at(1);
-                    timeleft = "";
-                }
-
-                SleepingAlarm *t = new SleepingAlarm( eventgrp, name, alarmtime, state, timeleft, days);
-                emit sleepingAlarmsReady(t);
-                col++;
-
-            }
-            pSleepingDataGridTable->ClearData();
-            delete pSleepingDataGridTable;
-            pSleepingDataGridTable = NULL;
-            delete[] pData;
-            pData=NULL;
-
-        }
-
     }
 }
 
@@ -5538,15 +5421,17 @@ void qOrbiter::getAttributeImage(QString param)
 
 
 
-void qOrbiter::setAlarm(bool toggle, int grp)
+void qOrbiter::setAlarm(QString dataGridId, int row, int role, bool toggle, int grp)
 {
+    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "qOrbiter.setAlarm start");
     if (grp != 0)
     {
+        LoggerWrapper::GetInstance()->Write(LV_DEBUG, "qOrbiter.setAlarm grp != 0");
         CMD_Toggle_Event_Handler toggleAlarm(m_dwPK_Device, iPK_Device_eventPlugin, grp);
         string pResponse="";
         if (SendCommand(toggleAlarm, &pResponse) && pResponse =="OK"){
-            Sleep(1000);
-            GetAlarms();
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiter::setAlarm RESP = OK");
+	    emit updateItemData(dataGridId, row, role, QVariant::fromValue(toggle));
         }
         else
         {

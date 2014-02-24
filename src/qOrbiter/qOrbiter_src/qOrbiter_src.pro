@@ -440,7 +440,6 @@ SOURCES += main.cpp \
         contextobjects/bookmarkitem.cpp \       
         contextobjects/promptdata.cpp \
         datamodels/existingorbitermodel.cpp \
-        datamodels/sleepingalarmmodel.cpp \
         datamodels/devicemodel.cpp \
         datamodels/attributeobject.cpp \
     logger/qorbiterlogger.cpp \
@@ -545,7 +544,6 @@ HEADERS += \
         contextobjects/bookmarkitem.h \      
         contextobjects/promptdata.h \
         datamodels/existingorbitermodel.h \
-        datamodels/sleepingalarmmodel.h \
         datamodels/devicemodel.h \
     datamodels/attributeobject.h \
     logger/qorbiterlogger.h \

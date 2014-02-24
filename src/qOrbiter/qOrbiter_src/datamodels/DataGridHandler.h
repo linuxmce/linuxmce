@@ -26,6 +26,7 @@
 
 #include "genericmodelitem.h"
 #include "ActiveMediaStreams.h"
+#include "DataModelItems/sleepingalarm.h"
 
 using namespace DCE;
 
@@ -33,29 +34,58 @@ class DataGridHandler
 {
 
 public:
-  static GenericModelItem* GetModelItemType(int PK_DataGrid) {
+  static GenericModelItem* GetModelItemType(int PK_DataGrid, QObject* parent = 0) {
 	if (PK_DataGrid == DATAGRID_Floorplan_Media_Streams_CONST) {
-	    return new ActiveMediaStreamItem();
+	    return new ActiveMediaStreamItem(parent);
+	} else if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
+	    return new SleepingAlarm(parent);
 	} else {
-	    return new GenericModelItem();
+	    return new GenericModelItem(parent);
 	}
   }
 
-  static GenericModelItem* GetModelItemForCell(int PK_DataGrid, DataGridCell* pCell)
+  static GenericModelItem* GetModelItemForCell(int PK_DataGrid, DataGridTable* pTable, int row, QObject * parent = 0)
   {
-    GenericModelItem* pItem = GetModelItemType(PK_DataGrid);
-    LoadDataFromCell(PK_DataGrid, pItem, pCell);
+    GenericModelItem* pItem = GetModelItemType(PK_DataGrid, parent);
+    LoadDataFromTable(PK_DataGrid, pItem, pTable, row);
     return pItem;
   }
 
-  static void LoadDataFromCell(int PK_DataGrid, GenericModelItem* pItem, DataGridCell* pCell)
+  static void LoadDataFromTable(int PK_DataGrid, GenericModelItem* pItem, DataGridTable* pTable, int row)
   {
-    if (PK_DataGrid == DATAGRID_Floorplan_Media_Streams_CONST) {
-      (static_cast<ActiveMediaStreamItem*>(pItem))->setFromDataGridCell(pCell);
+    int col = 0;
+    DataGridCell *pCell = pTable->GetData(col, row);
+    if(!pCell){
+      return;
     }
-
-
-  }
+    if (PK_DataGrid == DATAGRID_Floorplan_Media_Streams_CONST) {
+        (static_cast<ActiveMediaStreamItem*>(pItem))->setFromDataGridCell(pCell);
+    } else if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
+        QString name;
+	QString days;
+	QString timeleft;
+	QString alarmtime;
+	int eventgrp;
+	bool state = QString::fromStdString(pCell->GetText()).contains("ON");
+        //getting the cell to the right
+        DataGridCell *pCell2 = pTable->GetData(1, row);
+	eventgrp = atoi(pCell2->GetValue());
+	QString data = pCell2->GetText();
+	QStringList breakerbreaker = data.split(QRegExp("\n"), QString::KeepEmptyParts );
+	name = breakerbreaker.at(0);
+	days=breakerbreaker.at(2);
+	days.remove("Day of Week");
+	if(!breakerbreaker.at(1).split(QRegExp("\n")).isEmpty())
+	{
+	    alarmtime=breakerbreaker.at(1).split(QRegExp(" "),QString::SkipEmptyParts).first();
+	    timeleft=breakerbreaker.at(1).split(QRegExp(" "),QString::SkipEmptyParts).last();
+	} else {
+	    alarmtime=breakerbreaker.at(1);
+	    timeleft = "";
+	}
+	(static_cast<SleepingAlarm*>(pItem))->setAlarmData(eventgrp, name, alarmtime, state, timeleft, days);
+    }
+}
 
 };
 

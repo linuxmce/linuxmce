@@ -25,12 +25,18 @@ class GenericFlatListModel : public QAbstractListModel
     Q_PROPERTY (int totalPages READ getTotalPages WRITE setTotalPages NOTIFY totalPagesChanged())
 
 public:
-    explicit GenericFlatListModel(GenericModelItem *prototypeItem, QObject *parent = 0);
+    explicit GenericFlatListModel(QObject *parent = 0);
+    GenericFlatListModel(GenericModelItem *prototypeItem, QObject *parent = 0);
     ~GenericFlatListModel();
+    
+    void setPrototype(GenericModelItem* pItem);
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    // Q_INVOKABLE to be able to call it from QML
+    Q_INVOKABLE bool setData(const int index, const QString roleName, const QVariant & value);
 
+    virtual Qt::ItemFlags flags(const QModelIndex & index ) const;
     QHash<int, QByteArray> roleNames() const;
 
     void appendRows(const QList<GenericModelItem*> &items);
@@ -47,7 +53,10 @@ public:
     GenericModelItem* currentRow();
 
     QModelIndex indexFromItem( const GenericModelItem* item) const;
+    void updateItemData(int row, int role, QVariant value);
+    void setModelName(QString s) { modelName = s; }
 
+    QString modelName;
     int totalcells;
     int seperator;
     bool loadingStatus;
@@ -64,7 +73,7 @@ signals:
     void loadingStatusChanged(bool state);
     void sizeChanged(int size);
     void gridTypeChanged(int type);
-    void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const int &sRow);
+    void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
     void progressChanged(double p);
     void ready(int type);
     void statusMessage(QString msg);
@@ -96,7 +105,6 @@ public slots:
      void setCurrentCells (int i) {currentCells = i; emit cellsChanged();}
      int getCurrentCells () {return currentCells;}
      void clearForPaging();
-
 
 private slots:
     void handleItemChange();

@@ -396,6 +396,7 @@ int main(int argc, char* argv[])
         orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
 
 	qmlRegisterType<GenericFlatListModel>();
+	qRegisterMetaType<QHash<int, QVariant> >("QHash<int, QVariant>");
 
         // connnect local logger
         QObject::connect(&pqOrbiter, SIGNAL(commandResponseChanged(QString)), &localLogger, SLOT(logCommandMessage(QString)));
@@ -546,9 +547,7 @@ int main(int argc, char* argv[])
         // QObject::connect (&w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()));
 
         //sleeping alarms
-        QObject::connect(&pqOrbiter, SIGNAL(sleepingAlarmsReady(SleepingAlarm*)), &w, SLOT(showSleepingAlarms(SleepingAlarm*)), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(setAlarm(bool,int)), &pqOrbiter, SLOT(setAlarm(bool,int)), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(getAlarms()), &pqOrbiter, SLOT(GetAlarms()), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(setAlarm(QString,int,int,bool,int)), &pqOrbiter, SLOT(setAlarm(QString,int,int,bool,int)), Qt::QueuedConnection);
 
         //navigation
         QObject::connect(&pqOrbiter,SIGNAL(gotoQml(QString)), &w, SLOT(gotoQScreen(QString)),Qt::QueuedConnection);
@@ -602,8 +601,10 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(newFileFormatSort(AttributeSortItem*)), w.uiFileFilter, SLOT(appendRow(AttributeSortItem*)), Qt::QueuedConnection);
 
 	// generic datagrid signals
-        QObject::connect(&pqOrbiter,SIGNAL(addDataGridItem(QString, GenericModelItem*)), &w, SLOT(addDataGridItem(QString, GenericModelItem*)),Qt::QueuedConnection);
-        QObject::connect(&w,SIGNAL(loadDataGrid(QString,int)), &pqOrbiter, SLOT(loadDataGrid(QString,int)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(prepareDataGrid(QString,int,int)), &w, SLOT(prepareDataGrid(QString,int,int)),Qt::DirectConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(addDataGridItem(QString,int,DataGridTable*)), &w, SLOT(addDataGridItem(QString,int,DataGridTable*)),Qt::QueuedConnection);
+        QObject::connect(&w,SIGNAL(loadDataGrid(QString,int,QString)), &pqOrbiter, SLOT(loadDataGrid(QString,int,QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(updateItemData(QString,int,int,QVariant)), &w, SLOT(updateItemData(QString,int,int,QVariant)), Qt::QueuedConnection);
 
         //now playing signals
         QObject::connect(&pqOrbiter, SIGNAL(setNowPlaying(bool)), w.nowPlayingButton,SLOT(setStatus(bool)),Qt::QueuedConnection);

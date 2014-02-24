@@ -277,10 +277,6 @@ orbiterInit=true;
     SecurityVideo = new SecurityVideoClass(this);
     qorbiterUIwin->rootContext()->setContextProperty("securityvideo", SecurityVideo);
 
-    //-alarms
-    sleeping_alarms = new SleepingAlarmModel(this);
-    qorbiterUIwin->rootContext()->setContextProperty("alarms",sleeping_alarms );
-
     QApplication::processEvents(QEventLoop::AllEvents);
     attribFilter = new AttributeSortModel(new AttributeSortItem,6, this);
     uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, this);
@@ -296,6 +292,8 @@ orbiterInit=true;
      * \todo move filters to their own initialization function, possibly multiple to account for dynamic setting of each one later.
      */
 
+    // Prepares models in this qt thread so owner thread is not QML as they would have been if they were created later
+    prepareModelPool(5);
 
     /*Needs Doin at construction */
     userList = new UserModel( new UserItem, this);
@@ -305,12 +303,16 @@ emit orbiterInitialized();
 
 qorbiterManager::~qorbiterManager()
 {
+    // clear any generic datagrids
+    clearAllDataGrid();
+
     cleanupData();
 }
 
 void qorbiterManager::gotoQScreen(QString s)
 {
 
+    clearAllDataGrid();
     if(s.contains("Screen_1.qml"))
     {
       logQtMessage("QOrbiter clearing models because screen is 1");
@@ -1077,17 +1079,43 @@ bool qorbiterManager::requestDataGrid()
     return true;
 }
 
-void qorbiterManager::addDataGridItem(QString dataGridId, GenericModelItem *pItem)
+void qorbiterManager::prepareDataGrid(QString dataGridId, int height, int width)
 {
-    qDebug() <<"manager.addDataGridItem() " << dataGridId;
-    if (!m_mapDataGridModels.contains(dataGridId))
+
+    if (m_mapDataGridModels.contains(dataGridId))
     {
-        LoggerWrapper::GetInstance()->Write(LV_STATUS, "addDataGridItem() preparing GenericFlatListModel");
-        GenericFlatListModel* pModel = new GenericFlatListModel(pItem, this);
-	m_mapDataGridModels.insert(dataGridId, pModel);
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "prepareDataGrid, clearing model");
+	m_mapDataGridModels[dataGridId]->clear();
     }
-    m_mapDataGridModels[dataGridId]->appendRow(pItem);
-    qDebug() <<"manager.addDataGridItem() end";
+}
+
+void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, DataGridTable* pTable)
+{
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "addDataGridItem() start");
+
+    for (int row = 0; row < pTable->GetRows(); row++)
+    {
+        GenericModelItem* pItem = DataGridHandler::GetModelItemForCell(PK_DataGrid, pTable, row);
+	m_mapDataGridModels[dataGridId]->appendRow(pItem);
+    }
+    pTable->ClearData();
+    delete pTable;
+
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "addDataGridItem() end");
+}
+
+void qorbiterManager::updateItemData(QString dataGridId, int row, int role, QVariant value)
+{
+    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "updateItemData() start");
+    if (m_mapDataGridModels.contains(dataGridId))
+    {
+        GenericFlatListModel* pModel = m_mapDataGridModels.value(dataGridId);
+    
+	pModel->updateItemData(row, role, value);
+    } else {
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "updateItemData() no such datagridid %s", dataGridId.toStdString().c_str());
+    }
+    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "updateItemData() end");
 }
 
 void qorbiterManager::clearDataGrid(QString dataGridId)
@@ -1096,7 +1124,9 @@ void qorbiterManager::clearDataGrid(QString dataGridId)
     if (m_mapDataGridModels.contains(dataGridId))
     {
         GenericFlatListModel* pModel = m_mapDataGridModels.take(dataGridId);
-	delete pModel;
+	pModel->clear();
+	pModel->setModelName("");
+	m_modelPool.push(pModel);
     }
     qDebug() << "manager.clearDataGrid() end";
 }
@@ -1104,23 +1134,45 @@ void qorbiterManager::clearDataGrid(QString dataGridId)
 void qorbiterManager::clearAllDataGrid() 
 {
     qDebug() << "manager.clearAllDataGrid()";
-    qDeleteAll(m_mapDataGridModels);
+    foreach (QString id, m_mapDataGridModels.keys())
+    {
+        GenericFlatListModel* pModel = m_mapDataGridModels.take(id);
+	pModel->clear();
+	pModel->setModelName("");
+	m_modelPool.push(pModel);
+    }
     qDebug() << "manager.clearAllDataGrid() end";
+}
+
+void qorbiterManager::prepareModelPool(int poolSize)
+{
+    // We must create the model here, so that QML will get a valid model returned from this method
+    // because this method will probably be called first (at property binding) from QML (before loadDataGrid)
+
+  for (int i = 0; i < poolSize; i++)
+    {
+      m_modelPool.push(new GenericFlatListModel(this));
+    }
 }
 
 GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int PK_DataGrid)
 {
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() id = %s", dataGridId.toStdString().c_str());
 
-    // We must create the model here, so that QML will get a valid model returned from this method
-    // because this method will probably be called first (at property binding) from QML (before loadDataGrid)
     if (!m_mapDataGridModels.contains(dataGridId))
     {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() preparing GenericFlatListModel");
-        GenericFlatListModel* pModel = new GenericFlatListModel(DataGridHandler::GetModelItemType(PK_DataGrid), this);
+        GenericFlatListModel* pModel = m_modelPool.pop();
+	pModel->setPrototype(DataGridHandler::GetModelItemType(PK_DataGrid));
+	pModel->setModelName(dataGridId);
 	m_mapDataGridModels.insert(dataGridId, pModel);
     }
-    emit loadDataGrid(dataGridId, PK_DataGrid); // loads data
+    QString option = "";
+    if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST)
+        option = QString::number(iFK_Room);
+
+    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "getDataGridModel() emit loadDataGrid");
+    emit loadDataGrid(dataGridId, PK_DataGrid, option); // loads data
     return m_mapDataGridModels[dataGridId];
 }
 
@@ -2117,23 +2169,11 @@ bool qorbiterManager::getRequestMore()
     return requestMore;
 }
 
-void qorbiterManager::updateAlarm(bool toggle, int grp)
+void qorbiterManager::updateAlarm(QString dataGridId,int row,int role,bool s, int g)
 {
-    //  sleeping_alarms->clear();
-    emit setAlarm(toggle, grp);
-
+   LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::updateAlarm");
+   emit setAlarm(dataGridId, row, role, s, g);
 }
-
-void qorbiterManager::showSleepingAlarms(SleepingAlarm *s)
-{
-    SleepingAlarm *t = sleeping_alarms->find(s->id());
-
-    if(t)
-        t->updateStatus(s->currentState());
-    else
-        sleeping_alarms->appendRow(new SleepingAlarm(s->eventHandler, s->name, s->alarmTime, s->b_state, s->timeLeft, s->activeDays));
-}
-
 
 void qorbiterManager::checkConnection()
 {
@@ -2171,17 +2211,13 @@ bool qorbiterManager::cleanupData()
     floorplans->clear();
     nowPlayingButton->resetData();
     filedetailsclass->clear();
-    sleeping_alarms->clear();
     screensaverImages.clear();
 
     attribFilter->clear();
     genreFilter->clear();
     mediaTypeFilter->clear();
     uiFileFilter->clear();
-    userList->clear();
-
-    // clear any generic datagrids
-    clearAllDataGrid();
+    userList->clear(); 
 
     m_bStartingUp=true;
     return true;

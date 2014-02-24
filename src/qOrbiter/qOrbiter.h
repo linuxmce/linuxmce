@@ -1425,8 +1425,9 @@ signals:
      * @name Generic datagrids
      */
     ///@{
-    void addDataGridItem(QString dataGridID, GenericModelItem* item);
-    void prepareDataGrid(QString dataGridID, GenericModelItem* item);
+    void addDataGridItem(QString dataGridID, int PK_DataGrid, DataGridTable* pTable);
+    void updateItemData(QString dataGridId, int row, int role, QVariant value);
+    void prepareDataGrid(QString dataGridID, int height, int width);
     ///@}
 
     /** @name Now Playing Signals
@@ -1546,13 +1547,6 @@ signals:
     void currentScreenSaverImage(QByteArray b);
     ///@}
 
-    /** @name Sleeping alarms signals
-     * Signals relating to the sleeping alarms
-     */
-    ///@{
-    void sleepingAlarmsReady(SleepingAlarm *t);
-    ///@}
-
     /** @name OSD properties
      * Properties relating specifically to and onscreen orbiter
      */
@@ -1650,7 +1644,7 @@ public slots:
 
     void getVolume();
 
-    void setAlarm(bool toggle, int grp);
+    void setAlarm(QString dataGridId, int row, int role, bool toggle, int grp);
 
     void beginSetup();
 
@@ -1782,7 +1776,7 @@ public slots:
     void getGridView(bool direction);
     void seekToGridPosition(QString s);
 
-    void loadDataGrid(QString dataGridID, int PK_DataGrid);
+    void loadDataGrid(QString dataGridID, int PK_DataGrid, QString option);
 
     //media
     void getContextImage(int attributeNumber);
@@ -1831,7 +1825,6 @@ public slots:
     void powerOff(QString deviceType);
 
     void GetAdvancedMediaOptions(int device);
-    void GetAlarms();
     void setZoom(QString zoomLevel);
     void setAspect(QString ratio);
     void GetText(int textno);

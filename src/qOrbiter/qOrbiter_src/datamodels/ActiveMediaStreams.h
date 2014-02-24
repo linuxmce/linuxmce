@@ -33,12 +33,12 @@ class ActiveMediaStreamItem : public GenericModelItem
 {
     Q_OBJECT
 
+public:
     enum Roles {
         StreamIDRole = Qt::UserRole+1,
         DescriptionRole =Qt::UserRole+2,
     };
 
-public:
     ActiveMediaStreamItem(DataGridCell *pCell);
     explicit ActiveMediaStreamItem( QObject *parent = NULL);
     void setFromDataGridCell(DataGridCell *pCell);

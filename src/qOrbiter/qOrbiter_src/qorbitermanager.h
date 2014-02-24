@@ -54,7 +54,6 @@
 
 #include<datamodels/existingorbitermodel.h>
 #include<datamodels/attributeobject.h>
-#include <datamodels/sleepingalarmmodel.h>
 #include <datamodels/genericflatlistmodel.h>
 
 #include <QStringList>
@@ -115,10 +114,10 @@
 #include <imageProviders/basicImageProvider.h>                 //qml image provider
 #include <imageProviders/gridimageprovider.h>                  //qml image provider for grids !not implemented!
 #include <screensaver/screensavermodule.h>
-#include <datamodels/DataModelItems/sleepingalarm.h>
 
 /*-------Dce Includes----*/
 #include <qOrbiter/qOrbiter.h>
+#include <DCE/DataGrid.h>
 
 /*---------------Threaded classes-----------*/
 
@@ -265,9 +264,6 @@ public:
     ScreenParamsClass *ScreenParameters;
     SecurityVideoClass *SecurityVideo;
     QList<QObject*> screenshotVars;
-
-    //-------------sleeping menu----------------------
-    SleepingAlarmModel * sleeping_alarms;
 
     //------------media vars-----------------------------------
     FileDetailsClass *filedetailsclass;
@@ -439,6 +435,7 @@ Param 10 - pk_attribute
     QMap <int, QString*> * mediatypeTranslation;
 
     QMap <QString, GenericFlatListModel*> m_mapDataGridModels;
+    QStack <GenericFlatListModel*> m_modelPool;
 
     //ui functions
     Q_INVOKABLE QDateTime getCurrentDateTime() const { return QDateTime::currentDateTimeUtc();}
@@ -621,7 +618,7 @@ signals:
     void stillLoading(bool b);
     void requestSubtypes(int subtype);
 
-    void loadDataGrid(QString dataGridId, int PK_DataGrid);
+    void loadDataGrid(QString dataGridId, int PK_DataGrid, QString option);
 
     /*Message and notification signals*/
     void dceResponseChanged();
@@ -693,8 +690,7 @@ signals:
     /*DCE Signals*/
     void reloadRouter();
     void executeCMD(int);
-    void setAlarm(bool s, int g);
-    void getAlarms();
+    void setAlarm(QString dataGridId,int row,int role,bool s, int g);
     void getSingleCam(int i_pk_camera_device, int h, int w);
     void dceGridSepChanged(int d);
     void commandCompleted();
@@ -1344,8 +1340,14 @@ public slots:
     void setCurrentPage(int page) {media_currentPage = page;   emit mediaPageChanged();  }
     int getCurrentPage() {return media_currentPage;}
 
+
+    void prepareModelPool(int poolSize);
+
+    /* called when a datagrid is about to be populated)*/
+    void prepareDataGrid(QString dataGridID, int height, int width);
     /* called when a datagrid item is ready (received)*/
-    void addDataGridItem(QString dataGridID, GenericModelItem *t);
+    void addDataGridItem(QString dataGridID, int PK_DataGrid, DataGridTable* pTable);
+    void updateItemData(QString dataGridId, int row, int role, QVariant value);
     /* called to clear all (temp) datagrids */
     void clearDataGrid(QString dataGridID);
     void clearAllDataGrid();
@@ -1380,9 +1382,7 @@ public slots:
 
     /*! @name Sleeping menu  */
     //@{
-    void updateAlarm(bool toggle, int grp);
-    void showSleepingAlarms(SleepingAlarm *s);
-    void getSleepingAlarms() {sleeping_alarms->clear(); emit getAlarms();}
+    void updateAlarm(QString dataGridId,int row,int role,bool s, int g);
     //@}
 
     /*! @name logging slots */

@@ -16,6 +16,12 @@ using namespace DCE;
  *
  */
 
+GenericFlatListModel::GenericFlatListModel(QObject *parent) :
+  QAbstractListModel(parent), m_prototype(NULL)
+{
+    qRegisterMetaType<QModelIndex>("QModelIndex");
+
+}
 GenericFlatListModel::GenericFlatListModel(GenericModelItem *prototypeItem, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototypeItem)
 {
@@ -33,6 +39,13 @@ GenericFlatListModel::GenericFlatListModel(GenericModelItem *prototypeItem, QObj
     setTotalPages(0);
 }
 
+void GenericFlatListModel::setPrototype(GenericModelItem* pItem)
+{
+  m_prototype = pItem;
+#ifndef QT5
+    setRoleNames(m_prototype->roleNames());
+#endif
+}
 int GenericFlatListModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
@@ -47,13 +60,33 @@ QVariant GenericFlatListModel::data(const QModelIndex &index, int role) const
     return m_list.at(index.row())->data(role);
 }
 
+bool GenericFlatListModel::setData(const int index, const QString roleName, const QVariant & value)
+{
+    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.setData");
+    
+    if(index < 0 || index >= m_list.size())
+        return false;
+
+    int role = m_prototype->roleNames().key(roleName.toUtf8());
+    if (role > 0)
+        return m_list.at(index)->setData(role, value);
+    else
+        return false;
+}
+
+Qt::ItemFlags GenericFlatListModel::flags ( const QModelIndex & index ) const 
+{
+  return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+}
+
 QHash<int, QByteArray> GenericFlatListModel::roleNames() const
 {
     return m_prototype->roleNames();
 }
 
 GenericFlatListModel::~GenericFlatListModel() {
-    delete m_prototype;
+    if (m_prototype != NULL)
+        delete m_prototype;
     clear();
 }
 
@@ -65,11 +98,12 @@ void GenericFlatListModel::appendRow(GenericModelItem *item)
 
 void GenericFlatListModel::appendRows(const QList<GenericModelItem *> &items)
 {
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "GenericFlatListModel.appendRows start");
+    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.appendRows start");
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(GenericModelItem *item, items) {
-         QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
-         m_list.append(item);
+        item->setParent(this);
+        QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
+        m_list.append(item);
     }
     endInsertRows();
     
@@ -80,11 +114,11 @@ void GenericFlatListModel::appendRows(const QList<GenericModelItem *> &items)
     // setCurrentCells(currentRows);
     // double p = (((double)m_list.size() / (double)seperator) * 100) ;
     //setProgress(p);
-    emit dataChanged(index2, index, currentRows);
+    emit dataChanged(index2, index);
     /* setLoadingStatus(false);
     QApplication::processEvents(QEventLoop::AllEvents);*/
 
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "GenericFlatListModel.appendRows end");
+    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.appendRows end");
 }
 
 void GenericFlatListModel::insertRow(int row, GenericModelItem *item)
@@ -100,13 +134,14 @@ void GenericFlatListModel::insertRow(int row, GenericModelItem *item)
 
 void GenericFlatListModel::handleItemChange()
 {
-  /*    GenericModelItem* item = static_cast<GenericModelItem*>(sender());
+    GenericModelItem* item = static_cast<GenericModelItem*>(sender());
     QModelIndex index = indexFromItem(item);
     qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
-        emit dataChanged(index, index, index.row() );
-	}*/
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "GenericFlatListModel.handleItemChange emit dataChanged");
+        emit dataChanged(index, index);
+    }
 }
 
 void GenericFlatListModel::reset()
@@ -170,19 +205,29 @@ QModelIndex GenericFlatListModel::indexFromItem(const GenericModelItem *item) co
     return QModelIndex();
 }
 
+void GenericFlatListModel::updateItemData(int row, int role, QVariant value)
+{
+    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.updateItemData start");
+    // TODO: should make sure model data is identical to when update request was sent
+    GenericModelItem* pItem = m_list.at(row);
+    pItem->updateData(role, value);
+    QModelIndex index = indexFromItem(pItem);
+    emit dataChanged(index, index);
+    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.updateItemData end");
+}
+
 void GenericFlatListModel::clear()
 {
     clearing = true;
-    QApplication::processEvents(QEventLoop::AllEvents);
-    emit modelAboutToBeReset();
+    //    QApplication::processEvents(QEventLoop::AllEvents);
+    // emit modelAboutToBeReset();
     beginResetModel();
-    qDeleteAll(m_list);
     m_list.clear();
-    setProgress(0.0);
-    QApplication::processEvents(QEventLoop::AllEvents);
+    // setProgress(0.0);
+    // QApplication::processEvents(QEventLoop::AllEvents);
     endResetModel();
-    emit modelReset();
-    QApplication::processEvents(QEventLoop::AllEvents);
+    // emit modelReset();
+    // QApplication::processEvents(QEventLoop::AllEvents);
     clearing = false;
 
 }

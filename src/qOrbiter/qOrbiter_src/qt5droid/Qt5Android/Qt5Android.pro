@@ -199,12 +199,12 @@ SOURCES += ../../main.cpp \
         ../../contextobjects/bookmarkitem.cpp \      
         ../../contextobjects/promptdata.cpp \
         ../../datamodels/existingorbitermodel.cpp \
-        ../../datamodels/sleepingalarmmodel.cpp \
         ../../datamodels/devicemodel.cpp \
         ../../datamodels/attributeobject.cpp \
     ../../logger/qorbiterlogger.cpp \
     ../../datamodels/genericflatlistmodel.cpp \
     ../../datamodels/genericmodelitem.cpp \
+    ../../datamodels/ActiveMediaStreams.cpp \
     ../../datamodels/listitembase.cpp
 
 
@@ -312,12 +312,12 @@ HEADERS += \
         ../../contextobjects/bookmarkitem.h \     
         ../../contextobjects/promptdata.h \
         ../../datamodels/existingorbitermodel.h \
-        ../../datamodels/sleepingalarmmodel.h \
         ../../datamodels/devicemodel.h \
     ../../datamodels/attributeobject.h \
     ../../logger/qorbiterlogger.h \
     ../../datamodels/genericflatlistmodel.h \
     ../../datamodels/genericmodelitem.h \
+    ../../datamodels/ActiveMediaStreams.h \
     ../../datamodels/listitembase.h
 
 RESOURCES += \

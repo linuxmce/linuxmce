@@ -8,7 +8,8 @@
 #include <QDebug>
 
 #endif
-class SleepingAlarm : public QObject
+#include "../genericmodelitem.h"
+class SleepingAlarm : public GenericModelItem
 {
     Q_OBJECT
 
@@ -23,30 +24,13 @@ class SleepingAlarm : public QObject
     };
 public:
 
-   explicit SleepingAlarm(int i, QString n, QString f, bool u, QString c, QString k);
+    explicit SleepingAlarm(QObject* parent = NULL);
 
-    QVariant data(int role) const;
-    QHash<int, QByteArray> roleNames() const;
-    inline QString id() const { return name; }
-    inline int handler() const { return eventHandler; }
-    inline QString remaining() const { return timeLeft; }
-    inline QString active() const { return activeDays; }
-    inline bool currentState() const {return b_state;}
-    inline QString time() const {return alarmTime;}
-
-    int eventHandler;
-    QString alarmTime;
-    bool b_state;
-    QString timeLeft;
-    QString activeDays;
-    QString status;
-    QString name;
-
+    void setAlarmData(int i, QString n, QString f, bool u, QString c, QString k);
+    virtual bool setData(int role, const QVariant &value);
 
 signals:  
     void dataChanged();
-public slots:
-    void updateStatus(bool s);
 
 };
 
