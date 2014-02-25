@@ -254,14 +254,19 @@ Item {
                 height: parent.height
                 font.weight: Font.Light
             }
-
-
-           MouseArea{
-               id:mouseclick
-               anchors.fill: parent
-               onClicked:manager.setStringParam(4, id);
-               onPressAndHold: fileviewscreen.state="alphabets"
-           }
+	    Flickable {
+		anchors.fill:parent
+		flickableDirection: Flickable.HorizontalFlick
+		onContentXChanged: alphaList.setDragout(contentX)
+		contentWidth: parent.width + alphaList.width
+		MouseArea{
+		    id:mouseclick
+		    anchors.fill: parent
+		    onClicked: { 
+			manager.setStringParam(4, id);
+		    }
+		}
+	    }
         }
     }
 
@@ -326,50 +331,65 @@ Item {
         }
     }
 
-    ListView{
-        id:alpha_list
-        height: manager.appHeight
-        width: scaleX(10)
-        model: alphabetlist
 
+    Rectangle {
+	id: alphaList
+        height: manager.appHeight
+        width: scaleX(14)
         anchors{
             top:fileviewscreen.top
-            left:list_view1.right
             bottom:fileviewscreen.bottom
-            right:fileviewscreen.right
         }
+        color: "black"
+        opacity:.75
 
-        delegate: Item{
-            height: scaleY(10)
-            width: scaleX(10)
+	x: fileviewscreen.x + fileviewscreen.width
+	
+	function setDragout(xLength){
+	    if (xLength > 30 || xLength < -30) {
+		if (xLength > alphaList.width) {
+		    xLength = alphaList.width
+		}
+		alphaList.x = fileviewscreen.x + fileviewscreen.width - xLength
+	    }
+	}
 
-            StyledText {
-                id:alpha_label
-                text: name
-                anchors.centerIn: parent
-                color: "white"
-                font.bold: true
-                fontSize: 42
-            }
+	ListView{
+            id:alpha_list
+            model: alphabetlist
+	    anchors.fill:parent
 
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    fileviewscreen.state="browsing"
-                    currentSeekLetter = name
-                    if(dataModel.totalPages==1){
-                        list_view1.maingrid.positionViewAtIndex(dataModel.setSection(name), ListView.Beginning)
-                    }else{
-                        manager.setGridStatus(false)
-                        manager.setSeekLetter(name)
+            delegate: Item{
+		height: scaleY(10)
+		width: scaleX(10)
 
+		StyledText {
+                    id:alpha_label
+                    text: name
+                    anchors.centerIn: parent
+                    color: "white"
+                    font.bold: true
+                    fontSize: 42
+		}
+
+		MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+			fileviewscreen.state="browsing"
+			currentSeekLetter = name
+			if(dataModel.totalPages==1){
+                            list_view1.maingrid.positionViewAtIndex(dataModel.setSection(name), ListView.Beginning)
+			}else{
+                            manager.setGridStatus(false)
+                            manager.setSeekLetter(name)
+			}
                     }
-                }
-                onPressAndHold: {
-                    fileviewscreen.state="browsing"
-                }
+                    onPressAndHold: {
+			fileviewscreen.state="browsing"
+                    }
+		}
             }
-        }
+	}
     }
 
 
