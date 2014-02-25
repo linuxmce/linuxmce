@@ -1805,7 +1805,7 @@ public slots:
     void updateFloorPlan(QString p);
     void GetScreenSaverImages();
     void BindMediaRemote(bool onoff);
-    void jumpToPlaylistPosition(int pos);
+    void jumpToPlaylistPosition(QString pos);
 
     void setNowPlayingDetails();
     void SetSecurityStatus(string pin, string mode, int user, string special);

@@ -3228,7 +3228,7 @@ void qOrbiter::changedPlaylistPosition(QString pos)
     if(!pos.contains(QRegExp("TITLE:")))
     {
         //  qDebug() << pos;
-        jumpToPlaylistPosition(pos.toInt());
+        jumpToPlaylistPosition(pos);
     }
     else
     {
@@ -3298,10 +3298,10 @@ void DCE::qOrbiter::BindMediaRemote(bool onoff)
     SendCommand(bind_remote);
 }
 
-void DCE::qOrbiter::jumpToPlaylistPosition(int pos)
+void DCE::qOrbiter::jumpToPlaylistPosition(QString pos)
 {
     //qDebug("jumping to playlist item");
-    CMD_Jump_Position_In_Playlist jump_playlist(m_dwPK_Device, iMediaPluginID, StringUtils::itos(pos), internal_streamID);
+    CMD_Jump_Position_In_Playlist jump_playlist(m_dwPK_Device, iMediaPluginID, pos.toStdString(), internal_streamID);
     SendCommand(jump_playlist);
 }
 

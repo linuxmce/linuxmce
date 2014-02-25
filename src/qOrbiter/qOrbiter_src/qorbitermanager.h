@@ -542,7 +542,7 @@ signals:
     void stopMediaInEa(int PK_EntertainArea);
     void stop_AV();
     void seekGrid(QString s);
-    void newPlaylistPosition(int pos);
+    void newPlaylistPosition(QString pos);
     void bindMediaRemote(bool b);
     void startPlayback(QString file);
     void play();
@@ -931,10 +931,10 @@ public slots:
 
     /*!
      * \brief This slot is called the PlaylistClickedHandler
-     * \param position
+     * \param position This can be relative +1, -1 and a absolute position
      * \ingroup qorbiter_properties
      */
-    void changedPlaylistPosition(int position) {emit newPlaylistPosition(position);}
+    void changedPlaylistPosition(QString position) {emit newPlaylistPosition(position);}
     //@}
 
     /*! @name Media Mode control slots*/

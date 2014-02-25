@@ -464,7 +464,7 @@ int main(int argc, char* argv[])
 
         //stored media signal
         QObject::connect(&pqOrbiter,SIGNAL(playlistItemAdded(PlaylistItemClass*)), storedVideoPlaylist,SLOT(appendRow(PlaylistItemClass*)), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(newPlaylistPosition(int)) , &pqOrbiter, SLOT(jumpToPlaylistPosition(int)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(newPlaylistPosition(QString)) , &pqOrbiter, SLOT(jumpToPlaylistPosition(QString)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(resetNowPlaying()), w.nowPlayingButton, SLOT(resetData()));
         QObject::connect(&pqOrbiter, SIGNAL(setPlaylistPosition(int)), w.nowPlayingButton, SLOT(setPlaylistPostion(int)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(changeTrack(QString)), &pqOrbiter, SLOT(changedTrack(QString)), Qt::QueuedConnection);
