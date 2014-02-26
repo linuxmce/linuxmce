@@ -3,7 +3,8 @@
 #include <QHash>
 #include <QVariant>
 #include "DCE/Logger.h"
-#include "../../../qorbitermanager.h"
+#include "../../qorbitermanager.h"
+
 using namespace DCE;
 
 SleepingAlarm::SleepingAlarm(QObject* parent) : GenericModelItem(parent) {
