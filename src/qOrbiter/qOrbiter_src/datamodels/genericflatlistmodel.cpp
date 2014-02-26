@@ -1,6 +1,6 @@
 #include "genericflatlistmodel.h"
 #include "DCE/Logger.h"
-#include "../../qorbitermanager.h"
+#include "../qorbitermanager.h"
 
 using namespace DCE;
 
