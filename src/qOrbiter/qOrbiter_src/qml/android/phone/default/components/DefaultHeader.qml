@@ -43,7 +43,7 @@ Item{
 
     Item{
         id:optionContainer
-        width: manager.b_orientation ? scaleX(6) : scaleX(8)
+        width: parent.height
 
         anchors{
             right: parent.right
@@ -54,20 +54,25 @@ Item{
             id:optionCol
             spacing:2
             anchors.fill: parent
+	    anchors.verticalCenter: parent.verticalCenter
+
             Rectangle{
-                color: "green"
-                height: hdr.height /4
+                color: style.darkhighlight
+                height: hdr.height /5
+                width: height
+		anchors.horizontalCenter: parent.horizontalCenter
+            }
+            Rectangle{
+                color: style.darkhighlight
+                height: hdr.height /5
+		anchors.horizontalCenter: parent.horizontalCenter
                 width: height
             }
             Rectangle{
-                color: "green"
-                height: hdr.height /4
+                color: style.darkhighlight
+                height: hdr.height /5
                 width: height
-            }
-            Rectangle{
-                color: "green"
-                height: hdr.height /4
-                width: height
+		anchors.horizontalCenter: parent.horizontalCenter
             }
         }
         MouseArea{

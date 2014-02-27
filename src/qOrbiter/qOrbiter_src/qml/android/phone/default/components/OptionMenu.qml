@@ -14,18 +14,18 @@ Item{
     }
 
     Rectangle{
-        anchors.fill: btnDisplay
-        color: style.stageBG
+        anchors.fill: optionMenu
+        color: style.button_system_color_hover // used as border between items
     }
 
     ListView{
         id: menuView
 	model: menuItems
         height:advancedrow.height
-	delegate:         StyledButton{
+	spacing: 2
+	delegate: MenuItem {
             height: localButtonH
-            width:advancedrow.width-10
-            useBorder: false
+	    width: advancedrow.width
             buttonText: text
             onActivated:  menuView.model.onClick(index)
         }

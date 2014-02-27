@@ -60,6 +60,7 @@ MediaScrollBar             MediaScrollBar.qml                        #no comment
 MediaSelector             MediaSelector.qml                        #no comment
 MediaSources             MediaSources.qml                        #no comment
 MediaTypes             MediaTypes.qml                        #no comment
+MenuItem	       MenuItem.qml			     #no comment
 MetaBlock             MetaBlock.qml                        #no comment
 Metadata_13             Metadata_13.qml                        #no comment
 Metadata_43             Metadata_43.qml                        #no comment
