@@ -5,6 +5,32 @@
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Utils.sh
 
+DEVICECATEGORY_Standard_Orbiter=3
+DEVICEDATA_PK_Distro=7
+
+getorbiterid()
+{
+	Q="SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia='$PK_Device'"
+	R=$(RunSQL "$Q")
+	for ROW in ${R}; do
+		device=$(Field 1 "$ROW")
+		Q="SELECT PK_Device FROM Device WHERE FK_Device_ControlledVia='$device'"
+		RES=$(RunSQL "$Q")
+		R=${R}$'\n\t '${RES}
+	done
+
+	for ROW in ${R}; do
+		device=$(Field 1 "$ROW")
+		Q="SELECT PK_Device FROM Device JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE FK_DeviceCategory=$DEVICECATEGORY_Standard_Orbiter AND (FK_Device_ControlledVia='$device' OR FK_Device_ControlledVia='$PK_Device')"
+		Orbiter_Device=$(RunSQL "$Q")
+		if [[ -n "$Orbiter_Device" ]]; then
+			builtin echo $Orbiter_Device
+			break
+		fi
+	done
+}
+
+
 Q="SELECT FK_DeviceCategory FROM Device JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE PK_Device=$PK_Device"
 DeviceCategory=$(RunSQL "$Q")
 
@@ -50,6 +76,13 @@ if [ -e /usr/share/kubuntu-default-settings/kde-profile/default/share/config/ksm
 			done < /usr/share/kubuntu-default-settings/kde-profile/default/share/config/ksmserverrc
 			mv /usr/share/kubuntu-default-settings/kde-profile/default/share/config/ksmserverrc.$$ /usr/share/kubuntu-default-settings/kde-profile/default/share/config/ksmserverrc
 	fi
+fi
+
+# Set DeviceData Distro properly for this orbiter
+OrbiterID=$(getorbiterid)
+if [[ -n "${OrbiterID}" ]]; then
+	Q="UPDATE Device_DeviceData SET IK_DeviceData='$PK_Distro' WHERE FK_Device='${OrbiterID}' AND FK_DeviceData='$DEVICEDATA_PK_Distro'"
+	R=$(RunSQL "$Q")
 fi
 
 exit 0
