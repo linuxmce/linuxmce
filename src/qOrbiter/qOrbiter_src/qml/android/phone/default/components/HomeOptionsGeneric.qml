@@ -10,29 +10,21 @@ Item{
         right:parent.right
     }
 
-    Rectangle{
-        anchors.fill: parent
-        color: "green"
-        opacity: .85
-        border.color: "white"
-    }
-
-    VisualItemModel {
+    ListModel {
         id:buttons
-        StyledButton{
-            height: localButtonH
-            width:advancedrow.width-10
-            useBorder: false
-            buttonText: qsTr("Home")
-            onActivated:  {manager.gotoQScreen("Screen_1.qml"); showOptions = !showOptions }
-        }
-
+	ListElement { text: "Home" }
+	function onClick(index) {
+	    showOptions = !showOptions;
+	    switch (index) {
+		case 0:
+		manager.gotoQScreen("Screen_1.qml");
+		break;
+	    }
+	}
+    }
+    OptionMenu {
+	menuItems: buttons
     }
 
-    ListView{
-        id:btnDisplay
-        model:buttons
-        height:(buttons.count+1)*localButtonH
-    }
 
 }

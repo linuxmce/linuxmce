@@ -11,91 +11,51 @@ Item{
         right:parent.right
     }
 
-    Rectangle{
-        anchors.fill: parent
-        color: "green"
-        opacity: .85
-    }
-
-    VisualItemModel {
+    ListModel {
         id:buttons
+	ListElement { text: "Home" }
+	ListElement { text: "Play All" }
+	ListElement { text: "Attribute\nSort" }
+	ListElement { text: "Genre" }
+	ListElement { text: "Sources" }
+	ListElement { text: "Resolution" }
+	ListElement { text: "Mediatypes" }
+	ListElement { text: "Users" }
 
-        StyledButton{
-            height: localButtonH
-            width:advancedrow.width-10
-            anchors.horizontalCenter: parent.horizontalCenter
-            useBorder: true
-            buttonText: qsTr("Play All")
-            onActivated:{manager.playMedia("!G"+iPK_Device); showOptions = !showOptions }
-        }
-        StyledButton{
-            height: localButtonH
-            width:advancedrow.width-10
-            useBorder: true
-            anchors.horizontalCenter: parent.horizontalCenter
-            buttonText: qsTr("Attribute\nSort")
-            onActivated:{filterTarget.currentModel = attribfilter; showOptions = !showOptions }
-        }
-        StyledButton{
-            height: localButtonH
-            width:advancedrow.width-10
-            anchors.horizontalCenter: parent.horizontalCenter
-            useBorder: true
-            buttonText: qsTr("Genre")
-            onActivated:{filterTarget.currentModel = genrefilter; showOptions = !showOptions }
-        }
-        StyledButton{
-            height: localButtonH
-            width:advancedrow.width-10
-            anchors.horizontalCenter: parent.horizontalCenter
-            useBorder: true
-            buttonText: qsTr("Sources")
-            onActivated:{filterTarget.currentModel = mediasourcelist; showOptions = !showOptions }
-        }
-        StyledButton{
-            height: localButtonH
-            width:advancedrow.width-10
-            anchors.horizontalCenter: parent.horizontalCenter
-            useBorder: false
-            buttonText: qsTr("Resolution")
-            onActivated:{filterTarget.currentModel = fileformatmodel; showOptions = !showOptions }
-        }
-        StyledButton{
-            height: localButtonH
-            width:advancedrow.width-10
-            anchors.horizontalCenter: parent.horizontalCenter
-            useBorder: true
-            buttonText: qsTr("Mediatypes")
-            onActivated:{filterTarget.currentModel = mediatypefilter; showOptions = !showOptions }
-        }
-        StyledButton{
-            height: localButtonH
-            width:advancedrow.width-10
-            anchors.horizontalCenter: parent.horizontalCenter
-            useBorder: true
-            buttonText: qsTr("Users")
-            onActivated:{filterTarget.currentModel = mediatypefilter; showOptions = !showOptions }
-        }
-
-        StyledButton{
-            height: localButtonH
-            width:advancedrow.width-10
-            anchors.horizontalCenter: parent.horizontalCenter
-            useBorder: true
-            buttonText: qsTr("Home")
-            onActivated:{manager.gotoQScreen("Screen_1.qml"); showOptions = !showOptions }
-        }
+	function onClick(index) {
+	    showOptions = !showOptions;
+	    switch (index) {
+		case 0:
+		manager.gotoQScreen("Screen_1.qml");
+		break;
+		case 1:
+		manager.playMedia("!G"+iPK_Device);
+		break;
+		case 2:
+		filterTarget.currentModel = attribfilter;
+		break;
+		case 3:
+		filterTarget.currentModel = genrefilter;
+		break;
+		case 4:
+		filterTarget.currentModel = mediasourcelist;
+		break;
+		case 5:
+		filterTarget.currentModel = fileformatmodel;
+		break;
+		case 6:
+		filterTarget.currentModel = mediatypefilter;
+		break;
+		case 7:
+		filterTarget.currentModel = mediatypefilter;
+		break;
+	    }
+	}
     }
-
-    ListView{
-        id:btnDisplay
+    OptionMenu {
         anchors.top: parent.top
-        model:buttons
-        height:advancedrow.height
-        width: advancedrow.width
-        spacing:10
+	menuItems: buttons
     }
-
 
 
 }

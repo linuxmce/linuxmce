@@ -26,7 +26,7 @@ Item{
 	delegate: MenuItem {
             height: localButtonH
 	    width: advancedrow.width
-            buttonText: text
+            buttonText: qsTr(text)
             onActivated:  menuView.model.onClick(index)
         }
 
