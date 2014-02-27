@@ -10,51 +10,25 @@ Item{
         left:parent.left
         right:parent.right
     }
-
-    Rectangle{
-        anchors.fill: btnDisplay
-        color: "green"
-        opacity: .85
-    }
-
-    VisualItemModel {
+    ListModel {
         id:buttons
-
-        StyledButton{
-            height: localButtonH
-            width:advancedrow.width-10
-//            anchors{
-//                left:parent.left
-//                right:parent.right
-//                leftMargin: 15
-//                rightMargin: 15
-//            }
-            useBorder: false
-            buttonText: qsTr("Exit")
-            onActivated:  {closeOrbiter(); showOptions = !showOptions }
-        }
-
-        StyledButton{
-            height: localButtonH
-            width:advancedrow.width-10
-//            anchors{
-//                left:parent.left
-//                right:parent.right
-//                leftMargin: 15
-//                rightMargin: 15
-//            }
-            useBorder: false
-            buttonText: qsTr("Sleeping Alarms")
-            onActivated:  {manager.gotoQScreen("Screen_29.qml"); showOptions = !showOptions }
-        }
-
+	ListElement { text: "Exit" }
+	ListElement { text: "Sleeping Alarms" }
+	// Cannot bind script to property (at least no until qt5), so we fake it till then
+	function onClick(index) {
+	    showOptions = !showOptions;
+	    switch (index) {
+		case 0:
+		closeOrbiter(); 
+		break;
+		case 1:
+		manager.gotoQScreen("Screen_29.qml");
+		break;
+	    }		
+	}
     }
-
-    ListView{
-        id:btnDisplay
-        model:buttons
-        height:advancedrow.height
-
+    OptionMenu {
+	menuItems: buttons
     }
 
 
