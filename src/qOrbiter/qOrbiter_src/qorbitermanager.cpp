@@ -1719,7 +1719,7 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 bool qorbiterManager::readLocalConfig()
 {
 
-    qDebug() << " config Break";
+
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
@@ -1772,9 +1772,20 @@ bool qorbiterManager::readLocalConfig()
     }
 #endif
 
+    // existence check
+
+    if(!localConfigFile.exists()){
+        qDebug() << "Did not find config.xml file in application path, searching /usr/bin";
+    this->logQtMessage("Did not find config.xml file in application path, searching /usr/bin");
+        localConfigFile.setFileName("/usr/bin/config.xml");
+    }
+
+
+
     if (!localConfigFile.open(QFile::ReadWrite))
     {
         qDebug()<< "No Config Found.";
+
         setDceResponse("config not found!::"+localConfigFile.fileName());
         setInternalIp("192.168.80.1");
         currentSkin="default";
