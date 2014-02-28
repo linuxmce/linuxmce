@@ -18,7 +18,8 @@ PopulateSection "${Parm_RootLocation}/${File}" "Nis Master" "NISMASTER=$IntIP"
 ## Set the default nis domain
 File="/etc/defaultdomain"
 mkdir -p "${Parm_RootLocation}/$(dirname $File)"
-echo "pluto" > "${Parm_RootLocation}/${File}"
+## FIXME: Get this from the database
+echo "LinuxMCE" > "${Parm_RootLocation}/${File}"
 
 ## Let the client know who is the server
 File="/etc/yp.conf"
