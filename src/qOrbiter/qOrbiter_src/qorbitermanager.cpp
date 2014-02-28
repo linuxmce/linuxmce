@@ -1777,10 +1777,10 @@ bool qorbiterManager::readLocalConfig()
 
 
     if(!chk.exists()){
-        qDebug() << "Did not find config.xml file in application path, searching /usr/bin";
-        this->logQtMessage("Did not find config.xml file in application path, searching /usr/bin");
-        localConfigFile.setFileName("/usr/bin/config.xml");
-        appConfigPath="/usr/bin/config.xml";
+        qDebug() << "Did not find config.xml file in application path, searching /usr/pluto/bin";
+        this->logQtMessage("Did not find config.xml file in application path, searching /usr/pluto/bin");
+        localConfigFile.setFileName("/usr/pluto/bin/config.xml");
+        appConfigPath="/usr/pluto/bin/config.xml";
     } else {
          localConfigFile.setFileName(xmlPath);
         qDebug() << "Found config.xml in app path, reading.";
