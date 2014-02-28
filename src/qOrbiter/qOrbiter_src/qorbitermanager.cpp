@@ -78,14 +78,14 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     #endif
     QObject(parent),qorbiterUIwin(view)
 {
-orbiterInit=true;
+    orbiterInit=true;
     //view.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     m_bStartingUp= true;
     // b_skinsReady = false;
     // b_orbiterReady = false;
     bAppError = false;
     isPhone = 0;
-
+    appConfigPath="";
 #ifndef __ANDROID__
     b_localLoading = false; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
 #elif defined QT5 && ANDROID || defined(ANDROID)
@@ -110,7 +110,6 @@ orbiterInit=true;
     {
         emit localConfigReady(false);
     }
-
 
 
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -161,13 +160,13 @@ orbiterInit=true;
 
 #ifdef for_desktop
 
-    #ifdef QT4_8
+#ifdef QT4_8
     buildType = "/qml/desktop";
-    #elif QT5 && defined RPI
+#elif QT5 && defined RPI
     buildType = "/qml/rpi";
-    #elif QT5 && !defined RPI && !defined ANDROID
+#elif QT5 && !defined RPI && !defined ANDROID
     buildType="/qml/qt5-desktop";
-    #endif
+#endif
     qrcPath = buildType+"/Splash.qml";
 #elif  WIN32
     buildType="/qml/desktop";
@@ -297,8 +296,8 @@ orbiterInit=true;
 
     /*Needs Doin at construction */
     userList = new UserModel( new UserItem, this);
-orbiterInit=true;
-emit orbiterInitialized();
+    orbiterInit=true;
+    emit orbiterInitialized();
 }
 
 qorbiterManager::~qorbiterManager()
@@ -315,7 +314,7 @@ void qorbiterManager::gotoQScreen(QString s)
     clearAllDataGrid();
     if(s.contains("Screen_1.qml"))
     {
-      logQtMessage("QOrbiter clearing models because screen is 1");
+        logQtMessage("QOrbiter clearing models because screen is 1");
         emit keepLoading(false);
         emit clearModel();
         emit cancelRequests();
@@ -413,9 +412,9 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/macosx";
 #elif for_desktop
 #ifdef QT5
-      remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/qt5-desktop";
+    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/qt5-desktop";
 #elif defined QT4
-   remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
+    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
 #endif
 
 #elif WIN32
@@ -445,11 +444,11 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     QString localDir = qmlPath.append(buildType);
 
 
-        if(b_localLoading){
-            finalPath=localDir;
-        } else{
-            finalPath = remoteDirectoryPath;
-        }
+    if(b_localLoading){
+        finalPath=localDir;
+    } else{
+        finalPath = remoteDirectoryPath;
+    }
 
 
 #ifdef __ANDROID__
@@ -644,10 +643,10 @@ void qorbiterManager::processConfig(QNetworkReply *config)
 
         int fp_deviceType = floorplan_device_list.at(index).attributes().namedItem("Type").nodeValue().toInt();
         int fpType = floorplan_device_list.at(index).attributes().namedItem("fpType").nodeValue().toInt();
-/*        if (fpType == 7)
-	        fpType = 6;
+        /*        if (fpType == 7)
+            fpType = 6;
         else */if (fpType == 4) // Move cameras to the security floorplan
-		fpType = 1;
+            fpType = 1;
         QImage icon;
         floorplans->appendRow(new FloorplanDevice( name, fp_deviceno, fp_deviceType, fpType, position, floorplans));
     }
@@ -1085,7 +1084,7 @@ void qorbiterManager::prepareDataGrid(QString dataGridId, int height, int width)
     if (m_mapDataGridModels.contains(dataGridId))
     {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "prepareDataGrid, clearing model");
-	m_mapDataGridModels[dataGridId]->clear();
+        m_mapDataGridModels[dataGridId]->clear();
     }
 }
 
@@ -1096,7 +1095,7 @@ void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, DataG
     for (int row = 0; row < pTable->GetRows(); row++)
     {
         GenericModelItem* pItem = DataGridHandler::GetModelItemForCell(PK_DataGrid, pTable, row);
-	m_mapDataGridModels[dataGridId]->appendRow(pItem);
+        m_mapDataGridModels[dataGridId]->appendRow(pItem);
     }
     pTable->ClearData();
     delete pTable;
@@ -1110,8 +1109,8 @@ void qorbiterManager::updateItemData(QString dataGridId, int row, int role, QVar
     if (m_mapDataGridModels.contains(dataGridId))
     {
         GenericFlatListModel* pModel = m_mapDataGridModels.value(dataGridId);
-    
-	pModel->updateItemData(row, role, value);
+
+        pModel->updateItemData(row, role, value);
     } else {
         LoggerWrapper::GetInstance()->Write(LV_WARNING, "updateItemData() no such datagridid %s", dataGridId.toStdString().c_str());
     }
@@ -1124,9 +1123,9 @@ void qorbiterManager::clearDataGrid(QString dataGridId)
     if (m_mapDataGridModels.contains(dataGridId))
     {
         GenericFlatListModel* pModel = m_mapDataGridModels.take(dataGridId);
-	pModel->clear();
-	pModel->setModelName("");
-	m_modelPool.push(pModel);
+        pModel->clear();
+        pModel->setModelName("");
+        m_modelPool.push(pModel);
     }
     qDebug() << "manager.clearDataGrid() end";
 }
@@ -1137,9 +1136,9 @@ void qorbiterManager::clearAllDataGrid()
     foreach (QString id, m_mapDataGridModels.keys())
     {
         GenericFlatListModel* pModel = m_mapDataGridModels.take(id);
-	pModel->clear();
-	pModel->setModelName("");
-	m_modelPool.push(pModel);
+        pModel->clear();
+        pModel->setModelName("");
+        m_modelPool.push(pModel);
     }
     qDebug() << "manager.clearAllDataGrid() end";
 }
@@ -1149,9 +1148,9 @@ void qorbiterManager::prepareModelPool(int poolSize)
     // We must create the model here, so that QML will get a valid model returned from this method
     // because this method will probably be called first (at property binding) from QML (before loadDataGrid)
 
-  for (int i = 0; i < poolSize; i++)
+    for (int i = 0; i < poolSize; i++)
     {
-      m_modelPool.push(new GenericFlatListModel(this));
+        m_modelPool.push(new GenericFlatListModel(this));
     }
 }
 
@@ -1166,11 +1165,11 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
     {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() preparing GenericFlatListModel");
         GenericFlatListModel* pModel = m_modelPool.pop();
-	pModel->setPrototype(DataGridHandler::GetModelItemType(PK_DataGrid));
-	pModel->setModelName(dataGridId);
-	pModel->setPK_DataGrid(PK_DataGrid);
-	pModel->setOption(option);
-	m_mapDataGridModels.insert(dataGridId, pModel);
+        pModel->setPrototype(DataGridHandler::GetModelItemType(PK_DataGrid));
+        pModel->setModelName(dataGridId);
+        pModel->setPK_DataGrid(PK_DataGrid);
+        pModel->setOption(option);
+        m_mapDataGridModels.insert(dataGridId, pModel);
     }
 
     LoggerWrapper::GetInstance()->Write(LV_DEBUG, "getDataGridModel() emit loadDataGrid");
@@ -1559,9 +1558,9 @@ void qorbiterManager::setMediaDevices(QNetworkReply *d)
     storageDevices = p;
 
 #ifndef ANDROID
-//    if(!storageDevices.isEmpty()){
-//        mountMediaDevices();
-//    }
+    //    if(!storageDevices.isEmpty()){
+    //        mountMediaDevices();
+    //    }
 #endif
 }
 
@@ -1753,7 +1752,7 @@ bool qorbiterManager::readLocalConfig()
     QFile localConfigFile;
     //**todo!! - add function for 1st run on android that copies the file to the xml path, then performs checks. we cannot install directly there.
 
-    localConfigFile.setFileName(xmlPath);
+
 
 #ifdef __ANDROID__
     if (createAndroidConfig())
@@ -1772,28 +1771,33 @@ bool qorbiterManager::readLocalConfig()
     }
 #endif
 
-    // existence check
 
-    if(!localConfigFile.exists()){
+    // existence check
+    QFileInfo chk(xmlPath);
+
+
+    if(!chk.exists()){
         qDebug() << "Did not find config.xml file in application path, searching /usr/bin";
-    this->logQtMessage("Did not find config.xml file in application path, searching /usr/bin");
+        this->logQtMessage("Did not find config.xml file in application path, searching /usr/bin");
         localConfigFile.setFileName("/usr/bin/config.xml");
+        appConfigPath="/usr/bin/config.xml";
+    } else {
+         localConfigFile.setFileName(xmlPath);
+        qDebug() << "Found config.xml in app path, reading.";
+        appConfigPath=xmlPath;
     }
 
 
 
-    if (!localConfigFile.open(QFile::ReadWrite))
-    {
+    if (!localConfigFile.open(QFile::ReadWrite)) {
         qDebug()<< "No Config Found.";
-
         setDceResponse("config not found!::"+localConfigFile.fileName());
         setInternalIp("192.168.80.1");
         currentSkin="default";
         setDeviceNumber(-1);
         return false;
-    }
-    else
-    {
+    } else {
+
         qDebug("Reading local cfg");
         setDceResponse("Reading Local Config");
         QByteArray tDoc;
@@ -1909,22 +1913,24 @@ bool qorbiterManager::writeConfig()
 #endif
     QFile localConfigFile;
 
-    localConfigFile.setFileName(xmlPath);
+    if(appConfigPath.isEmpty()){
+        appConfigPath = xmlPath;
+        qDebug() << "Empty application write path. adjusted to: " <<xmlPath;
+    }
+localConfigFile.setFileName(appConfigPath);
+
     if (!localConfigFile.open(QFile::ReadWrite))
     {
         setDceResponse(localConfigFile.errorString());
-        //setDceResponse("Local Config is missing!");
+        setDceResponse("Local Config is missing!");
         return false;
     }
     else
     {
-        if (!localConfig.setContent( &localConfigFile))
-        {
+        if (!localConfig.setContent(&localConfigFile)){
             setDceResponse("Cannot set document type!");
             return false;
-        }
-        else
-        {
+        } else {
             localConfigFile.close();
             localConfigFile.remove();
             QDomElement configVariables = localConfig.documentElement().toElement();
@@ -1943,6 +1949,7 @@ bool qorbiterManager::writeConfig()
             configVariables.namedItem("firstrun").attributes().namedItem("id").setNodeValue(QString("false"));
             configVariables.namedItem("debug").attributes().namedItem("id").setNodeValue(debugMode ==true? "true" : "false");
             configVariables.namedItem("phone").attributes().namedItem("id").setNodeValue(QString::number(isPhone));
+
             if(!mobileStorageLocation.isEmpty()){
                 configVariables.namedItem("mobile_storage").attributes().namedItem("id").setNodeValue(mobileStorageLocation);
             }
@@ -2184,8 +2191,8 @@ bool qorbiterManager::getRequestMore()
 
 void qorbiterManager::updateAlarm(QString dataGridId,int row,int role,bool s, int g)
 {
-   LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::updateAlarm");
-   emit setAlarm(dataGridId, row, role, s, g);
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::updateAlarm");
+    emit setAlarm(dataGridId, row, role, s, g);
 }
 
 void qorbiterManager::checkConnection()
@@ -2230,7 +2237,7 @@ bool qorbiterManager::cleanupData()
     genreFilter->clear();
     mediaTypeFilter->clear();
     uiFileFilter->clear();
-    userList->clear(); 
+    userList->clear();
 
     m_bStartingUp=true;
     return true;

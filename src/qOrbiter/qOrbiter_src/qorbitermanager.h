@@ -243,6 +243,7 @@ public:
     QString routerPort;
     long iPK_Device;
     QString qs_ext_routerip;
+    QString appConfigPath;
     /*messaging*/
     QString commandResponse;
     QString eventResponse;
@@ -748,6 +749,12 @@ public slots:
     */
     void setFormFactor(int f) {isPhone = f; emit formFactorChanged();}
     int getFormFactor(){ return isPhone;}
+
+    /*!
+     * \brief sendDceMessage
+     * \param m
+     *  Allows you to send a qml / javascript object to dce which will then be converted to a properly formatted dce command.
+     */
     void sendDceMessage(QVariantMap m) {if(!m.isEmpty()) emit newMessageSend(m);}
 
 

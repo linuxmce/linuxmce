@@ -229,7 +229,10 @@ void DceScreenSaver::beginZoom()
 
 void DceScreenSaver::startFadeTimer(int time)
 {
-#ifndef QT5
+
+#ifdef QT5
+  Q_UNUSED(time)
+#else
     fadeAnimation->setDuration(time);
     fadeAnimation->start();
 #endif
