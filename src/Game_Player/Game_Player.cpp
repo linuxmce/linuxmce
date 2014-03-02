@@ -82,6 +82,7 @@ m_GameMutex ("game_player")
   m_bLoadSavedGame = 0;
   m_iModifier = 0;
   m_bIsRecording = false;
+  m_bStateDirExists=false;
 }
 
 //<-dceag-const2-b->!
@@ -122,6 +123,18 @@ Game_Player::PrepareToDelete ()
   m_pDevice_App_Server = NULL;
   m_iPK_MediaType = 0;
   XSetErrorHandler(NULL);
+  if (FileUtils::DirExists(GAME_PLAYER_STATE_DIR))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Game Player State directory exists. Cleaning up, and deleting.");
+      if (!FileUtils::DelDir(GAME_PLAYER_STATE_DIR))
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game Player State directory could not be deleted.");
+	}
+      else
+	{
+	  m_bStateDirExists=false;
+	}
+    }
 }
 
 //<-dceag-getconfig-b->
@@ -133,6 +146,39 @@ bool Game_Player::GetConfig()
 
   // Put your code here to initialize the data in this class
   // The configuration parameters DATA_ are now populated
+
+	// This next chunk of code attempts as defensively as possible, to keep a 
+	// clean game state directory, after each launch of Game_Player.
+	if (!FileUtils::DirExists(GAME_PLAYER_STATE_DIR))
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Game Player State directory does not exist. Creating.");
+	    // Create state dir if it does not exist (e.g. after media director boots)
+	    FileUtils::MakeDir(GAME_PLAYER_STATE_DIR);
+	    if (!FileUtils::DirExists(GAME_PLAYER_STATE_DIR))
+	      {
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"Could not create Game Player State directory.");
+		m_bStateDirExists=false;
+	      }
+	    else
+	      {
+		m_bStateDirExists=true;
+	      }
+	  }
+	else // Directory already exists, delete it; remake it.
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_WARNING,"Game Player State dir " GAME_PLAYER_STATE_DIR " exists, possible crash? Deleting and recreating.");
+	    FileUtils::DelDir(GAME_PLAYER_STATE_DIR);
+	    FileUtils::MakeDir(GAME_PLAYER_STATE_DIR);
+	    if (!FileUtils::DirExists(GAME_PLAYER_STATE_DIR))
+	      {
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"Could not recreate Game Player State Dir after cleanup.");
+		m_bStateDirExists=false;
+	      }
+	    else
+	      {
+		m_bStateDirExists=true;
+	      }
+	  }
 
   XInitThreads();
   XSetErrorHandler(_defaultWindowHandler);
@@ -767,6 +813,9 @@ void Game_Player::CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_R
   PLUTO_SAFETY_LOCK (gm, m_GameMutex);
 
   m_pEmulatorController->gotoMenu(iMenuType);
+
+  CMD_Set_Active_Menu CMD_Set_Active_Menu(m_dwPK_Device,m_pDevice_Game_Plugin->m_dwPK_Device,StringUtils::itos(iMenuType));
+  SendCommand(CMD_Set_Active_Menu);
 
   if (iMenuType > 0)
     {

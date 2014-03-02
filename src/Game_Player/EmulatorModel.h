@@ -58,6 +58,8 @@ namespace DCE
     long int m_dwPK_Device_Orbiter;
     string m_sSystemConfiguration;
     int m_iExit_Code;
+    bool m_bEmitsMenuChanges;
+    bool emitsMenuChanges() { return m_bEmitsMenuChanges; }
     bool emulatorHasCrashed() { return (m_iExit_Code > 0); }
 
     map<string, string> m_mapMedia;

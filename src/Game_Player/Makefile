@@ -71,7 +71,8 @@ sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files) \
 	Apple2EmulatorModel.cpp \
 	Apple2EmulatorController.cpp \
 	Atari800EmulatorModel.cpp \
-	Atari800EmulatorController.cpp
+	Atari800EmulatorController.cpp \
+	$(ROOT)/inotify/inotify_class.cpp
 #<-dceag-mh-e->
 
 CXXFLAGS += 

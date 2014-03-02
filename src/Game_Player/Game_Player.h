@@ -50,6 +50,8 @@
 #include "EmulatorFactory.h"
 #include "EmulatorController.h"
 
+#define GAME_PLAYER_STATE_DIR "/run/Game_Player"
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -69,6 +71,7 @@ namespace DCE
 
   private:
     bool m_bIsRecording;
+    bool m_bStateDirExists;
     pluto_pthread_mutex_t m_GameMutex;
     EmulatorFactory *m_pEmulatorFactory;
     EmulatorController *m_pEmulatorController;

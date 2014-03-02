@@ -47,6 +47,11 @@ namespace DCE
   {
   }
 
+  void X11EmulatorController::ProcessStateDirEvent(cpp_inotify_event event)
+  {
+    EmulatorController::ProcessStateDirEvent(event);
+  }
+
   /**
    * Set the m_bResend flag, so that we can try sending a keypress one more time, 
    * if it failed.
