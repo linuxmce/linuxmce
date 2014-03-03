@@ -1425,9 +1425,9 @@ signals:
      * @name Generic datagrids
      */
     ///@{
-    void addDataGridItem(QString dataGridID, int PK_DataGrid, DataGridTable* pTable);
+    void addDataGridItem(QString dataGridID, int PK_DataGrid, int indexStart, int numRows, DataGridTable* pTable);
     void updateItemData(QString dataGridId, int row, int role, QVariant value);
-    void prepareDataGrid(QString dataGridID, int height, int width);
+    void prepareDataGrid(QString dataGridID, QString dgName, int height, int width);
     ///@}
 
     /** @name Now Playing Signals
@@ -1777,6 +1777,7 @@ public slots:
     void seekToGridPosition(QString s);
 
     void loadDataGrid(QString dataGridID, int PK_DataGrid, QString option);
+    void loadDataForDataGrid(QString dataGridId, QString dgName, int PK_DataGrid, QString option, int startRow, int numRows, int numColumns, QString seek);
 
     //media
     void getContextImage(int attributeNumber);

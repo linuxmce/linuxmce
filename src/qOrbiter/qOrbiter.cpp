@@ -2718,11 +2718,6 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString op
     int gHeight = 0;
     int gWidth = 0;
     string dgName ="_dg_"+StringUtils::itos(PK_DataGrid) + "_" + StringUtils::itos(m_dwPK_Device);
-    int iData_Size=0;
-    int GridCurRow = 0;
-    int GridCurCol= 0;
-    char *pData = NULL;
-    string m_sSeek = "";
     m_dwIDataGridRequestCounter++;
 
     int offset = 0;
@@ -2730,32 +2725,45 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString op
     int iOffset= 0;
     string valassign = "0";
     bool isSuccessfull;
-  
+    int fetchItems = media_pageSeperator;
+
     CMD_Populate_Datagrid populateGrid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName), PK_DataGrid, option.toStdString(), 0, &pkVar, &valassign,  &isSuccessfull, &gWidth, &gHeight );
 
     if (SendCommand(populateGrid))
     {
-        //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-        DCE::CMD_Request_Datagrid_Contents requestGrid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName),    int(gHeight), int(gWidth),           false, false,        true,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
-	if(SendCommand(requestGrid))
-        {
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
+	QString dgN = QString::fromStdString(dgName);
+	if (fetchItems > gHeight)
+	    fetchItems = gHeight;
+	emit prepareDataGrid(dataGridId, dgN, gHeight, gWidth);
+        loadDataForDataGrid(dataGridId, dgN, PK_DataGrid, option, 0, fetchItems, gWidth, QString());
+    }
+}
 
-	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
-	    emit prepareDataGrid(dataGridId, gHeight, gWidth);
+void DCE::qOrbiter::loadDataForDataGrid(QString dataGridId, QString dgName, int PK_DataGrid, QString option, int startRow, int numRows, int numColumns, QString seek) {
+    char *pData = NULL;
+    int iData_Size=0;
+    int GridCurRow = startRow;
+    int GridCurCol= 0;
+    int iOffset = 0;
+    int rows = numRows;
 
-	    DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-	    //	    cellsToRender= pDataGridTable->getTotalRowCount();
-	    
-	    /*	    for (int row = 0; row < pDataGridTable->GetRows(); row++)
-		    {*/
-	        emit addDataGridItem(dataGridId, PK_DataGrid, pDataGridTable);
-	/*            }
-	    pDataGridTable->ClearData();
-	    delete pDataGridTable;
-	    pDataGridTable = NULL;*/
-	    delete[] pData;
-	    pData=NULL;
-        }
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "loadDataForDataGrid id = %s, startRow = %d, numRows = %d", dataGridId.toStdString().c_str(), startRow, numRows);
+
+	//CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
+    DCE::CMD_Request_Datagrid_Contents requestGrid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn),
+						    StringUtils::itos( m_dwIDataGridRequestCounter ),
+						    dgName.toStdString(), rows, numColumns,
+						    false, false,
+						    true,  seek.toStdString(),    int(iOffset),
+						    &pData, &iData_Size, &GridCurRow, &GridCurCol );
+    if(SendCommand(requestGrid))
+    {
+
+	DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
+	emit addDataGridItem(dataGridId, PK_DataGrid, GridCurRow, rows, pDataGridTable);
+	delete[] pData;
+	pData=NULL;
     }
 }
 

@@ -20,7 +20,7 @@ class GenericFlatListModel : public QAbstractListModel
 
     Q_PROPERTY (double progress READ getProgress WRITE setProgress NOTIFY progressChanged)
     Q_PROPERTY (bool loadingStatus READ getLoadingStatus WRITE setLoadingStatus NOTIFY loadingStatusChanged)
-    Q_PROPERTY (int totalcells READ getTotalCells WRITE setTotalCells NOTIFY sizeChanged)
+      //    Q_PROPERTY (int totalcells READ getTotalCells WRITE setTotalCells NOTIFY sizeChanged)
     Q_PROPERTY (int currentCells READ getCurrentCells WRITE setCurrentCells NOTIFY cellsChanged)
     Q_PROPERTY (int totalPages READ getTotalPages WRITE setTotalPages NOTIFY totalPagesChanged())
 
@@ -52,6 +52,7 @@ public:
     GenericModelItem* find(const QString &id) const;
     GenericModelItem* currentRow();
 
+    void resetWindowVariables();
     QModelIndex indexFromItem( const GenericModelItem* item) const;
     void updateItemData(int row, int role, QVariant value);
     void setModelName(QString s) { modelName = s; }
@@ -59,10 +60,23 @@ public:
     void setOption(QString option) { m_option = option; }
 
     QString modelName;
+    // Values we need when requesting data
+    QString m_dgName;
     int m_PK_DataGrid;
     QString m_option;
 
-    int totalcells;
+    int m_windowStart; // item number at start of the window
+    int m_bForward; // forward(true) or backward request(false)
+    int m_windowSize; // The size of the window of items to display
+    //    int indexEnd;
+    int m_iLastRow; // last row accessed, to be able to see what direction we are scrolling
+    int m_requestStart; // start of the requested range
+    int m_requestEnd; // end of the requested range
+    
+
+    int totalRows;
+    int m_totalCols;
+
     int seperator;
     bool loadingStatus;
     int gridType;
@@ -96,8 +110,15 @@ public slots:
      void setSeperator(int s) {seperator = s;}
      void checkForMore();
      void populateGrid(int mediaType);
-     void setTotalCells(int cells);
-     int getTotalCells();
+
+     void setWindowSize(int windowSize) { m_windowSize = windowSize; if (m_windowSize > totalRows) m_windowSize = totalRows; }
+     void setTotalRows(int rows);
+     void setTotalCols(int cols) { m_totalCols = cols; }
+     int getTotalRows();
+     void setDgName(QString dgName) { m_dgName = dgName; }
+     void setRequestedRows(int start, int end) { m_requestEnd = end; m_requestStart = start; }
+     bool isForwardRequest() { return m_bForward; }
+
      void setGridType( int type);
      int getGridType();
      void clear();
@@ -111,7 +132,7 @@ public slots:
      int getCurrentCells () {return currentCells;}
      void clearForPaging();
     Q_INVOKABLE void refreshData();
-
+    void requestMoreData(int row, int direction);
 
 private slots:
     void handleItemChange();

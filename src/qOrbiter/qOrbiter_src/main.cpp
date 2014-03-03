@@ -602,10 +602,12 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(newFileFormatSort(AttributeSortItem*)), w.uiFileFilter, SLOT(appendRow(AttributeSortItem*)), Qt::QueuedConnection);
 
 	// generic datagrid signals
-        QObject::connect(&pqOrbiter,SIGNAL(prepareDataGrid(QString,int,int)), &w, SLOT(prepareDataGrid(QString,int,int)),Qt::DirectConnection);
-        QObject::connect(&pqOrbiter,SIGNAL(addDataGridItem(QString,int,DataGridTable*)), &w, SLOT(addDataGridItem(QString,int,DataGridTable*)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(prepareDataGrid(QString,QString,int,int)), &w, SLOT(prepareDataGrid(QString,QString,int,int)),Qt::DirectConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(addDataGridItem(QString,int,int,int,DataGridTable*)), &w, SLOT(addDataGridItem(QString,int,int,int,DataGridTable*)),Qt::QueuedConnection);
         QObject::connect(&w,SIGNAL(loadDataGrid(QString,int,QString)), &pqOrbiter, SLOT(loadDataGrid(QString,int,QString)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(updateItemData(QString,int,int,QVariant)), &w, SLOT(updateItemData(QString,int,int,QVariant)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(refreshDataGrid(QString,int,QString)), &pqOrbiter, SLOT(refreshDataGrid(QString,int,QString)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(loadDataForDataGrid(QString,QString,int,QString,int,int,int,QString)), &pqOrbiter, SLOT(loadDataForDataGrid(QString,QString,int,QString,int,int,int,QString)), Qt::QueuedConnection);
 
         //now playing signals
         QObject::connect(&pqOrbiter, SIGNAL(setNowPlaying(bool)), w.nowPlayingButton,SLOT(setStatus(bool)),Qt::QueuedConnection);

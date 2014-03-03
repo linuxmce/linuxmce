@@ -34,13 +34,24 @@ class DataGridHandler
 {
 
 public:
+    enum Roles {
+        DescriptionRole = Qt::UserRole+1,
+        ValueRole =Qt::UserRole+2,
+    };
+
   static GenericModelItem* GetModelItemType(int PK_DataGrid, QObject* parent = 0) {
 	if (PK_DataGrid == DATAGRID_Floorplan_Media_Streams_CONST) {
 	    return new ActiveMediaStreamItem(parent);
 	} else if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
 	    return new SleepingAlarm(parent);
 	} else {
-	    return new GenericModelItem(parent);
+	    // Default roles
+	    GenericModelItem* pItem = new GenericModelItem(parent);
+	    QHash<int, QByteArray> names;
+	    names[DescriptionRole] = "description";
+	    names[ValueRole] = "value";
+	    pItem->setRoleNames(names);
+	    return pItem;
 	}
   }
 
@@ -84,6 +95,10 @@ public:
 	    timeleft = "";
 	}
 	(static_cast<SleepingAlarm*>(pItem))->setAlarmData(eventgrp, name, alarmtime, state, timeleft, days);
+    } else {
+        // Default, get one cell use text and value
+        pItem->setData(ValueRole, pCell->GetValue());
+	pItem->setData(DescriptionRole, pCell->GetText());
     }
 }
 

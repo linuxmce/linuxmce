@@ -1078,24 +1078,36 @@ bool qorbiterManager::requestDataGrid()
     return true;
 }
 
-void qorbiterManager::prepareDataGrid(QString dataGridId, int height, int width)
+ void qorbiterManager::prepareDataGrid(QString dataGridId, QString dgName, int height, int width)
 {
 
     if (m_mapDataGridModels.contains(dataGridId))
     {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "prepareDataGrid, clearing model");
         m_mapDataGridModels[dataGridId]->clear();
+	m_mapDataGridModels[dataGridId]->setTotalRows(height);
+	m_mapDataGridModels[dataGridId]->setTotalCols(width);
+	m_mapDataGridModels[dataGridId]->setWindowSize(media_pageSeperator);
+	// Assumes we always start at the top of the list
+	m_mapDataGridModels[dataGridId]->setRequestedRows(0,media_pageSeperator);
+	m_mapDataGridModels[dataGridId]->setDgName(dgName);
     }
 }
 
-void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, DataGridTable* pTable)
+void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, int indexStart, int numRows, DataGridTable* pTable)
 {
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "addDataGridItem() start");
 
-    for (int row = 0; row < pTable->GetRows(); row++)
+    GenericFlatListModel* pModel = m_mapDataGridModels[dataGridId];
+    // If the request is backwards, we need to insert in reverse order
+    int direction = pModel->isForwardRequest() ? 1 : -1;
+    int start = pModel->isForwardRequest() ? indexStart : indexStart+numRows-1;
+    int count = 0;
+    for (int row = start; count < numRows; row = row + direction)
     {
         GenericModelItem* pItem = DataGridHandler::GetModelItemForCell(PK_DataGrid, pTable, row);
-        m_mapDataGridModels[dataGridId]->appendRow(pItem);
+	m_mapDataGridModels[dataGridId]->insertRow(row, pItem);
+	count++;
     }
     pTable->ClearData();
     delete pTable;

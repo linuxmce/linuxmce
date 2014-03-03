@@ -621,6 +621,7 @@ signals:
     void requestSubtypes(int subtype);
 
     void loadDataGrid(QString dataGridId, int PK_DataGrid, QString option);
+    void loadDataForDataGrid(QString dataGridId, QString dgName, int PK_DataGrid, QString m_option, int start, int numItems, int numCols, QString seek);
 
     /*Message and notification signals*/
     void dceResponseChanged();
@@ -1353,9 +1354,9 @@ public slots:
     void prepareModelPool(int poolSize);
 
     /* called when a datagrid is about to be populated)*/
-    void prepareDataGrid(QString dataGridID, int height, int width);
+    void prepareDataGrid(QString dataGridID, QString dgName, int height, int width);
     /* called when a datagrid item is ready (received)*/
-    void addDataGridItem(QString dataGridID, int PK_DataGrid, DataGridTable* pTable);
+    void addDataGridItem(QString dataGridID, int PK_DataGrid, int indexStart, int numRows, DataGridTable* pTable);
     void updateItemData(QString dataGridId, int row, int role, QVariant value);
     /* called to clear all (temp) datagrids */
     void clearDataGrid(QString dataGridID);
@@ -1363,6 +1364,7 @@ public slots:
     Q_INVOKABLE GenericFlatListModel* getDataGridModel(QString dataGridId, int PK_DataGrid);
 
     void refreshDataGrid(QString dataGridId, int PK_DataGrid, QString option) { emit loadDataGrid(dataGridId, PK_DataGrid, option); }
+    void loadMoreData(QString dataGridId, QString dgName, int PK_DataGrid, QString option, int start, int numItems, int numCols, QString seek) { emit loadDataForDataGrid(dataGridId, dgName, PK_DataGrid, option, start, numItems, numCols, seek); }
 
     //@}
 
