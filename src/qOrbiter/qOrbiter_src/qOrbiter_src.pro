@@ -550,6 +550,7 @@ HEADERS += \
     datamodels/genericflatlistmodel.h \
     datamodels/genericmodelitem.h \
     datamodels/ActiveMediaStreams.h \
+    datamodels/MediaFilter.h \
     datamodels/DataGridHandler.h \
     datamodels/listitembase.h
 

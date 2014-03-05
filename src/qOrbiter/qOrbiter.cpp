@@ -1353,13 +1353,13 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 
     setMediaType(iPK_MediaType);
 
-    if (iPK_MediaType != q_mediaType.toInt()){
+    if (iPK_MediaType != mediaFilter.getMediaType()){
         initializeGrid();
         media_currentRow = 0;
         i_mediaModelRows = 0;
     }
-gridPaused = false;
-    q_mediaType = QString::number(iPK_MediaType);
+    gridPaused = false;
+    mediaFilter.setMediaType(iPK_MediaType);
 
     currentScreen= "Screen_47.qml";
     emit gotoQml("Screen_47.qml");
@@ -2239,11 +2239,6 @@ void qOrbiter::beginSetup()
     iPK_Device_eventPlugin = 12;
     m_pOrbiterCat = 5;
     internal_streamID = 0;
-    videoDefaultSort = "13";
-    audioDefaultSort = "2";
-    photoDefaultSort = "29";
-    gamesDefaultSort = "49";
-    backwards = false;
     i_current_mediaType = 0;
     i_current_floorplanType = 0;
     setCurrentPage(0);
@@ -2321,54 +2316,15 @@ int qOrbiter::getCurrentRow()
 
 void qOrbiter::initializeGrid()
 {
-    goBack.clear();
+    mediaFilter.clear();
+
 gridPaused = false;
-    QString datagridVariableString ;
-    //datagrid option variables
-    //  QString q_mediaType;           //1
-    q_subType="";             //2
-    q_fileFormat="";          //3
-    q_attribute_genres="";    //4
-    q_mediaSources ="1,2";         //5 need comma delineation
-    q_usersPrivate = "0";        //6
-    q_attributetype_sort="";  //7
-    q_pk_users="0";             //8
-    q_last_viewed=" 2 ";        //9
-    q_pk_attribute="";        //10
-    qs_seek ="";
-    // 4||||1,2|0|3|0 | 2 |
-
-    // 4||||1,2|0 |2|0|2|
-
-    // 5||||1,2|0|0|0 | 2 |
-
-    datagridVariableString.append(q_mediaType).append("|").append(q_subType).append("|").append(q_fileFormat).append("|").append(q_attribute_genres).append("|").append(q_mediaSources).append("|").append(q_usersPrivate).append("|").append(q_attributetype_sort).append("|").append(q_pk_users).append("|").append(q_last_viewed).append("|").append(q_pk_attribute);
-    goBack.append(datagridVariableString);
     emit commandResponseChanged("Dg Variables Reset");
 }
 
 void qOrbiter::setStringParam(int paramType, QString param)
 {
-
-    /*
-    QString q_mediaType;           //1 passed in inital dg request
-    QString q_subType;             //2
-    QString q_fileFormat;          //3
-    QString q_attribute_genres;    //4
-    QString q_mediaSources;         //5 needs comma seperator
-
-    QString q_usersPrivate;        //6
-    QString q_attributetype_sort;  //7
-    QString q_pk_users;             //8
-    QString q_last_viewed;        //9
-    QString q_pk_attribute;        //10
-    QString *datagridVariableString;
-    */
-
-    QStringList longassstring;
-    QString datagridVariableString;
-
-    backwards = false;
+    mediaFilter.setStringParam(paramType, param);
 
     if(!param.contains("!F"))
         b_cancelRequest = true;
@@ -2376,24 +2332,9 @@ void qOrbiter::setStringParam(int paramType, QString param)
     switch (paramType)
     {
     case 1:
-        q_subType = param;
-        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-        datagridVariableString = longassstring.join("|");
-        emit clearAndContinue(q_mediaType.toInt());;
-        break;
-
     case 2:
-        q_fileFormat = param;
-        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-        datagridVariableString = longassstring.join("|");
-        emit clearAndContinue(q_mediaType.toInt());;
-        break;
-
     case 3:
-        q_attribute_genres = param;
-        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-        datagridVariableString = longassstring.join("|");
-        emit clearAndContinue(q_mediaType.toInt());;
+        emit clearAndContinue(mediaFilter.getMediaType());;
         break;
 
     case 4:
@@ -2416,33 +2357,17 @@ void qOrbiter::setStringParam(int paramType, QString param)
             }
             else
             {
-                q_pk_attribute = param.remove("!A");
-                longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-                datagridVariableString = longassstring.join("|");
-                emit clearAndContinue(q_mediaType.toInt());;
+	        emit clearAndContinue(mediaFilter.getMediaType());
             }
         }
         else{ // 5||||1,2	!D'/home/public/data/videos/1.82 TB (sdd1) ST2000DL003-9VT [51]'|0|0|0 | 2 |
             qDebug() << "Browsing by file";
-            int t = param.indexOf("\t");
-
-            QString apnd = param.mid(t);
-            qDebug()<< apnd;
-            q_mediaSources.append(apnd);
-            qDebug() << q_mediaSources;
-            longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-            datagridVariableString = longassstring.join("|");
-            qDebug() << datagridVariableString;
-            emit clearAndContinue(q_mediaType.toInt());;
+            emit clearAndContinue(mediaFilter.getMediaType());
         }
         break;
 
     case 5:
-        q_usersPrivate = param+",0";
-
-        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-        datagridVariableString = longassstring.join("|");
-        emit clearAndContinue(q_mediaType.toInt());;
+        emit clearAndContinue(mediaFilter.getMediaType());
         break;
 
     case 6:
@@ -2454,28 +2379,13 @@ void qOrbiter::setStringParam(int paramType, QString param)
         }
         else
         {
-            if(backwards ==false)
-            {
-                q_attributetype_sort = param;
-            }
-            longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-            datagridVariableString = longassstring.join("|");
-            emit clearAndContinue(q_mediaType.toInt());;
+	    emit clearAndContinue(mediaFilter.getMediaType());
             break;
         }
 
     case 7:
-        q_pk_users = param;
-
-        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-        datagridVariableString = longassstring.join("|");
-        emit clearAndContinue(q_mediaType.toInt());;
-        break;
     case 8:
-        q_last_viewed = param;
-        longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-        datagridVariableString = longassstring.join("|");
-        emit clearAndContinue(q_mediaType.toInt());;
+        emit clearAndContinue(mediaFilter.getMediaType());
 
         break;
     case 9:
@@ -2493,52 +2403,22 @@ void qOrbiter::setStringParam(int paramType, QString param)
             break;
         }
         else{
-            q_pk_attribute = param.remove("!A");
-            longassstring << q_mediaType+ "|" + q_subType + "|" + q_fileFormat + "|" + q_attribute_genres + "|" + q_mediaSources << "|" + q_usersPrivate +"|" + q_attributetype_sort +"|" + q_pk_users + "|" + q_last_viewed +"|" + q_pk_attribute;
-            datagridVariableString = longassstring.join("|");
-            emit clearAndContinue(q_mediaType.toInt());;
+	    emit clearAndContinue(mediaFilter.getMediaType());
             break;
         }
 
     default:
-        emit clearAndContinue(q_mediaType.toInt());;
+        emit clearAndContinue(mediaFilter.getMediaType());
 
     }
 }
 
 void qOrbiter::goBackGrid()
 {
-
-    backwards= true;
-
-    if(goBack.count() ==0)
-    {
-        initializeSorting();
-        emit clearAndContinue(i_current_mediaType);
+    if (mediaFilter.goBack()) {
+        updateSelectedAttributes(mediaFilter.getFilterString());
     }
-    else
-    {
-
-        goBack.removeLast();
-
-
-        if(!goBack.empty()){
-            int back = goBack.count()-1;
-            QStringList reverseParams = goBack.at(back).split("|", QString::KeepEmptyParts);
-            q_mediaType = reverseParams.first();
-            q_subType = reverseParams.at(1);
-            q_fileFormat = reverseParams.at(2);
-            q_attribute_genres = reverseParams.at(3);
-            q_mediaSources = reverseParams.at(4);
-            q_usersPrivate = reverseParams.at(5);
-            q_attributetype_sort = reverseParams.at(6);
-            q_pk_users = reverseParams.at(7);
-            q_last_viewed = reverseParams.at(8);
-            q_pk_attribute = reverseParams.at(9);
-            updateSelectedAttributes(goBack.at(back));
-        }
-        emit clearAndContinue(q_mediaType.toInt());
-    }
+    emit clearAndContinue(mediaFilter.getMediaType());
 }
 
 void qOrbiter::requestPage(int page)
@@ -3736,8 +3616,7 @@ void DCE::qOrbiter::changedTrack(QString direction)
 void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that populates after the initial request to break out the threading and allow for a checkpoint across threads
 {
 
-
-    backwards=false;
+    mediaFilter.setBackwards(false);
     //emit commandResponseChanged("requesting additional media");
 #ifdef QT5
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -4850,7 +4729,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
     }
 
     qDebug() << "Preparing file list, mediatype==>" << iPK_MediaType;
-    q_mediaType = QString::number(iPK_MediaType);
+    mediaFilter.setMediaType(iPK_MediaType);
     requestMore = false;
     media_currentRow = 0;
     cellsToRender = 0;
@@ -4880,131 +4759,15 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 
     m_dwIDataGridRequestCounter++;  //request counter dont know what its used for.
 
-    QString params;                 // param string for the datagrid options as specified in initializeSort()
     QString s;
 
-    if(backwards == true)                               //this deals with screen handlers
-    {
-        emit commandResponseChanged("Going back a level");
-    }
-    else
-    {
-        //video
-        if (iPK_MediaType == 5)
-        {
-            if (q_attributetype_sort == "")
-            {
-                q_attributetype_sort = videoDefaultSort;
-            }
-            else if(q_attributetype_sort == "12" && q_pk_attribute !="") //catches program
-            {
-                q_attributetype_sort= "52";
-            }
-            else if(q_attributetype_sort == "1" && q_pk_attribute !="") //catches director
-            {
-                q_attributetype_sort = "13";
-            }
-            else if (q_attributetype_sort =="2" && q_pk_attribute !="" ) // performer - sets filter to title
-            {
-                q_attributetype_sort = "13";
-            }
-            else if (q_attributetype_sort =="8" && q_pk_attribute !="") // genre?
-            {
-                q_attributetype_sort = "13";
-            }
-            else if(q_attributetype_sort =="52" && q_pk_attribute !="")
-            {
-                q_attributetype_sort = "13";
-            }
-            else if(q_attributetype_sort =="10" && q_pk_attribute !="")
-            {
-                q_attributetype_sort = "12";
-            }
-            else if (q_pk_attribute !=""){
-                q_attributetype_sort = "13";
-            }
-            else if(q_subType == "1" ){
-                if(q_attributetype_sort ==""||"13"){
-                    q_attributetype_sort = "12";
-                }
-
-            }
-            else if(q_subType == "2"){
-                if(q_attributetype_sort ==""){
-                    q_attributetype_sort ="13";
-                }
-            }
-        }
-
-        //audio
-        if (iPK_MediaType == 4)
-        {
-            if (q_attributetype_sort == "" )
-            {
-                q_attributetype_sort = audioDefaultSort;
-            }
-            else if(q_attributetype_sort == "2" && q_pk_attribute !="" ) //catches performer
-            {
-                q_attributetype_sort= "3";
-            }
-            else if (q_attributetype_sort =="8"  && q_pk_attribute !="") //catches genre
-            {
-                q_attributetype_sort = "2";
-            }
-            else if(q_attributetype_sort =="3" && q_pk_attribute !="") //album
-            {
-                q_attributetype_sort = "13";
-            }
-
-        }
-        //photos
-        if (iPK_MediaType == 7)
-        {
-            if (q_attributetype_sort == "" )
-            {
-                qDebug() << "Browsing by PhotoDefaultSort ;"<<photoDefaultSort;
-                q_attributetype_sort = photoDefaultSort;
-            } else if (q_attributetype_sort != "" && q_pk_attribute !="") {
-                q_attributetype_sort = 13 ;
-            }
-
-        }
-        //radio (streaming)
-        if (iPK_MediaType == 43)
-        {
-            if (q_attributetype_sort == "" )
-            {
-                q_attributetype_sort = "8"; // first genre
-            }
-            else if(q_attributetype_sort == "8" && q_pk_attribute !="" ) // genre -> channel
-            {
-                q_attributetype_sort= "10";
-            }
-        }
-
-        //playlists
-
-
-        //games
-
+    bool updated = mediaFilter.goBackOrForward();
+    s = mediaFilter.getFilterString();
+    qDebug() << "MediaFilter string = " << s;
+    if (updated) {
+        emit updateSelectedAttributes(s);
     }
 
-    if(q_attributetype_sort=="0"){
-        q_usersPrivate = "0";
-
-    }
-
-
-    params = "|"+q_subType +"|"+q_fileFormat+"|"+q_attribute_genres+"|"+q_mediaSources+"|"+q_usersPrivate +"|"+q_attributetype_sort+"|"+q_pk_users+"|"+q_last_viewed+"|"+q_pk_attribute+"";
-    s = q_mediaType + params;
-    if(backwards == false)
-    {
-        q_mediaType = QString::number(iPK_MediaType);
-        if(!goBack.at(goBack.count()-1).contains(s)){
-            emit updateSelectedAttributes(s);
-            goBack<< s;
-        }
-    }
 #ifdef QT5
     //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
@@ -5034,19 +4797,9 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
             if (cellsToRender == 0)
             {
-                if(q_attributetype_sort=="52" && backwards==false )
-                {
-                    q_attributetype_sort=="11";
-                    goBack.removeLast();
-
-                    params = "|"+q_subType +"|"+q_fileFormat+"|"+q_attribute_genres+"|"+q_mediaSources+"||"+q_attributetype_sort+"||2|"+q_pk_attribute+"";
-                    s = q_mediaType + params;
-
-                    // backwards = false;
-                    emit clearAndContinue(iPK_MediaType);
-                    return;
-                }
-
+	        if (mediaFilter.noMedia()) {
+		    emit clearAndContinue(mediaFilter.getMediaType());
+		}
                 emit mediaResponseChanged("No Media");
                 return;
                 // exit ; //exit the loop because there is no grid? - eventually provide "no media" feedback

@@ -318,6 +318,7 @@ HEADERS += \
     ../../datamodels/genericflatlistmodel.h \
     ../../datamodels/genericmodelitem.h \
     ../../datamodels/ActiveMediaStreams.h \
+    ../../datamodels/MediaFilter.h \
     ../../datamodels/listitembase.h
 
 RESOURCES += \

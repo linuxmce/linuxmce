@@ -31,6 +31,7 @@
 #include <contextobjects/bookmarkitem.h>
 #include <contextobjects/floorplandevice.h>
 #include <contextobjects/modelpage.h>
+#include <datamodels/MediaFilter.h>
 #include <datamodels/gridItem.h>
 #include <datamodels/genericmodelitem.h>
 #include <contextobjects/epgchannellist.h>
@@ -195,25 +196,9 @@ public:
 
     /*! @name Filter Parameter Member Variables */
     //@{
-    QStringList goBack;             /*!< List of Comma seperated strings of the previous data grid request */
-    QString qs_seek;                /*!< The Seek letter of the data grid request */
-    QString q_mediaType;            /*!< The media type of the requested data grid. this is at position 1 */
-    QString q_subType;              /*!< The media sub type of the request data grid. This is at position 2*/
-    QString q_fileFormat;           /*!< The file format of the requested data grid. This is at position 3*/
-    QString q_attribute_genres;     /*!< The attribute_genres value for the requested datagrid. This is at position 4*/
-    QString q_mediaSources;         /*!< The media sources for the requested datagrid. This is at position 5.*/
-    QString q_usersPrivate;         /*!< The private users to include in the requested media grid files. This is at position 6*/
-    QString q_attributetype_sort;   /*!< The Attribute that is being used to sort (filter) the requested data grid. This is at position 7*/
-    QString q_pk_users;             /*!< The requested public users to include. This is position 8*/
-    QString q_last_viewed;          /*!< Unknown Position 9*/
-    QString q_pk_attribute;         /*!< The Attribute currently being searched(?) This is position 10*/
+    MediaFilter mediaFilter;
     int cellsToRender;              /*!< Total Cells in this data grid request */
     QString *datagridVariableString;/*!< The String that will be used for the datagrid command */
-    QString videoDefaultSort;       /*!< Comma seperated string of the default sorting for video files */
-    QString audioDefaultSort;       /*!< Comma seperated string of the default audio sorting */
-    QString photoDefaultSort;       /*!< Comma seperated string of the default photo sorting */
-    QString gamesDefaultSort;       /*!< Comma seperated string of the default games sorting */
-    bool backwards;                 /*!< boolean governing if the grid is currently going down or up */
     bool requestMore;               /*!< Related to the requesting operations of filling the grid.
     //@}
 
