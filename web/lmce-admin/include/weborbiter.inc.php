@@ -192,7 +192,7 @@ function getNews($socket)
 		}
 	}
 	
-	return $out;
+	return trim($out);
 }
 
 
