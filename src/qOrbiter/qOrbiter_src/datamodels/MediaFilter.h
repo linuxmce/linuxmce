@@ -37,7 +37,6 @@ namespace DCE
     Q_OBJECT
 
  private:
-    bool backwards;                 /*!< boolean governing if the grid is currently going down or up */
     QStringList filterStack;             /*!< List of Comma seperated strings of the previous data grid request */
     QString qs_seek;                /*!< The Seek letter of the data grid request */
     int q_mediaType;            /*!< The media type of the requested data grid. this is at position 1 */
@@ -58,7 +57,6 @@ namespace DCE
  public:
 
     MediaFilter() {
-        backwards = false;
 	// TODO: should be loaded from DCE router or from user preferences
 	videoDefaultSort = "13";
 	audioDefaultSort = "2";
@@ -67,9 +65,14 @@ namespace DCE
     }
 
     int getMediaType() { return q_mediaType; }
-    void setMediaType(int mediaType) {  q_mediaType = mediaType; }
-    bool isBackwards() { return backwards; }
-    void setBackwards(bool backward) { backwards = backward; }
+    void setMediaType(int mediaType) {
+        if (mediaType != q_mediaType)
+	{
+	    clear();
+	    q_mediaType = mediaType;
+	    updateAttributeToList();
+	}
+    }
 
     void clear() {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::clear()");
@@ -114,8 +117,6 @@ namespace DCE
 	QString q_last_viewed;         //8
 	QString q_pk_attribute;        //9
       */
-
-	backwards = false;
 
 	// !P = playlist, !D = directory, !F = file, !A = attribute
 
@@ -167,10 +168,7 @@ namespace DCE
 	    }
 	  else
 	    {
-	      if(backwards ==false)
-		{
-		  q_attributetype_sort = param;
-		}
+	      q_attributetype_sort = param;
 	      break;
 	    }
 
@@ -191,12 +189,15 @@ namespace DCE
 	      break;
 	  }
 	}
+	// Does this new filter parameter cause a change in the attribute to list?
+	updateAttributeToList();
+
 	emit filterChanged(q_mediaType);
+	emit filterStringChanged(getFilterString());
     }
 
     bool goBack() {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::goBack() stack count = %d", filterStack.count());
-	backwards = true;
 	if(filterStack.count() > 0)
 	{
 	    // remove current filter
@@ -217,22 +218,20 @@ namespace DCE
 		q_pk_attribute = reverseParams.at(9);
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::goBack() new filter string: %s", getFilterString().toStdString().c_str());
 		emit filterChanged(q_mediaType);
+		emit filterStringChanged(getFilterString());
 		return true;
 	    }
 	}
-	emit filterChanged(q_mediaType);
 	return false;
     }
 
-    bool goBackOrForward() {
-        LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::goBackOrForward()");
+    /*
+     * Update the attributetype_sort (what attribute to list) based on the previous type.
+     * Called to update the string after a change in the browse by attribute
+     */
+    bool updateAttributeToList() {
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::updateAttributeToList()");
 
-	if(backwards == true)                               //this deals with screen handlers
-	{
-	  //        emit commandResponseChanged("Going back a level");
-	}
-	else
-	{
 	    //video
 	    if (q_mediaType == 5)
 	    {
@@ -328,21 +327,16 @@ namespace DCE
 
 	    //games
 
-	}
-
 	if(q_attributetype_sort=="0"){
 	    q_usersPrivate = "0";
 	}
 
 
-	if(backwards == false)
-	{
-	    QString s = getFilterString();
-	    if(!filterStack.at(filterStack.count()-1).contains(s)){
-	        LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::goBackOrForward() new filter string: %s", s.toStdString().c_str());
-		filterStack<< s;
-		return true;
-	    }
+	QString s = getFilterString();
+	if(!filterStack.at(filterStack.count()-1).contains(s)){
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::updateAttributeToList() new filter string: %s", s.toStdString().c_str());
+	    filterStack<< s;
+	    return true;
 	}
 	return false;
     }
@@ -355,17 +349,19 @@ namespace DCE
     void noMedia() {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::noMedia()");
 
-	if(q_attributetype_sort=="52" && backwards==false )
+	if(q_attributetype_sort=="52" /* TODO: only call this method when going deeper in the media browser && backwards==false */)
 	{
 	    q_attributetype_sort=="11";
 	    filterStack.removeLast();
 
 	    // backwards = false;
 	    emit filterChanged(q_mediaType);
+	    emit filterStringChanged(getFilterString());
 	}
     }
 
 signals:
+    void filterStringChanged(QString attributeString);
     void filterChanged(int PK_MediaType);
     void itemSelected(QString id);
 };

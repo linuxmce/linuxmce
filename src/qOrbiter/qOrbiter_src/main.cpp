@@ -565,7 +565,6 @@ int main(int argc, char* argv[])
         //mediagrid
         QObject::connect(&w, SIGNAL(gridStatus(bool)), &pqOrbiter, SLOT(setGridStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(resetSearchParams()), &pqOrbiter, SLOT(initializeGrid()), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(updateSelectedAttributes(QString)), &w, SLOT(updateSelectedAttributes(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(cancelRequests()), &pqOrbiter, SLOT(cancelAllRequests()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(gridGoBack()), &pqOrbiter, SLOT(goBackGrid()), Qt::QueuedConnection);
         QObject::connect(mediaModel, SIGNAL(pagingCleared()), &pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
@@ -596,6 +595,7 @@ int main(int argc, char* argv[])
 
 	// Media filter
         QObject::connect(&pqOrbiter.mediaFilter, SIGNAL(filterChanged(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter.mediaFilter, SIGNAL(filterStringChanged(QString)), &w, SLOT(updateSelectedAttributes(QString)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter.mediaFilter, SIGNAL(itemSelected(QString)), &pqOrbiter, SLOT(GetFileInfoForQml(QString)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter.mediaFilter, SIGNAL(itemSelected(QString)), &w, SLOT(mediaItemSelected(QString)), Qt::QueuedConnection);
 

@@ -2331,9 +2331,7 @@ void qOrbiter::setStringParam(int paramType, QString param)
 
 void qOrbiter::goBackGrid()
 {
-    if (mediaFilter.goBack()) {
-        updateSelectedAttributes(mediaFilter.getFilterString());
-    }
+  mediaFilter.goBack();
 }
 
 void qOrbiter::requestPage(int page)
@@ -3531,7 +3529,6 @@ void DCE::qOrbiter::changedTrack(QString direction)
 void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that populates after the initial request to break out the threading and allow for a checkpoint across threads
 {
 
-    mediaFilter.setBackwards(false);
     //emit commandResponseChanged("requesting additional media");
 #ifdef QT5
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -4676,12 +4673,8 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 
     QString s;
 
-    bool updated = mediaFilter.goBackOrForward();
     s = mediaFilter.getFilterString();
     qDebug() << "MediaFilter string = " << s;
-    if (updated) {
-        emit updateSelectedAttributes(s);
-    }
 
 #ifdef QT5
     //QApplication::processEvents(QEventLoop::AllEvents);

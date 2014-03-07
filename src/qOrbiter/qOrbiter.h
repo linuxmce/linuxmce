@@ -1399,7 +1399,6 @@ signals:
     void newGenreSort(AttributeSortItem*);
     void newFileFormatSort(AttributeSortItem*);
     void attributeSortFinished();
-    void updateSelectedAttributes(QString attributeString);
     void mediaAuthChanged(int user); /*!< For invalid private media authorization. Anything besides -1 correlates to the user associated with that number being set.*/
     ///@}
 
