@@ -1171,8 +1171,12 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() id = %s", dataGridId.toStdString().c_str());
 
     QString option = "";
-    if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST)
+    if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
         option = QString::number(iFK_Room);
+    } else if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
+      // TODO: extend to use real values
+        option = "4||||1,2||13||2|";
+    }
     if (!m_mapDataGridModels.contains(dataGridId))
     {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() preparing GenericFlatListModel");
@@ -2061,10 +2065,10 @@ void qorbiterManager::goBackGrid()
 
 
 
-void qorbiterManager::showFileInfo(QString fk_file)
+void qorbiterManager::mediaItemSelected(QString itemID)
 {
-
-    // pqOrbiter->GetMediaAttributeGrid(fk_file);
+    filedetailsclass->setVisible(true);
+    filedetailsclass->setFile(itemID);
 }
 
 void qorbiterManager::requestSecurityPic(int i_pk_camera_device, int h, int w)

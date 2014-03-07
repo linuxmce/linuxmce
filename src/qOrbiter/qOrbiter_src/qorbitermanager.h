@@ -1332,7 +1332,7 @@ public slots:
     void setStringParam(int paramType, QString param);
     void goBackGrid();
     void requestPage(int p){ setCurrentPage(p); emit requestDcePages(p);}
-    void showFileInfo(QString fk_file);
+    void mediaItemSelected(QString fk_file);
     void initializeGridModel();
     void showMessage(QString message, int duration, bool critical);
     void setRequestMore(bool state);

@@ -1391,9 +1391,6 @@ signals:
     void addItem(gridItem*);
     void requestMediaGrid(int);
     void clearPageGrid();
-    void clearAndContinue(int type);
-    void showFileInfo(bool state);
-    void setFocusFile(QString);
     void modelPageCount(int t);
     void clearModel();
     void pageSeperatorChanged(int s);

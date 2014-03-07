@@ -1351,8 +1351,6 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 //<-dceag-c401-e->
 {
 
-    setMediaType(iPK_MediaType);
-
     if (iPK_MediaType != mediaFilter.getMediaType()){
         initializeGrid();
         media_currentRow = 0;
@@ -2329,88 +2327,6 @@ void qOrbiter::setStringParam(int paramType, QString param)
     if(!param.contains("!F"))
         b_cancelRequest = true;
 
-    switch (paramType)
-    {
-    case 1:
-    case 2:
-    case 3:
-        emit clearAndContinue(mediaFilter.getMediaType());;
-        break;
-
-    case 4:
-        if (!param.contains("!D")){
-            qDebug() << "Browse by file not engaged.";
-            if(param.contains("!F"))
-            {
-
-                emit showFileInfo(true);
-                emit setFocusFile(param);
-                GetFileInfoForQml(param);
-                break;
-            }
-            else if (param.contains("!P"))
-            {
-                emit showFileInfo(true);
-                emit setFocusFile(param);
-                GetFileInfoForQml(param);
-                break;
-            }
-            else
-            {
-	        emit clearAndContinue(mediaFilter.getMediaType());
-            }
-        }
-        else{ // 5||||1,2	!D'/home/public/data/videos/1.82 TB (sdd1) ST2000DL003-9VT [51]'|0|0|0 | 2 |
-            qDebug() << "Browsing by file";
-            emit clearAndContinue(mediaFilter.getMediaType());
-        }
-        break;
-
-    case 5:
-        emit clearAndContinue(mediaFilter.getMediaType());
-        break;
-
-    case 6:
-        if (param.contains("!P"))
-        {
-            emit showFileInfo(true);
-            emit setFocusFile(param);
-            break;
-        }
-        else
-        {
-	    emit clearAndContinue(mediaFilter.getMediaType());
-            break;
-        }
-
-    case 7:
-    case 8:
-        emit clearAndContinue(mediaFilter.getMediaType());
-
-        break;
-    case 9:
-        if(param.contains("!F"))
-        {
-
-            emit showFileInfo(true);
-            emit setFocusFile(param);
-            break;
-        }
-        else if (param.contains("!P"))
-        {
-            emit showFileInfo(true);
-            emit setFocusFile(param);
-            break;
-        }
-        else{
-	    emit clearAndContinue(mediaFilter.getMediaType());
-            break;
-        }
-
-    default:
-        emit clearAndContinue(mediaFilter.getMediaType());
-
-    }
 }
 
 void qOrbiter::goBackGrid()
@@ -2418,7 +2334,6 @@ void qOrbiter::goBackGrid()
     if (mediaFilter.goBack()) {
         updateSelectedAttributes(mediaFilter.getFilterString());
     }
-    emit clearAndContinue(mediaFilter.getMediaType());
 }
 
 void qOrbiter::requestPage(int page)
@@ -4797,9 +4712,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
             if (cellsToRender == 0)
             {
-	        if (mediaFilter.noMedia()) {
-		    emit clearAndContinue(mediaFilter.getMediaType());
-		}
+	        mediaFilter.noMedia();
                 emit mediaResponseChanged("No Media");
                 return;
                 // exit ; //exit the loop because there is no grid? - eventually provide "no media" feedback

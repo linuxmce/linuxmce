@@ -102,21 +102,22 @@ namespace DCE
     void setStringParam(int paramType, QString param) {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::setStringParam() type = %d, param = %s", paramType, param.toStdString().c_str());
       /*
-	QString q_mediaType;           //1 passed in inital dg request
-	QString q_subType;             //2
-	QString q_fileFormat;          //3
-	QString q_attribute_genres;    //4
-	QString q_mediaSources;         //5 needs comma seperator
+	QString q_subType;             //1
+	QString q_fileFormat;          //2
+	QString q_attribute_genres;    //3
+	        q_pk_attribute;        //4
+	QString q_mediaSources;        //4? needs comma seperator
 
-	QString q_usersPrivate;        //6
-	QString q_attributetype_sort;  //7
-	QString q_pk_users;             //8
-	QString q_last_viewed;        //9
-	QString q_pk_attribute;        //10
-	QString *datagridVariableString;
+	QString q_usersPrivate;        //5
+	QString q_attributetype_sort;  //6
+	QString q_pk_users;            //7
+	QString q_last_viewed;         //8
+	QString q_pk_attribute;        //9
       */
 
 	backwards = false;
+
+	// !P = playlist, !D = directory, !F = file, !A = attribute
 
 	switch (paramType)
 	{
@@ -132,12 +133,10 @@ namespace DCE
 	case 4:
 	  if (!param.contains("!D")){
             qDebug() << "Browse by file not engaged.";
-            if(param.contains("!F"))
+            if(param.contains("!F") || param.contains("!P"))
 	      {
-                break;
-	      }
-            else if (param.contains("!P"))
-	      {
+		emit itemSelected(param);
+		return;
                 break;
 	      }
             else
@@ -162,6 +161,8 @@ namespace DCE
 	case 6:
 	  if (param.contains("!P"))
 	    {
+	      emit itemSelected(param);
+	      return;
 	      break;
 	    }
 	  else
@@ -180,19 +181,17 @@ namespace DCE
 	  q_last_viewed = param;
 	  break;
 	case 9:
-	  if(param.contains("!F"))
-	    {
+	  if(param.contains("!F") || param.contains("!P"))
+	  {
+	      emit itemSelected(param);
+	      return;
 	      break;
-	    }
-	  else if (param.contains("!P"))
-	    {
+	  } else {
+              q_pk_attribute = param.remove("!A");
 	      break;
-	    }
-	  else{
-            q_pk_attribute = param.remove("!A");
-            break;
 	  }
 	}
+	emit filterChanged(q_mediaType);
     }
 
     bool goBack() {
@@ -217,9 +216,11 @@ namespace DCE
 		q_last_viewed = reverseParams.at(8);
 		q_pk_attribute = reverseParams.at(9);
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::goBack() new filter string: %s", getFilterString().toStdString().c_str());
+		emit filterChanged(q_mediaType);
 		return true;
 	    }
 	}
+	emit filterChanged(q_mediaType);
 	return false;
     }
 
@@ -351,7 +352,7 @@ namespace DCE
 	return params;
     }
 
-    bool noMedia() {
+    void noMedia() {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::noMedia()");
 
 	if(q_attributetype_sort=="52" && backwards==false )
@@ -360,11 +361,13 @@ namespace DCE
 	    filterStack.removeLast();
 
 	    // backwards = false;
-	    //                    emit clearAndContinue(q_mediaType);
-	    return true;
+	    emit filterChanged(q_mediaType);
 	}
-	return false;
     }
+
+signals:
+    void filterChanged(int PK_MediaType);
+    void itemSelected(QString id);
 };
 }
 #endif

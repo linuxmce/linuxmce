@@ -13,6 +13,7 @@
 class gridItem: public QObject
 {
     Q_OBJECT
+public:
     enum Roles {
         NameRole = Qt::UserRole+1,
         IndexRole =Qt::UserRole+2,
@@ -24,7 +25,6 @@ class gridItem: public QObject
         TrackerRole=Qt::DisplayRole+8
     };
 
-public:
     gridItem() {}
     explicit gridItem( QString ident, QString name,  QString path,  int index, QObject *parent=0 );
 

@@ -27,6 +27,7 @@
 #include "genericmodelitem.h"
 #include "ActiveMediaStreams.h"
 #include "DataModelItems/sleepingalarm.h"
+#include "gridItem.h"
 
 using namespace DCE;
 
@@ -36,8 +37,23 @@ class DataGridHandler
 public:
     enum Roles {
         DescriptionRole = Qt::UserRole+1,
-        ValueRole =Qt::UserRole+2,
+        ValueRole = Qt::UserRole+2,
     };
+
+    static QHash<int, QByteArray> getRoleNames(int PK_DataGrid) {
+        QHash<int, QByteArray> names;
+	if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
+	    names[gridItem::NameRole] = "name";
+	    names[gridItem::IndexRole] = "dceindex";
+	    names[gridItem::PathRole] = "path";
+	    names[gridItem::FKRole]= "id";
+	} else {
+	    // generic roles
+	    names[DescriptionRole] = "description";
+	    names[ValueRole] = "value";
+	}
+        return names;
+    }
 
   static GenericModelItem* GetModelItemType(int PK_DataGrid, QObject* parent = 0) {
 	if (PK_DataGrid == DATAGRID_Floorplan_Media_Streams_CONST) {
@@ -45,12 +61,9 @@ public:
 	} else if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
 	    return new SleepingAlarm(parent);
 	} else {
-	    // Default roles
+	    // uses generic model item
 	    GenericModelItem* pItem = new GenericModelItem(parent);
-	    QHash<int, QByteArray> names;
-	    names[DescriptionRole] = "description";
-	    names[ValueRole] = "value";
-	    pItem->setRoleNames(names);
+	    pItem->setRoleNames(getRoleNames(PK_DataGrid));
 	    return pItem;
 	}
   }
@@ -69,7 +82,18 @@ public:
     if(!pCell){
       return;
     }
-    if (PK_DataGrid == DATAGRID_Floorplan_Media_Streams_CONST) {
+    if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
+        const char *pPath = pCell->GetImagePath();
+        QString fk_file;
+        QString cellTitle;
+        QString filePath;
+	filePath = QString::fromUtf8(pPath).remove(".tnj");
+	fk_file = pCell->GetValue();
+	cellTitle = QString::fromUtf8(pCell->m_Text);
+        pItem->setData(gridItem::FKRole, fk_file);
+        pItem->setData(gridItem::NameRole, cellTitle);
+        pItem->setData(gridItem::PathRole, filePath.remove("/home/mediapics/"));
+    } else if (PK_DataGrid == DATAGRID_Floorplan_Media_Streams_CONST) {
         (static_cast<ActiveMediaStreamItem*>(pItem))->setFromDataGridCell(pCell);
     } else if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
         QString name;
