@@ -34,6 +34,10 @@ for i in $(seq 1 $MaxIt); do
 	for HostMAC in $R; do
 		echo "Sending WOL magic packet (iteration $i of $MaxIt) to $HostMAC"
 		/usr/sbin/etherwake -b -i "$IntIf" "$HostMAC"
+
+		#For motherboards with Nvidia Ethernet chipset with reversed MAC address, we issue a wake command with reversed MAC
+		Reversed_HostMAC="${HostMAC:15:2}:${HostMAC:12:2}:${HostMAC:9:2}:${HostMAC:6:2}:${HostMAC:3:2}:${HostMAC:0:2}";
+		/usr/sbin/etherwake -b -i "$IntIf" "$Reversed_HostMAC"
 	done
 	sleep 1
 done

@@ -31,3 +31,7 @@ if [[ -n "$Parm_Device" ]]; then
 fi
 
 /usr/sbin/etherwake -b -i "$IntIf" "$Parm_MAC"
+
+#For motherboards with Nvidia Ethernet chipset with reversed MAC address, we issue a wake command with reversed MAC
+Reversed_Parm_MAC="${Parm_MAC:15:2}:${Parm_MAC:12:2}:${Parm_MAC:9:2}:${Parm_MAC:6:2}:${Parm_MAC:3:2}:${Parm_MAC:0:2}";
+/usr/sbin/etherwake -b -i "$IntIf" "$Reversed_Parm_MAC"
