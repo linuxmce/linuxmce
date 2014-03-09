@@ -14,7 +14,7 @@ function editCode($output,$dbADO) {
 	}
 	
 	if ($action=='form') {		
-		$res=$dbADO->Execute('SELECT IRData FROM InfraredGroup_Command WHERE PK_InfraredGroup_Command=?',$irgcID);
+		$res=$dbADO->Execute('SELECT IRData, FK_Command, Command.Description from InfraredGroup_Command, Command where PK_InfraredGroup_Command=? and PK_Command=FK_Command',$irgcID);
 		if($res->RecordCount()!=0){
 			$row=$res->FetchRow();
 			$oldData=$row['IRData'];
@@ -26,16 +26,9 @@ function editCode($output,$dbADO) {
 		
 	<!-- CodePress -->	
 	<style>
-	body {color:#000;background-color:white;font:15px georgia, "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, sans-serif; letter-spacing:0.01em;margin:15px;}
-	p {margin:0 0 15px 0;}
-	a,a:visited {color:#7f0055;}
-	select {background:#ffffe1;}
-	button {margin-top:5px;}
-	#logo {text-align:center;background-color:#d6d6d6;padding:10px;-moz-border-radius:5px;border:1px solid silver;}
-	#container {width:700px;margin:20px auto;padding:25px;border:3px solid #d9d9d9;-moz-border-radius:10px;background:#f8f8f8;}
-	#languages {margin:5px 0;}
-	#codepress {width:100%;height:400px;border:1px solid gray;frameborder:0;}
-	#default {font-weight:bold;color:red;}
+	body {margin:15px;}
+	fieldset {background-color: #FFF;}
+	#codepress {width:100%;height:100%;border:1px solid gray;frameborder:0;}
 	</style>
 	
 	<script>
@@ -51,45 +44,39 @@ function editCode($output,$dbADO) {
 	
 	<!-- end CodePress -->	
 	<script>
+	function AddPageEvent(o,e,f){
+		if (o.addEventListener){ o.addEventListener(e,f,true); return true; }
+		else if (o.attachEvent){ return o.attachEvent("on"+e,f); }
+		else { return false; }
+	}
+
 	function setCode(){
 		document.editCode.irdata.value=getAsPlainText();
 		document.editCode.submit();
 	}
-	
+	function resizeEditor(event) {
+		document.getElementById("codepress").style.height = (window.innerHeight - 120) + "px";
+	}
+	AddPageEvent(window,"load",resizeEditor);
+	AddPageEvent(window,"resize",resizeEditor);
 	</script>
-	
-	
 
-	
-		<form action="index.php" method="post" name="editCode">
-		<input type="hidden" name="section" value="editCode">
-		<input type="hidden" name="action" value="add">
-		<input type="hidden" name="irgcID" value="'.$irgcID.'">		
-		<input type="hidden" name="from" value="'.$from.'">		
-		<input type="hidden" name="irdata" value="">		
-		
-		<h3>Edit code #'.$irgcID.'</h3>
-		<table width="100%">
-			<tr>
-				<td bgcolor="black"><img src="include/images/spacer.gif" border="0" height="1" width="1"></td>
-			</tr>
-		</table>
-		<div class="err">'.stripslashes(@$_GET['error']).'</div>
-		<div class="confirm" align="center"><B>'.stripslashes(@$_GET['msg']).'</B></div>
+	<form action="index.php" method="post" name="editCode">
+	<input type="hidden" name="section" value="editCode">
+	<input type="hidden" name="action" value="add">
+	<input type="hidden" name="irgcID" value="'.$irgcID.'">		
+	<input type="hidden" name="from" value="'.$from.'">		
+	<input type="hidden" name="irdata" value="">		
 
-		
-	<div id="container">
-
+	<fieldset>
+	<legend>Edit code #'.$irgcID.' - #'.$row['FK_Command'].' '.$row['Description'] .'</legend>
+	<div class="err">'.stripslashes(@$_GET['error']).'</div>
+	<div class="confirm" align="center"><B>'.stripslashes(@$_GET['msg']).'</B></div>
 	<iframe id="codepress" src="codeLoader.php?irgcID='.$irgcID.'"></iframe><br /><br/>
-	
-	
 	<div align="center"><input type="button" class="button" name="save" value="'.$TEXT_UPDATE_CONST.'" onClick="setCode();"> <input type="button" class="button" name="close" value="'.$TEXT_CLOSE_CONST.'" onclick="self.close();"></div>
-	<br/><br/>
-	
-	</div><!--/container-->
-		
-		</form>
-		';
+	</fieldset>
+	</form>
+	';
 		
 	} else {
 		$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$_SESSION['installationID'],$dbADO);
