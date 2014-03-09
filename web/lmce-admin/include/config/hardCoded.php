@@ -56,6 +56,7 @@
 	$GLOBALS['OrbiterPlugIn'] = 12; 			// Orbiter Plug In
 	$GLOBALS['XinePlayer'] = 5; 				// Xine Player
 	$GLOBALS['BluetoothDongle'] = 13; 			// BluetoothDongle
+	$GLOBALS['OMXPlayer'] = 2259;				// OMX Player
 	$GLOBALS['rootMediaDirectorsID'] = 28;			// Media Directors
 	$GLOBALS['rootRPIMediaDirectorsID'] = 2216; 		// Raspberry PI Media Directors
 	$GLOBALS['rootJogglersID'] = 2266;				// Jogglers

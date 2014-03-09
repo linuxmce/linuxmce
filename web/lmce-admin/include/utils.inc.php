@@ -3267,17 +3267,25 @@ function processAudioSettings($deviceID,$dbADO)
 	$AC3setting=@$_POST['ac3_'.$deviceID];
 	$newAS=$audioSettings.@$AC3setting;
 	$dbADO->Execute('UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?',array($newAS,$deviceID,$GLOBALS['AudioSettings']));
-	
+
+	# FIXME: Make this more generic - i.e. ANY audio device on the system, perhaps referencing the InstallWizard tables for 'default' devices.
 	$xinePlayerData=getFieldsAsArray('Device Xine','Xine.PK_Device AS PK_Device',$dbADO,'
 		INNER JOIN Device Orbiter ON Xine.FK_Device_ControlledVia=Orbiter.PK_Device
 		INNER JOIN Device MD ON Orbiter.FK_Device_ControlledVia=MD.PK_Device
 		WHERE MD.PK_Device='.$deviceID.' AND Xine.FK_DeviceTemplate='.$GLOBALS['XinePlayer']);
-	
+
+	$omxPlayerData=getFieldsAsArray('Device OMX','OMX.PK_Device AS PK_Device',$dbADO,'
+		INNER JOIN Device Orbiter ON OMX.FK_Device_ControlledVia=Orbiter.PK_Device
+		INNER JOIN Device MD ON Orbiter.FK_Device_ControlledVia=MD.PK_Device
+		WHERE MD.PK_Device='.$deviceID.' AND OMX.FK_DeviceTemplate='.$GLOBALS['OMXPlayer']);
+
 	$ac3DD=(isset($_POST['ac3_'.$deviceID]))?'Pass Through':'Stereo 2.0';
 	if(isset($xinePlayerData['PK_Device'][0]) && $xinePlayerData['PK_Device'][0]!=0){
 		$dbADO->Execute('UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?',array($ac3DD,$xinePlayerData['PK_Device'][0],$GLOBALS['OutputSpeakerArrangement']));
+	}elseif(isset($omxPlayerData['PK_Device'][0]) && $omxPlayerData['PK_Device'][0]!=0){
+		$dbADO->Execute('UPDATE Device_DeviceData SET IK_DeviceData=? WHERE FK_Device=? AND FK_DeviceData=?',array($ac3DD,$omxPlayerData['PK_Device'][0],$GLOBALS['OutputSpeakerArrangement']));
 	}else{
-		$error=" ERROR: cannot find xine player device for device #$deviceID";
+		$error=" ERROR: cannot find Xine or OMX player device for device #$deviceID";
 		writeFile($GLOBALS['ErrorLog'],date('d-m-Y H:i:s')."$error\n\n",'a+');
 	}
 	return @$error;	
