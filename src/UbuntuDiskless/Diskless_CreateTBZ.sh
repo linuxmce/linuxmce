@@ -628,9 +628,9 @@ MD_Install_Packages () {
 			LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all"$TARGET_KVER_LTS_HES" linux-firmware
 			VerifyExitCode "Ancillary programs install failed"
 
-			# Install plymouth theme on MD in Ubuntu
-			LC_ALL=C chroot $TEMP_DIR apt-get -y install lmce-plymouth-theme
-			VerifyExitCode "MCE plymouth theme install failed"
+			## Install plymouth theme on MD in Ubuntu
+			#LC_ALL=C chroot $TEMP_DIR apt-get -y install lmce-plymouth-theme
+			#VerifyExitCode "MCE plymouth theme install failed"
 
 	                # upstart fix to prevent waiting on MD boot
 	                sed -i".pbackup" 's/ and static-network-up//g' "$TEMP_DIR/etc/init/rc-sysinit.conf"
