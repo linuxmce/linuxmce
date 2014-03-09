@@ -6,14 +6,26 @@ function editModules($output,$dbADO) {
 
 	/* @var $dbADO ADOConnection */
 	/* @var $rs ADORecordSet */
-	
+
 	$out='';
 	$installationID = (int)$_SESSION['installationID'];
 	$action = isset($_REQUEST['action'])?cleanString($_REQUEST['action']):'form';
 	$from = isset($_REQUEST['from'])?cleanString($_REQUEST['from']):'';
 	$deviceID = (int)@$_REQUEST['deviceID'];
-	
-	
+
+	$queryDistro='SELECT * FROM Device JOIN Device_DeviceData ON FK_Device=PK_Device WHERE FK_DeviceData=? AND PK_Device=?';
+	$resDistro=$dbADO->Execute($queryDistro,array($GLOBALS['rootPK_Distro'],$deviceID));	/* $GLOBALS['rootPK_Distro'],$deviceID */
+	if($resDistro->RecordCount()>0){
+		$rowDistro=$resDistro->FetchRow();
+		$distroID=$rowDistro['IK_DeviceData'];
+	}
+	$queryOS='SELECT * FROM Distro WHERE PK_Distro=?';
+	$resOS=$dbADO->Execute($queryOS,array($distroID));
+	if($resOS->RecordCount()>0){
+		$rowOS=$resOS->FetchRow();
+		$osID=$rowOS['FK_OperatingSystem'];
+	}
+
 	if ($action=='form') {
 		$out.='
 		<h3>'.$TEXT_EDIT_SOFTWARE_MODULES_CONST.'</h3>
@@ -22,7 +34,7 @@ function editModules($output,$dbADO) {
 				<td bgcolor="black"><img src="include/images/spacer.gif" border="0" height="1" width="1"></td>
 			</tr>
 		</table>
-				
+
 	<div class="err"><br>'.@$_GET['error'].'</div>
 	<div align="center" class="confirm"><B>'.@$_REQUEST['msg'].'</B></div>	
 		
@@ -32,7 +44,7 @@ function editModules($output,$dbADO) {
 			<input type="hidden" name="from" value="'.$from.'">
 			<input type="hidden" name="deviceID" value="'.$deviceID.'">
 			
-			'.getInstallWizardDeviceTemplates(6,$dbADO,$deviceID,1,1).'
+			'.getInstallWizardDeviceTemplates(6,$dbADO,$deviceID,$distroID,$osID).'
 			<div align="center"><input type="submit" class="button" value="'.$TEXT_SAVE_CONST.'"> <input type="button" class="button" value="'.$TEXT_CLOSE_CONST.'" onClick="self.close();"></div>
 		</form>
 	';	
