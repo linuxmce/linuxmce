@@ -23,7 +23,7 @@ Detect() {
 	availPath=$(find /dev/disk/by-path -name '*:*' -exec basename {} \;)
 	for Drive in $availPath; do
 		drivePathDevName=$(udevadm info --query=all --name="/dev/disk/by-path/${Drive}" | grep 'N:' | awk '{ print $2 }')
-		confirmDrive=$(echo "$drivePathDevName" | grep -E 'sd|hd|xd|md' | awk '{ print $1 }')
+		confirmDrive=$(echo "$drivePathDevName" | grep -E 'sd|hd|xd|md|vd' | awk '{ print $1 }')
 		if [[ "$confirmDrive" == "" ]]; then 
 			continue
 		fi
@@ -32,7 +32,7 @@ Detect() {
 	availPath="$Hdds"
 
 	## Looks for standard device names mounted in mtab and learns path. Note some mounted drives show only UUID
-	mountedDevName=$(cat /etc/mtab | awk '/dev\/(sd|hd|md|xd)./ {print $1}')
+	mountedDevName=$(cat /etc/mtab | awk '/dev\/(sd|hd|md|xd|vd)./ {print $1}')
 	for Drive in $mountedDevName; do
 		mountedDevGrep=$(udevadm info --query=all --name=${Drive} | grep 'S: disk/by-path/' | awk -F/ '{print $NF}')
 		mountedDevPath=$(echo "$mountedDevPath $mountedDevGrep" | sed -e 's/^[ \t]*//')
