@@ -944,9 +944,9 @@ InitialBootPrep () {
 	#id:5:initdefault: # Launch Manager
 	#EOF
 
-	#cp /tmp/firstboot /etc/rc5.d/S90firstboot
-	#chmod 755 /etc/rc5.d/S90firstboot
-	#rm -f /tmp/firstboot
+	mv /tmp/firstboot /etc/init.d/firstboot
+	chmod +x /etc/init.d/firstboot
+	update-rc.d start firstboot 90 2 3 4 5 .
 
 	# Remove KDM startup
 	echo "/bin/false" >/etc/X11/default-display-manager
