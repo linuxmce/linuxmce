@@ -946,7 +946,7 @@ InitialBootPrep () {
 
 	mv /tmp/firstboot /etc/init.d/firstboot
 	chmod +x /etc/init.d/firstboot
-	update-rc.d start firstboot 90 2 3 4 5 .
+	update-rc.d firstboot start 90 2 3 4 5 .
 
 	# Remove KDM startup
 	echo "/bin/false" >/etc/X11/default-display-manager
