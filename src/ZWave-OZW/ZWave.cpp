@@ -537,6 +537,13 @@ void ZWave::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMes
 	} else if (StringUtils::StartsWith(sArguments,"HN")) {
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() HealNetwork");
 		OpenZWave::Manager::Get()->HealNetwork(m_pZWInterface->GetHomeId(), true);
+	} else if (StringUtils::StartsWith(sArguments,"TNN")) {
+		uint8 nodeId = atoi(sArguments.substr(3).c_str());
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() TestNetworkNode node %d", nodeId);
+		OpenZWave::Manager::Get()->TestNetworkNode(m_pZWInterface->GetHomeId(), nodeId, 10);
+	} else if (StringUtils::StartsWith(sArguments,"TN")) {
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() TestNetwork");
+		OpenZWave::Manager::Get()->TestNetwork(m_pZWInterface->GetHomeId(), 10);
 	}
 }
 
@@ -876,6 +883,11 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 					OpenZWave::Manager::Get()->GetValueAsBool(id, &state);
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed event");
 					SendLightChangedEvents (PKDevice, state ? 100 : 0);
+				} else if ( label == "Level" ) {
+					uint8 level = 0;
+					OpenZWave::Manager::Get()->GetValueAsByte(id, &level);
+					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State(level) changed, send light changed event");
+					SendLightChangedEvents (PKDevice, level);
 				} else if ( label == "Luminance" ) {
 					float level = 0;
 					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
