@@ -29,7 +29,7 @@ QVariant GenericModelItem::data(int role) const
 
 bool GenericModelItem::setData(int role, const QVariant &value)
 {
-    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericModelItem.setData");
+  //    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericModelItem.setData");
     m_data.insert(role, value);
     emit dataChanged();
     return true;

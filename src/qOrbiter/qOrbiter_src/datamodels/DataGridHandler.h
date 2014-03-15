@@ -23,6 +23,7 @@
 
 #include "pluto_main/Define_DataGrid.h"
 #include "../DCE/DataGrid.h"
+#include "DCE/Logger.h"
 
 #include "genericmodelitem.h"
 #include "ActiveMediaStreams.h"

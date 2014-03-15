@@ -13,14 +13,16 @@
 #include <QList>
 #include <QVariant>
 #include <QDebug>
+#include <QReadWriteLock>
 
 class GenericFlatListModel : public QAbstractListModel
 {
     Q_OBJECT
 
+    mutable QReadWriteLock lock;
+
     Q_PROPERTY (double progress READ getProgress WRITE setProgress NOTIFY progressChanged)
     Q_PROPERTY (bool loadingStatus READ getLoadingStatus WRITE setLoadingStatus NOTIFY loadingStatusChanged)
-      //    Q_PROPERTY (int totalcells READ getTotalCells WRITE setTotalCells NOTIFY sizeChanged)
     Q_PROPERTY (int currentCells READ getCurrentCells WRITE setCurrentCells NOTIFY cellsChanged)
     Q_PROPERTY (int totalPages READ getTotalPages WRITE setTotalPages NOTIFY totalPagesChanged())
 
@@ -52,23 +54,27 @@ public:
     GenericModelItem* find(const QString &id) const;
     GenericModelItem* currentRow();
 
-    void resetWindowVariables();
+    void resetWindow();
     QModelIndex indexFromItem( const GenericModelItem* item) const;
     void updateItemData(int row, int role, QVariant value);
     void setModelName(QString s) { modelName = s; }
     void setPK_DataGrid(int PK_DataGrid) { m_PK_DataGrid = PK_DataGrid; }
     void setOption(QString option) { m_option = option; }
+    void seek(QString seek);
+    void seekResult(int row);
+    bool isSeeking() { return m_seek; }
 
     QString modelName;
     // Values we need when requesting data
     QString m_dgName;
     int m_PK_DataGrid;
     QString m_option;
+    bool m_seek;
+    bool loaded;
 
     int m_windowStart; // item number at start of the window
     int m_bForward; // forward(true) or backward request(false)
     int m_windowSize; // The size of the window of items to display
-    //    int indexEnd;
     int m_iLastRow; // last row accessed, to be able to see what direction we are scrolling
     int m_requestStart; // start of the requested range
     int m_requestEnd; // end of the requested range
@@ -102,7 +108,8 @@ signals:
     void cellsChanged();
     void pagingCleared();
     void totalPagesChanged();
-    
+    void scrollToItem(int item);
+
 public slots:
      QVariant get(int index, const QString &name) const;
      void setTotalPages(int p){totalPages = p;qDebug() << "New page count " << totalPages; emit totalPagesChanged();}
@@ -111,11 +118,12 @@ public slots:
      void checkForMore();
      void populateGrid(int mediaType);
 
-     void setWindowSize(int windowSize) { m_windowSize = windowSize; if (m_windowSize > totalRows) m_windowSize = totalRows; }
+     void setWindowSize(int windowSize) { m_windowSize = windowSize; }
      void setTotalRows(int rows);
      void setTotalCols(int cols) { m_totalCols = cols; }
      int getTotalRows();
      void setDgName(QString dgName) { m_dgName = dgName; }
+     QString getDGName() { return m_dgName; }
      void setRequestedRows(int start, int end) { m_requestEnd = end; m_requestStart = start; }
      bool isForwardRequest() { return m_bForward; }
 
@@ -133,6 +141,9 @@ public slots:
      void clearForPaging();
     Q_INVOKABLE void refreshData();
     void requestMoreData(int row, int direction);
+
+    void removeComplete();
+
 
 private slots:
     void handleItemChange();

@@ -53,10 +53,12 @@ namespace DCE
     QString audioDefaultSort;       /*!< Comma seperated string of the default audio sorting */
     QString photoDefaultSort;       /*!< Comma seperated string of the default photo sorting */
     QString gamesDefaultSort;       /*!< Comma seperated string of the default games sorting */
-
+    QString dataGridId;             /*!< datagrid this filter is controlling */
  public:
 
     MediaFilter() {
+        q_mediaType = 0;
+	clear();
 	// TODO: should be loaded from DCE router or from user preferences
 	videoDefaultSort = "13";
 	audioDefaultSort = "2";
@@ -65,14 +67,8 @@ namespace DCE
     }
 
     int getMediaType() { return q_mediaType; }
-    void setMediaType(int mediaType) {
-        if (mediaType != q_mediaType)
-	{
-	    clear();
-	    q_mediaType = mediaType;
-	    updateAttributeToList();
-	}
-    }
+    QString getDataGridId() { return dataGridId; }
+    void setDataGridId(QString id) { dataGridId = id; }
 
     void clear() {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::clear()");
@@ -96,12 +92,18 @@ namespace DCE
 	
 	// 5||||1,2|0|0|0 | 2 |
 	
-	QString datagridVariableString ;
-	
-	datagridVariableString.append(QString::number(q_mediaType)).append("|").append(q_subType).append("|").append(q_fileFormat).append("|").append(q_attribute_genres).append("|").append(q_mediaSources).append("|").append(q_usersPrivate).append("|").append(q_attributetype_sort).append("|").append(q_pk_users).append("|").append(q_last_viewed).append("|").append(q_pk_attribute);
-	filterStack.append(datagridVariableString);
+	/*	if (q_mediaType > 0) {
+	    // Don't add this to the stack if no media type is set
+	    QString datagridVariableString ;
+	    datagridVariableString.append(QString::number(q_mediaType)).append("|").append(q_subType).append("|").append(q_fileFormat).append("|").append(q_attribute_genres).append("|").append(q_mediaSources).append("|").append(q_usersPrivate).append("|").append(q_attributetype_sort).append("|").append(q_pk_users).append("|").append(q_last_viewed).append("|").append(q_pk_attribute);
+	    filterStack.append(datagridVariableString);
+	    }*/
     }
 
+    /*
+     * Set a filter parameter
+     * Calling this will trigger filterChanged+filterStringChanged signals
+     */
     void setStringParam(int paramType, QString param) {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::setStringParam() type = %d, param = %s", paramType, param.toStdString().c_str());
       /*
@@ -193,36 +195,7 @@ namespace DCE
 	updateAttributeToList();
 
 	emit filterChanged(q_mediaType);
-	emit filterStringChanged(getFilterString());
-    }
-
-    bool goBack() {
-        LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::goBack() stack count = %d", filterStack.count());
-	if(filterStack.count() > 0)
-	{
-	    // remove current filter
-	    filterStack.removeLast();
-
-	    if(!filterStack.empty()){
-	        int back = filterStack.count()-1;
-		QStringList reverseParams = filterStack.at(back).split("|", QString::KeepEmptyParts);
-		q_mediaType = reverseParams.first().toInt();
-		q_subType = reverseParams.at(1);
-		q_fileFormat = reverseParams.at(2);
-		q_attribute_genres = reverseParams.at(3);
-		q_mediaSources = reverseParams.at(4);
-		q_usersPrivate = reverseParams.at(5);
-		q_attributetype_sort = reverseParams.at(6);
-		q_pk_users = reverseParams.at(7);
-		q_last_viewed = reverseParams.at(8);
-		q_pk_attribute = reverseParams.at(9);
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::goBack() new filter string: %s", getFilterString().toStdString().c_str());
-		emit filterChanged(q_mediaType);
-		emit filterStringChanged(getFilterString());
-		return true;
-	    }
-	}
-	return false;
+	emit filterStringChanged(dataGridId);
     }
 
     /*
@@ -333,7 +306,8 @@ namespace DCE
 
 
 	QString s = getFilterString();
-	if(!filterStack.at(filterStack.count()-1).contains(s)){
+	// Don't add any filter with mediaType == 0
+	if(q_mediaType > 0 && (filterStack.count() == 0 || !filterStack.at(filterStack.count()-1).contains(s))){
 	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::updateAttributeToList() new filter string: %s", s.toStdString().c_str());
 	    filterStack<< s;
 	    return true;
@@ -346,6 +320,54 @@ namespace DCE
 	return params;
     }
 
+public slots:
+
+    void setMediaType(int mediaType) {
+        if (mediaType != q_mediaType)
+	{
+	    clear();
+	    q_mediaType = mediaType;
+	    updateAttributeToList();
+	}
+    }
+
+    /*
+     * Signals the media filter to go back to the previous filter setting
+     */
+    bool goBack() {
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::goBack() stack count = %d", filterStack.count());
+	// always keep one filter on stack, this is the initial filter
+	if(filterStack.count() > 1)
+	{
+	    // remove current filter
+	    filterStack.removeLast();
+	    // load previous filter
+	    int back = filterStack.count()-1;
+	    QStringList reverseParams = filterStack.at(back).split("|", QString::KeepEmptyParts);
+
+	    //	    if(!filterStack.empty()){
+		q_mediaType = reverseParams.first().toInt();
+		q_subType = reverseParams.at(1);
+		q_fileFormat = reverseParams.at(2);
+		q_attribute_genres = reverseParams.at(3);
+		q_mediaSources = reverseParams.at(4);
+		q_usersPrivate = reverseParams.at(5);
+		q_attributetype_sort = reverseParams.at(6);
+		q_pk_users = reverseParams.at(7);
+		q_last_viewed = reverseParams.at(8);
+		q_pk_attribute = reverseParams.at(9);
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::goBack() new filter string: %s", getFilterString().toStdString().c_str());
+		emit filterChanged(q_mediaType);
+		emit filterStringChanged(dataGridId);
+		return true;
+		//}
+	}
+	return false;
+    }
+
+    /*
+     * signal that no media was found, and allow the filter to adjust
+     */
     void noMedia() {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::noMedia()");
 
@@ -356,12 +378,12 @@ namespace DCE
 
 	    // backwards = false;
 	    emit filterChanged(q_mediaType);
-	    emit filterStringChanged(getFilterString());
+	    emit filterStringChanged(dataGridId);
 	}
     }
 
 signals:
-    void filterStringChanged(QString attributeString);
+    void filterStringChanged(QString dataGridId);
     void filterChanged(int PK_MediaType);
     void itemSelected(QString id);
 };

@@ -1351,20 +1351,13 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 //<-dceag-c401-e->
 {
 
-    if (iPK_MediaType != mediaFilter.getMediaType()){
-        initializeGrid();
-        media_currentRow = 0;
-        i_mediaModelRows = 0;
-    }
+    emit showFileListMediaType(iPK_MediaType);
     gridPaused = false;
-    mediaFilter.setMediaType(iPK_MediaType);
-
     currentScreen= "Screen_47.qml";
     emit gotoQml("Screen_47.qml");
 
     setGridStatus(true);
     b_cancelRequest = false;
-    prepareFileList(iPK_MediaType);
     requestTypes(iPK_MediaType);
     emit commandComplete();
     emit commandResponseChanged("Show File List Complete, Calling request Media Grid");
@@ -2314,7 +2307,7 @@ int qOrbiter::getCurrentRow()
 
 void qOrbiter::initializeGrid()
 {
-    mediaFilter.clear();
+  // Taken care of when setMediaType changes mediaType     mediaFilter.clear();
 
 gridPaused = false;
     emit commandResponseChanged("Dg Variables Reset");
@@ -2322,16 +2315,11 @@ gridPaused = false;
 
 void qOrbiter::setStringParam(int paramType, QString param)
 {
-    mediaFilter.setStringParam(paramType, param);
+  //    mediaFilter.setStringParam(paramType, param);
 
     if(!param.contains("!F"))
         b_cancelRequest = true;
 
-}
-
-void qOrbiter::goBackGrid()
-{
-  mediaFilter.goBack();
 }
 
 void qOrbiter::requestPage(int page)
@@ -2506,11 +2494,12 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString op
 
     string *sResponse;
 
-    emit commandResponseChanged("Getting data grid PK_DataGrid" + PK_DataGrid);
+    emit commandResponseChanged(QString("Getting data grid PK_DataGrid ").append(QString::number(PK_DataGrid)));
     int cellsToRender= 0;
     int gHeight = 0;
-    int gWidth = 0;
-    string dgName ="_dg_"+StringUtils::itos(PK_DataGrid) + "_" + StringUtils::itos(m_dwPK_Device);
+    int gWidth = 1;
+    QString dgName;
+    dgName.append(dataGridId).append("_").append(QString::number(m_dwPK_Device));
     m_dwIDataGridRequestCounter++;
 
     int offset = 0;
@@ -2520,16 +2509,30 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString op
     bool isSuccessfull;
     int fetchItems = media_pageSeperator;
 
-    CMD_Populate_Datagrid populateGrid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(dgName), PK_DataGrid, option.toStdString(), 0, &pkVar, &valassign,  &isSuccessfull, &gWidth, &gHeight );
+    CMD_Populate_Datagrid populateGrid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), dgName.toStdString(), PK_DataGrid, option.toStdString(), 0, &pkVar, &valassign,  &isSuccessfull, &gWidth, &gHeight );
 
     if (SendCommand(populateGrid))
     {
-        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
-	QString dgN = QString::fromStdString(dgName);
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Grid Dimensions: Height %d, Width %d", gHeight, gWidth);
 	if (fetchItems > gHeight)
 	    fetchItems = gHeight;
+	QString dgN = dgName;
+	// For media browser, we need to get _<dgname> as this is the one that contains images
+	if (PK_DataGrid == DATAGRID_Media_Browser_CONST)
+	{
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGrid() media browser, using _<dgname>");
+	    dgN = QString("_")+dgN;
+	}
+
+	// hack/fixme: need to sleep a short while here, because if we emit prepareDataGrid too soon,
+	// the qml list view will get invalid items show on screen.
+	// the prepareDataGrid signal is connected to the prepareDataGrid method in qorbiterManager, which
+	// calls setTotalRows on the GenericFlatListModel. This model is connected to the qml ListView.
+	// There might be some race condition going on between the ListView initializing and the model populating,
+	// but I have been unable to track this down (yet).
+	QThread::msleep(100);
+
 	emit prepareDataGrid(dataGridId, dgN, gHeight, gWidth);
-        loadDataForDataGrid(dataGridId, dgN, PK_DataGrid, option, 0, fetchItems, gWidth, QString());
     }
 }
 
@@ -2540,13 +2543,18 @@ void DCE::qOrbiter::loadDataForDataGrid(QString dataGridId, QString dgName, int 
     int GridCurCol= 0;
     int iOffset = 0;
     int rows = numRows;
-
+    
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "loadDataForDataGrid id = %s, startRow = %d, numRows = %d", dataGridId.toStdString().c_str(), startRow, numRows);
+
+    QString gridName = dgName;
+    // Remove _ prefix for media browser when seeking
+    if (PK_DataGrid == DATAGRID_Media_Browser_CONST && !seek.isEmpty())
+        gridName.remove(0,1);
 
 	//CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
     DCE::CMD_Request_Datagrid_Contents requestGrid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn),
 						    StringUtils::itos( m_dwIDataGridRequestCounter ),
-						    dgName.toStdString(), rows, numColumns,
+						    gridName.toStdString(), rows, numColumns,
 						    false, false,
 						    true,  seek.toStdString(),    int(iOffset),
 						    &pData, &iData_Size, &GridCurRow, &GridCurCol );
@@ -2678,7 +2686,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             // int cellsToRender= pDataGridTable->GetRows();
 #ifndef ANDROID
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %d, Width %d", gHeight, gWidth);
 #endif
 
             int index;
@@ -2891,7 +2899,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
         if(SendCommand(req_data_grid))
         {
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %d, Width %d", gHeight, gWidth);
             QString cellTitle;
             QString qs_plsIndex;
             QString fk_file;
@@ -3261,7 +3269,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
                 //creating a dg table to check for cells. If 0, then we error out and provide a single "error cell"
                 DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
                 //int cellsToRender= pDataGridTable->GetRows();
-                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+                LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %d, Width %d", gHeight, gWidth);
                 QString cellTitle;
                 QString cellAttribute;
                 int index;
@@ -3745,7 +3753,7 @@ void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             cellsToRender= pDataGridTable->GetRows();
 
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Advanced AV  Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Advanced AV  Grid Dimensions: Height %d, Width %d", gHeight, gWidth);
             QString cellTitle;
             QString fk_file;
             QString filePath;
@@ -3953,7 +3961,7 @@ void DCE::qOrbiter::showAdvancedButtons()
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             cellsToRender= pDataGridTable->GetRows();
 
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Advanced AV  Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Advanced AV  Grid Dimensions: Height %d, Width %d", gHeight, gWidth);
 
             QString cellTitle;
             QString fk_file;
@@ -4051,7 +4059,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
 
 
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %d, Width %d", gHeight, gWidth);
 
             QString cellTitle;
             QString cellAttribute;
@@ -4193,7 +4201,7 @@ void DCE::qOrbiter::ShowBookMarks()
             DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
             cellsToRender= pDataGridTable->GetRows();
 
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bookmark Grid Dimensions: Height %i, Width %i", gHeight, gWidth);
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bookmark Grid Dimensions: Height %d, Width %d", gHeight, gWidth);
             QString cellTitle;
             QString fk_file;
             QString filePath;
@@ -4627,7 +4635,7 @@ void qOrbiter::adjustRoomLights(QString level)
 
 
 
-void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
+void DCE::qOrbiter::prepareFileList(QString filterString)
 {
     if(currentScreen != "Screen_47.qml"){
         qDebug() << "Cancelling request, screen is not file view screen" ;
@@ -4640,13 +4648,13 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
         qDebug() << currentScreen;
     }
 
-    qDebug() << "Preparing file list, mediatype==>" << iPK_MediaType;
-    mediaFilter.setMediaType(iPK_MediaType);
+    qDebug() << "Preparing file list, filter==>" << filterString;
+    //    mediaFilter.setMediaType(iPK_MediaType);
     requestMore = false;
     media_currentRow = 0;
     cellsToRender = 0;
     //pMediaGridTable = NULL;
-    emit mediaResponseChanged("Initial media request for media type " + QString::number(iPK_MediaType));
+    emit mediaResponseChanged("Initial media request for filter " + filterString);
 #ifdef QT5
     //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
@@ -4673,7 +4681,7 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
 
     QString s;
 
-    s = mediaFilter.getFilterString();
+    s = filterString;//mediaFilter.getFilterString();
     qDebug() << "MediaFilter string = " << s;
 
 #ifdef QT5
@@ -4702,10 +4710,11 @@ void DCE::qOrbiter::prepareFileList(int iPK_MediaType)
             DataGridTable * pMediaGridTable = new DataGridTable(iData_Size,pData,false);
             cellsToRender= pMediaGridTable->GetRows();
 
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %i, Width %i", gHeight, gWidth);
+            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %d, Width %d", gHeight, gWidth);
             if (cellsToRender == 0)
             {
-	        mediaFilter.noMedia();
+	      //	      emit noMediaFound();
+	      //	        mediaFilter.noMedia();
                 emit mediaResponseChanged("No Media");
                 return;
                 // exit ; //exit the loop because there is no grid? - eventually provide "no media" feedback

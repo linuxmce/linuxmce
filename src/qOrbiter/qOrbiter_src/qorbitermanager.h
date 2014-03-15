@@ -106,6 +106,8 @@
 #include <contextobjects/screenshotattributes.h>
 #include <contextobjects/existingorbiter.h>
 
+#include <datamodels/MediaFilter.h>
+
 
 //own version of OrbiterData.h
 #include <datamodels/listModel.h>                            //custom item model
@@ -383,6 +385,7 @@ Param 10 - pk_attribute
     QString audioDefaultSort;
     QString photoDefaultSort;
     QString gamesDefaultSort;
+    MediaFilter mediaFilter;
 
 
     QStringList goBack;
@@ -615,11 +618,11 @@ signals:
     void cancelRequests(); /*!< \brief signal used to cancel thread processing activity in the dce thread */
     void clearAndContinue(int t); /*! \brief signal used to tell the the listmodel to clear itself and request new data of the mediatype t */
     void showList();
-    void setDceGridParam(int a, QString p );
     void keepLoading(bool s);
     void stillLoading(bool b);
     void requestSubtypes(int subtype);
 
+    void prepareFileList(QString filter);
     void loadDataGrid(QString dataGridId, int PK_DataGrid, QString option);
     void loadDataForDataGrid(QString dataGridId, QString dgName, int PK_DataGrid, QString m_option, int start, int numItems, int numCols, QString seek);
 
@@ -1330,7 +1333,7 @@ public slots:
     void addMediaItem(gridItem* g);
     void updateModel();
     void setStringParam(int paramType, QString param);
-    void goBackGrid();
+    bool goBackGrid();
     void requestPage(int p){ setCurrentPage(p); emit requestDcePages(p);}
     void mediaItemSelected(QString fk_file);
     void initializeGridModel();
@@ -1350,7 +1353,6 @@ public slots:
     void setCurrentPage(int page) {media_currentPage = page;   emit mediaPageChanged();  }
     int getCurrentPage() {return media_currentPage;}
 
-
     void prepareModelPool(int poolSize);
 
     /* called when a datagrid is about to be populated)*/
@@ -1365,6 +1367,9 @@ public slots:
 
     void refreshDataGrid(QString dataGridId, int PK_DataGrid, QString option) { emit loadDataGrid(dataGridId, PK_DataGrid, option); }
     void loadMoreData(QString dataGridId, QString dgName, int PK_DataGrid, QString option, int start, int numItems, int numCols, QString seek) { emit loadDataForDataGrid(dataGridId, dgName, PK_DataGrid, option, start, numItems, numCols, seek); }
+    Q_INVOKABLE void seekGrid(QString dataGridId, QString s);
+
+    void mediaFilterChanged(QString dataGridId);
 
     //@}
 

@@ -31,7 +31,6 @@
 #include <contextobjects/bookmarkitem.h>
 #include <contextobjects/floorplandevice.h>
 #include <contextobjects/modelpage.h>
-#include <datamodels/MediaFilter.h>
 #include <datamodels/gridItem.h>
 #include <datamodels/genericmodelitem.h>
 #include <contextobjects/epgchannellist.h>
@@ -196,7 +195,6 @@ public:
 
     /*! @name Filter Parameter Member Variables */
     //@{
-    MediaFilter mediaFilter;
     int cellsToRender;              /*!< Total Cells in this data grid request */
     QString *datagridVariableString;/*!< The String that will be used for the datagrid command */
     bool requestMore;               /*!< Related to the requesting operations of filling the grid.
@@ -1381,6 +1379,7 @@ signals:
  */
 
     ///@{
+    void showFileListMediaType(int mediaType);
     void gridPauseChanged(bool g);
     void newGrid();
     void initializeSorting();
@@ -1733,7 +1732,7 @@ public slots:
     bool checkLoadingStatus();
 
     void requestLiveTvPlaylist();
-    void prepareFileList( int iPK_MediaType);
+    void prepareFileList(QString filterString);
     void cleanupGrid();
     void populateAdditionalMedia();
     void setRecievingStatus(bool b);
@@ -1744,7 +1743,6 @@ public slots:
     int getCurrentRow();
     void initializeGrid();
     void setStringParam(int paramType, QString param);
-    void goBackGrid();
     void requestPage(int page);
     void setMediaType(int t) { i_current_mediaType = t; emit mediaTypeChanged( i_current_mediaType);}
     int getMediaType () {return i_current_mediaType;}

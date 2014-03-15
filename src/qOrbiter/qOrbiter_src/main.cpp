@@ -566,7 +566,6 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(gridStatus(bool)), &pqOrbiter, SLOT(setGridStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(resetSearchParams()), &pqOrbiter, SLOT(initializeGrid()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(cancelRequests()), &pqOrbiter, SLOT(cancelAllRequests()), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(gridGoBack()), &pqOrbiter, SLOT(goBackGrid()), Qt::QueuedConnection);
         QObject::connect(mediaModel, SIGNAL(pagingCleared()), &pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::QueuedConnection);
         QObject::connect(mediaModel, SIGNAL(itemAdded(int)), &pqOrbiter, SLOT(setCurrentRow(int)),Qt::QueuedConnection);
@@ -575,9 +574,8 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(clearModel()), mediaModel, SLOT(reset()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(clearFileDetails()), w.attribFilter, SLOT(clear()));
-        QObject::connect(mediaModel,SIGNAL(ready(int)), &pqOrbiter, SLOT(prepareFileList(int)), Qt::QueuedConnection);
+
         QObject::connect(&w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(setDceGridParam(int,QString)), &pqOrbiter, SLOT(setStringParam(int,QString)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(authUserMedia(int,QString,int)), &pqOrbiter, SLOT(authorizePrivateMedia(int,QString,int)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(mediaAuthChanged(int)), w.userList, SLOT(setCurrentPrivateUser(int)), Qt::QueuedConnection);
         //  QObject::connect(w.userList, SIGNAL(privateUserChanged(int, QString)), &pqOrbiter, SLOT(setStringParam(int,QString)),Qt::QueuedConnection);
@@ -594,10 +592,14 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(dceGridSepChanged(int)), &pqOrbiter, SLOT(setGridSeperator(int)), Qt::QueuedConnection);
 
 	// Media filter
-        QObject::connect(&pqOrbiter.mediaFilter, SIGNAL(filterChanged(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter.mediaFilter, SIGNAL(filterStringChanged(QString)), &w, SLOT(updateSelectedAttributes(QString)), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter.mediaFilter, SIGNAL(itemSelected(QString)), &pqOrbiter, SLOT(GetFileInfoForQml(QString)), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter.mediaFilter, SIGNAL(itemSelected(QString)), &w, SLOT(mediaItemSelected(QString)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(showFileListMediaType(int)), &w.mediaFilter, SLOT(setMediaType(int)), Qt::QueuedConnection);
+	//        QObject::connect(&pqOrbiter, SIGNAL(showFileListMediaType(int)), &w, SLOT(prepareFileList()), Qt::QueuedConnection);
+        //QObject::connect(&w.mediaFilter, SIGNAL(filterChanged(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
+        QObject::connect(&w.mediaFilter, SIGNAL(filterStringChanged(QString)), &w, SLOT(mediaFilterChanged(QString)), Qt::QueuedConnection);
+        QObject::connect(&w.mediaFilter, SIGNAL(itemSelected(QString)), &pqOrbiter, SLOT(GetFileInfoForQml(QString)), Qt::QueuedConnection);
+        QObject::connect(&w.mediaFilter, SIGNAL(itemSelected(QString)), &w, SLOT(mediaItemSelected(QString)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(gridGoBack()), &w.mediaFilter, SLOT(goBack()), Qt::QueuedConnection);
+	QObject::connect(&pqOrbiter, SIGNAL(noMediaFound()), &w.mediaFilter, SLOT(noMedia()),Qt::QueuedConnection);
 
         QObject::connect(&pqOrbiter, SIGNAL(newAttributeSort(AttributeSortItem*)), w.attribFilter, SLOT(appendRow(AttributeSortItem*)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(newMediaSubtype(AttributeSortItem*)), w.mediaTypeFilter, SLOT(appendRow(AttributeSortItem*)), Qt::QueuedConnection);

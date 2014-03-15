@@ -6,12 +6,14 @@ using namespace DCE;
 
 /*!
  *\class GenericFlatListModel
- *\brief This class is a generic flat C++ listmodel for use with qml
+ *\brief This class is a generic flat C++ listmodel that wraps a LinuxMCE datagrid, for use with qml
  *
  *\ingroup qt_controllers
  *
  *The GenericFlatListModel is based on QAbstractListmodel. Its purpose is to provide a non-abstract listmodel class that is easiliy
- *availible for use with the various lists and models that are part of LinuxMCE.
+ *availible for use with the various datagrids that are part of LinuxMCE.
+ *
+ *This class allows transparently for lazy loading and a window of loaded items. It also supports seeking.
  *
  *\sa QAbstractListmodel
  *
@@ -21,8 +23,12 @@ GenericFlatListModel::GenericFlatListModel(QObject *parent) :
   QAbstractListModel(parent), m_prototype(NULL)
 {
     qRegisterMetaType<QModelIndex>("QModelIndex");
+    loaded = false;
     m_windowSize = 100;
-    resetWindowVariables();
+    totalRows = 0;
+    m_totalCols = 0;
+    m_seek = false;
+    resetWindow();
 }
 GenericFlatListModel::GenericFlatListModel(GenericModelItem *prototypeItem, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototypeItem)
@@ -32,19 +38,24 @@ GenericFlatListModel::GenericFlatListModel(GenericModelItem *prototypeItem, QObj
 #endif
     qRegisterMetaType<QModelIndex>("QModelIndex");
     qRegisterMetaType<QMap<int, QString*> >("QMap");
+    loaded = false;
     m_windowSize = 100;
-    resetWindowVariables();
+    totalRows = 0;
+    m_totalCols = 0;
+    m_seek = false;
+    resetWindow();
+
     seperator = 16;
     loadingStatus = false;
     progress = 0;
     clearing = false;
+
     clear();
 }
 
-void GenericFlatListModel::resetWindowVariables() {
+void GenericFlatListModel::resetWindow() {
+    m_list.clear();
     m_windowStart = 0;
-    totalRows = 0;
-    m_totalCols = 0;
     m_iLastRow = 0;
     m_requestStart = -1;
     m_requestEnd = -1;
@@ -60,42 +71,50 @@ void GenericFlatListModel::setPrototype(GenericModelItem* pItem)
 }
 int GenericFlatListModel::rowCount(const QModelIndex &parent) const
 {
-    Q_UNUSED(parent);
-    return totalRows;
+  //    Q_UNUSED(parent);
+    if (!parent.isValid()) { // invalid parent == root parent
+      //        LoggerWrapper::GetInstance()->Write(LV_STATUS, "GenericFlatListModel.rowCount = %d", totalRows);
+        return totalRows;
+    } else {
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.rowCount invalid parent index");
+        return 0;
+    }
 }
 
 
 // not const per se, but from the outside this object contains all data at any time, so lets roll with that
 QVariant GenericFlatListModel::data(const QModelIndex &index, int role) const
 {
-    LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.data row = %d", index.row());
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "GenericFlatListModel.data row = %d (0->%d)[%d->%d]", index.row(), totalRows, m_windowStart, m_windowStart+m_list.size());
     // index outside the range of the datagrid ?
     if(index.row() < 0 || index.row() >= totalRows)
         return QVariant();
     
-    LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.data between 0 and totalRows");
-    LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.data windowStart = %d, windowEnd = %d", m_windowStart, m_windowStart+m_list.size());
     // index outside of the loaded items ?
     if (index.row() < m_windowStart || index.row() >= m_windowStart+m_list.size()) {
         // This method must be const to satisfy the superclass, but even though we are actually changing the state of the
         // object here, the change is only internal, externally we always fake it and say we have the total number of rows
         const_cast<GenericFlatListModel*>(this)->requestMoreData(index.row(), index.row()-m_iLastRow);
 	const_cast<GenericFlatListModel*>(this)->m_iLastRow = index.row();
-        return QString("Loading...");
+	// Only return Loading... for the first role
+	if (role == Qt::UserRole+1) {
+	    return QString("Loading...");
+	} else {
+	    return QVariant("");
+	}
     }
-    LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.data between m_windowStart and indexEnd");
     return m_list.at(index.row()-m_windowStart)->data(role);
 }
 
 bool GenericFlatListModel::setData(const int index, const QString roleName, const QVariant & value)
 {
-    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.setData");
+  LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.setData, index = %d", index);
     
-    if(index < 0 || index > totalRows)
+    if(index < 0 || index >= totalRows)
         return false;
 
     // index outside of the loaded items ?
-    if (index < m_windowStart || index > m_windowStart+m_list.size())
+    if (index < m_windowStart || index >= m_windowStart+m_list.size())
         return false;
 
     int role = m_prototype->roleNames().key(roleName.toUtf8());
@@ -107,7 +126,7 @@ bool GenericFlatListModel::setData(const int index, const QString roleName, cons
 
 Qt::ItemFlags GenericFlatListModel::flags ( const QModelIndex & index ) const 
 {
-  return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+    return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 }
 
 QHash<int, QByteArray> GenericFlatListModel::roleNames() const
@@ -157,7 +176,7 @@ void GenericFlatListModel::insertRow(int row, GenericModelItem *item)
 {
     LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.insertRow row = %d", row);
     // Is received row within the expected request range
-    if (m_requestStart >= 0 && row >= m_requestStart && row < m_requestEnd) {
+    if (m_requestStart >= 0 && row >= m_requestStart && row <= m_requestEnd) {
       bool okToInsert = false;
       if (m_bForward) {
 	if (row == m_requestStart) {
@@ -166,7 +185,7 @@ void GenericFlatListModel::insertRow(int row, GenericModelItem *item)
 	  okToInsert = true;
 	}
       } else {
-	if (row == m_requestEnd-1) {
+	if (row == m_requestEnd) {
 	  LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.insertRow backward request ok");
 	  m_requestEnd--;
 	  okToInsert = true;
@@ -178,23 +197,27 @@ void GenericFlatListModel::insertRow(int row, GenericModelItem *item)
 	m_list.insert(row-m_windowStart, item);
 	if (!m_bForward)
 	    m_windowStart--;
+	//	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.insertRow emit dataChanged");
 	emit dataChanged(index(row), index(row));
       }
 
-      if (m_requestStart == m_requestEnd) {
+      if (m_requestStart > m_requestEnd) {
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.insertRow request complete");
 	// we are done
 	m_requestStart = -1;
 	m_requestEnd = -1;
+	beginResetModel();
+	endResetModel();
       }
     }
-    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.insertRow end");
+    //    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.insertRow end");
 }
 
 void GenericFlatListModel::handleItemChange()
 {
     GenericModelItem* item = static_cast<GenericModelItem*>(sender());
     QModelIndex index = indexFromItem(item);
-    qDebug() << "Handling item change for:" << index;
+    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.handleItemChange row = %d", index.row());
     if(index.isValid())
     {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "GenericFlatListModel.handleItemChange emit dataChanged");
@@ -206,13 +229,13 @@ void GenericFlatListModel::reset()
 {
     clearing = true;
     QApplication::processEvents(QEventLoop::AllEvents);
-    emit modelAboutToBeReset();
+    //    emit modelAboutToBeReset();
     beginResetModel();
     resetInternalData();
     setProgress(0.0);
     QApplication::processEvents(QEventLoop::AllEvents);
     endResetModel();
-    emit modelReset();
+    //    emit modelReset();
     QApplication::processEvents(QEventLoop::AllEvents);
    clearing = false;
 }
@@ -263,10 +286,11 @@ QModelIndex GenericFlatListModel::indexFromItem(const GenericModelItem *item) co
     Q_ASSERT(item);
     for(int row=0; row<m_list.size(); ++row) {
 
-        if(m_list.at(row) == item) return index(row);
+        if(m_list.at(row) == item) return index(row+m_windowStart);
 
     }
-
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "GenericFlatListModel.indexFromItem invalid item (or outside current window)");
+    //TODO - how to deal with items outside our window
     return QModelIndex();
 }
 
@@ -282,22 +306,28 @@ void GenericFlatListModel::updateItemData(int row, int role, QVariant value)
     pItem->updateData(role, value);
     QModelIndex index = indexFromItem(pItem);
     emit dataChanged(index, index);
-    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.updateItemData end");
+    //    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.updateItemData end");
 }
 
 void GenericFlatListModel::clear()
 {
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.clear start");
     clearing = true;
-    QModelIndex index;
-    beginRemoveRows(index, m_windowStart, m_windowStart+m_list.size());
-    m_list.clear();
-    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.clear m_list cleared");
-
-    resetWindowVariables();
-    endRemoveRows();
+    loaded = false;
+    if (totalRows > 0)
+    {
+        QModelIndex index;
+        beginRemoveRows(index, 0, totalRows-1);
+	totalRows = 0;
+	//	m_totalCols = 0;
+	resetWindow();
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.clear m_list cleared");
+	endRemoveRows();
+	beginResetModel();    
+	endResetModel();
+    }
     clearing = false;
-    LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.clear end");
+    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.clear end");
 
 }
 
@@ -356,15 +386,18 @@ void GenericFlatListModel::populateGrid(int mediaType)
 void GenericFlatListModel::setTotalRows(int rows)
 {
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.setTotalRows rows = %d", rows);
+    loaded = true; // tie into this method, as this is always called after a populate datagrid
     // ok, so the fakery starts here - once we got the number of rows, immediately say that we got them all..
-    beginInsertRows(QModelIndex(), 0, rows);
+    beginInsertRows(QModelIndex(), 0, (rows-1));
     totalRows = rows;
 
     // TODO ?? what are these for? standard list api?
     //    emit statusMessage("Size Changed" + QString::number(totalRows));
     //    emit sizeChanged(rows);
     endInsertRows();
-    LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.setTotalRows end");
+    beginResetModel();
+    endResetModel();
+
 }
 
 int GenericFlatListModel::getTotalRows()
@@ -463,13 +496,14 @@ void GenericFlatListModel::clearForPaging()
 void GenericFlatListModel::refreshData() {
     QObject* p = QObject::parent();
     qorbiterManager* pManager = static_cast<qorbiterManager*>(p);
-    // TODO: pass along indexStart
+    // Clear all window items and request new datagrid data
+    clear();
     pManager->refreshDataGrid(modelName, m_PK_DataGrid, m_option);
 }
 
 void GenericFlatListModel::requestMoreData(int row, int direction) {
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.requestMoreData row = %d", row);
-    if (row >= m_requestStart && row < m_requestEnd) {
+    if (row >= m_requestStart && row <= m_requestEnd) {
         LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.requestMoreData row already requested");
 	return;
     }
@@ -486,9 +520,11 @@ void GenericFlatListModel::requestMoreData(int row, int direction) {
         newWindowStart = row - numItems/3;
 
 	// if the new window end exeeds the total number of rows, adjust backwards
-	if (newWindowStart + m_windowSize > totalRows) {
+	if (newWindowStart + m_windowSize >= totalRows) {
 	    newWindowStart = totalRows - numItems;
 	}
+	if (newWindowStart <= 0)
+	  newWindowStart = 0;
 
 	// new window and old overlaps, need to adjust request
 	if (newWindowStart < m_windowStart+m_list.size()) {
@@ -500,6 +536,9 @@ void GenericFlatListModel::requestMoreData(int row, int direction) {
 
 	// get the number of items to still have maxItems - need to get the same number as we clear
 	numItems = rowsToClear;
+	// when doing a request on an empty window, we get 0 items, so we just get a full window
+	if (numItems <= 0 && m_list.size() == 0)
+	    numItems = m_windowSize > totalRows ? totalRows : m_windowSize;
 	m_windowStart = newWindowStart;
 	m_bForward = true;
 
@@ -535,7 +574,7 @@ void GenericFlatListModel::requestMoreData(int row, int direction) {
 
     // request new data. Make sure that the request is valid (numItems > 0)
     if (numItems > 0) {
-        m_requestEnd = m_requestStart + numItems;
+        m_requestEnd = m_requestStart + numItems - 1; // m_requestStart & -End are inclusive
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.requestMoreData start = %d, end = %d", m_requestStart, m_requestEnd);
 	QObject* p = QObject::parent();
 	qorbiterManager* pManager = static_cast<qorbiterManager*>(p);
@@ -546,4 +585,34 @@ void GenericFlatListModel::requestMoreData(int row, int direction) {
 	m_requestEnd = -1;
     }
 
+}
+
+void GenericFlatListModel::seek(QString seek)
+{
+    resetWindow();
+    m_seek = true;
+    LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.seek start");
+    QObject* p = QObject::parent();
+    qorbiterManager* pManager = static_cast<qorbiterManager*>(p);
+    int numItems = 1; // hack: to get the exact row from the datagrid plugin, request only one row to get the row number. The normal loading code will then load a window of items around that row.
+    if (numItems >= totalRows)
+      numItems = totalRows;
+    if (numItems > 0)
+      pManager->loadMoreData(modelName, m_dgName, m_PK_DataGrid, m_option, 0, numItems, m_totalCols, seek);
+    else
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "GenericFlatListModel.seek numItems = 0, aborting!");
+      
+}
+
+void GenericFlatListModel::seekResult(int row)
+{
+    if (m_seek) {
+	m_seek = false;
+	// Scroll to position
+	emit scrollToItem(row);
+    }
+}
+
+void GenericFlatListModel::removeComplete() {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "GenericFlatListModel.removeComplete");
 }
