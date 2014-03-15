@@ -72,7 +72,7 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
             anchors.topMargin: scaleY(3)
-            model:dataModel
+            model: manager.getDataGridModel("MediaFile", 63)
             delegate: MediaListGridDelagate{}
             focus: true
             //clip: true
@@ -89,13 +89,17 @@ Item {
 
             Keys.onPressed: {
                 if(event.key !==Qt.Key_Enter && event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235){
+		    manager.seekGrid("MediaFile", event.key)
                     gridView.currentIndex = dataModel.setSection(event.key)
                     gridView.positionViewAtIndex(currentIndex,ListView.Beginning)
                 }
             }
-
+	    Connections {  
+		target: manager.getDataGridModel("MediaFile", 63)
+		onScrollToItem: {  gridView.currentIndex = item; gridView.positionViewAtIndex(item, ListView.Beginning); } 
+	    }  
             Keys.onEnterPressed: {
-                manager.setStringParam(4, dataModel.get(currentIndex, "id"))
+                manager.setStringParam(4, manager.getDataGridModel("MediaFile", 63).get(currentIndex, "id"))
                 gridView.positionViewAtIndex(0, ListView.Beginning)
             }
 
