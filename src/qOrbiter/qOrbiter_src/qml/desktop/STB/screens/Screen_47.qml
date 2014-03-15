@@ -173,13 +173,13 @@ StyledScreen {
         cellWidth: contactDelegate.width
         contentHeight: mediaList.height
         contentWidth: mediaList.width
-        model: dataModel
+        model: manager.getDataGridModel("MediaFile", 63)
         focus:true
         clip:true
         onCurrentIndexChanged: console.log("Current index changed: ==> " +currentIndex)
         Keys.onPressed: { // enter and back keys
             if(event.key ===Qt.Key_Enter || (event.key === 16777220 || event.key ===16777221 || event.key === Qt.Key_Return)) {
-                manager.setStringParam(4, dataModel.get(mediaList.currentIndex, "id"))
+                manager.setStringParam(4, manager.getDataGridModel("MediaFile", 63).get(mediaList.currentIndex, "id"))
                 console.log("Current Index ==>"+mediaList.currentIndex)
                 mediaList.positionViewAtIndex(mediaList.currentIndex, ListView.Visible)
 
@@ -194,9 +194,7 @@ StyledScreen {
             } else if(event.key === Qt.Key_Shift){
                 filtering.forceActiveFocus()
             } else if(event.key !== Qt.Key_Escape && event.key !== Qt.Key_Tab&& event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235){
-                mediaList.currentIndex = dataModel.setSection(event.key)
-                console.log("Letter Jump Index ==>  "+mediaList.currentIndex)
-                mediaList.positionViewAtIndex(mediaList.currentIndex,ListView.visible)
+		manager.seekGrid("MediaFile", 63)
             } else if(event.key=== Qt.Key_M){
                 manager.gotoQScreen("Screen_1.qml")
             }
@@ -205,7 +203,10 @@ StyledScreen {
             console.log("Depth ==>" + depth)
             console.log("Stack Depth ==> "+ indexStack.count)
         }
-
+	Connections {  
+	    target: manager.getDataGridModel("MediaFile", 63)  
+            onScrollToItem: { mediaList.currentIndex = item; mediaList.positionViewAtIndex(item, ListView.Beginning); } 
+	} 
         Keys.onEscapePressed: {
             if(screen_forty_seven_of_nine.state=== "detail")
             {
@@ -465,7 +466,7 @@ StyledScreen {
                 script:{
                     infoPanel.forceActiveFocus()
                     console.log("Setting info panel focus to active.")
-                      dataModel.setPause(true)
+                    // No alternative in data grid model code atm.:  dataModel.setPause(true)
                 }
             }
         }
