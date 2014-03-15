@@ -14,7 +14,7 @@ Item {
         width: parent.width
         height: parent.height
         anchors.centerIn: gridholder
-        model:dataModel
+        model: manager.getDataGridModel("MediaFile", 63)
         delegate: MediaListGridDelagate{}
         cacheBuffer: 15
         focus: true

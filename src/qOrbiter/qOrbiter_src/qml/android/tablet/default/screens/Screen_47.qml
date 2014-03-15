@@ -14,9 +14,10 @@ Item {
     Keys.onReleased:{
         event.accepted = true
         switch(event.key){
+        case Qt.Key_Back:
         case Qt.Key_MediaPrevious:
-            manager.goBackGrid()
-            event.accepted=true
+	    if (!manager.goBackGrid())
+                event.accepted=false
             break;
         case Qt.Key_Menu:
             if(fileviewscreen.state!=="sorting")
@@ -52,15 +53,8 @@ Item {
     MediaPositionHeader {
         id: pos_label
     }
-    Connections
-    {
-        target: dataModel
-        onProgressChanged:{progress_bar_fill.height = progress_bar.height* ((dataModel.currentCells /dataModel.totalcells)); }
-        onReady:progress_bar_fill.height = 0
-        onLoadingStatusChanged:progress_bar_fill.color = dataModel.loadingStatus ? "green" : "red"
-    }
 
-    Rectangle
+/*    Rectangle
     {
         id:progress_bar
         height: scaleY(65)
@@ -99,7 +93,7 @@ Item {
         }
 
     }
-
+*/
 
     Component
     {
@@ -159,7 +153,7 @@ Item {
     }
 
 
-    ListView{
+/*    ListView{
         id:model_pages
         height: scaleY(65)
         width: scaleX(10)
@@ -187,7 +181,7 @@ Item {
 
         }
 
-    }
+    }*/
     ListView{
         id:alphalist
         height: scaleY(65)
@@ -222,17 +216,14 @@ Item {
 
                     alphabetrect.scale = 1
                 }
-                onReleased: { if(dataModel.totalPages===1){
-                        grid_view1.maingrid.positionViewAtIndex(dataModel.setSection(name), ListView.Beginning)
-
-                    }else{
-
-                        manager.setSeekLetter(name)
-                    }
-                }
+                onReleased: manager.seekGrid("MediaFile", name)
             }
         }
     }
+    Connections { 
+	target: manager.getDataGridModel("MediaFile", 63) 
+	onScrollToItem: {  grid_view1.maingrid.positionViewAtIndex(item, ListView.Beginning); }
+    } 
 
     Row
     {
