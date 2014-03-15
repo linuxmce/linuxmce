@@ -252,7 +252,7 @@ Rectangle {
 
                         alphabetrect.scale = 1
                     }
-                    onClicked: setSeekLetter(name)
+                    onClicked: manager.seekGrid("MediaFile", name)
                 }
             }
         }

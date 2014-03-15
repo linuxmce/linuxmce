@@ -22,7 +22,7 @@ Rectangle {
         width: scaleX(60) //RayBe was 82
         height: scaleY(60) //RayBe was 82
         anchors.centerIn: gridholder
-        model:dataModel
+        model: manager.getDataGridModel("MediaFile", 63)
         delegate: contactDelegate
         cacheBuffer: 20
         focus: true
