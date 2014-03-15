@@ -8,7 +8,8 @@ Rectangle {
     clip: true
     anchors.horizontalCenter: parent.horizontalCenter
     color: "transparent"
-
+    property alias maingrid:gridView
+   
 
     Connections{
         target: dcerouter
@@ -43,7 +44,7 @@ Rectangle {
         height: scaleY(82)
 
         anchors.centerIn: gridholder
-        model:dataModel
+        model: manager.getDataGridModel("MediaFile", 63)
         delegate: contactDelegate
         cacheBuffer: 20
         focus: true
@@ -62,7 +63,7 @@ Rectangle {
         width: scaleX(82)
         height: scaleY(82)
         anchors.centerIn: gridholder
-        model: dataModel
+        model: manager.getDataGridModel("MediaFile", 63)
         delegate: contactDelegate
         cacheBuffer: 20
 

@@ -65,14 +65,10 @@ Rectangle {
         }
 
     }
-    Connections
-    {
-        target: dataModel
-        onProgressChanged:{progress_bar_fill.height = ((progress_bar.height) * (dataModel.progress / 100)); console.log(dataModel.progress)}
-        onReady:progress_bar_fill.height = 0
-        onLoadingStatusChanged:progress_bar_fill.color = dataModel.loadingStatus ? "green" : "red"
-    }
-
+    Connections { 
+	target: manager.getDataGridModel("MediaFile", 63) 
+        onScrollToItem: {console.log("scroll to item : " + item); grid_view1.maingrid.positionViewAtIndex(item, ListView.Beginning); } 
+    } 
     Rectangle
     {
         id:progress_bar
@@ -263,36 +259,6 @@ Rectangle {
 
     MultiStateFileDisplay{id:grid_view1; anchors.top: pos_label.bottom}
 
-
-    ListView{
-        id:model_pages
-        height: appH
-        width: scaleX(10)
-        model: pageList
-        anchors.left: parent.left
-        delegate: Rectangle{
-            height: scaleY(10)
-            width: scaleX(10)
-            color: "transparent"
-            Text {
-                id:page_label2
-                text: label
-                font.pixelSize: scaleY(3.5)
-                anchors.centerIn: parent
-                color: label == manager.media_currentPage ? "green":"slategrey"
-                font.bold: true
-
-            }
-
-            MouseArea{
-                anchors.fill: parent
-                onReleased: {  page_label.font.italic = true ; manager.requestPage(index);  }
-                onPressed: page_label.font.italic = false
-            }
-
-        }
-
-    }
     ListView{
         id:alphalist
         height: grid_view1.height
@@ -326,7 +292,7 @@ Rectangle {
 
                     alphabetrect.scale = 1
                 }
-                onClicked: manager.seekToGridPosition(name)
+                onClicked: manager.seekGrid("MediaFile", name)
             }
         }
     }
