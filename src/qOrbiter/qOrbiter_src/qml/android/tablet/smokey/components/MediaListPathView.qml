@@ -4,6 +4,6 @@ import "../components"
 PathView{
     id:media_path
     anchors.fill: parent
-    model:dataModel
+    model: manager.getDataGridModel("MediaFile", 63)
     visible:current_view_type===3
 }

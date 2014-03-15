@@ -6,7 +6,7 @@ GridView{
     anchors.fill: parent
     visible: current_view_type===1
 
-    model:dataModel
+    model: manager.getDataGridModel("MediaFile", 63)
     clip:true
     
     delegate: Item{

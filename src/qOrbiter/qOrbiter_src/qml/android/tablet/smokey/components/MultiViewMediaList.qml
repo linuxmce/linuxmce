@@ -18,7 +18,7 @@ Item{
     MediaListGridView{
         id:media_grid
         anchors.fill: parent
-        model:dataModel
+        model: manager.getDataGridModel("MediaFile", 63)
         visible:current_view_type===2
     }
     

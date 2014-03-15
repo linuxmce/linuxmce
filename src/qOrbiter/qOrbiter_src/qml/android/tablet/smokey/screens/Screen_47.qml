@@ -12,12 +12,9 @@ Item {
     Keys.onReleased: {
         switch(event.key){
         case Qt.Key_MediaPrevious:
-
-            manager.initializeSortString()
-            if(manager.q_mediaType===5){
-                files_view_screen.state="selection"
-                 manager.setGridStatus(false)
-            }
+        case Qt.Key_Back:
+	    if (!manager.goBackGrid())
+                event.accepted=false
             break;
         }
     }
