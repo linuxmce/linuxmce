@@ -21,11 +21,11 @@ Item {
         forceActiveFocus()
     }
 
-    Connections{
+/*    Connections{
         target:manager
         onDceGridSepChanged:manager.requestPage(0)
     }
-
+*/
     ListModel{
         id:alphabetlist
 
@@ -141,10 +141,9 @@ Item {
         event.accepted=true
         switch(event.key){
         case Qt.Key_Back:
-            manager.goBackGrid()
-            break;
         case Qt.Key_MediaPrevious:
-            manager.goBackGrid()
+	    if (!manager.goBackGrid())
+                event.accepted=false
             break;
         case Qt.Key_Menu:
             if(selector.state === "hidden")
@@ -270,67 +269,25 @@ Item {
         }
     }
 
-    Rectangle{
-        id:up_arrow
-        height: manager.appHeight*.07
-        color: "black"
-        opacity:.85
-        anchors{
-            top:parent.top
-            left:parent.left
-            right:parent.right
-        }
-        StyledText{
-            anchors.centerIn: parent
-            text:"up"
-            fontSize: 43
-            color:"white"
-
-        }
-        MouseArea{
-            anchors.fill: parent
-            onReleased:{ if(manager.media_currentPage !==0) manager.requestPage( manager.media_currentPage-1) }
-        }
-    }
-
     ListView {
         id: list_view1
-        model:dataModel
+        model: manager.getDataGridModel("MediaFile", 63)
         delegate: contactDelegateList
         clip: true
         cacheBuffer: 15
         spacing:scaleY(1)
         width: parent.width
         anchors{
-            top:up_arrow.bottom
+            top:parent.top
             left:parent.left
-            bottom:dwn_arrow.top
+            bottom:parent.bottom
         }
 
     }
-    Rectangle{
-        id:dwn_arrow
-        height: manager.appHeight*.07
-        color: "black"
-        opacity:.85
-
-        anchors{
-            left:parent.left
-            right:parent.right
-            bottom: parent.bottom
-        }
-        StyledText{
-            anchors.centerIn: parent
-            text:"Down"
-            fontSize: 43
-            color:"white"
-        }
-        MouseArea{
-            anchors.fill: parent
-            onPressed: manager.requestPage( manager.media_currentPage+1)
-        }
+    Connections {
+        target: manager.getDataGridModel("MediaFile", 63)
+        onScrollToItem: {console.log("scroll to item : " + item); list_view1.positionViewAtIndex(item, ListView.Beginning); }
     }
-
 
     Rectangle {
 	id: alphaList
@@ -377,12 +334,12 @@ Item {
                     onClicked: {
 			fileviewscreen.state="browsing"
 			currentSeekLetter = name
-			if(dataModel.totalPages==1){
-                            list_view1.maingrid.positionViewAtIndex(dataModel.setSection(name), ListView.Beginning)
-			}else{
-                            manager.setGridStatus(false)
-                            manager.setSeekLetter(name)
-			}
+//			if(dataModel.totalPages==1){
+//                            list_view1.maingrid.positionViewAtIndex(dataModel.setSection(name), ListView.Beginning)
+//			}else{
+//                            manager.setGridStatus(false)
+                            manager.seekGrid("MediaFile", name)
+//			}
                     }
                     onPressAndHold: {
 			fileviewscreen.state="browsing"
