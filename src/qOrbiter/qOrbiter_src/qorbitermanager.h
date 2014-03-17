@@ -36,6 +36,7 @@
 
 /*---qt includes----*/
 #include <QtGlobal>
+#include <QReadWriteLock>
 #if (QT5)
 
 #include <QtQuick/QQuickView>
@@ -231,6 +232,8 @@ public:
 #endif
 
     ~qorbiterManager();
+
+    QReadWriteLock modelPoolLock;
 
     //for Pi - for_pi now sets GLENABLED
     //FileReader * fileReader;

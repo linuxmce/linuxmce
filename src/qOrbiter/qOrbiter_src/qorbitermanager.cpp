@@ -1192,28 +1192,40 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
 	// GenericFlatListModels are kept in a pool in qorbitermanager, because we want the
 	// Objects to belong to this thread, and not the QML thread, which is the one that calls
 	// this method. Creating them in this method would create them in the QML thread.
-        pModel = m_modelPool.pop();
-        pModel->clear();
-        pModel->setPrototype(DataGridHandler::GetModelItemType(PK_DataGrid));
-        pModel->setModelName(dataGridId);
-        pModel->setOption("");
-        pModel->setPK_DataGrid(PK_DataGrid);
-        m_mapDataGridModels.insert(dataGridId, pModel);
+	// lock this section so we don't prepare the same model more than once
+	modelPoolLock.lockForWrite();
+	// Check that the model still is not in map
+	if (!m_mapDataGridModels.contains(dataGridId))
+	{
+	    pModel = m_modelPool.pop();
+	    pModel->clear();
+	    pModel->setPrototype(DataGridHandler::GetModelItemType(PK_DataGrid));
+	    pModel->setModelName(dataGridId);
+	    pModel->setOption("");
+	    pModel->setPK_DataGrid(PK_DataGrid);
+	    m_mapDataGridModels.insert(dataGridId, pModel);
+	    
+	    QString option = "";
+	    if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
+	      option = QString::number(iFK_Room);
+	    } else if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
+	      option = mediaFilter.getFilterString();
+	      mediaFilter.setDataGridId(dataGridId);
+	    }
+	    pModel->setOption(option);
+	    
+	    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "getDataGridModel() emit loadDataGrid");
+	    emit loadDataGrid(dataGridId, PK_DataGrid, option); // loads data
+	} else {
+	    pModel = m_mapDataGridModels[dataGridId];
+	}
+
+	modelPoolLock.unlock();
+
     } else {
         pModel = m_mapDataGridModels[dataGridId];
     }
 
-    QString option = "";
-    if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
-        option = QString::number(iFK_Room);
-    } else if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
-        option = mediaFilter.getFilterString();
-	mediaFilter.setDataGridId(dataGridId);
-    }
-    pModel->setOption(option);
-
-    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "getDataGridModel() emit loadDataGrid");
-    emit loadDataGrid(dataGridId, PK_DataGrid, option); // loads data
     return pModel;
 }
 
