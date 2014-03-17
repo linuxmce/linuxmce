@@ -23,8 +23,6 @@ class GenericFlatListModel : public QAbstractListModel
 
     Q_PROPERTY (double progress READ getProgress WRITE setProgress NOTIFY progressChanged)
     Q_PROPERTY (bool loadingStatus READ getLoadingStatus WRITE setLoadingStatus NOTIFY loadingStatusChanged)
-    Q_PROPERTY (int currentCells READ getCurrentCells WRITE setCurrentCells NOTIFY cellsChanged)
-    Q_PROPERTY (int totalPages READ getTotalPages WRITE setTotalPages NOTIFY totalPagesChanged())
 
 public:
     explicit GenericFlatListModel(QObject *parent = 0);
@@ -85,38 +83,23 @@ public:
 
     int seperator;
     bool loadingStatus;
-    int gridType;
     double progress;
-    int currentCells;
     bool clearing;
     int totalPages;
 
     
 signals:
-    void itemAdded(int row);
-    void gimmieData(int type);
     void loadingStatusChanged(bool state);
     void sizeChanged(int size);
-    void gridTypeChanged(int type);
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
     void progressChanged(double p);
-    void ready(int type);
-    void statusMessage(QString msg);
 
     void modelAboutToBeReset();
     void modelReset();
-    void cellsChanged();
-    void pagingCleared();
-    void totalPagesChanged();
     void scrollToItem(int item);
 
 public slots:
      QVariant get(int index, const QString &name) const;
-     void setTotalPages(int p){totalPages = p;qDebug() << "New page count " << totalPages; emit totalPagesChanged();}
-     int  getTotalPages() {return totalPages;}
-     void setSeperator(int s) {seperator = s;}
-     void checkForMore();
-     void populateGrid(int mediaType);
 
      void setWindowSize(int windowSize) { m_windowSize = windowSize; }
      void setTotalRows(int rows);
@@ -127,18 +110,11 @@ public slots:
      void setRequestedRows(int start, int end) { m_requestEnd = end; m_requestStart = start; }
      bool isForwardRequest() { return m_bForward; }
 
-     void setGridType( int type);
-     int getGridType();
      void clear();
      void setLoadingStatus(bool b);
      bool getLoadingStatus();
      void setProgress(double n_progress);
      double getProgress();
-     void attributeSort();
-     void clearAndRequest( int );
-     void setCurrentCells (int i) {currentCells = i; emit cellsChanged();}
-     int getCurrentCells () {return currentCells;}
-     void clearForPaging();
     Q_INVOKABLE void refreshData();
     void requestMoreData(int row, int direction);
 

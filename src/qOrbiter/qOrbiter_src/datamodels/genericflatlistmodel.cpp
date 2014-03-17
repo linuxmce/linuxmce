@@ -372,17 +372,6 @@ void GenericFlatListModel::sortModel(int column, Qt::SortOrder order)
 {
 }
 
-void GenericFlatListModel::checkForMore()
-{
-
-
-}
-
-void GenericFlatListModel::populateGrid(int mediaType)
-{
-    //manager_ref->pqOrbiter->prepareFileList(mediaType);
-}
-
 void GenericFlatListModel::setTotalRows(int rows)
 {
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.setTotalRows rows = %d", rows);
@@ -403,19 +392,6 @@ void GenericFlatListModel::setTotalRows(int rows)
 int GenericFlatListModel::getTotalRows()
 {
     return totalRows;
-}
-
-void GenericFlatListModel::setGridType(int type)
-{
-    gridType = type;
-    //emit gridTypeChanged(gridType);
-    ////qdebug("Grid Type Set");
-
-}
-
-int GenericFlatListModel::getGridType()
-{
-    return gridType;
 }
 
 void GenericFlatListModel::setLoadingStatus(bool b)
@@ -441,56 +417,6 @@ void GenericFlatListModel::setProgress(double n_progress)
 double GenericFlatListModel::getProgress()
 {
     return progress;
-}
-
-void GenericFlatListModel::attributeSort()
-{
-
-
-}
-
-void GenericFlatListModel::clearAndRequest(int type)
-{
-    clearing = true;
-    gridType = type;
-    QApplication::processEvents(QEventLoop::AllEvents);
-    emit modelAboutToBeReset();
-    beginResetModel();
-    if(    resetInternalData()){
-        setProgress(0.0);
-        QApplication::processEvents(QEventLoop::AllEvents);
-        endResetModel();
-        emit modelReset();
-
-        QApplication::processEvents(QEventLoop::AllEvents);
-        clearing = false;
-        emit ready(gridType);
-    }
-    else
-    {
-
-    }
-}
-
-void GenericFlatListModel::clearForPaging()
-{
-
-    /*
-    if(removeRows(0, m_list.count(), QModelIndex()))
-        emit pagingCleared();
-        */
-    QApplication::processEvents(QEventLoop::AllEvents);
-    emit modelAboutToBeReset();
-    beginResetModel();
-    if(resetInternalData()){
-        setProgress(0.0);
-        QApplication::processEvents(QEventLoop::AllEvents);
-        endResetModel();
-        emit modelReset();
-        emit pagingCleared();
-        QApplication::processEvents(QEventLoop::AllEvents);
-    }
-
 }
 
 void GenericFlatListModel::refreshData() {
@@ -589,6 +515,7 @@ void GenericFlatListModel::requestMoreData(int row, int direction) {
 
 void GenericFlatListModel::seek(QString seek)
 {
+  // TODO: if (window >= totalRows) { seek in m_list; }
     resetWindow();
     m_seek = true;
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.seek start");
