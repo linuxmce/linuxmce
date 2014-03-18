@@ -15,11 +15,6 @@ Item {
     focus:true
     property int mouselocY: 0
     property int mouselocX: 0
-    property int mpCount: model_pages.count
-    //    Connections{
-    //        target:dcerouter
-    //        onNewGrid:{manager.requestPage(0); console.log("New Orbiter Grid Ready")}
-    //    }
 
     Connections{
         target:userList
@@ -88,18 +83,12 @@ Item {
             Component.onCompleted:forceActiveFocus()
 
             Keys.onPressed: {
-                if(event.key !==Qt.Key_Enter && event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235){
-		    manager.seekGrid("MediaFile", event.key)
-                    gridView.currentIndex = dataModel.setSection(event.key)
-                    gridView.positionViewAtIndex(currentIndex,ListView.Beginning)
+                if(event.key !==Qt.Key_Enter && event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235 && event.text != ""){
+		    manager.seekGrid("MediaFile", event.text)
                 }
             }
-	    Connections {  
-		target: manager.getDataGridModel("MediaFile", 63)
-		onScrollToItem: {  gridView.currentIndex = item; gridView.positionViewAtIndex(item, ListView.Beginning); } 
-	    }  
             Keys.onEnterPressed: {
-                manager.setStringParam(4, manager.getDataGridModel("MediaFile", 63).get(currentIndex, "id"))
+                manager.setStringParam(4, gridView.model.get(currentIndex, "id"))
                 gridView.positionViewAtIndex(0, ListView.Beginning)
             }
 
@@ -119,6 +108,10 @@ Item {
                 }
             }
         }
+    Connections {  
+	target: gridView.model
+	onScrollToItem: {  gridView.currentIndex = item; gridView.positionViewAtIndex(item, ListView.Beginning); } 
+    }  
 
 
     Rectangle{
