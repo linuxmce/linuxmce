@@ -245,7 +245,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
     skinMessage("build type set to:: "+buildType);
     initializeGridModel();  //begins setup of media grid listmodel and its properties
-    initializeSortString(); //associated logic for navigating media grids
 
     //managing where were are variables
     i_current_command_grp = 0;
@@ -1039,7 +1038,7 @@ void qorbiterManager::updateSelectedAttributes(QString attributes)
 {
     qDebug() << "Updated Attributes::" << attributes.split("|");
     QStringList ta = attributes.split("|");
-    setTypeSort(ta.at(6));
+    //    setTypeSort(ta.at(6));
     setSubType(ta.at(1));
     setGridMediaType(ta.at(0));
     setGridFileFormat(ta.at(2));
@@ -1080,7 +1079,7 @@ bool qorbiterManager::requestDataGrid()
 
  void qorbiterManager::prepareDataGrid(QString dataGridId, QString dgName, int height, int width)
 {
-
+    modelPoolLock.lockForRead();
     if (m_mapDataGridModels.contains(dataGridId))
     {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "prepareDataGrid, clearing model");
@@ -1091,12 +1090,15 @@ bool qorbiterManager::requestDataGrid()
 	// set total row count last, as this will make the model look populated to the view
 	m_mapDataGridModels[dataGridId]->setTotalRows(height);
     }
+    modelPoolLock.unlock();
+
 }
 
 void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, int indexStart, int numRows, DataGridTable* pTable)
 {
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "addDataGridItem() start");
     // Make sure datagrid is still in the active map
+    modelPoolLock.lockForRead();
     if (m_mapDataGridModels.contains(dataGridId))
     {
         GenericFlatListModel* pModel = m_mapDataGridModels[dataGridId];
@@ -1119,6 +1121,7 @@ void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, int i
 	  }
 	}
     }
+    modelPoolLock.unlock();
     pTable->ClearData();
     delete pTable;
 
@@ -1128,6 +1131,7 @@ void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, int i
 void qorbiterManager::updateItemData(QString dataGridId, int row, int role, QVariant value)
 {
     LoggerWrapper::GetInstance()->Write(LV_DEBUG, "updateItemData() start");
+    modelPoolLock.lockForRead();
     if (m_mapDataGridModels.contains(dataGridId))
     {
         GenericFlatListModel* pModel = m_mapDataGridModels.value(dataGridId);
@@ -1136,12 +1140,14 @@ void qorbiterManager::updateItemData(QString dataGridId, int row, int role, QVar
     } else {
         LoggerWrapper::GetInstance()->Write(LV_WARNING, "updateItemData() no such datagridid %s", dataGridId.toStdString().c_str());
     }
+    modelPoolLock.unlock();
     LoggerWrapper::GetInstance()->Write(LV_DEBUG, "updateItemData() end");
 }
 
 void qorbiterManager::clearDataGrid(QString dataGridId)
 {
     qDebug() << "manager.clearDataGrid() " << dataGridId;
+    modelPoolLock.lockForWrite();
     if (m_mapDataGridModels.contains(dataGridId))
     {
         GenericFlatListModel* pModel = m_mapDataGridModels.take(dataGridId);
@@ -1151,12 +1157,14 @@ void qorbiterManager::clearDataGrid(QString dataGridId)
         pModel->setOption("");
         m_modelPool.push(pModel);
     }
+    modelPoolLock.unlock();
     qDebug() << "manager.clearDataGrid() end";
 }
 
 void qorbiterManager::clearAllDataGrid() 
 {
     qDebug() << "manager.clearAllDataGrid()";
+    modelPoolLock.lockForWrite();
     foreach (QString id, m_mapDataGridModels.keys())
     {
         GenericFlatListModel* pModel = m_mapDataGridModels.take(id);
@@ -1165,6 +1173,7 @@ void qorbiterManager::clearAllDataGrid()
         pModel->setOption("");
         m_modelPool.push(pModel);
     }
+    modelPoolLock.unlock();
     qDebug() << "manager.clearAllDataGrid() end";
 }
 
@@ -1188,7 +1197,6 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
     GenericFlatListModel* pModel = NULL;
     if (!m_mapDataGridModels.contains(dataGridId))
     {
-        LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() preparing GenericFlatListModel");
 	// GenericFlatListModels are kept in a pool in qorbitermanager, because we want the
 	// Objects to belong to this thread, and not the QML thread, which is the one that calls
 	// this method. Creating them in this method would create them in the QML thread.
@@ -1197,6 +1205,7 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
 	// Check that the model still is not in map
 	if (!m_mapDataGridModels.contains(dataGridId))
 	{
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() preparing GenericFlatListModel");
 	    pModel = m_modelPool.pop();
 	    pModel->clear();
 	    pModel->setPrototype(DataGridHandler::GetModelItemType(PK_DataGrid));
@@ -2051,30 +2060,6 @@ void qorbiterManager::setStringParam(int paramType, QString param)
 {
     mediaFilter.setStringParam(paramType, param);
 }
-
-void qorbiterManager::initializeSortString()
-{
-    goBack.clear();
-    QString datagridVariableString ;
-    //datagrid option variables
-    //  QString q_mediaType;           //1
-    q_subType="";             //2
-    q_fileFormat="";          //3
-    q_attribute_genres="";    //4
-    q_mediaSources ="1,2";         //5 need comma delineation
-    q_usersPrivate = "0";        //6
-    q_attributetype_sort="";  //7
-    q_pk_users="0";             //8
-    q_last_viewed="2";        //9
-    q_pk_attribute="";        //10
-    qs_seek ="";
-
-    datagridVariableString.append(q_mediaType).append("|").append(q_subType).append("|").append(q_fileFormat).append("|").append(q_attribute_genres).append("|").append(q_mediaSources).append("|").append(q_usersPrivate).append("|").append(q_attributetype_sort).append("|").append(q_pk_users).append("|").append(q_last_viewed).append("|").append(q_pk_attribute);
-
-    // goBack.append(datagridVariableString);
-    setDceResponse("Dg Variables Reset");
-}
-
 
 void qorbiterManager::initializeGridModel()
 {

@@ -170,7 +170,6 @@ class qorbiterManager : public QObject
 
     Q_PROPERTY(int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)/*!< \brief Contains the current media type of the playing media. \ingroup qorbiter_properties */
     Q_PROPERTY (QString q_mediaType READ getSorting WRITE setGridMediaType NOTIFY mediaGridTypeChanged) /*!< \brief Contains the current media type of the media grid being browsed \ingroup qorbiter_properties */
-    Q_PROPERTY (QString q_attributetype_sort READ getTypeSort WRITE setTypeSort NOTIFY typeSortChanged) /*!< \brief attribute type sorting */
     Q_PROPERTY (QString q_subType READ getSubType WRITE setSubType NOTIFY subTypeChanged)
     Q_PROPERTY(QString q_fileFormat READ getGridFileFormat WRITE setGridFileFormat NOTIFY gridFileFormatChanged)
     Q_PROPERTY(QString q_attribute_genres READ getGridAttributeGenres WRITE setGridAttributeGenres NOTIFY gridAttributeGenresChanged)
@@ -379,11 +378,9 @@ Param 10 - pk_attribute
     QString q_attribute_genres;    //4
     QString q_mediaSources;         //5
     QString q_usersPrivate;        //6
-    QString q_attributetype_sort;  //7
     QString q_pk_users;             //8
     QString q_last_viewed;        //9
     QString q_pk_attribute;        //10
-    QString *datagridVariableString;
     QString videoDefaultSort;
     QString audioDefaultSort;
     QString photoDefaultSort;
@@ -391,7 +388,6 @@ Param 10 - pk_attribute
     MediaFilter mediaFilter;
 
 
-    QStringList goBack;
     QString qs_seek;
     bool backwards;
     bool requestMore;
@@ -590,7 +586,6 @@ signals:
 
 
     /*Datagrid Signals*/
-    void typeSortChanged();
     void subTypeChanged();
     void resetSearchParams();
     void gridStatus(bool s);
@@ -1303,9 +1298,6 @@ public slots:
     void setSubType(QString t) {q_subType = t; emit subTypeChanged();}
     QString getSubType(){return q_subType;}
 
-    void setTypeSort(QString t) {q_attributetype_sort = t; emit typeSortChanged();}
-    QString getTypeSort(){return q_attributetype_sort;}
-
     void setMediaType(int m) {i_current_mediaType = m; emit mediaTypeChanged();}
     int getMediaType(){return i_current_mediaType;}
 
@@ -1330,7 +1322,6 @@ public slots:
     void setGridLastViewed(QString l){q_last_viewed = l; emit gridLastViewedChanged();}
     QString getGridLastViewed(){return q_last_viewed;}
 
-    void initializeSortString();
     void clearMediaModel();
     void getGrid(int i);
     void addMediaItem(gridItem* g);

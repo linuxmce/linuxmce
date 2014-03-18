@@ -515,20 +515,21 @@ void GenericFlatListModel::requestMoreData(int row, int direction) {
 
 void GenericFlatListModel::seek(QString seek)
 {
-  // TODO: if (window >= totalRows) { seek in m_list; }
-    resetWindow();
+    if (m_windowSize >= totalRows && m_windowStart == 0 && m_list.size() == totalRows) {
+    } else {
+        resetWindow();
+    }
     m_seek = true;
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.seek start");
     QObject* p = QObject::parent();
     qorbiterManager* pManager = static_cast<qorbiterManager*>(p);
     int numItems = 1; // hack: to get the exact row from the datagrid plugin, request only one row to get the row number. The normal loading code will then load a window of items around that row.
     if (numItems >= totalRows)
-      numItems = totalRows;
+        numItems = totalRows;
     if (numItems > 0)
-      pManager->loadMoreData(modelName, m_dgName, m_PK_DataGrid, m_option, 0, numItems, m_totalCols, seek);
+        pManager->loadMoreData(modelName, m_dgName, m_PK_DataGrid, m_option, 0, numItems, m_totalCols, seek);
     else
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "GenericFlatListModel.seek numItems = 0, aborting!");
-      
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "GenericFlatListModel.seek numItems = 0, aborting!");
 }
 
 void GenericFlatListModel::seekResult(int row)
