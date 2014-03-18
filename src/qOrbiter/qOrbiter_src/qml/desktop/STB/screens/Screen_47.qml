@@ -179,7 +179,7 @@ StyledScreen {
         onCurrentIndexChanged: console.log("Current index changed: ==> " +currentIndex)
         Keys.onPressed: { // enter and back keys
             if(event.key ===Qt.Key_Enter || (event.key === 16777220 || event.key ===16777221 || event.key === Qt.Key_Return)) {
-                manager.setStringParam(4, manager.getDataGridModel("MediaFile", 63).get(mediaList.currentIndex, "id"))
+                manager.setStringParam(4, mediaList.model.get(mediaList.currentIndex, "id"))
                 console.log("Current Index ==>"+mediaList.currentIndex)
                 mediaList.positionViewAtIndex(mediaList.currentIndex, ListView.Visible)
 
@@ -194,7 +194,7 @@ StyledScreen {
             } else if(event.key === Qt.Key_Shift){
                 filtering.forceActiveFocus()
             } else if(event.key !== Qt.Key_Escape && event.key !== Qt.Key_Tab&& event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235){
-		manager.seekGrid("MediaFile", 63)
+		manager.seekGrid("MediaFile", event.text)
             } else if(event.key=== Qt.Key_M){
                 manager.gotoQScreen("Screen_1.qml")
             }
@@ -204,7 +204,7 @@ StyledScreen {
             console.log("Stack Depth ==> "+ indexStack.count)
         }
 	Connections {  
-	    target: manager.getDataGridModel("MediaFile", 63)  
+	    target: mediaList.model
             onScrollToItem: { mediaList.currentIndex = item; mediaList.positionViewAtIndex(item, ListView.Beginning); } 
 	} 
         Keys.onEscapePressed: {
