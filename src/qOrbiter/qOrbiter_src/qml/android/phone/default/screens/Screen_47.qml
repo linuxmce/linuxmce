@@ -285,7 +285,7 @@ Item {
 
     }
     Connections {
-        target: manager.getDataGridModel("MediaFile", 63)
+        target: list_view1.model
         onScrollToItem: {console.log("scroll to item : " + item); list_view1.positionViewAtIndex(item, ListView.Beginning); }
     }
 
