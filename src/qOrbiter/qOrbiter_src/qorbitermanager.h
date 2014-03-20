@@ -700,6 +700,7 @@ signals:
     void commandCompleted();
     void setDceVar(int variable, QString valToAssign);
     void changeScreen(QString screen);
+    void textChanged(QString sDesignObj, QString sText, int iPK_Text);
 
     //runtime
     void commandResponseChanged();
@@ -1390,6 +1391,7 @@ public slots:
     bool OrbiterGen();              //prelim orbter generation
     void quickReload();
     void setVariable(int variable, QString valueToAssign){ if(!valueToAssign.isEmpty())  emit setDceVar(variable, valueToAssign);  }
+    void setText(QString sDesignObj, QString sValue, int iPK_Text);
 //@}
 
     /*! @name Sleeping menu  */

@@ -610,6 +610,7 @@ void qOrbiter::CMD_Set_Text(string sPK_DesignObj,string sText,int iPK_Text,strin
     //  cout << "Parm #9 - Text=" << sText << endl;
     //  cout << "Parm #25 - PK_Text=" << iPK_Text << endl;
     emit commandResponseChanged(QString::fromStdString(sText));
+    emit setText(QString::fromStdString(sPK_DesignObj),QString::fromStdString(sText), iPK_Text);
 }
 
 //<-dceag-c26-b->

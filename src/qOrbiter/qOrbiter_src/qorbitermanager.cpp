@@ -1038,7 +1038,6 @@ void qorbiterManager::updateSelectedAttributes(QString attributes)
 {
     qDebug() << "Updated Attributes::" << attributes.split("|");
     QStringList ta = attributes.split("|");
-    //    setTypeSort(ta.at(6));
     setSubType(ta.at(1));
     setGridMediaType(ta.at(0));
     setGridFileFormat(ta.at(2));
@@ -2566,5 +2565,9 @@ bool qorbiterManager::setupMobileStorage(QString externalStorage)
 
 }
 
+void qorbiterManager::setText(QString sDesignObj, QString sValue, int iPK_Text) 
+{
+    emit textChanged(sDesignObj, sValue, iPK_Text);
+}
 
 
