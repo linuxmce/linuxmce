@@ -1,39 +1,4 @@
-openzwave (1.0-635lmce5) UNRELEASED; urgency=low
-
-  [ sambuca ]
-  * try to fix SUC/SIS the last time
-
- -- sambuca <developer@linuxmce.org>  Tue, 10 Dec 2013 20:07:00 +0100
-
-openzwave (1.0-635lmce4) UNRELEASED; urgency=low
-
-  [ sambuca ]
-  * try to fix SUC/SIS once more
-
- -- sambuca <developer@linuxmce.org>  Sat, 07 Dec 2013 13:51:00 +0100
-
-openzwave (1.0-635lmce3) UNRELEASED; urgency=low
-
-  [ sambuca ]
-  * try to fix SUC/SIS once more
-
- -- sambuca <developer@linuxmce.org>  Wed, 04 Dec 2013 22:51:00 +0100
-
-openzwave (1.0-635lmce2) UNRELEASED; urgency=low
-
-  [ sambuca ]
-  * try to fix SUC/SIS once more
-
- -- sambuca <developer@linuxmce.org>  Thu, 29 Nov 2013 23:08:00 +0100
-
-openzwave (1.0-635lmce1) UNRELEASED; urgency=low
-
-  [ sambuca ]
-  * multiple fixed
-
- -- Peer Oliver Schmidt <developer@linuxmce.org>  Thu, 10 Oct 2013 20:40:00 +0000
-
-openzwave (1.0-635) UNRELEASED; urgency=low
+openzwave (1.0.742-1) UNRELEASED; urgency=low
 
   [ hari ]
   * Initial release.
@@ -47,4 +12,7 @@ openzwave (1.0-635) UNRELEASED; urgency=low
   * increase deb package version
   * new package
 
- -- root <root@pluto.vt100.at>  Mon, 28 Jan 2013 13:48:57 +0100
+  [ fish ]
+  * fix i386 builds on debian
+
+ -- fish <justin@dynam.ac>  Sat, 15 Feb 2014 00:40:22 +0800
