@@ -91,12 +91,15 @@ bool ZWInterface::Init(ZWConfigData* data) {
 	// The second argument is the path for saved Z-Wave network state and the log file.  If you leave it NULL 
 	// the log file will appear in the program's working directory.
 	OpenZWave::Options::Create( "/etc/openzwave/config/", "/etc/openzwave/", "" );
+	OpenZWave::Options::Get()->AddOptionInt("RetryTimeout", 2000);
 	OpenZWave::Options::Get()->Lock();
 
 	if ( m_sLogFile != "")
 	{
 		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::Init() setting OpenZWave log file to %s", m_sLogFile.c_str());
-		OpenZWave::Log::Create(m_sLogFile, true, false, OpenZWave::LogLevel_Info, OpenZWave::LogLevel_Debug, OpenZWave::LogLevel_Error);
+		OpenZWave::Log* pLog = OpenZWave::Log::Create(m_sLogFile, true, false, OpenZWave::LogLevel_Info, OpenZWave::LogLevel_Debug, OpenZWave::LogLevel_Error);
+		pLog->SetLogFileName(m_sLogFile); // Make sure, in case Log::Create already was called before we got here
+		pLog->SetLoggingState(OpenZWave::LogLevel_Info, OpenZWave::LogLevel_Debug, OpenZWave::LogLevel_Error);
 	}
 
 	OpenZWave::Manager::Create();
