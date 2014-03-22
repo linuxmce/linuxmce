@@ -23,8 +23,7 @@ Item {
         mediaList.forceActiveFocus()
     }
 
-    Connections
-    {
+    Connections{
         target: filedetailsclass
         onShowDetailsChanged:
         {
@@ -47,16 +46,22 @@ Item {
         contentHeight: scaleY(24)
         contentWidth: scaleX(25)
         anchors.top: parent.top
-        model: dataModel
-       flickableDirection:GridView.HorizontalFlick
+        model: manager.getDataGridModel("MediaFile", 63)
+        flickableDirection:GridView.HorizontalFlick
         focus:true
         clip:true
         onCurrentIndexChanged: console.log("Current index changed: ==> " +currentIndex)
+
+        Connections {
+            target: mediaList.model
+            onScrollToItem: {  mediaList.currentIndex = item; mediaList.positionViewAtIndex(item, ListView.Beginning); }
+        }
+
         Keys.onPressed: { // enter and back keys
             if(event.key ===Qt.Key_Enter || (event.key === 16777220 || event.key ===16777221 || event.key === Qt.Key_Return)) {
-                manager.setStringParam(4, dataModel.get(mediaList.currentIndex, "id"))
+                manager.setStringParam(4, mediaList.model.get(mediaList.currentIndex, "id"))
                 console.log("Current Index ==>"+mediaList.currentIndex)
-                mediaList.positionViewAtIndex(mediaList.currentIndex, ListView.Visible)
+              //  mediaList.positionViewAtIndex(mediaList.currentIndex, ListView.Visible)
 
 
                 if(indexStack.count !==0 && indexStack.get(indexStack.count).idx !==mediaList.currentIndex){
@@ -69,9 +74,12 @@ Item {
             } else if(event.key === Qt.Key_Shift){
                 filtering.forceActiveFocus()
             } else if(event.key !== Qt.Key_Escape && event.key !== Qt.Key_Tab&& event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235){
-                mediaList.currentIndex = dataModel.setSection(event.key)
+
+                manager.seekGrid("MediaFile", event.text)
+                // mediaList.currentIndex = dataModel.setSection(event.key)
                 console.log("Letter Jump Index ==>  "+mediaList.currentIndex)
-                mediaList.positionViewAtIndex(mediaList.currentIndex,ListView.visible)
+                // mediaList.positionViewAtIndex(mediaList.currentIndex,ListView.visible)
+           return
             } else if(event.key=== Qt.Key_M){
                 manager.gotoQScreen("Screen_1.qml")
             }
@@ -155,85 +163,8 @@ Item {
 
     }
 
-    Row{
-        id:filtering
-        height: childrenRect.height
-        width: parent.width
-        anchors.bottom: parent.bottom
-        focus:false
-        spacing:scaleX(2)
-        property int childCount:5
-        Keys.onPressed: if(event.key === Qt.Key_Shift) {mediaList.forceActiveFocus(); filter_view.currentFilterModel = ""; filter_view.visible = false }
-        onActiveFocusChanged: {
-            sorting_filter.forceActiveFocus()
-        }
-        Behavior on opacity{
-            PropertyAnimation{
-                duration: 500
-            }
-        }
-        function moveFocus(idx){
-            if(idx !==-1 && idx !==childCount ){
-                for (var i = 0; i < filtering.children.length; i++){
-                    if(filtering.children[i].rowindex===(idx)){
-                        filtering.children[i].forceActiveFocus()
-                        filter_view.x = filtering.children[i].x
-                    }
-                }
-            }
-        }
-        function moveSort(idx){
-
-        }
-
-        /*
-          Sort, Genre, Type, Source
-
-          */
-
-        FilterButton {
-            id: sorting_filter
-            text: qsTr("Sort")
-            rowindex: 0
-            onActiveFocusChanged: if(activeFocus) {filter_view.currentFilterModel = attribfilter; }
-        }
-        FilterButton{
-            id:genre_filter
-            text:qsTr("Genres")
-            rowindex: 1
-            onActiveFocusChanged: if(activeFocus) filter_view.currentFilterModel = genrefilter
-        }
-        FilterButton{
-            id:type_filter
-            text:qsTr("MediaTypes")
-            rowindex: 2
-            onActiveFocusChanged: if(activeFocus) filter_view.currentFilterModel = mediatypefilter
-        }
-        FilterButton{
-            id:source_filter
-            text:qsTr("File Format")
-            rowindex: 3
-            onActiveFocusChanged:  if(activeFocus) filter_view.currentFilterModel = fileformatmodel
-        }
-        FilterButton{
-            id:playAllbutton
-            text:"Play All"
-            rowindex: 4
-            onActiveFocusChanged: if(activeFocus) {filter_view.currentFilterModel = "" }
-            Keys.onEnterPressed: {
-                  manager.playMedia("!G"+iPK_Device)
-            }
-            Keys.onReturnPressed: {
-                  manager.playMedia("!G"+iPK_Device)
-            }
-
-            Keys.onPressed: {
-                if(event.key === Qt.Key_Enter|| event.key ===Qt.Key_Return){
-                    manager.playMedia("!G"+iPK_Device)
-                }
-                console.log(event.key)
-            }
-        }
+    MediaFilterRow {
+        id: filtering
     }
 
     Item{

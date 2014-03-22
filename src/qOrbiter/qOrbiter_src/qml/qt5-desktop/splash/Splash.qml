@@ -8,22 +8,38 @@ Item {
     height: 720
     width: 1280
 
+    Rectangle{
+        anchors.fill: parent
+        color:"black"
+    }
+
+    Component.onCompleted: {
+        pageLoader.source= "SplashView.qml"
+    }
+
     property bool orbiterSetup:false
     property string router_ip: ""
 
-    onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true; newOrbiterOptionContainer.visible=true; window.showSetup()}
+    onOrbiterSetupChanged:{
+        console.log(orbiterSetup);
+        existing_orbiters.visible = false;
+        orbiter_options.visible = true;
+        newOrbiterOptionContainer.visible=true;
+        window.showSetup()
+    }
+
     onWidthChanged: console.log("detected size change")
     Image {
         id: splash
         anchors.centerIn: parent
-        fillMode: Image.PreserveAspectFit
-        source: "noir/img/icons/bedroom.jpg"
+        fillMode: Image.PreserveAspectCrop
+        source: "../noir/img/icons/bedroom.jpg"
         anchors.fill: parent
     }
     FontLoader{
         id:myFont
         name:"Sawasdee"
-        source: "../skins-common/fonts/Sawasdee.ttf"
+        source: "../../skins-common/fonts/Sawasdee.ttf"
     }
 
     function scaleX(x){
@@ -53,15 +69,15 @@ Item {
     Loader {
         id:pageLoader
         objectName: "loadbot"
-        source: "SplashView.qml"
+      //  source:
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
         }
     }
 
-//    Connections{
-//        target:window
-//        onMessageChanged:loadingStatus.text = window.message
-//        //onStatusChanged: screenchange("SetupNewOrbiter.qml")
-//    }
+    Connections{
+        target:window
+        onMessageChanged:loadingStatus.text = window.message
+        //onStatusChanged: screenchange("SetupNewOrbiter.qml")
+    }
 }

@@ -1,7 +1,6 @@
 // import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 2.0
 
-import "noir/components"
 Item {
   height: appH
   width: appW
@@ -46,7 +45,7 @@ Item {
     Connections{
         target:window
         onMessageChanged:loadingStatus.text = window.message
-        //onStatusChanged: screenchange("SetupNewOrbiter.qml")
+        onStatusChanged: screenchange("SetupNewOrbiter.qml")
     }
 
     Rectangle {

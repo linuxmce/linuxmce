@@ -8,6 +8,7 @@ FloorplanDisplay             FloorplanDisplay.qml                        #no com
 FocusButton             FocusButton.qml                        #no comment
 FocusRow             FocusRow.qml                        #no comment
 ListDisplay             ListDisplay.qml                        #no comment
+MediaFilterRow             MediaFilterRow.qml                        #no comment
 MediaListGridDelagate             MediaListGridDelagate.qml                        #no comment
 MediaPlaybackHeader             MediaPlaybackHeader.qml                        #no comment
 MediaPlaybackTemplate             MediaPlaybackTemplate.qml                        #no comment

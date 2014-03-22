@@ -85,6 +85,9 @@ Item {
             console.log("initializing media player "+manager.mediaPlayerID)
             dceMediaController.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
         }
+        onFileUrlChanged: {
+            player.source=Qt.resolvedUrl(dceMediaController.fileUrl)
+        }
     }
 
     Connections{
@@ -98,13 +101,21 @@ Item {
 
     MediaPlayer{
         id:player
-        source: dceMediaController.fileUrl
-        onSourceChanged:{ if(source !==""){play()}; console.log(source)}
+        source: "http://us.ah.fm:9000" //dceMediaController.fileUrl
+        onSourceChanged:{
+            if(source !==""){play()};
+            console.log("New media player source::"+dceMediaController.fileUrl)
+        }
+        onError: console.log("Error::"+error+" ==>"+errorString)
+        onErrorStringChanged: console.log(errorString)
+
     }
 
-    //    VideoOutput{
-    //        id:videoPlane
-    //    }
+        VideoOutput{
+            id:videoPlane
+            anchors.fill: parent
+            source:player
+        }
 
     //    Audio{
     //        id:audioPlayer

@@ -33,6 +33,10 @@ Item {
     //        color: "black"
     //    }
 
+    Component.onCompleted: {
+        glScreenSaver.setImageList(manager.screensaverImages)
+    }
+
     Connections{
         target: manager
         onOrientationChanged: checkLayout()
@@ -299,12 +303,19 @@ Item {
 
     DceScreenSaver{
         id:glScreenSaver
-        height: manager.appHeight
-        width: manager.appWidth
+        anchors{
+            top:parent.top
+            left:parent.left
+            right:parent.right
+            bottom:parent.bottom
+        }
+
         focus:true
         interval:60000
-        anchors.centerIn: parent
+
         requestUrl:manager.m_ipAddress
+
+
         Connections{
             target:manager
             onScreenSaverImagesReady:glScreenSaver.setImageList(manager.screensaverImages)
