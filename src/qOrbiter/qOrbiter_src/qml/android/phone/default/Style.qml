@@ -90,7 +90,7 @@ QtObject{
     property int mediabuttonh :scaleY(12)
 
     property color button_system_color: "black"
-    property color button_system_color_hover: "green"
+    property color button_system_color_hover: "#ff33b5e5"
     property color button_system_text_color: "antiquewhite"
 
     property color button_action_color: "lightgrey"

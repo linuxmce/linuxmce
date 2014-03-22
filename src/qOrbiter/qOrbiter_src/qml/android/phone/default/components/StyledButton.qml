@@ -20,7 +20,7 @@ Item{
         }
     }
 
-    property string phil:useHandler ? dceHandler.item.pressed ? "yellow" : "black" :  fly_trap.pressed ? "green": "black"
+    property string phil:useHandler ? dceHandler.item.pressed ? "yellow" : "black" :  fly_trap.pressed ? style.button_system_color_hover: style.button_system_color
     property int textSize:28
     property alias buttonText:button_label.text
     property alias hitArea:fly_trap
