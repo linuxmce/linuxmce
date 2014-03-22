@@ -1216,6 +1216,8 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
 	    QString option = "";
 	    if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
 	      option = QString::number(iFK_Room);
+	    } else if (PK_DataGrid == DATAGRID_Phone_Book_Auto_Compl_CONST) {
+	        option = QString::number(iPK_User).append("|%");
 	    } else if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
 	      option = mediaFilter.getFilterString();
 	      mediaFilter.setDataGridId(dataGridId);
