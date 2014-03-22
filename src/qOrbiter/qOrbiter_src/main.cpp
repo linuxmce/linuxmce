@@ -57,7 +57,6 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <QtQuick/QQuickView>
 #include <QtCore/QThread>
 
-
 #else
 #include <QApplication>
 #include <QtDeclarative/QDeclarativeEngine>
@@ -600,7 +599,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w.mediaFilter, SIGNAL(itemSelected(QString)), &pqOrbiter, SLOT(GetFileInfoForQml(QString)), Qt::QueuedConnection);
         QObject::connect(&w.mediaFilter, SIGNAL(itemSelected(QString)), &w, SLOT(mediaItemSelected(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(gridGoBack()), &w.mediaFilter, SLOT(goBack()), Qt::QueuedConnection);
-	QObject::connect(&pqOrbiter, SIGNAL(noMediaFound()), &w.mediaFilter, SLOT(noMedia()),Qt::QueuedConnection);
+        //QObject::connect(&pqOrbiter, SIGNAL(noMediaFound()), &w.mediaFilter, SLOT(noMedia()),Qt::QueuedConnection);
 
         QObject::connect(&pqOrbiter, SIGNAL(newAttributeSort(AttributeSortItem*)), w.attribFilter, SLOT(appendRow(AttributeSortItem*)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(newMediaSubtype(AttributeSortItem*)), w.mediaTypeFilter, SLOT(appendRow(AttributeSortItem*)), Qt::QueuedConnection);

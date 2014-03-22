@@ -128,7 +128,7 @@ linux-g++{
                 }else{
                 folder_01.source = qml/qt5-desktop
                 folder_01.target = $$DESTDIR/qml/
-                DEFINES += for_desktop
+                DEFINES += for_desktop GLENABLED
                 }
                 glmsg=scenegraph
         }

@@ -166,8 +166,8 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
         mainView.rootContext()->setContextProperty("appW", 800);
         mainView.rootContext()->setContextProperty("appH", 600);
     }else{
-        mainView.rootContext()->setContextProperty("appW", 1280);
-        mainView.rootContext()->setContextProperty("appH", 720);
+        mainView.rootContext()->setContextProperty("appW", 720);
+        mainView.rootContext()->setContextProperty("appH", 1280);
     }
 #elif RPI
 

@@ -60,6 +60,7 @@ public:
     QSize endSize;
     int m_animationTimer;
     int tick;
+    bool imgSet;
 
 
 signals:
@@ -126,9 +127,10 @@ public slots:
         update();
 #else
         update(0,0,width(), height());
-        qWarning() << "Update forced";
+
         t=NULL;
 #endif
+          qWarning() << "Update forced";
     }
     Q_INVOKABLE  void setImageList(QStringList l);
 private:

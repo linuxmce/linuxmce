@@ -455,6 +455,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 #ifdef QANDROID
     setDceResponse("Loading Qt Quick 2 Skins for Qt5");
     remoteDirectoryPath.append("/qt5");
+    finalPath = remoteDirectoryPath;
 #else
     setDceResponse("Loading Qt Quick 1 Skins for Qt 4");
 #endif

@@ -39,7 +39,7 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     currentScale = 1;
     endSize.setHeight(0);
     endSize.setWidth(0);
-
+    imgSet = false;
 
     currentUrl = "";
     active = false;
@@ -102,7 +102,6 @@ void DceScreenSaver::setImageList(QStringList l)
 void DceScreenSaver::requestImage(QString img){
     QNetworkRequest req;
     req.setUrl("http://"+requestUrl+"/lmce-admin/imdbImage.php?type=screensaver&val="+img);
-    qDebug() << req.url().toString();
     QObject::connect(requestManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processImageData(QNetworkReply*)));
     requestManager->get(req);
 }
@@ -124,15 +123,14 @@ void DceScreenSaver::processImageData(QNetworkReply *r){
     if(t.isNull()){
         intervalTimer->start(interval);
     }else{
-        surface =currentImage;
+        surface =currentImage.copy();
         currentImage= t.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
     }
 
-#ifndef QT5
+    imgSet=false;
     startFadeTimer(2500);
-#else
-    update();
-#endif
+
+
 
     //  beginZoom();
 
@@ -154,16 +152,13 @@ void DceScreenSaver::getNextImage()
 
 
 #ifdef QT4
-void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget )
-{
+void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget ){
 
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-
     p->setBrush(Qt::NoBrush);
     p->setPen(Qt::NoPen);
-
     p->setRenderHint(QPainter::HighQualityAntialiasing, 1);
 
 
@@ -176,7 +171,6 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
     p->drawPixmap(tgtRect, surface, tgtRect);
 
     //setup and new pix map over it
-
     p->setOpacity(fadeOpacity);
 
     //create 'composed image'
@@ -185,35 +179,37 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
 #endif
 
 #ifdef QT5
-void DceScreenSaver::paint(QPainter *painter  )
-{
-
+void DceScreenSaver::paint(QPainter *painter){
 
     painter->setBrush(Qt::NoBrush);
     painter->setPen(Qt::NoPen);
-
     painter->setRenderHint(QPainter::HighQualityAntialiasing, 1);
-
 
     //draw old frame first
     QRectF tgtRect(0,0,width(), height());
-    QSize scaledSize;
-    scaledSize.setHeight(height()*currentScale);
-    scaledSize.setWidth(width()*currentScale);
-
-    painter->drawPixmap(tgtRect, surface, tgtRect);
-    painter->drawPixmap(tgtRect, currentImage, tgtRect);
+    if(fadeOpacity==1){
+        painter->drawPixmap(tgtRect, surface.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
+    }else{
+         painter->drawPixmap(tgtRect, surface.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
+        //setup and new pix map over it
+        painter->setOpacity(fadeOpacity);
+        //create 'composed image'
+        painter->drawPixmap(tgtRect, currentImage.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
+    }
 }
 #endif
 
 
 
-void DceScreenSaver::timerEvent(QTimerEvent *event)
-{
+void DceScreenSaver::timerEvent(QTimerEvent *event){
 
     if(event->timerId()==m_animationTimer){
         if(fadeOpacity!=1 && !currentImage.isNull() ){
             this->update();
+        } else   if(fadeOpacity==1 && !imgSet){
+            qWarning() << "Transition finish, setting currentImg ==> surface";
+            surface=currentImage.copy();
+            imgSet=true;
         }
     }
 
@@ -230,12 +226,10 @@ void DceScreenSaver::beginZoom()
 void DceScreenSaver::startFadeTimer(int time)
 {
 
-#ifdef QT5
-  Q_UNUSED(time)
-#else
+
     fadeAnimation->setDuration(time);
     fadeAnimation->start();
-#endif
+
 }
 
 

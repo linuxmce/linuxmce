@@ -6,7 +6,7 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <meta-data android:value="stupid" android:name="android.app.lib_name"/>
+            <meta-data android:value="qorbiterqt5" android:name="android.app.lib_name"/>
             <meta-data android:name="android.app.qt_sources_resource_id" android:resource="@array/qt_sources"/>
             <meta-data android:value="default" android:name="android.app.repository"/>
             <meta-data android:name="android.app.qt_libs_resource_id" android:resource="@array/qt_libs"/>
