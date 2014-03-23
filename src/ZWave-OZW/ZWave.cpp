@@ -835,6 +835,8 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"ZWave::OnNotification() ValueAdded: Polling not enabled, ignoring node %d/%d/%d, value label %s, You might consider manually setting polling for this value.", _notification->GetNodeId(), id.GetCommandClassId(), id.GetInstance(), label.c_str());
 				}
 			}
+			// Set verified changes - this will prevent a ValueChanged notification for unchanged values
+			OpenZWave::Manager::Get()->SetChangeVerified(id, true);
 		}
 /*		if (m_pZWInterface->IsReady() && nodeInfo != NULL && nodeInfo->m_generic != 0)
 		{
