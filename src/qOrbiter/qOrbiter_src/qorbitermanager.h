@@ -1323,10 +1323,8 @@ public slots:
     void setGridLastViewed(QString l){q_last_viewed = l; emit gridLastViewedChanged();}
     QString getGridLastViewed(){return q_last_viewed;}
 
-    void clearMediaModel();
+   
     void getGrid(int i);
-    void addMediaItem(gridItem* g);
-    void updateModel();
     void setStringParam(int paramType, QString param);
     bool goBackGrid();
     void requestPage(int p){ setCurrentPage(p); emit requestDcePages(p);}

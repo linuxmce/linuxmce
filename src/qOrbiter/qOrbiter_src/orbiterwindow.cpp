@@ -110,6 +110,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 
 #ifdef QT5
     mainView.setResizeMode(QQuickView::SizeViewToRootObject);
+
 #else
     mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
@@ -166,16 +167,20 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
         mainView.rootContext()->setContextProperty("appW", 800);
         mainView.rootContext()->setContextProperty("appH", 600);
     }else{
-        mainView.rootContext()->setContextProperty("appW", 720);
-        mainView.rootContext()->setContextProperty("appH", 1280);
+        mainView.rootContext()->setContextProperty("appW", 1280);
+        mainView.rootContext()->setContextProperty("appH", 720);
     }
 #elif RPI
-
     mainView.rootContext()->setContextProperty("appW", mainView.height());
     mainView.rootContext()->setContextProperty("appH", mainView.width());
 #else
     mainView.rootContext()->setContextProperty("appW", 800);
     mainView.rootContext()->setContextProperty("appH", 600);
+#endif
+
+#if (QT5)
+    mainView.rootContext()->setContextProperty("appW", 1280);
+    mainView.rootContext()->setContextProperty("appH", 720);
 #endif
 
 

@@ -131,7 +131,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
     //Resize to view as opposed to the root item
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
-    qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
+    qorbiterUIwin->setResizeMode(QQuickView::SizeViewToRootObject);
 #else
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
@@ -1408,21 +1408,6 @@ void qorbiterManager::execGrp(int grp)
 }
 
 
-void qorbiterManager::addMediaItem(gridItem* g)
-{
-
-}
-
-void qorbiterManager::updateModel()
-{
-
-}
-
-void qorbiterManager::clearMediaModel()
-{
-
-
-}
 
 void qorbiterManager:: setLocation(const int &room, const int &ea)
 {
