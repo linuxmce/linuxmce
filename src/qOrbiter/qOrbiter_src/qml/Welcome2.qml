@@ -1,8 +1,8 @@
 import QtQuick 2.0
 
 Item {
-   height: 1024
-   width: 768
+   height: appH
+   width: appW
 
     Rectangle{
         anchors.fill: parent

@@ -125,42 +125,42 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     //  mainView.rootContext()->setContextProperty("orbiterList" , "");
 
 #ifdef GLENABLED
-        #ifdef QT4_8
-        QGLFormat format= QGLFormat::defaultFormat();
-        glWidget = new QGLWidget(format);
-        glWidget->setAutoFillBackground(false);
-        mainView.setViewport(glWidget);
-        mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-        #endif
+#ifdef QT4_8
+    QGLFormat format= QGLFormat::defaultFormat();
+    glWidget = new QGLWidget(format);
+    glWidget->setAutoFillBackground(false);
+    mainView.setViewport(glWidget);
+    mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+#endif
 #endif
 
-    #ifdef RPI
-        mainView.setSurfaceType(QSurface::OpenGLSurface);
-        qDebug() << "Surface id " <<mainView.OpenGLSurface;
-        qDebug() << "is opengl? " << mainView.openglContext();
-        qDebug() << "surface type " << mainView.surfaceType();
-        //mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-    #endif
+#ifdef RPI
+    mainView.setSurfaceType(QSurface::OpenGLSurface);
+    qDebug() << "Surface id " <<mainView.OpenGLSurface;
+    qDebug() << "is opengl? " << mainView.openglContext();
+    qDebug() << "surface type " << mainView.surfaceType();
+    //mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+#endif
 
-//    #if defined (QT4) && defined (ANDROID)
-//        QGLFormat format= QGLFormat::defaultFormat();
-//        glWidget = new QGLWidget();
-//        glWidget->setAutoFillBackground(false);
-//        mainView.setViewport(glWidget);
-//        mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-//    #endif
+    //    #if defined (QT4) && defined (ANDROID)
+    //        QGLFormat format= QGLFormat::defaultFormat();
+    //        glWidget = new QGLWidget();
+    //        glWidget->setAutoFillBackground(false);
+    //        mainView.setViewport(glWidget);
+    //        mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    //    #endif
 
 
 
     // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
 
-        //window sizing
+    //window sizing
 #ifdef ANDROID
 
-    #ifdef QT4_8
+#ifdef QT4_8
     mainView.rootContext()->setContextProperty("appW", mainView.width());
     mainView.rootContext()->setContextProperty("appH", mainView.height());
-    #endif
+#endif
 
 #elif for_desktop
     if(fullScreen==true){
@@ -188,10 +188,10 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #ifdef for_desktop
 #ifndef QT5
     buildType = "/qml/desktop";
-     qrcPath = "qrc:main/Welcome.qml";
+    qrcPath = "qrc:main/Welcome.qml";
 #else
     buildType = "/qml/qt5-desktop";
-     qrcPath = "qrc:qt5-desktop/Welcome2.qml";
+    qrcPath = "qrc:qml/Welcome2.qml";
 #endif   
     localPath = "qt5-desktop/";
 #elif defined (for_freemantle)
@@ -216,7 +216,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     qrcPath = "qrc:osx/Splash.qml";
     localPath = "desktop/";
 #elif defined __ANDROID__
-    qrcPath = "qrc:android/Splash.qml";
+    qrcPath = "qrc:main/Welcome2.qml";
     localPath = "android/";
 #elif defined for_android
     buildType = "/qml/android";
@@ -232,44 +232,30 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 
 #endif
 
-#ifdef ANDROID
-
-
+#ifdef ANDROID    
+/* Android ifdef for loading initial qml file */
 
     #ifdef QT4_8
     mainView.rootContext()->setContextProperty("appW", mainView.width());
     mainView.rootContext()->setContextProperty("appH", mainView.height());
     #endif
-
     mainView.engine()->addImportPath("assets:/imports/androidComponents");
     mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
     mainView.engine()->addPluginPath("assets:/lib");
 
     qDebug() << "Plugin path list"; mainView.engine()->pluginPathList().join("\n");
-
     mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
-
-
-#ifdef QT5
-    mainView.setSource(QString("assets:/qml/Welcome.qml"));
-#else
-    mainView.setSource(QString("assets:/qml/Base.qml"));
 #endif
-  #else
+/*End Special Android setup */
 
-    if(mainView.source().isEmpty())
-    mainView.setSource(qrcPath);
-#endif
-
-
-//   mainView.setSource(QApplication::applicationDirPath().remove("/bin")+buildType+"/Splash.qml");
-
+ mainView.setSource(qrcPath); /* Sets the initial qml file based on all the above switching */
 
 }
 
-void orbiterWindow::initView()
-{
-
+/*!
+ * \brief orbiterWindow::initView This function is used to provide any special handling needed for window setup on start.
+ */
+void orbiterWindow::initView(){
 #ifdef Q_OS_SYMBIAN
     mainView.showFullScreen();
 #elif defined(Q_WS_MAEMO_5)
@@ -294,11 +280,9 @@ void orbiterWindow::initView()
     // mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
 
-    qDebug() << mainView.thread()->currentThread();
 }
 
-void orbiterWindow::setMessage(QString imsg)
-{
+void orbiterWindow::setMessage(QString imsg){
     // QApplication::processEvents(QEventLoop::AllEvents);
     message = imsg; emit MessageChanged();
     //qDebug() << "Orbiter window output:" << imsg;
@@ -309,31 +293,28 @@ void orbiterWindow::forceResponse(QString forced)
 
 }
 
-void orbiterWindow::loadSetupPage()
-{
+void orbiterWindow::loadSetupPage(){
     mainView.setSource(QUrl("qrc:main/SetupNewOrbiter.qml"));
 }
 
-QString orbiterWindow::getMessage()
-{
+QString orbiterWindow::getMessage(){
     return message;
 }
 
-void orbiterWindow::qmlSetupLmce(int device, QString ip)
-{
-
+void orbiterWindow::qmlSetupLmce(int device, QString ip){
     qDebug() <<"Orbiter Window Settings.\n Device::"<<device<<"\n Router::"<<ip;
     emit setupLmce(device, ip);
     router=ip;
 }
 
-bool orbiterWindow::getOrbiterState()
-{
+bool orbiterWindow::getOrbiterState(){
     return newOrbiter;
 }
 
-void orbiterWindow::showSplash()
-{
+/*!
+ * \brief orbiterWindow::showSplash Shows the initial loading page, which then loads the splash.
+ */
+void orbiterWindow::showSplash(){
     mainView.setSource(QUrl(qrcPath));
 }
 
@@ -387,6 +368,11 @@ void orbiterWindow::prepareExistingOrbiters()
 
 }
 
+/*!
+ * \brief orbiterWindow::displayPromptResponse Used for initial setup. Works differently than original implementation in Orbiter classic.
+ * \param type
+ * \param pList
+ */
 void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)
 {
 #ifdef QT_DEBUG
@@ -407,6 +393,15 @@ void orbiterWindow::displayPromptResponse(int type, QList<QObject*> pList)
     emit showList();
 }
 
+/*!
+ * \brief orbiterWindow::setupNewOrbiter Sets up a new orbiter
+ * \param user
+ * \param room
+ * \param skin
+ * \param lang
+ * \param height
+ * \param w
+ */
 void orbiterWindow::setupNewOrbiter(int user, int room, int skin, int lang, int height, int w)
 {
 #ifdef QT_DEBUG

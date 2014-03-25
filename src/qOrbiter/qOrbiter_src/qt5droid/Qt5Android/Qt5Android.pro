@@ -25,8 +25,8 @@ CONFIG += thread
 TARGET=qorbiterqt5
 
         DEFINES+=GLENABLED ANDROID QT5 QANDROID
-        QT+= opengl script network xml core widgets
-        QT+= quick qml
+        QT+= opengl script network xml core
+        QT+= quick qml multimedia
         glmsg= yes
 
 
@@ -363,4 +363,6 @@ OTHER_FILES += \
     android/src/org/kde/necessitas/origo/QtActivity.java \
     android/src/org/kde/necessitas/origo/QtApplication.java \
     ../../../platforms/Android/qt5-pkg-src/AndroidManifest.xml
+
+ANDROID_EXTRA_LIBS = ../../../platforms/Android/androidPlugins/armeabi-v7a/libDceScreenSaver.so
 
