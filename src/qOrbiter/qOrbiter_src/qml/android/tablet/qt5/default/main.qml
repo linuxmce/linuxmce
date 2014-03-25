@@ -2,9 +2,10 @@ import QtQuick 2.0
 import "../../../../skins-common/lib/handlers"
 import "components"
 
+
+
 Item {
     id: qml_root
-
     onWidthChanged: console.log(width+"::"+height)
     height:manager.appHeight
     width:manager.appWidth
@@ -26,6 +27,7 @@ Item {
     function scaleY(y){
         return y/100*qml_root.height
     }
+
     focus:true
     Keys.onReleased:{
 
@@ -59,6 +61,45 @@ Item {
         id:bgFill
         color:"black"
     }
+
+//    DceScreenSaver{
+//        id:glScreenSaver
+////        anchors{
+////            top:qml_root.top
+////            bottom:qml_root.bottom
+////            left: qml_root.left
+////            right: qml_root.right
+////        }
+//        height:manager.appHeight
+//        width: manager.appWidth
+//        interval:30000
+
+
+//        requestUrl:manager.m_ipAddress
+//        Component.onCompleted: {
+//            glScreenSaver.setImageList(manager.screensaverImages)
+//        }
+
+//        Connections{
+//            target:manager
+//            onScreenSaverImagesReady:{
+//                glScreenSaver.setImageList(manager.screensaverImages)
+//                console.log("Orbiter Consume Screensaver images")
+//                console.log("Orbiter counts " + glScreenSaver.pictureCount)
+//            }
+//        }
+
+//        MouseArea{
+//            anchors.fill: parent
+//            onClicked: {
+//                if(!uiOn){
+//                    console.log("screensaver revive")
+//                    hideUi()
+//                }
+//            }
+//        }
+
+//    }
 
     ListModel{
         id:scenarios
@@ -114,26 +155,26 @@ Item {
     }
 
 
-    Item{
-        id:mini_screen_saver
-        anchors.fill: qml_root
+//    Item{
+//        id:mini_screen_saver
+//        anchors.fill: qml_root
 
-        Timer{
-            id:mini_ss_timer
-            interval:10000
-            running: true // screensaver.active
-            triggeredOnStart: true
-            onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
-            repeat: true
-        }
+//        Timer{
+//            id:mini_ss_timer
+//            interval:10000
+//            running: true // screensaver.active
+//            triggeredOnStart: true
+//            onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
+//            repeat: true
+//        }
 
-        Image{
-            id:mini_screen_saver_image
-            height: mini_screen_saver.height
-            width: mini_screen_saver.width
-            source: "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
-        }
-    }
+//        Image{
+//            id:mini_screen_saver_image
+//            height: mini_screen_saver.height
+//            width: mini_screen_saver.width
+//            source: "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
+//        }
+//    }
 
     Loader {
         id:pageLoader
