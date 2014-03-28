@@ -606,7 +606,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(newFileFormatSort(AttributeSortItem*)), w.uiFileFilter, SLOT(appendRow(AttributeSortItem*)), Qt::QueuedConnection);
 
 	// generic datagrid signals
-        QObject::connect(&pqOrbiter,SIGNAL(prepareDataGrid(QString,QString,int,int)), &w, SLOT(prepareDataGrid(QString,QString,int,int)),Qt::DirectConnection);
+        QObject::connect(&pqOrbiter,SIGNAL(prepareDataGrid(QString,QString,int,int)), &w, SLOT(prepareDataGrid(QString,QString,int,int)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(addDataGridItem(QString,int,int,int,DataGridTable*)), &w, SLOT(addDataGridItem(QString,int,int,int,DataGridTable*)),Qt::QueuedConnection);
         QObject::connect(&w,SIGNAL(loadDataGrid(QString,int,QString)), &pqOrbiter, SLOT(loadDataGrid(QString,int,QString)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(updateItemData(QString,int,int,QVariant)), &w, SLOT(updateItemData(QString,int,int,QVariant)), Qt::QueuedConnection);
