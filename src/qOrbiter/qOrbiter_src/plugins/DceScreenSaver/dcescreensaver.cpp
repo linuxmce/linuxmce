@@ -207,7 +207,7 @@ void DceScreenSaver::timerEvent(QTimerEvent *event){
         if(fadeOpacity!=1 && !currentImage.isNull() ){
             this->update();
         } else   if(fadeOpacity==1 && !imgSet){
-            qWarning() << "Transition finish, setting currentImg ==> surface";
+          //  qWarning() << "Transition finish, setting currentImg ==> surface";
             surface=currentImage.copy();
             imgSet=true;
         }
