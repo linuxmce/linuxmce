@@ -13,6 +13,7 @@ Item{
             duration: 500
         }
     }
+    clip:true
 
     Rectangle{
         id:bg_fill
@@ -32,7 +33,10 @@ Item{
         fontSize: textSize
         anchors.centerIn: parent
         color:"antiquewhite"
+
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        //elide:Text.ElideRight
+
     }
 
     MouseArea{

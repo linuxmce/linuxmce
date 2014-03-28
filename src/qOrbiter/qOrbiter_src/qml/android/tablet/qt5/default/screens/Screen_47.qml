@@ -42,6 +42,7 @@ Item {
         }
     }
 
+
     MediaListProgressBar{
         id:progress_bar
         anchors.bottom: parent.bottom

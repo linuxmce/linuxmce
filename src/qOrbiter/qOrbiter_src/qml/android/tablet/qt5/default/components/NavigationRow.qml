@@ -1,12 +1,17 @@
 import QtQuick 2.0
 
-import "../../../skins-common/lib/handlers"
+import "../../../../../skins-common/lib/handlers"
 
 
 Row{
     id:nav_row
     height: scaleY(8)
-    width:parent.width
+    anchors{
+        left:parent.left
+        right:parent.right
+        top:parent.top
+    }
+
     property alias navigation:nav
     property string defaultSource:"ScenarioComponent.qml"
     property string navSource:"ScenarioComponent.qml"

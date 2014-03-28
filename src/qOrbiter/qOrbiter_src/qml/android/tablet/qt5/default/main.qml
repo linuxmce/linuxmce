@@ -1,4 +1,6 @@
 import QtQuick 2.0
+import QtQuick.Window 2.0
+import DceScreenSaver 1.0
 import "../../../../skins-common/lib/handlers"
 import "components"
 
@@ -7,8 +9,8 @@ import "components"
 Item {
     id: qml_root
     onWidthChanged: console.log(width+"::"+height)
-    height:manager.appHeight
-    width:manager.appWidth
+
+
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
@@ -28,78 +30,79 @@ Item {
         return y/100*qml_root.height
     }
 
+    Component.onCompleted: state="wide"
+
     focus:true
     Keys.onReleased:{
 
-            switch(event.key){
-            case Qt.Key_Menu:
-                console.log("menu button caught in root!")
-                break;
-            case Qt.Key_VolumeUp:
-                console.log("Vol up")
-                break;
-            case Qt.Key_VolumeDown:
-                console.log("vol down")
-                break;
-               case Qt.Key_MediaPrevious:
-                   console.log("Caught back button! Phew!")
-                   manager.goBacktoQScreen()
-                   break;
-               case Qt.Key_Back:
-                   console.log("Caught Back again! Tricky...")
-                   manager.goBacktoQScreen()
-                   break;
-               default:
-                   console.log("I have no idea what key " + event.key + " is. ")
-                   break;
-            }
-
-            event.accepted= true
+        switch(event.key){
+        case Qt.Key_Menu:
+            console.log("menu button caught in root!")
+            break;
+        case Qt.Key_VolumeUp:
+            console.log("Vol up")
+            break;
+        case Qt.Key_VolumeDown:
+            console.log("vol down")
+            break;
+        case Qt.Key_MediaPrevious:
+            console.log("Caught back button! Phew!")
+            manager.goBacktoQScreen()
+            break;
+        case Qt.Key_Back:
+            console.log("Caught Back again! Tricky...")
+            manager.goBacktoQScreen()
+            break;
+        default:
+            console.log("I have no idea what key " + event.key + " is. ")
+            break;
         }
+
+        event.accepted= true
+    }
     Rectangle{
         anchors.fill: parent
         id:bgFill
-        color:"black"
+        color:"red"
     }
 
-//    DceScreenSaver{
-//        id:glScreenSaver
-////        anchors{
-////            top:qml_root.top
-////            bottom:qml_root.bottom
-////            left: qml_root.left
-////            right: qml_root.right
-////        }
-//        height:manager.appHeight
-//        width: manager.appWidth
-//        interval:30000
+    DceScreenSaver{
+        id:glScreenSaver
+        anchors{
+            top:qml_root.top
+            bottom:qml_root.bottom
+            left: qml_root.left
+            right: qml_root.right
+        }
+        //        height:manager.appHeight
+        //        width: manager.appWidth
+        interval:30000
 
+        requestUrl:manager.m_ipAddress
+        Component.onCompleted: {
+            glScreenSaver.setImageList(manager.screensaverImages)
+        }
 
-//        requestUrl:manager.m_ipAddress
-//        Component.onCompleted: {
-//            glScreenSaver.setImageList(manager.screensaverImages)
-//        }
+        Connections{
+            target:manager
+            onScreenSaverImagesReady:{
+                glScreenSaver.setImageList(manager.screensaverImages)
+                console.log("Orbiter Consume Screensaver images")
+                console.log("Orbiter counts " + glScreenSaver.pictureCount)
+            }
+        }
 
-//        Connections{
-//            target:manager
-//            onScreenSaverImagesReady:{
-//                glScreenSaver.setImageList(manager.screensaverImages)
-//                console.log("Orbiter Consume Screensaver images")
-//                console.log("Orbiter counts " + glScreenSaver.pictureCount)
-//            }
-//        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                if(!uiOn){
+                    console.log("screensaver revive")
+                    hideUi()
+                }
+            }
+        }
 
-//        MouseArea{
-//            anchors.fill: parent
-//            onClicked: {
-//                if(!uiOn){
-//                    console.log("screensaver revive")
-//                    hideUi()
-//                }
-//            }
-//        }
-
-//    }
+    }
 
     ListModel{
         id:scenarios
@@ -154,34 +157,65 @@ Item {
         }
     }
 
+    //    Timer{
+    //        id:mini_ss_timer
+    //        interval:10000
+    //        running: false // screensaver.active
+    //        triggeredOnStart: true
+    //        onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
+    //        repeat: true
+    //    }
+    //    Item{
+    //        id:mini_screen_saver
+    //        anchors{
+    //            top:parent.top
+    //            left:parent.left
+    //            right:parent.right
+    //            bottom:parent.bottom
+    //        }
 
-//    Item{
-//        id:mini_screen_saver
-//        anchors.fill: qml_root
+    //        Component.onCompleted: {
+    //            bgFill.color="blue"
+    //            mini_ss_timer.running = true
+    //            mini_ss_timer.start()
+    //            console.log("Orbiter Consume Screensaver images")
+    //        }
 
-//        Timer{
-//            id:mini_ss_timer
-//            interval:10000
-//            running: true // screensaver.active
-//            triggeredOnStart: true
-//            onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
-//            repeat: true
-//        }
 
-//        Image{
-//            id:mini_screen_saver_image
-//            height: mini_screen_saver.height
-//            width: mini_screen_saver.width
-//            source: "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
-//        }
-//    }
 
+    //        Image{
+    //            id:mini_screen_saver_image
+    //            height: mini_screen_saver.height
+    //            width: mini_screen_saver.width
+    //            source:"http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
+
+    //        }
+    //    }
+
+
+    Rectangle{
+        anchors.fill: nav_row
+        color: "black"
+        opacity: .65
+    }
+
+    NavigationRow {
+        id: nav_row
+    }
+    MediaPopup{
+        id:media_notification
+
+    }
     Loader {
         id:pageLoader
         objectName: "loadbot"
         focus: true
-        height: qml_root.height-nav_row.height-info_panel.height
-        anchors.top: nav_row.bottom
+        anchors{
+            top: manager.currentScreen==="Screen_1.qml" ? media_notification.bottom : nav_row.bottom
+            bottom:info_panel.top
+            left:parent.left
+            right:parent.right
+        }
         Keys.onBackPressed: console.log("back")
         onSourceChanged:  loadin
         onLoaded: {
@@ -203,19 +237,6 @@ Item {
                               pageLoader.source = "screens/Screen_X.qml"
                               screenfile = source
                           }
-    }
-    Rectangle{
-        anchors.fill: nav_row
-        color: "black"
-        opacity: .65
-    }
-
-    NavigationRow {
-        id: nav_row
-    }
-    MediaPopup{
-    id:media_notification
-
     }
 
     InformationPanel {
@@ -243,7 +264,7 @@ Item {
 
     FontLoader{
         id:appFont
-         source:"../../../../skins-common/fonts/Sawasdee.ttf"
+        source:"../../../../skins-common/fonts/Sawasdee.ttf"
     }
 
     //=================Components==================================================//
@@ -305,4 +326,38 @@ Item {
             properties: "opacity"; to: "1"; duration: 5000
         }
     }
+
+    states: [
+        State {
+            name: "wide"
+            PropertyChanges {
+                target: qml_root
+                height:manager.appHeight
+                width:manager.appWidth
+                rotation:0
+            }
+            PropertyChanges {
+                target: bgFill
+                color:"yellow"
+
+            }
+        },
+        State {
+            name: "portrait"
+            PropertyChanges {
+                target: qml_root
+                height:manager.appWidth
+                width:manager.appHeight
+                transformOrigin:qml_root.Center
+                rotation:270
+                x:0
+                y:0
+            }
+            PropertyChanges {
+                target: bgFill
+                color:"green"
+
+            }
+        }
+    ]
 }

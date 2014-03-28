@@ -6,12 +6,28 @@ Item{
     height: parent.height
     width: parent.width
     property int itemBuffer:25
+    Component.onCompleted: {
+        media_list.model=manager.getDataGridModel("MediaFile", 63)
+        media_list.positionViewAtIndex(item, ListView.Beginning)
+    }
+
+    Connections {
+        target: manager.getDataGridModel("MediaFile", 63)
+        onScrollToItem: {
+            console.log("scroll to item : " + item); media_list.positionViewAtIndex(item, ListView.Beginning);
+        }
+    }
     ListView{
         id:media_list
-        anchors.fill: parent
+        anchors{
+            left:parent.left
+            right:parent.right
+            bottom:parent.bottom
+            top:parent.top
+        }
         visible: current_view_type===1
         spacing:scaleY(2)
-        model:dataModel
+
         clip:true
 
         delegate: Item{
@@ -53,14 +69,14 @@ Item{
     GridView{
         id:media_grid
         anchors.fill: parent
-        model:dataModel
+        //  model:manager.getDataGridModel("MediaFile", 63)
         visible:current_view_type===2
     }
     
     PathView{
         id:media_path
         anchors.fill: parent
-        model:dataModel
+        // model:manager.getDataGridModel("MediaFile", 63)
         visible:current_view_type===3
     }
 }
