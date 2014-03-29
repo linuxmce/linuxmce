@@ -16,21 +16,30 @@ Item {
 
         GridView{
             id:scenario_display
-            height:parent.height *.75
-            width: parent.width *.75
-            anchors.centerIn: parent
+            anchors{
+                right:parent.right
+                left:parent.left
+                top:parent.top
+                bottom:parent.bottom
+                margins: scaleX(5)
+            }
+
             model:current_scenario_model
             cellWidth:scaleX(20)
-            cellHeight:scaleY(15)
+            cellHeight:scaleY(20)
 
             delegate: Item{
-                height: scaleY(15)
+                height: scaleY(20)
                 width: scaleX(20)
+
                 StyledButton{
                     id:button
+                    height: scaleY(20)
+                    width: scaleX(20)
                     buttonText: title
                     textSize: 38
                     hitArea.onReleased: manager.execGrp(params)
+
                 }
             }
         }
