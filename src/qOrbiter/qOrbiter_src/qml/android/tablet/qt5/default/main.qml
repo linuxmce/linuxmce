@@ -10,7 +10,6 @@ Item {
     id: qml_root
     onWidthChanged: console.log(width+"::"+height)
 
-
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
@@ -249,16 +248,11 @@ Item {
     }
 
 
-    function screenchange(screenname )
-    {
+    function screenchange(screenname ){
         pageLoader.source = "screens/"+screenname
-
     }
 
-
-
-    function checkStatus(component)
-    {
+    function checkStatus(component){
         console.log(component.progress)
     }
 
@@ -301,6 +295,11 @@ Item {
         }
     }
 
+
+    /* * */
+    function lowerInfoPanel(){
+        info_panel.state="hidden"
+    }
 
     Loader{
         id:componentLoader

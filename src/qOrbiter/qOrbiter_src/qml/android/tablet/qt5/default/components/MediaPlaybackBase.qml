@@ -35,18 +35,9 @@ Item{
         clip:true
         anchors.right: metaDataPanel.left
 
-        StyledText{
-            id:ct
-            text:"Controls go here!"
-            anchors.centerIn: parent
-            fontSize: 48
-            color:"white"
-        }
-
-        MouseArea{
-            anchors.fill: parent
-            onReleased: media_playback_base.state="metadata"
-        }
+      AdvancedMediaOptions{
+          id:options
+      }
     }
 
 

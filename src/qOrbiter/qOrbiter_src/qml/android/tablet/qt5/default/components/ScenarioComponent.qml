@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import "../../../skins-common/lib/handlers"
+import "../../../../../skins-common/lib/handlers"
 
 ListView{
     id:scenarioList
@@ -31,14 +31,14 @@ ListView{
                         current_scenario_model=currentRoomTelecom
                     else if(modelName==="currentRoomSecurity")
                         current_scenario_model = currentRoomSecurity
-                }else if (manager.currentScreen==="Screen_47"){                        
+                }else if (manager.currentScreen==="Screen_47.qml"){
                     if(name==="Attribute")
                         console.log("attribute selected")
                 }
                 else{
                     current_scenario_model = []
                 }
-                
+                 console.log(manager.currentScreen)
                 scenarioList.currentModelName = modelName
             }
         }
