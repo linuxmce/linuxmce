@@ -1,4 +1,5 @@
 AdvancedMediaOptions AdvancedMediaOptions.qml
+Bookmarks	Bookmarks.qml
 Clock Clock.qml
 Controls_4 Controls_4.qml
 Controls_5 Controls_5.qml
@@ -7,6 +8,7 @@ FileDetails_5 FileDetails_5.qml
 FileDetails_4 FileDetails_4.qml
 FileDetails_21 FileDetails_21.qml
 FpSprite FpSprite.qml
+Jog	Jog.qml
 HomeScreenContent HomeScreenContent.qml
 InformationPanel InformationPanel.qml
 ListDisplay ListDisplay.qml
@@ -17,6 +19,7 @@ NowPlayingImage NowPlayingImage.qml
 MediaListProgressBar MediaListProgressBar.qml
 MultiViewMediaList MultiViewMediaList.qml
 PlaylistView PlaylistView.qml
+PlaylistEditor PlaylistEditor.qml
 RoomSelector RoomSelector.qml
 ScenarioComponent ScenarioComponent.qml
 StyledText StyledText.qml
@@ -31,3 +34,6 @@ MediaOptions4 MediaOptions4.qml
 MediaOptions5 MediaOptions5.qml
 FloorplanDisplay FloorplanDisplay.qml
 FloorPlanOptions FloorPlanOptions.qml
+Resend Resend.qml
+Thumbnail Thumbnail.qml
+Zoom Zoom.qml

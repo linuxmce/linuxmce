@@ -61,7 +61,7 @@ Item{
             anchors.fill: parent
             model:availbleOptions
             delegate: StyledButton{
-                buttonText: name
+                label: name
                 anchors{
                     left:parent.left
                     right:parent.right

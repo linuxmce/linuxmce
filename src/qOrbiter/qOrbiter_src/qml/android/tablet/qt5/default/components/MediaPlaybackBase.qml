@@ -28,19 +28,10 @@ Item{
         id:now_playing_image_container
     }
 
-    Item{
-        id:controlPanel
-        height: parent.height
-        width: parent.width
-        clip:true
-        anchors.right: metaDataPanel.left
 
       AdvancedMediaOptions{
           id:options
       }
-    }
-
-
 
     Item{
         id:metaDataPanel
@@ -124,9 +115,17 @@ Item{
                 x:media_playback_base.x / 2
 
             }
+            PropertyChanges {
+                target: options
+                state:"unloaded"
+            }
         },
         State {
             name: "playlist"
+            PropertyChanges {
+                target: options
+                state:"unloaded"
+            }
             AnchorChanges{
                 target: metaDataPanel
                 anchors.left: undefined
@@ -135,6 +134,12 @@ Item{
         },
         State {
             name: "controls"
+
+            PropertyChanges {
+                target: options
+                state:"loaded"
+            }
+
             AnchorChanges{
                 target: metaDataPanel
                 anchors.right: undefined
