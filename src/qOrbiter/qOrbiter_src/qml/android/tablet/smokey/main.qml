@@ -4,10 +4,12 @@ import AudioVisual 1.0
 import "../../../skins-common/lib/handlers"
 import "components"
 //Tablet - Smokey
+
 Item {
     id: qml_root
     height:manager.appHeight
     width:manager.appWidth
+
     property int screensaverTimer:15000 // manager.screenSaverTimeout*1000
     property bool uiOn:true
     //    anchors{
