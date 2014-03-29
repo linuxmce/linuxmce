@@ -155,8 +155,6 @@ Item{
             to: "*"
             AnchorAnimation{
                 duration: 750
-
-
             }
         }
     ]

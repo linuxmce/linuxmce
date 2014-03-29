@@ -1,4 +1,4 @@
-import QtQuick 1.1
+import QtQuick 2.0
 
 Item{
     id:codelistrect
@@ -31,13 +31,13 @@ Item{
 
         StyledButton{
 
-            buttonText: "-7%"
+            label: "-7%"
             onActivated: manager.setZoomLevel("-7")
 
         }
         StyledButton{
 
-            buttonText: "-5%"
+            label: "-5%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("-5")
@@ -46,7 +46,7 @@ Item{
 
         StyledButton{
 
-            buttonText: "-4%"
+            label: "-4%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("-4")
@@ -54,7 +54,7 @@ Item{
         }
         StyledButton{
 
-            buttonText: "-2%"
+            label: "-2%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("-2")
@@ -62,7 +62,7 @@ Item{
         }
         StyledButton{
 
-            buttonText: "-1%"
+            label: "-1%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("-1")
@@ -71,7 +71,7 @@ Item{
 
         StyledButton{
 
-            buttonText: "+1%"
+            label: "+1%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("+1")
@@ -79,7 +79,7 @@ Item{
         }
         StyledButton{
 
-            buttonText: "+2%"
+            label: "+2%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("+2")
@@ -88,7 +88,7 @@ Item{
 
         StyledButton{
 
-            buttonText: "+4%"
+            label: "+4%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("+4")
@@ -96,7 +96,7 @@ Item{
         }
         StyledButton{
 
-            buttonText: "+5%"
+            label: "+5%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("+5")
@@ -104,7 +104,7 @@ Item{
         }
         StyledButton{
 
-            buttonText: "+7%"
+            label: "+7%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("+7")
@@ -124,7 +124,7 @@ Item{
 
         StyledButton{
 
-            buttonText: "90%"
+            label: "90%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("90")
@@ -133,7 +133,7 @@ Item{
 
         StyledButton{
 
-            buttonText: "95%"
+            label: "95%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("95")
@@ -141,7 +141,7 @@ Item{
         }
         StyledButton{
 
-            buttonText: "100%"
+            label: "100%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("100")
@@ -149,7 +149,7 @@ Item{
         }
         StyledButton{
 
-            buttonText: "105%"
+            label: "105%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("105")
@@ -158,7 +158,7 @@ Item{
 
         StyledButton{
 
-            buttonText: "110%"
+            label: "110%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("110")
@@ -166,7 +166,7 @@ Item{
         }
         StyledButton{
 
-            buttonText: "115%"
+            label: "115%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("115")
@@ -175,7 +175,7 @@ Item{
 
         StyledButton{
 
-            buttonText: "120%"
+            label: "120%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("120")
@@ -183,7 +183,7 @@ Item{
         }
         StyledButton{
 
-            buttonText: "125%"
+            label: "125%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("125")
@@ -191,7 +191,7 @@ Item{
         }
         StyledButton{
 
-            buttonText: "130%"
+            label: "130%"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setZoomLevel("130")
@@ -212,7 +212,7 @@ Item{
         spacing:scaleY(2)
 
         StyledButton{
-            buttonText: "Auto"
+            label: "Auto"
            textSize:scaleY(8)
             MouseArea{
                 anchors.fill: parent
@@ -221,7 +221,7 @@ Item{
         }
         StyledButton{
 
-            buttonText: "1:1"
+            label: "1:1"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setAspectRatio("1:1")
@@ -230,7 +230,7 @@ Item{
 
         StyledButton{
 
-            buttonText: "4:3"
+            label: "4:3"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setAspectRatio("4:3")
@@ -239,7 +239,7 @@ Item{
 
         StyledButton{
 
-            buttonText: "16:9"
+            label: "16:9"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setAspectRatio("16:9")
@@ -247,7 +247,7 @@ Item{
         }
         StyledButton{
 
-            buttonText: "2.11:1"
+            label: "2.11:1"
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setAspectRatio("2.11:1")
