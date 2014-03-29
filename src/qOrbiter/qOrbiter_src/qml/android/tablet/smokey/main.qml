@@ -230,7 +230,7 @@ Item {
             onClicked: {
                 if(!uiOn){
                     console.log("screensaver revive")
-                    hideUi()
+
                 }
             }
         }
@@ -364,7 +364,9 @@ Item {
         height: parent.height
         width: parent.width
         objectName: "componentbot"
-        onLoaded: {console.log("Component is loaded")}
+        onLoaded: {
+            console.log("Component is loaded")
+        }
     }
 
     SequentialAnimation{

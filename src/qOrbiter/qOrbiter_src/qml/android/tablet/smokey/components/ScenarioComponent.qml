@@ -43,7 +43,7 @@ ListView{
                 else{
                     current_scenario_model = []
                 }
-                
+
                 scenarioList.currentModelName = modelName
             }
         }

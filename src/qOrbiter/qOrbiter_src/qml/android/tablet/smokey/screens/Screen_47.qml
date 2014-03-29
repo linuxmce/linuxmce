@@ -80,6 +80,7 @@ Item {
     MediaListProgressBar{
         id:progress_bar
         anchors.bottom: bottomOptions.top
+        anchors.bottomMargin: 5
         anchors.horizontalCenter: parent.horizontalCenter
     }
 
