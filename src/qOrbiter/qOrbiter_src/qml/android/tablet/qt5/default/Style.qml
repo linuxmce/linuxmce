@@ -78,6 +78,7 @@ QtObject{
     property int quickAnimation:350
     property int mediumAnimation:500
     property int longAnimation:750
+    property int animationEasing:Easing.OutBack
 
 
     //----old style---//

@@ -9,11 +9,13 @@ import "components"
 Item {
     id: qml_root
     onWidthChanged: console.log(width+"::"+height)
+    height: manager.appHeight
+    width: manager.appWidth
 
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
-
+    signal showUi(bool uiState)
     property variant current_scenario_model
     property variant current_header_model:scenarios
 
@@ -21,6 +23,7 @@ Item {
     property string screenfile
     property string dynamic_height
     property string dynamic_width
+    property bool showingUi:true
 
     function scaleX(x){
         return x/100*qml_root.width
@@ -94,9 +97,7 @@ Item {
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                if(state==="uion"){
-
-                }
+                toggleUi(!showingUi)
             }
         }
 
@@ -208,6 +209,18 @@ Item {
         id:pageLoader
         objectName: "loadbot"
         focus: true
+        state:"active"
+        Connections{
+            target:qml_root
+            onShowUi:{
+                if(uiState){
+                    state="active"
+                }else{
+                    state="hidden"
+                }
+            }
+        }
+
         anchors{
             top: manager.currentScreen==="Screen_1.qml" ? media_notification.bottom : nav_row.bottom
             bottom:info_panel.top
@@ -280,7 +293,6 @@ Item {
 
     }
 
-
     function updateBackground(portait, wide){
         appBackground.pSource = portait
         appBackground.wSource = wide
@@ -306,6 +318,11 @@ Item {
     }
 
     /* * */
+    function toggleUi(toggleState){
+        showUi(toggleState)
+        showingUi = toggleState
+    }
+
     function lowerInfoPanel(){
         info_panel.state="hidden"
     }
@@ -412,36 +429,6 @@ Item {
                 target: bgFill
                 color:"green"
 
-            }
-        },
-        State {
-            name: "uioff"
-            PropertyChanges {
-                target: pageLoader
-                state:"hidden"
-            }
-            PropertyChanges{
-                target:info_panel
-                state:"hidden"
-            }
-            PropertyChanges{
-                target:nav_row
-                state:"hidden"
-            }
-        },
-        State {
-            name: "uion"
-            PropertyChanges {
-                target: pageLoader
-                state:"active"
-            }
-            PropertyChanges{
-                target:info_panel
-                state:"retracted"
-            }
-            PropertyChanges{
-                target:nav_row
-                state:"active"
             }
         }
 

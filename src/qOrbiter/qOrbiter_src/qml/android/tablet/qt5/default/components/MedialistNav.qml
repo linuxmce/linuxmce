@@ -7,36 +7,36 @@ Row {
     spacing: scaleX(1)
 
     StyledButton{
-        buttonText: "Attribute"
+        label: "Attribute"
         onActivated: {attributeSelector.currentModel=attribfilter; }
     }
 
     StyledButton{
-        buttonText: "Genre"
+        label: "Genre"
         onActivated: {attributeSelector.currentModel=genrefilter; }
     }
 
     StyledButton{
-        buttonText: "MediaType"
+        label: "MediaType"
         onActivated: {attributeSelector.currentModel=mediatypefilter; }
     }
 
     StyledButton{
-        buttonText: "Resolution"
+        label: "Resolution"
         onActivated: {attributeSelector.currentModel=fileformatmodel; }
     }
     StyledButton{
-        buttonText: "Sources"
+        label: "Sources"
         // onActivated: {attributeSelector.currentModel=undefined; }
     }
 
     StyledButton{
-        buttonText: "Users"
+        label: "Users"
         // onActivated: {attributeSelector.currentModel=undefined; }
     }
 
     StyledButton{
-        buttonText: "Play All"
+        label: "Play All"
         onActivated:  manager.playMedia("!G"+iPK_Device)
     }
 }

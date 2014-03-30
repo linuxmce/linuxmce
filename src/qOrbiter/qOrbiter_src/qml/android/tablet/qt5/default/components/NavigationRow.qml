@@ -11,7 +11,16 @@ Row{
         right:parent.right
         top:parent.top
     }
-
+    Connections{
+        target:qml_root
+        onShowUi:{
+            if(uiState){
+                state="active"
+            }else{
+                state="hidden"
+            }
+        }
+    }
     property alias navigation:nav
     property string defaultSource:"ScenarioComponent.qml"
     property string navSource:"ScenarioComponent.qml"
@@ -83,4 +92,14 @@ Row{
         }
     ]
 
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+            AnchorAnimation{
+                duration:style.quickAnimation
+                easing.type:style.animationEasing
+            }
+        }
+    ]
 }

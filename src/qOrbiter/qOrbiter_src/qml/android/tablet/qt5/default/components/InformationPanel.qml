@@ -8,8 +8,20 @@ Item{
     anchors.left:parent.left
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    Component.onCompleted:{ info_panel.state="retracted"; statusTimer.start() }
-
+    Component.onCompleted:{
+        info_panel.state="retracted";
+        statusTimer.start()
+    }
+    Connections{
+        target:qml_root
+        onShowUi:{
+            if(uiState){
+                state="retracted"
+            }else{
+                state="hidden"
+            }
+        }
+    }
     Timer{
         id:statusTimer
         interval: 5000
@@ -230,10 +242,7 @@ Item{
                 target:close
                 visible:false
             }
-            PropertyChanges{
-                target:pageLoader
-                state:"active"
-            }
+
         }
 
         
@@ -241,23 +250,13 @@ Item{
     transitions: [
         
         Transition {
-            from: "retracted"
+            from: "*"
             to: "*"
             PropertyAnimation{
                 target:info_panel
                 properties:"height"
-                duration:1000
-                easing.type: Easing.OutBounce
-            }
-        },
-        Transition {
-            from: "*"
-            to: "retracted"
-            PropertyAnimation{
-                target:info_panel
-                properties:"height"
-                duration:1000
-                easing.type: Easing.OutElastic
+                duration:style.quickAnimation
+                easing.type:style.animationEasing
             }
         }
     ]
