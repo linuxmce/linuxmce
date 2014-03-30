@@ -9,6 +9,7 @@ Item{
     property variant returnProperties:[]
     property int columnCount: columnTitles.length
     property color listBgColor: "green"
+    property color listBgActiveColor:"green"
     property alias headerListModel: displayList.model
     property Item delegateType:null
     property string displayProperty:""
@@ -87,7 +88,7 @@ Item{
 
             Rectangle{
                 anchors.fill: parent
-                color:"black"
+                color:displayList.currentIndex===index ? listBgActiveColor : "black"
                 opacity: .65
                 border.color: "white"
                 border.width: 1
@@ -102,7 +103,7 @@ Item{
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-
+                    displayList.currentIndex=index
                     var obj = new Object;
                     for(var prop in returnProperties){
                         console.log("Checking "+returnProperties[prop])
