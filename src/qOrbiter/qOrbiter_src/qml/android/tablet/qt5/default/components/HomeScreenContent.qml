@@ -12,9 +12,13 @@ Item{
 
         StyledButton{
             buttonText.text: "Power"
+            onActivated: loadComponent("PowerControl.qml")
         }
         StyledButton{
             buttonText.text: "Sleeping Menu"
+            onActivated: {
+
+            }
         }
 
     }

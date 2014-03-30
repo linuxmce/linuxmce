@@ -1,30 +1,10 @@
 import QtQuick 2.0
 import "../../../../../skins-common/lib/handlers"
 
-Item{
+GenericContainer{
     id:powerControl
-
-    Item{
-        anchors{
-            top:parent.top
-            left:parent.left
-            right:parent.right
-        }
-        Rectangle{
-            id:hdrFill
-            anchors.fill: parent
-            color:style.headerBgColor
-            gradient:style.bgHeaderGradient
-        }
-    }
-
-    StyledText{
-        anchors.bottom: btnRow.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        text: qsTr("Power Control")
-        fontSize: scaleY(9)
-    }
-
+    headerLabel: "Power Control"
+    fullscreen: true
     Row{
         id:btnRow
         height:140
@@ -38,7 +18,7 @@ Item{
         anchors.leftMargin: 50
 
         StyledButton{
-            buttonText: qsTr("Display On")
+            label: qsTr("Display On")
             height: 120
             width: 200
             onActivated: manager.toggleDisplay(1)
@@ -46,7 +26,7 @@ Item{
         }
 
         StyledButton{
-            buttonText: qsTr("Display Off")
+            label: qsTr("Display Off")
             height: 120
             width: 200
             onActivated: manager.toggleDisplay(0)
@@ -62,66 +42,18 @@ Item{
         spacing:scaleX(10)
         height: 140
         StyledButton{
-            buttonText: qsTr("Turn Off MD")
+            label: qsTr("Turn Off MD")
             height: 120
             width: 200
-//            handler:PowerToggleHandler{mode:0}
-//            useHandler: true
+            //            handler:PowerToggleHandler{mode:0}
+            //            useHandler: true
         }
         StyledButton{
-            buttonText: qsTr("Turn On MD")
+            label: qsTr("Turn On MD")
             height: 120
             width: 200
-//            handler:PowerToggleHandler{mode:0}
-//            useHandler: true
+            //            handler:PowerToggleHandler{mode:0}
+            //            useHandler: true
         }
     }
-
-    states: [
-        State {
-            name: "opening"
-            PropertyChanges {
-                target: powerControl
-
-            }
-
-            AnchorChanges{
-                anchors{
-                    top:parent.top
-                    bottom:parent.bottom
-                    left:parent.left
-                    right:parent.left
-                }
-            }
-        },
-        State {
-            name: "ready"
-            PropertyChanges {
-                target: object
-
-            }
-            AnchorChanges{
-                anchors{
-                    top:parent.top
-                    bottom:parent.bottom
-                    left:parent.left
-                    right:parent.right
-                }
-            }
-        },
-        State {
-            name: "closing"
-            PropertyChanges {
-                target: powerControl
-            }
-            AnchorChanges{
-                anchors{
-                    top:parent.top
-                    bottom:parent.bottom
-                    left:parent.right
-                    right:parent.right
-                }
-            }
-        }
-    ]
 }

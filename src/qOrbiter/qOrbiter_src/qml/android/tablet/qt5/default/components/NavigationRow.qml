@@ -59,4 +59,28 @@ Row{
         visible: manager.currentScreen==="Screen_47.qml"
     }
 
+
+    states: [
+        State {
+            name: "active"
+           AnchorChanges{
+               target: nav_row
+               anchors{
+                   bottom:undefined
+                   top:parent.top
+               }
+           }
+        },
+        State {
+            name: "hidden"
+            AnchorChanges{
+                target: nav_row
+                anchors{
+                    top:undefined
+                    bottom:parent.top
+                }
+            }
+        }
+    ]
+
 }

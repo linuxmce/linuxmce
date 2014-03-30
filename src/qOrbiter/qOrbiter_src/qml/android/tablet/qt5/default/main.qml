@@ -94,9 +94,8 @@ Item {
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                if(!uiOn){
-                    console.log("screensaver revive")
-                    hideUi()
+                if(state==="uion"){
+
                 }
             }
         }
@@ -236,11 +235,51 @@ Item {
                               pageLoader.source = "screens/Screen_X.qml"
                               screenfile = source
                           }
+
+        states: [
+            State {
+                name: "hidden"
+                PropertyChanges {
+                    target: pageLoader
+                    opacity:0
+                    enabled:false
+                }
+            },
+            State {
+                name: "active"
+                PropertyChanges {
+                    target: pageLoader
+                    opacity:1
+                    enabled:true
+                }
+            }
+        ]
+        transitions: [
+            Transition {
+                from: "*"
+                to: "*"
+                PropertyAnimation{
+                    duration: 500
+                }
+            }
+        ]
     }
 
     InformationPanel {
         id: info_panel
     }
+
+    function toggleBars(barState){
+        if(barState){
+            nav_row.state="hidden"
+            info_panel.state="hidden"
+        }else {
+            nav_row.state="active"
+            info_panel.state="retracted"
+        }
+
+    }
+
 
     function updateBackground(portait, wide){
         appBackground.pSource = portait
@@ -262,39 +301,9 @@ Item {
     }
 
     //=================Components==================================================//
-    function loadComponent(componentName)
-    {
+    function loadComponent(componentName){
         componentLoader.source = "components/"+componentName
-        if (componentLoader.status == Component.Ready)
-        {
-            manager.setDceResponse("Command to change to:" + componentName+ " was successfull")
-        }
-        else if (componentLoader.status == Component.Loading)
-        {
-            console.log("loading page from network")
-            finishLoadingComponent(componentName)
-        }
-        else
-        {
-            console.log("Command to add: " + componentName + " failed!")
-            componentFile = componentName
-        }
     }
-
-    function finishLoadingComponent (comp)
-    {
-        if(componentLoader.status != Component.Ready)
-        {
-            console.log("finishing network load")
-            componentLoader.source = "components/"+comp
-            console.log("screen" + comp + " loaded.")
-        }
-        else
-        {
-            finishLoadingComponent(comp)
-        }
-    }
-
 
     /* * */
     function lowerInfoPanel(){
@@ -303,10 +312,44 @@ Item {
 
     Loader{
         id:componentLoader
-        height: parent.height
-        width: parent.width
+        anchors{
+            top:nav_row.bottom
+            bottom:info_panel.top
+            left:parent.left
+            right:parent.right
+        }
+        function close(){
+            componentLoader.source=""
+        }
+
         objectName: "componentbot"
-        onLoaded: {console.log("Component is loaded")}
+        onStatusChanged: {
+            console.log("Current Component Loader status is " + componentLoader.status)
+        }
+
+        onLoaded: {
+            console.log("Component is loaded")
+        }
+
+        states: [
+            State {
+                name: "active"
+                PropertyChanges {
+                    target: componentLoader
+                    enabled: true
+                    opacity:1
+
+                }
+            },
+            State {
+                name: "hidden"
+                PropertyChanges {
+                    target: componentLoader
+                    enabled: false
+                    opacity:0
+                }
+            }
+        ]
     }
 
 
@@ -357,6 +400,37 @@ Item {
                 color:"green"
 
             }
+        },
+        State {
+            name: "uioff"
+            PropertyChanges {
+                target: pageLoader
+                state:"hidden"
+            }
+            PropertyChanges{
+                target:info_panel
+                state:"hidden"
+            }
+            PropertyChanges{
+                target:nav_row
+                state:"hidden"
+            }
+        },
+        State {
+            name: "uion"
+            PropertyChanges {
+                target: pageLoader
+                state:"active"
+            }
+            PropertyChanges{
+                target:info_panel
+                state:"retracted"
+            }
+            PropertyChanges{
+                target:nav_row
+                state:"active"
+            }
         }
+
     ]
 }

@@ -35,6 +35,7 @@ QtObject{
     //end scale function
 
 
+
     //New style //
     /* Overall */
     property double bgLightOpacity:.35
@@ -70,6 +71,12 @@ QtObject{
         GradientStop{ position:0.0;color:"transparent"}
         GradientStop{ position:0.65;color:"black"}
     }
+
+
+    /* Animation Speeds */
+    property int quickAnimation:350
+    property int mediumAnimation:500
+    property int longAnimation:750
 
 
     //----old style---//

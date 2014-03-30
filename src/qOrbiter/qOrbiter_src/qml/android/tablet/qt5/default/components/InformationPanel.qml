@@ -6,6 +6,7 @@ Item{
     id:info_panel
     width:parent.width
     anchors.left:parent.left
+    anchors.right: parent.right
     anchors.bottom: parent.bottom
     Component.onCompleted:{ info_panel.state="retracted"; statusTimer.start() }
 
@@ -110,7 +111,7 @@ Item{
             }
             PropertyChanges{
                 target:pageLoader
-                visible:true
+                state:"active"
             }
             PropertyChanges{
                 target:location_info
@@ -149,7 +150,7 @@ Item{
             }
             PropertyChanges{
                 target:pageLoader
-                visible:false
+                state:"hidden"
             }
             PropertyChanges{
                 target:location_info
@@ -196,7 +197,7 @@ Item{
             }
             PropertyChanges{
                 target:pageLoader
-                visible:false
+                state:"hidden"
             }
 
         },
@@ -231,10 +232,10 @@ Item{
             }
             PropertyChanges{
                 target:pageLoader
-                visible:true
+                state:"active"
             }
-
         }
+
         
     ]
     transitions: [

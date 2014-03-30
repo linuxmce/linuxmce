@@ -8,6 +8,7 @@ FileDetails_5 FileDetails_5.qml
 FileDetails_4 FileDetails_4.qml
 FileDetails_21 FileDetails_21.qml
 FpSprite FpSprite.qml
+GenericContainer GenericContainer.qml
 HeaderListView HeaderListView.qml
 Jog	Jog.qml
 HomeScreenContent HomeScreenContent.qml
@@ -23,6 +24,7 @@ PlaylistView PlaylistView.qml
 PlaylistEditor PlaylistEditor.qml
 RoomSelector RoomSelector.qml
 ScenarioComponent ScenarioComponent.qml
+StyledHeader StyledHeader.qml
 StyledText StyledText.qml
 StyledButton StyledButton.qml
 UserSelector UserSelector.qml
