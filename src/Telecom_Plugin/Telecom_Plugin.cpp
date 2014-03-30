@@ -4851,7 +4851,7 @@ void Telecom_Plugin::CMD_Phone_to_Baby_Monitor(int iPK_Device,string sPhoneNumbe
 
 			m_bBabyMonitorActive=!m_bBabyMonitorActive;
 			int iText=(m_bBabyMonitorActive ? TEXT_Baby_Monitor_On_CONST : TEXT_Baby_Monitor_Off_CONST);
-			m_pOrbiter_Plugin->DisplayMessageOnOrbiter(dwDevice_Caller,
+			m_pOrbiter_Plugin->DisplayMessageOnOrbiter(StringUtils::itos(pMessage->m_dwPK_Device_From),
 								   "<%=T"+StringUtils::itos(iText)+"%>");
 
 		}
