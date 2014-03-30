@@ -60,7 +60,7 @@ Item {
             }
             model:screenshotAttributes
             delegate: StyledButton{
-                buttonText: attributeType
+                label: attributeType
                 anchors{
                     left:parent.left
                     right:parent.right
