@@ -3770,9 +3770,12 @@ void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced
                 index = pDataGridTable->CovertColRowType(it->first).first;
                 if(!cellTitle.contains("learn"))
                 {
-
+//                    qDebug() << pCell->GetText();
+//                    qDebug() << pCell->m_NumAttributes;
+//                cellTitle.prepend("Missing Command name ");
+                  emit newDeviceCommand(new AvCommand(fk_file.toInt(), cellTitle, false, device));
                 }
-                emit newDeviceCommand(new AvCommand(fk_file.toInt(), cellTitle, false, device));
+
             }
             pDataGridTable->ClearData();
             delete pDataGridTable; pDataGridTable=NULL;
