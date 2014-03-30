@@ -102,3 +102,5 @@ VideoButtons             VideoButtons.qml                        #no comment
 VideoComponent             VideoComponent.qml                        #no comment
 VideoControls             VideoControls.qml                        #no comment
 ZoomAspect             ZoomAspect.qml                        #no comment
+AudioDelegate	AudioDelegate.qml
+VideoDelegate VideoDelegate.qml
