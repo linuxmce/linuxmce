@@ -6,10 +6,12 @@ Item {
     height: pageLoader.height
     width:manager.appWidth
     property int current_view_type:1
-    Component.onCompleted: {current_header_model=media_filters; lowerInfoPanel()}
+    Component.onCompleted: {
+        setNavigation("MedialistNav.qml")
+        hideInfoPanel()
+    }
     state: manager.i_current_mediaType === 5 ? "selection" : "viewing"
-    Connections
-    {
+    Connections{
         target: filedetailsclass
         onShowDetailsChanged:{
             files_view_screen.state="detail"
@@ -34,9 +36,12 @@ Item {
             width: childrenRect.width
 
             StyledButton{
-              buttonText.text: name
-             textSize: 48
-              hitArea.onReleased:{ mediatypefilter.setSelectionStatus(name); files_view_screen.state="viewing"}
+                buttonText.text: name
+                textSize: 48
+                hitArea.onReleased:{
+                    mediatypefilter.setSelectionStatus(name);
+                    files_view_screen.state="viewing"
+                }
             }
         }
     }
@@ -77,10 +82,10 @@ Item {
             StateChangeScript{
                 script: {manager.resetModelAttributes; mediatypefilter.resetStates(); attribfilter.resetStates(); }
             }
-        //("5", "", "", "", "1,2", "", "13", "", "2", "")
-        //("5", "1", "", "", "1,2", "", "12", "", "2", "")
-        //("5", "1", "", "", "1,2", "", "52", "", "2", "7691")
-        //("5", "1", "", "", "1,2", "", "12", "", "2", "")
+            //("5", "", "", "", "1,2", "", "13", "", "2", "")
+            //("5", "1", "", "", "1,2", "", "12", "", "2", "")
+            //("5", "1", "", "", "1,2", "", "52", "", "2", "7691")
+            //("5", "1", "", "", "1,2", "", "12", "", "2", "")
         },
         State {
             name: "viewing"

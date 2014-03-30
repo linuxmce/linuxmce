@@ -19,6 +19,7 @@ NavOptions5 NavOptions5.qml
 NavOptions43 NavOptions43.qml
 NowPlayingImage NowPlayingImage.qml
 MediaListProgressBar MediaListProgressBar.qml
+MediaListNav MediaListNav.qml
 MultiViewMediaList MultiViewMediaList.qml
 PlaylistView PlaylistView.qml
 PlaylistEditor PlaylistEditor.qml

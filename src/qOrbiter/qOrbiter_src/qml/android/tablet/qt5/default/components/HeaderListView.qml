@@ -9,8 +9,8 @@ Item{
     property variant returnProperties:[]
     property string headerBgColor:style.headerBgColor
     property int columnCount: columnTitles.length
-    property color listBgColor: "green"
-    property color listBgActiveColor:"green"
+    property color listBgColor: style.listItemBgColor
+    property color listBgActiveColor:style.listItemActiveBgColor
     property color contentBg:style.contentBgColor
     property alias headerListModel: displayList.model
     property Item delegateType:null
@@ -46,7 +46,8 @@ Item{
             anchors.centerIn: parent
             text:listTitle
             visible:listTitle !==""
-            fontSize: scaleY(5)
+            fontSize: scaleY(8)
+            isBold: true
         }
 
         Row{
@@ -89,11 +90,11 @@ Item{
                 left:parent.left
                 right:parent.right
             }
-            height:scaleY(8)
-
+            height:scaleY(9)
+            clip:true
             Rectangle{
                 anchors.fill: parent
-                color:displayList.currentIndex===index ? listBgActiveColor : "black"
+                color:ms.pressed ? style.listItemPressedBgColor : displayList.currentIndex===index ? listBgActiveColor : "black"
                 opacity: .65
                 border.color: "white"
                 border.width: 1
@@ -101,11 +102,14 @@ Item{
 
             StyledText{
                 text:model[displayProperty] //displayList.model[index][displayProperty]
-                fontSize: 18
+                fontSize: scaleY(5)
+                isBold: true
                 anchors.centerIn: parent
+
             }
 
             MouseArea{
+                id:ms
                 anchors.fill: parent
                 onClicked: {
                     displayList.currentIndex=index

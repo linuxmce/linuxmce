@@ -84,7 +84,7 @@ opacity: 0
             from: "*"
             to: "closing"
             AnchorAnimation{
-                duration:500
+                duration:style.mediumAnimation
             }
             SequentialAnimation{
                 PropertyAnimation{target:genericContainer; property:"opacity"; to:0; duration:style.quickAnimation }

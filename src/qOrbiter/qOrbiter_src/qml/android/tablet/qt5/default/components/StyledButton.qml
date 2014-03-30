@@ -9,6 +9,7 @@ Item{
     property alias label:button_label.text
     property alias buttonText:button_label
     property alias hitArea:fly_trap
+    property bool wrapText:true
     signal activated()
     Behavior on opacity{
         PropertyAnimation{

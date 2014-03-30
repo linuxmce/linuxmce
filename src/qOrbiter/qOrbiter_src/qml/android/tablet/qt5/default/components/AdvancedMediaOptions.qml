@@ -15,7 +15,8 @@ Item{
     Rectangle{
         id:fil
         anchors.fill: parent
-        color: "black"
+        color: style.contentBgColor
+        opacity:style.bgContentOpacity
     }
 
     Loader{
@@ -48,13 +49,15 @@ Item{
 
     Rectangle{
         id:optionContainer
+        gradient:style.bgContentGradient
+        width: scaleX(15)
+
         anchors{
             top:parent.top
             left:parent.left
             bottom:parent.bottom
             leftMargin: 10
         }
-        width: scaleX(15)
 
         ListView{
             id:optionView
@@ -85,7 +88,7 @@ Item{
             control:"Bookmarks.qml"
         }
         ListElement{
-            name:"Resend Command"
+            name:"Resend \n Command"
             control:"Resend.qml"
         }
 

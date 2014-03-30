@@ -310,6 +310,19 @@ Item {
         info_panel.state="hidden"
     }
 
+    function hideInfoPanel(){
+        info_panel.state = "hidden"
+    }
+
+    function showInfoPanel(){
+        info_panel.state = "retracted"
+    }
+
+    function setNavigation(n){
+        nav_row.navSource=""
+        nav_row.navSource = n
+    }
+
     Loader{
         id:componentLoader
         anchors{

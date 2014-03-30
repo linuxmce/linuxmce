@@ -24,6 +24,8 @@ Item {
             text:"Please choose device to control"
             anchors.centerIn: parent
             visible:avcodes_root.state==="ready"
+            fontSize:scaleY(8)
+            isBold: true
         }
     }
     HeaderListView {

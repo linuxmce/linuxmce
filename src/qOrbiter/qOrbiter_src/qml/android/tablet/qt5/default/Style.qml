@@ -49,6 +49,7 @@ QtObject{
     property int listItemHeight:scaleY(8)
     property color listItemBgColor:"green"
     property color listItemActiveBgColor: "white"
+     property color listItemPressedBgColor: "limegreen"
     property Gradient bgHeaderGradient: Gradient{
         GradientStop{ position:0.0;color:"transparent"}
         GradientStop{ position:0.65;color:"black"}
@@ -56,7 +57,7 @@ QtObject{
     property Gradient bgContentGradient: Gradient{
 
         GradientStop{ position:0.0;color:"transparent"}
-        GradientStop{ position:0.65;color:"black"}
+        GradientStop{ position:0.75;color:"black"}
     }
 
     /* Buttons and their junk */

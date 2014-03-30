@@ -5,7 +5,12 @@ import "../../../../skins-common/lib/handlers"
 Item {
     height:manager.appHeight
     width:manager.appWidth
-    Component.onCompleted:{ current_header_model=scenarios;manager.setBoundStatus(true); info_panel.state="retracted"; nav_row.navSource=nav_row.defaultSource }
+    Component.onCompleted:{
+        current_header_model=scenarios;
+        manager.setBoundStatus(true);
+        info_panel.state="retracted";
+        nav_row.navSource=nav_row.defaultSource
+    }
     Item{
         id:home_panel
         height: parent.height - info_panel.height - nav_row.height

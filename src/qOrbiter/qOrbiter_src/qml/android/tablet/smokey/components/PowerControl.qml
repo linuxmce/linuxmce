@@ -1,6 +1,6 @@
-import QtQuick 1.0
+import QtQuick 1.1
 import "../../../../skins-common/lib/handlers"
-import "../components"
+
 
 Item{
     id:powerControl
