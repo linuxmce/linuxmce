@@ -3,10 +3,13 @@ import QtQuick 2.0
 Item {
     anchors.fill: parent
     id:avcodes_root
+    property int selectedDevice:-1
+
 
     Component.onCompleted: {
         state="loading"
         manager.showAvControl()
+        state="ready"
     }
 
     Item{
@@ -23,7 +26,48 @@ Item {
             visible:avcodes_root.state==="ready"
         }
     }
+    HeaderListView {
+        id: headerListView
+        anchors{
+            left:parent.left
+            right:parent.horizontalCenter
+            bottom:parent.bottom
+            top:avcodes_hdr.bottom
+            margins: scaleY(2)
+        }
 
+        headerListModel: deviceList
+        displayProperty: "name"
+        listTitle:"AV - Devices"
+        returnProperties:["devicenumber", "name", "device_number"]
+        onActivationCallback: {
+            deviceCommands.clear()
+            console.log("\n"+JSON.stringify(props, null, "\t"))
+            // var p = headerListModel[idx]["name"]
+            // console.log("p")
+            manager.showDeviceCodes(props.devicenumber);selectedDevice = props.devicenumber
+        }
+    }
+
+    HeaderListView{
+        id:commandView
+        anchors{
+            left:parent.horizontalCenter
+            right:parent.right
+            bottom:parent.bottom
+            top:avcodes_hdr.bottom
+            margins: scaleY(2)
+        }
+
+        headerListModel: deviceCommands
+        displayProperty: "name"
+        listTitle:"Commands"
+        returnProperties: ["commandnumber"]
+        onActivationCallback: {
+            console.log("\n"+JSON.stringify(props, null, "\t"))
+            manager.resendCode(selectedDevice, props.commandnumber)
+        }
+    }
 
 
     states: [
@@ -35,7 +79,7 @@ Item {
 
             }
             PropertyChanges {
-                target: colorfiller
+                target: codefiller
                 color:"green"
             }
 
