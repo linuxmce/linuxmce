@@ -31,9 +31,9 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
-#ifndef QT5
+
  QHash<int, QByteArray> roleNames() const;
-#endif
+
 
  /*QAbstractListModel functions*/
 
@@ -49,6 +49,7 @@ public:
     QModelIndex indexFromItem( const AvDevice* item) const;
     AvDevice* currentRow();
     void sortModel(int column, Qt::SortOrder order);
+    AvDevice* getItem(int itmIndex);
 
     /*Added functions */
 

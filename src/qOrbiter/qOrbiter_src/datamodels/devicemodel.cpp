@@ -33,12 +33,12 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const
         return QVariant();
     return m_list.at(index.row())->data(role);
 }
-#ifndef QT5
+
 QHash<int, QByteArray> DeviceModel::roleNames() const
 {
     return m_prototype->roleNames();
 }
-#endif
+
 
 DeviceModel::~DeviceModel() {
     delete m_prototype;
@@ -49,7 +49,6 @@ void DeviceModel::appendRow(AvDevice *item)
 {
     setLoadingStatus(true);
     appendRows(QList<AvDevice*>() << new AvDevice(item->deviceNumber(), item->id(), item->controlled(), item->located(), item->device_Type(), item->activity(), this));
-
     item->deleteLater();
 }
 
@@ -93,7 +92,7 @@ void DeviceModel::handleItemChange()
     qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
-        emit dataChanged(index, index, 0);
+        emit dataChanged(index, index, index.row());
     }
 }
 
@@ -221,125 +220,11 @@ void DeviceModel::sortModel(int column, Qt::SortOrder order)
 {
 }
 
-//void DeviceModel::checkForMore()
-//{
+AvDevice* DeviceModel::getItem(int itmIndex)
+{
+    if(m_list.length() <= itmIndex){
+        return m_list.at(itmIndex);
+    }
 
-
-//}
-
-//void DeviceModel::populateGrid(int mediaType)
-//{
-//    //manager_ref->pqOrbiter->prepareFileList(mediaType);
-//}
-
-//void DeviceModel::setTotalCells(int cells)
-//{
-//    totalcells = cells;
-//    emit statusMessage("Size Changed" + QString::number(totalcells));
-//    if ( m_list.size() < totalcells)
-//    {
-
-
-
-//    }
-//    else
-//    {
-
-
-//    }
-//    emit sizeChanged(cells);
-
-//}
-
-//int DeviceModel::getTotalCells()
-//{
-//    return totalcells;
-//}
-
-//void DeviceModel::setGridType(int type)
-//{
-//    gridType = type;
-//    //emit gridTypeChanged(gridType);
-//    ////qdebug("Grid Type Set");
-
-//}
-
-//int DeviceModel::getGridType()
-//{
-//    return gridType;
-//}
-
-//void DeviceModel::setLoadingStatus(bool b)
-//{
-//    loadingStatus = b;
-//    emit loadingStatusChanged(loadingStatus);
-//}
-
-//bool DeviceModel::getLoadingStatus()
-//{
-//    return loadingStatus;
-//}
-
-//void DeviceModel::setProgress(double n_progress)
-//{
-//    progress = n_progress;
-//    emit progressChanged( progress );
-//    // qDebug() << "Loading Progress:" << progress;
-//    // qDebug() << QString::number(m_list.count()) +" cells in model, out of " + QString::number(totalcells);
-
-//}
-
-//double DeviceModel::getProgress()
-//{
-//    return progress;
-//}
-
-//void DeviceModel::attributeSort()
-//{
-
-
-//}
-
-//void DeviceModel::clearAndRequest(int type)
-//{
-//    resetting = true;
-//    gridType = type;
-//    QApplication::processEvents(QEventLoop::AllEvents);
-//    emit modelAboutToBeReset();
-//    beginResetModel();
-//    if(    resetInternalData()){
-//        setProgress(0.0);
-//        QApplication::processEvents(QEventLoop::AllEvents);
-//        endResetModel();
-//        emit modelReset();
-
-//        QApplication::processEvents(QEventLoop::AllEvents);
-//        resetting = false;
-//        emit ready(gridType);
-//    }
-//    else
-//    {
-
-//    }
-//}
-
-//void DeviceModel::clearForPaging()
-//{
-
-//    /*
-//    if(removeRows(0, m_list.count(), QModelIndex()))
-//        emit pagingCleared();
-//        */
-//    QApplication::processEvents(QEventLoop::AllEvents);
-//    emit modelAboutToBeReset();
-//    beginResetModel();
-//    if(resetInternalData()){
-//        setProgress(0.0);
-//        QApplication::processEvents(QEventLoop::AllEvents);
-//        endResetModel();
-//        emit modelReset();
-//        emit pagingCleared();
-//        QApplication::processEvents(QEventLoop::AllEvents);
-//    }
-
-//}
+    return new AvDevice();
+}

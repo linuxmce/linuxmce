@@ -17,7 +17,7 @@
 
 */
 #include "avcodegrid.h"
-#include <QDebug>
+
 
 AvCodeGrid::AvCodeGrid(AvCommand* prototype, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype)
@@ -59,7 +59,7 @@ void AvCodeGrid::appendRows(const QList<AvCommand *> &items)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(AvCommand *item, items) {
-        qDebug() << "Inserting at:" << rowCount() << item->cmdParent();
+       // qDebug() << "Inserting at:" << rowCount() << item->cmdParent();
         QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
         m_list.append(item);
     }
@@ -83,7 +83,7 @@ void AvCodeGrid::handleItemChange()
 {
     AvCommand* item = static_cast<AvCommand*>(sender());
     QModelIndex index = indexFromItem(item);
-    qDebug() << "Handling item change for:" << index;
+   // qDebug() << "Handling item change for:" << index;
     if(index.isValid())
     {
         emit dataChanged(index, index, 0);

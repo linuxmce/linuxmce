@@ -31,6 +31,7 @@ class DceScreenSaver :
     Q_PROPERTY(int pictureCount READ getPictureCount NOTIFY pictureCountChanged)
     Q_PROPERTY(double fadeOpacity READ getFadeOpacity WRITE setFadeOpacity NOTIFY fadeOpacityChanged)
     Q_PROPERTY(double currentScale READ getCurrentScale WRITE setCurrentScale NOTIFY currentScaleChanged)
+    Q_PROPERTY(QString currentImageName READ getCurrentImageName NOTIFY currentImageNameChanged)
 
 public:
 #ifdef QT5
@@ -51,6 +52,7 @@ public:
     QString requestUrl;
     int pictureCount;
     QStringList urlList;
+    QString currentImageName;
 
     QPixmap currentImage;
     QPixmap surface;
@@ -76,8 +78,15 @@ signals:
     void urlListReady();
     void fadeOpacityChanged();
     void currentScaleChanged();
+    void currentImageNameChanged();
 
 public slots:
+
+    void setCurrentImageName(QString n) {
+        if(!n.isEmpty() ){
+            n = currentImageName;
+        }                                        }
+    QString getCurrentImageName(){return currentImageName;}
 
     void setCurrentScale(double d){ currentScale =d;}
     double getCurrentScale(){return currentScale;}
@@ -117,20 +126,20 @@ public slots:
 #ifdef __ANDROID__
         QPixmap t = currentImage.scaled(width(), height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
 #else
-         QPixmap t = currentImage.scaled(width(), height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        QPixmap t = currentImage.scaled(width(), height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 #endif
 
         if(!t.isNull()){
             currentImage = t;
         }
-       #ifdef QT5
+#ifdef QT5
         update();
 #else
         update(0,0,width(), height());
 
         t=NULL;
 #endif
-          qWarning() << "Update forced";
+        qWarning() << "Update forced";
     }
     Q_INVOKABLE  void setImageList(QStringList l);
 private:
@@ -153,7 +162,7 @@ protected:
 #ifdef QT4
     void paint(QPainter *p ,const QStyleOptionGraphicsItem *option, QWidget *widget );
 #elif QT5
-   void paint(QPainter *painter);
+    void paint(QPainter *painter);
 #endif
     void timerEvent(QTimerEvent *event);
 

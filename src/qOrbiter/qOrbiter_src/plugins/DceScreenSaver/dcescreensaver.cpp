@@ -40,6 +40,7 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     endSize.setHeight(0);
     endSize.setWidth(0);
     imgSet = false;
+    currentImageName="none";
 
     currentUrl = "";
     active = false;
@@ -68,7 +69,7 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     QObject::connect(this, SIGNAL(heightChanged()), this, SLOT(forceUpdate()));
     QObject::connect(this, SIGNAL(widthChanged()), this, SLOT(forceUpdate()));
     //  QObject::connect(zoomAnimation, SIGNAL(finished()), this, SLOT(resetPicture()));
-    qDebug() << "Screensaver ctor";
+
 }
 
 DceScreenSaver::~DceScreenSaver()
@@ -101,6 +102,7 @@ void DceScreenSaver::setImageList(QStringList l)
 
 void DceScreenSaver::requestImage(QString img){
     QNetworkRequest req;
+    setCurrentImageName(img);
     req.setUrl("http://"+requestUrl+"/lmce-admin/imdbImage.php?type=screensaver&val="+img);
     QObject::connect(requestManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processImageData(QNetworkReply*)));
     requestManager->get(req);
