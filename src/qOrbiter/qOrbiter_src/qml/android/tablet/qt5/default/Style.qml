@@ -19,10 +19,10 @@ QtObject{
     property string skincreator: "Langston Ball (aka golgoj4)"
     property string skinname: "qt5default"
     property string skindir: "qt5default"
-    property string skindescription: "Android phone skin, work in progress"
+    property string skindescription: "Skin using qt5."
     property string skinversion: "1.0"
-    property string skinvariation: "Android 320X480"
-    property string maincolor: "grey"
+    property string skinvariation: "Tablet"
+    property string maincolor: "black - green"
 
     //scale function
     function scaleX(x){
@@ -33,6 +33,46 @@ QtObject{
     }
 
     //end scale function
+
+
+    //New style //
+    /* Overall */
+    property double bgLightOpacity:.35
+    property double bgHeavyOpacity:.65
+    property double bgContentOpacity:.50
+
+    /* Headers, containers and lists */
+    property color contentBgColor:"darkgrey"
+    property int headerFontSize:14
+    property color headerBgColor:"green"
+    property int listItemHeight:scaleY(8)
+    property color listItemBgColor:"green"
+    property color listItemActiveBgColor: "white"
+    property Gradient bgHeaderGradient: Gradient{
+        GradientStop{ position:0.0;color:"transparent"}
+        GradientStop{ position:0.65;color:"black"}
+    }
+    property Gradient bgContentGradient: Gradient{
+
+        GradientStop{ position:0.0;color:"transparent"}
+        GradientStop{ position:0.65;color:"black"}
+    }
+
+    /* Buttons and their junk */
+    property int buttonHeight:scaleY(4)
+    property int  buttonWidth: scaleX(12)
+    property int buttonLabelSize:scaleY(2)
+    property color buttonColor:"green"
+    property color buttonPressedColor:"white"
+    property color buttonBorderColor:"white"
+    property int buttonBorderWidth:1
+    property Gradient buttonGradient: Gradient{
+        GradientStop{ position:0.0;color:"transparent"}
+        GradientStop{ position:0.65;color:"black"}
+    }
+
+
+    //----old style---//
     //-color definitions
 
     property color accentcolor: "orange"
@@ -110,7 +150,7 @@ QtObject{
     property color rowbgColor: "transparent"
 
     //Notifications bar
-    property int width: orbiterW - 5
+  //  property int width: orbiterW - 5
     property color not_color: "aliceblue"
     property string not_pos: "anchors: parent.top"
 
