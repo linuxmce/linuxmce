@@ -4,5 +4,6 @@ Screen_2 Screen_2.qml       #??
 Screen_47 Screen_47.qml     #This is the media view screen. its called by anything that shows a list of media files.
 Screen_54 Screen_54.qml     #This is the stored audio remote screen.
 Screen_70 Screen_70.qml     #this is the stored video remote screen.
+Screen_77 Screen_77.qml     #this is the otar radio screen
 Screen_308 Screen_308.qml   #Chromecast screen
 Screen_187 Screen_187.qml   #this is the resume media screen.
