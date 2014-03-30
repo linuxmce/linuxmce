@@ -100,7 +100,7 @@ Item {
 
             }
             PropertyChanges {
-                target: colorfiller
+                target: codefiller
                 color:"yellow"
             }
             AnchorChanges{

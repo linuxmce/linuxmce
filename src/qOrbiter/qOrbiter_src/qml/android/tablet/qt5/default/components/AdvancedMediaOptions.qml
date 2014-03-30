@@ -117,7 +117,7 @@ Item{
             name: "loaded"
             PropertyChanges {
                 target: fil
-                opacity:.85
+                opacity:.65
             }
         }
     ]

@@ -19,6 +19,7 @@ Item{
     property alias playlistSource:playlist.model
     property alias playlistDelegate:playlist.delegate
     property bool enableScrollbar:true
+    property string label:"foo"
 
     Item{
         id: options_display

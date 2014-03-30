@@ -58,4 +58,5 @@ Row{
         }
         visible: manager.currentScreen==="Screen_47.qml"
     }
+
 }

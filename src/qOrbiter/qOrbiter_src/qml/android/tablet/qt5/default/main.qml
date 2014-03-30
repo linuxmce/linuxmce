@@ -337,7 +337,7 @@ Item {
             }
             PropertyChanges {
                 target: bgFill
-                color:"yellow"
+                color:"black"
 
             }
         },

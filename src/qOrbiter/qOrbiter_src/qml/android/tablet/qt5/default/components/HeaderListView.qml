@@ -7,9 +7,11 @@ Item{
     property variant columnTitles:[]
     property variant columnSpacing:[]
     property variant returnProperties:[]
+    property string headerBgColor:style.headerBgColor
     property int columnCount: columnTitles.length
     property color listBgColor: "green"
     property color listBgActiveColor:"green"
+    property color contentBg:style.contentBgColor
     property alias headerListModel: displayList.model
     property Item delegateType:null
     property string displayProperty:""
@@ -20,7 +22,9 @@ Item{
     Rectangle{
         anchors.fill: parent
         id:backing
-        color:listBgColor
+        color:contentBg
+        gradient:style.bgContentGradient
+        opacity:bgContentOpacity
     }
 
     Item{
@@ -33,7 +37,7 @@ Item{
         Rectangle{
             anchors.fill: parent
             id:hdrBg
-            color:"black"
+            color:headerBgColor
             opacity:.75
         }
 
@@ -48,9 +52,9 @@ Item{
         Row{
             id:colLayout
             anchors{
-                left:headerListView.left
-                right:headerListView.right
-                top:headerListView.top
+                left:hdrContainer.left
+                right:hdrContainer.right
+                top:hdrContainer.top
             }
 
             Repeater{
@@ -69,6 +73,7 @@ Item{
     
     ListView{
         id:displayList
+        Component.onCompleted: {displayList.currentIndex=-1}
         clip:true
         anchors{
             top:hdrContainer.bottom
