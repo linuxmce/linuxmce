@@ -41,3 +41,5 @@ FloorPlanOptions FloorPlanOptions.qml
 Resend Resend.qml
 Thumbnail Thumbnail.qml
 Zoom Zoom.qml
+AudioDelegate AudioDelegate.qml
+VideoDelegate VideoDelegate.qml

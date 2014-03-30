@@ -18,6 +18,8 @@ Item {
     signal showUi(bool uiState)
     property variant current_scenario_model
     property variant current_header_model:scenarios
+    property variant audioMediaTypes:[4]
+    property variant videoMediaTypes:[5,11]
 
     property string locationinfo: "standby"
     property string screenfile
@@ -230,6 +232,7 @@ Item {
         Keys.onBackPressed: console.log("back")
         onSourceChanged:  loadin
         onLoaded: {
+
             console.log("Screen Changed:" + pageLoader.source)
         }
         onStatusChanged:  if (pageLoader.status == Component.Ready)
@@ -254,15 +257,16 @@ Item {
                 name: "hidden"
                 PropertyChanges {
                     target: pageLoader
-                    opacity:0
+                    visible:false
                     enabled:false
+
                 }
             },
             State {
                 name: "active"
                 PropertyChanges {
                     target: pageLoader
-                    opacity:1
+                    visible:true
                     enabled:true
                 }
             }

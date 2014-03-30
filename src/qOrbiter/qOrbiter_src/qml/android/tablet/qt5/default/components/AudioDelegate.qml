@@ -1,0 +1,35 @@
+import QtQuick 2.0
+Item{
+    id:audioDelegate
+    height: scaleY(23)
+    width:scaleX(18)
+    clip:true
+
+    Image{
+        source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
+        anchors.left: parent.left
+        anchors.fill: parent
+        fillMode: Image.PreserveAspectCrop
+        smooth: true
+        asynchronous: true
+    }
+    Rectangle{
+        anchors.fill: parent
+        opacity: .65
+        color:trap.pressed ? "darkgreen" : "black"
+
+    }
+
+    StyledText{
+        text: name
+        anchors.centerIn: parent
+        fontSize: 36
+        color: "White"
+    }
+
+    MouseArea{
+        id:trap
+        anchors.fill: parent
+        onReleased: manager.setStringParam(4, id);
+    }
+}
