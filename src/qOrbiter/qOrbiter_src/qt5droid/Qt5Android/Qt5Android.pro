@@ -206,7 +206,8 @@ SOURCES += ../../main.cpp \
     ../../datamodels/genericflatlistmodel.cpp \
     ../../datamodels/genericmodelitem.cpp \
     ../../datamodels/ActiveMediaStreams.cpp \
-    ../../datamodels/listitembase.cpp
+    ../../datamodels/listitembase.cpp \
+contextobjects/linuxmcedata.cpp
 
 
 
@@ -320,7 +321,8 @@ HEADERS += \
     ../../datamodels/genericmodelitem.h \
     ../../datamodels/ActiveMediaStreams.h \
     ../../datamodels/MediaFilter.h \
-    ../../datamodels/listitembase.h
+    ../../datamodels/listitembase.h \
+contextobjects/linuxmcedata.h
 
 RESOURCES += \
         ../../skinData.qrc

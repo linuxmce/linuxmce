@@ -215,9 +215,26 @@ class qorbiterManager : public QObject
 
     /*!
      * \warning enablescreensavermode - currently unused, should be built anyways
-     * \warning networkload - currently is used for android devices
+     * \warning networkload - currently is used for all devices
      */
 
+    /*! \warning I am a bad person for this - Langston */
+    enum MediaSubTypes{
+        TVSHOWS,
+        MOVIES,
+        HOMEVIDEOS,
+        SPORTSEVENTS,
+        MUSICVIDEOS,
+        ALTERNATIVE,
+        POPULARMUSIC,
+        CLASSICALMUSIC,
+        LEARNING,
+        AUDIOBOOKS,
+        ARCADE,
+        CONSOLE
+    };
+
+    Q_ENUMS(MediaSubTypes)
 
 public:
 #if QT5 && !ANDROID
@@ -689,7 +706,7 @@ signals:
     void continueSetup();
     void gotMountDevices();
 
-     void newHouseMode(QString pass, int mode);
+    void newHouseMode(QString pass, int mode);
 
     /*DCE Signals*/
     void reloadRouter();
@@ -1274,12 +1291,12 @@ public slots:
      */
     QString translateAttribute(int a){
         QString rVal;
-                switch (a) {
-            case 1:
+        switch (a) {
+        case 1:
 
-                break;
-            default:
-                break;
+            break;
+        default:
+            break;
         }
         return rVal;
     }
@@ -1323,7 +1340,9 @@ public slots:
     void setGridLastViewed(QString l){q_last_viewed = l; emit gridLastViewedChanged();}
     QString getGridLastViewed(){return q_last_viewed;}
 
-   
+    void updateMediaString(){updateSelectedAttributes(mediaFilter.getFilterString()); }
+
+
     void getGrid(int i);
     void setStringParam(int paramType, QString param);
     bool goBackGrid();
@@ -1390,7 +1409,7 @@ public slots:
     void quickReload();
     void setVariable(int variable, QString valueToAssign){ if(!valueToAssign.isEmpty())  emit setDceVar(variable, valueToAssign);  }
     void setText(QString sDesignObj, QString sValue, int iPK_Text);
-//@}
+    //@}
 
     /*! @name Sleeping menu  */
     //@{

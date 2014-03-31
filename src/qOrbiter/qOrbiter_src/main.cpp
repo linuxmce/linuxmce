@@ -593,6 +593,8 @@ int main(int argc, char* argv[])
 
 	// Media filter
         QObject::connect(&pqOrbiter, SIGNAL(showFileListMediaType(int)), &w.mediaFilter, SLOT(setMediaType(int)), Qt::QueuedConnection);
+         QObject::connect(&pqOrbiter, SIGNAL(showFileListMediaType(int)), &w, SLOT(setGridMediaType(QString)), Qt::QueuedConnection);
+
 	//        QObject::connect(&pqOrbiter, SIGNAL(showFileListMediaType(int)), &w, SLOT(prepareFileList()), Qt::QueuedConnection);
         //QObject::connect(&w.mediaFilter, SIGNAL(filterChanged(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
         QObject::connect(&w.mediaFilter, SIGNAL(filterStringChanged(QString)), &w, SLOT(mediaFilterChanged(QString)), Qt::QueuedConnection);

@@ -296,6 +296,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     /*Needs Doin at construction */
     userList = new UserModel( new UserItem, this);
     orbiterInit=true;
+    QObject::connect(&mediaFilter, SIGNAL( currentMediaTypeChanged(QString)), this, SLOT(setGridMediaType(QString)));
+    QObject::connect(&mediaFilter, SIGNAL(newMediaFilter()), SLOT(updateMediaString()));
     emit orbiterInitialized();
 }
 
@@ -1029,7 +1031,6 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status)
         m_bStartingUp = false;
         QApplication::processEvents(QEventLoop::AllEvents);
         writeConfig();
-
         startOrbiter();
 
     }

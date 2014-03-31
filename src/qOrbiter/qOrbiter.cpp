@@ -4647,13 +4647,12 @@ void DCE::qOrbiter::prepareFileList(QString filterString)
         requestMore=false;
         return;
     }
-    else
-    {
+    else{
         qDebug() << currentScreen;
     }
 
     qDebug() << "Preparing file list, filter==>" << filterString;
-    //    mediaFilter.setMediaType(iPK_MediaType);
+  //  mediaFilter.setMediaType(iPK_MediaType);
     requestMore = false;
     media_currentRow = 0;
     cellsToRender = 0;
