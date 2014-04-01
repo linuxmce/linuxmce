@@ -188,6 +188,7 @@ SOURCES += \
         ../../datamodels/avcodegrid.cpp \
         ../../contextobjects/floorplandevice.cpp \
         ../../contextobjects/screenshotattributes.cpp \
+        ../../contextobjects/linuxmcedata.cpp \
         ../../orbiterwindow.cpp \
         ../../contextobjects/screensaverclass.cpp \
         ../../datamodels/skinloader.cpp \
@@ -206,11 +207,11 @@ SOURCES += \
         ../../datamodels/existingorbitermodel.cpp \
         ../../datamodels/devicemodel.cpp \
         ../../datamodels/attributeobject.cpp \
-    ../../logger/qorbiterlogger.cpp \
-    ../../datamodels/genericflatlistmodel.cpp \
-    ../../datamodels/genericmodelitem.cpp \
-    ../../datamodels/ActiveMediaStreams.cpp \
-    ../../datamodels/listitembase.cpp
+        ../../logger/qorbiterlogger.cpp \
+        ../../datamodels/genericflatlistmodel.cpp \
+        ../../datamodels/genericmodelitem.cpp \
+        ../../datamodels/ActiveMediaStreams.cpp \
+        ../../datamodels/listitembase.cpp
 
 
 
@@ -285,6 +286,7 @@ HEADERS += \
         ../../datamodels/floorplanimageitem.h \
         ../../contextobjects/floorplandevice.h \
         ../../contextobjects/screenshotattributes.h \
+        ../../contextobjects/linuxmcedata.h \
         ../../orbiterwindow.h \
         ../../contextobjects/screensaverclass.h \
         ../../datamodels/skinloader.h  \

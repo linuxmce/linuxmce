@@ -202,12 +202,12 @@ SOURCES += ../../main.cpp \
         ../../datamodels/existingorbitermodel.cpp \
         ../../datamodels/devicemodel.cpp \
         ../../datamodels/attributeobject.cpp \
-    ../../logger/qorbiterlogger.cpp \
-    ../../datamodels/genericflatlistmodel.cpp \
-    ../../datamodels/genericmodelitem.cpp \
-    ../../datamodels/ActiveMediaStreams.cpp \
-    ../../datamodels/listitembase.cpp \
-../../contextobjects/linuxmcedata.cpp
+        ../../logger/qorbiterlogger.cpp \
+        ../../datamodels/genericflatlistmodel.cpp \
+        ../../datamodels/genericmodelitem.cpp \
+        ../../datamodels/ActiveMediaStreams.cpp \
+        ../../datamodels/listitembase.cpp \
+        ../../contextobjects/linuxmcedata.cpp
 
 
 
