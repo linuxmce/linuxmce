@@ -122,7 +122,7 @@
 #include <qOrbiter/qOrbiter.h>
 #include <DCE/DataGrid.h>
 
-/*---------------Threaded classes-----------*/
+#include <contextobjects/linuxmcedata.h>
 
 
 #include <qOrbiter/qOrbiter.h>
@@ -217,24 +217,6 @@ class qorbiterManager : public QObject
      * \warning enablescreensavermode - currently unused, should be built anyways
      * \warning networkload - currently is used for all devices
      */
-
-    /*! \warning I am a bad person for this - Langston */
-    enum MediaSubTypes{
-        TVSHOWS,
-        MOVIES,
-        HOMEVIDEOS,
-        SPORTSEVENTS,
-        MUSICVIDEOS,
-        ALTERNATIVE,
-        POPULARMUSIC,
-        CLASSICALMUSIC,
-        LEARNING,
-        AUDIOBOOKS,
-        ARCADE,
-        CONSOLE
-    };
-
-    Q_ENUMS(MediaSubTypes)
 
 public:
 #if QT5 && !ANDROID

@@ -77,6 +77,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <contextobjects/epgchannellist.h>
 #include <contextobjects/playlistclass.h>
 #include <contextobjects/timecodemanager.h>
+#include <contextobjects/linuxmcedata.h>
 
 #ifdef debug
 #include <QDebug>
@@ -220,6 +221,7 @@ int main(int argc, char* argv[])
 
     QOrbiterLogger localLogger;
 
+
 #ifdef __ANDROID__
 //    if(androidHelper.updateExternalStorageLocation()){
 
@@ -351,6 +353,7 @@ int main(int argc, char* argv[])
         QThread dceThread;
 
         qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
+        qmlRegisterType<LinuxmceData>("DataEnums",1,0,"Linuxmce");
 
         if(deviceType==0){
 
@@ -395,6 +398,7 @@ int main(int argc, char* argv[])
         orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
 
 	qmlRegisterType<GenericFlatListModel>();
+
 	qRegisterMetaType<QHash<int, QVariant> >("QHash<int, QVariant>");
 
         // connnect local logger

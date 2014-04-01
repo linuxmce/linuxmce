@@ -870,6 +870,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
      *Various context objects are set in this function after processing is done
      */
     //------------------------------------------context objects----------------------------------------------------
+  // qorbiterUIwin->rootContext()->setContextProperty("lmceData", &linuxmceData);                 //current room scenarios model
     qorbiterUIwin->rootContext()->setContextObject(this);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights);                 //current room scenarios model
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);                   //current room media model
