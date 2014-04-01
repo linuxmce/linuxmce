@@ -6,8 +6,30 @@
 class LinuxmceData : public QObject
 {
     Q_OBJECT
+    /*! \warning I am a bad person for this - Langston */
+
 public:
-    explicit LinuxmceData(QObject *parent = 0);
+    enum MediaSubTypes{
+        TVSHOWS,
+        MOVIES,
+        HOMEVIDEOS,
+        SPORTSEVENTS,
+        MUSICVIDEOS,
+        ALTERNATIVE,
+        POPULARMUSIC,
+        CLASSICALMUSIC,
+        LEARNING,
+        AUDIOBOOKS,
+        ARCADE,
+        CONSOLE
+    };
+
+    Q_ENUMS(MediaSubTypes)
+    explicit LinuxmceData(QObject *parent = 0);    
+
+//    static void declareToQml(){
+//        qmlRegisterType<LinuxmceData>("DataEnums",1,0,"LinuxmceData");
+//    }
 
 signals:
 
