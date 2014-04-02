@@ -14,7 +14,7 @@ Item {
     property string screen:"screenum ipsum"
     signal readyToClose()
     signal screenClosing()
-    signal opening()
+    signal screenOpening()
 
     anchors{
         top:pageLoader.top
@@ -30,9 +30,7 @@ Item {
                 target: screen_root
                 opacity:0
             }
-            ScriptAction{
-                script: { opening() }
-            }
+
         },
         State {
             name: "opened"
@@ -47,14 +45,20 @@ Item {
                 target: screen_root
                 opacity:0
             }
-            ScriptAction{
-                script: {screenClosing() }
-            }
+
         },
         State {
             name: "closed"
-            ScriptAction{
-                script: { readyToClose() }
+
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+            PropertyAnimation{
+                duration: 500
             }
         }
     ]

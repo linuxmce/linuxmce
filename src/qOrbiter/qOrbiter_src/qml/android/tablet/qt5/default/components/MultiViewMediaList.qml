@@ -1,11 +1,9 @@
 import QtQuick 2.0
-
+import org.linuxmce.enums 1.0
 import "../components"
 
 Item{
     id:multi_view_list
-
-
     anchors{
         left:parent.left
         right:parent.right
@@ -56,7 +54,13 @@ Item{
     
     GridView{
         id:media_grid
-        anchors.fill: parent
+        anchors{
+            left:parent.left
+            right:parent.right
+            bottom:parent.bottom
+            top:parent.top
+        }
+
         model:manager.getDataGridModel("MediaFile", 63)
         visible:current_view_type===1
         delegate:currentDelegate
@@ -73,7 +77,7 @@ Item{
             },
             State {
                 name: "audio"
-                when:manager.q_mediaType=="4"
+                when:manager.q_mediaType==Mediatypes.STOREDAUDIO
                 PropertyChanges {
                     target: media_grid
                     cellHeight: scaleY(24)
@@ -90,7 +94,7 @@ Item{
             },
             State {
                 name: "tv"
-                when:manager.q_subType===Linuxmce.TVSHOWS
+                when:manager.q_subType==Subtypes.LIVETV
                 PropertyChanges {
                     target: media_grid
                     cellHeight: scaleY(24)
@@ -99,7 +103,7 @@ Item{
             },
             State {
                 name: "movies"
-
+                when: manager.q_subType==Subtypes.MOVIES
                 PropertyChanges {
                     target: media_grid
                     cellHeight: scaleY(24)
@@ -119,12 +123,12 @@ Item{
     states: [
         State {
             name: "audio"
-            when:manager.q_mediaType === "4"
+            when:manager.q_mediaType == Mediatypes.STOREDAUDIO
 
         },
         State {
             name: "video"
-            when:manager.q_mediaType ==="5"
+            when:manager.q_mediaType == Mediatypes.STOREDMEDIA
         }
     ]
 }
