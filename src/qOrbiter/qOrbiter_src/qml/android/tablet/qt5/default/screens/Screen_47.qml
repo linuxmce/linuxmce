@@ -1,16 +1,17 @@
 import QtQuick 2.0
+
 import "../components"
 
-Item {
+StyledScreen {
     id:files_view_screen
-    height: pageLoader.height
-    width:manager.appWidth
+    screen: "Media Files View"
     property int current_view_type:1
+
     Component.onCompleted: {
         setNavigation("MedialistNav.qml")
         hideInfoPanel()
     }
-    state: manager.i_current_mediaType === 5 ? "selection" : "viewing"
+    state: manager.q_mediaType === 5 ? "selection" : "viewing"
     Connections{
         target: filedetailsclass
         onShowDetailsChanged:{
@@ -19,7 +20,7 @@ Item {
     }
     MultiViewMediaList{
         id:media_view
-        anchors.centerIn: parent
+
     }
 
     GridView{

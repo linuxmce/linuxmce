@@ -180,7 +180,8 @@ Item
 
                         alphabetrect.scale = 1
                     }
-                    onClicked: { if(dataModel.totalPages===1){
+                    onClicked: {
+                        if(dataModel.totalPages===1){
                             gridView.currentIndex = dataModel.setSection(name)
                             gridView.positionViewAtIndex(gridView.currentIndex, ListView.Beginning)
 
@@ -194,7 +195,7 @@ Item
 
         StyledText {
             id: loaded_cells
-            text: dataModel.currentCells
+            text: manager.q_mediaType // dataModel.currentCells
             color: "white"
             font.bold: true
             font.pixelSize: scaleY(4)

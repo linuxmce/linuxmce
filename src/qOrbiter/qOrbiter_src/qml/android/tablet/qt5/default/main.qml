@@ -207,11 +207,15 @@ Item {
         id:media_notification
 
     }
+    InformationPanel {
+        id: info_panel
+    }
     Loader {
         id:pageLoader
         objectName: "loadbot"
         focus: true
         state:"active"
+        clip:true
         Connections{
             target:qml_root
             onShowUi:{
@@ -282,9 +286,7 @@ Item {
         ]
     }
 
-    InformationPanel {
-        id: info_panel
-    }
+
 
     function toggleBars(barState){
         if(barState){

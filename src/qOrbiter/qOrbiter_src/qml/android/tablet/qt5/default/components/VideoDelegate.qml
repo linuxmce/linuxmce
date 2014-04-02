@@ -2,7 +2,7 @@ import QtQuick 2.0
 Item{
     id:videoDelegate
     height: scaleY(25)
-    width: parent.width
+    width: parent.width /2
     clip:true
 
     Image{

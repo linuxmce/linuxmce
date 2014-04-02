@@ -1,12 +1,21 @@
 import QtQuick 2.0
+
 import "../components"
 
 Item{
     id:multi_view_list
-    height: parent.height
-    width: parent.width
+
+
+    anchors{
+        left:parent.left
+        right:parent.right
+        top:parent.top
+        bottom:parent.bottom
+    }
+
     property int itemBuffer:25
-clip:true
+    clip:true
+
     Component{
         id:audioItem
         AudioDelegate{}
@@ -19,7 +28,6 @@ clip:true
 
     property variant currentDelegate:multi_view_list.state==="video"? videoItem :audioItem
     Component.onCompleted: {
-
         media_grid.model=manager.getDataGridModel("MediaFile", 63)
         media_grid.positionViewAtIndex(item, ListView.Beginning)
     }
@@ -52,9 +60,53 @@ clip:true
         model:manager.getDataGridModel("MediaFile", 63)
         visible:current_view_type===1
         delegate:currentDelegate
-        cellHeight: scaleY(24)
-        cellWidth:scaleX(19)
 
+
+        states: [
+            State {
+                name: "default"
+                PropertyChanges {
+                    target: media_grid
+                    cellHeight: scaleY(24)
+                    cellWidth:scaleX(19)
+                }
+            },
+            State {
+                name: "audio"
+                when:manager.q_mediaType=="4"
+                PropertyChanges {
+                    target: media_grid
+                    cellHeight: scaleY(24)
+                    cellWidth:scaleX(19)
+                }
+            },
+            State {
+                name: "video-default"
+                PropertyChanges {
+                    target: media_grid
+                    cellHeight: scaleY(24)
+                    cellWidth:scaleX(19)
+                }
+            },
+            State {
+                name: "tv"
+                when:manager.q_subType===Linuxmce.TVSHOWS
+                PropertyChanges {
+                    target: media_grid
+                    cellHeight: scaleY(24)
+                    cellWidth:scaleX(19)
+                }
+            },
+            State {
+                name: "movies"
+
+                PropertyChanges {
+                    target: media_grid
+                    cellHeight: scaleY(24)
+                    cellWidth:scaleX(19)
+                }
+            }
+        ]
     }
     
     PathView{
@@ -67,13 +119,12 @@ clip:true
     states: [
         State {
             name: "audio"
-            when:manager.q_mediaType === 4
+            when:manager.q_mediaType === "4"
 
         },
         State {
             name: "video"
-            when:manager.q_mediaType === 5
-
+            when:manager.q_mediaType ==="5"
         }
     ]
 }

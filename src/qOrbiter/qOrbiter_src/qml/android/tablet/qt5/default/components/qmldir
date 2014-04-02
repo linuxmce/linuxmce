@@ -28,6 +28,7 @@ ScenarioComponent ScenarioComponent.qml
 StyledHeader StyledHeader.qml
 StyledText StyledText.qml
 StyledButton StyledButton.qml
+StyledScreen StyledScreen.qml
 UserSelector UserSelector.qml
 MediaPlaybackBase MediaPlaybackBase.qml
 MediaPopup MediaPopup.qml
