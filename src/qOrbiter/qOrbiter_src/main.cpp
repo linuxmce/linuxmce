@@ -78,7 +78,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <contextobjects/playlistclass.h>
 #include <contextobjects/timecodemanager.h>
 #include <contextobjects/linuxmcedata.h>
-
+#include <contextobjects/mediatypehelper.h>
 #ifdef debug
 #include <QDebug>
 #endif
@@ -353,8 +353,8 @@ int main(int argc, char* argv[])
         QThread dceThread;
 
         qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
-        qmlRegisterType<LinuxmceData>("DataEnums",1,0,"Linuxmce");
-
+        qmlRegisterType<LinuxmceData>("org.linuxmce.enums",1,0,"Subtypes");
+        qmlRegisterType<MediaTypeHelper>("org.linuxmce.enums",1,0,"Mediatypes");
         if(deviceType==0){
 
         } else {

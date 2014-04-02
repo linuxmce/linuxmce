@@ -10,19 +10,20 @@ class LinuxmceData : public QObject
 
 public:
     enum MediaSubTypes{
-        TVSHOWS,
-        MOVIES,
-        HOMEVIDEOS,
-        SPORTSEVENTS,
-        MUSICVIDEOS,
-        ALTERNATIVE,
-        POPULARMUSIC,
-        CLASSICALMUSIC,
-        LEARNING,
-        AUDIOBOOKS,
-        ARCADE,
-        CONSOLE
+        TVSHOWS=1,
+        MOVIES=2,
+        HOMEVIDEOS=3,
+        SPORTSEVENTS=4,
+        MUSICVIDEOS=5,
+        ALTERNATIVE=6,
+        POPULARMUSIC=7,
+        CLASSICALMUSIC=8,
+        LEARNING=9,
+        AUDIOBOOKS=10,
+        ARCADE=11,
+        CONSOLE=12
     };
+
 
     Q_ENUMS(MediaSubTypes)
     explicit LinuxmceData(QObject *parent = 0);    

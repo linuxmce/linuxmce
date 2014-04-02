@@ -84,8 +84,10 @@ TRANSLATIONS += app_de.ts
         QML_IMPORT_PATH = "androidComponents"
 
         INSTALLS+= qmlplugins
-        HEADERS += ../../plugins/AndroidInfo/androidsystem.h
-        SOURCES += ../../plugins/AndroidInfo/androidsystem.cpp
+        HEADERS += ../../plugins/AndroidInfo/androidsystem.h \
+    ../../contextobjects/mediatypehelper.h
+        SOURCES += ../../plugins/AndroidInfo/androidsystem.cpp \
+    ../../contextobjects/mediatypehelper.cpp
 
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH = imports
@@ -207,7 +209,8 @@ SOURCES += ../../main.cpp \
         ../../datamodels/genericmodelitem.cpp \
         ../../datamodels/ActiveMediaStreams.cpp \
         ../../datamodels/listitembase.cpp \
-        ../../contextobjects/linuxmcedata.cpp
+        ../../contextobjects/linuxmcedata.cpp \
+../../contextobjects/mediatypehelper.h
 
 
 
@@ -322,7 +325,8 @@ HEADERS += \
     ../../datamodels/ActiveMediaStreams.h \
     ../../datamodels/MediaFilter.h \
     ../../datamodels/listitembase.h \
-        ../../contextobjects/linuxmcedata.h
+        ../../contextobjects/linuxmcedata.h \
+../../contextobjects/mediatypehelper.h
 
 RESOURCES += \
         ../../skinData.qrc

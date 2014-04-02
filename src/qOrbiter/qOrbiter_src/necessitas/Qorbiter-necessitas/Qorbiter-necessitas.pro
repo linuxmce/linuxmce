@@ -189,6 +189,7 @@ SOURCES += \
         ../../contextobjects/floorplandevice.cpp \
         ../../contextobjects/screenshotattributes.cpp \
         ../../contextobjects/linuxmcedata.cpp \
+        ../../contextobjects/mediatypehelper.cpp
         ../../orbiterwindow.cpp \
         ../../contextobjects/screensaverclass.cpp \
         ../../datamodels/skinloader.cpp \
@@ -287,6 +288,7 @@ HEADERS += \
         ../../contextobjects/floorplandevice.h \
         ../../contextobjects/screenshotattributes.h \
         ../../contextobjects/linuxmcedata.h \
+        ../../contextobjects/mediatypehelper.cpp \
         ../../orbiterwindow.h \
         ../../contextobjects/screensaverclass.h \
         ../../datamodels/skinloader.h  \
