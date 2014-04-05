@@ -77,7 +77,7 @@ Item{
             },
             State {
                 name: "audio"
-                when:manager.q_mediaType==Mediatypes.STOREDAUDIO
+                when:manager.q_mediaType==Mediatypes.STORED_AUDIO
                 PropertyChanges {
                     target: media_grid
                     cellHeight: scaleY(24)
@@ -86,6 +86,7 @@ Item{
             },
             State {
                 name: "video-default"
+
                 PropertyChanges {
                     target: media_grid
                     cellHeight: scaleY(24)
@@ -94,7 +95,7 @@ Item{
             },
             State {
                 name: "tv"
-                when:manager.q_subType==Subtypes.LIVETV
+                when:manager.q_subType==Subtypes.TVSHOWS
                 PropertyChanges {
                     target: media_grid
                     cellHeight: scaleY(24)
@@ -123,12 +124,12 @@ Item{
     states: [
         State {
             name: "audio"
-            when:manager.q_mediaType == Mediatypes.STOREDAUDIO
+            when:manager.q_mediaType == Mediatypes.STORED_AUDIO
 
         },
         State {
             name: "video"
-            when:manager.q_mediaType == Mediatypes.STOREDMEDIA
+            when:manager.q_mediaType == Mediatypes.STORED_VIDEO
         }
     ]
 }

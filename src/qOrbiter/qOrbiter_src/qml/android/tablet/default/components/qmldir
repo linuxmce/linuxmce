@@ -11,6 +11,7 @@ AttributeTypes             AttributeTypes.qml                        #no comment
 AudioButtons             AudioButtons.qml                        #no comment
 AudioComponent             AudioComponent.qml                        #no comment
 AudioControl             AudioControl.qml                        #no comment
+AudioDelegate             AudioDelegate.qml                        #no comment
 AudioMetaData             AudioMetaData.qml                        #no comment
 AudioRemote             AudioRemote.qml                        #no comment
 Avcodes             Avcodes.qml                        #no comment
@@ -101,6 +102,5 @@ UserListComponent             UserListComponent.qml                        #no c
 VideoButtons             VideoButtons.qml                        #no comment
 VideoComponent             VideoComponent.qml                        #no comment
 VideoControls             VideoControls.qml                        #no comment
+VideoDelegate             VideoDelegate.qml                        #no comment
 ZoomAspect             ZoomAspect.qml                        #no comment
-AudioDelegate	AudioDelegate.qml
-VideoDelegate VideoDelegate.qml

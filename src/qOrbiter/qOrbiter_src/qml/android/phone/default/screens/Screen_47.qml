@@ -21,7 +21,7 @@ Item {
         forceActiveFocus()
     }
 
-/*    Connections{
+    /*    Connections{
         target:manager
         onDceGridSepChanged:manager.requestPage(0)
     }
@@ -142,7 +142,7 @@ Item {
         switch(event.key){
         case Qt.Key_Back:
         case Qt.Key_MediaPrevious:
-	    if (!manager.goBackGrid())
+            if (!manager.goBackGrid())
                 event.accepted=false
             break;
         case Qt.Key_Menu:
@@ -253,19 +253,19 @@ Item {
                 height: parent.height
                 font.weight: Font.Light
             }
-	    Flickable {
-		anchors.fill:parent
-		flickableDirection: Flickable.HorizontalFlick
-		onContentXChanged: alphaList.setDragout(contentX)
-		contentWidth: parent.width + alphaList.width
-		MouseArea{
-		    id:mouseclick
-		    anchors.fill: parent
-		    onClicked: { 
-			manager.setStringParam(4, id);
-		    }
-		}
-	    }
+            Flickable {
+                anchors.fill:parent
+                flickableDirection: Flickable.HorizontalFlick
+                onContentXChanged: alphaList.setDragout(contentX)
+                contentWidth: parent.width + alphaList.width
+                MouseArea{
+                    id:mouseclick
+                    anchors.fill: parent
+                    onClicked: {
+                        manager.setStringParam(4, id);
+                    }
+                }
+            }
         }
     }
 
@@ -290,7 +290,7 @@ Item {
     }
 
     Rectangle {
-	id: alphaList
+        id: alphaList
         height: manager.appHeight
         width: scaleX(14)
         anchors{
@@ -300,53 +300,53 @@ Item {
         color: "black"
         opacity:.75
 
-	x: fileviewscreen.x + fileviewscreen.width
-	
-	function setDragout(xLength){
-	    if (xLength > 30 || xLength < -30) {
-		if (xLength > alphaList.width) {
-		    xLength = alphaList.width
-		}
-		alphaList.x = fileviewscreen.x + fileviewscreen.width - xLength
-	    }
-	}
+        x: fileviewscreen.x + fileviewscreen.width
 
-	ListView{
+        function setDragout(xLength){
+            if (xLength > 30 || xLength < -30) {
+                if (xLength > alphaList.width) {
+                    xLength = alphaList.width
+                }
+                alphaList.x = fileviewscreen.x + fileviewscreen.width - xLength
+            }
+        }
+
+        ListView{
             id:alpha_list
             model: alphabetlist
-	    anchors.fill:parent
+            anchors.fill:parent
 
             delegate: Item{
-		height: scaleY(10)
-		width: scaleX(10)
+                height: scaleY(10)
+                width: scaleX(10)
 
-		StyledText {
+                StyledText {
                     id:alpha_label
                     text: name
                     anchors.centerIn: parent
                     color: "white"
                     font.bold: true
                     fontSize: 42
-		}
+                }
 
-		MouseArea{
+                MouseArea{
                     anchors.fill: parent
                     onClicked: {
-			fileviewscreen.state="browsing"
-			currentSeekLetter = name
-//			if(dataModel.totalPages==1){
-//                            list_view1.maingrid.positionViewAtIndex(dataModel.setSection(name), ListView.Beginning)
-//			}else{
-//                            manager.setGridStatus(false)
-                            manager.seekGrid("MediaFile", name)
-//			}
+                        fileviewscreen.state="browsing"
+                        currentSeekLetter = name
+                        //			if(dataModel.totalPages==1){
+                        //                            list_view1.maingrid.positionViewAtIndex(dataModel.setSection(name), ListView.Beginning)
+                        //			}else{
+                        //                            manager.setGridStatus(false)
+                        manager.seekGrid("MediaFile", name)
+                        //			}
                     }
                     onPressAndHold: {
-			fileviewscreen.state="browsing"
+                        fileviewscreen.state="browsing"
                     }
-		}
+                }
             }
-	}
+        }
     }
 
 
