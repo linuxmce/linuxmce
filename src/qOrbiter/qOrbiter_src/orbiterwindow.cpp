@@ -216,7 +216,11 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     qrcPath = "qrc:osx/Splash.qml";
     localPath = "desktop/";
 #elif defined __ANDROID__
-    qrcPath = "qrc:main/Welcome2.qml";
+#ifdef QT5
+qrcPath = "qrc:main/Welcome2.qml";
+#else
+    qrcPath = "qrc:main/Welcome.qml";
+#endif
     localPath = "android/";
 #elif defined for_android
     buildType = "/qml/android";

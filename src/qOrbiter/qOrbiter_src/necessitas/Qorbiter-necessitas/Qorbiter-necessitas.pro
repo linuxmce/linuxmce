@@ -189,7 +189,7 @@ SOURCES += \
         ../../contextobjects/floorplandevice.cpp \
         ../../contextobjects/screenshotattributes.cpp \
         ../../contextobjects/linuxmcedata.cpp \
-        ../../contextobjects/mediatypehelper.cpp
+        ../../contextobjects/mediatypehelper.cpp \
         ../../orbiterwindow.cpp \
         ../../contextobjects/screensaverclass.cpp \
         ../../datamodels/skinloader.cpp \
@@ -213,7 +213,6 @@ SOURCES += \
         ../../datamodels/genericmodelitem.cpp \
         ../../datamodels/ActiveMediaStreams.cpp \
         ../../datamodels/listitembase.cpp
-
 
 
 # Please do not modify the following two lines. Required for deployment.
@@ -288,7 +287,7 @@ HEADERS += \
         ../../contextobjects/floorplandevice.h \
         ../../contextobjects/screenshotattributes.h \
         ../../contextobjects/linuxmcedata.h \
-        ../../contextobjects/mediatypehelper.cpp \
+        ../../contextobjects/mediatypehelper.h \
         ../../orbiterwindow.h \
         ../../contextobjects/screensaverclass.h \
         ../../datamodels/skinloader.h  \

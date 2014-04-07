@@ -27,14 +27,20 @@ SkinDataModel::SkinDataModel(QUrl &baseUrl, SkinDataItem* prototype, qorbiterMan
     setRoleNames(m_prototype->roleNames());
 #endif
     qRegisterMetaType<QModelIndex>("QModelIndex");
+
     ui_reference = uiRef;
+
+
     SkinLoader* load = new SkinLoader(m_baseUrl, ui_reference, this);
+
     m_skin_loader = load;
+
 #ifndef QT5
     current_style = new QDeclarativeComponent(ui_reference->qorbiterUIwin->rootContext()->engine(), this);
 #else
     current_style = new QQmlComponent(ui_reference->qorbiterUIwin->rootContext()->engine(), this);
 #endif
+
     QObject::connect(m_skin_loader, SIGNAL(finishedList()), this, SLOT(checkStatus()));
     QObject::connect(ui_reference, SIGNAL(internalIpChanged(QString)), this, SLOT(setBaseUrl(QString)));
 }

@@ -6,12 +6,12 @@
 #include <QDeclarativeItem>
 #include <QGLWidget>
 
-    #ifndef __ANDROID__
-        #include <QBoxLayout>
-        #include <phonon>
-        #include <QHBoxLayout>
-        #include <colorfilterproxywidget.h>
-    #endif
+#ifndef __ANDROID__
+#include <QBoxLayout>
+#include <phonon>
+#include <QHBoxLayout>
+#include <colorfilterproxywidget.h>
+#endif
 
 #elif QT5
 #include <QQuickItem>
@@ -106,18 +106,18 @@ public:
 
 
 #ifndef __ANDROID__
-    #ifdef QT4
-        QWidget *window;
-        QList <Phonon::AudioOutputDevice> outputs;
-        QVBoxLayout *layout;
-        ColorFilterProxyWidget *filterProxy;
-    #elif QT5
+#ifdef QT4
+    QWidget *window;
+    QList <Phonon::AudioOutputDevice> outputs;
+    QVBoxLayout *layout;
+    ColorFilterProxyWidget *filterProxy;
+#elif QT5
     /*
      *In Qt5
      *We dont need to do any painting of the operations normally
      *This may change with raspberry pi
      */
-    #endif
+#endif
 #endif
 
     qMediaPlayer *mediaPlayer;
@@ -145,13 +145,13 @@ public:
 
 #ifdef QT4
 
-    #ifndef __ANDROID__
-        Phonon::VideoWidget *videoSurface;
-        Phonon::AudioOutput *audioSink;
-        Phonon::MediaObject *mediaObject;
-        Phonon::MediaController * discController;
-        QGLWidget *accel;
-    #endif
+#ifndef __ANDROID__
+    Phonon::VideoWidget *videoSurface;
+    Phonon::AudioOutput *audioSink;
+    Phonon::MediaObject *mediaObject;
+    Phonon::MediaController * discController;
+    QGLWidget *accel;
+#endif
 
 #endif
 
@@ -190,6 +190,8 @@ signals:
     void incomingTick(quint64);
     void updatePluginSeek(int);
 
+    void setPluginVolume(double d);
+
 public slots:
 
     void setCurrentDevice(long d){currentDevice = d;mountDrive(currentDevice);}
@@ -204,7 +206,7 @@ public slots:
     }
 
     void androidPlaybackEnded(bool ended){
-         mediaPlayer->mediaEnded();
+        mediaPlayer->mediaEnded();
     }
 
 
@@ -234,10 +236,16 @@ public slots:
     void setVolume(qreal vol){
 
 #ifdef QT4
+    #ifndef __ANDROID__
         qreal c = audioSink->volume();
         qWarning() << "Current volume" << c;
         qreal d = c+0.01;
+
         audioSink->setVolume(d);
+    #else
+        setPluginVolume((double)vol);
+    #endif
+
 #endif
         qDebug() << vol;
         volume = vol;
@@ -280,17 +288,17 @@ public slots:
         if (mediaPlaying==false)
         {
 #ifndef __ANDROID__
-    #ifndef QT5
+#ifndef QT5
             filterProxy->hide();
-    #endif
+#endif
 #endif
         }
         else
         {
 #ifndef __ANDROID__
-    #ifdef QT4
+#ifdef QT4
             filterProxy->show();
-    #endif
+#endif
 #endif
         }
         emit mediaPlayingChanged();
@@ -348,22 +356,22 @@ public slots:
 
     void setState(){
 #ifndef __ANDROID__
-    #ifdef QT4
+#ifdef QT4
         qDebug() << mediaObject->state();
         int i =  mediaObject->errorType();
         if(i==0){
             setCurrentStatus("Media Player Loading");
 #ifndef __ANDROID__
-    #ifdef QT4
-        qDebug() << "Titles: \t" << discController->availableTitles();
-        qDebug() << "Chapters: \t" << discController->availableChapters();
-        qDebug() << "SubTitles: \t" << discController->availableSubtitles();
-        qDebug() << "Angles: \t" << discController->availableAngles();
-        qDebug() << "Audio Channels: \t" << discController->availableAudioChannels();
-        qDebug() << "Features: \t" << discController->supportedFeatures();
+#ifdef QT4
+            qDebug() << "Titles: \t" << discController->availableTitles();
+            qDebug() << "Chapters: \t" << discController->availableChapters();
+            qDebug() << "SubTitles: \t" << discController->availableSubtitles();
+            qDebug() << "Angles: \t" << discController->availableAngles();
+            qDebug() << "Audio Channels: \t" << discController->availableAudioChannels();
+            qDebug() << "Features: \t" << discController->supportedFeatures();
 
 
-    #endif
+#endif
 #endif
         } else if( i== 1){
             setCurrentStatus("Media Player Stopped");
@@ -379,11 +387,9 @@ public slots:
             mediaPlayer->EVENT_Playback_Completed(mediaPlayer->currentMediaUrl.toStdString(), mediaPlayer->i_StreamId, false);
             qWarning("Media could not start.");
         }
-    #endif
+#endif
 #endif
     }
-
-
 
     void setMediaPosition(int msec) {
         qDebug() << msec;
@@ -487,11 +493,13 @@ private slots:
     bool initViews(bool flipped);
     void setupDirectories();
 #ifdef QT4
+#ifndef __ANDROID__
     void setSubtitles(){      qDebug() << "SubTitles: \t" << discController->availableSubtitles(); }
     void setAvailTitles(int t){ qDebug() << "Titles: \t" << discController->availableTitles(); }
     void setChapters(int c){qDebug() << "Chapters: \t" << discController->availableChapters(); }
     void setAngles(int a) {qDebug() << "Angles: \t" << discController->availableAngles(); }
     void setAudioChannels(){ qDebug() << "Audio Channels: \t" << discController->availableAudioChannels();}
+#endif
 #endif
 };
 
