@@ -14,7 +14,7 @@ Item {
 
     Image{
         fillMode: Image.PreserveAspectCrop
-        source: "qrc:/img/Splash.png"
+        source: "qrc:../img/Splash.png"
     }
 
     Rectangle{
