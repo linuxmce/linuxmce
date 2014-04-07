@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 1.1
 Item{
     id:controlPanel
     height: parent.height
@@ -15,7 +15,8 @@ Item{
     Rectangle{
         id:fil
         anchors.fill: parent
-        color: "black"
+        color: style.contentBgColor
+        opacity:style.bgContentOpacity
     }
 
     Loader{
@@ -48,20 +49,22 @@ Item{
 
     Rectangle{
         id:optionContainer
+        gradient:style.bgContentGradient
+        width: scaleX(15)
+
         anchors{
             top:parent.top
             left:parent.left
             bottom:parent.bottom
             leftMargin: 10
         }
-        width: scaleX(15)
 
         ListView{
             id:optionView
             anchors.fill: parent
             model:availbleOptions
             delegate: StyledButton{
-                buttonText: name
+                label: name
                 anchors{
                     left:parent.left
                     right:parent.right
@@ -85,7 +88,7 @@ Item{
             control:"Bookmarks.qml"
         }
         ListElement{
-            name:"Resend Command"
+            name:"Resend \n Command"
             control:"Resend.qml"
         }
 
@@ -117,7 +120,7 @@ Item{
             name: "loaded"
             PropertyChanges {
                 target: fil
-                opacity:.85
+                opacity:.65
             }
         }
     ]

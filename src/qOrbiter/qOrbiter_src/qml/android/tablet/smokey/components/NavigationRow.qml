@@ -9,6 +9,7 @@ Item{
     property string defaultSource:"ScenarioComponent.qml"
     property string navSource:"ScenarioComponent.qml"
     anchors{
+        top:qml_root.top
         left:qml_root.left
         right:qml_root.right
     }
@@ -58,7 +59,7 @@ Item{
         StyledButton {
             id: exit_label
             buttonText: qsTr("Exit")
-            hitArea.onReleased: manager.exitApp()
+            hitArea.onReleased: manager.closeOrbiter()
             opacity:manager.currentScreen ==="Screen_1.qml" ? 1 : 0
         }
         StyledButton {
@@ -76,7 +77,7 @@ Item{
 
                 //            else{
 
-                //                pageLoader.item.state="selection"
+                //                pageLoader.item.sztate="selection"
                 //                manager.goBackGrid()
                 //                mediatypefilter.reset()
                 //            }

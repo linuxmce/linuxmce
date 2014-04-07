@@ -109,6 +109,10 @@ Item {
         return y/100*qml_root.height
     }
 
+    function dumpObj(obj, message){
+        console.log((message? message+"\n\t" : "No Message \n\t")+ JSON.stringify(obj, null, "\t"))
+    }
+
     focus:true
     Keys.onReleased:{
 

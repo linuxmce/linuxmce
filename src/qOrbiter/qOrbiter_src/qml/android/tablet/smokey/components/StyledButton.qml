@@ -27,6 +27,7 @@ Item{
     property alias hitArea:fly_trap
     property alias handler:dceHandler.sourceComponent
     property bool useHandler:false
+    property alias label:button_label.text
 
     signal activated()
     Behavior on opacity{

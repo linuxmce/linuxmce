@@ -16,10 +16,10 @@ Item {
     }
 
 
-//    Connections{
-//        target:filedetailsclass
-//        onImageChanged:filedetailsimage.source = "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?img="+filedetailsclass.screenshot
-//    }
+    Connections{
+        target:filedetailsclass
+        onImageChanged:filedetailsimage.source = "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?img="+filedetailsclass.screenshot
+    }
 
     Rectangle{
         id:bg_mask
@@ -199,7 +199,7 @@ Item {
 
         StyledButton{
             buttonText: "Close"
-            hitArea.onReleased: {files_view_screen.state="viewing"; filedetailsclass.clear()}
+            hitArea.onReleased: {content.state="viewing"; filedetailsclass.clear()}
         }
     }
 }

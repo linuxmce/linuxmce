@@ -3,6 +3,8 @@ import QtQuick 1.0
 Item{
     height: childrenRect.height
     width: childrenRect.width
+    property int aspectRatio:dcenowplaying.aspect
+
     Connections{
         target:dcenowplaying
         onImageChanged:refreshtimer.start()
@@ -10,9 +12,9 @@ Item{
 
     Image {
         id: nowplayingimage
-        width:dcenowplaying.aspect==="album" ? scaleX(38) : dcenowplaying.aspect==="wide"? scaleX(50) : scaleX(25)
-        height:dcenowplaying.aspect==="album" ? scaleY(45) : dcenowplaying.aspect==="wide"? scaleY(45) : scaleY(65)
-       // fillMode: Image.PreserveAspectFit
+        width: scaleY(35)
+        height: scaleY(35)
+       fillMode: Image.PreserveAspectFit
         source: "image://listprovider/updateobject/"+securityvideo.timestamp
       //  anchors.horizontalCenter: parent.horizontalCenter
         smooth: true
@@ -28,4 +30,28 @@ Item{
         onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
         running: true
     }
+
+    states: [
+        State {
+            name: "wideImage"
+            PropertyChanges {
+                target: nowplayingimage
+
+            }
+        },
+        State {
+            name: "squareImage"
+            PropertyChanges {
+                target: nowplayingimage
+
+            }
+        },
+        State{
+            name:"posterImage"
+            PropertyChanges{
+                target: nowplayingimage
+            }
+        }
+
+    ]
 }

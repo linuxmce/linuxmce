@@ -1,8 +1,13 @@
 import QtQuick 1.1
 
 Item {
-    width: parent.width
-    height: parent.height
+    anchors{
+        top:parent.top
+        left:parent.left
+        right:parent.right
+        bottom:parent.bottom
+        margins:scaleX(4)
+    }
 
     Component.onCompleted: {
         manager.cleanupScreenie()
@@ -21,58 +26,34 @@ Item {
             bottom:parent.bottom
             left: propertyList.right
             right:parent.right
-}
-            Image {
-                id: screenshotImage
-                anchors.fill: parent
-                source: ""
-                fillMode: Image.PreserveAspectFit
-                onSourceChanged: console.log("image updated")
-            }
         }
+        Image {
+            id: screenshotImage
+            anchors.fill: parent
+            source: ""
+            fillMode: Image.PreserveAspectFit
+            onSourceChanged: console.log("image updated")
+        }
+    }
 
-
-    Rectangle{
+    HeaderListView{
         id:propertyList
-        width: parent.width*.25
+        isUsingIndex: true
         anchors{
             top:parent.top
             left:parent.left
             bottom:parent.bottom
-            leftMargin: scaleX(10)
         }
-        color:"green"
-        StyledText{
-            id:propLabel
-            text:"Attribtes"
-            anchors.top: parent.top
-            anchors.horizontalCenter: parent.horizontalCenter
+        width:parent.width*.33
+        listTitle:"Attributes"
+        displayProperty: "attributeType"
+        returnProperties: ["attributeNo"]
+        headerListModel:screenshotAttributes
+        onActivationCallback: {
+              manager.saveScreenShot(props.attributeNo)
         }
 
-        ListView{
-            id:propView
-            spacing:scaleY(2)
-            anchors{
-                top:propLabel.bottom
-                left:parent.left
-                right:parent.right
-                bottom:parent.bottom
-            }
-            model:screenshotAttributes
-            delegate: StyledButton{
-                buttonText: attributeType
-                anchors{
-                    left:parent.left
-                    right:parent.right
-                }
-
-                onActivated: {
-                    manager.saveScreenShot(attributeNo)
-                    manager.cleanupScreenie()
-                    slideOut.source=""
-                }
-            }
-        }
     }
+
 
 }

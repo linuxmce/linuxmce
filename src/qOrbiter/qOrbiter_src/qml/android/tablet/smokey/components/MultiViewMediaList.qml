@@ -1,48 +1,135 @@
-import QtQuick 1.0
+import QtQuick 1.1
+import org.linuxmce.enums 1.0
 import "../components"
 
 Item{
     id:multi_view_list
-    height: parent.height
-    width: parent.width
+    anchors{
+        left:parent.left
+        right:parent.right
+        top:parent.top
+        bottom:parent.bottom
+    }
+
     property int itemBuffer:25
+    clip:true
 
-    Loader{
-        id:viewLoader
+    Component{
+        id:audioItem
+        AudioDelegate{}
     }
 
-    MediaListListView {
-        id: media_list
+    Component{
+        id:videoItem
+        VideoDelegate{}
     }
-    
-    MediaListGridView{
+
+    property variant currentDelegate:multi_view_list.state==="video"? videoItem :audioItem
+    Component.onCompleted: {
+        media_grid.model=manager.getDataGridModel("MediaFile", 63)
+        media_grid.positionViewAtIndex(item, ListView.Beginning)
+    }
+
+    Connections {
+        target: manager.getDataGridModel("MediaFile", 63)
+        onScrollToItem: {
+            console.log("scroll to item : " + item);
+            media_grid.positionViewAtIndex(item, ListView.Beginning);
+        }
+    }
+    ListView{
+        id:media_list
+        anchors{
+            left:parent.left
+            right:parent.right
+            bottom:parent.bottom
+            top:parent.top
+            margins: scaleX(2)
+        }
+        delegate:currentDelegate
+        visible: current_view_type===2
+        spacing:scaleY(2)
+        clip:true
+    }
+
+    GridView{
         id:media_grid
-        anchors.fill: parent
-        model: manager.getDataGridModel("MediaFile", 63)
-        visible:current_view_type===2
+        anchors{
+            left:parent.left
+            right:parent.right
+            bottom:parent.bottom
+            top:parent.top
+        }
+
+        model:manager.getDataGridModel("MediaFile", 63)
+        visible:current_view_type===1
+        delegate:currentDelegate
+
+
+        states: [
+            State {
+                name: "default"
+                PropertyChanges {
+                    target: media_grid
+                    cellHeight: scaleY(24)
+                    cellWidth:scaleX(19)
+                }
+            },
+            State {
+                name: "audio"
+                when:manager.q_mediaType==Mediatypes.STORED_AUDIO
+                PropertyChanges {
+                    target: media_grid
+                    cellHeight: scaleY(24)
+                    cellWidth:scaleX(19)
+                }
+            },
+            State {
+                name: "video-default"
+
+                PropertyChanges {
+                    target: media_grid
+                    cellHeight: scaleY(24)
+                    cellWidth:scaleX(19)
+                }
+            },
+            State {
+                name: "tv"
+                when:manager.q_subType==Subtypes.TVSHOWS
+                PropertyChanges {
+                    target: media_grid
+                    cellHeight: scaleY(20)
+                    cellWidth:scaleX(19)
+                }
+            },
+            State {
+                name: "movies"
+                when: manager.q_subType==Subtypes.MOVIES
+                PropertyChanges {
+                    target: media_grid
+                    cellHeight: scaleY(24)
+                    cellWidth:scaleX(16)
+                }
+            }
+        ]
     }
-    
-    MediaListPathView {
-        id: media_path
+
+    PathView{
+        id:media_path
+        anchors.fill: parent
+        // model:manager.getDataGridModel("MediaFile", 63)
+        visible:current_view_type===3
     }
 
     states: [
         State {
-            name: "list"
-            PropertyChanges {
-                target: viewLoader
-                source:"MediaListListView.qml"
-            }
+            name: "audio"
+            when:manager.q_mediaType == Mediatypes.STORED_AUDIO
+
         },
         State {
-            name: "grid"
-            PropertyChanges {
-                target: viewLoader
-                source:"MediaListGridView.qml"
-            }
-        }, State{
-
+            name: "video"
+            when:manager.q_mediaType == Mediatypes.STORED_VIDEO
         }
-
     ]
 }
