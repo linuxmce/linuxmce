@@ -25,6 +25,7 @@
 #include <string.h>
 #include <cstdlib>
 #include <errno.h>
+#include <unistd.h>
 
 using namespace std;
 
