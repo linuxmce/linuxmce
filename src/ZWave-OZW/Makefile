@@ -51,7 +51,7 @@ ZWave: $(sources:.cpp=.o)
 #	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) ZWave.bin ZWave.so >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) ZWave ZWave.so >/dev/null
 
 package:
 	chmod +x make_package.sh
