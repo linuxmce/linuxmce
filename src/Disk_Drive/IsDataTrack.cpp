@@ -18,6 +18,7 @@
 #include "sys/ioctl.h"
 #include <cstring>
 #include <cstdlib>
+#include <unistd.h>
 
 extern "C"
 {
