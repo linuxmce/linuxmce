@@ -113,6 +113,17 @@ function build_main_debs() {
 					RepositorySource=25
 					Main_Version='2.0.0.46.'
 					;;
+ 				"trusty")
+					Distro_ID="20"
+					RepositorySource=25
+					Main_Version='2.0.0.46.'
+					# mame - excluded due to long time for compilation.
+					exclude_list=$exclude_list,682,683
+
+					# Not building for some reason or other
+					exclude_list=$exclude_list,498,499 # Simplephone - API change
+					exclude_list=$exclude_list,782,785 # ola
+					;;
 			esac
 			;;
 		"raspbian")
