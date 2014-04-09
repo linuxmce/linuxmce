@@ -10,7 +10,7 @@
  or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more details.
  */
 #include "SIP_Thread.h"
-#include <linphone/config.h>
+#include <lpconfig.h>
 #include <linphonecore.h>
 #include "DCE/Logger.h"
 #include "DCE/DCEConfig.h"
@@ -28,8 +28,12 @@ static inline void func_exit(const char * func)
 }
 /* Callbacks for linphone core */
 static void stub() {}
+#ifdef LINPHONE_3_6
+static void call_state_changed(LinphoneCore *linphoneCore, LinphoneCall *call, LinphoneCallState cstate, const char *msg);
+#else
 static void call_received(LinphoneCore *linphoneCore, const char *from);
 static void bye_received(LinphoneCore *linphoneCore, const char *from);
+#endif
 static void auth_requested(LinphoneCore *linphoneCore, const char *realm, const char *username);
 static void display_something(LinphoneCore * linphoneCore, LINPHONE_CONST char *something);
 static void display_url(LinphoneCore * linphoneCore, LINPHONE_CONST char *something, LINPHONE_CONST char *url);
@@ -120,14 +124,20 @@ static void LS_UnregisterWithAsterisk()
 static void LS_InitVTable()
 {
 	LS_LinphoneCoreVTable.show = (ShowInterfaceCb) stub;
+#ifdef LINPHONE_3_6
+	LS_LinphoneCoreVTable.call_state_changed = call_state_changed;
+#else
 	LS_LinphoneCoreVTable.inv_recv = call_received;
 	LS_LinphoneCoreVTable.bye_recv = bye_received;
+#endif
 	LS_LinphoneCoreVTable.auth_info_requested = auth_requested;
 	LS_LinphoneCoreVTable.display_status = (DisplayStatusCb) display_something;
 	LS_LinphoneCoreVTable.display_message = (DisplayMessageCb) display_something;
 	LS_LinphoneCoreVTable.display_warning = (DisplayMessageCb) display_warning;
 	LS_LinphoneCoreVTable.display_url = (DisplayUrlCb) display_url;
+#ifndef LINPHONE_3_6
 	LS_LinphoneCoreVTable.display_question = (DisplayQuestionCb) stub;
+#endif
 }
 /** Initialize LinphoneProxyConfig variable */
 static void LS_InitProxy()
@@ -250,6 +260,30 @@ bool LS_AcceptCall_nolock()
 }
 /* Linphone callbacks - implementation */
 /* Note: the lock is already taken in LS_ProcessEvents; these functions are called from linphone_core_iterate */
+#ifdef LINPHONE_3_6
+static void call_state_changed(LinphoneCore *linphoneCore, LinphoneCall *call, LinphoneCallState cstate, const char *msg){
+	char *from;
+	from = linphone_call_get_remote_address_as_string(call);
+        switch(cstate){
+		case LinphoneCallIncomingReceived:
+			//printf("New Incoming Call.\n");
+			if (strstr(from, "\"plutosecurity\""))
+			{
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "SimplePhone: It's a 'speak in the house' call");
+				LS_AcceptCall_nolock();
+			}
+			free(from);
+		break;
+		case LinphoneCallEnd:
+			//printf("Call is terminated.\n");
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "SimplePhone: Received bye, from '%s'", from);
+			LS_DropCall_nolock(); // lock is already taken in LS_Main_Loop
+		break;
+                default:
+                        printf("Unhandled notification %i\n",cstate);
+        }
+}
+#else
 static void call_received(LinphoneCore *linphoneCore, const char *from)
 {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SimplePhone: Received call, from '%s'", from);
@@ -264,6 +298,7 @@ static void bye_received(LinphoneCore *linphoneCore, const char *from)
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SimplePhone: Received bye, from '%s'", from);
 	LS_DropCall_nolock(); // lock is already taken in LS_Main_Loop
 }
+#endif
 static void auth_requested(LinphoneCore *linphoneCore, const char *realm, const char *username)
 {
 	func_enter("callback: auth_requested");
