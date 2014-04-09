@@ -158,6 +158,16 @@ iface dsl-provider inet ppp
 fi
 
 # IPv4 interfaces configuration
+## get Domain for Internal DNS configuration
+DD_Domain=187
+
+Q="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=$DD_Domain AND FK_Device=$PK_Device"
+DomainName=$(RunSQL "$Q")
+DomainName=$(Field "1" "$DomainName")
+if [[ "$DomainName" == "" ]] ;then
+        DomainName="LinuxMCE"
+fi
+
 echo "
 #####
 # IPv4 network interfaces
@@ -214,7 +224,9 @@ if [[ "$Intv6IP" == "disabled" ]]; then
 else
 	echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$IntIf.disable_ipv6=0" >>"$File"
 fi
-
+echo "        # DNS Settings for Internal Net
+        dns-nameservers $IntIP
+        dns-search $DomainName" >>"$File"
 echo "IPv4: External $ExtIf=$Setting, internal $IntIf=static"
 
 # IPv6 interfaces configuration
