@@ -674,6 +674,7 @@ LIBS += -lportmidi
 MIDI_LIB =
 endif
 
+LIBS+= -lpthread
 #-------------------------------------------------
 # 'default' target needs to go here, before the 
 # include files which define additional targets
