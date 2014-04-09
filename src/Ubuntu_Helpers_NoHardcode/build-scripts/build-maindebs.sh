@@ -121,7 +121,6 @@ function build_main_debs() {
 					exclude_list=$exclude_list,682,683
 
 					# Not building for some reason or other
-					exclude_list=$exclude_list,498,499 # Simplephone - API change
 					exclude_list=$exclude_list,782,785 # ola
 					;;
 			esac
