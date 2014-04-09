@@ -241,3 +241,4 @@ libprotobuf-dev
 protobuf-compiler
 libshairport-dev
 ola-dev
+python-twisted
