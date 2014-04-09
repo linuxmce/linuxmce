@@ -6,7 +6,8 @@
 DEVICETEMPLATE_HAL=1808
 DEVICETEMPLATE_AppServer=26
 
-lshwd # needed for some systems which won't report usb devices until you run lshwd first (bug in usb architecture)
+#lshwd is obsolete and unmaintained in 5 years.  removing to see if anything breaks - phenigma - 2014-04-09
+#lshwd # needed for some systems which won't report usb devices until you run lshwd first (bug in usb architecture)
 
 HALdev=$(FindDevice_Template "$PK_Device" "$DEVICETEMPLATE_HAL" "norecursion")
 if [[ -z "$HALdev" ]]; then

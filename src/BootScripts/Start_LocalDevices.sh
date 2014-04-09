@@ -9,7 +9,8 @@ function printHelp()
 	Logging "$TYPE" "$SEVERITY_NORMAL" "Invalid paramters: ./Start_LocalDevices.sh [ -d DeviceID [-r RouterAddress ] ]" >&2
 }
 
-lshwd # needed for some systems which won't report usb devices until you run lshwd first (bug in usb architecture)
+#lshwd is obsolete and unmaintained in 5 years.  removing to see if anything breaks - phenigma - 2014-04-09
+#lshwd # needed for some systems which won't report usb devices until you run lshwd first (bug in usb architecture)
 /usr/pluto/bin/UpdateAvailableSerialPorts.sh
 /usr/pluto/bin/UpdateAvailableSoundCards.sh
 bash -x /usr/pluto/bin/SoundCards_Setup.sh | tee-pluto /var/log/pluto/SoundCards_Setup.log
