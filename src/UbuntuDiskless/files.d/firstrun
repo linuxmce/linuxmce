@@ -61,8 +61,9 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 		dpkg -l libdvdcss2 | grep ^ii || find /usr/pluto/deb-cache/ -iname 'libdvdcss*' -exec dpkg -i {} \;
 
 		## Install video driver
-		. /usr/pluto/bin/Utils.sh
+		. /usr/pluto/bin/VideoDetectSetup
 		CheckVideoDriver
+
 		update-rc.d -f firstrun remove
 
 		if echo "$Best_Video_Driver" | grep -Eq '(nvidia|fglrx|via|virge|savage)'; then
