@@ -15,11 +15,10 @@ mkdir -p "${Parm_RootLocation}/$(dirname $File)"
 cp "/usr/pluto/templates/nis-client.template" "${Parm_RootLocation}/${File}"
 PopulateSection "${Parm_RootLocation}/${File}" "Nis Master" "NISMASTER=$IntIP"
 
-## Set the default nis domain
+## Set the default nis domain, copy from the core
 File="/etc/defaultdomain"
 mkdir -p "${Parm_RootLocation}/$(dirname $File)"
-## FIXME: Get this from the database
-echo "LinuxMCE" > "${Parm_RootLocation}/${File}"
+cp -f "${File}" "${Parm_RootLocation}/${File}"
 
 ## Let the client know who is the server
 File="/etc/yp.conf"
