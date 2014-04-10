@@ -582,10 +582,15 @@ Q="FLUSH PRIVILEGES"
 RunSQL "$Q"
 
 ## Setup Samba Domain / Hostname
+DT_Core=7
 DD_Domain=187
 DD_ComputerName=188
 
-Q="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=$DD_Domain AND FK_Device=$PK_Device"
+Q="SELECT PK_Device FROM Device WHERE FK_DeviceTemplate='$DT_Core'"
+Core_Device=$(RunSQL "$Q")
+Core_Device=$(Field 1 "$Core_Device")
+
+Q="SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_DeviceData=$DD_Domain AND FK_Device=$Core_Device"
 DomainName=$(RunSQL "$Q")
 DomainName=$(Field "1" "$DomainName")
 if [[ "$DomainName" == "" ]] ;then
