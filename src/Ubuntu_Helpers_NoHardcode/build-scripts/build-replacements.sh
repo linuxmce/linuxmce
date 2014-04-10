@@ -91,12 +91,6 @@ function Build_Replacements_Common_ubuntu
 	#Package: mtx-pluto
 	Build_Replacement_Package mtx-pluto ubuntu/mtx-1.3.11
 
-	#Package: libowfs
-	Build_Replacement_Package libowfs27 external/owfs-2.8p5
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/*ow*.deb
-	dir_="${svn_dir}/${svn_branch_name}/external"
-	cp $dir_/*ow*.deb "${replacements_dir}"
-
 	# TODO Fix this package so it builds against target kernel not running kernel
 	#Package: linux-image-diskless
 	dir_=${svn_dir}/${svn_branch_name}/ubuntu/linux-image-dummy
@@ -111,7 +105,6 @@ function Build_Replacements_Common_ubuntu
 
 	# Yes possy, I am just testing...
 	# Build_Replacement_Package pcsxr ubuntu/pcsxr-1.9.93
-
 }
 
 function Build_Replacements_Lucid
@@ -193,6 +186,12 @@ function Build_Replacements_Lucid
 
 	#Package: lshwd
 	Build_Replacement_Package lshwd_2.0 ubuntu/lshwd-2.0-rc4
+
+	#Package: libowfs
+	Build_Replacement_Package libowfs27 external/owfs-2.8p5
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/*ow*.deb
+	dir_="${svn_dir}/${svn_branch_name}/external"
+	cp $dir_/*ow*.deb "${replacements_dir}"
 }
 
 function Build_Replacements_Precise
@@ -243,6 +242,12 @@ function Build_Replacements_Precise
 
 	#Package: lshwd
 	Build_Replacement_Package lshwd_2.0 ubuntu/lshwd-2.0-rc4
+
+	#Package: libowfs
+	Build_Replacement_Package libowfs27 external/owfs-2.8p5
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/*ow*.deb
+	dir_="${svn_dir}/${svn_branch_name}/external"
+	cp $dir_/*ow*.deb "${replacements_dir}"
 }
 
 function Build_Replacements_Intrepid
@@ -411,6 +416,14 @@ function Build_Replacements_Trusty
 
 	#Package: lshwd
 	#Build_Replacement_Package lshwd_2.0 ubuntu/lshwd-2.0-rc4
+
+	#owfs 2.8p5 is no longer needed as it is in the ubuntu trusty/universe repo
+	##Package: libowfs
+	#Build_Replacement_Package libowfs27 external/owfs-2.8p5
+	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/*ow*.deb
+	#dir_="${svn_dir}/${svn_branch_name}/external"
+	#cp $dir_/*ow*.deb "${replacements_dir}"
+
 }
 
 trap 'Error "Undefined error in $0" ; apt-get install libtool -y' EXIT
