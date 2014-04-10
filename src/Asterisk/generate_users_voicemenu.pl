@@ -82,6 +82,7 @@ $list .= "/tmp/pluto-default-voicemenu4.gsm";
 `/bin/mkdir -p /usr/share/asterisk/sounds/pluto`;
 `/bin/chmod 770 -R /usr/share/asterisk/sounds/pluto`;
 `/usr/bin/sox $list /usr/share/asterisk/sounds/pluto/pluto-default-voicemenu.gsm`;
+`/bin/chown -R asterisk:www-data /usr/share/asterisk/sounds/pluto`;
 `/bin/mkdir -p /var/spool/asterisk/voicemail/default/`;
 `/bin/chown -R asterisk:www-data /var/spool/asterisk/voicemail`;
 `/bin/chmod 755 -R /var/spool/asterisk`;
@@ -96,6 +97,7 @@ print "Generating speech for invalid IVR entries.\n";
 &generate_voice(&get_text($FK_Language, 2172),"/tmp/invalid-entry.gsm");
 $list .= "/tmp/invalid-entry.gsm ";
 `/usr/bin/sox $list /usr/share/asterisk/sounds/pluto/invalid-entry.gsm`;
+`/bin/chown -R asterisk:www-data /usr/share/asterisk/sounds/pluto`;
 
 # Clean up
 unlink "/tmp/pluto-default-voicemenu1.gsm";
