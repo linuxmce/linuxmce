@@ -1057,6 +1057,10 @@ DeviceData_Impl *ZWave::GetDeviceForPortChannel(string sPortChannel) {
 
 void ZWave::DoNodeToDeviceMapping()
 {
+        // make sure zw interface is ready (this will also check if it is inited successfully), if not, we got no nodes in our list and would delete all LMCE devices...
+        if (!m_pZWInterface->IsReady()) {
+	        return;
+	}
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWave::DoNodeToDeviceMapping(): Listing nodes found in ZWave network");
 	list<NodeInfo*>::iterator it;
 	m_pZWInterface->Lock();
