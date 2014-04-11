@@ -9,3 +9,4 @@ else
 echo "It is a Marantz AV Receiver"
 /usr/pluto/bin/MessageSend dcerouter -r 0 $1 1 806 224 $2 13 "$4" 44 1918
 fi
+
