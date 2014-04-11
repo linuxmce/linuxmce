@@ -235,10 +235,12 @@ python-central
 python-setuptools
 libqjson-dev
 libeibclient-dev
-libow-dev
 libcppunit-dev
 libprotobuf-dev
 protobuf-compiler
 libshairport-dev
 ola-dev
 python-twisted
+owfs-dev 
+owfs 
+libowfs27

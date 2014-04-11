@@ -243,11 +243,12 @@ function Build_Replacements_Precise
 	#Package: lshwd
 	Build_Replacement_Package lshwd_2.0 ubuntu/lshwd-2.0-rc4
 
-	#Package: libowfs
-	Build_Replacement_Package libowfs27 external/owfs-2.8p5
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/*ow*.deb
-	dir_="${svn_dir}/${svn_branch_name}/external"
-	cp $dir_/*ow*.deb "${replacements_dir}"
+	#owfs 2.8p5 is no longer needed as it is in the ubuntu precise/universe repo
+	##Package: libowfs
+	#Build_Replacement_Package libowfs27 external/owfs-2.8p5
+	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/*ow*.deb
+	#dir_="${svn_dir}/${svn_branch_name}/external"
+	#cp $dir_/*ow*.deb "${replacements_dir}"
 }
 
 function Build_Replacements_Intrepid
