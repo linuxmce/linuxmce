@@ -2702,9 +2702,6 @@ function SerialPortInfo($parent,$name,$dbADO)
 		return $name;
 	}
 
-	//Lets get the PCI_ID and USB_ID from the condensed string	
-	list($PciId,$UsbId)=explode("+",$name);
-
 	//Is this serial port on a Media Director?
 	$cmd = "";
 	if($parent != 1) {
@@ -2712,15 +2709,15 @@ function SerialPortInfo($parent,$name,$dbADO)
 		$ip=getFieldsAsArray('Device','IPaddress',$dbADO,'WHERE PK_Device='.$parent);
 		$ipAddress=$ip['IPaddress'][0];
 
-		$cmd = "ssh ".$ipAddress." ";
+		$cmd = "sudo -u root /usr/pluto/bin/TranslateRemoteSerialPort.sh ".$ipAddress." ".$name;
+	} else {
+		$cmd = "/usr/pluto/bin/TranslateSerialPort.sh ".$name;
 	}
 
-	//Un-condense the stored serial port string
-	$cmd .= "find /sys/devices -name '*tty*' | egrep '/tty[:/]' | grep usb | grep '" . $PciId . ".*-" . $UsbId . ".*' | sed -r 's,tty[:/],,g'";
 	$res=exec($cmd);
 	
 	//and return the ACTUAL serial port device
-	return "/dev/".basename($res)." (".$name.")";
+	return $res." (".$name.")";
 
 
 	
