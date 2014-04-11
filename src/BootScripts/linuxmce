@@ -211,7 +211,7 @@ start() {
 	#alsactl store
 
 	export DISPLAY=":${Display}"
-	#StartService "Configure Device Changes" "/usr/pluto/bin/Config_Device_Changes.sh"
+	StartService "Configure Device Changes" "/usr/pluto/bin/Config_Device_Changes.sh"
 
 	# hack: cleaning lockfile on M/D start to allow
 	# local devices to start
