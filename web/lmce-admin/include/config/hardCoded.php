@@ -92,6 +92,7 @@
 	$GLOBALS['VDR_Plugin']=1704;				// VDR plugin
 	$GLOBALS['SlimServer_Streamer']=53;			// SlimServer Streamer
 	$GLOBALS['PhotoScreenSaver']=1825;			// Photo Screen Saver
+	$GLOBALS['DT_Zone']=1867;				// Zone
 	
 	// PK_Template from table Template
 	

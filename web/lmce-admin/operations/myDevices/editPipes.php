@@ -58,6 +58,12 @@ function editPipes($output,$dbADO) {
 			WHERE FK_DeviceTemplate=?';
 
 		$toDeviceTemplate=(isset($toDeviceTemplate))?$toDeviceTemplate:-1;
+		if (intval($toDeviceTemplate) === $GLOBALS['DT_Zone']){
+			$parentOfZone=getFieldsAsArray('Device','FK_Device_ControlledVia',$dbADO,'WHERE PK_Device='.$toDevice);
+			$parentOfZone=$parentOfZone['FK_Device_ControlledVia'][0];
+			$templateOfParent=getFieldsAsArray('Device','FK_DeviceTemplate',$dbADO,'WHERE PK_Device='.$parentOfZone);
+			$toDeviceTemplate=$templateOfParent['FK_DeviceTemplate'][0];
+		}
 
 		$resInput=$dbADO->Execute($queryInput,$toDeviceTemplate);
 
@@ -72,9 +78,17 @@ function editPipes($output,$dbADO) {
 			FROM Device 
 			INNER JOIN DeviceTemplate ON Device.FK_DeviceTemplate=PK_DeviceTemplate
 			INNER JOIN DeviceTemplate_Input ON DeviceTemplate_Input.FK_DeviceTemplate=Device.FK_DeviceTemplate 
-			WHERE (Device.FK_DeviceTemplate IN ('.join(',',$avDTIDArray).') OR Device.FK_DeviceTemplate=?) AND FK_Installation=?';	
-		$resConnectedToDevices=$dbADO->Execute($queryConnectedToDevices,array($GLOBALS['LightSwitchOnOff'],$installationID));
-		$conD=array();
+			WHERE (Device.FK_DeviceTemplate IN ('.join(',',$avDTIDArray).') OR Device.FK_DeviceTemplate=?) AND FK_Installation=?
+
+			UNION
+
+			SELECT DISTINCT Child.*
+			FROM Device Child
+			JOIN Device Parent ON Child.FK_Device_ControlledVia = Parent.PK_Device
+			WHERE Child.FK_DeviceTemplate = ' . $GLOBALS['DT_Zone'] . ' AND Parent.FK_DeviceTemplate IN ('.join(',',$avDTIDArray).') AND Parent.$
+		';
+		$resConnectedToDevices=$dbADO->Execute($queryConnectedToDevices,array($GLOBALS['LightSwitchOnOff'],$installationID,$installationID));
+ 		$conD=array();
 		while($rowConD=$resConnectedToDevices->FetchRow()){
 			$conD[$rowConD['PK_Device']]=$rowConD['Description'];
 		}
