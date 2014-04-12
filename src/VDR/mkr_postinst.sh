@@ -23,7 +23,7 @@ if ! grep -q "^SVDRP_PORT=2001" /etc/default/vdr; then
 fi
                                                                 
 # We can't have VDR running during setup file edit
-invoke-rc.d vdr stop
+invoke-rc.d vdr stop || :
 
 # If we have an entry for svdrpservice already, we don't touch the setup.conf
 if grep -q "^svdrpservice" /var/lib/vdr/setup.conf; then
