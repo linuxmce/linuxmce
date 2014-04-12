@@ -1063,6 +1063,13 @@ switch ($section) {
 	    $output->setHelpSrc('/wiki/index.php/Device_Status');
 	    deviceStatus($output,$dbADO);
 	break;
+	case 'advancedZWave';
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/automation/advancedZWave.php');
+	    $output->setHelpSrc('/wiki/index.php/Advanced_ZWave');
+	    advancedZWave($output,$dbADO);
+	break;
 	case 'executeScenarios';
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');

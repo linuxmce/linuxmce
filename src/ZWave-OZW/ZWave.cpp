@@ -1605,6 +1605,25 @@ void ZWave::CMD_Get_Data(string sText,char **pData,int *iData_Size,string &sCMD_
 		delete[] neighbors;
 		s += "]";
 
+		OpenZWave::Node::NodeData nodeData;
+		OpenZWave::Manager::Get()->GetNodeStatistics(homeId, node_id, &nodeData);
+		s += ", \"statistics\": {";
+		s+= "\"sentCnt\":" + StringUtils::itos(nodeData.m_sentCnt) + ",";
+		s+= "\"sentFailed\":" + StringUtils::itos(nodeData.m_sentFailed) + ",";
+		s+= "\"retries\":" + StringUtils::itos(nodeData.m_retries) + ",";
+		s+= "\"receivedCnt\":" + StringUtils::itos(nodeData.m_receivedCnt) + ",";
+		s+= "\"receivedDups\":" + StringUtils::itos(nodeData.m_receivedDups) + ",";
+		s+= "\"receivedUnsolicited\":" + StringUtils::itos(nodeData.m_receivedUnsolicited) + ",";
+		s+= "\"sentTS\":\"" + nodeData.m_sentTS + "\",";
+		s+= "\"receivedTS\":\"" + nodeData.m_receivedTS + "\",";
+		s+= "\"lastRequestRTT\":" + StringUtils::itos(nodeData.m_lastRequestRTT) + ",";
+		s+= "\"averageRequestRTT\":" + StringUtils::itos(nodeData.m_averageRequestRTT) + ",";
+		s+= "\"lastResponseRTT\":" + StringUtils::itos(nodeData.m_lastResponseRTT) + ",";
+		s+= "\"averageResponseRTT\":" + StringUtils::itos(nodeData.m_averageResponseRTT) + ",";
+		s+= "\"quality\":" + StringUtils::itos(nodeData.m_quality);
+		/*      uint8 m_lastReceivedMessage[254];
+                        list<CommandClassData> m_ccData;   */
+		s += "}";
 
 		s += "},";
 	}
