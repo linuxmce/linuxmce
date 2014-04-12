@@ -360,5 +360,5 @@ XKeySym.Volume-    KP_Subtract
 
 # We restart VDR after the install on the core
 if [[ "$PK_Device" -eq "1" ]]; then
-        service vdr restart
+        service vdr restart || :
 fi
