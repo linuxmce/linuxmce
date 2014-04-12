@@ -113,6 +113,14 @@ public:
 	* @brief Device data access methods:
 	*/
 
+	string Get_Floorplan_Info()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Floorplan_Info_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_Floorplan_Info_CONST];
+	}
+
 	string Get_COM_Port_on_PC()
 	{
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_COM_Port_on_PC_CONST);
@@ -246,6 +254,7 @@ public:
 	virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage) { };
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
 	//Data accessors
+	string DATA_Get_Floorplan_Info() { return GetData()->Get_Floorplan_Info(); }
 	string DATA_Get_COM_Port_on_PC() { return GetData()->Get_COM_Port_on_PC(); }
 	bool DATA_Get_Only_One_Per_PC() { return GetData()->Get_Only_One_Per_PC(); }
 	bool DATA_Get_Autoassign_to_parents_room() { return GetData()->Get_Autoassign_to_parents_room(); }
@@ -265,6 +274,7 @@ public:
 	virtual void CMD_SetWakeUp(int iValue,int iNodeID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Config_Param(int iValue,int iSize,int iNodeID,int iParameter_ID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Association(int iNodeID,int iGroup_ID,string sNodes_List,string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Get_Data(string sText,char **pData,int *iData_Size,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Polling_State(int iPK_Device,string sValue_To_Assign,bool bReport,bool bAlways,int iNodeID,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Add_Node(string sOptions,int iValue,string sTimeout,bool bMultiple,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Remove_Node(string sOptions,int iValue,string sTimeout,bool bMultiple,string &sCMD_Result,class Message *pMessage) {};
@@ -539,6 +549,35 @@ public:
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
 								CMD_Set_Association(iNodeID,iGroup_ID,sNodes_List.c_str(),sCMD_Result,pMessage);
+						}
+					};
+					iHandled++;
+					continue;
+				case COMMAND_Get_Data_CONST:
+					{
+						string sCMD_Result="OK";
+						string sText=pMessage->m_mapParameters[COMMANDPARAMETER_Text_CONST];
+						char *pData=pMessage->m_mapData_Parameters[COMMANDPARAMETER_Data_CONST];
+						int iData_Size=pMessage->m_mapData_Lengths[COMMANDPARAMETER_Data_CONST];
+						CMD_Get_Data(sText.c_str(),&pData,&iData_Size,sCMD_Result,pMessage);
+						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+						pMessageOut->m_mapData_Parameters[COMMANDPARAMETER_Data_CONST]=pData; pMessageOut->m_mapData_Lengths[COMMANDPARAMETER_Data_CONST]=iData_Size;
+							pMessageOut->m_mapParameters[0]=sCMD_Result;
+							SendMessage(pMessageOut);
+						}
+						else if( (pMessage->m_eExpectedResponse==ER_DeliveryConfirmation || pMessage->m_eExpectedResponse==ER_ReplyString) && !pMessage->m_bRespondedToMessage )
+						{
+							pMessage->m_bRespondedToMessage=true;
+							SendString(sCMD_Result);
+						}
+						if( (itRepeat=pMessage->m_mapParameters.find(COMMANDPARAMETER_Repeat_Command_CONST))!=pMessage->m_mapParameters.end() )
+						{
+							int iRepeat=atoi(itRepeat->second.c_str());
+							for(int i=2;i<=iRepeat;++i)
+								CMD_Get_Data(sText.c_str(),&pData,&iData_Size,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;

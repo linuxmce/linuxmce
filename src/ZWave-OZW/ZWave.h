@@ -112,9 +112,11 @@ public:
 
 	/*
 			*****DATA***** accessors inherited from base class
+	string DATA_Get_Floorplan_Info();
 	string DATA_Get_COM_Port_on_PC();
 	bool DATA_Get_Only_One_Per_PC();
 	bool DATA_Get_Autoassign_to_parents_room();
+	bool DATA_Get_Polling_Enabled();
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Sensor_Tripped(bool bTripped);
@@ -223,6 +225,17 @@ NOEMON or CANBUS */
 
 	virtual void CMD_Set_Association(int iNodeID,int iGroup_ID,string sNodes_List) { string sCMD_Result; CMD_Set_Association(iNodeID,iGroup_ID,sNodes_List.c_str(),sCMD_Result,NULL);};
 	virtual void CMD_Set_Association(int iNodeID,int iGroup_ID,string sNodes_List,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #870 - Get Data */
+	/**  */
+		/** @param #9 Text */
+			/** What data to return.  This is free form */
+		/** @param #19 Data */
+			/** The data being returned */
+
+	virtual void CMD_Get_Data(string sText,char **pData,int *iData_Size) { string sCMD_Result; CMD_Get_Data(sText.c_str(),pData,iData_Size,sCMD_Result,NULL);};
+	virtual void CMD_Get_Data(string sText,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #966 - Set Polling State */

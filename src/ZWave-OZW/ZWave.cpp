@@ -1540,3 +1540,79 @@ void ZWave::SendRelativeHumidityChangedEvent(unsigned int PK_Device, float value
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Sending  Humidity Changed event from PK_Device %d, value %s",PK_Device, sVal.c_str());
 	SendEvent(PK_Device, EVENT_Humidity_Changed_CONST, EVENTPARAMETER_Value_CONST, sVal.c_str());
 }
+
+//<-dceag-c870-b->
+
+	/** @brief COMMAND: #870 - Get Data */
+	/**  */
+		/** @param #9 Text */
+			/** What data to return.  This is free form */
+		/** @param #19 Data */
+			/** The data being returned */
+
+void ZWave::CMD_Get_Data(string sText,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage)
+//<-dceag-c870-e->
+{
+	string s = "";
+	s += "{ ";
+
+	s += "\"nodes\" : [";
+	list<NodeInfo*>::iterator it;
+	list<NodeInfo*> nodes = m_pZWInterface->GetNodes();
+	for (it = nodes.begin(); it != nodes.end(); it++)
+	{
+		NodeInfo *node = *it;
+		uint8 node_id = node->m_nodeId;
+		uint32 homeId = m_pZWInterface->GetHomeId();
+		s += "{ \"id\" : " + StringUtils::itos(node_id) + ",";
+
+		s += " \"manufacturerName\": \""+OpenZWave::Manager::Get()->GetNodeManufacturerName(homeId, node_id)+"\",";
+		s += " \"productName\": \""+OpenZWave::Manager::Get()->GetNodeProductName(homeId, node_id)+"\",";
+		s += " \"queryStage\": \""+OpenZWave::Manager::Get()->GetNodeQueryStage(homeId, node_id)+"\",";
+		s += " \"isFailed\": ";
+		if (OpenZWave::Manager::Get()->IsNodeFailed(homeId, node_id))
+			s += "true";
+		else
+			s+= "false";
+		s += ",";
+		s += " \"isAwake\": ";
+		if (OpenZWave::Manager::Get()->IsNodeAwake(homeId, node_id))
+			s += "true";
+		else
+			s += "false";
+		s += ",";
+
+		s += " \"devices\": [";
+		for (vector<LMCEDevice*>::iterator it = node->m_vectDevices.begin(); it != node->m_vectDevices.end(); ++it)
+		{
+			LMCEDevice* pLmceDevice = *it;
+			s += "{ \"pkDevice\": " + StringUtils::itos(pLmceDevice->m_dwPK_Device) + ",";
+			s += " \"fkDeviceTemplate\": " + StringUtils::itos(pLmceDevice->m_dwFK_DeviceTemplate);
+			s += "},";
+		}
+		if (node->m_vectDevices.size() > 0)
+			s = s.substr(0, s.length()-1);
+		s += "],";
+
+		uint8 *neighbors;
+		int neighborsCount = OpenZWave::Manager::Get()->GetNodeNeighbors(homeId, node_id, &neighbors);
+		s += "\"neighbors\": [";
+		for (int i = 0; i < neighborsCount; i++) {
+			s += StringUtils::itos(neighbors[i])+",";
+		}
+		if (neighborsCount > 0)
+			s = s.substr(0, s.length()-1);
+		delete[] neighbors;
+		s += "]";
+
+
+		s += "},";
+	}
+	s = s.substr(0, s.length()-1);
+	s += "]}";
+
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Get Data() returning %s", s.c_str());	
+	(*pData) = new char[s.length()+1];
+	strcpy((*pData), s.c_str());
+	(*iData_Size) = s.length();
+}
