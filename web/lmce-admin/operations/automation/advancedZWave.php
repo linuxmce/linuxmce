@@ -40,6 +40,11 @@ function advancedZWave($output,$dbADO){
 			    var node = nodes[i];
 			    el.id = node.id;
 			    el.className = "node";
+			    if (node.isFailed) {
+			        el.className += " failed";
+			    } else if (!node.isAwake) {
+			        el.className += " sleeping";
+			    }
 			    el.style = "";
 			    el.style.left = (node.x-25)+"px";
 			    el.style.top = (node.y-25+topOffset)+"px";
@@ -95,11 +100,11 @@ function advancedZWave($output,$dbADO){
 			    ct.insert("<p class=\"command\" onclick=\"updateNodeNeighbors("+node.id+");\">Update node neighbors</p>");
 
 			}
+			$$(\'.node\').invoke("observe", "mousedown", function(event) { mouseDownNode(event) });
 			// Draw lines between nodes
 			for (var i = 0; i < nodes.length; i++) {
 			    updateLinksForNode(nodes[i].id);
 			}
-			$$(\'div[class="node"]\').invoke("observe", "mousedown", function(event) { mouseDownNode(event) });
 		    }
 		   });
 		}
@@ -136,7 +141,7 @@ function advancedZWave($output,$dbADO){
 		    var neighbors = node.neighbors;
 		    for (var j = 0; j < neighbors.length; j++) {
 		    	updateLink(id, neighbors[j]);
-		    }			    
+		    }
 		}
 		function updateLink(fromNodeId, toNodeId) {
 		    var reverse = false;
@@ -238,6 +243,8 @@ function advancedZWave($output,$dbADO){
 </script>
 <style>
 .node { position:absolute; width: 50px; height: 50px; background: grey; -moz-border-radius: 25px; -webkit-border-radius: 25px; border-radius: 25px;  z-index: 20;}
+.sleeping { background-color: #FFFF00; }
+.failed { background-color: red; }
 .node p { text-align: center; vertical-align: middle;}
 .nodeHover { width: 300px; position:absolute; background: #CCCC66; border: 1px solid black; margin: 2px; z-index:100;}
 .nodeHover p { text-align: left; line-spacing: 0.5; margin-top: 2px; margin-bottom: 2px; }
