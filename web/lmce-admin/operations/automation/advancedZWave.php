@@ -46,6 +46,8 @@ function advancedZWave($output,$dbADO){
 			    el.onclick = function(id) {
 			        return function() { $("hover_"+id).toggle(); };
 			    }(node.id);
+			    $(\'nodedisplay\').appendChild(el);
+
 			    var p = document.createElement("p");
 			    el.appendChild(p);
 			    p.innerHTML = node.id;
@@ -59,30 +61,39 @@ function advancedZWave($output,$dbADO){
 
 			    $(hover).insert("<p>"+node.manufacturerName+"</p>");
 			    $(hover).insert("<p>"+node.productName+"</p>");
-			    $(hover).insert("<p>Status: "+(node.isFailed ? "FAILED" : "ok")+"</p>");
-			    $(hover).insert("<p>Awake: "+(node.isAwake ? "Yes" : "No")+"</p>");
-			    $(hover).insert("<p>OpenZWave query stage: "+node.queryStage+"</p>");
+			    var dt = document.createElement("div");
+			    dt.id = "detailsTab";
+			    $(hover).appendChild(dt);
+			    dt.insert("<p>Status: "+(node.isFailed ? "FAILED" : "ok")+"</p>");
+			    dt.insert("<p>Awake: "+(node.isAwake ? "Yes" : "No")+"</p>");
+			    dt.insert("<p>OpenZWave query stage: "+node.queryStage+"</p>");
 
-			    $(hover).insert("<p>LinuxMCE Devices</p>");
+			    dt.insert("<p>LinuxMCE Devices</p>");
 			    var s = "";
 			    for (var j = 0; j < node.devices.length; j++) {
 				var device = node.devices[j];
 			        s += "<li>"+device.name+" #"+device.pkDevice+"("+device.fkDeviceTemplate+")</li>";
 			    }
-			    $(hover).insert("<ul>"+s+"</ul>");
+			    dt.insert("<ul>"+s+"</ul>");
 			    var stats = node.statistics;
-			    $(hover).insert("</ul><p>Detailed statistics:</p>");
-			    $(hover).insert("<p>Message count:</p>");
-			    $(hover).insert("<p>Sent: " + stats.sentCnt + ", failed: " + stats.sentFailed + ", retries: " + stats.retries + "</p>");
-			    $(hover).insert("<p>Received: " + stats.receivedCnt + ", duplicates: " + stats.receivedDups + ", unsolicited: " + stats.receivedUnsolicited + "</p>");
-			    $(hover).insert("<p>RTT (round-trip-time)</p>");
-			    $(hover).insert("<p>Last request: " + stats.lastRequestRTT + ", average: " + stats.averageRequestRTT + "</p>");
-			    $(hover).insert("<p>Last response: " + stats.lastResponseRTT + ", average: " + stats.averageResponseRTT + "</p>");
-			    $(hover).insert("<p>Last sent: " + stats.sentTS + "</p>");
-			    $(hover).insert("<p>Last received: " + stats.receivedTS + "</p>");
-			    $(hover).insert("<p>Quality: " + stats.quality + "</p>");
+			    dt.insert("</ul><p>Detailed statistics:</p>");
+			    dt.insert("<p>Message count:</p>");
+			    dt.insert("<p>Sent: " + stats.sentCnt + ", failed: " + stats.sentFailed + ", retries: " + stats.retries + "</p>");
+			    dt.insert("<p>Received: " + stats.receivedCnt + ", duplicates: " + stats.receivedDups + ", unsolicited: " + stats.receivedUnsolicited + "</p>");
+			    dt.insert("<p>RTT (round-trip-time)</p>");
+			    dt.insert("<p>Last request: " + stats.lastRequestRTT + ", average: " + stats.averageRequestRTT + "</p>");
+			    dt.insert("<p>Last response: " + stats.lastResponseRTT + ", average: " + stats.averageResponseRTT + "</p>");
+			    dt.insert("<p>Last sent: " + stats.sentTS + "</p>");
+			    dt.insert("<p>Last received: " + stats.receivedTS + "</p>");
+			    dt.insert("<p>Quality: " + stats.quality + "</p>");
 
-			    $(\'nodedisplay\').appendChild(el);
+			    var ct = document.createElement("div");
+			    ct.id = "commandTab";
+			    ct.style = "";
+			    $(hover).appendChild(ct);
+			    ct.insert("<p class=\"command\" onclick=\"healNode("+node.id+");\">Heal node</p>");
+			    ct.insert("<p class=\"command\" onclick=\"updateNodeNeighbors("+node.id+");\">Update node neighbors</p>");
+
 			}
 			// Draw lines between nodes
 			for (var i = 0; i < nodes.length; i++) {
@@ -92,6 +103,25 @@ function advancedZWave($output,$dbADO){
 		    }
 		   });
 		}
+		function healNode(id) {
+	            new Ajax.Request("index.php", {
+		        method:"post",
+		        parameters:{section: "advancedZWave", action:"ajax", healNode:id },
+		        onSuccess: function(transport) {
+			
+			}
+		        });
+		}
+		function updateNodeNeighbors(id) {
+	            new Ajax.Request("index.php", {
+		        method:"post",
+		        parameters:{section: "advancedZWave", action:"ajax", updateNodeNeighbors:id },
+		        onSuccess: function(transport) {
+			
+			}
+		        });
+		}
+
 		function getNode(id) {
 		    var i = 0;
 	 	    while (i < nodes.length) {
@@ -99,6 +129,7 @@ function advancedZWave($output,$dbADO){
 			    return nodes[i];
 		        i++;
 		    }
+		    return null;
 		}
 		function updateLinksForNode(id) {
 		    var node = getNode(id)
@@ -120,13 +151,13 @@ function advancedZWave($output,$dbADO){
 			    linkEl.className = "link";
 			    // Create two halves that we can color to indicate direction
 		   	    var halfEl = document.createElement("div");
-			    halfEl.id = linkEl.id + "_" + toNodeId;
-			    halfEl.className = "link_bad linkhalf";
+			    halfEl.id = linkEl.id + "_" + fromNodeId;
+			    halfEl.className = "link_ok linkhalf";
 			    halfEl.top = "50%";
 			    linkEl.appendChild(halfEl);
 		   	    halfEl = document.createElement("div");
-			    halfEl.id = linkEl.id + "_" + fromNodeId;
-			    halfEl.className = "link_ok linkhalf";
+			    halfEl.id = linkEl.id + "_" + toNodeId;
+			    halfEl.className = "link_bad linkhalf";
 			    halfEl.top = "0px";
 			    linkEl.appendChild(halfEl);
 
@@ -135,19 +166,18 @@ function advancedZWave($output,$dbADO){
 			    reverse = true;
 			    var halfElFromMe = $(linkEl.id+"_"+fromNodeId);
 			    halfElFromMe.className = "link_ok link_half";
+		            var tmp = fromNodeId;
+			    fromNodeId = toNodeId;
+			    toNodeId = tmp;
 			}
-		    }
-		    if (reverse) {
-		        var tmp = fromNodeId;
-			fromNodeId = toNodeId;
-			toNodeId = tmp;
 		    }
 		    // make sure the link indicates a link from fromNode to toNode
 		    var fromNode = getNode(fromNodeId);
 		    linkEl.style.top = (fromNode.y+topOffset)+"px";
 		    linkEl.style.left = fromNode.x+"px";
 		    var toNode = getNode(toNodeId);
-
+		    if (toNode == null)
+		        return;
 		    var length = Math.sqrt(Math.pow(toNode.x - fromNode.x,2) + Math.pow(toNode.y - fromNode.y,2));
 		    linkEl.style.height = length + "px";
 
@@ -212,6 +242,7 @@ function advancedZWave($output,$dbADO){
 .nodeHover { width: 300px; position:absolute; background: #CCCC66; border: 1px solid black; margin: 2px; z-index:100;}
 .nodeHover p { text-align: left; line-spacing: 0.5; margin-top: 2px; margin-bottom: 2px; }
 .nodeHover ul { margin: 2px; }
+.nodeHover span { width: 70px; padding: 2px; border:1px solid black; margin: 5px; }
 .link { position: absolute; width: 3px; background-color: red; z-index: 10; -webkit-transform-origin: top left;
     -moz-transform-origin: top left;
     -o-transform-origin: top left;
@@ -229,7 +260,13 @@ function advancedZWave($output,$dbADO){
     width: 100%;
     height: 50%;
 }
-
+.command {
+    background-color: grey;
+    border: 1px solid black;
+}
+.command:hover {
+    background-color: white;
+}
 </style>
 ';
 	$out.='<div id="nodedisplay"></div>';
@@ -249,7 +286,9 @@ function advancedZWave($output,$dbADO){
 	        }
 	        $o = json_decode($floorplanInfo);
 		$fpInfo = $o->nodes;
-	        $json = substr($retArray[1], 4, $retArray[1].length-7);
+
+		$startPos = strpos($retArray[1],"{");
+	        $json = substr($retArray[1], $startPos, strrpos($retArray[1],"}")-$startPos+1);
 		$o = json_decode($json);
 		$nodes = $o->nodes;
 		
@@ -324,6 +363,22 @@ function advancedZWave($output,$dbADO){
 	    print(json_encode($o));
 	    exit();
         }
+	if (isset($_POST['healNode'])) {
+	    header('Content-type: application/json');
+            $id = $_POST['healNode'];
+	    $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 788 51 "HNN'.$id.'"';
+	    $ret=exec_batch_command($cmd,1);
+	    print("{ \"ok\": 1 }");
+	    exit;
+	}
+	if (isset($_POST['updateNodeNeighbors'])) {
+	    header('Content-type: application/json');
+            $id = $_POST['updateNodeNeighbors'];
+	    $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 788 51 "NNU'.$id.'"';
+	    $ret=exec_batch_command($cmd,1);
+	    print("{ \"ok\": 1 }");
+	    exit;
+	}
     }
 
 
