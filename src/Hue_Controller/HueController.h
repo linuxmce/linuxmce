@@ -45,8 +45,8 @@ namespace DCE
 
         QList<HueControllerHardware*> hueControllers;
         QList<HueBulb*> hueBulbs;
-
-        QTimer rTime;
+QNetworkAccessManager * linkButtonManager;
+        QTimer *linkButtonTimer;
 
 
         // Private methods
@@ -205,7 +205,7 @@ NOEMON or CANBUS */
         void initResponse();      
         void downloadConfigResponse(QNetworkReply*);
         void dummySlot();
-        void setLinkButton(bool link){linkButton = link; emit linkButtonChanged();}
+        void setLinkButton(bool link){if(link!=linkButton) {   linkButton = link; /*LoggerWrapper::GetInstance()->Write(LV_STATUS, "Link Button watcher:: %s ", linkButton )*/; emit linkButtonChanged(); }}
         bool getLinkButton(){return linkButton;}
         bool checkLinkButton();
 

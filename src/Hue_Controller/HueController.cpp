@@ -49,18 +49,19 @@ HueController::HueController(int DeviceID, string ServerAddress, bool bConnectEv
 
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "HueController, Device %d is alive!", this->m_dwPK_Device);
     authUser ="";
-    triesLeft=5;
+    triesLeft=1000;
     linkButton=false;
     mb_isNew=true;
-
+    linkButtonManager = new QNetworkAccessManager();
     // QObject::connect(this, SIGNAL(initiateConfigDownload()), this, SLOT(getHueDataStore()), Qt::DirectConnection);
     // QObject::connect(this, SIGNAL(initiateConfigDownload()), this, SLOT(dummySlot()));
     //QObject::connect(this,SIGNAL(testSignal()), this, SLOT(dummySlot()));
-    QTimer *t = new QTimer();
-    t->setInterval(3000);
-    QObject::connect(t, SIGNAL(timeout()), this, SLOT(checkLinkButton()));
-    t->setSingleShot(false);
-    t->start();
+
+    linkButtonTimer = new QTimer();
+    linkButtonTimer->setInterval(3000);
+    QObject::connect(linkButtonTimer, SIGNAL(timeout()), this, SLOT(checkLinkButton()));
+    linkButtonTimer->setSingleShot(false);
+
     pthread_yield();
 }
 
@@ -79,20 +80,22 @@ HueController::~HueController()
 
 }
 bool HueController::checkLinkButton(){
-    qDebug() << "Checking link button";
+    //  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Checking Link Button Status");
+    QString lclUser=authUser;
     if(authUser==""||authUser=="linuxmceSetup"){
-        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device not setup, cannot check status of link button!");
-        return false;
+        lclUser="newdeveloper";
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Device not setup, using system username :: newdeveloper");
+
     }
 
     QString deviceIp = hueControllers.at(0)->m_ipAddress;
-    QUrl setupUrl = "http://"+deviceIp+"/api/"+authUser;
+    QUrl setupUrl = "http://"+deviceIp+"/api/"+lclUser;
     //  qDebug()<< setupUrl.toString();
-    QNetworkAccessManager *setupManager = new QNetworkAccessManager;
+
     QNetworkRequest setupReq(setupUrl);
-    QNetworkReply * setupReply = setupManager->get(setupReq);
+    QNetworkReply * setupReply = linkButtonManager->get(setupReq);
     QEventLoop respWait;
-    QObject::connect(setupManager, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
+    QObject::connect(linkButtonManager, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
     respWait.exec();
 
     QByteArray setupResponse = setupReply->readAll();   
@@ -103,27 +106,46 @@ bool HueController::checkLinkButton(){
 
     QVariantMap res = parser.parse(setupResponse, &ok).toMap();
 
-
     if(!ok){
         //  qDebug() << "Bad Link Button Response response";
         LoggerWrapper::GetInstance()->Write(LV_WARNING, "Could not connect to %s ! Response was invalid. Please check the device ip and that it is setup.", deviceIp.toStdString().c_str());
-
         return false;
     }
 
     if(res.keys().contains("error")){
-        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Link Button Not pressed!");
-        if(linkButton)
-        {
-            this->setLinkButton(false);
-        }
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "Link Button watcher::unknown");
+        this->setLinkButton(false);
         return false;
+    } else if (res.keys().contains("config")){
+        QVariantMap  configBlock = res["config"].toMap();
+        if(configBlock["linkbutton"].toBool()==true){
+
+            this->setLinkButton(true);
+            return true;
+        }else {
+            this->setLinkButton(false);
+            return false;
+        }
+
     }
 
+    return false;
 
 }
 
 bool HueController::setupController(int controllerIndex){
+
+    /* send press link button at top of setup ? */
+
+    //    for(int ls = 0; ls < triesLeft; ls++){
+    //        if(!checkLinkButton()){
+    //            LoggerWrapper::GetInstance()->Write(LV_STATUS, "Link Button not pressed. now on retry %d of %d ", ls , triesLeft);
+    //            sleep(5);
+    //        } else {
+    //
+    //            break;
+    //        }
+    //    }
 
     QString installationTag = QString::number(m_pData->m_dwPK_Installation);
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Setting up Hue Hub with LinuxMCE-%s ", installationTag.toStdString().c_str());
@@ -157,8 +179,6 @@ bool HueController::setupController(int controllerIndex){
         return false;
     }
 
-
-
     if(res.keys().contains("error")){
         QVariantMap errorDetails = res["error"].toMap();        
         QString error_msg= errorDetails["description"].toString();
@@ -169,9 +189,11 @@ bool HueController::setupController(int controllerIndex){
             /* Send Message to Screen somehow */
 
             if(linkButton==true){
-                setupController(controllerIndex);
-                qDebug()<< linkButton;
+                // setupController(controllerIndex);
+                //  qDebug()<< linkButton;
             } else {
+                /* delay  and wait until button is pressed */
+
                 return false;
             }
             break;
@@ -185,7 +207,8 @@ bool HueController::setupController(int controllerIndex){
 
         QVariantMap sucessDetail = res["success"].toMap();     ;
         authUser = sucessDetail["username"].toString();
-        qDebug() << authUser;
+        linkButtonTimer->stop();
+        qDebug() << "Current set username ::"<< authUser;
         this->DATA_Set_Username(authUser.toStdString(), true);
         pthread_yield();
         return true;
@@ -217,23 +240,25 @@ bool HueController::GetConfig()
         return false;
     }
 
+    qDebug() << "Current user name " << DATA_Get_Username().c_str();
+    authUser = QString::fromStdString(DATA_Get_Username().c_str());
+
     for (int i = 0; i < db_controllers.length(); i++){
         HueControllerHardware *controllerDevice = new HueControllerHardware();
         targetIpAddress = db_controllers.at(i);
         controllerDevice->m_ipAddress = db_controllers.at(i);
         hueControllers.append(controllerDevice);
-        qDebug() << DATA_Get_Username().c_str();
-        authUser = QString::fromStdString(DATA_Get_Username());
-
-        //        qDebug() << authUser;
 
         if(authUser=="linuxmceSetup" || authUser.isEmpty()){
+            /* send screen message to press button here */
+
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Default Username Found. Will now attempt to setup device");
             this->mb_isNew = true;
             if(setupController(hueControllers.count()-1)){
 
                 // DCE::CMD_Reload reloadRouter(this->m_dwPK_Device, 1);
                 // SendCommand(reloadRouter);
+
             }else{
                 LoggerWrapper::GetInstance()->Write(LV_STATUS, "Failed to setup device!");
                 pthread_yield();
@@ -248,22 +273,27 @@ bool HueController::GetConfig()
         if(downloadControllerConfig(QUrl(controllerDevice->m_ipAddress), i)){
             qDebug() << "Finished processing controller " << i;
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Finished processing controller #%d", i);
-        pthread_yield();
+            linkButtonTimer->start();
+
+            if((int)m_pData->m_vectDeviceData_Impl_Children.size()!=hueBulbs.length()){
+                this->CMD_Report_Child_Devices();
+            }
+            pthread_yield();
             return true;
         }
     }
 
 
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Finished with all Hue Controllers. Total Count: %d", db_controllers.size());
+
+    //        if(mb_isNew==true){
     //
-    //    if(mb_isNew==true){
-    //
-    //        qDebug()<< "Reporting new devices";
-    //            //this->CMD_Report_Child_Devices();
-    //    }
-    //    else{
-    //        qDebug() << "not reporting new devices.";
-    //    }
+    //            qDebug()<< "Reporting new devices";
+    //                this->CMD_Report_Child_Devices();
+    //        }
+    //        else{
+    //            qDebug() << "not reporting new devices.";
+    //        }
     return true;
 }
 
@@ -484,10 +514,12 @@ void HueController::CreateChildren()
 
     qDebug() << "Finished with Children Devices";
 
-    if(m_pData->m_vectDeviceData_Impl_Children.size()!=hueBulbs.size()){
-        qDebug() << hueBulbs.count()- m_pData->m_vectDeviceData_Impl_Children.size() << " device(s) not added to linuxmce.";
-        this->CMD_Report_Child_Devices();
-    }
+    //    if(m_pData->!=hueBulbs.size()){
+    //        qDebug() << hueBulbs.size();
+    //        qDebug() << m_pData->m_vectDeviceData_Impl_Children.size();
+    //      //  qDebug() << hueBulbs.count()- m_pData->m_vectDeviceData_Impl_Children.size() << " device(s) not added to linuxmce.";
+    //        this->CMD_Report_Child_Devices();
+    //    }
     pthread_yield();
 }
 
@@ -638,21 +670,23 @@ void HueController::CMD_Off(int iPK_Pipe,string &sCMD_Result,Message *pMessage)
 void HueController::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessage)
         //<-dceag-c756-e->
 {
-
     pthread_yield();
-    cout << "Need to implement command #756 - Report Child Devices" << endl;
+    // cout << "Need to implement command #756 - Report Child Devices" << endl;
     QList<int>added;
 
     for(int n=0; n < hueBulbs.size(); n++ ){
-	qDebug() << hueBulbs.at(n)->lightName;
-        qDebug() << hueBulbs.at(n)->getLinuxMceId();
+        qDebug()<< "Current Light: \t" << hueBulbs.at(n)->lightName;
+        qDebug()<< "Current Light LMCE id \t" << hueBulbs.at(n)->getLinuxMceId();
 	if(hueBulbs.at(n)->getLinuxMceId()==0){
             qDebug() <<  hueBulbs.at(n)->lightName << " has no linuxmce id. it should be added.";
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "%s has no LinuxMCE Device number, it should be added.", hueBulbs.at(n)->lightName.toStdString().c_str());
+
             for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ )
             {
                 DeviceData_Impl *existingBulb = m_pData->m_vectDeviceData_Impl_Children.at(i);
+
                 if (existingBulb->mapParameters_Find(DEVICEDATA_UnitNo_CONST)=="" && added.indexOf(existingBulb->m_dwPK_Device)==-1 ){
+
                     qDebug () << "Setting ID for existing light with unknown configuration with " << hueBulbs.at(n)->lightName;
                     CMD_Set_Device_Data setUnit(this->m_dwPK_Device, 4, existingBulb->m_dwPK_Device,StringUtils::itos(hueBulbs.at(n)->getInternalId()),DEVICEDATA_UnitNo_CONST);
                     string pResonseA = "";
@@ -717,6 +751,8 @@ void HueController::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessa
     }
     mb_isNew=false;
     pthread_yield();
+    sCMD_Result= "Done";
+    this->EVENT_Reporting_Child_Devices("OK", "New Devices");
 }
 
 //<-dceag-c757-b->
@@ -893,9 +929,8 @@ bool HueController::downloadControllerConfig(QUrl deviceIp, int index)
         // << " :: " << i.value();
         QVariantMap light = i.value().toMap();
 
-        QVariantMap state = light["state"].toMap();
-        qDebug() << state["on"].toString();
-        qDebug() << i.key() << "::" << light["name"].toString() ;
+        QVariantMap state = light["state"].toMap();      
+
         QString fd = state["on"].toString();
         b->powerState = fd;
         b->lightId = i.key().toInt();
@@ -903,9 +938,23 @@ bool HueController::downloadControllerConfig(QUrl deviceIp, int index)
         b->modelId = light["model"].toString();
         b->linuxmceId=0;
         b->controller=hueControllers.at(index)->m_ipAddress;
+        qDebug() << i.key() << "::" << light["name"].toString() ;
+
+        for( int l=0; l < (int)m_pData->m_vectDeviceData_Impl_Children.size(); l++ ){
+            DeviceData_Impl *existingBulb = m_pData->m_vectDeviceData_Impl_Children.at(l);
+            qDebug() << "Existing light UnitNo :: " << existingBulb->mapParameters_Find(DEVICEDATA_UnitNo_CONST).c_str();
+            if(existingBulb->mapParameters_Find(DEVICEDATA_UnitNo_CONST).c_str() == QString::number(b->lightId)){
+                qDebug() << "Matched existing light";
+                b->linuxmceId = existingBulb->m_dwPK_Device;
+            }
+
+        }
+
         hueBulbs.append(b);
 
+
     }
+
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Controller Lights:: %d ",hueBulbs.count());
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Lights setup in LinuxMCE :: %d ",m_pData->m_vectDeviceData_Impl_Children.size());
 
