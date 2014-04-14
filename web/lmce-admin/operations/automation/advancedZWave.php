@@ -48,14 +48,18 @@ function advancedZWave($output,$dbADO){
 			    el.style = "";
 			    el.style.left = (node.x-25)+"px";
 			    el.style.top = (node.y-25+topOffset)+"px";
-			    el.onclick = function(id) {
-			        return function() { $("hover_"+id).toggle(); };
-			    }(node.id);
+
 			    $(\'nodedisplay\').appendChild(el);
 
-			    var p = document.createElement("p");
-			    el.appendChild(p);
-			    p.innerHTML = node.id;
+			    var el2 = document.createElement("div");
+			    el2.className = "nodeHandle";
+			    el2.style = "padding-top:1px; height: 100%;";
+			    el2.onclick = function(id) {
+			        return function() { $("hover_"+id).toggle(); };
+			    }(node.id);
+			    el2.insert("<p>"+node.id+"</p>");
+			    el.appendChild(el2);
+
 			    var hover = document.createElement("div");
 			    el.appendChild(hover);
 			    hover.id = "hover_"+node.id;
@@ -66,9 +70,17 @@ function advancedZWave($output,$dbADO){
 
 			    $(hover).insert("<p>"+node.manufacturerName+"</p>");
 			    $(hover).insert("<p>"+node.productName+"</p>");
+			    $(hover).insert("<span class=\"tab\" onclick=\"selectTab(\'status\',"+node.id+")\">Status</span>");
+			    $(hover).insert("<span class=\"tab\" onclick=\"selectTab(\'command\',"+node.id+")\">Commands</span>");
+			    $(hover).insert("<span class=\"tab\" onclick=\"selectTab(\'config\',"+node.id+")\">Configuration</span>");
+			    $(hover).insert("<span class=\"tab\" onclick=\"selectTab(\'values\',"+node.id+")\">Values</span>");
+			    var tabSectionEl = document.createElement("div");
+			    tabSectionEl.id = "tabsection";
+			    $(hover).appendChild(tabSectionEl);
+
 			    var dt = document.createElement("div");
-			    dt.id = "detailsTab";
-			    $(hover).appendChild(dt);
+			    dt.id = "statusTab_"+node.id;
+			    tabSectionEl.appendChild(dt);
 			    dt.insert("<p>Status: "+(node.isFailed ? "FAILED" : "ok")+"</p>");
 			    dt.insert("<p>Awake: "+(node.isAwake ? "Yes" : "No")+"</p>");
 			    dt.insert("<p>OpenZWave query stage: "+node.queryStage+"</p>");
@@ -93,14 +105,54 @@ function advancedZWave($output,$dbADO){
 			    dt.insert("<p>Quality: " + stats.quality + "</p>");
 
 			    var ct = document.createElement("div");
-			    ct.id = "commandTab";
-			    ct.style = "";
-			    $(hover).appendChild(ct);
+			    ct.id = "commandTab_"+node.id;
+			    ct.style = "display:none;";
+			    tabSectionEl.appendChild(ct);
 			    ct.insert("<p class=\"command\" onclick=\"healNode("+node.id+");\">Heal node</p>");
 			    ct.insert("<p class=\"command\" onclick=\"updateNodeNeighbors("+node.id+");\">Update node neighbors</p>");
 
+			    var vt = document.createElement("div");
+			    vt.id = "valuesTab_"+node.id;
+			    vt.style = "display:none;";
+			    tabSectionEl.appendChild(vt);
+			    vt.insert("<p>Values</p>");
+			    var t = "<table><tr>";
+			    t += "<td>Index</td><td>Label</td><td>Value</td><td>Units</td><td>Genre</td></tr>";
+
+			    var configEl = document.createElement("div");
+			    configEl.id = "configTab_"+node.id;
+			    configEl.style = "display:none;";
+			    tabSectionEl.appendChild(configEl);
+			    var configt = "<table><tr>";
+			    configt += "<td>Index</td><td>Label</td><td>Value</td><td>Units</td></tr>";
+
+			    for (var j = 0; j < node.values.length; j++) {
+				var value = node.values[j];
+				var tooltip = value.help;
+				var row = "<tr><td>"+value.index+"</td>";
+				var onclick = "";
+				if (value.genre == "config") {
+				    onclick = "setConfigParam("+node.id+","+value.index+")";
+				}
+				row += "<td class=\"cell_"+value.genre+"\"onclick=\""+onclick+"\" title=\""+tooltip+"\">"+value.label+"</td>";
+				row += "<td>"+value.value+"</td>";
+				row += "<td>"+value.units+"</td>";
+				if (value.genre != "config")
+				    row += "<td>"+value.genre+"</td>";
+				row += "</tr>";
+				if (value.genre == "config") {
+				    configt += row;
+				} else {
+				    t += row;
+				}
+			    }
+			    t += "</table>";
+			    configt += "</table>";
+			    vt.insert(t);
+			    configEl.insert(configt);
+
 			}
-			$$(\'.node\').invoke("observe", "mousedown", function(event) { mouseDownNode(event) });
+			$$(\'.nodeHandle\').invoke("observe", "mousedown", function(event) { mouseDownNode(event) });
 			// Draw lines between nodes
 			for (var i = 0; i < nodes.length; i++) {
 			    updateLinksForNode(nodes[i].id);
@@ -108,23 +160,35 @@ function advancedZWave($output,$dbADO){
 		    }
 		   });
 		}
-		function healNode(id) {
+		function selectTab(tab,id) {
+		    $("statusTab_"+id).hide();
+		    $("commandTab_"+id).hide();
+		    $("configTab_"+id).hide();
+		    $("valuesTab_"+id).hide();
+		    $(tab+"Tab_"+id).show();
+		}
+		function performCommand(parameters) {
+		    parameters.section = "advancedZWave";
+		    parameters.action = "ajax";
 	            new Ajax.Request("index.php", {
 		        method:"post",
-		        parameters:{section: "advancedZWave", action:"ajax", healNode:id },
+		        parameters: parameters,
 		        onSuccess: function(transport) {
 			
 			}
 		        });
+		
+		}
+		function healNode(id) {
+		    performCommand({healNode:id});
 		}
 		function updateNodeNeighbors(id) {
-	            new Ajax.Request("index.php", {
-		        method:"post",
-		        parameters:{section: "advancedZWave", action:"ajax", updateNodeNeighbors:id },
-		        onSuccess: function(transport) {
-			
-			}
-		        });
+		    performCommand({updateNodeNeighbors:id});
+		}
+		function setConfigParam(nodeId, index) {
+		    var val = prompt("Please enter new value for parameter:");
+		    if (val != "")
+		        performCommand({setConfigParam:nodeId, paramIndex:index, valueToSet:val});
 		}
 
 		function getNode(id) {
@@ -207,10 +271,10 @@ function advancedZWave($output,$dbADO){
 			function mouseDownNode(event) {
 			    isMouseDown = true;
 			    hasMoved = false;
-			    movingNode = event.target;
+			    movingNode = event.target.parentElement;
 			}
 			function mouseUpNode(event) {
-			    if (isMouseDown) {
+			    if (isMouseDown && movingNode != null) {
 			        isMouseDown = false;
 			        var id = movingNode.id;
 			        movingNode = null;
@@ -219,7 +283,7 @@ function advancedZWave($output,$dbADO){
 			    }
 			}
 			function mouseMoveNode(event) {
-			    if (isMouseDown) {
+			    if (isMouseDown && movingNode != null) {
 			        hasMoved = true;
 			        var x = event.pageX;
 			        var y = event.pageY;
@@ -246,10 +310,12 @@ function advancedZWave($output,$dbADO){
 .sleeping { background-color: #FFFF00; }
 .failed { background-color: red; }
 .node p { text-align: center; vertical-align: middle;}
-.nodeHover { width: 300px; position:absolute; background: #CCCC66; border: 1px solid black; margin: 2px; z-index:100;}
+.nodeHover { width: 320px; position:absolute; background: #CCCC66; border: 1px solid black; margin: 2px; z-index:1000;}
 .nodeHover p { text-align: left; line-spacing: 0.5; margin-top: 2px; margin-bottom: 2px; }
 .nodeHover ul { margin: 2px; }
-.nodeHover span { width: 70px; padding: 2px; border:1px solid black; margin: 5px; }
+span.tab { padding: 3px; padding-left: 6px; padding-right: 6px; border:1px solid black; border-bottom: 0px; margin: 5px; margin-bottom:7px; }
+span.tab:hover { background-color: white; }
+
 .link { position: absolute; width: 3px; background-color: red; z-index: 10; -webkit-transform-origin: top left;
     -moz-transform-origin: top left;
     -o-transform-origin: top left;
@@ -273,6 +339,14 @@ function advancedZWave($output,$dbADO){
 }
 .command:hover {
     background-color: white;
+}
+td.cell_config:hover {
+    background-color: white;  
+}
+#tabSection {
+    border-top: 1px solid black;
+    margin: 0;
+    margin-top: 2px;
 }
 </style>
 ';
@@ -375,7 +449,8 @@ function advancedZWave($output,$dbADO){
             $id = $_POST['healNode'];
 	    $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 788 51 "HNN'.$id.'"';
 	    $ret=exec_batch_command($cmd,1);
-	    print("{ \"ok\": 1 }");
+	    $retArray=explode("\n",$ret);
+	    print("{ \"ok\": ".($retArray[0].strrpos("OK") >= 0 ? 1 : 0)." }");
 	    exit;
 	}
 	if (isset($_POST['updateNodeNeighbors'])) {
@@ -383,7 +458,19 @@ function advancedZWave($output,$dbADO){
             $id = $_POST['updateNodeNeighbors'];
 	    $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 788 51 "NNU'.$id.'"';
 	    $ret=exec_batch_command($cmd,1);
-	    print("{ \"ok\": 1 }");
+	    $retArray=explode("\n",$ret);
+	    print("{ \"ok\": ".($retArray[0].strrpos("OK") >= 0 ? 1 : 0)." }");
+	    exit;
+	}
+	if (isset($_POST['setConfigParam'])) {
+	    header('Content-type: application/json');
+            $id = $_POST['setConfigParam'];
+            $param = $_POST['paramIndex'];
+            $value = $_POST['valueToSet'];
+	    $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 841 48 "'.$value.'" 222 "0" 239 "'.$id.'" 248 "'.$param.'"';
+	    $ret=exec_batch_command($cmd,1);
+	    $retArray=explode("\n",$ret);
+	    print("{ \"ok\": ".($retArray[0].strrpos("OK") >= 0 ? 1 : 0)." }");
 	    exit;
 	}
     }
@@ -395,7 +482,7 @@ function advancedZWave($output,$dbADO){
     $out.='</form>';
 
     $output->setBody($out);
-    $output->setMenuTitle($TEXT_ADVANCED_CONST.' |');
+    $output->setMenuTitle($TEXT_AUTOMATION_CONST.' |');
     $output->setPageTitle("ZWave");
     $output->setNavigationMenu(array('Advanced ZWave'=>'index.php?section=advancedZWave'));
     $output->setTitle(APPLICATION_NAME);

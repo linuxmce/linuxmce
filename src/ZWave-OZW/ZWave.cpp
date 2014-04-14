@@ -1623,7 +1623,29 @@ void ZWave::CMD_Get_Data(string sText,char **pData,int *iData_Size,string &sCMD_
 		s+= "\"quality\":" + StringUtils::itos(nodeData.m_quality);
 		/*      uint8 m_lastReceivedMessage[254];
                         list<CommandClassData> m_ccData;   */
-		s += "}";
+		s += "},";
+
+		s += " \"values\": [";
+		for (list<OpenZWave::ValueID>::iterator it = node->m_values.begin(); it != node->m_values.end(); ++it)
+		{
+			OpenZWave::ValueID value = *it;
+			s += "{ \"label\": \"" + OpenZWave::Manager::Get()->GetValueLabel(value) + "\",";
+			s += " \"help\": \"" + StringUtils::Replace(OpenZWave::Manager::Get()->GetValueHelp(value), "\"", "&quot;") + "\",";
+			s += " \"index\": " + StringUtils::itos(value.GetIndex()) + ",";
+			string val;
+			OpenZWave::Manager::Get()->GetValueAsString(value, &val);
+			s += " \"value\": \"" + val + "\",";
+			s += " \"units\": \"" + OpenZWave::Manager::Get()->GetValueUnits(value) + "\",";
+			s += " \"min\": " + StringUtils::itos(OpenZWave::Manager::Get()->GetValueMin(value)) + ",";
+			s += " \"max\": " + StringUtils::itos(OpenZWave::Manager::Get()->GetValueMax(value)) + ",";
+			string genreText = string(OpenZWave::Value::GetGenreNameFromEnum(value.GetGenre()));
+			s += " \"genre\": \"" + genreText + "\"";
+
+			s += "},";
+		}
+		if (node->m_values.size() > 0)
+			s = s.substr(0, s.length()-1);
+		s += "]";
 
 		s += "},";
 	}
