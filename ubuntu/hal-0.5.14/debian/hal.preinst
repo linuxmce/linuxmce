@@ -1,0 +1,40 @@
+#!/bin/sh
+
+set -e
+
+rm_conffile() {
+  PKGNAME="hal"
+  CONFFILE="$1"
+
+  if [ -e "$CONFFILE" ]; then
+   md5sum="`md5sum \"$CONFFILE\" | sed -e \"s/ .*//\"`"
+   old_md5sum="`dpkg-query -W -f='${Conffiles}' $PKGNAME | sed -n -e \"\\\\' $CONFFILE'{s/ obsolete$//;s/.* //p}\"`"
+   if [ "$md5sum" != "$old_md5sum" ]; then
+     echo "Obsolete conffile $CONFFILE has been modified by you."
+     echo "Saving as $CONFFILE.dpkg-bak ..."
+     mv -f "$CONFFILE" "$CONFFILE".dpkg-bak
+   else
+     echo "Removing obsolete conffile $CONFFILE ..."
+     rm -f "$CONFFILE"
+   fi
+ fi
+}
+
+case "$1" in
+  install|upgrade)
+    if dpkg --compare-versions "$2" lt "0.5.11-3"; then
+      rm_conffile "/etc/udev/hal.rules"
+      rm -f /etc/udev/rules.d/z99_hal.rules
+    fi
+    if dpkg --compare-versions "$2" lt "0.5.12~git20090406.46dc48-1"; then
+      rm_conffile "/etc/udev/rules.d/90-hal.rules"
+    fi
+    # Remove old SysV init scripts, using D-Bus activation now
+    if dpkg --compare-versions "$2" lt-nl "0.5.14-4"; then
+      rm_conffile /etc/init.d/hal
+      rm_conffile /etc/default/hal
+      update-rc.d -f hal remove >/dev/null
+    fi
+esac
+
+#DEBHELPER#

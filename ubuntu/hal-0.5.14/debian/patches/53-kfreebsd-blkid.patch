@@ -1,0 +1,272 @@
+From d9fb4b1238a7e7256edfcb68ded37bbebfa419a7 Mon Sep 17 00:00:00 2001
+From: Michael Biebl <biebl@debian.org>
+Date: Mon, 23 Nov 2009 05:25:13 +0100
+Subject: [PATCH 5/6] Use blkid on kfreebsd
+
+Use blkid instead of libvolume-id on kfreebsd.
+---
+ hald/freebsd/probing/Makefile.am     |    8 ++--
+ hald/freebsd/probing/probe-storage.c |   38 ++++++++++---
+ hald/freebsd/probing/probe-volume.c  |   99 +++++++++++++++++++--------------
+ 3 files changed, 91 insertions(+), 54 deletions(-)
+
+diff --git a/hald/freebsd/probing/Makefile.am b/hald/freebsd/probing/Makefile.am
+index 67b8dcf..8832e83 100644
+--- a/hald/freebsd/probing/Makefile.am
++++ b/hald/freebsd/probing/Makefile.am
+@@ -56,16 +56,16 @@ hald_probe_scsi_LDADD = \
+ 	$(top_builddir)/hald/freebsd/libprobe/libhald_freebsd_probe.la
+ 
+ hald_probe_storage_SOURCES = freebsd_dvd_rw_utils.c freebsd_dvd_rw_utils.h probe-storage.c
+-hald_probe_storage_CPPFLAGS = $(AM_CPPFLAGS) @GLIB_CFLAGS@ @VOLUME_ID_CFLAGS@
++hald_probe_storage_CPPFLAGS = $(AM_CPPFLAGS) @GLIB_CFLAGS@ @BLKID_CFLAGS@
+ hald_probe_storage_LDADD = \
+ 	@GLIB_LIBS@							\
+-	@VOLUME_ID_LIBS@						\
++	@BLKID_LIBS@							\
+ 	$(top_builddir)/hald/freebsd/libprobe/libhald_freebsd_probe.la
+ 
+ hald_probe_volume_SOURCES = freebsd_dvd_rw_utils.c freebsd_dvd_rw_utils.h probe-volume.c
+-hald_probe_volume_CPPFLAGS = $(AM_CPPFLAGS) @GLIB_CFLAGS@ @VOLUME_ID_CFLAGS@
++hald_probe_volume_CPPFLAGS = $(AM_CPPFLAGS) @GLIB_CFLAGS@ @BLKID_CFLAGS@
+ hald_probe_volume_LDADD = \
+ 	@GLIB_LIBS@							\
+-	@VOLUME_ID_LIBS@						\
++	@BLKID_LIBS@							\
+ 	@LIBUFS_LIBS@							\
+ 	$(top_builddir)/hald/freebsd/libprobe/libhald_freebsd_probe.la
+diff --git a/hald/freebsd/probing/probe-storage.c b/hald/freebsd/probing/probe-storage.c
+index 4ad8153..932ee90 100644
+--- a/hald/freebsd/probing/probe-storage.c
++++ b/hald/freebsd/probing/probe-storage.c
+@@ -35,7 +35,7 @@
+ #include <sys/disk.h>
+ #include <netinet/in.h>
+ #include <glib.h>
+-#include <libvolume_id.h>
++#include <blkid.h>
+ 
+ #include "libhal/libhal.h"
+ 
+@@ -240,16 +240,38 @@ main (int argc, char **argv)
+     }
+   else if (! has_children) /* by definition, if it has children it has no fs */
+     {
+-      struct volume_id *vid;
++      blkid_probe pr;
++      int fd;
+ 
+-      vid = volume_id_open_node(device_file);
+-      if (! vid)
++      fd = open(device_file, O_RDONLY);
++      if (fd < 0)
+ 	goto end;
+ 
+-      if (volume_id_probe_all(vid, 0, 0) == 0 && vid->usage_id == VOLUME_ID_FILESYSTEM)
+-	ret = 2;		/* has a filesystem */
+-
+-      volume_id_close(vid);
++      pr = blkid_new_probe ();
++      if (pr != NULL)
++        {
++          blkid_probe_set_request (pr, BLKID_PROBREQ_LABEL | BLKID_PROBREQ_UUID |
++                                       BLKID_PROBREQ_TYPE | BLKID_PROBREQ_SECTYPE |
++                                       BLKID_PROBREQ_USAGE | BLKID_PROBREQ_VERSION);
++          if (blkid_probe_set_device (pr, fd, 0, 0) == 0 &&
++              blkid_do_safeprobe (pr) == 0)
++            {
++              const char *usage;
++
++              /* signal to hald that we've found something and a fakevolume
++               * should be added - see hald/linux/blockdev.c:add_blockdev_probing_helper_done()
++               * and hald/linux/blockdev.c:block_rescan_storage_done().
++               */
++              if (blkid_probe_lookup_value (pr, "USAGE", &usage, NULL) == 0 &&
++                  (strcmp (usage, "filesystem") == 0 ||
++                   strcmp (usage, "raid") == 0 ||
++                   strcmp (usage, "other") == 0 ||
++                   strcmp (usage, "crypto") == 0))
++                ret = 2;
++            }
++          blkid_free_probe (pr);
++        }
++      close (fd);
+     }
+ 
+  end:
+diff --git a/hald/freebsd/probing/probe-volume.c b/hald/freebsd/probing/probe-volume.c
+index 42f3cc8..4289c46 100644
+--- a/hald/freebsd/probing/probe-volume.c
++++ b/hald/freebsd/probing/probe-volume.c
+@@ -46,7 +46,7 @@
+ #endif /* HAVE_LIBUFS */
+ #include <isofs/cd9660/iso.h>
+ #include <glib.h>
+-#include <libvolume_id.h>
++#include <blkid.h>
+ 
+ #include "libhal/libhal.h"
+ 
+@@ -105,19 +105,20 @@ hf_probe_volume_getenv_int (const char *name)
+ }
+ 
+ static char *
+-hf_probe_volume_get_label (const struct volume_id *vid)
++hf_probe_volume_get_label (const blkid_probe pr)
+ {
+-  char *label = NULL;
++  const char *label;
++  char *volume_label = NULL;
+ 
+-  if (vid && *vid->label)
++  if (blkid_probe_lookup_value(pr, "LABEL", &label, NULL) == 0)
+     {
+-      if (g_utf8_validate(vid->label, -1, NULL))
+-	label = g_strdup(vid->label);
++      if (g_utf8_validate(label, -1, NULL))
++        volume_label = g_strdup(label);
+       else				/* assume ISO8859-1 */
+-	label = g_convert(vid->label, -1, "UTF-8", "ISO8859-1", NULL, NULL, NULL);
++        volume_label = g_convert(label, -1, "UTF-8", "ISO8859-1", NULL, NULL, NULL);
+     }
+ 
+-  return label;
++  return volume_label;
+ }
+ 
+ static void
+@@ -323,7 +324,7 @@ main (int argc, char **argv)
+   char *grandparent_udi;
+   char *parent_drive_type;
+   int fd = -1;
+-  struct volume_id *vid = NULL;
++  blkid_probe pr;
+   int ret = 1;
+   gboolean has_children;
+   gboolean is_swap;
+@@ -333,7 +334,10 @@ main (int argc, char **argv)
+   gboolean has_data = FALSE;
+   gboolean is_blank = FALSE;
+   const char *usage;
+-  char *label;
++  const char *type;
++  const char *type_version;
++  const char *label;
++  const char *uuid;
+   unsigned int sector_size = 0;
+   off_t media_size = 0;
+ 
+@@ -388,21 +392,28 @@ main (int argc, char **argv)
+    */
+   if (! has_children && ! (is_cdrom && ! has_data))
+     {
+-      vid = volume_id_open_fd(fd);
+-      if (vid)
+-	{
+-	  if (volume_id_probe_all(vid, 0, media_size) == 0)
+-	    has_data = TRUE;
+-	  else
+-	    {
+-	      volume_id_close(vid);
+-	      vid = NULL;
+-	    }
+-	}
++      pr = blkid_new_probe ();
++      if (pr != NULL)
++        {
++          int bid_ret;
++
++          blkid_probe_set_request (pr, BLKID_PROBREQ_LABEL | BLKID_PROBREQ_UUID |
++                                       BLKID_PROBREQ_TYPE | BLKID_PROBREQ_SECTYPE |
++                                       BLKID_PROBREQ_USAGE | BLKID_PROBREQ_VERSION);
++
++          bid_ret = blkid_probe_set_device (pr, fd, 0, media_size);
++          if (bid_ret == 0)
++            {
++              bid_ret = blkid_do_safeprobe (pr);
++              hfp_warning ("blkid_do_safeprobe returned an error");
++            }
++          if (bid_ret == 0)
++            has_data = TRUE;
++        }
+     }
+ 
+   if (! has_children && ! is_swap && ! has_audio && ! has_data && ! is_blank)
+-    goto end;
++    goto end_free;
+ 
+   libhal_device_add_capability(hfp_ctx, hfp_udi, "volume", &hfp_error);
+   if (is_cdrom)
+@@ -511,9 +522,14 @@ main (int argc, char **argv)
+ 	  hfp_cdrom_free(cdrom);
+ 	}
+ 
+-      if (has_data && vid && (! strcmp(vid->type, "iso9660") ||
+-          ! strcmp(vid->type, "udf")))
+-        hf_probe_volume_advanced_disc_detect(fd);
++      if (has_data && pr) {
++        const char *cdrom_fstype;
++        if (! blkid_probe_lookup_value(pr, "TYPE", &cdrom_fstype, NULL) &&
++            (! strcmp(cdrom_fstype, "iso9660") || ! strcmp(cdrom_fstype, "udf"))) {
++          hf_probe_volume_advanced_disc_detect(fd);
++        }
++      }
++
+     }
+   else
+     {
+@@ -611,28 +627,24 @@ main (int argc, char **argv)
+     usage = "partitiontable";
+   else if (is_swap)
+     usage = "other";
+-  else
+-    switch (vid ? vid->usage_id : (enum volume_id_usage) -1)
+-      {
+-      case VOLUME_ID_FILESYSTEM:	usage = "filesystem"; break;
+-      case VOLUME_ID_DISKLABEL:		usage = "disklabel"; break;
+-      case VOLUME_ID_OTHER:		usage = "other"; break;
+-      case VOLUME_ID_RAID:		usage = "raid"; break;
+-      case VOLUME_ID_CRYPTO:		usage = "crypto"; break;
+-      case VOLUME_ID_UNUSED:		usage = "unused"; break;
+-      default:				usage = "unknown"; break;
+-      }
+-
++  else if (blkid_probe_lookup_value(pr, "USAGE", &usage, NULL))
++    usage = "";
+   libhal_device_set_property_string(hfp_ctx, hfp_udi, "volume.fsusage", usage, &hfp_error);
+-  libhal_device_set_property_string(hfp_ctx, hfp_udi, "volume.fstype", vid ? vid->type: "", &hfp_error);
+-  if (vid && *vid->type_version)
+-    libhal_device_set_property_string(hfp_ctx, hfp_udi, "volume.fsversion", vid->type_version, &hfp_error);
+ 
+-  label = hf_probe_volume_get_label(vid);
++  if (blkid_probe_lookup_value(pr, "TYPE", &type, NULL))
++    type = "";
++  libhal_device_set_property_string(hfp_ctx, hfp_udi, "volume.fstype", type, &hfp_error);
++  if (blkid_probe_lookup_value(pr, "VERSION", &type, NULL))
++    type_version = "";
++  libhal_device_set_property_string(hfp_ctx, hfp_udi, "volume.fsversion", type_version, &hfp_error);
++
++  label = hf_probe_volume_get_label(pr);
+   libhal_device_set_property_string(hfp_ctx, hfp_udi, "volume.label", label ? label : "", &hfp_error);
+   g_free(label);
+ 
+-  libhal_device_set_property_string(hfp_ctx, hfp_udi, "volume.uuid", vid ? vid->uuid : "", &hfp_error);
++  if (blkid_probe_lookup_value(pr, "UUID", &uuid, NULL))
++    uuid = "";
++  libhal_device_set_property_string(hfp_ctx, hfp_udi, "volume.uuid", uuid, &hfp_error);
+ 
+   ioctl(fd, DIOCGSECTORSIZE, &sector_size);
+ 
+@@ -645,6 +657,9 @@ main (int argc, char **argv)
+ 
+   ret = 0;			/* is a volume */
+ 
++ end_free:
++  blkid_free_probe (pr);
++
+  end:
+   return ret;
+ }
+-- 
+1.6.5.4
+

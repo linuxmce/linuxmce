@@ -1,0 +1,141 @@
+hal-info
+===
+
+The information FDI scripts have been moved to a subpackage called hal-info.
+
+Q: What is it?
+A: hal-info is just a small hal package that provides hardware data and quirks.
+   These quirks are currently things like what mice support reporting battery
+   status, what music players are supported and what cameras are detected.
+   This could also include a list of display adaptors that need resuming
+   or a list of broken batteries that might explode.
+
+Q: Why split the information data from the main tarball?
+A: Well, policy and probing information is still in the daemon package where
+   they belong. Hal is released every few months with updated
+   dependencies and lots of snazzy new features.
+   Users love this, stable distributions hate it, and don't update HAL,
+   missing the newest hardware quirk updates. This means that new hardware
+   often won't work out of the box until the next version of the distro
+   is released.
+
+So, for example, stable distro 'x' ships HAL 0.5.9 with no intention
+of updating it other than for security fixes. Stable distro 'x'
+does however update from hal-info-20061107 to hal-info-{date} as there
+are no new features, minimal risk of breaking, and lots of chance that
+more hardware that didn't work now will.
+
+What does this mean for:
+
+ * An end user: Not much - all the fdi files are installed in the
+   same places as they used to be.
+ * A distro packager: hal should depend on hal-info, of any version.
+   Existing patches to the fdi files in fdi/information should be moved
+   to the hal-info product.
+ * Release architect: updating hal-info shouldn't break anything
+   that already works or add new dependencies.
+ * Developer: hal-info should be checked out in the same level
+   directory as hal if you intend to use ./run-hald.sh
+
+SCM
+===
+
+ - anonymous checkouts
+
+   $ git clone git://git.freedesktop.org/git/hal.git
+
+ - checkouts if you got an ssh account on fd.o (username@ is optional)
+
+   $ git clone ssh://[username@]git.freedesktop.org/git/hal.git
+
+ - commit to local repository
+
+   $ git commit -a
+
+ - push local repository to master repository at fd.o (remember most patches
+   requires review at the mailing list)
+
+   $ git push
+
+ - pull changes from master repository at fd.o
+
+   $ git pull
+
+ - diff of working tree versus local repository
+
+   $ git diff
+
+ - diff of local repository vs. master repository at fd.o
+
+   synchronize with upstream repo:
+   $ git pull
+
+   (possibly merge changes)
+
+   generate the diff:
+   $ git diff origin HEAD
+
+ - influential environment variables (set these in e.g. .bash_profile)
+
+   export GIT_AUTHOR_NAME='Your Full Name'
+   export GIT_COMMITTER_NAME='Your Full Name'
+   export GIT_COMMITTER_EMAIL=youremail@domain.net
+   export GIT_AUTHOR_EMAIL=youremail@domain.net
+
+ - see also
+
+    http://www.kernel.org/pub/software/scm/git/docs/
+
+
+Committing code
+===
+
+ - Commit messages should be of the form (the five lines between the
+   lines starting with ===)
+
+=== begin example commit ===
+short explanation of the commit
+
+Longer explanation explaining exactly what's changed, whether any
+external or private interfaces changed, what bugs were fixed (with bug
+tracker reference if applicable) and so forth. Be concise but not too brief.
+=== end example commit ===
+
+ - Always add a brief description of the commit to the _first_ line of
+   the commit and terminate by two newlines (it will work without the
+   second newline, but that is not nice for the interfaces). 
+
+ - First line (the brief description) must only be one sentence and
+   must not start with a capital letter. Don't use a trailing period
+   either.
+
+ - The main description (the body) is normal prose and should use normal
+   punctuation and capital letters where appropriate. Normally, for patches
+   sent to a mailing list it's copied from there.
+
+ - When committing code on behalf of others use the --author option, e.g.
+   git commit -a --author "Joe Coder <joe@coder.org>"
+
+Coding Style
+===
+
+ - Please follow the coding style already used - it's not a must, but it's
+   nice to have consistency.
+
+ - Write docs for all functions and structs and so on. We use gtkdoc format.
+
+ - All external interfaces (network protocols, file formats, etc.)
+   should have documented specifications sufficient to allow an
+   alternative implementation to be written. Our implementation should
+   be strict about specification compliance (should not for example
+   heuristically parse a file and accept not-well-formed
+   data). Avoiding heuristics is also important for security reasons;
+   if it looks funny, ignore it (or exit, or disconnect).
+
+Configuring the sources
+===
+
+To configure the HAL sources for a generic modern Linux desktop
+distribution using Linux 2.6.20, one should use
+
+--enable-console-kit --enable-acl-management --enable-docbook-docs --enable-acpi-ibm --enable-acpi-toshiba --enable-umount-helper

@@ -1,0 +1,78 @@
+Index: hal-0.5.13/hal.conf.in
+===================================================================
+--- hal-0.5.13.orig/hal.conf.in	2009-11-19 11:24:36.977898355 -0600
++++ hal-0.5.13/hal.conf.in	2009-11-19 11:29:42.429898643 -0600
+@@ -25,7 +25,73 @@
+            send_interface="org.freedesktop.Hal.Device"/>
+     <allow send_destination="org.freedesktop.Hal"
+            send_interface="org.freedesktop.Hal.Manager"/>
++  </policy>
++
++  <!-- Only allow users at the local console to manipulate devices,
++       requires consolekit -->
++  <policy at_console="true">
++    <allow send_destination="org.freedesktop.Hal"
++           send_interface="org.freedesktop.Hal.Device.CPUFreq"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.DockStation"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.KillSwitch"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.KeyboardBacklight"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.LaptopPanel"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.Leds"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.LightSensor"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.Storage"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.Storage.Removable"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.SystemPowerManagement"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.Volume"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.Volume.Crypto"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.WakeOnLan"/>
++  </policy>
++
++  <!-- Debian group policies -->
++  <policy group="powerdev">
++    <allow send_destination="org.freedesktop.Hal"
++           send_interface="org.freedesktop.Hal.Device.CPUFreq"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.DockStation"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.KillSwitch"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.KeyboardBacklight"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.LaptopPanel"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.Leds"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.LightSensor"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.WakeOnLan"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.SystemPowerManagement"/>
++  </policy>
++  <policy group="plugdev">
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.Storage"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.Storage.Removable"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.Volume"/>
++    <allow send_destination="org.freedesktop.Hal"
++    	   send_interface="org.freedesktop.Hal.Device.Volume.Crypto"/>
++  </policy>
+ 
++  <!-- well,...and root too -->
++  <policy user="root">
+     <allow send_destination="org.freedesktop.Hal"
+            send_interface="org.freedesktop.Hal.Device.CPUFreq"/>
+     <allow send_destination="org.freedesktop.Hal"

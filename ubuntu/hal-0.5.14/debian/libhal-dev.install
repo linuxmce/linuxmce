@@ -1,0 +1,4 @@
+debian/tmp/usr/include/hal/libhal.h
+debian/tmp/usr/lib/pkgconfig/hal.pc
+debian/tmp/usr/lib/libhal.so
+debian/tmp/usr/lib/libhal.a

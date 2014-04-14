@@ -1,0 +1,24 @@
+Description: Create /var/run/hald on start.
+ This directory contains runtime data, like pid files and sockets and needs
+ to be created dynamically as /run is now on a tmpfs by default.
+Author: Michael Biebl <biebl@debian.org>
+Bug-Debian: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=632900
+Index: hal-0.5.14/hald/hald.c
+===================================================================
+--- hal-0.5.14.orig/hald/hald.c	2011-08-12 15:22:27.568421974 +0200
++++ hal-0.5.14/hald/hald.c	2011-08-12 15:43:20.900665455 +0200
+@@ -667,11 +667,13 @@
+ 	/*master_slave_setup ();
+ 	  sleep (100000000);*/
+ 
+-
+ 	loop = g_main_loop_new (NULL, FALSE);
+ 
+ 	HAL_INFO ((PACKAGE_STRING));
+ 	HAL_INFO (("using child timeout %is", opt_child_timeout));
++
++	/* Create directory containing runtime data, like pid files and sockets */
++	mkdir (PACKAGE_LOCALSTATEDIR "/run/hald", 0755);
+ 	
+ 	if (opt_become_daemon) {
+ 		int child_pid;

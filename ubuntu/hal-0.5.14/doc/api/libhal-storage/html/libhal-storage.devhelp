@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE book PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "">
+<book xmlns="http://www.devhelp.net/book" title="HAL Storage Library Reference Manual" link="index.html" author="David Zeuthen" name="libhal-storage">
+  <chapters>
+    <sub name="API Reference" link="rn01.html">
+      <sub name="libhal-storage" link="libhal-storage-libhal-storage.html"/>
+    </sub>
+    <sub name="Index" link="ix01.html"/>
+    <sub name="License" link="license.html"/>
+  </chapters>
+  <functions>
+    <function name="struct LibHalDrive_s" link="libhal-storage-libhal-storage.html#LibHalDrive-s"/>
+    <function name="LibHalDrive" link="libhal-storage-libhal-storage.html#LibHalDrive"/>
+    <function name="struct LibHalVolume_s" link="libhal-storage-libhal-storage.html#LibHalVolume-s"/>
+    <function name="LibHalVolume" link="libhal-storage-libhal-storage.html#LibHalVolume"/>
+    <function name="struct LibHalStoragePolicy_s" link="libhal-storage-libhal-storage.html#LibHalStoragePolicy-s"/>
+    <function name="LibHalStoragePolicy" link="libhal-storage-libhal-storage.html#LibHalStoragePolicy"/>
+    <function name="enum LibHalStoragePolicyIcon" link="libhal-storage-libhal-storage.html#LibHalStoragePolicyIcon"/>
+    <function name="LibHalStoragePolicyIconPair" link="libhal-storage-libhal-storage.html#LibHalStoragePolicyIconPair"/>
+    <function name="libhal_storage_policy_new ()" link="libhal-storage-libhal-storage.html#libhal-storage-policy-new"/>
+    <function name="libhal_drive_from_device_file ()" link="libhal-storage-libhal-storage.html#libhal-drive-from-device-file"/>
+    <function name="libhal_drive_free ()" link="libhal-storage-libhal-storage.html#libhal-drive-free"/>
+    <function name="libhal_drive_is_hotpluggable ()" link="libhal-storage-libhal-storage.html#libhal-drive-is-hotpluggable"/>
+    <function name="libhal_drive_uses_removable_media ()" link="libhal-storage-libhal-storage.html#libhal-drive-uses-removable-media"/>
+    <function name="libhal_drive_is_media_detected ()" link="libhal-storage-libhal-storage.html#libhal-drive-is-media-detected"/>
+    <function name="libhal_drive_is_media_detection_automatic ()" link="libhal-storage-libhal-storage.html#libhal-drive-is-media-detection-automatic"/>
+    <function name="libhal_drive_get_size ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-size"/>
+    <function name="libhal_drive_get_media_size ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-media-size"/>
+    <function name="libhal_drive_get_partition_scheme ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-partition-scheme"/>
+    <function name="libhal_drive_no_partitions_hint ()" link="libhal-storage-libhal-storage.html#libhal-drive-no-partitions-hint"/>
+    <function name="libhal_drive_requires_eject ()" link="libhal-storage-libhal-storage.html#libhal-drive-requires-eject"/>
+    <function name="libhal_drive_get_type ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-type"/>
+    <function name="libhal_drive_get_bus ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-bus"/>
+    <function name="libhal_drive_get_cdrom_caps ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-cdrom-caps"/>
+    <function name="libhal_drive_get_device_major ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-device-major"/>
+    <function name="libhal_drive_get_device_minor ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-device-minor"/>
+    <function name="libhal_drive_get_type_textual ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-type-textual"/>
+    <function name="libhal_drive_get_device_file ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-device-file"/>
+    <function name="libhal_drive_get_udi ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-udi"/>
+    <function name="libhal_drive_get_serial ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-serial"/>
+    <function name="libhal_drive_get_firmware_version ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-firmware-version"/>
+    <function name="libhal_drive_get_model ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-model"/>
+    <function name="libhal_drive_get_vendor ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-vendor"/>
+    <function name="libhal_drive_get_physical_device_udi ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-physical-device-udi"/>
+    <function name="libhal_drive_get_dedicated_icon_drive ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-dedicated-icon-drive"/>
+    <function name="libhal_drive_get_dedicated_icon_volume ()" link="libhal-storage-libhal-storage.html#libhal-drive-get-dedicated-icon-volume"/>
+    <function name="libhal_drive_policy_compute_display_name ()" link="libhal-storage-libhal-storage.html#libhal-drive-policy-compute-display-name"/>
+    <function name="libhal_drive_policy_default_get_mount_root ()" link="libhal-storage-libhal-storage.html#libhal-drive-policy-default-get-mount-root"/>
+    <function name="libhal_volume_from_device_file ()" link="libhal-storage-libhal-storage.html#libhal-volume-from-device-file"/>
+    <function name="libhal_volume_from_mount_point ()" link="libhal-storage-libhal-storage.html#libhal-volume-from-mount-point"/>
+    <function name="libhal_volume_free ()" link="libhal-storage-libhal-storage.html#libhal-volume-free"/>
+    <function name="libhal_volume_get_size ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-size"/>
+    <function name="libhal_volume_get_disc_capacity ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-disc-capacity"/>
+    <function name="libhal_volume_get_udi ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-udi"/>
+    <function name="libhal_volume_get_device_file ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-device-file"/>
+    <function name="libhal_volume_get_device_major ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-device-major"/>
+    <function name="libhal_volume_get_device_minor ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-device-minor"/>
+    <function name="libhal_volume_get_fstype ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-fstype"/>
+    <function name="libhal_volume_get_fsversion ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-fsversion"/>
+    <function name="libhal_volume_get_fsusage ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-fsusage"/>
+    <function name="libhal_volume_is_mounted ()" link="libhal-storage-libhal-storage.html#libhal-volume-is-mounted"/>
+    <function name="libhal_volume_is_mounted_read_only ()" link="libhal-storage-libhal-storage.html#libhal-volume-is-mounted-read-only"/>
+    <function name="libhal_volume_is_partition ()" link="libhal-storage-libhal-storage.html#libhal-volume-is-partition"/>
+    <function name="libhal_volume_is_disc ()" link="libhal-storage-libhal-storage.html#libhal-volume-is-disc"/>
+    <function name="libhal_volume_get_partition_scheme ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-partition-scheme"/>
+    <function name="libhal_volume_get_partition_type ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-partition-type"/>
+    <function name="libhal_volume_get_partition_label ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-partition-label"/>
+    <function name="libhal_volume_get_partition_uuid ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-partition-uuid"/>
+    <function name="libhal_volume_get_partition_flags ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-partition-flags"/>
+    <function name="libhal_volume_get_partition_number ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-partition-number"/>
+    <function name="libhal_volume_get_partition_start_offset ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-partition-start-offset"/>
+    <function name="libhal_volume_get_partition_media_size ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-partition-media-size"/>
+    <function name="libhal_volume_get_label ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-label"/>
+    <function name="libhal_volume_get_mount_point ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-mount-point"/>
+    <function name="libhal_volume_get_uuid ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-uuid"/>
+    <function name="libhal_volume_get_storage_device_udi ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-storage-device-udi"/>
+    <function name="libhal_volume_crypto_get_backing_volume_udi ()" link="libhal-storage-libhal-storage.html#libhal-volume-crypto-get-backing-volume-udi"/>
+    <function name="libhal_volume_crypto_get_clear_volume_udi ()" link="libhal-storage-libhal-storage.html#libhal-volume-crypto-get-clear-volume-udi"/>
+    <function name="libhal_volume_disc_has_audio ()" link="libhal-storage-libhal-storage.html#libhal-volume-disc-has-audio"/>
+    <function name="libhal_volume_disc_has_data ()" link="libhal-storage-libhal-storage.html#libhal-volume-disc-has-data"/>
+    <function name="libhal_volume_disc_is_blank ()" link="libhal-storage-libhal-storage.html#libhal-volume-disc-is-blank"/>
+    <function name="libhal_volume_disc_is_rewritable ()" link="libhal-storage-libhal-storage.html#libhal-volume-disc-is-rewritable"/>
+    <function name="libhal_volume_disc_is_appendable ()" link="libhal-storage-libhal-storage.html#libhal-volume-disc-is-appendable"/>
+    <function name="libhal_volume_get_disc_type ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-disc-type"/>
+    <function name="libhal_volume_get_msdos_part_table_type ()" link="libhal-storage-libhal-storage.html#libhal-volume-get-msdos-part-table-type"/>
+  </functions>
+</book>

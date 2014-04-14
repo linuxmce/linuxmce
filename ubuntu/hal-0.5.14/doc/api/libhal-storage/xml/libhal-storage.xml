@@ -1,0 +1,1037 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY version SYSTEM "version.xml">
+]>
+<refentry id="libhal-storage-libhal-storage">
+<refmeta>
+<refentrytitle role="top_of_page" id="libhal-storage-libhal-storage.top_of_page">libhal-storage</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>LIBHAL-STORAGE Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>libhal-storage</refname>
+<refpurpose></refpurpose>
+</refnamediv>
+
+<refsynopsisdiv id="libhal-storage-libhal-storage.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+struct              <link linkend="LibHalDrive-s">LibHalDrive_s</link>;
+typedef             <link linkend="LibHalDrive">LibHalDrive</link>;
+struct              <link linkend="LibHalVolume-s">LibHalVolume_s</link>;
+typedef             <link linkend="LibHalVolume">LibHalVolume</link>;
+struct              <link linkend="LibHalStoragePolicy-s">LibHalStoragePolicy_s</link>;
+typedef             <link linkend="LibHalStoragePolicy">LibHalStoragePolicy</link>;
+enum                <link linkend="LibHalStoragePolicyIcon">LibHalStoragePolicyIcon</link>;
+                    <link linkend="LibHalStoragePolicyIconPair">LibHalStoragePolicyIconPair</link>;
+<link linkend="LibHalStoragePolicy">LibHalStoragePolicy</link> * <link linkend="libhal-storage-policy-new">libhal_storage_policy_new</link>         ();
+<link linkend="LibHalDrive">LibHalDrive</link> *       <link linkend="libhal-drive-from-device-file">libhal_drive_from_device_file</link>       (<link linkend="LibHalContext">LibHalContext</link> *hal_ctx,
+                                                         const <link linkend="char">char</link> *device_file);
+<link linkend="void">void</link>                <link linkend="libhal-drive-free">libhal_drive_free</link>                   (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+<link linkend="dbus-bool-t">dbus_bool_t</link>         <link linkend="libhal-drive-is-hotpluggable">libhal_drive_is_hotpluggable</link>        (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+<link linkend="dbus-bool-t">dbus_bool_t</link>         <link linkend="libhal-drive-uses-removable-media">libhal_drive_uses_removable_media</link>   (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+<link linkend="dbus-bool-t">dbus_bool_t</link>         <link linkend="libhal-drive-is-media-detected">libhal_drive_is_media_detected</link>      (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+<link linkend="dbus-bool-t">dbus_bool_t</link>         <link linkend="libhal-drive-is-media-detection-automatic">libhal_drive_is_media_detection_automatic</link>
+                                                        (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+<link linkend="dbus-uint64-t">dbus_uint64_t</link>       <link linkend="libhal-drive-get-size">libhal_drive_get_size</link>               (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+<link linkend="dbus-uint64-t">dbus_uint64_t</link>       <link linkend="libhal-drive-get-media-size">libhal_drive_get_media_size</link>         (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+const <link linkend="char">char</link> *        <link linkend="libhal-drive-get-partition-scheme">libhal_drive_get_partition_scheme</link>   (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+<link linkend="dbus-bool-t">dbus_bool_t</link>         <link linkend="libhal-drive-no-partitions-hint">libhal_drive_no_partitions_hint</link>     (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+<link linkend="dbus-bool-t">dbus_bool_t</link>         <link linkend="libhal-drive-requires-eject">libhal_drive_requires_eject</link>         (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+<link linkend="LibHalDriveType">LibHalDriveType</link>     <link linkend="libhal-drive-get-type">libhal_drive_get_type</link>               (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+<link linkend="LibHalDriveBus">LibHalDriveBus</link>      <link linkend="libhal-drive-get-bus">libhal_drive_get_bus</link>                (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+<link linkend="LibHalDriveCdromCaps">LibHalDriveCdromCaps</link>  <link linkend="libhal-drive-get-cdrom-caps">libhal_drive_get_cdrom_caps</link>       (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+unsigned <link linkend="int">int</link>        <link linkend="libhal-drive-get-device-major">libhal_drive_get_device_major</link>       (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+unsigned <link linkend="int">int</link>        <link linkend="libhal-drive-get-device-minor">libhal_drive_get_device_minor</link>       (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+const <link linkend="char">char</link> *        <link linkend="libhal-drive-get-type-textual">libhal_drive_get_type_textual</link>       (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+const <link linkend="char">char</link> *        <link linkend="libhal-drive-get-device-file">libhal_drive_get_device_file</link>        (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+const <link linkend="char">char</link> *        <link linkend="libhal-drive-get-udi">libhal_drive_get_udi</link>                (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+const <link linkend="char">char</link> *        <link linkend="libhal-drive-get-serial">libhal_drive_get_serial</link>             (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+const <link linkend="char">char</link> *        <link linkend="libhal-drive-get-firmware-version">libhal_drive_get_firmware_version</link>   (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+const <link linkend="char">char</link> *        <link linkend="libhal-drive-get-model">libhal_drive_get_model</link>              (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+const <link linkend="char">char</link> *        <link linkend="libhal-drive-get-vendor">libhal_drive_get_vendor</link>             (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+const <link linkend="char">char</link> *        <link linkend="libhal-drive-get-physical-device-udi">libhal_drive_get_physical_device_udi</link>
+                                                        (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+const <link linkend="char">char</link> *        <link linkend="libhal-drive-get-dedicated-icon-drive">libhal_drive_get_dedicated_icon_drive</link>
+                                                        (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+const <link linkend="char">char</link> *        <link linkend="libhal-drive-get-dedicated-icon-volume">libhal_drive_get_dedicated_icon_volume</link>
+                                                        (<link linkend="LibHalDrive">LibHalDrive</link> *drive);
+<link linkend="char">char</link> *              <link linkend="libhal-drive-policy-compute-display-name">libhal_drive_policy_compute_display_name</link>
+                                                        (<link linkend="LibHalDrive">LibHalDrive</link> *drive,
+                                                         <link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="char">char</link> *              <link linkend="libhal-drive-policy-default-get-mount-root">libhal_drive_policy_default_get_mount_root</link>
+                                                        ();
+<link linkend="LibHalVolume">LibHalVolume</link> *      <link linkend="libhal-volume-from-device-file">libhal_volume_from_device_file</link>      (<link linkend="LibHalContext">LibHalContext</link> *hal_ctx,
+                                                         const <link linkend="char">char</link> *device_file);
+<link linkend="LibHalVolume">LibHalVolume</link> *      <link linkend="libhal-volume-from-mount-point">libhal_volume_from_mount_point</link>      (<link linkend="LibHalContext">LibHalContext</link> *hal_ctx,
+                                                         const <link linkend="char">char</link> *mount_point);
+<link linkend="void">void</link>                <link linkend="libhal-volume-free">libhal_volume_free</link>                  (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="dbus-uint64-t">dbus_uint64_t</link>       <link linkend="libhal-volume-get-size">libhal_volume_get_size</link>              (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="dbus-uint64-t">dbus_uint64_t</link>       <link linkend="libhal-volume-get-disc-capacity">libhal_volume_get_disc_capacity</link>     (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+const <link linkend="char">char</link> *        <link linkend="libhal-volume-get-udi">libhal_volume_get_udi</link>               (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+const <link linkend="char">char</link> *        <link linkend="libhal-volume-get-device-file">libhal_volume_get_device_file</link>       (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+unsigned <link linkend="int">int</link>        <link linkend="libhal-volume-get-device-major">libhal_volume_get_device_major</link>      (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+unsigned <link linkend="int">int</link>        <link linkend="libhal-volume-get-device-minor">libhal_volume_get_device_minor</link>      (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+const <link linkend="char">char</link> *        <link linkend="libhal-volume-get-fstype">libhal_volume_get_fstype</link>            (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+const <link linkend="char">char</link> *        <link linkend="libhal-volume-get-fsversion">libhal_volume_get_fsversion</link>         (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="LibHalVolumeUsage">LibHalVolumeUsage</link>   <link linkend="libhal-volume-get-fsusage">libhal_volume_get_fsusage</link>           (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="dbus-bool-t">dbus_bool_t</link>         <link linkend="libhal-volume-is-mounted">libhal_volume_is_mounted</link>            (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="dbus-bool-t">dbus_bool_t</link>         <link linkend="libhal-volume-is-mounted-read-only">libhal_volume_is_mounted_read_only</link>  (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="dbus-bool-t">dbus_bool_t</link>         <link linkend="libhal-volume-is-partition">libhal_volume_is_partition</link>          (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="dbus-bool-t">dbus_bool_t</link>         <link linkend="libhal-volume-is-disc">libhal_volume_is_disc</link>               (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+const <link linkend="char">char</link> *        <link linkend="libhal-volume-get-partition-scheme">libhal_volume_get_partition_scheme</link>  (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+const <link linkend="char">char</link> *        <link linkend="libhal-volume-get-partition-type">libhal_volume_get_partition_type</link>    (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+const <link linkend="char">char</link> *        <link linkend="libhal-volume-get-partition-label">libhal_volume_get_partition_label</link>   (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+const <link linkend="char">char</link> *        <link linkend="libhal-volume-get-partition-uuid">libhal_volume_get_partition_uuid</link>    (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+const <link linkend="char">char</link> **       <link linkend="libhal-volume-get-partition-flags">libhal_volume_get_partition_flags</link>   (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+unsigned <link linkend="int">int</link>        <link linkend="libhal-volume-get-partition-number">libhal_volume_get_partition_number</link>  (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="dbus-uint64-t">dbus_uint64_t</link>       <link linkend="libhal-volume-get-partition-start-offset">libhal_volume_get_partition_start_offset</link>
+                                                        (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="dbus-uint64-t">dbus_uint64_t</link>       <link linkend="libhal-volume-get-partition-media-size">libhal_volume_get_partition_media_size</link>
+                                                        (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+const <link linkend="char">char</link> *        <link linkend="libhal-volume-get-label">libhal_volume_get_label</link>             (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+const <link linkend="char">char</link> *        <link linkend="libhal-volume-get-mount-point">libhal_volume_get_mount_point</link>       (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+const <link linkend="char">char</link> *        <link linkend="libhal-volume-get-uuid">libhal_volume_get_uuid</link>              (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+const <link linkend="char">char</link> *        <link linkend="libhal-volume-get-storage-device-udi">libhal_volume_get_storage_device_udi</link>
+                                                        (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+const <link linkend="char">char</link> *        <link linkend="libhal-volume-crypto-get-backing-volume-udi">libhal_volume_crypto_get_backing_volume_udi</link>
+                                                        (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="char">char</link> *              <link linkend="libhal-volume-crypto-get-clear-volume-udi">libhal_volume_crypto_get_clear_volume_udi</link>
+                                                        (<link linkend="LibHalContext">LibHalContext</link> *hal_ctx,
+                                                         <link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="dbus-bool-t">dbus_bool_t</link>         <link linkend="libhal-volume-disc-has-audio">libhal_volume_disc_has_audio</link>        (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="dbus-bool-t">dbus_bool_t</link>         <link linkend="libhal-volume-disc-has-data">libhal_volume_disc_has_data</link>         (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="dbus-bool-t">dbus_bool_t</link>         <link linkend="libhal-volume-disc-is-blank">libhal_volume_disc_is_blank</link>         (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="dbus-bool-t">dbus_bool_t</link>         <link linkend="libhal-volume-disc-is-rewritable">libhal_volume_disc_is_rewritable</link>    (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="dbus-bool-t">dbus_bool_t</link>         <link linkend="libhal-volume-disc-is-appendable">libhal_volume_disc_is_appendable</link>    (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="LibHalVolumeDiscType">LibHalVolumeDiscType</link>  <link linkend="libhal-volume-get-disc-type">libhal_volume_get_disc_type</link>       (<link linkend="LibHalVolume">LibHalVolume</link> *volume);
+<link linkend="int">int</link>                 <link linkend="libhal-volume-get-msdos-part-table-type">libhal_volume_get_msdos_part_table_type</link>
+                                                        ();
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="libhal-storage-libhal-storage.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+</para>
+</refsect1>
+
+<refsect1 id="libhal-storage-libhal-storage.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="LibHalDrive-s" role="struct">
+<title>struct LibHalDrive_s</title>
+<indexterm zone="LibHalDrive-s"><primary sortas="LibHalDrive_s">LibHalDrive_s</primary></indexterm><programlisting>struct LibHalDrive_s;</programlisting>
+<para>
+</para></refsect2>
+<refsect2 id="LibHalDrive" role="typedef">
+<title>LibHalDrive</title>
+<indexterm zone="LibHalDrive"><primary sortas="LibHalDrive">LibHalDrive</primary></indexterm><programlisting>typedef struct LibHalDrive_s LibHalDrive;
+</programlisting>
+<para>
+</para></refsect2>
+<refsect2 id="LibHalVolume-s" role="struct">
+<title>struct LibHalVolume_s</title>
+<indexterm zone="LibHalVolume-s"><primary sortas="LibHalVolume_s">LibHalVolume_s</primary></indexterm><programlisting>struct LibHalVolume_s;</programlisting>
+<para>
+</para></refsect2>
+<refsect2 id="LibHalVolume" role="typedef">
+<title>LibHalVolume</title>
+<indexterm zone="LibHalVolume"><primary sortas="LibHalVolume">LibHalVolume</primary></indexterm><programlisting>typedef struct LibHalVolume_s LibHalVolume;
+</programlisting>
+<para>
+</para></refsect2>
+<refsect2 id="LibHalStoragePolicy-s" role="struct">
+<title>struct LibHalStoragePolicy_s</title>
+<indexterm zone="LibHalStoragePolicy-s"><primary sortas="LibHalStoragePolicy_s">LibHalStoragePolicy_s</primary></indexterm><programlisting>struct LibHalStoragePolicy_s;</programlisting>
+<para>
+</para></refsect2>
+<refsect2 id="LibHalStoragePolicy" role="typedef">
+<title>LibHalStoragePolicy</title>
+<indexterm zone="LibHalStoragePolicy"><primary sortas="LibHalStoragePolicy">LibHalStoragePolicy</primary></indexterm><programlisting>typedef struct LibHalStoragePolicy_s LibHalStoragePolicy;
+</programlisting>
+<para>
+</para></refsect2>
+<refsect2 id="LibHalStoragePolicyIcon" role="enum">
+<title>enum LibHalStoragePolicyIcon</title>
+<indexterm zone="LibHalStoragePolicyIcon"><primary sortas="LibHalStoragePolicyIcon">LibHalStoragePolicyIcon</primary></indexterm><programlisting>typedef enum {
+	LIBHAL_STORAGE_ICON_DRIVE_REMOVABLE_DISK           = 0x10000,
+	LIBHAL_STORAGE_ICON_DRIVE_REMOVABLE_DISK_IDE       = 0x10001,
+	LIBHAL_STORAGE_ICON_DRIVE_REMOVABLE_DISK_SCSI      = 0x10002,
+	LIBHAL_STORAGE_ICON_DRIVE_REMOVABLE_DISK_USB       = 0x10003,
+	LIBHAL_STORAGE_ICON_DRIVE_REMOVABLE_DISK_IEEE1394  = 0x10004,
+	LIBHAL_STORAGE_ICON_DRIVE_DISK                     = 0x10100,
+	LIBHAL_STORAGE_ICON_DRIVE_DISK_IDE                 = 0x10101,
+	LIBHAL_STORAGE_ICON_DRIVE_DISK_SCSI                = 0x10102,
+	LIBHAL_STORAGE_ICON_DRIVE_DISK_USB                 = 0x10103,
+	LIBHAL_STORAGE_ICON_DRIVE_DISK_IEEE1394            = 0x10104,
+	LIBHAL_STORAGE_ICON_DRIVE_CDROM                    = 0x10200,
+	LIBHAL_STORAGE_ICON_DRIVE_CDROM_IDE                = 0x10201,
+	LIBHAL_STORAGE_ICON_DRIVE_CDROM_SCSI               = 0x10202,
+	LIBHAL_STORAGE_ICON_DRIVE_CDROM_USB                = 0x10203,
+	LIBHAL_STORAGE_ICON_DRIVE_CDROM_IEEE1394           = 0x10204,
+	LIBHAL_STORAGE_ICON_DRIVE_FLOPPY                   = 0x10300,
+	LIBHAL_STORAGE_ICON_DRIVE_FLOPPY_IDE               = 0x10301,
+	LIBHAL_STORAGE_ICON_DRIVE_FLOPPY_SCSI              = 0x10302,
+	LIBHAL_STORAGE_ICON_DRIVE_FLOPPY_USB               = 0x10303,
+	LIBHAL_STORAGE_ICON_DRIVE_FLOPPY_IEEE1394          = 0x10304,
+	LIBHAL_STORAGE_ICON_DRIVE_TAPE                     = 0x10400,
+	LIBHAL_STORAGE_ICON_DRIVE_COMPACT_FLASH            = 0x10500,
+	LIBHAL_STORAGE_ICON_DRIVE_MEMORY_STICK             = 0x10600,
+	LIBHAL_STORAGE_ICON_DRIVE_SMART_MEDIA              = 0x10700,
+	LIBHAL_STORAGE_ICON_DRIVE_SD_MMC                   = 0x10800,
+	LIBHAL_STORAGE_ICON_DRIVE_CAMERA                   = 0x10900,
+	LIBHAL_STORAGE_ICON_DRIVE_PORTABLE_AUDIO_PLAYER    = 0x10a00,
+	LIBHAL_STORAGE_ICON_DRIVE_ZIP                      = 0x10b00,
+        LIBHAL_STORAGE_ICON_DRIVE_JAZ                      = 0x10c00,
+        LIBHAL_STORAGE_ICON_DRIVE_FLASH_KEY                = 0x10d00,
+
+	LIBHAL_STORAGE_ICON_VOLUME_REMOVABLE_DISK          = 0x20000,
+	LIBHAL_STORAGE_ICON_VOLUME_REMOVABLE_DISK_IDE      = 0x20001,
+	LIBHAL_STORAGE_ICON_VOLUME_REMOVABLE_DISK_SCSI     = 0x20002,
+	LIBHAL_STORAGE_ICON_VOLUME_REMOVABLE_DISK_USB      = 0x20003,
+	LIBHAL_STORAGE_ICON_VOLUME_REMOVABLE_DISK_IEEE1394 = 0x20004,
+	LIBHAL_STORAGE_ICON_VOLUME_DISK                    = 0x20100,
+	LIBHAL_STORAGE_ICON_VOLUME_DISK_IDE                = 0x20101,
+	LIBHAL_STORAGE_ICON_VOLUME_DISK_SCSI               = 0x20102,
+	LIBHAL_STORAGE_ICON_VOLUME_DISK_USB                = 0x20103,
+	LIBHAL_STORAGE_ICON_VOLUME_DISK_IEEE1394           = 0x20104,
+	LIBHAL_STORAGE_ICON_VOLUME_CDROM                   = 0x20200,
+	LIBHAL_STORAGE_ICON_VOLUME_CDROM_IDE               = 0x20201,
+	LIBHAL_STORAGE_ICON_VOLUME_CDROM_SCSI              = 0x20202,
+	LIBHAL_STORAGE_ICON_VOLUME_CDROM_USB               = 0x20203,
+	LIBHAL_STORAGE_ICON_VOLUME_CDROM_IEEE1394          = 0x20204,
+	LIBHAL_STORAGE_ICON_VOLUME_FLOPPY                  = 0x20300,
+	LIBHAL_STORAGE_ICON_VOLUME_FLOPPY_IDE              = 0x20301,
+	LIBHAL_STORAGE_ICON_VOLUME_FLOPPY_SCSI             = 0x20302,
+	LIBHAL_STORAGE_ICON_VOLUME_FLOPPY_USB              = 0x20303,
+	LIBHAL_STORAGE_ICON_VOLUME_FLOPPY_IEEE1394         = 0x20304,
+	LIBHAL_STORAGE_ICON_VOLUME_TAPE                    = 0x20400,
+	LIBHAL_STORAGE_ICON_VOLUME_COMPACT_FLASH           = 0x20500,
+	LIBHAL_STORAGE_ICON_VOLUME_MEMORY_STICK            = 0x20600,
+	LIBHAL_STORAGE_ICON_VOLUME_SMART_MEDIA             = 0x20700,
+	LIBHAL_STORAGE_ICON_VOLUME_SD_MMC                  = 0x20800,
+	LIBHAL_STORAGE_ICON_VOLUME_CAMERA                  = 0x20900,
+	LIBHAL_STORAGE_ICON_VOLUME_PORTABLE_AUDIO_PLAYER   = 0x20a00,
+	LIBHAL_STORAGE_ICON_VOLUME_ZIP                     = 0x20b00,
+        LIBHAL_STORAGE_ICON_VOLUME_JAZ                     = 0x20c00,
+        LIBHAL_STORAGE_ICON_VOLUME_FLASH_KEY               = 0x20d00,
+
+	LIBHAL_STORAGE_ICON_DISC_CDROM                     = 0x30000,
+	LIBHAL_STORAGE_ICON_DISC_CDR                       = 0x30001,
+	LIBHAL_STORAGE_ICON_DISC_CDRW                      = 0x30002,
+	LIBHAL_STORAGE_ICON_DISC_DVDROM                    = 0x30003,
+	LIBHAL_STORAGE_ICON_DISC_DVDRAM                    = 0x30004,
+	LIBHAL_STORAGE_ICON_DISC_DVDR                      = 0x30005,
+	LIBHAL_STORAGE_ICON_DISC_DVDRW                     = 0x30006,
+	LIBHAL_STORAGE_ICON_DISC_DVDPLUSR                  = 0x30007,
+	LIBHAL_STORAGE_ICON_DISC_DVDPLUSRW                 = 0x30008,
+	LIBHAL_STORAGE_ICON_DISC_DVDPLUSRWDL               = 0x30009,
+	LIBHAL_STORAGE_ICON_DISC_BDROM                     = 0x3000a,
+	LIBHAL_STORAGE_ICON_DISC_BDR                       = 0x3000b,
+	LIBHAL_STORAGE_ICON_DISC_BDRE                      = 0x3000c,
+	LIBHAL_STORAGE_ICON_DISC_HDDVDROM                  = 0x3000d,
+	LIBHAL_STORAGE_ICON_DISC_HDDVDR                    = 0x3000e,
+	LIBHAL_STORAGE_ICON_DISC_HDDVDRW                   = 0x3000f,
+	LIBHAL_STORAGE_ICON_DISC_MRW                       = 0x30010,
+	LIBHAL_STORAGE_ICON_DISC_MRWW                      = 0x30011,
+	LIBHAL_STORAGE_ICON_DISC_MO                        = 0x30012
+} LibHalStoragePolicyIcon;
+</programlisting>
+<para>
+</para></refsect2>
+<refsect2 id="LibHalStoragePolicyIconPair" role="struct">
+<title>LibHalStoragePolicyIconPair</title>
+<indexterm zone="LibHalStoragePolicyIconPair"><primary sortas="LibHalStoragePolicyIconPair">LibHalStoragePolicyIconPair</primary></indexterm><programlisting>typedef struct {
+	LibHalStoragePolicyIcon icon;
+	const char *icon_path;
+} LibHalStoragePolicyIconPair;
+</programlisting>
+<para>
+</para></refsect2>
+<refsect2 id="libhal-storage-policy-new" role="function">
+<title>libhal_storage_policy_new ()</title>
+<indexterm zone="libhal-storage-policy-new"><primary sortas="libhal_storage_policy_new">libhal_storage_policy_new</primary></indexterm><programlisting><link linkend="LibHalStoragePolicy">LibHalStoragePolicy</link> * libhal_storage_policy_new         ();</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-from-device-file" role="function">
+<title>libhal_drive_from_device_file ()</title>
+<indexterm zone="libhal-drive-from-device-file"><primary sortas="libhal_drive_from_device_file">libhal_drive_from_device_file</primary></indexterm><programlisting><link linkend="LibHalDrive">LibHalDrive</link> *       libhal_drive_from_device_file       (<link linkend="LibHalContext">LibHalContext</link> *hal_ctx,
+                                                         const <link linkend="char">char</link> *device_file);</programlisting>
+<para>
+</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>hal_ctx</parameter>&#160;:</term>
+<listitem><simpara>             libhal context to use
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>device_file</parameter>&#160;:</term>
+<listitem><simpara>         Name of special device file, e.g. '/dev/hdc'
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>              LibHalDrive object or NULL if it doesn't exist
+
+ Get the drive object that either is (when given e.g. /dev/sdb) or contains
+ (when given e.g. /dev/sdb1) the given device file. 
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-free" role="function">
+<title>libhal_drive_free ()</title>
+<indexterm zone="libhal-drive-free"><primary sortas="libhal_drive_free">libhal_drive_free</primary></indexterm><programlisting><link linkend="void">void</link>                libhal_drive_free                   (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+Free all resources used by a LibHalDrive object.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>              Object to free
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-is-hotpluggable" role="function">
+<title>libhal_drive_is_hotpluggable ()</title>
+<indexterm zone="libhal-drive-is-hotpluggable"><primary sortas="libhal_drive_is_hotpluggable">libhal_drive_is_hotpluggable</primary></indexterm><programlisting><link linkend="dbus-bool-t">dbus_bool_t</link>         libhal_drive_is_hotpluggable        (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-uses-removable-media" role="function">
+<title>libhal_drive_uses_removable_media ()</title>
+<indexterm zone="libhal-drive-uses-removable-media"><primary sortas="libhal_drive_uses_removable_media">libhal_drive_uses_removable_media</primary></indexterm><programlisting><link linkend="dbus-bool-t">dbus_bool_t</link>         libhal_drive_uses_removable_media   (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-is-media-detected" role="function">
+<title>libhal_drive_is_media_detected ()</title>
+<indexterm zone="libhal-drive-is-media-detected"><primary sortas="libhal_drive_is_media_detected">libhal_drive_is_media_detected</primary></indexterm><programlisting><link linkend="dbus-bool-t">dbus_bool_t</link>         libhal_drive_is_media_detected      (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-is-media-detection-automatic" role="function">
+<title>libhal_drive_is_media_detection_automatic ()</title>
+<indexterm zone="libhal-drive-is-media-detection-automatic"><primary sortas="libhal_drive_is_media_detection_automatic">libhal_drive_is_media_detection_automatic</primary></indexterm><programlisting><link linkend="dbus-bool-t">dbus_bool_t</link>         libhal_drive_is_media_detection_automatic
+                                                        (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-size" role="function">
+<title>libhal_drive_get_size ()</title>
+<indexterm zone="libhal-drive-get-size"><primary sortas="libhal_drive_get_size">libhal_drive_get_size</primary></indexterm><programlisting><link linkend="dbus-uint64-t">dbus_uint64_t</link>       libhal_drive_get_size               (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-media-size" role="function">
+<title>libhal_drive_get_media_size ()</title>
+<indexterm zone="libhal-drive-get-media-size"><primary sortas="libhal_drive_get_media_size">libhal_drive_get_media_size</primary></indexterm><programlisting><link linkend="dbus-uint64-t">dbus_uint64_t</link>       libhal_drive_get_media_size         (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-partition-scheme" role="function">
+<title>libhal_drive_get_partition_scheme ()</title>
+<indexterm zone="libhal-drive-get-partition-scheme"><primary sortas="libhal_drive_get_partition_scheme">libhal_drive_get_partition_scheme</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_drive_get_partition_scheme   (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-no-partitions-hint" role="function">
+<title>libhal_drive_no_partitions_hint ()</title>
+<indexterm zone="libhal-drive-no-partitions-hint"><primary sortas="libhal_drive_no_partitions_hint">libhal_drive_no_partitions_hint</primary></indexterm><programlisting><link linkend="dbus-bool-t">dbus_bool_t</link>         libhal_drive_no_partitions_hint     (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-requires-eject" role="function">
+<title>libhal_drive_requires_eject ()</title>
+<indexterm zone="libhal-drive-requires-eject"><primary sortas="libhal_drive_requires_eject">libhal_drive_requires_eject</primary></indexterm><programlisting><link linkend="dbus-bool-t">dbus_bool_t</link>         libhal_drive_requires_eject         (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-type" role="function">
+<title>libhal_drive_get_type ()</title>
+<indexterm zone="libhal-drive-get-type"><primary sortas="libhal_drive_get_type">libhal_drive_get_type</primary></indexterm><programlisting><link linkend="LibHalDriveType">LibHalDriveType</link>     libhal_drive_get_type               (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-bus" role="function">
+<title>libhal_drive_get_bus ()</title>
+<indexterm zone="libhal-drive-get-bus"><primary sortas="libhal_drive_get_bus">libhal_drive_get_bus</primary></indexterm><programlisting><link linkend="LibHalDriveBus">LibHalDriveBus</link>      libhal_drive_get_bus                (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-cdrom-caps" role="function">
+<title>libhal_drive_get_cdrom_caps ()</title>
+<indexterm zone="libhal-drive-get-cdrom-caps"><primary sortas="libhal_drive_get_cdrom_caps">libhal_drive_get_cdrom_caps</primary></indexterm><programlisting><link linkend="LibHalDriveCdromCaps">LibHalDriveCdromCaps</link>  libhal_drive_get_cdrom_caps       (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-device-major" role="function">
+<title>libhal_drive_get_device_major ()</title>
+<indexterm zone="libhal-drive-get-device-major"><primary sortas="libhal_drive_get_device_major">libhal_drive_get_device_major</primary></indexterm><programlisting>unsigned <link linkend="int">int</link>        libhal_drive_get_device_major       (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-device-minor" role="function">
+<title>libhal_drive_get_device_minor ()</title>
+<indexterm zone="libhal-drive-get-device-minor"><primary sortas="libhal_drive_get_device_minor">libhal_drive_get_device_minor</primary></indexterm><programlisting>unsigned <link linkend="int">int</link>        libhal_drive_get_device_minor       (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-type-textual" role="function">
+<title>libhal_drive_get_type_textual ()</title>
+<indexterm zone="libhal-drive-get-type-textual"><primary sortas="libhal_drive_get_type_textual">libhal_drive_get_type_textual</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_drive_get_type_textual       (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-device-file" role="function">
+<title>libhal_drive_get_device_file ()</title>
+<indexterm zone="libhal-drive-get-device-file"><primary sortas="libhal_drive_get_device_file">libhal_drive_get_device_file</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_drive_get_device_file        (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-udi" role="function">
+<title>libhal_drive_get_udi ()</title>
+<indexterm zone="libhal-drive-get-udi"><primary sortas="libhal_drive_get_udi">libhal_drive_get_udi</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_drive_get_udi                (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-serial" role="function">
+<title>libhal_drive_get_serial ()</title>
+<indexterm zone="libhal-drive-get-serial"><primary sortas="libhal_drive_get_serial">libhal_drive_get_serial</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_drive_get_serial             (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-firmware-version" role="function">
+<title>libhal_drive_get_firmware_version ()</title>
+<indexterm zone="libhal-drive-get-firmware-version"><primary sortas="libhal_drive_get_firmware_version">libhal_drive_get_firmware_version</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_drive_get_firmware_version   (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-model" role="function">
+<title>libhal_drive_get_model ()</title>
+<indexterm zone="libhal-drive-get-model"><primary sortas="libhal_drive_get_model">libhal_drive_get_model</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_drive_get_model              (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-vendor" role="function">
+<title>libhal_drive_get_vendor ()</title>
+<indexterm zone="libhal-drive-get-vendor"><primary sortas="libhal_drive_get_vendor">libhal_drive_get_vendor</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_drive_get_vendor             (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-physical-device-udi" role="function">
+<title>libhal_drive_get_physical_device_udi ()</title>
+<indexterm zone="libhal-drive-get-physical-device-udi"><primary sortas="libhal_drive_get_physical_device_udi">libhal_drive_get_physical_device_udi</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_drive_get_physical_device_udi
+                                                        (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-dedicated-icon-drive" role="function">
+<title>libhal_drive_get_dedicated_icon_drive ()</title>
+<indexterm zone="libhal-drive-get-dedicated-icon-drive"><primary sortas="libhal_drive_get_dedicated_icon_drive">libhal_drive_get_dedicated_icon_drive</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_drive_get_dedicated_icon_drive
+                                                        (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-get-dedicated-icon-volume" role="function">
+<title>libhal_drive_get_dedicated_icon_volume ()</title>
+<indexterm zone="libhal-drive-get-dedicated-icon-volume"><primary sortas="libhal_drive_get_dedicated_icon_volume">libhal_drive_get_dedicated_icon_volume</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_drive_get_dedicated_icon_volume
+                                                        (<link linkend="LibHalDrive">LibHalDrive</link> *drive);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-policy-compute-display-name" role="function">
+<title>libhal_drive_policy_compute_display_name ()</title>
+<indexterm zone="libhal-drive-policy-compute-display-name"><primary sortas="libhal_drive_policy_compute_display_name">libhal_drive_policy_compute_display_name</primary></indexterm><programlisting><link linkend="char">char</link> *              libhal_drive_policy_compute_display_name
+                                                        (<link linkend="LibHalDrive">LibHalDrive</link> *drive,
+                                                         <link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>drive</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-drive-policy-default-get-mount-root" role="function">
+<title>libhal_drive_policy_default_get_mount_root ()</title>
+<indexterm zone="libhal-drive-policy-default-get-mount-root"><primary sortas="libhal_drive_policy_default_get_mount_root">libhal_drive_policy_default_get_mount_root</primary></indexterm><programlisting><link linkend="char">char</link> *              libhal_drive_policy_default_get_mount_root
+                                                        ();</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-from-device-file" role="function">
+<title>libhal_volume_from_device_file ()</title>
+<indexterm zone="libhal-volume-from-device-file"><primary sortas="libhal_volume_from_device_file">libhal_volume_from_device_file</primary></indexterm><programlisting><link linkend="LibHalVolume">LibHalVolume</link> *      libhal_volume_from_device_file      (<link linkend="LibHalContext">LibHalContext</link> *hal_ctx,
+                                                         const <link linkend="char">char</link> *device_file);</programlisting>
+<para>
+</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>hal_ctx</parameter>&#160;:</term>
+<listitem><simpara>            libhal context to use
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>device_file</parameter>&#160;:</term>
+<listitem><simpara>        Name of special device file, e.g. '/dev/hda5'
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>             LibHalVolume object or NULL if it doesn't exist
+
+ Get the volume object for a given device file.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-from-mount-point" role="function">
+<title>libhal_volume_from_mount_point ()</title>
+<indexterm zone="libhal-volume-from-mount-point"><primary sortas="libhal_volume_from_mount_point">libhal_volume_from_mount_point</primary></indexterm><programlisting><link linkend="LibHalVolume">LibHalVolume</link> *      libhal_volume_from_mount_point      (<link linkend="LibHalContext">LibHalContext</link> *hal_ctx,
+                                                         const <link linkend="char">char</link> *mount_point);</programlisting>
+<para>
+</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>hal_ctx</parameter>&#160;:</term>
+<listitem><simpara>             libhal context to use
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>mount_point</parameter>&#160;:</term>
+<listitem><simpara>         Name of mount point without terminting slash, e.g. '/media/disk'
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>              LibHalVolume object or NULL if it doesn't exist
+
+ Get the volume object for a given mount point 
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-free" role="function">
+<title>libhal_volume_free ()</title>
+<indexterm zone="libhal-volume-free"><primary sortas="libhal_volume_free">libhal_volume_free</primary></indexterm><programlisting><link linkend="void">void</link>                libhal_volume_free                  (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+Free all resources used by a LibHalVolume object.</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>              Object to free
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-size" role="function">
+<title>libhal_volume_get_size ()</title>
+<indexterm zone="libhal-volume-get-size"><primary sortas="libhal_volume_get_size">libhal_volume_get_size</primary></indexterm><programlisting><link linkend="dbus-uint64-t">dbus_uint64_t</link>       libhal_volume_get_size              (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-disc-capacity" role="function">
+<title>libhal_volume_get_disc_capacity ()</title>
+<indexterm zone="libhal-volume-get-disc-capacity"><primary sortas="libhal_volume_get_disc_capacity">libhal_volume_get_disc_capacity</primary></indexterm><programlisting><link linkend="dbus-uint64-t">dbus_uint64_t</link>       libhal_volume_get_disc_capacity     (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-udi" role="function">
+<title>libhal_volume_get_udi ()</title>
+<indexterm zone="libhal-volume-get-udi"><primary sortas="libhal_volume_get_udi">libhal_volume_get_udi</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_volume_get_udi               (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-device-file" role="function">
+<title>libhal_volume_get_device_file ()</title>
+<indexterm zone="libhal-volume-get-device-file"><primary sortas="libhal_volume_get_device_file">libhal_volume_get_device_file</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_volume_get_device_file       (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-device-major" role="function">
+<title>libhal_volume_get_device_major ()</title>
+<indexterm zone="libhal-volume-get-device-major"><primary sortas="libhal_volume_get_device_major">libhal_volume_get_device_major</primary></indexterm><programlisting>unsigned <link linkend="int">int</link>        libhal_volume_get_device_major      (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-device-minor" role="function">
+<title>libhal_volume_get_device_minor ()</title>
+<indexterm zone="libhal-volume-get-device-minor"><primary sortas="libhal_volume_get_device_minor">libhal_volume_get_device_minor</primary></indexterm><programlisting>unsigned <link linkend="int">int</link>        libhal_volume_get_device_minor      (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-fstype" role="function">
+<title>libhal_volume_get_fstype ()</title>
+<indexterm zone="libhal-volume-get-fstype"><primary sortas="libhal_volume_get_fstype">libhal_volume_get_fstype</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_volume_get_fstype            (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-fsversion" role="function">
+<title>libhal_volume_get_fsversion ()</title>
+<indexterm zone="libhal-volume-get-fsversion"><primary sortas="libhal_volume_get_fsversion">libhal_volume_get_fsversion</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_volume_get_fsversion         (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-fsusage" role="function">
+<title>libhal_volume_get_fsusage ()</title>
+<indexterm zone="libhal-volume-get-fsusage"><primary sortas="libhal_volume_get_fsusage">libhal_volume_get_fsusage</primary></indexterm><programlisting><link linkend="LibHalVolumeUsage">LibHalVolumeUsage</link>   libhal_volume_get_fsusage           (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-is-mounted" role="function">
+<title>libhal_volume_is_mounted ()</title>
+<indexterm zone="libhal-volume-is-mounted"><primary sortas="libhal_volume_is_mounted">libhal_volume_is_mounted</primary></indexterm><programlisting><link linkend="dbus-bool-t">dbus_bool_t</link>         libhal_volume_is_mounted            (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-is-mounted-read-only" role="function">
+<title>libhal_volume_is_mounted_read_only ()</title>
+<indexterm zone="libhal-volume-is-mounted-read-only"><primary sortas="libhal_volume_is_mounted_read_only">libhal_volume_is_mounted_read_only</primary></indexterm><programlisting><link linkend="dbus-bool-t">dbus_bool_t</link>         libhal_volume_is_mounted_read_only  (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-is-partition" role="function">
+<title>libhal_volume_is_partition ()</title>
+<indexterm zone="libhal-volume-is-partition"><primary sortas="libhal_volume_is_partition">libhal_volume_is_partition</primary></indexterm><programlisting><link linkend="dbus-bool-t">dbus_bool_t</link>         libhal_volume_is_partition          (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-is-disc" role="function">
+<title>libhal_volume_is_disc ()</title>
+<indexterm zone="libhal-volume-is-disc"><primary sortas="libhal_volume_is_disc">libhal_volume_is_disc</primary></indexterm><programlisting><link linkend="dbus-bool-t">dbus_bool_t</link>         libhal_volume_is_disc               (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-partition-scheme" role="function">
+<title>libhal_volume_get_partition_scheme ()</title>
+<indexterm zone="libhal-volume-get-partition-scheme"><primary sortas="libhal_volume_get_partition_scheme">libhal_volume_get_partition_scheme</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_volume_get_partition_scheme  (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-partition-type" role="function">
+<title>libhal_volume_get_partition_type ()</title>
+<indexterm zone="libhal-volume-get-partition-type"><primary sortas="libhal_volume_get_partition_type">libhal_volume_get_partition_type</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_volume_get_partition_type    (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-partition-label" role="function">
+<title>libhal_volume_get_partition_label ()</title>
+<indexterm zone="libhal-volume-get-partition-label"><primary sortas="libhal_volume_get_partition_label">libhal_volume_get_partition_label</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_volume_get_partition_label   (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-partition-uuid" role="function">
+<title>libhal_volume_get_partition_uuid ()</title>
+<indexterm zone="libhal-volume-get-partition-uuid"><primary sortas="libhal_volume_get_partition_uuid">libhal_volume_get_partition_uuid</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_volume_get_partition_uuid    (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-partition-flags" role="function">
+<title>libhal_volume_get_partition_flags ()</title>
+<indexterm zone="libhal-volume-get-partition-flags"><primary sortas="libhal_volume_get_partition_flags">libhal_volume_get_partition_flags</primary></indexterm><programlisting>const <link linkend="char">char</link> **       libhal_volume_get_partition_flags   (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-partition-number" role="function">
+<title>libhal_volume_get_partition_number ()</title>
+<indexterm zone="libhal-volume-get-partition-number"><primary sortas="libhal_volume_get_partition_number">libhal_volume_get_partition_number</primary></indexterm><programlisting>unsigned <link linkend="int">int</link>        libhal_volume_get_partition_number  (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-partition-start-offset" role="function">
+<title>libhal_volume_get_partition_start_offset ()</title>
+<indexterm zone="libhal-volume-get-partition-start-offset"><primary sortas="libhal_volume_get_partition_start_offset">libhal_volume_get_partition_start_offset</primary></indexterm><programlisting><link linkend="dbus-uint64-t">dbus_uint64_t</link>       libhal_volume_get_partition_start_offset
+                                                        (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-partition-media-size" role="function">
+<title>libhal_volume_get_partition_media_size ()</title>
+<indexterm zone="libhal-volume-get-partition-media-size"><primary sortas="libhal_volume_get_partition_media_size">libhal_volume_get_partition_media_size</primary></indexterm><programlisting><link linkend="dbus-uint64-t">dbus_uint64_t</link>       libhal_volume_get_partition_media_size
+                                                        (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-label" role="function">
+<title>libhal_volume_get_label ()</title>
+<indexterm zone="libhal-volume-get-label"><primary sortas="libhal_volume_get_label">libhal_volume_get_label</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_volume_get_label             (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-mount-point" role="function">
+<title>libhal_volume_get_mount_point ()</title>
+<indexterm zone="libhal-volume-get-mount-point"><primary sortas="libhal_volume_get_mount_point">libhal_volume_get_mount_point</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_volume_get_mount_point       (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-uuid" role="function">
+<title>libhal_volume_get_uuid ()</title>
+<indexterm zone="libhal-volume-get-uuid"><primary sortas="libhal_volume_get_uuid">libhal_volume_get_uuid</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_volume_get_uuid              (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-storage-device-udi" role="function">
+<title>libhal_volume_get_storage_device_udi ()</title>
+<indexterm zone="libhal-volume-get-storage-device-udi"><primary sortas="libhal_volume_get_storage_device_udi">libhal_volume_get_storage_device_udi</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_volume_get_storage_device_udi
+                                                        (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-crypto-get-backing-volume-udi" role="function">
+<title>libhal_volume_crypto_get_backing_volume_udi ()</title>
+<indexterm zone="libhal-volume-crypto-get-backing-volume-udi"><primary sortas="libhal_volume_crypto_get_backing_volume_udi">libhal_volume_crypto_get_backing_volume_udi</primary></indexterm><programlisting>const <link linkend="char">char</link> *        libhal_volume_crypto_get_backing_volume_udi
+                                                        (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-crypto-get-clear-volume-udi" role="function">
+<title>libhal_volume_crypto_get_clear_volume_udi ()</title>
+<indexterm zone="libhal-volume-crypto-get-clear-volume-udi"><primary sortas="libhal_volume_crypto_get_clear_volume_udi">libhal_volume_crypto_get_clear_volume_udi</primary></indexterm><programlisting><link linkend="char">char</link> *              libhal_volume_crypto_get_clear_volume_udi
+                                                        (<link linkend="LibHalContext">LibHalContext</link> *hal_ctx,
+                                                         <link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>hal_ctx</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-disc-has-audio" role="function">
+<title>libhal_volume_disc_has_audio ()</title>
+<indexterm zone="libhal-volume-disc-has-audio"><primary sortas="libhal_volume_disc_has_audio">libhal_volume_disc_has_audio</primary></indexterm><programlisting><link linkend="dbus-bool-t">dbus_bool_t</link>         libhal_volume_disc_has_audio        (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-disc-has-data" role="function">
+<title>libhal_volume_disc_has_data ()</title>
+<indexterm zone="libhal-volume-disc-has-data"><primary sortas="libhal_volume_disc_has_data">libhal_volume_disc_has_data</primary></indexterm><programlisting><link linkend="dbus-bool-t">dbus_bool_t</link>         libhal_volume_disc_has_data         (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-disc-is-blank" role="function">
+<title>libhal_volume_disc_is_blank ()</title>
+<indexterm zone="libhal-volume-disc-is-blank"><primary sortas="libhal_volume_disc_is_blank">libhal_volume_disc_is_blank</primary></indexterm><programlisting><link linkend="dbus-bool-t">dbus_bool_t</link>         libhal_volume_disc_is_blank         (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-disc-is-rewritable" role="function">
+<title>libhal_volume_disc_is_rewritable ()</title>
+<indexterm zone="libhal-volume-disc-is-rewritable"><primary sortas="libhal_volume_disc_is_rewritable">libhal_volume_disc_is_rewritable</primary></indexterm><programlisting><link linkend="dbus-bool-t">dbus_bool_t</link>         libhal_volume_disc_is_rewritable    (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-disc-is-appendable" role="function">
+<title>libhal_volume_disc_is_appendable ()</title>
+<indexterm zone="libhal-volume-disc-is-appendable"><primary sortas="libhal_volume_disc_is_appendable">libhal_volume_disc_is_appendable</primary></indexterm><programlisting><link linkend="dbus-bool-t">dbus_bool_t</link>         libhal_volume_disc_is_appendable    (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-disc-type" role="function">
+<title>libhal_volume_get_disc_type ()</title>
+<indexterm zone="libhal-volume-get-disc-type"><primary sortas="libhal_volume_get_disc_type">libhal_volume_get_disc_type</primary></indexterm><programlisting><link linkend="LibHalVolumeDiscType">LibHalVolumeDiscType</link>  libhal_volume_get_disc_type       (<link linkend="LibHalVolume">LibHalVolume</link> *volume);</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>volume</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="libhal-volume-get-msdos-part-table-type" role="function">
+<title>libhal_volume_get_msdos_part_table_type ()</title>
+<indexterm zone="libhal-volume-get-msdos-part-table-type"><primary sortas="libhal_volume_get_msdos_part_table_type">libhal_volume_get_msdos_part_table_type</primary></indexterm><programlisting><link linkend="int">int</link>                 libhal_volume_get_msdos_part_table_type
+                                                        ();</programlisting>
+<para>
+</para>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><emphasis>Returns</emphasis>&#160;:</term><listitem><simpara>              The partition type or -1 if volume is not
+                       a partition or the media the volume stems from
+                       isn't partition with a MS DOS style table
+
+ If the volume is on a drive with a MSDOS style partition table, return
+ the partition table id.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

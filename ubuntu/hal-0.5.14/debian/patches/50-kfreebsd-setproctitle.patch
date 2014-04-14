@@ -1,0 +1,124 @@
+From a2aab553483d0ba2011538df3d84ae6e70e6108f Mon Sep 17 00:00:00 2001
+From: Michael Biebl <biebl@debian.org>
+Date: Wed, 11 Nov 2009 05:49:53 +0100
+Subject: [PATCH 2/6] Disable usage of setproctitle on kfreebsd
+
+---
+ hald/freebsd/addons/addon-mouse.c    |    2 ++
+ hald/freebsd/addons/addon-storage.c  |    2 ++
+ hald/freebsd/probing/probe-hiddev.c  |    2 ++
+ hald/freebsd/probing/probe-mouse.c   |    2 ++
+ hald/freebsd/probing/probe-scsi.c    |    2 ++
+ hald/freebsd/probing/probe-storage.c |    2 ++
+ hald/freebsd/probing/probe-volume.c  |    2 ++
+ 7 files changed, 14 insertions(+), 0 deletions(-)
+
+diff --git a/hald/freebsd/addons/addon-mouse.c b/hald/freebsd/addons/addon-mouse.c
+index 51194ca..fd81437 100644
+--- a/hald/freebsd/addons/addon-mouse.c
++++ b/hald/freebsd/addons/addon-mouse.c
+@@ -322,7 +322,9 @@ main (int argc, char **argv)
+   if (! addon.device_file)
+     goto end;
+ 
++#ifndef __GLIBC__
+   setproctitle("%s", addon.device_file);
++#endif
+ 
+   if (! libhal_device_addon_is_ready(hfp_ctx, hfp_udi, &hfp_error))
+     goto end;
+diff --git a/hald/freebsd/addons/addon-storage.c b/hald/freebsd/addons/addon-storage.c
+index 3125037..069b007 100644
+--- a/hald/freebsd/addons/addon-storage.c
++++ b/hald/freebsd/addons/addon-storage.c
+@@ -329,12 +329,14 @@ skip_check:
+ static void
+ update_proc_title (const char *device)
+ {
++#ifndef __GLIBC__
+   if (polling_disabled)
+     setproctitle("no polling on %s because it is explicitly disabled", device);
+   else if (is_locked_by_hal)
+     setproctitle("no polling on %s because it is locked by HAL", device);
+   else
+     setproctitle("%s", device);
++#endif
+ }
+ 
+ static DBusHandlerResult
+diff --git a/hald/freebsd/probing/probe-hiddev.c b/hald/freebsd/probing/probe-hiddev.c
+index f0c598b..3e2d415 100644
+--- a/hald/freebsd/probing/probe-hiddev.c
++++ b/hald/freebsd/probing/probe-hiddev.c
+@@ -71,8 +71,10 @@ main (int argc, char **argv)
+   if (fd < 0)
+     goto end;
+ 
++#ifndef __GLIBC__
+   /* give a meaningful process title for ps(1) */
+   setproctitle("%s", device_file);
++#endif
+ 
+ #ifdef HAVE_LIBUSB20
+   report_id = hid_get_report_id(fd);
+diff --git a/hald/freebsd/probing/probe-mouse.c b/hald/freebsd/probing/probe-mouse.c
+index a2cffc1..ea6cced 100644
+--- a/hald/freebsd/probing/probe-mouse.c
++++ b/hald/freebsd/probing/probe-mouse.c
+@@ -301,7 +301,9 @@ main (int argc, char **argv)
+     goto end;
+ 
+   /* give a meaningful process title for ps(1) */
++#ifndef __GLIBC__
+   setproctitle("%s", device_file);
++#endif
+ 
+   /* Sleep for a second to give moused a chance to connect. */
+   sleep(1);
+diff --git a/hald/freebsd/probing/probe-scsi.c b/hald/freebsd/probing/probe-scsi.c
+index 2de75e2..6de38d0 100644
+--- a/hald/freebsd/probing/probe-scsi.c
++++ b/hald/freebsd/probing/probe-scsi.c
+@@ -47,8 +47,10 @@ main (int argc, char **argv)
+   if (! device_file)
+     goto end;
+ 
++#ifndef __GLIBC__
+   /* give a meaningful process title for ps(1) */
+   setproctitle("%s", device_file);
++#endif
+ 
+   /* cam_open_device() fails unless we use O_RDWR */
+   cam = cam_open_device(device_file, O_RDWR);
+diff --git a/hald/freebsd/probing/probe-storage.c b/hald/freebsd/probing/probe-storage.c
+index a0e7f77..4ad8153 100644
+--- a/hald/freebsd/probing/probe-storage.c
++++ b/hald/freebsd/probing/probe-storage.c
+@@ -193,8 +193,10 @@ main (int argc, char **argv)
+   if (! parent)
+     goto end;
+ 
++#ifndef __GLIBC__
+   /* give a meaningful process title for ps(1) */
+   setproctitle("%s", device_file);
++#endif
+ 
+   has_children = hfp_getenv_bool("HF_HAS_CHILDREN");
+   only_check_for_media = hfp_getenv_bool("HF_ONLY_CHECK_FOR_MEDIA");
+diff --git a/hald/freebsd/probing/probe-volume.c b/hald/freebsd/probing/probe-volume.c
+index 73e0318..c435eaf 100644
+--- a/hald/freebsd/probing/probe-volume.c
++++ b/hald/freebsd/probing/probe-volume.c
+@@ -347,7 +347,9 @@ main (int argc, char **argv)
+     goto end;
+ 
+   /* give a meaningful process title for ps(1) */
++#ifndef __GLIBC__
+   setproctitle("%s", device_file);
++#endif
+ 
+   has_children = hfp_getenv_bool("HF_HAS_CHILDREN");
+   is_swap = hfp_getenv_bool("HF_IS_SWAP");
+-- 
+1.6.5.4
+

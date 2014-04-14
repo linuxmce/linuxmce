@@ -1,0 +1,136 @@
+Source: hal
+Section: admin
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Utopia Maintenance Team <pkg-utopia-maintainers@lists.alioth.debian.org>
+Uploaders: Sjoerd Simons <sjoerd@debian.org>, Sebastian Dröge <slomo@debian.org>, Michael Biebl <biebl@debian.org>
+Build-Depends: debhelper (>= 8),
+ cdbs,
+ autotools-dev,
+ libdbus-glib-1-dev (>= 0.61),
+ libglib2.0-dev,
+ libsysfs-dev,
+ libexpat1-dev,
+ libpopt-dev,
+ pkg-config,
+ pciutils,
+ doxygen,
+ intltool (>= 0.22),
+ libusb-dev [linux-any],
+ libusb2-dev [kfreebsd-any],
+ libusbhid-dev [kfreebsd-any],
+ libcam-dev [kfreebsd-any],
+ libblkid-dev (>= 2.15),
+ xmlto,
+ libxml2-utils,
+ gtk-doc-tools,
+ dh-autoreconf
+Standards-Version: 3.9.3
+Vcs-Svn: svn://svn.debian.org/pkg-utopia/packages/unstable/hal/
+Vcs-Browser: http://svn.debian.org/wsvn/pkg-utopia/packages/unstable/hal/
+Homepage: http://hal.freedesktop.org/
+
+Package: hal
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+ adduser,
+ pciutils,
+ usbutils [!hurd-i386],
+ udev (>= 143) [linux-any],
+ dbus (>= 0.61),
+ lsb-base (>= 3.2-14),
+ hal-info (>= 20070402),
+ mount (>= 2.13) [linux-any],
+ freebsd-utils [kfreebsd-any]
+Recommends: eject,
+ pm-utils [linux-any],
+ consolekit (>= 0.3)
+Breaks: xserver-xorg (<< 1:7.6+8)
+Description: Hardware Abstraction Layer
+ HAL provides an abstract view on hardware.
+ .
+ This abstraction layer is simply an interface that makes it possible to
+ add support for new devices and new ways of connecting devices to the
+ computer, without modifying every application that uses the device.
+ It maintains a list of devices that currently exist, and can provide
+ information about those upon request.
+
+Package: hal-doc
+Architecture: all
+Section: doc
+Depends: ${misc:Depends}
+Suggests: devhelp
+Description: Hardware Abstraction Layer - documentation
+ HAL provides an abstract view on hardware.
+ .
+ This abstraction layer is simply an interface that makes it possible to
+ add support for new devices and new ways of connecting devices to the
+ computer, without modifying every application that uses the device.
+ It maintains a list of devices that currently exist, and can provide
+ information about those upon request.
+ .
+ This package contains the API documentation for HAL.
+
+Package: libhal1
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Hardware Abstraction Layer - shared library
+ HAL provides an abstract view on hardware.
+ .
+ This abstraction layer is simply an interface that makes it possible to
+ add support for new devices and new ways of connecting devices to the
+ computer, without modifying every application that uses the device.
+ It maintains a list of devices that currently exist, and can provide
+ information about those upon request.
+ .
+ This package contains shared libraries to be used by applications.
+
+Package: libhal-storage1
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Hardware Abstraction Layer - shared library for storage devices
+ HAL provides an abstract view on hardware.
+ .
+ This abstraction layer is simply an interface that makes it possible to
+ add support for new devices and new ways of connecting devices to the
+ computer, without modifying every application that uses the device.
+ It maintains a list of devices that currently exist, and can provide
+ information about those upon request.
+ .
+ This library provides an interface for handling storage devices.
+
+Package: libhal-dev
+Section: libdevel
+Architecture: any
+Depends: libhal1 (= ${binary:Version}), ${misc:Depends}, libdbus-1-dev (>= 0.60)
+Suggests: hal-doc
+Description: Hardware Abstraction Layer - development files
+ HAL provides an abstract view on hardware.
+ .
+ This abstraction layer is simply an interface that makes it possible to
+ add support for new devices and new ways of connecting devices to the
+ computer, without modifying every application that uses the device.
+ It maintains a list of devices that currently exist, and can provide
+ information about those upon request.
+ .
+ This package contains files that are needed to build applications.
+
+Package: libhal-storage-dev
+Section: libdevel
+Architecture: any
+Depends: libhal-storage1 (= ${binary:Version}), ${misc:Depends}, libdbus-1-dev (>= 0.60), libhal-dev
+Suggests: hal-doc
+Description: Hardware Abstraction Layer - development files
+ HAL provides an abstract view on hardware.
+ .
+ This abstraction layer is simply an interface that makes it possible to
+ add support for new devices and new ways of connecting devices to the
+ computer, without modifying every application that uses the device.
+ It maintains a list of devices that currently exist, and can provide
+ information about those upon request.
+ .
+ This package contains files that are needed to build applications that use
+ libhal-storage1.
+

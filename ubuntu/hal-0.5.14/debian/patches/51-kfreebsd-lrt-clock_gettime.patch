@@ -1,0 +1,24 @@
+From 5a9eaefe2a373856c2fd7e568921a01492d10b1c Mon Sep 17 00:00:00 2001
+From: Michael Biebl <biebl@debian.org>
+Date: Thu, 19 Nov 2009 19:43:22 +0100
+Subject: [PATCH 3/6] Link against -lrt for clock_gettime
+
+Link against -lrt as we need that for clock_gettime on kfreebsd.
+AC_SEARCH_LIBS should handle the case nicely that on freebsd this function is
+already part of libc.
+---
+ configure.in |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+Index: hal-0.5.14/configure.in
+===================================================================
+--- hal-0.5.14.orig/configure.in	2011-04-10 06:58:38.683837727 +0200
++++ hal-0.5.14/configure.in	2011-04-10 06:58:42.603788447 +0200
+@@ -510,6 +510,7 @@
+ AM_CONDITIONAL(HALD_COMPILE_SOLARIS, [test x$HALD_BACKEND = xsolaris], [Compiling for Solaris])
+ AC_SUBST(HALD_BACKEND)
+ if test "x$HALD_BACKEND" = "xfreebsd"; then
++    AC_SEARCH_LIBS([clock_gettime], [rt])
+     USE_BSDLIBUSB20=no
+     USE_BSDLIBUSB=no
+     LIBUSB20_LIBS=""

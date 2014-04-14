@@ -1,0 +1,677 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY version SYSTEM "version.xml">
+]>
+<refentry id="libhal-uthash">
+<refmeta>
+<refentrytitle role="top_of_page" id="libhal-uthash.top_of_page">uthash</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>LIBHAL Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>uthash</refname>
+<refpurpose></refpurpose>
+</refnamediv>
+
+<refsynopsisdiv id="libhal-uthash.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+#define             <link linkend="uthash-fatal">uthash_fatal</link>                        (msg)
+#define             <link linkend="uthash-bkt-malloc">uthash_bkt_malloc</link>                   (sz)
+#define             <link linkend="uthash-bkt-free">uthash_bkt_free</link>                     (ptr)
+#define             <link linkend="uthash-tbl-malloc">uthash_tbl_malloc</link>                   (sz)
+#define             <link linkend="uthash-tbl-free">uthash_tbl_free</link>                     (ptr)
+#define             <link linkend="uthash-noexpand-fyi">uthash_noexpand_fyi</link>                 (tbl)
+#define             <link linkend="uthash-expand-fyi">uthash_expand_fyi</link>                   (tbl)
+#define             <link linkend="HASH-INITIAL-NUM-BUCKETS--CAPS">HASH_INITIAL_NUM_BUCKETS</link>
+#define             <link linkend="HASH-BKT-CAPACITY-THRESH--CAPS">HASH_BKT_CAPACITY_THRESH</link>
+#define             <link linkend="HASH-FIND--CAPS">HASH_FIND</link>                           (hh,head,keyptr,keylen_in,out)
+#define             <link linkend="HASH-ADD--CAPS">HASH_ADD</link>                            (hh,head,fieldname,keylen_in,add)
+#define             <link linkend="HASH-ADD-KEYPTR--CAPS">HASH_ADD_KEYPTR</link>                     (hh,head,keyptr,keylen_in,add)
+#define             <link linkend="HASH-DELETE--CAPS">HASH_DELETE</link>                         (hh,head,delptr)
+#define             <link linkend="HASH-FIND-STR--CAPS">HASH_FIND_STR</link>                       (head,findstr,out)
+#define             <link linkend="HASH-ADD-STR--CAPS">HASH_ADD_STR</link>                        (head,strfield,add)
+#define             <link linkend="HASH-FIND-INT--CAPS">HASH_FIND_INT</link>                       (head,findint,out)
+#define             <link linkend="HASH-ADD-INT--CAPS">HASH_ADD_INT</link>                        (head,intfield,add)
+#define             <link linkend="HASH-DEL--CAPS">HASH_DEL</link>                            (head,delptr)
+#define             <link linkend="HASH-OOPS--CAPS">HASH_OOPS</link>                           (...)
+#define             <link linkend="HASH-FSCK--CAPS">HASH_FSCK</link>                           (head)
+#define             <link linkend="HASH-EMIT-KEY--CAPS">HASH_EMIT_KEY</link>                       (hh,head,keyptr,fieldlen)
+#define             <link linkend="HASH-FCN--CAPS">HASH_FCN</link>
+#define             <link linkend="HASH-BER--CAPS">HASH_BER</link>                            (key,keylen,num_bkts,bkt,i,j,k)
+#define             <link linkend="HASH-SAX--CAPS">HASH_SAX</link>                            (key,keylen,num_bkts,bkt,i,j,k)
+#define             <link linkend="HASH-FNV--CAPS">HASH_FNV</link>                            (key,keylen,num_bkts,bkt,i,j,k)
+#define             <link linkend="HASH-OAT--CAPS">HASH_OAT</link>                            (key,keylen,num_bkts,bkt,i,j,k)
+#define             <link linkend="HASH-JEN-MIX--CAPS">HASH_JEN_MIX</link>                        (a,b,c)
+#define             <link linkend="HASH-JEN--CAPS">HASH_JEN</link>                            (key,keylen,num_bkts,bkt,i,j,k)
+#define             <link linkend="HASH-JSW--CAPS">HASH_JSW</link>                            (key,keylen,num_bkts,bkt,i,j,k)
+#define             <link linkend="HASH-KEYCMP--CAPS">HASH_KEYCMP</link>                         (a,b,len)
+#define             <link linkend="HASH-FIND-IN-BKT--CAPS">HASH_FIND_IN_BKT</link>                    (hh,head,keyptr,keylen_in,out)
+#define             <link linkend="HASH-ADD-TO-BKT--CAPS">HASH_ADD_TO_BKT</link>                     (hh,head,add)
+#define             <link linkend="HASH-DEL-IN-BKT--CAPS">HASH_DEL_IN_BKT</link>                     (hh,head,delptr)
+#define             <link linkend="HASH-EXPAND-BUCKETS--CAPS">HASH_EXPAND_BUCKETS</link>                 (tbl)
+#define             <link linkend="HASH-SORT--CAPS">HASH_SORT</link>                           (head,cmpfcn)
+                    <link linkend="UT-hash-bucket">UT_hash_bucket</link>;
+                    <link linkend="UT-hash-table">UT_hash_table</link>;
+                    <link linkend="UT-hash-handle">UT_hash_handle</link>;
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="libhal-uthash.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+</para>
+</refsect1>
+
+<refsect1 id="libhal-uthash.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="uthash-fatal" role="macro">
+<title>uthash_fatal()</title>
+<indexterm zone="uthash-fatal"><primary sortas="uthash_fatal">uthash_fatal</primary></indexterm><programlisting>#define uthash_fatal(msg) exit(-1)        /* fatal error (out of memory,etc) */
+</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>msg</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="uthash-bkt-malloc" role="macro">
+<title>uthash_bkt_malloc()</title>
+<indexterm zone="uthash-bkt-malloc"><primary sortas="uthash_bkt_malloc">uthash_bkt_malloc</primary></indexterm><programlisting>#define uthash_bkt_malloc(sz) malloc(sz)  /* malloc fcn for UT_hash_bucket's */
+</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>sz</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="uthash-bkt-free" role="macro">
+<title>uthash_bkt_free()</title>
+<indexterm zone="uthash-bkt-free"><primary sortas="uthash_bkt_free">uthash_bkt_free</primary></indexterm><programlisting>#define uthash_bkt_free(ptr) free(ptr)    /* free fcn for UT_hash_bucket's   */
+</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>ptr</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="uthash-tbl-malloc" role="macro">
+<title>uthash_tbl_malloc()</title>
+<indexterm zone="uthash-tbl-malloc"><primary sortas="uthash_tbl_malloc">uthash_tbl_malloc</primary></indexterm><programlisting>#define uthash_tbl_malloc(sz) malloc(sz)  /* malloc fcn for UT_hash_table    */
+</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>sz</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="uthash-tbl-free" role="macro">
+<title>uthash_tbl_free()</title>
+<indexterm zone="uthash-tbl-free"><primary sortas="uthash_tbl_free">uthash_tbl_free</primary></indexterm><programlisting>#define uthash_tbl_free(ptr) free(ptr)    /* free fcn for UT_hash_table      */
+</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>ptr</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="uthash-noexpand-fyi" role="macro">
+<title>uthash_noexpand_fyi()</title>
+<indexterm zone="uthash-noexpand-fyi"><primary sortas="uthash_noexpand_fyi">uthash_noexpand_fyi</primary></indexterm><programlisting>#define uthash_noexpand_fyi(tbl)          /* can be defined to log noexpand  */
+</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>tbl</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="uthash-expand-fyi" role="macro">
+<title>uthash_expand_fyi()</title>
+<indexterm zone="uthash-expand-fyi"><primary sortas="uthash_expand_fyi">uthash_expand_fyi</primary></indexterm><programlisting>#define uthash_expand_fyi(tbl)            /* can be defined to log expands   */
+</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>tbl</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-INITIAL-NUM-BUCKETS--CAPS" role="macro">
+<title>HASH_INITIAL_NUM_BUCKETS</title>
+<indexterm zone="HASH-INITIAL-NUM-BUCKETS--CAPS"><primary sortas="HASH_INITIAL_NUM_BUCKETS">HASH_INITIAL_NUM_BUCKETS</primary></indexterm><programlisting>#define HASH_INITIAL_NUM_BUCKETS 32  /* initial number of buckets        */
+</programlisting>
+<para>
+</para></refsect2>
+<refsect2 id="HASH-BKT-CAPACITY-THRESH--CAPS" role="macro">
+<title>HASH_BKT_CAPACITY_THRESH</title>
+<indexterm zone="HASH-BKT-CAPACITY-THRESH--CAPS"><primary sortas="HASH_BKT_CAPACITY_THRESH">HASH_BKT_CAPACITY_THRESH</primary></indexterm><programlisting>#define HASH_BKT_CAPACITY_THRESH 10  /* expand when bucket count reaches */
+</programlisting>
+<para>
+</para></refsect2>
+<refsect2 id="HASH-FIND--CAPS" role="macro">
+<title>HASH_FIND()</title>
+<indexterm zone="HASH-FIND--CAPS"><primary sortas="HASH_FIND">HASH_FIND</primary></indexterm><programlisting>#define             HASH_FIND(hh,head,keyptr,keylen_in,out)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>hh</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>head</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>keyptr</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>keylen_in</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-ADD--CAPS" role="macro">
+<title>HASH_ADD()</title>
+<indexterm zone="HASH-ADD--CAPS"><primary sortas="HASH_ADD">HASH_ADD</primary></indexterm><programlisting>#define             HASH_ADD(hh,head,fieldname,keylen_in,add)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>hh</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>head</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>fieldname</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>keylen_in</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>add</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-ADD-KEYPTR--CAPS" role="macro">
+<title>HASH_ADD_KEYPTR()</title>
+<indexterm zone="HASH-ADD-KEYPTR--CAPS"><primary sortas="HASH_ADD_KEYPTR">HASH_ADD_KEYPTR</primary></indexterm><programlisting>#define             HASH_ADD_KEYPTR(hh,head,keyptr,keylen_in,add)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>hh</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>head</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>keyptr</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>keylen_in</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>add</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-DELETE--CAPS" role="macro">
+<title>HASH_DELETE()</title>
+<indexterm zone="HASH-DELETE--CAPS"><primary sortas="HASH_DELETE">HASH_DELETE</primary></indexterm><programlisting>#define             HASH_DELETE(hh,head,delptr)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>hh</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>head</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>delptr</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-FIND-STR--CAPS" role="macro">
+<title>HASH_FIND_STR()</title>
+<indexterm zone="HASH-FIND-STR--CAPS"><primary sortas="HASH_FIND_STR">HASH_FIND_STR</primary></indexterm><programlisting>#define             HASH_FIND_STR(head,findstr,out)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>head</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>findstr</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-ADD-STR--CAPS" role="macro">
+<title>HASH_ADD_STR()</title>
+<indexterm zone="HASH-ADD-STR--CAPS"><primary sortas="HASH_ADD_STR">HASH_ADD_STR</primary></indexterm><programlisting>#define             HASH_ADD_STR(head,strfield,add)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>head</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>strfield</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>add</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-FIND-INT--CAPS" role="macro">
+<title>HASH_FIND_INT()</title>
+<indexterm zone="HASH-FIND-INT--CAPS"><primary sortas="HASH_FIND_INT">HASH_FIND_INT</primary></indexterm><programlisting>#define             HASH_FIND_INT(head,findint,out)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>head</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>findint</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-ADD-INT--CAPS" role="macro">
+<title>HASH_ADD_INT()</title>
+<indexterm zone="HASH-ADD-INT--CAPS"><primary sortas="HASH_ADD_INT">HASH_ADD_INT</primary></indexterm><programlisting>#define             HASH_ADD_INT(head,intfield,add)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>head</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>intfield</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>add</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-DEL--CAPS" role="macro">
+<title>HASH_DEL()</title>
+<indexterm zone="HASH-DEL--CAPS"><primary sortas="HASH_DEL">HASH_DEL</primary></indexterm><programlisting>#define             HASH_DEL(head,delptr)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>head</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>delptr</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-OOPS--CAPS" role="macro">
+<title>HASH_OOPS()</title>
+<indexterm zone="HASH-OOPS--CAPS"><primary sortas="HASH_OOPS">HASH_OOPS</primary></indexterm><programlisting>#define HASH_OOPS(...) do { fprintf(stderr,__VA_ARGS__); exit(-1); } while (0)
+</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>...</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-FSCK--CAPS" role="macro">
+<title>HASH_FSCK()</title>
+<indexterm zone="HASH-FSCK--CAPS"><primary sortas="HASH_FSCK">HASH_FSCK</primary></indexterm><programlisting>#define             HASH_FSCK(head)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>head</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-EMIT-KEY--CAPS" role="macro">
+<title>HASH_EMIT_KEY()</title>
+<indexterm zone="HASH-EMIT-KEY--CAPS"><primary sortas="HASH_EMIT_KEY">HASH_EMIT_KEY</primary></indexterm><programlisting>#define             HASH_EMIT_KEY(hh,head,keyptr,fieldlen)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>hh</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>head</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>keyptr</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>fieldlen</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-FCN--CAPS" role="macro">
+<title>HASH_FCN</title>
+<indexterm zone="HASH-FCN--CAPS"><primary sortas="HASH_FCN">HASH_FCN</primary></indexterm><programlisting>#define             HASH_FCN</programlisting>
+<para>
+</para></refsect2>
+<refsect2 id="HASH-BER--CAPS" role="macro">
+<title>HASH_BER()</title>
+<indexterm zone="HASH-BER--CAPS"><primary sortas="HASH_BER">HASH_BER</primary></indexterm><programlisting>#define             HASH_BER(key,keylen,num_bkts,bkt,i,j,k)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>key</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>keylen</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>num_bkts</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>bkt</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>i</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>j</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>k</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-SAX--CAPS" role="macro">
+<title>HASH_SAX()</title>
+<indexterm zone="HASH-SAX--CAPS"><primary sortas="HASH_SAX">HASH_SAX</primary></indexterm><programlisting>#define             HASH_SAX(key,keylen,num_bkts,bkt,i,j,k)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>key</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>keylen</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>num_bkts</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>bkt</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>i</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>j</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>k</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-FNV--CAPS" role="macro">
+<title>HASH_FNV()</title>
+<indexterm zone="HASH-FNV--CAPS"><primary sortas="HASH_FNV">HASH_FNV</primary></indexterm><programlisting>#define             HASH_FNV(key,keylen,num_bkts,bkt,i,j,k)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>key</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>keylen</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>num_bkts</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>bkt</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>i</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>j</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>k</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-OAT--CAPS" role="macro">
+<title>HASH_OAT()</title>
+<indexterm zone="HASH-OAT--CAPS"><primary sortas="HASH_OAT">HASH_OAT</primary></indexterm><programlisting>#define             HASH_OAT(key,keylen,num_bkts,bkt,i,j,k)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>key</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>keylen</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>num_bkts</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>bkt</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>i</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>j</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>k</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-JEN-MIX--CAPS" role="macro">
+<title>HASH_JEN_MIX()</title>
+<indexterm zone="HASH-JEN-MIX--CAPS"><primary sortas="HASH_JEN_MIX">HASH_JEN_MIX</primary></indexterm><programlisting>#define             HASH_JEN_MIX(a,b,c)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>a</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>b</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>c</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-JEN--CAPS" role="macro">
+<title>HASH_JEN()</title>
+<indexterm zone="HASH-JEN--CAPS"><primary sortas="HASH_JEN">HASH_JEN</primary></indexterm><programlisting>#define             HASH_JEN(key,keylen,num_bkts,bkt,i,j,k)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>key</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>keylen</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>num_bkts</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>bkt</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>i</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>j</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>k</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-JSW--CAPS" role="macro">
+<title>HASH_JSW()</title>
+<indexterm zone="HASH-JSW--CAPS"><primary sortas="HASH_JSW">HASH_JSW</primary></indexterm><programlisting>#define             HASH_JSW(key,keylen,num_bkts,bkt,i,j,k)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>key</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>keylen</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>num_bkts</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>bkt</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>i</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>j</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>k</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-KEYCMP--CAPS" role="macro">
+<title>HASH_KEYCMP()</title>
+<indexterm zone="HASH-KEYCMP--CAPS"><primary sortas="HASH_KEYCMP">HASH_KEYCMP</primary></indexterm><programlisting>#define HASH_KEYCMP(a,b,len) memcmp(a,b,len) 
+</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>a</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>b</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>len</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-FIND-IN-BKT--CAPS" role="macro">
+<title>HASH_FIND_IN_BKT()</title>
+<indexterm zone="HASH-FIND-IN-BKT--CAPS"><primary sortas="HASH_FIND_IN_BKT">HASH_FIND_IN_BKT</primary></indexterm><programlisting>#define             HASH_FIND_IN_BKT(hh,head,keyptr,keylen_in,out)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>hh</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>head</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>keyptr</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>keylen_in</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>out</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-ADD-TO-BKT--CAPS" role="macro">
+<title>HASH_ADD_TO_BKT()</title>
+<indexterm zone="HASH-ADD-TO-BKT--CAPS"><primary sortas="HASH_ADD_TO_BKT">HASH_ADD_TO_BKT</primary></indexterm><programlisting>#define             HASH_ADD_TO_BKT(hh,head,add)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>hh</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>head</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>add</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-DEL-IN-BKT--CAPS" role="macro">
+<title>HASH_DEL_IN_BKT()</title>
+<indexterm zone="HASH-DEL-IN-BKT--CAPS"><primary sortas="HASH_DEL_IN_BKT">HASH_DEL_IN_BKT</primary></indexterm><programlisting>#define             HASH_DEL_IN_BKT(hh,head,delptr)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>hh</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>head</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>delptr</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-EXPAND-BUCKETS--CAPS" role="macro">
+<title>HASH_EXPAND_BUCKETS()</title>
+<indexterm zone="HASH-EXPAND-BUCKETS--CAPS"><primary sortas="HASH_EXPAND_BUCKETS">HASH_EXPAND_BUCKETS</primary></indexterm><programlisting>#define             HASH_EXPAND_BUCKETS(tbl)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>tbl</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="HASH-SORT--CAPS" role="macro">
+<title>HASH_SORT()</title>
+<indexterm zone="HASH-SORT--CAPS"><primary sortas="HASH_SORT">HASH_SORT</primary></indexterm><programlisting>#define             HASH_SORT(head,cmpfcn)</programlisting>
+<para>
+</para><variablelist role="params">
+<varlistentry><term><parameter>head</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>cmpfcn</parameter>&#160;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="UT-hash-bucket" role="struct">
+<title>UT_hash_bucket</title>
+<indexterm zone="UT-hash-bucket"><primary sortas="UT_hash_bucket">UT_hash_bucket</primary></indexterm><programlisting>typedef struct {
+   struct UT_hash_handle *hh_head;
+   unsigned count;  
+   unsigned expand_mult;  
+} UT_hash_bucket;
+</programlisting>
+<para>
+</para></refsect2>
+<refsect2 id="UT-hash-table" role="struct">
+<title>UT_hash_table</title>
+<indexterm zone="UT-hash-table"><primary sortas="UT_hash_table">UT_hash_table</primary></indexterm><programlisting>typedef struct {
+   UT_hash_bucket *buckets;
+   unsigned num_buckets;
+   unsigned num_items;
+   int noexpand;  /* when set, inhibits expansion of buckets for this hash  */
+   int hash_q; /* measures the evenness of the items among buckets (0-1) */
+   struct UT_hash_handle *tail; /* tail hh in app order, for fast append    */
+   char *name;    /* macro-stringified name of list head, used by libut     */
+   int hho;
+   /* scratch */
+   unsigned bkt;
+   char *key;
+   size_t keylen;
+   int i,j,k;
+   /* scratch for bucket expansion */
+   UT_hash_bucket *new_buckets, *newbkt;
+   struct UT_hash_handle *hh, *hh_nxt;
+   unsigned bkt_i, bkt_ideal, sum_of_deltas;
+   int new_hash_q;
+   /* scratch for sort */
+   int looping,nmerges,insize,psize,qsize;
+   struct UT_hash_handle *p, *q, *e, *list, *tale;
+} UT_hash_table;
+</programlisting>
+<para>
+</para></refsect2>
+<refsect2 id="UT-hash-handle" role="struct">
+<title>UT_hash_handle</title>
+<indexterm zone="UT-hash-handle"><primary sortas="UT_hash_handle">UT_hash_handle</primary></indexterm><programlisting>typedef struct {
+   struct UT_hash_table *tbl;
+   void *elmt;                       /* ptr to enclosing element       */
+   void *prev;                       /* prev element in app order      */
+   void *next;                       /* next element in app order      */
+   struct UT_hash_handle *hh_prev;   /* previous hh in bucket order    */
+   struct UT_hash_handle *hh_next;   /* next hh in bucket order        */
+   void *key;                        /* ptr to enclosing struct's key  */
+   size_t keylen;                       /* enclosing struct's key len     */
+} UT_hash_handle;
+</programlisting>
+<para>
+</para></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

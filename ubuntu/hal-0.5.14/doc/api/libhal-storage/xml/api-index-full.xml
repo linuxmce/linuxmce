@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<!DOCTYPE indexdiv PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+<!ENTITY version SYSTEM "version.xml">
+]>
+<indexdiv>
+<indexdiv><title>L</title>
+<indexentry><primaryie linkends="LibHalDrive"><link linkend="LibHalDrive">LibHalDrive</link></primaryie></indexentry>
+<indexentry><primaryie linkends="LibHalDrive-s"><link linkend="LibHalDrive-s">LibHalDrive_s</link></primaryie></indexentry>
+<indexentry><primaryie linkends="LibHalStoragePolicy"><link linkend="LibHalStoragePolicy">LibHalStoragePolicy</link></primaryie></indexentry>
+<indexentry><primaryie linkends="LibHalStoragePolicyIcon"><link linkend="LibHalStoragePolicyIcon">LibHalStoragePolicyIcon</link></primaryie></indexentry>
+<indexentry><primaryie linkends="LibHalStoragePolicyIconPair"><link linkend="LibHalStoragePolicyIconPair">LibHalStoragePolicyIconPair</link></primaryie></indexentry>
+<indexentry><primaryie linkends="LibHalStoragePolicy-s"><link linkend="LibHalStoragePolicy-s">LibHalStoragePolicy_s</link></primaryie></indexentry>
+<indexentry><primaryie linkends="LibHalVolume"><link linkend="LibHalVolume">LibHalVolume</link></primaryie></indexentry>
+<indexentry><primaryie linkends="LibHalVolume-s"><link linkend="LibHalVolume-s">LibHalVolume_s</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-free"><link linkend="libhal-drive-free">libhal_drive_free</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-from-device-file"><link linkend="libhal-drive-from-device-file">libhal_drive_from_device_file</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-bus"><link linkend="libhal-drive-get-bus">libhal_drive_get_bus</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-cdrom-caps"><link linkend="libhal-drive-get-cdrom-caps">libhal_drive_get_cdrom_caps</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-dedicated-icon-drive"><link linkend="libhal-drive-get-dedicated-icon-drive">libhal_drive_get_dedicated_icon_drive</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-dedicated-icon-volume"><link linkend="libhal-drive-get-dedicated-icon-volume">libhal_drive_get_dedicated_icon_volume</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-device-file"><link linkend="libhal-drive-get-device-file">libhal_drive_get_device_file</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-device-major"><link linkend="libhal-drive-get-device-major">libhal_drive_get_device_major</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-device-minor"><link linkend="libhal-drive-get-device-minor">libhal_drive_get_device_minor</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-firmware-version"><link linkend="libhal-drive-get-firmware-version">libhal_drive_get_firmware_version</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-media-size"><link linkend="libhal-drive-get-media-size">libhal_drive_get_media_size</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-model"><link linkend="libhal-drive-get-model">libhal_drive_get_model</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-partition-scheme"><link linkend="libhal-drive-get-partition-scheme">libhal_drive_get_partition_scheme</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-physical-device-udi"><link linkend="libhal-drive-get-physical-device-udi">libhal_drive_get_physical_device_udi</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-serial"><link linkend="libhal-drive-get-serial">libhal_drive_get_serial</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-size"><link linkend="libhal-drive-get-size">libhal_drive_get_size</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-type"><link linkend="libhal-drive-get-type">libhal_drive_get_type</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-type-textual"><link linkend="libhal-drive-get-type-textual">libhal_drive_get_type_textual</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-udi"><link linkend="libhal-drive-get-udi">libhal_drive_get_udi</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-get-vendor"><link linkend="libhal-drive-get-vendor">libhal_drive_get_vendor</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-is-hotpluggable"><link linkend="libhal-drive-is-hotpluggable">libhal_drive_is_hotpluggable</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-is-media-detected"><link linkend="libhal-drive-is-media-detected">libhal_drive_is_media_detected</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-is-media-detection-automatic"><link linkend="libhal-drive-is-media-detection-automatic">libhal_drive_is_media_detection_automatic</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-no-partitions-hint"><link linkend="libhal-drive-no-partitions-hint">libhal_drive_no_partitions_hint</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-policy-compute-display-name"><link linkend="libhal-drive-policy-compute-display-name">libhal_drive_policy_compute_display_name</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-policy-default-get-mount-root"><link linkend="libhal-drive-policy-default-get-mount-root">libhal_drive_policy_default_get_mount_root</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-requires-eject"><link linkend="libhal-drive-requires-eject">libhal_drive_requires_eject</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-drive-uses-removable-media"><link linkend="libhal-drive-uses-removable-media">libhal_drive_uses_removable_media</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-storage-policy-new"><link linkend="libhal-storage-policy-new">libhal_storage_policy_new</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-crypto-get-backing-volume-udi"><link linkend="libhal-volume-crypto-get-backing-volume-udi">libhal_volume_crypto_get_backing_volume_udi</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-crypto-get-clear-volume-udi"><link linkend="libhal-volume-crypto-get-clear-volume-udi">libhal_volume_crypto_get_clear_volume_udi</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-disc-has-audio"><link linkend="libhal-volume-disc-has-audio">libhal_volume_disc_has_audio</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-disc-has-data"><link linkend="libhal-volume-disc-has-data">libhal_volume_disc_has_data</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-disc-is-appendable"><link linkend="libhal-volume-disc-is-appendable">libhal_volume_disc_is_appendable</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-disc-is-blank"><link linkend="libhal-volume-disc-is-blank">libhal_volume_disc_is_blank</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-disc-is-rewritable"><link linkend="libhal-volume-disc-is-rewritable">libhal_volume_disc_is_rewritable</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-free"><link linkend="libhal-volume-free">libhal_volume_free</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-from-device-file"><link linkend="libhal-volume-from-device-file">libhal_volume_from_device_file</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-from-mount-point"><link linkend="libhal-volume-from-mount-point">libhal_volume_from_mount_point</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-device-file"><link linkend="libhal-volume-get-device-file">libhal_volume_get_device_file</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-device-major"><link linkend="libhal-volume-get-device-major">libhal_volume_get_device_major</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-device-minor"><link linkend="libhal-volume-get-device-minor">libhal_volume_get_device_minor</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-disc-capacity"><link linkend="libhal-volume-get-disc-capacity">libhal_volume_get_disc_capacity</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-disc-type"><link linkend="libhal-volume-get-disc-type">libhal_volume_get_disc_type</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-fstype"><link linkend="libhal-volume-get-fstype">libhal_volume_get_fstype</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-fsusage"><link linkend="libhal-volume-get-fsusage">libhal_volume_get_fsusage</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-fsversion"><link linkend="libhal-volume-get-fsversion">libhal_volume_get_fsversion</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-label"><link linkend="libhal-volume-get-label">libhal_volume_get_label</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-mount-point"><link linkend="libhal-volume-get-mount-point">libhal_volume_get_mount_point</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-msdos-part-table-type"><link linkend="libhal-volume-get-msdos-part-table-type">libhal_volume_get_msdos_part_table_type</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-partition-flags"><link linkend="libhal-volume-get-partition-flags">libhal_volume_get_partition_flags</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-partition-label"><link linkend="libhal-volume-get-partition-label">libhal_volume_get_partition_label</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-partition-media-size"><link linkend="libhal-volume-get-partition-media-size">libhal_volume_get_partition_media_size</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-partition-number"><link linkend="libhal-volume-get-partition-number">libhal_volume_get_partition_number</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-partition-scheme"><link linkend="libhal-volume-get-partition-scheme">libhal_volume_get_partition_scheme</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-partition-start-offset"><link linkend="libhal-volume-get-partition-start-offset">libhal_volume_get_partition_start_offset</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-partition-type"><link linkend="libhal-volume-get-partition-type">libhal_volume_get_partition_type</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-partition-uuid"><link linkend="libhal-volume-get-partition-uuid">libhal_volume_get_partition_uuid</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-size"><link linkend="libhal-volume-get-size">libhal_volume_get_size</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-storage-device-udi"><link linkend="libhal-volume-get-storage-device-udi">libhal_volume_get_storage_device_udi</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-udi"><link linkend="libhal-volume-get-udi">libhal_volume_get_udi</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-get-uuid"><link linkend="libhal-volume-get-uuid">libhal_volume_get_uuid</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-is-disc"><link linkend="libhal-volume-is-disc">libhal_volume_is_disc</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-is-mounted"><link linkend="libhal-volume-is-mounted">libhal_volume_is_mounted</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-is-mounted-read-only"><link linkend="libhal-volume-is-mounted-read-only">libhal_volume_is_mounted_read_only</link></primaryie></indexentry>
+<indexentry><primaryie linkends="libhal-volume-is-partition"><link linkend="libhal-volume-is-partition">libhal_volume_is_partition</link></primaryie></indexentry>
+</indexdiv>
+</indexdiv>

@@ -1,0 +1,428 @@
+<!-- ##### SECTION Title ##### -->
+uthash
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### MACRO uthash_fatal ##### -->
+<para>
+
+</para>
+
+@msg: 
+
+
+<!-- ##### MACRO uthash_bkt_malloc ##### -->
+<para>
+
+</para>
+
+@sz: 
+
+
+<!-- ##### MACRO uthash_bkt_free ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### MACRO uthash_tbl_malloc ##### -->
+<para>
+
+</para>
+
+@sz: 
+
+
+<!-- ##### MACRO uthash_tbl_free ##### -->
+<para>
+
+</para>
+
+@ptr: 
+
+
+<!-- ##### MACRO uthash_noexpand_fyi ##### -->
+<para>
+
+</para>
+
+@tbl: 
+
+
+<!-- ##### MACRO uthash_expand_fyi ##### -->
+<para>
+
+</para>
+
+@tbl: 
+
+
+<!-- ##### MACRO HASH_INITIAL_NUM_BUCKETS ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO HASH_BKT_CAPACITY_THRESH ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO HASH_FIND ##### -->
+<para>
+
+</para>
+
+@hh: 
+@head: 
+@keyptr: 
+@keylen_in: 
+@out: 
+
+
+<!-- ##### MACRO HASH_ADD ##### -->
+<para>
+
+</para>
+
+@hh: 
+@head: 
+@fieldname: 
+@keylen_in: 
+@add: 
+
+
+<!-- ##### MACRO HASH_ADD_KEYPTR ##### -->
+<para>
+
+</para>
+
+@hh: 
+@head: 
+@keyptr: 
+@keylen_in: 
+@add: 
+
+
+<!-- ##### MACRO HASH_DELETE ##### -->
+<para>
+
+</para>
+
+@hh: 
+@head: 
+@delptr: 
+
+
+<!-- ##### MACRO HASH_FIND_STR ##### -->
+<para>
+
+</para>
+
+@head: 
+@findstr: 
+@out: 
+
+
+<!-- ##### MACRO HASH_ADD_STR ##### -->
+<para>
+
+</para>
+
+@head: 
+@strfield: 
+@add: 
+
+
+<!-- ##### MACRO HASH_FIND_INT ##### -->
+<para>
+
+</para>
+
+@head: 
+@findint: 
+@out: 
+
+
+<!-- ##### MACRO HASH_ADD_INT ##### -->
+<para>
+
+</para>
+
+@head: 
+@intfield: 
+@add: 
+
+
+<!-- ##### MACRO HASH_DEL ##### -->
+<para>
+
+</para>
+
+@head: 
+@delptr: 
+
+
+<!-- ##### MACRO HASH_OOPS ##### -->
+<para>
+
+</para>
+
+@...: 
+
+
+<!-- ##### MACRO HASH_FSCK ##### -->
+<para>
+
+</para>
+
+@head: 
+
+
+<!-- ##### MACRO HASH_EMIT_KEY ##### -->
+<para>
+
+</para>
+
+@hh: 
+@head: 
+@keyptr: 
+@fieldlen: 
+
+
+<!-- ##### MACRO HASH_FCN ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO HASH_BER ##### -->
+<para>
+
+</para>
+
+@key: 
+@keylen: 
+@num_bkts: 
+@bkt: 
+@i: 
+@j: 
+@k: 
+
+
+<!-- ##### MACRO HASH_SAX ##### -->
+<para>
+
+</para>
+
+@key: 
+@keylen: 
+@num_bkts: 
+@bkt: 
+@i: 
+@j: 
+@k: 
+
+
+<!-- ##### MACRO HASH_FNV ##### -->
+<para>
+
+</para>
+
+@key: 
+@keylen: 
+@num_bkts: 
+@bkt: 
+@i: 
+@j: 
+@k: 
+
+
+<!-- ##### MACRO HASH_OAT ##### -->
+<para>
+
+</para>
+
+@key: 
+@keylen: 
+@num_bkts: 
+@bkt: 
+@i: 
+@j: 
+@k: 
+
+
+<!-- ##### MACRO HASH_JEN_MIX ##### -->
+<para>
+
+</para>
+
+@a: 
+@b: 
+@c: 
+
+
+<!-- ##### MACRO HASH_JEN ##### -->
+<para>
+
+</para>
+
+@key: 
+@keylen: 
+@num_bkts: 
+@bkt: 
+@i: 
+@j: 
+@k: 
+
+
+<!-- ##### MACRO HASH_JSW ##### -->
+<para>
+
+</para>
+
+@key: 
+@keylen: 
+@num_bkts: 
+@bkt: 
+@i: 
+@j: 
+@k: 
+
+
+<!-- ##### MACRO HASH_KEYCMP ##### -->
+<para>
+
+</para>
+
+@a: 
+@b: 
+@len: 
+
+
+<!-- ##### MACRO HASH_FIND_IN_BKT ##### -->
+<para>
+
+</para>
+
+@hh: 
+@head: 
+@keyptr: 
+@keylen_in: 
+@out: 
+
+
+<!-- ##### MACRO HASH_ADD_TO_BKT ##### -->
+<para>
+
+</para>
+
+@hh: 
+@head: 
+@add: 
+
+
+<!-- ##### MACRO HASH_DEL_IN_BKT ##### -->
+<para>
+
+</para>
+
+@hh: 
+@head: 
+@delptr: 
+
+
+<!-- ##### MACRO HASH_EXPAND_BUCKETS ##### -->
+<para>
+
+</para>
+
+@tbl: 
+
+
+<!-- ##### MACRO HASH_SORT ##### -->
+<para>
+
+</para>
+
+@head: 
+@cmpfcn: 
+
+
+<!-- ##### STRUCT UT_hash_bucket ##### -->
+<para>
+
+</para>
+
+@hh_head: 
+
+<!-- ##### STRUCT UT_hash_table ##### -->
+<para>
+
+</para>
+
+@buckets: 
+@noexpand: 
+@hash_q: 
+@tail: 
+@name: 
+@hho: 
+@key: 
+@keylen: 
+@i: 
+@j: 
+@k: 
+@new_buckets: 
+@newbkt: 
+@hh: 
+@hh_nxt: 
+@bkt_ideal: 
+@sum_of_deltas: 
+@new_hash_q: 
+@looping: 
+@nmerges: 
+@insize: 
+@psize: 
+@qsize: 
+@p: 
+@q: 
+@e: 
+@list: 
+@tale: 
+
+<!-- ##### STRUCT UT_hash_handle ##### -->
+<para>
+
+</para>
+
+@tbl: 
+@elmt: 
+@prev: 
+@next: 
+@hh_prev: 
+@hh_next: 
+@key: 
+@keylen: 
+

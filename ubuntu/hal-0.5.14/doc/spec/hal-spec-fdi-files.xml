@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<chapter id="spec-device-info">
+  <title>Device Information Files</title>
+  <para>
+    Device information files (<literal>.fdi</literal> files is a
+    shorthand) are used to merge arbitrary properties onto device
+    objects. The way device information files works is that once all
+    device properties are merged onto a device object it is tried
+    against the set of installed device information files.  Device
+    information files are used for both merging facts and policy
+    settings about devices.
+  </para>
+
+  <sect1 id="fdi-matching">
+    <title>Matching</title>
+
+    <para>
+      Each device information file got a number of
+      <literal>&#60;match key="some_property"
+        [string|int|bool|..]="required_value" &#62;
+      </literal>
+      directives
+      that is tested against the properties of the device object. If
+      all the match directives passes then the device information can
+      include <literal>&#60;[merge|append|prepend|addset] key="some_property"
+        type="[string|int|bool|..]"&#62;
+      </literal>
+      directives to
+      respectively merge new properties or append to existing
+      properties on the device object. It's important to emphasize
+      that any previously property stemming from device detection can
+      be overridden by a device information file.
+    </para>
+    <para>
+      The <literal>&#60;match&#62;</literal>,
+      <literal>&#60;merge&#62;</literal>, <literal>&#60;append&#62;</literal>, 
+      <literal>&#60;prepend&#62;</literal>
+      and <literal>&#60;addset&#62;</literal> directives always
+      requires the <literal>key</literal> attribute which must be
+      either a property name on the device object in question or a
+      path to a property on another device object. The latter case is
+      expressed either through direct specification of the UDI, such
+      as
+      <literal>/org/freedesktop/Hal/devices/computer:foo.bar</literal>
+      or indirect references such as
+      <literal>@info.parent:baz</literal> where the latter means that
+      the device object specified by the UDI in the string property
+      <literal>info.parent</literal> should be used to query the
+      property <literal>baz</literal>. It is also possible to use
+      multiple indirections, e.g. for a volume on a USB memory stick
+      the indirection <literal>@block.storage_device:@storage.originating_device:usb.vendor_id</literal>
+      will reference the <literal>usb.vendor_id</literal> property
+      on the device object representing the USB interface.
+    </para>
+    <para>
+      When the property to match have been determined a number of
+      attributes can be used within the <literal>&#60;match&#62;</literal>
+      tag:
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>string</literal> - match a string property; for example
+            <literal>&#60;match key="foo.bar" string="baz"&#62;</literal>
+            will match only if 'foo.bar' is a string property assuming the value 'baz'.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>string_outof</literal> - work like <literal>string</literal> but
+	    the match is done against a list of strings separated by ';'. 
+	    For example: 
+	    <literal>&#60;match key="system.hardware.product" string_outof="Satellite A30;Portable PC"&#62;</literal>	
+	    In this example the line matches if <literal>system.hardware.product</literal>
+	    is exactly 'Satellite A30' or 'Portable PC'.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>int</literal> - match an integer property
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>int_outof</literal> - work like <literal>int</literal> but
+	    the match is done against a list of integer separated by ';'. 
+	    For example: 
+	    <literal>&#60;match key="usb.product_id" int_outof="0x1007;0x1008;0x1009"&#62;</literal>	
+	    In this example the line matches if <literal>usb.product_id</literal> is 0x1007, 0x1008 or 0x1009.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>uint64</literal> - match property with the 64-bit unsigned type
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>bool</literal> - match a boolean property
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>double</literal> - match a property of type double
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>exists</literal> - used as
+            <literal>&#60;match key="foo.bar" exists="true"&#62;</literal>. Can be used with
+            'true' and 'false' respectively to match when a property exists and it doesn't.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>empty</literal> - can only be used on string or strlist properties
+            with 'true' and 'false'.
+            The semantics for 'true' is to match only when the string is non-empty.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>is_ascii</literal> - matches only when a string property
+            contain only ASCII characters. Can be used with 'true' or 'false'.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>is_absolute_path</literal> - matches only when a string
+            property represents an absolute path (the path doesn't have to exist).
+            Can be used with 'true' or 'false'.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>sibling_contains</literal> - can only be used with string and
+	    strlist (string list).
+            For a string key this matches when a sibling item contains the
+            (sub-)string in the same property. For a string list, this is if a string
+            matches an item in the list.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>contains</literal> - can only be used with string and
+            strlist (string list).
+            For a string key this matches when the property contains the given
+            (sub-)string. For a string list this match if the given string match
+            a item of the list.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>contains_ncase</literal> - like <literal>contains</literal>
+            but the property and the given key are converted to lowercase before check.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>contains_not</literal> - can only be used with strlist (string list)
+	    and string properties.
+            For a string list this match if the given string not match any of the
+            item of the list (or the property is not set for the device). For a string
+	    this match of the property not contains the (sub-)string. You can use this
+	    attribute to construct if/else blocks together with e.g. <literal>contains</literal>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>contains_outof</literal> - like <literal>contains</literal> but can be
+	    used only with strings and the match is done against a list of (sub-)strings 
+	    separated by ';'. 
+	    For example: 
+	    <literal>&#60;match key="system.hardware.product" contains_outof="D600;D610;C540"&#62;</literal>	
+	    In this example the line matches if <literal>system.hardware.product</literal>
+	    contains D600, D610 or C540.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>prefix</literal> - can only be used with string properties.
+            Matches if property begins with the key.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>prefix_ncase</literal> - like <literal>prefix</literal> but the
+            property and the given key are converted to lowercase before the check.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>prefix_outof</literal> - like <literal>prefix</literal> but the
+	    match is done against a list of prefixes separated by ';'. 
+	    For example: 
+	    <literal>&#60;match key="system.hardware.product" prefix_outof="1860;2366;2371"&#62;</literal>	
+	    In this example the line matches if <literal>system.hardware.product</literal>
+	    starts with 1860, 2366 or 2371.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>suffix</literal> - can only be used with string properties.
+            Matches if property ends with the key.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>suffix_ncase</literal> - like <literal>suffix</literal> but the
+            property and the given key are converted to lowercase before the check.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>compare_lt</literal> - can be used on int, uint64, double
+            and string properties to compare with a constant.
+            Matches when the given property is less than the given constant
+            using the default ordering.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>compare_le</literal> - like <literal>compare_lt</literal>
+            but matches when less than or equal.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>compare_gt</literal> - like <literal>compare_lt</literal>
+            but matches when greater than.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>compare_ge</literal> - like <literal>compare_lt</literal>
+            but matches when greater than or equal.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>compare_ne</literal> - like <literal>compare_lt</literal>
+            but matches when not equal.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </para>
+    
+  </sect1>
+  <sect1 id="fdi-merging">
+    <title>Merging</title>
+    <para>
+
+      The <literal>&#60;merge&#62;</literal>, <literal>&#60;append&#62;</literal>, 
+      <literal>&#60;prepend&#62;</literal>
+      and <literal>&#60;addset&#62;</literal> directives all require
+      the <literal>type</literal> attribute which specifies what to
+      merge. The following values are supported
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>string</literal> - The value is copied to the property. For example
+            <literal>&#60;merge key="foo.bar" type="string"&#62;baz&#60;/merge&#62;</literal>
+            will merge the value 'baz' into the property 'foo.bar'.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>strlist</literal> - For <literal>&#60;merge&#62;</literal> the value is
+            copied to the property and the current property will be overwritten. For
+            <literal>&#60;append&#62;</literal>
+            and <literal>&#60;prepend&#62;</literal> the value is
+            append or prepend to the list as new
+            item. For <literal>&#60;addset&#62;</literal> the strlist
+            is treated as a set and the value is appended if, and only
+            if, the value doesn't exist already. Usage of
+	    <literal>&#60;copy_property&#62;</literal> overwrite the complete list with the 
+	    value of the given property to copy from.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>bool</literal> - Can merge the values 'true' or 'false'
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>int</literal> - Merges an integer
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>uint64</literal> - Merges an unsigned 64-bit integer
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>double</literal> - Merges a double precision floating point number
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>copy_property</literal> - Copies the value of a given
+            property - supports paths with direct and indirect UDI's. For example
+            <literal>&#60;merge key="foo.bar" type="copy_property"&#62;@info.parent:baz.bat&#60;/merge&#62;</literal>
+            will merge the value of the property <literal>baz.bat</literal> on the device object with the UDI from
+            the property <literal>info.parent</literal> into the property <literal>foo.bar</literal> on
+            the device object being processed.
+          </para>
+        </listitem>
+      </itemizedlist>
+      The <literal>&#60;remove&#62;</literal>, directive require only a key and can be used with all keys.
+      For <literal>strlist</literal> there is additionally a special syntax to remove a item from the
+      string list. For example to remove item 'bla' from property 'foo.bar':
+      <literal>&#60;remove key="foo.bar" type="strlist"&#62;bla&#60;/remove&#62;</literal>
+    </para>
+
+  </sect1>
+  <sect1 id="fdi-search-paths">
+    <title>Search Paths</title>
+
+    <para>
+      Device Information files are read from two directories
+      
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>/usr/share/hal/fdi</literal> - for files provided by packages
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>/etc/hal/fdi</literal> - for files provided by the system administrator / user
+          </para>
+        </listitem>
+      </itemizedlist>
+      
+      in exactly that order. This means that the files provided by the
+      system administrator will be processed last such that they can
+      overwrite / change properties caused by the device information
+      files provided by packages.
+      
+      The following directory structure is used in <literal>/usr/share/hal/fdi</literal>
+      
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>information</literal> - device information files used to merge device information
+            <itemizedlist>
+              <listitem>
+                <para>
+                  <literal>10freedesktop</literal> - included with the hal package
+                </para>
+              </listitem>
+              <listitem>
+                <para>
+                  <literal>20thirdparty</literal> - from a 3rd party, not included in hal package
+              </para>
+              </listitem>
+          </itemizedlist>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>policy</literal> - device information files to merge policy properties such as addons or callouts.
+            <itemizedlist>
+              <listitem>
+                <para>
+                  <literal>10osvendor</literal> - included with the hal package
+                </para>
+              </listitem>
+              <listitem>
+                <para>
+                  <literal>20thirdparty</literal> - from a 3rd party, not included in hal package
+                </para>
+              </listitem>
+            </itemizedlist>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>preprobe</literal> - device information files read before probing devices
+            <itemizedlist>
+              <listitem>
+                <para>
+                  <literal>10osvendor</literal> - included with the hal package
+                </para>
+              </listitem>
+              <listitem>
+                <para>
+                  <literal>20thirdparty</literal> - from a 3rd party, not included in hal package
+                </para>
+              </listitem>
+            </itemizedlist>
+          </para>
+        </listitem>
+      </itemizedlist>
+
+      As evident, third party packages should drop device information files in
+
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>/usr/share/hal/fdi/information/20thirdparty</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>/usr/share/hal/fdi/policy/20thirdparty</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>/usr/share/hal/fdi/preprobe/20thirdparty</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+
+    </para>
+    <para>
+      The <literal>/etc/hal/fdi</literal> tree uses this layout
+      
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>information</literal> - device information files used to merge device information
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>policy</literal> - device information files to merge policy properties such as addons or callouts.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>preprobe</literal> - device information files to read before probing devices
+          </para>
+        </listitem>
+      </itemizedlist>
+      
+      All device information files are matched for every hal device
+      object in the following order.
+
+    <orderedlist>
+      <listitem> 
+	<para>
+          When a device is discovered, the <literal>preprobe</literal>
+          device information files (e.g. all files
+          from <literal>/usr/share/hal/fdi/preprobe</literal>
+          and <literal>/etc/hal/fdi/preprobe</literal>) are
+          processed.
+        </para>
+        <para> 
+          Typically, this class of device information files is used to
+          tell HAL to leave the device alone by setting the bool
+          property <literal>info.ignore</literal> to TRUE. It can also
+          be used to run programs, preprobe callouts, prior to normal
+          device investigation.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          HAL now runs the preprobe callouts.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          HAL now probes/investigates the device.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          All the <literal>information</literal> device information
+          files (e.g. all files
+          from <literal>/usr/share/hal/fdi/information</literal>
+          and <literal>/etc/hal/fdi/information</literal>) are
+          processed.
+        </para>
+        <para>
+          These device information files are typically used to
+          associate extra information with a device object.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          All the <literal>policy</literal> policy information
+          files (e.g. all files
+          from <literal>/usr/share/hal/fdi/policy</literal>
+          and <literal>/etc/hal/fdi/policy</literal>) are
+          processed.
+        </para>
+        <para>
+          These device information files are typically used to
+          associate callouts and addons with a device object.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          HAL now runs the callouts, starts addons, and then finally
+          announces the device on the system message bus.
+        </para>
+      </listitem>
+    </orderedlist>
+
+    </para>
+  </sect1>
+</chapter>

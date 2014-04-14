@@ -1,0 +1,45 @@
+From 8f624253f0135ca77a893ad4e8168f51ef90d4da Mon Sep 17 00:00:00 2001
+From: Martin Pitt <martin.pitt@ubuntu.com>
+Date: Mon, 14 Feb 2011 11:26:22 +0100
+Subject: Do not build hald-probe-video4linux if v4l1 is not available.
+
+The old v4l1 API is gone from current kernels (2.6.38), and thus
+linux/videodev.h does not exist any more. Add a configure check for the include
+and do not build hald-probe-video4linux if it is not available.
+---
+ configure.in                   |    3 +++
+ hald/linux/probing/Makefile.am |    7 +++++--
+ 2 files changed, 8 insertions(+), 2 deletions(-)
+
+Index: hal/configure.in
+===================================================================
+--- hal.orig/configure.in	2009-08-24 14:42:29.000000000 +0200
++++ hal/configure.in	2011-02-14 11:42:54.931499233 +0100
+@@ -479,6 +479,9 @@
+ fi 
+ AM_CONDITIONAL([HAVE_LIBPCI], [test "x$USE_LIBPCI" = "xyes"])
+ 
++AC_CHECK_HEADERS([linux/videodev.h], [have_videodev_h=yes], [])
++AM_CONDITIONAL(HAVE_V4L1, [test "x$have_videodev_h" = "xyes"])
++
+ USE_LIBUSB20=no
+ USE_LIBUSB=no
+ LIBUSB20_LIBS=""
+Index: hal/hald/linux/probing/Makefile.am
+===================================================================
+--- hal.orig/hald/linux/probing/Makefile.am	2009-11-09 16:33:53.000000000 +0100
++++ hal/hald/linux/probing/Makefile.am	2011-02-14 11:43:33.141499233 +0100
+@@ -19,8 +19,11 @@
+ 	hald-probe-smbios 		\
+ 	hald-probe-serial 		\
+ 	hald-probe-ieee1394-unit 	\
+-	hald-probe-net-bluetooth 	\
+-	hald-probe-video4linux
++	hald-probe-net-bluetooth
++
++if HAVE_V4L1
++libexec_PROGRAMS += hald-probe-video4linux
++endif
+ endif
+ 
+ hald_probe_smbios_SOURCES = probe-smbios.c ../../logger.c

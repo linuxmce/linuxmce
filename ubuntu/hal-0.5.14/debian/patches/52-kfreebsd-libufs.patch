@@ -1,0 +1,76 @@
+From f895e8a9d5e2de320307e32d712b7a5fdf5e3efb Mon Sep 17 00:00:00 2001
+From: Michael Biebl <biebl@debian.org>
+Date: Mon, 23 Nov 2009 03:22:45 +0100
+Subject: [PATCH 4/6] Check for availability of libufs on (k)freebsd
+
+Check for availability of libufs on (k)freebsd
+and compile the code conditionally.
+---
+ configure.in                        |    8 ++++++++
+ hald/freebsd/probing/Makefile.am    |    2 +-
+ hald/freebsd/probing/probe-volume.c |    4 ++++
+ 3 files changed, 13 insertions(+), 1 deletions(-)
+
+Index: hal-0.5.14/configure.in
+===================================================================
+--- hal-0.5.14.orig/configure.in	2011-04-10 06:58:42.603788447 +0200
++++ hal-0.5.14/configure.in	2011-04-10 06:58:55.755623107 +0200
+@@ -511,6 +511,14 @@
+ AC_SUBST(HALD_BACKEND)
+ if test "x$HALD_BACKEND" = "xfreebsd"; then
+     AC_SEARCH_LIBS([clock_gettime], [rt])
++    LIBUFS_LIBS=""
++    AC_CHECK_HEADERS([libufs.h],
++                     [AC_CHECK_LIB([libufs], [ufs_disk_fillout], [USE_LIBUFS="yes"], [], [])])
++    if test "x$USE_LIBUFS" = "xyes"; then
++        AC_DEFINE(HAVE_LIBUFS, 1, [Set if we have libufs])
++        LIBUFS_LIBS="-lufs"
++        AC_SUBST(LIBUFS_LIBS)
++    fi
+     USE_BSDLIBUSB20=no
+     USE_BSDLIBUSB=no
+     LIBUSB20_LIBS=""
+Index: hal-0.5.14/hald/freebsd/probing/Makefile.am
+===================================================================
+--- hal-0.5.14.orig/hald/freebsd/probing/Makefile.am	2009-08-24 14:42:29.000000000 +0200
++++ hal-0.5.14/hald/freebsd/probing/Makefile.am	2011-04-10 06:58:55.755623107 +0200
+@@ -67,5 +67,5 @@
+ hald_probe_volume_LDADD = \
+ 	@GLIB_LIBS@							\
+ 	@VOLUME_ID_LIBS@						\
+-	-lufs								\
++	@LIBUFS_LIBS@							\
+ 	$(top_builddir)/hald/freebsd/libprobe/libhald_freebsd_probe.la
+Index: hal-0.5.14/hald/freebsd/probing/probe-volume.c
+===================================================================
+--- hal-0.5.14.orig/hald/freebsd/probing/probe-volume.c	2011-04-10 06:58:39.675825255 +0200
++++ hal-0.5.14/hald/freebsd/probing/probe-volume.c	2011-04-10 06:58:55.787622704 +0200
+@@ -38,10 +38,12 @@
+ #include <sys/param.h>
+ #include <sys/mount.h>
+ #include <sys/types.h>
++#ifdef HAVE_LIBUFS
+ #include <ufs/ufs/ufsmount.h>
+ #include <ufs/ufs/dinode.h>
+ #include <ufs/ffs/fs.h>
+ #include <libufs.h>
++#endif /* HAVE_LIBUFS */
+ #include <isofs/cd9660/iso.h>
+ #include <glib.h>
+ #include <libvolume_id.h>
+@@ -563,6 +565,7 @@
+ 
+   libhal_device_set_property_bool(hfp_ctx, hfp_udi, "volume.ignore", has_children || is_swap, &hfp_error);
+ 
++#ifdef HAVE_LIBUFS
+   if (vid && ! strcmp (vid->type, "ufs"))
+     {
+       struct uufsd ufsdisk;
+@@ -602,6 +605,7 @@
+ 	  ufs_disk_close(&ufsdisk);
+ 	}
+     }
++#endif /* HAVE_LIBUFS */
+ 
+   if (has_children)
+     usage = "partitiontable";

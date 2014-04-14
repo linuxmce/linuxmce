@@ -1,0 +1,144 @@
+
+Ongoing items that always need work
+-----------------------------------
+
+ - Valgrind once in a while to check / fix memory leaks / memory corruption
+
+ - Keep the spec in sync with the code
+
+ - Write / check / update docs of exported libraries
+
+ - Audit all code and drop privileges in helpers where appropriate
+
+
+Items specifically planned for 0.5.12 
+(TODO: need to go through and nominate things for 0.5.12)
+------------------------------------
+
+ - Sort out input device classification mess
+
+ - Don't invoke setfacl(1) directly; use system calls instead
+
+ - Should provide a hal-fdi-file-validate tool that validates fdi
+   files.
+
+ - Release engineering. Would be nice to have a set of Makefile
+   targets to automatically make a new release, upload it somewhere
+   and send announcement mail. Seems that cairo have something we
+   might be able to lift.
+
+ - Make sure we check if the optical drives supports the commands
+   we are sending to it (proposed by pjones)
+
+ - Move /usr/libexec to /usr/lib/hal/ - drop /usr/lib/hal/scripts -
+   use /usr/lib/hal/methods. Need to provide backwards compat
+   for 3rd party so we need to retain /usr/lib/hal/scripts
+
+ - Think hard about the interfaces HAL exports to addons as
+   out-of-tree code like NUT and Bluez now starts to use it. Includes
+   interface stability thoughts and what we guarantee and what we
+   don't. Might have license implications too.
+
+ - LVM support
+   https://bugs.freedesktop.org/show_bug.cgi?id=6427
+
+ - Format volume methods
+
+ - Disk partitioning methods
+
+ - File system label renaming
+
+ - Provide mechanism for polling storage devices we can't poll regulary
+   e.g. PC floppy drives and Zip drives. When that it is, actually go back
+   to provide children for volumes detected like we did in HAL 0.4.x
+
+ - Provide mechanism for tuning the readahead size. For example, a DVD
+   player application (such as GNOME's Totem) might want to read ahead
+   several hundreds of megabyte so the drive only needs to spin up every
+   e.g. 20 minutes while watching a DVD movie. This enables the kernel
+   driver to put the drive in a low-power mode to get substantially better
+   battery life. Probably requires kernel work since the pages would
+   have to be pinned?
+
+ - Use udev data instead of probing (whenever possible). Here we need
+   the raw serial from udev; for e.g. USB drives, udev prepends it
+   with the make/model of the usb device.
+
+ - Configuration of serial and other legacy ports, see
+   http://lists.freedesktop.org/archives/hal/2006-August/005784.html
+
+ - Clean up what the user did by invoking methods on HAL
+    - e.g. unmount storage devices
+    - other things
+    - we can now sanely do this thanks to ConsoleKit
+    - depends on PolicyKit
+
+ - Devices of capability access_control could export an interface with
+   for requesting / dropping access to the device, e.g. 
+
+    RequestAccess()
+    GiveupAccess()   (better naming welcome)
+
+   which will change device file ownership or add/remove an ACL.
+   Depends on PolicyKit
+
+ - It would be nice if method calls could return string, bool int etc.
+   Perhaps use dbus-send style, e.g. int32:<number>' or 'string:the_string'
+   or 'bool:true'. Granted, this is already possible today through addons
+   so maybe not important.
+
+Other items
+-----------
+
+ - Device firmware. It would be nice to export a property and some 
+   DeviceCondition when a device asked for firmware that was missing
+   and is such in a state where it cannot operate. Might need kernel
+   work. Same goes for drivers.
+
+ - Export ink levels for printers
+   https://bugs.freedesktop.org/show_bug.cgi?id=2295
+
+ - Signal when a USB device doesn't have enough power
+   https://bugs.freedesktop.org/show_bug.cgi?id=4452
+   (it appears that this is true IFF the kernel leaves
+    bConfigurationValue as zero)
+
+ - Teach HAL about multisession and partitioned optical discs - may
+   require reworking the 'fakevolume' code as we'd be adding more
+   than one fakevolume
+
+ - Have a mechanism so an addon can do things on system suspend/resume;
+   such as saving/restoring the backlight value (macbook, macbookpro,
+   omap, dell addon's)
+
+Optimization
+------------
+
+ - Port hal daemon core to use dbus glib bindings
+   - One proxy per hal device object
+   - hal device object is an GObject
+   - wants to export multiple D-Bus interfaces for a single GObject
+   - for some interfaces... need/want to handle all messages on myself
+     (for forwarding to addons)
+   - ie. need to partipate in Introspection() on "DBusGProxy" stuff
+
+ - Linux: Optionally drop sysfs coldplug code
+   - for starting up before udev and piggy tailing on udev's coldplug code
+
+ - Performance! Profile and optimize! Too big of a task to describe in
+   one bullet. Feel free to provide patches to this file to break it up
+   after some analysis.
+
+External projects:
+------------------
+
+ - We need to finish PolicyKit, at least get 0.3 out (in Spring 2007)
+   and work on bringing it to 1.0 rather fast (ideally before Fall
+   2007).
+
+ - Runtime power management in the kernel. This is still ongoing
+   and AFAIK there is no concrete idea about the user space interface.
+   Once the user space interface is set in stone we can easily
+   export this via HAL for selective suspend and/or tuning of knobs.
+
+

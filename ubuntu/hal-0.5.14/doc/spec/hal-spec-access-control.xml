@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<chapter id="access-control">
+  <title>Access Control</title>
+
+  <para>
+    Access to hardware by unprivileged users is traditionally granted
+    in two ways either by granting access to the <emphasis>special
+    device file</emphasis> or allowing access through another process,
+    using IPC acting on behalf of the user. HAL follows the latter
+    model and uses the system-wide message bus (D-Bus) as the IPC
+    mechanism. In addition, HAL has support for modifying the ACL's
+    (access control lists) on a device file to grant/revoke access to
+    users based on several criteria.
+  </para>
+
+  <sect1 id="access-control-device-file">
+    <title>Device Files</title>
+    <para>
+      If HAL is built with <literal>--enable-acl-management</literal>
+      (requires both <literal>--enable-console-kit</literal>
+      and <literal>--enable-policy-kit</literal>) then ACL's on device
+      objects with the capability <literal>access_control</literal>
+      are automatically managed according to the properties defined in
+      <xref linkend="device-properties-access-control"/>. In addition,
+      for this configuration, HAL ships with a device information file
+      (normally installed in
+      <literal>/usr/share/hal/fdi/policy/10osvendor/20-acl-management.fdi</literal>)
+      that merges this capability on device objects that are normally
+      accessed by unprivileged users through the device file. This
+      includes e.g. sound cards, webcams and other devices but
+      excludes drives and volumes as the latter two are normally
+      accessed by a user through mounting them into the file system.
+    </para>
+    <para>
+      HAL uses PolicyKit to decide what users should have access
+      according to PolicyKit configuration; see the PolicyKit
+      privilege definition
+      file <literal>/usr/share/PolicyKit/policy/org.freedesktop.hal.device-access.policy</literal>
+      on a system with HAL installed for the default access suggested
+      by the HAL package and/or OS vendor.
+    </para>
+    <para>
+      In addition, 3rd party packages can supply device information
+      files to specify (via
+      the <literal>access_control.grant_user</literal>
+      and <literal>access_control.grant_group</literal> properties)
+      that a given user or group should always have access to a device
+      file. This is useful for system-wide software (such as AV
+      streaming management) that runs as an unprivileged system
+      user. This interface is supposed to be stable so 3rd party
+      packages can depend on it.
+    </para>
+
+      <sect2 id="access-control-device-file-policies">
+        <title>Device Files policies</title>
+	<para>
+          This is a list of the device file policies/rules delivered with
+	  the HAL package to manage ACL's as defined via <literal>
+	  access_control.type</literal> and the current default Policykit
+	  policies for inactive and active users.
+        </para>
+	<informaltable>
+        <tgroup cols="2">
+          <thead>
+            <row>
+              <entry>Type</entry>
+              <entry>Description</entry>
+              <entry>allow_inactive</entry>
+              <entry>allow_active</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>
+                <literal>audio-player</literal>
+              </entry>
+              <entry>Directly access audio players.</entry>
+	      <entry>no</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>camera</literal>
+              </entry>
+              <entry>Directly access digital cameras.</entry>
+	      <entry>no</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>cdrom</literal>
+              </entry>
+              <entry>Directly access optical drives.</entry>
+	      <entry>yes</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>dvb</literal>
+              </entry>
+              <entry>Directly access DVB devices.</entry>
+	      <entry>no</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>fingerprint-reader</literal>
+              </entry>
+              <entry>Directly access to fingerprint reader devices.</entry>
+	      <entry>no</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>floppy</literal>
+              </entry>
+              <entry>Directly access Floppy devices.</entry>
+	      <entry>yes</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>ieee1394-avc</literal>
+              </entry>
+              <entry>Directly access Firewire AVC devices.</entry>
+	      <entry>no</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>ieee1394-iidc</literal>
+              </entry>
+              <entry>Directly access Firewire IIDC devices.</entry>
+	      <entry>no</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>smart-card-reader</literal>
+              </entry>
+              <entry>Directly access Smart Card Reader security devices.</entry>
+	      <entry>no</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>joystick</literal>
+              </entry>
+              <entry>Directly access Joystick devices.</entry>
+	      <entry>yes</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>modem</literal>
+              </entry>
+              <entry>Directly access serial modem devices.</entry>
+	      <entry>auth_admin_keep_always</entry>
+	      <entry>auth_admin_keep_always</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>mouse</literal>
+              </entry>
+              <entry>Directly access Mouse (input) devices</entry>
+	      <entry>yes</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>obex</literal>
+              </entry>
+              <entry>Directly access OBEX devices.</entry>
+	      <entry>no</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>pda</literal>
+              </entry>
+              <entry>Directly access PDA devices.</entry>
+	      <entry>no</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>ppdev</literal>
+              </entry>
+              <entry>Directly access parallel port devices.</entry>
+	      <entry>auth_admin_keep_always</entry>
+	      <entry>auth_admin_keep_always</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>printer</literal>
+              </entry>
+              <entry>Directly access printer devices.</entry>
+	      <entry>no</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>removable-block</literal>
+              </entry>
+              <entry>Directly access removable block devices.</entry>
+	      <entry>no</entry>
+	      <entry>no</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>scanner</literal>
+              </entry>
+              <entry>Directly access scanners.</entry>
+	      <entry>no</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>sound</literal>
+              </entry>
+              <entry>Directly access sound devices.</entry>
+	      <entry>no</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>video</literal>
+              </entry>
+              <entry>Directly access Video devices.</entry>
+	      <entry>yes</entry>
+	      <entry>yes</entry>
+            </row>
+            <row>
+              <entry>
+                <literal>video4linux</literal>
+              </entry>
+              <entry>Directly access video capture devices.</entry>
+	      <entry>no</entry>
+	      <entry>yes</entry>
+            </row>
+          </tbody>
+        </tgroup>
+        </informaltable>
+      </sect2>
+
+  </sect1>
+
+  <sect1 id="access-control-ipc">
+    <title>D-Bus Interfaces</title>
+    <para>
+      If HAL is built without ConsoleKit support
+      (e.g. without <literal>--enable-console-kit</literal>) access to
+      the various D-Bus interfaces that provides mechanisms is only
+      protected by the D-Bus security configuration files
+      (e.g. using <literal>at_console</literal> to restrict to console
+      user on Red Hat systems) and, in certain cases, restricted to
+      the super user.
+    </para>
+    <para>
+      If ConsoleKit support is enabled, access to D-Bus interfaces is
+      currently hardcoded to only allow active users at the system
+      console. If PolicyKit support is enabled, the PolicyKit library
+      will be in charge of determining access; see the PolicyKit
+      privilege definition files
+      in <literal>/etc/PolicyKit/privileges</literal> on a system with
+      HAL installed for the default access suggested by the HAL
+      package and/or OS vendor.
+    </para>
+  </sect1>
+
+</chapter>
+

@@ -1,0 +1,98 @@
+.\" 
+.\" hal-lock manual page.
+.\" Copyright (C) 2007 David Zeuthen <david@fubar.dk>
+.\"
+.TH HAL-LOCK 1
+.SH NAME
+hal-lock \- lock an interface
+.SH SYNOPSIS
+.PP
+.B hal-lock
+[options]
+
+.SH DESCRIPTION
+
+\fIhal-lock\fP can be used to acquire a lock on a given interface
+either on a given device or globally. For more information about both
+the big picture and the semantics of 
+.B HAL
+locks, refer to the \fIHAL spec\fP which can be found in
+.I "@docdir@/spec/hal-spec.html"
+depending on the distribution.
+
+.SH OPTIONS
+The following options are supported:
+.TP
+.I "--interface"
+The name of the interface to lock.
+.TP
+.I "--run"
+Program to run if the lock was acquired.
+.TP
+.I "--udi"
+The UDI (\fIUnique Device Identifier\fP) of the device object. If this
+is ommitted, the global lock will be tried.
+.TP
+.I "--exclusive"
+Whether the lock can be held by others.
+.TP
+.I "--exit-with-lock"
+Kill the program if the acquired lock is lost. This only makes sense if you pass a specific
+.I UDI
+due to the semantics of HAL locks.
+.TP
+.I "--exit-with-dev"
+Kill the program if the device is removed. This only makes sense if you pass a specific
+.I UDI
+due to the semantics of HAL locks.
+.TP
+.I "--help"
+Print out usage.
+.TP
+.I "--version"
+Print the version.
+
+.SH RETURN VALUE
+.PP
+This program will attempt to grab a lock on a given interface.
+Unless, a specific 
+.I UDI 
+is given, the global lock will be tried.  If the lock was succesfully
+acquired the program specified by the option --run will be run and
+upon termination this program will exit with exit code 0. If the lock
+wasn't acquired or an error occured while taking the lock, this
+program will exit with a non-zero exit code and the given program will
+not be run.
+
+
+.SH NOTES
+.PP
+This program is only useful for launching software that doesn't use
+HAL at all (since such software launched using 
+.I hal-lock 
+would be locked out itself); for example a partition table editor
+.I part-foo
+may use wrapper script like this
+
+.I hal-lock --interface org.freedesktop.Hal.Device.Storage --exclusive --run /path/to/part-foo-program
+
+.SH BUGS
+.PP
+Please send bug reports to either the distribution or the HAL
+mailing list, see 
+.I "http://lists.freedesktop.org/mailman/listinfo/hal"
+on how to subscribe.
+
+.SH SEE ALSO
+.PP
+\&\fIhald\fR\|(8), 
+\&\fIlshal\fR\|(1), 
+\&\fIhal-get-property\fR\|(1),
+\&\fIhal-set-property\fR\|(1),
+\&\fIhal-find-by-property\fR\|(1),
+\&\fIhal-find-by-capability\fR\|(1)
+
+.SH AUTHOR
+Written by David Zeuthen <david@fubar.dk> with a lot of help from many
+others.
+

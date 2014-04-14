@@ -1,0 +1,40 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/autoreconf.mk
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/autotools.mk
+include /usr/share/cdbs/1/rules/utils.mk
+
+# List any files which are not installed
+include /usr/share/cdbs/1/rules/utils.mk
+common-binary-post-install-arch:: list-missing
+
+DEB_CONFIGURE_EXTRA_FLAGS := --with-pid-file=/var/run/hald/hald.pid \
+                             --with-hwdata=/usr/share/misc \
+                             --without-macbook \
+                             --without-macbookpro \
+                             --disable-policy-kit \
+                             --disable-console-kit \
+                             --disable-smbios \
+                             --disable-acl-management \
+                             --enable-umount-helper \
+                             --enable-docbook-docs \
+                             --without-keymaps \
+                             --docdir=/usr/share/doc/hal-doc \
+                             --with-udev-prefix=/lib
+
+DEB_DH_INSTALLINIT_ARGS := -- start 24 2 3 4 5 . stop 16 1 .
+
+install/hal::
+	# Remove executable bit as this is nothing that can be executed
+	chmod -x $(DEB_DESTDIR)/usr/lib/hal/scripts/hal-functions
+	# Don't install 10-x11-input.fdi until xorg input hotplugging is fixed to 
+	# properly support non-US keyboard layouts (see also: #442316). 
+	rm -f $(DEB_DESTDIR)/usr/share/hal/fdi/policy/10osvendor/10-x11-input.fdi
+
+binary-install/hal::
+	# Only install udev rules on Linux architectures. The
+	# directory doesn't even exist on e.g. GNU/kFreeBSD
+ifeq ($(DEB_HOST_ARCH_OS),linux)
+	dh_install -phal debian/tmp/lib/udev/rules.d/
+endif

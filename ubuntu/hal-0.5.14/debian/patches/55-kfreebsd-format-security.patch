@@ -1,0 +1,39 @@
+Description: fixes for -Wformat-security in FreeBSD-specific code
+Author: Steven Chamberlain <steven@pyro.eu.org>
+Bug-Debian: http://bugs.debian.org/660400
+
+Index: hal-0.5.14/hald/freebsd/hf-acpi.c
+===================================================================
+--- hal-0.5.14.orig/hald/freebsd/hf-acpi.c	2012-02-19 03:28:06.000000000 +0000
++++ hal-0.5.14/hald/freebsd/hf-acpi.c	2012-02-19 03:29:18.000000000 +0000
+@@ -520,7 +520,7 @@
+ 
+   g_return_val_if_fail(HAL_IS_DEVICE(parent), NULL);
+ 
+-  if (get_sysctl == NULL || ! hf_has_sysctl(get_sysctl))
++  if (get_sysctl == NULL || ! hf_has_sysctl("%s", get_sysctl))
+     return NULL;
+   device = hf_device_new(parent);
+ 
+@@ -536,7 +536,7 @@
+     {
+       int bmax;
+ 
+-      if (hf_get_int_sysctl(&bmax, NULL, max_sysctl))
++      if (hf_get_int_sysctl(&bmax, NULL, "%s", max_sysctl))
+         hal_device_property_set_int(device, "laptop_panel.num_levels", bmax);
+       else
+         hal_device_property_set_int(device, "laptop_panel.num_levels", max_levels);
+Index: hal-0.5.14/hald/freebsd/hf-devtree.c
+===================================================================
+--- hal-0.5.14.orig/hald/freebsd/hf-devtree.c	2012-02-19 03:33:18.000000000 +0000
++++ hal-0.5.14/hald/freebsd/hf-devtree.c	2012-02-19 03:33:49.000000000 +0000
+@@ -556,7 +556,7 @@
+ 
+   devfile = g_strdup_printf("/dev/%s%i", driver, unit);
+   if (g_file_test(devfile, G_FILE_TEST_EXISTS))
+-    hf_device_property_set_string_printf(device, "freebsd.device_file", devfile);
++    hf_device_property_set_string_printf(device, "freebsd.device_file", "%s", devfile);
+   g_free(devfile);
+ }
+ 

@@ -1,0 +1,33 @@
+Index: hal-0.5.13/tools/hal-storage-mount.c
+===================================================================
+--- hal-0.5.13.orig/tools/hal-storage-mount.c	2009-05-27 15:26:03.000000000 -0500
++++ hal-0.5.13/tools/hal-storage-mount.c	2009-11-19 10:52:30.979682802 -0600
+@@ -92,6 +92,14 @@
+ }
+ 
+ static void
++permission_denied_uid (const char *device, const char *uid)
++{
++	fprintf (stderr, "org.freedesktop.Hal.Device.Volume.PermissionDenied\n");
++	fprintf (stderr, "Refusing to mount device %s for uid=%s.\n", device, uid);
++	exit (1);
++}
++
++static void
+ already_mounted (const char *device)
+ {
+ 	fprintf (stderr, "org.freedesktop.Hal.Device.Volume.AlreadyMounted\n");
+@@ -856,6 +864,13 @@
+                 }
+                 libhal_free_string (polkit_result);
+         }
++#else
++	/* root can do everything; only allow handling removable devices
++	 * without uid change to non-root users */
++	if (!invoked_by_uid || strcmp(invoked_by_uid, "0"))
++		if (!action || strcmp (action, "org.freedesktop.hal.storage.mount-removable"))
++			permission_denied_uid (device, invoked_by_uid);
++
+ #endif
+ 
+ #ifdef DEBUG

@@ -1,0 +1,14 @@
+debian/tmp/etc/
+debian/tmp/usr/bin/
+debian/tmp/usr/sbin/
+debian/tmp/sbin/umount.hal usr/sbin
+debian/tmp/usr/lib/hal/
+debian/tmp/usr/share/hal/fdi/
+# Now conditionally installed from debian/rules:
+# debian/tmp/lib/udev/rules.d/
+debian/preferences.fdi  etc/hal/fdi/policy
+debian/debian-storage-policy-ignore-fixed-crypto-drives.fdi usr/share/hal/fdi/policy/10osvendor
+# D-Bus activation
+debian/org.freedesktop.Hal.service usr/share/dbus-1/system-services/
+# systemd integration
+debian/hal.service lib/systemd/system/

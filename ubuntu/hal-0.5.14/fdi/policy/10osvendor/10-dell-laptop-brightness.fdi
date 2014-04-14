@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<deviceinfo version="0.2">
+
+  <!-- This is for controlling LCD brightness on DELL computers.
+       DELL require the use of libsmbios to control the panel together with the dcdbas kernel module.
+       You will need at least version 0.12.1 of libsmbios.
+       NOTE: You will need to remove both Primary AND Admin Passwords for this
+       to work correctly.
+       See http://bugs.freedesktop.org/show_bug.cgi?id=7221 for details. -->
+  <device>
+    <match key="info.subsystem" string="platform">
+      <match key="platform.id" string="dcdbas">
+        <match key="/org/freedesktop/Hal/devices/computer:system.kernel.name" string="Linux">
+          <match key="/org/freedesktop/Hal/devices/computer:system.hardware.vendor" prefix="Dell ">
+            <match key="/org/freedesktop/Hal/devices/computer:system.formfactor" string="laptop">
+              <spawn udi="/org/freedesktop/Hal/devices/dell_lcd_panel"/>
+            </match>
+          </match>
+        </match>
+      </match>
+    </match>
+  </device>
+
+  <device>
+    <match key="info.udi" string="/org/freedesktop/Hal/devices/dell_lcd_panel">
+      <append key="info.capabilities" type="strlist">laptop_panel</append>
+      <merge key="info.category" type="string">laptop_panel</merge>
+      <merge key="info.product" type="string">Dell Laptop Panel</merge>
+      <merge key="laptop_panel.access_method" type="string">custom</merge>
+      <merge key="laptop_panel.brightness_in_hardware" type="bool">true</merge>
+      <append key="info.addons" type="strlist">hald-addon-dell-backlight</append>
+    </match>
+  </device>
+
+</deviceinfo>

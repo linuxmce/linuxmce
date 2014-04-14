@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE book PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "">
+<book xmlns="http://www.devhelp.net/book" title="HAL Client Library Reference Manual" link="index.html" author="David Zeuthen" name="libhal" version="2" language="c">
+  <chapters>
+    <sub name="API Reference" link="rn01.html">
+      <sub name="libhal" link="libhal-libhal.html"/>
+    </sub>
+    <sub name="Index" link="ix01.html"/>
+    <sub name="License" link="license.html"/>
+  </chapters>
+  <functions>
+    <keyword type="macro" name="DBUS_API_SUBJECT_TO_CHANGE" link="libhal-libhal.html#DBUS-API-SUBJECT-TO-CHANGE--CAPS"/>
+    <keyword type="macro" name="LIBHAL_DEPRECATED" link="libhal-libhal.html#LIBHAL-DEPRECATED--CAPS"/>
+    <keyword type="macro" name="LIBHAL_FREE_DBUS_ERROR()" link="libhal-libhal.html#LIBHAL-FREE-DBUS-ERROR--CAPS"/>
+    <keyword type="macro" name="LIBHAL_CHECK_LIBHALCONTEXT()" link="libhal-libhal.html#LIBHAL-CHECK-LIBHALCONTEXT--CAPS"/>
+    <keyword type="enum" name="enum LibHalPropertyType" link="libhal-libhal.html#LibHalPropertyType"/>
+    <keyword type="typedef" name="LibHalContext" link="libhal-libhal.html#LibHalContext"/>
+    <keyword type="typedef" name="LibHalProperty" link="libhal-libhal.html#LibHalProperty"/>
+    <keyword type="typedef" name="LibHalPropertySet" link="libhal-libhal.html#LibHalPropertySet"/>
+    <keyword type="function" name="LibHalIntegrateDBusIntoMainLoop ()" link="libhal-libhal.html#LibHalIntegrateDBusIntoMainLoop"/>
+    <keyword type="function" name="LibHalDeviceAdded ()" link="libhal-libhal.html#LibHalDeviceAdded"/>
+    <keyword type="function" name="LibHalDeviceRemoved ()" link="libhal-libhal.html#LibHalDeviceRemoved"/>
+    <keyword type="function" name="LibHalDeviceNewCapability ()" link="libhal-libhal.html#LibHalDeviceNewCapability"/>
+    <keyword type="function" name="LibHalDeviceLostCapability ()" link="libhal-libhal.html#LibHalDeviceLostCapability"/>
+    <keyword type="function" name="LibHalDevicePropertyModified ()" link="libhal-libhal.html#LibHalDevicePropertyModified"/>
+    <keyword type="function" name="LibHalDeviceCondition ()" link="libhal-libhal.html#LibHalDeviceCondition"/>
+    <keyword type="function" name="LibHalGlobalInterfaceLockAcquired ()" link="libhal-libhal.html#LibHalGlobalInterfaceLockAcquired"/>
+    <keyword type="function" name="LibHalGlobalInterfaceLockReleased ()" link="libhal-libhal.html#LibHalGlobalInterfaceLockReleased"/>
+    <keyword type="function" name="LibHalInterfaceLockAcquired ()" link="libhal-libhal.html#LibHalInterfaceLockAcquired"/>
+    <keyword type="function" name="LibHalInterfaceLockReleased ()" link="libhal-libhal.html#LibHalInterfaceLockReleased"/>
+    <keyword type="function" name="LibHalSingletonDeviceAdded ()" link="libhal-libhal.html#LibHalSingletonDeviceAdded"/>
+    <keyword type="function" name="LibHalSingletonDeviceRemoved ()" link="libhal-libhal.html#LibHalSingletonDeviceRemoved"/>
+    <keyword type="function" name="libhal_ctx_new ()" link="libhal-libhal.html#libhal-ctx-new"/>
+    <keyword type="function" name="libhal_ctx_set_cache ()" link="libhal-libhal.html#libhal-ctx-set-cache"/>
+    <keyword type="function" name="libhal_ctx_set_dbus_connection ()" link="libhal-libhal.html#libhal-ctx-set-dbus-connection"/>
+    <keyword type="function" name="libhal_ctx_get_dbus_connection ()" link="libhal-libhal.html#libhal-ctx-get-dbus-connection"/>
+    <keyword type="function" name="libhal_ctx_set_user_data ()" link="libhal-libhal.html#libhal-ctx-set-user-data"/>
+    <keyword type="function" name="libhal_ctx_get_user_data ()" link="libhal-libhal.html#libhal-ctx-get-user-data"/>
+    <keyword type="function" name="libhal_ctx_set_device_added ()" link="libhal-libhal.html#libhal-ctx-set-device-added"/>
+    <keyword type="function" name="libhal_ctx_set_device_removed ()" link="libhal-libhal.html#libhal-ctx-set-device-removed"/>
+    <keyword type="function" name="libhal_ctx_set_device_new_capability ()" link="libhal-libhal.html#libhal-ctx-set-device-new-capability"/>
+    <keyword type="function" name="libhal_ctx_set_device_lost_capability ()" link="libhal-libhal.html#libhal-ctx-set-device-lost-capability"/>
+    <keyword type="function" name="libhal_ctx_set_device_property_modified ()" link="libhal-libhal.html#libhal-ctx-set-device-property-modified"/>
+    <keyword type="function" name="libhal_ctx_set_device_condition ()" link="libhal-libhal.html#libhal-ctx-set-device-condition"/>
+    <keyword type="function" name="libhal_ctx_set_global_interface_lock_acquired ()" link="libhal-libhal.html#libhal-ctx-set-global-interface-lock-acquired"/>
+    <keyword type="function" name="libhal_ctx_set_global_interface_lock_released ()" link="libhal-libhal.html#libhal-ctx-set-global-interface-lock-released"/>
+    <keyword type="function" name="libhal_ctx_set_interface_lock_acquired ()" link="libhal-libhal.html#libhal-ctx-set-interface-lock-acquired"/>
+    <keyword type="function" name="libhal_ctx_set_interface_lock_released ()" link="libhal-libhal.html#libhal-ctx-set-interface-lock-released"/>
+    <keyword type="function" name="libhal_ctx_set_singleton_device_added ()" link="libhal-libhal.html#libhal-ctx-set-singleton-device-added"/>
+    <keyword type="function" name="libhal_ctx_set_singleton_device_removed ()" link="libhal-libhal.html#libhal-ctx-set-singleton-device-removed"/>
+    <keyword type="function" name="libhal_ctx_init ()" link="libhal-libhal.html#libhal-ctx-init"/>
+    <keyword type="function" name="libhal_ctx_shutdown ()" link="libhal-libhal.html#libhal-ctx-shutdown"/>
+    <keyword type="function" name="libhal_ctx_free ()" link="libhal-libhal.html#libhal-ctx-free"/>
+    <keyword type="function" name="libhal_ctx_init_direct ()" link="libhal-libhal.html#libhal-ctx-init-direct"/>
+    <keyword type="function" name="libhal_get_all_devices ()" link="libhal-libhal.html#libhal-get-all-devices"/>
+    <keyword type="function" name="libhal_device_exists ()" link="libhal-libhal.html#libhal-device-exists"/>
+    <keyword type="function" name="libhal_device_print ()" link="libhal-libhal.html#libhal-device-print"/>
+    <keyword type="function" name="libhal_device_property_exists ()" link="libhal-libhal.html#libhal-device-property-exists"/>
+    <keyword type="function" name="libhal_device_get_property_string ()" link="libhal-libhal.html#libhal-device-get-property-string"/>
+    <keyword type="function" name="libhal_device_get_property_int ()" link="libhal-libhal.html#libhal-device-get-property-int"/>
+    <keyword type="function" name="libhal_device_get_property_uint64 ()" link="libhal-libhal.html#libhal-device-get-property-uint64"/>
+    <keyword type="function" name="libhal_device_get_property_double ()" link="libhal-libhal.html#libhal-device-get-property-double"/>
+    <keyword type="function" name="libhal_device_get_property_bool ()" link="libhal-libhal.html#libhal-device-get-property-bool"/>
+    <keyword type="function" name="libhal_device_get_property_strlist ()" link="libhal-libhal.html#libhal-device-get-property-strlist"/>
+    <keyword type="function" name="libhal_device_set_property_string ()" link="libhal-libhal.html#libhal-device-set-property-string"/>
+    <keyword type="function" name="libhal_device_set_property_int ()" link="libhal-libhal.html#libhal-device-set-property-int"/>
+    <keyword type="function" name="libhal_device_set_property_uint64 ()" link="libhal-libhal.html#libhal-device-set-property-uint64"/>
+    <keyword type="function" name="libhal_device_set_property_double ()" link="libhal-libhal.html#libhal-device-set-property-double"/>
+    <keyword type="function" name="libhal_device_set_property_bool ()" link="libhal-libhal.html#libhal-device-set-property-bool"/>
+    <keyword type="function" name="libhal_device_property_strlist_append ()" link="libhal-libhal.html#libhal-device-property-strlist-append"/>
+    <keyword type="function" name="libhal_device_property_strlist_prepend ()" link="libhal-libhal.html#libhal-device-property-strlist-prepend"/>
+    <keyword type="function" name="libhal_device_property_strlist_remove_index ()" link="libhal-libhal.html#libhal-device-property-strlist-remove-index"/>
+    <keyword type="function" name="libhal_device_property_strlist_remove ()" link="libhal-libhal.html#libhal-device-property-strlist-remove"/>
+    <keyword type="function" name="libhal_device_remove_property ()" link="libhal-libhal.html#libhal-device-remove-property"/>
+    <keyword type="function" name="libhal_device_get_property_type ()" link="libhal-libhal.html#libhal-device-get-property-type"/>
+    <keyword type="struct" name="struct LibHalChangeSet_s" link="libhal-libhal.html#LibHalChangeSet-s"/>
+    <keyword type="typedef" name="LibHalChangeSet" link="libhal-libhal.html#LibHalChangeSet"/>
+    <keyword type="function" name="libhal_device_new_changeset ()" link="libhal-libhal.html#libhal-device-new-changeset"/>
+    <keyword type="function" name="libhal_changeset_set_property_string ()" link="libhal-libhal.html#libhal-changeset-set-property-string"/>
+    <keyword type="function" name="libhal_changeset_set_property_int ()" link="libhal-libhal.html#libhal-changeset-set-property-int"/>
+    <keyword type="function" name="libhal_changeset_set_property_uint64 ()" link="libhal-libhal.html#libhal-changeset-set-property-uint64"/>
+    <keyword type="function" name="libhal_changeset_set_property_double ()" link="libhal-libhal.html#libhal-changeset-set-property-double"/>
+    <keyword type="function" name="libhal_changeset_set_property_bool ()" link="libhal-libhal.html#libhal-changeset-set-property-bool"/>
+    <keyword type="function" name="libhal_changeset_set_property_strlist ()" link="libhal-libhal.html#libhal-changeset-set-property-strlist"/>
+    <keyword type="function" name="libhal_device_commit_changeset ()" link="libhal-libhal.html#libhal-device-commit-changeset"/>
+    <keyword type="function" name="libhal_device_free_changeset ()" link="libhal-libhal.html#libhal-device-free-changeset"/>
+    <keyword type="function" name="libhal_device_get_all_properties ()" link="libhal-libhal.html#libhal-device-get-all-properties"/>
+    <keyword type="function" name="libhal_get_all_devices_with_properties ()" link="libhal-libhal.html#libhal-get-all-devices-with-properties"/>
+    <keyword type="function" name="libhal_property_set_sort ()" link="libhal-libhal.html#libhal-property-set-sort"/>
+    <keyword type="function" name="libhal_free_property_set ()" link="libhal-libhal.html#libhal-free-property-set"/>
+    <keyword type="function" name="libhal_property_set_get_num_elems ()" link="libhal-libhal.html#libhal-property-set-get-num-elems"/>
+    <keyword type="function" name="libhal_ps_get_type ()" link="libhal-libhal.html#libhal-ps-get-type"/>
+    <keyword type="function" name="libhal_ps_get_string ()" link="libhal-libhal.html#libhal-ps-get-string"/>
+    <keyword type="function" name="libhal_ps_get_int32 ()" link="libhal-libhal.html#libhal-ps-get-int32"/>
+    <keyword type="function" name="libhal_ps_get_uint64 ()" link="libhal-libhal.html#libhal-ps-get-uint64"/>
+    <keyword type="function" name="libhal_ps_get_double ()" link="libhal-libhal.html#libhal-ps-get-double"/>
+    <keyword type="function" name="libhal_ps_get_bool ()" link="libhal-libhal.html#libhal-ps-get-bool"/>
+    <keyword type="typedef" name="LibHalPropertySetIterator" link="libhal-libhal.html#LibHalPropertySetIterator"/>
+    <keyword type="function" name="libhal_psi_init ()" link="libhal-libhal.html#libhal-psi-init"/>
+    <keyword type="function" name="libhal_psi_has_more ()" link="libhal-libhal.html#libhal-psi-has-more"/>
+    <keyword type="function" name="libhal_psi_next ()" link="libhal-libhal.html#libhal-psi-next"/>
+    <keyword type="function" name="libhal_psi_get_type ()" link="libhal-libhal.html#libhal-psi-get-type"/>
+    <keyword type="function" name="libhal_psi_get_key ()" link="libhal-libhal.html#libhal-psi-get-key"/>
+    <keyword type="function" name="libhal_psi_get_string ()" link="libhal-libhal.html#libhal-psi-get-string"/>
+    <keyword type="function" name="libhal_psi_get_int ()" link="libhal-libhal.html#libhal-psi-get-int"/>
+    <keyword type="function" name="libhal_psi_get_uint64 ()" link="libhal-libhal.html#libhal-psi-get-uint64"/>
+    <keyword type="function" name="libhal_psi_get_double ()" link="libhal-libhal.html#libhal-psi-get-double"/>
+    <keyword type="function" name="libhal_psi_get_bool ()" link="libhal-libhal.html#libhal-psi-get-bool"/>
+    <keyword type="function" name="libhal_psi_get_strlist ()" link="libhal-libhal.html#libhal-psi-get-strlist"/>
+    <keyword type="function" name="libhal_string_array_length ()" link="libhal-libhal.html#libhal-string-array-length"/>
+    <keyword type="function" name="libhal_free_string_array ()" link="libhal-libhal.html#libhal-free-string-array"/>
+    <keyword type="function" name="libhal_free_string ()" link="libhal-libhal.html#libhal-free-string"/>
+    <keyword type="function" name="libhal_new_device ()" link="libhal-libhal.html#libhal-new-device"/>
+    <keyword type="function" name="libhal_device_commit_to_gdl ()" link="libhal-libhal.html#libhal-device-commit-to-gdl"/>
+    <keyword type="function" name="libhal_remove_device ()" link="libhal-libhal.html#libhal-remove-device"/>
+    <keyword type="function" name="libhal_merge_properties ()" link="libhal-libhal.html#libhal-merge-properties"/>
+    <keyword type="function" name="libhal_device_matches ()" link="libhal-libhal.html#libhal-device-matches"/>
+    <keyword type="function" name="libhal_manager_find_device_string_match ()" link="libhal-libhal.html#libhal-manager-find-device-string-match"/>
+    <keyword type="function" name="libhal_device_add_capability ()" link="libhal-libhal.html#libhal-device-add-capability"/>
+    <keyword type="function" name="libhal_device_query_capability ()" link="libhal-libhal.html#libhal-device-query-capability"/>
+    <keyword type="function" name="libhal_find_device_by_capability ()" link="libhal-libhal.html#libhal-find-device-by-capability"/>
+    <keyword type="function" name="libhal_device_property_watch_all ()" link="libhal-libhal.html#libhal-device-property-watch-all"/>
+    <keyword type="function" name="libhal_device_property_remove_watch_all ()" link="libhal-libhal.html#libhal-device-property-remove-watch-all"/>
+    <keyword type="function" name="libhal_device_add_property_watch ()" link="libhal-libhal.html#libhal-device-add-property-watch"/>
+    <keyword type="function" name="libhal_device_remove_property_watch ()" link="libhal-libhal.html#libhal-device-remove-property-watch"/>
+    <keyword type="function" name="libhal_device_lock ()" link="libhal-libhal.html#libhal-device-lock"/>
+    <keyword type="function" name="libhal_device_unlock ()" link="libhal-libhal.html#libhal-device-unlock"/>
+    <keyword type="function" name="libhal_device_rescan ()" link="libhal-libhal.html#libhal-device-rescan"/>
+    <keyword type="function" name="libhal_device_reprobe ()" link="libhal-libhal.html#libhal-device-reprobe"/>
+    <keyword type="function" name="libhal_device_emit_condition ()" link="libhal-libhal.html#libhal-device-emit-condition"/>
+    <keyword type="function" name="libhal_device_claim_interface ()" link="libhal-libhal.html#libhal-device-claim-interface"/>
+    <keyword type="function" name="libhal_device_addon_is_ready ()" link="libhal-libhal.html#libhal-device-addon-is-ready"/>
+    <keyword type="function" name="libhal_device_singleton_addon_is_ready ()" link="libhal-libhal.html#libhal-device-singleton-addon-is-ready"/>
+    <keyword type="function" name="libhal_device_acquire_interface_lock ()" link="libhal-libhal.html#libhal-device-acquire-interface-lock"/>
+    <keyword type="function" name="libhal_device_release_interface_lock ()" link="libhal-libhal.html#libhal-device-release-interface-lock"/>
+    <keyword type="function" name="libhal_acquire_global_interface_lock ()" link="libhal-libhal.html#libhal-acquire-global-interface-lock"/>
+    <keyword type="function" name="libhal_release_global_interface_lock ()" link="libhal-libhal.html#libhal-release-global-interface-lock"/>
+    <keyword type="function" name="libhal_device_is_caller_locked_out ()" link="libhal-libhal.html#libhal-device-is-caller-locked-out"/>
+    <keyword type="function" name="libhal_device_is_locked_by_others ()" link="libhal-libhal.html#libhal-device-is-locked-by-others"/>
+    <keyword type="function" name="libhal_device_is_caller_privileged ()" link="libhal-libhal.html#libhal-device-is-caller-privileged"/>
+  </functions>
+</book>

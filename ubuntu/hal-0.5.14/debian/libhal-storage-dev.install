@@ -1,0 +1,4 @@
+debian/tmp/usr/include/hal/libhal-storage.h
+debian/tmp/usr/lib/pkgconfig/hal-storage.pc
+debian/tmp/usr/lib/libhal-storage.so
+debian/tmp/usr/lib/libhal-storage.a

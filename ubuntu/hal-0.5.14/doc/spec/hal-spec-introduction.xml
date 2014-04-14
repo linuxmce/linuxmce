@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<chapter id="introduction">
+  <title>Introduction</title>
+
+  <sect1 id="introduction-about">
+    <title>About</title>
+    <para>
+      This document concerns the specification of HAL which is a
+      piece of software that provides a view of the various hardware
+      attached to a system. In addition to this, HAL keeps detailed
+      metadata for each piece of hardware and provide hooks such
+      that system- and desktop-level software can react to changes
+      in the hardware configuration in order to maintain system
+      policy.
+    </para>
+    <para>
+      HAL represents a piece of hardware as a <emphasis>device object</emphasis>.
+      A device object is identified by a unique identifer and carries a set of
+      key/value paris referred to as <emphasis>device properties</emphasis>.
+      Some properties are derived from the actual hardware, some are merged
+      from <emphasis>device information files</emphasis>
+      and some are related to the
+      actual device configuration. This document specifies the set
+      of device properties and gives them well-defined meaning. This
+      enable system and desktop level components to distinguish
+      between the different device objects and discover and
+      configure devices based on these properties.
+    </para>
+    <para>
+      HAL provides an easy-to-use API through D-Bus which is an IPC
+      framework that, among other things, provides a system-wide
+      message-bus that allows applications to talk to one
+      another. Specifically, D-Bus provides asynchronous
+      notification such that HAL can notify other peers on the
+      message-bus when devices are added and removed as well as when
+      properties on a device are changing.
+    </para>
+    <para>
+      The most important goal of HAL is to provide plug-and-play
+      facilities for UNIX-like desktops with focus on providing a
+      rich and extensible description of device characteristics and
+      features. HAL has no other major dependencies apart from D-Bus
+      which, given sufficient infrastructure, allows it to be
+      implemented on many UNIX-like systems. The major focus,
+      initially, is systems running the Linux 2.6 series kernels.
+    </para>
+  </sect1>
+
+  <sect1 id="introduction-acknowledgements">
+    <title>Acknowledgements</title>
+    <para>
+      Havoc Pennington's article
+      <ulink url="http://www.ometer.com/hardware.html">''Making Hardware Just Work''
+      </ulink>
+      motivated this work. The specification and software would not exist
+      without all the useful ideas, suggestions, comments and patches
+      from the
+      <ulink url="http://freedesktop.org/mailman/listinfo/xdg">Free Desktop</ulink> and
+      <ulink url="http://freedesktop.org/mailman/listinfo/hal">HAL</ulink>
+      mailing lists.
+    </para>
+    <para>
+      All trademarks mentioned belong to their respective owners.
+    </para>
+  </sect1>
+
+  <sect1 id="ov_halarch">
+    <title>Architecture of HAL</title>
+    <para>
+      The HAL consists of a number of components as outlined in the
+      diagram below. Note that this diagram is high-level and doesn't
+      capture all implementation details.
+    </para>
+    <para>
+      <inlinegraphic fileref="hal-arch.png" format="PNG"/>
+    </para>
+    <para>
+      Details on each component
+      <itemizedlist>
+        <listitem><para>
+            <emphasis>HAL daemon</emphasis>
+          </para>
+          <para>
+            A system-wide service that maintains a database of device
+            objects. The daemon is responsible for merging information
+            from device information files and managing the life cycle
+            of device objects. The service is implemented as a daemon
+            and uses helpers to query devices for specific information.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <emphasis>Applications</emphasis>
+          </para>
+          <para>
+            These are applications consuming services from HAL; this
+            includes desktop-wide session daemons for maintaining
+            policy such as power and disk/volume management.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <emphasis>Callouts</emphasis>
+          </para>
+          <para>
+            Callouts are programs that run when device objects are
+            added and removed in the HAL daemon. This is useful for
+            3rd party software to merge additional information onto
+            the device object before it is announced on
+            D-Bus. Callouts are specified on a per-device basis with
+            the <literal>info.callouts.add</literal> and
+            <literal>info.callouts.remove</literal>. See
+            <xref linkend="device-properties-info"/> for details.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <emphasis>Methods</emphasis>
+          </para>
+          <para>
+            It is possible to specify that a given HAL device object
+            implements a specific D-Bus interface,
+            e.g. <literal>org.freedesktop.Hal.Device.Frob</literal>
+            with a set of
+            methods <literal>Foo</literal>, <literal>Bar</literal>
+            and <literal>Baz</literal> and have programs run when
+            applications call into this interface. This is defined in
+            the <literal>info.interfaces</literal> property, consult
+            <xref linkend="device-properties-info"/> for details.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <emphasis>Addons</emphasis>
+          </para>
+          <para>
+            An <emphasis>addon</emphasis> can be characterized as a
+            daemon whose life cycle is tied to a device object in
+            HAL. And addon can also <emphasis>claim</emphasis> a
+            specific interface on the device object to provide
+            services to applications for configuring / using the
+            device without having to spawn a new program for every
+            method call. HAL provides a facility to launch/destroy one
+            or more addons per device object using
+            the <literal>info.addons</literal> property. See
+            <xref linkend="device-properties-info"/> for details.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <emphasis>Device Information Files</emphasis>
+          </para>
+          <para>
+            A set of files that matches properties on device objects
+            and merges additional information. These files are used,
+            for among other things, to specify what callouts, methods
+            and addons to associate with a device object. For example,
+            for drives using removable media, HAL includes an add-on
+            daemon which sole purpose is to continously poll the drive
+            to detect media change.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      The D-Bus system message bus is used to provide a ''network
+      API'' to applications. As D-Bus is designed to be language
+      independent, potentially many languages / runtime systems will
+      be able to easily access the services offered by HAL.
+    </para>
+  </sect1>
+
+  <sect1 id="introduction-device-objects">
+    <title>Device Objects</title>
+    <para>
+      It is important to precisely define the term HAL device
+      object. It's actually a bit blurry to define in general, it
+      includes what most UNIX-like systems consider first class
+      objects when it comes to hardware. In particular, a device
+      object should represent the smallest unit of addressable
+      hardware. This means there can be a one-to-many relationship
+      between a physical device and the device objects exported by
+      HAL. Specifically, a multi-function printer, which appear to
+      users as a single device may show up as several device
+      objects; e.g. one HAL device object for each of the printing,
+      scanning, fax and storage interfaces. Conversely, some devices
+      may be implemented such that the HAL device object represent
+      several functional interfaces. HAL is not concerned with this
+      duality of either one-to-many or many-to-one relationships
+      between device objects and the actual iron constituting what
+      users normally understand as a single piece of hardware;
+      a device object represents the smallest addressable unit.
+    </para>
+    <para>
+      Device objects in HAL are organised on a by-connection basis,
+      e.g. for a given device object X it is possible to find the
+      device object Y where X is attached to Y. This gives structure
+      to the device database of HAL; it is possible to map the devices
+      out in a tree. Further, software emulation devices exported by
+      the operating system kernel, such as SCSI emulation for USB
+      Storage Devices, are also considered device objects in HAL. This
+      implies that operating system kernel specific bits leak into the
+      device object database. However applications using HAL will not
+      notice this, such device objects are not referenced anywhere in
+      the device objects that users are interested in; they are merely
+      used as glue to build the device tree.
+    </para>
+    <para>
+      In addition to provide information about what kind of hardware a
+      device object represents (such as a PCI or USB device) and how
+      to address it, HAL merges information about the functional
+      interfaces the operating system kernel provides in order to use
+      the device; in most cases this is represented on the device
+      object as a string property with the name of the special device
+      file in
+      <literal>/dev</literal>. In addition to the special device file,
+      a number of other useful properties are merged. This means that
+      both hardware and functional properties are on the same device
+      object, which may prove to be useful for an application
+      programmer. For example, an application might query HAL for the
+      device object that exports the special device file
+      <literal>/dev/input/mouse2</literal> and learn that this is
+      provide by an USB mouse from a certain manufacturer by
+      checking the properties that export the USB vendor and product
+      identifiers.  See <xref linkend="device-capabilities"/>
+      and
+      <xref linkend="device-properties"/>
+      for details.
+    </para>
+    <para>
+      Finally, HAL provides one or more <emphasis>D-Bus
+      interfaces</emphasis> for applications to configure and/or use
+      the device. These interfaces are discussed in
+      <xref linkend="interfaces"/>.
+    </para>
+    <para>
+      Summarizing, a device object is comprised by
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <emphasis>UDI</emphasis>
+        </para>
+        <para>
+          This is the the <emphasis>Unique Device
+          Identifer</emphasis>, that is unique for a device object -
+          that is, no other device object can have the same UDI at the
+          same time.  The UDI is computed using bus-specific
+          information and is meant to be unique across device
+          insertions and independent of the physical port or slot the
+          device may be plugged into.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis>Properties</emphasis>
+        </para>
+        <para>
+          Each device object got a set of properties which are
+          key/value pairs.  The key is an ASCII string while the value
+          can be one of several types, see below. Properties are
+          arranged into name spaces using ''.'' as a separator.
+          <itemizedlist>
+            <listitem>
+              <para>
+                <literal>string</literal> - UTF8 string
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                <literal>strlist</literal> - ordered list with UTF8 strings
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                <literal>int</literal> - 32-bit signed integer
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                <literal>uint64</literal> - 64-bit unsigned integer
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                <literal>bool</literal> - truth value
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                <literal>double</literal> - IEEE754 double precision
+                floating point number
+              </para>
+            </listitem>
+          </itemizedlist>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis>Interfaces</emphasis>
+        </para>
+        <para>
+          Applications can configure and/or use a device using D-Bus
+          interfaces. Typically, there's a one-to-one relationship
+          between capabilities/namespaces and interfaces.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      Properties of a device object carry all the important
+      information about a device object. For organisational reasons
+      properties are also namespaced using ''.'' as a separator.
+    </para>
+    <para>
+      It can be useful to classify properties into four groups
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>Metadata - Information about how the devices
+          are connected with respect to each other
+          (parent/child relationships), what kind of
+          device it is, what functionality it provides
+          etc.
+        </para>
+      </listitem>
+      <listitem>
+        <para>Facts -
+          vendor ID, product ID, disk serial numbers,
+          number of buttons on a mouse, formats accepted
+          by a mp3 player and so on.
+        </para>
+      </listitem>
+      <listitem>
+        <para>Usage specific information -
+          Network link status, special device file name,
+          filesystem mount location etc.
+        </para>
+      </listitem>
+      <listitem>
+        <para>Policy -
+          How the device is to be used be users; usually
+          defined by the system administrator.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      The first category is determined by HAL, the second category
+      includes information merged from either querying the hardware
+      itself or from device information files. The third category is
+      intercepted by monitoring the hardware and finally the last is
+      merged from files under control of the system
+      administrator. This document is concerned with precisely
+      defining several properties; see
+      <xref linkend="device-properties"/> and onwards for more
+      information.  As a complement to device properties, HAL also
+      provides <emphasis>conditions</emphasis> on HAL device
+      objects. Conditions are used to relay events that are happening
+      on devices which are not easily expressed in properties. This
+      includes events such as ''processor is overheating'' or ''block
+      device unmounted''.
+    </para>
+    <para>
+      There is a special hal device object referred to as the ''root
+      computer device object''. This device object represent the
+      entire system as a whole and all other devices are either
+      directly or indirectly childs of this device object. It has
+      the
+      UDI <literal>/org/freedesktop/Hal/devices/computer</literal>.
+    </para>
+    <para>
+      The fundamental idea about HAL is that all ''interesting''
+      information about hardware that a desktop application needs,
+      can be obtained by querying HAL. 
+    </para>
+  </sect1>
+
+  <sect1 id="device-capabilities">
+    <title>Device Capabilities</title>
+    <para>
+      Mainstream hardware isn't very good at reporting what it really
+      is, it only reports, at best, how to interact with it. This is a
+      problem; many devices, such as MP3 players or digital still
+      cameras, appear to the operating system as plain USB Mass
+      Storage devices when the device in fact is a lot more than just
+      that. The core of the problem is that without external metadata,
+      the operating system and desktop environment will present it to
+      the user as just e.g. a mass storage device.
+    </para>
+    <para>
+      As HAL is concerned with merging of external metadata, through
+      e.g. device information files, there needs to be some scheme on
+      how to record what the device actually is. This is achieved by
+      two textual properties, <literal>info.category</literal> and
+      <literal>info.capabilities</literal>. The former describes
+      <emphasis>what the device is</emphasis> (as a single
+      alphanumeric keyword) and the latter describes
+      <emphasis>what the device does</emphasis> (as a number of
+      alphanumeric keywords separated by whitespace). The keywords
+      available for use is defined in this document; we'll refer to
+      them in following simply as <emphasis>capabilities</emphasis>.
+    </para>
+    <para>
+      HAL itself, assigns capabilities on device detection time by
+      inspecting the device class (if available, it depends on the
+      bus type) and looking at information from the operating system
+      and the hardware itself. 
+    </para>
+    <para>
+      User mode drivers such as <literal>libgphoto2</literal>
+      and <literal>sane</literal> provides device information to
+      merge information about devices they can drive. As such,
+      device objects represent an USB interface gain additional
+      properties such as ''scanner'' or ''camera''.
+    </para>
+    <para>
+      Having a capability also means that part of the property
+      namespace, prefixed with the capability name, will be populated
+      with more specific information about the capability. Indeed,
+      some properties may even be required such that applications and
+      device libraries have something to expect. For instance, the
+      capability for being a MP3 player may require properties
+      defining what audio formats the device support (e.g. Ogg and
+      MP3), whether it support recording of audio, and how to interact
+      with the device. For example, the latter may specify ''USB
+      Storage Device'' or ''proprietary protocol, use libfooplayer''.
+    </para>
+    <para>
+      Finally, capabilities have an inheritance scheme, e.g. if a device
+      has a capability <literal>foo.bar</literal>, it must also have
+      the capability <literal>foo</literal>.
+    </para>
+  </sect1>
+
+</chapter>
