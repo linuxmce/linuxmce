@@ -34,7 +34,7 @@ case "${flavor}" in
                                 RepositorySource=25
                                 ;;
                         "trusty")
-                                Distro_ID="20"
+                                Distro_ID="21"
                                 RepositorySource=25
                                 ;;
                 esac

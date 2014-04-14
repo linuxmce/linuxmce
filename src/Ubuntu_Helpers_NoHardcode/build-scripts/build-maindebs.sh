@@ -114,7 +114,7 @@ function build_main_debs() {
 					Main_Version='2.0.0.46.'
 					;;
  				"trusty")
-					Distro_ID="20"
+					Distro_ID="21"
 					RepositorySource=25
 					Main_Version='2.0.0.46.'
 					# mame - excluded due to long time for compilation.
