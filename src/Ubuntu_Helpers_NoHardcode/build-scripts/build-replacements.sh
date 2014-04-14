@@ -372,7 +372,7 @@ function Build_Replacements_Intrepid
 	Build_Replacement_Package lshwd_2.0 ubuntu/lshwd-2.0-rc4
 }
 
-function Build_Replacements_Trusty
+function Build_Replacements_trusty
 {
 	mkdir -pv "$replacements_dir"
 
@@ -415,6 +415,11 @@ function Build_Replacements_Trusty
 	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
 
+	# Package: libhal1, libhal-dev....  ugh.  Need a new hw detection daemon!
+	Build_Replacement_Package ubuntu/hal-0.5.14
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*hal*.deb
+	cp "${svn_dir}/${svn_branch_name}/ubuntu/*hal*.deb ${replacements_dir}"
+
 	#Package: lshwd
 	#Build_Replacement_Package lshwd_2.0 ubuntu/lshwd-2.0-rc4
 
@@ -456,7 +461,7 @@ case "${flavor}" in
                                 Build_Replacements_Precise
                                 ;;
                         "trusty")
-                                Build_Replacements_Trusty
+                                Build_Replacements_trusty
                                 ;;
                 esac
 		DisplayMessage "Building Replacements for $flavor"
