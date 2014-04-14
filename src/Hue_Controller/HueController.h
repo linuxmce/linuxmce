@@ -46,6 +46,7 @@ namespace DCE
         QList<HueControllerHardware*> hueControllers;
         QList<HueBulb*> hueBulbs;
 QNetworkAccessManager * linkButtonManager;
+QNetworkAccessManager * commandManager;
         QTimer *linkButtonTimer;
 
 

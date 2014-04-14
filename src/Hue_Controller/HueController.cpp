@@ -49,10 +49,11 @@ HueController::HueController(int DeviceID, string ServerAddress, bool bConnectEv
 
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "HueController, Device %d is alive!", this->m_dwPK_Device);
     authUser ="";
-    triesLeft=1000;
+    triesLeft=6;
     linkButton=false;
     mb_isNew=true;
     linkButtonManager = new QNetworkAccessManager();
+
     // QObject::connect(this, SIGNAL(initiateConfigDownload()), this, SLOT(getHueDataStore()), Qt::DirectConnection);
     // QObject::connect(this, SIGNAL(initiateConfigDownload()), this, SLOT(dummySlot()));
     //QObject::connect(this,SIGNAL(testSignal()), this, SLOT(dummySlot()));
@@ -88,8 +89,8 @@ bool HueController::checkLinkButton(){
 
     }
 
-    QString deviceIp = hueControllers.at(0)->m_ipAddress;
-    QUrl setupUrl = "http://"+deviceIp+"/api/"+lclUser;
+
+    QUrl setupUrl = "http://"+targetIpAddress+"/api/"+lclUser;
     //  qDebug()<< setupUrl.toString();
 
     QNetworkRequest setupReq(setupUrl);
@@ -108,7 +109,7 @@ bool HueController::checkLinkButton(){
 
     if(!ok){
         //  qDebug() << "Bad Link Button Response response";
-        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Could not connect to %s ! Response was invalid. Please check the device ip and that it is setup.", deviceIp.toStdString().c_str());
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Could not connect to %s ! Response was invalid. Please check the device ip and that it is setup.", targetIpAddress.toStdString().c_str());
         return false;
     }
 
@@ -135,7 +136,6 @@ bool HueController::checkLinkButton(){
 
 bool HueController::setupController(int controllerIndex){
 
-    /* send press link button at top of setup ? */
 
     //    for(int ls = 0; ls < triesLeft; ls++){
     //        if(!checkLinkButton()){
@@ -149,9 +149,9 @@ bool HueController::setupController(int controllerIndex){
 
     QString installationTag = QString::number(m_pData->m_dwPK_Installation);
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Setting up Hue Hub with LinuxMCE-%s ", installationTag.toStdString().c_str());
-    QString deviceIp = hueControllers.at(controllerIndex)->m_ipAddress;
 
-    QUrl setupUrl = "http://"+deviceIp+"/api/";
+
+    QUrl setupUrl = "http://"+targetIpAddress+"/api/";
     QVariantMap setupParams;
     installationTag.prepend("LinuxMCE-");
     setupParams.insert("devicetype",installationTag);
@@ -175,7 +175,7 @@ bool HueController::setupController(int controllerIndex){
 
     if(!ok){
         qDebug() << "Bad response";
-        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Could not connect to %s ! Response was invalid. Please check the device ip and that it is setup.", deviceIp.toStdString().c_str());
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "Could not connect to %s ! Response was invalid. Please check the device ip and that it is setup.", targetIpAddress.toStdString().c_str());
         return false;
     }
 
@@ -189,7 +189,7 @@ bool HueController::setupController(int controllerIndex){
             /* Send Message to Screen somehow */
 
             if(linkButton==true){
-                // setupController(controllerIndex);
+               setupController(controllerIndex);
                 //  qDebug()<< linkButton;
             } else {
                 /* delay  and wait until button is pressed */
@@ -327,20 +327,17 @@ bool HueController::Register()
 void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
         //<-dceag-cmdch-e->
 {
-    //    qDebug() << pMessage->m_dwMessage_Type;
-    //    qDebug() << pMessage->m_dwPK_Device_To;
-    //    qDebug() << pMessage->m_dwID;
-    //    qDebug() << pMessage->m_mapData_Parameters.size();
+
     qDebug() << pMessage->ToString().c_str();
     QStringList command = QString::fromStdString(pMessage->ToString(false)).remove("-o ").remove("\"").split(" ");
     int cmd = command.at(3).toInt();
     int device = pMessage->m_dwPK_Device_To;
-    QString controllerTarget;
+
     int ID=0;
 
     for (int f = 0; f < hueBulbs.size(); ++f){
         if(hueBulbs.at(f)->getLinuxMceId()==device){
-            controllerTarget = hueBulbs.at(f)->getController();
+
             ID = hueBulbs.at(f)->getInternalId();
         }
     }
@@ -348,7 +345,7 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
     QVariantMap params;
     QUrl target;
 
-    if(!controllerTarget.isEmpty() && ID != 0)
+    if(!targetIpAddress.isEmpty() || ID == 0)
     {
 
     }
@@ -381,7 +378,7 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
 
     switch (cmd) {
     case 193:
-        target.setUrl("http://"+controllerTarget+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
+        target.setUrl("http://"+targetIpAddress+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
         sCMD_Result = "OFF - OK";
         params.insert("on", false);
         if(sendPowerMessage(target, params))
@@ -392,7 +389,7 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
             break;
         }
     case 192:
-        target.setUrl("http://"+controllerTarget+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
+        target.setUrl("http://"+targetIpAddress+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
         params.insert("on", true);
         if(sendPowerMessage(target, params))
             sCMD_Result = "ON - OK";
@@ -401,7 +398,7 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
     case 184:
         qDebug() << command.at(5); //.replace("","\"");
 
-        target.setUrl("http://"+controllerTarget+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
+        target.setUrl("http://"+targetIpAddress+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
         params.insert("on", true);
         params.insert("bri",int(setLevelVal.toInt()*2.55));
         if(sendPowerMessage(target, params))
@@ -409,7 +406,7 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
 
         break;
     case 980:
-        target.setUrl("http://"+controllerTarget+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
+        target.setUrl("http://"+targetIpAddress+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
         params.insert("on", true);
         params.insert("bri",q.lightness());
         params.insert("hue",( q.hsvHue()*conversion_var) );
@@ -417,7 +414,7 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
         if(sendPowerMessage(target, params));
         sCMD_Result = "SET RBG - OK";
     case 641:
-        target.setUrl("http://"+controllerTarget+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
+        target.setUrl("http://"+targetIpAddress+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
         params.insert("on", true);
         params.insert("alert",command.at(5).toLower()=="on" ? "lselect":"none");
         if(sendPowerMessage(target, params));
@@ -425,7 +422,7 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
 
         break;
     case 550:
-        target.setUrl("http://"+controllerTarget+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
+        target.setUrl("http://"+targetIpAddress+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
         params.insert("on", true);
         params.insert("effect",command.at(5).toLower());
         if(sendPowerMessage(target, params));
@@ -879,7 +876,7 @@ bool HueController::downloadControllerConfig(QUrl deviceIp, int index)
 
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connecting to %s , controller # %d ",deviceIp.toString().toStdString().c_str(),index);
 
-    QUrl initUrl = "http://"+deviceIp.toString()+"/api/"+authUser;
+    QUrl initUrl = "http://"+targetIpAddress+"/api/"+authUser;
     QNetworkAccessManager *initManager = new QNetworkAccessManager;
     QNetworkRequest init(initUrl);
     QNetworkReply * rt = initManager->get(QNetworkRequest(init));
@@ -1000,20 +997,26 @@ void HueController::initResponse(){
 
 bool HueController::sendPowerMessage(QUrl message, QVariant params)
 {
+    // LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending Message:: %s ",message.toString(), params.toString());
     qDebug() << "state message::"<<message;
-    QNetworkAccessManager *p = new QNetworkAccessManager;
+QNetworkAccessManager * cmdMgr = new QNetworkAccessManager();
     QNetworkRequest pr(message);
     QJson::Serializer serializer;
     QByteArray serialized = serializer.serialize(params);
     qDebug()<< serialized;
+ QEventLoop respWait;
 
-    QNetworkReply * ptx =  p->put(pr, serialized);
-    QEventLoop respWait;
-    QObject::connect(p, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
+
+
+    QObject::connect(cmdMgr, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
+     QNetworkReply * ptx =  cmdMgr->put(pr, serialized);
     cout << "Waiting for Response" << endl;
     respWait.exec();
+
     qDebug()<< "Got Response";
     qDebug() << ptx->readAll();
+    /* Need to start returning status here */
+
     pthread_yield();
     return true;
 }
