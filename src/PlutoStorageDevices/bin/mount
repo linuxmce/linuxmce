@@ -33,7 +33,7 @@ while [[ $(( start_date + 5 )) -ge $(date +%s) ]] && [[ -e /proc/$mount_pid ]]  
 done
 
 sleep 0.2
-cat /proc/mounts > /etc/mtab
+[[ ! -L /etc/mtab ]] && cat /proc/mounts > /etc/mtab
 if [[ "$DoLocks" -eq "1" ]]; then
 	Unlock "mtab" "mount-wrapper"  >> /var/log/pluto/umount-wrapper.log
 fi
