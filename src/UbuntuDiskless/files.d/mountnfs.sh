@@ -6,7 +6,7 @@ set -e
 File="/etc/init.d/mountnfs.sh"
 
 mkdir -p "${Parm_RootLocation}/$(dirname $File)"
-cat <<-EOF >"${Parm_RootLocation}/$File"
+cat <<-'EOF' >"${Parm_RootLocation}/$File"
 	#!/bin/sh
 	### BEGIN INIT INFO
 	# Provides:          mountnfs.sh
@@ -24,36 +24,36 @@ cat <<-EOF >"${Parm_RootLocation}/$File"
 
 	start () {
 	        log_daemon_msg "Mounting remote filesystems" "mountnfs.sh"
-		mount -a -t nfs,nfs4,smbfs,cifs,ncp,ncpfs,coda,ocfs2,gfs
-        	err=$?
+	        mount -a -t nfs,nfs4,smbfs,cifs,ncp,ncpfs,coda,ocfs2,gfs
+                err=$?
 	        log_end_msg $err
-		return $err
+	        return $err
 	}
 
 	status () {
 	        status_of_proc mountnfs.sh mountnfs.sh
-		return $?
+	        return $?
 	}
 
 	case "$1" in
-		start|"")
-			$1
-			exit $?
-			;;
-		restart|reload|force-reload)
-			echo "Error: argument '$1' not supported" >&2
-			exit 3
+	        start|"")
+	                $1
+	                exit $?
 	                ;;
-		stop)
-			: # No-op
-			;;
-		status)
-			$1
-			exit $?
-			;;
-		*)
-			echo "Usage: $0 [start|stop|status]" >&2
-			exit 3
+	        restart|reload|force-reload)
+	                echo "Error: argument '$1' not supported" >&2
+	                exit 3
+	                ;;
+	        stop)
+	                : # No-op
+	                ;;
+	        status)
+	                $1
+	                exit $?
+	                ;;
+	        *)
+	                echo "Usage: $0 [start|stop|status]" >&2
+	                exit 3
 	esac
 	:
 	EOF
