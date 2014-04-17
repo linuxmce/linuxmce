@@ -65,8 +65,8 @@ function setLoglevels($output,$dbADO) {
 	} else {
 		$plutoConf = "/etc/pluto.conf";
 	}
-	$cmdToSend = "sudo -u root cat $plutoConf | grep LogLevels";
-	$temp = exec_batch_command($cmdToSend);
+	$cmdToSend = "sudo -u root /usr/pluto/bin/readConfValue.sh '$plutoConf' 'LogLevels'";
+	$temp = exec($cmdToSend);
 	$pieces = explode("=",$temp);
 	$temp = explode(",",trim($pieces[1]));
 	foreach ($temp as $level) {
@@ -129,9 +129,9 @@ function setLoglevels($output,$dbADO) {
 		
 		// write out the new loglevels to pluto.conf
 		$loglevels = $_REQUEST['loglevels'];
-		$loglevels = "LogLevels = ".implode(",",array_keys($loglevels));
-		$cmd = "sed -i -e 's/LogLevels.*/$loglevels/' $plutoConf";
-		exec_batch_command("sudo -u root $cmd",1);
+		$loglevels = implode(",",array_keys($loglevels));
+		$cmd = "sudo -u root /usr/pluto/bin/updateConfValue.sh '$plutoConf' 'LogLevels' '$loglevels'";
+		exec("$cmd");
 
 		$suffix=(isset($err))?'&error='.$err:'';
 		$out='
@@ -141,9 +141,9 @@ function setLoglevels($output,$dbADO) {
 		</script>';
 		die($out);
 	}
-	
+
 	$output->setBody($out);
-	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_SET_LOGLEVELS_CONST);			
+	$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_SET_LOGLEVELS_CONST);
 	$output->output();
 }
 ?>
