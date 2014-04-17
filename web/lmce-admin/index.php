@@ -1885,6 +1885,12 @@ switch ($section) {
 	    include_once('operations/mediaBrowser/filePicker.php');
 	    filePicker($output,$mediadbADO,$dbADO);
 	break;
+	case 'installWizards':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/packages/installWizardList.php');
+	    installWizardList($output,$dbADO);
+	break;
 
 	case 'index';
 		@$_SESSION['lastLeftFrameSrc']='';
