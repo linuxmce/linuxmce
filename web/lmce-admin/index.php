@@ -1885,7 +1885,7 @@ switch ($section) {
 	    include_once('operations/mediaBrowser/filePicker.php');
 	    filePicker($output,$mediadbADO,$dbADO);
 	break;
-	case 'installWizards':
+	case 'installWizardList':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
 	    include_once('operations/packages/installWizardList.php');

@@ -37,6 +37,14 @@ function installWizardList($output,$dbADO) {
 	}
 	$rs->Close();
 
+	$arrayIdStep=array();
+	$arrayDescriptionStep=array();
+	$arrayIdStep[]=0;
+	$arrayDescriptionStep[]=$TEXT_DISABLED_CONST.' / '.$TEXT_NONE_CONST;
+	$arrayIdStep[]=5;
+	$arrayDescriptionStep[]=$TEXT_CORE_CONST;
+	$arrayIdStep[]=6;
+	$arrayDescriptionStep[]=$TEXT_MEDIA_DIRECTOR_CONST;
 
 	if ($action=='form') {
 		$DataFormValidation='';
@@ -47,6 +55,7 @@ function installWizardList($output,$dbADO) {
 			}
 		</script>
 		<form action="index.php" method="post" name="installWizardList">
+		<input type="hidden" name="section" value="installWizardList">
 		<input type="hidden" name="action" value="add">
 		<input type="hidden" name="from" value="'.$from.'">
 
@@ -68,20 +77,41 @@ function installWizardList($output,$dbADO) {
 
 				$out.='
 					<tr bgcolor="#F0F3F8">
+						<td>'.$TEXT_NAME_CONST.'</td>
 						<td>'.$TEXT_STEP_CONST.'</td>
-						<td>'.$TEXT_DEFAULT_CONST.'</td>
+						<td colspan="2">'.$TEXT_DEVICE_TEMPLATE_CONST.'</td>
+					</tr>
+					<tr bgcolor="#F0F3F8">
+						<td><input type="text" name="comments_'.$rowWizard['PK_InstallWizard'].'" value="'.$rowWizard['Comments'].'"></td>
+
+<!--						<td><input type="text" name="step_'.$rowWizard['PK_InstallWizard'].'" value="'.$rowWizard['Step'].'"></td> -->
+						<td><select name="step_'.$rowWizard['PK_InstallWizard'].'">
+					';
+					foreach($arrayDescriptionStep as $key => $value){
+						$out.='
+							<option value="'.$arrayIdStep[$key].'" '.(($arrayIdStep[$key]==$rowWizard['Step'])?'selected':'').'>'.$value.'</option>
+						';
+					}
+					$out.='
+						</select></td>
+
+						<td colspan="2"><input type="text" name="deviceTemplate_'.$rowWizard['PK_InstallWizard'].'" value="'.$rowWizard['FK_DeviceTemplate'].'"></td>
+
+<!--						<td><input type="text" name="default_'.$rowWizard['PK_InstallWizard'].'" value="'.$rowWizard['Default'].'"></td> -->
+						<td><input name="default_'.$rowWizard['PK_InstallWizard'].'" type="checkbox" value="1" '.(($rowWizard['Default']==1)?'checked':'').'>  '.$TEXT_DEFAULT_CONST.'</td>
+
+						<td><input type="submit" class="button" name="deleteWizard_'.$rowWizard['PK_InstallWizard'].'" value="'.$TEXT_DELETE_INSTALL_WIZARD_CONST.'"></td>
+					</tr>
+					<input type="hidden" name="displayedWizard" value="'.join(",",$displayedWizard).'">
+
+					<tr bgcolor="#F0F3F8">
+						<td>&nbsp;</td>
+						<td>'.$TEXT_OPERATING_SYSTEM_CONST.'</td>
+						<td>'.$TEXT_DISTRO_CONST.'</td>
 						<td>'.$TEXT_DEVICE_TEMPLATE_CONST.'</td>
 						<td>'.$TEXT_COMMENTS_CONST.'</td>
 					</tr>
-					<tr bgcolor="#F0F3F8">
-						<td><input type="text" name="step_'.$rowWizard['PK_InstallWizard'].'" value="'.$rowWizard['Step'].'"></td>
-						<td><input type="text" name="default_'.$rowWizard['PK_InstallWizard'].'" value="'.$rowWizard['Default'].'"></td>
-						<td><input type="text" name="deviceTemplate_'.$rowWizard['PK_InstallWizard'].'" value="'.$rowWizard['FK_DeviceTemplate'].'"></td>
-						<td><input type="text" name="comments_'.$rowWizard['PK_InstallWizard'].'" value="'.$rowWizard['Comments'].'"></td>
-					</tr>
-					<input type="hidden" name="displayedWizard" value="'.join(",",$displayedWizard).'">
 				';
-
 				$queryWizardCompatibility='SELECT * FROM InstallWizard_Distro WHERE FK_InstallWizard=?';
 				$resWizardCompatibility=$dbADO->Execute($queryWizardCompatibility,$rowWizard['PK_InstallWizard']);
 				while($rowCompatibility=$resWizardCompatibility->fetchRow()){
@@ -107,11 +137,15 @@ function installWizardList($output,$dbADO) {
 							<option value="'.$arrayIdDistro[$key].'" '.(($arrayIdDistro[$key]==$rowCompatibility['FK_Distro'])?'selected':'').'>'.$value.'</option>
 						';
 					}
+
 					$out.='
 						</select></td>
-						<td><textarea cols="60" name="comments_'.$rowCompatibility['PK_InstallWizard_Distro'].'">'.$rowCompatibility['Comments'].'</textarea></td>
+						<td><input type="text" name="compatDeviceTemplate_'.$rowCompatibility['PK_InstallWizard_Distro'].'" value="'.$rowCompatibility['FK_DeviceTemplate'].'"></td>
+						<td><textarea cols="180" name="compatComments_'.$rowCompatibility['PK_InstallWizard_Distro'].'">'.$rowCompatibility['Comments'].'</textarea></td>
 						<td><input type="submit" class="button" name="deleteCompatibility_'.$rowCompatibility['PK_InstallWizard_Distro'].'" value="'.$TEXT_DELETE_COMPATIBILITY_CONST.'"></td>
 					</tr>
+					<input type="hidden" name="compatArray" value="'.join(",",$compatArray).'">
+
 				';
 
 				}
@@ -119,11 +153,13 @@ function installWizardList($output,$dbADO) {
 					<tr>
 						<td>&nbsp;</td>
 						<td>&nbsp;</td>
-						<td><input type="submit" class="button" name="addCompatibility_'.$rowWizard['PK_InstallWizard'].'" value="'.$TEXT_ADD_OTHER_COMPATIBILITY_CONST.'"><br></td>
+						<td colspan="6" align="centre"><input type="submit" class="button" name="addCompatibility_'.$rowWizard['PK_InstallWizard'].'" value="'.$TEXT_ADD_OTHER_COMPATIBILITY_CONST.'"></td>
+					</tr>
+					<tr>
 						<td colspan="6" align="center"><input type="submit" class="button" name="save" value="'.$TEXT_SAVE_CONST.'"></td>
 					</tr>
 					<tr>
-						<td colspan=5><hr></td>
+						<td colspan=6><hr></td>
 					</tr>
 				';
 
@@ -131,7 +167,7 @@ function installWizardList($output,$dbADO) {
 			$out.='
 					<tr>
 						<td colspan="7">
-							<input type="submit" class="button" name="addWizard" value="'.$TEXT_ADD_NEW_INSTALLWIZARD_CONST.'">
+							<input type="submit" class="button" name="addWizard" value="'.$TEXT_ADD_INSTALL_WIZARD_CONST.'">
 						</td>
 					</tr>
 				</table>
@@ -145,65 +181,76 @@ function installWizardList($output,$dbADO) {
 		$displayedWizardArray=explode(",",@$_POST['displayedWizard']);
 		$compatArray=explode(",",@$_POST['compatArray']);
 
-//		if(isset($_POST['addWizard'])){
-//			// add new wizard in table InstallWizard
-//			$insertInstallWizard='INSERT INTO InstallWizard';
-//			$dbADO->Execute($insertInstallWizard);
-//		}
+		if(isset($_POST['addWizard'])){
+			// add new wizard in table InstallWizard
+			$insertInstallWizard='INSERT INTO InstallWizard (InstallWizard.Default) VALUES (0)';
+			$dbADO->Execute($insertInstallWizard);
+		}
 
-//		foreach($compatArray AS $value){
-//			$compatOperatingSystem=(cleanInteger(@$_POST['OperatingSystem_'.$value]))?@$_POST['OperatingSystem_'.$value]:NULL;
-//			$compatDistro=(cleanInteger(@$_POST['distro_'.$value]))?@$_POST['distro_'.$value]:NULL;
-//			$compatComments=cleanString(@$_POST['comments_'.$value]);
-//			if(isset($_POST['deleteCompatibility_'.$value])) {
-//				$deleteInstallWizardDistro='DELETE FROM InstallWizard_Distro WHERE PK_InstallWizard_Distro=?';
-//				$dbADO->Execute($deleteInstallWizardDistro,$value);
-//			} else {
-//				$updateInstallWizardDistro='
-//					UPDATE InstallWizard_Distro SET
-//						FK_OperatingSystem=?,
-//						FK_Distro=?,
-//						Comments=?
-//					WHERE PK_InstallWizard_Distro=?';
-//				$dbADO->Execute($updateInstallWizardDistro,array($compatOperatingSystem,$compatDistro,$compatComments,$value));
-//			}
-//		}
+		foreach($compatArray AS $value){
+			$compatOperatingSystem=(cleanInteger(@$_POST['OperatingSystem_'.$value]))?@$_POST['OperatingSystem_'.$value]:NULL;
+			$compatDistro=(cleanInteger(@$_POST['distro_'.$value]))?@$_POST['distro_'.$value]:NULL;
+			$compatDeviceTemplate=(cleanInteger(@$_POST['compatDeviceTemplate_'.$value]))?@$_POST['compatDeviceTemplate_'.$value]:NULL;
+			$compatComments=cleanString(@$_POST['compatComments_'.$value]);
+			if(isset($_POST['deleteCompatibility_'.$value])) {
+				$deleteInstallWizardDistro='DELETE FROM InstallWizard_Distro WHERE PK_InstallWizard_Distro=?';
+				$dbADO->Execute($deleteInstallWizardDistro,$value);
+			} else {
+				$updateInstallWizardDistro='
+					UPDATE InstallWizard_Distro SET
+						FK_OperatingSystem=?,
+						FK_Distro=?,
+						FK_DeviceTemplate=?,
+						Comments=?
+					WHERE PK_InstallWizard_Distro=?';
+				$dbADO->Execute($updateInstallWizardDistro,array($compatOperatingSystem,$compatDistro,$compatDeviceTemplate,$compatComments,$value));
+			}
+		}
 
-//		foreach($displayedWizardArray AS $value) {
-//			$wizardDeviceTemplate=(@$_POST['deviceTemplate_'.$value]!='0')?@$_POST['deviceTemplate_'.$value]:0;
-//			$wizardStep=(@$_POST['step_'.$value]!='0')?@$_POST['step_'.$value]:0;
-//			$wizardDefault=(@$_POST['default_'.$value]!='0')?@$_POST['default_'.$value]:0;
-//			$wizardComments=(@$_POST['comments_'.$value]!='0')?@$_POST['comments_'.$value]:NULL;
-//
-//			$updateInstallWizard='
-//				UPDATE InstallWizard SET
-//					FK_DeviceTemplate=?,
-//					Step=?,
-//					Default=?,
-//					Comments=?
-//				WHERE PK_InstallWizard=?';
-//			$dbADO->Execute($updateInstallWizard,array($wizardDeviceTempalte,$wizardStep,$wizardDefault,$wizardComments,$value));
-//
-//			if(isset($_POST['deleteWizard_'.$value])) {
-//				$deleteInstallWizardDistro='DELETE FROM InstallWizard_Distro WHERE FK_InstallWizard=?';
-//				$dbADO->Execute($deleteInstallWizardDistro,$value);
-//				$deleteInstallWizard='DELETE FROM InstallWizard WHERE PK_InstallWizard=?';
-//				$dbADO->Execute($deleteInstallWizard,$value);
-//			}
-//
-//			// add compatibility
-//			if(isset($_POST['addCompatibility_'.$value])) {
-//				$insertInstallWizardDistro='INSERT INTO InstallWizard_Distro (FK_InstallWizard) VALUES (?)';
-//				$dbADO->Execute($insertInstallWizardDistro,$value);
-//			}
+		foreach($displayedWizardArray AS $value) {
+			$wizardDeviceTemplate=(cleanInteger(@$_POST['deviceTemplate_'.$value])!='0')?@$_POST['deviceTemplate_'.$value]:0;
+			$wizardStep=(cleanInteger(@$_POST['step_'.$value])!='0')?@$_POST['step_'.$value]:0;
+			$wizardDefault=(cleanInteger(@$_POST['default_'.$value])!='0')?1:0;
+			$wizardComments=(@$_POST['comments_'.$value]!='')?@$_POST['comments_'.$value]:NULL;
 
-//		}
-//		$out.='';
+			$updateInstallWizard='
+				UPDATE InstallWizard SET
+					FK_DeviceTemplate=?,
+					Step=?,
+					InstallWizard.Default=?,
+					Comments=?
+				WHERE PK_InstallWizard=?';
+			$dbADO->Execute($updateInstallWizard,array($wizardDeviceTemplate,$wizardStep,$wizardDefault,$wizardComments,$value));
 
+			if(isset($_POST['deleteWizard_'.$value])) {
+				$deleteInstallWizardDistro='DELETE FROM InstallWizard_Distro WHERE FK_InstallWizard=?';
+				$dbADO->Execute($deleteInstallWizardDistro,$value);
+				$deleteInstallWizard='DELETE FROM InstallWizard WHERE PK_InstallWizard=?';
+				$dbADO->Execute($deleteInstallWizard,$value);
+			}
+
+			// add compatibility
+			if(isset($_POST['addCompatibility_'.$value])) {
+				$insertInstallWizardDistro='INSERT INTO InstallWizard_Distro (FK_InstallWizard) VALUES (?)';
+				$dbADO->Execute($insertInstallWizardDistro,$value);
+			}
+
+		}
+		$out.='<script>';
+
+		$out.="self.location='index.php?section=installWizardList&from=".$from."';";
+		$out.='</script>';
 	}
 
+//$output->setMenuTitle($TEXT_DEVELOPERS_CONST.' |');
+//$output->setPageTitle($TEXT_INSTALL_WIZARD_CONST);
+//$output->setNavigationMenu(array($TEXT_DISTRO_CONST=>'index.php?section=installWizardList'));
+//$output->setBody($out);
+//$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_DISTRO_CONST);
+//$output->output();
+
 	$output->setBody($out);
-//	$output->setTitle(@$rowPackage['Description'].' - '.APPLICATION_NAME.' :: '.$TEXT_CREATE_NEW_INSTALL_WIZARD_CONST);
+	$output->setTitle(@$rowPackage['Description'].' - '.APPLICATION_NAME.' :: '.$TEXT_CREATE_NEW_INSTALL_WIZARD_CONST);
 	$output->output();
 }
 ?>
