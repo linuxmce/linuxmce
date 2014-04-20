@@ -1,0 +1,2393 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>The xine hacker's guide</title><meta name="generator" content="DocBook XSL Stylesheets V1.78.1" /><meta name="description" content="This document should help xine hackers to find their way through xine's architecture and source code. It's a pretty free-form document containing a loose collection of articles describing various aspects of xine's internals." /></head><body><div class="book"><div class="titlepage"><div><div><h1 class="title"><a id="idp49925104"></a>The xine hacker's guide</h1></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Günter</span> <span class="surname">Bartsch</span></h3></div><div class="author"><h3 class="author"><span class="firstname">Heiko</span> <span class="surname">Schäfer</span></h3></div><div class="author"><h3 class="author"><span class="firstname">Richard</span> <span class="surname">Wareham</span></h3></div><div class="author"><h3 class="author"><span class="firstname">Miguel</span> <span class="surname">Freitas</span></h3></div><div class="author"><h3 class="author"><span class="firstname">James</span> <span class="surname">Courtier-Dutton</span></h3></div><div class="author"><h3 class="author"><span class="firstname">Siggi</span> <span class="surname">Langauf</span></h3></div><div class="author"><h3 class="author"><span class="firstname">Marco</span> <span class="surname">Zühlke</span></h3></div><div class="author"><h3 class="author"><span class="firstname">Mike</span> <span class="surname">Melanson</span></h3></div><div class="author"><h3 class="author"><span class="firstname">Michael</span> <span class="surname">Roitzsch</span></h3></div><div class="author"><h3 class="author"><span class="firstname">Diego</span> <span class="surname">Pettenò</span></h3></div><div class="author"><h3 class="author"><span class="firstname">Darren</span> <span class="surname">Salt</span></h3></div></div></div><div><p class="copyright">Copyright © 2001-2010 the xine project team</p></div><div><div class="abstract"><p class="title"><strong>Abstract</strong></p><p>
+    This document should help xine hackers to find their way through
+    xine's architecture and source code. It's a pretty free-form document
+    containing a loose collection of articles describing various aspects
+    of xine's internals.
+   </p></div></div></div><hr /></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="chapter"><a href="#intro">1. Introduction</a></span></dt><dd><dl><dt><span class="sect1"><a href="#idp51709584">Where am I?</a></span></dt><dt><span class="sect1"><a href="#idp51885712">What does this text do?</a></span></dt><dt><span class="sect1"><a href="#idp51324784">New versions of this document</a></span></dt><dt><span class="sect1"><a href="#idp52200864">Feedback</a></span></dt></dl></dd><dt><span class="chapter"><a href="#xine-library">2. Using the xine library</a></span></dt><dd><dl><dt><span class="sect1"><a href="#idp52300560">xine architecture as visible to libxine clients</a></span></dt><dt><span class="sect1"><a href="#idp52419888">Writing a new frontend to xine</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp52981168">Source code of a simple X11 frontend</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#overview">3. xine code overview</a></span></dt><dd><dl><dt><span class="sect1"><a href="#idp50547792">Walking the source tree</a></span></dt><dt><span class="sect1"><a href="#idp54005152">Object oriented programming in C</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54015936">Why not using C++?</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idp54018448">Coding style and guidelines</a></span></dt><dt><span class="sect1"><a href="#idp54026944">The xine logging system</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54028128">xine_log</a></span></dt><dt><span class="sect2"><a href="#idp54031120">xprintf</a></span></dt><dt><span class="sect2"><a href="#idp54034304">lprintf/llprintf</a></span></dt><dt><span class="sect2"><a href="#idp54041664">_x_assert/_x_abort</a></span></dt></dl></dd><dt><span class="sect1"><a href="#contribute">How to contribute</a></span></dt></dl></dd><dt><span class="chapter"><a href="#internals">4. xine internals</a></span></dt><dd><dl><dt><span class="sect1"><a href="#idp54204400">Engine architecture and data flow</a></span></dt><dt><span class="sect1"><a href="#idp54254832">Plugin system</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54263520">Plugin location and filesystem layout</a></span></dt><dt><span class="sect2"><a href="#idp54270288">Plugin Content: What's inside the .so?</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idp54293776">What is this metronom thingy?</a></span></dt><dt><span class="sect1"><a href="#idp54300128">How does xine synchronize audio and video?</a></span></dt><dt><span class="sect1"><a href="#osd">Overlays and OSD</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54327456">Overlay Manager</a></span></dt><dt><span class="sect2"><a href="#idp54329440">OSD Renderer</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idp54354944">MRLs</a></span></dt></dl></dd><dt><span class="chapter"><a href="#stream">5. xine's stream layer</a></span></dt><dd><dl><dt><span class="sect1"><a href="#idp54424416">Input layer</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54473584">Writing a xine input plugin</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idp54499328">Demuxer layer</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54500512">Introduction to demuxer theory</a></span></dt><dt><span class="sect2"><a href="#idp54504336">Input considerations</a></span></dt><dt><span class="sect2"><a href="#idp54506208">Seeking Policy</a></span></dt><dt><span class="sect2"><a href="#idp54429776">Writing a xine demuxer</a></span></dt><dt><span class="sect2"><a href="#idp54546560">Buffer types</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idp54554384">Decoder layer</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54555568">Audio and video decoders</a></span></dt><dt><span class="sect2"><a href="#idp54557760">Video output formats</a></span></dt><dt><span class="sect2"><a href="#idp54559376">Audio output formats</a></span></dt><dt><span class="sect2"><a href="#idp54560976">Writing a xine decoder</a></span></dt><dt><span class="sect2"><a href="#idp54597504">SPU decoder</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#output">6. xine's output layer</a></span></dt><dd><dl><dt><span class="sect1"><a href="#idp54694544">Post plugin layer</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54695744">General principle of post plugins</a></span></dt><dt><span class="sect2"><a href="#idp54749136">Writing a xine post plugin</a></span></dt><dt><span class="sect2"><a href="#idp54763520">Interception</a></span></dt><dt><span class="sect2"><a href="#idp54826320">Rewiring and the ticket system</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idp54861408">Video output</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54867872">Writing a xine video out plugin</a></span></dt></dl></dd></dl></dd></dl></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a id="intro"></a>Chapter 1. Introduction</h1></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#idp51709584">Where am I?</a></span></dt><dt><span class="sect1"><a href="#idp51885712">What does this text do?</a></span></dt><dt><span class="sect1"><a href="#idp51324784">New versions of this document</a></span></dt><dt><span class="sect1"><a href="#idp52200864">Feedback</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp51709584"></a>Where am I?</h2></div></div></div><p>
+   You are currently looking at a piece of documentation for xine.
+   xine is a free video player. It lives on
+   <a class="ulink" href="http://www.xine-project.org/" target="_top">http://www.xine-project.org/</a>. Specifically
+   this document goes under the moniker of the "xine Hackers' Guide".
+  </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp51885712"></a>What does this text do?</h2></div></div></div><p>
+   This document should help xine hackers to find their way through
+   xine's architecture and source code. It's a pretty free-form document
+   containing a loose collection of articles describing various aspects
+   of xine's internals. It has been written by a number of people who work
+   on xine themselves and is intended to provide the important concepts and
+   methods used within xine. Readers should not consider this document to be
+   an exhausative description of the internals of xine. As with all projects
+   which provide access, the source-code should be considered the definitive
+   source of information.
+  </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp51324784"></a>New versions of this document</h2></div></div></div><p>
+   This document is being developed in the xine-lib cvs repository within
+   the directory <code class="filename">doc/hackersguide/</code>. If you are
+   unsure what to do with the stuff in that directory, please read the
+   <code class="filename">README</code> file located there.
+  </p><p>
+   New versions of this document can also be obtained from the xine web site:
+   <a class="ulink" href="http://www.xine-project.org/" target="_top">http://www.xine-project.org/</a>.
+  </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp52200864"></a>Feedback</h2></div></div></div><p>
+   All comments, error reports, additional information and criticism
+   concerning this document should be directed to the xine documentations
+   mailing list <code class="email">&lt;<a class="email" href="mailto:xine-docs@lists.sourceforge.net">xine-docs@lists.sourceforge.net</a>&gt;</code>.
+   Questions about xine hacking in general should be sent to the
+   developer mailing list <code class="email">&lt;<a class="email" href="mailto:xine-devel@lists.sourceforge.net">xine-devel@lists.sourceforge.net</a>&gt;</code>.
+  </p></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a id="xine-library"></a>Chapter 2. Using the xine library</h1></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#idp52300560">xine architecture as visible to libxine clients</a></span></dt><dt><span class="sect1"><a href="#idp52419888">Writing a new frontend to xine</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp52981168">Source code of a simple X11 frontend</a></span></dt></dl></dd></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp52300560"></a>xine architecture as visible to libxine clients</h2></div></div></div><p>
+   The following drawing shows the components of xine as outside applications
+   see them. For every component, the functions for creating and destroying it
+   are given. Every other function works in the context it is enclosed in.
+   Functions that facilitate the connection of the individual components are
+   also given.
+  </p><div class="mediaobject"><img alt="" src="library.png" /><div class="caption"><p>outside view on xine components</p></div></div><p>
+   The function are named just to give you an overview of what is actually
+   there. It is all thoroughly documented in the plublic header
+   <code class="filename">xine.h</code>, which is the main and preferably the only xine
+   header, clients should include. (xine/xineutils.h and the XML parser might
+   make an exception.)
+  </p><p>
+   Details on the OSD feature can be found in the <a class="link" href="#osd" title="Overlays and OSD">OSD section</a>.
+  </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp52419888"></a>Writing a new frontend to xine</h2></div></div></div><p>
+   The best way to explain this seems to be actual code. Below you
+   will find a very easy and hopefully self-explaining xine frontend
+   to give you a start.
+  </p><p>
+   One important thing to note is that any X11 based xine-lib frontend
+   must call <code class="function">XInitThreads()</code> before calling the
+   first Xlib function, because xine will access the display from
+   within a different thread than the frontend.
+  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp52981168"></a>Source code of a simple X11 frontend</h3></div></div></div><pre class="programlisting">
+/*
+** Copyright (C) 2003 Daniel Caujolle-Bert &lt;segfault@club-internet.fr&gt;
+**
+** This program is free software; you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation; either version 2 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program; if not, write to the Free Software
+** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**
+*/
+
+/*
+ * compile-command: "gcc -Wall -O2 `pkg-config --cflags --libs libxine x11` -lm -o xinimin xinimin.c"
+ */
+
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;math.h&gt;
+
+#include &lt;X11/X.h&gt;
+#include &lt;X11/Xlib.h&gt;
+#include &lt;X11/Xutil.h&gt;
+#include &lt;X11/keysym.h&gt;
+#include &lt;X11/Xatom.h&gt;
+#include &lt;X11/Xutil.h&gt;
+#include &lt;X11/extensions/XShm.h&gt;
+
+#include &lt;xine.h&gt;
+#include &lt;xine/xineutils.h&gt;
+
+
+#define MWM_HINTS_DECORATIONS   (1L &lt;&lt; 1)
+#define PROP_MWM_HINTS_ELEMENTS 5
+typedef struct {
+  uint32_t  flags;
+  uint32_t  functions;
+  uint32_t  decorations;
+  int32_t   input_mode;
+  uint32_t  status;
+} MWMHints;
+
+static xine_t              *xine;
+static xine_stream_t       *stream;
+static xine_video_port_t   *vo_port;
+static xine_audio_port_t   *ao_port;
+static xine_event_queue_t  *event_queue;
+
+static Display             *display;
+static int                  screen;
+static Window               window[2];
+static int                  xpos, ypos, width, height, fullscreen;
+static double               pixel_aspect;
+
+static int                  running = 1;
+
+#define INPUT_MOTION (ExposureMask | ButtonPressMask | KeyPressMask | \
+                      ButtonMotionMask | StructureNotifyMask |        \
+                      PropertyChangeMask | PointerMotionMask)
+
+/* this will be called by xine, if it wants to know the target size of a frame */
+static void dest_size_cb(void *data, int video_width, int video_height, double video_pixel_aspect,
+                         int *dest_width, int *dest_height, double *dest_pixel_aspect)  {
+  *dest_width        = width;
+  *dest_height       = height;
+  *dest_pixel_aspect = pixel_aspect;
+}
+
+/* this will be called by xine when it's about to draw the frame */
+static void frame_output_cb(void *data, int video_width, int video_height,
+                            double video_pixel_aspect, int *dest_x, int *dest_y,
+                            int *dest_width, int *dest_height,
+                            double *dest_pixel_aspect, int *win_x, int *win_y) {
+  *dest_x            = 0;
+  *dest_y            = 0;
+  *win_x             = xpos;
+  *win_y             = ypos;
+  *dest_width        = width;
+  *dest_height       = height;
+  *dest_pixel_aspect = pixel_aspect;
+}
+
+static void event_listener(void *user_data, const xine_event_t *event) {
+  switch(event-&gt;type) {
+  case XINE_EVENT_UI_PLAYBACK_FINISHED:
+    running = 0;
+    break;
+
+  case XINE_EVENT_PROGRESS:
+    {
+      xine_progress_data_t *pevent = (xine_progress_data_t *) event-&gt;data;
+
+      printf("%s [%d%%]\n", pevent-&gt;description, pevent-&gt;percent);
+    }
+    break;
+
+  /* you can handle a lot of other interesting events here */
+  }
+}
+
+int main(int argc, char **argv) {
+  char              configfile[2048];
+  x11_visual_t      vis;
+  double            res_h, res_v;
+  char             *vo_driver = "auto";
+  char             *ao_driver = "auto";
+  char             *mrl = NULL;
+  int               i;
+  Atom              XA_NO_BORDER;
+  MWMHints          mwmhints;
+
+  /* parsing command line */
+  for (i = 1; i &lt; argc; i++) {
+    if (strcmp(argv[i], "-vo") == 0) {
+      vo_driver = argv[++i];
+    }
+    else if (strcmp(argv[i], "-ao") == 0) {
+      ao_driver = argv[++i];
+    }
+    else
+      mrl = argv[i];
+  }
+
+  if (!mrl) {
+    printf("specify an mrl\n");
+    return 1;
+  }
+  printf("mrl: '%s'\n", mrl);
+
+  if (!XInitThreads()) {
+    printf("XInitThreads() failed\n");
+    return 1;
+  }
+
+  /* load xine config file and init xine */
+  xine = xine_new();
+  snprintf(configfile, sizeof(configfile), "%s%s", xine_get_homedir(), "/.xine/config");
+  xine_config_load(xine, configfile);
+  xine_init(xine);
+
+  display = XOpenDisplay(NULL);
+  screen  = XDefaultScreen(display);
+  xpos    = 0;
+  ypos    = 0;
+  width   = 320;
+  height  = 200;
+
+  /* some initalization for the X11 Window we will be showing video in */
+  XLockDisplay(display);
+  fullscreen = 0;
+  window[0] = XCreateSimpleWindow(display, XDefaultRootWindow(display),
+                                  xpos, ypos, width, height, 1, 0, 0);
+
+  window[1] = XCreateSimpleWindow(display, XDefaultRootWindow(display),
+                                  0, 0, (DisplayWidth(display, screen)),
+                                  (DisplayHeight(display, screen)), 0, 0, 0);
+
+  XSelectInput(display, window[0], INPUT_MOTION);
+
+  XSelectInput(display, window[1], INPUT_MOTION);
+
+  XA_NO_BORDER         = XInternAtom(display, "_MOTIF_WM_HINTS", False);
+  mwmhints.flags       = MWM_HINTS_DECORATIONS;
+  mwmhints.decorations = 0;
+  XChangeProperty(display, window[1],
+                  XA_NO_BORDER, XA_NO_BORDER, 32, PropModeReplace, (unsigned char *) &amp;mwmhints,
+                  PROP_MWM_HINTS_ELEMENTS);
+
+  XMapRaised(display, window[fullscreen]);
+
+  res_h = (DisplayWidth(display, screen) * 1000 / DisplayWidthMM(display, screen));
+  res_v = (DisplayHeight(display, screen) * 1000 / DisplayHeightMM(display, screen));
+  XSync(display, False);
+  XUnlockDisplay(display);
+
+  /* filling in the xine visual struct */
+  vis.display           = display;
+  vis.screen            = screen;
+  vis.d                 = window[fullscreen];
+  vis.dest_size_cb      = dest_size_cb;
+  vis.frame_output_cb   = frame_output_cb;
+  vis.user_data         = NULL;
+  pixel_aspect          = res_v / res_h;
+
+  /* opening xine output ports */
+  vo_port = xine_open_video_driver(xine, vo_driver, XINE_VISUAL_TYPE_X11, (void *)&amp;vis);
+  ao_port = xine_open_audio_driver(xine , ao_driver, NULL);
+
+  /* open a xine stream connected to these ports */
+  stream = xine_stream_new(xine, ao_port, vo_port);
+  /* hook our event handler into the streams events */
+  event_queue = xine_event_new_queue(stream);
+  xine_event_create_listener_thread(event_queue, event_listener, NULL);
+
+  /* make the video window visible to xine */
+  xine_port_send_gui_data(vo_port, XINE_GUI_SEND_DRAWABLE_CHANGED, (void *) window[fullscreen]);
+  xine_port_send_gui_data(vo_port, XINE_GUI_SEND_VIDEOWIN_VISIBLE, (void *) 1);
+
+  /* start playback */
+  if (!xine_open(stream, mrl) || !xine_play(stream, 0, 0)) {
+    printf("Unable to open mrl '%s'\n", mrl);
+    return 1;
+  }
+
+  while (running) {
+    XEvent xevent;
+    int    got_event;
+
+    XLockDisplay(display);
+    got_event = XPending(display);
+    if( got_event )
+      XNextEvent(display, &amp;xevent);
+    XUnlockDisplay(display);
+
+    if( !got_event ) {
+      xine_usec_sleep(20000);
+      continue;
+    }
+
+    switch(xevent.type) {
+
+    case KeyPress:
+      {
+        XKeyEvent  kevent;
+        KeySym     ksym;
+        char       kbuf[256];
+        int        len;
+
+        kevent = xevent.xkey;
+
+        XLockDisplay(display);
+        len = XLookupString(&amp;kevent, kbuf, sizeof(kbuf), &amp;ksym, NULL);
+        XUnlockDisplay(display);
+
+        switch (ksym) {
+
+        case XK_q:
+        case XK_Q:
+          /* user pressed q =&gt; quit */
+          running = 0;
+          break;
+
+        case XK_f:
+        case XK_F:
+          {
+            /* user pressed f =&gt; toggle fullscreen */
+            Window    tmp_win;
+
+            XLockDisplay(display);
+            XUnmapWindow(display, window[fullscreen]);
+            fullscreen = !fullscreen;
+            XMapRaised(display, window[fullscreen]);
+            XSync(display, False);
+            XTranslateCoordinates(display, window[fullscreen],
+                                  DefaultRootWindow(display),
+                                  0, 0, &amp;xpos, &amp;ypos, &amp;tmp_win);
+            XUnlockDisplay(display);
+
+            xine_port_send_gui_data(vo_port, XINE_GUI_SEND_DRAWABLE_CHANGED,
+                                    (void*) window[fullscreen]);
+          }
+          break;
+
+        case XK_Up:
+          /* cursor up =&gt; increase volume */
+          xine_set_param(stream, XINE_PARAM_AUDIO_VOLUME,
+                         (xine_get_param(stream, XINE_PARAM_AUDIO_VOLUME) + 1));
+          break;
+
+        case XK_Down:
+          /* cursor down =&gt; decrease volume */
+          xine_set_param(stream, XINE_PARAM_AUDIO_VOLUME,
+                         (xine_get_param(stream, XINE_PARAM_AUDIO_VOLUME) - 1));
+          break;
+
+        case XK_plus:
+          /* plus =&gt; next audio channel */
+          xine_set_param(stream, XINE_PARAM_AUDIO_CHANNEL_LOGICAL,
+                         (xine_get_param(stream, XINE_PARAM_AUDIO_CHANNEL_LOGICAL) + 1));
+          break;
+
+        case XK_minus:
+          /* minus =&gt; previous audio channel */
+          xine_set_param(stream, XINE_PARAM_AUDIO_CHANNEL_LOGICAL,
+                         (xine_get_param(stream, XINE_PARAM_AUDIO_CHANNEL_LOGICAL) - 1));
+          break;
+
+        case XK_space:
+          /* space =&gt; toggle pause mode */
+          if (xine_get_param(stream, XINE_PARAM_SPEED) != XINE_SPEED_PAUSE)
+            xine_set_param(stream, XINE_PARAM_SPEED, XINE_SPEED_PAUSE);
+          else
+            xine_set_param(stream, XINE_PARAM_SPEED, XINE_SPEED_NORMAL);
+          break;
+
+        }
+      }
+      break;
+
+    case Expose:
+      /* this handles (partial) occlusion of our video window */
+      if (xevent.xexpose.count != 0)
+        break;
+      xine_port_send_gui_data(vo_port, XINE_GUI_SEND_EXPOSE_EVENT, &amp;xevent);
+      break;
+
+    case ConfigureNotify:
+      {
+        XConfigureEvent *cev = (XConfigureEvent *) &amp;xevent;
+        Window           tmp_win;
+
+        width  = cev-&gt;width;
+        height = cev-&gt;height;
+
+        if ((cev-&gt;x == 0) &amp;&amp; (cev-&gt;y == 0)) {
+          XLockDisplay(display);
+          XTranslateCoordinates(display, cev-&gt;window,
+                                DefaultRootWindow(cev-&gt;display),
+                                0, 0, &amp;xpos, &amp;ypos, &amp;tmp_win);
+          XUnlockDisplay(display);
+        } else {
+          xpos = cev-&gt;x;
+          ypos = cev-&gt;y;
+        }
+      }
+      break;
+
+    }
+  }
+
+  /* cleanup */
+  xine_close(stream);
+  xine_event_dispose_queue(event_queue);
+  xine_dispose(stream);
+  xine_close_audio_driver(xine, ao_port);
+  xine_close_video_driver(xine, vo_port);
+  xine_exit(xine);
+
+  XLockDisplay(display);
+  XUnmapWindow(display, window[fullscreen]);
+  XDestroyWindow(display, window[0]);
+  XDestroyWindow(display, window[1]);
+  XUnlockDisplay(display);
+
+  XCloseDisplay (display);
+
+  return 0;
+}</pre></div></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a id="overview"></a>Chapter 3. xine code overview</h1></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#idp50547792">Walking the source tree</a></span></dt><dt><span class="sect1"><a href="#idp54005152">Object oriented programming in C</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54015936">Why not using C++?</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idp54018448">Coding style and guidelines</a></span></dt><dt><span class="sect1"><a href="#idp54026944">The xine logging system</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54028128">xine_log</a></span></dt><dt><span class="sect2"><a href="#idp54031120">xprintf</a></span></dt><dt><span class="sect2"><a href="#idp54034304">lprintf/llprintf</a></span></dt><dt><span class="sect2"><a href="#idp54041664">_x_assert/_x_abort</a></span></dt></dl></dd><dt><span class="sect1"><a href="#contribute">How to contribute</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp50547792"></a>Walking the source tree</h2></div></div></div><p>
+   The <code class="filename">src/</code> directory in xine-lib contains several
+   modules, this should give you a quick overview on where
+   to find what sources.
+  </p><p>
+   Directories marked with "(imported)" contain
+   code that is copied from an external project into xine-lib.
+   Everything below such a directory is up to this project. When modifying
+   code there, be sure to send the patches on. If some xine specific
+   adaptation of the code is absolutely necessary, a patch containing
+   the changes should be stored in Mercurial to not lose the changes the
+   next time we sync with the external project.
+  </p><p>
+   </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="filename">audio_out</code></span></dt><dd><p>
+       Audio output plugins. These provide a thin abstraction layer
+       around different types of audio output architectures or platforms.
+       Basically an audio output plugin provides functions to query and setup
+       the audio hardware and output audio data (e.g. PCM samples).
+      </p><p></p></dd><dt><span class="term"><code class="filename">demuxers</code></span></dt><dd><p>
+       Demuxer plugins that handle various system layer file formats
+       like avi, asf or mpeg. The ideal demuxer know nothing about where the
+       data comes from and who decodes it. It should basically just unpack
+       it into chunks the rest of the engine can eat.
+      </p><p></p></dd><dt><span class="term"><code class="filename">dxr3</code></span></dt><dd><p>
+       Code to support the DXR3 / hollywood+ hardware mpeg decoder.
+      </p><p></p></dd><dt><span class="term"><code class="filename">input</code></span></dt><dd><p>
+       Input plugins encapsulate the origin of the data. Data sources like
+       ordinary files, DVDs, CDA or streaming media are handled here.
+      </p><p>
+       </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="filename">dvb</code></span></dt><dd><p>
+           Some headers for Digital Video Broadcast.
+          </p><p></p></dd><dt><span class="term"><code class="filename">libdvdnav</code> (imported)</span></dt><dd><p>
+           The libdvdnav library for DVD navigation is used
+           by xine's DVD input plugin.
+          </p><p></p></dd><dt><span class="term"><code class="filename">libreal</code>, <code class="filename">librtsp</code></span></dt><dd><p>
+           Support for RealMedia streaming as used by the RTSP input plugin.
+          </p><p></p></dd><dt><span class="term"><code class="filename">vcd</code></span></dt><dd><p>
+           The enhanced VCD input plugin which also handles VCD navigation.
+          </p><p>
+           </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="filename">libcdio</code>, <code class="filename">libvcd</code> (imported)</span></dt><dd><p>
+               Libraries used by the enhanced VCD plugin.
+              </p><p></p></dd></dl></div><p>
+          </p><p></p></dd></dl></div><p>
+      </p><p></p></dd><dt><span class="term"><code class="filename">liba52</code> (imported)</span></dt><dd><p>
+       A52 (aka AC3, aka Dolby Digital) audio decoder library and xine plugin.
+      </p><p>
+       We maintain some small integration improving differences between the
+       original liba52 and our copy in the file
+       <code class="filename">diff_against_release.patch</code>.
+      </p><p></p></dd><dt><span class="term"><code class="filename">libdts</code> (imported)</span></dt><dd><p>
+       AC5 (aka DTS) audio decoder library and xine plugin, which is capable
+       of software decoding as well as digital passthrough.
+      </p><p></p></dd><dt><span class="term"><code class="filename">libfaad</code> (imported)</span></dt><dd><p>
+       The Free AAC Decoder library and xine plugin.
+      </p><p></p></dd><dt><span class="term"><code class="filename">libffmpeg</code></span></dt><dd><p>
+       A xine decoder plugin using various audio and video decoders from the
+       ffmpeg decoder pack libavcodec. Their MPEG encoder is also for the DXR3.
+      </p><p>
+       To optimize the integration of libavcodec and the xine engine, we maintain
+       some differences between the original ffmpeg and our copy in the file
+       <code class="filename">diff_to_ffmpeg_cvs.txt</code>.
+      </p><p>
+       </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="filename">libavcodec</code> (imported)</span></dt><dd><p>
+           The libavcodec decoder pack as used by xine's ffmpeg plugin.
+          </p><p></p></dd></dl></div><p>
+      </p><p></p></dd><dt><span class="term"><code class="filename">libflac</code></span></dt><dd><p>
+       A xine demuxer and decoder plugin for the Free Lossless Audio Codec library,
+       which has to be installed separately.
+      </p><p></p></dd><dt><span class="term"><code class="filename">liblpcm</code></span></dt><dd><p>
+       Audio decoder plugin that "decodes" raw PCM data; most notably
+       endianess-conversions are done here.
+      </p><p></p></dd><dt><span class="term"><code class="filename">libmad</code> (imported)</span></dt><dd><p>
+       Mpeg audio decoder plugin (i.e. mp2 and mp3 decoding).
+       ISO/IEC compliant decoder using fixed point math.
+      </p><p></p></dd><dt><span class="term"><code class="filename">libmpeg2</code> (imported)</span></dt><dd><p>
+       Most important MPEG video decoder plugin, provides fast and
+       high-precision MPEG-1/2 video decoding.
+      </p><p>
+       Although this is an imported library, we have heavily modified
+       our internal copy to blend it as seamlessly as possible into
+       the xine engine in order to get the maximum MPEG decoding
+       performance.
+      </p><p></p></dd><dt><span class="term"><code class="filename">libmpeg2new</code></span></dt><dd><p>
+       James started an effort to bring a recent and unmodified version
+       of libmpeg2 into xine to one day replace our current internal
+       modified libmpeg2 with one closer to the original. But since
+       the full feature catalog has not yet been achieved with the new
+       one, it is still disabled.
+      </p><p>
+       </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="filename">include</code>, <code class="filename">libmpeg2</code> (imported)</span></dt><dd><p>
+           The code of the imported new libmpeg2.
+          </p><p></p></dd></dl></div><p>
+      </p><p></p></dd><dt><span class="term"><code class="filename">libreal</code></span></dt><dd><p>
+       A thin wrapper around Real's binary codecs from the Linux RealPlayer to
+       use them as a xine plugin.
+      </p><p></p></dd><dt><span class="term"><code class="filename">libspeex</code></span></dt><dd><p>
+       A xine decoder plugin for the speex library,
+       which has to be installed separately.
+      </p><p></p></dd><dt><span class="term"><code class="filename">libspucc</code></span></dt><dd><p>
+       Closed caption subtitle decoder plugin.
+      </p><p></p></dd><dt><span class="term"><code class="filename">libspudec</code></span></dt><dd><p>
+       DVD SPU subtitle decoder plugin.
+      </p><p></p></dd><dt><span class="term"><code class="filename">libsputext</code></span></dt><dd><p>
+       Plain text subtitle decoder plugins.
+      </p><p></p></dd><dt><span class="term"><code class="filename">libtheora</code></span></dt><dd><p>
+       A xine decoder plugin for the theora library,
+       which has to be installed separately.
+      </p><p></p></dd><dt><span class="term"><code class="filename">libvorbis</code></span></dt><dd><p>
+       A xine decoder plugin for the ogg/vorbis library,
+       which has to be installed separately.
+      </p><p></p></dd><dt><span class="term"><code class="filename">libw32dll</code></span></dt><dd><p>
+       Video and audio decoder plugins that exploit some wine code
+       to use win32 (media player and Quicktime) codecs in xine.
+       Works on x86 platforms only.
+      </p><p>
+       </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">
+          <code class="filename">DirectShow</code>, <code class="filename">dmo</code>,
+          <code class="filename">qtx</code>, <code class="filename">wine</code> (imported)
+         </span></dt><dd><p>
+           Stripped down version of wine to support Video for Windows DLLs
+           and additional code to use DirectShow, DMO and QuickTime DLLs.
+          </p><p></p></dd></dl></div><p>
+      </p><p></p></dd><dt><span class="term"><code class="filename">libxineadec</code></span></dt><dd><p>
+       xine's decoder pack of additional audio decoders.
+      </p><p>
+       </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="filename">gsm610</code> (imported)</span></dt><dd><p>
+           The gsm610 audio decoder library as used by the related xine plugin.
+          </p><p></p></dd><dt><span class="term"><code class="filename">nosefart</code> (imported)</span></dt><dd><p>
+           The nosefart audio decoder library as used by the related xine plugin.
+          </p><p></p></dd></dl></div><p>
+      </p><p></p></dd><dt><span class="term"><code class="filename">libxinevdec</code></span></dt><dd><p>
+       xine's decoder pack of additional video decoders.
+      </p><p></p></dd><dt><span class="term"><code class="filename">post</code></span></dt><dd><p>
+       Video and audio post effect plugins live here. Post plugins
+       modify streams of video frames or audio buffers as they leave
+       the decoder to provide conversion or effects.
+      </p><p>
+       </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="filename">audio</code></span></dt><dd><p>
+           Some audio effects as xine audio filter posts.
+          </p><p></p></dd><dt><span class="term"><code class="filename">deinterlace</code> (imported)</span></dt><dd><p>
+           The tvtime deinterlacer as a xine video filter post.
+          </p><p></p></dd><dt><span class="term"><code class="filename">goom</code> (imported)</span></dt><dd><p>
+           The goom audio visualizer as a xine visualizer post.
+          </p><p></p></dd><dt><span class="term"><code class="filename">mosaico</code></span></dt><dd><p>
+           Some post plugins merging multiple frames into one. For example
+           picture in picture can be done with this.
+          </p><p></p></dd><dt><span class="term"><code class="filename">planar</code></span></dt><dd><p>
+           Some simple 2D video effects as xine video filter posts.
+          </p><p></p></dd><dt><span class="term"><code class="filename">visualizations</code></span></dt><dd><p>
+           Audio visualization post plugins.
+          </p><p></p></dd></dl></div><p>
+      </p><p></p></dd><dt><span class="term"><code class="filename">video_out</code></span></dt><dd><p>
+       Contains various video output driver plugins. Video output drivers
+       are thin abstraction layers over various video output platforms
+       (e.g. X11, directfb, directX, …). Video output driver plugins
+       provide functions like frame allocation and drawing and handle
+       stuff like hardware acceleration, scaling and colorspace conversion
+       if necessary. They do not handle a/v sync since this is done
+       in the xine-engine already.
+      </p><p>
+       </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="filename">libdha</code> (imported)</span></dt><dd><p>
+           A library for direct hardware access to the graphics card
+           as used by the vidix video out plugin.
+          </p><p></p></dd><dt><span class="term"><code class="filename">vidix</code> (imported)</span></dt><dd><p>
+           The vidix system for high performance video output
+           as used by the vidix video out plugin.
+          </p><p></p></dd></dl></div><p>
+      </p><p></p></dd><dt><span class="term"><code class="filename">xine-engine</code></span></dt><dd><p>
+       The heart of xine – its engine. Contains code to
+       load and handle all the plugins, the configuration repository
+       as well as the generic decoding loops and code for synchronized output.
+       A lot of helper functions for plugins to use live here as well.
+       What's in the individual files should be guessable by the files'
+       names. This document is not going to explain the source, because
+       it simply changes too often. A look at the architectural drawing
+       in the <a class="link" href="#internals" title="Chapter 4. xine internals">internals section</a> should
+       give you a pretty good idea, what to expect in this directory.
+       Basically, everything in this picture that is not called "plugin"
+       lives here.
+      </p><p></p></dd><dt><span class="term"><code class="filename">xine-utils</code></span></dt><dd><p>
+       Collection of utility functions and platform abstractions.
+       Also contains a simple XML parser for frontend playlist handling.
+      </p><p></p></dd></dl></div><p>
+  </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp54005152"></a>Object oriented programming in C</h2></div></div></div><p>
+   xine uses a lot of design principles normally found in
+   object oriented designs. As xine is written in C, a few
+   basic principles shall be explained here on how xine
+   is object oriented anyway.
+  </p><p>
+   Classes are structs containing function pointers and public member data.
+   Example:
+   </p><pre class="programlisting">
+   typedef struct my_stack_s my_class_t;
+   
+   struct my_stack_s {
+     /* method "push" with one parameter and no return value */
+     void (*push)(my_stack_t *this, int i);
+   
+     /* method "add" with no parameters and no return value */
+     void (*add)(my_stack_t *this);
+   
+     /* method "pop" with no parameters (except "this") and a return value */
+     int (*pop) (my_stack_t *this);
+   };
+   
+   /* constructor */
+   my_class_t *new_my_stack(void);</pre><p>
+  </p><p>
+   To derive from such a class, private member variables can be added:
+   </p><pre class="programlisting">
+   typedef struct {
+     my_stack_t    stack; /* public part */
+   
+     /* private part follows here */
+     int           values[MAX_STACK_SIZE];
+     int           stack_size;
+   } intstack_t;</pre><p>
+   Each method is implemented as a static method (static to prevent
+   namespace pollution). The "this" pointer needs to be cast to the
+   private pointer type to gain access to the private member variables.
+  </p><p>
+   Implementation of the "push" method follows:
+   </p><pre class="programlisting">
+   static void push (my_stack_t *this_gen, int i) {
+     intstack_t *this = (intstack_t *)this_gen;
+     this-&gt;values[MAX_STACK_SIZE - ++this-&gt;stack_size] = i;
+   }</pre><p>
+  </p><p>
+   The part added to the derived class is private, because when
+   defining the new structure directly in the .c file, where it will
+   be used, outside modules have no way of seeing the definition
+   of the derived class. A public derivation is possible by defining
+   the above structure in a .h file for others to include.
+  </p><p>
+   Something similar to a protected, package or friend visibility is also
+   possible:
+   </p><pre class="programlisting">
+   struct my_stack_s {
+     void (*push)(my_stack_t *this, int i);
+     void (*add)(my_stack_t *this);
+     int  (*pop)(my_stack_t *this);
+   
+   #ifdef STACK_INTERNAL
+     void (*flush)(my_stack_t *this);
+   #endif
+   };</pre><p>
+   All modules, who need to access the internal part have to add
+   </p><pre class="programlisting">   #define STACK_INTERNAL</pre><p>
+   before including the header with the definition. It is clear that only
+   those friend modules can derive from this class.
+  </p><p>
+   Finally the contructor malloc()s the data struct (private variant)
+   and fills in function pointers and default values. Usually the
+   constructor is the only public (i.e. non-static) function in the module:
+   </p><pre class="programlisting">
+   my_stack_t *new_my_stack(void) {
+     intstack_t *this;
+   
+     /* alloc memory */
+     this = malloc(sizeof(intstack_t));
+   
+     /* fill in methods */
+     this-&gt;push = push;
+     this-&gt;add  = add;
+     this-&gt;pop  = pop;
+   
+     /* init data fields */
+     this-&gt;stack_size = 0;
+   
+     /* return public part */
+     return &amp;this-&gt;stack;
+   }</pre><p>
+  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54015936"></a>Why not using C++?</h3></div></div></div><p>
+    After all these considerations about object oriented C, you might
+    ask, why we do not use C++ after all? The easy answer would be: xine wants
+    to be as fast as possible and C++ is simply too slow. But this is only the
+    easy answer and it is not entirely true any more. Thoughtfully applied, you
+    can write very fast C++ code with today's compilers, but these compilers might
+    not be available on all platforms in the necessary quality. Even with
+    a sophisticated compiler, C++ is much harder to optimize than plain C and thus
+    C compiles much faster. Another big problem is that the C++ ABI is not as
+    well-defined as the C ABI. With C, you can easily mix libraries and
+    applications built by different compilers. With C++, this is unlikely to work.
+    But the final argument is that xine does not really need C++. xine's
+    inheritance hierarchy is very flat, mostly one level only and does not need
+    things like multiple or virtual inheritance. Most of the external projects
+    that are used by xine are plain C as well and using more than one language
+    complicates the build system. As we saw above, we can emulate
+    object orientation reduced to our real needs in plain C.
+   </p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp54018448"></a>Coding style and guidelines</h2></div></div></div><p>
+   This section contains some guidelines for writing xine-code.
+   These are really just guidelines, no strict rules.
+   Contributions will not be rejected if they do not meet these
+   rules but they will be even more appreciated if they do.
+   </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+      Comment your interfaces directly in the header files.
+      No doxygen comments, ordinary C comments will do.
+     </p></li><li class="listitem"><p>
+      Use C-style comments (/* */), not C++-style (//).
+     </p></li><li class="listitem"><p>
+      When in doubt, use lower case. BTW: This thing is called xine, never Xine.
+     </p></li><li class="listitem"><p>
+      Use expressive variable and function identifiers on all public interfaces.
+      Use underscores to seperate words in identifiers, not uppercase
+      letters (my_function_name is ok, myFunctionName is not ok).
+     </p></li><li class="listitem"><p>
+      Avoid macros unless they are really useful. Avoid gotos.
+     </p></li><li class="listitem"><p>
+      use something like
+      </p><pre class="programlisting">   printf("module: ..."[,…]);</pre><p>
+      for console output. All console output goes to stdout and
+      must be prefixed by the module name which generates the
+      output (see example above).
+     </p></li><li class="listitem"><p>
+      Refer to emac's C-mode for all questions of proper indentiation.
+      That first of all means: indent with two spaces.
+     </p></li></ul></div><p>
+  </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp54026944"></a>The xine logging system</h2></div></div></div><p>
+   xine offers a wide range of possibilities to display
+   strings. This section should describe when to use
+   which way and how to do it right.
+  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54028128"></a>xine_log</h3></div></div></div><p>
+    Output which is done thru this function will be
+    displayed for the end user by the frontend.
+    If <code class="varname">xine-&gt;verbosity</code> is not 0 the messages will also
+    be displayed on the console. Ideally these strings
+    are translated.
+    This function is for information which the user should
+    read always.
+    </p><pre class="programlisting">   xine_log(xine_t *xine, int buf, const char *format, ...);</pre><p>
+    <code class="varname">buf</code> is either XINE_LOG_MSG for general messages or
+    XINE_LOG_PLUGIN for messages about plugins.
+   </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54031120"></a>xprintf</h3></div></div></div><p>
+    This macro uses the <code class="varname">xine-&gt;verbosity</code> value to decide
+    if the string should be printed to the console. Possible
+    values are XINE_VERBOSITY_NONE, XINE_VERBOSITY_LOG or
+    XINE_VERBOSITY_DEBUG. By default nothing is printed.
+    When you use xine-ui you can enable this output with
+    the <em class="parameter"><code>--verbose=[1,2]</code></em> options.
+    This function should be used for information which the
+    user should only read up on request.
+    </p><pre class="programlisting">   xprintf(xine_t *xine, int verbosity, const char *format, ...);</pre><p>
+   </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54034304"></a>lprintf/llprintf</h3></div></div></div><p>
+    These macros are for debugging purpose only. Under normal
+    circumstances it is disabled. And can only be enabled by changing
+    a define statement and a recompilation. It has to be enabled for these
+    files that are of interest.
+    It should only be used for information which is intended for developers.
+    </p><pre class="programlisting">
+   lprintf(const char *format, ...);
+   llprintf(bool, const char *format, ...);</pre><p>
+    <code class="varname">bool</code> is a flag which enables or disables this logging.
+   </p><p>
+    <code class="function">lprintf</code> can be enabled by defining LOG at the top of the source file.
+    <code class="function">llprintf</code> can be used for more than one categorie
+    per file by using diffent lables:
+    </p><pre class="programlisting">
+   #define LOG_LOAD 1
+   #define LOG_SAVE 0
+   
+   llprintf(LOG_LOAD, "loading was successful\n");
+   llprintf(LOG_SAVE, "could not save to file %s\n", filename);</pre><p>
+   </p><p>
+    In this case only the first messages is printed. To enable/disable change the defines.
+   </p><p>
+    LOG_MODULE should be used to set the modulename for xprintf/lprintf/llprintf.
+    Each output line will start with "modulename: ".
+    </p><pre class="programlisting">   #define LOG_MODULE "modulename"</pre><p>
+   </p><p>
+    LOG_VERBOSE can be defined to enable the logging of functionname and linenumbers.
+    Then the output will be: "modulename: (function_name:42) message".
+   </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54041664"></a>_x_assert/_x_abort</h3></div></div></div><p>
+    These are not purely logging functions, but despite their original C library versions,
+    they always output debugging text, which is why usage of these functions is preferred.
+   </p><p>
+    <code class="function">_x_assert()</code> checks a condition and prints a note,
+    when the condition is false. In addition, a debug build and only a debug build will
+    terminate the application, when the condition is false. Release versions will only
+    print the note, but try to continue.
+   </p><p>
+    <code class="function">_x_abort()</code> always terminates the application after printing a note.
+   </p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="contribute"></a>How to contribute</h2></div></div></div><p>
+   Make sure you send your patches in unified diff format to
+   the xine-devel mailing list. You'll have to subscribe first,
+   otherwise you're not allowed to post. Please do not send
+   patches to individual developers unless instructed otherwise
+   because your patch is more likely to get lost in an overfull
+   INBOX in that case. Please be patient, it may take 1-2 weeks
+   before you hear any comments on your work (developers may be
+   working on other parts of the code or are simply busy at
+   the moment).
+  </p><p>
+   We prefer to receive patches in a format which is immediately
+   committable. This normally means that we want your name and email address
+   (we're not keen on pseudonyms), a subject line which provides a
+   convenient summary of your changes, and body text which provides a longer
+   description (if needed).
+  </p><p>
+   There are a few ways to submit your patches:
+  </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+     <span class="command"><strong>hg diff</strong></span> is probably the easiest. You'll need a
+     subject line and body text as described above. If you're copying or
+     renaming files, or a file should be marked as executable, then use
+     <span class="command"><strong>hg diff --git</strong></span>; this will include the necessary
+     information (if copying or renaming, you need to have used <span class="command"><strong>hg
+     copy</strong></span> or <span class="command"><strong>hg rename</strong></span> for this to work).
+    </p><p>
+     If you're attaching the patch (recommended), then including the
+     metadata in the patch file is recommended, e.g.
+    </p><pre class="screen">From: Fred Patcher &lt;patcher@example.com&gt;
+Subject: Properly toggle the randomiser switch
+
+The randomiser switch was sometimes not being toggled, leading to random
+behaviour.
+
+diff --git a/foo/control.c b/foo/control.c
+...</pre></li><li class="listitem"><p>
+     <span class="command"><strong>diff -u</strong></span> is also acceptable, but we prefer that you
+     do so from the top-level directory within the source code (prefix the
+     files' path names with <em class="parameter"><code>./</code></em>) or from the directory
+     containing the source code directory. Basically, use <span class="command"><strong>hg
+     diff</strong></span> if you can.
+    </p></li><li class="listitem"><p>
+     <span class="command"><strong>hg email</strong></span> is preferred. You'll need to commit your
+     changes locally for this to work, but this is the easiest way of
+     sending a set of patches for inclusion and review; it'll send the mail
+     directly.
+    </p></li><li class="listitem"><p>
+     <span class="command"><strong>hg export</strong></span> can also be used with specific changeset
+     identifiers. Again, you'll need to commit your changes locally for
+     this to work.
+    </p></li></ul></div><p>
+  </p><p>
+   Patches should normally be included as attachments. Some mail clients and
+   webmail services are known to mangle whitespace or wrap lines, either of
+   which is enough to render a patch potentially useless.
+  </p></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a id="internals"></a>Chapter 4. xine internals</h1></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#idp54204400">Engine architecture and data flow</a></span></dt><dt><span class="sect1"><a href="#idp54254832">Plugin system</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54263520">Plugin location and filesystem layout</a></span></dt><dt><span class="sect2"><a href="#idp54270288">Plugin Content: What's inside the .so?</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idp54293776">What is this metronom thingy?</a></span></dt><dt><span class="sect1"><a href="#idp54300128">How does xine synchronize audio and video?</a></span></dt><dt><span class="sect1"><a href="#osd">Overlays and OSD</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54327456">Overlay Manager</a></span></dt><dt><span class="sect2"><a href="#idp54329440">OSD Renderer</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idp54354944">MRLs</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp54204400"></a>Engine architecture and data flow</h2></div></div></div><div class="mediaobject"><img alt="" src="architecture.png" /><div class="caption"><p>xine engine architecture</p></div></div><p>
+   Media streams usually consist of audio and video data multiplexed
+   into one bitstream in the so-called system-layer (e.g. AVI, Quicktime or MPEG).
+   A demuxer plugin is used to parse the system layer and extract audio and video
+   packages. The demuxer uses an input plugin to read the data and stores it
+   in pre-allocated buffers from the global buffer pool.
+   The buffers are then added to the audio or video stream fifo.
+  </p><p>
+   From the other end of these fifos the audio and video decoder threads
+   consume the buffers and hand them over to the current audio or video
+   decoder plugin for decompression. These plugins then send the decoded
+   data to the output layer. The buffer holding the encoded
+   data is no longer needed and thus released to the global buffer pool.
+  </p><p>
+   In the output layer, the video frames and audio samples pass through a
+   post plugin tree, which can apply effects or other operations to the data.
+   When reaching the output loops, frames and samples are enqueued to be
+   displayed, when the presentation time has arrived.
+  </p><p>
+   A set of extra information travels with the data. Starting at the input and
+   demuxer level, where this information is generated, the data is attached to
+   the buffers as they wait in the fifo. The decoder loops copy the data to
+   a storage of their own. From there, every frame and audio buffer leaving
+   the stream layer is tagged with the data the decoder loop storage currently
+   holds.
+  </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp54254832"></a>Plugin system</h2></div></div></div><p>
+   The plugin system enables some of xine's most valuable features:
+   </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+      drop-in extensiability
+     </p></li><li class="listitem"><p>
+      support parallel installation of multiple (incompatible) libxine versions
+     </p></li><li class="listitem"><p>
+      support for multiple plugin directories
+      (<code class="filename">$prefix/lib/xine/plugins</code>,
+      <code class="filename">$HOME/.xine/plugins</code>, …)
+     </p></li><li class="listitem"><p>
+      support for recursive plugin directories
+      (plugins are found even in subdirectories of the plugin directories)
+     </p></li><li class="listitem"><p>
+      version management
+      (On start, xine finds all plugins in its plugin (sub)directories and
+      chooses an appropriate version (usually the newest) for each plugin.)
+     </p></li><li class="listitem"><p>
+      simplification
+      (Plugins don't have to follow any special naming convention,
+      and any plugin may contain an arbitrary subset of input, demuxer,
+      decoder or output plugins.)
+     </p></li></ul></div><p>
+  </p><p>
+   Essentally, plugins are just shared objects, ie dynamic libraries. In
+   contrast to normal dynamic libraries, they are stored outside of the
+   system's library PATHs and libxine does its own bookkeeping, which
+   enables most advanced features mentioned above.
+  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54263520"></a>Plugin location and filesystem layout</h3></div></div></div><p>
+    The primary goal for this new plugin mechanism was the need to support
+    simultaneous installation of several (most likely incompatible)
+    libxine versions without them overwriting each other's
+    plugins. Therefore, we have this simple layout:
+   </p><p>
+    Plugins are installed below XINE_PLUGINDIR
+    (<code class="filename">/usr/local/lib/xine/plugins</code> by default).
+    Note that plugins are never directly installed into XINE_PLUGINDIR.
+    Instead, a separate subdirectory is created for each "plugin
+    provider". A plugin provider is equivalent with the exact version of
+    one source package. Typical examples include "xine-lib-0.9.11" or
+    "xine-vcdnav-1.0". Every source package is free to install an
+    arbitrary number of plugins in its own, private directory. If a
+    package installs several plugins, they may optionally be organized
+    further into subdirectories.
+   </p><p>
+    So you will finally end up with something like this:
+    </p><pre class="screen">
+   /usr/local/lib/xine/plugins
+     xine-lib-0.9.11
+         demux_mpeg_block.so
+         decode_mpeg.so
+         video_out_xv.so
+         …
+     xine-vcdnav-0.9.11
+         input_vcdnav.so
+     xine-lib-1.2
+         input
+             file.so
+             stdin_fifo.so
+             vcd.so
+         demuxers
+             fli.so
+             avi.so
+             …
+         decoders
+             ffmpeg.so
+             mpeg.so (may contain mpeg 1/2 audio and video decoders)
+             pcm.so
+             …
+         output
+             video_xv.so
+             audio_oss.so
+             …
+     xine-lib-3.0
+             avi.so (avi demuxer)
+             mpeg.so (contains mpeg demuxers and audio/video decoders)
+             video_out_xv.so (Xv video out)
+             …</pre><p>
+   </p><p>
+    As you can see, every package is free to organize plugins at will
+    below its own plugin provider directory.
+    Additionally, administrators may choose to put plugins directly into
+    XINE_PLUGINDIR, or in a "local" subdirectory.
+    Users may wish to put additional plugins in ~/.xine/plugins/.
+    Again, there may be subdirectories to help organize the plugins.
+   </p><p>
+    The default value for XINE_PLUGINDIR can be obtained using the
+    <span class="command"><strong>pkg-config --variable=plugindir libxine</strong></span> command.
+   </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54270288"></a>Plugin Content: What's inside the .so?</h3></div></div></div><p>
+    Each plugin library (.so file) contains an arbitrary number of (virtual)
+    plugins. Typically, it will contain exactly one plugin. However, it
+    may be useful to put a set of related plugins in one library, so they
+    can share common code.
+   </p><p>
+    First of all, what is a virtual plugin?
+    A virtual plugin is essentially a structure that is defined by the
+    xine engine. This structure typically contains lots of function
+    pointers to the actual API functions.
+    For each plugin API, there are several API versions, and each API
+    version may specify a new, incompatible structure. Therefore, it is
+    essential that only those plugins are loaded that support current
+    libxine's API, so the .so file needs a plugin list that
+    provides libxine with the version information, even before it tries to
+    load any of the plugins.
+   </p><p>
+    This plugin list is held in an array named <code class="varname">xine_plugin_info</code>":
+    </p><pre class="programlisting">
+   plugin_info_t xine_plugin_info[] = {
+     /* type, API, "name", version, special_info, init_function */
+     { PLUGIN_DEMUX, 20, "flac", XINE_VERSION_CODE, NULL, demux_flac_init_class },
+     { PLUGIN_AUDIO_DECODER, 13, "flacdec", XINE_VERSION_CODE, &amp;dec_info_audio, init_plugin },
+     { PLUGIN_NONE, 0, "", 0, NULL, NULL }
+   };</pre><p>
+   </p><p>
+    The structure of xine_plugin_info may <span class="emphasis"><em>never</em></span> be changed.
+    If it ever needs to be changed, it must be renamed to avoid
+    erraneous loading of incompatible plugins.
+   </p><p>
+    <code class="varname">xine_plugin_info</code> can contain any number of plugins
+    and must be terminated with a <span class="type">PLUGIN_NONE</span> entry. Available plugin
+    types are:
+    </p><pre class="programlisting">
+   #define PLUGIN_NONE           0
+   #define PLUGIN_INPUT          1
+   #define PLUGIN_DEMUX          2
+   #define PLUGIN_AUDIO_DECODER  3
+   #define PLUGIN_VIDEO_DECODER  4
+   #define PLUGIN_SPU_DECODER    5
+   #define PLUGIN_AUDIO_OUT      6
+   #define PLUGIN_VIDEO_OUT      7
+   #define PLUGIN_POST           8</pre><p>
+   </p><p>
+    The plugin version number is generated from xine-lib's version number
+    like this: MAJOR * 10000 + MINOR * 100 + SUBMINOR.
+    This is not required, but it's an easy way to ensure that the version
+    increases for every release.
+   </p><p>
+    Every entry in <code class="varname">xine_plugin_info</code> has an initialization
+    function for the plugin class context.
+    This function returns a pointer to freshly allocated (typically
+    via <code class="function">malloc()</code>) structure containing mainly function
+    pointers; these are the "methods" of the plugin class.
+   </p><p>
+    The "plugin class" is not what we call to do the job yet (like decoding
+    a video or something), it must be instantiated. One reason for having the
+    class is to hold any global settings that must be accessed by every
+    instance. Remember that xine library is multistream capable: multible
+    videos can be decoded at the same time, thus several instances of the
+    same plugin are possible.
+   </p><p>
+    If you think this is pretty much an object-oriented aproach,
+    then you're right.
+   </p><p>
+    A fictitious file input plugin that supports input plugin API 12 and
+    13, found in xine-lib 2.13.7 would then define this plugin list:
+    </p><pre class="programlisting">
+   #include &lt;xine/plugin.h&gt;
+   …
+   plugin_t *init_api12(void) {
+     input_plugin_t *this;
+   
+     this = malloc(sizeof(input_plugin_t));
+     …
+     return (plugin_t *)this;
+   }
+   /* same thing, with different initialization for API 13 */
+   
+   const plugin_info_t xine_plugin_info[] = {
+     { PLUGIN_INPUT, 12, "file", 21307, init_api12 },
+     { PLUGIN_INPUT, 13, "file", 21307, init_api13 },
+     { PLUGIN_NONE, 0, "", 0, NULL }
+   }</pre><p>
+    This input plugin supports two APIs, other plugins might provide a
+    mixture of demuxer and decoder plugins that belong together somehow
+    (ie. share common code).
+   </p><p>
+    You'll find exact definitions of public functions and plugin structs
+    in the appropriate header files for each plugin type:
+    <code class="filename">input/input_plugin.h</code> for input plugins,
+    <code class="filename">demuxers/demux.h</code> for demuxer plugins,
+    <code class="filename">xine-engine/video_decoder.h</code> for video decoder plugins,
+    <code class="filename">xine-engine/audio_decoder.h</code> for audio decoder plugins,
+    <code class="filename">xine-engine/post.h</code> for post plugins,
+    <code class="filename">xine-engine/video_out.h</code> for video out plugins,
+    <code class="filename">xine-engine/audio_out.h</code> for audio out plugins.
+    Additional information will also be given in the dedicated sections below.
+   </p><p>
+    Many plugins will need some additional "private" data fields.
+    These should be simply added at the end of the plugin structure.
+    For example a demuxer plugin called "foo" with two private
+    fields "xine" and "count" may have a plugin structure declared in
+    the following way:
+    </p><pre class="programlisting">
+   typedef struct {
+     /* public fields "inherited" from demux.h */
+     demux_plugin_t    demux_plugin;
+   
+     xine_t           *xine;
+     int               count;
+   } demux_foo_t;</pre><p>
+   </p><p>
+    The plugin would then access public members via the
+    <code class="varname">demux_plugin</code> field and private fields directly.
+   </p><p>
+    Summary: Plugins consist of two C-style classes, each representing a different context.
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+       The first is the so called "plugin class" context. This is a singleton context,
+       which means it will exist either not at all or at most once per xine context.
+       This plugin class context is a C-style class which is subclassing the related
+       class from the xine plugin headers. This contains functions, which are
+       independent of the actual instance of the plugin. Most prominently, it contains
+       a factory method to instantiate the next context.
+      </p></li><li class="listitem"><p>
+       The second context is the instance context. This is another C-style class, which
+       is constructed and disposed withing the plugin class context. This one does
+       the actual work and subclasses the related plugin struct from the xine plugin
+       headers. It is instantiated for every separate running instance of the plugin
+      </p></li></ul></div><p>
+   </p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp54293776"></a>What is this metronom thingy?</h2></div></div></div><p>
+   Metronom serves two purposes:
+   </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+      Generate vpts (virtual presentation time stamps) from pts (presentation time stamps)
+      for a/v output and synchronization.
+     </p></li><li class="listitem"><p>
+      Provide a master clock (system clock reference, scr), possibly provided
+      by external scr plugins (this can be used if some hardware decoder or network
+      server dictates the time).
+     </p></li></ul></div><p>
+  </p><p>
+   pts/vpts values are given in 1/90000 sec units. pts values in mpeg streams
+   may wrap (that is, return to zero or any other value without further notice),
+   can be missing on some frames or (for broken streams) may "dance" around
+   the correct values. Metronom therefore has some heuristics built-in to generate
+   clean vpts values which can then be used in the output layers to schedule audio/video
+   output.
+  </p><p>
+   The heuristics used in metronom have always been a field of research. Current metronom's
+   implementation <span class="emphasis"><em>tries</em></span> to stick to pts values as reported from demuxers,
+   that is, vpts may be obtained by a simple operation of vpts = pts + <code class="varname">vpts_offset</code>,
+   where <code class="varname">vpts_offset</code> takes into account any wraps. Whenever pts is zero,
+   metronom will estimate vpts based on previous values. If a difference is found between the
+   estimated and calculated vpts values by above formula, it will be smoothed by using a
+   "drift correction".
+  </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp54300128"></a>How does xine synchronize audio and video?</h2></div></div></div><p>
+   Every image frame or audio buffer leaving decoder is tagged by metronom with
+   a vpts information. This will tell video_out and audio_out threads when that
+   data should be presented. Usually there isn't a significative delay associated
+   with video driver, so we expect it to get on screen at the time it's
+   delivered for drawing. Unfortunately the same isn't true for audio: all sound
+   systems implement some amount of buffering (or fifo), any data being send to it
+   <span class="emphasis"><em>now</em></span> will only get played some time in future. audio_out thread
+   must take this into account for making perfect A-V sync by asking the sound latency
+   to audio driver.
+  </p><p>
+   Some audio drivers can't tell the current delay introduced in playback. This is
+   especially true for most sound servers like ESD or aRts and explain why in such
+   cases the sync is far from perfect.
+  </p><p>
+   Another problem xine must handle is the sound card clock drift. vpts are
+   compared to the system clock (or even to a different clock provided by a scr plugin)
+   for presentation but sound card is sampling audio by its own clocking
+   mechanism, so a small drift may occur. As the playback goes on this
+   error will accumulate possibly resulting in audio gaps or audio drops. To avoid that
+   annoying effect, two countermeasures are available (switchable with xine config
+   option <em class="parameter"><code>audio.synchronization.av_sync_method</code></em>):
+   </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+      The small sound card errors are feedbacked to metronom. The details
+      are given by <code class="filename">audio_out.c</code> comments:
+      </p><pre class="programlisting">
+   /* By adding gap errors (difference between reported and expected
+    * sound card clock) into metronom's vpts_offset we can use its
+    * smoothing algorithms to correct sound card clock drifts.
+    * obs: previously this error was added to xine scr.
+    *
+    * audio buf ---&gt; metronom --&gt; audio fifo --&gt; (buf-&gt;vpts - hw_vpts)
+    *           (vpts_offset + error)                     gap
+    *                    &lt;---------- control --------------|
+    *
+    * Unfortunately audio fifo adds a large delay to our closed loop.
+    *
+    * These are designed to avoid updating the metronom too fast.
+    * - it will only be updated 1 time per second (so it has a chance of
+    *   distributing the error for several frames).
+    * - it will only be updated 2 times for the whole audio fifo size
+    *   length (so the control will wait to see the feedback effect)
+    * - each update will be of gap/SYNC_GAP_RATE.
+    *
+    * Sound card clock correction can only provide smooth playback for
+    * errors &lt; 1% nominal rate. For bigger errors (bad streams) audio
+    * buffers may be dropped or gaps filled with silence.
+    */</pre><p>
+     </p></li><li class="listitem"><p>
+      The audio is stretched or squeezed a slight bit by resampling, thus compensating
+      the drift: The next comment in <code class="filename">audio_out.c</code> explains:
+      </p><pre class="programlisting">
+   /* Alternative for metronom feedback: fix sound card clock drift
+    * by resampling all audio data, so that the sound card keeps in
+    * sync with the system clock. This may help, if one uses a DXR3/H+
+    * decoder board. Those have their own clock (which serves as xine's
+    * master clock) and can only operate at fixed frame rates (if you
+    * want smooth playback). Resampling then avoids A/V sync problems,
+    * gaps filled with 0-frames and jerky video playback due to different
+    * clock speeds of the sound card and DXR3/H+.
+    */</pre><p>
+     </p></li></ul></div><p>
+  </p></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="osd"></a>Overlays and OSD</h2></div></div></div><p>
+   The roots of xine overlay capabilities are DVD subpictures and subtitles support
+   (also known as 'spu'). The DVD subtitles are encoded in a RLE (Run Length Encoding - the
+   most simple compressing technique) format, with a palette of colors and transparency
+   levels. You probably thought that subtitles were just simple text saved into DVDs, right?
+   Wrong, they are bitmaps.
+  </p><p>
+   In order to optimize to the most common case, xine's internal format for screen overlays
+   is a similar representation to the 'spu' data. This brings not only performance
+   benefit (since blending functions may skip large image areas due to RLE) but also
+   compatibility: it's possible to re-encode any xine overlay to the original spu format
+   for displaying with mpeg hardware decoders like DXR3.
+  </p><p>
+   Displaying subtitles requires the ability to sync them to the video stream. This
+   is done using the same kind of pts/vpts stuff of a-v sync code. DVD subtitles,
+   for example, may request: show this spu at pts1 and hide it at pts2. This brings the
+   concept of the 'video overlay manager', that is a event-driven module for managing
+   overlay's showing and hiding.
+  </p><p>
+   The drawback of using internal RLE format is the difficulty in manipulating it
+   as graphic. To overcome that we created the 'OSD renderer', where OSD stands
+   for On Screen Display just like in TV sets. The osd renderer is a module
+   providing simple graphic primitives (lines, rectagles, draw text etc) over
+   a "virtual" bitmap area. Everytime we want to show that bitmap it will
+   be RLE encoded and sent to the overlay manager for displaying.
+  </p><div class="mediaobject"><img alt="" src="overlays.png" /><div class="caption"><p>overlays architecture</p></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54327456"></a>Overlay Manager</h3></div></div></div><p>
+    The overlay manager interface is available to any xine plugin. It's a bit unlikely
+    to be used directly, anyway here's a code snippet for enqueueing an overlay for
+    displaying:
+    </p><pre class="programlisting">
+   video_overlay_event_t       event;
+   
+   event.object.handle = this-&gt;video_overlay-&gt;get_handle(this-&gt;video_overlay,0);
+   
+   memset(this-&gt;event.object.overlay, 0, sizeof(*this-&gt;event.object.overlay));
+   
+   /* set position and size for this overlay */
+   event.object.overlay-&gt;x = 0;
+   event.object.overlay-&gt;y = 0;
+   event.object.overlay-&gt;width = 100;
+   event.object.overlay-&gt;height = 100;
+   
+   /* clipping region is mostly used by dvd menus for highlighting buttons */
+   event.object.overlay-&gt;clip_top    = 0;
+   event.object.overlay-&gt;clip_bottom = image_height;
+   event.object.overlay-&gt;clip_left   = 0;
+   event.object.overlay-&gt;clip_right  = image_width;
+   
+   /* the hard part: provide a RLE image */
+   event.object.overlay-&gt;rle = your_rle;
+   event.object.overlay-&gt;data_size = your_size;
+   event.object.overlay-&gt;num_rle = your_rle_count;
+   
+   /* palette must contain YUV values for each color index */
+   memcpy(event.object.overlay-&gt;clip_color, color, sizeof(color));
+   
+   /* this table contains transparency levels for each color index.
+      0 = completely transparent, 15 - completely opaque */
+   memcpy(event.object.overlay-&gt;clip_trans, trans, sizeof(trans));
+   
+   /* set the event type and time for displaying */
+   event.event_type = EVENT_SHOW_SPU;
+   event.vpts = 0; /* zero is a special vpts value, it means 'now' */
+   video_overlay-&gt;add_event(video_overlay, &amp;event);</pre><p>
+   </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54329440"></a>OSD Renderer</h3></div></div></div><p>
+    OSD is a general API for rendering stuff over playing video. It's available both
+    to xine plugins and to frontends.
+   </p><p>
+    The first thing you need is to allocate a OSD object for drawing from the
+    renderer. The code below allocates a 300x200 area. This size can't be changed
+    during the lifetime of a OSD object, but it's possible to place it anywhere
+    over the image.
+   </p><pre class="programlisting">
+   osd_object_t osd;
+   
+   osd = this-&gt;osd_renderer-&gt;new_object(osd_renderer, 300, 200);</pre><p>
+    Now we may want to set font and color for text rendering. Although we will
+    refer to fonts over this document, in fact the OSD can be any kind of bitmap. Font
+    files are searched and loaded during initialization from
+    <code class="filename">$prefix/share/xine/fonts/</code> and <code class="filename">~/.xine/fonts</code>.
+    There's a sample utility to convert truetype fonts at
+    <code class="filename">xine-lib/misc/xine-fontconv.c</code>. Palette may be manipulated directly,
+    however most of the time it's convenient to use pre-defined text palettes.
+   </p><pre class="programlisting">
+   /* set sans serif 24 font */
+   osd_renderer-&gt;set_font(osd, "sans", 24);
+   
+   /* copy pre-defined colors for white, black border, transparent background to
+      starting at the index used by the first text palette */
+   osd_renderer-&gt;set_text_palette(osd, TEXTPALETTE_WHITE_BLACK_TRANSPARENT, OSD_TEXT1);
+   
+   /* copy pre-defined colors for white, no border, translucid background to
+      starting at the index used by the second text palette */
+   osd_renderer-&gt;set_text_palette(osd, TEXTPALETTE_WHITE_NONE_TRANSLUCID, OSD_TEXT2);</pre><p>
+    Now render the text and show it:
+    </p><pre class="programlisting">
+   osd_renderer-&gt;render_text(osd, 0, 0, "white text, black border", OSD_TEXT1);
+   osd_renderer-&gt;render_text(osd, 0, 30, "white text, no border", OSD_TEXT2);
+   
+   osd_renderer-&gt;show(osd, 0); /* 0 stands for 'now' */</pre><p>
+   </p><p>
+    There's a 1:1 mapping between OSD objects and overlays, therefore the
+    second time you send an OSD object for displaying it will actually substitute
+    the first image. By using set_position() function we can move overlay
+    over the video.
+   </p><pre class="programlisting">
+   for( i=0; i &lt; 100; i+=10 ) {
+     osd_renderer-&gt;set_position(osd, i, i );
+     osd_renderer-&gt;show(osd, 0);
+     sleep(1);
+   }
+   osd_renderer-&gt;hide(osd, 0);</pre><p>
+    For additional functions please check osd.h or the public header.
+   </p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="idp54343120"></a>OSD palette notes</h4></div></div></div><p>
+     The palette functions demand some additional explanation, skip this if you
+     just want to write text fast without worring with details! :)
+    </p><p>
+     We have a 256-entry palette, each one defining yuv and transparency levels.
+     Although xine fonts are bitmaps and may use any index they want, we have
+     defined a small convention:
+    </p><pre class="programlisting">
+   /*
+    Palette entries as used by osd fonts:
+   
+    0: not used by font, always transparent
+    1: font background, usually transparent, may be used to implement
+       translucid boxes where the font will be printed.
+    2-5: transition between background and border (usually only alpha
+         value changes).
+    6: font border. if the font is to be displayed without border this
+       will probably be adjusted to font background or near.
+    7-9: transition between border and foreground
+    10: font color (foreground)
+   */</pre><p>
+     The so called 'transitions' are used to implement font anti-aliasing. That
+     convention requires that any font file must use only the colors from 1 to 10.
+     When we use the set_text_palette() function we are just copying 11 palette
+     entries to the specified base index.
+    </p><p>
+     That base index is the same we pass to render_text() function to use the
+     text palette. With this scheme is possible to have several diferent text
+     colors at the same time and also draw fonts over custom background.
+    </p><pre class="programlisting">
+   /* obtains size the text will occupy */
+   renderer-&gt;get_text_size(osd, text, &amp;width, &amp;height);
+   
+   /* draws a box using font background color (translucid) */
+   renderer-&gt;filled_rect(osd, x1, y1, x1+width, y1+height, OSD_TEXT2 + 1);
+   
+   /* render text */
+   renderer-&gt;render_text(osd, x1, y1, text, OSD_TEXT2);</pre></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="idp54348080"></a>OSD text and palette FAQ</h4></div></div></div><p>
+     Q: What is the format of the color palette entries?
+    </p><p>
+     A: It's the same as used by overlay blending code (YUV).
+    </p><p>
+     Q: What is the relation between a text palette and a palette
+        I set with xine_osd_set_palette?
+    </p><p>
+     A: xine_osd_set_palette will set the entire 256 color palette
+        to be used when we blend the osd image.
+        "text palette" is a sequence of 11 colors from palette to be
+        used to render text. that is, by calling osd_render_text()
+        with color_base=100 will render text using colors 100-110.
+    </p><p>
+     Q: Can I render text with colors in my own palette?
+    </p><p>
+     A: Sure. Just pass the color_base to osd_render_text()
+    </p><p>
+     Q: Has a text palette change effects on already drawed text?
+    </p><p>
+     A: osd_set_text_palette() will overwrite some colors on palette
+        with pre-defined ones. So yes, it will change the color
+        on already drawed text (if you do it before calling osd_show,
+        of course).
+        If you don't want to change the colors of drawed text just
+        use different color_base values.
+    </p><p>
+     Q: What about the shadows of osd-objects? Can I turn them off
+        or are they hardcoded?
+    </p><p>
+     A: osd objects have no shadows by itself, but fonts use 11
+        colors to produce an anti-aliased effect.
+        if you set a "text palette" with entries 0-9 being transparent
+        and 10 being foreground you will get rid of any borders or
+        anti-aliasing.
+    </p></div></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp54354944"></a>MRLs</h2></div></div></div><p>
+   This section defines a draft for a syntactic specification of MRLs as
+   used by xine-lib. The language of MRLs is designed to be a true subset
+   of the language of URIs as given in RFC2396. A type 2 grammar for the
+   language of MRLs is given in EBNF below.
+  </p><p>
+   Semantically, MRLs consist of two distinct parts that are evaluated by
+   different components of the xine architecture. The first part,
+   derivable from the symbol &lt;input_source&gt; in the given grammar, is
+   completely handed to the input plugins, with input plugins signaling
+   if they can handle the MRL.
+  </p><p>
+   The second part, derivable from &lt;stream_setup&gt; and delimited from the
+   first by a crosshatch ('#') contains parameters that modify the
+   initialization and playback behaviour of the stream to which the MRL
+   is passed. The possible parameters are mentioned in the manpage to
+   xine-ui.
+  </p><p>
+   The following definition should be regarded as a guideline only.
+   Of course any given input plugin only understands a subset of all
+   possible MRLs. On the other hand, invalid MRLs according to this
+   definition might be understood for convenience reasons.
+   Some user awareness is required at this point.
+  </p><p>
+   EBNF grammar for MRLs:
+   </p><pre class="programlisting">
+   &lt;mrl&gt;           ::= &lt;input_source&gt;[#&lt;stream_setup&gt;]
+   &lt;input_source&gt;  ::= (&lt;absolute_mrl&gt;|&lt;relative_mrl&gt;)
+   &lt;absolute_mrl&gt;  ::= &lt;input&gt;:(&lt;hierarch_part&gt;|&lt;opaque_part&gt;)
+   &lt;hierarch_part&gt; ::= (&lt;net_path&gt;|&lt;abs_path&gt;)[?&lt;query&gt;]
+   &lt;opaque_part&gt;   ::= (&lt;unreserved&gt;|&lt;escaped&gt;|;|?|:|@|&amp;|=|+|$|,){&lt;mrl_char&gt;}
+   &lt;relative_mrl&gt;  ::= (&lt;abs_path&gt;|&lt;rel_path&gt;)
+   &lt;net_path&gt;      ::= //&lt;authority&gt;[&lt;abs_path&gt;]
+   &lt;abs_path&gt;      ::= /&lt;path_segments&gt;
+   &lt;rel_path&gt;      ::= &lt;rel_segment&gt;[&lt;abs_path&gt;]
+   &lt;rel_segment&gt;   ::= &lt;rel_char&gt;{&lt;rel_char&gt;}
+   &lt;rel_char&gt;      ::= (&lt;unreserved&gt;|&lt;escaped&gt;|;|@|&amp;|=|+|$|,)
+   &lt;input&gt;         ::= &lt;alpha&gt;{(&lt;alpha&gt;|&lt;digit&gt;|+|-|.)}
+   &lt;authority&gt;     ::= (&lt;server&gt;|&lt;reg_name&gt;)
+   &lt;server&gt;        ::= [[&lt;userinfo&gt;@]&lt;host&gt;[:&lt;port&gt;]]
+   &lt;userinfo&gt;      ::= {(&lt;unreserved&gt;|&lt;escaped&gt;|;|:|&amp;|=|+|$|,)}
+   &lt;host&gt;          ::= (&lt;hostname&gt;|&lt;ipv4_address&gt;|&lt;ipv6_reference&gt;)
+   &lt;hostname&gt;      ::= {&lt;domainlabel&gt;.}&lt;toplabel&gt;[.]
+   &lt;domainlabel&gt;   ::= (&lt;alphanum&gt;|&lt;alphanum&gt;{(&lt;alphanum&gt;|-)}&lt;alphanum&gt;)
+   &lt;toplabel&gt;      ::= (&lt;alpha&gt;|&lt;alpha&gt;{(&lt;alphanum&gt;|-)}&lt;alphanum&gt;)
+   &lt;ipv4_address&gt;  ::= &lt;digit&gt;{&lt;digit&gt;}.&lt;digit&gt;{&lt;digit&gt;}.&lt;digit&gt;{&lt;digit&gt;}.&lt;digit&gt;{&lt;digit&gt;}
+   &lt;port&gt;          ::= {&lt;digit&gt;}
+   &lt;reg_name&gt;      ::= &lt;reg_char&gt;{&lt;reg_char&gt;}
+   &lt;reg_char&gt;      ::= (&lt;unreserved&gt;|&lt;escaped&gt;|;|:|@|&amp;|=|+|$|,)
+   &lt;path_segments&gt; ::= &lt;segment&gt;{/&lt;segment&gt;}
+   &lt;segment&gt;       ::= {&lt;path_char&gt;}{;&lt;param&gt;}
+   &lt;param&gt;         ::= {&lt;path_char&gt;}
+   &lt;path_char&gt;     ::= (&lt;unreserved&gt;|&lt;escaped&gt;|:|@|&amp;|=|+|$|,)
+   &lt;query&gt;         ::= {&lt;mrl_char&gt;}
+   &lt;stream_setup&gt;  ::= &lt;stream_option&gt;;{&lt;stream_option&gt;}
+   &lt;stream_option&gt; ::= (&lt;configoption&gt;|&lt;engine_option&gt;|novideo|noaudio|nospu)
+   &lt;configoption&gt;  ::= &lt;configentry&gt;:&lt;configvalue&gt;
+   &lt;configentry&gt;   ::= &lt;unreserved&gt;{&lt;unreserved&gt;}
+   &lt;configvalue&gt;   ::= &lt;stream_char&gt;{&lt;stream_char&gt;}
+   &lt;engine_option&gt; ::= &lt;unreserved&gt;{&lt;unreserved&gt;}:&lt;stream_char&gt;{&lt;stream_char&gt;}
+   &lt;stream_char&gt;   ::= (&lt;unreserved&gt;|&lt;escaped&gt;|:|@|&amp;|=|+|$|,)
+   &lt;mrl_char&gt;      ::= (&lt;reserved&gt;|&lt;unreserved&gt;|&lt;escaped&gt;)
+   &lt;reserved&gt;      ::= (;|/|?|:|@|&amp;|=|+|$|,|[|])
+   &lt;unreserved&gt;    ::= (&lt;alphanum&gt;|&lt;mark&gt;)
+   &lt;mark&gt;          ::= (-|_|.|!|~|*|'|(|))
+   &lt;escaped&gt;       ::= %&lt;hex&gt;&lt;hex&gt;
+   &lt;hex&gt;           ::= (&lt;digit&gt;|A|B|C|D|E|F|a|b|c|d|e|f)
+   &lt;alphanum&gt;      ::= (&lt;alpha&gt;|&lt;digit&gt;)
+   &lt;alpha&gt;         ::= (&lt;lowalpha&gt;|&lt;upalpha&gt;)
+   &lt;lowalpha&gt;      ::= (a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z)
+   &lt;upalpha&gt;       ::= (A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)
+   &lt;digit&gt;         ::= (0|1|2|3|4|5|6|7|8|9)</pre><p>
+   With &lt;ipv6_reference&gt; being an IPv6 address enclosed in [ and ] as defined in RFC2732.
+  </p></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a id="stream"></a>Chapter 5. xine's stream layer</h1></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#idp54424416">Input layer</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54473584">Writing a xine input plugin</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idp54499328">Demuxer layer</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54500512">Introduction to demuxer theory</a></span></dt><dt><span class="sect2"><a href="#idp54504336">Input considerations</a></span></dt><dt><span class="sect2"><a href="#idp54506208">Seeking Policy</a></span></dt><dt><span class="sect2"><a href="#idp54429776">Writing a xine demuxer</a></span></dt><dt><span class="sect2"><a href="#idp54546560">Buffer types</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idp54554384">Decoder layer</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54555568">Audio and video decoders</a></span></dt><dt><span class="sect2"><a href="#idp54557760">Video output formats</a></span></dt><dt><span class="sect2"><a href="#idp54559376">Audio output formats</a></span></dt><dt><span class="sect2"><a href="#idp54560976">Writing a xine decoder</a></span></dt><dt><span class="sect2"><a href="#idp54597504">SPU decoder</a></span></dt></dl></dd></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp54424416"></a>Input layer</h2></div></div></div><p>
+   Many media players expect streams to be stored within files on
+   some local medium. In actual fact, media may be streamed over a
+   network (e.g. via HTTP or RTP), encoded onto a specialized medium
+   (e.g. DVD), etc. To allow you to access all this media, xine supports
+   the concept of an "input plugin". The tasks performed by an
+   input plugin are:
+   </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+      Validation of Media Resource Locators (MRLs).
+     </p></li><li class="listitem"><p>
+      MRL specific session management (e.g. opening and closing local files).
+     </p></li><li class="listitem"><p>
+      Reading blocks/specific numbers of bytes from the input device.
+     </p></li></ul></div><p>
+  </p><p>
+   In addition to these tasks, the input plugin may keep track of some
+   input device-specific state information (e.g. a DVD plugin may keep
+   track of navigational state data such as current title/chapter).
+  </p><p>
+   There are two classes of input device which xine recognizes.
+   Byte-oriented devices can, upon request, return an arbitary
+   non-zero number of bytes from a stream. Examples of such devices
+   are files or network streams. Block-oriented devices, however, have
+   a prefered block or "frame"-size. An example of such a device is
+   a DVD where data is stored in logical blocks of 2048 bytes. One may
+   pass the hint to xine that the plugin is block-oriented by setting the
+   INPUT_CAP_BLOCK capability. Note that this is only a hint and
+   xine does not guarantee that all requests to the plugin will
+   be purely block based.
+  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54473584"></a>Writing a xine input plugin</h3></div></div></div><p>
+    An input plugin provides API functions which allow the engine to
+    access the data source the plugin encapsulates. The input plugin API
+    is declared in <code class="filename">input/input_plugin.h</code>.
+   </p><p>
+    An input plugin exports a public function of the form:
+    </p><pre class="programlisting">   void *input_init_plugin(xine_t *xine, void *data);</pre><p>
+    This function initializes an input plugin class object with the
+    following functions:
+   </p><p>
+    </p><pre class="programlisting">   char *get_description(input_class_t *this_gen);</pre><p>
+    This function returns a plaintext, one-line string describing the plugin.
+   </p><p>
+    </p><pre class="programlisting">   char *get_identifier(input_class_t *this_gen);</pre><p>
+    This function returns a shorter identifier describing the plugin.
+   </p><p>
+    </p><pre class="programlisting">   xine_mrl_t **get_dir(input_class_t *this_gen, const char *filename, int *nFiles);</pre><p>
+    Retrieves a directory listing from the plugin. This function is optional.
+   </p><p>
+    </p><pre class="programlisting">   char **get_autoplay_list(input_class_t *this_gen, int *num_files);</pre><p>
+    Retrieves the autoplay playlist from the plugin. This function is optional.
+   </p><p>
+    </p><pre class="programlisting">   int eject_media(input_class_t *this_gen);</pre><p>
+    Ejects the medium. This function is optional.
+   </p><p>
+    </p><pre class="programlisting">   void dispose(input_class_t *this_gen);</pre><p>
+    This function frees the memory used by the input plugin class object.
+   </p><p>
+    </p><pre class="programlisting">   input_plugin_t *get_instance(input_class_t *class_gen, xine_stream_t *stream, const char *mrl);</pre><p>
+    The plugin should try, if it can handle the specified MRL and return an
+    instance of itself if so. If not, NULL should be returned. When a new MRL
+    is to be played, xine engine asks all the available input plugins one by
+    one if they can handle the MRL.
+    Note that input plugins are not guaranteed to be queried
+    in any particular order and the first input plugin to claim an MRL
+    gets control so try not to duplicate MRLs already found within xine.
+   </p><p>
+    </p><pre class="programlisting">   int open(input_plugin_t *this_gen);</pre><p>
+    You should do any device-specific initialisation within this function.
+   </p><p>
+    </p><pre class="programlisting">   uint32_t get_capabilities(input_plugin_t *this_gen);</pre><p>
+    Returns a bit mask describing the input device's capabilities.
+    You may logically OR the <code class="varname">INPUT_CAP_*</code> constants together to get
+    a suitable bit-mask (via the '|' operator).
+   </p><p>
+    </p><pre class="programlisting">   off_t read(input_plugin_t *this_gen, char *buf, off_t nlen);</pre><p>
+    Reads a specified number of bytes into a buffer and returns the number of bytes actually copied.
+   </p><p>
+    </p><pre class="programlisting">   buf_element_t *read_block(input_plugin_t *this_gen, fifo_buffer_t *fifo, off_t len);</pre><p>
+    Should the input plugin set the block-oriented hint and if the
+    demuxer supports it, this function will be called to read a block directly
+    into a xine buffer from the buffer pool.
+   </p><p>
+    </p><pre class="programlisting">   off_t seek(input_plugin_t *this_gen, off_t offset, int origin);</pre><p>
+    This function is called by xine when it is required that subsequent
+    reads come from another part of the stream.
+   </p><p>
+    </p><pre class="programlisting">   off_t get_current_pos(input_plugin_t *this_gen);</pre><p>
+    Returns the current position within a finite length stream.
+   </p><p>
+    </p><pre class="programlisting">   off_t get_length(input_plugin_t *this_gen);</pre><p>
+    Similarly this function returns the length of the stream.
+   </p><p>
+    </p><pre class="programlisting">   uint32_t get_blocksize(input_plugin_t *this_gen);</pre><p>
+    Returns the device's prefered block-size if applicable.
+   </p><p>
+    </p><pre class="programlisting">   char *get_mrl(input_plugin_t *this_gen);</pre><p>
+    Returns the current MRL.
+   </p><p>
+    </p><pre class="programlisting">   int get_optional_data(input_plugin_t *this_gen, void *data, int data_type);</pre><p>
+    This function allows the input to advertise extra information that is
+    not available through other API functions. See <code class="varname">INPUT_OPTIONAL_*</code> defines.
+   </p><p>
+    </p><pre class="programlisting">   void dispose(input_plugin_t *this_gen);</pre><p>
+    This function closes all resources and frees the input_plugin_t object.
+   </p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp54499328"></a>Demuxer layer</h2></div></div></div><p>
+   This section is designed to familiarize a programmer with general demuxer
+   concepts and how they apply to the xine multimedia library.
+  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54500512"></a>Introduction to demuxer theory</h3></div></div></div><p>
+    xine's demuxer layer is responsible for taking apart multimedia files or
+    streams so that the engine can decode them and present them to the user.
+    "Demuxer" is short for demultiplexor, which is the opposite of
+    multiplexing. This refers to the process of combining 2 or more things
+    into one. Multimedia streams usually, at a minimum, multiplex an audio
+    stream and a video stream together into one stream. Sometimes, there are
+    multiple audio streams (e.g., for multiple language tracks). Sometimes,
+    there is a subtitle data stream multiplexed into the multimedia stream.
+   </p><p>
+    There are many different multimedia formats in existence and there are
+    varying strategies for demuxing different types of multimedia files.
+    Formats in the MPEG family, for example, are designed to allow easy
+    playback from almost any place within the file. Many formats cannot deal
+    with this circumstance and at least need to be demuxed from the beginning
+    of the stream and played through to the end. Some formats, such as MPEG and
+    AVI, have marker information before every chunk in the stream. Other
+    formats, such as Apple Quicktime, are required to have a master index that
+    contains all information for taking apart a file. Many game-oriented
+    multimedia formats are designed strictly for playing from start to finish
+    without any regard to random seeking within the file.
+   </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54504336"></a>Input considerations</h3></div></div></div><p>
+    A xine demuxer interacts with xine's input layer in order to receive
+    data. The underlying input plugin might be a file, a network stream, or
+    a block-oriented disc storage device like a DVD. A file input offers the
+    most flexibility in being able to read either blocks of data or individual
+    bytes, and being able to seek freely. Other input plugins may not allow the
+    demuxer to seek (such as stdin or certain network streams). Some input
+    plugins only allow the demuxer to read blocks of data and not individual
+    bytes (such as the CD-DA input plugin). The demuxer needs to check the
+    capabilities of the underlying input plugin before attempting to seek
+    around.
+   </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54506208"></a>Seeking Policy</h3></div></div></div><p>
+    If possible, it is desirable that a demuxer can seek randomly through
+    the stream. This is easier for some file formats and essentially impossible
+    for other formats. xine's seeking API function allows a seek target to be
+    specified in terms of a ratio from 0 to 65535, or time in milliseconds from 0.
+    Time-based seeking is useful for specifying, e.g., a 1-minute jump forward
+    or backward in a stream. With the ratio-based seeking, the demuxer can
+    interpret the ratio value in the domain he sees most fit. This can also be
+    some sort of time or a simple file offset.
+   </p><p>
+    If a multimedia stream has video, there generally needs to be a way to
+    identify keyframes in the stream in order to facilitate seeking. Many
+    game-oriented formats fall over in this area as they carry no keyframe
+    information aside from the implicit assumption that the first frame is a
+    keyframe.
+   </p><p>
+    In a stream with video, a seek operation should always jump to a keyframe.
+    xine Policy: When the seek target is between 2 keyframes, jump to the
+    earlier keyframe. E.g., if there are keyframes at stream offsets 10000 and
+    20000, and the user requests a seek to offset 18000, choose the keyframe
+    at offset 10000.
+   </p><p>
+    Note that there can be difficulties when the audio and video streams are
+    not tightly interleaved. In many formats, the audio frames are several
+    time units ahead of the video frames for the purpose of pre-buffering.
+    This is a typical scenario in the middle of a stream:
+    </p><pre class="programlisting">
+   audio frame @ time 10
+   video frame @ time 8
+   audio frame @ time 11
+   video frame @ time 9
+   audio frame @ time 12
+      keyframe @ time 10
+   audio frame @ time 13</pre><p>
+    If the demuxer seeks to the keyframe @ time 10, the next audio chunk will
+    have a timestamp of 13, which is well ahead of where the video is. While
+    the xine engine will eventually recover, it will make playback choppy for
+    a few seconds after the seek. One strategy for dealing with this situation
+    is to seek back to the nearest keyframe before the requested seek and then
+    seek back to find the audio frame with the nearest timestamp before the
+    keyframe. In this example, that would mean seeking back to [af@time 10].
+    Then, demux the chunks in order, but skip the video frames until the next
+    keyframe is encountered.
+   </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54429776"></a>Writing a xine demuxer</h3></div></div></div><p>
+    A demuxer plugin provides API functions which allow the engine to
+    initialize demuxing, dispatch data chunks to the engine, seek within the
+    stream, get the stream length, among other functions. The demuxer API
+    is declared in <code class="filename">demuxers/demux.h</code>.
+   </p><p>
+    Writing a new xine demuxer is largely a process of using other demuxers as
+    references and understanding how they interact with the engine. This
+    section will give a brief overview of each API function.
+   </p><p>
+    A demuxer plugin exports a public function of the form:
+    </p><pre class="programlisting">   void *demux_wc3movie_init_plugin(xine_t *xine, void *data);</pre><p>
+    This function initializes a demuxer plugin class object with 6
+    demuxer-specific functions. These functions mainly provide information
+    that a frontend can use to build user-friendly features. These functions
+    include:
+   </p><p>
+    </p><pre class="programlisting">   char *get_description(demux_class_t *this_gen);</pre><p>
+    This function returns a plaintext, one-line string describing the plugin.
+   </p><p>
+    </p><pre class="programlisting">   char *get_identifier(demux_class_t *this_gen);</pre><p>
+    This function returns a shorter identifier describing the plugin.
+   </p><p>
+    </p><pre class="programlisting">   char *get_extensions(demux_class_t *this_gen);</pre><p>
+    This function returns a string with the file extensions that this demuxer
+    is known to use. For example, Microsoft .WAV files use "wav". If there are
+    multiple known extensions, separate each extension with a space. For
+    example, Apple Quicktime has the extensions "mov qt mp4".
+   </p><p>
+    </p><pre class="programlisting">   char *get_mimetypes(demux_class_t *this_gen)</pre><p>
+    This function returns a string with the MIME types that this demuxer is
+    known to use. Multiple MIME type specifications should be separated with a
+    semicolon (;). For example, Apple Quicktime uses several MIME types:
+    </p><pre class="programlisting">
+   return "video/quicktime: mov,qt: Quicktime animation;"
+          "video/x-quicktime: mov,qt: Quicktime animation;"
+          "application/x-quicktimeplayer: qtl: Quicktime list;";</pre><p>
+   </p><p>
+    </p><pre class="programlisting">   void class_dispose(demux_class_t *this_gen);</pre><p>
+    This function frees the memory used by the demuxer plugin class object.
+   </p><p>
+    </p><pre class="programlisting">   demux_plugin_t *open_plugin(demux_class_t *class_gen, xine_stream_t *stream, input_plugin_t *input_gen);</pre><p>
+    This function is invoked by the xine engine to determine if the demuxer is
+    able to handle a particular multimedia stream. The engine can specify if
+    the demuxer is supposed to check the stream by content (validate the actual
+    stream data and see if it is of the expected type), by extension (check the
+    name of the MRL and see if the file extension is correct), or explicitly
+    (the engine is passing on a user request to force this demuxer to be used).
+   </p><p>
+    The order in which the engine queries the available demuxers is determined
+    by the priority stated in the demuxer_info_t, which is attached to every
+    demuxer's plugin info structure. Demuxers with higher priority values are
+    called before those with lower priority. The order amongst demuxers of
+    equal priority is undefined. The idea behind this is to have the demuxers
+    for high-level container formats have high priorities, while the raw format
+    demuxers have low priorities. This way, a stream of a high-level container
+    format with a beginning that happens to look like a low-level raw format is
+    still handled by the correct demuxer, because it is queried first.
+   </p><p>
+    NOTE: In the course of checking the stream by content, care must be taken
+    not to consume bytes out of a non-seekable stream. If the stream is
+    non-seekable, use the input plugin's preview buffer facility to get a cache
+    of the first few bytes. If the stream is seekable, reset the stream before
+    operating on the data (you do not know where some other demuxer left the
+    stream positioned).
+   </p><p>
+    If the demuxer can handle the stream, it creates a new demux_plugin_t
+    structure and initializes the main demuxer functions which are called by
+    the engine to do the tough demuxing duty. These functions include:
+   </p><p>
+    </p><pre class="programlisting">   void demux_send_headers(demux_plugin_t *this_gen);</pre><p>
+    This function generally reads the headers of the stream, does whatever it
+    has to do to figure out what audio and video codecs are used in the file,
+    and asks the xine engine to initialize the correct decoders with the
+    proper parameters (like width and height for video, sample rate and
+    channels for audio).
+   </p><p>
+    </p><pre class="programlisting">   int demux_send_chunk(demux_plugin_t *this_gen);</pre><p>
+    This function reads data from the stream and sends it to the appropriate
+    decoder. This is where the bulk of the demuxing work is performed. Despite
+    the name, the function is actually free to send as much data as it wants
+    to, or as much as it can. A good policy is to send an entire chunk of
+    compressed audio or video data and then return. The chunk is likely large
+    enough that it will have to be broken up into multiple xine buffers. If
+    a chunk of audio is 20000 bytes large, and the engine is returning
+    4096-byte buffers, send 4 full buffers and 1 partial buffer to the audio
+    decoder and then return.
+   </p><p>
+    </p><pre class="programlisting">   int demux_seek(demux_plugin_t *this_gen, off_t start_pos, int start_time, int playing);</pre><p>
+    This function is called by the engine to request stream repositioning.
+    This function should be implemented if possible. See the section on
+    "Seeking Policy" for more information. A seek operation should reposition
+    the demuxer's internal accounting variables to be ready to start
+    dispatching chunks from the new position when the xine engine calls
+    demux_send_chunk() again. If seeking is not feasible, the function quietly
+    returns and the demuxer's position is unaffected.
+   </p><p>
+    </p><pre class="programlisting">   void demux_dispose(demux_plugin_t *this_gen);</pre><p>
+    This function frees the demux_plugin_t object.
+   </p><p>
+    </p><pre class="programlisting">   int demux_get_status(demux_plugin_t *this_gen);</pre><p>
+    This function returns the current internal status of the demuxer. There
+    are 2 states: DEMUX_OK, for when the demuxer is demuxing or ready to demux,
+    and DEMUX_FINISHED, for when the demuxer has reached the end of the stream
+    or has encountered some sort of error.
+   </p><p>
+    </p><pre class="programlisting">   int demux_get_stream_length(demux_plugin_t *this_gen);</pre><p>
+    This function returns the length (time duration) of the stream in
+    milliseconds. If the length of the stream cannot be determined, return 0.
+   </p><p>
+    </p><pre class="programlisting">   uint32_t demux_get_capabilities(demux_plugin_t *this_gen);</pre><p>
+    This function returns an array of bit flags indicating special features of
+    the demuxer. See <code class="varname">DEMUX_CAP_*</code> defines.
+   </p><p>
+    </p><pre class="programlisting">   int demux_get_optional_data(demux_plugin_t *this_gen, void *data, int data_type);</pre><p>
+    This function allows the demuxer to advertise extra information that is
+    not available through other API functions. See <code class="varname">DEMUX_OPTIONAL_*</code> defines.
+   </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54546560"></a>Buffer types</h3></div></div></div><p>
+    Demuxer must send data to decoders using two fifos names <code class="varname">video_fifo</code>
+    and <code class="varname">audio_fifo</code>. Both are available at <code class="varname">stream</code>
+    level. The following code fragment shows how it's done.
+   </p><pre class="programlisting">
+   buf_element_t *buf;
+   
+   buf = stream-&gt;video_fifo-&gt;buffer_pool_alloc(stream-&gt;video_fifo);
+   buf-&gt;type = BUF_CONTROL_START;
+   stream-&gt;video_fifo-&gt;put(stream-&gt;video_fifo, buf);</pre><p>
+    Buffers must have set the <code class="varname">type</code> field as shown. All buffer types are
+    defined in <code class="filename">xine-engine/buffer.h</code>.
+   </p><p>
+    The control buffer types are very important and must be sent by all kinds of demuxers.
+    They tell decoders to start/stop their operations and inform metronom about
+    discontinuities, either relative or absolute. There is also a reset buffer
+    type that must be sent when demuxers are seeking as a "warm restart" indication to
+    the decoders.
+   </p><p>
+    To help finding out buffer types for known codecs, functions from <code class="filename">buffer_types.c</code>
+    may be used to convert "FOURCC" codes or audio format tags (as used in AVI files) to the xine
+    byffer type:
+    </p><pre class="programlisting">   buf-&gt;type = fourcc_to_buf_video((void*)this-&gt;avi-&gt;bih.biCompression);</pre><p>
+   </p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp54554384"></a>Decoder layer</h2></div></div></div><p>
+   This section is designed to familiarize a programmer with basic audio
+   and video decoding concepts and how they apply to the xine decoder API.
+  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54555568"></a>Audio and video decoders</h3></div></div></div><p>
+    Audio and video data requires an enormous amount of storage. Thus, the
+    raw data is encoded using a variety of compression techniques which
+    drastically reduces the amount of space required to transmit and store the
+    data. Before playback, the compressed data needs to be decoded.
+   </p><p>
+    The process of decoding data is rather straightforward in a computer
+    science sense: An array of encoded data is fed into a decoder and the
+    decoder outputs an array of decoded data which is ready to be presented
+    to the user (either displayed on the screen or played through the
+    speakers).
+   </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54557760"></a>Video output formats</h3></div></div></div><p>
+    Raw video data comes in a variety of formats, most commonly in RGB and
+    YUV. xine's output layer currently only accepts data in YV12 format (a.k.a.
+    YUV 4:2:0 planar) or YUY2 format (a.k.a. YUV 4:2:2 packed). If the output
+    format is a RGB space, the data must be converted to an acceptable YUV
+    format before being dispatched to the video output unit. xine has a number
+    of support functions to facilitate converting RGB to YUV.
+   </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54559376"></a>Audio output formats</h3></div></div></div><p>
+    Raw audio data equates to uncompressed PCM audio. xine's audio output
+    modules expect 8-bit PCM data to be unsigned and 16-bit PCM data to be
+    signed and in little endian format. When there is more than one channel,
+    the channel data is interleaved. For example, stereo data is interleaved
+    as left sample, right sample: LRLRLRLR. If there are 4 or 6 channels, the
+    same interleaving applies: 123456123456.
+   </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54560976"></a>Writing a xine decoder</h3></div></div></div><p>
+    Writing a new xine decoder for an audio or video format entails
+    accumulating a buffer of encoded data, performing the necessary operations
+    for decoding and then passing it on the appropriate output module. The
+    best reference for understanding the decoder API is the various decoding
+    modules available. In particular, xine has example video and audio
+    decoders named <code class="filename">src/libxinevdec/foovideo.c</code> and
+    <code class="filename">src/libxineadec/fooaudio.c</code>, respectively.
+   </p><p>
+    This section will give a brief overview of each API function.
+    The decoder API is declared in <code class="filename">src/xine-engine/video_decoder.h</code>
+    and <code class="filename">src/xine-engine/audio_decoder.h</code>.
+   </p><p>
+    A decoder plugin must, like every plugin, export a public array of
+    plugin_info_t types. The array usually has 2 entries: The first contains
+    the plugin information regarding the decoder and the second entry is
+    a terminating NULL entry. However, there may be more entries.
+    Each entry contains 6 fields:
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+       <code class="varname">plugin type</code>: Either PLUGIN_VIDEO_DECODER or PLUGIN_AUDIO_DECODER.
+      </p></li><li class="listitem"><p>
+       <code class="varname">API</code>: The plugin API revision that this plugin adheres to.
+      </p></li><li class="listitem"><p>
+       <code class="varname">name</code>: A character string that identifies the plugin.
+      </p></li><li class="listitem"><p>
+       <code class="varname">version</code>: #define'd as XINE_VERSION_CODE.
+      </p></li><li class="listitem"><p>
+       <code class="varname">supported types</code>: A structure that defines the buffer types that this plugin can handle.
+      </p></li><li class="listitem"><p>
+       <code class="varname">init function</code>: The function that the xine engine calls in order to initialize this decoder plugin.
+      </p></li></ul></div><p>
+    The supported types field is a decoder_info_t structure. This struct
+    combines a list of buffer types that the plugin can handle, along with
+    a relative default priority. The priority allows xine to have multiple
+    plugins that can handle one data type and the plugin with the highest
+    priority takes precedence. The code defines the default priority, which
+    can be overriden by the user.
+    The list of buffer types is an array of uint32_t types from the list of
+    buffer types defined in <code class="filename">src/xine-engine/buffer.h</code>.
+   </p><p>
+    </p><pre class="programlisting">   void *init_plugin(xine_t *xine, void *data);</pre><p>
+    This function allocates a plugin class and initializes a set of functions
+    for the xine engine to invoke. These functions include:
+   </p><p>
+    </p><pre class="programlisting">   char *get_identifier(video_decoder_class_t *this);</pre><p>
+    </p><pre class="programlisting">   char *get_identifier(audio_decoder_class_t *this);</pre><p>
+    This function returns a brief character string identifying the plugin.
+   </p><p>
+    </p><pre class="programlisting">   char *get_description(video_decoder_class_t *this);</pre><p>
+    </p><pre class="programlisting">   char *get_description(audio_decoder_class_t *this);</pre><p>
+    This function returns a slightly longer description of the plugin.
+   </p><p>
+    </p><pre class="programlisting">   void dispose_class(video_decoder_class_t *this);</pre><p>
+    </p><pre class="programlisting">   void dispose_class(audio_decoder_class_t *this);</pre><p>
+    This function frees the resources allocated by the plugin class.
+   </p><p>
+    </p><pre class="programlisting">   video_decoder_t *open_plugin(video_decoder_class_t *class_gen, xine_stream_t *stream);</pre><p>
+    </p><pre class="programlisting">   audio_decoder_t *open_plugin(audio_decoder_class_t *class_gen, xine_stream_t *stream);</pre><p>
+    This function initializes the decoder plugin's private state. It also
+    initializes and returns either an audio_decoder_t or a video_decoder_t for
+    the engine. The decoder_t contains a number of functions that the plugin
+    invokes to handle data decoding. These functions include:
+   </p><p>
+    </p><pre class="programlisting">   void decode_data(video_decoder_t *this_gen, buf_element_t *buf);</pre><p>
+    </p><pre class="programlisting">   void decode_data(audio_decoder_t *this_gen, buf_element_t *buf);</pre><p>
+    This function performs the bulk of the decoding work. The xine engine
+    delivers buffers (xine_buffer_t data types) to this function and it is up
+    to this function to assemble the parts of the buffer, decode the data, and
+    send the decoded data to the proper output unit. The constraint is that
+    you must never call a port function of the output port when the port has
+    not been opened by you. (See the <code class="function">open()</code> and
+    <code class="function">close()</code> functions of <span class="type">xine_video_port_t</span>
+    and <span class="type">xine_audio_port_t</span>.)
+   </p><p>
+    A buffer has a <code class="varname">decoder_flags</code> field which can have
+    a number of flags set. The first buffer that a decoder receives ought
+    to have the BUF_FLAG_HEADER flag set. This indicates that the buffer
+    content contains the essential setup information for decoding
+    (width, height, etc. for video; sample rate, channels, etc. for audio).
+   </p><p>
+    If the BUF_FLAG_HEADER flag is not set, the content of the buffer should
+    be accumulated in a private buffer until a buffer with a
+    BUF_FLAG_FRAME_END flag is set. This indicates that the entire chunk has
+    been transmitted to the decoder and is ready to be decoded. Fetch either
+    an empty video frame or audio buffer from the appropriate output unit. Perform
+    the appropriate decoding operations and set the pts for the output buffer
+    (and the duration, a.k.a. video_step, for video). Dispatch the decoded
+    data to the output and reset the internal buffer accumulation accounting.
+   </p><p>
+    </p><pre class="programlisting">   void flush(video_decoder_t *this_gen);</pre><p>
+    </p><pre class="programlisting">   void flush(audio_decoder_t *this_gen);</pre><p>
+    This function is called when either the xine engine flushes the stream, e.g.,
+    after a seek operation or when decoding runs too slow and frames arrive in
+    the output loops fast enough. Decoders should release everything they have
+    already decoded, drop the rest and wait for new input.
+   </p><p>
+    </p><pre class="programlisting">   void reset(video_decoder_t *this_gen);</pre><p>
+    </p><pre class="programlisting">   void reset(audio_decoder_t *this_gen);</pre><p>
+    This function is called when the xine engine resets the stream.
+    Decoders should get ready to receive data that has nothing to do
+    with the one it worked on up to now.
+   </p><p>
+    </p><pre class="programlisting">   void discontinuity(video_decoder_t *this_gen);</pre><p>
+    </p><pre class="programlisting">   void discontinuity(audio_decoder_t *this_gen);</pre><p>
+    This function is called when the xine engine encounters a pts
+    discontinuity. Decoders should forget all timestamping information
+    they might have accumulated from the stream to not confuse metronom.
+   </p><p>
+    </p><pre class="programlisting">   void dispose(video_decoder_t *this_gen);</pre><p>
+    </p><pre class="programlisting">   void dispose(audio_decoder_t *this_gen);</pre><p>
+    This function frees the resources used by the decoder plugin.
+   </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54597504"></a>SPU decoder</h3></div></div></div><p>
+    A lot written above also applies for subpicture unit (SPU) decoders. The
+    SPU decoder API is declared in <code class="filename">src/xine-engine/spu_decoder.h</code>.
+    Details on the data, SPU decoders are expected to output, see the section on
+    <a class="link" href="#osd" title="Overlays and OSD">overlays and OSD</a>.
+   </p><p>
+    However, there are some differences to consider. At first, unlike audio and
+    video, subtitles do not form a continuous stream. The decoder will therefore
+    only be called once in a while. The metronom call for timestamping,
+    which for audio and video is done by the engine, has to be done manually for SPU:
+    </p><pre class="programlisting">   vpts = metronom-&gt;got_spu_packet(metronom, buf-&gt;pts);</pre><p>
+   </p><p>
+    Another difference is that while both audio and video decoders are automatically
+    blocked in their <code class="function">get_buffer()</code>/<code class="function">get_frame()</code>
+    methods when the output cannot take any more data, this does not work for SPU,
+    because it could take minutes before the next free slot becomes available and we must not
+    block the decoder thread for that long since it might be shared with a video decoder.
+    But when a SPU decoder does not share the thread and we let it run without any
+    blocking, it will overflow the available overlay slots very soon. Since SPU
+    decoders should not have to know, whether they share the thread or not, a helper
+    function <code class="function">_x_spu_decoder_sleep()</code> is provided, which, when told
+    the timestamp of the next overlay, will wait long enough to not overflow the
+    overlay slots, but short enough to not hinder a video decoder in the same thread.
+   </p><p>
+    There are also two functions in the SPU decoder API, which have not been discussed above:
+   </p><p>
+    </p><pre class="programlisting">   int get_interact_info(spu_decoder_t *this_gen, void *data);</pre><p>
+    Since SPUs are sometimes (on DVDs for example) used for user interaction like menu
+    highlights, this function can be called to get <code class="varname">data</code> filled with
+    the current interaction information. The caller and the decoder have to agree on
+    what this is exactly. With DVDs, you can get a copy of the current NAV packet here.
+   </p><p>
+    </p><pre class="programlisting">   void set_button(spu_decoder_t *this_gen, int32_t button, int32_t mode);</pre><p>
+    Also for interaction, you can ask the decoder here to change the
+    current highlighting.
+   </p></div></div></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a id="output"></a>Chapter 6. xine's output layer</h1></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="#idp54694544">Post plugin layer</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54695744">General principle of post plugins</a></span></dt><dt><span class="sect2"><a href="#idp54749136">Writing a xine post plugin</a></span></dt><dt><span class="sect2"><a href="#idp54763520">Interception</a></span></dt><dt><span class="sect2"><a href="#idp54826320">Rewiring and the ticket system</a></span></dt></dl></dd><dt><span class="sect1"><a href="#idp54861408">Video output</a></span></dt><dd><dl><dt><span class="sect2"><a href="#idp54867872">Writing a xine video out plugin</a></span></dt></dl></dd></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp54694544"></a>Post plugin layer</h2></div></div></div><p>
+   In this section you will learn, how the powerful post plugin architecture
+   works and how to write post plugins.
+  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54695744"></a>General principle of post plugins</h3></div></div></div><p>
+    The name "post plugin" comes from "postprocessing" which already describes
+    what these plugins are supposed to do: they take video frames, audio
+    buffers or subpicture planes as they leave the decoders and apply arbitrary
+    processing to them. Then they pass processed elements on to the output
+    loops. Post plugins can not only be chained to process the predecessor's
+    output and advance the data to their successor, they can form arbitrary trees,
+    since post plugins can have any number of inputs and outputs. Additionally,
+    the interconnection of the plugins currently inserted in such a tree can
+    be changed on the fly during playback. The public function
+    <code class="function">xine_post_wire()</code> is used by frontends to form such
+    connections.
+   </p><p>
+    Due to the variety of possible applications, the interface post plugins have
+    to implement is just the basic foundation. The complexity comes from hooking
+    your post plugin into the engine data paths for video frames and audio buffers,
+    intercepting the data and performing your operation on them. This is done by
+    taking the interface of a video or audio port, replacing some of the functions
+    with your own ones and passing the interface to the decoder or predecessor
+    post plugin that is going to feed you with data by accessing this interface
+    and by doing that, calling the functions you provide. From there you can do
+    almost anything you want. Constructing video frames from audio buffers to
+    visualize sound is possible as well as just outputting an integer giving the
+    average brightness of an image. It is also possible to invent post plugins
+    with no output (not very useful, unless the plugin has some side-effect) or
+    no input at all; for the latter you have to create your own pthread, otherwise
+    your plugin will not do anything. An audio signal generator could be
+    implemented like this. The various data types, post plugins can
+    accept as input or offer as output are defined in <code class="filename">xine.h</code>
+    as <code class="varname">XINE_POST_DATA_*</code> defines.
+   </p><p>
+    Some terminology used in the following explanations:
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+       <code class="varname">down direction</code>:
+       The direction from the decoders to the output. This is the way video or audio
+       data (actual content and meta information) usually travels through the engine.
+      </p></li><li class="listitem"><p>
+       <code class="varname">up direction</code>:
+       The direction from the output to the decoders. This is the way some video or audio
+       metadata like metronom timestamps travel through the engine.
+      </p></li><li class="listitem"><p>
+       <code class="varname">interception</code>:
+       Post plugins are inserted into the engine data paths by the means of the decorator
+       design pattern. This works by taking engine structures with member funtions like
+       video or audio ports, video frames or overlay managers and inserting your own functions
+       into a copy of this structure. This is called interception. This modified structure
+       is then passed up to the plugin that uses it and thus calls your replaced functions.
+      </p></li></ul></div><p>
+   </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54749136"></a>Writing a xine post plugin</h3></div></div></div><p>
+    The post plugin API is declared in <code class="filename">src/xine-engine/post.h</code>
+    The plugin info of post plugins contains the post plugin type, which is one of the
+    <code class="varname">XINE_POST_TYPE_*</code> defines and the init_class function of the plugin.
+   </p><p>
+    </p><pre class="programlisting">   post_plugin_t *open_plugin(post_class_t *class_gen, int inputs, xine_audio_port_t **audio_target, xine_video_port_t **video_target);</pre><p>
+    Returns an instance of the plugin. Some post plugins evaluate <code class="varname">inputs</code>
+    to open a variable number of inputs. Since almost all post plugins have audio or video
+    outputs, you can hand in a NULL-terminated array of ports to connect to these outputs.
+    In this function you can also intercept these ports so that your plugin is actually used.
+    There is a helper function to initialize a <span class="type">post_plugin_t</span>, which you are
+    encouraged to use: <code class="function">_x_post_init()</code>.
+   </p><p>
+    </p><pre class="programlisting">   char *get_identifier(post_class_t *class_gen);</pre><p>
+    This function returns a short identifier describing the plugin.
+   </p><p>
+    </p><pre class="programlisting">   char *get_description(post_class_t *class_gen);</pre><p>
+    This function returns a plaintext, one-line string describing the plugin.
+   </p><p>
+    </p><pre class="programlisting">   void dispose(post_class_t *class_gen);</pre><p>
+    This function frees the memory used by the video out plugin class object.
+   </p><p>
+    The <span class="type">post_plugin_t</span> structure contains the publicly visible
+    part of the post plugin with the audio and video inputs and the type of
+    the post plugin. Not publicly visible are the lists of all inputs and outputs,
+    the <code class="function">dispose()</code> function and some internal stuff which
+    plugins do not have to worry about.
+   </p><p>
+    </p><pre class="programlisting">   void dispose(post_plugin_t *this_gen);</pre><p>
+    This function frees the memory used by the plugin instance, but not necessarily
+    immediately. Since post plugins enter their own functions into engine structures,
+    they might still be needed when <code class="function">dispose()</code> is being called.
+    They maintain a usage counter to detect that. To check for such a condition, you
+    should use the <code class="function">_x_post_dispose()</code> helper function like that:
+    </p><pre class="programlisting">
+   if (_x_post_dispose(this))
+     really_free(this);</pre><p>
+    <code class="function">_x_post_dispose()</code> frees any ressources allocated by any of the
+    post plugin helper functions and returns boolean true, if the plugin is not needed
+    any more.
+   </p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54763520"></a>Interception</h3></div></div></div><p>
+    Currently, we have four engine structures which can be intercepted by post plugins:
+    video ports, video frames, overlay managers and audio ports. You could do this
+    interception manually, but since this is quite a complex process, there are helper
+    functions to assist you and their usage is encouraged.
+   </p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="idp54764880"></a>Intercepting a video port</h4></div></div></div><p>
+     </p><pre class="programlisting">
+   post_video_port_t *_x_post_intercept_video_port(post_plugin_t *post,
+     xine_video_port_t *port, post_in_t **input, post_out_t **output);</pre><p>
+     This function will intercept <code class="varname">port</code> and returns a structure
+     for you to pass up. All functions in the port will be replaced with dummy
+     pass through functions that do nothing but relaying the call down to the original
+     port. If you want (that is, <code class="varname">input</code> or <code class="varname">output</code> are
+     not NULL), this function will also create the input and output descriptors complete
+     with rewiring functions and add them to the relevant lists.
+     This is required, if you want this port to be advertised by the plugin to the outside world.
+    </p><p>
+     <span class="type">post_video_port_t</span> makes a variety of interception schemes very easy.
+     If you want to replace any of the default functions with your own, just enter it
+     into <code class="varname">new_port</code>. You can use <code class="varname">original_port</code>
+     from within your function to propagate calls down to the original port.
+     The constraint is that your functions have to ensure that every original
+     port held open scores one usage counter point, so that opened ports are always
+     closed before the plugin is disposed. Therefore, you should use the macro
+     <code class="function">_x_post_inc_usage()</code> before calling
+     <code class="function">original_port-&gt;open()</code> and use the macro
+     <code class="function">_x_post_dec_usage()</code> after calling
+     <code class="function">original_port-&gt;close()</code>. Note that <code class="function">_x_post_dec_usage()</code>
+     might dispose the plugin, when <code class="function">dispose()</code> has been called
+     earlier and usage count drops to zero, so do never touch plugin structures after
+     <code class="function">_x_post_dec_usage()</code>. In addition, you must never call a port
+     function of the original port when the port is not open.
+    </p><p>
+     Intercepting video frames or the overlay manager of the port is even easier.
+     You do not have to reimplement <code class="function">get_frame()</code> or
+     <code class="function">get_overlay_manager()</code>. Just enter a <code class="varname">intercept_frame</code>
+     or <code class="varname">intercept_ovl</code> function which returns boolean true, if
+     you want to intercept. The functions to insert in the intercepted frame or overlay
+     manager are taken from <code class="varname">new_frame</code> and <code class="varname">new_manager</code>
+     respectively. Note that the defaults are reversed: If you do not enter such a
+     decision function for either one, all frames and no overlay manager will be intercepted.
+    </p><p>
+     For convenience <span class="type">post_video_port_t</span> also contains pointers to the
+     current stream and to the current post plugin and a user_data pointer, where you
+     can put in anything you need in addition. If your port is used by more than one
+     thread, you can also enforce locking on the port, frame or overlay manager level
+     by entering a lock into <code class="varname">port_lock</code>, <code class="varname">frame_lock</code> or
+     <code class="varname">manager_lock</code> respectively.
+    </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="idp54781056"></a>Intercepting an audio port</h4></div></div></div><p>
+     Audio port interception is just a stripped down version of video port interception.
+     Everything related to frames and overlay manager is not needed and audio buffers
+     do not need to be intercepted, since they have no member functions. Everything else
+     of the above still applies.
+    </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="idp54782528"></a>Intercepting overlay manager</h4></div></div></div><p>
+     </p><pre class="programlisting">   void _x_post_intercept_overlay_manager(video_overlay_manager_t *original, post_video_port_t *port);</pre><p>
+     Interception of the overlay manager is done automatically when your
+     <code class="function">intercept_ovl()</code> decision function returns boolean true.
+     Should you ever decide not to use that, interception can be done with this helper
+     function, which simply creates an intercepted overlay manager with dummy
+     pass through functions in <code class="varname">port-&gt;new_manager</code> and stores the original
+     manager in <code class="varname">port-&gt;original_manager</code>.
+    </p><p>
+     No matter how you intercepted the overlay manager, your own replacement
+     functions will receive <code class="varname">port-&gt;new_manager</code> as the overlay manager
+     argument. But you most likely want to have access to the <span class="type">post_video_port_t</span>
+     from within your functions. For that, there exists a pointer retrieval function:
+     </p><pre class="programlisting">   post_video_port_t *_x_post_ovl_manager_to_port(video_overlay_manager_t *manager);</pre><p>
+    </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="idp54788464"></a>Intercepting a video frame</h4></div></div></div><p>
+     </p><pre class="programlisting">
+   vo_frame_t *_x_post_intercept_video_frame(vo_frame_t *frame, post_video_port_t *port);
+   vo_frame_t *_x_post_restore_video_frame(vo_frame_t *frame, post_video_port_t *port);</pre><p>
+     Interception of video frames is done automatically when your
+     <code class="function">intercept_frame()</code> decision function returns boolean true or
+     when there is no such function in <span class="type">post_video_port_t</span>.
+     Should you ever decide not to use that, interception can be done with the helper
+     function <code class="function">_x_post_intercept_video_frame()</code>.
+    </p><p>
+     Since the same video frame can be in use in the decoder and in the output and in
+     any post plugin in between at the same time, simply modifying the frame
+     structure does not work, because every user of the frame needs to see his version
+     and the frame must always travel along the same path through the plugins for its
+     entire lifetime. To ensure that, <code class="function">_x_post_intercept_video_frame()</code>
+     provides a shallow copy of the frame structure with the original frame attached to
+     <code class="varname">copy-&gt;next</code>. This copy will be filled with your own
+     frame functions from <code class="varname">port-&gt;new_frame</code> and with dummy pass
+     through functions for those you did not provide. This way, every part of xine
+     using this frame will see its own frame structure with a list of frame
+     contexts from down the data path attached to <code class="varname">frame-&gt;next</code>.
+     <code class="function">_x_post_restore_video_frame()</code> reverses this and should be
+     used when the frame is freed or disposed.
+    </p><p>
+     Your own replacement functions will receive the copied frame as as argument.
+     But you most likely want to have access to the <span class="type">post_video_port_t</span>
+     from within your functions. For that, there exists a pointer retrieval function:
+     </p><pre class="programlisting">   post_video_port_t *_x_post_video_frame_to_port(vo_frame_t *frame);</pre><p>
+     The constraint is that your functions have to ensure that every intercepted
+     frame scores one usage counter point, so that these frames are always
+     freed or disposed before the plugin is disposed. Therefore, you should use the macro
+     <code class="function">_x_post_inc_usage()</code> before calling
+     <code class="function">_x_post_intercept_video_frame()</code> and use the macro
+     <code class="function">_x_post_dec_usage()</code> after calling
+     <code class="function">_x_post_restore_video_frame()</code>. Note that <code class="function">_x_post_dec_usage()</code>
+     might dispose the plugin, when <code class="function">dispose()</code> has been called
+     earlier and usage count drops to zero, so do never touch plugin structures after
+     <code class="function">_x_post_dec_usage()</code>.
+    </p><p>
+     From within your own frame functions, you can propagate calls to the original
+     frame by calling a function on <code class="varname">frame-&gt;next</code>. Since
+     modifications to the frame can travel both upwards and downwards (decoders and
+     output can modify the frame), changes need to be copied between the frame
+     structure contexts. You should use the <code class="function">_x_post_frame_copy_down()</code>
+     and <code class="function">_x_post_frame_copy_up()</code> helper functions like that:
+     </p><pre class="programlisting">
+   _x_post_frame_copy_down(frame, frame-&gt;next);
+   frame-&gt;next-&gt;draw(frame-&gt;next, stream);
+   _x_post_frame_copy_up(frame, frame-&gt;next);</pre><p>
+    </p><p>
+     If your post plugin modifies the content of the frame, you have to modify
+     a deep copy of the frame, because the decoder might still use the frame as
+     a reference frame for future decoding. The usual procedure is:
+     </p><pre class="programlisting">
+   modified_frame = port-&gt;original_port-&gt;get_frame(port-&gt;original_port, …);
+   _x_post_frame_copy_down(frame, modified_frame);
+   copy_and_modify(frame, modified_frame);
+   skip = modified_frame-&gt;draw(modified_frame, stream);
+   _x_post_frame_copy_up(frame, modified_frame);
+   modified_frame-&gt;free(modified_frame);</pre><p>
+    </p><p>
+     When the output receives a frame via <code class="function">draw()</code>,
+     it usually receives the stream where the frame
+     originates as well and modifies the state of this stream by passing
+     the frame through the stream's metronom. Sometimes this is unwanted.
+     For example, when you pass the same frame to the output more than once, it
+     will confuse metronom. To solve this, you can call
+     <code class="function">frame-&gt;next-&gt;draw()</code> with NULL as the stream.
+     You might also want to prevent frames from being passed down to the output
+     completely, because your post plugin creates something else from these frames,
+     but does not need them to be drawn. In both these situations, you have
+     to call the helper function <code class="function">_x_post_frame_u_turn()</code>
+     when the frame is drawn, because this does some housekeeping which the
+     decoder might expect to take place.
+    </p><p>
+     The following diagram summarizes the situations of a video frame passing
+     through a post plugin:
+    </p><div class="mediaobject"><img alt="" src="post_frame.png" /><div class="caption"><p>video frame passing through a post plugin</p></div></div></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="idp54814864"></a>Summary of constraints</h4></div></div></div><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+       Call <code class="function">_x_post_inc_usage()</code> before port <code class="function">open()</code>
+       before any other port function.
+      </p></li><li class="listitem"><p>
+       Call <code class="function">_x_post_inc_usage()</code> before issueing an intercepted frame.
+      </p></li><li class="listitem"><p>
+       Call <code class="function">_x_post_dec_usage()</code> after port <code class="function">close()</code>
+       and do not call any port functions after that.
+      </p></li><li class="listitem"><p>
+       Call <code class="function">_x_post_dec_usage()</code> after restoring a frame.
+      </p></li><li class="listitem"><p>
+       When a frame is drawn by your plugin, it must either be drawn on the original
+       port with the correct stream as argument or U-turned (or passed through a
+       private metronom manually).
+      </p></li><li class="listitem"><p>
+       If your post plugin keeps locked frames, release them when your input port is being
+       closed.
+      </p></li><li class="listitem"><p>
+       Do not assume your plugin is alive after <code class="function">_x_post_dec_usage()</code>.
+      </p></li></ul></div></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54826320"></a>Rewiring and the ticket system</h3></div></div></div><p>
+    Rewiring is the reconnection of one post plugin's outputs and another post plugin's
+    inputs. This can happen on the fly during playback, which makes this a very delicate
+    process. In one such input to output connection, only the output is active by either
+    writing data directly to the connected input or by calling functions there. Therefore
+    we have to notify only the output, when it is rewired. This is done by calling the
+    <code class="function">rewire()</code> member function of the corresponding
+    <span class="type">xine_post_out_t</span> when the frontend issues a rewiring on this output.
+    This is done from the frontend thread for the rewire operation to return synchroneously.
+    But since this can happen on the fly, we have to assure that no other thread is relying
+    on the connection while we modify it. For this, threads working within post plugins
+    have to be accounted and on demand suspended in safe positions. For this, xine offers
+    a synchronization facility called "tickets".
+   </p><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="idp54829776"></a>Ticket system principles and operations</h4></div></div></div><p>
+     The idea of the ticket system is based on an extended read-write lock, where there can
+     be many readers in parallel, but only one exclusive writer. A certain interface might
+     require you to have a ticket before calling its functions. The ticket system now
+     allows multiple threads to operate within the component behind the interface by
+     granting as many tickets as needed. But should an outside operation require exclusive
+     access to the component, all granted tickets can be revoked and have to be given back
+     by the threads who hold them, which suspends the threads. After the exclusive
+     operation, tickets will be reissued so all suspended threads can continue where they
+     stopped. We will now look at the ticket primitives in detail:
+    </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="function">acquire()</code></span></dt><dd><p>
+        You receive a new ticket. If the ticket is currently revoked, you can be blocked
+        until it is reissued. There is one exception to this: You can acquire a revoked
+        ticket, if you revoked it atomic yourself. You can also acquire a ticket irrevocably.
+        Between acquire and release of an irrevocable ticket, it is guaranteed that
+        you will not be blocked by ticket revocation.
+       </p></dd><dt><span class="term"><code class="function">release()</code></span></dt><dd><p>
+        You give a ticket back when you do not need it any longer. If the ticket is
+        currently revoked, you can be blocked until it is reissued. If you acquired the
+        ticket irrevocably, you have to release it irrevocably as well.
+       </p></dd><dt><span class="term"><code class="function">renew()</code></span></dt><dd><p>
+        You must only call this function, when the ticket has been revoked, so be
+        sure to check <code class="varname">ticket_revoked</code> before. You give the ticket
+        back and receive a new one. In between, you can be blocked until the ticket is
+        reissued. You have to renew irrevocably, if you cannot assure that the thread holds
+        no irrevocable tickets. If you can assure this, renew revocably.
+       </p></dd><dt><span class="term"><code class="function">revoke()</code></span></dt><dd><p>
+        This function can only be called by the xine engine, plugins do not have access to it.
+        It revokes all tickets and after finite time, all threads will run into a
+        <code class="function">acquire()</code>, <code class="function">release()</code> or <code class="function">renew()</code>
+        and will be suspended there. Then the revocation returns and you can modify structures
+        or call functions with the knowledge that all ticket holders will remain in safe
+        positions. When you additionally need exclusive access where no other revoker
+        can interfere, you have to revoke atomic.
+       </p></dd><dt><span class="term"><code class="function">issue()</code></span></dt><dd><p>
+        This function can only be called by the xine engine, plugins do not have access to it.
+        It ends ticket revocation and hands out new tickets to all threads that applied with a
+        <code class="function">acquire()</code> or <code class="function">renew()</code>. If you revoked the
+        tickets atomic, you have to issue them atomic.
+       </p></dd></dl></div><p>
+     When you use the ticket system in any way, you have to obey to the following rules:
+     </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+        Assure to release irrevocable tickets ater a finite time.
+       </p></li><li class="listitem"><p>
+        Assure to release or renew revocable tickets ater a finite time.
+       </p></li><li class="listitem"><p>
+        Assure to reissue tickets you revoked atomic after a finite time.
+       </p></li><li class="listitem"><p>
+        Pair calls properly.
+       </p></li><li class="listitem"><p>
+        Never revoke a ticket you hold.
+       </p></li><li class="listitem"><p>
+        Never acquire a ticket you revoked atomic before.
+       </p></li><li class="listitem"><p>
+        Never acquire a ticket revocable more than once.
+       </p></li></ul></div><p>
+    </p></div><div class="sect3"><div class="titlepage"><div><div><h4 class="title"><a id="idp54853840"></a>Ticket handling in decoder and post plugins</h4></div></div></div><p>
+     The contract of the video and audio port interfaces is that you need to have
+     the port ticket, when you want to call functions of these interfaces. The decoder
+     plugins do not have to worry about this at all, since the decoder loops inside the
+     engine handle the ticketing. Post plugins get the ticket assigned by the engine,
+     but usually, a post plugin does not create a new thread, it is called by the
+     decoder thread and therefore already owns the necessary ticket. All port functions
+     are also ticket-safe as they follow all the rules given above.
+    </p><p>
+     You only have to remember that tickets need to be renewed as soon as possible,
+     when the are revoked. For this, the helper function
+     <code class="function">_x_post_rewire()</code> should be used in prominent locations
+     where it is safe to be suspended. Candidates for such locations are at the
+     beginning of the port's <code class="function">open()</code> and
+     <code class="function">get_frame()</code>/<code class="function">get_buffer()</code> functions.
+     The default pass through implementations for intercepted ports already do this.
+    </p><p>
+     The port tickets are revoked, whenever a rewiring takes place or the engine
+     switches into pause mode. The tickets are reissued, when the rewiring is finished
+     or the engine switches from pause mode into playback. Some post plugins might
+     contain critical parts, where they must not be interrupted by a rewire or pause.
+     These sections can be enclosed in <code class="function">_x_post_lock()</code> and
+     <code class="function">_x_post_unlock()</code>, which will simply acquire and release an
+     irrevocable ticket for you. As long as you hold such a ticket, it is guaranteed
+     that you will never be interrupted by a pause or rewire.
+    </p></div></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp54861408"></a>Video output</h2></div></div></div><p>
+   In order to allow for device-dependant acceleration features, xine
+   calls upon the video output plugin for more than just displaying
+   images. The tasks performed by the video plugins are:
+   </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+      Allocation of <span class="type">vo_frame_t</span> structures and their
+      subsequent destruction.
+     </p></li><li class="listitem"><p>
+      Allocation of memory for use by one frame (this is to allow
+      for the ability of some video output plugins to map frames directly
+      into video-card memory hence removing the need for the frame to
+      be copied across the PCI/AGP bus at display time).
+     </p></li><li class="listitem"><p>
+      Most important, the ability to render/copy a given
+      frame to the output device.
+     </p></li><li class="listitem"><p>
+      Optionally the copying of the frame from a file dependant
+      colour-space and depth into the frame structure. This is to allow for
+      on-the fly colour-space conversion and scaling if required (e.g. the XShm
+      ouput plugin uses this mechanism).
+     </p></li></ul></div><p>
+  </p><p>
+   Although these extra responsibilities add great complexity to your
+   plugin it should be noted that they allow plugins to take full advantage
+   of any special hardware-acceleration without sacrificing flexibility.
+  </p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a id="idp54867872"></a>Writing a xine video out plugin</h3></div></div></div><p>
+    The video out plugin API is declared in <code class="filename">src/xine-engine/video_out.h</code>
+    The plugin info of video out plugins contains the visual type, priority,
+    and the init_class function of the plugin.
+   </p><p>
+    The <code class="varname">visual_type</code> field is used by xine to
+    determine if the GUI used by the client is supported by the plugin
+    (e.g. X11 output plugins require the GUI to be running under the
+    X Windowing system) and also to determine the type of information passed to the
+    <code class="function">open_plugin()</code> function as its <code class="varname">visual</code> parameter.
+   </p><p>
+    </p><pre class="programlisting">   char *get_description(video_driver_class_t *this_gen);</pre><p>
+    This function returns a plaintext, one-line string describing the plugin.
+   </p><p>
+    </p><pre class="programlisting">   char *get_identifier(video_driver_class_t *this_gen);</pre><p>
+    This function returns a shorter identifier describing the plugin.
+   </p><p>
+    </p><pre class="programlisting">   void dispose(video_driver_class_t *this_gen);</pre><p>
+    This function frees the memory used by the video out plugin class object.
+   </p><p>
+    </p><pre class="programlisting">   vo_driver_t *get_instance(video_driver_class_t *class_gen, const void *visual);</pre><p>
+    Returns an instance of the plugin.
+    The <code class="varname">visual</code> is a pointer to a visual-dependant
+    structure/variable. For example, if you had previously claimed your
+    plugin was of the VISUAL_TYPE_X11 type, this would be a pointer
+    to a <span class="type">x11_visual_t</span>, which amongst other things hold the
+    <span class="type">Display</span> variable associated with the
+    X-server xine should display to. See plugin source-code for other
+    VISUAL_TYPE_* constants and associated structures. Note that this
+    field is provided by the client application and so if you wish to add another visual
+    type you will either need to extend an existing client or write a new
+    one.
+   </p><p>
+    </p><pre class="programlisting">   uint32_t get_capabilities(vo_driver_t *this_gen);</pre><p>
+    Returns a bit mask describing the output plugin's capabilities.
+    You may logically OR the <code class="varname">VO_CAP_*</code> constants together to get
+    a suitable bit-mask (via the '|' operator).
+   </p><p>
+    </p><pre class="programlisting">
+   int get_property(vo_driver_t *self, int property);
+   int set_property(vo_driver_t *self, int property, int value);
+   void get_property_min_max(vo_driver_t *self, int property, int *min, int *max);</pre><p>
+    Handle the getting, setting of properties and define their bounds.
+    Valid property IDs can be found in the <code class="filename">video_out.h</code>
+    header file.
+   </p><p>
+    </p><pre class="programlisting">   int gui_data_exchange(vo_driver_t *self, int data_type, void *data);</pre><p>
+    Accepts various forms of data from the UI (e.g. the mouse has moved or the
+    window has been hidden). Look at existing plugins for examples of data
+    exchanges from various UIs.
+   </p><p>
+    </p><pre class="programlisting">   vo_frame_t *alloc_frame(vo_driver_t *self);</pre><p>
+    Returns a pointer to a xine video frame.
+    Typically the video plugin will add private fields to the end of the
+    <span class="type">vo_frame_t</span> structure which are used for internal purposes by the plugin.
+   </p><p>
+    The function pointers within the frame structure provide a mechanism for the
+    driver to retain full control of how the frames are managed and rendered to. If
+    the VO_CAP_COPIES_IMAGE flag was set in the plugins capabilities then the
+    copy field is required and will be called sequentially for each 16-pixel high
+    strip in the image. The plugin may then decide, based on the frame's format, how
+    this is copied into the frame.
+   </p><p>
+    </p><pre class="programlisting">   void update_frame_format(vo_driver_t *self, vo_frame_t *img, uint32_t width, uint32_t height, double ratio, int format, int flags);</pre><p>
+    This function will be called each time the colour-depth/space or size of a frame changes.
+    Typically this function would allocate sufficient memory for the frame, assign the pointers
+    to the individual planes of the frame to the <code class="varname">base</code> field of the
+    frame and perform any driver-specific changes.
+   </p><p>
+    </p><pre class="programlisting">   void display_frame(vo_driver_t *self, vo_frame_t *vo_img);</pre><p>
+    Renders a given frame to the output device.
+   </p><p>
+    </p><pre class="programlisting">
+   void overlay_begin(vo_driver_t *self, vo_frame_t *vo_img, int changed);
+   void overlay_blend(vo_driver_t *self, vo_frame_t *vo_img, vo_overlay_t *overlay);
+   void overlay_end(vo_driver_t *self, vo_frame_t *vo_img);</pre><p>
+    These are used to blend overlays on frames. <code class="function">overlay_begin()</code> is called,
+    when the overlay appears for the first time, <code class="function">overlay_blend()</code> is then
+    called for every subsequent frame and <code class="function">overlay_end()</code> is called, when
+    the overlay should disappear again.
+   </p><p>
+    </p><pre class="programlisting">   int redraw_needed(vo_driver_t *self);</pre><p>
+    Queries the driver, if the current frame needs to be drawn again.
+   </p><p>
+    </p><pre class="programlisting">   void dispose(vo_driver_t *self);</pre><p>
+    Releases all resources and frees the plugin.
+   </p></div></div></div></div></body></html>
