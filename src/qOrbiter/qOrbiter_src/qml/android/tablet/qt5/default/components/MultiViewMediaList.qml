@@ -12,6 +12,8 @@ Item{
     }
 
     property int itemBuffer:25
+    property int currentCellHeight:0
+    property int currentCellWidth:0
     clip:true
 
     Component{
@@ -64,54 +66,8 @@ Item{
         model:manager.getDataGridModel("MediaFile", 63)
         visible:current_view_type===1
         delegate:currentDelegate
-
-
-        states: [
-            State {
-                name: "default"
-                PropertyChanges {
-                    target: media_grid
-                    cellHeight: scaleY(24)
-                    cellWidth:scaleX(19)
-                }
-            },
-            State {
-                name: "audio"
-                when:manager.q_mediaType==Mediatypes.STORED_AUDIO
-                PropertyChanges {
-                    target: media_grid
-                    cellHeight: scaleY(24)
-                    cellWidth:scaleX(19)
-                }
-            },
-            State {
-                name: "video-default"
-
-                PropertyChanges {
-                    target: media_grid
-                    cellHeight: scaleY(24)
-                    cellWidth:scaleX(19)
-                }
-            },
-            State {
-                name: "tv"
-                when:manager.q_subType==Subtypes.TVSHOWS
-                PropertyChanges {
-                    target: media_grid
-                    cellHeight: scaleY(24)
-                    cellWidth:scaleX(19)
-                }
-            },
-            State {
-                name: "movies"
-                when: manager.q_subType==Subtypes.MOVIES
-                PropertyChanges {
-                    target: media_grid
-                    cellHeight: scaleY(24)
-                    cellWidth:scaleX(19)
-                }
-            }
-        ]
+        cellHeight: currentCellHeight
+        cellWidth:currentCellWidth
     }
     
     PathView{
@@ -122,14 +78,62 @@ Item{
     }
 
     states: [
-        State {
-            name: "audio"
-            when:manager.q_mediaType == Mediatypes.STORED_AUDIO
+           State {
+               name: "audio"
+               when:manager.q_mediaType == Mediatypes.STORED_AUDIO
+               PropertyChanges {
+                   target: multi_view_list
+                   currentCellHeight: scaleY(24)
+                   currentCellWidth:scaleX(19)
+               }
 
-        },
-        State {
-            name: "video"
-            when:manager.q_mediaType == Mediatypes.STORED_VIDEO
-        }
-    ]
+           },
+           State {
+               name: "video"
+               when:manager.q_mediaType == Mediatypes.STORED_VIDEO
+               PropertyChanges {
+                   target: multi_view_list
+                   currentCellHeight: scaleY(24)
+                   currentCellWidth:scaleX(19)
+               }
+           },
+           State {
+               name: "default"
+               when:manager.q_mediaType != Mediatypes.STORED_VIDEO && manager.q_mediaType != Mediatypes.STORED_AUDIO
+               PropertyChanges {
+                   target: multi_view_list
+                   currentCellHeight: scaleY(24)
+                   currentCellWidth:scaleX(19)
+               }
+           },
+           State {
+               name: "video-default"
+               extend:"video"
+               PropertyChanges {
+                   target: multi_view_list
+                   currentCellHeight: scaleY(24)
+                   currentCellWidth:scaleX(19)
+               }
+           },
+           State {
+               name: "tv"
+               when:manager.q_subType==Subtypes.TVSHOWS
+               extend:"video"
+               PropertyChanges {
+                   target: multi_view_list
+                   currentCellHeight: scaleY(20)
+                   currentCellWidth:scaleX(19)
+               }
+           },
+           State {
+               name: "movies"
+               when: manager.q_subType==Subtypes.MOVIES
+               extend:"video"
+               PropertyChanges {
+                   target: multi_view_list
+                   currentCellHeight: scaleY(24)
+                   currentCellWidth:scaleX(16)
+               }
+           }
+       ]
 }

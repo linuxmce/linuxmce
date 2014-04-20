@@ -99,7 +99,11 @@ Item {
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                toggleUi(!showingUi)
+                if(manager.currentScreen!=="Screen_1.qml" && !showingUi){
+                    toggleUi(!showingUi)
+                } else if (manager.currentScreen==="Screen_1.qml"){
+                    toggleUi(!showingUi)
+                }
             }
         }
 
@@ -230,7 +234,7 @@ Item {
         anchors{
             top: manager.currentScreen==="Screen_1.qml" ? media_notification.bottom : nav_row.bottom
             bottom:info_panel.top
-            left:parent.left
+            left:showingUi ? parent.left : parent.right
             right:parent.right
         }
         Keys.onBackPressed: console.log("back")

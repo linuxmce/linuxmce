@@ -1,13 +1,12 @@
 import QtQuick 2.0
 Item{
     id:videoDelegate
-    height: scaleY(25)
-    width: parent.width /2
+    height:currentCellHeight
+    width: currentCellWidth
     clip:true
 
     Image{
-        source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
-        anchors.left: parent.left
+        source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""        
         anchors.fill: parent
         fillMode: Image.PreserveAspectCrop
         smooth: true

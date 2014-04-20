@@ -1,7 +1,5 @@
 import QtQuick 2.0
-
 import "../../../../../skins-common/lib/handlers"
-
 
 Row{
     id:nav_row

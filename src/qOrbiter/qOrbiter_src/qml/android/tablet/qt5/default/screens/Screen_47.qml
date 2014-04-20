@@ -1,5 +1,5 @@
 import QtQuick 2.0
-
+import org.linuxmce.enums 1.0
 import "../components"
 
 StyledScreen {
@@ -8,14 +8,15 @@ StyledScreen {
     property int current_view_type:1
 
     Component.onCompleted: {
+
         setNavigation("MedialistNav.qml")
         hideInfoPanel()
+        if(manager.q_mediaType == Mediatypes.STORED_VIDEO ){state= "selection"}else{state="viewing"}
+
     }
     Item{
         id:content
         anchors.fill: parent
-
-        state: manager.q_mediaType =="5" ? "selection" : "viewing"
         Connections{
             target: filedetailsclass
             onShowDetailsChanged:{
@@ -65,79 +66,111 @@ StyledScreen {
             anchors.left: files_view_screen.right
         }
 
-        states: [
-            State {
-                name: "selection"
-                PropertyChanges {
-                    target: media_view
-                    visible:false
-                }
-                PropertyChanges {
-                    target: progress_bar
-                    visible:false
-                }
-                PropertyChanges {
-                    target: typeSelection
-                    visible:true
-                }
-                AnchorChanges{
-                    target: file_details_loader
-                    anchors.left: parent.right
-                }
-                StateChangeScript{
-                    script: {manager.resetModelAttributes; mediatypefilter.resetStates(); attribfilter.resetStates(); }
-                }
-                //("5", "", "", "", "1,2", "", "13", "", "2", "")
-                //("5", "1", "", "", "1,2", "", "12", "", "2", "")
-                //("5", "1", "", "", "1,2", "", "52", "", "2", "7691")
-                //("5", "1", "", "", "1,2", "", "12", "", "2", "")
-            },
-            State {
-                name: "viewing"
-                PropertyChanges {
-                    target: progress_bar
-                    visible:true
-                }
-                PropertyChanges {
-                    target: media_view
-                    visible:true
-                }
-                PropertyChanges{
-                    target:typeSelection
-                    visible:false
-                }
-                AnchorChanges{
-                    target: file_details_loader
-                    anchors.left: parent.right
-                }
-            },
-            State {
-                name: "detail"
-                PropertyChanges {
-                    target: progress_bar
-                    visible:false
-                }
-                PropertyChanges {
-                    target: media_view
-                    visible:false
-                }
-                PropertyChanges{
-                    target:typeSelection
-                    visible:false
-                }
-                AnchorChanges{
-                    target: file_details_loader
-                    anchors.left: parent.left
-                }
-                PropertyChanges {
-                    target: file_details_loader
-                    source:"../components/FileDetails_"+manager.i_current_mediaType+".qml"
+    }
+
+    states: [
+
+        State{
+            name:"default"
+            PropertyChanges {
+                target: media_view
+                visible:true
+            }
+            PropertyChanges {
+                target: progress_bar
+                visible:true
+            }
+            PropertyChanges {
+                target: typeSelection
+                visible:false
+            }
+            AnchorChanges{
+                target: file_details_loader
+                anchors.left: parent.right
+            }
+            StateChangeScript{
+                script: {
+                    manager.resetModelAttributes;
+                    mediatypefilter.resetStates();
+                    attribfilter.resetStates();
                 }
             }
+        },
 
-        ]
+        State {
+            name: "selection"
+            PropertyChanges {
+                target: media_view
+                visible:false
+            }
+            PropertyChanges {
+                target: progress_bar
+                visible:false
+            }
+            PropertyChanges {
+                target: typeSelection
+                visible:true
+            }
+            AnchorChanges{
+                target: file_details_loader
+                anchors.left: parent.right
+            }
+            StateChangeScript{
+                script: {
+                    manager.resetModelAttributes;
+                    mediatypefilter.resetStates();
+                    attribfilter.resetStates();
+                }
+            }
+            //("5", "", "", "", "1,2", "", "13", "", "2", "")
+            //("5", "1", "", "", "1,2", "", "12", "", "2", "")
+            //("5", "1", "", "", "1,2", "", "52", "", "2", "7691")
+            //("5", "1", "", "", "1,2", "", "12", "", "2", "")
+        },
+        State {
+            name: "viewing"
+            PropertyChanges {
+                target: progress_bar
+                visible:true
+            }
+            PropertyChanges {
+                target: media_view
+                visible:true
+            }
+            PropertyChanges{
+                target:typeSelection
+                visible:false
+            }
+            AnchorChanges{
+                target: file_details_loader
+                anchors.left: parent.right
+            }
+        },
+        State {
+            name: "detail"
+            PropertyChanges {
+                target: progress_bar
+                visible:false
+            }
+            PropertyChanges {
+                target: media_view
+                visible:false
+            }
+            PropertyChanges{
+                target:typeSelection
+                visible:false
+            }
+            AnchorChanges{
+                target: file_details_loader
+                anchors.left: parent.left
+            }
+            PropertyChanges {
+                target: file_details_loader
+                source:"../components/FileDetails_"+manager.q_mediaType+".qml"
+            }
+        }
 
-    }
+    ]
 
 
 }

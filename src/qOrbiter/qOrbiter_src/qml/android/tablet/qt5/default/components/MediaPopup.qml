@@ -6,6 +6,11 @@ Item {
     height: scaleY(10)
     state:"hidden"
 
+    MouseArea{
+        anchors.fill: parent
+        onPressed: manager.gotoQScreen(dcenowplaying.qs_screen)
+    }
+
     Connections{
         target:dcenowplaying
         onB_mediaPlayingChanged:dcenowplaying.b_mediaPlaying && manager.currentScreen === "Screen_1.qml" ? media_notificaton_header.state ="active"  : media_notificaton_header.state = "hidden"
@@ -34,10 +39,7 @@ Item {
         anchors.bottom:parent.bottom
         anchors.left: parent.left
 
-        MouseArea{
-            anchors.fill: parent
-            onPressed: manager.gotoQScreen(dcenowplaying.qs_screen)
-        }
+
     }
     Connections{
         target: dcenowplaying
