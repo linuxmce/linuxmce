@@ -37,7 +37,7 @@ cd /tmp/
 mkdir -p hts_tmp
 cd hts_tmp/
 #Download the voices
-wget -c http://festvox.org/packed/festival/2.1/festvox_cmu_us_slt_arctic_hts.tar.gz
+wget -c http://www.linuxmce.org/festvox_cmu_us_slt_arctic_hts.tar.gz
 
 #Extract the voices
 for t in $(ls); do
