@@ -85,7 +85,7 @@ int GenericFlatListModel::rowCount(const QModelIndex &parent) const
 // not const per se, but from the outside this object contains all data at any time, so lets roll with that
 QVariant GenericFlatListModel::data(const QModelIndex &index, int role) const
 {
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "GenericFlatListModel.data row = %d (0->%d)[%d->%d]", index.row(), totalRows, m_windowStart, m_windowStart+m_list.size());
+  //  LoggerWrapper::GetInstance()->Write(LV_STATUS, "GenericFlatListModel.data row = %d (0->%d)[%d->%d]", index.row(), totalRows, m_windowStart, m_windowStart+m_list.size());
     // index outside the range of the datagrid ?
     if(index.row() < 0 || index.row() >= totalRows)
         return QVariant();
@@ -108,7 +108,7 @@ QVariant GenericFlatListModel::data(const QModelIndex &index, int role) const
 
 bool GenericFlatListModel::setData(const int index, const QString roleName, const QVariant & value)
 {
-  LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.setData, index = %d", index);
+ // LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.setData, index = %d", index);
     
     if(index < 0 || index >= totalRows)
         return false;
@@ -148,7 +148,7 @@ void GenericFlatListModel::appendRow(GenericModelItem *item)
 
 void GenericFlatListModel::appendRows(const QList<GenericModelItem *> &items)
 {
-    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.appendRows start");
+  //  LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.appendRows start");
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(GenericModelItem *item, items) {
         item->setParent(this);
@@ -168,25 +168,25 @@ void GenericFlatListModel::appendRows(const QList<GenericModelItem *> &items)
     /* setLoadingStatus(false);
     QApplication::processEvents(QEventLoop::AllEvents);*/
 
-    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.appendRows end");
+  //  LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.appendRows end");
 }
 
 // Not to be confused with the QAbstractItemModel::insertRow
 void GenericFlatListModel::insertRow(int row, GenericModelItem *item)
 {
-    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.insertRow row = %d", row);
+ //   LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.insertRow row = %d", row);
     // Is received row within the expected request range
     if (m_requestStart >= 0 && row >= m_requestStart && row <= m_requestEnd) {
       bool okToInsert = false;
       if (m_bForward) {
 	if (row == m_requestStart) {
-	  LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.insertRow forward request ok");
+    //  LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.insertRow forward request ok");
 	  m_requestStart++;
 	  okToInsert = true;
 	}
       } else {
 	if (row == m_requestEnd) {
-	  LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.insertRow backward request ok");
+//	  LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.insertRow backward request ok");
 	  m_requestEnd--;
 	  okToInsert = true;
 	}
@@ -217,10 +217,10 @@ void GenericFlatListModel::handleItemChange()
 {
     GenericModelItem* item = static_cast<GenericModelItem*>(sender());
     QModelIndex index = indexFromItem(item);
-    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.handleItemChange row = %d", index.row());
+  //  LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.handleItemChange row = %d", index.row());
     if(index.isValid())
     {
-        LoggerWrapper::GetInstance()->Write(LV_STATUS, "GenericFlatListModel.handleItemChange emit dataChanged");
+   //     LoggerWrapper::GetInstance()->Write(LV_STATUS, "GenericFlatListModel.handleItemChange emit dataChanged");
         emit dataChanged(index, index);
     }
 }
@@ -299,7 +299,7 @@ void GenericFlatListModel::updateItemData(int row, int role, QVariant value)
     LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.updateItemData start");
     // TODO: should make sure model data is identical to when update request was sent
     if (row < m_windowStart || row > m_windowStart+m_list.size()) {
-        LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.updateItemData row outside loaded window");
+    //    LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.updateItemData row outside loaded window");
 	return;
     }      
     GenericModelItem* pItem = m_list.at(row-m_windowStart);
@@ -321,7 +321,7 @@ void GenericFlatListModel::clear()
 	totalRows = 0;
 	//	m_totalCols = 0;
 	resetWindow();
-	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.clear m_list cleared");
+//	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.clear m_list cleared");
 	endRemoveRows();
 	beginResetModel();    
 	endResetModel();
@@ -438,7 +438,7 @@ void GenericFlatListModel::requestMoreData(int row, int direction) {
     // the easiest way around this might be to add a request counter, and only accept rows inserted from the last request
     int newWindowStart;
     int numItems = m_windowSize;
-    LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.requestMoreData m_windowSize = %d, numItems = %d", m_windowSize, numItems);
+   // LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.requestMoreData m_windowSize = %d, numItems = %d", m_windowSize, numItems);
     int rowsToClear = m_list.size();
     if (direction >= 0) {
         LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.requestMoreData scrolling down");
