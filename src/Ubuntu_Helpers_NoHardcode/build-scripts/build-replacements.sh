@@ -240,8 +240,23 @@ function Build_Replacements_Precise
 	Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
 
+	#Package: libbluray1
+	Build_Replacement_Package libbluray1 ubuntu/libbluray-0.5.0
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*bluray*.deb
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
+	cp $dir_/*bluray*.deb "${replacements_dir}"
+
+	# precise libsmbclient doesn't ship a pkg-config file, but xine checks for it, so lets provide one
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/smbclient.pc /usr/lib/pkgconfig/
+	#Package: libxine2
+	Build_Replacement_Package libxine2 ubuntu/xine-lib-1.2.4
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
+	cp $dir_/*xine*.deb "${replacements_dir}"
+
+	#Obsolete
 	#Package: lshwd
-	Build_Replacement_Package lshwd_2.0 ubuntu/lshwd-2.0-rc4
+	#Build_Replacement_Package lshwd_2.0 ubuntu/lshwd-2.0-rc4
 
 	#owfs 2.8p5 is no longer needed as it is in the ubuntu precise/universe repo
 	##Package: libowfs
