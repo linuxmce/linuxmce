@@ -11,6 +11,9 @@ Item{
         bottom:parent.bottom
     }
 
+    property int currentCellHeight:20
+    property int currentCellWidth:20
+
     property int itemBuffer:25
     clip:true
 
@@ -60,58 +63,12 @@ Item{
             bottom:parent.bottom
             top:parent.top
         }
+        cellHeight: currentCellHeight
+        cellWidth:currentCellWidth
 
         model:manager.getDataGridModel("MediaFile", 63)
-        visible:current_view_type===1
+        visible:true //current_view_type===1
         delegate:currentDelegate
-
-
-        states: [
-            State {
-                name: "default"
-                PropertyChanges {
-                    target: media_grid
-                    cellHeight: scaleY(24)
-                    cellWidth:scaleX(19)
-                }
-            },
-            State {
-                name: "audio"
-                when:manager.q_mediaType==Mediatypes.STORED_AUDIO
-                PropertyChanges {
-                    target: media_grid
-                    cellHeight: scaleY(24)
-                    cellWidth:scaleX(19)
-                }
-            },
-            State {
-                name: "video-default"
-
-                PropertyChanges {
-                    target: media_grid
-                    cellHeight: scaleY(24)
-                    cellWidth:scaleX(19)
-                }
-            },
-            State {
-                name: "tv"
-                when:manager.q_subType==Subtypes.TVSHOWS
-                PropertyChanges {
-                    target: media_grid
-                    cellHeight: scaleY(20)
-                    cellWidth:scaleX(19)
-                }
-            },
-            State {
-                name: "movies"
-                when: manager.q_subType==Subtypes.MOVIES
-                PropertyChanges {
-                    target: media_grid
-                    cellHeight: scaleY(24)
-                    cellWidth:scaleX(16)
-                }
-            }
-        ]
     }
 
     PathView{
@@ -120,16 +77,64 @@ Item{
         // model:manager.getDataGridModel("MediaFile", 63)
         visible:current_view_type===3
     }
-
     states: [
         State {
             name: "audio"
             when:manager.q_mediaType == Mediatypes.STORED_AUDIO
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(24)
+                currentCellWidth:scaleX(19)
+            }
 
         },
         State {
             name: "video"
             when:manager.q_mediaType == Mediatypes.STORED_VIDEO
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(24)
+                currentCellWidth:scaleX(19)
+            }
+        },
+        State {
+            name: "default"
+            when:manager.q_mediaType != Mediatypes.STORED_VIDEO && manager.q_mediaType != Mediatypes.STORED_AUDIO
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(24)
+                currentCellWidth:scaleX(19)
+            }
+        },
+        State {
+            name: "video-default"
+            extend:"video"
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(24)
+                currentCellWidth:scaleX(19)
+            }
+        },
+        State {
+            name: "tv"
+            when:manager.q_subType==Subtypes.TVSHOWS
+            extend:"video"
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(20)
+                currentCellWidth:scaleX(19)
+            }
+        },
+        State {
+            name: "movies"
+            when: manager.q_subType==Subtypes.MOVIES
+            extend:"video"
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(24)
+                currentCellWidth:scaleX(16)
+            }
         }
     ]
+
 }

@@ -2,7 +2,8 @@ import QtQuick 1.1
 Item{
     id:videoDelegate  
     clip:true
-
+    height: currentCellHeight
+    width:currentCellWidth
     Image{
         source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
         anchors.left: parent.left

@@ -132,7 +132,7 @@ StyledScreen {
                 }
                 PropertyChanges {
                     target: file_details_loader
-                    source:"../components/FileDetails_"+manager.i_current_mediaType+".qml"
+                    source:"../components/FileDetails_"+manager.q_mediaType+".qml"
                 }
             }
 

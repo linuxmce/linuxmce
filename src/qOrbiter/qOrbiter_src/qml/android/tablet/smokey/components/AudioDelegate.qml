@@ -1,8 +1,8 @@
 import QtQuick 1.1
 Item{
     id:audioDelegate
-    height: scaleY(23)
-    width:scaleX(18)
+    height: currentCellHeight
+    width:currentCellWidth
     clip:true
 
     Image{
