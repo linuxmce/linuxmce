@@ -85,7 +85,7 @@ function editPipes($output,$dbADO) {
 			SELECT DISTINCT Child.*
 			FROM Device Child
 			JOIN Device Parent ON Child.FK_Device_ControlledVia = Parent.PK_Device
-			WHERE Child.FK_DeviceTemplate = ' . $GLOBALS['DT_Zone'] . ' AND Parent.FK_DeviceTemplate IN ('.join(',',$avDTIDArray).') AND Parent.$
+			WHERE Child.FK_DeviceTemplate = ' . $GLOBALS['DT_Zone'] . ' AND Parent.FK_DeviceTemplate IN ('.join(',',$avDTIDArray).') AND Parent.FK_Installation=?
 		';
 		$resConnectedToDevices=$dbADO->Execute($queryConnectedToDevices,array($GLOBALS['LightSwitchOnOff'],$installationID,$installationID));
  		$conD=array();
