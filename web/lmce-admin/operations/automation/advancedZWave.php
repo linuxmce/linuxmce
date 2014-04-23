@@ -110,6 +110,7 @@ function advancedZWave($output,$dbADO){
 			    tabSectionEl.appendChild(ct);
 			    ct.insert("<p class=\"command\" onclick=\"healNode("+node.id+");\">Heal node</p>");
 			    ct.insert("<p class=\"command\" onclick=\"updateNodeNeighbors("+node.id+");\">Update node neighbors</p>");
+			    ct.insert("<p class=\"command\" onclick=\"testNode("+node.id+");\">Test node</p>");
 
 			    var vt = document.createElement("div");
 			    vt.id = "valuesTab_"+node.id;
@@ -181,6 +182,9 @@ function advancedZWave($output,$dbADO){
 		}
 		function healNode(id) {
 		    performCommand({healNode:id});
+		}
+		function testNode(id) {
+		    performCommand({testNode:id});
 		}
 		function updateNodeNeighbors(id) {
 		    performCommand({updateNodeNeighbors:id});
@@ -448,6 +452,15 @@ td.cell_config:hover {
 	    header('Content-type: application/json');
             $id = $_POST['healNode'];
 	    $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 788 51 "HNN'.$id.'"';
+	    $ret=exec_batch_command($cmd,1);
+	    $retArray=explode("\n",$ret);
+	    print("{ \"ok\": ".($retArray[0].strrpos("OK") >= 0 ? 1 : 0)." }");
+	    exit;
+	}
+	if (isset($_POST['testNode'])) {
+	    header('Content-type: application/json');
+            $id = $_POST['testNode'];
+	    $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 788 51 "TNN'.$id.'"';
 	    $ret=exec_batch_command($cmd,1);
 	    $retArray=explode("\n",$ret);
 	    print("{ \"ok\": ".($retArray[0].strrpos("OK") >= 0 ? 1 : 0)." }");
