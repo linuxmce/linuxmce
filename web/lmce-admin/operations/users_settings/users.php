@@ -1,27 +1,28 @@
 <?
 //Rob Woodward - Modified to stop enable / disable from re-setting password
 function checkVPNaccess($username) {
-	return (exec("awk '$1==\"$username\" {print $1}' /etc/ppp/chap-secrets") == $username);
+	$username=exec("echo $username | tr '[:upper:]' '[:lower:]'");
+	return (exec("awk '$1==\"$username\" {print $1}' /etc/ppp/pap-secrets") == $username);
 }
 
-function setVPNaccess($username, $access) {
+function setVPNaccess($username, $access, $userVPNIP) {
 	//Rob Woodward - Check if the user already exists in the chap-secrets file
-	if (checkVPNaccess($username)) {
-		//If user is already in the chap-secrets file, get their current/last set password
-		$pass = exec("awk '$1==\"$username\" {print $3}' /etc/ppp/chap-secrets");
-	} else {
-		$pass="!VPNpass1"; // this is atm default password for newly created VPN users
-	}
 
 	if($access) // enable user's VPN access
 	{
-		exec("sudo -u root /usr/pluto/bin/Network_VPN.sh enable $username $pass");
+		exec("sudo -u root /usr/pluto/bin/Network_VPN.sh enable pluto_$username $userVPNIP");
 	}
 	else // disable user's VPN access
 	{
-		exec("sudo -u root /usr/pluto/bin/Network_VPN.sh disable $username");
+		exec("sudo -u root /usr/pluto/bin/Network_VPN.sh disable pluto_$username $userVPNIP");
 	}
 }
+
+function changeVPN($username, $userVPNIP, $userVPNAccess){
+	echo "$username";
+	exec("sudo -u root /usr/pluto/bin/Network_VPN.sh change pluto_$username $userVPNIP $userVPNAccess");
+}
+
 
 function users($output,$dbADO) {
 	
@@ -44,11 +45,31 @@ function users($output,$dbADO) {
 		exit();
 	}
 
+	// extract VPN settings from DeviceData
+        $resVPN=$dbADO->Execute('SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=295');
+        $rowVPN=$resVPN->FetchRow();
+        $VPN_data=explode(",", $rowVPN['IK_DeviceData']);
+        $enableVPN = ($VPN_data[0]=='on')?1:0;
+        $VPNRange=explode('-',$VPN_data[1]);
+        $VPNCountStart=explode('.',$VPNRange[0]);
+        $VPNCountStart=$VPNCountStart[3];
+        $VPNCountEnd=explode('.',$VPNRange[1]);
+        $VPNCountEnd=$VPNCountEnd[3];
+		$VPNNet=explode('.',$VPNRange[0]);
+        $VPNNet=$VPNNet[0].'.'.$VPNNet[1].'.'.$VPNNet[2];
+		$VPNCount=$VPNCountStart;
+
+		while ($VPNCount <= $VPNCountEnd) {
+			$VPN_IP[]=$VPNNet.'.'.$VPNCount;
+			$VPNCount++;
+		}
+	
 	$installationID = cleanInteger($_SESSION['installationID']);
 
 	$out.='<p>'.translate('TEXT_USERS_NOTE_CONST').'</p>';
 
 	if ($action=='form') {
+	
 		$queryUsers = 'SELECT Users.*,Installation_Users.userCanModifyInstallation as canModifyInstallation,userCanChangeHouseMode
 		FROM Users 
 		INNER JOIN Installation_Users on FK_Users = PK_Users
@@ -106,7 +127,7 @@ function users($output,$dbADO) {
 
 				$displayedUsers[]=$rowUser['PK_Users'];
 				$color=($i%2==1?"F0F3F8":"EEEEEE");
-				$hasVPNaccess=checkVPNaccess($rowUser['UserName']);
+				$hasVPNaccess=checkVPNaccess("pluto_".$rowUser['UserName']);
 				$out.='<tr valign="top" bgcolor="#'.$color.'">
 						<td>
 							<table width="100%">
@@ -117,7 +138,6 @@ function users($output,$dbADO) {
 									<td align="center">
 										<a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=userChangePassword&from=users&userID='.$rowUser['PK_Users'].'\',\'width=400,height=400,toolbar=1,resizable=1\');">'.translate('TEXT_USER_CHANGE_PASSWORD_CONST').'</a><br>
 										<a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=userChangePIN&from=users&userID='.$rowUser['PK_Users'].'\',\'width=400,height=200,toolbar=1,resizable=1\');">'.translate('TEXT_USER_CHANGE_PIN_CONST').'</a><br>
-										<a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=userChangeVPNPassword&from=users&userID='.$rowUser['PK_Users'].'\',\'width=400,height=200,toolbar=1,resizable=1\');">'.translate('TEXT_USER_CHANGE_VPN_PASSWORD_CONST').'</a><br>
 										<a href="javascript:void(0);" onClick="windowOpen(\'index.php?section=userPic&from=users&userID='.$rowUser['PK_Users'].'\',\'width=600,height=400,toolbar=1,resizable=1,scrollbars=1\');">'.translate('TEXT_UPLOAD_PICTURE_CONST').'</a><br>
 										<a href="javascript:if(confirm(\''.translate('TEXT_DELETE_USER_CONFIRMATION_CONST').'\'))self.location=\'index.php?section=users&action=delete&did='.$rowUser['PK_Users'].'\'">'.translate('TEXT_DELETE_USER_CONST').'</a>
 									</td>
@@ -214,8 +234,29 @@ function users($output,$dbADO) {
 									<td align="center"><B>'.translate('TEXT_CAN_CONNECT_TO_VPN_CONST').'</B></td>
 								</tr>
 								<tr>
-									<td align="center"><input type="checkbox" name="userCanConnectToVPN_'.$rowUser['PK_Users'].'" value="1" '.($hasVPNaccess ? " checked='checked' ":'').'></td>
-								</tr>		
+									<td align="center"><input type="checkbox" name="userCanConnectToVPN_'.$rowUser['PK_Users'].'" value="1" '.($hasVPNaccess ? " checked='checked' ":'').'>';
+									$username='pluto_'.$rowUser['UserName'];
+									$username=exec("echo $username | tr '[:upper:]' '[:lower:]'");
+									$uservpn=exec("awk '$1==\"$username\" {print $4}' /etc/ppp/pap-secrets");
+									$Select_IP = '<option name="userVPNIP_'.$rowUser['PK_Users'].'" value="Auto">Automatic</option>';
+									foreach ($VPN_IP as $IP => $User_IP) {
+										$selected=$uservpn == $User_IP?'selected':'';
+										$Select_IP .= '<option name="userVPNIP_'.$rowUser['PK_Users'].'" value="'.$User_IP.'" '.$selected.' >'.$User_IP.'</option>';
+										if ($uservpn == $User_IP) {
+											$VPN_IP=array_diff($VPN_IP, array($User_IP)); 
+										};
+									};
+									$out.='<select name="userVPNIP_'.$rowUser['PK_Users'].'">'.$Select_IP.'
+									</select>';
+									$uservpnaccess=exec("awk '$1==\"$username\" {print $5}' /etc/ppp/pap-secrets | cut -d\"#\" -f2");
+									$out.='
+									<select name="userVPNAccess_'.$rowUser['PK_Users'].'">
+									<option name="userVPNAccess_'.$rowUser['PK_Users'].'" value="Core '.(($uservpnaccess=="Core")?'selected':'').'">Core Only</option>
+									<option name="userVPNAccess_'.$rowUser['PK_Users'].'" value="LAN" '.(($uservpnaccess=="LAN")?'selected':'').'>Core and Local Network</option>
+									<option name="userVPNAccess_'.$rowUser['PK_Users'].'" value="All" '.(($uservpnaccess=="All")?'selected':'').'>Everything</option>
+								        </select>
+									</td>
+								</tr>
 							</table>
 						</td>
 						<td align="center">
@@ -230,6 +271,7 @@ function users($output,$dbADO) {
 						</td>			
 			</tr>
 			<tr><td colspan="6"><hr /></td></tr>';
+				unset($Select_IP);
 				$i++;
 			}
 
@@ -275,6 +317,12 @@ function users($output,$dbADO) {
 				$cmd='sudo -u root /usr/pluto/bin/RemoveUser.sh -d '.$toDel;
 				exec($cmd);
 
+				$res=$dbADO->Execute('select Username from Users where PK_Users=?',$toDel);
+				while ($row=$res->FetchRow()) {
+					$username=$row['Username'];
+				}
+				exec_batch_command("sudo -u root /usr/pluto/bin/Network_VPN.sh delete pluto_$username");
+
 				$dbADO->Execute('DELETE FROM Installation_Users WHERE FK_Users=?',$toDel);
 				$dbADO->Execute('DELETE FROM Users WHERE PK_Users=?',$toDel);
 				
@@ -309,6 +357,8 @@ function users($output,$dbADO) {
 				$userCanModifyInstallation = cleanInteger(@$_POST['userCanModifyInstallation_'.$user]);
 				$userCanChangeHouseMode= cleanInteger(@$_POST['userCanChangeHouseMode_'.$user]);
 				$userCanConnectToVPN= cleanInteger(@$_POST['userCanConnectToVPN_'.$user]);
+				$userVPNIP = cleanString($_POST['userVPNIP_'.$user]);
+				$userVPNAccess = cleanString($_POST['userVPNAccess_'.$user]);
 
 				$userLanguage = cleanInteger(@$_POST['userLanguage_'.$user]);
 				$HideFromOrbiter = cleanInteger(@$_POST['HideFromOrbiter_'.$user]);
@@ -330,7 +380,8 @@ function users($output,$dbADO) {
 				$userLanguage,$HideFromOrbiter,$user));
 
 				// modify user's VPN access if needed
-				setVPNaccess($userName, $userCanConnectToVPN);
+				setVPNaccess($userName, $userCanConnectToVPN, $userVPNIP);
+				changeVPN($userName, $userVPNIP, $userVPNAccess);
 
 				// if the user is current user, update session variables
 				if($user==$_SESSION['userID']){

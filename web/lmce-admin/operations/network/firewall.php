@@ -20,122 +20,533 @@ function firewall($output,$dbADO) {
 	if(count($retArray)==0){
 		$_GET['error'].='Insuffient rights: pluto.conf file cannot be opened.';
 	}
+	// grep all interfaces
+	exec('cat /proc/net/dev | tail -n +3 | cut -d":" -f 1  | sed -e \'s/^[ \t]*//\'',$ifArray);
 	
+	$i=0;
+	if (@$AdvancedFirewall == 1){
+		$res=$dbADO->Execute('SELECT Matchname FROM Firewall WHERE Protocol=\'chain-ipv4\' AND Matchname != \'nat\' ORDER BY PK_Firewall');
+		while ($row=$res->FetchRow()) {
+	$key[]=$i;
+	$value[]=$row['Matchname'];
+	$i++;
+	}
+	$more_chains=array_combine($key, $value);
+	}
+	
+	$start_chains=Array(
+	"0"=>"input",
+	"1"=>"forward",
+	"2"=>"output",
+	"3"=>"nat",
+	);
+	
+	$RuleTYPE=Array(
+	"0"=>"select",
+	"1"=>"prerouting",
+	"2"=>"postrouting",
+	"3"=>"output"
+	);
+	
+	$start_RPolicy=Array(
+	"0"=>"ACCEPT",
+	"1"=>"DROP",
+	"2"=>"REJECT",
+	"3"=>"REDIRECT",
+	"4"=>"LOG"
+	);
+	
+	if(count($more_chains)!=0){
+	$chains=array_merge($start_chains, $more_chains);
+	$RPolicy=array_merge($start_RPolicy, $more_chains);
+	} else {
+	$chains=$start_chains;
+	$RPolicy=$start_RPolicy;
+	}
+	
+		foreach ($chains as $chainnr => $chain) {
+		$selected='';
+		$chain_options.= "<option value='$chain' $selected >$chain</option>";
+	}
+	
+	foreach ($RPolicy as $RulepPolicy => $Policy) {
+			$selected=$row['RPolicy'] == $RPolicy?'selected':'';
+			$RulePolicy_options .= "<option value='$Policy' $selected >$Policy</option>";
+		}
+		
 	if ($action == 'form') {
 
-		$out.='
+	$out.='
 	<script>
+	function fwIPVersion()
+	{
+	document.getElementById(\'firewall\').submit();
+	}
 	function enableDestination()
 	{
-		if(document.firewall.RuleType.value=="port_forward"){
-			document.firewall.DestinationPort.disabled=false;
-			document.firewall.DestinationIP.disabled=false;
-		}else{
-			document.firewall.DestinationPort.disabled=true;
-			document.firewall.DestinationIP.disabled=true;
+		if(document.getElementById(\'firewall\').Chain.value=="input"){
+			document.getElementById(\'firewall\').IntIf.disabled=false;
+			document.getElementById(\'firewall\').ExtIf.disabled=true;
+			document.getElementById(\'firewall\').RuleType.disabled=true;
+		} else if(document.getElementById(\'firewall\').Chain.value=="output"){
+			document.getElementById(\'firewall\').IntIf.disabled=true;
+			document.getElementById(\'firewall\').ExtIf.disabled=false;
+			document.getElementById(\'firewall\').RuleType.disabled=true;
+		} else if(document.getElementById(\'firewall\').Chain.value=="forward"){
+			document.getElementById(\'firewall\').IntIf.disabled=false;
+			document.getElementById(\'firewall\').ExtIf.disabled=false;
+			document.getElementById(\'firewall\').DestinationPort.disabled=false;
+			document.getElementById(\'firewall\').DestinationIP.disabled=false;
+			document.getElementById(\'firewall\').RuleType.disabled=true;
+		} else if(document.getElementById(\'firewall\').Chain.value=="VPN"){
+			document.getElementById(\'firewall\').DestinationPort.disabled=false;
+			document.getElementById(\'firewall\').DestinationIP.disabled=false;
+			document.getElementById(\'firewall\').RuleType.disabled=true;
+		} else if(document.getElementById(\'firewall\').Chain.value=="mds"){
+			document.getElementById(\'firewall\').DestinationPort.disabled=false;
+			document.getElementById(\'firewall\').DestinationIP.disabled=false;
+			document.getElementById(\'firewall\').RuleType.disabled=true;
+		} else{
+			document.getElementById(\'firewall\').DestinationPort.disabled=false;
+			document.getElementById(\'firewall\').DestinationIP.disabled=false;
+			document.getElementById(\'firewall\').RuleType.disabled=false;
 		}
 	}
-		
-	function confirmDisableFirewall(ver)
+        function confirmDisableFirewall(ver)
+        {
+                if((document.getElementById(\'firewall\').change_ipv4_firewall_status.checked && ver=="ipv4")
+                        || (document.getElementById(\'firewall\').change_ipv4_firewall_status.checked && ver=="ipv6")){
+                        if(confirm("("+ver+") '.translate('TEXT_DISABLE_FIREWALL_CONFIRMATION_CONST').'")){
+                                document.getElementById(\'firewall\').submit();
+                        }else{
+                                if(ver=="ipv4") document.getElementById(\'firewall\').change_ipv4_firewall_status.checked=false;
+                                else if(ver=="ipv6") document.getElementById(\'firewall\').change_ipv6_firewall_status.checked=false;
+                        }
+                }else{
+                        document.getElementById(\'firewall\').submit();
+                }
+        }
+	function confirmAdvanced()
 	{
-		if((document.firewall.change_ipv4_firewall_status.checked && ver=="ipv4")
-			|| (document.firewall.change_ipv6_firewall_status.checked && ver=="ipv6")){
-			if(confirm("("+ver+") '.translate('TEXT_DISABLE_FIREWALL_CONFIRMATION_CONST').'")){
-				document.firewall.submit();
-			}else{
-				if(ver=="ipv4") document.firewall.change_ipv4_firewall_status.checked=false;
-				else if(ver=="ipv6") document.firewall.change_ipv6_firewall_status.checked=false;
+		if (document.getElementById(\'firewall\').advanced_firewall.checked){
+			if(confirm("Advanced Settings?")){
+				document.getElementById(\'firewall\').submit();
 			}
 		}else{
-			document.firewall.submit();
+			document.getElementById(\'firewall\').submit();
 		}
+	}
+	function confirmResetFirewall()
+	{
+			if(confirm("Are you sure you want to reset the Firewall to defaults?")){
+				document.getElementById(\'firewall\').IDIOT.type="submit";
+				document.getElementById(\'firewall\').submit();
+			}
+	}
+	function confirmDisableRule(RuleID)
+	{
+		document.getElementById(\'firewall\').disableRule.value=RuleID;
+		document.getElementById(\'firewall\').submit();
+	}
+	function confirmEnableRule(RuleID)
+	{
+		document.getElementById(\'firewall\').enableRule.value=RuleID;
+		document.getElementById(\'firewall\').submit();
+	}
+
+	function show_allRules()
+	{
+		if (document.getElementById(\'firewall\').show_all_rules.checked){
+			if(confirm("Show all unprocessed rules?")){
+				document.getElementById(\'firewall\').submit();
+			}
+		}else{
+			document.getElementById(\'firewall\').submit();
+		}
+	}
+	function fw_block()
+	{
+		if (document.getElementById(\'firewall\').fw_blocklist.checked){
+			document.getElementById(\'firewall\').submit();
+		}else{
+			if(confirm("Disable automatic blocking of TOP20 known attackers?")){
+				document.getElementById(\'firewall\').submit();
+			}
+		}
+	}
+
+	
+	function add_Chain()
+	{
+		document.getElementById(\'firewall\').add_Chain.type="submit";
+		document.getElementById(\'firewall\').New_Chain.value;
+		document.getElementById(\'firewall\').submit();
 	}
 	</script>
 	<div class="err">'.(isset($_GET['error'])?strip_tags($_GET['error']):'').'</div>
-	<form action="index.php" method="POST" name="firewall">
+	<form id="firewall" action="index.php" method="POST" name="firewall">
 	<input type="hidden" name="section" value="firewall">
 	<input type="hidden" name="action" value="add">
+	<input type="hidden" name="disableRule" value="add">
+	<input type="hidden" name="enableRule" value="add">
 	<div align="center" class="confirm"><B>'.(isset($_GET['msg'])?strip_tags($_GET['msg']):'').'</B></div>
 		
 	<table border="0" align="center">
 		<tr>
-			<td colspan="7" align="center"><h3 class="err">'.((@$DisableFirewall!=1)?'':'- '.translate('TEXT_FIREWALL_DISABLED_WARNING_CONST').' - ')
-					.((@$DisableIPv6Firewall!=1)?'':' - '.translate('TEXT_IPV6_FIREWALL_DISABLED_WARNING_CONST').' -').'</h3></td>
-		</tr>
+			<td colspan="100%" align="center"><h3 class="err">'.((@$DisableIPv4Firewall!=1)?'':'- '.translate('TEXT_FIREWALL_DISABLED_WARNING_CONST').' - ')
+                                        .((@$DisableIPv6Firewall!=1)?'':' - '.translate('TEXT_IPV6_FIREWALL_DISABLED_WARNING_CONST').' -').'</h3></td>
+ 		</tr>
 		<tr>
-			<td colspan="7" align="center"><input type="checkbox" name="change_ipv4_firewall_status" value="1" '.((@$DisableFirewall!=1)?'':'checked').' onClick="confirmDisableFirewall(\'ipv4\');"> IPv4 '.translate('TEXT_FIREWALL_DISABLED_CONST').'    <input type="checkbox" name="change_ipv6_firewall_status" value="1" '.((@$DisableIPv6Firewall!=1)?'':'checked').' onClick="confirmDisableFirewall(\'ipv6\');"> IPv6 '.translate('TEXT_FIREWALL_DISABLED_CONST').'</td>
+			<td colspan="4" align="left">
+			<input type="checkbox" name="change_ipv4_firewall_status" value="1" '.((@$DisableIPv4Firewall!=1)?'':'checked').' onClick="confirmDisableFirewall(\'ipv4\');"> IPv4 '.translate('TEXT_FIREWALL_DISABLED_CONST').'<br />
+			<input type="checkbox" name="change_ipv6_firewall_status" value="1" '.((@$DisableIPv6Firewall!=1)?'':'checked').' onClick="confirmDisableFirewall(\'ipv6\');"> IPv6 '.translate('TEXT_FIREWALL_DISABLED_CONST').'<br />
+			<input type="checkbox" name="advanced_firewall" value="1" '.((@$AdvancedFirewall!=1)?'':'checked').' onClick="confirmAdvanced();" > Advanced Firewall Settings<br />';
+			if ($AdvancedFirewall == 1){
+				$out.='<input type="checkbox" name="show_all_rules" value="1" '.((@$Show_all_rules!=1)?'':'checked').' onClick="show_allRules();"> Show all unprocessed rules<br />';
+				$out.='<input type="checkbox" name="fw_blocklist" value="1" '.((@$fw_blocklist!=1)?'':'checked').' onClick="fw_block();"> Block TOP20 known attackers';
+			}
+			$out.='</td><td colspan="3" align="left">Select Firewall : <select name="fwVersion" onChange="fwIPVersion()"">
+                                <option value="ipv4" '.((@$fwVersion!="ipv4")?'':'selected').'>IPv4 Firewall</option>
+                                <option value="ipv6" '.((@$fwVersion!="ipv6")?'':'selected').'>IPv6 Firewall</option>
+                        </select>
+			<td colspan="30%" align="right"><input type="button" class="button" name="IDIOT" value="Yes, I was an IDIOT. Please reset my '.@$fwVersion.' firewall to defaults" onclick="confirmResetFirewall()"></td>
 		</tr>
-		<tr class="tablehead">
-			<td align="center"><B>'.translate('TEXT_PROTOCOL_CONST').'</B></td>
-			<td align="center"><B>'.translate('TEXT_IPVERSION_CONST').'</B></td>
+		<tr><td colspan="100%"><hr></td></tr>';
+		$i=0;
+		if (@$AdvancedFirewall == 1){
+		$chain=count($chains);
+		}else{
+		$chain=1;
+		}
+		while ( $i < $chain) {
+		$out.= '<tr><td colspan="100%"></td></tr>
+		<tr><td colspan="4" align="left"><B>'.$chains[$i];
+		$out.= '</B></td><td colspan="5" align="Left">';
+		if ($chains[$i] == 'input' || $chains[$i] == 'forward' || $chains[$i] == 'output'){
+				if (@$AdvancedFirewall == 1){
+					$out.='Default Firewall Policy : ';
+					$res=$dbADO->Execute('SELECT Matchname FROM Firewall where Protocol = \''.$chains[$i].'\' AND RuleType = "policy'.$fwVersion.'"');
+						while ($row=$res->FetchRow()) {
+					        $out.= $row['Matchname'].'</td>';
+							$DPolicy=$row['Matchname'];
+						}
+					$out.='<td colspan="30%" align="right" >Set default policy :
+					<input type="submit" class="button" name="'.$chains[$i].'Policy" value="ACCEPT">
+					<input type="submit" class="button" name="'.$chains[$i].'Policy" value="DROP">
+					<input type="submit" class="button" name="'.$chains[$i].'Policy" value="REJECT">';
+				}
+
+		} elseif ($chains[$i] != 'nat') {
+					$out.='<td colspan="30%" align="right" >
+					<input type="submit" class="button" name="'.$chains[$i].'chain" value="Edit">
+					<input type="submit" class="button" name="'.$chains[$i].'chain" value="DELETE"></td>';
+				}
+		
+		$out.='</tr><tr class="tablehead">
+			<td align="center"><B>'.translate('TEXT_DISABLED_CONST').'</B></td>';
+			if (@$AdvancedFirewall == 1){
+				$out.='<td align="center"><B>'.translate('TEXT_POSITION_CONST').'</B></td>';
+			}
+			$out.='<td align="center"><B>'.translate('TEXT_IPVERSION_CONST').'</B></td>';
+			if (@$AdvancedFirewall == 1){
+				$out.='<td align="center"><B>'.translate('TEXT_RULE_TYPE_CONST').'</B></td>';
+				if ( $chains[$i] == 'input' ) {
+			                $out.='<td align="center"><B>'.translate('TEXT_INT_IF_CONST').'</B></td>
+					<td></td>';
+				}
+				if ( $chains[$i] == 'forward' || $chains[$i] == 'dmz' || $chains[$i] == 'nat') {
+					$out.='<td align="center"><B>'.translate('TEXT_INT_IF_CONST').'</B></td>
+					<td align="center"><B>'.translate('TEXT_EXT_IF_CONST').'</B></td>';
+				}
+				if ( $chains[$i] == 'output' ) {
+                			$out.='<td></td><td align="center"><B>'.translate('TEXT_EXT_IF_CONST').'</B></td>';
+				}
+		        	$out.='<td align="crnter"><B>'.translate('TEXT_MATCH_CONST').'</B></td>';
+			}
+			$out.='<td align="center"><B>'.translate('TEXT_PROTOCOL_CONST').'</B></td>
 			<td align="center"><B>'.translate('TEXT_SOURCE_PORT_CONST').'</B></td>
 			<td align="center"><B>'.translate('TEXT_DESTINATION_PORT_CONST').'</B></td>
 			<td align="center"><B>'.translate('TEXT_DESTINATION_IP_CONST').'</B></td>
-			<td align="center"><B>'.translate('TEXT_RULE_TYPE_CONST').'</B></td>
-			<td align="center"><B>'.translate('TEXT_LIMIT_TO_IP_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_LIMIT_TO_IP_CONST').'</B></td>';
+			if (@$AdvancedFirewall == 1){
+				$out.='<td align="center"><B>'.translate('TEXT_RULE_POLICY_CONST').'</B></td>';
+			}
+			$out.='<td align="center"><B>'.translate('TEXT_DESCRIPTION_CONST').'</B></td>
 			<td>&nbsp;</td>
-		</tr>';
-		$res=$dbADO->Execute('SELECT * FROM Firewall ORDER BY SourcePort, Protocol');
+		</tr>
+		';
+		if (@$AdvancedFirewall == 1) {
+			if (@$Show_all_rules == 1 || $chains[$i] != 'input' || $chains[$i] != 'forward' || $chains[$i] != 'output') {
+				$res=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType LIKE "'.$chains[$i].'%" AND Protocol LIKE \'%-'.$fwVersion.'\' ORDER BY PK_Firewall');
+			} else {
+				$res=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType="'.$chains[$i].'" AND RPolicy!=\''.$DPolicy.'\' AND Protocol LIKE \'%-'.$fwVersion.'\' ORDER BY PK_Firewall');
+			}
+		} else {
+			$res=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType="'.$chains[$i].'" AND RPolicy!=\''.$DPolicy.'\' AND Protocol LIKE \'%-'.$fwVersion.'\' ORDER BY SourcePort');
+		}
 		$pos=0;
 		while($row=$res->FetchRow()){
 			++$pos;
 			$protocol=explode("-",$row['Protocol']);
-			$out.='
-				<tr class="'.(($pos%2==0)?'alternate_back':'').'">
-					<td align="center">'.$protocol[0].'</td>
-					<td align="center">'.$protocol[1].'</td>
-					<td align="center">'.($protocol[0] == 'ip' ? 'protocol: ' : '').
-					$row['SourcePort'].($row['SourcePortEnd'] > 0 ? ' to '.$row['SourcePortEnd'] : '').'</B></td>
-					<td align="center">'.($row['DestinationPort'] > 0 ? $row['DestinationPort']:'').'</td>
-					<td align="center">'.($row['DestinationIP'] > 0 ? $row['DestinationIP']:'').'</td>
-					<td align="center">'.$row['RuleType'].'</td>
-					<td align="center">'.$row['SourceIP'].'</td>
-					<td align="center"><a href="index.php?section=firewall&action=del&delid='.$row['PK_Firewall'].'">'.translate('TEXT_DELETE_CONST').'</a></td>
-				</tr>';
+			if (isset($_GET['rule']) && $row['PK_Firewall'] == $_GET['rule']) {
+				$Disabled=$row['Disabled'];
+				if ( $DPolicy == $row['RPolicy'] ) {
+					$out.='<tr style="color: #808080">';
+				} else {
+					if ( $row['Disabled'] == 1 ) {
+						$out.='<tr class="err">';
+					} else {
+						$out.='<tr class="'.(($pos%2==0)?'alternate_back':'').'">';
+					}
+				}
+				$out.='<td align="center"><input type="checkbox" name="disable" value="'.$row['PK_Firewall'].'" onclick="if (this.checked) { confirmDisableRule('.$row['PK_Firewall'].') } else { confirmEnableRule('.$row['PK_Firewall'].') }" '.((@$Disabled!=1)?'':'checked').' /></td>';
+					if (@$AdvancedFirewall == 1){
+						$out.='<td align="center"><a href="index.php?section=firewall&action=move&moverule='.$prevrule.'" style="text-decoration: none;">&#8679;</a><a href="index.php?section=firewall&action=move&moverule='.$row['PK_Firewall'].'" style="text-decoration: none;">&#8681;</a></td>';
+						$prevrule=$row['PK_Firewall'];
+					}
+					$out.='<td align="center"><select name="IPVersion" STYLE="width:70px">
+						<option value="ipv4" selected>IPv4</option>
+						<!--<option value="ipv6">IPv6</option>
+						<option value="both">both</option>-->
+					</select></td>';
+					if (@$AdvancedFirewall == 1){
+						$out.='<td align="center"><select name="Chain2">
+							'.$chain_options.'
+							<option value="input" '.((@$row['RuleType']!='input')?'':'selected').'>core_input</option>
+							<option value="forward" '.((@$row['RuleType']!='forward')?'':'selected').'>port_forward</option>
+							<option value="forward">core_forwarding</option>
+							<option value="output" '.((@$row['RuleType']!='output')?'':'selected').'>core_output</option>
+							<option value="nat" '.((@$row['RuleType']!='nat')?'':'selected').'>nat</option>
+							</select>
+						<select name="RuleType2">
+							<option value="POSTROUTING">postrouting</option>
+							<option value="PREROUTING">prerouting</option>
+							<option value="output">output</option>
+						</select></td>';
+        	                                if ( $chains[$i] == 'input' )  {
+	        	                                $out.='<td><select name="IntIf" STYLE="width:70px">
+				                        <option value=""></option>';
+			        	                foreach ($ifArray as $string){
+                        				        $out.= '<option value="'.$string.'" ';
+								if ($row['IntIF']==$string) {
+									$out.='selected';
+								}
+								$out.='>'.$string.'</option>';
+				                        }
+                        				$out.= '</select></td>
+							<td></td>';
+                                        	}
+	                                        if ( $chains[$i] == 'forward' || $chains[$i] == 'dmz' || $chains[$i] == 'nat' )  {
+		                                        $out.='<td><select name="IntIf" STYLE="width:70px">
+				                        <option value=""></option>';
+				                        foreach ($ifArray as $string){
+                        				        $out.= '<option value="'.$string.'" '; 
+								if ($row['IntIF']==$string) {
+                                                	                $out.='selected';
+                                                        	}
+	                                                        $out.='>'.$string.'</option>';
+				                        }
+                	        			$out.= '</select></td>';
+	                	                        $out.='<td><select name="IntIf" STYLE="width:70px">
+			        	                <option value=""></option>';
+			                	        foreach ($ifArray as $string){
+                        				        $out.= '<option value="'.$string.'" ';
+                                                        	if ($row['IntIF']==$string) {
+                                                                	$out.='selected';
+	                                                        }
+        	                                                $out.='>'.$string.'</option>';
+				                        }
+                        				$out.= '</select></td>';
+                                	        }
+                                        	if ( $chains[$i] == 'output' )  {
+		                                        $out.='<td></td><td><select name="IntIf" STYLE="width:70px">
+				                        <option value=""></option>';
+				                        foreach ($ifArray as $string){
+                        				        $out.= '<option value="'.$string.'" ';
+                                	                        if ($row['IntIF']==$string) {
+                                        	                        $out.='selected';
+                                                	        }
+                                                        	$out.='>'.$string.'</option>';
+				                        }
+        	                			$out.= '</select></td>';
+                	                        }
+						$out.='<td><input type="text" name="Matchname" value="'.$row['Matchname'].'" STYLE="width:100%"></td>';
+					} else {
+                			        $out.='<input type="hidden" name="Chain" value="input">';
+		                        }
+					$out.='<td align="center"><select name="protocol" STYLE="width:70px">
+					<option value="tcp" '.($protocol[0]=='tcp'?'selected':'').'>tcp</option>
+					<option value="udp" '.($protocol[0] == 'udp' ? 'selected':'').'>udp</option>
+					<option value="ip" '.($protocol[0] == 'ip' ? 'selected':'').'>ip</option>
+					</select></td>';
+                                        if ( $row['SourcePort'] == ''){
+                                                $out.='<td align="center"></td>';
+                                        }else{
+						$out.='<td align="center"><input type="text" name="SourcePort" value="'.$row['SourcePort'].'" size="2">'.($row['SourcePortEnd'] > 0 ? ' to <input type="text" name="SourcePort" value="'.$row['SourcePortEnd'].'" size="2">' : '').'</B></td>';
+                                        }
+                                        $out.='<td align="center">'.($row['DestinationPort'] > 0 ? '<input type="text" name="DestinationPort" value"'.$row['DestinationPort'].'" size="2">':'').'</td>
+					<td align="center">'.($row['DestinationIP'] > 0 ? '<input type="text" name="DestinationIP" value"'.$row['DestinationIP'].'" size="8".':'').'</td>
+					<td align="center"><input type="text" name="SourceIP" value="'.$row['SourceIP'].'" size="8"></td>';
+					if (@$AdvancedFirewall == 1){
+						$out.='<td align="center"><select name="RPolicy" STYLE="width:70px">'.$RulePolicy_options.'</select></td></td>';
+					} else {
+                			        $out.='<input type="hidden" name="RPolicy" value="ACCEPT">';
+		                        }
+					$out.='<td align="center"><textarea rows="2" cols="4" name="Description" value="'.$row['Description'].'"></textarea></td>
+					<td align="center"><a href="index.php?section=firewall&saverule='.$row['PK_Firewall'].'">'.translate('TEXT_SAVE_CONST').'</a>&nbsp;<a href="index.php?section=firewall&action=del&delid='.$row['PK_Firewall'].'">'.translate('TEXT_DELETE_CONST').'</a></td>
+					</tr>';
+			} else {
+				$Disabled=$row['Disabled'];
+				if ( $DPolicy == $row['RPolicy'] ) {
+					$out.='<tr style="color: #808080">';
+				} else {
+					if ( $row['Disabled'] == 1 ) {
+						$out.='<tr class="err">';
+					} else {
+						$out.='<tr class="'.(($pos%2==0)?'alternate_back':'').'">';
+					}
+				}
+				$out.='<td align="center"><input type="checkbox" name="disable" value="'.$row['PK_Firewall'].'" onclick="if (this.checked) { confirmDisableRule('.$row['PK_Firewall'].') } else { confirmEnableRule('.$row['PK_Firewall'].') }" '.((@$Disabled!=1)?'':'checked').' /></td>';
+				if (@$AdvancedFirewall == 1){
+					$out.='<td align="center"><a href="index.php?section=firewall&action=move&moverule='.$prevrule.'" style="text-decoration: none;">&#8679;</a><a href="index.php?section=firewall&action=move&moverule='.$row['PK_Firewall'].'" style="text-decoration: none;">&#8681;</a></td>';
+					$prevrule=$row['PK_Firewall'];
+				}
+				$out.='<td align="center">'.$protocol[1].'</td>';
+						if (@$AdvancedFirewall == 1){
+							$out.='<td align="center">'.$row['RuleType'].'</td>';
+        	                                        if ( $chains[$i] == 'input' )  {
+                	                        	        $out.='<td>'.$row['IntIF'].'
+								<td></td>';
+                                	                }
+							if ( $chains[$i] == 'forward' || $chains[$i] == 'dmz' || $chains[$i] == 'nat' )  {
+								$out.='<td>'.$row['IntIF'].'</td>
+								<td>'.$row['ExtIF'].'</td>';
+							}
+	                                                if ( $chains[$i] == 'output' ) {
+        	                                        	$out.='<td></td>
+								<td>'.$row['ExtIF'].'</td>';
+                        	                        }
+							$out.='<td>'.$row['Matchname'].'</td>';
+						}
+						$out.='<td align="center">'.$protocol[0].'</td>';
+                                               	if ( $row['SourcePort'] == ''){
+                                                       	$out.='<td align="center"></td>';
+                                                }else{
+       	                                                $out.='<td align="center">'.($protocol[0] == 'ip' ? 'protocol: ' : '').
+						$row['SourcePort'].($row['SourcePortEnd'] > 0 ? ' to '.$row['SourcePortEnd'] : '').'</B></td>';
+                       	                        }
+                               	                $out.='<td align="center">'.($row['DestinationPort'] > 0 ? $row['DestinationPort']:'').'</td>
+						<td align="center">'.($row['DestinationIP'] > 0 ? $row['DestinationIP']:'').'</td>
+						<td align="center">'.$row['SourceIP'].'</td>';
+						if (@$AdvancedFirewall == 1){
+							$out.='<td align="center">'.$row['RPolicy'].'</td>';
+						}
+						$out.='<td align="center">'.$row['Description'].'</td>
+						<td align="center"><a href="index.php?section=firewall&rule='.$row['PK_Firewall'].'">'.translate('TEXT_EDIT_CONST').'</a>&nbsp;<a href="index.php?section=firewall&action=del&delid='.$row['PK_Firewall'].'">'.translate('TEXT_DELETE_CONST').'</a></td>
+					</tr>';
+
+			}
+		}
+		$i++;
+		$out.='<tr><td colspan="100%"><hr></td></tr>';
 		}
 		$out.='
 		<tr>
-			<td colspan="7" align="center">&nbsp;</td>
-		</tr>		
-		<tr>
-			<td colspan="7" align="center" bgcolor="#EEEEEE"><B>'.translate('TEXT_ADD_NEW_FIREWALL_RULE_CONST').'</B></td>
+			<td colspan="100%" align="center">&nbsp;</td>
 		</tr>
-		<tr class="tablehead">
-			<td align="center"><B>'.translate('TEXT_PROTOCOL_CONST').'</B></td>
-			<td align="center"><B>'.translate('TEXT_IPVERSION_CONST').'</B></td>
+		<tr>
+			<td colspan="100%" align="center" bgcolor="#EEEEEE"><B>'.translate('TEXT_ADD_NEW_FIREWALL_RULE_CONST').'</B></td>
+		</tr>
+		<tr class="tablehead">';
+		if (@$AdvancedFirewall == 1){
+			$out.='<td colspan="3" align="center"><B>'.translate('TEXT_IPVERSION_CONST').'</B></td>';
+		} else {
+			$out.='<td colspan="2" align="center"><B>'.translate('TEXT_IPVERSION_CONST').'</B></td>';
+		}
+			if (@$AdvancedFirewall == 1){
+				$out.='<td align="center"><B>'.translate('TEXT_RULE_TYPE_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_INT_IF_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_EXT_IF_CONST').'</B></td>
+				<td align="center"><B>'.translate('TEXT_MATCH_CONST').'</B></td>';
+			}
+			$out.='<td align="center"><B>'.translate('TEXT_PROTOCOL_CONST').'</B></td>
 			<td align="center"><B>'.translate('TEXT_SOURCE_PORT_CONST').'</B></td>
 			<td align="center"><B>'.translate('TEXT_DESTINATION_PORT_CONST').'</B></td>
 			<td align="center"><B>'.translate('TEXT_DESTINATION_IP_CONST').'</B></td>
-			<td align="center"><B>'.translate('TEXT_RULE_TYPE_CONST').'</B></td>
-			<td align="center"><B>'.translate('TEXT_LIMIT_TO_IP_CONST').'*</B></td>
+			<td align="center"><B>'.translate('TEXT_LIMIT_TO_IP_CONST').'*</B></td>';
+			if (@$AdvancedFirewall == 1){
+				$out.='<td align="center"><B>'.translate('TEXT_RULE_POLICY_CONST').'</B></td>';
+			}
+			$out.='<td align="center"><B>'.translate('TEXT_DESCRIPTION_CONST').'</B></td>
 			<td>&nbsp;</td>
 		</tr>				
-		<tr>
-			<td align="center"><select name="protocol" STYLE="width:70px">
+		<tr>';
+		if (@$AdvancedFirewall == 1){
+			$out.='<td colspan="3" align="center"><select name="IPVersion" STYLE="width:70px">';
+		} else {
+			$out.='<td colspan="2" align="center"><select name="IPVersion" STYLE="width:70px">';
+		}
+                $out.='<option value="ipv4" '.((@$fwVersion!="ipv4")?'':'selected').'>IPv4</option>
+                                <option value="ipv6" '.((@$fwVersion!="ipv6")?'':'selected').'>IPv6</option>
+			</select></td>';
+			if (@$AdvancedFirewall == 1){
+				$out.='<td align="center" width="110"><select name="Chain" onChange="enableDestination()">
+					'.$chain_options.'
+					<option value="input">core_input</option>
+					<option value="forward">port_forward</option>
+					<option value="forward">core_forwarding</option>
+					<option value="output">core_output</option>
+				        <option value="nat">nat</option>
+				</select>
+				<select name="RuleType" disabled>
+					<option value="POSTROUTING">postrouting</option>
+					<option value="PREROUTING">prerouting</option>
+					<option value="output">output</option>
+				</select></td>
+				<td><select name="IntIf" STYLE="width:70px">
+				<option value=""></option>';
+				foreach ($ifArray as $string){
+					$out.= '<option value="'.$string.'">'.$string.'</option>';
+				}
+				$out.= '</select></td>
+				<td><select name="ExtIf" STYLE="width:70px" disabled>
+				<option value=""></option>';
+				foreach ($ifArray as $string){
+					$out.= '<option value="'.$string.'">'.$string.'</option>';
+				}
+				$out.= '</select></td>
+				<td><input type="text" name="Matchname" STYLE="width:200px">
+				</select></td>';
+			} else {
+			$out.='<input type="hidden" name="Chain" value="input">';
+			}
+			$out.='<td align="center"><select name="protocol" STYLE="width:70px">
 				<option value="tcp">tcp</option>
 				<option value="udp">udp</option>
 				<option value="ip">ip</option>
 			</select></td>
-			<td align="center"><select name="IPVersion" STYLE="width:70px">
-				<option value="ipv4">IPv4</option>
-				<option value="ipv6">IPv6</option>
-				<option value="both">both</option>
-			</select></td>
-			<td align="center"><input type="text" name="SourcePort" size="2"> to <input type="text" name="SourcePortEnd" size="2"></td>
+			<td align="center" width="120"><input type="text" name="SourcePort" size="2"> to <input type="text" name="SourcePortEnd" size="2"></td>
 			<td align="center"><input type="text" name="DestinationPort" size="2" disabled></td>
 			<td align="center"><input type="text" name="DestinationIP" size="8" disabled></td>
-			<td align="center"><select name="RuleType" onChange="enableDestination()">
-				<option value="core_input">core_input</option>
-				<option value="port_forward">port_forward</option>
-			</select></td>
-			<td align="center"><input type="text" name="SourceIP" size="8"></td>
+			<td align="center"><input type="text" name="SourceIP" size="8"></td>';
+			if (@$AdvancedFirewall == 1){
+				$out.='<td align="center"><select name="RPolicy" STYLE="width:70px">">'.$RulePolicy_options.'</select></td>';
+			} else {
+			$out.='<input type="hidden" name="RPolicy" value="ACCEPT">';
+			}
+			$out.='<td align="center"><textarea rows="2" cols="4" name="Description" value=""></textarea></td>
 			<td align="center">&nbsp;</td>
 		</tr>		
 		<tr>
-			<td colspan="7" align="center" bgcolor="#EEEEEE"><input type="submit" class="button" name="add" value="'.translate('TEXT_ADD_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
-		</tr>		
-		<tr>
-			<td colspan="7" align="left">* '.translate('TEXT_OPTIONAL_FIELD_CONST').'</td>
+			<td colspan="100%" align="center" bgcolor="#EEEEEE"><input type="submit" class="button" name="add" value="'.translate('TEXT_ADD_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
+		</tr>';
+		if (@$AdvancedFirewall == 1){
+		$out.='<tr>
+			<td colspan="100%" align="center" bgcolor="#EEEEEE">'.translate('TEXT_NAME_OF_NEW_CHAIN_CONST').': <input type="TEXT" name="New_Chain" /><input type="submit" class="button" name="add_Chain" value="'.translate('TEXT_ADD_CONST').'" onClick="add_Chain()" /></td>
+		</tr>';
+		}
+		$out.='<tr>
+			<td colspan="100%" align="left">* '.translate('TEXT_OPTIONAL_FIELD_CONST').'</td>
 		</tr>		
 	</table>	
 	</form>
@@ -152,36 +563,150 @@ function firewall($output,$dbADO) {
 			exit(0);
 		}
 		if(isset($_POST['add'])){
+			$Matchname=@$_POST['Matchname'];
 			$Protocol=@$_POST['protocol'].'-'.@$_POST['IPVersion'];
 			$SourcePort=@$_POST['SourcePort'];
 			$SourcePortEnd=@$_POST['SourcePortEnd'];
 			$DestinationPort=isset($_POST['DestinationPort'])?$_POST['DestinationPort']:0;
 			$DestinationIP=isset($_POST['DestinationIP'])?$_POST['DestinationIP']:0;
-			$RuleType=@$_POST['RuleType'];
+			if (isset($_POST['RuleType'])) {
+				$Chain=@$_POST['Chain'];
+				$RuleType=@$_POST['RuleType'];
+				$Chain=$Chain."-".$RuleType;
+			} else {
+				$Chain=@$_POST['Chain'];
+			}
 			$SourceIP=@$_POST['SourceIP'];
-			
-			$insert='INSERT INTO Firewall (Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP) VALUES (?,?,?,?,?,?,?)';
-			$dbADO->Execute($insert,array($Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$RuleType,$SourceIP));
-		}
+			$RPolicy=@$_POST['RPolicy'];
+			$Description=@$_POST['Description'];
 
-		if(isset($_REQUEST['delid'])){
-			$delid=$_REQUEST['delid'];
-			$dbADO->Execute('DELETE FROM Firewall WHERE PK_Firewall=?',$delid);
-		}else{
-			if(@$_REQUEST['change_ipv4_firewall_status']==1) 
-				writeConf($accessFile, 'DisableFirewall',@$DisableFirewall,1);
-			else 
-				writeConf($accessFile, 'DisableFirewall',@$DisableFirewall,0);
-			
-			if(@$_REQUEST['change_ipv6_firewall_status']==1) 
-				writeConf($accessFile, 'DisableIPv6Firewall',@$DisableIPv6Firewall,1);
-			else 
-				writeConf($accessFile, 'DisableIPv6Firewall',@$DisableIPv6Firewall,0);
-
+			$insert='INSERT INTO Firewall (Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?)';
+			$dbADO->Execute($insert,array($Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$Chain,$SourceIP,$RPolicy,$Description));
 		}
-				
-		exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh');
 		
+		if(isset($_POST['add_Chain'])) {
+			$Chain=@$_POST['New_Chain'];
+			$Protocol="chain-ipv4";
+			$insert='INSERT INTO Firewall (Matchname, Protocol) VALUES (?,?)';
+			$dbADO->Execute($insert,array($Chain, $Protocol));
+		}
+		
+		if(isset($_POST['inputPolicy'])){
+			$RuleType="policy";
+			$RuleType.=$fwVersion;
+			$Protocol="input";
+			$Matchname=@$_POST['inputPolicy'];
+
+			$insert='UPDATE Firewall SET Matchname=? WHERE Protocol=? AND RuleType=?';
+			$dbADO->Execute($insert,array($Matchname, $Protocol,$RuleType));
+		}
+
+		if(isset($_POST['forwardPolicy'])){
+			$RuleType="policy";
+			$RuleType.=$fwVersion;
+			$Protocol="forward";
+			$Matchname=@$_POST['forwardPolicy'];
+
+			$insert='UPDATE Firewall SET Matchname=? WHERE Protocol=? AND RuleType=?';
+			$dbADO->Execute($insert,array($Matchname, $Protocol,$RuleType));
+		}
+
+		if(isset($_POST['outputPolicy'])){
+			$RuleType="policy";
+			$RuleType.=$fwVersion;
+			$Protocol="output";
+			$Matchname=@$_POST['outputPolicy'];
+
+			$insert='UPDATE Firewall SET Matchname=? WHERE Protocol=? AND RuleType=?';
+			$dbADO->Execute($insert,array($Matchname, $Protocol,$RuleType));
+		}
+
+                if(isset($_REQUEST['enableRule'])){
+			$enable=$_REQUEST['enableRule'];
+			$insert='UPDATE Firewall SET Disabled=? WHERE PK_Firewall=?';
+			$dbADO->Execute($insert,array('0', $enable));
+                }
+
+                if(isset($_REQUEST['disableRule'])){
+			$disable=$_REQUEST['disableRule'];
+			$insert='UPDATE Firewall SET Disabled=? WHERE PK_Firewall=?';
+			$dbADO->Execute($insert,array('1', $disable));
+                }
+
+                if(isset($_REQUEST['moverule'])){
+			$rule=$_REQUEST['moverule'];
+                        $select='Select RuleType, Protocol FROM Firewall WHERE PK_Firewall=?';
+                        $temp=$dbADO->Execute($select,array( $rule));
+                        while ($row=$temp->FetchRow()) {
+                                $chain=$row['RuleType'];
+                                $protocol=$row['Protocol'];
+                        }
+                        $ipversion = substr($protocol, strpos($protocol, "-")+1);
+                        $select='Select PK_Firewall FROM Firewall WHERE RuleType=? AND Protocol LIKE ?';
+                        $rules=$dbADO->Execute($select,array( $chain, '%-'.$ipversion));
+                        while ($row=$rules->FetchRow()) {
+                                if ($next == 1) {
+                                        $nextrule=$row['PK_Firewall'];
+                                }
+                                if ($next == 1) {
+                                $next=0;
+                                }
+                                if ($row['PK_Firewall'] == $rule) {
+                                $next=1;
+                                }
+                        }
+			if ($nextrule != ''){
+				$dbADO->Execute('UPDATE Firewall SET PK_Firewall=? WHERE PK_Firewall=?',array( '0', $rule));
+				$dbADO->Execute('UPDATE Firewall SET PK_Firewall=? WHERE PK_Firewall=?',array( $rule, $nextrule));
+				$dbADO->Execute('UPDATE Firewall SET PK_Firewall=? WHERE PK_Firewall=?',array( $nextrule, '0'));
+			}
+                } else {
+			if(isset($_REQUEST['delid'])){
+				$delid=$_REQUEST['delid'];
+				$dbADO->Execute('DELETE FROM Firewall WHERE PK_Firewall=?',$delid);
+			}else{
+				if(isset($_POST['IDIOT'])){
+					writeConf($accessFile,'AdvancedFirewall',@$AdvancedFirewall,0);
+					writeConf($accessFile,'Show_all_rules',@$Show_all_rules,0);
+					$dbADO->Execute('DELETE FROM Firewall WHERE Protocol LIKE ?',array( "%-".$fwVersion));
+					$dbADO->Execute('DELETE FROM Firewall WHERE RuleType LIKE ?',array( "policy".$fwVersion));
+				}else{
+					if(@$_REQUEST['change_ipv4_firewall_status']==1){
+						writeConf($accessFile, 'DisableIPv4Firewall',@$DisableIPv4Firewall,1);
+					}else{
+						writeConf($accessFile, 'DisableIPv4Firewall',@$DisableIPv4Firewall,0);
+					}
+					if(@$_REQUEST['change_ipv6_firewall_status']==1){
+						writeConf($accessFile, 'DisableIPv6Firewall',@$DisableIPv6Firewall,1);
+					}else{
+						writeConf($accessFile, 'DisableIPv6Firewall',@$DisableIPv6Firewall,0);
+					}
+					if(@$_REQUEST['advanced_firewall']==1){
+						writeConf($accessFile, 'AdvancedFirewall',@$AdvancedFirewall,1);
+					}else{
+						writeConf($accessFile, 'AdvancedFirewall',@$AdvancedFirewall,0);
+					}
+					if(@$_REQUEST['show_all_rules']==1){
+						writeConf($accessFile, 'Show_all_rules',@$Show_all_rules,1);
+					}else{
+						writeConf($accessFile, 'Show_all_rules',@$Show_all_rules,0);
+					}
+					if(@$_REQUEST['fw_blocklist']==1){
+						writeConf($accessFile, 'fw_blocklist',@$fw_blocklist,1);
+					}else{
+						writeConf($accessFile, 'fw_blocklist',@$fw_blocklist,0);
+					}
+					if(@$_REQUEST['fwVersion']=="ipv4"){
+						writeConf($accessFile, 'fwVersion',@$fwVersion,'ipv4');
+					}else{
+						writeConf($accessFile, 'fwVersion',@$fwVersion,'ipv6');
+					}
+				}
+			}
+		}
+
+		exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh');
+
 		header("Location: index.php?section=firewall&msg=".translate('TEXT_FIREWALL_RULES_UPDATED_CONST'));
 	}
 
