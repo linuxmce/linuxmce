@@ -194,8 +194,4 @@ $TEXT_APPLY_CONST='Apply';
 $TEXT_DEFINE_CONST='Define';
 $TEXT_DESCRIPTION_REQUIRED_CONST='Description required';
 $TEXT_DISTRO_CONST='Distro';
-$TEXT_FILTER_BY_OS_DISTRO_CONST='Filter by Operating System/Distribution';
-$TEXT_DEFAULT_CONST='Default';
-$TEXT_ADD_OTHER_COMPATIBILITY_CONST='Add another compatibility';
-$TEXT_DELETE_COMPATIBILITY_CONST='Delete compatibility';
 ?>
