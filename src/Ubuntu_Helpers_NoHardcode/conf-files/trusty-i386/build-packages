@@ -156,7 +156,7 @@ patch
 po4a
 quilt
 ruby-dev
-ruby1.8-dev
+ruby1.9.1-dev
 sgmltools-lite
 sharutils
 squashfs-tools
@@ -203,9 +203,7 @@ libqpidcommon2-dev
 libqpidtypes1-dev
 libhupnp-dev
 portaudio19-dev
-libhal-dev
 python-support
-python-central
 python-setuptools
 libqjson-dev
 python-twisted
@@ -223,12 +221,9 @@ libplist-dev
 libcrypt-openssl-rsa-perl
 libcrypt-openssl-bignum-perl
 libshairport-dev
-ola-dev
 qtchooser
 qt5-default
 qtbase5-dev
 qtmultimedia5-dev
 qtscript5-dev
-owfs-dev
-owfs
-libowfs27
+libow-dev
