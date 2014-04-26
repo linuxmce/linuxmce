@@ -459,28 +459,68 @@ if [[ "$VPNenabled" == "on" ]]; then
     		echo 0 > $each/accept_redirects
     		echo 0 > $each/send_redirects
 	done
-        
+
         # OpenSWAN IPSEC config files
-	CORE_MASK=$(ip addr show $IntIf|awk '/inet .* '"$IntIf"'/ {print $2}'|awk -F \/ '{print $2}')
+	CORE_MASK=$(ip addr show $IntIf|awk '/inet .* '"$IntIf"'/ {print $2}'|awk -F \/ '{print $2}'|head -1)
         sed -r "s,%VPNPSK%,$VPNPSK,g" /usr/pluto/templates/ipsec.secrets.tmpl >/etc/ipsec.secrets
-	sed -r "s,%CORE_NET%,$IntNetworkAddress,g;s,%CORE_MASK%,$CORE_MASK,g" /usr/pluto/templates/ipsec.conf.tmpl >/etc/ipsec.conf
-        
+	echo $IntNetworkAddress $CORE_MASK
+	sed -r "s,%CORE_NET%,$IntNetworkAddress,g;s,%CORE_MASK%,$CORE_MASK,g" /usr/pluto/templates/ipsec.conf.tmpl > /etc/ipsec.conf
+
         # XL2TP config files
         sed -r "s,%VPN_IP_RANGE%,$VPNrange,g;s,%CORE_INT_IP%,$IntIP,g" /usr/pluto/templates/xl2tpd.conf.tmpl >/etc/xl2tpd/xl2tpd.conf
 
         # PPP config files
         sed -r "s,%CORE_INT_IP%,$IntIP,g" /usr/pluto/templates/options.xl2tpd.tmpl >/etc/ppp/options.xl2tpd
-        
+
         # PPP users secret file
         Q="SELECT UserName,Password FROM Users"
 		R=$(RunSQL "$Q")
-		echo "# Secrets for authentication using CHAP" > /etc/ppp/chap-secrets
+		echo "# Secrets for authentication using VPN and System Authentacation" > /etc/ppp/pap-secrets
 		for ROW in $R; do
 			User=$(Field 1 "$ROW")
-			Pass="!VPNpass1"
-			echo "#$User	l2tpd	$Pass	*" >> /etc/ppp/chap-secrets
+			username=$(echo $User | tr '[:upper:]' '[:lower:]');
+			Pass="\"\""
+			echo "#pluto_$username	*	$Pass	*" >> /etc/ppp/pap-secrets
 		done
+	chmod 644 /etc/ppp/pap-secrets
+
+	#Setup ip-up and ip-down script for pppd
+        grep -w "^#Setup iptables" /etc/ppp/ip-up >/dev/null
+        if [[ "$?" -ne "0" ]]; then
+                echo "Setting up /etc/ppp/ip-up"
+
+                ipup=$"#Setup iptables  and update db
+if [[ ! "$6" == "" ]]; then
+	if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
+		R=$(mysql pluto_main -ss -e"SELECT Protocol FROM Firewall WHERE RuleType='VPN' AND SourceIP='$5' AND Protocol='ip-ipv4' ORDER BY PK_Firewall")
+		if [ "$R" ]; then
+			mysql pluto_main -ss -e "UPDATE Firewall SET Offline='0' WHERE RuleType='VPN' AND SourceIP='$5'"
+		fi
+		/usr/pluto/bin/Network_Firewall.sh
+	fi
+fi"
+
+                echo "$ipup" >> /etc/ppp/ip-up
+        fi
+        grep -w "^#Setup iptables" /etc/ppp/ip-down >/dev/null
+        if [[ "$?" -ne "0" ]]; then
+                echo "Setting up /etc/ppp/ip-down"
+
+                ipdown=$"#Setup iptables  and update db
+if [[ ! "$6" == "" ]]; then
+        if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
+                R=$(mysql pluto_main -ss -e"SELECT Protocol FROM Firewall WHERE RuleType='VPN' AND SourceIP='$5' AND Protocol='ip-ipv4' ORDER BY PK_Firewall")
+                if [ "$R" ]; then
+                        mysql pluto_main -ss -e "UPDATE Firewall SET Offline='1' WHERE RuleType='VPN' AND SourceIP='$5'"
+                fi
+                /usr/pluto/bin/Network_Firewall.sh
+        fi
+fi"
+
+                echo "$ipdown" >> /etc/ppp/ip-down
+        fi
 fi
+
 
 if ! BlacklistConfFiles '/etc/default/isc-dhcp-server' ;then
 	if [ ! -e /etc/default/isc-dhcp-server.pbackup ] && [ -e /etc/default/isc-dhcp-server ] ;then

@@ -1,4 +1,3 @@
-require-mschap-v2
 ms-dns %CORE_INT_IP%
 asyncmap 0
 auth
@@ -9,5 +8,6 @@ modem
 debug
 name l2tpd
 proxyarp
-lcp-echo-interval 30
-lcp-echo-failure 4
+ipparam "VPN Client"
+lcp-echo-interval 10
+lcp-echo-failure 3

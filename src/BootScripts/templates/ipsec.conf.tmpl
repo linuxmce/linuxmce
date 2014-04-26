@@ -1,3 +1,4 @@
+
 # /etc/ipsec.conf - Openswan IPsec configuration file
 
 version 2.0
@@ -9,9 +10,9 @@ config setup
   protostack=netkey
 
 conn L2TP-PSK-NAT
-  rightsubnet=vhost:%priv
+  forceencaps = yes
+  rightsubnet=vhost:%priv,no
   also=L2TP-PSK-noNAT
-
 
 conn L2TP-PSK-noNAT
   authby=secret
@@ -25,4 +26,5 @@ conn L2TP-PSK-noNAT
   left=%defaultroute
   leftprotoport=17/1701
   right=%any
-  rightprotoport=17/%any
+  rightprotoport=17/0
+

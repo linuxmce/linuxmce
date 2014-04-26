@@ -4,8 +4,8 @@ ipsec saref = yes
 [lns default]
 ip range = %VPN_IP_RANGE%
 local ip = %CORE_INT_IP%
-require chap = yes
-refuse pap = yes
+require pap = yes
+unix authentication = yes
 require authentication = yes
 name = LinuxMCE_VPN_Server
 ppp debug = yes
