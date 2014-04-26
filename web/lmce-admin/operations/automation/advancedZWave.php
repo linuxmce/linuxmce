@@ -21,7 +21,7 @@ function advancedZWave($output,$dbADO){
 	var hasMoved = true;
 	var movingNode;
 	var nodePos = new Object();
-	var topOffset = 150;
+	var topOffset = 180;
 	    function loadData() {
 	        new Ajax.Request("index.php", {
 		    method:"get",
@@ -302,7 +302,22 @@ function advancedZWave($output,$dbADO){
 				updateLinksForNode(movingNode.id);
 			    }
 		}    
-            
+	function refresh() {
+	    $(\'nodedisplay\').innerHTML="";
+	    loadData();
+	}            
+	function healNetwork() {
+	    performCommand({healNetwork:1});
+	}            
+	function testNetwork() {
+	    performCommand({testNetwork:1});
+	}            
+	function networkUpdate() {
+	    performCommand({testNetwork:1});
+	}            
+	function softReset() {
+	    performCommand({softReset:1});
+	}            
 	    document.observe("dom:loaded", function() {
 	        loadData();
 	        $$(\'body\').invoke("observe", "mouseup", function(event) { mouseUpNode(event) });
@@ -340,6 +355,7 @@ span.tab:hover { background-color: white; }
 .command {
     background-color: grey;
     border: 1px solid black;
+    margin: 2px;
 }
 .command:hover {
     background-color: white;
@@ -354,6 +370,11 @@ td.cell_config:hover {
 }
 </style>
 ';
+	$out.='<input class="command" type="button" value="Refresh" onclick="refresh()" />';
+	$out.='<input class="command" type="button" value="Heal network" onclick="healNetwork()" />';
+	$out.='<input class="command" type="button" value="Network Update" onclick="networkUpdate()" />';
+	$out.='<input class="command" type="button" value="Test network" onclick="testNetwork()" />';
+	$out.='<input class="command" type="button" value="Soft reset controller" onclick="softReset()" />';
 	$out.='<div id="nodedisplay"></div>';
 
     } else {
@@ -461,6 +482,22 @@ td.cell_config:hover {
 	    header('Content-type: application/json');
             $id = $_POST['testNode'];
 	    $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 788 51 "TNN'.$id.'"';
+	    $ret=exec_batch_command($cmd,1);
+	    $retArray=explode("\n",$ret);
+	    print("{ \"ok\": ".($retArray[0].strrpos("OK") >= 0 ? 1 : 0)." }");
+	    exit;
+	}
+	if (isset($_POST['softReset']) || isset($_POST['healNetwork']) || isset($_POST['testNetwork']) || isset($_POST['networkUpdate'])) {
+	    header('Content-type: application/json');
+	    if (isset($_POST['softReset'])) {
+	        $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 776 51 ""';
+ 	    } else if (isset($_POST['healNetwork'])) {
+	        $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 788 51 "HN"';
+ 	    } else if (isset($_POST['testNetwork'])) {
+	        $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 788 51 "TN"';
+ 	    } else if (isset($_POST['networkUpdate'])) {
+	        $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 788 51 "NU"';
+	    }
 	    $ret=exec_batch_command($cmd,1);
 	    $retArray=explode("\n",$ret);
 	    print("{ \"ok\": ".($retArray[0].strrpos("OK") >= 0 ? 1 : 0)." }");
