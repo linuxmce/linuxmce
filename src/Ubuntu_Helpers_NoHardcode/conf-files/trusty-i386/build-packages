@@ -119,7 +119,6 @@ libstdc++6
 libsvga1-dev
 libswscale-dev
 libtag1-dev
-libtcltk-ruby
 libtiff5-dev
 libtheora-dev
 libtool
@@ -155,8 +154,8 @@ nasm
 patch
 po4a
 quilt
-ruby-dev
-ruby1.9.1-dev
+ruby2.0-dev
+ruby2.0-tcltk
 sgmltools-lite
 sharutils
 squashfs-tools
