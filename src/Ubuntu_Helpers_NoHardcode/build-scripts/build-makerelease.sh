@@ -70,7 +70,7 @@ function Build_MakeRelease {
 	mkdir -pv "${mkr_dir}"
 
 	cp -v "${svn_dir}/${svn_branch_name}/src/bin/MakeRelease" "${mkr_dir}"
-#	cp -v "${svn_dir}/${svn_branch_name}/src/bin/MakeRelease_PrepFiles" "${mkr_dir}"
+	cp -v "${svn_dir}/${svn_branch_name}/src/bin/MakeRelease_PrepFiles" "${mkr_dir}"
 	if [ -e "${svn_dir}/${svn_branch_name}/src/bin/mysql_wrapper" ]
 	then
 		cp -v "${svn_dir}/${svn_branch_name}/src/bin/mysql_wrapper" "${mkr_dir}"
