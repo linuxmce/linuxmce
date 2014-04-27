@@ -231,3 +231,6 @@ libsysfs-dev
 libblkid-dev
 dh-autoreconf
 hal-info
+python-protobuf
+libprotoc-dev
+qtdeclarative5-dev
