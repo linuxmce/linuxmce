@@ -231,3 +231,4 @@ dh-exec
 libsysfs-dev
 libblkid-dev
 dh-autoreconf
+hal-info
