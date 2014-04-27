@@ -122,20 +122,31 @@ RubyDCEEmbededClass::CallCmdHandler(Message *pMessage) {
 			if(TYPE(result)==T_ARRAY)
 			{
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got returnParamArray from Ruby");
-		    	char *tmpbuf[RARRAY(result)->len];
+#ifdef RUBY2_0
+			    	char *tmpbuf[RARRAY_LEN(result)];
+				for(int i=0;i<RARRAY_LEN(result);i++)
+				{
+					VALUE v=RARRAY_PTR(result)[i];
+#else
+				char *tmpbuf[RARRAY(result)->len];
 				for(int i=0;i<RARRAY(result)->len;i++)
 				{
 					VALUE v=RARRAY(result)->ptr[i];
+#endif
 					if(TYPE(v)!=T_NIL)
 					{
 						switch(this->pcs_->getParamType(i))
 						{
 							case PARAMETERTYPE_string_CONST:
+#ifdef RUBY2_0
+								tmpbuf[i]=strdup(StringValuePtr(v));
+#else
 								tmpbuf[i]=strdup(STR2CSTR(v));
+#endif
 								pMessageOut->m_mapParameters[i]=tmpbuf[i];
 								break;
 							case PARAMETERTYPE_int_CONST:
-						    	tmpbuf[i]=(char*)malloc(20);
+								tmpbuf[i]=(char*)malloc(20);
 								sprintf(tmpbuf[i],"%d",NUM2INT(v));
 								pMessageOut->m_mapParameters[i]=tmpbuf[i];
 								break;
@@ -143,10 +154,17 @@ RubyDCEEmbededClass::CallCmdHandler(Message *pMessage) {
 								pMessageOut->m_mapParameters[i]=(TYPE(v)==T_TRUE?true:false);
 								break;
 							case PARAMETERTYPE_Data_CONST:
-							    tmpbuf[i]=(char*)calloc(RSTRING(v)->len,sizeof(char));
+#ifdef RUBY2_0
+								tmpbuf[i]=(char*)calloc(RSTRING_LEN(v),sizeof(char));
+								memcpy(tmpbuf[i],RSTRING_PTR(v),RSTRING_LEN(v));
+								pMessageOut->m_mapData_Parameters[i]=tmpbuf[i];
+								pMessageOut->m_mapData_Lengths[i]=RSTRING_LEN(v);
+#else
+								tmpbuf[i]=(char*)calloc(RSTRING(v)->len,sizeof(char));
 								memcpy(tmpbuf[i],RSTRING(v)->ptr,RSTRING(v)->len);
 								pMessageOut->m_mapData_Parameters[i]=tmpbuf[i];
 								pMessageOut->m_mapData_Lengths[i]=RSTRING(v)->len;
+#endif
 								break;
 							case PARAMETERTYPE_double_CONST:
 						    	tmpbuf[i]=(char*)malloc(20);

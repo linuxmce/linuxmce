@@ -18,19 +18,29 @@ Gen_Dev_Files = $(GENDEV)/Generic_Serial_DeviceBase.cpp
 sources = Main.cpp Generic_Serial_Device.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
-CXXFLAGS +=
+PKG_CONFIG := $(shell pkg-config --cflags --libs ruby-2.0)
+
+CXXFLAGS += -fpermissive
 CPPFLAGS += -I$(ROOT)/MessageTranslation
 LDFLAGS +=
-XTRALDLIBS = -lruby1.8 -lSerial -lrt -lMessageTranslation
+XTRALDLIBS = -lSerial -lrt -lMessageTranslation
+
+ifneq (,$(findstring '-lruby*', $(PKG_CONFIG)))
 
 ifneq (,$(findstring amd64, $(arch))) 
-        CPPFLAGS += -I/usr/lib/ruby/1.8/x86_64-linux
+	CPPFLAGS += -I/usr/lib/ruby/1.8/x86_64-linux
 else
 	ifneq (,$(findstring armhf, $(arch)))
-	        CPPFLAGS += -I/usr/lib/ruby/1.8/arm-linux-eabihf
+		CPPFLAGS += -I/usr/lib/ruby/1.8/arm-linux-eabihf
 	else
-	        CPPFLAGS += -I/usr/lib/ruby/1.8/i386-linux -I/usr/lib/ruby/1.8/i486-linux -I/usr/lib/ruby/1.8/i686-linux
+		CPPFLAGS += -I/usr/lib/ruby/1.8/i386-linux -I/usr/lib/ruby/1.8/i486-linux -I/usr/lib/ruby/1.8/i686-linux
 	endif
+	XTRALDLIBS += -lruby1.8
+endif
+
+else
+	CPPFLAGS += $(PKG_CONFIG) -DRUBY2_0
+	XTRALDLIBS += $(PKG_CONFIG)
 endif
 
 #<-mkr_B_use_mysql_wrapper_b->

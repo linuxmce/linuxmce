@@ -55,31 +55,49 @@ RubyEmbededClass::_callmethod(VALUE arg) {
 std::string 
 RubyEmbededClass::_backtrace() {
 	string bcktr;
-	
-    
+
 	// position
 	char tmpbuff[128];
+#ifdef RUBY2_0
+	sprintf(tmpbuff, "\n\tin: %s: %d", rb_sourcefile, rb_sourceline);
+#else
 	sprintf(tmpbuff, "\n\tin: %s: %d", ruby_sourcefile, ruby_sourceline);
-    bcktr += tmpbuff;
-	
-    ID id = rb_frame_last_func();
-    if(id) {
-        bcktr += " :in `";
+#endif
+
+	bcktr += tmpbuff;
+
+#ifdef RUBY2_0
+	ID id = rb_frame_this_func();
+#else
+	ID id = rb_frame_last_func();
+#endif
+
+	if(id) {
+		bcktr += " :in `";
 		bcktr += rb_id2name(id);
 		bcktr += "'";
-    }
-	
+	}
 	bcktr += "\n";
-	
-    // backtrace
-    if(!NIL_P(ruby_errinfo)) {
-        VALUE ary = rb_funcall(ruby_errinfo, rb_intern("backtrace"), 0);
-        int c;
-        for (c=0; c<RARRAY(ary)->len; c++) {
-            bcktr += "\tfrom "; bcktr += RSTRING(RARRAY(ary)->ptr[c])->ptr; bcktr += "\n";
-        }
-    }
-    return bcktr;
+
+	// backtrace
+#ifdef RUBY2_0
+	if(!NIL_P(rb_errinfo)) {
+		VALUE ary = rb_funcall(rb_errinfo, rb_intern("backtrace"), 0);
+		int c;
+		for (c=0; c<RARRAY_LEN(ary); c++) {
+			bcktr += "\tfrom "; bcktr += RSTRING_PTR(RARRAY_PTR(ary)[c]); bcktr += "\n";
+		}
+	}
+#else
+	if(!NIL_P(ruby_errinfo)) {
+		VALUE ary = rb_funcall(ruby_errinfo, rb_intern("backtrace"), 0);
+		int c;
+		for (c=0; c<RARRAY(ary)->len; c++) {
+			bcktr += "\tfrom "; bcktr += RSTRING(RARRAY(ary)->ptr[c])->ptr; bcktr += "\n";
+		}
+#endif
+
+	return bcktr;
 }
 
 VALUE 

@@ -83,11 +83,19 @@ RubyEmbeder::loadCode(RubyEmbederCodeSupplier *psup) throw(RubyException) {
 		
 		std::string errpoint;
 		errpoint = "\nerror: ";
+#ifdef RUBY2_0
+		errpoint += RSTRING_PTR(message);
+#else
 		errpoint += RSTRING(message)->ptr;
+#endif
 		
 		errpoint += ", line: ";
 		char tmpbuff[12];
+#ifdef RUBY2_0
+		sprintf(tmpbuff, "%d", rb_sourceline);
+#else
 		sprintf(tmpbuff, "%d", ruby_sourceline);
+#endif
 		errpoint += tmpbuff;
 		
 		errpoint += "\n";
