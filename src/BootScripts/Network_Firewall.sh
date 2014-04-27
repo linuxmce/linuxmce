@@ -6,6 +6,31 @@ if [[ "$blocklist" == "" ]]; then
 	echo fw_blocklist=1 >> /etc/pluto.conf
 fi
 
+DisableIPv4Firewall=$(cat /etc/pluto.conf | grep DisableIPv4Firewall)
+if [[ "$DisableIPv4Firewall" == "" ]]; then
+	echo DisableIPv4Firewall=0 >> /etc/pluto.conf
+fi
+
+DisableIPv6Firewall=$(cat /etc/pluto.conf | grep DisableIPv6Firewall)
+if [[ "$DisableIPv6Firewall" == "" ]]; then
+	echo DisableIPv6Firewall=0 >> /etc/pluto.conf
+fi
+
+AdvancedFirewall=$(cat /etc/pluto.conf | grep AdvancedFirewall)
+if [[ "$AdvancedFirewall" == "" ]]; then
+	echo AdvancedFirewall=0 >> /etc/pluto.conf
+fi
+
+Show_all_rules=$(cat /etc/pluto.conf | grep Show_all_rules)
+if [[ "$Show_all_rules" == "" ]]; then
+	echo Show_all_rules=0 >> /etc/pluto.conf
+fi
+
+fwVersion=$(cat /etc/pluto.conf | grep fwVersion)
+if [[ "$fwVersion" == "" ]]; then
+	echo fwVersion=ipv4 >> /etc/pluto.conf
+fi
+
 . /usr/pluto/bin/Network_Parameters.sh
 . /usr/pluto/bin/LockUtils.sh
 
