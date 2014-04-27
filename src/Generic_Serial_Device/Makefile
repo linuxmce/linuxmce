@@ -25,8 +25,10 @@ CPPFLAGS += -I$(ROOT)/MessageTranslation
 LDFLAGS +=
 XTRALDLIBS = -lSerial -lrt -lMessageTranslation
 
-ifneq (,$(findstring '-lruby*', $(PKG_CONFIG)))
-
+ifneq (,$(findstring ruby, $(PKG_CONFIG)))
+	CPPFLAGS += $(PKG_CONFIG) -DRUBY2_0
+	XTRALDLIBS += $(PKG_CONFIG)
+else
 ifneq (,$(findstring amd64, $(arch))) 
 	CPPFLAGS += -I/usr/lib/ruby/1.8/x86_64-linux
 else
@@ -37,10 +39,6 @@ else
 	endif
 	XTRALDLIBS += -lruby1.8
 endif
-
-else
-	CPPFLAGS += $(PKG_CONFIG) -DRUBY2_0
-	XTRALDLIBS += $(PKG_CONFIG)
 endif
 
 #<-mkr_B_use_mysql_wrapper_b->

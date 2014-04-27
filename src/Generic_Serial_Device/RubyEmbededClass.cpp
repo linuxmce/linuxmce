@@ -95,6 +95,7 @@ RubyEmbededClass::_backtrace() {
 		for (c=0; c<RARRAY(ary)->len; c++) {
 			bcktr += "\tfrom "; bcktr += RSTRING(RARRAY(ary)->ptr[c])->ptr; bcktr += "\n";
 		}
+	}
 #endif
 
 	return bcktr;
