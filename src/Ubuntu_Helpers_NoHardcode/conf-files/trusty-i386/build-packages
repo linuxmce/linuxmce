@@ -227,3 +227,7 @@ qtbase5-dev
 qtmultimedia5-dev
 qtscript5-dev
 libow-dev
+dh-exec
+libsysfs-dev
+libblkid-dev
+dh-autoreconf
