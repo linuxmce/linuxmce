@@ -20,12 +20,13 @@ sources = Main.cpp Generic_Serial_Device.cpp $(Gen_Dev_Files)
 
 PKG_CONFIG := $(shell pkg-config --cflags --libs ruby-2.0)
 
-CXXFLAGS += -fpermissive
+CXXFLAGS +=
 CPPFLAGS += -I$(ROOT)/MessageTranslation
 LDFLAGS +=
 XTRALDLIBS = -lSerial -lrt -lMessageTranslation
 
 ifneq (,$(findstring ruby, $(PKG_CONFIG)))
+	CXXFLAGS += -fpermissive
 	CPPFLAGS += $(PKG_CONFIG) -DRUBY2_0
 	XTRALDLIBS += $(PKG_CONFIG)
 else
