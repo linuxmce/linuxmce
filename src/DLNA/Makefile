@@ -40,7 +40,7 @@ bin: DLNA
 so: DLNA.so
 
 moc_LMCERenderer.cpp:
-	moc -o moc_LMCERenderer.cpp LMCERenderer.h
+	QT_SELECT=4 moc -o moc_LMCERenderer.cpp LMCERenderer.h
 
 DLNA.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
@@ -56,7 +56,7 @@ DLNA: $(sources:.cpp=.o)
 distclean: clean
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) DLNA.bin DLNA.so >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) moc_LMCERenderer.cpp DLNA.bin DLNA.so >/dev/null
 
 package:
 	chmod +x make_package.sh
