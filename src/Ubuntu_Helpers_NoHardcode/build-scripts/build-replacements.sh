@@ -417,7 +417,7 @@ function Build_Replacements_trusty
 
         Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1
 
-	Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2
+	#Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2
 
 	# Open ZWave library
 	Build_Replacement_Package libopenzwave1.0 external/open-zwave
@@ -431,9 +431,10 @@ function Build_Replacements_trusty
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
 
 	# Package: libhal1, libhal-dev....  ugh.  Need a new hw detection daemon!
-	Build_Replacement_Package ubuntu/hal-0.5.14
+	Build_Replacement_Package hal ubuntu/hal-0.5.14
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*hal*.deb
-	cp "${svn_dir}/${svn_branch_name}/ubuntu/*hal*.deb ${replacements_dir}"
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
+	cp $dir_/*hal*.deb "${replacements_dir}"
 
 	#Package: lshwd
 	#Build_Replacement_Package lshwd_2.0 ubuntu/lshwd-2.0-rc4
