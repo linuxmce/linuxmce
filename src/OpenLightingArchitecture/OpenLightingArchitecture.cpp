@@ -120,6 +120,8 @@ void OpenLightingArchitecture::ReceivedCommandForChild(DeviceData_Impl *pDeviceD
 		channel = atoi(portChannel.c_str())-1;
 	}
 
+	ola::client::SendDMXArgs dmxArgs;
+
 	sCMD_Result = "UNHANDLED CHILD";
 	switch (pMessage->m_dwID) {
 		case COMMAND_Generic_On_CONST:
@@ -131,7 +133,7 @@ void OpenLightingArchitecture::ReceivedCommandForChild(DeviceData_Impl *pDeviceD
 			} else {
 				dmxBuffer.SetChannel(channel, 255);
 			}
-			olaClient->SendDmx(universe,dmxBuffer);
+			olaClient->SendDMX(universe,dmxBuffer,dmxArgs);
 			sCMD_Result = "OK";
 			break;
 			;;
@@ -144,7 +146,7 @@ void OpenLightingArchitecture::ReceivedCommandForChild(DeviceData_Impl *pDeviceD
 			} else {
 				dmxBuffer.SetChannel(channel, 0);
 			}
-			olaClient->SendDmx(universe,dmxBuffer);
+			olaClient->SendDMX(universe,dmxBuffer,dmxArgs);
 			sCMD_Result = "OK";
 			break;
 			;;
@@ -161,7 +163,7 @@ void OpenLightingArchitecture::ReceivedCommandForChild(DeviceData_Impl *pDeviceD
 			} else {
 				dmxBuffer.SetChannel(channel, value);
 			}
-			olaClient->SendDmx(universe,dmxBuffer);
+			olaClient->SendDMX(universe,dmxBuffer,dmxArgs);
 			sCMD_Result = "OK";
 			break;
 			;;
@@ -179,7 +181,7 @@ void OpenLightingArchitecture::ReceivedCommandForChild(DeviceData_Impl *pDeviceD
 			dmxBuffer.SetChannel(channelR, valueR);
 			dmxBuffer.SetChannel(channelG, valueG);
 			dmxBuffer.SetChannel(channelB, valueB);
-			olaClient->SendDmx(universe,dmxBuffer);
+			olaClient->SendDMX(universe,dmxBuffer,dmxArgs);
 			sCMD_Result = "OK";
 			break;
 			;;

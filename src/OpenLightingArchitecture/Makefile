@@ -20,9 +20,10 @@ sources = Main.cpp OpenLightingArchitecture.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS +=
+CPPFLAGS += `pkg-config --cflags libola`
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r -lola -lolacommon -lprotobuf
+XTRALDLIBS = -lmysqlclient_r -lprotobuf `pkg-config --libs libola`
+
 
 Gen_Dev_Files +=
 sources +=

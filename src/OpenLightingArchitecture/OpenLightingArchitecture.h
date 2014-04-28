@@ -23,7 +23,6 @@
 #include <ola/DmxBuffer.h>
 #include <ola/Logging.h>
 #include <ola/OlaClientWrapper.h>
-#include <ola/OlaClient.h>
 
 //<-dceag-decl-b->
 namespace DCE
@@ -48,8 +47,8 @@ public:
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
 		ola::DmxBuffer dmxBuffer;
-		ola::OlaClientWrapper olaClientWrapper;
-		ola::OlaClient *olaClient;
+		ola::client::OlaClientWrapper olaClientWrapper;
+		ola::client::OlaClient *olaClient;
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
