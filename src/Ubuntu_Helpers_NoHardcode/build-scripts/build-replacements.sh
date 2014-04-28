@@ -241,7 +241,9 @@ function Build_Replacements_Precise
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
 
 	Build_Replacement_Package ola external/ola-0.9.0
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola-dev*.deb
+	# don't auto install as it pulls up whiptail...  need to pre-seed the values
+	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola_*.deb
+	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola-dev*.deb
 	dir_="${svn_dir}/${svn_branch_name}/external/"
 	cp $dir_/ola*.deb "${replacements_dir}"
 
@@ -448,7 +450,9 @@ function Build_Replacements_trusty
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
 
 	Build_Replacement_Package ola external/ola-0.9.0
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola-dev*.deb
+	# don't auto install as it pulls up whiptail...  need to pre-seed the values
+	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola_*.deb
+	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola-dev*.deb
 	dir_="${svn_dir}/${svn_branch_name}/external"
 	cp $dir_/ola*.deb "${replacements_dir}"
 
