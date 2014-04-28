@@ -259,6 +259,18 @@ function Build_Replacements_Precise
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
 	cp $dir_/*xine*.deb "${replacements_dir}"
 
+	#Package: protobuf
+	#Build_Replacement_Package protobuf ubuntu/ola/protobuf-2.3.0
+	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/ola/*proto*.deb
+	#dir_="${svn_dir}/${svn_branch_name}/ubuntu/ola"
+	#cp $dir_/*proto*.deb "${replacements_dir}"
+
+	#Package: ola
+	#Build_Replacement_Package ola ubuntu/ola/ola-0.8.9
+	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/ola/*ola*.deb
+	#dir_="${svn_dir}/${svn_branch_name}/ubuntu/ola"
+	#cp $dir_/*ola*.deb "${replacements_dir}"
+
 	#Obsolete
 	#Package: lshwd
 	#Build_Replacement_Package lshwd_2.0 ubuntu/lshwd-2.0-rc4
