@@ -11,7 +11,7 @@ set -e
 #set -x
 
 make_jobs=""
-# set NUMCORES=X in /etc/lmce-build/builder.custom.conf to enable multi-job builds
+# set NUMCORES=X in /etc/lmce-build/builder.conf to enable multi-job builds
 [[ -n "$NUM_CORES" ]] && [[ "$NUM_CORES" -gt 1 ]] && make_jobs="-j $NUM_CORES"
 
 PLUTO_BUILD_CRED=""

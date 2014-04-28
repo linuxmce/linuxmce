@@ -6,7 +6,7 @@ set -e
 set -x
 
 make_jobs=""
-# set NUMCORES=X in /etc/lmce-build/builder.custom.conf to enable multi-job builds
+# set NUMCORES=X in /etc/lmce-build/builder.conf to enable multi-job builds
 [[ -n "$NUM_CORES" ]] && [[ 1 -lt "$NUM_CORES" ]] && make_jobs="-j $NUM_CORES"
 
 case "${flavor}" in
