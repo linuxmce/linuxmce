@@ -240,6 +240,11 @@ function Build_Replacements_Precise
 	Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
 
+	Build_Replacement_Package ola external/ola-0.9.0
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola-dev*.deb
+	dir_="${svn_dir}/${svn_branch_name}/external/ola"
+	cp $dir_/ola*.deb "${replacements_dir}"
+
 	#Package: libbluray1
 	Build_Replacement_Package libbluray1 ubuntu/libbluray-0.5.0
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*bluray*.deb
@@ -429,6 +434,11 @@ function Build_Replacements_trusty
 
 	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
+
+	Build_Replacement_Package ola external/ola-0.9.0
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola-dev*.deb
+	dir_="${svn_dir}/${svn_branch_name}/external/ola"
+	cp $dir_/ola*.deb "${replacements_dir}"
 
 	# Package: libhal1, libhal-dev....  ugh.  Need a new hw detection daemon!
 	Build_Replacement_Package hal ubuntu/hal-0.5.14

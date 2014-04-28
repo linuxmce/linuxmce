@@ -116,12 +116,12 @@ function build_main_debs() {
  				"trusty")
 					Distro_ID="21"
 					RepositorySource=25
-					Main_Version='2.0.0.46.'
-					# mame - excluded due to long time for compilation.
-					exclude_list=$exclude_list,682,683
+					Main_Version='2.0.0.47.'
+					# mame snaps, mame - excluded due to long time for compilation.
+					exclude_list=$exclude_list,681,682,683
 
 					# Not building for some reason or other
-					exclude_list=$exclude_list,782,785 # ola
+					#exclude_list=$exclude_list,782,785 # ola
 					;;
 			esac
 			;;

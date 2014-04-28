@@ -38,7 +38,7 @@ case "${flavor}" in
                         "trusty")
                                 Distro_ID="21"
                                 RepositorySource=25
-				Main_Version="2.0.0.46."
+				Main_Version="2.0.0.47."
                                 ;;
                 esac
                 ;;
