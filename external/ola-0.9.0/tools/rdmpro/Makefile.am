@@ -1,0 +1,7 @@
+include $(top_srcdir)/common.mk
+
+bin_PROGRAMS = rdmpro_sniffer
+
+rdmpro_sniffer_SOURCES = rdm-sniffer.cpp
+rdmpro_sniffer_LDADD = $(top_builddir)/common/libolacommon.la \
+                       $(top_builddir)/plugins/usbpro/libolausbprowidget.la
