@@ -242,7 +242,7 @@ function Build_Replacements_Precise
 
 	Build_Replacement_Package ola external/ola-0.9.0
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola-dev*.deb
-	dir_="${svn_dir}/${svn_branch_name}/external/ola"
+	dir_="${svn_dir}/${svn_branch_name}/external/"
 	cp $dir_/ola*.deb "${replacements_dir}"
 
 	#Package: libbluray1
@@ -437,7 +437,7 @@ function Build_Replacements_trusty
 
 	Build_Replacement_Package ola external/ola-0.9.0
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola-dev*.deb
-	dir_="${svn_dir}/${svn_branch_name}/external/ola"
+	dir_="${svn_dir}/${svn_branch_name}/external"
 	cp $dir_/ola*.deb "${replacements_dir}"
 
 	# Package: libhal1, libhal-dev....  ugh.  Need a new hw detection daemon!
