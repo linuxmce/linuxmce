@@ -55,13 +55,13 @@ function advancedZWave($output,$dbADO){
 			    el2.className = "nodeHandle";
 			    el2.style = "padding-top:1px; height: 100%;";
 			    el2.onclick = function(id) {
-			        return function() { $("hover_"+id).toggle(); };
+			        return function(event) { $("hover_"+id).style.left=( document.getElementById(id).offsetLeft+50)+"px"; $("hover_"+id).style.top = document.getElementById(id).offsetTop+"px"; $("hover_"+id).toggle();};
 			    }(node.id);
 			    el2.insert("<p>"+node.id+"</p>");
 			    el.appendChild(el2);
 
 			    var hover = document.createElement("div");
-			    el.appendChild(hover);
+			    $(\'nodedisplay\').appendChild(hover);
 			    hover.id = "hover_"+node.id;
 			    hover.className = "nodeHover";
 			    hover.style = "display:none;";
@@ -208,33 +208,43 @@ function advancedZWave($output,$dbADO){
 		    var node = getNode(id)
 		    var neighbors = node.neighbors;
 		    for (var j = 0; j < neighbors.length; j++) {
-		    	updateLink(id, neighbors[j]);
+		    	updateLink(id, neighbors[j], true);
+		    }
+		    // Need to look for any links going just to this node (just for update, dont create new ones)
+		    // the correct way (but more time-consuming) would be to iterate every nodes neighbours
+		    for (var j = 0; j < nodes.length; j++) {
+		        if (nodes[j].id != id)
+		    	    updateLink(nodes[j].id, id, false);
 		    }
 		}
-		function updateLink(fromNodeId, toNodeId) {
+		function updateLink(fromNodeId, toNodeId, createNew) {
 		    var reverse = false;
 		    var linkEl = $(\'link_\'+fromNodeId+\'_\'+toNodeId);
 		    if (!linkEl) {
 		        // look for link the other way around
 		        linkEl = $(\'link_\'+toNodeId+\'_\'+fromNodeId);
 			if (!linkEl) {
-		            // create new link
-		   	    linkEl = document.createElement("div");
-			    linkEl.id = \'link_\'+fromNodeId+\'_\'+toNodeId;
-			    linkEl.className = "link";
-			    // Create two halves that we can color to indicate direction
-		   	    var halfEl = document.createElement("div");
-			    halfEl.id = linkEl.id + "_" + fromNodeId;
-			    halfEl.className = "link_ok linkhalf";
-			    halfEl.top = "50%";
-			    linkEl.appendChild(halfEl);
-		   	    halfEl = document.createElement("div");
-			    halfEl.id = linkEl.id + "_" + toNodeId;
-			    halfEl.className = "link_bad linkhalf";
-			    halfEl.top = "0px";
-			    linkEl.appendChild(halfEl);
+			    if (createNew) {
+		                // create new link
+		   	    	linkEl = document.createElement("div");
+				linkEl.id = \'link_\'+fromNodeId+\'_\'+toNodeId;
+			    	linkEl.className = "link";
+			    	// Create two halves that we can color to indicate direction
+		   	    	var halfEl = document.createElement("div");
+			    	halfEl.id = linkEl.id + "_" + fromNodeId;
+			    	halfEl.className = "link_ok linkhalf";
+			    	halfEl.top = "50%";
+			    	linkEl.appendChild(halfEl);
+		   	    	halfEl = document.createElement("div");
+			    	halfEl.id = linkEl.id + "_" + toNodeId;
+			    	halfEl.className = "link_bad linkhalf";
+			    	halfEl.top = "0px";
+			    	linkEl.appendChild(halfEl);
 
-			    $(\'nodedisplay\').appendChild(linkEl);
+			    	$(\'nodedisplay\').appendChild(linkEl);
+			    } else {
+			        return;
+			    }
 			} else {
 			    reverse = true;
 			    var halfElFromMe = $(linkEl.id+"_"+fromNodeId);
