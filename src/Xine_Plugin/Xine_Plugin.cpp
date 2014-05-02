@@ -502,7 +502,7 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 				
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Appending extra items to list: ");
 			string sFolder = sFileToPlay;
-			string sExt = "";
+			string sExt = "*.TS";
 			
 			if ( StringUtils::EndsWith(mediaURL,"INFO.VDR",true) ) {
                         	sFolder = StringUtils::RemoveStringFromEnd(mediaURL,9);
@@ -518,6 +518,7 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 			}
 
                         if ( StringUtils::EndsWith(mediaURL,".REC",true) ) {
+                        	
                  		mediaURL = mediaURL + "/00001.ts";
 			}
 
