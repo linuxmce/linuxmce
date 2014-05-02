@@ -302,7 +302,10 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 			);
 
 	// hack: VDR recordings are detected by the info.vdr or info in the recording dir. T
-	bool bVDRRecording = ( StringUtils::EndsWith(mediaURL,"INFO.VDR", true) || StringUtils::EndsWith(mediaURL,"INFO",true) );
+	bool bVDRRecording = ( StringUtils::EndsWith(mediaURL,"INFO.VDR", true) || 
+				StringUtils::EndsWith(mediaURL,"INFO",true) || 
+				StringUtils::EndsWith(mediaURL,".REC",true)
+					 );
 
 	// hack: redirect MythTV recordings to MythTV_Player
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Doing MythTV redirection check...");
@@ -512,6 +515,10 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
                         	sFileToPlay = sFolder;
                                 sExt = "0*.ts";
                  		mediaURL = sFolder + "/00001.ts";
+			}
+
+                        if ( StringUtils::EndsWith(mediaURL,".REC",true) ) {
+                 		mediaURL = mediaURL + "/00001.ts";
 			}
 
 			list<string> vItems;
