@@ -1,6 +1,5 @@
 usr/bin/xine-config
 usr/include
-usr/lib/libxine.la
 usr/lib/libxine*.so
 usr/lib/pkgconfig/libxine.pc
 usr/lib/xine/plugins/*/*.la
