@@ -240,6 +240,8 @@ function Build_Replacements_Precise
 	Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
 
+	# ola needs to be configured to the current build environment
+	cd ${svn_dir}/${svn_branch_name}/external/ola-0.9.0 && autoreconf -i || :
 	Build_Replacement_Package ola external/ola-0.9.0
 	# don't auto install as it pulls up whiptail...  need to pre-seed the values
 	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola_*.deb
@@ -449,7 +451,9 @@ function Build_Replacements_trusty
 	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
 
-	Build_Replacement_Package ola external/ola-0.9.0
+        # ola needs to be configured to the current build environment
+	cd ${svn_dir}/${svn_branch_name}/external/ola-0.9.0 && autoreconf -i || :
+        Build_Replacement_Package ola external/ola-0.9.0
 	# don't auto install as it pulls up whiptail...  need to pre-seed the values
 	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola_*.deb
 	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola-dev*.deb
