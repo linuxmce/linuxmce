@@ -260,6 +260,7 @@ macx{
         folder_03.target = $$APP_RESOURCES_PATH
         ICON = ../platforms/osx/osxicons.icns
         DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
+        DEFINES+=MACBUILD
 }
 
 linux-rasp-pi-g++{
@@ -309,6 +310,7 @@ macx{
         contains(QT_VERSION,4.*.*){
         LIBS += -lQtXml
         LIBS += -lQtNetwork
+
         }
         else:contains(QT_VERSION,5.*.*){
         QT += xml

@@ -409,22 +409,22 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
         setFormFactor(1);
     }
 
-#elif MACOSX
-    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/macosx";
-#elif for_desktop
-#ifdef QT5
+#elif defined Q_OS_MACX
+    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
+#elif defined for_desktop
+#ifdef defined QT5
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/qt5-desktop";
 #elif defined QT4
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
 #endif
 
-#elif WIN32
+#elif defined WIN32
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
-#elif RPI
+#elif defined RPI
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/rpi";
-#elif for_harmattan
+#elif defined for_harmattan
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/harmattan";
-#elif for_android
+#elif defined for_android
     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
         buildType = "/qml/android/tablet";
@@ -453,35 +453,41 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 
 
 #ifdef __ANDROID__
-    setDceResponse("Loading Skins");
-#ifdef QANDROID
-    setDceResponse("Loading Qt Quick 2 Skins for Qt5");
-    remoteDirectoryPath.append("/qt5");
-    finalPath = remoteDirectoryPath;
-#else
+    setDceResponse("Loading Skins")
+    #ifdef QANDROID
+     setDceResponse("Loading Qt Quick 2 Skins for Qt5");
+     remoteDirectoryPath.append("/qt5");
+     finalPath = remoteDirectoryPath;
+    #else
     setDceResponse("Loading Qt Quick 1 Skins for Qt 4");
-#endif
+    #endif
 
     if( !loadSkins(QUrl(finalPath)))
     {   emit skinIndexReady(false);
         b_skinReady = false;
         return false;
     }
-#elif for_android
+#elif defined Q_OS_MACX
+
+    if( !loadSkins(QUrl(finalPath)))
+    {   emit skinIndexReady(false);
+        b_skinReady = false;
+        return false;
+    }
+
+#elif defined for_android
     setDceResponse("Loading skins");
     if( !loadSkins(QUrl(finalPath)))
     {   emit skinIndexReady(false);
         return false;
     }
-#elif WIN32
+#elif defined WIN32
     setDceResponse("Loading skins");
     if( !loadSkins(QUrl::fromLocalFile(finalPath)))
     {   emit skinIndexReady(false);
         return false;
     }
-#elif for_desktop
-
-
+#elif defined for_desktop
     if( !loadSkins(QUrl(finalPath)))
     {
         emit skinIndexReady(false);
@@ -506,7 +512,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
         }
     }
 
-#elif RPI
+#elif defined RPI
 
     if( !loadSkins(QUrl(finalPath)))
     {

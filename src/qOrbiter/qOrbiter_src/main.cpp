@@ -270,7 +270,7 @@ int main(int argc, char* argv[])
         case 's':
             screen="fullscreen";
             break;
-        case 'osd':
+        case 'onscreen':
             screen="fullscreen";
             deviceType=0;
             break;
