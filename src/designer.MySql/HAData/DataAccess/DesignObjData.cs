@@ -149,7 +149,10 @@ namespace HAData.DataAccess {
 			Column.AllowDBNull = false;
 			Column.DefaultValue = 0;
 
-			Columns.Add(FK_STABILITYSTATUS_FIELD, typeof(System.Int32));
+			Column = Columns.Add(FK_STABILITYSTATUS_FIELD, typeof(System.Int32));
+			Column.DefaultValue = 1;
+			Column.AllowDBNull = false;
+			
 			Table.PrimaryKey = PKColumns;
 
 			return Table;

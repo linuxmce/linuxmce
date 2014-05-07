@@ -10,6 +10,8 @@ using HAData.DataAccess;
 using System.Data;
 using System.Diagnostics;
 
+using MySql;
+
 namespace HADesigner
 {
 	/// <summary>

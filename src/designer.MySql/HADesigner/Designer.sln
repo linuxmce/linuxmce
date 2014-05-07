@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C# Express 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HADesigner", "HADesigner.csproj", "{A34C2628-3F2A-4A28-ADF7-39E13A2C6CFC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HAData", "..\HAData\HAData.csproj", "{C5679AE5-F8FF-451F-A97B-EA58F93B04AF}"
@@ -20,11 +20,11 @@ Global
 		{C5679AE5-F8FF-451F-A97B-EA58F93B04AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5679AE5-F8FF-451F-A97B-EA58F93B04AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = HADesigner.csproj
-	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = HADesigner.csproj
 	EndGlobalSection
 	GlobalSection(DPCodeReviewSolutionGUID) = preSolution
 		DPCodeReviewSolutionGUID = {00000000-0000-0000-0000-000000000000}

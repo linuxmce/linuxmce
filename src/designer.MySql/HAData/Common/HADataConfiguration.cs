@@ -27,7 +27,8 @@ namespace HAData.Common
 //		public static string ConnectionString="server=localhost;User ID=sa;Password=msvirus;database=HA";
 //		public static string ConnectionString="server=192.168.1.116;User ID=sa;Password=orlando10;database=HA";
 //		public static string ConnectionString="server=localhost;user id=sa;password=msvirus;database=HA";
-		public static string ConnectionString=@"DRIVER={MySQL ODBC 3.51 Driver};SERVER=localhost;UID=root;PWD=;DATABASE=pluto_dce;";
+//		public static string ConnectionString=@"DRIVER={MySQL ODBC 3.51 Driver};SERVER=localhost;UID=root;PWD=;DATABASE=pluto_dce;";
+		public static string ConnectionString=@"SERVER=localhost;UID=root;PWD=;DATABASE=pluto_dce;";
 		public static string Company = "Business Advantages";
 		public static string AppName = "Home Automation";
 		public static string DataPath = @"Y:\graphics";

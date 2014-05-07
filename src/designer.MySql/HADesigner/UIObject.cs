@@ -417,7 +417,8 @@ namespace HADesigner
 		{
 			get
 			{
-				return m_intDesignObjCategoryIDOriginal != m_intDesignObjCategoryID || m_strDescription != m_strDescriptionOriginal || m_intPriority != m_intPriorityOriginal || this.m_blnAnimate != this.m_blnAnimateOriginal || m_intUIDesignObjType != m_intUIDesignObjTypeOriginal || m_blnCantGoBack != m_blnCantGoBackOriginal;			}
+				return m_intDesignObjCategoryIDOriginal != m_intDesignObjCategoryID || m_strDescription != m_strDescriptionOriginal || m_intPriority != m_intPriorityOriginal || this.m_blnAnimate != this.m_blnAnimateOriginal || m_intUIDesignObjType != m_intUIDesignObjTypeOriginal || m_blnCantGoBack != m_blnCantGoBackOriginal;
+			}
 		}
 		public bool LinkOriginalsChanged
 		{
@@ -1141,6 +1142,25 @@ namespace HADesigner
 			{
 				child.ParentX = x;
 				child.ParentY = y;
+			}
+		}
+
+		public void SetDefaultSize(int Width, int Height)
+		{
+			UIChildSkinLanguage child = GetCurrentChildSkinLanguage(-1, -1);
+			if(null != child)
+			{
+				child.Width = Width;
+				child.Height = Height;
+			}
+		}
+
+		public void SetDefaultIsTabStop(bool IsTabStop)
+		{
+			UIChildSkinLanguage child = GetCurrentChildSkinLanguage(-1, -1);
+			if(null != child)
+			{
+				child.IsTabStop = IsTabStop;
 			}
 		}
 	}
