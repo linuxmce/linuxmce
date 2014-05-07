@@ -45,8 +45,8 @@ namespace HADesigner
 		private int languageID=-1;
 		private int skinID=-1;
 		StringPair[] spStyles;
-        private IContainer components;
-        
+		private IContainer components;
+		
 		public int LanguageID
 		{
 			get {return this.languageID;}
@@ -128,7 +128,7 @@ namespace HADesigner
 				else 
 					return null;
 			}
-        }
+		}
 
 		private UIDesignObjDisplayControl m_objUIDesignObjDisplayControl = null;
 
@@ -150,11 +150,7 @@ namespace HADesigner
 		private System.Windows.Forms.Button button6;
 		private System.Windows.Forms.Button btnCancel;
 		private System.Windows.Forms.Button btnEditText;
-		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.TextBox tbWidth;
-		private System.Windows.Forms.Label label4;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.TextBox tbHeight;
 		private System.Windows.Forms.TextBox tbX;
 		private System.Windows.Forms.Button btnRemoveDesignObj;
@@ -171,7 +167,6 @@ namespace HADesigner
 		private System.Windows.Forms.Button btnAddSkinLanguage;
 
 		private System.Windows.Forms.Button btnRemoveSkinLanguage;
-		private System.Windows.Forms.Label label6;
 		private System.Windows.Forms.ComboBox cbButton;
 		private System.Windows.Forms.ComboBox cbStyle;
 		private System.Windows.Forms.TextBox tbDescription;
@@ -188,7 +183,6 @@ namespace HADesigner
 		private System.Windows.Forms.TabPage tabOnSelected_WithChange;
 		private System.Windows.Forms.TabPage tabOnSelected_NoChange;
 		private System.Windows.Forms.TabPage tabOnHighlighted;
-		private System.Windows.Forms.Button btnSelectDesignObjInTree;
 		private System.Windows.Forms.ComboBox cbAlignH;
 		private System.Windows.Forms.ComboBox cbAlignV;
 		private System.Windows.Forms.NumericUpDown nudPriority;
@@ -196,9 +190,7 @@ namespace HADesigner
 		private System.Windows.Forms.Button btnVariationControllerCriteria;
 		private System.Windows.Forms.CheckBox chCantGoBack;
 		private System.Windows.Forms.TextBox tbRotate;
-		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.TextBox tbOpacity;
-		private System.Windows.Forms.Label label7;
 		
 
 
@@ -208,25 +200,15 @@ namespace HADesigner
 		private System.Windows.Forms.TabPage tabChildren;
 		private System.Windows.Forms.TabPage tabButtons;
 		private System.Windows.Forms.TabControl tabAllPages;
-		private System.Windows.Forms.Label label11;
 		private System.Windows.Forms.Label lVariationOwner;
 		private System.Windows.Forms.ComboBox cbVariationStability;
-		private System.Windows.Forms.Label label12;
-		private System.Windows.Forms.Label label13;
 		private System.Windows.Forms.CheckBox chChildBehindBG;
-		private System.Windows.Forms.Label label14;
-		private System.Windows.Forms.Label label15;
 		private System.Windows.Forms.TextBox tbTS_Up;
 		private System.Windows.Forms.TextBox tbTS_Down;
-		private System.Windows.Forms.Label label16;
 		private System.Windows.Forms.TextBox tbTS_Right;
-		private System.Windows.Forms.Label label17;
 		private System.Windows.Forms.TextBox tbTS_Left;
-		private System.Windows.Forms.Label label18;
-		private System.Windows.Forms.Label label19;
 		private System.Windows.Forms.TextBox tbTiedTo;
 		private System.Windows.Forms.Label lDesignObjOwner;
-		private System.Windows.Forms.Label label20;
 		private System.Windows.Forms.ComboBox cbDesignObjStability;
 		private System.Windows.Forms.CheckBox chCanBeHidden;
 		private System.Windows.Forms.CheckBox chHideByDefault;
@@ -235,7 +217,6 @@ namespace HADesigner
 		private System.Windows.Forms.CheckBox chRegenerateForEachScreen;
 		private System.Windows.Forms.CheckBox chIsTabStop;
 		private System.Windows.Forms.CheckBox chDontResetSelectedState;
-		private System.Windows.Forms.Label label21;
 		private System.Windows.Forms.TextBox tbVisibleStates;
 		private System.Windows.Forms.Button btnChildUp;
 		private System.Windows.Forms.Button btnChildDown;
@@ -243,19 +224,14 @@ namespace HADesigner
 		private System.Windows.Forms.Label lbEffect;
 		private System.Windows.Forms.ComboBox cbEffectsSelectChange;
 		private System.Windows.Forms.Panel panel1;
-		private System.Windows.Forms.Label label22;
 		private System.Windows.Forms.ComboBox cbEffectsSelectNoChange;
 		private System.Windows.Forms.Panel panel2;
-		private System.Windows.Forms.Label label23;
 		private System.Windows.Forms.ComboBox cbEffectsHighlight;
 		private System.Windows.Forms.Panel pnCommandGroupInfo;
 		private System.Windows.Forms.Label lMasterDevice;
 		private System.Windows.Forms.CheckBox chRelToSender;
 		private System.Windows.Forms.TextBox tbDeviceCategory;
 		private System.Windows.Forms.TextBox tbMasterDeviceList;
-		private System.Windows.Forms.Label label10;
-		private System.Windows.Forms.Label label9;
-		private System.Windows.Forms.Label label8;
 		private System.Windows.Forms.ComboBox cbBroadcast;
 		private System.Windows.Forms.Button btnOnActivateGoto;
 		private System.Windows.Forms.ListBox lbSelectedCommands;
@@ -270,6 +246,8 @@ namespace HADesigner
 		private System.Windows.Forms.ComboBox cbLanguageSkin_Child;
 		private System.Windows.Forms.Button btnAddSkinLanguage_Child;
 		private System.Windows.Forms.Button btnRemoveSkinLanguage_Child;
+		private Button btnAddExplicitText;
+		private Button btnAddExplicitDesignObj;
 
 		private CommonMethods m_objCommon = new CommonMethods();
 
@@ -429,7 +407,7 @@ namespace HADesigner
 			{
 				StyleDataRow sdr = new StyleDataRow(dr);
 				this.spStyles[iStyle] = new StringPair(sdr.fPK_Style.ToString(),sdr.fDescription);// TODO: Style Description can be null ?
-				this.cbStyle.Items.Add(this.spStyles[iStyle++]);    
+				this.cbStyle.Items.Add(this.spStyles[iStyle++]);	
 			}
 		}
 
@@ -981,1426 +959,1462 @@ namespace HADesigner
 		/// </summary>
 		private void InitializeComponent()
 		{
-            this.components = new System.ComponentModel.Container();
-            this.panelPreview = new System.Windows.Forms.Panel();
-            this.lbVariations = new System.Windows.Forms.ListBox();
-            this.button6 = new System.Windows.Forms.Button();
-            this.btnSaveChanges = new System.Windows.Forms.Button();
-            this.cbAvailableVariations = new System.Windows.Forms.ComboBox();
-            this.lbChildrenDesignObjs = new System.Windows.Forms.ListBox();
-            this.btnLoadSelectedDesignObj = new System.Windows.Forms.Button();
-            this.btnCancel = new System.Windows.Forms.Button();
-            this.btnRemoveDesignObj = new System.Windows.Forms.Button();
-            this.tbX = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.tbY = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.tbWidth = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.tbHeight = new System.Windows.Forms.TextBox();
-            this.pnParameters = new System.Windows.Forms.Panel();
-            this.btnRemoveSelectedVariation = new System.Windows.Forms.Button();
-            this.lbText = new System.Windows.Forms.ListBox();
-            this.btnEditText = new System.Windows.Forms.Button();
-            this.btnRemoveText = new System.Windows.Forms.Button();
-            this.mnuDesignObjXDesigner = new System.Windows.Forms.MainMenu(this.components);
-            this.mnuZoom = new System.Windows.Forms.MenuItem();
-            this.miZoom25 = new System.Windows.Forms.MenuItem();
-            this.miZoom50 = new System.Windows.Forms.MenuItem();
-            this.miZoom100 = new System.Windows.Forms.MenuItem();
-            this.miZoom200 = new System.Windows.Forms.MenuItem();
-            this.mnuSkin = new System.Windows.Forms.MenuItem();
-            this.mnuLanguage = new System.Windows.Forms.MenuItem();
-            this.cbLanguageSkin = new System.Windows.Forms.ComboBox();
-            this.cbAlignH = new System.Windows.Forms.ComboBox();
-            this.chCantGoBack = new System.Windows.Forms.CheckBox();
-            this.btnVariationControllerCriteria = new System.Windows.Forms.Button();
-            this.chRegenerateForEachScreen = new System.Windows.Forms.CheckBox();
-            this.chChildBehindBG = new System.Windows.Forms.CheckBox();
-            this.chCanBeHidden = new System.Windows.Forms.CheckBox();
-            this.cbAlignV = new System.Windows.Forms.ComboBox();
-            this.btnSelectDesignObjInTree = new System.Windows.Forms.Button();
-            this.btnRemoveSkinLanguage = new System.Windows.Forms.Button();
-            this.cbStyle = new System.Windows.Forms.ComboBox();
-            this.btnAddSkinLanguage = new System.Windows.Forms.Button();
-            this.tabButtons = new System.Windows.Forms.TabPage();
-            this.cbButton = new System.Windows.Forms.ComboBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.tabAllPages = new System.Windows.Forms.TabControl();
-            this.tabParameters = new System.Windows.Forms.TabPage();
-            this.label20 = new System.Windows.Forms.Label();
-            this.cbDesignObjStability = new System.Windows.Forms.ComboBox();
-            this.lDesignObjOwner = new System.Windows.Forms.Label();
-            this.label13 = new System.Windows.Forms.Label();
-            this.label12 = new System.Windows.Forms.Label();
-            this.cbVariationStability = new System.Windows.Forms.ComboBox();
-            this.chDontResetSelectedState = new System.Windows.Forms.CheckBox();
-            this.lVariationOwner = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
-            this.tabChildren = new System.Windows.Forms.TabPage();
-            this.cbLanguageSkin_Child = new System.Windows.Forms.ComboBox();
-            this.btnAddSkinLanguage_Child = new System.Windows.Forms.Button();
-            this.btnRemoveSkinLanguage_Child = new System.Windows.Forms.Button();
-            this.btnChildDown = new System.Windows.Forms.Button();
-            this.btnChildUp = new System.Windows.Forms.Button();
-            this.tbVisibleStates = new System.Windows.Forms.TextBox();
-            this.label21 = new System.Windows.Forms.Label();
-            this.tbTiedTo = new System.Windows.Forms.TextBox();
-            this.label19 = new System.Windows.Forms.Label();
-            this.tbTS_Right = new System.Windows.Forms.TextBox();
-            this.label17 = new System.Windows.Forms.Label();
-            this.tbTS_Left = new System.Windows.Forms.TextBox();
-            this.label18 = new System.Windows.Forms.Label();
-            this.tbTS_Down = new System.Windows.Forms.TextBox();
-            this.label16 = new System.Windows.Forms.Label();
-            this.tbTS_Up = new System.Windows.Forms.TextBox();
-            this.label15 = new System.Windows.Forms.Label();
-            this.label14 = new System.Windows.Forms.Label();
-            this.chIsTabStop = new System.Windows.Forms.CheckBox();
-            this.chDontMergeBG = new System.Windows.Forms.CheckBox();
-            this.chChildBeforeText = new System.Windows.Forms.CheckBox();
-            this.tbOpacity = new System.Windows.Forms.TextBox();
-            this.tbRotate = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.btnBGColorTSL = new System.Windows.Forms.Button();
-            this.chHideByDefault = new System.Windows.Forms.CheckBox();
-            this.tabOnActivate = new System.Windows.Forms.TabPage();
-            this.tabOnLoad = new System.Windows.Forms.TabPage();
-            this.tabOnUnload = new System.Windows.Forms.TabPage();
-            this.tabOnStartup = new System.Windows.Forms.TabPage();
-            this.tabOnHighlight = new System.Windows.Forms.TabPage();
-            this.tabOnUnhighlight = new System.Windows.Forms.TabPage();
-            this.tabOnTimeout = new System.Windows.Forms.TabPage();
-            this.tabOnSelected_WithChange = new System.Windows.Forms.TabPage();
-            this.pnEffectsSelectChange = new System.Windows.Forms.Panel();
-            this.lbEffect = new System.Windows.Forms.Label();
-            this.cbEffectsSelectChange = new System.Windows.Forms.ComboBox();
-            this.tabOnSelected_NoChange = new System.Windows.Forms.TabPage();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.label22 = new System.Windows.Forms.Label();
-            this.cbEffectsSelectNoChange = new System.Windows.Forms.ComboBox();
-            this.tabOnHighlighted = new System.Windows.Forms.TabPage();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.label23 = new System.Windows.Forms.Label();
-            this.cbEffectsHighlight = new System.Windows.Forms.ComboBox();
-            this.tbDescription = new System.Windows.Forms.TextBox();
-            this.nudPriority = new System.Windows.Forms.NumericUpDown();
-            this.lblPriority = new System.Windows.Forms.Label();
-            this.cbAnimate = new System.Windows.Forms.CheckBox();
-            this.pnCommandGroupInfo = new System.Windows.Forms.Panel();
-            this.lMasterDevice = new System.Windows.Forms.Label();
-            this.chRelToSender = new System.Windows.Forms.CheckBox();
-            this.tbDeviceCategory = new System.Windows.Forms.TextBox();
-            this.tbMasterDeviceList = new System.Windows.Forms.TextBox();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.cbBroadcast = new System.Windows.Forms.ComboBox();
-            this.btnOnActivateGoto = new System.Windows.Forms.Button();
-            this.lbSelectedCommands = new System.Windows.Forms.ListBox();
-            this.btnOnActivateDown = new System.Windows.Forms.Button();
-            this.tvCommand = new System.Windows.Forms.TreeView();
-            this.btnOnActivateUp = new System.Windows.Forms.Button();
-            this.btnOnActivateRemoveAG = new System.Windows.Forms.Button();
-            this.btnOnActivateAddAG = new System.Windows.Forms.Button();
-            this.pnOnActivateParameters = new System.Windows.Forms.Panel();
-            this.labAvailableCommands = new System.Windows.Forms.Label();
-            this.labSelectedCommands = new System.Windows.Forms.Label();
-            this.tabButtons.SuspendLayout();
-            this.tabAllPages.SuspendLayout();
-            this.tabParameters.SuspendLayout();
-            this.tabChildren.SuspendLayout();
-            this.tabOnSelected_WithChange.SuspendLayout();
-            this.pnEffectsSelectChange.SuspendLayout();
-            this.tabOnSelected_NoChange.SuspendLayout();
-            this.panel1.SuspendLayout();
-            this.tabOnHighlighted.SuspendLayout();
-            this.panel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.nudPriority)).BeginInit();
-            this.pnCommandGroupInfo.SuspendLayout();
-            this.SuspendLayout();
-            // 
-            // panelPreview
-            // 
-            this.panelPreview.AllowDrop = true;
-            this.panelPreview.AutoScroll = true;
-            this.panelPreview.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelPreview.Location = new System.Drawing.Point(0, 0);
-            this.panelPreview.Name = "panelPreview";
-            this.panelPreview.Size = new System.Drawing.Size(936, 406);
-            this.panelPreview.TabIndex = 0;
-            this.panelPreview.Paint += new System.Windows.Forms.PaintEventHandler(this.panelPreview_Paint);
-            this.panelPreview.DragDrop += new System.Windows.Forms.DragEventHandler(this.panelPreview_DragDrop);
-            this.panelPreview.DragEnter += new System.Windows.Forms.DragEventHandler(this.panelPreview_DragEnter);
-            // 
-            // lbVariations
-            // 
-            this.lbVariations.AllowDrop = true;
-            this.lbVariations.DisplayMember = "Description";
-            this.lbVariations.Location = new System.Drawing.Point(4, 476);
-            this.lbVariations.Name = "lbVariations";
-            this.lbVariations.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbVariations.Size = new System.Drawing.Size(128, 108);
-            this.lbVariations.TabIndex = 5;
-            this.lbVariations.Tag = "Selected";
-            this.lbVariations.ValueMember = "ID";
-            this.lbVariations.DragOver += new System.Windows.Forms.DragEventHandler(this.lbVariations_DragOver);
-            this.lbVariations.SelectedIndexChanged += new System.EventHandler(this.lbVariations_SelectedIndexChanged);
-            this.lbVariations.DragDrop += new System.Windows.Forms.DragEventHandler(this.lbVariations_DragDrop);
-            this.lbVariations.DragEnter += new System.Windows.Forms.DragEventHandler(this.lbVariations_DragEnter);
-            // 
-            // button6
-            // 
-            this.button6.Location = new System.Drawing.Point(100, 588);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(32, 23);
-            this.button6.TabIndex = 7;
-            this.button6.Text = "Add";
-            this.button6.Click += new System.EventHandler(this.button6_Click);
-            // 
-            // btnSaveChanges
-            // 
-            this.btnSaveChanges.Location = new System.Drawing.Point(828, 644);
-            this.btnSaveChanges.Name = "btnSaveChanges";
-            this.btnSaveChanges.Size = new System.Drawing.Size(88, 20);
-            this.btnSaveChanges.TabIndex = 8;
-            this.btnSaveChanges.Text = "Save Changes";
-            this.btnSaveChanges.Click += new System.EventHandler(this.btnSaveChanges_Click);
-            // 
-            // cbAvailableVariations
-            // 
-            this.cbAvailableVariations.DisplayMember = "Description";
-            this.cbAvailableVariations.Location = new System.Drawing.Point(4, 588);
-            this.cbAvailableVariations.Name = "cbAvailableVariations";
-            this.cbAvailableVariations.Size = new System.Drawing.Size(88, 21);
-            this.cbAvailableVariations.TabIndex = 9;
-            this.cbAvailableVariations.ValueMember = "ID";
-            // 
-            // lbChildrenDesignObjs
-            // 
-            this.lbChildrenDesignObjs.DisplayMember = "Description";
-            this.lbChildrenDesignObjs.Location = new System.Drawing.Point(0, 0);
-            this.lbChildrenDesignObjs.Name = "lbChildrenDesignObjs";
-            this.lbChildrenDesignObjs.Size = new System.Drawing.Size(224, 147);
-            this.lbChildrenDesignObjs.TabIndex = 10;
-            this.lbChildrenDesignObjs.ValueMember = "ID";
-            this.lbChildrenDesignObjs.SelectedIndexChanged += new System.EventHandler(this.lbDesignObjsOrText_SelectedIndexChanged);
-            this.lbChildrenDesignObjs.DoubleClick += new System.EventHandler(this.lbChildrenDesignObjs_DoubleClick);
-            this.lbChildrenDesignObjs.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lbChildrenDesignObjs_MouseDown);
-            // 
-            // btnLoadSelectedDesignObj
-            // 
-            this.btnLoadSelectedDesignObj.Location = new System.Drawing.Point(0, 152);
-            this.btnLoadSelectedDesignObj.Name = "btnLoadSelectedDesignObj";
-            this.btnLoadSelectedDesignObj.Size = new System.Drawing.Size(40, 23);
-            this.btnLoadSelectedDesignObj.TabIndex = 11;
-            this.btnLoadSelectedDesignObj.Text = "Load";
-            this.btnLoadSelectedDesignObj.Click += new System.EventHandler(this.btnLoadSelectedDesignObj_Click);
-            // 
-            // btnCancel
-            // 
-            this.btnCancel.Location = new System.Drawing.Point(732, 644);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(88, 20);
-            this.btnCancel.TabIndex = 13;
-            this.btnCancel.Text = "Cancel";
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
-            // 
-            // btnRemoveDesignObj
-            // 
-            this.btnRemoveDesignObj.Location = new System.Drawing.Point(104, 152);
-            this.btnRemoveDesignObj.Name = "btnRemoveDesignObj";
-            this.btnRemoveDesignObj.Size = new System.Drawing.Size(56, 23);
-            this.btnRemoveDesignObj.TabIndex = 14;
-            this.btnRemoveDesignObj.Text = "Remove";
-            this.btnRemoveDesignObj.Click += new System.EventHandler(this.btnRemoveDesignObj_Click);
-            // 
-            // tbX
-            // 
-            this.tbX.Enabled = false;
-            this.tbX.Location = new System.Drawing.Point(416, 104);
-            this.tbX.Name = "tbX";
-            this.tbX.Size = new System.Drawing.Size(40, 20);
-            this.tbX.TabIndex = 15;
-            this.tbX.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbX_KeyDown);
-            this.tbX.Leave += new System.EventHandler(this.tbX_Leave);
-            // 
-            // label1
-            // 
-            this.label1.Location = new System.Drawing.Point(400, 104);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(16, 23);
-            this.label1.TabIndex = 17;
-            this.label1.Text = "X";
-            // 
-            // label2
-            // 
-            this.label2.Location = new System.Drawing.Point(464, 104);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(16, 23);
-            this.label2.TabIndex = 19;
-            this.label2.Text = "Y";
-            // 
-            // tbY
-            // 
-            this.tbY.Enabled = false;
-            this.tbY.Location = new System.Drawing.Point(480, 104);
-            this.tbY.Name = "tbY";
-            this.tbY.Size = new System.Drawing.Size(40, 20);
-            this.tbY.TabIndex = 18;
-            this.tbY.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbY_KeyDown);
-            this.tbY.Leave += new System.EventHandler(this.tbY_Leave);
-            // 
-            // label3
-            // 
-            this.label3.Location = new System.Drawing.Point(400, 128);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(40, 23);
-            this.label3.TabIndex = 21;
-            this.label3.Text = "W";
-            // 
-            // tbWidth
-            // 
-            this.tbWidth.Enabled = false;
-            this.tbWidth.Location = new System.Drawing.Point(416, 128);
-            this.tbWidth.Name = "tbWidth";
-            this.tbWidth.Size = new System.Drawing.Size(40, 20);
-            this.tbWidth.TabIndex = 20;
-            this.tbWidth.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbWidth_KeyDown);
-            this.tbWidth.Leave += new System.EventHandler(this.tbWidth_Leave);
-            // 
-            // label4
-            // 
-            this.label4.Location = new System.Drawing.Point(464, 128);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(40, 23);
-            this.label4.TabIndex = 23;
-            this.label4.Text = "H";
-            // 
-            // tbHeight
-            // 
-            this.tbHeight.Enabled = false;
-            this.tbHeight.Location = new System.Drawing.Point(480, 128);
-            this.tbHeight.Name = "tbHeight";
-            this.tbHeight.Size = new System.Drawing.Size(40, 20);
-            this.tbHeight.TabIndex = 22;
-            this.tbHeight.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbHeight_KeyDown);
-            this.tbHeight.Leave += new System.EventHandler(this.tbHeight_Leave);
-            // 
-            // pnParameters
-            // 
-            this.pnParameters.AutoScroll = true;
-            this.pnParameters.Location = new System.Drawing.Point(0, 8);
-            this.pnParameters.Name = "pnParameters";
-            this.pnParameters.Size = new System.Drawing.Size(456, 176);
-            this.pnParameters.TabIndex = 24;
-            // 
-            // btnRemoveSelectedVariation
-            // 
-            this.btnRemoveSelectedVariation.Location = new System.Drawing.Point(4, 612);
-            this.btnRemoveSelectedVariation.Name = "btnRemoveSelectedVariation";
-            this.btnRemoveSelectedVariation.Size = new System.Drawing.Size(128, 23);
-            this.btnRemoveSelectedVariation.TabIndex = 0;
-            this.btnRemoveSelectedVariation.Text = "Remove Selected";
-            this.btnRemoveSelectedVariation.Click += new System.EventHandler(this.btnRemoveSelectedVariation_Click);
-            // 
-            // lbText
-            // 
-            this.lbText.DisplayMember = "Description";
-            this.lbText.Location = new System.Drawing.Point(232, 48);
-            this.lbText.Name = "lbText";
-            this.lbText.Size = new System.Drawing.Size(152, 95);
-            this.lbText.TabIndex = 25;
-            this.lbText.ValueMember = "ID";
-            this.lbText.SelectedIndexChanged += new System.EventHandler(this.lbDesignObjsOrText_SelectedIndexChanged);
-            this.lbText.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lbText_MouseDown);
-            // 
-            // btnEditText
-            // 
-            this.btnEditText.Location = new System.Drawing.Point(240, 152);
-            this.btnEditText.Name = "btnEditText";
-            this.btnEditText.Size = new System.Drawing.Size(40, 23);
-            this.btnEditText.TabIndex = 26;
-            this.btnEditText.Text = "Edit";
-            this.btnEditText.Click += new System.EventHandler(this.btnEditText_Click);
-            // 
-            // btnRemoveText
-            // 
-            this.btnRemoveText.Location = new System.Drawing.Point(320, 152);
-            this.btnRemoveText.Name = "btnRemoveText";
-            this.btnRemoveText.Size = new System.Drawing.Size(56, 23);
-            this.btnRemoveText.TabIndex = 27;
-            this.btnRemoveText.Text = "Remove";
-            this.btnRemoveText.Click += new System.EventHandler(this.btnRemoveText_Click);
-            // 
-            // mnuDesignObjXDesigner
-            // 
-            this.mnuDesignObjXDesigner.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+			this.components = new System.ComponentModel.Container();
+			System.Windows.Forms.Label label1;
+			System.Windows.Forms.Label label2;
+			System.Windows.Forms.Label label3;
+			System.Windows.Forms.Label label4;
+			System.Windows.Forms.Label label6;
+			System.Windows.Forms.Label label20;
+			System.Windows.Forms.Label label13;
+			System.Windows.Forms.Label label12;
+			System.Windows.Forms.Label label11;
+			System.Windows.Forms.Label label21;
+			System.Windows.Forms.Label label19;
+			System.Windows.Forms.Label label17;
+			System.Windows.Forms.Label label18;
+			System.Windows.Forms.Label label16;
+			System.Windows.Forms.Label label15;
+			System.Windows.Forms.Label label14;
+			System.Windows.Forms.Label label5;
+			System.Windows.Forms.Label label7;
+			System.Windows.Forms.Label label22;
+			System.Windows.Forms.Label label23;
+			System.Windows.Forms.Label label10;
+			System.Windows.Forms.Label label9;
+			System.Windows.Forms.Label label8;
+			this.panelPreview = new System.Windows.Forms.Panel();
+			this.lbVariations = new System.Windows.Forms.ListBox();
+			this.button6 = new System.Windows.Forms.Button();
+			this.btnSaveChanges = new System.Windows.Forms.Button();
+			this.cbAvailableVariations = new System.Windows.Forms.ComboBox();
+			this.lbChildrenDesignObjs = new System.Windows.Forms.ListBox();
+			this.btnLoadSelectedDesignObj = new System.Windows.Forms.Button();
+			this.btnCancel = new System.Windows.Forms.Button();
+			this.btnRemoveDesignObj = new System.Windows.Forms.Button();
+			this.tbX = new System.Windows.Forms.TextBox();
+			this.tbY = new System.Windows.Forms.TextBox();
+			this.tbWidth = new System.Windows.Forms.TextBox();
+			this.tbHeight = new System.Windows.Forms.TextBox();
+			this.pnParameters = new System.Windows.Forms.Panel();
+			this.btnRemoveSelectedVariation = new System.Windows.Forms.Button();
+			this.lbText = new System.Windows.Forms.ListBox();
+			this.btnEditText = new System.Windows.Forms.Button();
+			this.btnRemoveText = new System.Windows.Forms.Button();
+			this.mnuDesignObjXDesigner = new System.Windows.Forms.MainMenu(this.components);
+			this.mnuZoom = new System.Windows.Forms.MenuItem();
+			this.miZoom25 = new System.Windows.Forms.MenuItem();
+			this.miZoom50 = new System.Windows.Forms.MenuItem();
+			this.miZoom100 = new System.Windows.Forms.MenuItem();
+			this.miZoom200 = new System.Windows.Forms.MenuItem();
+			this.mnuSkin = new System.Windows.Forms.MenuItem();
+			this.mnuLanguage = new System.Windows.Forms.MenuItem();
+			this.cbLanguageSkin = new System.Windows.Forms.ComboBox();
+			this.cbAlignH = new System.Windows.Forms.ComboBox();
+			this.chCantGoBack = new System.Windows.Forms.CheckBox();
+			this.btnVariationControllerCriteria = new System.Windows.Forms.Button();
+			this.chRegenerateForEachScreen = new System.Windows.Forms.CheckBox();
+			this.chChildBehindBG = new System.Windows.Forms.CheckBox();
+			this.chCanBeHidden = new System.Windows.Forms.CheckBox();
+			this.cbAlignV = new System.Windows.Forms.ComboBox();
+			this.btnRemoveSkinLanguage = new System.Windows.Forms.Button();
+			this.cbStyle = new System.Windows.Forms.ComboBox();
+			this.btnAddSkinLanguage = new System.Windows.Forms.Button();
+			this.tabButtons = new System.Windows.Forms.TabPage();
+			this.cbButton = new System.Windows.Forms.ComboBox();
+			this.tabAllPages = new System.Windows.Forms.TabControl();
+			this.tabParameters = new System.Windows.Forms.TabPage();
+			this.cbDesignObjStability = new System.Windows.Forms.ComboBox();
+			this.lDesignObjOwner = new System.Windows.Forms.Label();
+			this.cbVariationStability = new System.Windows.Forms.ComboBox();
+			this.chDontResetSelectedState = new System.Windows.Forms.CheckBox();
+			this.lVariationOwner = new System.Windows.Forms.Label();
+			this.tabChildren = new System.Windows.Forms.TabPage();
+			this.btnAddExplicitText = new System.Windows.Forms.Button();
+			this.btnAddExplicitDesignObj = new System.Windows.Forms.Button();
+			this.cbLanguageSkin_Child = new System.Windows.Forms.ComboBox();
+			this.btnAddSkinLanguage_Child = new System.Windows.Forms.Button();
+			this.btnRemoveSkinLanguage_Child = new System.Windows.Forms.Button();
+			this.btnChildDown = new System.Windows.Forms.Button();
+			this.btnChildUp = new System.Windows.Forms.Button();
+			this.tbVisibleStates = new System.Windows.Forms.TextBox();
+			this.tbTiedTo = new System.Windows.Forms.TextBox();
+			this.tbTS_Right = new System.Windows.Forms.TextBox();
+			this.tbTS_Left = new System.Windows.Forms.TextBox();
+			this.tbTS_Down = new System.Windows.Forms.TextBox();
+			this.tbTS_Up = new System.Windows.Forms.TextBox();
+			this.chIsTabStop = new System.Windows.Forms.CheckBox();
+			this.chDontMergeBG = new System.Windows.Forms.CheckBox();
+			this.chChildBeforeText = new System.Windows.Forms.CheckBox();
+			this.tbOpacity = new System.Windows.Forms.TextBox();
+			this.tbRotate = new System.Windows.Forms.TextBox();
+			this.btnBGColorTSL = new System.Windows.Forms.Button();
+			this.chHideByDefault = new System.Windows.Forms.CheckBox();
+			this.tabOnActivate = new System.Windows.Forms.TabPage();
+			this.tabOnLoad = new System.Windows.Forms.TabPage();
+			this.tabOnUnload = new System.Windows.Forms.TabPage();
+			this.tabOnStartup = new System.Windows.Forms.TabPage();
+			this.tabOnHighlight = new System.Windows.Forms.TabPage();
+			this.tabOnUnhighlight = new System.Windows.Forms.TabPage();
+			this.tabOnTimeout = new System.Windows.Forms.TabPage();
+			this.tabOnSelected_WithChange = new System.Windows.Forms.TabPage();
+			this.pnEffectsSelectChange = new System.Windows.Forms.Panel();
+			this.lbEffect = new System.Windows.Forms.Label();
+			this.cbEffectsSelectChange = new System.Windows.Forms.ComboBox();
+			this.tabOnSelected_NoChange = new System.Windows.Forms.TabPage();
+			this.panel1 = new System.Windows.Forms.Panel();
+			this.cbEffectsSelectNoChange = new System.Windows.Forms.ComboBox();
+			this.tabOnHighlighted = new System.Windows.Forms.TabPage();
+			this.panel2 = new System.Windows.Forms.Panel();
+			this.cbEffectsHighlight = new System.Windows.Forms.ComboBox();
+			this.tbDescription = new System.Windows.Forms.TextBox();
+			this.nudPriority = new System.Windows.Forms.NumericUpDown();
+			this.lblPriority = new System.Windows.Forms.Label();
+			this.cbAnimate = new System.Windows.Forms.CheckBox();
+			this.pnCommandGroupInfo = new System.Windows.Forms.Panel();
+			this.lMasterDevice = new System.Windows.Forms.Label();
+			this.chRelToSender = new System.Windows.Forms.CheckBox();
+			this.tbDeviceCategory = new System.Windows.Forms.TextBox();
+			this.tbMasterDeviceList = new System.Windows.Forms.TextBox();
+			this.cbBroadcast = new System.Windows.Forms.ComboBox();
+			this.btnOnActivateGoto = new System.Windows.Forms.Button();
+			this.lbSelectedCommands = new System.Windows.Forms.ListBox();
+			this.btnOnActivateDown = new System.Windows.Forms.Button();
+			this.tvCommand = new System.Windows.Forms.TreeView();
+			this.btnOnActivateUp = new System.Windows.Forms.Button();
+			this.btnOnActivateRemoveAG = new System.Windows.Forms.Button();
+			this.btnOnActivateAddAG = new System.Windows.Forms.Button();
+			this.pnOnActivateParameters = new System.Windows.Forms.Panel();
+			this.labAvailableCommands = new System.Windows.Forms.Label();
+			this.labSelectedCommands = new System.Windows.Forms.Label();
+			label1 = new System.Windows.Forms.Label();
+			label2 = new System.Windows.Forms.Label();
+			label3 = new System.Windows.Forms.Label();
+			label4 = new System.Windows.Forms.Label();
+			label6 = new System.Windows.Forms.Label();
+			label20 = new System.Windows.Forms.Label();
+			label13 = new System.Windows.Forms.Label();
+			label12 = new System.Windows.Forms.Label();
+			label11 = new System.Windows.Forms.Label();
+			label21 = new System.Windows.Forms.Label();
+			label19 = new System.Windows.Forms.Label();
+			label17 = new System.Windows.Forms.Label();
+			label18 = new System.Windows.Forms.Label();
+			label16 = new System.Windows.Forms.Label();
+			label15 = new System.Windows.Forms.Label();
+			label14 = new System.Windows.Forms.Label();
+			label5 = new System.Windows.Forms.Label();
+			label7 = new System.Windows.Forms.Label();
+			label22 = new System.Windows.Forms.Label();
+			label23 = new System.Windows.Forms.Label();
+			label10 = new System.Windows.Forms.Label();
+			label9 = new System.Windows.Forms.Label();
+			label8 = new System.Windows.Forms.Label();
+			this.tabButtons.SuspendLayout();
+			this.tabAllPages.SuspendLayout();
+			this.tabParameters.SuspendLayout();
+			this.tabChildren.SuspendLayout();
+			this.tabOnSelected_WithChange.SuspendLayout();
+			this.pnEffectsSelectChange.SuspendLayout();
+			this.tabOnSelected_NoChange.SuspendLayout();
+			this.panel1.SuspendLayout();
+			this.tabOnHighlighted.SuspendLayout();
+			this.panel2.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.nudPriority)).BeginInit();
+			this.pnCommandGroupInfo.SuspendLayout();
+			this.SuspendLayout();
+			// 
+			// label1
+			// 
+			label1.Location = new System.Drawing.Point(400, 104);
+			label1.Name = "label1";
+			label1.Size = new System.Drawing.Size(16, 23);
+			label1.TabIndex = 17;
+			label1.Text = "X";
+			// 
+			// label2
+			// 
+			label2.Location = new System.Drawing.Point(464, 104);
+			label2.Name = "label2";
+			label2.Size = new System.Drawing.Size(16, 23);
+			label2.TabIndex = 19;
+			label2.Text = "Y";
+			// 
+			// label3
+			// 
+			label3.Location = new System.Drawing.Point(400, 128);
+			label3.Name = "label3";
+			label3.Size = new System.Drawing.Size(40, 23);
+			label3.TabIndex = 21;
+			label3.Text = "W";
+			// 
+			// label4
+			// 
+			label4.Location = new System.Drawing.Point(464, 128);
+			label4.Name = "label4";
+			label4.Size = new System.Drawing.Size(40, 23);
+			label4.TabIndex = 23;
+			label4.Text = "H";
+			// 
+			// label6
+			// 
+			label6.Location = new System.Drawing.Point(32, 24);
+			label6.Name = "label6";
+			label6.Size = new System.Drawing.Size(100, 23);
+			label6.TabIndex = 13;
+			label6.Text = "Button";
+			// 
+			// label20
+			// 
+			label20.Location = new System.Drawing.Point(608, 88);
+			label20.Name = "label20";
+			label20.Size = new System.Drawing.Size(100, 16);
+			label20.TabIndex = 51;
+			label20.Text = "Stability:";
+			// 
+			// label13
+			// 
+			label13.Location = new System.Drawing.Point(608, 8);
+			label13.Name = "label13";
+			label13.Size = new System.Drawing.Size(112, 16);
+			label13.TabIndex = 48;
+			label13.Text = "Global options";
+			// 
+			// label12
+			// 
+			label12.Location = new System.Drawing.Point(456, 136);
+			label12.Name = "label12";
+			label12.Size = new System.Drawing.Size(100, 16);
+			label12.TabIndex = 47;
+			label12.Text = "Stability:";
+			// 
+			// label11
+			// 
+			label11.Location = new System.Drawing.Point(456, 8);
+			label11.Name = "label11";
+			label11.Size = new System.Drawing.Size(136, 16);
+			label11.TabIndex = 43;
+			label11.Text = "Variation specific options";
+			// 
+			// label21
+			// 
+			label21.Location = new System.Drawing.Point(664, 128);
+			label21.Name = "label21";
+			label21.Size = new System.Drawing.Size(80, 16);
+			label21.TabIndex = 63;
+			label21.Text = "Visible States:";
+			// 
+			// label19
+			// 
+			label19.Location = new System.Drawing.Point(664, 88);
+			label19.Name = "label19";
+			label19.Size = new System.Drawing.Size(72, 16);
+			label19.TabIndex = 61;
+			label19.Text = "Tie state to:";
+			// 
+			// label17
+			// 
+			label17.Location = new System.Drawing.Point(712, 64);
+			label17.Name = "label17";
+			label17.Size = new System.Drawing.Size(16, 23);
+			label17.TabIndex = 59;
+			label17.Text = "R:";
+			label17.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// label18
+			// 
+			label18.Location = new System.Drawing.Point(688, 64);
+			label18.Name = "label18";
+			label18.Size = new System.Drawing.Size(16, 23);
+			label18.TabIndex = 57;
+			label18.Text = "L:";
+			label18.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// label16
+			// 
+			label16.Location = new System.Drawing.Point(712, 40);
+			label16.Name = "label16";
+			label16.Size = new System.Drawing.Size(16, 23);
+			label16.TabIndex = 55;
+			label16.Text = "D:";
+			label16.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// label15
+			// 
+			label15.Location = new System.Drawing.Point(688, 40);
+			label15.Name = "label15";
+			label15.Size = new System.Drawing.Size(16, 23);
+			label15.TabIndex = 53;
+			label15.Text = "U:";
+			label15.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// label14
+			// 
+			label14.Location = new System.Drawing.Point(656, 24);
+			label14.Name = "label14";
+			label14.Size = new System.Drawing.Size(100, 16);
+			label14.TabIndex = 52;
+			label14.Text = "Tab Stop Help";
+			// 
+			// label5
+			// 
+			label5.Location = new System.Drawing.Point(400, 152);
+			label5.Name = "label5";
+			label5.Size = new System.Drawing.Size(40, 23);
+			label5.TabIndex = 44;
+			label5.Text = "R";
+			// 
+			// label7
+			// 
+			label7.Location = new System.Drawing.Point(464, 152);
+			label7.Name = "label7";
+			label7.Size = new System.Drawing.Size(40, 23);
+			label7.TabIndex = 46;
+			label7.Text = "O";
+			// 
+			// label22
+			// 
+			label22.Location = new System.Drawing.Point(16, 16);
+			label22.Name = "label22";
+			label22.Size = new System.Drawing.Size(216, 16);
+			label22.TabIndex = 1;
+			label22.Text = "Effect";
+			// 
+			// label23
+			// 
+			label23.Location = new System.Drawing.Point(16, 16);
+			label23.Name = "label23";
+			label23.Size = new System.Drawing.Size(216, 16);
+			label23.TabIndex = 1;
+			label23.Text = "Effect";
+			// 
+			// label10
+			// 
+			label10.Location = new System.Drawing.Point(440, 32);
+			label10.Name = "label10";
+			label10.Size = new System.Drawing.Size(96, 23);
+			label10.TabIndex = 20;
+			label10.Text = "Device Category:";
+			label10.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// label9
+			// 
+			label9.Location = new System.Drawing.Point(496, 8);
+			label9.Name = "label9";
+			label9.Size = new System.Drawing.Size(80, 16);
+			label9.TabIndex = 19;
+			label9.Text = "Master Device:";
+			label9.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// label8
+			// 
+			label8.Location = new System.Drawing.Point(344, 16);
+			label8.Name = "label8";
+			label8.Size = new System.Drawing.Size(64, 16);
+			label8.TabIndex = 18;
+			label8.Text = "Broadcast:";
+			// 
+			// panelPreview
+			// 
+			this.panelPreview.AllowDrop = true;
+			this.panelPreview.AutoScroll = true;
+			this.panelPreview.Dock = System.Windows.Forms.DockStyle.Top;
+			this.panelPreview.Location = new System.Drawing.Point(0, 0);
+			this.panelPreview.Name = "panelPreview";
+			this.panelPreview.Size = new System.Drawing.Size(936, 406);
+			this.panelPreview.TabIndex = 0;
+			this.panelPreview.DragDrop += new System.Windows.Forms.DragEventHandler(this.panelPreview_DragDrop);
+			this.panelPreview.DragEnter += new System.Windows.Forms.DragEventHandler(this.panelPreview_DragEnter);
+			this.panelPreview.Paint += new System.Windows.Forms.PaintEventHandler(this.panelPreview_Paint);
+			// 
+			// lbVariations
+			// 
+			this.lbVariations.AllowDrop = true;
+			this.lbVariations.DisplayMember = "Description";
+			this.lbVariations.Location = new System.Drawing.Point(4, 476);
+			this.lbVariations.Name = "lbVariations";
+			this.lbVariations.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+			this.lbVariations.Size = new System.Drawing.Size(128, 108);
+			this.lbVariations.TabIndex = 5;
+			this.lbVariations.Tag = "Selected";
+			this.lbVariations.ValueMember = "ID";
+			this.lbVariations.SelectedIndexChanged += new System.EventHandler(this.lbVariations_SelectedIndexChanged);
+			this.lbVariations.DragDrop += new System.Windows.Forms.DragEventHandler(this.lbVariations_DragDrop);
+			this.lbVariations.DragEnter += new System.Windows.Forms.DragEventHandler(this.lbVariations_DragEnter);
+			this.lbVariations.DragOver += new System.Windows.Forms.DragEventHandler(this.lbVariations_DragOver);
+			// 
+			// button6
+			// 
+			this.button6.Location = new System.Drawing.Point(100, 588);
+			this.button6.Name = "button6";
+			this.button6.Size = new System.Drawing.Size(32, 23);
+			this.button6.TabIndex = 7;
+			this.button6.Text = "Add";
+			this.button6.Click += new System.EventHandler(this.button6_Click);
+			// 
+			// btnSaveChanges
+			// 
+			this.btnSaveChanges.Location = new System.Drawing.Point(680, 182);
+			this.btnSaveChanges.Name = "btnSaveChanges";
+			this.btnSaveChanges.Size = new System.Drawing.Size(88, 20);
+			this.btnSaveChanges.TabIndex = 8;
+			this.btnSaveChanges.Text = "Save Changes";
+			this.btnSaveChanges.Click += new System.EventHandler(this.btnSaveChanges_Click);
+			// 
+			// cbAvailableVariations
+			// 
+			this.cbAvailableVariations.DisplayMember = "Description";
+			this.cbAvailableVariations.Location = new System.Drawing.Point(4, 588);
+			this.cbAvailableVariations.Name = "cbAvailableVariations";
+			this.cbAvailableVariations.Size = new System.Drawing.Size(88, 21);
+			this.cbAvailableVariations.TabIndex = 9;
+			this.cbAvailableVariations.ValueMember = "ID";
+			// 
+			// lbChildrenDesignObjs
+			// 
+			this.lbChildrenDesignObjs.DisplayMember = "Description";
+			this.lbChildrenDesignObjs.Location = new System.Drawing.Point(0, 0);
+			this.lbChildrenDesignObjs.Name = "lbChildrenDesignObjs";
+			this.lbChildrenDesignObjs.Size = new System.Drawing.Size(224, 147);
+			this.lbChildrenDesignObjs.TabIndex = 10;
+			this.lbChildrenDesignObjs.ValueMember = "ID";
+			this.lbChildrenDesignObjs.SelectedIndexChanged += new System.EventHandler(this.lbDesignObjsOrText_SelectedIndexChanged);
+			this.lbChildrenDesignObjs.DoubleClick += new System.EventHandler(this.lbChildrenDesignObjs_DoubleClick);
+			this.lbChildrenDesignObjs.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lbChildrenDesignObjs_MouseDown);
+			// 
+			// btnLoadSelectedDesignObj
+			// 
+			this.btnLoadSelectedDesignObj.Location = new System.Drawing.Point(0, 152);
+			this.btnLoadSelectedDesignObj.Name = "btnLoadSelectedDesignObj";
+			this.btnLoadSelectedDesignObj.Size = new System.Drawing.Size(40, 23);
+			this.btnLoadSelectedDesignObj.TabIndex = 11;
+			this.btnLoadSelectedDesignObj.Text = "Load";
+			this.btnLoadSelectedDesignObj.Click += new System.EventHandler(this.btnLoadSelectedDesignObj_Click);
+			// 
+			// btnCancel
+			// 
+			this.btnCancel.Location = new System.Drawing.Point(582, 182);
+			this.btnCancel.Name = "btnCancel";
+			this.btnCancel.Size = new System.Drawing.Size(88, 20);
+			this.btnCancel.TabIndex = 13;
+			this.btnCancel.Text = "Cancel";
+			this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+			// 
+			// btnRemoveDesignObj
+			// 
+			this.btnRemoveDesignObj.Location = new System.Drawing.Point(46, 152);
+			this.btnRemoveDesignObj.Name = "btnRemoveDesignObj";
+			this.btnRemoveDesignObj.Size = new System.Drawing.Size(56, 23);
+			this.btnRemoveDesignObj.TabIndex = 14;
+			this.btnRemoveDesignObj.Text = "Remove";
+			this.btnRemoveDesignObj.Click += new System.EventHandler(this.btnRemoveDesignObj_Click);
+			// 
+			// tbX
+			// 
+			this.tbX.Enabled = false;
+			this.tbX.Location = new System.Drawing.Point(416, 104);
+			this.tbX.Name = "tbX";
+			this.tbX.Size = new System.Drawing.Size(40, 20);
+			this.tbX.TabIndex = 15;
+			this.tbX.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbX_KeyDown);
+			this.tbX.Leave += new System.EventHandler(this.tbX_Leave);
+			// 
+			// tbY
+			// 
+			this.tbY.Enabled = false;
+			this.tbY.Location = new System.Drawing.Point(480, 104);
+			this.tbY.Name = "tbY";
+			this.tbY.Size = new System.Drawing.Size(40, 20);
+			this.tbY.TabIndex = 18;
+			this.tbY.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbY_KeyDown);
+			this.tbY.Leave += new System.EventHandler(this.tbY_Leave);
+			// 
+			// tbWidth
+			// 
+			this.tbWidth.Enabled = false;
+			this.tbWidth.Location = new System.Drawing.Point(416, 128);
+			this.tbWidth.Name = "tbWidth";
+			this.tbWidth.Size = new System.Drawing.Size(40, 20);
+			this.tbWidth.TabIndex = 20;
+			this.tbWidth.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbWidth_KeyDown);
+			this.tbWidth.Leave += new System.EventHandler(this.tbWidth_Leave);
+			// 
+			// tbHeight
+			// 
+			this.tbHeight.Enabled = false;
+			this.tbHeight.Location = new System.Drawing.Point(480, 128);
+			this.tbHeight.Name = "tbHeight";
+			this.tbHeight.Size = new System.Drawing.Size(40, 20);
+			this.tbHeight.TabIndex = 22;
+			this.tbHeight.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbHeight_KeyDown);
+			this.tbHeight.Leave += new System.EventHandler(this.tbHeight_Leave);
+			// 
+			// pnParameters
+			// 
+			this.pnParameters.AutoScroll = true;
+			this.pnParameters.Location = new System.Drawing.Point(0, 8);
+			this.pnParameters.Name = "pnParameters";
+			this.pnParameters.Size = new System.Drawing.Size(456, 176);
+			this.pnParameters.TabIndex = 24;
+			// 
+			// btnRemoveSelectedVariation
+			// 
+			this.btnRemoveSelectedVariation.Location = new System.Drawing.Point(4, 612);
+			this.btnRemoveSelectedVariation.Name = "btnRemoveSelectedVariation";
+			this.btnRemoveSelectedVariation.Size = new System.Drawing.Size(128, 23);
+			this.btnRemoveSelectedVariation.TabIndex = 0;
+			this.btnRemoveSelectedVariation.Text = "Remove Selected";
+			this.btnRemoveSelectedVariation.Click += new System.EventHandler(this.btnRemoveSelectedVariation_Click);
+			// 
+			// lbText
+			// 
+			this.lbText.DisplayMember = "Description";
+			this.lbText.Location = new System.Drawing.Point(232, 48);
+			this.lbText.Name = "lbText";
+			this.lbText.Size = new System.Drawing.Size(152, 95);
+			this.lbText.TabIndex = 25;
+			this.lbText.ValueMember = "ID";
+			this.lbText.SelectedIndexChanged += new System.EventHandler(this.lbDesignObjsOrText_SelectedIndexChanged);
+			this.lbText.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lbText_MouseDown);
+			// 
+			// btnEditText
+			// 
+			this.btnEditText.Location = new System.Drawing.Point(232, 152);
+			this.btnEditText.Name = "btnEditText";
+			this.btnEditText.Size = new System.Drawing.Size(40, 23);
+			this.btnEditText.TabIndex = 26;
+			this.btnEditText.Text = "Edit";
+			this.btnEditText.Click += new System.EventHandler(this.btnEditText_Click);
+			// 
+			// btnRemoveText
+			// 
+			this.btnRemoveText.Location = new System.Drawing.Point(278, 152);
+			this.btnRemoveText.Name = "btnRemoveText";
+			this.btnRemoveText.Size = new System.Drawing.Size(56, 23);
+			this.btnRemoveText.TabIndex = 27;
+			this.btnRemoveText.Text = "Remove";
+			this.btnRemoveText.Click += new System.EventHandler(this.btnRemoveText_Click);
+			// 
+			// mnuDesignObjXDesigner
+			// 
+			this.mnuDesignObjXDesigner.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.mnuZoom,
             this.mnuSkin,
             this.mnuLanguage});
-            // 
-            // mnuZoom
-            // 
-            this.mnuZoom.Index = 0;
-            this.mnuZoom.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+			// 
+			// mnuZoom
+			// 
+			this.mnuZoom.Index = 0;
+			this.mnuZoom.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.miZoom25,
             this.miZoom50,
             this.miZoom100,
             this.miZoom200});
-            this.mnuZoom.Text = "Zoom";
-            // 
-            // miZoom25
-            // 
-            this.miZoom25.Index = 0;
-            this.miZoom25.Text = "25%";
-            this.miZoom25.Click += new System.EventHandler(this.miZoom_Click);
-            // 
-            // miZoom50
-            // 
-            this.miZoom50.Index = 1;
-            this.miZoom50.Text = "50%";
-            this.miZoom50.Click += new System.EventHandler(this.miZoom_Click);
-            // 
-            // miZoom100
-            // 
-            this.miZoom100.Index = 2;
-            this.miZoom100.Text = "100%";
-            this.miZoom100.Click += new System.EventHandler(this.miZoom_Click);
-            // 
-            // miZoom200
-            // 
-            this.miZoom200.Index = 3;
-            this.miZoom200.Text = "200%";
-            this.miZoom200.Click += new System.EventHandler(this.miZoom_Click);
-            // 
-            // mnuSkin
-            // 
-            this.mnuSkin.Index = 1;
-            this.mnuSkin.Text = "Skin";
-            // 
-            // mnuLanguage
-            // 
-            this.mnuLanguage.Index = 2;
-            this.mnuLanguage.Text = "Language";
-            // 
-            // cbLanguageSkin
-            // 
-            this.cbLanguageSkin.DisplayMember = "LanguageSkin";
-            this.cbLanguageSkin.Location = new System.Drawing.Point(232, 0);
-            this.cbLanguageSkin.Name = "cbLanguageSkin";
-            this.cbLanguageSkin.Size = new System.Drawing.Size(152, 21);
-            this.cbLanguageSkin.TabIndex = 30;
-            this.cbLanguageSkin.Text = "Language - Skin";
-            this.cbLanguageSkin.ValueMember = "ID";
-            this.cbLanguageSkin.SelectedIndexChanged += new System.EventHandler(this.cbLanguageSkin_SelectedIndexChanged);
-            // 
-            // cbAlignH
-            // 
-            this.cbAlignH.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbAlignH.Items.AddRange(new object[] {
+			this.mnuZoom.Text = "Zoom";
+			// 
+			// miZoom25
+			// 
+			this.miZoom25.Index = 0;
+			this.miZoom25.Text = "25%";
+			this.miZoom25.Click += new System.EventHandler(this.miZoom_Click);
+			// 
+			// miZoom50
+			// 
+			this.miZoom50.Index = 1;
+			this.miZoom50.Text = "50%";
+			this.miZoom50.Click += new System.EventHandler(this.miZoom_Click);
+			// 
+			// miZoom100
+			// 
+			this.miZoom100.Index = 2;
+			this.miZoom100.Text = "100%";
+			this.miZoom100.Click += new System.EventHandler(this.miZoom_Click);
+			// 
+			// miZoom200
+			// 
+			this.miZoom200.Index = 3;
+			this.miZoom200.Text = "200%";
+			this.miZoom200.Click += new System.EventHandler(this.miZoom_Click);
+			// 
+			// mnuSkin
+			// 
+			this.mnuSkin.Index = 1;
+			this.mnuSkin.Text = "Skin";
+			// 
+			// mnuLanguage
+			// 
+			this.mnuLanguage.Index = 2;
+			this.mnuLanguage.Text = "Language";
+			// 
+			// cbLanguageSkin
+			// 
+			this.cbLanguageSkin.DisplayMember = "LanguageSkin";
+			this.cbLanguageSkin.Location = new System.Drawing.Point(232, 0);
+			this.cbLanguageSkin.Name = "cbLanguageSkin";
+			this.cbLanguageSkin.Size = new System.Drawing.Size(152, 21);
+			this.cbLanguageSkin.TabIndex = 30;
+			this.cbLanguageSkin.Text = "Language - Skin";
+			this.cbLanguageSkin.ValueMember = "ID";
+			this.cbLanguageSkin.SelectedIndexChanged += new System.EventHandler(this.cbLanguageSkin_SelectedIndexChanged);
+			// 
+			// cbAlignH
+			// 
+			this.cbAlignH.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.cbAlignH.Items.AddRange(new object[] {
             "Default",
             "Left",
             "Center",
             "Right"});
-            this.cbAlignH.Location = new System.Drawing.Point(464, 80);
-            this.cbAlignH.MaxDropDownItems = 9;
-            this.cbAlignH.Name = "cbAlignH";
-            this.cbAlignH.Size = new System.Drawing.Size(56, 21);
-            this.cbAlignH.TabIndex = 31;
-            this.cbAlignH.SelectedIndexChanged += new System.EventHandler(this.cbAlignment_SelectedIndexChanged);
-            // 
-            // chCantGoBack
-            // 
-            this.chCantGoBack.Location = new System.Drawing.Point(608, 32);
-            this.chCantGoBack.Name = "chCantGoBack";
-            this.chCantGoBack.Size = new System.Drawing.Size(104, 24);
-            this.chCantGoBack.TabIndex = 42;
-            this.chCantGoBack.Text = "Can\'t Go Back";
-            this.chCantGoBack.CheckedChanged += new System.EventHandler(this.chCantGoBack_CheckedChanged);
-            // 
-            // btnVariationControllerCriteria
-            // 
-            this.btnVariationControllerCriteria.Location = new System.Drawing.Point(608, 136);
-            this.btnVariationControllerCriteria.Name = "btnVariationControllerCriteria";
-            this.btnVariationControllerCriteria.Size = new System.Drawing.Size(112, 23);
-            this.btnVariationControllerCriteria.TabIndex = 41;
-            this.btnVariationControllerCriteria.Text = "Controller Criteria";
-            this.btnVariationControllerCriteria.Click += new System.EventHandler(this.btnVariationControllerCriteria_Click);
-            // 
-            // chRegenerateForEachScreen
-            // 
-            this.chRegenerateForEachScreen.Enabled = false;
-            this.chRegenerateForEachScreen.Location = new System.Drawing.Point(536, 160);
-            this.chRegenerateForEachScreen.Name = "chRegenerateForEachScreen";
-            this.chRegenerateForEachScreen.Size = new System.Drawing.Size(120, 16);
-            this.chRegenerateForEachScreen.TabIndex = 39;
-            this.chRegenerateForEachScreen.Text = "Regen per screen";
-            this.chRegenerateForEachScreen.CheckedChanged += new System.EventHandler(this.chRegenerateForEachScreen_CheckedChanged);
-            // 
-            // chChildBehindBG
-            // 
-            this.chChildBehindBG.Enabled = false;
-            this.chChildBehindBG.Location = new System.Drawing.Point(536, 56);
-            this.chChildBehindBG.Name = "chChildBehindBG";
-            this.chChildBehindBG.Size = new System.Drawing.Size(168, 16);
-            this.chChildBehindBG.TabIndex = 40;
-            this.chChildBehindBG.Text = "Children behind bg";
-            this.chChildBehindBG.CheckedChanged += new System.EventHandler(this.chBGOnTop_CheckedChanged);
-            // 
-            // chCanBeHidden
-            // 
-            this.chCanBeHidden.Enabled = false;
-            this.chCanBeHidden.Location = new System.Drawing.Point(536, 8);
-            this.chCanBeHidden.Name = "chCanBeHidden";
-            this.chCanBeHidden.Size = new System.Drawing.Size(72, 16);
-            this.chCanBeHidden.TabIndex = 38;
-            this.chCanBeHidden.Text = "Can Hide";
-            this.chCanBeHidden.CheckedChanged += new System.EventHandler(this.chCanBeHidden_CheckedChanged);
-            // 
-            // cbAlignV
-            // 
-            this.cbAlignV.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbAlignV.Items.AddRange(new object[] {
+			this.cbAlignH.Location = new System.Drawing.Point(464, 80);
+			this.cbAlignH.MaxDropDownItems = 9;
+			this.cbAlignH.Name = "cbAlignH";
+			this.cbAlignH.Size = new System.Drawing.Size(56, 21);
+			this.cbAlignH.TabIndex = 31;
+			this.cbAlignH.SelectedIndexChanged += new System.EventHandler(this.cbAlignment_SelectedIndexChanged);
+			// 
+			// chCantGoBack
+			// 
+			this.chCantGoBack.Location = new System.Drawing.Point(608, 32);
+			this.chCantGoBack.Name = "chCantGoBack";
+			this.chCantGoBack.Size = new System.Drawing.Size(104, 24);
+			this.chCantGoBack.TabIndex = 42;
+			this.chCantGoBack.Text = "Can\'t Go Back";
+			this.chCantGoBack.CheckedChanged += new System.EventHandler(this.chCantGoBack_CheckedChanged);
+			// 
+			// btnVariationControllerCriteria
+			// 
+			this.btnVariationControllerCriteria.Location = new System.Drawing.Point(608, 136);
+			this.btnVariationControllerCriteria.Name = "btnVariationControllerCriteria";
+			this.btnVariationControllerCriteria.Size = new System.Drawing.Size(112, 23);
+			this.btnVariationControllerCriteria.TabIndex = 41;
+			this.btnVariationControllerCriteria.Text = "Controller Criteria";
+			this.btnVariationControllerCriteria.Click += new System.EventHandler(this.btnVariationControllerCriteria_Click);
+			// 
+			// chRegenerateForEachScreen
+			// 
+			this.chRegenerateForEachScreen.Enabled = false;
+			this.chRegenerateForEachScreen.Location = new System.Drawing.Point(536, 160);
+			this.chRegenerateForEachScreen.Name = "chRegenerateForEachScreen";
+			this.chRegenerateForEachScreen.Size = new System.Drawing.Size(120, 16);
+			this.chRegenerateForEachScreen.TabIndex = 39;
+			this.chRegenerateForEachScreen.Text = "Regen per screen";
+			this.chRegenerateForEachScreen.CheckedChanged += new System.EventHandler(this.chRegenerateForEachScreen_CheckedChanged);
+			// 
+			// chChildBehindBG
+			// 
+			this.chChildBehindBG.Enabled = false;
+			this.chChildBehindBG.Location = new System.Drawing.Point(536, 56);
+			this.chChildBehindBG.Name = "chChildBehindBG";
+			this.chChildBehindBG.Size = new System.Drawing.Size(168, 16);
+			this.chChildBehindBG.TabIndex = 40;
+			this.chChildBehindBG.Text = "Children behind bg";
+			this.chChildBehindBG.CheckedChanged += new System.EventHandler(this.chBGOnTop_CheckedChanged);
+			// 
+			// chCanBeHidden
+			// 
+			this.chCanBeHidden.Enabled = false;
+			this.chCanBeHidden.Location = new System.Drawing.Point(536, 8);
+			this.chCanBeHidden.Name = "chCanBeHidden";
+			this.chCanBeHidden.Size = new System.Drawing.Size(72, 16);
+			this.chCanBeHidden.TabIndex = 38;
+			this.chCanBeHidden.Text = "Can Hide";
+			this.chCanBeHidden.CheckedChanged += new System.EventHandler(this.chCanBeHidden_CheckedChanged);
+			// 
+			// cbAlignV
+			// 
+			this.cbAlignV.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.cbAlignV.Items.AddRange(new object[] {
             "Default",
             "Top",
             "Middle",
             "Bottom"});
-            this.cbAlignV.Location = new System.Drawing.Point(408, 80);
-            this.cbAlignV.Name = "cbAlignV";
-            this.cbAlignV.Size = new System.Drawing.Size(56, 21);
-            this.cbAlignV.TabIndex = 37;
-            this.cbAlignV.SelectedIndexChanged += new System.EventHandler(this.cbAlignment_SelectedIndexChanged);
-            // 
-            // btnSelectDesignObjInTree
-            // 
-            this.btnSelectDesignObjInTree.Location = new System.Drawing.Point(48, 152);
-            this.btnSelectDesignObjInTree.Name = "btnSelectDesignObjInTree";
-            this.btnSelectDesignObjInTree.Size = new System.Drawing.Size(48, 23);
-            this.btnSelectDesignObjInTree.TabIndex = 36;
-            this.btnSelectDesignObjInTree.Text = "Select";
-            this.btnSelectDesignObjInTree.Click += new System.EventHandler(this.btnSelectDesignObjInTree_Click);
-            // 
-            // btnRemoveSkinLanguage
-            // 
-            this.btnRemoveSkinLanguage.Location = new System.Drawing.Point(328, 24);
-            this.btnRemoveSkinLanguage.Name = "btnRemoveSkinLanguage";
-            this.btnRemoveSkinLanguage.Size = new System.Drawing.Size(56, 23);
-            this.btnRemoveSkinLanguage.TabIndex = 34;
-            this.btnRemoveSkinLanguage.Text = "remove";
-            this.btnRemoveSkinLanguage.Click += new System.EventHandler(this.btnRemoveSkinLanguage_Click);
-            // 
-            // cbStyle
-            // 
-            this.cbStyle.DisplayMember = "Description";
-            this.cbStyle.Enabled = false;
-            this.cbStyle.Location = new System.Drawing.Point(408, 56);
-            this.cbStyle.Name = "cbStyle";
-            this.cbStyle.Size = new System.Drawing.Size(112, 21);
-            this.cbStyle.TabIndex = 35;
-            this.cbStyle.Text = "Style";
-            this.cbStyle.ValueMember = "ID";
-            this.cbStyle.SelectedIndexChanged += new System.EventHandler(this.cbStyle_SelectedIndexChanged);
-            // 
-            // btnAddSkinLanguage
-            // 
-            this.btnAddSkinLanguage.Location = new System.Drawing.Point(232, 24);
-            this.btnAddSkinLanguage.Name = "btnAddSkinLanguage";
-            this.btnAddSkinLanguage.Size = new System.Drawing.Size(80, 23);
-            this.btnAddSkinLanguage.TabIndex = 33;
-            this.btnAddSkinLanguage.Text = "Add skin/lang";
-            this.btnAddSkinLanguage.Click += new System.EventHandler(this.btnAddSkinLanguage_Click);
-            // 
-            // tabButtons
-            // 
-            this.tabButtons.Controls.Add(this.cbButton);
-            this.tabButtons.Controls.Add(this.label6);
-            this.tabButtons.Location = new System.Drawing.Point(4, 22);
-            this.tabButtons.Name = "tabButtons";
-            this.tabButtons.Size = new System.Drawing.Size(768, 230);
-            this.tabButtons.TabIndex = 1;
-            this.tabButtons.Text = "Button";
-            // 
-            // cbButton
-            // 
-            this.cbButton.DisplayMember = "Description";
-            this.cbButton.Location = new System.Drawing.Point(112, 24);
-            this.cbButton.Name = "cbButton";
-            this.cbButton.Size = new System.Drawing.Size(208, 21);
-            this.cbButton.TabIndex = 14;
-            this.cbButton.ValueMember = "ID";
-            this.cbButton.SelectedIndexChanged += new System.EventHandler(this.changeButton);
-            // 
-            // label6
-            // 
-            this.label6.Location = new System.Drawing.Point(32, 24);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(100, 23);
-            this.label6.TabIndex = 13;
-            this.label6.Text = "Button";
-            // 
-            // tabAllPages
-            // 
-            this.tabAllPages.Controls.Add(this.tabParameters);
-            this.tabAllPages.Controls.Add(this.tabChildren);
-            this.tabAllPages.Controls.Add(this.tabButtons);
-            this.tabAllPages.Controls.Add(this.tabOnActivate);
-            this.tabAllPages.Controls.Add(this.tabOnLoad);
-            this.tabAllPages.Controls.Add(this.tabOnUnload);
-            this.tabAllPages.Controls.Add(this.tabOnStartup);
-            this.tabAllPages.Controls.Add(this.tabOnHighlight);
-            this.tabAllPages.Controls.Add(this.tabOnUnhighlight);
-            this.tabAllPages.Controls.Add(this.tabOnTimeout);
-            this.tabAllPages.Controls.Add(this.tabOnSelected_WithChange);
-            this.tabAllPages.Controls.Add(this.tabOnSelected_NoChange);
-            this.tabAllPages.Controls.Add(this.tabOnHighlighted);
-            this.tabAllPages.Location = new System.Drawing.Point(148, 412);
-            this.tabAllPages.Name = "tabAllPages";
-            this.tabAllPages.SelectedIndex = 0;
-            this.tabAllPages.Size = new System.Drawing.Size(776, 256);
-            this.tabAllPages.TabIndex = 32;
-            this.tabAllPages.SelectedIndexChanged += new System.EventHandler(this.tabAllPages_SelectedIndexChanged);
-            // 
-            // tabParameters
-            // 
-            this.tabParameters.Controls.Add(this.label20);
-            this.tabParameters.Controls.Add(this.cbDesignObjStability);
-            this.tabParameters.Controls.Add(this.lDesignObjOwner);
-            this.tabParameters.Controls.Add(this.label13);
-            this.tabParameters.Controls.Add(this.label12);
-            this.tabParameters.Controls.Add(this.cbVariationStability);
-            this.tabParameters.Controls.Add(this.chDontResetSelectedState);
-            this.tabParameters.Controls.Add(this.lVariationOwner);
-            this.tabParameters.Controls.Add(this.label11);
-            this.tabParameters.Controls.Add(this.chCantGoBack);
-            this.tabParameters.Controls.Add(this.btnVariationControllerCriteria);
-            this.tabParameters.Controls.Add(this.pnParameters);
-            this.tabParameters.Location = new System.Drawing.Point(4, 22);
-            this.tabParameters.Name = "tabParameters";
-            this.tabParameters.Size = new System.Drawing.Size(768, 230);
-            this.tabParameters.TabIndex = 0;
-            this.tabParameters.Text = "General Info";
-            // 
-            // label20
-            // 
-            this.label20.Location = new System.Drawing.Point(608, 88);
-            this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(100, 16);
-            this.label20.TabIndex = 51;
-            this.label20.Text = "Stability:";
-            // 
-            // cbDesignObjStability
-            // 
-            this.cbDesignObjStability.Items.AddRange(new object[] {
+			this.cbAlignV.Location = new System.Drawing.Point(408, 80);
+			this.cbAlignV.Name = "cbAlignV";
+			this.cbAlignV.Size = new System.Drawing.Size(56, 21);
+			this.cbAlignV.TabIndex = 37;
+			this.cbAlignV.SelectedIndexChanged += new System.EventHandler(this.cbAlignment_SelectedIndexChanged);
+			// 
+			// btnRemoveSkinLanguage
+			// 
+			this.btnRemoveSkinLanguage.Location = new System.Drawing.Point(328, 24);
+			this.btnRemoveSkinLanguage.Name = "btnRemoveSkinLanguage";
+			this.btnRemoveSkinLanguage.Size = new System.Drawing.Size(56, 23);
+			this.btnRemoveSkinLanguage.TabIndex = 34;
+			this.btnRemoveSkinLanguage.Text = "remove";
+			this.btnRemoveSkinLanguage.Click += new System.EventHandler(this.btnRemoveSkinLanguage_Click);
+			// 
+			// cbStyle
+			// 
+			this.cbStyle.DisplayMember = "Description";
+			this.cbStyle.Enabled = false;
+			this.cbStyle.Location = new System.Drawing.Point(408, 56);
+			this.cbStyle.Name = "cbStyle";
+			this.cbStyle.Size = new System.Drawing.Size(112, 21);
+			this.cbStyle.TabIndex = 35;
+			this.cbStyle.Text = "Style";
+			this.cbStyle.ValueMember = "ID";
+			this.cbStyle.SelectedIndexChanged += new System.EventHandler(this.cbStyle_SelectedIndexChanged);
+			// 
+			// btnAddSkinLanguage
+			// 
+			this.btnAddSkinLanguage.Location = new System.Drawing.Point(232, 24);
+			this.btnAddSkinLanguage.Name = "btnAddSkinLanguage";
+			this.btnAddSkinLanguage.Size = new System.Drawing.Size(80, 23);
+			this.btnAddSkinLanguage.TabIndex = 33;
+			this.btnAddSkinLanguage.Text = "Add skin/lang";
+			this.btnAddSkinLanguage.Click += new System.EventHandler(this.btnAddSkinLanguage_Click);
+			// 
+			// tabButtons
+			// 
+			this.tabButtons.Controls.Add(this.cbButton);
+			this.tabButtons.Controls.Add(label6);
+			this.tabButtons.Location = new System.Drawing.Point(4, 22);
+			this.tabButtons.Name = "tabButtons";
+			this.tabButtons.Size = new System.Drawing.Size(768, 230);
+			this.tabButtons.TabIndex = 1;
+			this.tabButtons.Text = "Button";
+			// 
+			// cbButton
+			// 
+			this.cbButton.DisplayMember = "Description";
+			this.cbButton.Location = new System.Drawing.Point(112, 24);
+			this.cbButton.Name = "cbButton";
+			this.cbButton.Size = new System.Drawing.Size(208, 21);
+			this.cbButton.TabIndex = 14;
+			this.cbButton.ValueMember = "ID";
+			this.cbButton.SelectedIndexChanged += new System.EventHandler(this.changeButton);
+			// 
+			// tabAllPages
+			// 
+			this.tabAllPages.Controls.Add(this.tabParameters);
+			this.tabAllPages.Controls.Add(this.tabChildren);
+			this.tabAllPages.Controls.Add(this.tabButtons);
+			this.tabAllPages.Controls.Add(this.tabOnActivate);
+			this.tabAllPages.Controls.Add(this.tabOnLoad);
+			this.tabAllPages.Controls.Add(this.tabOnUnload);
+			this.tabAllPages.Controls.Add(this.tabOnStartup);
+			this.tabAllPages.Controls.Add(this.tabOnHighlight);
+			this.tabAllPages.Controls.Add(this.tabOnUnhighlight);
+			this.tabAllPages.Controls.Add(this.tabOnTimeout);
+			this.tabAllPages.Controls.Add(this.tabOnSelected_WithChange);
+			this.tabAllPages.Controls.Add(this.tabOnSelected_NoChange);
+			this.tabAllPages.Controls.Add(this.tabOnHighlighted);
+			this.tabAllPages.Location = new System.Drawing.Point(148, 412);
+			this.tabAllPages.Name = "tabAllPages";
+			this.tabAllPages.SelectedIndex = 0;
+			this.tabAllPages.Size = new System.Drawing.Size(776, 256);
+			this.tabAllPages.TabIndex = 32;
+			this.tabAllPages.SelectedIndexChanged += new System.EventHandler(this.tabAllPages_SelectedIndexChanged);
+			// 
+			// tabParameters
+			// 
+			this.tabParameters.Controls.Add(label20);
+			this.tabParameters.Controls.Add(this.cbDesignObjStability);
+			this.tabParameters.Controls.Add(this.lDesignObjOwner);
+			this.tabParameters.Controls.Add(label13);
+			this.tabParameters.Controls.Add(label12);
+			this.tabParameters.Controls.Add(this.cbVariationStability);
+			this.tabParameters.Controls.Add(this.chDontResetSelectedState);
+			this.tabParameters.Controls.Add(this.lVariationOwner);
+			this.tabParameters.Controls.Add(label11);
+			this.tabParameters.Controls.Add(this.chCantGoBack);
+			this.tabParameters.Controls.Add(this.btnVariationControllerCriteria);
+			this.tabParameters.Controls.Add(this.pnParameters);
+			this.tabParameters.Location = new System.Drawing.Point(4, 22);
+			this.tabParameters.Name = "tabParameters";
+			this.tabParameters.Size = new System.Drawing.Size(768, 230);
+			this.tabParameters.TabIndex = 0;
+			this.tabParameters.Text = "General Info";
+			// 
+			// cbDesignObjStability
+			// 
+			this.cbDesignObjStability.Items.AddRange(new object[] {
             "Unstable",
             "Testing",
             "Stable"});
-            this.cbDesignObjStability.Location = new System.Drawing.Point(608, 104);
-            this.cbDesignObjStability.Name = "cbDesignObjStability";
-            this.cbDesignObjStability.Size = new System.Drawing.Size(121, 21);
-            this.cbDesignObjStability.TabIndex = 50;
-            // 
-            // lDesignObjOwner
-            // 
-            this.lDesignObjOwner.Location = new System.Drawing.Point(608, 64);
-            this.lDesignObjOwner.Name = "lDesignObjOwner";
-            this.lDesignObjOwner.Size = new System.Drawing.Size(120, 16);
-            this.lDesignObjOwner.TabIndex = 49;
-            // 
-            // label13
-            // 
-            this.label13.Location = new System.Drawing.Point(608, 8);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(112, 16);
-            this.label13.TabIndex = 48;
-            this.label13.Text = "Global options";
-            // 
-            // label12
-            // 
-            this.label12.Location = new System.Drawing.Point(456, 136);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(100, 16);
-            this.label12.TabIndex = 47;
-            this.label12.Text = "Stability:";
-            // 
-            // cbVariationStability
-            // 
-            this.cbVariationStability.Items.AddRange(new object[] {
+			this.cbDesignObjStability.Location = new System.Drawing.Point(608, 104);
+			this.cbDesignObjStability.Name = "cbDesignObjStability";
+			this.cbDesignObjStability.Size = new System.Drawing.Size(121, 21);
+			this.cbDesignObjStability.TabIndex = 50;
+			// 
+			// lDesignObjOwner
+			// 
+			this.lDesignObjOwner.Location = new System.Drawing.Point(608, 64);
+			this.lDesignObjOwner.Name = "lDesignObjOwner";
+			this.lDesignObjOwner.Size = new System.Drawing.Size(120, 16);
+			this.lDesignObjOwner.TabIndex = 49;
+			// 
+			// cbVariationStability
+			// 
+			this.cbVariationStability.Items.AddRange(new object[] {
             "Unstable",
             "Testing",
             "Stable"});
-            this.cbVariationStability.Location = new System.Drawing.Point(456, 152);
-            this.cbVariationStability.Name = "cbVariationStability";
-            this.cbVariationStability.Size = new System.Drawing.Size(121, 21);
-            this.cbVariationStability.TabIndex = 46;
-            // 
-            // chDontResetSelectedState
-            // 
-            this.chDontResetSelectedState.Location = new System.Drawing.Point(456, 88);
-            this.chDontResetSelectedState.Name = "chDontResetSelectedState";
-            this.chDontResetSelectedState.Size = new System.Drawing.Size(120, 32);
-            this.chDontResetSelectedState.TabIndex = 45;
-            this.chDontResetSelectedState.Text = "Don\'t reset selected state";
-            this.chDontResetSelectedState.CheckedChanged += new System.EventHandler(this.chDontResetSelectedState_CheckedChanged);
-            // 
-            // lVariationOwner
-            // 
-            this.lVariationOwner.Location = new System.Drawing.Point(464, 64);
-            this.lVariationOwner.Name = "lVariationOwner";
-            this.lVariationOwner.Size = new System.Drawing.Size(120, 16);
-            this.lVariationOwner.TabIndex = 44;
-            // 
-            // label11
-            // 
-            this.label11.Location = new System.Drawing.Point(456, 8);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(136, 16);
-            this.label11.TabIndex = 43;
-            this.label11.Text = "Variation specific options";
-            // 
-            // tabChildren
-            // 
-            this.tabChildren.Controls.Add(this.cbLanguageSkin_Child);
-            this.tabChildren.Controls.Add(this.btnAddSkinLanguage_Child);
-            this.tabChildren.Controls.Add(this.btnRemoveSkinLanguage_Child);
-            this.tabChildren.Controls.Add(this.btnChildDown);
-            this.tabChildren.Controls.Add(this.btnChildUp);
-            this.tabChildren.Controls.Add(this.tbVisibleStates);
-            this.tabChildren.Controls.Add(this.label21);
-            this.tabChildren.Controls.Add(this.tbTiedTo);
-            this.tabChildren.Controls.Add(this.label19);
-            this.tabChildren.Controls.Add(this.tbTS_Right);
-            this.tabChildren.Controls.Add(this.label17);
-            this.tabChildren.Controls.Add(this.tbTS_Left);
-            this.tabChildren.Controls.Add(this.label18);
-            this.tabChildren.Controls.Add(this.tbTS_Down);
-            this.tabChildren.Controls.Add(this.label16);
-            this.tabChildren.Controls.Add(this.tbTS_Up);
-            this.tabChildren.Controls.Add(this.label15);
-            this.tabChildren.Controls.Add(this.label14);
-            this.tabChildren.Controls.Add(this.chIsTabStop);
-            this.tabChildren.Controls.Add(this.chDontMergeBG);
-            this.tabChildren.Controls.Add(this.chChildBeforeText);
-            this.tabChildren.Controls.Add(this.cbStyle);
-            this.tabChildren.Controls.Add(this.lbChildrenDesignObjs);
-            this.tabChildren.Controls.Add(this.label2);
-            this.tabChildren.Controls.Add(this.cbAlignH);
-            this.tabChildren.Controls.Add(this.tbOpacity);
-            this.tabChildren.Controls.Add(this.cbAlignV);
-            this.tabChildren.Controls.Add(this.btnEditText);
-            this.tabChildren.Controls.Add(this.btnSelectDesignObjInTree);
-            this.tabChildren.Controls.Add(this.chRegenerateForEachScreen);
-            this.tabChildren.Controls.Add(this.tbRotate);
-            this.tabChildren.Controls.Add(this.chCanBeHidden);
-            this.tabChildren.Controls.Add(this.cbLanguageSkin);
-            this.tabChildren.Controls.Add(this.btnAddSkinLanguage);
-            this.tabChildren.Controls.Add(this.btnRemoveText);
-            this.tabChildren.Controls.Add(this.label1);
-            this.tabChildren.Controls.Add(this.tbHeight);
-            this.tabChildren.Controls.Add(this.btnRemoveSkinLanguage);
-            this.tabChildren.Controls.Add(this.lbText);
-            this.tabChildren.Controls.Add(this.label5);
-            this.tabChildren.Controls.Add(this.label4);
-            this.tabChildren.Controls.Add(this.tbY);
-            this.tabChildren.Controls.Add(this.label7);
-            this.tabChildren.Controls.Add(this.tbWidth);
-            this.tabChildren.Controls.Add(this.btnLoadSelectedDesignObj);
-            this.tabChildren.Controls.Add(this.btnBGColorTSL);
-            this.tabChildren.Controls.Add(this.chHideByDefault);
-            this.tabChildren.Controls.Add(this.chChildBehindBG);
-            this.tabChildren.Controls.Add(this.tbX);
-            this.tabChildren.Controls.Add(this.label3);
-            this.tabChildren.Controls.Add(this.btnRemoveDesignObj);
-            this.tabChildren.Location = new System.Drawing.Point(4, 22);
-            this.tabChildren.Name = "tabChildren";
-            this.tabChildren.Size = new System.Drawing.Size(768, 230);
-            this.tabChildren.TabIndex = 7;
-            this.tabChildren.Text = "Children";
-            // 
-            // cbLanguageSkin_Child
-            // 
-            this.cbLanguageSkin_Child.DisplayMember = "LanguageSkin";
-            this.cbLanguageSkin_Child.Location = new System.Drawing.Point(392, 0);
-            this.cbLanguageSkin_Child.Name = "cbLanguageSkin_Child";
-            this.cbLanguageSkin_Child.Size = new System.Drawing.Size(136, 21);
-            this.cbLanguageSkin_Child.TabIndex = 67;
-            this.cbLanguageSkin_Child.Text = "Language - Skin";
-            this.cbLanguageSkin_Child.ValueMember = "ID";
-            this.cbLanguageSkin_Child.SelectedIndexChanged += new System.EventHandler(this.cbLanguageSkin_Child_SelectedIndexChanged);
-            // 
-            // btnAddSkinLanguage_Child
-            // 
-            this.btnAddSkinLanguage_Child.Location = new System.Drawing.Point(392, 24);
-            this.btnAddSkinLanguage_Child.Name = "btnAddSkinLanguage_Child";
-            this.btnAddSkinLanguage_Child.Size = new System.Drawing.Size(80, 24);
-            this.btnAddSkinLanguage_Child.TabIndex = 68;
-            this.btnAddSkinLanguage_Child.Text = "Add skin/lang";
-            this.btnAddSkinLanguage_Child.Click += new System.EventHandler(this.btnAddSkinLanguage_Child_Click_1);
-            // 
-            // btnRemoveSkinLanguage_Child
-            // 
-            this.btnRemoveSkinLanguage_Child.Location = new System.Drawing.Point(472, 24);
-            this.btnRemoveSkinLanguage_Child.Name = "btnRemoveSkinLanguage_Child";
-            this.btnRemoveSkinLanguage_Child.Size = new System.Drawing.Size(56, 24);
-            this.btnRemoveSkinLanguage_Child.TabIndex = 69;
-            this.btnRemoveSkinLanguage_Child.Text = "remove";
-            this.btnRemoveSkinLanguage_Child.Click += new System.EventHandler(this.btnRemoveSkinLanguage_Child_Click_1);
-            // 
-            // btnChildDown
-            // 
-            this.btnChildDown.Location = new System.Drawing.Point(200, 152);
-            this.btnChildDown.Name = "btnChildDown";
-            this.btnChildDown.Size = new System.Drawing.Size(24, 23);
-            this.btnChildDown.TabIndex = 66;
-            this.btnChildDown.Text = "D";
-            this.btnChildDown.Click += new System.EventHandler(this.btnChildDown_Click);
-            // 
-            // btnChildUp
-            // 
-            this.btnChildUp.Location = new System.Drawing.Point(168, 152);
-            this.btnChildUp.Name = "btnChildUp";
-            this.btnChildUp.Size = new System.Drawing.Size(24, 23);
-            this.btnChildUp.TabIndex = 65;
-            this.btnChildUp.Text = "U";
-            this.btnChildUp.Click += new System.EventHandler(this.btnChildUp_Click);
-            // 
-            // tbVisibleStates
-            // 
-            this.tbVisibleStates.Location = new System.Drawing.Point(664, 144);
-            this.tbVisibleStates.Name = "tbVisibleStates";
-            this.tbVisibleStates.Size = new System.Drawing.Size(88, 20);
-            this.tbVisibleStates.TabIndex = 64;
-            this.tbVisibleStates.TextChanged += new System.EventHandler(this.tbVisibleStates_TextChanged);
-            // 
-            // label21
-            // 
-            this.label21.Location = new System.Drawing.Point(664, 128);
-            this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(80, 16);
-            this.label21.TabIndex = 63;
-            this.label21.Text = "Visible States:";
-            // 
-            // tbTiedTo
-            // 
-            this.tbTiedTo.Location = new System.Drawing.Point(664, 104);
-            this.tbTiedTo.Name = "tbTiedTo";
-            this.tbTiedTo.Size = new System.Drawing.Size(64, 20);
-            this.tbTiedTo.TabIndex = 62;
-            this.tbTiedTo.TextChanged += new System.EventHandler(this.tbTiedTo_TextChanged);
-            // 
-            // label19
-            // 
-            this.label19.Location = new System.Drawing.Point(664, 88);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(72, 16);
-            this.label19.TabIndex = 61;
-            this.label19.Text = "Tie state to:";
-            // 
-            // tbTS_Right
-            // 
-            this.tbTS_Right.Location = new System.Drawing.Point(728, 64);
-            this.tbTS_Right.Name = "tbTS_Right";
-            this.tbTS_Right.Size = new System.Drawing.Size(40, 20);
-            this.tbTS_Right.TabIndex = 60;
-            this.tbTS_Right.TextChanged += new System.EventHandler(this.tbTS_Right_TextChanged);
-            // 
-            // label17
-            // 
-            this.label17.Location = new System.Drawing.Point(712, 64);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(16, 23);
-            this.label17.TabIndex = 59;
-            this.label17.Text = "R:";
-            this.label17.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // tbTS_Left
-            // 
-            this.tbTS_Left.Location = new System.Drawing.Point(672, 64);
-            this.tbTS_Left.Name = "tbTS_Left";
-            this.tbTS_Left.Size = new System.Drawing.Size(40, 20);
-            this.tbTS_Left.TabIndex = 58;
-            this.tbTS_Left.TextChanged += new System.EventHandler(this.tbTS_Left_TextChanged);
-            // 
-            // label18
-            // 
-            this.label18.Location = new System.Drawing.Point(688, 64);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(16, 23);
-            this.label18.TabIndex = 57;
-            this.label18.Text = "L:";
-            this.label18.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // tbTS_Down
-            // 
-            this.tbTS_Down.Location = new System.Drawing.Point(728, 40);
-            this.tbTS_Down.Name = "tbTS_Down";
-            this.tbTS_Down.Size = new System.Drawing.Size(40, 20);
-            this.tbTS_Down.TabIndex = 56;
-            this.tbTS_Down.TextChanged += new System.EventHandler(this.tbTS_Down_TextChanged);
-            // 
-            // label16
-            // 
-            this.label16.Location = new System.Drawing.Point(712, 40);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(16, 23);
-            this.label16.TabIndex = 55;
-            this.label16.Text = "D:";
-            this.label16.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // tbTS_Up
-            // 
-            this.tbTS_Up.Location = new System.Drawing.Point(672, 40);
-            this.tbTS_Up.Name = "tbTS_Up";
-            this.tbTS_Up.Size = new System.Drawing.Size(40, 20);
-            this.tbTS_Up.TabIndex = 54;
-            this.tbTS_Up.TextChanged += new System.EventHandler(this.tbTS_Up_TextChanged);
-            // 
-            // label15
-            // 
-            this.label15.Location = new System.Drawing.Point(688, 40);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(16, 23);
-            this.label15.TabIndex = 53;
-            this.label15.Text = "U:";
-            this.label15.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label14
-            // 
-            this.label14.Location = new System.Drawing.Point(656, 24);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(100, 16);
-            this.label14.TabIndex = 52;
-            this.label14.Text = "Tab Stop Help";
-            // 
-            // chIsTabStop
-            // 
-            this.chIsTabStop.Location = new System.Drawing.Point(536, 128);
-            this.chIsTabStop.Name = "chIsTabStop";
-            this.chIsTabStop.Size = new System.Drawing.Size(104, 24);
-            this.chIsTabStop.TabIndex = 51;
-            this.chIsTabStop.Text = "Is Tab Stop";
-            this.chIsTabStop.CheckedChanged += new System.EventHandler(this.cbIsTabStop_CheckedChanged);
-            // 
-            // chDontMergeBG
-            // 
-            this.chDontMergeBG.Enabled = false;
-            this.chDontMergeBG.Location = new System.Drawing.Point(536, 104);
-            this.chDontMergeBG.Name = "chDontMergeBG";
-            this.chDontMergeBG.Size = new System.Drawing.Size(112, 16);
-            this.chDontMergeBG.TabIndex = 50;
-            this.chDontMergeBG.Text = "Don\'t merge bg";
-            this.chDontMergeBG.CheckedChanged += new System.EventHandler(this.chDontMergeBG_CheckedChanged);
-            // 
-            // chChildBeforeText
-            // 
-            this.chChildBeforeText.Enabled = false;
-            this.chChildBeforeText.Location = new System.Drawing.Point(536, 80);
-            this.chChildBeforeText.Name = "chChildBeforeText";
-            this.chChildBeforeText.Size = new System.Drawing.Size(168, 16);
-            this.chChildBeforeText.TabIndex = 49;
-            this.chChildBeforeText.Text = "Children before text";
-            this.chChildBeforeText.CheckedChanged += new System.EventHandler(this.chChildBeforeText_CheckedChanged);
-            // 
-            // tbOpacity
-            // 
-            this.tbOpacity.Enabled = false;
-            this.tbOpacity.Location = new System.Drawing.Point(480, 152);
-            this.tbOpacity.Name = "tbOpacity";
-            this.tbOpacity.Size = new System.Drawing.Size(40, 20);
-            this.tbOpacity.TabIndex = 45;
-            this.tbOpacity.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbOpacity_KeyDown);
-            this.tbOpacity.Leave += new System.EventHandler(this.tbOpacity_Leave);
-            // 
-            // tbRotate
-            // 
-            this.tbRotate.Enabled = false;
-            this.tbRotate.Location = new System.Drawing.Point(416, 152);
-            this.tbRotate.Name = "tbRotate";
-            this.tbRotate.Size = new System.Drawing.Size(40, 20);
-            this.tbRotate.TabIndex = 43;
-            this.tbRotate.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbRotate_KeyDown);
-            this.tbRotate.Leave += new System.EventHandler(this.tbRotate_Leave);
-            // 
-            // label5
-            // 
-            this.label5.Location = new System.Drawing.Point(400, 152);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(40, 23);
-            this.label5.TabIndex = 44;
-            this.label5.Text = "R";
-            // 
-            // label7
-            // 
-            this.label7.Location = new System.Drawing.Point(464, 152);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(40, 23);
-            this.label7.TabIndex = 46;
-            this.label7.Text = "O";
-            // 
-            // btnBGColorTSL
-            // 
-            this.btnBGColorTSL.Enabled = false;
-            this.btnBGColorTSL.Location = new System.Drawing.Point(416, 176);
-            this.btnBGColorTSL.Name = "btnBGColorTSL";
-            this.btnBGColorTSL.Size = new System.Drawing.Size(104, 23);
-            this.btnBGColorTSL.TabIndex = 48;
-            this.btnBGColorTSL.Text = "Plain BG Color";
-            this.btnBGColorTSL.Click += new System.EventHandler(this.btnBGColorTSL_Click);
-            // 
-            // chHideByDefault
-            // 
-            this.chHideByDefault.Enabled = false;
-            this.chHideByDefault.Location = new System.Drawing.Point(536, 32);
-            this.chHideByDefault.Name = "chHideByDefault";
-            this.chHideByDefault.Size = new System.Drawing.Size(104, 16);
-            this.chHideByDefault.TabIndex = 47;
-            this.chHideByDefault.Text = "Hide By Default";
-            this.chHideByDefault.CheckedChanged += new System.EventHandler(this.chHideByDefault_CheckedChanged);
-            // 
-            // tabOnActivate
-            // 
-            this.tabOnActivate.Location = new System.Drawing.Point(4, 22);
-            this.tabOnActivate.Name = "tabOnActivate";
-            this.tabOnActivate.Size = new System.Drawing.Size(768, 230);
-            this.tabOnActivate.TabIndex = 2;
-            this.tabOnActivate.Text = "OnActivate";
-            // 
-            // tabOnLoad
-            // 
-            this.tabOnLoad.Location = new System.Drawing.Point(4, 22);
-            this.tabOnLoad.Name = "tabOnLoad";
-            this.tabOnLoad.Size = new System.Drawing.Size(768, 230);
-            this.tabOnLoad.TabIndex = 3;
-            this.tabOnLoad.Text = "OnLoad";
-            // 
-            // tabOnUnload
-            // 
-            this.tabOnUnload.Location = new System.Drawing.Point(4, 22);
-            this.tabOnUnload.Name = "tabOnUnload";
-            this.tabOnUnload.Size = new System.Drawing.Size(768, 230);
-            this.tabOnUnload.TabIndex = 4;
-            this.tabOnUnload.Text = "OnUnload";
-            // 
-            // tabOnStartup
-            // 
-            this.tabOnStartup.Location = new System.Drawing.Point(4, 22);
-            this.tabOnStartup.Name = "tabOnStartup";
-            this.tabOnStartup.Size = new System.Drawing.Size(768, 230);
-            this.tabOnStartup.TabIndex = 5;
-            this.tabOnStartup.Text = "OnStartup";
-            // 
-            // tabOnHighlight
-            // 
-            this.tabOnHighlight.Location = new System.Drawing.Point(4, 22);
-            this.tabOnHighlight.Name = "tabOnHighlight";
-            this.tabOnHighlight.Size = new System.Drawing.Size(768, 230);
-            this.tabOnHighlight.TabIndex = 6;
-            this.tabOnHighlight.Text = "OnHighlight";
-            // 
-            // tabOnUnhighlight
-            // 
-            this.tabOnUnhighlight.Location = new System.Drawing.Point(4, 22);
-            this.tabOnUnhighlight.Name = "tabOnUnhighlight";
-            this.tabOnUnhighlight.Size = new System.Drawing.Size(768, 230);
-            this.tabOnUnhighlight.TabIndex = 7;
-            this.tabOnUnhighlight.Text = "OnUnhighlight";
-            // 
-            // tabOnTimeout
-            // 
-            this.tabOnTimeout.Location = new System.Drawing.Point(4, 22);
-            this.tabOnTimeout.Name = "tabOnTimeout";
-            this.tabOnTimeout.Size = new System.Drawing.Size(768, 230);
-            this.tabOnTimeout.TabIndex = 8;
-            this.tabOnTimeout.Text = "OnTimeout";
-            // 
-            // tabOnSelected_WithChange
-            // 
-            this.tabOnSelected_WithChange.Controls.Add(this.pnEffectsSelectChange);
-            this.tabOnSelected_WithChange.Location = new System.Drawing.Point(4, 22);
-            this.tabOnSelected_WithChange.Name = "tabOnSelected_WithChange";
-            this.tabOnSelected_WithChange.Size = new System.Drawing.Size(768, 230);
-            this.tabOnSelected_WithChange.TabIndex = 9;
-            this.tabOnSelected_WithChange.Text = "OnSelected(with change)";
-            // 
-            // pnEffectsSelectChange
-            // 
-            this.pnEffectsSelectChange.Controls.Add(this.lbEffect);
-            this.pnEffectsSelectChange.Controls.Add(this.cbEffectsSelectChange);
-            this.pnEffectsSelectChange.Location = new System.Drawing.Point(8, 8);
-            this.pnEffectsSelectChange.Name = "pnEffectsSelectChange";
-            this.pnEffectsSelectChange.Size = new System.Drawing.Size(456, 168);
-            this.pnEffectsSelectChange.TabIndex = 10;
-            // 
-            // lbEffect
-            // 
-            this.lbEffect.Location = new System.Drawing.Point(16, 16);
-            this.lbEffect.Name = "lbEffect";
-            this.lbEffect.Size = new System.Drawing.Size(216, 16);
-            this.lbEffect.TabIndex = 11;
-            this.lbEffect.Text = "Effect";
-            // 
-            // cbEffectsSelectChange
-            // 
-            this.cbEffectsSelectChange.DisplayMember = "Description";
-            this.cbEffectsSelectChange.Location = new System.Drawing.Point(16, 40);
-            this.cbEffectsSelectChange.Name = "cbEffectsSelectChange";
-            this.cbEffectsSelectChange.Size = new System.Drawing.Size(264, 21);
-            this.cbEffectsSelectChange.TabIndex = 12;
-            this.cbEffectsSelectChange.ValueMember = "ID";
-            this.cbEffectsSelectChange.SelectedIndexChanged += new System.EventHandler(this.cbEffectsSelectChange_SelectedIndexChanged);
-            // 
-            // tabOnSelected_NoChange
-            // 
-            this.tabOnSelected_NoChange.Controls.Add(this.panel1);
-            this.tabOnSelected_NoChange.Location = new System.Drawing.Point(4, 22);
-            this.tabOnSelected_NoChange.Name = "tabOnSelected_NoChange";
-            this.tabOnSelected_NoChange.Size = new System.Drawing.Size(768, 230);
-            this.tabOnSelected_NoChange.TabIndex = 13;
-            this.tabOnSelected_NoChange.Text = "OnSelected(no change)";
-            // 
-            // panel1
-            // 
-            this.panel1.Controls.Add(this.label22);
-            this.panel1.Controls.Add(this.cbEffectsSelectNoChange);
-            this.panel1.Location = new System.Drawing.Point(8, 8);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(456, 168);
-            this.panel1.TabIndex = 3;
-            // 
-            // label22
-            // 
-            this.label22.Location = new System.Drawing.Point(16, 16);
-            this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(216, 16);
-            this.label22.TabIndex = 1;
-            this.label22.Text = "Effect";
-            // 
-            // cbEffectsSelectNoChange
-            // 
-            this.cbEffectsSelectNoChange.DisplayMember = "Description";
-            this.cbEffectsSelectNoChange.Location = new System.Drawing.Point(16, 40);
-            this.cbEffectsSelectNoChange.Name = "cbEffectsSelectNoChange";
-            this.cbEffectsSelectNoChange.Size = new System.Drawing.Size(264, 21);
-            this.cbEffectsSelectNoChange.TabIndex = 0;
-            this.cbEffectsSelectNoChange.ValueMember = "ID";
-            this.cbEffectsSelectNoChange.SelectedIndexChanged += new System.EventHandler(this.cbEffectsSelectNoChange_SelectedIndexChanged);
-            // 
-            // tabOnHighlighted
-            // 
-            this.tabOnHighlighted.Controls.Add(this.panel2);
-            this.tabOnHighlighted.Location = new System.Drawing.Point(4, 22);
-            this.tabOnHighlighted.Name = "tabOnHighlighted";
-            this.tabOnHighlighted.Size = new System.Drawing.Size(768, 230);
-            this.tabOnHighlighted.TabIndex = 9;
-            this.tabOnHighlighted.Text = "OnHightlighted";
-            // 
-            // panel2
-            // 
-            this.panel2.Controls.Add(this.label23);
-            this.panel2.Controls.Add(this.cbEffectsHighlight);
-            this.panel2.Location = new System.Drawing.Point(8, 8);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(456, 168);
-            this.panel2.TabIndex = 3;
-            // 
-            // label23
-            // 
-            this.label23.Location = new System.Drawing.Point(16, 16);
-            this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(216, 16);
-            this.label23.TabIndex = 1;
-            this.label23.Text = "Effect";
-            // 
-            // cbEffectsHighlight
-            // 
-            this.cbEffectsHighlight.DisplayMember = "Description";
-            this.cbEffectsHighlight.Location = new System.Drawing.Point(16, 40);
-            this.cbEffectsHighlight.Name = "cbEffectsHighlight";
-            this.cbEffectsHighlight.Size = new System.Drawing.Size(264, 21);
-            this.cbEffectsHighlight.TabIndex = 0;
-            this.cbEffectsHighlight.ValueMember = "ID";
-            this.cbEffectsHighlight.SelectedIndexChanged += new System.EventHandler(this.cbEffectsHighlight_SelectedIndexChanged);
-            // 
-            // tbDescription
-            // 
-            this.tbDescription.Location = new System.Drawing.Point(12, 412);
-            this.tbDescription.Name = "tbDescription";
-            this.tbDescription.Size = new System.Drawing.Size(128, 20);
-            this.tbDescription.TabIndex = 36;
-            this.tbDescription.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbDescription_KeyDown);
-            this.tbDescription.Leave += new System.EventHandler(this.tbDescription_Leave);
-            // 
-            // nudPriority
-            // 
-            this.nudPriority.Location = new System.Drawing.Point(68, 436);
-            this.nudPriority.Maximum = new decimal(new int[] {
+			this.cbVariationStability.Location = new System.Drawing.Point(456, 152);
+			this.cbVariationStability.Name = "cbVariationStability";
+			this.cbVariationStability.Size = new System.Drawing.Size(121, 21);
+			this.cbVariationStability.TabIndex = 46;
+			// 
+			// chDontResetSelectedState
+			// 
+			this.chDontResetSelectedState.Location = new System.Drawing.Point(456, 88);
+			this.chDontResetSelectedState.Name = "chDontResetSelectedState";
+			this.chDontResetSelectedState.Size = new System.Drawing.Size(120, 32);
+			this.chDontResetSelectedState.TabIndex = 45;
+			this.chDontResetSelectedState.Text = "Don\'t reset selected state";
+			this.chDontResetSelectedState.CheckedChanged += new System.EventHandler(this.chDontResetSelectedState_CheckedChanged);
+			// 
+			// lVariationOwner
+			// 
+			this.lVariationOwner.Location = new System.Drawing.Point(464, 64);
+			this.lVariationOwner.Name = "lVariationOwner";
+			this.lVariationOwner.Size = new System.Drawing.Size(120, 16);
+			this.lVariationOwner.TabIndex = 44;
+			// 
+			// tabChildren
+			// 
+			this.tabChildren.Controls.Add(this.btnAddExplicitText);
+			this.tabChildren.Controls.Add(this.btnAddExplicitDesignObj);
+			this.tabChildren.Controls.Add(this.cbLanguageSkin_Child);
+			this.tabChildren.Controls.Add(this.btnAddSkinLanguage_Child);
+			this.tabChildren.Controls.Add(this.btnRemoveSkinLanguage_Child);
+			this.tabChildren.Controls.Add(this.btnChildDown);
+			this.tabChildren.Controls.Add(this.btnChildUp);
+			this.tabChildren.Controls.Add(this.tbVisibleStates);
+			this.tabChildren.Controls.Add(this.btnSaveChanges);
+			this.tabChildren.Controls.Add(this.btnCancel);
+			this.tabChildren.Controls.Add(label21);
+			this.tabChildren.Controls.Add(this.tbTiedTo);
+			this.tabChildren.Controls.Add(label19);
+			this.tabChildren.Controls.Add(this.tbTS_Right);
+			this.tabChildren.Controls.Add(label17);
+			this.tabChildren.Controls.Add(this.tbTS_Left);
+			this.tabChildren.Controls.Add(label18);
+			this.tabChildren.Controls.Add(this.tbTS_Down);
+			this.tabChildren.Controls.Add(label16);
+			this.tabChildren.Controls.Add(this.tbTS_Up);
+			this.tabChildren.Controls.Add(label15);
+			this.tabChildren.Controls.Add(label14);
+			this.tabChildren.Controls.Add(this.chIsTabStop);
+			this.tabChildren.Controls.Add(this.chDontMergeBG);
+			this.tabChildren.Controls.Add(this.chChildBeforeText);
+			this.tabChildren.Controls.Add(this.cbStyle);
+			this.tabChildren.Controls.Add(this.lbChildrenDesignObjs);
+			this.tabChildren.Controls.Add(label2);
+			this.tabChildren.Controls.Add(this.cbAlignH);
+			this.tabChildren.Controls.Add(this.tbOpacity);
+			this.tabChildren.Controls.Add(this.cbAlignV);
+			this.tabChildren.Controls.Add(this.btnEditText);
+			this.tabChildren.Controls.Add(this.chRegenerateForEachScreen);
+			this.tabChildren.Controls.Add(this.tbRotate);
+			this.tabChildren.Controls.Add(this.chCanBeHidden);
+			this.tabChildren.Controls.Add(this.cbLanguageSkin);
+			this.tabChildren.Controls.Add(this.btnAddSkinLanguage);
+			this.tabChildren.Controls.Add(this.btnRemoveText);
+			this.tabChildren.Controls.Add(label1);
+			this.tabChildren.Controls.Add(this.tbHeight);
+			this.tabChildren.Controls.Add(this.btnRemoveSkinLanguage);
+			this.tabChildren.Controls.Add(this.lbText);
+			this.tabChildren.Controls.Add(label5);
+			this.tabChildren.Controls.Add(label4);
+			this.tabChildren.Controls.Add(this.tbY);
+			this.tabChildren.Controls.Add(label7);
+			this.tabChildren.Controls.Add(this.tbWidth);
+			this.tabChildren.Controls.Add(this.btnLoadSelectedDesignObj);
+			this.tabChildren.Controls.Add(this.btnBGColorTSL);
+			this.tabChildren.Controls.Add(this.chHideByDefault);
+			this.tabChildren.Controls.Add(this.chChildBehindBG);
+			this.tabChildren.Controls.Add(this.tbX);
+			this.tabChildren.Controls.Add(label3);
+			this.tabChildren.Controls.Add(this.btnRemoveDesignObj);
+			this.tabChildren.Location = new System.Drawing.Point(4, 22);
+			this.tabChildren.Name = "tabChildren";
+			this.tabChildren.Size = new System.Drawing.Size(768, 230);
+			this.tabChildren.TabIndex = 7;
+			this.tabChildren.Text = "Children";
+			// 
+			// btnAddExplicitText
+			// 
+			this.btnAddExplicitText.Location = new System.Drawing.Point(340, 152);
+			this.btnAddExplicitText.Name = "btnAddExplicitText";
+			this.btnAddExplicitText.Size = new System.Drawing.Size(40, 23);
+			this.btnAddExplicitText.TabIndex = 71;
+			this.btnAddExplicitText.Text = "Add";
+			this.btnAddExplicitText.UseVisualStyleBackColor = true;
+			this.btnAddExplicitText.Click += new System.EventHandler(this.btnAddExplicitText_Click);
+			// 
+			// btnAddExplicitDesignObj
+			// 
+			this.btnAddExplicitDesignObj.Location = new System.Drawing.Point(108, 152);
+			this.btnAddExplicitDesignObj.Name = "btnAddExplicitDesignObj";
+			this.btnAddExplicitDesignObj.Size = new System.Drawing.Size(40, 23);
+			this.btnAddExplicitDesignObj.TabIndex = 70;
+			this.btnAddExplicitDesignObj.Text = "Add";
+			this.btnAddExplicitDesignObj.UseVisualStyleBackColor = true;
+			this.btnAddExplicitDesignObj.Click += new System.EventHandler(this.btnAddExplicitDesignObj_Click);
+			// 
+			// cbLanguageSkin_Child
+			// 
+			this.cbLanguageSkin_Child.DisplayMember = "LanguageSkin";
+			this.cbLanguageSkin_Child.Location = new System.Drawing.Point(392, 0);
+			this.cbLanguageSkin_Child.Name = "cbLanguageSkin_Child";
+			this.cbLanguageSkin_Child.Size = new System.Drawing.Size(136, 21);
+			this.cbLanguageSkin_Child.TabIndex = 67;
+			this.cbLanguageSkin_Child.Text = "Language - Skin";
+			this.cbLanguageSkin_Child.ValueMember = "ID";
+			this.cbLanguageSkin_Child.SelectedIndexChanged += new System.EventHandler(this.cbLanguageSkin_Child_SelectedIndexChanged);
+			// 
+			// btnAddSkinLanguage_Child
+			// 
+			this.btnAddSkinLanguage_Child.Location = new System.Drawing.Point(392, 24);
+			this.btnAddSkinLanguage_Child.Name = "btnAddSkinLanguage_Child";
+			this.btnAddSkinLanguage_Child.Size = new System.Drawing.Size(80, 24);
+			this.btnAddSkinLanguage_Child.TabIndex = 68;
+			this.btnAddSkinLanguage_Child.Text = "Add skin/lang";
+			this.btnAddSkinLanguage_Child.Click += new System.EventHandler(this.btnAddSkinLanguage_Child_Click_1);
+			// 
+			// btnRemoveSkinLanguage_Child
+			// 
+			this.btnRemoveSkinLanguage_Child.Location = new System.Drawing.Point(472, 24);
+			this.btnRemoveSkinLanguage_Child.Name = "btnRemoveSkinLanguage_Child";
+			this.btnRemoveSkinLanguage_Child.Size = new System.Drawing.Size(56, 24);
+			this.btnRemoveSkinLanguage_Child.TabIndex = 69;
+			this.btnRemoveSkinLanguage_Child.Text = "remove";
+			this.btnRemoveSkinLanguage_Child.Click += new System.EventHandler(this.btnRemoveSkinLanguage_Child_Click_1);
+			// 
+			// btnChildDown
+			// 
+			this.btnChildDown.Location = new System.Drawing.Point(200, 152);
+			this.btnChildDown.Name = "btnChildDown";
+			this.btnChildDown.Size = new System.Drawing.Size(24, 23);
+			this.btnChildDown.TabIndex = 66;
+			this.btnChildDown.Text = "D";
+			this.btnChildDown.Click += new System.EventHandler(this.btnChildDown_Click);
+			// 
+			// btnChildUp
+			// 
+			this.btnChildUp.Location = new System.Drawing.Point(174, 152);
+			this.btnChildUp.Name = "btnChildUp";
+			this.btnChildUp.Size = new System.Drawing.Size(24, 23);
+			this.btnChildUp.TabIndex = 65;
+			this.btnChildUp.Text = "U";
+			this.btnChildUp.Click += new System.EventHandler(this.btnChildUp_Click);
+			// 
+			// tbVisibleStates
+			// 
+			this.tbVisibleStates.Location = new System.Drawing.Point(664, 144);
+			this.tbVisibleStates.Name = "tbVisibleStates";
+			this.tbVisibleStates.Size = new System.Drawing.Size(88, 20);
+			this.tbVisibleStates.TabIndex = 64;
+			this.tbVisibleStates.TextChanged += new System.EventHandler(this.tbVisibleStates_TextChanged);
+			// 
+			// tbTiedTo
+			// 
+			this.tbTiedTo.Location = new System.Drawing.Point(664, 104);
+			this.tbTiedTo.Name = "tbTiedTo";
+			this.tbTiedTo.Size = new System.Drawing.Size(64, 20);
+			this.tbTiedTo.TabIndex = 62;
+			this.tbTiedTo.TextChanged += new System.EventHandler(this.tbTiedTo_TextChanged);
+			// 
+			// tbTS_Right
+			// 
+			this.tbTS_Right.Location = new System.Drawing.Point(728, 64);
+			this.tbTS_Right.Name = "tbTS_Right";
+			this.tbTS_Right.Size = new System.Drawing.Size(40, 20);
+			this.tbTS_Right.TabIndex = 60;
+			this.tbTS_Right.TextChanged += new System.EventHandler(this.tbTS_Right_TextChanged);
+			// 
+			// tbTS_Left
+			// 
+			this.tbTS_Left.Location = new System.Drawing.Point(672, 64);
+			this.tbTS_Left.Name = "tbTS_Left";
+			this.tbTS_Left.Size = new System.Drawing.Size(40, 20);
+			this.tbTS_Left.TabIndex = 58;
+			this.tbTS_Left.TextChanged += new System.EventHandler(this.tbTS_Left_TextChanged);
+			// 
+			// tbTS_Down
+			// 
+			this.tbTS_Down.Location = new System.Drawing.Point(728, 40);
+			this.tbTS_Down.Name = "tbTS_Down";
+			this.tbTS_Down.Size = new System.Drawing.Size(40, 20);
+			this.tbTS_Down.TabIndex = 56;
+			this.tbTS_Down.TextChanged += new System.EventHandler(this.tbTS_Down_TextChanged);
+			// 
+			// tbTS_Up
+			// 
+			this.tbTS_Up.Location = new System.Drawing.Point(672, 40);
+			this.tbTS_Up.Name = "tbTS_Up";
+			this.tbTS_Up.Size = new System.Drawing.Size(40, 20);
+			this.tbTS_Up.TabIndex = 54;
+			this.tbTS_Up.TextChanged += new System.EventHandler(this.tbTS_Up_TextChanged);
+			// 
+			// chIsTabStop
+			// 
+			this.chIsTabStop.Location = new System.Drawing.Point(536, 128);
+			this.chIsTabStop.Name = "chIsTabStop";
+			this.chIsTabStop.Size = new System.Drawing.Size(104, 24);
+			this.chIsTabStop.TabIndex = 51;
+			this.chIsTabStop.Text = "Is Tab Stop";
+			this.chIsTabStop.CheckedChanged += new System.EventHandler(this.cbIsTabStop_CheckedChanged);
+			// 
+			// chDontMergeBG
+			// 
+			this.chDontMergeBG.Enabled = false;
+			this.chDontMergeBG.Location = new System.Drawing.Point(536, 104);
+			this.chDontMergeBG.Name = "chDontMergeBG";
+			this.chDontMergeBG.Size = new System.Drawing.Size(112, 16);
+			this.chDontMergeBG.TabIndex = 50;
+			this.chDontMergeBG.Text = "Don\'t merge bg";
+			this.chDontMergeBG.CheckedChanged += new System.EventHandler(this.chDontMergeBG_CheckedChanged);
+			// 
+			// chChildBeforeText
+			// 
+			this.chChildBeforeText.Enabled = false;
+			this.chChildBeforeText.Location = new System.Drawing.Point(536, 80);
+			this.chChildBeforeText.Name = "chChildBeforeText";
+			this.chChildBeforeText.Size = new System.Drawing.Size(168, 16);
+			this.chChildBeforeText.TabIndex = 49;
+			this.chChildBeforeText.Text = "Children before text";
+			this.chChildBeforeText.CheckedChanged += new System.EventHandler(this.chChildBeforeText_CheckedChanged);
+			// 
+			// tbOpacity
+			// 
+			this.tbOpacity.Enabled = false;
+			this.tbOpacity.Location = new System.Drawing.Point(480, 152);
+			this.tbOpacity.Name = "tbOpacity";
+			this.tbOpacity.Size = new System.Drawing.Size(40, 20);
+			this.tbOpacity.TabIndex = 45;
+			this.tbOpacity.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbOpacity_KeyDown);
+			this.tbOpacity.Leave += new System.EventHandler(this.tbOpacity_Leave);
+			// 
+			// tbRotate
+			// 
+			this.tbRotate.Enabled = false;
+			this.tbRotate.Location = new System.Drawing.Point(416, 152);
+			this.tbRotate.Name = "tbRotate";
+			this.tbRotate.Size = new System.Drawing.Size(40, 20);
+			this.tbRotate.TabIndex = 43;
+			this.tbRotate.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbRotate_KeyDown);
+			this.tbRotate.Leave += new System.EventHandler(this.tbRotate_Leave);
+			// 
+			// btnBGColorTSL
+			// 
+			this.btnBGColorTSL.Enabled = false;
+			this.btnBGColorTSL.Location = new System.Drawing.Point(416, 176);
+			this.btnBGColorTSL.Name = "btnBGColorTSL";
+			this.btnBGColorTSL.Size = new System.Drawing.Size(104, 23);
+			this.btnBGColorTSL.TabIndex = 48;
+			this.btnBGColorTSL.Text = "Plain BG Color";
+			this.btnBGColorTSL.Click += new System.EventHandler(this.btnBGColorTSL_Click);
+			// 
+			// chHideByDefault
+			// 
+			this.chHideByDefault.Enabled = false;
+			this.chHideByDefault.Location = new System.Drawing.Point(536, 32);
+			this.chHideByDefault.Name = "chHideByDefault";
+			this.chHideByDefault.Size = new System.Drawing.Size(104, 16);
+			this.chHideByDefault.TabIndex = 47;
+			this.chHideByDefault.Text = "Hide By Default";
+			this.chHideByDefault.CheckedChanged += new System.EventHandler(this.chHideByDefault_CheckedChanged);
+			// 
+			// tabOnActivate
+			// 
+			this.tabOnActivate.Location = new System.Drawing.Point(4, 22);
+			this.tabOnActivate.Name = "tabOnActivate";
+			this.tabOnActivate.Size = new System.Drawing.Size(768, 230);
+			this.tabOnActivate.TabIndex = 2;
+			this.tabOnActivate.Text = "OnActivate";
+			// 
+			// tabOnLoad
+			// 
+			this.tabOnLoad.Location = new System.Drawing.Point(4, 22);
+			this.tabOnLoad.Name = "tabOnLoad";
+			this.tabOnLoad.Size = new System.Drawing.Size(768, 230);
+			this.tabOnLoad.TabIndex = 3;
+			this.tabOnLoad.Text = "OnLoad";
+			// 
+			// tabOnUnload
+			// 
+			this.tabOnUnload.Location = new System.Drawing.Point(4, 22);
+			this.tabOnUnload.Name = "tabOnUnload";
+			this.tabOnUnload.Size = new System.Drawing.Size(768, 230);
+			this.tabOnUnload.TabIndex = 4;
+			this.tabOnUnload.Text = "OnUnload";
+			// 
+			// tabOnStartup
+			// 
+			this.tabOnStartup.Location = new System.Drawing.Point(4, 22);
+			this.tabOnStartup.Name = "tabOnStartup";
+			this.tabOnStartup.Size = new System.Drawing.Size(768, 230);
+			this.tabOnStartup.TabIndex = 5;
+			this.tabOnStartup.Text = "OnStartup";
+			// 
+			// tabOnHighlight
+			// 
+			this.tabOnHighlight.Location = new System.Drawing.Point(4, 22);
+			this.tabOnHighlight.Name = "tabOnHighlight";
+			this.tabOnHighlight.Size = new System.Drawing.Size(768, 230);
+			this.tabOnHighlight.TabIndex = 6;
+			this.tabOnHighlight.Text = "OnHighlight";
+			// 
+			// tabOnUnhighlight
+			// 
+			this.tabOnUnhighlight.Location = new System.Drawing.Point(4, 22);
+			this.tabOnUnhighlight.Name = "tabOnUnhighlight";
+			this.tabOnUnhighlight.Size = new System.Drawing.Size(768, 230);
+			this.tabOnUnhighlight.TabIndex = 7;
+			this.tabOnUnhighlight.Text = "OnUnhighlight";
+			// 
+			// tabOnTimeout
+			// 
+			this.tabOnTimeout.Location = new System.Drawing.Point(4, 22);
+			this.tabOnTimeout.Name = "tabOnTimeout";
+			this.tabOnTimeout.Size = new System.Drawing.Size(768, 230);
+			this.tabOnTimeout.TabIndex = 8;
+			this.tabOnTimeout.Text = "OnTimeout";
+			// 
+			// tabOnSelected_WithChange
+			// 
+			this.tabOnSelected_WithChange.Controls.Add(this.pnEffectsSelectChange);
+			this.tabOnSelected_WithChange.Location = new System.Drawing.Point(4, 22);
+			this.tabOnSelected_WithChange.Name = "tabOnSelected_WithChange";
+			this.tabOnSelected_WithChange.Size = new System.Drawing.Size(768, 230);
+			this.tabOnSelected_WithChange.TabIndex = 9;
+			this.tabOnSelected_WithChange.Text = "OnSelected(with change)";
+			// 
+			// pnEffectsSelectChange
+			// 
+			this.pnEffectsSelectChange.Controls.Add(this.lbEffect);
+			this.pnEffectsSelectChange.Controls.Add(this.cbEffectsSelectChange);
+			this.pnEffectsSelectChange.Location = new System.Drawing.Point(8, 8);
+			this.pnEffectsSelectChange.Name = "pnEffectsSelectChange";
+			this.pnEffectsSelectChange.Size = new System.Drawing.Size(456, 168);
+			this.pnEffectsSelectChange.TabIndex = 10;
+			// 
+			// lbEffect
+			// 
+			this.lbEffect.Location = new System.Drawing.Point(16, 16);
+			this.lbEffect.Name = "lbEffect";
+			this.lbEffect.Size = new System.Drawing.Size(216, 16);
+			this.lbEffect.TabIndex = 11;
+			this.lbEffect.Text = "Effect";
+			// 
+			// cbEffectsSelectChange
+			// 
+			this.cbEffectsSelectChange.DisplayMember = "Description";
+			this.cbEffectsSelectChange.Location = new System.Drawing.Point(16, 40);
+			this.cbEffectsSelectChange.Name = "cbEffectsSelectChange";
+			this.cbEffectsSelectChange.Size = new System.Drawing.Size(264, 21);
+			this.cbEffectsSelectChange.TabIndex = 12;
+			this.cbEffectsSelectChange.ValueMember = "ID";
+			this.cbEffectsSelectChange.SelectedIndexChanged += new System.EventHandler(this.cbEffectsSelectChange_SelectedIndexChanged);
+			// 
+			// tabOnSelected_NoChange
+			// 
+			this.tabOnSelected_NoChange.Controls.Add(this.panel1);
+			this.tabOnSelected_NoChange.Location = new System.Drawing.Point(4, 22);
+			this.tabOnSelected_NoChange.Name = "tabOnSelected_NoChange";
+			this.tabOnSelected_NoChange.Size = new System.Drawing.Size(768, 230);
+			this.tabOnSelected_NoChange.TabIndex = 13;
+			this.tabOnSelected_NoChange.Text = "OnSelected(no change)";
+			// 
+			// panel1
+			// 
+			this.panel1.Controls.Add(label22);
+			this.panel1.Controls.Add(this.cbEffectsSelectNoChange);
+			this.panel1.Location = new System.Drawing.Point(8, 8);
+			this.panel1.Name = "panel1";
+			this.panel1.Size = new System.Drawing.Size(456, 168);
+			this.panel1.TabIndex = 3;
+			// 
+			// cbEffectsSelectNoChange
+			// 
+			this.cbEffectsSelectNoChange.DisplayMember = "Description";
+			this.cbEffectsSelectNoChange.Location = new System.Drawing.Point(16, 40);
+			this.cbEffectsSelectNoChange.Name = "cbEffectsSelectNoChange";
+			this.cbEffectsSelectNoChange.Size = new System.Drawing.Size(264, 21);
+			this.cbEffectsSelectNoChange.TabIndex = 0;
+			this.cbEffectsSelectNoChange.ValueMember = "ID";
+			this.cbEffectsSelectNoChange.SelectedIndexChanged += new System.EventHandler(this.cbEffectsSelectNoChange_SelectedIndexChanged);
+			// 
+			// tabOnHighlighted
+			// 
+			this.tabOnHighlighted.Controls.Add(this.panel2);
+			this.tabOnHighlighted.Location = new System.Drawing.Point(4, 22);
+			this.tabOnHighlighted.Name = "tabOnHighlighted";
+			this.tabOnHighlighted.Size = new System.Drawing.Size(768, 230);
+			this.tabOnHighlighted.TabIndex = 9;
+			this.tabOnHighlighted.Text = "OnHightlighted";
+			// 
+			// panel2
+			// 
+			this.panel2.Controls.Add(label23);
+			this.panel2.Controls.Add(this.cbEffectsHighlight);
+			this.panel2.Location = new System.Drawing.Point(8, 8);
+			this.panel2.Name = "panel2";
+			this.panel2.Size = new System.Drawing.Size(456, 168);
+			this.panel2.TabIndex = 3;
+			// 
+			// cbEffectsHighlight
+			// 
+			this.cbEffectsHighlight.DisplayMember = "Description";
+			this.cbEffectsHighlight.Location = new System.Drawing.Point(16, 40);
+			this.cbEffectsHighlight.Name = "cbEffectsHighlight";
+			this.cbEffectsHighlight.Size = new System.Drawing.Size(264, 21);
+			this.cbEffectsHighlight.TabIndex = 0;
+			this.cbEffectsHighlight.ValueMember = "ID";
+			this.cbEffectsHighlight.SelectedIndexChanged += new System.EventHandler(this.cbEffectsHighlight_SelectedIndexChanged);
+			// 
+			// tbDescription
+			// 
+			this.tbDescription.Location = new System.Drawing.Point(12, 412);
+			this.tbDescription.Name = "tbDescription";
+			this.tbDescription.Size = new System.Drawing.Size(128, 20);
+			this.tbDescription.TabIndex = 36;
+			this.tbDescription.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbDescription_KeyDown);
+			this.tbDescription.Leave += new System.EventHandler(this.tbDescription_Leave);
+			// 
+			// nudPriority
+			// 
+			this.nudPriority.Location = new System.Drawing.Point(68, 436);
+			this.nudPriority.Maximum = new decimal(new int[] {
             10,
             0,
             0,
             0});
-            this.nudPriority.Name = "nudPriority";
-            this.nudPriority.Size = new System.Drawing.Size(48, 20);
-            this.nudPriority.TabIndex = 37;
-            this.nudPriority.Value = new decimal(new int[] {
+			this.nudPriority.Name = "nudPriority";
+			this.nudPriority.Size = new System.Drawing.Size(48, 20);
+			this.nudPriority.TabIndex = 37;
+			this.nudPriority.Value = new decimal(new int[] {
             1,
             0,
             0,
             0});
-            this.nudPriority.ValueChanged += new System.EventHandler(this.nudPriority_ValueChanged);
-            this.nudPriority.Leave += new System.EventHandler(this.nudPriority_Leave);
-            // 
-            // lblPriority
-            // 
-            this.lblPriority.Location = new System.Drawing.Point(12, 436);
-            this.lblPriority.Name = "lblPriority";
-            this.lblPriority.Size = new System.Drawing.Size(48, 16);
-            this.lblPriority.TabIndex = 38;
-            this.lblPriority.Text = "Priority";
-            this.lblPriority.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // cbAnimate
-            // 
-            this.cbAnimate.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.cbAnimate.Location = new System.Drawing.Point(12, 452);
-            this.cbAnimate.Name = "cbAnimate";
-            this.cbAnimate.Size = new System.Drawing.Size(72, 24);
-            this.cbAnimate.TabIndex = 40;
-            this.cbAnimate.Text = "Animate";
-            this.cbAnimate.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.cbAnimate.Click += new System.EventHandler(this.cbAnimate_Click);
-            // 
-            // pnCommandGroupInfo
-            // 
-            this.pnCommandGroupInfo.Controls.Add(this.lMasterDevice);
-            this.pnCommandGroupInfo.Controls.Add(this.chRelToSender);
-            this.pnCommandGroupInfo.Controls.Add(this.tbDeviceCategory);
-            this.pnCommandGroupInfo.Controls.Add(this.tbMasterDeviceList);
-            this.pnCommandGroupInfo.Controls.Add(this.label10);
-            this.pnCommandGroupInfo.Controls.Add(this.label9);
-            this.pnCommandGroupInfo.Controls.Add(this.label8);
-            this.pnCommandGroupInfo.Controls.Add(this.cbBroadcast);
-            this.pnCommandGroupInfo.Controls.Add(this.btnOnActivateGoto);
-            this.pnCommandGroupInfo.Controls.Add(this.lbSelectedCommands);
-            this.pnCommandGroupInfo.Controls.Add(this.btnOnActivateDown);
-            this.pnCommandGroupInfo.Controls.Add(this.tvCommand);
-            this.pnCommandGroupInfo.Controls.Add(this.btnOnActivateUp);
-            this.pnCommandGroupInfo.Controls.Add(this.btnOnActivateRemoveAG);
-            this.pnCommandGroupInfo.Controls.Add(this.btnOnActivateAddAG);
-            this.pnCommandGroupInfo.Controls.Add(this.pnOnActivateParameters);
-            this.pnCommandGroupInfo.Controls.Add(this.labAvailableCommands);
-            this.pnCommandGroupInfo.Controls.Add(this.labSelectedCommands);
-            this.pnCommandGroupInfo.Location = new System.Drawing.Point(156, 436);
-            this.pnCommandGroupInfo.Name = "pnCommandGroupInfo";
-            this.pnCommandGroupInfo.Size = new System.Drawing.Size(752, 200);
-            this.pnCommandGroupInfo.TabIndex = 41;
-            // 
-            // lMasterDevice
-            // 
-            this.lMasterDevice.Location = new System.Drawing.Point(640, 8);
-            this.lMasterDevice.Name = "lMasterDevice";
-            this.lMasterDevice.Size = new System.Drawing.Size(100, 23);
-            this.lMasterDevice.TabIndex = 24;
-            // 
-            // chRelToSender
-            // 
-            this.chRelToSender.Location = new System.Drawing.Point(352, 32);
-            this.chRelToSender.Name = "chRelToSender";
-            this.chRelToSender.Size = new System.Drawing.Size(96, 24);
-            this.chRelToSender.TabIndex = 23;
-            this.chRelToSender.Text = "Rel to Sender";
-            this.chRelToSender.TextChanged += new System.EventHandler(this.chRelToSender_TextChanged);
-            // 
-            // tbDeviceCategory
-            // 
-            this.tbDeviceCategory.Location = new System.Drawing.Point(536, 32);
-            this.tbDeviceCategory.Name = "tbDeviceCategory";
-            this.tbDeviceCategory.Size = new System.Drawing.Size(48, 20);
-            this.tbDeviceCategory.TabIndex = 22;
-            this.tbDeviceCategory.TextChanged += new System.EventHandler(this.tbDeviceCategory_TextChanged);
-            // 
-            // tbMasterDeviceList
-            // 
-            this.tbMasterDeviceList.Location = new System.Drawing.Point(584, 8);
-            this.tbMasterDeviceList.Name = "tbMasterDeviceList";
-            this.tbMasterDeviceList.Size = new System.Drawing.Size(48, 20);
-            this.tbMasterDeviceList.TabIndex = 21;
-            this.tbMasterDeviceList.TextChanged += new System.EventHandler(this.tbMasterDeviceList_TextChanged);
-            // 
-            // label10
-            // 
-            this.label10.Location = new System.Drawing.Point(440, 32);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(96, 23);
-            this.label10.TabIndex = 20;
-            this.label10.Text = "Device Category:";
-            this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label9
-            // 
-            this.label9.Location = new System.Drawing.Point(496, 8);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(80, 16);
-            this.label9.TabIndex = 19;
-            this.label9.Text = "Master Device:";
-            this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label8
-            // 
-            this.label8.Location = new System.Drawing.Point(344, 16);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(64, 16);
-            this.label8.TabIndex = 18;
-            this.label8.Text = "Broadcast:";
-            // 
-            // cbBroadcast
-            // 
-            this.cbBroadcast.Items.AddRange(new object[] {
+			this.nudPriority.ValueChanged += new System.EventHandler(this.nudPriority_ValueChanged);
+			this.nudPriority.Leave += new System.EventHandler(this.nudPriority_Leave);
+			// 
+			// lblPriority
+			// 
+			this.lblPriority.Location = new System.Drawing.Point(12, 436);
+			this.lblPriority.Name = "lblPriority";
+			this.lblPriority.Size = new System.Drawing.Size(48, 16);
+			this.lblPriority.TabIndex = 38;
+			this.lblPriority.Text = "Priority";
+			this.lblPriority.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			// 
+			// cbAnimate
+			// 
+			this.cbAnimate.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.cbAnimate.Location = new System.Drawing.Point(12, 452);
+			this.cbAnimate.Name = "cbAnimate";
+			this.cbAnimate.Size = new System.Drawing.Size(72, 24);
+			this.cbAnimate.TabIndex = 40;
+			this.cbAnimate.Text = "Animate";
+			this.cbAnimate.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.cbAnimate.Click += new System.EventHandler(this.cbAnimate_Click);
+			// 
+			// pnCommandGroupInfo
+			// 
+			this.pnCommandGroupInfo.Controls.Add(this.lMasterDevice);
+			this.pnCommandGroupInfo.Controls.Add(this.chRelToSender);
+			this.pnCommandGroupInfo.Controls.Add(this.tbDeviceCategory);
+			this.pnCommandGroupInfo.Controls.Add(this.tbMasterDeviceList);
+			this.pnCommandGroupInfo.Controls.Add(label10);
+			this.pnCommandGroupInfo.Controls.Add(label9);
+			this.pnCommandGroupInfo.Controls.Add(label8);
+			this.pnCommandGroupInfo.Controls.Add(this.cbBroadcast);
+			this.pnCommandGroupInfo.Controls.Add(this.btnOnActivateGoto);
+			this.pnCommandGroupInfo.Controls.Add(this.lbSelectedCommands);
+			this.pnCommandGroupInfo.Controls.Add(this.btnOnActivateDown);
+			this.pnCommandGroupInfo.Controls.Add(this.tvCommand);
+			this.pnCommandGroupInfo.Controls.Add(this.btnOnActivateUp);
+			this.pnCommandGroupInfo.Controls.Add(this.btnOnActivateRemoveAG);
+			this.pnCommandGroupInfo.Controls.Add(this.btnOnActivateAddAG);
+			this.pnCommandGroupInfo.Controls.Add(this.pnOnActivateParameters);
+			this.pnCommandGroupInfo.Controls.Add(this.labAvailableCommands);
+			this.pnCommandGroupInfo.Controls.Add(this.labSelectedCommands);
+			this.pnCommandGroupInfo.Location = new System.Drawing.Point(156, 436);
+			this.pnCommandGroupInfo.Name = "pnCommandGroupInfo";
+			this.pnCommandGroupInfo.Size = new System.Drawing.Size(752, 200);
+			this.pnCommandGroupInfo.TabIndex = 41;
+			// 
+			// lMasterDevice
+			// 
+			this.lMasterDevice.Location = new System.Drawing.Point(640, 8);
+			this.lMasterDevice.Name = "lMasterDevice";
+			this.lMasterDevice.Size = new System.Drawing.Size(100, 23);
+			this.lMasterDevice.TabIndex = 24;
+			// 
+			// chRelToSender
+			// 
+			this.chRelToSender.Location = new System.Drawing.Point(352, 32);
+			this.chRelToSender.Name = "chRelToSender";
+			this.chRelToSender.Size = new System.Drawing.Size(96, 24);
+			this.chRelToSender.TabIndex = 23;
+			this.chRelToSender.Text = "Rel to Sender";
+			this.chRelToSender.TextChanged += new System.EventHandler(this.chRelToSender_TextChanged);
+			// 
+			// tbDeviceCategory
+			// 
+			this.tbDeviceCategory.Location = new System.Drawing.Point(536, 32);
+			this.tbDeviceCategory.Name = "tbDeviceCategory";
+			this.tbDeviceCategory.Size = new System.Drawing.Size(48, 20);
+			this.tbDeviceCategory.TabIndex = 22;
+			this.tbDeviceCategory.TextChanged += new System.EventHandler(this.tbDeviceCategory_TextChanged);
+			// 
+			// tbMasterDeviceList
+			// 
+			this.tbMasterDeviceList.Location = new System.Drawing.Point(584, 8);
+			this.tbMasterDeviceList.Name = "tbMasterDeviceList";
+			this.tbMasterDeviceList.Size = new System.Drawing.Size(48, 20);
+			this.tbMasterDeviceList.TabIndex = 21;
+			this.tbMasterDeviceList.TextChanged += new System.EventHandler(this.tbMasterDeviceList_TextChanged);
+			// 
+			// cbBroadcast
+			// 
+			this.cbBroadcast.Items.AddRange(new object[] {
             "None",
             "Direct Siblings",
             "Same Computer",
             "Same Room",
             "Same House",
             "All Houses"});
-            this.cbBroadcast.Location = new System.Drawing.Point(408, 8);
-            this.cbBroadcast.Name = "cbBroadcast";
-            this.cbBroadcast.Size = new System.Drawing.Size(88, 21);
-            this.cbBroadcast.TabIndex = 17;
-            this.cbBroadcast.SelectedIndexChanged += new System.EventHandler(this.cbBroadcast_SelectedIndexChanged);
-            // 
-            // btnOnActivateGoto
-            // 
-            this.btnOnActivateGoto.Location = new System.Drawing.Point(160, 136);
-            this.btnOnActivateGoto.Name = "btnOnActivateGoto";
-            this.btnOnActivateGoto.Size = new System.Drawing.Size(40, 23);
-            this.btnOnActivateGoto.TabIndex = 9;
-            this.btnOnActivateGoto.Text = "Goto";
-            this.btnOnActivateGoto.Click += new System.EventHandler(this.btnOnActivateGoto_Click);
-            // 
-            // lbSelectedCommands
-            // 
-            this.lbSelectedCommands.DisplayMember = "Description";
-            this.lbSelectedCommands.Location = new System.Drawing.Point(200, 24);
-            this.lbSelectedCommands.Name = "lbSelectedCommands";
-            this.lbSelectedCommands.Size = new System.Drawing.Size(144, 147);
-            this.lbSelectedCommands.TabIndex = 8;
-            this.lbSelectedCommands.ValueMember = "CommandID";
-            this.lbSelectedCommands.SelectedIndexChanged += new System.EventHandler(this.lbSelectedCommands_SelectedIndexChanged);
-            // 
-            // btnOnActivateDown
-            // 
-            this.btnOnActivateDown.Location = new System.Drawing.Point(176, 48);
-            this.btnOnActivateDown.Name = "btnOnActivateDown";
-            this.btnOnActivateDown.Size = new System.Drawing.Size(24, 23);
-            this.btnOnActivateDown.TabIndex = 15;
-            this.btnOnActivateDown.Text = "D";
-            this.btnOnActivateDown.Click += new System.EventHandler(this.btnOnActivateDown_Click);
-            // 
-            // tvCommand
-            // 
-            this.tvCommand.AllowDrop = true;
-            this.tvCommand.Location = new System.Drawing.Point(8, 24);
-            this.tvCommand.Name = "tvCommand";
-            this.tvCommand.Size = new System.Drawing.Size(152, 144);
-            this.tvCommand.TabIndex = 5;
-            this.tvCommand.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvCommand_AfterSelect);
-            // 
-            // btnOnActivateUp
-            // 
-            this.btnOnActivateUp.Location = new System.Drawing.Point(176, 24);
-            this.btnOnActivateUp.Name = "btnOnActivateUp";
-            this.btnOnActivateUp.Size = new System.Drawing.Size(24, 23);
-            this.btnOnActivateUp.TabIndex = 14;
-            this.btnOnActivateUp.Text = "U";
-            this.btnOnActivateUp.Click += new System.EventHandler(this.btnOnActivateUp_Click);
-            // 
-            // btnOnActivateRemoveAG
-            // 
-            this.btnOnActivateRemoveAG.Enabled = false;
-            this.btnOnActivateRemoveAG.Location = new System.Drawing.Point(160, 112);
-            this.btnOnActivateRemoveAG.Name = "btnOnActivateRemoveAG";
-            this.btnOnActivateRemoveAG.Size = new System.Drawing.Size(32, 23);
-            this.btnOnActivateRemoveAG.TabIndex = 7;
-            this.btnOnActivateRemoveAG.Text = "<<";
-            this.btnOnActivateRemoveAG.Click += new System.EventHandler(this.btnOnActivateRemoveAG_Click);
-            // 
-            // btnOnActivateAddAG
-            // 
-            this.btnOnActivateAddAG.Enabled = false;
-            this.btnOnActivateAddAG.Location = new System.Drawing.Point(160, 88);
-            this.btnOnActivateAddAG.Name = "btnOnActivateAddAG";
-            this.btnOnActivateAddAG.Size = new System.Drawing.Size(32, 23);
-            this.btnOnActivateAddAG.TabIndex = 6;
-            this.btnOnActivateAddAG.Text = ">>";
-            this.btnOnActivateAddAG.Click += new System.EventHandler(this.btnOnActivateAddAG_Click);
-            // 
-            // pnOnActivateParameters
-            // 
-            this.pnOnActivateParameters.AutoScroll = true;
-            this.pnOnActivateParameters.BackColor = System.Drawing.SystemColors.Control;
-            this.pnOnActivateParameters.Location = new System.Drawing.Point(352, 56);
-            this.pnOnActivateParameters.Name = "pnOnActivateParameters";
-            this.pnOnActivateParameters.Size = new System.Drawing.Size(392, 112);
-            this.pnOnActivateParameters.TabIndex = 13;
-            // 
-            // labAvailableCommands
-            // 
-            this.labAvailableCommands.Location = new System.Drawing.Point(16, 8);
-            this.labAvailableCommands.Name = "labAvailableCommands";
-            this.labAvailableCommands.Size = new System.Drawing.Size(112, 23);
-            this.labAvailableCommands.TabIndex = 4;
-            this.labAvailableCommands.Text = "Available Commands";
-            // 
-            // labSelectedCommands
-            // 
-            this.labSelectedCommands.Location = new System.Drawing.Point(200, 8);
-            this.labSelectedCommands.Name = "labSelectedCommands";
-            this.labSelectedCommands.Size = new System.Drawing.Size(120, 23);
-            this.labSelectedCommands.TabIndex = 10;
-            this.labSelectedCommands.Text = "Selected Commands";
-            // 
-            // DesignObjDesigner
-            // 
-            this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-            this.ClientSize = new System.Drawing.Size(936, 734);
-            this.Controls.Add(this.pnCommandGroupInfo);
-            this.Controls.Add(this.cbAnimate);
-            this.Controls.Add(this.lblPriority);
-            this.Controls.Add(this.nudPriority);
-            this.Controls.Add(this.tbDescription);
-            this.Controls.Add(this.cbAvailableVariations);
-            this.Controls.Add(this.button6);
-            this.Controls.Add(this.lbVariations);
-            this.Controls.Add(this.btnRemoveSelectedVariation);
-            this.Controls.Add(this.btnCancel);
-            this.Controls.Add(this.btnSaveChanges);
-            this.Controls.Add(this.panelPreview);
-            this.Controls.Add(this.tabAllPages);
-            this.KeyPreview = true;
-            this.Menu = this.mnuDesignObjXDesigner;
-            this.Name = "DesignObjDesigner";
-            this.Text = "DesignObjXDesigner";
-            this.Load += new System.EventHandler(this.DesignObjDesigner_Load);
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.DesignObjDesigner_FormClosed);
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.DesignObjDesigner_FormClosing);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DesignObjDesigner_KeyDown);
-            this.tabButtons.ResumeLayout(false);
-            this.tabAllPages.ResumeLayout(false);
-            this.tabParameters.ResumeLayout(false);
-            this.tabChildren.ResumeLayout(false);
-            this.tabChildren.PerformLayout();
-            this.tabOnSelected_WithChange.ResumeLayout(false);
-            this.pnEffectsSelectChange.ResumeLayout(false);
-            this.tabOnSelected_NoChange.ResumeLayout(false);
-            this.panel1.ResumeLayout(false);
-            this.tabOnHighlighted.ResumeLayout(false);
-            this.panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.nudPriority)).EndInit();
-            this.pnCommandGroupInfo.ResumeLayout(false);
-            this.pnCommandGroupInfo.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+			this.cbBroadcast.Location = new System.Drawing.Point(408, 8);
+			this.cbBroadcast.Name = "cbBroadcast";
+			this.cbBroadcast.Size = new System.Drawing.Size(88, 21);
+			this.cbBroadcast.TabIndex = 17;
+			this.cbBroadcast.SelectedIndexChanged += new System.EventHandler(this.cbBroadcast_SelectedIndexChanged);
+			// 
+			// btnOnActivateGoto
+			// 
+			this.btnOnActivateGoto.Location = new System.Drawing.Point(160, 136);
+			this.btnOnActivateGoto.Name = "btnOnActivateGoto";
+			this.btnOnActivateGoto.Size = new System.Drawing.Size(40, 23);
+			this.btnOnActivateGoto.TabIndex = 9;
+			this.btnOnActivateGoto.Text = "Goto";
+			this.btnOnActivateGoto.Click += new System.EventHandler(this.btnOnActivateGoto_Click);
+			// 
+			// lbSelectedCommands
+			// 
+			this.lbSelectedCommands.DisplayMember = "Description";
+			this.lbSelectedCommands.Location = new System.Drawing.Point(200, 24);
+			this.lbSelectedCommands.Name = "lbSelectedCommands";
+			this.lbSelectedCommands.Size = new System.Drawing.Size(144, 147);
+			this.lbSelectedCommands.TabIndex = 8;
+			this.lbSelectedCommands.ValueMember = "CommandID";
+			this.lbSelectedCommands.SelectedIndexChanged += new System.EventHandler(this.lbSelectedCommands_SelectedIndexChanged);
+			// 
+			// btnOnActivateDown
+			// 
+			this.btnOnActivateDown.Location = new System.Drawing.Point(176, 48);
+			this.btnOnActivateDown.Name = "btnOnActivateDown";
+			this.btnOnActivateDown.Size = new System.Drawing.Size(24, 23);
+			this.btnOnActivateDown.TabIndex = 15;
+			this.btnOnActivateDown.Text = "D";
+			this.btnOnActivateDown.Click += new System.EventHandler(this.btnOnActivateDown_Click);
+			// 
+			// tvCommand
+			// 
+			this.tvCommand.AllowDrop = true;
+			this.tvCommand.Location = new System.Drawing.Point(8, 24);
+			this.tvCommand.Name = "tvCommand";
+			this.tvCommand.Size = new System.Drawing.Size(152, 144);
+			this.tvCommand.TabIndex = 5;
+			this.tvCommand.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvCommand_AfterSelect);
+			// 
+			// btnOnActivateUp
+			// 
+			this.btnOnActivateUp.Location = new System.Drawing.Point(176, 24);
+			this.btnOnActivateUp.Name = "btnOnActivateUp";
+			this.btnOnActivateUp.Size = new System.Drawing.Size(24, 23);
+			this.btnOnActivateUp.TabIndex = 14;
+			this.btnOnActivateUp.Text = "U";
+			this.btnOnActivateUp.Click += new System.EventHandler(this.btnOnActivateUp_Click);
+			// 
+			// btnOnActivateRemoveAG
+			// 
+			this.btnOnActivateRemoveAG.Enabled = false;
+			this.btnOnActivateRemoveAG.Location = new System.Drawing.Point(160, 112);
+			this.btnOnActivateRemoveAG.Name = "btnOnActivateRemoveAG";
+			this.btnOnActivateRemoveAG.Size = new System.Drawing.Size(32, 23);
+			this.btnOnActivateRemoveAG.TabIndex = 7;
+			this.btnOnActivateRemoveAG.Text = "<<";
+			this.btnOnActivateRemoveAG.Click += new System.EventHandler(this.btnOnActivateRemoveAG_Click);
+			// 
+			// btnOnActivateAddAG
+			// 
+			this.btnOnActivateAddAG.Enabled = false;
+			this.btnOnActivateAddAG.Location = new System.Drawing.Point(160, 88);
+			this.btnOnActivateAddAG.Name = "btnOnActivateAddAG";
+			this.btnOnActivateAddAG.Size = new System.Drawing.Size(32, 23);
+			this.btnOnActivateAddAG.TabIndex = 6;
+			this.btnOnActivateAddAG.Text = ">>";
+			this.btnOnActivateAddAG.Click += new System.EventHandler(this.btnOnActivateAddAG_Click);
+			// 
+			// pnOnActivateParameters
+			// 
+			this.pnOnActivateParameters.AutoScroll = true;
+			this.pnOnActivateParameters.BackColor = System.Drawing.SystemColors.Control;
+			this.pnOnActivateParameters.Location = new System.Drawing.Point(352, 56);
+			this.pnOnActivateParameters.Name = "pnOnActivateParameters";
+			this.pnOnActivateParameters.Size = new System.Drawing.Size(392, 112);
+			this.pnOnActivateParameters.TabIndex = 13;
+			// 
+			// labAvailableCommands
+			// 
+			this.labAvailableCommands.Location = new System.Drawing.Point(16, 8);
+			this.labAvailableCommands.Name = "labAvailableCommands";
+			this.labAvailableCommands.Size = new System.Drawing.Size(112, 23);
+			this.labAvailableCommands.TabIndex = 4;
+			this.labAvailableCommands.Text = "Available Commands";
+			// 
+			// labSelectedCommands
+			// 
+			this.labSelectedCommands.Location = new System.Drawing.Point(200, 8);
+			this.labSelectedCommands.Name = "labSelectedCommands";
+			this.labSelectedCommands.Size = new System.Drawing.Size(120, 23);
+			this.labSelectedCommands.TabIndex = 10;
+			this.labSelectedCommands.Text = "Selected Commands";
+			// 
+			// DesignObjDesigner
+			// 
+			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
+			this.ClientSize = new System.Drawing.Size(936, 677);
+			this.Controls.Add(this.pnCommandGroupInfo);
+			this.Controls.Add(this.cbAnimate);
+			this.Controls.Add(this.lblPriority);
+			this.Controls.Add(this.nudPriority);
+			this.Controls.Add(this.tbDescription);
+			this.Controls.Add(this.cbAvailableVariations);
+			this.Controls.Add(this.button6);
+			this.Controls.Add(this.lbVariations);
+			this.Controls.Add(this.btnRemoveSelectedVariation);
+			this.Controls.Add(this.panelPreview);
+			this.Controls.Add(this.tabAllPages);
+			this.KeyPreview = true;
+			this.Menu = this.mnuDesignObjXDesigner;
+			this.Name = "DesignObjDesigner";
+			this.Text = "DesignObjXDesigner";
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.DesignObjDesigner_FormClosing);
+			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.DesignObjDesigner_FormClosed);
+			this.Load += new System.EventHandler(this.DesignObjDesigner_Load);
+			this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DesignObjDesigner_KeyDown);
+			this.tabButtons.ResumeLayout(false);
+			this.tabAllPages.ResumeLayout(false);
+			this.tabParameters.ResumeLayout(false);
+			this.tabChildren.ResumeLayout(false);
+			this.tabChildren.PerformLayout();
+			this.tabOnSelected_WithChange.ResumeLayout(false);
+			this.pnEffectsSelectChange.ResumeLayout(false);
+			this.tabOnSelected_NoChange.ResumeLayout(false);
+			this.panel1.ResumeLayout(false);
+			this.tabOnHighlighted.ResumeLayout(false);
+			this.panel2.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.nudPriority)).EndInit();
+			this.pnCommandGroupInfo.ResumeLayout(false);
+			this.pnCommandGroupInfo.PerformLayout();
+			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 		#endregion
@@ -2479,14 +2493,6 @@ namespace HADesigner
 			}
 		}
 
-		private void btnSelectDesignObjInTree_Click(object sender, System.EventArgs e)
-		{
-			if (this.selectedUIDesignObj != null)
-			{
-				MainForm.Browser.DesignObjTreeView.SelectedNode = DesignObjTree.GetNodeByID(MainForm.Browser.DesignObjTreeView, this.selectedUIDesignObj.ID);
-			}
-		}
-
 		private void DesignObjDesigner_FormClosed(object sender, System.EventArgs e)
 		{
 			if (this.m_objUIDesignObj != null)
@@ -2499,6 +2505,51 @@ namespace HADesigner
 				this.m_objUIDesignObjDisplayControl.Dispose();
 			}
 			MainForm.removedDesignObjDesignerWindow(this.intDesignObjID);
+		}
+
+		private void AddNewChild(int PK_DesignObj, int X, int Y, int Width, int Height, bool IsTabStop)
+		{
+			//Get the selected variation
+
+			UIDesignObjVariation objSelectedVariation = (UIDesignObjVariation)lbVariations.SelectedItems[0];
+			UIDesignObj objNewDesignObj = new UIDesignObj(
+				objSelectedVariation,
+				-1,
+				PK_DesignObj,
+				this.GraphicsDirectory);
+
+			objNewDesignObj.NeedsParentVariationLink = true;
+
+			objNewDesignObj.SetDefaultPosition(X, Y);
+			objNewDesignObj.SetDefaultIsTabStop(IsTabStop);
+
+			if (Width >= 0 && Height >= 0)
+			{
+				objNewDesignObj.SetDefaultSize(Width, Height);
+			}
+
+			objSelectedVariation.DesignObjs.Add(objNewDesignObj);
+
+			m_objUIDesignObj.DeselectAllDesignObjs(false);
+
+			objNewDesignObj.Selected = true;
+
+			//rebuild the object model
+			m_objUIDesignObj.Build(this.skinID);
+
+			//TODO: add a child here ?
+		}
+
+		private void AddNewText(int PK_Text)
+		{
+			//Get the selected variation
+
+			UIDesignObjVariation selectedVariation = (UIDesignObjVariation)lbVariations.SelectedItems[0];
+			UIText newText = new UIText(selectedVariation, -1, PK_Text);
+			UITextSkinLanguage newUITSL = new UITextSkinLanguage(newText, -1);
+
+			newText.TextSkinLanguages.Add(newUITSL);
+			selectedVariation.Text.Add(newText);
 		}
 
 		private void panelPreview_DragDrop(object sender, System.Windows.Forms.DragEventArgs e)
@@ -2521,50 +2572,22 @@ namespace HADesigner
 					}
 					else
 					{
-						//Get the selected variation
-
-						UIDesignObjVariation objSelectedVariation = (UIDesignObjVariation) lbVariations.SelectedItems[0];
-						UIDesignObj objNewDesignObj = new	UIDesignObj(
-							objSelectedVariation, 
-							-1,
-							otn.DesignObjDataRow.fPK_DesignObj, 
-							this.GraphicsDirectory);
-				
-						objNewDesignObj.NeedsParentVariationLink =	true;
-					
 						Point ptClient = this.panelPreview.PointToClient(new Point(e.X,e.Y));
 						ptClient.X -= this.panelPreview.AutoScrollPosition.X;
 						ptClient.Y -= this.panelPreview.AutoScrollPosition.Y;
 
-						objNewDesignObj.SetDefaultPosition(
+						ptClient = new Point(
 							Convert.ToInt32(Convert.ToDouble(ptClient.X)	/ m_objUIDesignObjDisplayControl.Scale), 
 							Convert.ToInt32(Convert.ToDouble(ptClient.Y)	/ m_objUIDesignObjDisplayControl.Scale)
 						);
-
-						objSelectedVariation.DesignObjs.Add(objNewDesignObj);
-					
-						m_objUIDesignObj.DeselectAllDesignObjs(false);
-
-						objNewDesignObj.Selected =	true;
-
-						//rebuild the object model
-						m_objUIDesignObj.Build(this.skinID);
-
-						//TODO: add a child here ?
+						AddNewChild(otn.DesignObjDataRow.fPK_DesignObj, ptClient.X, ptClient.Y, -1, -1, false);
 					}
 				}
 				else if(e.Data.GetDataPresent("HAData.Common.TreeBuilder.TextTreeNode"))
 				{
 					TextTreeNode ttn = (TextTreeNode) e.Data.GetData("HAData.Common.TreeBuilder.TextTreeNode");
-                
-					//Get the selected variation
 
-					UIDesignObjVariation selectedVariation = (UIDesignObjVariation) lbVariations.SelectedItems[0];
-					UIText newText = new UIText(selectedVariation, -1, ttn.TextDataRow.fPK_Text); 
-					UITextSkinLanguage newUITSL = new UITextSkinLanguage(newText,-1);
-                
-					newText.TextSkinLanguages.Add(newUITSL);
-					selectedVariation.Text.Add(newText);
+					AddNewText(ttn.TextDataRow.fPK_Text);
 				}
 				else MessageBox.Show("ERROR: Unrecognized Drag & Drop Data");
 
@@ -4271,6 +4294,60 @@ namespace HADesigner
 			}
 		}
 
+		private void btnAddExplicitDesignObj_Click(object sender, EventArgs e)
+		{
+			AddExplicitDesignObj DesignObjDialog = new AddExplicitDesignObj();
+			if (DesignObjDialog.ShowDialog() == DialogResult.OK)
+			{
+				Int32 PK_DesignObj, X, Y, Width, Height;
+				bool IsTabStop;
+				
+				try { PK_DesignObj = Convert.ToInt32(DesignObjDialog.txtDesignObj.Text);}
+					catch { PK_DesignObj = -1; }
+				try { X = Convert.ToInt32(DesignObjDialog.txtX.Text); }
+					catch { X = 0; }
+				try { Y = Convert.ToInt32(DesignObjDialog.txtY.Text); }
+					catch { Y = 0; }
+				try { Width = Convert.ToInt32(DesignObjDialog.txtWidth.Text); }
+					catch { Width = -1; }
+				try { Height = Convert.ToInt32(DesignObjDialog.txtHeight.Text); }
+					catch { Height = -1; }
+				IsTabStop = DesignObjDialog.checkIsTabStop.Checked;
+				
+				if (PK_DesignObj > 0)
+				{
+					bool origBlock = this.BlockUpdateImage();
+					
+					AddNewChild(PK_DesignObj, X, Y, Width, Height, IsTabStop);
+					
+					UpdateChildrenDesignObjs();
+					this.UpdateImage(origBlock);
+				}
+			}
+		}
+
+		private void btnAddExplicitText_Click(object sender, EventArgs e)
+		{
+			AddExplicitTextObj TextObjDialog = new AddExplicitTextObj();
+			if (TextObjDialog.ShowDialog() == DialogResult.OK)
+			{
+				Int32 PK_TextObj;
+				
+				try { PK_TextObj = Convert.ToInt32(TextObjDialog.txtTextObj.Text);}
+					catch { PK_TextObj = -1; }
+				
+				if (PK_TextObj > 0)
+				{
+					bool origBlock = this.BlockUpdateImage();
+					
+					AddNewText(PK_TextObj);
+					
+					UpdateChildrenDesignObjs();
+					this.UpdateImage(origBlock);
+				}
+			}
+		}
+
 	}
 
 	public class UIDesignObjDisplayControl : Control
@@ -4297,7 +4374,7 @@ namespace HADesigner
 
 		public int CurrentSkinForChild()
 		{
-            return m_objParentForm.SkinID;
+			return m_objParentForm.SkinID;
 		}
 
 		public void ReleaseBitmap()
@@ -4373,7 +4450,7 @@ namespace HADesigner
 				{
 					bool origBlock = this.m_objParentForm.BlockUpdateImage();
 					m_objParentForm.SelectDesignObj(m_UIDesignObj.SelectedDesignObj);
-                    this.m_objParentForm.UnBlockUpdateImage(origBlock);
+					this.m_objParentForm.UnBlockUpdateImage(origBlock);
 					this.UpdateImage();
 				}
 				m_objParentForm.UnlockInterface();
