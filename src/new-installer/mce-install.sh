@@ -528,6 +528,9 @@ Setup_Pluto_Conf () {
 		"precise")
 			PK_DISTRO=20
 			;;
+		"trusty")
+			PK_DISTRO=21
+			;;
 	esac
 
 
@@ -748,7 +751,7 @@ VideoDriverSetup () {
 }
 
 addAdditionalTTYStart () {
-	if [[ "$DISTRO" = "lucid" ]] || [[ "$DISTRO" = "precise" ]]; then
+	if [[ "$DISTRO" = "lucid" ]] || [[ "$DISTRO" = "precise" ]] || [[ "$DISTRO" == "trusty" ]]; then
 		sed -i 's/23/235/' /etc/init/tty2.conf
 		sed -i 's/23/235/' /etc/init/tty3.conf
 		sed -i 's/23/235/' /etc/init/tty4.conf
