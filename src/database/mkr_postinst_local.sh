@@ -37,3 +37,11 @@ if [ $PROCESS = "install" ]; then
 	#fi
 	set -e
 fi
+if [ $PROCESS = "upgrade" ]; then
+	echo
+	echo Updating system database using sqlCVS
+	echo Please be patient...
+	## FIXME - schema.linuxmce.org is hard coded
+	/usr/pluto/bin/sqlCVS -R 3999 -H schema.linuxmce.org $PLUTO_DB_CRED -n -d anonymous -U anonymous~nopass -D $MySqlDBName -r local -A -e update || exit $?
+fi
+
