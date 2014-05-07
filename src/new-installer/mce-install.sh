@@ -898,10 +898,10 @@ CreateFirstBoot () {
 		#nohup /usr/pluto/bin/Diskless_CreateTBZ.sh >> \${diskless_log} 2>&1 &
 	}
 
-	VideoDriver () {
-		. /usr/pluto/bin/VideoDetectSetup
-		CheckVideoDriver
-	}
+	#VideoDriver () {
+	#	. /usr/pluto/bin/VideoDetectSetup
+	#	CheckVideoDriver
+	#}
 
 
 	###########################################################
@@ -916,7 +916,7 @@ CreateFirstBoot () {
 	SetupNetworking
 	CleanInstallSteps
 	#CreateDisklessImage
-	VideoDriver
+	#VideoDriver # not necessary, done @ avwizard
 	StatsMessage "Firstboot Script Complete"
 	exit 0
 	NACHOS
