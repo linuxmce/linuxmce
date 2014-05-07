@@ -13,7 +13,7 @@ namespace HAData.Common
 		Socket m_Socket = null;
 		string m_ServerName;
 		int m_ServerPort = 3450;
-		IPHostEntry m_IPHostEntry=null;
+		IPAddress[] m_IPAddresses = {};
 
 		public HAServerConnection(string ServerName)
 		{
@@ -31,8 +31,7 @@ namespace HAData.Common
 				//        BOOL bSuccess = FALSE;
 				try
 				{
-					m_IPHostEntry=null;
-					m_IPHostEntry = Dns.GetHostByName(m_ServerName);
+					m_IPAddresses = Dns.GetHostAddresses(m_ServerName);
 				}
 				catch(Exception)
 				{
@@ -40,13 +39,13 @@ namespace HAData.Common
 					return;
 				}
 
-				if( m_IPHostEntry.AddressList.Length!=1 )
+				if( m_IPAddresses.Length == 0 )
 				{
 					MessageBox.Show("Error getting IP Address");
 					return;
 				}
 
-				IPAddress ip = m_IPHostEntry.AddressList[0];
+				IPAddress ip = m_IPAddresses[0];
 
 				IPEndPoint ipe = new IPEndPoint(ip,m_ServerPort);
 
