@@ -14,8 +14,8 @@ HostName=$(RunSQL "$H")
 DomainName=$(RunSQL "$D")
 
 # Site files
-default=LinuxMCE
-defaultssl=LinuxMCE-ssl
+default=LinuxMCE.conf
+defaultssl=LinuxMCE-ssl.conf
 
 PHP_CONFIG_FILE=
 if [[ -e /etc/php5/apache2/php.ini ]] ;then
@@ -100,6 +100,8 @@ a2dissite pluto 2>/dev/null|| /bin/true
 # disable default site that ships with apache
 a2dissite default 2>/dev/null|| /bin/true
 a2dissite default-ssl 2>/dev/null|| /bin/true
+a2dissite 000-default 2>/dev/null|| /bin/true
+a2dissite 000-default-ssl 2>/dev/null|| /bin/true
 
 # make sure that mythweb hasn't taken over web admin
 a2dissite default-mythbuntu 2>/dev/null|| /bin/true
