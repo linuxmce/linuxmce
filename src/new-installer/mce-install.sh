@@ -12,7 +12,7 @@ HOST_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/
 DEB_CACHE=$HOST_DISTRO-$HOST_RELEASE-$HOST_ARCH
 
 DISTRO="$(lsb_release -c -s)"
-COMPOS="unstable"
+COMPOS="main"
 DT_MEDIA_DIRECTOR=3
 LOCAL_REPO_BASE=/usr/pluto/deb-cache/$DEB_CACHE
 LOCAL_REPO_DIR=./
@@ -311,18 +311,21 @@ ConfigSources () {
 	AddRepoToSources "http://deb.linuxmce.org/ubuntu/ ${DISTRO} ${COMPOS}"
 	AddRepoToSources "http://debian.slimdevices.com/ stable main"
 
-	# Check where our distro is hosted and assign the proper variable
-	DISTRO_HOST=
-	#Silently gather and assign appropriate repo based on the distribution
-	[[ -z "$DISTRO_HOST" ]] && wget -q http://archive.ubuntu.com/ubuntu/dists/${DISTRO}/main/binary-i386/Packages.gz && DISTRO_HOST=archive
-	[[ -z "$DISTRO_HOST" ]] && wget -q http://old-releases.ubuntu.com/ubuntu/dists/${DISTRO}/main/binary-i386/Packages.gz && DISTRO_HOST=old-releases
+#	# Check where our distro is hosted and assign the proper variable
+#	DISTRO_HOST=
+#	#Silently gather and assign appropriate repo based on the distribution
+#	[[ -z "$DISTRO_HOST" ]] && wget -q http://archive.ubuntu.com/ubuntu/dists/${DISTRO}/main/binary-i386/Packages.gz && DISTRO_HOST=archive
+#	[[ -z "$DISTRO_HOST" ]] && wget -q http://old-releases.ubuntu.com/ubuntu/dists/${DISTRO}/main/binary-i386/Packages.gz && DISTRO_HOST=old-releases
 
-	AddRepoToSources "http://${DISTRO_HOST}.ubuntu.com/ubuntu ${DISTRO} main restricted universe multiverse"
-	AddRepoToSources "http://${DISTRO_HOST}.ubuntu.com/ubuntu ${DISTRO}-security main restricted universe multiverse"
-	AddRepoToSources "http://archive.canonical.com/ubuntu ${DISTRO} partner"
+	if $(wget -q http://old-releases.ubuntu.com/ubuntu/dists/${DISTRO}/main/binary-i386/Packages.gz) then
+		DISTRO_HOST=old-releases
+		AddRepoToSources "http://${DISTRO_HOST}.ubuntu.com/ubuntu ${DISTRO} main restricted universe multiverse"
+		AddRepoToSources "http://${DISTRO_HOST}.ubuntu.com/ubuntu ${DISTRO}-security main restricted universe multiverse"
+	fi
+#	AddRepoToSources "http://archive.canonical.com/ubuntu ${DISTRO} partner"
 
 	if AddRepoToSources "http://download.videolan.org/pub/debian/stable/ /"; then
-		wget -O - http://download.videolan.org/pub/debian/videolan-apt.asc|apt-key add -
+		AddGpgKeyToKeyring "http://download.videolan.org/pub/debian/videolan-apt.asc"
 	fi
 
 	# Setup pluto's apt.conf
@@ -640,6 +643,9 @@ Create_And_Config_Devices () {
 	StatsMessage "Updating Startup Scripts"
 	# "DCERouter postinstall"
 	/usr/pluto/bin/Update_StartupScrips.sh
+
+	StatsMessage "Installing & Configuring Packages"
+	/usr/pluto/bin/Config_Device_Changes.sh
 }
 
 Configure_Network_Options () {
