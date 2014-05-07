@@ -304,5 +304,5 @@ rm server.crt
 rm server.csr
 fi
 
-service apache2 force-reload
+service apache2 force-reload || :
 
