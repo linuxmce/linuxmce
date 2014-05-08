@@ -240,14 +240,18 @@ if [[ "$DestIP" != "" ]] && [[ "$DestIP" != "NULL" ]]; then
 	if [ ! $? -eq 0 ]; then
 		DestIP=${DestIP:1}
 		if [[ "$Forward" == "OUTPUT" ]]; then
-			parmDest="--to "$DestPort""
+			parmDest="--to "$DestPort""			
 		else
 			parmDest="--to "$DestIP:$DestPort""
 		fi
 		DestIP="! -d $DestIP"
     else
 		parmDest="--to-destination "$DestIP:$DestPort""
-		DestIP="-d $DestIP"
+		if [[ ! $Forward == "PREROUTING" ]];then
+			DestIP="-d $DestIP"
+		else
+			DestIP=""
+		fi
 	fi
 fi
 
@@ -696,7 +700,7 @@ fi
 			#Delete existend proxy rules because this need before them.
 			Q="SELECT * FROM Firewall WHERE Description LIKE '%PROXY'"
 			R=$(RunSQL "$Q")
-			if ! [ "$R" ]; then
+			if  [ "$R" ]; then
 				Q="DELETE FROM Firewall WHERE Description LIKE '%PROXY'"
 				RunSQL "$Q"
 			fi	
