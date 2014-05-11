@@ -127,11 +127,11 @@ Site="
 		
 	DocumentRoot /var/www/
 	<Directory />
-		Options FollowSymLinks
+		Options +FollowSymLinks
 		AllowOverride None
 	</Directory>
 	<Directory /var/www/>
-		Options Indexes FollowSymLinks MultiViews
+		Options +Indexes +FollowSymLinks +MultiViews
 		AllowOverride All
 		Order allow,deny
 		allow from all
@@ -141,7 +141,7 @@ Site="
 	ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/
 	<Directory \"/usr/lib/cgi-bin\">
 		AllowOverride None
-		Options ExecCGI -MultiViews +SymLinksIfOwnerMatch
+		Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
 		Order allow,deny
 		Allow from all
 	</Directory>
@@ -165,7 +165,7 @@ Site="
 	
 	Alias /icons/ \"/usr/share/apache2/icons/\"
 	<Directory \"/usr/share/apache2/icons\">
-	    Options Indexes MultiViews
+	    Options +Indexes +MultiViews
 	    AllowOverride None
 	    Order allow,deny
 	    Allow from all
