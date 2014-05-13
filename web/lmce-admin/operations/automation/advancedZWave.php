@@ -206,6 +206,15 @@ function advancedZWave($output,$dbADO){
 		        });
 		
 		}
+		function addNode() {
+		    performCommand({"addNode":1});
+		}
+		function removeNode() {
+		    performCommand({"removeNode":1});
+		}
+		function cancelControllerCommand() {
+		    performCommand({"cancelControllerCommand":1});
+		}
 		function addAssociation(id, groupid) {
 		    var node = prompt("Add association to node:");
 		    performCommand({"addAssociation":id, "group":groupid, "node":node});
@@ -420,6 +429,9 @@ td.cell_config:hover {
 	$out.='<input class="command" type="button" value="Network Update" onclick="networkUpdate()" />';
 	$out.='<input class="command" type="button" value="Test network" onclick="testNetwork()" />';
 	$out.='<input class="command" type="button" value="Soft reset controller" onclick="softReset()" />';
+	$out.='<input class="command" type="button" value="Add Node" onclick="addNode()" />';
+	$out.='<input class="command" type="button" value="Remove Node" onclick="removeNode()" />';
+	$out.='<input class="command" type="button" value="Cancel Add/Remove" onclick="cancelControllerCommand()" />';
 	$out.='<div id="nodedisplay"></div>';
 
     } else {
@@ -532,7 +544,7 @@ td.cell_config:hover {
 	    print("{ \"ok\": ".($retArray[0].strrpos("OK") >= 0 ? 1 : 0)." }");
 	    exit;
 	}
-	if (isset($_POST['softReset']) || isset($_POST['healNetwork']) || isset($_POST['testNetwork']) || isset($_POST['networkUpdate']) || isset($_POST['addAssociation']) || isset($_POST['removeAssociation'])) {
+	if (isset($_POST['softReset']) || isset($_POST['healNetwork']) || isset($_POST['testNetwork']) || isset($_POST['networkUpdate']) || isset($_POST['addAssociation']) || isset($_POST['removeAssociation']) || isset($_POST['addNode']) || isset($_POST['removeNode']) || isset($_POST['cancelControllerCommand'])) {
 	    header('Content-type: application/json');
 	    if (isset($_POST['softReset'])) {
 	        $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 776 51 ""';
@@ -552,6 +564,12 @@ td.cell_config:hover {
 	        $group = $_POST['group'];
 	        $node = $_POST['node'];
                 $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 842 239 '.$id.' 249 '.$group.' 250 -'.$node;
+	    } else if (isset($_POST['addNode'])) {
+                $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 967';
+	    } else if (isset($_POST['cancelControllerCommand'])) {
+                $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 967 48 5';
+	    } else if (isset($_POST['removeNode'])) {
+                $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 968';
 	    }
 	    $ret=exec_batch_command($cmd,1);
 	    $retArray=explode("\n",$ret);
