@@ -274,6 +274,9 @@ void OrbiterRenderer_SDL::Configure()
 
     // we will use the per-pixel transparency
 	//SetOrbiterWindowTransparency(0.5);
+
+	if (FileUtils::FileExists("/etc/pluto/orbiter.disable.mouse"))
+		SDL_ShowCursor(0);
 }
 //----------------------------------------------------------------------------------------------------
 void OrbiterRenderer_SDL::SetOrbiterWindowTransparency(double TransparencyLevel)
