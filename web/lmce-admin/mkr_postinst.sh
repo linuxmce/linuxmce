@@ -261,6 +261,8 @@ if ! BlacklistConfFiles "$PHP_CONFIG_FILE" ;then
 	sed -i 's/max_execution_time =.*/max_execution_time = 120 ;/g' $PHP_CONFIG_FILE
 	#adjust PHP maximum upload filesize
 	sed -i 's/upload_max_filesize =.*/upload_max_filesize = 16M ;/g' $PHP_CONFIG_FILE
+	#make sure short open tags are acceptable
+	sed -i 's/short_open_tag =.*/short_open_tag = On ;/g' $PHP_CONFIG_FILE
 fi
 
 # (re)enable SSL support in apache using a self-signed cert
