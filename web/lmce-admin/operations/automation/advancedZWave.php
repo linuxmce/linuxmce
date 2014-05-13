@@ -74,6 +74,7 @@ function advancedZWave($output,$dbADO){
 			    $(hover).insert("<span class=\"tab\" onclick=\"selectTab(\'command\',"+node.id+")\">Commands</span>");
 			    $(hover).insert("<span class=\"tab\" onclick=\"selectTab(\'config\',"+node.id+")\">Configuration</span>");
 			    $(hover).insert("<span class=\"tab\" onclick=\"selectTab(\'values\',"+node.id+")\">Values</span>");
+			    $(hover).insert("<span class=\"tab\" onclick=\"selectTab(\'association\',"+node.id+")\">Associations</span>");
 			    var tabSectionEl = document.createElement("div");
 			    tabSectionEl.id = "tabsection";
 			    $(hover).appendChild(tabSectionEl);
@@ -152,6 +153,30 @@ function advancedZWave($output,$dbADO){
 			    vt.insert(t);
 			    configEl.insert(configt);
 
+			    var assocEl = document.createElement("div");
+			    assocEl.id = "associationTab_"+node.id;
+			    assocEl.style = "display:none;";
+			    tabSectionEl.appendChild(assocEl);
+			    var assoct = "<table><tr>";
+			    assoct += "<td>Group</td><td>Nodes</td><td>Add</td><td>Remove</td></tr>";
+
+			    for (var j = 0; j < node.associationGroups.length; j++) {
+				var group = node.associationGroups[j];
+				assoct += "<tr><td>"+group.name+":</td>";
+				var assocNodes = "";
+				for (var a = 0; a < group.nodes.length; a++) {
+				    assocNodes += group.nodes[a] + ",";
+				}
+				if (group.nodes.length > 0) {
+				    assocNodes = assocNodes.substr(0, assocNodes.length - 1);
+				}
+				assoct += "<td>"+assocNodes+"</td>";
+				assoct += "<td><p class=\"command\" onclick=\"addAssociation("+node.id+","+(j+1)+");\">Add</p></td>";
+				assoct += "<td><p class=\"command\" onclick=\"removeAssociation("+node.id+","+(j+1)+");\">Remove</p></td></tr>";
+			    }
+			    assoct += "</table>";
+			    assocEl.insert(assoct);
+
 			}
 			$$(\'.nodeHandle\').invoke("observe", "mousedown", function(event) { mouseDownNode(event) });
 			// Draw lines between nodes
@@ -166,6 +191,7 @@ function advancedZWave($output,$dbADO){
 		    $("commandTab_"+id).hide();
 		    $("configTab_"+id).hide();
 		    $("valuesTab_"+id).hide();
+		    $("associationTab_"+id).hide();
 		    $(tab+"Tab_"+id).show();
 		}
 		function performCommand(parameters) {
@@ -179,6 +205,14 @@ function advancedZWave($output,$dbADO){
 			}
 		        });
 		
+		}
+		function addAssociation(id, groupid) {
+		    var node = prompt("Add association to node:");
+		    performCommand({"addAssociation":id, "group":groupid, "node":node});
+		}
+		function removeAssociation(id, groupid) {
+		    var node = prompt("Remove association to node:");
+		    performCommand({"removeAssociation":id, "group":groupid, "node":node});
 		}
 		function healNode(id) {
 		    performCommand({healNode:id});
@@ -339,7 +373,7 @@ function advancedZWave($output,$dbADO){
 .sleeping { background-color: #FFFF00; }
 .failed { background-color: red; }
 .node p { text-align: center; vertical-align: middle;}
-.nodeHover { width: 320px; position:absolute; background: #CCCC66; border: 1px solid black; margin: 2px; z-index:1000;}
+.nodeHover { width: 400px; position:absolute; background: #CCCC66; border: 1px solid black; margin: 2px; z-index:1000;}
 .nodeHover p { text-align: left; line-spacing: 0.5; margin-top: 2px; margin-bottom: 2px; }
 .nodeHover ul { margin: 2px; }
 span.tab { padding: 3px; padding-left: 6px; padding-right: 6px; border:1px solid black; border-bottom: 0px; margin: 5px; margin-bottom:7px; }
@@ -366,6 +400,7 @@ span.tab:hover { background-color: white; }
     background-color: grey;
     border: 1px solid black;
     margin: 2px;
+    padding: 2px;
 }
 .command:hover {
     background-color: white;
@@ -497,7 +532,7 @@ td.cell_config:hover {
 	    print("{ \"ok\": ".($retArray[0].strrpos("OK") >= 0 ? 1 : 0)." }");
 	    exit;
 	}
-	if (isset($_POST['softReset']) || isset($_POST['healNetwork']) || isset($_POST['testNetwork']) || isset($_POST['networkUpdate'])) {
+	if (isset($_POST['softReset']) || isset($_POST['healNetwork']) || isset($_POST['testNetwork']) || isset($_POST['networkUpdate']) || isset($_POST['addAssociation']) || isset($_POST['removeAssociation'])) {
 	    header('Content-type: application/json');
 	    if (isset($_POST['softReset'])) {
 	        $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 776 51 ""';
@@ -507,6 +542,16 @@ td.cell_config:hover {
 	        $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 788 51 "TN"';
  	    } else if (isset($_POST['networkUpdate'])) {
 	        $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 788 51 "NU"';
+	    } else if (isset($_POST['addAssociation'])) {
+	        $id = $_POST['addAssociation'];
+	        $group = $_POST['group'];
+	        $node = $_POST['node'];
+                $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 842 239 '.$id.' 249 '.$group.' 250 '.$node;
+	    } else if (isset($_POST['removeAssociation'])) {
+	        $id = $_POST['removeAssociation'];
+	        $group = $_POST['group'];
+	        $node = $_POST['node'];
+                $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 842 239 '.$id.' 249 '.$group.' 250 -'.$node;
 	    }
 	    $ret=exec_batch_command($cmd,1);
 	    $retArray=explode("\n",$ret);
