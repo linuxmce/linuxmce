@@ -109,7 +109,7 @@ done
 ## Run Orbiter
 xset m 2 2 
 
-if [[ "$Valgrind" == *"$Executable"* ]]; then
+if [[ "$Executable" == *"$Valgrind"* ]]; then
 	$VGcmd "$Executable" "$@"
 	Orbiter_RetCode=$?
 else
