@@ -1645,6 +1645,28 @@ void ZWave::CMD_Get_Data(string sText,char **pData,int *iData_Size,string &sCMD_
 		}
 		if (node->m_values.size() > 0)
 			s = s.substr(0, s.length()-1);
+		s += "],";
+
+		s += " \"associationGroups\": [";
+		uint8 numGroups = OpenZWave::Manager::Get()->GetNumGroups(homeId, node_id);
+		for (int i = 0; i < numGroups; i++)
+		{
+		        s += "{ \"name\": \"" + OpenZWave::Manager::Get()->GetGroupLabel(homeId, node_id, i+1) + "\",";
+			uint8 maxAssoc = OpenZWave::Manager::Get()->GetMaxAssociations(homeId, node_id, i+1);
+			uint8* assoc = new uint8[maxAssoc];
+			uint8 numAssoc = OpenZWave::Manager::Get()->GetAssociations(homeId, node_id, i+1, &assoc);
+			s += " \"nodes\": [";
+			for (int j = 0; j < numAssoc; j++) {
+			        s += StringUtils::itos((int)assoc[j]) + ",";
+			}
+			delete[] assoc;
+			if (numAssoc > 0)
+			        s = s.substr(0, s.length() - 1);
+			s += "]";
+			s += "},";
+		}
+		if (numGroups > 0)
+			s = s.substr(0, s.length()-1);
 		s += "]";
 
 		s += "},";
