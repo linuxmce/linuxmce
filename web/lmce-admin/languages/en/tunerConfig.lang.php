@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_TUNER_SETUP_CONST='Tuner(s) setup';
 $TEXT_TUNER_WARNING_CONST='WARNING: if you close this window without setting any tuner you won\'t be able to use the TV.';
 $TEXT_TUNNERS_QUESTION_CONST='How many Tuners does this have?';

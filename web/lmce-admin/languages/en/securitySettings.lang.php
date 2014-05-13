@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_DO_NOTHING_CONST='Do Nothing';
 $TEXT_ANNOUNCEMENT_CONST='Announcement';
 $TEXT_SNAP_PICTURE_CONST='Snap Picture';

@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_CHOOSE_PREFERRED_REMOTES_CONST='Choose preferred remotes';
 $TEXT_PREFERRED_REMOTES_INFO_CONST='Use this screen to specify what remote controls you want to use for media scenarios.  If you do not specify any preferences, LinuxMCE will pick the most logical choice automatically.  If you do specify preferences, LinuxMCE will use your choice instead.';
 $TEXT_REMOVE_REMOTE_CONFIRMATION_CONST='Are you sure you want to remove this remote?';

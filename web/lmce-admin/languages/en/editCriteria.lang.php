@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EDIT_CRITERIA_CONST='Edit Criteria';
 $TEXT_CRITERIA_CONST='Criteria';
 $TEXT_ERROR_CANNOT_DELETE_ROOT_LEVEL_NESTING_CONST='You cannot delete root level nesting.';

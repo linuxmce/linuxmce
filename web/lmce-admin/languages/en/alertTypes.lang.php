@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ALERT_TYPES_CONST='Alert types';
 $TEXT_DELAY_BEFORE_ALARM_CONST='Delay Before Alarm';
 $TEXT_EXIT_DELAY_CONST='Exit Delay';

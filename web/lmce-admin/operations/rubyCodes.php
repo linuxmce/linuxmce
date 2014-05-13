@@ -1,4 +1,4 @@
-<?
+<?php
 function rubyCodes($output,$dbADO,$mediaADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');

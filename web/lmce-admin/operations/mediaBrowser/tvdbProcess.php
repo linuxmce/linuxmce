@@ -1,4 +1,4 @@
-<?
+<?php
 
 include_once('tvdbUtils.php');
 $seasonNo = $_POST['seasonNo'];

@@ -1,4 +1,4 @@
-<?
+<?php
 	// pluto Asterisk
 	$dbPlutoTelecomType = "MySQL";
 	$dbPlutoTelecomUser = "root";

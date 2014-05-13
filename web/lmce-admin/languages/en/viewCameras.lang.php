@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_VIEW_CAMERAS_CONST='View Cameras';
 $TEXT_ERROR_CAMERA_SCREENSHOT_NOT_AVAILABLE_CONST='Camera screenshot not available.';
 $TEXT_NO_CAMERA_DEVICES_CONST='No camera devices';

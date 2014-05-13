@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EDIT_DEVICE_DATA_CONST='Edit Device Data';
 $TEXT_PARAMETER_NAME_CONST='Parameter Name';
 $TEXT_PARAMETER_TYPE_CONST='Parameter Type';

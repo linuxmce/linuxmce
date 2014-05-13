@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ROOMS_CONST='Pièces';
 $TEXT_MANUALY_CONFIGURE_EA_CONFIRMATION_CONST='Êtes vous sûre de vouloir manuellement configurer la zonde de divertissement pour la pièce';
 $TEXT_ROOM_DESCRIPTION_CONST='Description de la pièce';

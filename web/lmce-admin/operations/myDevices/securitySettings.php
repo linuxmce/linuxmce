@@ -1,4 +1,4 @@
-<?
+<?php
 function securitySettings($output,$dbADO,$securitydbADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');

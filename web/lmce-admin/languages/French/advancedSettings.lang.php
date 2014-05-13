@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ADVANCED_SETTINGS_CONST='Paramètres réseau avancés';
 $TEXT_IPV6TUNNEL_SETTINGS_CONST='Paramètres du tunnel IPv6';
 $TEXT_IPv6TUNNEL_ENDPOINT_CONST='IPv6 tunnel endpoint';

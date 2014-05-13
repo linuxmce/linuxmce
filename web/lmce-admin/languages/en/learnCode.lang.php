@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_LEARN_CODE_CONST='Learn code';
 $TEXT_LEARN_CODE_COND_CONST='your interface module must support learning';
 $TEXT_IR_CODE_LEARNED_CONST='Infrared code learned!';

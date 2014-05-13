@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_TELECOM_SCENARIOS_CONST='Telecom Scenarios';
 $TEXT_THE_SPEED_DIAL_WAS_DELETED_CONST='The speed dial was deleted.';
 $TEXT_TS_NO_ROOMS_CONST='There are no rooms in this installation. Go to rooms section to add rooms.';

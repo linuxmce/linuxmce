@@ -1,4 +1,4 @@
-<?
+<?php
 function debug($text) {
 	// temporary debug logging function
 	return;

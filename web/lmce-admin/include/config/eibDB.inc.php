@@ -1,4 +1,4 @@
-<?
+<?php
 	// pluto Asterisk
 	$dbEIBType = "MySQL";
 	$dbEIBUser = "eib";

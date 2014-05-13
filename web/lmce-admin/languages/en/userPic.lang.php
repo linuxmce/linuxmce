@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_UPDATE_USER_PICTURE_CONST='Update user\'s picture';
 $TEXT_CHOOSE_PICTURE_CONST='Choose picture';
 $TEXT_UPLOAD_PICTURE_CONST='Upload picture';

@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_INSTALLATION_SETTINGS_CONST='Réglages de l\'installation';
 $TEXT_LOCATION_CONST='Lieu';
 $TEXT_ADDRESS_CONST='Addresse';

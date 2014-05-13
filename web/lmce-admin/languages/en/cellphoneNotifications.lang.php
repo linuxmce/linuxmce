@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ERROR_CANNOT_FIND_SECURITY_PLUGIN_CONST='Cannot find Security plugin.';
 $TEXT_CELLPHONE_NOTIFICATIONS_CONST='Cellphone Notifications';
 $TEXT_CELLPHONE_NOTIFICATION_INFO_CONST='How should LinuxMCE try to contact you when there is a security alert?';

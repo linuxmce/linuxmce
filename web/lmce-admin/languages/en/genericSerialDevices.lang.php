@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_GENERIC_SERIAL_DEVICES_CONST='Generic Serial Devices';
 $TEXT_RUBY_SOURCE_CODE_CONST='Ruby Codes';
 $TEXT_DELETE_GCD_CONFIRMATION_CONST='Are you sure you want to delete this device?';

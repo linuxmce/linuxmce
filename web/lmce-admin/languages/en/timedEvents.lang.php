@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_DELETE_EVENT_NOTIFICATION_CONST='The event handler was deleted.';
 $TEXT_TIMED_EVENTS_CONST='Timed Events';
 $TEXT_NEW_TIMED_EVENT_DESCRIPTION_CONST='New timed event description';

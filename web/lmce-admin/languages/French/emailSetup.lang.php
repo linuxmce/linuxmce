@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EMAILSERVICE_CONST='Service couriel:';
 $TEXT_GMAIL_CONST='GMail';
 $TEXT_HOTMAILMSN_CONST='Hotmail/MSN';

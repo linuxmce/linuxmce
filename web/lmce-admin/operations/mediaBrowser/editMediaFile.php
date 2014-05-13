@@ -1,4 +1,4 @@
-<?
+<?php
 
 
 function editMediaFile($output,$mediadbADO,$dbADO) {

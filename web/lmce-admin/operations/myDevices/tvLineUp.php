@@ -1,4 +1,4 @@
-<?
+<?php
 function tvLineUp($output,$dbADO,$mediaADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');

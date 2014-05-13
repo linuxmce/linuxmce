@@ -1,4 +1,4 @@
-<?
+<?php
 function backup($output,$dbADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');

@@ -1,4 +1,4 @@
-<?
+<?php
 session_name('Web-admin');
 session_start();
 
@@ -33,7 +33,7 @@ if($irgcID>0){
 </head>
 
 <!-- no line break between body and pre -->
-<body id="ffedt"><pre id="ieedt"><?=$code?>
+<body id="ffedt"><pre id="ieedt"><?php=$code?>
 </pre>
 </body>
 </html>

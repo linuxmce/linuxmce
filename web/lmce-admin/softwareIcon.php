@@ -1,4 +1,4 @@
-<?
+<?php
 session_name('Web-admin');
 session_start();
 

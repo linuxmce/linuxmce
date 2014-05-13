@@ -1,4 +1,4 @@
-<?
+<?php
 function printingSystem($output,$dbADO) {
 	// include language files
 	includeLangFile('common.lang.php');

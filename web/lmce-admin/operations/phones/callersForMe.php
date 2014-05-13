@@ -1,4 +1,4 @@
-<?
+<?php
 function callersForMe($output,$dbADO,$telecomADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');

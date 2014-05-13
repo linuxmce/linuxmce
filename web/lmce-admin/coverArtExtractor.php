@@ -1,4 +1,4 @@
-<?
+<?php
 require('include/config/config.inc.php');
 require('include/utils.inc.php');
 require_once("include/amazonTools.inc.php");

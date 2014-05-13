@@ -1,4 +1,4 @@
-<?
+<?php
 //se iau intai cele selectate, din baza de date si apoi se verifica array-ul din DeviceTemplate_DeviceParameter!
 function myDevicesFrames($output,$dbADO) {
 /* @var $dbADO ADOConnection */

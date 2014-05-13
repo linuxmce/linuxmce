@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_DELETE_CRITICAL_DEVICE_CONST='Delete critical device';
 $TEXT_ERROR_INVALID_ID_CONST='Invalid device ID specified.';
 $TEXT_DELETE_CRITICAL_DEVICE_NOTICE_CONST='This is a critical device !!! If you delete it, this will break your installation.';

@@ -1,4 +1,4 @@
-<?
+<?php
 	$ampReceivers=array(103);
 	$deviceID=(int)@$_REQUEST['deviceID'];
 	$dtID=$_REQUEST['dtID'];

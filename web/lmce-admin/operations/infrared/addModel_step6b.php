@@ -1,4 +1,4 @@
-<?
+<?php
 	$deviceID=(int)@$_REQUEST['deviceID'];
 	$multiInputsCategs=array(103,77,126,98,109);
 	$mediaTypesDT=array(106,104,107,105,108,135);

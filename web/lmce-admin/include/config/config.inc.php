@@ -1,4 +1,4 @@
-<?PHP
+<?php
   	
   	// language to fall back if a CONST does not exist in users language, or if the whole language file is missing
   	$GLOBALS['fallbacklang']='en';

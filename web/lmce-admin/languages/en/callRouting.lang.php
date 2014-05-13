@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_CALL_ROUTING_CONST='Call routing';
 $TEXT_USER_STATUS_CONST='Users\'s status';
 $TEXT_TELL_USER_STATUS_VOICEMAIL_CONST='Tell the user my status first and give them the option of going straight to voicemail';

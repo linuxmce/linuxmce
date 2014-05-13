@@ -1,4 +1,4 @@
-﻿<?
+﻿<?php
 $TEXT_DELETE_EVENT_NOTIFICATION_CONST='L\'événement a été supprimé.';
 $TEXT_TIMED_EVENTS_CONST='Événements temporisés';
 $TEXT_NEW_TIMED_EVENT_DESCRIPTION_CONST='Decription du nouvel événement temporisé';

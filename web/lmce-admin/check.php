@@ -1,4 +1,4 @@
-<?
+<?php
   	//debuging
   	$GLOBALS['inDebug']=0;
   	

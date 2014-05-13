@@ -1,4 +1,4 @@
-<?
+<?php
 function ripStatus($output,$mediadbADO,$dbADO){
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/powerFile.lang.php');

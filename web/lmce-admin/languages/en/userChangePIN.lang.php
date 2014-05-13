@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_CHANGE_PIN_CODE_CONST='Change PIN Code';
 $TEXT_OLD_PASSWORD_OR_PIN_CONST='Old password or PIN';
 $TEXT_NEW_PIN_CONST='New PIN';

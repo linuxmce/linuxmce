@@ -1,4 +1,4 @@
-<?
+<?php
 function editLongAttribute($output,$mediadbADO) {
 	global $mediaTypes;
 	// include language files

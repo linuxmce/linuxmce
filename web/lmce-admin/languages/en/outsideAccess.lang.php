@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_OUTSIDE_ACCESS_CONST='Outside Access';
 $TEXT_ERROR_OPENING_PLUTO_CONF_CONST='Insuffient rights: pluto.conf file cannot be opened.';
 $TEXT_ALLOW_OUTSIDE_ACCESS_80_CONST='Allow outside access to the website on port 80';

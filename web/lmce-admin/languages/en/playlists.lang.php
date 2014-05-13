@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_PLAYLISTS_CONST='Playlists';
 $TEXT_PLAYLIST_CONST='Playlist';
 $TEXT_CONFIRM_DELETE_PLAYLIST_CONST='Are you sure you want to delete this playlist?';

@@ -1,4 +1,4 @@
-<?
+<?php
 function priorityCallers($output,$dbADO,$telecomADO) {
 	global 	$stepsArray;
 

@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EDIT_EVENT_COMMANDS_CONST='Edit Event Commands';
 $TEXT_SELECT_A_DEVICE_CONST='Select a device';
 $TEXT_NO_COMMAND_CONST='no command';

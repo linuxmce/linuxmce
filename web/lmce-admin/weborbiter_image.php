@@ -1,4 +1,4 @@
-<?
+<?php
 if (!isset($_REQUEST['device_id']) || empty($_REQUEST['device_id']))
 {
 	header("HTTP/1.0 404 Not Found");

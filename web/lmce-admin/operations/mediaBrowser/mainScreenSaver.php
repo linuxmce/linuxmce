@@ -1,4 +1,4 @@
-<?
+<?php
 function mainScreenSaver($output,$mediadbADO,$dbADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');

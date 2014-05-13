@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ADD_SOFTWARE_ON_WHICH_COMPUTER_CONST='Add software on which computer?';
 $TEXT_SOFTWARE_PACKAGE_NAME_CONST='What is the name of the software package?';
 $TEXT_NONPLUTO_MANTAINED_CONST='If the software package is not maintained by LinuxMCE, please provide the following:';

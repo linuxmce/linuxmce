@@ -1,4 +1,4 @@
-<?
+<?php
 function is_valid_user($userID,$passMD5,$dbADO){
 	if($userID==0 || $passMD5==''){
 		return false;

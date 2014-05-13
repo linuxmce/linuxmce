@@ -1,4 +1,4 @@
-<?
+<?php
 function alertsLog($output,$securitydbADO,$dbADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');

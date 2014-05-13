@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_MAILBOX_FOR_USER_CONST='Mailbox for user';
 $TEXT_MAILBOX_GENERAL_CONST='General mailbox';
 $TEXT_MESSAGE_ID_CONST='ID';

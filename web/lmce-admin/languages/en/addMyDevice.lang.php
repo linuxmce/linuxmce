@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ADD_TOP_LEVEL_DEVICE_CONST='Add top level device';
 $TEXT_ADD_CHILD_DEVICE_CONST='Add child device';
 $TEXT_IGNORE_ON_OFF_CONST='Ignore On/Off';

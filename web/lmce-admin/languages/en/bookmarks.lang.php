@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ICON_CONST='Icon';
 $TEXT_MEDIA_PROVIDER_CONST='Media Provider';
 $TEXT_CHANNEL_CONST='Channel';

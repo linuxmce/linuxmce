@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_FAX_MANAGEMENT_CONST='Gestion des FAX';
 $TEXT_FAX_SEND_NEW_CONST='Envoyer nouveau fax';
 $TEXT_ASTERISK_DB_NOT_FOUND_CONST='Base de données Asterisk non trouvée.';

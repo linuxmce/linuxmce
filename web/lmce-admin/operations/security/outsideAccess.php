@@ -1,4 +1,4 @@
-<?
+<?php
 
 	// include language files
 	includeLangFile('common.lang.php');

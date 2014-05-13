@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ADD_EDIT_REPOSITORY_SOURCE_CONST='Add/Edit Repository Source';
 $TEXT_COMPATIBLE_WITH_CONST='Compatible with';
 $TEXT_REPOSITORY_TYPE_CONST='Repository Type';

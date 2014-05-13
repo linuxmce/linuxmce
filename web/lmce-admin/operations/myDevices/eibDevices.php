@@ -1,4 +1,4 @@
-<?
+<?php
 function eibDevices($output,$dbADO,$eibADO) {
 	// include language files
 	includeLangFile('common.lang.php');

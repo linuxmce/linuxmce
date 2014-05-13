@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ADVANCED_SETTINGS_CONST='Advanced network settings';
 $TEXT_IPV6TUNNEL_SETTINGS_CONST='IPv6 tunnel settings';
 $TEXT_IPv6TUNNEL_ENDPOINT_CONST='Server IPv4 Address';

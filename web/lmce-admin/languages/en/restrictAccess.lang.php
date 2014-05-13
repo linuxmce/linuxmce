@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_RESTRICT_ACCESS_CONST='Restrict access';
 $TEXT_RESTRICT_ACCESS_INFO_CONST='Normally anybody can control any room by switching to it, and anybody can switch to being another on the orbiter and access that users private media.  You can restrict these by <ul><li>1) limiting who can control a room and/or which orbiters can be used to control it, and </li><li>2) requiring a pin number to switch to a particular user</li></ul>';
 $TEXT_FULL_ACCESS_TO_EVERYONE_CONST='Full access to everyone.';

@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_SEARCH_MEDIA_CONST='Search media';
 $TEXT_SHOW_CONTENT_CONST='Show content';
 $TEXT_SEARCH_KEYWORD_CONST='Search filename';

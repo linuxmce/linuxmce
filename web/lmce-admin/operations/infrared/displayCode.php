@@ -1,4 +1,4 @@
-<?
+<?php
 function displayCode($output,$publicADO)
 {
 	// include language files

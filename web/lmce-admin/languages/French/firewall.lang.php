@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_FIREWALL_RULES_CONST='Règles du pare-feu';
 $TEXT_PROTOCOL_CONST='Protocole';
 $TEXT_IPVERSION_CONST='Version IP';

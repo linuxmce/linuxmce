@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_PHONE_LINES_CONST='Lignes téléphoniques';
 $TEXT_FAX_CONST='Ligne Fax entrant';
 $TEXT_FAX_EMAIL_CONST='envoyer fax entrants par mail à';

@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_MOBILE_ORBITER_SCENARIOS_CONST='Mobile Orbiter Scenarios';
 $TEXT_ADD_MOBILE_ORBITER_SCENARIO_CONST='Add scenario';
 $TEXT_NO_MOBILE_SCENARIOS_CONST='No mobile scenarios.';

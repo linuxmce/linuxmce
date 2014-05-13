@@ -1,4 +1,4 @@
-<?
+<?php
 function pickScenario($output,$dbADO) {
 	// include language file
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');

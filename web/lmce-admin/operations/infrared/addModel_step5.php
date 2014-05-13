@@ -1,4 +1,4 @@
-<?
+<?php
 	$multiInputsCategs=array(103,77,126,98,109);
 	$deviceID=(int)@$_REQUEST['deviceID'];
 	$return=(int)@$_REQUEST['return'];

@@ -1,4 +1,4 @@
-<?
+<?php
 	$dtID=$_REQUEST['dtID'];
 	$deviceID=(int)@$_REQUEST['deviceID'];
 	if($dtID==0){

@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_RESTART_CONST='Restart';
 $TEXT_QUICK_RELOAD_ROUTER_CONST='Quick Reload Router';
 $TEXT_RESTART_CORE_CONST='Core (reset everything)';

@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EDIT_RESPOND_TO_EVENT_CONST='Edit Respond to Event';
 $TEXT_EXTRA_INFO_CONST='Extra info';
 $TEXT_RESPOND_TO_EVENT_NOTES_CONST='Specify above what event you want LinuxMCE to wait for.  Specify below what LinuxMCE should do when the event occurs by choosing the device you want to respond, and what commands you want to send it.';

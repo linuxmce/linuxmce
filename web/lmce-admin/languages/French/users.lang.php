@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_USERS_CONST='Utilisateurs';
 $TEXT_USERS_NOTE_CONST='Ajouter tous les utilisateurs ou membres de la famille qui utiliseront LinuxMCE.';
 $TEXT_USER_CHANGE_PASSWORD_CONST='Changer mot de passe';

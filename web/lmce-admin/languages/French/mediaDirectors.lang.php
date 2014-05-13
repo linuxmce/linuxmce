@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_MEDIA_DIRECTORS_CONST='Directeurs de média';
 $TEXT_ADVANCED_PREPARATION_NOTE_CONST='Ce dispositif à besoin de préparations antérieures qui peuvent durer quelques minutes. Votre noyeau est en train de les faire. Vous allez voir un message sur tout les orbiters et directeurs de média dès que terminé. Veuillez attendre aver l\'utilisation du dispositif jusque\'à ce moment.';
 $TEXT_CONNECTED_TO_CONST='Connecté à';

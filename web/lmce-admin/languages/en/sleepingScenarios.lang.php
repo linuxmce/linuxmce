@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_SLEEPING_SCENARIOS_CONST='Sleeping Scenarios';
 $TEXT_SLEEPING_SCENARIOS_NO_ROOMS_CONST='There are no rooms in this installation. Go to rooms section to add rooms.';
 $TEXT_ADD_SLEEPING_SCENARIO_CONST='Add scenario';

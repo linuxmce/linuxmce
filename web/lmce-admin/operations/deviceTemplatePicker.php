@@ -1,4 +1,4 @@
-<?
+<?php
 function deviceTemplatePicker($output,$dbADO) {
 	// include language files
  	includeLangFile('deviceTemplatePicker.lang.php');

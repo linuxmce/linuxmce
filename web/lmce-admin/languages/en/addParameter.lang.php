@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ADD_PARAMETER_CONST='Add parameter';
 $TEXT_PARAMETER_NAME_CONST='Parameter Name';
 $TEXT_PARAMETER_TYPE_CONST='Parameter Type';

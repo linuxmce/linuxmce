@@ -1,4 +1,4 @@
-<?
+<?php
 function addTranslationItem($output,$dbADO) {
 	global $dbPlutoMainServer,$dbPlutoMainUser,$dbPlutoMainPass;
 	

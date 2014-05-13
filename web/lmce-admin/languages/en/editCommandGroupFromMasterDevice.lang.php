@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EDIT_COMMAND_GROUP_CONST='Edit Command Group';
 $TEXT_ADD_REMOVE_COMMANDS_FOR_CG_CONST='Add/Remove commands';
 $TEXT_NO_COMMANDS_LEFT_CONST='No commands left';

@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_REQUEST_DIRECTORY_NAME_CONST='Please type the new name for the directory:';
 $TEXT_CONFIRM_DELETE_DIRECTORY_CONST='Are you sure you want to delete this directory? All files from it will be also deleted.';
 $TEXT_REQUEST_SUBDIRECTORY_NAME_CONST='Please type the new name for the subdirectory:';

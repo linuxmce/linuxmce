@@ -1,4 +1,4 @@
-<?
+<?php
 	// hard-coded values
 	// PK_DeviceCategory from table DeviceCategory
 	

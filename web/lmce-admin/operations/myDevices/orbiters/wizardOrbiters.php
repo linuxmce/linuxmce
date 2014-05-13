@@ -1,4 +1,4 @@
-<?
+<?php
 function wizardOrbiters($output,$dbADO) {
 	// include language files
  	includeLangFile('common.lang.php');

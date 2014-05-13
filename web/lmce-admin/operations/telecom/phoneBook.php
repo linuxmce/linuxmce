@@ -1,4 +1,4 @@
-<?
+<?php
 function phoneBook($output,$telecomADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');

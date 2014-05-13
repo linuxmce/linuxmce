@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_PACKAGES_CONST='Packages';
 $TEXT_GROUP_BY_MANUFACTURER_CONST='Group by manufacturer';
 $TEXT_SHOW_DEPENDENCIES_CONST='Show dependencies';

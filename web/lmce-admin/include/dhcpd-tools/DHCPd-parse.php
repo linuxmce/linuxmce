@@ -215,12 +215,12 @@ print("<tr><td>IP Address</td><td>MAC</td><td>Start Time</td><td>End Time</td><t
 while($lease = $test->nextLease()): ?>
 
 <TR>
-	<TD><?= $lease["ip_addr"] ?></TD>
-	<TD><?= $lease["mac"] ?></TD>
-	<TD><?= date("H:i j-M-Y", $lease["starts"]) ?></TD>
-	<TD><?= date("H:i j-M-Y", $lease["ends"]) ?></TD>
-	<TD><?= $lease["hostname"] ?></TD>
-	<TD><?= $lease["status"] ?></TD>
+	<TD><?php= $lease["ip_addr"] ?></TD>
+	<TD><?php= $lease["mac"] ?></TD>
+	<TD><?php= date("H:i j-M-Y", $lease["starts"]) ?></TD>
+	<TD><?php= date("H:i j-M-Y", $lease["ends"]) ?></TD>
+	<TD><?php= $lease["hostname"] ?></TD>
+	<TD><?php= $lease["status"] ?></TD>
 </TR>
 
 <?php

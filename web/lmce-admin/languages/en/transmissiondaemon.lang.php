@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_TRANSMISSIONSERVER_CONST='Transmission server';
 $TEXT_TRANSMISSIONSERVER_NOT_AVAILABLE_CONST='We are sorry, Transmission Server is only accesible from internal network.';
 $TEXT_TRANSMISSIONDAEMON='Transmission Daemon';

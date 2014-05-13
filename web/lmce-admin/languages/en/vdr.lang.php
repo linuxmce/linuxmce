@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_VDR_SETUP_CONST='VDR Setup';
 $TEXT_CHOOSE_TV_SERVICE_CONST='Choose TV Service';
 $TEXT_PROVIDERS_CONST='Providers';

@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_IS_A_TOP_LEVEL_CATEGORY_CONST='Is A Top Level Category';
 $TEXT_IS_AUDIO_VIDEO_CONST='Is Audio/Video';
 $TEXT_PLEASE_ENTER_A_DESCRIPTION_CONST='Please enter a description';

@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_MYTH_SETTINGS_CONST='Myth Settings';
 $TEXT_MYTH_INSTRUCTIONS_CONST='To configure Myth, please go to the computing applications sections on the orbiter and choose MythTV Setup.   Return to this page if you wish to identify HDTV channels detected on a cable system.<br><br>Please note, to configure HDTV QAM cable channels you <b>must create and configure a Zap2it labs account, AND complete a QAM channel scan</b> before the options will become available.';
 $TEXT_PICK_THE_TUNING_DEVICE_CONST='Pick the tuning device';

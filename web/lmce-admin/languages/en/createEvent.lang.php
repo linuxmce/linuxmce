@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EVENT_LIST_CATEGORY_CONST='Event List Category';
 $TEXT_CLICK_HERE_TO_CREATE_AN_EVENT_LIST_CATEGORY_CONST='click here to create an Event List Category';
 $TEXT_IF_EVENT_CATEGORY_IS_NOT_IN_THE_LIST_CONST='If the events list category is not in the list';

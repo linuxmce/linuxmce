@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_MEDIA_DIRECTORS_CONST='Media Directors';
 $TEXT_WAIT_FOR_PREPARATION_NOTIFICATION_CONST='This device requires some advance preparation, which can take several minutes. Your Core is doing this now and you will see a message on all orbiters and media directors notifying you when it\'s done. Please wait to use the device until then.';
 $TEXT_CONNECTED_TO_CONST='Connected to';

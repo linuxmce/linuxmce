@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EIB_INVALID_PARAMETER_CONST='Paramètre non valider';
 $TEXT_UPDATE_GROUP_ADDRESSES_CONST='Mise à jour des adresses de groupe (importation fichier .esf de ETS)';
 $TEXT_GROUP_ADDRESSES_CONST='Adresses de groupe';

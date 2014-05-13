@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_CREATE_ADVANCED_EVENT_CONST='Create Advanced Event';
 $TEXT_NEW_EVENT_CONST='New event';
 $TEXT_PLEASE_SELECT_AN_EVENT_CONST='Please select an event';

@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_DHCP_LEASES_CONST='DHCP Leases';
 $TEXT_IP_ADDRESS_CONST='IP Address';
 $TEXT_MAC_ADDRESS_CONST='MAC Address';

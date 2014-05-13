@@ -1,4 +1,4 @@
-<?
+<?php
 //Rob Woodward - Modified to stop enable / disable from re-setting password
 function checkVPNaccess($username) {
 	$username=exec("echo $username | tr '[:upper:]' '[:lower:]'");

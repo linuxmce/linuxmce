@@ -1,4 +1,4 @@
-<?PHP
+<?php
  include('include/adodb/adodb-errorhandler.inc.php');
  require('include/adodb/adodb.inc.php');
  include('include/adodb/tohtml.inc.php');

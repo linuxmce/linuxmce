@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_CHANGE_PASSWORD_CONST='Change password';
 $TEXT_CHANGE_VPN_PASSWORD_CONST='Change VPN password';
 $TEXT_YOUR_PASSWORD_CONST='Your Password';

@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_NO_ATTRIBUTE_SELECTED_CONST='No attribute selected.';
 $TEXT_ATTRIBUTE_CONST='Attribute';
 $TEXT_ADD_FILE_CONST='Add file';

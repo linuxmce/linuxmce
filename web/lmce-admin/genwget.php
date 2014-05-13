@@ -1,4 +1,4 @@
-<?
+<?php
 require('include/config/config.inc.php');
 require('include/utils.inc.php');
 require('include/template.class.inc.php');

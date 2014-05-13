@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_SECURITY_SCENARIOS_CONST='Security Scenarios';
 $TEXT_SS_NO_ROOMS_CONST='There are no rooms in this installation. Go to rooms section to add rooms.';
 $TEXT_NO_SECURITY_SCENARIOS_CONST='No security scenarios for this room.';

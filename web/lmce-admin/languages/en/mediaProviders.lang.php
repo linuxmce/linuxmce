@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_MEDIA_PROVIDERS_CONST='Media Providers';
 $TEXT_NO_MEDIA_PROVIDERS_CONST='No media providers.';
 $TEXT_MEDIA_TYPE_CONST='Media type';

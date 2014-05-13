@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_THE_EVENT_WAS_DELETED_CONST='The event was deleted.';
 $TEXT_ADVANCED_EVENTS_CONST='Advanced Events';
 $TEXT_EVENT_CONST='Event';

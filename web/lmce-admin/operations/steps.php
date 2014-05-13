@@ -1,4 +1,4 @@
-<?
+<?php
 function steps($output,$dbADO) {
 	// include language files
 	includeLangFile('common.lang.php');

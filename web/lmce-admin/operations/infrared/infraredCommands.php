@@ -1,4 +1,4 @@
-<?
+<?php
 function infraredCommands($output,$publicADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');

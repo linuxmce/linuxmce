@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_FOUND_CONST='Trouvé';
 $TEXT_DELETE_MEDIA_FILES_CONFIRMATION_CONST='Êtes-vous sûr de vouloir supprimer ce fichier média ? Le fichier physique sera aussi supprimé d\'il existe!';
 $TEXT_ADD_SEGMENT_CONST='Ajouter segment';

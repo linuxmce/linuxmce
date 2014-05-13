@@ -1,4 +1,4 @@
-<?
+<?php
 require_once('g/session_start.php');
 
 $last_page = $_SESSION['last_page'];
@@ -44,7 +44,7 @@ function CollapsableItemWriteHTML(intCount){
 		};
 		strHTML += "		<table width='100%'>";
 		strHTML += "			<tr bgcolor='#D1D9EA'>";
-		strHTML += "				<td><table cellpadding='2' cellspacing='0' border='0'><tr><td valign='bottom'><a href='JavaScript:" + this.variableName + ".expand()'><IMG SRC='/<?= APPLICATION_PATH ?>/inc/images/gbtn_expand.gif' border='0'></a></td><td valign='bottom'>&nbsp;<a href='JavaScript:" + this.variableName + ".expand()' class='normalLinkBold'>" + this.text + "</a></td></tr></table></td>";
+		strHTML += "				<td><table cellpadding='2' cellspacing='0' border='0'><tr><td valign='bottom'><a href='JavaScript:" + this.variableName + ".expand()'><IMG SRC='/<?php= APPLICATION_PATH ?>/inc/images/gbtn_expand.gif' border='0'></a></td><td valign='bottom'>&nbsp;<a href='JavaScript:" + this.variableName + ".expand()' class='normalLinkBold'>" + this.text + "</a></td></tr></table></td>";
 		strHTML += "			</tr>";
 		strHTML += "		</table>";
 		strHTML += "	</div>";
@@ -56,7 +56,7 @@ function CollapsableItemWriteHTML(intCount){
 		};
 		strHTML += "		<table width='100%'>";
 		strHTML += "			<tr bgcolor='#D1D9EA'>";
-		strHTML += "				<td colspan='2'><table cellpadding='2' cellspacing='0' border='0'><tr><td valign='bottom'><a href='JavaScript:" + this.variableName + ".collapse()'><IMG SRC='/<?= APPLICATION_PATH ?>/inc/images/gbtn_collapse.gif' border='0'></a></td><td valign='bottom'>&nbsp;<a href='JavaScript:" + this.variableName + ".collapse()' class='normalLinkBold'>" + this.text + "</a></td></tr></table></td>";
+		strHTML += "				<td colspan='2'><table cellpadding='2' cellspacing='0' border='0'><tr><td valign='bottom'><a href='JavaScript:" + this.variableName + ".collapse()'><IMG SRC='/<?php= APPLICATION_PATH ?>/inc/images/gbtn_collapse.gif' border='0'></a></td><td valign='bottom'>&nbsp;<a href='JavaScript:" + this.variableName + ".collapse()' class='normalLinkBold'>" + this.text + "</a></td></tr></table></td>";
 		strHTML += "			</tr>";
 		strHTML += "			<tr>";
 		strHTML += "				<td>&nbsp;</td>";

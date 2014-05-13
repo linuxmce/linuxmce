@@ -1,4 +1,4 @@
-<?
+<?php
 function screenSaver() {
 	$out='
 	<script>

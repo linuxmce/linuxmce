@@ -1,4 +1,4 @@
-<?
+<?php
 
 $pass=""; $user="root"; $db="pluto_media";
  $con= mysql_connect("localhost", $user, $pass); 	 // connection

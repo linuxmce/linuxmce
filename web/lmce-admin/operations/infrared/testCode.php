@@ -1,4 +1,4 @@
-<?
+<?php
 function testCode($output,$publicADO)
 {
 	// include language files

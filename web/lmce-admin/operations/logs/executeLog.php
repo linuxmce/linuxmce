@@ -1,4 +1,4 @@
-<?
+<?php
 require('../../include/utils.inc.php');
 
 $scriptID=$_REQUEST['script'];

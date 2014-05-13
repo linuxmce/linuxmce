@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_MAILBOX_FOR_USER_CONST='Boîte vocale pour l\'utilisateur';
 $TEXT_MAILBOX_GENERAL_CONST='Boîte vocale générale';
 $TEXT_MESSAGE_ID_CONST='ID';

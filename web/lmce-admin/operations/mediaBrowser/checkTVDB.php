@@ -1,4 +1,4 @@
-<?
+<?php
 
 /*
 	Copyright 2010 - Langston Ball

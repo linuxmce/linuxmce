@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_FIREWALL_RULES_CONST='Firewall rules';
 $TEXT_PROTOCOL_CONST='Protocol';
 $TEXT_IPVERSION_CONST='IP version';

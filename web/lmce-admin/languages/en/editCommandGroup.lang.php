@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_SCENARIO_DELETED_CONST='The scenario was deleted.';
 $TEXT_ERROR_SCENARIO_DOES_NOT_EXISTS_CONST='This command group does not exists!';
 $TEXT_EDIT_MY_SCENARIO_CONST='Edit My Scenario';

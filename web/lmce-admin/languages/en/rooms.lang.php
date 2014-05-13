@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ROOMS_CONST='Rooms';
 $TEXT_MANUALY_CONFIGURE_EA_CONFIRMATION_CONST='Are you sure you want to manualy configure the entertain area(s) for room';
 $TEXT_ROOM_DESCRIPTION_CONST='Room Description';

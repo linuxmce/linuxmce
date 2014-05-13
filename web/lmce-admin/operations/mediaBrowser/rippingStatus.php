@@ -1,4 +1,4 @@
-<?
+<?php
 function rippingStatus($output,$dbADO,$mediadbADO) {
 	global $mediaTypes;
 	// include language files

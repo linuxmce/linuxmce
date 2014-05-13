@@ -1,4 +1,4 @@
-<?
+<?php
 function editComputingApplications($output,$dbADO,$mediadbADO) {
 	global $wikiHost;
 	
@@ -158,7 +158,7 @@ function editComputingApplications($output,$dbADO,$mediadbADO) {
 			
 			// move up
 			if((int)$device_qs!=0 && isset($_POST['u_'.$device_qs])){
-				$res=$dbADO->Execute('SELECT * FROM Device_QuickStart WHERE FK_Device=? AND SortOrder<? ORDER BY SortOrder DESC LIMIT 0,1',array($mdID,$currentPos));
+				$res=$dbADO->Execute('SELECT * FROM Device_QuickStart WHERE FK_Device=? AND SortOrder<?php ORDER BY SortOrder DESC LIMIT 0,1',array($mdID,$currentPos));
 				if($res->RecordCount()>0){
 					$row=$res->FetchRow();
 					$dbADO->Execute('UPDATE Device_QuickStart SET SortOrder=? WHERE PK_Device_QuickStart=?',array($row['SortOrder'],$device_qs));

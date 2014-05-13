@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EDIT_PLAYLIST_CONST='Edit Playlist';
 $TEXT_FILENAME_CONST='Filename';
 $TEXT_PATH_CONST='Path';

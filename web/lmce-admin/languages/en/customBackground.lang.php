@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_CUSTOM_BACKGROUND_FOR_ORBITER_CONST='Custom background for orbiter #';
 $TEXT_ADD_CUSTOM_MAIN_MENU_BACKGROUND_CONST='Add a custom main menu background';
 $TEXT_ANY_ROOM_CONST='Any room';

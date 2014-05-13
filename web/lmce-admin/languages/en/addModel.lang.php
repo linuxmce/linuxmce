@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ADD_DEVICE_TEMPLATE_CONST='Add device template';
 $TEXT_ADD_MODEL_CONST='Add model';
 $TEXT_QUESTION_1_TITLE_CONST='Question 1 of 8 - How to control?';

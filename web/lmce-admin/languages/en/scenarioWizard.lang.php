@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_LIGHTING_WIZARD_CONST='Lighting wizard';
 $TEXT_CLIMATE_WIZARD_CONST='Climate wizard';
 $TEXT_ADVANCED_WIZARD_CONST='Advanced wizard';

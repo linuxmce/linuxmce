@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_DEVICE_CATEGORY_DEVICE_DATA_DATA_CONST='Device Category Device Data';
 $TEXT_NO_DEVICE_DATA_FOR_THIS_DEVICE_CATEGORY_CONST='No device data for this device category.';
 $TEXT_DEVICE_DATA_UPDATED_FOR_DEVICE_CATEGORY_CONST='Device data updated for device category.';

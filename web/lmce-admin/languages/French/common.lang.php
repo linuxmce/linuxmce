@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_DEVICE_TEMPLATE_CONST='Modèle de dispositif';
 $TEXT_DEVICE_TEMPLATES_CONST='Modèles de dispositif';
 $TEXT_MANUFACTURER_CONST='Fabricant';

@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ORBITES_CONST='Orbiters';
 $TEXT_PRIVACY_SETTINGS_CONST='Privacy settings';
 $TEXT_ORBITER_WIN_INSTALLER_CONST='Orbiter Win Installer';

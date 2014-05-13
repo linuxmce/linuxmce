@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_RIPPING_STATUS_CONST='Ripping Status';
 $TEXT_SLOT_CONST='Slot';
 $TEXT_DISC_CONST='Disc';

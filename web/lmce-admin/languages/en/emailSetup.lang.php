@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EMAILSETUP_CONST='Email Setup';
 
 $TEXT_MAIl_SENDER_CONST='Mail sender details';

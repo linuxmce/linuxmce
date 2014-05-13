@@ -1,4 +1,4 @@
-<?
+<?php
 	$mID=$_REQUEST['mID'];
 	$dcID=$_REQUEST['dcID'];
 

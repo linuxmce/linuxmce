@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_MEDIA_SCENARIOS_CONST='Media scenarios';
 $TEXT_MEDIA_SCENARIOS_NOTE_CONST='Each Media Scenario will be a button on the Orbiter.  To use Media from a Media Director, just check the box for the type of media you want.  To use Media from another source, like a VCR, DVD player, etc., use the "Add Media Scenario" section.';
 $TEXT_ADD_MEDIA_SCENARIO_CONST='Add Media Scenario';

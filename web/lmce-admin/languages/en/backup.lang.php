@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_BACKUP_RESTORE_CONST='Backup/Restore';
 $TEXT_BACKUP_CONST='Backup';
 $TEXT_RESTORE_CONST='Restore';

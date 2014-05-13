@@ -1,4 +1,4 @@
-<?
+<?php
 $Path='/usr/pluto/';
 $allowedFiles=array(
 	'installers/OrbiterInstaller.msi',

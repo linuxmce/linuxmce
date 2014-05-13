@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EDIT_IR_CODES_CONST='Edit IR codes';
 $TEXT_EDIT_GSD_CODES_CONST='Edit Ruby codes';
 $TEXT_WARNING_CHANGES_AFFECT_ALL_CONST='WARNING: the changes will afect all devices created from device template';

@@ -1,4 +1,4 @@
-<?
+<?php
 require_once('include/config/config.inc.php');
 require_once('include/utils.inc.php');
 require_once('include/weborbiter.inc.php');

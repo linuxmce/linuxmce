@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_PICK_SCENARIO_CONST='Pick scenario';
 $TEXT_SCENARIO_DESCRIPTION_CONST='Scenario description';
 $TEXT_SCENARIO_TYPE_CONST='Scenario type';

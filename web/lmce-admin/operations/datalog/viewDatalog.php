@@ -1,4 +1,4 @@
-<?
+<?php
 
 // Creates an array from a string created with 'multimplode'
 function multiexplode($string){

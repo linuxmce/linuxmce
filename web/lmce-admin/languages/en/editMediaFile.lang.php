@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EDIT_MEDIA_FILE_CONST='Edit Media file';
 $TEXT_DELETE_FILE_CONST='Delete File';
 $TEXT_DELETE_FILE_CONFIRMATION_CONST='Are you sure you want to delete this file? It will be removed both from database and disk.';

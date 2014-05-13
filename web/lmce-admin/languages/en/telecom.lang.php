@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ERROR_PHONE_NUMBER_REQUIRED_CONST='You must provide either "phone number" or "dial as" fields.';
 $TEXT_PHONE_NUMBER_ADDED_CONST='The phone number was added.';
 $TEXT_CONTACT_WAS_ADDED_CONST='The contact was added.';

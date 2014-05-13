@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EDIT_RESPOND_TO_EVENT_CONST='Modifier réponse à l\'événement';
 $TEXT_EXTRA_INFO_CONST='Infos supplémentaires';
 $TEXT_RESPOND_TO_EVENT_NOTES_CONST='Spécifier ci-dessus l\événement auquel LinuxMCE devra faire attention. Spécifier ci-dessous ce que LinuxMCE devra faire si l\'événement survient en choisissant le dispositif et la commande à envoyer.';

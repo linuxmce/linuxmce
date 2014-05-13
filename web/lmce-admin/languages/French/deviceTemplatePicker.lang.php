@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_PICK_DEVICE_TEMPLATE_CONST='Choisissez modèle de dispositif';
 $TEXT_ADD_MANUFACTURER_CONST='Ajouter fabricant';
 $TEXT_ADD_DEVICE_CATEGORY_CONST='Ajouter catégorie';

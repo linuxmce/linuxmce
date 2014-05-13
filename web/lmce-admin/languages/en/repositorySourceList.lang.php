@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_CREATE_NEW_REPOSITORY_SOURCE_CONST='Create new Repository Source';
 $TEXT_FILTER_BY_CONST='Filter by Operating System/Distribution';
 

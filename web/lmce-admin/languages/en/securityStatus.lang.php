@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_SECURITY_STATUS_CONST='Security status';
 $TEXT_ALARM_CONST='Alarm';
 $TEXT_SELECT_MODE_CONST='Select Mode';

@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_CALLERS_FOR_ME_CONST='Callers for me';
 $TEXT_CALLER_FOR_ME_ADDED_CONST='Phone number(s) added.';
 $TEXT_ERROR_NOTHING_TO_ADD_CONST='ERROR: nothing to add.';

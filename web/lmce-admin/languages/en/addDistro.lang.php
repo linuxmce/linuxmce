@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ADD_DISTRIBUTION_CONST='Add distribution';
 $TEXT_EDIT_DISTRIBUTION_CONST='Edit distribution';
 $TEXT_INSTALLER_CONST='Installer';

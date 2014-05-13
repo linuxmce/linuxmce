@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_SET_RESOLUTION_TITLE_CONST='Change resolution and refresh';
 $TEXT_SET_RESOLUTION_INFO_CONST='Choose resolution and refresh and click "test resolution" button.';
 $TEXT_RESOLUTION_CONST='Resolution';

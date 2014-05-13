@@ -1,4 +1,4 @@
-<?
+<?php
 function transmissionCreatelinks($path, $Transmission_Root, $transmissionADO, $CLpage, $transmission_files_per_page) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');

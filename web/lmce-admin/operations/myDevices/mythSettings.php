@@ -1,4 +1,4 @@
-<?
+<?php
 function mythSettings($output,$dbADO) {
 
 	error_reporting(E_ALL );

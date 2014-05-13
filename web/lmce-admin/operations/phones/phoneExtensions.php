@@ -1,4 +1,4 @@
-<?
+<?php
 function phoneExtensions($output,$dbADO) {
 	// obsolete file
 		

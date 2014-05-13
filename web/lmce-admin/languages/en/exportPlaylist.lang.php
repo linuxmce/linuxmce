@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EXPORT_PLAYLIST_CONST = 'Export Playlist';
 $TEXT_EXPORT_PLAYLIST_HINT_CONST = '	<HR>
 					Please choose your export options below. Please keep in mind that LinuxMCE\'s playlist system

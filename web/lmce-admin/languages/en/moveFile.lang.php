@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_CHOSE_DESTINATION_CONST='Chose destination';
 $TEXT_MOVE_MEDIA_FILE_CONST='Move Media file';
 $TEXT_FROM_DIRECTORY_CONST='From directory';

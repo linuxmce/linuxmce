@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_PACKAGE_CONTAIN_SOURCE_CODE_CONST='This package contain source code.';
 $TEXT_SOURCE_CODE_FOR_PACKAGE_CONST='The source code for this package is:';
 $TEXT_PACKAGE_TYPE_CONST='Package Type';

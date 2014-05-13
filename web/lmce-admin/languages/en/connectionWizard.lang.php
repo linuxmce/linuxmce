@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_AV_CONNECTION_WIZARD_CONST='A/V equipment connection wizard';
 $TEXT_ADVANCED_MODE_CONST='Advanced mode';
 $TEXT_ADD_DEVICE_CONST='Add device';

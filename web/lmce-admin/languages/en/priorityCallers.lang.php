@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_PRIORITY_CALLERS_CONST='Priority Callers';
 $TEXT_PRIORITY_CALLLER_ADDED_CONST='Phone number(s) added.';
 $TEXT_ERROR_NOTHING_TO_ADD_CONST='ERROR: nothing to add.';

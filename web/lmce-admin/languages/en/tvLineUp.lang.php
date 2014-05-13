@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_TV_LINEUP_CONST='TV Lineup';
 $TEXT_PROVIDERS_FOR_ZIP_CODE_CONST='Providers for ZIP code';
 $TEXT_SHOW_PROVIDERS_CONST='show providers';

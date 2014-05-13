@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_DELETE_CRITICAL_DEVICE_CONFIRMATION_CONST='ATTENTION !!! Ceci est un dispositif critique !!! Êtes-vous sûr de vouloir le supprimer?';
 $TEXT_DELETE_DEVICE_CONST='Supprimer dispositif';
 $TEXT_NOT_RECOMENDED_CONST='(NON RECOMMANDE)';

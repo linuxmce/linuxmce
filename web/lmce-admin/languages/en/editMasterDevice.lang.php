@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_IMPLEMENTS_DCE_CONST='Implements DCE';
 $TEXT_COMMAND_LINE_CONST='Command line';
 $TEXT_MANUFACTURER_URL_CONST='Manufacturer URL';

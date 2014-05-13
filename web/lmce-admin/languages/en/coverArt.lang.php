@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_COVERART_CONST='Cover Art';
 $TEXT_SHOW_ALL_FILES_CONST='Show all files';
 $TEXT_SHOW_FILES_NO_COVERART_CONST='Show Files With no cover art';

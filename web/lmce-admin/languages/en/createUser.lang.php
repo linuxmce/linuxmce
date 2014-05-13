@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ADD_NEW_USER_CONST='Add new user/family member';
 $TEXT_ADD_USER_INFO_CONST='Pick a username.  If you specify a "Nickname", that name will appear on all the screens instead of the username.  The nickname can be anything and does not need to be unique.';
 $TEXT_CONFIRM_PASSWORD_CONST='Re-Type password';

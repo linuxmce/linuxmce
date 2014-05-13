@@ -1,4 +1,4 @@
-<?
+<?php
 function devicesAV($output,$dbADO) {
 	// obsolete file
 	

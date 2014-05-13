@@ -1,4 +1,4 @@
-<?
+<?php
 require_once 'Image/Graph.php';
 
 $mysqlhost="localhost"; // MySQL-Host

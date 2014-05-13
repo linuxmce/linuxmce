@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_TITLE_AV_EQUIPMENT_CONST='Equipement A/V';
 $TEXT_LOADING_NOTICE_CONST='Chargement en cours, veuillez patienter ...';
 $TEXT_TYPE_OF_DEVICE_CONST='Type du dispositif';

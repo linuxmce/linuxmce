@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_TRANSLATION_ITEMS_CONST='Translation items';
 $TEXT_SUB_CATEGORY_CONST='Sub-category';
 $TEXT_ADD_ITEM_CONST='Add item';

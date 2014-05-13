@@ -1,4 +1,4 @@
-<?
+<?php
 function sqlcvs_diff($output,$dbADO) {
 	/* @var $dbADO ADOConnection */
 	/* @var $rs ADORecordSet */

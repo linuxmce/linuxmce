@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_PICK_DEVICE_TEMPLATE_CONST='Pick Device Template';
 $TEXT_ADD_MANUFACTURER_CONST='Add manufacturer';
 $TEXT_ADD_DEVICE_CATEGORY_CONST='Add device category';

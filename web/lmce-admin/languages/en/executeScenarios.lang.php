@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EXECUTE_SCENARIOS_CONST='Execute scenarios';
 $TEXT_EXECUTE_SCENARIOS_EXPLANATION_CONST='Click on a scenario to execute it just like you had touched the button on the Orbiter.';
 $TEXT_SCENARIO_DESCRIPTION_CONST='Scenario description';

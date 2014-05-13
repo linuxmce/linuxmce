@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_INVALID_FLOORPLAN_SPECIFIED_CONST='Invalid floorplan specified';
 $TEXT_CHOOSE_FILE_CONST='Choose a file';
 $TEXT_FILETYPE_RESTRICTION_CONST='must be PNG';

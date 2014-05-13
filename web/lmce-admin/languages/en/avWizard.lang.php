@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_AV_EQUIPMENT_CONST='A/V Equipment';
 $TEXT_CONNECTION_WIZARD_CONST='Connection Wizard';
 $TEXT_SHARE_CODES_CONST='Share my I/R codes with other LinuxMCE users.';

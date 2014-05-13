@@ -1,4 +1,4 @@
-<?
+<?php
 header("Content-type: text/javascript");
 
 require_once('include/config/config.inc.php');

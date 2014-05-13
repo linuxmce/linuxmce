@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_WELCOME_MSG_CONST='Welcome to LinuxMCE Admin.  Please log in:';
 $TEXT_HELP_WITH_ADMIN_SITE_CONST='Help with the LinuxMCE Admin site';
 $TEXT_ORBITER_WIN_INSTALLER_CONST='Orbiter, Utilities and other software';

@@ -1,4 +1,4 @@
-<?
+<?php
 	// the document with instructions for option 1, I'll write C++ code
 	$writeCodeDocument=1;
 	

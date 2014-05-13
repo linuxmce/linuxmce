@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_DELETE_CRITICAL_DEVICE_CONFIRMATION_CONST='WARNING !!! This is a critical device !!! Are you sure you want to delete it?';
 $TEXT_DELETE_DEVICE_CONST='Delete Device';
 $TEXT_NOT_RECOMENDED_CONST='(NOT RECOMENDED)';

@@ -1,4 +1,4 @@
-<?
+<?php
 	 
 	//depreciated and not used. functions moved into tvdb utils.
 function  tvdbSeries($output,$mediadbADO,$dbADO)	 

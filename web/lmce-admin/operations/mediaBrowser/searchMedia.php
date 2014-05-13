@@ -1,4 +1,4 @@
-<?
+<?php
 function searchMedia($output,$mediadbADO) {
 	// include language files
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');

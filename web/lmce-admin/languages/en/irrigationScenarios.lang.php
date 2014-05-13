@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_IRRIGATION_SCENARIOS_CONST='Irrigation Scenarios';
 $TEXT_ADD_IRRIGATION_SCENARIO_CONST='Add scenario';
 $TEXT_NO_IRRIGATION_SCENARIOS_CONST='No irrigation scenarios for this room.';

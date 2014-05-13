@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ZONES_CONST='Zones';
 $TEXT_SECURITY_CONST='Security';
 $TEXT_SECURITY_ZONES_CONST='Security Zones';

@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EVENT_CATEGORY_CONST='Event Category';
 $TEXT_EVENT_NAME_CONST='Event Name';
 $TEXT_NOTHING_TO_SELECT_CONST='nothing to select';

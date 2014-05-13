@@ -1,4 +1,4 @@
-<?
+<?php
 	$configFile = '/etc/pluto.conf';
 	
 	$DB_NAME = LoadConfig($configFile,"MySqlDBName");

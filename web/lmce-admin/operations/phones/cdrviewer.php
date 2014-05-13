@@ -1,4 +1,4 @@
-<?
+<?php
 function cdrviewer($output) {
 	includeLangFile('common.lang.php');
 	includeLangFile('cdrviewer.lang.php');

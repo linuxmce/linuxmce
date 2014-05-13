@@ -1,4 +1,4 @@
-<?
+<?php
 
 function advancedZWave($output,$dbADO){
     $out = "<script>

@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_NETWORK_SETTINGS_CONST='Réglages réseau';
 $TEXT_NO_DEVICEDATA_NETWORK_INTERFACES_CONST='Pas d\'infos dans Device_DeviceData concernant des cartes réseau.';
 $TEXT_OFFLINEMODE_CONST='Mode hors ligne';

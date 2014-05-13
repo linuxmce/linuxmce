@@ -1,4 +1,4 @@
-<?PHP
+<?php
 //ADDED BY PAUL MUMBY FOR RECURSIVE TAGGING CODE
 function editMediaTagsRecursive($output,$mediadbADO,$dbADO)
 {

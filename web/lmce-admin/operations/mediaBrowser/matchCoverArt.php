@@ -1,4 +1,4 @@
-<?
+<?php
 function matchCoverArt($output,$mediadbADO) {
 	global $mediaTypes;
 	// include language files

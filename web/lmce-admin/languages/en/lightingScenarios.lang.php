@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_LIGHTING_SCENARIOS_CONST='Lighting Scenarios';
 $TEXT_LIGHTING_SCENARIOS_INFO_CONST='<p>Note: The first lighting scenario is the "Default ON" for that room, meaning that if you tell LinuxMCE to make your lighting follow-you, when you enter the room, that first scenario will be executed.  The second scenario is the "Default OFF" when you leave the room. You should make the first scenario turn on the lights to your normal level, and the second scenario turn them off.  The rest of the scenarios can be anything you want.';
 $TEXT_LIGHTING_SCENARIOS_NO_ROOMS_CONST='There are no rooms in this installation.';

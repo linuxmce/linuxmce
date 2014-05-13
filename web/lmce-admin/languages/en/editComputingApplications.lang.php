@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_EDIT_COMPUTING_APPLICATIONS_CONST='Edit Computing Applications';
 $TEXT_COMPUTING_INFO_CONST='The following applications will appear on the "Computing" menu:';
 $TEXT_APPLICATION_CONST='Application';

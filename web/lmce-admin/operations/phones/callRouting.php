@@ -1,4 +1,4 @@
-<?
+<?php
 function callRouting($output,$dbADO,$asteriskADO,$telecomADO) {
 	global 	$stepsArray;
 

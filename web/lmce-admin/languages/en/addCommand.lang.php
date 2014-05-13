@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_COMMAND_NAME_CONST='Command name';
 $TEXT_AV_COMMAND_CONST='AV Command';
 $TEXT_PIPES_THIS_COMMAND_USES_CONST='Pipes this command uses';

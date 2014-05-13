@@ -1,4 +1,4 @@
-<?
+<?php
 function getMAC($int){
 	$mac = exec("ip link show $int | awk '/ether/ {print $2}'");
  	return $mac;

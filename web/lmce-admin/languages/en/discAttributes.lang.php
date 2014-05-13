@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_DISC_ATTRIBUTES_CONST='Disc attributes';
 $TEXT_DISC_ID_CONST='Disc ID';
 $TEXT_ADD_DISC_ATTRIBUTE_CONST='Add disc attribute';

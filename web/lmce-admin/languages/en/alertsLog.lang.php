@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_ALERTS_LOG_CONST='Alerts log';
 $TEXT_FOUND_CONST='Found';
 $TEXT_ALERT_TYPE_CONST='Alert type';

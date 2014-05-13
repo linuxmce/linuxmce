@@ -1,4 +1,4 @@
-<?
+<?php
 $TEXT_DEVICE_TEMPLATE_CONST='Device Template';
 $TEXT_DEVICE_TEMPLATES_CONST='Device Templates';
 $TEXT_MANUFACTURER_CONST='Manufacturer';

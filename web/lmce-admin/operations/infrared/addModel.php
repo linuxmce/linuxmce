@@ -1,4 +1,4 @@
-<?
+<?php
 function addModel($output,$dbADO,$mediadbADO)
 {
 	// include language files
