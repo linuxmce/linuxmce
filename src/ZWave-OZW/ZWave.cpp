@@ -1626,24 +1626,32 @@ void ZWave::CMD_Get_Data(string sText,char **pData,int *iData_Size,string &sCMD_
 		s += "},";
 
 		s += " \"values\": [";
-		for (list<OpenZWave::ValueID>::iterator it = node->m_values.begin(); it != node->m_values.end(); ++it)
+		int valCount = 0;
+		for (vector<LMCEDevice*>::iterator nodeit = node->m_vectDevices.begin(); nodeit != node->m_vectDevices.end(); ++nodeit)
 		{
-			OpenZWave::ValueID value = *it;
-			s += "{ \"label\": \"" + OpenZWave::Manager::Get()->GetValueLabel(value) + "\",";
-			s += " \"help\": \"" + StringUtils::Replace(OpenZWave::Manager::Get()->GetValueHelp(value), "\"", "&quot;") + "\",";
-			s += " \"index\": " + StringUtils::itos(value.GetIndex()) + ",";
-			string val;
-			OpenZWave::Manager::Get()->GetValueAsString(value, &val);
-			s += " \"value\": \"" + val + "\",";
-			s += " \"units\": \"" + OpenZWave::Manager::Get()->GetValueUnits(value) + "\",";
-			s += " \"min\": " + StringUtils::itos(OpenZWave::Manager::Get()->GetValueMin(value)) + ",";
-			s += " \"max\": " + StringUtils::itos(OpenZWave::Manager::Get()->GetValueMax(value)) + ",";
-			string genreText = string(OpenZWave::Value::GetGenreNameFromEnum(value.GetGenre()));
-			s += " \"genre\": \"" + genreText + "\"";
-
-			s += "},";
+			LMCEDevice* pLmceDevice = *nodeit;
+			for (vector<OpenZWave::ValueID>::iterator it = pLmceDevice->m_vectValues.begin(); it != pLmceDevice->m_vectValues.end(); ++it)
+			{
+				OpenZWave::ValueID value = *it;
+				s += "{ \"label\": \"" + OpenZWave::Manager::Get()->GetValueLabel(value) + "\",";
+				s += " \"help\": \"" + StringUtils::Replace(OpenZWave::Manager::Get()->GetValueHelp(value), "\"", "&quot;") + "\",";
+				s += " \"index\": " + StringUtils::itos(value.GetIndex()) + ",";
+				string val;
+				OpenZWave::Manager::Get()->GetValueAsString(value, &val);
+				s += " \"value\": \"" + val + "\",";
+				s += " \"units\": \"" + OpenZWave::Manager::Get()->GetValueUnits(value) + "\",";
+				s += " \"min\": " + StringUtils::itos(OpenZWave::Manager::Get()->GetValueMin(value)) + ",";
+				s += " \"max\": " + StringUtils::itos(OpenZWave::Manager::Get()->GetValueMax(value)) + ",";
+				string genreText = string(OpenZWave::Value::GetGenreNameFromEnum(value.GetGenre()));
+				s += " \"genre\": \"" + genreText + "\",";
+				s += " \"pk_device\": " + StringUtils::itos(pLmceDevice->m_dwPK_Device) + ",";
+				string polled = OpenZWave::Manager::Get()->isPolled(value) ? "true" : "false";
+				s += " \"polling\": " + polled;
+				s += "},";
+				valCount++;
+			}
 		}
-		if (node->m_values.size() > 0)
+		if (valCount > 0)
 			s = s.substr(0, s.length()-1);
 		s += "],";
 

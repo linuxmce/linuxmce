@@ -113,13 +113,14 @@ function advancedZWave($output,$dbADO){
 			    ct.insert("<p class=\"command\" onclick=\"updateNodeNeighbors("+node.id+");\">Update node neighbors</p>");
 			    ct.insert("<p class=\"command\" onclick=\"testNode("+node.id+");\">Test node</p>");
 
+			    // Config and Values tab
 			    var vt = document.createElement("div");
 			    vt.id = "valuesTab_"+node.id;
 			    vt.style = "display:none;";
 			    tabSectionEl.appendChild(vt);
 			    vt.insert("<p>Values</p>");
 			    var t = "<table><tr>";
-			    t += "<td>Index</td><td>Label</td><td>Value</td><td>Units</td><td>Genre</td></tr>";
+			    t += "<td>Index</td><td>Label</td><td>Value</td><td>Units</td><td>Genre</td><td>PK_Device</td><td>Polled</td></tr>";
 
 			    var configEl = document.createElement("div");
 			    configEl.id = "configTab_"+node.id;
@@ -139,8 +140,11 @@ function advancedZWave($output,$dbADO){
 				row += "<td class=\"cell_"+value.genre+"\"onclick=\""+onclick+"\" title=\""+tooltip+"\">"+value.label+"</td>";
 				row += "<td>"+value.value+"</td>";
 				row += "<td>"+value.units+"</td>";
-				if (value.genre != "config")
+				if (value.genre != "config") {
 				    row += "<td>"+value.genre+"</td>";
+				    row += "<td>"+value.pk_device+"</td>";
+				    row += "<td><input type=\"checkbox\" " + (value.polling ? "checked=\"checked\" " : "") + "onchange=\"changePolling("+value.pk_device+",\'"+value.label+"\',this.checked);\"></td>";
+				}
 				row += "</tr>";
 				if (value.genre == "config") {
 				    configt += row;
@@ -237,7 +241,9 @@ function advancedZWave($output,$dbADO){
 		    if (val != "")
 		        performCommand({setConfigParam:nodeId, paramIndex:index, valueToSet:val});
 		}
-
+		function changePolling(pkDevice,label,state) {
+		    performCommand({"setPolling":1, "pkDevice": pkDevice, "label":label, "state": state});
+		}
 		function getNode(id) {
 		    var i = 0;
 	 	    while (i < nodes.length) {
@@ -454,7 +460,7 @@ td.cell_config:hover {
 	        $json = substr($retArray[1], $startPos, strrpos($retArray[1],"}")-$startPos+1);
 		$o = json_decode($json);
 		$nodes = $o->nodes;
-		
+
 		$deviceNames = getDeviceNames($dbADO);
 
 		// Set x & y
@@ -544,8 +550,10 @@ td.cell_config:hover {
 	    print("{ \"ok\": ".($retArray[0].strrpos("OK") >= 0 ? 1 : 0)." }");
 	    exit;
 	}
-	if (isset($_POST['softReset']) || isset($_POST['healNetwork']) || isset($_POST['testNetwork']) || isset($_POST['networkUpdate']) || isset($_POST['addAssociation']) || isset($_POST['removeAssociation']) || isset($_POST['addNode']) || isset($_POST['removeNode']) || isset($_POST['cancelControllerCommand'])) {
+	if (isset($_POST['softReset']) || isset($_POST['healNetwork']) || isset($_POST['testNetwork']) || isset($_POST['networkUpdate']) || isset($_POST['addAssociation']) || isset($_POST['removeAssociation']) || isset($_POST['addNode']) || isset($_POST['removeNode']) || isset($_POST['cancelControllerCommand']) || isset($_POST['setPolling'])) {
+
 	    header('Content-type: application/json');
+
 	    if (isset($_POST['softReset'])) {
 	        $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 776 51 ""';
  	    } else if (isset($_POST['healNetwork'])) {
@@ -570,6 +578,11 @@ td.cell_config:hover {
                 $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 967 48 5';
 	    } else if (isset($_POST['removeNode'])) {
                 $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 968';
+	    } else if (isset($_POST['setPolling'])) {
+	        $pkDevice = $_POST['pkDevice'];
+		$label = $_POST['label'];
+		$state = $_POST['state'];
+                $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 966 2 '.$pkDevice.' 5 "'.$label.'" 220 "'.($state == "true" ? '1' : '').'" 225 "1"';
 	    }
 	    $ret=exec_batch_command($cmd,1);
 	    $retArray=explode("\n",$ret);
