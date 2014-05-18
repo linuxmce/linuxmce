@@ -33,30 +33,31 @@ TARGET = $$qtLibraryTarget($$TARGET)
 
 linux-g++{
 
-!RPI{
-INCLUDEPATH+=$$[QT_INSTALL_PREFIX]/include/phonon/Phonon
-DESTDIR=../../imports/AudioVisual
-}
+    !RPI{
+    INCLUDEPATH+=$$[QT_INSTALL_PREFIX]/include/phonon/Phonon
+    DESTDIR=../../imports/AudioVisual
+    }
 
-RPI{
-DESTDIR=../../imports/AudioVisual
-RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
-}
-
+    RPI{
+    DESTDIR=../../imports/AudioVisual
+    RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
+    }
 }
 
 linux-rasp-pi-g++{
-DESTDIR=../../imports/AudioVisual
-DEFINES+=RPI
-RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
+    DESTDIR=../../imports/AudioVisual
+    DEFINES+=RPI
+    RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
 }
 
 android-g++{
-DESTDIR=../../../platforms/Android/androidPlugins/armeabi-v7a/
+    DESTDIR=../../../platforms/Android/androidPlugins/armeabi-v7a/
 }
+
 macx-clang{
-DESTDIR=../../imports/AudioVisual
+    DESTDIR=../../imports/AudioVisual
 }
+
 OTHER_FILES = qmldir
 
 # Input
@@ -163,7 +164,7 @@ unix {
         INSTALLS += target qmldir
 }
 
-message("Plugin install path at" $$installPath)
+message("Plugin install path at" $$DESTDIR)
 
 OTHER_FILES += \
     android/res/values-rs/strings.xml \
