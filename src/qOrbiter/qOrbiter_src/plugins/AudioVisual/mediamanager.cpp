@@ -30,13 +30,14 @@ MediaManager::MediaManager(QQuickItem *parent):
     QQuickItem(parent)
   #endif
 {
-#ifdef __ANDROID__
-    setFlag(ItemHasNoContents, true);
+#ifdef __ANDROID__   
 
-#elif QT4
-    setFlag(ItemHasNoContents, false);
-#elif QT5
-    setFlag(QQuickItem::ItemHasContents, false);
+    #ifdef QT4
+      setFlag(ItemHasNoContents, false);
+    #elif QT5
+     setFlag(QQuickItem::ItemHasContents, false);
+    #endif
+
 #endif
     serverAddress = "";
     deviceNumber = -1;

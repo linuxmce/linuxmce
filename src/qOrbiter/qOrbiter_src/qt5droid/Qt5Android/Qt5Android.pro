@@ -51,7 +51,7 @@ TRANSLATIONS += app_de.ts
         qmlplugins.files += ../../../platforms/Android/androidPlugins/x86/libandroidplugin_1_1.so
         qmlplugins.path = /libs/x86
 
-        } else: armeabi-v7a {
+        } armeabi-v7a {
         qmlplugins.files = ../../../platforms/Android/androidPlugins/armeabi-v7a/libqmlshadersplugin.so
         qmlplugins.files += ../../../platforms/Android/androidPlugins/armeabi-v7a/libandroidplugin_1_1.so
                 qmlplugins.path = /libs/armeabi-v7a
@@ -370,5 +370,12 @@ OTHER_FILES += \
     android/src/org/kde/necessitas/origo/QtApplication.java \
     ../../../platforms/Android/qt5-pkg-src/AndroidManifest.xml
 
-ANDROID_EXTRA_LIBS = ../../../platforms/Android/androidPlugins/armeabi-v7a/libDceScreenSaver.so
+
+    contains(QT_VERSION,5.*.*){
+   ANDROID_EXTRA_LIBS = $$_PRO_FILE_PWD_/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libDceScreenSaver.so #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
+    } else {
+   ANDROID_EXTRA_LIBS = $$_PRO_FILE_PWD_/../../../platforms/Android/androidPlugins/armeabi-v7a/libDceScreenSaver.so
+    }
+
+
 

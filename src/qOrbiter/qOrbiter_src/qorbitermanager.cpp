@@ -453,8 +453,8 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 
 
 #ifdef __ANDROID__
-    setDceResponse("Loading Skins")
-    #ifdef QANDROID
+    setDceResponse("Loading Skins");
+    #ifdef QT5
      setDceResponse("Loading Qt Quick 2 Skins for Qt5");
      remoteDirectoryPath.append("/qt5");
      finalPath = remoteDirectoryPath;

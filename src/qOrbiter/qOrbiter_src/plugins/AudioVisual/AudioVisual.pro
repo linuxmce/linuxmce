@@ -9,12 +9,13 @@ INCLUDEPATH += ../../../../ ../../../../DCE/
 
 contains(QT_VERSION,4.*.*){
 
-message("$$QT_VERSION DCE-Av-Plugin")
+         message("$$QT_VERSION DCE-Av-Plugin")
          QT += declarative phonon network opengl
- android-g++{
+
+        android-g++{
        QT-=phonon
         message("For Android")
-  }
+         }
 
 	DEFINES+=QT4
 }
@@ -51,7 +52,12 @@ linux-rasp-pi-g++{
 }
 
 android-g++{
-    DESTDIR=../../../platforms/Android/androidPlugins/armeabi-v7a/
+
+    contains(QT_VERSION,5.*.*){
+    DESTDIR=../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
+    } else {
+    DESTDIR=../../../platforms/Android/androidPlugins/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
+    }
 }
 
 macx-clang{

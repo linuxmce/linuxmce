@@ -21,28 +21,26 @@ uri = DceScreenSaver
 TARGET = $$qtLibraryTarget($$TARGET)
 
 linux-g++{
+    DESTDIR=../../imports/DceScreenSaver
 
-DESTDIR=../../imports/DceScreenSaver
-
-RPI{
-RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
+    RPI{
+    RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
+    }
 }
 
-}
 linux-rasp-pi-g++{
-DESTDIR=../../imports/DceScreenSaver
-DEFINES+=RPI
-RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
+    DESTDIR=../../imports/DceScreenSaver
+    DEFINES+=RPI
+    RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
 }
 
 
 android-g++{
 
-QT5{
-
-DESTDIR=../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
+    contains(QT_VERSION,5.*.*){
+    DESTDIR=../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
     } else {
-DESTDIR=../../../platforms/Android/androidPlugins/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
+    DESTDIR=../../../platforms/Android/androidPlugins/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
     }
 }
 
@@ -61,8 +59,10 @@ OTHER_FILES = qmldir
 !equals(_PRO_FILE_PWD_, $$DESTDIR) {
 
 android-g++{
-   QMLDIR_TARGET=../../../platforms/Android/androidComponents/Qt5/DceScreenSaver/qmldir
+
+
     QT5{
+ QMLDIR_TARGET=../../../platforms/Android/androidComponents/Qt5/DceScreenSaver/qmldir
     } else{
     QMLDIR_TARGET=../../../platforms/Android/androidComponents/DceScreenSaver/qmldir
     }
