@@ -13,8 +13,25 @@ OTHER_FILES += \
 
 SUBDIRS += ../qOrbiter_src/plugins/AudioVisual \
              ../qOrbiter_src/plugins/DceScreenSaver
+android-g++{
 
+contains(QT_VERSION,4.8.*){
+SUBDIRS += ../qOrbiter_src/necessitas/QOrbiter-necessitas
+
+}
+
+contains(QT_VERSION,4.7.*){
+        message(This version not supported on android)
+}
+
+contains(QT_VERSION,5.*.*){
+ SUBDIRS += ../qOrbiter_src/qt5Droid/Qt5Android
+}
+
+} else {
 SUBDIRS += ../qOrbiter_src
+}
+
 
 #folder_01.source = ../qOrbiter_src/qml/desktop
 #folder_01.target = $$DESTDIR/qml
