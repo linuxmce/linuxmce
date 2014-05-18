@@ -1,6 +1,11 @@
 TEMPLATE = lib
-# This does not seem to do anything
 TARGET = AudioVisual
+
+CONFIG += qt plugin
+CONFIG += warn_off
+QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
+INCLUDEPATH += ../../../../ ../../../../DCE/
+
 
 contains(QT_VERSION,4.*.*){
 
@@ -22,12 +27,9 @@ contains(QT_VERSION,5.*.*){
 
 
 uri = AudioVisual
-#TARGET = $$qtLibraryTarget($$TARGET)
+TARGET = $$qtLibraryTarget($$TARGET)
 
-CONFIG += qt plugin
-CONFIG += warn_off
-QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
-INCLUDEPATH += ../../../../ ../../../../DCE/
+
 
 linux-g++{
 
@@ -52,7 +54,9 @@ RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
 android-g++{
 DESTDIR=../../../platforms/Android/androidPlugins/armeabi-v7a/
 }
-
+macx-clang{
+DESTDIR=../../imports/AudioVisual
+}
 OTHER_FILES = qmldir
 
 # Input
@@ -159,7 +163,7 @@ unix {
         INSTALLS += target qmldir
 }
 
-message("Plugin install path at" $$RASP_INSTALL_TARGET)
+message("Plugin install path at" $$installPath)
 
 OTHER_FILES += \
     android/res/values-rs/strings.xml \

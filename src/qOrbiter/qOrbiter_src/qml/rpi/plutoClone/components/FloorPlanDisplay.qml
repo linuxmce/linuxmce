@@ -1,10 +1,11 @@
-import QtQuick 2.0
+import QtQuick 1.1
 
-Rectangle {
+Item {
     objectName: "floorplan_display"
+    id:floorplandisplay
     width: childrenRect.width
     height: childrenRect.height
-    color: "transparent"
+  //  Component.onCompleted:{ floorplan_devices.setCurrentPage(1)}
     property int scaleFactor:floorplanimage.scale
 
 
@@ -24,7 +25,7 @@ Rectangle {
         c = Qt.createComponent("FpSprite.qml");
         if(c.status === Component.Loading)
         {   console.log("Component Loading")
-           finishPlacingSprites(c,pX,pY, num, state, devtype)
+            finishPlacingSprites(c,pX,pY, num, state, devtype)
         }
         else if (c.status === Component.Error)
         {
@@ -59,7 +60,6 @@ Rectangle {
 
         }
     }
-    Component.onCompleted: floorplan_devices.setCurrentPage(1)
 
 
 
@@ -68,11 +68,11 @@ Rectangle {
         objectName: "main_rect"
         height: scaleY(80)
         width:scaleX(80)
-        border.color: style.highlight1
+        border.color: "black"
         border.width: scaleX(1) *.25
-        radius: 10
+        radius: 5
         anchors.centerIn: parent
-        color:style.lighthighlight
+        color:"black"
 
         Image {
             objectName: "floorplan_image"
@@ -80,16 +80,15 @@ Rectangle {
             source: ""
             anchors.centerIn: parent
             scale: floorplanimage.height > floorplanimage.width ? .5 : .75
-
         }
 
         Rectangle
         {
             height: childrenRect.height + 5
             width: scaleX(18)
-            color: style.lighthighlight
+            color: "black"
             anchors.right: parent.right
-            StyledText{
+            Text{
                 id:fplabel
                 text: qsTr("Floorplans")
                 height: scaleY(5)
@@ -101,20 +100,19 @@ Rectangle {
                 width: scaleX(18)
                 model:floorplan_pages
                 clip:true
-
+                visible: floorplan_pages.count !==0
                 anchors.top: fplabel.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
 
                 delegate:Rectangle{
                     height: scaleY(9)
                     width: scaleX(16)
-                    color: style.accentcolor
-                    border.color: style.darkhighlight
-                    StyledText {
+                    color: skinStyle.accentcolor
+                    border.color: skinStyle.darkhighlight
+                    Text {
                         id: desc
                         text: m_description
                     }
-
                     MouseArea{
                         anchors.fill: parent
                         onPressed:{
@@ -127,57 +125,6 @@ Rectangle {
             }
         }
     }
-    ListView
-    {
-        id:floorplanDevices
-        height: scaleY(20)
-        width: scaleX(80)
-        model:floorplan_devices
-        clip:true
-        orientation: ListView.Horizontal
-        anchors.top: mainRect.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        visible:false
-        delegate:
-            Rectangle{
-            id:fp_device_rect
-            height: scaleY(20)
-            width: scaleY(20)
-
-            color: "lightgrey"
-
-
-            Column{
-                StyledText {
-                    id: fpDevice_name
-                    text: "I am " + name
-                }
-                StyledText {
-                    id: fpDevice_type
-                    text: "I am type" + type
-                }
-                StyledText {
-                    id: fp_type
-                    text: "Floorplan type" + floorplantype
-                }
-                StyledText {
-                    id: fpDevice_no
-                    text: "I am Dev#" + deviceno
-                }
-                StyledText {
-                    id: fpDevice_pos
-                    text: "Position" + floorplan_devices.getDeviceX(deviceno) + "," + floorplan_devices.getDeviceY(deviceno)
-                    // onStyledTextChanged: placeSprites(floorplan_devices.getDeviceX(deviceno),floorplan_devices.getDeviceY(deviceno),deviceno)
-                }
-            }
-
-            MouseArea{
-                anchors.fill: parent
-                onClicked: manager.getFloorplanDeviceCommand(type)
-            }
-        }
-    }
-
 
 }
 

@@ -92,12 +92,12 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     roomList.append(new PromptData("No Rooms",0));
 
     mainView.engine()->addImportPath("imports");
-    qDebug() << mainView.engine()->importPathList();
+    qDebug() << "QML Import Path List::" << mainView.engine()->importPathList();
 
     mainView.engine()->addPluginPath("lib");
     mainView.engine()->addPluginPath("imports");
 
-    qDebug() << mainView.engine()->pluginPathList();
+    qDebug() << "Qt Plugin Paths::"<<mainView.engine()->pluginPathList();
 
     mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
     mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
@@ -192,8 +192,9 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #else
     buildType = "/qml/qt5-desktop";
     qrcPath = "qrc:qml/Welcome2.qml";
-#endif   
     localPath = "qt5-desktop/";
+#endif   
+
 #elif defined (for_freemantle)
     buildType = "/qml/freemantle";
     qrcPath = "qrc:freemantle/Splash.qml";
@@ -212,8 +213,8 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     qrcPath = qStringFromNSString([resourcePath stringByAppendingPathComponent:@"qml/Splash.qml"]);
     localPath = "desktop/";
 #elif defined(Q_OS_MACX)
-    buildType="/qml/desktop";
-    qrcPath = "qrc:osx/Splash.qml";
+    buildType="/qml/qt5-desktop";
+    qrcPath = "qrc:main/Welcome.qml";
     localPath = "desktop/";
 #elif defined __ANDROID__
 #ifdef QT5

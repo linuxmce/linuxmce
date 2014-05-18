@@ -39,7 +39,7 @@
  */
 
 #ifdef IOS
-#import <UIKit/UIKit.h>
+# <UIKit/UIKit.h>
 
 #include "ioshelpers.h"
 #include <QtGui/QApplication>

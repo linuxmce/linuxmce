@@ -248,19 +248,25 @@ for_harmattan{
 }
 
 #mac desktop config
-macx{
+macx-clang{
         APP_RESOURCES_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/resources
         folder_01.source = qml/desktop
         folder_01.target = $$APP_RESOURCES_PATH/qml
+
         folder_02.source= img
         folder_02.target= $$APP_RESOURCES_PATH   #left blank so it will appear in the root
-        folder_05.source = qml/template
-        folder_05.target = $$DESTDIR/qml
+
         folder_03.source = config.xml
         folder_03.target = $$APP_RESOURCES_PATH
+
         ICON = ../platforms/osx/osxicons.icns
-        DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
+
+        plugins_folder.source = imports/
+        plugins_folder.target = ../../../$$DESTDIR/$$TARGET".app"/Contents/MacOS/imports
+
+        DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 plugins_folder
         DEFINES+=MACBUILD
+        QML_IMPORT_PATH=plugins_folder.target
 }
 
 linux-rasp-pi-g++{
@@ -317,6 +323,9 @@ macx{
         QT += network
         }
 
+} else {
+        QT += xml
+        QT += network
 }
 
 #windows builds require a special pthreads.

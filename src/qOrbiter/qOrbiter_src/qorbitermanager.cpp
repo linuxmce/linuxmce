@@ -178,7 +178,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     buildType="/qml/harmattan";
     qrcPath = "qrc:harmattan/Splash.qml";
 #elif defined (Q_OS_MACX)
-    buildType="/qml/desktop";
+    buildType="/qml/qt5-desktop";
     qrcPath = "qrc:osx/Splash.qml";
 #elif defined (RPI)
     buildType="/qml/rpi";
@@ -410,7 +410,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     }
 
 #elif defined Q_OS_MACX
-    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
+    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/qt5-desktop";
 #elif defined for_desktop
 #ifdef defined QT5
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/qt5-desktop";
