@@ -15,20 +15,20 @@ SUBDIRS += ../qOrbiter_src/plugins/AudioVisual \
              ../qOrbiter_src/plugins/DceScreenSaver
 android-g++{
 
-contains(QT_VERSION,4.8.*){
-SUBDIRS += ../qOrbiter_src/necessitas/QOrbiter-necessitas
+    contains(QT_VERSION,4.8.*){
+    SUBDIRS += ../qOrbiter_src/necessitas/QOrbiter-necessitas
+    }
 
-}
+    contains(QT_VERSION,4.7.*){
+    message(This version not supported on android)
+    }
 
-contains(QT_VERSION,4.7.*){
-        message(This version not supported on android)
-}
-
-contains(QT_VERSION,5.*.*){
- SUBDIRS += ../qOrbiter_src/qt5Droid/Qt5Android
-}
-
-} else {
+    contains(QT_VERSION,5.*.*){
+    SUBDIRS += ../qOrbiter_src/qt5droid/Qt5Android
+    SUBDIRS -= ../qOrbiter_src/QOrbiter_src.pro
+    }
+CONFIG+=ordered
+} else{
 SUBDIRS += ../qOrbiter_src
 }
 
