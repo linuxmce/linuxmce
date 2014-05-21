@@ -28,7 +28,7 @@ using namespace DCE;
 // Qt includes
 //#include <QtCore>
 #include <QtDBus>
-#include <QtWidgets/QApplication>
+//#include <QtWidgets/QApplication>
 
 // Additional required includes
 #include "pluto_main/Define_DeviceTemplate.h"
@@ -61,8 +61,10 @@ OMX_Player::~OMX_Player()
 
 void OMX_Player::PrepareToDelete ()
 {
-  Command_Impl::PrepareToDelete ();
-  m_pDevice_App_Server = NULL;
+	Command_Impl::PrepareToDelete ();
+	delete m_pqApp;
+	m_pDevice_App_Server = NULL;
+	m_pDevice_OMX_Plugin = NULL;
 }
 
 //<-dceag-getconfig-b->
@@ -90,7 +92,14 @@ bool OMX_Player::GetConfig()
 		return false;
 	}
 
-	
+	int argc = 0;
+	char **argv;
+	m_pqApp = new QCoreApplication(argc, argv);
+
+	if (!QDBusConnection::sessionBus().isConnected()) {
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"Cannot connect to the D-Bus session bus.");
+		return false;
+	}
 
   return true;
 }
@@ -303,6 +312,7 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 	cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
 
+	sCMD_Result = "FAIL";
 
 	if (m_bOMXIsRunning) {
 /*		if (m_omxplayer) {
@@ -352,8 +362,13 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 							false, true, false);
 		if (SendCommand (CMD_Spawn_Application))
 		{
-			m_bOMXIsRunning = true;
-			return;
+			m_pDBusInterface = new QDBusInterface(SERVICE_NAME, "/", "", QDBusConnection::sessionBus());
+			if (m_pDBusInterface->isValid()) {
+				m_bOMXIsRunning = true;
+				sCMD_Result="OK";
+				return;
+			}
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - D-Bus interface is not valid.");
 		}
 		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - failed to launch");
 	}
