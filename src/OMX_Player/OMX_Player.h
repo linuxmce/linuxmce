@@ -20,8 +20,9 @@
 #include "Gen_Devices/OMX_PlayerBase.h"
 //<-dceag-d-e->
 
-#include "omxcommands.h"
-#include "omxplayer/CLibOMX.h"
+//#include "omxcommands.h"
+//#include "omxplayer/CLibOMX.h"
+#include <QObject>
 
 //<-dceag-decl-b->
 namespace DCE
@@ -29,15 +30,18 @@ namespace DCE
 	class OMX_Player : public OMX_Player_Command
 	{
 //<-dceag-decl-e->
+		Q_OBJECT
+
+private:
 		// Private member variables
 		DeviceData_Base *m_pDevice_OMX_Plugin;
 		DeviceData_Base *m_pDevice_App_Server;
-	        CLibOMX *m_omxplayer;
+	        //CLibOMX *m_omxplayer;
 		bool m_bOMXIsRunning;
 
 		// Private methods
-
 		void ProcessNotification(void *pObject, int event);
+
 public:
 		int m_iStreamID;
 		string m_filename;

@@ -25,6 +25,11 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+// Qt includes
+//#include <QtCore>
+#include <QtDBus>
+#include <QtWidgets/QApplication>
+
 // Additional required includes
 #include "pluto_main/Define_DeviceTemplate.h"
 #include "pluto_main/Define_Command.h"
@@ -54,8 +59,7 @@ OMX_Player::~OMX_Player()
 	EVENT_Playback_Completed("",0,false);
 }
 
-void
-OMX_Player::PrepareToDelete ()
+void OMX_Player::PrepareToDelete ()
 {
   Command_Impl::PrepareToDelete ();
   m_pDevice_App_Server = NULL;
@@ -85,6 +89,8 @@ bool OMX_Player::GetConfig()
 		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"I need an App Server to function.");
 		return false;
 	}
+
+	
 
   return true;
 }
@@ -270,8 +276,8 @@ void OMX_Player::NotifierCallback(void *pObject, int event)
 {
         cout << "CALLBACK FUNCTION CALLED!!!  " << event << endl;
 
-	OMX_Player* pThis = (OMX_Player*) pObject;
-	pThis->EVENT_Playback_Completed(pThis->m_filename,pThis->m_iStreamID,false);
+//	OMX_Player* pThis = (OMX_Player*) pObject;
+//	pThis->EVENT_Playback_Completed(pThis->m_filename,pThis->m_iStreamID,false);
 }
 
 //<-dceag-c37-b->
@@ -299,17 +305,18 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 
 
 	if (m_bOMXIsRunning) {
-		if (m_omxplayer) {
+/*		if (m_omxplayer) {
 			m_omxplayer->SendCommand(OMX_QUIT,"0"); // 'q'
 			m_omxplayer->Cleanup();
 			delete m_omxplayer;
 		}
+*/
 		m_bOMXIsRunning = false;
 	}
 
 	m_iStreamID = iStreamID;
 
-	m_omxplayer = new CLibOMX;
+/*	m_omxplayer = new CLibOMX;
 
         // open file
         m_omxplayer->OpenFile(sMediaURL);
@@ -325,7 +332,8 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 	EVENT_Playback_Started(sMediaURL,m_iStreamID,"","","");
 
 	sCMD_Result = "OK";
-/*
+*/
+
 	if (m_pDevice_App_Server)
 	{
 		string sMessage =
@@ -345,16 +353,13 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 		if (SendCommand (CMD_Spawn_Application))
 		{
 			m_bOMXIsRunning = true;
-
-//			return true;
+			return;
 		}
 		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - failed to launch");
 	}
 	else
 		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - no app server");
-	
-//	return false;	
-*/
+
 }
 
 //<-dceag-c38-b->
@@ -374,18 +379,18 @@ void OMX_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
-	m_omxplayer->SendCommand(OMX_QUIT,"0"); // 'q');
+/*	m_omxplayer->SendCommand(OMX_QUIT,"0"); // 'q');
 	m_omxplayer->Cleanup();
 
 	if (m_omxplayer)
 		delete m_omxplayer;
-
-	m_bOMXIsRunning = false;
-
 //	EVENT_Playback_Completed(m_filename,iStreamID,false);
 
+*/
+	m_bOMXIsRunning = false;
+
 	sCMD_Result = "OK";
-/*
+
 	DeviceData_Base *pDevice_App_Server = NULL;
 	string sResponse;
 	if (!m_bRouterReloading)
@@ -406,8 +411,6 @@ void OMX_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 
 	LoggerWrapper::GetInstance ()->Write (LV_STATUS,"OMX_Player::CMD_Stop_Media %p %s",pDevice_App_Server,	sResponse.c_str ());
 
-//	return false;
-*/
 }
 
 //<-dceag-c39-b->
@@ -424,7 +427,7 @@ void OMX_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMes
 	cout << "Implemented command #39 - Pause Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-	m_omxplayer->SendCommand(OMX_PAUSE,"0"); // 'p');
+//	m_omxplayer->SendCommand(OMX_PAUSE,"0"); // 'p');
 	sCMD_Result = "OK";
 }
 
@@ -442,7 +445,7 @@ void OMX_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pM
 	cout << "Implemented command #40 - Restart Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-	m_omxplayer->SendCommand(OMX_PAUSE,"0"); // 'p');
+//	m_omxplayer->SendCommand(OMX_PAUSE,"0"); // 'p');
 	sCMD_Result = "OK";
 }
 
@@ -466,7 +469,7 @@ void OMX_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed
 	cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
 	cout << "Parm #220 - Report=" << bReport << endl;
 
-	m_omxplayer->SendCommand(OMX_PAUSE,"0"); // 'p');
+//	m_omxplayer->SendCommand(OMX_PAUSE,"0"); // 'p');
 	sCMD_Result = "OK";
 }
 
@@ -501,7 +504,7 @@ void OMX_Player::CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_Re
 	cout << "Implemented command #63 - Skip Fwd - Channel/Track Greater" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-	m_omxplayer->SendCommand(OMX_SEEK_FORWARD_30,"0"); // 0x5b43);
+//	m_omxplayer->SendCommand(OMX_SEEK_FORWARD_30,"0"); // 0x5b43);
 	sCMD_Result = "OK";
 }
 
@@ -519,7 +522,7 @@ void OMX_Player::CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Res
 	cout << "Implemented command #64 - Skip Back - Channel/Track Lower" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-	m_omxplayer->SendCommand(OMX_SEEK_BACK_30,"0"); // 0x5b44);
+//	m_omxplayer->SendCommand(OMX_SEEK_BACK_30,"0"); // 0x5b44);
 	sCMD_Result = "OK";
 }
 
@@ -540,6 +543,7 @@ void OMX_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStre
 	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
+/*
 	if (atoi(sValue_To_Assign.c_str())==0) {
 		string filename=m_omxplayer->m_filename;
 		m_omxplayer->SendCommand(OMX_QUIT,"0"); // 'q');
@@ -553,6 +557,7 @@ void OMX_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStre
 	        m_omxplayer->Start();
 	        m_bOMXIsRunning = true;
 	}
+*/
 	sCMD_Result = "OK";
 }
 
@@ -570,7 +575,7 @@ void OMX_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
 	cout << "Implemented command #92 - Pause" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-	m_omxplayer->SendCommand(OMX_PAUSE,"0"); // 'p');
+//	m_omxplayer->SendCommand(OMX_PAUSE,"0"); // 'p');
 	sCMD_Result = "OK";
 }
 
@@ -591,7 +596,7 @@ void OMX_Player::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message 
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #203 - Eject=" << bEject << endl;
 
-	m_omxplayer->SendCommand(OMX_QUIT,"0"); // 'q');
+//	m_omxplayer->SendCommand(OMX_QUIT,"0"); // 'q');
 	sCMD_Result = "OK";
 }
 
