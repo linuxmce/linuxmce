@@ -3,11 +3,12 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = 
+TARGET = OMX_Player
 DEPENDPATH += .
 INCLUDEPATH += . .. ../DCE
 QT -= gui
-CONFIG += qdbus
+QT += dbus
 # Input
-HEADERS += OMX_Player.h
-SOURCES += Main.cpp OMX_Player.cpp
+HEADERS += OMX_Player.h ../Gen_Devices/OMX_PlayerBase.h
+SOURCES += Main.cpp OMX_Player.cpp ../Gen_Devices/OMX_PlayerBase.cpp
+LIBS += -lSerializeClass -lDCECommon -lPlutoUtils -lpthread -L../lib

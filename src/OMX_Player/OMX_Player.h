@@ -20,14 +20,12 @@
 #include "Gen_Devices/OMX_PlayerBase.h"
 //<-dceag-d-e->
 
-//#include "omxcommands.h"
-//#include "omxplayer/CLibOMX.h"
 #include <QObject>
 
 //<-dceag-decl-b->
 namespace DCE
 {
-	class OMX_Player : public OMX_Player_Command
+	class OMX_Player : public QObject, public OMX_Player_Command
 	{
 //<-dceag-decl-e->
 		Q_OBJECT
