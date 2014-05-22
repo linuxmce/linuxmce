@@ -3,12 +3,12 @@ import QtQuick 1.1
 Item {
     objectName: "floorplan_display"
     id:floorplandisplay
-   anchors{
-    top:parent.top
-    left:parent.left
-    right:parent.right
-    bottom:parent.bottom
-   }
+    anchors{
+        top:parent.top
+        left:parent.left
+        right:parent.right
+        bottom:parent.bottom
+    }
     Component.onCompleted:{
         floorplan_devices.setCurrentPage(1)
     }
@@ -34,8 +34,32 @@ Item {
             return lightingCommands
     }
 
-    function placeSprites(x,y, num, state, devtype)
-    {
+    function placeQmlSprites(){
+        console.log("Placing QML Sprites, "+ floorplan_devices.count()+" devices to create.")
+        for (var cnt = 0; cnt < floorplan_devices.count(); cnt++){
+            var lcl = floorplan_devices.get(cnt)
+            console.log(JSON.stringify(lcl, null, "\t"))
+            var c
+            console.log("QML Creating Sprite")
+            c = Qt.createComponent("FpSprite.qml");
+            if(c.status === Component.Loading)
+            {   console.log("QML Floorplan object Loading")
+                finishPlacingSprites(c,lcl.x,lcl.y, lcl.deviceNum, unknown, lcl.type)
+            }
+            else if (c.status === Component.Error)
+            {
+                console.log("QML Floorplan object error::"+ c.errorString())
+            }
+            else if (c.status === Component.Ready)
+            {
+                console.log("QML Floorplan object Ready!")
+                var sprite = c.createObject(floorplanimage, {"x": lcl.x, "y": lcl.y, "deviceNum": lcl.deviceno, "deviceType": lcl.type});
+            }
+        }
+
+    }
+
+    function placeSprites(x,y, num, state, devtype){
         var i;
         var pX = x; //x point
         var pY = y; //y point
@@ -57,11 +81,9 @@ Item {
         }
     }
 
-    function finishPlacingSprites(c,x,y,num, state, devtype)
-    {
+    function finishPlacingSprites(c,x,y,num, state, devtype){
         console.log("Finishing Creation")
-        if(c.status === Component.Ready )
-        {
+        if(c.status === Component.Ready ){
             var sprite = c.createObject(floorplanimage, {"x": x, "y": y, "deviceNum": num, "deviceType": devtype});
         }
     }
@@ -107,6 +129,7 @@ Item {
                 source: ""
                 anchors.centerIn: parent
                 scale: floorplanimage.height > floorplanimage.width ? .60 : .65
+
                 Behavior on scale {
                     PropertyAnimation{
                         duration: 350
@@ -142,8 +165,8 @@ Item {
             delegate:Rectangle{
                 height: scaleY(9)
                 width: scaleX(35)
-                color: appStyle.accentcolor
-                border.color: appStyle.darkhighlight
+                color: style.accentcolor
+                border.color: style.darkhighlight
                 Text {
                     id: desc
                     text: m_description
