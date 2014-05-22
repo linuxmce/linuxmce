@@ -99,6 +99,7 @@ StyledScreen {
 
         State {
             name: "selection"
+            extend:"default"
             PropertyChanges {
                 target: media_view
                 visible:false
@@ -110,10 +111,6 @@ StyledScreen {
             PropertyChanges {
                 target: typeSelection
                 visible:true
-            }
-            AnchorChanges{
-                target: file_details_loader
-                anchors.left: parent.right
             }
             StateChangeScript{
                 script: {
@@ -129,33 +126,13 @@ StyledScreen {
         },
         State {
             name: "viewing"
-            PropertyChanges {
-                target: progress_bar
-                visible:true
-            }
-            PropertyChanges {
-                target: media_view
-                visible:true
-            }
-            PropertyChanges{
-                target:typeSelection
-                visible:false
-            }
-            AnchorChanges{
-                target: file_details_loader
-                anchors.left: parent.right
-            }
+            extend:"default"
+
         },
         State {
             name: "detail"
-            PropertyChanges {
-                target: progress_bar
-                visible:false
-            }
-            PropertyChanges {
-                target: media_view
-                visible:false
-            }
+            extend:"selection"
+
             PropertyChanges{
                 target:typeSelection
                 visible:false

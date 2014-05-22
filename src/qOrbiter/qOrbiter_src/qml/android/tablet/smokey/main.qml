@@ -87,6 +87,7 @@ Item {
             onMediaPlayerIdChanged:{
                 console.log("initializing qml media player::"+manager.mediaPlayerID)
                 dcePlayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+
             }
         }
 
