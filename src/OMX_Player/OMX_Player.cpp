@@ -62,6 +62,7 @@ OMX_Player::~OMX_Player()
 void OMX_Player::PrepareToDelete ()
 {
 	Command_Impl::PrepareToDelete ();
+	delete m_pqDBusPlayerInterface;
 	delete m_pqApp;
 	m_pDevice_App_Server = NULL;
 	m_pDevice_OMX_Plugin = NULL;
@@ -362,8 +363,8 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 							false, true, false);
 		if (SendCommand (CMD_Spawn_Application))
 		{
-			m_pDBusInterface = new QDBusInterface(SERVICE_NAME, "/", "", QDBusConnection::sessionBus());
-			if (m_pDBusInterface->isValid()) {
+			m_pqDBusPlayerInterface = new QDBusInterface("org.mpris.MediaPlayer2.omxplayer", "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", QDBusConnection::sessionBus());
+			if (m_pqDBusPlayerInterface->isValid()) {
 				m_bOMXIsRunning = true;
 				sCMD_Result="OK";
 				return;
@@ -394,14 +395,8 @@ void OMX_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
-/*	m_omxplayer->SendCommand(OMX_QUIT,"0"); // 'q');
-	m_omxplayer->Cleanup();
+	EVENT_Playback_Completed(m_filename,iStreamID,false);
 
-	if (m_omxplayer)
-		delete m_omxplayer;
-//	EVENT_Playback_Completed(m_filename,iStreamID,false);
-
-*/
 	m_bOMXIsRunning = false;
 
 	sCMD_Result = "OK";
@@ -442,8 +437,16 @@ void OMX_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMes
 	cout << "Implemented command #39 - Pause Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-//	m_omxplayer->SendCommand(OMX_PAUSE,"0"); // 'p');
-	sCMD_Result = "OK";
+	if (m_pqDBusPlayerInterface->isValid()) {
+		QDBusReply<QString> reply = m_pqDBusPlayerInterface->call(QDBus::NoBlock, "Pause");
+		if (reply.isValid()) {
+			sCMD_Result = "OK";
+			return;
+		}
+		LoggerWrapper::GetInstance ()->Write (LV_STATUS,"OMX_Player::CMD_Stop_Media %s", qPrintable(reply.error().message()));
+	}
+
+	sCMD_Result = "FAIL";
 }
 
 //<-dceag-c40-b->

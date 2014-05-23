@@ -38,7 +38,7 @@ private:
 		DeviceData_Base *m_pDevice_App_Server;
 		bool m_bOMXIsRunning;
 		QCoreApplication *m_pqApp;
-		QDBusInterface *m_pDBusInterface;
+		QDBusInterface *m_pqDBusPlayerInterface;
 
 		// Private methods
 		void ProcessNotification(void *pObject, int event);
