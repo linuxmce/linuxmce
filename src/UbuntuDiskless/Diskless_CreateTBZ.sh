@@ -276,7 +276,7 @@ MD_System_Level_Prep () {
 			cat <<-EOF > $TEMP_DIR/etc/apt/sources.list
 				#deb http://10.10.42.99/raspbian/ ./
 				deb file:/usr/pluto/deb-cache/$DEB_CACHE ./
-				deb http://deb.linuxmce.org/ precise main
+				deb http://deb.linuxmce.org/raspbian/ $TARGET_RELEASE main
 				deb $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
 				deb http://archive.raspberrypi.org/debian $TARGET_RELEASE main
 				EOF
