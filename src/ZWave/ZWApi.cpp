@@ -155,7 +155,7 @@ void ZWApi::ZWApi::handleCommandSensorMultilevelReport(int nodeid, int instance_
 
 	case SENSOR_MULTILEVEL_REPORT_GENERAL_PURPOSE_VALUE:
 	        if (scale == 0) {
-		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"General purpose measurement value received: %d %",value);
+		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"General purpose measurement value received: %d %%",value);
 		} else {
 		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"General purpose measurement value received: %d (dimensionless)",value);
 		}
@@ -163,7 +163,7 @@ void ZWApi::ZWApi::handleCommandSensorMultilevelReport(int nodeid, int instance_
 		break;
 	case SENSOR_MULTILEVEL_REPORT_LUMINANCE:
 	        if (scale == 0) {
-		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Luminance measurement received: %d %",value);
+		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Luminance measurement received: %d %%",value);
 		} else {
 		        DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Luminance measurement received: %d Lux",value);
 		}
@@ -1650,7 +1650,7 @@ void *ZWApi::ZWApi::receiveFunction() {
 					// DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "QUEUE FILLED: await_callback: %i timer: %i",await_callback,timer++);
 					timer++;
 					if (timer > 30 && await_callback != 0) {
-						DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING, "No callback received: await_callback: %i timer: %i",await_callback,timer);
+						DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING, "No callback received: await_callback: %i timer: %li",await_callback,timer);
 						timer = 0;
 						// resend, we got no final callback
 						await_ack = 0;
@@ -1677,7 +1677,7 @@ void *ZWApi::ZWApi::receiveFunction() {
 
 			// we have been idle for 30 seconds, let's poll the devices
 			if ((idletimer > 300) && poll_state) {
-				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "We have been idle for %i seconds, polling device states", idletimer / 10);
+				DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "We have been idle for %li seconds, polling device states", idletimer / 10);
 				zwRequestBasicReport(NODE_BROADCAST,0);
 				zwRequestBasicReport(NODE_BROADCAST,2);
 				zwRequestMultilevelSensorReport(NODE_BROADCAST);
