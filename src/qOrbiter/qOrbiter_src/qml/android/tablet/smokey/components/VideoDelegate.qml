@@ -4,26 +4,36 @@ Item{
     clip:true
     height: currentCellHeight
     width:currentCellWidth
-    Image{
-        source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
-        anchors.left: parent.left
-        anchors.fill: parent
-        fillMode: Image.PreserveAspectCrop
-        smooth: true
-        asynchronous: true
-    }
     Rectangle{
         anchors.fill: parent
-        opacity: .65
+        opacity: path !=="" ? .65 : 85
         color:trap.pressed ? "darkgreen" : "black"
 
     }
+    Image{
+        id:imdbImg
+        source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
+        anchors.fill: parent
+        anchors.margins: 10
+        smooth: true
+        asynchronous: true
+    }
+
 
     StyledText{
-        text: name
-        anchors.centerIn: parent
+        //text:multi_view_list.state
+       //  text: name
+      text:manager.q_attributeType_sort
+        anchors.verticalCenter: parent.verticalCenter
+        wrapMode: Text.WrapAnywhere
         fontSize: 36
+       // visible:path==="" ? true : false
+        isBold: true
         color: "White"
+        anchors{
+            left:parent.left
+            right:parent.right
+        }
     }
 
     MouseArea{

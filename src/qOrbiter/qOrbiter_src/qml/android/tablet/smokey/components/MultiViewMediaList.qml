@@ -14,6 +14,19 @@ Item{
     property int currentCellHeight:20
     property int currentCellWidth:20
 
+    property variant dvdPosterDimensions:{"w":755, "h":1080 }
+    property variant hdPosterDimensions:{"w":955, "h":1080 }
+    property variant cdDimensions:{"w":320, "h":230}
+    property variant mameArtDimensions:{"w":320, "h":230}
+
+    property double dvdPosterRatio:1080/955
+    property double hdPosterRatio:1080/755
+    property double cdCoverRatioFront:1080/1080
+    property double cdCoverRatioBack:1080/1264
+    property double vcdRatio:1080/1080
+    property double vhsRatio:1280/620
+
+
     property int itemBuffer:25
     clip:true
 
@@ -27,11 +40,23 @@ Item{
         VideoDelegate{}
     }
 
-    property variant currentDelegate:multi_view_list.state==="video"? videoItem :audioItem
+    property variant currentDelegate:manager.q_mediaType==5 ? videoItem :audioItem
     Component.onCompleted: {
+        if(manager.q_mediaType=="4"){
+            multi_view_list.state="audio"
+        } else if(manager.q_mediaType=="5"){
+            multi_view_list.state="video"
+            manager.setGridStatus(false);
+        } else {
+            multi_view_list.state="default"
+        }
+
         media_grid.model=manager.getDataGridModel("MediaFile", 63)
         media_grid.positionViewAtIndex(item, ListView.Beginning)
     }
+
+
+
 
     Connections {
         target: manager.getDataGridModel("MediaFile", 63)
@@ -80,7 +105,7 @@ Item{
     states: [
         State {
             name: "audio"
-            when:manager.q_mediaType == Mediatypes.STORED_AUDIO
+          //  when:manager.q_mediaType == Mediatypes.STORED_AUDIO
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: scaleY(24)
@@ -90,11 +115,14 @@ Item{
         },
         State {
             name: "video"
-            when:manager.q_mediaType == Mediatypes.STORED_VIDEO
+          //  when:manager.q_mediaType == Mediatypes.STORED_VIDEO
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: scaleY(24)
                 currentCellWidth:scaleX(19)
+            }
+            StateChangeScript{
+                script: manager.setGridStatus(false)
             }
         },
         State {
@@ -127,12 +155,22 @@ Item{
         },
         State {
             name: "movies"
-            when: manager.q_subType==Subtypes.MOVIES
+            when: manager.q_subType==Subtypes.MOVIES && manager.q_mediaType==Mediatypes.STORED_VIDEO
             extend:"video"
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleY(24)
-                currentCellWidth:scaleX(16)
+                currentCellHeight: currentCellWidth*hdPosterRatio
+                currentCellWidth:scaleX(20)
+            }
+        },
+        State {
+            name: "seasons"
+            when:manager.q_attributeType_sort==52 && manager.q_subType==Subtypes.TVSHOWS
+            extend:"tv"
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: currentCellWidth*hdPosterRatio
+                currentCellWidth:scaleX(20)
             }
         }
     ]

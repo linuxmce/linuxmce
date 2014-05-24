@@ -64,6 +64,7 @@ StyledScreen {
             height: parent.height
             width: parent.width
             anchors.left: files_view_screen.right
+            source:"../components/FileDetails_"+manager.q_mediaType+".qml"
         }
 
         states: [
@@ -130,12 +131,7 @@ StyledScreen {
                     target: file_details_loader
                     anchors.left: parent.left
                 }
-                PropertyChanges {
-                    target: file_details_loader
-                    source:"../components/FileDetails_"+manager.q_mediaType+".qml"
-                }
             }
-
         ]
 
     }
