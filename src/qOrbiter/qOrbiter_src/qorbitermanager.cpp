@@ -999,7 +999,7 @@ void qorbiterManager::swapSkins(QString incSkin)
 #ifdef __ANDROID__
         qorbiterUIwin->engine()->rootContext()->setContextProperty("style", tskinModel->currentItem);
 #else
-        qorbiterUIwin->engine()->rootContext()->setContextProperty("skinStyle", tskinModel->currentItem);
+       // qorbiterUIwin->engine()->rootContext()->setContextProperty("skinStyle", tskinModel->currentItem);
 #endif
 
 #if (QT5)
@@ -1820,7 +1820,7 @@ bool qorbiterManager::readLocalConfig()
 
     qDebug() << mobileStorageLocation;
     if(setupMobileStorage(androidHelper->externalStorageLocation)){
-        xmlPath = mobileStorageLocation+"config.xml" ;
+        xmlPath = mobileStorageLocation+"/config.xml" ;
     }
     else{
 
@@ -2244,7 +2244,12 @@ bool qorbiterManager::cleanupData()
 {
     qDebug() << "Cleaning up data";
     roomLights->clear();                 //current room scenarios model
-    roomMedia->clear();
+
+
+    if(roomMedia){
+         roomMedia->clear();
+    }
+
     roomClimate->clear();
     roomClimateScenarios.clear();
     roomLightingScenarios.clear();
@@ -2322,8 +2327,6 @@ void qorbiterManager::setActiveSkin(QString name)
         tskinModel->setActiveSkin(name);
     }
     qDebug("Setting Skin");
-
-
 }
 
 void qorbiterManager::cleanupScreenie()
@@ -2345,17 +2348,15 @@ void qorbiterManager::initializeConnections()
 void qorbiterManager::reloadHandler()
 {
     if(cleanupData()){
-        qorbiterUIwin->setSource(remoteDirectoryPath+"/splash/Splash.qml");
+        qorbiterUIwin->setSource(QUrl("qrc:reload/GenericReload.qml"));
         //        gotoQScreen("ReloadHandler.qml");
     }
-
-
 }
 
 void qorbiterManager::disconnectHandler()
 {
     if(cleanupData()){
-       qorbiterUIwin->setSource(remoteDirectoryPath+"/splash/Splash.qml");
+        qorbiterUIwin->setSource(QUrl("qrc:reload/GenericReload.qml"));
         //        gotoQScreen("ReloadHandler.qml");
     }
 
