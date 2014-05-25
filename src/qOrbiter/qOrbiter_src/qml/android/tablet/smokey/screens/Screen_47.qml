@@ -46,7 +46,6 @@ StyledScreen {
                     hitArea.onReleased:{
                         content.state="viewing"
                         mediatypefilter.setSelectionStatus(name);
-
                     }
                 }
             }

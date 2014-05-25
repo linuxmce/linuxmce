@@ -11,8 +11,8 @@ Item{
         bottom:parent.bottom
     }
 
-    property int currentCellHeight:20
-    property int currentCellWidth:20
+    property int currentCellHeight:scaleX(20)
+    property int currentCellWidth:scaleX(20)
 
     property variant dvdPosterDimensions:{"w":755, "h":1080 }
     property variant hdPosterDimensions:{"w":955, "h":1080 }
@@ -54,9 +54,6 @@ Item{
         media_grid.model=manager.getDataGridModel("MediaFile", 63)
         media_grid.positionViewAtIndex(item, ListView.Beginning)
     }
-
-
-
 
     Connections {
         target: manager.getDataGridModel("MediaFile", 63)
@@ -108,8 +105,8 @@ Item{
           //  when:manager.q_mediaType == Mediatypes.STORED_AUDIO
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleY(24)
-                currentCellWidth:scaleX(19)
+                currentCellHeight: scaleX(25)
+                currentCellWidth:scaleX(25)
             }
 
         },
@@ -145,7 +142,7 @@ Item{
         },
         State {
             name: "tv"
-            when:manager.q_subType==Subtypes.TVSHOWS
+            when:manager.q_subType==Subtypes.TVSHOWS && manager.q_pk_attribute==""
             extend:"video"
             PropertyChanges {
                 target: multi_view_list
@@ -165,12 +162,22 @@ Item{
         },
         State {
             name: "seasons"
-            when:manager.q_attributeType_sort==52 && manager.q_subType==Subtypes.TVSHOWS
+            when:manager.q_attributeType_sort==Attributes.TV_Season_ID && manager.q_subType==Subtypes.TVSHOWS
             extend:"tv"
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: currentCellWidth*hdPosterRatio
                 currentCellWidth:scaleX(20)
+            }
+        },
+        State {
+            name: "episodes"
+            when:manager.q_attributeType_sort==Attributes.Title && manager.q_subType==Subtypes.TVSHOWS
+            extend:"tv"
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(20)
+                currentCellWidth:scaleX(19)
             }
         }
     ]

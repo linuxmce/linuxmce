@@ -21,13 +21,13 @@ Item{
 
 
     StyledText{
-        //text:multi_view_list.state
-       //  text: name
-      text:manager.q_attributeType_sort
+    //   text:multi_view_list.state
+      text: name
+     //text:manager.q_attributeType_sort
         anchors.verticalCenter: parent.verticalCenter
         wrapMode: Text.WrapAnywhere
         fontSize: 36
-       // visible:path==="" ? true : false
+        visible:path==="" ? true : false
         isBold: true
         color: "White"
         anchors{
