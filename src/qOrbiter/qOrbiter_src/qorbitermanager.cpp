@@ -296,8 +296,18 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     /*Needs Doin at construction */
     userList = new UserModel( new UserItem, this);
     orbiterInit=true;
+
     QObject::connect(&mediaFilter, SIGNAL( currentMediaTypeChanged(QString)), this, SLOT(setGridMediaType(QString)));
     QObject::connect(&mediaFilter, SIGNAL(newMediaFilter()), SLOT(updateMediaString()));
+
+    //    QObject::connect(&mediaFilter, SIGNAL(attributeGenresChanged(QString)), this, SLOT(setGridAttributeGenres(QString)));
+    //    QObject::connect(&mediaFilter, SIGNAL(attributeTypeSortChanged(QString)), this, SLOT(setAttributeTypeSort(QString)));
+    //    QObject::connect(&mediaFilter, SIGNAL(fileFormatChanged(QString)), this, SLOT(setGridFileFormat(QString)));
+    //    QObject::connect(&mediaFilter, SIGNAL(pkAttributeChanged(QString)), this, SLOT(setGridPkAttribute(QString)));
+    //    QObject::connect(&mediaFilter, SIGNAL(pkUsersChanged(QString)), this, SLOT(setGridPkUsers(QString)));
+    //    QObject::connect(&mediaFilter, SIGNAL(usersPrivateChanged(QString)), this, SLOT(setGridUsersPrivate(QString)));
+    //    QObject::connect(&mediaFilter, SIGNAL(lastViewedChanged(QString)), this, SLOT(setGridLastViewed(QString)));
+
     emit orbiterInitialized();
 }
 
@@ -454,13 +464,13 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 
 #ifdef __ANDROID__
     setDceResponse("Loading Skins");
-    #ifdef QT5
-     setDceResponse("Loading Qt Quick 2 Skins for Qt5");
-     remoteDirectoryPath.append("/qt5");
-     finalPath = remoteDirectoryPath;
-    #else
+#ifdef QT5
+    setDceResponse("Loading Qt Quick 2 Skins for Qt5");
+    remoteDirectoryPath.append("/qt5");
+    finalPath = remoteDirectoryPath;
+#else
     setDceResponse("Loading Qt Quick 1 Skins for Qt 4");
-    #endif
+#endif
 
     if( !loadSkins(QUrl(finalPath)))
     {   emit skinIndexReady(false);
@@ -876,7 +886,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
      *Various context objects are set in this function after processing is done
      */
     //------------------------------------------context objects----------------------------------------------------
-  // qorbiterUIwin->rootContext()->setContextProperty("lmceData", &linuxmceData);                 //current room scenarios model
+    // qorbiterUIwin->rootContext()->setContextProperty("lmceData", &linuxmceData);                 //current room scenarios model
     qorbiterUIwin->rootContext()->setContextObject(this);
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights);                 //current room scenarios model
     qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);                   //current room media model
@@ -1056,6 +1066,7 @@ void qorbiterManager::updateSelectedAttributes(QString attributes)
     setGridLastViewed(ta.at(8));
     setGridAttributeGenres(ta.at(3));
     setGridUsersPrivate(ta.at(5));
+    setGridAttributeTypeSort(ta.at(6));
 }
 
 
@@ -1085,18 +1096,18 @@ bool qorbiterManager::requestDataGrid()
     return true;
 }
 
- void qorbiterManager::prepareDataGrid(QString dataGridId, QString dgName, int height, int width)
+void qorbiterManager::prepareDataGrid(QString dataGridId, QString dgName, int height, int width)
 {
     modelPoolLock.lockForRead();
     if (m_mapDataGridModels.contains(dataGridId))
     {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "prepareDataGrid, clearing model");
         m_mapDataGridModels[dataGridId]->clear();
-	m_mapDataGridModels[dataGridId]->setDgName(dgName);
-	m_mapDataGridModels[dataGridId]->setWindowSize(media_pageSeperator);
-	m_mapDataGridModels[dataGridId]->setTotalCols(width);
-	// set total row count last, as this will make the model look populated to the view
-	m_mapDataGridModels[dataGridId]->setTotalRows(height);
+        m_mapDataGridModels[dataGridId]->setDgName(dgName);
+        m_mapDataGridModels[dataGridId]->setWindowSize(media_pageSeperator);
+        m_mapDataGridModels[dataGridId]->setTotalCols(width);
+        // set total row count last, as this will make the model look populated to the view
+        m_mapDataGridModels[dataGridId]->setTotalRows(height);
     }
     modelPoolLock.unlock();
 
@@ -1110,24 +1121,24 @@ void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, int i
     if (m_mapDataGridModels.contains(dataGridId))
     {
         GenericFlatListModel* pModel = m_mapDataGridModels[dataGridId];
-	if (pModel->isSeeking()) 
-	{
-	    // when seeking, just indicate the row to search to, and the model will request a window containing that row
-	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "addDataGridItem() seeking, request start = %d, end = %d", indexStart, indexStart+numRows-1);
-	    pModel->seekResult(indexStart);
-	} else {
-	  // If the request is backwards, we need to insert in reverse order
-	  int direction = pModel->isForwardRequest() ? 1 : -1;
-	  int start = pModel->isForwardRequest() ? indexStart : indexStart+numRows-1;
-	  int count = 0;
-	  for (int row = start; count < numRows; row = row + direction)
-	  {
-	      GenericModelItem* pItem = DataGridHandler::GetModelItemForCell(PK_DataGrid, pTable, row);
-	      // TODO: stop if datagrid model is reset or request stopped
-	      m_mapDataGridModels[dataGridId]->insertRow(row, pItem);
-	      count++;
-	  }
-	}
+        if (pModel->isSeeking())
+        {
+            // when seeking, just indicate the row to search to, and the model will request a window containing that row
+            LoggerWrapper::GetInstance()->Write(LV_STATUS, "addDataGridItem() seeking, request start = %d, end = %d", indexStart, indexStart+numRows-1);
+            pModel->seekResult(indexStart);
+        } else {
+            // If the request is backwards, we need to insert in reverse order
+            int direction = pModel->isForwardRequest() ? 1 : -1;
+            int start = pModel->isForwardRequest() ? indexStart : indexStart+numRows-1;
+            int count = 0;
+            for (int row = start; count < numRows; row = row + direction)
+            {
+                GenericModelItem* pItem = DataGridHandler::GetModelItemForCell(PK_DataGrid, pTable, row);
+                // TODO: stop if datagrid model is reset or request stopped
+                m_mapDataGridModels[dataGridId]->insertRow(row, pItem);
+                count++;
+            }
+        }
     }
     modelPoolLock.unlock();
     pTable->ClearData();
@@ -1159,7 +1170,7 @@ void qorbiterManager::clearDataGrid(QString dataGridId)
     if (m_mapDataGridModels.contains(dataGridId))
     {
         GenericFlatListModel* pModel = m_mapDataGridModels.take(dataGridId);
-	// TODO: stop any requests on this datagrid model
+        // TODO: stop any requests on this datagrid model
         pModel->clear();
         pModel->setModelName("");
         pModel->setOption("");
@@ -1205,41 +1216,41 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
     GenericFlatListModel* pModel = NULL;
     if (!m_mapDataGridModels.contains(dataGridId))
     {
-	// GenericFlatListModels are kept in a pool in qorbitermanager, because we want the
-	// Objects to belong to this thread, and not the QML thread, which is the one that calls
-	// this method. Creating them in this method would create them in the QML thread.
-	// lock this section so we don't prepare the same model more than once
-	modelPoolLock.lockForWrite();
-	// Check that the model still is not in map
-	if (!m_mapDataGridModels.contains(dataGridId))
-	{
-	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() preparing GenericFlatListModel");
-	    pModel = m_modelPool.pop();
-	    pModel->clear();
-	    pModel->setPrototype(DataGridHandler::GetModelItemType(PK_DataGrid));
-	    pModel->setModelName(dataGridId);
-	    pModel->setOption("");
-	    pModel->setPK_DataGrid(PK_DataGrid);
-	    m_mapDataGridModels.insert(dataGridId, pModel);
-	    
-	    QString option = "";
-	    if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
-	      option = QString::number(iFK_Room);
-	    } else if (PK_DataGrid == DATAGRID_Phone_Book_Auto_Compl_CONST) {
-	        option = QString::number(iPK_User).append("|%");
-	    } else if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
-	      option = mediaFilter.getFilterString();
-	      mediaFilter.setDataGridId(dataGridId);
-	    }
-	    pModel->setOption(option);
-	    
-	    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "getDataGridModel() emit loadDataGrid");
-	    emit loadDataGrid(dataGridId, PK_DataGrid, option); // loads data
-	} else {
-	    pModel = m_mapDataGridModels[dataGridId];
-	}
+        // GenericFlatListModels are kept in a pool in qorbitermanager, because we want the
+        // Objects to belong to this thread, and not the QML thread, which is the one that calls
+        // this method. Creating them in this method would create them in the QML thread.
+        // lock this section so we don't prepare the same model more than once
+        modelPoolLock.lockForWrite();
+        // Check that the model still is not in map
+        if (!m_mapDataGridModels.contains(dataGridId))
+        {
+            LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() preparing GenericFlatListModel");
+            pModel = m_modelPool.pop();
+            pModel->clear();
+            pModel->setPrototype(DataGridHandler::GetModelItemType(PK_DataGrid));
+            pModel->setModelName(dataGridId);
+            pModel->setOption("");
+            pModel->setPK_DataGrid(PK_DataGrid);
+            m_mapDataGridModels.insert(dataGridId, pModel);
 
-	modelPoolLock.unlock();
+            QString option = "";
+            if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
+                option = QString::number(iFK_Room);
+            } else if (PK_DataGrid == DATAGRID_Phone_Book_Auto_Compl_CONST) {
+                option = QString::number(iPK_User).append("|%");
+            } else if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
+                option = mediaFilter.getFilterString();
+                mediaFilter.setDataGridId(dataGridId);
+            }
+            pModel->setOption(option);
+
+            LoggerWrapper::GetInstance()->Write(LV_DEBUG, "getDataGridModel() emit loadDataGrid");
+            emit loadDataGrid(dataGridId, PK_DataGrid, option); // loads data
+        } else {
+            pModel = m_mapDataGridModels[dataGridId];
+        }
+
+        modelPoolLock.unlock();
 
     } else {
         pModel = m_mapDataGridModels[dataGridId];
@@ -1254,7 +1265,7 @@ void qorbiterManager::seekGrid(QString dataGridId, QString s)
     if (m_mapDataGridModels.contains(dataGridId))
     {
         GenericFlatListModel* pModel = m_mapDataGridModels[dataGridId];
-	pModel->seek(s);
+        pModel->seek(s);
     }
 }
 
@@ -1265,9 +1276,9 @@ void qorbiterManager::mediaFilterChanged(QString dataGridId)
     if (m_mapDataGridModels.contains(dataGridId))
     {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::mediaFilterChanged() model exists");
-	pModel = m_mapDataGridModels[dataGridId];
-	pModel->setOption(mediaFilter.getFilterString());
-	pModel->refreshData();
+        pModel = m_mapDataGridModels[dataGridId];
+        pModel->setOption(mediaFilter.getFilterString());
+        pModel->refreshData();
     }
     updateSelectedAttributes(mediaFilter.getFilterString());
 }
@@ -1862,7 +1873,7 @@ bool qorbiterManager::readLocalConfig()
         localConfigFile.setFileName("/usr/pluto/bin/config.xml");
         appConfigPath="/usr/pluto/bin/config.xml";
     } else {
-         localConfigFile.setFileName(xmlPath);
+        localConfigFile.setFileName(xmlPath);
         qDebug() << "Found config.xml in app path, reading.";
         appConfigPath=xmlPath;
     }
@@ -1997,7 +2008,7 @@ bool qorbiterManager::writeConfig()
         appConfigPath = xmlPath;
         qDebug() << "Empty application write path. adjusted to: " <<xmlPath;
     }
-localConfigFile.setFileName(appConfigPath);
+    localConfigFile.setFileName(appConfigPath);
 
     if (!localConfigFile.open(QFile::ReadWrite))
     {
@@ -2334,7 +2345,8 @@ void qorbiterManager::initializeConnections()
 void qorbiterManager::reloadHandler()
 {
     if(cleanupData()){
-        gotoQScreen("ReloadHandler.qml");
+        qorbiterUIwin->setSource(remoteDirectoryPath+"/splash/Splash.qml");
+        //        gotoQScreen("ReloadHandler.qml");
     }
 
 
@@ -2342,7 +2354,10 @@ void qorbiterManager::reloadHandler()
 
 void qorbiterManager::disconnectHandler()
 {
-    gotoQScreen("Splash.qml");
+    if(cleanupData()){
+       qorbiterUIwin->setSource(remoteDirectoryPath+"/splash/Splash.qml");
+        //        gotoQScreen("ReloadHandler.qml");
+    }
 
 }
 

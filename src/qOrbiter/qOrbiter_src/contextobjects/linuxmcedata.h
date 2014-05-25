@@ -23,8 +23,6 @@ public:
         ARCADE=11,
         CONSOLE=12
     };
-
-
     Q_ENUMS(MediaSubTypes)
     explicit LinuxmceData(QObject *parent = 0);    
 

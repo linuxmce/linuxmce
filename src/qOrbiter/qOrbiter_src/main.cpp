@@ -186,7 +186,7 @@ extern "C" {
 
 int main(int argc, char* argv[])
 {
- int deviceType =-1; /*!< deviceType can be 0 for osd(onscreen qorbiter), 1 for desktop(linux,mac,windows),2 for android, 3 for i0S */
+    int deviceType =-1; /*!< deviceType can be 0 for osd(onscreen qorbiter), 1 for desktop(linux,mac,windows),2 for android, 3 for i0S */
 
 
 #ifdef for_harmattan
@@ -223,11 +223,11 @@ int main(int argc, char* argv[])
 
 
 #ifdef __ANDROID__
-//    if(androidHelper.updateExternalStorageLocation()){
+    //    if(androidHelper.updateExternalStorageLocation()){
 
-//        if(androidHelper.externalStorageLocation!="")
-//        localLogger.setLogLocation(QString(androidHelper.externalStorageLocation+"LinuxMCE/"));
-//    }
+    //        if(androidHelper.externalStorageLocation!="")
+    //        localLogger.setLogLocation(QString(androidHelper.externalStorageLocation+"LinuxMCE/"));
+    //    }
 #endif
 
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
@@ -355,6 +355,9 @@ int main(int argc, char* argv[])
         qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
         qmlRegisterType<LinuxmceData>("org.linuxmce.enums",1,0,"Subtypes");
         qmlRegisterType<MediaTypeHelper>("org.linuxmce.enums",1,0,"Mediatypes");
+        qmlRegisterType<SubTypesHelper>("org.linuxmce.enums",1,0,"MediaSubtypes");
+        qmlRegisterType<AttributeTypeHelper>("org.linuxmce.enums",1,0,"Attributes");
+
         if(deviceType==0){
 
         } else {
@@ -397,9 +400,9 @@ int main(int argc, char* argv[])
         orbiterWin.mainView.rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
         orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
 
-	qmlRegisterType<GenericFlatListModel>();
+        qmlRegisterType<GenericFlatListModel>();
 
-	qRegisterMetaType<QHash<int, QVariant> >("QHash<int, QVariant>");
+        qRegisterMetaType<QHash<int, QVariant> >("QHash<int, QVariant>");
 
         // connnect local logger
         QObject::connect(&pqOrbiter, SIGNAL(commandResponseChanged(QString)), &localLogger, SLOT(logCommandMessage(QString)));
@@ -487,7 +490,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(isOsd(bool)), &w, SLOT(setOsd(bool)));
         QObject::connect(&pqOrbiter, SIGNAL(monitorStatusChanged(bool)), &w, SLOT(setMonitorStatus(bool)));
         QObject::connect(&w, SIGNAL(newMessageSend(QVariantMap)), &pqOrbiter, SLOT(executeMessageSend(QVariantMap)), Qt::QueuedConnection);
-	QObject::connect(&pqOrbiter, SIGNAL(setText(QString,QString,int)), &w, SLOT(setText(QString,QString,int)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(setText(QString,QString,int)), &w, SLOT(setText(QString,QString,int)), Qt::QueuedConnection);
 
         //timecodemanager signals / slots
         QObject::connect(&pqOrbiter, SIGNAL(updateTimeCode(QString,int)), timecode, SLOT(start(QString,int)), Qt::QueuedConnection);
@@ -595,11 +598,11 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(mediaPageChanged(int)), &w, SLOT(setCurrentPage(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(dceGridSepChanged(int)), &pqOrbiter, SLOT(setGridSeperator(int)), Qt::QueuedConnection);
 
-	// Media filter
+        // Media filter
         QObject::connect(&pqOrbiter, SIGNAL(showFileListMediaType(int)), &w.mediaFilter, SLOT(setMediaType(int)), Qt::QueuedConnection);
-         QObject::connect(&pqOrbiter, SIGNAL(showFileListMediaType(int)), &w, SLOT(setGridMediaType(QString)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(showFileListMediaType(int)), &w, SLOT(setGridMediaType(QString)), Qt::QueuedConnection);
 
-	//        QObject::connect(&pqOrbiter, SIGNAL(showFileListMediaType(int)), &w, SLOT(prepareFileList()), Qt::QueuedConnection);
+        //        QObject::connect(&pqOrbiter, SIGNAL(showFileListMediaType(int)), &w, SLOT(prepareFileList()), Qt::QueuedConnection);
         //QObject::connect(&w.mediaFilter, SIGNAL(filterChanged(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
         QObject::connect(&w.mediaFilter, SIGNAL(filterStringChanged(QString)), &w, SLOT(mediaFilterChanged(QString)), Qt::QueuedConnection);
         QObject::connect(&w.mediaFilter, SIGNAL(itemSelected(QString)), &pqOrbiter, SLOT(GetFileInfoForQml(QString)), Qt::QueuedConnection);
@@ -611,7 +614,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(newMediaSubtype(AttributeSortItem*)), w.mediaTypeFilter, SLOT(appendRow(AttributeSortItem*)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(newFileFormatSort(AttributeSortItem*)), w.uiFileFilter, SLOT(appendRow(AttributeSortItem*)), Qt::QueuedConnection);
 
-	// generic datagrid signals
+        // generic datagrid signals
         QObject::connect(&pqOrbiter,SIGNAL(prepareDataGrid(QString,QString,int,int)), &w, SLOT(prepareDataGrid(QString,QString,int,int)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(addDataGridItem(QString,int,int,int,DataGridTable*)), &w, SLOT(addDataGridItem(QString,int,int,int,DataGridTable*)),Qt::QueuedConnection);
         QObject::connect(&w,SIGNAL(loadDataGrid(QString,int,QString)), &pqOrbiter, SLOT(loadDataGrid(QString,int,QString)),Qt::QueuedConnection);
@@ -732,7 +735,7 @@ int main(int argc, char* argv[])
         dceThread.start();
 
         //#ifdef Q_OS_LINUX
-        //        QProcess p;
+        //        QProcess p;`
         //        p.start("awk", QStringList() << "/MemTotal/ { print $2 }" << "/proc/meminfo");
         //        p.waitForFinished();
         //        QString memory = p.readAllStandardOutput();

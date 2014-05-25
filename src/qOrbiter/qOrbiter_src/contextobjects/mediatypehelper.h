@@ -7,6 +7,7 @@ class MediaTypeHelper : public QObject
 {
     Q_OBJECT
 public:
+    explicit MediaTypeHelper(QObject *parent = 0);
     enum MediaTypes{
         LINUXMCE_LIVE_TV=1,
         LINUXMCE_CD=2,
@@ -26,12 +27,91 @@ public:
         NP_NETWORK_MEDIA=66
     };
     Q_ENUMS(MediaTypes)
-    explicit MediaTypeHelper(QObject *parent = 0);
-
-signals:
-
-public slots:
 
 };
 
+class AttributeTypeHelper : public QObject
+{
+    Q_OBJECT
+public:
+    AttributeTypeHelper() {}
+    virtual ~AttributeTypeHelper() {}
+    enum Attributes{
+        Director= 1,
+        Performer= 2,
+        Album= 3,
+        Track= 5,
+        ASIN= 6,
+        CDDB= 7,
+        Genre= 8,
+        Ref_Num= 9,
+        Channel =10,
+        Episode =11,
+        Program =12,
+        Title =13,
+        Disc_ID= 14,
+        Conductor= 15,
+        ComposerWriter= 16,
+        Studio =17,
+        Rating =18,
+        Release_Date= 19,
+        Website =20,
+        Chapter =21,
+        Encoding =22,
+        Format =23,
+        Aspect_Ratio_s= 24,
+        Audio_Encoding =25,
+        Rated =26,
+        DVD_Release_Date =27,
+        Run_Time =28,
+        Keyword =29,
+        Screen_Saver_For_MD= 30,
+        Region= 32,
+        Language= 33,
+        Aspect_Ratio= 34,
+        Number_of_Discs =35,
+        IMDB= 36,
+        Synopsis= 37,
+        Producer =38,
+        Executive_Producer= 39,
+        Purchase_Info= 40,
+        TV_Channel_ID =41,
+        TV_Program_ID= 42,
+        TV_Series_ID= 43,
+        Creation_Date =44,
+        THX_Disk_ID =45,
+        Screen_saver_disabled= 46,
+        Manufacturer= 47,
+        Year= 48,
+        System =49,
+        Season_Number= 50,
+        Episode_Number= 51,
+        TV_Season_ID =52,
+        System_Configuration= 56
+    };
+    Q_ENUMS(Attributes)
+};
+
+class SubTypesHelper : public QObject
+{
+    Q_OBJECT
+public:
+    SubTypesHelper() {}
+    virtual ~SubTypesHelper() {}
+    enum MediaSubTypes{
+        TVSHOWS=1,
+        MOVIES=2,
+        HOMEVIDEOS=3,
+        SPORTSEVENTS=4,
+        MUSICVIDEOS=5,
+        ALTERNATIVE=6,
+        POPULARMUSIC=7,
+        CLASSICALMUSIC=8,
+        LEARNING=9,
+        AUDIOBOOKS=10,
+        ARCADE=11,
+        CONSOLE=12
+    };
+    Q_ENUMS(MediaSubTypes)
+};
 #endif // MEDIATYPEHELPER_H

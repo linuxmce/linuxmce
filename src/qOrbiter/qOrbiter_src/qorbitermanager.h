@@ -173,6 +173,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString q_subType READ getSubType WRITE setSubType NOTIFY subTypeChanged)
     Q_PROPERTY(QString q_fileFormat READ getGridFileFormat WRITE setGridFileFormat NOTIFY gridFileFormatChanged)
     Q_PROPERTY(QString q_attribute_genres READ getGridAttributeGenres WRITE setGridAttributeGenres NOTIFY gridAttributeGenresChanged)
+    Q_PROPERTY(QString q_attributeType_sort READ getGridAttributeTypeSort WRITE setGridAttributeTypeSort NOTIFY gridAttributeSortChanged )
     Q_PROPERTY(QString q_mediaSources READ getGridMediaSources WRITE setGridMediaSources NOTIFY gridMediaSourcesChanged)
     Q_PROPERTY(QString q_usersPrivate READ getGridUsersPrivate WRITE setGridUsersPrivate NOTIFY gridPrivateUsersChanged)
     Q_PROPERTY(QString q_pk_users READ getGridPkUsers WRITE setGridPkUsers NOTIFY gridPkUsersChanged  )
@@ -384,6 +385,7 @@ Param 10 - pk_attribute
     QString audioDefaultSort;
     QString photoDefaultSort;
     QString gamesDefaultSort;
+    QString q_attributeType_sort;
     MediaFilter mediaFilter;
 
 
@@ -599,12 +601,14 @@ signals:
     void gridPkUsersChanged();
     void gridPkAttributeChanged();
     void gridLastViewedChanged();
+    void gridAttributeSortChanged();
 
     void requestDcePages(int i);
     void filterChanged();
     void resetFilter();
     void modelChanged();
     void mediaGridTypeChanged();
+    void attributeSortChanged();
     void gridTypeChanged(int i);
     void mediaRequest(int);
     void mediaSeperatorChanged(int sep);
@@ -1303,6 +1307,12 @@ public slots:
 
     void setGridMediaType(QString t){q_mediaType = t; qDebug() << q_mediaType; emit mediaGridTypeChanged();}
     QString getSorting() {return q_mediaType;}
+
+    void setAttributeTypeSort(QString t){ q_attributeType_sort = t; emit attributeSortChanged();}
+    QString getAttributeTypeSort(){return q_attributeType_sort;}
+
+    void setGridAttributeTypeSort(QString t){ q_attributeType_sort = t; emit gridAttributeSortChanged();}
+    QString getGridAttributeTypeSort(){return q_attributeType_sort;}
 
     void setGridFileFormat(QString g){q_fileFormat= g; emit gridFileFormatChanged();  }
     QString getGridFileFormat(){return q_fileFormat; }

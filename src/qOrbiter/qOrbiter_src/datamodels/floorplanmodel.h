@@ -120,6 +120,7 @@ signals:
 public slots:
     FloorplanDevice* find(int device) const;
     FloorplanDevice *get(int idx);
+    Q_INVOKABLE int count() { return m_list.size();}
     void clearAllSelections();
     void clear();
     void handleItemChange();
@@ -144,7 +145,7 @@ public slots:
     QImage getPageImage(QString &id);
 
     void setImageData(const uchar *data, int iData_size);
-    void setImage(QImage fp) { currentImage = fp; emit floorPlanImageChanged(); emit requestNewFloorPlanData(currentPage); populateSprites();}
+    void setImage(QImage fp) { populateSprites();  currentImage = fp; emit floorPlanImageChanged(); emit requestNewFloorPlanData(currentPage);}
 
     int getDeviceX(int device);
     int getDeviceY(int device);

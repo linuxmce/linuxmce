@@ -433,7 +433,7 @@ bool MediaManager::mountDrive(long device){
        mountProcess->waitForFinished(10000);
 
        qDebug() << "Process Status ::" <<mountProcess->state();
-       if(mountProcess->state()== QProcess::FailedToStart){
+       if(mountProcess->error() == QProcess::FailedToStart){
            qWarning() << "command failed to start!";
            qDebug() << mountProcess->readAllStandardError();
            qDebug() << mountProcess->errorString();

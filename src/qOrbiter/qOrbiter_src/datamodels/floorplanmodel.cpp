@@ -339,7 +339,7 @@ void FloorPlanModel::populateSprites()
     qDebug("Populating Sprites");
     QObject * view = uiRef->qorbiterUIwin->rootObject();
     QObject * page = view->findChild<QObject*>("floorplan_display");
-    qDebug() << page->parent();
+
 
     foreach(FloorplanDevice* item, m_list) {
 
@@ -373,6 +373,7 @@ void FloorPlanModel::setCurrentPage(QString currentPageId)
     setCurrentIntPage( currentPage.toInt());
     QString s = getCurrentImagePath();
     emit pageChanged(s);
+
 }
 
 void FloorPlanModel::setImageData(const uchar *data, int iData_size)
@@ -382,6 +383,7 @@ void FloorPlanModel::setImageData(const uchar *data, int iData_size)
     {
         setImage(t);
         emit floorPlanStatus("Converted Image");
+
     }
     else
     {
