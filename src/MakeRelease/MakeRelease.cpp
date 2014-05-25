@@ -2033,13 +2033,16 @@ string Makefile = "none:\n"
 //				&vect_pRow_Package_Source_Dependencies);
 //	}
 
-	// Get a list of all the other packages which we depend on, and which have compatible 'package' repository sources.  We are going to add them to the .deb as dependencies
+	// Get a list of all the other packages which we depend on, and which are compatible and have compatible 'package' repository sources.  We are going to add them to the .deb as dependencies
 	vector<Row_Package_Source *> vect_pRow_Package_Source_Dependencies;
 	pRow_Package_Source->Table_Package_Source_get()->GetRows(
 		"JOIN Package_Package ON Package_Package.FK_Package_DependsOn=Package_Source.FK_Package AND Package_Package.FK_Package=" + StringUtils::itos(pRow_Package_Source->FK_Package_get()) +
-		" JOIN Package_Source_Compat ON Package_Source_Compat.FK_Package_Source = Package_Source.PK_Package_Source AND Package_Source_Compat.FK_Distro = " + StringUtils::itos(g_iPK_Distro) +
-		" JOIN RepositorySource ON RepositorySource.PK_RepositorySource=Package_Source.FK_RepositorySource AND RepositorySource.FK_RepositoryType=" + StringUtils::itos(REPOSITORYTYPE_PACKAGE_CONST),
-		&vect_pRow_Package_Source_Dependencies);
+		" JOIN Package_Source_Compat ON Package_Source_Compat.FK_Package_Source = Package_Source.PK_Package_Source JOIN RepositorySource ON RepositorySource.PK_RepositorySource=Package_Source.FK_RepositorySource AND RepositorySource.FK_RepositoryType=" + StringUtils::itos(REPOSITORYTYPE_PACKAGE_CONST)
+		+ " JOIN Package_Compat ON Package_Source.FK_Package=Package_Compat.FK_Package WHERE (((Package_Compat.FK_Distro IS NULL OR Package_Compat.FK_Distro = " + StringUtils::itos(g_iPK_Distro)
+			+ ") AND (Package_Compat.FK_OperatingSystem IS NULL OR Package_Compat.FK_OperatingSystem = " + StringUtils::itos(g_pRow_Distro->FK_OperatingSystem_get())
+			+ ")) AND ((Package_Source_Compat.FK_Distro IS NULL OR Package_Source_Compat.FK_Distro = " + StringUtils::itos(g_iPK_Distro)
+			+ ") AND (Package_Source_Compat.FK_OperatingSystem IS NULL OR Package_Source_Compat.FK_OperatingSystem = " + StringUtils::itos(g_pRow_Distro->FK_OperatingSystem_get()) + ")))"
+		, &vect_pRow_Package_Source_Dependencies);
 
 	string sDepends,sPreDepends;
 
