@@ -38,6 +38,7 @@ public:
     void clear();
     void addSkin(QString url);
     int *default_ea;
+    bool ready;
 
 #ifndef QT5
     QDeclarativeComponent *current_style;

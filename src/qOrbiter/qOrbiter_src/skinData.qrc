@@ -25,4 +25,9 @@
     <qresource prefix="/qt5-desktop">
         <file alias="Welcome2.qml">qml/Welcome2.qml</file>
     </qresource>
+    <qresource prefix="/reload">
+        <file alias="AndroidReload.qml">qml/skins-common/lib/startup/AndroidReload.qml</file>
+        <file alias="GenericReload.qml">qml/skins-common/lib/startup/DesktopReload.qml</file>
+        <file>qml/skins-common/lib/startup/IoSReload.qml</file>
+    </qresource>
 </RCC>

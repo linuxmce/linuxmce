@@ -86,6 +86,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     bAppError = false;
     isPhone = 0;
     appConfigPath="";
+    status="starting";
 #ifndef __ANDROID__
     b_localLoading = false; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
 #elif defined QT5 && ANDROID || defined(ANDROID)
@@ -460,6 +461,14 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     } else{
         finalPath = remoteDirectoryPath;
     }
+
+
+    QUrl base(finalPath);
+        tskinModel = new SkinDataModel(base, new SkinDataItem, this);
+        QObject::connect(tskinModel, SIGNAL(currentSkinReady()), this, SLOT(showSkin()));
+        qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
+        QObject::connect(tskinModel, SIGNAL(skinsFinished(bool)), this, SLOT(setSkinStatus(bool)));
+
 
 
 #ifdef __ANDROID__
@@ -999,7 +1008,7 @@ void qorbiterManager::swapSkins(QString incSkin)
 #ifdef __ANDROID__
         qorbiterUIwin->engine()->rootContext()->setContextProperty("style", tskinModel->currentItem);
 #else
-       // qorbiterUIwin->engine()->rootContext()->setContextProperty("skinStyle", tskinModel->currentItem);
+        // qorbiterUIwin->engine()->rootContext()->setContextProperty("skinStyle", tskinModel->currentItem);
 #endif
 
 #if (QT5)
@@ -1662,11 +1671,6 @@ bool qorbiterManager::loadSkins(QUrl base)
     emit skinMessage("Skins path" +base.toString());
 
 
-    tskinModel = new SkinDataModel(base, new SkinDataItem, this);
-    QObject::connect(tskinModel, SIGNAL(currentSkinReady()), this, SLOT(showSkin()));
-    qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
-    QObject::connect(tskinModel, SIGNAL(skinsFinished(bool)), this, SLOT(setSkinStatus(bool)));
-
     /*
       TODO ASAP:
       Write feeder function that preceeds this call to creat a simple string list
@@ -1780,14 +1784,16 @@ void qorbiterManager::setFloorplanType(int t)
 
 void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 {
-
-    setDceResponse("Triggering connection to LMCE Device ID [" + incdeviceid + "] port Router Address [" + incrouterip + "]") ;
-
-    setInternalIp(incrouterip);
-    setDeviceNumber(incdeviceid.toInt());
-
-    setDceResponse("Initializing Local Manager");
-    initializeManager(incrouterip.toStdString(), incdeviceid.toLong());
+    if(status=="starting"){
+        setDceResponse("Triggering connection to LMCE Device ID [" + incdeviceid + "] port Router Address [" + incrouterip + "]") ;
+        setInternalIp(incrouterip);
+        setDeviceNumber(incdeviceid.toInt());
+        setDceResponse("Initializing Local Manager");
+        initializeManager(incrouterip.toStdString(), incdeviceid.toLong());
+    } else {
+        status="running";
+        loadSkins(finalPath);
+    }
 
     //  getConfiguration(); /* Connect to skins ready signal */
 }
@@ -2247,7 +2253,7 @@ bool qorbiterManager::cleanupData()
 
 
     if(roomMedia){
-         roomMedia->clear();
+        roomMedia->clear();
     }
 
     roomClimate->clear();
@@ -2349,6 +2355,7 @@ void qorbiterManager::reloadHandler()
 {
     if(cleanupData()){
         qorbiterUIwin->setSource(QUrl("qrc:reload/GenericReload.qml"));
+      status="reloading";
         //        gotoQScreen("ReloadHandler.qml");
     }
 }
@@ -2357,6 +2364,7 @@ void qorbiterManager::disconnectHandler()
 {
     if(cleanupData()){
         qorbiterUIwin->setSource(QUrl("qrc:reload/GenericReload.qml"));
+        status="disconnected";
         //        gotoQScreen("ReloadHandler.qml");
     }
 

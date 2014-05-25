@@ -14,6 +14,7 @@
 
 SkinDataModel::SkinDataModel(QUrl &baseUrl, SkinDataItem* prototype, qorbiterManager *uiRef, QObject* parent): QAbstractListModel(parent), m_prototype(prototype)
 {
+    ready=false;
     m_baseUrl = baseUrl ;
     clear();
 
@@ -29,10 +30,7 @@ SkinDataModel::SkinDataModel(QUrl &baseUrl, SkinDataItem* prototype, qorbiterMan
     qRegisterMetaType<QModelIndex>("QModelIndex");
 
     ui_reference = uiRef;
-
-
     SkinLoader* load = new SkinLoader(m_baseUrl, ui_reference, this);
-
     m_skin_loader = load;
 
 #ifndef QT5
@@ -65,12 +63,8 @@ SkinDataModel::~SkinDataModel() {
 
 }
 
-void SkinDataModel::appendRow(SkinDataItem *item)
-{
-
+void SkinDataModel::appendRow(SkinDataItem *item){
             appendRows(QList<SkinDataItem*>() << item);
-
-
 }
 
 void SkinDataModel::appendRows(const QList<SkinDataItem *> &items)
@@ -212,10 +206,11 @@ void SkinDataModel::setActiveSkin(QString name)
                 break;
             }
         }
-        currentItem = current_style->create();
+       // currentItem = current_style->create();
         ui_reference->currentSkin = name;
         ui_reference->writeConfig();
         emit currentSkinReady();
+        ready=true;
     }
 
 }

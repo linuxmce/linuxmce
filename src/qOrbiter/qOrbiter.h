@@ -234,6 +234,7 @@ public:
     virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
     virtual void OnDisconnect();
     virtual void OnReload();
+
     virtual bool OnReplaceHandler(string msg);
     virtual int PromptFor(std::string sToken);
     virtual int PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std::string> *p_mapPrompts);

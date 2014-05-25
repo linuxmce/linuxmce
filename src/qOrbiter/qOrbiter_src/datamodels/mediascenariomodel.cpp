@@ -5,6 +5,7 @@ MediaScenarioModel::MediaScenarioModel(MediaScenarioItem* prototype, QObject* pa
    #ifndef QT5
     setRoleNames(m_prototype->roleNames());
 #endif
+     QList<MediaScenarioItem*> *m_list = new QList<MediaScenarioItem*>;
 }
 
 
@@ -86,8 +87,9 @@ void MediaScenarioModel::sortModel(int column, Qt::SortOrder order)
 
 void MediaScenarioModel::clear()
 {
-  qDeleteAll(m_list);
-  m_list.clear();
+   if(!m_list.empty()){
+       m_list.clear();
+   }
 }
 
 bool MediaScenarioModel::removeRow(int row, const QModelIndex &parent)

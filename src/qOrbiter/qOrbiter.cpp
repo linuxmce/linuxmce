@@ -1052,7 +1052,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit setNowPlaying(false);
         emit gotoQml("Screen_1.qml");
         b_mediaPlaying = false;
-       // emit currentScreenChanged("Screen_1.qml");
+        // emit currentScreenChanged("Screen_1.qml");
         currentScreen = "Screen_1.qml";
         internal_streamID = iStreamID;
         emit streamIdChanged(iStreamID);
@@ -1760,7 +1760,7 @@ bool DCE::qOrbiter::initialize()
     //    }
     emit commandResponseChanged("Initialization IP::"+ QString::fromStdString(m_sIPAddress));
 
-
+qDebug() << "INITIALIZE!!!!!!!!!";
     if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
     {
         m_dwMaxRetries = 1;
@@ -1831,7 +1831,7 @@ bool DCE::qOrbiter::initialize()
 void qOrbiter::requestConfigData()
 {
 #ifndef __ANDROID__
-   #ifndef Q_OS_MAC
+#ifndef Q_OS_MAC
     pthread_yield();
 #endif
 #endif
@@ -2310,15 +2310,15 @@ int qOrbiter::getCurrentRow()
 
 void qOrbiter::initializeGrid()
 {
-  // Taken care of when setMediaType changes mediaType     mediaFilter.clear();
+    // Taken care of when setMediaType changes mediaType     mediaFilter.clear();
 
-gridPaused = false;
+    gridPaused = false;
     emit commandResponseChanged("Dg Variables Reset");
 }
 
 void qOrbiter::setStringParam(int paramType, QString param)
 {
-  //    mediaFilter.setStringParam(paramType, param);
+    //    mediaFilter.setStringParam(paramType, param);
 
     if(!param.contains("!F"))
         b_cancelRequest = true;
@@ -2517,25 +2517,25 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString op
     if (SendCommand(populateGrid))
     {
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Grid Dimensions: Height %d, Width %d", gHeight, gWidth);
-	if (fetchItems > gHeight)
-	    fetchItems = gHeight;
-	QString dgN = dgName;
-	// For media browser, we need to get _<dgname> as this is the one that contains images
-	if (PK_DataGrid == DATAGRID_Media_Browser_CONST)
-	{
-	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGrid() media browser, using _<dgname>");
-	    dgN = QString("_")+dgN;
-	}
+        if (fetchItems > gHeight)
+            fetchItems = gHeight;
+        QString dgN = dgName;
+        // For media browser, we need to get _<dgname> as this is the one that contains images
+        if (PK_DataGrid == DATAGRID_Media_Browser_CONST)
+        {
+            LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGrid() media browser, using _<dgname>");
+            dgN = QString("_")+dgN;
+        }
 
-	// hack/fixme: need to sleep a short while here, because if we emit prepareDataGrid too soon,
-	// the qml list view will get invalid items show on screen.
-	// the prepareDataGrid signal is connected to the prepareDataGrid method in qorbiterManager, which
-	// calls setTotalRows on the GenericFlatListModel. This model is connected to the qml ListView.
-	// There might be some race condition going on between the ListView initializing and the model populating,
-	// but I have been unable to track this down (yet).
-	QThread::msleep(100);
+        // hack/fixme: need to sleep a short while here, because if we emit prepareDataGrid too soon,
+        // the qml list view will get invalid items show on screen.
+        // the prepareDataGrid signal is connected to the prepareDataGrid method in qorbiterManager, which
+        // calls setTotalRows on the GenericFlatListModel. This model is connected to the qml ListView.
+        // There might be some race condition going on between the ListView initializing and the model populating,
+        // but I have been unable to track this down (yet).
+        QThread::msleep(100);
 
-	emit prepareDataGrid(dataGridId, dgN, gHeight, gWidth);
+        emit prepareDataGrid(dataGridId, dgN, gHeight, gWidth);
     }
 }
 
@@ -2554,20 +2554,20 @@ void DCE::qOrbiter::loadDataForDataGrid(QString dataGridId, QString dgName, int 
     if (PK_DataGrid == DATAGRID_Media_Browser_CONST && !seek.isEmpty())
         gridName.remove(0,1);
 
-	//CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
+    //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
     DCE::CMD_Request_Datagrid_Contents requestGrid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn),
-						    StringUtils::itos( m_dwIDataGridRequestCounter ),
-						    gridName.toStdString(), rows, numColumns,
-						    false, false,
-						    true,  seek.toStdString(),    int(iOffset),
-						    &pData, &iData_Size, &GridCurRow, &GridCurCol );
+                                                    StringUtils::itos( m_dwIDataGridRequestCounter ),
+                                                    gridName.toStdString(), rows, numColumns,
+                                                    false, false,
+                                                    true,  seek.toStdString(),    int(iOffset),
+                                                    &pData, &iData_Size, &GridCurRow, &GridCurCol );
     if(SendCommand(requestGrid))
     {
 
-	DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-	emit addDataGridItem(dataGridId, PK_DataGrid, GridCurRow, rows, pDataGridTable);
-	delete[] pData;
-	pData=NULL;
+        DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
+        emit addDataGridItem(dataGridId, PK_DataGrid, GridCurRow, rows, pDataGridTable);
+        delete[] pData;
+        pData=NULL;
     }
 }
 
@@ -2860,7 +2860,7 @@ void DCE::qOrbiter::moveMedia(QString eas, int streamID)
     string pResponse;
     if(SendCommand(move_media, &pResponse) && pResponse=="OK")
     {
-      emit commandResponseChanged("Move media");
+        emit commandResponseChanged("Move media");
     }
     else
     {
@@ -2922,13 +2922,13 @@ void DCE::qOrbiter::requestMediaPlaylist()
 #ifdef QT5
                 QCoreApplication::processEvents(QEventLoop::AllEvents);
 #else
- QApplication::processEvents(QEventLoop::AllEvents);
+                QApplication::processEvents(QEventLoop::AllEvents);
 #endif
 
 #ifdef RPI
                 msleep(45);
 #elif ANDROID
-                 msleep(30);
+                msleep(30);
 #else
                 // msleep(10);
 #endif
@@ -3631,9 +3631,9 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 #ifdef RPI
                 msleep(5);
 #elif ANDROID
-               msleep(20);
+                msleep(20);
 #else
-//                msleep(5);
+                //                msleep(5);
 #endif
             }
             else if(!requestMore ){
@@ -3647,7 +3647,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
                 delete []pData; pData=NULL;
                 return;
             } else if(gridPaused){
-               logMediaMessage("Datagrid is paused.");
+                logMediaMessage("Datagrid is paused.");
                 media_pos=index;
                 logMediaMessage("Stopped at "+QString::number(media_pos));
                 return;
@@ -3701,10 +3701,10 @@ void DCE::qOrbiter::setUser(int user)
 
 
     if(SendCommand(userData, &cResp)){
-       logDceMessage("set user cmd " +QString::fromStdString(cResp.c_str()));
+        logDceMessage("set user cmd " +QString::fromStdString(cResp.c_str()));
     }
     else{
-       logDceMessage("Set user failed! " +QString::fromStdString(cResp.c_str()));
+        logDceMessage("Set user failed! " +QString::fromStdString(cResp.c_str()));
     }
 }
 
@@ -3772,10 +3772,10 @@ void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced
                 index = pDataGridTable->CovertColRowType(it->first).first;
                 if(!cellTitle.contains("learn"))
                 {
-//                    qDebug() << pCell->GetText();
-//                    qDebug() << pCell->m_NumAttributes;
-//                cellTitle.prepend("Missing Command name ");
-                  emit newDeviceCommand(new AvCommand(fk_file.toInt(), cellTitle, false, device));
+                    //                    qDebug() << pCell->GetText();
+                    //                    qDebug() << pCell->m_NumAttributes;
+                    //                cellTitle.prepend("Missing Command name ");
+                    emit newDeviceCommand(new AvCommand(fk_file.toInt(), cellTitle, false, device));
                 }
 
             }
@@ -4303,7 +4303,7 @@ void qOrbiter::OnReload()
 #endif
     emit routerReload();
 #ifndef __ANDROID__
-   #ifndef Q_OS_MAC
+#ifndef Q_OS_MAC
     pthread_yield();
 #endif
 #endif
@@ -4656,7 +4656,7 @@ void DCE::qOrbiter::prepareFileList(QString filterString)
     }
 
     qDebug() << "Preparing file list, filter==>" << filterString;
-  //  mediaFilter.setMediaType(iPK_MediaType);
+    //  mediaFilter.setMediaType(iPK_MediaType);
     requestMore = false;
     media_currentRow = 0;
     cellsToRender = 0;
@@ -4720,8 +4720,8 @@ void DCE::qOrbiter::prepareFileList(QString filterString)
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Datagrid Dimensions: Height %d, Width %d", gHeight, gWidth);
             if (cellsToRender == 0)
             {
-	      //	      emit noMediaFound();
-	      //	        mediaFilter.noMedia();
+                //	      emit noMediaFound();
+                //	        mediaFilter.noMedia();
                 emit mediaResponseChanged("No Media");
                 return;
                 // exit ; //exit the loop because there is no grid? - eventually provide "no media" feedback
@@ -4847,8 +4847,8 @@ void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
         //QApplication::processEvents(QEventLoop::AllEvents);
 #endif
 #ifndef __ANDROID__
-   #ifndef Q_OS_MAC
-    pthread_yield();
+#ifndef Q_OS_MAC
+        pthread_yield();
 #endif
 #endif
 
@@ -5129,8 +5129,8 @@ void qOrbiter::setAlarm(QString dataGridId, int row, int role, bool toggle, int 
         CMD_Toggle_Event_Handler toggleAlarm(m_dwPK_Device, iPK_Device_eventPlugin, grp);
         string pResponse="";
         if (SendCommand(toggleAlarm, &pResponse) && pResponse =="OK"){
-	    LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiter::setAlarm RESP = OK");
-	    emit updateItemData(dataGridId, row, role, QVariant::fromValue(toggle));
+            LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiter::setAlarm RESP = OK");
+            emit updateItemData(dataGridId, row, role, QVariant::fromValue(toggle));
         }
         else
         {
@@ -5263,7 +5263,7 @@ void qOrbiter::setVariable(int pkvar ,QString val)
 }
 
 void qOrbiter::reInitialize(){
-
+    qDebug() << "REINITIALIZE";
     Disconnect();
     initializeGrid();
     initialize();

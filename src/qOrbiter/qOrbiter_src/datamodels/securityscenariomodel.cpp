@@ -85,8 +85,10 @@ void SecurityScenarioModel::sortModel(int column, Qt::SortOrder order)
 
 void SecurityScenarioModel::clear()
 {
-  qDeleteAll(m_list);
-  m_list.clear();
+    if(!m_list.empty()){
+        qDeleteAll(m_list);
+        m_list.clear();
+    }
 }
 
 bool SecurityScenarioModel::removeRow(int row, const QModelIndex &parent)

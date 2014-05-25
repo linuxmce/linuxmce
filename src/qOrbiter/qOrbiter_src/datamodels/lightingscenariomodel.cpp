@@ -87,8 +87,10 @@ void LightingScenarioModel::sortModel(int column, Qt::SortOrder order)
 
 void LightingScenarioModel::clear()
 {
-  qDeleteAll(m_list);
-  m_list.clear();
+    if(!m_list.empty()){
+        qDeleteAll(m_list);
+        m_list.clear();
+    }
 }
 
 bool LightingScenarioModel::removeRow(int row, const QModelIndex &parent)

@@ -239,6 +239,7 @@ public:
 
     bool b_glEnabled;
     bool first_run;
+    QString status;
     int isPhone; /*!< 1) phone 2) tablet 3)PC 4)htpc */
     //settings
     QString sPK_User;

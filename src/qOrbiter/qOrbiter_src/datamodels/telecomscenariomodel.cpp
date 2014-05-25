@@ -87,8 +87,10 @@ void TelecomScenarioModel::sortModel(int column, Qt::SortOrder order)
 
 void TelecomScenarioModel::clear()
 {
-  qDeleteAll(m_list);
-  m_list.clear();
+    if(!m_list.empty()){
+        qDeleteAll(m_list);
+        m_list.clear();
+    }
 }
 
 bool TelecomScenarioModel::removeRow(int row, const QModelIndex &parent)
