@@ -3,8 +3,8 @@ import QtQuick 1.0
 Rectangle{
 
     color: "transparent"
-    height: style.stdbuttonh
-    width: style.stdbuttonw
+    height: skinStyle.stdbuttonh
+    width: skinStyle.stdbuttonw
     property alias buttontext: buttonLabel.text
     property alias buttontextcolor: buttonLabel.color
     property alias buttontextfontsize: buttonLabel.font.pointSize
@@ -29,15 +29,15 @@ Rectangle{
     Rectangle {
         id:buttonBase
         color:"transparent"
-        height: style.stdbuttonh
-        width: style.stdbuttonw
+        height: skinStyle.stdbuttonh
+        width: skinStyle.stdbuttonw
         Image {
             id: button_bg
             source: "../img/buttonbg.png"
             anchors.fill: parent
         }
 
-        Text {
+        StyledText {
             id: buttonLabel
             width: -1
             height: 0
@@ -48,12 +48,10 @@ Rectangle{
             anchors.fill: parent
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
-            anchors.margins: 5
-            font.family: "Droid Sans"
+            anchors.margins: 5        
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             // elide: "ElideRight"
             color:"black"
-
             z:1
         }
         Image {

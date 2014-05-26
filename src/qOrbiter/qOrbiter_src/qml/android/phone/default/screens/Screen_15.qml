@@ -45,7 +45,7 @@ StyledScreen{
         border.color: "black"
         border.width: 2
         anchors.centerIn: parent
-        color: "transparent"
+        color: "black"
 
         Image {
             id: securityimage
@@ -53,19 +53,6 @@ StyledScreen{
             source: "image://listprovider/securityimage/"+camera+"/"+securityvideo.timestamp
             anchors.centerIn: parent
             width: scaleX(85)
-
-        }
-
-        Rectangle{
-            height: scaleY(10)
-            width: scaleX(15)
-            anchors.top: securityimage.bottom
-            anchors.horizontalCenter: securitycamrect.horizontalCenter
-
-            Text {
-                id: buttonplaceholder
-                text: qsTr("Camera label and controls go here")
-            }
         }
     }
 

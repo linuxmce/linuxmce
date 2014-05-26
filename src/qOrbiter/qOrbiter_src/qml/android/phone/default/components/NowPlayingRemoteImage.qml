@@ -1,4 +1,5 @@
 import QtQuick 1.1
+import org.linuxmce.enums 1.0
 
 Image {
     id: nowplayingimage
@@ -9,7 +10,10 @@ Image {
     source: ""
     opacity: 1
     scale:1
-
+    Connections    {
+        target: dcenowplaying
+        onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+    }
 //    StyledText{
 //        anchors.centerIn: parent
 //        text:dcenowplaying.imageAspectRatio

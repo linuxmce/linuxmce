@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 1.1
 
 /*!
  *\class Style
@@ -12,7 +12,7 @@ import QtQuick 1.0
  *
  */
 
-QtObject{
+Item{
     id:classicstyle
     objectName: "orbiter_style"
     //skin description
@@ -33,6 +33,15 @@ QtObject{
     }
 
     //end scale function
+
+    /* Image aspect ratios */
+    property double dvdPosterRatio:1080/955
+    property double hdPosterRatio:1080/755
+    property double cdCoverRatioFront:1080/1080
+    property double cdCoverRatioBack:1080/1264
+    property double vcdRatio:1080/1080
+    property double vhsRatio:1280/620
+
     //-color definitions
 
     property color accentcolor: "orange"
@@ -79,6 +88,8 @@ QtObject{
 
     //title and other misc windo accents
     property color titletextcolor: "black"
+
+
     //button styling
     property int buttonH:scaleY(15)
     property int buttonW: scaleY(15)
@@ -111,7 +122,7 @@ QtObject{
     property color rowbgColor: "transparent"
 
     //Notifications bar
-    property int width: orbiterW - 5
+    property int notificationWidth: orbiterW - 5
     property color not_color: "aliceblue"
     property string not_pos: "anchors: parent.top"
 
@@ -126,5 +137,11 @@ QtObject{
     //stage
     property color stage_bg: "lightSteelblue"
     property color bgcolor: "lightsteelblue"
+
+    /* Media Remote - Non TV */
+    property int toolbarHeight: manager.b_orientation ? scaleY(8) : scaleY(12)
+    property int toolbarButtonHeight:manager.b_orientation ? scaleY(8) : scaleY(12)
+    property int toolbarButtonWidth:manager.b_orientation ? scaleY(8) : scaleY(12)
+    property color toolbarBgColor:"black"
 
 }

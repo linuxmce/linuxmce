@@ -10,7 +10,7 @@ Item {
     }
     focus:false
     state:"controls"
-    property Item controlSourceItem:AudioRemote{id:remote}
+
     property double conversionRate:metadataContainer.x/manager.appWidth
 
     Component.onCompleted:{

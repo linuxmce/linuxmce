@@ -43,7 +43,6 @@ Item{
         border.width: useBorder ? 1 : 0
         radius: 5
         opacity:useHandler ? dceHandler.item.pressed ? 1 : .65 :  fly_trap.pressed ? 1 : .65
-
     }
 
     StyledText{

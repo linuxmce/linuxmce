@@ -1,14 +1,13 @@
-import QtQuick 1.0
-import "../../../../skins-common/lib/handlers"
-
+import QtQuick 1.1
+import "../"
 Item {
-    id:audio_remote
+    id:genericBasicControls
     width: manager.appWidth
     height:skinStyle.toolbarButtonHeight
+
     Rectangle{
         anchors.fill: parent
-        color: skinStyle.toolbarBgColor
-        opacity: .25
+        color:skinStyle.toolbarBgColor
     }
 
     Row{
@@ -65,4 +64,5 @@ Item {
             onActivated: manager.stopMedia()
         }
     }
+
 }

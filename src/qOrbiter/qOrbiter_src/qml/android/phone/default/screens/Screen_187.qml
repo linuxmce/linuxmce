@@ -25,9 +25,9 @@ Item {
     Rectangle {
         id:containerrect
         anchors.fill: parent
-        color: style.bgcolor
+        color: skinStyle.bgcolor
         clip: true
-        border.color: style.highlight1
+        border.color: skinStyle.highlight1
         border.width: 2
         anchors.centerIn: parent
         radius: 10

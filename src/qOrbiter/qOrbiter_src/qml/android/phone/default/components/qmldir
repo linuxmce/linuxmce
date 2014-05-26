@@ -32,6 +32,8 @@ FloorPlanDisplay             FloorPlanDisplay.qml                        #no com
 FloorplanNav             FloorplanNav.qml                        #no comment
 Floorplan             Floorplan.qml                        #no comment
 GenericAttributeFilter             GenericAttributeFilter.qml                        #no comment
+GenericFooterRemote             GenericFooterRemote.qml                        #no comment
+GenericMetaData             GenericMetaData.qml                        #no comment
 GenericSelector             GenericSelector.qml                        #no comment
 GenreFilter             GenreFilter.qml                        #no comment
 GenreSelector             GenreSelector.qml                        #no comment

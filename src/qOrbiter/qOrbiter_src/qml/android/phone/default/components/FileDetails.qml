@@ -234,7 +234,7 @@ Item {
         Rectangle {
             width: container.width
             height: childrenRect.height
-            color: style.button_system_color
+            color: skinStyle.button_system_color
 
             Text {
                 text: section
@@ -270,8 +270,8 @@ Item {
         spacing: scaleY(.5)
         AvOptionButton {
             id: buttonsq1
-            width: style.stdbuttonw
-            height: style.stdbuttonh
+            width: skinStyle.stdbuttonw
+            height: skinStyle.stdbuttonh
             radius: 10
 
             //anchors.leftMargin: 18
@@ -285,16 +285,16 @@ Item {
 
         AvOptionButton {
             id: buttonsq2
-            width: style.stdbuttonw
-            height: style.stdbuttonh
+            width: skinStyle.stdbuttonw
+            height: skinStyle.stdbuttonh
             radius: 10
             buttontext: "Move"
         }
 
         AvOptionButton {
             id: buttonsq3
-            width: style.stdbuttonw
-            height: style.stdbuttonh
+            width: skinStyle.stdbuttonw
+            height: skinStyle.stdbuttonh
             radius: 10
             buttontext: "Close"
             x: ((parent.width/3)*2)
