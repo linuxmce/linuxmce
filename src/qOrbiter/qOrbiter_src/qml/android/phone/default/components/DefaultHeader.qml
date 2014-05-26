@@ -18,6 +18,11 @@ Item{
         color: "black"
         opacity: .75
     }
+    Rectangle{
+        anchors.fill: parent
+        gradient: skinStyle.buttonGradient
+        opacity: .50
+    }
 
 
     Row{

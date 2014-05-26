@@ -2,8 +2,8 @@ import QtQuick 1.1
 
 Item{
     id:styled_button
-    height: button_label.paintedHeight < scaleY(5) ? scaleY(5) : button_label.paintedHeight+(button_label.paintedHeight*.02)
-    width:opacity ? button_label.paintedWidth < scaleX(10) ? scaleX(10) : (button_label.paintedWidth) + (button_label.paintedWidth*.02) :0
+    height: button_label.paintedHeight < scaleY(5) ? scaleY(5) : button_label.paintedHeight+(button_label.paintedHeight*.05)
+    width:opacity ? button_label.paintedWidth < scaleX(10) ? scaleX(10) : (button_label.paintedWidth) + (button_label.paintedWidth*.05) :0
 
     //    anchors{
     //        left: button_label.left
@@ -42,8 +42,15 @@ Item{
         border.color: "white"
         border.width: useBorder ? 1 : 0
         radius: 5
-        opacity:useHandler ? dceHandler.item.pressed ? 1 : .65 :  fly_trap.pressed ? 1 : .65
+        opacity:useHandler ? dceHandler.item.pressed ? .65 : .65 :  fly_trap.pressed ? .65 : .65
     }
+
+   Rectangle{
+       anchors.fill: parent
+       gradient:skinStyle.buttonGradient
+       opacity: .50
+       radius: bg_fill.radius
+   }
 
     StyledText{
         id:button_label
@@ -53,7 +60,8 @@ Item{
         fontSize: textSize
         anchors.centerIn: parent
         color:"antiquewhite"
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        wrapMode:button_label.paintedWidth < scaleX(10) ? Text.NoWrap : Text.WrapAtWordBoundaryOrAnywhere
+       // width: button_label.paintedWidth < styled_button.width ? button_label.paintedWidth :styled_button.width
     }
 
     MouseArea{

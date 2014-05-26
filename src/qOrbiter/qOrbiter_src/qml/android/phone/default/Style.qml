@@ -22,7 +22,7 @@ Item{
     property string skindescription: "Android phone skin, work in progress"
     property string skinversion: "1.0"
     property string skinvariation: "Android Small Screen Phones"
-    property string maincolor: "grey"
+    property string maincolor:"#5034282C"
 
     //scale function
     function scaleX(x){
@@ -87,7 +87,7 @@ Item{
     property color t_but_color: "darkgrey"
 
     //title and other misc windo accents
-    property color titletextcolor: "black"
+    property color titletextcolor: "#5034282C"
 
 
     //button styling
@@ -100,20 +100,33 @@ Item{
     property int mediabuttonw :scaleY(12)
     property int mediabuttonh :scaleY(12)
 
-    property color button_system_color: "black"
-    property color button_system_color_hover: "#ff33b5e5"
+    property color button_system_color: "#5034282C"
+    property color button_system_color_hover: "#3EA055"
     property color button_system_text_color: "antiquewhite"
 
-    property color button_action_color: "lightgrey"
-    property color button_action_color_hover: "darkgrey"
+    property color button_action_color: "#3EA055"
+    property color button_action_color_hover: "#27332F"
 
     property variant bgImg: "null"
     property string b_title: "null"
     property int but_smooth: 10
 
+    property alias buttonGradient:buttonGrad
+  Gradient{
+      id:buttonGrad
+        GradientStop{
+            position: 0.0
+            color:"transparent"
+        }
+        GradientStop{
+            position:.55
+            color:"black"
+        }
+    }
+
     //navigations
     property color arrow_color_nav: "lightsteelblue"
-    property color arrow_text_nav: "black"
+    property color arrow_text_nav: "#5034282C"
 
 
     //row container styling
@@ -135,13 +148,13 @@ Item{
     property color advanced_bg_text: "white"
 
     //stage
-    property color stage_bg: "lightSteelblue"
-    property color bgcolor: "lightsteelblue"
+    property color stage_bg:  "#5034282C"
+    property color bgcolor:  "#5034282C"
 
     /* Media Remote - Non TV */
     property int toolbarHeight: manager.b_orientation ? scaleY(8) : scaleY(12)
     property int toolbarButtonHeight:manager.b_orientation ? scaleY(8) : scaleY(12)
     property int toolbarButtonWidth:manager.b_orientation ? scaleY(8) : scaleY(12)
-    property color toolbarBgColor:"black"
+    property color toolbarBgColor:"#5034282C"
 
 }

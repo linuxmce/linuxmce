@@ -2,196 +2,173 @@ import QtQuick 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 
-
-Item {
-    height: manager.appHeight
-    width:  manager.appWidth
+StyledScreen {
     id: advancedscreen
-    state: "reg"
-    HomeButton{}
+    Item{
+        id:content
+        anchors.fill:parent
 
-    Flow {
-        id: flow1
-        anchors.centerIn: parent
-        height: scaleY(75)
-        width: scaleX(85)
-        spacing: 10
 
-        ButtonSq{
-            id:regenorbiter
-            height: style.buttonH
-            width: style.buttonW
-            buttontext: "Regen Orbiter"
-            radius: 5
+        state: "reg"
 
-            MouseArea{
-                anchors.fill:parent
-                z:5
-                onClicked: regenOrbiter(manager.m_dwPK_Device)
+
+
+        Flow {
+            id: flow1
+            anchors.centerIn: parent
+            height: scaleY(75)
+            width: scaleX(85)
+            spacing: 10
+
+            StyledButton{
+                id:regenorbiter
+
+                buttonText: "Regen \nOrbiter"
+                onActivated:  regenOrbiter(manager.m_dwPK_Device)
+            }
+
+            StyledButton{
+                id:pending
+
+                buttonText: "Pending\n Tasks"
+
+            }
+
+            StyledButton{
+                id:networksettings
+
+                buttonText: "Network \nSettings"
+
+            }
+
+            StyledButton{
+                id:avwizard
+
+                buttonText: "Av\n wizard"
+
+            }
+
+            StyledButton{
+                id:regenorbiters
+
+                buttonText: "Regen \n All Orbiters"
+
+            }
+
+            StyledButton{
+                id:quickreload
+
+                buttonText: "Quick \n Reload"
+                onActivated: manager.quickReload()
+
+            }
+
+            StyledButton{
+                id:changeStyle
+
+                buttonText: "Change\n Styles"
+
+            }
+            StyledButton{
+                id:diagnostic
+
+                buttonText: "Diagnostics"
+                onActivated: content.state="diag"
+
             }
         }
 
-        ButtonSq{
-            id:pending
-            height: style.buttonH
-            width: style.buttonW
-            buttontext: "Pending Tasks"
-            radius: 5
-        }
+        Rectangle{
+            id:diagPanel
+            anchors.fill: parent
+            color:"black"
 
-        ButtonSq{
-            id:networksettings
-            height: style.buttonH
-            width: style.buttonW
-            buttontext: "Network Settings"
-            radius: 5
-        }
+            onVisibleChanged: {
+                if(visible){
+                    androidSystem.updateBuildInformation()
+                    androidSystem.updateExternalStorageLocation()
+                }
+            }
 
-        ButtonSq{
-            id:avwizard
-            height: style.buttonH
-            width: style.buttonW
-            buttontext: "Av wizard"
-            radius: 5
-        }
+            StyledButton{
+                anchors.top:parent.top
+                anchors.left: parent.left
+                buttonText: qsTr("Back")
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: content.state="reg"
+                }
+            }
+            Column{
+                height: parent.height*.75
+                width: parent.width*.85
+                anchors.bottom: parent.bottom
 
-        ButtonSq{
-            id:regenorbiters
-            height: style.buttonH
-            width: style.buttonW
-            buttontext: "Regen All Orbiters"
-            radius: 5
-        }
 
-        ButtonSq{
-            id:quickreload
-            height: style.buttonH
-            width: style.buttonW
-            buttontext: "Quick Reload"
-            radius: 5
-            MouseArea{
-                anchors.fill: parent
-                z:10
-                onClicked: manager.quickReload()
+                StyledText{
+                    text: "Api Level:"+ androidSystem.apiLevel
+                    font.pixelSize: 26
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    color: androidSystem.redStandard
+                }
+
+                StyledText{
+                    text: "Storage Location:"+ androidSystem.externalStorageLocation
+                    font.pixelSize: 26
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    color: androidSystem.blueStandard
+                }
+
+                StyledText{
+                    text: "Media Mount Status:"+ androidSystem.mountStatus
+                    font.pixelSize: 26
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    color: androidSystem.getOrangeStandard()
+                }
+
+                StyledText{
+                    text: "Made By:"+ androidSystem.deviceManufacturer
+                    font.pixelSize: 26
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    color: "white"
+                }
+
+                StyledText{
+                    text: "Devicename:"+ androidSystem.deviceName
+                    font.pixelSize: 26
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    color: androidSystem.purpleStandard
+                }
+
             }
         }
 
-        ButtonSq{
-            id:changeStyle
-            height: style.buttonH
-            width: style.buttonW
-            buttontext: "Change Styles"
-            radius: 5
+        states: [
+            State {
+                name: "reg"
+                PropertyChanges {
+                    target: flow1
+                    visible:true
+                }
+                PropertyChanges {
+                    target: diagPanel
+                    visible:false
+                }
+            },
+            State{
+                name:"diagnostic"
+                PropertyChanges{
+                    target:flow1
+                    visible:false
+                }
+                PropertyChanges {
+                    target: diagPanel
+                    visible:true
+                }
 
-            MouseArea{
-                anchors.fill: parent
-               // onClicked: MyJs.createComponentObjects("SkinSelector.qml")
             }
-        }
-        ButtonSq{
-            id:diagnostic
-            height: style.buttonH
-            width: style.buttonW
-            buttontext: "Diagnostics"
-            radius: 5
 
-            MouseArea{
-                anchors.fill: parent
-                onClicked:advancedscreen.state="diag"
-            }
-        }
+        ]
     }
-
-    Rectangle{
-        id:diagPanel
-        anchors.fill: parent
-        color:"black"
-
-        onVisibleChanged: {
-            if(visible){
-                androidSystem.updateBuildInformation()
-                androidSystem.updateExternalStorageLocation()
-            }
-        }
-
-        ButtonSq{
-            anchors.top:parent.top
-            anchors.left: parent.left
-            buttontext: qsTr("Back")
-            MouseArea{
-                anchors.fill: parent
-                onClicked: advancedscreen.state="reg"
-            }
-        }
-        Column{
-            height: parent.height*.75
-            width: parent.width*.85
-            anchors.bottom: parent.bottom
-
-
-            StyledText{
-                text: "Api Level:"+ androidSystem.apiLevel
-                font.pixelSize: 26
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                color: androidSystem.redStandard
-            }
-
-            StyledText{
-                text: "Storage Location:"+ androidSystem.externalStorageLocation
-                font.pixelSize: 26
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                color: androidSystem.blueStandard
-            }
-
-            StyledText{
-                text: "Media Mount Status:"+ androidSystem.mountStatus
-                font.pixelSize: 26
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                color: androidSystem.getOrangeStandard()
-            }
-
-            StyledText{
-                text: "Made By:"+ androidSystem.deviceManufacturer
-                font.pixelSize: 26
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                color: "white"
-            }
-
-            StyledText{
-                text: "Devicename:"+ androidSystem.deviceName
-                font.pixelSize: 26
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                color: androidSystem.purpleStandard
-            }
-
-        }
-    }
-
-    states: [
-        State {
-            name: "reg"
-            PropertyChanges {
-                target: flow1
-                visible:true
-            }
-            PropertyChanges {
-                target: diagPanel
-                visible:false
-            }
-        },
-        State{
-            name:"diagnostic"
-            PropertyChanges{
-                target:flow1
-                visible:false
-            }
-            PropertyChanges {
-                target: diagPanel
-                visible:true
-            }
-
-        }
-
-    ]
 
 }

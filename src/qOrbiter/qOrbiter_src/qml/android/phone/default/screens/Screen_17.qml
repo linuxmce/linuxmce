@@ -1,23 +1,60 @@
 import QtQuick 1.0
 import "../components"
-Item{
-    id:climate
+/*
+screen params for this screen are
+2 - value of the device
+159 - the Screen
+*/
+StyledScreen{
+    id:quadcameraview
+    property int camera:screenparams.getParam(2)
+    Timer{
+        id:securitytimer
+        repeat: true
+        interval: 1000
+        triggeredOnStart: true
+        running: true
+        onTriggered:{
+            "image://listprovider/securityimage/"+camera+"/"+securityvideo.timestamp
+            manager.requestSecurityPic(screenparams.getParam(2), 640, 480)
+        }
+    }
+
+    Connections{
+        target: securityvideo
+        onImageUpdated:{
+            "image://listprovider/securityimage/"+camera+"/"+securityvideo.timestamp
+            manager.requestSecurityPic(screenparams.getParam(2), 640, 480)
+        }
+    }
+
+    StyledText {
+        id: singlecamlabel
+        text: "Quad Camera view"
+        font.pointSize: 15
+        anchors{
+            top:parent.top
+            left:parent.left
+        }
+    }
 
     Rectangle{
-        height: style.orbiterH
-        width: style.orbiterW
-        color: style.bgcolor
-        Text {
-            id: climatelabel
-            x: 74
-            y: 101
-            text: "Quad View Cameras"
-            font.family: "Droid Sans"
-            font.bold: false
-            font.pointSize: 15
-            color:style.titletextcolor
+        id:securitycamrect
+        height: childrenRect.height
+        width: childrenRect.width
+        border.color: "black"
+        border.width: 2
+        anchors.centerIn: parent
+        color: "black"
+
+        Image {
+            id: securityimage
+            fillMode: Image.PreserveAspectFit
+            source: "image://listprovider/securityimage/"+camera+"/"+securityvideo.timestamp
+            anchors.centerIn: parent
+            width: scaleX(85)
         }
-        HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
     }
+
 
 }

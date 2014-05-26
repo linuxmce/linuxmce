@@ -17,10 +17,9 @@ import "../components"
  Param:  253  Value:  0
   */
 
-Item {
+StyledScreen {
     id:asktoresume
-    width: manager.appWidth
-    height: manager.appHeight
+
 
     Rectangle {
         id:containerrect
@@ -34,47 +33,31 @@ Item {
         opacity:.85
     }
 
-    Row
-    {
+    Flow{
         height: childrenRect.height + scaleY(1)
         width: childrenRect.width
         spacing: scaleX(1)
 
         anchors.centerIn: parent
 
-        ButtonSq{
-            buttontext: "Yes Resume"
-            buttonsqradius: 10
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {manager.setPosition(screenparams.getParam(188)) ;gotoQScreen("Screen_"+screenparams.getParam(226)+".qml") }
-            }
-        }
-        ButtonSq{
-            buttontext: "No thank you"
-            buttonsqradius: 10
-            MouseArea{
-                anchors.fill: parent
-                onClicked: gotoQScreen("Screen_"+screenparams.getParam(226)+".qml")
-            }
+        StyledButton{
+            buttonText: "Yes Resume"
+            onActivated:  {manager.setPosition(screenparams.getParam(188)) ;gotoQScreen("Screen_"+screenparams.getParam(226)+".qml") }
+
         }
 
-        ButtonSq{
-            buttontext: "Yes Always Resume"
-            buttonsqradius: 10
-            MouseArea{
-                anchors.fill: parent
-                // onClicked: gotoQScreen()
-            }
+        StyledButton{
+            buttonText: "No thank you"
+            onActivated: gotoQScreen("Screen_"+screenparams.getParam(226)+".qml")
+
         }
 
-        ButtonSq{
-            buttontext: "No thank you, Never resume"
-            buttonsqradius: 10
-            MouseArea{
-                anchors.fill: parent
-                //onClicked: gotoQScreen()
-            }
+        StyledButton{
+            buttonText: "Yes Always Resume"
+        }
+
+        StyledButton{
+            buttonText: "No thank you, Never resume"
         }
 
     }
