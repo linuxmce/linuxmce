@@ -13,7 +13,7 @@ StyledScreen{
         repeat: true
         interval: 1000
         triggeredOnStart: true
-        running: false
+        running: true
         onTriggered:{
             "image://listprovider/securityimage/"+camera+"/"+securityvideo.timestamp
             manager.requestSecurityPic(screenparams.getParam(2), 640, 480)
@@ -28,54 +28,46 @@ StyledScreen{
         }
     }
 
+    StyledText {
+        id: singlecamlabel
+        text: "Single Camera view"
+        font.pointSize: 15
+        anchors{
+            top:parent.top
+            left:parent.left
+        }
+    }
 
     Rectangle{
-        height: style.orbiterH
-        width: style.orbiterW
+        id:securitycamrect
+        height: childrenRect.height
+        width: childrenRect.width
+        border.color: "black"
+        border.width: 2
+        anchors.centerIn: parent
         color: "transparent"
-        Component.onCompleted: requestSecurityPic(screenparams.getParam(2), 640, 480)
-        Text {
-            id: singlecamlabel
-            x: 74
-            y: 101
-            text: "Single Camera view"
-            font.family: "Droid Sans"
-            font.bold: false
-            font.pointSize: 15
 
-        }
-        Rectangle{
-            id:securitycamrect
-            height: childrenRect.height
-            width: childrenRect.width
-            border.color: "black"
-            border.width: 2
+        Image {
+            id: securityimage
+            fillMode: Image.PreserveAspectFit
+            source: "image://listprovider/securityimage/"+camera+"/"+securityvideo.timestamp
             anchors.centerIn: parent
-            color: "transparent"
+            width: scaleX(85)
 
-            Image {
-                id: securityimage
-                fillMode: Image.PreserveAspectFit
-                source: "image://listprovider/securityimage/"+camera+"/"+securityvideo.timestamp
-                anchors.centerIn: parent
-                width: scaleX(85)
-
-            }
-
-            Rectangle{
-                height: scaleY(10)
-                width: scaleX(15)
-               anchors.top: securityimage.bottom
-               anchors.horizontalCenter: securitycamrect.horizontalCenter
-
-               Text {
-                   id: buttonplaceholder
-                   text: qsTr("Camera label and controls go here")
-               }
-            }
         }
 
-        HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
+        Rectangle{
+            height: scaleY(10)
+            width: scaleX(15)
+            anchors.top: securityimage.bottom
+            anchors.horizontalCenter: securitycamrect.horizontalCenter
+
+            Text {
+                id: buttonplaceholder
+                text: qsTr("Camera label and controls go here")
+            }
+        }
     }
+
 
 }
