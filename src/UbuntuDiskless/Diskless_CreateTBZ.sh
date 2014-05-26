@@ -279,6 +279,7 @@ MD_System_Level_Prep () {
 				deb http://deb.linuxmce.org/raspbian/ $TARGET_RELEASE main
 				deb $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
 				deb http://archive.raspberrypi.org/debian $TARGET_RELEASE main
+				deb http://twolife.be/raspbian/ $TARGET_RELEASE main backports
 				EOF
 			;;
 	esac
@@ -535,7 +536,7 @@ MD_Install_Packages () {
 			;;
 		"raspbian")
 			# Classic MD
-			DEVICE_LIST="2216 62 1759 2259 11 1825 26 1808 2122"
+			DEVICE_LIST="2216 62 1759 2259 11 1825 26 1808 2122 2278"
 			# qMD
 			#DEVICE_LIST="2216 2278 2259 11 26 1808 2122"
 			;;
