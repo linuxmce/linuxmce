@@ -57,19 +57,19 @@ Item{
 	    anchors.verticalCenter: parent.verticalCenter
 
             Rectangle{
-                color: style.darkhighlight
+                color: skinStyle.darkhighlight
                 height: hdr.height /5
                 width: height
 		anchors.horizontalCenter: parent.horizontalCenter
             }
             Rectangle{
-                color: style.darkhighlight
+                color: skinStyle.darkhighlight
                 height: hdr.height /5
 		anchors.horizontalCenter: parent.horizontalCenter
                 width: height
             }
             Rectangle{
-                color: style.darkhighlight
+                color: skinStyle.darkhighlight
                 height: hdr.height /5
                 width: height
 		anchors.horizontalCenter: parent.horizontalCenter

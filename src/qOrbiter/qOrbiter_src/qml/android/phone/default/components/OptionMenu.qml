@@ -15,7 +15,7 @@ Item{
 
     Rectangle{
         anchors.fill: optionMenu
-        color: style.button_system_color_hover // used as border between items
+        color: skinStyle.button_system_color_hover // used as border between items
     }
 
     ListView{

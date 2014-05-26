@@ -5,7 +5,7 @@ screen params for this screen are
 2 - value of the device
 159 - the Screen
 */
-Item{
+StyledScreen{
     id:singlecameraview
     property int camera:screenparams.getParam(2)
     Timer{

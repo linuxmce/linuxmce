@@ -2,17 +2,12 @@ import QtQuick 1.1
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 
-Item {
+StyledScreen {
     id:stage
     signal swapStyle()
 
     property bool showSecondary:false
-    anchors{
-        top:parent.top
-        left:parent.left
-        right:parent.right
-        bottom:parent.bottom
-    }
+
 
     Component.onCompleted:{ forceActiveFocus() ; hdr.state="open"}
     property int itemH:manager.b_orientation ? homeSelectionLayout.height /3 :homeSelectionLayout.height /3

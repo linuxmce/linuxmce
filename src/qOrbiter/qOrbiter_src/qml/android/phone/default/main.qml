@@ -67,10 +67,11 @@ Item {
 
 
             Component.onCompleted: {
+               console.log("initializing qml media player::"+manager.mediaPlayerID)
+
                 if(manager.mediaPlayerID !== -1){
                      dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
                     androidSystem.startAudioService(dceplayer.callbackAddress);
-                    console.log("initializing qml media player::"+manager.mediaPlayerID)
 
                 }
             }
@@ -200,10 +201,10 @@ Item {
 
     DceScreenSaver{
          id:glScreenSaver
-         height:parent.height
-         width: parent.width
+         height:qmlroot.height
+         width: qmlroot.width
          interval:30000
-         anchors.centerIn: parent
+         anchors.centerIn: qmlroot
          requestUrl:manager.m_ipAddress
          Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)
@@ -228,6 +229,11 @@ Item {
 
     function screenchange(screenname )
     {
+        if(manager.currentScreen===screenname){
+            console.log("Duplicate call to same screen ==>"+screenname)
+         //   return
+        }
+
         pageLoader.source = "screens/"+screenname
         if (pageLoader.status == Component.Ready)
         {
@@ -253,7 +259,7 @@ Item {
         {
             console.log("finishing load")
             pageLoader.source = "screens/"+screenname
-            console.log("screen" + screenname + " loaded.")
+            console.log("SCREEN==>" + screenname + " loaded.")
         }
         else
         {
@@ -319,7 +325,7 @@ Item {
         else if (componentLoader.status == Component.Loading)
         {
             console.log("loading component from network")
-            finishLoadingComponent(componentName)
+
         }
         else
         {

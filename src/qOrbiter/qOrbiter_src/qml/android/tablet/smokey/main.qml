@@ -33,6 +33,9 @@ Item {
         width: 1
         color:"white"
     }
+    Style{
+        id:style
+    }
 
     Timer{
         id:refresh

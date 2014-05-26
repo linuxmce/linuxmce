@@ -26,7 +26,7 @@ Item {
         ButtonSq{
             buttontext: "Play All"
             buttontextfontsize: scaleY(5)
-            height: style.stdbuttonh
+            height: skinStyle.stdbuttonh
             width: parent.width
             buttontextbold: false
             imgSource: ""
@@ -35,14 +35,10 @@ Item {
         }
 
 
-        ButtonSq{
-            buttontext: "Attribute Sort"
-            buttonsqradius: 7
-             buttontextfontsize: scaleY(5)
-            height: style.stdbuttonh
+        StyledButton{
+            buttonText: "Attribute Sort"
+            height: skinStyle.stdbuttonh
             width: parent.width
-            imgSource: ""
-            color: androidSystem.orangeHighlight
             onActivated:{filterTarget.currentModel = attribfilter; attributeSelector.state="hidden"}
         }
 
@@ -51,7 +47,7 @@ Item {
             buttontext: "Genre"
             buttonsqradius: 7
              buttontextfontsize: scaleY(5)
-            height: style.stdbuttonh
+            height: skinSyle.stdbuttonh
             width: parent.width
             imgSource: ""
             color: androidSystem.orangeHighlight

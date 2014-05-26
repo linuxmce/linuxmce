@@ -387,9 +387,9 @@ Item {
     }*/
 
 
-    AttributeSelector {
-        id:selector
-    }
+//    AttributeSelector {
+//        id:selector
+//    }
 
 
 
