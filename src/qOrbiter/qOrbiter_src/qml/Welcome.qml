@@ -26,7 +26,7 @@ Item {
 
 
     Text{
-        text:"Please Wait, Loading"
+        text:"Please Wait, Loading LinuxMCE"
         color:"white"
         anchors.centerIn: parent
         font.pointSize: 32

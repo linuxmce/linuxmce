@@ -214,21 +214,13 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
     QCoreApplication::setOrganizationDomain("org.linuxmce.QOrbiter");
     QCoreApplication::setOrganizationName("www.linuxMCE.org");
-#ifdef __ANDROID__ && ! defined(QT5)
+
+#ifdef __ANDROID__ && !defined(QT5)
     AndroidSystem androidHelper;
     deviceType=2;
 #endif
 
     QOrbiterLogger localLogger;
-
-
-#ifdef __ANDROID__
-    //    if(androidHelper.updateExternalStorageLocation()){
-
-    //        if(androidHelper.externalStorageLocation!="")
-    //        localLogger.setLogLocation(QString(androidHelper.externalStorageLocation+"LinuxMCE/"));
-    //    }
-#endif
 
     g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
     g_sBinaryPath = FileUtils::BasePath(argv[0]);
@@ -270,7 +262,7 @@ int main(int argc, char* argv[])
         case 's':
             screen="fullscreen";
             break;
-        case 'onscreen':
+        case 'o':
             screen="fullscreen";
             deviceType=0;
             break;
@@ -288,7 +280,8 @@ int main(int argc, char* argv[])
              << "-r -- the IP address of the DCE Router  Defaults to 'dcerouter'." << endl
              << "-d -- This device's ID number.  If not specified, it will be requested from the router based on our IP address." << endl
              << "-l -- Where to save the log files.  Specify 'dcerouter' to have the messages logged to the DCE Router.  Defaults to stdout." << endl
-             << "-s --Switch to frameless fullscreen mode." << endl;
+             << "-s --Switch to frameless fullscreen mode." << endl
+             << "-o --Switch for frameless MD." << endl;
 #ifndef __ANDROID__
         exit(1);
 #endif

@@ -85,10 +85,12 @@ TARGET=qorbiter-$$QT_VERSION
 
         INSTALLS+= qmlplugins
         HEADERS += ../../plugins/AndroidInfo/androidsystem.h \
-        androidmediaplayer.h
+        androidmediaplayer.h \
+    ../../contextobjects/screenmessage.h
 
         SOURCES += ../../plugins/AndroidInfo/androidsystem.cpp \
         androidmediaplayer.cpp \
+    ../../contextobjects/screenmessage.cpp
 
 
 

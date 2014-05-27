@@ -30,7 +30,7 @@ MediaManager::MediaManager(QQuickItem *parent):
     QQuickItem(parent)
   #endif
 {
-#ifdef __ANDROID__   
+#ifdef Q_OS_ANDROID
 
     #ifdef QT4
       setFlag(ItemHasNoContents, false);

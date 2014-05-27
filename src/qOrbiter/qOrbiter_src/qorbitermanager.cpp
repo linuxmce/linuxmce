@@ -312,16 +312,13 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     emit orbiterInitialized();
 }
 
-qorbiterManager::~qorbiterManager()
-{
+qorbiterManager::~qorbiterManager(){
     // clear any generic datagrids
     clearAllDataGrid();
-
     cleanupData();
 }
 
-void qorbiterManager::gotoQScreen(QString s)
-{
+void qorbiterManager::gotoQScreen(QString s){
 
     clearAllDataGrid();
     if(s.contains("Screen_1.qml"))
@@ -331,7 +328,6 @@ void qorbiterManager::gotoQScreen(QString s)
         emit clearModel();
         emit cancelRequests();
         emit resetFilter();
-
     }
 
     //send the qmlview a request to go to a screen, needs error handling
@@ -619,8 +615,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     }
 
     setDceResponse("Attempting to write config");
-    if (!writeConfig())
-    {
+    if (!writeConfig()){
         setDceResponse("Couldnt save config!");
     }
 
@@ -1732,16 +1727,11 @@ void qorbiterManager::quickReload()
     //bool connected = pqOrbiter->m_bRouterReloading;
 }
 
-void qorbiterManager::showUI(bool b)
-{
+void qorbiterManager::showUI(bool b){
 
-    if( b_orbiterReady && b_skinReady )
-    {
-
+    if( b_orbiterReady && b_skinReady ) {
         setActiveSkin(currentSkin);
-    }
-    else
-    {
+    } else  {
         setDceResponse("Orbiter Cant Show UI");
 #ifdef debug
         qDebug() << "Orbiter Status:" << b_orbiterReady;
@@ -1751,22 +1741,19 @@ void qorbiterManager::showUI(bool b)
 
 }
 
-void qorbiterManager::displayModelPages(QList<QObject *> pages)
-{
+void qorbiterManager::displayModelPages(QList<QObject *> pages){
     qorbiterUIwin->rootContext()->setContextProperty("pageList", QVariant::fromValue(pages));
 }
 
 
-void qorbiterManager::getFloorplanDevices(int floorplantype)
-{
-    for (int i=0; i < floorplans->rowCount(); i++)
-    {
+void qorbiterManager::getFloorplanDevices(int floorplantype){
+
+    for (int i=0; i < floorplans->rowCount(); i++) {
 #ifdef debug
         qDebug() << floorplans->index(i, 0, QModelIndex()).data(1);
 #endif
 
-        if(floorplans->index(i).data(6).toInt() == floorplantype)
-        {
+        if(floorplans->index(i).data(6).toInt() == floorplantype)  {
 
             QString markerID = floorplans->index(i).data(1).toString();
             current_floorplan_devices.append(floorplans->find(markerID));
@@ -1784,6 +1771,9 @@ void qorbiterManager::setFloorplanType(int t)
 
 void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 {
+    qDebug() << "Current Status ==> " << status;
+
+
     if(status=="starting"){
         setDceResponse("Triggering connection to LMCE Device ID [" + incdeviceid + "] port Router Address [" + incrouterip + "]") ;
         setInternalIp(incrouterip);
@@ -1824,7 +1814,7 @@ bool qorbiterManager::readLocalConfig()
 
 #ifdef NECESSITAS
 
-    qDebug() << mobileStorageLocation;
+    qDebug() << "Mobile Storage Location::" << mobileStorageLocation;
     if(setupMobileStorage(androidHelper->externalStorageLocation)){
         xmlPath = mobileStorageLocation+"/config.xml" ;
     }
@@ -1988,7 +1978,7 @@ bool qorbiterManager::readLocalConfig()
 
 
         }
-
+        setDceResponse("Finished READ of config.xml @"+mobileStorageLocation);
         return true;
     }
 }
@@ -2002,7 +1992,7 @@ bool qorbiterManager::writeConfig()
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif __ANDROID__
-    QString xmlPath = mobileStorageLocation+"config.xml";
+    QString xmlPath = mobileStorageLocation+"/config.xml";
 #elif WIN32
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #else
@@ -2016,14 +2006,11 @@ bool qorbiterManager::writeConfig()
     }
     localConfigFile.setFileName(appConfigPath);
 
-    if (!localConfigFile.open(QFile::ReadWrite))
-    {
+    if (!localConfigFile.open(QFile::ReadWrite)){
         setDceResponse(localConfigFile.errorString());
         setDceResponse("Local Config is missing!");
         return false;
-    }
-    else
-    {
+    } else {
         if (!localConfig.setContent(&localConfigFile)){
             setDceResponse("Cannot set document type!");
             return false;
@@ -2053,12 +2040,10 @@ bool qorbiterManager::writeConfig()
 
             QByteArray output = localConfig.toByteArray();
             localConfigFile.open(QFile::ReadWrite);
-            if (!localConfigFile.write(output))
-            {
+            if (!localConfigFile.write(output)){
                 localConfigFile.close();
                 setDceResponse("save failed");
                 qWarning("Save Failed");
-
                 return false;
             }
             localConfigFile.close();
@@ -2291,8 +2276,7 @@ void qorbiterManager::showMessage(QString message, int duration, bool critical)
 
 void qorbiterManager::startOrbiter()
 {
-    if (b_skinReady && b_orbiterReady)
-    {
+    if (b_skinReady && b_orbiterReady)    {
         setDceResponse("Showing main orbiter window");
         QApplication::processEvents(QEventLoop::AllEvents);
 
@@ -2305,9 +2289,9 @@ void qorbiterManager::startOrbiter()
         qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
         qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
-        QApplication::processEvents(QEventLoop::AllEvents);
+     //   QApplication::processEvents(QEventLoop::AllEvents);
         emit screenChange("Screen_1.qml");
-        QApplication::processEvents(QEventLoop::AllEvents);
+       // QApplication::processEvents(QEventLoop::AllEvents);
     }
     else
     {
@@ -2405,7 +2389,7 @@ bool qorbiterManager::createAndroidConfig()
 {
 
 
-    QFile droidConfig(mobileStorageLocation+"config.xml");
+    QFile droidConfig(mobileStorageLocation+"/config.xml");
     setDceResponse("Config File Path::"+droidConfig.fileName());
     if (droidConfig.exists() && droidConfig.size() != 0)
     {

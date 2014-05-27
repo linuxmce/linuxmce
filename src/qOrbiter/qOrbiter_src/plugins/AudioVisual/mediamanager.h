@@ -6,7 +6,7 @@
 #include <QDeclarativeItem>
 #include <QGLWidget>
 
-#ifndef __ANDROID__
+#ifndef Q_OS_ANDROID
 #include <QBoxLayout>
 #include <phonon>
 #include <QHBoxLayout>
@@ -56,7 +56,7 @@ class MediaManager :
     Q_PROPERTY(int incomingTime READ getIncomingTime WRITE setIncomingTime NOTIFY incomingTimeChanged)
     Q_PROPERTY(bool flipColors READ getColorFlip WRITE setColorFlip NOTIFY colorFlipChanged)
 #ifndef __ANDROID__
-    //  Q_PROPERTY(QList <Phonon::AudioOutputDevice> outputs READ getAvailibleOutputs NOTIFY availibleAudioOutputsChanged())
+     Q_PROPERTY(QList <Phonon::AudioOutputDevice> outputs READ getAvailibleOutputs NOTIFY availibleAudioOutputsChanged())
 #endif
     Q_PROPERTY(QString serverAddress READ getServerAddress WRITE setServerAddress NOTIFY serverAddressChanged)
     Q_PROPERTY(int deviceNumber READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
@@ -105,19 +105,19 @@ public:
 
 
 
-#ifndef __ANDROID__
-#ifdef QT4
+#ifndef Q_OS_ANDROID
+    #ifdef QT4
     QWidget *window;
     QList <Phonon::AudioOutputDevice> outputs;
     QVBoxLayout *layout;
     ColorFilterProxyWidget *filterProxy;
-#elif QT5
+    #elif QT5
     /*
      *In Qt5
      *We dont need to do any painting of the operations normally
      *This may change with raspberry pi
      */
-#endif
+    #endif
 #endif
 
     qMediaPlayer *mediaPlayer;
@@ -145,13 +145,13 @@ public:
 
 #ifdef QT4
 
-#ifndef __ANDROID__
+    #ifndef Q_OS_ANDROID
     Phonon::VideoWidget *videoSurface;
     Phonon::AudioOutput *audioSink;
     Phonon::MediaObject *mediaObject;
     Phonon::MediaController * discController;
     QGLWidget *accel;
-#endif
+    #endif
 
 #endif
 
@@ -221,9 +221,9 @@ public slots:
     }
     bool getColorFlip() { return flipColors;}
 
-#ifndef __ANDROID__
-    //  void setAvailibleOutputs(QList<Phonon::AudioOutputDevice> l){outputs.clear(); outputs = l; emit availibleAudioOutputsChanged(); }
-    //  QList <Phonon::AudioOutputDevice> getAvailibleOutputs(){ return outputs;}
+#ifndef Q_OS_ANDROID
+      void setAvailibleOutputs(QList<Phonon::AudioOutputDevice> l){outputs.clear(); outputs = l; emit availibleAudioOutputsChanged(); }
+      QList <Phonon::AudioOutputDevice> getAvailibleOutputs(){ return outputs;}
 #endif
 
     void setMuted(bool m){muted = m; emit mutedChanged();}
@@ -236,7 +236,7 @@ public slots:
     void setVolume(qreal vol){
 
 #ifdef QT4
-    #ifndef __ANDROID__
+    #ifndef Q_OS_ANDROID
         qreal c = audioSink->volume();
         qWarning() << "Current volume" << c;
         qreal d = c+0.01;
@@ -287,7 +287,7 @@ public slots:
 
         if (mediaPlaying==false)
         {
-#ifndef __ANDROID__
+#ifndef Q_OS_ANDROID
 #ifndef QT5
             filterProxy->hide();
 #endif
@@ -295,7 +295,7 @@ public slots:
         }
         else
         {
-#ifndef __ANDROID__
+#ifndef Q_OS_ANDROID
 #ifdef QT4
             filterProxy->show();
 #endif
@@ -310,7 +310,7 @@ public slots:
     void setFileReference(QString f){
         fileReference = f;
         androidUrl = fileReference;
-#ifdef __ANDROID__
+#ifdef Q_OS_ANDROID
         emit androidUrlUpdated();
         connectInfoSocket();
         startTimeCodeServer();
@@ -493,13 +493,13 @@ private slots:
     bool initViews(bool flipped);
     void setupDirectories();
 #ifdef QT4
-#ifndef __ANDROID__
+    #ifndef Q_OS_ANDROID
     void setSubtitles(){      qDebug() << "SubTitles: \t" << discController->availableSubtitles(); }
     void setAvailTitles(int t){ qDebug() << "Titles: \t" << discController->availableTitles(); }
     void setChapters(int c){qDebug() << "Chapters: \t" << discController->availableChapters(); }
     void setAngles(int a) {qDebug() << "Angles: \t" << discController->availableAngles(); }
     void setAudioChannels(){ qDebug() << "Audio Channels: \t" << discController->availableAudioChannels();}
-#endif
+    #endif
 #endif
 };
 

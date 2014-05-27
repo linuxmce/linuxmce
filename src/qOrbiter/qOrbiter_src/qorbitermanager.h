@@ -416,6 +416,7 @@ Param 10 - pk_attribute
     QList<QObject*> existingOrbiters;
 
     QStringList screensaverImages;
+    QList<QObject> *screenMessages;
 
     QStringList *gotoScreenList;
 

@@ -1760,7 +1760,7 @@ bool DCE::qOrbiter::initialize()
     //    }
     emit commandResponseChanged("Initialization IP::"+ QString::fromStdString(m_sIPAddress));
 
-qDebug() << "INITIALIZE!!!!!!!!!";
+    qDebug() << "INITIALIZE!!!!!!!!!";
     if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
     {
         m_dwMaxRetries = 1;
@@ -1779,41 +1779,26 @@ qDebug() << "INITIALIZE!!!!!!!!!";
 
         CreateChildren();
         return true;
-    }
-    else
-    {
-
-
+    } else {
         //QApplication::processEvents(QEventLoop::AllEvents);
-        if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
-        {
-
+        if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect ) {
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router");
             emit commandResponseChanged("No Connection to Router");
             emit routerInvalid();
             //QApplication::processEvents(QEventLoop::AllEvents);
             return false;
-
-        }
-        else if( m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice )
-        {
+        } else if( m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice ) {
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Bad Device");
             emit commandResponseChanged("Bad Device");
             emit connectionValid(true);
             return false;
-        }
-
-        else if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_NeedReload )
-        {
-
+        } else if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_NeedReload ){
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Router Needs Reload");
             emit commandResponseChanged("Needs Reload");
             //QApplication::processEvents(QEventLoop::AllEvents);
             return false;
-        }
-        else
-        {
+        } else {
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
             Disconnect();
@@ -1887,7 +1872,7 @@ void DCE::qOrbiter::deinitialize()
 {
     char *pData;
     int iSize;
-    pData = "NULL";
+    pData = NULL;
     iSize = 0;
     BindMediaRemote(false);
     //DCE::CMD_Orbiter_Registered CMD_OrbiterUnRegistered(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
@@ -1945,7 +1930,7 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
     i_user = user;
     i_ea = ea.toInt();
     i_room = room;
-    pData = "NULL";
+    pData = NULL;
     iSize = 0;
     string pResponse ="";
     //on-off  PkUsers -int entArea -string  int room
@@ -2589,7 +2574,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     int GridCurCol= 0;
     string pResponse="";
     char *pData;
-    pData = "NULL";
+    pData = NULL;
 
     QString temp;
     m_dwIDataGridRequestCounter++;
@@ -2888,7 +2873,7 @@ void DCE::qOrbiter::requestMediaPlaylist()
     int GridCurRow = 0;
     int GridCurCol= 0;
     char *pData;
-    pData = "NULL";
+    pData = NULL;
     m_dwIDataGridRequestCounter++;
 
     string sPopulateResp ="";
@@ -3248,7 +3233,7 @@ void DCE::qOrbiter::GetNowPlayingAttributes()
         int GridCurCol= 0;
 
         char *pData;
-        pData = "NULL";
+        pData = NULL;
 
         m_dwIDataGridRequestCounter++;
 
@@ -3390,7 +3375,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
     int GridCurRow = 0;
     int GridCurCol= 0;
     char *pData;
-    pData = "NULL";
+    pData = NULL;
     m_dwIDataGridRequestCounter++;
 #ifdef ANDROID
 
@@ -3401,8 +3386,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
     CMD_Populate_Datagrid cmd_populate_livetv_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 11, m_UserID + "," + m_EA, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 #endif
     qDebug() << "Userid::" <<m_UserID.c_str();
-    if (SendCommand(cmd_populate_livetv_grid))
-    {
+    if (SendCommand(cmd_populate_livetv_grid))    {
         /*
               initial request to populate the text only grid as denoted by the lack of a leading "_" as in _MediaFile_43
               this way, we can safely check empty grids and error gracefully in the case of no matching media
@@ -3564,7 +3548,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
 
     int iData_Size=0;
     char *pData;
-    pData = "NULL";
+    pData = NULL;
     //CMD_Request_Datagrid_Contents(                              long DeviceIDFrom,                long DeviceIDTo,                   string sID,                                string sDataGrid_ID, int iRow_count,int iColumn_count,        bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,       int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
 
     DCE::CMD_Request_Datagrid_Contents req_data_grid_pics( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(imgDG),    media_pageSeperator,    gWidth,                  false,                 false,                                 true, m_sSeek,   iOffset,  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
@@ -3738,7 +3722,7 @@ void DCE::qOrbiter::GetAdvancedMediaOptions(int device) // prepping for advanced
     int GridCurRow = 0;
     int GridCurCol= 0;
     char *pData;
-    pData = "NULL";
+    pData = NULL;
     string m_sSeek = "";
     string options = StringUtils::itos(device) + ",134, 670";
     m_dwIDataGridRequestCounter++;
@@ -3947,7 +3931,7 @@ void DCE::qOrbiter::showAdvancedButtons()
     int GridCurRow = 0;
     int GridCurCol= 0;
     char *pData;
-    pData = "NULL";
+    pData = NULL;
     string m_sSeek = "";
     m_dwIDataGridRequestCounter++;
     int iOffset = 0;
@@ -3989,7 +3973,7 @@ void DCE::qOrbiter::showAdvancedButtons()
                 splitter = cellTitle.split("/");
                 qDebug() << splitter.join("--");
 
-                emit addDevice(new AvDevice(fk_file.toInt(), splitter.at(0), splitter.at(splitter.length()-2), "null", -1, false ));
+                emit addDevice(new AvDevice(fk_file.toInt(), splitter.at(0), splitter.at(splitter.length()-2), NULL, -1, false ));
             }
         }
     }
@@ -4041,7 +4025,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
     int GridCurCol= 0;
 
     char *pData;
-    pData = "NULL";
+    pData = NULL;
     m_dwIDataGridRequestCounter++;
 
     CMD_Populate_Datagrid cmd_populate_attribute_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 31, QString::number(i_ea).toStdString(), 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
@@ -4189,7 +4173,7 @@ void DCE::qOrbiter::ShowBookMarks()
     int GridCurRow = 0;
     int GridCurCol= 0;
     char *pData;
-    pData = "NULL";
+    pData = NULL;
     string m_sSeek = "";
     string options = "0,"+StringUtils::itos(i_ea);
     m_dwIDataGridRequestCounter++;
@@ -4291,7 +4275,7 @@ void qOrbiter::OnReload()
     BindMediaRemote(false);
     char *pData;
     int iSize;
-    pData = "NULL";
+    pData = NULL;
     iSize = 0;
     DCE::CMD_Orbiter_Registered unregister(m_dwPK_Device, iOrbiterPluginID, StringUtils::itos(m_dwPK_Device) ,i_user, StringUtils::itos(i_ea), i_room, &pData, &iSize);
     SendCommand(unregister);
@@ -4682,7 +4666,7 @@ void DCE::qOrbiter::prepareFileList(QString filterString)
 
     int iData_Size=0;
     char *pData;
-    pData = "NULL";
+    pData = NULL;
 
     m_dwIDataGridRequestCounter++;  //request counter dont know what its used for.
 
@@ -4836,7 +4820,7 @@ void qOrbiter::getFloorPlanImage(QString fp_path)
 
 void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)
 {
-    char *picData="";
+    char *picData=NULL;
     int picData_Size;
     picData_Size = 0;
     CMD_Request_File reqFile((long)m_dwPK_Device, (long)4 , inc_requested_img_path.toStdString(), &picData, &picData_Size);

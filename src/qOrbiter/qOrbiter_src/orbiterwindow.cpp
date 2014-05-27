@@ -125,7 +125,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     //  mainView.rootContext()->setContextProperty("orbiterList" , "");
 
 #ifdef GLENABLED
-#ifdef QT4_8
+#ifndef Q_OS_ANDROID
     QGLFormat format= QGLFormat::defaultFormat();
     glWidget = new QGLWidget(format);
     glWidget->setAutoFillBackground(false);
@@ -220,7 +220,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #ifdef QT5
 qrcPath = "qrc:main/Welcome2.qml";
 #else
-    qrcPath = "qrc:main/Welcome.qml";
+    qrcPath = "assets:/qml/Base.qml";
 #endif
     localPath = "android/";
 #elif defined for_android
