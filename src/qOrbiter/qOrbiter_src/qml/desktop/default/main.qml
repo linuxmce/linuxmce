@@ -43,6 +43,10 @@ Item {
         dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
     }
 
+    Style{
+        id:skinStyle
+    }
+
     FontLoader{
         id:myFont
         name:"Sawasdee"
@@ -167,9 +171,7 @@ Item {
         if (componentLoader.status == Component.Ready){
             if(paramObj){
                 var i = componentLoader.item
-                for(var p in paramObj){
-                    console.log(JSON.stringify(paramObj))
-                    console.log(JSON.stringify(p))
+                for(var p in paramObj){                   
                     i[p] =paramObj[p]
                 }
                 console.log(JSON.stringify(componentLoader.item))

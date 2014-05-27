@@ -14,11 +14,7 @@ Item{
     property alias fontSize:label.fontSize
     property alias textObj:label
     onActiveFocusChanged: console.log( text+ " active focus is " + activeFocus)
-    Rectangle{
-        anchors.fill: parent
-        gradient: appStyle.buttonGradient
-        radius:5
-    }
+
     Rectangle{
         anchors.fill: parent
         color:"black"
@@ -26,6 +22,11 @@ Item{
         radius:5
         border.color: "white"
         border.width: focusButton.activeFocus ? 3 : 0
+    }
+    Rectangle{
+        anchors.fill: parent
+        gradient: appStyle.buttonGradient
+        radius:5
     }
     StyledText{
         id:label

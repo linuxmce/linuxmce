@@ -30,12 +30,10 @@ Item{
 
         }
     }
-    Rectangle{
-        anchors.fill: parent
-        opacity:ftr.activeFocus ? 1 : .65
-        color:appStyle.primaryLightColor
-        border.width: ftr.activeFocus ? 2 : 0
-        border.color:  "red"
+
+    GradientFiller {
+        opacity: .75
+
     }
 
     Item{
@@ -47,9 +45,7 @@ Item{
             margins: 5
             left:parent.left
         }
-        GradientFiller {
-            opacity: .75
-        }
+
     }
 
     ListView{
@@ -104,16 +100,18 @@ Item{
                 }
 
             }
-            Rectangle{
-                anchors.fill: parent
-                gradient: appStyle.buttonGradient
-                radius:5
-            }
+
             Rectangle{
                 anchors.fill: parent
                 radius:5
                 opacity: .75
                 color: currentItem===index ? appStyle.complimentColorLight : appStyle.darkHighlightColor
+            }
+            Rectangle{
+                anchors.fill: parent
+                gradient: appStyle.buttonGradient
+                radius:5
+                opacity: .65
             }
             StyledText{
                 anchors.centerIn: parent
@@ -121,6 +119,7 @@ Item{
                 font.pixelSize:headerText
                 font.bold: true
                 font.capitalization: Font.SmallCaps
+                color:appStyle.lighttext
             }
             Keys.onTabPressed: {swapFocus();ftr.state="hidden"}
             Keys.onDownPressed: {
@@ -164,27 +163,23 @@ Item{
                 keyNavigationWraps: true
                 clip:true
                 anchors.bottom: parent.top
+                anchors.bottomMargin: 10
                 spacing:scaleY(1)
                 delegate: Item{
                     rotation: 180
                     height:label.paintedHeight
                     width: scenarioList.itemWidth
-                    Rectangle{
-                        anchors.fill: parent
-                        gradient: appStyle.buttonGradient
-                        radius:5
-                    }
-                    Rectangle{
-                        anchors.fill: parent
-                        radius:5
-                        clip: true
-                        color:submodel.currentIndex === index ? "darkgrey" : "black"
-                        opacity: submodel.currentIndex === index ? .85 : .65
+
+
+                    GradientFiller{
+                        fillColor: submodel.currentIndex === index ? "black" : appStyle.button_system_color
+                        opacity: submodel.currentIndex === index ? .75 : .55
+                        grpRadius: 5
                     }
 
                     StyledText {
                         id:label
-                        color:"white"
+                        color:appStyle.lighttext
                         text: title
                         font.bold: submodel.currentIndex === index
                         width:parent.width

@@ -10,13 +10,10 @@ Item{
     height:scaleY(8)
     state:"hidden"
     property bool isActive: activeFocus
-    Rectangle{
-        anchors.fill: parent
-        color:appStyle.primaryLightColor
-        border.width: hdr.activeFocus ? 2 : 0
-        focus:false
-        border.color:"red"
-        opacity: hdr.activeFocus ? 1 : .65
+
+    GradientFiller {
+        opacity: .75
+
     }
 
     Row{

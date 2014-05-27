@@ -56,62 +56,63 @@ Item {
 
     MediaListGridDelagate {
         id: contactDelegate
-       visible: false
+        visible: false
     }
 
-        GridView {
-            id: gridView
-            //z: 2
-            width: scaleX(95)
-            height: scaleY(85)
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            anchors.topMargin: scaleY(3)
-            model: manager.getDataGridModel("MediaFile", 63)
-            delegate: MediaListGridDelagate{}
-            focus: true
-            //clip: true
-            //contentItem.clip: true
-            cellWidth: contactDelegate.width
-            cellHeight: contactDelegate.height
-            flow:GridView.TopToBottom
-            opacity:1
-            scale:1
-            cacheBuffer: 15
-            interactive:true
-            highlightFollowsCurrentItem:true
-            Component.onCompleted:forceActiveFocus()
+    GridView {
+        id: gridView
+        //z: 2
+        width: scaleX(95)
+        height: scaleY(85)
 
-            Keys.onPressed: {
-                if(event.key !==Qt.Key_Enter && event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235 && event.text != ""){
-		    manager.seekGrid("MediaFile", event.text)
-                }
-            }
-            Keys.onEnterPressed: {
-                manager.setStringParam(4, gridView.model.get(currentIndex, "id"))
-                gridView.positionViewAtIndex(0, ListView.Beginning)
-            }
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: scaleY(3)
+        model: manager.getDataGridModel("MediaFile", 63)
+        delegate: MediaListGridDelagate{}
+        focus: true
+        //clip: true
+        //contentItem.clip: true
+        cellWidth: contactDelegate.width
+        cellHeight: contactDelegate.height
+        flow:GridView.TopToBottom
+        opacity:1
+        scale:1
+        cacheBuffer: 15
+        interactive:true
+        highlightFollowsCurrentItem:true
+        Component.onCompleted:forceActiveFocus()
 
-            highlight:Rectangle{
-                color:"white"
-                border.color: "white"
-                border.width: 1
-                opacity: .35
-                BorderImage {
-                    id: borderimg
-                    horizontalTileMode: BorderImage.Repeat
-                    source: "../img/icons/drpshadow.png"
-                    anchors.fill: parent
-                    anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
-                    border { left: 10; top: 10; right: 10; bottom: 10 }
-                    smooth: true
-                }
+        Keys.onPressed: {
+            if(event.key !==Qt.Key_Enter && event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235 && event.text != ""){
+                manager.seekGrid("MediaFile", event.text)
             }
         }
-    Connections {  
-	target: gridView.model
-	onScrollToItem: {  gridView.currentIndex = item; gridView.positionViewAtIndex(item, ListView.Beginning); } 
-    }  
+        Keys.onEnterPressed: {
+            manager.setStringParam(4, gridView.model.get(currentIndex, "id"))
+            gridView.positionViewAtIndex(0, ListView.Beginning)
+        }
+
+        highlight:Rectangle{
+            color:"white"
+            border.color: "white"
+            border.width: 1
+            opacity: .35
+            BorderImage {
+                id: borderimg
+                horizontalTileMode: BorderImage.Repeat
+                source: "../img/icons/drpshadow.png"
+                anchors.fill: parent
+                anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
+                border { left: 10; top: 10; right: 10; bottom: 10 }
+                smooth: true
+            }
+        }
+    }
+    Connections {
+        target: gridView.model
+        onScrollToItem: {  gridView.currentIndex = item; gridView.positionViewAtIndex(item, ListView.Beginning); }
+    }
 
 
     Rectangle{
@@ -128,10 +129,10 @@ Item {
                 text: "Play All"
                 PlayAll{}
             }
-//            MoonButton {
-//                id: genre
-//                text: "Genre"
-//            }
+            //            MoonButton {
+            //                id: genre
+            //                text: "Genre"
+            //            }
             MoonButton {
                 id: asort
                 text: "Attribute \n Sort"
@@ -150,7 +151,7 @@ Item {
                 MouseArea{
                     anchors.fill:parent
                     onClicked: {myFilters.y = rez.y; myFilters.selectingUser = true; myFilters.currentFilterModel=userList}
-                    }
+                }
             }
             MoonButton {
                 id: rez
@@ -158,7 +159,7 @@ Item {
                 MouseArea{
                     anchors.fill:parent
                     onClicked: {myFilters.y = rez.y; myFilters.currentFilterModel=fileformatmodel}
-                    }
+                }
             }
             MoonButton {
                 id: mTypes

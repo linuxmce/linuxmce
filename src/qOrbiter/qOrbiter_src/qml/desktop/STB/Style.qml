@@ -30,8 +30,16 @@ Item{
     property string skindescription: "Basic skin to mimic a standard Set-top box."
     property string skinversion: "1.0"
     property string skinvariation: "TV 16:9"
-    property string maincolor: "Black"
+    property string maincolor:"#5034282C"
     property string accentcolor: "white"
+
+    /* Image aspect ratios */
+        property double dvdPosterRatio:1080/955
+        property double hdPosterRatio:1080/755
+        property double cdCoverRatioFront:1080/1080
+        property double cdCoverRatioBack:1080/1264
+        property double vcdRatio:1080/1080
+        property double vhsRatio:1280/620
 
     property variant buttonGradient:btnGradient
     Gradient{
@@ -82,20 +90,20 @@ Item{
     property int orbiterW: 800
 
     //main colors http://colorschemedesigner.com/#3JB1Tw0w0l7l7
-    property color mainColor: "#1B5898"
-    property color darkHighlightColor: "#FF6000"
-    property color lightHighlightColor:"#F0C73C"
+    property color mainColor: "#34282c"
+    property color darkHighlightColor: "#483d41"
+    property color lightHighlightColor:"#ada9aa"
 
-    property color lighttext: "slategrey"
+    property color lighttext: "white"
 
-    property color primaryLightColor:"#2F67B6"
+    property color primaryLightColor:"#9934282C"
     property color primaryDarkColor:"#264E90"
 
     property color secondaryLightColor:"#5056A1"
-    property color secondaryDarkColor:"#313579"
+    property color secondaryDarkColor:"#283330"
 
-    property color complimentColorLight:"#FAC23D"
-    property color complimentColorDark:"#CB670E"
+    property color complimentColorLight:"#3EA055"
+    property color complimentColorDark:"#34282c"
 
     property int homescreenrowheight:100
     property int homescreenbuttonheight: 90
@@ -125,11 +133,11 @@ Item{
     property int buttonRegFont: scaleX(5)
     property int buttonH:95
     property int buttonW: 95
-    property color button_system_color: "darkgrey"
-    property color button_system_color_hover: "lightblue"
+    property color button_system_color: secondaryDarkColor
+    property color button_system_color_hover: complimentColorLight
 
-    property color button_action_color: "maroon"
-    property color button_action_color_hover: "lightblue"
+    property color button_action_color: lightHighlightColor
+    property color button_action_color_hover:complimentColorLight
 
     property string bgImg: "null"
     property string b_title: "null"
