@@ -126,6 +126,14 @@ public:
 			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_COM_Port_on_PC_CONST);
 	}
 
+	string Get_Timeout()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Timeout_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_Timeout_CONST];
+	}
+
 	bool Get_Only_One_Per_PC()
 	{
 		if( m_bRunningWithoutDeviceData )
@@ -256,6 +264,7 @@ public:
 	//Data accessors
 	string DATA_Get_Floorplan_Info() { return GetData()->Get_Floorplan_Info(); }
 	string DATA_Get_COM_Port_on_PC() { return GetData()->Get_COM_Port_on_PC(); }
+	string DATA_Get_Timeout() { return GetData()->Get_Timeout(); }
 	bool DATA_Get_Only_One_Per_PC() { return GetData()->Get_Only_One_Per_PC(); }
 	bool DATA_Get_Autoassign_to_parents_room() { return GetData()->Get_Autoassign_to_parents_room(); }
 	bool DATA_Get_Polling_Enabled() { return GetData()->Get_Polling_Enabled(); }
