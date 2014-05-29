@@ -188,6 +188,7 @@ int main(int argc, char* argv[])
 
 	bool bAppError=false;
 	bool bReload=false;
+	bool bRestart = false;
 	try
 	{
 
@@ -199,7 +200,7 @@ int main(int argc, char* argv[])
 		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface created.");
 		bool bQuit = false;
 		// TODO: should we add some limit to the number of loops - the same way the normal startup script does
-		while (!bAppError && (!bQuit || bReload))
+		while (!bAppError && (!bQuit || bReload) && !bRestart)
 		{
 			bReload = false;
 			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "New ZWave instance");
@@ -216,24 +217,28 @@ int main(int argc, char* argv[])
 				pZWave->CreateChildren();
 				pZWave->SetReady(true);
 				// Now we have our config data from LMCE
-				if (!pZWInterface->IsReady()) {
-					pZWInterface->Init(pZWave->GetConfigData());
-				} else {
-					if (pZWInterface->RequireRestart(pZWave->GetConfigData()))
-					{
-						LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Restarting ZWInterface.");
-						pZWInterface->Init(pZWave->GetConfigData());
-					}
-				}
-				pZWave->DoNodeToDeviceMapping();
-				LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWave+ZWInterface setup done, joining DCE thread");
-
-				if( bLocalMode )
-					pZWave->RunLocalMode();
-				else
+				ZWConfigData* pConfigData = pZWave->GetConfigData();
+				if (pZWInterface->RequireRestart(pConfigData))
 				{
-					if(pZWave->m_RequestHandlerThread)
-						pthread_join(pZWave->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
+				        LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "Restarting..");
+					bRestart = true;
+					delete pConfigData;
+				} else {
+				        if (!pZWInterface->IsReady()) {
+					        pZWInterface->Init(pConfigData);
+					} else {
+					        delete pConfigData;
+					}
+					pZWave->DoNodeToDeviceMapping();
+					LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWave+ZWInterface setup done, joining DCE thread");
+
+					if( bLocalMode )
+					        pZWave->RunLocalMode();
+					else
+					{
+					        if(pZWave->m_RequestHandlerThread)
+						        pthread_join(pZWave->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
+					}
 				}
 				// Detach and clean up locks
 				pZWInterface->SetZWave(NULL);
@@ -283,7 +288,7 @@ int main(int argc, char* argv[])
 	if( bAppError )
 		return 1;
 
-	if( bReload )
+	if( bReload || bRestart )
 		return 2;
 	else
 		return 0;

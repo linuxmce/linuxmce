@@ -35,6 +35,8 @@ namespace DCE {
 			m_dwFK_DeviceTemplate = 0;
 			m_iMainValue = -1;
 		}
+		~LMCEDevice() {
+		}
 		void assignValue(OpenZWave::ValueID valueID) {
 /*			if (m_iMainValue == -1 || (bMainValue &&m_vectValues[m_iMainValue].GetCommandClassId() == 32))
 			m_iMainValue = m_vectValues.size();*/

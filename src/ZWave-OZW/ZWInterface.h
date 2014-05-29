@@ -33,6 +33,7 @@ namespace DCE
 		uint32 m_iPolledValues;
 
 		ZWave* m_pZWave;
+		ZWConfigData* m_pConfigData;
 		string m_sLogFile;
 	public:
 		ZWInterface();

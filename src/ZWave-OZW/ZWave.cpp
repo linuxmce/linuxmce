@@ -1000,8 +1000,8 @@ void ZWave::SetInterface(ZWInterface* pZWInterface)
 ZWConfigData* ZWave::GetConfigData()
 {
 	string port = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
-	
-	return new ZWConfigData(port);
+	int timeout = atoi(DATA_Get_Timeout().c_str());
+	return new ZWConfigData(port, timeout);
 }
 
 void ZWave::PortChannelToNodeInstance(string pc, uint8 &iNodeId, uint8 &iInstance)

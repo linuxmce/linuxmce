@@ -20,8 +20,10 @@ namespace DCE
 	{
 	public:
 		string m_sPort;
-		ZWConfigData(string port) {
+		int m_itimeout;
+		ZWConfigData(string port, int timeout) {
 			m_sPort = port;
+			m_itimeout = timeout;
 		}
 	};
 }

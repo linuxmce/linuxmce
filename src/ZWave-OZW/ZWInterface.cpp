@@ -17,6 +17,7 @@ using namespace DCE;
 ZWInterface::ZWInterface()
 {
 	m_pZWave = NULL;
+	m_pConfigData = NULL;
 	g_homeId = 0;
 	m_iPolledValues = 0;
 	g_initFailed = false;
@@ -38,7 +39,12 @@ ZWInterface::ZWInterface()
 ZWInterface::~ZWInterface()
 {
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::~() destructor, calling OpenZWave::Manager::Destroy()");
+	if (m_pConfigData != NULL)
+	        OpenZWave::Manager::Get()->RemoveDriver(m_pConfigData->m_sPort );
+	OpenZWave::Manager::Get()->RemoveWatcher( OnNotification_static, this );
 	OpenZWave::Manager::Destroy();
+	OpenZWave::Options::Destroy();
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::~() destructor, OZW destroyed");
 	Lock();
 	for( list<NodeInfo*>::iterator it = g_nodes.begin(); it != g_nodes.end(); ++it )
 	{
@@ -46,7 +52,13 @@ ZWInterface::~ZWInterface()
 		delete nodeInfo;
 		g_nodes.erase( it );
 	}
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::~() destructor, internal node data destroyed");
 	UnLock();
+	if (m_pConfigData != NULL) {
+	        delete m_pConfigData;
+		m_pConfigData = NULL;
+	}
+	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::~() destructor, done");
 }
 
 NodeInfo* ZWInterface::GetNodeInfo ( OpenZWave::Notification const* _notification) {
@@ -85,13 +97,20 @@ bool ZWInterface::Init(ZWConfigData* data) {
 	LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::Init() start");
 	
 	pthread_mutex_lock( &initMutex );
-	
+
+	if (m_pConfigData != NULL)
+	        delete m_pConfigData;
+	m_pConfigData = data;
+
 	// Create the OpenZWave Manager.
 	// The first argument is the path to the config files (where the manufacturer_specific.xml file is located
 	// The second argument is the path for saved Z-Wave network state and the log file.  If you leave it NULL 
 	// the log file will appear in the program's working directory.
 	OpenZWave::Options::Create( "/etc/openzwave/config/", "/etc/openzwave/", "" );
-	OpenZWave::Options::Get()->AddOptionInt("RetryTimeout", 2000);
+	if (data->m_itimeout >= 10) {
+	        LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::Init() RetryTimeout = %d", data->m_itimeout);
+	        OpenZWave::Options::Get()->AddOptionInt("RetryTimeout", data->m_itimeout);
+	}
 	OpenZWave::Options::Get()->Lock();
 
 	if ( m_sLogFile != "")
@@ -114,7 +133,6 @@ bool ZWInterface::Init(ZWConfigData* data) {
 	pthread_cond_wait( &initCond, &initMutex );
 	
 	m_bInitDone = true;
-	
 	if( !g_initFailed )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::Init() init successfull");
@@ -139,7 +157,11 @@ void ZWInterface::SetZWave(ZWave* pZWave) {
 }
 
 bool ZWInterface::RequireRestart(ZWConfigData* data) {
-	// TODO compare new config with old config and decide what to do
+        if (m_pConfigData != NULL && data != NULL) {
+	  LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::RequireRestart() %d != %d", m_pConfigData->m_itimeout, data->m_itimeout);
+	        if (m_pConfigData->m_itimeout != data->m_itimeout)
+		        return true;
+	}
 	return false;
 }
 
