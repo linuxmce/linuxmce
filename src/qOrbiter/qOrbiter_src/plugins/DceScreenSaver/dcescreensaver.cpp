@@ -43,10 +43,10 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     currentImageName="none";
 
     currentUrl = "";
-    active = false;
+    active = true;
     running = false;
     ready = false;
-    interval = 5000;
+    interval = 60000;
     requestManager = new QNetworkAccessManager(this);
     intervalTimer = new QTimer();
     intervalTimer->setSingleShot(false);
@@ -74,7 +74,9 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
 
 DceScreenSaver::~DceScreenSaver()
 {
-
+intervalTimer->stop();
+currentImage=NULL;
+surface=NULL;
 }
 
 void DceScreenSaver::setImageList(QStringList l)
@@ -83,16 +85,21 @@ void DceScreenSaver::setImageList(QStringList l)
         l.removeAll("");
     }
     urlList=l;
+
     if(!urlList.isEmpty()){
         emit urlListReady();
         pictureCount = l.count();
-        getNextImage();
-        setRunning(true);
-        setReady(true);
-        setActive(true);
+        if(active){
+            getNextImage();
+            setRunning(true);
+        } else {
+            setRunning(false);
+            qWarning() << "Screen Saver images loaded, but screensaver disabled by option.";
+        }
+
+        setReady(true);        
         qWarning() << "Screen Saver images loaded.";
-    }
-    else {
+    }  else {
         setRunning(false);
         setReady(false);
         setActive(false);

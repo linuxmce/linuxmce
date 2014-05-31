@@ -339,7 +339,7 @@ win32{
 }
 
 CONFIG +=warn_off
-
+DESTDIR+=../madness
 # Smart Installer package's UID
 # This UID is from the protected range and therefore the package will
 # fail to install if self-signed. By default qmake uses the unprotected
@@ -362,7 +362,7 @@ message(Qt version: $$[QT_VERSION])
 message(Qt is installed in $$[QT_INSTALL_PREFIX])
 message (Build Type: $$DEFINES)
 message( Opengl Status: $$glmsg )
-
+message( Output Path $$DESTDIR )
 SOURCES += main.cpp \
         ../qOrbiter.cpp \
         ../../Gen_Devices/qOrbiterBase.cpp \
