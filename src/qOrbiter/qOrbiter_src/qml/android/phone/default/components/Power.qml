@@ -1,108 +1,113 @@
 import QtQuick 1.0
 
-Rectangle {
+Item {
     id:powerrect
     width: scaleX(75)
     height: scaleY(55)
     clip: true
-    color: skinStyle.darkhighlight
     anchors.centerIn: parent
-    border.color: skinStyle.lighthighlight
-    border.width: 2
-    opacity: 1
 
     Rectangle{
+        anchors.fill: parent
+        border.color: skinStyle.button_system_text_color
+        color:skinStyle.toolbarBgColor
+        border.width: 2
+    }
 
-        width: powerrect.width-1
-        height: powerrect.height-1
-        color:"transparent"
-        clip:true
-        anchors.centerIn: parent
+    Rectangle{
+        id:exit
+        anchors{
+            left:parent.left
+            right:parent.right
+            margins: 5
+            top:powerrect.top
+        }
 
-        Rectangle{
-            id:exit
-            width: parent.width
-            height: scaleX(15)
-            Text {
-                id: exit_label
-                text: qsTr("Exit")
-                font.bold: true
-                font.pixelSize: scaleY(3)
+        height: parent.height*.20
+        gradient: skinStyle.buttonGradient
+        StyledText {
+            id: exit_label
+            text: qsTr("Close")
+            anchors.centerIn: parent
+            color:skinStyle.highlight2
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: loadComponent("NullComponent.qml")
+        }
+    }
+
+    Row{
+        anchors{
+            top:exit.bottom
+            bottom:parent.bottom
+            left:parent.left
+            right:parent.right
+        }
+        spacing: scaleX(5)
+        Column {
+            id: on
+            width: parent.width/2 - 10
+            height: parent.height
+            spacing: scaleY(10)
+
+            StyledButton{
+                id:pwron
+                buttonText: qsTr("Display ON")
+
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+                        manager.displayToggle(1)
+                        loadComponent("NullComponent.qml")
+                    }
+                }
             }
-            MouseArea{
-                anchors.fill: parent
-                onClicked: loadComponent("NullComponent.qml")
+
+            StyledButton {
+                id: mdonlabel
+                buttonText:  qsTr("Media \n Director ON")
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+
+                        loadComponent("NullComponent.qml")
+                    }
+                }
             }
         }
 
-        Row{
-            anchors.top: exit.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: childrenRect.width
-            height: childrenRect.height
-            spacing: scaleX(5)
-            Column {
-                id: on
-                width: childrenRect.width
-                height: childrenRect.height
-                spacing: 10
-                StyledButton{
-                    id:pwron
-                    buttonText: qsTr("Display On")
+        Column {
+            id: off
+            width: parent.width/2 - 10
+            height: parent.height
+            spacing: scaleY(10)
+            StyledButton {
+                id: offlabel
+                buttonText: qsTr("Display OFF")
 
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: {
-                            manager.displayToggle(1)
-                            loadComponent("NullComponent.qml")
-                        }
-                    }
-                }
-
-                StyledButton {
-                    id: mdonlabel
-                    buttonText:  qsTr("Media Director\n On")
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: {
-
-                            loadComponent("NullComponent.qml")
-                        }
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+                        manager.toggleDisplay(false)
+                        loadComponent("NullComponent.qml")
                     }
                 }
             }
 
-            Column {
-                id: off
-                width: childrenRect.width
-                height: childrenRect.height
-                spacing: 10
-                StyledButton {
-                    id: offlabel
-                    buttonText: qsTr("Display Off")
+            StyledButton{
+                id: mdofflabel
+                buttonText: "Media \n Director OFF"
 
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: {
-                            manager.toggleDisplay(false)
-                           loadComponent("NullComponent.qml")
-                        }
-                    }
-                }
-
-                StyledButton{
-                    id: mdofflabel
-                    buttonText: "Media Director\n Off"
-
-                    MouseArea{
-                        anchors.fill: parent
-                        onClicked: {
-                           loadComponent("NullComponent.qml")
-                        }
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+                        loadComponent("NullComponent.qml")
                     }
                 }
             }
         }
     }
 }
+
 
