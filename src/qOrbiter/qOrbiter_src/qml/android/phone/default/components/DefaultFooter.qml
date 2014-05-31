@@ -33,6 +33,9 @@ Item{
             buttonText: "Power"
             onActivated: {loadComponent("Power.qml")}
         }
+        StyledText{
+           text:manager.m_ipAddress
+        }
     }
 
     states: [

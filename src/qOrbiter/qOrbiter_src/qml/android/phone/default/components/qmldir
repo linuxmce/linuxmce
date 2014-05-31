@@ -80,6 +80,7 @@ NowPlayingButton             NowPlayingButton.qml                        #no com
 NowPlayingRemoteImage             NowPlayingRemoteImage.qml                        #no comment
 NullComponent             NullComponent.qml                        #no comment
 OptionMenu             OptionMenu.qml                        #no comment
+Panel             Panel.qml                        #no comment
 PhoneFloorplanLayout             PhoneFloorplanLayout.qml                        #no comment
 Power             Power.qml                        #no comment
 Remote_Audio_controls             Remote_Audio_controls.qml                        #no comment

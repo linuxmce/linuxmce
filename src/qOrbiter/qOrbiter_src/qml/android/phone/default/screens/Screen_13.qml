@@ -1,8 +1,10 @@
 import QtQuick 1.0
 import "../components"
-Item{
+StyledScreen{
     id:securitypanel
     property bool isInvalidPin : false
+
+
     ListModel{
         id:securityModes
 

@@ -38,14 +38,11 @@ StyledScreen{
         }
     }
 
-    Rectangle{
+    Panel{
         id:securitycamrect
         height: childrenRect.height
         width: childrenRect.width
-        border.color: "black"
-        border.width: 2
         anchors.centerIn: parent
-        color: "black"
 
         Image {
             id: securityimage

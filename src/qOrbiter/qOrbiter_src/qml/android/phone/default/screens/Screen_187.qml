@@ -18,67 +18,42 @@ import "../components"
   */
 
 StyledScreen {
-    id:asktoresume
+    id:ask_to_resume
+
+    Panel{
+        headerTitle: "Would you like to resume your media?"
 
 
-    Rectangle {
-        id:containerrect
-        anchors.fill: parent
-        color: skinStyle.bgcolor
-        clip: true
-        border.color: skinStyle.highlight1
-        border.width: 2
-        anchors.centerIn: parent
-        radius: 10
-        opacity:.85
-    }
+        Flow{
+            height: childrenRect.height + scaleY(1)
+            width: childrenRect.width
+            spacing: scaleX(1)
+            anchors.centerIn: parent
 
-    Flow{
-        height: childrenRect.height + scaleY(1)
-        width: childrenRect.width
-        spacing: scaleX(1)
+            StyledButton{
+                buttonText: "Yes Resume"
+                onActivated:  {manager.setPosition(screenparams.getParam(188)) ;gotoQScreen("Screen_"+screenparams.getParam(226)+".qml") }
 
-        anchors.centerIn: parent
+            }
 
-        StyledButton{
-            buttonText: "Yes Resume"
-            onActivated:  {manager.setPosition(screenparams.getParam(188)) ;gotoQScreen("Screen_"+screenparams.getParam(226)+".qml") }
+            StyledButton{
+                buttonText: "No thank you"
+                onActivated: gotoQScreen("Screen_"+screenparams.getParam(226)+".qml")
 
-        }
+            }
 
-        StyledButton{
-            buttonText: "No thank you"
-            onActivated: gotoQScreen("Screen_"+screenparams.getParam(226)+".qml")
+            StyledButton{
+                buttonText: "Yes Always Resume"
+            }
 
-        }
+            StyledButton{
+                buttonText: "No thank you, Never resume"
+            }
 
-        StyledButton{
-            buttonText: "Yes Always Resume"
-        }
-
-        StyledButton{
-            buttonText: "No thank you, Never resume"
         }
 
     }
 
-    Text {
-        id: text1
-        width: parent.width -10
-        height: scaleY(5)
-        text: "Would you Like to Auto resume your media?"
-        z: 2
-        font.family: "Droid Sans"
-        font.italic: false
-        horizontalAlignment: Text.AlignHCenter
-        font.bold: false
-        color: "aliceblue"
-        wrapMode: Text.WrapAnywhere
-        font.pixelSize: 18
-        anchors.centerIn: containerrect
-        anchors.verticalCenterOffset: 50
-    }
 
-    HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
-}
+  }
 

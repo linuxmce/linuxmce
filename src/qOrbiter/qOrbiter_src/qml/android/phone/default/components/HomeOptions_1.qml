@@ -12,23 +12,23 @@ Item{
     }
     ListModel {
         id:buttons
-	ListElement { text: "Exit" }
-	ListElement { text: "Sleeping Alarms" }
-	// Cannot bind script to property (at least no until qt5), so we fake it till then
-	function onClick(index) {
-	    showOptions = !showOptions;
-	    switch (index) {
-		case 0:
-		closeOrbiter(); 
-		break;
-		case 1:
-		manager.gotoQScreen("Screen_29.qml");
-		break;
-	    }		
-	}
+        ListElement { text: "Exit" }
+        ListElement { text: "Sleeping Alarms" }
+        // Cannot bind script to property (at least no until qt5), so we fake it till then
+        function onClick(index) {
+            showOptions = !showOptions;
+            switch (index) {
+            case 0:
+                closeOrbiter();
+                break;
+            case 1:
+                manager.gotoQScreen("Screen_29.qml");
+                break;
+            }
+        }
     }
     OptionMenu {
-	menuItems: buttons
+        menuItems: buttons
     }
 
 

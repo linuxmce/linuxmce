@@ -1,5 +1,4 @@
 import QtQuick 1.1
-//
 
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
@@ -8,6 +7,14 @@ Item{
     width:manager.b_orientation ? parent.width /2 : parent.width /3
     clip:true
     property int buttonH:optionPanel.height / advancedrow.children.length -10
+    function setCurrentSource(s){
+        if(s!==""){
+            console.log("Setting options to "+s)
+        optionLoader.source=s
+        } else {
+            optionLoader.source = "HomeOptionsGeneric.qml"
+        }
+    }
 
     opacity: showOptions ? 1 : 0
 
@@ -24,30 +31,11 @@ Item{
         anchors.top: parent.top
         source:"HomeOptionsGeneric.qml"
         onStatusChanged: {
-            if (optionLoader.status===Loader.Error){
+            if (optionLoader.status===Loader.Error && manager.currentScreen!=="Screen_1.qml"){
                 source = "HomeOptionsGeneric.qml"
             }
         }
         height: manager.appHeight-hdr.height-ftr.height
     }
-
-    states: [
-        State {
-            name: "home"
-            when: manager.currentScreen==="Screen_1.qml"
-            PropertyChanges {
-                target: optionLoader
-                source:"HomeOptions_1.qml"
-            }
-        },
-        State {
-            name: "media"
-            when:manager.currentScreen==="Screen_47.qml"
-            PropertyChanges {
-                target: optionLoader
-                source:"HomeOptions_47.qml"
-            }
-        }
-    ]
 
 }

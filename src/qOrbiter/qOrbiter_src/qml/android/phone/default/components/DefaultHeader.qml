@@ -59,25 +59,25 @@ Item{
             id:optionCol
             spacing:2
             anchors.fill: parent
-	    anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenter: parent.verticalCenter
 
             Rectangle{
                 color: skinStyle.darkhighlight
                 height: hdr.height /5
                 width: height
-		anchors.horizontalCenter: parent.horizontalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
             }
             Rectangle{
                 color: skinStyle.darkhighlight
                 height: hdr.height /5
-		anchors.horizontalCenter: parent.horizontalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
                 width: height
             }
             Rectangle{
                 color: skinStyle.darkhighlight
                 height: hdr.height /5
                 width: height
-		anchors.horizontalCenter: parent.horizontalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
             }
         }
         MouseArea{

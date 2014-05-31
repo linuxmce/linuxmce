@@ -320,6 +320,11 @@ Item {
             console.log("Screen Changed:" + pageLoader.source)
         }
     }
+
+    function setOptions(options){
+        advancedrow.setCurrentSource(options)
+    }
+
     HomeOptions {
         id: advancedrow
         anchors{
