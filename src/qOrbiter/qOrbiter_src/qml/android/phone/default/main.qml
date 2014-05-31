@@ -40,55 +40,55 @@ Item {
     }
 
     MediaManager{
-            id:dceplayer
-            anchors.top: parent.top
-            anchors.left:parent.left
-            focus:true
-            onMediaPlayingChanged: {
-                if(!mediaPlaying)
-                    androidSystem.stopMedia()
-            }
-
-
-            onAndroidUrlUpdated:{
-                console.log("NEW ANDROID URL")
-                if(androidUrl.length > 4){
-                    console.log("URL ok!")
-
-                    androidSystem.playMedia(dceplayer.androidUrl)
-                }
-                else{
-                    console.log("Url Malformed!")
-                    console.log("Url::"+androidUrl)
-                }
-            }
-
-            //  onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
-
-
-            Component.onCompleted: {
-               console.log("initializing qml media player::"+manager.mediaPlayerID)
-
-                if(manager.mediaPlayerID !== -1){
-                     dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-                    androidSystem.startAudioService(dceplayer.callbackAddress);
-
-                }
-            }
-
-            Connections{
-                target:manager
-                onMediaPlayerIdChanged:{
-                    console.log("initializing qml media player::"+manager.mediaPlayerID)
-                    dcePlayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-                }
-            }
-
+        id:dceplayer
+        anchors.top: parent.top
+        anchors.left:parent.left
+        focus:true
+        onMediaPlayingChanged: {
+            if(!mediaPlaying)
+                androidSystem.stopMedia()
         }
+
+
+        onAndroidUrlUpdated:{
+            console.log("NEW ANDROID URL")
+            if(androidUrl.length > 4){
+                console.log("URL ok!")
+
+                androidSystem.playMedia(dceplayer.androidUrl)
+            }
+            else{
+                console.log("Url Malformed!")
+                console.log("Url::"+androidUrl)
+            }
+        }
+
+        //  onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
+
+
+        Component.onCompleted: {
+            console.log("initializing qml media player::"+manager.mediaPlayerID)
+
+            if(manager.mediaPlayerID !== -1){
+                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                androidSystem.startAudioService(dceplayer.callbackAddress);
+
+            }
+        }
+
+        Connections{
+            target:manager
+            onMediaPlayerIdChanged:{
+                console.log("initializing qml media player::"+manager.mediaPlayerID)
+                dcePlayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+            }
+        }
+
+    }
 
     Component.onCompleted: {
         androidSystem.updateBuildInformation()
-          manager.setDceGridSep(100)
+        manager.setDceGridSep(100)
     }
 
     Keys.onReleased: {
@@ -135,7 +135,7 @@ Item {
 
         function returncount(){
             return scenarios.count
-        }    
+        }
 
         ListElement{
             name:"Lights"
@@ -200,38 +200,66 @@ Item {
     }
 
     DceScreenSaver{
-         id:glScreenSaver
-         height:qmlroot.height
-         width: qmlroot.width
-         interval:30000
-         anchors.centerIn: qmlroot
-         requestUrl:manager.m_ipAddress
-         Component.onCompleted: {
-            glScreenSaver.setImageList(manager.screensaverImages)
-         }
+        id:glScreenSaver
+        height:qmlroot.height
+        width: qmlroot.width
+        interval:30000
+        anchors.centerIn: qmlroot
+        // active: manager.m_ipAddress==="192.168.80.1"
+        requestUrl:manager.m_ipAddress
+        Component.onCompleted: {
+            if(manager.m_ipAddress==="192.168.80.1"){
+                glScreenSaver.setImageList(manager.screensaverImages)
+            } else{
+                active=false;
+            }
+        }
 
-         Connections{
-             target:manager
-             onScreenSaverImagesReady:{
-                 glScreenSaver.setImageList(manager.screensaverImages)
-                 console.log("Orbiter Consume Screensaver images")
-                 console.log("Orbiter counts " + glScreenSaver.pictureCount)
-             }
-         }
+        Connections{
+            target:manager
+            onScreenSaverImagesReady:{
+                glScreenSaver.setImageList(manager.screensaverImages)
+                console.log("Orbiter Consume Screensaver images")
+                console.log("Orbiter counts " + glScreenSaver.pictureCount)
+            }
+        }
+    }
 
-     }
+    Rectangle{
+        id:mobileGradient
+        anchors.fill: parent
+        //  visible:!glScreenSaver.active
+        gradient:Gradient{
+            GradientStop{
+                color: "darkgreen"
+                position: 0.0
+            }
+
+            GradientStop{
+                color:"black"
+                position: .65
+            }
+        }
+        Rectangle{
+            anchors.fill: parent
+            color:skinStyle.toolbarBgColor
+
+        }
+    }
+
+
 
 
     function showExitConfirm(){
 
-    } 
+    }
 
 
     function screenchange(screenname )
     {
         if(manager.currentScreen===screenname){
             console.log("Duplicate call to same screen ==>"+screenname)
-         //   return
+            //   return
         }
 
         pageLoader.source = "screens/"+screenname
