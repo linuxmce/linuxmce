@@ -4,6 +4,7 @@ $TEXT_ADD_INSTALL_WIZARD_CONST='Add Install Wizard';
 $TEXT_DELETE_INSTALL_WIZARD_CONST='Delete InstallWizard';
 $TEXT_INSTAL_WIZARD_ENTRIES_CONST='Install Wizard Entries';
 $TEXT_STEP_CONST='Step';
+$TEXT_DEFAULT_CONST='Default';
 
 $TEXT_NO_REPOSITORY_SOURCES_CONST='No repository sources';
 

@@ -98,7 +98,7 @@ function installWizardList($output,$dbADO) {
 						<td colspan="2"><input type="text" name="deviceTemplate_'.$rowWizard['PK_InstallWizard'].'" value="'.$rowWizard['FK_DeviceTemplate'].'"></td>
 
 <!--						<td><input type="text" name="default_'.$rowWizard['PK_InstallWizard'].'" value="'.$rowWizard['Default'].'"></td> -->
-						<td>Default: <input name="default_'.$rowWizard['PK_InstallWizard'].'" type="checkbox" value="1" '.(($rowWizard['Default']==1)?'checked':'').'>  '.$TEXT_DEFAULT_CONST.'</td>
+						<td>'.$TEXT_DEFAULT_CONST.': <input name="default_'.$rowWizard['PK_InstallWizard'].'" type="checkbox" value="1" '.(($rowWizard['Default']==1)?'checked':'').'></td>
 
 						<td><input type="submit" class="button" name="deleteWizard_'.$rowWizard['PK_InstallWizard'].'" value="'.$TEXT_DELETE_INSTALL_WIZARD_CONST.'"></td>
 					</tr>
