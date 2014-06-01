@@ -56,7 +56,9 @@ class MediaManager :
     Q_PROPERTY(int incomingTime READ getIncomingTime WRITE setIncomingTime NOTIFY incomingTimeChanged)
     Q_PROPERTY(bool flipColors READ getColorFlip WRITE setColorFlip NOTIFY colorFlipChanged)
 #ifndef __ANDROID__
+#ifndef QT5
      Q_PROPERTY(QList <Phonon::AudioOutputDevice> outputs READ getAvailibleOutputs NOTIFY availibleAudioOutputsChanged())
+#endif
 #endif
     Q_PROPERTY(QString serverAddress READ getServerAddress WRITE setServerAddress NOTIFY serverAddressChanged)
     Q_PROPERTY(int deviceNumber READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
@@ -222,8 +224,10 @@ public slots:
     bool getColorFlip() { return flipColors;}
 
 #ifndef Q_OS_ANDROID
+#ifndef QT5
       void setAvailibleOutputs(QList<Phonon::AudioOutputDevice> l){outputs.clear(); outputs = l; emit availibleAudioOutputsChanged(); }
       QList <Phonon::AudioOutputDevice> getAvailibleOutputs(){ return outputs;}
+#endif
 #endif
 
     void setMuted(bool m){muted = m; emit mutedChanged();}

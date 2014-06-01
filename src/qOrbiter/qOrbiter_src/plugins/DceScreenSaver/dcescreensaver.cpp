@@ -75,8 +75,7 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
 DceScreenSaver::~DceScreenSaver()
 {
 intervalTimer->stop();
-currentImage=NULL;
-surface=NULL;
+
 }
 
 void DceScreenSaver::setImageList(QStringList l)
