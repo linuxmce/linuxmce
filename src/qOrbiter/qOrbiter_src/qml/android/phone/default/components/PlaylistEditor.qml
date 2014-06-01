@@ -4,7 +4,7 @@ Item {
     anchors.fill: parent
     StyledText{
         anchors.centerIn: parent
-        text:" Media Bookmarks \n Coming Soon"
+        text:"Playlist Editor\n Coming Soon"
         color:"white"
         fontSize: scaleY(10)
     }

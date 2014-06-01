@@ -3,12 +3,9 @@ import "../components"
 StyledScreen{
 
     MediaPlaybackTemplate {
-
         id: storedVideoRemote
 
-
     }
-
 }
 
 

@@ -11,13 +11,7 @@ Item {
 
     Component.onCompleted:{
         manager.setBoundStatus(true)
-        metadataContainer.forceActiveFocus()
-        //    anchors{
-        //        top:parent.top
-        //        left:parent.left
-        //        right:parent.right
-        //        bottom:parent.Bottom
-        //    }
+        metadataContainer.forceActiveFocus()     
         setNavigation("MediaControl.qml")
     }
 
@@ -34,20 +28,23 @@ Item {
         width: parent.width
     }
 
+    AdvancedMediaOptions{
+        id:advanced_options
+    }
+
     Item{
         id:buttonList
     }
 
-
-
     states: [
+
+
         State {
             name: "controls"
             PropertyChanges {
                 target: metadataContainer
                 visible:true
-                focus:true
-                x:0
+                focus:true              
             }
 
             PropertyChanges{
@@ -59,10 +56,16 @@ Item {
 
             PropertyChanges{
                 target:volIndicator
-                height: 0
-                width: 0
-                opacity:0
                 visible:false
+            }
+
+            AnchorChanges{
+                target: metadataContainer
+                anchors{
+                    top:parent.top
+                    left:parent.left
+
+                }
             }
         },
         State{
@@ -75,19 +78,22 @@ Item {
                 psPos:0
 
             }
-            PropertyChanges {
-                target: metadataContainer
-                //                visible:false
-                enabled:false
-                focus:false
-                x:templatePlaylist.psPos+manager.appWidth
+
+            AnchorChanges{
+                target:metadataContainer
+                anchors{
+                    left:parent.right
+                }
             }
         },
         State{
             name:"advanced"
-            PropertyChanges {
-                target: imgContainer
-                visible:false
+            AnchorChanges{
+                target: metadataContainer
+                anchors{
+                    left:undefined
+                    right:parent.left
+                }
             }
         },
         State {
@@ -102,41 +108,10 @@ Item {
                 visible:true
                 opacity:1
             }
-        },
-        State{
-            name:"dragging"
-            when: md_drag.drag.active
         }
     ]
 
-    transitions: [
-        Transition {
-            from: "*"
-            to: "controls"
-            PropertyAnimation{
-                target:metadataContainer
-                property: "x"
-                to:0
-                duration: 350
-                easing.type: Easing.InCurve
-            }
-        },
-        Transition {
-            from: "*"
-            to: "controls"
-            ScriptAction{
-                script: metadataContainer.forceActiveFocus()
-            }
-        },
-        Transition {
-            from: "*"
-            to: "volume"
-            ScriptAction{
-                script:volIndicator.forceActiveFocus()
-            }
 
-        }
-    ]
 
 
     Item{

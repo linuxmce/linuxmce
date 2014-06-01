@@ -218,7 +218,7 @@ Item {
             right: qml_root.right
         }
         interval:30000
-
+        active:manager.m_ipAddress==="192.168.80.1"
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)

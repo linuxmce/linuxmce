@@ -234,7 +234,7 @@ Item {
         width: qmlroot.width
         interval:30000
         anchors.centerIn: qmlroot
-        active: manager.m_ipAddress==="192.168.80.1"
+        active: manager.m_ipAddress==="192.168.80.1" ? true : false
         requestUrl:manager.m_ipAddress
 
 
