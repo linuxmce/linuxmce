@@ -98,7 +98,7 @@ function installWizardList($output,$dbADO) {
 						<td colspan="2"><input type="text" name="deviceTemplate_'.$rowWizard['PK_InstallWizard'].'" value="'.$rowWizard['FK_DeviceTemplate'].'"></td>
 
 <!--						<td><input type="text" name="default_'.$rowWizard['PK_InstallWizard'].'" value="'.$rowWizard['Default'].'"></td> -->
-						<td><input name="default_'.$rowWizard['PK_InstallWizard'].'" type="checkbox" value="1" '.(($rowWizard['Default']==1)?'checked':'').'>  '.$TEXT_DEFAULT_CONST.'</td>
+						<td>Default: <input name="default_'.$rowWizard['PK_InstallWizard'].'" type="checkbox" value="1" '.(($rowWizard['Default']==1)?'checked':'').'>  '.$TEXT_DEFAULT_CONST.'</td>
 
 						<td><input type="submit" class="button" name="deleteWizard_'.$rowWizard['PK_InstallWizard'].'" value="'.$TEXT_DELETE_INSTALL_WIZARD_CONST.'"></td>
 					</tr>
@@ -200,7 +200,7 @@ function installWizardList($output,$dbADO) {
 					UPDATE InstallWizard_Distro SET
 						FK_OperatingSystem=?,
 						FK_Distro=?,
-						FK_DeviceTemplate=?,
+						FK_DeviceTemplate_Required=?,
 						Comments=?
 					WHERE PK_InstallWizard_Distro=?';
 				$dbADO->Execute($updateInstallWizardDistro,array($compatOperatingSystem,$compatDistro,$compatDeviceTemplate,$compatComments,$value));
@@ -241,13 +241,6 @@ function installWizardList($output,$dbADO) {
 		$out.="self.location='index.php?section=installWizardList&from=".$from."';";
 		$out.='</script>';
 	}
-
-//$output->setMenuTitle($TEXT_DEVELOPERS_CONST.' |');
-//$output->setPageTitle($TEXT_INSTALL_WIZARD_CONST);
-//$output->setNavigationMenu(array($TEXT_DISTRO_CONST=>'index.php?section=installWizardList'));
-//$output->setBody($out);
-//$output->setTitle(APPLICATION_NAME.' :: '.$TEXT_DISTRO_CONST);
-//$output->output();
 
 	$output->setBody($out);
 	$output->setTitle(@$rowPackage['Description'].' - '.APPLICATION_NAME.' :: '.$TEXT_CREATE_NEW_INSTALL_WIZARD_CONST);
