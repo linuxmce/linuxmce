@@ -3123,16 +3123,19 @@ void DCE::qOrbiter::SetSecurityStatus(string pin, string mode, int user, string 
 
 void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth) //shows security camera, needs to be threaded as it blocks the ui
 {
-    char *sData;
-    int sData_size= 0;
-    string imgtype;
-    CMD_Get_Video_Frame singleVideoFrame(m_dwPK_Device,long(cam_device), string("1"), 0, iWidth, iHeight, &sData, &sData_size, &imgtype);
-    SendCommand(singleVideoFrame);
+    if(currentScreen=="Screen_15.qml"){
+        char *sData;
+        int sData_size= 0;
+        string imgtype;
+        CMD_Get_Video_Frame singleVideoFrame(m_dwPK_Device,long(cam_device), string("1"), 0, iWidth, iHeight, &sData, &sData_size, &imgtype);
+        SendCommand(singleVideoFrame);
 
-    QImage returnedFrame;
-    returnedFrame.loadFromData(QByteArray(sData, sData_size));
-    //  qDebug()<< "Returned security frame " << returnedFrame.size();
-    emit securityImageReady(cam_device, returnedFrame);
+        QImage returnedFrame;
+        returnedFrame.loadFromData(QByteArray(sData, sData_size));
+        //  qDebug()<< "Returned security frame " << returnedFrame.size();
+        emit securityImageReady(cam_device, returnedFrame);
+    }
+
 }
 
 void DCE::qOrbiter::GetMultipleSecurityCams(QStringList cams) // not implemented yet

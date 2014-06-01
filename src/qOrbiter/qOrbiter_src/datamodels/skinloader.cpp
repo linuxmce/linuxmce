@@ -15,9 +15,9 @@ SkinLoader::SkinLoader(QUrl baseUrl, qorbiterManager *uiRef, SkinDataModel *pare
 #ifdef QT4_8
     current_component = new QDeclarativeComponent(ui_reference->qorbiterUIwin->rootContext()->engine(),this);
 #elif QT5
-      current_component = new QQmlComponent(ui_reference->qorbiterUIwin->rootContext()->engine(),this);
+    current_component = new QQmlComponent(ui_reference->qorbiterUIwin->rootContext()->engine(),this);
 #endif
-qDebug("Skin loader constructor complete");
+    qDebug("Skin loader constructor complete");
 }
 
 
@@ -34,16 +34,16 @@ void SkinLoader::loadSkin(QString name) {
 #if (QT5)
     current_component = new QQmlComponent(ui_reference->qorbiterUIwin->engine(), style);
 #else
-     current_component = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), style);
+    current_component = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), style);
 
 #endif
- current_component->loadUrl(style); //= new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), style);
+    current_component->loadUrl(style); //= new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), style);
     if (current_component->isLoading()) {
         //qDebug() << "Hooking up slot";
 #ifdef QT4_8
         if (QObject::connect(current_component, SIGNAL(statusChanged(QDeclarativeComponent::Status)),this, SLOT(continueLoading())))
 #elif QT5
-         if (QObject::connect(current_component, SIGNAL(statusChanged(QQmlComponent::Status)),this, SLOT(continueLoading())))
+        if (QObject::connect(current_component, SIGNAL(statusChanged(QQmlComponent::Status)),this, SLOT(continueLoading())))
 #endif
         {
             //qDebug() << "Hooked!";
@@ -59,7 +59,7 @@ void SkinLoader::loadSkin(QString name) {
 
         if(!skinsToLoad.isEmpty()){
             qWarning() << "Attempting to remove damaged Style.qml from list of availible skins";
-           skinsToLoad.takeAt(loadercounter);
+            skinsToLoad.takeAt(loadercounter);
             totalSkinsToLoad = skinsToLoad.size();
             qWarning() << "Updated the list of skins to " << totalSkinsToLoad;
             loadercounter++;

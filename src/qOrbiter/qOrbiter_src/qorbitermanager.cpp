@@ -458,12 +458,13 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
         finalPath = remoteDirectoryPath;
     }
 
-
     QUrl base(finalPath);
-        tskinModel = new SkinDataModel(base, new SkinDataItem, this);
-        QObject::connect(tskinModel, SIGNAL(currentSkinReady()), this, SLOT(showSkin()));
-        qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
-        QObject::connect(tskinModel, SIGNAL(skinsFinished(bool)), this, SLOT(setSkinStatus(bool)));
+
+    tskinModel = new SkinDataModel(base, new SkinDataItem, this);
+    qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
+    QObject::connect(tskinModel, SIGNAL(currentSkinReady()), this, SLOT(showSkin()));
+    QObject::connect(tskinModel, SIGNAL(skinsFinished(bool)), this, SLOT(setSkinStatus(bool)));
+
 
 
 
@@ -1053,7 +1054,6 @@ void qorbiterManager::skinLoaded(QDeclarativeView::Status status)
         QApplication::processEvents(QEventLoop::AllEvents);
         writeConfig();
         startOrbiter();
-
     }
 }
 
@@ -1705,16 +1705,24 @@ bool qorbiterManager::loadSkins(QUrl base)
     qDebug()<<"inside of skins we find" << localSkins.join(",");
     tskinModel->addSkin("default");
 #else
-    QDir desktopQmlPath(QString(base.toString()),"",QDir::Name, QDir::NoDotAndDotDot);
-    setDceResponse("Desktop Skin Search Path:"+ desktopQmlPath.dirName());
-    localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
+    if(b_localLoading ){
+        QDir desktopQmlPath(QString(base.toString()),"",QDir::Name, QDir::NoDotAndDotDot);
+        setDceResponse("Desktop Skin Search Path:"+ desktopQmlPath.dirName());
+        localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
 
-    qDebug() << localSkins.count();
-    qDebug()<<"inside of skins we find" << localSkins.join(",");
-    if(localSkins.count()==0){
-        tskinModel->addSkin("default,aeon,STB");
+        qDebug() << localSkins.count();
+        qDebug()<<"inside of skins we find" << localSkins.join(",");
+        if(localSkins.count()==0){
+
+            tskinModel->addSkin("default,aeon,STB");
+        } else {
+            tskinModel->addSkin(localSkins.join(","));
+        }
     } else {
-        tskinModel->addSkin(localSkins.join(","));
+
+             tskinModel->addSkin("default,aeon,STB");
+
+
     }
 #endif
     return true;
@@ -1782,6 +1790,7 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
         initializeManager(incrouterip.toStdString(), incdeviceid.toLong());
     } else {
         status="running";
+        qDebug() << finalPath;
         loadSkins(finalPath);
     }
 
@@ -2240,6 +2249,7 @@ bool qorbiterManager::cleanupData()
     if(roomMedia){
         roomMedia->clear();
     }
+    tskinModel->clear();
 
     roomClimate->clear();
     roomClimateScenarios.clear();
@@ -2289,9 +2299,9 @@ void qorbiterManager::startOrbiter()
         qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
         qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
-     //   QApplication::processEvents(QEventLoop::AllEvents);
+        //   QApplication::processEvents(QEventLoop::AllEvents);
         emit screenChange("Screen_1.qml");
-       // QApplication::processEvents(QEventLoop::AllEvents);
+        // QApplication::processEvents(QEventLoop::AllEvents);
     }
     else
     {
@@ -2339,7 +2349,7 @@ void qorbiterManager::reloadHandler()
 {
     if(cleanupData()){
         qorbiterUIwin->setSource(QUrl("qrc:reload/GenericReload.qml"));
-      status="reloading";
+        status="reloading";
         //        gotoQScreen("ReloadHandler.qml");
     }
 }

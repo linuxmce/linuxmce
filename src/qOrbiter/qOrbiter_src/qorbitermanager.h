@@ -170,15 +170,15 @@ class qorbiterManager : public QObject
 
     Q_PROPERTY(int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)/*!< \brief Contains the current media type of the playing media. \ingroup qorbiter_properties */
     Q_PROPERTY (QString q_mediaType READ getSorting WRITE setGridMediaType NOTIFY mediaGridTypeChanged) /*!< \brief Contains the current media type of the media grid being browsed \ingroup qorbiter_properties */
-    Q_PROPERTY (QString q_subType READ getSubType WRITE setSubType NOTIFY subTypeChanged)
-    Q_PROPERTY(QString q_fileFormat READ getGridFileFormat WRITE setGridFileFormat NOTIFY gridFileFormatChanged)
-    Q_PROPERTY(QString q_attribute_genres READ getGridAttributeGenres WRITE setGridAttributeGenres NOTIFY gridAttributeGenresChanged)
-    Q_PROPERTY(QString q_attributeType_sort READ getGridAttributeTypeSort WRITE setGridAttributeTypeSort NOTIFY gridAttributeSortChanged )
-    Q_PROPERTY(QString q_mediaSources READ getGridMediaSources WRITE setGridMediaSources NOTIFY gridMediaSourcesChanged)
-    Q_PROPERTY(QString q_usersPrivate READ getGridUsersPrivate WRITE setGridUsersPrivate NOTIFY gridPrivateUsersChanged)
-    Q_PROPERTY(QString q_pk_users READ getGridPkUsers WRITE setGridPkUsers NOTIFY gridPkUsersChanged  )
-    Q_PROPERTY(QString q_last_viewed READ getGridLastViewed WRITE setGridLastViewed NOTIFY gridLastViewedChanged)
-    Q_PROPERTY(QString q_pk_attribute READ getGridPkAttribute WRITE setGridPkAttribute NOTIFY gridPkAttributeChanged)
+    Q_PROPERTY (QString q_subType READ getSubType WRITE setSubType NOTIFY subTypeChanged)/*! Subtype property for media grid */
+    Q_PROPERTY(QString q_fileFormat READ getGridFileFormat WRITE setGridFileFormat NOTIFY gridFileFormatChanged)/*! File format property for the current media grid. */
+    Q_PROPERTY(QString q_attribute_genres READ getGridAttributeGenres WRITE setGridAttributeGenres NOTIFY gridAttributeGenresChanged)/*! Attribute/Genre property of the current media grid*/
+    Q_PROPERTY(QString q_attributeType_sort READ getGridAttributeTypeSort WRITE setGridAttributeTypeSort NOTIFY gridAttributeSortChanged )/*! Attribute type property for the current media grid */
+    Q_PROPERTY(QString q_mediaSources READ getGridMediaSources WRITE setGridMediaSources NOTIFY gridMediaSourcesChanged) /*! Media sources property for the current grid */
+    Q_PROPERTY(QString q_usersPrivate READ getGridUsersPrivate WRITE setGridUsersPrivate NOTIFY gridPrivateUsersChanged) /*! Private users property for the current grid */
+    Q_PROPERTY(QString q_pk_users READ getGridPkUsers WRITE setGridPkUsers NOTIFY gridPkUsersChanged  ) /*! The PK users for this grid */
+    Q_PROPERTY(QString q_last_viewed READ getGridLastViewed WRITE setGridLastViewed NOTIFY gridLastViewedChanged) /*! Last viewed property setting for this grid */
+    Q_PROPERTY(QString q_pk_attribute READ getGridPkAttribute WRITE setGridPkAttribute NOTIFY gridPkAttributeChanged) /*! Pk attribute filter for this grid */
     /* Add properties here for missing grid values */
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)/*!< \brief Contains string of the current user \ingroup qorbiter_properties */
     Q_PROPERTY (QString currentRoom READ getCurrentRoom WRITE setCurrentRoom NOTIFY roomChanged)/*!< \brief Contains the current EA or room with the EA  \ingroup qorbiter_properties */
@@ -190,6 +190,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString m_ipAddress READ getInternalIp WRITE setInternalIp NOTIFY internalIpChanged)/*!< \brief Contains string of current ip address \code manager.m_ipAddress \endcode  \ingroup qorbiter_properties  */
     Q_PROPERTY (QString internalHost READ getInternalHost WRITE setInternalHost NOTIFY internalHostChanged)
     Q_PROPERTY (QString externalip READ getExternalIp WRITE setExternalIp NOTIFY externalIpChanged)
+    Q_PROPERTY (bool usingExternal READ getUsingExternal NOTIFY usingExternalChanged) /*! \brief Used to indicate to the user and application if the external ip is in use */
     Q_PROPERTY (QString externalHost READ getExternalHost WRITE setExternalHost NOTIFY externalHostChanged )
     Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )/*!< \brief Contains the number of cells returned in media grid \code manager.media_pageSeperator \endcode  \ingroup qorbiter_properties */
     Q_PROPERTY (int media_currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY mediaPageChanged) /*!< \brief Contains the current page of the media grid is on. Starts at 0. \ingroup qorbiter_properties */
@@ -472,6 +473,7 @@ Param 10 - pk_attribute
     QString internalHost;
     QString externalip;
     QString externalHost;
+    bool usingExternal;
 
     bool debugMode;
     bool dceBool;                   //
@@ -651,6 +653,7 @@ signals:
     void floorplanTypeChanged(int t);
     void internalIpChanged(QString ip);
     void externalIpChanged();
+    void usingExternalChanged();
     void internalHostChanged();
     void externalHostChanged();
     void deviceNumberChanged(int d);
@@ -869,6 +872,8 @@ public slots:
     QString getInternalIp() {return m_ipAddress; }
     void setInternalHost(QString h) { internalHost = h; emit internalHostChanged();}
     QString getInternalHost() {return internalHost;}
+    void setUsingExternal(bool t){if(usingExternal != t ){ usingExternal=t; emit usingExternalChanged(); } }
+    bool getUsingExternal(){return usingExternal;}
     void setExternalIp(QString ex) {externalip = ex; emit externalIpChanged();}
     QString getExternalIp() {return externalip;}
     void setExternalHost(QString h) { externalHost = h; emit externalHostChanged();}
@@ -1183,7 +1188,7 @@ public slots:
             qDebug() << "Bad Data removed from list at entry " << d;
         }
         emit screenSaverImagesReady();
-        ScreenSaver->setActive(true);
+        //ScreenSaver->setActive(true);
     }
 
     QStringList getScreensaverImages(){

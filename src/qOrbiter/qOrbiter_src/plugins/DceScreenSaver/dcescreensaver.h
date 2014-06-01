@@ -24,7 +24,7 @@ class DceScreenSaver :
     Q_DISABLE_COPY(DceScreenSaver)
 
     Q_PROPERTY(QString requestUrl READ getRequestUrl WRITE setRequestUrl NOTIFY requestUrlChanged)
-    Q_PROPERTY(bool active READ getActive WRITE setActive NOTIFY activeChanged)
+    Q_PROPERTY(bool active READ getActive WRITE setScreenSaverActive NOTIFY activeChanged)
     Q_PROPERTY(bool running READ getRunning NOTIFY runningChanged)
     Q_PROPERTY(bool ready READ getReady NOTIFY readyChanged)
     Q_PROPERTY(int interval READ getInterval WRITE setInterval NOTIFY intervalChanged)
@@ -102,7 +102,7 @@ public slots:
     void setRequestUrl(QString s){ requestUrl = s; emit requestUrlChanged();}
     QString getRequestUrl(){return requestUrl;}
 
-    void setActive(bool b){active = b;
+    void setScreenSaverActive(bool b){active = b;
                            if(!b){
                                intervalTimer->stop();
                                setRunning(false);
@@ -151,7 +151,7 @@ private:
     QString currentUrl;
 
 private slots:
-    void resetPicture() {endSize = currentImage.size();  }
+    void resetPicture() { endSize = currentImage.size();  }
 
 protected:
 

@@ -33,6 +33,7 @@ linux-rasp-pi-g++{
 target.path=/opt/QOrbiter
 QML_IMPORT_PATH=target.path/imports
 INSTALLS +=target
+INTALLS += /tmp
 } else {
 target.path=$HOME
 INSTALLS=target

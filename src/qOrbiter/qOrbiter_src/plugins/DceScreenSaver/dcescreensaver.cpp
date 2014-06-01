@@ -89,10 +89,12 @@ void DceScreenSaver::setImageList(QStringList l)
     if(!urlList.isEmpty()){
         emit urlListReady();
         pictureCount = l.count();
+
         if(active){
             getNextImage();
             setRunning(true);
         } else {
+            qDebug() <<"Screen Saver inactive";
             setRunning(false);
             qWarning() << "Screen Saver images loaded, but screensaver disabled by option.";
         }
@@ -102,7 +104,7 @@ void DceScreenSaver::setImageList(QStringList l)
     }  else {
         setRunning(false);
         setReady(false);
-        setActive(false);
+        setScreenSaverActive(false);
     }
 
 }
