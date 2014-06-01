@@ -10,43 +10,27 @@ Item{
         height: parent.height
         width: parent.width
         spacing:scaleX(2)
-        
-        StyledText{
-            id:pageSplit
-            text:"Items per Page: "+ manager.media_pageSeperator
-            color:"white"
-            fontSize:24
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
+        StyledButton{
+            buttonText: "A-Z"
+            width: scaleX(15)
+            onActivated: {
+                pageLoader.item.toggleAlphabet()
+            }
         }
-        
-        //            StyledText{
-        //                id:pageNo
-        //                text:"Current Page:"+ manager.media_currentPage
-        //                color:"white"
-        //                fontSize:24
-        //            }
+
+        StyledText{
+            text: "Seeking to :"+pageLoader.item.currentSeekLetter
+            width: scaleX(15)
+
+        }
+
         
         StyledText{
             id:itemCount
             text:dataModel.currentItemIndex + "/" + dataModel.totalcells
             color:"white"
-            fontSize:24
-            anchors.right: parent.right
+            fontSize:24           
             anchors.verticalCenter: parent.verticalCenter
         }
-
-
-        
-//        StyledText{
-//            id:letterSort
-//            text:"Jump to :"+manager.qs_seek
-//            color:"white"
-//            fontSize:24
-//            MouseArea{
-//                anchors.fill: parent
-//                onReleased: fileviewscreen.state="alphabets"
-//            }
-//        }
     }
 }

@@ -5,27 +5,27 @@ Item{
     id: optionMenu
     property int localButtonH:scaleY(10)
     property variant menuItems
-
-    height: (buttons.count)*localButtonH
+    height: manager.appHeight
     anchors{
         top:parent.top
         left:parent.left
         right:parent.right
+
     }
 
     Rectangle{
-        anchors.fill: optionMenu
+        anchors.fill: menuView
         color: skinStyle.button_system_color_hover // used as border between items
     }
 
     ListView{
         id: menuView
-	model: menuItems
+        model: menuItems
         height:advancedrow.height
-	spacing: 2
-	delegate: MenuItem {
+        spacing: 2
+        delegate: MenuItem {
             height: localButtonH
-	    width: advancedrow.width
+            width: advancedrow.width
             buttonText: qsTr(text)
             onActivated:  menuView.model.onClick(index)
         }

@@ -1,6 +1,6 @@
 import QtQuick 1.1
 import org.linuxmce.enums 1.0
-
+import "../components"
 
 Item{
     id:multi_view_list
@@ -39,8 +39,6 @@ Item{
         id:videoItem
         VideoDelegate{}
     }
-
-
 
     property variant currentDelegate:manager.q_mediaType==5 ? videoItem :audioItem
     Component.onCompleted: {
@@ -91,7 +89,7 @@ Item{
         cellWidth:currentCellWidth
 
         model:manager.getDataGridModel("MediaFile", 63)
-        visible:current_view_type===1
+        visible:true //current_view_type===1
         delegate:currentDelegate
     }
 
@@ -107,8 +105,8 @@ Item{
           //  when:manager.q_mediaType == Mediatypes.STORED_AUDIO
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleX(32)
-                currentCellWidth:scaleX(32)
+                currentCellHeight: scaleX(25)
+                currentCellWidth:scaleX(25)
             }
 
         },

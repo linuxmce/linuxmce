@@ -9,6 +9,7 @@ AssignScreenShot             AssignScreenShot.qml                        #no com
 AttributeDelegate             AttributeDelegate.qml                        #no comment
 AttributeSelector             AttributeSelector.qml                        #no comment
 AttributeTypes             AttributeTypes.qml                        #no comment
+AudioDelegate             AudioDelegate.qml                        #no comment
 AudioRemote             AudioRemote.qml                        #no comment
 Avcodes             Avcodes.qml                        #no comment
 AvOptionButton             AvOptionButton.qml                        #no comment
@@ -71,6 +72,7 @@ Metadata_5             Metadata_5.qml                        #no comment
 MetadataContainer             MetadataContainer.qml                        #no comment
 MultiSelectDelegate             MultiSelectDelegate.qml                        #no comment
 MultiStateFileDisplay             MultiStateFileDisplay.qml                        #no comment
+MultiViewMediaList             MultiViewMediaList.qml                        #no comment
 NavigationArrows             NavigationArrows.qml                        #no comment
 NonEPGPlaylist             NonEPGPlaylist.qml                        #no comment
 NotificationBar             NotificationBar.qml                        #no comment
@@ -114,3 +116,4 @@ Timers             Timers.qml                        #no comment
 UserListComponent             UserListComponent.qml                        #no comment
 UserSelector             UserSelector.qml                        #no comment
 VideoControls             VideoControls.qml                        #no comment
+VideoDelegate             VideoDelegate.qml                        #no comment
