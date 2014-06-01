@@ -52,8 +52,8 @@ Item{
         Text {
             id: track
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
-            anchors.bottom:controls.top
-            anchors.left: ha.right
+//            anchors.bottom:controls.top
+//            anchors.left: ha.right
             text: qsTr("Track: ") + dcenowplaying.track
             //font.italic: true
             smooth: true

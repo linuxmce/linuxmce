@@ -34,6 +34,7 @@ Item {
         text:headerTitle
         isBold: true
         font.pixelSize: scaleY(7)
+        color:skinStyle.tile_color
     }
 
     Item{

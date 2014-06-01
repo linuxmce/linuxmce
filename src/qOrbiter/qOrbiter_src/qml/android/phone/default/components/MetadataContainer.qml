@@ -10,17 +10,19 @@ Item{
         case Qt.Key_VolumeDown:
             manager.adjustVolume(-2)
             mediaPlaybackBase.state = "volume"
+            event.accepted = true
             break;
 
         case Qt.Key_VolumeUp:
             manager.adjustVolume(+2)
             mediaPlaybackBase.state = "volume"
+            event.accepted = true
             break;
 
         default:
-            console.log("Unknown Key ==> "+ event.key)
+            console.log("Uncaught Key ==> "+ event.key)
         }
-        event.accepted = true
+
     }
 
     onXChanged:{

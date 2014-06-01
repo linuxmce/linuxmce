@@ -28,21 +28,15 @@ StyledScreen{
         }
     }
 
-    StyledText {
-        id: singlecamlabel
-        text: "Single Camera view"
-        font.pointSize: 15
-        anchors{
-            top:parent.top
-            left:parent.left
-        }
-    }
+
 
     Panel{
         id:securitycamrect
         height: childrenRect.height
         width: childrenRect.width
         anchors.centerIn: parent
+
+        headerTitle: "Single Camera View"
 
         Image {
             id: securityimage

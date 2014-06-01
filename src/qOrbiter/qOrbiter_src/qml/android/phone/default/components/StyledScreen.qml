@@ -8,6 +8,7 @@ Item {
         console.log(manager.currentScreen+" is open.")
       var o = String(manager.currentScreen)
         setOptions(o.replace("Screen","HomeOptions"))
+
     }
 
     function close(){

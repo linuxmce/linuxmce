@@ -2,12 +2,13 @@ import QtQuick 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 import "../../../../skins-common/lib/handlers"
+StyledScreen{
+    id:file_view_screen
 
-StyledScreen {
-    id:fileviewscreen
-    Item{
+    Item {
+        id:fileviewscreen
+        anchors.fill: parent
 
-        clip: true
         focus:true
         state:"browsing"
         property string currentSeekLetter:"A"
@@ -16,11 +17,7 @@ StyledScreen {
             forceActiveFocus()
         }
 
-        /*    Connections{
-        target:manager
-        onDceGridSepChanged:manager.requestPage(0)
-    }
-*/
+
         ListModel{
             id:alphabetlist
 
@@ -133,76 +130,27 @@ StyledScreen {
         }
 
         Keys.onReleased: {
-            event.accepted=true
+
             switch(event.key){
             case Qt.Key_Back:
+                manager.goBackGrid();
+                 event.accepted=true
+                break;
             case Qt.Key_MediaPrevious:
                 if (!manager.goBackGrid())
                     event.accepted=false
-                break;
-            case Qt.Key_Menu:
-                if(selector.state === "hidden")
-                    selector.state ="atrselect"
                 else
-                    selector.state ="hidden"
-                break;
-            case Qt.Key_M:
-                if(selector.state === "hidden")
-                    selector.state ="atrselect"
-                else
-                    selector.state ="hidden"
-                break;
+                     event.accepted=true
+         break;
             default:
                 console.log(event.key)
                 break
             }
         }
 
-        //    Connections
-        //    {
-        //        target: dataModel
-        //        onProgressChanged:progress_bar_fill.width = progress_bar.width* ((dataModel.currentCells / dataModel.totalcells))
-        //        onReady:progress_bar_fill.width = 0
-        //    }
 
-        //    Rectangle
-        //    {
-        //        id:progress_bar
-        //        height: scaleY(3)
-        //        width: scaleX(50)
-        //        color: "transparent"
-        //        radius:5
-        //        anchors.bottom: parent.bottom
-        //        anchors.horizontalCenter: list_view1.horizontalCenter
-        //        Text {
-        //            id: total_cells
-        //            text: dataModel.totalcells
-        //            color: "yellow"
-        //            font.pixelSize: scaleY(3)
-        //            anchors.left: progress_bar.right
-        //        }
 
-        //        Text {
-        //            id: current_cells
-        //            text: dataModel.currentCells
-        //            color: "green"
-        //            font.pixelSize: scaleY(3)
-        //            anchors.left: progress_bar_fill.right
-        //        }
-
-        //        Rectangle{
-        //            id:progress_bar_fill
-        //            height: parent.height
-        //            width: 0
-        //            color: androidSystem.orangeHighlight
-        //            anchors.bottom: parent.bottom
-        //            clip:true
-        //            radius:5
-        //        }
-        //    }
-
-        Connections
-        {
+        Connections{
             target: filedetailsclass
             onShowDetailsChanged:
             {
@@ -346,45 +294,9 @@ StyledScreen {
 
 
 
-        /*  ListView{
-        id:model_pages
-        height: manager.appHeight
-        width: scaleX(10)
-        model: dataModel.totalPages
-        anchors.left: list_view1.right
-        delegate: Item{
-            height: scaleY(10)
-            width: scaleX(10)
-
-            Rectangle{
-                anchors.fill: parent
-                radius: 5
-                color: "transparent"
-            }
-            Text {
-                id:page_label
-                text: name
-                font.pixelSize: scaleY(2)
-                anchors.centerIn: parent
-                color: "orange"
-                font.bold: true
-            }
-
-            MouseArea{
-                anchors.fill: parent
-                onReleased: { manager.requestPage(index) ; parent.color = "transparent"}
-                onPressed: parent.color = "orange"
-
-            }
-
-        }
-
-    }*/
-
-
-        //    AttributeSelector {
-        //        id:selector
-        //    }
+        //        AttributeSelector {
+        //            id:selector
+        //        }
 
 
 
@@ -406,4 +318,5 @@ StyledScreen {
             }
         ]
     }
+
 }

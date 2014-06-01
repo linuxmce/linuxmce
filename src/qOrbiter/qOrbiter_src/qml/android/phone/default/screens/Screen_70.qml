@@ -1,10 +1,14 @@
 import QtQuick 1.0
 import "../components"
+StyledScreen{
 
-MediaPlaybackTemplate {
+    MediaPlaybackTemplate {
 
-    id: storedVideoRemote
+        id: storedVideoRemote
 
+
+    }
 
 }
+
 

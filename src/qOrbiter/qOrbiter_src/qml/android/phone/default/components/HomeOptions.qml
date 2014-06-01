@@ -8,9 +8,10 @@ Item{
     clip:true
     property int buttonH:optionPanel.height / advancedrow.children.length -10
     function setCurrentSource(s){
+
         if(s!==""){
             console.log("Setting options to "+s)
-        optionLoader.source=s
+            optionLoader.source=s
         } else {
             optionLoader.source = "HomeOptionsGeneric.qml"
         }
@@ -31,7 +32,7 @@ Item{
         anchors.top: parent.top
         source:"HomeOptionsGeneric.qml"
         onStatusChanged: {
-            if (optionLoader.status===Loader.Error && manager.currentScreen!=="Screen_1.qml"){
+            if (optionLoader.status===Loader.Error){
                 source = "HomeOptionsGeneric.qml"
             }
         }

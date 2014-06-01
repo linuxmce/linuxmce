@@ -15,6 +15,7 @@ Item{
         ListElement { text: "Exit" }
         ListElement { text: "Sleeping Alarms" }
         // Cannot bind script to property (at least no until qt5), so we fake it till then
+
         function onClick(index) {
             showOptions = !showOptions;
             switch (index) {

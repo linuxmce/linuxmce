@@ -2,13 +2,9 @@ import QtQuick 1.1
 import "../../../../skins-common/lib/handlers"
 Item {
     id:mediaPlaybackBase
-    anchors{
-        top:parent.top
-        left:parent.left
-        right:parent.right
-        bottom:parent.Bottom
-    }
-    focus:false
+
+    anchors.fill: parent
+    focus:true
     state:"controls"
 
     property double conversionRate:metadataContainer.x/manager.appWidth
@@ -16,6 +12,12 @@ Item {
     Component.onCompleted:{
         manager.setBoundStatus(true)
         metadataContainer.forceActiveFocus()
+        //    anchors{
+        //        top:parent.top
+        //        left:parent.left
+        //        right:parent.right
+        //        bottom:parent.Bottom
+        //    }
         setNavigation("MediaControl.qml")
     }
 
@@ -148,17 +150,19 @@ Item {
             case Qt.Key_VolumeDown:
                 manager.adjustVolume(-2)
                 tripped=true
+                event.accepted = true
                 break;
 
             case Qt.Key_VolumeUp:
                 manager.adjustVolume(+2)
                 tripped=true
+                event.accepted = true
                 break;
 
             default:
                 console.log("Unknown Key ==> "+ event.key)
             }
-            event.accepted = true
+
             closeTimer.restart()
         }
 

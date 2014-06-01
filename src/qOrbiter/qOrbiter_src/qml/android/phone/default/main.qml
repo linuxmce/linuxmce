@@ -94,12 +94,18 @@ Item {
     Keys.onReleased: {
         switch(event.key){
 
+        case Qt.Key_Menu:
+            showOptions=!showOptions
+            console.log("menu button caught in root")
+            break;
+
         case Qt.Key_Back:
             if(manager.currentScreen==="Screen_1.qml"){
                 showExitConfirm()
             } else{
                 manager.goBacktoQScreen()
             }
+            console.log("Caught Back Key")
             break
         case Qt.Key_MediaPrevious:
             if(manager.currentScreen==="Screen_1.qml"){
@@ -111,8 +117,8 @@ Item {
         default:
             console.log(event.key)
         }
+        event.accepted=true
     }
-
     signal close()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
@@ -199,31 +205,6 @@ Item {
         }
     }
 
-    DceScreenSaver{
-        id:glScreenSaver
-        height:qmlroot.height
-        width: qmlroot.width
-        interval:30000
-        anchors.centerIn: qmlroot
-        // active: manager.m_ipAddress==="192.168.80.1"
-        requestUrl:manager.m_ipAddress
-        Component.onCompleted: {
-            if(manager.m_ipAddress==="192.168.80.1"){
-                glScreenSaver.setImageList(manager.screensaverImages)
-            } else{
-                active=false;
-            }
-        }
-
-        Connections{
-            target:manager
-            onScreenSaverImagesReady:{
-                glScreenSaver.setImageList(manager.screensaverImages)
-                console.log("Orbiter Consume Screensaver images")
-                console.log("Orbiter counts " + glScreenSaver.pictureCount)
-            }
-        }
-    }
 
     Rectangle{
         id:mobileGradient
@@ -247,7 +228,23 @@ Item {
         }
     }
 
+    DceScreenSaver{
+        id:glScreenSaver
+        height:qmlroot.height
+        width: qmlroot.width
+        interval:30000
+        anchors.centerIn: qmlroot
+        active: manager.m_ipAddress==="192.168.80.1"
+        requestUrl:manager.m_ipAddress
 
+
+        Connections{
+            target:manager
+            onScreenSaverImagesReady:{
+                glScreenSaver.setImageList(manager.screensaverImages)
+            }
+        }
+    }
 
 
     function showExitConfirm(){
