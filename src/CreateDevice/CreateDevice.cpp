@@ -348,7 +348,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Found %d rows 
 	else if( iPK_DeviceCategory==DEVICECATEGORY_Media_Director_CONST )
 	{
 		// Get Distro and OS from Device
-                string SQL = "SELECT IK_DeviceData as FK_Distro, FK_OperatingSystem FROM Device LEFT JOIN Device_DeviceData ON FK_Device=PK_Device LEFT JOIN Distro ON IK_DeviceData=PK_Distro WHERE FK_DeviceData=" TOSTRING(DEVICEDATA_PK_Distro_CONST) " AND PK_Device=" + StringUtils::itos(PK_Device);
+                string SQL = "SELECT IK_DeviceData as FK_Distro, FK_OperatingSystem, FK_DeviceTemplate FROM Device LEFT JOIN Device_DeviceData ON FK_Device=PK_Device LEFT JOIN Distro ON IK_DeviceData=PK_Distro WHERE FK_DeviceData=" TOSTRING(DEVICEDATA_PK_Distro_CONST) " AND PK_Device=" + StringUtils::itos(PK_Device);
 
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt -- %s",SQL.c_str());
 
@@ -356,7 +356,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Found %d rows 
 		if( ( osdistro.r=db_wrapper_query_result ( SQL ) ) && ( row=db_wrapper_fetch_row( osdistro.r ) ) )
 		{
 			PK_Distro=atoi( row[0] );
-			string SQL = string("SELECT FK_DeviceTemplate, FK_OperatingSystem, FK_Distro FROM InstallWizard RIGHT JOIN InstallWizard_Distro ON FK_InstallWizard=PK_InstallWizard WHERE InstallWizard.Default=1 AND InstallWizard.Step=6 AND ((FK_Distro=") + row[0] + ") OR (FK_OperatingSystem=" + row[1] + " AND FK_Distro IS NULL) OR (FK_OperatingSystem IS NULL AND FK_Distro IS NULL))";
+			string SQL = string("SELECT FK_DeviceTemplate, FK_OperatingSystem, FK_Distro FROM InstallWizard RIGHT JOIN InstallWizard_Distro ON FK_InstallWizard=PK_InstallWizard WHERE InstallWizard.Default=1 AND InstallWizard.Step=6 AND ((FK_Distro=") + row[0] + ") OR (FK_OperatingSystem=" + row[1] + " AND FK_Distro IS NULL) OR (FK_OperatingSystem IS NULL AND FK_Distro IS NULL)) AND (FK_DeviceTemplate_Required = '" + row[2] + "' OR FK_DeviceTemplate_Required IS NULL)";
 			PlutoSqlResult result_child_dev;
 			if( ( result_child_dev.r=db_wrapper_query_result( SQL ) ) )
 			{
