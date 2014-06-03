@@ -140,7 +140,7 @@ function installWizardList($output,$dbADO) {
 
 					$out.='
 						</select></td>
-						<td><input type="text" name="compatDeviceTemplate_'.$rowCompatibility['PK_InstallWizard_Distro'].'" value="'.$rowCompatibility['FK_DeviceTemplate'].'"></td>
+						<td><input type="text" name="compatDeviceTemplate_'.$rowCompatibility['PK_InstallWizard_Distro'].'" value="'.$rowCompatibility['FK_DeviceTemplate_Required'].'"></td>
 						<td><textarea cols="180" name="compatComments_'.$rowCompatibility['PK_InstallWizard_Distro'].'">'.$rowCompatibility['Comments'].'</textarea></td>
 						<td><input type="submit" class="button" name="deleteCompatibility_'.$rowCompatibility['PK_InstallWizard_Distro'].'" value="'.$TEXT_DELETE_COMPATIBILITY_CONST.'"></td>
 					</tr>
