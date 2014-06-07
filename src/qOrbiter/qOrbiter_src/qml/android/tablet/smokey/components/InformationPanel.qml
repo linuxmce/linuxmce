@@ -4,6 +4,7 @@ import "../../../../skins-common/lib/handlers"
 
 Item{
     id:info_panel
+    property bool restore:false
     anchors{
         top:undefined
         left:parent.left

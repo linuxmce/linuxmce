@@ -25,7 +25,7 @@ Item {
             anchors.fill: parent
             onClicked: {
                 if(!uiOn){
-                    hideUi()
+                    uiOn=true
                 }
             }
         }
@@ -112,7 +112,7 @@ Item {
         },
         State{
             name:"screensaver"
-            when:!uiOn
+            when:!uiOn && dcenowplaying.b_mediaPlaying
             PropertyChanges {
                 target: media_notificaton_header
                 height:qml_root.height
@@ -131,6 +131,7 @@ Item {
         }
 
     ]
+
 
 
 

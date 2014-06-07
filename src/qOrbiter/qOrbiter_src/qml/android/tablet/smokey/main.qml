@@ -12,6 +12,23 @@ Item {
 
     property int screensaverTimer:15000 // manager.screenSaverTimeout*1000
     property bool uiOn:true
+    onUiOnChanged: {
+        if(uiOn){
+            if(info_panel.restore){
+                info_panel.state="retracted"
+                info_panel.restore=false
+            }
+        } else {
+            if(info_panel.state==="retracted"){
+                info_panel.restore=true
+            } else {
+                info_panel.restore=false
+            }
+
+            info_panel.state="hidden"
+        }
+    }
+
     //    anchors{
     //        top:parent.top
     //        bottom: parent.bottom
@@ -22,9 +39,26 @@ Item {
     Timer{
         id:hideUiTimer
         interval:screensaverTimer
-        running: false
-        repeat: false
-        onTriggered: {}
+        running: true
+        repeat: true
+        onTriggered: {
+            if(uiOn){
+                uiOn=false
+                if(glScreenSaver.active){
+                    glScreenSaver.forceActiveFocus()
+                } else {
+                    mobileGradient.forceActiveFocus()
+                }
+            }
+        }
+    }
+
+    function screenSaverMode(running){
+        if(running){
+
+        } else {
+
+        }
     }
 
     Rectangle{
@@ -93,6 +127,8 @@ Item {
 
             }
         }
+
+
 
     }
 
@@ -209,6 +245,64 @@ Item {
         }
     }
 
+
+
+    property color mobilegradientone:"darkgreen"
+    property color mobilegradienttwo:style.contentBgColor
+    property variant colorArray:["darkblue", "black", "grey", "darkcyan" ,"purple", "slategrey", "crimson", "gold", "dodgerblue"]
+
+    Timer{
+        id:colorTimer
+        interval: 5000
+        onTriggered: {
+            mobilegradientone = colorArray[Math.floor(Math.random() * colorArray.length)]
+            mobilegradienttwo = colorArray[Math.floor(Math.random() * colorArray.length)]
+        }
+        running:mobileGradient.visible
+        repeat: true
+    }
+
+    Rectangle{
+        id:mobileGradient
+        anchors.fill: parent
+        visible:!glScreenSaver.active
+        gradient:Gradient{
+            GradientStop{
+                color: mobilegradientone
+                position: 0.0
+                Behavior on color {
+                    ColorAnimation {  duration: 2000 }
+                }
+
+            }
+
+            GradientStop{
+                color:mobilegradienttwo
+                position: .65
+                Behavior on color {
+                    ColorAnimation {  duration: 2000 }
+                }
+            }
+        }
+        Rectangle{
+            anchors.fill: parent
+            color:"black"
+            opacity: .50
+            Behavior on color {
+                ColorAnimation {  duration: 2000 }
+            }
+
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                if(!uiOn){
+                    console.log("screensaver revive")
+                    uiOn=true
+                }
+            }
+        }
+    }
     DceScreenSaver{
         id:glScreenSaver
         anchors{
@@ -238,7 +332,7 @@ Item {
             onClicked: {
                 if(!uiOn){
                     console.log("screensaver revive")
-
+                    uiOn=true
                 }
             }
         }
@@ -256,6 +350,12 @@ Item {
             bottom:info_panel.top
             left:qml_root.left
             right:qml_root.right
+        }
+        opacity: uiOn ? 1 : 0
+        Behavior on opacity {
+            PropertyAnimation{
+                duration: 750
+            }
         }
 
         Keys.onBackPressed: console.log("back")
@@ -390,6 +490,18 @@ Item {
             id: fadein
             target:pageLoader
             properties: "opacity"; to: "1"; duration: 5000
+        }
+    }
+    MouseArea{
+        id:mst
+        anchors.fill: parent
+
+        onPressed: {
+            mouse.accepted=false
+            console.log("Mouse X: "+mouse.x)
+            console.log("Mouse Y:"+mouse.y)
+            console.log("\n")
+            hideUiTimer.restart()
         }
     }
 }

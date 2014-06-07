@@ -89,17 +89,36 @@ Item{
         State {
             name: "extended"
             when:uiOn
-            PropertyChanges {
+
+            AnchorChanges{
                 target: nav_row
-                height:scaleY(8)
+                anchors{
+                    bottom:undefined
+                    top:parent.top
+                }
             }
         },
         State {
             when:!uiOn
             name: "retracted"
-            PropertyChanges {
+
+            AnchorChanges{
                 target: nav_row
-                height:0
+                anchors{
+                    top:undefined
+                    bottom:parent.top
+                }
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+            AnchorAnimation{
+            duration: 500
+            easing.type: Easing.InCurve
             }
         }
     ]
