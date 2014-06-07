@@ -3,7 +3,12 @@ import QtQuick 1.1
 Item {
     id:screen_root
     state:"opening"
+    property string navigation:""
     Component.onCompleted: {
+        if(navigation!==""){
+            setNavigation(navigation)
+        }
+
         state="opened"
         console.log(manager.currentScreen+" is open.")
       var o = String(manager.currentScreen)

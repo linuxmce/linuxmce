@@ -2,21 +2,11 @@
 import QtQuick 1.0
 import "../components"
 import "../../../../skins-common/lib/handlers"
-Item{
+StyledScreen{
     id:sleepingAlamsScreen
-    anchors{
-        top:parent.top
-        bottom:parent.bottom
-        left:parent.left
-        right: parent.right
-    }
 
-    Rectangle{
-        anchors.fill: parent
-        color: "black"
-        opacity: .85
-    }
-
+Panel{
+    headerTitle: "Sleeping Alarms for this room: "+manager.currentRoom
     ListView{
         id:alarmlist
         anchors.fill: parent
@@ -40,7 +30,7 @@ Item{
             }
             Row{
                 id:delegatalayoutrow
-		anchors.centerIn: parent
+                anchors.centerIn: parent
                 width: parent.width
                 anchors{
                     top:parent.top
@@ -93,5 +83,7 @@ Item{
     Component.onCompleted: {
         forceActiveFocus()
     }
+}
+
 
 }

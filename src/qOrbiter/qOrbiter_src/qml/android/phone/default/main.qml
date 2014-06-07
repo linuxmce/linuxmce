@@ -209,7 +209,7 @@ Item {
     Rectangle{
         id:mobileGradient
         anchors.fill: parent
-        //  visible:!glScreenSaver.active
+         visible:!glScreenSaver.active
         gradient:Gradient{
             GradientStop{
                 color: "darkgreen"
@@ -234,15 +234,23 @@ Item {
         width: qmlroot.width
         interval:30000
         anchors.centerIn: qmlroot
-        active: manager.m_ipAddress==="192.168.80.1" ? true : false
+         active:manager.m_ipAddress==="192.168.80.1"
         requestUrl:manager.m_ipAddress
 
-
-        Connections{
-            target:manager
-            onScreenSaverImagesReady:{
-                glScreenSaver.setImageList(manager.screensaverImages)
+        Component.onCompleted: {
+            if(glScreenSaver.pictureCount===0 && glScreenSaver.active){
+                 glScreenSaver.setImageList(manager.screensaverImages)
             }
+        }
+    }
+
+
+
+    Connections{
+        target:manager
+        onScreenSaverImagesReady:{
+            console.log("Retrieving Screen Saver Images...")
+            glScreenSaver.setImageList(manager.screensaverImages)
         }
     }
 

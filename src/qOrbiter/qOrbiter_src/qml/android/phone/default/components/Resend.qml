@@ -1,7 +1,7 @@
 import QtQuick 1.1
 
 Item {
-    anchors.fill: parent
+    anchors.fill: slideOut
     id:avcodes_root
     property int selectedDevice:-1
 
@@ -24,7 +24,7 @@ Item {
             text:"Please choose device to control"
             anchors.centerIn: parent
             visible:avcodes_root.state==="ready"
-            fontSize:scaleY(8)
+            fontSize:scaleY(5)
             isBold: true
         }
     }
@@ -36,7 +36,7 @@ Item {
             right:parent.horizontalCenter
             bottom:parent.bottom
             top:avcodes_hdr.bottom
-            margins: scaleY(2)
+            margins: scaleY(1)
         }
 
         headerListModel: deviceList
@@ -59,7 +59,7 @@ Item {
             right:parent.right
             bottom:parent.bottom
             top:avcodes_hdr.bottom
-            margins: scaleY(2)
+            margins: scaleY(1)
         }
 
         headerListModel: deviceCommands

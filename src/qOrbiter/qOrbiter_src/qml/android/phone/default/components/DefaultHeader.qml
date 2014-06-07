@@ -117,6 +117,13 @@ Item{
         State {
             name: "floorplan"
             when:hdrContent.source==="FloorplanNav.qml"
+        },
+        State {
+            name: "tv"
+            PropertyChanges{
+                target:hdrContent
+                source:"MediaGridHeader.qml"
+            }
 
         }
     ]

@@ -8,12 +8,12 @@ width: txtDate.paintedWidth
     }
     Timer { // Update the clock element periodically
         interval: 5; running: true; repeat: true
-        onTriggered: txtDate.text = getDate()
+        onTriggered: txtDate.text = getDate()+ " -QOrbiter " +manager.m_dwPK_Device
     }
 
     StyledText{
         id: txtDate
-        text: getDate()      
+        text: getDate()
         smooth: true
         color:"white"
         fontSize: manager.b_orientation ? scaleY(3) : scaleY(5)

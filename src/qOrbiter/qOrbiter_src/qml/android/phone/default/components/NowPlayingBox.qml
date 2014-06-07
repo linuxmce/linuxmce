@@ -1,43 +1,43 @@
 import QtQuick 1.0
 
-Rectangle {
+Item {
 
     id: np_box
     height: scaleY(40)
     width: scaleX(75)
     visible: dcenowplaying.b_mediaPlaying ? true : false
-    color:"transparent"
+
     clip:true
 
-   Connections
+    Connections
     {
         target: dcenowplaying
         onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
-   Component.onCompleted: manager.BindMediaRemote(true)
+    // Component.onCompleted: manager.BindMediaRemote(true)
 
-   Image {
-      id: nowplayingimage
-     anchors.fill: np_box
-      fillMode: Image.PreserveAspectFit
-  height:scaleX(50)
-width:scaleX(50)
-      source: ""
-     
-  }
-   Text {
-       id: np
-       text:dceTimecode.qsCurrentTime
-       font.pixelSize: scaleY(2.5)
-       anchors.bottom: np_box.bottom
-       wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-       anchors.horizontalCenter: np_box.horizontalCenter
-       color: "white"
-       visible:  dceTimecode.qsCurrentTime ==="0" ? false: true
-   }
+    Image {
+        id: nowplayingimage
+        anchors.fill: np_box
+        fillMode: Image.PreserveAspectFit
+        height:scaleX(50)
+        width:scaleX(50)
+        source: ""
 
-   /*
+    }
+    Text {
+        id: np
+        text:dceTimecode.qsCurrentTime
+        font.pixelSize: scaleY(2.5)
+        anchors.bottom: np_box.bottom
+        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+        anchors.horizontalCenter: np_box.horizontalCenter
+        color: "white"
+        visible:  dceTimecode.qsCurrentTime ==="0" ? false: true
+    }
+
+    /*
    Image{
         id:np_image
         fillMode: Image.PreserveAspectCrop

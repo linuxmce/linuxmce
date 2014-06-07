@@ -66,6 +66,7 @@ Item{
             model:availbleOptions
             delegate: StyledButton{
                 buttonText: name
+                textSize: 14
                 anchors{
                     left:parent.left
                     right:parent.right

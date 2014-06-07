@@ -4,7 +4,7 @@ Rectangle {
     id:droidepg_small
     width: scaleX(66)
     height: scaleY(65)
-    color: "transparent"    
+    color: "transparent"
     clip:true
     Component.onCompleted: manager.setNowPlayingTv()
     Connections{
@@ -37,7 +37,7 @@ Rectangle {
         ListView{
             id:epgplaylistview
             height: droidepg_small.height-hdr.height
-	    width: droidepg_small.width
+            width: droidepg_small.width
             clip:true
             interactive: true
             flickableDirection: "VerticalFlick"
@@ -48,7 +48,7 @@ Rectangle {
                 id:delrect
                 border.color: "orange"
                 border.width: 1
-		width: droidepg_small.width
+                width: droidepg_small.width
                 height: scaleY(15)
                 color: "transparent"
 

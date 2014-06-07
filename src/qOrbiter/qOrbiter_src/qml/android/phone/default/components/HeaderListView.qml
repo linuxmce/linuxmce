@@ -8,13 +8,13 @@ Item{
     property variant columnTitles:[]
     property variant columnSpacing:[]
     property variant returnProperties:[]
-    property string headerBgColor:style.headerBgColor
+    property string headerBgColor:skinStyle.headerBgColor
     property int columnCount: columnTitles.length
-    property color listBgColor: style.listItemBgColor
-    property color listBgActiveColor:style.listItemActiveBgColor
-    property color listTextInactiveColor:style.listItemTextInactiveColor
-    property color listTextActiveColor:style.listItemTextActiveColor
-    property color contentBg:style.contentBgColor
+    property color listBgColor: skinStyle.listItemBgColor
+    property color listBgActiveColor:skinStyle.listItemActiveBgColor
+    property color listTextInactiveColor:skinStyle.listItemTextInactiveColor
+    property color listTextActiveColor:skinStyle.listItemTextActiveColor
+    property color contentBg:skinStyle.contentBgColor
     property alias headerListModel: displayList.model
     property Item delegateType:null
     property string displayProperty:""
@@ -27,7 +27,7 @@ Item{
         anchors.fill: parent
         id:backing
         color:contentBg
-        gradient:style.bgContentGradient
+        gradient:skinStyle.bgContentGradient
         opacity:bgContentOpacity
     }
 
@@ -50,7 +50,7 @@ Item{
             anchors.centerIn: parent
             text:listTitle
             visible:listTitle !==""
-            fontSize: scaleY(8)
+            fontSize: scaleY(5)
             isBold: true
         }
 
@@ -102,7 +102,7 @@ Item{
 
             Rectangle{
                 anchors.fill: parent
-                color:ms.pressed ? style.listItemPressedBgColor : displayList.currentIndex===index ? listBgActiveColor : "black"
+                color:ms.pressed ? skinStyle.listItemPressedBgColor : displayList.currentIndex===index ? listBgActiveColor : "black"
                 opacity: .65
                 border.color: "white"
                 border.width: 1
@@ -110,7 +110,7 @@ Item{
 
             StyledText{
                 text:isUsingIndex ? displayList.model[index][displayProperty] : model[displayProperty] //displayList.model[index][displayProperty]
-                fontSize: scaleY(5)
+                fontSize:manager.b_orientation ? scaleY(4) : scaleY(5)
                 isBold: true
                 color: ms.pressed ? listTextActiveColor : displayList.currentIndex===index ? listTextActiveColor : listTextInactiveColor
                 anchors.centerIn: parent

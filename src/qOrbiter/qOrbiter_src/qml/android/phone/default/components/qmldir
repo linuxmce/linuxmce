@@ -24,6 +24,7 @@ ControlGrid             ControlGrid.qml                        #no comment
 ControlRow             ControlRow.qml                        #no comment
 DefaultFooter             DefaultFooter.qml                        #no comment
 DefaultHeader             DefaultHeader.qml                        #no comment
+DefaultHeader.qml             DefaultHeader.qml.autosave                        #no comment
 DroidHomeSelector             DroidHomeSelector.qml                        #no comment
 DroidListView             DroidListView.qml                        #no comment
 EPGPlaylist             EPGPlaylist.qml                        #no comment
@@ -118,6 +119,9 @@ TelecomSelector             TelecomSelector.qml                        #no comme
 TemplatePlaylist             TemplatePlaylist.qml                        #no comment
 Thumbnail             Thumbnail.qml                        #no comment
 Timers             Timers.qml                        #no comment
+TvbuttonGrid             TvbuttonGrid.qml                        #no comment
+TvMediaControl             TvMediaControl.qml                        #no comment
+TvmetaData             TvmetaData.qml                        #no comment
 UserListComponent             UserListComponent.qml                        #no comment
 UserSelector             UserSelector.qml                        #no comment
 VideoControls             VideoControls.qml                        #no comment
