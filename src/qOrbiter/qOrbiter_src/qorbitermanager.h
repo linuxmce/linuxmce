@@ -1232,11 +1232,13 @@ public slots:
 
     /*! @name QML Skin Function slots*/
     //@{
+    Q_INVOKABLE void clearSkinCache(){ qorbiterUIwin->engine()->clearComponentCache(); qWarning() << "Cache Cleared.";}
     void setActiveSkin(QString name);
     bool loadSkins(QUrl url);
     void showSkin() { swapSkins(currentSkin); }
     QString getCurrentSkin(){return currentSkin;}
     void setConfigSkin(QString skin){currentSkin = skin; emit currentSkinChanged(); }
+
 #if (QT5)
     void skinLoaded(QQuickView::Status status);
 #else

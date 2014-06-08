@@ -342,7 +342,6 @@ int main(int argc, char* argv[])
         /*! See line 4702 for idea on how to get data from router to execute selection */
         /*! UI will need to be created to allow the device to make the selections before the device tries to connect */
 
-
         QThread dceThread;
 
         qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );

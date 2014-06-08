@@ -569,6 +569,7 @@ void qorbiterManager::refreshUI(QUrl url)
 #else
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
+    qorbiterUIwin->engine()->clearComponentCache();
     qorbiterUIwin->rootContext()->setBaseUrl(url);
     qorbiterUIwin->setSource(url);
     emit currentSkinChanged();
@@ -2350,6 +2351,7 @@ void qorbiterManager::reloadHandler()
     if(cleanupData()){
         qorbiterUIwin->setSource(QUrl("qrc:reload/GenericReload.qml"));
         status="reloading";
+        qorbiterUIwin->engine()->clearComponentCache();
         //        gotoQScreen("ReloadHandler.qml");
     }
 }
