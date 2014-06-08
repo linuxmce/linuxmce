@@ -2,17 +2,23 @@ import QtQuick 1.1
 
 Item {
     id:screen_root
-
+    state:"opening"
     property string navigation:""
-        anchors{
-            top:pageLoader.top
-            left:pageLoader.left
-            right:pageLoader.right
-            bottom:pageLoader.bottom
-        }
+    property string screen:"screen um ipsum lorem"
+    signal readyToClose()
+    signal screenClosing()
+    signal screenOpening()
+
+    anchors{
+        top:pageLoader.top
+        left:pageLoader.left
+        right:pageLoader.right
+        bottom:pageLoader.bottom
+    }
 
     Component.onCompleted: {
-        state="opening"
+        screen=manager.currentScreen
+
         if(navigation!==""){
             setNavigation(navigation)
         }
@@ -28,32 +34,25 @@ Item {
         state="closing"
     }
 
-    property string screen:"screenum ipsum"
-    signal readyToClose()
-    signal screenClosing()
-    signal screenOpening()
-
-
-
     states: [
         State {
             name: "opening"
             StateChangeScript{
-                script: {console.log(screen+"is opening")}
+                script: {console.log(screen+" is opening")}
             }
 
         },
         State {
             name: "opened"
             StateChangeScript{
-                script: {console.log(screen+"is opened")}
+                script: {console.log(screen+" is opened")}
             }
 
         },
         State {
             name: "closing"
             StateChangeScript{
-                script: {console.log(screen+"is closing")}
+                script: {console.log(screen+" is closing")}
             }
 
         },

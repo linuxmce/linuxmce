@@ -260,6 +260,14 @@ Item {
     }
 
 
+
+
+    function checkStatus(component)
+    {
+        console.log(component.progress)
+    }
+
+
     function screenchange(screenname )    {
         if(screenfile===screenname){
             console.log("Duplicate call to same screen ==>"+screenname)
@@ -271,13 +279,6 @@ Item {
 
 
     }
-
-
-    function checkStatus(component)
-    {
-        console.log(component.progress)
-    }
-
 
 
     Loader {
@@ -296,12 +297,14 @@ Item {
         onStatusChanged: {
             if (pageLoader.status == Component.Ready){
                 manager.setDceResponse("Command to change to:" + manager.currentScreen+ " was successfull")
+
+                screenfile=manager.currentScreen
             }else if (pageLoader.status == Component.Loading){
                 console.log("loading page from network")
                 console.log(pageLoader.progress)
             }else if(pageLoader.status===Component.Error){
                 console.log("Command to change to:" + manager.currentScreen + " failed!")
-                screenfile = manager.currentScreen
+                screenfile = "Screen_x.qml"
                 pageLoader.source = "screens/Screen_x.qml"
             }
         }

@@ -5,11 +5,7 @@ Item{
     id:advancedrow
     property int localButtonH:scaleY(15)
     height: (buttons.count)*localButtonH
-    anchors{
-        top:parent.top
-        left:parent.left
-        right:parent.right
-    }
+    anchors.fill: parent
     ListModel {
         id:buttons
         ListElement { text: "Exit" }
@@ -31,7 +27,4 @@ Item{
     OptionMenu {
         menuItems: buttons
     }
-
-
-
 }

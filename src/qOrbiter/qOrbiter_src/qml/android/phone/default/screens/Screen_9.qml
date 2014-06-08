@@ -74,7 +74,6 @@ StyledScreen{
                 anchors.topMargin: scaleY(5)
                 color: "white"
                 text: ""
-                font.family: "Droid Sans Mono"
                 cursorVisible: true
                 readOnly: false
                 horizontalAlignment: TextInput.AlignHCenter

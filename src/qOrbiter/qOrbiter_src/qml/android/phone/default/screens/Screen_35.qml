@@ -1,22 +1,11 @@
 import QtQuick 1.0
 import "../components"
-Item{
+StyledScreen{
     id:securitystatus
 
-    Rectangle{
-        height: style.orbiterH
-        width: style.orbiterW
-        color: style.bgcolor
-        Text {
-            id: statussec
-            x: 74
-            y: 101
-            text: "Mode Changed"
-            font.family: "Droid Sans"
-            font.bold: false
-            font.pointSize: 15
-        }
-        HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
+    Panel{
+        headerTitle: "Mode Changed"
+        anchors.centerIn: parent
     }
 
 }
