@@ -2,17 +2,25 @@ import QtQuick 1.1
 
 Item {
     id:screen_root
-    state:"opening"
+
     property string navigation:""
+        anchors{
+            top:pageLoader.top
+            left:pageLoader.left
+            right:pageLoader.right
+            bottom:pageLoader.bottom
+        }
+
     Component.onCompleted: {
+        state="opening"
         if(navigation!==""){
             setNavigation(navigation)
         }
 
-        state="opened"
         console.log(manager.currentScreen+" is open.")
-      var o = String(manager.currentScreen)
+        var o = String(manager.currentScreen)
         setOptions(o.replace("Screen","HomeOptions"))
+        state="opened"
 
     }
 
@@ -25,50 +33,38 @@ Item {
     signal screenClosing()
     signal screenOpening()
 
-    anchors{
-        top:pageLoader.top
-        left:pageLoader.left
-        right:pageLoader.right
-        bottom:pageLoader.bottom
-    }
+
 
     states: [
         State {
             name: "opening"
-            PropertyChanges {
-                target: screen_root
-                opacity:0
+            StateChangeScript{
+                script: {console.log(screen+"is opening")}
             }
 
         },
         State {
             name: "opened"
-            PropertyChanges {
-                target: screen_root
-                opacity:1
+            StateChangeScript{
+                script: {console.log(screen+"is opened")}
             }
+
         },
         State {
             name: "closing"
-            PropertyChanges {
-                target: screen_root
-                opacity:0
+            StateChangeScript{
+                script: {console.log(screen+"is closing")}
             }
 
         },
         State {
             name: "closed"
-
-        }
-    ]
-
-    transitions: [
-        Transition {
-            from: "*"
-            to: "*"
-            PropertyAnimation{
-                duration: 500
+            StateChangeScript{
+                script: {console.log(screen+"is closed")}
             }
+
         }
     ]
+
+
 }

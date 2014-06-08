@@ -2,520 +2,51 @@ import QtQuick 1.0
 Item{
     /* Item sized using anchors */
 
-    Item {
 
-        id:remotenumberpad
-        anchors{
-            left:parent.left
-            right:parent.right
-            bottom:parent.bottom
-            top:parent.top
+    property int flowButtonHeight: buttonFlow.height/3
+    property int flowButtonWidth:buttonFlow.width/3
+    property string numberString:""
+
+    Item {
+        id:padHeader
+       width: parent.width
+        height: scaleX(10)
+
+        Rectangle{
+            anchors.fill: parent
+            gradient:skinStyle.bgHeaderGradient
         }
 
-        Column{
-            id:padcolumn
-            spacing:5
-            width:parent.width
-            height:parent.height
-            anchors.centerIn: parent
-
-            Rectangle {
-                id: numberdisplay
-                width: numberrect.width
-                height: scaleY(5)
-                color: skinStyle.highlight2
-                radius: 2
-                anchors.horizontalCenter: parent.horizontalCenter
-                border.color: skinStyle.accentcolor
-                border.width: 1
-
-                TextInput {
-                    id: text_input1
-                    text: ""
-                    cursorVisible: true
-                    readOnly: false
-                    horizontalAlignment: TextInput.AlignHCenter
-                    font.pixelSize: 23
-                }
+        StyledText{
+            anchors{
+                left:parent.left
+                verticalCenter: parent.verticalCenter
             }
-
-            Rectangle{
-                id:numberrect
-                height: childrenRect.height
-                width: childrenRect.width
-                // anchors.top: numberdisplay.bottom
-                anchors.topMargin: 5
-                anchors.horizontalCenter: parent.horizontalCenter
-                border.color: skinStyle.highlight1
-                color: "transparent"
-                radius: 5
-                Column{
-                    id: numberrowcolum
-                    spacing: 5
-
-                    Row{
-                        id:toprow
-                        spacing: 8
-                        //number one
-                        Rectangle{
-                            id:number1
-                            height: scaleX(15)
-                            width: scaleX(15)
-                            color:"silver"
-
-                            Image {
-                                id: name
-                                source: "../img/buttonbg.png"
-                                anchors.fill: parent
-                            }
-                            Text {
-                                id: numberonelabel
-                                text: qsTr("1")
-
-                                font.pixelSize: parent.height * .50
-                                anchors.centerIn: parent
-                            }
-
-                            MouseArea
-                            {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered:
-                                {
-                                    parent.color = "silver"
-                                }
-                                onExited:
-                                {
-                                    parent.color = "silver"
-                                }
-
-
-                                onClicked:
-                                {
-                                    text_input1.text = text_input1.text + "1"
-                                }
-
-                            }
-                        }
-                        //number two
-                        Rectangle{
-                            id:number2
-                            height: scaleX(15)
-                            width: scaleX(15)
-                            color:"silver"
-
-                            Image {
-
-                                source: "../img/buttonbg.png"
-                                anchors.fill: parent
-                            }
-                            Text {
-                                id: numbero2label
-                                text: qsTr("2")
-                                color: "black"
-                                font.pixelSize: parent.height * .50
-                                anchors.centerIn: parent
-                            }
-
-                            MouseArea
-                            {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered:
-                                {
-                                    parent.color = "silver"
-                                }
-                                onExited:
-                                {
-                                    parent.color = "silver"
-                                }
-
-
-                                onClicked:
-                                {
-                                    text_input1.text = text_input1.text + "2"
-                                }
-
-                            }
-                        }
-                        //number 3
-                        Rectangle{
-                            id:number3
-                            height: scaleX(15)
-                            width: scaleX(15)
-                            color:"silver"
-
-                            Image {
-
-                                source: "../img/buttonbg.png"
-                                anchors.fill: parent
-                            }
-                            Text {
-                                id: number3label
-                                text: qsTr("3")
-                                color: "black"
-                                font.pixelSize: parent.height * .50
-                                anchors.centerIn: parent
-                            }
-
-                            MouseArea
-                            {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered:
-                                {
-                                    parent.color = "silver"
-                                }
-                                onExited:
-                                {
-                                    parent.color = "silver"
-                                }
-
-
-                                onClicked:
-                                {
-                                    text_input1.text = text_input1.text + "3"
-                                }
-
-                            }
-                        }
-
-                    }
-
-                    //secondrow
-                    Row
-                    {
-                        id:middlerow
-                        spacing: 8
-
-                        //number 4
-                        Rectangle{
-                            id:number4
-                            height: scaleX(15)
-                            width: scaleX(15)
-                            color:"silver"
-
-                            Image {
-
-                                source: "../img/buttonbg.png"
-                                anchors.fill: parent
-                            }
-                            Text {
-                                id: numberonelabe4
-                                text: qsTr("4")
-                                color: "black"
-                                font.pixelSize: parent.height * .50
-                                anchors.centerIn: parent
-                            }
-
-                            MouseArea
-                            {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered:
-                                {
-                                    parent.color = "silver"
-                                }
-                                onExited:
-                                {
-                                    parent.color = "silver"
-                                }
-
-
-                                onClicked:
-                                {
-                                    text_input1.text = text_input1.text + "4"
-                                }
-
-                            }
-                        }
-                        //number 5
-                        Rectangle{
-                            id:number5
-                            height: scaleX(15)
-                            width: scaleX(15)
-                            color:"silver"
-
-                            Image {
-
-                                source: "../img/buttonbg.png"
-                                anchors.fill: parent
-                            }
-                            Text {
-                                id: numbero5label
-                                text: qsTr("5")
-                                color: "black"
-                                font.pixelSize: parent.height * .50
-                                anchors.centerIn: parent
-                            }
-
-                            MouseArea
-                            {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered:
-                                {
-                                    parent.color = "silver"
-                                }
-                                onExited:
-                                {
-                                    parent.color = "silver"
-                                }
-
-
-                                onClicked:
-                                {
-                                    text_input1.text = text_input1.text + "5"
-                                }
-
-                            }
-                        }
-                        //number 6
-                        Rectangle{
-                            id:number6
-                            height: scaleX(15)
-                            width: scaleX(15)
-                            color:"silver"
-
-                            Image {
-
-                                source: "../img/buttonbg.png"
-                                anchors.fill: parent
-                            }
-                            Text {
-                                id: number6label
-                                text: qsTr("6")
-                                color: "black"
-                                font.pixelSize: parent.height * .50
-                                anchors.centerIn: parent
-                            }
-
-                            MouseArea
-                            {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered:
-                                {
-                                    parent.color = "silver"
-                                }
-                                onExited:
-                                {
-                                    parent.color = "silver"
-                                }
-
-
-
-                                onClicked:
-                                {
-                                    text_input1.text = text_input1.text + "6"
-                                }
-
-                            }
-                        }
-
-                    }
-
-                    //bottom row
-                    Row
-                    {
-                        id:bottomrow
-                        spacing: 8
-                        //number 7
-                        Rectangle{
-                            id:number7
-                            height: scaleX(15)
-                            width: scaleX(15)
-                            color:"silver"
-
-                            Image {
-
-                                source: "../img/buttonbg.png"
-                                anchors.fill: parent
-                            }
-                            Text {
-                                id: number7label
-                                text: qsTr("7")
-                                color: "black"
-                                font.pixelSize: parent.height * .50
-                                anchors.centerIn: parent
-                            }
-
-                            MouseArea
-                            {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered:
-                                {
-                                    parent.color = "silver"
-                                }
-                                onExited:
-                                {
-                                    parent.color = "silver"
-                                }
-
-
-                                onClicked:
-                                {
-                                    text_input1.text = text_input1.text + "7"
-                                }
-
-                            }
-                        }
-                        //number 8
-                        Rectangle{
-                            id:number8
-                            height: scaleX(15)
-                            width: scaleX(15)
-                            color:"silver"
-
-                            Image {
-
-                                source: "../img/buttonbg.png"
-                                anchors.fill: parent
-                            }
-                            Text {
-                                id: number8label
-                                text: qsTr("8")
-                                color: "black"
-                                font.pixelSize: parent.height * .50
-                                anchors.centerIn: parent
-                            }
-
-                            MouseArea
-                            {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered:
-                                {
-                                    parent.color = "silver"
-                                }
-                                onExited:
-                                {
-                                    parent.color = "silver"
-                                }
-
-
-                                onClicked:
-                                {
-                                    text_input1.text = text_input1.text + "8"
-                                }
-
-                            }
-                        }
-                        //number 9
-                        Rectangle{
-                            id:number9
-                            height: scaleX(15)
-                            width: scaleX(15)
-                            color:"silver"
-
-                            Image {
-
-                                source: "../img/buttonbg.png"
-                                anchors.fill: parent
-                            }
-                            Text {
-                                id: number9label
-                                text: qsTr("9")
-                                color: "black"
-                                font.pixelSize: parent.height * .50
-                                anchors.centerIn: parent
-                            }
-
-                            MouseArea
-                            {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered:
-                                {
-                                    parent.color = "silver"
-                                }
-                                onExited:
-                                {
-                                    parent.color = "silver"
-                                }
-
-                                onClicked:
-                                {
-                                    text_input1.text = text_input1.text + "9"
-                                }
-
-                            }
-                        }
-                    }
-
-                    Row{
-                        id:actionbuttons
-                        height: childrenRect.height
-                        width: childrenRect.width
-                        spacing: 8
-                        StyledButton{
-                            id:backbutton
-                            height: scaleX(15)
-                            width: scaleX(15)
-
-                            buttonText: "Back"
-
-                            textSize: 10
-                            onActivated: {
-                                text_input1.text = ""
-                            }
-                        }
-
-
-
-                        //number 9
-                        Rectangle{
-                            id:number0
-                            height: scaleX(15)
-                            width: scaleX(15)
-                            color:"silver"
-
-                            Image {
-
-                                source: "../img/buttonbg.png"
-                                anchors.fill: parent
-                            }
-
-
-                            Text {
-                                id: number0label
-                                text: qsTr("0")
-                                color: "black"
-                                font.pixelSize: parent.height * .50
-                                anchors.centerIn: parent
-                            }
-
-                            MouseArea
-                            {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered:
-                                {
-                                    parent.color = "silver"
-                                }
-                                onExited:
-                                {
-                                    parent.color = "silver"
-                                }
-                                onClicked: text_input1.text = text_input1.text + "0"
-
-                            }
-                        }
-
-                        StyledButton{
-                            id:go
-                            height: scaleX(15)
-                            width: scaleX(15)
-                            buttonText: "Go"
-                            textSize: 10
-                            onActivated: {
-                                manager.TuneToChannel(text_input1.text, text_input1.text)
-                                text_input1.text = ""
-                            }
-
-                        }
-                    }
+            text:"Channel "+numberString
+        }
+
+    }
+
+    Flow{
+        id:buttonFlow
+        width: scaleX(65)
+        height: scaleY(55)
+
+        anchors{
+            top:padHeader.bottom
+            horizontalCenter: padHeader.horizontalCenter
+        }
+
+        Repeater{
+            id:buttonRepeater
+            model: 9
+
+            delegate: StyledButton{
+                height: flowButtonHeight
+                width: flowButtonWidth
+                buttonText: index+1
+                onActivated: {
+                    numberString = numberString+(index+1)
                 }
             }
         }
@@ -523,5 +54,47 @@ Item{
 
 
 
+
+    Row{
+        id:actionbuttons
+        anchors{
+            top:buttonFlow.bottom
+            left:buttonFlow.left
+            right:buttonFlow.right
+        }
+        height:childrenRect.height
+        spacing: 0
+        StyledButton{
+            id:backbutton
+            height: flowButtonHeight
+            width: flowButtonWidth
+
+            buttonText: qsTr("BACK")
+
+            textSize: 10
+            onActivated: {
+                numberString = ""
+            }
+        }
+
+        StyledButton{
+            height: flowButtonHeight
+            width: flowButtonWidth
+            buttonText: "0"
+            onActivated: {
+                numberString = numberString+"0"
+            }
+        }
+
+        StyledButton{
+            height: flowButtonHeight
+            width: flowButtonWidth
+            buttonText: qsTr("GO")
+            onActivated: {
+                manager.changeChannels(numberString)
+                numberString = ""
+            }
+        }
+    }
 
 }

@@ -2,8 +2,7 @@ import QtQuick 1.0
 
 Rectangle {
     id:droidepg_small
-    width: scaleX(66)
-    height: scaleY(65)
+
     color: "transparent"
     clip:true
     Component.onCompleted: manager.setNowPlayingTv()

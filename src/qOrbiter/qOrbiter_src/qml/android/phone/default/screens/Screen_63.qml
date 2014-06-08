@@ -7,134 +7,115 @@ StyledScreen {
     navigation: "TvMediaControl.qml"
 
     Item{
-        height:parent.height
-        width: parent.width
+        id:container
+        anchors.fill: parent
 
-        state:"default"
+        Component.onCompleted: {
+            container.state="INFO"
+        }
 
         NowPlayingBox{
             id:np_box
         }
 
-//        Component.onCompleted: {
-//            state="INFO"
-//        }
-
         TvmetaData {
             id: metadatavideo
+            anchors{
+                left:parent.right
+                right:parent.right
+                top:parent.top
+                bottom:parent.bottom
+
+            }
         }
 
         TvbuttonGrid {
             id: remote1
+            anchors{
+                left:container.right
+                right:container.right
+                bottom: container.bottom
+                top:container.top
+            }
         }
 
 
         RemoteNumberPad {
             id: remotenumberpad1
+            width: container.width
+            height: container.height
+            anchors{
+                left:container.right
+                top:container.top
+            }
+            visible:false
         }
 
         EPGPlaylist{
             id:playlist;
-
+            anchors{
+                left:container.right
+                right:container.right
+                bottom: container.bottom
+                top:container.top
+            }
         }
 
 
         states: [
-            State {
-                name: "default"
 
-                AnchorChanges{
-                    target: metadatavideo
-                    anchors{
-                        left:parent.right
-                        right:parent.right
-                        top:parent.top
-                        bottom:parent.bottom
-
-                    }
-                }
-                AnchorChanges{
-                    target: remote1
-                    anchors{
-                        left:parent.right
-                        right:parent.right
-                        bottom: parent.bottom
-                        top:parent.top
-                    }
-                }
-                AnchorChanges{
-                    target: playlist
-                    anchors{
-                        left:parent.right
-                        right:parent.right
-                        bottom: parent.bottom
-                        top:parent.top
-                    }
-                }
-                AnchorChanges{
-                    target: remotenumberpad1
-                    anchors{
-                        left:parent.right
-                        right:parent.right
-                        bottom: parent.bottom
-                        top:parent.top
-                    }
-                }
-
-            },
             State {
                 name: "INFO"
-                extend: "default"
+                extend: ""
                 AnchorChanges{
                     target: metadatavideo
                     anchors{
-                        left:parent.left
-                        right:parent.right
-                        bottom: parent.bottom
-                        top:parent.top
+                        left:container.left
+                        right:container.right
+                        bottom: container.bottom
+                        top:container.top
                     }
                 }
-                AnchorChanges{
-                    target: remotenumberpad1
-                    anchors{
-                        left:parent.right
-                    }
-                }
+
             },
             State {
                 name: "NUMBERS"
-                extend: "default"
+                extend: ""
+                PropertyChanges {
+                    target: remotenumberpad1
+                    visible:true
+                }
                 AnchorChanges{
                     target: remotenumberpad1
                     anchors{
-                        left:parent.left
+                        left:container.left
                     }
                 }
             },
             State{
                 name:"GRID"
-                extend:"default"
+                extend:""
                 AnchorChanges{
                     target: playlist
                     anchors{
-                        left:parent.left
+                        left:container.left
                     }
                 }
             },
             State{
                 name:"REMOTE"
-                extend:"default"
+                extend:""
                 AnchorChanges{
                     target: remote1
                     anchors{
-                        left:parent.left
+                        left:container.left
                     }
                 }
             }
             ,
             State{
                 name:"advanced"
-                extend:"default"
+                extend:""
             }
 
         ]

@@ -4,8 +4,8 @@ Item {
     id:panelRoot
     height: scaleY(85)
     width: scaleX(85)
-    anchors.centerIn: parent
-    property int panelHeaderHeight:height(.25)
+
+    property int panelHeaderHeight:height*.25
     property string headerTitle:"Lorem Ipsum"
     clip:true
 

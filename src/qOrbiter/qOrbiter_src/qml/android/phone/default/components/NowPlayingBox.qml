@@ -77,57 +77,7 @@ Item {
 
 
 
-    states: [
-        State {
-            name: "livetv"
 
-            PropertyChanges {
-                target: column1
-                x: 0
-                y: 30
-                anchors.horizontalCenterOffset: 0
-                anchors.topMargin: 0
-            }
-
-
-
-            PropertyChanges {
-                target: mousearea1
-                x: 0
-                y: 0
-                width: 231
-                height: 133
-                anchors.topMargin: 0
-                anchors.rightMargin: 0
-            }
-
-            PropertyChanges {
-                target: np_box
-                x: 0
-                y: 0
-            }
-        },
-        State {
-            name: "storedaudio"
-
-            PropertyChanges {
-                target: column1
-                x: -39
-                y: 29
-            }
-
-
-        },
-        State {
-            name: "storedvideo"
-        },
-        State {
-            name: "game"
-        },
-        State {
-            name: "dvd"
-        }
-    ]
 
 
 }

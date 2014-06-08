@@ -209,7 +209,7 @@ Item {
     Rectangle{
         id:mobileGradient
         anchors.fill: parent
-         visible:!glScreenSaver.active
+        visible:!glScreenSaver.active
         gradient:Gradient{
             GradientStop{
                 color: "darkgreen"
@@ -234,12 +234,12 @@ Item {
         width: qmlroot.width
         interval:30000
         anchors.centerIn: qmlroot
-         active:manager.m_ipAddress==="192.168.80.1"
+        active:manager.m_ipAddress==="192.168.80.1"
         requestUrl:manager.m_ipAddress
 
         Component.onCompleted: {
             if(glScreenSaver.pictureCount===0 && glScreenSaver.active){
-                 glScreenSaver.setImageList(manager.screensaverImages)
+                glScreenSaver.setImageList(manager.screensaverImages)
             }
         }
     }
@@ -260,46 +260,18 @@ Item {
     }
 
 
-    function screenchange(screenname )
-    {
-        if(manager.currentScreen===screenname){
+    function screenchange(screenname )    {
+        if(screenfile===screenname){
             console.log("Duplicate call to same screen ==>"+screenname)
-            //   return
-        }
-
-        pageLoader.source = "screens/"+screenname
-        if (pageLoader.status == Component.Ready)
-        {
-            manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-        }
-        else if (pageLoader.status == Component.Loading)
-        {
-            console.log("loading page from network")
-            finishLoading(screenname)
-        }
-        else
-        {
-            console.log("Command to change to:" + screenname + " failed!")
-
-            screenfile = screenname
-            pageLoader.source = "screens/Screen_x.qml"
-        }
-    }
-
-    function finishLoading (screenname)
-    {
-        if(pageLoader.status != Component.Ready)
-        {
-            console.log("finishing load")
+            console.log(pageLoader.source)
+            return
+        } else {
             pageLoader.source = "screens/"+screenname
-            console.log("SCREEN==>" + screenname + " loaded.")
-        }
-        else
-        {
-            finishLoading(screenname)
         }
 
+
     }
+
 
     function checkStatus(component)
     {
@@ -320,7 +292,20 @@ Item {
 
         focus: true
         Keys.onBackPressed: console.log("back")
-        onSourceChanged:  loadin
+
+        onStatusChanged: {
+            if (pageLoader.status == Component.Ready){
+                manager.setDceResponse("Command to change to:" + manager.currentScreen+ " was successfull")
+            }else if (pageLoader.status == Component.Loading){
+                console.log("loading page from network")
+                console.log(pageLoader.progress)
+            }else if(pageLoader.status===Component.Error){
+                console.log("Command to change to:" + manager.currentScreen + " failed!")
+                screenfile = manager.currentScreen
+                pageLoader.source = "screens/Screen_x.qml"
+            }
+        }
+
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
         }

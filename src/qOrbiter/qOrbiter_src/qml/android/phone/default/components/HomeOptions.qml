@@ -15,6 +15,7 @@ Item{
         } else {
             optionLoader.source = "HomeOptionsGeneric.qml"
         }
+
     }
 
     opacity: showOptions ? 1 : 0

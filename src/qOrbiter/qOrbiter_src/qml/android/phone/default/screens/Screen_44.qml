@@ -7,12 +7,7 @@ StyledScreen {
     Item{
         id:content
         anchors.fill:parent
-
-
         state: "reg"
-
-
-
         Flow {
             id: flow1
             anchors.centerIn: parent
@@ -74,6 +69,12 @@ StyledScreen {
 
                 buttonText: "Diagnostics"
                 onActivated: content.state="diag"
+
+            }
+            StyledButton{
+                id:refresh
+                buttonText: "Clear Cache"
+                onActivated: manager.clearSkinCache()
 
             }
         }
