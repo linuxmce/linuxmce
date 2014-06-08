@@ -2,12 +2,13 @@ import QtQuick 1.0
 import "../components"
 StyledScreen{
     id:securitypanel
-    property bool isInvalidPin : false
+
 
     Item{
         id:content
         anchors.fill: parent
 
+        property bool isInvalidPin : false
         ListModel{
             id:securityModes
 
@@ -49,57 +50,26 @@ StyledScreen{
 
         }
 
-        //delegate
-        Component {
-            id: securityDelegate
-            Item{
-                clip: true
-                width: modeView.cellWidth
-                height: modeView.cellHeight
-
-                StyledButton {
-                    id: secDelegateBt
-                    width : parent.width
-                    height: parent.height
-                    buttonText: name
-                    onActivated: manager.setHouseMode(text_input1.text, mode)
-                }
-            }
-        }
 
         // The CMD_Set_Text is sent to the orbiter when an invalid pin is entered, we can catch it here and do something useful with it
         Connections {
             target: manager
             onTextChanged: {
                 if (iPK_Text == 617) {
-                    isInvalidPin = true
+                    content.isInvalidPin = true
                     text_input1.text = sText;
                     text_input1.echoMode = TextInput.Normal;
-                    rectangle2.color = "red";
+                    text_input1.fillColor = "red";
                 }
             }
         }
 
-        GridView {
-            id: modeView
-            anchors {
-                left: parent.left
-                right: parent.right
-                top: keypadSection.bottom
-                bottom: parent.bottom
-            }
-            clip: true
-            model: securityModes
-            cellHeight: scaleX(18)
-            cellWidth: scaleX(50)
-            delegate: securityDelegate
-        }
 
         function resetInvalidPin() {
             if (isInvalidPin) {
                 text_input1.echoMode = TextInput.Password;
                 text_input1.text = "";
-                rectangle2.color = "white";
+                text_input1.fillColor = "white";
                 isInvalidPin = false;
             }
         }
@@ -113,116 +83,101 @@ StyledScreen{
                 text_input1.text = text_input1.text.substring(0,text_input1.text.length-1);
         }
 
-        Rectangle{
+        Panel{
             id: keypadSection
             anchors{
                 top:parent.top
                 left:parent.left
                 right:parent.right
-            }
-            height: appH / 1.76
-            color: style.button_system_color
-            opacity:.65
-
-            StyledText {
-                id: securitypanellabel
-                anchors.top: parent.top
-                anchors.topMargin: 5
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: "Security Panel"
+                bottom:parent.bottom
             }
 
-            Rectangle {
-                id: rectangle1
-                anchors.top: securitypanellabel.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.topMargin: 5
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 5
-                color: "#789199"
-                radius: 22
-                width: scaleX(70)
-                Rectangle {
-                    id: rectangle2
-                    anchors.top: rectangle1.top
-                    anchors.topMargin: 5
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.leftMargin : 5
-                    anchors.rightMargin : 5
-                    height: 30
-                    color: "#ffffff"
-                    radius: 19
+            headerTitle: "Security Panel"
+            property int flowButtonHeight: flow1.height/3
+            property int flowButtonWidth:flow1.width/3
 
-                    TextInput {
-                        id: text_input1
-                        anchors.fill: parent
-                        text: ""
-                        echoMode: TextInput.Password
-                        font.family: "Droid Sans Mono"
-                        cursorVisible: true
-                        readOnly: false
-                        anchors.margins: 0
-                        horizontalAlignment: TextInput.AlignHCenter
-                        font.pixelSize: 23
-                    }
-                }
+            TextInput {
+                id: text_input1
+                width: parent.width
+                height: scaleY(8)
+                anchors.top: keypadSection.top
+                text: ""
+                echoMode: TextInput.Password
+                color: "white"
+                fillColor: "green"
+                cursorVisible: true
+                readOnly: false
+                horizontalAlignment: TextInput.AlignHCenter
+                font.pixelSize: 44
+            }
+            Flow {
+                id: flow1
+                anchors.top: text_input1.bottom
+                width: parent.width /2
+                height:scaleY(35)
 
-                Rectangle {
-                    id: rectangle3
-                    anchors.top: rectangle2.bottom
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    anchors.margins: 5
-                    color: "#ffffff"
-                    radius: 28
+                Repeater{
+                    model: 9
 
-                    Flow {
-                        id: flow1
-                        anchors.top: parent.top
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.margins: 6
-                        width: (scaleX(16) + 5) * 3
-                        spacing: 5
-                        Repeater{
-                            model: 9;
-
-                            StyledButton {
-                                width : scaleX(16)
-                                height: scaleX(16)
-                                buttonText: (index+1)
-                                onActivated: typeText(index+1)
-                            }
-                        }
-                        StyledButton {
-                            width : scaleX(16)
-                            height: scaleX(16)
-                            buttonText: "<"
-                            onActivated: clearText();
-                        }
-                        StyledButton {
-                            width : scaleX(16)
-                            height: scaleX(16)
-                            buttonText: "0"
-                            onActivated: typeText("0")
-                        }
-                        StyledButton {
-                            width : scaleX(16)
-                            height: scaleX(16)
-                            buttonText: "Map"
-                            onActivated: {
-                                manager.showfloorplan(1)
-                                manager.setFloorplanType(1)
-                            }
-                        }
+                    StyledButton {
+                        height: keypadSection.flowButtonHeight
+                        width: keypadSection.flowButtonWidth
+                        buttonText: (index+1)
+                        onActivated: content.typeText(index+1)
                     }
                 }
             }
+            Row{
+                id:bottomRow
+                height: keypadSection.flowButtonHeight
+                width:parent.width
+                anchors.top: flow1.bottom
+
+                StyledButton {
+                    height: keypadSection.flowButtonHeight
+                    width: keypadSection.flowButtonWidth
+                    buttonText: "<"
+                    onActivated: content.clearText();
+                }
+                StyledButton {
+                    height: keypadSection.flowButtonHeight
+                    width: keypadSection.flowButtonWidth
+                    buttonText: "0"
+                    onActivated: content.typeText("0")
+                }
+                StyledButton {
+                    height: keypadSection.flowButtonHeight
+                    width: keypadSection.flowButtonWidth
+                    buttonText: "Map"
+                    onActivated: {
+                        manager.showfloorplan(1)
+                        manager.setFloorplanType(1)
+                    }
+                }
+            }
+            GridView {
+                id: modeView
+                anchors {
+                    top:flow1.top
+                    left:flow1.right
+                    right:parent.right
+                    bottom:parent.bottom
+                }
+
+                clip: true
+                model: securityModes
+                cellHeight: keypadSection.flowButtonHeight
+                cellWidth: width
+                delegate:    StyledButton {
+                    id: secDelegateBt
+                    height: keypadSection.flowButtonHeight
+                    width: parent.width
+                    buttonText: name
+                    onActivated: manager.setHouseMode(text_input1.text, mode)
+                }
+            }
+
         }
     }
-
-    
 }
-
 
