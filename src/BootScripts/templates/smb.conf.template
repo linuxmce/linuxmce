@@ -23,6 +23,7 @@
         unix extensions = no
         wide links = yes
 	security = user
+	client lanman auth = yes
 ########## Printing ##########
 
 # If you want to automatically load your printer list rather
