@@ -3,7 +3,7 @@ import QtQuick 1.0
 Item{
     id:styled_button
     height: button_label.paintedHeight < scaleY(5) ? scaleY(5) : button_label.paintedHeight+(button_label.paintedHeight*.02)
-    width:opacity ? button_label.paintedWidth < scaleX(10) ? scaleX(10) : (button_label.paintedWidth) + (button_label.paintedWidth*.02) :0
+    width:opacity ? button_label.paintedWidth < scaleX(12) ? scaleX(12) : (button_label.paintedWidth) + (button_label.paintedWidth*.02) :0
 
     //    anchors{
     //        left: button_label.left

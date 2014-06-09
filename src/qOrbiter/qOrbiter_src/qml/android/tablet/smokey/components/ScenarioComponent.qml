@@ -6,6 +6,7 @@ ListView{
     id:scenarioList
     height:scaleY(7)
     width:  (scaleX(10)*8)
+    visible:manager.currentScreen==="Screen_1.qml"
     spacing: scaleY(2)
     model:current_header_model
     clip:true

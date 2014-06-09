@@ -30,5 +30,9 @@ Item {
             buttonText: qsTr("Change Styles")
             onActivated: loadComponent("SkinSelector.qml")
         }
+        StyledButton{
+            buttonText: qsTr("Refresh Skin")
+            onActivated: manager.clearSkinCache()
+        }
     }
 }

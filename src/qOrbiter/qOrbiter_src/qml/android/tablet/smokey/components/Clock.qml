@@ -2,6 +2,9 @@ import QtQuick 1.0
 
 Item {
     property bool verticalMirror: false
+    property color clockColor:"white"
+    property int clockFontSize: 32
+    property bool boldClock:false
     function getDate(){
         var d = new Date();
         return Qt.formatDateTime(d, "dddd ,MMMM d || hh:mm ");
@@ -15,13 +18,13 @@ Item {
     StyledText{
         id: txtDate
         text: getDate()
-        color: "white"
+        color: clockColor
         font.letterSpacing: 2
         font.family: appFont.name
         smooth: true
         anchors.centerIn: parent
-        font.pixelSize: 32
-        font.bold: false
+        font.pixelSize: clockFontSize
+        font.bold: boldClock
     }
 }
 

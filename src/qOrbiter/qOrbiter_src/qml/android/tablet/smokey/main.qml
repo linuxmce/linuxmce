@@ -9,9 +9,14 @@ Item {
     id: qml_root
     height:manager.appHeight
     width:manager.appWidth
-
+    property alias skinStyle:style
     property int screensaverTimer:15000 // manager.screenSaverTimeout*1000
     property bool uiOn:true
+    Rectangle{
+        anchors.fill: parent
+        color:"black"
+    }
+
     onUiOnChanged: {
         if(uiOn){
             if(info_panel.restore){

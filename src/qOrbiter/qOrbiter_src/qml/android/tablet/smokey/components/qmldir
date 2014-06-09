@@ -37,6 +37,7 @@ NavigationRow             NavigationRow.qml                        #no comment
 NavOptions43             NavOptions43.qml                        #no comment
 NavOptions5             NavOptions5.qml                        #no comment
 NowPlayingImage             NowPlayingImage.qml                        #no comment
+Panel             Panel.qml                        #no comment
 PlaylistEditor             PlaylistEditor.qml                        #no comment
 PlaylistView             PlaylistView.qml                        #no comment
 PowerControl             PowerControl.qml                        #no comment

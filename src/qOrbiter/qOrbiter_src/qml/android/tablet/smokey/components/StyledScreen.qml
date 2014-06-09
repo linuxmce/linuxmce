@@ -3,7 +3,12 @@ import QtQuick 1.1
 Item {
     id:screen_root
     state:"opening"
+
     Component.onCompleted: {
+        if(navigation==="ScenarioCompnent.qml"){
+            setNavigation(navigation)
+        }
+
         state="opened"
     }
 
@@ -11,7 +16,12 @@ Item {
         state="closing"
     }
 
+    function setNavigation(navFile){
+        nav_row.navSource=navFile
+    }
+
     property string screen:"screenum ipsum"
+    property string navigation:"ScenarioComponent.qml"
     signal readyToClose()
     signal screenClosing()
     signal screenOpening()

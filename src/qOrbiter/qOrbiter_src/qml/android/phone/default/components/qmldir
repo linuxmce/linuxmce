@@ -24,7 +24,6 @@ ControlGrid             ControlGrid.qml                        #no comment
 ControlRow             ControlRow.qml                        #no comment
 DefaultFooter             DefaultFooter.qml                        #no comment
 DefaultHeader             DefaultHeader.qml                        #no comment
-DefaultHeader.qml             DefaultHeader.qml.autosave                        #no comment
 DroidHomeSelector             DroidHomeSelector.qml                        #no comment
 DroidListView             DroidListView.qml                        #no comment
 EPGPlaylist             EPGPlaylist.qml                        #no comment

@@ -4,7 +4,8 @@ Item{
     id:nav_row
     height: scaleY(8)
     state:"extended"
-
+    property double loadingProgress: nav.progress
+    onLoadingProgressChanged: console.log(loadingProgress)
     property alias navigation:nav
     property string defaultSource:"ScenarioComponent.qml"
     property string navSource:"ScenarioComponent.qml"
@@ -40,6 +41,16 @@ Item{
                 left: parent.left
                 right:parent.right
             }
+            onSourceChanged: {
+                if(nav.status===Component.Ready){
+                    console.log("Header Navigation loaded")
+                }else if(nav.status===Component.Loading){
+                    console.log("Header Navigation Loading")
+                } else if(nav.status===Component.Error){
+                    console.log("Header Navigation failed to load, falling back.")
+                }
+            }
+
             anchors.rightMargin: parent.width*.25
         }
 
@@ -117,8 +128,8 @@ Item{
             from: "*"
             to: "*"
             AnchorAnimation{
-            duration: 500
-            easing.type: Easing.InCurve
+                duration: 500
+                easing.type: Easing.InCurve
             }
         }
     ]

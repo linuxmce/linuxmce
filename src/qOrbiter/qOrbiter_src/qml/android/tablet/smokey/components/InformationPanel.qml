@@ -63,6 +63,7 @@ Item{
         id:time_keeper
         anchors.top: orbiter_status_text.bottom
         anchors.left: orbiter_status_text.left
+
     }
     Column{
         id:user_info
