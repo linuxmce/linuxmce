@@ -3,196 +3,262 @@ import "../components"
 
 Item {
     id: remote1
-
     height:parent.height
     width: parent.width
-    property int rowHeight:scaleY(8)
+    property int rowHeight:scaleY(12)
     Column { // Info, Up, Menu, Ch+
-        id:col1
-        spacing: 1
+        id:leftCol
+        spacing: manager.b_orientation ? scaleX(1) : scaleY(1)
         height: parent.height
-        width: parent.width / 3
+        width: scaleX(18)
         anchors{
             left:parent.left
             top:parent.top
         }
 
-        Row {
-            spacing: 1
-            height: rowHeight
-            anchors{
-                left:parent.left
-                right:parent.right
-            }
+        StyledButton {
+            state:"fixed"
+            id: btVolUp
+            buttonText: "Vol+"
+            onActivated: manager.adjustVolume(+1)
+        }
+        StyledButton {
+            id: btVolDown
+            state:"fixed"
+            buttonText: "Vol-"
+            onActivated: manager.adjustVolume(-1)
+        }
 
-            StyledButton {
-                id: btInfo
-                buttonText: "Info"
-                onActivated: manager.extraButton("info")
-            }
-            StyledButton {
-                id: btUp
-                buttonText: "Up"
-                onActivated: manager.moveArrowDirection(1) //up
-            }
-            StyledButton {
-                id: btMenu
-                buttonText: "Menu"
-                onActivated: manager.extraButton("menu")
-            }
-            StyledButton {
-                id: btChannelUp
-                buttonText: "Ch+"
-                onActivated: manager.changeTrack("+1")
-            }
+        StyledButton {
+            id: off_btn
+            state:"fixed"
+            buttonText: "Off"
+            onActivated:{manager. manager.stopMedia()}
         }
-        Row {
-            spacing: 1
-            height: rowHeight
+
+    }
+
+    Column { // Info, Up, Menu, Ch+
+        id:rightCol
+        spacing: manager.b_orientation ? scaleX(1) : scaleY(1)
+        height: parent.height
+        width: scaleX(18)
+        anchors{
+            right:parent.right
+            top:parent.top
+        }
+
+        StyledButton {
+            id: btChannelUp
+            state:"fixed"
+            buttonText: "Ch+"
+            onActivated: manager.changeTrack("+1")
+        }
+        StyledButton {
+            id: btSkipNext
+            state:"fixed"
+            buttonText: "Mute"
+            onActivated: manager.muteSound()
+        }
+        StyledButton {
+            state:"fixed"
+            id: btChannelDown
+            buttonText: "Ch-"
+            onActivated: manager.changeTrack("-1")
+        }
+
+
+    }
+
+    Rectangle{
+        id:mainDiamond
+        height: scaleY(12)*3
+        width:  scaleX(18)*3
+        color:"transparent"
+       anchors{
+        horizontalCenter: parent.horizontalCenter
+        top:parent.top
+       }
+        StyledButton {
+            id: btUp
+            anchors{
+                top:parent.top
+                horizontalCenter: parent.horizontalCenter
+
+            }
+            state:"fixed"
+            buttonText: "Up"
+            onActivated: manager.moveArrowDirection(1) //up
+        }
+
+        StyledButton {
+            state:"fixed"
+            anchors{
+                bottom:parent.bottom
+                 horizontalCenter: parent.horizontalCenter
+            }
+            id: btDown
+            buttonText: "Down"
+            onActivated: manager.moveArrowDirection(2) //down
+        }
+        StyledButton {
+            id: btLeft
             anchors{
                 left:parent.left
-                right:parent.right
+                verticalCenter: parent.verticalCenter
             }
-            StyledButton {
-                id: btLeft
-                buttonText: "Left"
-                onActivated: manager.moveArrowDirection(3)
-            }
-            StyledButton {
-                id: btOk
-                buttonText: "Ok"
-                onActivated: manager.moveArrowDirection(5) //ok
-            }
-            StyledButton {
-                id: btRight
-                buttonText: "Right"
-                onActivated: manager.moveArrowDirection(4)
-            }
-            StyledButton {
-                id: btChannelDown
-                buttonText: "Ch-"
-                onActivated: manager.changeTrack("-1")
-            }
+            state:"fixed"
+            buttonText: "Left"
+            onActivated: manager.moveArrowDirection(3)
         }
-        Row { // Exit, Down, Guide, VolUp
-            spacing: 1
-            height: rowHeight
+        StyledButton {
+            id: btOk
             anchors{
-                left:parent.left
-                right:parent.right
+                horizontalCenter: parent.horizontalCenter
+                verticalCenter: parent.verticalCenter
             }
-            StyledButton {
-                id: btExit
-                buttonText: "Exit"
-                onActivated: manager.extraButton("exit")
-            }
-            StyledButton {
-                id: btDown
-                buttonText: "Down"
-                onActivated: manager.moveArrowDirection(2) //down
-            }
-            StyledButton {
-                id: btGuide
-                buttonText: "Guide"
-                onActivated: manager.extraButton("guide")
-            }
-            StyledButton {
-                id: btVolUp
-                buttonText: "Vol+"
-                onActivated: manager.adjustVolume(+1)
-            }
+            state:"fixed"
+            buttonText: "Ok"
+            onActivated: manager.moveArrowDirection(5) //ok
         }
-        Row { // Stop, Pause, Play, VolDown
-            height: rowHeight
+        StyledButton {
+            id: btRight
             anchors{
-                left:parent.left
                 right:parent.right
+                verticalCenter: parent.verticalCenter
             }
-            StyledButton {
-                id: btStop
-                buttonText: "Stop"
-                // This is the Live TV remote, so we use the "Stop" CMD (AV control), and not the "Stop Media" CMD (DCE players)
-                onActivated: manager.stop_AV()
-            }
-            StyledButton {
-                id: btPause
-                buttonText: "Pause"
-                onActivated: manager.pause()
-            }
-            StyledButton {
-                id: btPlay
-                buttonText: "Play"
-                onActivated: manager.play()
-            }
-            StyledButton {
-                id: btVolDown
-                buttonText: "Vol-"
-                onActivated: manager.adjustVolume(-1)
-            }
+            state:"fixed"
+            buttonText: "Right"
+            onActivated: manager.moveArrowDirection(4)
         }
-        
-        Row { // SkipBack, Rewind, FastForward, SkipFwd
-            height: rowHeight
-            anchors{
-                left:parent.left
-                right:parent.right
-            }
-            StyledButton {
-                id: btSkipBack
-                buttonText: "Off"
-                onActivated: manager.stopMedia()
-            }
-            StyledButton {
-                id: btRewind
-                buttonText: "Rewind"
-                onActivated: manager.setPlaybackSpeed(-1)
-            }
-            StyledButton {
-                id: btFFwd
-                buttonText: "FFwd"
-                onActivated: manager.setPlaybackSpeed(1)
-            }
-            StyledButton {
-                id: btSkipNext
-                buttonText: "Mute"
-                onActivated: manager.muteSound()
-            }
+
+    }
+
+
+    Row { // Exit, Down, Guide, VolUp
+        id:dvrRow
+        spacing: manager.b_orientation ? scaleX(1) : scaleY(1)
+        height: rowHeight
+        anchors{
+            bottom:transports.top
+            left:parent.left
+            right:parent.right
         }
-        
-        Row { // Red, Green, Yellow, Blue
-            height: rowHeight
-            anchors{
-                left:parent.left
-                right:parent.right
-            }
-            StyledButton {
-                id: btRed
-                buttonText: "Red"
-                phil: "red"
-                
-                onActivated: manager.redButtonPress()
-            }
-            StyledButton {
-                id: btGreen
-                buttonText: "Green"
-                phil: "green"
-                
-                onActivated: manager.greenButton()
-            }
-            StyledButton {
-                id: btYellow
-                buttonText: "Yellow"
-                phil: "yellow"
-                
-                onActivated: manager.yellowButton()
-            }
-            StyledButton {
-                id: btBlue
-                buttonText: "Blue"
-                phil: "blue"
-                
-                onActivated: manager.blueButton()
-            }
+        StyledButton {
+            state:"fixed"
+            id: btExit
+            buttonText: "Exit"
+            onActivated: manager.extraButton("exit")
+        }
+
+        StyledButton {
+            state:"fixed"
+            id: btGuide
+            buttonText: "Guide"
+            onActivated: manager.extraButton("guide")
+        }
+        StyledButton {
+            id: btInfo
+            state:"fixed"
+            buttonText: "Info"
+            onActivated: manager.extraButton("info")
+        }
+
+        StyledButton {
+            id: btMenu
+            state:"fixed"
+            buttonText: "Menu"
+            onActivated: manager.extraButton("menu")
+        }
+
+    }
+
+
+    Row {
+        id:transports// SkipBack, Rewind, FastForward, SkipFwd
+
+        spacing: manager.b_orientation ? scaleX(1) : scaleY(1)
+
+        height: rowHeight
+        anchors{
+            left:parent.left
+            right:parent.right
+            bottom:colorButtons.top
+        }
+        StyledButton {
+            id: btStop
+            state:"fixed"
+            buttonText: "Stop"
+            // This is the Live TV remote, so we use the "Stop" CMD (AV control), and not the "Stop Media" CMD (DCE players)
+            onActivated: manager.stop_AV()
+        }
+        StyledButton {
+            id: btRewind
+            state:"fixed"
+            buttonText: "Rewind"
+            onActivated: manager.setPlaybackSpeed(-1)
+        }
+        StyledButton {
+            id: btPause
+            state:"fixed"
+            buttonText: "Pause"
+            onActivated: manager.pause()
+        }
+        StyledButton {
+            id: btPlay
+            state:"fixed"
+            buttonText: "Play"
+            onActivated: manager.play()
+        }
+        StyledButton {
+            id: btFFwd
+            state:"fixed"
+            buttonText: "FFwd"
+            onActivated: manager.setPlaybackSpeed(1)
+        }
+
+    }
+
+    Row { // Red, Green, Yellow, Blue
+        id:colorButtons
+        spacing: manager.b_orientation ? scaleX(1) : scaleY(1)
+        height: rowHeight
+        anchors{
+            bottom:parent.bottom
+            left:parent.left
+            right:parent.right
+        }
+        StyledButton {
+            id: btRed
+            state:"fixed"
+            buttonText: "Red"
+            phil: "red"
+
+            onActivated: manager.redButtonPress()
+        }
+        StyledButton {
+            id: btGreen
+            state:"fixed"
+            buttonText: "Green"
+            phil: "green"
+
+            onActivated: manager.greenButton()
+        }
+        StyledButton {
+            id: btYellow
+            state:"fixed"
+            buttonText: "Yellow"
+            phil: "yellow"
+
+            onActivated: manager.yellowButton()
+        }
+        StyledButton {
+            id: btBlue
+            state:"fixed"
+            buttonText: "Blue"
+            phil: "blue"
+            onActivated: manager.blueButton()
         }
     }
+
 }

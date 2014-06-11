@@ -5,12 +5,12 @@ Item{
     width: parent.width
     clip:true
 
-    anchors.left: metadataContainer.right
+    anchors.left: parent.right
     anchors.top: parent.top
     state:"unloaded"
     MouseArea{
         anchors.fill: parent
-        onReleased: mediaPlaybackBase.state="metadata"
+      //  onReleased: mediaPlaybackBase.state="metadata"
     }
 
     Rectangle{
@@ -42,7 +42,7 @@ Item{
 
         Behavior on anchors{
             AnchorAnimation{
-                duration: 350
+                duration: 500
                 easing.type: Easing.InCubic
             }
         }

@@ -32,8 +32,7 @@ StyledScreen {
         TvbuttonGrid {
             id: remote1
             anchors{
-                left:container.right
-                right:container.right
+                left:container.right               
                 bottom: container.bottom
                 top:container.top
             }
@@ -56,6 +55,15 @@ StyledScreen {
             anchors{
                 left:container.right
                 right:container.right
+                bottom: container.bottom
+                top:container.top
+            }
+        }
+        AdvancedMediaOptions{
+            id:advanced_options
+            width: parent.width
+            anchors{
+                left:container.right
                 bottom: container.bottom
                 top:container.top
             }
@@ -108,6 +116,7 @@ StyledScreen {
                 AnchorChanges{
                     target: remote1
                     anchors{
+
                         left:container.left
                     }
                 }
@@ -116,6 +125,13 @@ StyledScreen {
             State{
                 name:"advanced"
                 extend:""
+                AnchorChanges{
+                    target: advanced_options
+                    anchors{
+
+                        left:container.left
+                    }
+                }
             }
 
         ]

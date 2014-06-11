@@ -52,6 +52,7 @@ Item{
        radius: bg_fill.radius
    }
 
+
     StyledText{
         id:button_label
         text:"ipsum"
@@ -77,5 +78,33 @@ Item{
         sourceComponent: undefined
     }
 
+    states: [
+        State {
+            name: "fixed"
+            PropertyChanges {
+                target: styled_button
+                height:scaleY(12)
+                width:scaleX(18)
+            }
+
+            PropertyChanges{
+                target: button_label
+                wrapMode:Text.WrapAtWordBoundaryOrAnywhere
+            }
+        },
+        State {
+            name: "numberpad"
+            PropertyChanges {
+                target: styled_button
+                height:manager.b_orientation ? scaleY(12) : scaleY(18)
+                width: manager.b_orientation ? scaleX(18) : scaleX(12)
+            }
+
+            PropertyChanges{
+                target: button_label
+                wrapMode:Text.WrapAtWordBoundaryOrAnywhere
+            }
+        }
+    ]
 
 }

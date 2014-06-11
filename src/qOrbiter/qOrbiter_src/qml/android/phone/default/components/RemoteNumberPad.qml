@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 1.1
 Item{
     /* Item sized using anchors */
 
@@ -9,7 +9,7 @@ Item{
 
     Item {
         id:padHeader
-       width: parent.width
+        width: parent.width
         height: scaleX(10)
 
         Rectangle{
@@ -29,8 +29,8 @@ Item{
 
     Flow{
         id:buttonFlow
-        width: scaleX(65)
-        height: scaleY(55)
+        width: 3*scaleX(18)
+        height:3*scaleY(12)
 
         anchors{
             top:padHeader.bottom
@@ -44,6 +44,7 @@ Item{
             delegate: StyledButton{
                 height: flowButtonHeight
                 width: flowButtonWidth
+                state:"fixed"
                 buttonText: index+1
                 onActivated: {
                     numberString = numberString+(index+1)
@@ -66,8 +67,7 @@ Item{
         spacing: 0
         StyledButton{
             id:backbutton
-            height: flowButtonHeight
-            width: flowButtonWidth
+            state:"fixed"
 
             buttonText: qsTr("BACK")
 
@@ -78,8 +78,7 @@ Item{
         }
 
         StyledButton{
-            height: flowButtonHeight
-            width: flowButtonWidth
+            state:"fixed"
             buttonText: "0"
             onActivated: {
                 numberString = numberString+"0"
@@ -87,8 +86,7 @@ Item{
         }
 
         StyledButton{
-            height: flowButtonHeight
-            width: flowButtonWidth
+            state:"fixed"
             buttonText: qsTr("GO")
             onActivated: {
                 manager.changeChannels(numberString)

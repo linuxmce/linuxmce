@@ -4,15 +4,10 @@ import "../components"
 Item {
     id: metadatavideo
 
-    
-    Image {
-        id: npgloss
-        source: "../img/widegreyshape.png"
-        height:parent.height
-        width:parent.width
-        smooth:true
-        opacity: .35
-    }
+   Rectangle{
+    anchors.fill: parent
+    gradient:skinStyle.bgContentGradient
+   }
     
     Column
     {
@@ -21,52 +16,46 @@ Item {
         spacing: 5
         height: childrenRect.height
         
-        Text {
+        StyledText {
             id: artist
             width: parent.width
-            text: qsTr("Device: ")  + dcenowplaying.qs_mainTitle
-            font.family: "Droid Sans"
+            text: qsTr("Device: ")  + dcenowplaying.qs_mainTitle       
             wrapMode: "NoWrap"
             font.bold: true
-            smooth: true
-            font.pixelSize: scaleY(3)
+            state:"header"
+            smooth: true        
             color: "orange"
         }
         
-        Text {
+        StyledText {
             id: network_id
             wrapMode: "NoWrap"
             text: qsTr("Network: ") + dcenowplaying.channelID
-            font.family: "Droid Sans"
+            state:"para"
             font.bold: true
             smooth: true
-            horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: scaleY(2)
+            horizontalAlignment: Text.AlignHCenter          
             color: "white"
         }
         
         
-        Text {
+        StyledText {
             id: channel_id
             wrapMode: "NoWrap"
-            text: qsTr("Channel: ") + dcenowplaying.channel
-            font.family: "Droid Sans"
+            text: qsTr("Channel: ") + dcenowplaying.channel           
             font.bold: true
             smooth: true
-            horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: scaleY(2)
+            horizontalAlignment: Text.AlignHCenter        
             color: "white"
         }
         
-        Text {
+        StyledText {
             id: program_title
             wrapMode: "NoWrap"
-            text: qsTr("Program:") + dcenowplaying.tvProgram
-            font.family: "Droid Sans"
+            text: qsTr("Program:") + dcenowplaying.tvProgram           
             font.bold: true
             smooth: true
-            horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: scaleY(2)
+            horizontalAlignment: Text.AlignHCenter           
             color: "white"
         }
     }
