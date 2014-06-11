@@ -1575,8 +1575,6 @@ signals:
     void dceIPChanged();
     void DCEHostChanged();
 
-
-
 public slots:
 
     void setGridPause(bool g){ gridPaused =g; emit gridPauseChanged(gridPaused); if(!gridPaused){populateAdditionalMedia();} qDebug() << "Grid is paused ::" << gridPaused; }
@@ -1649,6 +1647,8 @@ public slots:
 
     void getAttributeImage(QString param);
 
+    void setDirectAv();
+    void showUiMenu();
 
     void setDeviceId(int d) {m_dwPK_Device = d; emit deviceIdChanged();}
     int getDeviceId() {return m_dwPK_Device;}

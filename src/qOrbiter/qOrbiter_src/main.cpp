@@ -482,8 +482,9 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(isOsd(bool)), &w, SLOT(setOsd(bool)));
         QObject::connect(&pqOrbiter, SIGNAL(monitorStatusChanged(bool)), &w, SLOT(setMonitorStatus(bool)));
         QObject::connect(&w, SIGNAL(newMessageSend(QVariantMap)), &pqOrbiter, SLOT(executeMessageSend(QVariantMap)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(liveAvPath()), &pqOrbiter, SLOT(setDirectAv()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(setText(QString,QString,int)), &w, SLOT(setText(QString,QString,int)), Qt::QueuedConnection);
-
+        QObject::connect(&w, SIGNAL(show_linuxmce_menu()), &pqOrbiter, SLOT(setDirectAv()), Qt::QueuedConnection);
         //timecodemanager signals / slots
         QObject::connect(&pqOrbiter, SIGNAL(updateTimeCode(QString,int)), timecode, SLOT(start(QString,int)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(stopTimeCode()), timecode, SLOT(stop()), Qt::QueuedConnection);

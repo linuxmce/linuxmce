@@ -573,6 +573,7 @@ signals:
 
     /*Dvd Specific*/
     void show_dvdMenu();
+    void show_linuxmce_menu();
 
     /*Metadata signals*/
     void objectUpdated();
@@ -1150,6 +1151,8 @@ public slots:
     void gridChangeChannel(QString chan, QString chanid) {emit newGridChannel(chan, chanid);}
     void extraButtonPressed(QString b) {emit extraButton(b);}
     void dvd_showMenu(bool b) { dvdMenuShowing = b ; emit show_dvdMenu();}
+    void showLinuxmceMenu(){emit show_linuxmce_menu();}
+
     void setZoomLevel(QString zoom) {emit zoomLevelChanged(zoom);}
     void setAspectRatio(QString r) {emit aspectRatioChanged(r);}
     void getVideoFrame() { emit requestVideoFrame();}

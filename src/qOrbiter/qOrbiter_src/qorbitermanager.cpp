@@ -768,7 +768,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
             QString m_command = lScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
             QString m_goto = lScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
             QString imgName = lScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-            QImage m_image = QImage("Qrc:/icons/"+imgName);
+            QImage m_image = QImage("qrc:/icons/"+imgName);
 
             lightModelHolder->appendRow(new LightingScenarioItem(m_name,m_label, m_param, m_command, m_goto, m_image, lightModelHolder));
         }

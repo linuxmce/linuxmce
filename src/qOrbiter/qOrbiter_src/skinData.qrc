@@ -29,5 +29,6 @@
         <file alias="AndroidReload.qml">qml/skins-common/lib/startup/AndroidReload.qml</file>
         <file alias="GenericReload.qml">qml/skins-common/lib/startup/DesktopReload.qml</file>
         <file>qml/skins-common/lib/startup/IoSReload.qml</file>
+        <file alias="Refresh.qml">qml/Refresh.qml</file>
     </qresource>
 </RCC>

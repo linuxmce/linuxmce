@@ -575,7 +575,8 @@ OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
     qml/Welcome.qml \
-    qml/Welcome2.qml
+    qml/Welcome2.qml \
+    qml/Refresh.qml
 
 for_harmattan{
         OTHER_FILES= \

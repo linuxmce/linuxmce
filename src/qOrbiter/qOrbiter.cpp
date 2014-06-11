@@ -5105,6 +5105,18 @@ void qOrbiter::getAttributeImage(QString param)
 
 }
 
+void qOrbiter::setDirectAv()
+{
+    CMD_Live_AV_Path setLiveAv(this->m_dwPK_Device, this->m_dwPK_Device_NowPlaying_Video, QString::number(this->i_ea).toStdString(), false);
+    SendCommand(setLiveAv);
+}
+
+void qOrbiter::showUiMenu()
+{
+    CMD_Set_Active_Menu showHome(this->m_dwPK_Device, this->m_dwPK_Device_NowPlaying, "Returning");
+    SendCommand(showHome);
+}
+
 
 
 void qOrbiter::setAlarm(QString dataGridId, int row, int role, bool toggle, int grp)
