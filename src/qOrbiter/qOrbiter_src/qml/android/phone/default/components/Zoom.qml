@@ -10,7 +10,7 @@ Item{
         width: parent.width
         height: scaleY(8)
         anchors.top:parent.top
-     //   anchors.topMargin: 10
+        //   anchors.topMargin: 10
         color:"black"
         StyledText{
             text:"Zoom & Aspect"
@@ -30,13 +30,13 @@ Item{
         spacing:scaleY(2)
 
         StyledButton{
-
+            state: "fixed"
             buttonText: "-7%"
             onActivated: manager.setZoomLevel("-7")
 
         }
         StyledButton{
-
+            state: "fixed"
             buttonText: "-5%"
             MouseArea{
                 anchors.fill: parent
@@ -45,7 +45,7 @@ Item{
         }
 
         StyledButton{
-
+            state: "fixed"
             buttonText: "-4%"
             MouseArea{
                 anchors.fill: parent
@@ -53,7 +53,7 @@ Item{
             }
         }
         StyledButton{
-
+            state: "fixed"
             buttonText: "-2%"
             MouseArea{
                 anchors.fill: parent
@@ -61,7 +61,7 @@ Item{
             }
         }
         StyledButton{
-
+            state: "fixed"
             buttonText: "-1%"
             MouseArea{
                 anchors.fill: parent
@@ -70,7 +70,7 @@ Item{
         }
 
         StyledButton{
-
+            state: "fixed"
             buttonText: "+1%"
             MouseArea{
                 anchors.fill: parent
@@ -78,7 +78,7 @@ Item{
             }
         }
         StyledButton{
-
+            state: "fixed"
             buttonText: "+2%"
             MouseArea{
                 anchors.fill: parent
@@ -87,7 +87,7 @@ Item{
         }
 
         StyledButton{
-
+            state: "fixed"
             buttonText: "+4%"
             MouseArea{
                 anchors.fill: parent
@@ -95,7 +95,7 @@ Item{
             }
         }
         StyledButton{
-
+            state: "fixed"
             buttonText: "+5%"
             MouseArea{
                 anchors.fill: parent
@@ -123,7 +123,7 @@ Item{
         spacing:scaleY(2)
 
         StyledButton{
-
+            state: "fixed"
             buttonText: "90%"
             MouseArea{
                 anchors.fill: parent
@@ -132,7 +132,7 @@ Item{
         }
 
         StyledButton{
-
+            state: "fixed"
             buttonText: "95%"
             MouseArea{
                 anchors.fill: parent
@@ -140,7 +140,7 @@ Item{
             }
         }
         StyledButton{
-
+            state: "fixed"
             buttonText: "100%"
             MouseArea{
                 anchors.fill: parent
@@ -148,7 +148,7 @@ Item{
             }
         }
         StyledButton{
-
+            state: "fixed"
             buttonText: "105%"
             MouseArea{
                 anchors.fill: parent
@@ -157,7 +157,7 @@ Item{
         }
 
         StyledButton{
-
+            state: "fixed"
             buttonText: "110%"
             MouseArea{
                 anchors.fill: parent
@@ -165,7 +165,7 @@ Item{
             }
         }
         StyledButton{
-
+            state: "fixed"
             buttonText: "115%"
             MouseArea{
                 anchors.fill: parent
@@ -174,7 +174,7 @@ Item{
         }
 
         StyledButton{
-
+            state: "fixed"
             buttonText: "120%"
             MouseArea{
                 anchors.fill: parent
@@ -182,7 +182,7 @@ Item{
             }
         }
         StyledButton{
-
+            state: "fixed"
             buttonText: "125%"
             MouseArea{
                 anchors.fill: parent
@@ -190,7 +190,7 @@ Item{
             }
         }
         StyledButton{
-
+            state: "fixed"
             buttonText: "130%"
             MouseArea{
                 anchors.fill: parent
@@ -212,15 +212,16 @@ Item{
         spacing:scaleY(2)
 
         StyledButton{
+            state: "fixed"
             buttonText: "Auto"
-           textSize:scaleY(8)
+
             MouseArea{
                 anchors.fill: parent
                 onClicked:manager.setAspectRatio("auto")
             }
         }
         StyledButton{
-
+            state: "fixed"
             buttonText: "1:1"
             MouseArea{
                 anchors.fill: parent
@@ -229,7 +230,7 @@ Item{
         }
 
         StyledButton{
-
+            state: "fixed"
             buttonText: "4:3"
             MouseArea{
                 anchors.fill: parent
@@ -238,7 +239,7 @@ Item{
         }
 
         StyledButton{
-
+            state: "fixed"
             buttonText: "16:9"
             MouseArea{
                 anchors.fill: parent
@@ -246,7 +247,7 @@ Item{
             }
         }
         StyledButton{
-
+            state: "fixed"
             buttonText: "2.11:1"
             MouseArea{
                 anchors.fill: parent

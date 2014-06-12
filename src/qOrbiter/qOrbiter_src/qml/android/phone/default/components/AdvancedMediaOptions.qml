@@ -8,10 +8,7 @@ Item{
     anchors.left: parent.right
     anchors.top: parent.top
     state:"unloaded"
-    MouseArea{
-        anchors.fill: parent
-      //  onReleased: mediaPlaybackBase.state="metadata"
-    }
+
 
     Rectangle{
         id:fil
@@ -90,12 +87,12 @@ Item{
             control:"Bookmarks.qml"
         }
         ListElement{
-            name:"Resend \n Command"
+            name:"Resend\nCommand"
             control:"Resend.qml"
         }
 
         ListElement{
-            name:"Manage Playlist"
+            name:"Manage\nPlaylist"
             control:"PlaylistEditor.qml"
         }
 

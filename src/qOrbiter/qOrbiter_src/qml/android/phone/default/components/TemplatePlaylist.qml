@@ -6,16 +6,13 @@ Item {
     height: manager.appHeight
     clip:true
 
-    property double spacetracker: ((phantom_spaceman.x+(manager.appWidth)) / manager.appWidth)
-  //  Component.onCompleted: manager.setBoundStatus(true)
-    property alias psPos:phantom_spaceman.x
-
+    //  Component.onCompleted: manager.setBoundStatus(true)
 
     Connections{
         target: mediaplaylist
         onActiveItemChanged:{
             nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex  , ListView.Beginning)
-             nonepgplaylistview.currentIndex = mediaplaylist.currentIndex
+            nonepgplaylistview.currentIndex = mediaplaylist.currentIndex
         }
     }
 
@@ -86,25 +83,9 @@ Item {
             PlaylistClickedHandler{
                 id:ps
                 anchors.fill: parent
-                drag.target: phantom_spaceman
-                drag.axis: Drag.XAxis
-                drag.filterChildren: true
-                onReleased: {
-                        phantom_spaceman.x=0
-                }
-            }
-        }
-}
-
-        Item{
-            id:phantom_spaceman
-            height:manager.appHeight
-            width: manager.appWidth
-            onXChanged:{
-                metadataContainer.x =( phantom_spaceman.x + metadataContainer.width)
-                  if  (phantom_spaceman.x < manager.appWidth *(-.75) ) {
-                    mediaPlaybackBase.state = "controls"
-                }
             }
         }
     }
+
+
+}

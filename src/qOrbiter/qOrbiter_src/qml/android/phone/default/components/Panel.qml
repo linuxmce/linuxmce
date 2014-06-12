@@ -7,6 +7,7 @@ Item {
 
     property int panelHeaderHeight:height*.25
     property string headerTitle:"Lorem Ipsum"
+    property alias headerAnchor:panelHeader
     clip:true
 
     Rectangle{

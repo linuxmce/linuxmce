@@ -5,31 +5,45 @@ Item {
 
     anchors.fill: parent
     focus:true
-    state:"controls"
 
-    property double conversionRate:metadataContainer.x/manager.appWidth
 
     Component.onCompleted:{
+        state="metadata"
         manager.setBoundStatus(true)
-        metadataContainer.forceActiveFocus()     
+        metadataContainer.forceActiveFocus()
         setNavigation("MediaControl.qml")
     }
 
-
     TemplatePlaylist {
         id: templatePlaylist
-        scale:conversionRate
-        opacity: scale
+        anchors{
+            left:mediaPlaybackBase.right
+            bottom:parent.bottom
+        }
+        opacity: 0
+        scale:0
     }
 
     MetadataContainer {
         id: metadataContainer
         height: parent.height
         width: parent.width
+        anchors{
+            left:mediaPlaybackBase.right
+            bottom:parent.bottom
+        }
+        scale:0
+        opacity:0
     }
 
     AdvancedMediaOptions{
         id:advanced_options
+        anchors{
+            left:mediaPlaybackBase.right
+            bottom:parent.bottom
+        }
+        scale:0
+        opacity:0
     }
 
     Item{
@@ -40,60 +54,46 @@ Item {
 
 
         State {
-            name: "controls"
+            name: "metadata"
+            extend: ""
             PropertyChanges {
                 target: metadataContainer
-                visible:true
-                focus:true              
+                opacity:1
+                scale:1
             }
-
-            PropertyChanges{
-                target:templatePlaylist
-                scale:conversionRate
-                opacity: scale
-                enabled:false
-            }
-
-            PropertyChanges{
-                target:volIndicator
-                visible:false
-            }
-
             AnchorChanges{
                 target: metadataContainer
-                anchors{
-                    top:parent.top
-                    left:parent.left
-
-                }
+                anchors.left: mediaPlaybackBase.left
             }
         },
         State{
             name:"playlist"
+            extend:""
+
             PropertyChanges{
                 target:templatePlaylist
-                spacetracker:1
-                scale:conversionRate
-                opacity: scale
-                psPos:0
-
+                scale:1
+                opacity: 1
             }
 
             AnchorChanges{
-                target:metadataContainer
-                anchors{
-                    left:parent.right
-                }
+                target:templatePlaylist
+                anchors.left: mediaPlaybackBase.left
             }
         },
         State{
             name:"advanced"
+            extend: ""
             AnchorChanges{
-                target: metadataContainer
+                target: advanced_options
                 anchors{
-                    left:undefined
-                    right:parent.left
+                    left:mediaPlaybackBase.left
                 }
+            }
+            PropertyChanges{
+                target: advanced_options
+                opacity:1
+                scale:1
             }
         },
         State {
@@ -119,6 +119,7 @@ Item {
         anchors.centerIn: parent
         focus:true
         clip:true
+        visible:false
         property bool tripped: false
         Keys.onReleased: {
             switch(event.key){

@@ -58,7 +58,7 @@ Item{
         text:"ipsum"
         isBold: false
         font.weight: Font.Light
-        fontSize: textSize
+        state:"para"
         anchors.centerIn: parent
         color:"antiquewhite"
         wrapMode:button_label.paintedWidth < scaleX(10) ? Text.NoWrap : Text.WrapAtWordBoundaryOrAnywhere
@@ -85,6 +85,7 @@ Item{
                 target: styled_button
                 height:scaleY(12)
                 width:scaleX(18)
+                state:"reg"
             }
 
             PropertyChanges{
@@ -103,6 +104,22 @@ Item{
             PropertyChanges{
                 target: button_label
                 wrapMode:Text.WrapAtWordBoundaryOrAnywhere
+            }
+        },
+        State {
+            name: "large-fixed"
+            PropertyChanges {
+                target: styled_button
+                height:manager.b_orientation ? scaleY(15) : scaleY(20)
+                width:manager.b_orientation ? scaleX(28) : scaleX(25)
+            }
+
+            PropertyChanges{
+                target: button_label
+                state:"para"
+                wrapMode:Text.WrapAtWordBoundaryOrAnywhere
+                width:styled_button.width
+                horizontalAlignment:Text.AlignHCenter
             }
         }
     ]

@@ -9,8 +9,8 @@ Text {
     property bool isItalic:false
     property double fontSize:manager.b_orientation ? scaleY(2.5) : scaleX(2.5)
     property double headerSize:scaleY(6)
-    property double paraSize:scaleY(4)
-    property double regSize:scaleY(3)
+    property double paraSize:manager.b_orientation ? scaleY(4) : scaleY(6)
+    property double regSize:manager.b_orientation ? scaleY(3) : scaleY(5)
     color:skinStyle.tile_color
     id:labelelement
     text: textLabel

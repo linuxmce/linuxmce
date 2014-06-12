@@ -11,72 +11,79 @@ StyledScreen {
         Flow {
             id: flow1
             anchors.centerIn: parent
-            height: scaleY(75)
-            width: scaleX(85)
+            height: scaleY(85)
+            width: scaleX(95)
             spacing: 10
 
             StyledButton{
                 id:regenorbiter
-
-                buttonText: "Regen \nOrbiter"
+                state: "large-fixed"
+                buttonText: "Regen\nOrbiter"
                 onActivated:  regenOrbiter(manager.m_dwPK_Device)
             }
 
             StyledButton{
                 id:pending
-
-                buttonText: "Pending\n Tasks"
+                state: "large-fixed"
+                buttonText: "Pending\nTasks"
 
             }
 
             StyledButton{
                 id:networksettings
-
-                buttonText: "Network \nSettings"
+                state: "large-fixed"
+                buttonText: "Network\nSettings"
 
             }
 
             StyledButton{
                 id:avwizard
-
-                buttonText: "Av\n wizard"
+                state: "large-fixed"
+                buttonText: "Av\nWizard"
 
             }
 
             StyledButton{
                 id:regenorbiters
-
-                buttonText: "Regen \n All Orbiters"
+                state: "large-fixed"
+                buttonText: "Regen All\nOrbiters"
 
             }
 
             StyledButton{
                 id:quickreload
-
-                buttonText: "Quick \n Reload"
+                state: "large-fixed"
+                buttonText: "Quick\n Reload"
                 onActivated: manager.quickReload()
 
             }
 
             StyledButton{
                 id:changeStyle
-
-                buttonText: "Change\n Styles"
+                state: "large-fixed"
+                buttonText: "Change\nStyles"
 
             }
             StyledButton{
                 id:diagnostic
-
+                state: "large-fixed"
                 buttonText: "Diagnostics"
                 onActivated: content.state="diag"
 
             }
             StyledButton{
                 id:refresh
-                buttonText: "Clear Cache"
-                onActivated: manager.clearSkinCache()
+                state: "large-fixed"
+                buttonText: "Clear\nCache"
+                onActivated:{ manager.clearSkinCache(); manager.goBacktoQScreen()}
+            }
+            StyledButton{
+                id:ping
+                state: "large-fixed"
+                buttonText: "Ping\nTest"
 
             }
+
         }
 
         Rectangle{
