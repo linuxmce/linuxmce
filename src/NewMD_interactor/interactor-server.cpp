@@ -37,6 +37,7 @@ int main()
 	char remoteIP[1024], remoteMAC[1024];
 	char remoteDeviceData[1024];
 	char remoteDeviceTemplate[1024];
+	char remotePNPIdentifier[1024];
 	int bytes, tmp;
 
 	saddr.sin_family = AF_INET;
@@ -121,6 +122,25 @@ int main()
 						NULL };
 					GetCommandOutput(args[0], args, NULL);
 				}
+			}
+			else if (strcmp(cmd, "select") == 0)
+			{
+				memset(remoteIP, 0, 1024);
+				memset(remoteMAC, 0, 1024);
+				memset(remoteDeviceData, 0, 1024);
+				memset(remotePNPIdentifier, 0, 1024);
+
+				sscanf(buffer, "%*s %s %s %s %s", remoteIP, remoteMAC, remoteDeviceData, remotePNPIdentifier);
+				printf("Split: IP=%s, MAC=%s, DD=%s, DT=%s\n", remoteIP, remoteMAC, remoteDeviceData, remotePNPIdentifier);
+
+				// messagesend a HAL type DeviceDetected Event here.
+				printf("New Interactor Device Selection\n");
+				char * args[] = { "/usr/pluto/bin/MessageSend", "localhost", "0", "-1001", "2", "65",
+					"28", remoteIP, "5", remoteMAC, "52", "3", "53", "5",
+					"54", strlen(remotePNPIdentifier) == 0 ? (char *) sDefaultPNPIdentifier : remotePNPIdentifier,
+					"55", remoteDeviceData,
+					NULL };
+				GetCommandOutput(args[0], args, NULL);
 			}
 			else if (strcmp(cmd, "rooms") == 0)
 			{
