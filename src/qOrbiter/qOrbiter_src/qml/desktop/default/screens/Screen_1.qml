@@ -18,6 +18,7 @@ Item{
         bottom:parent.bottom
     }
 
+
     Item {
         id:stage
         signal swapStyle()

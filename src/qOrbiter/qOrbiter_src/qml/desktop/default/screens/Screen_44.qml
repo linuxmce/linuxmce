@@ -168,12 +168,12 @@ Rectangle {
                 id:componentDisplay
                 height: scaleY(skinStyle.buttonH)
                 width: scaleX(skinStyle.buttonW)
-                buttontext: qsTr("Display Components")
+                buttontext: qsTr("Clear Compone \nCache")
                 radius: 5
                 MouseArea{
                     id:showComponents
                     anchors.fill: parent
-                    onClicked: MyJs.createStageComponent("ComponentViewer.qml", advancedscreen)
+                    onClicked: manager.clearSkinCache()
                 }
             }
 

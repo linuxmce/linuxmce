@@ -66,14 +66,12 @@ Item {
         width: manager.appWidth
         focus:true
         interval:30000
+        active:manager.m_ipAddress==="192.168.80.1"
         anchors.centerIn: parent
         requestUrl:manager.m_ipAddress
         Connections{
             target:manager
             onScreenSaverImagesReady:glScreenSaver.setImageList(manager.screensaverImages)
-        }
-        Component.onCompleted: {
-            glScreenSaver.setInterval(30000)
         }
 
         MouseArea{
@@ -266,7 +264,9 @@ Item {
             case Qt.Key_Tab:
                 hideUI()
                 break;
-
+            case Qt.Key_F3:
+                manager.clearSkinCache()
+                break;
             case Qt.Key_VolumeMute:
                 manager.mute()
                 break;

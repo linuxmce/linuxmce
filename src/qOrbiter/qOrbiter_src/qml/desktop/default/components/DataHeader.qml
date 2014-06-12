@@ -14,7 +14,7 @@ The data header is a persistent qml header that displays state full information 
  */
 Item{
     id:dataheader
-    height: scaleY(5)
+    height: scaleY(8)
     anchors{
         top:parent.top
         left:parent.left
