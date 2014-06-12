@@ -87,6 +87,7 @@ DISTFILES =     cpp/src/command_classes/CommandClass.cpp \
     dotnet/examples/OZWForm/src/NodeForm.Designer.cs \
     dotnet/examples/OZWForm/src/ValuePanelString.resx \
     dotnet/src/resource.h \
+    config/aeon_labs/hemg2.xml \
     cpp/src/command_classes/ControllerReplication.cpp \
     config/schlagelink/itemp.xml \
     cpp/src/command_classes/Meter.h \
@@ -142,8 +143,8 @@ DISTFILES =     cpp/src/command_classes/CommandClass.cpp \
     cpp/src/platform/windows/MutexImpl.h \
     cpp/hidapi/m4/ax_pthread.m4 \
     dotnet/examples/OZWForm/src/ConfigurationWakeUpDlg.Designer.cs \
-    cpp/hidapi/doxygen/Doxyfile \
     cpp/src/command_classes/Alarm.h \
+    cpp/hidapi/doxygen/Doxyfile \
     dotnet/examples/OZWForm/src/ValuePanel.Designer.cs \
     cpp/src/Utils.cpp \
     cpp/src/command_classes/SensorMultilevel.h \
@@ -158,6 +159,7 @@ DISTFILES =     cpp/src/command_classes/CommandClass.cpp \
     cpp/src/platform/unix/SerialControllerImpl.cpp \
     config/fibaro/fgbs001.xml \
     cpp/src/command_classes/CommandClasses.h \
+    config/fibaro/fgms.xml \
     cpp/tinyxml/tinyxmlerror.cpp \
     cpp/src/command_classes/SwitchAll.cpp \
     dotnet/examples/OZWForm/src/ValuePanelBool.resx \
@@ -227,6 +229,7 @@ DISTFILES =     cpp/src/command_classes/CommandClass.cpp \
     docs/images+css/Doxywizard2.JPG \
     dotnet/examples/OZWForm/src/ControllerCommandDlg.cs \
     cpp/src/command_classes/UserCode.h \
+    config/philio/psm02.xml \
     cpp/src/command_classes/Indicator.cpp \
     cpp/build/libopenzwave.pc.in \
     cpp/src/platform/unix/LogImpl.cpp \
@@ -248,6 +251,7 @@ DISTFILES =     cpp/src/command_classes/CommandClass.cpp \
     cpp/src/command_classes/MultiCmd.h \
     debian/copyright \
     config/aeon_labs/hem.xml \
+    config/vision/zs5101eu.xml \
     dotnet/examples/OZWForm/src/ValuePanel.resx \
     cpp/src/command_classes/Proprietary.cpp \
     dotnet/examples/OZWForm/src/ValuePanelShort.cs \
@@ -415,6 +419,7 @@ DISTFILES =     cpp/src/command_classes/CommandClass.cpp \
     dotnet/examples/OZWForm/src/MainForm.Designer.cs \
     cpp/src/platform/unix/ThreadImpl.h \
     dotnet/src/ZWValueID.h \
+    config/aeon_labs/recessed_doorsensor.xml \
     debian/changelog \
     cpp/src/Node.h \
     dotnet/build/vs2010/OpenZWaveDotNet.vcxproj \
@@ -431,6 +436,7 @@ DISTFILES =     cpp/src/command_classes/CommandClass.cpp \
     cpp/src/value_classes/ValueSchedule.h \
     cpp/build/windows/vs2010/OpenZWave.vcxproj \
     dotnet/src/ZWNotification.h \
+    config/zwave.me/ZME_WCD2.xml \
     cpp/hidapi/m4/pkg.m4 \
     dotnet/build/vs2010/OpenZWaveDotNet.vcxproj.filters \
     cpp/src/Defs.h \

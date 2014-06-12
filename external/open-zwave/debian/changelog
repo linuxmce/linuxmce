@@ -1,3 +1,10 @@
+openzwave (1.0.816-1) UNRELEASED; urgency=low
+
+  [ root ]
+  * New upstream release
+
+ -- sambuca <developers@linuxmce.org>  Thu, 12 Jun 2014 21:57:00 +0100
+
 openzwave (1.0.759-1) UNRELEASED; urgency=low
 
   [ root ]
