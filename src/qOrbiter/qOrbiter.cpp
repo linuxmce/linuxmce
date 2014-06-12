@@ -5105,9 +5105,9 @@ void qOrbiter::getAttributeImage(QString param)
 
 }
 
-void qOrbiter::setDirectAv()
+void qOrbiter::setDirectAv(int truth)
 {
-    CMD_Live_AV_Path setLiveAv(this->m_dwPK_Device, this->m_dwPK_Device_NowPlaying_Video, QString::number(this->i_ea).toStdString(), false);
+    CMD_Live_AV_Path setLiveAv(this->m_dwPK_Device, iMediaPluginID, QString::number(this->i_ea).toStdString(), m_bUsingLiveAVPath ? false : true);
     SendCommand(setLiveAv);
 }
 

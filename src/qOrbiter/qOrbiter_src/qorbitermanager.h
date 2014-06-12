@@ -718,7 +718,7 @@ signals:
     void mediaResponseChanged();
 
     void discreteAudioChanged();
-    void liveAvPath( );
+    void liveAvPath(int f );
     void containsVideo( );
     void isOsd( );
     void monitorStatusChanged( );
@@ -1024,7 +1024,7 @@ public slots:
      * \brief setLiveAvPath
      * \param path
      */
-    void setLiveAvPath(bool path) { usingLiveAvPath = path; qDebug() ; emit liveAvPath();}
+    void setLiveAvPath(bool path) { usingLiveAvPath = path; qDebug() ; emit liveAvPath(usingLiveAvPath ? 1 : 0);}
 
     /*!
      * \brief getLiveAvPath

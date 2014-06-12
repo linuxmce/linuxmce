@@ -1647,7 +1647,7 @@ public slots:
 
     void getAttributeImage(QString param);
 
-    void setDirectAv();
+    void setDirectAv(int truth);
     void showUiMenu();
 
     void setDeviceId(int d) {m_dwPK_Device = d; emit deviceIdChanged();}
