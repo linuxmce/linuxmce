@@ -38,6 +38,7 @@ int main()
 	char remoteDeviceData[1024];
 	char remoteDeviceTemplate[1024];
 	char remotePNPIdentifier[1024];
+	char sDefaultPNPIdentifier[1024];
 	int bytes, tmp;
 
 	saddr.sin_family = AF_INET;
