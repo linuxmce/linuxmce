@@ -33,7 +33,7 @@ Item {
             id: off_btn
             state:"fixed"
             buttonText: "Off"
-            onActivated:{manager. manager.stopMedia()}
+            onActivated: manager.stopMedia()
         }
 
     }
