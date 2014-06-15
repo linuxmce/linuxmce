@@ -127,6 +127,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #ifdef GLENABLED
     #ifndef Q_OS_ANDROID
         #ifndef QT5
+#ifndef QT5
     QGLFormat format= QGLFormat::defaultFormat();
     glWidget = new QGLWidget(format);
     glWidget->setAutoFillBackground(false);
@@ -134,6 +135,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
         #endif
     #endif
+#endif
 #endif
 
 #ifdef RPI
