@@ -17,21 +17,23 @@ Item{
     property alias style: stbStyle
 
     function scaleX(x){
-    return x/100*appW
+        return x/100*appW
     }
     function scaleY(y){
-    return y/100*appH
+        return y/100*appH
     }
 
     //skin description
     property string skincreator: "Langston Ball"
-    property string skinname: "STB"
+    property string skinname: "STB Qt5"
     property string skindir: "STB"
     property string skindescription: "Basic skin to mimic a standard Set-top box."
     property string skinversion: "1.0"
     property string skinvariation: "TV 16:9"
-    property string maincolor: "Black"
-    property string accentcolor: "white"
+
+    /* Starting Size Properties */
+
+    /* End Starting Size Properties */
 
     /* Animation Properties */
     property int globalAnimationSpeed:750
@@ -41,13 +43,27 @@ Item{
     property int orbiterH: 600
     property int orbiterW: 800
 
+    /* Opacity Defitions */
     property bool useOpacity:false
     property double appOpacity: .45
 
+
     //main colors http://colorschemedesigner.com/#3JB1Tw0w0l7l7
+    //-color definitions
+    property color accentcolor: "green"
+    property color highlight1: "silver"
+    property color highlight2: "orange"
+    property color alertcolor: "red"
+    property color warncolor:"yellow"
+    property color darkColor:"black"
+    property double shadeOpacity:.65
+    property color darkhighlight: "darkgrey"
+    property color lighthighlight: "green"
     property color mainColor: "black"
     property color darkHighlightColor: "darkgreen"
     property color lightHighlightColor:"yellow"
+    //--end color definitions
+
 
     property color lighttext: "slategrey"
 
@@ -123,5 +139,55 @@ Item{
     //stage
     property color stage_bg: "darkgrey"
     property color bgcolor: "black"
+
+    //New style //
+    /* Overall */
+    property double bgLightOpacity:.35
+    property double bgHeavyOpacity:.65
+    property double bgContentOpacity:.50
+
+    /* Headers, containers and lists */
+    property color contentBgColor:"darkgrey"
+    property int headerFontSize:14
+    property color headerBgColor:"green"
+    property int listItemHeight:scaleY(8)
+    property color listItemBgColor:"green"
+    property color listItemActiveBgColor: "white"
+    property color listItemPressedBgColor: "limegreen"
+    property color listItemTextInactiveColor:"white"
+    property color listItemTextActiveColor:"black"
+    property Gradient bgHeaderGradient: Gradient{
+        GradientStop{ position:0.0;color:"transparent"}
+        GradientStop{ position:0.65;color:"black"}
+    }
+    property Gradient bgContentGradient: Gradient{
+
+        GradientStop{ position:0.0;color:"transparent"}
+        GradientStop{ position:0.75;color:"black"}
+    }
+
+    /* Buttons and their junk */
+    property int buttonHeight:scaleY(4)
+    property int  buttonWidth: scaleX(12)
+    property int buttonLabelSize:scaleY(2)
+    property color buttonColor:"darkgreen"
+    property color buttonPressedColor:"white"
+    property color buttonBorderColor:"white"
+    property int buttonBorderWidth:1
+    property Gradient buttonGradient: Gradient{
+        GradientStop{ position:0.0;color:"transparent"}
+        GradientStop{ position:0.65;color:"black"}
+    }
+
+
+    /* Animation Speeds */
+    property int quickAnimation:350
+    property int mediumAnimation:500
+    property int longAnimation:750
+    property int animationEasing:Easing.OutBack
+
+
+    //end scale function
+
 
 }

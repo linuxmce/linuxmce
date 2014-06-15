@@ -176,8 +176,7 @@ Item {
         }
     }
 
-    function checkLayout()
-    {
+    function checkLayout(){
         console.log("c++ slot orientation changed")
         console.log(manager.appHeight+" x " + manager.appWidth)
         pageLoader.forceActiveFocus()
@@ -311,7 +310,7 @@ Item {
         }
 
         focus:true
-        interval:60000
+        interval:30*(1000)
 
         requestUrl:manager.m_ipAddress
 
