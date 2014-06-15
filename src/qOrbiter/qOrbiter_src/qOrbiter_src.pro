@@ -265,7 +265,7 @@ macx-clang{
         plugins_folder.target = ../../../$$DESTDIR/$$TARGET".app"/Contents/MacOS/imports
 
       message("You Must copy the libraries at $$[QT_INSTALL_PREFIX]/qml to $$QTDIR/imports before deploying" )
-        DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 plugins_folder
+        DEPLOYMENTFOLDERS +=  folder_03 plugins_folder
         DEFINES+=MACBUILD
         QML_IMPORT_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/MacOS/imports
         QT-=bundle
