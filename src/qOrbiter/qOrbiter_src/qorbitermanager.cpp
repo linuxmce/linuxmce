@@ -1848,7 +1848,7 @@ bool qorbiterManager::readLocalConfig()
 #endif
     QFile localConfigFile;
     //**todo!! - add function for 1st run on android that copies the file to the xml path, then performs checks. we cannot install directly there.
-
+qDebug() << "Xml Path is " << xmlPath;
 
 
 #ifdef __ANDROID__

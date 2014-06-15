@@ -10,5 +10,8 @@ $QT_INSTALL_DIR/bin/qmake qOrbiterMaster.pro
 #make clean
 make
 cd ../build-output
+cp -r -v $QT_INSTALL_DIR/qml/ qorbiter-core-gl.app/Contents/MacOS/imports
 $QT_INSTALL_DIR/bin/./macdeployqt qorbiter-core-gl.app -dmg
+echo "build complete, check output."
+ls -lha
 exit 0;
