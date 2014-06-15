@@ -92,7 +92,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     roomList.append(new PromptData("No Rooms",0));
 
     mainView.engine()->addImportPath("imports");
-    qDebug() << "QML Import Path List::" << mainView.engine()->importPathList();
+
 
     mainView.engine()->addPluginPath("lib");
     mainView.engine()->addPluginPath("imports");
@@ -218,8 +218,10 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     localPath = "desktop/";
 #elif defined(Q_OS_MACX)
     buildType="/qml/qt5-desktop";
-    qrcPath = "qrc:main/Welcome.qml";
+    qrcPath = "qrc:main/Welcome2.qml";
     localPath = "desktop/";
+    qDebug() << "Adding "<< QApplication::applicationDirPath()+"/imports/";
+    mainView.engine()->addImportPath(QApplication::applicationDirPath()+"/imports/");
 #elif defined __ANDROID__
 #ifdef QT5
 qrcPath = "qrc:main/Welcome2.qml";
@@ -256,7 +258,7 @@ qrcPath = "qrc:main/Welcome2.qml";
     mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
 #endif
 /*End Special Android setup */
-
+ qDebug() << "QML Import Path List::" << mainView.engine()->importPathList();
  mainView.setSource(qrcPath); /* Sets the initial qml file based on all the above switching */
 
 }
