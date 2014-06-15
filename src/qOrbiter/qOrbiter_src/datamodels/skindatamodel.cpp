@@ -186,33 +186,21 @@ void SkinDataModel::setActiveSkin(QString name)
 #else
      current_style = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), QUrl(skinURL));
 #endif
-
+qDebug("eggs");
     if (current_style->isError()) {
         qDebug() << current_style->errorString();
         // this dir does not contain a Style.qml; ignore it
         ui_reference->setDceResponse(current_style->errors().last().toString());
-        return;
-    }
-    else
-    {
-        //turning it into a qObject - this part actually loads it - the error should connect to a slot and not an exit
 
-        //wait for it to load up
-        while (!current_style->isReady())
-        {
-            if(current_style->isError())
-            {
-                ui_reference->setDceResponse(current_style->errors().last().toString());
-                break;
-            }
-        }
-       // currentItem = current_style->create();
+    } else {
+        qDebug() << "Skin Component loaded";
         ui_reference->currentSkin = name;
         ui_reference->writeConfig();
         emit currentSkinReady();
         ready=true;
+        current_style = NULL;
     }
-
+        qDebug("bacon");
 }
 
 void SkinDataModel::checkStatus()
