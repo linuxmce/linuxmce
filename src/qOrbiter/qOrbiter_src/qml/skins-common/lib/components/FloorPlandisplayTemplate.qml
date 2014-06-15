@@ -3,12 +3,7 @@ import QtQuick 1.1
 Item {
     objectName: "floorplan_display"
     id:floorplandisplay
-    anchors{
-        top:parent.top
-        left:parent.left
-        right:parent.right
-        bottom:parent.bottom
-    }
+    anchors.fill: parent
     Component.onCompleted:{
         floorplan_devices.setCurrentPage(1)
     }
