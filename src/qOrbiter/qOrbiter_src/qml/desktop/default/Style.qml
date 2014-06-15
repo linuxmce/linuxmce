@@ -42,15 +42,6 @@ QtObject{
     property string skindescription: "Pluto Classic Skin"
     property string skinversion: "1.0"
     property string skinvariation: "Desktop 800x600"
-    property color maincolor: "#0D4392"
-    property color accentcolor: "#EE873B"
-    property color highlight1: "aliceblue"
-    property color highlight2: "slategrey"
-    property color alertcolor: "red"
-    property color warncolor:"yellow"
-
-    property color darkhighlight: "#628BC7"
-    property color lighthighlight: "#3F76C7"
     //main stage styles
     property int orbiterH: 720
     property int orbiterW: 1280

@@ -30,8 +30,7 @@ Item{
     property string skindescription: "Basic skin to mimic a standard Set-top box."
     property string skinversion: "1.0"
     property string skinvariation: "TV 16:9"
-    property string maincolor:"#5034282C"
-    property string accentcolor: "white"
+
 
     /* Image aspect ratios */
         property double dvdPosterRatio:1080/955
@@ -41,18 +40,7 @@ Item{
         property double vcdRatio:1080/1080
         property double vhsRatio:1280/620
 
-    property variant buttonGradient:btnGradient
-    Gradient{
-        id:btnGradient
-        GradientStop{
-            position: 0.0
-            color:"transparent"
-        }
-        GradientStop{
-            position: 0.5
-            color:"black"
-        }
-    }
+
 
     property variant alertGradient:alrtGradient
     Gradient{
@@ -91,8 +79,6 @@ Item{
 
     //main colors http://colorschemedesigner.com/#3JB1Tw0w0l7l7
     property color mainColor: "#34282c"
-    property color darkHighlightColor: "#483d41"
-    property color lightHighlightColor:"#ada9aa"
 
     property color lighttext: "white"
 
