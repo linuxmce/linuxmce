@@ -192,4 +192,6 @@ Item{
     property int toolbarButtonWidth:manager.b_orientation ? scaleY(8) : scaleY(12)
     property color toolbarBgColor:"#7534282C"
 
+
+
 }
