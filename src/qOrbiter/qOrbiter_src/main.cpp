@@ -215,7 +215,7 @@ int main(int argc, char* argv[])
     QCoreApplication::setOrganizationDomain("org.linuxmce.QOrbiter");
     QCoreApplication::setOrganizationName("www.linuxMCE.org");
 
-#ifdef __ANDROID__ && !defined(QT5)
+#ifdef __ANDROID__
     AndroidSystem androidHelper;
     deviceType=2;
 #endif
@@ -482,12 +482,13 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(isOsd(bool)), &w, SLOT(setOsd(bool)));
         QObject::connect(&pqOrbiter, SIGNAL(monitorStatusChanged(bool)), &w, SLOT(setMonitorStatus(bool)));
         QObject::connect(&w, SIGNAL(newMessageSend(QVariantMap)), &pqOrbiter, SLOT(executeMessageSend(QVariantMap)), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(liveAvPath(int f)), &pqOrbiter, SLOT(setDirectAv(int t)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(liveAvPath(int)), &pqOrbiter, SLOT(setDirectAv(int)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(setText(QString,QString,int)), &w, SLOT(setText(QString,QString,int)), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(show_linuxmce_menu()), &pqOrbiter, SLOT(setDirectAv()), Qt::QueuedConnection);
+      //  QObject::connect(&w, SIGNAL(show_linuxmce_menu()), &pqOrbiter, SLOT(setDirectAv()), Qt::QueuedConnection);
         //timecodemanager signals / slots
         QObject::connect(&pqOrbiter, SIGNAL(updateTimeCode(QString,int)), timecode, SLOT(start(QString,int)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(stopTimeCode()), timecode, SLOT(stop()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(connectionLost()), &w, SLOT(disconnectHandler()), Qt::QueuedConnection);
 
         //setup
         QObject::connect(&w, SIGNAL(orbiterInitialized()), &orbiterWin, SLOT(setOrbiterInitialized()));
@@ -715,6 +716,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(greenButton()), &pqOrbiter, SLOT(greenButton()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(yellowButton()), &pqOrbiter, SLOT(yellowButton()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(blueButton()), &pqOrbiter, SLOT(blueButton()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
         //FIXME: below emits error: QObject::connect: Attempt to bind non-signal orbiterWindow::close()
         //QObject::connect (&w,SIGNAL, &w, SLOT(closeOrbiter()), Qt::DirectConnection);
         QObject::connect(&w, SIGNAL(reloadRouter()), &pqOrbiter, SLOT(quickReload()), Qt::QueuedConnection);
@@ -722,7 +724,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(replaceDevice()), &w, SLOT(replaceHandler()));
         QObject::connect(&pqOrbiter, SIGNAL(routerDisconnect()), &w, SLOT(disconnectHandler()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(routerReload()), &w, SLOT(connectionWatchdog()), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(reInitialize()), &pqOrbiter, SLOT(initialize()), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(reInitialize()), &pqOrbiter, SLOT(reInitialize()), Qt::QueuedConnection);
         //   QObject::connect(&w, SIGNAL(deviceNumberChanged(int)), &pqOrbiter, SLOT(setDeviceId(int)));
         QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &orbiterWin, SLOT(setRouterAddress(QString)));
         dceThread.start();

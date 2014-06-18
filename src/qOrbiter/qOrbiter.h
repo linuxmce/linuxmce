@@ -1322,6 +1322,8 @@ signals:
     void deviceIdChanged();
     void setEa(int room, int ea);
     void screenSaverTimerOutChanged(int t);
+    void connectionLost();
+    void connectionStarted();
 
     /** @name Logging Signals
      * Signal used for logging.

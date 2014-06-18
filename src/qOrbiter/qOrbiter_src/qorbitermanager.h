@@ -214,6 +214,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY(QString m_localAddress  READ getLocalAddress WRITE setLocalAddress NOTIFY localAddressChanged)
     Q_PROPERTY(QStringList screensaverImages READ getScreensaverImages NOTIFY screenSaverImagesReady )
     Q_PROPERTY(int screenSaverTimeout READ getScreenSaverTimeout WRITE setScreensaverTimerout NOTIFY screenSaverTimeoutChanged)
+    Q_PROPERTY(bool bReload  WRITE setReloadStatus NOTIFY bReloadChanged)
 
     /*!
      * \warning enablescreensavermode - currently unused, should be built anyways
@@ -697,6 +698,7 @@ signals:
     void showSetup();
     void continueSetup();
     void gotMountDevices();
+    void bReloadChanged();
 
     void newHouseMode(QString pass, int mode);
 
@@ -753,6 +755,8 @@ public slots:
 
     void setImagePath(QString i) {imagePath = i; emit imagePathChanged();}
     QString getImagePath(){return imagePath;}
+
+    void setReloadStatus(bool b ){if(bReload != b){bReload = b; emit bReloadChanged();} }
 
     /*!
     * \brief setFormFactor
@@ -845,7 +849,7 @@ public slots:
     void getConfiguration();
     bool writeConfig();
     bool readLocalConfig();
-    void setConnectedState(bool state) { connectedState = state; checkConnection(); emit connectedStateChanged(); }
+    void setConnectedState(bool state) { if(state != connectedState ){ connectedState = state; setReloadStatus(false);  emit connectedStateChanged(); }  }
     bool getConnectedState () {return connectedState;}
     void setDceResponse(QString response);
     QString getDceResponse () ;

@@ -1750,9 +1750,7 @@ bool DCE::qOrbiter::initDceVars(){
 
 }
 
-bool DCE::qOrbiter::initialize()
-{
-
+bool DCE::qOrbiter::initialize(){
     emit commandResponseChanged("Connecting to router");
     emit commandResponseChanged("Starting dce initialization");
     //    if(m_sIPAddress==""){
@@ -2782,7 +2780,7 @@ void DCE::qOrbiter::playMedia(QString inc_FKFile)
     CMD_MH_Play_Media playMedia(m_dwPK_Device, iMediaPluginID, 0 , inc_FKFile.toStdString(), 0, 0, StringUtils::itos(i_ea), false, false, false, false, false);
     cout << "Playing file: " << inc_FKFile.toStdString() << endl;
     string pos = "";
-    int streamID = NULL;
+
     // CMD_Play_Media playMedia(m_dwPK_Device, iMediaPluginID, i_current_mediaType, 1001 , pos, inc_FKFile.toStdString());
     SendCommand(playMedia);
 }
@@ -4296,7 +4294,7 @@ void qOrbiter::OnReload()
 #endif
 
     DisconnectAndWait();
-
+    emit routerReloading("Reloading");
 }
 
 bool qOrbiter::OnReplaceHandler(string msg)
@@ -5263,9 +5261,14 @@ void qOrbiter::setVariable(int pkvar ,QString val)
 
 void qOrbiter::reInitialize(){
     qDebug() << "REINITIALIZE";
-    Disconnect();
-    initializeGrid();
-    initialize();
+    if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
+    {
+        m_dwMaxRetries = 1;
+        m_bRouterReloading = false;
+        m_bReload = false;
+        m_bOrbiterConnected = true;
+    }
+    emit routerConnectionChanged(true);
 
 }
 

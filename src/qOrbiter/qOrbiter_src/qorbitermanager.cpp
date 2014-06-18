@@ -2230,7 +2230,6 @@ void qorbiterManager::checkConnection()
 {
     setDceResponse("Disconnect detected, checking");
     emit pingTheRouter();
-
 }
 
 
@@ -2275,7 +2274,7 @@ bool qorbiterManager::cleanupData()
     mediaTypeFilter->clear();
     uiFileFilter->clear();
     userList->clear();
-
+    clearSkinCache();
     m_bStartingUp=true;
     return true;
 }
@@ -2348,28 +2347,18 @@ void qorbiterManager::initializeConnections()
 
 void qorbiterManager::reloadHandler()
 {
-    if(cleanupData()){
-        qorbiterUIwin->setSource(QUrl("qrc:reload/GenericReload.qml"));
-        status="reloading";
-        qorbiterUIwin->engine()->clearComponentCache();
-        //        gotoQScreen("ReloadHandler.qml");
-    }
+    setConnectedState(false);
+    setReloadStatus(true);
 }
 
 void qorbiterManager::disconnectHandler()
 {
-    if(cleanupData()){
-        qorbiterUIwin->setSource(QUrl("qrc:reload/GenericReload.qml"));
-        status="disconnected";
-        //        gotoQScreen("ReloadHandler.qml");
-    }
-
+    setConnectedState(false);
 }
 
 void qorbiterManager::replaceHandler()
 {
-
-    gotoQScreen("Splash.qml");
+    closeOrbiter();
 }
 
 void qorbiterManager::setDceResponse(QString response)
