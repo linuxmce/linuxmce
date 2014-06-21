@@ -72,7 +72,7 @@ Item{
             TextInput {
                 id: routerip
                 width: scaleX(40)
-                text: window.router
+                text:window.router
                 font.pointSize: infoTextSize
                 font.family: myFont.name
                 //  onTextChanged: setRouterIp(routerip.text)
