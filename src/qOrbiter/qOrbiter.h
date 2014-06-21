@@ -1826,15 +1826,19 @@ public slots:
     void getFloorplanDeviceCommand(int device);
 
     void shutdown();
+    void changeAndRestart(QString ip){
+        if(!ip.isEmpty() && ip!=dceIP ) {
+            qDebug() << "Switching ip address "<<ip;
+            dceIP=ip; m_sIPAddress = ip.toStdString();
+            m_sHostName = ip.toStdString();
+            reInitialize();
+        }
+    }
 
     //child devices
 
-
-
-
-
 protected:
-     /*! @name logging slots*/
+    /*! @name logging slots*/
     //@{
     void logStatusMessage(QString statusM) {emit newStatusMessage(statusM); }
     void logDceMessage(QString dceM){ emit newDceMessage(dceM); }

@@ -67,7 +67,9 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     else {
         fullScreenOrbiter = false;
     }
-
+    internalIp="0.0.0.0";
+    externalIp="0.0.0.0";
+    usingExternal=false;
     router = QString::fromStdString(routerip);
     phoneSize = false;
     localPath = "";

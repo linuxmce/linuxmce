@@ -26,7 +26,7 @@ Item{
         Text{
             text:title
             font.pixelSize: manager.appHeight*.04
-            width:parent.width /2
+            width:parent.width /2-parent.width*.15
             color:"white"
             font.weight: Font.Light
         }
@@ -64,5 +64,35 @@ Item{
                 }
             }
         }
+        Item{
+            height: parent.height-5
+            width: parent.width*.15
+            anchors.verticalCenter: parent.verticalCenter
+
+            Rectangle{
+                id:clear
+                radius: 5
+                height: parent.height-5
+                width: height
+                anchors.verticalCenter: parent.verticalCenter
+                color:"darkgreen"
+                border.color: "white"
+                border.width: 2
+                Text {
+                   anchors.centerIn: parent
+                    text: qsTr("X")
+                }
+                MouseArea{
+                    anchors.fill: parent
+                    id:ms
+                    onReleased: {
+                        value=""
+                    }
+                }
+
+            }
+        }
+
+
     }
 }

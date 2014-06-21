@@ -50,7 +50,9 @@ class orbiterWindow : public QObject
     Q_PROPERTY (bool b_skinDataReady READ getSkinDataState WRITE setSkinDataState NOTIFY skinDataLoaded  ) /*! window.b_skinDataReady: True when skins are done being loaded \ingroup startup_properties */
     Q_PROPERTY(bool b_reloadStatus READ getReloadStatus WRITE setReloadStatus NOTIFY reloadStatusChanged) /*! window.b_reloadStatus \ingroup startup_properties */
     Q_PROPERTY (QString qmlPage READ getQmlPage WRITE setQmlPage NOTIFY pageChanged)/*! window.qmlPage \ingroup startup_properties */
-
+    Q_PROPERTY (QString internalIp READ getInternalIp WRITE setInternalIp NOTIFY internalIpChanged)
+    Q_PROPERTY (QString externalIp READ getExternalIp WRITE setExternalIp NOTIFY externalIpChanged)
+    Q_PROPERTY (bool usingExternal READ getUsingExternal WRITE setUsingExternal NOTIFY usingExternalChanged)
 public:
 
     /*!
@@ -97,10 +99,22 @@ public:
     bool phoneSize;
     bool fullScreenOrbiter;
     bool orbiterInitialized;
+    QString internalIp;
+    QString externalIp;
+    bool usingExternal;
 
     void initView();
 
 public slots:
+    void setUsingExternal(bool x){ if(x!= usingExternal) {usingExternal = x; emit usingExternalChanged();}  }
+    bool getUsingExternal() {return usingExternal;}
+
+    void setExternalIp(QString ip){qDebug() << "updating external ip for window."; if(externalIp != ip){externalIp = ip; emit externalIpChanged();} }
+    QString getExternalIp(){return externalIp;}
+
+    void setInternalIp(QString ip) { if(internalIp != ip) {internalIp = ip; emit internalIpChanged();} }
+    QString getInternalIp(){return internalIp;}
+
     void setDeviceNumber(int d){deviceno = d; emit deviceChanged();}
     int getDeviceNumber(){return deviceno;}
 
@@ -205,6 +219,9 @@ signals:
     void routerChanged();
     void backButtonPressed();
     void beginLoading();
+    void internalIpChanged();
+    void externalIpChanged();
+    void usingExternalChanged();
 };
 #endif
 

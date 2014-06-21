@@ -190,7 +190,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString m_ipAddress READ getInternalIp WRITE setInternalIp NOTIFY internalIpChanged)/*!< \brief Contains string of current ip address \code manager.m_ipAddress \endcode  \ingroup qorbiter_properties  */
     Q_PROPERTY (QString internalHost READ getInternalHost WRITE setInternalHost NOTIFY internalHostChanged)
     Q_PROPERTY (QString externalip READ getExternalIp WRITE setExternalIp NOTIFY externalIpChanged)
-    Q_PROPERTY (bool usingExternal READ getUsingExternal NOTIFY usingExternalChanged) /*! \brief Used to indicate to the user and application if the external ip is in use */
+    Q_PROPERTY (bool usingExternal READ getUsingExternal WRITE setUsingExternal NOTIFY usingExternalChanged) /*! \brief Used to indicate to the user and application if the external ip is in use */
     Q_PROPERTY (QString externalHost READ getExternalHost WRITE setExternalHost NOTIFY externalHostChanged )
     Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )/*!< \brief Contains the number of cells returned in media grid \code manager.media_pageSeperator \endcode  \ingroup qorbiter_properties */
     Q_PROPERTY (int media_currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY mediaPageChanged) /*!< \brief Contains the current page of the media grid is on. Starts at 0. \ingroup qorbiter_properties */
@@ -241,6 +241,7 @@ public:
 
     bool b_glEnabled;
     bool first_run;
+    bool useInternal;
     QString status;
     int isPhone; /*!< 1) phone 2) tablet 3)PC 4)htpc */
     //settings
@@ -654,8 +655,8 @@ signals:
     void roomChanged();
     void floorplanTypeChanged(int t);
     void internalIpChanged(QString ip);
-    void externalIpChanged();
-    void usingExternalChanged();
+    void externalIpChanged(QString ip);
+    void usingExternalChanged(bool ext);
     void internalHostChanged();
     void externalHostChanged();
     void deviceNumberChanged(int d);
@@ -663,6 +664,7 @@ signals:
     void imagePathChanged();
     void pingTheRouter();
     void orbiterInitialized();
+    void switchIpAddress(QString ip);
 
     /*Media Device Control Signals*/
     void resendAvCodes();
@@ -839,6 +841,13 @@ public slots:
     //@}
 
     /*Splash screen related slots*/
+    void restartFomUi(QString ip){
+        if(!ip.isEmpty()){
+             switchIpAddress(ip);
+        }
+
+    }
+
     void showExistingOrbiter(const QList<QObject *> l )  ;
     void connectionWatchdog();
     void showUI(bool b);
@@ -849,7 +858,7 @@ public slots:
     void getConfiguration();
     bool writeConfig();
     bool readLocalConfig();
-    void setConnectedState(bool state) { if(state != connectedState ){ connectedState = state; setReloadStatus(false);  emit connectedStateChanged(); }  }
+    void setConnectedState(bool state) { if(state != connectedState ){ connectedState = state;  if(connectedState) {setReloadStatus(false); } else { connectionWatchdog(); } ;  emit connectedStateChanged(); }  }
     bool getConnectedState () {return connectedState;}
     void setDceResponse(QString response);
     QString getDceResponse () ;
@@ -873,13 +882,15 @@ public slots:
     int getAppW(){return appWidth; }
 
     /*Network State property functions*/
-    void setInternalIp(QString s) { m_ipAddress = s; setDceResponse("got ip address, sending to dce"); emit internalIpChanged(m_ipAddress); }
+    void setInternalIp(QString s) { m_ipAddress = s; setDceResponse("got ip address, sending to dce"); emit internalIpChanged(m_ipAddress); setInternalHost(m_ipAddress);}
     QString getInternalIp() {return m_ipAddress; }
     void setInternalHost(QString h) { internalHost = h; emit internalHostChanged();}
     QString getInternalHost() {return internalHost;}
-    void setUsingExternal(bool t){if(usingExternal != t ){ usingExternal=t; emit usingExternalChanged(); } }
+
+    void setUsingExternal(bool t){ if(usingExternal != t ){ usingExternal=t; emit usingExternalChanged( usingExternal); } }
     bool getUsingExternal(){return usingExternal;}
-    void setExternalIp(QString ex) {externalip = ex; emit externalIpChanged();}
+
+    void setExternalIp(QString ex) {qDebug() << "updating external ip in manager.";  externalip = ex; emit externalIpChanged(externalip);setExternalHost(externalip); }
     QString getExternalIp() {return externalip;}
     void setExternalHost(QString h) { externalHost = h; emit externalHostChanged();}
     QString getExternalHost() {return externalHost;}

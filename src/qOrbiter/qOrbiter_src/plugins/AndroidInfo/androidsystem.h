@@ -93,7 +93,7 @@ public slots:
     void setMountStatus(bool b) {mountStatus = b; emit mountStatusChanged();}
     bool getMountStatus(){return mountStatus;}
 
-    void setExternalStorageLocation(QString e) { if(e==""){return;}  if(!e.endsWith("/")) {e.append("/");}  externalStorageLocation = e; emit externalStorageLocationChanged();}
+    void setExternalStorageLocation(QString e) { if(e==""){return;}  else  {externalStorageLocation = e; emit externalStorageLocationChanged();}}
     QString getExternalStorageLocation(){return externalStorageLocation;}
 
     QColor  getBlueStandard() {return blueStandard;}

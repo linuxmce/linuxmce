@@ -491,6 +491,10 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(connectionLost()), &w, SLOT(disconnectHandler()), Qt::QueuedConnection);
 
         //setup
+        QObject::connect(&w, SIGNAL(switchIpAddress(QString)), &pqOrbiter,SLOT(changeAndRestart(QString)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(usingExternalChanged(bool)), &orbiterWin, SLOT(setUsingExternal(bool)));
+        QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &orbiterWin, SLOT(setInternalIp(QString)));
+        QObject::connect(&w, SIGNAL(externalIpChanged(QString)), &orbiterWin, SLOT(setExternalIp(QString)));
         QObject::connect(&w, SIGNAL(orbiterInitialized()), &orbiterWin, SLOT(setOrbiterInitialized()));
         QObject::connect(&w, SIGNAL(registerOrbiter(int,QString,int)), &pqOrbiter,SLOT(registerDevice(int,QString,int)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(startManager(QString,QString)), &w, SLOT(qmlSetupLmce(QString,QString)),Qt::QueuedConnection);
@@ -745,7 +749,8 @@ int main(int argc, char* argv[])
 
         }else if(sRouter_IP =="" && w.getInternalIp() != ""){
             qDebug() << "No Command line opt set but config file located";
-            sRouter_IP = w.getInternalIp().toStdString();
+
+            sRouter_IP = w.getInternalIp().toStdString();                                           //use internal ip first
             if(PK_Device == -1){
                 PK_Device = w.getDeviceNumber();
             }
@@ -772,10 +777,6 @@ int main(int argc, char* argv[])
             }
 
         }
-
-#ifdef __ANDROID__
-        qDebug() << orbiterWin.mainView.engine()->pluginPathList().join("\n");
-#endif
 
         orbiterWin.initView();
 #ifdef __ANDROID__

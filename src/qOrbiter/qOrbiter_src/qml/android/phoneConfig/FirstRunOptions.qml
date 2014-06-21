@@ -130,7 +130,7 @@ Item{
                 manager.writeConfig()
                 firstRunOptions.state = "hidden"
                 rootItem.forceActiveFocus()
-                wait.start()
+              //  manager.restartFomUi()
             }
         }
     }

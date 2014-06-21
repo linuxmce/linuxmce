@@ -15,4 +15,5 @@
 <mobile_storage id=""/>
 <networkload id="true" />
 <debug id="false"/>
+<lastconnect id="internal" />
 </orbiter>

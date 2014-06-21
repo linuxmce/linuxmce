@@ -87,6 +87,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     isPhone = 0;
     appConfigPath="";
     status="starting";
+    usingExternal=false;
 #ifndef __ANDROID__
     b_localLoading = false; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
 #elif defined QT5 && ANDROID || defined(ANDROID)
@@ -1984,11 +1985,18 @@ qDebug() << "Xml Path is " << xmlPath;
                 else
                 {setFormFactor(2);}
             }
-
-
-
+            QString ext = configVariables.namedItem("lastconnect").attributes().namedItem("id").nodeValue();
+            if(ext=="internal"){
+               setUsingExternal(false);
+        } else {
+               setUsingExternal(true);
+            }
         }
-        setDceResponse("Finished READ of config.xml @"+mobileStorageLocation);
+#ifdef __ANDROID__
+        setDceResponse("Finished READ of config.xml at::"+mobileStorageLocation);
+#else
+        setDceResponse("Finished READ of config.xml at::"+mobileStorageLocation);
+#endif
         return true;
     }
 }
@@ -2014,6 +2022,7 @@ bool qorbiterManager::writeConfig()
         appConfigPath = xmlPath;
         qDebug() << "Empty application write path. adjusted to: " <<xmlPath;
     }
+    qDebug() << appConfigPath;
     localConfigFile.setFileName(appConfigPath);
 
     if (!localConfigFile.open(QFile::ReadWrite)){
@@ -2026,7 +2035,7 @@ bool qorbiterManager::writeConfig()
             return false;
         } else {
             localConfigFile.close();
-            localConfigFile.remove();
+            localConfigFile.remove(); // have to remove and then re-create!
             QDomElement configVariables = localConfig.documentElement().toElement();
             configVariables.namedItem("routerip").attributes().namedItem("id").setNodeValue(m_ipAddress);           //internal ip
             configVariables.namedItem("routeraddress").attributes().namedItem("id").setNodeValue(internalHost);     //internal hostname
@@ -2036,14 +2045,14 @@ bool qorbiterManager::writeConfig()
             configVariables.namedItem("skin").attributes().namedItem("id").setNodeValue(currentSkin);
 #endif
             configVariables.namedItem("routerport").attributes().namedItem("id").setNodeValue(routerPort);
-            configVariables.namedItem("externalip").attributes().namedItem("id").setNodeValue(qs_ext_routerip);     //externalip
+            configVariables.namedItem("externalip").attributes().namedItem("id").setNodeValue(externalHost);     //externalip
             configVariables.namedItem("externalHost").attributes().namedItem("id").setNodeValue(externalHost);      //external host
 
             configVariables.namedItem("device").attributes().namedItem("id").setNodeValue(QString::number(iPK_Device));
             configVariables.namedItem("firstrun").attributes().namedItem("id").setNodeValue(QString("false"));
             configVariables.namedItem("debug").attributes().namedItem("id").setNodeValue(debugMode ==true? "true" : "false");
             configVariables.namedItem("phone").attributes().namedItem("id").setNodeValue(QString::number(isPhone));
-
+            configVariables.namedItem("lastconnect").attributes().namedItem("id").setNodeValue(usingExternal ? "external" : "internal");
             if(!mobileStorageLocation.isEmpty()){
                 configVariables.namedItem("mobile_storage").attributes().namedItem("id").setNodeValue(mobileStorageLocation);
             }
@@ -2057,7 +2066,7 @@ bool qorbiterManager::writeConfig()
                 return false;
             }
             localConfigFile.close();
-            setDceResponse("save succeded");
+            setDceResponse("Save succeded to " + mobileStorageLocation);
             return true;
         }
     }
@@ -2414,7 +2423,7 @@ bool qorbiterManager::createAndroidConfig()
             return false;
         }
 
-        if(defaultConfig.copy(mobileStorageLocation+"config.xml"))
+        if(defaultConfig.copy(mobileStorageLocation+"/config.xml"))
         {
             setDceResponse("file copied, verifying");
 
@@ -2437,6 +2446,7 @@ bool qorbiterManager::createAndroidConfig()
         }
         else
         {
+
             setDceResponse("Cannot install configuration!!");
             setDceResponse(defaultConfig.errorString());
             return false;
@@ -2539,11 +2549,11 @@ bool qorbiterManager::setupMobileStorage(QString externalStorage)
 
 #ifdef ANDROID
     QStringList androidStorageLocation;
-    androidStorageLocation <<"/mnt/sdcard/"<< "/data/"<< "/mnt/external/"<< "/mnt/sdcard/ext_sd/" << "/mnt/sdcard-ext/"<< "/mnt/sdcard/external_sd"<< "/mnt/extSdCard/"<< "/mnt/external1/"<< "/Removable/MicroSD/";
+    androidStorageLocation <<"/mnt/sdcard"<< "/data"<< "/mnt/external"<< "/mnt/sdcard/ext_sd" << "/mnt/sdcard-ext"<< "/mnt/sdcard/external_sd"<< "/mnt/extSdCard"<< "/mnt/external1"<< "/Removable/MicroSD";
 
     QDir extLocation;
 
-    extLocation.setPath(externalStorage+"LinuxMCE/");
+    extLocation.setPath(externalStorage+"/LinuxMCE");
 
     if(extLocation.exists() && extLocation.isReadable()){
         setMobileStorage(extLocation.path());
@@ -2558,7 +2568,7 @@ bool qorbiterManager::setupMobileStorage(QString externalStorage)
 
             if(extLocation.isReadable())
             {
-                setMobileStorage(androidStorageLocation.at(i)+"LinuxMCE/");
+                setMobileStorage(androidStorageLocation.at(i)+"/LinuxMCE");
                 return true;
             }
         }
