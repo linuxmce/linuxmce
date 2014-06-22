@@ -480,6 +480,8 @@ Param 10 - pk_attribute
     bool debugMode;
     bool dceBool;                   //
     bool bLocalMode;                //local running flag, for running without router.
+    int reloadCount;
+    int disconnectCount;
 
     string sEntertainArea;          //current entertain area int
     int iPK_User;                    //current user
@@ -758,7 +760,7 @@ public slots:
     void setImagePath(QString i) {imagePath = i; emit imagePathChanged();}
     QString getImagePath(){return imagePath;}
 
-    void setReloadStatus(bool b ){if(bReload != b){bReload = b; emit bReloadChanged();} }
+    void setReloadStatus(bool b ){if(bReload != b){bReload = b; emit bReloadChanged(); if(bReload==false) {getConfiguration();} else {reloadCount++;} } }
 
     /*!
     * \brief setFormFactor
@@ -858,7 +860,7 @@ public slots:
     void getConfiguration();
     bool writeConfig();
     bool readLocalConfig();
-    void setConnectedState(bool state) { if(state != connectedState ){ connectedState = state;  if(connectedState) {setReloadStatus(false); } else { connectionWatchdog(); } ;  emit connectedStateChanged(); }  }
+    void setConnectedState(bool state) { if(state != connectedState ){ connectedState = state;  if(connectedState) {setReloadStatus(false); } else { connectionWatchdog(); disconnectCount++; } ;  emit connectedStateChanged(); }  }
     bool getConnectedState () {return connectedState;}
     void setDceResponse(QString response);
     QString getDceResponse () ;

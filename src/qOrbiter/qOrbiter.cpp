@@ -5262,7 +5262,7 @@ void qOrbiter::setVariable(int pkvar ,QString val)
 void qOrbiter::reInitialize(){
     qDebug() << "REINITIALIZE";
 
-
+Disconnect();
     if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
     {
         m_dwMaxRetries = 1;

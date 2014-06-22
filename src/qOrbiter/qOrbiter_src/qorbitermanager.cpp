@@ -87,7 +87,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     isPhone = 0;
     appConfigPath="";
     status="starting";
-    usingExternal=false;
+    setUsingExternal(false);
+    disconnectCount=0;
+    reloadCount=0;
 #ifndef __ANDROID__
     b_localLoading = false; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
 #elif defined QT5 && ANDROID || defined(ANDROID)
@@ -1733,8 +1735,8 @@ bool qorbiterManager::loadSkins(QUrl base)
 void qorbiterManager::quickReload()
 {
     emit reloadRouter();
-    // pqOrbiter->QuickReload();
-    //bool connected = pqOrbiter->m_bRouterReloading;
+    setReloadStatus(true);
+
 }
 
 void qorbiterManager::showUI(bool b){
@@ -2362,7 +2364,7 @@ void qorbiterManager::reloadHandler()
 
 void qorbiterManager::disconnectHandler()
 {
-    setConnectedState(false);
+    setConnectedState(false);   
 }
 
 void qorbiterManager::replaceHandler()
@@ -2525,10 +2527,7 @@ void qorbiterManager::setCurrentScreen(QString s)
 void qorbiterManager::connectionWatchdog()
 {
     QTimer::singleShot(15000, this, SIGNAL(reInitialize()));
-#ifdef debug
     emit qtMessage("Starting Watchdog");
-#endif
-
 }
 
 
