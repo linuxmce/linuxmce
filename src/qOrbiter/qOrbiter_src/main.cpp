@@ -762,7 +762,7 @@ int main(int argc, char* argv[])
         }
 
         QList<QString*> myHosts;
-        QString badMatch = orbiterWin.getRouterAddress();
+        QString badMatch = orbiterWin.getInternalIp();
         int f = badMatch.lastIndexOf(".");
         qDebug() << badMatch.length() - f ;
         badMatch.remove(f, badMatch.length() - f);
@@ -773,6 +773,7 @@ int main(int argc, char* argv[])
                     qDebug() << "My Ip's" << address.toString() << ":: badMatch==>"<<badMatch;
                     w.setLocalAddress(address.toString());
                     pqOrbiter.setLocalIp(address.toString());
+                    w.setHomeNetwork(true);
                 }
             }
 

@@ -2,7 +2,7 @@ import QtQuick 1.1
 
 Item {
     anchors.fill: parent
-    property string routerAddress:window.router
+    property string routerAddress:manager.usingExternal ? manager.externalHost : manager.internalHost
     onRouterAddressChanged: {
 
      window.router=routerAddress

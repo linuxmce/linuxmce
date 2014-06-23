@@ -214,7 +214,8 @@ class qorbiterManager : public QObject
     Q_PROPERTY(QString m_localAddress  READ getLocalAddress WRITE setLocalAddress NOTIFY localAddressChanged)
     Q_PROPERTY(QStringList screensaverImages READ getScreensaverImages NOTIFY screenSaverImagesReady )
     Q_PROPERTY(int screenSaverTimeout READ getScreenSaverTimeout WRITE setScreensaverTimerout NOTIFY screenSaverTimeoutChanged)
-    Q_PROPERTY(bool bReload  WRITE setReloadStatus NOTIFY bReloadChanged)
+    Q_PROPERTY(bool bReload READ getReloadStatus NOTIFY bReloadChanged)
+    Q_PROPERTY(bool homeNetwork WRITE setHomeNetwork READ getHomeNetwork NOTIFY homeNetworkChanged)
 
     /*!
      * \warning enablescreensavermode - currently unused, should be built anyways
@@ -467,6 +468,7 @@ Param 10 - pk_attribute
     bool bAppError;                 //error flagging
     bool bReload;                   //reload flag
     bool needRegen;                 //regen flag
+    bool alreadyConfigured;
 
     std::string s_RouterIP;               // string of the router ip
     QString m_ipAddress;
@@ -476,6 +478,7 @@ Param 10 - pk_attribute
     QString externalip;
     QString externalHost;
     bool usingExternal;
+    bool homeNetwork;
 
     bool debugMode;
     bool dceBool;                   //
@@ -661,6 +664,7 @@ signals:
     void usingExternalChanged(bool ext);
     void internalHostChanged();
     void externalHostChanged();
+    void homeNetworkChanged();
     void deviceNumberChanged(int d);
     void applicationPathChanged();
     void imagePathChanged();
@@ -760,7 +764,8 @@ public slots:
     void setImagePath(QString i) {imagePath = i; emit imagePathChanged();}
     QString getImagePath(){return imagePath;}
 
-    void setReloadStatus(bool b ){if(bReload != b){bReload = b; emit bReloadChanged(); if(bReload==false) {getConfiguration();} else {reloadCount++;} } }
+    void setReloadStatus(bool b ){if(bReload != b){bReload = b; emit bReloadChanged(); if(bReload==false) { } else {reloadCount++;} } }
+    bool getReloadStatus() {return bReload;}
 
     /*!
     * \brief setFormFactor
@@ -891,6 +896,9 @@ public slots:
 
     void setUsingExternal(bool t){ if(usingExternal != t ){ usingExternal=t; emit usingExternalChanged( usingExternal); } }
     bool getUsingExternal(){return usingExternal;}
+
+    void setHomeNetwork(bool y) { if(homeNetwork != y) { homeNetwork=y; emit homeNetworkChanged();  } }
+    bool getHomeNetwork() { return homeNetwork;}
 
     void setExternalIp(QString ex) {qDebug() << "updating external ip in manager.";  externalip = ex; emit externalIpChanged(externalip);setExternalHost(externalip); }
     QString getExternalIp() {return externalip;}

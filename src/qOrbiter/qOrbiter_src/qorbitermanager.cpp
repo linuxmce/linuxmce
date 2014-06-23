@@ -81,6 +81,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     orbiterInit=true;
     //view.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     m_bStartingUp= true;
+    homeNetwork=false;
+    alreadyConfigured = false;
+    iFK_Room = -1;
+    iea_area= -1;
     // b_skinsReady = false;
     // b_orbiterReady = false;
     bAppError = false;
@@ -593,18 +597,21 @@ void qorbiterManager::processConfig(QNetworkReply *config)
 {
 
     qDebug() << "Processing config.";
-    iPK_Device_DatagridPlugIn =  long(6);
-    iPK_Device_OrbiterPlugin = long(9);
-    iPK_Device_GeneralInfoPlugin = long(4);
-    iPK_Device_SecurityPlugin = long(13);
-    iPK_Device_LightingPlugin = long(8);
-    m_dwIDataGridRequestCounter = 0;
-    iOrbiterPluginID = 9;
-    iMediaPluginID = 10;
-    iPK_Device_eventPlugin = 12;
-    iSize = 0;
-    m_pOrbiterCat = 5;
-    s_onOFF = "1";
+    if(!alreadyConfigured){
+        iPK_Device_DatagridPlugIn =  long(6);
+        iPK_Device_OrbiterPlugin = long(9);
+        iPK_Device_GeneralInfoPlugin = long(4);
+        iPK_Device_SecurityPlugin = long(13);
+        iPK_Device_LightingPlugin = long(8);
+        m_dwIDataGridRequestCounter = 0;
+        iOrbiterPluginID = 9;
+        iMediaPluginID = 10;
+        iPK_Device_eventPlugin = 12;
+        iSize = 0;
+        m_pOrbiterCat = 5;
+        s_onOFF = "1";
+    }
+
 
     QDomDocument configData;//(config->readAll());
     QByteArray tConf= config->readAll().replace("\n", "");
@@ -630,17 +637,19 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     //------------DEFAULTS-FOR-ORBITER------------------------------------------------------------
     QDomElement defaults = root.firstChildElement("Default");
     QString sPK_User = defaults.attribute("sPK_User");
-    iFK_Room = defaults.attribute("DefaultRoom").toInt();
-    iea_area = defaults.attribute("DefaultEA").toInt();
-    iPK_User = defaults.attribute("PK_User").toInt();
-    if(iPK_User == 0)
-        iPK_User =1;
-    setDceResponse("Defaults Set");
-
+    if(!alreadyConfigured){
+        iFK_Room = defaults.attribute("DefaultRoom").toInt();
+        iea_area = defaults.attribute("DefaultEA").toInt();
+        iPK_User = defaults.attribute("PK_User").toInt();
+        if(iPK_User == 0)
+            iPK_User =1;
+        setDceResponse("Defaults Set");
+    }
     //-floorplans-----------------------------------------------------------------------------------------------------
     QDomElement floorplanXml = root.firstChildElement("Floorplans");
 
     QDomNodeList floorplanList = floorplanXml.childNodes();
+    pages.clear();
     for(int index = 0; index < floorplanList.count(); index++)
     {
         floorplans->totalPages = index;
@@ -658,6 +667,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     //floorplan devices
     QDomElement floorplan_devices = root.firstChildElement("FloorplanDevices");
     QDomNodeList floorplan_device_list = floorplan_devices.childNodes();
+    floorplans->clear();
     for(int index = 0; index < floorplan_device_list.count(); index++)
     {
         QString name = floorplan_device_list.at(index).attributes().namedItem("Name").nodeValue();
@@ -685,6 +695,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     QDomElement userXml = root.firstChildElement("Users");
 
     QDomNodeList userXmlList = userXml.childNodes();
+   userList->clear();
     for(int index = 0; index < userXmlList.count(); index++)
     {
         QString m_userName = userXmlList.at(index).nodeName();      //username
@@ -705,7 +716,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     m_lRooms = new LocationModel(new LocationItem, this);   //roomlistmodel
     QMap <QString, int> RroomMapping;                       //map for later reference
     QDomNodeList roomListXml = roomXml.childNodes();
-
+    m_lRooms->clear();
     for(int index = 0; index < roomListXml.count(); index++)
     {
         QString m_name = roomListXml.at(index).attributes().namedItem("Description").nodeValue();
@@ -896,46 +907,53 @@ void qorbiterManager::processConfig(QNetworkReply *config)
      */
     //------------------------------------------context objects----------------------------------------------------
     // qorbiterUIwin->rootContext()->setContextProperty("lmceData", &linuxmceData);                 //current room scenarios model
-    qorbiterUIwin->rootContext()->setContextObject(this);
-    qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights);                 //current room scenarios model
-    qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);                   //current room media model
-    qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);               //curent room climate model
-    qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);               //curret room telecom model
-    qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);             //current room security model
-    qorbiterUIwin->rootContext()->setContextProperty("current_floorplan_devices", QVariant::fromValue(current_floorplan_devices));
-    qorbiterUIwin->rootContext()->setContextProperty("floorplan_devices", floorplans);                  //floorplan devices
-    qorbiterUIwin->rootContext()->setContextProperty("floorplan_pages", QVariant::fromValue(pages));    //pages for floorplans
-    qorbiterUIwin->rootContext()->setContextProperty("currentFloorplanType", QVariant::fromValue(i_currentFloorplanType));
-    qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
-    qorbiterUIwin->rootContext()->setContextProperty("iPK_Device", QVariant::fromValue(iPK_Device));  //orbiter device number
-    qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea);           //custom room list item provided
-    qorbiterUIwin->rootContext()->setContextProperty("userList", userList);                           //custom user list provided
-    qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
-    qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
-    qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
-    qorbiterUIwin->rootContext()->setContextProperty("avcodes", QVariant::fromValue(buttonList));
-    qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
-    qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
+    if(!alreadyConfigured){
+        qorbiterUIwin->rootContext()->setContextObject(this);
+        qorbiterUIwin->rootContext()->setContextProperty("currentRoomLights", roomLights);                 //current room scenarios model
+        qorbiterUIwin->rootContext()->setContextProperty("currentRoomMedia", roomMedia);                   //current room media model
+        qorbiterUIwin->rootContext()->setContextProperty("currentRoomClimate", roomClimate);               //curent room climate model
+        qorbiterUIwin->rootContext()->setContextProperty("currentRoomTelecom", roomTelecom);               //curret room telecom model
+        qorbiterUIwin->rootContext()->setContextProperty("currentRoomSecurity", roomSecurity);             //current room security model
+        qorbiterUIwin->rootContext()->setContextProperty("current_floorplan_devices", QVariant::fromValue(current_floorplan_devices));
+        qorbiterUIwin->rootContext()->setContextProperty("floorplan_devices", floorplans);                  //floorplan devices
+        qorbiterUIwin->rootContext()->setContextProperty("floorplan_pages", QVariant::fromValue(pages));    //pages for floorplans
+        qorbiterUIwin->rootContext()->setContextProperty("currentFloorplanType", QVariant::fromValue(i_currentFloorplanType));
+        qorbiterUIwin->rootContext()->setContextProperty("currentuser", sPK_User);
+        qorbiterUIwin->rootContext()->setContextProperty("iPK_Device", QVariant::fromValue(iPK_Device));  //orbiter device number
+        qorbiterUIwin->rootContext()->setContextProperty("currentroom", m_lRooms->sdefault_Ea);           //custom room list item provided
+        qorbiterUIwin->rootContext()->setContextProperty("userList", userList);                           //custom user list provided
+        qorbiterUIwin->rootContext()->setContextProperty("roomList", m_lRooms);                           //custom room list  provided
+        qorbiterUIwin->rootContext()->setContextProperty("gmediaType", q_mediaType);
+        qorbiterUIwin->rootContext()->setContextProperty("screenshotAttributes", QVariant::fromValue(screenshotVars));
+        qorbiterUIwin->rootContext()->setContextProperty("avcodes", QVariant::fromValue(buttonList));
+        qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
+        qorbiterUIwin->rootContext()->setContextProperty("currentBookmarks", QVariant::fromValue(current_bookmarks));
+    }
+
 
     setDceResponse("Properties Done");
 
     setDceResponse("Setting location");
-    QApplication::processEvents(QEventLoop::AllEvents);
-    //------------not sure if neccesary since it knows where we are.
-    qDebug() << iPK_User;
     setActiveRoom(iFK_Room, iea_area);
-
     setCurrentUser(QString::number(iPK_User));
 
-    //-----setting up the FILEFORMAT model------------------------------------------------------------------------
-    this->qorbiterUIwin->rootContext()->setContextProperty("fileformatmodel", uiFileFilter); //custom fileformatmodel for selection filter item
-    connect(uiFileFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
-    connect(this, SIGNAL(resetFilter()), uiFileFilter, SLOT(clear()));
 
-    //-----setting up the MEDIASUBTYPE model------------------------------------------------------------------------
-    this->qorbiterUIwin->rootContext()->setContextProperty("mediatypefilter", mediaTypeFilter); //custom mediatype selection model
-    connect(mediaTypeFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
-    connect(this, SIGNAL(resetFilter()), mediaTypeFilter, SLOT(clear()));
+    //-----setting up the FILEFORMAT model------------------------------------------------------------------------
+
+    if(!alreadyConfigured){
+        this->qorbiterUIwin->rootContext()->setContextProperty("fileformatmodel", uiFileFilter); //custom fileformatmodel for selection filter item
+        connect(uiFileFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
+        connect(this, SIGNAL(resetFilter()), uiFileFilter, SLOT(clear()));
+
+        //-----setting up the MEDIASUBTYPE model------------------------------------------------------------------------
+        this->qorbiterUIwin->rootContext()->setContextProperty("mediatypefilter", mediaTypeFilter); //custom mediatype selection model
+
+        connect(mediaTypeFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
+        connect(this, SIGNAL(resetFilter()), mediaTypeFilter, SLOT(clear()));
+    }
+
+
+
 
     //-----setting up the GENRE model------------------------------------------------------------------------
     QDomElement genreElement = root.firstChildElement("GenreList");
@@ -947,14 +965,20 @@ void qorbiterManager::processConfig(QNetworkReply *config)
         QString pk= genrelist.at(index).attributes().namedItem("PK_Attribute").nodeValue();
         genreFilter->appendRow(new AttributeSortItem(name,pk, "",false,genreFilter));
     }
-    this->qorbiterUIwin->rootContext()->setContextProperty("genrefilter", genreFilter); //custom mediatype selection model
-    connect(genreFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
-    QObject::connect(this, SIGNAL(resetFilter()), genreFilter, SLOT(resetStates()));
 
-    //-----setting up the ATTRIBUTE model------------------------------------------------------------------------
-    this->qorbiterUIwin->rootContext()->setContextProperty("attribfilter", attribFilter); //custom mediatype selection model
-    connect(attribFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
-    QObject::connect(this, SIGNAL(resetFilter()), attribFilter, SLOT(clear()) );
+
+    if(!alreadyConfigured){
+
+        this->qorbiterUIwin->rootContext()->setContextProperty("genrefilter", genreFilter); //custom mediatype selection model
+        connect(genreFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
+        QObject::connect(this, SIGNAL(resetFilter()), genreFilter, SLOT(resetStates()));
+
+        //-----setting up the ATTRIBUTE model------------------------------------------------------------------------
+        this->qorbiterUIwin->rootContext()->setContextProperty("attribfilter", attribFilter); //custom mediatype selection model
+        connect(attribFilter, SIGNAL(SetTypeSort(int,QString)), this, SLOT(setStringParam(int,QString)));
+        QObject::connect(this, SIGNAL(resetFilter()), attribFilter, SLOT(clear()) );
+    }
+
     binaryConfig.clear();
     tConf.clear();
     configData.clear();
@@ -962,7 +986,12 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     getMediaDevices();
     setDceResponse(" Remote Config Complete");
     emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
-    setOrbiterStatus(true);
+
+    if(!alreadyConfigured){
+         setOrbiterStatus(true);
+    }
+
+    alreadyConfigured=true;
 }
 
 void qorbiterManager::getConfiguration()
@@ -1724,7 +1753,7 @@ bool qorbiterManager::loadSkins(QUrl base)
         }
     } else {
 
-             tskinModel->addSkin("default,aeon,STB");
+        tskinModel->addSkin("default,aeon,STB");
 
 
     }
@@ -1851,7 +1880,7 @@ bool qorbiterManager::readLocalConfig()
 #endif
     QFile localConfigFile;
     //**todo!! - add function for 1st run on android that copies the file to the xml path, then performs checks. we cannot install directly there.
-qDebug() << "Xml Path is " << xmlPath;
+    qDebug() << "Xml Path is " << xmlPath;
 
 
 #ifdef __ANDROID__
@@ -1989,9 +2018,9 @@ qDebug() << "Xml Path is " << xmlPath;
             }
             QString ext = configVariables.namedItem("lastconnect").attributes().namedItem("id").nodeValue();
             if(ext=="internal"){
-               setUsingExternal(false);
-        } else {
-               setUsingExternal(true);
+                setUsingExternal(false);
+            } else {
+                setUsingExternal(true);
             }
         }
 #ifdef __ANDROID__
@@ -2364,7 +2393,7 @@ void qorbiterManager::reloadHandler()
 
 void qorbiterManager::disconnectHandler()
 {
-    setConnectedState(false);   
+    setConnectedState(false);
 }
 
 void qorbiterManager::replaceHandler()

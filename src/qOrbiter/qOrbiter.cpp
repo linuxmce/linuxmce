@@ -4258,13 +4258,14 @@ void DCE::qOrbiter::adjustVolume(int vol)
 
 void qOrbiter::OnDisconnect()
 {
+
     emit routerConnectionChanged(false);
     qDebug("Router disconnected!");
     m_bOrbiterConnected = false;
     setNowPlaying(false);
     emit eventResponseChanged("Connection Lost");
     emit routerDisconnect();
-    DisconnectAndWait();
+  Disconnect();
 }
 
 void qOrbiter::OnReload()
@@ -4293,7 +4294,7 @@ void qOrbiter::OnReload()
 #endif
 #endif
 
-    DisconnectAndWait();
+   Disconnect();
     emit routerReloading("Reloading");
 }
 
@@ -5260,11 +5261,16 @@ void qOrbiter::setVariable(int pkvar ,QString val)
 }
 
 void qOrbiter::reInitialize(){
-    qDebug() << "REINITIALIZE";
 
+
+    if(m_bOrbiterConnected){
+        return;
+    }
+      qDebug() << "REINITIALIZE";
 Disconnect();
     if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
     {
+        CreateChildren();
         m_dwMaxRetries = 1;
         m_bRouterReloading = false;
         m_bReload = false;
