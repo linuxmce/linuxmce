@@ -50,7 +50,7 @@ QtObject{
     property color listItemTextActiveColor:"black"
     property Gradient bgHeaderGradient: Gradient{
         GradientStop{ position:0.0;color:"transparent"}
-        GradientStop{ position:0.65;color:"black"}
+        GradientStop{ position:0.65;color:manager.connectedState ? "black" : "red"}
     }
     property Gradient bgContentGradient: Gradient{
 

@@ -12,16 +12,15 @@ Item{
     function setNavigaton(qmlpage){
         hdrContent.source=qmlpage
     }
-
     Rectangle{
         anchors.fill: parent
-        color: "black"
-        opacity: .75
+        color:skinStyle.headerBgColor
+        opacity: skinStyle.bgContentOpacity
     }
     Rectangle{
         anchors.fill: parent
-        gradient: skinStyle.buttonGradient
-        opacity: .50
+        gradient: skinStyle.bgHeaderGradient
+        opacity: skinStyle.bgHeavyOpacity
     }
 
 
