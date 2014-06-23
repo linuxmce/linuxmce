@@ -10,7 +10,7 @@ Item {
     height:manager.appHeight
     width:manager.appWidth
     property alias skinStyle:style
-    property int screensaverTimer:15000 // manager.screenSaverTimeout*1000
+    property int screensaverTimer:manager.screenSaverTimeout*1000
     property bool uiOn:true
     Rectangle{
         anchors.fill: parent

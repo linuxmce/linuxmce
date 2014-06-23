@@ -17,7 +17,7 @@ Item{
 
     Rectangle{
         anchors.fill: parent
-        color:style.darkColor
+        color:manager.connectedState ? style.darkColor : style.alertcolor
         opacity:style.shadeOpacity
     }
 
