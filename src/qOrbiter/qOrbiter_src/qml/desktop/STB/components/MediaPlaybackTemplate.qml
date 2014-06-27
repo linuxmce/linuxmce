@@ -55,7 +55,7 @@ else
             width: scaleX(35)
             StyledText{
                 id:titleData
-                text: dcenowplaying.qs_mainTitle
+                text: dcenowplaying.qs_mainTitle + dceplayer.videoStream
                 anchors.centerIn: parent
                 fontSize: headerText
                 color: "white"

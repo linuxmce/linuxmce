@@ -105,14 +105,9 @@ Item{
                 anchors.fill: parent
                 radius:5
                 opacity: .75
-                color: currentItem===index ? appStyle.complimentColorLight : appStyle.darkHighlightColor
+                color: currentItem===index ? appStyle.listItemActiveBgColor : appStyle.listItemBgColor
             }
-            Rectangle{
-                anchors.fill: parent
-                gradient: appStyle.buttonGradient
-                radius:5
-                opacity: .65
-            }
+
             StyledText{
                 anchors.centerIn: parent
                 text:name
@@ -121,6 +116,14 @@ Item{
                 font.capitalization: Font.SmallCaps
                 color:appStyle.lighttext
             }
+
+            Rectangle{
+                anchors.fill: parent
+                gradient: appStyle.buttonGradient
+                radius:5
+                opacity: .65
+            }
+
             Keys.onTabPressed: {swapFocus();ftr.state="hidden"}
             Keys.onDownPressed: {
                 if(submodel.currentIndex !==0){

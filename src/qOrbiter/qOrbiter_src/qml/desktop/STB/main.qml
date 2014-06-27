@@ -27,13 +27,15 @@ Item {
     property string screenfile
     property string dynamic_height
     property string dynamic_width
+    property bool uiOn:true
+     property int screensaverTimer:manager.screenSaverTimeout*1000
+
     onActiveFocusChanged: {
         pageLoader.forceActiveFocus()
     }
-    Rectangle{
-        id:filler
-        anchors.fill: qmlroot
-        color: "black"
+
+    Component.onCompleted: {
+        dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
     }
 
     Connections{
@@ -63,9 +65,119 @@ Item {
 
     }
 
-    Component.onCompleted: {
-        dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+
+    function scaleX(x){
+        return x/100*manager.appWidth
     }
+    function scaleY(y){
+        return y/100*manager.appHeight
+    }
+
+
+    function screenchange(screenname )
+    {
+        pageLoader.source = "screens/"+screenname
+        if (pageLoader.status == Component.Ready)
+        {
+            manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
+        }
+        else if (pageLoader.status == Component.Loading)
+        {
+            console.log("loading page from network")
+            finishLoading(screenname)
+        }
+        else
+        {
+            console.log("Command to change to:" + screenname + " failed!")
+            screenfile = screenname
+            pageLoader.source = "screens/Screen_x.qml"
+        }
+    }
+
+    function finishLoading (screenname)
+    {
+        if(pageLoader.status != Component.Ready)
+        {
+            console.log("finishing load")
+            pageLoader.source = "screens/"+screenname
+            console.log("screen" + screenname + " loaded.")
+        }
+        else
+        {
+            finishLoading(screenname)
+        }
+
+    }
+
+    function checkStatus(component)
+    {
+        console.log(component.progress)
+    }
+    //=================Components==================================================//
+    function loadComponent(componentName )
+    {
+        componentLoader.source = "components/"+componentName
+        if (componentLoader.status === Component.Ready)
+        {
+            manager.setDceResponse("Command to change to:" + componentName+ " was successfull")
+        }
+        else if (componentLoader.status === Component.Loading)
+        {
+            console.log("loading page from network")
+            finishLoadingComponent(componentName)
+        }
+        else
+        {
+            console.log("Command to add: " + componentName + " failed!")
+
+        }
+    }
+
+    function finishLoadingComponent (componentName)
+    {
+        if(componentLoader.status !== Component.Ready)
+        {
+            console.log("finishing network load")
+            componentLoader.source = "components/"+componentName
+            console.log("screen" + componentName + " loaded.")
+        }
+        else
+        {
+            finishLoadingComponent(componentName)
+        }
+
+    }
+
+    function swapFocus(){
+
+        console.log("Swap Focus Function.")
+
+        if(hdr.activeFocus)
+        { console.log("Header had focus, set to page loader.")
+            pageLoader.forceActiveFocus()
+        }else if (pageLoader.activeFocus){
+            console.log("Pageloader had, sending to footer menu.")
+            ftr.forceActiveFocus()
+        }else if(ftr.activeFocus){
+            console.log("Footer Had focus, sending to video plane.")
+            dceplayer.forceActiveFocus()
+        }else if(dceplayer.activeFocus){
+            console.log("Player had focus, sending to header.")
+            hdr.forceActiveFocus()
+        }else {
+            pageLoader.forceActiveFocus()
+        }
+
+        console.log("Header Focus::"+hdr.activeFocus)
+        console.log("Loader Focus::"+pageLoader.activeFocus)
+        console.log("Footer Focus::"+ftr.activeFocus)
+        console.log("Dceplayer Focus::"+dceplayer.activeFocus)
+        if(dceplayer.mediaPlaying && pageLoader.activeFocus){
+            dceplayer.forceActiveFocus()
+        }
+        ftr.currentItem = -1
+    }
+
 
 
     FontLoader{
@@ -73,6 +185,30 @@ Item {
         name:"Sawasdee"
         source: "../../skins-common/fonts/Sawasdee.ttf"
     }
+
+    Timer{
+            id:hideUiTimer
+            interval:screensaverTimer
+            running: true
+            repeat: true
+            onTriggered: {
+                if(uiOn){
+                    uiOn=false
+                    if(glScreenSaver.active){
+                        glScreenSaver.forceActiveFocus()
+                    } else {
+                        mobileGradient.forceActiveFocus()
+                    }
+                }
+            }
+        }
+
+    Rectangle{
+        id:filler
+        anchors.fill: qmlroot
+        color: "black"
+    }
+
 
     ListModel{
         id:scenarios
@@ -201,118 +337,6 @@ Item {
     }
 
 
-    function scaleX(x){
-        return x/100*manager.appWidth
-    }
-    function scaleY(y){
-        return y/100*manager.appHeight
-    }
-
-
-    function screenchange(screenname )
-    {
-        pageLoader.source = "screens/"+screenname
-        if (pageLoader.status == Component.Ready)
-        {
-            manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-        }
-        else if (pageLoader.status == Component.Loading)
-        {
-            console.log("loading page from network")
-            finishLoading(screenname)
-        }
-        else
-        {
-            console.log("Command to change to:" + screenname + " failed!")
-            screenfile = screenname
-            pageLoader.source = "screens/Screen_x.qml"
-        }
-    }
-
-    function finishLoading (screenname)
-    {
-        if(pageLoader.status != Component.Ready)
-        {
-            console.log("finishing load")
-            pageLoader.source = "screens/"+screenname
-            console.log("screen" + screenname + " loaded.")
-        }
-        else
-        {
-            finishLoading(screenname)
-        }
-
-    }
-
-    function checkStatus(component)
-    {
-        console.log(component.progress)
-    }
-    //=================Components==================================================//
-    function loadComponent(componentName )
-    {
-        componentLoader.source = "components/"+componentName
-        if (componentLoader.status === Component.Ready)
-        {
-            manager.setDceResponse("Command to change to:" + componentName+ " was successfull")
-        }
-        else if (componentLoader.status === Component.Loading)
-        {
-            console.log("loading page from network")
-            finishLoadingComponent(componentName)
-        }
-        else
-        {
-            console.log("Command to add: " + componentName + " failed!")
-
-        }
-    }
-
-    function finishLoadingComponent (componentName)
-    {
-        if(componentLoader.status !== Component.Ready)
-        {
-            console.log("finishing network load")
-            componentLoader.source = "components/"+componentName
-            console.log("screen" + componentName + " loaded.")
-        }
-        else
-        {
-            finishLoadingComponent(componentName)
-        }
-
-    }
-
-    function swapFocus(){
-
-        console.log("Swap Focus Function.")
-
-        if(hdr.activeFocus)
-        { console.log("Header had focus, set to page loader.")
-            pageLoader.forceActiveFocus()
-        }else if (pageLoader.activeFocus){
-            console.log("Pageloader had, sending to footer menu.")
-            ftr.forceActiveFocus()
-        }else if(ftr.activeFocus){
-            console.log("Footer Had focus, sending to video plane.")
-            dceplayer.forceActiveFocus()
-        }else if(dceplayer.activeFocus){
-            console.log("Player had focus, sending to header.")
-            hdr.forceActiveFocus()
-        }else {
-            pageLoader.forceActiveFocus()
-        }
-
-        console.log("Header Focus::"+hdr.activeFocus)
-        console.log("Loader Focus::"+pageLoader.activeFocus)
-        console.log("Footer Focus::"+ftr.activeFocus)
-        console.log("Dceplayer Focus::"+dceplayer.activeFocus)
-        if(dceplayer.mediaPlaying && pageLoader.activeFocus){
-            dceplayer.forceActiveFocus()
-        }
-        ftr.currentItem = -1
-    }
-
 
     DceScreenSaver{
         id:glScreenSaver
@@ -340,7 +364,7 @@ Item {
 
     MediaManager{
         id:dceplayer
-        anchors.top: parent.top
+        anchors.top: dceplayer.videoStream ? parent.top : parent.bottom
         anchors.left:parent.left
         flipColors: true
         focus:true
@@ -546,6 +570,18 @@ Item {
 
 
     //floorplans
+    MouseArea{
+         id:mst
+         anchors.fill: parent
+
+         onPressed: {
+             mouse.accepted=false
+             console.log("Mouse X: "+mouse.x)
+             console.log("Mouse Y:"+mouse.y)
+             console.log("\n")
+             hideUiTimer.restart()
+         }
+     }
 }
 
 

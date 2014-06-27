@@ -1,6 +1,9 @@
 import QtQuick 1.1
 
 Item {
+    property string screenName:"lorem ipsum foo"
+    property string screenDescription:"basic description"
+
     anchors{
         top:pageLoader.top
         left:pageLoader.left

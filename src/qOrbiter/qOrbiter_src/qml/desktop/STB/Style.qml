@@ -163,7 +163,7 @@ Item{
 
     //headers
     property int  stdHdrHeight: scaleY(8)
-    //New style //
+    //New style -------------------------------------------------------------//
     /* Overall */
     property double bgLightOpacity:.35
     property double bgHeavyOpacity:.65
@@ -172,7 +172,7 @@ Item{
     /* Headers, containers and lists */
     property color contentBgColor:"darkgrey"
     property int headerFontSize:14
-    property color headerBgColor:"green"
+    property color headerBgColor:"black"
     property int listItemHeight:scaleY(8)
     property color listItemBgColor:"green"
     property color listItemActiveBgColor: "white"
