@@ -55,13 +55,16 @@ class MediaManager :
     Q_PROPERTY(QString fileUrl READ getMediaUrl NOTIFY fileUrlChanged)
     Q_PROPERTY(int incomingTime READ getIncomingTime WRITE setIncomingTime NOTIFY incomingTimeChanged)
     Q_PROPERTY(bool flipColors READ getColorFlip WRITE setColorFlip NOTIFY colorFlipChanged)
+    Q_PROPERTY(bool videoStream READ getVideoStream WRITE setVideoStream NOTIFY videoStreamChanged)
+    Q_PROPERTY(QString serverAddress READ getServerAddress WRITE setServerAddress NOTIFY serverAddressChanged)
+    Q_PROPERTY(int deviceNumber READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
+
 #ifndef __ANDROID__
 #ifndef QT5
      Q_PROPERTY(QList <Phonon::AudioOutputDevice> outputs READ getAvailibleOutputs NOTIFY availibleAudioOutputsChanged())
 #endif
 #endif
-    Q_PROPERTY(QString serverAddress READ getServerAddress WRITE setServerAddress NOTIFY serverAddressChanged)
-    Q_PROPERTY(int deviceNumber READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
+
     Q_OBJECT
 
 public:
@@ -144,6 +147,7 @@ public:
 
     int incomingTime;
     long currentDevice;
+    bool videoStream;
 
 #ifdef QT4
 
@@ -158,6 +162,7 @@ public:
 #endif
 
 signals:
+    void videoStreamChanged();
     void connectedChanged();
     void currentStatusChanged();
     void totalTimeChanged();
@@ -195,6 +200,9 @@ signals:
     void setPluginVolume(double d);
 
 public slots:
+
+    void setVideoStream(bool b ){if(videoStream != mediaObject->hasVideo()) { videoStream = mediaObject->hasVideo(); emit videoStreamChanged();} qDebug() << "Item has video::"<<videoStream;}
+    bool getVideoStream(){return videoStream;}
 
     void setCurrentDevice(long d){currentDevice = d;mountDrive(currentDevice);}
 

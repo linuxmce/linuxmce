@@ -139,6 +139,7 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaObject, SIGNAL(aboutToFinish()), this, SIGNAL(mediaAboutToFinish()));
     QObject::connect(mediaObject, SIGNAL(prefinishMarkReached(qint32)), this ,SLOT(setPrefinishMarkHit(qint32)));
     QObject::connect(mediaObject,SIGNAL(metaDataChanged()), this, SLOT(updateMetaData()));
+    QObject::connect(mediaObject, SIGNAL(hasVideoChanged(bool)), this , SLOT(setVideoStream(bool)));
     /*internals*/
     QObject::connect(audioSink, SIGNAL(volumeChanged(qreal)), this, SLOT(setVolume(qreal)));
     QObject::connect(audioSink, SIGNAL(mutedChanged(bool)), this, SLOT(setMuted(bool)));
@@ -270,6 +271,11 @@ void MediaManager::setMediaUrl(QString url)
     qDebug() <<"Media Object Source::"<< mediaObject->currentSource().fileName();
 
     mediaObject->play();
+    if(mediaObject->hasVideo()){
+        setVideoStream(true);
+    } else {
+        setVideoStream(false);
+    }
     qDebug() <<"Item is playing? " << mediaObject->state();
     qDebug() << "Errors " << mediaObject->errorString();
     discController->setAutoplayTitles(true);
