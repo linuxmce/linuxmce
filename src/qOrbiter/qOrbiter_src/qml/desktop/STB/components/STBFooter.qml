@@ -33,7 +33,6 @@ Item{
 
     GradientFiller {
         opacity: .75
-
     }
 
     Item{
@@ -45,7 +44,6 @@ Item{
             margins: 5
             left:parent.left
         }
-
     }
 
     ListView{

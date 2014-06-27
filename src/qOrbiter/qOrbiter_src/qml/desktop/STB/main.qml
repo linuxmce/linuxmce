@@ -28,7 +28,7 @@ Item {
     property string dynamic_height
     property string dynamic_width
     property bool uiOn:true
-     property int screensaverTimer:manager.screenSaverTimeout*1000
+    property int screensaverTimer:15000 //manager.screenSaverTimeout*1000
 
     onActiveFocusChanged: {
         pageLoader.forceActiveFocus()
@@ -189,15 +189,16 @@ Item {
     Timer{
             id:hideUiTimer
             interval:screensaverTimer
-            running: true
-            repeat: true
+            running: false
+            repeat: false
             onTriggered: {
                 if(uiOn){
                     uiOn=false
                     if(glScreenSaver.active){
                         glScreenSaver.forceActiveFocus()
                     } else {
-                        mobileGradient.forceActiveFocus()
+                        uiOn=true
+                      ftr.forceActiveFocus()
                     }
                 }
             }
@@ -357,7 +358,7 @@ Item {
         MouseArea{
             anchors.fill: parent
             hoverEnabled: true
-            onPressed:if(glScreenSaver.activeFocus) hideUI()
+            onPressed:if(glScreenSaver.activeFocus) { uiOn=!uiOn}
         }
 
     }
@@ -579,7 +580,7 @@ Item {
              console.log("Mouse X: "+mouse.x)
              console.log("Mouse Y:"+mouse.y)
              console.log("\n")
-             hideUiTimer.restart()
+          //   hideUiTimer.restart()
          }
      }
 }
