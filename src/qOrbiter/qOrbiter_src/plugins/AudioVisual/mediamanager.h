@@ -201,7 +201,20 @@ signals:
 
 public slots:
 
-    void setVideoStream(bool b ){if(videoStream != mediaObject->hasVideo()) { videoStream = mediaObject->hasVideo(); emit videoStreamChanged();} qDebug() << "Item has video::"<<videoStream;}
+    void setVideoStream(bool b ){
+#ifdef QT4
+        if(videoStream != mediaObject->hasVideo()) {
+            videoStream = mediaObject->hasVideo(); emit videoStreamChanged();
+        }
+#else
+        if(videoStream != b){
+            videoStream = b;
+            emit videoStreamChanged();
+        }
+           qDebug() << "Item has video::"<<videoStream;
+#endif
+
+    }
     bool getVideoStream(){return videoStream;}
 
     void setCurrentDevice(long d){currentDevice = d;mountDrive(currentDevice);}
