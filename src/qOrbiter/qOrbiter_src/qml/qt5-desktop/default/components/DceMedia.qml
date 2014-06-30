@@ -7,7 +7,10 @@ Item {
     anchors.fill: parent
     //   property alias videoPlayer:vplayer
     property string currentMediaUrl:dceMediaController.fileUrl
-
+    property bool mediaPlaying:player.playbackState === MediaPlayer.PlayingState
+    property string currentStatus:""
+    property double volume:0.0
+    property double mediaBuffer:0.0
 
 //    Keys.onPressed:{
 

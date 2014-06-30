@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.1
 
 Item{
     id:focusButton
@@ -23,6 +23,11 @@ Item{
         border.color: "white"
         border.width: focusButton.activeFocus ? 3 : 0
     }
+    Rectangle{
+        anchors.fill: parent
+        gradient: appStyle.buttonGradient
+        radius:5
+    }
     StyledText{
         id:label
         text:focusButton.text
@@ -43,5 +48,14 @@ Item{
         if(hasParentModel)
             parent.selectItem()
         else select()
+    }
+    MouseArea{
+        anchors.fill: parent
+        onClicked: {
+            if(hasParentModel)
+                parent.selectItem
+            else
+                select()
+        }
     }
 }

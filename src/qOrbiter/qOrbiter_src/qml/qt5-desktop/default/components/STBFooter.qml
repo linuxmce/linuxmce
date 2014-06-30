@@ -1,13 +1,15 @@
-import QtQuick 2.0
-import QtGraphicalEffects 1.0
+import QtQuick 2.1
+
 import "../../../skins-common/lib/components"
 Item{
     id:ftr
+
     width: qmlroot.width
     height:scaleY(14)
     anchors.top: parent.bottom
     property bool isActive: false
-    onActiveFocusChanged:{ if(activeFocus){
+    onActiveFocusChanged:{
+        if(activeFocus){
             scenarioList.forceActiveFocus()
             ftr.state="showing"
             console.log("showing state")
@@ -17,27 +19,43 @@ Item{
         else{
             currentItem = -1
             ftr.state = "hidden"
-            pageLoader.item.focus = true
-
         }
     }
     Component.onCompleted: ftr.state = "hidden"
 
     property int currentItem: -1
+    Connections{
+        target: manager
+        onRoomChanged:{
 
+        }
+    }
 
-    Rectangle{
-        anchors.fill: parent
-        opacity:ftr.activeFocus ? 1 : .65
-        color:appStyle.mainColor
-        border.width: ftr.activeFocus ? 2 : 0
-        border.color:  "red"
+    GradientFiller {
+        opacity: .75
+    }
+
+    Item{
+        id:npOptions
+        width: (dcenowplaying.b_mediaPlaying || dceplayer.mediaPlaying) ? scaleX(8) :0
+        anchors{
+            top:parent.top
+            bottom:parent.bottom
+            margins: 5
+            left:parent.left
+        }
     }
 
     ListView{
         id:scenarioList
         height: parent.height / 2
-        width: parent.width
+        anchors{
+            top:parent.top
+            left:npOptions.right
+            right:parent.right
+            margins: 5
+        }
+        property int itemWidth:(scenarioList.width)/6
         spacing:scaleX(1)
         orientation: ListView.Horizontal
         onActiveFocusChanged:{
@@ -54,7 +72,7 @@ Item{
         delegate: Item{
             id:scenarioParent
             height: parent.height
-            width: scaleX(15)
+            width:scenarioList.itemWidth
             onActiveFocusChanged: {
                 if(activeFocus){
                     currentItem= index
@@ -84,21 +102,29 @@ Item{
             Rectangle{
                 anchors.fill: parent
                 radius:5
-                color: currentItem===index ? appStyle.lightHighlightColor : appStyle.darkHighlightColor
+                opacity: .75
+                color: currentItem===index ? appStyle.listItemActiveBgColor : appStyle.listItemBgColor
             }
+
             StyledText{
                 anchors.centerIn: parent
                 text:name
-                font.pixelSize: 32
+                font.pixelSize:headerText
                 font.bold: true
                 font.capitalization: Font.SmallCaps
+                color:appStyle.lighttext
             }
+
+            Rectangle{
+                anchors.fill: parent
+                gradient: appStyle.buttonGradient
+                radius:5
+                opacity: .65
+            }
+
             Keys.onTabPressed: {swapFocus();ftr.state="hidden"}
             Keys.onDownPressed: {
-                if(submodel.count===0){
-                    metarow.forceActiveFocus()
-                    submodel.currentIndex = -1
-                } else if(submodel.currentIndex !==0){
+                if(submodel.currentIndex !==0){
                     submodel.decrementCurrentIndex()
                 }
                 else{
@@ -110,7 +136,7 @@ Item{
             Keys.onUpPressed: submodel.incrementCurrentIndex()
             Keys.onEnterPressed: { pressed() }
             Keys.onPressed: {
-                console.log(event.key)
+                 console.log("Pressed-"+manager.dumpKey(event.key))
                 if(event.key === Qt.Key_Enter || event.key===Qt.Key_Return )
                 {
                     if(submodel.currentIndex !==-1){
@@ -138,22 +164,23 @@ Item{
                 keyNavigationWraps: true
                 clip:true
                 anchors.bottom: parent.top
+                anchors.bottomMargin: 10
                 spacing:scaleY(1)
                 delegate: Item{
                     rotation: 180
                     height:label.paintedHeight
-                    width: parent.width
-                    Rectangle{
-                        anchors.fill: parent
-                        radius:5
-                        clip: true
-                        color:submodel.currentIndex === index ? "darkgrey" : "black"
-                        opacity: submodel.currentIndex === index ? .85 : .65
+                    width: scenarioList.itemWidth
+
+
+                    GradientFiller{
+                        fillColor: submodel.currentIndex === index ? "black" : appStyle.button_system_color
+                        opacity: submodel.currentIndex === index ? .75 : .55
+                        grpRadius: 5
                     }
 
                     StyledText {
                         id:label
-                        color:"white"
+                        color:appStyle.lighttext
                         text: title
                         font.bold: submodel.currentIndex === index
                         width:parent.width
@@ -165,12 +192,33 @@ Item{
                     Connections{
                         target:scenarioParent
                         onPressed:{
-                            if(submodel.currentIndex === index && submodel.model !==advancedMenu)
+
+                            if(submodel.currentIndex === index && submodel.model !==advancedMenu){
                                 manager.execGrp(params)
-                            else{
+                            }else{
+                                // console.log(submodel.model[index].params)
+                                if(submodel.currentIndex!==index){
+                                    //console.log(advancedMenu.get(index).params)
+                                    return;
+                                }
                                 switch(params){
+                                case 1:
+                                    manager.quickReload()
+                                    break;
+                                case 2:
+                                    manager.regenOrbiter(manager.m_dwPK_Device)
+                                    break;
+                                case 3:
+                                    console.log("Show Power!")
+                                    break;
+                                case 5:
+                                    manager.gotoQScreen("Screen_44.qml")
+                                    break;
                                 case 7:
                                     manager.exitApp()
+                                    break;
+                                default:
+                                    console.log(params)
                                     break;
                                 }
                             }
@@ -178,7 +226,7 @@ Item{
                     }
                     MouseArea{
                         anchors.fill: parent
-                        onReleased:{
+                        onClicked:{
 
                             if(submodel.model !==advancedMenu)
                             {
@@ -189,8 +237,23 @@ Item{
                             }
                             else{
                                 switch(params){
+                                case 1:
+                                    manager.quickReload()
+                                    break;
+                                case 2:
+                                    manager.regenOrbiter(manager.m_dwPK_Device)
+                                    break;
+                                case 3:
+                                    console.log("Show Power!")
+                                    break;
+                                case 5:
+                                    manager.gotoQScreen("Screen_44.qml")
+                                    break;
                                 case 7:
                                     manager.exitApp()
+                                    break;
+                                default:
+                                    console.log(params)
                                     break;
                                 }
                             }
@@ -216,17 +279,21 @@ Item{
     }
     FocusRow{
         id:metarow
-        height: parent.height/3
-        width: parent.width
-        anchors.bottom: parent.bottom
+        height: parent.height/2
+        anchors{
+            top:scenarioList.bottom
+            right:parent.right
+            left:npOptions.right
+            bottom:parent.bottom
+           margins: 5
+        }
+
         Keys.onUpPressed: scenarioList.forceActiveFocus()
 
         FocusButton{
             text:manager.sPK_User
             fontSize: 22
             height: parent.height
-
-
         }
 
         FocusButton{
@@ -240,8 +307,11 @@ Item{
     }
     Clock{
         id:timekeeper
-        anchors.top: metarow.top
-        anchors.right: metarow.right
+        anchors{
+            top:metarow.top
+            bottom: metarow.bottom
+            right:metarow.right
+        }
 
     }
 

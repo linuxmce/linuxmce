@@ -1,13 +1,7 @@
-import QtQuick 2.0
+import QtQuick 2.1
 import "../components"
-Item {
+StyledScreen {
     id:screen_forty_seven_of_nine
-    anchors{
-        top:parent.top
-        left:parent.left
-        right:parent.right
-        bottom:parent.bottom
-    }
 
     state: "browsing"
     property int depth:0
@@ -23,45 +17,171 @@ Item {
         mediaList.forceActiveFocus()
     }
 
-    Connections{
+    Connections
+    {
         target: filedetailsclass
-        onShowDetailsChanged:
-        {
+        onShowDetailsChanged:{
+
             screen_forty_seven_of_nine.state = "detail"
             depth--
         }
     }
+
+
 
     MediaListGridDelagate {
         id: contactDelegate
         visible: false
     }
 
+    Item{
+        id:navHeader
+        height: scaleY(8)
+        anchors{
+            top:parent.top
+            left:parent.left
+            right:parent.right
+        }
+        Rectangle{
+            anchors.fill: parent
+            color: appStyle.primaryDarkColor
+        }
+        GradientFiller{
+            fillColor: "black"
+            opacity: .65
+        }
+
+        Rectangle{
+            id:homeAnchor
+            color:"white"
+            width: height
+            anchors{
+                top:parent.top
+                left:parent.left
+                bottom:parent.bottom
+                margins: 5
+            }
+        }
+        StyledText{
+            id:mediatypeLabel
+            anchors{
+                top:parent.top
+                left: attribLabel.right
+                bottom:parent.bottom
+                margins: 15
+            }
+            color:"white"
+            text: qsTr("Mediatype:")+manager.q_mediaType
+        }
+
+        StyledText{
+            id:attribLabel
+            anchors{
+                top:parent.top
+                left: homeAnchor.right
+                bottom:parent.bottom
+                margins: 15
+            }
+            color:"white"
+            text: qsTr("Attribute:")+ manager.q_attributetype_sort
+
+        }
+
+
+        StyledText{
+            id:subTypeLabel
+            anchors{
+                top:parent.top
+                left: mediatypeLabel.right
+                bottom:parent.bottom
+                margins: 15
+            }
+            color:"white"
+            text: qsTr("Genre(s):")+ manager.q_attribute_genres
+        }
+
+        StyledText{
+            id:pkAttributeLabel
+            anchors{
+                top:parent.top
+                left: subTypeLabel.right
+                bottom:parent.bottom
+                margins: 10
+            }
+            color:"white"
+            text: qsTr("Pk Attribute")+ manager.q_pk_attribute
+        }
+        StyledText{
+            id:lastViewedLabel
+            anchors{
+                top:parent.top
+                left: pkAttributeLabel.right
+                bottom:parent.bottom
+                margins: 10
+            }
+            color:"white"
+            text: qsTr("Last Viewed")+ manager.q_last_viewed
+        }
+
+        StyledText{
+            id:pkUsersLabel
+            anchors{
+                top:parent.top
+                left: lastViewedLabel.right
+                bottom:parent.bottom
+                margins: 10
+            }
+            color:"white"
+            text: qsTr("Users")+ manager.q_pk_users
+        }
+        StyledText{
+            id:fileFormatLabel
+            anchors{
+                top:parent.top
+                left: pkUsersLabel.right
+                bottom:parent.bottom
+                margins: 10
+            }
+            color:"white"
+            text: qsTr("File Format: ")+ manager.q_fileFormat
+        }
+        StyledText{
+            id:subLabel
+            anchors{
+                top:parent.top
+                left: fileFormatLabel.right
+                bottom:parent.bottom
+                margins: 15
+            }
+            color:"white"
+            text: qsTr("Subtype(s):")+ manager.q_subType
+        }
+    }
+
+
     GridView{
         id:mediaList
-        height: parent.height - scaleY(15)
-        width: parent.width
+
+        anchors{
+            top:navHeader.bottom
+            left:parent.left
+            right:parent.right
+            bottom:filtering.top
+        }
+
         cellHeight: contactDelegate.height
         cellWidth: contactDelegate.width
-        contentHeight: scaleY(24)
-        contentWidth: scaleX(25)
-        anchors.top: parent.top
+        contentHeight: mediaList.height
+        contentWidth: mediaList.width
         model: manager.getDataGridModel("MediaFile", 63)
-        flickableDirection:GridView.HorizontalFlick
         focus:true
         clip:true
         onCurrentIndexChanged: console.log("Current index changed: ==> " +currentIndex)
-
-        Connections {
-            target: mediaList.model
-            onScrollToItem: {  mediaList.currentIndex = item; mediaList.positionViewAtIndex(item, ListView.Beginning); }
-        }
-
         Keys.onPressed: { // enter and back keys
             if(event.key ===Qt.Key_Enter || (event.key === 16777220 || event.key ===16777221 || event.key === Qt.Key_Return)) {
                 manager.setStringParam(4, mediaList.model.get(mediaList.currentIndex, "id"))
                 console.log("Current Index ==>"+mediaList.currentIndex)
-              //  mediaList.positionViewAtIndex(mediaList.currentIndex, ListView.Visible)
+                mediaList.positionViewAtIndex(mediaList.currentIndex, ListView.Visible)
 
 
                 if(indexStack.count !==0 && indexStack.get(indexStack.count).idx !==mediaList.currentIndex){
@@ -74,12 +194,7 @@ Item {
             } else if(event.key === Qt.Key_Shift){
                 filtering.forceActiveFocus()
             } else if(event.key !== Qt.Key_Escape && event.key !== Qt.Key_Tab&& event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235){
-
-                manager.seekGrid("MediaFile", event.text)
-                // mediaList.currentIndex = dataModel.setSection(event.key)
-                console.log("Letter Jump Index ==>  "+mediaList.currentIndex)
-                // mediaList.positionViewAtIndex(mediaList.currentIndex,ListView.visible)
-           return
+		manager.seekGrid("MediaFile", event.text)
             } else if(event.key=== Qt.Key_M){
                 manager.gotoQScreen("Screen_1.qml")
             }
@@ -88,7 +203,10 @@ Item {
             console.log("Depth ==>" + depth)
             console.log("Stack Depth ==> "+ indexStack.count)
         }
-
+	Connections {  
+	    target: mediaList.model
+            onScrollToItem: { mediaList.currentIndex = item; mediaList.positionViewAtIndex(item, ListView.Beginning); } 
+	} 
         Keys.onEscapePressed: {
             if(screen_forty_seven_of_nine.state=== "detail")
             {
@@ -163,8 +281,85 @@ Item {
 
     }
 
-    MediaFilterRow {
-        id: filtering
+    Row{
+        id:filtering
+        height: childrenRect.height
+        width: parent.width
+        anchors.bottom: parent.bottom
+        focus:false
+        spacing:scaleX(2)
+        property int childCount:5
+        Keys.onPressed: if(event.key === Qt.Key_Shift) {mediaList.forceActiveFocus(); filter_view.currentFilterModel = ""; filter_view.visible = false }
+        onActiveFocusChanged: {
+            sorting_filter.forceActiveFocus()
+        }
+        Behavior on opacity{
+            PropertyAnimation{
+                duration: 500
+            }
+        }
+        function moveFocus(idx){
+            if(idx !==-1 && idx !==childCount ){
+                for (var i = 0; i < filtering.children.length; i++){
+                    if(filtering.children[i].rowindex===(idx)){
+                        filtering.children[i].forceActiveFocus()
+                        filter_view.x = filtering.children[i].x
+                    }
+                }
+            }
+        }
+        function moveSort(idx){
+
+        }
+
+        /*
+          Sort, Genre, Type, Source
+
+          */
+
+        FilterButton {
+            id: sorting_filter
+            text: qsTr("Sort")
+            rowindex: 0
+            onActiveFocusChanged: if(activeFocus) {filter_view.currentFilterModel = attribfilter; }
+        }
+        FilterButton{
+            id:genre_filter
+            text:qsTr("Genres")
+            rowindex: 1
+            onActiveFocusChanged: if(activeFocus) filter_view.currentFilterModel = genrefilter
+        }
+        FilterButton{
+            id:type_filter
+            text:qsTr("MediaTypes")
+            rowindex: 2
+            onActiveFocusChanged: if(activeFocus) filter_view.currentFilterModel = mediatypefilter
+        }
+        FilterButton{
+            id:source_filter
+            text:qsTr("File Format")
+            rowindex: 3
+            onActiveFocusChanged:  if(activeFocus) filter_view.currentFilterModel = fileformatmodel
+        }
+        FilterButton{
+            id:playAllbutton
+            text:"Play All"
+            rowindex: 4
+            onActiveFocusChanged: if(activeFocus) {filter_view.currentFilterModel = "" }
+            Keys.onEnterPressed: {
+                manager.playMedia("!G"+iPK_Device)
+            }
+            Keys.onReturnPressed: {
+                manager.playMedia("!G"+iPK_Device)
+            }
+
+            Keys.onPressed: {
+                if(event.key === Qt.Key_Enter|| event.key ===Qt.Key_Return){
+                    manager.playMedia("!G"+iPK_Device)
+                }
+                console.log(event.key)
+            }
+        }
     }
 
     Item{
@@ -271,6 +466,7 @@ Item {
                 script:{
                     infoPanel.forceActiveFocus()
                     console.log("Setting info panel focus to active.")
+                    // No alternative in data grid model code atm.:  dataModel.setPause(true)
                 }
             }
         }

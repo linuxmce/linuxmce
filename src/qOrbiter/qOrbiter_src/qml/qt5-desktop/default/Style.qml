@@ -9,7 +9,7 @@
  *
  */
 
-import QtQuick 2.0
+import QtQuick 2.1
 
 Item{
     id:stbStyle
@@ -17,56 +17,79 @@ Item{
     property alias style: stbStyle
 
     function scaleX(x){
-        return x/100*appW
+        return x/100*manager.appWidth
     }
     function scaleY(y){
-        return y/100*appH
+        return y/100*manager.appHeight
     }
 
     //skin description
     property string skincreator: "Langston Ball"
-    property string skinname: "STB Qt5"
+    property string skinname: "STB"
     property string skindir: "STB"
     property string skindescription: "Basic skin to mimic a standard Set-top box."
     property string skinversion: "1.0"
     property string skinvariation: "TV 16:9"
 
-    /* Starting Size Properties */
 
-    /* End Starting Size Properties */
+    /* Image aspect ratios */
+        property double dvdPosterRatio:1080/955
+        property double hdPosterRatio:1080/755
+        property double cdCoverRatioFront:1080/1080
+        property double cdCoverRatioBack:1080/1264
+        property double vcdRatio:1080/1080
+        property double vhsRatio:1280/620
 
+
+
+    property variant alertGradient:alrtGradient
+    Gradient{
+        id:alrtGradient
+        GradientStop{
+            position: 0.0
+            color:"black"
+        }
+        GradientStop{
+            position: 0.5
+            color:lightHighlightColor
+        }
+    }
+
+    property variant contentGradient:cntGradient
+    Gradient{
+        id:cntGradient
+        GradientStop{
+            position: 0.0
+            color:"white"
+        }
+        GradientStop{
+            position: 0.5
+            color:"grey"
+        }
+    }
     /* Animation Properties */
     property int globalAnimationSpeed:750
     property int globalAnimationEasing:Easing.InOutQuad
     /* End Animation Properties */
 
+    property int margins:5
+
     property int orbiterH: 600
     property int orbiterW: 800
 
-    /* Opacity Defitions */
-    property bool useOpacity:false
-    property double appOpacity: .45
-
-
     //main colors http://colorschemedesigner.com/#3JB1Tw0w0l7l7
-    //-color definitions
-    property color accentcolor: "green"
-    property color highlight1: "silver"
-    property color highlight2: "orange"
-    property color alertcolor: "red"
-    property color warncolor:"yellow"
-    property color darkColor:"black"
-    property double shadeOpacity:.65
-    property color darkhighlight: "darkgrey"
-    property color lighthighlight: "green"
-    property color mainColor: "black"
-    property color darkHighlightColor: "darkgreen"
-    property color lightHighlightColor:"yellow"
-    //--end color definitions
+    property color mainColor: "#34282c"
 
+    property color lighttext: "white"
 
-    property color lighttext: "slategrey"
+    property color primaryLightColor:"#9934282C"
+    property color primaryDarkColor:"#264E90"
 
+    property color secondaryLightColor:"#5056A1"
+    property color secondaryDarkColor:"#283330"
+
+    property color complimentColorLight:"#3EA055"
+    property color complimentColorDark:"#34282c"
 
     property int homescreenrowheight:100
     property int homescreenbuttonheight: 90
@@ -80,10 +103,8 @@ Item{
 
     //textStyles
 
-
     property int title_size: 18
-    property color title_color: "white"
-    property color sub_title_color:"green"
+    property color tile_color: "white"
 
     property int t_but_size: 16
     property color t_but_color: "darkgrey"
@@ -98,11 +119,11 @@ Item{
     property int buttonRegFont: scaleX(5)
     property int buttonH:95
     property int buttonW: 95
-    property color button_system_color: "darkgrey"
-    property color button_system_color_hover: "lightblue"
+    property color button_system_color: secondaryDarkColor
+    property color button_system_color_hover: complimentColorLight
 
-    property color button_action_color: "maroon"
-    property color button_action_color_hover: "lightblue"
+    property color button_action_color: primaryLightColor
+    property color button_action_color_hover:complimentColorLight
 
     property string bgImg: "null"
     property string b_title: "null"
@@ -140,7 +161,9 @@ Item{
     property color stage_bg: "darkgrey"
     property color bgcolor: "black"
 
-    //New style //
+    //headers
+    property int  stdHdrHeight: scaleY(8)
+    //New style -------------------------------------------------------------//
     /* Overall */
     property double bgLightOpacity:.35
     property double bgHeavyOpacity:.65
@@ -149,10 +172,10 @@ Item{
     /* Headers, containers and lists */
     property color contentBgColor:"darkgrey"
     property int headerFontSize:14
-    property color headerBgColor:"green"
+    property color headerBgColor:"black"
     property int listItemHeight:scaleY(8)
     property color listItemBgColor:"green"
-    property color listItemActiveBgColor: "white"
+    property color listItemActiveBgColor: "darkgrey"
     property color listItemPressedBgColor: "limegreen"
     property color listItemTextInactiveColor:"white"
     property color listItemTextActiveColor:"black"
@@ -188,6 +211,17 @@ Item{
 
 
     //end scale function
+    //-color definitions
 
+    property color accentcolor: "green"
+    property color highlight1: "silver"
+    property color highlight2: "orange"
+    property color alertcolor: "red"
+    property color warncolor:"yellow"
+    property color darkColor:"black"
+    property double shadeOpacity:.65
 
+    property color darkhighlight: "darkgrey"
+    property color lighthighlight: "green"
+    //--end color definitions
 }

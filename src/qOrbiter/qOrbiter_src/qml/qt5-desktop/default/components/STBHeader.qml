@@ -1,35 +1,36 @@
-import QtQuick 2.0
-import QtGraphicalEffects 1.0
-
+import QtQuick 2.1
+import "../../../skins-common/lib/components"
 
 Item{
     id:hdr
-    anchors.bottom: parent.top
-    width: qmlroot.width
+    anchors{
+        left:qmlroot.left
+        right:qmlroot.right
+    }
     height:scaleY(8)
     state:"hidden"
     property bool isActive: activeFocus
-    Rectangle{
-        anchors.fill: parent
-        color:appStyle.mainColor
-        border.width: hdr.activeFocus ? 2 : 0
-        focus:false
-        border.color:"red"
-        opacity: hdr.activeFocus ? 1 : .65
+
+    GradientFiller {
+        opacity: .75
+
     }
 
     Row{
-        height: parent.height
-        width: parent.width
+        anchors{
+            top:parent.top
+            bottom:parent.bottom
+            left:parent.left
+            right:parent.right
+            margins: appStyle.margins
+        }
         spacing: 5
-
         StyledText {
             id: name
-            text: "Orbiter "+ manager.m_dwPK_Device + " is connected to "+ manager.m_ipAddress
+            text: "Orbiter "+ manager.m_dwPK_Device + " is connected "
             fontSize: mediumText
             color: "white"
-        }        
-
+        }
     }
 
 

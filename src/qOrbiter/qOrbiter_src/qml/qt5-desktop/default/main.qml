@@ -7,9 +7,11 @@
  *This is a common component used to implement consistent persistent logic.
  */
 
-import QtQuick 2.0
+import QtQuick 2.1
+import AudioVisual 1.0
 import DceScreenSaver 1.0
-
+import "../../skins-common/lib/components"
+import "../../skins-common/lib/handlers"
 import "components"
 
 Item {
@@ -18,23 +20,22 @@ Item {
     height:manager.appHeight
     //focus:true
     signal close()
+    signal showMetaData()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
     property string locationinfo: "standby"
     property string screenfile
     property string dynamic_height
     property string dynamic_width
+    property bool uiOn:true
+    property int screensaverTimer:15000 //manager.screenSaverTimeout*1000
+
     onActiveFocusChanged: {
         pageLoader.forceActiveFocus()
     }
-    //    Rectangle{
-    //        id:filler
-    //        anchors.fill: qmlroot
-    //        color: "black"
-    //    }
 
     Component.onCompleted: {
-        glScreenSaver.setImageList(manager.screensaverImages)
+        dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
     }
 
     Connections{
@@ -55,11 +56,161 @@ Item {
         }
     }
 
+    function showMenu(yay){
+        if(yay){
+            pageLoader.focus=false
+        } else {
+            pageLoader.forceActiveFocus()
+        }
+
+    }
+
+
+    function scaleX(x){
+        return x/100*manager.appWidth
+    }
+    function scaleY(y){
+        return y/100*manager.appHeight
+    }
+
+
+    function screenchange(screenname )
+    {
+        pageLoader.source = "screens/"+screenname
+        if (pageLoader.status == Component.Ready)
+        {
+            manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
+        }
+        else if (pageLoader.status == Component.Loading)
+        {
+            console.log("loading page from network")
+            finishLoading(screenname)
+        }
+        else
+        {
+            console.log("Command to change to:" + screenname + " failed!")
+            screenfile = screenname
+            pageLoader.source = "screens/Screen_x.qml"
+        }
+    }
+
+    function finishLoading (screenname)
+    {
+        if(pageLoader.status != Component.Ready)
+        {
+            console.log("finishing load")
+            pageLoader.source = "screens/"+screenname
+            console.log("screen" + screenname + " loaded.")
+        }
+        else
+        {
+            finishLoading(screenname)
+        }
+
+    }
+
+    function checkStatus(component)
+    {
+        console.log(component.progress)
+    }
+    //=================Components==================================================//
+    function loadComponent(componentName )
+    {
+        componentLoader.source = "components/"+componentName
+        if (componentLoader.status === Component.Ready)
+        {
+            manager.setDceResponse("Command to change to:" + componentName+ " was successfull")
+        }
+        else if (componentLoader.status === Component.Loading)
+        {
+            console.log("loading page from network")
+            finishLoadingComponent(componentName)
+        }
+        else
+        {
+            console.log("Command to add: " + componentName + " failed!")
+
+        }
+    }
+
+    function finishLoadingComponent (componentName)
+    {
+        if(componentLoader.status !== Component.Ready)
+        {
+            console.log("finishing network load")
+            componentLoader.source = "components/"+componentName
+            console.log("screen" + componentName + " loaded.")
+        }
+        else
+        {
+            finishLoadingComponent(componentName)
+        }
+
+    }
+
+    function swapFocus(){
+
+        console.log("Swap Focus Function.")
+
+        if(hdr.activeFocus)
+        { console.log("Header had focus, set to page loader.")
+            pageLoader.forceActiveFocus()
+        }else if (pageLoader.activeFocus){
+            console.log("Pageloader had, sending to footer menu.")
+            ftr.forceActiveFocus()
+        }else if(ftr.activeFocus){
+            console.log("Footer Had focus, sending to video plane.")
+            dceplayer.forceActiveFocus()
+        }else if(dceplayer.activeFocus){
+            console.log("Player had focus, sending to header.")
+            hdr.forceActiveFocus()
+        }else {
+            pageLoader.forceActiveFocus()
+        }
+
+        console.log("Header Focus::"+hdr.activeFocus)
+        console.log("Loader Focus::"+pageLoader.activeFocus)
+        console.log("Footer Focus::"+ftr.activeFocus)
+        console.log("Dceplayer Focus::"+dceplayer.activeFocus)
+
+        if(dceplayer.mediaPlaying && pageLoader.activeFocus){
+            dceplayer.forceActiveFocus()
+        }
+        ftr.currentItem = -1
+    }
+
+
+
     FontLoader{
         id:myFont
         name:"Sawasdee"
         source: "../../skins-common/fonts/Sawasdee.ttf"
     }
+
+    Timer{
+            id:hideUiTimer
+            interval:screensaverTimer
+            running: false
+            repeat: false
+            onTriggered: {
+                if(uiOn){
+                    uiOn=false
+                    if(glScreenSaver.active){
+                        glScreenSaver.forceActiveFocus()
+                    } else {
+                        uiOn=true
+                      ftr.forceActiveFocus()
+                    }
+                }
+            }
+        }
+
+    Rectangle{
+        id:filler
+        anchors.fill: qmlroot
+        color: "black"
+    }
+
 
     ListModel{
         id:scenarios
@@ -156,15 +307,19 @@ Item {
     Loader{
         id:overLay
         source: ""
+        anchors{
+            top:parent.top
+            left:parent.left
+            right:parent.right
+            bottom:parent.bottom
+        }
+
         onSourceChanged: {
             if(source !== ""){
                 z=10
                 overLay.forceActiveFocus()
-            }
-            else
-            {
+            } else {
                 z=0
-
             }
 
             if(overLay.status === Component.Ready){
@@ -176,144 +331,26 @@ Item {
         }
     }
 
-    function checkLayout(){
+    function checkLayout()
+    {
         console.log("c++ slot orientation changed")
         console.log(manager.appHeight+" x " + manager.appWidth)
         pageLoader.forceActiveFocus()
     }
 
 
-    function scaleX(x){
-        return x/100*manager.appWidth
-    }
-    function scaleY(y){
-        return y/100*manager.appHeight
-    }
-
-
-    function screenchange(screenname )
-    {
-        pageLoader.source = "screens/"+screenname
-        if (pageLoader.status == Component.Ready)
-        {
-            manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-        }
-        else if (pageLoader.status == Component.Loading)
-        {
-            console.log("loading page from network")
-            finishLoading(screenname)
-        }
-        else
-        {
-            console.log("Command to change to:" + screenname + " failed!")
-            screenfile = screenname
-            pageLoader.source = "screens/Screen_x.qml"
-        }
-    }
-
-    function finishLoading (screenname)
-    {
-        if(pageLoader.status != Component.Ready)
-        {
-            console.log("finishing load")
-            pageLoader.source = "screens/"+screenname
-            console.log("screen" + screenname + " loaded.")
-        }
-        else
-        {
-            finishLoading(screenname)
-        }
-
-    }
-
-    function checkStatus(component)
-    {
-        console.log(component.progress)
-    }
-    //=================Components==================================================//
-    function loadComponent(componentName )
-    {
-        componentLoader.source = "components/"+componentName
-        if (componentLoader.status === Component.Ready)
-        {
-            manager.setDceResponse("Command to change to:" + componentName+ " was successfull")
-        }
-        else if (componentLoader.status === Component.Loading)
-        {
-            console.log("loading page from network")
-            finishLoadingComponent(componentName)
-        }
-        else
-        {
-            console.log("Command to add: " + componentName + " failed!")
-
-        }
-    }
-
-    function finishLoadingComponent (componentName)
-    {
-        if(componentLoader.status !== Component.Ready)
-        {
-            console.log("finishing network load")
-            componentLoader.source = "components/"+componentName
-            console.log("screen" + componentName + " loaded.")
-        }
-        else
-        {
-            finishLoadingComponent(componentName)
-        }
-
-    }
-
-    function swapFocus(){
-
-        console.log("Swap Focus Function.")
-
-        if(hdr.activeFocus)
-        { console.log("Header had focus, set to page loader.")
-            pageLoader.forceActiveFocus()
-        }
-        else if (pageLoader.activeFocus)
-        {
-            console.log("Pageloader had, sending to footer menu.")
-            ftr.forceActiveFocus()
-        }
-        else if(ftr.activeFocus)
-        {
-            console.log("Footer Had focus, sending to video plane.")
-            dceplayer.forceActiveFocus()
-        }
-        else if(dceplayer.activeFocus)
-        {   console.log("Player had focus, sending to header.")
-            hdr.forceActiveFocus()
-        }
-        else
-            pageLoader.forceActiveFocus()
-
-
-        console.log("Header Focus::"+hdr.activeFocus)
-        console.log("Loader Focus::"+pageLoader.activeFocus)
-        console.log("Footer Focus::"+ftr.activeFocus)
-        console.log("Dceplayer Focus::"+dceplayer.activeFocus)
-
-        ftr.currentItem = -1
-    }
-
 
     DceScreenSaver{
         id:glScreenSaver
-        anchors{
-            top:parent.top
-            left:parent.left
-            right:parent.right
-            bottom:parent.bottom
-        }
-
+        height: manager.appHeight
+        width: manager.appWidth
         focus:true
-        interval:30*(1000)
-
+        interval:30000
+        anchors.centerIn: parent
         requestUrl:manager.m_ipAddress
-
+        Component.onCompleted: {
+            glScreenSaver.setImageList(manager.screensaverImages)
+        }
 
         Connections{
             target:manager
@@ -322,31 +359,102 @@ Item {
         MouseArea{
             anchors.fill: parent
             hoverEnabled: true
-            onPressed:if(glScreenSaver.activeFocus) hideUI()
+            onPressed:if(glScreenSaver.activeFocus) { uiOn=!uiOn}
         }
 
     }
 
     DceMedia{
         id:dceplayer
-        anchors{
-            top:parent.top
-            bottom:parent.bottom
-            left:parent.left
-            right:parent.right
-        }
-        onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
+        anchors.top: dceplayer.videoStream ? parent.top : parent.bottom
+        anchors.left:parent.left
+
+        focus:true
+        // onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
         onActiveFocusChanged: {
             if(activeFocus){
                 console.log("Media Player has focus")
-                pageLoader.forceActiveFocus()
+                //  pageLoader.forceActiveFocus()
             }
         }
 
-//        Keys.onVolumeDownPressed: manager.adjustVolume("-1")
-//        Keys.onVolumeUpPressed:  manager.adjustVolume("+1")
-//        Keys.onTabPressed: ftr.forceActiveFocus()
+        Component.onCompleted: {
+            setWindowSize(manager.appHeight, manager.appWidth);
+        }
 
+        Connections{
+            target:manager
+            onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
+            onMediaPlayerIdChanged:{
+                console.log("initializing media player"+manager.mediaPlayerID)
+                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+            }
+        }
+
+            onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
+            onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
+            onMediaPlayingChanged: console.log("Media Playback status changed locally to "+dceplayer.mediaPlaying)
+            onVolumeChanged:console.log(volume)
+        Keys.onVolumeDownPressed: manager.adjustVolume("-1")
+        Keys.onVolumeUpPressed:  manager.adjustVolume("+1")
+        Keys.onTabPressed: ftr.forceActiveFocus()
+
+        Keys.onPressed: {
+
+            switch(event.key){
+            case Qt.Key_Back:
+                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1));
+                break;
+            case Qt.Key_Forward:
+                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1))
+                break;
+            case 16777347: /* Keycode Track forward */
+                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1));
+                break;
+            case 16777346: /* Keycode Track Backwards */
+                manager.changedPlaylistPosition((mediaplaylist.currentIndex-1))
+                break;
+            case Qt.Key_Plus: /*Plus sign */
+                manager.adjustVolume(+1)
+                break;
+            case Qt.Key_VolumeMute:
+                manager.mute()
+                break;
+            case Qt.Key_M:
+                manager.mute()
+                break;
+            case Qt.Key_Minus: /* Minus Sign */
+                manager.adjustVolume(-1)
+                break;
+            case Qt.Key_T:
+                showMetaData()
+                break;
+            case Qt.Key_Tab:
+                swapFocus()
+                break;
+            case Qt.Key_S:
+                manager.stopMedia()
+                break;
+
+            case Qt.Key_Pause:
+                manager.pauseMedia()
+                break;
+            case Qt.Key_P:
+                manager.pauseMedia()
+                break;
+
+            case Qt.Key_PageUp:
+                manager.changedPlaylistPosition(mediaplaylist.currentIndex-1)
+                break;
+
+            case Qt.Key_PageDown:
+                manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
+                break;
+            default:
+                console.log(manager.dumpKey(event.key))
+                break
+            }
+        }
     }
 
     Item{
@@ -361,7 +469,6 @@ Item {
             onTriggered: vIndicator.opacity=0
         }
 
-
         Rectangle{
             anchors.fill: parent
             color:"black"
@@ -372,7 +479,7 @@ Item {
             id:volLevel
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            text:""//dceplayer.volume
+            text:dceplayer.volume
             color: "white"
             fontSize: 42
             font.bold: true
@@ -391,47 +498,47 @@ Item {
 
     STBHeader {
         id: hdr
-
     }
 
     Loader {
         id:pageLoader
         objectName: "loadbot"
+        onSourceChanged:  loadin
+        property bool isActive:item.activeFocus
+        focus:true
         anchors{
-            left:parent.left
-            bottom: ftr.top
-            right:parent.right
             top:hdr.bottom
+            left:qmlroot.left
+            bottom:ftr.top
+            right:qmlroot.right
         }
 
-        onSourceChanged:  loadin
-        focus:true
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
             pageLoader.forceActiveFocus()
-
         }
+
         onActiveFocusChanged: {
             if(activeFocus)
             {  console.log("Pageloader gained active focus");   }
-            else
-            { console.log("Page loader lost active focus");   }
+            else if (pageLoader.item.activeFocus){
+                console.log("Pageloader content gained active focus");
+            }
+            else{
+                console.log("Page loader lost active focus ::"+ pageLoader.activeFocus);
+            }
         }
+        onIsActiveChanged: console.log("New pageloader content focus is "+isActive)
+
         Keys.onTabPressed:{
             console.log("Tab Focus Swap.")
             ftr.forceActiveFocus()
-            pageLoader.focus = false;
         }
         Keys.onPressed: {
             if(event.key === Qt.Key_M){
                 console.log("Show Menu")
-                event.accepted===true
             } else if (event.key === Qt.Key_H){
                 console.log("Show Header")
-                event.accepted===true
-            } else {
-                console.log("Caught unhandled key. phew!")
-                event.accepted===true
             }
         }
     }
@@ -465,6 +572,18 @@ Item {
 
 
     //floorplans
+    MouseArea{
+         id:mst
+         anchors.fill: parent
+
+         onPressed: {
+             mouse.accepted=false
+             console.log("Mouse X: "+mouse.x)
+             console.log("Mouse Y:"+mouse.y)
+             console.log("\n")
+          //   hideUiTimer.restart()
+         }
+     }
 }
 
 

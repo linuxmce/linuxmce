@@ -1,21 +1,17 @@
-import QtQuick 2.0
-
+import QtQuick 2.1
+import "../../../skins-common/qt5-lib/handlers"
 ListView{
     id:playlist
+    width: scaleX(38)
     anchors{
-        top:npHeader.bottom
+        top:infoHdr.bottom
         bottom:parent.bottom
-        left:parent.left
+        margins: scaleX(1)
     }
-    width:parent.width *.25
-    spacing:scaleY(1)
 
-    Component.onCompleted: manager.setBoundStatus(true)
+    spacing:scaleX(1)
+    Component.onCompleted: {manager.setBoundStatus(true);mediaplaylist.populate()}
     highlightFollowsCurrentItem: true
-    highlight: Rectangle{
-        color:"red"
-    }
-
     model: dcenowplaying.qs_screen==="Screen_63.qml" ? simpleepg : mediaplaylist
     clip:true
 
@@ -27,9 +23,19 @@ ListView{
         }
     }
 
+    Timer{
+        id:indexUpdate
+        interval: mediaplaylist.count()*10
+        running: false
+        onTriggered: {
+            console.log("interval is" + interval)
+            playlist.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
+            console.log("Current index is " + mediaplaylist.currentIndex)
+        }
+    }
+    
     delegate: Item{
-        property bool isCurrent:index===dcenowplaying.m_iplaylistPosition
-        height: isCurrent ? scaleY(15) : scaleY(10)
+        height: index === dcenowplaying.m_iplaylistPosition ? scaleY(15) : scaleY(10)
         width: parent.width - 10
         clip:true
         Keys.onPressed: {
@@ -40,23 +46,24 @@ ListView{
 
         Rectangle{
             anchors.fill: parent
-            color:isCurrent? skinStyle.darkHighlightColor : skinStyle.mainColor
+            color:playlist.currentIndex === index? "black" : skinStyle.mainColor
             opacity: .85
-            border.width: isCurrent ? 5 : 2
+            border.width: index === dcenowplaying.m_iplaylistPosition ? 5 : 2
             radius:5
-            border.color: isCurrent? "white" : "black"
+            border.color: playlist.currentIndex === index? "white" : "black"
         }
         Image {
             id: playlistimage
             fillMode: Image.PreserveAspectCrop
-            source: isCurrent ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: ""
+            source:  index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: ""
             anchors.fill: parent
-            opacity: 1
+            opacity: source !=="" ? .50 :0
         }
+
         StyledText{
             id:label
-            text:isCurrent ? "Now Playing - " + name : name
-            fontSize:isCurrent ? mediumText :mediumText
+            text:index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
+            fontSize:index === dcenowplaying.m_iplaylistPosition ? headerText :mediumText
             color:"white"
             width: parent.width
             font.capitalization: Font.SmallCaps
@@ -64,9 +71,12 @@ ListView{
             font.bold: true
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         }
-        MouseArea{
-            anchors.fill: parent
-            onClicked: manager.changedPlaylistPosition(index)
+        GradientFiller{
+            opacity: .50
+            fillColor: "black"
+        }
+
+        PlaylistClickedHandler {
         }
     }
     
@@ -87,7 +97,8 @@ ListView{
             }
             StateChangeScript{
                 script: {
-                    playlist.forceActiveFocus()
+                    playlist.forceActiveFocus();
+
                 }
             }
         }
@@ -98,7 +109,8 @@ ListView{
             from: "*"
             to: "*"
             AnchorAnimation{
-                duration: 750
+                duration: appStyle.globalAnimationSpeed
+                easing.type: appStyle.globalAnimationEasing
             }
         }
     ]

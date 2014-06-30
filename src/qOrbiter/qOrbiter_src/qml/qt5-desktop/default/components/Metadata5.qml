@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.1
 
 Column{
     id:textCol
@@ -10,10 +10,10 @@ Column{
         width: scaleX(35)
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
         text:dcenowplaying.episode =="" ? qsTr("Title: ")+ dcenowplaying.qs_mainTitle :qsTr("Program: ")+ dcenowplaying.tvProgram
-        font.bold: false
+        font.bold: true
         font.italic: false
         smooth: true
-        fontSize: scaleY(6)
+        fontSize: scaleY(5)
         visible:  dcenowplaying.qs_mainTitle =="" ? false: true
         color:"white"
 
@@ -22,7 +22,7 @@ Column{
         id: episode_title
         width: scaleX(35)
         text: qsTr("Episode: ")+ dcenowplaying.episode
-        font.bold: false
+        font.bold: true
         //  wrapMode: "WrapAtWordBoundaryOrAnywhere"
         elide: "ElideRight"
         smooth: true

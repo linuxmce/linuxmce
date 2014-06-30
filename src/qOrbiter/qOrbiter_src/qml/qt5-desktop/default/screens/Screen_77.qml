@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.1
 import "../components"
 Item {
     id:screen_fiddy_fo

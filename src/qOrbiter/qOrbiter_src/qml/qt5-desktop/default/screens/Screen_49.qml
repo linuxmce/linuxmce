@@ -1,8 +1,6 @@
-import QtQuick 2.0
+import QtQuick 2.1
+import "../components"
+MediaPlaybackTemplate {
 
-Item {
-    width: manager.appWidth
-    height: manager.appHeight
 
-    Keys.onTabPressed: swapFocus()
 }

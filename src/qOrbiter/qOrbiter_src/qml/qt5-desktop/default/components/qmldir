@@ -7,6 +7,7 @@ FilterButton             FilterButton.qml                        #no comment
 FloorplanDisplay             FloorplanDisplay.qml                        #no comment
 FocusButton             FocusButton.qml                        #no comment
 FocusRow             FocusRow.qml                        #no comment
+GradientFiller             GradientFiller.qml                        #no comment
 ListDisplay             ListDisplay.qml                        #no comment
 MediaFilterRow             MediaFilterRow.qml                        #no comment
 MediaListGridDelagate             MediaListGridDelagate.qml                        #no comment
@@ -19,5 +20,7 @@ RoomSelector             RoomSelector.qml                        #no comment
 RowButton             RowButton.qml                        #no comment
 STBFooter             STBFooter.qml                        #no comment
 STBHeader             STBHeader.qml                        #no comment
+StyledButton             StyledButton.qml                        #no comment
+StyledScreen             StyledScreen.qml                        #no comment
 StyledText             StyledText.qml                        #no comment
 TemplateListView             TemplateListView.qml                        #no comment
