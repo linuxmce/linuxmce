@@ -62,7 +62,7 @@
 #include <QFile>
 #include <QDir>
 #include <QDataStream>
-
+#include <QKeyEvent>
 #include <QProcess>
 #include <QtXml/QDomDocument>
 
@@ -1266,6 +1266,7 @@ public slots:
     void showSkin() { swapSkins(currentSkin); }
     QString getCurrentSkin(){return currentSkin;}
     void setConfigSkin(QString skin){currentSkin = skin; emit currentSkinChanged(); }
+    Q_INVOKABLE QString dumpKey(int key){QKeySequence seq(key) ; return seq.toString(); }
 
 #if (QT5)
     void skinLoaded(QQuickView::Status status);
