@@ -12,71 +12,75 @@ Item {
     property double volume:0.0
     property double mediaBuffer:0.0
 
-//    Keys.onPressed:{
+    function setConnectionDetails(deviceID, router){
+        dceMediaController.setConnectionDetails(deviceID, router)
+    }
 
-//        if(!activeFocus)
-//            return
+    //    Keys.onPressed:{
 
-//        switch(event.key){
-//        case Qt.Key_Back:
-//            manager.changedPlaylistPosition((mediaplaylist.currentIndex-++1));
-//            break;
-//        case Qt.Key_Forward:
-//            manager.changedPlaylistPosition((mediaplaylist.currentIndex+1))
-//            break;
-//        case 16777347: /* Keycode Track forward */
-//            manager.changedPlaylistPosition((mediaplaylist.currentIndex+1));
-//            break;
-//        case 16777346: /* Keycode Track Backwards */
-//            manager.changedPlaylistPosition((mediaplaylist.currentIndex-1))
-//            break;
-//        case Qt.Key_Plus: /*Plus sign */
-//            manager.adjustVolume(+1)
-//            break;
+    //        if(!activeFocus)
+    //            return
 
-//        case Qt.Key_VolumeMute:
-//            manager.mute()
-//            break;
+    //        switch(event.key){
+    //        case Qt.Key_Back:
+    //            manager.changedPlaylistPosition((mediaplaylist.currentIndex-++1));
+    //            break;
+    //        case Qt.Key_Forward:
+    //            manager.changedPlaylistPosition((mediaplaylist.currentIndex+1))
+    //            break;
+    //        case 16777347: /* Keycode Track forward */
+    //            manager.changedPlaylistPosition((mediaplaylist.currentIndex+1));
+    //            break;
+    //        case 16777346: /* Keycode Track Backwards */
+    //            manager.changedPlaylistPosition((mediaplaylist.currentIndex-1))
+    //            break;
+    //        case Qt.Key_Plus: /*Plus sign */
+    //            manager.adjustVolume(+1)
+    //            break;
 
-//        case Qt.Key_M:
-//            manager.mute()
-//            break;
+    //        case Qt.Key_VolumeMute:
+    //            manager.mute()
+    //            break;
 
-//        case Qt.Key_Minus: /* Minus Sign */
-//            manager.adjustVolume(-1)
-//            break;
-//        case Qt.Key_T:
-//            if(playlist.state==="showing")
-//                playlist.state="hidden"
-//            else
-//                playlist.state = "showing"
+    //        case Qt.Key_M:
+    //            manager.mute()
+    //            break;
 
-//            break;
+    //        case Qt.Key_Minus: /* Minus Sign */
+    //            manager.adjustVolume(-1)
+    //            break;
+    //        case Qt.Key_T:
+    //            if(playlist.state==="showing")
+    //                playlist.state="hidden"
+    //            else
+    //                playlist.state = "showing"
 
-//        case Qt.Key_S:
-//            manager.stopMedia()
-//            break;
+    //            break;
 
-//        case Qt.Key_Pause:
-//            manager.pauseMedia()
-//            break;
-//        case Qt.Key_P:
-//            manager.pauseMedia()
-//            break;
+    //        case Qt.Key_S:
+    //            manager.stopMedia()
+    //            break;
 
-//        case Qt.Key_PageUp:
-//            manager.changedPlaylistPosition(mediaplaylist.currentIndex-1)
-//            break;
+    //        case Qt.Key_Pause:
+    //            manager.pauseMedia()
+    //            break;
+    //        case Qt.Key_P:
+    //            manager.pauseMedia()
+    //            break;
 
-//        case Qt.Key_PageDown:
-//            manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
-//            break;
-//        default:
-//            console.log(event.key)
-//            break
-//        }
+    //        case Qt.Key_PageUp:
+    //            manager.changedPlaylistPosition(mediaplaylist.currentIndex-1)
+    //            break;
 
-//    }
+    //        case Qt.Key_PageDown:
+    //            manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
+    //            break;
+    //        default:
+    //            console.log(event.key)
+    //            break
+    //        }
+
+    //    }
 
     MediaManager{
         id:dceMediaController
@@ -104,7 +108,7 @@ Item {
 
     MediaPlayer{
         id:player
-        source: "http://us.ah.fm:9000" //dceMediaController.fileUrl
+        source: dceMediaController.fileUrl
         onSourceChanged:{
             if(source !==""){play()};
             console.log("New media player source::"+dceMediaController.fileUrl)
@@ -114,11 +118,11 @@ Item {
 
     }
 
-        VideoOutput{
-            id:videoPlane
-            anchors.fill: parent
-            source:player
-        }
+    VideoOutput{
+        id:videoPlane
+        anchors.fill: parent
+        source:player
+    }
 
     //    Audio{
     //        id:audioPlayer

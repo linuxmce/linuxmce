@@ -4,13 +4,10 @@ Item{
     id:styled_button
     height: button_label.paintedHeight < scaleY(5) ? scaleY(5) : button_label.paintedHeight+(button_label.paintedHeight*.05)
     width:opacity ? button_label.paintedWidth < scaleX(10) ? scaleX(10) : (button_label.paintedWidth) + (button_label.paintedWidth*.05) :0
-
-    //    anchors{
-    //        left: button_label.left
-    //        right: button_label.right
-    //        top:button_label.top
-    //        bottom:button_label.bottom
-    //    }
+    focus:true
+    onActiveFocusChanged:{
+        console.log(buttonText+"has focus")
+    }
 
     Component.onCompleted: {
         if(useHandler ){
@@ -29,6 +26,13 @@ Item{
     property bool useBorder:true
     signal activated()
     signal held()
+    signal moveUp()
+    signal moveDown()
+    signal moveLeft()
+    signal moveRight()
+    property bool active: activeFocus ? true : false
+    property bool hasParentModel:false
+
     Behavior on opacity{
         PropertyAnimation{
             duration: 500
@@ -39,7 +43,7 @@ Item{
         id:bg_fill
         anchors.fill: parent
         color:phil
-        border.color: "white"
+        border.color: styled_button.activeFocus ? "green": "white"
         border.width: useBorder ? 1 : 0
         radius: 5
         opacity:useHandler ? dceHandler.item.pressed ? .65 : .65 :  fly_trap.pressed ? .65 : .65
@@ -59,7 +63,7 @@ Item{
         font.weight: Font.Light
         state:"para"
         anchors.centerIn: parent
-        color:"antiquewhite"
+        color: active ?"black" : "antiquewhite"
         wrapMode:button_label.paintedWidth < scaleX(10) ? Text.NoWrap : Text.WrapAtWordBoundaryOrAnywhere
        // width: button_label.paintedWidth < styled_button.width ? button_label.paintedWidth :styled_button.width
     }
