@@ -30,6 +30,11 @@ SUBDIRS += ../qOrbiter_src
 #DEPLOYMENTFOLDERS += folder_05
 
 linux-rasp-pi-g++{
+
+folder_05.source = ../qOrbiter_src/imports
+folder_05.target = $$DESTDIR/imports
+DEPLOYMENTFOLDERS += folder_05
+
 target.path=/opt/QOrbiter
 QML_IMPORT_PATH=target.path/imports
 INSTALLS +=target

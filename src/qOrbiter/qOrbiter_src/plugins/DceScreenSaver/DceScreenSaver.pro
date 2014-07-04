@@ -83,6 +83,7 @@ copy_qmldir.target=$$QMLDIR_TARGET
     PRE_TARGETDEPS += $$copy_qmldir.target
 }
 
+message("Plugin install path at" $$DESTDIR)
 qmldir.files = qmldir
 unix {
     maemo5 | !isEmpty(MEEGO_VERSION_MAJOR) {

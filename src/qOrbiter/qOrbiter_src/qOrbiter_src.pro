@@ -116,25 +116,14 @@ linux-g++{
         contains(QT_VERSION,5.*.*){
                 QT+= qml quick script widgets
                 QT-= declarative
-
-                RPI{
-                DESTDIR = ../build-output
-                folder_01.source= qml/rpi
-                folder_01.target= qml
-                DEFINES+=RPI GLENABLED
-                DEFINES-=for_desktop
-                target.path=/opt/QOrbiter
-                QML_IMPORT_PATH=imports
-                INSTALLS+=target
-                }else{
                 folder_01.source = qml/qt5-desktop
                 folder_01.target = $$DESTDIR/qml/
                 DEFINES += for_desktop GLENABLED
-                }
+
                 glmsg=scenegraph
         }
-
-        plugins_folder.source = imports/
+!RPI{
+        plugins_folder.source = imports
         plugins_folder.target = $$DESTDIR
         DEPLOYMENTFOLDERS+= plugins_folder
 
@@ -142,6 +131,8 @@ linux-g++{
         folder_03.target = $$DESTDIR
         DEPLOYMENTFOLDERS+= folder_03
         QML_IMPORT_PATH=imports
+}
+
 }
 
 local-development{
@@ -274,22 +265,25 @@ macx-clang{
 }
 
 linux-rasp-pi-g++{
-        DESTDIR = ../build-output
+
         folder_01.source= qml/rpi
         folder_01.target= qml
 
-        folder_03.source = config.xml
-        folder_03.target = $$DESTDIR
-        DEPLOYMENTFOLDERS+= folder_03
+        folder_02.source = config.xml
+        folder_02.target =
 
-        plugins_folder.source = imports/
-        plugins_folder.target = $$DESTDIR
-        DEPLOYMENTFOLDERS+= plugins_folder
+        screen_saver.source =  imports/DceScreenSaver
+        screen_saver.target =imports
+
+        av_plugin.source = imports/AudioVisual
+        av_plugin.target = imports
 
         DEFINES+=RPI GLENABLED
-        DEFINES-=for_desktop        
-        QT+=qml
+        DEFINES-=for_desktop
+        DEPLOYMENTFOLDERS += folder_02 screen_saver av_plugin #folder_01
+        QT+= qml
         QT-=declarative
+
         target.path=/opt/QOrbiter
         QML_IMPORT_PATH=imports
         INSTALLS+=target

@@ -9,6 +9,7 @@
 #endif
 
 #include <QTimer>
+#include <QTime>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QPixmap>
 #include <QPropertyAnimation>
@@ -33,6 +34,8 @@ class DceScreenSaver :
     Q_PROPERTY(double currentScale READ getCurrentScale WRITE setCurrentScale NOTIFY currentScaleChanged)
     Q_PROPERTY(QString currentImageName READ getCurrentImageName NOTIFY currentImageNameChanged)
     Q_PROPERTY(bool useAnimation READ getUseAnimation WRITE setUseAnimation NOTIFY useAnimationChanged)
+    Q_PROPERTY(QString debugInfo READ getDebugInfo WRITE setDebugInfo NOTIFY debugInfoChanged)
+    Q_PROPERTY(bool enableDebug READ getEnableDebug WRITE setEnableDebug NOTIFY enableDebugChanged)
 public:
 #ifdef QT5
     DceScreenSaver(QQuickPaintedItem *parent=0);
@@ -40,6 +43,8 @@ public:
     DceScreenSaver(QDeclarativeItem *parent = 0);
 #endif
     ~DceScreenSaver();
+
+    QString debugInfo;
 
 
     int opacity;
@@ -64,6 +69,7 @@ public:
     int m_animationTimer;
     int tick;
     bool imgSet;
+    bool enableDebug;
 
 
 signals:
@@ -81,8 +87,15 @@ signals:
     void currentScaleChanged();
     void currentImageNameChanged();
     void useAnimationChanged();
-
+    void debugInfoChanged();
+    void enableDebugChanged();
 public slots:
+
+    void setDebugInfo(QString i){ if( enableDebug && debugInfo != i) { debugInfo = QTime::currentTime().toString()+"::"+i; emit debugInfoChanged();}  }
+    QString getDebugInfo(){return debugInfo;}
+
+    void setEnableDebug(bool e){if (enableDebug != e) { enableDebug =e; emit enableDebugChanged(); }  }
+    bool getEnableDebug(){ return enableDebug;}
 
     void setUseAnimation(bool ani){ if(ani!= useAnimation) {useAnimation = ani; emit useAnimationChanged(); }   }
     bool getUseAnimation(){return useAnimation;}
