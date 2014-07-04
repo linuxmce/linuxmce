@@ -236,9 +236,9 @@ qrcPath = "qrc:main/Welcome2.qml";
     qrcPath = "qrc:android/Splash.qml";
     localPath = "android/";
 #elif defined RPI
-    buildType = "/qml/rpi";
+    buildType = "/qml/qt5-desktop";
     qrcPath = "qrc:main/Welcome2.qml";
-    localPath = "rpi/";
+    localPath = "qt5-desktop/";
 #else
     buildType = "/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";

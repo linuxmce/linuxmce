@@ -170,13 +170,17 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
 #ifdef QT4_8
     buildType = "/qml/desktop";
+    setHostDevice(3)
 #elif QT5 && defined RPI
-    buildType = "/qml/rpi";
+    buildType = "/qml/qt5-desktop";
+    setHostDevice(1)
 #elif QT5 && !defined RPI && !defined ANDROID
+  setHostDevice(3);
     buildType="/qml/qt5-desktop";
 #endif
     qrcPath = buildType+"/Splash.qml";
 #elif  WIN32
+    setHostDevice(4);
     buildType="/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
 #elif defined (for_freemantle)
@@ -186,10 +190,12 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     buildType="/qml/harmattan";
     qrcPath = "qrc:harmattan/Splash.qml";
 #elif defined (Q_OS_MACX)
+    setHostDevice(2);
     buildType="/qml/qt5-desktop";
     qrcPath = "qrc:osx/Splash.qml";
 #elif defined (RPI)
-    buildType="/qml/rpi";
+    buildType="/qml/qt5-desktop";
+    setHostDevice(1);
 #elif defined ANDROID
 
 #ifndef QT5
@@ -200,10 +206,12 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     {
         setFormFactor(2);
         buildType = "/qml/android/tablet";
+        setHostDevice(6);
     }
     else
     {
         setFormFactor(1);
+        setHostDevice(5);
         if(isPhone !=2){
             buildType = "/qml/android/phone";
         }
@@ -435,7 +443,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 #elif defined WIN32
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
 #elif defined RPI
-    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/rpi";
+    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/qt5-desktop";
 #elif defined for_harmattan
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/harmattan";
 #elif defined for_android

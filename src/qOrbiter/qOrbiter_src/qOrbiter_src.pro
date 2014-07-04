@@ -118,6 +118,7 @@ linux-g++{
                 QT-= declarative
 
                 RPI{
+                DESTDIR = ../build-output
                 folder_01.source= qml/rpi
                 folder_01.target= qml
                 DEFINES+=RPI GLENABLED
@@ -273,24 +274,22 @@ macx-clang{
 }
 
 linux-rasp-pi-g++{
-
+        DESTDIR = ../build-output
         folder_01.source= qml/rpi
         folder_01.target= qml
 
-        folder_02.source = config.xml
-        folder_02.target =
+        folder_03.source = config.xml
+        folder_03.target = $$DESTDIR
+        DEPLOYMENTFOLDERS+= folder_03
 
-      #  plugins_folder.source = imports/
-      # plugins_folder.target = $$DESTDIR
-
-       # DEPLOYMENTFOLDERS+= plugins_folder
+        plugins_folder.source = imports/
+        plugins_folder.target = $$DESTDIR
+        DEPLOYMENTFOLDERS+= plugins_folder
 
         DEFINES+=RPI GLENABLED
-        DEFINES-=for_desktop
-        DEPLOYMENTFOLDERS += folder_02 #folder_01
-        QT+= qml
+        DEFINES-=for_desktop        
+        QT+=qml
         QT-=declarative
-
         target.path=/opt/QOrbiter
         QML_IMPORT_PATH=imports
         INSTALLS+=target
@@ -342,7 +341,7 @@ win32{
 }
 
 CONFIG +=warn_off
-DESTDIR+=../madness
+
 # Smart Installer package's UID
 # This UID is from the protected range and therefore the package will
 # fail to install if self-signed. By default qmake uses the unprotected

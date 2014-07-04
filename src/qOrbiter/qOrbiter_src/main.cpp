@@ -345,11 +345,10 @@ int main(int argc, char* argv[])
         QThread dceThread;
 
         qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
-        qmlRegisterType<LinuxmceData>("org.linuxmce.enums",1,0,"Subtypes");
         qmlRegisterType<MediaTypeHelper>("org.linuxmce.enums",1,0,"Mediatypes");
         qmlRegisterType<SubTypesHelper>("org.linuxmce.enums",1,0,"MediaSubtypes");
         qmlRegisterType<AttributeTypeHelper>("org.linuxmce.enums",1,0,"Attributes");
-
+        qmlRegisterType<HostSystemData>("org.linuxmce.enums",1,0,"HostDevices");
         if(deviceType==0){
 
         } else {
@@ -484,7 +483,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(newMessageSend(QVariantMap)), &pqOrbiter, SLOT(executeMessageSend(QVariantMap)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(liveAvPath(int)), &pqOrbiter, SLOT(setDirectAv(int)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(setText(QString,QString,int)), &w, SLOT(setText(QString,QString,int)), Qt::QueuedConnection);
-      //  QObject::connect(&w, SIGNAL(show_linuxmce_menu()), &pqOrbiter, SLOT(setDirectAv()), Qt::QueuedConnection);
+        //  QObject::connect(&w, SIGNAL(show_linuxmce_menu()), &pqOrbiter, SLOT(setDirectAv()), Qt::QueuedConnection);
         //timecodemanager signals / slots
         QObject::connect(&pqOrbiter, SIGNAL(updateTimeCode(QString,int)), timecode, SLOT(start(QString,int)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(stopTimeCode()), timecode, SLOT(stop()), Qt::QueuedConnection);

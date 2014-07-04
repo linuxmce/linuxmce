@@ -1,5 +1,5 @@
 TEMPLATE = subdirs
-
+DESTDIR = ../build-output
 OTHER_FILES += \
     qtc_packaging/debian_harmattan/rules \
     qtc_packaging/debian_harmattan/README \
@@ -25,15 +25,14 @@ SUBDIRS += ../qOrbiter_src
 #folder_03.target = $$DESTDIR/qml
 #folder_04.source = ../qOrbiter_src/config.xml
 #folder_04.target = $$DESTDIR
-folder_05.source = ../qOrbiter_src/imports
-folder_05.target = $$DESTDIR/imports
-DEPLOYMENTFOLDERS += folder_05
+#folder_05.source = ../qOrbiter_src/imports
+#folder_05.target = $$DESTDIR/imports
+#DEPLOYMENTFOLDERS += folder_05
 
 linux-rasp-pi-g++{
 target.path=/opt/QOrbiter
 QML_IMPORT_PATH=target.path/imports
 INSTALLS +=target
-INTALLS += /tmp
 } else {
 target.path=$HOME
 INSTALLS=target

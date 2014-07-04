@@ -34,7 +34,7 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     setFlag(ItemHasNoContents, false);
 #endif
     m_animationTimer = startTimer(animationInterval);
-
+    useAnimation=false;
     fadeOpacity = 1;
     currentScale = 1;
     endSize.setHeight(0);
@@ -74,7 +74,7 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
 
 DceScreenSaver::~DceScreenSaver()
 {
-intervalTimer->stop();
+    intervalTimer->stop();
 
 }
 
@@ -98,7 +98,7 @@ void DceScreenSaver::setImageList(QStringList l)
             qWarning() << "Screen Saver images loaded, but screensaver disabled by option.";
         }
 
-        setReady(true);        
+        setReady(true);
         qWarning() << "Screen Saver images loaded.";
     }  else {
         setRunning(false);
@@ -138,10 +138,13 @@ void DceScreenSaver::processImageData(QNetworkReply *r){
     }
 
     imgSet=false;
-    startFadeTimer(2500);
-
-
-
+    if(useAnimation){
+        startFadeTimer(2500);
+    } else {
+        fadeOpacity=1;
+        this->forceUpdate();
+    }
+    qDebug() << "new picture";
     //  beginZoom();
 
 }
@@ -190,17 +193,20 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
 
 #ifdef QT5
 void DceScreenSaver::paint(QPainter *painter){
-
+    qWarning() << "Painting!";
     painter->setBrush(Qt::NoBrush);
     painter->setPen(Qt::NoPen);
     painter->setRenderHint(QPainter::HighQualityAntialiasing, 1);
-
-    //draw old frame first
     QRectF tgtRect(0,0,width(), height());
+
+    if(useAnimation){
+        fadeOpacity=1;
+    }
+
     if(fadeOpacity==1){
         painter->drawPixmap(tgtRect, surface.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
     }else{
-         painter->drawPixmap(tgtRect, surface.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
+        painter->drawPixmap(tgtRect, surface.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
         //setup and new pix map over it
         painter->setOpacity(fadeOpacity);
         //create 'composed image'
@@ -217,7 +223,7 @@ void DceScreenSaver::timerEvent(QTimerEvent *event){
         if(fadeOpacity!=1 && !currentImage.isNull() ){
             this->update();
         } else   if(fadeOpacity==1 && !imgSet){
-          //  qWarning() << "Transition finish, setting currentImg ==> surface";
+            //  qWarning() << "Transition finish, setting currentImg ==> surface";
             surface=currentImage.copy();
             imgSet=true;
         }
@@ -235,8 +241,6 @@ void DceScreenSaver::beginZoom()
 
 void DceScreenSaver::startFadeTimer(int time)
 {
-
-
     fadeAnimation->setDuration(time);
     fadeAnimation->start();
 

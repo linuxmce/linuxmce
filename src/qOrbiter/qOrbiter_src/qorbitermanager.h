@@ -216,6 +216,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY(int screenSaverTimeout READ getScreenSaverTimeout WRITE setScreensaverTimerout NOTIFY screenSaverTimeoutChanged)
     Q_PROPERTY(bool bReload READ getReloadStatus NOTIFY bReloadChanged)
     Q_PROPERTY(bool homeNetwork WRITE setHomeNetwork READ getHomeNetwork NOTIFY homeNetworkChanged)
+    Q_PROPERTY(int hostDevice READ getHostDevice WRITE setHostDevice NOTIFY hostDeviceChanged)
 
     /*!
      * \warning enablescreensavermode - currently unused, should be built anyways
@@ -517,8 +518,10 @@ Param 10 - pk_attribute
     /*Child Device IDs*/
     int mediaPlayerID;
     int communicatorID;
-
+    int hostDevice;
 signals:
+
+  void hostDeviceChanged();
 
     /*ScreenSaver*/
     void screenSaverTimeoutChanged();
@@ -738,6 +741,9 @@ signals:
 #endif
 
 public slots:
+    void setHostDevice(int d){ if(hostDevice != d ) {hostDevice=d; emit hostDeviceChanged(); }  }
+    int getHostDevice(){return hostDevice;}
+
     /*! @name Screen and Screen Saver */
     //@{
     void updateScreenSaverTimeout(int t){ screenSaverTimeout = t; }

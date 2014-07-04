@@ -32,7 +32,7 @@ class DceScreenSaver :
     Q_PROPERTY(double fadeOpacity READ getFadeOpacity WRITE setFadeOpacity NOTIFY fadeOpacityChanged)
     Q_PROPERTY(double currentScale READ getCurrentScale WRITE setCurrentScale NOTIFY currentScaleChanged)
     Q_PROPERTY(QString currentImageName READ getCurrentImageName NOTIFY currentImageNameChanged)
-
+    Q_PROPERTY(bool useAnimation READ getUseAnimation WRITE setUseAnimation NOTIFY useAnimationChanged)
 public:
 #ifdef QT5
     DceScreenSaver(QQuickPaintedItem *parent=0);
@@ -53,6 +53,7 @@ public:
     int pictureCount;
     QStringList urlList;
     QString currentImageName;
+    bool useAnimation;
 
     QPixmap currentImage;
     QPixmap surface;
@@ -79,8 +80,12 @@ signals:
     void fadeOpacityChanged();
     void currentScaleChanged();
     void currentImageNameChanged();
+    void useAnimationChanged();
 
 public slots:
+
+    void setUseAnimation(bool ani){ if(ani!= useAnimation) {useAnimation = ani; emit useAnimationChanged(); }   }
+    bool getUseAnimation(){return useAnimation;}
 
     void setCurrentImageName(QString n) {
         if(!n.isEmpty() ){
