@@ -3,6 +3,8 @@ import QtQuick 2.1
 Item {
     property string screenName:"lorem ipsum foo"
     property string screenDescription:"basic description"
+    property bool isActive:false
+    focus:true
 
     anchors{
         top:pageLoader.top
@@ -10,25 +12,13 @@ Item {
         right:pageLoader.right
         bottom: pageLoader.bottom
     }
-
-
-
-    MouseArea{
-        anchors.fill: parent
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
-        onClicked: {
-            if(mouse.button===Qt.LeftButton){
-                if(pageLoader.activeFocus){
-                    ftr.forceActiveFocus()
-                }
-
-            } else if (mouse.button===Qt.RightButton){
-                if(ftr.isActive){
-                    pageLoader.forceActiveFocus()
-                }
-
-            }
-        }
-    }
+    onActiveFocusChanged: if(activeFocus){
+                              uiOn=false
+                              isActive=true
+                              if(children.length!==0){
+                                  console.log("activating first child object for "+screenName)
+                                  children[0].forceActiveFocus()
+                              }
+                          }
 
 }

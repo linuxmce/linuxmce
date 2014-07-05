@@ -3,16 +3,12 @@ import "../components"
 StyledScreen {
     screenName: "Advanced Screen"
     screenDescription: "Advanced options"
-    Component.onCompleted: {
-       advanced_flow.forceActiveFocus()
-    }
-
 
     Flow{
         id:advanced_flow
         focus:true
         property int idx:-1
-        property int rowFactor: (width / children[0].width) -1y
+        property int rowFactor: (width / children[0].width) -1
         onIdxChanged: {
             if(idx < 0){
                 idx=0

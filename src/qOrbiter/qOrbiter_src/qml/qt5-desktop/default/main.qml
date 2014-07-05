@@ -10,6 +10,8 @@
 import QtQuick 2.1
 import AudioVisual 1.0
 import DceScreenSaver 1.0
+import org.linuxmce.enums 1.0
+
 import "../../skins-common/lib/components"
 import "../../skins-common/lib/handlers"
 import "components"
@@ -31,7 +33,7 @@ Item {
     property int screensaverTimer:15000 //manager.screenSaverTimeout*1000
 
     onActiveFocusChanged: {
-        pageLoader.forceActiveFocus()
+        uiOn=true
     }
 
     Component.onCompleted: {
@@ -149,28 +151,17 @@ Item {
     }
 
     function swapFocus(){
-
+        uiOn =!uiOn
         console.log("Swap Focus Function.")
-
-        if(hdr.activeFocus)
-        { console.log("Header had focus, set to page loader.")
-            pageLoader.forceActiveFocus()
-        }else if (pageLoader.activeFocus){
-            console.log("Pageloader had, sending to footer menu.")
+        if(uiOn){
             ftr.forceActiveFocus()
-        }else if(ftr.activeFocus){
-            console.log("Footer Had focus, sending to video plane.")
-            dceplayer.forceActiveFocus()
-        }else if(dceplayer.activeFocus){
-            console.log("Player had focus, sending to header.")
-            hdr.forceActiveFocus()
-        }else {
+        } else {
             pageLoader.forceActiveFocus()
         }
 
         console.log("Header Focus::"+hdr.activeFocus)
-        console.log("Loader Focus::"+pageLoader.activeFocus)
-        console.log("Footer Focus::"+ftr.activeFocus)
+        console.log("Loader Focus::"+pageLoader.isActive)
+        console.log("Footer Focus::"+ftr.isActive)
         console.log("Dceplayer Focus::"+dceplayer.activeFocus)
 
         if(dceplayer.mediaPlaying && pageLoader.activeFocus){
@@ -188,22 +179,14 @@ Item {
     }
 
     Timer{
-            id:hideUiTimer
-            interval:screensaverTimer
-            running: false
-            repeat: false
-            onTriggered: {
-                if(uiOn){
-                    uiOn=false
-                    if(glScreenSaver.active){
-                        glScreenSaver.forceActiveFocus()
-                    } else {
-                        uiOn=true
-                      ftr.forceActiveFocus()
-                    }
-                }
-            }
+        id:hideUiTimer
+        interval:screensaverTimer
+        running: false
+        repeat: true
+        onTriggered: {
+            uiOn=false
         }
+    }
 
     Rectangle{
         id:filler
@@ -345,8 +328,15 @@ Item {
         height: manager.appHeight
         width: manager.appWidth
         focus:true
+        active: true
+        useAnimation:manager.hostDevice !== HostDevices.RASPBERRY_PI ? true : false
         interval:30000
+        enableDebug:false
         anchors.centerIn: parent
+        onDebugInfoChanged:{
+            console.log(debugInfo)
+        }
+
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)
@@ -359,7 +349,7 @@ Item {
         MouseArea{
             anchors.fill: parent
             hoverEnabled: true
-            onPressed:if(glScreenSaver.activeFocus) { uiOn=!uiOn}
+            onPressed:swapFocus()
         }
 
     }
@@ -391,16 +381,16 @@ Item {
             }
         }
 
-            onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
-            onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
-            onMediaPlayingChanged: console.log("Media Playback status changed locally to "+dceplayer.mediaPlaying)
-            onVolumeChanged:console.log(volume)
+        onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
+        onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
+        onMediaPlayingChanged: console.log("Media Playback status changed locally to "+dceplayer.mediaPlaying)
+        onVolumeChanged:console.log(volume)
         Keys.onVolumeDownPressed: manager.adjustVolume("-1")
         Keys.onVolumeUpPressed:  manager.adjustVolume("+1")
         Keys.onTabPressed: ftr.forceActiveFocus()
 
         Keys.onPressed: {
-
+            hideUiTimer.restart()
             switch(event.key){
             case Qt.Key_Back:
                 manager.changedPlaylistPosition((mediaplaylist.currentIndex+1));
@@ -435,7 +425,9 @@ Item {
             case Qt.Key_S:
                 manager.stopMedia()
                 break;
-
+            case Qt.Key_Menu:
+                manager.gotoQScreen("Screen_1.qml")
+                break;
             case Qt.Key_Pause:
                 manager.pauseMedia()
                 break;
@@ -454,6 +446,8 @@ Item {
                 console.log(manager.dumpKey(event.key))
                 break
             }
+
+            event.accepted=true;
         }
     }
 
@@ -504,7 +498,7 @@ Item {
         id:pageLoader
         objectName: "loadbot"
         onSourceChanged:  loadin
-        property bool isActive:item.activeFocus
+        property bool isActive:false
         focus:true
         anchors{
             top:hdr.bottom
@@ -519,20 +513,24 @@ Item {
         }
 
         onActiveFocusChanged: {
-            if(activeFocus)
-            {  console.log("Pageloader gained active focus");   }
+            if(activeFocus){
+
+                isActive=true
+                console.log("Pageloader gained active focus");
+                item.forceActiveFocus()
+            }
             else if (pageLoader.item.activeFocus){
                 console.log("Pageloader content gained active focus");
             }
             else{
+                isActive=false
                 console.log("Page loader lost active focus ::"+ pageLoader.activeFocus);
             }
         }
         onIsActiveChanged: console.log("New pageloader content focus is "+isActive)
 
         Keys.onTabPressed:{
-            console.log("Tab Focus Swap.")
-            ftr.forceActiveFocus()
+            swapFocus()
         }
         Keys.onPressed: {
             if(event.key === Qt.Key_M){
@@ -573,17 +571,24 @@ Item {
 
     //floorplans
     MouseArea{
-         id:mst
-         anchors.fill: parent
-
-         onPressed: {
-             mouse.accepted=false
-             console.log("Mouse X: "+mouse.x)
-             console.log("Mouse Y:"+mouse.y)
-             console.log("\n")
-          //   hideUiTimer.restart()
-         }
-     }
+        id:mst
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton | Qt.LeftButton | Qt.MidButton
+        onPressed: {
+            if(mouse.button==Qt.RightButton){
+                console.log("Event Filter swapping focus")
+                swapFocus()
+                mouse.accepted=true
+                return;
+            }
+            uiOn=true
+            mouse.accepted=false
+            console.log("Mouse X: "+mouse.x)
+            console.log("Mouse Y:"+mouse.y)
+            console.log("\n")
+            hideUiTimer.restart()
+        }
+    }
 }
 
 

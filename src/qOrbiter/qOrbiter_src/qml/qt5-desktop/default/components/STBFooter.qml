@@ -6,22 +6,28 @@ Item{
 
     width: qmlroot.width
     height:scaleY(14)
-    anchors.top: parent.bottom
+    visible:false
+    focus:true
+    anchors{
+        bottom:qmlroot.bottom
+    }
+
+
+
     property bool isActive: false
     onActiveFocusChanged:{
         if(activeFocus){
+            isActive=true
             scenarioList.forceActiveFocus()
-            ftr.state="showing"
-            console.log("showing state")
-            scenarioList.currentIndex = -1
-            isActive = true
+            console.log("footer gained focus and assigned to scenarios.")
         }
         else{
             currentItem = -1
-            ftr.state = "hidden"
+            console.log("Footer lost active focus")
         }
     }
-    Component.onCompleted: ftr.state = "hidden"
+    //    Component.onCompleted: ftr.state = "hidden"
+
 
     property int currentItem: -1
     Connections{
@@ -136,7 +142,8 @@ Item{
             Keys.onUpPressed: submodel.incrementCurrentIndex()
             Keys.onEnterPressed: { pressed() }
             Keys.onPressed: {
-                 console.log("Pressed-"+manager.dumpKey(event.key))
+                 hideUiTimer.restart()
+                console.log("Pressed-"+manager.dumpKey(event.key))
                 if(event.key === Qt.Key_Enter || event.key===Qt.Key_Return )
                 {
                     if(submodel.currentIndex !==-1){
@@ -146,9 +153,7 @@ Item{
                     }else{
                         manager.gotoQScreen("Screen_"+(index+2)+".qml")
                     }
-
-
-                    ftr.state = "hidden"
+                    swapFocus()
                 }
             }
             signal pressed()
@@ -285,7 +290,7 @@ Item{
             right:parent.right
             left:npOptions.right
             bottom:parent.bottom
-           margins: 5
+            margins: 5
         }
 
         Keys.onUpPressed: scenarioList.forceActiveFocus()
@@ -321,30 +326,32 @@ Item{
     states: [
         State {
             name: "hidden"
-            PropertyChanges {
-                target: hdr
-                state:"hidden"
-            }
+            extend: ""
+            when:!uiOn
             PropertyChanges {
                 target: ftr
                 currentItem:-1
                 isActive:false
+                visible:true
             }
 
             AnchorChanges{
                 target:ftr
                 anchors.bottom: undefined
                 anchors.top: qmlroot.bottom
-
             }
         },
         State {
             name: "showing"
+            when:uiOn
+            extend:""
             PropertyChanges {
-                target: hdr
-                state:"showing"
-                isActive:true
+                target: ftr
+                currentItem:-1
+                visible:true
+
             }
+
             AnchorChanges{
                 target:ftr
                 anchors.top: undefined

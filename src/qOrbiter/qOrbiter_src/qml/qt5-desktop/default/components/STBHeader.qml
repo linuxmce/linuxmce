@@ -9,7 +9,7 @@ Item{
     }
     height:scaleY(8)
     state:"hidden"
-    property bool isActive: activeFocus
+    property bool isActive: false
 
     GradientFiller {
         opacity: .75
@@ -44,7 +44,7 @@ Item{
     states: [
         State {
             name: "hidden"
-
+            when:!uiOn
             AnchorChanges{
                 target:hdr
                 anchors.top: undefined
@@ -53,6 +53,7 @@ Item{
         },
         State {
             name: "showing"
+            when:uiOn
             AnchorChanges{
                 target:hdr
                 anchors.bottom: undefined
