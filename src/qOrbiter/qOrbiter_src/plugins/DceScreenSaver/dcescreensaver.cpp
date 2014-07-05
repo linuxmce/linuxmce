@@ -135,8 +135,10 @@ void DceScreenSaver::processImageData(QNetworkReply *r){
 
 
     if(t.isNull()){
+        setDebugInfo("Null Pixmap");
         intervalTimer->start(interval);
         this->update();
+        return;
     }else{
         setDebugInfo("new picture");
         surface =currentImage.copy();
