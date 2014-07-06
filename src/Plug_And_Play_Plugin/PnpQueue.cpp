@@ -395,7 +395,7 @@ bool PnpQueue::Process_Detect_Stage_Detected(PnpQueueEntry *pPnpQueueEntry)
 			RunSetupScript(pPnpQueueEntry);
 			pPnpQueueEntry->Stage_set(PNP_DETECT_STAGE_DONE);
 #ifdef DEBUG
-			LoggerWrapper::GetInstance()->Write(LV_STATUS,"PnpQueue::Process_Detect_Stage_Detected queue %d was existing device, nothing to do",pPnpQueueEntry->m_pRow_PnpQueue->PK_PnpQueue_get());
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"PnpQueue::Process_Detect_Stage_Detected queue %d was existing device, nothing to do",pPnpQueueEntry->m_pRow_PnpQueue->PK_PnpQueue_get());
 #endif
 			return true;
 		}
@@ -431,6 +431,7 @@ bool PnpQueue::Process_Detect_Stage_Confirm_Possible_DT(PnpQueueEntry *pPnpQueue
 	else if( pPnpQueueEntry->m_pRow_PnpQueue->Parms_get().size() )
 		sSqlWhere += (sSqlWhere.size() ? " AND " : "") + string("SerialNumber='") + StringUtils::SQLEscape(pPnpQueueEntry->m_pRow_PnpQueue->Parms_get()) + "'";
 
+	// Check if device is in the UnknownDevices table, skip if it is.
 	if( sSqlWhere.size() )
 	{
 		// Unknown only applies if it's on the same machine, unless it's an ethernet device which is universal
@@ -447,7 +448,7 @@ bool PnpQueue::Process_Detect_Stage_Confirm_Possible_DT(PnpQueueEntry *pPnpQueue
 	}
 
 	// It's a new device.  Did we get a valid device template already?
-	Row_DeviceTemplate *pRow_DeviceTemplate = pPnpQueueEntry->m_pRow_PnpQueue->FK_DeviceTemplate_get() ? pPnpQueueEntry->m_pRow_PnpQueue->FK_DeviceTemplate_getrow() : NULL;  // This will be NULL if there's no device template
+	Row_DeviceTemplate *pRow_DeviceTemplate = pPnpQueueEntry->m_pRow_PnpQueue->FK_DeviceTemplate_get() ? pPnpQueueEntry->m_pRow_PnpQueue->FK_DeviceTemplate_getrow() : NULL;  // This will be NULL if there's no device template in the PnpQueueEntry.
 	if( pRow_DeviceTemplate )
 	{
 		pPnpQueueEntry->Stage_set(PNP_DETECT_STAGE_PROMPTING_USER_FOR_DT);
@@ -457,9 +458,9 @@ bool PnpQueue::Process_Detect_Stage_Confirm_Possible_DT(PnpQueueEntry *pPnpQueue
 		return Process_Detect_Stage_Prompting_User_For_DT(pPnpQueueEntry);
 	}
 
-	if( pPnpQueueEntry->m_pRow_PnpQueue->MACaddress_get().size()>=11 )
+	// Build a query to check the DHCPDevice table for an existing matching entry
+	if( pPnpQueueEntry->m_pRow_PnpQueue->MACaddress_get().size()>=11 )  // It's IP based
 	{
-		// It's IP based
 		PhoneDevice pd("", pPnpQueueEntry->m_pRow_PnpQueue->MACaddress_get(), 0);
 		sSqlWhere = StringUtils::i64tos(pd.m_iMacAddress) + ">=Mac_Range_Low AND " + StringUtils::i64tos(pd.m_iMacAddress) + "<=Mac_Range_High";
 	}
@@ -476,6 +477,7 @@ bool PnpQueue::Process_Detect_Stage_Confirm_Possible_DT(PnpQueueEntry *pPnpQueue
 	vector<Row_DHCPDevice *> vectRow_DHCPDevice;
 	m_pDatabase_pluto_main->DHCPDevice_get()->GetRows(sSqlWhere,&vectRow_DHCPDevice);
 
+	// Since we didn't find any specific match in DHCPDevice (known devices), try to match anything in the same Category with the same VendorModelID.
 	bool bMatchingCategory=false;
 	if( vectRow_DHCPDevice.size()==0 && pPnpQueueEntry->m_pRow_PnpQueue->Category_get().size() )
 	{
@@ -497,22 +499,22 @@ bool PnpQueue::Process_Detect_Stage_Confirm_Possible_DT(PnpQueueEntry *pPnpQueue
 #ifdef DEBUG
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"PnpQueue::Process_Detect_Stage_Confirm_Possible_DT queue %d has %d candidates",pPnpQueueEntry->m_pRow_PnpQueue->PK_PnpQueue_get(),(int) vectRow_DHCPDevice.size());
 #endif
-	if( vectRow_DHCPDevice.size()>0 )
+	if( vectRow_DHCPDevice.size()>0 )  // At least one device has matched known devices, continue to narrow the results.
 	{
 		for(vector<Row_DHCPDevice *>::iterator it=vectRow_DHCPDevice.begin();it!=vectRow_DHCPDevice.end();++it)
 		{
 			Row_DHCPDevice *pRow_DHCPDevice = *it;
 			if( pRow_DHCPDevice->SerialNumber_get().size() && pPnpQueueEntry->m_pRow_PnpQueue->SerialNumber_get().find(pRow_DHCPDevice->SerialNumber_get())==string::npos )
-				continue; // Don't do this if the serial number doesn't match
+				continue; // Don't do this (add to possible devices) if the SerialNumber doesn't match
 			if( !bMatchingCategory && pRow_DHCPDevice->Parms_get().size() && pPnpQueueEntry->m_pRow_PnpQueue->Parms_get().find(pRow_DHCPDevice->Parms_get())==string::npos )
-				continue; // Don't do this if the serial number doesn't match
+				continue; // Don't do this (add to possible devices) if the Parms don't match
 			if( !bMatchingCategory && pRow_DHCPDevice->Category_get().size() && pPnpQueueEntry->m_pRow_PnpQueue->Category_get()!=pRow_DHCPDevice->Category_get() )
 			{
 #ifdef DEBUG
 			LoggerWrapper::GetInstance()->Write(LV_STATUS,"PnpQueue::Process_Detect_Stage_Confirm_Possible_DT queue %d skipping PK_DHCPDevice %d because category %s doesn't match",
 				pPnpQueueEntry->m_pRow_PnpQueue->PK_PnpQueue_get(),vectRow_DHCPDevice[0]->PK_DHCPDevice_get(),pPnpQueueEntry->m_pRow_PnpQueue->Category_get().c_str());
 #endif
-				continue; // Don't do this if a category is specified and it doesn't match
+				continue; // Don't do this (add to possible devices) if a category is specified and it doesn't match
 			}
 
 			pPnpQueueEntry->m_mapPK_DHCPDevice_possible[pRow_DHCPDevice->PK_DHCPDevice_get()]=pRow_DHCPDevice;  // This is a possibility
@@ -548,7 +550,7 @@ bool PnpQueue::Process_Detect_Stage_Confirm_Possible_DT(PnpQueueEntry *pPnpQueue
 			return Process_Detect_Stage_Detected(pPnpQueueEntry);
 		}
 	}
-	if( pPnpQueueEntry->m_mapPK_DHCPDevice_possible.size()==0 && CheckForDeviceTemplateOnWeb(pPnpQueueEntry) )
+	if( pPnpQueueEntry->m_mapPK_DHCPDevice_possible.size()==0 && CheckForDeviceTemplateOnWeb(pPnpQueueEntry) )  // We didn't match a known device locally.  Check the web for a DT.
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "PnpQueue::Process_Detect_Stage_Confirm_Possible_DT queue %d identified on web",pPnpQueueEntry->m_pRow_PnpQueue->PK_PnpQueue_get());
 		pPnpQueueEntry->Stage_set(PNP_DETECT_STAGE_RUNNING_PRE_PNP_SCRIPT);
