@@ -132,13 +132,13 @@ int main()
 				memset(remotePNPIdentifier, 0, 1024);
 
 				sscanf(buffer, "%*s %s %s %s %s", remoteIP, remoteMAC, remoteDeviceData, remotePNPIdentifier);
-				printf("Split: IP=%s, MAC=%s, DD=%s, DT=%s\n", remoteIP, remoteMAC, remoteDeviceData, remotePNPIdentifier);
+				printf("Split: IP=%s, MAC=%s, DD=%s, PNP_ID=%s\n", remoteIP, remoteMAC, remoteDeviceData, remotePNPIdentifier);
 
 				// messagesend a HAL type DeviceDetected Event here.
 				printf("New Interactor Device Selection\n");
 				char * args[] = { "/usr/pluto/bin/MessageSend", "localhost", "0", "-1001", "2", "65",
 					"28", remoteIP, "5", remoteMAC, "52", "3", "53", "5",
-					"54", strlen(remotePNPIdentifier) == 0 ? (char *) sDefaultPNPIdentifier : remotePNPIdentifier,
+					"51", strlen(remotePNPIdentifier) == 0 ? sDefaultPNPIdentifier : remotePNPIdentifier,
 					"55", remoteDeviceData,
 					NULL };
 				GetCommandOutput(args[0], args, NULL);
