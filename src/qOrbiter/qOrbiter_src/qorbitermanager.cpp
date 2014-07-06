@@ -170,10 +170,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 
 #ifdef QT4_8
     buildType = "/qml/desktop";
-    setHostDevice(3)
+    setHostDevice(3);
 #elif QT5 && defined RPI
     buildType = "/qml/qt5-desktop";
-    setHostDevice(1)
+    setHostDevice(1);
 #elif QT5 && !defined RPI && !defined ANDROID
   setHostDevice(3);
     buildType="/qml/qt5-desktop";
