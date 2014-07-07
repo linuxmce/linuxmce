@@ -33,12 +33,12 @@ Item{
 
 
     /* Image aspect ratios */
-        property double dvdPosterRatio:1080/955
-        property double hdPosterRatio:1080/755
-        property double cdCoverRatioFront:1080/1080
-        property double cdCoverRatioBack:1080/1264
-        property double vcdRatio:1080/1080
-        property double vhsRatio:1280/620
+    property double dvdPosterRatio:1080/955
+    property double hdPosterRatio:1080/755
+    property double cdCoverRatioFront:1080/1080
+    property double cdCoverRatioBack:1080/1264
+    property double vcdRatio:1080/1080
+    property double vhsRatio:1280/620
 
 
 
@@ -60,16 +60,20 @@ Item{
         id:cntGradient
         GradientStop{
             position: 0.0
-            color:"white"
+            color:"transparent"
         }
         GradientStop{
             position: 0.5
-            color:"grey"
+            color:"black"
         }
     }
     /* Animation Properties */
     property int globalAnimationSpeed:750
     property int globalAnimationEasing:Easing.InOutQuad
+    property int quickAnimation:350
+    property int mediumAnimation:500
+    property int longAnimation:750
+
     /* End Animation Properties */
 
     property int margins:5
@@ -119,8 +123,8 @@ Item{
     property int buttonRegFont: scaleX(5)
     property int buttonH:95
     property int buttonW: 95
-    property color button_system_color: secondaryDarkColor
-    property color button_system_color_hover: complimentColorLight
+    property string button_system_color: secondaryDarkColor
+    property string button_system_color_hover: complimentColorLight
 
     property color button_action_color: primaryLightColor
     property color button_action_color_hover:complimentColorLight
@@ -163,6 +167,7 @@ Item{
 
     //headers
     property int  stdHdrHeight: scaleY(8)
+
     //New style -------------------------------------------------------------//
     /* Overall */
     property double bgLightOpacity:.35
@@ -172,10 +177,10 @@ Item{
     /* Headers, containers and lists */
     property color contentBgColor:"darkgrey"
     property int headerFontSize:14
-    property color headerBgColor:"black"
+    property color headerBgColor:"green"
     property int listItemHeight:scaleY(8)
     property color listItemBgColor:"green"
-    property color listItemActiveBgColor: "darkgrey"
+    property color listItemActiveBgColor: "white"
     property color listItemPressedBgColor: "limegreen"
     property color listItemTextInactiveColor:"white"
     property color listItemTextActiveColor:"black"
@@ -201,13 +206,6 @@ Item{
         GradientStop{ position:0.0;color:"transparent"}
         GradientStop{ position:0.65;color:"black"}
     }
-
-
-    /* Animation Speeds */
-    property int quickAnimation:350
-    property int mediumAnimation:500
-    property int longAnimation:750
-    property int animationEasing:Easing.OutBack
 
 
     //end scale function

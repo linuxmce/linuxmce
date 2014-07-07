@@ -5,17 +5,20 @@ Item{
     height: button_label.paintedHeight < scaleY(5) ? scaleY(5) : button_label.paintedHeight+(button_label.paintedHeight*.05)
     width:opacity ? button_label.paintedWidth < scaleX(10) ? scaleX(10) : (button_label.paintedWidth) + (button_label.paintedWidth*.05) :0
     focus:true
+
     onActiveFocusChanged:{
         console.log(buttonText+"has focus")
     }
 
-    Component.onCompleted: {
+    Component.onCompleted: {     
+
         if(useHandler ){
             fly_trap.anchors.fill = undefined
             fly_trap.height=0
             fly_trap.width=0
         }
     }
+
 
     property string phil:useHandler ? dceHandler.item.pressed ? "yellow" : "black" :  fly_trap.pressed ? appStyle.button_system_color_hover: appStyle.button_system_color
     property int textSize:28
@@ -32,6 +35,32 @@ Item{
     signal moveRight()
     property bool active: activeFocus ? true : false
     property bool hasParentModel:false
+    property bool idxMatch:false
+    property bool useLocalKeys: false
+    onIdxMatchChanged: {
+        if(idxMatch){
+            forceActiveFocus()
+        }
+    }
+
+
+    Keys.onPressed: {
+        if(useLocalKeys){
+            switch(event.key){
+            case Qt.Key_Enter:
+                activated()
+                event.accepted=true
+                break;
+            case Qt.Key_Return:
+                event.accepted=true
+                activated();
+                break
+            default:
+                console.log(manager.dumpKey(event.key)+ " is unused, not accepting.")
+                break;
+            }
+        }
+    }
 
     Behavior on opacity{
         PropertyAnimation{

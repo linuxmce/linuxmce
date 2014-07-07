@@ -4,7 +4,6 @@ Item {
     height: parent.height
     width: parent.width
     onActiveFocusChanged: {
-
         if(activeFocus){
             fd_close.forceActiveFocus();
             console.log("File Details got focus, passed to controls")
@@ -15,7 +14,7 @@ Item {
         id:fd_hdr
         height:scaleY(15)
         width: scaleX(75)
-        color:skinStyle.mainColor
+        color:appStyle.mainColor
         opacity: .65
     }
     StyledText {
@@ -59,18 +58,20 @@ Item {
             id: fd_play
             actionLabel: "Play"
             rowIndex: 0
-            onExecute:  {manager.playMedia(filedetailsclass.file); screen_forty_seven_of_nine.state="browsing"; dataModel.setPause(false)}  //dce function
+            onExecute:  {manager.playMedia(filedetailsclass.file); content.state="browsing"; dataModel.setPause(false)}  //dce function
         }
+
         FdActionButton {
             id: fd_move
             actionLabel: "Move"
             rowIndex: 1
         }
+
         FdActionButton {
             id: fd_close
             actionLabel: "Close"
             rowIndex: 2
-            onExecute: { filedetailsclass.clear();screen_forty_seven_of_nine.state="browsing"; dataModel.setPause(false)  }
+            onExecute: { filedetailsclass.clear();content.state="viewing"; dataModel.setPause(false)  }
         }
 
     }

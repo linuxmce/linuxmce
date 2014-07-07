@@ -2,8 +2,8 @@ import QtQuick 2.1
 import "../components"
 Item{
     id:filterButton
-    height: scaleY(10)
-    width: scaleX(18)
+    height: scaleY(8)
+    width: scaleX(15)
     focus: false
     signal moveUp()
     signal moveDown()

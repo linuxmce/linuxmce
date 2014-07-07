@@ -4,7 +4,9 @@ Text {
     width: paintedWidth
     height: paintedHeight
     font.family: myFont.name
-    font.pixelSize: fontSize   
+    font.pixelSize: fontSize
+    font.bold: isBold
+    property bool isBold:false
     property int fontSize:mediumText
     property int headerText:scaleY(5)
     property int mediumText:scaleY(4)
