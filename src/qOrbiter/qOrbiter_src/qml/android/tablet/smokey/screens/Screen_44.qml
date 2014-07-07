@@ -1,7 +1,7 @@
 import QtQuick 1.1
 import "../components"
 
-Item {
+StyledScreen {
     anchors.fill: parent
 
     onVisibleChanged: {

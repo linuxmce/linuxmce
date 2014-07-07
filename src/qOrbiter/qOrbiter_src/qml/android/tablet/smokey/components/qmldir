@@ -9,6 +9,7 @@ Controls_5             Controls_5.qml                        #no comment
 FileDetails_21             FileDetails_21.qml                        #no comment
 FileDetails_4             FileDetails_4.qml                        #no comment
 FileDetails_5             FileDetails_5.qml                        #no comment
+FileDetailsGeneric             FileDetailsGeneric.qml                        #no comment
 FloorplanDisplay             FloorplanDisplay.qml                        #no comment
 FloorplanNav             FloorplanNav.qml                        #no comment
 FloorPlanOptions             FloorPlanOptions.qml                        #no comment

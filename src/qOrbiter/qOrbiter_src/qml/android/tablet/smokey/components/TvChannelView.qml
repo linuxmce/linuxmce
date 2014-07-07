@@ -8,10 +8,10 @@ Item {
         bottom:parent.bottom
     }
 
-    Component.onCompleted: {
-      //  manager.getLiveTVPlaylist();
-        manager.setNowPlayingTv()
-    }
+//    Component.onCompleted: {
+//      //  manager.getLiveTVPlaylist();
+//        manager.setNowPlayingTv()
+//    }
     clip:true
 
     Connections{

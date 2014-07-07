@@ -142,7 +142,7 @@ Item{
         },
         State {
             name: "tv"
-            when:manager.q_subType==Subtypes.TVSHOWS && manager.q_pk_attribute==""
+            when:manager.q_subType==MediaSubtypes.TVSHOWS && manager.q_pk_attribute==""
             extend:"video"
             PropertyChanges {
                 target: multi_view_list
@@ -152,7 +152,7 @@ Item{
         },
         State {
             name: "movies"
-            when: manager.q_subType==Subtypes.MOVIES && manager.q_mediaType==Mediatypes.STORED_VIDEO
+            when: manager.q_subType==MediaSubtypes.MOVIES && manager.q_mediaType==Mediatypes.STORED_VIDEO
             extend:"video"
             PropertyChanges {
                 target: multi_view_list
@@ -162,7 +162,7 @@ Item{
         },
         State {
             name: "seasons"
-            when:manager.q_attributeType_sort==Attributes.TV_Season_ID && manager.q_subType==Subtypes.TVSHOWS
+            when:manager.q_attributeType_sort==Attributes.TV_Season_ID && manager.q_subType==MediaSubtypes.TVSHOWS
             extend:"tv"
             PropertyChanges {
                 target: multi_view_list
@@ -172,7 +172,7 @@ Item{
         },
         State {
             name: "episodes"
-            when:manager.q_attributeType_sort==Attributes.Title && manager.q_subType==Subtypes.TVSHOWS
+            when:manager.q_attributeType_sort==Attributes.Title && manager.q_subType==MediaSubtypes.TVSHOWS
             extend:"tv"
             PropertyChanges {
                 target: multi_view_list
