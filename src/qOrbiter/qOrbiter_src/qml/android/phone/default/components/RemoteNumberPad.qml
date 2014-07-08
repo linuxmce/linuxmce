@@ -14,7 +14,7 @@ Item{
 
         Rectangle{
             anchors.fill: parent
-            gradient:skinStyle.bgHeaderGradient
+            gradient:appStyle.bgHeaderGradient
         }
 
         StyledText{

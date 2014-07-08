@@ -12,20 +12,20 @@ Item {
 
     Rectangle{
         anchors.fill: parent
-        color:skinStyle.toolbarBgColor
+        color:appStyle.toolbarBgColor
     }
 
     Rectangle{
         id:phil
         anchors.fill: parent
-        gradient:skinStyle.buttonGradient
+        gradient:appStyle.buttonGradient
         opacity: .55
     }
 
     Rectangle{
         id:panelHeader
         height: panelRoot.height*.20
-        color:skinStyle.toolbarBgColor
+        color:appStyle.toolbarBgColor
         anchors.margins: 5
         anchors{
             top:parent.top
@@ -43,7 +43,7 @@ Item {
         width: panelHeader.width
         isBold: true
         font.pixelSize: scaleY(4)
-        color:skinStyle.tile_color
+        color:appStyle.tile_color
     }
 
 }

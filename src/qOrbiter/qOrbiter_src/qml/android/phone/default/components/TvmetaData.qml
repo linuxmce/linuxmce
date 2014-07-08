@@ -6,7 +6,7 @@ Item {
 
    Rectangle{
     anchors.fill: parent
-    gradient:skinStyle.bgContentGradient
+    gradient:appStyle.bgContentGradient
    }
     
     Column

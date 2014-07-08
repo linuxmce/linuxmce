@@ -13,7 +13,7 @@ Item{
     Rectangle{
         id:fil
         anchors.fill: parent
-        color: skinStyle.button_system_color
+        color: appStyle.button_system_color
         opacity:.65
     }
 
@@ -47,7 +47,7 @@ Item{
 
     Rectangle{
         id:optionContainer
-        gradient:skinStyle.buttonGradient
+        gradient:appStyle.buttonGradient
         width: scaleX(15)
 
         anchors{

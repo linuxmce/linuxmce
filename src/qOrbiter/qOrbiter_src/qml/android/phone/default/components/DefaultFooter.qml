@@ -10,13 +10,13 @@ Item{
     }
     Rectangle{
         anchors.fill: parent
-        color:skinStyle.headerBgColor
-        opacity: skinStyle.bgContentOpacity
+        color:appStyle.headerBgColor
+        opacity: appStyle.bgContentOpacity
     }
     Rectangle{
         anchors.fill: parent
-        gradient: skinStyle.bgHeaderGradient
-        opacity: skinStyle.bgHeavyOpacity
+        gradient: appStyle.bgHeaderGradient
+        opacity: appStyle.bgHeavyOpacity
     }
 
     Row{

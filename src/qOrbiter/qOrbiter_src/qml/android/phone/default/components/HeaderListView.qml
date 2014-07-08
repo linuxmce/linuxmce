@@ -8,13 +8,13 @@ Item{
     property variant columnTitles:[]
     property variant columnSpacing:[]
     property variant returnProperties:[]
-    property string headerBgColor:skinStyle.headerBgColor
+    property string headerBgColor:appStyle.headerBgColor
     property int columnCount: columnTitles.length
-    property color listBgColor: skinStyle.listItemBgColor
-    property color listBgActiveColor:skinStyle.listItemActiveBgColor
-    property color listTextInactiveColor:skinStyle.listItemTextInactiveColor
-    property color listTextActiveColor:skinStyle.listItemTextActiveColor
-    property color contentBg:skinStyle.contentBgColor
+    property color listBgColor: appStyle.listItemBgColor
+    property color listBgActiveColor:appStyle.listItemActiveBgColor
+    property color listTextInactiveColor:appStyle.listItemTextInactiveColor
+    property color listTextActiveColor:appStyle.listItemTextActiveColor
+    property color contentBg:appStyle.contentBgColor
     property alias headerListModel: displayList.model
     property Item delegateType:null
     property string displayProperty:""
@@ -27,7 +27,7 @@ Item{
         anchors.fill: parent
         id:backing
         color:contentBg
-        gradient:skinStyle.bgContentGradient
+        gradient:appStyle.bgContentGradient
         opacity:bgContentOpacity
     }
 
@@ -102,7 +102,7 @@ Item{
 
             Rectangle{
                 anchors.fill: parent
-                color:ms.pressed ? skinStyle.listItemPressedBgColor : displayList.currentIndex===index ? listBgActiveColor : "black"
+                color:ms.pressed ? appStyle.listItemPressedBgColor : displayList.currentIndex===index ? listBgActiveColor : "black"
                 opacity: .65
                 border.color: "white"
                 border.width: 1

@@ -14,13 +14,13 @@ Item{
     }
     Rectangle{
         anchors.fill: parent
-        color:skinStyle.headerBgColor
-        opacity: skinStyle.bgContentOpacity
+        color:appStyle.headerBgColor
+        opacity: appStyle.bgContentOpacity
     }
     Rectangle{
         anchors.fill: parent
-        gradient: skinStyle.bgHeaderGradient
-        opacity: skinStyle.bgHeavyOpacity
+        gradient: appStyle.bgHeaderGradient
+        opacity: appStyle.bgHeavyOpacity
     }
 
 
@@ -61,19 +61,19 @@ Item{
             anchors.verticalCenter: parent.verticalCenter
 
             Rectangle{
-                color: skinStyle.darkhighlight
+                color: appStyle.darkhighlight
                 height: hdr.height /5
                 width: height
                 anchors.horizontalCenter: parent.horizontalCenter
             }
             Rectangle{
-                color: skinStyle.darkhighlight
+                color: appStyle.darkhighlight
                 height: hdr.height /5
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: height
             }
             Rectangle{
-                color: skinStyle.darkhighlight
+                color: appStyle.darkhighlight
                 height: hdr.height /5
                 width: height
                 anchors.horizontalCenter: parent.horizontalCenter

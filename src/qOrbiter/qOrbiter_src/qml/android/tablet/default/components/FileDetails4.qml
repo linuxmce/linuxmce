@@ -8,10 +8,10 @@ Rectangle {
     anchors.top: parent.top
     anchors.topMargin: scaleY(5)
     anchors.horizontalCenter: parent.horizontalCenter
-    color: skinStyle.highlight2
+    color: appStyle.highlight2
     clip: true
     radius: 5
-    border.color: skinStyle.highlight1
+    border.color: appStyle.highlight1
     border.width: 3
     MouseArea{
         anchors.fill: filedetailrect
@@ -33,7 +33,7 @@ Rectangle {
         id:titlerect
         height: childrenRect.height + 5
         width: parent.width
-        color:skinStyle.highlight1
+        color:appStyle.highlight1
         radius:2.5
         StyledText {
             id: text2

@@ -20,7 +20,7 @@ Item{
         }
     }
 
-    property string phil:useHandler ? dceHandler.item.pressed ? "yellow" : "black" :  fly_trap.pressed ? skinStyle.button_system_color_hover: skinStyle.button_system_color
+    property string phil:useHandler ? dceHandler.item.pressed ? "yellow" : "black" :  fly_trap.pressed ? appStyle.button_system_color_hover: appStyle.button_system_color
     property int textSize:28
     property alias buttonText:button_label.text
     property alias hitArea:fly_trap
@@ -47,7 +47,7 @@ Item{
 
    Rectangle{
        anchors.fill: parent
-       gradient:skinStyle.buttonGradient
+       gradient:appStyle.buttonGradient
        opacity: .50
        radius: bg_fill.radius
    }

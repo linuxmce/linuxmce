@@ -49,7 +49,7 @@ Item {
         font.weight: Font.DemiBold
         isBold: true
         font.pixelSize: scaleY(5)
-        color:skinStyle.tile_color
+        color:appStyle.tile_color
     }
 
 }

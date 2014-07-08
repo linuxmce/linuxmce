@@ -3,8 +3,8 @@ import QtQuick 1.0
 Rectangle{
 
     color: "transparent"
-    height: skinStyle.stdbuttonh
-    width: skinStyle.stdbuttonw
+    height: appStyle.stdbuttonh
+    width: appStyle.stdbuttonw
     property alias buttontext: buttonLabel.text
     property alias buttontextcolor: buttonLabel.color
     property alias buttontextfontsize: buttonLabel.font.pointSize
@@ -29,8 +29,8 @@ Rectangle{
     Rectangle {
         id:buttonBase
         color:"transparent"
-        height: skinStyle.stdbuttonh
-        width: skinStyle.stdbuttonw
+        height: appStyle.stdbuttonh
+        width: appStyle.stdbuttonw
         Image {
             id: button_bg
             source: "../img/buttonbg.png"

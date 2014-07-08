@@ -3,11 +3,11 @@ import "../"
 Item {
     id:genericBasicControls
     width: manager.appWidth
-    height:skinStyle.toolbarButtonHeight
+    height:appStyle.toolbarButtonHeight
 
     Rectangle{
         anchors.fill: parent
-        color:skinStyle.toolbarBgColor
+        color:appStyle.toolbarBgColor
     }
 
     Row{

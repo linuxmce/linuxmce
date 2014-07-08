@@ -7,6 +7,7 @@ Item {
     height: scaleY(8)
     property int slidertimer: (scroll_tab.x / scroller_transit.width) * dceTimecode.tcTotalTime
     visible:dceTimecode.tcTotalTime!==0
+
     Rectangle{
         id:drag_indicator
         height: scaleY(8)
@@ -28,8 +29,13 @@ Item {
         height: parent.height
         width: parent.width
         anchors.centerIn: parent
+    }
+
+    Rectangle{
+        id:timerFill
 
     }
+
     Image{
       id:scroller_fill
       source: "../img/active.png"

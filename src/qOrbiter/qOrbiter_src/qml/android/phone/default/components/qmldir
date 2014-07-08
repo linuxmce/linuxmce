@@ -39,6 +39,7 @@ GenericMetaData             GenericMetaData.qml                        #no comme
 GenericSelector             GenericSelector.qml                        #no comment
 GenreFilter             GenreFilter.qml                        #no comment
 GenreSelector             GenreSelector.qml                        #no comment
+GradientFiller             GradientFiller.qml                        #no comment
 HaControls             HaControls.qml                        #no comment
 HeaderListView             HeaderListView.qml                        #no comment
 HomeButtonDelegate             HomeButtonDelegate.qml                        #no comment

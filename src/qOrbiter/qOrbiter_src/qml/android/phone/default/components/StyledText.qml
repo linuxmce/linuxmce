@@ -11,7 +11,7 @@ Text {
     property double headerSize:scaleY(6)
     property double paraSize:manager.b_orientation ? scaleY(4) : scaleY(6)
     property double regSize:manager.b_orientation ? scaleY(3) : scaleY(5)
-    color:skinStyle.tile_color
+    color:appStyle.tile_color
     id:labelelement
     text: textLabel
     font.bold: isBold

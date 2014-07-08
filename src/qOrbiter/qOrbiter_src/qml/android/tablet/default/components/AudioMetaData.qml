@@ -60,7 +60,7 @@ Rectangle{
             smooth: true
             font.pixelSize: scaleY(3.5)
             visible:  dcenowplaying.mediatitle =="" ? false: true
-            color:skinStyle.accentcolor
+            color:appStyle.accentcolor
         }
         
         StyledText {
@@ -104,7 +104,7 @@ Rectangle{
              font.bold: true
             fontSize: scaleY(2)
             visible:  dcenowplaying.releasedate =="" ? false: true
-            color:skinStyle.accentColor
+            color:appStyle.accentColor
         }
         
     }

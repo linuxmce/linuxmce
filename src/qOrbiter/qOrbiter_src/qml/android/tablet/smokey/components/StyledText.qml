@@ -12,5 +12,5 @@ Text {
     font.pixelSize: fontSize
     font.weight: Font.Light
     font.family: appFont.name
-    color:skinStyle.tile_color
+    color:appStyle.tile_color
 }

@@ -11,7 +11,7 @@ Item {
     focus:true
 
     Style{
-        id:skinStyle
+        id:appStyle
     }
 
     Rectangle{
@@ -223,7 +223,7 @@ Item {
         }
         Rectangle{
             anchors.fill: parent
-            color:skinStyle.toolbarBgColor
+            color:appStyle.toolbarBgColor
 
         }
     }

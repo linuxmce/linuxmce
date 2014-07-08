@@ -16,6 +16,7 @@ FloorPlanOptions             FloorPlanOptions.qml                        #no com
 FpSprite             FpSprite.qml                        #no comment
 GenericAttributeSelector             GenericAttributeSelector.qml                        #no comment
 GenericFileDetails             GenericFileDetails.qml                        #no comment
+GradientFiller             GradientFiller.qml                        #no comment
 HeaderListView             HeaderListView.qml                        #no comment
 HomeScreenContent             HomeScreenContent.qml                        #no comment
 InformationPanel             InformationPanel.qml                        #no comment

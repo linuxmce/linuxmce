@@ -28,7 +28,7 @@ Item{
             smooth: true
             font.pixelSize: scaleY(4)
             visible:  dcenowplaying.mediatitle =="" ? false: true
-            color:skinStyle.accentcolor
+            color:appStyle.accentcolor
         }
         StyledText { /* showing up with performers! fix */
             id: title_text
@@ -89,7 +89,7 @@ Item{
             font.bold: true
             fontSize: scaleY(4)
             visible:  dcenowplaying.releasedate =="" ? false: true
-            color:skinStyle.accentColor
+            color:appStyle.accentColor
         }
     }
 }
