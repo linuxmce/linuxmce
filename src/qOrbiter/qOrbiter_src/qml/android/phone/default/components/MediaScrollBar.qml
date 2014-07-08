@@ -3,10 +3,18 @@ import QtQuick 1.1
 
 Item {
     id:scroller
-    width: scaleX(55)
+    anchors{
+        left:parent.left
+        right:parent.right
+        margins: 10
+    }
     height: scaleY(8)
-    property int slidertimer: (scroll_tab.x / scroller_transit.width) * dceTimecode.tcTotalTime
+    property int slidertimer: (scroll_tab.x / width) * dceTimecode.tcTotalTime
     visible:dceTimecode.tcTotalTime!==0
+    GradientFiller{
+        fillColor: "green"
+        grpRadius: 5
+    }
 
     Rectangle{
         id:drag_indicator
@@ -23,34 +31,37 @@ Item {
         anchors.topMargin: scaleY(1)
     }
 
-    Image {
-        id: scroller_transit
-        source: "../img/blue.png"
-        height: parent.height
-        width: parent.width
-        anchors.centerIn: parent
-    }
+
 
     Rectangle{
-        id:timerFill
-
+        radius: 5
+        color:"white"
+        height: parent.height-2
+        anchors{
+            right:scroll_tab.horizontalCenter
+            left:scroller.left
+            verticalCenter: parent.verticalCenter
+            margins: 2
+        }
+        opacity: .35
     }
 
-    Image{
-      id:scroller_fill
-      source: "../img/active.png"
-      height: scroll_tab.height -1
-      width: (scroller_transit.x + scroll_tab.x)+5
-      anchors.verticalCenter: scroller_transit.verticalCenter
-      anchors.left: scroller_transit.left
-    }
+//    Rectangle{
+//        id:elapsed_fill
+//        height: scroll_tab-1
+//        width: (scroller_transit.x + scroll_tab.x)+5
+//        anchors.verticalCenter: scroller.verticalCenter
+//        anchors.left: scroller_transit.left
+//    }
+
+
 
     Image {
         id: scroll_tab
         source: "../img/scroller.png"
         height: scaleY(9)
         width: scaleX(3)
-        anchors.verticalCenter: scroller_transit.verticalCenter
+        anchors.verticalCenter: parent.verticalCenter
         x: ( dceTimecode.runningTimer / dceTimecode.tcTotalTime) * scroller.width
         MouseArea{
             anchors.fill: parent
@@ -63,7 +74,7 @@ Item {
                                    dceTimecode.showDragTime(slidertimer)  }
                                else
                                {drag_indicator.opacity = 0
-                                   }
+                               }
             onReleased: {
                 drag_indicator.opacity =0
                 dceTimecode.finishDragging()
@@ -71,13 +82,14 @@ Item {
         }
     }
 
-    Text {
+    StyledText {
         id: np
         text:dceTimecode.qsCurrentTime
         font.pixelSize: scaleY(2.5)
-        anchors.bottom: media_scroller.top
+
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        anchors.horizontalCenter: media_scroller.horizontalCenter
+        anchors.horizontalCenter: scroller.horizontalCenter
+        anchors.verticalCenter: scroller.verticalCenter
         color: "white"
         visible:  dceTimecode.qsCurrentTime ==="0" ? false: true
     }
