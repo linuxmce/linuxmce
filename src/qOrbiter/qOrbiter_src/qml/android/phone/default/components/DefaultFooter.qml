@@ -43,7 +43,7 @@ Item{
             onActivated: {loadComponent("Power.qml")}
         }
         StyledText{
-           text:"Current Router Address:"+manager.m_ipAddress
+            text:"Current Router Address:"+manager.m_ipAddress
         }
     }
 
@@ -51,18 +51,29 @@ Item{
         State {
             name: "closed"
             when:manager.currentScreen!=="Screen_1.qml"
-            PropertyChanges {
+
+
+            AnchorChanges{
                 target: ftrItem
-                 height: manager.b_orientation ? scaleY(0) : scaleY(0)
+                anchors{
+                    bottom:undefined
+                    top:parent.bottom
+                }
             }
         },
         State {
             name: "open"
             when:manager.currentScreen="Screen_1.qml"
-            PropertyChanges {
+
+
+            AnchorChanges{
                 target: ftrItem
-                 height: manager.b_orientation ? scaleY(8) : scaleY(12)
+                anchors{
+                    top:undefined
+                    bottom:parent.bottom
+                }
             }
+
         }
     ]
 
