@@ -12,7 +12,11 @@ import "../components"
   *Advanced Device Controls
 
   */
-MediaPlaybackBase{
-id:screen_54
+StyledScreen{
+    MediaPlaybackBase{
+        id:screen_54
+
+    }
 
 }
+

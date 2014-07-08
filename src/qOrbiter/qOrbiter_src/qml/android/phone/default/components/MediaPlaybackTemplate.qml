@@ -142,10 +142,7 @@ Item {
             closeTimer.restart()
         }
 
-        MouseArea{
-            anchors.fill: parent
-            onClicked: mediaPlaybackBase.state = "controls"
-        }
+
         Timer{
             id:closeTimer
             running:parent.activeFocus

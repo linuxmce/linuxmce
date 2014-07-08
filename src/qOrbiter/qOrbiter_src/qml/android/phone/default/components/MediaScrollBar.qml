@@ -33,7 +33,7 @@ Item {
     Image{
       id:scroller_fill
       source: "../img/active.png"
-      height: scroller_transit.height
+      height: scroll_tab.height -1
       width: (scroller_transit.x + scroll_tab.x)+5
       anchors.verticalCenter: scroller_transit.verticalCenter
       anchors.left: scroller_transit.left

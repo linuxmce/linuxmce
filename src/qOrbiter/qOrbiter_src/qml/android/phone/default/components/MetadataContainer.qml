@@ -25,16 +25,6 @@ Item{
 
     }
 
-    onXChanged:{
-        if (x >  width*.65 ){
-            mediaPlaybackBase.state = "playlist"
-        }else if ( x+width < ( width *.20) ){
-            console.log("Advanced Mode")
-        }
-    }
-
-
-
     Rectangle{
         anchors.fill: parent
         color: "black"
@@ -50,19 +40,6 @@ Item{
             right:metadataContainer.right
             top:metadataContainer.top
         }
-    }
-    
-    
-    MouseArea{
-        id:md_drag
-        anchors.fill: parent
-        drag.target: metadataContainer
-        drag.axis: Drag.XAxis
-        drag.filterChildren: true
-        onReleased: if(enabled){
-                        mediaPlaybackBase.state="controls"
-                    }
-        
     }
     
     MediaScrollBar{
