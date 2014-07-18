@@ -1,13 +1,6 @@
-#!/bin/bash
+o#!/bin/bash
 
-. /usr/pluto/bin/Network_Parameters.sh
-. /usr/pluto/bin/LockUtils.sh
-
-AllowMark=0x01
-Rulenumber=0
-
-#Set defaults settings
-
+#Set defaults settings to conf file (pluto.conf
 #Set default blocklist on
 blocklist=$(cat /etc/pluto.conf | grep fw_blocklist)
 if [[ "$blocklist" == "" ]]; then
@@ -39,46 +32,64 @@ if [[ "$fwVersion" == "" ]]; then
 	echo fwVersion=ipv4 >> /etc/pluto.conf
 fi
 
+#get configs and set other default values
+. /usr/pluto/bin/Network_Parameters.sh
+. /usr/pluto/bin/LockUtils.sh
+
+AllowMark=0x01
+Rulenumber=0
+
 #set rules to the db what are not set and need to work for the network,
 #set the rules only as advanced firewall is not set as advanced firewall is set user can use the default or set his own rules.
-if [[ "$AdvancedFirewall" == "0" ]]; then
+#if [[ "$AdvancedFirewall" == "0" ]]; then
    #IPV4
 	# Set default policy's
 	Q="SELECT Matchname, Protocol FROM Firewall WHERE RuleType='policyipv4' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType) VALUES ('DROP', 'input', 'policyipv4')"
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType) VALUES ('DROP', 'forward', 'policyipv4')"
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType) VALUES ('ACCEPT', 'output', 'policyipv4')"
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType) VALUES ('DROP', 'input', 'policyipv4')"
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType) VALUES ('DROP', 'forward', 'policyipv4')"
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType) VALUES ('ACCEPT', 'output', 'policyipv4')"
+		$(RunSQL "$Q")
 	fi
 
 	# Set loopback interface
 	Q="SELECT Description FROM Firewall WHERE Description='Allow Loopback' AND Protocol LIKE '%-ipv4' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-        mysql pluto_main -ss -e"INSERT INTO Firewall (Description, IntIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'all-ipv4', 'input', 'ACCEPT')"
-        mysql pluto_main -ss -e"INSERT INTO Firewall (Description, ExtIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'all-ipv4', 'output', 'ACCEPT')"
-        mysql pluto_main -ss -e"INSERT INTO Firewall (Description, IntIf, ExtIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'lo', 'all-ipv4', 'forward', 'ACCEPT')"
+        Q="INSERT INTO Firewall (Description, IntIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'all-ipv4', 'input', 'ACCEPT')"
+		$(RunSQL "$Q")
+        Q="INSERT INTO Firewall (Description, ExtIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'all-ipv4', 'output', 'ACCEPT')"
+		$(RunSQL "$Q")
+        Q="INSERT INTO Firewall (Description, IntIf, ExtIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'lo', 'all-ipv4', 'forward', 'ACCEPT')"
+		$(RunSQL "$Q")
 	fi
 
 	# Set stateful inspection
 	Q="SELECT Matchname, Protocol FROM Firewall WHERE Matchname='-m state --state ESTABLISHED,RELATED' AND Protocol LIKE '%-ipv4' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv4', 'input', 'ACCEPT', 'Allow Established')"
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv4', 'forward', 'ACCEPT', 'Allow Established')"
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv4', 'output', 'ACCEPT', 'Allow Established')"
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv4', 'input', 'ACCEPT', 'Allow Established')"
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv4', 'forward', 'ACCEPT', 'Allow Established')"$(RunSQL "$Q")		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv4', 'output', 'ACCEPT', 'Allow Established')"
+		$(RunSQL "$Q")
 	fi
 	
 	#DHCP/BOOTP
 	Q="SELECT Matchname, IntIF, Protocol, SourcePort, Ruletype FROM Firewall WHERE IntIf='$IntIf' AND Protocol='udp-ipv4' AND SourcePort='67' AND RuleType='input' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-		mysql pluto_main -ss -e"INSERT INTO Firewall (IntIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('$IntIf', 'udp-ipv4', '67', 'input', 'ACCEPT', 'Allow DHCP')"
-		mysql pluto_main -ss -e"INSERT INTO Firewall (ExtIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('$IntIf', 'udp-ipv4', '68', 'output', 'ACCEPT', 'Allow DHCP')"
+		Q="INSERT INTO Firewall (IntIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('$IntIf', 'udp-ipv4', '67', 'input', 'ACCEPT', 'Allow DHCP')"
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (ExtIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('$IntIf', 'udp-ipv4', '68', 'output', 'ACCEPT', 'Allow DHCP')"
+		$(RunSQL "$Q")
 		if [[ "$ExtIP" == "DHCP" ]] || [[ "$ExtIP" == "dhcp" ]]; then
-			mysql pluto_main -ss -e"INSERT INTO Firewall (IntIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('$ExtIf', 'udp-ipv4', '68', 'input', 'ACCEPT', 'Allow DHCP')"
-			mysql pluto_main -ss -e"INSERT INTO Firewall (ExtIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('$ExtIf', 'udp-ipv4', '67', 'output', 'ACCEPT', 'Allow DHCP')"
+			Q="INSERT INTO Firewall (IntIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('$ExtIf', 'udp-ipv4', '68', 'input', 'ACCEPT', 'Allow DHCP')"
+			$(RunSQL "$Q")
+			Q="INSERT INTO Firewall (ExtIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('$ExtIf', 'udp-ipv4', '67', 'output', 'ACCEPT', 'Allow DHCP')"
+			$(RunSQL "$Q")
 		fi
 	fi
 	
@@ -86,7 +97,8 @@ if [[ "$AdvancedFirewall" == "0" ]]; then
 	Q="SELECT Matchname, IntIF, SourceIP, Ruletype FROM Firewall WHERE IntIf='$IntIf' AND SourceIP='$IntNet/$IntBitmask' AND RuleType='input' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-		mysql pluto_main -ss -e"INSERT INTO Firewall (IntIF, SourceIP, Protocol, RuleType, RPolicy, Description) VALUES ('$IntIf', '$IntNet/$IntBitmask', 'all-ipv4', 'input', 'ACCEPT', 'Allow Local Network')"
+		Q="INSERT INTO Firewall (IntIF, SourceIP, Protocol, RuleType, RPolicy, Description) VALUES ('$IntIf', '$IntNet/$IntBitmask', 'all-ipv4', 'input', 'ACCEPT', 'Allow Local Network')"
+		$(RunSQL "$Q")
 	fi
 	
 	# Allow certain ICMP traffic
@@ -96,38 +108,51 @@ if [[ "$AdvancedFirewall" == "0" ]]; then
 	Q="SELECT Matchname, Protocol FROM Firewall WHERE RuleType='policyipv6' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType) VALUES ('DROP', 'input', 'policyipv6')"
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType) VALUES ('DROP', 'forward', 'policyipv6')"
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType) VALUES ('ACCEPT', 'output', 'policyipv6')"
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType) VALUES ('DROP', 'input', 'policyipv6')"
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType) VALUES ('DROP', 'forward', 'policyipv6')"
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType) VALUES ('ACCEPT', 'output', 'policyipv6')"
+		$(RunSQL "$Q")
 	fi
 	
 	# Set loopback interface
 	Q="SELECT Description FROM Firewall WHERE Description='Allow Loopback' AND Protocol LIKE '%-ipv6' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-        mysql pluto_main -ss -e"INSERT INTO Firewall (Description, IntIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'all-ipv6', 'input', 'ACCEPT')"
-        mysql pluto_main -ss -e"INSERT INTO Firewall (Description, ExtIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'all-ipv6', 'output', 'ACCEPT')"
-        mysql pluto_main -ss -e"INSERT INTO Firewall (Description, IntIf, ExtIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'lo', 'all-ipv6', 'forward', 'ACCEPT')"
+        Q="INSERT INTO Firewall (Description, IntIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'all-ipv6', 'input', 'ACCEPT')"
+		$(RunSQL "$Q")
+        Q="INSERT INTO Firewall (Description, ExtIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'all-ipv6', 'output', 'ACCEPT')"
+		$(RunSQL "$Q")
+        Q="INSERT INTO Firewall (Description, IntIf, ExtIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'lo', 'all-ipv6', 'forward', 'ACCEPT')"
+		$(RunSQL "$Q")
 	fi
 
 	# Set stateful inspection
 	Q="SELECT Matchname FROM Firewall WHERE Matchname='-m state --state ESTABLISHED,RELATED' AND Protocol LIKE '%-ipv6' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv6', 'input', 'ACCEPT', 'Allow Established')"
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv6', 'forward', 'ACCEPT', 'Allow Established')"
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv6', 'output', 'ACCEPT', 'Allow Established')"
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv6', 'input', 'ACCEPT', 'Allow Established')"
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv6', 'forward', 'ACCEPT', 'Allow Established')"
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv6', 'output', 'ACCEPT', 'Allow Established')"
+		$(RunSQL "$Q")
 	fi
 
 	#DHCP/BOOTP
 		Q="SELECT Matchname, IntIF, Protocol, SourcePort, Ruletype FROM Firewall WHERE IntIf='$IntIf' AND Protocol='udp-ipv6' AND SourcePort='546' AND RuleType='input' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-		mysql pluto_main -ss -e"INSERT INTO Firewall (IntIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('$IntIf', 'udp-ipv6', '546', 'input', 'ACCEPT', 'Allow DHCP')"
-		mysql pluto_main -ss -e"INSERT INTO Firewall (ExtIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('$IntIf', 'udp-ipv6', '547', 'output', 'ACCEPT', 'Allow DHCP')"
+		Q="INSERT INTO Firewall (IntIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('$IntIf', 'udp-ipv6', '546', 'input', 'ACCEPT', 'Allow DHCP')"
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (ExtIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('$IntIf', 'udp-ipv6', '547', 'output', 'ACCEPT', 'Allow DHCP')"
+		$(RunSQL "$Q")
 		if [[ "$Extv6IP" == "DHCP" ]] || [[ "$Extv6IP" == "dhcp" ]]; then
-			mysql pluto_main -ss -e"INSERT INTO Firewall (IntIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('$ExtIf', 'udp-ipv6', '547', 'input', 'ACCEPT', 'Allow DHCP')"
-			mysql pluto_main -ss -e"INSERT INTO Firewall (ExtIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('$ExtIf', 'udp-ipv6', '546', 'output', 'ACCEPT', 'Allow DHCP')"
+			Q="INSERT INTO Firewall (IntIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('$ExtIf', 'udp-ipv6', '547', 'input', 'ACCEPT', 'Allow DHCP')"
+			$(RunSQL "$Q")
+			Q="INSERT INTO Firewall (ExtIF, Protocol, SourcePort, RuleType, RPolicy, Description) VALUES ('$ExtIf', 'udp-ipv6', '546', 'output', 'ACCEPT', 'Allow DHCP')"
+			$(RunSQL "$Q")
 		fi
 	fi
 	
@@ -135,31 +160,47 @@ if [[ "$AdvancedFirewall" == "0" ]]; then
 	Q="SELECT Matchname, IntIF, SourceIP, Ruletype FROM Firewall WHERE IntIf='$IntIf' AND SourceIP='$Intv6Net/$Intv6Netmask' AND RuleType='input' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-		[[ ! "$Intv6Net" == "disabled::" ]] && mysql pluto_main -ss -e"INSERT INTO Firewall (IntIF, SourceIP, Protocol, RuleType, RPolicy, Description) VALUES ('$IntIf', '$Intv6Net/$Intv6Netmask', 'allp-ipv6', 'input', 'ACCEPT', 'Allow Local Network')"
-		[[ ! "$Intv6Net" == "disabled::" ]] && mysql pluto_main -ss -e"INSERT INTO Firewall (IntIF, SourceIP, Protocol, RuleType, RPolicy, Description) VALUES ('$IntIf', '$Intv6Net/$Intv6Netmask', 'all-ipv6', 'forward', 'ACCEPT', 'Allow Local Network')"
+		[[ ! "$Intv6Net" == "disabled::/" ]] && Q="INSERT INTO Firewall (IntIF, SourceIP, Protocol, RuleType, RPolicy, Description) VALUES ('$IntIf', '$Intv6Net/$Intv6Netmask', 'all-ipv6', 'input', 'ACCEPT', 'Allow Local Network')" && $(RunSQL "$Q")
+		[[ ! "$Intv6Net" == "disabled::/" ]] && Q="INSERT INTO Firewall (IntIF, SourceIP, Protocol, RuleType, RPolicy, Description) VALUES ('$IntIf', '$Intv6Net/$Intv6Netmask', 'all-ipv6', 'forward', 'ACCEPT', 'Allow Local Network')" && $(RunSQL "$Q")
 	fi
 	
 	# Allow certain ICMP traffic
 	Q="SELECT Description FROM Firewall WHERE Description='Allow PING requests' AND Protocol LIKE '%-ipv6' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('--icmpv6-type 128', 'icmpv6-ipv6', 'input', 'ACCEPT', 'Allow PING requests')"
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('--icmpv6-type 129', 'icmpv6-ipv6', 'input', 'ACCEPT', 'Allow PING replys')"
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('--icmpv6-type 133 -m hl --hl-eq 255', 'icmpv6-ipv6', 'input', 'ACCEPT', '')" #Allow Router solicitation
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('--icmpv6-type 134 -m hl --hl-eq 255', 'icmpv6-ipv6', 'input', 'ACCEPT', '')" #Allow Router solicitation
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('--icmpv6-type 135 -m hl --hl-eq 255', 'icmpv6-ipv6', 'input', 'ACCEPT', '')" #Allow Neighbor solicitation
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('--icmpv6-type 136 -m hl --hl-eq 255', 'icmpv6-ipv6', 'input', 'ACCEPT', '')" #Allow Neighbor advertisement
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('--icmpv6-type 137 -m hl --hl-eq 255', 'icmpv6-ipv6', 'input', 'ACCEPT', '')" #Allow Redirect message
+		echo "ipv6 icmp"
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m icmp6  --icmpv6-type 128', 'icmp-ipv6', 'input', 'ACCEPT', 'Allow PING requests')"
+		$(RunSQL "$Q")
+		echo $Q
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m icmp6 --icmpv6-type 129', 'icmp-ipv6', 'input', 'ACCEPT', 'Allow PING replys')"
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m icmp6 --icmpv6-type 133 -m hl --hl-eq 255', 'icmp-ipv6', 'input', 'ACCEPT', '')" #Allow Router solicitation
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m icmp6 --icmpv6-type 134 -m hl --hl-eq 255', 'icmp-ipv6', 'input', 'ACCEPT', '')" #Allow Router solicitation
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m icmp6 --icmpv6-type 135 -m hl --hl-eq 255', 'icmp-ipv6', 'input', 'ACCEPT', '')" #Allow Neighbor solicitation
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m icmp6 --icmpv6-type 136 -m hl --hl-eq 255', 'icmp-ipv6', 'input', 'ACCEPT', '')" #Allow Neighbor advertisement
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m icmp6 --icmpv6-type 137 -m hl --hl-eq 255', 'icmp-ipv6', 'input', 'ACCEPT', '')" #Allow Redirect message
+		$(RunSQL "$Q")
 
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('--icmpv6-type 128', 'icmpv6-ipv6', 'output', 'ACCEPT', 'Allow PING requests')"
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('--icmpv6-type 129', 'icmpv6-ipv6', 'output', 'ACCEPT', 'Allow PING replys')"
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('--icmpv6-type 133 -m hl --hl-eq 255', 'icmpv6-ipv6', 'output', 'ACCEPT', '')" #Allow Router solicitation
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('--icmpv6-type 134 -m hl --hl-eq 255', 'icmpv6-ipv6', 'output', 'ACCEPT', '')" #Allow Router solicitation
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('--icmpv6-type 135 -m hl --hl-eq 255', 'icmpv6-ipv6', 'output', 'ACCEPT', '')" #Allow Neighbor solicitation
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('--icmpv6-type 136 -m hl --hl-eq 255', 'icmpv6-ipv6', 'output', 'ACCEPT', '')" #Allow Neighbor advertisement
-		mysql pluto_main -ss -e"INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('--icmpv6-type 137 -m hl --hl-eq 255', 'icmpv6-ipv6', 'output', 'ACCEPT', '')" #Allow Redirect message
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m icmp6 --icmpv6-type 128', 'icmp-ipv6', 'output', 'ACCEPT', 'Allow PING requests')"
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m icmp6 --icmpv6-type 129', 'icmp-ipv6', 'output', 'ACCEPT', 'Allow PING replys')"
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m icmp6 --icmpv6-type 133 -m hl --hl-eq 255', 'icmp-ipv6', 'output', 'ACCEPT', '')" #Allow Router solicitation
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m icmp6 --icmpv6-type 134 -m hl --hl-eq 255', 'icmp-ipv6', 'output', 'ACCEPT', '')" #Allow Router solicitation
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m icmp6 --icmpv6-type 135 -m hl --hl-eq 255', 'icmp-ipv6', 'output', 'ACCEPT', '')" #Allow Neighbor solicitation
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m icmp6 --icmpv6-type 136 -m hl --hl-eq 255', 'icmp-ipv6', 'output', 'ACCEPT', '')" #Allow Neighbor advertisement
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m icmp6 --icmpv6-type 137 -m hl --hl-eq 255', 'icmp-ipv6', 'output', 'ACCEPT', '')" #Allow Redirect message
+		$(RunSQL "$Q")
 	fi
-fi
+#fi
 
 #include a list with Firewall aplications to scripts what set the settings for the applications listed.
 . /usr/pluto/bin/Firewall_applications.sh
@@ -184,13 +225,21 @@ IPTables ()
 		Description="${12}"
 
 		if [[ "$IntIf" != "" ]] &&  [[ "$IntIf" != "NULL" ]]; then
-			parmIntIf="-i $IntIf"
+			if [[ "$IntIf" == "ipv6tunn" ]]; then
+				parmIntIf="-i ipv6tunnel"
+			else
+				parmIntIf="-i $IntIf"
+			fi
 		else
 			parmIntIf=""
 		fi
 
 		if [[ "$ExtIf" != "" ]] && [[ "$ExtIf" != "NULL" ]]; then
-			parmExtIf="-o $ExtIf"
+			if [[ "$ExtIf" == "ipv6tunn" ]]; then
+				parmExtIf="-o ipv6tunnel"
+			else
+				parmExtIf="-o $ExtIf"
+			fi
 		else
 			parmExtIf=""
 		fi
@@ -204,9 +253,6 @@ IPTables ()
 			Protocol=""
 		elif [[ "$Protocol" == "all" ]]; then
 			Protocol="all"
-		elif [[ "$Protocol" == "icmpv6" ]]; then
-			Protocol="icmpv6"
-			#parmD/SPort=""
 		else
 			Protocol="-p $Protocol"
 		fi
@@ -324,9 +370,13 @@ Manual_CHain_Rules()
 		tmp=$(Field 4 "$Port")
 		echo $tmp | grep -q '-'
 		if [ $? -eq 0 ]; then
-    		Protocol="$(echo $tmp | cut -d"-" -f 1)"
+			if [[ "$tmp" == "icmp-ipv6" ]]; then
+				Protocol="icmpv6"
+			else
+				Protocol="$(echo $tmp | cut -d"-" -f 1)"
+			fi
 		else
-   			Protocol=$(Field 3 "$Port")
+			Protocol=$(Field 3 "$Port")
 		fi
 		SrcIP=$(Field 5 "$Port")
 		SrcPort1=$(Field 6 "$Port")
@@ -550,9 +600,13 @@ for Protocol in $R; do
 				tmp=$(Field 4 "$Port")
 				echo $tmp | grep -q '-'
 				if [ $? -eq 0 ]; then
-			    		Protocol="$(echo $tmp | cut -d"-" -f 1)"
+					if [[ "$tmp" == "icmp-ipv6" ]]; then
+						Protocol="icmpv6"
+					else
+						Protocol="$(echo $tmp | cut -d"-" -f 1)"
+					fi
 				else
-		    			Protocol=$(Field 3 "$Port")
+					Protocol=$(Field 3 "$Port")
 				fi
 				SrcIP=$(Field 5 "$Port")
 				SrcPort1=$(Field 6 "$Port")
@@ -600,9 +654,13 @@ for Protocol in $R; do
 				tmp=$(Field 4 "$Port")
 				echo $tmp | grep -q '-'
 				if [ $? -eq 0 ]; then
-			    		Protocol="$(echo $tmp | cut -d"-" -f 1)"
+					if [[ "$tmp" == "icmp-ipv6" ]]; then
+						Protocol="icmpv6"
+					else
+						Protocol="$(echo $tmp | cut -d"-" -f 1)"
+					fi
 				else
-		    			Protocol=$(Field 3 "$Port")
+					Protocol=$(Field 3 "$Port")
 				fi
 				SrcIP=$(Field 5 "$Port")
 				SrcPort1=$(Field 6 "$Port")
@@ -645,9 +703,13 @@ for ForwardType in "${ForwardTypeArr[@]}"; do
 				tmp=$(Field 5 "$Port")
 				echo $tmp | grep -q '-'
 				if [ $? -eq 0 ]; then
-			    		Protocol="$(echo $tmp | cut -d"-" -f 1)"
+					if [[ "$tmp" == "icmp-ipv6" ]]; then
+						Protocol="icmpv6"
+					else
+						Protocol="$(echo $tmp | cut -d"-" -f 1)"
+					fi
 				else
-		    			Protocol=$(Field 5 "$Port")
+					Protocol=$(Field 5 "$Port")
 				fi
 				SrcIP=$(Field 6 "$Port")
 				SrcPort1=$(Field 7 "$Port")
@@ -738,9 +800,13 @@ for Protocol in $R; do
 				tmp=$(Field 4 "$Port")
 				echo $tmp | grep -q '-'
 				if [ $? -eq 0 ]; then
-			    		Protocol="$(echo $tmp | cut -d"-" -f 1)"
+					if [[ "$tmp" == "icmp-ipv6" ]]; then
+						Protocol="icmpv6"
+					else
+						Protocol="$(echo $tmp | cut -d"-" -f 1)"
+					fi
 				else
-		    			Protocol=$(Field 3 "$Port")
+					Protocol=$(Field 3 "$Port")
 				fi
 				SrcIP=$(Field 5 "$Port")
 				SrcPort1=$(Field 6 "$Port")
