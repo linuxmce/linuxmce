@@ -7,6 +7,8 @@ debian/tmp/usr/share/hal/fdi/
 # Now conditionally installed from debian/rules:
 # debian/tmp/lib/udev/rules.d/
 debian/preferences.fdi  etc/hal/fdi/policy
+debian/preferences.fdi  etc/hal/fdi/preprobe
+debian/preferences.fdi  etc/hal/fdi/information
 debian/debian-storage-policy-ignore-fixed-crypto-drives.fdi usr/share/hal/fdi/policy/10osvendor
 # D-Bus activation
 debian/org.freedesktop.Hal.service usr/share/dbus-1/system-services/

@@ -21,6 +21,7 @@ Build-Depends: debhelper (>= 8),
  libusbhid-dev [kfreebsd-any],
  libcam-dev [kfreebsd-any],
  libblkid-dev (>= 2.15),
+ libudev-dev (>= 185),
  xmlto,
  libxml2-utils,
  gtk-doc-tools,
@@ -43,8 +44,7 @@ Depends: ${shlibs:Depends}, ${misc:Depends},
  mount (>= 2.13) [linux-any],
  freebsd-utils [kfreebsd-any]
 Recommends: eject,
- pm-utils [linux-any],
- consolekit (>= 0.3)
+ pm-utils [linux-any]
 Breaks: xserver-xorg (<< 1:7.6+8)
 Description: Hardware Abstraction Layer
  HAL provides an abstract view on hardware.

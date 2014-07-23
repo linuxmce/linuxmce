@@ -35,6 +35,7 @@ install/hal::
 binary-install/hal::
 	# Only install udev rules on Linux architectures. The
 	# directory doesn't even exist on e.g. GNU/kFreeBSD
-ifeq ($(DEB_HOST_ARCH_OS),linux)
-	dh_install -phal debian/tmp/lib/udev/rules.d/
-endif
+	# (disabled for everything now, the udev format has changed).
+	#ifeq ($(DEB_HOST_ARCH_OS),linux)
+	#dh_install -phal debian/tmp/lib/udev/rules.d/
+	#endif

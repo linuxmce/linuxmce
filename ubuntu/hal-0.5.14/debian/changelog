@@ -1,3 +1,41 @@
+hal (0.5.14-8ubuntu2ppa5) saucy; urgency=low
+
+  * As a hack, install preferences.fdi into /etc/hal/fdi/{preprobe,information}
+    so that fdi cache generation works (lp: #1192171)
+
+ -- Michael Blennerhassett <mjblenner@gmail.com>  Mon, 01 Jul 2013 21:26:46 +1000
+
+hal (0.5.14-8ubuntu2ppa4) saucy; urgency=low
+
+  * Don't install /lib/udev/rules.d/90-hal.rules
+
+ -- Michael Blennerhassett <mjblenner@gmail.com>  Mon, 01 Jul 2013 19:19:11 +1000
+
+hal (0.5.14-8ubuntu2ppa3) saucy; urgency=low
+
+  * Hardcode /dev, rather than using udevadm
+
+ -- Michael Blennerhassett <mjblenner@gmail.com>  Mon, 01 Jul 2013 18:33:00 +1000
+
+hal (0.5.14-8ubuntu2ppa2) saucy; urgency=low
+
+  * Add libudev-dev dep.
+
+ -- Michael Blennerhassett <mjblenner@gmail.com>  Sun, 30 Jun 2013 21:23:23 +1000
+
+hal (0.5.14-8ubuntu2ppa1) saucy; urgency=low
+
+  * Get the events directly from libudev.
+
+ -- Michael Blennerhassett <mjblenner@gmail.com>  Sun, 30 Jun 2013 20:05:27 +1000
+
+hal (0.5.14-8ubuntu2) saucy; urgency=low
+
+  * Drop consolekit recommends; consolekit support already has been disabled
+    in 2009.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Tue, 30 Apr 2013 16:39:25 -0700
+
 hal (0.5.14-8ubuntu1) raring; urgency=low
 
   * Added missing preprocessor directive, fixing FTBFS

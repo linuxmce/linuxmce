@@ -17,3 +17,5 @@
 60-create-run-hald-directory.patch
 65-glib-single-include.patch
 66-missing-types_h.patch
+66-hal-libudev-events.patch
+68-udevadm-update.patch
