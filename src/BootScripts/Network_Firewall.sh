@@ -1,4 +1,4 @@
-o#!/bin/bash
+#!/bin/bash
 
 #Set defaults settings to conf file (pluto.conf
 #Set default blocklist on
@@ -39,9 +39,17 @@ fi
 AllowMark=0x01
 Rulenumber=0
 
+if [[ -n "$IntIP" ]]; then
+	#TODO: use 4 byte netmask in these calculations
+	IntNet="$(echo "$IntIP" | cut -d. -f-3).0"
+	IntBitmask=24
+
+	Intv6Net="$(echo "$Intv6IP" | cut -d":" -f-4):"
+fi
+
 #set rules to the db what are not set and need to work for the network,
 #set the rules only as advanced firewall is not set as advanced firewall is set user can use the default or set his own rules.
-#if [[ "$AdvancedFirewall" == "0" ]]; then
+if [[ "$AdvancedFirewall" == "0" ]]; then
    #IPV4
 	# Set default policy's
 	Q="SELECT Matchname, Protocol FROM Firewall WHERE RuleType='policyipv4' ORDER BY PK_Firewall"
@@ -59,11 +67,11 @@ Rulenumber=0
 	Q="SELECT Description FROM Firewall WHERE Description='Allow Loopback' AND Protocol LIKE '%-ipv4' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-        Q="INSERT INTO Firewall (Description, IntIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'all-ipv4', 'input', 'ACCEPT')"
+        Q="INSERT INTO Firewall (Description, IntIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'ip-ipv4', 'input', 'ACCEPT')"
 		$(RunSQL "$Q")
-        Q="INSERT INTO Firewall (Description, ExtIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'all-ipv4', 'output', 'ACCEPT')"
+        Q="INSERT INTO Firewall (Description, ExtIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'ip-ipv4', 'output', 'ACCEPT')"
 		$(RunSQL "$Q")
-        Q="INSERT INTO Firewall (Description, IntIf, ExtIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'lo', 'all-ipv4', 'forward', 'ACCEPT')"
+        Q="INSERT INTO Firewall (Description, IntIf, ExtIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'lo', 'ip-ipv4', 'forward', 'ACCEPT')"
 		$(RunSQL "$Q")
 	fi
 
@@ -71,9 +79,9 @@ Rulenumber=0
 	Q="SELECT Matchname, Protocol FROM Firewall WHERE Matchname='-m state --state ESTABLISHED,RELATED' AND Protocol LIKE '%-ipv4' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv4', 'input', 'ACCEPT', 'Allow Established')"
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'ip-ipv4', 'input', 'ACCEPT', 'Allow Established')"
 		$(RunSQL "$Q")
-		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv4', 'forward', 'ACCEPT', 'Allow Established')"$(RunSQL "$Q")		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv4', 'output', 'ACCEPT', 'Allow Established')"
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'ip-ipv4', 'forward', 'ACCEPT', 'Allow Established')"$(RunSQL "$Q")		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv4', 'output', 'ACCEPT', 'Allow Established')"
 		$(RunSQL "$Q")
 	fi
 	
@@ -97,7 +105,9 @@ Rulenumber=0
 	Q="SELECT Matchname, IntIF, SourceIP, Ruletype FROM Firewall WHERE IntIf='$IntIf' AND SourceIP='$IntNet/$IntBitmask' AND RuleType='input' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-		Q="INSERT INTO Firewall (IntIF, SourceIP, Protocol, RuleType, RPolicy, Description) VALUES ('$IntIf', '$IntNet/$IntBitmask', 'all-ipv4', 'input', 'ACCEPT', 'Allow Local Network')"
+		Q="INSERT INTO Firewall (IntIF, SourceIP, Protocol, RuleType, RPolicy, Description) VALUES ('$IntIf', '$IntNet/$IntBitmask', 'ip-ipv4', 'input', 'ACCEPT', 'Allow Local Network')"
+		$(RunSQL "$Q")
+		Q="INSERT INTO Firewall (IntIF, SourceIP, Protocol, RuleType, RPolicy, Description) VALUES ('$IntIf', '$IntNet/$IntBitmask', 'ip-ipv4', 'forward', 'ACCEPT', 'Allow Local Network')"
 		$(RunSQL "$Q")
 	fi
 	
@@ -120,11 +130,11 @@ Rulenumber=0
 	Q="SELECT Description FROM Firewall WHERE Description='Allow Loopback' AND Protocol LIKE '%-ipv6' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-        Q="INSERT INTO Firewall (Description, IntIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'all-ipv6', 'input', 'ACCEPT')"
+        Q="INSERT INTO Firewall (Description, IntIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'ip-ipv6', 'input', 'ACCEPT')"
 		$(RunSQL "$Q")
-        Q="INSERT INTO Firewall (Description, ExtIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'all-ipv6', 'output', 'ACCEPT')"
+        Q="INSERT INTO Firewall (Description, ExtIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'ip-ipv6', 'output', 'ACCEPT')"
 		$(RunSQL "$Q")
-        Q="INSERT INTO Firewall (Description, IntIf, ExtIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'lo', 'all-ipv6', 'forward', 'ACCEPT')"
+        Q="INSERT INTO Firewall (Description, IntIf, ExtIf, Protocol, RuleType, RPolicy) VALUES ('Allow Loopback', 'lo', 'lo', 'ip-ipv6', 'forward', 'ACCEPT')"
 		$(RunSQL "$Q")
 	fi
 
@@ -132,11 +142,11 @@ Rulenumber=0
 	Q="SELECT Matchname FROM Firewall WHERE Matchname='-m state --state ESTABLISHED,RELATED' AND Protocol LIKE '%-ipv6' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv6', 'input', 'ACCEPT', 'Allow Established')"
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'ip-ipv6', 'input', 'ACCEPT', 'Allow Established')"
 		$(RunSQL "$Q")
-		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv6', 'forward', 'ACCEPT', 'Allow Established')"
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'ip-ipv6', 'forward', 'ACCEPT', 'Allow Established')"
 		$(RunSQL "$Q")
-		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv6', 'output', 'ACCEPT', 'Allow Established')"
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'ip-ipv6', 'output', 'ACCEPT', 'Allow Established')"
 		$(RunSQL "$Q")
 	fi
 
@@ -160,8 +170,8 @@ Rulenumber=0
 	Q="SELECT Matchname, IntIF, SourceIP, Ruletype FROM Firewall WHERE IntIf='$IntIf' AND SourceIP='$Intv6Net/$Intv6Netmask' AND RuleType='input' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 	if ! [ "$R" ]; then
-		[[ ! "$Intv6Net" == "disabled::/" ]] && Q="INSERT INTO Firewall (IntIF, SourceIP, Protocol, RuleType, RPolicy, Description) VALUES ('$IntIf', '$Intv6Net/$Intv6Netmask', 'all-ipv6', 'input', 'ACCEPT', 'Allow Local Network')" && $(RunSQL "$Q")
-		[[ ! "$Intv6Net" == "disabled::/" ]] && Q="INSERT INTO Firewall (IntIF, SourceIP, Protocol, RuleType, RPolicy, Description) VALUES ('$IntIf', '$Intv6Net/$Intv6Netmask', 'all-ipv6', 'forward', 'ACCEPT', 'Allow Local Network')" && $(RunSQL "$Q")
+		[[ ! "$Intv6Net" == "disabled::/" ]] && Q="INSERT INTO Firewall (IntIF, SourceIP, Protocol, RuleType, RPolicy, Description) VALUES ('$IntIf', '$Intv6Net/$Intv6Netmask', 'ip-ipv6', 'input', 'ACCEPT', 'Allow Local Network')" && $(RunSQL "$Q")
+		[[ ! "$Intv6Net" == "disabled::/" ]] && Q="INSERT INTO Firewall (IntIF, SourceIP, Protocol, RuleType, RPolicy, Description) VALUES ('$IntIf', '$Intv6Net/$Intv6Netmask', 'ip-ipv6', 'forward', 'ACCEPT', 'Allow Local Network')" && $(RunSQL "$Q")
 	fi
 	
 	# Allow certain ICMP traffic
@@ -200,7 +210,7 @@ Rulenumber=0
 		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m icmp6 --icmpv6-type 137 -m hl --hl-eq 255', 'icmp-ipv6', 'output', 'ACCEPT', '')" #Allow Redirect message
 		$(RunSQL "$Q")
 	fi
-#fi
+fi
 
 #include a list with Firewall aplications to scripts what set the settings for the applications listed.
 . /usr/pluto/bin/Firewall_applications.sh
@@ -250,7 +260,13 @@ IPTables ()
 	
 		#ToDo check Protocol
 		if [[ "$Protocol" == "ip" ]]; then
-			Protocol=""
+			parmSPort=""
+			tmp="$(echo $SrcPort | cut -d: -f1)"
+			if [[ -n "$tmp" && ("$tmp" != "NULL" || "$tmp" -ne 0) ]]; then
+				Protocol="-p $tmp"
+			else
+				Protocol=""
+			fi	
 		elif [[ "$Protocol" == "all" ]]; then
 			Protocol="all"
 		else
@@ -271,7 +287,7 @@ IPTables ()
 			FilterIP6="-s $FilterIP"
 		fi
 
-		if [[ "$SrcPort" == ":" ]] || [[ "$SrcPort" == "NULL" ]] || [[ "$SrcPort" == "NULL:NULL" ]]; then
+		if [[ "$SrcPort" == ":" ]] || [[ "$SrcPort" == "NULL" ]] || [[ "$SrcPort" == "NULL:NULL" ]] || [[ "$parmSPort" == "" ]]; then
 			parmSPort=""
 		else
 			parmSPort="--sport $SrcPort"
@@ -335,17 +351,19 @@ IPTables ()
 		# apply rule to IPv6 chain if needed
 	if [[ "$IPversion" == ipv6 ]] || [[ "$IPversion" == both ]]; then
 		if [[ ! "$DisableIPv6Firewall" == "1" ]]; then
-			if [[ "$Matchname" != "" ]] && [[ "$Matchname" != "NULL" ]]; then
+			if [[ ! "$Protocol" == "all" ]]; then
 				echo ip6tables $RuleType $parmIntIf $parmExtIf $Matchname $Protocol $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
-				ip6tables $RuleType $parmIntIf $parmExtIf $Matchname $Protocol $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
+					ip6tables $RuleType $parmIntIf $parmExtIf $Matchname $Protocol $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
+				# samba 139/tcp ports come paired with explicit rejects on 445/tcp
+				# reason: to avoid timeout connecting to 445/tcp in smbclient
+				if [[ "$Protocol" == tcp && ( "$PortBegin" -le 139 && "$PortEnd" -ge 139 ) ]]; then
+					ip6tables -A INPUT -p tcp -s "$FilterIP6" --dport 445 -j REJECT
+				fi
 			else
-				echo ip6tables $RuleType $parmIntIf $parmExtIf $Protocol $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
-				ip6tables $RuleType $parmIntIf $parmExtIf $Protocol $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
-			fi
-			# samba 139/tcp ports come paired with explicit rejects on 445/tcp
-			# reason: to avoid timeout connecting to 445/tcp in smbclient
-			if [[ "$Protocol" == tcp && ( "$PortBegin" -le 139 && "$PortEnd" -ge 139 ) ]]; then
-				ip6tables -A INPUT -p tcp -s "$FilterIP6" --dport 445 -j REJECT
+				echo ip6tables $RuleType $parmIntIf $parmExtIf $Matchname -p tcp $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
+					 ip6tables $RuleType $parmIntIf $parmExtIf $Matchname -p tcp $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
+				echo ip6tables $RuleType $parmIntIf $parmExtIf $Matchname -p udp $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
+				     ip6tables $RuleType $parmIntIf $parmExtIf $Matchname -p udp $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
 			fi
 		fi
 	fi
@@ -522,12 +540,6 @@ echo "Setting default Policy"
 
 
 	# If on multiple NIC's, accept incoming on LAN and NAT or masquerade on external
-if [[ -n "$IntIP" ]]; then
-	#TODO: use 4 byte netmask in these calculations
-	IntNet="$(echo "$IntIP" | cut -d. -f-3).0"
-	IntBitmask=24
-
-	Intv6Net="$(echo "$Intv6IP" | cut -d":" -f-4)::"
 	## Workaround for some ISPs that don't allow routers and drop packets based on TTL.
 	iptables -t mangle -A POSTROUTING -o $ExtIf -j TTL --ttl-set 255
 	ip6tables -t mangle -A POSTROUTING -o $ExtIf -j HL --hl-set 255
@@ -543,7 +555,6 @@ if [[ -n "$IntIP" ]]; then
 	if [[ "$ExtIf" == "ppp0" ]]; then
 		iptables -t nat -A POSTROUTING -s "$IntNet/$IntBitmask" \! -d "$IntNet/$IntBitmask" -o $ExtIf -j MASQUERADE
 	fi
-fi
 
 #Create all the chains manual defined created.
 #ipv4
