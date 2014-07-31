@@ -180,10 +180,18 @@ function firewall($output,$dbADO) {
 	);
 	
 	$RuleTYPE=Array(
-	"0"=>"select",
-	"1"=>"prerouting",
-	"2"=>"postrouting",
-	"3"=>"output"
+	"0"=>"",
+	"1"=>"PREROUTING",
+	"2"=>"POSTROUTING",
+	"3"=>"OUTPUT",
+	);
+	
+	$protocolarr=Array(
+	"0"=>"tcp",
+	"1"=>"udp",
+	"2"=>"tcp & udp",
+	"3"=>"icmp",
+	"4"=>"ip",
 	);
 	
 	$start_RPolicy=Array(
@@ -192,14 +200,16 @@ function firewall($output,$dbADO) {
 	"2"=>"REJECT",
 	"3"=>"RETURN",
 	"4"=>"REDIRECT",
-	"5"=>"LOG"
+	"5"=>"LOG",
 	);
 	
 	if(count($more_chains)!=0){
 	$chains=array_merge($start_chains, $more_chains);
+	$save_chains=array_merge($start_chains, $more_chains);
 	$RPolicy=array_merge($start_RPolicy, $more_chains);
 	} else {
 	$chains=$start_chains;
+	$save_chains=$start_chains;
 	$RPolicy=$start_RPolicy;
 	}
 	
@@ -212,6 +222,11 @@ function firewall($output,$dbADO) {
 			$selected=$row['RPolicy'] == $RPolicy?'selected':'';
 			$RulePolicy_options .= "<option value='$Policy' $selected >$Policy</option>";
 		}
+	
+	foreach ($RuleTYPE as $RuleTYPEnr => $Ruletype) {
+		$selected='';
+		$Ruletype_options.= "<option value='$Ruletype' $selected >$Ruletype</option>";
+	}
 		
 	if ($action == 'form') {
 
@@ -424,6 +439,20 @@ function firewall($output,$dbADO) {
 		while($row=$res->FetchRow()){
 			++$pos;
 			$protocol=explode("-",$row['Protocol']);
+			if ($protocol[0] == "all") {
+				$protocol[0]='tcp & udp';
+			}
+			$RuleTypearr=explode("-",$row['RuleType']);
+				$save_chain_options="";
+				foreach ($save_chains as $chainnr => $save_chain) {
+					$selected=$RuleTypearr[0] == $save_chain?'selected':'';
+					$save_chain_options.= "<option value='$save_chain' $selected >$save_chain</option>";
+				}
+				$save_Ruletype_options="";
+				foreach ($RuleTYPE as $save_RuleTYPEnr => $save_Ruletype) {
+					$selected=$RuleTypearr[1] == $save_Ruletype?'selected':'';
+					$save_Ruletype_options.= "<option value='$save_Ruletype' $selected >$save_Ruletype</option>";
+				}
 			if (isset($_GET['rule']) && $row['PK_Firewall'] == $_GET['rule']) {
 				$Disabled=$row['Disabled'];
 				if ( $DPolicy == $row['RPolicy'] ) {
@@ -444,6 +473,8 @@ function firewall($output,$dbADO) {
 						function saveRule()
 	{	
 		document.getElementById(\'firewall\').save_Rule.value;
+		document.getElementById(\'firewall\').save_IntIf.value;
+		document.getElementById(\'firewall\').save_ExtIf.value;
 		document.getElementById(\'firewall\').save_Matchname.value;
 		document.getElementById(\'firewall\').save_protocol.value;
 		document.getElementById(\'firewall\').save_IPVersion.value;
@@ -451,102 +482,147 @@ function firewall($output,$dbADO) {
 		document.getElementById(\'firewall\').save_SourcePortEnd.value;
 		document.getElementById(\'firewall\').save_DestinationPort.value;
 		document.getElementById(\'firewall\').save_DestinationIP.value;		  
-		document.getElementById(\'firewall\').save_chain.value;
+		document.getElementById(\'firewall\').save_Chain.value;
 		document.getElementById(\'firewall\').save_RuleType.value;
 		document.getElementById(\'firewall\').save_SourceIP.value;
 		document.getElementById(\'firewall\').save_RPolicy.value;
 		document.getElementById(\'firewall\').save_Description.value;
-		document.getElementById(\'firewall\').save_Rule.value=RuleID;
 		document.getElementById(\'firewall\').submit();
 		
 	}
 	</script>
 					<td align="center"><select name="save_IPVersion" STYLE="width:70px">
-						<option value="ipv4" selected>IPv4</option>
-						<!--<option value="ipv6">IPv6</option>
-						<option value="both">both</option>-->
+						<option value="ipv4" '.($protocol[1]=='ipv4'?'selected':'').'>IPv4</option>
+						<option value="ipv6" '.($protocol[1]=='ipv6'?'selected':'').'>IPv6</option>
+						<!--<option value="both">both</option>-->
 					</select></td>';
 					if (@$AdvancedFirewall == 1){
-						$out.='<td align="center"><select name="save_chain">
-							'.$chain_options.'
-							<option value="input" '.((@$row['RuleType']!='input')?'':'selected').'>core_input</option>
-							<option value="forward" '.((@$row['RuleType']!='forward')?'':'selected').'>port_forward</option>
-							<option value="forward">core_forwarding</option>
-							<option value="output" '.((@$row['RuleType']!='output')?'':'selected').'>core_output</option>
-							<option value="nat" '.((@$row['RuleType']!='nat')?'':'selected').'>nat</option>
-							</select>
-						<select name="save_RuleType">
-							<option value="POSTROUTING">postrouting</option>
-							<option value="PREROUTING">prerouting</option>
-							<option value="output">output</option>
-						</select></td>';
-        	                                if ( $chains[$i] == 'input' )  {
+						$out.='<td align="center"><select name="save_Chain">
+							'.$save_chain_options.'
+							
+							</select>';
+						if ($RuleTypearr[1] == 'PREROUTING' || $RuleTypearr[1] == 'POSTROUTING' || $RuleTypearr[1] == 'OUTPUT' ) {
+							$out.='<select name="save_RuleType">
+										'.$save_Ruletype_options.'
+									</select></td>';
+						} else {
+							$out.='<input type="hidden" name="save_RuleType" value="" />';
+						}
+        	                                if ( $chains[$i] == 'input'  || $chains[$i]=='nat' || $RuleTypearr[1] == 'PREROUTING')  {
 	        	                                $out.='<td><select name="save_IntIf" STYLE="width:70px">
 				                        <option value=""></option>';
 			        	                foreach ($ifArray as $string){
-                        				        $out.= '<option value="'.$string.'" ';
-								if ($row['IntIF']==$string) {
-									$out.='selected';
-								}
-								$out.='>'.$string.'</option>';
-				                        }
+											if ($string=="ipv6tunnel"){
+												if ($row['IntIF']==="ipv6tunn") {
+												$out.='<option value="ipv6tunn" selected>'.$string.'</option>';
+												} else {
+													$out.='<option value="ipv6tunn">'.$string.'</option>';
+												}
+											} else {
+												$out.= '<option value="'.$string.'" ';
+												if ($row['IntIF']==$string) {
+													$out.='selected';
+												}
+												$out.='>'.$string.'</option>';
+											}
+										}
                         				$out.= '</select></td>
-							<td></td>';
-                                        	}
-	                                        if ( $chains[$i] == 'forward' || $chains[$i] == 'dmz' || $chains[$i] == 'nat' )  {
+							<td><input type="hidden" name="save_ExtIf" value="" /></td>';
+                                        	} elseif ($chains[$i] =='output') {
+												     $out.='<td><input type="hidden" name="save_IntIf" value="" /></td><td><select name="save_ExtIf" STYLE="width:70px">
+														<option value=""></option>';
+														foreach ($ifArray as $string){
+															if ($string=="ipv6tunnel"){
+																if ($row['ExtIF']==="ipv6tunn") {
+																	$out.='<option value="ipv6tunn" selected>'.$string.'</option>';
+																} else {
+																	$out.='<option value="ipv6tunn">'.$string.'</option>';
+																}
+															} else {
+																$out.= '<option value="'.$string.'" ';
+																if ($row['ExtIF']==$string) {
+																		$out.='selected';
+																}
+																$out.='>'.$string.'</option>';
+															}
+														}
+        	                			$out.= '</select></td>';
+											} else {
 		                                        $out.='<td><select name="save_IntIf" STYLE="width:70px">
 				                        <option value=""></option>';
 				                        foreach ($ifArray as $string){
-                        				        $out.= '<option value="'.$string.'" '; 
-								if ($row['IntIF']==$string) {
-                                                	                $out.='selected';
-                                                        	}
-	                                                        $out.='>'.$string.'</option>';
+												if ($string=="ipv6tunnel"){
+													if ($row['IntIF']==="ipv6tunn") {
+														$out.='<option value="ipv6tunn" selected>'.$string.'</option>';
+													} else {
+														$out.='<option value="ipv6tunn">'.$string.'</option>';
+													}
+												} else {
+													$out.= '<option value="'.$string.'" '; 
+													if ($row['IntIF']==$string) {
+														$out.='selected';
+													}
+													$out.='>'.$string.'</option>';
+												}
 				                        }
                 	        			$out.= '</select></td>';
-	                	                        $out.='<td><select name="save_IntIf" STYLE="width:70px">
+	                	                        $out.='<td><select name="save_ExtIf" STYLE="width:70px">
 			        	                <option value=""></option>';
 			                	        foreach ($ifArray as $string){
+											if ($string=="ipv6tunnel"){
+												if ($row['ExtIF']==="ipv6tunn") {
+													$out.='<option value="ipv6tunn" selected>'.$string.'</option>';
+												} else {
+													$out.='<option value="ipv6tunn">'.$string.'</option>';
+												}
+											} else {
                         				        $out.= '<option value="'.$string.'" ';
-                                                        	if ($row['IntIF']==$string) {
-                                                                	$out.='selected';
-	                                                        }
-        	                                                $out.='>'.$string.'</option>';
-				                        }
+                                                if ($row['ExtIF']==$string) {
+                                                   	$out.='selected';
+	                                            }
+        	                                    $out.='>'.$string.'</option>';
+											}
+										}
                         				$out.= '</select></td>';
                                 	        }
-                                        	if ( $chains[$i] == 'output' )  {
-		                                        $out.='<td></td><td><select name="save_IntIf" STYLE="width:70px">
-				                        <option value=""></option>';
-				                        foreach ($ifArray as $string){
-                        				        $out.= '<option value="'.$string.'" ';
-                                	                        if ($row['IntIF']==$string) {
-                                        	                        $out.='selected';
-                                                	        }
-                                                        	$out.='>'.$string.'</option>';
-				                        }
-        	                			$out.= '</select></td>';
-                	                        }
-						$out.='<td><input type="text" name="save_Matchname" value="'.$row['Matchname'].'" STYLE="width:100%"></td>';
+						$out.='<td><input type="text" name="save_Matchname" value="'.$row['Matchname'].'" STYLE="width:100%" /></td>';
 					} else {
                 			     $out.='<input type="hidden" name="save_Chain" value="input">';   
 		                        }
-					$out.='<td align="center"><select name="save_protocol" STYLE="width:70px">
-					<option value="tcp" '.($protocol[0]=='tcp'?'selected':'').'>tcp</option>
-					<option value="udp" '.($protocol[0] == 'udp' ? 'selected':'').'>udp</option>
-					<option value="ip" '.($protocol[0] == 'ip' ? 'selected':'').'>ip</option>
-					</select></td>
-					<td align="center"><input type="text" name="save_SourcePort" value="'.$row['SourcePort'].'" size="2" /> to <input type="text" name="save_SourcePortEnd" value="'.$row['SourcePortEnd'].'" size="2" /></B></td>
-                    <td align="center"><input type="text" name="save_DestinationPort" value"'.$row['DestinationPort'].'" size="2" /></td>
-					<td align="center"><input type="text" name="save_DestinationIP" value"'.$row['DestinationIP'].'" size="8" /></td>
+					$out.='<td align="center"><select name="save_protocol" STYLE="width:70px">';
+						foreach ($protocolarr as $string){
+							if ($string=="tcp & udp"){
+								if ($protocol[0]===$string) {
+									$out.='<option value"all" selected>'.$string.'</option>';
+								} else {
+									$out.='<option value"all">'.$string.'</option>';
+								}
+							} else {
+								$out.='<option value"'.$string.'" ';
+								if ($protocol[0]===$string) {
+									$out.='selected';
+								}$out.='>'.$string.'</option>';
+							}
+						}
+						$out.='</select></td></td>
+					<td align="center"><input type="text" name="save_SourcePort" value="'.$row['SourcePort'].'" size="4" /> to <input type="text" name="save_SourcePortEnd" value="'.$row['SourcePortEnd'].'" size="4" /></B></td>
+                    <td align="center"><input type="text" name="save_DestinationPort" value="'.$row['DestinationPort'].'" size="4" /></td>
+					<td align="center"><input type="text" name="save_DestinationIP" value="'.$row['DestinationIP'].'" size="8" /></td>
 					<td align="center"><input type="text" name="save_SourceIP" value="'.$row['SourceIP'].'" size="8"></td>';
 					if (@$AdvancedFirewall == 1){
-						$out.='<td align="center"><select name="save_RPolicy" STYLE="width:70px">'.$RulePolicy_options.'</select></td></td>';
+						$out.='<td align="center"><select name="save_RPolicy" STYLE="width:70px">';
+						foreach ($RPolicy as $string){
+							$out.='<option value"'.$string.'" ';
+							if ($row['RPolicy']==$string) {
+								$out.='selected';
+							}$out.='>'.$string.'</option>';
+						}
+						$out.='</select></td></td>';
 					} else {
                 			        $out.='<input type="hidden" name="save_RPolicy" value="ACCEPT">';
 		                        }
-					$out.='<td align="center"><textarea rows="2" cols="4" name="save_Description" value="'.$row['Description'].'"></textarea></td>
-					<td align="center"><input type="hidden" name="save_Rule" value="'.$row['PK_Firewall'].'" /><span style="text-decoration: underline; color:#009108; font-size: 12px;" onclick="saveRule()">'.translate('TEXT_SAVE_CONST').'</span>&nbsp;<a href="index.php?section=firewall&action=del&delid='.$row['PK_Firewall'].'">'.translate('TEXT_DELETE_CONST').'</a></td>
+					$out.='<td align="center"><textarea rows="2" cols="4" name="save_Description">'.$row['Description'].'</textarea></td>
+					<td align="center"><input type="hidden" name="save_Rule" value="'.$row['PK_Firewall'].'" /><span style="text-decoration: underline; cursor:pointer; color:#009108; font-size: 12px;" onclick="saveRule()">'.translate('TEXT_SAVE_CONST').'</span>&nbsp;<a href="index.php?section=firewall&action=del&delid='.$row['PK_Firewall'].'">'.translate('TEXT_DELETE_CONST').'</a></td>
 					</tr>';
 			} else {
 				$Disabled=$row['Disabled'];
@@ -567,15 +643,25 @@ function firewall($output,$dbADO) {
 				$out.='<td align="center">'.$protocol[1].'</td>';
 						if (@$AdvancedFirewall == 1){
 							$out.='<td align="center">'.$row['RuleType'].'</td>';
+							if ($row['IntIF']=="ipv6tunn"){
+								$IntIf="ipv6tunnel";
+							} else {
+								$IntIf=$row['IntIF'];
+							}
+							if ($row['ExtIF']=="ipv6tunn"){
+								$ExtIf="ipv6tunnel";
+							} else {
+								$ExtIf=$row['ExtIF'];
+							}
         	                if ( $chains[$i] == 'input' )  {
-                	            $out.='<td>'.$row['IntIF'].'
+                	            $out.='<td>'.$IntIf.'
 								<td></td>';
                             } elseif ( $chains[$i] == 'output' ) {
-        	                      $out.='<td></td>
-								<td>'.$row['ExtIF'].'</td>';
+        	                      $out.='<td></td>';
+								$out.='<td>'.$ExtIf.'</td>';
                         	} else {
-								$out.='<td>'.$row['IntIF'].'</td>
-								<td>'.$row['ExtIF'].'</td>';
+								$out.='<td>'.$IntIf.'</td>
+								<td>'.$ExtIf.'</td>';
 							}
 							$out.='<td>'.$row['Matchname'].'</td>';
 						}
@@ -616,9 +702,9 @@ function firewall($output,$dbADO) {
 		}
 			if (@$AdvancedFirewall == 1){
 				$out.='<td align="center"><B>'.translate('TEXT_RULE_TYPE_CONST').'</B></td>
-				<td align="center"><B>'.translate('TEXT_INT_IF_CONST').'</B></td>
-				<td align="center"><B>'.translate('TEXT_EXT_IF_CONST').'</B></td>
-				<td align="center"><B>'.translate('TEXT_MATCH_CONST').'</B></td>';
+				<td align="center"><B>'.translate('TEXT_INT_IF_CONST').'*</B></td>
+				<td align="center"><B>'.translate('TEXT_EXT_IF_CONST').'*</B></td>
+				<td align="center"><B>'.translate('TEXT_MATCH_CONST').'*</B></td>';
 			}
 			$out.='<td align="center"><B>'.translate('TEXT_PROTOCOL_CONST').'</B></td>
 			<td align="center"><B>'.translate('TEXT_SOURCE_PORT_CONST').'</B></td>
@@ -644,10 +730,7 @@ function firewall($output,$dbADO) {
 					'.$chain_options.'
 				</select>
 				<select name="RuleType" disabled>
-				<option></option>
-					<option value="PREROUTING">prerouting</option>
-					<option value="POSTROUTING">postrouting</option>
-					<option value="output">output</option>
+				'.$Ruletype_options.'
 				</select></td>';
 				if (@$AdvancedFirewall == 1){
 				$out.='<td><select name="IntIf" STYLE="width:70px">
@@ -667,14 +750,17 @@ function firewall($output,$dbADO) {
 			} else {
 			$out.='<input type="hidden" name="Chain" value="input">';
 			}
-			$out.='<td align="center"><select name="protocol" STYLE="width:70px">
-				<option value="tcp">tcp</option>
-				<option value="udp">udp</option>
-				<option value="all">tcp & udp</option>
-				<option value="ip">ip</option>
-			</select></td>
-			<td align="center" width="120"><input type="text" name="SourcePort" size="2"> to <input type="text" name="SourcePortEnd" size="2"></td>
-			<td align="center"><input type="text" name="DestinationPort" size="2" disabled></td>
+			$out.='<td align="center"><select name="protocol" STYLE="width:70px">';
+				foreach ($protocolarr as $string){
+					if ($string==='tcp & udp') {
+						$out.='<option value"all">'.$string.'</option>';
+					} else {
+						$out.='<option value="'.$string.'">'.$string.'</option>';
+					}
+				}
+			$out.='</select></td>
+			<td align="center" width="120"><input type="text" name="SourcePort" size="4"> to <input type="text" name="SourcePortEnd" size="2"></td>
+			<td align="center"><input type="text" name="DestinationPort" size="4" disabled></td>
 			<td align="center"><input type="text" name="DestinationIP" size="8" disabled></td>
 			<td align="center"><input type="text" name="SourceIP" size="8"></td>';
 			if (@$AdvancedFirewall == 1){
@@ -714,17 +800,19 @@ function firewall($output,$dbADO) {
 			$IntIF=@$_POST['IntIf'];
 			$ExtIF=@$_POST['ExtIf'];
 			$Matchname=@$_POST['Matchname'];
-			$Protocol=@$_POST['protocol'].'-'.@$_POST['IPVersion'];
+			if ($_POST['protocol'] == 'tcp & udp') {
+				$Protocol='all-'.@$_POST['IPVersion'];
+			} else {
+				$Protocol=@$_POST['protocol'].'-'.@$_POST['IPVersion'];
+			}
 			$SourcePort=@$_POST['SourcePort'];
 			$SourcePortEnd=@$_POST['SourcePortEnd'];
 			$DestinationPort=isset($_POST['DestinationPort'])?$_POST['DestinationPort']:0;
 			$DestinationIP=isset($_POST['DestinationIP'])?$_POST['DestinationIP']:0;
+			$Chain=@$_POST['Chain'];
 			if (isset($_POST['RuleType']) && $_POST['RuleType'] != "" ) {
-				$Chain=@$_POST['Chain'];
 				$RuleType=@$_POST['RuleType'];
-				$Chain=$Chain."-".$RuleType;
-			} else {
-				$Chain=@$_POST['Chain'];
+				$Chain.="-".$RuleType;
 			}
 			$SourceIP=@$_POST['SourceIP'];
 			$RPolicy=@$_POST['RPolicy'];
@@ -740,7 +828,7 @@ function firewall($output,$dbADO) {
 						$insert='INSERT INTO Firewall (IntIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?)';
 						$dbADO->Execute($insert,array($IntIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$input,$SourceIP,$RPolicy,$Description));
 					} else {
-						if ($Chain == "port_forward (NAT)") {
+						if ($_POST['Chain'] == "port_forward (NAT)") {
 							$forward='forward';
 						} else {
 							$forward=$_POST['Chain'];
@@ -752,20 +840,28 @@ function firewall($output,$dbADO) {
 							}
 						}
 						//Insert the forward rule.
+						$msg.=$forward;
 						$insert='INSERT INTO Firewall (IntIF,ExtIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)';
 						$dbADO->Execute($insert,array($IntIF,$ExtIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$forward,$SourceIP,$RPolicy,$Description));
 					}
 				//Insert the prerouting rule.
+				$msg.=' Prerouting';
 				$insert='INSERT INTO Firewall (IntIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?)';
 				$dbADO->Execute($insert,array($IntIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$Chain,$SourceIP,$RPolicy,$Description));
+				$msg.=$Chain;
 			}
 		}
 		
 		if(isset($_POST['save_Rule'])){
 			$rule_nr=$_POST['save_Rule'];
-			echo '1'.$rule_nr;
+			$IntIF=@$_POST['save_IntIf'];
+			$ExtIF=@$_POST['save_ExtIf'];
 			$Matchname=@$_POST['save_Matchname'];
-			$Protocol=@$_POST['save_protocol'].'-'.@$_POST['save_IPVersion'];
+			if ($_POST['save_protocol'] == 'tcp & udp') {
+				$Protocol='all-'.@$_POST['save_IPVersion'];
+			} else {
+				$Protocol=@$_POST['save_protocol'].'-'.@$_POST['save_IPVersion'];
+			}
 			$SourcePort=@$_POST['save_SourcePort'];
 			$SourcePortEnd=@$_POST['save_SourcePortEnd'];
 			$DestinationPort=isset($_POST['save_DestinationPort'])?$_POST['save_DestinationPort']:0;
@@ -780,8 +876,7 @@ function firewall($output,$dbADO) {
 			$SourceIP=@$_POST['save_SourceIP'];
 			$RPolicy=@$_POST['save_RPolicy'];
 			$Description=@$_POST['save_Description'];
-			
-			$update="UPDATE Firewall SET Matchname='".$Matchname."' , Protocol='".$Protocol."', SourcePort='".$SourcePort."', SourcePortEnd='".$SourcePortEnd."', DestinationPort='".$DestinationPort."', DestinationIP='".$DestinationIP."', RuleType='".$Chain."',SourceIP='".$SourceIP."',RPolicy='".$RPolicy."',Description='".$Description."' WHERE PK_Firewall='".$rule_nr."'";
+			$update="UPDATE Firewall SET IntIF='".$IntIF."' , ExtIF='".$ExtIF."' ,Matchname='".$Matchname."' , Protocol='".$Protocol."', SourcePort='".$SourcePort."', SourcePortEnd='".$SourcePortEnd."', DestinationPort='".$DestinationPort."', DestinationIP='".$DestinationIP."', RuleType='".$Chain."',SourceIP='".$SourceIP."',RPolicy='".$RPolicy."',Description='".$Description."' WHERE PK_Firewall='".$rule_nr."'";
 			$dbADO->Execute($update);
 		}
 		
@@ -908,7 +1003,7 @@ function firewall($output,$dbADO) {
 
 		exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh');
 
-		header("Location: index.php?section=firewall&msg=".translate('TEXT_FIREWALL_RULES_UPDATED_CONST'));
+		header("Location: index.php?section=firewall&msg=".$msg.translate('TEXT_FIREWALL_RULES_UPDATED_CONST'));
 	}
 
 	$output->setMenuTitle(translate('TEXT_ADVANCED_CONST').' |');
