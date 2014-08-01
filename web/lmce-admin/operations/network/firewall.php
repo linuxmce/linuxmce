@@ -163,7 +163,7 @@ function firewall($output,$dbADO) {
 	
 	$i=0;
 	if (@$AdvancedFirewall == 1){
-		$res=$dbADO->Execute('SELECT Matchname FROM Firewall WHERE Protocol=\'chain-ipv4\' AND Matchname != \'nat\' ORDER BY PK_Firewall');
+		$res=$dbADO->Execute('SELECT Matchname FROM Firewall WHERE Protocol=\'chain-'.$fwVersion.'\' AND Matchname != \'nat\' ORDER BY PK_Firewall');
 		while ($row=$res->FetchRow()) {
 	$key[]=$i;
 	$value[]=$row['Matchname'];
@@ -172,12 +172,20 @@ function firewall($output,$dbADO) {
 	$more_chains=array_combine($key, $value);
 	}
 	
-	$start_chains=Array(
-	"0"=>"input",
-	"1"=>"forward",
-	"2"=>"port_forward (NAT)",
-	"3"=>"output",
-	);
+	if ($fwVersion == "ipv6") {
+		$start_chains=Array(
+		"0"=>"input",
+		"1"=>"forward",
+		"2"=>"output",
+		);
+	} else {
+		$start_chains=Array(
+		"0"=>"input",
+		"1"=>"forward",
+		"2"=>"port_forward (NAT)",
+		"3"=>"output",
+		);
+	};
 	
 	$RuleTYPE=Array(
 	"0"=>"PREROUTING",
@@ -741,11 +749,14 @@ function firewall($output,$dbADO) {
 			<td align="center" width="110"><select name="Chain" onChange="enableDestination()">
 				'.$chain_options.'
 			</select>';
-			if (@$AdvancedFirewall == 1){
+			if (@$AdvancedFirewall == 1 && $fwVersion != "ipv6"){
 				$out.='<select name="RuleType" disabled>
 				'.$Ruletype_options.'
 				</select></td>';
-				
+			} else {
+				$out.='</td>';
+			}
+			if (@$AdvancedFirewall == 1) {
 				$out.='<td><select name="IntIf" STYLE="width:70px">
 				<option value=""></option>';
 				foreach ($ifArray as $string){
@@ -760,9 +771,8 @@ function firewall($output,$dbADO) {
 				$out.= '</select></td>
 				<td><input type="text" name="Matchname" STYLE="width:200px">
 				</select></td>';
-			} else {
-				$out.='</td>';
 			}
+			
 			$out.='<td align="center"><select name="protocol" STYLE="width:70px">';
 				foreach ($protocolarr as $string){
 					if ($string==='tcp & udp') {
@@ -794,11 +804,13 @@ function firewall($output,$dbADO) {
 		}
 		$out.='<tr>
 			<td colspan="100%" align="left">* '.translate('TEXT_OPTIONAL_FIELD_CONST').'</td>
-		</tr>
-		<tr>
-			<td colspan="100%" align="left">** This field is '.translate('TEXT_OPTIONAL_FIELD_CONST').' only not with port_forward (NAT), input is then port 9000 on the core to go to port 9000 = 9000:9000</td>
-		</tr>	
-	</table>	
+		</tr>';
+		if ($fwVersion == "ipv6") {
+			$out.='<tr>
+				<td colspan="100%" align="left">** This field is '.translate('TEXT_OPTIONAL_FIELD_CONST').' only not with port_forward (NAT), input is then port 9000 on the core to go to port 9000 = 9000:9000</td>
+			</tr>';
+		}
+	$out.='</table>	
 	</form>
 		<script>
 		 	var frmvalidator = new formValidator("firewall");
