@@ -509,6 +509,7 @@ function firewall($output,$dbADO) {
 							'.$save_chain_options.'
 							
 							</select>';
+					if (@$AdvancedFirewall == 1){	
 						if ($RuleTypearr[1] == 'PREROUTING' || $RuleTypearr[1] == 'POSTROUTING' || $RuleTypearr[1] == 'OUTPUT' ) {
 							$out.='<select name="save_RuleType">
 										'.$save_Ruletype_options.'
@@ -516,7 +517,6 @@ function firewall($output,$dbADO) {
 						} else {
 							$out.='<input type="hidden" name="save_RuleType" value="" />';
 						}
-						if (@$AdvancedFirewall == 1){
         	                                if ( $chains[$i] == 'input'  || $chains[$i]=='nat' || $RuleTypearr[1] == 'PREROUTING')  {
 	        	                                $out.='<td><select name="save_IntIf" STYLE="width:70px">
 				                        <option value=""></option>';
@@ -596,7 +596,8 @@ function firewall($output,$dbADO) {
                                 	        }
 						$out.='<td><input type="text" name="save_Matchname" value="'.$row['Matchname'].'" STYLE="width:100%" /></td>';
 					} else {
-                			     $out.='<input type="hidden" name="save_IntIf" value="" />
+                			    $out.='<input type="hidden" name="save_RuleType" value="" />
+								<input type="hidden" name="save_IntIf" value="" />
 								<input type="hidden" name="save_ExtIf" value="" />
 								<input type="hidden" name="save_Matchname" value="" />';   
 		                        }
@@ -719,7 +720,7 @@ function firewall($output,$dbADO) {
 			}
 			$out.='<td align="center"><B>'.translate('TEXT_PROTOCOL_CONST').'</B></td>
 			<td align="center"><B>'.translate('TEXT_SOURCE_PORT_CONST').'</B></td>
-			<td align="center"><B>'.translate('TEXT_DESTINATION_PORT_CONST').'</B></td>
+			<td align="center"><B>'.translate('TEXT_DESTINATION_PORT_CONST').'**</B></td>
 			<td align="center"><B>'.translate('TEXT_DESTINATION_IP_CONST').'</B></td>
 			<td align="center"><B>'.translate('TEXT_LIMIT_TO_IP_CONST').'*</B></td>';
 			if (@$AdvancedFirewall == 1){
@@ -729,21 +730,22 @@ function firewall($output,$dbADO) {
 			<td>&nbsp;</td>
 		</tr>				
 		<tr>';
-		if (@$AdvancedFirewall == 1){
+		if (@$AdvancedFirewall == 1) {
 			$out.='<td colspan="3" align="center"><select name="IPVersion" STYLE="width:70px">';
 		} else {
-			$out.='<td colspan="2" align="center"><select name="IPVersion" STYLE="width:70px">';
+			$out.='<td colspan="2" align="center"><select name="IPVersion" STYLE="width:70px">'; 
 		}
-                $out.='<option value="ipv4" '.((@$fwVersion!="ipv4")?'':'selected').'>IPv4</option>
-                                <option value="ipv6" '.((@$fwVersion!="ipv6")?'':'selected').'>IPv6</option>
-			</select></td>';
-				$out.='<td align="center" width="110"><select name="Chain" onChange="enableDestination()">
-					'.$chain_options.'
-				</select>
-				<select name="RuleType" disabled>
+		    $out.='<option value="ipv4" '.((@$fwVersion!="ipv4")?'':'selected').'>IPv4</option>
+                <option value="ipv6" '.((@$fwVersion!="ipv6")?'':'selected').'>IPv6</option>
+			</select></td>
+			<td align="center" width="110"><select name="Chain" onChange="enableDestination()">
+				'.$chain_options.'
+			</select>';
+			if (@$AdvancedFirewall == 1){
+				$out.='<select name="RuleType" disabled>
 				'.$Ruletype_options.'
 				</select></td>';
-				if (@$AdvancedFirewall == 1){
+				
 				$out.='<td><select name="IntIf" STYLE="width:70px">
 				<option value=""></option>';
 				foreach ($ifArray as $string){
@@ -759,7 +761,7 @@ function firewall($output,$dbADO) {
 				<td><input type="text" name="Matchname" STYLE="width:200px">
 				</select></td>';
 			} else {
-			$out.='<input type="hidden" name="Chain" value="input">';
+				$out.='</td>';
 			}
 			$out.='<td align="center"><select name="protocol" STYLE="width:70px">';
 				foreach ($protocolarr as $string){
@@ -792,7 +794,10 @@ function firewall($output,$dbADO) {
 		}
 		$out.='<tr>
 			<td colspan="100%" align="left">* '.translate('TEXT_OPTIONAL_FIELD_CONST').'</td>
-		</tr>		
+		</tr>
+		<tr>
+			<td colspan="100%" align="left">** This field is '.translate('TEXT_OPTIONAL_FIELD_CONST').' only not with port_forward (NAT), input is then port 9000 on the core to go to port 9000 = 9000:9000</td>
+		</tr>	
 	</table>	
 	</form>
 		<script>
@@ -821,9 +826,15 @@ function firewall($output,$dbADO) {
 			$DestinationPort=isset($_POST['DestinationPort'])?$_POST['DestinationPort']:0;
 			$DestinationIP=isset($_POST['DestinationIP'])?$_POST['DestinationIP']:0;
 			$Chain=@$_POST['Chain'];
-			if (isset($_POST['RuleType']) && $_POST['RuleType'] != "" ) {
-				$RuleType=@$_POST['RuleType'];
-				$Chain.="-".$RuleType;
+			if (@$AdvancedFirewall == 1){
+				if (isset($_POST['RuleType']) && $_POST['RuleType'] != "" ) {
+					$RuleType=@$_POST['RuleType'];
+					$Chain.="-".$RuleType;
+				}
+			} else {
+					if ($_POST['Chain'] == "port_forward (NAT)") {
+						$RuleType="PREROUTING";
+					}
 			}
 			$SourceIP=@$_POST['SourceIP'];
 			$RPolicy=@$_POST['RPolicy'];
