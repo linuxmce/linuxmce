@@ -825,8 +825,6 @@ function firewall($output,$dbADO) {
 			exit(0);
 		}
 		
-		$run_sh='yes';
-		
 		if(isset($_POST['add'])){
 			$IntIF=@$_POST['IntIf'];
 			$ExtIF=@$_POST['ExtIf'];
@@ -882,10 +880,8 @@ function firewall($output,$dbADO) {
 						$dbADO->Execute($insert,array($IntIF,$ExtIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$forward,$SourceIP,$RPolicy,$Description));
 					}
 				//Insert the prerouting rule.
-				$msg.=' Prerouting';
 				$insert='INSERT INTO Firewall (IntIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?)';
 				$dbADO->Execute($insert,array($IntIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$Chain,$SourceIP,$RPolicy,$Description));
-				$msg.=$Chain;
 			}
 		}
 		
@@ -1031,22 +1027,16 @@ function firewall($output,$dbADO) {
 					}
 					if(@$_REQUEST['fwVersion']=="ipv4"){
 						writeConf($accessFile, 'fwVersion',@$fwVersion,'ipv4');
-						$run_sh='no';
 						}else{
 						writeConf($accessFile, 'fwVersion',@$fwVersion,'ipv6');
-						$run_sh='no';
 					}
 					
 				}
 			}
 		}
 		
-		if ($run_sh == "yes") {
 			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh');
 			header("Location: index.php?section=firewall&msg=".$msg.translate('TEXT_FIREWALL_RULES_UPDATED_CONST'));
-		} else {
-			header("Location: index.php?section=firewall");
-		}
 	}
 
 	$output->setMenuTitle(translate('TEXT_ADVANCED_CONST').' |');
