@@ -180,10 +180,9 @@ function firewall($output,$dbADO) {
 	);
 	
 	$RuleTYPE=Array(
-	"0"=>"",
-	"1"=>"PREROUTING",
-	"2"=>"POSTROUTING",
-	"3"=>"OUTPUT",
+	"0"=>"PREROUTING",
+	"1"=>"POSTROUTING",
+	"2"=>"OUTPUT",
 	);
 	
 	$protocolarr=Array(
@@ -241,10 +240,14 @@ function firewall($output,$dbADO) {
 		if(document.getElementById(\'firewall\').Chain.value=="input"){
 			document.getElementById(\'firewall\').IntIf.disabled=false;
 			document.getElementById(\'firewall\').ExtIf.disabled=true;
+			document.getElementById(\'firewall\').DestinationPort.disabled=false;
+			document.getElementById(\'firewall\').DestinationIP.disabled=false;
 			document.getElementById(\'firewall\').RuleType.disabled=true;
 		} else if(document.getElementById(\'firewall\').Chain.value=="output"){
 			document.getElementById(\'firewall\').IntIf.disabled=true;
 			document.getElementById(\'firewall\').ExtIf.disabled=false;
+			document.getElementById(\'firewall\').DestinationPort.disabled=false;
+			document.getElementById(\'firewall\').DestinationIP.disabled=false;
 			document.getElementById(\'firewall\').RuleType.disabled=true;
 		} else if(document.getElementById(\'firewall\').Chain.value=="forward"){
 			document.getElementById(\'firewall\').IntIf.disabled=false;
@@ -253,14 +256,20 @@ function firewall($output,$dbADO) {
 			document.getElementById(\'firewall\').DestinationIP.disabled=false;
 			document.getElementById(\'firewall\').RuleType.disabled=true;
 		} else if(document.getElementById(\'firewall\').Chain.value=="VPN"){
+			document.getElementById(\'firewall\').IntIf.disabled=false;
+			document.getElementById(\'firewall\').ExtIf.disabled=false;
 			document.getElementById(\'firewall\').DestinationPort.disabled=false;
 			document.getElementById(\'firewall\').DestinationIP.disabled=false;
 			document.getElementById(\'firewall\').RuleType.disabled=true;
 		} else if(document.getElementById(\'firewall\').Chain.value=="mds"){
+			document.getElementById(\'firewall\').IntIf.disabled=false;
+			document.getElementById(\'firewall\').ExtIf.disabled=false;
 			document.getElementById(\'firewall\').DestinationPort.disabled=false;
 			document.getElementById(\'firewall\').DestinationIP.disabled=false;
 			document.getElementById(\'firewall\').RuleType.disabled=true;
 		} else{
+			document.getElementById(\'firewall\').IntIf.disabled=false;
+			document.getElementById(\'firewall\').ExtIf.disabled=false;
 			document.getElementById(\'firewall\').DestinationPort.disabled=false;
 			document.getElementById(\'firewall\').DestinationIP.disabled=false;
 			document.getElementById(\'firewall\').RuleType.disabled=false;
@@ -401,8 +410,8 @@ function firewall($output,$dbADO) {
 				$out.='<td align="center"><B>'.translate('TEXT_POSITION_CONST').'</B></td>';
 			}
 			$out.='<td align="center"><B>'.translate('TEXT_IPVERSION_CONST').'</B></td>';
-			if (@$AdvancedFirewall == 1){
 				$out.='<td align="center"><B>'.translate('TEXT_RULE_TYPE_CONST').'</B></td>';
+				if (@$AdvancedFirewall == 1){
 				if ( $chains[$i] == 'input' ) {
 			                $out.='<td align="center"><B>'.translate('TEXT_INT_IF_CONST').'</B></td>
 					<td></td>';
@@ -496,7 +505,6 @@ function firewall($output,$dbADO) {
 						<option value="ipv6" '.($protocol[1]=='ipv6'?'selected':'').'>IPv6</option>
 						<!--<option value="both">both</option>-->
 					</select></td>';
-					if (@$AdvancedFirewall == 1){
 						$out.='<td align="center"><select name="save_Chain">
 							'.$save_chain_options.'
 							
@@ -508,6 +516,7 @@ function firewall($output,$dbADO) {
 						} else {
 							$out.='<input type="hidden" name="save_RuleType" value="" />';
 						}
+						if (@$AdvancedFirewall == 1){
         	                                if ( $chains[$i] == 'input'  || $chains[$i]=='nat' || $RuleTypearr[1] == 'PREROUTING')  {
 	        	                                $out.='<td><select name="save_IntIf" STYLE="width:70px">
 				                        <option value=""></option>';
@@ -587,7 +596,9 @@ function firewall($output,$dbADO) {
                                 	        }
 						$out.='<td><input type="text" name="save_Matchname" value="'.$row['Matchname'].'" STYLE="width:100%" /></td>';
 					} else {
-                			     $out.='<input type="hidden" name="save_Chain" value="input">';   
+                			     $out.='<input type="hidden" name="save_IntIf" value="" />
+								<input type="hidden" name="save_ExtIf" value="" />
+								<input type="hidden" name="save_Matchname" value="" />';   
 		                        }
 					$out.='<td align="center"><select name="save_protocol" STYLE="width:70px">';
 						foreach ($protocolarr as $string){
@@ -640,9 +651,9 @@ function firewall($output,$dbADO) {
 					$out.='<td align="center"><a href="index.php?section=firewall&action=move&moverule='.$prevrule.'" style="text-decoration: none;">&#8679;</a><a href="index.php?section=firewall&action=move&moverule='.$row['PK_Firewall'].'" style="text-decoration: none;">&#8681;</a></td>';
 					$prevrule=$row['PK_Firewall'];
 				}
-				$out.='<td align="center">'.$protocol[1].'</td>';
+				$out.='<td align="center">'.$protocol[1].'</td>
+				<td align="center">'.$row['RuleType'].'</td>';
 						if (@$AdvancedFirewall == 1){
-							$out.='<td align="center">'.$row['RuleType'].'</td>';
 							if ($row['IntIF']=="ipv6tunn"){
 								$IntIf="ipv6tunnel";
 							} else {
@@ -700,9 +711,9 @@ function firewall($output,$dbADO) {
 		} else {
 			$out.='<td colspan="2" align="center"><B>'.translate('TEXT_IPVERSION_CONST').'</B></td>';
 		}
+				$out.='<td align="center"><B>'.translate('TEXT_RULE_TYPE_CONST').'</B></td>';
 			if (@$AdvancedFirewall == 1){
-				$out.='<td align="center"><B>'.translate('TEXT_RULE_TYPE_CONST').'</B></td>
-				<td align="center"><B>'.translate('TEXT_INT_IF_CONST').'*</B></td>
+				$out.='<td align="center"><B>'.translate('TEXT_INT_IF_CONST').'*</B></td>
 				<td align="center"><B>'.translate('TEXT_EXT_IF_CONST').'*</B></td>
 				<td align="center"><B>'.translate('TEXT_MATCH_CONST').'*</B></td>';
 			}
@@ -759,20 +770,20 @@ function firewall($output,$dbADO) {
 					}
 				}
 			$out.='</select></td>
-			<td align="center" width="120"><input type="text" name="SourcePort" size="4"> to <input type="text" name="SourcePortEnd" size="2"></td>
-			<td align="center"><input type="text" name="DestinationPort" size="4" disabled></td>
-			<td align="center"><input type="text" name="DestinationIP" size="8" disabled></td>
+			<td align="center" width="120"><input type="text" name="SourcePort" size="4" /> to <input type="text" name="SourcePortEnd" size="2" /></td>
+			<td align="center"><input type="text" name="DestinationPort" size="4" /></td>
+			<td align="center"><input type="text" name="DestinationIP" size="8" /></td>
 			<td align="center"><input type="text" name="SourceIP" size="8"></td>';
 			if (@$AdvancedFirewall == 1){
 				$out.='<td align="center"><select name="RPolicy" STYLE="width:70px">">'.$RulePolicy_options.'</select></td>';
 			} else {
 			$out.='<input type="hidden" name="RPolicy" value="ACCEPT">';
 			}
-			$out.='<td align="center"><textarea rows="2" cols="4" name="Description" value=""></textarea></td>
+			$out.='<td align="center"><textarea rows="2" cols="4" name="Description" value="" /></textarea></td>
 			<td align="center">&nbsp;</td>
 		</tr>		
 		<tr>
-			<td colspan="100%" align="center" bgcolor="#EEEEEE"><input type="submit" class="button" name="add" value="'.translate('TEXT_ADD_CONST').'"> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'"></td>
+			<td colspan="100%" align="center" bgcolor="#EEEEEE"><input type="submit" class="button" name="add" value="'.translate('TEXT_ADD_CONST').'" /> <input type="reset" class="button" name="cancelBtn" value="'.translate('TEXT_CANCEL_CONST').'" /></td>
 		</tr>';
 		if (@$AdvancedFirewall == 1){
 		$out.='<tr>
