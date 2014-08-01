@@ -824,6 +824,9 @@ function firewall($output,$dbADO) {
 			header("Location: index.php?section=firewall&error=".translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 			exit(0);
 		}
+		
+		$run_sh='yes';
+		
 		if(isset($_POST['add'])){
 			$IntIF=@$_POST['IntIf'];
 			$ExtIF=@$_POST['ExtIf'];
@@ -916,9 +919,10 @@ function firewall($output,$dbADO) {
 		
 		if(isset($_POST['add_Chain'])) {
 			$Chain=@$_POST['New_Chain'];
-			$Protocol="chain-ipv4";
+			$Protocol="chain-".$fwVersion;
 			$insert='INSERT INTO Firewall (Matchname, Protocol) VALUES (?,?)';
 			$dbADO->Execute($insert,array($Chain, $Protocol));
+			$run_sh='no';
 		}
 		
 		if(isset($_POST['inputPolicy'])){
@@ -1009,8 +1013,7 @@ function firewall($output,$dbADO) {
 					if(@$_REQUEST['change_ipv6_firewall_status']==1){
 						writeConf($accessFile, 'DisableIPv6Firewall',@$DisableIPv6Firewall,1);
 					}else{
-						writeConf($accessFile, 'DisableIPv6Firewall',@$DisableIPv6Firewall,0);
-					}
+						writeConf($accessFile, 'DisableIPv6Firewall',@$DisableIPv6Firewall,0);				}
 					if(@$_REQUEST['advanced_firewall']==1){
 						writeConf($accessFile, 'AdvancedFirewall',@$AdvancedFirewall,1);
 					}else{
@@ -1028,16 +1031,22 @@ function firewall($output,$dbADO) {
 					}
 					if(@$_REQUEST['fwVersion']=="ipv4"){
 						writeConf($accessFile, 'fwVersion',@$fwVersion,'ipv4');
-					}else{
+						$run_sh='no';
+						}else{
 						writeConf($accessFile, 'fwVersion',@$fwVersion,'ipv6');
+						$run_sh='no';
 					}
+					
 				}
 			}
 		}
-
-		exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh');
-
-		header("Location: index.php?section=firewall&msg=".$msg.translate('TEXT_FIREWALL_RULES_UPDATED_CONST'));
+		
+		if ($run_sh == "yes") {
+			exec_batch_command('sudo -u root /usr/pluto/bin/Network_Firewall.sh');
+			header("Location: index.php?section=firewall&msg=".$msg.translate('TEXT_FIREWALL_RULES_UPDATED_CONST'));
+		} else {
+			header("Location: index.php?section=firewall");
+		}
 	}
 
 	$output->setMenuTitle(translate('TEXT_ADVANCED_CONST').' |');
