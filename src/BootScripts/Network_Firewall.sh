@@ -81,7 +81,9 @@ if [[ "$AdvancedFirewall" == "0" ]]; then
 	if ! [ "$R" ]; then
 		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'ip-ipv4', 'input', 'ACCEPT', 'Allow Established')"
 		$(RunSQL "$Q")
-		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'ip-ipv4', 'forward', 'ACCEPT', 'Allow Established')"$(RunSQL "$Q")		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'all-ipv4', 'output', 'ACCEPT', 'Allow Established')"
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'ip-ipv4', 'forward', 'ACCEPT', 'Allow Established')"
+		$(RunSQL "$Q")		
+		Q="INSERT INTO Firewall (Matchname, Protocol, RuleType, RPolicy, Description) VALUES ('-m state --state ESTABLISHED,RELATED', 'ip-ipv4', 'output', 'ACCEPT', 'Allow Established')"
 		$(RunSQL "$Q")
 	fi
 	
