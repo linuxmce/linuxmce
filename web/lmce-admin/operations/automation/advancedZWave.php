@@ -582,7 +582,7 @@ td.cell_config:hover {
 	        $pkDevice = $_POST['pkDevice'];
 		$label = $_POST['label'];
 		$state = $_POST['state'];
-                $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 966 2 '.$pkDevice.' 5 "'.$label.'" 220 "'.($state == "true" ? '1' : '').'" 225 "1"';
+                $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 966 2 '.$pkDevice.' 5 "'.$label.'" 220 "'.($state == "true" ? '1' : '').'" 225 1';
 	    }
 	    $ret=exec_batch_command($cmd,1);
 	    $retArray=explode("\n",$ret);
