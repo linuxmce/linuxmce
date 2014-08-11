@@ -1,5 +1,5 @@
 Package: linux-image-default-raspbian-wheezy
-Version: 3.10-3-rpi-lmce1
+Version: 3.10-3-rpi-lmce2
 Section: unknown
 Priority: optional
 Architecture: all

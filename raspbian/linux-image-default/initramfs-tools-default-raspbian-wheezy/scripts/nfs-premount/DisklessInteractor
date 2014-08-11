@@ -20,7 +20,9 @@ exec 1>&2
 sleep 5
 wait_for_udev 10
 
-DT=$(/scripts/DeviceTemplate)
+#DT=$(/scripts/DeviceTemplate)
+#PNP_ID=$(/scripts/PlugNPlayID)
+PNP_ID="rpi_b"
 
 MyIP=`ifconfig eth0 | grep "inet addr" | sed -r 's/^.* inet addr:([0-9.]*).*/\1/g'`
 MyMAC=`ifconfig eth0 | grep "HWaddr "  | sed -r 's/^.* HWaddr ([a-zA-Z0-9:]*)/\1/g'`
@@ -34,8 +36,8 @@ Architecture="armhf"
 #	Architecture="amd64"
 #fi
 
-echo "IP: $MyIP; MAC: $MyMAC; Gateway: $Gateway; Architecture: $Architecture; DT: $DT"
-/scripts/interactor "$Gateway" "$MyIP" "$MyMAC" "$Architecture" "$DT"
+echo "IP: $MyIP; MAC: $MyMAC; Gateway: $Gateway; Architecture: $Architecture; PNP_ID: $PNP_ID"
+/scripts/interactor "$Gateway" "$MyIP" "$MyMAC" "$Architecture" "$PNP_ID" "select"
 
 clear
 echo "ERROR: Cannot connect to router, rebooting in 5 seconds.."

@@ -1,5 +1,5 @@
 Package: linux-image-default-raspbian-wheezy
-Version: {Kernel_Version}-lmce1
+Version: {Kernel_Version}-lmce2
 Section: unknown
 Priority: optional
 Architecture: {Kernel_Arch}
