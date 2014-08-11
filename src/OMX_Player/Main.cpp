@@ -24,7 +24,7 @@
 // and the svn revision as a global variable that can be inspected within a core dump
 #define  VERSION "<=version=>"
 const char *g_szCompile_Date="<=compile_date=>";
-/*SVN_REVISION*/
+int g_SvnRevision=28698;
 
 
 using namespace DCE;

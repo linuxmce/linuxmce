@@ -63,7 +63,6 @@ void OMX_Player::PrepareToDelete ()
 {
 	Command_Impl::PrepareToDelete ();
 	delete m_pqDBusPlayerInterface;
-	delete m_pqApp;
 	m_pDevice_App_Server = NULL;
 	m_pDevice_OMX_Plugin = NULL;
 }
@@ -92,10 +91,6 @@ bool OMX_Player::GetConfig()
 		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"I need an App Server to function.");
 		return false;
 	}
-
-	int argc = 0;
-	char **argv;
-	m_pqApp = new QCoreApplication(argc, argv);
 
 	if (!QDBusConnection::sessionBus().isConnected()) {
 		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"Cannot connect to the D-Bus session bus.");

@@ -111,9 +111,9 @@ extern "C" {
 //<-dceag-plug-e->
 
 //<-dceag-main-b->
-int main(int argc, char* argv[]) 
+int main(int argc, char** argv) 
 {
-	QCoreApplication qApp;
+	QCoreApplication app(argc, argv);
 
 	g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
 	g_sBinaryPath = FileUtils::BasePath(argv[0]);

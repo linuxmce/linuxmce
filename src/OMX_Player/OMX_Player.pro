@@ -3,7 +3,7 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = OMX_Player
+TARGET = ../bin/OMX_Player
 DEPENDPATH += .
 INCLUDEPATH += . .. ../DCE
 QT -= gui
