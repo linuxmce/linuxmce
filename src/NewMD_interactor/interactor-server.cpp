@@ -137,7 +137,7 @@ int main()
 				// messagesend a HAL type DeviceDetected Event here.
 				printf("New Interactor Device Selection\n");
 				char * args[] = { "/usr/pluto/bin/MessageSend", "localhost", "0", "-1001", "2", "65",
-					"28", remoteIP, "5", remoteMAC, "52", "3", "53", "5",
+					"28", remoteIP, "5", remoteMAC, "52", "3", "53", "6",
 					"51", strlen(remotePNPIdentifier) == 0 ? sDefaultPNPIdentifier : remotePNPIdentifier,
 					"55", remoteDeviceData,
 					NULL };
