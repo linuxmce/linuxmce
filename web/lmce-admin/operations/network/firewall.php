@@ -847,6 +847,7 @@ function firewall($output,$dbADO) {
 			} else {
 					if ($_POST['Chain'] == "port_forward (NAT)") {
 						$RuleType="PREROUTING";
+						$Chain.="-".$RuleType;
 					}
 			}
 			$SourceIP=@$_POST['SourceIP'];
