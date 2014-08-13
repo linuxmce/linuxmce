@@ -20,25 +20,18 @@
 #include "Gen_Devices/OMX_PlayerBase.h"
 //<-dceag-d-e->
 
-#include <QtCore/QCoreApplication>
-#include <QObject>
-#include <QtDBus>
-
 //<-dceag-decl-b->
 namespace DCE
 {
-	class OMX_Player : public QObject, public OMX_Player_Command
+	class OMX_Player : public OMX_Player_Command
 	{
 //<-dceag-decl-e->
-		Q_OBJECT
 
 private:
 		// Private member variables
 		DeviceData_Base *m_pDevice_OMX_Plugin;
 		DeviceData_Base *m_pDevice_App_Server;
 		bool m_bOMXIsRunning;
-		QCoreApplication *m_pqApp;
-		QDBusInterface *m_pqDBusPlayerInterface;
 
 		// Private methods
 		void ProcessNotification(void *pObject, int event);

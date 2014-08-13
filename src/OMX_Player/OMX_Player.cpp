@@ -25,11 +25,6 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
-// Qt includes
-//#include <QtCore>
-#include <QtDBus>
-//#include <QtWidgets/QApplication>
-
 // Additional required includes
 #include "pluto_main/Define_DeviceTemplate.h"
 #include "pluto_main/Define_Command.h"
@@ -62,8 +57,6 @@ OMX_Player::~OMX_Player()
 void OMX_Player::PrepareToDelete ()
 {
 	Command_Impl::PrepareToDelete ();
-	delete m_pqDBusPlayerInterface;
-	delete m_pqApp;
 	m_pDevice_App_Server = NULL;
 	m_pDevice_OMX_Plugin = NULL;
 }
@@ -95,12 +88,6 @@ bool OMX_Player::GetConfig()
 
 	int argc = 0;
 	char **argv;
-	m_pqApp = new QCoreApplication(argc, argv);
-
-	if (!QDBusConnection::sessionBus().isConnected()) {
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"Cannot connect to the D-Bus session bus.");
-		return false;
-	}
 
   return true;
 }
@@ -328,20 +315,14 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 	m_iStreamID = iStreamID;
 
 /*	m_omxplayer = new CLibOMX;
-
         // open file
         m_omxplayer->OpenFile(sMediaURL);
-
         m_omxplayer->RegisterNotifier(OMX_Player::NotifierCallback, this);
-
 	// start the engine running
         m_omxplayer->Start();
-
 	m_bOMXIsRunning = true;
-
 //	void EVENT_Playback_Started(string sMRL,int iStream_ID,string sSectionDescription,string sAudio,string sVideo) { GetEvents()->Playback_Started(sMRL.c_str(),iStream_ID,sSectionDescription.c_str(),sAudio.c_str(),sVideo.c_str()); }
 	EVENT_Playback_Started(sMediaURL,m_iStreamID,"","","");
-
 	sCMD_Result = "OK";
 */
 
@@ -363,13 +344,13 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 							false, true, false);
 		if (SendCommand (CMD_Spawn_Application))
 		{
-			m_pqDBusPlayerInterface = new QDBusInterface("org.mpris.MediaPlayer2.omxplayer", "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", QDBusConnection::sessionBus());
-			if (m_pqDBusPlayerInterface->isValid()) {
+//			m_pqDBusPlayerInterface = new QDBusInterface("org.mpris.MediaPlayer2.omxplayer", "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", QDBusConnection::sessionBus());
+//			if (m_pqDBusPlayerInterface->isValid()) {
 				m_bOMXIsRunning = true;
 				sCMD_Result="OK";
 				return;
-			}
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - D-Bus interface is not valid.");
+//			}
+//			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - D-Bus interface is not valid.");
 		}
 		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - failed to launch");
 	}
@@ -437,14 +418,14 @@ void OMX_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMes
 	cout << "Implemented command #39 - Pause Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-	if (m_pqDBusPlayerInterface->isValid()) {
-		QDBusReply<QString> reply = m_pqDBusPlayerInterface->call(QDBus::NoBlock, "Pause");
-		if (reply.isValid()) {
+//	if (m_pqDBusPlayerInterface->isValid()) {
+//		QDBusReply<QString> reply = m_pqDBusPlayerInterface->call(QDBus::NoBlock, "Pause");
+//		if (reply.isValid()) {
 			sCMD_Result = "OK";
 			return;
-		}
-		LoggerWrapper::GetInstance ()->Write (LV_STATUS,"OMX_Player::CMD_Stop_Media %s", qPrintable(reply.error().message()));
-	}
+//		}
+//		LoggerWrapper::GetInstance ()->Write (LV_STATUS,"OMX_Player::CMD_Stop_Media %s", qPrintable(reply.error().message()));
+//	}
 
 	sCMD_Result = "FAIL";
 }
