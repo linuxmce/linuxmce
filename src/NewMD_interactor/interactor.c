@@ -35,11 +35,22 @@
 #define FIL "*************************************"
 #endif
 
+#define MSG2 "There are multiple DeviceTemplates available for this Device."
+#define MSG3 "Please go to an existing orbiter and make a selection.       "
+#define FIL2 "*************************************************************"
+
 void DisplayPleaseWait()
 {
 	printf(BRIGHT "**" FIL "**" NORMAL "\n");
 	printf(BRIGHT "* " COLOR MSG NORMAL BRIGHT " *" NORMAL "\n");
 	printf(BRIGHT "**" FIL "**" NORMAL "\n");
+}
+void DisplayPleaseChoose()
+{
+	printf(BRIGHT "**" FIL2 "**" NORMAL "\n");
+	printf(BRIGHT "* " COLOR MSG2 NORMAL BRIGHT " *" NORMAL "\n");
+	printf(BRIGHT "* " COLOR MSG3 NORMAL BRIGHT " *" NORMAL "\n");
+	printf(BRIGHT "**" FIL2 "**" NORMAL "\n");
 }
 
 // ./interactor <Gateway> <IP> <MAC>
@@ -124,13 +135,19 @@ int main(int argc, char * argv[])
 
 	bytes = snprintf(buffer, 1024, "%s %s %s 9|1|112|%s %s\n", myCommand, myIP, myMAC, myArchitecture, myDT_VendorModelID);
 	write(s, buffer, bytes < 1024 ? bytes : 1024);
-	
+
+	printf("%s\n", buffer);
+
 	close(s);
 
 	// Do the actual server stuff
 	s = s_srv;
 
 	DisplayPleaseWait();
+
+	if (strcmp(myCommand, "select") == 0)
+		DisplayPleaseChoose();
+
 	while (! do_reboot)
 	{
 		s2 = accept(s, NULL, NULL);
