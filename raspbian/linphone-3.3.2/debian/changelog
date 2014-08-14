@@ -1,4 +1,4 @@
-linphone (3.5.3~1lmce1) unstable; urgency=low
+linphone (3.5.3~1lmce2) unstable; urgency=low
 
   * build for raspbian with lmce
   * falsely update version # to supersede raspbian/wheezy version
