@@ -323,11 +323,13 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 
 	if (m_pDevice_App_Server)
 	{
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Spawning OMXPlayer: %s", sMediaURL.c_str());
+
 		string sMessage =
-		StringUtils::itos (m_dwPK_Device) + " " +
-		StringUtils::itos (m_dwPK_Device) +
-		" 1 " TOSTRING (COMMAND_Application_Exited_CONST) " "
-		TOSTRING (COMMANDPARAMETER_Exit_Code_CONST) " ";
+			StringUtils::itos (m_dwPK_Device) + " " +
+			StringUtils::itos (m_dwPK_Device) +
+			" 1 " TOSTRING (COMMAND_Application_Exited_CONST) " "
+			TOSTRING (COMMANDPARAMETER_Exit_Code_CONST) " ";
 
 		DCE::CMD_Spawn_Application CMD_Spawn_Application (m_dwPK_Device,
 							m_pDevice_App_Server->
@@ -342,36 +344,53 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 			// TODO: add checking (retry, timout) here
 			// We don't get dbus session bus information until omxplayer is running
 			char *env;
+			const char *dbus_addr;
 			std::string line;
 			std::ifstream infile;
 
 			infile.open(OMXPLAYER_DBUS_ADDR);
+			if (!infile.is_open()) {
+				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Could not open file %s", OMXPLAYER_DBUS_ADDR.c_str());
+			}
 			std::getline(infile, line);
 			infile.close();
+			dbus_addr = line.c_str();
 			line = std::string("DBUS_SESSION_BUS_ADDRESS=") + line;
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - %s", line.c_str());
 			env = (char *)line.c_str();
 			putenv(env);
 
 			infile.open(OMXPLAYER_DBUS_PID);
+			if (!infile.is_open()) {
+				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Could not open file %s", OMXPLAYER_DBUS_PID.c_str());
+			}
 			std::getline(infile, line);
 			infile.close();
 			line = std::string("DBUS_SESSION_BUS_PID=") + line;
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - %s", line.c_str());
 			env = (char *)line.c_str();
 			putenv(env);
 
-			g_dbus_conn = new DBus::Connection(DBus::Connection::SessionBus());
-			g_player_client = new OMXPlayerClient(*g_dbus_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
-			g_props_client = new OMXPropsClient(*g_dbus_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Opening D-Bus Session Bus: %s", dbus_addr);
+//			g_dbus_conn = new DBus::Connection(DBus::Connection::SessionBus());
+			g_dbus_conn = new DBus::Connection(dbus_addr);
+			if (g_dbus_conn->connected()) {
+				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Creating Player interface");
+				g_player_client = new OMXPlayerClient(*g_dbus_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
+				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Creating Properties interface");
+				g_props_client = new OMXPropsClient(*g_dbus_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
 
-			string sPlayerIdentity = g_props_client->Identity();
-// TODO: add checking here (check some property)
-//			m_pqDBusPlayerInterface = new QDBusInterface("org.mpris.MediaPlayer2.omxplayer", "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", QDBusConnection::sessionBus());
-//			if (m_pqDBusPlayerInterface->isValid()) {
-				m_bOMXIsRunning = true;
-				sCMD_Result="OK";
-				return;
-//			}
-//			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - D-Bus interface is not valid.");
+				if (g_player_client != NULL && g_props_client != NULL) {
+//					string sPlayerIdentity = g_props_client->Identity();
+					m_bOMXIsRunning = true;
+					sCMD_Result="OK";
+					LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - bOMXISRunning=true,sCMD_Result=OK");
+					return;
+				}
+				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't open one, or more, D-Bus Interfaces");
+			}
+
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't open D-Bus Session Bus");
 		}
 		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - failed to launch");
 	}
