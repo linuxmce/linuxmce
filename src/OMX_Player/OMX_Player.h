@@ -20,6 +20,14 @@
 #include "Gen_Devices/OMX_PlayerBase.h"
 //<-dceag-d-e->
 
+#include "omxplayer-client.h"
+
+static const char *OMXPLAYER_SERVER_NAME = "org.mpris.MediaPlayer2.omxplayer";
+static const char *OMXPLAYER_SERVER_PATH = "/org/mpris/MediaPlayer2";
+
+static const string OMXPLAYER_DBUS_ADDR = "/tmp/omxplayerdbus";
+static const string OMXPLAYER_DBUS_PID = "/tmp/omxplayerdbus.pid";
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -32,6 +40,11 @@ private:
 		DeviceData_Base *m_pDevice_OMX_Plugin;
 		DeviceData_Base *m_pDevice_App_Server;
 		bool m_bOMXIsRunning;
+
+		OMXPlayerClient *g_player_client = NULL;
+		OMXPropsClient *g_props_client = NULL;
+		DBus::Connection *g_dbus_conn = NULL;
+		DBus::BusDispatcher dispatcher;
 
 		// Private methods
 		void ProcessNotification(void *pObject, int event);

@@ -1,0 +1,111 @@
+<?xml version="1.0" ?>
+<node name="/org/mpris/MediaPlayer2">
+
+  <interface name="org.freedesktop.DBus.Propertier">
+    <method name="CanQuit">
+      <arg type="b" direction="out"/>
+    </method>
+    <method name="Fullscreen">
+      <arg type="b" direction="out"/>
+    </method>
+    <method name="CanSetFullscreen">
+      <arg type="b" direction="out"/>
+    </method>
+    <method name="CanRaise">
+      <arg type="b" direction="out"/>
+    </method>
+    <method name="HasTrackList">
+      <arg type="b" direction="out"/>
+    </method>
+    <method name="Identity">
+      <arg type="s" direction="out"/>
+    </method>
+    <method name="SupportedUriSchemes">
+      <arg type="as" direction="out"/>
+    </method>
+    <method name="SupportedMimeTypes">
+      <arg type="as" direction="out"/>
+    </method>
+    <method name="CanGoNext">
+      <arg type="b" direction="out"/>
+    </method>
+    <method name="CanGoPrevious">
+      <arg type="b" direction="out"/>
+    </method>
+    <method name="CanSeek">
+      <arg type="b" direction="out"/>
+    </method>
+    <method name="CanControl">
+      <arg type="b" direction="out"/>
+    </method>
+    <method name="CanPlay">
+      <arg type="b" direction="out"/>
+    </method>
+    <method name="CanPause">
+      <arg type="b" direction="out"/>
+    </method>
+    <method name="PlaybackStatus">
+      <arg type="s" direction="out"/>
+    </method>
+    <method name="Volume">
+      <arg type="d" direction="out"/>
+    </method>
+    <method name="Volume">
+      <arg type="d" name="volume" direction="in"/>
+      <arg type="d" direction="out"/>
+    </method>
+    <method name="Mute"></method>
+    <method name="UnMute"></method>
+    <method name="Position">
+      <arg type="x" direction="out"/>
+    </method>
+    <method name="Duration">
+      <arg type="x" direction="out"/>
+    </method>
+    <method name="MinimumRate">
+      <arg type="d" direction="out"/>
+    </method>
+    <method name="MaximumRate">
+      <arg type="d" direction="out"/>
+    </method>
+  </interface>
+
+  <interface name="org.mpris.MediaPlayer2.Player">
+    <method name="Next"></method>
+    <method name="Previous"></method>
+    <method name="Pause"></method>
+    <method name="Stop"></method>
+    <method name="Seek">
+      <arg type="x" name="microseconds" direction="in"/>
+      <arg type="x" direction="out"/>
+    </method>
+    <method name="SetPosition">
+      <arg type="s" name="path" direction="in"/>
+      <arg type="x" name="position" direction="in"/>
+      <arg type="x" direction="out"/>
+    </method>
+    <method name="ListSubtitles">
+      <arg type="as" direction="out"/>
+    </method>
+    <method name="ListAudio">
+      <arg type="as" direction="out"/>
+    </method>
+    <method name="ListVideo">
+      <arg type="as" direction="out"/>
+    </method>
+    <method name="SelectSubtitle">
+      <arg type="i" name="index" direction="in"/>
+      <arg type="b" direction="out"/>
+    </method>
+    <method name="SelectAudio">
+      <arg type="i" name="index" direction="in"/>
+      <arg type="b" direction="out"/>
+    </method>
+    <method name="ShowSubtitles"></method>
+    <method name="HideSubtitles"></method>
+    <method name="Action">
+      <arg type="i" name="key_val" direction="in"/>
+    </method>
+  </interface>
+
+</node>
