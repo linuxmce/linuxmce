@@ -370,50 +370,67 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 			infile.close();
 			dbus_addr = line.c_str();
 
+			// Setup the Player Connection, register and setup the Player_proxy Interface
 			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Opening D-Bus Player Connection: %s", dbus_addr);
 			g_player_conn = new DBus::Connection(dbus_addr, false);
+
+			if (!g_player_conn->connected()) {
+				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't create Player Connection");
+				return;
+			}
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Registering Player Connection");
+			if (!g_player_conn->register_bus()) {
+				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't register_bus() Player Connection");
+				return;
+			}
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Creating Player interface");
+			g_player_client = new OMXPlayerClient(*g_player_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
+
+
+			// Setup the Props Connection, register and setup the Props_proxy Interface
 			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Opening D-Bus Props Connection: %s", dbus_addr);
 			g_props_conn = new DBus::Connection(dbus_addr, false);
-
-			if (g_player_conn->connected() && g_props_conn->connected()) {
-				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Connected to D-Bus");
-				if (g_player_conn->register_bus() && g_props_conn->register_bus()) {
-					LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Registered with D-Bus");
-
-					LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Creating Player interface");
-					g_player_client = new OMXPlayerClient(*g_player_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
-
-					LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Creating Properties interface");
-					g_props_client = new OMXPropsClient(*g_props_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
-
-					if (g_player_client != NULL && g_props_client != NULL) {
-						string sIdentity;
-						bool bIdentity = false;
-						while (!bIdentity && i<RETRIES) {
-							try {
-								sIdentity = g_props_client->Identity();
-								bIdentity = true;
-							}
-							catch (DBus::Error &dbus_err) {
-								//cout << "Waiting for Identity()..." << endl;
-								usleep(100000);
-							}
-						}
-						LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - D-Bus Player Identity: %s", sIdentity.c_str());
-
-						m_bOMXIsRunning = true;
-						sCMD_Result="OK";
-						LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - bOMXISRunning=true,sCMD_Result=OK");
-						return;
-					}
-					LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't open one, or more, D-Bus Interfaces");
-				}
-				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't open one, or more, D-Bus Interfaces");
+			if (!g_props_conn->connected()) {
+				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't create Props Connection");
+				return;
 			}
 
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't open D-Bus Session Bus");
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Registering Props Connection");
+			if (!g_props_conn->register_bus()) {
+				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't register_bus() Props Connection");
+				return;
+			}
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Creating Properties interface");
+			g_props_client = new OMXPropsClient(*g_props_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
+
+			if (g_player_client != NULL && g_props_client != NULL) {
+				int i = 0;
+				string sIdentity;
+				bool bIdentity = false;
+				while (!bIdentity && i++<RETRIES) {
+					try {
+						sIdentity = g_props_client->Identity();
+						bIdentity = true;
+					}
+					catch (DBus::Error &dbus_err) {
+						//cout << "Waiting for Identity()..." << endl;
+						usleep(100000);
+					}
+				}
+				if (bIdentity) {
+					LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - D-Bus Player Identity (%i): %s", i, sIdentity.c_str());
+					LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - bOMXISRunning=true,sCMD_Result=OK");
+					m_bOMXIsRunning = true;
+					sCMD_Result="OK";
+					return;
+				}
+
+			}
+			else
+				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't open one, or more, D-Bus Interfaces");
 		}
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - failed to launch");
+		else
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - failed to Spawn Application");
 	}
 	else
 		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - no app server");
@@ -510,12 +527,12 @@ void OMX_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMes
 void OMX_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c40-e->
 {
-//	cout << "Need to implement command #40 - Restart Media" << endl;
-	cout << "Implemented command #40 - Restart Media" << endl;
+	cout << "Need to implement command #40 - Restart Media" << endl;
+//	cout << "Implemented command #40 - Restart Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
+// TODO: need to check if it is paused in order to un-pause it.
 	g_player_client->Pause();
-//	m_omxplayer->SendCommand(OMX_PAUSE,"0"); // 'p');
 	sCMD_Result = "OK";
 }
 
@@ -539,8 +556,14 @@ void OMX_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed
 	cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
 	cout << "Parm #220 - Report=" << bReport << endl;
 
-	g_player_client->Pause();
-//	m_omxplayer->SendCommand(OMX_PAUSE,"0"); // 'p');
+	string sStatus = g_props_client->PlaybackStatus();
+	string sPaused = "Paused";
+//	string sPlaying = "Playing";
+	size_t foundPaused = sStatus.find(sPaused);
+//	size_t foundPlaying = sStatus.find(sPlaying);
+
+	if (iMediaPlaybackSpeed > 0 && foundPaused != string::npos)
+		g_player_client->Pause(); // un pause the playing media.
 	sCMD_Result = "OK";
 }
 
@@ -576,7 +599,6 @@ void OMX_Player::CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_Re
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
 	g_player_client->Next();
-//	m_omxplayer->SendCommand(OMX_SEEK_FORWARD_30,"0"); // 0x5b43);
 	sCMD_Result = "OK";
 }
 
@@ -595,7 +617,6 @@ void OMX_Player::CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Res
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
 	g_player_client->Previous();
-//	m_omxplayer->SendCommand(OMX_SEEK_BACK_30,"0"); // 0x5b44);
 	sCMD_Result = "OK";
 }
 
@@ -611,11 +632,12 @@ void OMX_Player::CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Res
 void OMX_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c65-e->
 {
-//	cout << "Need to implement command #65 - Jump Position In Playlist" << endl;
-	cout << "Implemented command #65 - Jump Position In Playlist" << endl;
+	cout << "Need to implement command #65 - Jump Position In Playlist" << endl;
+//	cout << "Implemented command #65 - Jump Position In Playlist" << endl;
 	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
+// No playlist capability in omxplayer yet.
 /*
 	if (atoi(sValue_To_Assign.c_str())==0) {
 		string filename=m_omxplayer->m_filename;
@@ -649,7 +671,6 @@ void OMX_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
 	g_player_client->Pause();
-//	m_omxplayer->SendCommand(OMX_PAUSE,"0"); // 'p');
 	sCMD_Result = "OK";
 }
 
@@ -671,7 +692,6 @@ void OMX_Player::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message 
 	cout << "Parm #203 - Eject=" << bEject << endl;
 
 	g_player_client->Stop();
-//	m_omxplayer->SendCommand(OMX_QUIT,"0"); // 'q');
 	sCMD_Result = "OK";
 }
 
@@ -938,6 +958,20 @@ void OMX_Player::CMD_Report_Playback_Position(int iStreamID,string *sText,string
 	cout << "Parm #9 - Text=" << sText << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+
+	int hrs, mins, secs;//, msecs, nsecs;
+	int64_t xPosition;
+
+	xPosition = g_props_client->Position();
+//	nsecs = xPosition % 1000;
+//	msecs = (xPosition / 1000) % 1000;
+	secs = (xPosition / 1000000) % 1000;
+	mins = (xPosition / 60000000) % 1000;
+	hrs = (xPosition / 360000000) % 1000;
+
+	*sText = to_string(hrs) + ":" + to_string(mins) + ":" + to_string(secs);
+	*sMediaPosition = to_string(xPosition);
+	sCMD_Result = "OK";
 }
 
 //<-dceag-c412-b->
