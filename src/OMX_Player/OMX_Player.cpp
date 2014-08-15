@@ -387,8 +387,6 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 					g_props_client = new OMXPropsClient(*g_props_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
 
 					if (g_player_client != NULL && g_props_client != NULL) {
-//						string sPlayerIdentity = g_props_client->Identity();
-
 						string sIdentity;
 						bool bIdentity = false;
 						while (!bIdentity && i<RETRIES) {
@@ -397,7 +395,7 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 								bIdentity = true;
 							}
 							catch (DBus::Error &dbus_err) {
-								cout << "Waiting for Identity()..." << endl;
+								//cout << "Waiting for Identity()..." << endl;
 								usleep(100000);
 							}
 						}
