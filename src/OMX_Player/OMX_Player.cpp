@@ -66,8 +66,10 @@ void OMX_Player::PrepareToDelete ()
 		delete g_player_client; // = new OMXPlayerClient(*g_dbus_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
 	if (g_props_client != NULL)
 		delete g_props_client; // = new OMXPropsClient(*g_dbus_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
-	if (g_dbus_conn != NULL)
-		delete g_dbus_conn;// = new DBus::Connection(DBus::Connection::SessionBus());
+	if (g_player_conn != NULL)
+		delete g_player_conn;// = new DBus::Connection(DBus::Connection::SessionBus());
+	if (g_props_conn != NULL)
+		delete g_props_conn;// = new DBus::Connection(DBus::Connection::SessionBus());
 
 	Command_Impl::PrepareToDelete ();
 	m_pDevice_App_Server = NULL;
@@ -343,14 +345,19 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 		{
 			// TODO: add checking (retry, timout) here
 			// We don't get dbus session bus information until omxplayer is running
+			int i;
 			char *env;
 			const char *dbus_addr;
 			std::string line;
 			std::ifstream infile;
 
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Opening file to get d-bus address: %s", OMXPLAYER_DBUS_ADDR.c_str());
 			infile.open(OMXPLAYER_DBUS_ADDR);
-			if (!infile.is_open()) {
+			while (!infile.is_open() && i<10) {
 				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Could not open file %s", OMXPLAYER_DBUS_ADDR.c_str());
+				i++;
+				usleep(200000);
+				infile.open(OMXPLAYER_DBUS_ADDR);
 			}
 			std::getline(infile, line);
 			infile.close();
@@ -360,32 +367,30 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 			env = (char *)line.c_str();
 			putenv(env);
 
-			infile.open(OMXPLAYER_DBUS_PID);
-			if (!infile.is_open()) {
-				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Could not open file %s", OMXPLAYER_DBUS_PID.c_str());
-			}
-			std::getline(infile, line);
-			infile.close();
-			line = std::string("DBUS_SESSION_BUS_PID=") + line;
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - %s", line.c_str());
-			env = (char *)line.c_str();
-			putenv(env);
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Opening D-Bus Player Connection: %s", dbus_addr);
+			g_player_conn = new DBus::Connection(dbus_addr, false);
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Opening D-Bus Props Connection: %s", dbus_addr);
+			g_props_conn = new DBus::Connection(dbus_addr, false);
 
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Opening D-Bus Session Bus: %s", dbus_addr);
-//			g_dbus_conn = new DBus::Connection(DBus::Connection::SessionBus());
-			g_dbus_conn = new DBus::Connection(dbus_addr);
-			if (g_dbus_conn->connected()) {
-				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Creating Player interface");
-				g_player_client = new OMXPlayerClient(*g_dbus_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
-				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Creating Properties interface");
-				g_props_client = new OMXPropsClient(*g_dbus_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
+			if (g_player_conn->connected() && g_props_conn->connected()) {
+				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Connected to D-Bus");
+				if (g_player_conn->register_bus() && g_props_conn->register_bus()) {
+					LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Registered with D-Bus");
 
-				if (g_player_client != NULL && g_props_client != NULL) {
-//					string sPlayerIdentity = g_props_client->Identity();
-					m_bOMXIsRunning = true;
-					sCMD_Result="OK";
-					LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - bOMXISRunning=true,sCMD_Result=OK");
-					return;
+					LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Creating Player interface");
+					g_player_client = new OMXPlayerClient(*g_player_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
+
+					LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Creating Properties interface");
+					g_props_client = new OMXPropsClient(*g_props_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
+
+					if (g_player_client != NULL && g_props_client != NULL) {
+//						string sPlayerIdentity = g_props_client->Identity();
+						m_bOMXIsRunning = true;
+						sCMD_Result="OK";
+						LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - bOMXISRunning=true,sCMD_Result=OK");
+						return;
+					}
+					LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't open one, or more, D-Bus Interfaces");
 				}
 				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't open one, or more, D-Bus Interfaces");
 			}
@@ -420,7 +425,8 @@ void OMX_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 
 	delete g_player_client; // = new OMXPlayerClient(*g_dbus_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
 	delete g_props_client; // = new OMXPropsClient(*g_dbus_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
-	delete g_dbus_conn;// = new DBus::Connection(DBus::Connection::SessionBus());
+	delete g_player_conn;// = new DBus::Connection(DBus::Connection::SessionBus());
+	delete g_props_conn;// = new DBus::Connection(DBus::Connection::SessionBus());
 
 	EVENT_Playback_Completed(m_filename,iStreamID,false);
 

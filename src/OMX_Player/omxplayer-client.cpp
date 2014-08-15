@@ -11,10 +11,12 @@ using namespace std;
 OMXPlayerClient::OMXPlayerClient(DBus::Connection &connection, const char *path, const char *name)
   : DBus::ObjectProxy(connection, path, name)
 {
+
 }
 
 OMXPropsClient::OMXPropsClient(DBus::Connection &connection, const char *path, const char *name)
   : DBus::ObjectProxy(connection, path, name)
 {
+
 }
 

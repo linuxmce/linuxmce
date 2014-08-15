@@ -41,10 +41,11 @@ private:
 		DeviceData_Base *m_pDevice_App_Server;
 		bool m_bOMXIsRunning;
 
+		DBus::BusDispatcher dispatcher;
+		DBus::Connection *g_player_conn = NULL;
+		DBus::Connection *g_props_conn = NULL;
 		OMXPlayerClient *g_player_client = NULL;
 		OMXPropsClient *g_props_client = NULL;
-		DBus::Connection *g_dbus_conn = NULL;
-		DBus::BusDispatcher dispatcher;
 
 		// Private methods
 		void ProcessNotification(void *pObject, int event);
