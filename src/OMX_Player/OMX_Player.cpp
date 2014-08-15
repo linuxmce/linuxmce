@@ -29,6 +29,9 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+static const string OMXPLAYER_DBUS_ADDR = "/tmp/omxplayerdbus";
+#define OMXPLAYER_DBUS_PID /tmp/omxplayerdbus.pid
+#define RETRIES 50
 
 // Additional required includes
 #include "pluto_main/Define_DeviceTemplate.h"
@@ -345,27 +348,27 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 		{
 			// TODO: add checking (retry, timout) here
 			// We don't get dbus session bus information until omxplayer is running
-			int i;
-			char *env;
+			int i=0;
 			const char *dbus_addr;
-			std::string line;
-			std::ifstream infile;
+			string line;
+			ifstream infile;
 
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Opening file to get d-bus address: %s", OMXPLAYER_DBUS_ADDR.c_str());
-			infile.open(OMXPLAYER_DBUS_ADDR);
-			while (!infile.is_open() && i<10) {
-				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Could not open file %s", OMXPLAYER_DBUS_ADDR.c_str());
-				i++;
-				usleep(200000);
-				infile.open(OMXPLAYER_DBUS_ADDR);
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Opening file '%s' to get d-bus address", OMXPLAYER_DBUS_ADDR.c_str());
+			infile.open(OMXPLAYER_DBUS_ADDR.c_str());
+			while (!infile.is_open() && i++<RETRIES) {
+				usleep(100000);
+				infile.open(OMXPLAYER_DBUS_ADDR.c_str());
 			}
+			if (!infile.is_open()) {
+				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Could not open file %s", OMXPLAYER_DBUS_ADDR.c_str());
+				system("killall omxplayer");
+				system("killall omxplayer.bin");
+				return;
+			}
+		usleep(500000);
 			std::getline(infile, line);
 			infile.close();
 			dbus_addr = line.c_str();
-			line = std::string("DBUS_SESSION_BUS_ADDRESS=") + line;
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - %s", line.c_str());
-			env = (char *)line.c_str();
-			putenv(env);
 
 			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Opening D-Bus Player Connection: %s", dbus_addr);
 			g_player_conn = new DBus::Connection(dbus_addr, false);
@@ -385,6 +388,21 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 
 					if (g_player_client != NULL && g_props_client != NULL) {
 //						string sPlayerIdentity = g_props_client->Identity();
+
+						string sIdentity;
+						bool bIdentity = false;
+						while (!bIdentity && i<RETRIES) {
+							try {
+								sIdentity = g_props_client->Identity();
+								bIdentity = true;
+							}
+							catch (DBus::Error &dbus_err) {
+								cout << "Waiting for Identity()..." << endl;
+								usleep(100000);
+							}
+						}
+						LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - D-Bus Player Identity: %s", sIdentity.c_str());
+
 						m_bOMXIsRunning = true;
 						sCMD_Result="OK";
 						LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - bOMXISRunning=true,sCMD_Result=OK");

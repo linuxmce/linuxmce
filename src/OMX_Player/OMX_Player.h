@@ -25,9 +25,6 @@
 static const char *OMXPLAYER_SERVER_NAME = "org.mpris.MediaPlayer2.omxplayer";
 static const char *OMXPLAYER_SERVER_PATH = "/org/mpris/MediaPlayer2";
 
-static const string OMXPLAYER_DBUS_ADDR = "/tmp/omxplayerdbus";
-static const string OMXPLAYER_DBUS_PID = "/tmp/omxplayerdbus.pid";
-
 //<-dceag-decl-b->
 namespace DCE
 {
