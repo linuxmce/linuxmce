@@ -102,7 +102,7 @@ if (!-d $dest) {
 	mkdir("$dest"); 
 }
 
-$api = new Flickr::API({'key' => $fKey});
+$api = new Flickr::API({'key' => $fKey,'rest_uri' => 'https://www.flickr.com/services/rest/','auth_uri' => 'https://www.flickr.com/services/auth/'});
 my ($max_number, $picture_nr);
 $max_number = getMaxNrFiles();
 $picture_nr = 0;
