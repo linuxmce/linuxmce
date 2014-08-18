@@ -457,6 +457,11 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - creating PlayerMonitorThread");
 				pthread_create(&m_tPlayerMonitorThread, NULL, &PlayerMonitor, this);
 
+				string sMediaInfo = "";
+				string sAudioInfo = "";
+				string sVideoInfo = "";
+				EVENT_Playback_Started(m_sMediaURL, m_iStreamID, sMediaInfo, sAudioInfo, sVideoInfo);
+
 				m_bOMXIsRunning = true;
 				sCMD_Result="OK";
 				return;
@@ -1099,8 +1104,6 @@ void OMX_Player::Set_Stopped(bool bSendEvent = true) {
 	if (m_bOMXIsRunning)
 	{
 	        m_bOMXIsRunning = false;
-	        m_iStreamID = 0;
-	        m_sMediaURL = "";
 
 	        if (g_player_client) {
 			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - Sending Stop() to g_player_client");
