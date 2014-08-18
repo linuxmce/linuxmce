@@ -1,0 +1,37 @@
+--- a/Makefile
++++ b/Makefile
+@@ -44,10 +44,10 @@
+ 	@rm -f $@ 
+ 	$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@ -Wno-deprecated-declarations
+ 
+-version:
++version.h:
+ 	bash gen_version.sh > version.h 
+ 
+-omxplayer.bin: version $(OBJS)
++omxplayer.bin: version.h $(OBJS)
+ 	$(CXX) $(LDFLAGS) -o omxplayer.bin $(OBJS) -lvchiq_arm -lvcos -ldbus-1 -lrt -lpthread -lavutil -lavcodec -lavformat -lswscale -lswresample -lpcre
+ 	$(STRIP) omxplayer.bin
+ 
+@@ -55,6 +55,7 @@
+ 	for i in $(OBJS); do (if test -e "$$i"; then ( rm $$i ); fi ); done
+ 	@rm -f omxplayer.old.log omxplayer.log
+ 	@rm -f omxplayer.bin
++	@rm -f oversion.h
+ 	@rm -rf $(DIST)
+ 	@rm -f omxplayer-dist.tar.gz
+ 
+--- a/gen_version.sh
++++ b/gen_version.sh
+@@ -22,6 +22,10 @@ if [ x"$?" = x"0" ]; then
+     if [ x"$upstream" != x"" ]; then
+ 	repo=$(git config remote.${upstream%/$branch}.url)
+     fi
++else
++    hash=$1
++    branch=$2
++    repo=$3
+ fi
+ 
+ echo "#ifndef __VERSION_H__"
+

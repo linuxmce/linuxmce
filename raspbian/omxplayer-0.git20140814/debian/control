@@ -1,0 +1,30 @@
+Source: omxplayer
+Section: video
+Priority: optional
+Maintainer: Sébastien Noel <sebastien@twolife.be>
+Build-Depends: debhelper (>= 9),
+ libboost1.49-dev | libboost1.50-dev,
+ libdbus-1-dev,
+ libfreetype6-dev,
+ libpcre3-dev,
+ libraspberrypi-dev,
+ libavcodec-ffmpeg-dev,
+ libavfilter-ffmpeg-dev,
+ libavformat-ffmpeg-dev,
+ libavutil-ffmpeg-dev,
+ libswresample-ffmpeg-dev,
+ libswscale-ffmpeg-dev
+Standards-Version: 3.9.4
+Homepage: https://github.com/popcornmix/omxplayer
+
+Package: omxplayer
+Architecture: armhf
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         fonts-freefont-ttf,
+         fbset,
+         x11-xserver-utils
+Description: Command line media player for Raspberry Pi
+ OMXPlayer was developed as a testbed for the XBMC Raspberry Pi
+ implementation and is quite handy to use standalone.
+

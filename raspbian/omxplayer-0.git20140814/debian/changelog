@@ -1,0 +1,18 @@
+omxplayer (0.git20140814-2) raspbian; urgency=low
+
+  * Add dependency x11-xserver-utils, fbset (git hash 90b895121d)
+
+ -- phenigma <phenigma@hotmail.com>  Thu, 14 Aug 2014 19:19:42 -0500
+
+omxplayer (0.git20140814-1) raspbian; urgency=low
+
+  * LMCE Release (git hash 90b895121d)
+
+ -- phenigma <phenigma@hotmail.com>  Thu, 14 Aug 2014 19:19:42 -0500
+
+omxplayer (0.git20140405-1) raspbian; urgency=low
+
+  * Initial release (git hash 1ca2f7adaa)
+
+ -- Sébastien Noel <sebastien@twolife.be>  Sat, 05 Apr 2014 23:35:35 +0200
+

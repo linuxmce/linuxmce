@@ -1,0 +1,15 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --parallel
+
+override_dh_auto_configure:
+	sh gen_version.sh 90b8951 master git://github.com/popcornmix/omxplayer.git > version.h
+
+override_dh_auto_test:
+	# Do not run test
+
+override_dh_auto_install:
+	install -m755 omxplayer.bin $(CURDIR)/debian/omxplayer/usr/bin/omxplayer.bin
+	install -m755 omxplayer $(CURDIR)/debian/omxplayer/usr/bin/omxplayer
+
