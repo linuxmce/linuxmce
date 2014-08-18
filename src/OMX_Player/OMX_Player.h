@@ -25,6 +25,8 @@
 static const char *OMXPLAYER_SERVER_NAME = "org.mpris.MediaPlayer2.omxplayer";
 static const char *OMXPLAYER_SERVER_PATH = "/org/mpris/MediaPlayer2";
 
+void *PlayerMonitor(void *pInstance);
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -36,7 +38,7 @@ private:
 		// Private member variables
 		DeviceData_Base *m_pDevice_OMX_Plugin;
 		DeviceData_Base *m_pDevice_App_Server;
-		bool m_bOMXIsRunning;
+		bool m_bOMXIsRunning = false;
 
 		DBus::BusDispatcher dispatcher;
 		DBus::Connection *g_player_conn = NULL;
@@ -44,10 +46,16 @@ private:
 		OMXPlayerClient *g_player_client = NULL;
 		OMXPropsClient *g_props_client = NULL;
 
+		bool m_bRunPlayerMonitor = false;
+		pthread_t m_tPlayerMonitorThread;
+
 		// Private methods
-		void ProcessNotification(void *pObject, int event);
+		friend void *PlayerMonitor(void *pInstance);
 
 public:
+		void Set_Stopped(void);
+		void Log(string txt);
+		pid_t m_pID = 0;
 		int m_iStreamID;
 		string m_filename;
 		// Public member variables

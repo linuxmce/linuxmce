@@ -6,8 +6,8 @@
 
 class OMXPlayerClient
   : public org::mpris::MediaPlayer2::Player_proxy,
-  public DBus::IntrospectableProxy,
-  public DBus::PropertiesProxy,
+//  public DBus::IntrospectableProxy,
+//  public DBus::PropertiesProxy,
   public DBus::ObjectProxy
 {
 public:
@@ -18,8 +18,8 @@ public:
 
 class OMXPropsClient
   : public org::freedesktop::DBus::Properties_proxy,
-  public DBus::IntrospectableProxy,
-  public DBus::PropertiesProxy,
+//  public DBus::IntrospectableProxy,
+//  public DBus::PropertiesProxy,
   public DBus::ObjectProxy
 {
 public:
