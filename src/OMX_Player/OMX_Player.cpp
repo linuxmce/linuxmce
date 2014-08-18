@@ -68,8 +68,9 @@ OMX_Player::~OMX_Player()
 
 void OMX_Player::PrepareToDelete ()
 {
-	kill(m_pID, SIGKILL);
-	m_pID = 0;
+	Set_Stopped(true);
+//	kill(m_pID, SIGKILL);
+//	m_pID = 0;
 
 	if (g_player_client != NULL)
 		delete g_player_client; // = new OMXPlayerClient(*g_dbus_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
@@ -326,13 +327,15 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 
 	sCMD_Result = "FAIL";
 
-	if (m_bOMXIsRunning) {
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - m_bOMXIsRunning TRUE at beginning of cmd?");
-//		Set_Stopped();
-		m_bOMXIsRunning = false;
+	// TODO: check (at least use) sMediaPosition
+	if (m_bOMXIsRunning && (iStreamID != m_iStreamID || sMediaURL != m_sMediaURL)) {
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - m_bOMXIsRunning TRUE, running Set_Stopped()");
+		Set_Stopped(false);
+//		m_bOMXIsRunning = false;
 	}
 
 	m_iStreamID = iStreamID;
+	m_sMediaURL = sMediaURL;
 
 	pid_t pid = fork();
 	if (pid < 0)                      // failed to fork
@@ -354,7 +357,7 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 			char *opt = (char *)"-r";
 			args.push_back(opt);
 		}
-		args.push_back((char *)sMediaURL.c_str());
+		args.push_back((char *)m_sMediaURL.c_str());
 		args.push_back((char *)NULL);
 
 		execv(fullname, &args[0]);
@@ -484,7 +487,7 @@ void OMX_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
 	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Stop_Media - Calling Set_Stopped()");
-	Set_Stopped();
+	Set_Stopped(true);
 
 //	g_player_client->Stop();
 //	delete g_player_client;
@@ -1091,11 +1094,13 @@ void OMX_Player::Log(string txt) {
 	cout << txt << endl;
 }
 
-void OMX_Player::Set_Stopped(void) {
+void OMX_Player::Set_Stopped(bool bSendEvent = true) {
 	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - called");
 	if (m_bOMXIsRunning)
 	{
 	        m_bOMXIsRunning = false;
+	        m_iStreamID = 0;
+	        m_sMediaURL = "";
 
 	        if (g_player_client) {
 			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - Sending Stop() to g_player_client");
@@ -1121,8 +1126,10 @@ void OMX_Player::Set_Stopped(void) {
 		        m_pID = 0;
 		}
 
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - Sending EVENT_Playback_Completed");
-	        EVENT_Playback_Completed(m_filename,m_iStreamID,false);
+		if (bSendEvent) {
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - Sending EVENT_Playback_Completed");
+		        EVENT_Playback_Completed(m_sMediaURL,m_iStreamID,false);
+		}
 	}
 
 	if (m_bRunPlayerMonitor) {
@@ -1143,8 +1150,8 @@ void *PlayerMonitor(void *pInstance) {
 	int options = 0;
 	pid_t child = waitpid(pThis->m_pID, stat_loc, options);
 	if (child == pThis->m_pID)  {
-		pThis->Log("[PlayerMonitor] stopping player (calling Set_Stopped()");
-		pThis->Set_Stopped();
+		pThis->Log("[PlayerMonitor] stopping player (calling Set_Stopped())");
+		pThis->Set_Stopped(true);
 	}
 	pThis->Log("[PlayerMonitor] exiting");
 }

@@ -49,15 +49,16 @@ private:
 		bool m_bRunPlayerMonitor = false;
 		pthread_t m_tPlayerMonitorThread;
 
+		int m_iStreamID;
+		string m_sMediaURL;
+
 		// Private methods
 		friend void *PlayerMonitor(void *pInstance);
 
 public:
-		void Set_Stopped(void);
+		void Set_Stopped(bool bSendEvent);
 		void Log(string txt);
 		pid_t m_pID = 0;
-		int m_iStreamID;
-		string m_filename;
 		// Public member variables
 		virtual void PrepareToDelete();
 
