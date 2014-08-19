@@ -459,7 +459,7 @@ bool PnpQueue::Process_Detect_Stage_Confirm_Possible_DT(PnpQueueEntry *pPnpQueue
 	}
 
 	// Build a query to check the DHCPDevice table for an existing matching entry
-	if( pPnpQueueEntry->m_pRow_PnpQueue->MACaddress_get().size()>=11 )  // It's IP based
+	if( pPnpQueueEntry->m_pRow_PnpQueue->MACaddress_get().size()>=11 && pPnpQueueEntry->m_pRow_PnpQueue->FK_PnpProtocol_get() != PNPPROTOCOL_Interactor_CONST)  // It's IP based
 	{
 		PhoneDevice pd("", pPnpQueueEntry->m_pRow_PnpQueue->MACaddress_get(), 0);
 		sSqlWhere = StringUtils::i64tos(pd.m_iMacAddress) + ">=Mac_Range_Low AND " + StringUtils::i64tos(pd.m_iMacAddress) + "<=Mac_Range_High";
@@ -469,7 +469,7 @@ bool PnpQueue::Process_Detect_Stage_Confirm_Possible_DT(PnpQueueEntry *pPnpQueue
 		sSqlWhere = string("'") + pPnpQueueEntry->m_pRow_PnpQueue->VendorModelId_get() + "' like concat(VendorModelID,'%') and VendorModelID != '' ";
 		string sCategory = pPnpQueueEntry->m_pRow_PnpQueue->Category_get();
 		if( sCategory.empty()==false )
-            sSqlWhere += " AND (category IS NULL or category='" + sCategory + "')";
+            sSqlWhere += " AND (Category IS NULL or Category='" + sCategory + "')";
 	}
 	else // Brute force, like RS232 or similar, where we have to check every device that matches the com method
 		sSqlWhere = "JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE PnpDetectionScript IS NOT NULL AND FK_CommMethod=" + StringUtils::itos(pPnpQueueEntry->m_pRow_PnpQueue->FK_CommMethod_get());
