@@ -7,7 +7,7 @@ SNR_LDFLAGS ?= -L/opt/libxine1-pluto/lib -L/opt/linphone-1.3.5/lib
 ROOT = ..
 CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
-CPPFLAGS = -I /usr/include/pluto -I /usr/include/pluto/DCE -I$(ROOT) -I/usr/include/mysql $(SNR_CPPFLAGS)
+CPPFLAGS = -I /usr/include/pluto -I /usr/include/pluto/DCE -I$(ROOT) -I/usr/include/mysql $(SNR_CPPFLAGS) -I../DCE
 LDFLAGS = -L /usr/pluto/lib -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCE -lPlutoUtils -lmysqlclient_r -lpthread
 

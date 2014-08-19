@@ -17,7 +17,7 @@
 #ifndef JSON_Plugin_h
 #define JSON_Plugin_h
 
-//	DCE Implemenation for #2061 JSON Plugin
+//	DCE Implemenation for #2294 JSON Plugin
 
 #include "Gen_Devices/JSON_PluginBase.h"
 //<-dceag-d-e->
