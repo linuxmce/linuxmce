@@ -418,13 +418,13 @@ bool PnpQueue::Process_Detect_Stage_Confirm_Possible_DT(PnpQueueEntry *pPnpQueue
 
 	vector<Row_UnknownDevices *> vectRow_UnknownDevices;
 	string sSqlWhere;
-	if( pPnpQueueEntry->m_pRow_PnpQueue->FK_PnpProtocol_get() != PNPPROTOCOL_Interactor_CONST && pPnpQueueEntry->m_pRow_PnpQueue->MACaddress_get().size() )
+	if( pPnpQueueEntry->m_pRow_PnpQueue->MACaddress_get().size() )
 		sSqlWhere += (sSqlWhere.size() ? " AND " : "") + string("MacAddress like '%") + pPnpQueueEntry->m_pRow_PnpQueue->MACaddress_get() + "%'";
 
 	if( pPnpQueueEntry->m_pRow_PnpQueue->VendorModelId_get().size() )
-		sSqlWhere += (sSqlWhere.size() ? " AND " : "") + string("VendorModelID like concat('") + pPnpQueueEntry->m_pRow_PnpQueue->VendorModelId_get() + "','%') and VendorModelID != ''";
+		sSqlWhere += (sSqlWhere.size() ? " AND " : "") + string("'") + pPnpQueueEntry->m_pRow_PnpQueue->VendorModelId_get() + string("' like concat(VendorModelID,'%') and VendorModelID != ''");
 	else if( pPnpQueueEntry->m_pRow_PnpQueue->FK_DeviceTemplate_get() )
-		sSqlWhere += (sSqlWhere.size() ? " AND " : "") + string("VendorModelID='DT:") + StringUtils::itos(pPnpQueueEntry->m_pRow_PnpQueue->FK_DeviceTemplate_get()) + "'";
+		sSqlWhere += (sSqlWhere.size() ? " AND " : "") + string("VendorModelId='DT:") + StringUtils::itos(pPnpQueueEntry->m_pRow_PnpQueue->FK_DeviceTemplate_get()) + "'";
 
 	if( pPnpQueueEntry->m_pRow_PnpQueue->SerialNumber_get().size() )
 		sSqlWhere += (sSqlWhere.size() ? " AND " : "") + string("SerialNumber='") + StringUtils::SQLEscape(pPnpQueueEntry->m_pRow_PnpQueue->SerialNumber_get()) + "'";
@@ -459,17 +459,17 @@ bool PnpQueue::Process_Detect_Stage_Confirm_Possible_DT(PnpQueueEntry *pPnpQueue
 	}
 
 	// Build a query to check the DHCPDevice table for an existing matching entry
-	if( pPnpQueueEntry->m_pRow_PnpQueue->FK_PnpProtocol_get() != PNPPROTOCOL_Interactor_CONST && pPnpQueueEntry->m_pRow_PnpQueue->MACaddress_get().size()>=11 )  // It's IP based
+	if( pPnpQueueEntry->m_pRow_PnpQueue->MACaddress_get().size()>=11 )  // It's IP based
 	{
 		PhoneDevice pd("", pPnpQueueEntry->m_pRow_PnpQueue->MACaddress_get(), 0);
 		sSqlWhere = StringUtils::i64tos(pd.m_iMacAddress) + ">=Mac_Range_Low AND " + StringUtils::i64tos(pd.m_iMacAddress) + "<=Mac_Range_High";
 	}
-	else if( pPnpQueueEntry->m_pRow_PnpQueue->VendorModelId_get().size() )  // It's usb or similar that has a vendor/model ID, or interactor based
+	else if( pPnpQueueEntry->m_pRow_PnpQueue->VendorModelId_get().size() )  // It's usb or similar that has a vendor/model ID
 	{
-		sSqlWhere = string("VendorModelID like concat('") +  pPnpQueueEntry->m_pRow_PnpQueue->VendorModelId_get() + "','%') AND VendorModelID != '' ";
+		sSqlWhere = string("'") + pPnpQueueEntry->m_pRow_PnpQueue->VendorModelId_get() + "' like concat(VendorModelID,'%') and VendorModelID != '' ";
 		string sCategory = pPnpQueueEntry->m_pRow_PnpQueue->Category_get();
 		if( sCategory.empty()==false )
-			sSqlWhere += " AND (Category IS NULL or Category='" + sCategory + "')";
+            sSqlWhere += " AND (category IS NULL or category='" + sCategory + "')";
 	}
 	else // Brute force, like RS232 or similar, where we have to check every device that matches the com method
 		sSqlWhere = "JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate WHERE PnpDetectionScript IS NOT NULL AND FK_CommMethod=" + StringUtils::itos(pPnpQueueEntry->m_pRow_PnpQueue->FK_CommMethod_get());
