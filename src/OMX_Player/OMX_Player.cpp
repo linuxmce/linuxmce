@@ -64,6 +64,7 @@ OMX_Player::~OMX_Player()
 //<-dceag-dest-e->
 {
 	EVENT_Playback_Completed("",0,false);
+	EVENT_Playback_Completed("",0,false);
 }
 
 void OMX_Player::PrepareToDelete ()
@@ -433,6 +434,12 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 			g_props_client = new OMXPropsClient(*g_props_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
 		}
 
+		// setup the monitoring thread to waitpid()??
+		m_bRunPlayerMonitor = true;
+		// TODO error reporting here
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - creating PlayerMonitorThread");
+		pthread_create(&m_tPlayerMonitorThread, NULL, &PlayerMonitor, this);
+
 		if (g_player_client != NULL && g_props_client != NULL) {
 			int i = 0;
 			string sIdentity;
@@ -450,12 +457,6 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 			if (bIdentity) {
 				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - D-Bus Player Identity (%i): %s", i, sIdentity.c_str());
 				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - bOMXISRunning=true,sCMD_Result=OK");
-
-				// setup the monitoring thread to waitpid()??
-				m_bRunPlayerMonitor = true;
-				// TODO error reporting here
-				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - creating PlayerMonitorThread");
-				pthread_create(&m_tPlayerMonitorThread, NULL, &PlayerMonitor, this);
 
 				string sMediaInfo = "";
 				string sAudioInfo = "";
@@ -1100,18 +1101,25 @@ void OMX_Player::Log(string txt) {
 }
 
 void OMX_Player::Set_Stopped(bool bSendEvent = true) {
+	bool stopped(false);
+
 	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - called");
 	if (m_bOMXIsRunning)
 	{
 	        m_bOMXIsRunning = false;
 
 	        if (g_player_client) {
+
 			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - Sending Stop() to g_player_client");
-			try {
-				g_player_client->Stop();
-			}
-			catch (DBus::Error &dbus_err) {
-				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - caught exception, omxplayer must be gone already");
+			while (!stopped) {
+				try {
+					g_player_client->Stop();
+				}
+				catch (DBus::Error &dbus_err) {
+					stopped = true;
+					LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - caught exception, omxplayer must be gone already");
+				}
+				usleep(100);
 			}
 			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - Deleting player client");
 			delete g_player_client;
@@ -1125,6 +1133,7 @@ void OMX_Player::Set_Stopped(bool bSendEvent = true) {
 
 		if (m_pID != 0) {
 			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - Killing child");
+//			system("killall omxplayer.bin");
 		        kill(m_pID, SIGKILL);
 		        m_pID = 0;
 		}
