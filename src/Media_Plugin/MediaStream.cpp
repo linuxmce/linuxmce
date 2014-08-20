@@ -841,6 +841,7 @@ void MediaStream::SetNowPlaying( OH_Orbiter *pOH_Orbiter, bool bRefreshScreen, b
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MediaStream::SetNowPlaying no media plugin");
 		return;
 	}
+	StreamWasUpdated();
 
 LoggerWrapper::GetInstance()->Write(LV_STATUS,"MediaStream::SetNowPlaying stream %p refresh %d"
 					,this,(int) bRefreshScreen);

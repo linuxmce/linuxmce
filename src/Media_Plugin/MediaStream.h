@@ -30,6 +30,8 @@
 #include "MediaTitle.h"
 #include "MediaSection.h"
 
+#include <time.h>
+
 using namespace std;
 
 class Row_MediaType_DesignObj;
@@ -81,6 +83,21 @@ namespace DCE
     {
         int m_iStreamID; /** A unique number to identify this stream -- cannot change this */
 
+    private:
+        struct timespec m_last_update;
+        void StreamWasUpdated()
+        {
+            clock_gettime(CLOCK_REALTIME, &m_last_update);
+        }
+        string getLastUpdate()
+        {
+            char *str_last_update;
+            asprintf(&str_last_update, "%ld;%ld", m_last_update.tv_sec, m_last_update.tv_nsec);
+            string s_last_update = string(str_last_update);
+            free(str_last_update);
+            return s_last_update;
+        }
+
     // picture information
     private:
 	char	*m_pPictureData;
@@ -88,7 +105,13 @@ namespace DCE
 
     // picture information access members
     public:
-	void	SetPicture(char *pPictureData,int iPictureSize) { delete[] m_pPictureData; m_pPictureData=pPictureData; m_iPictureSize=iPictureSize; }
+	void	SetPicture(char *pPictureData,int iPictureSize)
+	{
+		delete[] m_pPictureData;
+		m_pPictureData=pPictureData;
+		m_iPictureSize=iPictureSize;
+		StreamWasUpdated();
+	}
 	char	*m_pPictureData_get() { return m_pPictureData; }
 	size_t	m_iPictureSize_get() { return m_iPictureSize; }
 
