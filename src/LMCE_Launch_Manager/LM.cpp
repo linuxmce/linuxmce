@@ -322,6 +322,11 @@ bool LM::checkMySQL(bool showMessage)
 		bResult = true;
 	}
 
+	if (showMessage)
+	{
+		writeLog(msg.c_str(),true,LV_STATUS);
+	}
+
 	return bResult;
 }
 //COMPLETE
@@ -500,7 +505,7 @@ void LM::rebootPC()
 	writeLog("Rebooting");	
 	m_uiMainUI.flushLog();
 	
-	exec_system("/sbin/reboot");
+	exec_system("/sbin/reboot",false);
 	// giving system time to start actual reboot
 	sleep(120);
 }
@@ -1151,11 +1156,11 @@ void LM::updateScripts()
 	writeOSD("Detecting Serial Ports. Please Wait.");
 	writeLog("Running UpdateAvailableSerialPorts.sh", true, LV_STATUS);
 	string sCmd = "/usr/pluto/bin/UpdateAvailableSerialPorts.sh";
-	exec_system(sCmd,false);
+	exec_system(sCmd,true);
 	writeOSD("Detecting Sound Cards. Please Wait.");
 	writeLog("Running UpdateAvailableSoundCards.sh", true, LV_STATUS);
 	string sCmd2="/usr/pluto/bin/UpdateAvailableSoundCards.sh";
-	exec_system(sCmd2,false);
+	exec_system(sCmd2,true);
 	writeLog("Process completed.");
 
 		
@@ -1314,7 +1319,7 @@ void LM::startCoreDevices(bool checkForAlreadyRunning)
 							string sCmd = "/usr/bin/screen -d -m -S " + screenName;
 							sCmd += " /usr/pluto/bin/Spawn_Device.sh " + dbrCoreDevices.value(0) + " " + m_sCoreIP + " " + deviceCommand;
 							//writeLog("Command string: " + sCmd,true);//TODO REMOVE DEBUG
-							exec_system(sCmd,false);
+							exec_system(sCmd,true);
 							writeLog("Starting device " +  dbrCoreDevices.value(0) + " " + dbrCoreDevices.value(1),true);// + ": " + args.join(" "));//TODO make a join method for custom list type
 							writeOSD("Starting device " +  dbrCoreDevices.value(0) + " " + dbrCoreDevices.value(1));
 							// wait for the device to register
@@ -1429,7 +1434,7 @@ void LM::startMediaDevices(bool checkForAlreadyRunning)
 							string sCmd = "/usr/bin/screen -d -m -S " + screenName;
 							sCmd += " /usr/pluto/bin/Spawn_Device.sh " + dbrMediaDevices.value(0) + " " + m_sCoreIP + " " + deviceCommand;
 							//writeLog("Command string: " + sCmd,true);//TODO REMOVE DEBUG
-							exec_system(sCmd,false);
+							exec_system(sCmd,true);
 
 							writeLog("Starting device " +  dbrMediaDevices.value(0) + " " + dbrMediaDevices.value(1),true);// + ": " + args.join(" "));
 							writeOSD("Starting device " +  dbrMediaDevices.value(0) + " " + dbrMediaDevices.value(1));
@@ -1823,7 +1828,7 @@ bool LM::checkScreenDimensions(bool askUser/*=true*/)
 	
 		return true;	// for now until i finish this sucker.
 	}
-
+	return true;  // added to remove compiler warning fn is not currently used
 }
 
 //TODO: A lot of cleanup and hook into socket once socket layer is complete
