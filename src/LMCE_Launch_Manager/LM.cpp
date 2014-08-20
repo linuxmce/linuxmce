@@ -1155,7 +1155,7 @@ void LM::updateScripts()
 	writeOSD("Detecting Sound Cards. Please Wait.");
 	writeLog("Running UpdateAvailableSoundCards.sh", true, LV_STATUS);
 	string sCmd2="/usr/pluto/bin/UpdateAvailableSoundCards.sh";
-	exec_system(sCmd,false);
+	exec_system(sCmd2,false);
 	writeLog("Process completed.");
 
 		
