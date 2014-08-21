@@ -30,6 +30,7 @@ CXXFLAGS += -fmessage-length=0
 CPPFLAGS +=
 LDFLAGS +=
 INTERNAL_LIBS_NAMES += pluto_main pluto_media
+EXTERNAL_LIBS_NAMES += rt
 
 Gen_Dev_Files += 
 sources += \
