@@ -85,17 +85,17 @@ namespace DCE
 
     private:
         struct timespec m_last_update;
+
+    protected:
         void StreamWasUpdated()
         {
             clock_gettime(CLOCK_REALTIME, &m_last_update);
         }
-        string getLastUpdate()
+
+    public:
+        struct timespec getLastUpdate()
         {
-            char *str_last_update;
-            asprintf(&str_last_update, "%ld;%ld", m_last_update.tv_sec, m_last_update.tv_nsec);
-            string s_last_update = string(str_last_update);
-            free(str_last_update);
-            return s_last_update;
+            return m_last_update;
         }
 
     // picture information
