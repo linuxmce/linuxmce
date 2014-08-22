@@ -9,7 +9,7 @@ CXX = g++
 CXXFLAGS = -Wall -fPIC -ggdb3
 CPPFLAGS = -I /usr/include/pluto -I /usr/include/pluto/DCE -I$(ROOT) -I/usr/include/mysql $(SNR_CPPFLAGS) -I../DCE
 LDFLAGS = -L /usr/pluto/lib -L$(ROOT)/lib
-BASELDLIBS = -lSerializeClass -lDCE -lPlutoUtils -lmysqlclient_r -lpthread
+BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lmysqlclient_r -lpthread
 
 MYNAME = JSON_Plugin
 VERSION = 2.0.0
