@@ -13,7 +13,7 @@ BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lmysqlclient_r -lpthread
 
 MYNAME = JSON_Plugin
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 2061mplateID
+MYDEVTEMPLATEID = 2294mplateID
 
 Gen_Dev_Files = $(GENDEV)/JSON_PluginBase.cpp
 sources = Main.cpp JSON_Plugin.cpp $(Gen_Dev_Files)
