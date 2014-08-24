@@ -687,7 +687,6 @@ void OMXPlayerInterface::Set_Finished() {
   m_mtxLocal.lock();
   m_bFinished = true;
   m_mtxLocal.unlock();
-  return;
 }
 
 void OMXPlayerInterface::Log(string txt) {
