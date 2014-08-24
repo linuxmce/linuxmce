@@ -23,8 +23,6 @@
 #include "OMXPlayerStream.h"
 
 
-void *PlayerMonitor(void *pInstance);
-
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -47,7 +45,6 @@ private:
 		string m_sGpuDeInt;
 
 		// Private methods
-		friend void *PlayerMonitor(void *pInstance);
 
 public:
 		void Log(string txt);

@@ -1,18 +1,28 @@
 #pragma once
 
-//#include "OMX_Player.h"
 #include "OMXPlayerInterface.h"
+#include "OMX_Player.h"
 
-using namespace std;
+namespace DCE
+{
+class OMX_Player;
 
 class OMXPlayerStream : public OMXPlayerInterface
 {
   private:
+    // members
+    OMX_Player *m_pOwner;
+
+    // methods
     // notifier callback from OMXPlayerInterface
     void PlayerStateNotifier(OMXPlayerInterface::State PlayerState);
 
   public:
-  OMXPlayerStream(string sAudioDevice, bool bPassthrough, string sGpuDeInt, const void *pInstance);
-//  OMXPlayerStream(string sAudioDevice, bool bPassthrough, string sGpuDeInt);
-  ~OMXPlayerStream(void);
+    // members
+
+    // methods
+    OMXPlayerStream(string sAudioDevice, bool bPassthrough, string sGpuDeInt, OMX_Player *pOwner);
+    ~OMXPlayerStream(void);
 };
+
+} // DCE namespace
