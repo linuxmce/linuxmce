@@ -20,10 +20,8 @@
 #include "Gen_Devices/OMX_PlayerBase.h"
 //<-dceag-d-e->
 
-#include "omxplayer-client.h"
+#include "OMXPlayer.h"
 
-static const char *OMXPLAYER_SERVER_NAME = "org.mpris.MediaPlayer2.omxplayer";
-static const char *OMXPLAYER_SERVER_PATH = "/org/mpris/MediaPlayer2";
 
 void *PlayerMonitor(void *pInstance);
 
@@ -38,27 +36,22 @@ private:
 		// Private member variables
 		DeviceData_Base *m_pDevice_OMX_Plugin;
 		DeviceData_Base *m_pDevice_App_Server;
-		bool m_bOMXIsRunning = false;
 
-		DBus::BusDispatcher dispatcher;
-		DBus::Connection *g_player_conn = NULL;
-		DBus::Connection *g_props_conn = NULL;
-		OMXPlayerClient *g_player_client = NULL;
-		OMXPropsClient *g_props_client = NULL;
-
-		bool m_bRunPlayerMonitor = false;
-		pthread_t m_tPlayerMonitorThread;
+		OMXPlayer *m_pOMXPlayer;
 
 		int m_iStreamID;
 		string m_sMediaURL;
+
+		string m_sAudioDevice;
+		bool m_bPassthrough;
+		string m_sGpuDeInt;
 
 		// Private methods
 		friend void *PlayerMonitor(void *pInstance);
 
 public:
-		void Set_Stopped(bool bSendEvent);
 		void Log(string txt);
-		pid_t m_pID = 0;
+
 		// Public member variables
 		virtual void PrepareToDelete();
 

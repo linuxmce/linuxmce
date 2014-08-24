@@ -107,5 +107,8 @@
       <arg type="i" name="key_val" direction="in"/>
     </method>
   </interface>
+  <interface name="org.mpris.MediaPlayer2.Root">
+    <method name="Quit"></method>
+  </interface>
 
 </node>
