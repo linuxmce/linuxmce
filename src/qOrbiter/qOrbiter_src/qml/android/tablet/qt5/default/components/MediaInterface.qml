@@ -7,7 +7,7 @@ Item{
     MediaManager{
         id:lmceData
         onMediaPlayingChanged: {
-            if(!mediaPlaying)
+            if(!mediaPlaying && androidPlayer.source!=="")
                 androidPlayer.stop()
         }
 
@@ -17,7 +17,7 @@ Item{
             if(androidUrl.length > 4){
                 console.log("URL ok!")
                 androidPlayer.source = lmceData.androidUrl
-                androidPlayer.play()
+
 
             }
             else{
@@ -30,29 +30,29 @@ Item{
 
 
         Component.onCompleted: {
-            if(manager.mediaPlayerID !== -1){
-                lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-               // androidSystem.startAudioService(lmceData.callbackAddress);
-                console.log("initializing qml media player::"+manager.mediaPlayerID)
 
-            }
+                lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                // androidSystem.startAudioService(lmceData.callbackAddress);
+                console.log("initializing qml media player::"+manager.mediaPlayerID+"::"+manager.m_ipAddress)
+
+
         }
 
-        Connections{
-            target:manager
-            onMediaPlayerIdChanged:{
-                console.log("initializing qml media player::"+manager.mediaPlayerID)
-                lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-
-            }
-        }
+//        Connections{
+//            target:manager
+//            onMediaPlayerIdChanged:{
+//                console.log("initializing qml media player::"+manager.mediaPlayerID)
+//                lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+//            }
+//        }
 
 
     }
 
     MediaPlayer{
         id:androidPlayer
-
+        autoPlay: true
+        autoLoad: true
     }
 
     VideoOutput{

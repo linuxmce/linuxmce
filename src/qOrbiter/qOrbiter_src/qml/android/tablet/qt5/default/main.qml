@@ -288,6 +288,10 @@ Item {
         ]
     }
 
+    MediaInterface{
+        anchors.fill: parent
+        id:mediaPlayer
+    }
 
 
     function toggleBars(barState){
@@ -433,11 +437,11 @@ Item {
                 x:0
                 y:0
             }
-            PropertyChanges {
-                target: bgFill
-                color:"green"
+//            PropertyChanges {
+//                target: bgFill
+//                color:"green"
 
-            }
+//            }
         }
 
     ]
