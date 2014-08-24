@@ -1,4 +1,5 @@
 import QtQuick 2.0
+
 Item{
     id:controlPanel
     height: parent.height
@@ -36,13 +37,6 @@ Item{
             } else if (slideOut.source !=="" && slideOut.status===Component.Ready){
                 slideOut.anchors.right =undefined
                 slideOut.anchors.right = parent.right
-            }
-        }
-
-        Behavior on anchors{
-            AnchorAnimation{
-                duration: 350
-                easing.type: Easing.InCubic
             }
         }
     }

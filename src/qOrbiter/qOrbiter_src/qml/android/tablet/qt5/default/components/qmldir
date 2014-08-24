@@ -1,3 +1,4 @@
+MediaInterface MediaInterface.qml
 AdvancedMediaOptions AdvancedMediaOptions.qml
 Bookmarks	Bookmarks.qml
 Clock Clock.qml

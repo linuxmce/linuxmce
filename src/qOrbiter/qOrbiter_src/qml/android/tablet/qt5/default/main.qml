@@ -1,9 +1,8 @@
 import QtQuick 2.0
 import DceScreenSaver 1.0
+
 import "../../../../skins-common/lib/handlers"
 import "components"
-
-
 
 Item {
     id: qml_root
@@ -67,11 +66,7 @@ Item {
 
         event.accepted= true
     }
-    Rectangle{
-        anchors.fill: parent
-        id:bgFill
-        color:"red"
-    }
+
 
     DceScreenSaver{
         id:glScreenSaver
