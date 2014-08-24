@@ -123,7 +123,7 @@ private:
 public:
   // public methods
   OMXPlayerInterface(string sAudioDevice, bool bPassthrough, string sGpuDeInt);
-  ~OMXPlayerInterface();
+  virtual ~OMXPlayerInterface();
 
   void Do_Rewind(void);
   void Do_FastForward(void);

@@ -201,20 +201,18 @@ void OMXPlayerInterface::Stop() {
     Set_Stopped();
     Send_Quit();
 
-//    bIdentity = false;
-
     // exiting player monitor thread
-      Log("Stop() - joining m_tPlayerMonitorThread\n");
     if (m_bRunPlayerMonitor) {
+      Log("Stop() - joining m_tPlayerMonitorThread\n");
       m_bRunPlayerMonitor = false;
       pthread_join(m_tPlayerMonitorThread, NULL);
       Log("Stop() - m_tPlayerMonitorThread joined\n");
     }
 
     // exiting output reader thread
-      Log("Stop() - joining m_tPlayerOutputReaderThread\n");
     if (m_bRunPlayerOutputReader)
     {
+      Log("Stop() - joining m_tPlayerOutputReaderThread\n");
       m_bRunPlayerOutputReader = false;
       pthread_join(m_tPlayerOutputReaderThread, NULL);
       Log("Stop() - m_tPlayerOutputReaderThread joined\n");
