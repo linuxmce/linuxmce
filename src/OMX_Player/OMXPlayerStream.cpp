@@ -19,7 +19,8 @@ OMXPlayerStream::~OMXPlayerStream()
 // inherited from OMXPlayerInterface
 void OMXPlayerStream::PlayerStateNotifier(OMXPlayerInterface::State PlayerState)
 {
-  // do something with PlayerState
+	// do something with PlayerState
+	cout << "*** [StateNotifier] - " << PlayerState << endl;
 }
 
 } // DCE namespace

@@ -325,7 +325,7 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 		m_pOMXPlayer->Stop(); // ??
 
 		// Wait for player to be stopped.
-		// TODO: Wait for Stop state notification instead??
+		// FIXME: Wait for Stop state notification instead
 		while (!m_pOMXPlayer->IsFinished()) usleep (1000);
 	}
 
@@ -340,149 +340,7 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 	string sVideoInfo = "";
 	EVENT_Playback_Started(m_sMediaURL, m_iStreamID, sMediaInfo, sAudioInfo, sVideoInfo);
 
-//	m_bOMXIsRunning = true;
 	sCMD_Result="OK";
-
-/*
-	m_iStreamID = iStreamID;
-	m_sMediaURL = sMediaURL;
-
-	pid_t pid = fork();
-	if (pid < 0)                      // failed to fork
-	{
-		cerr << "Failed to fork" << endl;
-		exit(127);
-		    // Throw exception
-	}
-	else if (pid == 0)                // child
-	{
-		// Code only executed by child process
-
-		// build command line
-		vector<char*> args;
-		char *fullname = (char *)"/usr/bin/omxplayer";
-		char *name = (char *)"omxplayer";
-		args.push_back(name);
-		if (true) {
-			char *opt = (char *)"-r";
-			args.push_back(opt);
-		}
-		args.push_back((char *)m_sMediaURL.c_str());
-		args.push_back((char *)NULL);
-
-		execv(fullname, &args[0]);
-
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - child - this should never be seen");
-		exit(127);
-	}
-	else                         // parent
-	{
-		// Code only executed by parent process
-		m_pID = pid;
-
-//		m_bOMXIsRunning = true;
-
-		// TODO: add checking (retry, timout) here
-		// We don't get dbus session bus information until omxplayer is running
-		int i=0;
-		const char *dbus_addr;
-		string line;
-		ifstream infile;
-
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Opening file '%s' to get d-bus address", OMXPLAYER_DBUS_ADDR.c_str());
-		infile.open(OMXPLAYER_DBUS_ADDR.c_str());
-		while (!infile.is_open() && i++<RETRIES) {
-			usleep(100000);
-			infile.open(OMXPLAYER_DBUS_ADDR.c_str());
-		}
-		if (!infile.is_open()) {
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Could not open file %s", OMXPLAYER_DBUS_ADDR.c_str());
-			system("killall omxplayer.bin");
-			return;
-		}
-		usleep(500000);
-		std::getline(infile, line);
-		infile.close();
-		dbus_addr = line.c_str();
-
-		// Setup the Player Connection, register and setup the Player_proxy Interface
-		if (!g_player_conn) {
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Opening D-Bus Player Connection: %s", dbus_addr);
-			g_player_conn = new DBus::Connection(dbus_addr, false);
-			if (!g_player_conn->connected()) {
-				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't create Player Connection");
-				return;
-			}
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Registering Player Connection");
-			if (!g_player_conn->register_bus()) {
-				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't register_bus() Player Connection");
-				return;
-			}
-		}
-		if (!g_player_client) {
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Creating Player interface");
-			g_player_client = new OMXPlayerClient(*g_player_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
-		}
-
-		// Setup the Props (Properties) Connection, register and setup the Props_proxy Interface
-		if (!g_props_conn) {
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Opening D-Bus Props Connection: %s", dbus_addr);
-			g_props_conn = new DBus::Connection(dbus_addr, false);
-			if (!g_props_conn->connected()) {
-				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't create Props Connection");
-				return;
-			}
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Registering Props Connection");
-			if (!g_props_conn->register_bus()) {
-				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't register_bus() Props Connection");
-				return;
-			}
-		}
-		if (!g_props_client) {
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Creating Properties interface");
-			g_props_client = new OMXPropsClient(*g_props_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
-		}
-
-		// setup the monitoring thread to waitpid()??
-		m_bRunPlayerMonitor = true;
-		// TODO error reporting here
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - creating PlayerMonitorThread");
-		pthread_create(&m_tPlayerMonitorThread, NULL, &PlayerMonitor, this);
-
-		if (g_player_client != NULL && g_props_client != NULL) {
-			int i = 0;
-			string sIdentity;
-			bool bIdentity = false;
-			while (!bIdentity && i++<RETRIES) {
-				try {
-					sIdentity = g_props_client->Identity();
-					bIdentity = true;
-				}
-				catch (DBus::Error &dbus_err) {
-					//cout << "Waiting for Identity()..." << endl;
-					usleep(100000);
-				}
-			}
-			if (bIdentity) {
-				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - D-Bus Player Identity (%i): %s", i, sIdentity.c_str());
-				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - bOMXISRunning=true,sCMD_Result=OK");
-
-				string sMediaInfo = "";
-				string sAudioInfo = "";
-				string sVideoInfo = "";
-				EVENT_Playback_Started(m_sMediaURL, m_iStreamID, sMediaInfo, sAudioInfo, sVideoInfo);
-
-				m_bOMXIsRunning = true;
-				sCMD_Result="OK";
-				return;
-			}
-			else
-				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - D-Bus did not return player identity");
-		}
-		else
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Couldn't open one, or more, D-Bus Interfaces");
-	} // fork()
-*/
 }
 
 //<-dceag-c38-b->
@@ -524,11 +382,10 @@ void OMX_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMes
 
 	sCMD_Result = "FAIL";
 
-	// TODO: add error checking
+	// FIXME: check pause status
 	m_pOMXPlayer->Do_Pause();
 
 	sCMD_Result = "OK";
-	return;
 }
 
 //<-dceag-c40-b->
@@ -545,7 +402,7 @@ void OMX_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pM
 //	cout << "Implemented command #40 - Restart Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-// TODO: need to check if it is paused in order to un-pause it.
+	// FIXME: check pause status
 	m_pOMXPlayer->Do_Pause();
 	sCMD_Result = "OK";
 }
@@ -570,16 +427,8 @@ void OMX_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed
 	cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
 	cout << "Parm #220 - Report=" << bReport << endl;
 
+	// FIXME: check pause status
 	m_pOMXPlayer->Do_Pause();
-
-/*
-	string sStatus = g_props_client->PlaybackStatus();
-	string sPaused = "Paused";
-	size_t foundPaused = sStatus.find(sPaused);
-	if (iMediaPlaybackSpeed > 0 && foundPaused != string::npos)
-		g_player_client->Pause(); // un pause the playing media.
-	sCMD_Result = "OK";
-*/
 }
 
 //<-dceag-c42-b->
@@ -685,6 +534,7 @@ void OMX_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
 	cout << "Implemented command #92 - Pause" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
+	// FIXME: check pause status
 	m_pOMXPlayer->Do_Pause();
 	sCMD_Result = "OK";
 }
@@ -1080,72 +930,3 @@ void OMX_Player::Log(string txt) {
 	cout << txt << endl;
 }
 
-/*
-void OMX_Player::Set_Stopped(bool bSendEvent = true) {
-	bool stopped(false);
-
-	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - called");
-	if (m_bOMXIsRunning)
-	{
-	        m_bOMXIsRunning = false;
-
-	        if (g_player_client) {
-
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - Sending Stop() to g_player_client");
-			while (!stopped) {
-				try {
-					g_player_client->Stop();
-				}
-				catch (DBus::Error &dbus_err) {
-					stopped = true;
-					LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - caught exception, omxplayer must be gone already");
-				}
-				usleep(100);
-			}
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - Deleting player client");
-			delete g_player_client;
-			g_player_client = NULL;
-		}
-		if (g_props_client) {
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - Deleting props client");
-			delete g_props_client;
-			g_props_client = NULL;
-		}
-
-		if (m_pID != 0) {
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - Killing child");
-//			system("killall omxplayer.bin");
-		        kill(m_pID, SIGKILL);
-		        m_pID = 0;
-		}
-
-		if (bSendEvent) {
-			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - Sending EVENT_Playback_Completed");
-		        EVENT_Playback_Completed(m_sMediaURL,m_iStreamID,false);
-		}
-	}
-
-	if (m_bRunPlayerMonitor) {
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - pthread_join'ing the PlayerMonitor");
-		m_bRunPlayerMonitor = false;
-		pthread_join(m_tPlayerMonitorThread, NULL);
-	}
-	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Set_Stopped - done");
-}
-
-void *PlayerMonitor(void *pInstance) {
-
-	OMX_Player* pThis = (OMX_Player*) pInstance;
-
-	pThis->Log("[PlayerMonitor] started");
-
-	int *stat_loc = NULL;
-	int options = 0;
-	pid_t child = waitpid(pThis->m_pID, stat_loc, options);
-	if (child == pThis->m_pID)  {
-		pThis->Log("[PlayerMonitor] stopping player (calling Set_Stopped())");
-		pThis->Set_Stopped(true);
-	}
-	pThis->Log("[PlayerMonitor] exiting");
-}
-*/
