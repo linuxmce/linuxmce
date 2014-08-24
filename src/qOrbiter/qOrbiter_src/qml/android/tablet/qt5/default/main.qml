@@ -1,5 +1,4 @@
 import QtQuick 2.0
-import QtQuick.Window 2.0
 import DceScreenSaver 1.0
 import "../../../../skins-common/lib/handlers"
 import "components"
@@ -32,6 +31,10 @@ Item {
     }
     function scaleY(y){
         return y/100*qml_root.height
+    }
+
+    Style{
+        id:style
     }
 
     Component.onCompleted: state="wide"

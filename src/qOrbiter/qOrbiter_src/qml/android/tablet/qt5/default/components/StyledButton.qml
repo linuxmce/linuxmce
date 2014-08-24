@@ -26,7 +26,6 @@ Item{
         border.width: 1
         radius: 5
         opacity: fly_trap.pressed ? 1 : .65
-
         gradient: style.buttonGradient
     }
 
