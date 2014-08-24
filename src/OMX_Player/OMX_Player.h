@@ -37,9 +37,6 @@ private:
 
 		OMXPlayerStream *m_pOMXPlayer;
 
-		int m_iStreamID;
-		string m_sMediaURL;
-
 		string m_sAudioDevice;
 		bool m_bPassthrough;
 		string m_sGpuDeInt;
@@ -47,6 +44,10 @@ private:
 		// Private methods
 
 public:
+		int m_iStreamID;
+		string m_sMediaURL;
+
+		void StateChanged(OMXPlayerInterface::State playerState, string sFilename, int iStreamID, bool bError);
 		void Log(string txt);
 
 		// Public member variables

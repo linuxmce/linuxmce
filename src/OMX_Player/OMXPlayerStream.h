@@ -14,6 +14,8 @@ class OMXPlayerStream : public OMXPlayerInterface
     OMX_Player *m_pOwner;
 
     // methods
+    void Log(string txt);
+
     // notifier callback from OMXPlayerInterface
     void PlayerStateNotifier(OMXPlayerInterface::State PlayerState);
 

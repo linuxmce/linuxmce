@@ -930,3 +930,15 @@ void OMX_Player::Log(string txt) {
 	cout << txt << endl;
 }
 
+void OMX_Player::StateChanged(OMXPlayerInterface::State playerState, string sMediaURL, int iStreamID, bool bError)
+{
+	if ( playerState == OMXPlayerStream::STOPPED 
+			|| playerState == OMXPlayerStream::EXITING ) {
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::StateChanged - STOPPED - iStreamID: %i, MediaURL: %s", iStreamID, sMediaURL.c_str());
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::StateChanged - Sending EVENT_Playback_Completed");
+		EVENT_Playback_Completed(sMediaURL, iStreamID, bError);
+	}
+	else {
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::StateChanged - iStreamID: %i, MediaURL: %s", iStreamID, sMediaURL.c_str());
+	}
+}
