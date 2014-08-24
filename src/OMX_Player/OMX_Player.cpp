@@ -34,7 +34,7 @@ using namespace DCE;
 #include "pluto_main/Define_Command.h"
 #include "pluto_main/Define_CommandParameter.h"
 
-#include "OMXPlayer.h"
+#include "OMXPlayerStream.h"
 //#include <unistd.h> // execl/usleep
 
 //<-dceag-const-b->
@@ -101,7 +101,7 @@ bool OMX_Player::GetConfig()
 	m_sAudioDevice = "hdmi";
 	m_bPassthrough = false;
 	m_sGpuDeInt = "";
-	m_pOMXPlayer = new OMXPlayer(m_sAudioDevice, m_bPassthrough, m_sGpuDeInt, this);
+	m_pOMXPlayer = new OMXPlayerStream(m_sAudioDevice, m_bPassthrough, m_sGpuDeInt, this);
 
 	if (!m_pOMXPlayer)
 		return false;

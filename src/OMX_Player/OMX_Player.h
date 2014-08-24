@@ -20,7 +20,7 @@
 #include "Gen_Devices/OMX_PlayerBase.h"
 //<-dceag-d-e->
 
-#include "OMXPlayer.h"
+#include "OMXPlayerStream.h"
 
 
 void *PlayerMonitor(void *pInstance);
@@ -37,7 +37,7 @@ private:
 		DeviceData_Base *m_pDevice_OMX_Plugin;
 		DeviceData_Base *m_pDevice_App_Server;
 
-		OMXPlayer *m_pOMXPlayer;
+		OMXPlayerStream *m_pOMXPlayer;
 
 		int m_iStreamID;
 		string m_sMediaURL;

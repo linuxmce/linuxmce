@@ -30,7 +30,7 @@ LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r `pkg-config --libs dbus-c++-1`
 
 Gen_Dev_Files +=
-sources += OMXPlayer.cpp OMXPlayerInterface.cpp
+sources += OMXPlayerStream.cpp OMXPlayerInterface.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
