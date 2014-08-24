@@ -148,6 +148,7 @@ void MediaManager::initializeConnections()
     QObject::connect(this, SIGNAL(incomingTick(quint64)), this, SLOT(processTimeCode(qint64)));
 #endif
 #endif
+    setCurrentStatus("Connections initialized.");
 }
 
 void MediaManager::setConnectionDetails(int r, QString s)
@@ -162,8 +163,7 @@ void MediaManager::setConnectionDetails(int r, QString s)
             initializePlayer();
         }
 
-    }else
-    {
+    }else{
         setCurrentStatus("Error in setup information");
         qDebug() << serverAddress <<"::" << deviceNumber;
     }

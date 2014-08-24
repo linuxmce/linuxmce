@@ -335,7 +335,7 @@ public slots:
     void setFileReference(QString f){
         fileReference = f;
         androidUrl = fileReference;
-#ifdef Q_OS_ANDROID
+#ifdef ANDROID
         emit androidUrlUpdated();
         connectInfoSocket();
         startTimeCodeServer();
