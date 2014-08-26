@@ -360,5 +360,12 @@ XKeySym.Volume-    KP_Subtract
 
 # We restart VDR after the install on the core
 if [[ "$PK_Device" -eq "1" ]]; then
-        service vdr restart || :
+	error=0
+        service vdr restart || error=1
+        if [[ "$error" -eq "1" ]]; then
+		cp /usr/share/doc/vdr/examples/vdr-init.d /etc/init.d/vdr || :
+		chmod +x /etc/init.d/vdr || :
+		/etc/init.d/vdr start || :
+		error=0
+	fi
 fi
