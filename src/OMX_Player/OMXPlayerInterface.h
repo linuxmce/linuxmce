@@ -39,7 +39,6 @@ class OMXRootClient
 
 };
 
-
 // client class
 void* PlayerMonitor(void *pInstance);
 void* PlayerOutputReader(void *pInstance);
@@ -47,8 +46,7 @@ void* PlayerOutputReader(void *pInstance);
 class OMXPlayerInterface
 {
 public:
-  // public variables
-  enum State { UNKNOWN, INITIALIZING, PLAYING, PAUSED, STOPPING, STOPPED, EXITING };
+  enum STATE { UNKNOWN, INITIALIZING, PLAYING, PAUSED, STOPPING, STOPPED, EXITING };
 
 private:
   // private variables
@@ -74,6 +72,9 @@ private:
   mutex m_mtxReadPipe;
   int m_iInPipe[2], m_iOutPipe[2];
   bool m_bInPipe[2], m_bOutPipe[2];
+
+  // state
+  STATE ePlayerState = STATE::UNKNOWN;
 
   // general
   bool	m_bOMXIsRunning;
@@ -108,17 +109,16 @@ private:
   void Send_Pause(void);
 
   // general class methods
-  void SetState(State PlayerState);
+  void SetState(STATE PlayerState);
   bool Get_CanQuit(void);
-  void Set_Stopped(void);
+  void Set_Stopped(bool val);
   void Set_Finished(void);
   int  Get_ErrCount(void);
   void Set_ErrCount(int count);
   void Inc_Error(void);
-  void Log(string txt);
+  virtual void Log(string txt);
   void OpenPipes(void);
   void ClosePipes(void);
-  void Init(void);
 
 public:
   // public methods
@@ -135,12 +135,15 @@ public:
   void Do_DecreaseVolume();
   void Do_IncreaseVolume();
 
-  bool Play(string sMediaURL);
+  virtual bool Play(string sMediaURL);
   void Stop(void);
+  void Init(void);
   void DeInit(void);
 
   bool IsStopped(void);
   bool IsFinished(void);
+
+  STATE Get_PlayerState(void);
 
   string Get_Identity(void);
   string Get_PlaybackStatus(void);
@@ -156,10 +159,10 @@ public:
   // c style callback - player state notifier
   public:
     // fn pointer to store notifier
-    void (*m_fpStateNotifier)(OMXPlayerInterface::State PlayerState);
+    void (*m_fpStateNotifier)(OMXPlayerInterface::STATE playerState);
 
     // fn to register notifier with the class
-    void RegisterStateNotifier( void (*Notifier)(OMXPlayerInterface::State PlayerState)) {
+    void RegisterStateNotifier( void (*Notifier)(OMXPlayerInterface::STATE playerState)) {
       m_fpStateNotifier = Notifier;
     };
   /*
@@ -177,7 +180,7 @@ public:
   // *********
   // c++ style inheritance based callback implementation - player state notifier
   private:
-    virtual void PlayerStateNotifier(OMXPlayerInterface::State PlayerState) {
+    virtual void PlayerStateNotifier(OMXPlayerInterface::STATE playerState) {
     };
   /*
   //  example c++ stype inheritance implementation

@@ -41,13 +41,15 @@ private:
 		bool m_bPassthrough;
 		string m_sGpuDeInt;
 
+		bool stopped = true;
+
 		// Private methods
 
 public:
 		int m_iStreamID;
 		string m_sMediaURL;
 
-		void StateChanged(OMXPlayerInterface::State playerState, string sFilename, int iStreamID, bool bError);
+		void StateChanged(OMXPlayerStream::STATE playerState, string sFilename, int iStreamID, bool bError);
 		void Log(string txt);
 
 		// Public member variables

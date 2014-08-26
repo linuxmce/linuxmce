@@ -6,7 +6,7 @@
 #include <sys/wait.h> // waitpid()
 #include <fcntl.h> // fcntl (pipe redirection)
 
-#define USE_PIPES
+//#define USE_PIPES
 
 const int RETRIES = 10;
 const int DBUS_RETRIES = 50;
@@ -49,44 +49,27 @@ OMXPlayerInterface::OMXPlayerInterface(string sAudioDevice, bool bPassthrough, s
   // callback fn's set NULL so we know it's not registered
   m_fpStateNotifier = NULL;
 
-  Init();
+  m_bOMXIsRunning = false;
 
-  m_sAudioDevice = sAudioDevice;
-  m_bPassthrough = bPassthrough;
-
-  DBus::_init_threading();
-  DBus::default_dispatcher = &dispatcher;
-}
-
-// destructor
-OMXPlayerInterface::~OMXPlayerInterface() {
-    Log("~OMXPlayerInterface() - DESTRUCTOR! - Calling DeInit()\n");
-    SetState(EXITING);
-
-    DeInit();
-}
-
-void OMXPlayerInterface::DeInit() {
-  if (!IsFinished()) {
-    Log("DeInit() - Calling Stop()\n"); 
-    Stop();
-    while (!IsFinished()) usleep(1000);
-  }
-}
-
-void OMXPlayerInterface::Init() {
-  g_player_conn = NULL;
-  g_props_conn = NULL;
-  g_root_conn = NULL;
   g_player_client = NULL;
   g_props_client = NULL;
   g_root_client = NULL;
-
-  m_iChildPID = 0;
-  m_bOMXIsRunning = false;
+  g_player_conn = NULL;
+  g_props_conn = NULL;
+  g_root_conn = NULL;
 
   m_bFinished = false;
-  m_bStopped = false;
+  m_bStopped = true;
+  m_sAudioDevice = sAudioDevice;
+  m_bPassthrough = bPassthrough;
+
+  m_bRunPlayerOutputReader = false;
+  m_bRunPlayerMonitor = false;
+  m_tPlayerOutputReaderThread = 0;
+  m_tPlayerMonitorThread = 0;
+
+  m_iChildPID = 0;
+
   m_bStoppedByReader = false;
   m_bStoppedByMonitor = false;
   m_iErrCount = 0;
@@ -94,28 +77,54 @@ void OMXPlayerInterface::Init() {
   m_bInPipe[0] = m_bInPipe[1] = false;
   m_bOutPipe[0] = m_bOutPipe[1] = false;
 
-  m_bRunPlayerOutputReader = false;
-  m_bRunPlayerMonitor = false;
+  Set_Stopped(true);
+
+  DBus::_init_threading();
+  DBus::default_dispatcher = &dispatcher;
+}
+
+// destructor
+OMXPlayerInterface::~OMXPlayerInterface() {
+    Log("~OMXPlayerInterface() - DESTRUCTOR! - Calling DeInit()");
+    SetState(STATE::EXITING);
+
+    DeInit();
+}
+
+void OMXPlayerInterface::DeInit() {
+  if (!IsFinished()) {
+    Log("DeInit() - Calling Stop()"); 
+    Stop();
+    while (!IsFinished()) usleep(1000);
+  }
+}
+
+void OMXPlayerInterface::Init() {
+	if ( ePlayerState != STATE::UNKNOWN ) {
+		Log("OMXPlayerInterface::Init - ERROR - Init() has already been run.");
+		return;
+	}
+	SetState(STATE::STOPPED);
 }
 
 
 void OMXPlayerInterface::Do_DecreaseVolume() {
-    Log("Do_DecreaseVolume() - calling Send_Action(KeyConfig::ACTION_DECREASE_VOLUME)\n");
+    Log("Do_DecreaseVolume() - calling Send_Action(KeyConfig::ACTION_DECREASE_VOLUME)");
     Send_Action(KeyConfig::ACTION_DECREASE_VOLUME);
 }
 
 void OMXPlayerInterface::Do_IncreaseVolume() {
-    Log("Do_IncreaseVolume() - calling Send_Action(KeyConfig::ACTION_INCREASE_VOLUME)\n");
+    Log("Do_IncreaseVolume() - calling Send_Action(KeyConfig::ACTION_INCREASE_VOLUME)");
     Send_Action(KeyConfig::ACTION_INCREASE_VOLUME);
 }
 
 void OMXPlayerInterface::Do_SeekBackSmall() {
-    Log("Do_SeekBack() - calling Send_Action(KeyConfig::ACTION_SEEK_BACK_SMALL)\n");
+    Log("Do_SeekBack() - calling Send_Action(KeyConfig::ACTION_SEEK_BACK_SMALL)");
     Send_Action(KeyConfig::ACTION_SEEK_BACK_SMALL);
 }
 
 void OMXPlayerInterface::Do_SeekBackLarge() {
-    Log("Do_SeekBack() - calling Send_Action(KeyConfig::ACTION_SEEK_BACK_LARGE)\n");
+    Log("Do_SeekBack() - calling Send_Action(KeyConfig::ACTION_SEEK_BACK_LARGE)");
     Send_Action(KeyConfig::ACTION_SEEK_BACK_LARGE);
 }
 
@@ -124,7 +133,7 @@ void OMXPlayerInterface::Do_SeekForwardSmall() {
     //  Add checks for seeking past end, omxplayer
     //  does not check this and idles if you seek
     //  past the end of the stream.
-    Log("Do_SeekForward() - calling Send_Action(KeyConfig::ACTION_SEEK_FORWARD_SMALL)\n");
+    Log("Do_SeekForward() - calling Send_Action(KeyConfig::ACTION_SEEK_FORWARD_SMALL)");
     Send_Action(KeyConfig::ACTION_SEEK_FORWARD_SMALL);
 }
 
@@ -133,96 +142,98 @@ void OMXPlayerInterface::Do_SeekForwardLarge() {
     //  Add checks for seeking past end, omxplayer
     //  does not check this and idles if you seek
     //  past the end of the stream.
-    Log("Do_SeekForward() - calling Send_Action(KeyConfig::ACTION_SEEK_FORWARD_LARGE)\n");
+    Log("Do_SeekForward() - calling Send_Action(KeyConfig::ACTION_SEEK_FORWARD_LARGE)");
     Send_Action(KeyConfig::ACTION_SEEK_FORWARD_LARGE);
 }
 
 void OMXPlayerInterface::Do_Rewind() {
-    Log("Do_Rewind() - calling Send_Action(KeyConfig::ACTION_REWIND)\n");
+    Log("Do_Rewind() - calling Send_Action(KeyConfig::ACTION_REWIND)");
     Send_Action(KeyConfig::ACTION_REWIND);
 }
 
 void OMXPlayerInterface::Do_FastForward() {
-    Log("Do_Rewind() - calling Send_Action(KeyConfig::ACTION_FAST_FORWARD\n");
+    Log("Do_Rewind() - calling Send_Action(KeyConfig::ACTION_FAST_FORWARD");
     Send_Action(KeyConfig::ACTION_FAST_FORWARD);
 }
 
 void OMXPlayerInterface::Send_Action(int Action) {
-  Log("Send_Action() - sending Action(" + to_string(Action) + ")\n");
+  Log("Send_Action() - sending Action(" + to_string(Action) + ")");
   try {
     g_player_client->Action(Action);
   }
   catch (DBus::Error &dbus_err) {
-    Log("Send_Action() - D-Bus error - omxplayer has gone away?\n");
+    Log("Send_Action() - D-Bus error - omxplayer has gone away?");
   }
 }
 
 void OMXPlayerInterface::Do_Pause() {
-    Log("Do_Pause() - calling Send_Pause()\n");
+    Log("Do_Pause() - calling Send_Pause()");
     Send_Pause();
 }
 
 void OMXPlayerInterface::Send_Pause() {
-  Log("Send_Pause() - sending Pause()\n");
+  Log("Send_Pause() - sending Pause()");
   try {
     g_player_client->Pause();
   }
   catch (DBus::Error &dbus_err) {
-    Log("Send_Pause() - D-Bus error - omxplayer has gone away?\n");
+    Log("Send_Pause() - D-Bus error - omxplayer has gone away?");
   }
 }
 
 void OMXPlayerInterface::Send_Stop() {
-  Log("Send_Stop() - sending Stop()\n");
+  Log("Send_Stop() - sending Stop()");
   try {
     g_player_client->Stop();
   }
   catch (DBus::Error &dbus_err) {
-    Log("Send_Stop() - D-Bus error - omxplayer has gone away?\n");
+    Log("Send_Stop() - D-Bus error - omxplayer has gone away?");
   }
 }
 
 
 void OMXPlayerInterface::Stop() {
     m_mtxLocal.lock();
-    if (!m_bOMXIsRunning) {
+    if (!m_bOMXIsRunning && ePlayerState >= STATE::STOPPING ) {
       m_mtxLocal.unlock();
-      //Log("Stop() - m_bOMXIsRunning = false, not running Stop()\n");
+
+      Log("Stop() - m_bOMXIsRunning = false, exiting Stop()");
       return;
     }
     m_bOMXIsRunning = false;
     m_mtxLocal.unlock();
 
-    SetState(STOPPING);
+    SetState(STATE::STOPPING);
 
-    Log("Stop() - called\n");
+    Log("Stop() - called");
 
-    if (!m_bStopped) Send_Stop();
-    Set_Stopped();
-    Send_Quit();
+    if ( !IsStopped() ) Send_Stop();
+//    Send_Quit();
 
     // exiting player monitor thread
-    if (m_bRunPlayerMonitor) {
-      Log("Stop() - joining m_tPlayerMonitorThread\n");
+    if (m_bRunPlayerMonitor && m_tPlayerMonitorThread) {
+      Log("Stop() - joining m_tPlayerMonitorThread");
       m_bRunPlayerMonitor = false;
       pthread_join(m_tPlayerMonitorThread, NULL);
-      Log("Stop() - m_tPlayerMonitorThread joined\n");
+      m_tPlayerMonitorThread = 0;
+      Log("Stop() - m_tPlayerMonitorThread joined");
     }
 
     // exiting output reader thread
-    if (m_bRunPlayerOutputReader)
+    if (m_bRunPlayerOutputReader && m_tPlayerOutputReaderThread)
     {
-      Log("Stop() - joining m_tPlayerOutputReaderThread\n");
+      Log("Stop() - joining m_tPlayerOutputReaderThread");
       m_bRunPlayerOutputReader = false;
       pthread_join(m_tPlayerOutputReaderThread, NULL);
-      Log("Stop() - m_tPlayerOutputReaderThread joined\n");
+      m_tPlayerOutputReaderThread = 0;
+      Log("Stop() - m_tPlayerOutputReaderThread joined");
     }
 
 #ifdef USE_PIPES
     ClosePipes();
 #endif
 
-    Log("Stop() - cleaning up D-Bus interface proxies\n");
+    Log("Stop() - cleaning up D-Bus interface proxies");
     // Clean up the client interfaces and connections;
     if (g_player_client != NULL)
       delete g_player_client;
@@ -234,7 +245,7 @@ void OMXPlayerInterface::Stop() {
       delete g_root_client;
     g_root_client = NULL;
 
-    Log("Stop() - cleaning up D-Bus connection proxies\n");
+    Log("Stop() - cleaning up D-Bus connection proxies");
     if (g_player_conn != NULL)
       delete g_player_conn;
     g_player_conn = NULL;
@@ -245,34 +256,39 @@ void OMXPlayerInterface::Stop() {
       delete g_root_conn;
     g_root_conn = NULL;
 
-    Log("Stop() - finished\n");
-    SetState(STOPPED);
+    Log("Stop() - finished");
+    Set_Stopped(true);
     Set_Finished();
+    SetState(STATE::STOPPED);
 }
 
 void OMXPlayerInterface::Send_Quit() {
-  Log("Send_Quit() - sending Quit()\n");
+  Log("Send_Quit() - sending Quit()");
   try {
 
-    if (!g_props_client)
-      Log("Send_Quit() - FUBAR! (props) Please report this to the author!");
+    if (!g_props_client) {
+      Log("Send_Quit() - FUBAR! (props) - Stop() pressed when not PLAYING?");
+      return;
+    }
 
     if (!g_props_client->CanQuit() ) {
-      Log("Send_Quit() - player unable to quit\n");
+      Log("Send_Quit() - player unable to quit");
       return; // false;
     }
 
-    if (!g_root_client)
-      Log("Send_Quit() - FUBAR! (root) Please report this to the author!");
-      g_root_client->Quit();
+    if (!g_root_client) {
+      Log("Send_Quit() - FUBAR! (root) - Stop() pressed when not PLAYING?");
+      return;
+    }
+    g_root_client->Quit();
   }
   catch (DBus::Error &dbus_err) {
-    Log("Send_Quit() - can't send, has omxplayer gone away?\n");
+    Log("Send_Quit() - can't send, has omxplayer gone away?");
   }
 }
 
 void OMXPlayerInterface::ClosePipes() {
-  Log("ClosePipes() - Closing pipes\n");
+  Log("ClosePipes() - Closing pipes");
   for (int i=0; i<2; i++) {
     if (m_bInPipe[i])
       close(m_iInPipe[i]);
@@ -280,16 +296,16 @@ void OMXPlayerInterface::ClosePipes() {
       close(m_iOutPipe[i]);
     m_bInPipe[i] = m_bOutPipe[i] = false;
   }
-  Log("ClosePipes() - Pipes are closed\n");
+  Log("ClosePipes() - Pipes are closed");
 }
 
 void OMXPlayerInterface::OpenPipes() {
-  Log("OpenPipes() - called\n");
+  Log("OpenPipes() - called");
   // setup pipes for the PlayerOutputReaderThread
 
   // initializing in pipe
   if ( pipe(m_iInPipe) == -1 ) {
-    Log("pipe() failed for in pipe\n");
+    Log("pipe() failed for in pipe");
     return;
   }
   else {
@@ -298,19 +314,23 @@ void OMXPlayerInterface::OpenPipes() {
 
   // initializing out pipe
   if ( pipe(m_iOutPipe) == -1 ) {
-    Log("pipe() failed for out pipe\n");
+    Log("pipe() failed for out pipe");
     return;
   }
   else {
     m_bOutPipe[0] = m_bOutPipe[1] = true;
   }
-  Log("OpenPipes() - finished\n");
+  Log("OpenPipes() - finished");
 }
 
 
 bool OMXPlayerInterface::Play(string sMediaURL) {
-  Init();
-  SetState(INITIALIZING);
+  if ( ePlayerState != STATE::STOPPED  ) {
+	Log("OMXPlayerInterface::Play - Must be STOPPED to Play()");
+	return false;
+  }
+
+  SetState(STATE::INITIALIZING);
 
   // TODO add error reporting
 
@@ -329,13 +349,13 @@ bool OMXPlayerInterface::Play(string sMediaURL) {
   else if (pid == 0)                // child
   {
     // Code only executed by child process
-    Log("(Child's) Play() - begins\n");
+    Log("(Child's) Play() - begins");
 
 #ifdef USING_PIPES    // connecting child stdin to InPipe, stdout & stderr to OutPipe
-    Log("(Child's) Play() - connecting to InPipe and OutPipe\n");
+    Log("(Child's) Play() - connecting to InPipe and OutPipe");
     if ( dup2(m_iInPipe[0], STDIN_FILENO)<0 || dup2(m_iOutPipe[1], STDOUT_FILENO)<0 ||
          dup2(m_iOutPipe[1], STDERR_FILENO)<0 ) {
-      Log("dup2() failed in child\n");
+      Log("dup2() failed in child");
 //      printf("%d : %s\n", errno, strerror(errno));
       exit(127);
     }
@@ -380,15 +400,15 @@ bool OMXPlayerInterface::Play(string sMediaURL) {
     }
 
     // add the media url
-    Log("(Child's) Play() - MediaURL: " + sMediaURL + "\n");
+    Log("(Child's) Play() - MediaURL: " + sMediaURL);
     args.push_back((char *)sMediaURL.c_str());
 
-    Log("(Child's) Play() - cmdline: ");
+    string sTxt = "(Child's) Play() - cmdline: ";
     for(std::vector<char *>::iterator it = args.begin(); it != args.end(); ++it) {
       string sArg(*it);
-      Log(sArg + " ");
+      sTxt = sTxt + sArg + " ";
     }
-    Log("\n");
+    Log(sTxt);
 
     // need a \0 as the last item in args[]
     args.push_back((char *)NULL);
@@ -396,7 +416,7 @@ bool OMXPlayerInterface::Play(string sMediaURL) {
     // replace this proces with omxplayer
     execv(fullname, &args[0]);
 
-    Log("child - omxplayer - THIS SHOULD NEVER BE SEEN!\n");
+    Log("child - omxplayer - THIS SHOULD NEVER BE SEEN!");
     exit(127);
   }
   else                         // parent
@@ -406,7 +426,7 @@ bool OMXPlayerInterface::Play(string sMediaURL) {
     m_bOMXIsRunning = true;
 
 #ifdef USE_PIPES
-    Log("Play() - closing child's end of pipes\n");
+    Log("Play() - closing child's end of pipes");
     // closing child's end of pipes
     close(m_iInPipe[0]);
     m_bInPipe[0] = false;
@@ -418,7 +438,7 @@ bool OMXPlayerInterface::Play(string sMediaURL) {
     // setup the output reader thread to watch for 'Stopped at XX:XX:XX' and 'have a nice day ;)' signals from omxplayer
     m_bRunPlayerOutputReader = true;
     // TODO error reporting here
-    Log("Play() - creating PlayerOutputReaderThread\n");
+    Log("Play() - creating PlayerOutputReaderThread");
     pthread_create(&m_tPlayerOutputReaderThread, NULL, &PlayerOutputReader, this);
 #endif
 
@@ -428,7 +448,7 @@ bool OMXPlayerInterface::Play(string sMediaURL) {
     ifstream infile;
     bool bPrivate(true);
 
-    Log("Play() - Opening file '" + OMXPLAYER_DBUS_ADDR + "' to get d-bus address\n");
+    Log("Play() - Opening file '" + OMXPLAYER_DBUS_ADDR + "' to get d-bus address");
     infile.open(OMXPLAYER_DBUS_ADDR.c_str());
 
     while (++i<=RETRIES && line == "") {
@@ -437,7 +457,7 @@ bool OMXPlayerInterface::Play(string sMediaURL) {
         infile.open(OMXPLAYER_DBUS_ADDR.c_str());
       }
       if (!infile.is_open())  {
-        Log("Play() - Could not open file " + OMXPLAYER_DBUS_ADDR + ", exiting... \n");
+        Log("Play() - Could not open file " + OMXPLAYER_DBUS_ADDR + ", exiting... ");
         Stop();
         system("killall omxplayer.bin");
         system("killall omxplayer");
@@ -450,10 +470,10 @@ bool OMXPlayerInterface::Play(string sMediaURL) {
     }
 
     if ( line != "" ) {
-      Log("Play() - Read line: " + line + "\n");
+      Log("Play() - Read line: " + line);
     }
     else {
-      Log("Play() - Failed to read D-Bus address line from " + OMXPLAYER_DBUS_ADDR + "\n");
+      Log("Play() - Failed to read D-Bus address line from " + OMXPLAYER_DBUS_ADDR);
 //      Stop();
       return false;
     }
@@ -462,59 +482,59 @@ bool OMXPlayerInterface::Play(string sMediaURL) {
 
     // setup the dbus 'Player' connection and client
     if (g_player_conn == NULL) {
-      Log("Play() - Creating connection to 'Player' bus\n");
+      Log("Play() - Creating connection to 'Player' bus");
       g_player_conn = new DBus::Connection(dbus_addr, bPrivate);
       if (!g_player_conn->connected()) {
-        Log("Play() - g_player_conn not connected(), exiting.\n");
+        Log("Play() - g_player_conn not connected(), exiting.");
       }
       if (!g_player_conn->register_bus()) {
-        Log("Play() - g_player_conn unable to register_bus(), exiting.\n");
+        Log("Play() - g_player_conn unable to register_bus(), exiting.");
         return false;
       }
     }
     if (g_player_client == NULL) {
-      Log("Play() - Creating Player_proxy client interface\n");
+      Log("Play() - Creating Player_proxy client interface");
       g_player_client = new OMXPlayerClient(*g_player_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
     }
 
     // setup the dbus 'Properties' connection and client
     if (g_props_conn == NULL) {
-      Log("Play() - Creating connection to 'Propertiess' bus\n");
+      Log("Play() - Creating connection to 'Propertiess' bus");
       g_props_conn = new DBus::Connection(dbus_addr, bPrivate);
       if (!g_props_conn->connected()) {
-        Log("Play() - g_props_conn not connected(), exiting.\n");
+        Log("Play() - g_props_conn not connected(), exiting.");
       }
       if (!g_props_conn->register_bus()) {
-        Log("Play() - g_props_conn unable to register_bus(), exiting.\n");
+        Log("Play() - g_props_conn unable to register_bus(), exiting.");
         return false;
       }
     }
     if (g_props_client == NULL) {
-      Log("Play() - Creating Properties_proxy client interface\n");
+      Log("Play() - Creating Properties_proxy client interface");
       g_props_client = new OMXPropsClient(*g_props_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
     }
 
     // setup the dbus 'Root' connection and client
     if (g_root_conn == NULL) {
-      Log("Play() - Creating connection to 'Root' bus\n");
+      Log("Play() - Creating connection to 'Root' bus");
       g_root_conn = new DBus::Connection(dbus_addr, bPrivate);
       if (!g_root_conn->connected()) {
-        Log("Play() - g_root_conn not connected(), exiting.\n");
+        Log("Play() - g_root_conn not connected(), exiting.");
       }
       if (!g_root_conn->register_bus()) {
-        Log("Play() - g_root_conn unable to register_bus(), exiting.\n");
+        Log("Play() - g_root_conn unable to register_bus(), exiting.");
         return false;
       }
     }
     if (g_root_client == NULL) {
-      Log("Play() - Creating Root_proxy client interface\n");
+      Log("Play() - Creating Root_proxy client interface");
       g_root_client = new OMXRootClient(*g_root_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
     }
 
     // setup the monitoring thread to waitpid()
     m_bRunPlayerMonitor = true;
     // TODO error reporting here
-    Log("Play() - Creating PlayerMonitorThread\n");
+    Log("Play() - Creating PlayerMonitorThread");
     pthread_create(&m_tPlayerMonitorThread, NULL, &PlayerMonitor, this);
 
     if (g_player_client != NULL && g_props_client != NULL) {
@@ -527,36 +547,44 @@ bool OMXPlayerInterface::Play(string sMediaURL) {
           bIdentity = true;
         }
         catch (DBus::Error &dbus_err) {
-          //Log("OMXPlayerInterface::Play() - Waiting for Identity()...\n");
+          //Log("OMXPlayerInterface::Play() - Waiting for Identity()...");
           usleep(100000);
         }
       }
-      Log("Play() - Identity() [" + to_string(i) + "]: " + sIdentity + "\n");
+      Log("Play() - Identity() [" + to_string(i) + "]: " + sIdentity);
     }
     else {
       Log("Play() - FUBAR!");
     }
 
-    SetState(PLAYING);
+    SetState(STATE::PLAYING);
+    Set_Stopped(false);
     // at this point the player is accessible through dbus
     return true;
   }
   // Code executed by both parent and child.
-  Log("OMXPlayerInterface::Play() - End - this should never happen.\n");
+  Log("OMXPlayerInterface::Play - End - this should never happen.");
   return false;
 }
 
 
-void OMXPlayerInterface::SetState(State PlayerState) {
+void OMXPlayerInterface::SetState(OMXPlayerInterface::STATE playerState) {
+  Log("OMXPlayerInterface::SetState - State: " + to_string((int)playerState));
+
+  ePlayerState = playerState;
+
   // if a c callback has been registered notify it
   if (m_fpStateNotifier)
-	m_fpStateNotifier(PlayerState);
+	m_fpStateNotifier(playerState);
 
   // if a c++ class has inherited this notify it
-  PlayerStateNotifier(PlayerState);
+  PlayerStateNotifier(playerState);
 }
 
-
+OMXPlayerInterface::STATE OMXPlayerInterface::Get_PlayerState(void) {
+//  Log("OMXPlayerInterface::Get_PlayerState");
+  return ePlayerState;
+}
 
 void OMXPlayerInterface::Inc_Error(void) {
   ++m_iErrCount;
@@ -568,22 +596,20 @@ void OMXPlayerInterface::Inc_Error(void) {
 
 }
 
-void OMXPlayerInterface::Set_Stopped() {
+void OMXPlayerInterface::Set_Stopped(bool val) {
 
   int i = 0;
   while (!m_mtxLocal.try_lock() && ++i<=RETRIES) {
     usleep(1000);
   }
   if (i >= RETRIES) {
-    Log("Set_Stopped() - can't get lock\n");
+    Log("Set_Stopped() - can't get lock");
     return;
   }
 
-  Log("Set_Stopped() - setting m_bStopped=true;\n");
-  m_bStopped = true;
+  //Log("Set_Stopped() - setting m_bStopped=" + string(val ? "true" : "false"));
+  m_bStopped = val;
   m_mtxLocal.unlock();
-
-//  Log("Set_Stopped() - finished\n");
 }
 
 bool OMXPlayerInterface::IsStopped(void) {
@@ -594,7 +620,7 @@ bool OMXPlayerInterface::IsStopped(void) {
     usleep(1000);
   }
   if (i >= RETRIES) {
-    Log("IsStopped() - can't get lock\n");
+    Log("IsStopped() - can't get lock");
     return false;
   }
 
@@ -612,7 +638,7 @@ int OMXPlayerInterface::Get_ErrCount(void) {
 void OMXPlayerInterface::Set_ErrCount(int count) {
   m_iErrCount = count;
   if (m_iErrCount >= DBUS_RETRIES) {
-    Log("Set_ErrCount() - count exceeds retries, calling Stop()\n");
+    Log("Set_ErrCount() - count exceeds retries, calling Stop()");
     Stop();
   }
 }
@@ -672,7 +698,7 @@ bool OMXPlayerInterface::IsFinished(void) {
     usleep(1000);
   }
   if (i >= RETRIES) {
-    Log("IsFinished() - can't get lock\n");
+    Log("IsFinished() - can't get lock");
     return false;
   }
 
@@ -689,21 +715,20 @@ void OMXPlayerInterface::Set_Finished() {
 
 void OMXPlayerInterface::Log(string txt) {
   m_mtxLog.lock();
-  cout << txt;
+  cout << txt << endl;
   m_mtxLog.unlock();
 }
 
 void *PlayerOutputReader(void *pInstance) {
   OMXPlayerInterface* pThis = (OMXPlayerInterface*) pInstance;
 
-  pThis->Log("[PlayerOutputReader] started\n");
+  pThis->Log("[PlayerOutputReader] started");
 
-  while (!pThis->m_bStopped) {
-//  while (!pThis->IsStopped()) {
+  while (!pThis->IsStopped()) {
     usleep(10000);
   }
 
-  pThis->Log("[PlayerOutputReader] exiting\n");
+  pThis->Log("[PlayerOutputReader] exiting");
 }
 
 
@@ -711,15 +736,15 @@ void *PlayerMonitor(void *pInstance) {
 
   OMXPlayerInterface* pThis = (OMXPlayerInterface*) pInstance;
 
-  pThis->Log("[PlayerMonitor] started\n");
+  pThis->Log("[PlayerMonitor] started");
 
   int *stat_loc;
   int options = 0;
   pid_t watch_id = pThis->m_iChildPID;
   pid_t child = waitpid(watch_id, stat_loc, options);
-  if (child == watch_id)  {
-    pThis->Log("[PlayerMonitor] calling Stop()\n");
+  //if (child == watch_id)  {
+    pThis->Log("[PlayerMonitor] calling Stop()");
     pThis->Stop();
-  }
-  pThis->Log("[PlayerMonitor] exiting\n");
+  //}
+  pThis->Log("[PlayerMonitor] exiting");
 }

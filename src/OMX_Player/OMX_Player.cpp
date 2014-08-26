@@ -64,7 +64,7 @@ OMX_Player::~OMX_Player()
 
 void OMX_Player::PrepareToDelete ()
 {
-	m_pOMXPlayer->Stop();
+	m_pOMXPlayer->Stop(0);
 
 	Command_Impl::PrepareToDelete ();
 	m_pDevice_App_Server = NULL;
@@ -96,7 +96,6 @@ bool OMX_Player::GetConfig()
 		return false;
 	}
 
-
 	// TODO:: Need to get sAudioDevice, bPassthrough, sGpuDeInt data
 	m_sAudioDevice = "hdmi";
 	m_bPassthrough = false;
@@ -105,6 +104,8 @@ bool OMX_Player::GetConfig()
 
 	if (!m_pOMXPlayer)
 		return false;
+
+	m_pOMXPlayer->Init();
 
 	return true;
 }
@@ -319,26 +320,37 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 
 	sCMD_Result = "FAIL";
 
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - iStreamID: %i, sMediaURL: %s", iStreamID, sMediaURL.c_str());
+//	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - checking if playing or if mediaURL has changed");
 	// TODO: check (at least use) sMediaPosition
-	if (!m_pOMXPlayer->IsStopped() && (iStreamID != m_iStreamID || sMediaURL != m_sMediaURL)) {
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - m_bOMXIsRunning TRUE, running Set_Stopped()");
-		m_pOMXPlayer->Stop(); // ??
+//	if ( m_pOMXPlayer->Get_PlayerState() != OMXPlayerStream::STATE::STOPPED ) { // && (iStreamID != m_iStreamID || sMediaURL != m_sMediaURL)) {
+//	if (!stopped) { // && (iStreamID != m_iStreamID || sMediaURL != m_sMediaURL)) {
+//	if ((iStreamID != m_iStreamID || sMediaURL != m_sMediaURL)) {
+//		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - PlayerState != STOPPED, running Stop(0)");
+//		m_pOMXPlayer->Stop(0); // ??
 
+//		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Waiting for player to be STOPPED");
 		// Wait for player to be stopped.
 		// FIXME: Wait for Stop state notification instead
-		while (!m_pOMXPlayer->IsFinished()) usleep (1000);
-	}
+//		while (!stopped) usleep (10000);
+//	}
 
-	if ( !m_pOMXPlayer->Play(sMediaURL) ) {
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - FAILED m_pOMXPlayer->Play(%s)", sMediaURL.c_str());
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - TRYING to Play(%s)", sMediaURL.c_str());
+
+	if ( !m_pOMXPlayer->Play(iStreamID, sMediaURL) ) {
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - FAILED to Play(%s)", sMediaURL.c_str());
 		return;
 	}
-	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - SUCCESS m_pOMXPlayer->Play(%s)", sMediaURL.c_str());
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - SUCCESSFUL Play(%s)", sMediaURL.c_str());
 
-	string sMediaInfo = "";
-	string sAudioInfo = "";
-	string sVideoInfo = "";
-	EVENT_Playback_Started(m_sMediaURL, m_iStreamID, sMediaInfo, sAudioInfo, sVideoInfo);
+	m_iStreamID = iStreamID;
+	m_sMediaURL = sMediaURL;
+
+//	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Send EVENT_Playback_Started()");
+//	string sMediaInfo = "";
+//	string sAudioInfo = "";
+//	string sVideoInfo = "";
+//	EVENT_Playback_Started(m_sMediaURL, m_iStreamID, sMediaInfo, sAudioInfo, sVideoInfo);
 
 	sCMD_Result="OK";
 }
@@ -361,7 +373,7 @@ void OMX_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
 	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Stop_Media - Calling Stop()");
-	m_pOMXPlayer->Stop();
+	m_pOMXPlayer->Stop(iStreamID);
 
 	sCMD_Result = "OK";
 }
@@ -556,7 +568,8 @@ void OMX_Player::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message 
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #203 - Eject=" << bEject << endl;
 
-	m_pOMXPlayer->Stop();
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Stop - Calling Stop()");
+	m_pOMXPlayer->Stop(iStreamID);
 	sCMD_Result = "OK";
 }
 
@@ -925,20 +938,57 @@ void OMX_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,M
 }
 
 
-void OMX_Player::Log(string txt) {
-	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::Log - %s", txt.c_str());
-	cout << txt << endl;
+void OMX_Player::Log(string txt)
+{
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"%s", txt.c_str());
+//	cout << txt << endl;
 }
 
-void OMX_Player::StateChanged(OMXPlayerInterface::State playerState, string sMediaURL, int iStreamID, bool bError)
+void OMX_Player::StateChanged(OMXPlayerStream::STATE playerState, string sMediaURL, int iStreamID, bool bEvent)
 {
-	if ( playerState == OMXPlayerStream::STOPPED 
-			|| playerState == OMXPlayerStream::EXITING ) {
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::StateChanged - STOPPED - iStreamID: %i, MediaURL: %s", iStreamID, sMediaURL.c_str());
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::StateChanged - Sending EVENT_Playback_Completed");
-		EVENT_Playback_Completed(sMediaURL, iStreamID, bError);
+	//  enum STATE { UNKNOWN, INITIALIZING, PLAYING, PAUSED, STOPPING, STOPPED, EXITING };
+
+//	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::StateChanged - ******* - iStreamID: %i, MediaURL: %s", iStreamID, sMediaURL.c_str());
+
+	if ( playerState == OMXPlayerStream::STATE::UNKNOWN ) {
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::StateChanged - %i - UNKNOWN - iStreamID: %i, MediaURL: %s", (int)playerState, iStreamID, sMediaURL.c_str());
+//		cout << "STATE0" << endl;
+	}
+	else if ( playerState == OMXPlayerStream::STATE::INITIALIZING ) {
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::StateChanged - %i - INITIALIZING - iStreamID: %i, MediaURL: %s", (int)playerState, iStreamID, sMediaURL.c_str());
+//		cout << "STATE1" << endl;
+		stopped=false;
+	}
+	else if ( playerState == OMXPlayerStream::STATE::PLAYING ) {
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::StateChanged - %i - PLAYING - iStreamID: %i, MediaURL: %s", (int)playerState, iStreamID, sMediaURL.c_str());
+//		cout << "STATE2" << endl;
+		stopped=false;
+	}
+	else if ( playerState == OMXPlayerStream::STATE::PAUSED ) {
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::StateChanged - %i - PAUSED - iStreamID: %i, MediaURL: %s", (int)playerState, iStreamID, sMediaURL.c_str());
+//		cout << "STATE3" << endl;
+		stopped=false;
+	}
+	else if ( playerState == OMXPlayerStream::STATE::STOPPING ) {
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::StateChanged - %i - STOPPING - iStreamID: %i, MediaURL: %s", (int)playerState, iStreamID, sMediaURL.c_str());
+//		cout << "STATE4" << endl;
+	}
+	else if ( playerState == OMXPlayerStream::STATE::STOPPED ) {
+//		cout << "STATE5" << endl;
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::StateChanged - %i - STOPPED - iStreamID: %i, MediaURL: %s", (int)playerState, iStreamID, sMediaURL.c_str());
+		if (bEvent) {
+			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::StateChanged - %i - STOPPED - Sending EVENT_Playback_Completed(%i, %s)", (int)playerState, iStreamID, sMediaURL.c_str());
+			EVENT_Playback_Completed(sMediaURL, iStreamID, false);
+		}
+		stopped=true;
+	}
+	else if ( playerState == OMXPlayerStream::STATE::EXITING ) {
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::StateChanged - %i - EXITING - iStreamID: %i, MediaURL: %s", (int)playerState, iStreamID, sMediaURL.c_str());
+//		cout << "STATE6" << endl;
+		stopped=true;
 	}
 	else {
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::StateChanged - iStreamID: %i, MediaURL: %s", iStreamID, sMediaURL.c_str());
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::StateChanged - %i - ERROR NO STATE - iStreamID: %i, MediaURL: %s", (int)playerState, iStreamID, sMediaURL.c_str());
+//		cout << "STATE-NO" << endl;
 	}
 }
