@@ -32,7 +32,7 @@ fi
 
 # Setup a custom nosignal image
 mkdir -p /root/.xine
-ln -s /usr/pluto/share/nosignal.mpg /root/.xine/nosignal.mpg
+ln -s /usr/pluto/share/nosignal.mpg /root/.xine/nosignal.mpg || :
 
 #
 # Make a backup copy of the existing setup.conf
