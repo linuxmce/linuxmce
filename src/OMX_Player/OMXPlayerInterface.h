@@ -103,6 +103,7 @@ private:
   friend void* PlayerOutputReader(void *pInstance);
 
   // player command class methods
+  int64_t Send_Seek(int64_t);
   void Send_Quit(void);
   void Send_Stop(void);
   void Send_Action(int);
@@ -125,6 +126,7 @@ public:
   OMXPlayerInterface(string sAudioDevice, bool bPassthrough, string sGpuDeInt);
   virtual ~OMXPlayerInterface();
 
+  void Do_Seek(int64_t);
   void Do_Rewind(void);
   void Do_FastForward(void);
   void Do_Pause(void);
@@ -134,6 +136,8 @@ public:
   void Do_SeekForwardLarge();
   void Do_DecreaseVolume();
   void Do_IncreaseVolume();
+  void Do_DecreaseSpeed();
+  void Do_IncreaseSpeed();
 
   virtual bool Play(string sMediaURL);
   void Stop(void);

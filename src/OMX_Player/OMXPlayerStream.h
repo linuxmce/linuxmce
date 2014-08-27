@@ -17,6 +17,7 @@ class OMXPlayerStream : public OMXPlayerInterface
     int m_iStreamIDNew = 0;
     string m_sMediaURLNew = "";
     bool bEvent = true;
+    int64_t xDuration;
 
     mutex m_mtxLog;
 

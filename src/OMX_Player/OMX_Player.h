@@ -43,7 +43,12 @@ private:
 
 		bool stopped = true;
 
+
+		int64_t m_xDuration;
+
 		// Private methods
+		string ZeroPad(int num, int width);
+		string TimeFromUSec(uint64_t usecs);
 
 public:
 		int m_iStreamID;

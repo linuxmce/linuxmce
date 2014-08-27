@@ -15,6 +15,7 @@ OMXPlayerStream::~OMXPlayerStream()
 {
 }
 
+
 // inherited from OMXPlayerInterface
 void OMXPlayerStream::Stop(int iStreamID) {
 	Log("OMXPlayerStream::Stop - iStreamID: " + to_string(iStreamID));
@@ -41,6 +42,8 @@ bool OMXPlayerStream::Play(int iStreamID, string sMediaURL) {
 
 	if ( !OMXPlayerInterface::Play(sMediaURL) )
 		return false;
+
+//        m_xDuration = OMXPlayerInterface::Get_Duration();
 
 	return true;
 }

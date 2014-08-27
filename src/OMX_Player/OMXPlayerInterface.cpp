@@ -108,6 +108,43 @@ void OMXPlayerInterface::Init() {
 }
 
 
+void OMXPlayerInterface::Do_Seek(int64_t usecs) {
+    // TODO: MUST!!!
+    //  Add checks for seeking past end, omxplayer
+    //  does not check this and idles if you seek
+    //  past the end of the stream.
+    Log("Do_Seek() - calling Seek(" + to_string(usecs) + ")");
+    Send_Seek(usecs);
+}
+
+int64_t OMXPlayerInterface::Send_Seek(int64_t usecs) {
+    int64_t sought;
+    Log("Send_Seek(" + to_string(usecs) + ")");
+    try {
+      sought = g_player_client->Seek(usecs);
+    }
+    catch (DBus::Error &dbus_err) {
+      Log("Send_Seek() - D-Bus error - seek failed.");
+    }
+    if (!sought)
+        Log("Send_Seek() - FAILED!");
+    else if (sought == usecs )
+	Log("Send_Seek() - SUCCESS!");
+    else
+        Log("Send_Seek() - This should not happen!");
+    return sought;
+}
+
+void OMXPlayerInterface::Do_DecreaseSpeed() {
+    Log("Do_DecreaseVolume() - calling Send_Action(KeyConfig::ACTION_DECREASE_SPEED)");
+    Send_Action(KeyConfig::ACTION_DECREASE_SPEED);
+}
+
+void OMXPlayerInterface::Do_IncreaseSpeed() {
+    Log("Do_IncreaseVolume() - calling Send_Action(KeyConfig::ACTION_INCREASE_SPEED)");
+    Send_Action(KeyConfig::ACTION_INCREASE_SPEED);
+}
+
 void OMXPlayerInterface::Do_DecreaseVolume() {
     Log("Do_DecreaseVolume() - calling Send_Action(KeyConfig::ACTION_DECREASE_VOLUME)");
     Send_Action(KeyConfig::ACTION_DECREASE_VOLUME);
@@ -155,6 +192,7 @@ void OMXPlayerInterface::Do_FastForward() {
     Log("Do_Rewind() - calling Send_Action(KeyConfig::ACTION_FAST_FORWARD");
     Send_Action(KeyConfig::ACTION_FAST_FORWARD);
 }
+
 
 void OMXPlayerInterface::Send_Action(int Action) {
   Log("Send_Action() - sending Action(" + to_string(Action) + ")");

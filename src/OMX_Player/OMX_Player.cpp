@@ -346,6 +346,8 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 	m_iStreamID = iStreamID;
 	m_sMediaURL = sMediaURL;
 
+	m_xDuration = m_pOMXPlayer->Get_Duration();
+
 //	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Send EVENT_Playback_Started()");
 //	string sMediaInfo = "";
 //	string sAudioInfo = "";
@@ -392,10 +394,8 @@ void OMX_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMes
 	cout << "Implemented command #39 - Pause Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-	sCMD_Result = "FAIL";
-
-	// FIXME: check pause status
-	m_pOMXPlayer->Do_Pause();
+	if ( m_pOMXPlayer->Get_PlaybackStatus() == "Playing" )
+		m_pOMXPlayer->Do_Pause();
 
 	sCMD_Result = "OK";
 }
@@ -414,8 +414,9 @@ void OMX_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pM
 //	cout << "Implemented command #40 - Restart Media" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-	// FIXME: check pause status
-	m_pOMXPlayer->Do_Pause();
+	if ( m_pOMXPlayer->Get_PlaybackStatus() == "Paused" )
+		m_pOMXPlayer->Do_Pause();
+
 	sCMD_Result = "OK";
 }
 
@@ -439,8 +440,31 @@ void OMX_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed
 	cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
 	cout << "Parm #220 - Report=" << bReport << endl;
 
-	// FIXME: check pause status
-	m_pOMXPlayer->Do_Pause();
+	string sStatus = m_pOMXPlayer->Get_PlaybackStatus();
+	if ( iMediaPlaybackSpeed == 1000 ) {
+		if ( sStatus == "Playing" ) {
+			m_pOMXPlayer->Do_Pause();
+		}
+		m_pOMXPlayer->Do_Pause();
+	}
+	else if ( iMediaPlaybackSpeed > 10 ) {
+		m_pOMXPlayer->Do_FastForward();
+	}
+	else if ( iMediaPlaybackSpeed < 10 ) {
+		m_pOMXPlayer->Do_Rewind();
+	}
+	else if ( iMediaPlaybackSpeed > 0 && iMediaPlaybackSpeed < 10 ) {
+		m_pOMXPlayer->Do_IncreaseSpeed();
+	}
+	else if ( iMediaPlaybackSpeed < 0 && iMediaPlaybackSpeed > -10 ) {
+		m_pOMXPlayer->Do_DecreaseSpeed();
+	}
+	else if ( iMediaPlaybackSpeed == 0 ) {
+		if ( sStatus == "Playing" ) {
+			m_pOMXPlayer->Do_Pause();
+		}
+	}
+	sCMD_Result = "OK";
 }
 
 //<-dceag-c42-b->
@@ -508,27 +532,43 @@ void OMX_Player::CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Res
 void OMX_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c65-e->
 {
-	cout << "Need to implement command #65 - Jump Position In Playlist" << endl;
-//	cout << "Implemented command #65 - Jump Position In Playlist" << endl;
+//	cout << "Need to implement command #65 - Jump Position In Playlist" << endl;
+	cout << "Implemented command #65 - Jump Position In Playlist" << endl;
 	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-// No playlist capability in omxplayer yet.
-/*
-	if (atoi(sValue_To_Assign.c_str())==0) {
-		string filename=m_omxplayer->m_filename;
-		m_omxplayer->SendCommand(OMX_QUIT,"0"); // 'q');
-		m_omxplayer->Cleanup();
-		if (m_omxplayer)
-			delete m_omxplayer;
-		m_bOMXIsRunning = false;
+	// No playlist capability in omxplayer.
+	// Jump FF ~10min or REW ~10min
+	// FIXME: Need to check for seeking past end, player does not.
 
-	        m_omxplayer = new CLibOMX;
-	        m_omxplayer->OpenFile(filename);
-	        m_omxplayer->Start();
-	        m_bOMXIsRunning = true;
+
+
+const int64_t msec = 1000;
+const int64_t sec = msec * 1000;
+const int64_t min = sec * 60;
+const int64_t hour = min * 60;
+const int64_t sec30 = min / 2;
+const int64_t min30 = hour / 2;
+
+int64_t xSeekVal = 0;
+int64_t xDuration = m_xDuration;
+int64_t xDurMod = 0;
+
+xDurMod = (xDuration / min30); // 1min/30mins FF, 20sec/30min REW
+cout << "xDuration == " << TimeFromUSec(xDuration) << ", div == " << (xDuration/xDurMod) << endl;
+xSeekVal = (min) + ((min) * (xDuration / min30));
+cout << "xSeekVal == " << xSeekVal << ", " << TimeFromUSec(xSeekVal) << endl;
+
+	if ( sValue_To_Assign == "+1" ) {
+		cout << "Calling - Seek(" << xSeekVal << ") - [" << TimeFromUSec(xSeekVal) << "]" << endl;
+		m_pOMXPlayer->Do_Seek(xSeekVal);
 	}
-*/
+	else if ( sValue_To_Assign == "-1" ) {
+		xSeekVal = xSeekVal/3;
+		cout << "Calling - Seek(" << -xSeekVal << ") - [-" << TimeFromUSec(xSeekVal) << "]" << endl;
+		m_pOMXPlayer->Do_Seek(-xSeekVal);
+	}
+
 	sCMD_Result = "OK";
 }
 
@@ -546,8 +586,9 @@ void OMX_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
 	cout << "Implemented command #92 - Pause" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 
-	// FIXME: check pause status
-	m_pOMXPlayer->Do_Pause();
+	if ( m_pOMXPlayer->Get_PlaybackStatus() == "Playing" )
+		m_pOMXPlayer->Do_Pause();
+
 	sCMD_Result = "OK";
 }
 
@@ -992,3 +1033,18 @@ void OMX_Player::StateChanged(OMXPlayerStream::STATE playerState, string sMediaU
 //		cout << "STATE-NO" << endl;
 	}
 }
+
+
+string OMX_Player::ZeroPad(int num, int width)
+{
+    std::ostringstream ss;
+    ss << std::setw( width ) << std::setfill( '0' ) << num;
+    return ss.str();
+}
+
+string OMX_Player::TimeFromUSec(uint64_t usecs) {
+        string ret;
+        ret = ZeroPad(usecs/1000/1000/60/60,2) + ":" + ZeroPad(usecs/1000/1000/60 % 60,2) + ":" + ZeroPad(usecs/1000/1000 % 60,2);// + "." + ZeroPad(usecs/1000 % 1000,3);// + ":" + to_string(usecs % 1000);
+        return ret;
+}
+
