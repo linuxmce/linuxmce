@@ -35,6 +35,7 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 		echo -e "\n\n\n\n\n\n\n\n\nRPI FIRSTRUN\n\n\n\n\n\n\n\n\n" >&2
 
 		# copy contents of /boot to /sdcard
+		mkdir -p /sdcard/
 		cp /boot/* /sdcard/
 
 		# not required with working u-boot
@@ -45,6 +46,45 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 		#[[ ! -f /sdcard/cmdline.txt.lmcebackup ]] && cp /sdcard/cmdline.txt /sdcard/cmdline.txt.lmcebackup
 		#echo "dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 elevator=deadline rootwait root=/dev/nfs nfsroot=192.168.80.1:/usr/pluto/diskless/$PK_Device ip=dhcp rootfstype=nfs" > /sdcard/cmdline.txt
 
+		cat <<-'EOF' >/etc/init.d/switch_cpu_governor
+		#!/bin/sh
+		### BEGIN INIT INFO
+		# Provides:          switch_cpu_governor
+		# Required-Start: udev mountkernfs
+		# Required-Stop:
+		# Default-Start: S
+		# Default-Stop:
+		# Short-Description: Switch to ondemand cpu governor (unless shift key is pressed)
+		# Description:
+		### END INIT INFO
+		##### Required-Start: udev mountkernfs $remote_fs
+
+		. /lib/lsb/init-functions
+
+		case "$1" in
+		  start)
+		    log_daemon_msg "Checking if shift key is held down"
+		    timeout 1 thd --dump /dev/input/event* | grep -q "LEFTSHIFT\|RIGHTSHIFT"
+		    if [ $? -eq 0 ]; then
+		      printf " Yes. Not switching scaling governor"
+		      log_end_msg 0
+		    else
+		      SYS_CPUFREQ_GOVERNOR=/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+		      [ -e $SYS_CPUFREQ_GOVERNOR ] && echo "ondemand" > $SYS_CPUFREQ_GOVERNOR
+		      echo 70 > /sys/devices/system/cpu/cpufreq/ondemand/up_threshold
+		      printf " No. Switching to ondemand scaling governor"
+		      log_end_msg 0
+		    fi
+		    ;;
+		  *)
+		    echo "Usage: $0 start" >&2
+		    exit 3
+		    ;;
+		esac
+		EOF
+		chmod +x /etc/init.d/switch_cpu_governor
+
+		"$INSSERV" -fv switch_cpu_governor
 		"$INSSERV" -fv linuxmce
 		"$INSSERV" -rfv firstrun
 		reboot
