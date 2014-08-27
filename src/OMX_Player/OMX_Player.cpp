@@ -320,22 +320,16 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 
 	sCMD_Result = "FAIL";
 
-	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - iStreamID: %i, sMediaURL: %s", iStreamID, sMediaURL.c_str());
-//	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - checking if playing or if mediaURL has changed");
-	// TODO: check (at least use) sMediaPosition
-//	if ( m_pOMXPlayer->Get_PlayerState() != OMXPlayerStream::STATE::STOPPED ) { // && (iStreamID != m_iStreamID || sMediaURL != m_sMediaURL)) {
-//	if (!stopped) { // && (iStreamID != m_iStreamID || sMediaURL != m_sMediaURL)) {
-//	if ((iStreamID != m_iStreamID || sMediaURL != m_sMediaURL)) {
-//		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - PlayerState != STOPPED, running Stop(0)");
-//		m_pOMXPlayer->Stop(0); // ??
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - TRYING iStreamID: %i, sMediaURL: %s", iStreamID, sMediaURL.c_str());
 
-//		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Waiting for player to be STOPPED");
-		// Wait for player to be stopped.
-		// FIXME: Wait for Stop state notification instead
-//		while (!stopped) usleep (10000);
-//	}
 
-	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - TRYING to Play(%s)", sMediaURL.c_str());
+	uint64_t xMediaPosition = 0;
+	xMediaPosition = USecFromTime(sMediaPosition);
+
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - TRYING Requested start: %s, usec = %i", sMediaPosition.c_str(), xMediaPosition);
+
+
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - TRYING to Play() from %s", sMediaPosition.c_str());
 
 	if ( !m_pOMXPlayer->Play(iStreamID, sMediaURL) ) {
 		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - FAILED to Play(%s)", sMediaURL.c_str());
@@ -347,6 +341,8 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 	m_sMediaURL = sMediaURL;
 
 	m_xDuration = m_pOMXPlayer->Get_Duration();
+	string sDuration = TimeFromUSec(m_xDuration);
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - sDuration = %s", sDuration.c_str());
 
 //	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - Send EVENT_Playback_Started()");
 //	string sMediaInfo = "";
@@ -479,9 +475,23 @@ void OMX_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed
 void OMX_Player::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c42-e->
 {
-	cout << "Need to implement command #42 - Jump to Position in Stream" << endl;
+	cout << "Implemented command #42 - Jump to Position in Stream" << endl;
+//	cout << "Need to implement command #42 - Jump to Position in Stream" << endl;
 	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+	const int64_t msec = 1000;
+	const int64_t sec = msec * 1000;
+	const int64_t min = sec * 60;
+	const int64_t hour = min * 60;
+	const int64_t sec30 = min / 2;
+	const int64_t min30 = hour / 2;
+
+	int64_t xValue = atoi(sValue_To_Assign.c_str());
+	xValue = xValue * sec;
+
+	cout << "Seeking: " << TimeFromUSec(xValue) << endl;
+	m_pOMXPlayer->Do_Seek(xValue);
 }
 
 //<-dceag-c63-b->
@@ -541,23 +551,18 @@ void OMX_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStre
 	// Jump FF ~10min or REW ~10min
 	// FIXME: Need to check for seeking past end, player does not.
 
+	const int64_t msec = 1000;
+	const int64_t sec = msec * 1000;
+	const int64_t min = sec * 60;
+	const int64_t hour = min * 60;
+	const int64_t sec30 = min / 2;
+	const int64_t min30 = hour / 2;
 
+	int64_t xSeekVal = 0;
+	int64_t xDuration = m_xDuration;
 
-const int64_t msec = 1000;
-const int64_t sec = msec * 1000;
-const int64_t min = sec * 60;
-const int64_t hour = min * 60;
-const int64_t sec30 = min / 2;
-const int64_t min30 = hour / 2;
-
-int64_t xSeekVal = 0;
-int64_t xDuration = m_xDuration;
-int64_t xDurMod = 0;
-
-xDurMod = (xDuration / min30); // 1min/30mins FF, 20sec/30min REW
-cout << "xDuration == " << TimeFromUSec(xDuration) << ", div == " << (xDuration/xDurMod) << endl;
-xSeekVal = (min) + ((min) * (xDuration / min30));
-cout << "xSeekVal == " << xSeekVal << ", " << TimeFromUSec(xSeekVal) << endl;
+	xSeekVal = (min) + ((min) * (xDuration / min30));
+	cout << "xSeekVal == " << xSeekVal << ", " << TimeFromUSec(xSeekVal) << endl;
 
 	if ( sValue_To_Assign == "+1" ) {
 		cout << "Calling - Seek(" << xSeekVal << ") - [" << TimeFromUSec(xSeekVal) << "]" << endl;
@@ -1048,3 +1053,38 @@ string OMX_Player::TimeFromUSec(uint64_t usecs) {
         return ret;
 }
 
+int64_t OMX_Player::USecFromTime(string sTime) {
+
+	const int64_t usec = 1;
+	const int64_t msec = 1000;
+	const int64_t sec = 1000 * msec;
+	const int64_t min = sec * 60;
+	const int64_t hour = min * 60;
+
+	int64_t usecs = 0;
+	int64_t iPlaceholderValue = hour;
+	iPlaceholderValue = hour;
+	string::size_type tokenPos = 0;
+	string curValue = StringUtils::Tokenize(sTime, string(":"), tokenPos);
+	while (curValue!="")
+	{
+		int iValue = atoi(curValue.c_str());
+		usecs = usecs + (iPlaceholderValue * iValue);
+
+		if (iPlaceholderValue == hour) {
+			iPlaceholderValue == min;
+		}
+		else if (iPlaceholderValue == min) {
+			iPlaceholderValue == sec;
+		}
+		else if (iPlaceholderValue == sec) {
+			iPlaceholderValue == msec;
+		}
+		else if (iPlaceholderValue == msec) {
+			iPlaceholderValue == usec;
+		}
+
+		curValue = StringUtils::Tokenize(sTime, string(":"), tokenPos);
+	}
+	return usecs;
+}

@@ -42,13 +42,12 @@ private:
 		string m_sGpuDeInt;
 
 		bool stopped = true;
-
-
 		int64_t m_xDuration;
 
 		// Private methods
 		string ZeroPad(int num, int width);
 		string TimeFromUSec(uint64_t usecs);
+		int64_t USecFromTime(string sTime);
 
 public:
 		int m_iStreamID;
