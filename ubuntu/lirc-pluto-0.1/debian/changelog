@@ -1,3 +1,9 @@
+lirc-pluto (0.1.2) unstable; urgency=low
+
+  * Updated dependencies
+
+ -- root <root@unknown>  Wed, 27 Aug 2014 23:26:21 -0500
+
 lirc-pluto (0.1.1) unstable; urgency=low
 
   * Updated dependencies

@@ -7,6 +7,6 @@ Standards-Version: 3.7.2
 
 Package: lirc-pluto
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, liblircclient0, liblircclient-dev, lirc, lirc-modules-2.6.20-15-generic | lirc-modules-2.6.22-14-generic | lirc-modules-source
+Depends: ${shlibs:Depends}, ${misc:Depends}, liblircclient0, liblircclient-dev, lirc
 Description: <insert up to 60 chars description>
  <insert long description, indented with spaces>
