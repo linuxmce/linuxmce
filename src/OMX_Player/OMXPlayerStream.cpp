@@ -18,7 +18,7 @@ OMXPlayerStream::~OMXPlayerStream()
 
 // inherited from OMXPlayerInterface
 void OMXPlayerStream::Stop(int iStreamID) {
-	Log("OMXPlayerStream::Stop - iStreamID: " + to_string(iStreamID));
+//	Log("OMXPlayerStream::Stop - iStreamID: " + to_string(iStreamID));
 	STATE state = Get_PlayerState();
 	if ( iStreamID == m_iStreamID || iStreamID == 0)
 		if ( state != STATE::STOPPING && state != STATE::STOPPED ) {
@@ -28,7 +28,7 @@ void OMXPlayerStream::Stop(int iStreamID) {
 }
 
 // inherited from OMXPlayerInterface
-bool OMXPlayerStream::Play(int iStreamID, string sMediaURL) {
+bool OMXPlayerStream::Play(int iStreamID, string sMediaURL, string sMediaPosition) {
 	if ( Get_PlayerState() != STATE::STOPPED ) {
 		Log("OMXPlayerStream::Play - ERROR - Can't Play() unless STOPPED, sending Stop()");
 		bEvent = false;
@@ -40,7 +40,7 @@ bool OMXPlayerStream::Play(int iStreamID, string sMediaURL) {
 	m_iStreamID = iStreamID;
 	m_sMediaURL = sMediaURL;
 
-	if ( !OMXPlayerInterface::Play(sMediaURL) )
+	if ( !OMXPlayerInterface::Play(sMediaURL, sMediaPosition) )
 		return false;
 
 //        m_xDuration = OMXPlayerInterface::Get_Duration();

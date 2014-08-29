@@ -108,6 +108,7 @@ private:
   void Send_Stop(void);
   void Send_Action(int);
   void Send_Pause(void);
+  int64_t Send_SetPosition(std::string sMediaPosition, int64_t xPos);
 
   // general class methods
   void SetState(STATE PlayerState);
@@ -120,6 +121,19 @@ private:
   virtual void Log(string txt);
   void OpenPipes(void);
   void ClosePipes(void);
+  void Do_QuitOnError(void);
+  string ZeroPad(int num, int width);
+  string TimeFromUSec(uint64_t usecs);
+  int64_t USecFromTime(string sTime);
+
+   /**
+     * @brief breaks the Input string in tokens and putes them in the deque_strings parameter, or a vector
+     */
+  string Tokenize( string &sInput, string sTokens, string::size_type &CurPos, bool bMultiCharacterTokens=false);
+//  void Tokenize(string &Input, string Tokens, deque<string> &deque_strings, bool bPushToFront);
+//  void Tokenize(string &Input, string Tokens, vector<string> &vect_strings);
+
+
 
 public:
   // public methods
@@ -138,8 +152,9 @@ public:
   void Do_IncreaseVolume();
   void Do_DecreaseSpeed();
   void Do_IncreaseSpeed();
+  void Do_SetPosition(std::string sMediaURL, int64_t xPos);
 
-  virtual bool Play(string sMediaURL);
+  virtual bool Play(string sMediaURL, string sMediaPosition);
   void Stop(void);
   void Init(void);
   void DeInit(void);

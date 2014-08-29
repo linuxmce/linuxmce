@@ -47,6 +47,7 @@ private:
 		// Private methods
 		string ZeroPad(int num, int width);
 		string TimeFromUSec(uint64_t usecs);
+		string TimeFromMSec(uint64_t msecs);
 		int64_t USecFromTime(string sTime);
 
 public:

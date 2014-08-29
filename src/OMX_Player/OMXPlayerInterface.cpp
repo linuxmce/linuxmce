@@ -9,7 +9,7 @@
 //#define USE_PIPES
 
 const int RETRIES = 10;
-const int DBUS_RETRIES = 50;
+const int DBUS_RETRIES = 100;
 
 using namespace std;
 
@@ -133,6 +133,25 @@ int64_t OMXPlayerInterface::Send_Seek(int64_t usecs) {
     else
         Log("Send_Seek() - This should not happen!");
     return sought;
+}
+
+void OMXPlayerInterface::Do_SetPosition(string sMediaURL, int64_t xPos) {
+    // FIXME: need to check for seek past end
+    Log("Do_SetPosition() - calling SetPosition('" + sMediaURL + "', " + to_string(xPos) + ") [" + TimeFromUSec(xPos) + "]");
+    if (Send_SetPosition(sMediaURL, xPos) != xPos)
+	Log("Do_SetPosition() - error setting position!");
+}
+
+int64_t OMXPlayerInterface::Send_SetPosition(string sMediaURL, int64_t xPos) {
+  int64_t ret;
+  Log("Send_SetPosition() - sending SetPosition('" + sMediaURL + "', " + to_string(xPos) + ") [" + TimeFromUSec(xPos) + "]");
+  try {
+    ret = g_player_client->SetPosition(sMediaURL, xPos);
+  }
+  catch (DBus::Error &dbus_err) {
+    Log("Send_SetPosition() - D-Bus error - omxplayer has gone away?");
+  }
+  return ret;
 }
 
 void OMXPlayerInterface::Do_DecreaseSpeed() {
@@ -362,7 +381,7 @@ void OMXPlayerInterface::OpenPipes() {
 }
 
 
-bool OMXPlayerInterface::Play(string sMediaURL) {
+bool OMXPlayerInterface::Play(string sMediaURL, string sMediaPosition) {
   if ( ePlayerState != STATE::STOPPED  ) {
 	Log("OMXPlayerInterface::Play - Must be STOPPED to Play()");
 	return false;
@@ -428,13 +447,22 @@ bool OMXPlayerInterface::Play(string sMediaURL) {
     args.push_back((char *)sopt.c_str());
 
     if (true) {
+      // set the video mode to match the source media, reset when done
       char *refresh = (char *)"-r";
       args.push_back(refresh);
     }
 
     if (true) {
+      // disable omxplayer's stdin keys
       char *nokeys = (char *)"--no-keys";
       args.push_back(nokeys);
+    }
+
+    if (true) {
+      // add the starting position
+      sMediaPosition = "-l" + sMediaPosition;
+      Log("(Child's) Play() - sMediaPosition: " + sMediaPosition);
+      args.push_back((char *)sMediaPosition.c_str());
     }
 
     // add the media url
@@ -473,7 +501,7 @@ bool OMXPlayerInterface::Play(string sMediaURL) {
     fcntl(m_iOutPipe[0], F_SETFL, O_NONBLOCK);
 
 
-    // setup the output reader thread to watch for 'Stopped at XX:XX:XX' and 'have a nice day ;)' signals from omxplayer
+    // setup the output reader thread to watch for 'Stopped at XX:XX:XX' and 'have a nice day ;)' signals from omxplayer?
     m_bRunPlayerOutputReader = true;
     // TODO error reporting here
     Log("Play() - creating PlayerOutputReaderThread");
@@ -496,9 +524,7 @@ bool OMXPlayerInterface::Play(string sMediaURL) {
       }
       if (!infile.is_open())  {
         Log("Play() - Could not open file " + OMXPLAYER_DBUS_ADDR + ", exiting... ");
-        Stop();
-        system("killall omxplayer.bin");
-        system("killall omxplayer");
+	Do_QuitOnError();
         return false;
       }
       else {
@@ -579,12 +605,18 @@ bool OMXPlayerInterface::Play(string sMediaURL) {
       int i = 0;
       string sIdentity;
       bool bIdentity = false;
-      while (!bIdentity && ++i<DBUS_RETRIES) {
+      while (!bIdentity && ++i<=DBUS_RETRIES) {
         try {
           sIdentity = g_props_client->Identity();
           bIdentity = true;
         }
         catch (DBus::Error &dbus_err) {
+if (i >=DBUS_RETRIES)
+{
+  Log("OMXPlayerInterface::Play - FAILED to Play(), exiting player if running...");
+  Do_QuitOnError();
+  return false;
+}
           //Log("OMXPlayerInterface::Play() - Waiting for Identity()...");
           usleep(100000);
         }
@@ -757,6 +789,12 @@ void OMXPlayerInterface::Log(string txt) {
   m_mtxLog.unlock();
 }
 
+void OMXPlayerInterface::Do_QuitOnError() {
+        Stop();
+        system("killall omxplayer.bin");
+        system("killall omxplayer");
+}
+
 void *PlayerOutputReader(void *pInstance) {
   OMXPlayerInterface* pThis = (OMXPlayerInterface*) pInstance;
 
@@ -786,3 +824,146 @@ void *PlayerMonitor(void *pInstance) {
   //}
   pThis->Log("[PlayerMonitor] exiting");
 }
+
+
+
+
+string OMXPlayerInterface::ZeroPad(int num, int width)
+{
+    std::ostringstream ss;
+    ss << std::setw( width ) << std::setfill( '0' ) << num;
+    return ss.str();
+}
+
+string OMXPlayerInterface::TimeFromUSec(uint64_t usecs) {
+        string ret;
+        ret = ZeroPad(usecs/1000/1000/60/60,2) + ":" + ZeroPad(usecs/1000/1000/60 % 60,2) + ":" + ZeroPad(usecs/1000/1000 % 60,2);// + "." + ZeroPad(usecs/1000 % 1000,3);// + ":" + to_string(usecs % 1000);
+        return ret;
+}
+
+int64_t OMXPlayerInterface::USecFromTime(string sTime) {
+
+	const int64_t usec = 1;
+	const int64_t msec = 1000;
+	const int64_t sec = 1000 * msec;
+	const int64_t min = sec * 60;
+	const int64_t hour = min * 60;
+
+	int64_t usecs = 0;
+	int64_t iPlaceholderValue = hour;
+	iPlaceholderValue = hour;
+	string::size_type tokenPos = 0;
+	string curValue = Tokenize(sTime, string(":"), tokenPos);
+	while (curValue!="")
+	{
+		int iValue = atoi(curValue.c_str());
+		usecs = usecs + (iPlaceholderValue * iValue);
+
+		if (iPlaceholderValue == hour) {
+			iPlaceholderValue == min;
+		}
+		else if (iPlaceholderValue == min) {
+			iPlaceholderValue == sec;
+		}
+		else if (iPlaceholderValue == sec) {
+			iPlaceholderValue == msec;
+		}
+		else if (iPlaceholderValue == msec) {
+			iPlaceholderValue == usec;
+		}
+
+		curValue = Tokenize(sTime, string(":"), tokenPos);
+	}
+	return usecs;
+}
+
+
+
+string OMXPlayerInterface::Tokenize( string &sInput, string sToken, string::size_type &CurPos, bool bMultiCharacterTokens )
+{
+    if ( CurPos >= sInput.length() ) // allready extracted all the pices
+	{
+        return "";
+	}
+
+    string::size_type TokenPos;
+
+    if ( bMultiCharacterTokens==false && sToken.length() > 1 )
+    {
+        TokenPos = sInput.length() + 1;
+
+        for( string::size_type i=0; i < sToken.length(); i++ )
+        {
+            string::size_type NewPos = CurPos;
+            Tokenize( sInput, sToken.substr(i, 1), NewPos );
+            if ( NewPos < TokenPos )
+                TokenPos = NewPos;
+        }
+        TokenPos--;
+    }
+    else
+    {
+        TokenPos = sInput.find( sToken, CurPos );
+        if ( TokenPos == string::npos )
+        {
+            TokenPos = sInput.length();
+        }
+    }
+
+	string sReturnValue = sInput.substr( CurPos, (TokenPos - CurPos) );
+	CurPos = TokenPos + (bMultiCharacterTokens ? sToken.length() : 1);
+    return sReturnValue;
+}
+
+/*
+void OMXPlayerInterface::Tokenize(string &Input, string Tokens, vector<string> &vect_strings)
+{
+	const char *pTokens = Tokens.c_str();
+	int Size = int(Tokens.size());
+	if( Size<1 || Size>3 )
+		return; // Not supported no tokens or more than 3
+
+	const char *pcPtr = Input.c_str();
+	char *pPtr_dup = strdup(pcPtr);
+	char *pPtr = pPtr_dup;
+	const char *pPtr_Start = pPtr;
+
+	while( *pPtr )
+    {
+		while( *pPtr && *pPtr!=pTokens[0]
+			&& (Size<2 || *pPtr!=pTokens[1])
+			&& (Size<3 || *pPtr!=pTokens[2]) )
+				pPtr++;
+
+		// We're stopped on a token, terminate this string and skip over any more tokens
+		while( *pPtr &&
+			( *pPtr==pTokens[0] ||
+			  (Size>1 && *pPtr==pTokens[1]) ||
+			  (Size>2 && *pPtr==pTokens[2]) ) )
+		{
+			(*pPtr)=0;
+			pPtr++;
+		}
+
+		if( *pPtr_Start && pPtr_Start!=pPtr )
+            vect_strings.push_back(pPtr_Start);
+		pPtr_Start=pPtr;
+    }
+	free(pPtr_dup);
+}
+
+void OMXPlayerInterface::Tokenize(string &Input, string Tokens, deque<string> &deque_strings, bool bPushToFront)
+{
+    string::size_type pos=0;
+    string sToken;
+    while( (sToken=Tokenize(Input,Tokens,pos)).length() )
+    {
+        if( bPushToFront )
+            deque_strings.push_front(sToken);
+        else
+            deque_strings.push_back(sToken);
+    }
+}
+
+
+*/

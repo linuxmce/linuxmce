@@ -34,7 +34,7 @@ class OMXPlayerStream : public OMXPlayerInterface
     OMXPlayerStream(string sAudioDevice, bool bPassthrough, string sGpuDeInt, OMX_Player *pOwner);
     ~OMXPlayerStream(void);
 
-    bool Play(int iStreamID, string sMediaURL);
+    bool Play(int iStreamID, string sMediaURL, string sMediaPosition);
     void Stop(int iStreamID);
 
 };

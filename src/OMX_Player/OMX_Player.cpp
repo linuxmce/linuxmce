@@ -12,6 +12,9 @@
 
 */
 
+#include <string> // map?
+#include <map> // map
+
 //<-dceag-d-b->
 #include "OMX_Player.h"
 #include "DCE/Logger.h"
@@ -35,7 +38,7 @@ using namespace DCE;
 #include "pluto_main/Define_CommandParameter.h"
 
 #include "OMXPlayerStream.h"
-//#include <unistd.h> // execl/usleep
+
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -331,7 +334,7 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 
 	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - TRYING to Play() from %s", sMediaPosition.c_str());
 
-	if ( !m_pOMXPlayer->Play(iStreamID, sMediaURL) ) {
+	if ( !m_pOMXPlayer->Play(iStreamID, sMediaURL, sMediaPosition) ) {
 		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - FAILED to Play(%s)", sMediaURL.c_str());
 		return;
 	}
@@ -913,6 +916,33 @@ void OMX_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,stri
 	cout << "Need to implement command #412 - Set Media Position" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+
+	map<string,string> mapMediaInfo;
+
+	string::size_type tokenPos = 0;
+	string sCurValue = StringUtils::Tokenize(sMediaPosition, " ", tokenPos);
+	sCurValue = StringUtils::Tokenize(sMediaPosition, " ", tokenPos);
+	while (sCurValue!="")
+	{
+		cout << "sCurValue = " << sCurValue << endl;
+
+		string::size_type tokenPos2 = 0;
+		std::string sKey = StringUtils::Tokenize(sCurValue, ":", tokenPos2);
+		std::string sValue = StringUtils::Tokenize(sCurValue, ":", tokenPos2);
+
+		cout << "Adding: " << sKey << "=" << sValue << endl;
+
+		mapMediaInfo[sKey] = sValue;
+
+		sCurValue = StringUtils::Tokenize(sMediaPosition, " ", tokenPos);
+	}
+
+	int64_t xTime = strtoull(mapMediaInfo["POS"].c_str(), NULL, 10) * 1000;
+
+	cout << "POS: " << mapMediaInfo["POS"] << ", " << xTime << endl;
+
+	string sMediaURL = "";
+	m_pOMXPlayer->Do_SetPosition(sMediaURL, xTime);
 }
 
 //<-dceag-c548-b->
@@ -1045,6 +1075,12 @@ string OMX_Player::ZeroPad(int num, int width)
     std::ostringstream ss;
     ss << std::setw( width ) << std::setfill( '0' ) << num;
     return ss.str();
+}
+
+string OMX_Player::TimeFromMSec(uint64_t msecs) {
+        string ret;
+        ret = ZeroPad(msecs/1000/60/60,2) + ":" + ZeroPad(msecs/1000/60 % 60,2) + ":" + ZeroPad(msecs/1000 % 60,2);// + "." + ZeroPad(usecs/1000 % 1000,3);// + ":" + to_string(usecs % 1000);
+        return ret;
 }
 
 string OMX_Player::TimeFromUSec(uint64_t usecs) {
