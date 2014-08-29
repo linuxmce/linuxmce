@@ -26,6 +26,7 @@ bool NowPlayingHandler::handleGet(CivetServer *server, struct mg_connection *con
 		"	\"media_type\": %d,\n"
 		"	\"media_device\": %d,\n"
 		"	\"description\": \"%s\",\n"
+		"	\"playlistid\": \"%d\",\n"
 		"	\"timestamp\": \"%s\",\n"
 		"	\"replace_cover_art\": %s,\n"
 		"	\"cover_art\": \"%s\"\n"
@@ -91,6 +92,7 @@ bool NowPlayingHandler::handleGet(CivetServer *server, struct mg_connection *con
 			pMediaStream->m_iPK_MediaType,       // media_type
 			pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device, // media_device
 			escapedMediaDescription.c_str(),     // description
+			pMediaStream->m_iPK_Playlist,        // Playlist ID - maybe useful for later playlist retrieval
 			escapedLastUpdateStr.c_str(),        // timestamp
 			bReplacePicture ? "true" : "false",  // replace_cover_art
 			escapedBase64Picture.c_str()         // cover_art
@@ -107,6 +109,7 @@ bool NowPlayingHandler::handleGet(CivetServer *server, struct mg_connection *con
 			0,                                   // media_type
 			0,                                   // media_device
 			"",                                  // description
+			0,                                   // playlist ID
 			"0",                                 // timestamp
 			"false",                             // replace_cover_art
 			""                                   // cover_art
