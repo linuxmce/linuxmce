@@ -279,7 +279,7 @@ MD_System_Level_Prep () {
 				deb http://deb.linuxmce.org/raspbian/ $TARGET_RELEASE main
 				deb $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
 				deb http://archive.raspberrypi.org/debian $TARGET_RELEASE main
-				deb http://twolife.be/raspbian/ $TARGET_RELEASE main backports
+				#deb http://twolife.be/raspbian/ $TARGET_RELEASE main backports
 				EOF
 			;;
 	esac
