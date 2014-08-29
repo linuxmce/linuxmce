@@ -73,7 +73,7 @@ public:
 #elif QT5
     explicit MediaManager(QQuickItem *parent = 0);
 #endif
-
+~MediaManager(){this->deleteLater();}
     //media info
     int currentTime;
     qint64 totalTime;
@@ -283,7 +283,6 @@ public slots:
 
     void mediaStarted(){
         setMediaPlaying(true);
-
     }
 
     void setServerAddress(QString a) {if(serverAddress !=a) {serverAddress = a;emit serverAddressChanged();}}
@@ -492,7 +491,8 @@ public slots:
 
         qs_totalTime =hrs + ":" + min + ":" +sec;
         totalTime = t;
-        emit totalTimeChanged();}
+        emit totalTimeChanged();
+    }
 
 
     QString getTotalTime() {return qs_totalTime;}

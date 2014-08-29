@@ -27,7 +27,6 @@
 
 package org.kde.necessitas.origo;
 
-
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -35,8 +34,6 @@ import java.util.Arrays;
 
 import org.kde.necessitas.ministro.IMinistro;
 import org.kde.necessitas.ministro.IMinistroCallback;
-import org.kde.necessitas.origo.LinuxmceAudioService;
-import org.kde.necessitas.origo.LinuxmceAudioService.LocalBinder;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -54,7 +51,6 @@ import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -72,14 +68,13 @@ import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import dalvik.system.DexClassLoader;
 
-
 //@ANDROID-11
 //QtCreator import android.app.Fragment;
 //QtCreator import android.view.ActionMode;
 //QtCreator import android.view.ActionMode.Callback;
 //@ANDROID-11
 
-public class QtActivity<LocalBinder> extends Activity
+public class QtActivity extends Activity
 {
     private final static int MINISTRO_INSTALL_REQUEST_CODE = 0xf3ee; // request code used to know when Ministro instalation is finished
     private static final int MINISTRO_API_LEVEL=2; // Ministro api level (check IMinistro.aidl file)
@@ -128,89 +123,9 @@ public class QtActivity<LocalBinder> extends Activity
     private DexClassLoader m_classLoader = null; // loader object
     private String[] m_qtLibs = null; // required qt libs
 
-
-    public static QtActivity qtactivity;
-    
-    LinuxmceAudioService mService;
-    public long myobj;
-    
-    boolean mBound = false;
-
-    public static QtActivity getActivity() {
-      return qtactivity;
-    }
-
-    public void PlayMedia(String url) {
-    	mService.playAudio(url);    
-    }
-   
-    public boolean SendMediaCommand(String Command, int mSeek, boolean pause, String file, float vol){
-    	boolean res = false;
-    	
-    	if(Command.contentEquals("play")){
-    		mService.playAudio(file);
-    		res = true;
-    	} 
-    	else if(Command.contentEquals("stop")){
-    	mService.stop();
-    	res = true;
-    	} 
-    	else if(Command.contentEquals("setVolume")){
-    		mService.setVolume(vol);
-    		res=true;
-    	}
-    	
-    	return res;
-    }
-    
-    
-    public void startAudioService(long t){ 
-    	Log.d("Linuxmce Audio Service", "Trying to start Linuxmce Audio Service");
-		Intent i = new Intent(this , LinuxmceAudioService.class);		
-		if(bindService(i, mConnection, this.BIND_AUTO_CREATE)){
-			
-		}
-		
-    }
-    
-    public void playAudioFile(String file){
-   	mService.playAudio(file);  	
-    	
-    }
-    
-    /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            LocalBinder binder = (LocalBinder) service;
-            mService = ((LinuxmceAudioService.LocalBinder)service).getService();
-            mBound = true;   
-           
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
-        }
-    };
-    
-    
-    
-
-  //This version sends an implicit intent that android will handle for us.
-//    public void playMedia(String url) {
-//        Uri uri = Uri.parse(url);
-
-//        startActivity(new Intent(Intent.ACTION_VIEW, uri));
-//    }
-
     // this function is used to load and start the loader
     private void loadApplication(Bundle loaderParams)
     {
-    		
         try
         {
             final int errorCode = loaderParams.getInt(ERROR_CODE_KEY);
@@ -239,7 +154,7 @@ public class QtActivity<LocalBinder> extends Activity
             ArrayList<String> libs = new ArrayList<String>();
             if ( m_activityInfo.metaData.containsKey("android.app.bundled_libs_resource_id") )
                 libs.addAll(Arrays.asList(getResources().getStringArray(m_activityInfo.metaData.getInt("android.app.bundled_libs_resource_id"))));
-            	
+
             String libName = null;
             if ( m_activityInfo.metaData.containsKey("android.app.lib_name") ) {
                 libName = m_activityInfo.metaData.getString("android.app.lib_name");
@@ -286,8 +201,7 @@ public class QtActivity<LocalBinder> extends Activity
                 }
             });
             errorDialog.show();
-        }   
-       
+        }
     }
 
     private ServiceConnection m_ministroConnection=new ServiceConnection() {
@@ -629,7 +543,6 @@ public class QtActivity<LocalBinder> extends Activity
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
-        qtactivity = this;
         super.onCreate(savedInstanceState);
         if (QtApplication.m_delegateObject != null && QtApplication.onCreate != null)
         {
@@ -650,8 +563,7 @@ public class QtActivity<LocalBinder> extends Activity
             if ( m_activityInfo.metaData.containsKey("android.app.splash_screen") )
                 setContentView(m_activityInfo.metaData.getInt("android.app.splash_screen"));
             startApp(true);
-        }      
-        
+        }
     }
     //---------------------------------------------------------------------------
 
@@ -782,68 +694,48 @@ public class QtActivity<LocalBinder> extends Activity
     //---------------------------------------------------------------------------
 
 
-@Override
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
-        int newKeyCode = keyCode;
-        if ( (keyCode == KeyEvent.KEYCODE_BACK) )
-        {
-           newKeyCode = KeyEvent.KEYCODE_MEDIA_PREVIOUS;
-        }
         if (QtApplication.m_delegateObject != null && QtApplication.onKeyDown != null)
-            return (Boolean)            		
-            QtApplication.invokeDelegateMethod(QtApplication.onKeyDown, newKeyCode,event);
+            return (Boolean) QtApplication.invokeDelegateMethod(QtApplication.onKeyDown, keyCode, event);
         else
-            return super.onKeyDown(newKeyCode, event);
+            return super.onKeyDown(keyCode, event);
     }
     public boolean super_onKeyDown(int keyCode, KeyEvent event)
     {
         return super.onKeyDown(keyCode, event);
     }
+    //---------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
 
- @Override
+    @Override
     public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event)
     {
-        int newKeyCode = keyCode;
-        if ( (keyCode == KeyEvent.KEYCODE_BACK) )
-        {
-            newKeyCode = KeyEvent.KEYCODE_MEDIA_PREVIOUS;
-        }
         if (QtApplication.m_delegateObject != null && QtApplication.onKeyMultiple != null)
-            return (Boolean)
-            QtApplication.invokeDelegateMethod(QtApplication.onKeyMultiple ,newKeyCode, repeatCount, event);
+            return (Boolean) QtApplication.invokeDelegateMethod(QtApplication.onKeyMultiple ,keyCode, repeatCount, event);
         else
-            return super.onKeyMultiple(newKeyCode, repeatCount, event);
+            return super.onKeyMultiple(keyCode, repeatCount, event);
     }
-
-    public boolean super_onKeyMultiple(int keyCode, int repeatCount,KeyEvent event)
+    public boolean super_onKeyMultiple(int keyCode, int repeatCount, KeyEvent event)
     {
         return super.onKeyMultiple(keyCode, repeatCount, event);
     }
+    //---------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
-
-@Override
+    @Override
     public boolean onKeyUp(int keyCode, KeyEvent event)
     {
-        int newKeyCode = keyCode;
-        if ( (keyCode == KeyEvent.KEYCODE_BACK) )
-        {
-            newKeyCode = KeyEvent.KEYCODE_MEDIA_PREVIOUS;
-        }
         if (QtApplication.m_delegateObject != null  && QtApplication.onKeyDown != null)
-            return (Boolean)
-QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
+            return (Boolean) QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, keyCode, event);
         else
-            return super.onKeyUp(newKeyCode, event);
+            return super.onKeyUp(keyCode, event);
     }
     public boolean super_onKeyUp(int keyCode, KeyEvent event)
     {
         return super.onKeyUp(keyCode, event);
     }
-//---------------------------------------------------------------------------
+    //---------------------------------------------------------------------------
 
     @Override
     public void onLowMemory()
@@ -1230,32 +1122,32 @@ QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
 
 //////////////// Activity API 8 /////////////
 //@ANDROID-8
-@Override
-    protected Dialog onCreateDialog(int id, Bundle args)
-    {
-        QtApplication.InvokeResult res = QtApplication.invokeDelegate(id, args);
-        if (res.invoked)
-            return (Dialog)res.methodReturns;
-        else
-            return super.onCreateDialog(id, args);
-    }
-    public Dialog super_onCreateDialog(int id, Bundle args)
-    {
-        return super.onCreateDialog(id, args);
-    }
-    //---------------------------------------------------------------------------
-
-    @Override
-    protected void onPrepareDialog(int id, Dialog dialog, Bundle args)
-    {
-        if (!QtApplication.invokeDelegate(id, dialog, args).invoked)
-            super.onPrepareDialog(id, dialog, args);
-    }
-    public void super_onPrepareDialog(int id, Dialog dialog, Bundle args)
-    {
-        super.onPrepareDialog(id, dialog, args);
-    }
-    //---------------------------------------------------------------------------
+//QtCreator @Override
+//QtCreator     protected Dialog onCreateDialog(int id, Bundle args)
+//QtCreator     {
+//QtCreator         QtApplication.InvokeResult res = QtApplication.invokeDelegate(id, args);
+//QtCreator         if (res.invoked)
+//QtCreator             return (Dialog)res.methodReturns;
+//QtCreator         else
+//QtCreator             return super.onCreateDialog(id, args);
+//QtCreator     }
+//QtCreator     public Dialog super_onCreateDialog(int id, Bundle args)
+//QtCreator     {
+//QtCreator         return super.onCreateDialog(id, args);
+//QtCreator     }
+//QtCreator     //---------------------------------------------------------------------------
+//QtCreator 
+//QtCreator     @Override
+//QtCreator     protected void onPrepareDialog(int id, Dialog dialog, Bundle args)
+//QtCreator     {
+//QtCreator         if (!QtApplication.invokeDelegate(id, dialog, args).invoked)
+//QtCreator             super.onPrepareDialog(id, dialog, args);
+//QtCreator     }
+//QtCreator     public void super_onPrepareDialog(int id, Dialog dialog, Bundle args)
+//QtCreator     {
+//QtCreator         super.onPrepareDialog(id, dialog, args);
+//QtCreator     }
+//QtCreator     //---------------------------------------------------------------------------
 //@ANDROID-8
     //////////////// Activity API 11 /////////////
 
@@ -1273,7 +1165,7 @@ QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
 //QtCreator         return super.dispatchKeyShortcutEvent(event);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator
+//QtCreator 
 //QtCreator     @Override
 //QtCreator     public void onActionModeFinished(ActionMode mode)
 //QtCreator     {
@@ -1285,7 +1177,7 @@ QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
 //QtCreator         super.onActionModeFinished(mode);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator
+//QtCreator 
 //QtCreator     @Override
 //QtCreator     public void onActionModeStarted(ActionMode mode)
 //QtCreator     {
@@ -1297,7 +1189,7 @@ QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
 //QtCreator         super.onActionModeStarted(mode);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator
+//QtCreator 
 //QtCreator     @Override
 //QtCreator     public void onAttachFragment(Fragment fragment)
 //QtCreator     {
@@ -1309,7 +1201,7 @@ QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
 //QtCreator         super.onAttachFragment(fragment);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator
+//QtCreator 
 //QtCreator     @Override
 //QtCreator     public View onCreateView(View parent, String name, Context context, AttributeSet attrs)
 //QtCreator     {
@@ -1324,7 +1216,7 @@ QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
 //QtCreator         return super.onCreateView(parent, name, context, attrs);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator
+//QtCreator 
 //QtCreator     @Override
 //QtCreator     public boolean onKeyShortcut(int keyCode, KeyEvent event)
 //QtCreator     {
@@ -1338,7 +1230,7 @@ QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
 //QtCreator         return super.onKeyShortcut(keyCode, event);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator
+//QtCreator 
 //QtCreator     @Override
 //QtCreator     public ActionMode onWindowStartingActionMode(Callback callback)
 //QtCreator     {
@@ -1370,7 +1262,7 @@ QtApplication.invokeDelegateMethod(QtApplication.onKeyUp, newKeyCode, event);
 //QtCreator         return super.dispatchGenericMotionEvent(event);
 //QtCreator     }
 //QtCreator     //---------------------------------------------------------------------------
-//QtCreator
+//QtCreator 
 //QtCreator     @Override
 //QtCreator     public boolean onGenericMotionEvent(MotionEvent event)
 //QtCreator     {

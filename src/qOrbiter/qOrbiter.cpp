@@ -375,6 +375,7 @@ void qOrbiter::CMD_Scroll_Grid(string sRelative_Level,string sPK_DesignObj,int i
     cout << "Parm #1 - Relative_Level=" << sRelative_Level << endl;
     cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
     cout << "Parm #30 - PK_Direction=" << iPK_Direction << endl;
+
 }
 
 //<-dceag-c10-b->
@@ -921,6 +922,7 @@ void qOrbiter::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_Result,M
     cout << "Need to implement command #192 - On" << endl;
     cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
     cout << "Parm #98 - PK_Device_Pipes=" << sPK_Device_Pipes << endl;
+    externalOn();
 }
 
 //<-dceag-c193-b->
@@ -935,6 +937,7 @@ void qOrbiter::CMD_Off(int iPK_Pipe,string &sCMD_Result,Message *pMessage)
 {
     cout << "Need to implement command #193 - Off" << endl;
     cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
+    externalOff();
 }
 
 //<-dceag-c238-b->
@@ -1189,6 +1192,7 @@ void qOrbiter::CMD_Quit(string &sCMD_Result,Message *pMessage)
 //<-dceag-c265-e->
 {
     cout << "Need to implement command #265 - Quit" << endl;
+    deinitialize();
 }
 
 //<-dceag-c324-b->
@@ -1339,6 +1343,7 @@ void qOrbiter::CMD_Show_Shortcuts(string &sCMD_Result,Message *pMessage)
 //<-dceag-c399-e->
 {
     cout << "Need to implement command #399 - Show Shortcuts" << endl;
+    showHelp();
 }
 
 //<-dceag-c401-b->
@@ -3361,7 +3366,7 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
       */
 
     //qDebug("Getting current Epg");
-
+    return;
     int gHeight = 1;
     int gWidth = 1;
     int pkVar = 0;
@@ -4265,7 +4270,7 @@ void qOrbiter::OnDisconnect()
     setNowPlaying(false);
     emit eventResponseChanged("Connection Lost");
     emit routerDisconnect();
-  Disconnect();
+    Disconnect();
 }
 
 void qOrbiter::OnReload()
@@ -4294,7 +4299,7 @@ void qOrbiter::OnReload()
 #endif
 #endif
 
-   Disconnect();
+    Disconnect();
     emit routerReloading("Reloading");
 }
 
@@ -4941,7 +4946,7 @@ void qOrbiter::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage
 void qOrbiter::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c202-e->
 {
-
+    emit moveLeft();
 }
 
 //<-dceag-c203-b->
@@ -4954,7 +4959,7 @@ void qOrbiter::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage
 void qOrbiter::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c203-e->
 {
-
+    emit moveRight();
 }
 
 //<-dceag-c240-b->
@@ -4967,7 +4972,7 @@ void qOrbiter::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessag
 void qOrbiter::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c240-e->
 {
-
+    emit backKey();
 }
 
 //<-dceag-c363-b->
@@ -4978,7 +4983,7 @@ void qOrbiter::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pM
 void qOrbiter::CMD_Back_Clear_Entry(string &sCMD_Result,Message *pMessage)
 //<-dceag-c363-e->
 {
-
+    emit clearKey();
 }
 
 //<-dceag-c548-b->
@@ -4993,7 +4998,7 @@ void qOrbiter::CMD_Back_Clear_Entry(string &sCMD_Result,Message *pMessage)
 void qOrbiter::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c548-e->
 {
-
+    emit menuKey();
 }
 
 
@@ -5266,8 +5271,8 @@ void qOrbiter::reInitialize(){
     if(m_bOrbiterConnected){
         return;
     }
-      qDebug() << "REINITIALIZE";
-Disconnect();
+    qDebug() << "REINITIALIZE";
+    Disconnect();
     if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
     {
         CreateChildren();
@@ -5275,7 +5280,7 @@ Disconnect();
         m_bRouterReloading = false;
         m_bReload = false;
         m_bOrbiterConnected = true;
-          emit routerConnectionChanged(true);
+        emit routerConnectionChanged(true);
     }else {
         emit routerConnectionChanged(false);
     }

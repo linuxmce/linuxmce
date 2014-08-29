@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="26" package="org.linuxmce.qorbiter" android:versionName="qt4b1-gl">
-    <application android:allowBackup="true" android:name="org.kde.necessitas.origo.QtApplication" android:persistent="true" android:icon="@drawable/icon" android:label="@string/app_name">
+<manifest android:versionCode="26" package="org.linuxmce.qorbiter.Qorbiter_necessitas" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="qt4b1-gl">
+    <application android:name="org.kde.necessitas.origo.QtApplication" android:icon="@drawable/icon" android:persistent="true" android:allowBackup="true" android:label="@string/app_name">
         <service android:name="org.kde.necessitas.origo.LinuxmceAudioService" android:icon="@drawable/icon"/>
-        <activity android:launchMode="singleInstance" android:configChanges="orientation|locale|fontScale|keyboard|keyboardHidden" android:name="org.kde.necessitas.origo.QtActivity" android:label="@string/app_name">
+        <activity android:name="org.kde.necessitas.origo.QtActivity" android:configChanges="orientation|locale|fontScale|keyboard|keyboardHidden" android:launchMode="singleInstance" android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -20,7 +20,7 @@
             <!-- Splash screen -->
         </activity>
     </application>
-    <supports-screens android:anyDensity="true" android:smallScreens="true" android:normalScreens="true" android:largeScreens="true"/>
+    <supports-screens android:largeScreens="true" android:normalScreens="true" android:anyDensity="true" android:smallScreens="true"/>
     <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="10"/>
     <uses-feature android:glEsVersion="0x00020000"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>

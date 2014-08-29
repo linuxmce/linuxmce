@@ -86,6 +86,10 @@ MediaManager::MediaManager(QQuickItem *parent):
 void MediaManager::initializePlayer()
 {
     setCurrentStatus("Initializing Media Player");
+    if(mediaPlayer){
+        mediaPlayer->Disconnect();
+
+    }
     if(!mediaPlayer){
         mediaPlayer = new qMediaPlayer(deviceNumber, serverAddress.toStdString(), this, true, false);
     }
@@ -156,13 +160,9 @@ void MediaManager::setConnectionDetails(int r, QString s)
     setServerAddress(s);
     setDeviceNumber(r);
 
-    if(!serverAddress.isEmpty() && deviceNumber > 1)
-    {
-        if(!mediaPlayer){
+    if(!serverAddress.isEmpty() && deviceNumber > 1){
             setCurrentStatus("Got address "+serverAddress+" and device number "+QString::number(deviceNumber)+", initializing");
             initializePlayer();
-        }
-
     }else{
         setCurrentStatus("Error in setup information");
         qDebug() << serverAddress <<"::" << deviceNumber;

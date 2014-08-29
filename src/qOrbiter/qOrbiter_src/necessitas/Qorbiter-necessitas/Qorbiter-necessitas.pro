@@ -357,7 +357,8 @@ OTHER_FILES += ../../Readme.txt \
     android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
     android/src/org/kde/necessitas/origo/VideoActivity.java \
     android/src/org/kde/necessitas/origo/LinuxmceAudioService.java \
-    ../../qml/android/phoneConfig/BaseLoaded.qml
+    ../../qml/android/phoneConfig/BaseLoaded.qml \
+    android/version.xml
 
 RESOURCES += \
     ../../skinData.qrc

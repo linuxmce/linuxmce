@@ -135,7 +135,11 @@ void SkinLoader::checkLoadingStatus()
 void SkinLoader::prepSkinsToLoad(QString skinlist)
 {
     loadercounter = 0;
-    skinlist.remove(",lib, qt5, splash");
+#ifndef QT5
+    skinlist.remove("lib, qt5, splash");
+#else
+     skinlist.remove("lib, splash");
+#endif
     skinsToLoad = skinlist.split(",");
     totalSkinsToLoad = skinsToLoad.size();
     loadSkin(skinsToLoad.first());

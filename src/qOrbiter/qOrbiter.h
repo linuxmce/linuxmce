@@ -1298,32 +1298,160 @@ light, climate, media, security, telecom */
 
 
 signals:
+    /*!
+     * \brief showHelp. Signals the GUI to show shortcuts/help.
+     */
+
+    void showHelp();
+
     //navigation
+    /*!
+     * \brief gotoQml Load a specific qml page.
+     * \param qml
+     */
     void gotoQml(QString qml);
+
+    /*!
+     * \brief gotoScreen. Load the screen in question.
+     * \param screen
+     */
+
+    /*!
+     * \brief menuKey. Signal the GUI to show the menu.
+     */    void menuKey();
+
     void gotoScreen(QString screen);
+    /*!
+     * \brief bookmarksReady. Signal containing available bookmarks for this item.
+     */
     void bookmarksReady(QList<QObject*>);
+    /*!
+     * \brief moveLeft. Tells the orbiter to move left in its context.
+     */
+    void moveLeft();
+    /*!
+     * \brief moveRight. Tells the orbiter to move right in its context.
+     */
+    void moveRight();
+    /*!
+     * \brief moveUp. Tells the orbiter to move up in its context.
+     */
+    void moveUp();
+    /*!
+     * \brief moveDown. Tells the orbiter to move down in its context.
+     */
+    void moveDown();
+
+    void enterKey();            /*!< Tell qorbiter to go or select */
+    void goKey();               /*!< Tell qorbiter to go / select */
+    void backKey();             /*!< Tell qorbiter to go back */
+    void clearKey();            /*!< Tell qorbiter to clear the entry in the current box */
+    void scrollDirection(int d); /*!< Tell qorbiter to scroll its grid up or down. 1 for up, 0 for down */
 
     //setup
+    /*!
+     * \brief addExistingOrbiter. Emitted when a new orbiter is found.
+     * \param o
+     */
     void addExistingOrbiter(ExistingOrbiter* o);
+    /*!
+     * \brief startManager. Signals the GUI to start is relevant information.
+     */
     void startManager(QString, QString);
+    /*!
+     * \brief deviceInvalid. Emitted when the device is invalid
+     */
     void deviceInvalid();
+    /*!
+     * \brief promptResponse. Sends a signal to prompt the user with a prompt type and list of options.
+     */
     void promptResponse(int, QList<QObject*>);
+    /*!
+     * \brief routerInvalid. Invalid router, no DCE connection available.
+     */
     void routerInvalid();
+    /*!
+     * \brief connectionValid. track connection to the router
+     * \param v
+     */
     void connectionValid(bool v);
+    /*!
+     * \brief routerReloading. Indicates the router is reloading.
+     * \param msg
+     */
     void routerReloading(QString msg);
+    /*!
+     * \brief replaceDevice. Emitted when a device with the same device number connects.
+     */
     void replaceDevice();
+    /*!
+     * \brief closeOrbiter Signal telling the GUI to close.
+     */
     void closeOrbiter();
+    /*!
+     * \brief statusMessage. Primarily used to send splash screen messages.
+     * \param s
+     */
     void statusMessage(QString s);      // special signal for use when setting up at the splash screen.
+    /*!
+     * \brief configReady. Signal that sends the configuration data for this GUI when it is ready.
+     * \param config
+     */
     void configReady(QByteArray config);
+    /*!
+     * \brief setMyIp. Sets the local ip for the orbiter internally.
+     * \param ip
+     */
     void setMyIp(QString ip);
+    /*!
+     * \brief newTCport. Emitted when the tcp port for connecting for timecode is changed.
+     * \param port
+     */
     void newTCport(int port);
+    /*!
+     * \brief mediaResponseChanged. Used to transfer messages about media to the GUI.
+     * \param r
+     */
     void mediaResponseChanged(QString r);
+    /*!
+     * \brief deviceValid. Signals the validity of the device to the GUI.
+     * \param s
+     */
     void  deviceValid(bool s);
+    /*!
+     * \brief deviceIdChanged. Emitted when the device ID changes.
+     */
     void deviceIdChanged();
+    /*!
+     * \brief setEa. emitted when the GUI is to be set to a specific EntertainArea and room.
+     * \param room
+     * \param ea
+     */
     void setEa(int room, int ea);
+    /*!
+     * \brief screenSaverTimerOutChanged. Emitted when the screensaver timeout changes.
+     * \param t
+     */
     void screenSaverTimerOutChanged(int t);
+    /*!
+     * \brief connectionLost. Emitted when the connection is lost to the router.
+     */
     void connectionLost();
+    /*!
+     * \brief connectionStarted. Emitted when initally connected to the router.
+     */
     void connectionStarted();
+
+    /*!
+     * \brief externalOn. Bring the GUI awake.
+     *  \todo Make the gui more seperate from router code, allowing for complete shutdown of gui while connection is maintained.
+     */
+    void externalOn();
+
+    /*!
+     * \brief externalOff. Puts the gui to 'sleep' mode.
+     */
+    void externalOff();
 
     /** @name Logging Signals
      * Signal used for logging.
@@ -1717,7 +1845,6 @@ public slots:
 
     //connections
     void connectionError();
-
 
     //media grid
 
