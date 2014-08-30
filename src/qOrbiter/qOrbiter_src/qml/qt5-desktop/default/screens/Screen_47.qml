@@ -7,34 +7,35 @@ StyledScreen {
     property int depth:0
     focusTarget: content
 
-
-
     Item{
         id:content
         anchors.fill: parent
         state: manager.q_mediaType =="5" ? "selection" : "viewing"
-
         focus:true
-        onActiveFocusChanged: {
-            if(state==="selection"){
-                typeSelection.forceActiveFocus()
-            } else{
-                mediaList.forceActiveFocus()
-            }
-        }
+//        onActiveFocusChanged: {
+//            if(activeFocus){
+//                console.log("content gained active focus")
+//                if(manager.q_mediaType =="5"){
+//                    typeSelection.forceActiveFocus()
+//                } else{
+//                    mediaList.forceActiveFocus()
+//                }
+//            } else {
+//                console.log("content lost focus")
+//            }
+
+
+//        }
 
         Component.onCompleted: {
-            if( manager.q_mediaType !="5"){
-                mediaList.forceActiveFocus()
-            } else {
-                manager.setGridStatus(false)
+            if(manager.q_mediaType =="5"){
+               content.state="selection"
+            } else{
+               content.state="viewing"
             }
         }
 
 
-        ListModel{
-            id:indexStack
-        }
 
         //    onActiveFocusChanged: {
         //        console.log(mediaList.parent.objectName+ " recieved focus, passing to mediaList grid")
@@ -51,7 +52,7 @@ StyledScreen {
 
         MediaNavHeader{
             id:navHeader
-            state:"hidden"
+
         }
 
         MultiViewMediaList{
@@ -126,8 +127,11 @@ StyledScreen {
             cellHeight:scaleY(15)
             visible:false
             onActiveFocusChanged: {
+                console.log("type selection list active focus is "+activeFocus)
                 if(!visible){
                     mediaList.forceActiveFocus()
+                } else {
+
                 }
             }
 
@@ -203,7 +207,7 @@ StyledScreen {
                 }
 
                 StateChangeScript{
-                    script: {typeSelection.forceActiveFocus(); manager.resetModelAttributes; mediatypefilter.resetStates(); attribfilter.resetStates(); }
+                    script: { manager.resetModelAttributes; mediatypefilter.resetStates(); attribfilter.resetStates(); }
                 }
                 //("5", "", "", "", "1,2", "", "13", "", "2", "")
                 //("5", "1", "", "", "1,2", "", "12", "", "2", "")
@@ -229,9 +233,7 @@ StyledScreen {
                     target: infoPanel
                     width:0
                 }
-                StateChangeScript{
-                    script: {mediaList.forceActiveFocus() }
-                }
+
             },
             State {
                 name: "detail"
@@ -252,9 +254,7 @@ StyledScreen {
                     target: infoPanel
                     width:content.width
                 }
-                StateChangeScript{
-                    script: {infoPanel.forceActiveFocus() }
-                }
+
             },
             State {
                 name: "filtering"
@@ -267,18 +267,16 @@ StyledScreen {
                     target: filterView
                     visible:true
                 }
-                PropertyChanges{
-                    target: navHeader
-                    state:"open"
-                }
-                StateChangeScript{
-                    script: { filtering.forceActiveFocus() }
-                }
+
+
 
 
             }
         ]
 
+    }
+    ListModel{
+        id:indexStack
     }
 
 }

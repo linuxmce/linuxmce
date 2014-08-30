@@ -3,6 +3,7 @@ import "../components"
 StyledScreen {
     screenName: "Advanced Screen"
     screenDescription: "Advanced options"
+    focusTarget: advanced_flow
 
     Flow{
         id:advanced_flow

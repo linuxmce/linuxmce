@@ -11,6 +11,33 @@ Item {
     property string currentStatus:""
     property double volume:0.0
     property double mediaBuffer:0.0
+    property bool online:dceMediaController.connected
+    property int lmceId:manager.mediaPlayerID
+
+    onOnlineChanged: {
+        if(!online && lmceId !==-1){
+            setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+        }
+    }
+
+    Timer{
+        id:reconnect
+        running:!online
+        repeat: true
+        interval: 10000
+        onTriggered: {
+            console.log("Connecting media player "+lmceId+" at "+manager.m_ipAddress)
+            setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+        }
+    }
+
+
+    Connections{
+        target: manager
+        onMediaPlayerIdChanged:{
+            setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+        }
+    }
 
     function setConnectionDetails(deviceID, router){
         dceMediaController.setConnectionDetails(deviceID, router)
@@ -110,11 +137,13 @@ Item {
         id:player
         source: dceMediaController.fileUrl
         onSourceChanged:{
+            console.log("!!!!!!!!!!!!!!!!!!!!!!!!!")
             if(source !==""){play()};
             console.log("New media player source::"+dceMediaController.fileUrl)
         }
         onError: console.log("Error::"+error+" ==>"+errorString)
         onErrorStringChanged: console.log(errorString)
+        onPlaybackStateChanged: console.log("New Playback state::"+playbackState)
 
     }
 
@@ -124,9 +153,9 @@ Item {
         source:player
     }
 
-    //    Audio{
-    //        id:audioPlayer
-    //    }
+    //        Audio{
+    //            id:audioPlayer
+    //        }
 
 
 }

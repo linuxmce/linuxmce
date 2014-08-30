@@ -237,7 +237,7 @@ Item{
                             {
                                 manager.execGrp(params)
                                 currentItem = -1
-                                swapFocus()
+//                                swapFocus()
                                 ftr.state = "hidden"
                             }
                             else{

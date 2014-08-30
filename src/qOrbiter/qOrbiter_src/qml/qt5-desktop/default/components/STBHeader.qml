@@ -27,7 +27,13 @@ Item{
         spacing: 5
         StyledText {
             id: name
-            text: "Orbiter "+ manager.m_dwPK_Device + " is connected "
+            text: "Orbiter "+ manager.m_dwPK_Device + " is connected to" + manager.m_ipAddress
+            fontSize: mediumText
+            color: "white"
+        }
+        StyledText {
+            id: mp
+            text: "Mediaplayer "+ manager.mediaPlayerID + (dceplayer.online ? " is connected " : " is offline.")
             fontSize: mediumText
             color: "white"
         }

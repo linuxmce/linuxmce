@@ -3,7 +3,7 @@ import "../components"
 Item{
     id:navHeader
     height: scaleY(0)
-
+    state:"hidden"
     anchors{
         top:content.top
         left:parent.left

@@ -43,6 +43,22 @@ Item {
     Connections{
         target: manager
         onOrientationChanged: checkLayout()
+        onDceRemoteCommand:{
+
+            if(manager.currentScreen=="Screen_1.qml"){
+                switch(cmd){
+                case RemoteCommands.EnterGo:
+                    uiOn=!uiOn
+
+                    break;
+                default:
+                    console.log("command #"+cmd + " & name "+name+"is unhandled")
+                    break;
+                }
+            }
+
+
+        }
     }
 
     Connections{
@@ -370,13 +386,14 @@ Item {
 
         Component.onCompleted: {
             setWindowSize(manager.appHeight, manager.appWidth);
+
         }
 
         Connections{
             target:manager
             onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
             onMediaPlayerIdChanged:{
-                console.log("initializing media player"+manager.mediaPlayerID)
+                console.log("initializing media player::"+manager.mediaPlayerID)
                 dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
             }
         }

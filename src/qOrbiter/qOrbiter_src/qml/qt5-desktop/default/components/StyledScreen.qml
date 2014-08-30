@@ -7,6 +7,13 @@ Item {
     property Item focusTarget:undefined
     focus:true
 
+    onFocusTargetChanged: {
+        if(focusTarget && !focusTarget.activeFocus){
+            console.log("focus target updated, activating.")
+            focusTarget.forceActiveFocus()
+        }
+    }
+
     anchors{
         top:pageLoader.top
         left:pageLoader.left
@@ -16,7 +23,7 @@ Item {
     onActiveFocusChanged: if(activeFocus){
                               uiOn=false
                               isActive=true
-                              if(focusTarget!==undefined){
+                              if(focusTarget){
                                   console.log("using focus target")
                                   focusTarget.forceActiveFocus()
                               } else if(children.length!==0 ){
