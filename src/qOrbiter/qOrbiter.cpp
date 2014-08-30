@@ -4896,7 +4896,10 @@ void DCE::qOrbiter::setGridSeperator(int sep)
 
 void qOrbiter::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c190-e->
-{}
+{
+    emit dceGuiCommand(EnterGo);
+    sCMD_Result="OK";
+}
 //<-dceag-c194-b->
 
 /** @brief COMMAND: #194 - Toggle Power */
@@ -4920,7 +4923,8 @@ void qOrbiter::CMD_Toggle_Power(string sOnOff,string &sCMD_Result,Message *pMess
 void qOrbiter::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c200-e->
 {
-
+    emit dceGuiCommand(MoveUp);
+        sCMD_Result="OK";
 }
 
 //<-dceag-c201-b->
@@ -4933,7 +4937,8 @@ void qOrbiter::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage)
 void qOrbiter::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c201-e->
 {
-
+emit dceGuiCommand(MoveDown);
+    sCMD_Result="OK";
 }
 
 //<-dceag-c202-b->
@@ -4946,7 +4951,7 @@ void qOrbiter::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage
 void qOrbiter::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c202-e->
 {
-    emit moveLeft();
+    emit dceGuiCommand(MoveLeft);
 }
 
 //<-dceag-c203-b->
@@ -4959,7 +4964,7 @@ void qOrbiter::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessage
 void qOrbiter::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c203-e->
 {
-    emit moveRight();
+    emit dceGuiCommand(MoveRight);
 }
 
 //<-dceag-c240-b->
@@ -4972,7 +4977,8 @@ void qOrbiter::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMessag
 void qOrbiter::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c240-e->
 {
-    emit backKey();
+    emit dceGuiCommand(BackPriorMenu);
+    sCMD_Result = "OK";
 }
 
 //<-dceag-c363-b->
@@ -4983,7 +4989,8 @@ void qOrbiter::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pM
 void qOrbiter::CMD_Back_Clear_Entry(string &sCMD_Result,Message *pMessage)
 //<-dceag-c363-e->
 {
-    emit clearKey();
+   emit dceGuiCommand(BackClearEntry);
+    sCMD_Result = "OK";
 }
 
 //<-dceag-c548-b->
@@ -4998,7 +5005,8 @@ void qOrbiter::CMD_Back_Clear_Entry(string &sCMD_Result,Message *pMessage)
 void qOrbiter::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c548-e->
 {
-    emit menuKey();
+    emit dceGuiCommand(Menu);
+    sCMD_Result="OK";
 }
 
 

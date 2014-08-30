@@ -79,6 +79,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <contextobjects/timecodemanager.h>
 #include <contextobjects/linuxmcedata.h>
 #include <contextobjects/mediatypehelper.h>
+#include <RemoteCommands.h>
 #ifdef debug
 #include <QDebug>
 #endif
@@ -349,6 +350,8 @@ int main(int argc, char* argv[])
         qmlRegisterType<SubTypesHelper>("org.linuxmce.enums",1,0,"MediaSubtypes");
         qmlRegisterType<AttributeTypeHelper>("org.linuxmce.enums",1,0,"Attributes");
         qmlRegisterType<HostSystemData>("org.linuxmce.enums",1,0,"HostDevices");
+        qmlRegisterType<RemoteCommands>("org.linuxmce.enums", 1,0, "RemoteCommands");
+        qmlRegisterType<UtilityCommands>("org.linuxmce.enums", 1,0, "UtilityCommands");
         if(deviceType==0){
 
         } else {
@@ -720,16 +723,20 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(yellowButton()), &pqOrbiter, SLOT(yellowButton()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(blueButton()), &pqOrbiter, SLOT(blueButton()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
+
         //FIXME: below emits error: QObject::connect: Attempt to bind non-signal orbiterWindow::close()
         //QObject::connect (&w,SIGNAL, &w, SLOT(closeOrbiter()), Qt::DirectConnection);
         QObject::connect(&w, SIGNAL(reloadRouter()), &pqOrbiter, SLOT(quickReload()), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter,SIGNAL(routerReload()), &w, SLOT(reloadHandler()));
-        QObject::connect(&pqOrbiter, SIGNAL(replaceDevice()), &w, SLOT(replaceHandler()));
+        QObject::connect(&pqOrbiter,SIGNAL(routerReload()), &w, SLOT(reloadHandler()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(replaceDevice()), &w, SLOT(replaceHandler()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(routerDisconnect()), &w, SLOT(disconnectHandler()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(routerReload()), &w, SLOT(connectionWatchdog()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(reInitialize()), &pqOrbiter, SLOT(reInitialize()), Qt::QueuedConnection);
         //   QObject::connect(&w, SIGNAL(deviceNumberChanged(int)), &pqOrbiter, SLOT(setDeviceId(int)));
         QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &orbiterWin, SLOT(setRouterAddress(QString)));
+
+        /*Remote command signal */
+        QObject::connect(&pqOrbiter, SIGNAL(dceGuiCommand(int)), &w, SLOT(handleDceGuiCommand(int)), Qt::QueuedConnection);
         dceThread.start();
 
         //#ifdef Q_OS_LINUX

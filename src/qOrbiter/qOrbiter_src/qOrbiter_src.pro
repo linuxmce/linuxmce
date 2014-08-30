@@ -64,7 +64,7 @@ contains(QT_VERSION,4.7.*){
 contains(QT_VERSION,5.*.*){
         message("$$QT_VERSION Core")
         DEFINES+=QT5
-	CONFIG+= opengl
+        CONFIG+= opengl
         QT+= script widgets
       include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
 }
@@ -109,8 +109,8 @@ linux-g++{
                 CONFIG+=opengl
                 DEFINES+= GLENABLED for_desktop
                 QT += script opengl
-	        folder_01.source = qml/desktop
-	        folder_01.target = $$DESTDIR/qml
+                folder_01.source = qml/desktop
+                folder_01.target = $$DESTDIR/qml
         }
 
         contains(QT_VERSION,5.*.*){
@@ -409,12 +409,12 @@ SOURCES += main.cpp \
         ../../DCE/DeviceData_Base.cpp \
         ../../DCE/DeviceData_Impl.cpp \
         datamodels/skindatamodel.cpp \
-        datamodels/skindataitem.cpp \     
+        datamodels/skindataitem.cpp \
         datamodels/DataModelItems/filtermodelitem.cpp \
         datamodels/DataModelItems/genreitem.cpp \
         ../../PlutoUtils/getch.cpp \
         datamodels/DataModelItems/attributesortitem.cpp \
-        datamodels/attributesortmodel.cpp \       
+        datamodels/attributesortmodel.cpp \
         datamodels/DataModelItems/mediatypeitem.cpp \
         contextobjects/nowplayingclass.cpp \
         contextobjects/screenparamsclass.cpp \
@@ -444,18 +444,18 @@ SOURCES += main.cpp \
         contextobjects/timecodemanager.cpp \
         imageProviders/floorplandeviceprovider.cpp \
         # ../../Gen_Devices/qMediaPlayerBase.cpp \
-        contextobjects/bookmarkitem.cpp \       
+        contextobjects/bookmarkitem.cpp \
         contextobjects/promptdata.cpp \
         datamodels/existingorbitermodel.cpp \
         datamodels/devicemodel.cpp \
         datamodels/attributeobject.cpp \
-    logger/qorbiterlogger.cpp \
-    datamodels/genericflatlistmodel.cpp \
-    datamodels/genericmodelitem.cpp \
-    datamodels/ActiveMediaStreams.cpp \
-    datamodels/listitembase.cpp \
-    contextobjects/linuxmcedata.cpp \
-contextobjects/mediatypehelper.cpp
+        logger/qorbiterlogger.cpp \
+        datamodels/genericflatlistmodel.cpp \
+        datamodels/genericmodelitem.cpp \
+        datamodels/ActiveMediaStreams.cpp \
+        datamodels/listitembase.cpp \
+        contextobjects/linuxmcedata.cpp \
+        contextobjects/mediatypehelper.cpp
 
 
 # Please do not modify the following two lines. Required for deployment.
@@ -519,7 +519,7 @@ HEADERS += \
         datamodels/DataModelItems/filtermodelitem.h \
         datamodels/DataModelItems/genreitem.h \
         datamodels/DataModelItems/attributesortitem.h \
-        datamodels/attributesortmodel.h \      
+        datamodels/attributesortmodel.h \
         datamodels/DataModelItems/mediatypeitem.h \
         contextobjects/filedetailsclass.h \
         contextobjects/nowplayingclass.h \
@@ -550,38 +550,39 @@ HEADERS += \
         contextobjects/timecodemanager.h \
         imageProviders/floorplandeviceprovider.h \
         # ../../Gen_Devices/qMediaPlayerBase.h \
-        contextobjects/bookmarkitem.h \      
+        contextobjects/bookmarkitem.h \
         contextobjects/promptdata.h \
         datamodels/existingorbitermodel.h \
         datamodels/devicemodel.h \
-    datamodels/attributeobject.h \
-    logger/qorbiterlogger.h \
-    datamodels/genericflatlistmodel.h \
-    datamodels/genericmodelitem.h \
-    datamodels/ActiveMediaStreams.h \
-    datamodels/MediaFilter.h \
-    datamodels/DataGridHandler.h \
-    datamodels/listitembase.h \
-    contextobjects/linuxmcedata.h \
-contextobjects/mediatypehelper.h
+        datamodels/attributeobject.h \
+        logger/qorbiterlogger.h \
+        datamodels/genericflatlistmodel.h \
+        datamodels/genericmodelitem.h \
+        datamodels/ActiveMediaStreams.h \
+        datamodels/MediaFilter.h \
+        datamodels/DataGridHandler.h \
+        datamodels/listitembase.h \
+        contextobjects/linuxmcedata.h \
+        contextobjects/mediatypehelper.h \
+        RemoteCommands.h
 
 
 
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
-    qml/Welcome.qml \
-    qml/Welcome2.qml \
-    qml/Refresh.qml
+        qml/Welcome.qml \
+        qml/Welcome2.qml \
+        qml/Refresh.qml
 
 for_harmattan{
         OTHER_FILES= \
-                qtc_packaging/debian_harmattan/rules \
-                qtc_packaging/debian_harmattan/README \
-                qtc_packaging/debian_harmattan/copyright \
-                qtc_packaging/debian_harmattan/control \
-                qtc_packaging/debian_harmattan/compat \
-                qtc_packaging/debian_harmattan/changelog \
+        qtc_packaging/debian_harmattan/rules \
+        qtc_packaging/debian_harmattan/README \
+        qtc_packaging/debian_harmattan/copyright \
+        qtc_packaging/debian_harmattan/control \
+        qtc_packaging/debian_harmattan/compat \
+        qtc_packaging/debian_harmattan/changelog \
 }
 
 

@@ -45,7 +45,7 @@
 #include <datamodels/DataGridHandler.h>
 
 #include "qorbitermanager.h"
-
+#include <RemoteCommands.h>
 
 
 

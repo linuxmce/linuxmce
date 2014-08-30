@@ -236,6 +236,25 @@ public:
 
     ~qorbiterManager();
 
+    enum DceRemoteCommands {
+        BackClearEntry=363,    /*!< For Keyboard use */
+        BackPriorMenu=240,     /*!< For intermenu use */
+        EnterGo=190,           /*!< Confirm Button */
+        Guide=126,             /*!< Any form of guide the orbiter can show */
+        Menu=548,              /*!< Contextual Menu */
+        MoveDown=201,          /*!< Movie focus down in context */
+        MoveLeft=202,          /*!< Move focus left in context */
+        MoveRight=203,         /*!< Move focus right in context */
+        MoveUp=200,            /*!< Move focus up in contex */
+        TogglePower=194        /*!< Toggle the power of the gui*/
+    };
+    Q_ENUMS(DceRemoteCommands)
+
+    enum DceUtilityCommands{
+        Off=193,
+        On=192
+    };
+
     QReadWriteLock modelPoolLock;
 
     //for Pi - for_pi now sets GLENABLED
@@ -521,7 +540,7 @@ Param 10 - pk_attribute
     int hostDevice;
 signals:
 
-  void hostDeviceChanged();
+    void hostDeviceChanged();
 
     /*ScreenSaver*/
     void screenSaverTimeoutChanged();
@@ -546,6 +565,10 @@ signals:
     /* Mobile device signals */
     void formFactorChanged();
 
+
+    /* Incoming Dce remote signal */
+
+    void dceRemoteCommand(int cmd, QString name);
 
     /* Media Playback Controls */
     void muteSound();
@@ -856,7 +879,7 @@ public slots:
     /*Splash screen related slots*/
     void restartFomUi(QString ip){
         if(!ip.isEmpty()){
-             switchIpAddress(ip);
+            switchIpAddress(ip);
         }
 
     }
@@ -1460,6 +1483,62 @@ public slots:
 
 
     //@}
+
+
+    void handleDceGuiCommand(int c){
+        QString cmdOut;
+
+        switch(c){
+        case BackClearEntry:
+            emit dceRemoteCommand(c , "Back/Clear Entry" );
+            break;
+
+        case BackPriorMenu:
+            emit dceRemoteCommand(c , "Back/Prior Menu" );
+            break;
+
+        case EnterGo:
+            emit dceRemoteCommand(c , "Enter/Go" );
+            break;
+
+        case Guide:
+            emit dceRemoteCommand(c , "Guide" );
+            break;
+
+        case Menu:
+            emit dceRemoteCommand(c , "Menu" );
+            break;
+
+        case MoveDown:
+            emit dceRemoteCommand(c , "Move Down" );
+            break;
+
+        case MoveLeft:
+            emit dceRemoteCommand(c , "Move Left" );
+            break;
+
+        case MoveRight:
+            emit dceRemoteCommand(c , "Move Right" );
+            break;
+
+        case MoveUp:
+            emit dceRemoteCommand(c , "Move Up" );
+            break;
+
+        case Off:
+            emit dceRemoteCommand(c , "Off" );
+            break;
+
+        case On:
+            emit dceRemoteCommand(c , "On" );
+            break;
+
+        default:
+            qWarning()<< "unhandled command" << cmdOut;
+        }
+
+
+    }
 
 private:
     void initializeConnections();

@@ -44,6 +44,7 @@
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QVariant>
+
 //<-dceag-d-b->!
 
 
@@ -86,6 +87,25 @@ class qOrbiter : public qOrbiter_Command
 
     // Private methods
 public:
+
+    enum DceRemoteCommands {
+        BackClearEntry=363,    /*!< For Keyboard use */
+        BackPriorMenu=240,     /*!< For intermenu use */
+        EnterGo=190,           /*!< Confirm Button */
+        Guide=126,             /*!< Any form of guide the orbiter can show */
+        Menu=548,              /*!< Contextual Menu */
+        MoveDown=201,          /*!< Movie focus down in context */
+        MoveLeft=202,          /*!< Move focus left in context */
+        MoveRight=203,         /*!< Move focus right in context */
+        MoveUp=200,            /*!< Move focus up in contex */
+        TogglePower=194        /*!< Toggle the power of the gui*/
+    };
+
+    enum DceUtilityCommands{
+        Off=193,
+        On=192
+    };
+
     // Public member variables
     /*!
    *@name MediaPlayer
@@ -1298,6 +1318,9 @@ light, climate, media, security, telecom */
 
 
 signals:
+
+    void dceGuiCommand(int i);
+
     /*!
      * \brief showHelp. Signals the GUI to show shortcuts/help.
      */
