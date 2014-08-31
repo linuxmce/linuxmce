@@ -46,11 +46,18 @@ case "$PK_Distro" in
 		FBWIDTH=$(for arg in $(cat /proc/cmdline); do echo $arg |grep "fbwidth" | cut -d '=' -f 2; done)
 		FBHEIGHT=$(for arg in $(cat /proc/cmdline); do echo $arg |grep "fbheight" | cut -d '=' -f 2; done)
 
-		SetDeviceData "$PK_Device" "$DEVICEDATA_Video_settings" "$FBWIDTH $FBHEIGHT/60"
+		Video_settings = GetDeviceData "$PK_Device" "$DEVICEDATA_Video_settings"
+		if [[ "$Video_settings" != "$FBWIDTH $FBHEIGHT/60" ]]; then
+			SetDeviceData "$PK_Device" "$DEVICEDATA_Video_settings" "$FBWIDTH $FBHEIGHT/60"
 
-		# FIXME: Grab these values from environment
-		SetDeviceData "$PK_Device" "$DEVICEDATA_Connector" "HDMI-0"
-		SetDeviceData "$PK_Device" "$DEVICEDATA_TV_Standard" "1080P"
+			# trigger an orbitergen
+			Q="UPDATE Orbiter set Regen=1 where PK_Orbiter=$OrbiterDev"
+			RunSQL "$Q"
+ 
+			# FIXME: Grab these values from environment
+			SetDeviceData "$PK_Device" "$DEVICEDATA_Connector" "HDMI-0"
+			SetDeviceData "$PK_Device" "$DEVICEDATA_TV_Standard" "1080P"
+		fi
 
 		# Prevent /etc/asound.conf from being generated on rpi
 		SetDeviceData "$PK_Device" "$DEVICEDATA_Audio_settings" "M"
