@@ -269,7 +269,6 @@ start() {
 	#alsactl store
 
 	export DISPLAY=":${Display}"
-	StartService "Configure Device Changes" "/usr/pluto/bin/Config_Device_Changes.sh"
 
 	# hack: cleaning lockfile on M/D start to allow
 	# local devices to start
@@ -285,6 +284,8 @@ start() {
 				StartX
 		fi
 	fi
+
+	StartService "Configure Device Changes" "/usr/pluto/bin/Config_Device_Changes.sh"
 
 	# If we are using VDR as our PVR, make sure the video dir is available, and restart VDR
 	# if needed.
