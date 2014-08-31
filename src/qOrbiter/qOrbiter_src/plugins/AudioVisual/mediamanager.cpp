@@ -86,10 +86,7 @@ MediaManager::MediaManager(QQuickItem *parent):
 void MediaManager::initializePlayer()
 {
     setCurrentStatus("Initializing Media Player");
-    if(mediaPlayer){
-        mediaPlayer->Disconnect();
 
-    }
     if(!mediaPlayer){
         mediaPlayer = new qMediaPlayer(deviceNumber, serverAddress.toStdString(), this, true, false);
     }
