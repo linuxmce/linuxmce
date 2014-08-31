@@ -1,5 +1,5 @@
 import QtQuick 2.1
-
+import org.linuxmce.enums 1.0
 Item{
     id:focusButton
     height: scaleY(10)
@@ -14,7 +14,34 @@ Item{
     property alias fontSize:label.fontSize
     property alias textObj:label
     onActiveFocusChanged: console.log( text+ " active focus is " + activeFocus)
+    Connections{
+        target:manager
+        onDceRemoteCommand:{
 
+            if(activeFocus){
+                resetUiTimeout()
+                console.log("FocusButton::Handling #"+ cmd+"::"+name)
+                switch(cmd){
+                case RemoteCommands.MoveLeft:
+                    parent.moveFocus(rowIndex-1)
+                    break;
+
+                case RemoteCommands.MoveRight:
+                    parent.moveFocus(rowIndex+1)
+                    break;
+
+                case RemoteCommands.EnterGo:
+                    if(hasParentModel)
+                        parent.selectItem()
+                    else select()
+                    break;
+
+                default:
+                    break;
+                }
+            }
+        }
+    }
     Rectangle{
         anchors.fill: parent
         color:"black"

@@ -1,5 +1,5 @@
 import QtQuick 2.1
-
+import org.linuxmce.enums 1.0
 import "../../../skins-common/lib/components"
 Item{
     id:ftr
@@ -22,14 +22,14 @@ Item{
             console.log("footer gained focus and assigned to scenarios.")
         }
         else{
-            currentItem = -1
+
             console.log("Footer lost active focus")
         }
     }
     //    Component.onCompleted: ftr.state = "hidden"
 
 
-    property int currentItem: -1
+
     Connections{
         target: manager
         onRoomChanged:{
@@ -61,27 +61,76 @@ Item{
             right:parent.right
             margins: 5
         }
+        function nextItem(){
+            if(currentIndex < count-1){
+                currentIndex++
+            } else {
+                currentIndex=0
+            }
+            scenarioList.currentItem.forceActiveFocus()
+        }
+        function lastItem(){
+            if(currentIndex!==0){
+                currentIndex--
+            }else {
+                currentIndex=count-1
+            }
+            scenarioList.currentItem.forceActiveFocus()
+        }
+
         property int itemWidth:(scenarioList.width)/6
         spacing:scaleX(1)
         orientation: ListView.Horizontal
         onActiveFocusChanged:{
+
             console.log("Active focus on Scenario listmodel is " + activeFocus);
             if(activeFocus){
+                currentIndex=0
                 if(scenarioList.count === 0){
+
+                }
+            } else {
+                currentIndex=-1
+            }
+        }
+        Connections{
+            target:manager
+            onDceRemoteCommand:{
+                if(!isActive){
+                    return;
+                }
+
+                switch(cmd){
+                case RemoteCommands.MoveLeft:
+                    console.log("Moving left")
+                    scenarioList.lastItem();
+                    break;
+
+                case RemoteCommands.MoveRight:
+                    console.log("moving right")
+                    scenarioList.nextItem()
+                    break;
+                case RemoteCommands.BackClearEntry:
+                    uiOn=false;
+                    break;
+
+                default:
+                    return;
 
                 }
             }
         }
         clip:false
-        focus:false
+        focus:true
         model:scenarios
         delegate: Item{
             id:scenarioParent
             height: parent.height
             width:scenarioList.itemWidth
+
             onActiveFocusChanged: {
                 if(activeFocus){
-                    currentItem= index
+
                     if(manager.currentScreen!=="Screen_47.qml"){
                         if(modelName==="currentRoomLights")
                             submodel.model = currentRoomLights
@@ -105,12 +154,43 @@ Item{
 
             }
 
+            Connections{
+                target:manager
+                onDceRemoteCommand:{
+                    if(!submodel.visible){
+                        return;
+                    }
+
+                    switch(cmd){
+                    case RemoteCommands.MoveDown:
+                        console.log("subModel::moving down")
+                        submodel.incrementCurrentIndex()
+                        break;
+                    case RemoteCommands.MoveUp:
+                        console.log("subModel::move up")
+                        if(submodel.currentIndex !==0){
+                            submodel.decrementCurrentIndex()
+                        }
+                        else{
+                            metarow.forceActiveFocus()
+                            submodel.currentIndex = -1
+                        }
+                        break;
+
+                    default:
+                        return;
+
+                    }
+                }
+            }
+
             Rectangle{
                 anchors.fill: parent
                 radius:5
                 opacity: .75
-                color: currentItem===index ? appStyle.listItemActiveBgColor : appStyle.listItemBgColor
+                color: scenarioList.currentIndex===index ? appStyle.listItemActiveBgColor : appStyle.listItemBgColor
             }
+
 
             StyledText{
                 anchors.centerIn: parent
@@ -128,7 +208,9 @@ Item{
                 opacity: .65
             }
 
-            Keys.onTabPressed: {swapFocus();ftr.state="hidden"}
+            Keys.onTabPressed: {
+                swapFocus();ftr.state="hidden"
+            }
             Keys.onDownPressed: {
                 if(submodel.currentIndex !==0){
                     submodel.decrementCurrentIndex()
@@ -142,13 +224,13 @@ Item{
             Keys.onUpPressed: submodel.incrementCurrentIndex()
             Keys.onEnterPressed: { pressed() }
             Keys.onPressed: {
-                 hideUiTimer.restart()
+                hideUiTimer.restart()
                 console.log("Pressed-"+manager.dumpKey(event.key))
                 if(event.key === Qt.Key_Enter || event.key===Qt.Key_Return )
                 {
                     if(submodel.currentIndex !==-1){
                         pressed()
-                        currentItem = -1
+                       scenarioList.currentIndex=-1
 
                     }else{
                         manager.gotoQScreen("Screen_"+(index+2)+".qml")
@@ -161,7 +243,7 @@ Item{
 
             ListView{
                 id:submodel
-                height:ftr.currentItem === index ?scaleY(85) : 0
+                height:scenarioList.currentIndex === index ?scaleY(85) : 0
                 width: parent.width
                 focus: true
                 rotation: 180
@@ -236,8 +318,8 @@ Item{
                             if(submodel.model !==advancedMenu)
                             {
                                 manager.execGrp(params)
-                                currentItem = -1
-//                                swapFocus()
+                                scenarioList.currentIndex = -1
+                                //                                swapFocus()
                                 ftr.state = "hidden"
                             }
                             else{
@@ -330,7 +412,7 @@ Item{
             when:!uiOn
             PropertyChanges {
                 target: ftr
-                currentItem:-1
+
                 isActive:false
                 visible:true
             }
@@ -347,7 +429,7 @@ Item{
             extend:""
             PropertyChanges {
                 target: ftr
-                currentItem:-1
+
                 visible:true
 
             }

@@ -32,6 +32,10 @@ Item {
     property bool uiOn:true
     property int screensaverTimer:15000 //manager.screenSaverTimeout*1000
 
+    function resetUiTimeout(){
+        hideUiTimer.restart()
+    }
+
     onActiveFocusChanged: {
         uiOn=true
     }
@@ -44,20 +48,11 @@ Item {
         target: manager
         onOrientationChanged: checkLayout()
         onDceRemoteCommand:{
-
-            if(manager.currentScreen=="Screen_1.qml"){
-                switch(cmd){
-                case RemoteCommands.EnterGo:
-                    uiOn=!uiOn
-
-                    break;
-                default:
-                    console.log("command #"+cmd + " & name "+name+"is unhandled")
-                    break;
-                }
+            resetUiTimeout()
+            if(manager.currentScreen=="Screen_1.qml" && !ftr.isActive){
+                uiOn=!uiOn
+                console.log("Main.qml::command #"+cmd + " & name "+name+"is unhandled")
             }
-
-
         }
     }
 
@@ -183,7 +178,7 @@ Item {
         if(dceplayer.mediaPlaying && pageLoader.activeFocus){
             dceplayer.forceActiveFocus()
         }
-        ftr.currentItem = -1
+
     }
 
 
