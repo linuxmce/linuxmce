@@ -49,9 +49,14 @@ Item {
         onOrientationChanged: checkLayout()
         onDceRemoteCommand:{
             resetUiTimeout()
+
             if(manager.currentScreen=="Screen_1.qml" && !ftr.isActive){
                 uiOn=!uiOn
                 console.log("Main.qml::command #"+cmd + " & name "+name+"is unhandled")
+                if(!uiOn){
+                    uiOn=true;
+                    return;
+                }
             }
         }
     }

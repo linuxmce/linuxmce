@@ -11,9 +11,6 @@ Item{
     anchors{
         bottom:qmlroot.bottom
     }
-
-
-
     property bool isActive: false
     onActiveFocusChanged:{
         if(activeFocus){
@@ -164,10 +161,6 @@ Item{
                     switch(cmd){
                     case RemoteCommands.MoveDown:
                         console.log("subModel::moving down")
-                        submodel.incrementCurrentIndex()
-                        break;
-                    case RemoteCommands.MoveUp:
-                        console.log("subModel::move up")
                         if(submodel.currentIndex !==0){
                             submodel.decrementCurrentIndex()
                         }
@@ -175,6 +168,14 @@ Item{
                             metarow.forceActiveFocus()
                             submodel.currentIndex = -1
                         }
+
+                        break;
+                    case RemoteCommands.MoveUp:
+                        console.log("subModel::move up")
+                        submodel.incrementCurrentIndex()
+                        break;
+                    case RemoteCommands.EnterGo:
+                        pressed()
                         break;
 
                     default:
@@ -412,7 +413,6 @@ Item{
             when:!uiOn
             PropertyChanges {
                 target: ftr
-
                 isActive:false
                 visible:true
             }
@@ -429,9 +429,8 @@ Item{
             extend:""
             PropertyChanges {
                 target: ftr
-
+                isActive:true
                 visible:true
-
             }
 
             AnchorChanges{
