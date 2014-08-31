@@ -46,7 +46,7 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 		#[[ ! -f /sdcard/cmdline.txt.lmcebackup ]] && cp /sdcard/cmdline.txt /sdcard/cmdline.txt.lmcebackup
 		#echo "dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 elevator=deadline rootwait root=/dev/nfs nfsroot=192.168.80.1:/usr/pluto/diskless/$PK_Device ip=dhcp rootfstype=nfs" > /sdcard/cmdline.txt
 
-		cat <<-'EOF' >/etc/init.d/switch_cpu_governor
+		cat <<-'EOFF' >/etc/init.d/switch_cpu_governor
 		#!/bin/sh
 		### BEGIN INIT INFO
 		# Provides:          switch_cpu_governor
@@ -81,7 +81,7 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 		    exit 3
 		    ;;
 		esac
-		EOF
+		EOFF
 		chmod +x /etc/init.d/switch_cpu_governor
 
 		"$INSSERV" -fv switch_cpu_governor
