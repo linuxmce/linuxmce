@@ -59,6 +59,7 @@ Item {
                 }
             }
         }
+        onScreenSaverImagesReady:glScreenSaver.setImageList(manager.screensaverImages)
     }
 
     Connections{
@@ -358,10 +359,7 @@ Item {
             glScreenSaver.setImageList(manager.screensaverImages)
         }
 
-        Connections{
-            target:manager
-            onScreenSaverImagesReady:glScreenSaver.setImageList(manager.screensaverImages)
-        }
+
         MouseArea{
             anchors.fill: parent
             hoverEnabled: true
@@ -387,15 +385,6 @@ Item {
         Component.onCompleted: {
             setWindowSize(manager.appHeight, manager.appWidth);
 
-        }
-
-        Connections{
-            target:manager
-            onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
-            onMediaPlayerIdChanged:{
-                console.log("initializing media player::"+manager.mediaPlayerID)
-                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-            }
         }
 
         onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)

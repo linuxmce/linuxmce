@@ -30,14 +30,15 @@ Item {
             setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
         }
     }
-
-
     Connections{
-        target: manager
+        target:manager
+        onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
         onMediaPlayerIdChanged:{
+            console.log("initializing media player::"+manager.mediaPlayerID)
             setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
         }
     }
+
 
     function setConnectionDetails(deviceID, router){
         dceMediaController.setConnectionDetails(deviceID, router)
