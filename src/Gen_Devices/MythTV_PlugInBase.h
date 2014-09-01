@@ -127,12 +127,20 @@ public:
 			return (m_mapParameters[DEVICEDATA_Dont_Auto_Configure_CONST]=="1" ? true : false);
 	}
 
-	string Get_Media_Catalog()
+	string Get_Protocol()
 	{
 		if( m_bRunningWithoutDeviceData )
-			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Media_Catalog_CONST);
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Protocol_CONST);
 		else
-			return m_mapParameters[DEVICEDATA_Media_Catalog_CONST];
+			return m_mapParameters[DEVICEDATA_Protocol_CONST];
+	}
+
+	string Get_Token()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Token_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_Token_CONST];
 	}
 
 };
@@ -243,7 +251,8 @@ public:
 	int DATA_Get_Priority() { return GetData()->Get_Priority(); }
 	bool DATA_Get_Only_One_Per_PC() { return GetData()->Get_Only_One_Per_PC(); }
 	bool DATA_Get_Dont_Auto_Configure() { return GetData()->Get_Dont_Auto_Configure(); }
-	string DATA_Get_Media_Catalog() { return GetData()->Get_Media_Catalog(); }
+	string DATA_Get_Protocol() { return GetData()->Get_Protocol(); }
+	string DATA_Get_Token() { return GetData()->Get_Token(); }
 	//Event accessors
 	void EVENT_Error_Occured(string sError_Message) { GetEvents()->Error_Occured(sError_Message.c_str()); }
 	void EVENT_PVR_Rec_Sched_Conflict() { GetEvents()->PVR_Rec_Sched_Conflict(); }

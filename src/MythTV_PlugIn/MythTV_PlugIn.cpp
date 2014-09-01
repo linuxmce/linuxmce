@@ -97,7 +97,14 @@ bool MythTV_PlugIn::GetConfig()
 	if( !MythTV_PlugIn_Command::GetConfig() )
 		return false;
 //<-dceag-getconfig-e->
+	m_sMyth_Token = MYTH_TOKEN;
+	m_sMyth_Protocol = MYTH_PROTOCOL;
 
+	if (DATA_Get_Token() != "" && DATA_Get_Protocol() != "" )
+	{
+       	    m_sMyth_Token = DATA_Get_Token();
+            m_sMyth_Protocol = DATA_Get_Protocol();
+    	}
 	m_pDBHelper_Myth = new DBHelper(m_pRouter->sDBHost_get( ), m_pRouter->sDBUser_get( ), m_pRouter->sDBPassword_get( ),"mythconverg");
 
 	// This will produce a harmless error after the first run.  By default myth doesn't index the start time, making 

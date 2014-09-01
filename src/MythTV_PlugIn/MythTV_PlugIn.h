@@ -53,6 +53,9 @@ class DBHelper;
 #define MYTHTV_SCHEDULE_RECORD_ONE_SHOWING_DAILY		9
 #define MYTHTV_SCHEDULE_RECORD_ONE_SHOWING_WEEKLY		10
 
+#define MYTH_PROTOCOL "72"
+#define MYTH_TOKEN "D78EFD6F"
+
 namespace DCE
 {
     using namespace std;
@@ -171,6 +174,8 @@ namespace DCE
     public:
         /** Public member variables */
         int m_dwTargetDevice;
+        string m_sMyth_Token;
+        string m_sMyth_Protocol;
 
 		class AlarmManager *m_pAlarmManager;
 
@@ -295,7 +300,8 @@ public:
 	int DATA_Get_Priority();
 	bool DATA_Get_Only_One_Per_PC();
 	bool DATA_Get_Dont_Auto_Configure();
-	string DATA_Get_Media_Catalog();
+	string DATA_Get_Protocol();
+	string DATA_Get_Token();
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Error_Occured(string sError_Message);

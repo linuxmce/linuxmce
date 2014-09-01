@@ -268,6 +268,7 @@
 #define DEVICEDATA_PK_Device_Phone_Baby_Monitor_CONST 315
 #define DEVICEDATA_Polling_Enabled_CONST 316
 #define DEVICEDATA_Debug_CONST 317
+#define DEVICEDATA_Token_CONST 318
 
 #define DEVICEDATA_TABLE "DeviceData"
 #define DEVICEDATA_PK_DEVICEDATA_FIELD "PK_DeviceData"
