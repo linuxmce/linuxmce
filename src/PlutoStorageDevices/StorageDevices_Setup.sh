@@ -25,7 +25,7 @@ if [[ -x /etc/init.d/autofs ]]; then
 	if [[ "$(pidof automount)" == "" ]] ;then
 		service autofs start
 	else
-		service autofs reload
+		service autofs restart
 	fi
 else
 	echo "WARNING: Autmount daemon doesn't exist ?!"
