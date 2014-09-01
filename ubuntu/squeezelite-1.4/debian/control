@@ -1,0 +1,46 @@
+Source: squeezelite
+Section: sound
+Priority: extra
+Maintainer: Chris Boot <debian@bootc.net>
+Build-Depends: debhelper (>= 9~), libasound2-dev, libflac-dev, libmad0-dev,
+ libvorbis-dev, libfaad-dev, libmpg123-dev, libsoxr-dev, libavformat-dev | libavformat-ffmpeg-dev,
+ portaudio19-dev
+Standards-Version: 3.9.5
+Homepage: https://code.google.com/p/squeezelite/
+Vcs-Git: git://anonscm.debian.org/collab-maint/squeezelite.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/squeezelite.git;a=summary
+
+Package: squeezelite
+Architecture: linux-any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: squeezelite-pa
+Description: lightweight headless Squeezebox emulator - ALSA version
+ Squeezelite is a small headless Squeezebox emulator. It is aimed at
+ supporting high quality audio including USB DAC based output at multiple
+ sample rates.
+ .
+ It supports decoding PCM (WAV/AIFF), FLAC, MP3, Ogg, AAC, WMA and ALAC
+ audio formats. It can also resample audio, which allows squeezelite to
+ upsample the output to the highest sample rate supported by the output
+ device.
+ .
+ This package is built with the resampling, ffmpeg and visualisation export
+ options. It uses ALSA for audio output.
+
+Package: squeezelite-pa
+Architecture: linux-any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: squeezelite
+Provides: squeezelite
+Description: lightweight headless Squeezebox emulator - PortAudio version
+ Squeezelite is a small headless Squeezebox emulator. It is aimed at
+ supporting high quality audio including USB DAC based output at multiple
+ sample rates.
+ .
+ It supports decoding PCM (WAV/AIFF), FLAC, MP3, Ogg, AAC, WMA and ALAC
+ audio formats. It can also resample audio, which allows squeezelite to
+ upsample the output to the highest sample rate supported by the output
+ device.
+ .
+ This package is built with the resampling, ffmpeg and visualisation export
+ options. It uses PortAudio for audio output.

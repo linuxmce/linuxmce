@@ -1,0 +1,48 @@
+Description: Simplify building of PortAudio based binary
+
+This Makefile patch conditionally adds libasound or libportaudio to the build
+flags depending on whether -DPORTAUDIO is included in CFLAGS.
+
+Author: Chris Boot <debian@bootc.net>
+Forwarded: no
+Last-Update: 2013-12-28
+
+--- a/Makefile
++++ b/Makefile
+@@ -1,12 +1,13 @@
+ # Cross compile support - create a Makefile which defines these three variables and then includes this Makefile...
+ CFLAGS  ?= -Wall -fPIC -O2
+-LDADD   ?= -lasound -lpthread -lm -lrt
++LDADD   ?= -lpthread -lm -lrt
+ EXECUTABLE ?= squeezelite
+ 
+ # passing one or more of these in $(OPTS) enables optional feature inclusion
+ OPT_DSD     = -DDSD
+ OPT_FF      = -DFFMPEG
+ OPT_LINKALL = -DLINKALL
++OPT_PORTAUDIO = -DPORTAUDIO
+ OPT_RESAMPLE= -DRESAMPLE
+ OPT_VIS     = -DVISEXPORT
+ 
+@@ -21,6 +22,8 @@
+ SOURCES_VIS      = output_vis.c
+ 
+ LINK_LINUX       = -ldl
++LINK_ALSA        = -lasound
++LINK_PORTAUDIO   = -lportaudio
+ 
+ LINKALL          = -lFLAC -lmad -lvorbisfile -lfaad -lmpg123
+ LINKALL_FF       = -lavcodec -lavformat -lavutil
+@@ -60,6 +63,12 @@
+ endif
+ endif
+ 
++ifneq (,$(findstring $(OPT_PORTAUDIO), $(OPTS)))
++	LDADD += $(LINK_PORTAUDIO)
++else
++	LDADD += $(LINK_ALSA)
++endif
++
+ OBJECTS = $(SOURCES:.c=.o)
+ 
+ all: $(EXECUTABLE)

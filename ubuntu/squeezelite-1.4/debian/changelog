@@ -1,0 +1,28 @@
+squeezelite (1.4-1) unstable; urgency=low
+
+  * New upstream release.
+  * Refresh Makefile-tweaks.patch due to Makefile rewrite.
+  * Enable full hardening build flags:
+    - Add DEB_BUILD_MAINT_OPTIONS := hardening=+all
+  * Add squeezelite-pa compiled with PortAudio instead of ALSA:
+    - Add new squeezelite-pa binary package
+    - Add Build-Depends on portaudio19-dev
+    - Add Makefile-portaudio.patch
+    - Adjust debian/rules to build twice with different options
+    - Minor shuffling around to accommodate the new package
+  * Remove no-upstream-changelog lintian override now that there is one.
+  * Add lintian override for debian-watch-may-check-gpg-signature; no signatures
+    are available.
+  * Fix typo: suppored/supported (typo-fix-suppored.patch).
+  * Update man page to document new/changed options.
+  * Update debian/copyright for included dsd2pcm source.
+  * Enable DSD (Direct Stream Digital) and DoP (DSD over PCM).
+  * Confine to linux-any for the time being; builds fail on kFreeBSD / Hurd.
+
+ -- Chris Boot <debian@bootc.net>  Thu, 09 Jan 2014 09:54:22 +0000
+
+squeezelite (1.3.1-1) unstable; urgency=low
+
+  * Initial release (Closes: #729885)
+
+ -- Chris Boot <debian@bootc.net>  Mon, 18 Nov 2013 15:44:55 +0000
