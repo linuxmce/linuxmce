@@ -85,7 +85,8 @@ TRANSLATIONS += app_de.ts
 
         INSTALLS+= qmlplugins
         HEADERS += ../../plugins/AndroidInfo/androidsystem.h \
-    ../../contextobjects/mediatypehelper.h
+    ../../contextobjects/mediatypehelper.h \
+    ../../RemoteCommands.h
         SOURCES += ../../plugins/AndroidInfo/androidsystem.cpp \
     ../../contextobjects/mediatypehelper.cpp
 
