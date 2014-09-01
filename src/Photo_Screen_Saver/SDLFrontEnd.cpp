@@ -199,6 +199,7 @@ int SDLFrontEnd::StartVideoMode(int Width, int Height, bool FullScreen)
 //		}
 	} 
 #endif
+	SDL_ShowCursor(0);
 
 	return 0;
 }
