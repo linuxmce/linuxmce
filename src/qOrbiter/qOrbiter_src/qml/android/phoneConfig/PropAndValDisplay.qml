@@ -9,7 +9,7 @@ Item{
     property alias editedValue:input.text
     property bool useList:false
     property bool useText:true
-    signal set()
+    signal setVal()
 
 
     Rectangle{
@@ -40,7 +40,7 @@ Item{
             echoMode: TextInput.Normal /*< important because it links the value to the assigned property value. */
             font.underline: true
             font.pointSize: 16
-            Keys.onEnterPressed: set()
+            Keys.onEnterPressed: setVal()
             font.weight: Font.DemiBold
             horizontalAlignment: TextInput.AlignRight
              onActiveFocusChanged: {
@@ -51,11 +51,11 @@ Item{
             Keys.onReleased: {
                 switch(event.key){
                 case Qt.Key_Return:
-                    set();
+                    setVal();
                     event.accepted = true
                     break;
                 case Qt.Key_Down:
-                    set();
+                    setVal();
                     event.accepted= true
                     break;
                 default:
