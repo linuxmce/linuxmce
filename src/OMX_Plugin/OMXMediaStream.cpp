@@ -54,8 +54,8 @@ namespace DCE {
 		return MediaStream::CanPlayMore();
 	}
 
-	bool OMXMediaStream::ContainsVideo()
-	{
-		return true;	// need this to stop Photo_Screen_Saver
-	}
+//	bool OMXMediaStream::ContainsVideo()
+//	{
+//		return true;	// need this to stop Photo_Screen_Saver
+//	}
 };

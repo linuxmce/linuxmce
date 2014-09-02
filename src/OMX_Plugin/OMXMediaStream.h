@@ -42,7 +42,7 @@ namespace DCE
 
 			bool ShouldUseStreaming();
 
-			bool ContainsVideo();
+			//bool ContainsVideo();
 
 			bool CanPlayMore();
 	};
