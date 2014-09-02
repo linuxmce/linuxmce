@@ -203,9 +203,11 @@ public slots:
 
     void setVideoStream(bool b ){
 #ifdef QT4
+#ifndef Q_OS_ANDROID
         if(videoStream != mediaObject->hasVideo()) {
             videoStream = mediaObject->hasVideo(); emit videoStreamChanged();
         }
+#endif
 #else
         if(videoStream != b){
             videoStream = b;

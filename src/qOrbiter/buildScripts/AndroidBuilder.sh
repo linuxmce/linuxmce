@@ -5,7 +5,7 @@ set -e
 # The following vars need to be modified to reflect
 # the local installation.
 
-LINUXMCE_SRC=~/lmce-trunk/src
+START=$(pwd)
 export ANDROID_NDK_PLATFORM=android-9
 NECESSITAS_ROOT=~/necessitas4
 export ANDROID_NDK_ROOT=$NECESSITAS_ROOT/android-ndk
@@ -19,15 +19,29 @@ TARGET=debug
 
 # We reset the path at the end of the script.
 trap 'export PATH=$OLDPATH' EXIT
-	
-cd $LINUXMCE_SRC/qOrbiter/qOrbiter_src/necessitas/Qorbiter-necessitas
+
+cd ../qOrbiter_src/plugins/AudioVisual
+make clean 
+$NECESSITAS_ROOT/Android/Qt/482/armeabi-v7a/bin/qmake AudioVisual.pro -r -spec android-g++ "CONFIG+=opengl"
+make clean -j6
+clear
+
+cd $START
+cd ../qOrbiter_src/plugins/DceScreenSaver
+make clean 
+$NECESSITAS_ROOT/Android/Qt/482/armeabi-v7a/bin/qmake DceScreenSaver.pro -r -spec android-g++ "CONFIG+=opengl"
+make clean -j6
+
+clear
+cd $START	
+cd ../qOrbiter_src/necessitas/Qorbiter-necessitas
 rm -rf installdir
 mkdir installdir
-make clean || :
+make clean 
 $NECESSITAS_ROOT/Android/Qt/482/armeabi-v7a/bin/qmake Qorbiter-necessitas.pro -r -spec android-g++ "CONFIG+=opengl"
-make clean -j6
+make  -j6
 make INSTALL_ROOT="android" install
 
 cd android
 android update project --path .
-$NECESSITAS_ROOT/apache-ant-1.8.4/bin/ant $TARGET
+$NECESSITAS_ROOT/apache-ant-1.8.4/bin/ant clean $TARGET
