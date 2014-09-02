@@ -15,8 +15,8 @@
 #    along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
 
 #This is the .pro file for the QOrbiter application using the Qt 5.1.0 beta 1 toolchain for Qt on android.
-#   This file is to be used when you are intending to build the application using Necessitas for android targeting
-#   Qt version 5.1.*
+#   This file is to be used when you are intending to build the application using Qt for android targeting
+#   Qt version 5.*.*
 
 CONFIG += thread
 
@@ -380,8 +380,8 @@ OTHER_FILES += \
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
     ANDROID_EXTRA_LIBS = \
-       $PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libDceScreenSaver.so \
-        $$PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libAudioVisual.so
+       $$PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libDceScreenSaver.so \
+       $$PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libAudioVisual.so
 }
 
 
