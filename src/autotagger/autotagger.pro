@@ -30,7 +30,7 @@ HEADERS += \
     pilot.h \
     film.h \
     databaseFunctions.h \
-    taglogger.h
+#    taglogger.h
 
 OTHER_FILES += \
     Readme.txt
