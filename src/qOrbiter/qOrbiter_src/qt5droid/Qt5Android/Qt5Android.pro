@@ -380,7 +380,7 @@ OTHER_FILES += \
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
     ANDROID_EXTRA_LIBS = \
-        /home/langston/lmce-src/1204/src/qOrbiter/qOrbiter_src/qt5droid/Qt5Android/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libDceScreenSaver.so \
+       $PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libDceScreenSaver.so \
         $$PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libAudioVisual.so
 }
 
