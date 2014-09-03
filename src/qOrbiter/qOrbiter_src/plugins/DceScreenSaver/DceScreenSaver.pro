@@ -34,6 +34,10 @@ linux-rasp-pi-g++{
     RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
 }
 
+macx-clang{
+DESTDIR=../../imports/DceScreenSaver
+
+}
 
 android-g++{
 

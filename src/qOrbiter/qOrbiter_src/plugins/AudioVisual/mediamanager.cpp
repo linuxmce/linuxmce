@@ -44,7 +44,7 @@ MediaManager::MediaManager(QQuickItem *parent):
     timeCodeServer = new QTcpServer();
     flipColors = false;
     lastTick = "";
-
+mediaPlayer = NULL;
     setCurrentStatus("Media Manager defaults set, initializing media engines");
 #ifdef QT4
 

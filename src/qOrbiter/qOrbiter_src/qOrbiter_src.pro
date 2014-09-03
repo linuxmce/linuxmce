@@ -260,7 +260,7 @@ macx-clang{
         DEPLOYMENTFOLDERS +=  folder_03 plugins_folder
         DEFINES+=MACBUILD
         QML_IMPORT_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/MacOS/imports
-        QT-=bundle
+       # QT-=bundle
 
 }
 
