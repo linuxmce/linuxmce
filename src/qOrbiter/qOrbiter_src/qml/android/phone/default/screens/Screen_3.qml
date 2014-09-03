@@ -1,8 +1,12 @@
 import QtQuick 1.0
 import "../components"
 
-PhoneFloorplanLayout{
+StyledScreen{
+  id:styledScreen
+
+  PhoneFloorplanLayout{
     id:media
+    anchors.fill: parent
 
     Row {
         id: rowButtons
@@ -69,5 +73,5 @@ PhoneFloorplanLayout{
         }
     }
 
-
+  }
 }
