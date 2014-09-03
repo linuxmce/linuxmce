@@ -4,8 +4,6 @@ import "../components"
 PhoneFloorplanLayout{
     id:media
 
-    property variant mediaStreamModel: manager.getDataGridModel("mediaStreams", 10)
-
     Row {
         id: rowButtons
 	anchors.top: parent.verticalCenter
@@ -45,13 +43,13 @@ PhoneFloorplanLayout{
             leftMargin: 10
 	    rightMargin: 10
         }
-        model: mediaStreamModel
+        model: manager.getDataGridModel("mediaStreams", 10)
         delegate:
             StyledButton{
             id:gridBtn
             buttonText: description
             textSize: 16
-	    height: scaleX(10)
+	    height: scaleY(10)
 	    width: parent.width
 	    
             onActivated: {

@@ -6,6 +6,7 @@ StyledScreen{
     id:sleepingAlamsScreen
 
 Panel{
+    anchors.fill: parent
     headerTitle: "Sleeping Alarms for this room: "+manager.currentRoom
     ListView{
         id:alarmlist
@@ -13,6 +14,7 @@ Panel{
         model: manager.getDataGridModel("sleepingAlarms", 29)
         anchors.centerIn: parent
         anchors.margins: 10
+	anchors.topMargin: 50
         delegate:Item{
             height: scaleY(15)
             anchors{
@@ -58,7 +60,7 @@ Panel{
                     }
                 }
                 Column{
-                    height: parent.height
+		    anchors.verticalCenter: parent.verticalCenter
                     StyledText {
                         id: alarmname
                         text:qsTr("Name: ") + name
