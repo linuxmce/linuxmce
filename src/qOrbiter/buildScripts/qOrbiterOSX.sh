@@ -10,18 +10,23 @@ echo "Starting builder script for QOrbiter-OSX v1"
 cd ..
 START=$(pwd)
 
-rm -rf build-output/qorbiter-core-gl.app 
-rm build-output/*.dmg
-rm qOrbiter_src/imports/AudioVisual/*.so
-rm qOrbiter_src/imports/DceScreenSaver/*.so
+rm -v  -rf build-output/qorbiter-core-gl.app 
+rm -v build-output/*.dmg
+rm -v qOrbiter_src/imports/AudioVisual/*.so
+rm -v qOrbiter_src/imports/DceScreenSaver/*.so
 
+clear
 cd qOrbiterMaster
-$QTINSTALL/bin/qmake qOrbiterMaster.pro 
+$QTINSTALL/bin/qmake qOrbiterMaster.pro  
 #make clean
-make
+LOG=$(make)
 cd ../build-output
+if [ -e qorbiter-core-gl.app ]; then
 cp -r -v $QTINSTALL/qml/ qorbiter-core-gl.app/Contents/MacOS/imports
-$QTINSTALL/bin/./macdeployqt qorbiter-core-gl.app -dmg
+WAIT=$($QTINSTALL/bin/./macdeployqt qorbiter-core-gl.app -dmg)
 echo "build complete, check output."
 ls -lha
+else
+echo "Failed to build app package!!"
+fi
 exit 0;
