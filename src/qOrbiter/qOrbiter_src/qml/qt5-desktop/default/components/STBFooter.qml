@@ -12,6 +12,8 @@ Item{
         bottom:qmlroot.bottom
     }
     property bool isActive: false
+    property Item focusedItem:null
+
     onActiveFocusChanged:{
         if(activeFocus){
             isActive=true
@@ -31,6 +33,12 @@ Item{
         target: manager
         onRoomChanged:{
 
+        }
+        onDceRemoteCommand:{
+            if(focusedItem)
+                focusedItem.processRemoteCommand(cmd, name)
+            else
+                console.log("no focused item set!")
         }
     }
 
@@ -76,47 +84,44 @@ Item{
         }
 
         property int itemWidth:(scenarioList.width)/6
+        property int lastIndex:0
         spacing:scaleX(1)
         orientation: ListView.Horizontal
+
         onActiveFocusChanged:{
 
             console.log("Active focus on Scenario listmodel is " + activeFocus);
             if(activeFocus){
-                currentIndex=0
-                if(scenarioList.count === 0){
-
-                }
+                scenarioList.currentIndex=lastIndex
             } else {
-                currentIndex=-1
+                lastIndex = scenarioList.currentIndex
+                scenarioList.currentIndex=-1
             }
         }
-        Connections{
-            target:manager
-            onDceRemoteCommand:{
-                if(!isActive){
-                    return;
-                }
+        function processRemoteCommand(command, ident){
+            console.log("ScenarioListItem::Processing command #"+command+"-"+ident)
 
-                switch(cmd){
-                case RemoteCommands.MoveLeft:
-                    console.log("Moving left")
-                    scenarioList.lastItem();
-                    break;
+            switch(command){
+            case RemoteCommands.MoveLeft:
+                console.log("ScenarioListItem::Moving left")
+                scenarioList.lastItem();
+                break;
 
-                case RemoteCommands.MoveRight:
-                    console.log("moving right")
-                    scenarioList.nextItem()
-                    break;
-                case RemoteCommands.BackClearEntry:
-                    uiOn=false;
-                    break;
+            case RemoteCommands.MoveRight:
+                console.log("ScenarioListItem::moving right")
+                scenarioList.nextItem()
+                break;
+            case RemoteCommands.BackClearEntry:
+                uiOn=false;
+                break;
 
-                default:
-                    return;
+            default:
+                console.log("ScenarioListitem::Failedto process command #"+command+"-"+ident)
+                return;
 
-                }
             }
         }
+
         clip:false
         focus:true
         model:scenarios
@@ -124,10 +129,16 @@ Item{
             id:scenarioParent
             height: parent.height
             width:scenarioList.itemWidth
+            property bool active:index===scenarioList.currentIndex
+            onActiveChanged: {
+                if(active){
+                    forceActiveFocus()
+                }
+            }
 
             onActiveFocusChanged: {
                 if(activeFocus){
-
+                   focusedItem = scenarioParent
                     if(manager.currentScreen!=="Screen_47.qml"){
                         if(modelName==="currentRoomLights")
                             submodel.model = currentRoomLights
@@ -150,38 +161,38 @@ Item{
                 }
 
             }
-
-            Connections{
-                target:manager
-                onDceRemoteCommand:{
-                    if(!submodel.visible){
-                        return;
+            function processRemoteCommand(command, ident){
+                console.log("ScenarioParent::Processing command #"+command+"-"+ident)
+                switch(command){
+                case RemoteCommands.MoveDown:
+                    console.log("subModel::moving down")
+                    if(submodel.currentIndex !==0){
+                        submodel.decrementCurrentIndex()
+                    }
+                    else{
+                        metarow.forceActiveFocus()
+                        submodel.currentIndex = -1
                     }
 
-                    switch(cmd){
-                    case RemoteCommands.MoveDown:
-                        console.log("subModel::moving down")
-                        if(submodel.currentIndex !==0){
-                            submodel.decrementCurrentIndex()
-                        }
-                        else{
-                            metarow.forceActiveFocus()
-                            submodel.currentIndex = -1
-                        }
+                    break;
+                case RemoteCommands.MoveUp:
+                    console.log("subModel::move up")
+                    submodel.incrementCurrentIndex()
+                    break;
+                case RemoteCommands.EnterGo:
+                    pressed()
+                    break;
+                 case RemoteCommands.MoveLeft:
+                     scenarioList.nextItem()
+                     break;
 
-                        break;
-                    case RemoteCommands.MoveUp:
-                        console.log("subModel::move up")
-                        submodel.incrementCurrentIndex()
-                        break;
-                    case RemoteCommands.EnterGo:
-                        pressed()
-                        break;
+                 case RemoteCommands.MoveRight:
+                     scenarioList.lastItem()
+                     break;
 
-                    default:
-                        return;
+                default:
+                    return;
 
-                    }
                 }
             }
 
@@ -231,7 +242,7 @@ Item{
                 {
                     if(submodel.currentIndex !==-1){
                         pressed()
-                       scenarioList.currentIndex=-1
+                        scenarioList.currentIndex=-1
 
                     }else{
                         manager.gotoQScreen("Screen_"+(index+2)+".qml")
@@ -376,6 +387,12 @@ Item{
             margins: 5
         }
 
+        onActiveFocusChanged: {
+            if(activeFocus){
+                focusedItem = metarow
+            }
+        }
+
         Keys.onUpPressed: scenarioList.forceActiveFocus()
 
         FocusButton{
@@ -415,6 +432,7 @@ Item{
                 target: ftr
                 isActive:false
                 visible:true
+                focusedItem:null
             }
 
             AnchorChanges{
