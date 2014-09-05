@@ -29,7 +29,7 @@ Item{
             StyledButton{
                 height: scaleY(16)
                 width: scaleX(18)
-                buttonText: entertainArea_list.model[index].ea_name
+                buttonText: Number(entertainArea_list.model[index].ea_name) == manager.m_dwPK_Device ? "This Device " : entertainArea_list.model[index].ea_name
                 hitArea.onReleased: {
                     manager.setActiveRoom(entertainArea_list.model[index].room, entertainArea_list.model[index].ea_number);
                     info_panel.state="retracted"
