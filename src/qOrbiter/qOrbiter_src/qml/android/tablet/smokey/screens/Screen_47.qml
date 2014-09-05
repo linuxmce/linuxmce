@@ -44,8 +44,9 @@ StyledScreen {
                     buttonText: name
                     textSize: 48
                     hitArea.onReleased:{
+                         mediatypefilter.setSelectionStatus(name);
                         content.state="viewing"
-                        mediatypefilter.setSelectionStatus(name);
+
                     }
                 }
             }

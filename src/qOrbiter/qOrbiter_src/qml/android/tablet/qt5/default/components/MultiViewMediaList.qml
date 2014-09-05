@@ -12,8 +12,20 @@ Item{
     }
 
     property int itemBuffer:25
-    property int currentCellHeight:0
-    property int currentCellWidth:0
+    property int currentCellHeight:scaleX(20)
+       property int currentCellWidth:scaleX(20)
+
+    property variant dvdPosterDimensions:{"w":755, "h":1080 }
+    property variant hdPosterDimensions:{"w":955, "h":1080 }
+    property variant cdDimensions:{"w":320, "h":230}
+    property variant mameArtDimensions:{"w":320, "h":230}
+
+    property double dvdPosterRatio:1080/955
+    property double hdPosterRatio:1080/755
+    property double cdCoverRatioFront:1080/1080
+    property double cdCoverRatioBack:1080/1264
+    property double vcdRatio:1080/1080
+    property double vhsRatio:1280/620
     clip:true
 
     Component{
@@ -28,6 +40,14 @@ Item{
 
     property variant currentDelegate:multi_view_list.state==="video"? videoItem :audioItem
     Component.onCompleted: {
+        if(manager.q_mediaType=="4"){
+                  multi_view_list.state="audio"
+              } else if(manager.q_mediaType=="5"){
+                  multi_view_list.state="video"
+                  manager.setGridStatus(false);
+              } else {
+                  multi_view_list.state="default"
+              }
         media_grid.model=manager.getDataGridModel("MediaFile", 63)
         media_grid.positionViewAtIndex(item, ListView.Beginning)
     }
@@ -78,62 +98,82 @@ Item{
     }
 
     states: [
-           State {
-               name: "audio"
-               when:manager.q_mediaType == Mediatypes.STORED_AUDIO
-               PropertyChanges {
-                   target: multi_view_list
-                   currentCellHeight: scaleY(24)
-                   currentCellWidth:scaleX(19)
-               }
+        State {
+            name: "audio"
+            when:manager.q_mediaType == Mediatypes.STORED_AUDIO
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(24)
+                currentCellWidth:scaleX(19)
+            }
 
-           },
-           State {
-               name: "video"
-               when:manager.q_mediaType == Mediatypes.STORED_VIDEO
-               PropertyChanges {
-                   target: multi_view_list
-                   currentCellHeight: scaleY(24)
-                   currentCellWidth:scaleX(19)
-               }
-           },
-           State {
-               name: "default"
-               when:manager.q_mediaType != Mediatypes.STORED_VIDEO && manager.q_mediaType != Mediatypes.STORED_AUDIO
-               PropertyChanges {
-                   target: multi_view_list
-                   currentCellHeight: scaleY(24)
-                   currentCellWidth:scaleX(19)
-               }
-           },
-           State {
-               name: "video-default"
-               extend:"video"
-               PropertyChanges {
-                   target: multi_view_list
-                   currentCellHeight: scaleY(24)
-                   currentCellWidth:scaleX(19)
-               }
-           },
-           State {
-               name: "tv"
-               when:manager.q_subType==Subtypes.TVSHOWS
-               extend:"video"
-               PropertyChanges {
-                   target: multi_view_list
-                   currentCellHeight: scaleY(20)
-                   currentCellWidth:scaleX(19)
-               }
-           },
-           State {
-               name: "movies"
-               when: manager.q_subType==Subtypes.MOVIES
-               extend:"video"
-               PropertyChanges {
-                   target: multi_view_list
-                   currentCellHeight: scaleY(24)
-                   currentCellWidth:scaleX(16)
-               }
-           }
-       ]
+        },
+        State {
+            name: "video"
+            when:manager.q_mediaType == Mediatypes.STORED_VIDEO
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(24)
+                currentCellWidth:scaleX(19)
+            }
+        },
+        State {
+            name: "default"
+            when:manager.q_mediaType != Mediatypes.STORED_VIDEO && manager.q_mediaType != Mediatypes.STORED_AUDIO
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(24)
+                currentCellWidth:scaleX(19)
+            }
+        },
+        State {
+            name: "video-default"
+            extend:"video"
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(24)
+                currentCellWidth:scaleX(19)
+            }
+        },
+        State {
+            name: "tv"
+            when:manager.q_subType==MediaSubtypes.TVSHOWS && manager.q_pk_attribute==""
+            extend:"video"
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(20)
+                currentCellWidth:scaleX(19)
+            }
+        },
+        State {
+            name: "movies"
+            when:  manager.q_subType==MediaSubtypes.MOVIES && manager.q_mediaType==Mediatypes.STORED_VIDEO
+            extend:"video"
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(24)
+                currentCellWidth:scaleX(16)
+            }
+        },
+        State {
+            name: "seasons"
+            when:manager.q_attributeType_sort==Attributes.TV_Season_ID && manager.q_subType==MediaSubtypes.TVSHOWS
+            extend:"tv"
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: currentCellWidth*hdPosterRatio
+                currentCellWidth:scaleX(20)
+            }
+        },
+        State {
+            name: "episodes"
+            when:manager.q_attributeType_sort==Attributes.Title && manager.q_subType==MediaSubtypes.TVSHOWS
+            extend:"tv"
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(20)
+                currentCellWidth:scaleX(19)
+            }
+        }
+    ]
 }

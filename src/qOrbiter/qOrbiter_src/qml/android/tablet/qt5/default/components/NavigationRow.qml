@@ -27,13 +27,13 @@ Row{
         id:nav
         source:navSource
         height: parent.height
-        width: parent.width*.75
+        width: item.width
     }
     StyledButton{
         buttonText.text:"Advanced"
         opacity: manager.currentScreen === "Screen_1.qml" ? 1 : 0
-
     }
+
     StyledButton {
         id: exit_label
         buttonText.text: qsTr("Exit")
@@ -49,19 +49,7 @@ Row{
     StyledButton{
         id:media_goback
         buttonText.text: "Back"
-        hitArea.onReleased:
-        {
-            if(manager.i_current_mediaType !== 5){
-                manager.goBackGrid();
-            }
-            else{
-                
-                pageLoader.item.state="selection"
-                manager.goBackGrid()
-                mediatypefilter.reset()
-            }
-            
-            
+        hitArea.onReleased:{ manager.goBackGrid()
         }
         visible: manager.currentScreen==="Screen_47.qml"
     }

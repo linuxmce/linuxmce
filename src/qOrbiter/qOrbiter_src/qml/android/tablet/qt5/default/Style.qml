@@ -80,6 +80,11 @@ QtObject{
     property int longAnimation:750
     property int animationEasing:Easing.OutBack
 
+    property int animation_quick:350
+    property int animation_medium:500
+    property int animation_long:750
+    property int animation_easing:Easing.OutBack
+
 
     //----old style---//
     //-color definitions
@@ -174,7 +179,5 @@ QtObject{
     //stage
     property color stage_bg: "lightSteelblue"
     property color bgcolor: "lightsteelblue"
-
-
 
 }

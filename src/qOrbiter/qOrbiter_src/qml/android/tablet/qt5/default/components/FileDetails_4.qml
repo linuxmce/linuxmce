@@ -199,7 +199,10 @@ Item {
 
         StyledButton{
             buttonText.text: "Close"
-            hitArea.onReleased: {files_view_screen.state="viewing"; filedetailsclass.clear()}
+            hitArea.onReleased: {
+                files_view_screen.state="viewing";
+                filedetailsclass.clear()
+            }
         }
     }
 }

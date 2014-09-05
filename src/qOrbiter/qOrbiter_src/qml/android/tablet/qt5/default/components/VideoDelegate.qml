@@ -1,29 +1,39 @@
 import QtQuick 2.0
 Item{
     id:videoDelegate
-    height:currentCellHeight
-    width: currentCellWidth
     clip:true
-
-    Image{
-        source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""        
-        anchors.fill: parent
-        fillMode: Image.PreserveAspectCrop
-        smooth: true
-        asynchronous: true
-    }
+    height: currentCellHeight
+    width:currentCellWidth
     Rectangle{
         anchors.fill: parent
-        opacity: .65
+        opacity: path !=="" ? .65 : 85
         color:trap.pressed ? "darkgreen" : "black"
 
     }
+    Image{
+        id:imdbImg
+        source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
+        anchors.fill: parent
+        anchors.margins: 10
+        smooth: true
+        asynchronous: true
+    }
+
 
     StyledText{
-        text: name
-        anchors.centerIn: parent
+    //   text:multi_view_list.state
+      text: name
+     //text:manager.q_attributeType_sort
+        anchors.verticalCenter: parent.verticalCenter
+        wrapMode: Text.WrapAnywhere
         fontSize: 36
+        visible:path==="" ? true : false
+        isBold: true
         color: "White"
+        anchors{
+            left:parent.left
+            right:parent.right
+        }
     }
 
     MouseArea{

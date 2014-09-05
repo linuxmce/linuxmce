@@ -4,6 +4,34 @@ import AudioVisual 1.0
 Item{
     id:mediaPlayerRoot
 
+    property bool dceConnected:manager.connectedState
+    property bool mediaPlayerConnected:lmceData.connected
+    property int mediaPlayerId:manager.mediaPlayerID
+
+    onDceConnectedChanged: {
+        if(!dceConnected && manager.mediaPlayerID!==-1){
+            lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+        }
+    }
+
+
+
+    Timer{
+        id:reconnect
+        running:!dceConnected && manager.connectedState
+        repeat: true
+        interval: 10000
+        onTriggered: {
+            console.log("Connecting media player "+lmceId+" at "+manager.m_ipAddress)
+            setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+        }
+    }
+
+
+    function restart(){
+         lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+    }
+
     MediaManager{
         id:lmceData
         onMediaPlayingChanged: {
@@ -11,14 +39,13 @@ Item{
                 androidPlayer.stop()
         }
 
-
+        /* TODO Add reconnect handler in cpp and here */
+        /* TODO Change android url to streaming url, generic for other devices. */
         onAndroidUrlUpdated:{
             console.log("NEW ANDROID URL")
             if(androidUrl.length > 4){
                 console.log("URL ok!")
                 androidPlayer.source = lmceData.androidUrl
-
-
             }
             else{
                 console.log("Url Malformed!")
@@ -30,29 +57,36 @@ Item{
 
 
         Component.onCompleted: {
-
+            if(manager.mediaPlayerID!==-1){
                 lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
                 // androidSystem.startAudioService(lmceData.callbackAddress);
-                console.log("initializing qml media player::"+manager.mediaPlayerID+"::"+manager.m_ipAddress)
-
-
+                console.log("onCompleted::initializing qml media player::"+manager.mediaPlayerID+"::"+manager.m_ipAddress)
+            }
         }
 
-//        Connections{
-//            target:manager
-//            onMediaPlayerIdChanged:{
-//                console.log("initializing qml media player::"+manager.mediaPlayerID)
-//                lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-//            }
-//        }
-
-
+                Connections{
+                    target:manager
+                    onMediaPlayerIdChanged:{
+                        if(manager.mediaPlayerID!==-1){
+                            console.log("onIdChanged::initializing qml media player::"+manager.mediaPlayerID)
+                            lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                        }
+                    }
+                }
     }
 
     MediaPlayer{
         id:androidPlayer
         autoPlay: true
         autoLoad: true
+        onDurationChanged: {
+            lmceData.setTotalTime(duration)
+        }
+        onErrorChanged: {
+        }
+
+        onPositionChanged: {lmceData.processTimeCode(position); console.log(position)}
+
     }
 
     VideoOutput{

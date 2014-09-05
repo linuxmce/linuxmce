@@ -36,7 +36,7 @@ Item {
         id:style
     }
 
-    Component.onCompleted: state="wide"
+    Component.onCompleted: {state="wide"; }
 
     focus:true
     Keys.onReleased:{
@@ -198,8 +198,12 @@ Item {
 
     Rectangle{
         anchors.fill: nav_row
-        color: "black"
+        color:manager.connectedState ? "black" : "red"
         opacity: .65
+
+        Behavior on color {
+            ColorAnimation {  duration: style.animation_quick }
+        }
     }
 
     NavigationRow {
@@ -420,11 +424,7 @@ Item {
                 width:manager.appWidth
                 rotation:0
             }
-            PropertyChanges {
-                target: bgFill
-                color:"black"
 
-            }
         },
         State {
             name: "portrait"
@@ -437,11 +437,7 @@ Item {
                 x:0
                 y:0
             }
-//            PropertyChanges {
-//                target: bgFill
-//                color:"green"
 
-//            }
         }
 
     ]

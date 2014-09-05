@@ -9,13 +9,10 @@ Item {
 
     clip:true
 
-    Connections
-    {
+    Connections{
         target: dcenowplaying
         onImageChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
-
-    // Component.onCompleted: manager.BindMediaRemote(true)
 
     Image {
         id: nowplayingimage
@@ -24,8 +21,8 @@ Item {
         height:scaleX(50)
         width:scaleX(50)
         source: ""
-
     }
+
     Text {
         id: np
         text:dceTimecode.qsCurrentTime

@@ -88,13 +88,13 @@ StyledScreen {
                 target: file_details_loader
                 anchors.left: parent.right
             }
-            StateChangeScript{
-                script: {
-                    manager.resetModelAttributes;
-                    mediatypefilter.resetStates();
-                    attribfilter.resetStates();
-                }
-            }
+//            StateChangeScript{
+//                script: {
+//                    manager.resetModelAttributes;
+//                    mediatypefilter.resetStates();
+//                    attribfilter.resetStates();
+//                }
+//            }
         },
 
         State {
