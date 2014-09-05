@@ -13,35 +13,32 @@ Item{
     property string text:""
     property alias fontSize:label.fontSize
     property alias textObj:label
-    onActiveFocusChanged: console.log( text+ " active focus is " + activeFocus)
-    Connections{
-        target:manager
-        onDceRemoteCommand:{
+    onActiveFocusChanged: {console.log( text+ " active focus is " + activeFocus); focusedItem = focusButton}
 
-            if(activeFocus){
-                resetUiTimeout()
-                console.log("FocusButton::Handling #"+ cmd+"::"+name)
-                switch(cmd){
-                case RemoteCommands.MoveLeft:
-                    parent.moveFocus(rowIndex-1)
-                    break;
+    function processRemoteCommand(command, ident){
+        console.log("FocusButton::Processing command #"+command+"-"+ident)
+        switch(command){
+        case RemoteCommands.MoveLeft:
+            parent.moveFocus(rowIndex-1)
+            break;
 
-                case RemoteCommands.MoveRight:
-                    parent.moveFocus(rowIndex+1)
-                    break;
+        case RemoteCommands.MoveRight:
+            parent.moveFocus(rowIndex+1)
+            break;
 
-                case RemoteCommands.EnterGo:
-                    if(hasParentModel)
-                        parent.selectItem()
-                    else select()
-                    break;
+        case RemoteCommands.EnterGo:
+            if(hasParentModel)
+                parent.selectItem()
+            else select()
+            break;
 
-                default:
-                    break;
-                }
-            }
+        default:
+            console.log("FocusButton::Failed to process command #"+command+"-"+ident)
+            break;
         }
     }
+
+
     Rectangle{
         anchors.fill: parent
         color:"black"
