@@ -25,7 +25,6 @@ It needs to be expanded to create device numberlists for now playing and other s
 #define SCREENPARAMSCLASS_H
 
 #include <QObject>
-#include <QMap>
 
 #include <QDebug>
 

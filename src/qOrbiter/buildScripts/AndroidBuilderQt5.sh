@@ -53,7 +53,7 @@ cd $START
 cd ../qOrbiter_src/qt5droid/Qt5Android
 rm -rf android-build
 mkdir -p  android-build/bin
-
+make clean
 $ANDROID_INSTALL/qmake Qt5Android.pro -r -spec android-g++ CONFIG+=debug
 make -j6
 make install INSTALL_ROOT=android-build
