@@ -1002,10 +1002,10 @@ class DataGridTable *Media_Plugin::CurrentMediaSections( string GridID, string P
     PLUTO_SAFETY_LOCK( mm, m_MediaMutex );
 
 	string::size_type pos=0;
-	string s1 = StringUtils::Tokenize( Parms, ",", pos );	// What were these for?
-	string s2 = StringUtils::Tokenize( Parms, ",", pos );	// What were these for?
-	string s3 = StringUtils::Tokenize( Parms, ",", pos );	// What were these for?
-	string s4 = StringUtils::Tokenize( Parms, ",", pos );	// What were these for?
+	string s1 = StringUtils::Tokenize( Parms, ",", pos );	// 32
+	string s2 = StringUtils::Tokenize( Parms, ",", pos );	// PK_Orbiter
+	string s3 = StringUtils::Tokenize( Parms, ",", pos );	// PK_DesignObj of current screen
+	string s4 = StringUtils::Tokenize( Parms, ",", pos );	// PK_Device (from VARIABLE_PK_Device_CONST)
 	/*int PK_User = */atoi(StringUtils::Tokenize( Parms, ",", pos ).c_str());
 
 	*iPK_Variable=VARIABLE_Track_or_Playlist_Positio_CONST;
