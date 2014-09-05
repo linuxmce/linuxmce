@@ -4,6 +4,7 @@ import "../../../../../skins-common/lib/handlers"
 Item{
     id:styledHdr
     property string labelText:"lorem Ipsum foo"
+    property bool useClose:true
     signal closeSignal()
     anchors{
         top:parent.top
@@ -25,6 +26,7 @@ Item{
 
     StyledButton{
         anchors.right: parent.right
+        visible:useClose
         label:"Close"
         onActivated: {
         closeSignal()

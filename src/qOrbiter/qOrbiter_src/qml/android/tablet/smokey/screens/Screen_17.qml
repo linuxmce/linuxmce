@@ -1,4 +1,4 @@
-import QtQuick 2.1
+import QtQuick 1.1
 import "../components"
 
 StyledScreen{
@@ -14,7 +14,7 @@ StyledScreen{
     Timer{
         id:picTimer
         repeat: true
-        interval: 1000
+        interval: 2000
         triggeredOnStart: true
         running: true
         onTriggered:{
