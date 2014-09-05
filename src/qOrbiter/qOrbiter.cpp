@@ -3126,7 +3126,7 @@ void DCE::qOrbiter::SetSecurityStatus(string pin, string mode, int user, string 
 
 void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth) //shows security camera, needs to be threaded as it blocks the ui
 {
-    if(currentScreen=="Screen_15.qml"){
+    if(currentScreen=="Screen_15.qml" || currentScreen=="Screen_17.qml"){
         char *sData;
         int sData_size= 0;
         string imgtype;
