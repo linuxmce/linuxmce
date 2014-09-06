@@ -113,6 +113,7 @@ Splash             Splash.qml                        #no comment
 Stage             Stage.qml                        #no comment
 StoredMediaTemplate             StoredMediaTemplate.qml                        #no comment
 StyledButton             StyledButton.qml                        #no comment
+StyledHeader             StyledHeader.qml                        #no comment
 StyledScreen             StyledScreen.qml                        #no comment
 StyledText             StyledText.qml                        #no comment
 TelecomSelector             TelecomSelector.qml                        #no comment
