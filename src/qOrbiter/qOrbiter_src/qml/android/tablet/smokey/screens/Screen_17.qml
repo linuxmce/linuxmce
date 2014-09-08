@@ -7,7 +7,7 @@ StyledScreen{
     property int tick:0
 
     onTickChanged: {
-        if(tick > cameraList.length-1)
+        if(tick > cameraList.length)
             tick=0
     }
 
@@ -18,18 +18,13 @@ StyledScreen{
         triggeredOnStart: true
         running: true
         onTriggered:{
-            if(cameraList[tick] ==="" || cameraList===undefined){
-                tick++
-                cameraLayout.currentIndex=0
-                return;
+            for (var cam in cameraList){
+                console.log("requesting new security image for "+cameraList[cam])
+                if(Number(cameraList[cam]!=0))
+                    manager.requestSecurityPic(cameraList[cam], 640, 480)
+                else
+                    console.log("Invalid Camera")
             }
-
-
-            // "image://listprovider/securityimage/"+cameraList[tick]+"/"+securityvideo.timestamp
-            console.log("requesting new security image")
-            manager.requestSecurityPic(cameraList[tick], 640, 480)
-            tick++
-            cameraLayout.currentIndex=tick
 
         }
     }
@@ -42,7 +37,14 @@ StyledScreen{
 
     Component.onCompleted: {
         cameraList =(screenparams.getParam(103)).split(",")
-        cameraList.unshift("")
+        for(var c in cameraList){
+            if(Number(cameraList[c])==0){
+                cameraList.splice(c,1)
+                console.log("removing!")
+            }
+        }
+        cameraLayout.model=cameraList.length
+        picTimer.running=true
     }
 
     GridView{
@@ -54,12 +56,12 @@ StyledScreen{
             right:parent.right
             bottom:parent.bottom
         }
-        cellHeight:400
-        cellWidth:400
+        cellHeight:parent.height*.35
+        cellWidth:parent.width *.35
 
         delegate:Item{
-            height: cameraLayout.currentIndex=== index ? 400 :200
-            width: cameraLayout.currentIndex=== index ? 400 : 200
+            height: parent.height*.30
+            width:parent.width*.30
             property int camera:cameraList[index]
             Image {
                 id: securityimage
