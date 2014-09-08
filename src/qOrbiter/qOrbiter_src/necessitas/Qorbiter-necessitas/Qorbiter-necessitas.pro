@@ -359,7 +359,9 @@ OTHER_FILES += ../../Readme.txt \
     android/src/org/kde/necessitas/origo/VideoActivity.java \
     android/src/org/kde/necessitas/origo/LinuxmceAudioService.java \
     ../../qml/android/phoneConfig/BaseLoaded.qml \
-    android/version.xml
+    android/version.xml \
+    android/src/org/kde/necessitas/origo/TextureHelper.java \
+    android/src/org/kde/necessitas/origo/MySurfaceTexture.java
 
 RESOURCES += \
     ../../skinData.qrc

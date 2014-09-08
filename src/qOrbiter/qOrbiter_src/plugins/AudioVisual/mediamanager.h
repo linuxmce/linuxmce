@@ -1,3 +1,20 @@
+/*
+    This file is part of QOrbiter for use with the LinuxMCE project found at http://www.linuxmce.org
+    Author: Langston Ball
+   Langston Ball  golgoj4@gmail.com
+    QOrbiter is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    QOrbiter is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
+*/
 #ifndef MEDIAMANAGER_H
 #define MEDIAMANAGER_H
 
@@ -59,10 +76,12 @@ class MediaManager :
     Q_PROPERTY(QString serverAddress READ getServerAddress WRITE setServerAddress NOTIFY serverAddressChanged)
     Q_PROPERTY(int deviceNumber READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
 
-#ifndef __ANDROID__
+#ifndef Q_OS_ANDROID
+
 #ifndef QT5
      Q_PROPERTY(QList <Phonon::AudioOutputDevice> outputs READ getAvailibleOutputs NOTIFY availibleAudioOutputsChanged())
 #endif
+
 #endif
 
     Q_OBJECT
@@ -237,7 +256,7 @@ public slots:
 
     void setColorFlip(bool f){
         flipColors = f;
-#ifndef __ANDROID__
+#ifndef Q_OS_ANDROID
 #ifndef QT5
         filterProxy->invert = f;
 #endif

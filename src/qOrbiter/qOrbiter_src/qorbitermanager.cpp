@@ -1,5 +1,6 @@
 /*
     This file is part of QOrbiter for use with the LinuxMCE project found at http://www.linuxmce.org
+    Author: Langston Ball
    Langston Ball  golgoj4@gmail.com
     QOrbiter is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

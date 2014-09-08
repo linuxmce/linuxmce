@@ -1,9 +1,26 @@
+/*
+    This file is part of QOrbiter for use with the LinuxMCE project found at http://www.linuxmce.org
+    Author: Langston Ball
+   Langston Ball  golgoj4@gmail.com
+    QOrbiter is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    QOrbiter is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
+*/
 #include "mediamanager.h"
 #include <QThread>
 #include <QTcpSocket>
 #include <QProcess>
 #include <QDir>
-#ifndef __ANDROID
+#ifndef Q_OS_ANDROID
 #ifdef QT4
 #include <QGraphicsScene>
 #include <QtOpenGL/QGLWidget>
@@ -13,6 +30,7 @@
 #include <QImage>
 #endif
 #endif
+
 
 using namespace DCE;
 
@@ -32,11 +50,11 @@ MediaManager::MediaManager(QQuickItem *parent):
 {
 #ifdef Q_OS_ANDROID
 
-    #ifdef QT4
-      setFlag(ItemHasNoContents, false);
-    #elif QT5
-     setFlag(QQuickItem::ItemHasContents, false);
-    #endif
+#ifdef QT4
+    setFlag(ItemHasNoContents, false);
+#elif QT5
+    setFlag(QQuickItem::ItemHasContents, false);
+#endif
 
 #endif
     serverAddress = "";
@@ -44,7 +62,7 @@ MediaManager::MediaManager(QQuickItem *parent):
     timeCodeServer = new QTcpServer();
     flipColors = false;
     lastTick = "";
-mediaPlayer = NULL;
+    mediaPlayer = NULL;
     setCurrentStatus("Media Manager defaults set, initializing media engines");
 #ifdef QT4
 
@@ -158,8 +176,8 @@ void MediaManager::setConnectionDetails(int r, QString s)
     setDeviceNumber(r);
 
     if(!serverAddress.isEmpty() && deviceNumber > 1){
-            setCurrentStatus("Got address "+serverAddress+" and device number "+QString::number(deviceNumber)+", initializing");
-            initializePlayer();
+        setCurrentStatus("Got address "+serverAddress+" and device number "+QString::number(deviceNumber)+", initializing");
+        initializePlayer();
     }else{
         setCurrentStatus("Error in setup information");
         qDebug() << serverAddress <<"::" << deviceNumber;
@@ -241,19 +259,19 @@ void MediaManager::setMediaUrl(QString url)
     }
 
     qDebug() << mediaPath;
-//    QString mountProg = "gksudo";
-//    QStringList args;
+    //    QString mountProg = "gksudo";
+    //    QStringList args;
 
-//    args.append(QString("mount -t nfs -o loop "+url+" /mnt/remote/dvd/"));
-//    QProcess *mountProcess = new QProcess(this);
-//    mountProcess->start(mountProg, args);
-//    mountProcess->waitForFinished(10000);
-//    qDebug() << "Process Status ::" <<mountProcess->state();
-//    if(mountProcess->state()== QProcess::FailedToStart){
-//        qWarning() << "command failed to start!";
-//        qDebug() << mountProcess->readAllStandardError();
-//        qDebug() << mountProcess->errorString();
-//    }
+    //    args.append(QString("mount -t nfs -o loop "+url+" /mnt/remote/dvd/"));
+    //    QProcess *mountProcess = new QProcess(this);
+    //    mountProcess->start(mountProg, args);
+    //    mountProcess->waitForFinished(10000);
+    //    qDebug() << "Process Status ::" <<mountProcess->state();
+    //    if(mountProcess->state()== QProcess::FailedToStart){
+    //        qWarning() << "command failed to start!";
+    //        qDebug() << mountProcess->readAllStandardError();
+    //        qDebug() << mountProcess->errorString();
+    //    }
 
     if(url.toLower().endsWith(".iso",Qt::CaseInsensitive)||url.toLower().endsWith(".dvd", Qt::CaseInsensitive)){
         mediaObject->setCurrentSource(Phonon::MediaSource(Phonon::Dvd, url));
@@ -354,6 +372,10 @@ void MediaManager::processSocketdata()
         setAndroidTotalTime(i);
     }
 
+    if(cmd=="currenttime"){
+        processTimeCode( QString(cmdList.last()).toInt());
+    }
+
     if(cmd=="error"){
         stopAndroidMedia();
         mediaPlayer->mediaEnded();
@@ -421,29 +443,29 @@ bool MediaManager::mountDrive(long device){
 
     qWarning() << mntDir.entryList().count();
     if(mntDir.exists() && mntDir.entryList().length() ==2){
-       qWarning() << mntDir.path() << " is not mounted, mounting";
+        qWarning() << mntDir.path() << " is not mounted, mounting";
 
-       QString mountProg = "gksudo";
-   #ifdef RPI
-       mountProg="";
-   #endif
-       qWarning() << "Current Device";
-       QString mntString = "mount -t nfs "+serverAddress+":/mnt/device/"+QString::number(currentDevice)+" "+mntDir.path()+" -o vers=3";
-       QStringList args;
-       args.append( mntString);
-       QProcess *mountProcess = new QProcess(this);
-       mountProcess->start(mountProg, args);
-       mountProcess->waitForFinished(10000);
+        QString mountProg = "gksudo";
+#ifdef RPI
+        mountProg="";
+#endif
+        qWarning() << "Current Device";
+        QString mntString = "mount -t nfs "+serverAddress+":/mnt/device/"+QString::number(currentDevice)+" "+mntDir.path()+" -o vers=3";
+        QStringList args;
+        args.append( mntString);
+        QProcess *mountProcess = new QProcess(this);
+        mountProcess->start(mountProg, args);
+        mountProcess->waitForFinished(10000);
 
-       qDebug() << "Process Status ::" <<mountProcess->state();
-       if(mountProcess->error() == QProcess::FailedToStart){
-           qWarning() << "command failed to start!";
-           qDebug() << mountProcess->readAllStandardError();
-           qDebug() << mountProcess->errorString();
-       }
-       qWarning() << "QProcess Exiting, state is :"<< mountProcess->state();
-       qWarning() << "Process exited with::"<< mountProcess->exitCode();
-       return true;
+        qDebug() << "Process Status ::" <<mountProcess->state();
+        if(mountProcess->error() == QProcess::FailedToStart){
+            qWarning() << "command failed to start!";
+            qDebug() << mountProcess->readAllStandardError();
+            qDebug() << mountProcess->errorString();
+        }
+        qWarning() << "QProcess Exiting, state is :"<< mountProcess->state();
+        qWarning() << "Process exited with::"<< mountProcess->exitCode();
+        return true;
     }
     else{
         qWarning() <<  mntDir.path() << " is mounted. done";
@@ -504,38 +526,38 @@ bool MediaManager::initViews(bool flipped)
 
 void MediaManager::setupDirectories()
 {
-        QString dirCmd = "gksudo";
-        QDir dvdDir;
-        dvdDir.setPath("/mnt/remote/dvd");
-        qDebug() << dvdDir.exists();
-    #ifdef RPI
-        dirCmd="";
-    #endif
-        if(!dvdDir.exists()){
-            QProcess *mkPath = new QProcess(this);
-            QStringList dArgs;
-            dArgs.append("mkdir -p /mnt/remote/dvd");
-            mkPath->start(dirCmd, dArgs);
-            mkPath->waitForFinished(10000);
-        }
+    QString dirCmd = "gksudo";
+    QDir dvdDir;
+    dvdDir.setPath("/mnt/remote/dvd");
+    qDebug() << dvdDir.exists();
+#ifdef RPI
+    dirCmd="";
+#endif
+    if(!dvdDir.exists()){
+        QProcess *mkPath = new QProcess(this);
+        QStringList dArgs;
+        dArgs.append("mkdir -p /mnt/remote/dvd");
+        mkPath->start(dirCmd, dArgs);
+        mkPath->waitForFinished(10000);
+    }
 
-         dirCmd = "";
-    #ifndef RPI
-        dirCmd  = "gksudo";
-    #endif
-        QDir mntDir;
-        mntDir.setPath("/mnt/remote/");
-        qDebug() << "Mount directory exists? " << mntDir.exists();
-        if(!mntDir.exists()){
-            QProcess *mkPath = new QProcess(this);
-            QStringList dArgs;
-            dArgs.append("mkdir -p /mnt/remote/");
-            mkPath->start(dirCmd, dArgs);
-            mkPath->waitForFinished(10000);
-            while(mkPath->state()==QProcess::Running){
-                qDebug() << mkPath->readAllStandardOutput();
-            }
+    dirCmd = "";
+#ifndef RPI
+    dirCmd  = "gksudo";
+#endif
+    QDir mntDir;
+    mntDir.setPath("/mnt/remote/");
+    qDebug() << "Mount directory exists? " << mntDir.exists();
+    if(!mntDir.exists()){
+        QProcess *mkPath = new QProcess(this);
+        QStringList dArgs;
+        dArgs.append("mkdir -p /mnt/remote/");
+        mkPath->start(dirCmd, dArgs);
+        mkPath->waitForFinished(10000);
+        while(mkPath->state()==QProcess::Running){
+            qDebug() << mkPath->readAllStandardOutput();
         }
+    }
 }
 
 
