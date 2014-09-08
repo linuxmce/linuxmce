@@ -20,18 +20,18 @@ Item{
         anchors.left: updating_time.right
         StyledButton{
             buttonText: "Advanced"
-            hitArea.onReleased: pageLoader.item.state="controls"
-             opacity:pageLoader.item.state==="controls" ? 0 : 1
+            hitArea.onReleased: qml_root.showAdvanced()
+
         }
         StyledButton{
             buttonText: "Playlist"
-            hitArea.onReleased: pageLoader.item.state="playlist"
-             opacity:pageLoader.item.state==="playlist" ? 0 : 1
+            hitArea.onReleased: qml_root.showPlaylist()
+
         }
         StyledButton{
             buttonText: "Metadata"
-            hitArea.onReleased: pageLoader.item.state="metadata"
-            opacity:pageLoader.item.state==="metadata" ? 0 : 1
+            hitArea.onReleased: qml_root.showMetadata()
+
         }
     }
 }

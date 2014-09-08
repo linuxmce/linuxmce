@@ -12,6 +12,10 @@ Item {
     property alias skinStyle:style
     property int screensaverTimer:manager.screenSaverTimeout*1000
     property bool uiOn:true
+
+    signal showMetadata()
+    signal showPlaylist()
+    signal showAdvanced()
     Rectangle{
         anchors.fill: parent
         color:"black"

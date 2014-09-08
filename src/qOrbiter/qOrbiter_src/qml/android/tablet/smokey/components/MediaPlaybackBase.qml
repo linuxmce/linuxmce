@@ -12,6 +12,18 @@ Item{
 
     property string screenLabel:"foo"
 
+    Connections{
+        target:qml_root
+        onShowMetadata:{
+            state="metatdata"
+        }
+        onShowPlaylist:{
+            state="playlist"
+        }
+        onShowAdvanced:{
+            state="controls"
+        }
+    }
 
     Component.onCompleted: {
         forceActiveFocus()
