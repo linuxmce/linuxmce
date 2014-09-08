@@ -100,6 +100,7 @@ void OMXPlayerInterface::DeInit() {
 }
 
 void OMXPlayerInterface::Init() {
+	system("killall omxplayer.bin");
 	if ( ePlayerState != STATE::UNKNOWN ) {
 		Log("OMXPlayerInterface::Init - ERROR - Init() has already been run.");
 		return;
