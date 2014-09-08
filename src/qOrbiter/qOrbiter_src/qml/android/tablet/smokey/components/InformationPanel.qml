@@ -12,19 +12,11 @@ Item{
         bottom:parent.bottom
     }
 
-    Component.onCompleted:{ info_panel.state="retracted";
-        statusTimer.start()
+    Component.onCompleted:{
+        info_panel.state="retracted";
     }
 
-    Timer{
-        id:statusTimer
-        interval: 750
-        triggeredOnStart: false
-        onTriggered: {
-            orbiter_status_text.opacity = 0;
-        }
 
-    }
 
     Rectangle{
         id:info_fill
@@ -35,9 +27,12 @@ Item{
     
     StyledText{
         id:orbiter_status_text
-        text:"LinuxMCE Orbiter "+manager.m_dwPK_Device + " is connected."
-        anchors.top: parent.top
-        anchors.left: parent.left
+        text:"LinuxMCE Orbiter: "+manager.m_dwPK_Device
+        anchors{
+            left:parent.left
+            bottom:parent.bottom
+        }
+
         font.pixelSize:36
         font.bold: true
         color:"green"
@@ -56,15 +51,18 @@ Item{
         anchors.top: parent.top
         anchors.left: parent.left
         source:"HomeScreenContent.qml"
-        visible:(info_panel.state === "hidden" || info_panel.state==="retracted" ) && orbiter_status_text.opacity === 0
+        visible:(info_panel.state === "hidden" || info_panel.state==="retracted" )
     }
 
     Clock{
         id:time_keeper
-        anchors.top: orbiter_status_text.bottom
-        anchors.left: orbiter_status_text.left
-
+       anchors{
+           verticalCenter: parent.verticalCenter
+           horizontalCenterOffset: scaleY(-15)
+           horizontalCenter: parent.horizontalCenter
+       }
     }
+
     Column{
         id:user_info
         width: childrenRect.width
@@ -269,7 +267,7 @@ Item{
             PropertyChanges {
                 target: info_panel
                 height:scaleY(0)
-                visible:false
+
             }
 
             PropertyChanges{
@@ -299,8 +297,8 @@ Item{
             PropertyAnimation{
                 target:info_panel
                 properties:"height"
-                duration:1000
-                easing.type: Easing.OutBounce
+                duration:skinStyle.animation_medium
+                easing.type: skinStyle.animation_easing
             }
         },
         Transition {
@@ -309,14 +307,10 @@ Item{
             PropertyAnimation{
                 target:info_panel
                 properties:"height"
-                duration:1000
-                easing.type: Easing.OutElastic
+                duration:skinStyle.animation_medium
+                easing.type: skinStyle.animation_easing
             }
-            ScriptAction{
-                script: {
-                    statusTimer.restart()
-                }
-            }
+
 
         }
     ]

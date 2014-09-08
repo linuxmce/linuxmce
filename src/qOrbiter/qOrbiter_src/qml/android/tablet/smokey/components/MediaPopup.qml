@@ -130,7 +130,7 @@ PropertyChanges{
             name:"media-screensaver"
             when:!uiOn && dcenowplaying.b_mediaPlaying
 
-            PropertyChanges {              
+            PropertyChanges {
                 target: bg
                 opacity:.25
                 color:"black"

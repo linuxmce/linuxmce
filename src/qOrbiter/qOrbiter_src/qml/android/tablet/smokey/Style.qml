@@ -23,7 +23,7 @@ QtObject{
     property string skinversion: "1.0"
     property string skinvariation: "Tablet 1280 x 736"
     property string maincolor: "black"
-
+    property bool profile:!manager.b_orientation
     //scale function
     function scaleX(x){
         return x/100*appH
@@ -73,15 +73,19 @@ QtObject{
 
 
     /* Animation Speeds */
-    property int quickAnimation:350
-    property int mediumAnimation:500
-    property int longAnimation:750
-    property int animationEasing:Easing.OutBack
 
 
-    //end scale function
+    property int animation_quick:350
+    property int animation_medium:500
+    property int animation_long:750
+    property int animation_easing:Easing.OutBack
+
+    /* Sizes */
+    property int headerButtonHeight:profile ? scaleY(8) : scaleY(10)
+    property int clockHeight:profile ? scaleY(12) : scaleY(10)
+    property int clockWidth:scaleX(50)
+
     //-color definitions
-
     property color accentcolor: "green"
     property color highlight1: "silver"
     property color highlight2: "orange"
@@ -91,8 +95,9 @@ QtObject{
     property double shadeOpacity:.65
 
     property color darkhighlight: "darkgrey"
-    property color lighthighlight: "green"
+    property color lighthighlight: "lightgreen"
     //--end color definitions
+
     //main stage styles
     property int orbiterH:appH
     property int orbiterW: appW
@@ -102,21 +107,18 @@ QtObject{
     property int homescreenrowheight:100
     property int homescreenbuttonheight: scaleX(12)
     property int homesreenbuttonwidth: scaleY(12)
-    property color homescreenscenariobuttoncolor: "aliceblue"
-    property color homescreenfloorplanbuttoncolor: "lightsteelblue"
-    property color homeScreenNowPlayingColorInActive: "indianred"
-    property color homeScreenNowPlayingColorActive: "lightcyan"
+
 
     property int homeselectorh: scaleY(15)
     property int homeselectorw: scaleY(15)
 
 
     //icon sizes
-    property int iconHeight: manager.b_orientation ? scaleY(22) :scaleY(16)
-    property int iconWidth: manager.b_orientation ? scaleY(22) :scaleY(16)
-    property int  stdbuttonh: manager.b_orientation ? scaleY(15) :scaleY(12)
-    property int  stdbuttonw: manager.b_orientation ? scaleY(15) :scaleY(12)
-    property int buttonLabelText : manager.b_orientation ? scaleY(3) : scaleY(2.5)
+    property int iconHeight: profile ? scaleY(22) :scaleY(16)
+    property int iconWidth: profile ? scaleY(22) :scaleY(16)
+    property int  stdbuttonh: profile ? scaleY(15) :scaleY(12)
+    property int  stdbuttonw: profile ? scaleY(15) :scaleY(12)
+    property int buttonLabelText : profile ? scaleY(3) : scaleY(2.5)
 
     //textStyles
     property string stylebuttonimage: ""

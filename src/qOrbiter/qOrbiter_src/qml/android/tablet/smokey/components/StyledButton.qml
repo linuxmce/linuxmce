@@ -35,12 +35,13 @@ Item{
             duration: 500
         }
     }
+    clip:true
 
     Rectangle{
         id:bg_fill
         anchors.fill: parent
         color:phil
-        border.color: "white"
+        border.color: style.buttonBorderColor
         border.width: 1
         radius: 5
         opacity:useHandler ? dceHandler.item.pressed ? 1 : .65 :  fly_trap.pressed ? 1 : .65

@@ -7,10 +7,11 @@ Text {
     property bool isBold:false
     property bool isItalic:false
     property double fontSize:scaleY(2.5)
+    horizontalAlignment: Text.AlignHCenter
     id:labelelement
     text: textLabel
     font.pixelSize: fontSize
     font.weight: Font.Light
     font.family: appFont.name
-    color:appStyle.tile_color
+    color:skinStyle.tile_color
 }

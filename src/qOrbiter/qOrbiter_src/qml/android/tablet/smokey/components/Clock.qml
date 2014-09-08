@@ -7,14 +7,15 @@ Item {
     property bool boldClock:false
     function getDate(){
         var d = new Date();
-        return Qt.formatDateTime(d, "dddd ,MMMM d || hh:mm ");
+        return Qt.formatDateTime(d, "dddd ,MMMM d \n hh:mm:ss -- yyyy ");
     }
     Timer { // Update the clock element periodically
         interval: 5; running: true; repeat: true
         onTriggered: txtDate.text = getDate()
     }
-    height: childrenRect.height
-    width: childrenRect.width
+
+
+
     StyledText{
         id: txtDate
         text: getDate()
@@ -22,8 +23,10 @@ Item {
         font.letterSpacing: 2
         font.family: appFont.name
         smooth: true
+        width: parent.width
         anchors.centerIn: parent
         font.pixelSize: clockFontSize
+        horizontalAlignment: Text.AlignHCenter
         font.bold: boldClock
     }
 }
