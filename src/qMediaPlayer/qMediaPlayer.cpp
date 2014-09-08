@@ -349,10 +349,10 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
 
     if(iPK_MediaType==5)
     {
-        path = "/public/data/videos";
+        path = "/public/data/videos/";
     }
     else if(iPK_MediaType ==4){
-        path = "/public/data/audio";
+        path = "/public/data/audio/";
     }
 
     if(QString::fromStdString(sMediaURL).contains("http")){
@@ -367,18 +367,16 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
     else
     {
         //begin ugly bit to determine the storage device for later use. its not passed explicitly, so i use a regex to determine it for media files
-        QRegExp deviceNo("(\\\[\\\d+\\\])");
+        QRegExp deviceNo("(\\\[\\\d+\\\]/)");
         int l = deviceNo.indexIn(QString::fromStdString(sMediaURL));
 
         if (l ==-1){
             setCommandResponse("Stored in /mediaType");
-        }
-        else
-        {
+        } else {
             if(!deviceNo.isEmpty()){
+                qDebug() << deviceNo.capturedTexts();
                 QString f = deviceNo.cap(0);
-                f.remove("[");
-                f.remove("]");
+                f.remove("["); f.remove("/"); f.remove("]");
                 deviceNumber = f;
                 localPath = (QString::fromStdString(sMediaURL)).split(deviceNo).at(1);
 #ifndef ANDROID
@@ -392,9 +390,7 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
         }
         //end ugly bit of regex. pretty because it works unless a user decides to also have [\d\d\d] type directories. I try to counter that by choosing only
         //the first match as that will be the first indexed by the regex engine.
-        QString adjPath = QString::fromStdString(sMediaURL).remove("/home");
-        adjPath.remove("//home");
-        //finishedPath="/mnt/remote/"+deviceNumber+adjPath;
+        QString adjPath = QString::fromStdString(sMediaURL).remove("//home");
         finishedPath = "/mnt/remote/"+deviceNumber+path+localPath;
     }
 
@@ -717,6 +713,20 @@ void qMediaPlayer::CMD_Mute(string &sCMD_Result,Message *pMessage)
 //<-dceag-c97-e->
 {
     cout << "Need to implement command #97 - Mute" << endl;
+#ifndef RPI
+#if defined (QT4) && ! defined (ANDROID)
+    qreal c = mp_manager->audioSink->volume();
+    qWarning() << "Current volume" << c;
+
+    if(mp_manager->audioSink->isMuted()){
+        mp_manager->audioSink->setMuted(false);
+    } else {
+        mp_manager->audioSink->setMuted(true);
+    }
+
+#endif
+#endif
+    qWarning("Toggled Mute");
 }
 
 //<-dceag-c123-b->
@@ -1644,7 +1654,17 @@ void qMediaPlayer::CMD_Select_B(string &sCMD_Result,Message *pMessage){
 void qMediaPlayer::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMessage){
     cout << "Need to implement command #89 - Volume Up" << endl;
     cout << "Repeat Count=" << iRepeat_Command << endl;
-    emit volumeDown(iRepeat_Command);
+#ifndef RPI
+#if defined (QT4) && ! defined (ANDROID)
+    qreal c = mp_manager->audioSink->volume();
+    qWarning() << "Current volume" << c;
+    qreal d = c+1.0;
+    qWarning() << "New volume" << d;
+    mp_manager->audioSink->setVolume(d);
+#endif
+#endif
+    qWarning("Set audio level Up.");
+  //  emit volumeDown(iRepeat_Command);
 }
 
 //<-dceag-c89-e->
@@ -1660,13 +1680,12 @@ void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message 
 #if defined (QT4) && ! defined (ANDROID)
     qreal c = mp_manager->audioSink->volume();
     qWarning() << "Current volume" << c;
-    qreal d = c-.01;
-    if(d < 0){
-        d= 0;
-    }
+    qreal d = c-1.0;
     mp_manager->audioSink->setVolume(d);
+     qWarning() << "New volume" << d;
 #endif
 #endif
+     sCMD_Result = "OK -Volume Down.";
     qWarning("Set audio level down.");
 
 }
