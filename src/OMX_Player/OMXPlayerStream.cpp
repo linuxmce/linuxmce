@@ -5,10 +5,12 @@
 namespace DCE
 {
 
-OMXPlayerStream::OMXPlayerStream(string sAudioDevice, bool bPassthrough, string sGpuDeInt, OMX_Player *pPlayer) :
+OMXPlayerStream::OMXPlayerStream(string sAudioDevice, bool bPassthrough, string sGpuDeInt, OMX_Player *pPlayer, int iTimeCodeReportFrequency) :
 	OMXPlayerInterface(sAudioDevice, bPassthrough, sGpuDeInt),
 	m_pPlayer(pPlayer)
 {
+	threadEventLoop = 0;
+	m_iTimeCodeReportFrequency = iTimeCodeReportFrequency;
 }
 
 OMXPlayerStream::~OMXPlayerStream()
@@ -19,6 +21,23 @@ OMXPlayerStream::~OMXPlayerStream()
 // inherited from OMXPlayerInterface
 void OMXPlayerStream::Stop(int iStreamID) {
 //	Log("OMXPlayerStream::Stop - iStreamID: " + to_string(iStreamID));
+
+	// stop the event thread first
+	if ( threadEventLoop )
+	{
+		Log("OMXPlayerStream::Stop - Stopping event processor." );
+
+		{
+//			PLUTO_SAFETY_LOCK(streamLock, m_streamMutex);
+			m_bExitThread = true;
+		}
+
+		pthread_join( threadEventLoop, NULL );
+		Log("OMXPlayerStream::Stop - Stopped event processor." );
+		threadEventLoop = 0;
+}
+
+
 	STATE state = Get_PlayerState();
 	if ( iStreamID == m_iStreamID || iStreamID == 0)
 		if ( state != STATE::STOPPING && state != STATE::STOPPED ) {
@@ -44,6 +63,15 @@ bool OMXPlayerStream::Play(int iStreamID, string sMediaURL, string sMediaPositio
 		return false;
 
 	m_xDuration = OMXPlayerInterface::Get_Duration();
+
+	if (!threadEventLoop)
+	{
+		Log("OMXPlayerStream::Play - Creating event processor" );
+		pthread_create( &threadEventLoop, NULL, EventProcessingLoop, this );
+		Log("OMXPlayerStream::Play - Event processor started" );
+	}
+	else
+		Log("OMXPlayerStream::Play - Event processor not false?!?!?" );
 
 	return true;
 }
@@ -101,6 +129,8 @@ string OMXPlayerStream::GetPosition()
 
 void OMXPlayerStream::ReportTimecode()
 {
+//	Log("OMXPlayerStream::ReportTimecode() - called.");
+
 	// FIXME: CHECK STATE
 //	if (!m_bInitialized)
 //	{
@@ -109,7 +139,8 @@ void OMXPlayerStream::ReportTimecode()
 //	}
 
 //	if (!m_iTimeCodeReportFrequency||!m_bIsRendering )
-//	       return;
+	if (!m_iTimeCodeReportFrequency )
+	       return;
 
 //	if( m_bIsVDR )
 //	{
@@ -119,6 +150,7 @@ void OMXPlayerStream::ReportTimecode()
 	int iSpeed = Get_Speed() / 1000;
 
 	m_pPlayer->ReportTimecodeViaIP( m_iStreamID, iSpeed);
+//	Log("OMXPlayerStream::ReportTimecode() - Timecode reported.");
 }
 
 int OMXPlayerStream::CalculatePosition(string &sMediaPosition,string *sMRL,int *Subtitle,int *Angle,int *AudioTrack)
@@ -177,5 +209,183 @@ int OMXPlayerStream::Get_MediaID() {
 	return ret;
 }
 
+
+
+void *EventProcessingLoop( void *pInstance )
+{
+	OMXPlayerStream * pStream = ( OMXPlayerStream* ) pInstance;
+
+//	bool checkResult;
+
+	// counter for timecode report
+	int iCounter_TimeCode = 0;
+
+	// 1/10th second interval counter
+	int iCounter = 0; //, jCounter = 0;
+
+//	XEvent event;
+	while ( ! pStream->m_bExitThread )
+	{
+/*
+		//reading and process X-events
+		if (!pStream->m_bBroadcastOnly)
+		{
+			if ( pStream->m_bIsRendering )
+			{
+				do
+				{
+					XLockDisplay( pStream->m_pFactory->m_pXDisplay );
+					checkResult = XCheckWindowEvent( pStream->m_pFactory->m_pXDisplay, pStream->windows[ pStream->m_iCurrentWindow ], INPUT_MOTION, &event );
+					XUnlockDisplay( pStream->m_pFactory->m_pXDisplay );
+
+					if ( checkResult == True )
+						pStream->XServerEventProcessor( event );
+				}
+				while ( checkResult == True );
+			}
+		}
+*/
+		// updating every second - position
+		if ( ++iCounter >= 10 )
+		{
+//			if (pStream->m_bInitialized)
+//			{
+//				LoggerWrapper::GetInstance()->Write( LV_WARNING, "[ID: %d] %s (seek %d) t.c. ctr %d freq %d,", pStream->m_iStreamID, pStream->GetPosition().c_str(), pStream->m_iSpecialSeekSpeed, iCounter_TimeCo$
+//			}
+			iCounter = 0;
+
+			//if it is a time - reporting our timecode to player object
+			if ( pStream->m_iTimeCodeReportFrequency && ++iCounter_TimeCode >= pStream->m_iTimeCodeReportFrequency )
+			{
+				pStream->ReportTimecode();
+				iCounter_TimeCode = 1;
+			}
+		}
+
+/*
+		// We need to wait 500ms after the stream starts before doing the seek!
+		if ( pStream->m_iSpecialOneTimeSeek )
+		{
+			jCounter++;
+			if ( jCounter > 5 )
+			{
+				pStream->Seek(pStream->m_iSpecialOneTimeSeek,10000); // As long as we're within 10 seconds that's fine
+				pStream->m_iSpecialOneTimeSeek = 0;
+				pStream->ReportTimecode();
+				pStream->changePlaybackSpeed( PLAYBACK_NORMAL );
+			}
+		}
+		else
+		{
+			jCounter = 0;
+		}
+*/
+/*
+		//updating time and speed when @trickplay mode
+		if (pStream->m_bTrickModeActive)
+		{
+			//only every 0.2s
+			if (iCounter%2==0)
+			{
+				pStream->DisplaySpeedAndTimeCode();
+			}
+		}
+*/
+
+// FIXME: Add this
+/*
+		//updating time and speed when paused
+		if ( pStream->Get_Speed==0)
+		{
+			//only every 0.5s
+			if (iCounter%5==0)
+			{
+				pStream->DisplaySpeedAndTimeCode();
+			}
+		}
+*/
+/*
+		if ( pStream->m_iSpecialSeekSpeed )
+			pStream->HandleSpecialSeekSpeed();
+*/
+		usleep( 100000 );
+
+	}
+
+	return NULL;
+}
+
+/*
+void OMXPlayerStream::DisplaySpeedAndTimeCode()
+{
+
+//	if (!m_bInitialized)
+//	{
+//		LoggerWrapper::GetInstance()->Write( LV_WARNING, "DisplaySpeedAndTimeCode called on non-initialized stream - aborting command");
+//		return;
+//	}
+
+	int iDirection = m_iSpecialSeekSpeed<0?-1:1;
+
+	int Whole = iDirection*m_iSpecialSeekSpeed / 1000;
+	int Fraction = iDirection*m_iSpecialSeekSpeed % 1000;
+
+	if (m_bTrickModeActive)
+	{
+		iDirection = 1;
+		Whole = m_iTrickPlaySpeed / 1000;
+		Fraction = m_iTrickPlaySpeed % 1000;
+	}
+
+	string sSpeed;
+
+	if ( iDirection < 0 )
+	{
+		sSpeed += "-";
+	}
+
+	if ( Whole )
+		sSpeed += StringUtils::itos( Whole );
+	else
+		sSpeed += "0";
+
+	if ( Fraction )
+		sSpeed += "." + StringUtils::itos( Fraction );
+
+	sSpeed += "x     ";
+
+	int seconds, totalTime;
+	getStreamPlaybackPosition( seconds, totalTime );
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "seconds %d", seconds );
+	seconds /= 1000;
+	int seconds_only = seconds;
+	int hours = seconds / 3600;
+	seconds -= hours * 3600;
+	int minutes = seconds / 60;
+	seconds -= minutes * 60;
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "h %d m %d s %d", hours, minutes, seconds );
+	if ( hours )
+	{
+		sSpeed += StringUtils::itos( hours ) + ":";
+
+		if ( minutes < 10 )
+			sSpeed += "0" + StringUtils::itos( minutes ) + ":";
+		else
+			sSpeed += StringUtils::itos( minutes ) + ":";
+	}
+	else
+		sSpeed += StringUtils::itos( minutes ) + ":";
+
+	if ( seconds < 10 )
+		sSpeed += "0" + StringUtils::itos( seconds );
+	else
+		sSpeed += StringUtils::itos( seconds );
+
+	if ( (( m_iSpecialSeekSpeed == 0 )&&!m_bTrickModeActive&&(m_iPlaybackSpeed!=0)) || ( seconds_only == 1 ) )
+		DisplayOSDText("");
+	else
+		DisplayOSDText( sSpeed );
+}
+*/
 
 } // DCE namespace

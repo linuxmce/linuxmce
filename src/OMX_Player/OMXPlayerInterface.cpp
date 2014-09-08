@@ -903,16 +903,16 @@ int64_t OMXPlayerInterface::USecFromTime(string sTime) {
 		usecs = usecs + (iPlaceholderValue * iValue);
 
 		if (iPlaceholderValue == hour) {
-			iPlaceholderValue == min;
+			iPlaceholderValue = min;
 		}
 		else if (iPlaceholderValue == min) {
-			iPlaceholderValue == sec;
+			iPlaceholderValue = sec;
 		}
 		else if (iPlaceholderValue == sec) {
-			iPlaceholderValue == msec;
+			iPlaceholderValue = msec;
 		}
 		else if (iPlaceholderValue == msec) {
-			iPlaceholderValue == usec;
+			iPlaceholderValue = usec;
 		}
 
 		curValue = Tokenize(sTime, string(":"), tokenPos);

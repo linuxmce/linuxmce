@@ -118,7 +118,7 @@ bool OMX_Player::GetConfig()
 	m_sAudioDevice = "hdmi";
 	m_bPassthrough = false;
 	m_sGpuDeInt = "";
-	m_pOMXPlayer = new OMXPlayerStream(m_sAudioDevice, m_bPassthrough, m_sGpuDeInt, this);
+	m_pOMXPlayer = new OMXPlayerStream(m_sAudioDevice, m_bPassthrough, m_sGpuDeInt, this, DATA_Get_Time_Code_Report_Frequency());
 
 	if (!m_pOMXPlayer)
 		return false;
@@ -1123,16 +1123,16 @@ int64_t OMX_Player::USecFromTime(string sTime) {
 		usecs = usecs + (iPlaceholderValue * iValue);
 
 		if (iPlaceholderValue == hour) {
-			iPlaceholderValue == min;
+			iPlaceholderValue = min;
 		}
 		else if (iPlaceholderValue == min) {
-			iPlaceholderValue == sec;
+			iPlaceholderValue = sec;
 		}
 		else if (iPlaceholderValue == sec) {
-			iPlaceholderValue == msec;
+			iPlaceholderValue = msec;
 		}
 		else if (iPlaceholderValue == msec) {
-			iPlaceholderValue == usec;
+			iPlaceholderValue = usec;
 		}
 
 		curValue = StringUtils::Tokenize(sTime, string(":"), tokenPos);
@@ -1170,8 +1170,9 @@ void OMX_Player::ReportTimecodeViaIP(int iStreamID, int Speed)
 
 	string sIPTimeCodeInfo = mediaInfo.ToString();
 
+	Log("OMX_Player::ReportTimecodeViaIP - " + sIPTimeCodeInfo );
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"reporting timecode stream %d speed %d %s", iStreamID, Speed, sIPTimeCodeInfo.c_str() );
-//	EVENT_Media_Position_Changed(atoi(pStream->m_sMediaType.c_str()), pStream->m_sCurrentFile, StringUtils::itos(pStream->m_iMediaID), iStreamID, mediaInfo.FormatTotalTime(), mediaInfo.FormatCurrentTime(), Speed);
+	EVENT_Media_Position_Changed(atoi(mediaInfo.m_sMediaType.c_str()), mediaInfo.m_sFileName, StringUtils::itos(mediaInfo.m_iMediaID), iStreamID, mediaInfo.FormatTotalTime(), mediaInfo.FormatCurrentTime(), Speed);
 
 	m_pNotificationSocket->SendStringToAll( sIPTimeCodeInfo );
 }
