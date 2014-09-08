@@ -396,12 +396,13 @@ void qorbiterManager::goBacktoQScreen()
         gotoScreenList->removeLast();
         setDceResponse("Starting screen switch");
         QVariant screenname= QVariant::fromValue(gotoScreenList->last());
-        currentScreen = gotoScreenList->last();
+
         QObject *item = qorbiterUIwin->rootObject();
         setDceResponse("About to call screenchange()");
         if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
+            setCurrentScreen(gotoScreenList->last());
             setDceResponse("Done call to screenchange()");
-            
+
         } else {
             setDceResponse("screenchange() FAILED");
         }
