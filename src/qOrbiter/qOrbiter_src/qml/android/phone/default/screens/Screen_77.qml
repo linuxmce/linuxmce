@@ -3,13 +3,13 @@
 import QtQuick 1.1
 import "../components"
 MediaPlaybackTemplate {
-    id:otar_radio
+    id:games
 
     StyledText{
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         fontSize: 50
-        text:qsTr("Over the Air Radio")
+        text:qsTr("Game System")
         color:"white"
     }
 
