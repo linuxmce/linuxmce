@@ -9937,7 +9937,8 @@ void Orbiter::UpdateTimeCodeLoop()
 			NULL != pDevice && 
 			(
 				pDevice->m_dwPK_DeviceTemplate==DEVICETEMPLATE_Xine_Player_CONST ||
-				pDevice->m_dwPK_DeviceTemplate==DEVICETEMPLATE_MPlayer_Player_CONST
+				pDevice->m_dwPK_DeviceTemplate==DEVICETEMPLATE_MPlayer_Player_CONST ||
+				pDevice->m_dwPK_DeviceTemplate==DEVICETEMPLATE_OMX_Player_CONST
 			)
 		)
 		{
