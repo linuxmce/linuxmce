@@ -131,6 +131,12 @@ void OMXPlayerStream::ReportTimecode()
 {
 //	Log("OMXPlayerStream::ReportTimecode() - called.");
 
+	STATE state = Get_PlayerState();
+	if ( state != STATE::PLAYING )
+	{
+		Log("OMXPlayerStream::ReportTimecode - skipping report as we're not PLAYING");
+		return;
+	}
 	// FIXME: CHECK STATE
 //	if (!m_bInitialized)
 //	{
