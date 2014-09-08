@@ -14,6 +14,7 @@
 
 #include <string> // map?
 #include <map> // map
+#include "XineMediaInfo.h"
 
 //<-dceag-d-b->
 #include "OMX_Player.h"
@@ -46,8 +47,11 @@ OMX_Player::OMX_Player(int DeviceID, string ServerAddress,bool bConnectEventHand
 	: OMX_Player_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
-	m_pDevice_App_Server = NULL;
+	m_pDeviceData_MediaPlugin = NULL;
+//	m_pDevice_App_Server = NULL;
 
+	m_pNotificationSocket = new XineNotification_SocketListener(string("m_pNotificationSocket"));
+	m_pNotificationSocket->m_bSendOnlySocket = true; // one second
 }
 
 //<-dceag-const2-b->
@@ -56,6 +60,7 @@ OMX_Player::OMX_Player(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pDa
 	: OMX_Player_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
 {
+	m_pDeviceData_MediaPlugin = NULL;
 }
 
 //<-dceag-dest-b->
@@ -63,6 +68,12 @@ OMX_Player::~OMX_Player()
 //<-dceag-dest-e->
 {
 	EVENT_Playback_Completed("",0,false);
+
+	if (m_pNotificationSocket)
+	{
+		delete m_pNotificationSocket;
+		m_pNotificationSocket = NULL;
+	}
 }
 
 void OMX_Player::PrepareToDelete ()
@@ -70,8 +81,9 @@ void OMX_Player::PrepareToDelete ()
 	m_pOMXPlayer->Stop(0);
 
 	Command_Impl::PrepareToDelete ();
-	m_pDevice_App_Server = NULL;
+//	m_pDevice_App_Server = NULL;
 	m_pDevice_OMX_Plugin = NULL;
+	m_pDeviceData_MediaPlugin = NULL;
 }
 
 //<-dceag-getconfig-b->
@@ -91,13 +103,16 @@ bool OMX_Player::GetConfig()
 		return false;
 	}
 
-	m_pDevice_App_Server =
-		m_pData->FindFirstRelatedDeviceOfCategory (DEVICECATEGORY_App_Server_CONST, this);
-	if (!m_pDevice_App_Server)
-	{
-		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"I need an App Server to function.");
-		return false;
-	}
+//	m_pDevice_App_Server =
+//		m_pData->FindFirstRelatedDeviceOfCategory (DEVICECATEGORY_App_Server_CONST, this);
+//	if (!m_pDevice_App_Server)
+//	{
+//		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"I need an App Server to function.");
+//		return false;
+//	}
+
+	m_pDeviceData_MediaPlugin =
+		m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfCategory(DEVICECATEGORY_Media_Plugins_CONST);
 
 	// TODO:: Need to get sAudioDevice, bPassthrough, sGpuDeInt data
 	m_sAudioDevice = "hdmi";
@@ -292,7 +307,7 @@ void OMX_Player::CMD_Update_Object_Image(string sPK_DesignObj,string sType,char 
 
 void OMX_Player::NotifierCallback(void *pObject, int event)
 {
-        cout << "CALLBACK FUNCTION CALLED!!!  " << event << endl;
+	cout << "CALLBACK FUNCTION CALLED!!!  " << event << endl;
 
 //	OMX_Player* pThis = (OMX_Player*) pObject;
 //	pThis->EVENT_Playback_Completed(pThis->m_filename,pThis->m_iStreamID,false);
@@ -485,10 +500,10 @@ void OMX_Player::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStr
 
 	const int64_t msec = 1000;
 	const int64_t sec = msec * 1000;
-	const int64_t min = sec * 60;
-	const int64_t hour = min * 60;
-	const int64_t sec30 = min / 2;
-	const int64_t min30 = hour / 2;
+//	const int64_t min = sec * 60;
+//	const int64_t hour = min * 60;
+//	const int64_t sec30 = min / 2;
+//	const int64_t min30 = hour / 2;
 
 	int64_t xValue = atoi(sValue_To_Assign.c_str());
 	xValue = xValue * sec;
@@ -558,7 +573,7 @@ void OMX_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStre
 	const int64_t sec = msec * 1000;
 	const int64_t min = sec * 60;
 	const int64_t hour = min * 60;
-	const int64_t sec30 = min / 2;
+//	const int64_t sec30 = min / 2;
 	const int64_t min30 = hour / 2;
 
 	int64_t xSeekVal = 0;
@@ -1078,15 +1093,15 @@ string OMX_Player::ZeroPad(int num, int width)
 }
 
 string OMX_Player::TimeFromMSec(uint64_t msecs) {
-        string ret;
-        ret = ZeroPad(msecs/1000/60/60,2) + ":" + ZeroPad(msecs/1000/60 % 60,2) + ":" + ZeroPad(msecs/1000 % 60,2);// + "." + ZeroPad(usecs/1000 % 1000,3);// + ":" + to_string(usecs % 1000);
-        return ret;
+	string ret;
+	ret = ZeroPad(msecs/1000/60/60,2) + ":" + ZeroPad(msecs/1000/60 % 60,2) + ":" + ZeroPad(msecs/1000 % 60,2);// + "." + ZeroPad(usecs/1000 % 1000,3);// + ":" + to_string(usecs % 1000);
+	return ret;
 }
 
 string OMX_Player::TimeFromUSec(uint64_t usecs) {
-        string ret;
-        ret = ZeroPad(usecs/1000/1000/60/60,2) + ":" + ZeroPad(usecs/1000/1000/60 % 60,2) + ":" + ZeroPad(usecs/1000/1000 % 60,2);// + "." + ZeroPad(usecs/1000 % 1000,3);// + ":" + to_string(usecs % 1000);
-        return ret;
+	string ret;
+	ret = ZeroPad(usecs/1000/1000/60/60,2) + ":" + ZeroPad(usecs/1000/1000/60 % 60,2) + ":" + ZeroPad(usecs/1000/1000 % 60,2);// + "." + ZeroPad(usecs/1000 % 1000,3);// + ":" + to_string(usecs % 1000);
+	return ret;
 }
 
 int64_t OMX_Player::USecFromTime(string sTime) {
@@ -1124,3 +1139,62 @@ int64_t OMX_Player::USecFromTime(string sTime) {
 	}
 	return usecs;
 }
+
+
+void OMX_Player::ReportTimecodeViaIP(int iStreamID, int Speed)
+{
+//	Xine_Stream *pStream =  ptrFactory->GetStream( iStreamID );
+//	if (pStream == NULL)
+//	{
+//		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Xine_Player::ReportTimecodeViaIP() stream is NULL");
+//		return;
+//	}
+
+	if( !m_pDeviceData_MediaPlugin )
+		return;
+
+	// filling media info structure
+	XineMediaInfo mediaInfo;
+
+	mediaInfo.m_iSpeed = m_pOMXPlayer->Get_Speed();
+	mediaInfo.m_iPositionInMilliseconds = m_pOMXPlayer->Get_Position() / 1000;
+	mediaInfo.m_iTotalLengthInMilliseconds = m_pOMXPlayer->Get_Duration() / 1000;
+
+	mediaInfo.m_iStreamID = m_pOMXPlayer->Get_iStreamID();
+	mediaInfo.m_iTitle = m_pOMXPlayer->Get_Title();
+	mediaInfo.m_iChapter = m_pOMXPlayer->Get_Chapter();
+	mediaInfo.m_sFileName = m_pOMXPlayer->Get_CurrentFile();
+	mediaInfo.m_sMediaType = m_pOMXPlayer->Get_MediaType();
+	mediaInfo.m_iMediaID = m_pOMXPlayer->Get_MediaID();
+//
+
+	string sIPTimeCodeInfo = mediaInfo.ToString();
+
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"reporting timecode stream %d speed %d %s", iStreamID, Speed, sIPTimeCodeInfo.c_str() );
+//	EVENT_Media_Position_Changed(atoi(pStream->m_sMediaType.c_str()), pStream->m_sCurrentFile, StringUtils::itos(pStream->m_iMediaID), iStreamID, mediaInfo.FormatTotalTime(), mediaInfo.FormatCurrentTime(), Speed);
+
+	m_pNotificationSocket->SendStringToAll( sIPTimeCodeInfo );
+}
+
+
+bool OMX_Player::Connect(int iPK_DeviceTemplate )
+{
+	if ( ! Command_Impl::Connect(iPK_DeviceTemplate) )
+		return false;
+
+	DeviceData_Base *pDevice = m_pData->GetTopMostDevice();
+	m_sIPofMD = pDevice->m_sIPAddress;
+
+//	if (!ptrFactory->StartupFactory())
+//		return false;
+
+	int iPort = DATA_Get_Port();
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Configured port for time/speed notification is: %i, IP is %s", iPort, m_sIPofMD.c_str());
+
+	m_pNotificationSocket->StartListening (iPort);
+
+	EVENT_Playback_Completed("",0,false);  // In case media plugin thought something was playing, let it know that there's not
+
+	return true;
+}
+

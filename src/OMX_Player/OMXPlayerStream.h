@@ -12,12 +12,16 @@ class OMXPlayerStream : public OMXPlayerInterface
   private:
     // members
     OMX_Player *m_pPlayer = NULL;
-    int m_iStreamID = 0;
     string m_sMediaURL = "";
     int m_iStreamIDNew = 0;
     string m_sMediaURLNew = "";
     bool bEvent = true;
-    int64_t xDuration;
+    int64_t m_xDuration = -1;
+
+
+    int m_iStreamID = 0;
+    int m_iChapter = -1;
+    int m_iTitle = -1;
 
     mutex m_mtxLog;
 
@@ -36,6 +40,13 @@ class OMXPlayerStream : public OMXPlayerInterface
 
     bool Play(int iStreamID, string sMediaURL, string sMediaPosition);
     void Stop(int iStreamID);
+    int Get_iStreamID();
+    string Get_MediaType();
+    int Get_MediaID();
+
+    string GetPosition();
+    void ReportTimecode();
+    int CalculatePosition(string &sMediaPosition,string *sMRL,int *Subtitle,int *Angle,int *AudioTrack);
 
 };
 

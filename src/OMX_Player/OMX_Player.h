@@ -20,6 +20,9 @@
 #include "Gen_Devices/OMX_PlayerBase.h"
 //<-dceag-d-e->
 
+#include "DCE/SocketListener.h"
+#include "DCE/ServerSocket.h"
+
 #include "OMXPlayerStream.h"
 
 
@@ -33,10 +36,11 @@ namespace DCE
 private:
 		// Private member variables
 		DeviceData_Base *m_pDevice_OMX_Plugin;
-		DeviceData_Base *m_pDevice_App_Server;
+//		DeviceData_Base *m_pDevice_App_Server;
 
 		OMXPlayerStream *m_pOMXPlayer;
 
+		string m_sIPofMD;
 		string m_sAudioDevice;
 		bool m_bPassthrough;
 		string m_sGpuDeInt;
@@ -478,8 +482,11 @@ public:
 	virtual void CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
-	};
+        void ReportTimecodeViaIP(int iStreamID, int Speed);
+        bool Connect(int iPK_DeviceTemplate );
 
+private:
+	DeviceData_Base *m_pDeviceData_MediaPlugin;
 
 
 	// From Xine_Player
@@ -503,7 +510,7 @@ public:
 			{
 				if ((*i)->SendString(sString))
 				{
-					LoggerWrapper::GetInstance()->Write(LV_STATUS,"Sending time code %s to %s",sString.c_str(),(*i)->m_sHostName.c_$
+					LoggerWrapper::GetInstance()->Write(LV_STATUS,"Sending time code %s to %s",sString.c_str(),(*i)->m_sHostName.c_str());
 				}
 				else
 				{

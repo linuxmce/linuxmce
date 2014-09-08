@@ -9,7 +9,7 @@
 //#define USE_PIPES
 
 const int RETRIES = 10;
-const int DBUS_RETRIES = 100;
+const int DBUS_RETRIES = 200;
 
 using namespace std;
 
@@ -108,6 +108,47 @@ void OMXPlayerInterface::Init() {
 }
 
 
+int OMXPlayerInterface::Get_Subtitle() {
+	int ret = 0;
+	// FIXME: GET THIS DATA
+	// we cannot access this data currently in omxplayer
+	return ret;
+}
+
+int OMXPlayerInterface::Get_Audio() {
+	int ret = 0;
+	// FIXME: GET THIS DATA
+	// we cannot access this data currently in omxplayer
+	return ret;
+}
+
+int OMXPlayerInterface::Get_Speed() {
+	int ret = 0;
+	// FIXME: GET THIS DATA
+	// we cannot access this data currently in omxplayer
+	ret = 1000;
+	return ret;
+}
+
+int OMXPlayerInterface::Get_Title() {
+	int ret = 0;
+	// FIXME: GET THIS DATA
+	// we cannot access this data currently in omxplayer
+	return ret;
+}
+
+int OMXPlayerInterface::Get_Chapter() {
+	int ret = 0;
+	// FIXME: GET THIS DATA
+	// we cannot access this data currently in omxplayer
+	return ret;
+}
+
+string OMXPlayerInterface::Get_CurrentFile() {
+	return m_sMediaURL;
+}
+
+
 void OMXPlayerInterface::Do_Seek(int64_t usecs) {
     // TODO: MUST!!!
     //  Add checks for seeking past end, omxplayer
@@ -151,6 +192,7 @@ int64_t OMXPlayerInterface::Send_SetPosition(string sMediaURL, int64_t xPos) {
   catch (DBus::Error &dbus_err) {
     Log("Send_SetPosition() - D-Bus error - omxplayer has gone away?");
   }
+  m_sMediaURL = sMediaURL;
   return ret;
 }
 
@@ -389,6 +431,7 @@ bool OMXPlayerInterface::Play(string sMediaURL, string sMediaPosition) {
 
   SetState(STATE::INITIALIZING);
 
+  m_sMediaURL = sMediaURL;
   // TODO add error reporting
 
 #ifdef USE_PIPES
@@ -792,7 +835,7 @@ void OMXPlayerInterface::Log(string txt) {
 void OMXPlayerInterface::Do_QuitOnError() {
         Stop();
         system("killall omxplayer.bin");
-        system("killall omxplayer");
+//        system("killall omxplayer");
 }
 
 void *PlayerOutputReader(void *pInstance) {

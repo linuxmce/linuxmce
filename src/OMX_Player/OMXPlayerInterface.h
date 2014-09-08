@@ -50,6 +50,7 @@ public:
 
 private:
   // private variables
+  string m_sMediaURL;
 
   // D-Bus data members
   DBus::BusDispatcher dispatcher;
@@ -168,6 +169,12 @@ public:
   string Get_PlaybackStatus(void);
   uint64_t Get_Position(void);
   uint64_t Get_Duration(void);
+  int Get_Speed(void);
+  int Get_Title(void);
+  int Get_Chapter(void);
+  int Get_Subtitle(void);
+  int Get_Audio(void);
+  string Get_CurrentFile(void);
 
 
   // *********
