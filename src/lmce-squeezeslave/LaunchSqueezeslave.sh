@@ -7,26 +7,27 @@
 
 DEVICEDATA_Alsa_Output_Device=74
 
-SQUEEZESLAVE=$(which squeezelite)
-[ -z "$SQUEEZESLAVE" ] && SQUEEZESLAVE=$(which squeezeslave)
+SQUEEZESLAVE=$(which squeezeslave)
+SQUEEZELITE=$(which squeezelite)
+[[ -n "$SQUEEZELITE" ]] && SQUEEZESLAVE="$SQUEEZELITE"
 
 #SQUEEZESLAVE=/usr/bin/squeezeslave
 SERVER=dcerouter
 DEVICE=0
 
 while getopts ":d:r:" optname
-  do
-    case "$optname" in
-      "d")
-        DEVICE=$OPTARG
-        ;;
-      "r")
-        SERVER=$OPTARG
-        ;;
-      *)
-        ;;
-    esac
-  done
+	do
+		case "$optname" in
+			"d")
+				DEVICE=$OPTARG
+				;;
+			"r")
+				SERVER=$OPTARG
+				;;
+			*)
+				;;
+		esac
+	done
 
 # echo "Device $DEVICE server $SERVER"
 # Don't know how to get MAC address without SQL
@@ -36,44 +37,35 @@ Q="
 	WHERE PK_Device='$DEVICE'
 "
 MAC=$(RunSQL "$Q")
-AUDIO_DEVICE=$(GetDeviceData "$DEVICE" "$DEVICEDATA_Alsa_Output_Device")
+[[ -z "$MAC" ]] && exit 2
 
+AUDIO_DEVICE=$(GetDeviceData "$DEVICE" "$DEVICEDATA_Alsa_Output_Device")
 OUTPUT=""
 # echo "Mac $MAC audio device $AUDIO_DEVICE"
-if [ -n "$AUDIO_DEVICE" ]; then
-  if [ "$SQUEEZESLAVE" = "$(which squeezeslave)" ]; then
-    OUTPUT=$($SQUEEZESLAVE -L | grep "$AUDIO_DEVICE" | cut -d: -f1)
-    #echo "$OUTPUT : $AUDIO_DEVICE"
-    # Strip any spaces from the string
-    OUTPUT=${OUTPUT//[[:space:]]}
-  else
-    OUTPUT="$AUDIO_DEVICE"
-  fi
+if [[ -n "$AUDIO_DEVICE" ]]; then
+	if [[ "$SQUEEZESLAVE" = "$SQUEEZELITE" ]]; then
+		OUTPUT="$AUDIO_DEVICE"
+	else
+		OUTPUT=$($SQUEEZESLAVE -L | grep "$AUDIO_DEVICE" | cut -d: -f1)
+		#echo "$OUTPUT : $AUDIO_DEVICE"
+		# Strip any spaces from the string
+		OUTPUT=${OUTPUT//[[:space:]]}
+	fi
 fi
+[[ -z "$OUTPUT" ]] && exit 1
 
 # Build command parameters
-PARAMS="";
-if [ -n "$OUTPUT" ]; then
-    if [ "$SQUEEZESLAVE" = "$(which squeezelite)" ]; then
-      OUTPUT="-o $OUTPUT"
-    else
-      OUTPUT="-o$OUTPUT"
-    fi
-      PARAMS="$PARAMS $OUTPUT"
+PARAMS=""
+if [[ "$SQUEEZESLAVE" = "$SQUEEZELITE" ]]; then
+	[[ -n "$OUTPUT" ]] && OUTPUT="-o $OUTPUT"
+	[[ -n "$SERVER" ]] && SERVER="-s $SERVER"
+	[[ -n "$MAC" ]] && MAC="-m $MAC"
+else
+	[[ -n "$OUTPUT" ]] && OUTPUT="-o$OUTPUT"
+	[[ -n "$MAC" ]] && MAC="-m$MAC"
 fi
-if [ -n "$MAC" ]; then
-    if [ "$SQUEEZESLAVE" = "$(which squeezelite)" ]; then
-      MAC="-m $MAC"
-    else
-      MAC="-m$MAC"
-    fi
-    PARAMS="$PARAMS $MAC"
-fi
-if [ -n "$SERVER" ]; then
-    if [ "$SQUEEZESLAVE" = "$(which squeezelite)" ]; then
-      SERVER="-s $SERVER"
-    fi
-    PARAMS="$PARAMS $SERVER"
-fi
+PARAMS="$OUTPUT $MAC $SERVER"
+
+
 echo "Starting squeezeslave: $SQUEEZESLAVE $PARAMS"
 $SQUEEZESLAVE $PARAMS
