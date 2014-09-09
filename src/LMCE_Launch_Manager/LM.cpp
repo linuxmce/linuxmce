@@ -1746,61 +1746,63 @@ bool LM::startMediaStation()
 	{
 		writeLog("Failed to connect to DCERouter!", true, LV_WARNING);
 		return false;
-	}	
-	
-	writeLog("Checking if Orbiter skin is OK");
-	if ( !confirmOrbiterSkinIsReady() )
-	{
-		writeLog("Failed to regenerate skin for Orbiter!!", true, LV_WARNING);
-		return false;
 	}
-	else
-        {
-                string status = getOrbiterStatus();
-                bool bRouterReloaded = false;
-                // repeat while status is "N"
-                while (status != "O")
-                {
-                    // firing reload event //TODO: should this be implemented through socket once socket layer is implemented??
-                    if (!bRouterReloaded)
-                       actionReloadRouter();
-                    
-                    writeLog("Trying to reload router to use new skin for this Orbiter, please wait (giving router 10 seconds to reload)...", true);
-                     
-                    // waiting 10 seconds
-                    int iCount=10;
-                    while (iCount--)
-                    {
-                        sleep(1);
-                    }
-                    
-                    // handling disconnection from router, the media station is not running,
-                    // so it may not auto-reconnect
-                    if (!m_pLMCE_Launch_Manager)
-                    {
-                        // assuming we were disconnected because of router reload
-                        bRouterReloaded = true;
-                        initialize_LMdevice();
-                    }
 
-                    status = getOrbiterStatus();
-                    if (status != "O" && status != "N" && status !="!")
-                    {
-                        writeLog("Received unknown status for this Orbiter, aborting Media Station start!", true, LV_WARNING);
-                        writeLog("Status was: "+status, true, LV_WARNING);
-                        return false;
-                    }
-                }
-		
-                writeLog("Check completed");
-        }
-	
+	if ( m_sOrbiterID != "") {
+		writeLog("Checking if Orbiter skin is OK");
+		if ( !confirmOrbiterSkinIsReady() )
+		{
+			writeLog("Failed to regenerate skin for Orbiter!!", true, LV_WARNING);
+			return false;
+		}
+		else
+	        {
+	                string status = getOrbiterStatus();
+	                bool bRouterReloaded = false;
+	                // repeat while status is "N"
+	                while (status != "O")
+	                {
+	                    // firing reload event //TODO: should this be implemented through socket once socket layer is implemented??
+	                    if (!bRouterReloaded)
+	                       actionReloadRouter();
+
+	                    writeLog("Trying to reload router to use new skin for this Orbiter, please wait (giving router 10 seconds to reload)...", true);
+
+	                    // waiting 10 seconds
+	                    int iCount=10;
+	                    while (iCount--)
+	                    {
+	                        sleep(1);
+	                    }
+
+	                    // handling disconnection from router, the media station is not running,
+	                    // so it may not auto-reconnect
+	                    if (!m_pLMCE_Launch_Manager)
+	                    {
+	                        // assuming we were disconnected because of router reload
+	                        bRouterReloaded = true;
+	                        initialize_LMdevice();
+	                    }
+
+	                    status = getOrbiterStatus();
+	                    if (status != "O" && status != "N" && status !="!")
+	                    {
+	                        writeLog("Received unknown status for this Orbiter, aborting Media Station start!", true, LV_WARNING);
+	                        writeLog("Status was: "+status, true, LV_WARNING);
+	                        return false;
+	                    }
+	                }
+
+	                writeLog("Check completed");
+	        }
+	}
 	// starting media services
 	startMediaDevices();
-	
+
 	// jumping to orbiter
-	jumpToOrbiter();
-	
+	if ( m_sOrbiterID != "")
+		jumpToOrbiter();
+
 	return true;
 }
 //TODO:decide if this is needed and port if it is
