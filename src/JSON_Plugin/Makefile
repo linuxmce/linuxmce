@@ -6,6 +6,7 @@ SNR_LDFLAGS ?= -L/opt/libxine1-pluto/lib -L/opt/linphone-1.3.5/lib
 
 ROOT = ..
 CXX = g++
+CFLAGS = -Wall -fPIC -ggdb3
 CXXFLAGS = -Wall -fPIC -ggdb3
 CPPFLAGS = -I /usr/include/pluto -I /usr/include/pluto/DCE -I$(ROOT) -I/usr/include/mysql $(SNR_CPPFLAGS) -I../DCE
 LDFLAGS = -L /usr/pluto/lib -L$(ROOT)/lib
@@ -21,6 +22,7 @@ sources = Main.cpp JSON_Plugin.cpp $(Gen_Dev_Files)
 
 sources += civetweb/CivetServer.cpp \
 	   CivetHandler/NowPlayingHandler.cpp \
+	   CivetHandler/MediaPlaylistHandler.cpp \
 	   EscapeJS.cpp
 Csources = civetweb/civetweb.c \
 	   base64.c

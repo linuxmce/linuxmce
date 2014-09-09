@@ -25,6 +25,9 @@ bool NowPlayingHandler::handleGet(CivetServer *server, struct mg_connection *con
 		"	\"active\": %s,\n"
 		"	\"media_type\": %d,\n"
 		"	\"media_device\": %d,\n"
+		"	\"remote_alt\": %s,\n"
+		"	\"playback_speed\": %s,\n"
+		"	\"stream_id\": %d,\n"
 		"	\"description\": \"%s\",\n"
 		"	\"sectiondescription\": \"%s\",\n"
 		"	\"playlistid\": \"%d\",\n"
@@ -93,6 +96,11 @@ bool NowPlayingHandler::handleGet(CivetServer *server, struct mg_connection *con
 			"true",                              // active
 			pMediaStream->m_iPK_MediaType,       // media_type
 			pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device, // media_device
+			pMediaStream->m_bUseAltScreens ? "true" : "false", // remote_alt
+			pMediaStream->m_pMediaDevice_Source
+				? StringUtils::itos(pMediaStream->m_pMediaDevice_Source->m_iLastPlaybackSpeed).c_str()
+				: "undefined",               // playback_speed
+			pMediaStream->m_iStreamID_get(),     // stream_id
 			escapedMediaDescription.c_str(),     // description
 			escapedSectionDescription.c_str(),     // description
 			pMediaStream->m_iPK_Playlist,        // Playlist ID - maybe useful for later playlist retrieval
@@ -111,6 +119,9 @@ bool NowPlayingHandler::handleGet(CivetServer *server, struct mg_connection *con
 			"false",                             // active
 			0,                                   // media_type
 			0,                                   // media_device
+			"false",                             // remote_alt
+			"undefined",                         // playback_speed
+			0,                                   // stream_id
 			"",                                  // description
 			"",                                  // section description
 			0,                                   // playlist ID

@@ -29,6 +29,7 @@ using namespace DCE;
 
 #include "civetweb/CivetServer.h"
 #include "CivetHandler/NowPlayingHandler.h"
+#include "CivetHandler/MediaPlaylistHandler.h"
 
 #include "DCERouter.h"
 
@@ -74,6 +75,7 @@ bool JSON_Plugin::GetConfig()
 	m_pMedia_Plugin = (Media_Plugin *) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
 
 	civetServer->addHandler("/now_playing", new NowPlayingHandler(m_pMedia_Plugin));
+	civetServer->addHandler("/playlist", new MediaPlaylistHandler(m_pMedia_Plugin));
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
