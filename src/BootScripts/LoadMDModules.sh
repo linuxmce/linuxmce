@@ -6,12 +6,15 @@
 DD_MODULES=106
 DT_GENERIC_PC_AS_MD=28
 DT_RPI_B_AS_MD=2216
+DC_COMPUTERS_MEDIA_DIRECTOR=8
 
 R=$(RunSQL "SELECT FK_DeviceTemplate FROM Device WHERE PK_Device = $PK_Device")
-ThisDeviceTemplate=$(Field "1" "$R")
+FK_DeviceTemplate=$(Field "1" "$R")
 
-# FIXME: should check for Device Category: Media Director instead
-if [[ "$ThisDeviceTemplate" == "$DT_GENERIC_PC_AS_MD" ]] || [[ "$ThisDeviceTemplate" == "$DT_RPI_B_AS_MD" ]]; then
+R=$(RunSQL "SELECT FK_DeviceCategory FROM DeviceTemplate WHERE PK_DeviceTemplate = $FK_DeviceTemplate")
+FK_DeviceCategory=$(Field "1" "$R")
+
+if [[ "$FK_DeviceCategory" == "$DC_COMPUTERS_MEDIA_DIRECTOR" ]]; then
 	R=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=${PK_Device} AND FK_DeviceData=$DD_MODULES")
 else
 	Q="
@@ -24,10 +27,6 @@ else
 			FK_DeviceData=$DD_MODULES
 			AND
 			Device.FK_Device_ControlledVia = $PK_Device
-			AND
-			(Device.FK_DeviceTemplate = $DT_GENERIC_PC_AS_MD
-				OR
-				Device.FK_DeviceTemplate = $DT_RPI_B_AS_MD)
 	"
 	R=$(RunSQL "$Q")
 fi
