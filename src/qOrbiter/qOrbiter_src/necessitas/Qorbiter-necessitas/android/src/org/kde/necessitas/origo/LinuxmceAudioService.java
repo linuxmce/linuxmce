@@ -27,18 +27,7 @@ import android.widget.Toast;
 import java.net.Socket;
 import android.os.Handler;
 
-import java.io.IOException;
 
-import javax.microedition.khronos.opengles.GL10;
-
-import android.content.Context;
-import android.graphics.SurfaceTexture;
-import android.media.MediaPlayer;
-import android.opengl.GLES11Ext;
-import android.opengl.GLES20;
-import android.util.Log;
-import android.view.Surface;
-import android.graphics.SurfaceTexture;
 
 
 /**
@@ -55,10 +44,8 @@ OnPreparedListener {
 
 
 	private final IBinder mBinder = new LocalBinder();
-        private static final String TAG = "LinuxMCE Media Service";
-        private static Surface mSurface;
-        private static SurfaceTexture mTexture;
-        public static Context context = null;
+        private static final String TAG = "LinuxMCE Media Service";      
+
 
         private final Handler handler = new Handler();
         private MediaPlayer mp;
