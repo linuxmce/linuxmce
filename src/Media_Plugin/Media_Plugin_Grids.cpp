@@ -1011,7 +1011,18 @@ class DataGridTable *Media_Plugin::CurrentMediaSections( string GridID, string P
 	*iPK_Variable=VARIABLE_Track_or_Playlist_Positio_CONST;
 	*sValue_To_Assign="";
 
-    class MediaStream *pMediaStream = DetermineStreamOnOrbiter( pMessage->m_dwPK_Device_From, true );
+	class MediaStream *pMediaStream = NULL;
+	string sPK_EntertainArea = pMessage->m_mapParameters[COMMANDPARAMETER_PK_EntertainArea_CONST];
+	if (!sPK_EntertainArea.empty())
+	{
+		vector<class EntertainArea *> vectEntertainArea;
+		DetermineEntArea(0, 0 , sPK_EntertainArea, vectEntertainArea);
+		pMediaStream = vectEntertainArea.size() == 1 ? vectEntertainArea[0]->m_pMediaStream : NULL;
+	}
+	else
+	{
+		pMediaStream = DetermineStreamOnOrbiter(pMessage->m_dwPK_Device_From, true);
+	}
 
     DataGridTable *pDataGrid = new DataGridTable();
 
