@@ -285,6 +285,22 @@ function Build_Replacements_Precise
 	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/*ow*.deb
 	#dir_="${svn_dir}/${svn_branch_name}/external"
 	#cp $dir_/*ow*.deb "${replacements_dir}"
+
+#libsoxr-0.1.1/
+	#Package: libsoxr-0.1.1 - for squeezelite
+	Build_Replacement_Package libsoxr0 ubuntu/libsoxr-0.1.1
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*soxr*.deb
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
+	cp $dir_/*soxr*.deb "${replacements_dir}"
+
+#ubuntu/squeezelite-1.4
+	#Package: squeezelite-1.4
+	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.4
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.4*.deb
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
+	cp $dir_/*squeezelite*.deb "${replacements_dir}"
+
+
 }
 
 function Build_Replacements_Intrepid
