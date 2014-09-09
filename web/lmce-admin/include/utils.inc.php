@@ -1400,7 +1400,7 @@ function displayCriteria($FK_CriteriaParmNesting,$eventHandlerID,$installationID
 						break;
 					}
 				}else{
-					if(substr($rowCP['CPL_Description'],0,3)=='PK_'){
+					if(substr($rowCP['CPL_Description'],0,3)=='PK_' && $rowCP['CPL_Description'] != 'PK_EventList'){
 						$out.='<select name="CriteriaParmValue_'.$rowCP['PK_CriteriaParm'].'">
 										<option value="0" ></option>';
 						$tableName=substr($rowCP['CPL_Description'],3);
