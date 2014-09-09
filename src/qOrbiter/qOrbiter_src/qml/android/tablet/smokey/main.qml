@@ -423,7 +423,6 @@ Item {
     function screenchange(screenname )
     {
         pageLoader.source = "screens/"+screenname
-
     }
 
 

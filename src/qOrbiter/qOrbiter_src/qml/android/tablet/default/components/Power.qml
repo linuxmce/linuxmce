@@ -1,10 +1,10 @@
 import QtQuick 1.0
 import "../../../../skins-common/lib/handlers"
-Rectangle{
+Item{
     id:power_rect_container
     height: manager.appHeight
     width: manager.appWidth
-    color: "transparent"
+
     MouseArea{
         anchors.fill: parent
     }

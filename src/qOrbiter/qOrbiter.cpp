@@ -1758,10 +1758,11 @@ bool DCE::qOrbiter::initDceVars(){
 bool DCE::qOrbiter::initialize(){
     emit commandResponseChanged("Connecting to router");
     emit commandResponseChanged("Starting dce initialization");
-    //    if(m_sIPAddress==""){
-    //        m_sIPAddress="192.168.80.1";
-    //    }
-    emit commandResponseChanged("Initialization IP::"+ QString::fromStdString(m_sIPAddress));
+        if(m_sIPAddress==""){
+            m_sIPAddress=dceIP.toStdString();
+            m_sHostName=dceIP.toStdString();
+        }
+    emit commandResponseChanged("Initialization IP::"+ dceIP);
 
     qDebug() << "INITIALIZE!!!!!!!!!";
     if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
@@ -1774,7 +1775,7 @@ bool DCE::qOrbiter::initialize(){
 
         emit deviceValid(true);
         emit commandResponseChanged("Starting Manager");
-        emit startManager(QString::number(m_dwPK_Device), QString::fromStdString(m_sIPAddress));
+        emit startManager(QString::number(m_dwPK_Device), dceIP);
 
         if(!getConfiguration()){
             exit(99);
@@ -1788,7 +1789,7 @@ bool DCE::qOrbiter::initialize(){
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "No Router");
             emit commandResponseChanged("No Connection to Router");
             emit routerInvalid();
-            //QApplication::processEvents(QEventLoop::AllEvents);
+            QApplication::processEvents(QEventLoop::AllEvents);
             return false;
         } else if( m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_BadDevice ) {
 
@@ -1799,20 +1800,20 @@ bool DCE::qOrbiter::initialize(){
         } else if(  m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_NeedReload ){
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Router Needs Reload");
             emit commandResponseChanged("Needs Reload");
-            //QApplication::processEvents(QEventLoop::AllEvents);
+            QApplication::processEvents(QEventLoop::AllEvents);
             return false;
         } else {
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
             Disconnect();
             emit commandResponseChanged("QOrbiter Connect() Failed for"+QString::number(this->m_dwPK_Device) );
-            //QApplication::processEvents(QEventLoop::AllEvents);
+            QApplication::processEvents(QEventLoop::AllEvents);
             return false;
         }
 
         Disconnect();
         return false;
-        //QApplication::processEvents(QEventLoop::AllEvents);
+        QApplication::processEvents(QEventLoop::AllEvents);
     }
 }
 
@@ -1827,7 +1828,7 @@ void qOrbiter::requestConfigData()
     QNetworkRequest updateDevice;
     QNetworkAccessManager *ud= new QNetworkAccessManager();
     qDebug() << "Getting config";
-    updateDevice.setUrl("http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(m_dwPK_Device));
+    updateDevice.setUrl("http://"+dceIP+"/lmce-admin/qOrbiterGenerator.php?d="+QString::number(m_dwPK_Device));
 
     QObject::connect(ud, SIGNAL(finished(QNetworkReply*)), this, SLOT(processConfigData(QNetworkReply*)));
     ud->get(updateDevice);
@@ -1955,7 +1956,8 @@ void qOrbiter::qmlSetup(int device, QString address)
     m_dwPK_Device = device;
     qWarning() << "DCE IP::" << address;
     m_sHostName = address.toStdString();
-    m_sIPAddress = address.toStdString();
+    dceIP = address;
+
     Disconnect();
     pingCore();
 
@@ -2011,7 +2013,7 @@ void qOrbiter::finishSetup()
     httpSettingsReply->disconnect(this, SLOT(finishSetup()));
     emit commandResponseChanged("Finishing setup...");
     //  qDebug() << httpSettingsReply->readAll();
-    QString settingsUrl = "http://"+ QString::fromStdString(m_sIPAddress);
+    QString settingsUrl = "http://"+ dceIP;
     settingsUrl.append("/lmce-admin/qOrbiterGenerator.php?d="+QString::number(m_dwPK_Device)) ;
     httpSettingsRequest->setUrl(settingsUrl);
     // qDebug() << "Settings url :: " << httpSettingsRequest->url();
@@ -4409,8 +4411,8 @@ void DCE::qOrbiter::newOrbiter()
           */
 int qOrbiter::PromptFor(std::string sToken)
 {
-    Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sIPAddress);
-    qDebug() << "Messaging core ip" << m_sIPAddress.c_str();
+    Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, dceIP.toStdString().c_str());
+    qDebug() << "Messaging core ip" << dceIP.toStdString().c_str();
     string sResults;
     DCE::CMD_Get_Orbiter_Options_DT CMD_Get_Orbiter_Options_DT(m_dwPK_Device, DEVICETEMPLATE_Orbiter_Plugin_CONST, BL_SameHouse,
                                                                sToken,&sResults);
@@ -4500,8 +4502,8 @@ int qOrbiter::DeviceIdInvalid()
 int qOrbiter::SetupNewOrbiter()
 {
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"start SetupNewOrbiter");
-    qDebug() << "Opening setup connection via Event_Impl to " << m_sIPAddress.c_str();
-    Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sIPAddress);
+    qDebug() << "Opening setup connection via Event_Impl to " << dceIP.toStdString().c_str();
+    Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, dceIP.toStdString().c_str());
     while(true)
     {
         string sResponse;
@@ -5012,11 +5014,11 @@ void qOrbiter::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message *
 
 void qOrbiter::pingCore()
 {
-    qDebug() << "Executing ping to" << m_sIPAddress.c_str();
-    if(m_sIPAddress!=""){
+    qDebug() << "Executing ping to" << dceIP.toStdString().c_str();
+    if(dceIP.toStdString()!=""){
 
-        emit commandResponseChanged("initiating ping to core with address::"+QString::fromStdString(m_sIPAddress));
-        QString url = QString::fromStdString(m_sIPAddress);
+        emit commandResponseChanged("initiating ping to core with address::"+dceIP);
+        QString url =dceIP;
         if(!url.contains(QRegExp("(\\D)"))){
 
             emit commandResponseChanged("Host name provided, doing lookup");
@@ -5058,7 +5060,7 @@ void qOrbiter::checkPing(QHostInfo info)
         emit commandResponseChanged("Router found, checking for LinuxMCE installation");
 
         if(!m_bRunning ){
-            emit commandResponseChanged("Checking for linuxmce installation" + QString::fromStdString(m_sIPAddress));
+            emit commandResponseChanged("Checking for linuxmce installation" + dceIP);
             checkInstall();
         }
     }
@@ -5067,9 +5069,9 @@ void qOrbiter::checkPing(QHostInfo info)
 
 void qOrbiter::checkInstall()
 {
-    emit commandResponseChanged("Checking for LinuxMCE installtion in checkInstall() at "+ QString::fromStdString(m_sIPAddress));
+    emit commandResponseChanged("Checking for LinuxMCE installtion in checkInstall() at "+ dceIP);
 
-    QString url = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/index.php";
+    QString url = "http://"+dceIP+"/lmce-admin/index.php";
     QNetworkAccessManager *pingManager = new QNetworkAccessManager();
 
     connect(pingManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(verifyInstall(QNetworkReply*)));
@@ -5086,7 +5088,7 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
         if ( initialize() == true )
         {
             emit routerConnectionChanged(true);
-            //  setm_sIPAddress(m_sIPAddress);
+//              setm_sIPAddress(m_sIPAddress);
 
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
 

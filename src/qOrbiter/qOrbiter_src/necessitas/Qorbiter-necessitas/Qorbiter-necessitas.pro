@@ -84,13 +84,11 @@ TARGET=qorbiter-$$QT_VERSION
  #       DEPLOYMENTFOLDERS+=folder_01
 
         INSTALLS+= qmlplugins
-        HEADERS += ../../plugins/AndroidInfo/androidsystem.h \
-        androidmediaplayer.h \
+        HEADERS += ../../plugins/AndroidInfo/androidsystem.h \   
     ../../contextobjects/screenmessage.h \
     ../../RemoteCommands.h
 
-        SOURCES += ../../plugins/AndroidInfo/androidsystem.cpp \
-        androidmediaplayer.cpp \
+        SOURCES += ../../plugins/AndroidInfo/androidsystem.cpp \  
     ../../contextobjects/screenmessage.cpp
 
 
@@ -359,9 +357,7 @@ OTHER_FILES += ../../Readme.txt \
     android/src/org/kde/necessitas/origo/VideoActivity.java \
     android/src/org/kde/necessitas/origo/LinuxmceAudioService.java \
     ../../qml/android/phoneConfig/BaseLoaded.qml \
-    android/version.xml \
-    android/src/org/kde/necessitas/origo/TextureHelper.java \
-    android/src/org/kde/necessitas/origo/MySurfaceTexture.java
+
 
 RESOURCES += \
     ../../skinData.qrc

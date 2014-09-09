@@ -7,7 +7,7 @@ set -e
 
 START=$(pwd)
 export ANDROID_NDK_PLATFORM=android-9
-NECESSITAS_ROOT=~/necessitas4
+NECESSITAS_ROOT=~/necessitas-alpha4
 export ANDROID_NDK_ROOT=$NECESSITAS_ROOT/android-ndk
 export ANDROID_SDK_ROOT=$NECESSITAS_ROOT/android-sdk
 OLDPATH=$PATH
@@ -21,14 +21,14 @@ TARGET=debug
 trap 'export PATH=$OLDPATH' EXIT
 
 cd ../qOrbiter_src/plugins/AudioVisual
-make clean 
+ 
 $NECESSITAS_ROOT/Android/Qt/482/armeabi-v7a/bin/qmake AudioVisual.pro -r -spec android-g++ "CONFIG+=opengl"
 make clean -j6
 clear
 
 cd $START
 cd ../qOrbiter_src/plugins/DceScreenSaver
-make clean 
+ 
 $NECESSITAS_ROOT/Android/Qt/482/armeabi-v7a/bin/qmake DceScreenSaver.pro -r -spec android-g++ "CONFIG+=opengl"
 make clean -j6
 
@@ -37,7 +37,7 @@ cd $START
 cd ../qOrbiter_src/necessitas/Qorbiter-necessitas
 rm -rf installdir
 mkdir installdir
-make clean 
+ 
 $NECESSITAS_ROOT/Android/Qt/482/armeabi-v7a/bin/qmake Qorbiter-necessitas.pro -r -spec android-g++ "CONFIG+=opengl"
 make  -j6
 make INSTALL_ROOT="android" install

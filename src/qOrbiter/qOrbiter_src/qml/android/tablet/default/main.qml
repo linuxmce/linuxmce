@@ -166,7 +166,6 @@ Item {
             console.log("finishing load")
             pageLoader.source = "screens/"+screenname
             console.log("screen" + screenname + " loaded.")
-
         }
         else
         {
@@ -203,40 +202,39 @@ Item {
         z:2
     }
 
+
     //=================Components==================================================//
-    function loadComponent(componentName )
+    function loadComponent(componentName)
     {
         componentLoader.source = "components/"+componentName
         if (componentLoader.status == Component.Ready)
         {
-            manager.setDceResponse("Command to change to:" + componentName+ " was successfull")
+            manager.setDceResponse("Command to load:" + componentName+ " was successfull")
         }
         else if (componentLoader.status == Component.Loading)
         {
-            console.log("loading Component from network")
+            console.log("loading item from network")
             finishLoadingComponent(componentName)
         }
         else
         {
-            console.log("Command to add: " + componentName + " failed!")
+            console.log("Command to load: " + componentName + " failed!")
             componentFile = componentName
-
         }
     }
 
-    function finishLoadingComponent (componentName)
+    function finishLoadingComponent (comp)
     {
         if(componentLoader.status != Component.Ready)
         {
-            console.log("Finished loading network component")
-            componentLoader.source = "components/"+componentName
-            console.log("screen" + componentName + " loaded.")
+            console.log("finishing network load")
+            componentLoader.source = "components/"+comp
+            console.log("item " + comp + " loaded.")
         }
         else
         {
-            finishLoadingComponent(componentName)
+            finishLoadingComponent(comp)
         }
-
     }
 
 
@@ -245,8 +243,7 @@ Item {
         height: parent.height
         width: parent.width
         objectName: "componentbot"
-        onLoaded: {console.log("Component is loaded")}
-        onSourceChanged: {opacity = 1}
+
     }
 
     PropertyAnimation{
