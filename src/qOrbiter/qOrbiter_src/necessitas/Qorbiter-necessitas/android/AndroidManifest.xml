@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<manifest android:versionCode="26" package="org.linuxmce.qorbiter.qOrbiterQt4" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="qt4b1-gl">
+<manifest android:versionCode="26" package="org.linuxmce.qorbiter.qOrbiterQt4.Qorbiter_necessitas" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="qt4b1-gl">
     <application android:name="org.kde.necessitas.origo.QtApplication" android:icon="@drawable/icon" android:persistent="true" android:allowBackup="true" android:label="@string/app_name">
         <service android:name="org.kde.necessitas.origo.LinuxmceAudioService" android:icon="@drawable/icon"/>
         <activity android:name="org.kde.necessitas.origo.QtActivity" android:configChanges="orientation|locale|fontScale|keyboard|keyboardHidden" android:launchMode="singleInstance" android:label="@string/app_name">
@@ -9,7 +9,7 @@
             </intent-filter>
             <meta-data android:name="android.app.qt_libs_resource_id" android:resource="@array/qt_libs"/>
             <meta-data android:name="android.app.bundled_libs_resource_id" android:resource="@array/bundled_libs"/>
-            <meta-data android:name="android.app.lib_name" android:value="qorbiter-4.8.2"/>
+            <meta-data android:name="android.app.lib_name" android:value=""/>
             <!--  Messages maps -->
             <meta-data android:name="android.app.ministro_not_found_msg" android:value="@string/ministro_not_found_msg"/>
             <meta-data android:name="android.app.ministro_needed_msg" android:value="@string/ministro_needed_msg"/>

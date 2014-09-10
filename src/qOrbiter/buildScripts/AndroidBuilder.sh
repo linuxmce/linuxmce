@@ -4,6 +4,22 @@ set -e
 
 # The following vars need to be modified to reflect
 # the local installation.
+INSTALLTODEVICE=""
+CLEANBUILD=""
+PCOUNT=1
+
+OPTIND=1 
+        while getopts "i:c:j:" opt; do 
+        case "$opt" in 
+                i)  INSTALLTODEVICE="Y"
+        ;; 
+                c)  CLEANBUILD="Y" 
+        ;;
+         	j)  PCOUNT=$OPTARG 
+        ;; 
+        esac 
+        done 
+
 
 START=$(pwd)
 export ANDROID_NDK_PLATFORM=android-9
@@ -23,14 +39,14 @@ trap 'export PATH=$OLDPATH' EXIT
 cd ../qOrbiter_src/plugins/AudioVisual
  
 $NECESSITAS_ROOT/Android/Qt/482/armeabi-v7a/bin/qmake AudioVisual.pro -r -spec android-g++ "CONFIG+=opengl"
-make clean -j6
+make clean -j$PCOUNT
 clear
 
 cd $START
 cd ../qOrbiter_src/plugins/DceScreenSaver
  
 $NECESSITAS_ROOT/Android/Qt/482/armeabi-v7a/bin/qmake DceScreenSaver.pro -r -spec android-g++ "CONFIG+=opengl"
-make clean -j6
+make clean -j$PCOUNT
 
 clear
 cd $START	
@@ -39,9 +55,18 @@ rm -rf installdir
 mkdir installdir
  
 $NECESSITAS_ROOT/Android/Qt/482/armeabi-v7a/bin/qmake Qorbiter-necessitas.pro -r -spec android-g++ "CONFIG+=opengl"
-make  -j6
+make  -j$PCOUNT
 make INSTALL_ROOT="android" install
 
 cd android
 android update project --path .
 $NECESSITAS_ROOT/apache-ant-1.8.4/bin/ant clean $TARGET
+
+if [ -n "$INSTALLTODEVICE" ]; then
+
+clear
+echo "Installing APK"
+$ANDROID_SDK_ROOT/platform-tools/./adb install bin/Qorbiter-necessitas-debug.apk
+fi;
+
+exit 0; 
