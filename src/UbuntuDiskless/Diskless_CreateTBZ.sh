@@ -501,13 +501,13 @@ MD_Install_Packages () {
 			# HACK: copy the foundation kernel.img to a normal linux kernal name with version
 			# FIXME: is there a better way to do this?  the raspbian kernels are missing the fdt.
 			#LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-image-3.6-trunk-rpi
-			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi0 raspberrypi-bootloader rpi-update
+			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi-bin raspberrypi-bootloader rpi-update
 			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install rpi-update
 			LC_ALL=C chroot "$TEMP_DIR" rpi-update
-			LC_ALL=C chroot "$TEMP_DIR" cp /boot/kernel.img /boot/vmlinuz-3.6-trunk-rpi
+			LC_ALL=C chroot "$TEMP_DIR" ln -sf /boot/kernel.img /boot/vmlinuz-3.6-trunk-rpi
 			LC_ALL=C chroot "$TEMP_DIR" touch /boot/initrd.img-3.6-trunk-rpi
 
-			LC_ALL=C chroot "$TEMP_DIR" mkdir /sdcard
+			LC_ALL=C chroot "$TEMP_DIR" mkdir -p /sdcard
 
 	                LC_ALL=C chroot $TEMP_DIR apt-get -y install alsa-base alsa-utils pulseaudio
 			VerifyExitCode "alsa-base, alsa-utils or pulseaudio packages install failed"
