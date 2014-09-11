@@ -1,8 +1,14 @@
+omxplayer (0.git20140814-3) raspbian; urgency=low
+
+  * Cherrypick 2 upstream fixes, fix sound and add rtp:// streaming
+
+ -- phenigma <phenigma@hotmail.com>  Sat, 23 Aug 2014 15:01:21 -0500
+
 omxplayer (0.git20140814-2) raspbian; urgency=low
 
   * Add dependency x11-xserver-utils, fbset (git hash 90b895121d)
 
- -- phenigma <phenigma@hotmail.com>  Thu, 14 Aug 2014 19:19:42 -0500
+ -- phenigma <phenigma@hotmail.com>  Thu, 14 Aug 2014 20:19:42 -0500
 
 omxplayer (0.git20140814-1) raspbian; urgency=low
 
