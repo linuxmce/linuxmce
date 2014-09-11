@@ -5,23 +5,7 @@
  * (C) Copyright 2004-2010
  * Matrix-Vision GmbH, andre.schwarz@matrix-vision.de
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef __CONFIG_H
@@ -29,7 +13,6 @@
 
 #include <version.h>
 
-#define CONFIG_MPC5xxx	1
 #define CONFIG_MPC5200 	1
 
 #ifndef CONFIG_SYS_TEXT_BASE
@@ -91,6 +74,7 @@
 #define CONFIG_CMD_CACHE
 #define CONFIG_CMD_DHCP
 #define CONFIG_CMD_FPGA
+#define CONFIG_CMD_FPGA_LOADMK
 #define CONFIG_CMD_I2C
 #define CONFIG_CMD_MII
 #define CONFIG_CMD_NET
@@ -109,6 +93,7 @@
 #define CONFIG_BOOTP_SEND_HOSTNAME
 #define CONFIG_BOOTP_SUBNETMASK
 #define CONFIG_BOOTP_VENDOREX
+#define CONFIG_LIB_RAND
 
 /*
  * Autoboot
@@ -239,7 +224,6 @@
 #define CONFIG_SYS_HUSH_PARSER
 #define CONFIG_CMDLINE_EDITING
 #undef 	CONFIG_SYS_LONGHELP
-#define CONFIG_SYS_PROMPT		"=> "
 #ifdef CONFIG_CMD_KGDB
 #define CONFIG_SYS_CBSIZE		1024
 #else
@@ -251,8 +235,6 @@
 
 #define CONFIG_SYS_MEMTEST_START	0x00800000
 #define CONFIG_SYS_MEMTEST_END		0x02f00000
-
-#define CONFIG_SYS_HZ			1000
 
 /* default load address */
 #define CONFIG_SYS_LOAD_ADDR		0x02000000
@@ -280,7 +262,7 @@
 
 #undef FPGA_DEBUG
 #undef CONFIG_SYS_FPGA_PROG_FEEDBACK
-#define CONFIG_FPGA		CONFIG_SYS_XILINX_SPARTAN2
+#define CONFIG_FPGA
 #define CONFIG_FPGA_XILINX	1
 #define CONFIG_FPGA_SPARTAN2	1
 #define CONFIG_FPGA_COUNT	1

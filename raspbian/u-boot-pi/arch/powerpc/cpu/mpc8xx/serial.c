@@ -2,23 +2,7 @@
  * (C) Copyright 2000
  * Wolfgang Denk, DENX Software Engineering, wd@denx.de.
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
@@ -189,7 +173,7 @@ static int smc_init (void)
 # endif
 #endif
 
-#if defined(CONFIG_FADS) || defined(CONFIG_ADS)
+#if defined(CONFIG_FADS)
 	/* Enable RS232 */
 #if defined(CONFIG_8xx_CONS_SMC1)
 	*((uint *) BCSR1) &= ~BCSR1_RS232EN_1;
@@ -198,7 +182,7 @@ static int smc_init (void)
 #endif
 #endif	/* CONFIG_FADS */
 
-#if defined(CONFIG_RPXLITE) || defined(CONFIG_RPXCLASSIC)
+#if defined(CONFIG_RPXLITE)
 	/* Enable Monitor Port Transceiver */
 	*((uchar *) BCSR0) |= BCSR0_ENMONXCVR ;
 #endif /* CONFIG_RPXLITE */
@@ -240,10 +224,6 @@ static int smc_init (void)
 	up->smc_rstate = 0;
 	up->smc_tstate = 0;
 #endif
-
-#if defined(CONFIG_MBX)
-	board_serial_init();
-#endif	/* CONFIG_MBX */
 
 	/* Set UART mode, 8 bit, no parity, one stop.
 	 * Enable receive and transmit.

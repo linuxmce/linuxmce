@@ -5,23 +5,7 @@
  * Influenced by code from:
  * Wolfgang Denk, DENX Software Engineering, wd@denx.de.
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
@@ -73,12 +57,10 @@ struct spi_slave *spi_setup_slave(unsigned int bus, unsigned int cs,
 	if (!spi_cs_is_valid(bus, cs))
 		return NULL;
 
-	ss = malloc(sizeof(struct soft_spi_slave));
+	ss = spi_alloc_slave(struct soft_spi_slave, bus, cs);
 	if (!ss)
 		return NULL;
 
-	ss->slave.bus = bus;
-	ss->slave.cs = cs;
 	ss->mode = mode;
 
 	/* TODO: Use max_hz to limit the SCK rate */
@@ -154,10 +136,14 @@ int  spi_xfer(struct spi_slave *slave, unsigned int bitlen,
 		/*
 		 * Check if it is time to work on a new byte.
 		 */
-		if((j % 8) == 0) {
-			tmpdout = *txd++;
+		if ((j % 8) == 0) {
+			if (txd)
+				tmpdout = *txd++;
+			else
+				tmpdout = 0;
 			if(j != 0) {
-				*rxd++ = tmpdin;
+				if (rxd)
+					*rxd++ = tmpdin;
 			}
 			tmpdin  = 0;
 		}
@@ -182,9 +168,11 @@ int  spi_xfer(struct spi_slave *slave, unsigned int bitlen,
 	 * bits over to left-justify them.  Then store the last byte
 	 * read in.
 	 */
-	if((bitlen % 8) != 0)
-		tmpdin <<= 8 - (bitlen % 8);
-	*rxd++ = tmpdin;
+	if (rxd) {
+		if ((bitlen % 8) != 0)
+			tmpdin <<= 8 - (bitlen % 8);
+		*rxd++ = tmpdin;
+	}
 
 	if (flags & SPI_XFER_END)
 		spi_cs_deactivate(slave);

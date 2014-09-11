@@ -2,23 +2,7 @@
  * (C) Copyright 2007
  * Gerald Van Baren, Custom IDEAS, vanbaren@cideas.com
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef __FDT_SUPPORT_H
@@ -26,8 +10,10 @@
 
 #ifdef CONFIG_OF_LIBFDT
 
-#include <fdt.h>
+#include <libfdt.h>
 
+u32 fdt_getprop_u32_default_node(const void *fdt, int off, int cell,
+				const char *prop, const u32 dflt);
 u32 fdt_getprop_u32_default(const void *fdt, const char *path,
 				const char *prop, const u32 dflt);
 int fdt_chosen(void *fdt, int force);
@@ -78,11 +64,16 @@ static inline void fdt_fixup_crypto_node(void *blob, int sec_rev) {}
 int fdt_pci_dma_ranges(void *blob, int phb_off, struct pci_controller *hose);
 #endif
 
-#ifdef CONFIG_OF_BOARD_SETUP
 void ft_board_setup(void *blob, bd_t *bd);
+/*
+ * The keystone2 SOC requires all 32 bit aliased addresses to be converted
+ * to their 36 physical format. This has to happen after all fdt nodes
+ * are added or modified by the image_setup_libfdt(). The ft_board_setup_ex()
+ * called at the end of the image_setup_libfdt() is to do that convertion.
+ */
+void ft_board_setup_ex(void *blob, bd_t *bd);
 void ft_cpu_setup(void *blob, bd_t *bd);
 void ft_pci_setup(void *blob, bd_t *bd);
-#endif
 
 void set_working_fdt_addr(void *addr);
 int fdt_resize(void *blob);
@@ -92,7 +83,7 @@ int fdt_fixup_nor_flash_size(void *blob);
 
 void fdt_fixup_mtdparts(void *fdt, void *node_info, int node_info_size);
 void fdt_del_node_and_alias(void *blob, const char *alias);
-u64 fdt_translate_address(void *blob, int node_offset, const u32 *in_addr);
+u64 fdt_translate_address(void *blob, int node_offset, const __be32 *in_addr);
 int fdt_node_offset_by_compat_reg(void *blob, const char *compat,
 					phys_addr_t compat_off);
 int fdt_alloc_phandle(void *blob);
@@ -103,6 +94,8 @@ int fdt_add_edid(void *blob, const char *compat, unsigned char *buf);
 int fdt_verify_alias_address(void *fdt, int anode, const char *alias,
 			      u64 addr);
 u64 fdt_get_base_address(void *fdt, int node);
+int fdt_read_range(void *fdt, int node, int n, uint64_t *child_addr,
+		   uint64_t *addr, uint64_t *len);
 
 enum fdt_status {
 	FDT_STATUS_OKAY,
@@ -133,4 +126,9 @@ static inline int fdt_status_disabled_by_alias(void *fdt, const char* alias)
 }
 
 #endif /* ifdef CONFIG_OF_LIBFDT */
+
+#ifdef USE_HOSTCC
+int fdtdec_get_int(const void *blob, int node, const char *prop_name,
+		int default_val);
+#endif
 #endif /* ifndef __FDT_SUPPORT_H */

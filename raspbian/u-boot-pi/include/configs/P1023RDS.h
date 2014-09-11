@@ -4,23 +4,7 @@
  * Authors:  Roy Zang <tie-fei.zang@freescale.com>
  *	     Chunhe Lan <b25806@freescale.com>
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 /*
@@ -30,25 +14,8 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-#ifdef CONFIG_NAND
-#define CONFIG_NAND_U_BOOT
-#define CONFIG_RAMBOOT_NAND
-#endif
-
-#ifdef CONFIG_NAND_U_BOOT
-#define CONFIG_SYS_TEXT_BASE_SPL	0xfff00000
-#define CONFIG_SYS_TEXT_BASE		0x11001000
-
-#ifdef CONFIG_NAND_SPL
-#define CONFIG_SYS_MONITOR_BASE	CONFIG_SYS_TEXT_BASE_SPL /* start of monitor */
-#else
-#define CONFIG_SYS_LDSCRIPT $(TOPDIR)/$(CPUDIR)/u-boot-nand.lds
-#define CONFIG_SYS_MONITOR_BASE	CONFIG_SYS_TEXT_BASE	/* start of monitor */
-#endif /* CONFIG_NAND_SPL */
-#endif
-
 #ifndef CONFIG_SYS_TEXT_BASE
-#define CONFIG_SYS_TEXT_BASE	0xeff80000
+#define CONFIG_SYS_TEXT_BASE	0xeff40000
 #endif
 
 #ifndef CONFIG_SYS_MONITOR_BASE
@@ -62,7 +29,6 @@
 /* High Level Configuration Options */
 #define CONFIG_BOOKE		/* BOOKE */
 #define CONFIG_E500		/* BOOKE e500 family */
-#define CONFIG_MPC85xx
 #define CONFIG_P1023
 #define CONFIG_P1023RDS
 #define CONFIG_MP		/* support multiple processors */
@@ -73,6 +39,7 @@
 #define CONFIG_PCIE2		/* PCIE controler 2 (slot 2) */
 #define CONFIG_PCIE3		/* PCIE controler 3 (slot 3) */
 #define CONFIG_FSL_PCI_INIT	/* Use common FSL init code */
+#define CONFIG_PCI_INDIRECT_BRIDGE	/* indirect PCI bridge support */
 #define CONFIG_FSL_PCIE_RESET	/* need PCIe reset errata */
 #define CONFIG_SYS_PCI_64BIT	/* enable 64-bit PCI resources */
 #define CONFIG_FSL_LAW		/* Use common FSL init code */
@@ -178,7 +145,6 @@ extern unsigned long get_clock_freq(void);
 #define CONFIG_SYS_BCSR_BASE		0xe0000000 /* start of on board FPGA */
 #define CONFIG_SYS_BCSR_BASE_PHYS	CONFIG_SYS_BCSR_BASE
 
-#ifndef CONFIG_NAND
 #define CONFIG_SYS_FLASH_BASE		0xee000000 /* start of FLASH 32M */
 
 #define CONFIG_SYS_FLASH_BASE_PHYS	CONFIG_SYS_FLASH_BASE
@@ -195,11 +161,8 @@ extern unsigned long get_clock_freq(void);
 #define CONFIG_SYS_MAX_FLASH_SECT	512	/* sectors per device */
 #define CONFIG_SYS_FLASH_ERASE_TOUT	60000	/* Flash Erase Timeout (ms) */
 #define CONFIG_SYS_FLASH_WRITE_TOUT	500	/* Flash Write Timeout (ms) */
-#else
-#define CONFIG_SYS_NO_FLASH
-#endif
 
-#if defined(CONFIG_SYS_SPL) || defined(CONFIG_RAMBOOT_NAND)
+#if defined(CONFIG_SYS_SPL)
 #define CONFIG_SYS_RAMBOOT
 #endif
 
@@ -210,12 +173,11 @@ extern unsigned long get_clock_freq(void);
 #define CONFIG_SYS_INIT_RAM_ADDR	0xffd00000	/* Initial L1 address */
 #define CONFIG_SYS_INIT_RAM_END	0x00004000	/* End of used area in RAM */
 
-#define CONFIG_SYS_GBL_DATA_SIZE	128	/* num bytes initial data */
 #define CONFIG_SYS_GBL_DATA_OFFSET	\
-	(CONFIG_SYS_INIT_RAM_END - CONFIG_SYS_GBL_DATA_SIZE)
+	(CONFIG_SYS_INIT_RAM_END - GENERATED_GBL_DATA_SIZE)
 #define CONFIG_SYS_INIT_SP_OFFSET	CONFIG_SYS_GBL_DATA_OFFSET
 
-#define CONFIG_SYS_MONITOR_LEN	(256 * 1024) /* Reserve 256 kB for Mon */
+#define CONFIG_SYS_MONITOR_LEN	(768 * 1024)
 #define CONFIG_SYS_MALLOC_LEN	(6 * 1024 * 1024) /* Reserved for malloc */
 
 #ifndef CONFIG_NAND_SPL
@@ -235,7 +197,7 @@ extern unsigned long get_clock_freq(void);
 
 /* NAND boot: 4K NAND loader config */
 #define CONFIG_SYS_NAND_SPL_SIZE	0x1000
-#define CONFIG_SYS_NAND_U_BOOT_SIZE	((512 << 10) + CONFIG_SYS_NAND_SPL_SIZE)
+#define CONFIG_SYS_NAND_U_BOOT_SIZE	((768 << 10) + CONFIG_SYS_NAND_SPL_SIZE)
 #define CONFIG_SYS_NAND_U_BOOT_DST	(0x11000000 - CONFIG_SYS_NAND_SPL_SIZE)
 #define CONFIG_SYS_NAND_U_BOOT_START	0x11000000
 #define CONFIG_SYS_NAND_U_BOOT_OFFS	(0)
@@ -256,17 +218,6 @@ extern unsigned long get_clock_freq(void);
 				| OR_FCM_TRLX \
 				| OR_FCM_EHTR)
 
-#ifdef CONFIG_RAMBOOT_NAND
-/* NAND Base Address */
-#define CONFIG_SYS_BR0_PRELIM	CONFIG_SYS_NAND_BR_PRELIM
-#define CONFIG_SYS_OR0_PRELIM	CONFIG_SYS_NAND_OR_PRELIM /* NAND Options */
-/* chip select 1 - BCSR */
-#define CONFIG_SYS_BR1_PRELIM  (BR_PHYS_ADDR(CONFIG_SYS_BCSR_BASE_PHYS) \
-				| BR_MS_GPCM | BR_PS_8 | BR_V)
-#define CONFIG_SYS_OR1_PRELIM  (OR_AM_32KB | OR_GPCM_CSNT | OR_GPCM_XACS \
-				| OR_GPCM_SCY | OR_GPCM_TRLX | OR_GPCM_EHTR \
-				| OR_GPCM_EAD)
-#else
 #define CONFIG_SYS_BR0_PRELIM  CONFIG_FLASH_BR_PRELIM	/* NOR Base Address */
 #define CONFIG_SYS_OR0_PRELIM  CONFIG_FLASH_OR_PRELIM	/* NOR Options */
 /* chip select 1 - BCSR */
@@ -275,7 +226,6 @@ extern unsigned long get_clock_freq(void);
 #define CONFIG_SYS_OR1_PRELIM  (OR_AM_32KB | OR_GPCM_CSNT | OR_GPCM_XACS \
 				| OR_GPCM_SCY | OR_GPCM_TRLX | OR_GPCM_EHTR \
 				| OR_GPCM_EAD)
-#endif
 
 /* Serial Port
  * open - index 2
@@ -312,15 +262,15 @@ extern unsigned long get_clock_freq(void);
 #define CONFIG_FIT_VERBOSE	/* enable fit_format_{error,warning}() */
 
 /* I2C */
-#define CONFIG_FSL_I2C		/* Use FSL common I2C driver */
-#define CONFIG_HARD_I2C		/* I2C with hardware support */
-#undef	CONFIG_SOFT_I2C		/* I2C bit-banged */
-#define CONFIG_I2C_MULTI_BUS
-#define CONFIG_SYS_I2C_SPEED	400000	/* I2C speed and slave address */
+#define CONFIG_SYS_I2C
+#define CONFIG_SYS_I2C_FSL
+#define CONFIG_SYS_FSL_I2C_SPEED	400000
+#define CONFIG_SYS_FSL_I2C_SLAVE	0x7F
+#define CONFIG_SYS_FSL_I2C_OFFSET	0x3000
+#define CONFIG_SYS_FSL_I2C2_SPEED	400000
+#define CONFIG_SYS_FSL_I2C2_SLAVE	0x7F
+#define CONFIG_SYS_FSL_I2C2_OFFSET	0x3100
 #define CONFIG_SYS_I2C_EEPROM_ADDR	0x51
-#define CONFIG_SYS_I2C_SLAVE		0x7F
-#define CONFIG_SYS_I2C_OFFSET		0x3000
-#define CONFIG_SYS_I2C2_OFFSET		0x3100
 
 /*
  * I2C2 EEPROM
@@ -398,22 +348,12 @@ extern unsigned long get_clock_freq(void);
 #define CONFIG_ENV_OVERWRITE
 
 #if defined(CONFIG_SYS_RAMBOOT)
-#if defined(CONFIG_RAMBOOT_NAND)
-#define CONFIG_ENV_IS_IN_NAND
-#define CONFIG_ENV_SIZE		CONFIG_SYS_NAND_BLOCK_SIZE
-#define CONFIG_ENV_OFFSET	((512 * 1024) + CONFIG_SYS_NAND_BLOCK_SIZE)
-#else
 #define CONFIG_ENV_IS_NOWHERE	/* Store ENV in memory only */
 #define CONFIG_ENV_ADDR		(CONFIG_SYS_MONITOR_BASE - 0x4000)
 #define CONFIG_ENV_SIZE		0x2000
-#endif
 #else
 #define CONFIG_ENV_IS_IN_FLASH
-#if CONFIG_SYS_MONITOR_BASE > 0xfff80000
-#define CONFIG_ENV_ADDR		0xfff80000
-#else
 #define CONFIG_ENV_ADDR		(CONFIG_SYS_MONITOR_BASE - CONFIG_ENV_SECT_SIZE)
-#endif
 #define CONFIG_ENV_SIZE		0x2000
 #define CONFIG_ENV_SECT_SIZE	0x20000 /* 128K (one sector) */
 #endif
@@ -463,7 +403,6 @@ extern unsigned long get_clock_freq(void);
 #define CONFIG_SYS_LONGHELP			/* undef to save memory	*/
 #define CONFIG_CMDLINE_EDITING		/* Command-line editing */
 #define CONFIG_SYS_LOAD_ADDR	0x2000000	/* default load address */
-#define CONFIG_SYS_PROMPT	"=> "		/* Monitor Command Prompt */
 #if defined(CONFIG_CMD_KGDB)
 #define CONFIG_SYS_CBSIZE	1024		/* Console I/O Buffer Size */
 #else
@@ -474,7 +413,6 @@ extern unsigned long get_clock_freq(void);
 #define CONFIG_SYS_MAXARGS	16		/* max number of command args */
 /* Boot Argument Buffer Size */
 #define CONFIG_SYS_BARGSIZE	CONFIG_SYS_CBSIZE
-#define CONFIG_SYS_HZ	1000		/* decrementer freq: 1ms ticks */
 
 /*
  * For booting Linux, the board info and command line data
@@ -486,7 +424,6 @@ extern unsigned long get_clock_freq(void);
 
 #if defined(CONFIG_CMD_KGDB)
 #define CONFIG_KGDB_BAUDRATE	230400	/* speed to run kgdb serial port */
-#define CONFIG_KGDB_SER_INDEX	2	/* which serial port to use */
 #endif
 
 /*
@@ -520,15 +457,10 @@ extern unsigned long get_clock_freq(void);
 #define CONFIG_PHY_MARVELL
 #endif
 
-#ifndef CONFIG_NAND
 /* Default address of microcode for the Linux Fman driver */
 /* QE microcode/firmware address */
 #define CONFIG_SYS_QE_FMAN_FW_IN_NOR
-#define CONFIG_SYS_QE_FMAN_FW_ADDR	0xEF000000
-#else
-#define CONFIG_SYS_QE_FMAN_FW_IN_NAND
-#define CONFIG_SYS_QE_FMAN_FW_ADDR	0x1f00000
-#endif
+#define CONFIG_SYS_FMAN_FW_ADDR	0xEFF00000
 #define CONFIG_SYS_QE_FMAN_FW_LENGTH	0x10000
 #define CONFIG_SYS_FDT_PAD		(0x3000 + CONFIG_SYS_QE_FMAN_FW_LENGTH)
 

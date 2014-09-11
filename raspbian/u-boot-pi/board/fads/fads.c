@@ -4,23 +4,7 @@
  *
  * Modified by, Yuli Barcohen, Arabella Software Ltd., yuli@arabellasw.com
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <config.h>
@@ -226,11 +210,7 @@ static int _draminit (uint base, uint noMbytes, uint edo, uint delay)
 
 	switch (noMbytes) {
 	case 4:				/* 4 Mbyte uses only CS2 */
-#ifdef CONFIG_ADS
-		memctl->memc_mamr = 0xc0a21114;
-#else
 		memctl->memc_mamr = 0x13a01114;	/* PTA 0x13 AMA 010 */
-#endif
 		memctl->memc_or2 = 0xffc00800;	/* 4M */
 		break;
 
@@ -242,11 +222,7 @@ static int _draminit (uint base, uint noMbytes, uint edo, uint delay)
 		break;
 
 	case 16:			/* 16 Mbyte uses only CS2 */
-#ifdef CONFIG_ADS	/* XXX: why PTA=0x60 only in 16M case? - NTL */
-		memctl->memc_mamr = 0x60b21114;	/* PTA 0x60 AMA 011 */
-#else
 		memctl->memc_mamr = 0x13b01114;	/* PTA 0x13 AMA 011 */
-#endif
 		memctl->memc_or2 = 0xff000800;	/* 16M */
 		break;
 
@@ -450,7 +426,7 @@ static int _initsdram(uint base, uint noMbytes)
 	*/
 
 	memctl->memc_mcr = 0x80808111;   /* run umpb cs4 1 count 1, addr 0x11 ??? (50MHz) */
-	                                 /* run umpb cs4 1 count 1, addr 0x11 precharge+MRS (100MHz) */
+					 /* run umpb cs4 1 count 1, addr 0x11 precharge+MRS (100MHz) */
 	udelay(200);
 
 	/* Run 8 refresh cycles */
@@ -583,7 +559,7 @@ static int initsdram(uint base, uint *noMbytes)
 
 	if(!_initsdram(base, m))
 	{
-	        *noMbytes += m;
+		*noMbytes += m;
 		return 0;
 	}
 	else
@@ -690,42 +666,6 @@ int testdram (void)
  * Check Board Identity:
  */
 
-#if defined(CONFIG_FADS) && defined(CONFIG_SYS_DAUGHTERBOARD)
-static void checkdboard(void)
-{
-	/* get db type from BCSR 3 */
-	uint k = (*((uint *)BCSR3) >> 24) & 0x3f;
-
-	puts (" with db ");
-
-	switch(k) {
-	case 0x03 :
-		puts ("MPC823");
-		break;
-	case 0x20 :
-		puts ("MPC801");
-		break;
-	case 0x21 :
-		puts ("MPC850");
-		break;
-	case 0x22 :
-		puts ("MPC821, MPC860 / MPC860SAR / MPC860T");
-		break;
-	case 0x23 :
-		puts ("MPC860SAR");
-		break;
-	case 0x24 :
-	case 0x2A :
-		puts ("MPC860T");
-		break;
-	case 0x3F :
-		puts ("MPC850SAR");
-		break;
-	default : printf("0x%x", k);
-	}
-}
-#endif	/* defined(CONFIG_FADS) && defined(CONFIG_SYS_DAUGHTERBOARD) */
-
 int checkboard (void)
 {
 #if   defined(CONFIG_MPC86xADS)
@@ -748,27 +688,12 @@ int checkboard (void)
 	puts (" rev ");
 
 	switch (r) {
-#if defined(CONFIG_ADS)
-	case 0x00:
-		puts ("ENG - this board sucks, check the errata, not supported\n");
-		return -1;
-	case 0x01:
-		puts ("PILOT - warning, read errata \n");
-		break;
-	case 0x02:
-		puts ("A - warning, read errata \n");
-		break;
-	case 0x03:
-		puts ("B\n");
-		break;
-#else  /* FADS */
 	case 0x00:
 		puts ("ENG\n");
 		break;
 	case 0x01:
 		puts ("PILOT\n");
 		break;
-#endif /* CONFIG_ADS */
 	default:
 		printf ("unknown (0x%x)\n", r);
 		return -1;
@@ -881,12 +806,6 @@ int pcmcia_init(void)
 #endif
 	case 5:
 		printf("; using 5V");
-#ifdef CONFIG_ADS
-		/*
-		** Enable 5 volt Vcc.
-		*/
-		*((uint *)BCSR1) &= ~BCSR1_PCCVCCON;
-#endif
 #ifdef CONFIG_FADS
 		/*
 		** Enable 5 volt Vcc.

@@ -4,23 +4,7 @@
  *
  * (C) Copyright 2008-2010 Freescale Semiconductor, Inc.
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
@@ -35,6 +19,7 @@
 #include <fsl_esdhc.h>
 #endif
 #include <netdev.h>
+#include <spl.h>
 
 #define CLK_CODE(arm, ahb, sel) (((arm) << 16) + ((ahb) << 8) + (sel))
 #define CLK_CODE_ARM(c)		(((c) >> 16) & 0xFF)
@@ -477,18 +462,86 @@ int get_clocks(void)
 {
 #ifdef CONFIG_FSL_ESDHC
 #if CONFIG_SYS_FSL_ESDHC_ADDR == MMC_SDHC2_BASE_ADDR
-	gd->sdhc_clk = mxc_get_clock(MXC_ESDHC2_CLK);
+	gd->arch.sdhc_clk = mxc_get_clock(MXC_ESDHC2_CLK);
 #elif CONFIG_SYS_FSL_ESDHC_ADDR == MMC_SDHC3_BASE_ADDR
-	gd->sdhc_clk = mxc_get_clock(MXC_ESDHC3_CLK);
+	gd->arch.sdhc_clk = mxc_get_clock(MXC_ESDHC3_CLK);
 #else
-	gd->sdhc_clk = mxc_get_clock(MXC_ESDHC1_CLK);
+	gd->arch.sdhc_clk = mxc_get_clock(MXC_ESDHC1_CLK);
 #endif
 #endif
 	return 0;
 }
 
-void reset_cpu(ulong addr)
+#define RCSR_MEM_CTL_WEIM	0
+#define RCSR_MEM_CTL_NAND	1
+#define RCSR_MEM_CTL_ATA	2
+#define RCSR_MEM_CTL_EXPANSION	3
+#define RCSR_MEM_TYPE_NOR	0
+#define RCSR_MEM_TYPE_ONENAND	2
+#define RCSR_MEM_TYPE_SD	0
+#define RCSR_MEM_TYPE_I2C	2
+#define RCSR_MEM_TYPE_SPI	3
+
+u32 spl_boot_device(void)
 {
-	struct wdog_regs *wdog = (struct wdog_regs *)WDOG_BASE_ADDR;
-	writew(4, &wdog->wcr);
+	struct ccm_regs *ccm =
+		(struct ccm_regs *)IMX_CCM_BASE;
+
+	u32 rcsr = readl(&ccm->rcsr);
+	u32 mem_type, mem_ctl;
+
+	/* In external mode, no boot device is returned */
+	if ((rcsr >> 10) & 0x03)
+		return BOOT_DEVICE_NONE;
+
+	mem_ctl = (rcsr >> 25) & 0x03;
+	mem_type = (rcsr >> 23) & 0x03;
+
+	switch (mem_ctl) {
+	case RCSR_MEM_CTL_WEIM:
+		switch (mem_type) {
+		case RCSR_MEM_TYPE_NOR:
+			return BOOT_DEVICE_NOR;
+		case RCSR_MEM_TYPE_ONENAND:
+			return BOOT_DEVICE_ONENAND;
+		default:
+			return BOOT_DEVICE_NONE;
+		}
+	case RCSR_MEM_CTL_NAND:
+		return BOOT_DEVICE_NAND;
+	case RCSR_MEM_CTL_EXPANSION:
+		switch (mem_type) {
+		case RCSR_MEM_TYPE_SD:
+			return BOOT_DEVICE_MMC1;
+		case RCSR_MEM_TYPE_I2C:
+			return BOOT_DEVICE_I2C;
+		case RCSR_MEM_TYPE_SPI:
+			return BOOT_DEVICE_SPI;
+		default:
+			return BOOT_DEVICE_NONE;
+		}
+	}
+
+	return BOOT_DEVICE_NONE;
 }
+
+#ifdef CONFIG_SPL_BUILD
+u32 spl_boot_mode(void)
+{
+	switch (spl_boot_device()) {
+	case BOOT_DEVICE_MMC1:
+#ifdef CONFIG_SPL_FAT_SUPPORT
+		return MMCSD_MODE_FAT;
+#else
+		return MMCSD_MODE_RAW;
+#endif
+		break;
+	case BOOT_DEVICE_NAND:
+		return 0;
+		break;
+	default:
+		puts("spl: ERROR:  unsupported device\n");
+		hang();
+	}
+}
+#endif

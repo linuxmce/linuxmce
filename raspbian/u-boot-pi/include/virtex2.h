@@ -3,24 +3,7 @@
  * Rich Ireland, Enterasys Networks, rireland@enterasys.com.
  * Keith Outwater, keith_outwater@mvis.com
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef _VIRTEX2_H_
@@ -28,36 +11,34 @@
 
 #include <xilinx.h>
 
-extern int Virtex2_load(Xilinx_desc *desc, const void *image, size_t size);
-extern int Virtex2_dump(Xilinx_desc *desc, const void *buf, size_t bsize);
-extern int Virtex2_info(Xilinx_desc *desc);
+extern struct xilinx_fpga_op virtex2_op;
 
 /*
  * Slave SelectMap Implementation function table.
  */
 typedef struct {
-	Xilinx_pre_fn	pre;
-	Xilinx_pgm_fn	pgm;
-	Xilinx_init_fn	init;
-	Xilinx_err_fn	err;
-	Xilinx_done_fn	done;
-	Xilinx_clk_fn	clk;
-	Xilinx_cs_fn	cs;
-	Xilinx_wr_fn	wr;
-	Xilinx_rdata_fn	rdata;
-	Xilinx_wdata_fn	wdata;
-	Xilinx_busy_fn	busy;
-	Xilinx_abort_fn	abort;
-	Xilinx_post_fn	post;
-} Xilinx_Virtex2_Slave_SelectMap_fns;
+	xilinx_pre_fn	pre;
+	xilinx_pgm_fn	pgm;
+	xilinx_init_fn	init;
+	xilinx_err_fn	err;
+	xilinx_done_fn	done;
+	xilinx_clk_fn	clk;
+	xilinx_cs_fn	cs;
+	xilinx_wr_fn	wr;
+	xilinx_rdata_fn	rdata;
+	xilinx_wdata_fn	wdata;
+	xilinx_busy_fn	busy;
+	xilinx_abort_fn	abort;
+	xilinx_post_fn	post;
+} xilinx_virtex2_slave_selectmap_fns;
 
 /* Slave Serial Implementation function table */
 typedef struct {
-	Xilinx_pgm_fn	pgm;
-	Xilinx_clk_fn	clk;
-	Xilinx_rdata_fn	rdata;
-	Xilinx_wdata_fn	wdata;
-} Xilinx_Virtex2_Slave_Serial_fns;
+	xilinx_pgm_fn	pgm;
+	xilinx_clk_fn	clk;
+	xilinx_rdata_fn	rdata;
+	xilinx_wdata_fn	wdata;
+} xilinx_virtex2_slave_serial_fns;
 
 /* Device Image Sizes (in bytes)
  *********************************************************************/
@@ -77,39 +58,39 @@ typedef struct {
 /* Descriptor Macros
  *********************************************************************/
 #define XILINX_XC2V40_DESC(iface, fn_table, cookie)	\
-{ Xilinx_Virtex2, iface, XILINX_XC2V40_SIZE, fn_table, cookie }
+{ xilinx_virtex2, iface, XILINX_XC2V40_SIZE, fn_table, cookie, &virtex2_op }
 
 #define XILINX_XC2V80_DESC(iface, fn_table, cookie) \
-{ Xilinx_Virtex2, iface, XILINX_XC2V80_SIZE, fn_table, cookie }
+{ xilinx_virtex2, iface, XILINX_XC2V80_SIZE, fn_table, cookie, &virtex2_op }
 
 #define XILINX_XC2V250_DESC(iface, fn_table, cookie) \
-{ Xilinx_Virtex2, iface, XILINX_XC2V250_SIZE, fn_table, cookie }
+{ xilinx_virtex2, iface, XILINX_XC2V250_SIZE, fn_table, cookie, &virtex2_op }
 
 #define XILINX_XC2V500_DESC(iface, fn_table, cookie) \
-{ Xilinx_Virtex2, iface, XILINX_XC2V500_SIZE, fn_table, cookie }
+{ xilinx_virtex2, iface, XILINX_XC2V500_SIZE, fn_table, cookie, &virtex2_op }
 
 #define XILINX_XC2V1000_DESC(iface, fn_table, cookie) \
-{ Xilinx_Virtex2, iface, XILINX_XC2V1000_SIZE, fn_table, cookie }
+{ xilinx_virtex2, iface, XILINX_XC2V1000_SIZE, fn_table, cookie, &virtex2_op }
 
 #define XILINX_XC2V1500_DESC(iface, fn_table, cookie) \
-{ Xilinx_Virtex2, iface, XILINX_XC2V1500_SIZE, fn_table, cookie }
+{ xilinx_virtex2, iface, XILINX_XC2V1500_SIZE, fn_table, cookie, &virtex2_op }
 
 #define XILINX_XC2V2000_DESC(iface, fn_table, cookie) \
-{ Xilinx_Virtex2, iface, XILINX_XC2V2000_SIZE, fn_table, cookie }
+{ xilinx_virtex2, iface, XILINX_XC2V2000_SIZE, fn_table, cookie, &virtex2_op }
 
 #define XILINX_XC2V3000_DESC(iface, fn_table, cookie) \
-{ Xilinx_Virtex2, iface, XILINX_XC2V3000_SIZE, fn_table, cookie }
+{ xilinx_virtex2, iface, XILINX_XC2V3000_SIZE, fn_table, cookie, &virtex2_op }
 
 #define XILINX_XC2V4000_DESC(iface, fn_table, cookie) \
-{ Xilinx_Virtex2, iface, XILINX_XC2V4000_SIZE, fn_table, cookie }
+{ xilinx_virtex2, iface, XILINX_XC2V4000_SIZE, fn_table, cookie, &virtex2_op }
 
 #define XILINX_XC2V6000_DESC(iface, fn_table, cookie) \
-{ Xilinx_Virtex2, iface, XILINX_XC2V6000_SIZE, fn_table, cookie }
+{ xilinx_virtex2, iface, XILINX_XC2V6000_SIZE, fn_table, cookie, &virtex2_op }
 
 #define XILINX_XC2V8000_DESC(iface, fn_table, cookie) \
-{ Xilinx_Virtex2, iface, XILINX_XC2V8000_SIZE, fn_table, cookie }
+{ xilinx_virtex2, iface, XILINX_XC2V8000_SIZE, fn_table, cookie, &virtex2_op }
 
 #define XILINX_XC2V10000_DESC(iface, fn_table, cookie) \
-{ Xilinx_Virtex2, iface, XILINX_XC2V10000_SIZE, fn_table, cookie }
+{ xilinx_virtex2, iface, XILINX_XC2V10000_SIZE, fn_table, cookie, &virtex2_op }
 
 #endif /* _VIRTEX2_H_ */

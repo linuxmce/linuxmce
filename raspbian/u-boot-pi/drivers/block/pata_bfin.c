@@ -12,6 +12,7 @@
 #include <command.h>
 #include <config.h>
 #include <asm/byteorder.h>
+#include <asm/clock.h>
 #include <asm/io.h>
 #include <asm/errno.h>
 #include <asm/portmux.h>
@@ -897,6 +898,8 @@ static void bfin_ata_identify(struct ata_port *ap, int dev)
 	/* assuming HD */
 	sata_dev_desc[ap->port_no].type = DEV_TYPE_HARDDISK;
 	sata_dev_desc[ap->port_no].blksz = ATA_SECT_SIZE;
+	sata_dev_desc[ap->port_no].log2blksz =
+		LOG2(sata_dev_desc[ap->port_no].blksz);
 	sata_dev_desc[ap->port_no].lun = 0;	/* just to fill something in... */
 
 	printf("PATA device#%d %s is found on ata port#%d.\n",

@@ -734,7 +734,6 @@ static int mount_ubifs(struct ubifs_info *c)
 	ubifs_msg("reserved for root:  %llu bytes (%llu KiB)",
 		c->report_rp_size, c->report_rp_size >> 10);
 
-	dbg_msg("compiled on:         " __DATE__ " at " __TIME__);
 	dbg_msg("min. I/O unit size:  %d bytes", c->min_io_size);
 	dbg_msg("LEB size:            %d bytes (%d KiB)",
 		c->leb_size, c->leb_size >> 10);
@@ -771,7 +770,7 @@ static int mount_ubifs(struct ubifs_info *c)
 	dbg_msg("node sizes:          ref %zu, cmt. start %zu, orph %zu",
 		UBIFS_REF_NODE_SZ, UBIFS_CS_NODE_SZ, UBIFS_ORPH_NODE_SZ);
 	dbg_msg("max. node sizes:     data %zu, inode %zu dentry %zu",
-	        UBIFS_MAX_DATA_NODE_SZ, UBIFS_MAX_INO_NODE_SZ,
+		UBIFS_MAX_DATA_NODE_SZ, UBIFS_MAX_INO_NODE_SZ,
 		UBIFS_MAX_DENT_NODE_SZ);
 	dbg_msg("dead watermark:      %d", c->dead_wm);
 	dbg_msg("dark watermark:      %d", c->dark_wm);
@@ -1164,10 +1163,9 @@ static struct file_system_type ubifs_fs_type = {
 	.get_sb  = ubifs_get_sb,
 };
 
-int ubifs_mount(char *vol_name)
+int ubifs_mount(char *name)
 {
 	int flags;
-	char name[80] = "ubi:";
 	void *data;
 	struct vfsmount *mnt;
 	int ret;
@@ -1186,7 +1184,6 @@ int ubifs_mount(char *vol_name)
 	 * Mount in read-only mode
 	 */
 	flags = MS_RDONLY;
-	strcat(name, vol_name);
 	data = NULL;
 	mnt = NULL;
 	ret = ubifs_get_sb(&ubifs_fs_type, flags, name, data, mnt);

@@ -7,20 +7,7 @@
  *
  * Configuration for the MX35pdk Freescale board.
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef __CONFIG_H
@@ -36,7 +23,6 @@
 
 /* Set TEXT at the beginning of the NOR flash */
 #define CONFIG_SYS_TEXT_BASE	0xA0000000
-#define CONFIG_SYS_CACHELINE_SIZE	32
 
 #define CONFIG_BOARD_EARLY_INIT_F
 #define CONFIG_BOARD_LATE_INIT
@@ -54,10 +40,8 @@
 /*
  * Hardware drivers
  */
-#define CONFIG_HARD_I2C
-#define CONFIG_I2C_MXC
-#define CONFIG_SYS_I2C_BASE		I2C1_BASE_ADDR
-#define CONFIG_SYS_I2C_SPEED		100000
+#define CONFIG_SYS_I2C
+#define CONFIG_SYS_I2C_MXC
 #define CONFIG_MXC_SPI
 #define CONFIG_MXC_GPIO
 
@@ -68,6 +52,7 @@
 #define CONFIG_POWER
 #define CONFIG_POWER_I2C
 #define CONFIG_POWER_FSL
+#define CONFIG_POWER_FSL_MC13892
 #define CONFIG_SYS_FSL_PMIC_I2C_ADDR	0x08
 #define CONFIG_RTC_MC13XXX
 
@@ -94,6 +79,8 @@
 
 #include <config_cmd_default.h>
 
+#define CONFIG_OF_LIBFDT
+#define CONFIG_CMD_BOOTZ
 #define CONFIG_CMD_PING
 #define CONFIG_CMD_DHCP
 #define CONFIG_BOOTP_SUBNETMASK
@@ -110,13 +97,15 @@
 #define CONFIG_NET_RETRY_COUNT	100
 #define CONFIG_CMD_DATE
 
+#define CONFIG_CMD_USB
+#define CONFIG_USB_STORAGE
 #define CONFIG_CMD_MMC
 #define CONFIG_DOS_PARTITION
 #define CONFIG_EFI_PARTITION
 #define CONFIG_CMD_EXT2
 #define CONFIG_CMD_FAT
 
-#define CONFIG_BOOTDELAY	3
+#define CONFIG_BOOTDELAY	1
 
 #define CONFIG_LOADADDR		0x80800000	/* loadaddr env var */
 
@@ -145,7 +134,6 @@
  * Miscellaneous configurable options
  */
 #define CONFIG_SYS_LONGHELP	/* undef to save memory */
-#define CONFIG_SYS_PROMPT	"MX35 U-Boot > "
 #define CONFIG_CMDLINE_EDITING
 #define CONFIG_SYS_HUSH_PARSER	/* Use the HUSH parser */
 
@@ -162,8 +150,6 @@
 #undef	CONFIG_SYS_CLKS_IN_HZ	/* everything, incl board info, in Hz */
 
 #define CONFIG_SYS_LOAD_ADDR		CONFIG_LOADADDR
-
-#define CONFIG_SYS_HZ				1000
 
 /*
  * Physical Memory Map
@@ -241,6 +227,18 @@
 #define CONFIG_SYS_NAND_BASE		(NFC_BASE_ADDR)
 #define CONFIG_MXC_NAND_HWECC
 #define CONFIG_SYS_NAND_LARGEPAGE
+
+/* EHCI driver */
+#define CONFIG_USB_EHCI
+#define CONFIG_SYS_USB_EHCI_MAX_ROOT_PORTS	1
+#define CONFIG_EHCI_IS_TDI
+#define CONFIG_EHCI_HCD_INIT_AFTER_RESET
+#define CONFIG_USB_EHCI_MXC
+#define CONFIG_MXC_USB_PORT	0
+#define CONFIG_MXC_USB_FLAGS	(MXC_EHCI_INTERFACE_DIFF_UNI | \
+				 MXC_EHCI_POWER_PINS_ENABLED | \
+				 MXC_EHCI_OC_PIN_ACTIVE_LOW)
+#define CONFIG_MXC_USB_PORTSC	(MXC_EHCI_UTMI_16BIT | MXC_EHCI_MODE_UTMI)
 
 /* mmc driver */
 #define CONFIG_MMC

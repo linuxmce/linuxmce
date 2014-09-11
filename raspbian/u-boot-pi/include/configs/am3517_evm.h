@@ -7,19 +7,7 @@
  *
  * Copyright (C) 2010 Texas Instruments Incorporated
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef __CONFIG_H
@@ -31,6 +19,7 @@
 #define CONFIG_OMAP		1	/* in a TI OMAP core */
 #define CONFIG_OMAP34XX		1	/* which is a 34XX */
 #define CONFIG_OMAP3_AM3517EVM	1	/* working with AM3517EVM */
+#define CONFIG_OMAP_COMMON
 
 #define CONFIG_EMIF4	/* The chip has EMIF4 controller */
 
@@ -69,6 +58,11 @@
  */
 
 /*
+ * OMAP GPIO configuration
+ */
+#define CONFIG_OMAP_GPIO
+
+/*
  * NS16550 Configuration
  */
 #define V_NS16550_CLK			48000000	/* 48MHz (APLL96/2) */
@@ -97,15 +91,16 @@
 
 /*
  * USB configuration
- * Enable CONFIG_MUSB_HCD for Host functionalities MSC, keyboard
- * Enable CONFIG_MUSB_UDC for Device functionalities.
+ * Enable CONFIG_MUSB_HOST for Host functionalities MSC, keyboard
+ * Enable CONFIG_MUSB_GADGET for Device functionalities.
  */
-#define CONFIG_USB_AM35X		1
-#define CONFIG_MUSB_HCD			1
+#define CONFIG_USB_MUSB_AM35X
+#define CONFIG_MUSB_HOST
+#define CONFIG_MUSB_PIO_ONLY
 
-#ifdef CONFIG_USB_AM35X
+#ifdef CONFIG_USB_MUSB_AM35X
 
-#ifdef CONFIG_MUSB_HCD
+#ifdef CONFIG_MUSB_HOST
 #define CONFIG_CMD_USB
 
 #define CONFIG_USB_STORAGE
@@ -117,21 +112,15 @@
 #define CONFIG_PREBOOT "usb start"
 #endif /* CONFIG_USB_KEYBOARD */
 
-#endif /* CONFIG_MUSB_HCD */
+#endif /* CONFIG_MUSB_HOST */
 
-#ifdef CONFIG_MUSB_UDC
-/* USB device configuration */
-#define CONFIG_USB_DEVICE		1
-#define CONFIG_USB_TTY			1
-#define CONFIG_SYS_CONSOLE_IS_IN_ENV	1
-/* Change these to suit your needs */
-#define CONFIG_USBD_VENDORID		0x0451
-#define CONFIG_USBD_PRODUCTID		0x5678
-#define CONFIG_USBD_MANUFACTURER	"Texas Instruments"
-#define CONFIG_USBD_PRODUCT_NAME	"AM3517EVM"
-#endif /* CONFIG_MUSB_UDC */
+#ifdef CONFIG_MUSB_GADGET
+#define CONFIG_USB_GADGET_DUALSPEED
+#define CONFIG_USB_ETHER
+#define CONFIG_USB_ETH_RNDIS
+#endif /* CONFIG_MUSB_GADGET */
 
-#endif /* CONFIG_USB_AM35X */
+#endif /* CONFIG_USB_MUSB_AM35X */
 
 /* commands to include */
 #include <config_cmd_default.h>
@@ -152,15 +141,23 @@
 #undef CONFIG_CMD_IMLS		/* List all found images	*/
 
 #define CONFIG_SYS_NO_FLASH
-#define CONFIG_HARD_I2C			1
-#define CONFIG_SYS_I2C_SPEED		100000
-#define CONFIG_SYS_I2C_SLAVE		1
-#define CONFIG_SYS_I2C_BUS		0
-#define CONFIG_SYS_I2C_BUS_SELECT	1
-#define CONFIG_DRIVER_OMAP34XX_I2C	1
+#define CONFIG_SYS_I2C
+#define CONFIG_SYS_OMAP24_I2C_SPEED	100000
+#define CONFIG_SYS_OMAP24_I2C_SLAVE	1
+#define CONFIG_SYS_I2C_OMAP34XX
 
-#undef CONFIG_CMD_NET
-#undef CONFIG_CMD_NFS
+/*
+ * Ethernet
+ */
+#define CONFIG_DRIVER_TI_EMAC
+#define CONFIG_DRIVER_TI_EMAC_USE_RMII
+#define CONFIG_MII
+#define CONFIG_BOOTP_DEFAULT
+#define CONFIG_BOOTP_DNS
+#define CONFIG_BOOTP_DNS2
+#define CONFIG_BOOTP_SEND_HOSTNAME
+#define CONFIG_NET_RETRY_COUNT		10
+
 /*
  * Board NAND Info.
  */
@@ -249,7 +246,6 @@
  */
 #define CONFIG_SYS_TIMERBASE		OMAP34XX_GPT2
 #define CONFIG_SYS_PTV			2	/* Divisor: 2^(PTV+1) => 8 */
-#define CONFIG_SYS_HZ			1000
 
 /*-----------------------------------------------------------------------
  * Physical Memory Map
@@ -281,7 +277,6 @@
 #define CONFIG_SYS_MONITOR_BASE		CONFIG_SYS_FLASH_BASE
 
 #define CONFIG_NAND_OMAP_GPMC
-#define GPMC_NAND_ECC_LP_x16_LAYOUT	1
 #define CONFIG_ENV_IS_IN_NAND		1
 #define SMNAND_ENV_OFFSET		0x260000 /* environment starts here */
 
@@ -336,6 +331,9 @@
 #define CONFIG_SPL_FAT_SUPPORT
 #define CONFIG_SPL_SERIAL_SUPPORT
 #define CONFIG_SPL_NAND_SUPPORT
+#define CONFIG_SPL_NAND_BASE
+#define CONFIG_SPL_NAND_DRIVERS
+#define CONFIG_SPL_NAND_ECC
 #define CONFIG_SPL_POWER_SUPPORT
 #define CONFIG_SPL_LDSCRIPT		"$(CPUDIR)/omap-common/u-boot-spl.lds"
 
@@ -350,6 +348,7 @@
 						10, 11, 12, 13}
 #define CONFIG_SYS_NAND_ECCSIZE		512
 #define CONFIG_SYS_NAND_ECCBYTES	3
+#define CONFIG_NAND_OMAP_ECCSCHEME	OMAP_ECC_HAM1_CODE_HW
 #define CONFIG_SYS_NAND_U_BOOT_START	CONFIG_SYS_TEXT_BASE
 #define CONFIG_SYS_NAND_U_BOOT_OFFS	0x80000
 

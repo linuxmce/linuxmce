@@ -3,19 +3,7 @@
  *
  * Copyright (C) 2012 Lukasz Dalek <luk0104@gmail.com>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef __CONFIG_H
@@ -28,8 +16,6 @@
 #define CONFIG_BOARD_H2200
 
 #define CONFIG_SYS_NO_FLASH
-
-#define CONFIG_SYS_HZ			1000
 
 #define CONFIG_NR_DRAM_BANKS		1
 #define PHYS_SDRAM_1			0xa0000000 /* SDRAM Bank #1 */
@@ -153,5 +139,30 @@
 					sizeof(CONFIG_SYS_PROMPT) + 16)
 
 #define CONFIG_BOOTARGS "root=/dev/ram0 ro console=ttyS0,115200n8"
+
+#define CONFIG_SYS_CONSOLE_IS_IN_ENV
+#define CONFIG_USB_DEV_PULLUP_GPIO	33
+/* USB VBUS GPIO 3 */
+
+#define CONFIG_CMD_NET
+#define CONFIG_CMD_PING
+
+#define CONFIG_BOOTDELAY		2
+#define CONFIG_BOOTCOMMAND		\
+	"setenv downloaded 0 ; while test $downloaded -eq 0 ; do " \
+	"if bootp ; then setenv downloaded 1 ; fi ; done ; " \
+	"source :script ; " \
+	"bootm ; "
+
+#define CONFIG_USB_GADGET_PXA2XX
+#define CONFIG_USB_ETHER
+#define CONFIG_USB_ETH_SUBSET
+
+#define CONFIG_USBNET_DEV_ADDR		"de:ad:be:ef:00:01"
+#define CONFIG_USBNET_HOST_ADDR	"de:ad:be:ef:00:02"
+#define CONFIG_EXTRA_ENV_SETTINGS \
+	"stdin=serial\0" \
+	"stdout=serial\0" \
+	"stderr=serial\0"
 
 #endif /* __CONFIG_H */

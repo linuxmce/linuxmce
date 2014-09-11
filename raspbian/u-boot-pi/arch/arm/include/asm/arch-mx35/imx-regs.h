@@ -3,23 +3,7 @@
  *
  * (C) Copyright 2008-2009 Freescale Semiconductor, Inc.
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef __ASM_ARCH_MX35_H
@@ -32,6 +16,8 @@
  */
 #define IRAM_BASE_ADDR		0x10000000	/* internal ram */
 #define IRAM_SIZE		0x00020000	/* 128 KB */
+
+#define LOW_LEVEL_SRAM_STACK	0x1001E000
 
 /*
  * AIPS 1
@@ -78,10 +64,12 @@
 #define GPIO2_BASE_ADDR		0x53FD0000
 #define SDMA_BASE_ADDR		0x53FD4000
 #define RTC_BASE_ADDR		0x53FD8000
-#define WDOG_BASE_ADDR		0x53FDC000
+#define WDOG1_BASE_ADDR		0x53FDC000
 #define PWM_BASE_ADDR		0x53FE0000
 #define RTIC_BASE_ADDR		0x53FEC000
 #define IIM_BASE_ADDR		0x53FF0000
+#define IMX_USB_BASE		0x53FF4000
+#define IMX_USB_PORT_OFFSET	0x400
 
 #define IMX_CCM_BASE		CCM_BASE_ADDR
 
@@ -258,11 +246,28 @@ struct iim_regs {
 	u32 iim_sdat;
 	u32 iim_prev;
 	u32 iim_srev;
-	u32 iim_prog_p;
+	u32 iim_prg_p;
 	u32 iim_scs0;
 	u32 iim_scs1;
 	u32 iim_scs2;
 	u32 iim_scs3;
+	u32 res1[0x1f1];
+	struct fuse_bank {
+		u32 fuse_regs[0x20];
+		u32 fuse_rsvd[0xe0];
+	} bank[3];
+};
+
+struct fuse_bank0_regs {
+	u32 fuse0_7[8];
+	u32 uid[8];
+	u32 fuse16_31[0x10];
+};
+
+struct fuse_bank1_regs {
+	u32 fuse0_21[0x16];
+	u32 usr;
+	u32 fuse23_31[9];
 };
 
 /* General Purpose Timer (GPT) registers */
@@ -286,15 +291,6 @@ struct cspi_regs {
 	u32 stat;
 	u32 period;
 	u32 test;
-};
-
-/* Watchdog Timer (WDOG) registers */
-struct wdog_regs {
-	u16 wcr;	/* Control */
-	u16 wsr;	/* Service */
-	u16 wrsr;	/* Reset Status */
-	u16 wicr;	/* Interrupt Control */
-	u16 wmcr;	/* Misc Control */
 };
 
 struct esdc_regs {

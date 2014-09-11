@@ -1,18 +1,7 @@
 /*
  * (C) Copyright 2012 Stephen Warren
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef _BCM2835_MBOX_H
@@ -130,6 +119,20 @@ struct bcm2835_mbox_tag_hdr {
  * };
  */
 
+#define BCM2835_MBOX_TAG_GET_MAC_ADDRESS	0x00010003
+
+struct bcm2835_mbox_tag_get_mac_address {
+	struct bcm2835_mbox_tag_hdr tag_hdr;
+	union {
+		struct {
+		} req;
+		struct {
+			u8 mac[6];
+			u8 pad[2];
+		} resp;
+	} body;
+};
+
 #define BCM2835_MBOX_TAG_GET_ARM_MEMORY		0x00010005
 
 struct bcm2835_mbox_tag_get_arm_mem {
@@ -154,7 +157,7 @@ struct bcm2835_mbox_tag_get_arm_mem {
 #define BCM2835_MBOX_POWER_DEVID_SPI		7
 #define BCM2835_MBOX_POWER_DEVID_CCP2TX		8
 
-#define BCM2835_MBOX_POWER_STATE_RESP_ON	(1 << 1)
+#define BCM2835_MBOX_POWER_STATE_RESP_ON	(1 << 0)
 /* Device doesn't exist */
 #define BCM2835_MBOX_POWER_STATE_RESP_NODEV	(1 << 1)
 
@@ -409,6 +412,7 @@ struct bcm2835_mbox_tag_overscan {
 			u32 top;
 			u32 bottom;
 			u32 left;
+			u32 right;
 		} resp;
 	} body;
 };

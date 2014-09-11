@@ -1,18 +1,7 @@
 /*
  * (C) Copyright 2012 Stephen Warren
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
@@ -23,17 +12,9 @@
 DECLARE_GLOBAL_DATA_PTR;
 
 /* Global variables that lcd.c expects to exist */
-int lcd_line_length;
-int lcd_color_fg;
-int lcd_color_bg;
-void *lcd_base;
-void *lcd_console_address;
-short console_col;
-short console_row;
 vidinfo_t panel_info;
-char lcd_cursor_enabled;
-ushort lcd_cursor_width;
-ushort lcd_cursor_height;
+
+static u32 bcm2835_pitch;
 
 struct msg_query {
 	struct bcm2835_mbox_hdr hdr;
@@ -51,6 +32,7 @@ struct msg_setup {
 	struct bcm2835_mbox_tag_virtual_offset virtual_offset;
 	struct bcm2835_mbox_tag_overscan overscan;
 	struct bcm2835_mbox_tag_allocate_buffer allocate_buffer;
+	struct bcm2835_mbox_tag_pitch pitch;
 	u32 end_tag;
 };
 
@@ -101,6 +83,7 @@ void lcd_ctrl_init(void *lcdbase)
 	msg_setup->overscan.body.req.right = 0;
 	BCM2835_MBOX_INIT_TAG(&msg_setup->allocate_buffer, ALLOCATE_BUFFER);
 	msg_setup->allocate_buffer.body.req.alignment = 0x100;
+	BCM2835_MBOX_INIT_TAG_NO_REQ(&msg_setup->pitch, GET_PITCH);
 
 	ret = bcm2835_mbox_call_prop(BCM2835_MBOX_PROP_CHAN, &msg_setup->hdr);
 	if (ret) {
@@ -111,6 +94,7 @@ void lcd_ctrl_init(void *lcdbase)
 
 	w = msg_setup->physical_w_h.body.resp.width;
 	h = msg_setup->physical_w_h.body.resp.height;
+	bcm2835_pitch = msg_setup->pitch.body.resp.pitch;
 
 	debug("bcm2835: Final resolution is %d x %d\n", w, h);
 
@@ -119,9 +103,14 @@ void lcd_ctrl_init(void *lcdbase)
 	panel_info.vl_bpix = LCD_COLOR16;
 
 	gd->fb_base = msg_setup->allocate_buffer.body.resp.fb_address;
-	lcd_base = (void *)gd->fb_base;
 }
 
 void lcd_enable(void)
 {
+}
+
+int lcd_get_size(int *line_length)
+{
+	*line_length = bcm2835_pitch;
+	return *line_length * panel_info.vl_row;
 }

@@ -2,27 +2,12 @@
  * (C) Copyright 2002 ELTEC Elektronik AG
  * Frank Gottschling <fgottschling@eltec.de>
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 /* includes */
 #include <common.h>
+#include <cli.h>
 #include <linux/ctype.h>
 #include <pci.h>
 #include <net.h>
@@ -129,7 +114,7 @@ int misc_init_r (void)
 		printf ("Press key:\n  <c> to copy current revision info to nvram.\n");
 		printf ("  <r> to reenter revision info.\n");
 		printf ("=> ");
-		if (0 != readline (NULL)) {
+		if (0 != cli_readline(NULL)) {
 			switch ((char) toupper (console_buffer[0])) {
 			case 'C':
 				copyNv = 1;
@@ -146,7 +131,7 @@ int misc_init_r (void)
 		memcpy (buf, &eerev.revision[0][0], 14);	/* save all revision info */
 		printf ("Enter revision number (0-9): %c  ",
 			eerev.revision[0][0]);
-		if (0 != readline (NULL)) {
+		if (0 != cli_readline(NULL)) {
 			eerev.revision[0][0] =
 				(char) toupper (console_buffer[0]);
 			memcpy (&eerev.revision[1][0], buf, 12);	/* shift rest of rev info */
@@ -154,14 +139,14 @@ int misc_init_r (void)
 
 		printf ("Enter revision character (A-Z): %c  ",
 			eerev.revision[0][1]);
-		if (1 == readline (NULL)) {
+		if (1 == cli_readline(NULL)) {
 			eerev.revision[0][1] =
 				(char) toupper (console_buffer[0]);
 		}
 
 		printf ("Enter board name (V-XXXX-XXXX): %s  ",
 			(char *) &eerev.board);
-		if (11 == readline (NULL)) {
+		if (11 == cli_readline(NULL)) {
 			for (i = 0; i < 11; i++)
 				eerev.board[i] =
 					(char) toupper (console_buffer[i]);
@@ -169,14 +154,14 @@ int misc_init_r (void)
 		}
 
 		printf ("Enter serial number: %s ", (char *) &eerev.serial);
-		if (6 == readline (NULL)) {
+		if (6 == cli_readline(NULL)) {
 			for (i = 0; i < 6; i++)
 				eerev.serial[i] = console_buffer[i];
 			eerev.serial[6] = '\0';
 		}
 
 		printf ("Enter ether node ID with leading zero (HEX): %02x%02x%02x%02x%02x%02x  ", eerev.etheraddr[0], eerev.etheraddr[1], eerev.etheraddr[2], eerev.etheraddr[3], eerev.etheraddr[4], eerev.etheraddr[5]);
-		if (12 == readline (NULL)) {
+		if (12 == cli_readline(NULL)) {
 			for (i = 0; i < 12; i += 2)
 				eerev.etheraddr[i >> 1] =
 					(char) (16 *
@@ -191,7 +176,7 @@ int misc_init_r (void)
 		l = strlen ((char *) &eerev.text);
 		printf ("Add to text section (max 64 chr): %s ",
 			(char *) &eerev.text);
-		if (0 != readline (NULL)) {
+		if (0 != cli_readline(NULL)) {
 			for (i = l; i < 63; i++)
 				eerev.text[i] = console_buffer[i - l];
 			eerev.text[63] = '\0';
@@ -207,9 +192,14 @@ int misc_init_r (void)
 		buf[4] = eerev.etheraddr[5];
 		buf[5] = eerev.etheraddr[4];
 
-		*(unsigned short *) &buf[20] = 0x48B2;
-		*(unsigned short *) &buf[22] = 0x0004;
-		*(unsigned short *) &buf[24] = 0x1433;
+		buf[20] = 0x48;
+		buf[21] = 0xB2;
+
+		buf[22] = 0x00;
+		buf[23] = 0x04;
+
+		buf[24] = 0x14;
+		buf[25] = 0x33;
 
 		printf ("\nSRom:  Writing i82559 info ........ ");
 		if (eepro100_srom_store ((unsigned short *) buf) == -1)

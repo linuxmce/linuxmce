@@ -3,27 +3,31 @@
  *
  * Copyright (C) 2012 Lukasz Dalek <luk0104@gmail.com>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
 #include <asm/arch/pxa.h>
 #include <asm/arch/pxa-regs.h>
 #include <asm/io.h>
+#include <usb.h>
 
 DECLARE_GLOBAL_DATA_PTR;
+
+int board_eth_init(bd_t *bis)
+{
+	usb_eth_initialize(bis);
+	return 0;
+}
+
+void reset_cpu(ulong ignore)
+{
+	/* Enable VLIO interface on Hamcop */
+	writeb(0x1, 0x4000);
+
+	/* Reset board (cold reset) */
+	writeb(0xff, 0x4002);
+}
 
 int board_init(void)
 {
@@ -35,6 +39,10 @@ int board_init(void)
 
 	/* adress of boot parameters */
 	gd->bd->bi_boot_params = 0xa0000100;
+
+	/* Let host see that device is disconnected */
+	udc_disconnect();
+	mdelay(500);
 
 	return 0;
 }

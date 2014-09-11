@@ -6,23 +6,7 @@
  * Sysgo Real-Time Solutions, GmbH <www.elinos.com>
  * Marius Groeger <mgroeger@sysgo.de>
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 /*
@@ -40,6 +24,7 @@
 
 #include <common.h>
 #include <command.h>
+#include <environment.h>
 #include <malloc.h>
 #include <stdio_dev.h>
 #include <version.h>
@@ -48,10 +33,12 @@
 #include <nand.h>
 #include <onenand_uboot.h>
 #include <mmc.h>
+#include <scsi.h>
 #include <libfdt.h>
 #include <fdtdec.h>
 #include <post.h>
 #include <logbuff.h>
+#include <asm/sections.h>
 
 #ifdef CONFIG_BITBANGMII
 #include <miiphy.h>
@@ -67,7 +54,7 @@ extern void dataflash_print_info(void);
 #endif
 
 #if defined(CONFIG_HARD_I2C) || \
-    defined(CONFIG_SOFT_I2C)
+	defined(CONFIG_SYS_I2C)
 #include <i2c.h>
 #endif
 
@@ -119,8 +106,8 @@ static int display_banner(void)
 {
 	printf("\n\n%s\n\n", version_string);
 	debug("U-Boot code: %08lX -> %08lX  BSS: -> %08lX\n",
-	       _TEXT_BASE,
-	       _bss_start_ofs + _TEXT_BASE, _bss_end_ofs + _TEXT_BASE);
+	       (ulong)&_start,
+	       (ulong)&__bss_start, (ulong)&__bss_end);
 #ifdef CONFIG_MODEM_SUPPORT
 	debug("Modem Support enabled\n");
 #endif
@@ -163,11 +150,15 @@ static int display_dram_config(void)
 	return (0);
 }
 
-#if defined(CONFIG_HARD_I2C) || defined(CONFIG_SOFT_I2C)
+#if defined(CONFIG_HARD_I2C) || defined(CONFIG_SYS_I2C)
 static int init_func_i2c(void)
 {
 	puts("I2C:   ");
+#ifdef CONFIG_SYS_I2C
+	i2c_init_all();
+#else
 	i2c_init(CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE);
+#endif
 	puts("ready\n");
 	return (0);
 }
@@ -207,8 +198,6 @@ static int arm_pci_init(void)
  */
 typedef int (init_fnc_t) (void);
 
-int print_cpuinfo(void);
-
 void __dram_init_banksize(void)
 {
 	gd->bd->bi_dram[0].start = CONFIG_SYS_SDRAM_BASE;
@@ -231,14 +220,22 @@ int __power_init_board(void)
 int power_init_board(void)
 	__attribute__((weak, alias("__power_init_board")));
 
+	/* Record the board_init_f() bootstage (after arch_cpu_init()) */
+static int mark_bootstage(void)
+{
+	bootstage_mark_name(BOOTSTAGE_ID_START_UBOOT_F, "board_init_f");
+
+	return 0;
+}
+
 init_fnc_t *init_sequence[] = {
 	arch_cpu_init,		/* basic arch cpu dependent setup */
-
-#if defined(CONFIG_BOARD_EARLY_INIT_F)
-	board_early_init_f,
-#endif
+	mark_bootstage,
 #ifdef CONFIG_OF_CONTROL
 	fdtdec_check_fdt,
+#endif
+#if defined(CONFIG_BOARD_EARLY_INIT_F)
+	board_early_init_f,
 #endif
 	timer_init,		/* initialize timer */
 #ifdef CONFIG_BOARD_POSTCLK_INIT
@@ -252,13 +249,11 @@ init_fnc_t *init_sequence[] = {
 	serial_init,		/* serial communications setup */
 	console_init_f,		/* stage 1 init of console */
 	display_banner,		/* say that we are here */
-#if defined(CONFIG_DISPLAY_CPUINFO)
 	print_cpuinfo,		/* display cpu info (and speed) */
-#endif
 #if defined(CONFIG_DISPLAY_BOARDINFO)
 	checkboard,		/* display board info */
 #endif
-#if defined(CONFIG_HARD_I2C) || defined(CONFIG_SOFT_I2C)
+#if defined(CONFIG_HARD_I2C) || defined(CONFIG_SYS_I2C)
 	init_func_i2c,
 #endif
 	dram_init,		/* configure available RAM banks */
@@ -277,22 +272,15 @@ void board_init_f(ulong bootflag)
 	void *new_fdt = NULL;
 	size_t fdt_size = 0;
 
-	bootstage_mark_name(BOOTSTAGE_ID_START_UBOOT_F, "board_init_f");
-
-	/* Pointer is writable since we allocated a register for it */
-	gd = (gd_t *) ((CONFIG_SYS_INIT_SP_ADDR) & ~0x07);
-	/* compiler optimization barrier needed for GCC >= 3.4 */
-	__asm__ __volatile__("": : :"memory");
-
 	memset((void *)gd, 0, sizeof(gd_t));
 
-	gd->mon_len = _bss_end_ofs;
+	gd->mon_len = (ulong)&__bss_end - (ulong)_start;
 #ifdef CONFIG_OF_EMBED
 	/* Get a pointer to the FDT */
-	gd->fdt_blob = _binary_dt_dtb_start;
+	gd->fdt_blob = __dtb_dt_begin;
 #elif defined CONFIG_OF_SEPARATE
 	/* FDT is at end of image */
-	gd->fdt_blob = (void *)(_end_ofs + _TEXT_BASE);
+	gd->fdt_blob = &_end;
 #endif
 	/* Allow the early environment to override the fdt address */
 	gd->fdt_blob = (void *)getenv_ulong("fdtcontroladdr", 16,
@@ -331,7 +319,7 @@ void board_init_f(ulong bootflag)
 	gd->ram_size -= CONFIG_SYS_MEM_TOP_HIDE;
 #endif
 
-	addr = CONFIG_SYS_SDRAM_BASE + gd->ram_size;
+	addr = CONFIG_SYS_SDRAM_BASE + get_effective_memsize();
 
 #ifdef CONFIG_LOGBUFFER
 #ifndef CONFIG_ALT_LB_ADDR
@@ -353,13 +341,14 @@ void board_init_f(ulong bootflag)
 
 #if !(defined(CONFIG_SYS_ICACHE_OFF) && defined(CONFIG_SYS_DCACHE_OFF))
 	/* reserve TLB table */
-	addr -= (4096 * 4);
+	gd->arch.tlb_size = PGTABLE_SIZE;
+	addr -= gd->arch.tlb_size;
 
 	/* round down to next 64 kB limit */
 	addr &= ~(0x10000 - 1);
 
-	gd->tlb_addr = addr;
-	debug("TLB table at: %08lx\n", addr);
+	gd->arch.tlb_addr = addr;
+	debug("TLB table from %08lx to %08lx\n", addr, addr + gd->arch.tlb_size);
 #endif
 
 	/* round down to next 4 kB limit */
@@ -427,6 +416,7 @@ void board_init_f(ulong bootflag)
 	}
 #endif
 
+#ifndef CONFIG_ARM64
 	/* setup stackpointer for exeptions */
 	gd->irq_sp = addr_sp;
 #ifdef CONFIG_USE_IRQ
@@ -439,6 +429,10 @@ void board_init_f(ulong bootflag)
 
 	/* 8-byte alignment for ABI compliance */
 	addr_sp &= ~0x07;
+#else	/* CONFIG_ARM64 */
+	/* 16-byte alignment for ABI compliance */
+	addr_sp &= ~0x0f;
+#endif	/* CONFIG_ARM64 */
 #else
 	addr_sp += 128;	/* leave 32 words for abort-stack   */
 	gd->irq_sp = addr_sp;
@@ -451,24 +445,19 @@ void board_init_f(ulong bootflag)
 	post_run(NULL, POST_ROM | post_bootmode_get(0));
 #endif
 
-	gd->bd->bi_baudrate = gd->baudrate;
 	/* Ram ist board specific, so move it to board code ... */
 	dram_init_banksize();
 	display_dram_config();	/* and display it */
 
 	gd->relocaddr = addr;
 	gd->start_addr_sp = addr_sp;
-	gd->reloc_off = addr - _TEXT_BASE;
+	gd->reloc_off = addr - (ulong)&_start;
 	debug("relocation Offset is: %08lx\n", gd->reloc_off);
 	if (new_fdt) {
 		memcpy(new_fdt, gd->fdt_blob, fdt_size);
 		gd->fdt_blob = new_fdt;
 	}
 	memcpy(id, (void *)gd, sizeof(gd_t));
-
-	relocate_code(addr_sp, id, addr);
-
-	/* NOTREACHED - relocate_code() does not return */
 }
 
 #if !defined(CONFIG_SYS_NO_FLASH)
@@ -476,7 +465,38 @@ static char *failed = "*** failed ***\n";
 #endif
 
 /*
- ************************************************************************
+ * Tell if it's OK to load the environment early in boot.
+ *
+ * If CONFIG_OF_CONFIG is defined, we'll check with the FDT to see
+ * if this is OK (defaulting to saying it's not OK).
+ *
+ * NOTE: Loading the environment early can be a bad idea if security is
+ *       important, since no verification is done on the environment.
+ *
+ * @return 0 if environment should not be loaded, !=0 if it is ok to load
+ */
+static int should_load_env(void)
+{
+#ifdef CONFIG_OF_CONTROL
+	return fdtdec_get_config_int(gd->fdt_blob, "load-environment", 1);
+#elif defined CONFIG_DELAY_ENVIRONMENT
+	return 0;
+#else
+	return 1;
+#endif
+}
+
+#if defined(CONFIG_DISPLAY_BOARDINFO_LATE) && defined(CONFIG_OF_CONTROL)
+static void display_fdt_model(const void *blob)
+{
+	const char *model;
+
+	model = (char *)fdt_getprop(blob, 0, "model", NULL);
+	printf("Model: %s\n", model ? model : "<unknown>");
+}
+#endif
+
+/************************************************************************
  *
  * This is the next part if the initialization sequence: we are now
  * running from RAM and have a "normal" C environment, i. e. global
@@ -493,12 +513,10 @@ void board_init_r(gd_t *id, ulong dest_addr)
 	ulong flash_size;
 #endif
 
-	gd = id;
-
 	gd->flags |= GD_FLG_RELOC;	/* tell others: relocation done */
 	bootstage_mark_name(BOOTSTAGE_ID_START_UBOOT_R, "board_init_r");
 
-	monitor_flash_len = _end_ofs;
+	monitor_flash_len = (ulong)&__rel_dyn_end - (ulong)_start;
 
 	/* Enable caches */
 	enable_caches();
@@ -540,15 +558,13 @@ void board_init_r(gd_t *id, ulong dest_addr)
 	flash_size = flash_init();
 	if (flash_size > 0) {
 # ifdef CONFIG_SYS_FLASH_CHECKSUM
-		char *s = getenv("flashchecksum");
-
 		print_size(flash_size, "");
 		/*
 		 * Compute and print flash CRC if flashchecksum is set to 'y'
 		 *
 		 * NOTE: Maybe we should add some WATCHDOG_RESET()? XXX
 		 */
-		if (s && (*s == 'y')) {
+		if (getenv_yesno("flashchecksum") == 1) {
 			printf("  CRC: %08X", crc32(0,
 				(const unsigned char *) CONFIG_SYS_FLASH_BASE,
 				flash_size));
@@ -573,8 +589,13 @@ void board_init_r(gd_t *id, ulong dest_addr)
 #endif
 
 #ifdef CONFIG_GENERIC_MMC
-       puts("MMC:   ");
-       mmc_initialize(gd->bd);
+	puts("MMC:   ");
+	mmc_initialize(gd->bd);
+#endif
+
+#ifdef CONFIG_CMD_SCSI
+	puts("SCSI:  ");
+	scsi_init();
 #endif
 
 #ifdef CONFIG_HAS_DATAFLASH
@@ -583,7 +604,10 @@ void board_init_r(gd_t *id, ulong dest_addr)
 #endif
 
 	/* initialize environment */
-	env_relocate();
+	if (should_load_env())
+		env_relocate();
+	else
+		set_default_env(NULL);
 
 #if defined(CONFIG_CMD_PCI) || defined(CONFIG_PCI)
 	arm_pci_init();
@@ -599,6 +623,15 @@ void board_init_r(gd_t *id, ulong dest_addr)
 #endif
 
 	console_init_r();	/* fully init console as a device */
+
+#ifdef CONFIG_DISPLAY_BOARDINFO_LATE
+# ifdef CONFIG_OF_CONTROL
+	/* Put this here so it appears on the LCD, now it is ready */
+	display_fdt_model(gd->fdt_blob);
+# else
+	checkboard();
+# endif
+#endif
 
 #if defined(CONFIG_ARCH_MISC_INIT)
 	/* miscellaneous arch dependent initialisations */
@@ -666,10 +699,4 @@ void board_init_r(gd_t *id, ulong dest_addr)
 	}
 
 	/* NOTREACHED - no way out of command loop except booting */
-}
-
-void hang(void)
-{
-	puts("### ERROR ### Please RESET the board ###\n");
-	for (;;);
 }

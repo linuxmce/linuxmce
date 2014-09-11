@@ -2,23 +2,7 @@
  * (C) Copyright 2001-2010
  * Wolfgang Denk, DENX Software Engineering, wd@denx.de.
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
@@ -78,28 +62,6 @@ static int eth_mac_skip(int index)
 	sprintf(enetvar, index ? "eth%dmacskip" : "ethmacskip", index);
 	return ((skip_state = getenv(enetvar)) != NULL);
 }
-
-#ifdef CONFIG_RANDOM_MACADDR
-void eth_random_enetaddr(uchar *enetaddr)
-{
-	uint32_t rval;
-
-	srand(get_timer(0));
-
-	rval = rand();
-	enetaddr[0] = rval & 0xff;
-	enetaddr[1] = (rval >> 8) & 0xff;
-	enetaddr[2] = (rval >> 16) & 0xff;
-
-	rval = rand();
-	enetaddr[3] = rval & 0xff;
-	enetaddr[4] = (rval >> 8) & 0xff;
-	enetaddr[5] = (rval >> 16) & 0xff;
-
-	/* make sure it's local and unicast */
-	enetaddr[0] = (enetaddr[0] | 0x02) & ~0x01;
-}
-#endif
 
 /*
  * CPU and board-specific Ethernet initializations.  Aliased function
@@ -295,7 +257,7 @@ int eth_initialize(bd_t *bis)
 	eth_current = NULL;
 
 	bootstage_mark(BOOTSTAGE_ID_NET_ETH_START);
-#if defined(CONFIG_MII) || defined(CONFIG_CMD_MII)
+#if defined(CONFIG_MII) || defined(CONFIG_CMD_MII) || defined(CONFIG_PHYLIB)
 	miiphy_init();
 #endif
 

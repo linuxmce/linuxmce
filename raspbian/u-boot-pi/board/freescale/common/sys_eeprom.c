@@ -4,23 +4,7 @@
  * Haiying Wang (haiying.wang@freescale.com)
  * Timur Tabi (timur@freescale.com)
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
@@ -34,7 +18,11 @@
 #endif
 
 #ifdef CONFIG_SYS_I2C_EEPROM_NXID
-#define MAX_NUM_PORTS	23
+/* some boards with non-256-bytes EEPROM have special define */
+/* for MAX_NUM_PORTS in board-specific file */
+#ifndef MAX_NUM_PORTS
+#define MAX_NUM_PORTS	16
+#endif
 #define NXID_VERSION	1
 #endif
 
@@ -70,8 +58,9 @@ static struct __attribute__ ((__packed__)) eeprom {
 	u8 res_1[21];     /* 0x2b - 0x3f Reserved */
 	u8 mac_count;     /* 0x40        Number of MAC addresses */
 	u8 mac_flag;      /* 0x41        MAC table flags */
-	u8 mac[MAX_NUM_PORTS][6];     /* 0x42 - x MAC addresses */
-	u32 crc;          /* x+1         CRC32 checksum */
+	u8 mac[MAX_NUM_PORTS][6];     /* 0x42 - 0xa1 MAC addresses */
+	u8 res_2[90];     /* 0xa2 - 0xfb Reserved */	
+	u32 crc;          /* 0xfc - 0xff CRC32 checksum */
 #endif
 } e;
 
@@ -437,13 +426,13 @@ int mac_read_from_eeprom(void)
 
 	if (read_eeprom()) {
 		printf("Read failed.\n");
-		return -1;
+		return 0;
 	}
 
 	if (!is_valid) {
 		printf("Invalid ID (%02x %02x %02x %02x)\n",
 		       e.id[0], e.id[1], e.id[2], e.id[3]);
-		return -1;
+		return 0;
 	}
 
 #ifdef CONFIG_SYS_I2C_EEPROM_NXID
@@ -459,7 +448,7 @@ int mac_read_from_eeprom(void)
 	crcp = (void *)&e + crc_offset;
 	if (crc != be32_to_cpu(*crcp)) {
 		printf("CRC mismatch (%08x != %08x)\n", crc, be32_to_cpu(e.crc));
-		return -1;
+		return 0;
 	}
 
 #ifdef CONFIG_SYS_I2C_EEPROM_NXID

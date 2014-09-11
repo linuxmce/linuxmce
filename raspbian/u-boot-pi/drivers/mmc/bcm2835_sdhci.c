@@ -39,16 +39,26 @@
 #include <common.h>
 #include <malloc.h>
 #include <sdhci.h>
+#include <asm/arch/timer.h>
 
 /* 400KHz is max freq for card ID etc. Use that as min */
 #define MIN_FREQ 400000
 
-static uint twoticks_delay;
+struct bcm2835_sdhci_host {
+	struct sdhci_host host;
+	uint twoticks_delay;
+	ulong last_write;
+};
+
+static inline struct bcm2835_sdhci_host *to_bcm(struct sdhci_host *host)
+{
+	return (struct bcm2835_sdhci_host *)host;
+}
 
 static inline void bcm2835_sdhci_raw_writel(struct sdhci_host *host, u32 val,
 						int reg)
 {
-	static ulong last_write;
+	struct bcm2835_sdhci_host *bcm_host = to_bcm(host);
 
 	/*
 	 * The Arasan has a bugette whereby it may lose the content of
@@ -58,11 +68,11 @@ static inline void bcm2835_sdhci_raw_writel(struct sdhci_host *host, u32 val,
 	 * (Which is just as well - otherwise we'd have to nobble the DMA engine
 	 * too)
 	 */
-	while (get_timer(last_write) < twoticks_delay)
+	while (get_timer_us(bcm_host->last_write) < bcm_host->twoticks_delay)
 		;
 
 	writel(val, host->ioaddr + reg);
-	last_write = get_timer(0);
+	bcm_host->last_write = get_timer_us(0);
 }
 
 static inline u32 bcm2835_sdhci_raw_readl(struct sdhci_host *host, int reg)
@@ -140,7 +150,14 @@ static const struct sdhci_ops bcm2835_ops = {
 
 int bcm2835_sdhci_init(u32 regbase, u32 emmc_freq)
 {
-	struct sdhci_host *host = NULL;
+	struct bcm2835_sdhci_host *bcm_host;
+	struct sdhci_host *host;
+
+	bcm_host = malloc(sizeof(*bcm_host));
+	if (!bcm_host) {
+		printf("sdhci_host malloc fail!\n");
+		return 1;
+	}
 
 	/*
 	 * See the comments in bcm2835_sdhci_raw_writel().
@@ -155,18 +172,14 @@ int bcm2835_sdhci_init(u32 regbase, u32 emmc_freq)
 	 * Multiply by 1000000 to get uS per two ticks.
 	 * +1 for hack rounding.
 	 */
-	twoticks_delay = ((2 * 1000000) / MIN_FREQ) + 1;
+	bcm_host->twoticks_delay = ((2 * 1000000) / MIN_FREQ) + 1;
+	bcm_host->last_write = 0;
 
-	host = malloc(sizeof(struct sdhci_host));
-	if (!host) {
-		printf("sdhci_host malloc fail!\n");
-		return 1;
-	}
-
+	host = &bcm_host->host;
 	host->name = "bcm2835_sdhci";
 	host->ioaddr = (void *)regbase;
 	host->quirks = SDHCI_QUIRK_BROKEN_VOLTAGE | SDHCI_QUIRK_BROKEN_R1B |
-		SDHCI_QUIRK_WAIT_SEND_CMD;
+		SDHCI_QUIRK_WAIT_SEND_CMD | SDHCI_QUIRK_NO_HISPD_BIT;
 	host->voltages = MMC_VDD_32_33 | MMC_VDD_33_34 | MMC_VDD_165_195;
 	host->ops = &bcm2835_ops;
 

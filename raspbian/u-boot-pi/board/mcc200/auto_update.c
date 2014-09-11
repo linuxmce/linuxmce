@@ -2,20 +2,7 @@
  * (C) Copyright 2006
  * Wolfgang Denk, DENX Software Engineering, wd@denx.de.
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 #include <common.h>
 #include <command.h>
@@ -24,11 +11,6 @@
 #include <asm/byteorder.h>
 #include <usb.h>
 #include <part.h>
-
-#ifdef CONFIG_SYS_HUSH_PARSER
-#include <hush.h>
-#endif
-
 
 #ifdef CONFIG_AUTO_UPDATE
 
@@ -260,7 +242,7 @@ int au_do_update(int idx, long sz)
 		/* parse_string_outer() runs off the end. */
 		addr[image_get_data_size (hdr)] = 0;
 		addr += 8;
-		parse_string_outer(addr, FLAG_PARSE_SEMICOLON);
+		run_command_list(addr, -1, 0);
 		return 0;
 	}
 

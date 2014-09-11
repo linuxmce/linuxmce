@@ -2,23 +2,7 @@
  * (C) Copyright 2008
  * Steve Sakoman <steve@sakoman.com>
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 #ifndef _OVERO_H_
 #define _OVERO_H_
@@ -37,6 +21,8 @@ const omap3_sysinfo sysinfo = {
 #define REVISION_0	0x0
 #define REVISION_1	0x1
 #define REVISION_2	0x2
+#define REVISION_3	0x3
+#define REVISION_4	0x4
 
 /*
  * IEN  - Input Enable
@@ -418,5 +404,21 @@ const omap3_sysinfo sysinfo = {
 #define MUX_USRP_E() \
 	MUX_VAL(CP(MCSPI1_SOMI),	(IEN  | PTD | DIS | M4)) /*GPIO_173 */\
 	MUX_VAL(CP(MCSPI1_CS1),		(IDIS | PTD | EN  | M4)) /*GPIO_175 */\
+
+#define MUX_ALTO35() \
+	MUX_VAL(CP(SYS_CLKOUT1),	(IEN  | PTU | EN  | M4)) /*GPIO_10-BTN*/\
+	MUX_VAL(CP(UART1_TX),		(IDIS | PTD | DIS | M4)) /*GPIO_148-RED LED*/\
+	MUX_VAL(CP(UART1_CTS),		(IDIS | PTD | DIS | M4)) /*GPIO_150-YELLOW LED*/\
+	MUX_VAL(CP(UART1_RX),		(IDIS | PTD | DIS | M4)) /*GPIO_151-BLUE LED*/\
+	MUX_VAL(CP(HDQ_SIO),		(IDIS | PTD | DIS | M4)) /*GPIO_170-GREEN LED*/\
+	MUX_VAL(CP(MCSPI1_CS1),		(IDIS | PTD | EN  | M4)) /*GPIO_175*/\
+
+#define MUX_ARBOR43C() \
+	MUX_VAL(CP(CSI2_DX1),		(IDIS | PTD | DIS | M4)) /*GPIO_114-RED LED*/\
+	MUX_VAL(CP(UART1_CTS),		(IDIS | PTD | DIS | M4)) /*GPIO_150-YELLOW LED*/\
+	MUX_VAL(CP(HDQ_SIO),		(IEN  | PTU | EN  | M4)) /*GPIO_170-BUTTON */\
+	MUX_VAL(CP(SYS_CLKOUT2),	(IDIS | PTD | DIS | M4)) /*GPIO_186-BLUE LED*/\
+	MUX_VAL(CP(JTAG_EMU1),		(IDIS | PTD | DIS | M4)) /*GPIO_31-CAP WAKE*/\
+	MUX_VAL(CP(SYS_CLKOUT1),	(IEN  | PTU | EN  | M4)) /*GPIO_10-CAP IRQ*/\
 
 #endif

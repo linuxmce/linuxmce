@@ -5,23 +5,7 @@
  * Author: Albert Aribaud <albert.u.boot@aribaud.net>
  * Copyright (c) 2010 Albert Aribaud.
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- * MA 02110-1301 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
@@ -232,21 +216,7 @@ static int twsi_stop(int status)
  */
 
 #define TWSI_FREQUENCY(m, n) \
-	((u8) (CONFIG_SYS_TCLK / (10 * (m + 1) * 2 * (1 << n))))
-
-/*
- * These are required to be reprogrammed before enabling the controller
- * because a reset loses them.
- * Default values come from the spec, but a twsi_reset will change them.
- * twsi_slave_address left uninitialized lest checkpatch.pl complains.
- */
-
-/* Baudrate generator: m (bits 7..4) =4, n (bits 3..0) =4 */
-static u8 twsi_baud_rate = 0x44; /* baudrate at controller reset */
-/* Default frequency corresponding to default m=4, n=4 */
-static u8 twsi_actual_speed = TWSI_FREQUENCY(4, 4);
-/* Default slave address is 0 (so is an uninitialized static) */
-static u8 twsi_slave_address;
+	(CONFIG_SYS_TCLK / (10 * (m + 1) * (1 << n)))
 
 /*
  * Reset controller.
@@ -254,7 +224,7 @@ static u8 twsi_slave_address;
  * Controller reset also resets the baud rate and slave address, so
  * re-establish them.
  */
-static void twsi_reset(void)
+static void twsi_reset(u8 baud_rate, u8 slave_address)
 {
 	/* ensure controller will be enabled by any twsi*() function */
 	twsi_control_flags = MVTWSI_CONTROL_TWSIEN;
@@ -263,9 +233,9 @@ static void twsi_reset(void)
 	/* wait 2 ms -- this is what the Marvell LSP does */
 	udelay(20000);
 	/* set baud rate */
-	writel(twsi_baud_rate, &twsi->baudrate);
+	writel(baud_rate, &twsi->baudrate);
 	/* set slave address even though we don't use it */
-	writel(twsi_slave_address, &twsi->slave_address);
+	writel(slave_address, &twsi->slave_address);
 	writel(0, &twsi->xtnd_slave_addr);
 	/* assert STOP but don't care for the result */
 	(void) twsi_stop(0);
@@ -293,12 +263,8 @@ void i2c_init(int requested_speed, int slaveadd)
 			}
 		}
 	}
-	/* save baud rate and slave for later calls to twsi_reset */
-	twsi_baud_rate = baud;
-	twsi_actual_speed = highest_speed;
-	twsi_slave_address = slaveadd;
 	/* reset controller */
-	twsi_reset();
+	twsi_reset(baud, slaveadd);
 }
 
 /*

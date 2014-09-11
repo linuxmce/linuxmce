@@ -4,23 +4,7 @@
  *
  * Copyright 2010-2011 Freescale Semiconductor, Inc.
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
@@ -28,7 +12,6 @@
 #include <linux/ctype.h>
 #include <linux/types.h>
 #include <asm/global_data.h>
-#include <fdt.h>
 #include <libfdt.h>
 #include <fdt_support.h>
 #include <exports.h>
@@ -37,6 +20,65 @@
  * Global data (for the gd->bd)
  */
 DECLARE_GLOBAL_DATA_PTR;
+
+/*
+ * Get cells len in bytes
+ *     if #NNNN-cells property is 2 then len is 8
+ *     otherwise len is 4
+ */
+static int get_cells_len(void *blob, char *nr_cells_name)
+{
+	const fdt32_t *cell;
+
+	cell = fdt_getprop(blob, 0, nr_cells_name, NULL);
+	if (cell && fdt32_to_cpu(*cell) == 2)
+		return 8;
+
+	return 4;
+}
+
+/*
+ * Write a 4 or 8 byte big endian cell
+ */
+static void write_cell(u8 *addr, u64 val, int size)
+{
+	int shift = (size - 1) * 8;
+	while (size-- > 0) {
+		*addr++ = (val >> shift) & 0xff;
+		shift -= 8;
+	}
+}
+
+/**
+ * fdt_getprop_u32_default_node - Return a node's property or a default
+ *
+ * @fdt: ptr to device tree
+ * @off: offset of node
+ * @cell: cell offset in property
+ * @prop: property name
+ * @dflt: default value if the property isn't found
+ *
+ * Convenience function to return a node's property or a default value if
+ * the property doesn't exist.
+ */
+u32 fdt_getprop_u32_default_node(const void *fdt, int off, int cell,
+				const char *prop, const u32 dflt)
+{
+	const fdt32_t *val;
+	int len;
+
+	val = fdt_getprop(fdt, off, prop, &len);
+
+	/* Check if property exists */
+	if (!val)
+		return dflt;
+
+	/* Check if property is long enough */
+	if (len < ((cell + 1) * sizeof(uint32_t)))
+		return dflt;
+
+	return fdt32_to_cpu(*val);
+}
 
 /**
  * fdt_getprop_u32_default - Find a node and return it's property or a default
@@ -52,18 +94,13 @@ DECLARE_GLOBAL_DATA_PTR;
 u32 fdt_getprop_u32_default(const void *fdt, const char *path,
 				const char *prop, const u32 dflt)
 {
-	const u32 *val;
 	int off;
 
 	off = fdt_path_offset(fdt, path);
 	if (off < 0)
 		return dflt;
 
-	val = fdt_getprop(fdt, off, prop, NULL);
-	if (val)
-		return fdt32_to_cpu(*val);
-	else
-		return dflt;
+	return fdt_getprop_u32_default_node(fdt, off, 0, prop, dflt);
 }
 
 /**
@@ -86,7 +123,7 @@ int fdt_find_and_setprop(void *fdt, const char *node, const char *prop,
 	if (nodeoff < 0)
 		return nodeoff;
 
-	if ((!create) && (fdt_get_property(fdt, nodeoff, prop, 0) == NULL))
+	if ((!create) && (fdt_get_property(fdt, nodeoff, prop, NULL) == NULL))
 		return 0; /* create flag not set; so exit quietly */
 
 	return fdt_setprop(fdt, nodeoff, prop, val, len);
@@ -148,9 +185,9 @@ static int fdt_fixup_stdout(void *fdt, int chosenoff)
 
 int fdt_initrd(void *fdt, ulong initrd_start, ulong initrd_end, int force)
 {
-	int   nodeoffset;
+	int   nodeoffset, addr_cell_len;
 	int   err, j, total;
-	u32   tmp;
+	fdt64_t  tmp;
 	const char *path;
 	uint64_t addr, size;
 
@@ -187,20 +224,22 @@ int fdt_initrd(void *fdt, ulong initrd_start, ulong initrd_end, int force)
 		return err;
 	}
 
+	addr_cell_len = get_cells_len(fdt, "#address-cells");
+
 	path = fdt_getprop(fdt, nodeoffset, "linux,initrd-start", NULL);
 	if ((path == NULL) || force) {
-		tmp = __cpu_to_be32(initrd_start);
+		write_cell((u8 *)&tmp, initrd_start, addr_cell_len);
 		err = fdt_setprop(fdt, nodeoffset,
-			"linux,initrd-start", &tmp, sizeof(tmp));
+			"linux,initrd-start", &tmp, addr_cell_len);
 		if (err < 0) {
 			printf("WARNING: "
 				"could not set linux,initrd-start %s.\n",
 				fdt_strerror(err));
 			return err;
 		}
-		tmp = __cpu_to_be32(initrd_end);
+		write_cell((u8 *)&tmp, initrd_end, addr_cell_len);
 		err = fdt_setprop(fdt, nodeoffset,
-			"linux,initrd-end", &tmp, sizeof(tmp));
+			"linux,initrd-end", &tmp, addr_cell_len);
 		if (err < 0) {
 			printf("WARNING: could not set linux,initrd-end %s.\n",
 				fdt_strerror(err));
@@ -301,8 +340,8 @@ void do_fixup_by_path(void *fdt, const char *path, const char *prop,
 void do_fixup_by_path_u32(void *fdt, const char *path, const char *prop,
 			  u32 val, int create)
 {
-	val = cpu_to_fdt32(val);
-	do_fixup_by_path(fdt, path, prop, &val, sizeof(val), create);
+	fdt32_t tmp = cpu_to_fdt32(val);
+	do_fixup_by_path(fdt, path, prop, &tmp, sizeof(tmp), create);
 }
 
 void do_fixup_by_prop(void *fdt,
@@ -320,7 +359,7 @@ void do_fixup_by_prop(void *fdt,
 #endif
 	off = fdt_node_offset_by_prop_value(fdt, -1, pname, pval, plen);
 	while (off != -FDT_ERR_NOTFOUND) {
-		if (create || (fdt_get_property(fdt, off, prop, 0) != NULL))
+		if (create || (fdt_get_property(fdt, off, prop, NULL) != NULL))
 			fdt_setprop(fdt, off, prop, val, len);
 		off = fdt_node_offset_by_prop_value(fdt, off, pname, pval, plen);
 	}
@@ -330,8 +369,8 @@ void do_fixup_by_prop_u32(void *fdt,
 			  const char *pname, const void *pval, int plen,
 			  const char *prop, u32 val, int create)
 {
-	val = cpu_to_fdt32(val);
-	do_fixup_by_prop(fdt, pname, pval, plen, prop, &val, 4, create);
+	fdt32_t tmp = cpu_to_fdt32(val);
+	do_fixup_by_prop(fdt, pname, pval, plen, prop, &tmp, 4, create);
 }
 
 void do_fixup_by_compat(void *fdt, const char *compat,
@@ -347,7 +386,7 @@ void do_fixup_by_compat(void *fdt, const char *compat,
 #endif
 	off = fdt_node_offset_by_compatible(fdt, -1, compat);
 	while (off != -FDT_ERR_NOTFOUND) {
-		if (create || (fdt_get_property(fdt, off, prop, 0) != NULL))
+		if (create || (fdt_get_property(fdt, off, prop, NULL) != NULL))
 			fdt_setprop(fdt, off, prop, val, len);
 		off = fdt_node_offset_by_compatible(fdt, off, compat);
 	}
@@ -356,44 +395,28 @@ void do_fixup_by_compat(void *fdt, const char *compat,
 void do_fixup_by_compat_u32(void *fdt, const char *compat,
 			    const char *prop, u32 val, int create)
 {
-	val = cpu_to_fdt32(val);
-	do_fixup_by_compat(fdt, compat, prop, &val, 4, create);
+	fdt32_t tmp = cpu_to_fdt32(val);
+	do_fixup_by_compat(fdt, compat, prop, &tmp, 4, create);
 }
 
-/*
- * Get cells len in bytes
- *     if #NNNN-cells property is 2 then len is 8
- *     otherwise len is 4
- */
-static int get_cells_len(void *blob, char *nr_cells_name)
-{
-	const u32 *cell;
-
-	cell = fdt_getprop(blob, 0, nr_cells_name, NULL);
-	if (cell && fdt32_to_cpu(*cell) == 2)
-		return 8;
-
-	return 4;
-}
-
-/*
- * Write a 4 or 8 byte big endian cell
- */
-static void write_cell(u8 *addr, u64 val, int size)
-{
-	int shift = (size - 1) * 8;
-	while (size-- > 0) {
-		*addr++ = (val >> shift) & 0xff;
-		shift -= 8;
-	}
-}
-
+#ifdef CONFIG_NR_DRAM_BANKS
+#define MEMORY_BANKS_MAX CONFIG_NR_DRAM_BANKS
+#else
+#define MEMORY_BANKS_MAX 4
+#endif
 int fdt_fixup_memory_banks(void *blob, u64 start[], u64 size[], int banks)
 {
 	int err, nodeoffset;
 	int addr_cell_len, size_cell_len, len;
-	u8 tmp[banks * 16]; /* Up to 64-bit address + 64-bit size */
+	u8 tmp[MEMORY_BANKS_MAX * 16]; /* Up to 64-bit address + 64-bit size */
 	int bank;
+
+	if (banks > MEMORY_BANKS_MAX) {
+		printf("%s: num banks %d exceeds hardcoded limit %d."
+		       " Recompile with higher MEMORY_BANKS_MAX?\n",
+		       __FUNCTION__, banks, MEMORY_BANKS_MAX);
+		return -1;
+	}
 
 	err = fdt_check_header(blob);
 	if (err < 0) {
@@ -405,10 +428,11 @@ int fdt_fixup_memory_banks(void *blob, u64 start[], u64 size[], int banks)
 	nodeoffset = fdt_path_offset(blob, "/memory");
 	if (nodeoffset < 0) {
 		nodeoffset = fdt_add_subnode(blob, 0, "memory");
-		if (nodeoffset < 0)
+		if (nodeoffset < 0) {
 			printf("WARNING: could not create /memory: %s.\n",
 					fdt_strerror(nodeoffset));
-		return nodeoffset;
+			return nodeoffset;
+		}
 	}
 	err = fdt_setprop(blob, nodeoffset, "device_type", "memory",
 			sizeof("memory"));
@@ -447,7 +471,7 @@ void fdt_fixup_ethernet(void *fdt)
 {
 	int node, i, j;
 	char enet[16], *tmp, *end;
-	char mac[16] = "ethaddr";
+	char mac[16];
 	const char *path;
 	unsigned char mac_addr[6];
 
@@ -456,6 +480,7 @@ void fdt_fixup_ethernet(void *fdt)
 		return;
 
 	i = 0;
+	strcpy(mac, "ethaddr");
 	while ((tmp = getenv(mac)) != NULL) {
 		sprintf(enet, "ethernet%d", i);
 		path = fdt_getprop(fdt, node, enet, NULL);
@@ -770,11 +795,11 @@ int fdt_node_set_part_info(void *blob, int parent_offset,
 
 		part = list_entry(pentry, struct part_info, link);
 
-		debug("%2d: %-20s0x%08x\t0x%08x\t%d\n",
+		debug("%2d: %-20s0x%08llx\t0x%08llx\t%d\n",
 			part_num, part->name, part->size,
 			part->offset, part->mask_flags);
 
-		sprintf(buf, "partition@%x", part->offset);
+		sprintf(buf, "partition@%llx", part->offset);
 add_sub:
 		ret = fdt_add_subnode(blob, parent_offset, buf);
 		if (ret == -FDT_ERR_NOSPACE) {
@@ -903,11 +928,11 @@ void fdt_del_node_and_alias(void *blob, const char *alias)
 }
 
 /* Helper to read a big number; size is in cells (not bytes) */
-static inline u64 of_read_number(const __be32 *cell, int size)
+static inline u64 of_read_number(const fdt32_t *cell, int size)
 {
 	u64 r = 0;
 	while (size--)
-		r = (r << 32) | be32_to_cpu(*(cell++));
+		r = (r << 32) | fdt32_to_cpu(*(cell++));
 	return r;
 }
 
@@ -921,7 +946,7 @@ static inline u64 of_read_number(const __be32 *cell, int size)
 
 /* Debug utility */
 #ifdef DEBUG
-static void of_dump_addr(const char *s, const u32 *addr, int na)
+static void of_dump_addr(const char *s, const fdt32_t *addr, int na)
 {
 	printf("%s", s);
 	while(na--)
@@ -929,7 +954,7 @@ static void of_dump_addr(const char *s, const u32 *addr, int na)
 	printf("\n");
 }
 #else
-static void of_dump_addr(const char *s, const u32 *addr, int na) { }
+static void of_dump_addr(const char *s, const fdt32_t *addr, int na) { }
 #endif
 
 /* Callbacks for bus specific translators */
@@ -938,21 +963,21 @@ struct of_bus {
 	const char	*addresses;
 	void		(*count_cells)(void *blob, int parentoffset,
 				int *addrc, int *sizec);
-	u64		(*map)(u32 *addr, const u32 *range,
+	u64		(*map)(fdt32_t *addr, const fdt32_t *range,
 				int na, int ns, int pna);
-	int		(*translate)(u32 *addr, u64 offset, int na);
+	int		(*translate)(fdt32_t *addr, u64 offset, int na);
 };
 
 /* Default translator (generic bus) */
 static void of_bus_default_count_cells(void *blob, int parentoffset,
 					int *addrc, int *sizec)
 {
-	const u32 *prop;
+	const fdt32_t *prop;
 
 	if (addrc) {
 		prop = fdt_getprop(blob, parentoffset, "#address-cells", NULL);
 		if (prop)
-			*addrc = be32_to_cpup((u32 *)prop);
+			*addrc = be32_to_cpup(prop);
 		else
 			*addrc = 2;
 	}
@@ -960,13 +985,13 @@ static void of_bus_default_count_cells(void *blob, int parentoffset,
 	if (sizec) {
 		prop = fdt_getprop(blob, parentoffset, "#size-cells", NULL);
 		if (prop)
-			*sizec = be32_to_cpup((u32 *)prop);
+			*sizec = be32_to_cpup(prop);
 		else
 			*sizec = 1;
 	}
 }
 
-static u64 of_bus_default_map(u32 *addr, const u32 *range,
+static u64 of_bus_default_map(fdt32_t *addr, const fdt32_t *range,
 		int na, int ns, int pna)
 {
 	u64 cp, s, da;
@@ -983,14 +1008,14 @@ static u64 of_bus_default_map(u32 *addr, const u32 *range,
 	return da - cp;
 }
 
-static int of_bus_default_translate(u32 *addr, u64 offset, int na)
+static int of_bus_default_translate(fdt32_t *addr, u64 offset, int na)
 {
 	u64 a = of_read_number(addr, na);
 	memset(addr, 0, na * 4);
 	a += offset;
 	if (na > 1)
-		addr[na - 2] = a >> 32;
-	addr[na - 1] = a & 0xffffffffu;
+		addr[na - 2] = cpu_to_fdt32(a >> 32);
+	addr[na - 1] = cpu_to_fdt32(a & 0xffffffffu);
 
 	return 0;
 }
@@ -1008,10 +1033,10 @@ static struct of_bus of_busses[] = {
 };
 
 static int of_translate_one(void * blob, int parent, struct of_bus *bus,
-			    struct of_bus *pbus, u32 *addr,
+			    struct of_bus *pbus, fdt32_t *addr,
 			    int na, int ns, int pna, const char *rprop)
 {
-	const u32 *ranges;
+	const fdt32_t *ranges;
 	int rlen;
 	int rone;
 	u64 offset = OF_BAD_ADDR;
@@ -1028,7 +1053,7 @@ static int of_translate_one(void * blob, int parent, struct of_bus *bus,
 	 * to translate addresses that aren't supposed to be translated in
 	 * the first place. --BenH.
 	 */
-	ranges = (u32 *)fdt_getprop(blob, parent, rprop, &rlen);
+	ranges = fdt_getprop(blob, parent, rprop, &rlen);
 	if (ranges == NULL || rlen == 0) {
 		offset = of_read_number(addr, na);
 		memset(addr, 0, pna * 4);
@@ -1070,12 +1095,12 @@ static int of_translate_one(void * blob, int parent, struct of_bus *bus,
  * that can be mapped to a cpu physical address). This is not really specified
  * that way, but this is traditionally the way IBM at least do things
  */
-u64 __of_translate_address(void *blob, int node_offset, const u32 *in_addr,
-			   const char *rprop)
+static u64 __of_translate_address(void *blob, int node_offset, const fdt32_t *in_addr,
+				  const char *rprop)
 {
 	int parent;
 	struct of_bus *bus, *pbus;
-	u32 addr[OF_MAX_ADDR_CELLS];
+	fdt32_t addr[OF_MAX_ADDR_CELLS];
 	int na, ns, pna, pns;
 	u64 result = OF_BAD_ADDR;
 
@@ -1143,7 +1168,7 @@ u64 __of_translate_address(void *blob, int node_offset, const u32 *in_addr,
 	return result;
 }
 
-u64 fdt_translate_address(void *blob, int node_offset, const u32 *in_addr)
+u64 fdt_translate_address(void *blob, int node_offset, const fdt32_t *in_addr)
 {
 	return __of_translate_address(blob, node_offset, in_addr, "ranges");
 }
@@ -1162,7 +1187,7 @@ int fdt_node_offset_by_compat_reg(void *blob, const char *compat,
 {
 	int len, off = fdt_node_offset_by_compatible(blob, -1, compat);
 	while (off != -FDT_ERR_NOTFOUND) {
-		u32 *reg = (u32 *)fdt_getprop(blob, off, "reg", &len);
+		const fdt32_t *reg = fdt_getprop(blob, off, "reg", &len);
 		if (reg) {
 			if (compat_off == fdt_translate_address(blob, off, reg))
 				return off;
@@ -1315,7 +1340,7 @@ int fdt_set_status_by_alias(void *fdt, const char* alias,
 	return fdt_set_node_status(fdt, offset, status, error_code);
 }
 
-#if defined(CONFIG_VIDEO)
+#if defined(CONFIG_VIDEO) || defined(CONFIG_LCD)
 int fdt_add_edid(void *blob, const char *compat, unsigned char *edid_buf)
 {
 	int noff;
@@ -1356,7 +1381,7 @@ err_size:
 int fdt_verify_alias_address(void *fdt, int anode, const char *alias, u64 addr)
 {
 	const char *path;
-	const u32 *reg;
+	const fdt32_t *reg;
 	int node, len;
 	u64 dt_addr;
 
@@ -1398,15 +1423,109 @@ u64 fdt_get_base_address(void *fdt, int node)
 {
 	int size;
 	u32 naddr;
-	const u32 *prop;
+	const fdt32_t *prop;
 
 	prop = fdt_getprop(fdt, node, "#address-cells", &size);
 	if (prop && size == 4)
-		naddr = *prop;
+		naddr = be32_to_cpup(prop);
 	else
 		naddr = 2;
 
 	prop = fdt_getprop(fdt, node, "ranges", &size);
 
 	return prop ? fdt_translate_address(fdt, node, prop + naddr) : 0;
+}
+
+/*
+ * Read a property of size <prop_len>. Currently only supports 1 or 2 cells.
+ */
+static int fdt_read_prop(const fdt32_t *prop, int prop_len, int cell_off,
+			 uint64_t *val, int cells)
+{
+	const fdt32_t *prop32 = &prop[cell_off];
+	const fdt64_t *prop64 = (const fdt64_t *)&prop[cell_off];
+
+	if ((cell_off + cells) > prop_len)
+		return -FDT_ERR_NOSPACE;
+
+	switch (cells) {
+	case 1:
+		*val = fdt32_to_cpu(*prop32);
+		break;
+	case 2:
+		*val = fdt64_to_cpu(*prop64);
+		break;
+	default:
+		return -FDT_ERR_NOSPACE;
+	}
+
+	return 0;
+}
+
+/**
+ * fdt_read_range - Read a node's n'th range property
+ *
+ * @fdt: ptr to device tree
+ * @node: offset of node
+ * @n: range index
+ * @child_addr: pointer to storage for the "child address" field
+ * @addr: pointer to storage for the CPU view translated physical start
+ * @len: pointer to storage for the range length
+ *
+ * Convenience function that reads and interprets a specific range out of
+ * a number of the "ranges" property array.
+ */
+int fdt_read_range(void *fdt, int node, int n, uint64_t *child_addr,
+		   uint64_t *addr, uint64_t *len)
+{
+	int pnode = fdt_parent_offset(fdt, node);
+	const fdt32_t *ranges;
+	int pacells;
+	int acells;
+	int scells;
+	int ranges_len;
+	int cell = 0;
+	int r = 0;
+
+	/*
+	 * The "ranges" property is an array of
+	 * { <child address> <parent address> <size in child address space> }
+	 *
+	 * All 3 elements can span a diffent number of cells. Fetch their size.
+	 */
+	pacells = fdt_getprop_u32_default_node(fdt, pnode, 0, "#address-cells", 1);
+	acells = fdt_getprop_u32_default_node(fdt, node, 0, "#address-cells", 1);
+	scells = fdt_getprop_u32_default_node(fdt, node, 0, "#size-cells", 1);
+
+	/* Now try to get the ranges property */
+	ranges = fdt_getprop(fdt, node, "ranges", &ranges_len);
+	if (!ranges)
+		return -FDT_ERR_NOTFOUND;
+	ranges_len /= sizeof(uint32_t);
+
+	/* Jump to the n'th entry */
+	cell = n * (pacells + acells + scells);
+
+	/* Read <child address> */
+	if (child_addr) {
+		r = fdt_read_prop(ranges, ranges_len, cell, child_addr,
+				  acells);
+		if (r)
+			return r;
+	}
+	cell += acells;
+
+	/* Read <parent address> */
+	if (addr)
+		*addr = fdt_translate_address(fdt, node, ranges + cell);
+	cell += pacells;
+
+	/* Read <size in child address space> */
+	if (len) {
+		r = fdt_read_prop(ranges, ranges_len, cell, len, scells);
+		if (r)
+			return r;
+	}
+
+	return 0;
 }
