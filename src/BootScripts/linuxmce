@@ -278,6 +278,7 @@ start() {
 		Q="SELECT FK_DeviceTemplate FROM Device WHERE PK_Device=$PK_Device"
 		FK_DeviceTemplate=$(RunSQL "$Q")
 
+		# FIXME: Look for an Orbiter on non-rpi-qMDs to determine if is X is needed?
 		if [[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_GenericPC_as_MD" ]] ||
 			[[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_RPi_B_as_MD" ]] ||
 			[[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_Core" ]]; then
