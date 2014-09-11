@@ -356,7 +356,7 @@ LoggerWrapper::GetInstance()->Write(LV_STATUS,"CreateDevice::DoIt Found %d rows 
 		if( ( osdistro.r=db_wrapper_query_result ( SQL ) ) && ( row=db_wrapper_fetch_row( osdistro.r ) ) )
 		{
 			PK_Distro=atoi( row[0] );
-			string SQL = string("SELECT FK_DeviceTemplate, FK_OperatingSystem, FK_Distro FROM InstallWizard RIGHT JOIN InstallWizard_Distro ON FK_InstallWizard=PK_InstallWizard WHERE InstallWizard.Default=1 AND InstallWizard.Step=6 AND ((FK_Distro=") + row[0] + ") OR (FK_OperatingSystem=" + row[1] + " AND FK_Distro IS NULL) OR (FK_OperatingSystem IS NULL AND FK_Distro IS NULL)) AND (FK_DeviceTemplate_Required = '" + row[2] + "' OR FK_DeviceTemplate_Required IS NULL)";
+			string SQL = string("SELECT FK_DeviceTemplate, FK_OperatingSystem, FK_Distro FROM InstallWizard RIGHT JOIN InstallWizard_Distro ON FK_InstallWizard=PK_InstallWizard WHERE InstallWizard.Default=1 AND InstallWizard.Step=6 AND ((FK_Distro=") + row[0] + ") OR (FK_OperatingSystem=" + row[1] + " AND FK_Distro IS NULL) OR (FK_OperatingSystem IS NULL AND FK_Distro IS NULL)) AND (FK_DeviceTemplate_Required IN (" + row[2] + ") OR FK_DeviceTemplate_Required IS NULL)";
 			PlutoSqlResult result_child_dev;
 			if( ( result_child_dev.r=db_wrapper_query_result( SQL ) ) )
 			{
