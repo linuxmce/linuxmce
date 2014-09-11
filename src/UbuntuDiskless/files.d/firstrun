@@ -32,10 +32,12 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 
 		INSSERV=$(which insserv)
 
-		echo -e "\n\n\n\n\n\n\n\n\nRPI FIRSTRUN\n\n\n\n\n\n\n\n\n" >&2
+		echo -e "\n\n\n\n\n\n\n\n\nRPI FIRSTRUN\n\n" >&2
 
+		echo -e "Updating RPI SDCARD from diskless image" >&2
 		# copy contents of /boot to /sdcard
 		mkdir -p /sdcard/
+		mount /sdcard
 		cp /boot/* /sdcard/
 
 		# not required with working u-boot
@@ -46,6 +48,7 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 		#[[ ! -f /sdcard/cmdline.txt.lmcebackup ]] && cp /sdcard/cmdline.txt /sdcard/cmdline.txt.lmcebackup
 		#echo "dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 elevator=deadline rootwait root=/dev/nfs nfsroot=192.168.80.1:/usr/pluto/diskless/$PK_Device ip=dhcp rootfstype=nfs" > /sdcard/cmdline.txt
 
+		echo -e "Creating cpu governor boot script" >&2
 		cat <<-'EOFF' >/etc/init.d/switch_cpu_governor
 		#!/bin/sh
 		### BEGIN INIT INFO
@@ -84,9 +87,11 @@ cat <<-'EOF' >"${Parm_RootLocation}/${File}"
 		EOFF
 		chmod +x /etc/init.d/switch_cpu_governor
 
+		echo -e "Setting up boot scripts" >&2
 		"$INSSERV" -fv switch_cpu_governor
 		"$INSSERV" -fv linuxmce
 		"$INSSERV" -rfv firstrun
+		echo -e "\n\nRPI FIRSTRUN\n\n\n\n\n\n\n\n\n" >&2
 		reboot
 		return 1
 	}
