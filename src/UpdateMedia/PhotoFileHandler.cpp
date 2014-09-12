@@ -95,64 +95,67 @@ bool PhotoFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttribute
 #endif
 	if (pPlutoMediaAttributes->m_mapAttributes.size() != 0)
 	{
-		Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(m_sFullFilename);
-		if(image.get() != 0) {
-			image->readMetadata();
+		try {
+			Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(m_sFullFilename);
+			if(image.get() != 0) {
+				image->readMetadata();
 
-			Exiv2::ExifData &exifData = image->exifData();
-			Exiv2::IptcData &iptcData = image->iptcData();
-
-			if (pPlutoMediaAttributes->m_mapAttributes.size() != 0)
-			{
-				// Keep track of tags we have cleared (only clear tags we are going to save, tags/attributes that are removed are handled in RemoveAttribute)
-				set<string> setClearedTags;
-				for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin(), 
-					    end = pPlutoMediaAttributes->m_mapAttributes.end(); it != end; ++it)
+				Exiv2::ExifData &exifData = image->exifData();
+				Exiv2::IptcData &iptcData = image->iptcData();
+				
+				if (pPlutoMediaAttributes->m_mapAttributes.size() != 0)
 				{
-					
-					if (it->second != NULL && it->second->m_sName != "")
+					// Keep track of tags we have cleared (only clear tags we are going to save, tags/attributes that are removed are handled in RemoveAttribute)
+					set<string> setClearedTags;
+					for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin(), 
+						    end = pPlutoMediaAttributes->m_mapAttributes.end(); it != end; ++it)
 					{
-						string tag = AttributeToTag(it->first);
-						if (tag != "") {
-							LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::SaveAttributes: saving tag %s, value = %s", tag.c_str(), it->second->m_sName.c_str());
-							if (setClearedTags.find(tag) == setClearedTags.end()) {
-								// Clear all tags of this key before starting to add new keys
-								if (StringUtils::StartsWith(tag, "Exif")) {
-									Exiv2::ExifData::iterator it = exifData.findKey(Exiv2::ExifKey(tag));
-									while (it != exifData.end()) {
-										exifData.erase(it);
-										it = exifData.findKey(Exiv2::ExifKey(tag));
+						
+						if (it->second != NULL && it->second->m_sName != "")
+						{
+							string tag = AttributeToTag(it->first);
+							if (tag != "") {
+								LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::SaveAttributes: saving tag %s, value = %s", tag.c_str(), it->second->m_sName.c_str());
+								if (setClearedTags.find(tag) == setClearedTags.end()) {
+									// Clear all tags of this key before starting to add new keys
+									if (StringUtils::StartsWith(tag, "Exif")) {
+										Exiv2::ExifData::iterator it = exifData.findKey(Exiv2::ExifKey(tag));
+										while (it != exifData.end()) {
+											exifData.erase(it);
+											it = exifData.findKey(Exiv2::ExifKey(tag));
+										}
+									} else if (StringUtils::StartsWith(tag, "Iptc")) {
+										Exiv2::IptcData::iterator it = iptcData.findKey(Exiv2::IptcKey(tag));
+										while (it != iptcData.end()) {
+											iptcData.erase(it);
+											it = iptcData.findKey(Exiv2::IptcKey(tag));
+										}
 									}
-								} else if (StringUtils::StartsWith(tag, "Iptc")) {
-									Exiv2::IptcData::iterator it = iptcData.findKey(Exiv2::IptcKey(tag));
-									while (it != iptcData.end()) {
-										iptcData.erase(it);
-										it = iptcData.findKey(Exiv2::IptcKey(tag));
-									}
+									setClearedTags.insert(tag);
 								}
-								setClearedTags.insert(tag);
-							}
-							Exiv2::Value::AutoPtr v = Exiv2::Value::create(Exiv2::asciiString);
-							v->read(it->second->m_sName.c_str());
-							if (StringUtils::StartsWith(tag, "Exif"))
-							{
-								exifData.add(Exiv2::ExifKey(tag.c_str()), v.get());
-							} else if (StringUtils::StartsWith(tag, "Iptc"))
-							{
-								iptcData.add(Exiv2::IptcKey(tag.c_str()), v.get());
+								Exiv2::Value::AutoPtr v = Exiv2::Value::create(Exiv2::asciiString);
+								v->read(it->second->m_sName.c_str());
+								if (StringUtils::StartsWith(tag, "Exif"))
+								{
+									exifData.add(Exiv2::ExifKey(tag.c_str()), v.get());
+								} else if (StringUtils::StartsWith(tag, "Iptc"))
+								{
+									iptcData.add(Exiv2::IptcKey(tag.c_str()), v.get());
+								}
 							}
 						}
 					}
+					
 				}
-
+				image->setExifData(exifData);
+				image->setIptcData(iptcData);
+				image->writeMetadata();
+			} else {
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::SaveAttributes: unable to open file");
 			}
-			image->setExifData(exifData);
-			image->setIptcData(iptcData);
-			image->writeMetadata();
-		} else {
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::SaveAttributes: unable to open file");
+		} catch (Exiv2::AnyError& e) {
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "# PhotoFileHandler::SaveAttributes() Exiv::AnyError: %s",  e.what());
 		}
-
 	}
 	else
 #ifdef UPDATEMEDIA_STATUS
@@ -169,45 +172,49 @@ bool PhotoFileHandler::RemoveAttribute(int nTagType, string sValue, PlutoMediaAt
 #endif
 	if (pPlutoMediaAttributes->m_mapAttributes.size() != 0)
 	{
-		Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(m_sFullFilename);
-		if(image.get() != 0) {
-			image->readMetadata();
-
-			Exiv2::ExifData &exifData = image->exifData();
-			Exiv2::IptcData &iptcData = image->iptcData();
-			string tag = AttributeToTag(nTagType);
-			if (tag != "") {
-				if (StringUtils::StartsWith(tag, "Exif"))
-				{
-					Exiv2::ExifKey key = Exiv2::ExifKey(tag);
-					Exiv2::ExifData::iterator pos = exifData.begin();
-					while (pos != exifData.end() && (pos->key() != tag || pos->value().toString() != sValue)) {
-						pos++;
-					}
-					if (pos == exifData.end() || pos->value().toString() != sValue)
+		try {
+			Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(m_sFullFilename);
+			if(image.get() != 0) {
+				image->readMetadata();
+				
+				Exiv2::ExifData &exifData = image->exifData();
+				Exiv2::IptcData &iptcData = image->iptcData();
+				string tag = AttributeToTag(nTagType);
+				if (tag != "") {
+					if (StringUtils::StartsWith(tag, "Exif"))
 					{
-						LoggerWrapper::GetInstance()->Write(LV_WARNING, "# PhotoFileHandler::RemoveAttributes: no such exif tag %s with value %s", tag.c_str(), sValue.c_str());
-					} else {
-						exifData.erase(pos);
-					}
-				} else if (StringUtils::StartsWith(tag, "Iptc"))
-				{
-					Exiv2::IptcKey key = Exiv2::IptcKey(tag);
-					Exiv2::IptcData::iterator pos = iptcData.begin();
-					while (pos != iptcData.end() && (pos->key() != tag || pos->value().toString() != sValue)) {
-						pos++;
-					}
-					if (pos == iptcData.end() || pos->value().toString() != sValue)
+						Exiv2::ExifKey key = Exiv2::ExifKey(tag);
+						Exiv2::ExifData::iterator pos = exifData.begin();
+						while (pos != exifData.end() && (pos->key() != tag || pos->value().toString() != sValue)) {
+							pos++;
+						}
+						if (pos == exifData.end() || pos->value().toString() != sValue)
+						{
+							LoggerWrapper::GetInstance()->Write(LV_WARNING, "# PhotoFileHandler::RemoveAttributes: no such exif tag %s with value %s", tag.c_str(), sValue.c_str());
+						} else {
+							exifData.erase(pos);
+						}
+					} else if (StringUtils::StartsWith(tag, "Iptc"))
 					{
-						LoggerWrapper::GetInstance()->Write(LV_WARNING, "# PhotoFileHandler::RemoveAttributes: no such iptc tag %s with value %s", tag.c_str(), sValue.c_str());
-					} else {
-						iptcData.erase(pos);
+						Exiv2::IptcKey key = Exiv2::IptcKey(tag);
+						Exiv2::IptcData::iterator pos = iptcData.begin();
+						while (pos != iptcData.end() && (pos->key() != tag || pos->value().toString() != sValue)) {
+							pos++;
+						}
+						if (pos == iptcData.end() || pos->value().toString() != sValue)
+						{
+							LoggerWrapper::GetInstance()->Write(LV_WARNING, "# PhotoFileHandler::RemoveAttributes: no such iptc tag %s with value %s", tag.c_str(), sValue.c_str());
+						} else {
+							iptcData.erase(pos);
+						}
 					}
 				}
+				image->setExifData(exifData);
+				image->setIptcData(iptcData);
+				image->writeMetadata();
 			}
-			image->setExifData(exifData);
-			image->setIptcData(iptcData);
-			image->writeMetadata();
+		} catch (Exiv2::AnyError& e) {
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "# PhotoFileHandler::RemoveAttributes() Exiv::AnyError: %s",  e.what());
 		}
 	}
 	return false;
@@ -232,128 +239,132 @@ string PhotoFileHandler::GetFileSourceForDB() {
 void PhotoFileHandler::getTagsFromFile(string sFilename, multimap<int,string>& mmapAttributes, list<pair<char *, size_t> >& listPictures) {
 	// open file
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: Processing file %s", sFilename.c_str());
-	Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(sFilename);
-	// check if everything's okay and only proceed if there is some meta data
-	if(image.get() != 0) {
-		image->readMetadata();
+	try {
+		Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(sFilename);
+		// check if everything's okay and only proceed if there is some meta data
+		if(image.get() != 0) {
+			image->readMetadata();
+			
+			Exiv2::ExifData &exifData = image->exifData();
+			Exiv2::IptcData &iptcData = image->iptcData();
+			
+			if(exifData.empty()) {
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: File %s does not contain any EXIF information",
+								    sFilename.c_str());
+			} else {
+				string sExifAttributesPlain = "";
+				
+				Exiv2::ExifData::const_iterator end = exifData.end();
+				for (Exiv2::ExifData::const_iterator i = exifData.begin(); i != end; ++i) {
+					// prepare string to write out all attributes found in the file
+					//cout << i->key() << " - " <<  i->tag() << " : " << i->value() << "\n";
+					//				sExifAttributesPlain += i->key() +  ": " + i->value().toString() + "; ";
 
-		Exiv2::ExifData &exifData = image->exifData();
-		Exiv2::IptcData &iptcData = image->iptcData();
-
-		if(exifData.empty()) {
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: File %s does not contain any EXIF information",
-						sFilename.c_str());
-		} else {
-			string sExifAttributesPlain = "";
-
-			Exiv2::ExifData::const_iterator end = exifData.end();
-			for (Exiv2::ExifData::const_iterator i = exifData.begin(); i != end; ++i) {
-				// prepare string to write out all attributes found in the file
-			 	//cout << i->key() << " - " <<  i->tag() << " : " << i->value() << "\n";
-				//				sExifAttributesPlain += i->key() +  ": " + i->value().toString() + "; ";
-
-				// map some attributes to LMCE media attributes
-				switch(i->tag()) {
-				case 0x0100:
-					// TODO Exif.Image.ImageWidth
-					break;
-				case 0x0101:
-					// TODO Exif.Image.ImageLength
-					break;
-				case 0x0102:
-					// TODO Exif.Image.BitsPerSample
-					break;
-				case 0x010E:
-					// ImageDescription mapped to "Title"
-					mmapAttributes.insert(pair<int, string>(ATTRIBUTETYPE_Title_CONST, i->value().toString()));
-					break;
-				case 0x0110:
-					// Exif.Image.Model mapped to "Manufacturer"
-					mmapAttributes.insert(pair<int, string>(ATTRIBUTETYPE_Manufacturer_CONST, i->value().toString()));
-					break;
-				case 0x0132:
-					// Exif.Image.DateTime mapped to "Year"
-					mmapAttributes.insert(pair<int, string>(ATTRIBUTETYPE_Year_CONST, i->value().toString()));
-					break;
-				case 0x013b:
-					// Artist mapped to "Composer/Writer"
-					mmapAttributes.insert(pair<int, string>(ATTRIBUTETYPE_ComposerWriter_CONST, i->value().toString()));
-					break;
-
-				case 271:
-					// TODO Exif.Image.Make
-					break;
-				case 305:
-					// TODO Exif.Image.Software
-					break;
-				case 33434:
-					// TODO Exif.Photo.ExposureTime
-					break;
-				case 33437:
-					// TODO Exif.Photo.FNumber
-					break;
-				case 34855:
-					// TODO Exif.Photo.ISOSpeedRatings
-					break;
-				case 37377:
-					// TODO Exif.Photo.ShutterSpeedValue
-					break;
-				case 37378:
-					// TODO Exif.Photo.ApertureValue
-					break;
-				case 37386:
-					// TODO Exif.Photo.Flash
-					break;
-				case 37510:
-					// TODO Exif.Photo.UserComment mapped to "Synopsis"
-					break;
-				case 274:
-					// TODO Exif.Image.Orientation
-					break;
-				case 34850:
-					// TODO Exif.Photo.ExposureProgram
-					break;
-				case 37380:
-					// TODO ExposureBiasValue
-					break;
-
-					// TODO GPSLatitude, GPSLongitude, GPSAltitude mapped to "Region"
-					// TODO GPSSpeed, GPSTrack, GPSImageDirection, GPSDestLatitude, GPSDestLongitude
-					// TODO BrightnessValue
-					// TODO SubjectDistance
-					// TODO MeteringMode
-					// TODO LightSource
-					// TODO FlashEnergy
-					// TODO SceneCapturedType
-
+					// map some attributes to LMCE media attributes
+					switch(i->tag()) {
+					case 0x0100:
+						// TODO Exif.Image.ImageWidth
+						break;
+					case 0x0101:
+						// TODO Exif.Image.ImageLength
+						break;
+					case 0x0102:
+						// TODO Exif.Image.BitsPerSample
+						break;
+					case 0x010E:
+						// ImageDescription mapped to "Title"
+						mmapAttributes.insert(pair<int, string>(ATTRIBUTETYPE_Title_CONST, i->value().toString()));
+						break;
+					case 0x0110:
+						// Exif.Image.Model mapped to "Manufacturer"
+						mmapAttributes.insert(pair<int, string>(ATTRIBUTETYPE_Manufacturer_CONST, i->value().toString()));
+						break;
+					case 0x0132:
+						// Exif.Image.DateTime mapped to "Year"
+						mmapAttributes.insert(pair<int, string>(ATTRIBUTETYPE_Year_CONST, i->value().toString()));
+						break;
+					case 0x013b:
+						// Artist mapped to "Composer/Writer"
+						mmapAttributes.insert(pair<int, string>(ATTRIBUTETYPE_ComposerWriter_CONST, i->value().toString()));
+						break;
+						
+					case 271:
+						// TODO Exif.Image.Make
+						break;
+					case 305:
+						// TODO Exif.Image.Software
+						break;
+					case 33434:
+						// TODO Exif.Photo.ExposureTime
+						break;
+					case 33437:
+						// TODO Exif.Photo.FNumber
+						break;
+					case 34855:
+						// TODO Exif.Photo.ISOSpeedRatings
+						break;
+					case 37377:
+						// TODO Exif.Photo.ShutterSpeedValue
+						break;
+					case 37378:
+						// TODO Exif.Photo.ApertureValue
+						break;
+					case 37386:
+						// TODO Exif.Photo.Flash
+						break;
+					case 37510:
+						// TODO Exif.Photo.UserComment mapped to "Synopsis"
+						break;
+					case 274:
+						// TODO Exif.Image.Orientation
+						break;
+					case 34850:
+						// TODO Exif.Photo.ExposureProgram
+						break;
+					case 37380:
+						// TODO ExposureBiasValue
+						break;
+						
+						// TODO GPSLatitude, GPSLongitude, GPSAltitude mapped to "Region"
+						// TODO GPSSpeed, GPSTrack, GPSImageDirection, GPSDestLatitude, GPSDestLongitude
+						// TODO BrightnessValue
+						// TODO SubjectDistance
+						// TODO MeteringMode
+						// TODO LightSource
+						// TODO FlashEnergy
+						// TODO SceneCapturedType
+						
+					}
+					
 				}
-
+				//						LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: Found EXIF data \"%s\"", sExifAttributesPlain.c_str());
 			}
-			//						LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: Found EXIF data \"%s\"", sExifAttributesPlain.c_str());
-		}
-		if (iptcData.empty()) {
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: File %s does not contain any IPTC information",
-						sFilename.c_str());
-		} else {
-			string sIptcAttributesPlain = "";
-
-			Exiv2::IptcData::iterator end = iptcData.end();
-			for (Exiv2::IptcData::iterator i = iptcData.begin(); i != end; ++i) {
-				cout << i->key() << " - " <<  i->tag() << " : " << i->value() << "\n";
-				sIptcAttributesPlain += i->key() +  ": " + i->value().toString() + "; ";
-
-				// map some attributes to LMCE media attributes
-				switch(i->tag()) {
-				case 0x0019:
-					// Iptc.Application2.Keywords mapped to "Keyword"
-					mmapAttributes.insert(pair<int, string>(ATTRIBUTETYPE_Keyword_CONST, i->value().toString()));
-					break;
+			if (iptcData.empty()) {
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: File %s does not contain any IPTC information",
+								    sFilename.c_str());
+			} else {
+				string sIptcAttributesPlain = "";
+				
+				Exiv2::IptcData::iterator end = iptcData.end();
+				for (Exiv2::IptcData::iterator i = iptcData.begin(); i != end; ++i) {
+					cout << i->key() << " - " <<  i->tag() << " : " << i->value() << "\n";
+					sIptcAttributesPlain += i->key() +  ": " + i->value().toString() + "; ";
+					
+					// map some attributes to LMCE media attributes
+					switch(i->tag()) {
+					case 0x0019:
+						// Iptc.Application2.Keywords mapped to "Keyword"
+						mmapAttributes.insert(pair<int, string>(ATTRIBUTETYPE_Keyword_CONST, i->value().toString()));
+						break;
+					}
+					
+					
 				}
-
-
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: Found IPTC data \"%s\"", sIptcAttributesPlain.c_str());
 			}
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: Found IPTC data \"%s\"", sIptcAttributesPlain.c_str());
 		}
+	} catch (Exiv2::AnyError& e) {
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# PhotoFileHandler::getTagsFromFile() Exiv::AnyError: %s", e.what());
 	}
 }
 
