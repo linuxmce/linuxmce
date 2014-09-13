@@ -1789,14 +1789,17 @@ void Xine_Stream::StopSpecialSeek()
 bool Xine_Stream::setSubtitle( int Value )
 {
 	PLUTO_SAFETY_LOCK(streamLock, m_streamMutex);
-	
+
 	if (!m_bInitialized)
 	{
 		LoggerWrapper::GetInstance()->Write( LV_WARNING, "SetSubtitle called on non-initialized stream - aborting command");
 		return false;
 	}
 
-	
+	int numsubtitle = xine_get_stream_info( m_pXineStream, XINE_STREAM_INFO_MAX_SPU_CHANNEL );
+	if ( Value > (numsubtitle - 1) )
+		Value = -1;
+
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "SPU was %d now %d", getSubtitle(), Value );
 	xine_set_param( m_pXineStream, XINE_PARAM_SPU_CHANNEL, Value );
 
@@ -1806,14 +1809,17 @@ bool Xine_Stream::setSubtitle( int Value )
 bool Xine_Stream::setAudio( int Value )
 {
 	PLUTO_SAFETY_LOCK(streamLock, m_streamMutex);
-	
+
 	if (!m_bInitialized)
 	{
 		LoggerWrapper::GetInstance()->Write( LV_WARNING, "SetAudio called on non-initialized stream - aborting command");
 		return false;
 	}
 
-	
+	int numaudio = xine_get_stream_info( m_pXineStream, XINE_STREAM_INFO_MAX_AUDIO_CHANNEL );
+	if ( Value > (numaudio - 1) )
+		Value = 0;
+
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "AUDIO was %d now %d", xine_get_param ( m_pXineStream, XINE_PARAM_AUDIO_CHANNEL_LOGICAL ), Value );
 	xine_set_param( m_pXineStream, XINE_PARAM_AUDIO_CHANNEL_LOGICAL, Value );
 
@@ -1823,14 +1829,13 @@ bool Xine_Stream::setAudio( int Value )
 int Xine_Stream::getSubtitle()
 {
 	PLUTO_SAFETY_LOCK(streamLock, m_streamMutex);
-	
+
 	if (!m_bInitialized)
 	{
 		LoggerWrapper::GetInstance()->Write( LV_WARNING, "getSubtitle called on non-initialized stream - aborting command");
 		return false;
 	}
 
-	
 	return xine_get_param ( m_pXineStream, XINE_PARAM_SPU_CHANNEL );
 }
 

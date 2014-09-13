@@ -907,7 +907,11 @@ void Xine_Player::CMD_Audio_Track(string sValue_To_Assign,int iStreamID,string &
 		return;
 	}
 	else
-		pStream->setAudio( atoi(sValue_To_Assign.c_str()) );
+		if (sValue_To_Assign == "") {
+			pStream->setAudio( pStream->getAudio() + 1 );
+		}
+		else
+			pStream->setAudio( atoi(sValue_To_Assign.c_str()) );
 }
 
 //<-dceag-c141-b->
@@ -932,7 +936,11 @@ void Xine_Player::CMD_Subtitle(string sValue_To_Assign,int iStreamID,string &sCM
 		return;
 	}
 	else
-		pStream->setSubtitle( atoi(sValue_To_Assign.c_str()) );
+		if (sValue_To_Assign == "") {
+			pStream->setSubtitle( pStream->getSubtitle() + 1 );
+		}
+		else
+			pStream->setSubtitle( atoi(sValue_To_Assign.c_str()) );
 }
 
 //<-dceag-c142-b->
