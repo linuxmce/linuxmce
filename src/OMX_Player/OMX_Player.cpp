@@ -24,7 +24,6 @@
 #include "PlutoUtils/Other.h"
 
 #include <iostream>
-
 using namespace std;
 using namespace DCE;
 
@@ -1199,3 +1198,36 @@ bool OMX_Player::Connect(int iPK_DeviceTemplate )
 	return true;
 }
 
+//<-dceag-c140-b->
+
+	/** @brief COMMAND: #140 - Audio Track */
+	/** Go to an audio track */
+		/** @param #5 Value To Assign */
+			/** The audio track to go to.  Simple A/V equipment ignores this and just toggles. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void OMX_Player::CMD_Audio_Track(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c140-e->
+//<-dceag-c141-b->
+
+	/** @brief COMMAND: #141 - Subtitle */
+	/** Go to a subtitle */
+		/** @param #5 Value To Assign */
+			/** The subtitle to go to.  Simple A/V equipment ignores this and just toggles. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void OMX_Player::CMD_Subtitle(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c141-e->
+//<-dceag-c142-b->
+
+	/** @brief COMMAND: #142 - Angle */
+	/** Go to an angle */
+		/** @param #5 Value To Assign */
+			/** The angle to go to.  Simple A/V equipment ignores this and just toggles. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+void OMX_Player::CMD_Angle(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
+//<-dceag-c142-e->

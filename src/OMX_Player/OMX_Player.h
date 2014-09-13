@@ -273,6 +273,39 @@ public:
 	virtual void CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #140 - Audio Track */
+	/** Go to an audio track */
+		/** @param #5 Value To Assign */
+			/** The audio track to go to.  Simple A/V equipment ignores this and just toggles. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Audio_Track(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Audio_Track(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Audio_Track(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #141 - Subtitle */
+	/** Go to a subtitle */
+		/** @param #5 Value To Assign */
+			/** The subtitle to go to.  Simple A/V equipment ignores this and just toggles. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Subtitle(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Subtitle(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Subtitle(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #142 - Angle */
+	/** Go to an angle */
+		/** @param #5 Value To Assign */
+			/** The angle to go to.  Simple A/V equipment ignores this and just toggles. */
+		/** @param #41 StreamID */
+			/** ID of stream to apply */
+
+	virtual void CMD_Angle(string sValue_To_Assign,int iStreamID) { string sCMD_Result; CMD_Angle(sValue_To_Assign.c_str(),iStreamID,sCMD_Result,NULL);};
+	virtual void CMD_Angle(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #190 - Enter/Go */
 	/** Enter was hit */
 		/** @param #41 StreamID */
