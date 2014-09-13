@@ -1209,6 +1209,9 @@ bool OMX_Player::Connect(int iPK_DeviceTemplate )
 
 void OMX_Player::CMD_Audio_Track(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c140-e->
+{
+}
+
 //<-dceag-c141-b->
 
 	/** @brief COMMAND: #141 - Subtitle */
@@ -1220,6 +1223,9 @@ void OMX_Player::CMD_Audio_Track(string sValue_To_Assign,int iStreamID,string &s
 
 void OMX_Player::CMD_Subtitle(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c141-e->
+{
+}
+
 //<-dceag-c142-b->
 
 	/** @brief COMMAND: #142 - Angle */
@@ -1231,3 +1237,5 @@ void OMX_Player::CMD_Subtitle(string sValue_To_Assign,int iStreamID,string &sCMD
 
 void OMX_Player::CMD_Angle(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c142-e->
+{
+}
