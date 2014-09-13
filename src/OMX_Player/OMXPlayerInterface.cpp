@@ -114,6 +114,47 @@ inline const int iterator_to_index(STRINGARRAY &a, STRINGARRAY::iterator it)
 }
 
 
+void OMXPlayerInterface::HideSubtitles() {
+	Do_HideSubtitles();
+}
+
+void OMXPlayerInterface::Do_HideSubtitles() {
+  try {
+    g_player_client->HideSubtitles();
+  }
+  catch (DBus::Error &dbus_err) {
+    Log("Do_HideSubtitles() - D-Bus error - omxplayer has gone away?");
+  }
+}
+
+void OMXPlayerInterface::ShowSubtitles() {
+	Do_ShowSubtitles();
+}
+
+void OMXPlayerInterface::Do_ShowSubtitles() {
+  try {
+    g_player_client->ShowSubtitles();
+  }
+  catch (DBus::Error &dbus_err) {
+    Log("Do_ShowSubtitles() - D-Bus error - omxplayer has gone away?");
+  }
+}
+
+bool OMXPlayerInterface::setSubtitle(int track) {
+	return Do_SelectSubtitle(track);
+}
+
+bool OMXPlayerInterface::Do_SelectSubtitle(int track) {
+  bool ret;
+  try {
+    ret = g_player_client->SelectSubtitle(track);
+  }
+  catch (DBus::Error &dbus_err) {
+    Log("Do_SelectSubtitle() - D-Bus error - omxplayer has gone away?");
+  }
+  return ret;
+}
+
 int OMXPlayerInterface::getCurrentSubtitle() {
 	std::vector< std::string > vsSubtitleTracks = Do_ListSubtitles();
 	for(std::vector<std::string>::iterator it = vsSubtitleTracks.begin(); it < vsSubtitleTracks.end(); it++)
@@ -121,14 +162,18 @@ int OMXPlayerInterface::getCurrentSubtitle() {
 		// <index>:<language>:<name>:<codec>:<active>
 		string::size_type tokenPos = 0;
 	        string index = Tokenize(*it, string(":"), tokenPos);
-	        string language = Tokenize(*it, string(":"), tokenPos);
+		tokenPos = it->find( "active", tokenPos );
+		if ( tokenPos != string::npos )
+			return atoi( index.c_str() );
+
+/*	        string language = Tokenize(*it, string(":"), tokenPos);
 	        string name = Tokenize(*it, string(":"), tokenPos);
 	        string codec = Tokenize(*it, string(":"), tokenPos);
 	        string active = Tokenize(*it, string(":"), tokenPos);
 
 		if (active == "active")
 			return atoi( index.c_str() );
-
+*/
 	}
 	return -1;
 }
@@ -141,14 +186,12 @@ int OMXPlayerInterface::getMaxSubtitle() {
 }
 
 std::vector< std::string > OMXPlayerInterface::Do_ListSubtitles() {
-	Log("OMXPlayerInterface::Do_ListSubtitles - called");
 	std::vector< std::string > ret;
 	ret = Get_ListSubtitles();
 	return ret;
 }
 
 std::vector< std::string > OMXPlayerInterface::Get_ListSubtitles() {
-  //Log("Get_ListSubtitles() - sending ListSubtitles()");
   std::vector< std::string > ret;
   try {
     ret = g_player_client->ListSubtitles();
@@ -156,9 +199,26 @@ std::vector< std::string > OMXPlayerInterface::Get_ListSubtitles() {
   catch (DBus::Error &dbus_err) {
     Log("Send_Action() - D-Bus error - omxplayer has gone away?");
   }
-  //Log("Get_ListSubtitles() - returning from ListSubtitles()");
   return ret;
 }
+
+
+/*
+bool OMXPlayerInterface::setVideo(int track) {
+	return Do_SelectVideo(track);
+}
+
+bool OMXPlayerInterface::Do_SelectVideo(int track) {
+  bool ret;
+  try {
+    ret = g_player_client->SelectVideo(track);
+  }
+  catch (DBus::Error &dbus_err) {
+    Log("Do_SelectVideo() - D-Bus error - omxplayer has gone away?");
+  }
+  return ret;
+}
+*/
 
 int OMXPlayerInterface::getCurrentVideo() {
 	std::vector< std::string > vsVideoTracks = Do_ListVideo();
@@ -167,14 +227,18 @@ int OMXPlayerInterface::getCurrentVideo() {
 		// <index>:<language>:<name>:<codec>:<active>
 		string::size_type tokenPos = 0;
 	        string index = Tokenize(*it, string(":"), tokenPos);
-	        string language = Tokenize(*it, string(":"), tokenPos);
+		tokenPos = it->find( "active", tokenPos );
+		if ( tokenPos != string::npos )
+			return atoi( index.c_str() );
+
+/*	        string language = Tokenize(*it, string(":"), tokenPos);
 	        string name = Tokenize(*it, string(":"), tokenPos);
 	        string codec = Tokenize(*it, string(":"), tokenPos);
 	        string active = Tokenize(*it, string(":"), tokenPos);
 
-		if (active == "active") 
+		if (active == "active")
 			return atoi( index.c_str() );
-
+*/
 	}
 	return -1;
 }
@@ -187,14 +251,12 @@ int OMXPlayerInterface::getMaxVideo() {
 }
 
 std::vector< std::string > OMXPlayerInterface::Do_ListVideo() {
-	Log("OMXPlayerInterface::Do_ListVideo - called");
 	std::vector< std::string > ret;
 	ret = Get_ListVideo();
 	return ret;
 }
 
 std::vector< std::string > OMXPlayerInterface::Get_ListVideo() {
-  //Log("Get_ListVideo() - sending ListVideo()");
   std::vector< std::string > ret;
   try {
     ret = g_player_client->ListVideo();
@@ -202,7 +264,22 @@ std::vector< std::string > OMXPlayerInterface::Get_ListVideo() {
   catch (DBus::Error &dbus_err) {
     Log("Send_Action() - D-Bus error - omxplayer has gone away?");
   }
-  //Log("Get_ListVideo() - returning from ListVideo()");
+  return ret;
+}
+
+
+bool OMXPlayerInterface::setAudio(int track) {
+	return Do_SelectAudio(track);
+}
+
+bool OMXPlayerInterface::Do_SelectAudio(int track) {
+  bool ret;
+  try {
+    ret = g_player_client->SelectAudio(track);
+  }
+  catch (DBus::Error &dbus_err) {
+    Log("Do_SelectAudio() - D-Bus error - omxplayer has gone away?");
+  }
   return ret;
 }
 
@@ -213,14 +290,19 @@ int OMXPlayerInterface::getCurrentAudio() {
 		// <index>:<language>:<name>:<codec>:<active>
 		string::size_type tokenPos = 0;
 	        string index = Tokenize(*it, string(":"), tokenPos);
-	        string language = Tokenize(*it, string(":"), tokenPos);
+
+		tokenPos = it->find( "active", tokenPos );
+		if ( tokenPos != string::npos )
+			return atoi( index.c_str() );
+
+/*	        string language = Tokenize(*it, string(":"), tokenPos);
 	        string name = Tokenize(*it, string(":"), tokenPos);
 	        string codec = Tokenize(*it, string(":"), tokenPos);
 	        string active = Tokenize(*it, string(":"), tokenPos);
 
-		if (active == "active") 
+		if (active == "active")
 			return atoi( index.c_str() );
-
+*/
 	}
 	return -1;
 }
@@ -233,14 +315,13 @@ int OMXPlayerInterface::getMaxAudio() {
 }
 
 std::vector< std::string > OMXPlayerInterface::Do_ListAudio() {
-	Log("OMXPlayerInterface::Do_ListAudio - called");
+//	Log("OMXPlayerInterface::Do_ListAudio - called");
 	std::vector< std::string > ret;
 	ret = Get_ListAudio();
 	return ret;
 }
 
 std::vector< std::string > OMXPlayerInterface::Get_ListAudio() {
-  //Log("Get_ListAudio() - sending ListAudio()");
   std::vector< std::string > ret;
   try {
     ret = g_player_client->ListAudio();
@@ -248,22 +329,19 @@ std::vector< std::string > OMXPlayerInterface::Get_ListAudio() {
   catch (DBus::Error &dbus_err) {
     Log("Send_Action() - D-Bus error - omxplayer has gone away?");
   }
-  //Log("Get_ListAudio() - returning from ListAudio()");
   return ret;
 }
 
 int OMXPlayerInterface::Get_Subtitle() {
-	int ret = 0;
 	// FIXME: GET THIS DATA
 	// we cannot access this data currently in omxplayer
-	return ret;
+	return getCurrentSubtitle();
 }
 
 int OMXPlayerInterface::Get_Audio() {
-	int ret = 0;
 	// FIXME: GET THIS DATA
 	// we cannot access this data currently in omxplayer
-	return ret;
+	return getCurrentAudio();
 }
 
 int OMXPlayerInterface::Get_Speed() {

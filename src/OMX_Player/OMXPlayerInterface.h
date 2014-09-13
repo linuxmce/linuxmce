@@ -144,6 +144,11 @@ public:
   OMXPlayerInterface(string sAudioDevice, bool bPassthrough, string sGpuDeInt);
   virtual ~OMXPlayerInterface();
 
+  void Do_HideSubtitles();
+  void Do_ShowSubtitles();
+  bool Do_SelectSubtitle(int track);
+//  bool Do_SelectVideo(int track);
+  bool Do_SelectAudio(int track);
   void Do_Seek(int64_t);
   void Do_Rewind(void);
   void Do_FastForward(void);
@@ -160,12 +165,19 @@ public:
   std::vector< std::string > Do_ListAudio();
   std::vector< std::string > Do_ListVideo();
   std::vector< std::string > Do_ListSubtitles();
+
   int getCurrentVideo();
   int getMaxVideo();
   int getCurrentAudio();
   int getMaxAudio();
   int getCurrentSubtitle();
   int getMaxSubtitle();
+//  bool setVideo(int track);
+  bool setAudio(int track);
+  bool setSubtitle(int track);
+  void ShowSubtitles();
+  void HideSubtitles();
+
 
   virtual bool Play(string sMediaURL, string sMediaPosition);
   void Stop(void);

@@ -53,6 +53,11 @@ class OMXPlayerStream : public OMXPlayerInterface
     string Get_MediaType();
     int Get_MediaID();
 
+//    int setVideo(int track);
+    int setAudio(int track);
+    int setSubtitle(int track);
+
+
     string GetPosition();
     void ReportTimecode();
     int CalculatePosition(string &sMediaPosition,string *sMRL,int *Subtitle,int *Angle,int *AudioTrack);

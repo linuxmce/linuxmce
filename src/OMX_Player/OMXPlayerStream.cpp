@@ -215,6 +215,38 @@ int OMXPlayerStream::Get_MediaID() {
 	return ret;
 }
 
+/*
+int OMXPlayerStream::setVideo(int track) {
+	if ( track < ( OMXPlayerInterface::getMaxVideo() ) )
+		if ( OMXPlayerInterface::setVideo(track) )
+			return track;
+	return -1;
+}
+*/
+
+int OMXPlayerStream::setAudio(int track) {
+	if ( track < ( OMXPlayerInterface::getMaxAudio() ) )
+		if ( OMXPlayerInterface::setAudio(track) )
+			return track;
+	return -1;
+}
+
+
+int OMXPlayerStream::setSubtitle(int track) {
+	int numsubs = OMXPlayerInterface::getMaxSubtitle();
+	if ( track < numsubs ) {
+		if ( OMXPlayerInterface::setSubtitle(track) )
+		{
+			OMXPlayerInterface::ShowSubtitles();
+			return track;
+		}
+
+		if (numsubs > 0)
+			OMXPlayerInterface::setSubtitle(0);
+		OMXPlayerInterface::HideSubtitles();
+	}
+	return -1;
+}
 
 
 void *EventProcessingLoop( void *pInstance )
