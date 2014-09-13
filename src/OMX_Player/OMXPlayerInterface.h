@@ -110,6 +110,9 @@ private:
   void Send_Action(int);
   void Send_Pause(void);
   int64_t Send_SetPosition(std::string sMediaPosition, int64_t xPos);
+  std::vector< std::string > Get_ListAudio();
+  std::vector< std::string > Get_ListVideo();
+  std::vector< std::string > Get_ListSubtitles();
 
   // general class methods
   void SetState(STATE PlayerState);
@@ -154,6 +157,15 @@ public:
   void Do_DecreaseSpeed();
   void Do_IncreaseSpeed();
   void Do_SetPosition(std::string sMediaURL, int64_t xPos);
+  std::vector< std::string > Do_ListAudio();
+  std::vector< std::string > Do_ListVideo();
+  std::vector< std::string > Do_ListSubtitles();
+  int getCurrentVideo();
+  int getMaxVideo();
+  int getCurrentAudio();
+  int getMaxAudio();
+  int getCurrentSubtitle();
+  int getMaxSubtitle();
 
   virtual bool Play(string sMediaURL, string sMediaPosition);
   void Stop(void);

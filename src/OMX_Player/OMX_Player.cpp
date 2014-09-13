@@ -1210,6 +1210,9 @@ bool OMX_Player::Connect(int iPK_DeviceTemplate )
 void OMX_Player::CMD_Audio_Track(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c140-e->
 {
+	cout << "Need to implement command #140 - Audio Track" << endl;
+	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c141-b->
@@ -1224,6 +1227,9 @@ void OMX_Player::CMD_Audio_Track(string sValue_To_Assign,int iStreamID,string &s
 void OMX_Player::CMD_Subtitle(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c141-e->
 {
+	cout << "Need to implement command #141 - Subtitle" << endl;
+	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
 //<-dceag-c142-b->
@@ -1238,4 +1244,7 @@ void OMX_Player::CMD_Subtitle(string sValue_To_Assign,int iStreamID,string &sCMD
 void OMX_Player::CMD_Angle(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c142-e->
 {
+	cout << "Need to implement command #142 - Angle" << endl;
+	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
+	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }

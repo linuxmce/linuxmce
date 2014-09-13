@@ -100,7 +100,6 @@ void OMXPlayerInterface::DeInit() {
 }
 
 void OMXPlayerInterface::Init() {
-	system("killall omxplayer.bin");
 	if ( ePlayerState != STATE::UNKNOWN ) {
 		Log("OMXPlayerInterface::Init - ERROR - Init() has already been run.");
 		return;
@@ -108,6 +107,150 @@ void OMXPlayerInterface::Init() {
 	SetState(STATE::STOPPED);
 }
 
+typedef std::vector< std::string > STRINGARRAY;
+inline const int iterator_to_index(STRINGARRAY &a, STRINGARRAY::iterator it)
+{
+	return it - a.begin();
+}
+
+
+int OMXPlayerInterface::getCurrentSubtitle() {
+	std::vector< std::string > vsSubtitleTracks = Do_ListSubtitles();
+	for(std::vector<std::string>::iterator it = vsSubtitleTracks.begin(); it < vsSubtitleTracks.end(); it++)
+	{
+		// <index>:<language>:<name>:<codec>:<active>
+		string::size_type tokenPos = 0;
+	        string index = Tokenize(*it, string(":"), tokenPos);
+	        string language = Tokenize(*it, string(":"), tokenPos);
+	        string name = Tokenize(*it, string(":"), tokenPos);
+	        string codec = Tokenize(*it, string(":"), tokenPos);
+	        string active = Tokenize(*it, string(":"), tokenPos);
+
+		if (active == "active")
+			return atoi( index.c_str() );
+
+	}
+	return -1;
+}
+
+int OMXPlayerInterface::getMaxSubtitle() {
+	int ret;
+	std::vector< std::string > vsSubtitleTracks = Do_ListSubtitles();
+	ret = iterator_to_index( vsSubtitleTracks,vsSubtitleTracks.end() );
+	return ret;
+}
+
+std::vector< std::string > OMXPlayerInterface::Do_ListSubtitles() {
+	Log("OMXPlayerInterface::Do_ListSubtitles - called");
+	std::vector< std::string > ret;
+	ret = Get_ListSubtitles();
+	return ret;
+}
+
+std::vector< std::string > OMXPlayerInterface::Get_ListSubtitles() {
+  //Log("Get_ListSubtitles() - sending ListSubtitles()");
+  std::vector< std::string > ret;
+  try {
+    ret = g_player_client->ListSubtitles();
+  }
+  catch (DBus::Error &dbus_err) {
+    Log("Send_Action() - D-Bus error - omxplayer has gone away?");
+  }
+  //Log("Get_ListSubtitles() - returning from ListSubtitles()");
+  return ret;
+}
+
+int OMXPlayerInterface::getCurrentVideo() {
+	std::vector< std::string > vsVideoTracks = Do_ListVideo();
+	for(std::vector<std::string>::iterator it = vsVideoTracks.begin(); it < vsVideoTracks.end(); it++)
+	{
+		// <index>:<language>:<name>:<codec>:<active>
+		string::size_type tokenPos = 0;
+	        string index = Tokenize(*it, string(":"), tokenPos);
+	        string language = Tokenize(*it, string(":"), tokenPos);
+	        string name = Tokenize(*it, string(":"), tokenPos);
+	        string codec = Tokenize(*it, string(":"), tokenPos);
+	        string active = Tokenize(*it, string(":"), tokenPos);
+
+		if (active == "active") 
+			return atoi( index.c_str() );
+
+	}
+	return -1;
+}
+
+int OMXPlayerInterface::getMaxVideo() {
+	int ret;
+	std::vector< std::string > vsVideoTracks = Do_ListVideo();
+	ret = iterator_to_index( vsVideoTracks,vsVideoTracks.end() );
+	return ret;
+}
+
+std::vector< std::string > OMXPlayerInterface::Do_ListVideo() {
+	Log("OMXPlayerInterface::Do_ListVideo - called");
+	std::vector< std::string > ret;
+	ret = Get_ListVideo();
+	return ret;
+}
+
+std::vector< std::string > OMXPlayerInterface::Get_ListVideo() {
+  //Log("Get_ListVideo() - sending ListVideo()");
+  std::vector< std::string > ret;
+  try {
+    ret = g_player_client->ListVideo();
+  }
+  catch (DBus::Error &dbus_err) {
+    Log("Send_Action() - D-Bus error - omxplayer has gone away?");
+  }
+  //Log("Get_ListVideo() - returning from ListVideo()");
+  return ret;
+}
+
+int OMXPlayerInterface::getCurrentAudio() {
+	std::vector< std::string > vsAudioTracks = Do_ListAudio();
+	for(std::vector<std::string>::iterator it = vsAudioTracks.begin(); it < vsAudioTracks.end(); it++)
+	{
+		// <index>:<language>:<name>:<codec>:<active>
+		string::size_type tokenPos = 0;
+	        string index = Tokenize(*it, string(":"), tokenPos);
+	        string language = Tokenize(*it, string(":"), tokenPos);
+	        string name = Tokenize(*it, string(":"), tokenPos);
+	        string codec = Tokenize(*it, string(":"), tokenPos);
+	        string active = Tokenize(*it, string(":"), tokenPos);
+
+		if (active == "active") 
+			return atoi( index.c_str() );
+
+	}
+	return -1;
+}
+
+int OMXPlayerInterface::getMaxAudio() {
+	int ret;
+	std::vector< std::string > vsAudioTracks = Do_ListAudio();
+	ret = iterator_to_index( vsAudioTracks,vsAudioTracks.end() );
+	return ret;
+}
+
+std::vector< std::string > OMXPlayerInterface::Do_ListAudio() {
+	Log("OMXPlayerInterface::Do_ListAudio - called");
+	std::vector< std::string > ret;
+	ret = Get_ListAudio();
+	return ret;
+}
+
+std::vector< std::string > OMXPlayerInterface::Get_ListAudio() {
+  //Log("Get_ListAudio() - sending ListAudio()");
+  std::vector< std::string > ret;
+  try {
+    ret = g_player_client->ListAudio();
+  }
+  catch (DBus::Error &dbus_err) {
+    Log("Send_Action() - D-Bus error - omxplayer has gone away?");
+  }
+  //Log("Get_ListAudio() - returning from ListAudio()");
+  return ret;
+}
 
 int OMXPlayerInterface::Get_Subtitle() {
 	int ret = 0;
@@ -849,24 +992,24 @@ void *PlayerOutputReader(void *pInstance) {
   }
 
   pThis->Log("[PlayerOutputReader] exiting");
+
+  return NULL;
 }
 
 
 void *PlayerMonitor(void *pInstance) {
-
   OMXPlayerInterface* pThis = (OMXPlayerInterface*) pInstance;
 
   pThis->Log("[PlayerMonitor] started");
 
-  int *stat_loc;
-  int options = 0;
   pid_t watch_id = pThis->m_iChildPID;
-  pid_t child = waitpid(watch_id, stat_loc, options);
-  //if (child == watch_id)  {
-    pThis->Log("[PlayerMonitor] calling Stop()");
-    pThis->Stop();
-  //}
+  waitpid(watch_id, NULL, 0);
+
+  pThis->Log("[PlayerMonitor] calling Stop()");
+  pThis->Stop();
   pThis->Log("[PlayerMonitor] exiting");
+
+  return NULL;
 }
 
 
