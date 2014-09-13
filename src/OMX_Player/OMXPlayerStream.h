@@ -56,7 +56,7 @@ class OMXPlayerStream : public OMXPlayerInterface
 //    int setVideo(int track);
     int setAudio(int track);
     int setSubtitle(int track);
-
+    int getCurrentSubtitle();
 
     string GetPosition();
     void ReportTimecode();

@@ -113,9 +113,14 @@ inline const int iterator_to_index(STRINGARRAY &a, STRINGARRAY::iterator it)
 	return it - a.begin();
 }
 
+bool OMXPlayerInterface::getSubtitlesShowing() {
+	return m_bSubtitlesShowing;
+}
 
 void OMXPlayerInterface::HideSubtitles() {
+	Log("OMXPlayerInterface::HideSubtitles");
 	Do_HideSubtitles();
+	m_bSubtitlesShowing = false;
 }
 
 void OMXPlayerInterface::Do_HideSubtitles() {
@@ -128,7 +133,9 @@ void OMXPlayerInterface::Do_HideSubtitles() {
 }
 
 void OMXPlayerInterface::ShowSubtitles() {
+	Log("OMXPlayerInterface::ShowSubtitles");
 	Do_ShowSubtitles();
+	m_bSubtitlesShowing = true;
 }
 
 void OMXPlayerInterface::Do_ShowSubtitles() {
@@ -141,6 +148,7 @@ void OMXPlayerInterface::Do_ShowSubtitles() {
 }
 
 bool OMXPlayerInterface::setSubtitle(int track) {
+	Log("OMXPlayerInterface::setSubtitle - " + to_string(track) );
 	return Do_SelectSubtitle(track);
 }
 
@@ -269,6 +277,7 @@ std::vector< std::string > OMXPlayerInterface::Get_ListVideo() {
 
 
 bool OMXPlayerInterface::setAudio(int track) {
+	Log("OMXPlayerInterface::setAudio - " + to_string(track) );
 	return Do_SelectAudio(track);
 }
 

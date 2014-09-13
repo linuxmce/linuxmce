@@ -85,6 +85,7 @@ private:
   bool	m_bStoppedByReader;
   bool	m_bStoppedByMonitor;
   bool  m_bPaused;
+  bool  m_bSubtitlesShowing = false;
 
   string m_sAudioDevice;
 
@@ -177,6 +178,7 @@ public:
   bool setSubtitle(int track);
   void ShowSubtitles();
   void HideSubtitles();
+  bool getSubtitlesShowing();
 
 
   virtual bool Play(string sMediaURL, string sMediaPosition);

@@ -225,26 +225,42 @@ int OMXPlayerStream::setVideo(int track) {
 */
 
 int OMXPlayerStream::setAudio(int track) {
-	if ( track < ( OMXPlayerInterface::getMaxAudio() ) )
-		if ( OMXPlayerInterface::setAudio(track) )
-			return track;
+	int iMaxAudio = OMXPlayerInterface::getMaxAudio();
+	if ( track >= iMaxAudio )
+		track = 0;
+
+	Log("OMXPlayerStream::setAudio - " + to_string(track) );
+	if ( OMXPlayerInterface::setAudio(track) )
+		return track;
+	Log("OMXPlayerStream::setAudio - track not available");
 	return -1;
 }
 
 
+int OMXPlayerStream::getCurrentSubtitle() {
+	if ( !OMXPlayerInterface::getSubtitlesShowing() ) return -1;
+
+	return OMXPlayerInterface::getCurrentSubtitle();
+}
+
 int OMXPlayerStream::setSubtitle(int track) {
+	if ( !OMXPlayerInterface::getSubtitlesShowing() ) track = 0;
+
 	int numsubs = OMXPlayerInterface::getMaxSubtitle();
+	Log("OMXPlayerStream::setSubtitle - " + to_string(track) + " of " + to_string(numsubs) );
 	if ( track < numsubs ) {
 		if ( OMXPlayerInterface::setSubtitle(track) )
 		{
+			Log("OMXPlayerStream::setSubtitle - track available, subtitles showing");
 			OMXPlayerInterface::ShowSubtitles();
 			return track;
 		}
 
-		if (numsubs > 0)
-			OMXPlayerInterface::setSubtitle(0);
-		OMXPlayerInterface::HideSubtitles();
+//		if (numsubs > 0)
+//			OMXPlayerInterface::setSubtitle(0);
 	}
+	OMXPlayerInterface::HideSubtitles();
+	Log("OMXPlayerStream::setSubtitle - track not available, subtitles hidden");
 	return -1;
 }
 

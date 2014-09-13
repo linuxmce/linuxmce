@@ -1210,9 +1210,19 @@ bool OMX_Player::Connect(int iPK_DeviceTemplate )
 void OMX_Player::CMD_Audio_Track(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c140-e->
 {
-	cout << "Need to implement command #140 - Audio Track" << endl;
+	cout << "Implemented command #140 - Audio Track" << endl;
+//	cout << "Need to implement command #140 - Audio Track" << endl;
 	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "OMX_Player::CMD_Audio_Track() with iStreamID %d.", iStreamID);
+
+	int iCurrentAudio = m_pOMXPlayer->getCurrentAudio();
+	if (sValue_To_Assign == "") {
+		m_pOMXPlayer->setAudio( iCurrentAudio + 1 );
+	}
+	else
+		m_pOMXPlayer->setAudio( atoi(sValue_To_Assign.c_str()) );
 }
 
 //<-dceag-c141-b->
@@ -1227,9 +1237,19 @@ void OMX_Player::CMD_Audio_Track(string sValue_To_Assign,int iStreamID,string &s
 void OMX_Player::CMD_Subtitle(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c141-e->
 {
-	cout << "Need to implement command #141 - Subtitle" << endl;
+	cout << "Implemented command #141 - Subtitle" << endl;
+//	cout << "Need to implement command #141 - Subtitle" << endl;
 	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "OMX_Player::CMD_Subtitle() with iStreamID %d.", iStreamID);
+
+	int iCurrentSubtitle = m_pOMXPlayer->getCurrentSubtitle();
+	if (sValue_To_Assign == "") {
+		m_pOMXPlayer->setSubtitle( iCurrentSubtitle + 1 );
+	}
+	else
+		m_pOMXPlayer->setSubtitle( atoi(sValue_To_Assign.c_str()) );
 }
 
 //<-dceag-c142-b->
