@@ -1,3 +1,49 @@
+/**
+ *   Thanks google.
+ *    https://code.google.com/p/razzlegames-android-ndk-tutorial/source/browse/trunk/jni/AndroidJNIHelper.h?r=4&spec=svn4
+ *
+ *    Create an easy to use way to grab jni environment
+ *
+ *    JNI method and constructor signature cheat sheet
+ *
+ *  B=byte
+ *  C=char
+ *  D=double
+ *  F=float
+ *  I=int
+ *  J=long
+ *  S=short
+ *  V=void
+ *  Z=boolean
+ *  Lfully-qualified-class=fully qualified class
+ *  [type=array of type>
+ *  (argument types)return type=method type.
+ *     If no arguments, use empty argument types: ().
+ *     If return type is void (or constructor) use (argument types)V.*
+ *
+ *     Example
+ *     @code
+ *     constructor:
+ *     (String s)
+ *
+ *     translates to:
+ *     (Ljava/lang/String;)V
+ *
+ *     method:
+ *     String toString()
+ *
+ *     translates to:
+ *     ()Ljava/lang/String;
+ *
+ *     method:
+ *     long myMethod(int n, String s, int[] arr)
+ *
+ *     translates to:
+ *     (ILjava/lang/String;[I)J
+ *     @endcode
+ *
+ */
+
 #include "androidsystem.h"
 #include <QDebug>
 #include <QApplication>
@@ -12,6 +58,7 @@ static jclass buildVersionSDKClass = 0;
 /* Cache of class ids and methodID lookups for use later for finding sdcard path. */
 static jclass externalStorageClass =0;
 static jclass fileClass = 0;
+static jclass linuxmceMediaService=0;
 static jmethodID storageMethodID =0;
 static jmethodID findPathID =0;
 static jmethodID storageLocationID=0 ;
@@ -34,6 +81,7 @@ static jmethodID s_qtActivity_StartMethod=0;
 static jmethodID s_qtActivity_StopMediaMethod=0;
 static jmethodID s_qtActivity_SeekMediaMethod=0;
 static jmethodID s_qtActivity_MediaControlMethod=0;
+static jmethodID s_qtActivity_VolumeControlMethod=0;
 
 
 AndroidSystem::AndroidSystem(QObject *parent) :
@@ -87,12 +135,15 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
         return -1;
     }
     m_pvm = vm;
+
+
     s_qtactivity = (jclass)env->NewGlobalRef(env->FindClass("org/kde/necessitas/origo/QtActivity"));
+    linuxmceMediaService = (jclass)env->NewGlobalRef(env->FindClass("org/kde/necessitas/origo/LinuxmceAudioService"));
     s_qtactivity_field = env->GetStaticMethodID(s_qtactivity, "getActivity", "()Lorg/kde/necessitas/origo/QtActivity;");
     //  s_qtActivity_PlayMediaMethod = env->GetMethodID(s_qtactivity, "playMedia", "(Ljava/lang/String;)V");
     s_qtActivity_MediaControlMethod = env->GetMethodID(s_qtactivity, "SendMediaCommand", "(Ljava/lang/String;IZLjava/lang/String;F)Z");
     s_qtActivity_StartMethod = env->GetMethodID(s_qtactivity, "startAudioService", "(J)V");
-
+ //s_qtActivity_VolumeControlMethod = env->GetMethodID(linuxmceMediaService, "SetVolume", "(F)V");
     jclass localBuildClass = env->FindClass("android/os/Build");
     buildVersionClass = reinterpret_cast<jclass>(env->NewGlobalRef(localBuildClass));
 
@@ -306,7 +357,7 @@ bool AndroidSystem::playMedia(QString url)
     jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_MediaControlMethod,jcom, mSeek, p, jstr, f);
     env->DeleteLocalRef(jstr);
     env->DeleteLocalRef(jcom);
-    m_pvm->DetachCurrentThread();    
+    m_pvm->DetachCurrentThread();
     return true;
 #else
     return false;
