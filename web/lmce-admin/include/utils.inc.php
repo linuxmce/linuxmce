@@ -797,23 +797,29 @@ function GetDeviceControlledVia($deviceID, $dbADO)
 
 function isMediaDirector($deviceID,$dbADO,$mdOnly=0)
 {
-	$getTemplate='SELECT FK_DeviceTemplate,FK_Device_ControlledVia FROM Device WHERE PK_Device=?';
-	$resTemplate=$dbADO->Execute($getTemplate,array($deviceID));
-	if($resTemplate->RecordCount()>0){
-		$row=$resTemplate->FetchRow();
-		$DeviceTemplate=$row['FK_DeviceTemplate'];
-	}else
-		return false;
-//	if($DeviceTemplate==$GLOBALS['rootMediaDirectorsID']){
-	if($DeviceTemplate==$GLOBALS['rootMediaDirectorsID'] || $DeviceTemplate==$GLOBALS['rootRPIMediaDirectorsID']){
-		return true;
+	if($deviceID!=0){
+		$resCategory=$dbADO->Execute('
+			SELECT FK_Device_ControlledVia,FK_DeviceCategory
+			FROM Device
+			INNER JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate
+			WHERE PK_Device=?',array($deviceID));
+
+	        if($resCategory->RecordCount()>0){
+			$row=$resCategory->FetchRow();
+			$DeviceCategory=$row['FK_DeviceCategory'];
+		}else
+			return false;
+
+		if($DeviceCategory==$GLOBALS['rootMediaDirectors'] ){
+			return true;
+		}
 	}
 	elseif($mdOnly==1){
 		return false;
-	}elseif($row['FK_Device_ControlledVia']=='' )
-		return false;
-	else{
+	}elseif($row['FK_Device_ControlledVia']!='' )
 		return isMediaDirector($row['FK_Device_ControlledVia'],$dbADO);
+	else{
+		return false;
 	}
 }
 
@@ -2875,7 +2881,7 @@ function getTopLevelParentIP($deviceID,$dbADO)
 			$topParent=getTopLevelParentIP($row['FK_Device_ControlledVia'],$dbADO);
 		}else{
 //			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceTemplate']==$GLOBALS['rootMediaDirectorsID']){
-			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceTemplate']==$GLOBALS['rootMediaDirectorsID'] || $row['FK_DeviceTemplate']==$GLOBALS['rootRPIMediaDirectorsID']){
+			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceCategory']==$GLOBALS['rootMediaDirectors']){
 				$topParent=($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] && $row['IPaddress']=='')?'127.0.0.1':$row['IPaddress'];
 			}else{
 				$topParent=0;
@@ -2900,7 +2906,7 @@ function getTopLevelParent($deviceID,$dbADO)
 			$topParent=getTopLevelParent($row['FK_Device_ControlledVia'],$dbADO);
 		}else{
 //			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceTemplate']==$GLOBALS['rootMediaDirectorsID']){
-			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceTemplate']==$GLOBALS['rootMediaDirectorsID'] || $row['FK_DeviceTemplate']==$GLOBALS['rootRPIMediaDirectorsID'] || $row['FK_DeviceTemplate']==$GLOBALS['rootJogglersID']){
+			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceCategory']==$GLOBALS['rootMediaDirectors'] || $row['FK_DeviceTemplate']==$GLOBALS['rootJogglersID']){
 				$topParent=$deviceID;
 			}else{
 				$topParent=0;
