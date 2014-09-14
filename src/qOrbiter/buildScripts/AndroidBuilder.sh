@@ -23,7 +23,7 @@ OPTIND=1
 
 START=$(pwd)
 export ANDROID_NDK_PLATFORM=android-9
-NECESSITAS_ROOT=~/necessitas-alpha4
+NECESSITAS_ROOT=~/necessitas4
 export ANDROID_NDK_ROOT=$NECESSITAS_ROOT/android-ndk
 export ANDROID_SDK_ROOT=$NECESSITAS_ROOT/android-sdk
 OLDPATH=$PATH
