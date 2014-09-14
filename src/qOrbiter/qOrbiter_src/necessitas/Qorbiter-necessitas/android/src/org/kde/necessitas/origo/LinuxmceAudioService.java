@@ -26,9 +26,8 @@ import android.media.MediaPlayer.OnPreparedListener;
 import android.widget.Toast;
 import java.net.Socket;
 import android.os.Handler;
-
-
-
+import android.content.Context;
+import android.media.AudioManager;
 
 /**
 * @author langston
@@ -44,9 +43,7 @@ OnPreparedListener {
 
 
 	private final IBinder mBinder = new LocalBinder();
-        private static final String TAG = "LinuxMCE Media Service";      
-
-
+        private static final String TAG = "LinuxMCE Media Service";
         private final Handler handler = new Handler();
         private MediaPlayer mp;
         private String current;
@@ -55,7 +52,7 @@ OnPreparedListener {
         private String message = null;
 
                 public TimecodeRunnable(String m){
-                		run();
+                run();
                 }
 
                 public void run() {
@@ -153,9 +150,17 @@ OnPreparedListener {
 
 	public void setVolume(float vol){
         if(mp!=null){
-        mp.setVolume(vol, vol);
+        Log.d(TAG, "Media Service volume tigger");
+        	AudioManager audioManager = (AudioManager)getSystemService(AUDIO_SERVICE);
+        	if(vol < 0 ){
+                        audioManager.adjustVolume(0xffffffff, 0);
+        	} else {
+                        audioManager.adjustVolume(0x00000001, 0);
+        	}
+        	 float actualVolume = (float)audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         }
         }
+
 
 	public void playAudio(String url) {
         try {
