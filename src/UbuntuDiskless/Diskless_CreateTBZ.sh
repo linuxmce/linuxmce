@@ -535,7 +535,7 @@ MD_Install_Packages () {
 			DEVICE_LIST="28 62 1759 5 11 1825 26 1808 1901 2122"
 			;;
 		"raspbian")
-			# Classic MD
+			# Classic MD/qMD/sqzelte
 			DEVICE_LIST="2216 62 1759 2259 11 1825 26 1808 2122 2278"
 			# qMD
 			#DEVICE_LIST="2216 2278 2259 11 26 1808 2122"
@@ -649,6 +649,8 @@ MD_Install_Packages () {
 			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install xinit
 			;;
 	esac
+
+	LC_ALL=C chroot "$TEMP_DIR" apt-get -y install pastebinit
 
 	#implement external_media_identifier fix
 	LC_ALL=C chroot $TEMP_DIR ln -s /usr/lib/libdvdread.so.4 /usr/lib/libdvdread.so.3
