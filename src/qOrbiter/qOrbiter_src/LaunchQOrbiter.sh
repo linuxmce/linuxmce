@@ -14,7 +14,11 @@ for ((i = 0; i < ${#Params[@]}; i++)); do
         esac
 done
 
-Executable=./qorbiter-core-gl
+cd /usr/pluto/bin
+
+export LD_LIBRARY_PATH=/opt/vc/lib
+
+Executable=/usr/pluto/bin/qorbiter-core-gl
 
 killall WatchGyroRemote  # In case it was running it will be grabbing the hid device
 
