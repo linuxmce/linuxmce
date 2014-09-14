@@ -60,10 +60,6 @@ public:
     QColor redStandard;
     QColor redHighlight;
 
-
-
-
-
 signals:
     void mountStatusChanged();
     void externalStorageLocationChanged();
