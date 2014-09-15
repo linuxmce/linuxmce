@@ -104,12 +104,12 @@ Item{
             switch(command){
             case RemoteCommands.MoveLeft:
                 console.log("ScenarioListItem::Moving left")
-                scenarioList.lastItem();
+                scenarioList.nextItem()
                 break;
 
             case RemoteCommands.MoveRight:
                 console.log("ScenarioListItem::moving right")
-                scenarioList.nextItem()
+                scenarioList.lastItem()
                 break;
             case RemoteCommands.BackClearEntry:
                 uiOn=false;
@@ -129,16 +129,39 @@ Item{
             id:scenarioParent
             height: parent.height
             width:scenarioList.itemWidth
+            focus:true
             property bool active:index===scenarioList.currentIndex
             onActiveChanged: {
                 if(active){
-                    forceActiveFocus()
+                    console.log(name+ " activated, focusing")
+                    scenarioParent.forceActiveFocus()
+                    focusedItem = scenarioParent
+                    if(manager.currentScreen!=="Screen_47.qml"){
+                        if(modelName==="currentRoomLights")
+                            submodel.model = currentRoomLights
+                        else if(modelName==="currentRoomMedia")
+                            submodel.model = currentRoomMedia
+                        else if(modelName==="currentRoomClimate")
+                            submodel.model = currentRoomClimate
+                        else if(modelName==="currentRoomTelecom")
+                            submodel.model=currentRoomTelecom
+                        else if(modelName==="currentRoomSecurity")
+                            submodel.model= currentRoomSecurity
+                        else if (modelName==="advancedMenu")
+                            submodel.model=advancedMenu
+                    }else if (manager.currentScreen==="Screen_47"){
+
+                        if(name==="Attribute")
+                            console.log("attribute selected")
+                    }
+                    submodel.currentIndex = -1
                 }
             }
 
             onActiveFocusChanged: {
                 if(activeFocus){
-                   focusedItem = scenarioParent
+                    console.log("processing focus")
+                    focusedItem = scenarioParent
                     if(manager.currentScreen!=="Screen_47.qml"){
                         if(modelName==="currentRoomLights")
                             submodel.model = currentRoomLights
@@ -165,11 +188,12 @@ Item{
                 console.log("ScenarioParent::Processing command #"+command+"-"+ident)
                 switch(command){
                 case RemoteCommands.MoveDown:
-                    console.log("subModel::moving down")
-                    if(submodel.currentIndex !==0){
+
+                    if(submodel.currentIndex !==0 && submodel.count !==0){
+                        console.log("subModel::moving down ")
                         submodel.decrementCurrentIndex()
-                    }
-                    else{
+                    } else{
+                        console.log("activating meta row")
                         metarow.forceActiveFocus()
                         submodel.currentIndex = -1
                     }
@@ -182,13 +206,13 @@ Item{
                 case RemoteCommands.EnterGo:
                     pressed()
                     break;
-                 case RemoteCommands.MoveLeft:
-                     scenarioList.nextItem()
-                     break;
+                case RemoteCommands.MoveLeft:
+                    scenarioList.nextItem()
+                    break;
 
-                 case RemoteCommands.MoveRight:
-                     scenarioList.lastItem()
-                     break;
+                case RemoteCommands.MoveRight:
+                    scenarioList.lastItem()
+                    break;
 
                 default:
                     return;
@@ -224,7 +248,7 @@ Item{
                 swapFocus();ftr.state="hidden"
             }
             Keys.onDownPressed: {
-                if(submodel.currentIndex !==0){
+                if(submodel.currentIndex !==0  && submodel.count !==0){
                     submodel.decrementCurrentIndex()
                 }
                 else{
