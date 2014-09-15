@@ -72,6 +72,8 @@ public:
 
 		void DumpData();
 		void UpdateOrbiterWeatherScenarios();
+		void UpdateBoundIcon(string sDeviceIDs, string sWeatherValue, string sType);
+		void UpdateText(string sDeviceIDs, string sPK_DesignObj, int iPK_Text, string sWeatherText);
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router

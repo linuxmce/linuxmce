@@ -40,6 +40,7 @@ using namespace DCE;
 #include "pluto_main/Define_EventParameter.h"
 #include "pluto_main/Define_FloorplanObjectType.h"
 #include "pluto_main/Define_FloorplanObjectType_Color.h"
+#include "pluto_main/Define_Text.h"
 #include "PlutoUtils/HttpUtils.h"
 
 #ifdef SIM_RADAR
@@ -51,6 +52,9 @@ using namespace DCE;
 #endif
 
 #define FILE_NO_RADAR_DATA "/usr/pluto/share/weather_no_radar_data.jpg"
+
+// Weather Icons
+#define WEATHER_ICON_UNKNOWN 1
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -272,6 +276,49 @@ bool Weather_PlugIn::OrbiterRegistered(class Socket *pSocket, class Message *pMe
 }
 
 /**
+ * Update bound icon with weather data.
+ */
+void Weather_PlugIn::UpdateBoundIcon(string sDeviceIDs, string sWeatherValue, string sType)
+{
+  string sText=""; // Doesn't really matter.
+  string sValue_To_Assign;
+
+  if (m_mapWeatherValues.find(sWeatherValue) == m_mapWeatherValues.end())
+    {
+      sValue_To_Assign="1";
+    }
+  else
+    {
+      sValue_To_Assign=StringUtils::itos(m_mapWeatherValues[sWeatherValue]);
+    }
+  CMD_Set_Bound_Icon_DL CMD_Set_Bound_Icon_DL(m_dwPK_Device, sDeviceIDs, sValue_To_Assign, sText, sType);
+  SendCommand(CMD_Set_Bound_Icon_DL);
+
+}
+
+/**
+ * Update Text objects on Orbiters
+ */
+void Weather_PlugIn::UpdateText(string sDeviceIDs, string sPK_DesignObj, int iPK_Text, string sWeatherText)
+{
+  string sText;
+  if (m_mapWeatherTexts.find(sWeatherText) == m_mapWeatherTexts.end())
+    {
+      sText = "??";
+    }
+  else
+    {
+      sText = m_mapWeatherTexts[sWeatherText];
+    }
+
+  sPK_DesignObj+=".0.0"; // This requires a fully qualified designObj
+
+  CMD_Set_Text_DL CMD_Set_Text_DL(m_dwPK_Device, sDeviceIDs, sPK_DesignObj, sText, iPK_Text);
+  SendCommand(CMD_Set_Text_DL);
+
+}
+
+/**
  * Update the scenario icon on the main page of each orbiter with the most recent weather data.
  */
 void Weather_PlugIn::UpdateOrbiterWeatherScenarios()
@@ -284,20 +331,67 @@ void Weather_PlugIn::UpdateOrbiterWeatherScenarios()
 	  sDeviceIDs+=StringUtils::itos(*it)+",";
 	}
       sDeviceIDs=sDeviceIDs.substr(0,sDeviceIDs.size()-1); // strip away trailing comma
-
-      string sText=""; // Doesn't really matter.
-      string sType="weather"; // change the weather icon.
-      string sValue_To_Assign;
-      if (m_mapWeatherValues.find("condicon_current") == m_mapWeatherValues.end())
-	{
-		sValue_To_Assign="0";
-	}
-      else
-	{
-		sValue_To_Assign=StringUtils::itos(m_mapWeatherValues["condicon_current"]);
-	}
-      CMD_Set_Bound_Icon_DL CMD_Set_Bound_Icon_DL(m_dwPK_Device, sDeviceIDs, sValue_To_Assign, sText, sType);
-      SendCommand(CMD_Set_Bound_Icon_DL);
+      UpdateBoundIcon(sDeviceIDs, "cond_current", "weather");
+      UpdateBoundIcon(sDeviceIDs, "cond_tonight", "weather_tonight");
+      UpdateBoundIcon(sDeviceIDs, "cond_day1", "weather_day1");
+      UpdateBoundIcon(sDeviceIDs, "cond_day2", "weather_day2");
+      UpdateBoundIcon(sDeviceIDs, "cond_day3", "weather_day3");
+      UpdateBoundIcon(sDeviceIDs, "cond_day1", "weather_day16");
+      UpdateBoundIcon(sDeviceIDs, "cond_day2", "weather_day26");
+      UpdateBoundIcon(sDeviceIDs, "cond_day3", "weather_day36");
+      UpdateBoundIcon(sDeviceIDs, "cond_day4", "weather_day4");
+      UpdateBoundIcon(sDeviceIDs, "cond_day5", "weather_day5");
+      UpdateBoundIcon(sDeviceIDs, "cond_day6", "weather_day6");
+ 
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNow_CONST),TEXT_Current_Description_CONST,"cond_current");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNow_CONST),TEXT_Current_Temperature_CONST,"temp_current");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNow_CONST),TEXT_Current_Humidity_Data_CONST,"humidity_current");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNow_CONST),TEXT_Current_Pressure_Data_CONST,"pressure_current");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNow_CONST),TEXT_Current_Wind_Data_CONST,"wind_current");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNow_CONST),TEXT_Current_Direction_Data_CONST,"direction_current");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNow_CONST),TEXT_Current_Visibility_Data_CONST,"visibility_current");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNow_CONST),TEXT_Current_Feels_Like_Data_CONST,"feelslike_current");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNow_CONST),TEXT_City_Data_CONST,"location");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNowDesc_CONST),TEXT_City_Data_CONST,"location");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast3_CONST),TEXT_City_Data_CONST,"location");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_City_Data_CONST,"location");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNowDesc_CONST),TEXT_Current_Description_CONST,"cond_current");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNowDesc_CONST),TEXT_Current_Temperature_CONST,"temp_current");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNowDesc_CONST),TEXT_Tomorrow_Weather_Forecast_CONST,"forecast_tonight");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNow_CONST),TEXT_Age_of_Data_CONST,"data_age");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherNowDesc_CONST),TEXT_Age_of_Data_CONST,"data_age");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast3_CONST),TEXT_Age_of_Data_CONST,"data_age");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_Age_of_Data_CONST,"data_age");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast3_CONST),TEXT_Day_1_Condition_CONST,"cond_day1");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast3_CONST),TEXT_Day_2_Condition_CONST,"cond_day2");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast3_CONST),TEXT_Day_3_Condition_CONST,"cond_day3");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast3_CONST),TEXT_3day_Hi_Data_1_CONST,"temp_hi_day1");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast3_CONST),TEXT_3day_Lo_Data_1_CONST,"temp_lo_day1");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast3_CONST),TEXT_3day_Hi_Data_2_CONST,"temp_hi_day2");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast3_CONST),TEXT_3day_Lo_Data_2_CONST,"temp_lo_day2");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast3_CONST),TEXT_3day_Hi_Data_3_CONST,"temp_hi_day3");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast3_CONST),TEXT_3day_Lo_Data_3_CONST,"temp_lo_day3");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast3_CONST),TEXT_3day_dow1_CONST,"dow_day1");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast3_CONST),TEXT_3day_dow2_CONST,"dow_day2");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast3_CONST),TEXT_3day_dow3_CONST,"dow_day3");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_3day_dow1_CONST,"dow_day1");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_3day_dow2_CONST,"dow_day2");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_3day_dow3_CONST,"dow_day3");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_6day_dow4_CONST,"dow_day4");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_6day_dow5_CONST,"dow_day5");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_6day_dow6_CONST,"dow_day6");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_3day_Hi_Data_1_CONST,"temp_hi_day1");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_3day_Lo_Data_1_CONST,"temp_lo_day1");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_3day_Hi_Data_2_CONST,"temp_hi_day2");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_3day_Lo_Data_2_CONST,"temp_lo_day2");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_3day_Hi_Data_3_CONST,"temp_hi_day3");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_3day_Lo_Data_3_CONST,"temp_lo_day3");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_6day_Hi_Data4_CONST,"temp_hi_day4");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_6day_Lo_Data4_CONST,"temp_lo_day4");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_6day_Hi_Data5_CONST,"temp_hi_day5");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_6day_Lo_Data5_CONST,"temp_lo_day5");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_6day_Hi_Data6_CONST,"temp_hi_day6");
+      UpdateText(sDeviceIDs,TOSTRING(DESIGNOBJ_mnuWeatherForecast6_CONST),TEXT_6day_Lo_Data6_CONST,"temp_lo_day6");
     }
   else
     {
