@@ -12,20 +12,20 @@ StyledScreen {
         anchors.fill: parent
         state: manager.q_mediaType =="5" ? "selection" : "viewing"
         focus:true
-//        onActiveFocusChanged: {
-//            if(activeFocus){
-//                console.log("content gained active focus")
-//                if(manager.q_mediaType =="5"){
-//                    typeSelection.forceActiveFocus()
-//                } else{
-//                    mediaList.forceActiveFocus()
-//                }
-//            } else {
-//                console.log("content lost focus")
-//            }
+        onActiveFocusChanged: {
+            if(activeFocus){
+                console.log("content gained active focus")
+                if(manager.q_mediaType =="5"){
+                    typeSelection.forceActiveFocus()
+                } else{
+                    mediaList.forceActiveFocus()
+                }
+            } else {
+                console.log("content lost focus")
+            }
 
 
-//        }
+        }
 
         Component.onCompleted: {
             if(manager.q_mediaType =="5"){
