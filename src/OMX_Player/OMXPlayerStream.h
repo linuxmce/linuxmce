@@ -24,8 +24,9 @@ class OMXPlayerStream : public OMXPlayerInterface
 
     bool m_bExitThread = false;
     int m_iStreamID = 0;
-    int m_iChapter = -1;
-    int m_iTitle = -1;
+    int m_iChapter = 0;
+    int m_iTitle = 0;
+    int m_iMediaType = 0;
 
     mutex m_mtxLog;
 
@@ -42,12 +43,14 @@ class OMXPlayerStream : public OMXPlayerInterface
   public:
     // members
     int m_iTimeCodeReportFrequency;
+    int m_iMediaID = -1;
+    string m_sMediaType = ""; // this is actually the MediaID, not to be confused with the LMCE MediaType above.
 
     // methods
     OMXPlayerStream(string sAudioDevice, bool bPassthrough, string sGpuDeInt, OMX_Player *pOwner, int iTimeCodeReportFrequency);
     ~OMXPlayerStream(void);
 
-    bool Play(int iStreamID, string sMediaURL, string sMediaPosition);
+    bool Play(int iStreamID, string sMediaURL, string sMediaPosition, int iMediaType);
     void Stop(int iStreamID);
     int Get_iStreamID();
     string Get_MediaType();

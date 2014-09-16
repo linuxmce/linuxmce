@@ -348,7 +348,7 @@ void OMX_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
 
 	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - TRYING to Play() from %s", sMediaPosition.c_str());
 
-	if ( !m_pOMXPlayer->Play(iStreamID, sMediaURL, sMediaPosition) ) {
+	if ( !m_pOMXPlayer->Play(iStreamID, sMediaURL, sMediaPosition, iPK_MediaType) ) {
 		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Play_Media - FAILED to Play(%s)", sMediaURL.c_str());
 		return;
 	}
@@ -387,10 +387,13 @@ void OMX_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
-	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Stop_Media - Calling Stop()");
-	m_pOMXPlayer->Stop(iStreamID);
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Stop_Media - Reporting postion:%s", m_pOMXPlayer->GetPosition().c_str());
 
-	sCMD_Result = "OK";
+	*sMediaPosition = m_pOMXPlayer->GetPosition();
+
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Stop_Media - Calling Stop()");
+
+	m_pOMXPlayer->Stop(iStreamID);
 }
 
 //<-dceag-c39-b->
@@ -632,8 +635,9 @@ void OMX_Player::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message 
 	cout << "Parm #203 - Eject=" << bEject << endl;
 
 	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Stop - Calling Stop()");
-	m_pOMXPlayer->Stop(iStreamID);
-	sCMD_Result = "OK";
+
+	string sMediaPosition;
+	CMD_Stop_Media(0, &sMediaPosition);
 }
 
 //<-dceag-c126-b->
@@ -895,24 +899,15 @@ void OMX_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMed
 void OMX_Player::CMD_Report_Playback_Position(int iStreamID,string *sText,string *sMediaPosition,string &sCMD_Result,Message *pMessage)
 //<-dceag-c259-e->
 {
-	cout << "Need to implement command #259 - Report Playback Position" << endl;
+	cout << "Implemented command #259 - Report Playback Position" << endl;
+//	cout << "Need to implement command #259 - Report Playback Position" << endl;
 	cout << "Parm #9 - Text=" << sText << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
-/*
-	int hrs, mins, secs;//, msecs, nsecs;
-	int64_t xPosition;
-	xPosition = g_props_client->Position();
-//	nsecs = xPosition % 1000;
-//	msecs = (xPosition / 1000) % 1000;
-	secs = (xPosition / 1000000) % 1000;
-	mins = (xPosition / 60000000) % 1000;
-	hrs = (xPosition / 360000000) % 1000;
-	*sText = to_string(hrs) + ":" + to_string(mins) + ":" + to_string(secs);
-	*sMediaPosition = to_string(xPosition);
-	sCMD_Result = "OK";
-*/
+	// FIXME: check stream id
+	*sMediaPosition = m_pOMXPlayer->GetPosition();
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Report_Playback_Position - %s", sMediaPosition->c_str());
 }
 
 //<-dceag-c412-b->
@@ -1022,9 +1017,23 @@ void OMX_Player::CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_Resu
 void OMX_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c920-e->
 {
-	cout << "Need to implement command #920 - Set Media ID" << endl;
+	cout << "Implemented command #920 - Set Media ID" << endl;
+//	cout << "Need to implement command #920 - Set Media ID" << endl;
 	cout << "Parm #10 - ID=" << sID << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+
+       LoggerWrapper::GetInstance()->Write(LV_STATUS,"Setting stream media info to %s",sID.c_str());
+
+	m_pOMXPlayer->m_sMediaType = "N";
+	m_pOMXPlayer->m_iMediaID = -1;
+
+	if (!sID.empty())
+	{
+		m_pOMXPlayer->m_sMediaType = sID[0];
+		sID.erase(0,1);
+		m_pOMXPlayer->m_iMediaID = atoi(sID.c_str());
+	}
 }
 
 

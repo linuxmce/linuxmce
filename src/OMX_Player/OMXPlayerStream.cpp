@@ -47,7 +47,7 @@ void OMXPlayerStream::Stop(int iStreamID) {
 }
 
 // inherited from OMXPlayerInterface
-bool OMXPlayerStream::Play(int iStreamID, string sMediaURL, string sMediaPosition) {
+bool OMXPlayerStream::Play(int iStreamID, string sMediaURL, string sMediaPosition, int iMediaType) {
 	if ( Get_PlayerState() != STATE::STOPPED ) {
 		Log("OMXPlayerStream::Play - ERROR - Can't Play() unless STOPPED, sending Stop()");
 		bEvent = false;
@@ -58,6 +58,7 @@ bool OMXPlayerStream::Play(int iStreamID, string sMediaURL, string sMediaPositio
 	bEvent = true;
 	m_iStreamID = iStreamID;
 	m_sMediaURL = sMediaURL;
+	m_iMediaType = iMediaType;
 
 	if ( !OMXPlayerInterface::Play(sMediaURL, sMediaPosition) )
 		return false;
@@ -204,15 +205,12 @@ int OMXPlayerStream::Get_iStreamID() {
 }
 
 string OMXPlayerStream::Get_MediaType() {
-	string ret = "N";
-	// FIXME: get the type and return it
-	return ret;
+	// this is the string version of the MediaID, not to be consused with the lmce MediaType.
+	return m_sMediaType;
 }
 
 int OMXPlayerStream::Get_MediaID() {
-	int ret = 0;
-	// FIXME: get this data somehow...
-	return ret;
+	return m_iMediaID;
 }
 
 /*
