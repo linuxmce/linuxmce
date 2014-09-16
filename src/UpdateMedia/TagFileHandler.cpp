@@ -48,6 +48,7 @@ bool TagFileHandler::LoadAttributes(PlutoMediaAttributes *pPlutoMediaAttributes,
 	{
 		int nType = it->first;
 		string sValue = it->second;
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "# LoadAttributes, from file: type %d: '%s'", nType, sValue.c_str());
 
 		MapPlutoMediaAttributes::iterator itm = pPlutoMediaAttributes->m_mapAttributes.find(nType);
 		if(itm == pPlutoMediaAttributes->m_mapAttributes.end())
@@ -193,10 +194,10 @@ void TagFileHandler::SetTagInfo(string sFilename, const map<int,string>& mapAttr
 	FileRef *f = new FileRef(m_sFullFilename.c_str());
 	if(NULL != f)
 	{
-		f->tag()->setArtist(String(ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Performer_CONST)));
-		f->tag()->setTitle(String(ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Title_CONST)));
-		f->tag()->setGenre(String(ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Genre_CONST)));
-		f->tag()->setAlbum(String(ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Album_CONST)));
+		f->tag()->setArtist(String(ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Performer_CONST), String::UTF8));
+		f->tag()->setTitle(String(ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Title_CONST), String::UTF8));
+		f->tag()->setGenre(String(ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Genre_CONST), String::UTF8));
+		f->tag()->setAlbum(String(ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Album_CONST), String::UTF8));
 		f->tag()->setTrack(atoi(ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Track_CONST).c_str()));
 		f->tag()->setYear(atoi(ExtractAttribute(mapAttributes, ATTRIBUTETYPE_Release_Date_CONST).c_str()));
 		f->save();
