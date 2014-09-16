@@ -681,7 +681,7 @@ int main(int argc, char *argv[])
 #endif
 
 		int res = connectToDataBase(sDBHost,sDBUser,sDBPassword,sPlutoMediaDbName, sPlutoMainDbName, iDBPort);
-		if (!res) {
+		if (res) {
 			return res;
 		}
 
