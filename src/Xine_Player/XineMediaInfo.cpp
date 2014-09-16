@@ -21,6 +21,12 @@ string XineMediaInfo::ToString()
     sResult += ",";
     sResult += StringUtils::itos(m_iMediaID);
     sResult += ",";
+    sResult += StringUtils::itos(m_iAngle);
+    sResult += ",";
+    sResult += StringUtils::itos(m_iAudio);
+    sResult += ",";
+    sResult += StringUtils::itos(m_iSubtitle);
+    sResult += ",";
     sResult += m_sFileName;
 
     return sResult;
@@ -29,7 +35,7 @@ string XineMediaInfo::ToString()
 bool XineMediaInfo::FromString(string sSource)
 {
     vector<string> vData = StringUtils::Split(sSource, ",");
-    if ( vData.size() != 9 )
+    if ( vData.size() != 9 && vData.size() != 12)
         return false;
     
     XineMediaInfo newInfo;
@@ -45,7 +51,15 @@ bool XineMediaInfo::FromString(string sSource)
     newInfo.m_iChapter = atoi(vData[5].c_str());
     newInfo.m_sMediaType = vData[6];
     newInfo.m_iMediaID = atoi(vData[7].c_str());
-    newInfo.m_sFileName = vData[8];
+
+    if (vData.size() == 9)
+        newInfo.m_sFileName = vData[8];
+    else if (vData.size() == 12) {
+        newInfo.m_iAngle = atoi(vData[8].c_str());
+        newInfo.m_iAudio = atoi(vData[9].c_str());
+        newInfo.m_iAudio = atoi(vData[10].c_str());
+        newInfo.m_sFileName = vData[11];
+    }
     
     *this = newInfo;
     

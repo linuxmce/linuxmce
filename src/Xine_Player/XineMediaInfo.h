@@ -21,7 +21,9 @@ public:
     string m_sFileName;
     string m_sMediaType; // D - disk, F - file, N - not known
     int m_iMediaID;
-    
+    int m_iAngle;
+    int m_iAudio;
+    int m_iSubtitle;
     
 public:
     XineMediaInfo();
