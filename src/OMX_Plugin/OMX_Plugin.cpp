@@ -340,6 +340,29 @@ bool OMX_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 		}
 	}
 
+        // if the disk ID not known, trying to see if we have a file with this name
+        int iPK_File=0;
+        if (pMediaFile)
+          iPK_File = pMediaFile->m_dwPK_File;
+        // if file or disk ID is already known, sending it
+        if ( iPK_File || pMediaStream->m_dwPK_Disc )
+        {
+          string sMediaID = (iPK_File?"F":"D");
+          sMediaID += StringUtils::itos(iPK_File?iPK_File:pMediaStream->m_dwPK_Disc);
+          DCE::CMD_Set_Media_ID cmd(m_dwPK_Device, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device, sMediaID, pOMXMediaStream->m_iStreamID_get());
+          SendCommand(cmd);
+          LoggerWrapper::GetInstance()->Write(LV_WARNING, "set media id command sent with id %s", sMediaID.c_str());
+        }
+        else
+        {
+          LoggerWrapper::GetInstance()->Write(LV_WARNING, "set media id command not sent");
+        }
+
+        if( pMediaFile && pOMXMediaStream->m_iPK_Playlist==0 )  // If this is part of a playlist, rather than just a normal bookmark, the user will likely want it to keep resuming at the set position
+                pMediaFile->m_sStartPosition=""; // Be sure to reset the start position so next time we start at the beginning of the file if this is in a queue
+
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "play media command sent from %d to %d!", m_dwPK_Device, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device);
+
 	return MediaHandlerBase::StartMedia(pMediaStream,sError);
  
 }
@@ -360,18 +383,18 @@ bool OMX_Plugin::StopMedia( class MediaStream *pMediaStream )
 	if ((pOMXMediaStream = ConvertToOMXMediaStream(pMediaStream,"OMX_Plugin::StopMedia():")) == NULL )
 		return false;
 
-	string savedPosition;
+        int PK_Device = pOMXMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device;
+ //       int StreamID = pXineMediaStream->m_iStreamID_get( );
+ 	string savedPosition;
 
 	DCE::CMD_Stop_Media CMD_Stop_Media(m_dwPK_Device,
 						pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
 						pOMXMediaStream->m_iStreamID_get(),
 						&savedPosition);
 
-	SendCommand(CMD_Stop_Media);
-
 	// TODO: Remove the device from the list of players also.
 	string Response;
-	if( !SendCommand( cmd ) ) // hack - todo see above, &Response ) ) ??
+	if( !SendCommand( CMD_Stop_Media ) ) // hack - todo see above, &Response ) ) ??
 	{
 		// TODO: handle failure when sending the command. This is ignored now.
 		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "The target device %d didn't respond to stop media command!", PK_Device );
@@ -381,8 +404,8 @@ bool OMX_Plugin::StopMedia( class MediaStream *pMediaStream )
 		pOMXMediaStream->m_sLastPosition=savedPosition;
 		if( pOMXMediaStream->m_iDequeMediaFile_Pos>=0 && pOMXMediaStream->m_iDequeMediaFile_Pos<pOMXMediaStream->m_dequeMediaFile.size() )
 		{
-			pOMXMediaStream->m_dequeMediaFile[pOMXMediaStream->m_iDequeMediaFile_Pos]->m_sStartPosition = SavedPosition;
-			LoggerWrapper::GetInstance()->Write( LV_STATUS, "Media stopped at %s",SavedPosition.c_str());
+			pOMXMediaStream->m_dequeMediaFile[pOMXMediaStream->m_iDequeMediaFile_Pos]->m_sStartPosition = savedPosition;
+			LoggerWrapper::GetInstance()->Write( LV_STATUS, "Media stopped at %s",savedPosition.c_str());
 		}
 
 		LoggerWrapper::GetInstance()->Write( LV_STATUS, "The target device %d responded to stop media command",
