@@ -16,7 +16,7 @@ VERSION = 2.0.0
 MYDEVTEMPLATEID = 1901mplateID
 
 Gen_Dev_Files = $(GENDEV)/MPlayer_PlayerBase.cpp
-sources = Main.cpp MPlayer_Player.cpp MPlayerEngine.cpp Log.cpp XineMediaInfo.cpp $(Gen_Dev_Files)
+sources = Main.cpp MPlayer_Player.cpp MPlayerEngine.cpp Log.cpp ../Xine_Player/XineMediaInfo.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=

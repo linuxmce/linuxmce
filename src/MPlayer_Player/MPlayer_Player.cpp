@@ -30,7 +30,7 @@ using namespace DCE;
 
 #include <cmath>
 #include "pluto_main/Define_MediaType.h"
-#include "XineMediaInfo.h"
+#include "../Xine_Player/XineMediaInfo.h"
 			 
 #include <signal.h>
 			 
