@@ -14,7 +14,7 @@
 
 #include <string> // map?
 #include <map> // map
-#include "XineMediaInfo.h"
+#include "../Xine_Player/XineMediaInfo.h"
 
 //<-dceag-d-b->
 #include "OMX_Player.h"
