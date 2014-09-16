@@ -354,21 +354,41 @@ bool OMX_Plugin::StopMedia( class MediaStream *pMediaStream )
 		m_mapDevicesToStreams.erase(it);
 
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "OMX_Plugin::StopMedia() Stopping Media Stream Playback... Pos: %d", pMediaStream->m_iDequeMediaFile_Pos );
- 
+
 	OMXMediaStream *pOMXMediaStream = NULL;
- 
+
 	if ((pOMXMediaStream = ConvertToOMXMediaStream(pMediaStream,"OMX_Plugin::StopMedia():")) == NULL )
 		return false;
- 
+
 	string savedPosition;
- 
+
 	DCE::CMD_Stop_Media CMD_Stop_Media(m_dwPK_Device,
 						pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
 						pOMXMediaStream->m_iStreamID_get(),
 						&savedPosition);
- 
+
 	SendCommand(CMD_Stop_Media);
- 
+
+	// TODO: Remove the device from the list of players also.
+	string Response;
+	if( !SendCommand( cmd ) ) // hack - todo see above, &Response ) ) ??
+	{
+		// TODO: handle failure when sending the command. This is ignored now.
+		LoggerWrapper::GetInstance()->Write( LV_CRITICAL, "The target device %d didn't respond to stop media command!", PK_Device );
+	}
+	else
+	{
+		pOMXMediaStream->m_sLastPosition=savedPosition;
+		if( pOMXMediaStream->m_iDequeMediaFile_Pos>=0 && pOMXMediaStream->m_iDequeMediaFile_Pos<pOMXMediaStream->m_dequeMediaFile.size() )
+		{
+			pOMXMediaStream->m_dequeMediaFile[pOMXMediaStream->m_iDequeMediaFile_Pos]->m_sStartPosition = SavedPosition;
+			LoggerWrapper::GetInstance()->Write( LV_STATUS, "Media stopped at %s",SavedPosition.c_str());
+		}
+
+		LoggerWrapper::GetInstance()->Write( LV_STATUS, "The target device %d responded to stop media command",
+		pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device);
+	}
+
 	return MediaHandlerBase::StopMedia(pMediaStream);
 }
 
