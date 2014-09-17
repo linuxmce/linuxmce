@@ -929,7 +929,7 @@ void OMX_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,stri
 	map<string,string> mapMediaInfo;
 
 	string::size_type tokenPos = 0;
-	string sCurValue = StringUtils::Tokenize(sMediaPosition, " ", tokenPos);
+	string sCurValue = StringUtils::TrimSpaces(sMediaPosition);
 	sCurValue = StringUtils::Tokenize(sMediaPosition, " ", tokenPos);
 	while (sCurValue!="")
 	{
@@ -947,11 +947,19 @@ void OMX_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,stri
 	}
 
 	int64_t xTime = strtoull(mapMediaInfo["POS"].c_str(), NULL, 10) * 1000;
+	int64_t xDuration = strtoull(mapMediaInfo["TOTAL"].c_str(), NULL, 10) * 1000;
+
+	xTime = (xTime>0) ? xTime : 0;
+	xTime = (xTime < xDuration) ? xTime : 0;
 
 	cout << "POS: " << mapMediaInfo["POS"] << ", " << xTime << endl;
+	cout << "AUDIO: " << mapMediaInfo["AUDIO"] << endl;
+	cout << "SUBTITLE: " << mapMediaInfo["SUBTITLE"] << endl;
+	cout << "TOTAL: " << mapMediaInfo["TOTAL"] << ", " << xDuration << endl;
 
 	string sMediaURL = "";
-	m_pOMXPlayer->Do_SetPosition(sMediaURL, xTime);
+	m_pOMXPlayer->Do_Seek(xTime);
+//	m_pOMXPlayer->Do_SetPosition(sMediaURL, xTime);
 }
 
 //<-dceag-c548-b->
