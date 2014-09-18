@@ -492,9 +492,9 @@ if [[ "$VPNenabled" == "on" ]]; then
                 ipup=$"#Setup iptables  and update db
 if [[ ! "$6" == "" ]]; then
 	if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
-		R=$(mysql pluto_main -ss -e"SELECT Protocol FROM Firewall WHERE RuleType='VPN' AND SourceIP='$5' AND Protocol='ip-ipv4' ORDER BY PK_Firewall")
+		R=$(mysql pluto_main -ss -e\"SELECT Protocol FROM Firewall WHERE RuleType='VPN' AND SourceIP='$5' AND Protocol='ip-ipv4' ORDER BY PK_Firewall\")
 		if [ "$R" ]; then
-			mysql pluto_main -ss -e "UPDATE Firewall SET Offline='0' WHERE RuleType='VPN' AND SourceIP='$5'"
+			mysql pluto_main -ss -e \"UPDATE Firewall SET Offline='0' WHERE RuleType='VPN' AND SourceIP='$5'\"
 		fi
 		/usr/pluto/bin/Network_Firewall.sh
 	fi
@@ -509,9 +509,9 @@ fi"
                 ipdown=$"#Setup iptables  and update db
 if [[ ! "$6" == "" ]]; then
         if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
-                R=$(mysql pluto_main -ss -e"SELECT Protocol FROM Firewall WHERE RuleType='VPN' AND SourceIP='$5' AND Protocol='ip-ipv4' ORDER BY PK_Firewall")
+                R=$(mysql pluto_main -ss -e\"SELECT Protocol FROM Firewall WHERE RuleType='VPN' AND SourceIP='$5' AND Protocol='ip-ipv4' ORDER BY PK_Firewall\")
                 if [ "$R" ]; then
-                        mysql pluto_main -ss -e "UPDATE Firewall SET Offline='1' WHERE RuleType='VPN' AND SourceIP='$5'"
+                        mysql pluto_main -ss -e \"UPDATE Firewall SET Offline='1' WHERE RuleType='VPN' AND SourceIP='$5'\"
                 fi
                 /usr/pluto/bin/Network_Firewall.sh
         fi

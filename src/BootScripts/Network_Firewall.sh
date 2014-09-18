@@ -857,9 +857,9 @@ if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
 		/usr/pluto/bin/Network_Blocklist.sh
 		ln -s /usr/pluto/bin/Network_Blocklist.sh /etc/cron.hourly/blocklist
 	else
-		rm /etc/cron.hourly/blocklist
+		rm -f /etc/cron.hourly/blocklist
 	fi
 else
-	rm /etc/cron.hourly/blocklist
+	rm -f /etc/cron.hourly/blocklist 
 fi
 
