@@ -350,7 +350,7 @@ int OrbiterGenerator::DoIt()
 	else
 		m_pRow_Orbiter->Reload();
 
-	if ( m_pRow_Device->FK_DeviceTemplate_get()==DEVICETEMPLATE_qOrbiter_CONST )
+	if ( m_pRow_Device->FK_DeviceTemplate_get()==DEVICETEMPLATE_qOrbiter_CONST || m_pRow_Device->FK_DeviceTemplate_get()==DEVICETEMPLATE_OnScreen_qOrbiter_CONST )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Device %d is a qOrbiter, no regen required.",m_iPK_Orbiter);
 		DatabaseUtils::UnLockTables(m_spDatabase_pluto_main.get());
