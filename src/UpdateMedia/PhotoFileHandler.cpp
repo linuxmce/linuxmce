@@ -26,7 +26,7 @@ using namespace std;
 #include <exiv2/image.hpp>
 #include <exiv2/exif.hpp>
 #include <exiv2/iptc.hpp>
-
+#include <exiv2/convert.hpp>
 
 namespace UpdateMediaVars
 {
@@ -102,7 +102,11 @@ bool PhotoFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttribute
 
 				Exiv2::ExifData &exifData = image->exifData();
 				Exiv2::IptcData &iptcData = image->iptcData();
-				
+				// Set IPTC CharacterSet to UTF-8, as that is what we save
+				Exiv2::Value::AutoPtr charset = Exiv2::Value::create(Exiv2::asciiString);
+				charset->read("UTF-8");
+				iptcData.add(Exiv2::IptcKey("Iptc.Envelope.CharacterSet"), charset.get());
+
 				if (pPlutoMediaAttributes->m_mapAttributes.size() != 0)
 				{
 					// Keep track of tags we have cleared (only clear tags we are going to save, tags/attributes that are removed are handled in RemoveAttribute)
@@ -346,21 +350,33 @@ void PhotoFileHandler::getTagsFromFile(string sFilename, multimap<int,string>& m
 				string sIptcAttributesPlain = "";
 				
 				Exiv2::IptcData::iterator end = iptcData.end();
+				Exiv2::IptcData::iterator charSetIt = iptcData.findKey(Exiv2::IptcKey("Iptc.Envelope.CharacterSet"));
+				string sourceCharset = "ISO-8859-1"; // default to ISO-8859-1 if nothing found below (this is the same behaviour as exiftool)
+				if (charSetIt != end) {
+					LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: Found IPTC charset \"%s\"", charSetIt->print().c_str());
+				}
 				for (Exiv2::IptcData::iterator i = iptcData.begin(); i != end; ++i) {
-					cout << i->key() << " - " <<  i->tag() << " : " << i->value() << "\n";
-					sIptcAttributesPlain += i->key() +  ": " + i->value().toString() + "; ";
+					LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: Found IPTC data '%s': '%s'",  i->key().c_str(), i->value().toString().c_str());
 					
 					// map some attributes to LMCE media attributes
 					switch(i->tag()) {
 					case 0x0019:
 						// Iptc.Application2.Keywords mapped to "Keyword"
-						mmapAttributes.insert(pair<int, string>(ATTRIBUTETYPE_Keyword_CONST, i->value().toString()));
+						string value = i->value().toString();
+						if (!Exiv2::convertStringCharset(value, sourceCharset.c_str(), "UTF-8")) {
+							LoggerWrapper::GetInstance()->Write(LV_WARNING, "# PhotoFileHandler::getTagsFromFile: Exiv2::convertStringCharset unable to convert from %s to UTF-8", sourceCharset.c_str());
+						}
+						if (value[value.length()-1] == 0) {
+							value = value.substr(0, value.length()-1);
+							LoggerWrapper::GetInstance()->Write(LV_WARNING, "# PhotoFileHandler::getTagsFromFile: removing hex 0 (null-termination) from value \"%s\"", value.c_str());
+						}
+
+						mmapAttributes.insert(pair<int, string>(ATTRIBUTETYPE_Keyword_CONST, value));
 						break;
 					}
 					
 					
 				}
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "# PhotoFileHandler::getTagsFromFile: Found IPTC data \"%s\"", sIptcAttributesPlain.c_str());
 			}
 		}
 	} catch (Exiv2::AnyError& e) {
