@@ -6,6 +6,7 @@ StyledScreen{
     property variant cameraList:[]
     property int tick:0
 
+
     onTickChanged: {
         if(tick > cameraList.length-1)
             tick=0

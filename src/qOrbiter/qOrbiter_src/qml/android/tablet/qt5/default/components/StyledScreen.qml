@@ -5,6 +5,8 @@ Item {
     state:"opening"
     Component.onCompleted: {
         state="opened"
+       setNavigation(navigationComponent)
+        lowerInfoPanel()
     }
 
     function close(){
@@ -15,6 +17,7 @@ Item {
     signal readyToClose()
     signal screenClosing()
     signal screenOpening()
+    property string navigationComponent:""
 
     anchors{
         top:pageLoader.top
