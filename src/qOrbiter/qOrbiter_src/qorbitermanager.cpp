@@ -1743,7 +1743,7 @@ bool qorbiterManager::loadSkins(QUrl base)
 #endif
     }else{
 #ifdef QT5
-        tskinModel->addSkin("default");
+        tskinModel->addSkin("default,data");
 #else
         tskinModel->addSkin("default,data,smokey");
 #endif
@@ -1751,12 +1751,12 @@ bool qorbiterManager::loadSkins(QUrl base)
 #elif for_android
     tskinModel->addSkin("default");
 #elif RPI
-    QDir desktopQmlPath(QString(base.toString()),"",QDir::Name, QDir::NoDotAndDotDot);
-    desktopQmlPath.setNameFilters(excludes);
-    setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
-    localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
+//    QDir desktopQmlPath(QString(base.toString()),"",QDir::Name, QDir::NoDotAndDotDot);
+//    desktopQmlPath.setNameFilters(excludes);
+//    setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
+//    localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
     
-    qDebug()<<"inside of skins we find" << localSkins.join(",");
+//    qDebug()<<"inside of skins we find" << localSkins.join(",");
     tskinModel->addSkin("default");
 #else
     if(b_localLoading ){
@@ -1773,10 +1773,7 @@ bool qorbiterManager::loadSkins(QUrl base)
             tskinModel->addSkin(localSkins.join(","));
         }
     } else {
-        
         tskinModel->addSkin("default,aeon,STB");
-        
-        
     }
 #endif
     return true;
