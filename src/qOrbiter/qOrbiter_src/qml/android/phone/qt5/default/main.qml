@@ -212,19 +212,5 @@ Item {
         }
     }
 
-    SequentialAnimation{
-        id:loadin
 
-        PropertyAnimation{
-            id:fadeout
-            target:pageLoader
-            properties: "opacity"; to: "0"; duration: 5000
-
-        }
-        PropertyAnimation{
-            id: fadein
-            target:pageLoader
-            properties: "opacity"; to: "1"; duration: 5000
-        }
-    }
 }

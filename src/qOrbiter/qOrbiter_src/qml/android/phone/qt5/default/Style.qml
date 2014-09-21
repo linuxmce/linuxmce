@@ -176,16 +176,8 @@ QtObject{
     //end scale function
     //-color definitions
 
-    property color accentcolor: "green"
-    property color highlight1: "silver"
-    property color highlight2: "orange"
-    property color alertcolor: "red"
-    property color warncolor:"yellow"
-    property color darkColor:"black"
     property double shadeOpacity:.65
 
-    property color darkhighlight: "darkgrey"
-    property color lighthighlight: "green"
     //--end color definitions
 
 }
