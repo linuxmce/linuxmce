@@ -14,7 +14,7 @@ StyledScreen {
     property int itemW:manager.b_orientation ? homeSelectionLayout.width/ 2 : homeSelectionLayout.width / 2
     focus:true
     Keys.onReleased: {
-        event.accepted=true
+
         switch(event.key){
         case Qt.Key_Back:
             if(showSecondary){
@@ -22,9 +22,11 @@ StyledScreen {
             }else{
                 console.log("show exit")
             }
+            event.accepted=true
             break;
         case Qt.Key_Menu :
             showOptions = !showOptions
+            event.accepted=true
             break;
         case Qt.Key_MediaPrevious:
             if(secondaryModel.visible){
@@ -34,6 +36,7 @@ StyledScreen {
             }
 
             console.log("Media previous")
+            event.accepted=true
             break;
         default:
             console.log(event.key)

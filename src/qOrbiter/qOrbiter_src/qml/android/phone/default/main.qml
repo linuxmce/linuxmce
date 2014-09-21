@@ -9,6 +9,15 @@ Item {
     width:manager.appWidth
     height:manager.appHeight
     focus:true
+    property bool profile:!manager.b_orientation
+    property bool uiOn:true
+    property alias skinStyle:appStyle
+    property int screensaverTimer:manager.screenSaverTimeout*1000
+
+
+    signal showMetadata()
+    signal showPlaylist()
+    signal showAdvanced()
 
     Style{
         id:appStyle
@@ -36,6 +45,24 @@ Item {
                 canary.rotation =1
             else
                 canary.rotation=(canary.rotation+1)
+        }
+    }
+
+    Timer{
+        id:hideUiTimer
+        interval:screensaverTimer
+        running: true
+        repeat: true
+        onTriggered: {
+            if(uiOn){
+                console.log("starting screensaver.")
+                uiOn=false
+                if(glScreenSaver.active){
+                    glScreenSaver.forceActiveFocus()
+                } else {
+                    mobileGradient.forceActiveFocus()
+                }
+            }
         }
     }
 
@@ -113,7 +140,16 @@ Item {
             } else{
                 manager.goBacktoQScreen()
             }
-            break
+            break;
+        case Qt.Key_VolumeDown:
+             androidSystem.setVolume(-1)
+            console.log("vol-")
+            break;
+        case Qt.Key_VolumeUp:
+            androidSystem.setVolume(1)
+            console.log("vol+")
+            break;
+
         default:
             console.log(event.key)
         }
@@ -274,6 +310,10 @@ Item {
             console.log(pageLoader.source)
             return
         } else {
+            if(pageLoader.item){
+                pageLoader.item.screenClosing()
+            }
+
             pageLoader.source = "screens/"+screenname
         }
 
@@ -284,12 +324,19 @@ Item {
     Loader {
         id:pageLoader
         objectName: "loadbot"
+        width: parent.width
         anchors{
             top:hdr.bottom
-            left:parent.left
-            right:parent.right
+            right:uiOn ? parent.right :parent.left
             bottom:ftr.top
         }
+
+//        Behavior on AnchorChanges{
+//            AnchorAnimation{
+//                duration: appStyle.animation_medium
+//                easing: appStyle.animation_easing
+//            }
+//        }
 
         focus: true
         Keys.onBackPressed: console.log("back")
@@ -312,6 +359,17 @@ Item {
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
         }
+
+        transitions: [
+            Transition {
+                from: "*"
+                to: "*"
+                AnchorAnimation{
+                    duration:appStyle.animation_medium
+                    easing:appStyle.animation_easing
+                }
+            }
+        ]
     }
 
     function setOptions(options){
@@ -337,8 +395,6 @@ Item {
     DefaultFooter {
         id: ftr
     }
-
-
 
     //=================Components==================================================//
     function loadComponent(componentName)
@@ -419,22 +475,18 @@ Item {
         anchors.centerIn: parent
     }
 
-    SequentialAnimation{
-        id:loadin
 
-        PropertyAnimation{
-            id:fadeout
-            target:pageLoader
-            properties: "opacity"; to: "0"; duration: 5000
-
+    MouseArea{
+        id:mst
+        anchors.fill: parent
+        onPressed: {
+            uiOn=true
+            mouse.accepted=false
+            console.log("Mouse X: "+mouse.x)
+            console.log("Mouse Y:"+mouse.y)
+            console.log("\n")
+            hideUiTimer.restart()
         }
-        PropertyAnimation{
-            id: fadein
-            target:pageLoader
-            properties: "opacity"; to: "1"; duration: 5000
-        }
-
     }
-
 
 }

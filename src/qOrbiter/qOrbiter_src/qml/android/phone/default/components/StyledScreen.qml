@@ -8,6 +8,7 @@ Item {
     signal readyToClose()
     signal screenClosing()
     signal screenOpening()
+    signal screenOpened()
 
     anchors{
         top:pageLoader.top
@@ -38,21 +39,21 @@ Item {
         State {
             name: "opening"
             StateChangeScript{
-                script: {console.log(screen+" is opening")}
+                script: {console.log(screen+" is opening");screenOpening(); }
             }
 
         },
         State {
             name: "opened"
             StateChangeScript{
-                script: {console.log(screen+" is opened")}
+                script: {console.log(screen+" is opened");screenOpened()}
             }
 
         },
         State {
             name: "closing"
             StateChangeScript{
-                script: {console.log(screen+" is closing")}
+                script: {console.log(screen+" is closing");screenClosing()}
             }
 
         },

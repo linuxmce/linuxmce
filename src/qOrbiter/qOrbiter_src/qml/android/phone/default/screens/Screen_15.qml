@@ -7,14 +7,25 @@ screen params for this screen are
 */
 StyledScreen{
     id:singlecameraview
+    property int currentInterval:0
+    onScreenOpening: {
+        currentInterval=glScreenSaver.interval
+        glScreenSaver.interval=300000000
+    }
+
+    onScreenClosing: {
+        glScreenSaver.interval=currentInterval
+        currentInterval=0
+    }
     property int camera:screenparams.getParam(2)
     Timer{
         id:securitytimer
         repeat: true
-        interval: 1000
+        interval: 1500
         triggeredOnStart: true
         running: true
         onTriggered:{
+
             "image://listprovider/securityimage/"+camera+"/"+securityvideo.timestamp
             manager.requestSecurityPic(screenparams.getParam(2), 640, 480)
         }
@@ -32,9 +43,7 @@ StyledScreen{
 
     Panel{
         id:securitycamrect
-        height: childrenRect.height
-        width: childrenRect.width
-        anchors.centerIn: parent
+        anchors.fill: parent
 
         headerTitle: "Single Camera View"
 
@@ -42,8 +51,7 @@ StyledScreen{
             id: securityimage
             fillMode: Image.PreserveAspectFit
             source: "image://listprovider/securityimage/"+camera+"/"+securityvideo.timestamp
-            anchors.centerIn: parent
-            width: scaleX(85)
+           anchors.fill: parent
         }
     }
 

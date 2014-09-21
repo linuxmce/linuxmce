@@ -7,6 +7,8 @@ Item{
         top:parent.top
         right:parent.right
     }
+
+    onStateChanged: console.log("Header State::"+state)
     height: manager.b_orientation ? scaleY(8) : scaleY(12)
 
     function setNavigaton(qmlpage){
@@ -88,7 +90,8 @@ Item{
     states: [
         State {
             name: "open"
-            when:manager.currentScreen==="Screen_1.qml"
+            extend: "default"
+            when:manager.currentScreen==="Screen_1.qml" && uiOn
             PropertyChanges {
                 target: hdr
                 height: manager.b_orientation ? scaleY(8) : scaleY(12)
@@ -100,6 +103,7 @@ Item{
         },
         State {
             name: "closed"
+            extend:"default"
             PropertyChanges {
                 target: hdr
                 height:0
@@ -107,7 +111,20 @@ Item{
 
         },
         State {
+            name: "screen_saver"
+
+            when:!uiOn
+            AnchorChanges{
+                target:hdr
+                anchors{
+                    top:undefined
+                    bottom:qmlroot.top
+                }
+            }
+        },
+        State {
             name: "grid"
+            extend:"default"
             PropertyChanges{
                 target:hdrContent
                 source:"MediaGridHeader.qml"
@@ -115,15 +132,28 @@ Item{
         },
         State {
             name: "floorplan"
+            extend:"default"
             when:hdrContent.source==="FloorplanNav.qml"
         },
         State {
             name: "tv"
+            extend:"default"
             PropertyChanges{
                 target:hdrContent
                 source:"MediaGridHeader.qml"
             }
 
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+            AnchorAnimation{
+                duration:appStyle.animation_quick
+                easing:appStyle.animation_easing
+            }
         }
     ]
 

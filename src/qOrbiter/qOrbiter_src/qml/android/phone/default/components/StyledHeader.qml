@@ -14,8 +14,8 @@ Item{
     Rectangle{
         id:hdrFill
         anchors.fill: parent
-        color:style.headerBgColor
-        gradient:style.bgHeaderGradient
+        color:appStyle.headerBgColor
+        gradient:appStyle.bgHeaderGradient
     }
 
     StyledText{

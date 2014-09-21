@@ -2,12 +2,15 @@ import QtQuick 1.1
 //phone - default
 Item{
     id:ftrItem
-    height: manager.b_orientation ? scaleY(16) : scaleY(12)
+    height: profile ? scaleY(14) : scaleY(10)
+    onStateChanged: console.log("Footer State::"+state)
+
     anchors{
         bottom:parent.bottom
         left:parent.left
         right:parent.right
     }
+
     Rectangle{
         anchors.fill: parent
         color:appStyle.headerBgColor
@@ -20,7 +23,7 @@ Item{
     }
 
     Row{
-        id:ftr
+
         height: manager.b_orientation ? scaleY(8) : scaleY(6)
         spacing: scaleX(5)
         anchors{
@@ -50,8 +53,7 @@ Item{
     states: [
         State {
             name: "closed"
-            when:manager.currentScreen!=="Screen_1.qml"
-
+            when:manager.currentScreen!=="Screen_1.qml" && uiOn
 
             AnchorChanges{
                 target: ftrItem
@@ -63,9 +65,7 @@ Item{
         },
         State {
             name: "open"
-            when:manager.currentScreen="Screen_1.qml"
-
-
+            when:manager.currentScreen=="Screen_1.qml" && uiOn
             AnchorChanges{
                 target: ftrItem
                 anchors{
@@ -73,7 +73,35 @@ Item{
                     bottom:parent.bottom
                 }
             }
+        },
+        State {
+            name: "screen_saver"
+            when:!uiOn
+            AnchorChanges{
+                target: ftrItem
+                anchors{
+                    bottom:undefined
+                    top:qmlroot.bottom
+                }
+            }
+            AnchorChanges{
+                target: pageLoader
+                anchors{
 
+                    right:qmlroot.left
+                }
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+            AnchorAnimation{
+                duration:appStyle.animation_quick
+                easing:appStyle.animation_easing
+            }
         }
     ]
 
