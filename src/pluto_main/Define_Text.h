@@ -1301,6 +1301,9 @@
 #define TEXT_X_Blue_CONST 2244
 #define TEXT_Y_Yellow_CONST 2245
 #define TEXT_Baby_Monitor_Status_CONST 2246
+#define TEXT_Top_Menu_CONST 2247
+#define TEXT_PopUp_Menu_CONST 2248
+#define TEXT_Skip_Forward_CONST 2249
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

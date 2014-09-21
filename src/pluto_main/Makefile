@@ -156,6 +156,7 @@ Table_Package_Package.cpp \
 Table_Package_Source.cpp \
 Table_Package_Source_Compat.cpp \
 Table_Package_Users.cpp \
+Table_Package_Version.cpp \
 Table_PageSetup.cpp \
 Table_PaidLicense.cpp \
 Table_ParameterType.cpp \

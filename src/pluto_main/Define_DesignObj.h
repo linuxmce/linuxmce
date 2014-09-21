@@ -2933,8 +2933,17 @@
 #define DESIGNOBJ_butA2600Keypad_CONST 6331
 #define DESIGNOBJ_butBabyMonitor_CONST 6332
 #define DESIGNOBJ_butBabyMonitor_Button_CONST 6333
-#define DESIGNOBJ_mnuGamesOptions_Default_CONST 6334
-#define DESIGNOBJ_butEscape_CONST 6336
+#define DESIGNOBJ_butLegacySearch_CONST 6334
+#define DESIGNOBJ_butLegacyOptions_CONST 6335
+#define DESIGNOBJ_butPVRRed_CONST 6336
+#define DESIGNOBJ_butPVRGreen_CONST 6337
+#define DESIGNOBJ_butPVRYellow_CONST 6338
+#define DESIGNOBJ_butPVRBlue_CONST 6339
+#define DESIGNOBJ_butBRTopMenu_CONST 6340
+#define DESIGNOBJ_butBRPopUpMenu_CONST 6341
+#define DESIGNOBJ_mnuSatelliteCablePVR_CONST 6342
+#define DESIGNOBJ_butSkipFwd_CONST 6344
+#define DESIGNOBJ_butFavorites_CONST 6345
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"
