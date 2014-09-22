@@ -1014,6 +1014,20 @@
 #define COMMAND_Get_Weather_Value_CONST 1117
 #define COMMAND_Phone_to_Baby_Monitor_CONST 1118
 #define COMMAND_Bind_Keypad_CONST 1119
+#define COMMAND_Top_Menu_CONST 1120
+#define COMMAND_PopUp_Menu_CONST 1121
+#define COMMAND_Start_CONST 1122
+#define COMMAND_PS_Playstation_CONST 1124
+#define COMMAND_L1_CONST 1125
+#define COMMAND_L2_CONST 1126
+#define COMMAND_L3_CONST 1127
+#define COMMAND_R1_CONST 1128
+#define COMMAND_R2_CONST 1129
+#define COMMAND_R3_CONST 1130
+#define COMMAND_Circle_CONST 1131
+#define COMMAND_Triangle_CONST 1132
+#define COMMAND_Square_CONST 1133
+#define COMMAND_X_CONST 1134
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"

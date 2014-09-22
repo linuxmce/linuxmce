@@ -30,6 +30,7 @@
 #define REPOSITORYSOURCE_Slimdevices_CONST 27
 #define REPOSITORYSOURCE_Local_debcache_CONST 28
 #define REPOSITORYSOURCE_Ubuntu_Security_CONST 29
+#define REPOSITORYSOURCE_yavdr_Ubuntu_PPA_CONST 30
 
 #define REPOSITORYSOURCE_TABLE "RepositorySource"
 #define REPOSITORYSOURCE_PK_REPOSITORYSOURCE_FIELD "PK_RepositorySource"
