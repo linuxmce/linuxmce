@@ -47,7 +47,6 @@ using namespace std;
 #include "Table_Package_Package.h"
 #include "Table_Package_Source.h"
 #include "Table_Package_Users.h"
-#include "Table_Package_Version.h"
 #include "Table_PageSetup.h"
 #include "Table_PaidLicense.h"
 #include "Table_QuickStartTemplate.h"
@@ -1562,13 +1561,6 @@ void Row_Package::Package_Users_FK_Package_getrows(vector <class Row_Package_Use
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_Package_Users *pTable = table->database->Package_Users_get();
-pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
-}
-void Row_Package::Package_Version_FK_Package_getrows(vector <class Row_Package_Version*> *rows)
-{
-PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-
-class Table_Package_Version *pTable = table->database->Package_Version_get();
 pTable->GetRows("`FK_Package`=" + StringUtils::itos(m_PK_Package),rows);
 }
 void Row_Package::PageSetup_FK_Package_getrows(vector <class Row_PageSetup*> *rows)

@@ -164,7 +164,6 @@ tblPackage_Package=NULL;
 tblPackage_Source=NULL;
 tblPackage_Source_Compat=NULL;
 tblPackage_Users=NULL;
-tblPackage_Version=NULL;
 tblPageSetup=NULL;
 tblPaidLicense=NULL;
 tblParameterType=NULL;
@@ -697,9 +696,6 @@ if( tblPackage_Source_Compat!=NULL )
 if( tblPackage_Users!=NULL )
 	if( !Commit_Package_Users(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
 		bResult=false;
-if( tblPackage_Version!=NULL )
-	if( !Commit_Package_Version(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
-		bResult=false;
 if( tblPageSetup!=NULL )
 	if( !Commit_PageSetup(bDeleteFailedModifiedRow,bDeleteFailedInsertRow) )
 		bResult=false;
@@ -1120,7 +1116,6 @@ DeleteTable_Package_Package();
 DeleteTable_Package_Source();
 DeleteTable_Package_Source_Compat();
 DeleteTable_Package_Users();
-DeleteTable_Package_Version();
 DeleteTable_PageSetup();
 DeleteTable_PaidLicense();
 DeleteTable_ParameterType();
