@@ -1304,6 +1304,13 @@
 #define TEXT_Top_Menu_CONST 2247
 #define TEXT_PopUp_Menu_CONST 2248
 #define TEXT_Skip_Forward_CONST 2249
+#define TEXT_PS_Button_CONST 2250
+#define TEXT_L1_CONST 2251
+#define TEXT_L2_CONST 2252
+#define TEXT_L3_CONST 2253
+#define TEXT_R1_CONST 2254
+#define TEXT_R2_CONST 2255
+#define TEXT_R3_CONST 2256
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"
