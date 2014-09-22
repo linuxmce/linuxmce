@@ -550,6 +550,9 @@
 				RelativePath=".\Table_Package_Users.cpp">
 			</File>
 			<File
+				RelativePath=".\Table_Package_Version.cpp">
+			</File>
+			<File
 				RelativePath=".\Table_PageSetup.cpp">
 			</File>
 			<File
