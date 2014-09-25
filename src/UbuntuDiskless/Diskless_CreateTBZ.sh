@@ -501,15 +501,21 @@ MD_Install_Packages () {
 			# HACK: copy the foundation kernel.img to a normal linux kernal name with version
 			# FIXME: is there a better way to do this?  the raspbian kernels are missing the fdt.
 			#LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-image-3.6-trunk-rpi
-			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi-bin raspberrypi-bootloader rpi-update
-			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install rpi-update
-			LC_ALL=C chroot "$TEMP_DIR" rpi-update
-			LC_ALL=C chroot "$TEMP_DIR" ln -sf /boot/kernel.img /boot/vmlinuz-3.6-trunk-rpi
-			LC_ALL=C chroot "$TEMP_DIR" touch /boot/initrd.img-3.6-trunk-rpi
-
+			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install libraspberrypi-bin raspberrypi-bootloader
+			#LC_ALL=C chroot "$TEMP_DIR" apt-get -y install rpi-update
+			#LC_ALL=C chroot "$TEMP_DIR" rpi-update
 			LC_ALL=C chroot "$TEMP_DIR" mkdir -p /sdcard
-
-	                LC_ALL=C chroot $TEMP_DIR apt-get -y install alsa-base alsa-utils pulseaudio
+			LC_ALL=C chroot "$TEMP_DIR" mkdir -p /tmp
+			cat <<-EOF > $TEMP_DIR/tmp/symlink_kernel.sh
+				#!/bin/bash
+				cd /boot
+				ln -sf kernel.img vmlinuz-3.6-trunk-rpi
+				touch /boot/initrd.img-3.6-trunk-rpi
+				EOF
+			chmod +x $TEMP_DIR/tmp/symlink_kernel.sh
+			LC_ALL=C chroot "$TEMP_DIR" /tmp/symlink_kernel.sh
+	                LC_ALL=C chroot $TEMP_DIR apt-get -y install alsa-base alsa-utils
+			# pulseaudio
 			VerifyExitCode "alsa-base, alsa-utils or pulseaudio packages install failed"
 			;;
 	esac
@@ -535,7 +541,7 @@ MD_Install_Packages () {
 			DEVICE_LIST="28 62 1759 5 11 1825 26 1808 1901 2122"
 			;;
 		"raspbian")
-			# Classic MD/qMD/sqzelte
+			# Classic MD/qMD/squeezelite
 			DEVICE_LIST="2216 62 1759 2259 11 1825 26 1808 2122 2278"
 			# qMD
 			#DEVICE_LIST="2216 2278 2259 11 26 1808 2122"
