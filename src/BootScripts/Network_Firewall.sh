@@ -215,7 +215,7 @@ if [[ "$AdvancedFirewall" == "0" ]]; then
 fi
 
 #include a list with Firewall aplications to scripts what set the settings for the applications listed.
-. /usr/pluto/bin/Firewall_applications.sh
+#. /usr/pluto/bin/Firewall_applications.sh
 
 #####
 # Function to set the rules
@@ -284,9 +284,16 @@ IPTables ()
 			fi
 			FilterMsg="; Not limited to specific IP"
 		else
-			FilterMsg="; Limited to: $FilterIP"
-			FilterIP4="-s $FilterIP"
-			FilterIP6="-s $FilterIP"
+			 grep -qv "[!]" <<< $DestIP
+                        if [ ! $? -eq 0 ]; then
+			FilterMsg="; Limited to: !$FilterIP"
+			FilterIP4="!-s $FilterIP"
+			FilterIP6="!-s $FilterIP"
+			else
+				FilterMsg="; Limited to: $FilterIP"
+        	                FilterIP4="-s $FilterIP"
+	                        FilterIP6="-s $FilterIP"
+			fi
 		fi
 
 		if [[ "$SrcPort" == ":" ]] || [[ "$SrcPort" == "NULL" ]] || [[ "$SrcPort" == "NULL:NULL" ]] || [[ "$parmSPort" == "" ]]; then
@@ -306,7 +313,7 @@ IPTables ()
 		else
 			grep -qv "[!]" <<< $DestIP
 			if [ ! $? -eq 0 ]; then
-				DestMsg="; Limited to: $FilterIP"
+				DestMsg="; Limited to: !$FilterIP"
 				DestIP4="! -d $DestIP"
 				DestIP6="! -d $DestIP"
 			else
@@ -390,24 +397,13 @@ Manual_CHain_Rules()
 		tmp=$(Field 4 "$Port")
 		echo $tmp | grep -q '-'
 		if [ $? -eq 0 ]; then
-			if [[ "$tmp" == "icmp-ipv6" ]]; then
-				Protocol="icmpv6"
-			else
-				Protocol="$(echo $tmp | cut -d"-" -f 1)"
-			fi
-		else
-			Protocol=$(Field 3 "$Port")
+    			Protocol="$(echo $tmp | cut -d"-" -f 1)"
 		fi
 		SrcIP=$(Field 5 "$Port")
 		SrcPort1=$(Field 6 "$Port")
 		SrcPort2=$(Field 7 "$Port")
-		if [[ "$SrcPort2" -eq 0 ]]; then
-			SrcPort2="$SrcPort1"
-		fi
+		SrcPort2="$SrcPort1"
 		DestIP=$(Field 8 "$Port")
-		if [[ "$DestIP" -eq 0 ]]; then
-			DestIP="NULL"
-		fi
 		DestPort=$(Field 9 "$Port")
 		RPolicy=$(Field 10 "$Port")
 		Description=$(Field 11 "$Port")
@@ -540,7 +536,7 @@ echo "Setting default Policy"
 		fi
 	done
 
-
+#. /usr/pluto/bin/Firewall_applications/Firewall_telecom.sh
 	# If on multiple NIC's, accept incoming on LAN and NAT or masquerade on external
 	## Workaround for some ISPs that don't allow routers and drop packets based on TTL.
 	iptables -t mangle -A POSTROUTING -o $ExtIf -j TTL --ttl-set 255
@@ -619,7 +615,7 @@ for Protocol in $R; do
 						Protocol="$(echo $tmp | cut -d"-" -f 1)"
 					fi
 				else
-					Protocol=$(Field 3 "$Port")
+					Protocol=$(Field 4 "$Port")
 				fi
 				SrcIP=$(Field 5 "$Port")
 				SrcPort1=$(Field 6 "$Port")
@@ -628,9 +624,6 @@ for Protocol in $R; do
 					SrcPort2="$SrcPort1"
 				fi
 				DestIP=$(Field 8 "$Port")
-				if [[ "$DestIP" -eq 0 ]]; then
-					DestIP="NULL"
-				fi
 				DestPort=$(Field 9 "$Port")
 				RPolicy=$(Field 10 "$Port")
 				Description=$(Field 11 "$Port")
@@ -673,7 +666,7 @@ for Protocol in $R; do
 						Protocol="$(echo $tmp | cut -d"-" -f 1)"
 					fi
 				else
-					Protocol=$(Field 3 "$Port")
+					Protocol=$(Field 4 "$Port")
 				fi
 				SrcIP=$(Field 5 "$Port")
 				SrcPort1=$(Field 6 "$Port")
@@ -682,9 +675,6 @@ for Protocol in $R; do
 					SrcPort2="$SrcPort1"
 				fi
 				DestIP=$(Field 8 "$Port")
-				if [[ "$DestIP" -eq 0 ]]; then
-					DestIP="NULL"
-				fi
 				DestPort=$(Field 9 "$Port")
 				RPolicy=$(Field 10 "$Port")
 				Description=$(Field 11 "$Port")
@@ -740,34 +730,28 @@ for ForwardType in "${ForwardTypeArr[@]}"; do
 					if [ ! $? -eq 0 ]; then
 						DestPort1=`echo $DestPort | cut -d \: -f 1`
 						DestPort2=`echo $DestPort | cut -d \: -f 2`
-						parmDPort="--dport $DestPort1"
-						DestPort="$DestPort2"
+						DestPort="$DestPort1"
 					else
 						parmDPort=""
 						DestPort="$DestPort"
 					fi
-				fi
-				
-				if [[ "$DestIP" -eq 0 ]]; then
-					DestIP="NULL"
-				else
-					if [[ "$DestIP" != "" ]] && [[ "$DestIP" != "NULL" ]]; then
-						grep -qv "[!]" <<< $DestIP
-						if [ ! $? -eq 0 ]; then
-							DestIP=${DestIP:1}
-							if [[ "$RuleType" == "OUTPUT" ]]; then
-								parmDest="--to "$DestPort""			
-							else
-								parmDest="--to "$DestIP:$DestPort""
-							fi
-							DestIP="! $DestIP"
+				fi				
+				if [[ "$DestIP" != "" ]] && [[ "$DestIP" != "NULL" ]]; then
+					grep -qv "[!]" <<< $DestIP
+					if [ ! $? -eq 0 ]; then
+						DestIP=${DestIP:1}
+						if [[ "$RuleType" == "OUTPUT" ]]; then
+							parmDest="--to "$DestPort2""			
 						else
-							parmDest="--to-destination "$DestIP:$DestPort""
-							if [[ ! $RuleType == "PREROUTING" ]];then
-								DestIP="$DestIP"
-							else
-								DestIP=""
-							fi
+							parmDest="--to "$DestIP:$DestPort2""
+						fi
+						DestIP="! $DestIP"
+					else
+						parmDest="--to-destination "$DestIP:$DestPort2""
+						if [[ ! $RuleType == "PREROUTING" ]];then
+							DestIP="$DestIP"
+						else
+							DestIP=""
 						fi
 					fi
 				fi
@@ -819,7 +803,7 @@ for Protocol in $R; do
 						Protocol="$(echo $tmp | cut -d"-" -f 1)"
 					fi
 				else
-					Protocol=$(Field 3 "$Port")
+					Protocol=$(Field 4 "$Port")
 				fi
 				SrcIP=$(Field 5 "$Port")
 				SrcPort1=$(Field 6 "$Port")
@@ -828,9 +812,6 @@ for Protocol in $R; do
 					SrcPort2="$SrcPort1"
 				fi
 				DestIP=$(Field 8 "$Port")
-				if [[ "$DestIP" -eq 0 ]]; then
-					DestIP="NULL"
-				fi
 				DestPort=$(Field 9 "$Port")
 				RPolicy=$(Field 10 "$Port")
 				Description=$(Field 11 "$Port")
@@ -860,6 +841,6 @@ if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
 		rm -f /etc/cron.hourly/blocklist
 	fi
 else
-	rm -f /etc/cron.hourly/blocklist 
+	rm -f /etc/cron.hourly/blocklist
 fi
 
