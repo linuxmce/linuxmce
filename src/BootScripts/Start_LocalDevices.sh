@@ -9,12 +9,16 @@ function printHelp()
 	Logging "$TYPE" "$SEVERITY_NORMAL" "Invalid paramters: ./Start_LocalDevices.sh [ -d DeviceID [-r RouterAddress ] ]" >&2
 }
 
+# Update pluto spawned devices with the actual list of spawned devices:
+
+ps ax|grep Spawn_Device|grep bash|cut -d":" -f2-|cut -d" " -f4 > /usr/pluto/locks/pluto_spawned_local_devices.txt
+
 #lshwd is obsolete and unmaintained in 5 years.  removing to see if anything breaks - phenigma - 2014-04-09
 #lshwd # needed for some systems which won't report usb devices until you run lshwd first (bug in usb architecture)
 /usr/pluto/bin/UpdateAvailableSerialPorts.sh
 /usr/pluto/bin/UpdateAvailableSoundCards.sh
-bash -x /usr/pluto/bin/SoundCards_Setup.sh | tee-pluto /var/log/pluto/SoundCards_Setup.log
-bash -x /usr/pluto/bin/SoundCards_Setup_ConferenceMicrophones.sh | tee-pluto /var/log/pluto/Soundcards_Setup.log
+bash -x /usr/pluto/bin/SoundCards_Setup.sh |& tee-pluto /var/log/pluto/SoundCards_Setup.log
+bash -x /usr/pluto/bin/SoundCards_Setup_ConferenceMicrophones.sh |& tee-pluto /var/log/pluto/Soundcards_Setup.log
 
 [[ $# -ne 4 && $# -ne 2 && $# -ne 0 ]] && printHelp && exit
 CurrentDevice=$PK_Device
