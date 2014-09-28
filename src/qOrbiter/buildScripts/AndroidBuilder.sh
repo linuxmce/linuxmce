@@ -22,9 +22,13 @@ OPTIND=1
 
 
 START=$(pwd)
+
+JAVAHOME=/usr/lib/jvm/java-6-openjdk-i386
+export JAVA_HOME=$JAVAHOME
+NECESSITAS_ROOT=~/necessitas
 export ANDROID_NDK_PLATFORM=android-9
-NECESSITAS_ROOT=~/necessitas4
 export ANDROID_NDK_ROOT=$NECESSITAS_ROOT/android-ndk
+
 export ANDROID_SDK_ROOT=$NECESSITAS_ROOT/android-sdk
 OLDPATH=$PATH
 NEWPATH=$OLDPATH:$ANDROID_NDK_ROOT:$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin
