@@ -16,6 +16,7 @@ Item {
     signal showMetadata()
     signal showPlaylist()
     signal showAdvanced()
+
     Rectangle{
         anchors.fill: parent
         color:"black"
@@ -175,6 +176,7 @@ Item {
             break;
         case Qt.Key_VolumeDown:
             console.log("vol down")
+
             manager.adjustVolume(-5)
             break;
         case Qt.Key_MediaPrevious:
