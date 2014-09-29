@@ -27,7 +27,7 @@ public:
 	string GetFileSourceForDB();
 
 	int m_iRomType;
-	string m_sROMSystem, m_sROMTitle, m_sROMManufacturer, m_sROMYear, m_sROMGenre;
+	string m_sROMSystem, m_sROMTitle, m_sROMSubtitle, m_sROMManufacturer, m_sROMYear, m_sROMGenre;
 
 private:
 	void GetRomInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures);

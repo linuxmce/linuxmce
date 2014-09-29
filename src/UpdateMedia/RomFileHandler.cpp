@@ -163,13 +163,49 @@ void RomFileHandler::getMAMEData(string sRomName)
 	{
 		vector<string> vectOutput_Rows;
 		vector<string>::iterator it;
-		StringUtils::Tokenize(sOutput,"\n",vectOutput_Rows);
-		if (vectOutput_Rows.size() == 4)
+		StringUtils::Tokenize(sOutput,"|",vectOutput_Rows);
+		if (vectOutput_Rows.size() == 5)
 		{
-			m_sROMTitle = vectOutput_Rows[0];
-			m_sROMYear = vectOutput_Rows[1];
-			m_sROMManufacturer = vectOutput_Rows[2];
-			m_sROMGenre = vectOutput_Rows[3];
+			if (vectOutput_Rows[0] != "NOMATCH")
+			{
+				m_sROMTitle = vectOutput_Rows[0];
+			}
+			else
+			{
+				m_sROMTitle.clear();
+			}
+			if (vectOutput_Rows[1] != "NOMATCH")
+			{
+				m_sROMYear = vectOutput_Rows[1];
+			}
+			else
+			{
+				m_sROMYear.clear();
+			}
+			if (vectOutput_Rows[2] != "NOMATCH")
+			{
+				m_sROMManufacturer = vectOutput_Rows[2];
+			}
+			else
+			{
+				m_sROMManufacturer.clear();
+			}
+			if (vectOutput_Rows[3] != "NOMATCH")
+			{
+				m_sROMGenre = vectOutput_Rows[3];
+			}
+			else
+			{
+				m_sROMGenre.clear();
+			}
+			if (vectOutput_Rows[4] != "NOMATCH")
+			{
+				m_sROMSubtitle=vectOutput_Rows[4];
+			}
+			else
+			{
+				m_sROMSubtitle.clear();
+			}
 			m_sROMSystem = "Arcade"; // FIXME: deal with this?
 		}
 	}
@@ -178,11 +214,12 @@ void RomFileHandler::getMAMEData(string sRomName)
 //-----------------------------------------------------------------------------------------------------
 void RomFileHandler::getCoweringData(string sRomName)
 {
-	m_sROMTitle = "NOMATCH";
-	m_sROMYear = "NOMATCH";
-	m_sROMManufacturer = "NOMATCH";
-	m_sROMGenre = "NOMATCH";
-	m_sROMSystem = "NOMATCH";
+	m_sROMTitle.clear();
+	m_sROMYear.clear();
+	m_sROMManufacturer.clear();
+	m_sROMGenre.clear();
+	m_sROMSystem.clear();
+	m_sROMSubtitle.clear();
 
 	// Cowering format ROM data is of the format: A Game Title (Year) (Manufacturer) [c] [c] [c]
 	// where [c] are ancilliary codes not currently parsed. 
@@ -311,7 +348,7 @@ void RomFileHandler::getSystem(string sFilename)
 void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes, list<pair<char *, size_t> >& listPictures)
 {
 
-  string sSnapFilename, sROMSystem, sROMTitle, sROMYear, sROMManufacturer, sROMGenre;
+  string sSnapFilename, sROMSystem, sROMTitle, sROMSubtitle, sROMYear, sROMManufacturer, sROMGenre;
   string sROMName = FileUtils::FilenameWithoutPath(sFilename,false);
 
   // Use MAMEROM to grab text attributes.
@@ -332,20 +369,24 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
   sROMManufacturer = m_sROMManufacturer;
   sROMGenre = m_sROMGenre;
   sROMSystem = m_sROMSystem;
+  sROMSubtitle = m_sROMSubtitle;
 
-  if (sROMTitle != "NOMATCH")
+  if (!sROMTitle.empty())
     mapAttributes[ATTRIBUTETYPE_Title_CONST] = sROMTitle;
 
-  if (sROMYear != "NOMATCH")
+  if (!sROMSubtitle.empty())
+    mapAttributes[ATTRIBUTETYPE_Episode_CONST] = sROMSubtitle;
+
+  if (!sROMYear.empty())
     mapAttributes[ATTRIBUTETYPE_Year_CONST] = sROMYear;
 
-  if (sROMManufacturer != "NOMATCH")
+  if (!sROMManufacturer.empty())
     mapAttributes[ATTRIBUTETYPE_Manufacturer_CONST] = sROMManufacturer;
 
-  if (sROMGenre != "NOMATCH")
+  if (!sROMGenre.empty())
     mapAttributes[ATTRIBUTETYPE_Genre_CONST] = sROMGenre;
 
-  if (sROMSystem != "NOMATCH")
+  if (!sROMSystem.empty())
 	  mapAttributes[ATTRIBUTETYPE_System_CONST] = sROMSystem;
 
   // Grab Cover art.

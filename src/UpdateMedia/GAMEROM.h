@@ -39,6 +39,7 @@ using namespace std;
 			Database_lmce_game *m_pMyDatabase;
 
 			string getTitleForROM(string sROMName);
+			string getSubTitleForROM(string sROMName);
 			string getYearForROM(string sROMName);
 			string getManufacturerForROM(string sROMName);
 			string getGenreForROM(string sROMName);		

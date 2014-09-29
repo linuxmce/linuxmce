@@ -19,11 +19,9 @@ int main(int argc, char *argv[])
  		string sROMYear = m_pGAMEROM->getYearForROM(sROM);
 		string sROMManufacturer = m_pGAMEROM->getManufacturerForROM(sROM);
  		string sROMGenre = m_pGAMEROM->getGenreForROM(sROM);
+		string sROMSubtitle = m_pGAMEROM->getSubTitleForROM(sROM);
 	
-		cout << sROMTitle << endl;
-		cout << sROMYear << endl;
-		cout << sROMManufacturer << endl;
-		cout << sROMGenre << endl;
+		cout << sROMTitle << "|" << sROMYear << "|" << sROMManufacturer << "|" << sROMGenre << "|" << sROMSubtitle;
 	}
 	return 0;
 

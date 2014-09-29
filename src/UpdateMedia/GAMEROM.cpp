@@ -30,7 +30,7 @@ string GAMEROM::getTitleForROM(string sROMName)
 	vector<class Row_Rom *> 		v_Rom;	
 	vector<class Row_Rom_RomAttribute *>	v_Rom_RomAttributes;
 	string 					sRomName = sROMName + ".zip";
-	string					s_WhereQuery = "WHERE Romname = '"+sRomName+"'";
+	string					s_WhereQuery = "WHERE Romname = '"+sRomName+"' OR md5 = '"+sROMName+"'";
 
 	if (!m_pMyDatabase->Rom_get()->GetRows(s_WhereQuery,&v_Rom)) 
 	{
@@ -53,7 +53,61 @@ string GAMEROM::getTitleForROM(string sROMName)
 		pRow_RomAttribute = m_pMyDatabase->RomAttribute_get()->GetRow(v_Rom_RomAttributes[i]->FK_RomAttribute_get());
 		if (pRow_RomAttribute-> FK_RomAttributeType_get() == ROMATTRIBUTETYPE_title_CONST) 
 		{
-			return pRow_RomAttribute->Name_get();
+			if (pRow_RomAttribute->Name_get().empty())
+			{
+				return "__BLANK";
+			}
+			else
+			{
+				return pRow_RomAttribute->Name_get();
+			}
+		}
+	}
+
+	// Nothing was found, return a message.
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not Find Title RomAttribute for ROMName: %s",sRomName.c_str());
+	return "NOMATCH";
+
+}
+
+string GAMEROM::getSubTitleForROM(string sROMName) 
+{
+	Row_Rom 				*pRow_Rom;
+	Row_RomAttribute				*pRow_RomAttribute;
+	vector<class Row_Rom *> 		v_Rom;	
+	vector<class Row_Rom_RomAttribute *>	v_Rom_RomAttributes;
+	string 					sRomName = sROMName + ".zip";
+	string					s_WhereQuery = "WHERE Romname = '"+sRomName+"' OR md5 = '"+sROMName+"'";
+
+	if (!m_pMyDatabase->Rom_get()->GetRows(s_WhereQuery,&v_Rom)) 
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not get Rom matching ROMName: %s",sRomName.c_str());
+		return "NOMATCH";
+	} 
+
+	if (v_Rom.size() == 0)
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not get Rom matching ROMName: %s",sRomName.c_str());
+		return "NOMATCH";
+	}
+
+	pRow_Rom = m_pMyDatabase->Rom_get()->GetRow(v_Rom[0]->PK_Rom_get());
+	pRow_Rom->Rom_RomAttribute_FK_Rom_getrows(&v_Rom_RomAttributes);
+
+	// Iterate through the resulting matching RomAttributes for a Rom
+	for (unsigned int i=0;i<v_Rom_RomAttributes.size();i++) 
+	{
+		pRow_RomAttribute = m_pMyDatabase->RomAttribute_get()->GetRow(v_Rom_RomAttributes[i]->FK_RomAttribute_get());
+		if (pRow_RomAttribute-> FK_RomAttributeType_get() == ROMATTRIBUTETYPE_subtitle_CONST) 
+		{
+			if (pRow_RomAttribute->Name_get().empty())
+			{
+				return "NOMATCH";
+			}
+			else
+			{
+				return pRow_RomAttribute->Name_get();
+			}
 		}
 	}
 
@@ -70,7 +124,7 @@ string GAMEROM::getYearForROM(string sROMName)
 	vector<class Row_Rom *> 		v_Rom;	
 	vector<class Row_Rom_RomAttribute *>	v_Rom_RomAttributes;
 	string 					sRomName = sROMName + ".zip";
-	string					s_WhereQuery = "WHERE Romname = '"+sRomName+"'";
+	string					s_WhereQuery = "WHERE Romname = '"+sRomName+"' OR md5 = '"+sROMName+"'";
 
 	InitDatabase();
 
@@ -95,7 +149,14 @@ string GAMEROM::getYearForROM(string sROMName)
 		pRow_RomAttribute = m_pMyDatabase->RomAttribute_get()->GetRow(v_Rom_RomAttributes[i]->FK_RomAttribute_get());
 		if (pRow_RomAttribute-> FK_RomAttributeType_get() == ROMATTRIBUTETYPE_year_CONST) 
 		{
-			return pRow_RomAttribute->Name_get();
+			if (pRow_RomAttribute->Name_get().empty())
+			{
+				return "__BLANK";
+			}
+			else
+			{
+				return pRow_RomAttribute->Name_get();
+			}
 		}
 	}
 
@@ -112,7 +173,7 @@ string GAMEROM::getManufacturerForROM(string sROMName)
 	vector<class Row_Rom *> 		v_Rom;	
 	vector<class Row_Rom_RomAttribute *>	v_Rom_RomAttributes;
 	string 					sRomName = sROMName + ".zip";
-	string					s_WhereQuery = "WHERE Romname = '"+sRomName+"'";
+	string					s_WhereQuery = "WHERE Romname = '"+sRomName+"' OR md5 = '"+sROMName+"'";
 
 	InitDatabase();
 
@@ -137,7 +198,14 @@ string GAMEROM::getManufacturerForROM(string sROMName)
 		pRow_RomAttribute = m_pMyDatabase->RomAttribute_get()->GetRow(v_Rom_RomAttributes[i]->FK_RomAttribute_get());
 		if (pRow_RomAttribute-> FK_RomAttributeType_get() == ROMATTRIBUTETYPE_manufacturer_CONST) 
 		{
-			return pRow_RomAttribute->Name_get();
+			if (pRow_RomAttribute->Name_get().empty())
+			{
+				return "__BLANK";
+			}
+			else
+			{
+				return pRow_RomAttribute->Name_get();
+			}
 		}
 	}
 
@@ -153,7 +221,7 @@ string GAMEROM::getGenreForROM(string sROMName)
 	vector<class Row_Rom *> 		v_Rom;	
 	vector<class Row_Rom_RomAttribute *>	v_Rom_RomAttributes;
 	string 					sRomName = sROMName + ".zip";
-	string					s_WhereQuery = "WHERE Romname = '"+sRomName+"'";
+	string					s_WhereQuery = "WHERE Romname = '"+sRomName+"' OR md5 = '"+sROMName+"'";
 
 	InitDatabase();
 
@@ -178,7 +246,14 @@ string GAMEROM::getGenreForROM(string sROMName)
 		pRow_RomAttribute = m_pMyDatabase->RomAttribute_get()->GetRow(v_Rom_RomAttributes[i]->FK_RomAttribute_get());
 		if (pRow_RomAttribute-> FK_RomAttributeType_get() == ROMATTRIBUTETYPE_genre_CONST) 
 		{
-			return pRow_RomAttribute->Name_get();
+			if (pRow_RomAttribute->Name_get().empty())
+			{
+				return "__BLANK";
+			}
+			else
+			{
+				return pRow_RomAttribute->Name_get();
+			}
 		}
 	}
 
