@@ -129,8 +129,8 @@ Item{
             name: "numberpad"
             PropertyChanges {
                 target: styled_button
-                height:manager.b_orientation ? scaleY(12) : scaleY(18)
-                width: manager.b_orientation ? scaleX(18) : scaleX(12)
+                height:manager.isProfile ? scaleY(12) : scaleY(18)
+                width: manager.isProfile ? scaleX(18) : scaleX(12)
             }
 
             PropertyChanges{
@@ -142,8 +142,8 @@ Item{
             name: "large-fixed"
             PropertyChanges {
                 target: styled_button
-                height:manager.b_orientation ? scaleY(15) : scaleY(20)
-                width:manager.b_orientation ? scaleX(28) : scaleX(25)
+                height:manager.isProfile ? scaleY(15) : scaleY(20)
+                width:manager.isProfile ? scaleX(28) : scaleX(25)
             }
 
             PropertyChanges{

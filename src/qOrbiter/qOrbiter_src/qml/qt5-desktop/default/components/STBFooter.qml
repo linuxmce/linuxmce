@@ -204,7 +204,9 @@ Item{
                     submodel.incrementCurrentIndex()
                     break;
                 case RemoteCommands.EnterGo:
-                    pressed()
+
+                pressed()
+
                     break;
                 case RemoteCommands.MoveLeft:
                     scenarioList.nextItem()
@@ -317,7 +319,9 @@ Item{
                         onPressed:{
 
                             if(submodel.currentIndex === index && submodel.model !==advancedMenu){
+                                console.log("executing cmd grp")
                                 manager.execGrp(params)
+                                showMenu(false)
                             }else{
                                 // console.log(submodel.model[index].params)
                                 if(submodel.currentIndex!==index){

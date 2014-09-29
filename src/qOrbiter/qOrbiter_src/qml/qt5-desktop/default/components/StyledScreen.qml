@@ -20,7 +20,7 @@ Item {
         right:pageLoader.right
         bottom: pageLoader.bottom
     }
-    onActiveFocusChanged: if(activeFocus){
+    onActiveFocusChanged: if(activeFocus && !focusTarget.activeFocus){
                               uiOn=false
                               isActive=true
                               if(focusTarget){

@@ -27,13 +27,13 @@ StyledScreen {
 
         }
 
-        Component.onCompleted: {
-            if(manager.q_mediaType =="5"){
-               content.state="selection"
-            } else{
-               content.state="viewing"
-            }
-        }
+//        Component.onCompleted: {
+//            if(manager.q_mediaType =="5"){
+//               content.state="selection"
+//            } else{
+//               content.state="viewing"
+//            }
+//        }
 
 
 
@@ -206,9 +206,13 @@ StyledScreen {
                     width:0
                 }
 
-                StateChangeScript{
-                    script: { manager.resetModelAttributes; mediatypefilter.resetStates(); attribfilter.resetStates(); }
-                }
+//                StateChangeScript{
+//                    script: {
+//                        manager.resetModelAttributes;
+//                        mediatypefilter.resetStates();
+//                        attribfilter.resetStates();
+//                    }
+//                }
                 //("5", "", "", "", "1,2", "", "13", "", "2", "")
                 //("5", "1", "", "", "1,2", "", "12", "", "2", "")
                 //("5", "1", "", "", "1,2", "", "52", "", "2", "7691")
