@@ -13,7 +13,7 @@ BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = Game_PlugIn
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 1964mplateID
+MYDEVTEMPLATEID = 1964
 
 Gen_Dev_Files = $(GENDEV)/Game_PlugInBase.cpp
 sources = Main.cpp Game_PlugIn.cpp $(Gen_Dev_Files)

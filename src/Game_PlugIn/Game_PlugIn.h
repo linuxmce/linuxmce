@@ -40,7 +40,7 @@
 //<-dceag-decl-b->
 namespace DCE
 {
-  class Game_PlugIn : public Game_PlugIn_Command, public MediaHandlerBase, public AlarmEvent
+	class Game_PlugIn : public Game_PlugIn_Command, public MediaHandlerBase, public AlarmEvent
 	{
 //<-dceag-decl-e->
 		// Private member variables
@@ -129,6 +129,15 @@ public:
 
 			*****COMMANDS***** we need to implement
 	*/
+
+
+	/** @brief COMMAND: #764 - Set Active Menu */
+	/** Used to set which screens to show given monitor mode, options, etc. */
+		/** @param #9 Text */
+			/** The menu currently active */
+
+	virtual void CMD_Set_Active_Menu(string sText) { string sCMD_Result; CMD_Set_Active_Menu(sText.c_str(),sCMD_Result,NULL);};
+	virtual void CMD_Set_Active_Menu(string sText,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #1119 - Bind Keypad */

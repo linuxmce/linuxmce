@@ -2,8 +2,8 @@
 Package = DCE_Destination_Package
 Dir = 
 desc = DCE Implemenation for #1964 Game PlugIn
-Maintainer = ThomasName
-Email = 
+Maintainer = thomasName
+Email = thom.cherryhomes@gmail.com
 Depend = DCE_Dependencies
 <-dceag-p-e->
 

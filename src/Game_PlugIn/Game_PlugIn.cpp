@@ -359,13 +359,25 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 	// Fill out the stream bits for OSD
 	string sROMName = FileUtils::FileWithoutExtension(FileUtils::FilenameWithoutPath(mediaURL));
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Game_PlugIn::CreateMediaStream(): Setting m_sMediaDescription to: %s",
-							m_pGAMEROM->getTitleForROM(sROMName).c_str());
- 
-	// pGameMediaStream->m_sMediaDescription = m_pGAMEROM->getTitleForROM(sROMName);
-    	// pGameMediaStream->m_sSectionDescription = m_pGAMEROM->getManufacturerForROM(sROMName) + " (" + m_pGAMEROM->getYearForROM(sROMName) + ")";
-    	// pGameMediaStream->m_sMediaSynopsis = "Example Synopsis!";
-
+	if (m_pGAMEROM->getTitleForROM(sROMName) != "NOMATCH")
+	  {
+	    pGameMediaStream->m_bPlugInWillSetDescription=true;
+	    pGameMediaStream->m_sMediaDescription = m_pGAMEROM->getTitleForROM(sROMName);
+	    if (m_pGAMEROM->getSubTitleForROM(sROMName) != "NOMATCH" ||
+		m_pGAMEROM->getSubTitleForROM(sROMName).size() > 2)
+	      {
+		pGameMediaStream->m_sMediaDescription += " \n("+m_pGAMEROM->getSubTitleForROM(sROMName)+")";
+	      }
+	  }
+	if (m_pGAMEROM->getManufacturerForROM(sROMName) != "NOMATCH")
+	  {
+	    pGameMediaStream->m_sSectionDescription = m_pGAMEROM->getManufacturerForROM(sROMName);
+	    if (m_pGAMEROM->getYearForROM(sROMName) != "NOMATCH" ||
+		!m_pGAMEROM->getYearForROM(sROMName).empty())
+	      {
+		pGameMediaStream->m_sSectionDescription += " \n("+m_pGAMEROM->getYearForROM(sROMName)+")";
+	      }
+	  }
 
 ///////////////////////////////////////////////////////////////////////
 // Game System specific code here. Basically, if we need to
@@ -407,7 +419,7 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 	{
 		pGameMediaStream->m_sAppName = "mess.mess";
 		pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_intv_CONST;
-		pGameMediaStream->m_sKeypadOverlayPath = "/home/name/intv/keypads/";
+		pGameMediaStream->m_sKeypadOverlayPath = "/home/snap/intv/keypads/";
 	}
 
 	if (mediaURL.find("/sg1000") != string::npos || StringUtils::ToLower(mediaURL).find(".sg") != string::npos)
@@ -865,10 +877,39 @@ void Game_PlugIn::CMD_Bind_Keypad(string sPK_DesignObj,string sPK_EntertainArea,
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_PlugIn::CMD_Bind_Keypad - Updating Keypad overlay designobj %s with png image size %d",sPK_DesignObj.c_str(),iData_Size);
       DCE::CMD_Update_Object_Image Update_Object_Image(m_dwPK_Device,pMessage->m_dwPK_Device_From,sPK_DesignObj,"3",pData,iData_Size,"1");
       SendCommand(Update_Object_Image);
+      delete pData;
     }
   else
     {
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_PlugIn::CMD_Bind_Keypad - Could not find a keypad, path %s.",sKeypadPath.c_str());
     }
+
+}
+//<-dceag-c764-b->
+
+	/** @brief COMMAND: #764 - Set Active Menu */
+	/** Used to set which screens to show given monitor mode, options, etc. */
+		/** @param #9 Text */
+			/** The menu currently active */
+
+void Game_PlugIn::CMD_Set_Active_Menu(string sText,string &sCMD_Result,Message *pMessage)
+//<-dceag-c764-e->
+{
+  PLUTO_SAFETY_LOCK( mm, m_pMedia_Plugin->m_MediaMutex );
+  
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Game_PlugIn::CMD_Set_Active_Menu %s",sText.c_str());
+
+  GameMediaStream *pGameMediaStream = 
+    ConvertToGameMediaStream(m_pMedia_Plugin->m_mapMediaStream_Find(m_mapDevicesToStreams[pMessage->m_dwPK_Device_From],pMessage->m_dwPK_Device_From));
+
+  if (!pGameMediaStream)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"Game_PlugIn::CMD_Set_Active_Menu stream is NULL");
+      return;
+    }
+
+  int PK_Screen_Remote_Alt;
+
+  // COMEBACKHERE
 
 }
