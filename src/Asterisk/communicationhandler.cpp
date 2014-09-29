@@ -149,7 +149,7 @@ int CommunicationHandler::handleDial(Token* ptoken)
 
 int CommunicationHandler::handleNewextenEvent(Token* ptoken) 
 {
-	if(ptoken->getKey(TOKEN_APPLICATION) == APPLICATION_CONF || ptoken->getKey(TOKEN_APPLICATION) == APPLICATION_MEETME)
+	if(ptoken->getKey(TOKEN_APPLICATION) == APPLICATION_CONF || ptoken->getKey(TOKEN_APPLICATION) == APPLICATION_MEETME || ptoken->getKey(TOKEN_APPLICATION) == APPLICATION_CONFBRIDGE)
 	{
 		//e.g.
 		//Event: Newexten

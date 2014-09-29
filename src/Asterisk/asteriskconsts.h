@@ -74,6 +74,7 @@
 #define APPLICATION_DIAL	"Dial"
 #define APPLICATION_CONF	"Conference"
 #define APPLICATION_MEETME	"MeetMe"
+#define APPLICATION_CONFBRIDGE	"ConfBridge"
 
 /*actions*/
 #define ACTION_ORIGINATE	"Originate"
