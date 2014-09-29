@@ -197,12 +197,12 @@ bool CEC_Adaptor::GetConfig()
 	    // Local Mode, hard code values to lookup.
 	    // This may be expanded later, but I merely want
 	    // to implement the bare minimum for a direction pad. -tschak
-	    m_mapCodesToButtons["0x00"] = make_pair<string,int>("ok",0);
-	    m_mapCodesToButtons["0x01"] = make_pair<string,int>("up",0);
-	    m_mapCodesToButtons["0x02"] = make_pair<string,int>("down",0);
-	    m_mapCodesToButtons["0x03"] = make_pair<string,int>("left",0);
-	    m_mapCodesToButtons["0x04"] = make_pair<string,int>("right",0);
-	    m_mapCodesToButtons["0x0D"] = make_pair<string,int>("back",0);
+	    m_mapCodesToButtons["0x0"] = make_pair<string,int>("ok",0);
+	    m_mapCodesToButtons["0x1"] = make_pair<string,int>("up",0);
+	    m_mapCodesToButtons["0x2"] = make_pair<string,int>("down",0);
+	    m_mapCodesToButtons["0x3"] = make_pair<string,int>("left",0);
+	    m_mapCodesToButtons["0x4"] = make_pair<string,int>("right",0);
+	    m_mapCodesToButtons["0xd"] = make_pair<string,int>("back",0);
 	  }
 
 	g_config.Clear();
@@ -219,6 +219,9 @@ bool CEC_Adaptor::GetConfig()
 	g_config.deviceTypes.add(CEC_DEVICE_TYPE_PLAYBACK_DEVICE);
 
 	m_pParser = LibCecInitialise(&g_config);
+	
+	// Tweak with this until we like it -tschak
+	m_pParser->SetLogicalAddress(CECDEVICE_TUNER1);
 
 	if (!m_pParser)
 	  {
