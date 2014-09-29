@@ -49,6 +49,7 @@ class LMCE_Game_Update
   string m_sSubtitle;
   string m_sManufacturer;
   string m_sYear;
+  string m_sGenre;
   int m_iSystem;
   GameDatabase *m_pGameDatabase;
 
