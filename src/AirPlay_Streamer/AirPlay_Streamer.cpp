@@ -163,6 +163,15 @@ void AirPlay_Streamer::CreateChildren()
   m_pAirPlay_Service->Name_AirPlay_set(m_pDeviceMD->m_sDescription.c_str());
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Service name is %s",cName);
   m_sCurrentMacAddress = m_pDeviceMD->GetMacAddress();
+  if (m_sCurrentMacAddress.empty())
+  {
+    // This is possibly the core, get the core's MAC address.
+    m_pDeviceCore=m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_pData->m_dwPK_Device_Core);
+    if (m_pDeviceCore)
+      {
+	m_sCurrentMacAddress=m_pDeviceCore->GetMacAddress();
+      }
+  }
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Address is %s",m_sCurrentMacAddress.c_str());
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Service is %s",m_pDeviceMD->m_sDescription.c_str());
   if (!m_pAirPlay_Service->init())

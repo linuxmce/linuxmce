@@ -39,6 +39,7 @@ public:
 	 	// Public member variables
 	  AirPlay_Service *m_pAirPlay_Service;
 	  DeviceData_Base *m_pDeviceMD; 
+	  DeviceData_Base *m_pDeviceCore;
 	  DeviceData_Base *m_pDevice_Media_PlugIn;
 	  string m_sCurrentMacAddress;
 	  bool m_bIsPlaying;
