@@ -502,6 +502,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter,SIGNAL(startManager(QString,QString)), &w, SLOT(qmlSetupLmce(QString,QString)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(addExistingOrbiter(ExistingOrbiter*)), w.myOrbiters, SLOT(appendRow(ExistingOrbiter*)));
         QObject::connect(&pqOrbiter, SIGNAL(deviceInvalid()), &orbiterWin, SLOT(prepareExistingOrbiters()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(clearExistingOrbiters()), w.myOrbiters, SLOT(clear()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(routerInvalid()), &orbiterWin, SIGNAL(showExternal()),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(connectionValid(bool)), &orbiterWin, SLOT(setConnectionState(bool)), Qt::QueuedConnection);
         QObject::connect(&orbiterWin,SIGNAL(setupLmce(int, QString)), &pqOrbiter, SLOT(qmlSetup(int, QString)),Qt::QueuedConnection);

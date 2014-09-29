@@ -26,9 +26,11 @@ void ExistingOrbiterModel::appendRows(const QList<ExistingOrbiter *> &items)
     beginInsertRows(QModelIndex(), rowCount(QModelIndex()), rowCount(QModelIndex())+items.size()-1);
     foreach(ExistingOrbiter *item, items) {
 
+        if(m_list.contains(item)){
+            return;
+        }
         QObject::connect(item, SIGNAL(dataChanged()), this, SLOT(handleItemChange()));
         m_list.append(item);
-
     }
 
     endInsertRows();

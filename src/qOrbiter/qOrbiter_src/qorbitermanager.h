@@ -185,7 +185,8 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString dceResponse READ getDceResponse WRITE setDceResponse NOTIFY dceResponseChanged)
     Q_PROPERTY (bool debugMode READ getDebugMode WRITE setDebugMode NOTIFY debugModeChanged )/*!< \brief Contains boolean of the current debug state. \ingroup qorbiter_properties */
     Q_PROPERTY (bool connectedState READ getConnectedState WRITE setConnectedState NOTIFY connectedStateChanged)
-    Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged)
+     Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged)
+    Q_PROPERTY (bool isProfile READ getOrientation WRITE setOrientation NOTIFY orientationChanged)
     Q_PROPERTY (QString currentScreen READ getCurrentScreen WRITE setCurrentScreen  NOTIFY screenChange)/*!< \brief Contains string of current screen. \code manager.currentScreen \endcode  \ingroup qorbiter_properties */
     Q_PROPERTY (QString m_ipAddress READ getInternalIp WRITE setInternalIp NOTIFY internalIpChanged)/*!< \brief Contains string of current ip address \code manager.m_ipAddress \endcode  \ingroup qorbiter_properties  */
     Q_PROPERTY (QString internalHost READ getInternalHost WRITE setInternalHost NOTIFY internalHostChanged)
@@ -348,6 +349,7 @@ public:
     QImage updatedObjectImage; //used for the current image for a given media item on screen
     QImage mediaScreenShot;    //used for screen shots
 
+    bool isProfile;
     bool b_orientation;
     int appHeight;
     int appWidth;
@@ -965,8 +967,12 @@ public slots:
     //! This function is called when the application window size changes.
     void checkOrientation(QSize);
 
-    bool getOrientation (){return b_orientation;}
-    void setOrientation (bool s) {  appHeight = qorbiterUIwin->height(); appWidth=qorbiterUIwin->width();  b_orientation = s; setDceResponse("orientation changed!! "); emit orientationChanged();}
+    bool getOrientation (){return isProfile;}
+    /*!
+     * \brief setOrientation. true if height < width (wide) or false if profile.
+     * \param s
+     */
+    void setOrientation (bool s) {  appHeight = qorbiterUIwin->height(); appWidth=qorbiterUIwin->width();  isProfile = s; setDceResponse("orientation changed!! "); emit orientationChanged();}
     //! Returns the current screen in string format
     QString getCurrentScreen();
     //! Sets the current screen in string format.

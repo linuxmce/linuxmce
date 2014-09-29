@@ -191,6 +191,10 @@ Item {
                              mainContent.opacity = .01
                              loading.visible= false
                              loading.text = "Content Loaded, one moment"
+                             configOptions.visible=false
+                             fil.visible=false;
+                             addresses.visible=false;
+                             contentRect.visible=false;
                          }
 
     }
