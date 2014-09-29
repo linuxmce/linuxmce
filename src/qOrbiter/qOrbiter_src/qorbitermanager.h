@@ -918,9 +918,10 @@ public slots:
     int getAppW(){return appWidth; }
 
     /*Network State property functions*/
-    void setInternalIp(QString s) { m_ipAddress = s; setDceResponse("got ip address, sending to dce"); emit internalIpChanged(m_ipAddress); setInternalHost(m_ipAddress);}
+    void setInternalIp(QString s) { if(s==m_ipAddress) {return;} m_ipAddress = s; setDceResponse("got ip address, sending to dce"); emit internalIpChanged(m_ipAddress); setInternalHost(m_ipAddress);}
     QString getInternalIp() {return m_ipAddress; }
-    void setInternalHost(QString h) { internalHost = h; emit internalHostChanged();}
+
+    void setInternalHost(QString h) { if(h==internalHost){return;} internalHost = h; emit internalHostChanged();}
     QString getInternalHost() {return internalHost;}
 
     void setUsingExternal(bool t){ if(usingExternal != t ){ usingExternal=t; emit usingExternalChanged( usingExternal); } }

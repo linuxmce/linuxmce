@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 3.0.0, 2014-09-21T14:28:07. -->
+<!-- Written by QtCreator 3.0.0, 2014-09-28T16:01:28. -->
 <qtcreator>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
-  <value type="int">3</value>
+  <value type="int">2</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.EditorSettings</variable>
@@ -490,7 +490,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Debug</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4BuildConfiguration</value>
-    <value type="int" key="Qt4ProjectManager.Qt4BuildConfiguration.BuildConfiguration">0</value>
+    <value type="int" key="Qt4ProjectManager.Qt4BuildConfiguration.BuildConfiguration">2</value>
     <value type="bool" key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild">true</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.1">
@@ -564,7 +564,7 @@
      </valuemap>
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
       <value type="QString" key="BuildTargetSdk">android-10</value>
-      <value type="QString" key="InputFile">/home/langston/linuxmce/qOrbiter/qOrbiter_src/qt5droid/build-Qt5Android-5_3_Android-Debug/android-libqorbiterqt5.so-deployment-settings.json</value>
+      <value type="QString" key="InputFile">/home/langston/linuxmce/qOrbiter/qOrbiter_src/qt5droid/Qt5Android/android-libqorbiterqt5.so-deployment-settings.json</value>
       <value type="QString" key="KeystoreLocation"></value>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Deploy to Android device</value>
@@ -774,7 +774,7 @@
      </valuemap>
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
       <value type="QString" key="BuildTargetSdk">android-10</value>
-      <value type="QString" key="InputFile">/home/langston/linuxmce/qOrbiter/qOrbiter_src/qt5droid/build-Qt5Android-5_3_Android-Debug/android-libqorbiterqt5.so-deployment-settings.json</value>
+      <value type="QString" key="InputFile">/home/langston/linuxmce/qOrbiter/qOrbiter_src/qt5droid/Qt5Android/android-libqorbiterqt5.so-deployment-settings.json</value>
       <value type="QString" key="KeystoreLocation"></value>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Deploy to Android device</value>

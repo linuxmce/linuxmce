@@ -8,5 +8,10 @@ QtObject{
  //Place you styling properties here.
  property string skincreator: ""
  property string skinname: ""
+ property string skindir: "data"
+ property string skindescription: "Skin using qt5."
+ property string skinversion: "1.0"
+ property string skinvariation: "Tablet"
+ property string maincolor: "rainbows"
 
 }

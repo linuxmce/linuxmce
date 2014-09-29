@@ -373,12 +373,9 @@ void orbiterWindow::setDeviceState(bool b)
     b_devicePresent = b; emit deviceChanged();
 }
 
-void orbiterWindow::prepareExistingOrbiters()
-{
-    userList.clear();
+void orbiterWindow::prepareExistingOrbiters(){
     qDebug()<< "showing List";
     emit showList();
-
 }
 
 /*!

@@ -7,8 +7,6 @@ Item{
     height: manager.appHeight
     width: manager.appWidth
 
-
-
     function scaleX(x){
         return x/100*qml_root.width
     }

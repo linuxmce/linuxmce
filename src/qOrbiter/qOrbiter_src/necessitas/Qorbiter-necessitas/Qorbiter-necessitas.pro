@@ -359,7 +359,7 @@ OTHER_FILES += ../../Readme.txt \
     ../../../platforms/Android/android/src/org/kde/necessitas/origo/LinuxmceAudioService.java \
     ../../qml/android/phoneConfig/BaseLoaded.qml \
     android/version.xml \
-    android/version.xml
+
 
 
 RESOURCES += \

@@ -1040,7 +1040,6 @@ void qorbiterManager::swapSkins(QString incSkin)
 {
     emit skinMessage("swapping skin to::" + incSkin);
     
-    
 #ifdef WIN32
     incSkin = "default";
 #endif
@@ -2573,9 +2572,7 @@ void qorbiterManager::connectionWatchdog()
 
 void qorbiterManager::showExistingOrbiter(const QList<QObject*> l )
 {
-    QList<QObject*> t ;
-    t = l ;
-    qorbiterUIwin->rootContext()->setContextProperty("orbiterList", QVariant::fromValue(t));
+    Q_UNUSED(l);
 }
 
 /*!

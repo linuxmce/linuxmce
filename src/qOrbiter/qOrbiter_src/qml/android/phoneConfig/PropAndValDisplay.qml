@@ -21,7 +21,7 @@ Item{
     }
     Row{
         width: parent.width - 15
-        height: childrenRect.height
+        height: scaleY(6)
         anchors.centerIn: parent
         Text{
             text:title

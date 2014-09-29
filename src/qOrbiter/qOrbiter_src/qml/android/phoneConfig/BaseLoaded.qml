@@ -3,8 +3,15 @@ import QtQuick 1.1
 Item {
     anchors.fill: parent
     property string routerAddress:manager.usingExternal ? manager.externalHost : manager.internalHost
-    onRouterAddressChanged: {
 
+    function refresh(){
+        if(manager.usingExternal)
+            routerAddress=manager.externalHost
+        else
+            routerAddress=manager.internalHost
+    }
+
+    onRouterAddressChanged: {
      window.router=routerAddress
       wait.start()
     }
@@ -92,7 +99,11 @@ Item {
                 font.weight: Font.Light
                 MouseArea{
                     anchors.fill: parent
-                    onReleased: {routerAddress=manager.internalHost;   manager.usingExternal = false}
+                    onReleased: {
+                        routerAddress=manager.internalHost;
+                        manager.usingExternal = false
+                        manager.writeConfig()
+                    }
                 }
             }
             Text {

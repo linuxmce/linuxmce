@@ -31,7 +31,7 @@ Item{
 
     Item{
         id:optionsRect
-         anchors.fill: parent
+        anchors.fill: parent
         Text {
             id: optionLabel
             text: qsTr("Is this your first time connecting? Click here to set options.")
@@ -67,27 +67,27 @@ Item{
                 id:routerAddress
                 title:"Home Ip / Host"
                 value: manager.m_ipAddress
-                onSet: {manager.m_ipAddress = editedValue}
+                onSetVal: {manager.m_ipAddress = editedValue}
 
             }
             PropAndValDisplay {
                 id:routerPort
                 title:"Web Port"
                 value: manager.routerPort
-                onSet: manager.routerPort = editedValue
+                onSetVal: manager.routerPort = editedValue
             }
             PropAndValDisplay {
                 id:awayIp
                 title:"Away Ip / Host "
                 value: manager.externalip
-                onSet: manager.externalip = editedValue
+                onSetVal: manager.externalip = editedValue
             }
 
             PropAndValDisplay {
                 id:skin
                 title:"Skin"
                 value: manager.currentSkin
-                onSet: manager.currentSkin = editedValue
+                onSetVal: manager.currentSkin = editedValue
             }
 
             PropAndValDisplay {
@@ -95,7 +95,7 @@ Item{
                 useText: true
                 title:"Type of Device"
                 value: manager.isPhone
-                onSet: manager.isPhone = editedValue
+                onSetVal: manager.isPhone = editedValue
             }
         }
     }
@@ -125,12 +125,10 @@ Item{
         MouseArea{
             anchors.fill: parent
             onClicked: {
-
-
                 manager.writeConfig()
                 firstRunOptions.state = "hidden"
                 rootItem.forceActiveFocus()
-              //  manager.restartFomUi()
+                //  manager.restartFomUi()
             }
         }
     }
