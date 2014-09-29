@@ -158,8 +158,8 @@ bool Notification::NotifyLoop(int iType,bool bProcessInBackground)
 		// Temporary hack until we get a good dialing rule set up
 		StringUtils::Replace(&sPhoneNumber,",","");
 		StringUtils::Replace(&sPhoneNumber," ","");
-		if( sPhoneNumber.size()>2 && sPhoneNumber[0]!='9' )
-			sPhoneNumber = "9" + sPhoneNumber;
+//		if( sPhoneNumber.size()>2 && sPhoneNumber[0]!='9' )
+//			sPhoneNumber = "9" + sPhoneNumber;
 
 		bool bMonitor = StringUtils::Tokenize((*s),",",pos)=="1";
 		bool bSecurity = StringUtils::Tokenize((*s),",",pos)=="1";
