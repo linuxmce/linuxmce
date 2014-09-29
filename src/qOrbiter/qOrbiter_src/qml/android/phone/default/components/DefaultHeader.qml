@@ -9,7 +9,7 @@ Item{
     }
 
     onStateChanged: console.log("Header State::"+state)
-    height: manager.b_orientation ? scaleY(8) : scaleY(12)
+    height: manager.isProfile ? scaleY(8) : scaleY(12)
 
     function setNavigaton(qmlpage){
         hdrContent.source=qmlpage
@@ -94,7 +94,7 @@ Item{
             when:manager.currentScreen==="Screen_1.qml" && uiOn
             PropertyChanges {
                 target: hdr
-                height: manager.b_orientation ? scaleY(8) : scaleY(12)
+                height: manager.isProfile ? scaleY(8) : scaleY(12)
             }
             PropertyChanges{
                 target:hdrContent

@@ -5,7 +5,7 @@ Item{
     height: manager.appHeight
     width:manager.appWidth
     focus:true
-    property bool rotated:manager.b_orientation
+    property bool rotated:manager.isProfile
     property string imageDir:""
     state:"floorplanView"
     Component.onCompleted: {

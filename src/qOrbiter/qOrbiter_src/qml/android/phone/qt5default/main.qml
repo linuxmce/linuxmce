@@ -33,7 +33,7 @@ Item {
 
     Image {
         id: appBackground
-        source: manager.b_orientation ? pSource : wSource
+        source: manager.isProfile ? pSource : wSource
         anchors.fill: parent
         property string pSource:""
         property string wSource:""

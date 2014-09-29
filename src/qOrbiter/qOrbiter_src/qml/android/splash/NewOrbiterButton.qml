@@ -25,7 +25,7 @@ Rectangle{
     
     Text {
         id: newOrbiterLabel
-        text: qsTr("Create New Orbiter? \n Or choose and Existing Orbiter")
+        text: qsTr("Create New Orbiter?")
         font.pointSize:infoTextSize
         width: parent.width
         anchors.centerIn: parent

@@ -25,7 +25,7 @@ Item {
         StyledText {
             id: exit
             text: qsTr("Exit")
-            font.pixelSize: manager.b_orientation ? scaleY(3) :scaleY(5)
+            font.pixelSize: manager.isProfile ? scaleY(3) :scaleY(5)
             anchors.centerIn: parent
             color: "white"
         }

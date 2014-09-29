@@ -9,7 +9,6 @@ Item {
     signal splashLoaded()
     focus:true
 
-
     Connections{
         target: window
         onShowList:{
@@ -57,19 +56,12 @@ Item {
         id: connectionBox
     }
 
-
-
     ExistingOrbiters {
         id: existing_orbiters
     }
 
     NewOrbiterButton {
         id: newOrbiterButton
-    }
-
-    FirstRunOptions{
-        anchors.bottom: parent.bottom
-        visible: manager.first_run
     }
 
     Text {

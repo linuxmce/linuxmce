@@ -24,7 +24,7 @@ Item{
         height: childrenRect.height
         width: childrenRect.width
         anchors.centerIn: parent
-        spacing: manager.b_orientation ? scaleX(10) : scaleX(12)
+        spacing: manager.isProfile ? scaleX(10) : scaleX(12)
 
         ButtonSq{
             id:leader

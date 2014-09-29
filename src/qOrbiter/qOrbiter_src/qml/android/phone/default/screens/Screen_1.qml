@@ -10,8 +10,8 @@ StyledScreen {
 
 
     Component.onCompleted:{ forceActiveFocus() ; hdr.state="open"}
-    property int itemH:manager.b_orientation ? homeSelectionLayout.height /3 :homeSelectionLayout.height /3
-    property int itemW:manager.b_orientation ? homeSelectionLayout.width/ 2 : homeSelectionLayout.width / 2
+    property int itemH:manager.isProfile ? homeSelectionLayout.height /3 :homeSelectionLayout.height /3
+    property int itemW:manager.isProfile ? homeSelectionLayout.width/ 2 : homeSelectionLayout.width / 2
     focus:true
     Keys.onReleased: {
 

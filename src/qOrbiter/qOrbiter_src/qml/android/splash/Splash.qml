@@ -15,11 +15,6 @@ Item {
 
    Component.onCompleted: console.log("splash loaded")
 
-    Rectangle{
-        id:phil
-        anchors.fill: splashLogic
-        color: "darkgreen"
-    }
 
     onOrbiterSetupChanged:{  console.log(orbiterSetup) ;
         existing_orbiters.visible = false;

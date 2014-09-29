@@ -26,8 +26,8 @@ Image {
             when:dcenowplaying.aspect==="WIDE"
             PropertyChanges {
                 target: nowplayingimage
-                height:manager.b_orientation? scaleX(55) : scaleX(25)
-                width:manager.b_orientation ? scaleX(55)   : scaleY(25)
+                height:manager.isProfile? scaleX(55) : scaleX(25)
+                width:manager.isProfile ? scaleX(55)   : scaleY(25)
             }
         },
         State {
@@ -35,8 +35,8 @@ Image {
             when:dcenowplaying.aspect==="ALBUM"
             PropertyChanges {
                 target: nowplayingimage
-                height:manager.b_orientation? scaleX(55) : scaleY(25)
-                width:manager.b_orientation ? scaleX(55)   : scaleY(35)
+                height:manager.isProfile? scaleX(55) : scaleY(25)
+                width:manager.isProfile ? scaleX(55)   : scaleY(35)
             }
         },
         State {
@@ -44,8 +44,8 @@ Image {
             when:dcenowplaying.aspect==="POSTER"
             PropertyChanges {
                 target: nowplayingimage
-                height:manager.b_orientation? scaleX(55) : scaleX(25)
-                width:manager.b_orientation ? scaleX(55)   : scaleY(25)
+                height:manager.isProfile? scaleX(55) : scaleX(25)
+                width:manager.isProfile ? scaleX(55)   : scaleY(25)
             }
         }
     ]

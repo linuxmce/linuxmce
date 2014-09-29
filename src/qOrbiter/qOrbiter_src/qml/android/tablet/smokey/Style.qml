@@ -23,7 +23,7 @@ QtObject{
     property string skinversion: "1.0"
     property string skinvariation: "Tablet 1280 x 736"
     property string maincolor: "black"
-    property bool profile:!manager.b_orientation
+    property bool profile:!manager.isProfile
     //scale function
     function scaleX(x){
         return x/100*appH

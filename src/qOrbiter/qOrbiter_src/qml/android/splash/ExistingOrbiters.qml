@@ -2,8 +2,8 @@ import QtQuick 1.1
 
 ListView{
     id:existing_orbiters
-    height: scaleY(65)
-    width: scaleX(95)
+    height: scaleY(55)
+    width: scaleX(75)
     clip: true
     anchors.left: parent.right
     anchors.verticalCenter: parent.verticalCenter
@@ -51,15 +51,15 @@ ListView{
                 width: parent.width
                 color: "#99CC99"
             }
-            Text {
-                id: dev_num
-                text:qsTr("Device:")+ device
-                font.pixelSize:  infoTextSize
-                font.italic: true
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                font.family: myFont.name
-                width: parent.width
-            }
+//            Text {
+//                id: dev_num
+//                text:qsTr("Device:")+ device
+//                font.pixelSize:  infoTextSize
+//                font.italic: true
+//                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+//                font.family: myFont.name
+//                width: parent.width
+//            }
         }
         MouseArea {
             anchors.fill: parent

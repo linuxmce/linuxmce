@@ -3,8 +3,8 @@ import QtQuick 2.0
 
 Item {
     id:np_box
-    width: manager.b_orientation ? scaleX(90) : scaleX(40)
-    height: manager.b_orientation ? childrenRect.height : scaleY(55)
+    width: manager.isProfile ? scaleX(90) : scaleX(40)
+    height: manager.isProfile ? childrenRect.height : scaleY(55)
     visible: dcenowplaying.b_mediaPlaying ? true : false
     clip:true
     property real textSize:style.buttonLabelText
@@ -111,7 +111,7 @@ Item {
 
 //        Text {
 //            id: starring
-//            width: manager.b_orientation ? scaleX (65) : scaleX (25)
+//            width: manager.isProfile ? scaleX (65) : scaleX (25)
 //            wrapMode: "WrapAtWordBoundaryOrAnywhere"
 //            text: qsTr("Perfomers: ") + dcenowplaying.performerlist
 //            smooth: true

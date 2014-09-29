@@ -39,16 +39,16 @@ Item {
     NowPlayingButton{
         id:fs_npButton
         anchors.top: parent.top
-        anchors.left: manager.b_orientation ? parent.horizontalCenter : parent.left
-        anchors.leftMargin: manager.b_orientation ? (fs_npButton.width / 2) * -1 : scaleX(2)
+        anchors.left: manager.isProfile ? parent.horizontalCenter : parent.left
+        anchors.leftMargin: manager.isProfile ? (fs_npButton.width / 2) * -1 : scaleX(2)
     }
 
 
     DroidHomeSelector{
         id:home_selector;
-        anchors.top: manager.b_orientation ? fs_npButton.bottom : parent.top
-        anchors.left: manager.b_orientation ? stage.left : fs_npButton.right
-        anchors.leftMargin: manager.b_orientation ? scaleX(15) : scaleX(1)
+        anchors.top: manager.isProfile ? fs_npButton.bottom : parent.top
+        anchors.left: manager.isProfile ? stage.left : fs_npButton.right
+        anchors.leftMargin: manager.isProfile ? scaleX(15) : scaleX(1)
     }
     ScenarioSelector{
         id:scenarioPopup

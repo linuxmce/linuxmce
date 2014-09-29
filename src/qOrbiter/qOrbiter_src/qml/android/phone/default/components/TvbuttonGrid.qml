@@ -8,7 +8,7 @@ Item {
     property int rowHeight:scaleY(12)
     Column { // Info, Up, Menu, Ch+
         id:leftCol
-        spacing: manager.b_orientation ? scaleX(1) : scaleY(1)
+        spacing: manager.isProfile ? scaleX(1) : scaleY(1)
         height: parent.height
         width: scaleX(18)
         anchors{
@@ -40,7 +40,7 @@ Item {
 
     Column { // Info, Up, Menu, Ch+
         id:rightCol
-        spacing: manager.b_orientation ? scaleX(1) : scaleY(1)
+        spacing: manager.isProfile ? scaleX(1) : scaleY(1)
         height: parent.height
         width: scaleX(18)
         anchors{
@@ -137,7 +137,7 @@ Item {
 
     Row { // Exit, Down, Guide, VolUp
         id:dvrRow
-        spacing: manager.b_orientation ? scaleX(1) : scaleY(1)
+        spacing: manager.isProfile ? scaleX(1) : scaleY(1)
         height: rowHeight
         anchors{
             bottom:transports.top
@@ -177,7 +177,7 @@ Item {
     Row {
         id:transports// SkipBack, Rewind, FastForward, SkipFwd
 
-        spacing: manager.b_orientation ? scaleX(1) : scaleY(1)
+        spacing: manager.isProfile ? scaleX(1) : scaleY(1)
 
         height: rowHeight
         anchors{
@@ -221,7 +221,7 @@ Item {
 
     Row { // Red, Green, Yellow, Blue
         id:colorButtons
-        spacing: manager.b_orientation ? scaleX(1) : scaleY(1)
+        spacing: manager.isProfile ? scaleX(1) : scaleY(1)
         height: rowHeight
         anchors{
             bottom:parent.bottom

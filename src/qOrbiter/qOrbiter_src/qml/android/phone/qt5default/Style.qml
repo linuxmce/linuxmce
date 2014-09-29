@@ -63,11 +63,11 @@ QtObject{
 
 
     //icon sizes
-    property int iconHeight: manager.b_orientation ? scaleY(22) :scaleY(16)
-    property int iconWidth: manager.b_orientation ? scaleY(22) :scaleY(16)
-    property int  stdbuttonh: manager.b_orientation ? scaleY(15) :scaleY(12)
-    property int  stdbuttonw: manager.b_orientation ? scaleY(15) :scaleY(12)
-    property int buttonLabelText : manager.b_orientation ? scaleY(3) : scaleY(2.5)
+    property int iconHeight: manager.isProfile ? scaleY(22) :scaleY(16)
+    property int iconWidth: manager.isProfile ? scaleY(22) :scaleY(16)
+    property int  stdbuttonh: manager.isProfile ? scaleY(15) :scaleY(12)
+    property int  stdbuttonw: manager.isProfile ? scaleY(15) :scaleY(12)
+    property int buttonLabelText : manager.isProfile ? scaleY(3) : scaleY(2.5)
 
     //textStyles
     property string stylebuttonimage: ""

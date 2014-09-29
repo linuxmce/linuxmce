@@ -70,8 +70,8 @@ Item{
 
 //            AnchorChanges{
 //                target: mediaMetadata
-//                anchors.top: manager.b_orientation ? nowplayingimage.bottom : parent.top
-//                anchors.left: manager.b_orientation? parent.left : nowplayingimage.right
+//                anchors.top: manager.isProfile ? nowplayingimage.bottom : parent.top
+//                anchors.left: manager.isProfile? parent.left : nowplayingimage.right
 //            }
 //        }
 //    ]

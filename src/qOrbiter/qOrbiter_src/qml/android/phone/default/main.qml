@@ -9,7 +9,7 @@ Item {
     width:manager.appWidth
     height:manager.appHeight
     focus:true
-    property bool profile:!manager.b_orientation
+    property bool profile:!manager.isProfile
     property bool uiOn:true
     property alias skinStyle:appStyle
     property int screensaverTimer:manager.screenSaverTimeout*1000

@@ -24,7 +24,7 @@ Item{
 
     Row{
 
-        height: manager.b_orientation ? scaleY(8) : scaleY(6)
+        height: manager.isProfile ? scaleY(8) : scaleY(6)
         spacing: scaleX(5)
         anchors{
             left:parent.left

@@ -10,7 +10,7 @@ Item{
     right:parent.right
    }
     focus:true
-    property bool rotated:manager.b_orientation
+    property bool rotated:manager.isProfile
     property string imageDir:""
     state:"floorplanView"
     Component.onCompleted: {

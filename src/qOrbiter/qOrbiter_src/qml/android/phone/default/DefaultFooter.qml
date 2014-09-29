@@ -6,7 +6,7 @@ import AudioVisual 1.0
 //phone - default
 Row{
     id:ftr
-    height: manager.b_orientation ? scaleY(8) : scaleY(12)
+    height: manager.isProfile ? scaleY(8) : scaleY(12)
     anchors{
         bottom:parent.bottom
         left:parent.left

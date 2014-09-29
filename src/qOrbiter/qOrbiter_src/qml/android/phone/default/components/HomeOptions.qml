@@ -4,7 +4,7 @@ import "../components"
 import "../js/ComponentLoader.js" as MyJs
 Item{
     id:optionPanel
-    width:manager.b_orientation ? parent.width /2 : parent.width /3
+    width:manager.isProfile ? parent.width /2 : parent.width /3
     clip:true
     property int buttonH:optionPanel.height / advancedrow.children.length -10
     function setCurrentSource(s){

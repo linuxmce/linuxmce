@@ -119,11 +119,11 @@ Item{
 
 
     //icon sizes
-    property int iconHeight: manager.b_orientation ? scaleY(17) :scaleY(16)
-    property int iconWidth: manager.b_orientation ? scaleX(25) :scaleY(16)
-    property int  stdbuttonh: manager.b_orientation ? scaleY(13) :scaleY(13)
-    property int  stdbuttonw: manager.b_orientation ? scaleY(14) :scaleY(14)
-    property int buttonLabelText : manager.b_orientation ? scaleY(3) : scaleY(2.5)
+    property int iconHeight: manager.isProfile ? scaleY(17) :scaleY(16)
+    property int iconWidth: manager.isProfile ? scaleX(25) :scaleY(16)
+    property int  stdbuttonh: manager.isProfile ? scaleY(13) :scaleY(13)
+    property int  stdbuttonw: manager.isProfile ? scaleY(14) :scaleY(14)
+    property int buttonLabelText : manager.isProfile ? scaleY(3) : scaleY(2.5)
 
     //textStyles
     property string stylebuttonimage: ""
@@ -187,9 +187,9 @@ Item{
     property color bgcolor:  "#5034282C"
 
     /* Media Remote - Non TV */
-    property int toolbarHeight: manager.b_orientation ? scaleY(8) : scaleY(12)
-    property int toolbarButtonHeight:manager.b_orientation ? scaleY(8) : scaleY(12)
-    property int toolbarButtonWidth:manager.b_orientation ? scaleY(8) : scaleY(12)
+    property int toolbarHeight: manager.isProfile ? scaleY(8) : scaleY(12)
+    property int toolbarButtonHeight:manager.isProfile ? scaleY(8) : scaleY(12)
+    property int toolbarButtonWidth:manager.isProfile ? scaleY(8) : scaleY(12)
     property color toolbarBgColor:"#7534282C"
 
 

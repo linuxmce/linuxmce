@@ -7,10 +7,10 @@ Text {
     property int textWidth
     property bool isBold:false
     property bool isItalic:false
-    property double fontSize:manager.b_orientation ? scaleY(2.5) : scaleX(2.5)
+    property double fontSize:manager.isProfile ? scaleY(2.5) : scaleX(2.5)
     property double headerSize:scaleY(6)
-    property double paraSize:manager.b_orientation ? scaleY(4) : scaleY(6)
-    property double regSize:manager.b_orientation ? scaleY(3) : scaleY(5)
+    property double paraSize:manager.isProfile ? scaleY(4) : scaleY(6)
+    property double regSize:manager.isProfile ? scaleY(3) : scaleY(5)
     color:appStyle.tile_color
     id:labelelement
     text: textLabel

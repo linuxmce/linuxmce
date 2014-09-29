@@ -8,7 +8,7 @@ Item {
         left:parent.left
         right:parent.right
     }
-    height: manager.b_orientation ? scaleY(8) : scaleY(12)
+    height: manager.isProfile ? scaleY(8) : scaleY(12)
     visible: dcenowplaying.b_mediaPlaying ? true : false
     clip:true
     property real textSize:appStyle.buttonLabelText
@@ -154,7 +154,7 @@ Item {
 
     //        Text {
     //            id: starring
-    //            width: manager.b_orientation ? scaleX (65) : scaleX (25)
+    //            width: manager.isProfile ? scaleX (65) : scaleX (25)
     //            wrapMode: "WrapAtWordBoundaryOrAnywhere"
     //            text: qsTr("Perfomers: ") + dcenowplaying.performerlist
     //            smooth: true

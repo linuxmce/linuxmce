@@ -16,6 +16,6 @@ width: txtDate.paintedWidth
         text: getDate()
         smooth: true
         color:"white"
-        fontSize: manager.b_orientation ? scaleY(3) : scaleY(5)
+        fontSize: manager.isProfile ? scaleY(3) : scaleY(5)
     }
 }

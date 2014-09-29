@@ -110,7 +110,7 @@ Item{
 
             StyledText{
                 text:isUsingIndex ? displayList.model[index][displayProperty] : model[displayProperty] //displayList.model[index][displayProperty]
-                fontSize:manager.b_orientation ? scaleY(4) : scaleY(5)
+                fontSize:manager.isProfile ? scaleY(4) : scaleY(5)
                 isBold: true
                 color: ms.pressed ? listTextActiveColor : displayList.currentIndex===index ? listTextActiveColor : listTextInactiveColor
                 anchors.centerIn: parent
