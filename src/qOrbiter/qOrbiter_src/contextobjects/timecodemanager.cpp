@@ -57,6 +57,11 @@ void TimeCodeManager::start(QString server, int iport)
 #ifdef QT_DEBUG
     qDebug("Starting timecode...");
 #endif
+
+if(dceMediaSocket->isOpen()){
+    return;
+}
+
    dceMediaSocket->close();
 //    dceMediaSocket->disconnectFromHost();
     port = iport;

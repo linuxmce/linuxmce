@@ -283,7 +283,7 @@ void orbiterWindow::initView(){
         mainView.show();
     }
 #elif defined(__ANDROID__)
-    mainView.showMaximized();
+    mainView.showFullScreen();
 #elif defined(for_android)
     mainView.show();
 #elif RPI

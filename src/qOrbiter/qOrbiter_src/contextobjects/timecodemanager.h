@@ -47,7 +47,7 @@ class TimeCodeManager : public QDeclarativeItem
     Q_PROPERTY (QString qsCurrentTime READ getStringTime WRITE setStringTime NOTIFY stringTimeChanged)/*!< \brief The string value of the current time in HH:MM:SS  \ingroup timecode_properties*/
     Q_PROPERTY (QString stringPlaybackSpeed READ getStringPlaybackSpeed WRITE setStringPlaybackSpeed NOTIFY sPlaybackSpeedChanged)/*!< \brief String value of playback speed \ingroup timecode_properties*/
     Q_PROPERTY (int playbackSpeed READ getSpeed WRITE setSpeed NOTIFY playbackSpeedChanged)/*!< \brief int value of the playback speed.  \ingroup timecode_properties*/
-
+    Q_PROPERTY(bool portConnected READ getPortConnected WRITE setPortConnected NOTIFY portConnectedChanged)
 public:
 #ifdef QT5
     explicit TimeCodeManager(QQuickItem *parent = 0);
@@ -95,6 +95,7 @@ signals:
     void tcMessage();
     void seekToTime(QString time);
     void dragtimeChanged();
+    void portConnectedChanged();
 
     
 public slots:
@@ -160,6 +161,9 @@ public slots:
                 emit seekToTime(QString::number(i_dragTime));
     }
     
+
+    void setPortConnected (bool isConnected) { if(port != isConnected ) {portConnected= isConnected; emit portConnectedChanged(); } }
+    bool getPortConnected() {return portConnected;}
 };
 
 #endif // TIMECODEMANAGER_H

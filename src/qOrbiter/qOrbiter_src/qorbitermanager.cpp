@@ -2529,14 +2529,16 @@ void qorbiterManager::checkOrientation(QSize)
     qDebug() << qorbiterUIwin->window()->rect().size();
     setDceResponse("orientation change");
 #else
-    
+    appHeight = qorbiterUIwin->height();
+    appWidth = qorbiterUIwin->width();
     if(appHeight < appWidth){
+
         setOrientation(false);
     }
     else{
         setOrientation( true);
     }
-    
+
 #endif
     qDebug() << qorbiterUIwin->size();
     

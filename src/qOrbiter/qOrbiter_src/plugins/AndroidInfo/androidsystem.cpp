@@ -73,6 +73,7 @@ static jmethodID getWindowManagerID=0;
 static jmethodID contextMethodID =0;
 static jmethodID displayID = 0;
 
+
 /* Media Player */
 //Used to obtain the reference to the QtActivity, via the crappy static
 static jmethodID s_qtactivity_field =0;
@@ -87,6 +88,7 @@ static jmethodID s_qtActivity_VolumeControlMethod=0;
 AndroidSystem::AndroidSystem(QObject *parent) :
     QObject(parent)
 {
+    setIsTablet(false);
     blueStandard = "#33B5E5";
     blueHighlight= "#0099CC";
     purpleStandard ="#AA66CC";

@@ -46,6 +46,7 @@ public:
     QString deviceBrand;
     QString externalStorageLocation;
     bool androidReady;
+    bool isTablet;
 
     bool mountStatus;
 
@@ -81,8 +82,11 @@ signals:
     void orangeHighlightChanged();
     void redStandardChanged();
     void redHighlightChanged();
+    void isTabletChanged();
 
 public slots:
+    void setIsTablet(bool b){if(isTablet !=b){ isTablet = b;} emit isTabletChanged();}
+    bool getIsTablet() {return isTablet;}
     void setReadyStatus(bool s) { androidReady = s; emit readyStatusChanged();}
     bool getReadyStatus() { return androidReady;}
 
