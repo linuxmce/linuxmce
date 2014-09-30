@@ -2,16 +2,12 @@
 //games? screen. not mame but game systems that are connected like ps3, etc
 import QtQuick 1.1
 import "../components"
-MediaPlaybackTemplate {
-    id:games
+StyledScreen{
+    screen:"Game System"
 
-    StyledText{
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        fontSize: 50
-        text:qsTr("Game System")
-        color:"white"
+    MediaPlaybackTemplate {
+        id:games
     }
-
-
 }
+
+
