@@ -13,6 +13,7 @@ import "../components"
   */
 MediaPlaybackBase{
 id:screen_176
-objectName: "InternetRadio"
+objectName: "Cannot Play Media"
+screenLabel: qsTr("Cannot play media")
 
 }

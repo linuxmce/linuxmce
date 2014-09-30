@@ -1,5 +1,9 @@
 import QtQuick 1.1
 import "../components"
-MediaPlaybackBase {
-    screenLabel: "Network Media"
+StyledScreen{
+screen:qsTr("WD Live Remote")
+    MediaPlaybackBase {
+        screenLabel: screen
+    }
+
 }

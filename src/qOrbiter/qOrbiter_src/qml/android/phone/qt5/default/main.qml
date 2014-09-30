@@ -1,5 +1,5 @@
 import QtQuick 2.0
-
+import DceScreenSaver 1.0
 import "components"
 import "js/ComponentLoader.js" as MyJs
 
@@ -10,7 +10,9 @@ Item {
     height:manager.appHeight
     focus:true
 
-    property Item appStyle: style
+    Style{
+        id:appStyle
+    }
 
     FontLoader{
         id:appFont
@@ -18,10 +20,26 @@ Item {
         source:"../../../../skins-common/fonts/Sawasdee.ttf"
     }
 
+    DceScreenSaver{
+        id:glScreenSaver
+        height:qml_root.height
+        width: qml_root.width
+        interval:30000
+        anchors.centerIn: qmlroot
+        active:manager.m_ipAddress = manager.internalHost
+        requestUrl:manager.m_ipAddress
 
-    Component.onCompleted: {
-        androidSystem.updateBuildInformation()
+        Component.onCompleted: {
+            if(glScreenSaver.pictureCount===0 && glScreenSaver.active){
+                glScreenSaver.setImageList(manager.screensaverImages)
+            }
+        }
     }
+
+
+//    Component.onCompleted: {
+//        androidSystem.updateBuildInformation()
+//    }
 
     Keys.onReleased: {
         switch(event.key){
@@ -76,14 +94,7 @@ Item {
     //        }
     //    }
 
-    Image {
-        id: appBackground
-        source: "img/bg.jpg"
-        anchors.fill: parent
-        property string pSource:""
-        property string wSource:""
 
-    }
 
     //    function updateBackground(portait, wide){
     //        appBackground.pSource = portait
