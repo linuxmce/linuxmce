@@ -27,12 +27,13 @@ public:
         intRole= Qt::DisplayRole+2, /*!< 'intRoom' - Integer room value */
         TypeRole= Qt::DisplayRole+3,/*!< 'room_type' - Integer Type of room */
         ImageRole= Qt::DisplayRole+4, /*!< 'room_image' - String / url to image in skin directory */
-        EaListRole=Qt::DisplayRole+5 /*!< 'ea_list' QVariantMap which can be accessed as a javascript object. */
+        EaListRole=Qt::DisplayRole+5, /*!< 'ea_list' QVariantMap which can be accessed as a javascript object. */
+        HideRole=Qt::DisplayRole+6  /*!< hide from orbiters */
     };
 
 public:
     LocationItem() {}
-    explicit LocationItem( QString &name,  int &iRoom, int &roomType,  QUrl &rmimage, QObject *parent = 0);
+    explicit LocationItem( QString &name,  int &iRoom, int &roomType,  QUrl &rmimage, bool isHidden, QObject *parent = 0);
 
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
@@ -41,6 +42,7 @@ public:
     inline int roomVal() const { return m_val; } 
     inline int room_type() const {return m_iType;}
     inline QUrl room_image() const {return roomImage;}
+    inline bool hideFromOrbiter() const {return hideRoom;}
     inline QVariantList entertainAreas() const {return ea_list;}
     void addEa(QString name, int no){
         QVariantMap p;
@@ -49,7 +51,6 @@ public:
         p.insert("ea_name", name);
         p.insert("room",roomVal());
         ea_list.append(p);
-
         emit dataChanged();
         qDebug() << ea_list;
     }
@@ -61,6 +62,7 @@ private:
     QString m_title;
     QUrl roomImage;
     QVariantList ea_list;
+    bool hideRoom;
 
 signals:
     void imageChanged();

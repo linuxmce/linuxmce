@@ -7,12 +7,13 @@
  * \param ea_name The string name of the current EA
  * \param roomType They Type of room
  * \param rmimg Image: url not image data
+ * \param hideFromOrbiter - if the room should be hidden.
  * \param parent
  *
  *
  */
-LocationItem::LocationItem(QString &name, int &intRoom, int &roomType, QUrl &rmimg, QObject *parent) :
-    m_name(name), m_val(intRoom), m_iType(roomType), roomImage(rmimg)
+LocationItem::LocationItem(QString &name, int &intRoom, int &roomType, QUrl &rmimg, bool isHidden, QObject *parent) :
+    m_name(name), m_val(intRoom), m_iType(roomType), roomImage(rmimg), hideRoom(isHidden)
 {
 }
 
@@ -30,6 +31,7 @@ QHash<int, QByteArray> LocationItem::roleNames() const
   names[TypeRole] = "room_type";
   names[ImageRole] = "room_image";
   names[EaListRole] = "ea_list";
+  names[HideRole] = "hideFromOrbiter";
   return names;
 }
 
@@ -51,6 +53,8 @@ QVariant LocationItem::data(int role) const
       return room_image();
   case EaListRole:
       return entertainAreas();
+  case HideRole:
+      return hideFromOrbiter();
   default:
     return QVariant();
   }

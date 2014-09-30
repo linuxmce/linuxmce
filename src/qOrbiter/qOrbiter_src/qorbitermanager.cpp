@@ -745,6 +745,8 @@ void qorbiterManager::processConfig(QNetworkReply *config)
         int m_val = roomListXml.at(index).attributes().namedItem("PK_Room").nodeValue().toInt();
         int m_iEA = roomListXml.at(index).attributes().namedItem("PK_EntertainArea").nodeValue().toInt();
         int m_iType = roomListXml.at(index).attributes().namedItem("FK_RoomType").nodeValue().toInt();
+        bool m_isHidden = roomListXml.at(index).attributes().namedItem("HideFromOrbiter").nodeValue().toInt();
+
         if (ea.isEmpty()){
             ea = roomListXml.at(index).attributes().namedItem("Description").nodeValue().append(QString::number(m_iEA));
         }
@@ -774,7 +776,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
             t->addEa(ea, m_iEA);
         }
         else{
-            m_lRooms->appendRow(new LocationItem(m_name, m_val, m_iType, imagePath, m_lRooms));
+            m_lRooms->appendRow(new LocationItem(m_name, m_val, m_iType, imagePath, m_isHidden, m_lRooms));
             LocationItem *t= m_lRooms->find(m_name);
             t->addEa(ea, m_iEA);
         }
