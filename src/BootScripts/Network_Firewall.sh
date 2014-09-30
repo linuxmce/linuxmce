@@ -215,7 +215,7 @@ if [[ "$AdvancedFirewall" == "0" ]]; then
 fi
 
 #include a list with Firewall aplications to scripts what set the settings for the applications listed.
-#. /usr/pluto/bin/Firewall_applications.sh
+. /usr/pluto/bin/Firewall_applications.sh
 
 #####
 # Function to set the rules
@@ -284,9 +284,10 @@ IPTables ()
 			fi
 			FilterMsg="; Not limited to specific IP"
 		else
-			 grep -qv "[!]" <<< $DestIP
+			 grep -qv "[!]" <<< $FilterIP
                         if [ ! $? -eq 0 ]; then
 			FilterMsg="; Limited to: !$FilterIP"
+			FilterIP="$(echo $FilterIP | cut -d"!" -f 2)"
 			FilterIP4="!-s $FilterIP"
 			FilterIP6="!-s $FilterIP"
 			else
@@ -313,11 +314,12 @@ IPTables ()
 		else
 			grep -qv "[!]" <<< $DestIP
 			if [ ! $? -eq 0 ]; then
-				DestMsg="; Limited to: !$FilterIP"
+				DestMsg="; Limited to: !$DestIP"
+				DestIP="$(echo $DestIP | cut -d"!" -f 2)"
 				DestIP4="! -d $DestIP"
 				DestIP6="! -d $DestIP"
 			else
-				DestMsg="; Limited to: $FilterIP"
+				DestMsg="; Limited to: $DestIP"
 				DestIP4="-d $DestIP"
 				DestIP6="-d $DestIP"
 			fi
@@ -536,7 +538,6 @@ echo "Setting default Policy"
 		fi
 	done
 
-#. /usr/pluto/bin/Firewall_applications/Firewall_telecom.sh
 	# If on multiple NIC's, accept incoming on LAN and NAT or masquerade on external
 	## Workaround for some ISPs that don't allow routers and drop packets based on TTL.
 	iptables -t mangle -A POSTROUTING -o $ExtIf -j TTL --ttl-set 255
