@@ -84,7 +84,7 @@ Item {
         boldClock: true
         Clock{
             id:time_keeper2
-           anchors.centerIn: parent
+            anchors.centerIn: parent
             clockFontSize: 54
             boldClock: true
             clockColor: "green"
@@ -98,10 +98,10 @@ Item {
             name: "active"
             when:dcenowplaying.b_mediaPlaying && manager.currentScreen === "Screen_1.qml" && uiOn
             //   when:dcenowplaying.b_mediaPlaying ===true && manager.currentScreen ==="Screen_1.qml"
-PropertyChanges{
- target: media_notificaton_header
- height:scaleY(10)
-}
+            PropertyChanges{
+                target: media_notificaton_header
+                height:scaleY(10)
+            }
             AnchorChanges{
                 target:media_notificaton_header
                 anchors.bottom:undefined
@@ -122,8 +122,8 @@ PropertyChanges{
             }
             AnchorChanges{
                 target:media_notificaton_header
-               anchors.top: undefined
-               anchors.bottom: qml_root.top
+                anchors.top: undefined
+                anchors.bottom: qml_root.top
             }
         },
         State{

@@ -6,9 +6,9 @@ import "components"
 
 Item {
     id: qml_root
-    onWidthChanged: console.log(width+"::"+height)
-    height: manager.appHeight
-    width: manager.appWidth
+    onWidthChanged: console.log(manager.appWidth+"::"+manager.appHeight)
+    height: manager.appWidth
+    width: manager.appHeight
 
     signal close()
     signal changeScreen(string s)

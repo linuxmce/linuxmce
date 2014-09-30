@@ -68,15 +68,15 @@ Item {
 
     }
 
-    StyledText {
-        id: updating_time
-        text: dceTimecode.qsCurrentTime + " of " + dceTimecode.qsTotalTime
-        fontSize:32
-        color: "white"
-        anchors.left: nowplayingimage.right
-        anchors.bottom: nowplayingimage.bottom
+//    StyledText {
+//        id: updating_time
+//        text: dceTimecode.qsCurrentTime + " of " + dceTimecode.qsTotalTime
+//        fontSize:32
+//        color: "white"
+//        anchors.left: nowplayingimage.right
+//        anchors.bottom: nowplayingimage.bottom
 
-    }
+//    }
 
     states: [
         State {

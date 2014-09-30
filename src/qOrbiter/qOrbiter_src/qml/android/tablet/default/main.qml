@@ -7,8 +7,7 @@ import "components"
 
 Item {
     id: qml_root
-    height:manager.appHeight
-    width:manager.appWidth
+  anchors.fill: parent
     property alias skinStyle:style
     property int screensaverTimer:manager.screenSaverTimeout*1000
     property bool uiOn:true

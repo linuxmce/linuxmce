@@ -8,10 +8,10 @@ Item{
         text: dceTimecode.qsCurrentTime + " of " + dceTimecode.qsTotalTime
         fontSize:32
         color: "white"
-        anchors.left: nowplayingimage.right
-        anchors.bottom: nowplayingimage.bottom
-
+        anchors.left: parent.left
+        visible:dceTimecode.qsTotalTime !==0
     }
+
 
     Row{
         width: childrenRect.width

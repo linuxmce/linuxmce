@@ -6,6 +6,7 @@ StyledScreen{
         id: storedVideoRemote
 
     }
+
 }
 
 

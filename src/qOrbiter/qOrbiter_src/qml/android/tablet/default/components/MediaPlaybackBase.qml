@@ -34,7 +34,9 @@ Item{
         } else {
 
         }
+
         manager.getStoredPlaylist()
+
         controlComponent = "Controls_5.qml"
         nav_row.navSource="NavOptions5.qml";
         info_panel.state="hidden";

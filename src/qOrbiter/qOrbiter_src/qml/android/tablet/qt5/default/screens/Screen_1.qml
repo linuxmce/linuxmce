@@ -3,12 +3,7 @@ import "../components"
 import "../../../../../skins-common/lib/handlers"
 
 Item {
-    anchors{
-        top:parent.top
-        left:parent.left
-        bottom:parent.bottom
-        right:parent.right
-    }
+  anchors.fill: parent
     Component.onCompleted:{ current_header_model=scenarios;manager.setBoundStatus(true); info_panel.state="retracted"; nav_row.navSource=nav_row.defaultSource }
 
     GridView{
