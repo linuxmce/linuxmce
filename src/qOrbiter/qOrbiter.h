@@ -1378,6 +1378,10 @@ signals:
      */
     void addExistingOrbiter(ExistingOrbiter* o);
     /*!
+     * \brief clearExistingOrbiters. tell the gui to clear the list because its being reloaded.
+     */
+    void clearExistingOrbiters();
+    /*!
      * \brief startManager. Signals the GUI to start is relevant information.
      */
     void startManager(QString, QString);

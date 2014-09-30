@@ -1,8 +1,8 @@
 import QtQuick 2.0
 
 Item {
-   height: appH
-   width: appW
+   height: manager.appHeight
+   width: manager.appWidth
 
    Image {
        id: bg

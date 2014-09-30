@@ -343,7 +343,7 @@ qorbiterManager::~qorbiterManager(){
 
 void qorbiterManager::gotoQScreen(QString s){
     
-    clearAllDataGrid();
+   // clearAllDataGrid();
     if(s.contains("Screen_1.qml"))
     {
         logQtMessage("QOrbiter clearing models because screen is 1");

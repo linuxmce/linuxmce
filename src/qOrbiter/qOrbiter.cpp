@@ -4482,6 +4482,7 @@ int qOrbiter::DeviceIdInvalid()
         return 0;
     }
     else{
+        clearExistingOrbiters();
         for(map<int,string>::iterator it=mapDevices.begin();it!=mapDevices.end();++it)
         {
             int i = (int)it->first;
