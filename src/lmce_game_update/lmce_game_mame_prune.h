@@ -32,7 +32,7 @@
 class LMCE_Game_Mame_Prune
 {
  public:
-  LMCE_Game_Mame_Prune(string sMamePath, string sRomPath, string sCategoryPath);
+  LMCE_Game_Mame_Prune(bool bDryRun, string sMamePath, string sRomPath, string sCategoryPath);
   virtual ~LMCE_Game_Mame_Prune();
   int Run();
 
@@ -44,8 +44,8 @@ class LMCE_Game_Mame_Prune
   string m_sCategoryPath;
   int m_iDeletedRoms;
   int m_iNotDeletedRoms;
+  bool m_bDryRun;
   bool IsUnwantedCategory(string sCategory);
   bool GetMAMEOutput(string &sMameOutput);
   void ProcessEntry(string sRomName, MAMERom *pCurrentRom);
-
 };

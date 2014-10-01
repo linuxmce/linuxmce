@@ -20,13 +20,14 @@
 #include <map>
 #include "lmce_game_mame_prune.h"
 
-LMCE_Game_Mame_Prune::LMCE_Game_Mame_Prune(string sMamePath, string sRomPath, string sCategoryPath)
+LMCE_Game_Mame_Prune::LMCE_Game_Mame_Prune(bool bDryRun, string sMamePath, string sRomPath, string sCategoryPath)
 {
   m_sMamePath=sMamePath;
   m_sRomPath=sRomPath;
   m_sCategoryPath=sCategoryPath;
   m_iDeletedRoms=0;
   m_iNotDeletedRoms=0;
+  m_bDryRun=false;
   m_pMAMECategory=new MAMECategory(sCategoryPath);
   m_pGameDatabase=new GameDatabase();
 }
@@ -181,10 +182,20 @@ void LMCE_Game_Mame_Prune::ProcessEntry(string sRomName, MAMERom *pCurrentRom)
   // Delete the rom and associated CHD if anything above flagged.
   if (bDelete)
     {
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Deleting ROM %s",sRomName.c_str());
-      string sCmd = "rm -rf "+m_sRomPath+"/"+sRomName+"*";
-      system(sCmd.c_str());
-      m_iDeletedRoms++;
+      if (!m_bDryRun)
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Deleting ROM %s",sRomName.c_str());
+	  string sCmd = "rm -rf "+m_sRomPath+"/"+sRomName+".zip";
+	  system(sCmd.c_str());
+	  string sCmd2 = "rm -rf "+m_sRomPath;
+	  system(sCmd2.c_str());
+	  m_iDeletedRoms++;
+	}
+      else
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Would have deleted ROM %s",sRomName.c_str());
+	  m_iDeletedRoms++;
+	}
     }
   else
     {
@@ -197,6 +208,7 @@ void LMCE_Game_Mame_Prune::ProcessEntry(string sRomName, MAMERom *pCurrentRom)
 int main(int argc, char* argv[])
 {
   bool bError = true;
+  bool bDryRun=false;
   string sMamePath;
   string sRomPath;
   string sCategoryPath;
@@ -236,6 +248,13 @@ int main(int argc, char* argv[])
 	      sCategoryPath = argv[++optnum];
 	      bError=false;
 	    }
+	  break;
+	case 'd':
+	  if (argc > 6)
+	    {
+	      bDryRun=true;
+	      LoggerWrapper::GetInstance()->Write(LV_STATUS,"This will be a dry run. No files will be deleted.");
+	    }
 	}
     }
 
@@ -247,12 +266,13 @@ int main(int argc, char* argv[])
 	   << endl
 	   << "\t -p -- The Path to the MAME binary. (Required)" << endl
 	   << "\t -r -- The Path to the directory containing ROMs. (Required)" << endl
-           << "\t -c -- The Path to the Category.ini file (Required)" << endl;
+           << "\t -c -- The Path to the Category.ini file (Required)" << endl
+	   << "\t -d -- Do a dry run (do not delete anything)" << endl;
       exit(1);
     }
 
-  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"sMamePath %s sRomPath %s sCategoryPath %s",sMamePath.c_str(),sRomPath.c_str(),sCategoryPath.c_str());
-  LMCE_Game_Mame_Prune *pLMCE_Game_Mame_Prune = new LMCE_Game_Mame_Prune(sMamePath,sRomPath,sCategoryPath);
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"bDryRun %d sMamePath %s sRomPath %s sCategoryPath %s",bDryRun,sMamePath.c_str(),sRomPath.c_str(),sCategoryPath.c_str());
+  LMCE_Game_Mame_Prune *pLMCE_Game_Mame_Prune = new LMCE_Game_Mame_Prune(bDryRun,sMamePath,sRomPath,sCategoryPath);
   iRetCode = pLMCE_Game_Mame_Prune->Run();
   delete pLMCE_Game_Mame_Prune;
   pLMCE_Game_Mame_Prune=NULL;
