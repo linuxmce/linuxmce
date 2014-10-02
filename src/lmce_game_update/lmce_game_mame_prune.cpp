@@ -27,7 +27,7 @@ LMCE_Game_Mame_Prune::LMCE_Game_Mame_Prune(bool bDryRun, string sMamePath, strin
   m_sCategoryPath=sCategoryPath;
   m_iDeletedRoms=0;
   m_iNotDeletedRoms=0;
-  m_bDryRun=false;
+  m_bDryRun=bDryRun;
   m_pMAMECategory=new MAMECategory(sCategoryPath);
   m_pGameDatabase=new GameDatabase();
 }
