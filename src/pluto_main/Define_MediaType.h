@@ -66,6 +66,7 @@
 #define MEDIATYPE_np_NetworkMedia_CONST 66
 #define MEDIATYPE_np_XBOX360_CONST 67
 #define MEDIATYPE_np_PVR_CONST 68
+#define MEDIATYPE_np_Playstation_CONST 69
 
 #define MEDIATYPE_TABLE "MediaType"
 #define MEDIATYPE_PK_MEDIATYPE_FIELD "PK_MediaType"
