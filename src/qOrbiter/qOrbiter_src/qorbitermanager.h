@@ -185,8 +185,8 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString dceResponse READ getDceResponse WRITE setDceResponse NOTIFY dceResponseChanged)
     Q_PROPERTY (bool debugMode READ getDebugMode WRITE setDebugMode NOTIFY debugModeChanged )/*!< \brief Contains boolean of the current debug state. \ingroup qorbiter_properties */
     Q_PROPERTY (bool connectedState READ getConnectedState WRITE setConnectedState NOTIFY connectedStateChanged)
-     Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged)
-    Q_PROPERTY (bool isProfile READ getOrientation WRITE setOrientation NOTIFY orientationChanged)
+     Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged) /*! \brief Used to track orientation \deprecated */
+    Q_PROPERTY (bool isProfile READ getOrientation WRITE setOrientation NOTIFY orientationChanged) /*! \brief if the device is in profile or landscape mode */
     Q_PROPERTY (QString currentScreen READ getCurrentScreen WRITE setCurrentScreen  NOTIFY screenChange)/*!< \brief Contains string of current screen. \code manager.currentScreen \endcode  \ingroup qorbiter_properties */
     Q_PROPERTY (QString m_ipAddress READ getInternalIp WRITE setInternalIp NOTIFY internalIpChanged)/*!< \brief Contains string of current ip address \code manager.m_ipAddress \endcode  \ingroup qorbiter_properties  */
     Q_PROPERTY (QString internalHost READ getInternalHost WRITE setInternalHost NOTIFY internalHostChanged)
@@ -196,27 +196,27 @@ class qorbiterManager : public QObject
     Q_PROPERTY (int media_pageSeperator READ getGridSeperator WRITE setGridSeperator NOTIFY newPageSeperator )/*!< \brief Contains the number of cells returned in media grid \code manager.media_pageSeperator \endcode  \ingroup qorbiter_properties */
     Q_PROPERTY (int media_currentPage READ getCurrentPage WRITE setCurrentPage NOTIFY mediaPageChanged) /*!< \brief Contains the current page of the media grid is on. Starts at 0. \ingroup qorbiter_properties */
     Q_PROPERTY(bool osdStatus READ getDisplayStatus WRITE toggleDisplay NOTIFY osdChanged )
-    Q_PROPERTY(int mediaPlayerID READ getMediaPlayerID WRITE setMediaPlayerID NOTIFY mediaPlayerIdChanged)
+    Q_PROPERTY(int mediaPlayerID READ getMediaPlayerID WRITE setMediaPlayerID NOTIFY mediaPlayerIdChanged)/*! \brief Contains the id of the dce media player */
     Q_PROPERTY (bool discreteAudio READ getDiscreteAudio WRITE setDiscreteAudio NOTIFY discreteAudioChanged )
-    Q_PROPERTY (bool m_bContainsVideo READ getContainsVideo WRITE setContainsVideo NOTIFY containsVideo)
-    Q_PROPERTY (bool usingLiveAvPath READ getLiveAvPath WRITE setLiveAvPath NOTIFY liveAvPath)
-    Q_PROPERTY (bool m_bIsOSD READ getOsd WRITE setOsd NOTIFY isOsd)
-    Q_PROPERTY (bool monitorAvailible READ getMonitorStatus WRITE setMonitorStatus NOTIFY monitorStatusChanged)
-    Q_PROPERTY(int deviceVolume READ getDeviceVolume WRITE setDeviceVolume NOTIFY deviceVolumeChanged)
-    Q_PROPERTY(bool first_run  READ getRunStatus NOTIFY firstRunChanged)
+    Q_PROPERTY (bool m_bContainsVideo READ getContainsVideo WRITE setContainsVideo NOTIFY containsVideo) /*! \brief if the current media stream contains video */
+    Q_PROPERTY (bool usingLiveAvPath READ getLiveAvPath WRITE setLiveAvPath NOTIFY liveAvPath)/*! \brief If the current media player is using the live av path */
+    Q_PROPERTY (bool m_bIsOSD READ getOsd WRITE setOsd NOTIFY isOsd) /*! \brief If this device is an On Screen Display */
+    Q_PROPERTY (bool monitorAvailible READ getMonitorStatus WRITE setMonitorStatus NOTIFY monitorStatusChanged) /*! \brief If monitor mode is available */
+    Q_PROPERTY(int deviceVolume READ getDeviceVolume WRITE setDeviceVolume NOTIFY deviceVolumeChanged) /*! \brief the current device now playing device, assuming it can provide discrete audio levels */
+    Q_PROPERTY(bool first_run  READ getRunStatus NOTIFY firstRunChanged) /*! \brief If this is the orbiters' first time being run */
     Q_PROPERTY (QString mediaResponse READ getMediaResponse WRITE setMediaResponse NOTIFY mediaResponseChanged)
     Q_PROPERTY (QString commandResponse READ getCommandResponse WRITE setCommandResponse NOTIFY commandResponseChanged)//for use in displaying command related dce replies.
     Q_PROPERTY (QString eventResponse READ getEventResponse WRITE setEventResponse NOTIFY eventResponseChanged) // for use in displaying message associated with incoming events
     Q_PROPERTY (QString deviceResponse READ getDeviceResponse WRITE setDeviceResponse NOTIFY deviceResponseChanged) // for use in display of messages associated with specific devices
     Q_PROPERTY (QString imagePath READ getImagePath WRITE setImagePath NOTIFY imagePathChanged)
-    Q_PROPERTY(QString currentSkin READ getCurrentSkin WRITE setConfigSkin NOTIFY currentSkinChanged)
+    Q_PROPERTY(QString currentSkin READ getCurrentSkin WRITE setConfigSkin NOTIFY currentSkinChanged)/*! \brief Contains the current skins name */
     Q_PROPERTY(QString routerPort READ getRouterPort WRITE setRouterPort NOTIFY routerPortChanged)
-    Q_PROPERTY(int isPhone READ getFormFactor WRITE setFormFactor NOTIFY formFactorChanged)
-    Q_PROPERTY(QString m_localAddress  READ getLocalAddress WRITE setLocalAddress NOTIFY localAddressChanged)
-    Q_PROPERTY(QStringList screensaverImages READ getScreensaverImages NOTIFY screenSaverImagesReady )
-    Q_PROPERTY(int screenSaverTimeout READ getScreenSaverTimeout WRITE setScreensaverTimerout NOTIFY screenSaverTimeoutChanged)
-    Q_PROPERTY(bool bReload READ getReloadStatus NOTIFY bReloadChanged)
-    Q_PROPERTY(bool homeNetwork WRITE setHomeNetwork READ getHomeNetwork NOTIFY homeNetworkChanged)
+    Q_PROPERTY(int isPhone READ getFormFactor WRITE setFormFactor NOTIFY formFactorChanged) /*! \brief If the device is a phone or not/ \deprecated */
+    Q_PROPERTY(QString m_localAddress  READ getLocalAddress WRITE setLocalAddress NOTIFY localAddressChanged) /*! \brief the  ip address for this device */
+    Q_PROPERTY(QStringList screensaverImages READ getScreensaverImages NOTIFY screenSaverImagesReady ) /*! \brief A list of the current screen saver image paths */
+    Q_PROPERTY(int screenSaverTimeout READ getScreenSaverTimeout WRITE setScreensaverTimerout NOTIFY screenSaverTimeoutChanged) /*! \brief The screensaver timeout when there is no video stream, or no media playing */
+    Q_PROPERTY(bool bReload READ getReloadStatus NOTIFY bReloadChanged) /*! \brief if reload is reqested */
+    Q_PROPERTY(bool homeNetwork WRITE setHomeNetwork READ getHomeNetwork NOTIFY homeNetworkChanged) /*! \brief if the device is on it's 'Home network' */
     Q_PROPERTY(int hostDevice READ getHostDevice WRITE setHostDevice NOTIFY hostDeviceChanged)
 
     /*!

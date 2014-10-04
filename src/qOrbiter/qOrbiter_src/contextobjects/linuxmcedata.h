@@ -11,7 +11,12 @@ public:
 
 };
 
-
+/*!
+ * \brief The HostSystemData class is used as a simple enum to provide
+ *  a qml enum for the host operating system.
+ * import into qml with statement: import org.linuxmce.enums
+ * use: HostDevices.OSX_DESKTOP
+ */
 class HostSystemData : public QObject{
     Q_OBJECT
 public:

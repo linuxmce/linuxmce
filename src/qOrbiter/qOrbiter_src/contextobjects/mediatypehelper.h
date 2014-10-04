@@ -3,6 +3,13 @@
 
 #include <QObject>
 
+/*!
+ * \brief The MediaTypeHelper class. this class provides a simple enum
+ * for use whe navigating media types.
+ * Import into qml with the statement: import org.linuxmce.enums
+ * use: Mediatypes.NP_LIVETV
+ *
+ */
 class MediaTypeHelper : public QObject
 {
     Q_OBJECT
@@ -30,6 +37,11 @@ public:
 
 };
 
+/*!
+ * \brief The AttributeTypeHelper class is designed to assist in providing an easy way to decode the options for navigating the media grid.
+ * import into qml with the statement: import org.linuxmce.enums
+ * use: Attributes.Director
+ */
 class AttributeTypeHelper : public QObject
 {
     Q_OBJECT
@@ -92,6 +104,11 @@ public:
     Q_ENUMS(Attributes)
 };
 
+/*!
+ * \brief The SubTypesHelper class is for use in qml with the different media subtypes.
+ * import into qml with statement: import org.linuxmce.enums.
+ * use: MediaSubtpes.TvShows
+ */
 class SubTypesHelper : public QObject
 {
     Q_OBJECT

@@ -6,6 +6,9 @@
  * \brief The RemoteCommands class. This class is a convienence class designed to make
  * passing the remote commands to the gui as simple as possible. This is a dirty method
  * of doing this, i understand.
+ * never the less, import org.linuxmce.enums
+ * use: RemoteCommands.Menu
+ *  \badcode
  */
 class RemoteCommands : public QObject {
     Q_OBJECT
