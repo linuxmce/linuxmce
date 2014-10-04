@@ -22,31 +22,31 @@ Item {
         }
     }
 
-    Image {
-        id: nowplayingimage
+//    Image {
+//        id: nowplayingimage
 
-        height:parent.height
-        fillMode: Image.PreserveAspectFit
-        source: "image://listprovider/updateobject/"+securityvideo.timestamp
-        anchors.bottom:parent.bottom
-        anchors.left: parent.left
+//        height:parent.height
+//        fillMode: Image.PreserveAspectFit
+//        source: "image://listprovider/updateobject/"+securityvideo.timestamp
+//        anchors.bottom:parent.bottom
+//        anchors.left: parent.left
 
-        MouseArea{
-            anchors.fill: parent
-            onPressed: manager.gotoQScreen(dcenowplaying.qs_screen)
-        }
-    }
+//        MouseArea{
+//            anchors.fill: parent
+//            onPressed: manager.gotoQScreen(dcenowplaying.qs_screen)
+//        }
+//    }
     Connections{
         target: dcenowplaying
         onImageChanged: refreshtimer.restart()
     }
 
-    Timer{
-        id:refreshtimer
-        interval: 1000
-        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-        running: nowplayingimage.visible
-    }
+//    Timer{
+//        id:refreshtimer
+//        interval: 1000
+//        onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
+//        running: nowplayingimage.visible
+//    }
     StyledText {
         id: generaltitle
         width: scaleX(35)
@@ -57,7 +57,7 @@ Item {
         smooth: true
         color:"white"
         font.pixelSize: scaleY(4)
-        anchors.top:parent.top
+        anchors.bottom: parent.bottom
         anchors.left: nowplayingimage.right
         visible:dcenowplaying.b_mediaPlaying
 
@@ -177,4 +177,8 @@ Item {
         }
 
     ]
+            MouseArea{
+                anchors.fill: parent
+                onPressed: manager.gotoQScreen(dcenowplaying.qs_screen)
+            }
 }

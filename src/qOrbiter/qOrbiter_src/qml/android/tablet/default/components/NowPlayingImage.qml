@@ -28,7 +28,7 @@ Item{
         id:refreshtimer
         interval: 500
         onTriggered: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
-        running: true
+        running: false
     }
 
     states: [

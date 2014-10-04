@@ -7,7 +7,7 @@ import "components"
 
 Item {
     id: qml_root
-  anchors.fill: parent
+    anchors.fill: parent
     property alias skinStyle:style
     property int screensaverTimer:manager.screenSaverTimeout*1000
     property bool uiOn:true
@@ -15,6 +15,8 @@ Item {
     signal showMetadata()
     signal showPlaylist()
     signal showAdvanced()
+
+
 
     Rectangle{
         anchors.fill: parent
