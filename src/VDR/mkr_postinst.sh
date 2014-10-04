@@ -21,7 +21,12 @@ fi
 if ! grep -q "^SVDRP_PORT=2001" /etc/default/vdr; then
 	echo "SVDRP_PORT=2001" >> /etc/default/vdr
 fi
-                                                                
+
+# Set default charset to utf-8 to permit non-english characters
+if ! grep -q "^VDR_CHARSET_OVERRIDE=UTF-8" /etc/default/vdr; then
+	echo "VDR_CHARSET_OVERRIDE=UTF-8" >> /etc/default/vdr
+fi
+
 # We can't have VDR running during setup file edit
 invoke-rc.d vdr stop || :
 
