@@ -185,7 +185,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY (QString dceResponse READ getDceResponse WRITE setDceResponse NOTIFY dceResponseChanged)
     Q_PROPERTY (bool debugMode READ getDebugMode WRITE setDebugMode NOTIFY debugModeChanged )/*!< \brief Contains boolean of the current debug state. \ingroup qorbiter_properties */
     Q_PROPERTY (bool connectedState READ getConnectedState WRITE setConnectedState NOTIFY connectedStateChanged)
-     Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged) /*! \brief Used to track orientation \deprecated */
+    Q_PROPERTY (bool b_orientation READ getOrientation WRITE setOrientation NOTIFY orientationChanged) /*! \brief Used to track orientation \deprecated */
     Q_PROPERTY (bool isProfile READ getOrientation WRITE setOrientation NOTIFY orientationChanged) /*! \brief if the device is in profile or landscape mode */
     Q_PROPERTY (QString currentScreen READ getCurrentScreen WRITE setCurrentScreen  NOTIFY screenChange)/*!< \brief Contains string of current screen. \code manager.currentScreen \endcode  \ingroup qorbiter_properties */
     Q_PROPERTY (QString m_ipAddress READ getInternalIp WRITE setInternalIp NOTIFY internalIpChanged)/*!< \brief Contains string of current ip address \code manager.m_ipAddress \endcode  \ingroup qorbiter_properties  */
@@ -768,6 +768,7 @@ signals:
 public slots:
     void setHostDevice(int d){ if(hostDevice != d ) {hostDevice=d; emit hostDeviceChanged(); }  }
     int getHostDevice(){return hostDevice;}
+    QString getHostDeviceName(){return HostSystemData::getSystemName(hostDevice); }
 
     /*! @name Screen and Screen Saver */
     //@{
@@ -803,7 +804,18 @@ public slots:
     * \param f
     * \ingroup qorbiter_properties
     */
-    void setFormFactor(int f) {isPhone = f; emit formFactorChanged();}
+    void setFormFactor(int f) {
+#ifdef __ANDROID__
+        if(f==1){
+           setHostDevice(HostSystemData::ANDROID_PHONE);
+        } else if (f==2){
+            setHostDevice(HostSystemData::ANDROID_TABLET);
+        } else {
+            setHostDevice(HostSystemData::OTHER_EMBEDDED);
+        }
+#endif
+        isPhone = f; emit formFactorChanged();
+                              }
     int getFormFactor(){ return isPhone;}
 
     /*!
@@ -1296,7 +1308,20 @@ public slots:
 
     /*! @name QML Skin Function slots*/
     //@{
-    Q_INVOKABLE void clearSkinCache(){ qorbiterUIwin->engine()->clearComponentCache(); qWarning() << "Cache Cleared.";}
+    Q_INVOKABLE void clearSkinCache(){
+        QUrl url = qorbiterUIwin->source();
+        qDebug() << "Cached base url " << url.toString();
+#if (QT5)
+        qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
+#else
+        qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
+#endif
+        qorbiterUIwin->engine()->clearComponentCache();
+        qWarning() << "Cache Cleared.";
+    }
+
+    Q_INVOKABLE void toggleSkinType();
+
     void setActiveSkin(QString name);
     bool loadSkins(QUrl url);
     void showSkin() { swapSkins(currentSkin); }

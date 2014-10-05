@@ -49,29 +49,35 @@ public:
     AbstractImageProvider(qorbiterManager * manager );
     ~AbstractImageProvider();
 
+    int widescreenAspect;
+    int profileAspect;
+    int tvAspect;
+    int discAspect;
+
 
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize)
     {
         QImage temp;
         QImage result;
+        QSize returnSize=requestedSize;
 
         if (id.contains("floorplan"))
         {
-             temp = floorplanProvider();
+             temp = floorplanProvider(returnSize);
        }
         else if(id.contains("securityimage"))
         {
            int camId = QString(id.section("/",-2,-2)).toInt();
             qDebug() << "Camera id" << camId;
-            temp = securityProvider(camId);
+            temp = securityProvider(returnSize, camId);
         }
         else if(id.contains("updateobject"))
         {
-            temp = updateObjectProvider();
+            temp = updateObjectProvider(returnSize);
         }
         else if(id.contains("screenshot"))
         {
-            temp = screenShot();
+            temp = screenShot(returnSize);
         }
 
         else if(id.contains("screensaver"))
@@ -80,14 +86,14 @@ public:
         }
         else if(id.contains("stream"))
         {
-            temp = Stream();
+            temp = Stream(returnSize);
         }
 
         //aspect checking
 
 
         if (requestedSize.isValid()) {
-            result = temp.scaled(requestedSize);
+            result = temp.scaled(returnSize);
         } else {
             result= temp;
         }
@@ -106,12 +112,12 @@ public slots:
 
 private:
     qorbiterManager * managerreference;
-    QImage floorplanProvider();
-    QImage securityProvider(int cam);
-    QImage updateObjectProvider();
-    QImage screenShot();
+    QImage floorplanProvider(QSize &requestedSize) ;
+    QImage securityProvider(QSize &requestedSize, int cam);
+    QImage updateObjectProvider(QSize &requestedSize);
+    QImage screenShot(QSize &requestedSize);
     QImage ScreenSaver();
-    QImage Stream();
+    QImage Stream(QSize &requestedSize);
 
 };
 

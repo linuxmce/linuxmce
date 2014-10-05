@@ -198,7 +198,7 @@ qDebug("eggs");
         ui_reference->writeConfig();
         emit currentSkinReady();
         ready=true;
-        current_style = NULL;
+
     }
         qDebug("bacon");
 }

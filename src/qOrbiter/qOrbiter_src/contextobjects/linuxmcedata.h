@@ -42,6 +42,29 @@ signals:
 
 public slots:
 
+   Q_INVOKABLE static const QString getSystemName(int s){
+        switch(s){
+        case RASPBERRY_PI:
+            return "Raspberry Pi";
+            break;
+        case OSX_DESKTOP:
+            return "OS X Desktop";
+            break;
+        case LINUX_DESKTOP:
+            return "Linux Desktop";
+            break;
+        case ANDROID_TABLET:
+            return "Android Tablet";
+            break;
+        case ANDROID_PHONE:
+            return "Android Phone";
+            break;
+        default:
+            return "Dunno, Windows 98?";
+            break;
+        }
+    }
+
 };
 
 #endif // LINUXMCEDATA_H

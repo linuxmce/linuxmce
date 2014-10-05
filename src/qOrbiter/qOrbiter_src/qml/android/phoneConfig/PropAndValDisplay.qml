@@ -21,7 +21,7 @@ Item{
     }
     Row{
         width: parent.width - 15
-        height: scaleY(6)
+        height: manager.appHeight*.06
         anchors.centerIn: parent
         Text{
             text:title

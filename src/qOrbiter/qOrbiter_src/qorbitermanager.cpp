@@ -91,6 +91,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     // b_orbiterReady = false;
     bAppError = false;
     isPhone = 0;
+    hostDevice=HostSystemData::OTHER_EMBEDDED;
     appConfigPath="";
     status="starting";
     setUsingExternal(false);
@@ -182,7 +183,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #endif
     qrcPath = buildType+"/Splash.qml";
 #elif  WIN32
-    setHostDevice(4);
+    setHostDevice(HostSystemData::WINDOWS_DESKTOP);
     buildType="/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
 #elif defined (for_freemantle)
@@ -192,44 +193,59 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     buildType="/qml/harmattan";
     qrcPath = "qrc:harmattan/Splash.qml";
 #elif defined (Q_OS_MACX)
-    setHostDevice(2);
+    setHostDevice(HostSystemData::OSX_DESKTOP);
     buildType="/qml/qt5-desktop";
     qrcPath = "qrc:osx/Splash.qml";
 #elif defined (RPI)
     buildType="/qml/qt5-desktop";
-    setHostDevice(1);
+    setHostDevice(HostSystemData::RASPBERRY_PI);
 #elif defined ANDROID
     
 #ifndef QT5
     qDebug() << "Resolution::"<<QApplication::desktop()->width()<<"w x "<<QApplication::desktop()->height()<<"h";
     int h = QApplication::desktop()->height();
     int w = QApplication::desktop()->width();
-    if (w > 480 && h > 854 || h > 480 && w > 854 )
-    {
-        setFormFactor(2);
-        buildType = "/qml/android/tablet";
-        setHostDevice(6);
-    }
-    else
-    {
-        setFormFactor(1);
-        setHostDevice(5);
-        if(isPhone !=2){
+    int pixelsX = QApplication::desktop()->physicalDpiX();
+    int pixelsY= QApplication::desktop()->physicalDpiY();
+    qDebug() << "Guessed DPI\n x::" << pixelsX << " Y::"<<pixelsY;
+
+    if(isPhone==0){ //no default set
+        setCommandResponse("No default form factor set, making initial selection");
+        if (w > 480 && h > 854 || h > 480 && w > 854 ){
+            setFormFactor(2);
+            buildType = "/qml/android/tablet";
+            setHostDevice(HostSystemData::ANDROID_TABLET);
+        }
+        else{
+            setFormFactor(1);
+            setHostDevice(HostSystemData::ANDROID_PHONE);
             buildType = "/qml/android/phone";
         }
+    } else{         //its set, overide setting
+
+        switch(isPhone){
+        case 1:
+            buildType = "/qml/android/phone";
+            qDebug() << buildType;
+            break;
+        case 2:
+            buildType = "/qml/android/tablet";
+            qDebug() << buildType;
+            break;
+        default:
+            setCommandResponse("Should not have gotten here, selecting phone for default");
+            buildType = "/qml/android/phone";
+            break;
+        }
+        setCommandResponse("Form factor set from config, using "+ buildType);
     }
+
+
+
 #endif
     qrcPath = ":android/Splash.qml";
     droidPath = "/";
-    
-    if(qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854)
-    {
-        emit mediaSeperatorChanged(50);
-    }
-    else
-    {
-        emit mediaSeperatorChanged(20);
-    }
+
 #elif defined (for_android)
     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
@@ -263,7 +279,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #else
 
 #ifdef QT5
- finalPath.append("/qt5")   ;
+    finalPath.append("/qt5")   ;
 #endif
 #endif
     
@@ -343,7 +359,7 @@ qorbiterManager::~qorbiterManager(){
 
 void qorbiterManager::gotoQScreen(QString s){
     
-   // clearAllDataGrid();
+    // clearAllDataGrid();
     if(s.contains("Screen_1.qml"))
     {
         logQtMessage("QOrbiter clearing models because screen is 1");
@@ -382,7 +398,7 @@ void qorbiterManager::gotoQScreen(QString s){
         
     } else {
         setDceResponse("screenchange() FAILED");
-        emit changeScreen(screenname.toString());
+
     }
 }
 
@@ -424,25 +440,11 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)));
     
 #ifdef __ANDROID__
-    if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
-    {
-        remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins/android/tablet";
-        setDceResponse("Guessing Android Tablet, Loading Tablet Skins");
 
-        QApplication::processEvents(QEventLoop::AllEvents);
-        setFormFactor(2);
-    }
-    else
-    {
-        remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins/android/phone";
-        setDceResponse("Guessing Android Phone, Loading Phone Skins");
-        QApplication::processEvents(QEventLoop::AllEvents);
-        setFormFactor(1);
-    }
 #ifdef QT5
- remoteDirectoryPath.append("/qt5")   ;
+    remoteDirectoryPath.append("/qt5")   ;
 #endif
-     qWarning()<< remoteDirectoryPath;
+    qWarning()<< remoteDirectoryPath;
 #elif defined Q_OS_MACX
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/qt5-desktop";
 #elif defined for_desktop
@@ -459,18 +461,8 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 #elif defined for_harmattan
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/harmattan";
 #elif defined for_android
-    if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
-    {
-        buildType = "/qml/android/tablet";
-        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/tablet";
-        setDceResponse("Guessing Android Tablet, Loading Tablet Skins");
-    }
-    else
-    {
-        buildType = "/qml/android/phone";
-        remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android/phone";
-        setDceResponse("Guessing Android Phone, Loading Phone Skins");
-    }
+
+
 #else
     remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins"+qmlPath;
 #endif
@@ -491,8 +483,6 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
     QObject::connect(tskinModel, SIGNAL(currentSkinReady()), this, SLOT(showSkin()));
     QObject::connect(tskinModel, SIGNAL(skinsFinished(bool)), this, SLOT(setSkinStatus(bool)));
-    
-    
     
     setDceResponse("initializeManager()::Loading Skins");
 #ifdef __ANDROID__
@@ -597,11 +587,11 @@ void qorbiterManager::refreshUI(QUrl url)
 #else
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
+
     qorbiterUIwin->engine()->clearComponentCache();
     qorbiterUIwin->rootContext()->setBaseUrl(url);
     qorbiterUIwin->setSource(url);
     emit currentSkinChanged();
-    
 }
 
 
@@ -1731,12 +1721,12 @@ bool qorbiterManager::loadSkins(QUrl base)
     QStringList localSkins;
     QStringList excludes;
     excludes << "!lib" << "!startup";
-    
+    tskinModel->clear();
 #ifdef for_harmattan
     tskinModel->addSkin("default");
     
 #elif __ANDROID__
-    if(isPhone == 1){
+    if(hostDevice == HostSystemData::ANDROID_PHONE){
 #ifdef QT5
         tskinModel->addSkin("default");
 #elif NECESSITAS
@@ -1752,12 +1742,12 @@ bool qorbiterManager::loadSkins(QUrl base)
 #elif for_android
     tskinModel->addSkin("default");
 #elif RPI
-//    QDir desktopQmlPath(QString(base.toString()),"",QDir::Name, QDir::NoDotAndDotDot);
-//    desktopQmlPath.setNameFilters(excludes);
-//    setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
-//    localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
+    //    QDir desktopQmlPath(QString(base.toString()),"",QDir::Name, QDir::NoDotAndDotDot);
+    //    desktopQmlPath.setNameFilters(excludes);
+    //    setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
+    //    localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
     
-//    qDebug()<<"inside of skins we find" << localSkins.join(",");
+    //    qDebug()<<"inside of skins we find" << localSkins.join(",");
     tskinModel->addSkin("default");
 #else
     if(b_localLoading ){
@@ -2030,11 +2020,25 @@ bool qorbiterManager::readLocalConfig()
             {setDebugMode(true);}
             
             if(!first_run){
-                if(!configVariables.namedItem("phone").attributes().namedItem("id").nodeValue().toInt() == 1 )
-                {setFormFactor(1);}
-                else
-                {setFormFactor(2);}
+                int ty = configVariables.namedItem("phone").attributes().namedItem("id").nodeValue().toInt();
+                qDebug() << "Type::"<<ty;
+                switch(ty){
+                case 1:
+                    qDebug() << "Phone read from config.";
+                    setFormFactor(1);
+                    break;
+                case 2:
+                    qDebug() << "Tablet read from config.";
+                    setFormFactor(2);
+                    break;
+                default:
+                    qDebug() << "error, setting default.";
+                    setFormFactor(1);
+                    break;
+
+                }
             }
+
             QString ext = configVariables.namedItem("lastconnect").attributes().namedItem("id").nodeValue();
             if(ext=="internal"){
                 setUsingExternal(false);
@@ -2101,6 +2105,7 @@ bool qorbiterManager::writeConfig()
             configVariables.namedItem("device").attributes().namedItem("id").setNodeValue(QString::number(iPK_Device));
             configVariables.namedItem("firstrun").attributes().namedItem("id").setNodeValue(QString("false"));
             configVariables.namedItem("debug").attributes().namedItem("id").setNodeValue(debugMode ==true? "true" : "false");
+            setDceResponse("Writing device type as "+ QString::number(isPhone));
             configVariables.namedItem("phone").attributes().namedItem("id").setNodeValue(QString::number(isPhone));
             configVariables.namedItem("lastconnect").attributes().namedItem("id").setNodeValue(usingExternal ? "external" : "internal");
             if(!mobileStorageLocation.isEmpty()){
@@ -2242,6 +2247,32 @@ void qorbiterManager::setCommandList(QList<QObject *> &l)
     //  qorbiterUIwin->rootContext()->setContextProperty("device_commands", QVariant::fromValue(commandList));
 }
 
+void qorbiterManager::toggleSkinType()
+{
+    {
+        qDebug() << tskinModel->m_baseUrl;
+        QString newPath= tskinModel->m_baseUrl.toString();
+        if(hostDevice==HostSystemData::ANDROID_PHONE){
+            setHostDevice(HostSystemData::ANDROID_TABLET);
+            setFormFactor(2);
+            newPath.replace("phone", "tablet");
+        } else {
+            setHostDevice(HostSystemData::ANDROID_PHONE);
+            setFormFactor(1);
+            newPath.replace("tablet", "phone");
+        }
+        tskinModel->m_baseUrl=QUrl(newPath);
+        qDebug() << newPath;
+        qDebug() << tskinModel->m_baseUrl;
+        loadSkins(tskinModel->m_baseUrl);
+
+        currentSkin="default";
+        if(writeConfig()){
+            swapSkins("default");
+        }
+    }
+}
+
 void qorbiterManager::showBookmarks(QList<QObject *> t)
 {
     
@@ -2333,7 +2364,7 @@ bool qorbiterManager::cleanupData()
     mediaTypeFilter->clear();
     uiFileFilter->clear();
     userList->clear();
-    clearSkinCache();
+
     m_bStartingUp=true;
     return true;
 }
@@ -2385,6 +2416,7 @@ void qorbiterManager::setActiveSkin(QString name)
     else {
         tskinModel->setActiveSkin(name);
     }
+
     qDebug("Setting Skin");
 }
 
@@ -2613,7 +2645,6 @@ bool qorbiterManager::setupMobileStorage(QString externalStorage)
             }
         }
     }
-    
     
     return false;
 #endif
