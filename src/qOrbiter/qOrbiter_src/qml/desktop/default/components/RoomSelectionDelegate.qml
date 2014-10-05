@@ -15,12 +15,13 @@ Item
 {
     id:roomselectioncomponent
     //delegate
-    height: 90
-    width: 160
+    height: hideFromOrbiter ? 0 : 90
+    width:hideFromOrbiter ? 0 : 160
     Rectangle{
         id:roomdelegate
         height:90
         width: 160
+        visible:!hideFromOrbiter
         color: skinStyle.not_color
 //        Image {
 //            id: roomimage

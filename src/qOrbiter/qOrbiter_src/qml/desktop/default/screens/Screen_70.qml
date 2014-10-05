@@ -21,7 +21,7 @@ MediaPlaybackBase{
             fillMode: Image.PreserveAspectCrop
             source:  index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: ""
             anchors.fill: parent
-            opacity: .5
+            opacity: .5            
 
         }
         StyledText {

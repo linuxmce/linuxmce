@@ -1,5 +1,5 @@
 import QtQuick 1.1
-
+import org.linuxmce.enums 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
 
@@ -155,7 +155,7 @@ Rectangle {
                 id:qorbiterConfig
                 height: scaleY(skinStyle.buttonH)
                 width: scaleX(skinStyle.buttonW)
-                buttontext: qsTr("Local Config")
+                buttontext: qsTr("Local Config for this \n"+manager.getHostDeviceName())
                 radius: 5
                 MouseArea{
                     id:showConfig
@@ -168,7 +168,7 @@ Rectangle {
                 id:componentDisplay
                 height: scaleY(skinStyle.buttonH)
                 width: scaleX(skinStyle.buttonW)
-                buttontext: qsTr("Clear Compone \nCache")
+                buttontext: qsTr("Clear Component \nCache")
                 radius: 5
                 MouseArea{
                     id:showComponents
