@@ -97,7 +97,7 @@ SetupX () {
 
 DualBus () {
 	if [[ $(lspci | grep -w 'VGA' | sort -u | wc -l) -gt "1" ]]; then
-		BestGPU
+		CheckVideoDriver
 		vga_pci="$1"
 		if [[ -e "$XF86Config" ]]; then
 			XorgConfig="$XF86Config"
@@ -369,8 +369,13 @@ Video_Driver_Detection () {
 	DriverInstalled="0"
 	driverConfig="none"
 	grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard" | grep -v "#" | grep -v "vesa" | grep -v "mouse" | grep -vq "kbd" && DriverInstalled="1"
-	# Check if we have nVidia or ATI cards in here, and specify proper config programs and commandline options.
 	if [[ "$DriverInstalled" -eq "0" ]]; then
+		CheckVideoDriver
+		grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard" | grep -v "#" | grep -v "vesa" | grep -v "mouse" | grep -vq "kbd" && DriverInstalled="1"
+	fi
+
+	# Check if we have nVidia or ATI cards in here, and specify proper config programs and commandline options.
+	if [[ "$DriverInstalled" -eq "1" ]]; then
 		case "$Best_Video_Driver" in
 			nvidia)
 				driverConfig="nvidia-xconfig"
@@ -379,6 +384,10 @@ Video_Driver_Detection () {
 			fglrx)
 				driverConfig="aticonfig"
 				driverLine="--initial"
+			;;
+			vboxvideo)
+				driverConfig="none"
+				driverLine=""
 			;;
 			*)
 				driverConfig="Xorg"
