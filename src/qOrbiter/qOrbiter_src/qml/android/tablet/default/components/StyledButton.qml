@@ -71,5 +71,49 @@ Item{
         sourceComponent: undefined
     }
 
+    states: [
+        State {
+            name: "fixed"
+            PropertyChanges {
+                target: styled_button
+                height:scaleY(12)
+                width:scaleX(18)
+                state:"reg"
+            }
 
+            PropertyChanges{
+                target: button_label
+                wrapMode:Text.WrapAtWordBoundaryOrAnywhere
+            }
+        },
+        State {
+            name: "numberpad"
+            PropertyChanges {
+                target: styled_button
+                height:manager.isProfile ? scaleY(12) : scaleY(18)
+                width: manager.isProfile ? scaleX(18) : scaleX(12)
+            }
+
+            PropertyChanges{
+                target: button_label
+                wrapMode:Text.WrapAtWordBoundaryOrAnywhere
+            }
+        },
+        State {
+            name: "large-fixed"
+            PropertyChanges {
+                target: styled_button
+                height:manager.isProfile ? scaleY(15) : scaleY(20)
+                width:manager.isProfile ? scaleX(28) : scaleX(25)
+            }
+
+            PropertyChanges{
+                target: button_label
+                state:"para"
+                wrapMode:Text.WrapAtWordBoundaryOrAnywhere
+                width:styled_button.width
+                horizontalAlignment:Text.AlignHCenter
+            }
+        }
+    ]
 }

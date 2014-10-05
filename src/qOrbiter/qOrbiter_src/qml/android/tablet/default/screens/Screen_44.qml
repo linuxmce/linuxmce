@@ -1,15 +1,16 @@
 import QtQuick 1.1
 import "../components"
-
+import org.linuxmce.enums 1.0
+/*Android - tablet - defaut */
 StyledScreen {
     anchors.fill: parent
-
+    id:advancedScreen
     onVisibleChanged: {
-            if(visible){
-                androidSystem.updateBuildInformation()
-                androidSystem.updateExternalStorageLocation()
-            }
+        if(visible){
+            androidSystem.updateBuildInformation()
+            androidSystem.updateExternalStorageLocation()
         }
+    }
 
     Flow{
         anchors.centerIn: parent
@@ -17,22 +18,80 @@ StyledScreen {
         spacing: 25
 
         StyledButton{
-            buttonText: qsTr("Regen this Orbiter")
-            onActivated: manager.regenOrbiter(manager.m_dwPK_Device)
+            id:regenorbiter
+            state: "large-fixed"
+            buttonText: "Regen\nOrbiter"
+            onActivated:  regenOrbiter(manager.m_dwPK_Device)
         }
 
         StyledButton{
-            buttonText: qsTr("Quick Reload")
+            id:pending
+            state: "large-fixed"
+            buttonText: "Pending\nTasks"
+
+        }
+
+        StyledButton{
+            id:networksettings
+            state: "large-fixed"
+            buttonText: "Network\nSettings"
+
+        }
+
+        StyledButton{
+            id:avwizard
+            state: "large-fixed"
+            buttonText: "Av\nWizard"
+
+        }
+
+        StyledButton{
+            id:regenorbiters
+            state: "large-fixed"
+            buttonText: "Regen All\nOrbiters"
+
+        }
+
+        StyledButton{
+            id:quickreload
+            state: "large-fixed"
+            buttonText: "Quick\n Reload"
             onActivated: manager.quickReload()
+
         }
 
         StyledButton{
-            buttonText: qsTr("Change Styles")
-            onActivated: loadComponent("SkinSelector.qml")
+            id:changeStyle
+            state: "large-fixed"
+            buttonText: "Change\nStyles"
+
         }
         StyledButton{
-            buttonText: qsTr("Refresh Skin")
-            onActivated: manager.clearSkinCache()
+            id:diagnostic
+            state: "large-fixed"
+            buttonText: "Diagnostics"
+            onActivated: content.state="diag"
+
         }
+        StyledButton{
+            id:refresh
+            state: "large-fixed"
+            buttonText: "Clear\nCache"
+            onActivated:{ manager.clearSkinCache(); manager.goBacktoQScreen()}
+        }
+        StyledButton{
+            id:ping
+            state: "large-fixed"
+            buttonText: "Ping\nTest"
+        }
+        StyledButton{
+            id:switchProfile
+            state: "large-fixed"
+            buttonText: manager.hostDevice==HostDevices.ANDROID_PHONE ? "Switch to\n Tablet skins" : "Switch to\n Phone Skins"
+            onActivated: {
+                manager.toggleSkinType()
+            }
+        }
+
     }
 }

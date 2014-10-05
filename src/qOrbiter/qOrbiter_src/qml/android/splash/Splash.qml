@@ -74,9 +74,5 @@ Item {
         }
     }
 
-    Connections{
-        target:window
-        onMessageChanged:loadingStatus.text = window.message
-        //onStatusChanged: screenchange("SetupNewOrbiter.qml")
-    }
+
 }

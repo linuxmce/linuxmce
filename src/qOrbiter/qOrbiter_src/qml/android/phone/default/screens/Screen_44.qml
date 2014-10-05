@@ -1,7 +1,8 @@
 import QtQuick 1.0
 import "../components"
 import "../js/ComponentLoader.js" as MyJs
-
+import org.linuxmce.enums 1.0
+/*Android - phone - defaut */
 StyledScreen {
     id: advancedscreen
     Item{
@@ -81,7 +82,14 @@ StyledScreen {
                 id:ping
                 state: "large-fixed"
                 buttonText: "Ping\nTest"
-
+            }
+            StyledButton{
+                id:switchProfile
+                state: "large-fixed"
+                buttonText: manager.hostDevice==HostDevices.ANDROID_PHONE ? "Switch to\n Tablet skins" : "Switch to\n Phone Skins"
+                onActivated: {
+                    manager.toggleSkinType()
+                }
             }
 
         }

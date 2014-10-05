@@ -66,7 +66,7 @@ Item {
 
     Text {
         id: loadingStatus
-        text: "Status " + manager.commandResponse
+        text: "Status::" + manager.commandResponse
         anchors.topMargin: scaleY(15)
         font.pixelSize: infoTextSize
         font.family: myFont.name
