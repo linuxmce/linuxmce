@@ -11,8 +11,8 @@ Item
     }
 
 
-    property int barHeight:scaleY(3)
-    property int barWidth:parent.width
+    property int barHeight:scaleY(8)
+    property int barWidth:manager.appWidth
 
     property string borderColor:"white"
     property string internalColor:"transparent"
@@ -130,8 +130,8 @@ Item
         }
     }
 
-    Rectangle
-    { anchors.fill: parent
+    Rectangle{
+        anchors.fill: parent
         id:progress_bar
 
         color: internalColor
@@ -144,74 +144,51 @@ Item
             width: parent.width-1
             color: dataModel.loadingStatus  ? inactiveColor : activeColor
             anchors.bottom: parent.bottom
-            opacity: .25
+            opacity: .50
         }
-        ListView{
-            id:alphalist
-            height: scaleY(4)
-            width: gridView.width
-            clip:true
-           anchors.centerIn: parent
-            model:alphabetlist
-            orientation:ListView.Horizontal
 
-            delegate:
-                Rectangle {
-                id:alphabetrect
-                height: scaleY(5)
-                width: scaleX(4)
-                color: "transparent"
-                clip:false
-                StyledText {
-                    id: test
-                    text: name
-                    font.pixelSize: 22
-                    anchors.centerIn: parent
-                    color:"aliceblue"
 
-                }
-                MouseArea{
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onEntered: {
-                        alphabetrect.scale = 1.5
-                    }
-                    onExited: {
+//        StyledText {
+//            id: loaded_cells
+//            text: dataModel.currentCells
+//            color: "white"
+//            font.bold: true
+//            font.pixelSize: scaleY(4)
+//            anchors.verticalCenter: progress_bar.verticalCenter
+//            anchors.left: progress_bar.left
 
-                        alphabetrect.scale = 1
-                    }
-                    onClicked: { if(dataModel.totalPages===1){
-                            gridView.currentIndex = dataModel.setSection(name)
-                            gridView.positionViewAtIndex(gridView.currentIndex, ListView.Beginning)
+//        }
 
-                        }else{
-                            manager.setSeekLetter(name)
-                        }
-                    }
-                }
+//        StyledText {
+//            id: total_cells
+//            text: dataModel.totalcells
+//            color: "grey"
+//            font.bold: true
+//            font.pixelSize: scaleY(4)
+//            anchors.bottom: progress_bar.top
+//            anchors.right: progress_bar.right
+//        }
+
+    }
+    ListView{
+        id:alphalist
+        height: scaleY(7)
+        width: parent.width
+        clip:true
+        anchors.centerIn: parent
+        model:alphabetlist
+        orientation:ListView.Horizontal
+
+        delegate:StyledButton{
+            height: scaleY(7)
+            width: scaleX(5)
+            buttonText: name
+            textSize: 35
+            onActivated:   {
+                files_view_screen.state="browsing"
+                currentSeekLetter = name
+                manager.seekGrid("MediaFile", name)
             }
         }
-
-        StyledText {
-            id: loaded_cells
-            text: dataModel.currentCells
-            color: "white"
-            font.bold: true
-            font.pixelSize: scaleY(4)
-           anchors.verticalCenter: progress_bar.verticalCenter
-           anchors.left: progress_bar.left
-
-        }
-
-        StyledText {
-            id: total_cells
-            text: dataModel.totalcells
-            color: "grey"
-            font.bold: true
-            font.pixelSize: scaleY(4)
-            anchors.bottom: progress_bar.top
-            anchors.right: progress_bar.right
-        }
-
     }
 }

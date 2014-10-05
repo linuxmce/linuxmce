@@ -6,6 +6,118 @@ StyledScreen {
     id:files_view_screen
     screen: "Media Files View"
     property int current_view_type:1
+    property string currentSeekLetter:""
+
+    ListModel{
+        id:alphabetlist
+
+        ListElement{
+            name:"0"
+        }
+
+        ListElement{
+            name:"A"
+        }
+
+        ListElement{
+            name:"B"
+        }
+
+        ListElement{
+            name:"C"
+        }
+
+        ListElement{
+            name:"D"
+        }
+
+        ListElement{
+            name:"E"
+        }
+
+        ListElement{
+            name:"F"
+        }
+
+        ListElement{
+            name:"G"
+        }
+
+        ListElement{
+            name:"H"
+        }
+
+        ListElement{
+            name:"I"
+        }
+
+        ListElement{
+            name:"J"
+        }
+
+        ListElement{
+            name:"K"
+        }
+
+        ListElement{
+            name:"L"
+        }
+
+        ListElement{
+            name:"M"
+        }
+        ListElement{
+            name:"N"
+        }
+
+        ListElement{
+            name:"O"
+        }
+
+        ListElement{
+            name:"P"
+        }
+
+        ListElement{
+            name:"Q"
+        }
+
+        ListElement{
+            name:"R"
+        }
+
+        ListElement{
+            name:"S"
+        }
+
+        ListElement{
+            name:"T"
+        }
+
+        ListElement{
+            name:"U"
+        }
+
+        ListElement{
+            name:"V"
+        }
+
+        ListElement{
+            name:"W"
+        }
+
+        ListElement{
+            name:"X"
+        }
+
+        ListElement{
+            name:"Y"
+        }
+
+        ListElement{
+            name:"Z"
+        }
+    }
 
     Component.onCompleted: {
         setNavigation("MedialistNav.qml")
@@ -44,7 +156,7 @@ StyledScreen {
                     buttonText: name
                     textSize: 48
                     hitArea.onReleased:{
-                         mediatypefilter.setSelectionStatus(name);
+                        mediatypefilter.setSelectionStatus(name);
                         content.state="viewing"
 
                     }

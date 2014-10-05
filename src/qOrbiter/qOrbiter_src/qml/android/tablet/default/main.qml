@@ -135,7 +135,11 @@ Item {
             onMediaPlayerIdChanged:{
                 console.log("initializing qml media player::"+manager.mediaPlayerID)
                 dcePlayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-
+            }
+            onConnectedStateChanged:{
+                if(manager.connectedState ){
+                     dcePlayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                }
             }
         }
 

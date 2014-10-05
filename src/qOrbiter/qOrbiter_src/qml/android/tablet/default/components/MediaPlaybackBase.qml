@@ -12,6 +12,7 @@ Item{
 
     property string screenLabel:"foo"
 
+
     Connections{
         target:qml_root
         onShowMetadata:{
