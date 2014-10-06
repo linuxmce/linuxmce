@@ -368,7 +368,17 @@ Video_Driver_Detection () {
 	# the binary drivers
 	DriverInstalled="0"
 	driverConfig="none"
-	grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard" | grep -v "#" | grep -v "vesa" | grep -v "mouse" | grep -vq "kbd" && DriverInstalled="1"
+	cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|nouveau|radeon|fglrx|savage|openchrome|via|virge|intel|i740|i128|mach64|cirrus|vboxvideo|fbdev)')
+	[[ -n "$cur_driver" ]] && DriverInstalled="1"
+#	grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard" | grep -v "#" | grep -v "vesa" | grep -v "mouse" | grep -vq "kbd" && DriverInstalled="1"
+	Best_Video_Driver="$cur_driver"
+	if [[ "$DriverInstalled" -eq "0" ]]; then
+		CheckVideoDriver
+		cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|nouveau|radeon|fglrx|savage|openchrome|via|virge|intel|i740|i128|mach64|cirrus|vboxvideo|fbdev)')
+		[[ -n "$cur_driver" ]] && DriverInstalled="1"
+#		grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard" | grep -v "#" | grep -v "vesa" | grep -v "mouse" | grep -vq "kbd" && DriverInstalled="1"
+	fi
+
 	if [[ "$DriverInstalled" -eq "0" ]]; then
 		CheckVideoDriver
 		grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard" | grep -v "#" | grep -v "vesa" | grep -v "mouse" | grep -vq "kbd" && DriverInstalled="1"
