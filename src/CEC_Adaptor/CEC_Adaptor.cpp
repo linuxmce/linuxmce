@@ -234,16 +234,17 @@ bool CEC_Adaptor::GetConfig()
 	m_sPort = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
 
 	if (m_sPort.empty())
-	  {
-	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"No COM Port specified. Please set one in Interfaces section of Web Admin, or re-detect device.");
-	    return false;
-	  }
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"No COM Port specified. Trying port 'RPI'.  Please set a port in the Interfaces section of Web Admin, or re-detect device.");
+		m_sPort = "RPI";
+	}
 
 	if (!m_pParser->Open(m_sPort.c_str()))
 	  {
 	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not open serial port %s",m_sPort.c_str());
+	    return false;
 	  }
-	
+
 	return true;
 }
 
