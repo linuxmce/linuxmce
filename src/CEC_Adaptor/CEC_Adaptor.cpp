@@ -233,7 +233,7 @@ bool CEC_Adaptor::GetConfig()
 
 	m_sPort = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
 
-	if (m_sPort.empty())
+	if (m_sPort.empty() || m_sPort == "0")
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"No COM Port specified. Trying port 'RPI'.  Please set a port in the Interfaces section of Web Admin, or re-detect device.");
 		m_sPort = "RPI";
