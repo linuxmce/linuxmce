@@ -494,6 +494,16 @@ function Build_Replacements_trusty
 
 }
 
+function Build_Replacements_raspbian_wheezy
+{
+	mkdir -pv "$replacements_dir"
+
+	#Package: libcec
+	Build_Replacement_Package libcec raspbian/libcec-2.1.4
+	cp ${svn_dir}/${svn_branch_name}/raspbian/cec*.deb ${replacements_dir}
+	dpkg -i ${svn_dir}/${svn_branch_name}/raspbian/libcec*.deb
+}
+
 trap 'Error "Undefined error in $0" ; apt-get install libtool -y' EXIT
 
 DisplayMessage "*** STEP: Building replacement debs"
@@ -530,7 +540,14 @@ case "${flavor}" in
                 Build_Replacements_Common_ubuntu
                 ;;
         "raspbian")
-                DisplayMessage "No replacements for raspbian at this time."
+                case "${build_name}" in
+                        "wheezy")
+				Build_Replacements_${flavor}_${build_name}
+				;;
+			*)
+		                DisplayMessage "No replacements at this time."
+				;;
+		esac
                 ;;
 esac
 
