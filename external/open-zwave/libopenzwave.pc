@@ -1,0 +1,11 @@
+prefix=/usr
+exec_prefix=/usr/bin
+libdir=/usr/lib/i386-linux-gnu/
+includedir=/usr/include/openzwave/
+
+Name: libopenzwave
+Description: A Open Source implementation of the ZWave Serial API
+URL: http://www.openzwave.org/
+Version: 1.0
+Libs: -L${libdir} -lopenzwave
+Cflags: -I${includedir} -I${includedir}/command_classes/ -I${includedir}/value_classes/ -I${includedir}/platform/
