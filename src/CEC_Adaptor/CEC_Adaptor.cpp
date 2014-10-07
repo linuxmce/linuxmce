@@ -25,9 +25,14 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
-#include <libcec/cecloader.h>
+#if CEC_LIB_VERSION_MAJOR > 1
+#include <cec.h>
+#endif
+
 #include "PlutoUtils/LinuxSerialUSB.h"
 using namespace CEC;
+
+#include <libcec/cecloader.h>
 
 libcec_configuration g_config;
 ICECCallbacks g_callbacks;
@@ -36,7 +41,11 @@ ICECCallbacks g_callbacks;
  * Globals for libCEC - find a better way to do this.
  */
 
+#if CEC_LIB_VERSION_MAJOR == 1
 int CecLogMessage(void *UNUSED(cbParam), const cec_log_message &message)
+#else
+int CecLogMessage(void *cbParam, const cec_log_message message)
+#endif
 {
   switch (message.level)
     {
@@ -57,7 +66,11 @@ int CecLogMessage(void *UNUSED(cbParam), const cec_log_message &message)
   return 0;
 }
 
+#if CEC_LIB_VERSION_MAJOR == 1
 int CecKeyPress(void *cbParam, const cec_keypress &key)
+#else
+int CecKeyPress(void *cbParam, const cec_keypress key)
+#endif
 {
   CEC_Adaptor *pCEC_Adaptor=(CEC_Adaptor *)cbParam;
   char cKey[5];
@@ -89,7 +102,11 @@ int CecKeyPress(void *cbParam, const cec_keypress &key)
   return 0;
 }
 
+#if CEC_LIB_VERSION_MAJOR == 1
 int CecCommand(void *UNUSED(cbParam), const cec_command &UNUSED(command))
+#else
+int CecCommand(void *cbParam, const cec_command command)
+#endif
 {
   // TODO
   return 0;
@@ -214,10 +231,15 @@ bool CEC_Adaptor::GetConfig()
 	g_callbacks.CBCecCommand = &CecCommand;
 	g_config.callbacks = &g_callbacks;
 
+#if CEC_LIB_VERSION_MAJOR == 1
 	g_config.deviceTypes.add(CEC_DEVICE_TYPE_RECORDING_DEVICE);
 	g_config.deviceTypes.add(CEC_DEVICE_TYPE_TUNER);
 	g_config.deviceTypes.add(CEC_DEVICE_TYPE_PLAYBACK_DEVICE);
-
+#else
+	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_RECORDING_DEVICE);
+	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_TUNER);
+	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_PLAYBACK_DEVICE);
+#endif
 	m_pParser = LibCecInitialise(&g_config);
 	
 	// Tweak with this until we like it -tschak
