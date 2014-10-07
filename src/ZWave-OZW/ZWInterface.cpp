@@ -102,6 +102,15 @@ bool ZWInterface::Init(ZWConfigData* data) {
 	        delete m_pConfigData;
 	m_pConfigData = data;
 
+	if ( m_sLogFile != "")
+	{
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::Init() setting OpenZWave log file to %s", m_sLogFile.c_str());
+		OpenZWave::Log* pLog = OpenZWave::Log::Create(m_sLogFile, true, false, OpenZWave::LogLevel_Info, OpenZWave::LogLevel_Debug, OpenZWave::LogLevel_Error);
+		pLog->SetLogFileName(m_sLogFile); // Make sure, in case Log::Create already was called before we got here
+		pLog->SetLoggingState(OpenZWave::LogLevel_Info, OpenZWave::LogLevel_Debug, OpenZWave::LogLevel_Error);
+	}
+
+
 	// Create the OpenZWave Manager.
 	// The first argument is the path to the config files (where the manufacturer_specific.xml file is located
 	// The second argument is the path for saved Z-Wave network state and the log file.  If you leave it NULL 
@@ -112,14 +121,6 @@ bool ZWInterface::Init(ZWConfigData* data) {
 	        OpenZWave::Options::Get()->AddOptionInt("RetryTimeout", data->m_itimeout);
 	}
 	OpenZWave::Options::Get()->Lock();
-
-	if ( m_sLogFile != "")
-	{
-		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::Init() setting OpenZWave log file to %s", m_sLogFile.c_str());
-		OpenZWave::Log* pLog = OpenZWave::Log::Create(m_sLogFile, true, false, OpenZWave::LogLevel_Info, OpenZWave::LogLevel_Debug, OpenZWave::LogLevel_Error);
-		pLog->SetLogFileName(m_sLogFile); // Make sure, in case Log::Create already was called before we got here
-		pLog->SetLoggingState(OpenZWave::LogLevel_Info, OpenZWave::LogLevel_Debug, OpenZWave::LogLevel_Error);
-	}
 
 	OpenZWave::Manager::Create();
 	
@@ -338,9 +339,15 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 		}
 		break;
 	}
-	
+	case OpenZWave::Notification::Type_Notification:
+	{
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::OnNotification() : Type_Notification, code = %d", _notification->GetNotification());
+		break;
+	}	
 	default:
 	{
+		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::OnNotification() : unhandled/ignored notification = %d", _notification->GetType());
+		break;
 	}
 	} // switch
 	if (m_pZWave != NULL && m_pZWave->IsReady())
