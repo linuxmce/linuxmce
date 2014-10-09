@@ -32,6 +32,7 @@ namespace DCE
       }
     else if (StringUtils::ToLower(sMediaFile).find(".nes") != string::npos)
       {
+	m_pEmulatorModel->m_sSystemName="famicom"; // grrrr...
 	sSlot = "cart";
       }
     
