@@ -1,3 +1,10 @@
+openzwave (1.1.911-2) UNRELEASED; urgency=low
+
+  [ root ]
+  * changed dependency for libudev0 to libudev0 OR libudev1
+
+ -- Peer Oliver Schmidt <developers@linuxmce.org>  Thu, 9 Oct 2014 11:26:00 +0100
+
 openzwave (1.1.911-1) UNRELEASED; urgency=low
 
   [ root ]
