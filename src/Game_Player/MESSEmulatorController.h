@@ -39,6 +39,7 @@ namespace DCE
     virtual void setSystemName(string sSystemName);
     virtual string getSystemName();
     virtual string getRomPathFromSlot();
+    virtual string getAdditionalOptions();
 
   private:
     string getRomFromSlot();

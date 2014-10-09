@@ -25,9 +25,14 @@ namespace DCE
 
   void FamicomEmulatorController::insertMediaNamed(string sMediaFile, string sSlot)
   {
-    if (StringUtils::ToLower(sMediaFile).find(".fds"))
+    if (StringUtils::ToLower(sMediaFile).find(".fds") != string::npos)
       {
+	m_pEmulatorModel->m_sSystemName="fds"; // grrr, #(%@#(% MESS!
 	sSlot = "flop";
+      }
+    else if (StringUtils::ToLower(sMediaFile).find(".nes") != string::npos)
+      {
+	sSlot = "cart";
       }
     
     EmulatorController::insertMediaNamed(sMediaFile,sSlot);

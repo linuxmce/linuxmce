@@ -136,6 +136,11 @@ namespace DCE
 
   }
 
+  string MESSEmulatorController::getAdditionalOptions()
+  {
+    return ""; // This is overridden as needed.
+  }
+
   bool MESSEmulatorController::run()
   {
     
@@ -146,7 +151,7 @@ namespace DCE
       }
 
     m_pEmulatorModel->m_sArgs = getSystemFromSlot() + "\t" +
-      getSlotsAndRoms();
+      getSlotsAndRoms() + getAdditionalOptions();
 
     //m_pEmulatorModel->m_sArgs = this->getSystemFromSlot() + "\t" + 
     //  this->getSlotTypeForFilename(getRomFromSlot()) + "\t" + 

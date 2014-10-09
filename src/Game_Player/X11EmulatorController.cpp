@@ -72,12 +72,12 @@ namespace DCE
    */
   void X11EmulatorController::findWindow()
   {
+    m_bFindWindowRunLoop=true;
     // If we're being called, we need to make double sure that we find the new window,
     // so zero out the old one.
     LoggerWrapper::GetInstance()->Write(LV_WARNING,"X11EmulatorController::findWindow() - pleaseResend %d",m_bResend);
-    bool bRunLoop=true;
     int iRetry=0; // number of times to retry despite a duplicate window returned.
-    while (bRunLoop==true)
+    while (m_bFindWindowRunLoop==true)
       {
 	if (m_pEmulatorModel->m_iWindowId != 0)
 	  {
@@ -108,7 +108,7 @@ namespace DCE
 	    if (iRetry>20)
 	      {
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Apparently got the same Window # again, ok. Let's use it.");
-		bRunLoop=false;
+		m_bFindWindowRunLoop=false;
 	      }
 	    else
 	      {
@@ -121,7 +121,7 @@ namespace DCE
 	    // We got a new window, let the loop break;
 	    LoggerWrapper::GetInstance()
 	      ->Write(LV_STATUS,"X11EmulatorController::findWindow() thread - Window %s found as %x",m_pEmulatorModel->m_sWindowName.c_str(),m_pEmulatorModel->m_iWindowId);
-	    bRunLoop=false;
+	    m_bFindWindowRunLoop=false;
 	  }
       }
     // magic to make emulator windows always get swallowed by orbiter, but only
@@ -222,6 +222,7 @@ namespace DCE
 
     m_pAlarmManager->CancelAlarmByType(CHECK_RESEND);
     m_pAlarmManager->Stop();
+    m_bFindWindowRunLoop=false;
     delete m_pAlarmManager;
     m_pAlarmManager=NULL;
 

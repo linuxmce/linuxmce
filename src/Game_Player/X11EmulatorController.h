@@ -58,6 +58,7 @@ namespace DCE
     pthread_t m_windowIdThread;
     string m_sLastAction;
     bool m_bResend; // Resend keystroke if needed. Set by default window handler.
+    bool m_bFindWindowRunLoop;
   };
 }
 
