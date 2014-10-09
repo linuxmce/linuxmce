@@ -563,7 +563,7 @@ MD_Install_Packages () {
 	## Begin installing the packages needed for the pluto devices
 	StatsMessage "Prep for MCE device installation"
 
-	for device in $DEVICE_LIST; do
+	for device in $DEVICE_LIST ; do
 		Q="SELECT
 			Package_Source.Name
 		   FROM
@@ -758,7 +758,7 @@ trap "Trap_Exit" EXIT
 Setup_Logfile
 
 #TODO get as much of this from database as possible
-for TARGET in "$TARGET_TYPES"; do
+for TARGET in "$TARGET_TYPES" ; do
 	case "$TARGET" in
 		"ubuntu-i386")
 			TARGET_DISTRO="ubuntu"
