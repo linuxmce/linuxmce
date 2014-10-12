@@ -7,7 +7,9 @@ import "components"
 
 Item {
     id: qml_root
-    anchors.fill: parent
+    height:manager.appHeight
+    width: manager.appWidth
+
     property alias skinStyle:style
     property int screensaverTimer:manager.screenSaverTimeout*1000
     property bool uiOn:true
@@ -134,11 +136,11 @@ Item {
             target:manager
             onMediaPlayerIdChanged:{
                 console.log("initializing qml media player::"+manager.mediaPlayerID)
-                dcePlayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
             }
             onConnectedStateChanged:{
                 if(manager.connectedState ){
-                     dcePlayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                     dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
                 }
             }
         }

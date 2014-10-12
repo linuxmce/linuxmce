@@ -23,6 +23,7 @@ StyledScreen{
         state:"browsing"
 
         Component.onCompleted: {
+            manager.setStringParam(0, manager.q_mediaType)
             hdr.state="grid"
             forceActiveFocus()
         }

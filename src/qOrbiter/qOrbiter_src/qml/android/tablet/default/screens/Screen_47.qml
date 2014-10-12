@@ -122,6 +122,7 @@ StyledScreen {
     Component.onCompleted: {
         setNavigation("MedialistNav.qml")
         hideInfoPanel()
+        manager.setStringParam(0, manager.q_mediaType)
     }
     Item{
         id:content
@@ -136,7 +137,6 @@ StyledScreen {
         }
         MultiViewMediaList{
             id:media_view
-
         }
 
         GridView{

@@ -185,7 +185,7 @@ Item
             buttonText: name
             textSize: 35
             onActivated:   {
-                files_view_screen.state="browsing"
+                //files_view_screen.state="browsing"
                 currentSeekLetter = name
                 manager.seekGrid("MediaFile", name)
             }

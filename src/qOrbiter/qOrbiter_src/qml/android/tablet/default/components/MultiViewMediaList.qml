@@ -25,8 +25,6 @@ Item{
     property double cdCoverRatioBack:1080/1264
     property double vcdRatio:1080/1080
     property double vhsRatio:1280/620
-
-
     property int itemBuffer:25
     clip:true
 
@@ -42,6 +40,7 @@ Item{
 
     property variant currentDelegate:manager.q_mediaType==5 ? videoItem :audioItem
     Component.onCompleted: {
+
         if(manager.q_mediaType=="4"){
             multi_view_list.state="audio"
         } else if(manager.q_mediaType=="5"){
@@ -50,15 +49,15 @@ Item{
         } else {
             multi_view_list.state="default"
         }
+        console.log("Getting grid for "+manager.q_mediaType);
 
-        media_grid.model=manager.getDataGridModel("MediaFile", 63)
-        media_grid.positionViewAtIndex(item, ListView.Beginning)
+        media_grid.positionViewAtIndex(0, ListView.Beginning)
     }
 
     Connections {
         target: manager.getDataGridModel("MediaFile", 63)
         onScrollToItem: {
-            console.log("scroll to item : " + item);
+            console.log("scroll to item : " + item+ " of "+media_grid.count);
             media_grid.positionViewAtIndex(item, ListView.Beginning);
         }
     }
@@ -102,7 +101,7 @@ Item{
     states: [
         State {
             name: "audio"
-          //  when:manager.q_mediaType == Mediatypes.STORED_AUDIO
+            //  when:manager.q_mediaType == Mediatypes.STORED_AUDIO
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: scaleX(25)
@@ -112,7 +111,7 @@ Item{
         },
         State {
             name: "video"
-          //  when:manager.q_mediaType == Mediatypes.STORED_VIDEO
+            //  when:manager.q_mediaType == Mediatypes.STORED_VIDEO
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: scaleY(24)
