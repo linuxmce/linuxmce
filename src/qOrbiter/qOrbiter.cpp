@@ -1358,15 +1358,17 @@ void qOrbiter::CMD_Show_File_List(int iPK_MediaType,string &sCMD_Result,Message 
 {
 
     emit showFileListMediaType(iPK_MediaType);
+    requestTypes(iPK_MediaType);
+    i_currentGridType=iPK_MediaType;
     gridPaused = false;
     currentScreen= "Screen_47.qml";
     emit gotoQml("Screen_47.qml");
-
     setGridStatus(true);
     b_cancelRequest = false;
-    requestTypes(iPK_MediaType);
+
     emit commandComplete();
     emit commandResponseChanged("Show File List Complete, Calling request Media Grid");
+
 }
 
 //<-dceag-c402-b->
@@ -2483,9 +2485,14 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
 
 void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString option)
 {
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGridGrid '%s', option = %s", dataGridId.toStdString().c_str(), option.toStdString().c_str());
 
+  QString fx = option.replace(0,1, QString::number(i_currentGridType));
+   qWarning() << fx;
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGridGrid '%s', option = %s", dataGridId.toStdString().c_str(), fx.toStdString().c_str());
+option = fx;
     string *sResponse;
+
+
 
     emit commandResponseChanged(QString("Getting data grid PK_DataGrid ").append(QString::number(PK_DataGrid)));
     int cellsToRender= 0;

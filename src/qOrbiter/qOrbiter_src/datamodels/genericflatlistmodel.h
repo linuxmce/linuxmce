@@ -23,6 +23,8 @@ class GenericFlatListModel : public QAbstractListModel
 
     Q_PROPERTY (double progress READ getProgress WRITE setProgress NOTIFY progressChanged)
     Q_PROPERTY (bool loadingStatus READ getLoadingStatus WRITE setLoadingStatus NOTIFY loadingStatusChanged)
+    Q_PROPERTY(int mediaType READ getMediaType NOTIFY modelMediaTypeChanged)
+    Q_PROPERTY(int lastIndex READ getLastIndex WRITE setLastIndex NOTIFY lastIndexChanged)
 
 public:
     explicit GenericFlatListModel(QObject *parent = 0);
@@ -70,16 +72,16 @@ public:
     bool m_seek;
     bool loaded;
 
-    int m_windowStart; // item number at start of the window
-    int m_bForward; // forward(true) or backward request(false)
-    int m_windowSize; // The size of the window of items to display
-    int m_iLastRow; // last row accessed, to be able to see what direction we are scrolling
-    int m_requestStart; // start of the requested range
-    int m_requestEnd; // end of the requested range
+    int m_windowStart; /*!< item number at start of the window */
+    int m_bForward; /*!< forward(true) or backward request(false) */
+    int m_windowSize; /*!< The size of the window of items to display */
+    int m_iLastRow; /*!< last row accessed, to be able to see what direction we are scrolling */
+    int m_requestStart; /*!< start of the requested range */
+    int m_requestEnd; /*!< end of the requested range */
     
 
-    int totalRows;
-    int m_totalCols;
+    int totalRows;  /*!< the total rows for this model currently */
+    int m_totalCols; /*!< the total columns for this model currently */
 
     int seperator;
     bool loadingStatus;
@@ -87,7 +89,12 @@ public:
     bool clearing;
     int totalPages;
 
-    
+    int lastIndex; /*!< simply tracks the last index of the grid */
+
+
+    int mediaType; /*!< This is set to the current media type for the model, if it is used for media. otherwise, its negative 1*/
+    void setMediaType(int m) {if(mediaType != m) {this->clear(); emit modelMediaTypeChanged();} }
+    int getMediaType(){return mediaType;}
 signals:
     void loadingStatusChanged(bool state);
     void sizeChanged(int size);
@@ -98,7 +105,16 @@ signals:
     void modelReset();
     void scrollToItem(int item);
 
+    void modelMediaTypeChanged();
+
+    void lastIndexChanged();
+
+
 public slots:
+
+    void setLastIndex(int i){if(lastIndex!=i) {lastIndex=i; emit lastIndexChanged();} }
+    int getLastIndex(){return lastIndex;}
+
      QVariant get(int index, const QString &name) const;
 
      void setWindowSize(int windowSize) { m_windowSize = windowSize; }

@@ -124,6 +124,9 @@ public:
 
         switch (paramType)
         {
+        case 0:
+            q_mediaType = param.toInt();
+            break;
         case 1:
             q_subType = param;
             break;
@@ -311,7 +314,7 @@ public:
         if(q_mediaType > 0 && (filterStack.count() == 0 || !filterStack.at(filterStack.count()-1).contains(s))){
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::updateAttributeToList() new filter string: %s", s.toStdString().c_str());
             filterStack<< s;
-
+            emit newMediaFilter();
             return true;
         }
         return false;
@@ -319,6 +322,7 @@ public:
 
     QString getFilterString() {
         QString params = QString::number(q_mediaType)+"|"+q_subType +"|"+q_fileFormat+"|"+q_attribute_genres+"|"+q_mediaSources+"|"+q_usersPrivate +"|"+q_attributetype_sort+"|"+q_pk_users+"|"+q_last_viewed+"|"+q_pk_attribute+"";
+
         return params;
     }
 
@@ -327,9 +331,11 @@ public slots:
     void setMediaType(int mediaType) {
         if (mediaType != q_mediaType)
         {
-            currentMediaTypeChanged(QString::number(mediaType));
             clear();
+
             q_mediaType = mediaType;
+            qDebug() << "!!!!!!!!!!!!!!! MODEL CLEAR";
+             currentMediaTypeChanged(QString::number(q_mediaType));
             updateAttributeToList();
         }
     }

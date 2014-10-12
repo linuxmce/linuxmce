@@ -29,6 +29,7 @@ GenericFlatListModel::GenericFlatListModel(QObject *parent) :
     m_totalCols = 0;
     m_seek = false;
     resetWindow();
+    mediaType=-1;
 }
 GenericFlatListModel::GenericFlatListModel(GenericModelItem *prototypeItem, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototypeItem)

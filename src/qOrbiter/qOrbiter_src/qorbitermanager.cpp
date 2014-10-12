@@ -155,6 +155,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     //Don't think we need this with Qt5 QQuickView as it resizes Object to View above
 #ifndef QT5
     QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
+
 #else
     QObject::connect(qorbiterUIwin, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
     QObject::connect(qorbiterUIwin, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
@@ -436,7 +437,11 @@ void qorbiterManager::goBacktoQScreen()
 bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 {
     setDeviceNumber(device_id);
-    setDceResponse("Starting Manager");
+    setDceResponse("Starting Manager with connection to :"+QString::fromStdString(sRouterIP));
+    if(sRouterIP.length() < 7){
+        setDceResponse("Ip is empty, using alternate :"+this->m_ipAddress);
+        sRouterIP = m_ipAddress.toStdString();
+    }
     QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)));
     
 #ifdef __ANDROID__
@@ -2543,20 +2548,18 @@ bool qorbiterManager::createAndroidConfig()
  */
 void qorbiterManager::checkOrientation(QSize)
 {
+    setDceResponse("checkOrientation(QSize)::start");
     //NOTE: Is this not handled by the window manager and Orientation change signals?
 #ifndef QT5
-    if(qorbiterUIwin->height() < qorbiterUIwin->width())
-    {
+    if(qorbiterUIwin->height() < qorbiterUIwin->width()){
         //setDceResponse("wide");
+
         appHeight = qorbiterUIwin->window()->rect().height();
         appWidth = qorbiterUIwin->window()->rect().width() ;
         setOrientation(false);
-    }
-    else
-    {
+    } else {
         appHeight = qorbiterUIwin->window()->rect().height();
         appWidth = qorbiterUIwin->window()->rect().width() ;
-        
         setOrientation( true);
     }
     
@@ -2574,8 +2577,8 @@ void qorbiterManager::checkOrientation(QSize)
     }
 
 #endif
-    qDebug() << qorbiterUIwin->size();
-    
+    qDebug() <<"QOrbiter Window size::"<< qorbiterUIwin->size();
+
 }
 
 void qorbiterManager::getGrid(int i)

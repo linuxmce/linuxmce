@@ -197,6 +197,7 @@ public:
     int i_current_mediaType;
     int i_current_floorplanType;
     string *s_user;
+    int i_currentGridType;
     //@}
 
     /*! @name Orbiter Setup Member Variables */
