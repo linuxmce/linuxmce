@@ -72,15 +72,10 @@ Item
 
                         alphabetrect.scale = 1
                     }
-                    onClicked: { if(dataModel.totalPages===1){
-                            gridView.currentIndex = dataModel.setSection(name)
-                            gridView.positionViewAtIndex(gridView.currentIndex, ListView.Beginning)
-
-                        }else{
-                            manager.setSeekLetter(name)
+                    onClicked: {
+                            manager.seekGrid("MediaFile", name)
                         }
                     }
-                }
             }
         }
 

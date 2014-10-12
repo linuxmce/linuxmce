@@ -81,7 +81,7 @@ Item {
         cacheBuffer: 15
         interactive:true
         highlightFollowsCurrentItem:true
-        Component.onCompleted:forceActiveFocus()
+        Component.onCompleted:{forceActiveFocus(); manager.setStringParam(0, manager.q_mediaType)}
 
         Keys.onPressed: {
             if(event.key !==Qt.Key_Enter && event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235 && event.text != ""){
