@@ -24,6 +24,13 @@ Item {
             loadComponent("PinWindow.qml", {"requestedUser":userToValidate})
         }
     }
+    Connections{
+        target:manager
+        onModelChanged:{
+            gridView.positionViewAtIndex(manager.currentIndex, GridView.Beginning)
+            manager.currentIndex=-1
+        }
+    }
 
 
     function runEffects(){
@@ -81,7 +88,14 @@ Item {
         cacheBuffer: 15
         interactive:true
         highlightFollowsCurrentItem:true
-        Component.onCompleted:{forceActiveFocus(); manager.setStringParam(0, manager.q_mediaType)}
+        Component.onCompleted:{forceActiveFocus(); manager.setStringParam(0, manager.q_mediaType); }
+        onModelChanged: {
+            currentIndex = manager.currentIndex
+            positionViewAtIndex(currentIndex, GridView.Beginning)
+            manager.currentIndex=1
+        }
+
+
 
         Keys.onPressed: {
             if(event.key !==Qt.Key_Enter && event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235 && event.text != ""){
@@ -179,7 +193,7 @@ Item {
                 MouseArea
                 {
                     anchors.fill:parent
-                    onClicked: manager.goBackGrid()
+                    onClicked:{ manager.goBackGrid()}
                 }
             }
 

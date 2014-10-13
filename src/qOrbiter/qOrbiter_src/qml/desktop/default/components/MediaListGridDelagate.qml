@@ -61,7 +61,11 @@ Item
             color: "transparent"
             
             MediaListClickHandler {
+
                 //  onActivated: console.log(id)
+               onActivated: {
+
+               }
             }
             
             BorderImage {
