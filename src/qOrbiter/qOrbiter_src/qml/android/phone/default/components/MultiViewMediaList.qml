@@ -57,7 +57,9 @@ Item{
     Connections{
         target:manager
         onModelChanged:{
-            media_grid.positionViewAtIndex(currentIndex, GridView.Beginning)
+            console.log("!!!!!!!!!!!!!model change!!!!!!!!!!!!!!!!!")
+            media_grid.positionViewAtIndex(manager.currentIndex, GridView.Beginning)
+            manager.currentIndex=-1
         }
     }
     Connections {
@@ -93,10 +95,12 @@ Item{
         }
         cellHeight: currentCellHeight
         cellWidth:currentCellWidth
-
         model:manager.getDataGridModel("MediaFile", 63)
         visible:true //current_view_type===1
         delegate:currentDelegate
+        onModelChanged: {
+            console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        }
     }
 
     PathView{
@@ -108,7 +112,7 @@ Item{
     states: [
         State {
             name: "audio"
-          //  when:manager.q_mediaType == Mediatypes.STORED_AUDIO
+            //  when:manager.q_mediaType == Mediatypes.STORED_AUDIO
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: scaleX(25)
@@ -118,7 +122,7 @@ Item{
         },
         State {
             name: "video"
-          //  when:manager.q_mediaType == Mediatypes.STORED_VIDEO
+            //  when:manager.q_mediaType == Mediatypes.STORED_VIDEO
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: scaleY(24)

@@ -85,16 +85,7 @@ Item{
             id:media_goback
             buttonText: "Back"
             hitArea.onReleased:{
-goingBack()
                 manager.goBackGrid();
-
-
-                //            else{
-
-                //                pageLoader.item.sztate="selection"
-                //                manager.goBackGrid()
-                //                mediatypefilter.reset()
-                //            }
             }
             visible: manager.currentScreen==="Screen_47.qml"
         }

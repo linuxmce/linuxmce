@@ -84,7 +84,7 @@ Item {
                     id:ms
                     anchors.fill: parent
                     property bool itemActive:model.status
-                    onClicked:{pageLoader.item.lastIndex=-1;filterlist.model.setSelectionStatus(name); itemActive =  filterlist.model.getSelectionStatus(name)}
+                    onClicked:{filterlist.model.setSelectionStatus(name); itemActive =  filterlist.model.getSelectionStatus(name)}
 
                 }
             }

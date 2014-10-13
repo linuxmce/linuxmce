@@ -43,8 +43,8 @@ Item{
     Connections{
         target:manager
         onModelChanged:{
-            media_grid.positionViewAtIndex(files_view_screen.currentIndex, GridView.Beginning)
-            files_view_screen.currentIndex=-1
+            media_grid.positionViewAtIndex(manager.currentIndex, GridView.Beginning)
+            manager.currentIndex=-1
         }
     }
 
@@ -95,7 +95,6 @@ Item{
         }
         cellHeight: currentCellHeight
         cellWidth:currentCellWidth
-
         model:manager.getDataGridModel("MediaFile", 63)
         visible:true //current_view_type===1
         delegate:currentDelegate

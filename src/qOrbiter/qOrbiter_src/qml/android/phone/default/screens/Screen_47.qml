@@ -6,32 +6,6 @@ StyledScreen{
     id:file_view_screen
     property int current_view_type:1
     property string currentSeekLetter:""
-    property int lastIndex:-1;
-    property int currentIndex:-1
-
-    ListModel{
-        id:stupid
-
-    }
-
-    function addForwardIndex(i){
-        console.log('Adding restore index of ' +i)
-        stupid.append({"marker":i})
-        currentIndex=-1
-        console.log("last array count:"+stupid.count)
-    }
-
-    function removeIndex(){
-
-        if(stupid.count==0){
-            console.log("No restore set, using 0")
-            currentIndex=0
-        } else {
-            currentIndex=stupid.get(stupid.count-1).marker
-            console.log("Restoring to index "+currentIndex)
-            stupid.remove(stupid.count-1)
-        }
-    }
 
     function toggleAlphabet(){
         console.log("toggling alphabet")

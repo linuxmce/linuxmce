@@ -7,39 +7,7 @@ StyledScreen {
     screen: "Media Files View"
     property int current_view_type:1
     property string currentSeekLetter:""
-    property int currentIndex:-1
-    property int lastIndex:-1
 
-    ListModel{
-        id:stupid
-
-    }
-
-    Connections{
-        target: nav_row
-        onGoingBack:{
-            removeIndex();
-        }
-    }
-
-    function addForwardIndex(i){
-        console.log('Adding restore index of ' +i)
-        stupid.append({"marker":i})
-        currentIndex=-1
-        console.log("last array count:"+stupid.count)
-    }
-
-    function removeIndex(){
-
-        if(stupid.count==0){
-            console.log("No restore set, using 0")
-            currentIndex=-1
-        } else {
-            currentIndex=stupid.get(stupid.count-1).marker
-            console.log("Restoring to index "+currentIndex)
-            stupid.remove(stupid.count-1)
-        }
-    }
 
     ListModel{
         id:alphabetlist

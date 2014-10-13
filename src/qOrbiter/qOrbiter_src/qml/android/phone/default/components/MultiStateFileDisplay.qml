@@ -64,6 +64,13 @@ Item{
             media_grid.positionViewAtIndex(item, ListView.Beginning);
         }
     }
+    Connections{
+        target:manager
+        onModelChanged:{
+            media_grid.positionViewAtIndex(manager.currentIndex, GridView.Beginning)
+            manager.currentIndex=-1
+        }
+    }
     ListView{
         id:media_list
         anchors{
@@ -93,12 +100,11 @@ Item{
         model:manager.getDataGridModel("MediaFile", 63)
         visible:current_view_type===1
         delegate:currentDelegate
-        onModelChanged: {
-            if(lastIndex!==-1){
-                console.log("Moving to last index")
-                media_grid.positionViewAtIndex(lastIndex, ListView.Beginning);
-            }
-        }
+//        onModelChanged: {
+//                console.log("Moving to last index")
+//                media_grid.positionViewAtIndex(manager.currentIndex, ListView.Beginning);
+//                manager.currentIndex=-1
+//        }
     }
 
     PathView{
