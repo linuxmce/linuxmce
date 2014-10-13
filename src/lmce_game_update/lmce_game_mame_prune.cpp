@@ -158,10 +158,10 @@ void LMCE_Game_Mame_Prune::ProcessEntry(string sRomName, MAMERom *pCurrentRom)
   string sTmpCategory;
   if (m_pMAMECategory->m_mapRomToCategory_Find(sRomName).empty())
     {
-      LoggerWrapper::GetInstance()->Write(LV_WARNING,"No Genre found for Game %s, trying clone %s",sRomName.c_str(), pCurrentRom->RomCloneOf_get().c_str());
+      // LoggerWrapper::GetInstance()->Write(LV_WARNING,"No Genre found for Game %s, trying clone %s",sRomName.c_str(), pCurrentRom->RomCloneOf_get().c_str());
       if (m_pMAMECategory->m_mapRomToCategory_Find(pCurrentRom->RomCloneOf_get()).empty())
 	{
-	  LoggerWrapper::GetInstance()->Write(LV_WARNING,"No Genre found for Clone of Game %s, Setting to Unknown.",pCurrentRom->RomCloneOf_get().c_str());
+	  // LoggerWrapper::GetInstance()->Write(LV_WARNING,"No Genre found for Clone of Game %s, Setting to Unknown.",pCurrentRom->RomCloneOf_get().c_str());
 	  sTmpCategory="Unknown";
 	}
       else
@@ -187,13 +187,15 @@ void LMCE_Game_Mame_Prune::ProcessEntry(string sRomName, MAMERom *pCurrentRom)
 	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Deleting ROM %s",sRomName.c_str());
 	  string sCmd = "rm -rf "+m_sRomPath+"/"+sRomName+".zip";
 	  system(sCmd.c_str());
-	  string sCmd2 = "rm -rf "+m_sRomPath;
+	  string sCmd2 = "rm -rf "+m_sRomPath+"/"+sRomName;
 	  system(sCmd2.c_str());
 	  m_iDeletedRoms++;
 	}
       else
 	{
-	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"Would have deleted ROM %s",sRomName.c_str());
+	  cout << "rm -rf " << m_sRomPath << "/" << sRomName << ".zip" << endl;
+	  cout << "rm -rf " << m_sRomPath << "/" << sRomName << endl;
+ 	  // LoggerWrapper::GetInstance()->Write(LV_STATUS,"Would have deleted ROM %s",sRomName.c_str());
 	  m_iDeletedRoms++;
 	}
     }
@@ -215,7 +217,7 @@ int main(int argc, char* argv[])
   char c;
   int iRetCode;
 
-  cout << "lmce_game_mame_prune, v. 2.0" << endl;
+  cout << "lmce_game_mame_prune, v. 2.1" << endl;
 
   for(int optnum=1;optnum<argc;++optnum)
     {

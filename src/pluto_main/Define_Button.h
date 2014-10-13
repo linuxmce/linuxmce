@@ -198,6 +198,8 @@
 #define BUTTON_a8select_CONST 254
 #define BUTTON_a8start_CONST 255
 #define BUTTON_Backspace_CONST 256
+#define BUTTON_TI99DashSlash_CONST 257
+#define BUTTON_TI99FCTN_CONST 258
 
 #define BUTTON_TABLE "Button"
 #define BUTTON_PK_BUTTON_FIELD "PK_Button"

@@ -166,7 +166,8 @@ FileHandlerFactory::~FileHandlerFactory(void)
 	  (sExtension == "atr") ||
 	  (sExtension == "xfd") ||
 	  (sExtension == "rom") ||
-			   (sExtension == "fds");
+			   (sExtension == "fds") ||
+	  (sExtension == "rpk");
 
 	return bHasRomExtension;	// do we do more tests here?
 }

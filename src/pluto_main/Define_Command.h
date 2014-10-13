@@ -1028,6 +1028,10 @@
 #define COMMAND_Triangle_CONST 1132
 #define COMMAND_Square_CONST 1133
 #define COMMAND_X_CONST 1134
+#define COMMAND_PIP_Toggle_CONST 1135
+#define COMMAND_Search_CONST 1136
+#define COMMAND_Function_CONST 1137
+#define COMMAND_Submenu_CONST 1138
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"

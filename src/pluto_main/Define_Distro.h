@@ -22,6 +22,7 @@
 #define DISTRO_Raspian_Wheezy_CONST 19
 #define DISTRO_Ubuntu_Precise_CONST 20
 #define DISTRO_Ubuntu_Trusty_CONST 21
+#define DISTRO_Raspbian_Jessie_CONST 22
 
 #define DISTRO_TABLE "Distro"
 #define DISTRO_PK_DISTRO_FIELD "PK_Distro"

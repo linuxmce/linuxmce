@@ -72,6 +72,8 @@ sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files) \
 	Apple2EmulatorController.cpp \
 	Atari800EmulatorModel.cpp \
 	Atari800EmulatorController.cpp \
+	TI994AEmulatorModel.cpp \
+	TI994AEmulatorController.cpp \
 	$(ROOT)/inotify/inotify_class.cpp
 #<-dceag-mh-e->
 

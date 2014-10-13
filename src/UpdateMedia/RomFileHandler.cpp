@@ -340,6 +340,9 @@ void RomFileHandler::getSystem(string sFilename)
 	if (sFilename.find("/a800") != string::npos || 
 	    sFilename.find("/a130xe") != string::npos)
 	  m_sROMSystem = "Atari 800";
+	if (sFilename.find("/ti99") != string::npos ||
+	sFilename.find(".rpk") != string::npos)
+	  m_sROMSystem = "TI 99/4A";
 
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"RomFileHandler::getSystem(%s) = %s",sFilename.c_str(),m_sROMSystem.c_str());
 
@@ -434,6 +437,9 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
 	if (sTmpFile.find(".dsk") != string::npos || sTmpFile.find(".do") != string::npos
 		|| sTmpFile.find(".po") != string::npos || sTmpFile.find(".nib") != string::npos)
 		sSnapFilename = "/home/snap/apple2/" + sROMTitle + ".jpg";
+
+	if (sTmpFile.find(".rpk") != string::npos)
+	  sSnapFilename = "/home/snap/ti99/" + sROMTitle + ".jpg";
 
   	if (m_sFullFilename.find("/a2600") != string::npos || sTmpFile.find(".a26") != string::npos)
 		sSnapFilename = "/home/snap/a2600/" + sROMTitle + ".jpg";

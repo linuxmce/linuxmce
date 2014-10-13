@@ -1311,6 +1311,16 @@
 #define TEXT_R1_CONST 2254
 #define TEXT_R2_CONST 2255
 #define TEXT_R3_CONST 2256
+#define TEXT_iTV_CONST 2257
+#define TEXT_PIP_CONST 2258
+#define TEXT_Swap_CONST 2259
+#define TEXT_Position_CONST 2260
+#define TEXT_Function_Menu_CONST 2261
+#define TEXT_Sub_Menu_CONST 2262
+#define TEXT_Title_CONST 2263
+#define TEXT_Last_CONST 2264
+#define TEXT_TIDashSlash_CONST 2266
+#define TEXT_TI99FCTN_CONST 2267
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"
