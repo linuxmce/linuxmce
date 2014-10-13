@@ -1197,7 +1197,7 @@ void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, int i
     modelPoolLock.unlock();
     pTable->ClearData();
     delete pTable;
-    
+    emit modelChanged();
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "addDataGridItem() end");
 }
 
@@ -1286,6 +1286,11 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
             pModel->setOption("");
             pModel->setPK_DataGrid(PK_DataGrid);
             m_mapDataGridModels.insert(dataGridId, pModel);
+             qDebug() << "eggs";
+            if(!currentIndexMap.isEmpty()){
+
+                currentIndexMap.clear();
+            }
             
             QString option = "";
             if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
@@ -2146,6 +2151,7 @@ void qorbiterManager::initializeGridModel()
 
 bool qorbiterManager::goBackGrid()
 {
+    removeRestoreIndex();
     return mediaFilter.goBack();
 }
 
@@ -2562,9 +2568,7 @@ void qorbiterManager::checkOrientation(QSize)
         appWidth = qorbiterUIwin->window()->rect().width() ;
         setOrientation( true);
     }
-    
-    qDebug() << qorbiterUIwin->window()->rect().size();
-    setDceResponse("orientation change");
+
 #else
     appHeight = qorbiterUIwin->height();
     appWidth = qorbiterUIwin->width();

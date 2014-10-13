@@ -179,6 +179,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY(QString q_pk_users READ getGridPkUsers WRITE setGridPkUsers NOTIFY gridPkUsersChanged  ) /*! The PK users for this grid */
     Q_PROPERTY(QString q_last_viewed READ getGridLastViewed WRITE setGridLastViewed NOTIFY gridLastViewedChanged) /*! Last viewed property setting for this grid */
     Q_PROPERTY(QString q_pk_attribute READ getGridPkAttribute WRITE setGridPkAttribute NOTIFY gridPkAttributeChanged) /*! Pk attribute filter for this grid */
+    Q_PROPERTY(int  currentIndex READ getCurrentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
     /* Add properties here for missing grid values */
     Q_PROPERTY (QString sPK_User READ getCurrentUser WRITE setCurrentUser NOTIFY userChanged)/*!< \brief Contains string of the current user \ingroup qorbiter_properties */
     Q_PROPERTY (QString currentRoom READ getCurrentRoom WRITE setCurrentRoom NOTIFY roomChanged)/*!< \brief Contains the current EA or room with the EA  \ingroup qorbiter_properties */
@@ -274,6 +275,7 @@ public:
     long iPK_Device;
     QString qs_ext_routerip;
     QString appConfigPath;
+
     /*messaging*/
     QString commandResponse;
     QString eventResponse;
@@ -308,6 +310,7 @@ public:
     QList<QObject*> skins_list;
     ExistingOrbiterModel *myOrbiters;
     QString qrcPath;
+
     //TODO, remove the below in favour of the data structure
     QMap <QString*, QString*> availibleSkins;
     QString qmlPath;
@@ -414,7 +417,8 @@ Param 10 - pk_attribute
     QString gamesDefaultSort;
     QString q_attributeType_sort;
     MediaFilter mediaFilter;
-
+    int currentIndex; /*!< the current index of the mediaGrid on screen */
+    QList<int> currentIndexMap; /*!< the list of indexes as the map is being traversed. should be cleared between mediatypes. int 1 is the mediatype, int 2 is the actual restore value */
 
     QString qs_seek;
     bool backwards;
@@ -627,6 +631,7 @@ signals:
 
 
     /*Datagrid Signals*/
+    void currentIndexChanged();
     void subTypeChanged();
     void resetSearchParams();
     void gridStatus(bool s);
@@ -666,6 +671,7 @@ signals:
     void prepareFileList(QString filter);
     void loadDataGrid(QString dataGridId, int PK_DataGrid, QString option);
     void loadDataForDataGrid(QString dataGridId, QString dgName, int PK_DataGrid, QString m_option, int start, int numItems, int numCols, QString seek);
+
 
     /*Message and notification signals*/
     void dceResponseChanged();
@@ -807,7 +813,7 @@ public slots:
     void setFormFactor(int f) {
 #ifdef __ANDROID__
         if(f==1){
-           setHostDevice(HostSystemData::ANDROID_PHONE);
+            setHostDevice(HostSystemData::ANDROID_PHONE);
         } else if (f==2){
             setHostDevice(HostSystemData::ANDROID_TABLET);
         } else {
@@ -815,7 +821,7 @@ public slots:
         }
 #endif
         isPhone = f; emit formFactorChanged();
-                              }
+    }
     int getFormFactor(){ return isPhone;}
 
     /*!
@@ -1193,7 +1199,7 @@ public slots:
      * \brief setMediaResponse
      * \param r
      */
-    void setMediaResponse (QString r) {mediaResponse = r; emit mediaResponseChanged();}
+    void setMediaResponse (QString r) {mediaResponse = r; qDebug() << mediaResponse; emit mediaResponseChanged();}
     /*!
      * \brief getMediaResponse
      * \return
@@ -1338,6 +1344,30 @@ public slots:
 
     /*! @name Datagrid Slots*/
     //@{
+
+    void setCurrentIndex(int i){ if(currentIndex!=i) { currentIndex=i; emit currentIndexChanged();}  }
+    int getCurrentIndex() {return currentIndex;}
+
+    void addRestoreIndex(int i){
+
+        setMediaResponse("addRestoreIndex()::Start");
+        setMediaResponse("addRestoreIndex()::Set into map index "+QString::number(i)+" for mediatype "+q_mediaType);
+        currentIndexMap.append(i);
+        setCurrentIndex(-1);
+    }
+
+    void removeRestoreIndex(){
+        if(currentIndexMap.isEmpty()){
+            setMediaResponse("removeRestoreIndex()::Nothing to restore, setting index -1");
+            setCurrentIndex(-1);
+        } else {
+            setMediaResponse("removeRestoreIndex()::Found restore index "+QString::number(currentIndexMap.last()));
+            setCurrentIndex(currentIndexMap.last());
+
+            currentIndexMap.removeLast();
+        }
+    }
+
 
     /*!
      * \brief requestGenres
