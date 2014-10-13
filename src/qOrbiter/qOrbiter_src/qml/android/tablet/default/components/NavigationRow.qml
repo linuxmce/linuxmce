@@ -9,6 +9,7 @@ Item{
     property alias navigation:nav
     property string defaultSource:"ScenarioComponent.qml"
     property string navSource:"ScenarioComponent.qml"
+    signal goingBack()
     anchors{
         top:qml_root.top
         left:qml_root.left
@@ -84,7 +85,9 @@ Item{
             id:media_goback
             buttonText: "Back"
             hitArea.onReleased:{
+goingBack()
                 manager.goBackGrid();
+
 
                 //            else{
 

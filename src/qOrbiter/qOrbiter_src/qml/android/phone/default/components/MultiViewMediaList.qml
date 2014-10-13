@@ -54,13 +54,19 @@ Item{
         media_grid.model=manager.getDataGridModel("MediaFile", 63)
         media_grid.positionViewAtIndex(item, ListView.Beginning)
     }
-
+    Connections{
+        target:manager
+        onModelChanged:{
+            media_grid.positionViewAtIndex(currentIndex, GridView.Beginning)
+        }
+    }
     Connections {
         target: manager.getDataGridModel("MediaFile", 63)
         onScrollToItem: {
             console.log("scroll to item : " + item);
             media_grid.positionViewAtIndex(item, ListView.Beginning);
         }
+
     }
     ListView{
         id:media_list

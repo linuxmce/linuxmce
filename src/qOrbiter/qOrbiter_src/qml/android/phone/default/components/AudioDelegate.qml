@@ -51,6 +51,6 @@ Item{
     MouseArea{
         id:trap
         anchors.fill: parent
-        onReleased: manager.setStringParam(4, id);
+        onReleased:{ addForwardIndex(model.index);manager.setStringParam(4, id);}
     }
 }

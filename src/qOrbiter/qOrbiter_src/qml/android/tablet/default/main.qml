@@ -13,6 +13,7 @@ Item {
     property alias skinStyle:style
     property int screensaverTimer:manager.screenSaverTimeout*1000
     property bool uiOn:true
+    property alias contentItem:pageLoader.item
 
     signal showMetadata()
     signal showPlaylist()
@@ -384,6 +385,7 @@ Item {
         onStatusChanged:  if (pageLoader.status == Component.Ready)
                           {
                               manager.setDceResponse("Command to change to:" + source+ " was successfull")
+                              contentItem=item.screen_root
                           }
                           else if (pageLoader.status == Component.Loading)
                           {

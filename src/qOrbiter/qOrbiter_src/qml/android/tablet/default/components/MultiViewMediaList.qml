@@ -39,6 +39,15 @@ Item{
     }
 
     property variant currentDelegate:manager.q_mediaType==5 ? videoItem :audioItem
+
+    Connections{
+        target:manager
+        onModelChanged:{
+            media_grid.positionViewAtIndex(files_view_screen.currentIndex, GridView.Beginning)
+            files_view_screen.currentIndex=-1
+        }
+    }
+
     Component.onCompleted: {
 
         if(manager.q_mediaType=="4"){
