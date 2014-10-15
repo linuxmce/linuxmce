@@ -438,7 +438,7 @@ void RomFileHandler::GetRomInfo(string sFilename, map<int,string>& mapAttributes
 		|| sTmpFile.find(".po") != string::npos || sTmpFile.find(".nib") != string::npos)
 		sSnapFilename = "/home/snap/apple2/" + sROMTitle + ".jpg";
 
-	if (sTmpFile.find(".rpk") != string::npos)
+	if (m_sFullFilename.find("/ti99") != string::npos)
 	  sSnapFilename = "/home/snap/ti99/" + sROMTitle + ".jpg";
 
   	if (m_sFullFilename.find("/a2600") != string::npos || sTmpFile.find(".a26") != string::npos)

@@ -209,7 +209,7 @@ if [[ -n "$MySqlPassword" ]]; then MYSQL_DB_CRED="$MYSQL_DB_CRED -p$MySqlPasswor
 MYSQL_DB_CRED=$(builtin echo $MYSQL_DB_CRED)
 export MYSQL_DB_CRED
 
-LMCE_DIRS="pictures audio documents videos games/MAME games/a2600 games/a2600p games/a5200 games/a5200p games/a7800 games/a7800p games/coleco games/intv games/sg1000 games/sms games/smspal games/nes games/famicom games/snes games/snespal games/genesis games/megadriv games/vectrex games/tg16 games/pce games/sgx games/apple2cp pvr"
+LMCE_DIRS="pictures audio documents videos games/MAME games/a2600 games/a2600p games/a5200 games/a5200p games/a7800 games/a7800p games/coleco games/intv games/sg1000 games/sms games/smspal games/nes games/famicom games/snes games/snespal games/genesis games/megadriv games/vectrex games/tg16 games/pce games/sgx games/c64 games/apple2e games/ti99 pvr"
 export LMCE_DIRS
 
 VGcmd=""
