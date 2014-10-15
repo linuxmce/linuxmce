@@ -22,4 +22,9 @@ namespace DCE
   
   }
 
+  string TI994AEmulatorController::getAdditionalOptions()
+  {
+    return "\t-autoboot_command\t\"\\r2\"";
+  }
+
 }

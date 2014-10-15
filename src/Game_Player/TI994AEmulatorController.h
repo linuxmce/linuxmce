@@ -22,7 +22,7 @@ namespace DCE
     ~TI994AEmulatorController(); // dtor
 
     TI994AEmulatorModel *m_pEmulatorModel;
-
+    string getAdditionalOptions();
 
   };
 

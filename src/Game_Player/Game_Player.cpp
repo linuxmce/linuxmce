@@ -68,10 +68,11 @@ Game_Player::Game_Player(int DeviceID, string ServerAddress,bool bConnectEventHa
 	: Game_Player_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 ,
-m_GameMutex ("game_player")
+	  m_GameMutex ("game_player"), m_X11ControllerMutex("x11_controller")
 {
   g_pGame_Player = this;
   m_GameMutex.Init (NULL);
+  m_X11ControllerMutex.Init(NULL);
   m_pAlarmManager = NULL;
   m_pDevice_App_Server = NULL;
   m_pEmulatorFactory=NULL;

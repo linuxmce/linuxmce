@@ -59,6 +59,8 @@ namespace DCE
 
   void X11EmulatorController::pleaseResend()
   {
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXX PLEASERESEND!");
+    PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"Asking parent to please re-send the key.");
     m_bResend=true;
   }
@@ -73,12 +75,14 @@ namespace DCE
   void X11EmulatorController::findWindow()
   {
     m_bFindWindowRunLoop=true;
+    PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);
     // If we're being called, we need to make double sure that we find the new window,
     // so zero out the old one.
     LoggerWrapper::GetInstance()->Write(LV_WARNING,"X11EmulatorController::findWindow() - pleaseResend %d",m_bResend);
     int iRetry=0; // number of times to retry despite a duplicate window returned.
     while (m_bFindWindowRunLoop==true)
       {
+	cout << m_bFindWindowRunLoop << endl;
 	if (m_pEmulatorModel->m_iWindowId != 0)
 	  {
 	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Previous Window Id was %x setting to 0 to reacquire new window.",m_pEmulatorModel->m_iWindowId);
@@ -135,7 +139,7 @@ namespace DCE
   {
     // Not much going on here. We set a global pointer to this class for our window handler
     // and then we call the base class.
-
+    PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);
     if (m_pGame_Player)
       {
 	if (m_pGame_Player->m_pData)
@@ -169,8 +173,11 @@ namespace DCE
 
   bool X11EmulatorController::run()
   {
+    PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);
     EmulatorController::run(); // superclass, sets running flag.
     m_sLastAction="NOP";
+    m_pEmulatorModel->m_iExit_Code=-1;
+    m_bResendFired=false;
     m_pAlarmManager=new AlarmManager();
     m_pAlarmManager->Start(1);
     // grab display.
@@ -202,7 +209,8 @@ namespace DCE
 	  ->Write(LV_CRITICAL,"X11EmulatorController::run() - failed to create window id thread.");
 	return false;
       }
-    
+   
+    usleep(40000); 
     m_pAlarmManager->AddRelativeAlarm(1,this,CHECK_RESEND,NULL);
 
     return true;
@@ -211,8 +219,14 @@ namespace DCE
 
   bool X11EmulatorController::stop()
   {
-
+    PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);
     m_pEmulatorModel->m_iWindowId = 0; // reset Window ID as it is no longer valid.
+ 
+    if (m_pEmulatorModel->m_iExit_Code > -1)
+      {
+	// There was an emulator crash. No need to do the rest of this, as it has already been fired.
+	return EmulatorController::stop();
+      }
 
     // Close display
     if (m_pEmulatorModel->m_pDisplay)
@@ -220,9 +234,13 @@ namespace DCE
 	//XCloseDisplay(m_pEmulatorModel->m_pDisplay);
       }
 
-    m_pAlarmManager->CancelAlarmByType(CHECK_RESEND);
+    if (m_bResendFired == true)
+      {
+	m_pAlarmManager->CancelAlarmByType(CHECK_RESEND);
+      }
     m_pAlarmManager->Stop();
     m_bFindWindowRunLoop=false;
+    pthread_join(m_windowIdThread,NULL);
     delete m_pAlarmManager;
     m_pAlarmManager=NULL;
 
@@ -232,6 +250,8 @@ namespace DCE
 
   void X11EmulatorController::AlarmCallback(int id, void* param)
   {
+    PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);
+    m_bResendFired=true;
     checkResend();
   }
 
@@ -254,6 +274,7 @@ namespace DCE
 
   bool X11EmulatorController::doAction(string sAction) // from EmulatorController
   {
+    PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);
     m_bResend=false;
 
     // TODO: Do we rethink doAction as a virtual instead of a pure virtual?
@@ -328,6 +349,7 @@ namespace DCE
 
   bool X11EmulatorController::pressButton(int iPK_Button, Message *pMessage)
   {
+    PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);
     if (!m_pEmulatorModel->m_pDisplay)
       {
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorModel::pressButton(%d) - No valid display pointer, bailing!",iPK_Button);
@@ -384,6 +406,7 @@ namespace DCE
 
   bool X11EmulatorController::pressClick(int iPositionX, int iPositionY, Message *pMessage)
   {
+    PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);
     if (!pMessage)
       {
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorController::pressClick(%d,%d) - malformed Message sent. aborting. ");
@@ -425,6 +448,7 @@ namespace DCE
 
   bool X11EmulatorController::getSnap(long int iPK_Device, int iWidth, int iHeight, char **pData, int& iData_Size)
   {
+    PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);
     size_t size; // length of image in bytes.
     XSetInputFocus(m_pEmulatorModel->m_pDisplay, m_pEmulatorModel->m_iWindowId, RevertToNone, CurrentTime);
     string sGeometry = StringUtils::itos(iWidth) + "x" + StringUtils::itos(iHeight);

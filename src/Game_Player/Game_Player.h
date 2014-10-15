@@ -91,6 +91,7 @@ namespace DCE
     bool Connect (int iPK_DeviceTemplate);
     void pleaseResend();
 
+    pluto_pthread_mutex_t m_X11ControllerMutex;
     int m_iPK_MediaType;	// Used by the stop media method.
     int m_iModifier;		// The current button modifier.
     bool m_bLoadSavedGame;
