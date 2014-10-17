@@ -32,6 +32,7 @@ Item {
     property bool uiOn:true
     property int screensaverTimer:15000 //manager.screenSaverTimeout*1000
 
+
     function resetUiTimeout(){
         hideUiTimer.restart()
     }
@@ -205,11 +206,6 @@ Item {
         }
     }
 
-    Rectangle{
-        id:filler
-        anchors.fill: qmlroot
-        color: "black"
-    }
 
 
     ListModel{
@@ -353,6 +349,7 @@ Item {
         onDebugInfoChanged:{
             console.log(debugInfo)
         }
+
 
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
