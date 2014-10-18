@@ -369,7 +369,9 @@ Item {
             bottom:info_panel.top
             left:qml_root.left
             right:qml_root.right
+
         }
+
         opacity: uiOn ? 1 : 0
         Behavior on opacity {
             PropertyAnimation{

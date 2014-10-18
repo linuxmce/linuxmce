@@ -258,6 +258,9 @@ Item{
                 target:controlPanel
                 state:"unloaded"
             }
+            StateChangeScript{
+                script:{manager.getStoredPlaylist()}
+            }
 
         },
         State {

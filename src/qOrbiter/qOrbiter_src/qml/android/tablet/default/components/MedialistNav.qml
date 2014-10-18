@@ -1,42 +1,53 @@
 import QtQuick 1.1
 import "../../../../skins-common/lib/handlers"
 
-Row {
-    width: childrenRect.width
-    height: scaleY(7)
-    spacing: scaleX(1)
+Flickable{
+    height:scaleY(7)
+    width:scaleX(69)
+    anchors.verticalCenter: parent.verticalCenter
+    contentWidth: btnRow.width
+    clip:true
 
-    StyledButton{
-        buttonText: "Attribute"
-        onActivated: {attributeSelector.currentModel=attribfilter; }
-    }
+    Row {
+        id:btnRow
+        width: childrenRect.width
+        height: scaleY(7)
+        spacing: scaleX(1)
 
-    StyledButton{
-        buttonText: "Genre"
-        onActivated: {attributeSelector.currentModel=genrefilter; }
-    }
+        StyledButton{
+            buttonText: "Attribute"
+            onActivated: {attributeSelector.currentModel=attribfilter; }
+        }
 
-    StyledButton{
-        buttonText: "MediaType"
-        onActivated: {attributeSelector.currentModel=mediatypefilter; }
-    }
+        StyledButton{
+            buttonText: "Genre"
+            onActivated: {attributeSelector.currentModel=genrefilter; }
+        }
 
-    StyledButton{
-        buttonText: "Resolution"
-        onActivated: {attributeSelector.currentModel=fileformatmodel; }
-    }
-    StyledButton{
-        buttonText: "Sources"
-        // onActivated: {attributeSelector.currentModel=undefined; }
-    }
+        StyledButton{
+            buttonText: "MediaType"
+            onActivated: {attributeSelector.currentModel=mediatypefilter; }
+        }
 
-    StyledButton{
-        buttonText: "Users"
-        // onActivated: {attributeSelector.currentModel=undefined; }
-    }
+        StyledButton{
+            buttonText: "Resolution"
+            onActivated: {attributeSelector.currentModel=fileformatmodel; }
+        }
+        StyledButton{
+            buttonText: "Sources"
+            // onActivated: {attributeSelector.currentModel=undefined; }
+        }
 
-    StyledButton{
-        buttonText: "Play All"
-        onActivated:  manager.playMedia("!G"+iPK_Device)
+        StyledButton{
+            buttonText: "Users"
+            // onActivated: {attributeSelector.currentModel=undefined; }
+        }
+
+        StyledButton{
+            buttonText: "Play All"
+            onActivated:  manager.playMedia("!G"+iPK_Device)
+        }
     }
 }
+
+

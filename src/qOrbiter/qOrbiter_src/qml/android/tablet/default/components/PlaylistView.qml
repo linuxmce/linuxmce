@@ -8,7 +8,7 @@ Item{
     property alias delegate:playlist_data.delegate
 
     Component.onCompleted: {
-        manager.getStoredPlaylist()
+      //  manager.getStoredPlaylist()
     }
 
     Connections{

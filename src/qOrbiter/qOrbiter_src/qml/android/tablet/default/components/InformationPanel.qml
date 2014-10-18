@@ -68,13 +68,15 @@ Item{
         width: childrenRect.width
         height: parent.height
         anchors.right: parent.right
+        anchors.rightMargin: scaleX(2)
+        spacing: scaleY(2)
         StyledButton{
             buttonText: manager.sPK_User
             hitArea.onReleased: info_panel.state="user"
         }
         StyledButton{
             id:location_info
-            buttonText: roomList.currentRoom+"::"+roomList.currentEA
+            buttonText: roomList.currentRoom//+"::"+roomList.currentEA
             hitArea.onReleased: info_panel.state="room"
         }
     }
