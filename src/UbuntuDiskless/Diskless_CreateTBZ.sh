@@ -1,12 +1,15 @@
 #!/bin/bash
 
+PROXY=""
+#PROXY=http_proxy=http://10.10.42.99:3142
+
 ###########################################################
 ### Setup global variables
 ###########################################################
 DEVICEDATA_Operating_System=209
 DEVICEDATA_Architecture=112
 
-#TARGET_TYPES="ubuntu-i386 raspbian-armhf"
+###TARGET_TYPES="ubuntu-i386 raspbian-armhf"
 #TARGET_TYPES="raspbian-armhf"
 TARGET_TYPES="ubuntu-i386"
 
@@ -200,7 +203,7 @@ function do_debootstrap {
 	esac
 
 	[[ -f $(which "qemu-$qemu_arch-static") ]] && qemu_static_bin=$(which "qemu-$qemu_arch-static")
-	debootstrap --arch "$TARGET_ARCH" --foreign --no-check-gpg "$release_name" "$temp_dir" "$repository"
+	$PROXY debootstrap --arch "$TARGET_ARCH" --foreign --no-check-gpg "$release_name" "$temp_dir" "$repository"
 	mkdir -p "$temp_dir/usr/bin"
 	[[ -f "$qemu_static_bin" ]] && cp "$qemu_static_bin" "$temp_dir/usr/bin"
 	chroot "$temp_dir" /debootstrap/debootstrap --second-stage
@@ -279,7 +282,6 @@ MD_System_Level_Prep () {
 				deb http://deb.linuxmce.org/raspbian/ $TARGET_RELEASE main
 				deb $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
 				deb http://archive.raspberrypi.org/debian $TARGET_RELEASE main
-				#deb http://twolife.be/raspbian/ $TARGET_RELEASE main backports
 				EOF
 			;;
 	esac
@@ -401,7 +403,7 @@ MD_Preseed () {
 	# but will work for any source.
 	gpgs=$(apt-get -y update |& grep -s NO_PUBKEY | awk '{ print $NF }' | cut -c 9-16);
 	if [ -n "$gpgs" ]; then
-		echo "$gpgs" | while read gpgkeys; do
+		echo "$gpgs" | while read gpgkeys ; do
 			gpg --keyserver pgp.mit.edu --recv-keys "$gpgkeys"
 			gpg --export --armor "$gpgkeys" | apt-key add -
 		done
@@ -542,7 +544,7 @@ MD_Install_Packages () {
 			;;
 		"raspbian")
 			# Classic MD/qMD/squeezelite
-			DEVICE_LIST="2216 62 1759 2259 11 1825 26 1808 2122 2278"
+			DEVICE_LIST="2216 62 1759 2259 11 1825 26 1808 2278"
 			# qMD
 			#DEVICE_LIST="2216 2278 2259 11 26 1808 2122"
 			;;
@@ -578,7 +580,7 @@ MD_Install_Packages () {
 		R=$(RunSQL "$Q")
 		VerifyExitCode "Connecting to MYSQL DB failed"
 
-		for Row in $R; do
+		for Row in $R ; do
 			pkg_name=$(Field 1 "$Row")
 		done
 
@@ -751,11 +753,11 @@ Create_PXE_Initramfs_Vmlinuz () {
 ### Main execution area
 ###########################################################
 
-#Setup trap
-trap "Trap_Exit" EXIT
-
 #Set up logging
 Setup_Logfile
+
+#Setup trap
+trap "Trap_Exit" EXIT
 
 #TODO get as much of this from database as possible
 for TARGET in "$TARGET_TYPES" ; do
@@ -804,7 +806,7 @@ for TARGET in "$TARGET_TYPES" ; do
 	StatsMessage "BEGIN: Host: $HOST_DISTRO - $HOST_RELEASE - $HOST_ARCH"
 	StatsMessage "BEGIN: Target: $TARGET_DISTRO - $TARGET_RELEASE - $TARGET_ARCH"
 
-	TEMP_DIR=$(mktemp -d /tmp/Diskless_CreateTBZ.XXXXXXXXX)
+	TEMP_DIR=$(mktemp -d /opt/Diskless_CreateTBZ.XXXXXXXXX)
 
 	#Function execution
 	MD_Create_And_Populate_Temp_Dir
