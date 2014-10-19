@@ -1760,10 +1760,10 @@ bool DCE::qOrbiter::initDceVars(){
 bool DCE::qOrbiter::initialize(){
     emit commandResponseChanged("Connecting to router");
     emit commandResponseChanged("Starting dce initialization");
-        if(m_sIPAddress==""){
-            m_sIPAddress=dceIP.toStdString();
-            m_sHostName=dceIP.toStdString();
-        }
+    if(m_sIPAddress==""){
+        m_sIPAddress=dceIP.toStdString();
+        m_sHostName=dceIP.toStdString();
+    }
     emit commandResponseChanged("Initialization IP::"+ dceIP);
 
     qDebug() << "INITIALIZE!!!!!!!!!";
@@ -2486,10 +2486,10 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
 void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString option)
 {
 
-  QString fx = option.replace(0,1, QString::number(i_currentGridType));
-   qWarning() << fx;
+    QString fx = option.replace(0,1, QString::number(i_currentGridType));
+    qWarning() << fx;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGridGrid '%s', option = %s", dataGridId.toStdString().c_str(), fx.toStdString().c_str());
-option = fx;
+    option = fx;
     string *sResponse;
 
 
@@ -2806,6 +2806,21 @@ void qOrbiter::mythtvPlayMedia()
     SendCommand(forward_media);
 }
 
+/*!
+ * \brief qOrbiter::simplePlayMedia. This function is designed as a simple play() for external devices and others too dumb to know when to toggle.
+ */
+void qOrbiter::simplePlayMedia()
+{
+    if(this->internal_streamID!=-1){
+        string resp="";
+        CMD_Play simple(this->m_dwPK_Device, this->m_dwPK_Device_NowPlaying, internal_streamID);
+        if(SendCommand(simple, &resp) && resp=="OK"){
+            emit commandResponseChanged("Sent play to media stream "+QString::number(internal_streamID));
+            emit commandComplete();
+        }
+    }
+}
+
 void DCE::qOrbiter::StopMedia()
 {
     CMD_MH_Stop_Media endMedia(m_dwPK_Device, iMediaPluginID,0,i_current_mediaType ,0,StringUtils::itos(i_ea),false);
@@ -2952,14 +2967,34 @@ void qOrbiter::checkTimeCode(int npDevice)
     //  emit setMyIp(QString::fromStdString(m_sIPAddress));
 
     DeviceData_Base *pDevice =m_pData->m_AllDevices.m_mapDeviceData_Base_Find((long)npDevice) ;
+
     qWarning() << pDevice->m_dwPK_DeviceTemplate;
     string sIPAddress ="";
+    string defaultPort= m_pEvent->GetDeviceDataFromDatabase(pDevice->m_dwPK_Device, DEVICEDATA_Port_CONST);
+
     qWarning() << "1st pass result is ==>" << sIPAddress.c_str();
     if( sIPAddress.empty() )
     {
         if( pDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Generic_PC_as_MD_CONST && !pDevice->m_pDevice_MD->m_sIPAddress.empty() ){
             qWarning("MD address?");
             sIPAddress = pDevice->m_pDevice_MD->m_sIPAddress;
+        } else if( pDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_OMX_Player_CONST){
+            qWarning() << "OMX Player device, looking up ip address data";
+            sIPAddress =  pDevice->m_sIPAddress;
+            if( sIPAddress.empty() )
+            {
+                if( pDevice->m_pDevice_MD && !pDevice->m_pDevice_MD->m_sIPAddress.empty() )
+                    sIPAddress = pDevice->m_pDevice_MD->m_sIPAddress;
+                else if( pDevice->m_pDevice_Core && !pDevice->m_pDevice_Core->m_sIPAddress.empty() )
+                    sIPAddress = pDevice->m_pDevice_Core->m_sIPAddress;
+                else
+                {
+                    LoggerWrapper::GetInstance()->Write(LV_WARNING,"Orbiter::CMD_Set_Now_Playing  Xine has no IP address");
+                    return;
+                }
+            }
+            LoggerWrapper::GetInstance()->Write(LV_WARNING,"Orbiter::CMD_Set_Now_Playing  Xine has no IP address");
+
         }else if(pDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_Xine_Player_CONST  ) {
             qWarning("On Screen Orbiter, looking up XINE Ip Address set!");
             sIPAddress =  pDevice->m_sIPAddress;
@@ -2972,7 +3007,7 @@ void qOrbiter::checkTimeCode(int npDevice)
                     sIPAddress = pDevice->m_pDevice_Core->m_sIPAddress;
                 else
                 {
-                    LoggerWrapper::GetInstance()->Write(LV_WARNING,"Orbiter::CMD_Set_Now_Playing  Xine has no IP address");
+                    LoggerWrapper::GetInstance()->Write(LV_WARNING,"QOrbiter::CMD_Set_Now_Playing  Xine has no IP address");
                     return;
                 }
             }
@@ -2988,7 +3023,10 @@ void qOrbiter::checkTimeCode(int npDevice)
     }
 
     if((i_current_mediaType==4||i_current_mediaType==5) && !sIPAddress.empty() ){
-        emit updateTimeCode(QString::fromStdString(sIPAddress), 12000);
+        if(defaultPort.empty() ){
+            defaultPort="12000";
+        }
+        emit updateTimeCode(QString::fromStdString(sIPAddress), QString::fromStdString(defaultPort).toInt());
     }
     else
     {
@@ -3000,8 +3038,6 @@ void qOrbiter::checkTimeCode(int npDevice)
 
 void qOrbiter::getStreamingVideo()
 {
-
-
 
     char *grabData;
     int grabData_size=0;
@@ -4934,7 +4970,7 @@ void qOrbiter::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c200-e->
 {
     emit dceGuiCommand(MoveUp);
-        sCMD_Result="OK";
+    sCMD_Result="OK";
 }
 
 //<-dceag-c201-b->
@@ -4947,7 +4983,7 @@ void qOrbiter::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage)
 void qOrbiter::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c201-e->
 {
-emit dceGuiCommand(MoveDown);
+    emit dceGuiCommand(MoveDown);
     sCMD_Result="OK";
 }
 
@@ -4999,7 +5035,7 @@ void qOrbiter::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pM
 void qOrbiter::CMD_Back_Clear_Entry(string &sCMD_Result,Message *pMessage)
 //<-dceag-c363-e->
 {
-   emit dceGuiCommand(BackClearEntry);
+    emit dceGuiCommand(BackClearEntry);
     sCMD_Result = "OK";
 }
 
@@ -5096,7 +5132,7 @@ void qOrbiter::verifyInstall(QNetworkReply *r)
         if ( initialize() == true )
         {
             emit routerConnectionChanged(true);
-//              setm_sIPAddress(m_sIPAddress);
+            //              setm_sIPAddress(m_sIPAddress);
 
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
 
@@ -5266,7 +5302,9 @@ void qOrbiter::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMe
 /** @brief COMMAND: #97 - Mute */
 /** mute */
 
-void qOrbiter::CMD_Mute(string &sCMD_Result,Message *pMessage){}
+void qOrbiter::CMD_Mute(string &sCMD_Result,Message *pMessage){
+
+}
 //<-dceag-c97-e->
 
 
@@ -5286,18 +5324,17 @@ void qOrbiter::setVariable(int pkvar ,QString val)
 void qOrbiter::reInitialize(){
 
 
-    if(m_bOrbiterConnected){
-        return;
-    }
+
     qDebug() << "REINITIALIZE";
     Disconnect();
     if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
     {
-        CreateChildren();
+
         m_dwMaxRetries = 1;
         m_bRouterReloading = false;
         m_bReload = false;
         m_bOrbiterConnected = true;
+        CreateChildren();
         emit routerConnectionChanged(true);
     }else {
         emit routerConnectionChanged(false);

@@ -1720,6 +1720,7 @@ signals:
     void mediaPlayerTimeCodeChanged();
     void stopPlayer();
     void pausePlayer();
+
     ///@}
 
     /** Sub Device ID signals
@@ -1927,6 +1928,7 @@ public slots:
     void GetSecurityCam(int i_inc_pkdevice);
     void playMedia(QString inc_FKFile);
     void mythtvPlayMedia();
+    void simplePlayMedia();
 
     void StopMedia();
     void StopMediaInEA(int PK_EntertainArea);

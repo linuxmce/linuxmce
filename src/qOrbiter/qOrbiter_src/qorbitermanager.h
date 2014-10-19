@@ -593,6 +593,7 @@ signals:
     void bindMediaRemote(bool b);
     void startPlayback(QString file);
     void play();
+    void simplePlay();
     void moveMedia(QString eas, int streamID);
     void zoomLevelChanged(QString zoom);
     void aspectRatioChanged(QString ratio);
@@ -914,7 +915,7 @@ public slots:
     void getConfiguration();
     bool writeConfig();
     bool readLocalConfig();
-    void setConnectedState(bool state) { if(state != connectedState ){ connectedState = state;  if(connectedState) {setReloadStatus(false); } else { connectionWatchdog(); disconnectCount++; } ;  emit connectedStateChanged(); }  }
+    void setConnectedState(bool state) { if(state != connectedState ){ connectedState = state;  if(connectedState) {setReloadStatus(false); } else { connectionWatchdog(); setMediaPlayerID(-1); disconnectCount++; } ;  emit connectedStateChanged(); }  }
     bool getConnectedState () {return connectedState;}
     void setDceResponse(QString response);
     QString getDceResponse () ;
@@ -1219,6 +1220,7 @@ public slots:
     //{@
     void playMedia(QString FK_Media) { emit startPlayback(FK_Media);}
     void mythTvPlay(){emit play();}
+    void playResume(){ emit simplePlay(); }
     void stopMedia() {emit stopPlayback();}
     void setPlaybackSpeed(int s) {emit setStreamSpeed(s);}
     void pauseMedia() {emit pause();}

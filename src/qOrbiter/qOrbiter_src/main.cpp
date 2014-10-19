@@ -542,6 +542,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(userChanged(int)), &pqOrbiter, SLOT(setUser(int)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(bindMediaRemote(bool)), &pqOrbiter, SLOT(BindMediaRemote(bool)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(play()), &pqOrbiter, SLOT(mythtvPlayMedia()), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(simplePlay()), &pqOrbiter, SLOT(simplePlayMedia()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(startPlayback(QString)), &pqOrbiter, SLOT(playMedia(QString)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(pause()), &pqOrbiter, SLOT(PauseMedia()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(setStreamSpeed(int)), &pqOrbiter, SLOT(setPlaybackSpeed(int)), Qt::QueuedConnection);
