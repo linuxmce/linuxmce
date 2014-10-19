@@ -969,6 +969,8 @@ public:
         void jumpToStreamPosition(int);
         void volumeUp(int repeat);
         void volumeDown(int repeat);
+        void androidVolumeUp();
+        void androidVolumeDown();
         void trackUp();
         void trackDown();
 

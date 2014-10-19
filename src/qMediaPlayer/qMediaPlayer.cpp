@@ -764,8 +764,16 @@ void qMediaPlayer::CMD_Guide(string &sCMD_Result,Message *pMessage)
 void qMediaPlayer::CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c139-e->
 {
-    setCommandResponse("Need to implement command #139 - Play");
-    cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+    if(iStreamID==i_StreamId){
+        setCommandResponse("Need to implement command #139 - Play");
+        cout << "Parm #41 - StreamID=" << iStreamID << endl;
+        emit startPlayback();
+        sCMD_Result="PLAY-OK";
+    } else {
+        sCMD_Result="FAIL-BAD STREAM ID";
+    }
+
 }
 
 //<-dceag-c140-b->
@@ -1663,6 +1671,11 @@ void qMediaPlayer::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *p
     mp_manager->audioSink->setVolume(d);
 #endif
 #endif
+
+#ifdef NECESSITAS
+ androidVolumeUp();
+#endif
+
     qWarning("Set audio level Up.");
   //  emit volumeDown(iRepeat_Command);
 }
@@ -1685,6 +1698,11 @@ void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message 
      qWarning() << "New volume" << d;
 #endif
 #endif
+
+#ifdef NECESSITAS
+    androidVolumeDown();
+#endif
+
      sCMD_Result = "OK -Volume Down.";
     qWarning("Set audio level down.");
 
