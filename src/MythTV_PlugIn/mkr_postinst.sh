@@ -30,7 +30,7 @@ UseDB "mythconverg"
 RunSQL "$Q"
 
 #Alter mythconverg.settings to force MasterServerIP to the core's internal NIC
-Q="UPDATE settings SET data='192.168.80.1' where value='BackendServerIP'"
+Q="UPDATE settings SET data='192.168.80.1' where value='MasterServerIP'"
 UseDB "mythconverg"
 RunSQL "$Q"
 
