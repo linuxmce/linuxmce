@@ -479,24 +479,29 @@ WorkTheLines()
 		echo "Routing emergency number: $number via $emergencyphonelineProtocol/$emergencyphonelineNumber"
 	done
 
-	SQL="SELECT id,protocol,name,host,username,password,prefix,enabled,phonenumber,isfax,faxmail,dtmfmode FROM $DB_PhoneLines_Table"
+	SQL="SELECT id FROM $DB_PhoneLines_Table"
 	R=$(RunSQL "$SQL")
-	for Row in "$R"; do
-		id=$(Field 1 "$Row")
-		protocol=$(Field 2 "$Row")
-		name=$(Field 3 "$Row")
-		host=$(Field 4 "$Row")
-		username=$(Field 5 "$Row")
-		password=$(Field 6 "$Row")
-		prefix=$(Field 7 "$Row")
-		enabled=$(Field 8 "$Row")
-		phonenumber=$(Field 9 "$Row")
-		isfax=$(Field 10 "$Row")
-		faxmail=$(Field 11 "$Row")
-		dtmfmode=$(Field 12 "$Row")
-		if [[ $protocol == 'GTALK' ]]; then phonenumber=$username; fi
-		echo "Working phoneline $id-$name ($protocol/$phonenumber)"
-		if [[ $enabled == "yes" ]]; then AddTrunk; fi
+	for Dbid in $R; do
+		id=$(Field 1 "$Dbid")
+		SQL="SELECT id,protocol,name,host,username,password,prefix,enabled,phonenumber,isfax,faxmail,dtmfmode FROM $DB_PhoneLines_Table WHERE id=$id"
+		R=$(RunSQL "$SQL")
+		for Row in "$R"; do
+			id=$(Field 1 "$Row")
+			protocol=$(Field 2 "$Row")
+			name=$(Field 3 "$Row")
+			host=$(Field 4 "$Row")
+			username=$(Field 5 "$Row")
+			password=$(Field 6 "$Row")
+			prefix=$(Field 7 "$Row")
+			enabled=$(Field 8 "$Row")
+			phonenumber=$(Field 9 "$Row")
+			isfax=$(Field 10 "$Row")
+			faxmail=$(Field 11 "$Row")
+			dtmfmode=$(Field 12 "$Row")
+			if [[ $protocol == 'GTALK' ]]; then phonenumber=$username; fi
+			echo "Working phoneline $id-$name ($protocol/$phonenumber)"
+			if [[ $enabled == "yes" ]]; then AddTrunk; fi
+		done
 	done
 	# TODO: check if we need that in outbound context end: exten => foo,1,Noop(bar) ?
 
