@@ -29,6 +29,11 @@ Q="UPDATE settings SET data=1 where value='TruncateDeletesSlowly'"
 UseDB "mythconverg"
 RunSQL "$Q"
 
+#Alter mythconverg.settings to force MasterServerIP to the core's internal NIC
+Q="UPDATE settings SET data='192.168.80.1' where value='BackendServerIP'"
+UseDB "mythconverg"
+RunSQL "$Q"
+
 #Re-run SetupUsers_Homes PlutoStorageDevices to make sure that the mythtv user gets added to each user's group
 /usr/pluto/bin/SetupUsers_Homes.sh
 /usr/pluto/bin/StorageDevices_Setup.sh

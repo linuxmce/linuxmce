@@ -11,7 +11,7 @@ ln -s /usr/lib/libXmu.so.6.2.0 /usr/lib/libXmu.so || :
 if [[ "$PK_Device" != "1" ]] ;then
 	scp -o 'StrictHostKeyChecking no' -o 'PasswordAuthentication no' root@dcerouter:/etc/mythtv/mysql.txt /etc/mythtv/ || :
 	touch /etc/mythtv/mysql.txt
-	sed -i "s/^DBHostName.*/DBHostName=dcerouter/g" /etc/mythtv/mysql.txt || :
+	sed -i "s/^DBHostName.*/DBHostName=192.168.80.1/g" /etc/mythtv/mysql.txt || :
 fi
 
 # make the proper ownership's because the backend can't read it otherwise
