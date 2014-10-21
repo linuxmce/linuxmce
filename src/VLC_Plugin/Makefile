@@ -25,7 +25,7 @@ LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r
 
 Gen_Dev_Files +=
-sources +=
+sources += VLCMediaStream.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
