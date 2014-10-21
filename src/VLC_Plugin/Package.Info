@@ -1,0 +1,9 @@
+<-dceag-p-b->
+Package = DCE_Destination_Package
+Dir = 
+desc = DCE Implemenation for #2301 VLC Plug-in
+Maintainer = thomasName
+Email = thom.cherryhomes@gmail.com
+Depend = DCE_Dependencies
+<-dceag-p-e->
+
