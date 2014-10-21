@@ -115,6 +115,26 @@ case "$URL_TYPE" in
 		AptSrc_ParseSourcesList
 		AptSrc_SourceExists "deb $EndSlashRepos $REPOS $SECTIONS"
 		retval=$?
+#		if [ "$retval" -ne 0 ]; then
+#			# Query for current RepositorySource
+#			# Use Repository ID to get other RepositorySource_URLs for this RepositorySource
+#			# If any of them match, consider the source to be found.
+#			Q="SELECT FK_RepositorySource FROM RepositorySource_URL WHERE URL LIKE 'deb $EndSlashRepos'"
+#			R=$(RunSQL "$Q")
+#			PK_RepositorySource=$(Field 1 "$R")
+#			Q="SELECT URL from RepositorySource_URL WHERE FK_RepositorySource='$PK_RepositorySource'"
+#			R=$(RunSQL "$Q")
+#			for SRC in $R ; do
+#				URL="$(echo $SRC | sed "$SPACE_SED; s/^deb *//")"
+#				EndSlashURL=$(echo "$URL" | sed "$SingleEndSlash")
+#				AptSrc_SourceExists "deb $EndSlashURL $REPOS $SECTIONS"
+#				retval=$?
+#				if [ "$retval" -eq 0 ]; then
+#					continue;
+#				fi
+#			done
+#		fi
+
 		if [ "$retval" -ne 0 ]; then
 			if [ "$REPOS" = "$lsbrelease" ]; then
 				if AptSrc_AddSource "deb $EndSlashRepos $REPOS $SECTIONS"; then
