@@ -300,7 +300,10 @@ function Build_Replacements_Precise
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
 	cp $dir_/*squeezelite*.deb "${replacements_dir}"
 
-
+	#Package: libcec
+	Build_Replacement_Package libcec ubuntu/libcec-2.1.4
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/cec*.deb ${replacements_dir}
+	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libcec*.deb
 }
 
 function Build_Replacements_Intrepid
