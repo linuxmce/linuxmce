@@ -43,7 +43,7 @@
 #define SCREEN_OpenFile_CONST 40
 #define SCREEN_BrowserConsole_CONST 41
 #define SCREEN_FavoritesPDA_CONST 42
-#define SCREEN_PCFileTools_CONST 43
+#define SCREEN_TI994A_Keyboard_CONST 43
 #define SCREEN_AdvancedOptions_CONST 44
 #define SCREEN_MakingCall_CONST 45
 #define SCREEN_MakingLinPhoneBroadcast_CONST 46
@@ -127,7 +127,7 @@
 #define SCREEN_MapTelecom_CONST 126
 #define SCREEN_NavMode_CONST 127
 #define SCREEN_PVR_Full_Screen_CONST 128
-#define SCREEN_Epg_CONST 129
+#define SCREEN_TI_Keyboard_CONST 129
 #define SCREEN_Help01_CONST 130
 #define SCREEN_Help02_CONST 131
 #define SCREEN_Help03_CONST 132
@@ -293,6 +293,8 @@
 #define SCREEN_Weather_Radar_CONST 307
 #define SCREEN_WD_HDTVLive_Remote_CONST 308
 #define SCREEN_XBOX_360_CONST 309
+#define SCREEN_TI_99_FS_CONST 310
+#define SCREEN_TI_99_FS_Options_CONST 311
 
 #define SCREEN_TABLE "Screen"
 #define SCREEN_PK_SCREEN_FIELD "PK_Screen"
