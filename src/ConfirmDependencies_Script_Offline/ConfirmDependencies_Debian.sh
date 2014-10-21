@@ -5,6 +5,22 @@
 if [[ -f /usr/pluto/bin/Config_Ops.sh ]]; then
 	. /usr/pluto/bin/Config_Ops.sh
 fi
+if [[ -f /usr/pluto/bin/SQL_Ops.sh ]]; then
+	. /usr/pluto/bin/SQL_Ops.sh
+else
+	RunSQL () {
+		mysql -A -N "$SQL_DB" $MYSQL_DB_CRED -e "$1;" | tr '\n\t ' $'\x20'$'\x01'$'\x02' | sed 's/ *$//'
+	}
+
+	Field () {
+		local Row FieldNumber
+		FieldNumber="$1"; shift
+		Row="$*"
+		echo "$Row" | cut -d$'\x01' -f"$FieldNumber" | tr $'\x02' ' '
+	}
+fi
+
+
 
 set -x
 
@@ -115,25 +131,26 @@ case "$URL_TYPE" in
 		AptSrc_ParseSourcesList
 		AptSrc_SourceExists "deb $EndSlashRepos $REPOS $SECTIONS"
 		retval=$?
-#		if [ "$retval" -ne 0 ]; then
-#			# Query for current RepositorySource
-#			# Use Repository ID to get other RepositorySource_URLs for this RepositorySource
-#			# If any of them match, consider the source to be found.
-#			Q="SELECT FK_RepositorySource FROM RepositorySource_URL WHERE URL LIKE 'deb $EndSlashRepos'"
-#			R=$(RunSQL "$Q")
-#			PK_RepositorySource=$(Field 1 "$R")
-#			Q="SELECT URL from RepositorySource_URL WHERE FK_RepositorySource='$PK_RepositorySource'"
-#			R=$(RunSQL "$Q")
-#			for SRC in $R ; do
-#				URL="$(echo $SRC | sed "$SPACE_SED; s/^deb *//")"
-#				EndSlashURL=$(echo "$URL" | sed "$SingleEndSlash")
-#				AptSrc_SourceExists "deb $EndSlashURL $REPOS $SECTIONS"
-#				retval=$?
-#				if [ "$retval" -eq 0 ]; then
-#					continue;
-#				fi
-#			done
-#		fi
+		if [ "$retval" -ne 0 ]; then
+			# Query for current RepositorySource
+			# Use Repository ID to get other RepositorySource_URLs for this RepositorySource
+			# If any of them match, consider the source to be found.
+			Q="SELECT FK_RepositorySource FROM RepositorySource_URL WHERE URL LIKE 'deb $EndSlashRepos' ORDER BY FK_RepositorySource DESC LIMIT 1"
+			R=$(RunSQL "$Q")
+			PK_RepositorySource=$(Field 1 "$R")
+			Q="SELECT URL from RepositorySource_URL WHERE FK_RepositorySource='$PK_RepositorySource'"
+			R=$(RunSQL "$Q")
+			for URL_SRC in $R ; do
+				SRC=$(Field 1 "$URL_SRC")
+				URL="$(echo $SRC | sed "$SPACE_SED; s/^deb *//")"
+				EndSlashURL=$(echo "$URL" | sed "$SingleEndSlash")
+				AptSrc_SourceExists "deb $EndSlashURL $REPOS $SECTIONS"
+				retval=$?
+				if [ "$retval" -eq 0 ]; then
+					break;
+				fi
+			done
+		fi
 
 		if [ "$retval" -ne 0 ]; then
 			if [ "$REPOS" = "$lsbrelease" ]; then
