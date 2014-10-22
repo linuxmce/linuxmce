@@ -20,6 +20,8 @@
 #include "Gen_Devices/VLC_PlayerBase.h"
 //<-dceag-d-e->
 
+#include "VLC.h"
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -31,6 +33,9 @@ namespace DCE
 		// Private methods
 public:
 		// Public member variables
+	  VLC::Config* m_config;
+	  VLC* m_pVLC;
+	  
 
 //<-dceag-const-b->
 public:
@@ -43,11 +48,11 @@ public:
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
 
-//<-dceag-const2-b->
-		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
-		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-		VLC_Player(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
-//<-dceag-const2-e->
+//<-dceag-const2-b->!
+
+		string MD_DeviceData_get(int iFK_DeviceData);
+		string Soundcard_get();
+		string Audiosettings_get();
 
 //<-dceag-h-b->
 	/*

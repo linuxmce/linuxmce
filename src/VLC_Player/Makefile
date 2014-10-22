@@ -20,12 +20,15 @@ sources = Main.cpp VLC_Player.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
-CPPFLAGS +=
-LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r
+CPPFLAGS += `pkg-config --cflags glib-2.0`
+LDFLAGS += `pkg-config --libs glib-2.0`
+XTRALDLIBS = -lmysqlclient_r -lvlc -lX11 -lXmu
 
 Gen_Dev_Files +=
-sources +=
+sources += VLC.cpp \
+	../utilities/linux/window_manager/WMController/WMController.cpp \
+	../utilities/linux/window_manager/wmctrl/wmctrl.cpp
+
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
@@ -45,7 +48,7 @@ VLC_Player.so: $(sources:.cpp=.o)
 	cp $@ ../bin
 #	chmod +x post_make.sh
 #	./post_make.sh $@
-		
+
 VLC_Player: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	mkdir -p ../bin
