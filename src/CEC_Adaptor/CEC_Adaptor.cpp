@@ -25,10 +25,7 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
-#if CEC_LIB_VERSION_MAJOR > 1
 #include <cec.h>
-#endif
-
 #include "PlutoUtils/LinuxSerialUSB.h"
 using namespace CEC;
 
@@ -41,11 +38,7 @@ ICECCallbacks g_callbacks;
  * Globals for libCEC - find a better way to do this.
  */
 
-#if CEC_LIB_VERSION_MAJOR == 1
-int CecLogMessage(void *UNUSED(cbParam), const cec_log_message &message)
-#else
 int CecLogMessage(void *cbParam, const cec_log_message message)
-#endif
 {
   switch (message.level)
     {
@@ -66,11 +59,7 @@ int CecLogMessage(void *cbParam, const cec_log_message message)
   return 0;
 }
 
-#if CEC_LIB_VERSION_MAJOR == 1
-int CecKeyPress(void *cbParam, const cec_keypress &key)
-#else
 int CecKeyPress(void *cbParam, const cec_keypress key)
-#endif
 {
   CEC_Adaptor *pCEC_Adaptor=(CEC_Adaptor *)cbParam;
   char cKey[5];
@@ -81,32 +70,33 @@ int CecKeyPress(void *cbParam, const cec_keypress key)
 
   if (key.duration > 0) // Ignore key downs
     {
-      map <string,pair<string,int> >::iterator it=pCEC_Adaptor->m_mapCodesToButtons.find(sKey);
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Attempting to map code to a known button.");
+      map < string,pair<string,int> >::iterator it=pCEC_Adaptor->m_mapCodesToButtons.find(sKey);
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Checking for end of range.");
+
       if ( it==pCEC_Adaptor->m_mapCodesToButtons.end() )
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sKey.c_str());
       else
 	{
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Sending to IR ReceiverBase");
 	  // Send it off to IRReceiverBase
 	  pCEC_Adaptor->ReceivedCode(it->second.second,it->second.first.c_str());
-	  
+
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Sending to AV Wizard");
 	  // Send to AV Wizard if needed.
 	  if (pCEC_Adaptor->m_dwPK_Device==DEVICEID_MESSAGESEND)
 	    {
 	      pCEC_Adaptor->ForceKeystroke(it->second.first,pCEC_Adaptor->m_sAVWHost,pCEC_Adaptor->m_iAVWPort);
 	      return 0;
 	    }
-	  
+
 	}
     }
 
   return 0;
 }
 
-#if CEC_LIB_VERSION_MAJOR == 1
-int CecCommand(void *UNUSED(cbParam), const cec_command &UNUSED(command))
-#else
 int CecCommand(void *cbParam, const cec_command command)
-#endif
 {
   // TODO
   return 0;
@@ -171,13 +161,15 @@ bool CEC_Adaptor::GetConfig()
 
 	if ( !m_bLocalMode )
 	  {
-	    	    DeviceData_Base *pDevice = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfCategory(DEVICECATEGORY_Infrared_Plugins_CONST);
+	      LoggerWrapper::GetInstance()->Write(LV_STATUS,"NOT Local Mode - find keys from remote configuration");
+	      DeviceData_Base *pDevice = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfCategory(DEVICECATEGORY_Infrared_Plugins_CONST);
 	    
 	    if ( pDevice )
 	      m_dwPK_Device_IRPlugin = pDevice->m_dwPK_Device;
 	    else
 	      m_dwPK_Device_IRPlugin = 0;
 	    
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Getting sibling remotes");
 	    string sResult;
 	    DCE::CMD_Get_Sibling_Remotes CMD_Get_Sibling_Remotes(m_dwPK_Device,m_dwPK_Device_IRPlugin, DEVICECATEGORY_CEC_Remote_Controls_CONST, &sResult);
 	    SendCommand(CMD_Get_Sibling_Remotes);
@@ -223,27 +215,22 @@ bool CEC_Adaptor::GetConfig()
 	  }
 
 	g_config.Clear();
+	g_callbacks.Clear();
 	snprintf(g_config.strDeviceName, 13, "LinuxMCE");
-	g_config.callbackParam = this;
-	g_config.clientVersion = CEC_CLIENT_VERSION_1_6_1;
+	g_config.clientVersion = CEC_CLIENT_VERSION_CURRENT;
+	g_config.bActivateSource = 0;
 	g_callbacks.CBCecLogMessage = &CecLogMessage;
 	g_callbacks.CBCecKeyPress = &CecKeyPress;
 	g_callbacks.CBCecCommand = &CecCommand;
 	g_config.callbacks = &g_callbacks;
 
-#if CEC_LIB_VERSION_MAJOR == 1
-	g_config.deviceTypes.add(CEC_DEVICE_TYPE_RECORDING_DEVICE);
-	g_config.deviceTypes.add(CEC_DEVICE_TYPE_TUNER);
-	g_config.deviceTypes.add(CEC_DEVICE_TYPE_PLAYBACK_DEVICE);
-#else
 	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_RECORDING_DEVICE);
-	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_TUNER);
-	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_PLAYBACK_DEVICE);
-#endif
+
+// no joy with additional device types it seems in libcec2, needs investigation
+//	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_TUNER);
+//	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_PLAYBACK_DEVICE);
+
 	m_pParser = LibCecInitialise(&g_config);
-	
-	// Tweak with this until we like it -tschak
-	m_pParser->SetLogicalAddress(CECDEVICE_TUNER1);
 
 	if (!m_pParser)
 	  {
@@ -251,19 +238,40 @@ bool CEC_Adaptor::GetConfig()
 	    return false;
 	  }
 
-	LoggerWrapper::GetInstance()->Write(LV_WARNING,"libCEC initialized - Version %s",m_pParser->ToString((cec_server_version)g_config.serverVersion));
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"libCEC initialized - Version %s",m_pParser->ToString((cec_server_version)g_config.serverVersion));
+
+	m_pParser->InitVideoStandalone();
 
 	m_sPort = TranslateSerialUSB(DATA_Get_COM_Port_on_PC());
 
 	if (m_sPort.empty() || m_sPort == "0")
 	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"No COM Port specified. Trying port 'RPI'.  Please set a port in the Interfaces section of Web Admin, or re-detect device.");
-		m_sPort = "RPI";
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"No COM Port specified. Trying autodetect.  Please set a port in the Interfaces section of Web Admin, or re-detect device.");
+
+		cec_adapter devices[10];
+		uint8_t iDevicesFound = m_pParser->FindAdapters(devices, 10, NULL);
+		if (iDevicesFound <= 0)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"No devices found with autodetect");
+			UnloadLibCec(m_pParser);
+			return false;
+		}
+		else
+		{
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Device path: %s, port: %s",devices[0].path,devices[0].comm);
+			m_sPort = devices[0].comm;
+		}
 	}
+
+//this fails in libcec2
+	//LoggerWrapper::GetInstance()->Write(LV_STATUS,"Attempting to set logical address");
+	// Tweak with this until we like it -tschak
+//	m_pParser->SetLogicalAddress(CECDEVICE_TUNER1);
 
 	if (!m_pParser->Open(m_sPort.c_str()))
 	  {
 	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not open serial port %s",m_sPort.c_str());
+	    UnloadLibCec(m_pParser);
 	    return false;
 	  }
 
