@@ -544,7 +544,7 @@ MD_Install_Packages () {
 			;;
 		"raspbian")
 			# Classic MD/qMD/squeezelite
-			DEVICE_LIST="2216 62 1759 2259 11 1825 26 1808 2278"
+			DEVICE_LIST="2216 62 1759 2259 11 1825 26 1808 2278 2284"
 			# qMD
 			#DEVICE_LIST="2216 2278 2259 11 26 1808 2122"
 			;;
