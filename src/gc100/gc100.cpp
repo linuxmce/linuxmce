@@ -720,6 +720,33 @@ void gc100::parse_message_device(std::string message)
 		LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sanity check: slot count should be positive not %d",count);
 	}
 
+	/*
+	 * gc100 and iTach w/ IR ports always report '3 IR' for IR modules
+	 * iTach Flex reports '1 IR' or '1 IR_BLASTER' for the single IR configuration (second one is for GC-BL2)
+	 *   and '1 IRTRIPORT' or '1 IRTRIPORT_BLASTER' for the 3-port IR configuration (second one is for GC-BL2)
+	 * We use this information to signel the iTachFlex out and not attempt to find sensors on its IR ports
+	 */
+	bool iTachFlex = false;
+	if (count == 1 && type == "IR")
+	{
+		iTachFlex = true;
+	}
+	else if (type == "IR_BLASTER")
+	{
+		type = "IR";
+		iTachFlex = true;
+	}
+	else if (type == "IRTRIPORT" || type == "IRTRIPORT_BLASTER")
+	{
+		/*
+		 * while the iTach Flex reports '1 IRTRIPORT', the 3 ports are accessible at IDs 1:1, 1:2, 1:3
+		 * we translate this to '3 IR' and the original gc100 code works as expected
+		 */
+		type = "IR";
+		count = 3;
+		iTachFlex = true;
+	}
+
 	type=StringUtils::Tokenize(token," ",pos2); // Module type is the only thing left
 
 	// OK we have all the info from the message now.  Create other derived values and add the right number of devices
@@ -755,7 +782,7 @@ void gc100::parse_message_device(std::string message)
 
 			// An IR module might be used for input, so request the state.  
 			// Either it will return the state, or an error if it's really for IR (which we ignore)
-			if (scratch.type=="IR")
+			if (scratch.type == "IR" && !iTachFlex)
 			{
 				send_to_gc100("getstate,"+key);
 				sent_messages++;
