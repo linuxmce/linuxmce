@@ -535,6 +535,8 @@ void gc100::parse_message_device(std::string message)
 		LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sanity check: slot count should be positive not %d",count);
 	}
 
+	type=StringUtils::Tokenize(token," ",pos2); // Module type is the only thing left
+
 	/*
 	 * gc100 and iTach w/ IR ports always report '3 IR' for IR modules
 	 * iTach Flex reports '1 IR' or '1 IR_BLASTER' for the single IR configuration (second one is for GC-BL2)
@@ -561,8 +563,6 @@ void gc100::parse_message_device(std::string message)
 		count = 3;
 		iTachFlex = true;
 	}
-
-	type=StringUtils::Tokenize(token," ",pos2); // Module type is the only thing left
 
 	// OK we have all the info from the message now.  Create other derived values and add the right number of devices
 	// First figure out what the next slot number should be
