@@ -65,8 +65,6 @@ namespace DCE
 //<-dceag-decl-e->
 		// Private member variables
 	private:
-		void SendIR_Loop(string Port, string IRCode, int Times = 1);
-		void SendIR_Real(string Port, string IRCode);
 
 		// Private methods
 protected:
@@ -194,9 +192,7 @@ public:
 		bool Open_gc100_Socket();
 		bool send_to_gc100(string Cmd);
 		std::string read_from_gc100();
-		bool ConvertPronto(string ProntoCode, string &gc_code);
-		std::string IRL_to_pronto(string learned_string);
-		string IRL_uncompress(string IRL_string);
+		bool ConvertPronto(string ProntoCode, string &gc_code, int Repeat = 1);
 
 		// For a given device find the pin and device id.  return false if it's not found
 		bool GetPinDeviceID(class DeviceData_Impl *pDeviceData,string &this_pin,int &this_device_id);

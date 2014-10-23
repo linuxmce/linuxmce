@@ -16,6 +16,7 @@
 
 //<-dceag-d-b->
 #include "gc100.h"
+#include "gc100_irl.h"
 #include "DCE/Logger.h"
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
@@ -47,8 +48,6 @@ const timespec LEARNING_TIMEOUT = {40, 0}; // 40 s
 //const timespec READY_TIMEOUT = {0, 800000000}; // 800 ms
 const timespec READY_TIMEOUT = {3, 0};
 
-const string LEARN_PREFIX_IRL = "GC-IRL";
-const string LEARN_PREFIX_IRE = "GC-IRE";
 const int GC100_COMMAND_PORT = 4998;
 const int hardcoded_Socket_Port = 6777;
 
@@ -195,6 +194,12 @@ void gc100::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 	// It's a Send Code command
 	if (pMessage->m_dwID == COMMAND_Send_Code_CONST)
 	{
+		int iRepeat = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Repeat_CONST].c_str());
+		if (iRepeat < 1)
+			iRepeat = 1;
+		if (iRepeat > 3)
+			iRepeat = 3;
+
 		string sPort;
 		if (pDeviceData_Impl)
 		{
@@ -222,7 +227,7 @@ void gc100::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 		}
 		string sCode = pMessage->m_mapParameters[COMMANDPARAMETER_Text_CONST];
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending IR to port '%s', code '%s'", sPort.c_str(), sCode.c_str());
-		SendIR(sPort, sCode, 1);
+		SendIR(sPort, sCode, iRepeat);
 		sCMD_Result = "OK";
 		return;
 	}
@@ -363,8 +368,13 @@ void gc100::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 */
 
 // Returns string starting with freq.  The "sendir,<address>,<id>," are prepended elsewhere
-bool gc100::ConvertPronto(string ProntoCode, string &gc_code)
+bool gc100::ConvertPronto(string ProntoCode, string &gc_code, int Repeat)
 {
+	if (Repeat < 1)
+		Repeat = 1;
+	if (Repeat > 3)
+		Repeat = 3;
+
 	std::string token;
 	int token_int;
 	long int frequency;
@@ -401,7 +411,7 @@ bool gc100::ConvertPronto(string ProntoCode, string &gc_code)
 			sscanf(token.c_str(),"%4x",&token_int);
 
 			frequency=(((41450/token_int)+5)/10)*1000;
-			gc_code=gc_code+StringUtils::itos(frequency)+",1"; // (Global Cache's IR test program sets this to 3, but some devices actually interpret all 3 repetitions)
+			gc_code=gc_code+StringUtils::itos(frequency)+","+StringUtils::itos(Repeat);
 
 			// # burst pairs for single sequence
 			token=StringUtils::Tokenize(ProntoCode," ",pos);
@@ -455,201 +465,6 @@ bool gc100::ConvertPronto(string ProntoCode, string &gc_code)
 		//gc_code="58000,1,1,192,193,48,146,48,146,48,48,48,146,48,146,48,146,48,48,48,146,48,146,48,146,48,48,48,48,48,48,48,146,48,48,48,48,48,48,48,146,48,48,48,48,48,48,48,146,48,2160"; // DEBUG
 	}
 	return return_value;
-}
-
-string gc100::IRL_uncompress(string IRL_string)
-{
-	bool done = false;
-	string sPair[4];
-	unsigned int iPairs = 0, i, pair_num = 0;
-	string::size_type pos = 0;
-	string sResult = "";
-
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "IRL_uncompress: compressed string: %s", IRL_string.c_str());
-	
-	string token1, token2, digits2, comp2;
-
-	// take prefix and frequency verbatim
-	sResult += StringUtils::Tokenize(IRL_string, ",", pos) + ",";
-	sResult += StringUtils::Tokenize(IRL_string, ",", pos);
-
-	while (! done)
-	{
-		if ((pos >= IRL_string.length()) || (++pair_num > 5000))
-		{
-			//LoggerWrapper::GetInstance()->Write(LV_STATUS, "IRL_uncompress: no more pairs; we're done");
-			done = true;
-		}
-		else
-		{
-			token1 = StringUtils::Tokenize(IRL_string, ",", pos); // ON value
-			token2 = StringUtils::Tokenize(IRL_string, ",", pos); // OFF value
-
-			if (token1 == "X" || token2 == "X" || token1 == "Z" || token2 == "Z")
-			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "IRL_uncompress: end-of sequence X or Z character detected");
-				done = true;
-			}
-			else
-			{
-				digits2 = token2;
-				comp2 = "";
-				
-				for (i = 0; i < token2.length(); i++)
-				{
-					if (token2[i] >= 'A' && token2[i] <= 'D')
-					{
-						digits2 = token2.substr(0, i);
-						comp2 = token2.substr(i);
-						break;
-					}
-				}
-
-				if (iPairs < 4)
-				{
-					sPair[iPairs] = string("") + "," + token1 + "," + digits2;
-					iPairs++;
-				}
-
-				sResult += string("") + "," + token1 + "," + digits2;
-				for (i = 0; i < comp2.length(); i++)
-				{
-					sResult += sPair[comp2[i] - 'A'];
-				}
-			}
-		}
-	}
-
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "IRL_uncompress: uncompressed code: %s", sResult.c_str());
-	return sResult;
-}
-
-std::string gc100::IRL_to_pronto(string raw_learned_string)
-{
-	std::string result,token,token2,pronto_pairs;
-	string::size_type pos;
-	std::string learned_string;
-	int freq,freq_token;
-	int pair_num;
-	int v1,v2;
-	bool done;
-	char conv_buf[256];
-	//char string_search[8192];
-	//char *last;
-	//char *c_pos;
-	int trunc_prefix;
-
-	//snprintf(string_search, sizeof(string_search), "%s", raw_learned_string.c_str());
-
-	//c_pos=NULL;
-	//last=&string_search[0];
-
-	//do {
-	//	c_pos=strstr(last+1, LEARN_PREFIX);
-	//	if (c_pos!=NULL) {
-	//		last=c_pos;
-	//	}
-	//   } while (c_pos!=NULL);
-
-	//  trunc_prefix=(int) &last - (int) &string_search[0];
-
-	trunc_prefix = raw_learned_string.rfind(LEARN_PREFIX_IRL);
-	if (trunc_prefix < 0)
-	{
-		trunc_prefix = raw_learned_string.rfind(LEARN_PREFIX_IRE);
-		if (trunc_prefix < 0)
-		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "IRL_to_pronto: trunc_prefix was %d", trunc_prefix);
-			trunc_prefix = 0;
-		}
-	}
-
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "IRL_to_pronto: trunc_prefix is %d",trunc_prefix);
-
-	learned_string = IRL_uncompress(raw_learned_string.substr(trunc_prefix));
-	pos=0;
-
-	// Output: 0000 format
-	result="0000 "; // Pronto raw pwm prefix
-
-	token=StringUtils::Tokenize(learned_string,",",pos); // First token is "GC-IRL" or "receiveir" header
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "IRL_to_pronto: prefix is %s",token.c_str());
-
-	token=StringUtils::Tokenize(learned_string,",",pos); // Next token is frequency
-	sscanf(token.c_str(),"%d",&freq);
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "IRL_to_pronto: freq is %d",freq);
-	freq_token = (int) (4145146 / freq);
-	sprintf(conv_buf,"%04x ",freq_token);
-	// Output: frequency word
-	result+=std::string(conv_buf);
-
-	/*token=StringUtils::Tokenize(learned_string,",",pos); // Next token is count?
-	sscanf(token.c_str(),"%d",&count);
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "IRL_to_pronto: count is %d",count);
-
-	token=StringUtils::Tokenize(learned_string,",",pos); // Next token is offset?
-	sscanf(token.c_str(),"%d",&offset);
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "IRL_to_pronto: offset is %d",offset);
-	*/
-
-	done=false;
-	pair_num=1;
-
-	while (!done)
-	{
-		if ((pos>=learned_string.length())||(pair_num>5000))
-		{
-			//LoggerWrapper::GetInstance()->Write(LV_STATUS, "IRL_to_pronto: no more pairs; we're done");
-			done=true;
-		}
-		else
-		{
-			token=StringUtils::Tokenize(learned_string,",",pos); // ON value
-			token2=StringUtils::Tokenize(learned_string,",",pos); // OFF value
-			
-			sscanf(token.c_str(),"%d",&v1);
-			sscanf(token2.c_str(),"%d",&v2);
-
-			//LoggerWrapper::GetInstance()->Write(LV_STATUS, "IRL_to_pronto: data pair #%d: %d/%d",pair_num,v1,v2);
-			// Do any necessary correcting of values here
-
-			if (token == "X" || token2 == "X" || token == "Z" || token2 == "Z")
-			{
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "IRL_to_pronto: end-of sequence X or Z character detected");
-				done=true;
-			}
-			else
-			{
-				if (v2==0)
-				{
-					v2=v1;
-					LoggerWrapper::GetInstance()->Write(LV_STATUS, "IRL_to_pronto: corrected 0 to %d",v2);
-				}
-
-				sprintf(conv_buf," %04x %04x",v1,v2);
-				pronto_pairs+=std::string(conv_buf);
-
-				pair_num++;
-			}
-		}
-	}
-
-	pair_num--;
-	// Output: # of pairs for single // DEBUG
-	result+="0000 ";
-
-	sprintf(conv_buf,"%04x",pair_num); // DEBUG
-	//sprintf(conv_buf,"%04x ",pair_num);
-	// Output: # of pairs for single burst
-	result+=std::string(conv_buf);
-
-	// Output: # of pairs for repeat sequence
-	//result+="0000";
-
-	// Output: all of the on/off pairs
-	result+=pronto_pairs;
-
-	return result;
 }
 
 bool gc100::send_to_gc100(string Cmd)
@@ -788,6 +603,7 @@ void gc100::parse_message_device(std::string message)
 				sent_messages++;
 				cout << "sent messages: " << sent_messages << endl;
 			}
+
 			next_slot++;
 		}
 		// Now save next_slot so the next module can number (global number only) starting from where we left off
@@ -1295,18 +1111,6 @@ void gc100::SendIR(string Port, string IRCode,int iRepeat)
 		return;
 	}
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SendIR wrapper: Port = %s code = %s", Port.c_str(), IRCode.c_str());
-	SendIR_Loop(Port, IRCode, 1);
-}
-
-void gc100::SendIR_Loop(string Port, string IRCode, int Times)
-{
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SendIR_Loop: Port = %s, Times = %d", Port.c_str(), Times);
-	for (int i = 0; i < Times; i++)
-		SendIR_Real(Port,IRCode);
-}
-
-void gc100::SendIR_Real(string Port, string IRCode)
-{
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SendIR: Port = %s", Port.c_str());
 	
 	m_bIRComplete = false;
@@ -1316,7 +1120,7 @@ void gc100::SendIR_Real(string Port, string IRCode)
 	//int timeout_count;
 
 	//ConvertPronto(IRCode.substr(2), gc_code);
-	bool ConvertReturn = ConvertPronto(IRCode, gc_code);
+	bool ConvertReturn = ConvertPronto(IRCode, gc_code, iRepeat);
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SendIR: Result of Pronto conversion was: %s", gc_code.c_str());
 
 	if (! ConvertReturn)
@@ -1638,7 +1442,7 @@ void gc100::LearningThread(LearningInfo * pLearningInfo)
 					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Terminating on retval of %d err=%d, desc=%s", retval, ErrNo, strerror(ErrNo));
 					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Raw learn string received: %s\n", learn_input_string.c_str());
 
-					pronto_result=IRL_to_pronto(learn_input_string);
+					pronto_result = gc100_irl::IRL_to_pronto(learn_input_string);
 					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Conversion to Pronto: %s", pronto_result.c_str());
 
 					if (pLearningInfo)
@@ -1867,7 +1671,7 @@ void gc100::SocketThread(int port)
 				string sMsg;
 				
 				parm = buffer + 10;
-				sMsg = IRL_to_pronto(parm) + "\n";
+				sMsg = gc100_irl::IRL_to_pronto(parm) + "\n";
 				send(learn_client, sMsg.c_str(), sMsg.length(), 0);
 			}
 			else if (strncmp("PRONTO-GC ", buffer, 10) == 0)
@@ -1913,13 +1717,19 @@ void gc100::SocketThread(int port)
 void gc100::CMD_Send_Code(string sText,string &sCMD_Result,Message *pMessage)
 //<-dceag-c191-e->
 {
+	int iRepeat = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Repeat_CONST].c_str());
+	if (iRepeat < 1)
+		iRepeat = 1;
+	if (iRepeat > 3)
+		iRepeat = 3;
+
 	if( sText.size() && (sText[0]=='5' || sText[0]=='6') )
 	{
 		string sTextNew = ConvertRC5_6(sText);
 LoggerWrapper::GetInstance()->Write(LV_STATUS,"Converted %s to %s",sText.c_str(),sTextNew.c_str());
 sText=sTextNew;
 	}
-	SendIR("",sText,1);
+	SendIR("",sText,iRepeat);
 }
 
 //<-dceag-c194-b->

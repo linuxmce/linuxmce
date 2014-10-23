@@ -25,7 +25,7 @@ LDFLAGS +=
 XTRALDLIBS = -lIRBase -lSerial -lMessageTranslation
 
 Gen_Dev_Files +=
-sources +=
+sources += gc100_irl.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
