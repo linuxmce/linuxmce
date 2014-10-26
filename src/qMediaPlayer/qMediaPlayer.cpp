@@ -97,8 +97,8 @@ bool qMediaPlayer::GetConfig()
             if(address.toString().contains(badMatch)){
                 qDebug() << "QMediaPlayer::My Ip's" << address.toString() << ":: badMatch==>"<<badMatch;
                 QString t = address.toString();
-                qDebug() <<"QMediaPlayer::"<< t;
                 DATA_Set_TCP_Address(t.toStdString(), true);
+               return true;
             }
         //CMD_Set_Device_Data setIp(this->m_dwPK_Device, 8, m_dwPK_Device, t.toStdString(), )
     }
