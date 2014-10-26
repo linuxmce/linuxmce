@@ -1,5 +1,6 @@
 #include "genericmodelitem.h"
 #include "DCE/Logger.h"
+#include <QDebug>
 using namespace DCE;
 /*!
  *\class GenericModelItem
@@ -30,6 +31,7 @@ QVariant GenericModelItem::data(int role) const
 bool GenericModelItem::setData(int role, const QVariant &value)
 {
   //    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericModelItem.setData");
+
     m_data.insert(role, value);
     emit dataChanged();
     return true;

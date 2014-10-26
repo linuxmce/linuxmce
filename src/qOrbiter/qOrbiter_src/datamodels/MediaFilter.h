@@ -155,9 +155,9 @@ public:
                 int t = param.indexOf("\t");
 
                 QString apnd = param.mid(t);
-                qDebug()<< apnd;
+                //  qDebug()<< apnd;
                 q_mediaSources.append(apnd);
-                qDebug() << q_mediaSources;
+                qDebug() << "mediaFilter()::Current Media sources "<< q_mediaSources;
             }
             break;
 
@@ -321,8 +321,12 @@ public:
     }
 
     QString getFilterString() {
+        //       qDebug() << "Current Media type is " << q_mediaType;
+        QStringList paramList;
+        paramList << QString::number(q_mediaType) << q_subType << q_fileFormat << q_attribute_genres << q_mediaSources << q_usersPrivate << q_attributetype_sort << q_pk_users << q_last_viewed << q_pk_attribute;
+        //qDebug() <<"Desired Output::" << paramList.join("|");
         QString params = QString::number(q_mediaType)+"|"+q_subType +"|"+q_fileFormat+"|"+q_attribute_genres+"|"+q_mediaSources+"|"+q_usersPrivate +"|"+q_attributetype_sort+"|"+q_pk_users+"|"+q_last_viewed+"|"+q_pk_attribute+"";
-
+        //     qDebug() << "Current Output::" << params;
         return params;
     }
 
@@ -335,7 +339,7 @@ public slots:
 
             q_mediaType = mediaType;
             qDebug() << "!!!!!!!!!!!!!!! MODEL CLEAR";
-             currentMediaTypeChanged(QString::number(q_mediaType));
+            currentMediaTypeChanged(QString::number(q_mediaType));
             updateAttributeToList();
         }
     }

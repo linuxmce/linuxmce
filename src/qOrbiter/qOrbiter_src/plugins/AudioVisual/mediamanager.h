@@ -170,7 +170,7 @@ public:
 
 #ifdef QT4
 
-    #ifndef Q_OS_ANDROID
+    #ifndef ANDROID
     Phonon::VideoWidget *videoSurface;
     Phonon::AudioOutput *audioSink;
     Phonon::MediaObject *mediaObject;
@@ -222,7 +222,7 @@ public slots:
 
     void setVideoStream(bool b ){
 #ifdef QT4
-#ifndef Q_OS_ANDROID
+#ifndef ANDROID
         if(videoStream != mediaObject->hasVideo()) {
             videoStream = mediaObject->hasVideo(); emit videoStreamChanged();
         }

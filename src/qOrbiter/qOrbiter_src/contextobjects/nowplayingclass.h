@@ -328,6 +328,7 @@ public slots:
     }
     QImage getStreamImage() { return streamImage;}
 
+
     void setScreen(QString inc_screen) {qs_screen = inc_screen; emit screenTypeChanged();}
     QString getScreen () {return qs_screen;}
 

@@ -590,6 +590,7 @@ signals:
     void stop_AV();
     void seekGrid(QString s);
     void newPlaylistPosition(QString pos);
+    void playlistSizeChanged();
     void bindMediaRemote(bool b);
     void startPlayback(QString file);
     void play();
@@ -888,7 +889,7 @@ public slots:
      * \brief setMediaPlayerID
      * \param i
      */
-    void setMediaPlayerID(int i) { mediaPlayerID = i; emit mediaPlayerIdChanged(); qDebug() << "New Media Player ID" << mediaPlayerID;}
+    void setMediaPlayerID(int i) { if(mediaPlayerID != i) {mediaPlayerID = i; emit mediaPlayerIdChanged(); qDebug() << "New Media Player ID" << mediaPlayerID;}}
 
     /*!
      * \brief getMediaPlayerID
@@ -915,7 +916,7 @@ public slots:
     void getConfiguration();
     bool writeConfig();
     bool readLocalConfig();
-    void setConnectedState(bool state) { if(state != connectedState ){ connectedState = state;  if(connectedState) {setReloadStatus(false); } else { connectionWatchdog(); setMediaPlayerID(-1); disconnectCount++; } ;  emit connectedStateChanged(); }  }
+    void setConnectedState(bool state) { if(state != connectedState ){ connectedState = state;  if(connectedState) {setReloadStatus(false); emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room ); } else { connectionWatchdog();  disconnectCount++; setReloadStatus(true); } ;  emit connectedStateChanged(); }  }
     bool getConnectedState () {return connectedState;}
     void setDceResponse(QString response);
     QString getDceResponse () ;
@@ -955,6 +956,10 @@ public slots:
     QString getExternalIp() {return externalip;}
     void setExternalHost(QString h) { externalHost = h; emit externalHostChanged();}
     QString getExternalHost() {return externalHost;}
+
+    void testDisconnect(){
+
+    }
 
     /*! @name floorplan slots*/
     //@{
@@ -1221,7 +1226,7 @@ public slots:
     void playMedia(QString FK_Media) { emit startPlayback(FK_Media);}
     void mythTvPlay(){emit play();}
     void playResume(){ emit simplePlay(); }
-    void stopMedia() {emit stopPlayback();}
+    void stopMedia() {emit stopPlayback(); clearDataGrid("Playlist");}
     void setPlaybackSpeed(int s) {emit setStreamSpeed(s);}
     void pauseMedia() {emit pause();}
     void adjustVolume(int vol) {emit setVolume(vol);}
@@ -1249,6 +1254,7 @@ public slots:
     void movePlaylistEntry(QString d, int index) {emit movePlistEntry(d, index); }
     void removePlaylistEntry(int index) {emit removePlistEntry(index);}
     void saveCurrentPlaylist(QString name, bool mode) {emit savePlist(name, mode);} /*true is public, false is private*/
+    void updatePlaylist(){ mediaFilterChanged("Playlist");/*playlistSizeChanged(); GenericFlatListModel *pModel = getDataGridModel("Playlist", 18); if(pModel){pModel->refreshData();}*/ }
     //@}
 
     /*! @name Screenshot & Images slots*/
@@ -1436,7 +1442,7 @@ public slots:
     void setMediaType(int m) {i_current_mediaType = m; emit mediaTypeChanged();}
     int getMediaType(){return i_current_mediaType;}
 
-    void setGridMediaType(QString t){q_mediaType = t; qDebug() << q_mediaType; emit mediaGridTypeChanged();}
+    void setGridMediaType(QString t){ if(q_mediaType!= t) {q_mediaType = t; setMediaResponse("Current Mediatype changed to " + q_mediaType); emit mediaGridTypeChanged() ;}}
     QString getSorting() {return q_mediaType;}
 
     void setAttributeTypeSort(QString t){ q_attributeType_sort = t; emit attributeSortChanged();}

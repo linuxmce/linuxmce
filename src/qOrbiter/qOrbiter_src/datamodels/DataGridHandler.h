@@ -39,93 +39,101 @@ public:
     enum Roles {
         DescriptionRole = Qt::UserRole+1,
         ValueRole = Qt::UserRole+2,
+         OtherRole = Qt::UserRole+3
     };
 
     static QHash<int, QByteArray> getRoleNames(int PK_DataGrid) {
         QHash<int, QByteArray> names;
-	if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
-	    names[gridItem::NameRole] = "name";
-	    names[gridItem::IndexRole] = "dceindex";
-	    names[gridItem::PathRole] = "path";
-	    names[gridItem::FKRole]= "id";
-	} else {
-	    // generic roles
-	    names[DescriptionRole] = "description";
-	    names[ValueRole] = "value";
-	}
+
+        switch (PK_DataGrid) {
+
+        case DATAGRID_Media_Browser_CONST: /*!< Case specific role for media browser */
+            names[gridItem::NameRole] = "name";
+            names[gridItem::IndexRole] = "dceindex";
+            names[gridItem::PathRole] = "path";
+            names[gridItem::FKRole]= "id";
+            break;
+
+        default: /*!< Generic Roles */
+            names[DescriptionRole] = "description";
+            names[ValueRole] = "value";
+            names[OtherRole] = "other";
+            break;
+        }
+
         return names;
     }
 
-  static GenericModelItem* GetModelItemType(int PK_DataGrid, QObject* parent = 0) {
-	if (PK_DataGrid == DATAGRID_Floorplan_Media_Streams_CONST) {
-	    return new ActiveMediaStreamItem(parent);
-	} else if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
-	    return new SleepingAlarm(parent);
-	} else {
-	    // uses generic model item
-	    GenericModelItem* pItem = new GenericModelItem(parent);
-	    pItem->setRoleNames(getRoleNames(PK_DataGrid));
-	    return pItem;
-	}
-  }
-
-  static GenericModelItem* GetModelItemForCell(int PK_DataGrid, DataGridTable* pTable, int row, QObject * parent = 0)
-  {
-    GenericModelItem* pItem = GetModelItemType(PK_DataGrid, parent);
-    LoadDataFromTable(PK_DataGrid, pItem, pTable, row);
-    return pItem;
-  }
-
-  static void LoadDataFromTable(int PK_DataGrid, GenericModelItem* pItem, DataGridTable* pTable, int row)
-  {
-    int col = 0;
-    DataGridCell *pCell = pTable->GetData(col, row);
-    if(!pCell){
-      return;
+    static GenericModelItem* GetModelItemType(int PK_DataGrid, QObject* parent = 0) {
+        if (PK_DataGrid == DATAGRID_Floorplan_Media_Streams_CONST) {
+            return new ActiveMediaStreamItem(parent);
+        } else if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
+            return new SleepingAlarm(parent);
+        } else {
+            // uses generic model item
+            GenericModelItem* pItem = new GenericModelItem(parent);
+            pItem->setRoleNames(getRoleNames(PK_DataGrid));
+            return pItem;
+        }
     }
-    if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
-        const char *pPath = pCell->GetImagePath();
-        QString fk_file;
-        QString cellTitle;
-        QString filePath;
-	filePath = QString::fromUtf8(pPath).remove(".tnj");
-	fk_file = pCell->GetValue();
-	cellTitle = QString::fromUtf8(pCell->m_Text);
-        pItem->setData(gridItem::FKRole, fk_file);
-        pItem->setData(gridItem::NameRole, cellTitle);
-        pItem->setData(gridItem::PathRole, filePath.remove("/home/mediapics/"));
-    } else if (PK_DataGrid == DATAGRID_Floorplan_Media_Streams_CONST) {
-        (static_cast<ActiveMediaStreamItem*>(pItem))->setFromDataGridCell(pCell);
-    } else if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
-        QString name;
-	QString days;
-	QString timeleft;
-	QString alarmtime;
-	int eventgrp;
-	bool state = QString::fromStdString(pCell->GetText()).contains("ON");
-        //getting the cell to the right
-        DataGridCell *pCell2 = pTable->GetData(1, row);
-	eventgrp = atoi(pCell2->GetValue());
-	QString data = pCell2->GetText();
-	QStringList breakerbreaker = data.split(QRegExp("\n"), QString::KeepEmptyParts );
-	name = breakerbreaker.at(0);
-	days=breakerbreaker.at(2);
-	days.remove("Day of Week");
-	if(!breakerbreaker.at(1).split(QRegExp("\n")).isEmpty())
-	{
-	    alarmtime=breakerbreaker.at(1).split(QRegExp(" "),QString::SkipEmptyParts).first();
-	    timeleft=breakerbreaker.at(1).split(QRegExp(" "),QString::SkipEmptyParts).last();
-	} else {
-	    alarmtime=breakerbreaker.at(1);
-	    timeleft = "";
-	}
-	(static_cast<SleepingAlarm*>(pItem))->setAlarmData(eventgrp, name, alarmtime, state, timeleft, days);
-    } else {
-        // Default, get one cell use text and value
-        pItem->setData(ValueRole, pCell->GetValue());
-	pItem->setData(DescriptionRole, pCell->GetText());
+
+    static GenericModelItem* GetModelItemForCell(int PK_DataGrid, DataGridTable* pTable, int row, QObject * parent = 0)
+    {
+        GenericModelItem* pItem = GetModelItemType(PK_DataGrid, parent);
+        LoadDataFromTable(PK_DataGrid, pItem, pTable, row);
+        return pItem;
     }
-}
+
+    static void LoadDataFromTable(int PK_DataGrid, GenericModelItem* pItem, DataGridTable* pTable, int row)
+    {
+        int col = 0;
+        DataGridCell *pCell = pTable->GetData(col, row);
+        if(!pCell){
+            return;
+        }
+        if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
+            const char *pPath = pCell->GetImagePath();
+            QString fk_file;
+            QString cellTitle;
+            QString filePath;
+            filePath = QString::fromUtf8(pPath).remove(".tnj");
+            fk_file = pCell->GetValue();
+            cellTitle = QString::fromUtf8(pCell->m_Text);
+            pItem->setData(gridItem::FKRole, fk_file);
+            pItem->setData(gridItem::NameRole, cellTitle);
+            pItem->setData(gridItem::PathRole, filePath.remove("/home/mediapics/"));
+        } else if (PK_DataGrid == DATAGRID_Floorplan_Media_Streams_CONST) {
+            (static_cast<ActiveMediaStreamItem*>(pItem))->setFromDataGridCell(pCell);
+        } else if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
+            QString name;
+            QString days;
+            QString timeleft;
+            QString alarmtime;
+            int eventgrp;
+            bool state = QString::fromStdString(pCell->GetText()).contains("ON");
+            //getting the cell to the right
+            DataGridCell *pCell2 = pTable->GetData(1, row);
+            eventgrp = atoi(pCell2->GetValue());
+            QString data = pCell2->GetText();
+            QStringList breakerbreaker = data.split(QRegExp("\n"), QString::KeepEmptyParts );
+            name = breakerbreaker.at(0);
+            days=breakerbreaker.at(2);
+            days.remove("Day of Week");
+            if(!breakerbreaker.at(1).split(QRegExp("\n")).isEmpty())
+            {
+                alarmtime=breakerbreaker.at(1).split(QRegExp(" "),QString::SkipEmptyParts).first();
+                timeleft=breakerbreaker.at(1).split(QRegExp(" "),QString::SkipEmptyParts).last();
+            } else {
+                alarmtime=breakerbreaker.at(1);
+                timeleft = "";
+            }
+            (static_cast<SleepingAlarm*>(pItem))->setAlarmData(eventgrp, name, alarmtime, state, timeleft, days);
+        } else {
+            // Default, get one cell use text and value
+            pItem->setData(ValueRole, pCell->GetValue());
+            pItem->setData(DescriptionRole, pCell->GetText());
+        }
+    }
 
 };
 

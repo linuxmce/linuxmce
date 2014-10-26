@@ -999,8 +999,12 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     setMediaType(iPK_MediaType);
     //**TODO - create a function that keeps a running track of the current room. like, the location info class or something.
     // it should unify the current location and media data in to one easily accesible item that update automatically on changes.
+
+
     map <int, string> mds;
+    map <int, string> qmds;
     GetDevicesByTemplate(DEVICETEMPLATE_OnScreen_Orbiter_CONST, &mds);
+    GetDevicesByTemplate(DEVICETEMPLATE_OnScreen_qOrbiter_CONST, &qmds);
 
     /* string::size_type pos=0;
     m_dwPK_Device_NowPlaying = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
@@ -1055,7 +1059,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit setNowPlaying(false);
         emit gotoQml("Screen_1.qml");
         b_mediaPlaying = false;
-        // emit currentScreenChanged("Screen_1.qml");
+
         currentScreen = "Screen_1.qml";
         internal_streamID = iStreamID;
         emit streamIdChanged(iStreamID);
@@ -1073,14 +1077,16 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         }
 
         emit setNowPlaying(true);
-        emit currentScreenChanged("Screen_"+scrn+".qml");
         currentScreen = "Screen_"+scrn+".qml";
+        emit gotoQml(currentScreen); /*!< \note This line set the command for the actual screen change */
+        emit currentScreenChanged(currentScreen); /*!< \note This line sets the media return to screen */
+        internal_streamID = iStreamID;
+
         emit subtitleChanged((QString::fromStdString(sText)));
         emit streamIdChanged(iStreamID);
-        emit subtitleChanged(QString::fromStdString(sText));
-        internal_streamID = iStreamID;
         emit mediaTypeChanged(iPK_MediaType);
         emit np_playlistIndexChanged(iValue);
+
         QString md1 = QString::fromStdString(sValue_To_Assign);
         QStringList mdlist;
         mdlist= md1.split(QRegExp("\\n"), QString::SkipEmptyParts);
@@ -1807,8 +1813,8 @@ bool DCE::qOrbiter::initialize(){
         } else {
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
-            Disconnect();
-            emit commandResponseChanged("QOrbiter Connect() Failed for"+QString::number(this->m_dwPK_Device) );
+            DisconnectAndWait();
+            emit commandResponseChanged("QOrbiter Connect() Failed for "+QString::number(this->m_dwPK_Device) );
             QApplication::processEvents(QEventLoop::AllEvents);
             return false;
         }
@@ -1968,6 +1974,7 @@ void qOrbiter::qmlSetup(int device, QString address)
 void qOrbiter::setCurrentScreen(QString s)
 {
     currentScreen = s;
+
 }
 
 void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int height, int width)
@@ -2486,13 +2493,11 @@ void DCE::qOrbiter::GetFileInfoForQml(QString qs_file_reference)
 void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString option)
 {
 
-    QString fx = option.replace(0,1, QString::number(i_currentGridType));
-    qWarning() << fx;
-    LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGridGrid '%s', option = %s", dataGridId.toStdString().c_str(), fx.toStdString().c_str());
-    option = fx;
+    //  QString fx = option.replace(0,1, QString::number(i_currentGridType));
+    //  qWarning() << fx;
+    //  LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGridGrid '%s', option = %s", dataGridId.toStdString().c_str(), fx.toStdString().c_str());
+    //  option = fx;
     string *sResponse;
-
-
 
     emit commandResponseChanged(QString("Getting data grid PK_DataGrid ").append(QString::number(PK_DataGrid)));
     int cellsToRender= 0;
@@ -2508,8 +2513,21 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString op
     string valassign = "0";
     bool isSuccessfull;
     int fetchItems = media_pageSeperator;
-
-    CMD_Populate_Datagrid populateGrid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), dgName.toStdString(), PK_DataGrid, option.toStdString(), 0, &pkVar, &valassign,  &isSuccessfull, &gWidth, &gHeight );
+    emit commandResponseChanged("Current Options::"+option);
+    CMD_Populate_Datagrid populateGrid(
+                m_dwPK_Device,
+                iPK_Device_DatagridPlugIn,
+                StringUtils::itos( m_dwIDataGridRequestCounter ),
+                dgName.toStdString(),
+                PK_DataGrid,
+                option.toStdString(),
+                0,
+                &pkVar,
+                &valassign,
+                &isSuccessfull,
+                &gWidth,
+                &gHeight
+                );
 
     if (SendCommand(populateGrid))
     {
@@ -2522,6 +2540,9 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString op
         {
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGrid() media browser, using _<dgname>");
             dgN = QString("_")+dgN;
+        } else if (PK_DataGrid == DATAGRID_Current_Media_Sections_CONST){
+          //  LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGrid() playists , using plist_<dgname>");
+          //  dgN = QString("plist_")+dgN;
         }
 
         // hack/fixme: need to sleep a short while here, because if we emit prepareDataGrid too soon,
@@ -2537,6 +2558,7 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString op
 }
 
 void DCE::qOrbiter::loadDataForDataGrid(QString dataGridId, QString dgName, int PK_DataGrid, QString option, int startRow, int numRows, int numColumns, QString seek) {
+    qDebug() << "loadDataForDataGrid()::"<< option;
     char *pData = NULL;
     int iData_Size=0;
     int GridCurRow = startRow;
@@ -2551,12 +2573,17 @@ void DCE::qOrbiter::loadDataForDataGrid(QString dataGridId, QString dgName, int 
     if (PK_DataGrid == DATAGRID_Media_Browser_CONST && !seek.isEmpty())
         gridName.remove(0,1);
 
+    if(PK_DataGrid == DATAGRID_Current_Media_Sections_CONST && !seek.isEmpty()){
+        gridName.remove("plist_");
+    }
+
+
     //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
     DCE::CMD_Request_Datagrid_Contents requestGrid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn),
                                                     StringUtils::itos( m_dwIDataGridRequestCounter ),
                                                     gridName.toStdString(), rows, numColumns,
                                                     false, false,
-                                                    true,  seek.toStdString(),    int(iOffset),
+                                                    true,  seek.toStdString(),    iOffset,
                                                     &pData, &iData_Size, &GridCurRow, &GridCurCol );
     if(SendCommand(requestGrid))
     {
@@ -2880,86 +2907,6 @@ void DCE::qOrbiter::moveMedia(QString eas, int streamID)
     }
 }
 
-void DCE::qOrbiter::requestMediaPlaylist()
-{
-    if(i_current_mediaType > 31 ){
-        qDebug() << "not getting media playlist because mediatype is " << i_current_mediaType;
-        return ;
-    }
-
-    qDebug("Fetching Playlist");
-    int gHeight = 0;
-    int gWidth = 1;
-    int pkVar = 0;
-    string valassign ="";
-    bool isSuccessfull;// = "false";
-    string m_sGridID ="plist_"+StringUtils::itos(m_dwPK_Device);
-    string m_sSeek;
-    int iOffset;
-    int iData_Size=0;
-    int GridCurRow = 0;
-    int GridCurCol= 0;
-    char *pData;
-    pData = NULL;
-    m_dwIDataGridRequestCounter++;
-
-    string sPopulateResp ="";
-    CMD_Populate_Datagrid cmd_populate_nowplaying_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 18, "38", DEVICETEMPLATE_Datagrid_Plugin_CONST, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
-
-    if (SendCommand(cmd_populate_nowplaying_grid))
-    {
-        //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
-        sPopulateResp = "";
-        DCE::CMD_Request_Datagrid_Contents req_data_grid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn), StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID),    int(gWidth), int(gHeight),           false, false,        false,   string(m_sSeek),    int(iOffset),  &pData,         &iData_Size, &GridCurRow, &GridCurCol );
-        if(SendCommand(req_data_grid))
-        {
-            DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
-            LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Attribute Datagrid Dimensions: Height %d, Width %d", gHeight, gWidth);
-            QString cellTitle;
-            QString qs_plsIndex;
-            QString fk_file;
-            int index = 0;
-
-            setPlaylistSize(pDataGridTable->GetRows());
-
-            for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it){
-
-                DataGridCell *pCell;
-                pCell = it->second;
-                cellTitle = pCell->GetText();
-                qs_plsIndex = pCell->GetValue();
-                index = qs_plsIndex.toInt();
-                fk_file = pCell->GetValue();
-                emit playlistItemAdded(new PlaylistItemClass(cellTitle, fk_file, index));
-#ifdef QT5
-                QCoreApplication::processEvents(QEventLoop::AllEvents);
-#else
-                QApplication::processEvents(QEventLoop::AllEvents);
-#endif
-
-#ifdef RPI
-                msleep(45);
-#elif ANDROID
-                msleep(30);
-#else
-                // msleep(10);
-#endif
-                index++;
-            }
-
-
-            emit playlistDone();
-            pDataGridTable->ClearData();
-            delete pDataGridTable;
-            delete []pData; pData=NULL;
-            pDataGridTable=NULL;
-        }
-    }
-    else
-    {
-        emit commandResponseChanged("Could not populate playlist!");
-    }
-}
 
 void qOrbiter::checkTimeCode(int npDevice)
 {
@@ -4315,7 +4262,14 @@ void qOrbiter::OnDisconnect()
     setNowPlaying(false);
     emit eventResponseChanged("Connection Lost");
     emit routerDisconnect();
-    Disconnect();
+
+}
+
+void qOrbiter::OnUnexpectedDisconnect()
+{
+    LoggerWrapper::GetInstance()->Write(LV_STATUS,"QOrbiter::onUnexpectedDisconnect %d", m_dwPK_Device);
+    emit routerConnectionChanged(false);
+
 }
 
 void qOrbiter::OnReload()
@@ -4344,7 +4298,7 @@ void qOrbiter::OnReload()
 #endif
 #endif
 
-    Disconnect();
+
     emit routerReloading("Reloading");
 }
 
@@ -4572,7 +4526,22 @@ int qOrbiter::SetupNewOrbiter()
     string sType = "Linux";
     statusMessage("Setting up orbiter with core");
 
-    DCE::CMD_New_Orbiter_DT CMD_New_Orbiter_DT(m_dwPK_Device, DEVICETEMPLATE_Orbiter_Plugin_CONST, BL_SameHouse, sType,sPK_Users,DEVICETEMPLATE_qOrbiter_CONST ,m_sMacAddress,sPK_Room,sWidth,sHeight,sPK_Skin,sPK_Lang,1,&PK_Device);
+    DCE::CMD_New_Orbiter_DT CMD_New_Orbiter_DT(m_dwPK_Device,
+                                               DEVICETEMPLATE_Orbiter_Plugin_CONST,
+                                               BL_SameHouse,
+                                               sType,
+                                               sPK_Users,
+                                               DEVICETEMPLATE_qOrbiter_CONST ,
+                                               m_sMacAddress,
+                                               sPK_Room,
+                                               sWidth,
+                                               sHeight,
+                                               sPK_Skin,
+                                               sPK_Lang
+                                               ,1
+                                               ,
+                                               &PK_Device
+                                               );
 
     CMD_New_Orbiter_DT.m_pMessage->m_eExpectedResponse = ER_ReplyMessage;
     Message *pResponse = event_Impl.SendReceiveMessage( CMD_New_Orbiter_DT.m_pMessage );
@@ -5323,24 +5292,40 @@ void qOrbiter::setVariable(int pkvar ,QString val)
 
 void qOrbiter::reInitialize(){
 
+    qDebug() << "qOrbiter::reInitialize()::start";
+    if(this->m_pPrimaryDeviceCommand->m_bQuit_get() == true ){
+        qDebug() << "Device set to quit";
+    }
+
+    this->m_pPrimaryDeviceCommand->Close();
+    pthread_cond_broadcast( &m_listMessageQueueCond );
+
+    qDebug() << this->m_pPrimaryDeviceCommand->GetStatus().c_str();
 
 
-    qDebug() << "REINITIALIZE";
-    Disconnect();
     if ((GetConfig() == true) && (Connect(PK_DeviceTemplate_get()) == true))
     {
-
         m_dwMaxRetries = 1;
         m_bRouterReloading = false;
         m_bReload = false;
         m_bOrbiterConnected = true;
+
+
+        emit deviceValid(true);
+        emit commandResponseChanged("Starting Manager");
+        emit startManager(QString::number(m_dwPK_Device), dceIP);
+
+        if(!getConfiguration()){
+            exit(99);
+        }
+
         CreateChildren();
         emit routerConnectionChanged(true);
     }else {
         emit routerConnectionChanged(false);
     }
 
-
+    qDebug() << "qOrbiter::reInitialize()::end \n\n";
 }
 
 void qOrbiter::authorizePrivateMedia(int mediaType, QString pin, int user){

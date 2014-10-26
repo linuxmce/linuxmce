@@ -48,7 +48,7 @@ MediaManager::MediaManager(QQuickItem *parent):
     QQuickItem(parent)
   #endif
 {
-#ifdef Q_OS_ANDROID
+#ifdef ANDROID
 
 #ifdef QT4
     setFlag(ItemHasNoContents, false);
@@ -66,7 +66,7 @@ MediaManager::MediaManager(QQuickItem *parent):
     setCurrentStatus("Media Manager defaults set, initializing media engines");
 #ifdef QT4
 
-#ifndef __ANDROID__
+#ifndef ANDROID
     // setAvailibleOutputs(Phonon::BackendCapabilities::availableAudioOutputDevices());
     qDebug() << outputs;
     qDebug() << Phonon::BackendCapabilities::availableMimeTypes();
@@ -118,7 +118,7 @@ void MediaManager::initializeConnections()
 
 
     /*From Dce MediaPlayer*/
-#ifndef __ANDROID__
+#ifndef ANDROID
     QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)));
 
 #ifdef QT4
@@ -139,7 +139,7 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()));
 
 
-#elif defined __ANDROID__
+#elif defined ANDROID
     QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString))); //effectively play for android.
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopAndroidMedia()));
 
@@ -147,7 +147,7 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
     QObject::connect(mediaPlayer,SIGNAL(jumpToStreamPosition(int)), this, SLOT(setMediaPosition(int)));
 
-#ifndef __ANDROID__
+#ifndef ANDROID
     /*From internal plugin*/
 #ifdef QT4
     QObject::connect(mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(setState()));
@@ -176,7 +176,7 @@ void MediaManager::setConnectionDetails(int r, QString s)
     setServerAddress(s);
     setDeviceNumber(r);
 
-    if(!serverAddress.isEmpty() && deviceNumber > 1){
+    if(!serverAddress.isEmpty() && deviceNumber > 0){
         setCurrentStatus("Got address "+serverAddress+" and device number "+QString::number(deviceNumber)+", initializing");
         initializePlayer();
     }else{
@@ -250,7 +250,7 @@ void MediaManager::setMediaUrl(QString url)
     fileUrl=url;
     emit fileUrlChanged();
 
-#if defined (QT4) && ! defined (__ANDROID__) //only for non android qt4
+#if defined (QT4) && ! defined (ANDROID) //only for non android qt4
 
     QString mediaPath;
     if(url.toLower().endsWith(".iso",Qt::CaseInsensitive)||url.toLower().endsWith(".dvd", Qt::CaseInsensitive)){

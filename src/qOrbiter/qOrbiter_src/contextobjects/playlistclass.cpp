@@ -202,7 +202,7 @@ void PlaylistClass::setCurrentIndex(int i)
 
   if(currentIndex > totalSize){
       qDebug() << "Oops, missing a track." << currentIndex << "::" << totalSize;
-      populate();
+     // populate();
   }
   else{
       qDebug() << " No Change in playlist size.";

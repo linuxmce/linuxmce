@@ -25,41 +25,9 @@ QImage AbstractImageProvider::floorplanProvider(QSize &requestedSize)
     {
         key.load(":/icons/icon.png");
     }
-    //aspect checking
-    int aRatio = key.height() / key.width();
-    if(key.height() > key.width())
-    {
-        managerreference->nowPlayingButton->setImageAspect("poster");
-    }
-    else if (key.height() < key.width())
-    {
-        managerreference->nowPlayingButton->setImageAspect("wide");
-    }
-    else if(key.height() == key.width()){
-        managerreference->nowPlayingButton->setImageAspect("album");
-    }
+     return key;
 
 
-    if(requestedSize.isValid()){
-        managerreference->setDceResponse("Abstract Image provider returned requestSize based on requested size. Image aspect" +QString::number(aRatio));
-        return key.scaled(requestedSize, Qt::KeepAspectRatio, Qt::SmoothTransformation );
-
-    } else if(requestedSize.height() <!0 ){
-        managerreference->setDceResponse("Abstract Image provider returned requestSize based on height() aspect " +QString::number(aRatio));
-        qDebug() << "Val" << requestedSize.height() * aRatio;
-        QSize fallback( (int)(requestedSize.height()*aRatio), requestedSize.height() );
-        qDebug() << fallback;
-        return key.scaled(fallback, Qt::KeepAspectRatio, Qt::SmoothTransformation );
-
-    } else if (requestedSize.width() <!0){
-        QSize fallback((int)(requestedSize.height()*aRatio), requestedSize.height() );
-           qDebug() << "Val" << requestedSize.height() * aRatio;
-        managerreference->setDceResponse("Abstract Image provider returned requestSize based on width() aspect " +QString::number(aRatio));
-        return key.scaled(fallback, Qt::KeepAspectRatio, Qt::SmoothTransformation );
-    } else {
-        managerreference->setDceResponse("Abstract Image provider returned no requestSize based on height() aspect " +QString::number(aRatio));
-        return key;
-    }
 
 }
 

@@ -13,7 +13,8 @@ contains(QT_VERSION,4.*.*){
          QT += declarative phonon network opengl
 
         android-g++{
-         QT-=phonon
+         QT-= phonon
+DEFINES+=ANDROID
         message("For Android")
          }
 

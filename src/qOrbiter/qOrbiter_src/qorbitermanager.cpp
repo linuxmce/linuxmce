@@ -361,13 +361,20 @@ qorbiterManager::~qorbiterManager(){
 void qorbiterManager::gotoQScreen(QString s){
     
     // clearAllDataGrid();
+
+
+
     if(s.contains("Screen_1.qml"))
     {
         logQtMessage("QOrbiter clearing models because screen is 1");
+
+       // clearDataGrid("Playlist");
+        clearDataGrid("sleepingAlarms");
         emit keepLoading(false);
         emit clearModel();
         emit cancelRequests();
         emit resetFilter();
+
     }
     
     //send the qmlview a request to go to a screen, needs error handling
@@ -382,7 +389,7 @@ void qorbiterManager::gotoQScreen(QString s){
     setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
         setDceResponse("Done call to screenchange()");
-        setCurrentScreen(s);
+
         if(!currentScreen.contains("187")){
             
             if(gotoScreenList->count() !=0){
@@ -417,7 +424,7 @@ void qorbiterManager::goBacktoQScreen()
         QObject *item = qorbiterUIwin->rootObject();
         setDceResponse("About to call screenchange()");
         if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
-            setCurrentScreen(gotoScreenList->last());
+
             setDceResponse("Done call to screenchange()");
 
         } else {
@@ -1169,6 +1176,7 @@ void qorbiterManager::prepareDataGrid(QString dataGridId, QString dgName, int he
 
 void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, int indexStart, int numRows, DataGridTable* pTable)
 {
+    qDebug() << "Adding item";
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "addDataGridItem() start");
     // Make sure datagrid is still in the active map
     modelPoolLock.lockForRead();
@@ -1190,6 +1198,7 @@ void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, int i
                 GenericModelItem* pItem = DataGridHandler::GetModelItemForCell(PK_DataGrid, pTable, row);
                 // TODO: stop if datagrid model is reset or request stopped
                 m_mapDataGridModels[dataGridId]->insertRow(row, pItem);
+
                 count++;
             }
         }
@@ -1265,6 +1274,7 @@ void qorbiterManager::prepareModelPool(int poolSize)
 
 GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int PK_DataGrid)
 {
+    qDebug() << "Fetching dg " << dataGridId << ": type : " << PK_DataGrid;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() id = %s", dataGridId.toStdString().c_str());
     
     GenericFlatListModel* pModel = NULL;
@@ -1286,24 +1296,44 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
             pModel->setOption("");
             pModel->setPK_DataGrid(PK_DataGrid);
             m_mapDataGridModels.insert(dataGridId, pModel);
-             qDebug() << "eggs";
-            if(!currentIndexMap.isEmpty()){
 
+            if(!currentIndexMap.isEmpty()){
                 currentIndexMap.clear();
             }
             
             QString option = "";
-            if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
+            switch(PK_DataGrid){
+
+            case  DATAGRID_Alarms_In_Room_CONST:
                 option = QString::number(iFK_Room);
-            } else if (PK_DataGrid == DATAGRID_Phone_Book_Auto_Compl_CONST) {
+                break;
+
+            case DATAGRID_Phone_Book_Auto_Compl_CONST:
                 option = QString::number(iPK_User).append("|%");
-            } else if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
+                break;
+
+            case DATAGRID_Media_Browser_CONST:
                 option = mediaFilter.getFilterString();
+                // qDebug() << "media browser outgoing option ::" << option;
                 mediaFilter.setDataGridId(dataGridId);
+                break;
+
+            case DATAGRID_Playlists_CONST:
+                option = "38";
+                break;
+
+            case DATAGRID_Current_Media_Sections_CONST:
+                option="38";
+                break;
+
+            default:
+                setMediaResponse("qOrbiterManager::getDataGridModel()::No Grid option set");
+                break;
             }
             pModel->setOption(option);
             
             LoggerWrapper::GetInstance()->Write(LV_DEBUG, "getDataGridModel() emit loadDataGrid");
+            qDebug() << "Checks complete, fetching grid " << PK_DataGrid;
             emit loadDataGrid(dataGridId, PK_DataGrid, option); // loads data
         } else {
             pModel = m_mapDataGridModels[dataGridId];
@@ -1330,10 +1360,12 @@ void qorbiterManager::seekGrid(QString dataGridId, QString s)
 
 void qorbiterManager::mediaFilterChanged(QString dataGridId)
 {
+    qDebug() << "mediaFilterChanged()";
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::mediaFilterChanged() start");
     GenericFlatListModel* pModel = NULL;
     if (m_mapDataGridModels.contains(dataGridId))
     {
+        qDebug() << "mediaFilterChanged()::" << "existing model type, checking filter of " << mediaFilter.getFilterString();
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::mediaFilterChanged() model exists");
         pModel = m_mapDataGridModels[dataGridId];
         pModel->setOption(mediaFilter.getFilterString());
@@ -1454,6 +1486,7 @@ void qorbiterManager::setActiveRoom(int room,int ea)
     emit setLocation(room, ea);
     emit keepLoading(false);
     emit clearModel();
+    clearDataGrid("Playlist");
     emit resetFilter();
     nowPlayingButton->resetData();
     
@@ -1503,7 +1536,7 @@ int qorbiterManager::getlocation() const
 
 void qorbiterManager::regenOrbiter(int deviceNo)
 {
-    emit screenChange("WebRegen.qml");
+    setCurrentScreen("WebRegen.qml");
 }
 
 void qorbiterManager::regenComplete(int i)
@@ -1514,7 +1547,7 @@ void qorbiterManager::regenComplete(int i)
     }
     else
     {
-        emit screenChange("LoadError.qml");
+        setCurrentScreen("LoadError.qml");
     }
 }
 
@@ -1840,10 +1873,12 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
         setDeviceNumber(incdeviceid.toInt());
         setDceResponse("Initializing Local Manager");
         initializeManager(incrouterip.toStdString(), incdeviceid.toLong());
-    } else {
+    } else if (status=="reconnect") {
         status="running";
-        qDebug() << finalPath;
-        loadSkins(finalPath);
+        setDceResponse("Re -Initializing Local Manager");
+        setCurrentScreen("Screen_1.qml");
+    } else {
+
     }
     
     //  getConfiguration(); /* Connect to skins ready signal */
@@ -2199,7 +2234,7 @@ void qorbiterManager::showfloorplan(int fptype)
     }
     
     
-    gotoQScreen(Screen);
+    setCurrentScreen(Screen);
     //pqOrbiter->ShowFloorPlan(fptype);
 }
 
@@ -2401,7 +2436,7 @@ void qorbiterManager::startOrbiter()
         qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
         //   QApplication::processEvents(QEventLoop::AllEvents);
-        emit screenChange("Screen_1.qml");
+        setCurrentScreen("Screen_1.qml");
         // QApplication::processEvents(QEventLoop::AllEvents);
     }
     else
@@ -2603,11 +2638,12 @@ void qorbiterManager::setCurrentScreen(QString s)
         currentScreen = s;
         emit screenChange(s);
     }
-    
+
 }
 
 void qorbiterManager::connectionWatchdog()
 {
+    status="reconnect";
     QTimer::singleShot(15000, this, SIGNAL(reInitialize()));
     emit qtMessage("Starting Watchdog");
 }

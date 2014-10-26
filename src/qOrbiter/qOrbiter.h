@@ -173,6 +173,7 @@ public:
     QString DCEHost;        /**< The hostname of the router */
     string m_sExternalIP;   /**< The external ip address of the router as seen from a WAN */
     QString m_localIp;
+    QString m_localMac;
     //@}
 
     /*! @name Device Id Member Variables */
@@ -240,6 +241,7 @@ public:
     bool m_bUseMask;                                    /*!< Carried Over from old Orbiter. May or may not apply */
     long currentDeviceTemplate;                         /*!< Used to track which DT we actually are: Onscreen QOrbiter, or Android, or iOS, or Desktop */
     //@}
+    QTimer *watchdog;
 
     //<-dceag-const-b->
 public:
@@ -254,6 +256,7 @@ public:
     virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
     virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
     virtual void OnDisconnect();
+    virtual void OnUnexpectedDisconnect();
     virtual void OnReload();
 
     virtual bool OnReplaceHandler(string msg);
@@ -1937,7 +1940,7 @@ public slots:
     void FfMedia();
     void PauseMedia();
     void moveMedia(QString eas, int streamID);
-    void requestMediaPlaylist();
+
     void checkTimeCode(int npDevice);
     void getStreamingVideo();
 
