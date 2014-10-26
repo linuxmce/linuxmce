@@ -1254,7 +1254,7 @@ public slots:
     void movePlaylistEntry(QString d, int index) {emit movePlistEntry(d, index); }
     void removePlaylistEntry(int index) {emit removePlistEntry(index);}
     void saveCurrentPlaylist(QString name, bool mode) {emit savePlist(name, mode);} /*true is public, false is private*/
-    void updatePlaylist(){ mediaFilterChanged("Playlist");/*playlistSizeChanged(); GenericFlatListModel *pModel = getDataGridModel("Playlist", 18); if(pModel){pModel->refreshData();}*/ }
+    void updatePlaylist(){ /*mediaFilterChanged("Playlist");*/ /*playlistSizeChanged(); GenericFlatListModel *pModel = getDataGridModel("Playlist", 18); if(pModel){pModel->refreshData();}*/ }
     //@}
 
     /*! @name Screenshot & Images slots*/
