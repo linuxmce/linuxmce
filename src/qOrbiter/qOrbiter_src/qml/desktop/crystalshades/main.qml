@@ -117,10 +117,10 @@ Item {
 */
                     MouseArea{
                         anchors.fill: parent
-                        //onClicked:gotoQScreen("Screen_1.qml")
+                        //onClicked:setCurrentScreen("Screen_1.qml")
                         onClicked: {
                             console.log("RayBe you have Clicked on: Advance")
-                            gotoQScreen("Screen_44.qml")
+                            setCurrentScreen("Screen_44.qml")
                         }
                     }
                 }
@@ -148,7 +148,7 @@ Item {
                     }
                     MouseArea{
                         anchors.fill: parent
-                        //onClicked:gotoQScreen("Screen_1.qml")
+                        //onClicked:setCurrentScreen("Screen_1.qml")
                         onClicked: {
                             console.log("RayBe you have Clicked on: Lights")
                             mainItemSelected(0)
@@ -178,7 +178,7 @@ Item {
                     }
                     MouseArea{
                         anchors.fill: parent
-                        //onClicked:gotoQScreen("Screen_1.qml")
+                        //onClicked:setCurrentScreen("Screen_1.qml")
                         onClicked: {
                             console.log("RayBe you have Clicked on: Media")
                             mainItemSelected(1)
@@ -208,7 +208,7 @@ Item {
                     }
                     MouseArea{
                         anchors.fill: parent
-                        //onClicked:gotoQScreen("Screen_1.qml")
+                        //onClicked:setCurrentScreen("Screen_1.qml")
                         onClicked: {
                             console.log("RayBe you have Clicked on: Climate")
                             mainItemSelected(2)
@@ -230,7 +230,7 @@ Item {
                     }
                     MouseArea{
                         anchors.fill: parent
-                        //onClicked:gotoQScreen("Screen_1.qml")
+                        //onClicked:setCurrentScreen("Screen_1.qml")
                         onClicked: {
                             console.log("RayBe you have Clicked on: Lights")
                             mainItemSelected(3)
@@ -252,7 +252,7 @@ Item {
                     }
                     MouseArea{
                         anchors.fill: parent
-                        //onClicked:gotoQScreen("Screen_1.qml")
+                        //onClicked:setCurrentScreen("Screen_1.qml")
                         onClicked: {
                             console.log("RayBe you have Clicked on: Lights")
                             mainItemSelected(4)
@@ -411,7 +411,7 @@ Item {
                         console.log("Clicked on:",index)
                         submenu.currentIndex = index
                         //execGrp(params) //RayBe
-                        gotoQScreen("Screen_1.qml") //RayBe to reset the screen in main erea
+                        setCurrentScreen("Screen_1.qml") //RayBe to reset the screen in main erea
                         manager.executeCommandGroup(params)
                     }
                 }
@@ -464,7 +464,7 @@ Item {
                     }
                     MouseArea {
                         anchors.fill: parent
-                        onClicked:gotoQScreen(dcenowplaying.qs_screen)
+                        onClicked:setCurrentScreen(dcenowplaying.qs_screen)
                     }
                 }
             }
@@ -556,7 +556,7 @@ Item {
                 }
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: gotoQScreen("Screen_44.qml")
+                    onClicked: setCurrentScreen("Screen_44.qml")
                 }
             }
 */

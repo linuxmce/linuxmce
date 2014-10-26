@@ -31,9 +31,9 @@ Rectangle {
         opacity: .25
     }
     Connections{
-        target: mediaplaylist
-        onActiveItemChanged:{
-            editView.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
+        target: dcenowplaying
+        onPlaylistPositionChanged:{
+            editView.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
         }
     }
 
@@ -43,7 +43,7 @@ Rectangle {
         width: metadataSection.width/1.5
         clip: true
         flickableDirection: Flickable.VerticalFlick
-        model:mediaplaylist
+        model:manager.getDataGridModel("Playlist", 18)
         Component.onCompleted: currentIndex= dcenowplaying.m_iplaylistPosition
         highlightFollowsCurrentItem: true
         spacing:scaleY(1)

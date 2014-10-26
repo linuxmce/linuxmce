@@ -33,23 +33,23 @@ Item{
         StyledButton{
             buttonText.text: qsTr("Yes Resume")
             hitArea.onReleased: {manager.setSeekPosition(screenparams.getParam(188)) ;
-                gotoQScreen("Screen_"+screenparams.getParam(226)+".qml")
+                setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
             }
         }
 
         StyledButton{
             buttonText.text: qsTr("No Thank You")
-            hitArea.onReleased: gotoQScreen("Screen_"+screenparams.getParam(226)+".qml")
+            hitArea.onReleased: setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
         }
 
         StyledButton{
             buttonText.text: qsTr("Yes Always Resume")
-            hitArea.onReleased: gotoQScreen("Screen_"+screenparams.getParam(226)+".qml")
+            hitArea.onReleased: setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
         }
 
         StyledButton{
             buttonText.text: qsTr("No thank you, Never resume")
-            hitArea.onReleased: gotoQScreen("Screen_"+screenparams.getParam(226)+".qml")
+            hitArea.onReleased: setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
         }
     }
 

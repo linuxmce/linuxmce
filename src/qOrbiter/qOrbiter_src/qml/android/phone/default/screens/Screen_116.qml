@@ -1,31 +1,21 @@
 import QtQuick 1.0
 import "../components"
-Rectangle {
+/*
+(17598): "116" :: 159
+ "File Server (192.168.80.165) 192.168.80.165(192.168.80.165)" :: 163
+"3856" :: 224
+ "3" :: 251
+ "0" :: 252
+"1" :: 253
+  */
+StyledScreen {
+    screen:"Plug n Play Hard Drive Screen"
 
-    height: style.orbiterH
-    width: style.orbiterW
-    color: style.advanced_bg
-    Text {
-        id: text1
-        x: 196
-        y: 139
-        text: "pnp Hard Drive Screen"
-        font.family: "Droid Sans Fallback"
-        font.pointSize: 24
-        font.pixelSize: 12
-    }
-
-    ButtonSq {
-        id: buttonsq1
-        height: 50
-        color: "#85eae9"
-        buttontext: "Home"
-        width: 50
-        x: 574
-        y: 25
-        MouseArea{
-            anchors.fill: parent
-            onClicked:gotoQScreen("Screen_1.qml")
+        HeaderListView{
+            height: parent.height
+            width: parent.width*.85
+            anchors.horizontalCenter: parent.horizontalCenter
+            listTitle:"Device Detected: \n"+ screenparams.getParam(163)+"\n Select Type:"
         }
-    }
+
 }

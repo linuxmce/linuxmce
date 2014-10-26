@@ -13,7 +13,7 @@ Rectangle {
         buttontext: "Back to live screen"
         MouseArea{
             anchors.fill: parent
-            onReleased: manager.gotoQScreen("Screen_48.qml")
+            onReleased: manager.setCurrentScreen("Screen_48.qml")
         }
     }
 

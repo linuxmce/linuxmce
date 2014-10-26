@@ -37,7 +37,7 @@ Rectangle {
 
         MouseArea{
             anchors.fill: parent
-            onClicked:manager.gotoQScreen(dcenowplaying.qs_screen)
+            onClicked:manager.setCurrentScreen(dcenowplaying.qs_screen)
             onEntered: {
                 currplaybg.opacity = 0.8
             }
@@ -65,7 +65,7 @@ Rectangle {
             radius: 5
             MouseArea{
                 anchors.fill: parent
-                onClicked:gotoQScreen("Screen_44.qml")
+                onClicked:setCurrentScreen("Screen_44.qml")
             }
         }
 
@@ -88,7 +88,7 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    gotoQScreen("Screen_29.qml")
+                    setCurrentScreen("Screen_29.qml")
 
                 }
             }

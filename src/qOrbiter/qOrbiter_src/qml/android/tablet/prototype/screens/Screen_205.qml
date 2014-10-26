@@ -74,7 +74,7 @@ source: "../img/icons/drpshadow.png"
                    anchors.horizontalCenter: parent.horizontalCenter
                    MouseArea{
                        anchors.fill: parent
-                       onClicked: {gotoQScreen("Screen_1.qml")}
+                       onClicked: {setCurrentScreen("Screen_1.qml")}
                    }
                }
 
@@ -87,7 +87,7 @@ source: "../img/icons/drpshadow.png"
                    anchors.horizontalCenter: parent.horizontalCenter
                    MouseArea{
                        anchors.fill: parent
-                       onClicked: {gotoQScreen("Screen_1.qml")}
+                       onClicked: {setCurrentScreen("Screen_1.qml")}
                    }
                }
             }

@@ -95,7 +95,12 @@ Item {
     //! \warn This function is required by the qml engine.
     //! this function load pages as called from other threads or in response to user events.
     function screenchange(screenname ){
-        console.log(screenname)
+        console.log("New Screen Request::"+screenname)
+        if(screenname==""){
+            console.log("Empty Screen!")
+            return;
+        }
+
         pageLoader.source = "screens/"+screenname
         //        while(pageLoader.status == Component.Loading){
         //            console.log("Screenchange::"+pageLoader.progress)
@@ -104,13 +109,15 @@ Item {
         if (pageLoader.status == Component.Ready){
             var s = String(screenname)
             manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-            manager.setCurrentScreen(screenname)
+           // manager.setCurrentScreen(screenname)
             componentLoader.source= ""
         }else if (pageLoader.status==Component.Error){
+            manager.setCurrentScreen("Error.qml")
             logger.userLogMsg ="Command to change to:" + screenname + " failed!"
             logger.userLogMsg = pageLoader.sourceComponent.errorString()
             screenfile = screenname
             pageLoader.source = "screens/Screen_x.qml"
+
         }
     }
 
@@ -247,16 +254,16 @@ Item {
 
             switch(event.key){
             case Qt.Key_Back:
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex-++1));
+                manager.changedPlaylistPosition((dcenowplaying.m_iplaylistPosition-1));
                 break;
             case Qt.Key_Forward:
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1))
+                manager.changedPlaylistPosition((dcenowplaying.m_iplaylistPosition+1))
                 break;
             case 16777347: /* Keycode Track forward */
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1));
+                manager.changedPlaylistPosition((dcenowplaying.m_iplaylistPosition+1));
                 break;
             case 16777346: /* Keycode Track Backwards */
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex-1))
+                manager.changedPlaylistPosition((dcenowplaying.m_iplaylistPosition-1))
                 break;
             case Qt.Key_Plus: /*Plus sign */
                 manager.adjustVolume(+1)
@@ -318,6 +325,7 @@ Item {
         objectName: "loadbot"
         focus:true
         z:5
+        source: "screens/Screen_1.qml"
         anchors{
             top:data_header.bottom
             bottom:qmlroot.bottom

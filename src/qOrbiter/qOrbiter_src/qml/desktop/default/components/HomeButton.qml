@@ -16,7 +16,7 @@ width: 25
         }
         MouseArea{
             anchors.fill: parent
-            onClicked:manager.gotoQScreen("Screen_1.qml")
+            onClicked:manager.setCurrentScreen("Screen_1.qml")
         }
     }
 }

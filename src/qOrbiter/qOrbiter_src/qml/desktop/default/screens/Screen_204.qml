@@ -62,7 +62,7 @@ Stage{
                     buttontextitalic: true
                     MouseArea{
                         anchors.fill: parent
-                        onClicked: gotoQScreen("Screen_1.qml")
+                        onClicked: setCurrentScreen("Screen_1.qml")
                     }
                 }
             }

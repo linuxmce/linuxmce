@@ -10,11 +10,11 @@ Item {
     }
 
     Connections{
-        target: mediaplaylist
-        onActiveItemChanged:{
-            playlistView.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
-        }
-    } 
+          target: dcenowplaying
+          onPlayListPositionChanged:{
+              playlistView.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+          }
+      }
 
     ListView {
         id: playlistView
@@ -22,7 +22,7 @@ Item {
         clip: true
         interactive: true
         flickableDirection: "VerticalFlick"
-	model: mediaplaylist
+    model: manager.getDataGridModel("Playlist", 18)
 	delegate:
            Rectangle {
 	       color: index === dcenowplaying.m_iplaylistPosition ? "#FFFFFF" : "#282828"

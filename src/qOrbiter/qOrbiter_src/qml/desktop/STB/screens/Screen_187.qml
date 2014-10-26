@@ -55,12 +55,12 @@ Item {
         RowButton{
             text:"Yes Resume."
             onSelect: {manager.setSeekPosition(screenparams.getParam(188)) ;
-                gotoQScreen("Screen_"+screenparams.getParam(226)+".qml")
+                setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
             }
         }
         RowButton{
             text:"No Thank You."
-            onSelect:  gotoQScreen("Screen_"+screenparams.getParam(226)+".qml")
+            onSelect:  setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
         }
     }
 }

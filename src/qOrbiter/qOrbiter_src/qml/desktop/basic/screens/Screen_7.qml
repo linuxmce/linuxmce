@@ -11,7 +11,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680
@@ -70,7 +70,7 @@ Item {
 	function onActivate3442() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14846
-		gotoQScreen("Screen_44.qml")
+		setCurrentScreen("Screen_44.qml")
 	}
 	StyledText {
 		x: 239
@@ -92,7 +92,7 @@ Item {
 	function onActivate3443() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14847
-		gotoQScreen("Screen_39.qml")
+		setCurrentScreen("Screen_39.qml")
 	}
 	StyledText {
 		x: 479
@@ -116,7 +116,7 @@ Item {
 	 // Calling Command 260 (Set Main Menu) with CommandGroup_Parameters from 14848
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 260 9 \"S\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14849
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 719
@@ -138,7 +138,7 @@ Item {
 	function onActivate3445() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14850
-		gotoQScreen("Screen_76.qml")
+		setCurrentScreen("Screen_76.qml")
 	}
 	StyledText {
 		x: 959

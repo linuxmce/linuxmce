@@ -52,7 +52,7 @@ Item{
     MouseArea{
         id:ms
         anchors.fill: parent
-       onClicked:manager.gotoQScreen(dcenowplaying.qs_screen)
+       onClicked:manager.setCurrentScreen(dcenowplaying.qs_screen)
     }
 }
 

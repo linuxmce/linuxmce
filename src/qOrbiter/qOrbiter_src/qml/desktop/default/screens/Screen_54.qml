@@ -9,7 +9,7 @@ MediaPlaybackBase{
     metadataComponent: AudioMetaData{ }
     scrollBarComponent: MediaScrollBar{}
     controlComponent: VideoControls{}
-    playlistSource:mediaplaylist
+    playlistSource:manager.getDataGridModel("Playlist", 18)
     playlistDelegate: Rectangle{
         height: scaleY(30)
         width: scaleX(18)

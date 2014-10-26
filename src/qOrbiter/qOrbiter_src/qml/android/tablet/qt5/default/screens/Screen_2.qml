@@ -66,7 +66,7 @@ Item {
         }
     }
 
-    Keys.onEscapePressed: manager.gotoQScreen("Screen_1.qml")
+    Keys.onEscapePressed: manager.setCurrentScreen("Screen_1.qml")
 
 //    Rectangle{
 //        id:fil

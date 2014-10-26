@@ -40,7 +40,7 @@ Rectangle {
         items: ListModel {
             ListElement {
                 text: "Home"
-                action: 'gotoQScreen("Screen_1.qml")'
+                action: 'setCurrentScreen("Screen_1.qml")'
             }
         }
     }
@@ -89,7 +89,7 @@ Rectangle {
                 }
                 MouseArea {
                     anchors.fill: parent
-                    onClicked:gotoQScreen(dcenowplaying.qs_screen)
+                    onClicked:setCurrentScreen(dcenowplaying.qs_screen)
                 }
             }
         }
@@ -177,7 +177,7 @@ Rectangle {
                 clip: true
                 interactive: true
                 flickableDirection: "VerticalFlick"
-                model: mediaplaylist
+                model: manager.getDataGridModel("Playlist", 18)
                 delegate:
                     Rectangle {
                     width:nonepgplaylistview.width

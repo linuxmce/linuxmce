@@ -11,7 +11,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680
@@ -50,7 +50,7 @@ Item {
 	 // Calling Command 44 (MH Stop Media) with CommandGroup_Parameters from 13739
 		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 44 45 \"<%=E%>\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 18035
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	ButtonSq {
 		id: button1569_53
@@ -169,7 +169,7 @@ Item {
 	 // Calling Command 744 (Set User Mode) with CommandGroup_Parameters from 16693
 		manager.sendDceMessage(srouterip + " "+deviceid + " -107 1 744 17 \"<%=39%>\" 194 \"1\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16701
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 108
@@ -203,7 +203,7 @@ Item {
 	 // Calling Command 744 (Set User Mode) with CommandGroup_Parameters from 16695
 		manager.sendDceMessage(srouterip + " "+deviceid + " -107 1 744 17 \"<%=39%>\" 194 \"2\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16703
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 325
@@ -237,7 +237,7 @@ Item {
 	 // Calling Command 744 (Set User Mode) with CommandGroup_Parameters from 16697
 		manager.sendDceMessage(srouterip + " "+deviceid + " -107 1 744 17 \"<%=39%>\" 194 \"3\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16705
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 541
@@ -271,7 +271,7 @@ Item {
 	 // Calling Command 744 (Set User Mode) with CommandGroup_Parameters from 16699
 		manager.sendDceMessage(srouterip + " "+deviceid + " -107 1 744 17 \"<%=39%>\" 194 \"4\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16707
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 758

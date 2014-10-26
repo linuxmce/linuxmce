@@ -13,7 +13,7 @@ Item {
 	 // Calling Command 337 (Rip Disk) with CommandGroup_Parameters from 14811
 		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 337 13 \"<%=17%>\" 17 \"<%=12%>\" 20 \"<%=13%>\" 50 \"<%=17%>\" 121 \"A\" 131 \"<%=31%>\" 151 \"<%=33%>\" 233 \"<%=45%>\" 234 \"<%=9%>\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14812
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1263
@@ -37,7 +37,7 @@ Item {
 	 // Calling Command 337 (Rip Disk) with CommandGroup_Parameters from 14813
 		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 337 13 \"<%=17%>\" 17 \"<%=12%>\" 20 \"<%=13%>\" 50 \"<%=17%>\" 121 \"<%=2%>\" 131 \"<%=31%>\" 151 \"<%=33%>\" 233 \"<%=45%>\" 234 \"<%=9%>\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14814
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1011

@@ -13,7 +13,7 @@ Item {
     property bool uiOn:true
     property alias skinStyle:appStyle
     property int screensaverTimer:manager.screenSaverTimeout*1000
-
+    property string lastLoaderError:""
 
     signal showMetadata()
     signal showPlaylist()
@@ -343,14 +343,13 @@ Item {
 
         onStatusChanged: {
             if (pageLoader.status == Component.Ready){
-                manager.setDceResponse("Command to change to:" + manager.currentScreen+ " was successfull")
-
+                manager.setDceResponse("pageLoader::Command to change to:" + manager.currentScreen+ " was successfull")
                 screenfile=manager.currentScreen
             }else if (pageLoader.status == Component.Loading){
-                console.log("loading page from network")
-                console.log(pageLoader.progress)
+                console.log("pageLoader::loading page from network"+pageLoader.progress)
             }else if(pageLoader.status===Component.Error){
-                console.log("Command to change to:" + manager.currentScreen + " failed!")
+                lastLoaderError="Failed to load screen "+manager.currentScreen+". Reason:\n"+pageLoader.Error
+                console.log("pageLoader::Command to change to:" + manager.currentScreen + " failed!")
                 screenfile = "Screen_x.qml"
                 pageLoader.source = "screens/Screen_x.qml"
             }

@@ -29,7 +29,7 @@ Flickable
             MouseArea{
                 id: mousearea1
                 anchors.fill: parent
-                onClicked:gotoQScreen("Screen_5.qml")
+                onClicked:setCurrentScreen("Screen_5.qml")
               }
         }
 

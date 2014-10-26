@@ -11,7 +11,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680
@@ -202,7 +202,7 @@ out"
 	function onActivate5188() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17554
-		gotoQScreen("Screen_46.qml")
+		setCurrentScreen("Screen_46.qml")
 	 // Calling Command 826 (Speak in house) with CommandGroup_Parameters from 17207
 		manager.sendDceMessage(srouterip + " "+deviceid + " -107 1 826 2 \"<%=!%>\" 201 \"<%=1%>\" ")
 	}

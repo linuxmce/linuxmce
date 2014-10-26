@@ -26,7 +26,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680
@@ -83,7 +83,7 @@ Item {
 	function onActivate5529() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17517
-		gotoQScreen("Screen_11.qml")
+		setCurrentScreen("Screen_11.qml")
 	}
 	StyledText {
 		x: 451
@@ -164,7 +164,7 @@ Item {
 	function onActivate1320() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 2210
-		gotoQScreen("Screen_11.qml")
+		setCurrentScreen("Screen_11.qml")
 	}
 	StyledText {
 		x: 1678
@@ -188,7 +188,7 @@ Direct"
 	function onActivate1319() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 2500
-		gotoQScreen("Screen_9.qml")
+		setCurrentScreen("Screen_9.qml")
 	}
 	StyledText {
 		x: 1680
@@ -212,7 +212,7 @@ Book"
 	function onActivate1321() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 2207
-		gotoQScreen("Screen_10.qml")
+		setCurrentScreen("Screen_10.qml")
 	}
 	StyledText {
 		x: 1680
@@ -236,7 +236,7 @@ Dial"
 	function onActivate1682() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 2416
-		gotoQScreen("Screen_23.qml")
+		setCurrentScreen("Screen_23.qml")
 	}
 	StyledText {
 		x: 1680

@@ -11,7 +11,7 @@ Item {
 	function onActivate4570() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16437
-		gotoQScreen("Screen_193.qml")
+		setCurrentScreen("Screen_193.qml")
 	}
 	StyledText {
 		x: 45
@@ -33,7 +33,7 @@ Item {
 	function onActivate5067() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17032
-		gotoQScreen("Screen_53.qml")
+		setCurrentScreen("Screen_53.qml")
 	}
 	StyledText {
 		x: 1680
@@ -55,7 +55,7 @@ Item {
 	function onActivate5082() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17035
-		gotoQScreen("Screen_232.qml")
+		setCurrentScreen("Screen_232.qml")
 	}
 	StyledText {
 		x: 45
@@ -84,7 +84,7 @@ Item {
 	function onActivate4619() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16441
-		gotoQScreen("Screen_193.qml")
+		setCurrentScreen("Screen_193.qml")
 	}
 	StyledText {
 		x: 1191
@@ -106,7 +106,7 @@ Item {
 	function onActivate4656() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16442
-		gotoQScreen("Screen_192.qml")
+		setCurrentScreen("Screen_192.qml")
 	}
 	StyledText {
 		x: 1191
@@ -128,7 +128,7 @@ Item {
 	function onActivate4647() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16536
-		gotoQScreen("Screen_198.qml")
+		setCurrentScreen("Screen_198.qml")
 	}
 	StyledText {
 		x: 1191
@@ -150,7 +150,7 @@ Item {
 	function onActivate4654() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16537
-		gotoQScreen("Screen_200.qml")
+		setCurrentScreen("Screen_200.qml")
 	}
 	StyledText {
 		x: 1191
@@ -172,7 +172,7 @@ Item {
 	function onActivate4679() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16438
-		gotoQScreen("Screen_194.qml")
+		setCurrentScreen("Screen_194.qml")
 	}
 	StyledText {
 		x: 1191
@@ -194,7 +194,7 @@ Item {
 	function onActivate4682() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16440
-		gotoQScreen("Screen_199.qml")
+		setCurrentScreen("Screen_199.qml")
 	}
 	StyledText {
 		x: 1191
@@ -216,7 +216,7 @@ Item {
 	function onActivate5318() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17300
-		gotoQScreen("Screen_250.qml")
+		setCurrentScreen("Screen_250.qml")
 	}
 	StyledText {
 		x: 1191
@@ -238,7 +238,7 @@ Item {
 	function onActivate5319() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17305
-		gotoQScreen("Screen_251.qml")
+		setCurrentScreen("Screen_251.qml")
 	}
 	StyledText {
 		x: 1191
@@ -267,7 +267,7 @@ Item {
 	function onActivate4681() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16439
-		gotoQScreen("Screen_239.qml")
+		setCurrentScreen("Screen_239.qml")
 	}
 	StyledText {
 		x: 1552
@@ -289,7 +289,7 @@ Item {
 	function onActivate4622() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16443
-		gotoQScreen("Screen_196.qml")
+		setCurrentScreen("Screen_196.qml")
 	}
 	StyledText {
 		x: 1552
@@ -311,7 +311,7 @@ Item {
 	function onActivate4642() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16445
-		gotoQScreen("Screen_197.qml")
+		setCurrentScreen("Screen_197.qml")
 	}
 	StyledText {
 		x: 1552
@@ -333,7 +333,7 @@ Item {
 	function onActivate4646() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16444
-		gotoQScreen("Screen_201.qml")
+		setCurrentScreen("Screen_201.qml")
 	}
 	StyledText {
 		x: 1552
@@ -355,7 +355,7 @@ Item {
 	function onActivate5084() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17039
-		gotoQScreen("Screen_232.qml")
+		setCurrentScreen("Screen_232.qml")
 	}
 	StyledText {
 		x: 1552
@@ -377,7 +377,7 @@ Item {
 	function onActivate5320() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17298
-		gotoQScreen("Screen_247.qml")
+		setCurrentScreen("Screen_247.qml")
 	}
 	StyledText {
 		x: 1552
@@ -399,7 +399,7 @@ Item {
 	function onActivate5321() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17297
-		gotoQScreen("Screen_245.qml")
+		setCurrentScreen("Screen_245.qml")
 	}
 	StyledText {
 		x: 1552
@@ -421,7 +421,7 @@ Item {
 	function onActivate5322() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17299
-		gotoQScreen("Screen_236.qml")
+		setCurrentScreen("Screen_236.qml")
 	}
 	StyledText {
 		x: 1552

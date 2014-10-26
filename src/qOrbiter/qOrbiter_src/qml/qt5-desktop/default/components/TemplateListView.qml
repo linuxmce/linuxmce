@@ -10,16 +10,16 @@ ListView{
     }
 
     spacing:scaleX(1)
-    Component.onCompleted: {manager.setBoundStatus(true);mediaplaylist.populate()}
+    Component.onCompleted: {manager.setBoundStatus(true);}
     highlightFollowsCurrentItem: true
-    model: dcenowplaying.qs_screen==="Screen_63.qml" ? simpleepg : mediaplaylist
+    model: dcenowplaying.qs_screen==="Screen_63.qml" ? simpleepg : manager.getDataGridModel("Playlist", 18)
     clip:true
 
+
     Connections{
-        target: mediaplaylist
-        onActiveItemChanged:{
-            playlist.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
-            playlist.currentIndex = mediaplaylist.currentIndex
+        target: dcenowplaying
+        onPlayListPositionChanged:{
+            playlist_data.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
         }
     }
 

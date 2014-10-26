@@ -81,10 +81,10 @@ StyledScreen {
                     { scenarioPopup.floorplanType = 7}
                     else if(modelName==="currentRoomSecurity")
                     {scenarioPopup.floorplanType = 1} //can also be 1?
-                    else if (modelName==="advanced"){ manager.gotoQScreen("Screen_44.qml") }
+                    else if (modelName==="advanced"){ manager.setCurrentScreen("Screen_44.qml") }
                     manager.showfloorplan(floorplantype)
                     manager.setFloorplanType(floorplantype)
-                  //  manager.gotoQScreen("Screen_"+scenarioPopup.floorplanType+".qml")
+                  //  manager.setCurrentScreen("Screen_"+scenarioPopup.floorplanType+".qml")
                 }
 
                 onActivated: {
@@ -99,7 +99,7 @@ StyledScreen {
                         {scenarioPopup.currentModel = currentRoomTelecom; scenarioPopup.floorplanType = 7}
                         else if(modelName==="currentRoomSecurity")
                         {scenarioPopup.currentModel = currentRoomSecurity; scenarioPopup.floorplanType = 1} //can also be 1?
-                        else if (modelName==="advanced"){ manager.gotoQScreen("Screen_44.qml") }
+                        else if (modelName==="advanced"){ manager.setCurrentScreen("Screen_44.qml") }
 
                     }
                     showSecondary = true

@@ -50,7 +50,7 @@ Item{
             items: ListModel {
                 ListElement {
                     text: "Home"
-                    action: 'gotoQScreen("Screen_1.qml")'
+                    action: 'setCurrentScreen("Screen_1.qml")'
                 }
                 ListElement {
                     text: "Back"

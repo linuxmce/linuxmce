@@ -8,13 +8,11 @@ Rectangle {
     clip:false
     property bool optionVisible: false
     Connections{
-        target: mediaplaylist
-        onActiveItemChanged:{
-            nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
-        }
-
-
-    }
+          target: dcenowplaying
+          onPlayListPositionChanged:{
+              nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+          }
+      }
     /*
     BorderImage {
         id: borderimg
@@ -35,7 +33,7 @@ Rectangle {
         clip: true
         interactive: true
         flickableDirection: "VerticalFlick"
-        model: mediaplaylist
+        model: manager.getDataGridModel("Playlist", 18)
 
         delegate:
             Rectangle {

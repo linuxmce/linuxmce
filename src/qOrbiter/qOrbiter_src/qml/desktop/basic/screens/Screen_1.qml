@@ -11,7 +11,7 @@ Item {
 	function onActivate2436() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 12457
-		gotoQScreen("Screen_64.qml")
+		setCurrentScreen("Screen_64.qml")
 	}
 	ButtonSq {
 		id: button2436_1
@@ -26,7 +26,7 @@ Item {
 	function onActivate1687() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14091
-		gotoQScreen("Screen_24.qml")
+		setCurrentScreen("Screen_24.qml")
 	}
 	StyledText {
 		x: 1199
@@ -52,7 +52,7 @@ User"
 	function onActivate3308() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14201
-		gotoQScreen("Screen_39.qml")
+		setCurrentScreen("Screen_39.qml")
 	}
 	StyledText {
 		x: 239
@@ -76,7 +76,7 @@ User"
 	 // Calling Command 260 (Set Main Menu) with CommandGroup_Parameters from 14202
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 260 9 \"S\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14203
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 479
@@ -98,7 +98,7 @@ User"
 	function onActivate3320() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14255
-		gotoQScreen("Screen_76.qml")
+		setCurrentScreen("Screen_76.qml")
 	}
 	StyledText {
 		x: 719
@@ -144,7 +144,7 @@ User"
 	function onActivate3411() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14821
-		gotoQScreen("Screen_7.qml")
+		setCurrentScreen("Screen_7.qml")
 	}
 	StyledText {
 		x: 959
@@ -166,7 +166,7 @@ User"
 	function onActivate1263() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 15162
-		gotoQScreen("Screen_2.qml")
+		setCurrentScreen("Screen_2.qml")
 	}
 	StyledText {
 		x: 239
@@ -198,7 +198,7 @@ User"
 	function onActivate1264() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 15163
-		gotoQScreen("Screen_3.qml")
+		setCurrentScreen("Screen_3.qml")
 	}
 	StyledText {
 		x: 239
@@ -386,7 +386,7 @@ User"
 	function onActivate3286() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14148
-		gotoQScreen("Screen_44.qml")
+		setCurrentScreen("Screen_44.qml")
 	}
 	ButtonSq {
 		id: button3286_23
@@ -401,26 +401,26 @@ User"
 	function onActivate3410() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14822
-		gotoQScreen("Screen_5.qml")
+		setCurrentScreen("Screen_5.qml")
 	}
 	function onActivate3409() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14820
-		gotoQScreen("Screen_6.qml")
+		setCurrentScreen("Screen_6.qml")
 	}
 	function onActivate3408() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14819
-		gotoQScreen("Screen_4.qml")
+		setCurrentScreen("Screen_4.qml")
 	}
 	function onActivate3407() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14818
-		gotoQScreen("Screen_3.qml")
+		setCurrentScreen("Screen_3.qml")
 	}
 	function onActivate3406() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14817
-		gotoQScreen("Screen_2.qml")
+		setCurrentScreen("Screen_2.qml")
 	}
 }

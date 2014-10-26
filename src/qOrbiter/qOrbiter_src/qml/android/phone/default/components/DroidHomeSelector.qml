@@ -92,7 +92,7 @@ Rectangle{
             smooth:true
             MouseArea{
                 anchors.fill: parent
-                onClicked:  {manager.gotoQScreen("Screen_44.qml"); scenarioPopup.floorplanType = -1}
+                onClicked:  {manager.setCurrentScreen("Screen_44.qml"); scenarioPopup.floorplanType = -1}
             }
         }
     }

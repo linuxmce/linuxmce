@@ -11,7 +11,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680
@@ -72,7 +72,7 @@ Item {
 	 // Calling Command 762 (Live TV) with CommandGroup_Parameters from 16683
 		manager.sendDceMessage(srouterip + " "+deviceid + " -304 1 762 ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17310
-		gotoQScreen("Screen_<%=NP_R%>.qml")
+		setCurrentScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 271
@@ -96,7 +96,7 @@ Item {
 	 // Calling Command 126 (Guide) with CommandGroup_Parameters from 16669
 		manager.sendDceMessage(srouterip + " "+deviceid + " -304 1 126 ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17308
-		gotoQScreen("Screen_<%=NP_R%>.qml")
+		setCurrentScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 271
@@ -143,7 +143,7 @@ Item {
 	 // Calling Command 548 (Menu) with CommandGroup_Parameters from 16673
 		manager.sendDceMessage(srouterip + " "+deviceid + " -304 1 548 9 \"future_recordings\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17309
-		gotoQScreen("Screen_<%=NP_R%>.qml")
+		setCurrentScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 271
@@ -190,7 +190,7 @@ Item {
 	 // Calling Command 42 (Jump to Position in Stream) with CommandGroup_Parameters from 16682
 		manager.sendDceMessage(srouterip + " "+deviceid + " -304 1 42 5 \"-10\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17311
-		gotoQScreen("Screen_<%=NP_R%>.qml")
+		setCurrentScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 271
@@ -214,7 +214,7 @@ Item {
 	 // Calling Command 123 (Info) with CommandGroup_Parameters from 16671
 		manager.sendDceMessage(srouterip + " "+deviceid + " -304 1 123 ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17312
-		gotoQScreen("Screen_<%=NP_R%>.qml")
+		setCurrentScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 271
@@ -236,7 +236,7 @@ Item {
 	function onActivate2028() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 9488
-		gotoQScreen("Screen_52.qml")
+		setCurrentScreen("Screen_52.qml")
 	}
 	StyledText {
 		x: 271
@@ -284,7 +284,7 @@ codes"
 	function onActivate5396() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17707
-		gotoQScreen("Screen_257.qml")
+		setCurrentScreen("Screen_257.qml")
 	}
 	StyledText {
 		x: 271
@@ -308,7 +308,7 @@ codes"
 	 // Calling Command 409 (Save Bookmark) with CommandGroup_Parameters from 17776
 		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 409 17 \"<%=U%>\" 29 \"1\" 45 \"<%=E%>\" 163 \"Bookmark added from orbiter <%=!%>\" 188 \" CHAN:<%=35%>\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 18208
-		gotoQScreen("Screen_<%=NP_R%>.qml")
+		setCurrentScreen("Screen_<%=NP_R%>.qml")
 	}
 	ButtonSq {
 		id: button5681_2751
@@ -413,7 +413,7 @@ codes"
 	 // Calling Command 126 (Guide) with CommandGroup_Parameters from 16669
 		manager.sendDceMessage(srouterip + " "+deviceid + " -304 1 126 ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17308
-		gotoQScreen("Screen_<%=NP_R%>.qml")
+		setCurrentScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 722
@@ -461,7 +461,7 @@ codes"
 	 // Calling Command 124 (Favorites) with CommandGroup_Parameters from 17484
 		manager.sendDceMessage(srouterip + " "+deviceid + " -304 1 124 ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17485
-		gotoQScreen("Screen_<%=NP_R%>.qml")
+		setCurrentScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 722
@@ -485,7 +485,7 @@ codes"
 	 // Calling Command 762 (Live TV) with CommandGroup_Parameters from 16683
 		manager.sendDceMessage(srouterip + " "+deviceid + " -304 1 762 ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17310
-		gotoQScreen("Screen_<%=NP_R%>.qml")
+		setCurrentScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 722
@@ -509,7 +509,7 @@ codes"
 	 // Calling Command 42 (Jump to Position in Stream) with CommandGroup_Parameters from 16682
 		manager.sendDceMessage(srouterip + " "+deviceid + " -304 1 42 5 \"-10\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17311
-		gotoQScreen("Screen_<%=NP_R%>.qml")
+		setCurrentScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 722
@@ -533,7 +533,7 @@ codes"
 	 // Calling Command 123 (Info) with CommandGroup_Parameters from 16671
 		manager.sendDceMessage(srouterip + " "+deviceid + " -304 1 123 ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17312
-		gotoQScreen("Screen_<%=NP_R%>.qml")
+		setCurrentScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 722
@@ -555,7 +555,7 @@ codes"
 	function onActivate2028() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 9488
-		gotoQScreen("Screen_52.qml")
+		setCurrentScreen("Screen_52.qml")
 	}
 	StyledText {
 		x: 722
@@ -583,7 +583,7 @@ codes"
 	 // Calling Command 102 (Record) with CommandGroup_Parameters from 13636
 		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 102 ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 18381
-		gotoQScreen("Screen_<%=NP_R%>.qml")
+		setCurrentScreen("Screen_<%=NP_R%>.qml")
 	}
 	ButtonSq {
 		id: button1566_2763
@@ -600,7 +600,7 @@ codes"
 	 // Calling Command 847 (Live AV Path) with CommandGroup_Parameters from 17380
 		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 847 45 \"<%=E%>\" 252 \"1\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17381
-		gotoQScreen("Screen_<%=NP_R%>.qml")
+		setCurrentScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 722
@@ -624,7 +624,7 @@ codes"
 	 // Calling Command 919 (On Demand) with CommandGroup_Parameters from 17486
 		manager.sendDceMessage(srouterip + " "+deviceid + " -304 1 919 ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17487
-		gotoQScreen("Screen_<%=NP_R%>.qml")
+		setCurrentScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 722
@@ -646,7 +646,7 @@ codes"
 	function onActivate5469() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17400
-		gotoQScreen("Screen_265.qml")
+		setCurrentScreen("Screen_265.qml")
 	}
 	StyledText {
 		x: 722

@@ -57,7 +57,7 @@ Item{
         StyledButton{
             buttonText:"Advanced"
             opacity: manager.currentScreen === "Screen_1.qml" ? 1 : 0
-            onActivated: manager.gotoQScreen("Screen_44.qml")
+            onActivated: manager.setCurrentScreen("Screen_44.qml")
         }
         StyledButton {
             id: showFloorplanCommand
@@ -76,7 +76,7 @@ Item{
         StyledButton {
             id: home_label
             buttonText: qsTr("Home")
-            hitArea.onReleased: manager.gotoQScreen("Screen_1.qml")
+            hitArea.onReleased: manager.setCurrentScreen("Screen_1.qml")
             opacity: manager.currentScreen !=="Screen_1.qml" ? 1 : 0
         }
 

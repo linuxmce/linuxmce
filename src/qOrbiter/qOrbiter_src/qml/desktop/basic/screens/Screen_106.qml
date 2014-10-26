@@ -18,7 +18,7 @@ Item {
 	function onActivate4416() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16161
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 0

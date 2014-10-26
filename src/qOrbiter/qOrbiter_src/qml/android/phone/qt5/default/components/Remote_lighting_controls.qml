@@ -111,7 +111,7 @@ Column {
         }
         MouseArea{
             anchors.fill: floorplan
-            onClicked: manager.gotoQScreen("Screen_2.qml")
+            onClicked: manager.setCurrentScreen("Screen_2.qml")
         }
     }
 

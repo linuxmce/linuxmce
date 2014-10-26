@@ -12,9 +12,9 @@ Item{
     }
 
     Connections{
-        target: mediaplaylist
-        onActiveItemChanged:{
-            nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
+        target: dcenowplaying
+        onPlayListPositionChanged:{
+            playlist_data.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
         }
     }
 
@@ -26,7 +26,7 @@ Item{
         id:playlist_data
         height:parent.height
         width:parent.width
-        model:mediaplaylist
+        model:manager.getDataGridModel("Playlist", 18)
         anchors.centerIn: parent
 
         cellHeight:scaleY(22)
@@ -45,7 +45,7 @@ Item{
             }
 
             StyledText{
-                text:isPlaying ? qsTr("Now Playing \n" + name ) : name
+                text:isPlaying ? qsTr("Now Playing \n" + description ) : description
                 color:"white"
                 fontSize: 36
                 width: parent.width

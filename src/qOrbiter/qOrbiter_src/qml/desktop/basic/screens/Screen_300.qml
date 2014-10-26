@@ -153,7 +153,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680
@@ -177,7 +177,7 @@ Item {
 	 // Calling Command 44 (MH Stop Media) with CommandGroup_Parameters from 13739
 		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 44 45 \"<%=E%>\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 18035
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	ButtonSq {
 		id: button1569_3162
@@ -360,7 +360,7 @@ Item {
 	 // Calling Command 847 (Live AV Path) with CommandGroup_Parameters from 17380
 		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 847 45 \"<%=E%>\" 252 \"1\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17381
-		gotoQScreen("Screen_<%=NP_R%>.qml")
+		setCurrentScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 0
@@ -404,7 +404,7 @@ Item {
 	function onActivate2028() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 9488
-		gotoQScreen("Screen_52.qml")
+		setCurrentScreen("Screen_52.qml")
 	}
 	StyledText {
 		x: 1680

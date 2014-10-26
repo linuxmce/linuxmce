@@ -38,7 +38,7 @@ Rectangle {
                 MouseArea{
                     anchors.fill:parent
                     z:5
-                    onClicked: manager.gotoQScreen("Regenerating.qml")
+                    onClicked: manager.setCurrentScreen("Regenerating.qml")
                 }
             }
 

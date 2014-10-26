@@ -32,13 +32,13 @@ StyledScreen {
 
             StyledButton{
                 buttonText: "Yes Resume"
-                onActivated:  {manager.setPosition(screenparams.getParam(188)) ;gotoQScreen("Screen_"+screenparams.getParam(226)+".qml") }
+                onActivated:  {manager.setPosition(screenparams.getParam(188)) ;setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml") }
 
             }
 
             StyledButton{
                 buttonText: "No thank you"
-                onActivated: gotoQScreen("Screen_"+screenparams.getParam(226)+".qml")
+                onActivated: setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
 
             }
 

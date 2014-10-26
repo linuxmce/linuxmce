@@ -8,10 +8,10 @@ ListView {
     orientation: ListView.Horizontal
     spacing: scaleX(1)
     Connections{
-        target: mediaplaylist
-        onActiveItemChanged:{
-            positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
+            target: dcenowplaying
+            onPlayListPositionChanged:{
+                positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+            }
         }
-    }
 
 }

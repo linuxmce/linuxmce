@@ -11,7 +11,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680
@@ -33,7 +33,7 @@ Item {
 	function onActivate2028() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 9488
-		gotoQScreen("Screen_52.qml")
+		setCurrentScreen("Screen_52.qml")
 	}
 	StyledText {
 		x: 1440
@@ -61,7 +61,7 @@ codes"
 	 // Calling Command 44 (MH Stop Media) with CommandGroup_Parameters from 13739
 		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 44 45 \"<%=E%>\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 18035
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	ButtonSq {
 		id: button1569_2928
@@ -452,7 +452,7 @@ codes"
 	 // Calling Command 126 (Guide) with CommandGroup_Parameters from 13675
 		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 126 ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14705
-		gotoQScreen("Screen_80.qml")
+		setCurrentScreen("Screen_80.qml")
 	}
 	StyledText {
 		x: 1680
@@ -476,7 +476,7 @@ codes"
 	 // Calling Command 86 (Menu (Show Menu)) with CommandGroup_Parameters from 14570
 		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 86 ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14706
-		gotoQScreen("Screen_80.qml")
+		setCurrentScreen("Screen_80.qml")
 	}
 	StyledText {
 		x: 120
@@ -561,7 +561,7 @@ codes"
 	 // Calling Command 42 (Jump to Position in Stream) with CommandGroup_Parameters from 16682
 		manager.sendDceMessage(srouterip + " "+deviceid + " -304 1 42 5 \"-10\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17311
-		gotoQScreen("Screen_<%=NP_R%>.qml")
+		setCurrentScreen("Screen_<%=NP_R%>.qml")
 	}
 	StyledText {
 		x: 1200

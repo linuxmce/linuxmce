@@ -43,7 +43,7 @@ Row{
     StyledButton {
         id: home_label
         buttonText.text: qsTr("Home")
-        hitArea.onReleased: manager.gotoQScreen("Screen_1.qml")
+        hitArea.onReleased: manager.setCurrentScreen("Screen_1.qml")
         opacity: manager.currentScreen !=="Screen_1.qml" ? 1 : 0
     }
     StyledButton{

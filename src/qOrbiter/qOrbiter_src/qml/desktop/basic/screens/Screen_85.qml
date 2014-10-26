@@ -133,7 +133,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680
@@ -155,7 +155,7 @@ Item {
 	function onActivate1664() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 12512
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	 // Calling Command 44 (MH Stop Media) with CommandGroup_Parameters from 13956
 		manager.sendDceMessage(srouterip + " "+deviceid + " -106 1 44 ")
 	}
@@ -172,7 +172,7 @@ Item {
 	function onActivate2028() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 9488
-		gotoQScreen("Screen_52.qml")
+		setCurrentScreen("Screen_52.qml")
 	}
 	StyledText {
 		x: 1200
@@ -198,7 +198,7 @@ codes"
 	function onActivate1940() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 15069
-		gotoQScreen("Screen_19.qml")
+		setCurrentScreen("Screen_19.qml")
 	}
 	StyledText {
 		x: 720

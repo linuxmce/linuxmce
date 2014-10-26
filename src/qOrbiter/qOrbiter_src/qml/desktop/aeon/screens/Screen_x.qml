@@ -26,7 +26,7 @@ Item{
             Text{text: "Home"; anchors.centerIn: parent}
             MouseArea{
                 anchors.fill: parent
-                onClicked:gotoQScreen("Screen_1.qml")
+                onClicked:setCurrentScreen("Screen_1.qml")
             }
         }
     }

@@ -37,7 +37,7 @@ Item {
             MouseArea{
                 id: mousearea1
                 anchors.fill: parent
-                onClicked: gotoQScreen("Screen_2.qml")
+                onClicked: setCurrentScreen("Screen_2.qml")
 
               }
 

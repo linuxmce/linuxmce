@@ -17,7 +17,7 @@ Item{
             showOptions = !showOptions;
             switch (index) {
             case 0:
-                manager.gotoQScreen("Screen_1.qml");
+                manager.setCurrentScreen("Screen_1.qml");
                 break;
             }
         }

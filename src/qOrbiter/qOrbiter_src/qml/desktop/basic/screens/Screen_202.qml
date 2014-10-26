@@ -11,7 +11,7 @@ Item {
 	function onActivate4723() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17106
-		gotoQScreen("Screen_234.qml")
+		setCurrentScreen("Screen_234.qml")
 	 // Calling Command 804 (Set Pnp Options) with CommandGroup_Parameters from 17002
 		manager.sendDceMessage(srouterip + " "+deviceid + " -111 1 804 5 \"1\" 52 \"134\" 224 \"<%=ID%>\" ")
 	 // Calling Command 8 (Remove Screen From History) with CommandGroup_Parameters from 17170
@@ -37,7 +37,7 @@ Item {
 	function onActivate4724() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17107
-		gotoQScreen("Screen_234.qml")
+		setCurrentScreen("Screen_234.qml")
 	 // Calling Command 804 (Set Pnp Options) with CommandGroup_Parameters from 17003
 		manager.sendDceMessage(srouterip + " "+deviceid + " -111 1 804 5 \"0\" 52 \"134\" 224 \"<%=ID%>\" ")
 	 // Calling Command 8 (Remove Screen From History) with CommandGroup_Parameters from 17169

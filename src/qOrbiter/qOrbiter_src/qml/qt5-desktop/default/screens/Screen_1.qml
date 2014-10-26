@@ -9,7 +9,7 @@ StyledScreen {
         if(dcenowplaying.b_mediaPlaying )
         {
             console.log("going to screen "+ dcenowplaying.qs_screen)
-            manager.gotoQScreen(dcenowplaying.qs_screen)
+            manager.setCurrentScreen(dcenowplaying.qs_screen)
         }
     }
 
@@ -17,7 +17,7 @@ StyledScreen {
 
     Connections{
         target: dcenowplaying
-        onScreenTypeChanged:manager.gotoQScreen(dcenowplaying.qs_screen)
+        onScreenTypeChanged:manager.setCurrentScreen(dcenowplaying.qs_screen)
     }
 
 

@@ -118,7 +118,7 @@ Item{
                         currentItem = -1
 
                     }else{
-                        manager.gotoQScreen("Screen_"+(index+2)+".qml")
+                        manager.setCurrentScreen("Screen_"+(index+2)+".qml")
                     }
 
 

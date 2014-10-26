@@ -248,7 +248,7 @@ Item
                     }
                     MouseArea {
                         anchors.fill: parent
-                        onClicked:gotoQScreen(dcenowplaying.qs_screen)
+                        onClicked:setCurrentScreen(dcenowplaying.qs_screen)
                     }
                 }
             }
@@ -339,7 +339,7 @@ Item
                 }
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: manager.gotoQScreen("Screen_44.qml")
+                    onClicked: manager.setCurrentScreen("Screen_44.qml")
                 }
             }
 

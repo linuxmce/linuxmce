@@ -10,30 +10,17 @@ ListView{
     }
 
     spacing:scaleX(1)
-    Component.onCompleted: {manager.setBoundStatus(true);mediaplaylist.populate()}
+    Component.onCompleted: {manager.setBoundStatus(true);}
     highlightFollowsCurrentItem: true
-    model: dcenowplaying.qs_screen==="Screen_63.qml" ? simpleepg : mediaplaylist
+    model: dcenowplaying.qs_screen==="Screen_63.qml" ? simpleepg : manager.getDataGridModel("Playlist", 63)
     clip:true
 
     Connections{
-        target: mediaplaylist
-        onActiveItemChanged:{
-            playlist.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
-            playlist.currentIndex = mediaplaylist.currentIndex
-        }
-    }
-
-    Timer{
-        id:indexUpdate
-        interval: mediaplaylist.count()*10
-        running: false
-        onTriggered: {
-            console.log("interval is" + interval)
-            playlist.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
-            console.log("Current index is " + mediaplaylist.currentIndex)
-        }
-    }
-    
+          target: dcenowplaying
+          onPlayListPositionChanged:{
+              positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+          }
+      }
     delegate: Item{
         height: index === dcenowplaying.m_iplaylistPosition ? scaleY(15) : scaleY(10)
         width: parent.width - 10

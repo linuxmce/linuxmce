@@ -33,7 +33,7 @@ Item {
         sourceSize: Qt.size(200,300)
         MouseArea{
             anchors.fill: parent
-            onPressed: manager.gotoQScreen(dcenowplaying.qs_screen)
+            onPressed: manager.setCurrentScreen(dcenowplaying.qs_screen)
         }
     }
     Connections{

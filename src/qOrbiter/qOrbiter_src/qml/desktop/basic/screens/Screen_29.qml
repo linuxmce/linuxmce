@@ -50,7 +50,7 @@ Item {
 	 // Calling Command 260 (Set Main Menu) with CommandGroup_Parameters from 14204
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 260 9 \"N\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14205
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	ButtonSq {
 		id: button3312_343

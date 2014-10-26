@@ -10,5 +10,5 @@ import QtQuick 1.1
  */
 MouseArea{
     anchors.fill: parent
-    onClicked: manager.changedPlaylistPosition(index)
+    onClicked: {manager.changedPlaylistPosition(index); console.log("Change track")}
 }

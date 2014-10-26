@@ -11,7 +11,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680
@@ -1202,7 +1202,7 @@ lock"
 	function onActivate1687() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14091
-		gotoQScreen("Screen_24.qml")
+		setCurrentScreen("Screen_24.qml")
 	}
 	StyledText {
 		x: 1047

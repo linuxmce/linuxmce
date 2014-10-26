@@ -32,7 +32,7 @@ Rectangle {
 
             MouseArea{
                 anchors.fill: parent
-                onClicked:gotoQScreen("Screen_44.qml")
+                onClicked:setCurrentScreen("Screen_44.qml")
             }
         }
 

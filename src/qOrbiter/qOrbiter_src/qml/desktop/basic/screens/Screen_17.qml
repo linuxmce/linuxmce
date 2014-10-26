@@ -11,7 +11,7 @@ Item {
 	function onActivate1415() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14507
-		gotoQScreen("Screen_15.qml")
+		setCurrentScreen("Screen_15.qml")
 	 // Calling Command 27 (Set Variable) with CommandGroup_Parameters from 14544
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 27 4 \"1\" 5 \"<%=18%>\" ")
 	}
@@ -35,7 +35,7 @@ Item {
 	function onActivate1416() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14508
-		gotoQScreen("Screen_15.qml")
+		setCurrentScreen("Screen_15.qml")
 	 // Calling Command 27 (Set Variable) with CommandGroup_Parameters from 14546
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 27 4 \"1\" 5 \"<%=19%>\" ")
 	}
@@ -59,7 +59,7 @@ Item {
 	function onActivate1417() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14509
-		gotoQScreen("Screen_15.qml")
+		setCurrentScreen("Screen_15.qml")
 	 // Calling Command 27 (Set Variable) with CommandGroup_Parameters from 14548
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 27 4 \"1\" 5 \"<%=20%>\" ")
 	}
@@ -83,7 +83,7 @@ Item {
 	function onActivate1418() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 14510
-		gotoQScreen("Screen_15.qml")
+		setCurrentScreen("Screen_15.qml")
 	 // Calling Command 27 (Set Variable) with CommandGroup_Parameters from 14550
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 27 4 \"1\" 5 \"<%=21%>\" ")
 	}
@@ -107,7 +107,7 @@ Item {
 	function onActivate1406() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 2231
-		gotoQScreen("Screen_15.qml")
+		setCurrentScreen("Screen_15.qml")
 	 // Calling Command 27 (Set Variable) with CommandGroup_Parameters from 14538
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 27 4 \"1\" 5 \"<%=18%>\" ")
 	}
@@ -124,7 +124,7 @@ Item {
 	function onActivate1407() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 2229
-		gotoQScreen("Screen_15.qml")
+		setCurrentScreen("Screen_15.qml")
 	 // Calling Command 27 (Set Variable) with CommandGroup_Parameters from 14536
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 27 4 \"1\" 5 \"<%=19%>\" ")
 	}
@@ -141,7 +141,7 @@ Item {
 	function onActivate1408() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 2227
-		gotoQScreen("Screen_15.qml")
+		setCurrentScreen("Screen_15.qml")
 	 // Calling Command 27 (Set Variable) with CommandGroup_Parameters from 14540
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 27 4 \"1\" 5 \"<%=20%>\" ")
 	}
@@ -158,7 +158,7 @@ Item {
 	function onActivate1409() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 2225
-		gotoQScreen("Screen_15.qml")
+		setCurrentScreen("Screen_15.qml")
 	 // Calling Command 27 (Set Variable) with CommandGroup_Parameters from 14542
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 27 4 \"1\" 5 \"<%=21%>\" ")
 	}
@@ -175,7 +175,7 @@ Item {
 	function onActivate1785() 
 	{
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 17174
-		gotoQScreen("Screen_1.qml")
+		setCurrentScreen("Screen_1.qml")
 	}
 	StyledText {
 		x: 1680

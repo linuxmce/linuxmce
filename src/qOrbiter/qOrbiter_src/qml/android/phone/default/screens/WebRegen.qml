@@ -1,9 +1,8 @@
 import QtQuick 1.0
+import "../components"
 
+StyledScreen {
 
-Item {
-    width: manager.appWidth
-    height:  manager.appHeight
     Component.onCompleted: {
         updateQorbiter()
     }

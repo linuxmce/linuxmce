@@ -271,7 +271,7 @@ Item{
                         scenarioList.currentIndex=-1
 
                     }else{
-                        manager.gotoQScreen("Screen_"+(index+2)+".qml")
+                        manager.setCurrentScreen("Screen_"+(index+2)+".qml")
                     }
                     swapFocus()
                 }
@@ -339,7 +339,7 @@ Item{
                                     console.log("Show Power!")
                                     break;
                                 case 5:
-                                    manager.gotoQScreen("Screen_44.qml")
+                                    manager.setCurrentScreen("Screen_44.qml")
                                     break;
                                 case 7:
                                     manager.exitApp()
@@ -374,7 +374,7 @@ Item{
                                     console.log("Show Power!")
                                     break;
                                 case 5:
-                                    manager.gotoQScreen("Screen_44.qml")
+                                    manager.setCurrentScreen("Screen_44.qml")
                                     break;
                                 case 7:
                                     manager.exitApp()

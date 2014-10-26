@@ -28,7 +28,7 @@ Item {
 	 // Calling Command 27 (Set Variable) with CommandGroup_Parameters from 16073
 		manager.sendDceMessage(srouterip + " "+deviceid + " -300 1 27 4 \"17\" ")
 	 // Calling Command 741 (Goto Screen) with CommandGroup_Parameters from 16072
-		gotoQScreen("Screen_97.qml")
+		setCurrentScreen("Screen_97.qml")
 	}
 	StyledText {
 		x: 1680

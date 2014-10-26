@@ -71,7 +71,7 @@ Item
                     }
                     MouseArea{
                         anchors.fill: parent
-                        //onClicked:gotoQScreen("Screen_1.qml")
+                        //onClicked:setCurrentScreen("Screen_1.qml")
                         onClicked: {
                             console.log("RayBe you have Clicked on: Lights")
                             mainItemSelected(0)
@@ -93,7 +93,7 @@ Item
                     }
                     MouseArea{
                         anchors.fill: parent
-                        //onClicked:gotoQScreen("Screen_1.qml")
+                        //onClicked:setCurrentScreen("Screen_1.qml")
                         onClicked: {
                             console.log("RayBe you have Clicked on: Media")
                             mainItemSelected(1)
@@ -115,7 +115,7 @@ Item
                     }
                     MouseArea{
                         anchors.fill: parent
-                        //onClicked:gotoQScreen("Screen_1.qml")
+                        //onClicked:setCurrentScreen("Screen_1.qml")
                         onClicked: {
                             console.log("RayBe you have Clicked on: Lights")
                             mainItemSelected(2)
@@ -137,7 +137,7 @@ Item
                     }
                     MouseArea{
                         anchors.fill: parent
-                        //onClicked:gotoQScreen("Screen_1.qml")
+                        //onClicked:setCurrentScreen("Screen_1.qml")
                         onClicked: {
                             console.log("RayBe you have Clicked on: Lights")
                             mainItemSelected(3)
@@ -159,7 +159,7 @@ Item
                     }
                     MouseArea{
                         anchors.fill: parent
-                        //onClicked:gotoQScreen("Screen_1.qml")
+                        //onClicked:setCurrentScreen("Screen_1.qml")
                         onClicked: {
                             console.log("RayBe you have Clicked on: Lights")
                             mainItemSelected(4)
@@ -382,7 +382,7 @@ Item
                     }
                     MouseArea {
                         anchors.fill: parent
-                        onClicked:gotoQScreen(dcenowplaying.qs_screen)
+                        onClicked:setCurrentScreen(dcenowplaying.qs_screen)
                     }
                 }
             }
@@ -473,7 +473,7 @@ Item
                 }
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: gotoQScreen("Screen_44.qml")
+                    onClicked: setCurrentScreen("Screen_44.qml")
                 }
             }
 

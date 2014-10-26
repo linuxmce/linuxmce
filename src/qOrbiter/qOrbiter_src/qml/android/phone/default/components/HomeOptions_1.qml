@@ -19,7 +19,7 @@ Item{
                 closeOrbiter();
                 break;
             case 1:
-                manager.gotoQScreen("Screen_29.qml");
+                manager.setCurrentScreen("Screen_29.qml");
                 break;
             }
         }

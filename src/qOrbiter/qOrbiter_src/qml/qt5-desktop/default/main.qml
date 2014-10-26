@@ -72,7 +72,7 @@ Item {
         if(dcenowplaying.b_mediaPlaying && manager.currentScreen==="Screen_1.qml")
         {
             console.log("going to screen "+ dcenowplaying.qs_screen)
-            manager.gotoQScreen(dcenowplaying.qs_screen)
+            manager.setCurrentScreen(dcenowplaying.qs_screen)
         }
     }
 
@@ -100,6 +100,7 @@ Item {
         if (pageLoader.status == Component.Ready)
         {
             manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
+            manager.currentScreen = screenname
         }
         else if (pageLoader.status == Component.Loading)
         {
@@ -111,6 +112,7 @@ Item {
             console.log("Command to change to:" + screenname + " failed!")
             screenfile = screenname
             pageLoader.source = "screens/Screen_x.qml"
+            manager.currentScreen="ErrorScreen.qml"
         }
     }
 
@@ -429,7 +431,7 @@ Item {
                 manager.stopMedia()
                 break;
             case Qt.Key_Menu:
-                manager.gotoQScreen("Screen_1.qml")
+                manager.setCurrentScreen("Screen_1.qml")
                 break;
             case Qt.Key_Pause:
                 manager.pauseMedia()
@@ -512,6 +514,7 @@ Item {
 
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
+
             pageLoader.forceActiveFocus()
         }
 

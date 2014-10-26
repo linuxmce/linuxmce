@@ -26,7 +26,8 @@ ListView{
             }
 
             hitArea.onReleased: {
-                if(manager.currentScreen==="Screen_1.qml"){
+                console.log(manager.currentScreen)
+                if(manager.currentScreen=="Screen_1.qml"){
                     if(modelName==="currentRoomLights")
                         current_scenario_model = currentRoomLights
                     else if(modelName==="currentRoomMedia")
@@ -42,10 +43,11 @@ ListView{
                         console.log("attribute selected")
                 }
                 else{
+                    console.log("Manager currentScreen is not Screen 1::"+manager.currentScreen)
                     current_scenario_model = []
                 }
-
-                scenarioList.currentModelName = modelName
+                 scenarioList.currentModelName = modelName
+                console.log(scenarioList.currentModelName)
             }
         }
     }

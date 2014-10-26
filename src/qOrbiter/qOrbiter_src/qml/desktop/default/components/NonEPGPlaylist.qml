@@ -3,9 +3,7 @@ import "../../../skins-common/lib/handlers"
 
 Rectangle {
     id:nonepgplaylist
-    Component.onCompleted: {
-        mediaplaylist.populate()
-    }
+
 
     visible: nonepgplaylistview.count > 1 ? true : false
     color: "transparent"
@@ -18,17 +16,120 @@ Rectangle {
 
     property bool optionVisible: false
 
-    Connections{
-        target: mediaplaylist
-        onActiveItemChanged:{
-            nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
+    Component{
+        id:del
+        Rectangle {
+               width:scaleX(25)
+               height:index === dcenowplaying.m_iplaylistPosition ? scaleY(12) : scaleY(8)
+               anchors.horizontalCenter: parent.horizontalCenter
+               color: "transparent"
+               clip: true
+               Image {
+                   id: playlistimage
+                   fillMode: Image.PreserveAspectCrop
+                   source: index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: manager.imagePath+"ui3/grey_cell.png"
+                   anchors.fill: parent
+                   opacity: .5
+               }
+               Text {
+                   id: position
+                   text: qsTr("Item #") + value + " of " + nonepgplaylistview.count
+                   font.family: "DroidSans"
+                   color: "aliceblue"
+                   font.pixelSize: scaleY(2.25)
+                   font.bold: true
+                   anchors.bottom: parent.bottom
+                   opacity: .75
+               }
 
-        }
+               Text {
+                  // text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
+                   text:description
+                   font.family: "DroidSans"
+                   color: "aliceblue"
+                   width: parent.width
+                   wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                   font.pixelSize: scaleY(2.15)
+                   //font.bold: true
+               }
+
+               Image {
+                   id: overlay
+                   fillMode: Image.PreserveAspectCrop
+                   source: "../img/icons/header.png"
+                   anchors.fill: parent
+                   opacity:index === dcenowplaying.m_iplaylistPosition ? .25 :  .15
+               }
+
+               PlaylistClickedHandler {
+               }
+
+               Column{
+                   id:options
+                   visible: optionVisible
+                   height: scaleY(12)
+                   anchors.right: parent.right
+                   spacing: scaleY(2)
+
+                   Rectangle{
+                       id:move_up
+                       height: scaleX(1)
+                       width: scaleX(1)
+                       color:"green"
+                       Text {
+                           id: up
+                           text: qsTr("Up")
+                       }
+                       PlaylistMoveHandler {
+                           direction: ""
+                       }
+                   }
+
+                   Rectangle{
+                       id:remove_box
+                       height: scaleX(1)
+                       width:scaleX(1)
+                       color:"yellow"
+                       PlaylistRemoveItemHandler {
+                       }
+                   }
+
+                   Rectangle{
+                       id:move_dwn
+                       height: scaleX(1)
+                       width: scaleX(1)
+                       color:"blue"
+                       Text {
+                           id: down
+                           text: qsTr("down")
+                       }
+                      PlaylistMoveHandler{
+                          direction: "+"
+                      }
+                   }
+               }
+           }
     }
+
+
 
     Behavior on opacity{
         PropertyAnimation{
             duration: 1000
+        }
+    }
+    Connections{
+          target: dcenowplaying
+          onPlayListPositionChanged:{
+              nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+          }
+      }
+    Connections{
+        target:manager
+        onPlaylistSizeChanged:{
+            console.log("playlist size change")
+            //manager.clearDataGrid("Playlist")
+            //nonepgplaylistview.model = manager.getDataGridModel("Playlist", 18)
         }
     }
 
@@ -40,99 +141,9 @@ Rectangle {
         clip: true
         interactive: true
         flickableDirection: "VerticalFlick"
-        model: mediaplaylist
+        model:manager.getDataGridModel("Playlist", 18)
+        delegate:del
 
-        delegate:
-            Rectangle {            
-            width:scaleX(25)
-            height:index === dcenowplaying.m_iplaylistPosition ? scaleY(12) : scaleY(8)
-            anchors.horizontalCenter: parent.horizontalCenter
-            color: "transparent"
-            clip: true
-            Image {
-                id: playlistimage
-                fillMode: Image.PreserveAspectCrop
-                source: index === dcenowplaying.m_iplaylistPosition ? playlistimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp: manager.imagePath+"ui3/grey_cell.png"
-                anchors.fill: parent
-                opacity: .5
-            }
-            Text {
-                id: position
-                text: qsTr("Item #") + index
-                font.family: "DroidSans"
-                color: "aliceblue"
-                font.pixelSize: scaleY(2.25)
-                font.bold: true
-                anchors.bottom: parent.bottom
-                opacity: .75
-            }
-
-            Text {
-                text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
-                font.family: "DroidSans"
-                color: "aliceblue"
-                width: parent.width
-                wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                font.pixelSize: scaleY(2.15)
-                //font.bold: true
-            }
-
-            Image {
-                id: overlay
-                fillMode: Image.PreserveAspectCrop
-                source: "../img/icons/header.png"
-                anchors.fill: parent
-                opacity:index === dcenowplaying.m_iplaylistPosition ? .25 :  .15
-            }
-
-            PlaylistClickedHandler {
-            }
-
-            Column{
-                id:options
-                visible: optionVisible
-                height: scaleY(12)
-                anchors.right: parent.right
-                spacing: scaleY(2)
-
-                Rectangle{
-                    id:move_up
-                    height: scaleX(1)
-                    width: scaleX(1)
-                    color:"green"
-                    Text {
-                        id: up
-                        text: qsTr("Up")
-                    }
-                    PlaylistMoveHandler {
-                        direction: ""
-                    }
-                }
-
-                Rectangle{
-                    id:remove_box
-                    height: scaleX(1)
-                    width:scaleX(1)
-                    color:"yellow"
-                    PlaylistRemoveItemHandler {
-                    }
-                }
-
-                Rectangle{
-                    id:move_dwn
-                    height: scaleX(1)
-                    width: scaleX(1)
-                    color:"blue"
-                    Text {
-                        id: down
-                        text: qsTr("down")
-                    }
-                   PlaylistMoveHandler{
-                       direction: "+"
-                   }
-                }
-            }
-        }
     }
 
     Rectangle{

@@ -154,7 +154,7 @@ Item {
     signal changeScreen(string s)
     signal setupStart(int x, string y)
 
-    property variant current_scenario_model
+    property variant current_scenario_model:currentRoomLights
     property variant current_header_model:scenarios
 
     property string locationinfo: "standby"
@@ -363,6 +363,7 @@ Item {
         id:pageLoader
         objectName: "loadbot"
         focus: true
+        source:"screens/Screen_1.qml"
         visible:qml_root.uiOn
         anchors{
             top: nav_row.bottom
@@ -387,7 +388,8 @@ Item {
         onStatusChanged:  if (pageLoader.status == Component.Ready)
                           {
                               manager.setDceResponse("Command to change to:" + source+ " was successfull")
-                              contentItem=item.screen_root
+
+                             // contentItem=item.screen_root
                           }
                           else if (pageLoader.status == Component.Loading)
                           {
@@ -400,6 +402,7 @@ Item {
 
                               pageLoader.source = "screens/Screen_X.qml"
                               screenfile = source
+                              manager.currentScreen="Screen_X.qml"
                           }
     }
 
@@ -435,7 +438,7 @@ Item {
 
     function screenchange(screenname )
     {
-        pageLoader.source = "screens/"+screenname
+        pageLoader.source = "screens/"+screenname        
     }
 
 
@@ -457,6 +460,7 @@ Item {
         if (componentLoader.status == Component.Ready)
         {
             manager.setDceResponse("Command to load:" + componentName+ " was successfull")
+
         }
         else if (componentLoader.status == Component.Loading)
         {

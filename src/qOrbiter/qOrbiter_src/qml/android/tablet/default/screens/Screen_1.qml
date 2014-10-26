@@ -2,13 +2,12 @@ import QtQuick 1.0
 import "../components"
 import "../../../../skins-common/lib/handlers"
 
-Item {
-    height:manager.appHeight
-    width:manager.appWidth
+StyledScreen {
+
     Component.onCompleted:{
         current_header_model=scenarios;
         if(dcenowplaying.b_mediaPlaying){
-            manager.setBoundStatus(true)
+          //  manager.setBoundStatus(true)
         }
         info_panel.state="retracted";
         nav_row.navSource=nav_row.defaultSource

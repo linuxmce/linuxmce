@@ -9,13 +9,11 @@ Item {
     //  Component.onCompleted: manager.setBoundStatus(true)
 
     Connections{
-        target: mediaplaylist
-        onActiveItemChanged:{
-            nonepgplaylistview.positionViewAtIndex(mediaplaylist.currentIndex  , ListView.Beginning)
-            nonepgplaylistview.currentIndex = mediaplaylist.currentIndex
-        }
-    }
-
+          target: dcenowplaying
+          onPlayListPositionChanged:{
+              nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+          }
+      }
     /*  BorderImage {
         id: borderimg
         verticalTileMode: BorderImage.Round
@@ -37,7 +35,7 @@ Item {
         anchors.centerIn: parent
         interactive: true
         flickableDirection: "VerticalFlick"
-        model: mediaplaylist
+        model: manager.getDataGridModel("Playist", 18)
         spacing:scaleX(2)
         delegate:
             Item{

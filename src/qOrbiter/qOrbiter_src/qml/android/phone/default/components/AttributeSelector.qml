@@ -98,7 +98,7 @@ Item {
             width: parent.width
             imgSource: ""
             color: androidSystem.blueHighlight
-            onActivated:{manager.gotoQScreen("Screen_1.qml");attributeSelector.state="hidden"}
+            onActivated:{manager.setCurrentScreen("Screen_1.qml");attributeSelector.state="hidden"}
 
         }
     }

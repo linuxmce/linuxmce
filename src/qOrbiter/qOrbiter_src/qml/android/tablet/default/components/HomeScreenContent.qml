@@ -16,7 +16,7 @@ Item{
         }
         StyledButton{
             buttonText: "Sleeping Menu"
-            onActivated: manager.gotoQScreen("Screen_29.qml")
+            onActivated: manager.setCurrentScreen("Screen_29.qml")
         }
 
     }

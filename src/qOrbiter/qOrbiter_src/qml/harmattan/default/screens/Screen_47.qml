@@ -8,7 +8,7 @@ Page {
     tools: ToolBarLayout {
         ToolIcon {
             iconId: "toolbar-view-home";
-            onClicked: gotoQScreen("Screen_1.qml");
+            onClicked: setCurrentScreen("Screen_1.qml");
         }
         ToolIcon {
             visible: false;

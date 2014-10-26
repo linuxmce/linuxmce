@@ -68,7 +68,7 @@ import "../components"
                     buttonsqradius: 10
                     MouseArea{
                         anchors.fill: parent
-                        onClicked: {manager.setPosition(screenparams.getParam(188)) ;gotoQScreen("Screen_"+screenparams.getParam(226)+".qml") }
+                        onClicked: {manager.setPosition(screenparams.getParam(188)) ;setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml") }
                     }
                 }
                 ButtonSq{
@@ -76,7 +76,7 @@ import "../components"
                     buttonsqradius: 10
                     MouseArea{
                         anchors.fill: parent
-                        onClicked: gotoQScreen("Screen_"+screenparams.getParam(226)+".qml")
+                        onClicked: setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
                     }
                 }
 
@@ -85,7 +85,7 @@ import "../components"
                     buttonsqradius: 10
                     MouseArea{
                         anchors.fill: parent
-                       // onClicked: gotoQScreen()
+                       // onClicked: setCurrentScreen()
                     }
                 }
 
@@ -94,7 +94,7 @@ import "../components"
                     buttonsqradius: 10
                     MouseArea{
                         anchors.fill: parent
-                        //onClicked: gotoQScreen()
+                        //onClicked: setCurrentScreen()
                     }
                 }
 

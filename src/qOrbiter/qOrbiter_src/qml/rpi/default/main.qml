@@ -48,7 +48,7 @@ Item {
         if(dcenowplaying.b_mediaPlaying && manager.currentScreen==="Screen_1.qml")
         {
             console.log("going to screen "+ dcenowplaying.qs_screen)
-            manager.gotoQScreen(dcenowplaying.qs_screen)
+            manager.setCurrentScreen(dcenowplaying.qs_screen)
         }
     }
 

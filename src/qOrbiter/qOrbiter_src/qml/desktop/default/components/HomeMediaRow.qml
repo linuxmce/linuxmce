@@ -51,7 +51,7 @@ Item{
 
             MouseArea{
                 anchors.fill: parent
-                onClicked:manager.gotoQScreen(dcenowplaying.qs_screen)
+                onClicked:manager.setCurrentScreen(dcenowplaying.qs_screen)
             }
         }
         Flickable{

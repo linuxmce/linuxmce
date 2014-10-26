@@ -14,7 +14,7 @@ Page {
     tools: ToolBarLayout {
         ToolIcon {
             iconId: "toolbar-home";
-            onClicked: gotoQScreen("Screen_1.qml");
+            onClicked: setCurrentScreen("Screen_1.qml");
         }
         ToolIcon {
             iconId: "toolbar-volume";
@@ -38,7 +38,7 @@ Page {
         visualParent: pageStack;
         MenuLayout {
             Repeater {
-                model: mediaplaylist;
+                model: manager.getDataGridModel("Playlist", 18);
                 MenuItem {
                     text: id;
                     onClicked: changedPlaylistPosition(name);

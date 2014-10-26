@@ -26,7 +26,7 @@ Item{
 	    showOptions = !showOptions;
 	    switch (index) {
 		case 0:
-		manager.gotoQScreen("Screen_1.qml");
+        manager.setCurrentScreen("Screen_1.qml");
 		break;
 		case 1:
 		manager.playMedia("!G"+iPK_Device);

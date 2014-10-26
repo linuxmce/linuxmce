@@ -13,7 +13,7 @@ Page {
         id: commonTools;
         ToolIcon {
             id: showHome;
-            onClicked: (itemsAreScreens == true ? console.log("dimmed home"):gotoQScreen("Screen_1.qml"));
+            onClicked: (itemsAreScreens == true ? console.log("dimmed home"):setCurrentScreen("Screen_1.qml"));
             iconSource: (itemsAreScreens == true ? "image://theme/icon-m-toolbar-home-dimmed":"image://theme/icon-m-toolbar-home");
         }
         ToolIcon {
@@ -111,7 +111,7 @@ Page {
                 onClicked: {
                     if (itemsAreScreens == true)
                     {
-                        gotoQScreen(page);
+                        setCurrentScreen(page);
                     }
                     else
                     {

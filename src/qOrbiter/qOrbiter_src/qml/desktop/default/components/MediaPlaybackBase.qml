@@ -4,7 +4,7 @@ import QtQuick 1.1
 
 Item {
     id:mediaPlaybackBase
-    height: parent.height
+    height: pageLoader.height
     width: manager.appWidth
 
     state:"default"

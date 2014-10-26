@@ -52,7 +52,7 @@ Item {
         if(dcenowplaying.b_mediaPlaying && manager.currentScreen==="Screen_1.qml")
         {
             console.log("going to screen "+ dcenowplaying.qs_screen)
-            manager.gotoQScreen(dcenowplaying.qs_screen)
+            manager.setCurrentScreen(dcenowplaying.qs_screen)
         }
     }
 
@@ -402,16 +402,16 @@ Item {
 
             switch(event.key){
             case Qt.Key_Back:
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1));
+                manager.changedPlaylistPosition((dcenowplaying.m_iplaylistPosition+1));
                 break;
             case Qt.Key_Forward:
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1))
+                manager.changedPlaylistPosition((dcenowplaying.m_iplaylistPosition+1))
                 break;
             case 16777347: /* Keycode Track forward */
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1));
+                manager.changedPlaylistPosition((dcenowplaying.m_iplaylistPosition+1));
                 break;
             case 16777346: /* Keycode Track Backwards */
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex-1))
+                manager.changedPlaylistPosition((dcenowplaying.m_iplaylistPosition-1))
                 break;
             case Qt.Key_Plus: /*Plus sign */
                 manager.adjustVolume(+1)

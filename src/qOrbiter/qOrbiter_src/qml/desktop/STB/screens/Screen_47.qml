@@ -196,7 +196,7 @@ StyledScreen {
             } else if(event.key !== Qt.Key_Escape && event.key !== Qt.Key_Tab&& event.key !== 16777237 && event.key !==16777236 && event.key !==16777234 && event.key !==16777235){
 		manager.seekGrid("MediaFile", event.text)
             } else if(event.key=== Qt.Key_M){
-                manager.gotoQScreen("Screen_1.qml")
+                manager.setCurrentScreen("Screen_1.qml")
             }
 
             console.log(event.key)
@@ -222,7 +222,7 @@ StyledScreen {
                 depth--
             }
             else if(depth <= 0){
-                manager.gotoQScreen("Screen_1.qml")
+                manager.setCurrentScreen("Screen_1.qml")
             }
         }
         highlightFollowsCurrentItem:true
