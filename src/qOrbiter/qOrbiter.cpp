@@ -1137,6 +1137,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         emit playlistPositionChanged(iValue);
         GetNowPlayingAttributes();
         emit clearPlaylist();
+
     }
 
 }
@@ -5134,7 +5135,7 @@ void qOrbiter::getAttributeImage(QString param)
 
 void qOrbiter::setDirectAv(int truth)
 {
-    CMD_Live_AV_Path setLiveAv(this->m_dwPK_Device, iMediaPluginID, QString::number(this->i_ea).toStdString(), m_bUsingLiveAVPath ? false : true);
+    CMD_Live_AV_Path setLiveAv(this->m_dwPK_Device, iMediaPluginID, QString::number(this->i_ea).toStdString(), truth);
     SendCommand(setLiveAv);
 }
 

@@ -465,7 +465,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter,SIGNAL(resetNowPlaying()), w.nowPlayingButton, SLOT(resetData()));
         QObject::connect(&pqOrbiter, SIGNAL(setPlaylistPosition(int)), w.nowPlayingButton, SLOT(setPlaylistPostion(int)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(changeTrack(QString)), &pqOrbiter, SLOT(changedTrack(QString)), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(clearPlaylist()), &w, SLOT(updatePlaylist()), Qt::QueuedConnection);
+       // QObject::connect(&pqOrbiter, SIGNAL(clearPlaylist()), &w, SLOT(updatePlaylist()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(newPlaylistPosition(QString)), &pqOrbiter, SLOT(jumpToPlaylistPosition(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(movePlistEntry(QString,int)), &pqOrbiter, SLOT(movePlaylistEntry(QString,int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(savePlist(QString,bool)), &pqOrbiter, SLOT(saveCurrentPlaylist(QString,bool)), Qt::QueuedConnection);

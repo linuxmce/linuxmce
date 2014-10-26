@@ -367,14 +367,11 @@ void qorbiterManager::gotoQScreen(QString s){
     if(s.contains("Screen_1.qml"))
     {
         logQtMessage("QOrbiter clearing models because screen is 1");
-
-       // clearDataGrid("Playlist");
         clearDataGrid("sleepingAlarms");
+        clearDataGrid("Playlist");
         emit keepLoading(false);
-        emit clearModel();
         emit cancelRequests();
         emit resetFilter();
-
     }
     
     //send the qmlview a request to go to a screen, needs error handling
@@ -1202,6 +1199,7 @@ void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, int i
                 count++;
             }
         }
+
     }
     modelPoolLock.unlock();
     pTable->ClearData();
@@ -1223,24 +1221,36 @@ void qorbiterManager::updateItemData(QString dataGridId, int row, int role, QVar
         LoggerWrapper::GetInstance()->Write(LV_WARNING, "updateItemData() no such datagridid %s", dataGridId.toStdString().c_str());
     }
     modelPoolLock.unlock();
+    emit modelChanged();
     LoggerWrapper::GetInstance()->Write(LV_DEBUG, "updateItemData() end");
 }
 
 void qorbiterManager::clearDataGrid(QString dataGridId)
 {
     qDebug() << "manager.clearDataGrid() " << dataGridId;
-    modelPoolLock.lockForWrite();
+
+    if(!modelPoolLock.tryLockForWrite()){
+        qDebug() << "clearDatagrid("<<dataGridId<<"):: failed to lock mutex.";
+        return;
+    }
+
     if (m_mapDataGridModels.contains(dataGridId))
     {
         GenericFlatListModel* pModel = m_mapDataGridModels.take(dataGridId);
         // TODO: stop any requests on this datagrid model
-        pModel->clear();
-        pModel->setModelName("");
-        pModel->setOption("");
-        m_modelPool.push(pModel);
+        if(!pModel->clearing){
+
+            pModel->clear();
+            pModel->setModelName("");
+            pModel->setOption("");
+            m_modelPool.push(pModel);
+        }
+
+
     }
     modelPoolLock.unlock();
     qDebug() << "manager.clearDataGrid() end";
+   emit modelChanged();
 }
 
 void qorbiterManager::clearAllDataGrid() 
@@ -1278,13 +1288,20 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() id = %s", dataGridId.toStdString().c_str());
     
     GenericFlatListModel* pModel = NULL;
+    qDebug() <<" Searching for model, id ::" << dataGridId;
     if (!m_mapDataGridModels.contains(dataGridId))
     {
         // GenericFlatListModels are kept in a pool in qorbitermanager, because we want the
         // Objects to belong to this thread, and not the QML thread, which is the one that calls
         // this method. Creating them in this method would create them in the QML thread.
         // lock this section so we don't prepare the same model more than once
-        modelPoolLock.lockForWrite();
+
+        qDebug() <<dataGridId << " doesnt exist creating new one.";
+
+        if(!modelPoolLock.tryLockForWrite()){
+            qDebug() << "Mutex locked, comeback later.";
+            return pModel;
+        }
         // Check that the model still is not in map
         if (!m_mapDataGridModels.contains(dataGridId))
         {
@@ -1343,6 +1360,7 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
         
     } else {
         pModel = m_mapDataGridModels[dataGridId];
+        qDebug() << "Model found with " << pModel->rowCount() << "row, returning;";
     }
     
     return pModel;
@@ -1485,7 +1503,6 @@ void qorbiterManager::setActiveRoom(int room,int ea)
 {
     emit setLocation(room, ea);
     emit keepLoading(false);
-    emit clearModel();
     clearDataGrid("Playlist");
     emit resetFilter();
     nowPlayingButton->resetData();

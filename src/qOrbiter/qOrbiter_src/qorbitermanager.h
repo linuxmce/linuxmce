@@ -1226,7 +1226,7 @@ public slots:
     void playMedia(QString FK_Media) { emit startPlayback(FK_Media);}
     void mythTvPlay(){emit play();}
     void playResume(){ emit simplePlay(); }
-    void stopMedia() {emit stopPlayback(); clearDataGrid("Playlist");}
+    void stopMedia() {emit stopPlayback(); }
     void setPlaybackSpeed(int s) {emit setStreamSpeed(s);}
     void pauseMedia() {emit pause();}
     void adjustVolume(int vol) {emit setVolume(vol);}
@@ -1254,7 +1254,7 @@ public slots:
     void movePlaylistEntry(QString d, int index) {emit movePlistEntry(d, index); }
     void removePlaylistEntry(int index) {emit removePlistEntry(index);}
     void saveCurrentPlaylist(QString name, bool mode) {emit savePlist(name, mode);} /*true is public, false is private*/
-    void updatePlaylist(){ /*mediaFilterChanged("Playlist");*/ /*playlistSizeChanged(); GenericFlatListModel *pModel = getDataGridModel("Playlist", 18); if(pModel){pModel->refreshData();}*/ }
+    void updatePlaylist(){  qDebug() << "playlist updating;";  GenericFlatListModel *pModel = getDataGridModel("Playlist", 18); if(pModel){pModel->refreshData();} }
     //@}
 
     /*! @name Screenshot & Images slots*/
