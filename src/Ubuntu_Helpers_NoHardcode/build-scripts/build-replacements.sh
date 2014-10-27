@@ -258,7 +258,7 @@ function Build_Replacements_Precise
 	# precise libsmbclient doesn't ship a pkg-config file, but xine checks for it, so lets provide one
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/smbclient.pc /usr/lib/pkgconfig/
 	#Package: libxine2
-	Build_Replacement_Package libxine2 ubuntu/xine-lib-1.2.4
+	Build_Replacement_Package libxine2 ubuntu/xine-lib-1.2.6
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
 	cp $dir_/*xine*.deb "${replacements_dir}"
@@ -484,6 +484,12 @@ function Build_Replacements_trusty
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*hal*.deb
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
 	cp $dir_/*hal*.deb "${replacements_dir}"
+
+	#Package: libxine2
+	Build_Replacement_Package libxine2 ubuntu/xine-lib-1.2.6
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
+	cp $dir_/*xine*.deb "${replacements_dir}"
 
 	#Package: lshwd
 	#Build_Replacement_Package lshwd_2.0 ubuntu/lshwd-2.0-rc4

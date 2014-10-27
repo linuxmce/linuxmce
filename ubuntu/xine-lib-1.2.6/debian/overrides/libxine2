@@ -1,0 +1,6 @@
+# This is a consequence of xine(5) being useful and being provided by two
+# packages; both libxine1 and libxine2 may be installed, and that man page
+# is useful with both.
+
+libxine2: lib-recommends-documentation recommends: libxine2-doc
+libxine2: lib-recommends-documentation recommends: libxine-doc

@@ -1,0 +1,3 @@
+# This needs to be examined and fixed upstream. Not much which can be done
+# at present without removing the plugin, and I don't want to do that.
+libxine2-misc-plugins: embedded-library usr/lib/xine/plugins/2.5/xineplug_inp_mms.so: libmms
