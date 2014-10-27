@@ -460,6 +460,21 @@ void qMediaPlayer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &s
 void qMediaPlayer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c39-e->
 {
+    setCommandResponse("Need to implement command #39 - Pause Media");
+#ifndef RPI
+
+#if defined (QT4) && ! defined (ANDROID)
+    if(mp_manager->mediaObject->state()==Phonon::PausedState){
+        mp_manager->mediaObject->play();
+        m_bPaused=false;
+    } else {
+        mp_manager->mediaObject->pause();
+        m_bPaused=true;
+    }
+
+#endif
+
+#else
     if(!m_bPaused){
         emit pausePlayback();
         setCommandResponse("Need to implement command #39 - Pause Media");
@@ -471,6 +486,7 @@ void qMediaPlayer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pM
     }
 
     m_bPaused = !m_bPaused;
+#endif
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
@@ -521,8 +537,8 @@ void qMediaPlayer::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iS
 //<-dceag-c42-e->
 {
     setCommandResponse(" Jump to Position in Stream");
-    // cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
-    // cout << "Parm #41 - StreamID=" << iStreamID << endl;
+    cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
+    cout << "Parm #41 - StreamID=" << iStreamID << endl;
     // emit jumpToStreamPosition(QString::fromStdString(sValue_To_Assign).toInt());
     qDebug() << sValue_To_Assign.c_str();
     quint64 tg = QString::fromStdString(sValue_To_Assign.c_str()).toInt();
