@@ -1,8 +1,7 @@
 import QtQuick 1.0
 
 Item{
-    height: childrenRect.height
-    width: childrenRect.width
+
     property int aspectRatio:dcenowplaying.aspect
 
     Connections{
@@ -12,8 +11,7 @@ Item{
 
     Image {
         id: nowplayingimage
-        width: scaleY(35)
-        height: scaleY(35)
+       anchors.fill: parent
        fillMode: Image.PreserveAspectFit
         source: "image://listprovider/updateobject/"+securityvideo.timestamp
       //  anchors.horizontalCenter: parent.horizontalCenter

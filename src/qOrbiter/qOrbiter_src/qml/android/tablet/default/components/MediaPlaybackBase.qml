@@ -2,15 +2,16 @@ import QtQuick 1.0
 import "../../../../skins-common/lib/handlers"
 Item{
     id:media_playback_base
-   anchors{
-    top:parent.top
-    left:parent.left
-    right:parent.right
-    bottom:parent.bottom
-   }
+    anchors{
+        top:parent.top
+        left:parent.left
+        right:parent.right
+        bottom:parent.bottom
+    }
     state:"metadata"
 
     property string screenLabel:"foo"
+    property bool usePlaylist:true
 
 
     Connections{
@@ -123,17 +124,17 @@ Item{
                 visible:true
             }
 
-//            Rectangle{
-//                id:circle
-//                height: parent.height
-//                width: parent.width
-//                radius: height
-//                color: "black"
-//                opacity: .75
-//                border.color: "white"
-//                border.width: 2
-//                anchors.centerIn: square
-//            }
+            //            Rectangle{
+            //                id:circle
+            //                height: parent.height
+            //                width: parent.width
+            //                radius: height
+            //                color: "black"
+            //                opacity: .75
+            //                border.color: "white"
+            //                border.width: 2
+            //                anchors.centerIn: square
+            //            }
 
             StyledButton{
                 id:up
@@ -179,7 +180,7 @@ Item{
             }
             StyledButton{
                 id:ok
-               anchors.centerIn: square
+                anchors.centerIn: square
                 buttonText: "Enter"
                 EnterButtonHandler{
                 }
@@ -275,7 +276,8 @@ Item{
                 state:"loaded"
             }
 
-        }, State {
+        },
+        State {
             name: "dvdmenu"
 
             PropertyChanges {

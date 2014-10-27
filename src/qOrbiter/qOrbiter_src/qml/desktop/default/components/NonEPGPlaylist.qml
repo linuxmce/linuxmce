@@ -121,14 +121,14 @@ Rectangle {
     Connections{
           target: dcenowplaying
           onPlayListPositionChanged:{
-              nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+             nonepgplaylistview.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
           }
       }
     Connections{
         target:manager
         onPlaylistSizeChanged:{
             console.log("playlist size change")
-            //manager.clearDataGrid("Playlist")
+          //  manager.refreshDataGrid("Playlist", 18, "38")
             //nonepgplaylistview.model = manager.getDataGridModel("Playlist", 18)
         }
     }

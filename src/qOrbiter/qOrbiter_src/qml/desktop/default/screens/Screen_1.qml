@@ -19,6 +19,8 @@ Item{
     }
 
 
+
+
     Item {
         id:stage
         signal swapStyle()

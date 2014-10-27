@@ -4,10 +4,12 @@ Item {
     id:panelRoot
     height: scaleY(85)
     width: scaleX(90)
-    anchors.centerIn: parent
+
+
     property alias headerRect:panelHeader
-    property int panelHeaderHeight:height*.10
+    property int panelHeaderHeight: useHeader ? height*.10 : 0
     property string headerTitle:"Lorem Ipsum"
+    property bool useHeader:true
     clip:true
 
     Rectangle{
@@ -43,13 +45,13 @@ Item {
         anchors.left: panelHeader.left
         anchors.verticalCenter: panelHeader.verticalCenter
         anchors.leftMargin: scaleX(2)
-        text:headerTitle
+        text:useHeader ? headerTitle : ""
         height: panelHeader.height
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         font.weight: Font.DemiBold
         isBold: true
         font.pixelSize: scaleY(5)
-        color:appStyle.tile_color
+        color:skinStyle.listItemActiveBgColor
     }
 
 }

@@ -28,6 +28,7 @@ Item{
     property alias handler:dceHandler.sourceComponent
     property bool useHandler:false
     property alias label:button_label.text
+    property alias buttonRadius:bg_fill.radius
 
     signal activated()
     Behavior on opacity{

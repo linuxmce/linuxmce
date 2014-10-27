@@ -66,13 +66,16 @@ Item {
         width: manager.appWidth
         focus:true
         interval:30000
-        active:manager.m_ipAddress==="192.168.80.1"
+        active:true
         anchors.centerIn: parent
         requestUrl:manager.m_ipAddress
         Connections{
             target:manager
             onScreenSaverImagesReady:glScreenSaver.setImageList(manager.screensaverImages)
         }
+        Component.onCompleted: {
+                  glScreenSaver.setImageList(manager.screensaverImages)
+              }
 
         MouseArea{
             anchors.fill: parent
@@ -199,12 +202,7 @@ Item {
     }
 
 
-    Image {
-        id: appbackground
-        source: manager.imagePath+"ui3/light_gray_texture-wallpaper-1920x1080.jpg"
-        anchors.fill: parent
-        opacity: 1
-    }
+
 
     //==========Visual Elements
     /*Header Element*/
@@ -221,8 +219,21 @@ Item {
         anchors.left:parent.left
         focus:true
 
+
         //  onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
-        z:dceplayer.mediaPlaying ==false ? -5 : 0
+        z:-5
+        onVideoStreamChanged: {
+            if(videoStream){
+                console.log("dceplayer::raising window")
+                dceplayer.z=1
+                 glScreenSaver.setScreenSaverActive(false)
+               } else {
+                console.log("dceplayer::lowering window")
+                glScreenSaver.setScreenSaverActive(true)
+                dceplayer.z=-5
+            }
+        }
+
         Component.onCompleted: {
             setWindowSize(manager.appHeight, manager.appWidth);
         }
@@ -243,10 +254,11 @@ Item {
             if(dceplayer.mediaPlaying){
                 hideUI()
                 forceActiveFocus()
-                glScreenSaver.setActive(false)
+
             }else{
+
                 hideUI()
-                glScreenSaver.setActive(true)
+
             }
         }
 

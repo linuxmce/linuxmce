@@ -65,6 +65,7 @@ QtObject{
     property color buttonColor:"darkgreen"
     property color buttonPressedColor:"white"
     property color buttonBorderColor:"white"
+    property double buttonOpacity:.55
     property int buttonBorderWidth:1
     property Gradient buttonGradient: Gradient{
         GradientStop{ position:0.0;color:"transparent"}

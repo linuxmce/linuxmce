@@ -43,7 +43,7 @@ Rectangle {
         width: metadataSection.width/1.5
         clip: true
         flickableDirection: Flickable.VerticalFlick
-        model:manager.getDataGridModel("Playlist", 18)
+       // model:manager.getDataGridModel("Playlist", 18)
         Component.onCompleted: currentIndex= dcenowplaying.m_iplaylistPosition
         highlightFollowsCurrentItem: true
         spacing:scaleY(1)

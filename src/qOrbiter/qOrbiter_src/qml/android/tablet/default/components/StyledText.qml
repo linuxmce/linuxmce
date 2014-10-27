@@ -11,7 +11,9 @@ Text {
     id:labelelement
     text: textLabel
     font.pixelSize: fontSize
-    font.weight: Font.Light
+    font.bold: isBold
+    font.weight: isBold ? Font.Bold : Font.Light
     font.family: appFont.name
     color:skinStyle.tile_color
+    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
 }

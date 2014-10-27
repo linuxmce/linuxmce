@@ -6,18 +6,23 @@ Item{
     visible: true
     height: childrenRect.height
     width: parent.width
-    Rectangle{
-        anchors.fill: parent
-        color:"black"
-        opacity:.65
-    }
+
     clip:true
 
     Column{
         id:textCol
         spacing: scaleY(.5)
-        width: childrenRect.width
+        width: parent.width
         height: dcenowplaying.aspect == "wide"?scaleY(25): scaleY(35)
+        StyledText {
+            id: starring_text
+            width: parent.width
+            wrapMode: "WrapAtWordBoundaryOrAnywhere"
+            text: dcenowplaying.performerlist == "" ? dcenowplaying.performerlist : qsTr("No Performer Information")
+            fontSize: scaleY(4)
+            elide: "ElideRight"
+            visible:false
+        }
         StyledText {
             id: generaltitle
             width:parent.width
@@ -27,8 +32,7 @@ Item{
             elide: "ElideRight"
             smooth: true
             font.pixelSize: scaleY(4)
-            visible:  dcenowplaying.mediatitle =="" ? false: true
-            color:appStyle.accentcolor
+            visible:  dcenowplaying.mediatitle =="" ? false: true           
         }
         StyledText { /* showing up with performers! fix */
             id: title_text
@@ -43,18 +47,7 @@ Item{
             opacity: .65
             style: Text.Sunken
         }
-        StyledText {
-            id: starring_text
-            width: scaleX(40)
-            wrapMode: "WrapAtWordBoundaryOrAnywhere"
-            text: dcenowplaying.performerlist == "" ? dcenowplaying.performerlist : qsTr("No Performer Information")
-            color: "Aliceblue"
-            //  font.bold: true
-            smooth: true
-            fontSize: scaleY(4)
-            elide: "ElideRight"
-            visible:false
-        }
+
 
         StyledText {
             id: album_text
@@ -63,8 +56,7 @@ Item{
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             smooth: true
             font.bold: true
-            fontSize: scaleY(4)
-            color:style.maincolor
+            fontSize: scaleY(4)            
         }
 
         StyledText {
@@ -82,14 +74,12 @@ Item{
             id: released_text
             width:parent.width
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
-            text: qsTr("Released: ") + dcenowplaying.releasedate
-            // font.italic: true
-
+            text: qsTr("Released: ") + dcenowplaying.releasedate           
             smooth: true
             font.bold: true
             fontSize: scaleY(4)
             visible:  dcenowplaying.releasedate =="" ? false: true
-            color:appStyle.accentColor
+
         }
     }
 }
