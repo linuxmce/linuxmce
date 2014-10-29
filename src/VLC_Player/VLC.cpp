@@ -157,4 +157,116 @@ namespace DCE
 
   }  
 
+  void VLC::PlayURL(string sMediaURL)
+  {
+    // libvlc_time_t iLength=0;
+    string::size_type pos=0;
+    libvlc_media_player_stop(m_pMp);
+    if (sMediaURL.find("://") == string::npos)
+      {
+	sMediaURL = "file://" + sMediaURL;
+      }
+    
+    sMediaURL=StringUtils::Tokenize(sMediaURL,"|",pos); // we only want the main part.
+
+    libvlc_media_t *m = libvlc_media_new_location (m_pInst, sMediaURL.c_str());
+    libvlc_media_player_set_media(m_pMp, m);
+    libvlc_media_release(m);
+    libvlc_media_player_set_xwindow (m_pMp, m_Window);
+    SetDuration(libvlc_media_player_get_length(m_pMp));
+    libvlc_media_player_play(m_pMp);
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"media player is seekable? %d",libvlc_media_player_is_seekable(m_pMp));
+    SetPlaying(true);
+  }
+
+  void VLC::Stop()
+  {
+    libvlc_media_player_stop(m_pMp);
+    SetPlaying(false);
+  }
+
+  void VLC::SetDuration(libvlc_time_t newDuration)
+  {
+    m_fDuration = (float)newDuration / 1000;
+  }
+
+  float VLC::GetDuration()
+  {
+    return m_fDuration;
+  }
+
+  float VLC::GetPosition()
+  {
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"GETPOSITION %f",m_fPosition);
+    return m_fPosition;
+  }
+
+  void VLC::SetPosition(float fPosition)
+  {
+    LoggerWrapper::GetInstance()->Write(LV_WARNING,"VLC::SetPosition(%f)",fPosition);
+    libvlc_media_player_set_position(m_pMp, fPosition);
+  }
+
+  bool VLC::IsPlaying()
+  {
+    return m_bIsPlaying;
+  }
+
+  void VLC::SetPlaying(bool bIsPlaying)
+  {
+    m_bIsPlaying = bIsPlaying;
+  }
+
+  void VLC::UpdateStatus()
+  {
+    SetDuration(0);
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TIME: %d",libvlc_media_player_get_time(m_pMp));
+    m_fPosition = libvlc_media_player_get_time(m_pMp) / 1000;
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CALCTIME: %f",m_fPosition);
+  }
+
+  void VLC::SetTime(float fTime)
+  {
+    libvlc_time_t iTime = fTime * 1000;
+    libvlc_media_player_set_time(m_pMp,iTime);
+  }
+
+  void VLC::Pause()
+  {
+    if (m_pMp)
+      libvlc_media_player_set_pause(m_pMp, 1);
+  }
+  
+  void VLC::Restart()
+  {
+    if (m_pMp)
+      libvlc_media_player_set_pause(m_pMp, 0);
+  }
+
+  void VLC::SetRate(float fMediaPlayBackSpeed)
+  {
+    if (m_pMp)
+      libvlc_media_player_set_rate(m_pMp, fMediaPlayBackSpeed);
+  }
+
+  void VLC::JumpFwd(int iMult)
+  {
+    // libvlc_time_t iTime;
+
+    if (!m_pMp)
+      return;
+
+    libvlc_media_player_set_time(m_pMp, (m_fPosition * 1000) + (iMult * 30 * 1000));    
+  }
+  
+  void VLC::JumpBack(int iMult)
+  {
+    // libvlc_time_t iTime;
+    
+    if (!m_pMp)
+      return;
+    
+    libvlc_media_player_set_time(m_pMp, (m_fPosition * 1000) - (iMult * 30 * 1000));
+  }
+
 }
