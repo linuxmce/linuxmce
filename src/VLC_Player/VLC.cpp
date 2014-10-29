@@ -19,7 +19,7 @@
 
 #include "utilities/linux/window_manager/WMController/WMController.h"
 
-// #define INACTIVE_VIDEO "/home/public/data/videos/big_buck_bunny_720p_surround.avi"
+// #define INACTIVE_VIDEO "/home/public/data/videos/rejected.dvd"
 #define INACTIVE_VIDEO "/usr/pluto/share/black.mpeg"
 
 namespace DCE
