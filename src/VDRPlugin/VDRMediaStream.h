@@ -56,6 +56,7 @@ namespace DCE
 		virtual ~VDRMediaStream();
         virtual void UpdateDescriptions(bool bAllFiles=false,MediaFile *pMediaFile_In=NULL);
         virtual int GetType() { return MEDIASTREAM_TYPE_VDR; }
+	virtual bool StreamingRequired();
 	};
 };
 

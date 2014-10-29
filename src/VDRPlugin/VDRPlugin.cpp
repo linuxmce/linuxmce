@@ -228,13 +228,26 @@ bool VDRPlugin::StartMedia( class MediaStream *pMediaStream,string &sError )
 		VDRChannel *pVDRChannel = *(m_ListVDRChannel.begin());
 		pVDRMediaStream->m_pVDRChannel = pVDRChannel;
 
-		
-		DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device, PK_Device,
-								pVDRMediaStream->m_iPK_MediaType,
-								pVDRMediaStream->m_iStreamID_get(), 
-								" CHAN:" + StringUtils::itos(pVDRMediaStream->m_pVDRChannel->m_dwChanNum),"");
-		SendCommand(CMD_Play_Media);
-		
+		if (pVDRMediaStream->StreamingRequired())
+		  {
+		    DCE::CMD_Start_Streaming CMD_Start_Streaming(m_dwPK_Device,
+								 pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
+								 pVDRMediaStream->m_iPK_MediaType,
+								 pVDRMediaStream->m_iStreamID_get(),
+								 " CHAN:" + StringUtils::itos(pVDRMediaStream->m_pVDRChannel->m_dwChanNum),
+								 "",
+								 pVDRMediaStream->GetTargets(DEVICETEMPLATE_VDR_CONST));
+		    SendCommand(CMD_Start_Streaming);
+		  }
+		else
+		  {
+		    
+		    DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device, PK_Device,
+						       pVDRMediaStream->m_iPK_MediaType,
+						       pVDRMediaStream->m_iStreamID_get(), 
+						       " CHAN:" + StringUtils::itos(pVDRMediaStream->m_pVDRChannel->m_dwChanNum),"");
+		    SendCommand(CMD_Play_Media);
+		  }
 	}	
 	
 	return MediaHandlerBase::StartMedia(pMediaStream,sError);

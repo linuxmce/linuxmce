@@ -57,6 +57,16 @@ namespace DCE
 		// No op. Is here to keep the compiler happy.
 	}
 
+  bool VDRMediaStream::StreamingRequired()
+  {
+    // if we have more than one target device.
+    if ( m_mapEntertainArea.size() > 1 )
+      return true;
+    
+    if ( m_mapEntertainArea.size() == 0 )
+      return false;
+  }
+
 	void VDRMediaStream::UpdateDescriptions(bool bAllFiles,MediaFile *pMediaFile_In)
 	{
 		/*
