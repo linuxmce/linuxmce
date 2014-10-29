@@ -13,6 +13,7 @@
 ConfEval
 
 LOCKFILE="/usr/pluto/locks/VDRrunning"
+XINE_IP=$1
 if [[ "$PK_Device" -eq "1" ]]; then
 	# We are running on the core, and do not want to stop VDR
 	trap 'killall -KILL vdr-sxfe' EXIT
@@ -35,4 +36,4 @@ else
 fi
 svdrpsend -p 2001 HITK Ok
 touch $LOCKFILE
-/usr/bin/vdr-sxfe --reconnect xvdr://127.0.0.1 --post tvtime:method=use_vo_driver --tcp --syslog --verbose
+/usr/bin/vdr-sxfe --reconnect xvdr://$XINE_IP --post tvtime:method=use_vo_driver --tcp --syslog --verbose

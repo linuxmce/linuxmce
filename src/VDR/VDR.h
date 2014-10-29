@@ -56,13 +56,14 @@ private:
 				string m_CurrentMode, m_CurrentProgram;
 				int m_CurTime, m_EndTime;
 				string m_sChannel,m_sInitialChannel;
+				bool m_bIsSlave; // Is this a slave 
         bool checkWindowName(long unsigned int window, string windowName);
         void selectWindow();
         string m_sVDRIp;
         
 
 protected:                                        
-        bool LaunchVDR(bool bSelectWindow=true);
+        bool LaunchVDR(bool bSelectWindow=true, string sIP="127.0.0.1");
         bool StopVDRFrontend();
 	      bool locateVDRWindow(long unsigned int window);
 		    Display *getDisplay() { return m_pDisplay; };

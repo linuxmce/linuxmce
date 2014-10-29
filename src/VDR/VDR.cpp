@@ -90,6 +90,7 @@ VDR::VDR(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLoca
   m_menustatus=0;
   m_sVDRmodus="";
   m_sMediaURL="";
+  m_bIsSlave=false;
 }
                                 
 
@@ -193,7 +194,7 @@ VDR::~VDR()
 }
 
 // #########LAUNCH
-bool VDR::LaunchVDR(bool bSelectWindow)
+bool VDR::LaunchVDR(bool bisSlave, string sIP)
 {
 	DeviceData_Base *pDevice_App_Server = m_pData->FindFirstRelatedDeviceOfCategory(DEVICECATEGORY_App_Server_CONST,this);
 	if( pDevice_App_Server )
@@ -204,7 +205,7 @@ bool VDR::LaunchVDR(bool bSelectWindow)
 		//string sWidth = m_pEvent->GetDeviceDataFromDatabase(m_pData->m_dwPK_Device_ControlledVia, DEVICEDATA_ScreenWidth_CONST);
 		//string sHeight = m_pEvent->GetDeviceDataFromDatabase(m_pData->m_dwPK_Device_ControlledVia, DEVICEDATA_ScreenHeight_CONST); 
 		DCE::CMD_Spawn_Application CMD_Spawn_Application(m_dwPK_Device,pDevice_App_Server->m_dwPK_Device,
-			"/usr/pluto/bin/StartVDRClient.sh", "VDR.VDR", "--reconnect\t--fullscreen\txvdr://127.0.0.1:37890",
+			"/usr/pluto/bin/StartVDRClient.sh", "VDR.VDR", ""+sIP+"",
 			sMessage + "1",sMessage + "0",false,false,true,false);
 		if( SendCommand(CMD_Spawn_Application) )
 		{
@@ -283,7 +284,16 @@ void VDR::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPosition,s
 	string sResponse;	
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"VDR:IAM IN PLAY MEDIA NOW");
 	
-	if (!sMediaURL.empty() && (sMediaURL.find("CHAN:") != string::npos))
+	// Check for slave (this means that we connect to an existing xvdr).
+	if (!sMediaURL.empty() && (sMediaURL.find("SLAVE|") != string::npos))
+	  {
+	    m_bIsSlave=true;
+	    string::size_type pos=0;
+	    StringUtils::Tokenize(sMediaURL,"|",pos); // We don't need this. It's just a guard, lop it off.
+	    m_sXineIP=m_sVDRIp=StringUtils::Tokenize(sMediaURL,"|",pos);
+	    sMediaURL=StringUtils::Tokenize(sMediaURL,"|",pos);
+	  }
+	else if (!sMediaURL.empty() && (sMediaURL.find("CHAN:") != string::npos))
 	{
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Channel specified in URL, setting..");
 		m_sMediaURL = sMediaURL;
@@ -1530,7 +1540,7 @@ void VDR::pollVDRStatus()
 		PLUTO_SAFETY_LOCK(mm,m_VDRMutex);
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDR.poll:in startup");
 
-		LaunchVDR();
+		LaunchVDR(false,m_sXineIP);
 		m_CurrentMode.clear();
 		m_CurrentProgram.clear();
 		
@@ -1553,9 +1563,12 @@ void VDR::pollVDRStatus()
 				string sCommand;
 				string sVDRResponse;
 				string currentchan;
-				sCommand = "CHAN";
-				SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
-				Sleep(1000);
+				if (!m_bIsSlave)
+				  {
+				    sCommand = "CHAN";
+				    SendVDRCommand(m_sVDRIp,sCommand,sVDRResponse);
+				    Sleep(1000);
+				  }
 				ParseCurrentChannel(sVDRResponse);
 			
 				//burgi 2008-04-01 AAA
