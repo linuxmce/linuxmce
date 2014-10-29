@@ -19,6 +19,7 @@
 
 #include "utilities/linux/window_manager/WMController/WMController.h"
 
+// #define INACTIVE_VIDEO "/home/public/data/videos/big_buck_bunny_720p_surround.avi"
 #define INACTIVE_VIDEO "/usr/pluto/share/black.mpeg"
 
 namespace DCE
@@ -28,7 +29,7 @@ namespace DCE
     m_pInst = NULL;
     m_pMp = NULL;
     m_pConfig = pConfig;
-    m_sWindowTitle = "linuxmcevlc";
+    m_sWindowTitle = "lmcevlc";
   }
 
   VLC::~VLC()
@@ -48,6 +49,23 @@ namespace DCE
   bool VLC::init()
   {
     libvlc_media_t* pInactive_media;
+    XInitThreads();
+    if ((m_pDisplay = XOpenDisplay(getenv("DISPLAY"))) == NULL)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Videolan::init() - Could not open X display from %s",getenv("DISPLAY"));
+	return false;
+      }
+
+    static const char* const args[] = {"--no-video-title-show"};
+
+    // m_pInst = libvlc_new(sizeof args / sizeof *args, args);
+    m_pInst = libvlc_new(NULL, NULL);
+
+    if (!m_pInst)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AirPlay_Videolan::init() failed.");
+	return false;
+      }
     
     if ((m_pDisplay = XOpenDisplay(getenv("DISPLAY"))) == NULL)
       {
@@ -136,7 +154,7 @@ namespace DCE
       }
     
     WMControllerImpl *pWMController = new WMControllerImpl();
-    bool bResult = pWMController->SetVisible("linuxmcevlc.linuxmcevlc", false);
+    bool bResult = pWMController->SetVisible("lmcevlc.lmcevlc", false);
 
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "VLC::MinimizeVLC WMController SetVisible returned %d", bResult);
     
@@ -167,8 +185,6 @@ namespace DCE
 	sMediaURL = "file://" + sMediaURL;
       }
     
-    sMediaURL=StringUtils::Tokenize(sMediaURL,"|",pos); // we only want the main part.
-
     libvlc_media_t *m = libvlc_media_new_location (m_pInst, sMediaURL.c_str());
     libvlc_media_player_set_media(m_pMp, m);
     libvlc_media_release(m);
