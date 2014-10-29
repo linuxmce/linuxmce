@@ -1174,6 +1174,52 @@ void VDR::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message *pMessag
 void VDR::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string sStreamingTargets,string &sCMD_Result,Message *pMessage)
 //<-dceag-c249-e->
 {
+  PLUTO_SAFETY_LOCK(mm,m_VDRMutex);
+  m_bIsSlave=false;
+  size_t pos=0;
+  while (pos<sStreamingTargets.size())
+    {
+      string sCurrentTarget = StringUtils::Tokenize(sStreamingTargets,",",pos);
+      if (atoi(sCurrentTarget.c_str())==m_dwPK_Device)
+	{
+	  // Master
+	  if (!sMediaURL.empty() && (sMediaURL.find("CHAN:") != string::npos))
+	    {
+	      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Channel specified in URL, setting..");
+	      m_sMediaURL = sMediaURL;
+	    }	
+	  
+	  if ( m_VDRStatus_get() == VDRSTATUS_DISCONNECTED )
+	    {
+	      m_VDRStatus_set(VDRSTATUS_STARTUP);
+	      
+	    }
+	  else
+	    {
+	      if (m_VDRStatus_get() == VDRSTATUS_LIVETV || m_VDRStatus_get() == VDRSTATUS_PLAYBACK)
+		{
+		  //SendVDRCommand(m_sVDRIp,"MESG LIVE",sResponse);
+		}
+	      else {
+		//SendVDRCommand(m_sVDRIp,"MESG PLAYBACK",sResponse);
+	      }
+	    }
+	  selectWindow();
+	  
+	  m_sInitialChannel = sMediaPosition;
+	  m_iStreamID=iStreamID; 
+	}
+      else
+	{
+	  // Slave
+	  DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
+					     atoi(sCurrentTarget.c_str()),
+					     iPK_MediaType, iStreamID,
+					     "",
+					     "SLAVE|"+m_sXineIP+"|");
+	  SendCommand(CMD_Play_Media);
+	}
+    }
 }
 //<-dceag-c367-b->
 
