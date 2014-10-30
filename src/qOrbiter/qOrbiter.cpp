@@ -1814,9 +1814,11 @@ bool DCE::qOrbiter::initialize(){
         } else {
 
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
-            DisconnectAndWait();
+
             emit commandResponseChanged("QOrbiter Connect() Failed for "+QString::number(this->m_dwPK_Device) );
-            QApplication::processEvents(QEventLoop::AllEvents);
+            this->m_bRunning = true;
+            DisconnectAndWait();
+            emit routerConnectionChanged(false);
             return false;
         }
 
@@ -1983,7 +1985,10 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
     httpOrbiterSettings = new QNetworkAccessManager();
     httpSettingsRequest = new QNetworkRequest();
 
-    "Processing New orbiter Setup";
+
+    qDebug() << "Room ::" << room;
+    qDebug() << "User ::" << users;
+    qDebug() << "MAC" << m_sMacAddress.c_str();
     sPK_Room = room;
     sPK_Users = users;
     sPK_Skin = skin;
@@ -2000,16 +2005,15 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
             statusMessage("Error Setting up orbiter!");
             m_dwPK_Device = -1;
             initialize();
-        }
-        else
-        {
+        } else {
             emit commandResponseChanged("New Device ID:" +QString::number(t));
             m_dwPK_Device = t ;
-            emit commandResponseChanged("setting ea");
-            httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d="));
-            // qDebug() << "Ea url::" <<httpSettingsRequest->url();
+            emit commandResponseChanged("Setting up Ea");
+            httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d=").append(QString::number(m_dwPK_Device)));
+            qDebug() << "Ea url::" <<httpSettingsRequest->url();
             httpSettingsReply = httpOrbiterSettings->get(*httpSettingsRequest);
             QObject::connect(httpSettingsReply, SIGNAL(finished()), this, SLOT(finishSetup()));
+
         }
     }
     else
@@ -2020,9 +2024,11 @@ void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int 
 
 void qOrbiter::finishSetup()
 {
+
     httpSettingsReply->disconnect(this, SLOT(finishSetup()));
+    emit commandResponseChanged(httpSettingsReply->readAll());
     emit commandResponseChanged("Finishing setup...");
-    //  qDebug() << httpSettingsReply->readAll();
+
     QString settingsUrl = "http://"+ dceIP;
     settingsUrl.append("/lmce-admin/qOrbiterGenerator.php?d="+QString::number(m_dwPK_Device)) ;
     httpSettingsRequest->setUrl(settingsUrl);
@@ -2035,7 +2041,7 @@ void qOrbiter::finishSetup()
 void qOrbiter::setupEa()
 {
     httpSettingsReply->disconnect(this,SLOT(setupEa()));
-    httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d="));
+    httpSettingsRequest->setUrl("http://"+QString::fromStdString(m_sIPAddress).append("/lmce-admin/setEa2.php?d=").append(QString::number(m_dwPK_Device)));
     qDebug() << "Ea url::" <<httpSettingsRequest->url();
     httpSettingsReply = httpOrbiterSettings->get(*httpSettingsRequest);
     QObject::connect(httpSettingsReply, SIGNAL(finished()), this, SLOT(initialize()));
@@ -2542,8 +2548,8 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString op
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGrid() media browser, using _<dgname>");
             dgN = QString("_")+dgN;
         } else if (PK_DataGrid == DATAGRID_Current_Media_Sections_CONST){
-          //  LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGrid() playists , using plist_<dgname>");
-          //  dgN = QString("plist_")+dgN;
+            //  LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGrid() playists , using plist_<dgname>");
+            //  dgN = QString("plist_")+dgN;
         }
 
         // hack/fixme: need to sleep a short while here, because if we emit prepareDataGrid too soon,
@@ -3695,7 +3701,6 @@ void DCE::qOrbiter::quickReload() //experimental function. checkConnection is go
 {
     Event_Impl event_Impl(DEVICEID_MESSAGESEND, 0, m_sHostName);
     event_Impl.m_pClientSocket->SendString( "RELOAD" );
-
 }
 
 void DCE::qOrbiter::powerOn(QString devicetype)
@@ -4270,6 +4275,8 @@ void qOrbiter::OnUnexpectedDisconnect()
 {
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"QOrbiter::onUnexpectedDisconnect %d", m_dwPK_Device);
     emit routerConnectionChanged(false);
+     pthread_cond_broadcast( &m_listMessageQueueCond );
+    Disconnect();
 
 }
 
@@ -4298,9 +4305,10 @@ void qOrbiter::OnReload()
     pthread_yield();
 #endif
 #endif
-
-
     emit routerReloading("Reloading");
+    emit routerConnectionChanged(false);
+    Disconnect();
+
 }
 
 bool qOrbiter::OnReplaceHandler(string msg)
@@ -4527,7 +4535,8 @@ int qOrbiter::SetupNewOrbiter()
     string sType = "Linux";
     statusMessage("Setting up orbiter with core");
 
-    DCE::CMD_New_Orbiter_DT CMD_New_Orbiter_DT(m_dwPK_Device,
+    DCE::CMD_New_Orbiter_DT CMD_New_Orbiter_DT(
+                                               m_dwPK_Device,
                                                DEVICETEMPLATE_Orbiter_Plugin_CONST,
                                                BL_SameHouse,
                                                sType,
@@ -4538,9 +4547,8 @@ int qOrbiter::SetupNewOrbiter()
                                                sWidth,
                                                sHeight,
                                                sPK_Skin,
-                                               sPK_Lang
-                                               ,1
-                                               ,
+                                               sPK_Lang,
+                                               1,
                                                &PK_Device
                                                );
 
@@ -4602,6 +4610,7 @@ void qOrbiter::CreateChildren()
         }
     }
     emit commandResponseChanged("Finished spawning children!");
+    emit routerConnectionChanged(true);
 }
 
 

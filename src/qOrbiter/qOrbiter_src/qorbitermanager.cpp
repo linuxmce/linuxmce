@@ -576,9 +576,9 @@ void qorbiterManager::initiateRestart()
     emit restartOrbiter();
     
 #ifdef Q_OS_ANDROID
-    gotoQScreen("../../../Splash.qml");
+    gotoQScreen("Screen_1.qml");
 #else
-    gotoQScreen("../../Splash.qml");
+    gotoQScreen("Screen_1.qml");
 #endif
     
 }
@@ -1250,7 +1250,7 @@ void qorbiterManager::clearDataGrid(QString dataGridId)
     }
     modelPoolLock.unlock();
     qDebug() << "manager.clearDataGrid() end";
-   emit modelChanged();
+    emit modelChanged();
 }
 
 void qorbiterManager::clearAllDataGrid() 
@@ -1894,6 +1894,7 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
         status="running";
         setDceResponse("Re -Initializing Local Manager");
         setCurrentScreen("Screen_1.qml");
+        setReloadStatus(false);
     } else {
 
     }

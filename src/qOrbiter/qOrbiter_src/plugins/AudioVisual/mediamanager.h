@@ -124,6 +124,7 @@ public:
 
     QTcpServer *timeCodeServer;
     QTcpServer *infoSocket;
+    QTcpServer *tcCallback;
     QString current_position;
     int iCurrent_Position;
 
@@ -148,6 +149,7 @@ public:
 
     QList<QTcpSocket*> clientList;
     QTcpSocket*lastClient;
+    QTcpSocket*callbackClient;
 
     QProcess *mountProcess;
 
@@ -354,6 +356,14 @@ public slots:
     bool getMediaPlaying() {return mediaPlaying;}
 
     void setFileReference(QString f){
+
+#ifdef ANDROID
+
+
+
+
+#endif
+
         fileReference = f;
         androidUrl = fileReference;
 #ifdef ANDROID
@@ -395,10 +405,12 @@ public slots:
     }
 
     void newClientConnected();
+    void callBackClientConnected();
     void startTimeCodeServer();
     void stopTimeCodeServer();
     void handleError(){
     }
+    void forwardCallbackData();
 
     void setState(){
 #ifndef __ANDROID__
@@ -521,6 +533,12 @@ public slots:
 
     void processTimeCode(qint64 f);
     void processSocketdata();
+
+    void reInit(){
+
+        mediaPlayer=NULL;
+       initializePlayer();
+    }
 
 private:
     void initializePlayer();

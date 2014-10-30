@@ -727,8 +727,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(reloadRouter()), &pqOrbiter, SLOT(quickReload()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(routerReload()), &w, SLOT(reloadHandler()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(replaceDevice()), &w, SLOT(replaceHandler()), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(routerDisconnect()), &w, SLOT(disconnectHandler()),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(routerReload()), &w, SLOT(connectionWatchdog()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(routerDisconnect()), &w, SLOT(disconnectHandler()),Qt::QueuedConnection);       
         QObject::connect(&w, SIGNAL(reInitialize()), &pqOrbiter, SLOT(initialize()), Qt::QueuedConnection);
         //   QObject::connect(&w, SIGNAL(deviceNumberChanged(int)), &pqOrbiter, SLOT(setDeviceId(int)));
         QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &orbiterWin, SLOT(setRouterAddress(QString)));

@@ -191,16 +191,27 @@ void MediaManager::newClientConnected(){
     if(timeCodeServer->hasPendingConnections()){
         QTcpSocket *lastSocket=timeCodeServer->nextPendingConnection();
         if(lastSocket->isValid()){
-            setCurrentStatus("New Client Connected."+lastSocket->peerAddress().toString());
+            setCurrentStatus("New Client Connected from"+lastSocket->peerAddress().toString());
             clientList.append(lastSocket);
         }
     }
 
 }
 
+void MediaManager::callBackClientConnected()
+{
+    if(tcCallback->hasPendingConnections()){
+        callbackClient = tcCallback->nextPendingConnection();
+        if(callbackClient->isValid()){
+            setCurrentStatus("Callback client connected.");
+            QObject::connect(callbackClient, SIGNAL(readyRead()), this, SLOT(forwardCallbackData()),Qt::QueuedConnection);
+        }
+    }
+}
+
 void MediaManager::startTimeCodeServer(){
 
-    setCurrentStatus("Staring timecode server on port 12000");
+    setCurrentStatus("Starting timecode server on port 12000");
     timeCodeServer->listen(QHostAddress::Any,12000);
     QObject::connect(timeCodeServer, SIGNAL(newConnection()), this , SLOT(newClientConnected()));
 }
@@ -215,6 +226,19 @@ void MediaManager::stopTimeCodeServer()
     timeCodeServer->close();
     setMediaPlaying(false);
     incomingTime=0;
+}
+
+void MediaManager::forwardCallbackData(){
+
+    QString callbackTc = callbackClient->readAll();
+    if(!callbackTc.isEmpty() && callbackTc.length() > 2){
+        int f = callbackTc.indexOf("|", 0);
+        callbackTc.remove(0,f);
+        callbackTc.remove("|");
+        setCurrentStatus("time recieved from ipc::"+callbackTc);
+        processTimeCode(callbackTc.toInt());
+
+    }
 }
 
 void MediaManager::setZoomLevel(QString zoom)
@@ -245,6 +269,7 @@ QImage MediaManager::getScreenShot(){
 
 void MediaManager::setMediaUrl(QString url)
 {
+
     setCurrentStatus("Got New Media Url::"+url);
     filepath=url;
     fileUrl=url;
@@ -487,6 +512,14 @@ void MediaManager::infoConnectHandler()
 
 void MediaManager::connectInfoSocket()
 {
+
+    if(!tcCallback){
+        tcCallback = new QTcpServer();
+        QObject::connect(tcCallback, SIGNAL(newConnection()), this, SLOT(callBackClientConnected()), Qt::QueuedConnection);
+    }
+    tcCallback->listen(QHostAddress::Any,12002);
+    setCurrentStatus("Opening callback port 12002::"+QString::number(tcCallback->serverPort()));
+
     if(!infoSocket){
         infoSocket = new QTcpServer();
     }
