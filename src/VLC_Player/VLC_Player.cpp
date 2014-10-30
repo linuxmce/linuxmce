@@ -25,6 +25,8 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include "pluto_main/Define_Button.h"
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 VLC_Player::VLC_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -39,6 +41,8 @@ VLC_Player::VLC_Player(int DeviceID, string ServerAddress,bool bConnectEventHand
 VLC_Player::~VLC_Player()
 //<-dceag-dest-e->
 {
+  EVENT_Playback_Completed("",0,false);  // In case media plugin thought something was playing, let it know that there's not
+
   if (m_config)
     {
       delete m_config;
@@ -141,7 +145,7 @@ void VLC_Player::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,strin
 void VLC_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
-	sCMD_Result = "UNKNOWN COMMAND";
+	sCMD_Result = "UNKNOWN DEVICE";
 }
 
 //<-dceag-sample-b->!
@@ -166,10 +170,34 @@ void VLC_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 void VLC_Player::CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,Message *pMessage)
 //<-dceag-c28-e->
 {
-	cout << "Need to implement command #28 - Simulate Keypress" << endl;
-	cout << "Parm #26 - PK_Button=" << sPK_Button << endl;
-	cout << "Parm #41 - StreamID=" << iStreamID << endl;
-	cout << "Parm #50 - Name=" << sName << endl;
+  cout << "Need to implement command #28 - Simulate Keypress" << endl;
+  cout << "Parm #26 - PK_Button=" << sPK_Button << endl;
+  cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  cout << "Parm #50 - Name=" << sName << endl;
+  
+  int PK_Button = atoi(sPK_Button.c_str());
+  LoggerWrapper::GetInstance()->Write(LV_WARNING,"Xine_Player::CMD_Simulate_Keypress %d",PK_Button);
+  switch(PK_Button)
+    {
+    case BUTTON_Up_Arrow_CONST:
+      CMD_Move_Up(iStreamID);
+      break;
+    case BUTTON_Down_Arrow_CONST:
+      CMD_Move_Down(iStreamID);
+      break;
+    case BUTTON_Left_Arrow_CONST:
+      CMD_Move_Left(iStreamID);
+      break;
+    case BUTTON_Right_Arrow_CONST:
+      CMD_Move_Right(iStreamID);
+      break;
+    case BUTTON_Enter_CONST:
+      CMD_EnterGo(iStreamID);
+      break;
+    default:
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"Xine_Player::CMD_Simulate_Keypress -- Can't handle %d",PK_Button);
+      break;
+    }	
 }
 
 //<-dceag-c29-b->
@@ -562,6 +590,7 @@ void VLC_Player::CMD_EnterGo(int iStreamID,string &sCMD_Result,Message *pMessage
 {
 	cout << "Need to implement command #190 - Enter/Go" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	m_pVLC->EnterGo();
 }
 
 //<-dceag-c200-b->
@@ -576,6 +605,7 @@ void VLC_Player::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessage
 {
 	cout << "Need to implement command #200 - Move Up" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	m_pVLC->MoveUp();
 }
 
 //<-dceag-c201-b->
@@ -590,6 +620,7 @@ void VLC_Player::CMD_Move_Down(int iStreamID,string &sCMD_Result,Message *pMessa
 {
 	cout << "Need to implement command #201 - Move Down" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	m_pVLC->MoveDown();
 }
 
 //<-dceag-c202-b->
@@ -604,6 +635,7 @@ void VLC_Player::CMD_Move_Left(int iStreamID,string &sCMD_Result,Message *pMessa
 {
 	cout << "Need to implement command #202 - Move Left" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	m_pVLC->MoveLeft();
 }
 
 //<-dceag-c203-b->
@@ -618,6 +650,7 @@ void VLC_Player::CMD_Move_Right(int iStreamID,string &sCMD_Result,Message *pMess
 {
 	cout << "Need to implement command #203 - Move Right" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
+	m_pVLC->MoveRight();
 }
 
 //<-dceag-c204-b->

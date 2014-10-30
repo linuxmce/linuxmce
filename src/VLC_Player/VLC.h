@@ -32,6 +32,7 @@ namespace DCE
     Pixmap m_NoPixmap;
     float m_fDuration, m_fPosition;
     bool m_bIsPlaying;
+    int m_iSerialNum;
 
   public:
 
@@ -67,6 +68,13 @@ namespace DCE
     void SetRate(float fMediaPlayBackSpeed);
     void JumpFwd(int iMult);
     void JumpBack(int iMult);
+    bool IsWindowValid() { return m_Window != 0; }
+    void MoveUp();
+    void MoveDown();
+    void MoveLeft();
+    void MoveRight();
+    void EnterGo();
+
   };
 
 }

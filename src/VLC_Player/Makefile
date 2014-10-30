@@ -22,13 +22,12 @@ sources = Main.cpp VLC_Player.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS += `pkg-config --cflags glib-2.0`
 LDFLAGS += `pkg-config --libs glib-2.0`
-XTRALDLIBS = -lmysqlclient_r -lvlc -lX11 -lXmu
+XTRALDLIBS = -lmysqlclient_r -lvlc -lX11 -lXmu -lWindowUtils -lXtst
 
 Gen_Dev_Files +=
 sources += VLC.cpp \
 	../utilities/linux/window_manager/WMController/WMController.cpp \
 	../utilities/linux/window_manager/wmctrl/wmctrl.cpp
-
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)

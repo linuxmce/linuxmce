@@ -18,9 +18,11 @@
 #include "VLC.h"
 
 #include "utilities/linux/window_manager/WMController/WMController.h"
+#include "WindowUtils/WindowUtils.h"
+#include <X11/keysym.h>
 
-// #define INACTIVE_VIDEO "/home/public/data/videos/rejected.dvd"
-#define INACTIVE_VIDEO "/usr/pluto/share/black.mpeg"
+#define INACTIVE_VIDEO "/home/public/data/videos/rejected.dvd"
+// #define INACTIVE_VIDEO "/usr/pluto/share/black.mpeg"
 
 namespace DCE
 {
@@ -30,6 +32,7 @@ namespace DCE
     m_pMp = NULL;
     m_pConfig = pConfig;
     m_sWindowTitle = "lmcevlc";
+    m_iSerialNum=0;
   }
 
   VLC::~VLC()
@@ -283,6 +286,51 @@ namespace DCE
       return;
     
     libvlc_media_player_set_time(m_pMp, (m_fPosition * 1000) - (iMult * 30 * 1000));
+  }
+
+  void VLC::MoveUp()
+  {
+    if (!IsWindowValid())
+      return;
+
+    WindowUtils::SendKeyToWindow(m_pDisplay,m_Window,XK_Up,m_iSerialNum++);
+
+  }
+  
+  void VLC::MoveDown()
+  {
+    if (!IsWindowValid())
+      return;
+
+    WindowUtils::SendKeyToWindow(m_pDisplay,m_Window,XK_Down,m_iSerialNum++);
+
+  }
+
+  void VLC::MoveLeft()
+  {
+    if (!IsWindowValid())
+      return;
+
+    WindowUtils::SendKeyToWindow(m_pDisplay,m_Window,XK_Left,m_iSerialNum++);
+
+  }
+
+  void VLC::MoveRight()
+  {
+    if (!IsWindowValid())
+      return;
+
+    WindowUtils::SendKeyToWindow(m_pDisplay,m_Window,XK_Up,m_iSerialNum++);
+
+  }
+
+  void VLC::EnterGo()
+  {
+    if (!IsWindowValid())
+      return;
+
+    WindowUtils::SendKeyToWindow(m_pDisplay,m_Window,XK_Return,m_iSerialNum++);
+    
   }
 
 }
