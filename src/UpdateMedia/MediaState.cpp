@@ -227,16 +227,17 @@ MediaSyncMode MediaState::SyncModeNeeded(string sDirectory, string sFile)
 
 		if(
 			!spFileHandler->FileAttributeExists() &&
-			item.m_sCurrentDbAttrDate != "" && item.m_bHasAttributes
+			item.m_sCurrentDbAttrDate != "" && item.m_bHasAttributes &&
+			StringUtils::SQLDateTime(item.m_sCurrentDbAttrDate) > StringUtils::SQLDateTime(sCurrentFileDate)
 			//&&
 			//!UpdateMediaFileUtils::IsDirectory(sCurrentFullFilename.c_str())
 		)
 		{
 #ifdef UPDATEMEDIA_STATUS
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Need to update file for %s/%s: "
-				"current attr date %s, has attr %d",
+				"current attr date %s, file date %s, has attr %d",
 				sDirectory.c_str(), sFile.c_str(), 
-				item.m_sCurrentDbAttrDate.c_str(), item.m_bHasAttributes); 
+			        item.m_sCurrentDbAttrDate.c_str(), sCurrentFileDate.c_str(), item.m_bHasAttributes); 
 #endif
 			bNeedtoUpdateFile = true;
 		}

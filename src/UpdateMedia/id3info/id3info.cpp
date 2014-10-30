@@ -396,8 +396,9 @@ void GetInformation(const ID3_Tag &myTag, map<int,string>& mapAttributes,
 				value = ID3_v1_genre_description[nGenre];
 		}
 	}
-
-	mapAttributes[PK_Attr] = value;
+	// Don't pass attribute on to LMCE if it does not know how to deal with it
+	if (PK_Attr != -1000)
+		mapAttributes[PK_Attr] = value;
   }
   delete iter;
 }
