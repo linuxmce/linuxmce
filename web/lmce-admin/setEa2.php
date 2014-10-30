@@ -6,6 +6,10 @@
   //initialization area
   if (isset($_GET["d"])) {
     $deviceID = $_GET['d'];
+    if($deviceID==""){
+   echo "No Device set";
+    return;
+    }
   } else {
     die("Please specify the device ID with d=xxxx");
   }
@@ -32,7 +36,7 @@ Need to get children devices and do the same as the parent.
     }
 
   $installation=$inst;
-  echo "Installation is ".$installation."<br>";
+  echo "Installation is ".$installation."<br>Device is ".$deviceID;
     if($installation==""){
     return;
   }
@@ -69,10 +73,10 @@ Need to get children devices and do the same as the parent.
       }
     $dupe = checkForDupe($conn, $deviceID);
       if($dupe)	{
-	echo "Duplicate, will set to ea for device<br>";
+	echo "Duplicate, will set to ea for  device #".$deviceID."<br>";
 	updateEntertainArea($conn, $deviceID, $mobileRoom);
 	} else {
-	echo "No Matching Ea found, will set to new EA<br>";
+	echo "No Matching Ea found, will set device #".$deviceID." to new EA<br>";
 	setEntertainArea($conn, $deviceID, $mobileRoom);
 	}
       }
@@ -82,24 +86,40 @@ function checkForDupe($connect, $device){
 global $mobileRoom;
 global $mobileEa; 
 $status = false;
+echo "<b>Checking for duplicate Ea for device:: " . $device. "</b><br>";
 $sql = "SELECT * FROM `EntertainArea` WHERE `Description` LIKE '".$device."' LIMIT 0, 30 ";
-echo "<b>Checking for duplicate Ea for device " . $device. "</b><br>";
 $result = mysql_query($sql, $connect) or die(mysql_error($connect));
 $i= 0;
+$eaRoom=-1;
+$fixitSql="";
 while ($row = mysql_fetch_array($result)){
-  if($row['Description']){
-    $status = true;
+  if($row['Description']){    
+     
     if($row['FK_Room'] != $mobileRoom){
-      echo "Location Mismatch. EA room is ".$row['FK_Room']." but Mobile QOrbiters room is ".$mobileRoom." fixing <BR> ";
-      $fixitSql ="";
+        $status = true;
+     $eaRoom=$row['FK_Room'];
+     $fixitSql ="UPDATE EntertainArea SET FK_Room = ".$mobileRoom." WHERE PK_EntertainArea = ".$row["PK_EntertainArea"].";";
     } else {
       $mobileEa = $row['PK_EntertainArea'];
-      echo "Found current ea for device ==> ".$mobileEa."<br>";
-
+      echo "Found current ea for device #".$device." ==> ".$mobileEa.". It set to the proper room<br>";
+      die("nothin to fix");
       }	
     }
   }
-return $status;
+  
+  if(status && $eaRoom!=-1){
+  echo $fixitSql."<br>";
+   $fixRes = mysql_query($fixitSql, $connect);
+    echo "Location Mismatch. EA room is ".$eaRoom." but Mobile QOrbiters room is ".$mobileRoom." fixing <BR> ";
+     
+     
+      $rc= mysql_affected_rows();
+      echo $rc;
+      echo "Updated EA for device ".$device."<br>";
+      die("no mas trabajo.");
+      
+  }
+return false;
 }
 
 function setEntertainArea($connect, $device, $location){
@@ -119,7 +139,7 @@ global $mobileEa;
   return;
   }
 echo "updating...<br>";
-$updatesql = "UPDATE `pluto_main`.`Device_EntertainArea` SET `FK_EntertainArea` = ".$mobileEa. " WHERE `Device_EntertainArea`.`FK_Device` = ".$device;
+$updatesql = "UPDATE `pluto_main`.`Device_EntertainArea` SET `FK_EntertainArea` = ".$mobileEa. " WHERE `Device_EntertainArea`.`FK_Device` = ".$deviceID;
 $result = mysql_query($updatesql, $connect) or die(mysql_error($conn));
 echo "updated. <br>";
 }
