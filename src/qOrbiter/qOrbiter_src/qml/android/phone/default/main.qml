@@ -114,8 +114,7 @@ Item {
     }
 
     Component.onCompleted: {
-        androidSystem.updateBuildInformation()
-        manager.setDceGridSep(100)
+        androidSystem.updateBuildInformation()     
     }
 
     Keys.onReleased: {
@@ -325,6 +324,7 @@ Item {
         id:pageLoader
         objectName: "loadbot"
         width: parent.width
+        source:"screens/Screen_1.qml"
         anchors{
             top:hdr.bottom
             right:uiOn ? parent.right :parent.left

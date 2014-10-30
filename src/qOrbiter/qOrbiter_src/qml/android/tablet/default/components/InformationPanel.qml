@@ -12,11 +12,14 @@ Item{
         bottom:parent.bottom
     }
 
+    MouseArea{
+        anchors.fill: parent
+        onClicked: uiOn=!uiOn
+    }
+
     Component.onCompleted:{
         info_panel.state="retracted";
     }
-
-
 
     Rectangle{
         id:info_fill

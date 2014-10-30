@@ -39,11 +39,10 @@ Panel{
             right:parent.right
             bottom:parent.bottom
         }
+        spacing: 5
         model:manager.getDataGridModel("Playlist", 18)
-        Component.onCompleted: {
-            console.log("Setting playlist position to " + dcenowplaying.m_iplaylistPosition)
-            positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
-        }
+        onCountChanged: positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+
         
         delegate: Item{
             height: manager.appHeight*.15
@@ -54,10 +53,10 @@ Panel{
 
             anchors.margins: 5
             
-            Rectangle{
-                anchors.fill: parent
-                gradient:style.buttonGradient
-            }
+//            Rectangle{
+//                anchors.fill: parent
+//                gradient:style.buttonGradient
+//            }
             
             Rectangle{
                 id:fil

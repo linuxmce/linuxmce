@@ -245,6 +245,11 @@ Item {
                 console.log("initializing media player"+manager.mediaPlayerID)
                 dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
             }
+            onConnectedStateChanged:{
+                if(manager.connectedState){
+                    dceplayer.reInit()
+                }
+            }
         }
 
         onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)

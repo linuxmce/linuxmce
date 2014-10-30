@@ -1,10 +1,20 @@
 // import QtQuick 1.1 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
 
-Rectangle {
+Item {
     width: appW
     height: appH
-    color: "transparent"
+property int sUser:-1
+    property int selectedRoom:-1
+    Rectangle{
+        anchors.fill: parent
+        gradient: Gradient{
+            GradientStop{ position:0.0;color:"transparent"}
+            GradientStop{ position:0.65;color:"black"}
+        }
+    }
+
+
     //palette?
     property string orangeRed: "#993300"
     property string deYork: "#99CC99"
@@ -27,49 +37,23 @@ Rectangle {
             newOrbiterSetupContainer.scale =1}
     }
 
-    Rectangle{
+    Item{
         id:newOrbiterSetupContainer
         height: parent.height*.90
         width: parent.width *.90
-        color:"transparent"
-
-        gradient: Gradient{
-            GradientStop{
-                position: 0.0
-                color:midnightBlue
-            }
-            GradientStop{
-                position:.15
-                color: midnightBlue
-            }
-            GradientStop{
-                position:.16
-                color:"white"
-            }
-            GradientStop{
-                position:.85
-                color:"white"
-            }
-            GradientStop{
-                position:.86
-                color:midnightBlue
-            }
-        }
-
-        radius: 10
         anchors.centerIn: parent
         opacity:0
         scale:0
 
         Behavior on opacity {
             PropertyAnimation{
-
                 duration: 500
             }
         }
         Behavior on scale{
             PropertyAnimation{
-                duration:500
+                duration:1200
+                easing.type: Easing.InQuad
             }
         }
         Row{
@@ -80,43 +64,51 @@ Rectangle {
                 font.pointSize: 18
                 font.bold: true
                 font.family: myFont.name
-            }          
+            }
         }
 
-        Column{
+        Row{
             id:contentColumn
             height: parent.height *.55
             width: parent.width *.75
             anchors.centerIn: newOrbiterSetupContainer
-            spacing: 75
+            spacing: 15
 
             ListView{
                 id:usersView
-                height: 75
-                width: parent.width
-                orientation: ListView.Horizontal
+                height: parent.height
+                width: parent.width/4
+                orientation: ListView.Vertical
                 spacing: 20
                 model:users
                 Component.onCompleted: currentIndex = -1
-                delegate:Rectangle{
+                delegate:Item{
                     height:newOrbiterSetupContainer.height *.15
-                    width: newOrbiterSetupContainer.width *.09
-                    radius:10
-                    border.color:usersView.currentIndex === index ? midnightBlue : orangeRed
-                    color: usersView.currentIndex === index ? deYork : "white"
+                    width: parent.width
+                    Rectangle{
+                        anchors.fill: parent
+                        radius:7.5
+                        border.color:usersView.currentIndex === index ? "green" : "white"
+                        color: usersView.currentIndex === index ? "green" : "black"
+                        opacity: .65
+                    }
+
                     Text {
                         text: dataTitle
                         font.pointSize: 12
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                        width: parent.width *.75
+                        width: parent.width
                         anchors.centerIn: parent
                         font.family: myFont.name
+                        font.bold: true
+                        color:"white"
                     }
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
                             usersView.currentIndex = index
-                            selectedUser.text = "You Selected: "+ dataTitle
+                            selectedUser.text = "You Selected: "+ dataTitle+ ", "+data_id
+                            sUser =data_id
                         }
                         hoverEnabled: true
                     }
@@ -126,34 +118,41 @@ Rectangle {
 
             ListView{
                 id:roomsView
-                height: 75
-                width: parent.width
-                orientation: ListView.Horizontal
+                height: parent.height
+                width: parent.width /4
+                orientation: ListView.Vertical
                 model:rooms
-                contentHeight: newOrbiterSetupContainer.height *.15
-                contentWidth: newOrbiterSetupContainer.width *.09
-                spacing:20
-                  Component.onCompleted: currentIndex = -1
+                spacing:10
+                Component.onCompleted: currentIndex = -1
                 delegate:
-                    Rectangle{
+                    Item{
                     height:newOrbiterSetupContainer.height *.15
-                    width: newOrbiterSetupContainer.width *.09
-                    radius:10
-                    border.color:roomsView.currentIndex === index ? midnightBlue : orangeRed
-                    color: roomsView.currentIndex === index ? deYork : "white"
+                    width: parent.width
+                    Rectangle{
+                        anchors.fill: parent
+                        radius:7.5
+                        border.color:roomsView.currentIndex === index ? "green" : "white"
+                        color: roomsView.currentIndex === index ? "green" : "black"
+                        opacity: .65
+                    }
+
+
                     Text {
                         text: dataTitle
                         font.pointSize: 12
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                        width: parent.width *.75
+                        width: parent.width
                         anchors.centerIn: parent
                         font.family: myFont.name
+                        font.bold: true
+                        color:"white"
                     }
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
                             roomsView.currentIndex = index
-                            selectedRoom.text = dataTitle
+                            selectedRoomText.text = "You Selected: "+dataTitle+" , "+data_id
+                            selectedRoom = data_id
                         }
                         hoverEnabled: true
                     }
@@ -163,26 +162,31 @@ Rectangle {
 
             ListView{
                 id:langView
-                height: 75
-                width: parent.width
-                orientation: ListView.Horizontal
+                height: parent.height
+                width: parent.width/4
+                orientation: ListView.Vertical
                 model:languages
-                spacing:20
-                  Component.onCompleted: currentIndex = -1
-                delegate:Rectangle{
+                spacing:10
+                Component.onCompleted: currentIndex = -1
+                delegate:Item{
                     height:newOrbiterSetupContainer.height *.15
-                    width: newOrbiterSetupContainer.width *.09
-                    radius:10
-                    border.color:langView.currentIndex === index ? midnightBlue : orangeRed
-                    color: langView.currentIndex === index ? deYork : "white"
-
+                    width: parent.width
+                    Rectangle{
+                        anchors.fill: parent
+                        radius:7.5
+                        border.color:langView.currentIndex === index ? "green" : "white"
+                        color: langView.currentIndex === index ? "green" : "black"
+                        opacity: .65
+                    }
                     Text {
-                        text: lang
+                        text: dataTitle
                         font.pointSize: 12
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                        width: parent.width *.75
+                        width: parent.width
                         anchors.centerIn: parent
                         font.family: myFont.name
+                        font.bold: true
+                        color:"white"
                     }
                     MouseArea{
                         anchors.fill: parent
@@ -225,7 +229,7 @@ Rectangle {
             }
             MouseArea{
                 anchors.fill: parent
-                onClicked: window.setupNewOrbiter(selectedUser, selectedRoom, 1, 1, appH, appW)
+                onClicked: window.setupNewOrbiter(String(sUser), String(selectedRoom), 1, 1, appH, appW)
             }
 
         }
@@ -260,59 +264,71 @@ Rectangle {
             width: parent.width / 3
             spacing:5
 
-                Text {
-                    id: selectedUser
-                    text: qsTr("Please Select a Default User")
-                    font.bold: true
-                    color: deYork
-                    font.pixelSize: 14
-                    font.family: myFont.name
-                    x:0
-                    onTextChanged: {
-                        x = -50
-                        userSelected.restart()
-                    }
+            Text {
+                id: selectedUser
+                text: qsTr("Please Select a Default User")
+                font.bold: true
+                color: "white"
+                font.pixelSize: 14
+                font.family: myFont.name
+                x:0
+                onTextChanged: {
+                    x = -50
+                    userSelected.restart()
                 }
-                ParallelAnimation{
-                    id:userSelected
+            }
+            Text {
+                id: selectedRoomText
+                text: qsTr("Please Select a Default Room")
+                font.bold: true
+                color: "white"
+                font.pixelSize: 14
+                font.family: myFont.name
+                anchors.left: selectedUser.left
+                onTextChanged: roomSelected.restart()
+            }
+            ParallelAnimation{
+                id:userSelected
 
-                    PropertyAnimation{
-                        target: selectedUser
-                        property:"x"
-                        to:confirmCol.width
-                        duration: 2500
-                    }
-
-                    PropertyAnimation{
-                        target:selectedUser
-                        property: "opacity"
-                        from:0
-                        to:1
-                        duration:1000
-                    }
-                }
-
-
-                Text {
-                    id: selectedRoom
-                    text: qsTr("Please Select A Default Room")
-                    font.family: myFont.name
+                PropertyAnimation{
+                    target: selectedUser
+                    property:"x"
+                    to:confirmCol.width
+                    duration: 2500
                 }
 
-
-
-                Text{
-                    id:selectedLang
-                    text:qsTr("Please Select a Default Language")
-                    font.family: myFont.name
+                PropertyAnimation{
+                    target:selectedUser
+                    property: "opacity"
+                    from:0
+                    to:1
+                    duration:1000
                 }
+            }
+            ParallelAnimation{
+                id:roomSelected
 
-
-                Text {
-                    id: selectedResolution
-                    text:"Size "+newOrbiterSetupContainer.height
-                    font.family: myFont.name
+                PropertyAnimation{
+                    target:selectedRoomText
+                    property: "opacity"
+                    from:0
+                    to:1
+                    duration:1000
                 }
+            }
+
+            Text{
+                id:selectedLang
+                text:qsTr("Please Select a Default Language")
+                font.family: myFont.name
+            }
+
+
+            Text {
+                id: selectedResolution
+                text:"Size "+newOrbiterSetupContainer.height
+                font.family: myFont.name
+            }
         }
 
     }

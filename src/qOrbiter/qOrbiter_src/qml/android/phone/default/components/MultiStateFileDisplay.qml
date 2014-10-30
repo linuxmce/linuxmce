@@ -53,7 +53,7 @@ Item{
             multi_view_list.state="default"
         }
 
-        media_grid.model=manager.getDataGridModel("MediaFile", 63)
+
         media_grid.positionViewAtIndex(item, ListView.Beginning)
     }
 
@@ -109,14 +109,13 @@ Item{
 
     PathView{
         id:media_path
-        anchors.fill: parent
-        // model:manager.getDataGridModel("MediaFile", 63)
+        anchors.fill: parent        
         visible:current_view_type===3
     }
     states: [
         State {
             name: "audio"
-            //  when:manager.q_mediaType == Mediatypes.STORED_AUDIO
+            when:manager.q_mediaType == Mediatypes.STORED_AUDIO
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: scaleX(32)
@@ -126,7 +125,7 @@ Item{
         },
         State {
             name: "video"
-            //  when:manager.q_mediaType == Mediatypes.STORED_VIDEO
+            when:manager.q_mediaType == Mediatypes.STORED_VIDEO
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: scaleY(24)

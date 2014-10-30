@@ -79,7 +79,6 @@ Item{
             font.bold: true
             fontSize: scaleY(4)
             visible:  dcenowplaying.releasedate =="" ? false: true
-
         }
     }
 }

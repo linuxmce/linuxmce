@@ -15,48 +15,60 @@ import "../components"
 StyledScreen{
     id:stored_audio
 
-    PlaylistPanel {
-        id: playlistPanel
-    }
-
     Panel{
-        id:metaData
+        id:mainPanel
         useHeader: false
-        height: parent.height
-        width: parent.width*.33
-        headerTitle: dcenowplaying.mediatitle
+
         anchors{
-            left:playlistPanel.right
             top:parent.top
+            left:parent.left
             bottom:parent.bottom
+            right:parent.right
+            margins: 10
+        }
+        headerTitle: dcenowplaying.mediatitle
+
+        PlaylistPanel {
+            id: playlistPanel
         }
 
-        NowPlayingImage{
-            id:npImage
-            anchors.top:parent.top
-            anchors.topMargin: metaData.panelHeaderHeight
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: scaleY(45)
-            height: width
+        Item{
+            id:centerLayout
+            anchors{
+                top:parent.top
+                left:playlistPanel.right
+                bottom:parent.bottom
+            }
+            width: parent.width*.33
+
+            NowPlayingImage{
+                id:npImage
+                anchors.top:parent.top
+                anchors.topMargin: metaData.panelHeaderHeight
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: scaleY(45)
+                height: width
+            }
+
+            StyledText{
+                width: parent.width
+                text: dceTimecode.qsCurrentTime +" of " +dceTimecode.qsTotalTime
+                anchors.top: npImage.bottom
+                font.pixelSize: 24
+                isBold: true
+            }
+
+            Metadata_4{
+                anchors.bottom: parent.bottom
+            }
+
         }
 
-        StyledText{
-            width: parent.width
-            text: dceTimecode.qsCurrentTime +" of " +dceTimecode.qsTotalTime
-            anchors.top: npImage.bottom
-            font.pixelSize: 24
-            isBold: true
-        }
 
-        Metadata_4{
-            anchors.bottom: parent.bottom
-        }
 
+        ControlDiamond {
+            id: controlDiamond
+        }
     }
-
-    ControlDiamond {
-        id: controlDiamond
-    }
-
 }
 

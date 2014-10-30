@@ -45,9 +45,7 @@ Item{
             buttonText: "Power"
             onActivated: {loadComponent("Power.qml")}
         }
-        StyledText{
-            text:"Current Router Address:"+manager.m_ipAddress
-        }
+
     }
 
     states: [

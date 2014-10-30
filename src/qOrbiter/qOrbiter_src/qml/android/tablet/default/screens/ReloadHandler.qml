@@ -1,10 +1,17 @@
 import QtQuick 1.1
 import "../components"
-Item {
+StyledScreen {
     anchors.fill: parent
-    StyledText{
+
+    Panel{
+        useHeader: false
         anchors.centerIn: parent
-        text:"Router is Reloading \n please be patient."
+        StyledText{
+            anchors.centerIn: parent
+            text:"Router is Reloading \n please be patient."
+        }
     }
+
+
 
 }
