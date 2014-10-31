@@ -140,13 +140,15 @@ public class QtActivity<LocalBinder> extends Activity
       return qtactivity;
     }
 
-    public void PlayMedia(String url) {
-        mService.playAudio(url);
+    public void PlayMedia(String url) {    
+    		  mService.playAudio(url);   
     }
 
     public boolean SendMediaCommand(String Command, int mSeek, boolean pause, String file, float vol){
         boolean res = false;
-
+        if(mService==null){
+    		return false;
+    	}
         if(Command.contentEquals("play")){
                 mService.playAudio(file);
                 res = true;
@@ -162,6 +164,53 @@ public class QtActivity<LocalBinder> extends Activity
 
         return res;
     }
+    
+    public int currentMediaPosition(){
+    	if(mService==null){
+    		return 0;
+    	}
+    	return mService.getElapsed();
+    }
+    
+    public boolean seekToPosition(int msec){ 
+    	if(mService==null){
+    		return false;
+    	}
+    	return mService.seek(msec);   	    
+    }
+    
+    public boolean setVolumeLevel(float vol){
+    	mService.setVolume(vol);
+    	return true;
+    }
+    
+    public boolean stopMedia(){
+    	if(mService==null){
+    		return false;
+    	}
+    	return mService.stop();
+    }
+    
+    public boolean pauseMedia(){    
+    	if(mService==null){
+    		return false;
+    	}
+    	return mService.pause();
+    }
+    
+    public boolean resumeMedia(){
+    	if(mService==null){
+    		return false;
+    	}
+    	return mService.resume();
+    }
+    
+    public int getElapsedTime(){
+    	if(mService==null){
+    		return 0;
+    	}
+    	return mService.getElapsed();
+    }
 
 
     public void startAudioService(long t){
@@ -175,7 +224,6 @@ public class QtActivity<LocalBinder> extends Activity
 
     public void playAudioFile(String file){
         mService.playAudio(file);
-
     }
 
     /** Defines callbacks for service binding, passed to bindService() */
@@ -188,7 +236,6 @@ public class QtActivity<LocalBinder> extends Activity
             LocalBinder binder = (LocalBinder) service;
             mService = ((LinuxmceAudioService.LocalBinder)service).getService();
             mBound = true;
-
         }
 
         @Override

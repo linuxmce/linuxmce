@@ -52,32 +52,30 @@ OnPreparedListener {
 	private MediaPlayer mp;
 	private String current;
 
-
+	/** This runnable is executed initially by a handler, but later internally the handler restarts it while the 
+	 * media player is playing.
+	 */
 	public class TimecodeRunnable implements Runnable {
 		private String message;		
 
 		public void run() {
-			if(mp == null){
+			if(mp == null || !mp.isPlaying()){
 				return;
 			}
 			android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
-				message="|"+mp.getCurrentPosition()+"|" ;
-				//Log.d(TAG, "Media Service sending time message "+message);
-				try{		
-					 Socket sender = new Socket("127.0.0.1", 12002);
-					ObjectOutputStream objOut = new ObjectOutputStream(sender.getOutputStream());
-					objOut.write(message.getBytes());
-					objOut.flush();
-					sender.close();
-				} catch (IOException e) {
-					Log.e(getClass().getName(), e.getMessage());
-				}
-
-			
-			if(mp.isPlaying()){
-				handler.postDelayed(tm, 1200);
+			message="|"+mp.getCurrentPosition()+"|" ;
+			//Log.d(TAG, "Media Service sending time message "+message);
+			try{		
+				Socket sender = new Socket("127.0.0.1", 12002);
+				ObjectOutputStream objOut = new ObjectOutputStream(sender.getOutputStream());
+				objOut.write(message.getBytes());
+				objOut.flush();
+				sender.close();
+			} catch (IOException e) {
+				Log.e(getClass().getName(), e.getMessage());
 			}
+			handler.postDelayed(tm, 1200);
 		}
 
 	}
@@ -197,8 +195,6 @@ OnPreparedListener {
 				mp.reset();
 			}
 
-
-
 			current = path.toString();
 
 			// Set the data source in another thread
@@ -251,23 +247,61 @@ OnPreparedListener {
 		}
 	}
 
-	public void stop(){
+	public boolean pause(){
+
+		if(mp!=null || mp.isPlaying()){
+			mp.pause();			
+			return true;
+		} else if(!mp.isPlaying()){
+			mp.start();
+			return true;
+		}
+		return false;
+
+	}
+	
+	public boolean resume(){
+		if(mp!=null || !mp.isPlaying()){
+			mp.start();		
+			return true;
+		} else if(mp.isPlaying()){
+			mp.pause();
+			return true;
+		}
+		return false;
+	}
+
+	public boolean seek(int msec){
+		if(mp!=null && mp.isPlaying()){
+			if(msec < mp.getDuration()){
+				mp.seekTo(msec);			
+				return true;
+			}
+		}
+		return false;
+	}
+	public boolean stop(){
 		if(mp!=null){
 			Log.d(TAG, "Audio Player Stop Called");
 			if(mp.isPlaying()){
 				mp.stop();
 				mp.release();
 				mp=null;
-				tm=null;
-
 			}
 			else{
 				mp.release();
-				mp=null;
-				tm=null;
+				mp=null;				
 
 			}
 		}
+		return true;
+	}
+
+	public int getElapsed(){
+		if(mp!=null && mp.isPlaying()){
+			return mp.getCurrentPosition();
+		}
+		return 0;
 	}
 
 

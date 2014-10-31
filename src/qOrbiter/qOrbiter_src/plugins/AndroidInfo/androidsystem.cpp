@@ -78,7 +78,10 @@ static jmethodID displayID = 0;
 //Used to obtain the reference to the QtActivity, via the crappy static
 static jmethodID s_qtactivity_field =0;
 static jclass s_qtactivity = 0;
+static jmethodID s_qtActivity_ResumeMethod=0;
 static jmethodID s_qtActivity_StartMethod=0;
+static jmethodID s_qtActivity_PauseMethod=0;
+static jmethodID s_qtActivity_TimeCodeMethod=0;
 static jmethodID s_qtActivity_StopMediaMethod=0;
 static jmethodID s_qtActivity_SeekMediaMethod=0;
 static jmethodID s_qtActivity_MediaControlMethod=0;
@@ -141,11 +144,18 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 
     s_qtactivity = (jclass)env->NewGlobalRef(env->FindClass("org/kde/necessitas/origo/QtActivity"));
     linuxmceMediaService = (jclass)env->NewGlobalRef(env->FindClass("org/kde/necessitas/origo/LinuxmceAudioService"));
-    s_qtactivity_field = env->GetStaticMethodID(s_qtactivity, "getActivity", "()Lorg/kde/necessitas/origo/QtActivity;");
-    //  s_qtActivity_PlayMediaMethod = env->GetMethodID(s_qtactivity, "playMedia", "(Ljava/lang/String;)V");
-    s_qtActivity_MediaControlMethod = env->GetMethodID(s_qtactivity, "SendMediaCommand", "(Ljava/lang/String;IZLjava/lang/String;F)Z");
     s_qtActivity_StartMethod = env->GetMethodID(s_qtactivity, "startAudioService", "(J)V");
- //s_qtActivity_VolumeControlMethod = env->GetMethodID(linuxmceMediaService, "SetVolume", "(F)V");
+    s_qtactivity_field = env->GetStaticMethodID(s_qtactivity, "getActivity", "()Lorg/kde/necessitas/origo/QtActivity;");
+    s_qtActivity_MediaControlMethod = env->GetMethodID(s_qtactivity, "SendMediaCommand", "(Ljava/lang/String;IZLjava/lang/String;F)Z");
+
+    /** New Media Commands */
+    s_qtActivity_ResumeMethod = env->GetMethodID(s_qtactivity, "resumeMedia", "()Z");
+    s_qtActivity_PauseMethod = env->GetMethodID(s_qtactivity, "pauseMedia", "()Z");
+    s_qtActivity_VolumeControlMethod = env->GetMethodID(s_qtactivity, "setVolumeLevel", "(F)Z");
+    s_qtActivity_SeekMediaMethod = env->GetMethodID(s_qtactivity, "seekToPosition", "(I)Z" );
+    s_qtActivity_StopMediaMethod = env->GetMethodID(s_qtactivity, "stopMedia", "()Z");
+    s_qtActivity_TimeCodeMethod = env->GetMethodID(s_qtactivity, "currentMediaPosition", "()I");
+
     jclass localBuildClass = env->FindClass("android/os/Build");
     buildVersionClass = reinterpret_cast<jclass>(env->NewGlobalRef(localBuildClass));
 
@@ -399,7 +409,7 @@ bool AndroidSystem::stopMedia()
     m_pvm->DetachCurrentThread();
     return true;
 #else
-return false;
+    return false;
 #endif
 }
 
@@ -456,6 +466,6 @@ bool AndroidSystem::setVolume(double vol)
     m_pvm->DetachCurrentThread();
     return true;
 #else
-return false;
+    return false;
 #endif
 }
