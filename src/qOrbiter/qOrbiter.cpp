@@ -3912,11 +3912,10 @@ void DCE::qOrbiter::moveDirection(int d) //connects ui buttons to dce commands
 
 void DCE::qOrbiter::JogStream(QString jump) //jumps position in stream for jog
 {
-    CMD_Jump_to_Position_in_Stream jog(m_dwPK_Device, iMediaPluginID, jump.toStdString(), m_dwPK_Device_NowPlaying  );
-    if(!SendCommand(jog))
-    {
+    qDebug() << "Jumping to " << jump;
+    CMD_Jump_to_Position_in_Stream jog(m_dwPK_Device, this->m_dwPK_Device_NowPlaying, jump.toStdString(), internal_streamID  );
+    SendCommand(jog);
 
-    }
 }
 
 
@@ -4275,7 +4274,7 @@ void qOrbiter::OnUnexpectedDisconnect()
 {
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"QOrbiter::onUnexpectedDisconnect %d", m_dwPK_Device);
     emit routerConnectionChanged(false);
-     pthread_cond_broadcast( &m_listMessageQueueCond );
+    pthread_cond_broadcast( &m_listMessageQueueCond );
     Disconnect();
 
 }
@@ -4536,21 +4535,21 @@ int qOrbiter::SetupNewOrbiter()
     statusMessage("Setting up orbiter with core");
 
     DCE::CMD_New_Orbiter_DT CMD_New_Orbiter_DT(
-                                               m_dwPK_Device,
-                                               DEVICETEMPLATE_Orbiter_Plugin_CONST,
-                                               BL_SameHouse,
-                                               sType,
-                                               sPK_Users,
-                                               DEVICETEMPLATE_qOrbiter_CONST ,
-                                               m_sMacAddress,
-                                               sPK_Room,
-                                               sWidth,
-                                               sHeight,
-                                               sPK_Skin,
-                                               sPK_Lang,
-                                               1,
-                                               &PK_Device
-                                               );
+                m_dwPK_Device,
+                DEVICETEMPLATE_Orbiter_Plugin_CONST,
+                BL_SameHouse,
+                sType,
+                sPK_Users,
+                DEVICETEMPLATE_qOrbiter_CONST ,
+                m_sMacAddress,
+                sPK_Room,
+                sWidth,
+                sHeight,
+                sPK_Skin,
+                sPK_Lang,
+                1,
+                &PK_Device
+                );
 
     CMD_New_Orbiter_DT.m_pMessage->m_eExpectedResponse = ER_ReplyMessage;
     Message *pResponse = event_Impl.SendReceiveMessage( CMD_New_Orbiter_DT.m_pMessage );
