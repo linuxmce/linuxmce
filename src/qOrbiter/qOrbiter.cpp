@@ -3136,6 +3136,8 @@ void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth
         returnedFrame.loadFromData(QByteArray(sData, sData_size));
         //  qDebug()<< "Returned security frame " << returnedFrame.size();
         emit securityImageReady(cam_device, returnedFrame);
+    } else {
+
     }
 
 }

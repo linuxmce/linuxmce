@@ -377,10 +377,8 @@ void qorbiterManager::gotoQScreen(QString s){
     //send the qmlview a request to go to a screen, needs error handling
     //This allows it to execute some transition or other if it wants to
     
-    setDceResponse("Starting screen switch");
-    QString lameFix = s.replace("http://", "https://");
-    qDebug() << lameFix;
-    QVariant screenname= lameFix;
+
+    QVariant screenname= s;
     
     QObject *item = qorbiterUIwin->rootObject();
     setDceResponse("About to call screenchange()");
@@ -388,17 +386,7 @@ void qorbiterManager::gotoQScreen(QString s){
         setDceResponse("Done call to screenchange()");
 
         if(!currentScreen.contains("187")){
-            
-            if(gotoScreenList->count() !=0){
-                
-                qWarning()<< gotoScreenList->count();
-                if(!gotoScreenList->at(gotoScreenList->count()-1).contains(currentScreen)){
-                    gotoScreenList->append(currentScreen);
-                }
-            }else{
-                gotoScreenList->append(currentScreen);
-            }
-            
+            gotoScreenList->append(currentScreen);
         }
         
     } else {
@@ -410,23 +398,26 @@ void qorbiterManager::gotoQScreen(QString s){
 //! Send the user back to the previous screen in the list
 void qorbiterManager::goBacktoQScreen()
 {
-    if(gotoScreenList->count() > 10)
-        gotoScreenList->removeFirst();
+
     
     if(!gotoScreenList->isEmpty()){
         gotoScreenList->removeLast();
-        setDceResponse("Starting screen switch");
+        setDceResponse("Starting backwards screen switch");
+        if(gotoScreenList->isEmpty()){
+            gotoScreenList->append("Screen_1.qml");
+        }
         QVariant screenname= QVariant::fromValue(gotoScreenList->last());
-
         QObject *item = qorbiterUIwin->rootObject();
-        setDceResponse("About to call screenchange()");
+        setDceResponse("About to call screenchange() for " + gotoScreenList->last());
         if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
 
-            setDceResponse("Done call to screenchange()");
-
+            setDceResponse("Done call to backwards screenchange()");
+            currentScreen=gotoScreenList->last();
+           screenChange(currentScreen);
         } else {
-            setDceResponse("screenchange() FAILED");
+            setDceResponse(" backwards screenchange() FAILED");
         }
+
     }
 }
 
@@ -576,9 +567,9 @@ void qorbiterManager::initiateRestart()
     emit restartOrbiter();
     
 #ifdef Q_OS_ANDROID
-    gotoQScreen("Screen_1.qml");
+    screenChange("Screen_1.qml");
 #else
-    gotoQScreen("Screen_1.qml");
+    screenChange("Screen_1.qml");
 #endif
     
 }
