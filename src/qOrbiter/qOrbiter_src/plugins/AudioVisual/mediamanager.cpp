@@ -52,6 +52,8 @@ MediaManager::MediaManager(QQuickItem *parent):
 
 #ifdef QT4
     setFlag(ItemHasNoContents, false);
+
+
 #elif QT5
     setFlag(QQuickItem::ItemHasContents, false);
 #endif
@@ -142,6 +144,11 @@ void MediaManager::initializeConnections()
 #elif defined ANDROID
     QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString))); //effectively play for android.
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopAndroidMedia()));
+    QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), this, SLOT(setPaused()));
+    QObject::connect(mediaPlayer, SIGNAL(androidVolumeDown()), this, SIGNAL(androidVolumeDown()));
+    QObject::connect(mediaPlayer, SIGNAL(androidVolumeUp()), this, SIGNAL(androidVolumeUp()));
+    QObject::connect(mediaPlayer, SIGNAL(newMediaPosition(int)), this, SLOT(setMediaPosition(int)));
+
 
 #endif
     QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));

@@ -130,9 +130,17 @@ public slots:
    /* Q_INVOKABLE*/ bool updateBuildInformation();
 
     bool playMedia(QString url);
-    bool stopMedia();
+    bool stopMedia();    
     bool startAudioService(long addr);
     bool setVolume(double vol);
+
+    void mediaStop();
+    void mediaPlay();
+    void mediaPause();
+    int getMediaPosition();
+    void mediaResume();
+    void mediaSeek(int s);
+    void mediaSetVol(double vol);
 
 private:
 

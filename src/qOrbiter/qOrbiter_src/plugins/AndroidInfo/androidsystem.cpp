@@ -469,3 +469,155 @@ bool AndroidSystem::setVolume(double vol)
     return false;
 #endif
 }
+
+void AndroidSystem::mediaStop()
+{
+#ifndef QT5
+    JNIEnv* env;
+    if (m_pvm->AttachCurrentThread(&env, NULL)<0)
+    {
+        qCritical()<<"AttachCurrentThread failed";
+        return ;
+    }
+
+    m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
+
+    if (!m_qtActivity){
+
+        qWarning("Cant find activity!!");
+        return;
+    }
+
+    jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_StopMediaMethod);
+    m_pvm->DetachCurrentThread();
+
+#endif
+}
+
+void AndroidSystem::mediaPlay()
+{
+
+}
+
+void AndroidSystem::mediaPause()
+{
+#ifndef QT5
+    JNIEnv* env;
+    if (m_pvm->AttachCurrentThread(&env, NULL)<0)
+    {
+        qCritical()<<"AttachCurrentThread failed";
+        return ;
+    }
+
+    m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
+
+    if (!m_qtActivity){
+
+        qWarning("Cant find activity!!");
+        return;
+    }
+
+    jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_PauseMethod);
+    m_pvm->DetachCurrentThread();
+
+#endif
+}
+
+int AndroidSystem::getMediaPosition()
+{
+#ifndef QT5
+    JNIEnv* env;
+    if (m_pvm->AttachCurrentThread(&env, NULL)<0)
+    {
+        qCritical()<<"AttachCurrentThread failed";
+        return 0 ;
+    }
+
+    m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
+
+    if (!m_qtActivity){
+
+        qWarning("Cant find activity!!");
+        return 0;
+    }
+
+    jint res = env->CallIntMethod(m_qtActivity, s_qtActivity_TimeCodeMethod);
+    int rt = res;
+    return rt;
+    m_pvm->DetachCurrentThread();
+#endif
+}
+
+void AndroidSystem::mediaResume()
+{
+#ifndef QT5
+    JNIEnv* env;
+    if (m_pvm->AttachCurrentThread(&env, NULL)<0)
+    {
+        qCritical()<<"AttachCurrentThread failed";
+        return ;
+    }
+
+    m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
+
+    if (!m_qtActivity){
+
+        qWarning("Cant find activity!!");
+        return;
+    }
+
+    jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_ResumeMethod);
+    m_pvm->DetachCurrentThread();
+
+#endif
+
+}
+
+void AndroidSystem::mediaSeek(int s)
+{
+#ifndef QT5
+    JNIEnv* env;
+    if (m_pvm->AttachCurrentThread(&env, NULL)<0)
+    {
+        qCritical()<<"AttachCurrentThread failed";
+        return ;
+    }
+
+    m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
+
+    if (!m_qtActivity){
+
+        qWarning("Cant find activity!!");
+        return;
+    }
+
+    jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_SeekMediaMethod, s );
+    m_pvm->DetachCurrentThread();
+
+#endif
+}
+
+void AndroidSystem::mediaSetVol(double vol)
+{
+#ifndef QT5
+    JNIEnv* env;
+    if (m_pvm->AttachCurrentThread(&env, NULL)<0)
+    {
+        qCritical()<<"AttachCurrentThread failed";
+        return ;
+    }
+
+    m_qtActivity = env->NewGlobalRef(env->CallStaticObjectMethod(s_qtactivity, s_qtactivity_field));
+
+    if (!m_qtActivity){
+
+        qWarning("Cant find activity!!");
+        return;
+    }
+
+    float lvl = float(vol);
+    jboolean res = env->CallBooleanMethod(m_qtActivity, s_qtActivity_VolumeControlMethod, lvl );
+    m_pvm->DetachCurrentThread();
+
+#endif
+}

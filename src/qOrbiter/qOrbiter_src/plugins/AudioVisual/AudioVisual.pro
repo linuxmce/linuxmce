@@ -137,6 +137,7 @@ SOURCES += \
 	../../../../Gen_Devices/qOrbiterBase.cpp \
 
 
+
 	
 HEADERS += \
 	audiovisual_plugin.h \  
@@ -165,6 +166,7 @@ HEADERS += \
 	../../../../pluto_main/Define_DeviceTemplate.h \
 	../../../../Gen_Devices/qMediaPlayerBase.h \
 	../../../../Gen_Devices/qOrbiterBase.h \
+
 
 
 

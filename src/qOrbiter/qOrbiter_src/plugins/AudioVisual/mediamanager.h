@@ -18,6 +18,9 @@
 #ifndef MEDIAMANAGER_H
 #define MEDIAMANAGER_H
 
+
+
+
 #ifdef QT4
 #include <qdeclarative.h>
 #include <QDeclarativeItem>
@@ -113,9 +116,15 @@ public:
     qreal volume;
     bool muted;
 
-#ifdef __ANDROID__
+#ifdef NECESSITAS
 
     long callbackAddress;
+#endif
+
+#ifdef __ANDROID__
+#ifdef QT4
+
+#endif
 #endif
 
     QString currentStatus;
@@ -216,9 +225,15 @@ signals:
     void fileNumberChanged();
     void incomingTimeChanged();
     void incomingTick(quint64);
-    void updatePluginSeek(int);
+    void updatePluginSeek(int pos);
 
     void setPluginVolume(double d);
+    void pauseMedia();
+    void requestPosition();
+    void requestDuration();
+
+    void androidVolumeUp();
+    void androidVolumeDown();
 
 public slots:
 
@@ -280,6 +295,11 @@ public slots:
 
     void triggerVolumeChange(){
 
+    }
+
+    void setPaused(){
+        qWarning() << "mediaManager::Setting pause";
+        emit pauseMedia();
     }
 
     void setVolume(qreal vol){
@@ -450,12 +470,17 @@ public slots:
     }
 
     void setMediaPosition(int msec) {
-        qDebug() << msec;
+        qDebug() << "Seeking to " << msec << " msec";
 #ifdef QT4
 
 #ifndef __ANDROID__
         mediaObject->seek((qint64)msec);
 #endif
+
+#ifdef ANDROID
+        updatePluginSeek(msec);
+#endif
+
 
 #elif QT5
         updatePluginSeek(msec);
@@ -537,7 +562,7 @@ public slots:
     void reInit(){
 
         mediaPlayer=NULL;
-       initializePlayer();
+        initializePlayer();
     }
 
 private:
