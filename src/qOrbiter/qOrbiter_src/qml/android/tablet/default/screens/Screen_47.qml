@@ -8,6 +8,25 @@ StyledScreen {
     property int current_view_type:1
     property string currentSeekLetter:""
 
+    Keys.onReleased: {
+
+        switch(event.key){
+        case Qt.Key_Back:
+            manager.goBackGrid();
+            event.accepted=true
+            break;
+        case Qt.Key_MediaPrevious:
+            if (!manager.goBackGrid())
+                event.accepted=false
+            else
+                event.accepted=true
+            break;
+        default:
+            console.log(event.key)
+            break
+        }
+    }
+
 
     ListModel{
         id:alphabetlist
@@ -124,6 +143,7 @@ StyledScreen {
         setNavigation("MedialistNav.qml")
         hideInfoPanel()
         manager.setStringParam(0, manager.q_mediaType)
+        forceActiveFocus()
     }
     Item{
         id:content
@@ -139,6 +159,7 @@ StyledScreen {
         MultiViewMediaList{
             id:media_view
         }
+
 
         GridView{
             id:typeSelection
