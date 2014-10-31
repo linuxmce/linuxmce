@@ -103,12 +103,43 @@ Item {
         anchors.top: parent.top
         anchors.left:parent.left
         focus:true
-        onMediaPlayingChanged: {
-            if(!mediaPlaying)
-                androidSystem.stopMedia()
+
+        Timer{
+            id:tcCallback
+            running:dceplayer.mediaPlaying
+            interval: 1000
+            repeat: true
+            onTriggered: {console.log("tick");dceplayer.processTimeCode(androidSystem.getMediaPosition())}
         }
 
+        onTotalTimeChanged: {
+            if(androidUrl.length==0){
+                tcCallback.stop()
+            } else {
+                tcCallback.start()
+            }
+        }
 
+        onMediaPlayingChanged: {
+            if(!mediaPlaying)
+                androidSystem.mediaStop()
+        }
+        onAndroidVolumeUp:{
+            androidSystem.mediaSetVol(1.0)
+        }
+
+        onAndroidVolumeDown:{
+            androidSystem.mediaSetVol(-1.0)
+        }
+
+        onPauseMedia:{
+            console.log("dceplayer::pause")
+            androidSystem.mediaPause();
+        }
+        onUpdatePluginSeek:{
+            console.log("dceplayer::seek to"+pos)
+            androidSystem.mediaSeek(pos);
+        }
         onAndroidUrlUpdated:{
             console.log("NEW ANDROID URL")
             if(androidUrl.length > 4){
@@ -141,7 +172,7 @@ Item {
             }
             onConnectedStateChanged:{
                 if(manager.connectedState ){
-                     dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                    dceplayer.reInit();
                 }
             }
         }
@@ -330,7 +361,7 @@ Item {
             left: qml_root.left
             right: qml_root.right
         }
-        interval:30000
+        interval:60000
         active:manager.m_ipAddress==="192.168.80.1"
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {

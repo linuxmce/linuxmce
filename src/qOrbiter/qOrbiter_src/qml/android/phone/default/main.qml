@@ -66,18 +66,20 @@ Item {
         }
     }
 
+    Timer{
+        id:tcCallback
+        running:dceplayer.mediaPlaying
+        interval: 1000
+        repeat: true
+        onTriggered: {console.log("tick");dceplayer.processTimeCode(androidSystem.getMediaPosition())}
+    }
+
     MediaManager{
         id:dceplayer
         anchors.top: parent.top
         anchors.left:parent.left
         focus:true
-        onMediaPlayingChanged: {
-            if(!mediaPlaying)
-                androidSystem.stopMedia()
-        }
-
-
-        onAndroidUrlUpdated:{
+            onAndroidUrlUpdated:{
             console.log("NEW ANDROID URL")
             if(androidUrl.length > 4){
                 console.log("URL ok!")
@@ -89,17 +91,46 @@ Item {
                 console.log("Url::"+androidUrl)
             }
         }
+            onTotalTimeChanged: {
+                if(androidUrl.length==0){
+                    tcCallback.stop()
+                } else {
+                    tcCallback.start()
+                }
+            }
 
-        //  onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
+        onMediaPlayingChanged: {
+            if(!mediaPlaying){
+                androidSystem.mediaStop()
+                tcCallback.stop()
+            } else {
+                tcCallback.start()
+            }
+
+        }
+        onAndroidVolumeUp:{
+            androidSystem.mediaSetVol(1.0)
+        }
+
+        onAndroidVolumeDown:{
+            androidSystem.mediaSetVol(-1.0)
+        }
+
+        onPauseMedia:{
+            console.log("dceplayer::pause")
+            androidSystem.mediaPause();
+        }
+        onUpdatePluginSeek:{
+            console.log("dceplayer::seek to"+pos)
+            androidSystem.mediaSeek(pos);
+        }
 
 
         Component.onCompleted: {
             console.log("initializing qml media player::"+manager.mediaPlayerID)
-
             if(manager.mediaPlayerID !== -1){
                 dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
                 androidSystem.startAudioService(dceplayer.callbackAddress);
-
             }
         }
 
@@ -108,6 +139,11 @@ Item {
             onMediaPlayerIdChanged:{
                 console.log("initializing qml media player::"+manager.mediaPlayerID)
                 dcePlayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+            }
+            onConnectedStateChanged:{
+                if(manager.connectedState ){
+                    dceplayer.reInit();
+                }
             }
         }
 
@@ -267,7 +303,7 @@ Item {
         id:glScreenSaver
         height:qmlroot.height
         width: qmlroot.width
-        interval:30000
+        interval:60000
         anchors.centerIn: qmlroot
         active:manager.m_ipAddress = manager.internalHost
         requestUrl:manager.m_ipAddress

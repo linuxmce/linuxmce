@@ -3,12 +3,12 @@ import QtQuick 1.1
 Item {
     id:screen_root
     state:"opening"
-
+    focus:true
     Component.onCompleted: {
         if(navigation==="ScenarioCompnent.qml"){
             setNavigation(navigation)
         }
-
+        forceActiveFocus()
         state="opened"
     }
 

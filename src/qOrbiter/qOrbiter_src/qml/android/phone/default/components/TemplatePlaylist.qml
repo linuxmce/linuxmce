@@ -61,7 +61,7 @@ Item {
 
             Text {
                 id: position
-                text: qsTr("#") + dceindex
+                text: qsTr("#") + value
                 color: "White"
                 font.pixelSize: scaleY(4)
                 anchors.bottom: parent.bottom
@@ -70,7 +70,7 @@ Item {
             }
 
             Text {
-                text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
+                text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing:\n " + description : description
                 color: "white"
                 width: parent.width
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
