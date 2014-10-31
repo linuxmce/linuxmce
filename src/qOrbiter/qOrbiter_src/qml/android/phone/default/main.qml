@@ -79,7 +79,7 @@ Item {
         anchors.top: parent.top
         anchors.left:parent.left
         focus:true
-            onAndroidUrlUpdated:{
+        onAndroidUrlUpdated:{
             console.log("NEW ANDROID URL")
             if(androidUrl.length > 4){
                 console.log("URL ok!")
@@ -91,13 +91,13 @@ Item {
                 console.log("Url::"+androidUrl)
             }
         }
-            onTotalTimeChanged: {
-                if(androidUrl.length==0){
-                    tcCallback.stop()
-                } else {
-                    tcCallback.start()
-                }
+        onTotalTimeChanged: {
+            if(androidUrl.length==0){
+                tcCallback.stop()
+            } else {
+                tcCallback.start()
             }
+        }
 
         onMediaPlayingChanged: {
             if(!mediaPlaying){
@@ -150,7 +150,7 @@ Item {
     }
 
     Component.onCompleted: {
-        androidSystem.updateBuildInformation()     
+        androidSystem.updateBuildInformation()
     }
 
     Keys.onReleased: {
@@ -177,7 +177,7 @@ Item {
             }
             break;
         case Qt.Key_VolumeDown:
-             androidSystem.setVolume(-1)
+            androidSystem.setVolume(-1)
             console.log("vol-")
             break;
         case Qt.Key_VolumeUp:
@@ -340,20 +340,14 @@ Item {
 
 
     function screenchange(screenname )    {
-        if(screenfile===screenname){
-            console.log("Duplicate call to same screen ==>"+screenname)
-            console.log(pageLoader.source)
-            return
-        } else {
-            if(pageLoader.item){
-                pageLoader.item.screenClosing()
-            }
 
-            pageLoader.source = "screens/"+screenname
-        }
-
+        pageLoader.item.screenClosing()
+        pageLoader.source="screens/"+screenname
 
     }
+
+
+
 
 
     Loader {
@@ -367,12 +361,12 @@ Item {
             bottom:ftr.top
         }
 
-//        Behavior on AnchorChanges{
-//            AnchorAnimation{
-//                duration: appStyle.animation_medium
-//                easing: appStyle.animation_easing
-//            }
-//        }
+        //        Behavior on AnchorChanges{
+        //            AnchorAnimation{
+        //                duration: appStyle.animation_medium
+        //                easing: appStyle.animation_easing
+        //            }
+        //        }
 
         focus: true
         Keys.onBackPressed: console.log("back")
@@ -380,13 +374,14 @@ Item {
         onStatusChanged: {
             if (pageLoader.status == Component.Ready){
                 manager.setDceResponse("pageLoader::Command to change to:" + manager.currentScreen+ " was successfull")
-                screenfile=manager.currentScreen
+
             }else if (pageLoader.status == Component.Loading){
                 console.log("pageLoader::loading page from network"+pageLoader.progress)
             }else if(pageLoader.status===Component.Error){
                 lastLoaderError="Failed to load screen "+manager.currentScreen+". Reason:\n"+pageLoader.Error
                 console.log("pageLoader::Command to change to:" + manager.currentScreen + " failed!")
-                screenfile = "Screen_x.qml"
+                screenfile = source
+                manager.currentScreen="Screen_X.qml"
                 pageLoader.source = "screens/Screen_x.qml"
             }
         }

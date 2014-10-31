@@ -14,15 +14,35 @@ Item {
     property int screensaverTimer:manager.screenSaverTimeout*1000
     property bool uiOn:true
     property alias contentItem:pageLoader.item
+    property variant current_scenario_model:currentRoomLights
+    property variant current_header_model:scenarios
+    property string locationinfo: "standby"
+    property string screenfile
 
     signal showMetadata()
     signal showPlaylist()
     signal showAdvanced()
+    signal close()
+    signal changeScreen(string s)
+    signal setupStart(int x, string y)
+
+    function scaleX(x){
+        return x/100*qml_root.width
+    }
+    function scaleY(y){
+        return y/100*qml_root.height
+    }
+
+    function dumpObj(obj, message){
+        console.log((message? message+"\n\t" : "No Message \n\t")+ JSON.stringify(obj, null, "\t"))
+    }
 
 
+    focus:true
 
     Rectangle{
         anchors.fill: parent
+        id:bgFill
         color:"black"
     }
 
@@ -43,12 +63,6 @@ Item {
         }
     }
 
-    //    anchors{
-    //        top:parent.top
-    //        bottom: parent.bottom
-    //        left: parent.left
-    //        right:parent.right
-    //    }
 
     Timer{
         id:hideUiTimer
@@ -85,18 +99,20 @@ Item {
         id:style
     }
 
-    Timer{
-        id:refresh
-        interval: 500
-        running:true
-        repeat: true
-        onTriggered: {
-            if(canary.rotation===360)
-                canary.rotation =1
-            else
-                canary.rotation=(canary.rotation+1)
-        }
-    }
+//    Timer{
+//        id:refresh
+//        interval: 500
+//        running:true
+//        repeat: true
+//        onTriggered: {
+//            if(canary.rotation===360)
+//                canary.rotation =1
+//            else
+//                canary.rotation=(canary.rotation+1)
+//        }
+//    }
+
+
 
     MediaManager{
         id:dceplayer
@@ -109,7 +125,7 @@ Item {
             running:dceplayer.mediaPlaying
             interval: 1000
             repeat: true
-            onTriggered: {console.log("tick");dceplayer.processTimeCode(androidSystem.getMediaPosition())}
+            onTriggered: {dceplayer.processTimeCode(androidSystem.getMediaPosition())}
         }
 
         onTotalTimeChanged: {
@@ -121,15 +137,16 @@ Item {
         }
 
         onMediaPlayingChanged: {
-            if(!mediaPlaying)
+            if(!mediaPlaying){
                 androidSystem.mediaStop()
+            }
         }
         onAndroidVolumeUp:{
-            androidSystem.mediaSetVol(1.0)
+            androidSystem.mediaSetVol(1)
         }
 
         onAndroidVolumeDown:{
-            androidSystem.mediaSetVol(-1.0)
+            androidSystem.mediaSetVol(-1)
         }
 
         onPauseMedia:{
@@ -177,65 +194,48 @@ Item {
             }
         }
 
-
-
     }
 
-    signal close()
-    signal changeScreen(string s)
-    signal setupStart(int x, string y)
 
-    property variant current_scenario_model:currentRoomLights
-    property variant current_header_model:scenarios
 
-    property string locationinfo: "standby"
-    property string screenfile
-
-    function scaleX(x){
-        return x/100*qml_root.width
-    }
-    function scaleY(y){
-        return y/100*qml_root.height
-    }
-
-    function dumpObj(obj, message){
-        console.log((message? message+"\n\t" : "No Message \n\t")+ JSON.stringify(obj, null, "\t"))
-    }
-
-    focus:true
     Keys.onReleased:{
+            switch(event.key){
 
-        switch(event.key){
-        case Qt.Key_Menu:
-            console.log("menu button caught in root!")
-            break;
-        case Qt.Key_VolumeUp:
-            console.log("Vol up")
-            manager.adjustVolume(5)
-            break;
-        case Qt.Key_VolumeDown:
-            console.log("vol down")
+            case Qt.Key_Menu:
+                showOptions=!showOptions
+                console.log("menu button caught in root")
+                break;
 
-            manager.adjustVolume(-5)
-            break;
-        case Qt.Key_MediaPrevious:
-            console.log("Caught back button! Phew!")
-            break;
-        case Qt.Key_Back:
-            console.log("Caught Back again! Tricky...")
-            break;
-        default:
-            console.log("I have no idea what key " + event.key + " is. ")
-            break;
+            case Qt.Key_Back:
+                if(manager.currentScreen==="Screen_1.qml"){
+                    showExitConfirm()
+                } else{
+                    manager.goBacktoQScreen()
+                }
+                console.log("Caught Back Key")
+                break
+            case Qt.Key_MediaPrevious:
+                if(manager.currentScreen==="Screen_1.qml"){
+                    showExitConfirm()
+                } else{
+                    manager.goBacktoQScreen()
+                }
+                break;
+            case Qt.Key_VolumeDown:
+                androidSystem.mediaSetVol(-1)
+                console.log("vol-")
+                break;
+            case Qt.Key_VolumeUp:
+                androidSystem.mediaSetVol(+1)
+                console.log("vol+")
+                break;
+
+            default:
+                console.log(event.key)
+            }
+            event.accepted=true
         }
 
-        event.accepted= true
-    }
-    Rectangle{
-        anchors.fill: parent
-        id:bgFill
-        color:"black"
-    }
 
     ListModel{
         id:scenarios

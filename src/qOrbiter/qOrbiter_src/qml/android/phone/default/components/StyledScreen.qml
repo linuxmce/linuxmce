@@ -60,7 +60,7 @@ Item {
         State {
             name: "closed"
             StateChangeScript{
-                script: {console.log(screen+"is closed")}
+                script: {console.log(screen+"is closed");readyToClose()}
             }
 
         }

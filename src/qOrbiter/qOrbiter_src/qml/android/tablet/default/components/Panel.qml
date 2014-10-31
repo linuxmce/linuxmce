@@ -10,6 +10,7 @@ Item {
     property int panelHeaderHeight: useHeader ? height*.10 : 0
     property string headerTitle:"Lorem Ipsum"
     property bool useHeader:true
+    property alias fillColor:bgfill.color
     clip:true
 
     Rectangle{
@@ -50,7 +51,7 @@ Item {
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         font.weight: Font.DemiBold
         isBold: true
-        font.pixelSize: scaleY(5)
+        font.pixelSize: scaleY(parent.height/100)
         color:skinStyle.listItemActiveBgColor
     }
 

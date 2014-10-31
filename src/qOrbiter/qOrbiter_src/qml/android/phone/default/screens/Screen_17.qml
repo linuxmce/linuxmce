@@ -24,6 +24,7 @@ StyledScreen{
     property int viewPortWidth:manager.appWidth / 2.75
     property int currentInterval:0
 
+
     Component.onCompleted: {
 
         cameraList =(screenparams.getParam(103)).split(",")

@@ -14,64 +14,65 @@ StyledScreen{
     Timer{
         id:picTimer
         repeat: true
-        interval: 2000
+        interval: 1000
         triggeredOnStart: true
         running: true
         onTriggered:{
-            for (var cam in cameraList){
-                console.log("requesting new security image for "+cameraList[cam])
-                if(Number(cameraList[cam]!=0))
-                    manager.requestSecurityPic(cameraList[cam], 640, 480)
-                else
-                    console.log("Invalid Camera")
+            console.log("requesting new security image for "+cameraList[cameraLayout.currentIndex])
+            manager.requestSecurityPic(cameraList[cameraLayout.currentIndex], 640, 480)
+            if(cameraLayout.currentIndex===cameraLayout.count-1){
+                cameraLayout.currentIndex=0
+            }else {
+               cameraLayout.currentIndex++
             }
+
 
         }
     }
 
-    StyledHeader{
-        id:hdr
-        useClose: false
-        labelText: cameraList.toString() + "::"+cameraList.length+" cameras. current camera is "+cameraList[tick]
-    }
 
     Component.onCompleted: {
-        cameraList =(screenparams.getParam(103)).split(",")
-        for(var c in cameraList){
-            if(Number(cameraList[c])==0){
-                cameraList.splice(c,1)
-                console.log("removing!")
+        var prep =  (screenparams.getParam(103).split(","))
+        var tmpArry = new Array
+        for(var c in prep){
+            var t = Number(prep[c])
+            if(t!=0){
+                tmpArry.push(prep[c])
             }
         }
-        cameraLayout.model=cameraList.length
+
+        cameraList=tmpArry
         picTimer.running=true
     }
 
     GridView{
         id:cameraLayout
-        model: cameraList.length
+        model:cameraList.length
+        currentIndex: 0
         anchors{
-            top:hdr.bottom
+            top:parent.top
             left:parent.left
             right:parent.right
             bottom:parent.bottom
         }
-        cellHeight:parent.height*.35
-        cellWidth:parent.width *.35
+        cellHeight:cameraLayout.height/2
+        cellWidth:cameraLayout.width/2
 
-        delegate:Item{
-            height: parent.height*.30
-            width:parent.width*.30
+        delegate:Panel{
+            height: cameraLayout.height*.48
+            width:cameraLayout.width*.48
             property int camera:cameraList[index]
+            fillColor: index===cameraLayout.currentIndex ? "green" :"white"
+            headerTitle:"Tap to view Camera "+ camera
             Image {
                 id: securityimage
+                anchors.top: headerRect.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.topMargin: 5
                 fillMode: Image.PreserveAspectFit
                 source:  "image://listprovider/securityimage/"+camera+"/"+securityvideo.timestamp
-                anchors.fill: parent
-            }
-            StyledHeader{
-                useClose: false
-                labelText: camera
+
+                height: parent.height-headerRect.height
             }
 
         }

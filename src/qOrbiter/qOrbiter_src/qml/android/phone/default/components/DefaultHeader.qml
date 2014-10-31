@@ -44,6 +44,7 @@ Item{
                 bottom:parent.bottom
             }
             source: "Clock.qml"
+
         }
     }
 
