@@ -908,4 +908,100 @@ void VLC_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,M
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
 
+/**
+ * Remote DVD mount/umount functions.
+ */
+
+
+
+bool VLC_Player::MountRemoteDVD(string sURL) {
+	// TODO release previously mounted DVD?
+	
+	bool bResult = false;
+	pair<int, string> remoteDVD = ExtractComputerAndDeviceFromRemoteDVD(sURL, bResult);
+	
+	if ( !bResult ) {
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::MountRemoteDVD %s is not a remote DVD",sURL.c_str());
+		return false;
+	}
+	else
+	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::MountRemoteDVD trying to mount %s",sURL.c_str());
+	}
+	
+	return MountRemoteDVD(remoteDVD.first, remoteDVD.second);
+}
+			
+bool VLC_Player::UnmountRemoteDVD(string sURL) {
+	return UnmountRemoteDVD();
+}
+
+bool VLC_Player::MountRemoteDVD(int iComputerID, string sDevice) {
+	int iResult = InvokeRemoteDVDHelper(iComputerID, sDevice, "start");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::MountRemoteDVD %s", ( (iResult==0)?"mounted OK":"failed to mount") );
+	
+	if (iResult == 0)
+		mountedRemoteDVDs.push_back(make_pair(iComputerID, sDevice));
+	
+	return (iResult == 0) ;
+}
+
+bool VLC_Player::UnmountRemoteDVD(int iComputerID, string sDevice) {
+	int iResult = InvokeRemoteDVDHelper(iComputerID, sDevice, "stop");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::UnmountRemoteDVD %s", ( (iResult==0)?"unmounted OK":"failed to unmount") );
+	
+	return (iResult == 0) ;
+}
+
+int VLC_Player::InvokeRemoteDVDHelper(int iComputerID, string sDevice, string sCommand) {
+	string sHelperCommand = "/usr/pluto/bin/StorageDevices_DVD.sh " + StringUtils::itos(iComputerID) + " " + sDevice + " " + sCommand;
+	int iResult = system( sHelperCommand.c_str() );
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::InvokeRemoteDVDHelper invoked [%s], return code %i", sHelperCommand.c_str(), iResult);
+
+	return iResult;
+}
+
+// extracts computerID and device name from URL, sets bResult to true if succeeds, false otherwise
+pair<int, string> VLC_Player::ExtractComputerAndDeviceFromRemoteDVD(string sURL, bool &bResult) {
+	const char prefix[] = "dvd:///mnt/optical/";
+	bResult = false;
+	pair<int, string> pResult = make_pair(-1, "");
+	
+	if ( !StringUtils::StartsWith(sURL, prefix) )
+		return pResult;
+	
+	sURL.erase(0, sizeof(prefix)-1);
+	
+	vector<string> vInfo = StringUtils::Split(sURL, "_");
+	if ( vInfo.size() < 2 )
+		return pResult;
+	
+	int iComputerID = atoi( vInfo[0].c_str() );
+	if ( iComputerID == 0 )
+		return pResult;
+		
+	string sDevice = vInfo[1];
+	
+	pResult.first = iComputerID;
+	pResult.second = sDevice;
+	
+	bResult = true;
+	return pResult;
+}
+
+bool VLC_Player::UnmountRemoteDVD() {
+	if (mountedRemoteDVDs.size() != 0)
+	{
+		pair<int, string> rDVD = mountedRemoteDVDs.back();
+		mountedRemoteDVDs.pop_back();
+		bool bResult = UnmountRemoteDVD(rDVD.first, rDVD.second);
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::UnmountRemoteDVD() unmount %s", (bResult?"succeeded":"failed") );
+		return bResult;
+	}
+	else
+	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::UnmountRemoteDVD() no remote DVD mounted" );
+		return false;
+	}
+}
 

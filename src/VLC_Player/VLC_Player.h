@@ -29,6 +29,9 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
+	private:
+	  	// history of all mounted remote DVDs
+	  vector<pair<int, string> > mountedRemoteDVDs;
 
 		// Private methods
 public:
@@ -556,6 +559,18 @@ public:
 	virtual void CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
+
+	// Remote DVD functions pulled from Xine_Player
+
+	bool MountRemoteDVD(string sURL);
+	bool UnmountRemoteDVD(string sURL);
+	bool MountRemoteDVD(int iComputerID, string sDevice);
+	bool UnmountRemoteDVD(int iComputerID, string sDevice);
+	bool UnmountRemoteDVD();	
+	int InvokeRemoteDVDHelper(int iComputerID, string sDevice, string sCommand);
+	pair<int, string> ExtractComputerAndDeviceFromRemoteDVD(string sURL, bool &bResult);
+	bool IsRemoteDVD(string sURL);
+
 	};
 
 //<-dceag-end-b->
