@@ -70,22 +70,18 @@ int CecKeyPress(void *cbParam, const cec_keypress key)
 
   if (key.duration > 0) // Ignore key downs
     {
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Attempting to map code to a known button.");
       map < string,pair<string,int> >::iterator it=pCEC_Adaptor->m_mapCodesToButtons.find(sKey);
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Checking for end of range.");
-
       if ( it==pCEC_Adaptor->m_mapCodesToButtons.end() )
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sKey.c_str());
       else
 	{
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Sending to IR ReceiverBase");
 	  // Send it off to IRReceiverBase
 	  pCEC_Adaptor->ReceivedCode(it->second.second,it->second.first.c_str());
 
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Sending to AV Wizard");
 	  // Send to AV Wizard if needed.
 	  if (pCEC_Adaptor->m_dwPK_Device==DEVICEID_MESSAGESEND)
 	    {
+	      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Sending key to AV Wizard");
 	      pCEC_Adaptor->ForceKeystroke(it->second.first,pCEC_Adaptor->m_sAVWHost,pCEC_Adaptor->m_iAVWPort);
 	      return 0;
 	    }
@@ -223,12 +219,13 @@ bool CEC_Adaptor::GetConfig()
 	g_callbacks.CBCecKeyPress = &CecKeyPress;
 	g_callbacks.CBCecCommand = &CecCommand;
 	g_config.callbacks = &g_callbacks;
+	g_config.callbackParam = this;
 
-	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_RECORDING_DEVICE);
+	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_PLAYBACK_DEVICE);
+//	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_RECORDING_DEVICE);
 
 // no joy with additional device types it seems in libcec2, needs investigation
 //	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_TUNER);
-//	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_PLAYBACK_DEVICE);
 
 	m_pParser = LibCecInitialise(&g_config);
 
