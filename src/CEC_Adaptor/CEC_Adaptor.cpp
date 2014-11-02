@@ -263,7 +263,7 @@ bool CEC_Adaptor::GetConfig()
 //this fails in libcec2
 	//LoggerWrapper::GetInstance()->Write(LV_STATUS,"Attempting to set logical address");
 	// Tweak with this until we like it -tschak
-//	m_pParser->SetLogicalAddress(CECDEVICE_TUNER1);
+//	m_pParser->SetLogicalAddress(CECDEVICE_PLAYBACK1);
 
 	if (!m_pParser->Open(m_sPort.c_str()))
 	  {
@@ -271,6 +271,16 @@ bool CEC_Adaptor::GetConfig()
 	    UnloadLibCec(m_pParser);
 	    return false;
 	  }
+
+	cec_logical_addresses addresses;
+	addresses = m_pParser->GetActiveDevices();
+
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Primary CEC Logical Address: %s",m_pParser->ToString( addresses.primary ) );
+	for ( uint8_t i = 0; i <= 11; i++ ) {
+		if ( addresses[i] ) {
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Active CEC Logical Address: %s",m_pParser->ToString( (cec_logical_address) i ) );
+		}
+	}
 
 	return true;
 }
@@ -305,17 +315,10 @@ CEC_Adaptor_Command *Create_CEC_Adaptor(Command_Impl *pPrimaryDeviceCommand, Dev
 void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-/*
-  if (IRBase::ProcessMessage(pMessage))
-    {
-      printf("Message Processed by IRBase");
-      sCMD_Result = "OK";
-    }
-*/
-
-  switch (pMessage->dwID)
+  // TODO: need to map devices
+  switch (pMessage->m_dwID)
   {
-    case CMD_On:
+    case COMMAND_Generic_On_CONST:
       if ( m_pParser->PowerOnDevices() )
       {
 	sCMD_Result = "OK";
@@ -324,7 +327,7 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       }
       return;
       break;
-    case CMD_Off:
+    case COMMAND_Generic_Off_CONST:
       if ( m_pParser->StandbyDevices() )
       {
         sCMD_Result = "OK";
@@ -333,7 +336,42 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       }
       return;
       break;
+    case COMMAND_Vol_Up_CONST:
+      if ( m_pParser->VolumeUp() )
+      {
+        sCMD_Result = "OK";
+      } else {
+        sCMD_Result = "NOT OK";
+      }
+      return;
+      break;
+    case COMMAND_Vol_Down_CONST:
+      if ( m_pParser->VolumeDown() )
+      {
+        sCMD_Result = "OK";
+      } else {
+        sCMD_Result = "NOT OK";
+      }
+      return;
+      break;
+    case COMMAND_Mute_CONST:
+      if ( m_pParser->MuteAudio() )
+      {
+        sCMD_Result = "OK";
+      } else {
+        sCMD_Result = "NOT OK";
+      }
+      return;
+      break;
   }
+
+/*
+  if (IRBase::ProcessMessage(pMessage))
+    {
+      printf("Message Processed by IRBase");
+      sCMD_Result = "OK";
+    }
+*/
 
   sCMD_Result = "UNHANDLED CHILD";
 }
