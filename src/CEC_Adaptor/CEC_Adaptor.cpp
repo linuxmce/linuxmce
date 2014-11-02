@@ -308,12 +308,36 @@ CEC_Adaptor_Command *Create_CEC_Adaptor(Command_Impl *pPrimaryDeviceCommand, Dev
 void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
+/*
   if (IRBase::ProcessMessage(pMessage))
     {
       printf("Message Processed by IRBase");
       sCMD_Result = "OK";
     }
-  
+*/
+
+  switch (pMessage->dwID)
+  {
+    case CMD_On:
+      if ( m_pParser->PowerOnDevices() )
+      {
+	sCMD_Result = "OK";
+      } else {
+        sCMD_Result = "NOT OK";
+      }
+      return;
+      break;
+    case CMD_Off:
+      if ( m_pParser->StandbyDevices() )
+      {
+        sCMD_Result = "OK";
+      } else {
+        sCMD_Result = "NOT OK";
+      }
+      return;
+      break;
+  }
+
   sCMD_Result = "UNHANDLED CHILD";
 }
 
