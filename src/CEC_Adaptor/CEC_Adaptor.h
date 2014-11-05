@@ -20,7 +20,7 @@
 #include "Gen_Devices/CEC_AdaptorBase.h"
 //<-dceag-d-e->
 
-#include <libcec/cec.h>
+#include <cec.h>
 #include "IRBase/IRBase.h"
 #include "../LIRC_DCE/IRReceiverBase.h"
 
@@ -31,6 +31,10 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
+	  CEC::cec_logical_addresses m_CEC_Addresses;
+	  std::map<uint8_t,uint16_t> m_mapAddresses;
+	  std::map<uint8_t,int> m_mapAddr_to_DT;
+	  std::map<uint8_t,uint16_t> m_mapVendorId;
 
 		// Private methods
 public:

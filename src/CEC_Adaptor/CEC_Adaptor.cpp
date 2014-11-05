@@ -222,9 +222,9 @@ bool CEC_Adaptor::GetConfig()
 	g_config.callbackParam = this;
 
 	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_PLAYBACK_DEVICE);
-//	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_RECORDING_DEVICE);
 
 // no joy with additional device types it seems in libcec2, needs investigation
+//	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_RECORDING_DEVICE);
 //	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_TUNER);
 
 	m_pParser = LibCecInitialise(&g_config);
@@ -272,15 +272,72 @@ bool CEC_Adaptor::GetConfig()
 	    return false;
 	  }
 
-	cec_logical_addresses addresses;
-	addresses = m_pParser->GetActiveDevices();
 
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Primary CEC Logical Address: %s",m_pParser->ToString( addresses.primary ) );
-	for ( uint8_t i = 0; i <= 11; i++ ) {
-		if ( addresses[i] ) {
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Active CEC Logical Address: %s",m_pParser->ToString( (cec_logical_address) i ) );
+	// check all active devices on the CEC bus, let's try to match them to DTs in our tree
+	m_CEC_Addresses.Clear();
+	m_CEC_Addresses = m_pParser->GetActiveDevices(); // Seems to return logical addresses for all known CEC devices
+//	m_CEC_Addresses = m_pParser->GetLogicalAddresses(); // Seems to return logical addresses for *this* device
+
+	m_mapAddresses.clear();
+	m_mapAddr_to_DT.clear();
+	m_mapVendorId.clear();
+
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Primary CEC Logical Address: %s",m_pParser->ToString( m_CEC_Addresses.primary ) );
+	for ( uint8_t iPtr = 0; iPtr <= 11; iPtr++ ) {
+		if ( m_CEC_Addresses[iPtr] ) {
+			// iPtr = Logical Address
+			// m_mapAddresses[i] = Physical Address
+			m_mapAddresses[iPtr] = m_pParser->GetDevicePhysicalAddress( (cec_logical_address) iPtr );
+			m_mapVendorId[iPtr] = m_pParser->GetDeviceVendorId( (cec_logical_address) iPtr );
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Active CEC Logical Address: %s, at Physical Address: %X, by Vendor: %s",m_pParser->ToString( (cec_logical_address) iPtr ), m_mapAddresses[iPtr], m_pParser->ToString( (cec_vendor_id)m_mapVendorId[iPtr] ) );
 		}
 	}
+
+	// Find MDs PK_Device
+	int iPK_Device = 0;
+	DeviceData_Base *pDevice = m_pData->GetTopMostDevice();
+	if ( pDevice )
+		iPK_Device = pDevice->m_dwPK_Device;
+//	string tmp_node_id = pDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+//	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MD's PK_Device=%i, CEC Physical Address: %s",iPK_Device, tmp_node_id.c_str() );
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MD's PK_Device=%i",iPK_Device );
+
+	// Check number of children (should only be one)
+	size_t size = m_pData->m_vectDeviceData_Impl_Children.size();
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Number of children=%i", size );
+
+	// Find PK_Device of child devices, this should only be an embedded transmit device template
+	for(std::vector<DeviceData_Impl *>::iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
+			it !=  m_pData->m_vectDeviceData_Impl_Children.end(); ++it)
+	{
+		DeviceData_Impl *pChildDevice = (*it);
+
+		if ( pChildDevice != NULL ) {
+			string tmp_node_id = pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Child's PK_Device=%i, CEC Physical Address: %s (N/A)", pChildDevice->m_dwPK_Device, tmp_node_id.c_str() );
+
+			// Check number of children (should only be one)
+			size_t size1 = pChildDevice->m_vectDeviceData_Impl_Children.size();
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Number of grand children=%i", size1 );
+
+			// iterate over grand children
+			DeviceData_Impl *pChildDevice1 = NULL;
+			for( VectDeviceData_Impl::const_iterator it1 = pChildDevice->m_vectDeviceData_Impl_Children.begin();
+				it1 != pChildDevice->m_vectDeviceData_Impl_Children.end(); ++it1 )
+			{
+				pChildDevice1 = (*it1);
+				if( pChildDevice1 != NULL )
+				{
+					string tmp_node_id = pChildDevice1->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Grandchild's PK_Device=%i, CEC Physical Address: %s", pChildDevice1->m_dwPK_Device, tmp_node_id.c_str() );
+				}
+			}
+
+		}
+	}
+//	m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(PK_Device_MD,DEVICEDATA_Audio_Settings_CONST);
+
+
 
 	return true;
 }
@@ -315,6 +372,8 @@ CEC_Adaptor_Command *Create_CEC_Adaptor(Command_Impl *pPrimaryDeviceCommand, Dev
 void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
+  sCMD_Result = "UNHANDLED CHILD";
+
   // TODO: need to map devices
   switch (pMessage->m_dwID)
   {
@@ -322,8 +381,6 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       if ( m_pParser->PowerOnDevices() )
       {
 	sCMD_Result = "OK";
-      } else {
-        sCMD_Result = "NOT OK";
       }
       return;
       break;
@@ -331,8 +388,6 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       if ( m_pParser->StandbyDevices() )
       {
         sCMD_Result = "OK";
-      } else {
-        sCMD_Result = "NOT OK";
       }
       return;
       break;
@@ -340,8 +395,6 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       if ( m_pParser->VolumeUp() )
       {
         sCMD_Result = "OK";
-      } else {
-        sCMD_Result = "NOT OK";
       }
       return;
       break;
@@ -349,8 +402,6 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       if ( m_pParser->VolumeDown() )
       {
         sCMD_Result = "OK";
-      } else {
-        sCMD_Result = "NOT OK";
       }
       return;
       break;
@@ -358,8 +409,6 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       if ( m_pParser->MuteAudio() )
       {
         sCMD_Result = "OK";
-      } else {
-        sCMD_Result = "NOT OK";
       }
       return;
       break;
@@ -373,7 +422,6 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
     }
 */
 
-  sCMD_Result = "UNHANDLED CHILD";
 }
 
 /*
