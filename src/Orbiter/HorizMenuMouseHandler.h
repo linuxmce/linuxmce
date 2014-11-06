@@ -53,6 +53,7 @@ namespace DCE
 		void Start();
 		void Stop();
 
+		DesignObj_Orbiter* FindChildObjectWithButton(DesignObj_Orbiter *pParent, int PK_Button);
 		bool ButtonDown(int PK_Button);
 		bool ButtonUp(int PK_Button);
 		void Move(int X,int Y,int PK_Direction);

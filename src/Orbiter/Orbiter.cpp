@@ -1936,7 +1936,14 @@ bool Orbiter::ClickedButton( DesignObj_Orbiter *pObj, int PK_Button )
 		)
 	)
 	{
+		if ( UsesUIVersion2() )
+		{
+			m_pObj_Highlighted_set(pObj);
+			CMD_Simulate_Keypress(StringUtils::ltos(BUTTON_Enter_CONST), 0,"");
+			return true;
+		}
 		SelectedObject( pObj, smKeyboard );
+		
 		return true;
 	}
 

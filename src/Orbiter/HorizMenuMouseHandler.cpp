@@ -67,6 +67,27 @@ void HorizMenuMouseHandler::Stop()
 {
 }
 
+DesignObj_Orbiter *HorizMenuMouseHandler::FindChildObjectWithButton(DesignObj_Orbiter *pParent, int PK_Button)
+{
+	if (pParent != NULL)
+	{
+		DesignObj_DataList::iterator iHao;
+		for( iHao=pParent->m_ChildObjects.begin(  ); iHao != pParent->m_ChildObjects.end(  ); ++iHao )
+		{
+			DesignObj_Orbiter *pObj = (DesignObj_Orbiter *) *iHao;
+			DesignObj_Orbiter *pFound = FindChildObjectWithButton(pObj, PK_Button);
+			if (pFound != NULL)
+				return pFound;
+
+			if (pObj->m_iPK_Button == PK_Button)
+			{
+				return pObj;
+			}
+		}
+	}
+	return NULL;
+}
+
 bool HorizMenuMouseHandler::ButtonDown(int PK_Button)
 {
 	switch( PK_Button )
@@ -79,6 +100,27 @@ bool HorizMenuMouseHandler::ButtonDown(int PK_Button)
 		}
 		else
 			return false;
+	case BUTTON_1_CONST:
+	case BUTTON_2_CONST:
+	case BUTTON_3_CONST:
+	case BUTTON_4_CONST:
+	case BUTTON_5_CONST:
+	case BUTTON_6_CONST:
+	case BUTTON_7_CONST:
+	case BUTTON_8_CONST:
+	case BUTTON_9_CONST:
+	case BUTTON_0_CONST:
+		if (m_pObj_ActiveSubMenu != NULL) {
+			// Select item from submenu
+			DesignObj_Orbiter *pObj = FindChildObjectWithButton(m_pObj_ActiveSubMenu, PK_Button);
+			if (pObj != NULL)
+			{
+				m_pMouseBehavior->HighlightObject(pObj);					
+				m_pMouseBehavior->m_pOrbiter->CMD_Simulate_Keypress(StringUtils::ltos(BUTTON_Enter_CONST), 0,"");
+			}
+			return true;
+		}
+		return false;
 	case BUTTON_Enter_CONST:
 		{
 			DesignObj_Orbiter *pObj_ToHighlight = m_pMouseBehavior->m_pOrbiter->m_pObj_Highlighted;
