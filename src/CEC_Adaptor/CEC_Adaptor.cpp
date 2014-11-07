@@ -372,14 +372,14 @@ CEC_Adaptor_Command *Create_CEC_Adaptor(Command_Impl *pPrimaryDeviceCommand, Dev
 void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-  sCMD_Result = "UNHANDLED CHILD";
-
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild");
   // TODO: need to map devices
   switch (pMessage->m_dwID)
   {
     case COMMAND_Generic_On_CONST:
       if ( m_pParser->PowerOnDevices() )
       {
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: Power On");
 	sCMD_Result = "OK";
       }
       return;
@@ -387,6 +387,7 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
     case COMMAND_Generic_Off_CONST:
       if ( m_pParser->StandbyDevices() )
       {
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: Power Off");
         sCMD_Result = "OK";
       }
       return;
@@ -394,6 +395,7 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
     case COMMAND_Vol_Up_CONST:
       if ( m_pParser->VolumeUp() )
       {
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: Volume Up");
         sCMD_Result = "OK";
       }
       return;
@@ -401,6 +403,7 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
     case COMMAND_Vol_Down_CONST:
       if ( m_pParser->VolumeDown() )
       {
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: Volume Down");
         sCMD_Result = "OK";
       }
       return;
@@ -408,11 +411,15 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
     case COMMAND_Mute_CONST:
       if ( m_pParser->MuteAudio() )
       {
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: Mute");
         sCMD_Result = "OK";
       }
       return;
       break;
   }
+
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: UNHANDLED COMMAND/CHILD");
+  sCMD_Result = "UNHANDLED CHILD";
 
 /*
   if (IRBase::ProcessMessage(pMessage))
@@ -433,6 +440,7 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
 void CEC_Adaptor::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: UNKNOWN DEVICE");
 	sCMD_Result = "UNKNOWN DEVICE";
 }
 
