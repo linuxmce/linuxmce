@@ -222,10 +222,7 @@ OnPreparedListener {
                                         mp.reset();
                                         mp.release();
                                         mp=null;
-
-
-
-					}
+                                        }
                                         catch (NullPointerException n){
                                         mp.reset();
                                         mp.release();
@@ -303,10 +300,11 @@ return false;
 
 	public int getElapsed(){
 
-        if(mp!=null){
+        if(mp!=null ){
         return mp.getCurrentPosition();
-        }
+        }else{
         return 0;
+        }
         }
 
 
@@ -321,19 +319,20 @@ return false;
 
 	public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
         Log.e(TAG, "onError--->   what:" + what + "    extra:" + extra);
-        mp.stop();
+        if(mp!=null){
         mp.reset();
         mp.release();
         mp=null;
+        }
 
-		connect("\n{event:completed}\n");
-                connect("\n{error:mediaplayer error.}\n");
-                return true;
+        connect("\n{event:completed}\n");
+        connect("\n{error:mediaplayer error.}\n");
+        return true;
 
 	}
 
 	public void onBufferingUpdate(MediaPlayer arg0, int percent) {
-        //	Log.d(TAG, "onBufferingUpdate called --->   percent:" + percent);
+        Log.d(TAG, "onBufferingUpdate called --->   percent:" + percent);
         }
 
 
