@@ -39,11 +39,11 @@ namespace DCE
     else if ((sMediaUpper.find(".CAR") != string::npos) ||
 	     (sMediaUpper.find(".ROM") != string::npos))
       {
-	sSlot="-cart";
+	sSlot="/cart";
       }
     else if ((sMediaUpper.find(".XEX") != string::npos))
       {
-	sSlot="-run";
+	sSlot="/run";
       }
 
     EmulatorController::insertMediaNamed(sMediaFile, sSlot);
@@ -81,6 +81,7 @@ namespace DCE
 	return false;
       }
 
+    m_pEmulatorModel->m_sArgs = "/opengl\t/f\t/portable\t";
     m_pEmulatorModel->m_sArgs = getSlotsAndRoms();
 
     if (!m_pEmulatorModel->m_sMediaPosition.empty() && !m_pEmulatorModel->m_bIsStreamingSource)

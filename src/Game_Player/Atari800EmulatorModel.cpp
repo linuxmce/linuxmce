@@ -22,15 +22,15 @@ namespace DCE
   {
     m_sConfigFile = ATARI800_CONFIG_FILE;
     m_sConfigFileTemplate = ATARI800_CONFIG_FILE_TEMPLATE;
-    m_sWindowName = "atari800.atari800";
+    m_sWindowName = "Altirra.exe.Wine";
     initializeActionstoKeysyms();
     initializeButtontoKeysyms();
-    m_sEmulatorBinary = "/usr/bin/atari800";
+    m_sEmulatorBinary = "/usr/pluto/bin/Altirra.sh";
     m_sProcessName = "atari800";
     m_bChangeRequiresRestart=true;
     m_bRunning=false;
     m_bHasArgs=true;
-    m_sArgs="";
+    m_sArgs="/portable\t/f\t";
   }
 
   Atari800EmulatorModel::~Atari800EmulatorModel()
