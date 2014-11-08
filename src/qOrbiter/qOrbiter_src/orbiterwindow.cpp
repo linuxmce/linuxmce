@@ -56,6 +56,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
         mainView.window()->setWindowFlags(Qt::FramelessWindowHint);
     }
 #elif QT5
+#ifndef  ANDROID
     mainView.setSurfaceType(QSurface::OpenGLSurface);
 
     QSurfaceFormat format;
@@ -65,6 +66,8 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.setFormat(format);
     mainView.setColor(QColor(Qt::transparent));
     mainView.setClearBeforeRendering(true);
+#endif
+
     if(frameless == true){
         mainView.setFlags(Qt::FramelessWindowHint);
     }

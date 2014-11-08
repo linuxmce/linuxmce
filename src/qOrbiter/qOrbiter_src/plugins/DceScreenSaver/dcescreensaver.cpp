@@ -35,6 +35,8 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
 #endif
     enableDebug=false;
     useAnimation=true;
+    zoomEnabled=false;
+    fadeEnabled = false;
     if(useAnimation){
          m_animationTimer = startTimer(animationInterval);
     }
@@ -148,7 +150,7 @@ void DceScreenSaver::processImageData(QNetworkReply *r){
     imgSet=false;
     if(useAnimation){
        setDebugInfo("Animation enabled.");
-        startFadeTimer(2500);
+        startFadeTimer();
     } else {
         setDebugInfo("Animation disabled");
         fadeOpacity=1;
@@ -180,24 +182,26 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
+    setDebugInfo("DceScreenSaver::paint() started");
     p->setBrush(Qt::NoBrush);
     p->setPen(Qt::NoPen);
     p->setRenderHint(QPainter::HighQualityAntialiasing, 1);
-
-
-    //draw old frame first
     QRectF tgtRect(0,0,width(), height());
-    QSize scaledSize;
-    scaledSize.setHeight(height()*currentScale);
-    scaledSize.setWidth(width()*currentScale);
 
-    p->drawPixmap(tgtRect, surface, tgtRect);
+    if(!useAnimation){
+        fadeOpacity=1;
+    }
 
-    //setup and new pix map over it
-    p->setOpacity(fadeOpacity);
-
-    //create 'composed image'
-    p->drawPixmap(tgtRect, currentImage, tgtRect);
+    if(fadeOpacity==1){
+        p->drawPixmap(tgtRect, surface.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
+    }else{
+        p->drawPixmap(tgtRect, surface.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
+        //setup and new pix map over it
+        p->setOpacity(fadeOpacity);
+        //create 'composed image'
+        p->drawPixmap(tgtRect, currentImage.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
+    }
+     setDebugInfo("DceScreenSaver::paint() ended.");
 }
 #endif
 
@@ -252,9 +256,9 @@ void DceScreenSaver::beginZoom()
     //    zoomAnimation->start();
 }
 
-void DceScreenSaver::startFadeTimer(int time)
+void DceScreenSaver::startFadeTimer()
 {
-    fadeAnimation->setDuration(time);
+    fadeAnimation->setDuration(2500);
     fadeAnimation->start();
 
 }

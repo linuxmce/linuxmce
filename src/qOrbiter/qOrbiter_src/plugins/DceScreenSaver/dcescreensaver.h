@@ -36,6 +36,8 @@ class DceScreenSaver :
     Q_PROPERTY(bool useAnimation READ getUseAnimation WRITE setUseAnimation NOTIFY useAnimationChanged)
     Q_PROPERTY(QString debugInfo READ getDebugInfo WRITE setDebugInfo NOTIFY debugInfoChanged)
     Q_PROPERTY(bool enableDebug READ getEnableDebug WRITE setEnableDebug NOTIFY enableDebugChanged)
+    Q_PROPERTY(bool fadeEnabled READ getFadeEnabled WRITE setFadeEnabled NOTIFY fadeEnabledChanged)
+    Q_PROPERTY(bool zoomEnabled READ getZoomEnabled WRITE setZoomEnabled NOTIFY zoomEnabledChanged)
 public:
 #ifdef QT5
     DceScreenSaver(QQuickPaintedItem *parent=0);
@@ -58,6 +60,8 @@ public:
     int pictureCount;
     QStringList urlList;
     QString currentImageName;
+    bool fadeEnabled;
+    bool zoomEnabled;
     bool useAnimation;
 
     QPixmap currentImage;
@@ -89,7 +93,15 @@ signals:
     void useAnimationChanged();
     void debugInfoChanged();
     void enableDebugChanged();
+    void fadeEnabledChanged();
+    void zoomEnabledChanged();
 public slots:
+
+    void setZoomEnabled (bool z){ if(z!=zoomEnabled) { zoomEnabled = z; emit zoomEnabledChanged();}  }
+    bool getZoomEnabled(){return zoomEnabled;}
+
+    void setFadeEnabled(bool f){ if(fadeEnabled !=f) {fadeEnabled = f; emit fadeEnabledChanged();}  }
+    bool getFadeEnabled(){return fadeEnabled;}
 
     void setDebugInfo(QString i){ if( enableDebug && debugInfo != i) { debugInfo = QTime::currentTime().toString()+"::"+i; emit debugInfoChanged();}  }
     QString getDebugInfo(){return debugInfo;}
@@ -121,18 +133,22 @@ public slots:
     QString getRequestUrl(){return requestUrl;}
 
     void setScreenSaverActive(bool b){active = b;
-                           if(!b){
-                               intervalTimer->stop();
-                               setRunning(false);
-                           } else {
-                               setRunning(true);
-                               intervalTimer->start(interval);
-                           }
-                                              emit activeChanged();
-                          }
+                                      if(!b){
+                                          intervalTimer->stop();
+
+                                          zoomAnimation->stop();
+                                          fadeAnimation->stop();
+                                          setRunning(false);
+                                      } else {
+                                          setRunning(true);
+                                          intervalTimer->start(interval);
+
+                                      }
+                                                                    emit activeChanged();
+                                     }
     bool getActive(){return active;}
 
-    void setInterval(int i){interval = i; intervalTimer->start(i); emit intervalChanged();}
+    void setInterval(int i){if(interval!=i) {interval = i; intervalTimer->start(i); startFadeTimer(); beginZoom(); emit intervalChanged();}}
     int getInterval(){return interval;}
 
     bool getRunning(){return running;}
@@ -157,7 +173,7 @@ public slots:
 
         t=NULL;
 #endif
-       setDebugInfo("Update forced");
+        setDebugInfo("Update forced");
     }
     Q_INVOKABLE  void setImageList(QStringList l);
 private:
@@ -170,10 +186,11 @@ private:
 
 private slots:
     void resetPicture() { endSize = currentImage.size();  }
+    void updateZoom (QVariant zoomVal){ setCurrentScale(zoomVal.toDouble()); this->update();}
 
 protected:
 
-    void startFadeTimer(int time);
+    void startFadeTimer();
     void stopFadeTimer();
 
 

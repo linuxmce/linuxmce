@@ -44,7 +44,7 @@ android-g++{
     contains(QT_VERSION,5.*.*){
     DESTDIR=$$PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
     } else {
-    DESTDIR=$PWD/../../../platforms/Android/androidPlugins/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
+    DESTDIR=$$PWD/../../../platforms/Android/androidPlugins/armeabi-v7a/  #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
     }
 }
 

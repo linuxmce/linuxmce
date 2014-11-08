@@ -543,8 +543,9 @@ int AndroidSystem::getMediaPosition()
 
     jint res = env->CallIntMethod(m_qtActivity, s_qtActivity_TimeCodeMethod);
     int rt = res;
-    return rt;
+
     m_pvm->DetachCurrentThread();
+    return rt;
 #endif
 }
 
