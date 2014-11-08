@@ -99,41 +99,67 @@ bool VDRInfoFileHandler::SaveAttributes(PlutoMediaAttributes *pPlutoMediaAttribu
 	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapAttributes.begin();
 		it != pPlutoMediaAttributes->m_mapAttributes.end(); ++it)
 	{
-		char cAttributeType = '?';
+		string cAttributeType = "?";
 
 		switch(it->first)
 		{
 			case ATTRIBUTETYPE_Channel_CONST:
-				cAttributeType = 'C';
+				cAttributeType = "C";
 				break;
 
 			case ATTRIBUTETYPE_Title_CONST:
-				cAttributeType = 'T';
+				cAttributeType = "T";
 				break;
 
-			case ATTRIBUTETYPE_Synopsis_CONST:
-				cAttributeType = 'D';
+			case ATTRIBUTETYPE_Episode_CONST:
+				cAttributeType = "S";
 				break;
 
 			case ATTRIBUTETYPE_Audio_Encoding_CONST:
-				cAttributeType = 'X';
+			case ATTRIBUTETYPE_Format_CONST:
+				cAttributeType = "X";
 				break;
 
 			default:
 				LoggerWrapper::GetInstance()->Write(LV_WARNING, "VDRInfoFileHandler: don't know attribute type convention for %d", it->first);
 				break;
 		}
+		AddAttributeToBuffer(cAttributeType, it->second->m_sName, sBuffer);
+	}
 
-		if(cAttributeType != '?')
+#ifdef UPDATEMEDIA_STATUS
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "# VDRInfoFileHandler::SaveAttributes: saving %d long attributes in the attribute file %s",
+		pPlutoMediaAttributes->m_mapLongAttributes.size(), GetFileAttribute().c_str());
+#endif
+
+	for(MapPlutoMediaAttributes::iterator it = pPlutoMediaAttributes->m_mapLongAttributes.begin();
+		it != pPlutoMediaAttributes->m_mapLongAttributes.end(); ++it)
+	{
+		string cAttributeType = "?";
+
+		switch(it->first)
 		{
-			string sType = "?";
-			sType[0] = cAttributeType;
-			sBuffer += sType + " " + it->second->m_sName + "\n";
+			case ATTRIBUTETYPE_Synopsis_CONST:
+				cAttributeType = "D";
+				break;
+			default:
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "VDRInfoFileHandler: don't know attribute type convention for %d", it->first);
+				break;
 		}
+		AddAttributeToBuffer(cAttributeType, it->second->m_sName, sBuffer);
 	}
 
 	FileUtils::WriteTextFile(GetFileAttribute(), sBuffer);
 	return true;
+}
+
+void VDRInfoFileHandler::AddAttributeToBuffer(string cAttributeType, string sName, string &sBuffer)
+{
+	if(cAttributeType != "?")
+	{
+		sBuffer += cAttributeType + " " + sName + "\n";
+	}
+
 }
 //-----------------------------------------------------------------------------------------------------
 bool VDRInfoFileHandler::RemoveAttribute(int /*nTagType*/, string /*sValue*/, PlutoMediaAttributes * /*pPlutoMediaAttributes*/)
