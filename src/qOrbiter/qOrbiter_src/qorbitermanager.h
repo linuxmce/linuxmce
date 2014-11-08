@@ -524,6 +524,7 @@ Param 10 - pk_attribute
     QStringList *sCurr_Room_Devices; //linked list of current devices (experimental)
     QString currentScreen;
 
+
     //plugin variables
     long iOrbiterPluginID;           //the orbiter plugin id for future use
     long iPK_Device_DatagridPlugIn;
@@ -545,6 +546,7 @@ Param 10 - pk_attribute
     int communicatorID;
     int hostDevice;
 signals:
+
 
     void hostDeviceChanged();
 
@@ -774,6 +776,8 @@ signals:
 #endif
 
 public slots:
+
+
     void setHostDevice(int d){ if(hostDevice != d ) {hostDevice=d; emit hostDeviceChanged(); }  }
     int getHostDevice(){return hostDevice;}
     QString getHostDeviceName(){return HostSystemData::getSystemName(hostDevice); }
@@ -1471,6 +1475,7 @@ public slots:
 
     void updateMediaString(){updateSelectedAttributes(mediaFilter.getFilterString()); }
 
+    void updateGenericOptions(QString opt){mediaFilter.setGenericOptions(opt);}
 
     void getGrid(int i);
     void setStringParam(int paramType, QString param);
@@ -1511,6 +1516,7 @@ public slots:
     Q_INVOKABLE void seekGrid(QString dataGridId, QString s);
 
     void mediaFilterChanged(QString dataGridId);
+    void genericFilterChanged(QString dataGridId);
 
     //@}
 

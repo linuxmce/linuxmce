@@ -35,6 +35,7 @@ namespace DCE
 class MediaFilter : public QObject {
 
     Q_OBJECT
+    Q_PROPERTY(QString genericOptions READ getGenericOptions WRITE setGenericOptions NOTIFY genericOptionsChanged)
 
 private:
     QStringList filterStack;             /*!< List of Comma seperated strings of the previous data grid request */
@@ -54,6 +55,7 @@ private:
     QString photoDefaultSort;       /*!< Comma seperated string of the default photo sorting */
     QString gamesDefaultSort;       /*!< Comma seperated string of the default games sorting */
     QString dataGridId;             /*!< datagrid this filter is controlling */
+    QString genericOptions; /*!< The generic options for non media grids */
 public:
 
     MediaFilter() {
@@ -64,6 +66,7 @@ public:
         audioDefaultSort = "2";
         photoDefaultSort = "29";
         gamesDefaultSort = "49";
+        genericOptions = "";
     }
 
     int getMediaType() { return q_mediaType; }
@@ -332,6 +335,9 @@ public:
 
 public slots:
 
+    void setGenericOptions(QString opt) {if(genericOptions != opt) { genericOptions=opt; emit genericOptionsChanged(dataGridId);} }
+    QString getGenericOptions(){return genericOptions;}
+
     void setMediaType(int mediaType) {
         if (mediaType != q_mediaType)
         {
@@ -403,6 +409,7 @@ signals:
     void itemSelected(QString id);
     void currentMediaTypeChanged(QString m);
     void newMediaFilter();
+    void genericOptionsChanged(QString dataGridId);
 };
 }
 #endif

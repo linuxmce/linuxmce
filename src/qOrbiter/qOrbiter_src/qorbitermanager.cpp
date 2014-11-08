@@ -81,6 +81,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 {
     mediaPlayerID=-1;
     orbiterInit=true;
+
     //view.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     m_bStartingUp= true;
     homeNetwork=false;
@@ -263,7 +264,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #endif
 
 #ifdef QANDROID
-   // qDebug() << "Resolution::"<<QApplication::desktop()->width()<<"w x "<<QApplication::desktop()->height()<<"h";
+    // qDebug() << "Resolution::"<<QApplication::desktop()->width()<<"w x "<<QApplication::desktop()->height()<<"h";
     int h = qorbiterUIwin->height();
     int w = qorbiterUIwin->width();
 
@@ -306,88 +307,88 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #endif
 
 
-qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
-setApplicationPath(QApplication::applicationDirPath());
-localDir = qmlPath.append(buildType);
-remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins"+buildType.remove("/qml");
-if(b_localLoading){
-    finalPath=localDir;
-}else{
-finalPath=remoteDirectoryPath;
-}
+    qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
+    setApplicationPath(QApplication::applicationDirPath());
+    localDir = qmlPath.append(buildType);
+    remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins"+buildType.remove("/qml");
+    if(b_localLoading){
+        finalPath=localDir;
+    }else{
+        finalPath=remoteDirectoryPath;
+    }
 
 #ifndef ANDROID
-qorbiterUIwin->setSource(finalPath+"/splash/Splash.qml"); /*! We dont set android because it has its own bootstrap */
+    qorbiterUIwin->setSource(finalPath+"/splash/Splash.qml"); /*! We dont set android because it has its own bootstrap */
 #else
 
 #endif
 
-skinMessage("build type set to:: "+buildType);
-initializeGridModel();  //begins setup of media grid listmodel and its properties
+    skinMessage("build type set to:: "+buildType);
+    initializeGridModel();  //begins setup of media grid listmodel and its properties
 
-//managing where were are variables
-i_current_command_grp = 0;
-i_current_mediaType =0;
-videoDefaultSort = "13";
-audioDefaultSort = "2";
-photoDefaultSort = "13";
-gamesDefaultSort = "49";
-i_currentFloorplanType = 0;
-backwards = false;
+    //managing where were are variables
+    i_current_command_grp = 0;
+    i_current_mediaType =0;
+    videoDefaultSort = "13";
+    audioDefaultSort = "2";
+    photoDefaultSort = "13";
+    gamesDefaultSort = "49";
+    i_currentFloorplanType = 0;
+    backwards = false;
 
-//file details object and imageprovider setup
-filedetailsclass = new FileDetailsClass(this);
-qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
-filedetailsclass->clear();
+    //file details object and imageprovider setup
+    filedetailsclass = new FileDetailsClass(this);
+    qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
+    filedetailsclass->clear();
 
-nowPlayingButton = new NowPlayingClass();
-qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
+    nowPlayingButton = new NowPlayingClass();
+    qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
 
-//screen parameters class that could be extended as needed to fetch other data
-ScreenParameters = new ScreenParamsClass(this);
-qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
+    //screen parameters class that could be extended as needed to fetch other data
+    ScreenParameters = new ScreenParamsClass(this);
+    qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
 
-//floorplan model initialization for slots in main.cpp
-floorplans = new FloorPlanModel( new FloorplanDevice , this);
+    //floorplan model initialization for slots in main.cpp
+    floorplans = new FloorPlanModel( new FloorplanDevice , this);
 
-//----------------Security Video setup
-SecurityVideo = new SecurityVideoClass(this);
-qorbiterUIwin->rootContext()->setContextProperty("securityvideo", SecurityVideo);
+    //----------------Security Video setup
+    SecurityVideo = new SecurityVideoClass(this);
+    qorbiterUIwin->rootContext()->setContextProperty("securityvideo", SecurityVideo);
 
-QApplication::processEvents(QEventLoop::AllEvents);
-attribFilter = new AttributeSortModel(new AttributeSortItem,6, this);
-uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, this);
-mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, this);
-genreFilter = new AttributeSortModel(new AttributeSortItem,3, this);
+    QApplication::processEvents(QEventLoop::AllEvents);
+    attribFilter = new AttributeSortModel(new AttributeSortItem,6, this);
+    uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, this);
+    mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, this);
+    genreFilter = new AttributeSortModel(new AttributeSortItem,3, this);
 
-gotoScreenList = new QStringList();
-ScreenSaver = new ScreenSaverClass(this);
-qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
-screenSaverTimeout = 60;
-screenPowerOffTimeout = 60;
-/*!
+    gotoScreenList = new QStringList();
+    ScreenSaver = new ScreenSaverClass(this);
+    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
+    screenSaverTimeout = 60;
+    screenPowerOffTimeout = 60;
+    /*!
      * \todo move filters to their own initialization function, possibly multiple to account for dynamic setting of each one later.
      */
 
-// Prepares models in this qt thread so owner thread is not QML as they would have been if they were created later
-prepareModelPool(5);
+    // Prepares models in this qt thread so owner thread is not QML as they would have been if they were created later
+    prepareModelPool(5);
 
-/*Needs Doin at construction */
-userList = new UserModel( new UserItem, this);
-orbiterInit=true;
+    /*Needs Doin at construction */
+    userList = new UserModel( new UserItem, this);
+    orbiterInit=true;
 
-QObject::connect(&mediaFilter, SIGNAL( currentMediaTypeChanged(QString)), this, SLOT(setGridMediaType(QString)));
-QObject::connect(&mediaFilter, SIGNAL(newMediaFilter()), SLOT(updateMediaString()));
+    QObject::connect(&mediaFilter, SIGNAL( currentMediaTypeChanged(QString)), this, SLOT(setGridMediaType(QString)));
+    QObject::connect(&mediaFilter, SIGNAL(newMediaFilter()), SLOT(updateMediaString()));
 
-//    QObject::connect(&mediaFilter, SIGNAL(attributeGenresChanged(QString)), this, SLOT(setGridAttributeGenres(QString)));
-//    QObject::connect(&mediaFilter, SIGNAL(attributeTypeSortChanged(QString)), this, SLOT(setAttributeTypeSort(QString)));
-//    QObject::connect(&mediaFilter, SIGNAL(fileFormatChanged(QString)), this, SLOT(setGridFileFormat(QString)));
-//    QObject::connect(&mediaFilter, SIGNAL(pkAttributeChanged(QString)), this, SLOT(setGridPkAttribute(QString)));
-//    QObject::connect(&mediaFilter, SIGNAL(pkUsersChanged(QString)), this, SLOT(setGridPkUsers(QString)));
-//    QObject::connect(&mediaFilter, SIGNAL(usersPrivateChanged(QString)), this, SLOT(setGridUsersPrivate(QString)));
-//    QObject::connect(&mediaFilter, SIGNAL(lastViewedChanged(QString)), this, SLOT(setGridLastViewed(QString)));
+    //    QObject::connect(&mediaFilter, SIGNAL(attributeGenresChanged(QString)), this, SLOT(setGridAttributeGenres(QString)));
+    //    QObject::connect(&mediaFilter, SIGNAL(attributeTypeSortChanged(QString)), this, SLOT(setAttributeTypeSort(QString)));
+    //    QObject::connect(&mediaFilter, SIGNAL(fileFormatChanged(QString)), this, SLOT(setGridFileFormat(QString)));
+    //    QObject::connect(&mediaFilter, SIGNAL(pkAttributeChanged(QString)), this, SLOT(setGridPkAttribute(QString)));
+    //    QObject::connect(&mediaFilter, SIGNAL(pkUsersChanged(QString)), this, SLOT(setGridPkUsers(QString)));
+    //    QObject::connect(&mediaFilter, SIGNAL(usersPrivateChanged(QString)), this, SLOT(setGridUsersPrivate(QString)));
+    //    QObject::connect(&mediaFilter, SIGNAL(lastViewedChanged(QString)), this, SLOT(setGridLastViewed(QString)));
 
-emit orbiterInitialized();
+    emit orbiterInitialized();
 }
 
 qorbiterManager::~qorbiterManager(){
@@ -400,13 +401,12 @@ void qorbiterManager::gotoQScreen(QString s){
 
     // clearAllDataGrid();
 
-
-
     if(s.contains("Screen_1.qml"))
     {
         logQtMessage("QOrbiter clearing models because screen is 1");
         clearDataGrid("sleepingAlarms");
         clearDataGrid("Playlist");
+        mediaFilter.setGenericOptions("");
         emit keepLoading(false);
         emit cancelRequests();
         emit resetFilter();
@@ -1315,7 +1315,7 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
 {
     qDebug() << "Fetching dg " << dataGridId << ": type : " << PK_DataGrid;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() id = %s", dataGridId.toStdString().c_str());
-
+mediaFilter.setDataGridId(dataGridId);
     GenericFlatListModel* pModel = NULL;
     qDebug() <<" Searching for model, id ::" << dataGridId;
     if (!m_mapDataGridModels.contains(dataGridId))
@@ -1348,10 +1348,10 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
             }
 
             QString option = "";
-            switch(PK_DataGrid){
 
+            switch(PK_DataGrid){
             case  DATAGRID_Alarms_In_Room_CONST:
-                option = QString::number(iFK_Room);
+                //option = QString::number(iFK_Room);
                 break;
 
             case DATAGRID_Phone_Book_Auto_Compl_CONST:
@@ -1361,7 +1361,7 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
             case DATAGRID_Media_Browser_CONST:
                 option = mediaFilter.getFilterString();
                 // qDebug() << "media browser outgoing option ::" << option;
-                mediaFilter.setDataGridId(dataGridId);
+
                 break;
 
             case DATAGRID_Playlists_CONST:
@@ -1374,12 +1374,13 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
 
             default:
                 setMediaResponse("qOrbiterManager::getDataGridModel()::No Grid option set");
+                option = mediaFilter.getGenericOptions();
                 break;
             }
             pModel->setOption(option);
 
-            LoggerWrapper::GetInstance()->Write(LV_DEBUG, "getDataGridModel() emit loadDataGrid");
-            qDebug() << "Checks complete, fetching grid " << PK_DataGrid;
+            LoggerWrapper::GetInstance()->Write(LV_DEBUG, "getDataGridModel() emit loadDataGrid  ");
+            qDebug() << "Checks complete, fetching grid " << dataGridId ;
             emit loadDataGrid(dataGridId, PK_DataGrid, option); // loads data
         } else {
             pModel = m_mapDataGridModels[dataGridId];
@@ -1407,7 +1408,7 @@ void qorbiterManager::seekGrid(QString dataGridId, QString s)
 
 void qorbiterManager::mediaFilterChanged(QString dataGridId)
 {
-    qDebug() << "mediaFilterChanged()";
+    qDebug() << "mediaFilterChanged() for " << dataGridId;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::mediaFilterChanged() start");
     GenericFlatListModel* pModel = NULL;
     if (m_mapDataGridModels.contains(dataGridId))
@@ -1419,6 +1420,23 @@ void qorbiterManager::mediaFilterChanged(QString dataGridId)
         pModel->refreshData();
     }
     updateSelectedAttributes(mediaFilter.getFilterString());
+}
+
+void qorbiterManager::genericFilterChanged(QString dataGridId)
+{
+    qDebug() << "genericFilterChanged() for " << dataGridId;
+
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::genericFilterChanged() start");
+    GenericFlatListModel* pModel = NULL;
+    if (m_mapDataGridModels.contains(dataGridId))
+    {
+        qDebug() << "genericFilterChanged()::" << "existing model type, checking filter of " << mediaFilter.getGenericOptions();
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::genericFilterChanged() model exists");
+        pModel = m_mapDataGridModels[dataGridId];
+        pModel->setOption(mediaFilter.getGenericOptions());
+        pModel->refreshData();
+    }
+
 }
 
 QString qorbiterManager::translateMediaType(int mediaType)

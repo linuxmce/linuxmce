@@ -603,6 +603,7 @@ int main(int argc, char* argv[])
 
         //        QObject::connect(&pqOrbiter, SIGNAL(showFileListMediaType(int)), &w, SLOT(prepareFileList()), Qt::QueuedConnection);
         //QObject::connect(&w.mediaFilter, SIGNAL(filterChanged(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
+        QObject::connect(&w.mediaFilter, SIGNAL(genericOptionsChanged(QString)), &w, SLOT(genericFilterChanged(QString)), Qt::QueuedConnection);
         QObject::connect(&w.mediaFilter, SIGNAL(filterStringChanged(QString)), &w, SLOT(mediaFilterChanged(QString)), Qt::QueuedConnection);
         QObject::connect(&w.mediaFilter, SIGNAL(itemSelected(QString)), &pqOrbiter, SLOT(GetFileInfoForQml(QString)), Qt::QueuedConnection);
         QObject::connect(&w.mediaFilter, SIGNAL(itemSelected(QString)), &w, SLOT(mediaItemSelected(QString)), Qt::QueuedConnection);
