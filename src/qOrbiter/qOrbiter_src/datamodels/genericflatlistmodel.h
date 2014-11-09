@@ -59,7 +59,7 @@ public:
     void updateItemData(int row, int role, QVariant value);
     void setModelName(QString s) { modelName = s; }
     void setPK_DataGrid(int PK_DataGrid) { m_PK_DataGrid = PK_DataGrid; }
-    void setOption(QString option) { m_option = option; }
+    Q_INVOKABLE void setOption(QString option) { m_option = option; }
     void seek(QString seek);
     void seekResult(int row);
     bool isSeeking() { return m_seek; }
@@ -108,7 +108,7 @@ signals:
     void modelMediaTypeChanged();
 
     void lastIndexChanged();
-
+    void optionChanged(QString dgId);
 
 public slots:
 

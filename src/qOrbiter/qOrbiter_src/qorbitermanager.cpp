@@ -1315,7 +1315,7 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
 {
     qDebug() << "Fetching dg " << dataGridId << ": type : " << PK_DataGrid;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() id = %s", dataGridId.toStdString().c_str());
-mediaFilter.setDataGridId(dataGridId);
+    mediaFilter.setDataGridId(dataGridId);
     GenericFlatListModel* pModel = NULL;
     qDebug() <<" Searching for model, id ::" << dataGridId;
     if (!m_mapDataGridModels.contains(dataGridId))
@@ -1374,7 +1374,7 @@ mediaFilter.setDataGridId(dataGridId);
 
             default:
                 setMediaResponse("qOrbiterManager::getDataGridModel()::No Grid option set");
-                option = mediaFilter.getGenericOptions();
+                    option = mediaFilter.getGenericOptions();
                 break;
             }
             pModel->setOption(option);

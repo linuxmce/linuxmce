@@ -1117,16 +1117,17 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     }
     //todo - fix livetv playlist to adjust position from clicking on the grid.
     else if(iPK_MediaType== 11){
-        emit np_channelID(QString::number(iValue));
-        emit np_network(QString::fromStdString(sValue_To_Assign));
+       // emit np_channelID(QString::number(iValue));
+       // emit np_network(QString::fromStdString(sValue_To_Assign));
         if(bRetransmit == 0){
 
         }
         b_mediaPlaying = true;
+
     }  else if(iPK_MediaType == 5) {
         b_mediaPlaying = true;
-        //  emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
-        //  emit np_title2Changed(QString::fromStdString(sText));
+          emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
+          emit np_title2Changed(QString::fromStdString(sText));
         emit playlistPositionChanged(iValue);
         GetNowPlayingAttributes();
         if(bRetransmit==1){
@@ -3083,6 +3084,9 @@ void DCE::qOrbiter::GetScreenSaverImages()
 
 void DCE::qOrbiter::BindMediaRemote(bool onoff)
 {
+    qDebug() << "Binding Media Remote";
+
+
     string status;
     if (onoff == true)
     {
@@ -5143,8 +5147,7 @@ void qOrbiter::getAttributeImage(QString param)
 
 }
 
-void qOrbiter::setDirectAv(int truth)
-{
+void qOrbiter::setDirectAv(int truth){
     CMD_Live_AV_Path setLiveAv(this->m_dwPK_Device, iMediaPluginID, QString::number(this->i_ea).toStdString(), truth);
     SendCommand(setLiveAv);
 }

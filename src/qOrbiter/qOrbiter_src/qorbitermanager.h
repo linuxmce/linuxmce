@@ -200,7 +200,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY(int mediaPlayerID READ getMediaPlayerID WRITE setMediaPlayerID NOTIFY mediaPlayerIdChanged)/*! \brief Contains the id of the dce media player */
     Q_PROPERTY (bool discreteAudio READ getDiscreteAudio WRITE setDiscreteAudio NOTIFY discreteAudioChanged )
     Q_PROPERTY (bool m_bContainsVideo READ getContainsVideo WRITE setContainsVideo NOTIFY containsVideo) /*! \brief if the current media stream contains video */
-    Q_PROPERTY (bool usingLiveAvPath READ getLiveAvPath WRITE setLiveAvPath NOTIFY liveAvPath)/*! \brief If the current media player is using the live av path */
+    Q_PROPERTY (bool usingLiveAvPath READ getLiveAvPath WRITE setLiveAvPath NOTIFY usingLiveAvPathChanged)/*! \brief If the current media player is using the live av path */
     Q_PROPERTY (bool m_bIsOSD READ getOsd WRITE setOsd NOTIFY isOsd) /*! \brief If this device is an On Screen Display */
     Q_PROPERTY (bool monitorAvailible READ getMonitorStatus WRITE setMonitorStatus NOTIFY monitorStatusChanged) /*! \brief If monitor mode is available */
     Q_PROPERTY(int deviceVolume READ getDeviceVolume WRITE setDeviceVolume NOTIFY deviceVolumeChanged) /*! \brief the current device now playing device, assuming it can provide discrete audio levels */
@@ -767,6 +767,7 @@ signals:
 
     void discreteAudioChanged();
     void liveAvPath(int f );
+    void usingLiveAvPathChanged();
     void containsVideo( );
     void isOsd( );
     void monitorStatusChanged( );
@@ -1054,7 +1055,7 @@ public slots:
      * \brief This sets the playlist for tv channels.
      * \ingroup qorbiter_properties
      */
-    void setNowPlayingTv() {emit bindMediaRemote(true); emit liveTVrequest(); }
+    void setNowPlayingTv() { emit liveTVrequest(); }
 
     /*!
      * \brief setBoundStatus
@@ -1113,7 +1114,7 @@ public slots:
      * \brief setLiveAvPath
      * \param path
      */
-    void setLiveAvPath(bool path) { usingLiveAvPath = path; qDebug() ; emit liveAvPath(usingLiveAvPath ? 1 : 0);}
+    void setLiveAvPath(bool path) { usingLiveAvPath = path; qDebug() ; emit usingLiveAvPathChanged();}
 
     /*!
      * \brief getLiveAvPath
@@ -1121,6 +1122,7 @@ public slots:
      */
     bool getLiveAvPath() { return usingLiveAvPath;}
 
+    void setDirectAv(bool avState){ emit liveAvPath(avState ? 1 : 0);}
     /*!
      * \brief setContainsVideo
      * \param video
@@ -1174,6 +1176,8 @@ public slots:
      * \param response
      */
     void setCommandResponse(QString response) {commandResponse =QTime::currentTime().toString()+"::"+response; qDebug() << commandResponse; emit commandResponseChanged();}
+
+
 
     /*!
      * \brief getCommandResponse
@@ -1230,7 +1234,7 @@ public slots:
     void playMedia(QString FK_Media) { emit startPlayback(FK_Media);}
     void mythTvPlay(){emit play();}
     void playResume(){ emit simplePlay(); }
-    void stopMedia() {emit stopPlayback(); }
+    void stopMedia() {emit stopPlayback(); setDirectAv(false);}
     void setPlaybackSpeed(int s) {emit setStreamSpeed(s);}
     void pauseMedia() {emit pause();}
     void adjustVolume(int vol) {emit setVolume(vol);}
