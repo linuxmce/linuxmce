@@ -5,9 +5,9 @@ Item {
     state:"opening"
     focus:true
     Component.onCompleted: {
-        if(navigation==="ScenarioCompnent.qml"){
+
             setNavigation(navigation)
-        }
+
         forceActiveFocus()
         state="opened"
     }

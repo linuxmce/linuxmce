@@ -3,7 +3,7 @@ import "../components"
 import "../../../../skins-common/lib/handlers"
 
 StyledScreen {
-
+    navigation: "ScenarioCompnent.qml"
     Component.onCompleted:{
         current_header_model=scenarios;
         if(dcenowplaying.b_mediaPlaying){

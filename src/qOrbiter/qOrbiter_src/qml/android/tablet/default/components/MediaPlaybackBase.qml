@@ -28,6 +28,7 @@ Item{
     }
 
     Component.onCompleted: {
+        manager.setBoundStatus(true)
         forceActiveFocus()
         if(media_playback_base.state!=="dvdmenu"){
             nav_row.navSource="NavOptions5.qml";

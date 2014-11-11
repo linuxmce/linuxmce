@@ -14,7 +14,7 @@ import "../components"
   */
 StyledScreen{
     id:stored_audio
-
+    navigation: "HeaderControls.qml"
     Panel{
         id:mainPanel
         useHeader: false

@@ -19,6 +19,7 @@ Item{
             fly_trap.width=0
         }
     }
+    smooth: true
 
     property string phil:useHandler ? dceHandler.item.pressed ? "yellow" : "black" :  fly_trap.pressed ? "green": "black"
     property int textSize:28
@@ -29,6 +30,7 @@ Item{
     property bool useHandler:false
     property alias label:button_label.text
     property alias buttonRadius:bg_fill.radius
+
 
     signal activated()
     Behavior on opacity{
@@ -43,7 +45,7 @@ Item{
         anchors.fill: parent
         color:phil
         border.color: style.buttonBorderColor
-        border.width: 1
+        border.width: buttonRadius == height ? 0 :1
         radius: 5
         opacity:useHandler ? dceHandler.item.pressed ? 1 : .65 :  fly_trap.pressed ? 1 : .65
 
@@ -79,7 +81,6 @@ Item{
                 target: styled_button
                 height:scaleY(12)
                 width:scaleX(18)
-                state:"reg"
             }
 
             PropertyChanges{
@@ -101,11 +102,40 @@ Item{
             }
         },
         State {
+            name: "numberpad-small"
+            PropertyChanges {
+                target: styled_button
+                height:manager.isProfile ? scaleY(9) : scaleY(15)
+                width: manager.isProfile ? scaleX(15) : scaleX(9)
+            }
+
+            PropertyChanges{
+                target: button_label
+                wrapMode:Text.WrapAtWordBoundaryOrAnywhere
+            }
+        },
+        State {
             name: "large-fixed"
             PropertyChanges {
                 target: styled_button
                 height:manager.isProfile ? scaleY(15) : scaleY(20)
                 width:manager.isProfile ? scaleX(28) : scaleX(25)
+            }
+
+            PropertyChanges{
+                target: button_label
+                state:"para"
+                wrapMode:Text.WrapAtWordBoundaryOrAnywhere
+                width:styled_button.width
+                horizontalAlignment:Text.AlignHCenter
+            }
+        },
+        State {
+            name: "round"
+            PropertyChanges {
+                target: styled_button
+                width:height
+                buttonRadius:height
             }
 
             PropertyChanges{

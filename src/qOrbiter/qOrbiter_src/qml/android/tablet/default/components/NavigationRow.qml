@@ -23,13 +23,6 @@ Item{
         opacity:style.shadeOpacity
     }
 
-    StyledText{
-        anchors.centerIn: parent
-        text:manager.currentScreen
-    }
-
-
-
     Loader{
         id:nav
         source:navSource

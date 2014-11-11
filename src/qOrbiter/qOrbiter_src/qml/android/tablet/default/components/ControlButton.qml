@@ -6,12 +6,14 @@ Item{
     height: 100
     width: height
     property string buttonLabel: "lorem ipsum"
+    property bool pressed:ms.pressed
     signal activated()
     
     Rectangle{
         anchors.fill: parent
         radius: parent.height
         gradient:style.buttonGradient
+        opacity: .65
     }
 
     
@@ -19,7 +21,7 @@ Item{
         id:fil
         anchors.fill: parent
         radius:parent.height
-        color:ms.pressed ? style.buttonPressedColor: style.buttonColor
+        color:ms.pressed ? style.buttonPressedColor: "black"
         opacity:style.buttonOpacity
 
     }

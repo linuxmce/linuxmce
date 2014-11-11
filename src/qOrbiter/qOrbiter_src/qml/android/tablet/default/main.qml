@@ -361,7 +361,9 @@ Item {
             left: qml_root.left
             right: qml_root.right
         }
-        interval:60000
+        interval:30000
+        useAnimation: true
+        onDebugInfoChanged: console.log(debugInfo)
         active:manager.m_ipAddress==="192.168.80.1"
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
