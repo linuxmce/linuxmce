@@ -129,7 +129,8 @@ void qMediaPlayer_Plugin::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_I
 void qMediaPlayer_Plugin::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
-    sCMD_Result = "FOOOBAAAAAR";
+
+    sCMD_Result = "UNKNOWN DEVICE";
 }
 
 //<-dceag-sample-b->
