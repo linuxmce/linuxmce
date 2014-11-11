@@ -4,7 +4,10 @@ import "../components"
 import "../../../../skins-common/lib/handlers"
 StyledScreen{
     id:sleepingAlamsScreen
-
+    Component.onCompleted: {
+        forceActiveFocus()
+        manager.updateGenericOptions(String(manager.getlocation()))
+    }
 Panel{
     anchors.fill: parent
     headerTitle: "Sleeping Alarms for this room: "+manager.currentRoom
