@@ -1709,6 +1709,7 @@ signals:
     void eventResponseChanged(QString e);
     void deviceResponseChanged(QString d);
     void commandComplete();
+    void commandFailed();
     void setText(QString designObj, QString text, int iPK_Text);
     ///@}
 

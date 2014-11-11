@@ -2888,7 +2888,7 @@ void DCE::qOrbiter::FfMedia()
 
 void DCE::qOrbiter::PauseMedia()
 {
-    CMD_Pause_Media pause_media(m_dwPK_Device, m_dwPK_Device_NowPlaying ,internal_streamID);
+    CMD_Pause_Media pause_media(m_dwPK_Device, iMediaPluginID ,internal_streamID);
     string pResponse;
     if(SendCommand(pause_media, &pResponse) && pResponse=="OK")
     {
@@ -3878,6 +3878,7 @@ void DCE::qOrbiter::osdBack() // connects the Go back action.
 void DCE::qOrbiter::moveDirection(int d) //connects ui buttons to dce commands
 {
     if(d==1){
+        qDebug() << "Moving " << "up";
         DCE::CMD_Move_Up moveUp(m_dwPK_Device, iMediaPluginID, internal_streamID);
         if(!SendCommand(moveUp))
         {
@@ -3886,6 +3887,7 @@ void DCE::qOrbiter::moveDirection(int d) //connects ui buttons to dce commands
     }
     else if(d==2)
     {
+         qDebug() << "Moving " << "down";
         DCE::CMD_Move_Down moveDown(m_dwPK_Device, iMediaPluginID, internal_streamID);
         if(!SendCommand(moveDown))
         {
@@ -3893,6 +3895,7 @@ void DCE::qOrbiter::moveDirection(int d) //connects ui buttons to dce commands
         }
     }
     else if(d==3){
+         qDebug() << "Moving " << "left";
         DCE::CMD_Move_Left moveLeft(m_dwPK_Device, iMediaPluginID, internal_streamID);
         if(!SendCommand(moveLeft))
         {
@@ -3900,6 +3903,7 @@ void DCE::qOrbiter::moveDirection(int d) //connects ui buttons to dce commands
         }
     }
     else if(d==4){
+         qDebug() << "Moving " << "right";
         DCE::CMD_Move_Right move(m_dwPK_Device, iMediaPluginID, internal_streamID);
         if(!SendCommand(move))
         {
@@ -4324,82 +4328,199 @@ bool qOrbiter::OnReplaceHandler(string msg)
 
 }
 
-void DCE::qOrbiter::extraButtons(QString button)
-{
-    if(button.toLower() == "livetv")
-    {
+void DCE::qOrbiter::extraButtons(QString button){
+
+    qDebug() << "handling extra button :: " << button.toLower();
+    string cResp ="";
+    if(button.toLower()=="enter/go"){
+
+    }else if(button.toLower() == "livetv"){
         CMD_Live_AV_Path selectLiveTvPath(m_dwPK_Device, iMediaPluginID, StringUtils::itos(i_ea), true);
         SendCommand(selectLiveTvPath);
-    }
+    } else if(button.toLower() == "schedule"){
 
-    if(button.toLower() == "schedule")
-    {
-
-    }
-
-    if(button.toLower() == "recordings")
-    {
+    } else if(button.toLower() == "recordings"){
         CMD_Recorded_TV_Menu showRecorded(m_dwPK_Device, m_dwPK_Device_NowPlaying);
         SendCommand(showRecorded);
-    }
-
-    if(button.toLower() == "music")
-    {
+    } else if(button.toLower() == "music"){
         CMD_Music showMusic(m_dwPK_Device, m_dwPK_Device_NowPlaying );
         SendCommand(showMusic);
-    }
-
-    if(button.toLower() == "guide")
-    {
+    } else if(button.toLower() == "guide"){
         DCE::CMD_Guide showGuide(m_dwPK_Device, m_dwPK_Device_NowPlaying );
         SendCommand(showGuide);
-    }
-
-    if(button.toLower() == "menu")
-    {
+    } else if(button.toLower() == "menu"){
         CMD_Menu_Show_Menu showMenu(m_dwPK_Device, m_dwPK_Device_NowPlaying );
         SendCommand(showMenu);
-    }
-
-    if(button.toLower() == "info")
-    {
+    } if(button.toLower() == "info"){
         CMD_Info showInfo(m_dwPK_Device, m_dwPK_Device_NowPlaying, "" );
         SendCommand(showInfo);
-    }
-
-    if(button.toLower() == "favorites")
-    {
+    } else if(button.toLower() == "favorites"){
         CMD_Favorites showFav(m_dwPK_Device, m_dwPK_Device_NowPlaying );
         SendCommand(showFav);
-    }
-
-    if(button.toLower() == "record")
-    {
+    }else if(button.toLower() == "record"){
         CMD_Record record(m_dwPK_Device, m_dwPK_Device_NowPlaying );
         SendCommand(record);
-    }
-
-    if(button.toLower() == "help")
-    {
+    } else if(button.toLower() == "help"){
         CMD_Help showHelp(m_dwPK_Device, m_dwPK_Device_NowPlaying );
         SendCommand(showHelp);
-    }
+    } else if(button.toLower() == "channelbookmark"){
 
-    if(button.toLower() == "channelbookmark")
-    {
-
-    }
-
-    if(button.toLower() == "exit")
-    {
+    }if(button.toLower() == "exit"){
         CMD_Exit exitAVscreen(m_dwPK_Device, m_dwPK_Device_NowPlaying);
         SendCommand(exitAVscreen);
+          return;
+    } else if(button.toLower()=="l2"){
+        CMD_L2 ps3_l2(this->m_dwPK_Device, m_dwPK_Device_NowPlaying);
+        if(SendCommand(ps3_l2, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+          return;
+    } else if(button.toLower()=="l1"){
+        CMD_L1 ps3_l1(this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(ps3_l1, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+          return;
+    }else if(button.toLower()=="l3"){
+        CMD_L3 ps3_l3(this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(ps3_l3, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+          return;
+    }else if(button.toLower()=="r1"){
+        CMD_R1 ps3_r1(this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(ps3_r1, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+          return;
+    }else if(button.toLower()=="r2"){
+        CMD_R2 ps3_r2(this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(ps3_r2, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+          return;
+    }else if(button.toLower()=="r3"){
+        CMD_R3 ps3_r3(this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(ps3_r3, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+          return;
+    }else if(button.toLower()=="psbutton"){
+        CMD_PS_Playstation ps3_btn(this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(ps3_btn, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+          return;
+    }else if(button.toLower()=="start"){
+        CMD_Start start(this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(start, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+          return;
+    }else if(button.toLower()=="select"){
+        CMD_Select select_cmd(this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(select_cmd, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+          return;
+    }else if(button.toLower()=="triangle"){
+        CMD_Triangle triangle (this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(triangle, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+          return;
+    }else if(button.toLower()=="square"){
+        CMD_Square square(this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(square, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+          return;
+    }else if(button.toLower()=="x"){
+        CMD_X x(this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(x, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+          return;
+    }else if(button.toLower()=="circle"){
+        CMD_Circle circle(this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(circle, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+          return;
+    }else if(button.toLower()=="home"){
+        CMD_Home home(this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(home, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+          return;
+    }else if(button.toLower()=="y"){
+        CMD_Yellow y(this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(y, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+          return;
+    }else if(button.toLower()=="a"){
+        CMD_A a(this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(a, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+        return;
+    }else if(button.toLower()=="b"){
+        CMD_B b(this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(b, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+        return;
+    }else if(button.toLower()=="xbox"){
+        CMD_Home xbox_home(this->m_dwPK_Device, iMediaPluginID);
+        if(SendCommand(xbox_home, &cResp) && cResp=="OK"){
+            emit commandComplete();
+        } else {
+            emit commandFailed();
+        }
+        return;
     }
+
 
 }
 
 void DCE::qOrbiter::saveScreenAttribute(QString attribute)
 {
+
     emit mediaResponseChanged("Saving Screenshot for attribute: "+attribute);
     string sAttribute = attribute.toStdString();
     DCE::CMD_Make_Thumbnail thumb(m_dwPK_Device, iMediaPluginID, sAttribute, screenieData,screenieDataSize );
