@@ -2888,6 +2888,7 @@ void DCE::qOrbiter::FfMedia()
 
 void DCE::qOrbiter::PauseMedia()
 {
+
     CMD_Pause_Media pause_media(m_dwPK_Device, iMediaPluginID ,internal_streamID);
     string pResponse;
     if(SendCommand(pause_media, &pResponse) && pResponse=="OK")
@@ -4129,25 +4130,25 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
 */
 void DCE::qOrbiter::redButton()
 {
-    CMD_Red pressRed(m_dwPK_Device, m_dwPK_Device_NowPlaying);
+    CMD_Red pressRed(m_dwPK_Device, iMediaPluginID);
     SendCommand(pressRed);
 }
 
 void DCE::qOrbiter::greenButton()
 {
-    CMD_Green pressGreen(m_dwPK_Device, m_dwPK_Device_NowPlaying);
+    CMD_Green pressGreen(m_dwPK_Device, iMediaPluginID);
     SendCommand(pressGreen);
 }
 
 void DCE::qOrbiter::yellowButton()
 {
-    CMD_Yellow pressYellow(m_dwPK_Device, m_dwPK_Device_NowPlaying);
+    CMD_Yellow pressYellow(m_dwPK_Device, iMediaPluginID);
     SendCommand(pressYellow);
 }
 
 void DCE::qOrbiter::blueButton()
 {
-    CMD_Blue pressBlue(m_dwPK_Device, m_dwPK_Device_NowPlaying);
+    CMD_Blue pressBlue(m_dwPK_Device, iMediaPluginID);
     SendCommand(pressBlue);
 }
 
