@@ -45,7 +45,7 @@ Panel{
 
         
         delegate: Item{
-            height: manager.appHeight*.15
+            height: manager.appHeight*.10
             anchors{
                 left:parent.left
                 right:parent.right

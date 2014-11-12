@@ -87,7 +87,7 @@ Item {
 
     StyledText {
         id: np
-        text:dceTimecode.qsCurrentTime
+        text:dceTimecode.qsCurrentTime +" of " +dceTimecode.qsTotalTime
         font.pixelSize: scaleY(3)
         isBold: true
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
