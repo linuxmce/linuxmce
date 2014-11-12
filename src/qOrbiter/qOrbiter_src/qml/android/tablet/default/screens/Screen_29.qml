@@ -9,7 +9,6 @@ Item {
     Component.onCompleted: {
         forceActiveFocus()
         manager.updateGenericOptions(String(manager.getlocation()))
-
     }
 
     StyledText{

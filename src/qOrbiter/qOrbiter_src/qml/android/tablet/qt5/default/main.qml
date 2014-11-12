@@ -78,7 +78,7 @@ Item {
         }
         //        height:manager.appHeight
         //        width: manager.appWidth
-        interval:30000
+        interval:60000
 
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
@@ -260,6 +260,7 @@ Item {
 
                               pageLoader.source = "screens/Screen_X.qml"
                               screenfile = source
+
                           }
 
         states: [

@@ -14,6 +14,7 @@ import "../components"
   */
 StyledScreen{
     id:stored_audio
+    Component.onCompleted: manager.setBoundStatus(true)
     navigation: "HeaderControls.qml"
     Panel{
         id:mainPanel

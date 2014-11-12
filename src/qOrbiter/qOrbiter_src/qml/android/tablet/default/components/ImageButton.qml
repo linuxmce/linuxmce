@@ -1,0 +1,32 @@
+import QtQuick 1.1
+import "../components"
+Item{
+    id:img_button
+    height: manager.isProfile ? scaleY(8) : scaleY(10)
+    width: height
+    signal activated()
+    property string upImage:""
+    property string downImage:""
+    property double imgRotation:0
+    opacity: mickey.pressed ? 1 : .65
+    Behavior on opacity{
+        PropertyAnimation{
+            duration: 250
+        }
+    }
+
+    Image {
+        id: btnImg
+        fillMode: Image.PreserveAspectFit
+        source: mickey.pressed ? downImage : upImage
+        height: parent.height *.75
+        width: height
+        anchors.centerIn: parent
+        rotation: imgRotation
+    }
+    MouseArea{
+        id:mickey
+        anchors.fill: parent
+        onPressed: activated()
+    }
+}

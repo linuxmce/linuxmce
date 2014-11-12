@@ -32,6 +32,7 @@ Row{
     StyledButton{
         buttonText.text:"Advanced"
         opacity: manager.currentScreen === "Screen_1.qml" ? 1 : 0
+        hitArea.onReleased: manager.currentScreen="Screen_44.qml"
     }
 
     StyledButton {
