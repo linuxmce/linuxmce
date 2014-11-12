@@ -177,11 +177,11 @@ Item {
             }
             break;
         case Qt.Key_VolumeDown:
-            androidSystem.setVolume(-1)
+            manager.adjustVolume(-1)
             console.log("vol-")
             break;
         case Qt.Key_VolumeUp:
-            androidSystem.setVolume(1)
+            manager.adjustVolume(+1)
             console.log("vol+")
             break;
 
@@ -330,9 +330,6 @@ Item {
 
     }
 
-
-
-
     function checkStatus(component)
     {
         console.log(component.progress)
@@ -340,15 +337,9 @@ Item {
 
 
     function screenchange(screenname )    {
-
-        pageLoader.item.screenClosing()
         pageLoader.source="screens/"+screenname
 
     }
-
-
-
-
 
     Loader {
         id:pageLoader
@@ -376,7 +367,7 @@ Item {
                 manager.setDceResponse("pageLoader::Command to change to:" + manager.currentScreen+ " was successfull")
 
             }else if (pageLoader.status == Component.Loading){
-                console.log("pageLoader::loading page from network"+pageLoader.progress)
+                console.log("pageLoader::loading"+manager.currentScreen+" from network"+pageLoader.progress)
             }else if(pageLoader.status===Component.Error){
                 lastLoaderError="Failed to load screen "+manager.currentScreen+". Reason:\n"+pageLoader.Error
                 console.log("pageLoader::Command to change to:" + manager.currentScreen + " failed!")

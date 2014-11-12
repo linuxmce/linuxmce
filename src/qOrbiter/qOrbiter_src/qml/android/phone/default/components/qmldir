@@ -20,6 +20,8 @@ Button             Button.qml                        #no comment
 ButtonSq             ButtonSq.qml                        #no comment
 ClimateSelector             ClimateSelector.qml                        #no comment
 Clock             Clock.qml                        #no comment
+ControlButton             ControlButton.qml                        #no comment
+ControlDiamond             ControlDiamond.qml                        #no comment
 ControlGrid             ControlGrid.qml                        #no comment
 ControlRow             ControlRow.qml                        #no comment
 DefaultFooter             DefaultFooter.qml                        #no comment
@@ -53,6 +55,7 @@ HomeOptionsGeneric             HomeOptionsGeneric.qml                        #no
 HomeOptions             HomeOptions.qml                        #no comment
 HomeSecurityRow             HomeSecurityRow.qml                        #no comment
 HomeTelecomRow             HomeTelecomRow.qml                        #no comment
+ImageButton             ImageButton.qml                        #no comment
 ImgButton             ImgButton.qml                        #no comment
 JogPanel             JogPanel.qml                        #no comment
 LightingSelector             LightingSelector.qml                        #no comment

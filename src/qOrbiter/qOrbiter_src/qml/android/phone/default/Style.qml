@@ -88,6 +88,7 @@ Item{
     property color buttonPressedColor:"white"
     property color buttonBorderColor:"white"
     property int buttonBorderWidth:1
+    property double buttonOpacity:.65
     property Gradient buttonGradient: Gradient{
         GradientStop{ position:0.0;color:"transparent"}
         GradientStop{ position:0.65;color:"black"}

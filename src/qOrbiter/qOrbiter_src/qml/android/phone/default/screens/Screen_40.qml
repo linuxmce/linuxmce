@@ -3,9 +3,8 @@ import "../components"
 StyledScreen{
     id:ps3_harmony
 
-    MediaPlaybackTemplate{
+   RemoteNumberPad{
 
-    }
-
+   }
 
 }

@@ -6,7 +6,7 @@ Item {
     height: manager.appHeight
     clip:true
 
-    //  Component.onCompleted: manager.setBoundStatus(true)
+      Component.onCompleted: manager.setBoundStatus(true)
 
     Connections{
           target: dcenowplaying
@@ -40,7 +40,7 @@ Item {
         delegate:
             Item{
             width:manager.appWidth-20
-            height: scaleY(20)
+            height: scaleY(12)
             clip: true
 
             Rectangle{
@@ -59,7 +59,15 @@ Item {
                 opacity: source ==="" ? 0 : 1
             }
 
-            Text {
+
+            Rectangle{
+                anchors.fill: parent
+                gradient:Gradient{
+                             GradientStop{ position:0.0;color:"transparent"}
+                             GradientStop{ position:0.65;color:index === dcenowplaying.m_iplaylistPosition ? "darkgreen": "black"}
+                         }
+            }
+            StyledText {
                 id: position
                 text: qsTr("#") + value
                 color: "White"
@@ -69,12 +77,13 @@ Item {
                 anchors.right: parent.right
             }
 
-            Text {
+            StyledText {
                 text:  index === dcenowplaying.m_iplaylistPosition ? "Now Playing:\n " + description : description
                 color: "white"
                 width: parent.width
+
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                font.pixelSize: scaleY(5)
+                font.pixelSize: scaleY(3)
                 font.bold: false
             }
 

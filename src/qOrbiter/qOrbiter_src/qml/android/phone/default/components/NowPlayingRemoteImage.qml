@@ -6,7 +6,7 @@ Image {
 
     property string aspectRatio:dcenowplaying.aspect
     height:scaleY(30)
-    width:scaleX(30)
+    width:height
     source: ""
     opacity: 1
     scale:1
@@ -27,7 +27,7 @@ Image {
             PropertyChanges {
                 target: nowplayingimage
                 height:manager.isProfile? scaleX(55) : scaleX(25)
-                width:manager.isProfile ? scaleX(55)   : scaleY(25)
+                width:manager.isProfile ? scaleY(55)   : scaleY(25)
             }
         },
         State {
@@ -36,7 +36,7 @@ Image {
             PropertyChanges {
                 target: nowplayingimage
                 height:manager.isProfile? scaleX(55) : scaleY(25)
-                width:manager.isProfile ? scaleX(55)   : scaleY(35)
+                width:height
             }
         },
         State {
@@ -44,8 +44,8 @@ Image {
             when:dcenowplaying.aspect==="POSTER"
             PropertyChanges {
                 target: nowplayingimage
-                height:manager.isProfile? scaleX(55) : scaleX(25)
-                width:manager.isProfile ? scaleX(55)   : scaleY(25)
+                height:manager.isProfile? scaleX(15) : scaleX(25)
+                width:manager.isProfile ? scaleY(25)   : scaleY(25)
             }
         }
     ]

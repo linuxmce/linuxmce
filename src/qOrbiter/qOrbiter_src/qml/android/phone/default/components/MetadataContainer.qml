@@ -33,7 +33,7 @@ Item{
 
     GenericMetaData{
         id:mediaMetadata
-        width: parent.width
+        width: parent.width /2
         anchors{
             bottom:media_scroller.top
             left:metadataContainer.left
@@ -41,18 +41,28 @@ Item{
             top:metadataContainer.top
         }
     }
+
+ControlDiamond{
+
+    anchors{
+        right:parent.right
+        bottom:media_scroller.top
+    }
+}
+
+
     
     MediaScrollBar{
         id:media_scroller;
-        anchors.bottom: controlsTarget.top
+        anchors.bottom: parent.bottom
         anchors.horizontalCenter: metadataContainer.horizontalCenter
         anchors.topMargin: scaleY(2)
     }
 
-    GenericFooterRemote{
-        id:controlsTarget
-        anchors.bottom: parent.bottom
-    }
+//    GenericFooterRemote{
+//        id:controlsTarget
+//        anchors.bottom: parent.bottom
+//    }
 
 //    states: [
 //        State {
