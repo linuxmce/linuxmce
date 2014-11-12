@@ -2,8 +2,7 @@ import QtQuick 1.1
 import "../../../../skins-common/lib/handlers"
 Item {
     id:nonepgplaylist
-    width: manager.appWidth
-    height: manager.appHeight
+   anchors.fill: parent
     clip:true
 
       Component.onCompleted: manager.setBoundStatus(true)

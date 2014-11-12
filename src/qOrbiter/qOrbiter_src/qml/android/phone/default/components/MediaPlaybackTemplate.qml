@@ -15,12 +15,12 @@ Item {
     }
 
     TemplatePlaylist {
-        id: templatePlaylist
-        height: parent.height
+        id: templatePlaylist       
         width: parent.width
         anchors{
             left:mediaPlaybackBase.right
             bottom:parent.bottom
+            top:parent.top
         }
         opacity: 0
         scale:0
