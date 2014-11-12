@@ -747,9 +747,13 @@ int main(int argc, char* argv[])
         //#endif
 
 
-        if(sRouter_IP!="")
-        {
+        if(sRouter_IP!=""){
             qDebug()<< "Command Line override. Using command line settings";
+
+            if(PK_Device == -1){
+                PK_Device = w.getDeviceNumber();
+            }
+             orbiterWin.setDeviceNumber(PK_Device); orbiterWin.setRouterAddress(QString::fromStdString(sRouter_IP));
 
         }else if(sRouter_IP =="" && w.getInternalIp() != ""){
             qDebug() << "No Command line opt set but config file located";
