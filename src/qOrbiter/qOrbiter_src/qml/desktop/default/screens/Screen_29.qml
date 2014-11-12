@@ -7,6 +7,11 @@ Item{
     Rectangle{
         height: manager.appHeight
         width: manager.appWidth
+        Component.onCompleted: {
+        //  alarmlist.model.setOption()
+           manager.updateGenericOptions(String(manager.getlocation()))
+        }
+
         color: "transparent"
         HomeButton{ x: 5; y: 5; width: 75; height: 75; smooth: true}
         Rectangle{
@@ -66,6 +71,7 @@ Item{
                                 model: manager.getDataGridModel("sleepingAlarms", 29)
                                 anchors.centerIn: parent
                                 anchors.margins: 10
+
                                 delegate:
                                     Rectangle
                                 {

@@ -18,7 +18,7 @@ Rectangle {
         onPlayListPositionChanged: nowplayingimage.source = "image://listprovider/updateobject/"+securityvideo.timestamp
     }
 
-    Component.onCompleted:setNowPlayingTv()
+
 
         //main 'now playing rect containing all the other items
 
