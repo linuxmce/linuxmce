@@ -51,12 +51,21 @@ StyledScreen{
                 height: width
             }
 
-            StyledText{
-                width: parent.width
-                text: dceTimecode.qsCurrentTime +" of " +dceTimecode.qsTotalTime
-                anchors.top: npImage.bottom
-                font.pixelSize: 24
-                isBold: true
+//            StyledText{
+
+//                width: parent.width
+//                text: dceTimecode.qsCurrentTime +" of " +dceTimecode.qsTotalTime
+//                anchors.top: npImage.bottom
+//                font.pixelSize: 24
+//                isBold: true
+//            }
+
+            MediaScrollBar{
+                id:scroller
+                anchors.top:npImage.bottom
+                anchors.topMargin: metaData.panelHeaderHeight
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: scaleY(45)
             }
 
             Metadata_4{
