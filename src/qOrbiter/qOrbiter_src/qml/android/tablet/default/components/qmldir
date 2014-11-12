@@ -39,6 +39,7 @@ MediaOptions4             MediaOptions4.qml                        #no comment
 MediaOptions5             MediaOptions5.qml                        #no comment
 MediaPlaybackBase             MediaPlaybackBase.qml                        #no comment
 MediaPopup             MediaPopup.qml                        #no comment
+MediaScrollBar             MediaScrollBar.qml                        #no comment
 Metadata_43             Metadata_43.qml                        #no comment
 Metadata_4             Metadata_4.qml                        #no comment
 Metadata_5             Metadata_5.qml                        #no comment

@@ -200,6 +200,12 @@ Item{
 
         Loader{
             id:mediaScrollerTarget
+            sourceComponent: MediaScrollBar{}
+            anchors{
+                bottom:controlsLoader.top
+                left:parent.left
+                right:parent.right
+            }
         }
 
         Loader{
@@ -209,12 +215,9 @@ Item{
             source:controlComponent
             anchors.bottom: parent.bottom
         }
-        Item{
-            id:hiddenDrag
-            height: parent.height
-            width: parent.width/2
-            x:parent.width /2
-        }
+
+
+
     }
 
     Item{
@@ -244,10 +247,7 @@ Item{
                 state:"unloaded"
             }
 
-            PropertyChanges {
-                target: hiddenDrag
-                x:media_playback_base.x / 2
-            }
+
         },
         State {
             name: "playlist"
