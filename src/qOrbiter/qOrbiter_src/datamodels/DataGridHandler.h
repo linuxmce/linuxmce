@@ -114,7 +114,7 @@ public:
             //getting the cell to the right
             DataGridCell *pCell2 = pTable->GetData(1, row);
             eventgrp = atoi(pCell2->GetValue());
-            QString data = pCell2->GetText();
+            QString data = QString::fromUtf8(pCell2->GetText());
             QStringList breakerbreaker = data.split(QRegExp("\n"), QString::KeepEmptyParts );
             name = breakerbreaker.at(0);
             days=breakerbreaker.at(2);
@@ -131,7 +131,7 @@ public:
         } else {
             // Default, get one cell use text and value
             pItem->setData(ValueRole, pCell->GetValue());
-            pItem->setData(DescriptionRole, pCell->GetText());
+            pItem->setData(DescriptionRole, QString::fromUtf8(pCell->GetText()));
         }
     }
 
