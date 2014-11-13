@@ -6577,7 +6577,7 @@ function editCommandGroupCommands($commandGroupID,$dbADO){
 				while ($rowSelectParameters=$resSelectParameters->FetchRow()) {
 					if(count($devicesToSend)>0){
 						foreach ($devicesToSend AS $deviceID){
-							$commandsToSend[$deviceID] .= "+escape(((document.getElementById('CommandParameterValue_".$rowCommandAssigned['PK_CommandGroup_Command']."_".$rowSelectParameters['FK_CommandParameter']."').value!='')?' ".$rowSelectParameters['FK_CommandParameter']." '+document.getElementById('CommandParameterValue_".$rowCommandAssigned['PK_CommandGroup_Command']."_".$rowSelectParameters['FK_CommandParameter']."').value:''))";
+							$commandsToSend[$deviceID] .= "+escape(((document.getElementById('CommandParameterValue_".$rowCommandAssigned['PK_CommandGroup_Command']."_".$rowSelectParameters['FK_CommandParameter']."').value!='')?' ".$rowSelectParameters['FK_CommandParameter']." \''+document.getElementById('CommandParameterValue_".$rowCommandAssigned['PK_CommandGroup_Command']."_".$rowSelectParameters['FK_CommandParameter']."').value+'\'':''))";
 						}					
 					}
 if($rowSelectParameters['C_CP_Description']=="") {
