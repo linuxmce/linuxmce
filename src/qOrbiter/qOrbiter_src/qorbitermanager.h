@@ -776,6 +776,9 @@ signals:
     void backButtonPressed();
 #endif
 
+    // telecom
+    void CMD_makeCall(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To);
+
 public slots:
 
 
@@ -1565,6 +1568,9 @@ public slots:
 
 
     //@}
+
+    // telecom
+    void makeCall(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To);
 
 
     void handleDceGuiCommand(int c){

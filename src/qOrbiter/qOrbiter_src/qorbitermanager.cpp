@@ -1307,7 +1307,6 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
 {
     qDebug() << "Fetching dg " << dataGridId << ": type : " << PK_DataGrid;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() id = %s", dataGridId.toStdString().c_str());
-    mediaFilter.setDataGridId(dataGridId);
     GenericFlatListModel* pModel = NULL;
     qDebug() <<" Searching for model, id ::" << dataGridId;
     if (!m_mapDataGridModels.contains(dataGridId))
@@ -1343,6 +1342,7 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
 
             switch(PK_DataGrid){
             case DATAGRID_Media_Browser_CONST:
+		mediaFilter.setDataGridId(dataGridId);
                 option = mediaFilter.getFilterString();
                 break;
 
@@ -1388,7 +1388,7 @@ void qorbiterManager::seekGrid(QString dataGridId, QString s)
 
 void qorbiterManager::mediaFilterChanged(QString dataGridId)
 {
-    qDebug() << "mediaFilterChanged() for " << dataGridId;
+      qDebug() << "mediaFilterChanged() for " << dataGridId;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::mediaFilterChanged() start");
     GenericFlatListModel* pModel = NULL;
     if (m_mapDataGridModels.contains(dataGridId))
@@ -1396,7 +1396,7 @@ void qorbiterManager::mediaFilterChanged(QString dataGridId)
         qDebug() << "mediaFilterChanged()::" << "existing model type, checking filter of " << mediaFilter.getFilterString();
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::mediaFilterChanged() model exists");
         pModel = m_mapDataGridModels[dataGridId];
-        pModel->setOption(mediaFilter.getFilterString());
+	pModel->setOption(mediaFilter.getFilterString());
         pModel->refreshData();
     }
     updateSelectedAttributes(mediaFilter.getFilterString());
@@ -1404,7 +1404,7 @@ void qorbiterManager::mediaFilterChanged(QString dataGridId)
 
 void qorbiterManager::genericFilterChanged(QString dataGridId)
 {
-    qDebug() << "genericFilterChanged() for " << dataGridId;
+      qDebug() << "genericFilterChanged() for " << dataGridId;
 
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::genericFilterChanged() start");
     GenericFlatListModel* pModel = NULL;
@@ -1413,10 +1413,10 @@ void qorbiterManager::genericFilterChanged(QString dataGridId)
         qDebug() << "genericFilterChanged()::" << "existing model type, checking filter of " << mediaFilter.getGenericOptions();
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::genericFilterChanged() model exists");
         pModel = m_mapDataGridModels[dataGridId];
-        pModel->setOption(mediaFilter.getGenericOptions());
+	//      pModel->setOption(mediaFilter.getGenericOptions());
         pModel->refreshData();
     }
-
+  
 }
 
 QString qorbiterManager::translateMediaType(int mediaType)
@@ -2739,4 +2739,6 @@ void qorbiterManager::setText(QString sDesignObj, QString sValue, int iPK_Text)
     emit textChanged(sDesignObj, sValue, iPK_Text);
 }
 
-
+void qorbiterManager::makeCall(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To) {
+	emit CMD_makeCall(iPK_Users, sPhoneExtension, sPK_Device_From, iPK_Device_To);
+}
