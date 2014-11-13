@@ -927,6 +927,7 @@ public slots:
     QString getDceResponse () ;
 
     /*Environment Slots. i.e. user, location, etc*/
+    int getCurrentPKUser() {return iPK_User;}
     QString getCurrentUser() {return sPK_User;}
     void setCurrentUser(QString inc_user );
     void setCurrentRoom(QString room) {currentRoom = room; writeConfig(); emit roomChanged();}
@@ -1513,6 +1514,7 @@ public slots:
     /* called to clear all (temp) datagrids */
     void clearDataGrid(QString dataGridID);
     void clearAllDataGrid();
+    Q_INVOKABLE GenericFlatListModel* getDataGridModel(QString dataGridId, int PK_DataGrid, QString initOption);
     Q_INVOKABLE GenericFlatListModel* getDataGridModel(QString dataGridId, int PK_DataGrid);
 
     void refreshDataGrid(QString dataGridId, int PK_DataGrid, QString option) { emit loadDataGrid(dataGridId, PK_DataGrid, option); }

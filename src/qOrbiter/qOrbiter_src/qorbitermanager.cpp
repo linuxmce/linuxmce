@@ -1303,7 +1303,7 @@ void qorbiterManager::prepareModelPool(int poolSize)
     }
 }
 
-GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int PK_DataGrid)
+GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int PK_DataGrid, QString initOption)
 {
     qDebug() << "Fetching dg " << dataGridId << ": type : " << PK_DataGrid;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "getDataGridModel() id = %s", dataGridId.toStdString().c_str());
@@ -1339,36 +1339,19 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
                 currentIndexMap.clear();
             }
 
-            QString option = "";
+            QString option = initOption == NULL ? "" : initOption;
 
             switch(PK_DataGrid){
-            case  DATAGRID_Alarms_In_Room_CONST:
-                //option = QString::number(iFK_Room);
-                break;
-
-            case DATAGRID_Phone_Book_Auto_Compl_CONST:
-                option = QString::number(iPK_User).append("|%");
-                break;
-
             case DATAGRID_Media_Browser_CONST:
                 option = mediaFilter.getFilterString();
-                // qDebug() << "media browser outgoing option ::" << option;
-
                 break;
 
             case DATAGRID_Playlists_CONST:
-                option = "38";
-                break;
-
             case DATAGRID_Current_Media_Sections_CONST:
                 option="38";
                 break;
-
-            default:
-                setMediaResponse("qOrbiterManager::getDataGridModel()::No Grid option set");
-                option = mediaFilter.getGenericOptions();
-                break;
             }
+	
             pModel->setOption(option);
 
             LoggerWrapper::GetInstance()->Write(LV_DEBUG, "getDataGridModel() emit loadDataGrid  ");
@@ -1386,6 +1369,11 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
     }
 
     return pModel;
+}
+
+GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int PK_DataGrid)
+{
+	return getDataGridModel(dataGridId, PK_DataGrid, "");
 }
 
 void qorbiterManager::seekGrid(QString dataGridId, QString s)
