@@ -6,7 +6,6 @@ StyledScreen{
     id:sleepingAlamsScreen
     Component.onCompleted: {
         forceActiveFocus()
-        manager.updateGenericOptions(String(manager.getlocation()))
     }
 Panel{
     anchors.fill: parent
@@ -14,7 +13,7 @@ Panel{
     ListView{
         id:alarmlist
         anchors.fill: parent
-        model: manager.getDataGridModel("sleepingAlarms", 29)
+        model: manager.getDataGridModel("sleepingAlarms", 29, String(manager.getlocation()))
         anchors.centerIn: parent
         anchors.margins: 10
 	anchors.topMargin: 50

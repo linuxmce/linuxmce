@@ -8,8 +8,6 @@ Item{
         height: manager.appHeight
         width: manager.appWidth
         Component.onCompleted: {
-        //  alarmlist.model.setOption()
-           manager.updateGenericOptions(String(manager.getlocation()))
         }
 
         color: "transparent"
@@ -68,7 +66,7 @@ Item{
                                 id:alarmlist
                                 height: scaleY(35)
                                 width: scaleX(25)
-                                model: manager.getDataGridModel("sleepingAlarms", 29)
+                                model: manager.getDataGridModel("sleepingAlarms", 29, String(manager.getlocation()))
                                 anchors.centerIn: parent
                                 anchors.margins: 10
 

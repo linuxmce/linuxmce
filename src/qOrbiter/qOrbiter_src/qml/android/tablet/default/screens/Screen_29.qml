@@ -8,7 +8,6 @@ Item {
     focus:true
     Component.onCompleted: {
         forceActiveFocus()
-        manager.updateGenericOptions(String(manager.getlocation()))
     }
 
     StyledText{
@@ -21,7 +20,7 @@ Item {
         id:alarmlist
         height: scaleY(70)
         width: scaleX(75)
-        model: manager.getDataGridModel("sleepingAlarms", 29)
+        model: manager.getDataGridModel("sleepingAlarms", 29, String(manager.getlocation()))
 
         orientation: ListView.Vertical
         anchors.centerIn: parent
