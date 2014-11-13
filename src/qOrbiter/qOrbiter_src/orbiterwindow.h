@@ -115,7 +115,7 @@ public slots:
     void setInternalIp(QString ip) { if(internalIp != ip) {internalIp = ip; emit internalIpChanged();} }
     QString getInternalIp(){return internalIp;}
 
-    void setDeviceNumber(int d){deviceno = d; emit deviceChanged();}
+    void setDeviceNumber(int d){deviceno = d; qDebug() << "new Device number "<< d ;emit deviceChanged();}
     int getDeviceNumber(){return deviceno;}
 
     QString getRouterAddress(){return router;}

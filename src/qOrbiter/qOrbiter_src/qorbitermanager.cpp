@@ -81,15 +81,13 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 {
     mediaPlayerID=-1;
     orbiterInit=true;
+    m_ipAddress="";
 
-    //view.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     m_bStartingUp= true;
     homeNetwork=false;
     alreadyConfigured = false;
     iFK_Room = -1;
     iea_area= -1;
-    // b_skinsReady = false;
-    // b_orbiterReady = false;
     bAppError = false;
     isPhone = 0;
     hostDevice=HostSystemData::OTHER_EMBEDDED;
@@ -110,18 +108,12 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #endif
     
     setDceResponse("Starting...");
-    
-    if (readLocalConfig())
-    {
-        
+    if (readLocalConfig()){
         emit localConfigReady(true);
-        
-        // QApplication::processEvents(QEventLoop::AllEvents);
-    }
-    else
-    {
+    }else{
         emit localConfigReady(false);
     }
+
     
     
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -1374,7 +1366,7 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
 
             default:
                 setMediaResponse("qOrbiterManager::getDataGridModel()::No Grid option set");
-                    option = mediaFilter.getGenericOptions();
+                option = mediaFilter.getGenericOptions();
                 break;
             }
             pModel->setOption(option);
@@ -2023,30 +2015,25 @@ bool qorbiterManager::readLocalConfig()
     // existence check
     QFileInfo chk(xmlPath);
 
-
     if(!chk.exists()){
-        qDebug() << "Did not find config.xml file in application path, searching /usr/pluto/bin";
+        setDceResponse("Did not find config.xml file in application path, searching /usr/pluto/bin");
         this->logQtMessage("Did not find config.xml file in application path, searching /usr/pluto/bin");
         localConfigFile.setFileName("/usr/pluto/bin/config.xml");
         appConfigPath="/usr/pluto/bin/config.xml";
     } else {
         localConfigFile.setFileName(xmlPath);
-        qDebug() << "Found config.xml in app path, reading.";
+        setDceResponse("Found config.xml in app path, reading.");
         appConfigPath=xmlPath;
     }
 
-
-
     if (!localConfigFile.open(QFile::ReadWrite)) {
-        qDebug()<< "No Config Found.";
+        setDceResponse("No Config Found.");
         setDceResponse("config not found!::"+localConfigFile.fileName());
         setInternalIp("192.168.80.1");
         currentSkin="default";
         setDeviceNumber(-1);
         return false;
     } else {
-
-        qDebug("Reading local cfg");
         setDceResponse("Reading Local Config");
         QByteArray tDoc;
         tDoc = localConfigFile.readAll();

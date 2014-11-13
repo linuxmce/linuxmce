@@ -373,12 +373,19 @@ int main(int argc, char* argv[])
         orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
         orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
 #endif
+
+#ifndef ANDROID
+        if(!sRouter_IP.empty()){
+            orbiterWin.setRouterAddress(QString::fromStdString(sRouter_IP));
+            w.m_ipAddress = QString::fromStdString(sRouter_IP);
+        }
+        orbiterWin.setDeviceNumber(PK_Device);
+        w.iPK_Device=PK_Device;
+#endif
         AbstractImageProvider* modelimageprovider = new AbstractImageProvider(&w);
         orbiterWin.mainView.engine()->addImageProvider("listprovider", modelimageprovider);
         pqOrbiter.moveToThread(&dceThread);
         QObject::connect(&dceThread, SIGNAL(started()), &pqOrbiter, SLOT(beginSetup()));
-
-
 
         //epg listmodel, no imageprovider as of yet
         EPGChannelList *simpleEPGmodel = new EPGChannelList(new EPGItemClass);
@@ -465,7 +472,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter,SIGNAL(resetNowPlaying()), w.nowPlayingButton, SLOT(resetData()));
         QObject::connect(&pqOrbiter, SIGNAL(setPlaylistPosition(int)), w.nowPlayingButton, SLOT(setPlaylistPostion(int)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(changeTrack(QString)), &pqOrbiter, SLOT(changedTrack(QString)), Qt::QueuedConnection);
-       // QObject::connect(&pqOrbiter, SIGNAL(clearPlaylist()), &w, SLOT(updatePlaylist()), Qt::QueuedConnection);
+        // QObject::connect(&pqOrbiter, SIGNAL(clearPlaylist()), &w, SLOT(updatePlaylist()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(newPlaylistPosition(QString)), &pqOrbiter, SLOT(jumpToPlaylistPosition(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(movePlistEntry(QString,int)), &pqOrbiter, SLOT(movePlaylistEntry(QString,int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(savePlist(QString,bool)), &pqOrbiter, SLOT(saveCurrentPlaylist(QString,bool)), Qt::QueuedConnection);
@@ -624,7 +631,7 @@ int main(int argc, char* argv[])
         //now playing signals
         QObject::connect(&pqOrbiter, SIGNAL(setNowPlaying(bool)), w.nowPlayingButton,SLOT(setStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(streamIdChanged(int)), w.nowPlayingButton, SLOT(setStreamID(int)),Qt::QueuedConnection);
-       QObject::connect(&pqOrbiter, SIGNAL(currentScreenChanged(QString)), w.nowPlayingButton, SLOT(setScreen(QString)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(currentScreenChanged(QString)), w.nowPlayingButton, SLOT(setScreen(QString)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(screenChange(QString)), &pqOrbiter, SLOT(setCurrentScreen(QString)));
         QObject::connect(&w, SIGNAL(requestStreamImage()), &pqOrbiter, SLOT(getStreamingVideo()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(requestStoredMediaImage(QString)), &pqOrbiter, SLOT(grabScreenshot(QString)), Qt::QueuedConnection);
@@ -728,7 +735,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(reloadRouter()), &pqOrbiter, SLOT(quickReload()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(routerReload()), &w, SLOT(reloadHandler()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(replaceDevice()), &w, SLOT(replaceHandler()), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(routerDisconnect()), &w, SLOT(disconnectHandler()),Qt::QueuedConnection);       
+        QObject::connect(&pqOrbiter, SIGNAL(routerDisconnect()), &w, SLOT(disconnectHandler()),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(reInitialize()), &pqOrbiter, SLOT(initialize()), Qt::QueuedConnection);
         //   QObject::connect(&w, SIGNAL(deviceNumberChanged(int)), &pqOrbiter, SLOT(setDeviceId(int)));
         QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &orbiterWin, SLOT(setRouterAddress(QString)));
@@ -753,16 +760,15 @@ int main(int argc, char* argv[])
             if(PK_Device == -1){
                 PK_Device = w.getDeviceNumber();
             }
-             orbiterWin.setDeviceNumber(PK_Device); orbiterWin.setRouterAddress(QString::fromStdString(sRouter_IP));
+            orbiterWin.setDeviceNumber(PK_Device); orbiterWin.setRouterAddress(QString::fromStdString(sRouter_IP));
 
         }else if(sRouter_IP =="" && w.getInternalIp() != ""){
             qDebug() << "No Command line opt set but config file located";
 
-            sRouter_IP = w.getInternalIp().toStdString();                                           //use internal ip first
-            if(PK_Device == -1){
-                PK_Device = w.getDeviceNumber();
-            }
-            orbiterWin.setDeviceNumber(PK_Device); orbiterWin.setRouterAddress(w.getInternalIp());
+            sRouter_IP = w.getInternalIp().toStdString();                                          //use internal ip first
+            PK_Device = w.getDeviceNumber();
+            orbiterWin.setDeviceNumber(PK_Device);
+            orbiterWin.setRouterAddress(w.getInternalIp());
         }
         else{
             qDebug() << "Nothing set, using defaults.";
@@ -775,21 +781,21 @@ int main(int argc, char* argv[])
         qDebug() << badMatch.length() - f ;
         badMatch.remove(f, badMatch.length() - f);
 
-//        foreach (const QHostAddress &address, QNetworkInterface::allAddresses()) {
-//            QNetworkInterface t =  QNetworkInterface::interfaceFromIndex(0);
-//             pqOrbiter.m_localMac= t.hardwareAddress();
-//             qDebug() << "My Mac is:: " << pqOrbiter.m_localMac;
-//            if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost)){
-//                if(address.toString().contains(badMatch)){
-//                    qDebug() << "My Ip's" << address.toString() << ":: badMatch==>"<<badMatch;
-//                    w.setLocalAddress(address.toString());
-//                    pqOrbiter.setLocalIp(address.toString());
-//                    w.setHomeNetwork(true);
-//                    break;
-//                }
-//            }
+        //        foreach (const QHostAddress &address, QNetworkInterface::allAddresses()) {
+        //            QNetworkInterface t =  QNetworkInterface::interfaceFromIndex(0);
+        //             pqOrbiter.m_localMac= t.hardwareAddress();
+        //             qDebug() << "My Mac is:: " << pqOrbiter.m_localMac;
+        //            if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost)){
+        //                if(address.toString().contains(badMatch)){
+        //                    qDebug() << "My Ip's" << address.toString() << ":: badMatch==>"<<badMatch;
+        //                    w.setLocalAddress(address.toString());
+        //                    pqOrbiter.setLocalIp(address.toString());
+        //                    w.setHomeNetwork(true);
+        //                    break;
+        //                }
+        //            }
 
-//        }
+        //        }
 
         orbiterWin.initView();
 #ifdef __ANDROID__

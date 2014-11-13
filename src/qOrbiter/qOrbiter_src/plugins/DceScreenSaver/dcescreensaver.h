@@ -63,6 +63,7 @@ public:
     bool fadeEnabled;
     bool zoomEnabled;
     bool useAnimation;
+    int transitionTime;
 
     QPixmap currentImage;
     QPixmap surface;
@@ -157,21 +158,14 @@ public slots:
     void setReady(bool r){ready = r; readyChanged();}
     bool getReady() {return ready;}
     void forceUpdate(){
-#ifdef __ANDROID__
-        QPixmap t = currentImage.scaled(width(), height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
-#else
-        QPixmap t = currentImage.scaled(width(), height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-#endif
 
-        if(!t.isNull()){
-            currentImage = t;
-        }
+
 #ifdef QT5
         update();
 #else
-        update(0,0,width(), height());
+       this->update();
 
-        t=NULL;
+
 #endif
         setDebugInfo("Update forced");
     }

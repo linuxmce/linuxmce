@@ -38,8 +38,9 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     zoomEnabled=false;
     fadeEnabled = false;
     if(useAnimation){
-         m_animationTimer = startTimer(animationInterval);
+        m_animationTimer = startTimer(animationInterval);
     }
+    transitionTime = 2500;
     fadeOpacity = 1;
     currentScale = 1;
     endSize.setHeight(0);
@@ -61,7 +62,7 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     currentImage.fill(Qt::black);
     fadeAnimation = new QPropertyAnimation(this, "fadeOpacity");
 
-    fadeAnimation->setDuration(2500);
+    fadeAnimation->setDuration(transitionTime);
     fadeAnimation->setStartValue(0.0);
     fadeAnimation->setEndValue(1.0);
 
@@ -77,14 +78,11 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
 
 }
 
-DceScreenSaver::~DceScreenSaver()
-{
+DceScreenSaver::~DceScreenSaver(){
     intervalTimer->stop();
-
 }
 
-void DceScreenSaver::setImageList(QStringList l)
-{
+void DceScreenSaver::setImageList(QStringList l){
     if(l.contains("")){
         l.removeAll("");
     }
@@ -98,13 +96,12 @@ void DceScreenSaver::setImageList(QStringList l)
             getNextImage();
             setRunning(true);
         } else {
-          setDebugInfo("Screen Saver inactive");
+            setDebugInfo("Screen Saver inactive");
             setRunning(false);
-           setDebugInfo("Screen Saver images loaded, but screensaver disabled by option.");
+            setDebugInfo("Screen Saver images loaded, but screensaver disabled by option.");
         }
-
         setReady(true);
-       setDebugInfo("Screen Saver images loaded.");
+        setDebugInfo("Screen Saver images loaded.");
     }  else {
         setRunning(false);
         setReady(false);
@@ -114,8 +111,12 @@ void DceScreenSaver::setImageList(QStringList l)
 }
 
 void DceScreenSaver::requestImage(QString img){
+    intervalTimer->stop();
+    requestManager = new QNetworkAccessManager();
+    qDebug() << "requesting image";
     QNetworkRequest req;
     setCurrentImageName(img);
+
     req.setUrl("http://"+requestUrl+"/lmce-admin/imdbImage.php?type=screensaver&val="+img);
     QObject::connect(requestManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processImageData(QNetworkReply*)));
     requestManager->get(req);
@@ -123,18 +124,19 @@ void DceScreenSaver::requestImage(QString img){
 
 void DceScreenSaver::processImageData(QNetworkReply *r){
 
+    requestManager=NULL;
+    qDebug() << "handling new data";
     QByteArray p;
-
 
     if(r->bytesAvailable()){
         p = r->readAll();
     } else{
+        r=NULL;
         return;
     }
 
     QPixmap t;
     t.loadFromData(p);
-
 
     if(t.isNull()){
         setDebugInfo("Null Pixmap");
@@ -149,7 +151,7 @@ void DceScreenSaver::processImageData(QNetworkReply *r){
 
     imgSet=false;
     if(useAnimation){
-       setDebugInfo("Animation enabled.");
+        setDebugInfo("Animation enabled.");
         startFadeTimer();
     } else {
         setDebugInfo("Animation disabled");
@@ -157,7 +159,7 @@ void DceScreenSaver::processImageData(QNetworkReply *r){
         this->forceUpdate();
     }
 
-
+    r=NULL;
 
 }
 
@@ -188,20 +190,29 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
     p->setRenderHint(QPainter::HighQualityAntialiasing, 1);
     QRectF tgtRect(0,0,width(), height());
 
-    if(!useAnimation){
-        fadeOpacity=1;
-    }
+    if(useAnimation){
 
-    if(fadeOpacity==1){
-        p->drawPixmap(tgtRect, surface.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
-    }else{
-        p->drawPixmap(tgtRect, surface.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
-        //setup and new pix map over it
-        p->setOpacity(fadeOpacity);
-        //create 'composed image'
+        if(fadeOpacity==1){
+            // qDebug() << "Scaling in new image -scale level::" << currentScale;
+            //   p->scale(currentScale, currentScale);
+            p->drawPixmap(tgtRect, surface.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
+        }else{
+            if(!currentImage.isNull()){
+                p->drawPixmap(tgtRect, surface.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
+                //setup and new pix map over it
+                p->setOpacity(fadeOpacity);
+                //create 'composed image'
+                //  qDebug() << "Fading in new image - opacity level::" << fadeOpacity;
+                p->drawPixmap(tgtRect, currentImage.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
+
+            }
+        }
+
+    } else {
+        p->setOpacity(1);
         p->drawPixmap(tgtRect, currentImage.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
     }
-     setDebugInfo("DceScreenSaver::paint() ended.");
+    setDebugInfo("DceScreenSaver::paint() ended.");
 }
 #endif
 
@@ -227,7 +238,7 @@ void DceScreenSaver::paint(QPainter *painter){
         //create 'composed image'
         painter->drawPixmap(tgtRect, currentImage.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
     }
-     setDebugInfo("DceScreenSaver::paint() ended.");
+    setDebugInfo("DceScreenSaver::paint() ended.");
 }
 #endif
 
@@ -239,10 +250,13 @@ void DceScreenSaver::timerEvent(QTimerEvent *event){
         if(fadeOpacity!=1 && !currentImage.isNull() ){
             this->update();
         } else   if(fadeOpacity==1 && !imgSet){
-            //  qWarning() << "Transition finish, setting currentImg ==> surface";
-            surface=currentImage.copy();
+            qWarning() << "Transition finish, setting currentImg ==> surface";
             imgSet=true;
-
+            surface=currentImage.copy();
+            intervalTimer->start(interval);
+            beginZoom();
+        } else {
+            this->update();
         }
     }
 
@@ -252,15 +266,13 @@ void DceScreenSaver::timerEvent(QTimerEvent *event){
 
 void DceScreenSaver::beginZoom()
 {
-    //    zoomAnimation->setDuration(interval);
-    //    zoomAnimation->start();
+    zoomAnimation->setDuration(interval);
+    zoomAnimation->start();
 }
 
-void DceScreenSaver::startFadeTimer()
-{
-    fadeAnimation->setDuration(2500);
+void DceScreenSaver::startFadeTimer(){
+    fadeAnimation->setDuration(transitionTime);
     fadeAnimation->start();
-
 }
 
 

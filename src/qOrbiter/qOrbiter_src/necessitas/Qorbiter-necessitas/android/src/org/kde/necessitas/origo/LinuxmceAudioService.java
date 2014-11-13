@@ -332,7 +332,7 @@ return false;
 	}
 
 	public void onBufferingUpdate(MediaPlayer arg0, int percent) {
-        Log.d(TAG, "onBufferingUpdate called --->   percent:" + percent);
+        //Log.d(TAG, "onBufferingUpdate called --->   percent:" + percent);
         }
 
 
