@@ -23,6 +23,7 @@
 #include <cec.h>
 #include "IRBase/IRBase.h"
 #include "../LIRC_DCE/IRReceiverBase.h"
+#include "CECDevice.h"
 
 //<-dceag-decl-b->
 namespace DCE
@@ -46,6 +47,8 @@ public:
 	  int m_dwPK_Device_IRPlugin;
 	  virtual void PrepareToDelete();
 	  map<string,pair<string,int> > m_mapCodesToButtons;
+	  std::vector<CECDevice> m_vectCecDevices;
+
 
 //<-dceag-const-b->
 public:

@@ -25,6 +25,7 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include "CECDevice.h"
 #include <cec.h>
 #include "PlutoUtils/LinuxSerialUSB.h"
 using namespace CEC;
@@ -273,6 +274,7 @@ bool CEC_Adaptor::GetConfig()
 	  }
 
 
+
 	// check all active devices on the CEC bus, let's try to match them to DTs in our tree
 	m_CEC_Addresses.Clear();
 	m_CEC_Addresses = m_pParser->GetActiveDevices(); // Seems to return logical addresses for all known CEC devices
@@ -287,9 +289,25 @@ bool CEC_Adaptor::GetConfig()
 		if ( m_CEC_Addresses[iPtr] ) {
 			// iPtr = Logical Address
 			// m_mapAddresses[i] = Physical Address
+
 			m_mapAddresses[iPtr] = m_pParser->GetDevicePhysicalAddress( (cec_logical_address) iPtr );
 			m_mapVendorId[iPtr] = m_pParser->GetDeviceVendorId( (cec_logical_address) iPtr );
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Active CEC Logical Address: %s, at Physical Address: %X, by Vendor: %s",m_pParser->ToString( (cec_logical_address) iPtr ), m_mapAddresses[iPtr], m_pParser->ToString( (cec_vendor_id)m_mapVendorId[iPtr] ) );
+
+
+			CECDevice device;
+			device.iVendorId = m_pParser->GetDeviceVendorId((cec_logical_address)iPtr);
+			device.iPhysical_Address = m_pParser->GetDevicePhysicalAddress((cec_logical_address)iPtr);
+			device.bActive = m_pParser->IsActiveSource((cec_logical_address)iPtr);
+			device.iCecVersion = m_pParser->GetDeviceCecVersion((cec_logical_address)iPtr);
+			device.power = m_pParser->GetDevicePowerStatus((cec_logical_address)iPtr);
+			device.osdName = m_pParser->GetDeviceOSDName((cec_logical_address)iPtr);
+
+//			strAddr.Format("%x.%x.%x.%x", (iPhysical_Address >> 12) & 0xF, (iPhysical_Address >> 8) & 0xF, (iPhysical_Address >> 4) & 0xF, iPhysical_Address & 0xF);
+//			device.lang = CECDEVICE_UNKNOWN;
+			m_pParser->GetDeviceMenuLanguage((cec_logical_address)iPtr, &device.lang);
+
+			m_vectCecDevices.push_back(device);
 		}
 	}
 
@@ -337,6 +355,9 @@ bool CEC_Adaptor::GetConfig()
 	}
 //	m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(PK_Device_MD,DEVICEDATA_Audio_Settings_CONST);
 
+	cec_logical_address ActiveSource = m_pParser->GetActiveSource();
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CEC Active Source: %s", m_pParser->ToString(ActiveSource) );
+
 
 
 	return true;
@@ -372,7 +393,18 @@ CEC_Adaptor_Command *Create_CEC_Adaptor(Command_Impl *pPrimaryDeviceCommand, Dev
 void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild");
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild - To: %i, ID: %i", pMessage->m_dwPK_Device_To, pMessage->m_dwID);
+
+        cout << "Message ID: " << pMessage->m_dwID << endl;
+        cout << "From:" << pMessage->m_dwPK_Device_From << endl;
+        cout << "To: " << pMessage->m_dwPK_Device_To << endl;
+
+        map<long, string>::iterator i;
+        for (i = pMessage->m_mapParameters.begin(); i != pMessage->m_mapParameters.end(); i++)
+        {
+                cout << "Parameter: " << i->first << " Value: " << i->second << endl;
+        }
+
   // TODO: need to map devices
   switch (pMessage->m_dwID)
   {
@@ -409,7 +441,7 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: Volume
       return;
       break;
     case COMMAND_Mute_CONST:
-      if ( m_pParser->MuteAudio() )
+      if ( m_pParser->AudioToggleMute() )
       {
 LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: Mute");
         sCMD_Result = "OK";
@@ -418,7 +450,7 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: Mute")
       break;
   }
 
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: UNHANDLED COMMAND/CHILD");
+LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: UNHANDLED COMMAND/CHILD - To: %i, ID: %i",  pMessage->m_dwPK_Device_To, pMessage->m_dwID);
   sCMD_Result = "UNHANDLED CHILD";
 
 /*
