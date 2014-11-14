@@ -1266,7 +1266,10 @@ public slots:
     void movePlaylistEntry(QString d, int index) {emit movePlistEntry(d, index); }
     void removePlaylistEntry(int index) {emit removePlistEntry(index);}
     void saveCurrentPlaylist(QString name, bool mode) {emit savePlist(name, mode);} /*true is public, false is private*/
-    void updatePlaylist(){  qDebug() << "playlist updating;";  GenericFlatListModel *pModel = getDataGridModel("Playlist", 18); if(pModel){pModel->refreshData();} }
+    void updatePlaylist(){  qDebug() << "playlist updating;";
+                            GenericFlatListModel *pModel = getDataGridModel("Playlist", 18, "38");
+                                                if(pModel){pModel->refreshData();}
+                         }
     //@}
 
     /*! @name Screenshot & Images slots*/
@@ -1517,6 +1520,7 @@ public slots:
     /* called to clear all (temp) datagrids */
     void clearDataGrid(QString dataGridID);
     void clearAllDataGrid();
+
     Q_INVOKABLE GenericFlatListModel* getDataGridModel(QString dataGridId, int PK_DataGrid, QString initOption);
     Q_INVOKABLE GenericFlatListModel* getDataGridModel(QString dataGridId, int PK_DataGrid);
 
