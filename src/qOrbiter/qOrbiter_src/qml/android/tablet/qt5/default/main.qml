@@ -81,7 +81,7 @@ Item {
         anchors.centerIn: parent
         height:manager.appHeight
         width: manager.appWidth
-        interval:15000
+        interval:60000
 
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
