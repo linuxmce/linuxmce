@@ -30988,5 +30988,53 @@ namespace DCE
 			COMMAND_Submenu_CONST,
 			0 /* number of parameters */); }
 	};
+	class CMD_HDMI_5 : public PreformedCommand {
+	public:
+		CMD_HDMI_5(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, 
+			COMMAND_HDMI_5_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_HDMI_5_DL : public PreformedCommand {
+	public:
+		CMD_HDMI_5_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_HDMI_5_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_HDMI_5_DT : public PreformedCommand {
+	public:
+		CMD_HDMI_5_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_HDMI_5_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_HDMI_5_Cat : public PreformedCommand {
+	public:
+		CMD_HDMI_5_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_HDMI_5_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_HDMI_6 : public PreformedCommand {
+	public:
+		CMD_HDMI_6(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, 
+			COMMAND_HDMI_6_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_HDMI_6_DL : public PreformedCommand {
+	public:
+		CMD_HDMI_6_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_HDMI_6_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_HDMI_6_DT : public PreformedCommand {
+	public:
+		CMD_HDMI_6_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_HDMI_6_CONST,
+			0 /* number of parameters */); }
+	};
+	class CMD_HDMI_6_Cat : public PreformedCommand {
+	public:
+		CMD_HDMI_6_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_HDMI_6_CONST,
+			0 /* number of parameters */); }
+	};
 }
 #endif
