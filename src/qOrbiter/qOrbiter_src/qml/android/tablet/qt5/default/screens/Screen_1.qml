@@ -4,6 +4,7 @@ import "../../../../../skins-common/lib/handlers"
 
 StyledScreen {
     navigationComponent: nav_row.defaultSource
+
     Component.onCompleted:{
         current_header_model=scenarios;
         manager.setBoundStatus(true);

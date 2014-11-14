@@ -101,9 +101,9 @@ Item {
             anchors.fill: parent
             onClicked: {
                 if(manager.currentScreen!=="Screen_1.qml" && !showingUi){
-                    // toggleUi(!showingUi)
+                  //  toggleUi(!showingUi)
                 } else if (manager.currentScreen==="Screen_1.qml"){
-                    // toggleUi(!showingUi)
+                 //  toggleUi(!showingUi)
                 }
             }
         }
@@ -190,10 +190,37 @@ Item {
         focus: true
         state:"active"
         clip:true
+        property string nextPage:""
+
+
+        function setNextPage(next){
+
+            if(next!==nextPage && next!==""){
+                console.log("setNextPage::setting next page "+next)
+                nextPage=next
+
+                if(item){
+                    console.log("setNextPage::closing current page")
+                    pageLoader.item.state="closing"
+                }  else {
+                    console.log("setNextPage:: no existing page, setting new page")
+                    loadNext()
+                }
+            } else {
+                console.log("setNextPage::coulnt set the next page!!")
+            }
+        }
+
+        function loadNext(){
+            console.log("loadNext::Loading next, clearing nextPage")
+            source = "screens/"+nextPage
+
+        }
+
         Connections{
             target:qml_root
             onShowUi:{
-                if(uiState){
+                if(qml_root.showingUi){
                     state="active"
                 }else{
                     state="hidden"
@@ -207,9 +234,8 @@ Item {
         }
         width: manager.appWidth
         Keys.onBackPressed: console.log("back")
-        onSourceChanged:  loadin
-        onLoaded: {
 
+        onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
         }
         onStatusChanged:  if (pageLoader.status == Component.Ready)
@@ -224,7 +250,7 @@ Item {
                           else if(pageLoader.status == Component.Error)
                           {
                               console.log("Command to change to:" + source + " failed!")
-
+                              console.log(pageLoader.Error)
                               pageLoader.source = "screens/Screen_X.qml"
                               screenfile = source
 
@@ -284,7 +310,8 @@ Item {
 
 
     function screenchange(screenname ){
-        pageLoader.source = "screens/"+screenname
+        console.log("screenchange::setting next page to "+screenname)
+        pageLoader.setNextPage(screenname)
     }
 
     function checkStatus(component){
@@ -383,30 +410,5 @@ Item {
         }
     }
 
-    states: [
-        State {
-            name: "wide"
-            PropertyChanges {
-                target: qml_root
-                height:manager.appHeight
-                width:manager.appWidth
-                rotation:0
-            }
 
-        },
-        State {
-            name: "portrait"
-            PropertyChanges {
-                target: qml_root
-                height:manager.appWidth
-                width:manager.appHeight
-                transformOrigin:qml_root.Center
-                rotation:270
-                x:0
-                y:0
-            }
-
-        }
-
-    ]
 }

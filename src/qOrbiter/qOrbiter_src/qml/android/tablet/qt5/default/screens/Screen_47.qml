@@ -6,14 +6,12 @@ StyledScreen {
     id:files_view_screen
     screen: "Media Files View"
     property int current_view_type:1
-
+navigationComponent: "MedialistNav.qml"
     Component.onCompleted: {
 
-        setNavigation("MedialistNav.qml")
-        hideInfoPanel()
-        if(manager.q_mediaType == Mediatypes.STORED_VIDEO ){state= "selection"}else{state="viewing"}
-
+        if(manager.q_mediaType === Mediatypes.STORED_VIDEO ) {state= "selection"}else{state="viewing"}
     }
+
     Item{
         id:content
         anchors.fill: parent
