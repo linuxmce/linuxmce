@@ -1,9 +1,8 @@
 import QtQuick 2.0
 import "../components"
-Item{
+StyledScreen{
     id:screen_x_root
-   height: manager.appHeight
-   width: manager.appWidth
+
 
     Rectangle{
         id:mask

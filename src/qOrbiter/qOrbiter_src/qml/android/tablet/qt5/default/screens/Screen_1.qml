@@ -2,9 +2,12 @@ import QtQuick 2.0
 import "../components"
 import "../../../../../skins-common/lib/handlers"
 
-Item {
-  anchors.fill: parent
-    Component.onCompleted:{ current_header_model=scenarios;manager.setBoundStatus(true); info_panel.state="retracted"; nav_row.navSource=nav_row.defaultSource }
+StyledScreen {
+    navigationComponent: nav_row.defaultSource
+    Component.onCompleted:{
+        current_header_model=scenarios;
+        manager.setBoundStatus(true);
+    }
 
     GridView{
         id:scenario_display
