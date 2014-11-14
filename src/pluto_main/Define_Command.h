@@ -1032,6 +1032,8 @@
 #define COMMAND_Search_CONST 1136
 #define COMMAND_Function_CONST 1137
 #define COMMAND_Submenu_CONST 1138
+#define COMMAND_HDMI_5_CONST 1139
+#define COMMAND_HDMI_6_CONST 1140
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"
