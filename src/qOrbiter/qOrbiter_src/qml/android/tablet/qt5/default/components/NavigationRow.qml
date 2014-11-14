@@ -4,9 +4,8 @@ import "../../../../../skins-common/lib/handlers"
 Row{
     id:nav_row
     height: scaleY(8)
-    anchors{
-        left:parent.left
-        right:parent.right
+    width: manager.appWidth
+    anchors{      
         top:parent.top
     }
     Connections{

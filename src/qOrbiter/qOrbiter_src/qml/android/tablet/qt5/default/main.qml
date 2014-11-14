@@ -6,9 +6,17 @@ import "components"
 
 Item {
     id: qml_root
-    onWidthChanged: console.log(manager.appWidth+"::"+manager.appHeight)
-    height: manager.appWidth
+
+    height: manager.appHeight
     width: manager.appHeight
+
+    Connections{
+        target:manager
+        onOrientationChanged:{
+            console.log("New Height "+manager.appHeight)
+            console.log("New Width " + manager.appWidth)
+        }
+    }
 
     signal close()
     signal changeScreen(string s)
@@ -26,10 +34,10 @@ Item {
     property bool showingUi:true
 
     function scaleX(x){
-        return x/100*qml_root.width
+        return x/100*manager.appWidth
     }
     function scaleY(y){
-        return y/100*qml_root.height
+        return y/100*manager.appHeight
     }
 
     Style{
@@ -70,15 +78,10 @@ Item {
 
     DceScreenSaver{
         id:glScreenSaver
-        anchors{
-            top:qml_root.top
-            bottom:qml_root.bottom
-            left: qml_root.left
-            right: qml_root.right
-        }
-        //        height:manager.appHeight
-        //        width: manager.appWidth
-        interval:60000
+        anchors.centerIn: parent
+        height:manager.appHeight
+        width: manager.appWidth
+        interval:15000
 
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
@@ -98,9 +101,9 @@ Item {
             anchors.fill: parent
             onClicked: {
                 if(manager.currentScreen!=="Screen_1.qml" && !showingUi){
-                    toggleUi(!showingUi)
+                    // toggleUi(!showingUi)
                 } else if (manager.currentScreen==="Screen_1.qml"){
-                    toggleUi(!showingUi)
+                    // toggleUi(!showingUi)
                 }
             }
         }
@@ -160,41 +163,6 @@ Item {
         }
     }
 
-    //    Timer{
-    //        id:mini_ss_timer
-    //        interval:10000
-    //        running: false // screensaver.active
-    //        triggeredOnStart: true
-    //        onTriggered:mini_screen_saver_image.source= "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(mini_screen_saver_image.source)
-    //        repeat: true
-    //    }
-    //    Item{
-    //        id:mini_screen_saver
-    //        anchors{
-    //            top:parent.top
-    //            left:parent.left
-    //            right:parent.right
-    //            bottom:parent.bottom
-    //        }
-
-    //        Component.onCompleted: {
-    //            bgFill.color="blue"
-    //            mini_ss_timer.running = true
-    //            mini_ss_timer.start()
-    //            console.log("Orbiter Consume Screensaver images")
-    //        }
-
-
-
-    //        Image{
-    //            id:mini_screen_saver_image
-    //            height: mini_screen_saver.height
-    //            width: mini_screen_saver.width
-    //            source:"http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+manager.getNextScreenSaverImage(source)
-
-    //        }
-    //    }
-
 
     Rectangle{
         anchors.fill: nav_row
@@ -236,9 +204,8 @@ Item {
         anchors{
             top: manager.currentScreen==="Screen_1.qml" ? media_notification.bottom : nav_row.bottom
             bottom:info_panel.top
-            left:showingUi ? parent.left : parent.right
-            right:parent.right
         }
+        width: manager.appWidth
         Keys.onBackPressed: console.log("back")
         onSourceChanged:  loadin
         onLoaded: {
