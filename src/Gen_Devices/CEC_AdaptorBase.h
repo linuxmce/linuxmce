@@ -44,6 +44,50 @@ public:
 	* @brief Events methods for our device
 	*/
 
+	virtual void Device_Detected(string sMac_Address,string sText,string sIP_Address,int iPK_DeviceTemplate,string sVendorModelID,int iPK_CommMethod,int iPK_PnpProtocol,string sPNP_Serial_Number,string sDeviceData,string sCategory,string sSignature)
+	{
+		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
+			EVENT_Device_Detected_CONST,
+			11 /* number of parameter's pairs (id, value) */,
+			EVENTPARAMETER_Mac_Address_CONST, sMac_Address.c_str(),
+			EVENTPARAMETER_Text_CONST, sText.c_str(),
+			EVENTPARAMETER_IP_Address_CONST, sIP_Address.c_str(),
+			EVENTPARAMETER_PK_DeviceTemplate_CONST, StringUtils::itos(iPK_DeviceTemplate).c_str(),
+			EVENTPARAMETER_VendorModelID_CONST, sVendorModelID.c_str(),
+			EVENTPARAMETER_PK_CommMethod_CONST, StringUtils::itos(iPK_CommMethod).c_str(),
+			EVENTPARAMETER_PK_PnpProtocol_CONST, StringUtils::itos(iPK_PnpProtocol).c_str(),
+			EVENTPARAMETER_PNP_Serial_Number_CONST, sPNP_Serial_Number.c_str(),
+			EVENTPARAMETER_DeviceData_CONST, sDeviceData.c_str(),
+			EVENTPARAMETER_Category_CONST, sCategory.c_str(),
+			EVENTPARAMETER_Signature_CONST, sSignature.c_str()));
+	}
+
+	virtual void Device_Removed(string sMac_Address,string sText,int iPK_Device,string sIP_Address,int iPK_DeviceTemplate,string sVendorModelID,int iPK_CommMethod,int iPK_PnpProtocol,string sPNP_Serial_Number,string sDeviceData,string sCategory)
+	{
+		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
+			EVENT_Device_Removed_CONST,
+			11 /* number of parameter's pairs (id, value) */,
+			EVENTPARAMETER_Mac_Address_CONST, sMac_Address.c_str(),
+			EVENTPARAMETER_Text_CONST, sText.c_str(),
+			EVENTPARAMETER_PK_Device_CONST, StringUtils::itos(iPK_Device).c_str(),
+			EVENTPARAMETER_IP_Address_CONST, sIP_Address.c_str(),
+			EVENTPARAMETER_PK_DeviceTemplate_CONST, StringUtils::itos(iPK_DeviceTemplate).c_str(),
+			EVENTPARAMETER_VendorModelID_CONST, sVendorModelID.c_str(),
+			EVENTPARAMETER_PK_CommMethod_CONST, StringUtils::itos(iPK_CommMethod).c_str(),
+			EVENTPARAMETER_PK_PnpProtocol_CONST, StringUtils::itos(iPK_PnpProtocol).c_str(),
+			EVENTPARAMETER_PNP_Serial_Number_CONST, sPNP_Serial_Number.c_str(),
+			EVENTPARAMETER_DeviceData_CONST, sDeviceData.c_str(),
+			EVENTPARAMETER_Category_CONST, sCategory.c_str()));
+	}
+
+	virtual void Done_Detecting_Devices(string sSignature)
+	{
+		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
+			EVENT_Done_Detecting_Devices_CONST,
+			1 /* number of parameter's pairs (id, value) */,
+			EVENTPARAMETER_Signature_CONST, sSignature.c_str()));
+	}
+
 };
 
 
@@ -79,6 +123,14 @@ public:
 	/**
 	* @brief Device data access methods:
 	*/
+
+	string Get_PortChannel_Number()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_PortChannel_Number_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_PortChannel_Number_CONST];
+	}
 
 	string Get_COM_Port_on_PC()
 	{
@@ -229,6 +281,7 @@ public:
 	virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage) { };
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
 	//Data accessors
+	string DATA_Get_PortChannel_Number() { return GetData()->Get_PortChannel_Number(); }
 	string DATA_Get_COM_Port_on_PC() { return GetData()->Get_COM_Port_on_PC(); }
 	bool DATA_Get_Ignore() { return GetData()->Get_Ignore(); }
 	bool DATA_Get_Only_One_Per_PC() { return GetData()->Get_Only_One_Per_PC(); }
@@ -236,6 +289,9 @@ public:
 	bool DATA_Get_PNP_Create_Without_Prompting() { return GetData()->Get_PNP_Create_Without_Prompting(); }
 	bool DATA_Get_Immediate_Reload_Isnt_Necessar() { return GetData()->Get_Immediate_Reload_Isnt_Necessar(); }
 	//Event accessors
+	void EVENT_Device_Detected(string sMac_Address,string sText,string sIP_Address,int iPK_DeviceTemplate,string sVendorModelID,int iPK_CommMethod,int iPK_PnpProtocol,string sPNP_Serial_Number,string sDeviceData,string sCategory,string sSignature) { GetEvents()->Device_Detected(sMac_Address.c_str(),sText.c_str(),sIP_Address.c_str(),iPK_DeviceTemplate,sVendorModelID.c_str(),iPK_CommMethod,iPK_PnpProtocol,sPNP_Serial_Number.c_str(),sDeviceData.c_str(),sCategory.c_str(),sSignature.c_str()); }
+	void EVENT_Device_Removed(string sMac_Address,string sText,int iPK_Device,string sIP_Address,int iPK_DeviceTemplate,string sVendorModelID,int iPK_CommMethod,int iPK_PnpProtocol,string sPNP_Serial_Number,string sDeviceData,string sCategory) { GetEvents()->Device_Removed(sMac_Address.c_str(),sText.c_str(),iPK_Device,sIP_Address.c_str(),iPK_DeviceTemplate,sVendorModelID.c_str(),iPK_CommMethod,iPK_PnpProtocol,sPNP_Serial_Number.c_str(),sDeviceData.c_str(),sCategory.c_str()); }
+	void EVENT_Done_Detecting_Devices(string sSignature) { GetEvents()->Done_Detecting_Devices(sSignature.c_str()); }
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_Send_Code(string sText,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Learn_IR(int iPK_Device,string sOnOff,int iPK_Text,int iPK_Command,string &sCMD_Result,class Message *pMessage) {};
