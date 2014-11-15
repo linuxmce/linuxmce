@@ -2,14 +2,33 @@ import QtQuick 1.1
 
 Item {
     id:screen_root
-    state:"opening"
+
     focus:true
+    opacity: 0
     Component.onCompleted: {
-
-            setNavigation(navigation)
-
+        setNavigation(navigation)
         forceActiveFocus()
-        state="opened"
+        state="opening"
+        screenOpening()
+    }
+    Behavior on opacity {
+        PropertyAnimation{
+            duration: 350
+        }
+    }
+
+    onOpacityChanged: {
+        if(opacity==0 && state=="closed"){
+            readyToClose()
+        } else if(opacity==1 && state=="opened"){
+            screenOpening()
+        }
+    }
+
+    onStateChanged: {
+        if(state=="closing"){
+            screenClosing()
+        }
     }
 
     function close(){
@@ -26,6 +45,10 @@ Item {
     signal screenClosing()
     signal screenOpening()
 
+    onReadyToClose: {
+        pageLoader.loadNext();
+    }
+
     anchors{
         top:pageLoader.top
         left:pageLoader.left
@@ -38,7 +61,7 @@ Item {
             name: "opening"
             PropertyChanges {
                 target: screen_root
-                opacity:0
+                opacity:1
             }
 
         },
@@ -46,7 +69,7 @@ Item {
             name: "opened"
             PropertyChanges {
                 target: screen_root
-                opacity:1
+                when:opacity==1
             }
         },
         State {
@@ -59,7 +82,7 @@ Item {
         },
         State {
             name: "closed"
-
+            when:opacity==0
         }
     ]
 

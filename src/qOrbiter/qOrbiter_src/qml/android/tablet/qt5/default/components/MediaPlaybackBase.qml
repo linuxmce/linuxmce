@@ -63,10 +63,10 @@ Item{
         Loader{
             id:controlsLoader
             width: parent.width
-
             source:controlComponent
             anchors.bottom: parent.bottom
         }
+
         Item{
             id:hiddenDrag
             height: parent.height

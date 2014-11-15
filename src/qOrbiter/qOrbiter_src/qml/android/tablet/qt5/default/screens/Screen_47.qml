@@ -6,7 +6,7 @@ StyledScreen {
     id:files_view_screen
     screen: "Media Files View"
     property int current_view_type:1
-navigationComponent: "MedialistNav.qml"
+    navigationComponent: "MedialistNav.qml"
     Component.onCompleted: {
 
         if(manager.q_mediaType === Mediatypes.STORED_VIDEO ) {state= "selection"}else{state="viewing"}
@@ -61,7 +61,7 @@ navigationComponent: "MedialistNav.qml"
             id:file_details_loader
             height: parent.height
             width: parent.width
-            anchors.left: files_view_screen.right
+            anchors.left: parent.right
         }
 
     }
@@ -86,13 +86,13 @@ navigationComponent: "MedialistNav.qml"
                 target: file_details_loader
                 anchors.left: parent.right
             }
-//            StateChangeScript{
-//                script: {
-//                    manager.resetModelAttributes;
-//                    mediatypefilter.resetStates();
-//                    attribfilter.resetStates();
-//                }
-//            }
+            //            StateChangeScript{
+            //                script: {
+            //                    manager.resetModelAttributes;
+            //                    mediatypefilter.resetStates();
+            //                    attribfilter.resetStates();
+            //                }
+            //            }
         },
 
         State {

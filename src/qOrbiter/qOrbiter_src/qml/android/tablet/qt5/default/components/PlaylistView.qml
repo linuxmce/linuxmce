@@ -8,9 +8,9 @@ Item{
     property alias delegate:playlist_data.delegate
 
     Connections{
-        target: mediaplaylist
-        onActiveItemChanged:{
-            playlist_data.positionViewAtIndex(mediaplaylist.currentIndex, ListView.Beginning)
+        target: manager
+        onModelChanged:{
+            playlist_data.positionViewAtIndex(manager.currentIndex, ListView.Beginning)
         }
     }
 
@@ -22,7 +22,7 @@ Item{
         id:playlist_data
         height:parent.height
         width:parent.width*.75
-        model:mediaplaylist
+        model:manager.getDataGridModel("Playlists", 63)
     }
 
 

@@ -207,7 +207,8 @@ Item {
                     loadNext()
                 }
             } else {
-                console.log("setNextPage::coulnt set the next page!!")
+                console.log("setNextPage::couldnt set the next page!!")
+                pageLoader.source="screens/"+next
             }
         }
 

@@ -31,7 +31,6 @@ Item {
 
     function close(){
         console.log("Loader Request close")
-        state="closed"
         pageLoader.loadNext();
     }
 

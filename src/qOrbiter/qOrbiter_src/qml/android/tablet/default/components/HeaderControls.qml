@@ -19,7 +19,7 @@ Item {
             smooth:true
             MouseArea{
                 anchors.fill: parent
-                onClicked: manager.adjustVolume(5)
+                onClicked: manager.adjustVolume(1)
             }
         }
         Image {

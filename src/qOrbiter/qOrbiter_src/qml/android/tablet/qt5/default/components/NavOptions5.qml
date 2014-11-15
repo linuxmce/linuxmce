@@ -1,6 +1,6 @@
 import QtQuick 2.0
 Item{
-    height: parent.height
+    height: scaleY(8)
     width: parent.width *.75
 
     StyledText {
@@ -8,9 +8,7 @@ Item{
         text: dceTimecode.qsCurrentTime + " of " + dceTimecode.qsTotalTime
         fontSize:32
         color: "white"
-        anchors.left: nowplayingimage.right
-        anchors.bottom: nowplayingimage.bottom
-
+        anchors.left: parent.left
     }
 
     Row{

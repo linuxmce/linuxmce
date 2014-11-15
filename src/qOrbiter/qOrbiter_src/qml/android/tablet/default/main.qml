@@ -161,6 +161,7 @@ Item {
             console.log("NEW ANDROID URL")
             if(androidUrl.length > 4){
                 console.log("URL ok!")
+               // var hax = String(dceplayer.androidUrl).replace("qOrbiterGenerator", "mediaStreamer")
                 androidSystem.playMedia(dceplayer.androidUrl)
             }
             else{
@@ -382,15 +383,24 @@ Item {
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                if(!uiOn){
-                    console.log("screensaver revive")
+                if(!uiOn){                    console.log("screensaver revive")
                     uiOn=true
                 }
             }
         }
 
     }
+    function screenchange(screenname )
+    {
+        pageLoader.source = "screens/"+screenname
+    }
 
+
+
+    function checkStatus(component)
+    {
+        console.log(component.progress)
+    }
 
     Loader {
         id:pageLoader
@@ -398,12 +408,22 @@ Item {
         focus: true
         source:"screens/Screen_1.qml"
         visible:qml_root.uiOn
+        property string nextScreen:""
+
         anchors{
             top: nav_row.bottom
             bottom:info_panel.top
             left:qml_root.left
             right:qml_root.right
 
+        }
+
+        function startChange(){
+            pageLoader.item.state="closing"
+        }
+
+        function loadNext(){
+            pageLoader.source="screens/"+nextScreen
         }
 
         opacity: uiOn ? 1 : 0
@@ -469,17 +489,7 @@ Item {
     }
 
 
-    function screenchange(screenname )
-    {
-        pageLoader.source = "screens/"+screenname        
-    }
 
-
-
-    function checkStatus(component)
-    {
-        console.log(component.progress)
-    }
 
     FontLoader{
         id:appFont
@@ -535,21 +545,6 @@ Item {
         }
     }
 
-    SequentialAnimation{
-        id:loadin
-
-        PropertyAnimation{
-            id:fadeout
-            target:pageLoader
-            properties: "opacity"; to: "0"; duration: 5000
-        }
-
-        PropertyAnimation{
-            id: fadein
-            target:pageLoader
-            properties: "opacity"; to: "1"; duration: 5000
-        }
-    }
     MouseArea{
         id:mst
         anchors.fill: parent
