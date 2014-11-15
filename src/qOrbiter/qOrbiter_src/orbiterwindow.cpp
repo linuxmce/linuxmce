@@ -212,7 +212,8 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     qrcPath = "qrc:qml/Welcome2.qml";
     localPath = "qt5-desktop/";
 #endif   
-
+    qDebug() << "Adding "<< QApplication::applicationDirPath()+"/imports/";
+    mainView.engine()->addImportPath(QApplication::applicationDirPath()+"/imports/");
 #elif defined (for_freemantle)
     buildType = "/qml/freemantle";
     qrcPath = "qrc:freemantle/Splash.qml";

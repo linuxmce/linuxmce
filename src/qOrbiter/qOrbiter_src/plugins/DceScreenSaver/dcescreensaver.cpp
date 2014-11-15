@@ -40,6 +40,12 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     if(useAnimation){
         m_animationTimer = startTimer(animationInterval);
     }
+    incomingTransition_x=0;
+    incomingTransition_y=0;
+    currentTransition_y=0;
+    currentTransition_x=0;
+
+
     transitionTime = 2500;
     fadeOpacity = 1;
     currentScale = 1;
@@ -72,6 +78,7 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     zoomAnimation->setDuration(interval);
 
     surface.fill(Qt::black);
+    QObject::connect(this, SIGNAL(rotationChanged()), this, SLOT(forceUpdate()));
     QObject::connect(this, SIGNAL(heightChanged()), this, SLOT(forceUpdate()));
     QObject::connect(this, SIGNAL(widthChanged()), this, SLOT(forceUpdate()));
     //  QObject::connect(zoomAnimation, SIGNAL(finished()), this, SLOT(resetPicture()));
@@ -145,8 +152,8 @@ void DceScreenSaver::processImageData(QNetworkReply *r){
         return;
     }else{
         setDebugInfo("new picture");
-        surface =currentImage.copy();
         currentImage= t.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+        fadeOpacity=0;
     }
 
     imgSet=false;
@@ -190,28 +197,21 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
     p->setRenderHint(QPainter::HighQualityAntialiasing, 1);
     QRectF tgtRect(0,0,width(), height());
 
-    if(useAnimation){
-
-        if(fadeOpacity==1){
-            // qDebug() << "Scaling in new image -scale level::" << currentScale;
-            //   p->scale(currentScale, currentScale);
-            p->drawPixmap(tgtRect, surface.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
-        }else{
-            if(!currentImage.isNull()){
-                p->drawPixmap(tgtRect, surface.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
-                //setup and new pix map over it
-                p->setOpacity(fadeOpacity);
-                //create 'composed image'
-                //  qDebug() << "Fading in new image - opacity level::" << fadeOpacity;
-                p->drawPixmap(tgtRect, currentImage.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
-
-            }
-        }
-
-    } else {
-        p->setOpacity(1);
-        p->drawPixmap(tgtRect, currentImage.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
+    if(!useAnimation){
+        fadeOpacity=1;
     }
+
+    if(fadeOpacity==1){
+        p->drawPixmap(tgtRect, surface, tgtRect);
+    }else{
+
+        p->drawPixmap(tgtRect, surface, tgtRect);
+        //setup and new pix map over it
+        p->setOpacity(fadeOpacity);
+        //create 'composed image'
+        p->drawPixmap(tgtRect, currentImage, tgtRect);
+    }
+    setDebugInfo("DceScreenSaver::paint() ended.");
     setDebugInfo("DceScreenSaver::paint() ended.");
 }
 #endif
@@ -230,13 +230,14 @@ void DceScreenSaver::paint(QPainter *painter){
     }
 
     if(fadeOpacity==1){
-        painter->drawPixmap(tgtRect, surface.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
+        painter->drawPixmap(tgtRect, surface, tgtRect);
     }else{
-        painter->drawPixmap(tgtRect, surface.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
+
+        painter->drawPixmap(tgtRect, surface, tgtRect);
         //setup and new pix map over it
         painter->setOpacity(fadeOpacity);
         //create 'composed image'
-        painter->drawPixmap(tgtRect, currentImage.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation), tgtRect);
+        painter->drawPixmap(tgtRect, currentImage, tgtRect);
     }
     setDebugInfo("DceScreenSaver::paint() ended.");
 }
@@ -254,7 +255,6 @@ void DceScreenSaver::timerEvent(QTimerEvent *event){
             imgSet=true;
             surface=currentImage.copy();
             intervalTimer->start(interval);
-            beginZoom();
         } else {
             this->update();
         }

@@ -12,7 +12,6 @@
         <item>QtServiceFramework</item>
         <item>QtSvg</item>
         <item>QtSystemInfo</item>
-        <item>QtWebKit</item>
         <item>QtXmlPatterns</item>
         <item>QtDeclarative</item>
     </array>

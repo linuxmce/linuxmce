@@ -65,6 +65,12 @@ public:
     bool useAnimation;
     int transitionTime;
 
+    int incomingTransition_x;
+    int incomingTransition_y;
+
+    int currentTransition_x;
+    int currentTransition_y;
+
     QPixmap currentImage;
     QPixmap surface;
     QPropertyAnimation *fadeAnimation;
@@ -158,16 +164,10 @@ public slots:
     void setReady(bool r){ready = r; readyChanged();}
     bool getReady() {return ready;}
     void forceUpdate(){
-
-
-#ifdef QT5
-        update();
-#else
-       this->update();
-
-
-#endif
+        qDebug() <<"dcescreensaver::size changed";
+        surface= currentImage.scaled(this->width(), this->height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
         setDebugInfo("Update forced");
+        this->update();
     }
     Q_INVOKABLE  void setImageList(QStringList l);
 private:
@@ -194,6 +194,7 @@ protected:
     void paint(QPainter *painter);
 #endif
     void timerEvent(QTimerEvent *event);
+
 
 
 
