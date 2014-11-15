@@ -102,6 +102,7 @@ signals:
     void enableDebugChanged();
     void fadeEnabledChanged();
     void zoomEnabledChanged();
+    void transitionFinished();
 public slots:
 
     void setZoomEnabled (bool z){ if(z!=zoomEnabled) { zoomEnabled = z; emit zoomEnabledChanged();}  }
@@ -110,7 +111,7 @@ public slots:
     void setFadeEnabled(bool f){ if(fadeEnabled !=f) {fadeEnabled = f; emit fadeEnabledChanged();}  }
     bool getFadeEnabled(){return fadeEnabled;}
 
-    void setDebugInfo(QString i){ if( enableDebug && debugInfo != i) { debugInfo = QTime::currentTime().toString()+"::"+i; emit debugInfoChanged();}  }
+    void setDebugInfo(QString i){ if( enableDebug && debugInfo != i) { debugInfo = QTime::currentTime().toString()+"DceScreenSaver::"+i; emit debugInfoChanged();}  }
     QString getDebugInfo(){return debugInfo;}
 
     void setEnableDebug(bool e){if (enableDebug != e) { enableDebug =e; emit enableDebugChanged(); }  }

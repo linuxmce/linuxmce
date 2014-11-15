@@ -120,7 +120,7 @@ void DceScreenSaver::setImageList(QStringList l){
 void DceScreenSaver::requestImage(QString img){
     intervalTimer->stop();
     requestManager = new QNetworkAccessManager();
-    qDebug() << "requesting image";
+    setDebugInfo("requesting image");
     QNetworkRequest req;
     setCurrentImageName(img);
 
@@ -132,7 +132,7 @@ void DceScreenSaver::requestImage(QString img){
 void DceScreenSaver::processImageData(QNetworkReply *r){
 
     requestManager=NULL;
-    qDebug() << "handling new data";
+    setDebugInfo("handling new data");
     QByteArray p;
 
     if(r->bytesAvailable()){
@@ -164,7 +164,9 @@ void DceScreenSaver::processImageData(QNetworkReply *r){
         setDebugInfo("Animation disabled");
         fadeOpacity=1;
         this->forceUpdate();
+
     }
+    emit newPictureRecieved();
 
     r=NULL;
 
@@ -191,7 +193,7 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    setDebugInfo("DceScreenSaver::paint() started");
+  //  setDebugInfo("DceScreenSaver::paint() started");
     p->setBrush(Qt::NoBrush);
     p->setPen(Qt::NoPen);
     p->setRenderHint(QPainter::HighQualityAntialiasing, 1);
@@ -201,7 +203,7 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
         fadeOpacity=1;
     }
 
-    if(fadeOpacity==1){
+    if(fadeOpacity==1 && imgSet){
         p->drawPixmap(tgtRect, surface, tgtRect);
     }else{
 
@@ -211,15 +213,15 @@ void DceScreenSaver::paint(QPainter *p ,const QStyleOptionGraphicsItem *option, 
         //create 'composed image'
         p->drawPixmap(tgtRect, currentImage, tgtRect);
     }
-    setDebugInfo("DceScreenSaver::paint() ended.");
-    setDebugInfo("DceScreenSaver::paint() ended.");
+  //  setDebugInfo("DceScreenSaver::paint() ended.");
+
 }
 #endif
 
 #ifdef QT5
 void DceScreenSaver::paint(QPainter *painter){
 
-    setDebugInfo("DceScreenSaver::paint() started");
+  //  setDebugInfo("DceScreenSaver::paint() started");
     painter->setBrush(Qt::NoBrush);
     painter->setPen(Qt::NoPen);
     painter->setRenderHint(QPainter::HighQualityAntialiasing, 1);
@@ -232,14 +234,13 @@ void DceScreenSaver::paint(QPainter *painter){
     if(fadeOpacity==1){
         painter->drawPixmap(tgtRect, surface, tgtRect);
     }else{
-
         painter->drawPixmap(tgtRect, surface, tgtRect);
         //setup and new pix map over it
         painter->setOpacity(fadeOpacity);
         //create 'composed image'
         painter->drawPixmap(tgtRect, currentImage, tgtRect);
     }
-    setDebugInfo("DceScreenSaver::paint() ended.");
+   // setDebugInfo("DceScreenSaver::paint() ended.");
 }
 #endif
 
@@ -248,15 +249,18 @@ void DceScreenSaver::paint(QPainter *painter){
 void DceScreenSaver::timerEvent(QTimerEvent *event){
 
     if(event->timerId()==m_animationTimer){
-        if(fadeOpacity!=1 && !currentImage.isNull() ){
+        if(fadeOpacity!=1 ){
             this->update();
         } else   if(fadeOpacity==1 && !imgSet){
-            qWarning() << "Transition finish, setting currentImg ==> surface";
-            imgSet=true;
-            surface=currentImage.copy();
+            setDebugInfo("Transition finish, setting currentImg ==> surface");
+
+            surface=currentImage.scaled(width(),height(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+           imgSet=true;
+            emit transitionFinished();
             intervalTimer->start(interval);
-        } else {
-            this->update();
+
+        } else if(fadeOpacity==1 && imgSet){
+           // this->update();
         }
     }
 
