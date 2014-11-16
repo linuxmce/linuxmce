@@ -138,7 +138,58 @@ int main(int argc, char *argv[])
     /*end mediatype defines */
 
     /* Screen defines */
+    QByteArray screenDefines;
+    QFile screenDefinesFile("../../pluto_main/Define_Screen.h");
+    QRegExp screenRegEx("(#define SCREEN_.*\\d(|\\d))\n");
+    screenRegEx.setPatternSyntax(QRegExp::RegExp2);
+    screenRegEx.setMinimal(true );
+    if(screenDefinesFile.exists()){
+        qDebug() << "\n\nFound Screen definitions:\n";
+        screenDefinesFile.open(QFile::ReadOnly);
+        screenDefines = screenDefinesFile.readAll();
+        screenDefinesFile.close();
+        QStringList screenDefineString;
+        int pos=0;
+        while ((pos = screenRegEx.indexIn(screenDefines, pos)) != -1) {
 
+            QString transform = screenRegEx.cap(1);
+            transform.remove("#define ");
+            transform.remove("SCREEN_");
+            transform.remove("\n");
+            transform.replace(" ", " = ");
+            transform.replace("_CONST", "");
+            screenDefineString << transform ;
+            pos += screenRegEx.matchedLength();
+        }
+        qDebug() << screenDefineString.count() << " screen definitions found";
+        qDebug() << screenDefineString.join(",\n");
+        qDebug() << "writing to file";
+        QString startTag = "/*<-SAG->*/";
+        QString endTag= "/*<-SAE->*/";
+        QByteArray tmp;
+
+        QFile screenEnumFile("../qOrbiter_src/contextobjects/linuxmcedata.h");
+        if(screenEnumFile.exists() && screenEnumFile.open(QFile::ReadWrite)){
+            qDebug() << screenEnumFile.fileName() << " open for read / write.";
+            tmp = screenEnumFile.readAll();
+            int start = tmp.indexOf(startTag)+startTag.length();
+            int end = tmp.indexOf(endTag)-endTag.length()+2;
+            if(start!=-1 && end !=-1){
+                qDebug() <<" Found Tags";
+                tmp.remove(start, end-start);
+                tmp.insert(start, "\n"+screenDefineString.join(",\n"));
+                screenEnumFile.resize(0);
+                screenEnumFile.write(tmp);
+                screenEnumFile.close();
+                qDebug() << "Wrote screen enums, file closed.";
+
+            } else {
+                qDebug() << " Could not locate tags!";
+            }
+
+        }
+
+    }
     /*end screen defines*/
 
     return a.exec();
