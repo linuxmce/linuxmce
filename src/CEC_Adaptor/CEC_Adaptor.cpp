@@ -424,21 +424,12 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       if ( m_pParser->PowerOnDevices( LogicalAddress ) )
       {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Power On");
-	if ( LogicalAddress == CECDEVICE_TUNER1 || LogicalAddress == CECDEVICE_TUNER2 || LogicalAddress == CECDEVICE_TUNER3 || LogicalAddress == CECDEVICE_TUNER4 ||
-	     LogicalAddress == CECDEVICE_PLAYBACKDEVICE1 || LogicalAddress == CECDEVICE_PLAYBACKDEVICE2 || LogicalAddress == CECDEVICE_PLAYBACKDEVICE3 )
-	{
-	  if ( m_pParser->SetStreamPath( iPhysicalAddress ) )
-	  {
-	    sCMD_Result = "OK";
-	    return;
-	  }
-	}
 	sCMD_Result = "OK";
       }
       return;
       break;
     case COMMAND_Generic_Off_CONST:
-      if ( m_pParser->StandbyDevices(LogicalAddress) )
+      if ( m_pParser->StandbyDevices( LogicalAddress ) )
       {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Power Off");
         sCMD_Result = "OK";
@@ -472,49 +463,47 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
     case COMMAND_Input_Select_CONST:
 // Parameter 71 - Value = Input Command
 // TODO: get this CONST
-      uint8_t iPort = 0;
+      char cPort = '0';
       string sCommand = pMessage->m_mapParameters[COMMANDPARAMETER_PK_Command_Input_CONST];
       uint64_t iCommand = strtol ( sCommand.c_str(), NULL, 10 );
       switch ( iCommand )
       {
 	case COMMAND_HDMI_1_CONST:
-	  iPort = 1;
+	  cPort = '1';
 	  break;
 	case COMMAND_HDMI_2_CONST:
-	  iPort = 2;
+	  cPort = '2';
 	  break;
 	case COMMAND_HDMI_3_CONST:
-	  iPort = 3;
+	  cPort = '3';
 	  break;
 	case COMMAND_HDMI_4_CONST:
-	  iPort = 4;
+	  cPort = '4';
 	  break;
 	case COMMAND_HDMI_5_CONST:
-	  iPort = 5;
+	  cPort = '5';
 	  break;
 	case COMMAND_HDMI_6_CONST:
-	  iPort = 6;
+	  cPort = '6';
 	  break;
 	default:
 	  return;
 	  break;
       }
 
-      //bool SetHDMIPort(cec_logical_address iBaseDevice, uint8_t iPort = CEC_DEFAULT_HDMI_PORT);
-      if ( m_pParser->SetHDMIPort(LogicalAddress, iPort ) )
-      {
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: SetHDMIPort");
-        sCMD_Result = "OK";
-      }
+      std::size_t found = sPhysicalAddress.find_first_of("0");
+      sPhysicalAddress[found]=cPort;
 
-      if ( LogicalAddress == CECDEVICE_TUNER1 || LogicalAddress == CECDEVICE_TUNER2 || LogicalAddress == CECDEVICE_TUNER3 || LogicalAddress == CECDEVICE_TUNER4 ||
-	     LogicalAddress == CECDEVICE_PLAYBACKDEVICE1 || LogicalAddress == CECDEVICE_PLAYBACKDEVICE2 || LogicalAddress == CECDEVICE_PLAYBACKDEVICE3 )
-      {
-	if ( m_pParser->SetStreamPath( iPhysicalAddress ) )
-	{
-	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: SetHDMIPort: SetStreamPath");
-	  sCMD_Result = "OK";
-	}
+//      sArguments = "4F 82" + sPhysicalAddress.substr(0, 2) + " " + sPhysicalAddress.substr(2, 2);
+      cec_command cmd;
+      cmd.Clear();
+      cmd.PushBack(0x4F); /* from - to */
+      cmd.PushBack(0x82); /* cmd number */
+      cmd.PushBack( strtol( sPhysicalAddress.substr(0, 2).c_str(), NULL, 16) );
+      cmd.PushBack( strtol( sPhysicalAddress.substr(2, 2).c_str(), NULL, 16) );
+
+      if ( m_pParser->Transmit(cmd) ) {
+	sCMD_Result = "OK";
       }
       return;
       break;
