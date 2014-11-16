@@ -62,20 +62,30 @@ Item {
 
     DceScreenSaver{
         id:glScreenSaver
-        height: manager.appHeight
-        width: manager.appWidth
-        focus:true
+        anchors{
+            top:qmlroot.top
+            bottom:qmlroot.bottom
+            left: qmlroot.left
+            right: qmlroot.right
+        }
         interval:30000
-        active:true
-        anchors.centerIn: parent
+        useAnimation: true
+        onDebugInfoChanged: console.log(debugInfo)
+        active:manager.m_ipAddress==="192.168.80.1"
         requestUrl:manager.m_ipAddress
+        Component.onCompleted: {
+            glScreenSaver.setImageList(manager.screensaverImages)
+        }
+
         Connections{
             target:manager
-            onScreenSaverImagesReady:glScreenSaver.setImageList(manager.screensaverImages)
+            onScreenSaverImagesReady:{
+                glScreenSaver.setImageList(manager.screensaverImages)
+                console.log("Orbiter Consume Screensaver images")
+                console.log("Orbiter counts " + glScreenSaver.pictureCount)
+            }
         }
-        Component.onCompleted: {
-                  glScreenSaver.setImageList(manager.screensaverImages)
-              }
+
 
         MouseArea{
             anchors.fill: parent
@@ -112,7 +122,7 @@ Item {
         if (pageLoader.status == Component.Ready){
             var s = String(screenname)
             manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-           // manager.setCurrentScreen(screenname)
+            // manager.setCurrentScreen(screenname)
             componentLoader.source= ""
         }else if (pageLoader.status==Component.Error){
             manager.setCurrentScreen("Error.qml")
@@ -179,7 +189,7 @@ Item {
         if (componentLoader.status == Component.Ready){
             if(paramObj){
                 var i = componentLoader.item
-                for(var p in paramObj){                   
+                for(var p in paramObj){
                     i[p] =paramObj[p]
                 }
                 console.log(JSON.stringify(componentLoader.item))
@@ -218,6 +228,7 @@ Item {
         anchors.top: parent.top
         anchors.left:parent.left
         focus:true
+        useInvertTrick: false
 
 
         //  onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
@@ -226,8 +237,8 @@ Item {
             if(videoStream){
                 console.log("dceplayer::raising window")
                 dceplayer.z=1
-                 glScreenSaver.setScreenSaverActive(false)
-               } else {
+                glScreenSaver.setScreenSaverActive(false)
+            } else {
                 console.log("dceplayer::lowering window")
                 glScreenSaver.setScreenSaverActive(true)
                 dceplayer.z=-5

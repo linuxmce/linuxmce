@@ -1,6 +1,7 @@
 import QtQuick 1.1
 import "../components"
 import "../../../skins-common/lib/handlers"
+import org.linuxmce.enums 1.0
 Item{
     id:sleepingmenu
 
@@ -66,7 +67,7 @@ Item{
                                 id:alarmlist
                                 height: scaleY(35)
                                 width: scaleX(25)
-                                model: manager.getDataGridModel("sleepingAlarms", 29, String(manager.getlocation()))
+                                model: manager.getDataGridModel("sleepingAlarms", DataGrids.Alarms_In_Room, String(manager.getlocation()))
                                 anchors.centerIn: parent
                                 anchors.margins: 10
 

@@ -1,5 +1,5 @@
 import QtQuick 1.0
-
+import org.linuxmce.enums 1.0
 import AudioVisual 1.0
 import "../effects"
 import "../components"
@@ -126,7 +126,7 @@ Item
             },
             State {
                 name: "tv"
-                when:manager.q_attributetype_sort === "12"
+                when:manager.q_attributetype_sort === MediaSubtypes.TVSHOWS
                 PropertyChanges {
                     target: mainItem
                     width: scaleX(21);
@@ -151,7 +151,7 @@ Item
             },
             State {
                 name: "movies"
-                when:manager.q_subType === "2"
+                when:manager.q_subType == MediaSubtypes.MOVIES
                 PropertyChanges {
                     target: mainItem
                     width: scaleX(16);
@@ -170,7 +170,7 @@ Item
             },
             State {
                 name: "seasons"
-                when:manager.q_attributetype_sort === "52"
+                when:manager.q_attributetype_sort === Attributes.TV_Season_ID
                 PropertyChanges {
                     target: mainItem
                     width: scaleX(14);
