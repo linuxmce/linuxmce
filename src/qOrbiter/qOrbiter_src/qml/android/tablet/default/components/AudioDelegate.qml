@@ -11,7 +11,6 @@ Item{
         opacity: .65
         color:trap.pressed ? "darkgreen" : "black"
         anchors.margins: 10
-
     }
 
     Image{
@@ -43,9 +42,10 @@ Item{
         anchors.bottom: parent.bottom
         fontSize: 36
         color: "White"
-        isBold: true
+        isBold: false
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         width: fillah.width
+        height: parent.height /4
     }
 
     MouseArea{

@@ -11,8 +11,8 @@ Item{
         bottom:parent.bottom
     }
 
-    property int currentCellHeight:scaleX(20)
-    property int currentCellWidth:scaleX(20)
+    property int currentCellHeight:scaleX(30)
+    property int currentCellWidth:scaleX(30)
 
     property variant dvdPosterDimensions:{"w":755, "h":1080 }
     property variant hdPosterDimensions:{"w":955, "h":1080 }
@@ -153,8 +153,8 @@ Item{
             extend:"video"
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleY(20)
-                currentCellWidth:scaleX(19)
+                currentCellHeight: scaleY(33)
+                currentCellWidth:scaleX(33)
             }
         },
         State {
@@ -164,7 +164,7 @@ Item{
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: currentCellWidth*hdPosterRatio
-                currentCellWidth:scaleX(20)
+                currentCellWidth:scaleX(25)
             }
         },
         State {
@@ -183,8 +183,8 @@ Item{
             extend:"tv"
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleY(20)
-                currentCellWidth:scaleX(19)
+                currentCellHeight: scaleY(33)
+                currentCellWidth:scaleX(33)
             }
         }
     ]

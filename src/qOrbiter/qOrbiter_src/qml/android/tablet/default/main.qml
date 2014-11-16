@@ -434,7 +434,7 @@ Item {
         }
 
         Keys.onBackPressed: console.log("back")
-        onSourceChanged:  loadin
+
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
         }
