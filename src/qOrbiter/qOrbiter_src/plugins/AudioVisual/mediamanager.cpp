@@ -168,7 +168,7 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaObject,SIGNAL(metaDataChanged()), this, SLOT(updateMetaData()));
     QObject::connect(mediaObject, SIGNAL(hasVideoChanged(bool)), this , SLOT(setVideoStream(bool)));
     /*internals*/
-    QObject::connect(audioSink, SIGNAL(volumeChanged(qreal)), this, SLOT(setVolume(qreal)));
+    QObject::connect(audioSink, SIGNAL(volumeChanged(qreal)), this, SLOT(setDisplayVolume(qreal)));
     QObject::connect(audioSink, SIGNAL(mutedChanged(bool)), this, SLOT(setMuted(bool)));
     mediaObject->setTickInterval(quint32(1000));
 #elif QT5
@@ -555,6 +555,8 @@ void MediaManager::disconnectInfoSocket()
 bool MediaManager::initViews(bool flipped)
 {
 #if defined (QT4) && ! defined (__ANDROID__)
+
+
     filterProxy = new ColorFilterProxyWidget(this);
 
     if(flipColors){
@@ -562,6 +564,9 @@ bool MediaManager::initViews(bool flipped)
     }
     else{
         filterProxy->invert = false;
+    }
+    if(!useInvertTrick){
+        filterProxy->enable=false;
     }
 
     filterProxy->setWidget(videoSurface);

@@ -71,10 +71,12 @@ class MediaManager :
     Q_PROPERTY(int mediaBuffer READ getMediaBuffer WRITE setMediaBuffer NOTIFY mediaBufferChanged)
     Q_PROPERTY(QString fileReference READ getFileReference NOTIFY fileReferenceChanged)
     Q_PROPERTY(qreal volume READ getVolume NOTIFY volumeChanged)
+    Q_PROPERTY(qreal displayVolume READ getDisplayVolume() WRITE setDisplayVolume NOTIFY displayVolumeChanged)
     Q_PROPERTY(bool muted READ getMuted WRITE setMuted NOTIFY mutedChanged)
     Q_PROPERTY(QString fileUrl READ getMediaUrl NOTIFY fileUrlChanged)
     Q_PROPERTY(int incomingTime READ getIncomingTime WRITE setIncomingTime NOTIFY incomingTimeChanged)
     Q_PROPERTY(bool flipColors READ getColorFlip WRITE setColorFlip NOTIFY colorFlipChanged)
+    Q_PROPERTY(bool useInvertTrick READ getInvertTrick WRITE setInvertTrick  NOTIFY useInvertTrickChanged)
     Q_PROPERTY(bool videoStream READ getVideoStream WRITE setVideoStream NOTIFY videoStreamChanged)
     Q_PROPERTY(QString serverAddress READ getServerAddress WRITE setServerAddress NOTIFY serverAddressChanged)
     Q_PROPERTY(int deviceNumber READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
@@ -109,11 +111,13 @@ public:
 
     bool mediaPlaying;
     bool hasError;
+    bool useInvertTrick;
     QString lastError;
     QString lastTick;
 
     //--------------------------
     qreal volume;
+    qreal displayVolume;
     bool muted;
 
 #ifdef NECESSITAS
@@ -192,6 +196,7 @@ public:
 #endif
 
 signals:
+    void useInvertTrickChanged();
     void videoStreamChanged();
     void connectedChanged();
     void currentStatusChanged();
@@ -231,11 +236,14 @@ signals:
     void pauseMedia();
     void requestPosition();
     void requestDuration();
-
+    void displayVolumeChanged();
     void androidVolumeUp();
     void androidVolumeDown();
 
 public slots:
+
+    void setInvertTrick(bool i){ if(i!=useInvertTrick){useInvertTrick=i; emit useInvertTrickChanged();} }
+    bool getInvertTrick() {return useInvertTrick;}
 
     void setVideoStream(bool b ){
 #ifdef QT4
@@ -276,7 +284,9 @@ public slots:
         flipColors = f;
 #ifndef Q_OS_ANDROID
 #ifndef QT5
+        if(useInvertTrick){
         filterProxy->invert = f;
+        }
 #endif
 #endif
         emit colorFlipChanged();
@@ -306,11 +316,8 @@ public slots:
 
 #ifdef QT4
 #ifndef Q_OS_ANDROID
-        qreal c = audioSink->volume();
-        qWarning() << "Current volume" << c;
-        qreal d = c+0.01;
 
-        audioSink->setVolume(d);
+        audioSink->setVolume(vol);
 #else
         setPluginVolume((double)vol);
 #endif
@@ -318,12 +325,17 @@ public slots:
 #endif
         qDebug() << vol;
         volume = vol;
+        displayVolume=vol;
+        emit displayVolumeChanged();
         emit volumeChanged();
     }
 
     qreal getVolume(){
         return volume;
     }
+
+    void setDisplayVolume(qreal lvl){if(displayVolume !=lvl){ displayVolume=lvl; emit displayVolumeChanged();} }
+    qreal getDisplayVolume(){return displayVolume;}
 
     void mediaStarted(){
         setMediaPlaying(true);
