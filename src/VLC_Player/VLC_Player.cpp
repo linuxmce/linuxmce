@@ -266,6 +266,35 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
   cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
+
+  string sMediaInfo;
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::CMD_Play_Media() called with iPK_MediaType %d, iStreamID %d, sMediaPosition %s, sMediaURL %s",
+				      iPK_MediaType,iStreamID,sMediaPosition.c_str(),sMediaURL.c_str());
+  
+  // Error out if VLC isn't initialized for some reason...
+  if (!m_pVLC)
+    {
+      sCMD_Result="ERROR";
+    }
+
+  if (IsRemoteDVD(sMediaURL))
+    {
+      MountRemoteDVD(sMediaURL);
+    }
+
+  if (m_pVLC->PlayURL(sMediaURL,sMediaPosition,sMediaInfo))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::EVENT_Playback_Started(streamID=%i)",iStreamID);
+      EVENT_Playback_Started(sMediaURL,iStreamID,sMediaInfo,m_pVLC->m_sAudioInfo,m_pVLC->m_sVideoInfo);
+    }
+  else
+    {
+      UnmountRemoteDVD();
+      sCMD_Result="ERROR";
+      EVENT_Playback_Completed(sMediaURL,iStreamID,true);
+    }
+
 }
 
 //<-dceag-c38-b->
@@ -913,6 +942,13 @@ void VLC_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,M
 /**
  * Remote DVD mount/umount functions.
  */
+
+bool VLC_Player::IsRemoteDVD(string sURL)
+{
+	bool bResult = false;
+	ExtractComputerAndDeviceFromRemoteDVD(sURL, bResult);
+	return bResult;
+}
 
 bool VLC_Player::MountRemoteDVD(string sURL) {
   // TODO release previously mounted DVD?

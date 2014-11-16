@@ -46,6 +46,8 @@ namespace DCE
     };
 
     Config *m_pConfig;
+    string m_sAudioInfo; // TBD: Compatible with Xine_Player
+    string m_sVideoInfo; // TBD: Compatible with Xine_Player
 
     string m_sWindowTitle;
     VLC(Config* pConfig);
@@ -53,7 +55,7 @@ namespace DCE
     bool init();
     bool CreateWindow();
     bool Minimize();
-    void PlayURL(string sMediaURL);
+    bool PlayURL(string sMediaURL, string sMediaPosition, string& sMediaInfo);
     void Stop();
     float GetDuration();
     void SetDuration(libvlc_time_t newDuration);
@@ -74,6 +76,7 @@ namespace DCE
     void MoveLeft();
     void MoveRight();
     void EnterGo();
+    void SetAudioVideoInfo();
 
   };
 

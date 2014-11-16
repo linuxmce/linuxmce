@@ -21,8 +21,8 @@
 #include "WindowUtils/WindowUtils.h"
 #include <X11/keysym.h>
 
-#define INACTIVE_VIDEO "/home/public/data/videos/rejected.dvd"
-// #define INACTIVE_VIDEO "/usr/pluto/share/black.mpeg"
+// #define INACTIVE_VIDEO "/home/public/data/videos/rejected.dvd"
+#define INACTIVE_VIDEO "/usr/pluto/share/black.mpeg"
 
 namespace DCE
 {
@@ -33,6 +33,8 @@ namespace DCE
     m_pConfig = pConfig;
     m_sWindowTitle = "lmcevlc";
     m_iSerialNum=0;
+    m_sAudioInfo="";
+    m_sVideoInfo="";
   }
 
   VLC::~VLC()
@@ -178,7 +180,7 @@ namespace DCE
 
   }  
 
-  void VLC::PlayURL(string sMediaURL)
+  bool VLC::PlayURL(string sMediaURL, string sMediaPosition, string& sMediaInfo)
   {
     // libvlc_time_t iLength=0;
     string::size_type pos=0;
@@ -189,13 +191,26 @@ namespace DCE
       }
     
     libvlc_media_t *m = libvlc_media_new_location (m_pInst, sMediaURL.c_str());
+    if (!m)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC::PlayURL() libvlc_media_new_location() returned NULL.");
+	return false;
+      }
+
     libvlc_media_player_set_media(m_pMp, m);
     libvlc_media_release(m);
     libvlc_media_player_set_xwindow (m_pMp, m_Window);
     SetDuration(libvlc_media_player_get_length(m_pMp));
-    libvlc_media_player_play(m_pMp);
+    if (!libvlc_media_player_play(m_pMp))
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC::PlayURL() - libvlc_media_player_play not successful.");
+	SetPlaying(false);
+	SetAudioVideoInfo();
+	return false;
+      }
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"media player is seekable? %d",libvlc_media_player_is_seekable(m_pMp));
     SetPlaying(true);
+    return true;
   }
 
   void VLC::Stop()
@@ -331,6 +346,12 @@ namespace DCE
 
     WindowUtils::SendKeyToWindow(m_pDisplay,m_Window,XK_Return,m_iSerialNum++);
     
+  }
+
+  void VLC::SetAudioVideoInfo()
+  {
+    m_sAudioInfo="";
+    m_sVideoInfo="";
   }
 
 }
