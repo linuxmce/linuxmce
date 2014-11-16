@@ -1,60 +1,74 @@
 import QtQuick 1.0
+import org.linuxmce.enums 1.0
 Item {
-    id: genericFileDetails
-
+    id: filedetailrect
+    width: manager.appWidth
+    height:manager.appHeight
+    state:"closed"
     anchors{
         top:parent.top
+        right:content.left
         bottom:parent.bottom
     }
-    width: parent.width
 
-    // property int bgImageProp:manager.q_subType ===("1"||"13") ? 43 : manager.q_attributetype_sort===53 ? 43 :36
-    MouseArea{
-        anchors.fill: filedetailrect
-        hoverEnabled: true
+    property int bgImageProp:manager.q_subType ===("1"||"13") ? 43 : manager.q_attributetype_sort===53 ? 43 :36
+
+    Timer{
+        id:poptimer
+        interval: 1500
+        onTriggered: filedetailrect.height = parent.height
+        running:true
     }
 
+    Behavior on height{
+        PropertyAnimation{
+            target: filedetailrect
+            property: "height"
+            duration: 1000
+            easing.type: Easing.OutElastic
+            easing.amplitude: .6
+        }
+    }
 
-    Connections{
-        target:filedetailsclass
-        onImageChanged:filedetailsimage.source = "http://"+m_ipAddress+"/lmce-admin/MediaImage.php?img="+filedetailsclass.screenshot
+    MouseArea{
+        anchors.fill: parent
+        hoverEnabled: true
+
+    }
+
+    Image {
+        id: fdbg
+        //  source: "../img/icons/nowplaying.png"
+        anchors.fill: filedetailrect
+        MouseArea{
+            anchors.fill: parent
+
+        }
+    }
+
+    Image{
+        id:imdb
+        anchors.fill: parent
+        source:"http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=imdb&file="+filedetailsclass.file+"&val="+bgImageProp
+        // onStatusChanged: imdb.status == Image.Ready ? filedetailrect.height = scaleY(100) : ""
     }
 
     Rectangle{
-        id:bg_mask
+        id:filler
         anchors.fill: parent
-        color:"black"
+        color: "black"
         opacity:.65
     }
-    Item{
-        anchors{
-            top:parent.top
-            left:parent.left
-            right:parent.right
-            height:filename_text.height
-        }
-        Rectangle{
-            id:titlerect
-            height: childrenRect.height + 5
-            width: parent.width
-            gradient: style.bgContentGradient
-            radius:2.5
-        }
 
-        StyledText {
-            id: filename_text
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: filedetailsclass.filename
-            font.pixelSize: 14
-            font.bold: true
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        }
-    }
+    //    FileDetailsHeader {
+    //        id: titlerect
+    //    }
 
-    Item{
+    Rectangle{
         id:imageholder
         height:childrenRect.height
         width:childrenRect.width
+        color: "transparent"
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
@@ -62,7 +76,7 @@ Item {
         BorderImage {
             id: borderimg
             horizontalTileMode: BorderImage.Repeat
-            source: "../img/icons/drpshadow.png"
+            //  source: "../img/icons/drpshadow.png"
             anchors.fill: filedetailsimage
             anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
             border { left: 10; top: 10; right: 10; bottom: 10 }
@@ -70,37 +84,41 @@ Item {
         }
         Image {
             id: filedetailsimage
-            width: filedetailsclass.aspect=="wide"? scaleX(30) : scaleX(23)
-            height:filedetailsclass.aspect=="wide"?scaleY(40) : scaleY(55)
-            source:"http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=imdb&file="+filedetailsclass.file+"&val="+13
+            property bool profile : filedetailsimage.sourceSize.height > filedetailsimage.sourceSize.width ? true : false
+            width:profile ? scaleX(25) : scaleX(45)
+            height:profile ? scaleY(65) : scaleY(58)
+            source:filedetailsclass.screenshot !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot : ""
             smooth: true
         }
 
         Image {
             id: npmask
-            source: "../img/icons/transparencymask.png"
+            // source: "../img/icons/transparencymask.png"
             anchors.fill: filedetailsimage
             opacity: .5
-
         }
     }
 
 
     Rectangle {
-        id: metadataCol
-        anchors.verticalCenter: imageholder.verticalCenter
-
-        width:  parent.width *.40
+        id: rectangle1
+        anchors.top: imageholder.top
+        width:  filedetailsimage.profile ? parent.width * .70 :  parent.width *.40
         height: childrenRect.height
         radius: 2.5
-        clip:  true
-        gradient: style.bgContentGradient
-
+        clip:  false
+        color:"transparent"
         anchors.left: imageholder.right
         anchors.leftMargin: scaleX(1)
 
-        Column
-        {
+        Rectangle{
+            id:fill
+            color: "black"
+            anchors.fill: parent
+            opacity: .65
+        }
+        Column{
+            id:metadata
             spacing:5
             anchors.margins: scaleY(1)
             width: parent.width
@@ -108,8 +126,8 @@ Item {
             StyledText {
                 id: fnametext
                 text: "Title: " + filedetailsclass.mediatitle
-                font.pixelSize: scaleY(4)
-                color:"white"
+                font.pixelSize: scaleY(5)
+                color:"aliceblue"
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 width: rectangle1.width *.95
             }
@@ -117,149 +135,131 @@ Item {
             StyledText {
                 id: programtext
                 width: scaleX(35)
-                text: qsTr("Album: ") + filedetailsclass.album
+                text: qsTr("Program: ") + filedetailsclass.program
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 smooth: true
+                color:"aliceblue"
                 font.pixelSize: scaleY(4)
-                visible:  filedetailsclass.album =="" ? false: true
+                visible:  filedetailsclass.program =="" ? false: true
             }
 
             StyledText {
                 id: episode
                 width: scaleX(35)
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                text: qsTr("Track: ") + filedetailsclass.track
+                text: qsTr("Episode: ") + filedetailsclass.episode
                 smooth: true
+                color:"aliceblue"
                 font.pixelSize: scaleY(4)
-                color:"white"
-                visible:  filedetailsclass.track =="" ? false: true
+                visible:  filedetailsclass.episode =="" ? false: true
             }
 
             StyledText {
                 id: genre
-                width: scaleX(35)
+                width: parent.width *.95
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
-
+                text: qsTr("Genre(s): ") + filedetailsclass.genre
                 smooth: true
-                isBold: false
+                color:"aliceblue"
                 font.pixelSize: scaleY(4)
-                color:"white"
                 visible:  filedetailsclass.genre =="" ? false: true
-                MouseArea{
-                    anchors.fill: genre
-                    hoverEnabled: true
-                    onEntered: { genre.elide = "ElideNone" ; }
-                    onExited: {genre.elide = "ElideRight"; }
-                }
-            }
-            StyledText {
-                id: released
-                width: scaleX(35)
-                wrapMode: "WrapAtWordBoundaryOrAnywhere"
-                text: qsTr("Released: ") + dcenowplaying.releasedate
-                smooth: true
-                font.pixelSize: scaleY(4)
-                color:"white"
-                visible:  filedetailsclass.releasedate ==="" ? false: true
-            }
 
+            }
 
             StyledText {
                 id: starring
-                width: scaleX(35)
+                width: parent.width *.95
                 wrapMode: "WrapAtWordBoundaryOrAnywhere"
                 text: qsTr("Perfomers: ") + filedetailsclass.performerlist
-
-                //  font.bold: true
-                isBold: false
                 smooth: true
+                color:"aliceblue"
                 font.pixelSize: scaleY(4)
-                color:"white"
                 elide: "ElideRight"
                 visible:  filedetailsclass.performerlist =="" ? false: true
 
-                MouseArea{
-                    anchors.fill: starring
-                    hoverEnabled: true
-                    onEntered: { starring.elide = "ElideNone" ; }
-                    onExited: {starring.elide = "ElideRight"; }
-                }
+            }
+            StyledText {
+                id: studiotext
+                width: parent.width *.95
+                text: qsTr("Program: ") + filedetailsclass.studio
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                smooth: true
+                color:"aliceblue"
+                font.pixelSize: scaleY(3)
+                visible:  filedetailsclass.studio =="" ? false: true
+            }
+
+            StyledText{
+                id:rating
+                text: filedetailsclass.rating
+                visible:  filedetailsclass.rating ==="" ? false: true
+            }
+
+            StyledText {
+                id: synopsis
+                width: parent.width *.95
+                wrapMode: "WrapAtWordBoundaryOrAnywhere"
+                text:  filedetailsclass.synop
+                smooth: true
+                color:"aliceblue"
+                font.pixelSize: scaleY(3)
+                // elide: "ElideRight"
+                visible:  filedetailsclass.synop =="" ? false: true
             }
         }
     }
-
 
     Row{
         id:options
         anchors.bottom: parent.bottom
         height: childrenRect.height
         width: parent.width
-        clip:true
 
         StyledButton{
             buttonText: "Play"
-            hitArea.onReleased: manager.playMedia(filedetailsclass.file)
+            hitArea.onReleased: {
+                 content.state="viewing"
+                manager.playMedia(filedetailsclass.file);
+
+            }
         }
 
         StyledButton{
             buttonText: "Close"
-            hitArea.onReleased: {content.state="viewing"; filedetailsclass.clear()}
+            hitArea.onReleased: {
+                content.state="viewing";
+                filedetailsclass.clear()
+            }
         }
     }
 
     states: [
         State {
-            name: "default"
+            name: "closed"
+            extend: ""
 
             AnchorChanges{
-                target:genericFileDetails
-                anchors{
-                    left:parent.left
-                }
-            }
-            PropertyChanges {
-                target: options
-                visible:false
-            }
-            PropertyChanges {
-                target: metadataCol
-                visible:false
-            }
-            PropertyChanges {
-                target: imageholder
-                visible:false
+                target:filedetailrect
+                anchors.right: content.left
             }
         },
-        State{
-            name: "hidden"
-            extend: "default"
+        State {
+            name: "open"
+
             AnchorChanges{
-                target:genericFileDetails
-                anchors{
-                    left:parent.left
-                }
-            }
-        },
-        State{
-            name: "showing"
-            extend: "default"
-            AnchorChanges{
-                target:genericFileDetails
-                anchors{
-                    left:parent.left
-                }
-            }
-            PropertyChanges {
-                target: metadataCol
-                visible:true
-            }
-            PropertyChanges {
-                target: options
-                visible:true
+                target: filedetailrect
+                anchors.right: content.right
             }
         }
-
     ]
+    transitions: Transition {
+        from: "closed"
+        to: "open"
+        AnchorAnimation{
+           duration: 350
+        }
+    }
+
 }
 
 

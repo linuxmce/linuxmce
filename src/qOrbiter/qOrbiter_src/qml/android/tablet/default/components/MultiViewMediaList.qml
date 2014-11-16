@@ -187,6 +187,17 @@ Item{
                 currentCellWidth:scaleX(33)
             }
         }
+        ,
+        State {
+            name: "radio"
+            when:manager.q_mediaType == Mediatypes.NP_OTARADIO
+            extend:"audio"
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(33)
+                currentCellWidth:scaleX(33)
+            }
+        }
     ]
 
 }

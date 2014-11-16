@@ -7,7 +7,7 @@ StyledScreen {
     screen: "Media Files View"
     property int current_view_type:1
     property string currentSeekLetter:""
-
+    property bool showDetails: false
     Keys.onReleased: {
 
         switch(event.key){
@@ -193,13 +193,11 @@ StyledScreen {
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
-        Loader{
-            id:file_details_loader
-            height: parent.height
-            width: parent.width
-            anchors.left: files_view_screen.right
-            source:"../components/FileDetails_"+manager.q_mediaType+".qml"
+        FileDetailsGeneric{
+            id:fileDetails
         }
+
+
 
         states: [
             State {
@@ -216,12 +214,18 @@ StyledScreen {
                     target: typeSelection
                     visible:true
                 }
-                AnchorChanges{
-                    target: file_details_loader
-                    anchors.left: parent.right
+
+                PropertyChanges {
+                    target: fileDetails
+                    state:"closed"
                 }
+
                 StateChangeScript{
-                    script: {manager.resetModelAttributes; mediatypefilter.resetStates(); attribfilter.resetStates(); }
+                    script: {
+                        manager.resetModelAttributes;
+                        mediatypefilter.resetStates();
+                        attribfilter.resetStates();
+                    }
                 }
                 //("5", "", "", "", "1,2", "", "13", "", "2", "")
                 //("5", "1", "", "", "1,2", "", "12", "", "2", "")
@@ -242,10 +246,11 @@ StyledScreen {
                     target:typeSelection
                     visible:false
                 }
-                AnchorChanges{
-                    target: file_details_loader
-                    anchors.left: parent.right
+                PropertyChanges {
+                    target: fileDetails
+                    state:"closed"
                 }
+
             },
             State {
                 name: "detail"
@@ -261,9 +266,9 @@ StyledScreen {
                     target:typeSelection
                     visible:false
                 }
-                AnchorChanges{
-                    target: file_details_loader
-                    anchors.left: parent.left
+                PropertyChanges {
+                    target: fileDetails
+                    state:"open"
                 }
             }
         ]
