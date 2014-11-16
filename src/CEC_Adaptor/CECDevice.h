@@ -30,7 +30,7 @@ namespace DCE {
 		string strAddr;
 		cec_menu_language lang;
 
-		uint64_t iPK_Device;
+		int     iPK_Device;
 
 		CECDevice(void) {
 			iPK_Device = 0;

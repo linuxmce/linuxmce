@@ -28,6 +28,8 @@ using namespace DCE;
 #include "CECDevice.h"
 #include <cec.h>
 #include "PlutoUtils/LinuxSerialUSB.h"
+#include "pluto_main/Define_CommandParameter.h"
+
 using namespace CEC;
 
 #include <libcec/cecloader.h>
@@ -52,7 +54,7 @@ int CecLogMessage(void *cbParam, const cec_log_message message)
     case CEC_LOG_NOTICE:
     case CEC_LOG_TRAFFIC:
     case CEC_LOG_DEBUG:
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"libCEC: %s",message.message);
+      LoggerWrapper::GetInstance()->Write(LV_DEBUG,"libCEC: %s",message.message);
       break;
     default:
       break;
@@ -280,19 +282,20 @@ bool CEC_Adaptor::GetConfig()
 	m_CEC_Addresses = m_pParser->GetActiveDevices(); // Seems to return logical addresses for all known CEC devices
 //	m_CEC_Addresses = m_pParser->GetLogicalAddresses(); // Seems to return logical addresses for *this* device
 
-	m_mapAddresses.clear();
-	m_mapAddr_to_DT.clear();
-	m_mapVendorId.clear();
+	m_mapPhysicalAddress_to_LA.clear();
+	m_mapPK_Device_to_PA.clear();
+	m_mapLA_to_VendorId.clear();
 
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Primary CEC Logical Address: %s",m_pParser->ToString( m_CEC_Addresses.primary ) );
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Primary CEC Logical Address: %s",m_pParser->ToString( m_CEC_Addresses.primary ) );
 	for ( uint8_t iPtr = 0; iPtr <= 11; iPtr++ ) {
 		if ( m_CEC_Addresses[iPtr] ) {
 			// iPtr = Logical Address
 			// m_mapAddresses[i] = Physical Address
 
-			m_mapAddresses[iPtr] = m_pParser->GetDevicePhysicalAddress( (cec_logical_address) iPtr );
-			m_mapVendorId[iPtr] = m_pParser->GetDeviceVendorId( (cec_logical_address) iPtr );
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Active CEC Logical Address: %s, at Physical Address: %X, by Vendor: %s",m_pParser->ToString( (cec_logical_address) iPtr ), m_mapAddresses[iPtr], m_pParser->ToString( (cec_vendor_id)m_mapVendorId[iPtr] ) );
+			uint64_t iPhysicalAddress = m_pParser->GetDevicePhysicalAddress( (cec_logical_address) iPtr );
+			m_mapPhysicalAddress_to_LA[iPhysicalAddress] = iPtr;
+			m_mapLA_to_VendorId[iPtr] = m_pParser->GetDeviceVendorId( (cec_logical_address) iPtr );
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Active CEC Logical Address: %s, at Physical Address: %X, by Vendor: %s",m_pParser->ToString( (cec_logical_address) iPtr ), iPhysicalAddress, m_pParser->ToString( (cec_vendor_id) m_mapLA_to_VendorId[iPtr] ) );
 
 
 			CECDevice device;
@@ -318,11 +321,11 @@ bool CEC_Adaptor::GetConfig()
 		iPK_Device = pDevice->m_dwPK_Device;
 //	string tmp_node_id = pDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 //	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MD's PK_Device=%i, CEC Physical Address: %s",iPK_Device, tmp_node_id.c_str() );
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MD's PK_Device=%i",iPK_Device );
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"MD's PK_Device=%i",iPK_Device );
 
 	// Check number of children (should only be one)
 	size_t size = m_pData->m_vectDeviceData_Impl_Children.size();
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Number of children=%i", size );
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Number of children=%i", size );
 
 	// Find PK_Device of child devices, this should only be an embedded transmit device template
 	for(std::vector<DeviceData_Impl *>::iterator it = m_pData->m_vectDeviceData_Impl_Children.begin();
@@ -332,11 +335,11 @@ bool CEC_Adaptor::GetConfig()
 
 		if ( pChildDevice != NULL ) {
 			string tmp_node_id = pChildDevice->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Child's PK_Device=%i, CEC Physical Address: %s (N/A)", pChildDevice->m_dwPK_Device, tmp_node_id.c_str() );
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Child's PK_Device=%i, CEC Physical Address: %s (N/A)", pChildDevice->m_dwPK_Device, tmp_node_id.c_str() );
 
 			// Check number of children (should only be one)
 			size_t size1 = pChildDevice->m_vectDeviceData_Impl_Children.size();
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Number of grand children=%i", size1 );
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Number of grand children=%i", size1 );
 
 			// iterate over grand children
 			DeviceData_Impl *pChildDevice1 = NULL;
@@ -346,8 +349,9 @@ bool CEC_Adaptor::GetConfig()
 				pChildDevice1 = (*it1);
 				if( pChildDevice1 != NULL )
 				{
-					string tmp_node_id = pChildDevice1->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
-					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Grandchild's PK_Device=%i, CEC Physical Address: %s", pChildDevice1->m_dwPK_Device, tmp_node_id.c_str() );
+					string sPhysicalAddress = pChildDevice1->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+					m_mapPK_Device_to_PA[pChildDevice1->m_dwPK_Device] = strtol(sPhysicalAddress.c_str(), NULL, 16);
+					LoggerWrapper::GetInstance()->Write(LV_STATUS,"Grandchild's PK_Device=%i, CEC Physical Address: %s, %i", pChildDevice1->m_dwPK_Device, sPhysicalAddress.c_str(), m_mapPK_Device_to_PA[pChildDevice1->m_dwPK_Device] );
 				}
 			}
 
@@ -356,7 +360,7 @@ bool CEC_Adaptor::GetConfig()
 //	m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(PK_Device_MD,DEVICEDATA_Audio_Settings_CONST);
 
 	cec_logical_address ActiveSource = m_pParser->GetActiveSource();
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CEC Active Source: %s", m_pParser->ToString(ActiveSource) );
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"CEC Active Source: %s", m_pParser->ToString(ActiveSource) );
 
 
 
@@ -393,33 +397,50 @@ CEC_Adaptor_Command *Create_CEC_Adaptor(Command_Impl *pPrimaryDeviceCommand, Dev
 void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild - To: %i, ID: %i", pMessage->m_dwPK_Device_To, pMessage->m_dwID);
+  sCMD_Result = "UNHANDLED CHILD";
 
-        cout << "Message ID: " << pMessage->m_dwID << endl;
-        cout << "From:" << pMessage->m_dwPK_Device_From << endl;
-        cout << "To: " << pMessage->m_dwPK_Device_To << endl;
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild - To: %i, ID: %i", pMessage->m_dwPK_Device_To, pMessage->m_dwID);
 
-        map<long, string>::iterator i;
-        for (i = pMessage->m_mapParameters.begin(); i != pMessage->m_mapParameters.end(); i++)
-        {
-                cout << "Parameter: " << i->first << " Value: " << i->second << endl;
-        }
+  cout << "Message ID: " << pMessage->m_dwID << endl;
+  cout << "From:" << pMessage->m_dwPK_Device_From << endl;
+  cout << "To: " << pMessage->m_dwPK_Device_To << endl;
 
-  // TODO: need to map devices
+  map<long, string>::iterator i;
+  for (i = pMessage->m_mapParameters.begin(); i != pMessage->m_mapParameters.end(); i++)
+  {
+    cout << "Parameter: " << i->first << " Value: " << i->second << endl;
+  }
+
+
+  string sPhysicalAddress = pDeviceData_Impl->m_mapParameters[DEVICEDATA_PortChannel_Number_CONST];
+  uint64_t iPhysicalAddress = m_mapPK_Device_to_PA[pMessage->m_dwPK_Device_To];
+  cout << "**Physical Address: " << sPhysicalAddress << ", " << iPhysicalAddress << endl;
+
+  cec_logical_address LogicalAddress = (cec_logical_address) m_mapPhysicalAddress_to_LA[iPhysicalAddress];
+
   switch (pMessage->m_dwID)
   {
     case COMMAND_Generic_On_CONST:
-      if ( m_pParser->PowerOnDevices() )
+      if ( m_pParser->PowerOnDevices( LogicalAddress ) )
       {
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: Power On");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Power On");
+	if ( LogicalAddress == CECDEVICE_TUNER1 || LogicalAddress == CECDEVICE_TUNER2 || LogicalAddress == CECDEVICE_TUNER3 || LogicalAddress == CECDEVICE_TUNER4 ||
+	     LogicalAddress == CECDEVICE_PLAYBACKDEVICE1 || LogicalAddress == CECDEVICE_PLAYBACKDEVICE2 || LogicalAddress == CECDEVICE_PLAYBACKDEVICE3 )
+	{
+	  if ( m_pParser->SetStreamPath( iPhysicalAddress ) )
+	  {
+	    sCMD_Result = "OK";
+	    return;
+	  }
+	}
 	sCMD_Result = "OK";
       }
       return;
       break;
     case COMMAND_Generic_Off_CONST:
-      if ( m_pParser->StandbyDevices() )
+      if ( m_pParser->StandbyDevices(LogicalAddress) )
       {
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: Power Off");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Power Off");
         sCMD_Result = "OK";
       }
       return;
@@ -427,7 +448,7 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: Power 
     case COMMAND_Vol_Up_CONST:
       if ( m_pParser->VolumeUp() )
       {
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: Volume Up");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Volume Up");
         sCMD_Result = "OK";
       }
       return;
@@ -435,7 +456,7 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: Volume
     case COMMAND_Vol_Down_CONST:
       if ( m_pParser->VolumeDown() )
       {
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: Volume Down");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Volume Down");
         sCMD_Result = "OK";
       }
       return;
@@ -443,15 +464,63 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: Volume
     case COMMAND_Mute_CONST:
       if ( m_pParser->AudioToggleMute() )
       {
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: Mute");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Mute");
         sCMD_Result = "OK";
+      }
+      return;
+      break;
+    case COMMAND_Input_Select_CONST:
+// Parameter 71 - Value = Input Command
+// TODO: get this CONST
+      uint8_t iPort = 0;
+      string sCommand = pMessage->m_mapParameters[COMMANDPARAMETER_PK_Command_Input_CONST];
+      uint64_t iCommand = strtol ( sCommand.c_str(), NULL, 10 );
+      switch ( iCommand )
+      {
+	case COMMAND_HDMI_1_CONST:
+	  iPort = 1;
+	  break;
+	case COMMAND_HDMI_2_CONST:
+	  iPort = 2;
+	  break;
+	case COMMAND_HDMI_3_CONST:
+	  iPort = 3;
+	  break;
+	case COMMAND_HDMI_4_CONST:
+	  iPort = 4;
+	  break;
+	case COMMAND_HDMI_5_CONST:
+	  iPort = 5;
+	  break;
+	case COMMAND_HDMI_6_CONST:
+	  iPort = 6;
+	  break;
+	default:
+	  return;
+	  break;
+      }
+
+      //bool SetHDMIPort(cec_logical_address iBaseDevice, uint8_t iPort = CEC_DEFAULT_HDMI_PORT);
+      if ( m_pParser->SetHDMIPort(LogicalAddress, iPort ) )
+      {
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: SetHDMIPort");
+        sCMD_Result = "OK";
+      }
+
+      if ( LogicalAddress == CECDEVICE_TUNER1 || LogicalAddress == CECDEVICE_TUNER2 || LogicalAddress == CECDEVICE_TUNER3 || LogicalAddress == CECDEVICE_TUNER4 ||
+	     LogicalAddress == CECDEVICE_PLAYBACKDEVICE1 || LogicalAddress == CECDEVICE_PLAYBACKDEVICE2 || LogicalAddress == CECDEVICE_PLAYBACKDEVICE3 )
+      {
+	if ( m_pParser->SetStreamPath( iPhysicalAddress ) )
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: SetHDMIPort: SetStreamPath");
+	  sCMD_Result = "OK";
+	}
       }
       return;
       break;
   }
 
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: UNHANDLED COMMAND/CHILD - To: %i, ID: %i",  pMessage->m_dwPK_Device_To, pMessage->m_dwID);
-  sCMD_Result = "UNHANDLED CHILD";
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: UNHANDLED COMMAND/CHILD - To: %i, ID: %i",  pMessage->m_dwPK_Device_To, pMessage->m_dwID);
 
 /*
   if (IRBase::ProcessMessage(pMessage))
@@ -472,7 +541,7 @@ LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: UNHAND
 void CEC_Adaptor::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
-LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: UNKNOWN DEVICE");
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ReceivedCommandForChild: UNKNOWN DEVICE");
 	sCMD_Result = "UNKNOWN DEVICE";
 }
 
