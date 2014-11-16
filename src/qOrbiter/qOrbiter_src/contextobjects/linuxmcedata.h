@@ -66,5 +66,21 @@ public slots:
     }
 
 };
+class HouseModesHelper : public QObject
+{
+    Q_OBJECT
+public:
+    HouseModesHelper() {}
+    virtual ~HouseModesHelper() {}
+    enum HouseModes{
+        Unarmed_at_home=1,
+        Armed_away=2,
+        Armed_at_home=3,
+        Sleeping_CONST=4,
+        Entertaining=5,
+        Armed_Extended_away=6
+    };
+    Q_ENUMS(HouseModes)
+};
 
 #endif // LINUXMCEDATA_H

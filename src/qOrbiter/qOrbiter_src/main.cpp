@@ -352,8 +352,9 @@ int main(int argc, char* argv[])
         qmlRegisterType<AttributeTypeHelper>("org.linuxmce.enums",1,0,"Attributes");
         qmlRegisterType<HostSystemData>("org.linuxmce.enums",1,0,"HostDevices");
         qmlRegisterType<RemoteCommands>("org.linuxmce.enums", 1,0, "RemoteCommands");
-         qmlRegisterType<DataGrids>("org.linuxmce.enums", 1,0, "DataGrids");
+        qmlRegisterType<DataGrids>("org.linuxmce.enums", 1,0, "DataGrids");
         qmlRegisterType<UtilityCommands>("org.linuxmce.enums", 1,0, "UtilityCommands");
+        qmlRegisterType<HouseModesHelper>("org.linuxmce.enums", 1,0, "HouseModes");
         if(deviceType==0){
 
         } else {
