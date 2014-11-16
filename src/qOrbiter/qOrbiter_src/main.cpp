@@ -347,6 +347,7 @@ int main(int argc, char* argv[])
         QThread dceThread;
 
         qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
+
         qmlRegisterType<MediaTypesHelper>("org.linuxmce.enums",1,0,"MediaTypes");
         qmlRegisterType<SubTypesHelper>("org.linuxmce.enums",1,0,"MediaSubtypes");
         qmlRegisterType<AttributeTypeHelper>("org.linuxmce.enums",1,0,"Attributes");
@@ -355,6 +356,8 @@ int main(int argc, char* argv[])
         qmlRegisterType<DataGrids>("org.linuxmce.enums", 1,0, "DataGrids");
         qmlRegisterType<UtilityCommands>("org.linuxmce.enums", 1,0, "UtilityCommands");
         qmlRegisterType<HouseModesHelper>("org.linuxmce.enums", 1,0, "HouseModes");
+        qmlRegisterType<RoomTypeHelper>("org.linuxmce.enums", 1,0, "RoomTypes");
+
         if(deviceType==0){
 
         } else {

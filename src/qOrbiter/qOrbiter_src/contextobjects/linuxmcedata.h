@@ -76,9 +76,35 @@ public:
         Unarmed_at_home=1,
         Armed_away=2,
         Armed_at_home=3,
-        Sleeping_CONST=4,
+        Sleeping=4,
         Entertaining=5,
         Armed_Extended_away=6
+    };
+    Q_ENUMS(HouseModes)
+};
+
+class RoomTypeHelper : public QObject
+{
+    Q_OBJECT
+public:
+    RoomTypeHelper() {}
+    virtual ~RoomTypeHelper() {}
+    enum RoomTypes{
+        Living_RoomFamily_Room=1,
+        ClosetStorage_Space=2,
+        Bedroom_Other=3,
+        Garage=4,
+        Kitchen=5,
+        Patio=6,
+        Dining_Room=7,
+        Outside_Area=8,
+        Miscellaneous=9,
+        Hallway=10,
+        Bedroom_Master=11,
+        Home_Theater=12,
+        FoyerEntrance=13,
+        Bathroom=14,
+        Unmanaged=15
     };
     Q_ENUMS(HouseModes)
 };
