@@ -7,6 +7,9 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+
+    /* Dg defines */
+
     QByteArray dgData;
     QRegExp dgDefines("(#define DATAGRID_.*\\d(|\\d)\n)");
     dgDefines.setPatternSyntax(QRegExp::RegExp2);
@@ -53,8 +56,8 @@ int main(int argc, char *argv[])
                         "explicit DataGrids(QObject *parent = 0);\n"
                         " enum DataGridList{\n"
                         "/*<ags>*/\n"+
-                         defineStrings.join(",\n")
-                       +"/*<agn>*/\n"
+                        defineStrings.join(",\n")
+                        +"/*<agn>*/\n"
                         " };\n"
                         "Q_ENUMS(DataGridList)\n"
                         "  signals:\n"
@@ -70,6 +73,73 @@ int main(int argc, char *argv[])
     } else {
         qDebug() << "No file found!";
     }
+
+    /* end dg defines */
+
+    /*media type defines */
+
+    QByteArray mediaTypeDefines;
+    QFile mediaTypeDefinesFile("../../pluto_main/Define_MediaType.h");
+    QRegExp mediaTypeRegEx("(#define MEDIATYPE_.*\\d(|\\d))\n");
+    mediaTypeRegEx.setPatternSyntax(QRegExp::RegExp2);
+    mediaTypeRegEx.setMinimal(true );
+    if(mediaTypeDefinesFile.exists()){
+        qDebug() << "\n\nFound Mediatypes definitions:\n";
+        mediaTypeDefinesFile.open(QFile::ReadOnly);
+        mediaTypeDefines = mediaTypeDefinesFile.readAll();
+        mediaTypeDefinesFile.close();
+        QStringList mediaTypeDefineString;
+        int pos=0;
+        while ((pos = mediaTypeRegEx.indexIn(mediaTypeDefines, pos)) != -1) {
+
+            QString transform = mediaTypeRegEx.cap(1);
+            transform.remove("#define ");
+            transform.remove("MEDIATYPE_");
+            transform.remove("\n");
+            transform.replace("np","NP");
+            transform.replace("pluto", "PLUTO");
+            transform.replace("lmce", "LMCE");
+            transform.replace("misc", "MISC");
+            transform.replace(" ", " = ");
+            transform.replace("_CONST", "");
+            mediaTypeDefineString << transform ;
+            pos += mediaTypeRegEx.matchedLength();
+        }
+        qDebug() << mediaTypeDefineString.count() << " mediatype definitions found";
+        qDebug() << mediaTypeDefineString.join(",\n");
+        qDebug() << "writing to file";
+        QString startTag = "/*<-AGB->*/";
+        QString endTag= "/*<-AGE->*/";
+        QByteArray tmp;
+
+        QFile mediaTypeEnumFile("../qOrbiter_src/contextobjects/mediatypehelper.h");
+        if(mediaTypeEnumFile.exists() && mediaTypeEnumFile.open(QFile::ReadWrite)){
+            qDebug() << mediaTypeEnumFile.fileName() << " open for read / write.";
+            tmp = mediaTypeEnumFile.readAll();
+            int start = tmp.indexOf(startTag)+startTag.length();
+            int end = tmp.indexOf(endTag)-endTag.length()+2;
+            if(start!=-1 && end !=-1){
+                qDebug() <<" Found Tags";
+                tmp.remove(start, end-start);
+                tmp.insert(start, "\n"+mediaTypeDefineString.join(",\n"));
+                mediaTypeEnumFile.resize(0);
+                mediaTypeEnumFile.write(tmp);
+                mediaTypeEnumFile.close();
+                qDebug() << "Wrote mediatype enums, file closed.";
+
+            } else {
+                qDebug() << " Could not locate tags!";
+            }
+
+        }
+
+    }
+
+    /*end mediatype defines */
+
+    /* Screen defines */
+
+    /*end screen defines*/
 
     return a.exec();
 }

@@ -347,7 +347,7 @@ int main(int argc, char* argv[])
         QThread dceThread;
 
         qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
-        qmlRegisterType<MediaTypeHelper>("org.linuxmce.enums",1,0,"Mediatypes");
+        qmlRegisterType<MediaTypesHelper>("org.linuxmce.enums",1,0,"MediaTypes");
         qmlRegisterType<SubTypesHelper>("org.linuxmce.enums",1,0,"MediaSubtypes");
         qmlRegisterType<AttributeTypeHelper>("org.linuxmce.enums",1,0,"Attributes");
         qmlRegisterType<HostSystemData>("org.linuxmce.enums",1,0,"HostDevices");

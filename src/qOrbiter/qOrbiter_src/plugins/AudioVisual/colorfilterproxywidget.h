@@ -62,11 +62,14 @@ protected:
         } else {
             QPainter *reg_painter = new QPainter();
 
-            QImage regColor(boundingRect().width(),boundingRect().height(), QImage::Format_ARGB32);
+            QImage regColor(boundingRect().width(),boundingRect().height(), QImage::Format_RGB32);
+
             reg_painter->begin(&regColor);
             QGraphicsProxyWidget::paint(reg_painter,option,widget);
             reg_painter->end();
-            painter->drawImage(0,0,regColor);
+
+
+            painter->drawImage(0,0,regColor, Qt::ColorOnly);
         }
 
     }

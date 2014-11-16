@@ -565,6 +565,7 @@ bool MediaManager::initViews(bool flipped)
     else{
         filterProxy->invert = false;
     }
+
     if(!useInvertTrick){
         filterProxy->enable=false;
     }

@@ -10,53 +10,13 @@
  * use: Mediatypes.NP_LIVETV
  *
  */
-class MediaTypeHelper : public QObject
-{
-    Q_OBJECT
-public:
-    explicit MediaTypeHelper(QObject *parent = 0);
-    enum MediaTypes{
-        LINUXMCE_LIVE_TV=1,
-        LINUXMCE_CD=2,
-        LINUXMCE_DVD =3,
-        STORED_AUDIO=4,
-        STORED_VIDEO=5,
-        LINUXMCE_LIVE_RADIO=6,
-        LINUXMCE_PICTURES=7,
-        NP_LIVETV=11,
-        NP_DVD=12,
-        NP_OTARADIO=13,
-        NP_SAT_RADIO=14,
-        NP_CABLE_RADIO=15,
-        NP_PICTURE =16,
-        NP_BluRay_CONST =31,
-        LINUXMCE_STREAMED_AUDIO=43,
-        LINUXMCE_STREAMED_VIDEO=44,
-        LMCE_AIRPLAY_AUDIO=60,
-        LMCE_AIRPLAY_VIDEO=61,
-        LMCE_AIRPLAY_PHOTOS=62,
-        LINUXMCE_YOUTUBE=63,
-        NP_INTERNET_MEDIA=64,
-        NP_NETWORK_MEDIA=66,
-        NP_XBOX_360 = 67,
-        NP_PLAYSTATION=68
-    };
-    Q_ENUMS(MediaTypes)
-
-};
-
-/*!
- * \brief The AttributeTypeHelper class is designed to assist in providing an easy way to decode the options for navigating the media grid.
- * import into qml with the statement: import org.linuxmce.enums
- * use: Attributes.Director
- */
 class AttributeTypeHelper : public QObject
 {
     Q_OBJECT
 public:
-    AttributeTypeHelper() {}
-    virtual ~AttributeTypeHelper() {}
+    explicit AttributeTypeHelper(QObject *parent = 0);
     enum Attributes{
+
         Director= 1,
         Performer= 2,
         Album= 3,
@@ -138,5 +98,84 @@ public:
         CONSOLE=12
     };
     Q_ENUMS(MediaSubTypes)
+};
+class MediaTypesHelper : public QObject
+{
+    Q_OBJECT
+public:
+    MediaTypesHelper() {}
+    virtual ~MediaTypesHelper() {}
+    enum MediaTypes{
+        /*<-AGB->*/
+        PLUTO_LiveTV = 1,
+        PLUTO_CD = 2,
+        PLUTO_DVD = 3,
+        PLUTO_StoredAudio = 4,
+        PLUTO_StoredVideo = 5,
+        PLUTO_LiveRadio = 6,
+        PLUTO_Pictures = 7,
+        NP_LiveTV = 11,
+        NP_DVD = 12,
+        NP_OTARadio = 13,
+        NP_SatelliteRadio = 14,
+        NP_CableRadio = 15,
+        NP_VideoTape = 16,
+        NP_LaserDisc = 17,
+        NP_Game = 18,
+        NP_CD = 19,
+        MISC_Burning = 20,
+        MISC_Playlist = 21,
+        MISC_EditPlaylist = 22,
+        MISC_BlankMedia = 23,
+        MISC_DocViewer = 24,
+        NP_Cassette = 25,
+        NP_Picture = 26,
+        PLUTO_HDDVD = 27,
+        PLUTO_BD = 28,
+        LMCE_Game = 29,
+        LMCE_Game_a2600 = 30,
+        NP_BluRay = 31,
+        LMCE_Game_a5200 = 32,
+        LMCE_Game_a7800 = 33,
+        LMCE_Game_coleco = 34,
+        LMCE_Game_intv = 35,
+        LMCE_Game_famicom = 36,
+        LMCE_Game_nes = 37,
+        LMCE_Game_sms = 38,
+        LMCE_Game_sg1000 = 39,
+        NP_Tivo3 = 40,
+        NP_Tivo2 = 41,
+        LMCE_Hulu = 42,
+        LMCE_StreamedAudio = 43,
+        LMCE_StreamedVideo = 44,
+        LMCE_Game_vectrex = 45,
+        LMCE_Game_tg16 = 46,
+        LMCE_Game_genesis = 47,
+        LMCE_Game_snes = 48,
+        LMCE_Game_megadriv = 49,
+        LMCE_Game_snespal = 50,
+        LMCE_Game_sgx = 51,
+        LMCE_Game_pce = 52,
+        LMCE_Game_apple2 = 53,
+        LMCE_Game_ps1 = 54,
+        LMCE_Game_ps2 = 55,
+        LMCE_Game_jaguar = 56,
+        LMCE_Game_vic20 = 57,
+        LMCE_Game_c64 = 58,
+        LMCE_Game_Atari800 = 59,
+        LMCE_Airplay_audio = 60,
+        LMCE_AirPlay_video = 61,
+        LMCE_AirPlay_photos = 62,
+        LMCE_YouTube = 63,
+        NP_InternetMedia = 64,
+        LMCE_Game_amiga = 65,
+        NP_NetworkMedia = 66,
+        NP_XBOX360 = 67,
+        NP_PVR = 68,
+        NP_Playstation = 69,
+        LMCE_Game_TI99 = 70
+        /*<-AGE->*/
+    };
+    Q_ENUMS(MediaTypes)
 };
 #endif // MEDIATYPEHELPER_H

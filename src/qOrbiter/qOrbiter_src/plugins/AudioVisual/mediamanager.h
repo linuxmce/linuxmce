@@ -191,6 +191,7 @@ public:
     Phonon::MediaObject *mediaObject;
     Phonon::MediaController * discController;
     QGLWidget *accel;
+    QWidget *surf;
 #endif
 
 #endif
@@ -242,7 +243,7 @@ signals:
 
 public slots:
 
-    void setInvertTrick(bool i){ if(i!=useInvertTrick){useInvertTrick=i; emit useInvertTrickChanged();} }
+    void setInvertTrick(bool i){ if(i!=useInvertTrick){useInvertTrick=i; if(filterProxy){filterProxy->enable=useInvertTrick;} emit useInvertTrickChanged();} }
     bool getInvertTrick() {return useInvertTrick;}
 
     void setVideoStream(bool b ){
@@ -284,9 +285,10 @@ public slots:
         flipColors = f;
 #ifndef Q_OS_ANDROID
 #ifndef QT5
-        if(useInvertTrick){
+
+if(filterProxy)
         filterProxy->invert = f;
-        }
+
 #endif
 #endif
         emit colorFlipChanged();
@@ -369,6 +371,7 @@ public slots:
         {
 #ifndef Q_OS_ANDROID
 #ifndef QT5
+            if(filterProxy)
             filterProxy->hide();
 #endif
 #endif
@@ -377,6 +380,7 @@ public slots:
         {
 #ifndef Q_OS_ANDROID
 #ifdef QT4
+            if(filterProxy)
             filterProxy->show();
 #endif
 #endif
