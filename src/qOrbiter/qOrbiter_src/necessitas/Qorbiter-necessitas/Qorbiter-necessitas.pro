@@ -213,7 +213,8 @@ SOURCES += \
         ../../datamodels/genericflatlistmodel.cpp \
         ../../datamodels/genericmodelitem.cpp \
         ../../datamodels/ActiveMediaStreams.cpp \
-        ../../datamodels/listitembase.cpp
+        ../../datamodels/listitembase.cpp \
+../../datagrids.cpp
 
 
 # Please do not modify the following two lines. Required for deployment.
@@ -314,7 +315,8 @@ HEADERS += \
     ../../datamodels/ActiveMediaStreams.h \
     ../../datamodels/MediaFilter.h \
     ../../datamodels/DataGridHandler.h \
-    ../../datamodels/listitembase.h
+    ../../datamodels/listitembase.h \
+        ../../datagrids.h
 
 
 OTHER_FILES += ../../Readme.txt \

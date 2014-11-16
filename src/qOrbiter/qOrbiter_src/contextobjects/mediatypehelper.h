@@ -18,20 +18,28 @@ public:
     enum MediaTypes{
         LINUXMCE_LIVE_TV=1,
         LINUXMCE_CD=2,
-        LINUXMCE_DVD,
+        LINUXMCE_DVD =3,
         STORED_AUDIO=4,
         STORED_VIDEO=5,
-        LIVE_RADIO=6,
+        LINUXMCE_LIVE_RADIO=6,
         LINUXMCE_PICTURES=7,
         NP_LIVETV=11,
         NP_DVD=12,
         NP_OTARADIO=13,
         NP_SAT_RADIO=14,
         NP_CABLE_RADIO=15,
+        NP_PICTURE =16,
+        NP_BluRay_CONST =31,
         LINUXMCE_STREAMED_AUDIO=43,
         LINUXMCE_STREAMED_VIDEO=44,
+        LMCE_AIRPLAY_AUDIO=60,
+        LMCE_AIRPLAY_VIDEO=61,
+        LMCE_AIRPLAY_PHOTOS=62,
         LINUXMCE_YOUTUBE=63,
-        NP_NETWORK_MEDIA=66
+        NP_INTERNET_MEDIA=64,
+        NP_NETWORK_MEDIA=66,
+        NP_XBOX_360 = 67,
+        NP_PLAYSTATION=68
     };
     Q_ENUMS(MediaTypes)
 

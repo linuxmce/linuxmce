@@ -291,7 +291,7 @@ void MediaManager::setMediaUrl(QString url)
         mediaPath = "/mnt/remote/"+url;
     }
 
-    qDebug() << mediaPath;
+    qDebug() << "Current media path::"<< mediaPath;
     //    QString mountProg = "gksudo";
     //    QStringList args;
 
@@ -464,14 +464,21 @@ bool MediaManager::mountDrive(long device){
     mntDir.setPath("/mnt/remote/"+QString::number(device));
     qDebug() << "Mount directory exists? " << mntDir.exists();
     if(!mntDir.exists()){
-        QProcess *mkPath = new QProcess(this);
+        qDebug() << "Attempting to create dir " << mntDir.path();
+        QProcess *mkPath = new QProcess();
         QStringList dArgs;
         dArgs.append("mkdir -p /mnt/remote/"+QString::number(device)+"");
         mkPath->start(dirCmd, dArgs);
         mkPath->waitForFinished(10000);
         while(mkPath->state()==QProcess::Running){
-            qDebug() << mkPath->readAllStandardOutput();
+            qDebug() << "Response to command::" << mkPath->readAllStandardOutput();
+            qDebug() << "Error Response to command::" << mkPath->readAllStandardError();
         }
+    }
+
+    if(!mntDir.exists()){
+        qWarning() << "Couldnt create path " << mntDir.path();
+        return false;
     }
 
     qWarning() << mntDir.entryList().count();
@@ -482,11 +489,11 @@ bool MediaManager::mountDrive(long device){
 #ifdef RPI
         mountProg="";
 #endif
-        qWarning() << "Current Device";
+        qWarning() << "Current Device " << currentDevice;
         QString mntString = "mount -t nfs "+serverAddress+":/mnt/device/"+QString::number(currentDevice)+" "+mntDir.path()+" -o vers=3";
         QStringList args;
         args.append( mntString);
-        QProcess *mountProcess = new QProcess(this);
+        QProcess *mountProcess = new QProcess();
         mountProcess->start(mountProg, args);
         mountProcess->waitForFinished(10000);
 

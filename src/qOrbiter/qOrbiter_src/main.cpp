@@ -79,6 +79,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <contextobjects/timecodemanager.h>
 #include <contextobjects/linuxmcedata.h>
 #include <contextobjects/mediatypehelper.h>
+#include <datagrids.h>
 #include <RemoteCommands.h>
 #ifdef debug
 #include <QDebug>
@@ -351,6 +352,7 @@ int main(int argc, char* argv[])
         qmlRegisterType<AttributeTypeHelper>("org.linuxmce.enums",1,0,"Attributes");
         qmlRegisterType<HostSystemData>("org.linuxmce.enums",1,0,"HostDevices");
         qmlRegisterType<RemoteCommands>("org.linuxmce.enums", 1,0, "RemoteCommands");
+         qmlRegisterType<DataGrids>("org.linuxmce.enums", 1,0, "DataGrids");
         qmlRegisterType<UtilityCommands>("org.linuxmce.enums", 1,0, "UtilityCommands");
         if(deviceType==0){
 
