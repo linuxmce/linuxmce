@@ -23,6 +23,7 @@ int main(int argc, char *argv[])
 
             QString transform = dgDefines.cap(1);
             transform.remove("#define ");
+            transform.remove("DATAGRID_");
             transform.remove("\n");
             transform.replace(" ", " = ");
             transform.replace("_CONST", "");
