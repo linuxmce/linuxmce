@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
             transform.remove("MEDIATYPE_");
             transform.remove("\n");
             transform.replace("np","NP");
-            transform.replace("pluto", "PLUTO");
+            transform.replace("pluto", "LMCE");
             transform.replace("lmce", "LMCE");
             transform.replace("misc", "MISC");
             transform.replace(" ", " = ");
