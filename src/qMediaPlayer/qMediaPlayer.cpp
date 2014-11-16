@@ -151,15 +151,31 @@ void qMediaPlayer::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
     sCMD_Result = "UNKNOWN COMMAND";
 }
 
-void qMediaPlayer::OnDisconnect()
-{
+void qMediaPlayer::OnDisconnect(){
     connected= false;
     mp_manager->setConnectionStatus(connected);
+
 }
 
 void qMediaPlayer::run()
 {
 
+}
+
+void qMediaPlayer::init()
+{
+    Disconnect();
+qWarning() << "QMediaPlayer Reinit--------------";
+    if(GetConfig() && Connect(DEVICETEMPLATE_qMediaPlayer_CONST)){
+        setCommandResponse("qMediaPlayer::Device "+QString::number(m_dwPK_Device)+" Connected.");
+        connected = true;
+    }else{
+        connected = false;
+        setCommandResponse("qMediaPlayer::Connection failed for "+QString::fromStdString(this->m_sIPAddress)+" and device number"+QString::number(m_dwPK_Device));
+        setConnectionStatus(false);
+
+    }
+    mp_manager->setConnectionStatus(connected);
 }
 
 //<-dceag-sample-b->
@@ -869,8 +885,8 @@ void qMediaPlayer::CMD_Move_Up(int iStreamID,string &sCMD_Result,Message *pMessa
 {
     cout << "Need to implement command #200 - Move Up" << endl;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
-     #ifndef QT5
- //this->mp_manager->p
+#ifndef QT5
+    //this->mp_manager->p
 #endif
 }
 
@@ -1680,11 +1696,11 @@ void qMediaPlayer::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *p
     cout << "Repeat Count=" << iRepeat_Command << endl;
 #ifndef RPI
 #if defined (QT4) && ! defined (ANDROID)
-    qreal c = mp_manager->audioSink->volume();
+    qreal c = mp_manager->displayVolume;
     qWarning() << "Current volume" << c;
-    qreal d = c+1.0;
+    qreal d = c+0.1;
     qWarning() << "New volume" << d;
-    mp_manager->audioSink->setVolume(d);
+    mp_manager->setVolume(d);
 #endif
 #endif
 
@@ -1707,11 +1723,12 @@ void qMediaPlayer::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *p
 void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMessage){
 #ifndef RPI
 #if defined (QT4) && ! defined (ANDROID)
-    qreal c = mp_manager->audioSink->volume();
-    qWarning() << "Current volume" << c;
-    qreal d = c-1.0;
-    mp_manager->audioSink->setVolume(d);
-     qWarning() << "New volume" << d;
+    qreal c = mp_manager->displayVolume;
+    qWarning() << "Current volume==>" << c;
+    qreal d = c+-0.1;
+    qWarning() << "New volume==>" << d;
+    mp_manager->setVolume(d);
+
 #endif
 #endif
 
@@ -1737,26 +1754,25 @@ void qMediaPlayer::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMes
 #if defined (QT4) && ! defined (ANDROID)
     if(t.contains("+") || t.contains("-")){
         if(t.contains("+")){
-            qreal e = mp_manager->audioSink->volume();
+            qreal e = mp_manager->displayVolume;
             qreal inc = t.remove("+").toDouble()/100;
             qreal n = e+inc;
-            mp_manager->audioSink->setVolume(n);
+            mp_manager->setVolume(n);
         }
         else if( t.contains("-")){
-            qreal e = mp_manager->audioSink->volume();
+            qreal e = mp_manager->displayVolume;
             qreal inc = t.remove("-").toInt();
             qreal n = e-inc;
             if(n>0)
-                mp_manager->audioSink->setVolume(n);
+                mp_manager->setVolume(n);
             else
-                mp_manager->audioSink->setVolume(0);
-
+                mp_manager->setVolume(0);
         }
 
     }
     else{
         int csLevl = t.toInt();
-        mp_manager->audioSink->setVolume(csLevl);
+        mp_manager->setVolume(csLevl);
         sCMD_Result = "OK -Level Set.";
     }
 
