@@ -76,7 +76,11 @@ class MediaManager :
     Q_PROPERTY(QString fileUrl READ getMediaUrl NOTIFY fileUrlChanged)
     Q_PROPERTY(int incomingTime READ getIncomingTime WRITE setIncomingTime NOTIFY incomingTimeChanged)
     Q_PROPERTY(bool flipColors READ getColorFlip WRITE setColorFlip NOTIFY colorFlipChanged)
+#ifdef QT4
+#ifndef ANDROID
     Q_PROPERTY(bool useInvertTrick READ getInvertTrick WRITE setInvertTrick  NOTIFY useInvertTrickChanged)
+#endif
+#endif
     Q_PROPERTY(bool videoStream READ getVideoStream WRITE setVideoStream NOTIFY videoStreamChanged)
     Q_PROPERTY(QString serverAddress READ getServerAddress WRITE setServerAddress NOTIFY serverAddressChanged)
     Q_PROPERTY(int deviceNumber READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)
@@ -242,10 +246,12 @@ signals:
     void androidVolumeDown();
 
 public slots:
-
+#ifdef QT4
+#ifndef ANDROID
     void setInvertTrick(bool i){ if(i!=useInvertTrick){useInvertTrick=i; if(filterProxy){filterProxy->enable=useInvertTrick;} emit useInvertTrickChanged();} }
     bool getInvertTrick() {return useInvertTrick;}
-
+   #endif
+#endif
     void setVideoStream(bool b ){
 #ifdef QT4
 #ifndef ANDROID
