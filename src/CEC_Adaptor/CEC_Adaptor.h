@@ -47,6 +47,7 @@ public:
 	  int m_dwPK_Device_IRPlugin;
 	  virtual void PrepareToDelete();
 	  map<string,pair<string,int> > m_mapCodesToButtons;
+          map<uint64_t,cec_user_control_code> m_mapLMCEtoCECcodes;
 	  std::vector<CECDevice> m_vectCecDevices;
 
 

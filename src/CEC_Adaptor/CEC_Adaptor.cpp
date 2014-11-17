@@ -199,6 +199,97 @@ bool CEC_Adaptor::GetConfig()
 		      }
 		  }
 	      }
+m_mapLMCEtoCECcodes[COMMAND_Send_Generic_EnterGo_CONST] = CEC_USER_CONTROL_CODE_SELECT;
+m_mapLMCEtoCECcodes[COMMAND_Move_Up_CONST] = CEC_USER_CONTROL_CODE_UP;
+m_mapLMCEtoCECcodes[COMMAND_Move_Down_CONST] = CEC_USER_CONTROL_CODE_DOWN;
+m_mapLMCEtoCECcodes[COMMAND_Move_Left_CONST] = CEC_USER_CONTROL_CODE_LEFT;
+m_mapLMCEtoCECcodes[COMMAND_Move_Right_CONST] = CEC_USER_CONTROL_CODE_RIGHT;
+m_mapLMCEtoCECcodes[COMMAND_Back_Prior_Menu_CONST] = CEC_USER_CONTROL_CODE_EXIT;
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_ROOT_MENU;
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_SETUP_MENU;
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_CONTENTS_MENU;
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_FAVORITE_MENU;
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_TOP_MENU;
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_DVD_MENU;
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_NUMBER_ENTRY_MODE; //           = 0x1D,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_NUMBER11; //                    = 0x1E,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_NUMBER12; //                    = 0x1F,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_NUMBER0; //                     = 0x20,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_NUMBER1; //                     = 0x21,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_NUMBER2; //                     = 0x22,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_NUMBER3; //                     = 0x23,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_NUMBER4; //                     = 0x24,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_NUMBER5; //                     = 0x25,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_NUMBER6; //                     = 0x26,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_NUMBER7; //                     = 0x27,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_NUMBER8; //                     = 0x28,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_NUMBER9; //                     = 0x29,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_DOT; //                         = 0x2A,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_ENTER; //                       = 0x2B,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_CLEAR; //                       = 0x2C,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_NEXT_FAVORITE; //               = 0x2F,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_CHANNEL_UP; //                  = 0x30,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_CHANNEL_DOWN; //                = 0x31,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_PREVIOUS_CHANNEL; //            = 0x32,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_SOUND_SELECT; //                = 0x33,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_INPUT_SELECT; //                = 0x34,
+m_mapLMCEtoCECcodes[COMMAND_Display_CONST] = CEC_USER_CONTROL_CODE_DISPLAY_INFORMATION; //         = 0x35,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_HELP; //                        = 0x36,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_PAGE_UP; //                     = 0x37,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_PAGE_DOWN; //                   = 0x38,
+  // reserved: 0x39 ... 0x3F
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_POWER; //                       = 0x40,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_VOLUME_UP; //                   = 0x41,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_VOLUME_DOWN; //                 = 0x42,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_MUTE; //                        = 0x43,
+m_mapLMCEtoCECcodes[COMMAND_Change_Playback_Speed_CONST] = CEC_USER_CONTROL_CODE_PLAY; //                        = 0x44,
+m_mapLMCEtoCECcodes[COMMAND_Stop_CONST] = CEC_USER_CONTROL_CODE_STOP; //                        = 0x45,
+m_mapLMCEtoCECcodes[COMMAND_Pause_Media_CONST] = CEC_USER_CONTROL_CODE_PAUSE; //                       = 0x46,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_RECORD; //                      = 0x47,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_REWIND; //                      = 0x48,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_FAST_FORWARD; //                = 0x49,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_EJECT; //                       = 0x4A,
+m_mapLMCEtoCECcodes[COMMAND_Skip_Fwd_ChannelTrack_Greater_CONST] = CEC_USER_CONTROL_CODE_FORWARD; //                     = 0x4B,
+m_mapLMCEtoCECcodes[COMMAND_Skip_Back_ChannelTrack_Lower_CONST] = CEC_USER_CONTROL_CODE_BACKWARD; //                    = 0x4C,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_STOP_RECORD; //                 = 0x4D,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_PAUSE_RECORD; //                = 0x4E,
+  // reserved: 0x4F
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_ANGLE; //                       = 0x50,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_SUB_PICTURE; //                 = 0x51,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_VIDEO_ON_DEMAND; //             = 0x52,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_ELECTRONIC_PROGRAM_GUIDE; //    = 0x53,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_TIMER_PROGRAMMING; //           = 0x54,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_INITIAL_CONFIGURATION; //       = 0x55,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_SELECT_BROADCAST_TYPE; //       = 0x56,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_SELECT_SOUND_PRESENTATION; //   = 0x57,
+  // reserved: 0x58 ... 0x5F
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_PLAY_FUNCTION; //               = 0x60,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_PAUSE_PLAY_FUNCTION; //         = 0x61,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_RECORD_FUNCTION; //             = 0x62,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_PAUSE_RECORD_FUNCTION; //       = 0x63,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_STOP_FUNCTION; //               = 0x64,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_MUTE_FUNCTION; //               = 0x65,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_RESTORE_VOLUME_FUNCTION; //     = 0x66,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_TUNE_FUNCTION; //               = 0x67,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_SELECT_MEDIA_FUNCTION; //       = 0x68,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_SELECT_AV_INPUT_FUNCTION; //    = 0x69,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_SELECT_AUDIO_INPUT_FUNCTION; // = 0x6A,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_POWER_TOGGLE_FUNCTION; //       = 0x6B,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_POWER_OFF_FUNCTION; //          = 0x6C,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_POWER_ON_FUNCTION; //           = 0x6D,
+  // reserved: 0x6E ... 0x70
+m_mapLMCEtoCECcodes[COMMAND_Blue_CONST] = CEC_USER_CONTROL_CODE_F1_BLUE; //                     = 0x71,
+m_mapLMCEtoCECcodes[COMMAND_Red_CONST] = CEC_USER_CONTROL_CODE_F2_RED; //                      = 0X72,
+m_mapLMCEtoCECcodes[COMMAND_Green_CONST] = CEC_USER_CONTROL_CODE_F3_GREEN; //                    = 0x73,
+m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; //                   = 0x74,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_F5; //                          = 0x75,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_DATA; //                        = 0x76,
+  // reserved: 0x77 ... 0xFF
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_AN_RETURN; //                   = 0x91, // return (Samsung)
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_AN_CHANNELS_LIST; //            = 0x96, // channels list (Samsung)
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_MAX; //                         = 0x96,
+//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_UNKNOWN; //                     = 0xFF
+
 	  }
 	else
 	  {
@@ -411,15 +502,48 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
     cout << "Parameter: " << i->first << " Value: " << i->second << endl;
   }
 
-
   string sPhysicalAddress = pDeviceData_Impl->m_mapParameters[DEVICEDATA_PortChannel_Number_CONST];
   uint64_t iPhysicalAddress = m_mapPK_Device_to_PA[pMessage->m_dwPK_Device_To];
   cout << "**Physical Address: " << sPhysicalAddress << ", " << iPhysicalAddress << endl;
 
   cec_logical_address LogicalAddress = (cec_logical_address) m_mapPhysicalAddress_to_LA[iPhysicalAddress];
+  cec_command cmd;
+  cmd.Clear();
+
+  char cLA =  (char) m_mapPhysicalAddress_to_LA[iPhysicalAddress];
+  string sAddr;
+
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild - To PA: %s, LA: %i", sPhysicalAddress.c_str(), (int) LogicalAddress );
 
   switch (pMessage->m_dwID)
   {
+    case COMMAND_Send_Generic_EnterGo_CONST:
+    case COMMAND_Move_Up_CONST:
+    case COMMAND_Move_Down_CONST:
+    case COMMAND_Move_Left_CONST:
+    case COMMAND_Move_Right_CONST:
+    case COMMAND_Back_Prior_Menu_CONST:
+    case COMMAND_Display_CONST:
+    case COMMAND_Change_Playback_Speed_CONST:
+    case COMMAND_Pause_Media_CONST:
+    case COMMAND_Skip_Fwd_ChannelTrack_Greater_CONST:
+    case COMMAND_Skip_Back_ChannelTrack_Lower_CONST:
+    case COMMAND_Stop_CONST:
+    case COMMAND_Blue_CONST:
+    case COMMAND_Red_CONST:
+    case COMMAND_Green_CONST:
+    case COMMAND_Yellow_CONST:
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild - UCP - To LA: %i, Code: %i", (int) LogicalAddress, m_mapLMCEtoCECcodes[pMessage->m_dwID] );
+      if ( m_pParser->SendKeypress( LogicalAddress, m_mapLMCEtoCECcodes[pMessage->m_dwID] ) )
+      {
+	if ( m_pParser->SendKeyRelease( LogicalAddress ) ) 
+        {
+	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: UCP - successful");
+	  sCMD_Result = "OK";
+        }
+      }
+      return;
+      break;
     case COMMAND_Generic_On_CONST:
       if ( m_pParser->PowerOnDevices( LogicalAddress ) )
       {
@@ -437,7 +561,7 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       return;
       break;
     case COMMAND_Vol_Up_CONST:
-      if ( m_pParser->VolumeUp() )
+      if ( ((int) LogicalAddress == 0 || (int) LogicalAddress == 5) && m_pParser->VolumeUp() )
       {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Volume Up");
         sCMD_Result = "OK";
@@ -445,7 +569,8 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       return;
       break;
     case COMMAND_Vol_Down_CONST:
-      if ( m_pParser->VolumeDown() )
+	// TODO: USE CONST
+      if ( ((int) LogicalAddress == 0 || (int) LogicalAddress == 5) && m_pParser->VolumeDown() )
       {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Volume Down");
         sCMD_Result = "OK";
@@ -453,7 +578,8 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       return;
       break;
     case COMMAND_Mute_CONST:
-      if ( m_pParser->AudioToggleMute() )
+	// TODO: USE CONST
+      if ( ((int) LogicalAddress == 0 || (int) LogicalAddress == 5) && m_pParser->AudioToggleMute() )
       {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Mute");
         sCMD_Result = "OK";
@@ -461,8 +587,6 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       return;
       break;
     case COMMAND_Input_Select_CONST:
-// Parameter 71 - Value = Input Command
-// TODO: get this CONST
       char cPort = '0';
       string sCommand = pMessage->m_mapParameters[COMMANDPARAMETER_PK_Command_Input_CONST];
       uint64_t iCommand = strtol ( sCommand.c_str(), NULL, 10 );
@@ -494,9 +618,9 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       std::size_t found = sPhysicalAddress.find_first_of("0");
       sPhysicalAddress[found]=cPort;
 
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Make input active: %s",  sPhysicalAddress.c_str() );
+
 //      sArguments = "4F 82" + sPhysicalAddress.substr(0, 2) + " " + sPhysicalAddress.substr(2, 2);
-      cec_command cmd;
-      cmd.Clear();
       cmd.PushBack(0x4F); /* from - to */
       cmd.PushBack(0x82); /* cmd number */
       cmd.PushBack( strtol( sPhysicalAddress.substr(0, 2).c_str(), NULL, 16) );
