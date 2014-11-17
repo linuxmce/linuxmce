@@ -1,6 +1,7 @@
 
 
 <?php
+
 /*
  * Qrbitergenerator.php. Its sole function is to prepare a blob 
  * configuration data for orbiter to consume on startup with key data to interact
@@ -10,7 +11,6 @@
 //initialization area
 if (isset($_GET["d"])) {
   $deviceID = $_GET['d'];
-
 } 
 else if( isset($_GET["m"]) ){
 	echo getMountPounts();
@@ -21,7 +21,8 @@ echo getCommandParameters($_GET["c"]);
 exit;
 }
 else if( isset($_GET["id"]) ) {
-
+ini_set('display_errors',1);  error_reporting(E_ALL);
+include "operations/mediaBrowser/mediaStreamer.php";
 sendMedia($_GET["id"]);
 exit;
 }
@@ -889,12 +890,17 @@ $paramArray["params"] = $p1Array;
 
 function sendMedia($fkFile){
 
+
+$stream=new VideoStream($fkFile);
+$stream.start();
+
+/*
+session_start();
+$_SESSION['file']=$fkFile;
 $size=filesize($fkFile);
 $length=$size;
 $start=0;
 $end=$size-1;
-
-
 header("Content-Disposition:inline; filename=".$fkFile."");
 header("Content-length:".$size."");
 header("Content-Transfer-Encoding: binary"); 
@@ -902,6 +908,7 @@ header("Content-Type: audio/mpeg");
 header("Accept-Ranges:0-".$length);
 header("Content-Range: bytes".$start."-".$end/$size."");
 echo file_get_contents($fkFile);
+*/
 
 }
 
