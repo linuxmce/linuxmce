@@ -59,11 +59,12 @@ public:
 public:
 		// Constructors/Destructor
         qMediaPlayer(int DeviceID, string ServerAddress, MediaManager *manager,bool bConnectEventHandler=true,bool bLocalMode=false, class Router *pRouter=NULL);
-		virtual ~qMediaPlayer();
+        virtual ~qMediaPlayer();
 		virtual bool GetConfig();
 		virtual bool Register();
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
+        virtual void OnReplaceHandler() { Disconnect(); this->deleteLater(); }
 
 //<-dceag-const-e->
         virtual void OnDisconnect();
@@ -980,6 +981,8 @@ public:
         void setConnectionStatus(bool b) {connected = b; emit connectionStatusChanged(connected);}
 
         void run();
+
+        void init();
 
         void mediaEnded();
 
