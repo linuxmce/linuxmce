@@ -312,6 +312,18 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
   cout << "Need to implement command #38 - Stop Media" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+  
+  if (!m_pVLC)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::CMD_Stop_Media(iStreamID=%i) - m_pVLC == NULL",iStreamID);
+      sCMD_Result="ERROR";
+      return;
+    }
+
+  // Preliminary, needs to be amended to close multiple streams
+  m_pVLC->Stop();
+  UnmountRemoteDVD();
+
 }
 
 //<-dceag-c39-b->

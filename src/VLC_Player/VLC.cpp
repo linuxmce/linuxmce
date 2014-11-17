@@ -201,7 +201,7 @@ namespace DCE
     libvlc_media_release(m);
     libvlc_media_player_set_xwindow (m_pMp, m_Window);
     SetDuration(libvlc_media_player_get_length(m_pMp));
-    if (!libvlc_media_player_play(m_pMp))
+    if (libvlc_media_player_play(m_pMp)<0)
       {
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC::PlayURL() - libvlc_media_player_play not successful.");
 	SetPlaying(false);
