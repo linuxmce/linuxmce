@@ -261,9 +261,9 @@ m_mapLMCEtoCECcodes[COMMAND_Display_CONST] = CEC_USER_CONTROL_CODE_DISPLAY_INFOR
 //m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_PAGE_DOWN; //                   = 0x38,
   // reserved: 0x39 ... 0x3F
 //m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_POWER; //                       = 0x40,
-//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_VOLUME_UP; //                   = 0x41,
-//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_VOLUME_DOWN; //                 = 0x42,
-//m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_MUTE; //                        = 0x43,
+m_mapLMCEtoCECcodes[COMMAND_Vol_Up_CONST] = CEC_USER_CONTROL_CODE_VOLUME_UP; //                   = 0x41,
+m_mapLMCEtoCECcodes[COMMAND_Vol_Down_CONST] = CEC_USER_CONTROL_CODE_VOLUME_DOWN; //                 = 0x42,
+m_mapLMCEtoCECcodes[COMMAND_Mute_CONST] = CEC_USER_CONTROL_CODE_MUTE; //                        = 0x43,
 m_mapLMCEtoCECcodes[COMMAND_Change_Playback_Speed_CONST] = CEC_USER_CONTROL_CODE_PLAY; //                        = 0x44,
 m_mapLMCEtoCECcodes[COMMAND_Stop_CONST] = CEC_USER_CONTROL_CODE_STOP; //                        = 0x45,
 m_mapLMCEtoCECcodes[COMMAND_Pause_Media_CONST] = CEC_USER_CONTROL_CODE_PAUSE; //                       = 0x46,
@@ -568,6 +568,26 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       }
       return;
       break;
+    case COMMAND_Vol_Up_CONST:
+    case COMMAND_Vol_Down_CONST:
+    case COMMAND_Mute_CONST:
+      {
+      cec_logical_address LogicalAddressForVolume = LogicalAddress;
+      // TODO: CHECK SYSTEM STATE HERE - DOES LA 5 exist? if so direct commands there if tv ARC is supported
+      if ( (int) LogicalAddress != 5 && m_CEC_Addresses[5] /* && TV_ARC */ )
+        LogicalAddressForVolume = (cec_logical_address) 5;
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild - VOL - UCP - To LA: %i, Code: %i", (int) LogicalAddressForVolume, m_mapLMCEtoCECcodes[pMessage->m_dwID] );
+      if ( m_pParser->SendKeypress( LogicalAddressForVolume, m_mapLMCEtoCECcodes[pMessage->m_dwID] ) )
+      {
+	if ( m_pParser->SendKeyRelease( LogicalAddressForVolume ) ) 
+        {
+	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: UCP - successful");
+	  sCMD_Result = "OK";
+        }
+      }
+      return;
+      break;
+      }
     case COMMAND_Generic_On_CONST:
       if ( m_pParser->PowerOnDevices( LogicalAddress ) )
       {
@@ -584,6 +604,7 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       }
       return;
       break;
+/*
     case COMMAND_Vol_Up_CONST:
       if ( ((int) LogicalAddress == 0 || (int) LogicalAddress == 5) && m_pParser->VolumeUp() )
       {
@@ -610,6 +631,7 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       }
       return;
       break;
+*/
     case COMMAND_Input_Select_CONST:
       char cPort = '0';
       string sCommand = pMessage->m_mapParameters[COMMANDPARAMETER_PK_Command_Input_CONST];
