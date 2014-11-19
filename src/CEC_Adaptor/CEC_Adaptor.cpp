@@ -97,7 +97,28 @@ int CecKeyPress(void *cbParam, const cec_keypress key)
 
 int CecCommand(void *cbParam, const cec_command command)
 {
-  // TODO
+  // TODO need to monitor commands from andrespond to other cec devices
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK!");
+  return 0;
+}
+
+int CecAlert(void *cbParam, const libcec_alert type, const libcec_parameter param)
+{
+  switch (type)
+  {
+  case CEC_ALERT_CONNECTION_LOST:
+/*    if (!CReconnect::Get().IsRunning())
+    {
+      PrintToStdOut("Connection lost - trying to reconnect\n");
+      CReconnect::Get().CreateThread(false);
+    }
+*/
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CEC_ALERT_CONNECTION_LOST!");
+    break;
+  default:
+    break;
+  }
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CEC_ALERT!");
   return 0;
 }
 
@@ -205,6 +226,7 @@ m_mapLMCEtoCECcodes[COMMAND_Move_Down_CONST] = CEC_USER_CONTROL_CODE_DOWN;
 m_mapLMCEtoCECcodes[COMMAND_Move_Left_CONST] = CEC_USER_CONTROL_CODE_LEFT;
 m_mapLMCEtoCECcodes[COMMAND_Move_Right_CONST] = CEC_USER_CONTROL_CODE_RIGHT;
 m_mapLMCEtoCECcodes[COMMAND_Back_Prior_Menu_CONST] = CEC_USER_CONTROL_CODE_EXIT;
+m_mapLMCEtoCECcodes[COMMAND_PS_Playstation_CONST] = CEC_USER_CONTROL_CODE_ROOT_MENU;
 //m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_ROOT_MENU;
 //m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_SETUP_MENU;
 //m_mapLMCEtoCECcodes[??] = CEC_USER_CONTROL_CODE_CONTENTS_MENU;
@@ -312,6 +334,7 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 	g_callbacks.CBCecLogMessage = &CecLogMessage;
 	g_callbacks.CBCecKeyPress = &CecKeyPress;
 	g_callbacks.CBCecCommand = &CecCommand;
+	g_callbacks.CBCecAlert = &CecAlert;
 	g_config.callbacks = &g_callbacks;
 	g_config.callbackParam = this;
 
@@ -533,6 +556,7 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
     case COMMAND_Red_CONST:
     case COMMAND_Green_CONST:
     case COMMAND_Yellow_CONST:
+    case COMMAND_PS_Playstation_CONST:
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild - UCP - To LA: %i, Code: %i", (int) LogicalAddress, m_mapLMCEtoCECcodes[pMessage->m_dwID] );
       if ( m_pParser->SendKeypress( LogicalAddress, m_mapLMCEtoCECcodes[pMessage->m_dwID] ) )
       {
