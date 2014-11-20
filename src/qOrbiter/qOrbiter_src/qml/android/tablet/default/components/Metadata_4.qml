@@ -16,10 +16,11 @@ Item{
         height: dcenowplaying.aspect == "wide"?scaleY(25): scaleY(35)
         StyledText {
             id: starring_text
-            width: parent.width
+            horizontalAlignment: Text.AlignLeft
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text: dcenowplaying.performerlist == "" ? dcenowplaying.performerlist : qsTr("No Performer Information")
             fontSize: scaleY(4)
+
             elide: "ElideRight"
             visible:false
         }
@@ -28,15 +29,17 @@ Item{
             width:parent.width
             text:  dcenowplaying.mediatitle
             font.bold: true
+            horizontalAlignment: Text.AlignLeft
             //  wrapMode: "WrapAtWordBoundaryOrAnywhere"
             elide: "ElideRight"
             smooth: true
             font.pixelSize: scaleY(4)
-            visible:  dcenowplaying.mediatitle =="" ? false: true           
+            visible:  dcenowplaying.mediatitle =="" ? false: true
         }
         StyledText { /* showing up with performers! fix */
             id: title_text
             width:parent.width
+            horizontalAlignment: Text.AlignLeft
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text: dcenowplaying.qs_mainTitle
             font.bold: true
@@ -51,16 +54,18 @@ Item{
 
         StyledText {
             id: album_text
+            horizontalAlignment: Text.AlignLeft
             width:parent.width
             text: dcenowplaying.album
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             smooth: true
             font.bold: true
-            fontSize: scaleY(4)            
+            fontSize: scaleY(4)
         }
 
         StyledText {
             id: genre_text
+            horizontalAlignment: Text.AlignLeft
             width:parent.width
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text: qsTr("Genre(s): ") + dcenowplaying.genre
@@ -72,9 +77,10 @@ Item{
         }
         StyledText {
             id: released_text
+            horizontalAlignment: Text.AlignLeft
             width:parent.width
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
-            text: qsTr("Released: ") + dcenowplaying.releasedate           
+            text: qsTr("Released: ") + dcenowplaying.releasedate
             smooth: true
             font.bold: true
             fontSize: scaleY(4)

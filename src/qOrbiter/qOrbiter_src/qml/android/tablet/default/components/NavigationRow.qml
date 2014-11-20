@@ -112,12 +112,31 @@ Item{
         State {
             when:!uiOn
             name: "retracted"
-
             AnchorChanges{
                 target: nav_row
                 anchors{
                     top:undefined
                     bottom:parent.top
+                }
+            }
+        },
+        State {
+            name: "lowered"
+            AnchorChanges{
+                target: nav_row
+                anchors{
+                    top:undefined
+                    bottom:parent.top
+                }
+            }
+        },
+        State {
+            name:"raised"
+            AnchorChanges{
+                target: nav_row
+                anchors{
+                    bottom:undefined
+                    top:parent.top
                 }
             }
         }
@@ -128,7 +147,7 @@ Item{
             from: "*"
             to: "*"
             AnchorAnimation{
-                duration: 500
+                duration: 350
                 easing.type: Easing.InCurve
             }
         }

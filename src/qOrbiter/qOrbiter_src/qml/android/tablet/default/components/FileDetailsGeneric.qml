@@ -84,11 +84,27 @@ Item {
         }
         Image {
             id: filedetailsimage
+            property double rotationAngle:0
             property bool profile : filedetailsimage.sourceSize.height > filedetailsimage.sourceSize.width ? true : false
             width:profile ? scaleX(25) : scaleX(45)
             height:profile ? scaleY(65) : scaleY(58)
             source:filedetailsclass.screenshot !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+filedetailsclass.screenshot : ""
             smooth: true
+            transform: Rotation { origin.x: 30; origin.y: 30; axis { x: 0; y: 1; z: 0 } angle: filedetailsimage.rotationAngle }
+            onSourceChanged:{
+                if(filedetailrect.state=="open"){
+                    rotationAngle=32
+                } else{
+                    rotationAngle=0
+                }
+            }
+
+            Behavior on rotation {
+                PropertyAnimation{
+                    duration: 350
+                }
+            }
+
         }
 
         Image {
@@ -218,7 +234,7 @@ Item {
         StyledButton{
             buttonText: "Play"
             hitArea.onReleased: {
-                 content.state="viewing"
+                content.state="viewing"
                 manager.playMedia(filedetailsclass.file);
 
             }
@@ -238,6 +254,11 @@ Item {
             name: "closed"
             extend: ""
 
+            PropertyChanges{
+                target:filedetailsimage
+             //   rotationAngle:0
+            }
+
             AnchorChanges{
                 target:filedetailrect
                 anchors.right: content.left
@@ -250,13 +271,17 @@ Item {
                 target: filedetailrect
                 anchors.right: content.right
             }
+            PropertyChanges{
+                target:filedetailsimage
+              //  rotationAngle:45
+            }
         }
     ]
     transitions: Transition {
         from: "closed"
         to: "open"
         AnchorAnimation{
-           duration: 350
+            duration: 350
         }
     }
 

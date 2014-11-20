@@ -11,8 +11,8 @@ Item{
         opacity:.65
     }
 
-//    border.color: "black"
-//    border.width: 1
+    //    border.color: "black"
+    //    border.width: 1
     clip:true
     Column{
         id:textCol
@@ -35,13 +35,13 @@ Item{
         StyledText {
             id: episode_title
             width:parent.width
-            text: qsTr("Episode: ")+ dcenowplaying.episode          
+            text: qsTr("Episode: ")+ dcenowplaying.episode
             //  wrapMode: "WrapAtWordBoundaryOrAnywhere"
             elide: "ElideRight"
             smooth: true
             fontSize: scaleY(4)
             visible:  dcenowplaying.episode =="" ? false: true
-           // color:appStyle.accentcolor
+            // color:appStyle.accentcolor
         }
         StyledText {
             id: starring
@@ -54,12 +54,12 @@ Item{
             fontSize: scaleY(3)
             elide: "ElideRight"
             visible:  dcenowplaying.performerlist =="" ? false: true
-//            MouseArea{
-//                anchors.fill: starring
-//                hoverEnabled: true
-//                onEntered: { starring.elide = "ElideNone" ; }
-//                onExited: {starring.elide = "ElideRight"; }
-//            }
+            //            MouseArea{
+            //                anchors.fill: starring
+            //                hoverEnabled: true
+            //                onEntered: { starring.elide = "ElideNone" ; }
+            //                onExited: {starring.elide = "ElideRight"; }
+            //            }
         }
         StyledText {
             id: genre
@@ -83,10 +83,10 @@ Item{
             wrapMode: "WrapAtWordBoundaryOrAnywhere"
             text: qsTr("Released: ") + dcenowplaying.releasedate
             // font.italic: true
-            smooth: true            
+            smooth: true
             fontSize: scaleY(4)
             visible:  dcenowplaying.releasedate =="" ? false: true
-           // color:appStyle.accentColor
+            // color:appStyle.accentColor
         }
 
         StyledText {

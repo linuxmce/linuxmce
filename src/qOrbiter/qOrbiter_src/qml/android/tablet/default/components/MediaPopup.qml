@@ -177,4 +177,16 @@ Item {
         }
 
     ]
+
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+            AnchorAnimation{
+                duration:skinStyle.animation_medium
+                easing.type: skinStyle.animation_easing
+            }
+
+        }
+    ]
 }

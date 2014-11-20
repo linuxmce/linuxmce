@@ -11,6 +11,7 @@ Item {
     property string headerTitle:"Lorem Ipsum"
     property bool useHeader:true
     property alias fillColor:bgfill.color
+    property string headerFillColor:style.buttonColor
     clip:true
 
     Rectangle{
@@ -19,20 +20,20 @@ Item {
         color:style.contentBgColor
         opacity: .65
         border.color: "white"
-        border.width: 2
+        border.width: 1
     }
 
     Rectangle{
         id:phil
         anchors.fill: parent
         gradient:style.buttonGradient
-        opacity: .55
+        opacity: .1
     }
 
     Rectangle{
         id:panelHeader
         height: panelHeaderHeight
-        color:style.buttonColor
+        color:headerFillColor
         anchors.margins: 5
         anchors{
             top:parent.top

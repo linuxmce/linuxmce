@@ -159,7 +159,7 @@ Item{
         },
         State {
             name: "movies"
-            when: manager.q_subType==MediaSubtypes.MOVIES && manager.q_mediaType==Mediatypes.STORED_VIDEO
+            when: manager.q_subType==MediaSubtypes.MOVIES && manager.q_mediaType==MediaTypes.LMCE_StoredVideo
             extend:"video"
             PropertyChanges {
                 target: multi_view_list
@@ -190,7 +190,7 @@ Item{
         ,
         State {
             name: "radio"
-            when:manager.q_mediaType == Mediatypes.NP_OTARADIO
+            when:manager.q_mediaType == MediaTypes.NP_OTARadio
             extend:"audio"
             PropertyChanges {
                 target: multi_view_list

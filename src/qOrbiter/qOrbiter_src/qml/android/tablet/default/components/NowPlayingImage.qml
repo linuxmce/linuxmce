@@ -1,8 +1,35 @@
 import QtQuick 1.0
-
+import org.linuxmce.enums 1.0
 Item{
+    id:imgContainer
+    height:0
+    width: 0
+    property string s_aspect: dcenowplaying.aspect
+    onS_aspectChanged: {
+        nowplayingimage.source="image://listprovider/updateobject/"+securityvideo.timestamp
+        console.log("checking mediatype "+manager.i_current_mediaType)
+        switch(manager.i_current_mediaType){
+        case MediaTypes.LMCE_StoredAudio:
+            console.log("LMCE_StoredAudio::ASPECT RATIO==>"+dcenowplaying.aspect)
+            state="wideImage"
+            break;
 
-    property int aspectRatio:dcenowplaying.aspect
+        case MediaTypes.LMCE_StoredVideo:
+
+            if(dcenowplaying.aspect=="poster"){
+                console.log("LMCE_StoredVideo::ASPECT RATIO==>"+dcenowplaying.aspect)
+                imgContainer.state="posterImage"
+            } else if (dcenowplaying.aspect=="wide"){
+                console.log("LMCE_StoredVideo::ASPECT RATIO==>"+dcenowplaying.aspect)
+                imgContainer.state="wideImage"
+            } else if(dcenowplaying.aspect=="square"){
+                console.log("LMCE_StoredVideo::ASPECT RATIO==>"+dcenowplaying.aspect)
+                imgContainer.state="squareImage"
+            }
+            break;
+        }
+    }
+
 
     Connections{
         target:dcenowplaying
@@ -11,17 +38,20 @@ Item{
 
     Image {
         id: nowplayingimage
-       anchors.fill: parent
-       fillMode: Image.PreserveAspectFit
-        source: "image://listprovider/updateobject/"+securityvideo.timestamp
-      //  anchors.horizontalCenter: parent.horizontalCenter
+        anchors.fill: parent
+        fillMode: Image.PreserveAspectFit
+       // source: "image://listprovider/updateobject/"+securityvideo.timestamp
+        //  anchors.horizontalCenter: parent.horizontalCenter
+        sourceSize.height: parent.height
+        sourceSize.width: parent.width
         smooth: true
         visible: source == undefined ? false : true
         onSourceChanged: {
-            console.log("ASPECT==>"+dcenowplaying.aspect)
+            console.log("nowplayingimage::ASPECT==>"+dcenowplaying.aspect)
             console.log("Source Size ==>"+sourceSize)
         }
     }
+
     Timer{
         id:refreshtimer
         interval: 500
@@ -33,21 +63,27 @@ Item{
         State {
             name: "wideImage"
             PropertyChanges {
-                target: nowplayingimage
-
+                target: imgContainer
+                height: manager.isProfile ? scaleY(14) : scaleY(38)
+                width: manager.isProfile ? scaleX(35) : scaleX(14)
             }
         },
         State {
             name: "squareImage"
+            when:manager.i_current_mediaType == MediaTypes.LMCE_StoredAudio
             PropertyChanges {
-                target: nowplayingimage
+                target: imgContainer
+                height: scaleX(25)
+                width: height
 
             }
         },
         State{
             name:"posterImage"
             PropertyChanges{
-                target: nowplayingimage
+                target: imgContainer
+                height: manager.isProfile ? scaleY(14) : scaleY(38)
+                width: manager.isProfile ? scaleX(35) : scaleX(14)
             }
         }
 

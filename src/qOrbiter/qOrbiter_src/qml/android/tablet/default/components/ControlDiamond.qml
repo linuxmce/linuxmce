@@ -8,7 +8,7 @@ Item{
     anchors.right: parent.right
     anchors.rightMargin: scaleX(2)
     anchors.bottom: parent.bottom
-    anchors.bottomMargin: scaleY(5)
+    anchors.bottomMargin: scaleY(2)
     
     ControlButton {
         id:play

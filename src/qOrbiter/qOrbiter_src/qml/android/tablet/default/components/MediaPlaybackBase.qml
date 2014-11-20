@@ -1,18 +1,75 @@
 import QtQuick 1.0
 import "../../../../skins-common/lib/handlers"
-Item{
+import org.linuxmce.enums 1.0
+
+Panel{
     id:media_playback_base
+    headerTitle: manager.translateMediaType(manager.i_current_mediaType)
+    fillColor: "grey"
+    headerFillColor: "black"
+    headerRect.opacity: .65
+    Row{
+        id:controlRow
+
+        anchors{
+            right:headerRect.right
+            top:headerRect.top
+            bottom:headerRect.bottom
+            margins: 5
+        }
+        width: headerRect.width/2
+        spacing: 5
+
+        StyledButton{
+            id:home
+            buttonText: qsTr("Home")
+            anchors.verticalCenter: parent.verticalCenter
+            onActivated: {
+                manager.setCurrentScreen("Screen_1.qml")
+            }
+        }
+
+        StyledButton{
+            id:options
+            anchors.verticalCenter: parent.verticalCenter
+            buttonText: qsTr("Media Options")
+            onActivated: {
+                manager.setCurrentScreen("Screen_1.qml")
+            }
+        }
+
+        StyledButton{
+            id:plst
+            anchors.verticalCenter: parent.verticalCenter
+            buttonText: qsTr("Playlist")
+            onActivated: {
+                showingPlaylist=!showingPlaylist
+            }
+        }
+    }
+
+
     anchors{
         top:parent.top
         left:parent.left
         right:parent.right
         bottom:parent.bottom
     }
-    state:"metadata"
+
 
     property string screenLabel:"foo"
     property bool usePlaylist:true
+    property string metadataComponent:"Metadata_"+manager.i_current_mediaType+".qml"
+    property alias scrollBarComponent:mediaScrollerTarget.sourceComponent
+    property string controlComponent: ""
+    property Item playlistSource
+    property Item playlistDelegate
+    property bool enableScrollbar:true
+    property Component playListComponent:PlaylistView{}
+    property bool showingPlaylist:true;
 
+    onShowingPlaylistChanged: {
+        console.log(showingPlaylist)    }
 
     Connections{
         target:qml_root
@@ -30,22 +87,44 @@ Item{
     Component.onCompleted: {
         manager.setBoundStatus(true)
         forceActiveFocus()
-        if(media_playback_base.state!=="dvdmenu"){
-            nav_row.navSource="NavOptions5.qml";
-            info_panel.state="hidden";
-            controlComponent = "Controls_5.qml" //controlsLoader.sourceComponent
-        } else {
+        info_panel.state="hidden";
+        controlComponent = "Controls_5.qml"
+        // nav_row.navSource="NavOptions5.qml";
 
+        switch(manager.i_current_mediaType){
+        case MediaTypes.LMCE_StoredAudio:
+            media_playback_base.state="localaudio"
+            break;
+
+        case MediaTypes.LMCE_StoredVideo:
+            media_playback_base.state="localvideo"
+            break;
+
+        case MediaTypes.LMCE_StreamedAudio:
+            media_playback_base.state="streamingaudio"
+            break;
+
+        case MediaTypes.LMCE_DVD:
+            media_playback_base.state="dvd"
+            break;
+
+        case MediaTypes.LMCE_LiveRadio:
+            media_playback_base.state="radio"
+            break;
+
+        case MediaTypes.LMCE_AirPlay_photos:
+            media_playback_base.state="airplay"
+            break;
+        case MediaTypes.NP_NetworkMedia:
+            media_playback_base.state="networkmedia"
+            break;
+
+        default:
+            media_playback_base.state="fallback"
+            break;
         }
 
-        manager.getStoredPlaylist()
-
-        controlComponent = "Controls_5.qml"
-        nav_row.navSource="NavOptions5.qml";
-        info_panel.state="hidden";
     }
-
-
 
     Connections{
         target: manager
@@ -61,13 +140,6 @@ Item{
         onTriggered: manager.grabStreamImage()
     }
 
-    property string metadataComponent:"Metadata_"+manager.i_current_mediaType+".qml"
-    property alias scrollBarComponent:mediaScrollerTarget.sourceComponent
-    property string controlComponent: ""
-    property Item playlistSource
-    property Item playlistDelegate
-    property bool enableScrollbar:true
-    property Component playListComponent:PlaylistView{}
 
     Item{
         id: options_display
@@ -81,227 +153,138 @@ Item{
         id: controlPanel
     }
 
-    Item{
-        id:metaDataPanel
-        height: parent.height
-        width: parent.width
-        clip:true
-
-        NowPlayingImage{
-            id:npImage
-            anchors.top:parent.top
+    NowPlayingImage{
+        id:npImage
+        anchors{
+            left:playlistPanel.right
+            top:headerRect.bottom
+            leftMargin: 5
         }
-        Image {
-            id: dvdImage
-            width: scaleX(65)
-            height:scaleY(65)
-            fillMode: Image.PreserveAspectFit
-            source: ""
-            visible:false
-            anchors{
-                top:parent.top
-                left: parent.left
-                margins: scaleX(2)
-            }
-        }
-
-        Item{
-            id:directionDiamond
-            height: dvdImage.height/2
-            width: height
-            visible:dvdImage.visible
-            anchors{
-                right: parent.right
-                verticalCenter: dvdImage.verticalCenter
-                margins: scaleX(5)
-            }
-
-            Rectangle{
-                id:square
-                anchors.fill: parent
-                color: "black"
-                opacity: .50
-                rotation: 0
-                visible:true
-            }
-
-            //            Rectangle{
-            //                id:circle
-            //                height: parent.height
-            //                width: parent.width
-            //                radius: height
-            //                color: "black"
-            //                opacity: .75
-            //                border.color: "white"
-            //                border.width: 2
-            //                anchors.centerIn: square
-            //            }
-
-            StyledButton{
-                id:up
-                anchors{
-                    horizontalCenter: square.horizontalCenter
-                    verticalCenter: square.top
-                }
-                buttonText: "Up"
-                ArrowUpHandler{
-                }
-            }
-
-            StyledButton{
-                id:dn
-                anchors{
-                    horizontalCenter: square.horizontalCenter
-                    verticalCenter: square.bottom
-                }
-                buttonText: "Down"
-                ArrowDownHandler{
-                }
-            }
-
-            StyledButton{
-                id:left
-                anchors{
-                    horizontalCenter: square.left
-                    verticalCenter: square.verticalCenter
-                }
-                buttonText: "Left"
-                ArrowLeftHandler{
-                }
-            }
-            StyledButton{
-                id:right
-                anchors{
-                    horizontalCenter: square.right
-                    verticalCenter: square.verticalCenter
-                }
-                buttonText: "Right"
-                ArrowRightHandler{
-                }
-            }
-            StyledButton{
-                id:ok
-                anchors.centerIn: square
-                buttonText: "Enter"
-                EnterButtonHandler{
-                }
-            }
-
-
-        }
-
-        Loader{
-            id:mediaTypeMetaData
-            width: parent.width-npImage.width
-            source: metadataComponent
-            anchors.right: metaDataPanel.right
-            anchors.top: npImage.top
-        }
-
-        Loader{
-            id:mediaScrollerTarget
-            sourceComponent: MediaScrollBar{}
-            anchors{
-                bottom:controlsLoader.top
-                left:parent.left
-                right:parent.right
-            }
-        }
-
-        Loader{
-            id:controlsLoader
-            width: parent.width
-
-            source:controlComponent
-            anchors.bottom: parent.bottom
-        }
-
-
-
     }
 
-    Item{
-        id:playlistPanel
-        height: parent.height
-        width: parent.width
-        clip: true
-        anchors.left: metaDataPanel.right
-
-        Loader{
-            id:playlist
-            sourceComponent: playListComponent
+    Image {
+        id: dvdImage
+        width: scaleX(65)
+        height:scaleY(65)
+        fillMode: Image.PreserveAspectFit
+        source: ""
+        visible:false
+        anchors{
+            top:parent.top
+            left: parent.left
+            margins: scaleX(2)
         }
+    }
 
+
+    ControlDiamond{
+        anchors.bottom: mediaScrollerTarget.top
+        visible:true
+    }
+
+
+    DirectionDiamond {
+        id: directionDiamond
+        visible:false
+    }
+
+    Loader{
+        id:mediaTypeMetaData
+        width: parent.width *.40
+        source: metadataComponent
+        anchors{
+            left: npImage.left
+            top:npImage.bottom
+            bottom: mediaScrollerTarget.top
+        }
+    }
+
+    Loader{
+        id:mediaScrollerTarget
+        sourceComponent: MediaScrollBar{}
+        anchors{
+            bottom:parent.bottom
+            left:parent.left
+            right:parent.right
+            margins: 10
+        }
+    }
+
+    PlaylistPanel{
+        id:playlistPanel
+        anchors{
+            top:media_playback_base.headerRect.bottom
+            bottom:mediaScrollerTarget.top
+            left:  parent.left
+            right:  undefined
+            leftMargin:  5
+        }
+        width: parent.width *.35
+        clip: true
     }
 
     states: [
         State {
-            name: "metadata"
-            AnchorChanges{
-                target:metaDataPanel
-                anchors.right: undefined
-                anchors.left: media_playback_base.left
-            }
-            PropertyChanges{
-                target:controlPanel
-                state:"unloaded"
-            }
-
+            name: "fallback"
+            extend: ""
+        },
+        State {
+            name: "localvideo"
 
         },
         State {
-            name: "playlist"
-            AnchorChanges{
-                target: metaDataPanel
-                anchors.left: undefined
-                anchors.right:media_playback_base.left
-            }
-            PropertyChanges{
-                target:controlPanel
-                state:"unloaded"
-            }
-            StateChangeScript{
-                script:{manager.getStoredPlaylist()}
-            }
+            name: "localaudio"
 
         },
-        State {
-            name: "controls"
-            AnchorChanges{
-                target: metaDataPanel
-                anchors.right: undefined
-                anchors.left: media_playback_base.right
-            }
-            PropertyChanges{
-                target:controlPanel
-                state:"loaded"
-            }
-
+        State{
+            name:"dvd"
         },
-        State {
-            name: "dvdmenu"
-
-            PropertyChanges {
-                target: npImage
-                visible:false
+        State{
+            name:"streamingaudio"
+        },
+        State{
+            name:"radio"
+        },
+        State{
+            name:"airplay"
+        },
+        State{
+            name:"networkmedia"
+        },
+        State{
+            name:"playlistopen"
+            when:showingPlaylist
+            AnchorChanges{
+                target: playlistPanel
+                anchors{
+                    right:undefined
+                    left:media_playback_base.left
+                }
             }
-            PropertyChanges {
-                target: dvdImage
-                visible:true
-            }
-            PropertyChanges {
-                target: mediaTypeMetaData
-                source:""
+        },
+        State{
+            name:"playlistclosed"
+            when:!showingPlaylist
+            AnchorChanges{
+                target: playlistPanel
+                anchors{
+                    left:undefined
+                    right:media_playback_base.left
+                }
             }
         }
+
     ]
+
+
 
     transitions: [
         Transition {
             from: "*"
             to: "*"
             AnchorAnimation{
-                duration: 750
+                duration:skinStyle.animation_medium
+                easing.type: skinStyle.animation_easing
 
 
             }

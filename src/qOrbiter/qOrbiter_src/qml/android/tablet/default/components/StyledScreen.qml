@@ -2,37 +2,42 @@ import QtQuick 1.1
 
 Item {
     id:screen_root
-
     focus:true
     opacity: 0
+
     Component.onCompleted: {
-        setNavigation(navigation)
+        console.log("screen opening")
         forceActiveFocus()
         state="opening"
         screenOpening()
     }
     Behavior on opacity {
         PropertyAnimation{
-            duration: 350
+            duration: 300
+        }
+    }
+
+    onScreenOpening: {
+        raiseNavigation(manager.currentScreen==="Screen_1.qml" ? true :keepHeader )
+        if(keepHeader){
+            setNavigation(navigation)
         }
     }
 
     onOpacityChanged: {
-        if(opacity==0 && state=="closed"){
-            readyToClose()
-        } else if(opacity==1 && state=="opened"){
-            screenOpening()
+        if(opacity===0 &&state==="closing"){
+            state="closed"
         }
     }
 
     onStateChanged: {
-        if(state=="closing"){
-            screenClosing()
-        }
-    }
+        if(state==="closed"){
+            console.log("closed")
 
-    function close(){
-        state="closing"
+            readyToClose()
+        } else if(state==="closing"){
+            raiseNavigation(true)
+        }
     }
 
     function setNavigation(navFile){
@@ -41,6 +46,9 @@ Item {
 
     property string screen:"screenum ipsum"
     property string navigation:"ScenarioComponent.qml"
+    property bool keepHeader:true
+    property bool keepFooter:false;
+    property bool noForce:false
     signal readyToClose()
     signal screenClosing()
     signal screenOpening()
@@ -69,7 +77,7 @@ Item {
             name: "opened"
             PropertyChanges {
                 target: screen_root
-                when:opacity==1
+                opacity:1
             }
         },
         State {
@@ -82,7 +90,7 @@ Item {
         },
         State {
             name: "closed"
-            when:opacity==0
+
         }
     ]
 

@@ -8,7 +8,7 @@ Item{
     property alias delegate:playlist_data.delegate
 
     Component.onCompleted: {
-      //  manager.getStoredPlaylist()
+
     }
 
     Connections{
@@ -26,7 +26,7 @@ Item{
         id:playlist_data
         height:parent.height
         width:parent.width
-        model:manager.getDataGridModel("Playlist", 18)
+
         anchors.centerIn: parent
 
         cellHeight:scaleY(22)
