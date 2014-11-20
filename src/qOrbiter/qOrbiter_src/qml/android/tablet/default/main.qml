@@ -18,6 +18,8 @@ Item {
     property variant current_header_model:scenarios
     property string locationinfo: "standby"
     property string screenfile
+    property variant screenPointer: pageLoader.item
+
 
     signal showMetadata()
     signal showPlaylist()
@@ -37,6 +39,14 @@ Item {
         console.log((message? message+"\n\t" : "No Message \n\t")+ JSON.stringify(obj, null, "\t"))
     }
 
+    function raiseNavigation(raised){
+        if(raised ){
+            nav_row.state="raised"
+        } else {
+            nav_row.state="lowered"
+        }
+    }
+
 
     focus:true
 
@@ -47,6 +57,7 @@ Item {
     }
 
     onUiOnChanged: {
+        console.log("UiOn::"+uiOn)
         if(uiOn){
             if(info_panel.restore){
                 info_panel.state="retracted"
@@ -99,18 +110,18 @@ Item {
         id:style
     }
 
-//    Timer{
-//        id:refresh
-//        interval: 500
-//        running:true
-//        repeat: true
-//        onTriggered: {
-//            if(canary.rotation===360)
-//                canary.rotation =1
-//            else
-//                canary.rotation=(canary.rotation+1)
-//        }
-//    }
+    //    Timer{
+    //        id:refresh
+    //        interval: 500
+    //        running:true
+    //        repeat: true
+    //        onTriggered: {
+    //            if(canary.rotation===360)
+    //                canary.rotation =1
+    //            else
+    //                canary.rotation=(canary.rotation+1)
+    //        }
+    //    }
 
 
 
@@ -161,7 +172,7 @@ Item {
             console.log("NEW ANDROID URL")
             if(androidUrl.length > 4){
                 console.log("URL ok!")
-               // var hax = String(dceplayer.androidUrl).replace("qOrbiterGenerator", "mediaStreamer")
+                // var hax = String(dceplayer.androidUrl).replace("qOrbiterGenerator", "mediaStreamer")
                 androidSystem.playMedia(dceplayer.androidUrl)
             }
             else{
@@ -200,42 +211,42 @@ Item {
 
 
     Keys.onReleased:{
-            switch(event.key){
+        switch(event.key){
 
-            case Qt.Key_Menu:
-                showOptions=!showOptions
-                console.log("menu button caught in root")
-                break;
+        case Qt.Key_Menu:
+            showOptions=!showOptions
+            console.log("menu button caught in root")
+            break;
 
-            case Qt.Key_Back:
-                if(manager.currentScreen==="Screen_1.qml"){
-                    showExitConfirm()
-                } else{
-                    manager.goBacktoQScreen()
-                }
-                console.log("Caught Back Key")
-                break
-            case Qt.Key_MediaPrevious:
-                if(manager.currentScreen==="Screen_1.qml"){
-                    showExitConfirm()
-                } else{
-                    manager.goBacktoQScreen()
-                }
-                break;
-            case Qt.Key_VolumeDown:
-                androidSystem.mediaSetVol(-1)
-                console.log("vol-")
-                break;
-            case Qt.Key_VolumeUp:
-                androidSystem.mediaSetVol(+1)
-                console.log("vol+")
-                break;
-
-            default:
-                console.log(event.key)
+        case Qt.Key_Back:
+            if(manager.currentScreen==="Screen_1.qml"){
+                showExitConfirm()
+            } else{
+                manager.goBacktoQScreen()
             }
-            event.accepted=true
+            console.log("Caught Back Key")
+            break
+        case Qt.Key_MediaPrevious:
+            if(manager.currentScreen==="Screen_1.qml"){
+                showExitConfirm()
+            } else{
+                manager.goBacktoQScreen()
+            }
+            break;
+        case Qt.Key_VolumeDown:
+            androidSystem.mediaSetVol(-1)
+            console.log("vol-")
+            break;
+        case Qt.Key_VolumeUp:
+            androidSystem.mediaSetVol(+1)
+            console.log("vol+")
+            break;
+
+        default:
+            console.log(event.key)
         }
+        event.accepted=true
+    }
 
 
     ListModel{
@@ -362,7 +373,7 @@ Item {
             left: qml_root.left
             right: qml_root.right
         }
-        interval:30000
+        interval:60*1000
         useAnimation: true
         onDebugInfoChanged: console.log(debugInfo)
         active:manager.m_ipAddress==="192.168.80.1"
@@ -390,9 +401,8 @@ Item {
         }
 
     }
-    function screenchange(screenname )
-    {
-        pageLoader.source = "screens/"+screenname
+    function screenchange(screenname ){
+        pageLoader.nextScreen = "screens/"+screenname
     }
 
 
@@ -407,7 +417,7 @@ Item {
         objectName: "loadbot"
         focus: true
         source:"screens/Screen_1.qml"
-        visible:qml_root.uiOn
+        // visible:qml_root.uiOn
         property string nextScreen:""
 
         anchors{
@@ -418,12 +428,39 @@ Item {
 
         }
 
+        onNextScreenChanged: {
+            if(screenPointer.noForce===true){
+                console.log("pageloader::"+source+" declares noforce::"+screenPointer.noForce+", ignoring "+nextScreen)
+                return;
+            }else {
+                console.log("pageloader::"+source+" noforce::"+screenPointer.noForce+" , loading next screen.")
+                console.log("next screen==>"+nextScreen)
+                startChange()
+            }
+
+        }
+
         function startChange(){
-            pageLoader.item.state="closing"
+
+            if(screenPointer.screen){
+                console.log("pageloader::closing page")
+                pageLoader.item.state="closing"
+            } else{
+                console.log("pageloader::no page jumping to next ==>"+nextScreen)
+                loadNext()
+            }
+
         }
 
         function loadNext(){
-            pageLoader.source="screens/"+nextScreen
+
+            console.log("pageloader::loading next screen")
+            if(nextScreen===""){
+                nextScreen="screens/Screen_1.qml"
+                return
+            }
+
+            pageLoader.source=nextScreen
         }
 
         opacity: uiOn ? 1 : 0
@@ -442,7 +479,7 @@ Item {
                           {
                               manager.setDceResponse("Command to change to:" + source+ " was successfull")
 
-                             // contentItem=item.screen_root
+                              // contentItem=item.screen_root
                           }
                           else if (pageLoader.status == Component.Loading)
                           {
@@ -458,14 +495,14 @@ Item {
                               manager.currentScreen="Screen_X.qml"
                           }
     }
-
-    NavigationRow {
-        id: nav_row
-
-    }
     MediaPopup{
         id:media_notification
     }
+    NavigationRow {
+        id: nav_row
+    }
+
+
     InformationPanel {
         id: info_panel
     }
