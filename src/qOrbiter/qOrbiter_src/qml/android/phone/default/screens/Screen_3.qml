@@ -1,5 +1,6 @@
 import QtQuick 1.0
 import "../components"
+import org.linuxmce.grids 1.0
 
 StyledScreen{
   id:styledScreen
@@ -13,12 +14,12 @@ StyledScreen{
 	anchors.top: parent.verticalCenter
 	anchors.left: parent.left
 	anchors.right: parent.right
-//	leftMargin: 10
-//	rightMargin: 10
-        ButtonSq {
+	spacing: 10
+        StyledButton {
             id: btOff
-	    height: style.stdbuttonh * 0.5
-            buttontext: "Stop"
+	    height: 50
+	    width: 200
+            buttonText: "Stop"
 	    // call stopMedia with selected EA
             onActivated: {
 	        console.log("manager.stopPlayback with EA = " + media.getSelections().get(0).device)
@@ -26,10 +27,11 @@ StyledScreen{
 		  activeStreams.model.refreshData()
             }
         }
-        ButtonSq {
+        StyledButton {
             id: btRemote
-	    height: style.stdbuttonh * 0.5
-            buttontext: "Remote"
+	    height: 50
+	    width: 200
+            buttonText: "Remote"
 	    // call stopMedia with selected EA
             onActivated: {
             }
@@ -47,7 +49,7 @@ StyledScreen{
             leftMargin: 10
 	    rightMargin: 10
         }
-        model: manager.getDataGridModel("mediaStreams", 10)
+        model: manager.getDataGridModel("mediaStreams", DataGrids.Floorplan_Media_Streams)
         delegate:
             StyledButton{
             id:gridBtn
