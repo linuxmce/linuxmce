@@ -20,27 +20,28 @@ namespace DCE {
 	class CECDevice
 	{
 	public:
-		cec_logical_address iLogical_Address;
+		uint16_t iPhysicalAddress;
+		cec_logical_addresses LogicalAddresses;
 		uint64_t iVendorId;
-		uint16_t iPhysical_Address;
 		bool     bActive;
 		cec_version iCecVersion;
 		cec_power_status power;
 		cec_osd_name osdName;
-		string strAddr;
+		string sAddr;
 		cec_menu_language lang;
 
 		int     iPK_Device;
 
+	// FIXME: use CONSTs to fill these with proper data.
 		CECDevice(void) {
+			LogicalAddresses.Clear();
+			iPhysicalAddress = 0;;
 			iPK_Device = 0;
-			iLogical_Address = (cec_logical_address) 0;
 			iVendorId = 0;
-			iPhysical_Address = 0;
 			bActive = false;
 			iCecVersion = (cec_version) 0;
 			power = (cec_power_status) 0;
-			strAddr = "";
+			sAddr = "";
 			//lang = CECDEVICE_UNKNOWN;
 /*
 //iVendorId = parser->GetDeviceVendorId((cec_logical_address)iPtr);

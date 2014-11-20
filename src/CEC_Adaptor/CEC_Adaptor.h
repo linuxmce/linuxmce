@@ -32,10 +32,10 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
-	  CEC::cec_logical_addresses m_CEC_Addresses;
+	  CEC::cec_logical_addresses m_CECAddresses;
+	  CEC::cec_logical_addresses m_myCECAddresses;
 	  std::map<uint16_t,uint8_t> m_mapPhysicalAddress_to_LA;
 	  std::map<int,uint16_t> m_mapPK_Device_to_PA;
-	  std::map<uint8_t,uint16_t> m_mapLA_to_VendorId;
 
 		// Private methods
 public:
