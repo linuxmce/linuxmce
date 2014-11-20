@@ -156,7 +156,7 @@ public slots:
                                      }
     bool getActive(){return active;}
 
-    void setInterval(int i){if(interval!=i) {interval = i; intervalTimer->start(i); startFadeTimer(); beginZoom(); emit intervalChanged();}}
+    void setInterval(int i){if(interval!=i) {interval = i; intervalTimer->start(i); startFadeTimer(); emit intervalChanged();}}
     int getInterval(){return interval;}
 
     bool getRunning(){return running;}
@@ -175,7 +175,7 @@ private:
     void requestImage(QString img);
     QNetworkAccessManager *requestManager;
     QTimer *intervalTimer;
-    void beginZoom();
+
     int scaleFactor();
     QString currentUrl;
 
@@ -195,6 +195,7 @@ protected:
     void paint(QPainter *painter);
 #endif
     void timerEvent(QTimerEvent *event);
+
 
 
 
