@@ -16,69 +16,11 @@ StyledScreen{
     id:stored_audio
     Component.onCompleted: manager.setBoundStatus(true)
     navigation: "HeaderControls.qml"
-    Panel{
-        id:mainPanel
-        useHeader: false
+    keepHeader: false
+    MediaPlaybackBase{
 
-        anchors{
-            top:parent.top
-            left:parent.left
-            bottom:parent.bottom
-            right:parent.right
-            margins: 10
-        }
-        headerTitle: dcenowplaying.mediatitle
-
-        PlaylistPanel {
-            id: playlistPanel
-        }
-
-        Item{
-            id:centerLayout
-            anchors{
-                top:parent.top
-                left:playlistPanel.right
-                bottom:parent.bottom
-            }
-            width: parent.width*.33
-
-            NowPlayingImage{
-                id:npImage
-                anchors.top:parent.top
-                anchors.topMargin: metaData.panelHeaderHeight
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: scaleY(45)
-                height: width
-            }
-
-//            StyledText{
-
-//                width: parent.width
-//                text: dceTimecode.qsCurrentTime +" of " +dceTimecode.qsTotalTime
-//                anchors.top: npImage.bottom
-//                font.pixelSize: 24
-//                isBold: true
-//            }
-
-            MediaScrollBar{
-                id:scroller
-                anchors.top:npImage.bottom
-                anchors.topMargin: metaData.panelHeaderHeight
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: scaleY(45)
-            }
-
-            Metadata_4{
-                anchors.bottom: parent.bottom
-            }
-
-        }
-
-
-
-        ControlDiamond {
-            id: controlDiamond
-        }
     }
+
+
 }
 

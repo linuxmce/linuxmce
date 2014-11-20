@@ -6,25 +6,25 @@ StyledScreen {
     Component.onCompleted: {
         updateQorbiter()
     }
+    property string requestUrl: ("http://"+manager.m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?d="+manager.m_dwPK_Device)
 
-    Rectangle{
+    Panel{
         anchors.fill: parent
-        color:"black"
-        opacity: .85
+
+        StyledText {
+            id: label
+            text: qsTr("Regenerating your Configuration data...")
+            anchors.centerIn: parent
+            font.bold: false
+            color:"white"
+            font.weight: Font.Light
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            width: parent.width
+            font.pixelSize: scaleY(8)
+        }
     }
 
- property string requestUrl: ("http://"+manager.m_ipAddress+"/lmce-admin/qOrbiterGenerator.php?d="+manager.m_dwPK_Device)
-    StyledText {
-        id: label
-        text: qsTr("Regenerating your Configuration data...")
-        anchors.centerIn: parent
-        font.bold: false
-        color:"white"
-        font.weight: Font.Light
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        width: parent.width
-        font.pixelSize: scaleY(8)
-    }
+
 
     function updateQorbiter(){
 

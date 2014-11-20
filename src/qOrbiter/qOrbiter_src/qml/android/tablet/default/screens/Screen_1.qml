@@ -4,13 +4,15 @@ import "../../../../skins-common/lib/handlers"
 
 StyledScreen {
     navigation: "ScenarioCompnent.qml"
+    keepHeader: true
     Component.onCompleted:{
         current_header_model=scenarios;
         if(dcenowplaying.b_mediaPlaying){
            manager.setBoundStatus(false)
         }
+        setNavigation(nav_row.defaultSource)
         info_panel.state="retracted";
-        nav_row.navSource=nav_row.defaultSource
+
     }
     Item{
         id:home_panel

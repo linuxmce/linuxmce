@@ -12,10 +12,14 @@ import "../components"
   *Advanced Device Controls
   */
 StyledScreen{
+    onScreenOpening: {
+       // screen_70.playlistSource=manager.getDataGridModel("Playlist", 18)
+    }
 
+    keepHeader: false
     MediaPlaybackBase{
-    id:screen_70
-
+        id:screen_70
+        headerTitle: "Stored Video"
     }
 }
 

@@ -1,10 +1,7 @@
 import QtQuick 1.1
 import "../components"
-Item{
+StyledScreen{
     id:screen_187
-    height: pageLoader.height
-    width: pageLoader.width
-
     property int device_from:screenparams.getParam(184) /*!< \brief Device from */
     property int device_mediasource:screenparams.getParam(186)/*!< \brief Device's mediasource id */
     property int stream_id:screenparams.getParam(187)/*!< \brief The stream id of the media being resumed. */
@@ -12,45 +9,53 @@ Item{
     property int users:screenparams.getParam(189)/*!< \brief Users for the media */
     property int mediatype:screenparams.getParam(190) /*!< \brief media type of the media in question */
     property int pending_screen:screenparams.getParam(226) /*!< \brief The next screen to go to after the decision.  */
+    noForce: true
+    Component.onCompleted: {
+        console.log("resume screen!")
+    }
 
-    Rectangle{
+    Panel{
+        id:resume_content
         anchors.fill: parent
-        color:"black"
-        opacity:.65
-    }
+        headerTitle: "Resume Options"
 
-    StyledText{
-        text: qsTr("Would you like to resume your media?")
-        fontSize: scaleY(8)
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-    }
+        StyledText{
+            text: qsTr("Would you like to resume your media?")
+            fontSize: scaleY(8)
+            anchors.top:resume_content.headerRect.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.margins: 10
+        }
 
-    Row{
-        height: childrenRect.height
-        width: parent.width
-        spacing: scaleX(2)
-        StyledButton{
-            buttonText: qsTr("Yes Resume")
-            hitArea.onReleased: {manager.setSeekPosition(screenparams.getParam(188)) ;
-                setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
+        Row{
+            height: parent.height/2
+            width: parent.width
+            spacing: scaleX(2)
+            StyledButton{
+                buttonText: qsTr("Yes Resume")
+                hitArea.onReleased: {manager.setSeekPosition(screenparams.getParam(188)) ;
+                    setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
+                }
+            }
+
+            StyledButton{
+                buttonText: qsTr("No Thank You")
+                hitArea.onReleased: setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
+            }
+
+            StyledButton{
+                buttonText: qsTr("Yes Always Resume")
+                hitArea.onReleased: setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
+            }
+
+            StyledButton{
+                buttonText: qsTr("No thank you, Never resume")
+                hitArea.onReleased: setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
             }
         }
-
-        StyledButton{
-            buttonText: qsTr("No Thank You")
-            hitArea.onReleased: setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
-        }
-
-        StyledButton{
-            buttonText: qsTr("Yes Always Resume")
-            hitArea.onReleased: setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
-        }
-
-        StyledButton{
-            buttonText: qsTr("No thank you, Never resume")
-            hitArea.onReleased: setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
-        }
     }
+
+
+
 
 }

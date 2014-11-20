@@ -1,18 +1,8 @@
 import QtQuick 1.0
 import "../components"
-Item{
+StyledScreen{
     id:screen_x_root
-   height: manager.appHeight
-   width: manager.appWidth
 
-    Rectangle{
-        id:mask
-        width: parent.width*85
-        height: scaleY(15)
-        color: "black"
-        opacity: .85
-        anchors.centerIn: parent
-    }
 
     StyledText {
         id: screen_loading_error
@@ -22,4 +12,5 @@ Item{
         font.pixelSize: 32
         font.bold: false
     }
+
 }
