@@ -32,9 +32,13 @@ using namespace DCE;
 VLC_Player::VLC_Player(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
   : VLC_Player_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
     //<-dceag-const-e->
+  ,m_VLCMutex("vlc_player")
 {
   m_config=new VLC::Config();
   m_pVLC=NULL;
+  m_pAlarmManager=NULL;
+  m_VLCMutex.Init(NULL);
+  m_iPlaybackSpeed=0;
 }
 
 //<-dceag-dest-b->
@@ -43,6 +47,8 @@ VLC_Player::~VLC_Player()
 {
   EVENT_Playback_Completed("",0,false);  // In case media plugin thought something was playing, let it know that there's not
   
+  m_iPlaybackSpeed=0;
+
   UnmountRemoteDVD();
   
   if (m_config)
@@ -55,6 +61,13 @@ VLC_Player::~VLC_Player()
     {
       delete m_pVLC;
       m_pVLC=NULL;
+    }
+
+  if (m_pAlarmManager)
+    {
+      m_pAlarmManager->Stop();
+      delete m_pAlarmManager;
+      m_pAlarmManager=NULL;
     }
   
 }
@@ -108,6 +121,9 @@ bool VLC_Player::GetConfig()
       return false;
     }
   
+  m_pAlarmManager=new AlarmManager();
+  m_pAlarmManager->Start(1); // Change this to more workers?
+
   // At this point, VLC is running.
   
   return true;
@@ -151,6 +167,37 @@ void VLC_Player::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 }
 
 //<-dceag-sample-b->!
+
+void VLC_Player::AlarmCallback(int id, void* param)
+{
+  PLUTO_SAFETY_LOCK(vm,m_VLCMutex);
+
+  switch (id)
+    {
+    case 1:
+      // temporary hack.
+      if (m_pVLC->IsPlaying())
+      {
+	m_pVLC->UpdateStatus();
+	m_pAlarmManager->AddRelativeAlarm(1,this,1,NULL);
+      }
+      else
+	{
+	  m_pAlarmManager->CancelAlarmByType(1);
+	}
+      break;
+    case 2:
+      // Transport Control altered.
+      if (m_pVLC->IsPlaying())
+	{
+	  DoTransportControls();
+	}
+      else
+	{
+	  m_pAlarmManager->CancelAlarmByType(2);
+	}
+    }
+}
 
 /*
   
@@ -287,6 +334,7 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
     {
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::EVENT_Playback_Started(streamID=%i)",iStreamID);
       EVENT_Playback_Started(sMediaURL,iStreamID,sMediaInfo,m_pVLC->m_sAudioInfo,m_pVLC->m_sVideoInfo);
+      m_pAlarmManager->AddRelativeAlarm(1,this,1,NULL);
     }
   else
     {
@@ -322,6 +370,10 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 
   // Preliminary, needs to be amended to close multiple streams
   m_pVLC->Stop();
+  m_iPlaybackSpeed=0;
+  if (!m_pVLC->IsPlaying())
+    m_pAlarmManager->CancelAlarmByType(1);
+
   UnmountRemoteDVD();
 
 }
@@ -338,6 +390,7 @@ void VLC_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMes
 {
   cout << "Need to implement command #39 - Pause Media" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  m_iPlaybackSpeed=0;
 }
 
 //<-dceag-c40-b->
@@ -352,6 +405,50 @@ void VLC_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pM
 {
   cout << "Need to implement command #40 - Restart Media" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  m_iPlaybackSpeed=1000;
+}
+
+/**
+ * DoTransportControl - Transport control in VLC_Player is represented by a series of libvlc_media_player_set_time() calls, which
+ * call this function from an alarm. The frequency of the alarm is determined by the requested media speed, e.g. 2x means two jumps by 2000ms
+ * every second, 4x means four jumps by 4000ms every second, and so on. 
+ */
+void VLC_Player::DoTransportControls()
+{
+  if ((m_iMediaPlaybackSpeed == 1000) || m_iMediaPlaybackSpeed == 0)
+    return;
+
+  int i=0, iSleepValue=0, iNumSleeps=0;
+  m_pAlarmManager->CancelAlarmByType(2);
+
+  // currently done as a table, Thom: come back here and make this a calculation, instead.
+  switch (abs(m_iMediaPlaybackSpeed))
+    {
+    case 2000:
+      iSleepValue=500;
+      iNumSleeps=2;
+      break;
+    case 4000:
+      iSleepValue=250;
+      iNumSleeps=4;
+      break;
+    case 8000:
+    case 16000:
+    case 32000:
+    case 64000:
+      iSleepValue=125;
+      iNumSleeps=8;
+      break;
+    }
+  
+  for (i=0;i<iNumSleeps;++i)
+    {
+      m_pVLC->SetTime(m_pVLC->GetTime()+m_iMediaPlaybackSpeed);
+      Sleep(iSleepValue);
+    }
+
+  m_pAlarmManager->AddRelativeAlarm(1,this,2,NULL);
+
 }
 
 //<-dceag-c41-b->
@@ -368,10 +465,23 @@ void VLC_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pM
 void VLC_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed,bool bReport,string &sCMD_Result,Message *pMessage)
 //<-dceag-c41-e->
 {
+  
   cout << "Need to implement command #41 - Change Playback Speed" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
   cout << "Parm #220 - Report=" << bReport << endl;
+
+  if (!m_pVLC)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::CMD_Change_Playback_Speed(iStreamId=%d,iMediaPlaybackSpeed=%d,bReport=%d) no VLC object! Bailing!",
+					  iStreamID,iMediaPlaybackSpeed,bReport);
+      sCMD_Result="ERROR";
+      return;
+    }
+
+  m_iMediaPlaybackSpeed=iMediaPlaybackSpeed;
+  DoTransportControls();
+
 }
 
 //<-dceag-c42-b->

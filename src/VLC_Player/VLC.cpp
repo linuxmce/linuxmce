@@ -253,16 +253,22 @@ namespace DCE
 
   void VLC::UpdateStatus()
   {
-    SetDuration(0);
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TIME: %d",libvlc_media_player_get_time(m_pMp));
     m_fPosition = libvlc_media_player_get_time(m_pMp) / 1000;
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CALCTIME: %f",m_fPosition);
+    m_fDuration = libvlc_media_player_get_length(m_pMp) / 1000;
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"POSITION: %f",m_fPosition);
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DURATION: %f",m_fDuration);
   }
 
-  void VLC::SetTime(float fTime)
+  int64_t VLC::SetTime(int64_t iTime)
   {
-    libvlc_time_t iTime = fTime * 1000;
     libvlc_media_player_set_time(m_pMp,iTime);
+    return libvlc_media_player_get_time(m_pMp);
+  }
+
+  int64_t VLC::GetTime()
+  {
+    return libvlc_media_player_get_time(m_pMp);
   }
 
   void VLC::Pause()

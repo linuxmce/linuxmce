@@ -61,7 +61,8 @@ namespace DCE
     void SetDuration(libvlc_time_t newDuration);
     float GetPosition();
     void SetPosition(float fPosition);
-    void SetTime(float fTime);
+    int64_t SetTime(int64_t iTime);
+    int64_t GetTime();
     bool IsPlaying();
     void SetPlaying(bool bIsPlaying);
     void UpdateStatus();

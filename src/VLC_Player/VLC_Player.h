@@ -21,11 +21,14 @@
 //<-dceag-d-e->
 
 #include "VLC.h"
+#include "AlarmManager.h"
+
+#define ALARM_CHECK_STATUS 1
 
 //<-dceag-decl-b->
 namespace DCE
 {
-  class VLC_Player : public VLC_Player_Command
+  class VLC_Player : public VLC_Player_Command, public AlarmEvent
   {
     //<-dceag-decl-e->
     // Private member variables
@@ -38,6 +41,7 @@ namespace DCE
     // Public member variables
     VLC::Config* m_config;
     VLC* m_pVLC;
+    pthread_t m_Status_Thread;
     
     
     //<-dceag-const-b->
@@ -52,10 +56,17 @@ namespace DCE
     //<-dceag-const-e->
     
     //<-dceag-const2-b->!
-    
+  
+    int m_iMediaPlaybackSpeed;
     string MD_DeviceData_get(int iFK_DeviceData);
     string Soundcard_get();
     string Audiosettings_get();
+
+    void DoTransportControls();
+    class AlarmManager* m_pAlarmManager;
+    void AlarmCallback(int id, void* param);
+    pluto_pthread_mutex_t m_VLCMutex;
+    int m_iPlaybackSpeed;
     
     //<-dceag-h-b->
     /*
