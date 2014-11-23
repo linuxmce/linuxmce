@@ -22,7 +22,7 @@ sources = Main.cpp VLC_Player.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS += `pkg-config --cflags glib-2.0`
 LDFLAGS += `pkg-config --libs glib-2.0`
-XTRALDLIBS = -lmysqlclient_r -lvlc -lX11 -lXmu -lWindowUtils -lXtst
+XTRALDLIBS = -lmysqlclient_r -lvlc -lX11 -lXmu
 
 Gen_Dev_Files +=
 sources += VLC.cpp \

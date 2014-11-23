@@ -313,47 +313,32 @@ namespace DCE
 
   void VLC::MoveUp()
   {
-    if (!IsWindowValid())
-      return;
-
-    WindowUtils::SendKeyToWindow(m_pDisplay,m_Window,XK_Up,m_iSerialNum++);
-
+    if (m_pMp)
+      libvlc_media_player_navigate(m_pMp,libvlc_navigate_up);
   }
   
   void VLC::MoveDown()
   {
-    if (!IsWindowValid())
-      return;
-
-    WindowUtils::SendKeyToWindow(m_pDisplay,m_Window,XK_Down,m_iSerialNum++);
-
+    if (m_pMp)
+      libvlc_media_player_navigate(m_pMp,libvlc_navigate_down);
   }
 
   void VLC::MoveLeft()
   {
-    if (!IsWindowValid())
-      return;
-
-    WindowUtils::SendKeyToWindow(m_pDisplay,m_Window,XK_Left,m_iSerialNum++);
-
+    if (m_pMp)
+      libvlc_media_player_navigate(m_pMp,libvlc_navigate_left);
   }
 
   void VLC::MoveRight()
   {
-    if (!IsWindowValid())
-      return;
-
-    WindowUtils::SendKeyToWindow(m_pDisplay,m_Window,XK_Up,m_iSerialNum++);
-
+    if (m_pMp)
+      libvlc_media_player_navigate(m_pMp,libvlc_navigate_right);
   }
 
   void VLC::EnterGo()
   {
-    if (!IsWindowValid())
-      return;
-
-    WindowUtils::SendKeyToWindow(m_pDisplay,m_Window,XK_Return,m_iSerialNum++);
-    
+    if (m_pMp)
+      libvlc_media_player_navigate(m_pMp,libvlc_navigate_activate);
   }
 
   void VLC::SetAudioVideoInfo()
