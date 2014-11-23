@@ -695,6 +695,18 @@ void VLC_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,i
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #60 - Width=" << iWidth << endl;
   cout << "Parm #61 - Height=" << iHeight << endl;
+
+  iData_Size=0;
+
+  if (!m_pVLC)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::CMD_Get_Video_Frame(sDisable_Aspect_Lock=%s,iStreamID=%d,iWidth=%d,iHeight=%d,iData_Size=%d) - m_pVLC == NULL",sDisable_Aspect_Lock.c_str(),iStreamID,iWidth,iHeight,iData_Size);
+      sCMD_Result="ERROR";
+      return;
+    }
+  
+  m_pVLC->GetScreenShot(iWidth,iHeight,pData,*iData_Size,*sFormat,sCMD_Result);
+
 }
 
 //<-dceag-c87-b->

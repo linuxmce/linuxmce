@@ -435,4 +435,22 @@ namespace DCE
     return m_iStreamID;
   }
 
+  bool VLC::GetScreenShot(int iWidth, int iHeight, char** pData, int& iData_Size, string& sFormat, string& sCMD_Result)
+  {
+    size_t size;
+    if (libvlc_video_take_snapshot(m_pMp,0,"/tmp/shot.png",iWidth,iHeight)==-1)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC::GetScreenShot(): Could not take snapshot.");
+	sCMD_Result="ERROR";
+	return false;
+      }
+
+    *pData = FileUtils::ReadFileIntoBuffer("/tmp/shot.png",size);
+    iData_Size=size;
+    FileUtils::DelFile("/tmp/shot.png");
+    sFormat="3";
+    sCMD_Result="OK";
+    return true;
+  }
+
 }
