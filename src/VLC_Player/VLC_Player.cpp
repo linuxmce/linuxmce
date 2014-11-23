@@ -544,6 +544,34 @@ void VLC_Player::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iStr
   cout << "Need to implement command #42 - Jump to Position in Stream" << endl;
   cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  char firstChar=sValue_To_Assign[0];
+  int64_t newTime=0;
+  
+  if (!m_pVLC)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::CMD_Jump_to_Position_in_Stream(sValue_To_Assign=%s,iStreamID=%i) - m_pVLC == NULL",sValue_To_Assign.c_str(),iStreamID);
+      sCMD_Result="ERROR";
+      return;
+    }
+  
+  if (firstChar=='+')
+    {
+      int64_t currentTime = m_pVLC->GetTime();
+      newTime=atoi(sValue_To_Assign.substr(1).c_str())*1000;
+      m_pVLC->SetTime(currentTime+newTime);
+    }
+  else if (firstChar=='-')
+    {
+      int64_t currentTime = m_pVLC->GetTime();
+      newTime=atoi(sValue_To_Assign.c_str());
+      m_pVLC->SetTime((currentTime+newTime)*1000);
+    }
+  else
+    {
+      m_pVLC->SetTime(atoi(sValue_To_Assign.c_str())*1000);
+    }
+  
 }
 
 //<-dceag-c63-b->
