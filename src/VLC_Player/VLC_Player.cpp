@@ -390,7 +390,25 @@ void VLC_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMes
 {
   cout << "Need to implement command #39 - Pause Media" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  if (!m_pVLC)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::CMD_Pause_Media(iStreamId=%d) no VLC object! Bailing!",
+					  iStreamID);
+      sCMD_Result="ERROR";
+      return;
+    }
+
+  if (!m_pVLC->IsPlaying())
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::CMD_Pause_Media(iStreamId=%d) nothing playing.",
+					  iStreamID);
+      sCMD_Result="ERROR";
+      return;      
+    }
+
+  m_pVLC->Pause();
   m_iPlaybackSpeed=0;
+
 }
 
 //<-dceag-c40-b->
@@ -405,6 +423,24 @@ void VLC_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pM
 {
   cout << "Need to implement command #40 - Restart Media" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  if (!m_pVLC)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::CMD_Restart_Media(iStreamId=%d) no VLC object! Bailing!",
+					  iStreamID);
+      sCMD_Result="ERROR";
+      return;
+    }
+
+  if (!m_pVLC->IsPlaying())
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::CMD_Restart_Media(iStreamId=%d) nothing playing.",
+					  iStreamID);
+      sCMD_Result="ERROR";
+      return;      
+    }
+
+  m_pVLC->Restart();
   m_iPlaybackSpeed=1000;
 }
 
@@ -480,7 +516,16 @@ void VLC_Player::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpeed
     }
 
   m_iMediaPlaybackSpeed=iMediaPlaybackSpeed;
-  DoTransportControls();
+
+  if (iMediaPlaybackSpeed==0)
+    {
+      m_pVLC->Pause();
+    }
+  else if (iMediaPlaybackSpeed!=0)
+    {
+      m_pVLC->Restart();
+      DoTransportControls();
+    }
 
 }
 

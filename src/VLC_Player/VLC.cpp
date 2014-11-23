@@ -253,11 +253,13 @@ namespace DCE
 
   void VLC::UpdateStatus()
   {
+#ifdef TRANSPORT_DEBUG
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TIME: %d",libvlc_media_player_get_time(m_pMp));
     m_fPosition = libvlc_media_player_get_time(m_pMp) / 1000;
     m_fDuration = libvlc_media_player_get_length(m_pMp) / 1000;
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"POSITION: %f",m_fPosition);
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DURATION: %f",m_fDuration);
+#endif
   }
 
   int64_t VLC::SetTime(int64_t iTime)
