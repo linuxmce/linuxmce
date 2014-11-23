@@ -728,6 +728,16 @@ void VLC_Player::CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_Re
   cout << "Need to implement command #87 - Goto Media Menu" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #64 - MenuType=" << iMenuType << endl;
+
+  if (!m_pVLC)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::Goto_Media_Menu(iStreamID=%i,iMenuType=%i) - no VLC object! Bailing!");
+      sCMD_Result="ERROR";
+      return;
+    }
+
+  m_pVLC->GotoMediaMenu(iMenuType);
+
 }
 
 //<-dceag-c92-b->

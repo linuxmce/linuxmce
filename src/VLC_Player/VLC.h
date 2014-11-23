@@ -91,7 +91,7 @@ namespace DCE
     void SetStreamID(int iStreamID);
     int GetStreamID();
     bool GetScreenShot(int iWidth, int iHeight, char** pData, int& iDataSize, string& sFormat, string& sCMD_Result);
-
+    void GotoMediaMenu(int iMenu);
   };
 
 }

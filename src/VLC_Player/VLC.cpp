@@ -315,7 +315,7 @@ namespace DCE
   {
     bool hasMenu = ((libvlc_media_player_get_chapter_count_for_title(m_pMp,0) > 0) && libvlc_media_player_get_title_count(m_pMp) > 1);
     bool isNavMenu = ((hasMenu) && (libvlc_media_player_get_title(m_pMp) == 0));
-
+    
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"hasMenu %d isNavMenu %d",hasMenu,isNavMenu);
     
     if (isNavMenu)
@@ -327,7 +327,7 @@ namespace DCE
 	m_pVLC_Player->EVENT_Menu_Onscreen(GetStreamID(),false);
       }
   }
-  
+
   int64_t VLC::SetTime(int64_t iTime)
   {
     libvlc_media_player_set_time(m_pMp,iTime);
@@ -423,6 +423,15 @@ namespace DCE
   {
     if (m_pMp)
       libvlc_media_player_previous_chapter(m_pMp);
+  }
+
+  void VLC::GotoMediaMenu(int iMenu)
+  {
+    if (m_pMp)
+      {
+	libvlc_media_player_set_title(m_pMp,0);
+	libvlc_media_player_set_chapter(m_pMp,iMenu);
+      }
   }
 
   void VLC::SetStreamID(int iStreamID)
