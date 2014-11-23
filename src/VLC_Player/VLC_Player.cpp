@@ -586,6 +586,16 @@ void VLC_Player::CMD_Skip_Fwd_ChannelTrack_Greater(int iStreamID,string &sCMD_Re
 {
   cout << "Need to implement command #63 - Skip Fwd - Channel/Track Greater" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  if (!m_pVLC)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::CMD_Skip_Fwd_ChannelTrack_Greater(iStreamID=%i) - m_pVLC == NULL",iStreamID);
+      sCMD_Result="ERROR";
+      return;
+    }
+
+  m_pVLC->NextChapter();
+
 }
 
 //<-dceag-c64-b->

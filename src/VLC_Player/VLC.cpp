@@ -347,4 +347,15 @@ namespace DCE
     m_sVideoInfo="";
   }
 
+  void VLC::NextChapter()
+  {
+    if (m_pMp)
+      libvlc_media_player_next_chapter(m_pMp);
+  }
+  
+  void VLC::PreviousChapter()
+  {
+    if (m_pMp)
+      libvlc_media_player_previous_chapter(m_pMp);
+  }
 }

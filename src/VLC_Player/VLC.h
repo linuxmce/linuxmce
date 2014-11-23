@@ -78,6 +78,8 @@ namespace DCE
     void MoveRight();
     void EnterGo();
     void SetAudioVideoInfo();
+    void NextChapter();
+    void PreviousChapter();
 
   };
 
