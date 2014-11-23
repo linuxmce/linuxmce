@@ -107,7 +107,7 @@ bool VLC_Player::GetConfig()
       m_config->m_sDeinterlacingMode=DATA_Get_Deinterlacing_Mode();
     }
   
-  m_pVLC=new VLC(m_config);
+  m_pVLC=new VLC(m_config,this);
   
   if (!m_pVLC)
     {
@@ -178,8 +178,8 @@ void VLC_Player::AlarmCallback(int id, void* param)
       // temporary hack.
       if (m_pVLC->IsPlaying())
       {
-	m_pVLC->UpdateStatus();
-	m_pAlarmManager->AddRelativeAlarm(1,this,1,NULL);
+	// m_pVLC->UpdateStatus();
+	// m_pAlarmManager->AddRelativeAlarm(1,this,1,NULL);
       }
       else
 	{
@@ -324,6 +324,8 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
     {
       sCMD_Result="ERROR";
     }
+
+  m_pVLC->SetStreamID(iStreamID);
 
   if (IsRemoteDVD(sMediaURL))
     {
@@ -610,6 +612,16 @@ void VLC_Player::CMD_Skip_Back_ChannelTrack_Lower(int iStreamID,string &sCMD_Res
 {
   cout << "Need to implement command #64 - Skip Back - Channel/Track Lower" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  if (!m_pVLC)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_Player::CMD_Skip_Back_ChannelTrack_Lower(iStreamID=%i) - m_pVLC == NULL",iStreamID);
+      sCMD_Result="ERROR";
+      return;
+    }
+
+  m_pVLC->PreviousChapter();
+
 }
 
 //<-dceag-c65-b->
@@ -628,7 +640,6 @@ void VLC_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStre
   cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
-
 //<-dceag-c81-b->
 
 /** @brief COMMAND: #81 - Navigate Next */

@@ -21,11 +21,15 @@
 namespace DCE
 {
 
+  class VLC_Player;
+
   class VLC
   {
   private:
     libvlc_instance_t* m_pInst;
     libvlc_media_player_t* m_pMp;
+    libvlc_event_manager_t* m_pMediaEventManager;
+    libvlc_event_manager_t* m_pMediaPlayerEventManager;
     Display* m_pDisplay;
     Window m_Window;
     Cursor m_Cursor;
@@ -33,6 +37,8 @@ namespace DCE
     float m_fDuration, m_fPosition;
     bool m_bIsPlaying;
     int m_iSerialNum;
+    int m_iStreamID;
+    DCE::VLC_Player* m_pVLC_Player;
 
   public:
 
@@ -50,7 +56,7 @@ namespace DCE
     string m_sVideoInfo; // TBD: Compatible with Xine_Player
 
     string m_sWindowTitle;
-    VLC(Config* pConfig);
+    VLC(Config* pConfig, DCE::VLC_Player* pVLC_Player);
     ~VLC();
     bool init();
     bool CreateWindow();
@@ -80,6 +86,10 @@ namespace DCE
     void SetAudioVideoInfo();
     void NextChapter();
     void PreviousChapter();
+    static void Media_Callbacks(const libvlc_event_t* event, void* ptr);
+    void UpdateNav();
+    void SetStreamID(int iStreamID);
+    int GetStreamID();
 
   };
 

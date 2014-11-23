@@ -21,24 +21,36 @@
 #include "WindowUtils/WindowUtils.h"
 #include <X11/keysym.h>
 
+#include "VLC_Player.h"
+
 // #define INACTIVE_VIDEO "/home/public/data/videos/rejected.dvd"
 #define INACTIVE_VIDEO "/usr/pluto/share/black.mpeg"
 
 namespace DCE
 {
-  VLC::VLC(Config* pConfig)
+  VLC::VLC(Config* pConfig, VLC_Player* pVLC_Player)
   {
+    m_pVLC_Player = pVLC_Player;
     m_pInst = NULL;
     m_pMp = NULL;
+    m_pMediaEventManager=NULL;
+    m_pMediaPlayerEventManager=NULL;
     m_pConfig = pConfig;
     m_sWindowTitle = "lmcevlc";
     m_iSerialNum=0;
     m_sAudioInfo="";
     m_sVideoInfo="";
+    m_iStreamID=0;
   }
 
   VLC::~VLC()
   {
+
+    libvlc_event_detach(m_pMediaEventManager,libvlc_MediaParsedChanged,Media_Callbacks,this);
+    libvlc_event_detach(m_pMediaEventManager,libvlc_MediaStateChanged,Media_Callbacks,this);
+    libvlc_event_detach(m_pMediaPlayerEventManager,libvlc_MediaPlayerPlaying,Media_Callbacks,this);
+    libvlc_event_detach(m_pMediaPlayerEventManager,libvlc_MediaPlayerVout,Media_Callbacks,this);
+
     if (m_pMp)
       {
 	libvlc_media_player_release(m_pMp);
@@ -180,6 +192,33 @@ namespace DCE
 
   }  
 
+  void VLC::Media_Callbacks(const libvlc_event_t* event, void* ptr)
+  {
+
+    VLC* self = reinterpret_cast<VLC*>(ptr);
+
+    switch(event->type)
+      {
+      case libvlc_MediaParsedChanged:
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC::Media_Callbacks(): MEDIA PARSED CHANGED!!!");
+	self->UpdateNav();
+	break;
+      case libvlc_MediaStateChanged:
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC::Media_Callbacks(): MEDIA STATE CHANGED!!");
+	self->UpdateNav();
+	break;
+      case libvlc_MediaPlayerPlaying:
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC::Media_Callbacks(): MEDIA PLAYING!!");
+	self->UpdateNav();
+	break;
+      case libvlc_MediaPlayerVout:
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC::Media_Callbacks(): MEDIA VOUT!!");
+	self->UpdateNav();
+	break;
+      }
+    
+  }
+
   bool VLC::PlayURL(string sMediaURL, string sMediaPosition, string& sMediaInfo)
   {
     // libvlc_time_t iLength=0;
@@ -198,6 +237,16 @@ namespace DCE
       }
 
     libvlc_media_player_set_media(m_pMp, m);
+    
+    m_pMediaEventManager=libvlc_media_event_manager(m);
+    m_pMediaPlayerEventManager=libvlc_media_player_event_manager(m_pMp);
+
+    libvlc_event_attach(m_pMediaEventManager,libvlc_MediaParsedChanged,Media_Callbacks,this);
+    libvlc_event_attach(m_pMediaEventManager,libvlc_MediaStateChanged,Media_Callbacks,this);
+    libvlc_event_attach(m_pMediaPlayerEventManager,libvlc_MediaPlayerPlaying,Media_Callbacks,this);
+    libvlc_event_attach(m_pMediaPlayerEventManager,libvlc_MediaPlayerVout,Media_Callbacks,this);
+
+
     libvlc_media_release(m);
     libvlc_media_player_set_xwindow (m_pMp, m_Window);
     SetDuration(libvlc_media_player_get_length(m_pMp));
@@ -262,6 +311,23 @@ namespace DCE
 #endif
   }
 
+  void VLC::UpdateNav()
+  {
+    bool hasMenu = ((libvlc_media_player_get_chapter_count_for_title(m_pMp,0) > 0) && libvlc_media_player_get_title_count(m_pMp) > 1);
+    bool isNavMenu = ((hasMenu) && (libvlc_media_player_get_title(m_pMp) == 0));
+
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"hasMenu %d isNavMenu %d",hasMenu,isNavMenu);
+    
+    if (isNavMenu)
+      {
+	m_pVLC_Player->EVENT_Menu_Onscreen(GetStreamID(),true);
+      }
+    else
+      {
+	m_pVLC_Player->EVENT_Menu_Onscreen(GetStreamID(),false);
+      }
+  }
+  
   int64_t VLC::SetTime(int64_t iTime)
   {
     libvlc_media_player_set_time(m_pMp,iTime);
@@ -358,4 +424,15 @@ namespace DCE
     if (m_pMp)
       libvlc_media_player_previous_chapter(m_pMp);
   }
+
+  void VLC::SetStreamID(int iStreamID)
+  {
+    m_iStreamID=iStreamID;
+  }
+
+  int VLC::GetStreamID()
+  {
+    return m_iStreamID;
+  }
+
 }
