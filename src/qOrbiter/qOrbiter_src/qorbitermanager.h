@@ -1010,7 +1010,7 @@ public slots:
     QString getCurrentScreen();
     //! Sets the current screen in string format.
     void setCurrentScreen(QString s);
-
+    void setCurrentScreen(int s);
     //security related
 
     /*!

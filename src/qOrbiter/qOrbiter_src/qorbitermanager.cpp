@@ -2694,6 +2694,16 @@ void qorbiterManager::setCurrentScreen(QString s)
 
 }
 
+void qorbiterManager::setCurrentScreen(int s)
+{
+    QString i = "Screen_"+QString::number(s)+".qml";
+
+    if(i!=currentScreen){
+        currentScreen = i;
+        emit screenChange(i);
+    }
+}
+
 void qorbiterManager::connectionWatchdog()
 {
     status="reconnect";

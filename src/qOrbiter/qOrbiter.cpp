@@ -271,6 +271,7 @@ void qOrbiter::CMD_Go_back(string sPK_DesignObj_CurrentScreen,string sForce,stri
     cout << "Need to implement command #4 - Go back" << endl;
     cout << "Parm #16 - PK_DesignObj_CurrentScreen=" << sPK_DesignObj_CurrentScreen << endl;
     cout << "Parm #21 - Force=" << sForce << endl;
+
 }
 
 //<-dceag-c5-b->
@@ -4020,7 +4021,7 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
     emit commandResponseChanged("Requesting id for: "+ fileWithPath);
     screenieData =NULL;         //screenshot data using the char** data structure for passing of data
     screenieDataSize=0;       //var for size of data
-    string s_format ="jpg";   //the format we want returned
+    string s_format ="JPG";   //the format we want returned
     int imageH;                 //image height of desired screenshot
     int imageW;                 //width of desired screenshot
     string sDisableAspectLock = "0";
@@ -4110,17 +4111,31 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
     CMD_Get_Video_Frame grabMediaScreenshot(long(m_dwPK_Device), long(m_dwPK_Device_NowPlaying), sDisableAspectLock,internal_streamID, 800 , 800, &screenieData, &screenieDataSize, &s_format);
     string mpResp= "";
 
-    if(SendCommand(grabMediaScreenshot, &mpResp) && mpResp =="OK")
+    if(SendCommand(grabMediaScreenshot, &mpResp) && mpResp=="OK")
     {
-        QByteArray screenShotData;              //config file put into qbytearray for processing
+        qDebug() << "Recieved image";
+        QByteArray screenShotData;
         QImage t;
         screenShotData.setRawData(screenieData, screenieDataSize);
+        qDebug() << screenieDataSize;
+        qDebug() << s_format.c_str();
         t.loadFromData(screenShotData);
         emit screenShotReady(t);
     }
     else
     {
-        emit mediaResponseChanged("Couldnt Create Screenshot!");
+        qDebug() << "Recieved bad or no image";
+        QByteArray screenShotData;
+        QImage t;
+        screenShotData.setRawData(screenieData, screenieDataSize);
+        t.loadFromData(screenShotData);
+        emit screenShotReady(t);
+        if(t.isNull()){
+            qDebug() << t.size();
+            qDebug() << screenieDataSize;
+            emit mediaResponseChanged("Couldnt Create Screenshot!");
+        }
+
     }
 
 }
@@ -4712,32 +4727,36 @@ int qOrbiter::SetupNewOrbiter()
 
 void qOrbiter::CreateChildren()
 {
-    emit commandResponseChanged("Creating Children");
-    emit commandResponseChanged("Size of children devices::"+QString::number((int)m_pData->m_vectDeviceData_Impl_Children.size()));
-    for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ )
-    {
-
-        emit commandResponseChanged("Finding Child devices...");
-        DeviceData_Impl *pDeviceData_Impl_Child = m_pData->m_vectDeviceData_Impl_Children[i];
-
-        // This device was marked as disabled
-        if (pDeviceData_Impl_Child->m_bDisabled)
+    if(PK_DeviceTemplate_get()==DEVICETEMPLATE_OnScreen_qOrbiter_CONST){
+        this->m_pPrimaryDeviceCommand->CreateChildren();
+    } else {
+        emit commandResponseChanged("Creating Children");
+        emit commandResponseChanged("Size of children devices::"+QString::number((int)m_pData->m_vectDeviceData_Impl_Children.size()));
+        for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ )
         {
-            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Child device %d is disabled", pDeviceData_Impl_Child->m_dwPK_Device);
-            continue;
-        }
-        emit commandResponseChanged("Current device template::"+QString::number(pDeviceData_Impl_Child->m_dwPK_DeviceTemplate));
 
-        if (pDeviceData_Impl_Child->m_dwPK_DeviceTemplate == 2205){
-            int t = pDeviceData_Impl_Child->m_dwPK_Device;
-            setqMediaPlayerID(t);
-            emit commandResponseChanged("QMediaPlayer ID::"+t);
-            //   emit qMediaPlayerIDChanged(qMediaPlayerID);
+            emit commandResponseChanged("Finding Child devices...");
+            DeviceData_Impl *pDeviceData_Impl_Child = m_pData->m_vectDeviceData_Impl_Children[i];
 
+            // This device was marked as disabled
+            if (pDeviceData_Impl_Child->m_bDisabled)
+            {
+                LoggerWrapper::GetInstance()->Write(LV_WARNING, "Child device %d is disabled", pDeviceData_Impl_Child->m_dwPK_Device);
+                continue;
+            }
+            emit commandResponseChanged("Current device template::"+QString::number(pDeviceData_Impl_Child->m_dwPK_DeviceTemplate));
+
+            if (pDeviceData_Impl_Child->m_dwPK_DeviceTemplate == 2205){
+                int t = pDeviceData_Impl_Child->m_dwPK_Device;
+                setqMediaPlayerID(t);
+                emit commandResponseChanged("QMediaPlayer ID::"+t);
+                //   emit qMediaPlayerIDChanged(qMediaPlayerID);
+            }
         }
+        emit commandResponseChanged("Finished spawning children!");
+        emit routerConnectionChanged(true);
     }
-    emit commandResponseChanged("Finished spawning children!");
-    emit routerConnectionChanged(true);
+
 }
 
 
@@ -5454,7 +5473,7 @@ void qOrbiter::reInitialize(){
         if(!getConfiguration()){
             exit(99);
         }
-
+        registerDevice(i_user,QString(i_ea), i_room);
         CreateChildren();
         emit routerConnectionChanged(true);
     }else {
