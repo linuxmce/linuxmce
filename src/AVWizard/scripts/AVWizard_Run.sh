@@ -4,7 +4,7 @@
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Utils.sh
 . /usr/pluto/bin/X-Common.sh
-. /usr/pluto/bin/VideoDetectSetup
+#. /usr/pluto/bin/VideoDetectSetup
 
 ###########################################################
 ### Setup global variables
