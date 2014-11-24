@@ -80,6 +80,8 @@ MediaManager::MediaManager(QQuickItem *parent):
     discController = new Phonon::MediaController(mediaObject);
     QObject::connect(discController, SIGNAL(availableTitlesChanged(int)), this, SLOT(setAvailTitles(int)));
     QObject::connect(discController, SIGNAL(availableSubtitlesChanged()), this, SLOT(setSubtitles()));
+    QObject::connect(discController, SIGNAL(availableMenusChanged(QList<NavigationMenu>)), this, SLOT(setMenus(QList<NavigationMenu>)));
+    QObject::connect(mediaObject, SIGNAL(metaDataChanged()), this, SLOT(updateMetaData()));
 
 
     Phonon::createPath(mediaObject, audioSink);
@@ -252,6 +254,7 @@ void MediaManager::setZoomLevel(QString zoom)
 {
     setCurrentStatus("Implement zoom level-template::"+zoom);
 
+
 }
 
 void MediaManager::setAspectRatio(QString aspect)
@@ -263,13 +266,11 @@ void MediaManager::setAspectRatio(QString aspect)
 
 QImage MediaManager::getScreenShot(){
 #if defined (QT4) && ! defined (ANDROID)
-    QImage screenShot(videoSurface->height(), videoSurface->width(), QImage::Format_ARGB32_Premultiplied );
-    screenShot.fill(Qt::black);
-    videoSurface->window()->render(&screenShot);
+
 #else
     QImage screenShot;
 #endif
-    return screenShot;
+    return videoSurface->snapshot();
 
 }
 
@@ -570,6 +571,7 @@ bool MediaManager::initViews(bool flipped)
         filterProxy->enable=false;
     }
 
+    videoSurface->installEventFilter(filterProxy);
     filterProxy->setWidget(videoSurface);
     filterProxy->setAutoFillBackground(false);
     filterProxy->hide();

@@ -31,6 +31,7 @@
 #include <phonon>
 #include <QHBoxLayout>
 #include <colorfilterproxywidget.h>
+#include <phonon/mediacontroller.h>
 #endif
 
 #elif QT5
@@ -46,6 +47,8 @@
 
 #include <QTime>
 #include <QTcpServer>
+
+class NavigationMenu;
 
 using namespace DCE;
 using namespace Qt;
@@ -250,7 +253,7 @@ public slots:
 #ifndef ANDROID
     void setInvertTrick(bool i){ if(i!=useInvertTrick){useInvertTrick=i; if(filterProxy){filterProxy->enable=useInvertTrick;} emit useInvertTrickChanged();} }
     bool getInvertTrick() {return useInvertTrick;}
-   #endif
+#endif
 #endif
     void setVideoStream(bool b ){
 #ifdef QT4
@@ -292,8 +295,8 @@ public slots:
 #ifndef Q_OS_ANDROID
 #ifndef QT5
 
-if(filterProxy)
-        filterProxy->invert = f;
+        if(filterProxy)
+            filterProxy->invert = f;
 
 #endif
 #endif
@@ -355,7 +358,17 @@ if(filterProxy)
     void setDeviceNumber(int d) { if(deviceNumber !=d) {deviceNumber = d; emit deviceNumberChanged();}}
     int getDeviceNumber() {return deviceNumber;}
 
-    void updateMetaData(){}
+    void updateMetaData(){
+
+        qDebug() <<"Artist::"<< mediaObject->metaData(Phonon::ArtistMetaData);
+        qDebug() <<"Album::"<< mediaObject->metaData(Phonon::AlbumMetaData);
+        qDebug() <<"Title::"<< mediaObject->metaData(Phonon::TitleMetaData);
+        qDebug() <<"Date::"<< mediaObject->metaData(Phonon::DateMetaData);
+        qDebug() <<"Genre::"<< mediaObject->metaData(Phonon::GenreMetaData);
+        qDebug() <<"Track::"<< mediaObject->metaData(Phonon::TracknumberMetaData);
+        qDebug() <<"Description::"<< mediaObject->metaData(Phonon::DescriptionMetaData);
+
+    }
 
     void setPrefinishMarkHit(qint32 t ) {}
 
@@ -378,7 +391,7 @@ if(filterProxy)
 #ifndef Q_OS_ANDROID
 #ifndef QT5
             if(filterProxy)
-            filterProxy->hide();
+                filterProxy->hide();
 #endif
 #endif
         }
@@ -387,7 +400,7 @@ if(filterProxy)
 #ifndef Q_OS_ANDROID
 #ifdef QT4
             if(filterProxy)
-            filterProxy->show();
+                filterProxy->show();
 #endif
 #endif
         }
@@ -587,6 +600,13 @@ if(filterProxy)
         initializePlayer();
     }
 
+
+#ifndef __ANDROID__
+#ifdef QT4
+
+#endif
+#endif
+
 private:
     void initializePlayer();
     void initializeConnections();
@@ -611,6 +631,8 @@ private slots:
     void setChapters(int c){qDebug() << "Chapters: \t" << discController->availableChapters(); }
     void setAngles(int a) {qDebug() << "Angles: \t" << discController->availableAngles(); }
     void setAudioChannels(){ qDebug() << "Audio Channels: \t" << discController->availableAudioChannels();}
+    void setMenus(QList<NavigationMenu> *menus){ qDebug()<< "Menus\t" << menus;}
+
 #endif
 #endif
 };
