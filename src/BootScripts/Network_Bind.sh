@@ -11,6 +11,16 @@ GetOldIpv6() {
 		Old_IPv6=$(sed -n "/^$Hostname/{n;p}" $ForwardZoneFile | grep -P "^\t|^$Hostname" | awk '{print $NF}')
 }
 
+#if ping google on the ipv6 network is ok then set IPv6Active is on else off (need to change this later ut for now.
+HOST="google.com"
+COUNT=1
+count=$(ping6 -c $COUNT $HOST | grep 'received' | awk -F',' '{ print $2 }' | awk '{ print $1 }')
+if [[ $count -eq 0 ]]; then
+	IPv6Active="off"
+else
+	IPv6Active="on"
+fi
+
 # Update bind zone files
 DD_NetworkInterfaces=32
 ConfGet "PK_Installation"
@@ -161,6 +171,8 @@ fi
 sed -i "/listen-on /d" /etc/bind/named.conf.options
 sed -i "/auth-nxdomain/ a\
 listen-on { 127.0.0.1;$IntIP;};" /etc/bind/named.conf.options
+
+echo "$IPv6Active"
 
 # Only try IPv6 connecions if IPv6 is enabled on core
 sed -i "/OPTIONS/d" /etc/default/bind9
