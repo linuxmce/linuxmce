@@ -310,15 +310,27 @@ if [[ "$IPv6TunnelActive" == "on" ]]; then
 	# Config IPv6 tunnel if enabled in advanced network setup
 	echo "IPv6 tunnel activated ($IPv6TunnelBroker), configuring interface"
 	auto=("${auto[@]}" $IPv6If)
-	IfConf="# --- IPv6 tunnel to $IPv6TunnelBroker
-iface $IPv6If inet6 v4tunnel
-	address $IPv6IP
-	netmask $IPv6Netmask
-	local $IntIP
-	endpoint $IPv6Endpoint
-	up ip -6 route add $IPv6Prefix/$IPv6PrefixNetmask dev $IntIf;ip -6 route add default dev $IPv6If
-	down ip -6 route flush dev $IPv6If
-	mtu 1480"
+	if [[ $IPv6TunnelBroker == SIXXS ]]; then
+			IfConf="# --- IPv6 tunnel to $IPv6TunnelBroker
+		iface $IPv6If inet6 v4tunnel
+		address $IPv6IP
+		netmask $IPv6Netmask
+		ttl 64
+		endpoint $IPv6Endpoint
+		up ip -6 route add default dev $IPv6If
+		down ip -6 route flush dev $IPv6If
+		mtu 1480"
+	else
+			IfConf="# --- IPv6 tunnel to $IPv6TunnelBroker
+		iface $IPv6If inet6 v4tunnel
+		address $IPv6IP
+		netmask $IPv6Netmask
+		local $IntIP
+		endpoint $IPv6Endpoint
+		up ip -6 route add $IPv6Prefix/$IPv6PrefixNetmask dev $IntIf;ip -6 route add default dev $IPv6If
+		down ip -6 route flush dev $IPv6If
+		mtu 1480"
+	fi
 	echo "$IfConf" >>"$File"
 	if [[ "$IPv6DynamicIPv4" == "on" ]]; then
 		echo "Dynamic IPv4 activated, creating scripts to update tunnel endpoint"
