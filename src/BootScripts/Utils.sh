@@ -674,3 +674,341 @@ function VDRInstalled() {
 	fi					
 	return $RETURNVALUE
 }
+
+DriverRank () {
+	# We figure out, based on the driver, which is our favored GPU. 10 being most favored. This list reflects the liklihood of combinations
+	# more than a head to head competition.
+	vga_info="$1"
+	driver_rank="1"
+	FindVideoDriver "$vga_info"
+	case "$prop_driver" in
+		cirrus) driver_rank="2" ;;
+		vboxvideo) driver_rank="3" ;;
+		i740|i128|mach64) driver_rank="4" ;;
+		radeon) driver_rank="5" ;;
+		intel) driver_rank="7" ;;
+		fglrx) driver_rank="8" ;;
+		nvidia)
+			nv_pid=$(pidof nvidia-install.sh) 
+			if [[ -z $nv_pid ]] ; then 
+				. /usr/pluto/bin/nvidia-install.sh
+			fi
+			current_nvidia=$(getInstalledNvidiaDriver)
+			preferred_nvidia=$(getPreferredNvidiaDriver)
+			case "$preferred_nvidia" in
+				nvidia-173) driver_rank="6" ;;
+				nvidia-current) driver_rank="10" ;;
+			esac
+	esac
+}
+
+BestGPU () {
+	vga_pci="$*"
+	# If there are more than one GPU, create an xorg.conf and determine the best to use.
+	if [[ $(wc -l <<< "$vga_pci") -gt "1" ]]; then
+		vga_1=$(echo "$vga_pci" | head -1)
+		vga_2=$(echo "$vga_pci" | awk 'NR==2')
+
+		# Run first GPU through the check
+		DriverRank "$vga_1"
+		rank_1="$driver_rank"
+		driver_1="$prop_driver"
+
+		# Run second GPU through the gauntlet
+		DriverRank "$vga_2"
+		rank_2="$driver_rank"
+		driver_2="$prop_driver"
+
+		# Choose the Highest number and complete
+		if [[ "$rank_1" -gt "$rank_2" ]]; then
+			vga_pci="$vga_1"
+			prop_driver="$driver_1"card
+			card_detail=$(echo "$vga_pci" | cut -d':' -f3-)
+		else 
+			vga_pci="$vga_2"
+			prop_driver="$driver_2"
+			card_detail=$(echo "$vga_pci" | cut -d':' -f3-)
+		fi
+	else
+		DriverRank "$vga_pci"
+		card_detail=$(echo "$vga_pci" | cut -d':' -f3-)
+	fi
+	InstallRoutine "$vga_pci" "$card_detail"
+}
+
+FindVideoDriver () {
+	#####################################################################
+	# Switching our default to fbdev for interoperability 
+	# with KVM & nVidia no-test in AVWizard_Run.sh
+	#####################################################################
+	vga_info="$1"
+	prop_driver="fbdev"
+
+	# 1002=ATI, 1106=VIA, 10de=nVidia, 8086=Intel 1013=cirrus 80ee=VirtualBox
+	chip_man=$(echo "$vga_info" | grep -Ewo '(\[1002|\[1106|\[10de|\[8086|\[1013|\[80ee)')
+ 
+	case "$chip_man" in 
+		*10de)
+			prop_driver="nvidia" ;;
+		*1002)
+			prop_driver="fglrx"
+			if grep -Ei '((R.)([2-5])|(9|X|ES)(1|2?)([0-9])(5|0)0|Xpress)' <<< "$vga_info"; then
+				prop_driver="radeon" 
+			fi 
+			if grep -Ei '(mach)' <<< "$vga_info"; then
+				prop_driver="mach64"
+			fi ;;
+
+		*8086)
+			prop_driver="intel"
+			if grep "i740" <<< "$vga_info"; then
+				prop_driver="i740"
+			fi
+			if grep "i128" <<< "$vga_info"; then
+				prop_driver="i128"
+			fi
+			if ! PackageIsInstalled "i965-va-driver"; then
+				apt-get -yf install i965-va-driver
+				VerifyExitCode "Install Intel Graphics Accelerator"
+			fi ;;
+
+		*1106)
+			prop_driver="openchrome" ;
+			if grep -i "Savage" <<< "$vga_info"; then
+				prop_driver="savage"
+			fi
+			#if echo "$vga_info"| grep -i "s3"; then
+				#prop_driver="via"; fi 
+			if grep -i "virge" <<< "$vga_info"; then
+				prop_driver="virge"
+			fi ;;
+		*1013)
+			prop_driver="cirrus" ;;
+		*80ee)
+			prop_driver="vboxvideo" ;;
+		*)
+			prop_driver="fbdev" ;;
+	esac
+}
+
+InstallVideoDriver () {
+	prop_driver="$1"
+	case "$prop_driver" in
+
+		# nVidia cards
+		nvidia)
+			if ! PackageIsInstalled nvidia-173 && ! PackageIsInstalled nvidia-current; then 
+				VerifyExitCode "Install Pluto nVidia Driver"
+				nv_pid=$(pidof nvidia-install.sh)
+				if [[ -n $nv_pid ]] ; then
+					StatusMessage "Installing nVidia driver this may take a few minutes"
+					installCorrectNvidiaDriver
+				else StartService "Installing nVidia driver this may take a few minutes" ". /usr/pluto/bin/nvidia-install.sh"
+					installCorrectNvidiaDriver
+				fi 
+				ConfSet "AVWizardOverride" "1"
+			fi ;;
+		nouveau)
+			if ! PackageIsInstalled xserver-xorg-video-nouveau; then
+				apt-get -yf install xserver-xorg-video-nouveau
+				VerifyExitCode "Install nouveau Driver"
+			fi ;;
+
+		# ATI cards
+		radeon)
+			if ! PackageIsInstalled xserver-xorg-video-radeon; then 
+				apt-get -yf install xserver-xorg-video-radeon
+				VerifyExitCode "Install radeon Driver"
+			fi ;;
+		fglrx)
+			if ! PackageIsInstalled fglrx; then 
+				apt-get -yf install fglrx
+				VerifyExitCode "Install fglrx Driver"
+				if -f /etc/X11/xorg.conf; then 
+					a=1
+						for i in xorg.conf; do
+						new=$(printf "fglrx.xorg.backup%03d" ${a})
+						cp /etc/X11/xorg.conf ${new}
+						let a=a+1
+					done
+
+				fi
+				ConfSet "AVWizardOverride" "1" 
+				reboot
+			fi ;;
+		mach64)
+			if ! PackageIsInstalled xserver-xorg-video-mach64; then 
+				apt-get -yf install xserver-xorg-video-mach64
+				VerifyExitCode "Install mach64 Driver"
+				ConfSet "AVWizardOverride" "1"
+			fi ;;
+
+		# Intel cards
+		intel)
+			if ! PackageIsInstalled xserver-xorg-video-intel; then 
+				apt-get -yf install xserver-xorg-video-intel
+				VerifyExitCode "Install Intel Driver"
+			fi ;;
+		i128)
+			if ! PackageIsInstalled xserver-xorg-video-i128; then 
+				apt-get -yf install xserver-xorg-video-i128
+				VerifyExitCode "Install i128 Driver"
+			fi ;;
+		i740)
+			if ! PackageIsInstalled xserver-xorg-video-i740; then 
+				apt-get -yf install xserver-xorg-video-i740
+				VerifyExitCode "Install i740 Driver"
+			fi ;; 
+
+		# VIA cards
+		openchrome)
+			if ! PackageIsInstalled xserver-xorg-video-openchrome; then 
+				apt-get -yf install xserver-xorg-video-openchrome
+				VerifyExitCode "Install opencrhome Driver"
+			fi ;; 
+		savage)
+			if ! PackageIsInstalled xserver-xorg-video-savage; then 
+				apt-get -yf install xserver-xorg-video-savage
+				VerifyExitCode "Install VIA Savage Driver"
+				ConfSet "AVWizardOverride" "1"
+			fi ;;
+		via)
+			if ! PackageIsInstalled xserver-xorg-video-via; then 
+				apt-get -yf install xserver-xorg-video-via
+				VerifyExitCode "Install VIA S3 Driver"
+				ConfSet "AVWizardOverride" "1"
+			fi ;;
+		virge)
+			if ! PackageIsInstalled xserver-xorg-video-s3virge; then 
+				apt-get -yf install xserver-xorg-video-s3virge
+				VerifyExitCode "Install VIA S3 Virge Driver"
+				ConfSet "AVWizardOverride" "1"
+			fi ;;
+
+		# VMWare
+		cirrus)
+			if ! PackageIsInstalled xserver-xorg-video-cirrus; then
+				apt-get -yf install xserver-xorg-video-cirrus
+				VerifyExitCode "Install Cirrus Driver"
+			fi ;;
+	esac
+}
+
+CheckVideoDriver() {
+	vga_pci=$(lspci -nn | grep -w 'VGA')
+	BestGPU "$vga_pci"
+}
+
+InstallRoutine() {
+	vga_pci="$1"
+	card_detail="$2"
+	online=$(ping -c 2 google.com)
+	offline_mismatch="false"
+	online_mismatch="false"
+	if [[ -f /etc/X11/xorg.conf ]] && [[ $(wc -l <<< "$vga_pci") -lt "2" ]]; then
+		# TODO figure out a better way to isolate the video driver in the xorg.conf list of "Driver" options
+		cur_driver=$(grep "Driver" /etc/X11/xorg.conf | grep -Eo '(nvidia|nouveau|radeon|fglrx|savage|openchrome|via|virge|intel|i740|i128|mach64|cirrus|vboxvideo|fbdev)')
+		if [[ "$prop_driver" != "$cur_driver" ]] && [[ -z $online ]]; then
+			offline_mismatch="true"
+		elif [[ "$prop_driver" != "$cur_driver" ]] && [[ -n $online ]]; then
+			online_mismatch="true"
+		fi
+
+		if [[ "$prop_driver" == "$cur_driver" ]] && [[ "$cur_driver" == "nvidia" ]] && [[ -n "$online" ]]; then 
+			StartService "Checking nVidia driver" ". /usr/pluto/bin/nvidia-install.sh" 
+			current_nvidia=$(getInstalledNvidiaDriver) 
+			preferred_nvidia=$(getPreferredNvidiaDriver) 
+			if [[ "$current_nvidia" != "$preferred_nvidia" ]]; then  
+				online_mismatch="true" 
+			fi 
+		fi
+
+		if [[ "$online_mismatch" == "false" ]] && [[ "$offline_mismatch" == "false" ]]; then
+			Mismatch="false"
+		else
+			Mismatch="true"
+		fi
+
+		# Look at mismatches and handle appropriately
+		if [[ "$cur_driver" == "$prop_driver" ]] && [[ "$Mismatch" == "false" ]]; then
+			StatusMessage "Correct driver '$prop_driver' already loaded"
+			return 0
+
+		else
+			# Remove fglrx via or nVidia drivers if they are installed, but do not match current requirements
+			ErrorMessage "Video chipset change detected !!!"
+			if [[ "$cur_driver" == "fglrx" ]]; then
+				echo ""
+				echo ""
+				echo ""
+				ErrorMessage "Purging fglrx driver due to multiple conflicts"
+				apt-get -y remove --purge xorg-driver-fglrx fglrx* --force-yes
+				apt-get -y install --reinstall libgl1-mesa-glx libgl1-mesa-dri fglrx-modaliases --force-yes
+				dpkg-reconfigure xserver-xorg
+				apt-get -y install --reinstall xserver-xorg-core --force-yes
+				reboot
+				exit 0
+			elif [[ "$cur_driver" == "nvidia" ]]; then
+				nv_pid=$(pidof nvidia-install.sh)
+				if [[ -n $nv_pid ]] ; then
+					StatusMessage "Installing nVidia driver this may take a few minutes"
+					installCorrectNvidiaDriver
+				else StartService "Installing nVidia driver this may take a few minutes" ". /usr/pluto/bin/nvidia-install.sh"
+					installCorrectNvidiaDriver
+				fi 
+				ConfSet "AVWizardOverride" "1"
+				exit 0
+			elif [[ "$cur_driver" == "via" ]]; then
+				StatusMessage "Removing old VIA driver"
+				apt-get -yf remove --purge xserver-xorg-video-via --force-yes
+				InstallVideoDriver "$prop_driver"
+				#reboot
+				exit 0
+			fi
+
+			if [[ "$offline_mismatch" == "true" ]]; then 
+				case "$prop_driver" in
+					nvidia)
+						prop_driver="nouveau" ;;
+					fglrx)
+						prop_driver="radeon" ;;
+					savage|via|virge)
+						prop_driver="openchrome" ;;
+				esac
+			fi
+
+			if [[ "$prop_driver" != "$cur_driver" ]]; then
+				StatusMessage "Using video driver '$prop_driver' for $card_detail"
+				InstallVideoDriver "$prop_driver"
+			fi
+		fi
+	else
+		# If there is no xorg.conf, install driver.
+		if [[ -z "$online" ]]; then
+			case "$prop_driver" in
+				nvidia)
+					prop_driver="nouveau" ;;
+				fglrx)
+					prop_driver="radeon" ;;
+				savage|via|verge)
+					prop_driver="openchrome" ;;
+			esac
+		fi
+		StatusMessage "/etc/X11/xorg.conf is missing. Using video driver '$prop_driver' for $card_detail"
+		InstallVideoDriver "$prop_driver"
+	fi
+	export Best_Video_Driver="$prop_driver"
+}
+
+GetVideoDriver() {
+	if [[ -n "$ForceVESA" ]]; then
+		echo fbdev
+		return 0
+	fi
+
+	local VideoDriver
+	#<-mkr_B_via_b->
+	VideoDriver="$Best_Video_Driver"
+	#<-mkr_B_via_e->
+	echo "$VideoDriver"
+}
