@@ -65,7 +65,8 @@ function advancedSettings($output, $dbADO) {
 
 	$IPv6TunnelProviders=array(
         "- ".translate('TEXT_NONE_CONST')." -"                => "",
-        "HE IPv6 Tunnel Broker"   => "he"
+        "HE IPv6 Tunnel Broker"   => "he",
+		"SIXXS IPv6 Tunnel Broker"   => "SIXXS"
   );
 
 	$out='';
