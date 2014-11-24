@@ -14,21 +14,28 @@ for ((i = 0; i < ${#Params[@]}; i++)); do
         esac
 done
 
-cd /usr/pluto/bin
-
-export LD_LIBRARY_PATH=/opt/vc/lib
-
+DD_DISTRO_Raspbian_CONST=19
 Executable=/usr/pluto/bin/qorbiter-core-gl
 
+cd /usr/pluto/bin
+
 killall WatchGyroRemote  # In case it was running it will be grabbing the hid device
+
+PLATFORM=""
+if [[ "$PK_Distro" == "$DD_DISTRO_Raspbian_CONST" ]] ;then
+	# FIXME: this should be done globally - export the rpi library path
+	export LD_LIBRARY_PATH=/opt/vc/lib
+
+	PLATFORM="-platform eglfs"
+fi
 
 ## Run qOrbiter
 
 if [[ "$Executable" == *"$Valgrind"* ]]; then
-	$VGcmd "$Executable" "$@" -platform eglfs
+	$VGcmd "$Executable" "$@" $PLATFORM
 	qOrbiter_RetCode=$?
 else
-	"$Executable" "$@" -platform eglfs
+	"$Executable" "$@" $PLATFORM
 	qOrbiter_RetCode=$?
 fi
 
