@@ -344,15 +344,12 @@ Item {
         width: manager.appWidth
         focus:true
         active: true
-        useAnimation:manager.hostDevice !== HostDevices.RASPBERRY_PI ? true : false
+        useAnimation:true
+        zoomEnabled: false
+
         interval:30000
         enableDebug:false
         anchors.centerIn: parent
-        onDebugInfoChanged:{
-            console.log(debugInfo)
-        }
-
-
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)

@@ -429,7 +429,13 @@ Item {
         }
 
         onNextScreenChanged: {
-            if(screenPointer.noForce===true){
+
+            if(!screenPointer){
+                console.log("Last screen likely had errors, loading next screen==>"+nextScreen)
+               loadNext()
+            }
+
+            if( screenPointer.noForce===true){
                 console.log("pageloader::"+source+" declares noforce::"+screenPointer.noForce+", ignoring "+nextScreen)
                 return;
             }else {
@@ -478,7 +484,7 @@ Item {
         onStatusChanged:  if (pageLoader.status == Component.Ready)
                           {
                               manager.setDceResponse("Command to change to:" + source+ " was successfull")
-
+                                screenfile = source
                               // contentItem=item.screen_root
                           }
                           else if (pageLoader.status == Component.Loading)
@@ -489,9 +495,6 @@ Item {
                           else if(pageLoader.status == Component.Error)
                           {
                               console.log("Command to change to:" + source + " failed!")
-
-                              pageLoader.source = "screens/Screen_X.qml"
-                              screenfile = source
                               manager.currentScreen="Screen_X.qml"
                           }
     }

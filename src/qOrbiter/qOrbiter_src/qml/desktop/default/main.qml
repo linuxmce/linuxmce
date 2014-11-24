@@ -1,6 +1,8 @@
 import QtQuick 1.1
 import AudioVisual 1.0
 import DceScreenSaver 1.0
+import org.linuxmce.screens 1.0
+import org.linuxmce.enums 1.0
 
 import "effects"
 import "components"
@@ -62,12 +64,10 @@ Item {
 
     DceScreenSaver{
         id:glScreenSaver
-        anchors{
-            top:qmlroot.top
-            bottom:qmlroot.bottom
-            left: qmlroot.left
-            right: qmlroot.right
-        }
+        height: manager.appHeight
+        width: manager.appWidth
+        x:parent.x
+        y:parent.y
         interval:30000
         useAnimation: true
         onDebugInfoChanged: console.log(debugInfo)
@@ -272,9 +272,7 @@ Item {
                 forceActiveFocus()
 
             }else{
-
                 hideUI()
-
             }
         }
 
@@ -342,7 +340,7 @@ Item {
                 manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
                 break;
             default:
-                console.log(event.key)
+                console.log("Didnt handle::"+event.key)
                 break
             }
         }
@@ -353,7 +351,7 @@ Item {
         objectName: "loadbot"
         focus:true
         z:5
-        source: "screens/Screen_1.qml"
+        source: "screens/Screen_"+Screens.Main+".qml"
         anchors{
             top:data_header.bottom
             bottom:qmlroot.bottom

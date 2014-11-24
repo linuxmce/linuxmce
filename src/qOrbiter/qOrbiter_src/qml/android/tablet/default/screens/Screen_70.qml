@@ -19,7 +19,7 @@ StyledScreen{
     keepHeader: false
     MediaPlaybackBase{
         id:screen_70
-        headerTitle: "Stored Video"
+        headerTitle: manager.translateMediaType(manager.i_current_mediaType)
     }
 }
 

@@ -22,10 +22,10 @@ Item {
     Connections{
         target:qmlroot
         onShowMetaData:{
-if(template.state==="hidden")
-    template.state="info"
-else
-    template.state="hidden"
+            if(template.state==="hidden")
+                template.state="info"
+            else
+                template.state="hidden"
         }
     }
 
@@ -55,7 +55,7 @@ else
             width: scaleX(35)
             StyledText{
                 id:titleData
-                text: dcenowplaying.qs_mainTitle + dceplayer.videoStream
+                text: dcenowplaying.qs_mainTitle
                 anchors.centerIn: parent
                 fontSize: headerText
                 color: "white"
@@ -91,7 +91,7 @@ else
         }
         Rectangle{
             id:temporalRect
-             color:appStyle.primaryLightColor
+            color:appStyle.primaryLightColor
             anchors{
                 margins: 5
                 top:parent.top

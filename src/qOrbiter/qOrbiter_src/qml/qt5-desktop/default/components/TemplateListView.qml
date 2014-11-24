@@ -46,7 +46,7 @@ ListView{
 
         Rectangle{
             anchors.fill: parent
-            color:playlist.currentIndex === index? "black" : skinStyle.mainColor
+            color:playlist.currentIndex === index? "black" : appStyle.mainColor
             opacity: .85
             border.width: index === dcenowplaying.m_iplaylistPosition ? 5 : 2
             radius:5
@@ -62,7 +62,7 @@ ListView{
 
         StyledText{
             id:label
-            text:index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + name : name
+            text:index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + description : description
             fontSize:index === dcenowplaying.m_iplaylistPosition ? headerText :mediumText
             color:"white"
             width: parent.width

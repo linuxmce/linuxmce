@@ -1,5 +1,6 @@
 import QtQuick 1.1
 import "../components"
+import org.linuxmce.screens 1.0
 StyledScreen{
     id:screen_187
     property int device_from:screenparams.getParam(184) /*!< \brief Device from */
@@ -10,8 +11,18 @@ StyledScreen{
     property int mediatype:screenparams.getParam(190) /*!< \brief media type of the media in question */
     property int pending_screen:screenparams.getParam(226) /*!< \brief The next screen to go to after the decision.  */
     noForce: true
+    keepHeader: false
     Component.onCompleted: {
         console.log("resume screen!")
+    }
+
+    StyledButton{
+        id:home
+        buttonText: "Home"
+        onActivated: {
+            noForce=false;
+            manager.setCurrentScreen(Screens.Main)
+        }
     }
 
     Panel{
@@ -31,26 +42,30 @@ StyledScreen{
             height: parent.height/2
             width: parent.width
             spacing: scaleX(2)
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: scaleY(15)
             StyledButton{
                 buttonText: qsTr("Yes Resume")
-                hitArea.onReleased: {manager.setSeekPosition(screenparams.getParam(188)) ;
+                hitArea.onReleased: {
+                    noForce=false;
+                    manager.setSeekPosition(screenparams.getParam(188)) ;
                     setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
                 }
             }
 
             StyledButton{
                 buttonText: qsTr("No Thank You")
-                hitArea.onReleased: setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
+                hitArea.onReleased: {noForce=false;setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")}
             }
 
             StyledButton{
                 buttonText: qsTr("Yes Always Resume")
-                hitArea.onReleased: setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
+                hitArea.onReleased:{ noForce=false;setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")}
             }
 
             StyledButton{
                 buttonText: qsTr("No thank you, Never resume")
-                hitArea.onReleased: setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")
+                hitArea.onReleased: {noForce=false;setCurrentScreen("Screen_"+screenparams.getParam(226)+".qml")}
             }
         }
     }

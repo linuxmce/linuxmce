@@ -13,7 +13,13 @@ Item {
     property bool orbiterSetup:false
     property string router_ip: ""
 
-    onOrbiterSetupChanged:{  console.log(orbiterSetup) ; existing_orbiters.visible = false; orbiter_options.visible = true; newOrbiterOptionContainer.visible=true; window.showSetup()}
+    onOrbiterSetupChanged:{
+        console.log(orbiterSetup) ;
+        existing_orbiters.visible = false;
+        orbiter_options.visible = true;
+        newOrbiterOptionContainer.visible=true;
+        window.showSetup()
+    }
     onWidthChanged: console.log("detected size change")
 
     Image {

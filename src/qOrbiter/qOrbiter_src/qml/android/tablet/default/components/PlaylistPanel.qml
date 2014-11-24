@@ -15,6 +15,7 @@ import "../components"
 Panel{
     id:playlistPanel
     headerTitle: qsTr("Playlist ") + playlistView.count + qsTr(" Items.")
+    property int itemCount:playlistView.count
     anchors{
         left:parent.left
         top:parent.top
@@ -50,6 +51,7 @@ Panel{
                 left:parent.left
                 right:parent.right
             }
+            clip:true
 
             anchors.margins: 5
             
@@ -70,7 +72,7 @@ Panel{
                 text:description
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                font.pixelSize: 24
+                font.pixelSize: 22
                 isBold: true
                 width: parent.width
             }
@@ -91,4 +93,42 @@ Panel{
         }
         
     }
+    states:[
+            State{
+                name:"playlistopen"
+                when:showingPlaylist
+                AnchorChanges{
+                    target: playlistPanel
+                    anchors{
+                        right:undefined
+                        left:media_playback_base.left
+                    }
+                }
+            },
+            State{
+                name:"playlistclosed"
+                when:!showingPlaylist
+                AnchorChanges{
+                    target: playlistPanel
+                    anchors{
+                        left:undefined
+                        right:media_playback_base.left
+                    }
+                }
+            }
+    ]
+
+
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+            AnchorAnimation{
+                duration:skinStyle.animation_medium
+                easing.type: skinStyle.animation_easing
+
+
+            }
+        }
+    ]
 }

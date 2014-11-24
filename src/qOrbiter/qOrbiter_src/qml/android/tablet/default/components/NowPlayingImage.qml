@@ -5,6 +5,12 @@ Item{
     height:0
     width: 0
     property string s_aspect: dcenowplaying.aspect
+    property double dvdPosterRatio:955/1080
+    property double hdPosterRatio:755/1080
+    property double cdCoverRatioFront:1080/1080
+    property double cdCoverRatioBack:1080/1264
+    property double vcdRatio:1080/1080
+    property double vhsRatio:1280/620
     onS_aspectChanged: {
         nowplayingimage.source="image://listprovider/updateobject/"+securityvideo.timestamp
         console.log("checking mediatype "+manager.i_current_mediaType)
@@ -64,8 +70,8 @@ Item{
             name: "wideImage"
             PropertyChanges {
                 target: imgContainer
-                height: manager.isProfile ? scaleY(14) : scaleY(38)
-                width: manager.isProfile ? scaleX(35) : scaleX(14)
+                height: manager.isProfile ? hdPosterRatio*width : hdPosterRatio*width
+                width: manager.isProfile ? scaleX(14) : scaleX(30)
             }
         },
         State {
