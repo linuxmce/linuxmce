@@ -32,10 +32,10 @@ fi
 ## Run qOrbiter
 
 if [[ "$Executable" == *"$Valgrind"* ]]; then
-	$VGcmd "$Executable" "$@" $PLATFORM
+	$VGcmd "$Executable" "$@" -o $PLATFORM
 	qOrbiter_RetCode=$?
 else
-	"$Executable" "$@" $PLATFORM
+	"$Executable" "$@" -o $PLATFORM
 	qOrbiter_RetCode=$?
 fi
 
