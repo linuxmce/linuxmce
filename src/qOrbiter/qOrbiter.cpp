@@ -1971,6 +1971,8 @@ void qOrbiter::qmlSetup(int device, QString address)
     m_sHostName = address.toStdString();
     dceIP = address;
 
+    qDebug() <<"DEVICE TEMPLATE==>" << PK_DeviceTemplate_get();
+
     Disconnect();
     pingCore();
 

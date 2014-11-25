@@ -1323,6 +1323,8 @@ light, climate, media, security, telecom */
 
 signals:
 
+    void deviceTemplateChanged(int dt);
+
     void dceGuiCommand(int i);
 
     /*!

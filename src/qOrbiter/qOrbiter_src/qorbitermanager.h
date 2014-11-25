@@ -163,7 +163,8 @@ class qorbiterManager : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY (int m_dwPK_Device READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)/*! \brief Contains the current device number \ingroup qorbiter_properties */
+    Q_PROPERTY (int iPK_Device READ getDeviceNumber WRITE setDeviceNumber NOTIFY deviceNumberChanged)/*! \brief Contains the current device number \ingroup qorbiter_properties */
+    Q_PROPERTY(int  deviceTemplate READ getDeviceTemplate WRITE setDeviceTemplate NOTIFY deviceTemplateChanged)
     Q_PROPERTY (int deviceVolume READ getDeviceVolume WRITE setDeviceVolume NOTIFY deviceVolumeChanged)
     Q_PROPERTY (int appHeight READ getAppH WRITE setAppH NOTIFY orientationChanged)/*!< \brief Contains the application height \ingroup qorbiter_properties */
     Q_PROPERTY (int appWidth READ getAppW WRITE setAppW NOTIFY orientationChanged)/*!< \brief Contains the application width \ingroup qorbiter_properties */
@@ -272,7 +273,8 @@ public:
     QString buildType;
     QByteArray binaryConfig;
     QString routerPort;
-    long iPK_Device;
+    int iPK_Device;
+    int deviceTemplate;
     QString qs_ext_routerip;
     QString appConfigPath;
 
@@ -704,6 +706,7 @@ signals:
     void externalHostChanged();
     void homeNetworkChanged();
     void deviceNumberChanged(int d);
+    void deviceTemplateChanged(int dt);
     void applicationPathChanged();
     void imagePathChanged();
     void pingTheRouter();
@@ -1543,6 +1546,9 @@ public slots:
 
     void setDeviceNumber(int d) {iPK_Device = d; emit deviceNumberChanged(iPK_Device);}
     int getDeviceNumber() {return iPK_Device;}
+
+    void setDeviceTemplate(int dt){if(deviceTemplate!=dt) {deviceTemplate=dt; emit deviceTemplateChanged(deviceTemplate);} }
+    int getDeviceTemplate(){return deviceTemplate;}
 
     //dce related slots
     /*! @name DCE Control Slots */

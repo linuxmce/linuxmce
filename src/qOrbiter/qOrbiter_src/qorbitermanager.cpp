@@ -1857,14 +1857,18 @@ bool qorbiterManager::loadSkins(QUrl base)
 
         qDebug() << localSkins.count();
         qDebug()<<"inside of skins we find" << localSkins.join(",");
-        if(localSkins.count()==0){
-
+        if(localSkins.count()==0){            
             tskinModel->addSkin("default,aeon,STB");
         } else {
             tskinModel->addSkin(localSkins.join(","));
         }
     } else {
-        tskinModel->addSkin("default,aeon,STB");
+        if(deviceTemplate==DEVICETEMPLATE_OnScreen_qOrbiter_CONST){
+            tskinModel->addSkin("STB");
+        } else {
+            tskinModel->addSkin("default,aeon,STB");
+        }
+
     }
 #endif
     return true;
