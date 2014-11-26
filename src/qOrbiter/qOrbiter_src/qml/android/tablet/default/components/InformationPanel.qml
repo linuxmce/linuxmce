@@ -30,7 +30,7 @@ Item{
     
     StyledText{
         id:orbiter_status_text
-        text:"LinuxMCE Orbiter: "+manager.m_dwPK_Device
+        text:"LinuxMCE Orbiter: "+manager.iPK_Device
         anchors{
             left:parent.left
             bottom:parent.bottom

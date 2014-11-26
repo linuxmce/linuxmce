@@ -18,7 +18,7 @@ StyledScreen {
 
         StyledButton{
             buttonText: qsTr("Regen this Orbiter")
-            onActivated: manager.regenOrbiter(manager.m_dwPK_Device)
+            onActivated: manager.regenOrbiter(manager.iPK_Device)
         }
 
         StyledButton{

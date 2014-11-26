@@ -45,7 +45,7 @@ property int localFontSize:22
                 MouseArea{
                     anchors.fill:parent
                     z:5
-                    onClicked: manager.regenOrbiter(manager.m_dwPK_Device)
+                    onClicked: manager.regenOrbiter(manager.iPK_Device)
                 }
                        buttontextfontsize:localFontSize
             }

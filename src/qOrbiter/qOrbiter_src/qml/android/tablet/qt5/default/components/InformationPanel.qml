@@ -41,7 +41,7 @@ Item{
     
     StyledText{
         id:orbiter_status_text
-        text:"LinuxMCE Orbiter "+manager.m_dwPK_Device + " connected."
+        text:"LinuxMCE Orbiter "+manager.iPK_Device + " connected."
         anchors.top: parent.top
         anchors.left: parent.left
         font.pixelSize:36

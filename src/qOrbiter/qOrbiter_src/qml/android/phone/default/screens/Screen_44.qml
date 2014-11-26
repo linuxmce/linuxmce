@@ -20,7 +20,7 @@ StyledScreen {
                 id:regenorbiter
                 state: "large-fixed"
                 buttonText: "Regen\nOrbiter"
-                onActivated:  regenOrbiter(manager.m_dwPK_Device)
+                onActivated:  regenOrbiter(manager.iPK_Device)
             }
 
             StyledButton{

@@ -20,7 +20,7 @@ Item{
     property variant mameArtDimensions:{"w":320, "h":230}
 
     property double dvdPosterRatio:1080/955
-    property double hdPosterRatio:1080/755
+    property double hdPosterRatio:1.48
     property double cdCoverRatioFront:1080/1080
     property double cdCoverRatioBack:1080/1264
     property double vcdRatio:1080/1080
@@ -115,17 +115,17 @@ Item{
     states: [
         State {
             name: "audio"
-            when:manager.q_mediaType == Mediatypes.STORED_AUDIO
+            //  when:manager.q_mediaType == Mediatypes.STORED_AUDIO
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleX(32)
-                currentCellWidth:scaleX(32)
+                currentCellHeight: scaleX(25)
+                currentCellWidth:scaleX(25)
             }
 
         },
         State {
             name: "video"
-            when:manager.q_mediaType == Mediatypes.STORED_VIDEO
+            //  when:manager.q_mediaType == Mediatypes.STORED_VIDEO
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: scaleY(24)
@@ -137,7 +137,7 @@ Item{
         },
         State {
             name: "default"
-            when:manager.q_mediaType != Mediatypes.STORED_VIDEO && manager.q_mediaType != Mediatypes.STORED_AUDIO
+            when:manager.q_mediaType != MediaTypes.STORED_VIDEO && manager.q_mediaType != MediaTypes.STORED_AUDIO
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: scaleY(24)
@@ -155,27 +155,27 @@ Item{
         },
         State {
             name: "tv"
-            when:manager.q_subType==Subtypes.TVSHOWS && manager.q_pk_attribute==""
+            when:manager.q_subType==MediaSubtypes.TVSHOWS && manager.q_pk_attribute==""
             extend:"video"
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleY(20)
-                currentCellWidth:scaleX(19)
+                currentCellHeight: scaleY(33)
+                currentCellWidth:scaleX(33)
             }
         },
         State {
             name: "movies"
-            when: manager.q_subType==Subtypes.MOVIES && manager.q_mediaType==Mediatypes.STORED_VIDEO
+            when: manager.q_subType==MediaSubtypes.MOVIES && manager.q_mediaType==MediaTypes.LMCE_StoredVideo
             extend:"video"
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: currentCellWidth*hdPosterRatio
-                currentCellWidth:scaleX(20)
+                currentCellWidth:scaleX(25)
             }
         },
         State {
             name: "seasons"
-            when:manager.q_attributeType_sort==Attributes.TV_Season_ID && manager.q_subType==Subtypes.TVSHOWS
+            when:manager.q_attributeType_sort==Attributes.TV_Season_ID && manager.q_subType==MediaSubtypes.TVSHOWS
             extend:"tv"
             PropertyChanges {
                 target: multi_view_list
@@ -185,12 +185,23 @@ Item{
         },
         State {
             name: "episodes"
-            when:manager.q_attributeType_sort==Attributes.Title && manager.q_subType==Subtypes.TVSHOWS
+            when:manager.q_attributeType_sort==Attributes.Title && manager.q_subType==MediaSubtypes.TVSHOWS
             extend:"tv"
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleY(20)
-                currentCellWidth:scaleX(19)
+                currentCellHeight: scaleY(33)
+                currentCellWidth:scaleX(33)
+            }
+        }
+        ,
+        State {
+            name: "radio"
+            when:manager.q_mediaType == MediaTypes.NP_OTARadio
+            extend:"audio"
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(33)
+                currentCellWidth:scaleX(33)
             }
         }
     ]

@@ -120,7 +120,7 @@ Item {
 
             StyledButton{
                 anchors.fill: parent
-                buttonText:Number(subModel[index].ea_name) == manager.m_dwPK_Device ? qsTr("This Device") : subModel[index].ea_name
+                buttonText:Number(subModel[index].ea_name) == manager.iPK_Device ? qsTr("This Device") : subModel[index].ea_name
                 onActivated: {
                     if(subMenu){
                         manager.setActiveRoom(subModel[index].room, subModel[index].ea_number);
