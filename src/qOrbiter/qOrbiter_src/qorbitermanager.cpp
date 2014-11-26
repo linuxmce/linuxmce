@@ -2513,7 +2513,7 @@ void qorbiterManager::processError(QString msg)
 void qorbiterManager::setActiveSkin(QString name)
 {
 
-    name ="STB";
+
     if(name=="splash_fallback"){
 
     }
