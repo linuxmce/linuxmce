@@ -130,6 +130,9 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 		int level,duration,temp,fan;
 		string heat;
 		uint32 homeId = m_pZWInterface->GetHomeId();
+		if (OpenZWave::Manager::Get()->IsNodeFailed(homeId, node_id)) {
+
+		}
 		switch (pMessage->m_dwID) {
 			case COMMAND_Generic_On_CONST:
 			case COMMAND_Set_Level_CONST:
@@ -196,11 +199,13 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 			{
 				temp = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST].c_str());
 				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET TEMPERATURE RECEIVED FOR CHILD %d, temperature: %d",node_id,temp);
-/*				// tempf = (int)( (9.0/5.0) * (float)temp + 32.0 );
-				myZWApi->zwThermostatSetpointSet(node_id,1,temp); // heating
-				myZWApi->zwThermostatSetpointSet(node_id,2,temp); // cooling
-				myZWApi->zwThermostatSetpointSet(node_id,10,temp); // auto changeover
-*/
+				string unit = GetCurrentDeviceData(pDeviceData_Impl->m_dwPK_Device, DEVICEDATA_Units_CONST);
+				if (unit == "F")
+				{
+					temp = (int)( (9.0/5.0) * (float)temp + 32.0 );
+					LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"Temperature converted to F : %d",temp);
+				}
+
 	// TODO: need to set temperature for a specific setpoint/mode. Setting it for the current operating mode might work,
 	// except when we receive a Set_HeatCool command just after the Set_Temperature command, which might be the usual LMCE way
 	// Set temperature for current operating mode, copy temperature to new mode if changed in Set_HeatCool
@@ -982,6 +987,25 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
                 //DeleteDevicesForNode(_notification->GetNodeId());
 		break;
 	}
+	case OpenZWave::Notification::Type_Notification:
+	{
+		if (_notification->GetNotification() == OpenZWave::Notification::Code_Dead)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "ZWInterface::OnNotification() : Node presumed dead, node id = %d", nodeInfo->m_nodeId);
+			// Trying to revive the node by issuing a test node command
+//			OpenZWave::Manager::Get()->TestNetworkNode(m_pZWInterface->GetHomeId(), nodeInfo->m_nodeId, 1);
+			// TODO: implement more logic around this. here are some ideas:
+			// - revive node X times - then alert user (email/popup)
+			// - if node is brought back to life, try heal node to improve network?
+		}
+		else if (_notification->GetNotification() == OpenZWave::Notification::Code_Alive)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Node brought back to life, node id = %d", nodeInfo->m_nodeId);
+		}
+		break;
+
+	}	
+
 	default:
 	{
 	}
