@@ -2510,8 +2510,7 @@ void qorbiterManager::processError(QString msg)
     setDceResponse("Process Error Slot:" + msg) ;
 }
 
-void qorbiterManager::setActiveSkin(QString name)
-{
+void qorbiterManager::setActiveSkin(QString name){
 
 
     if(name=="splash_fallback"){

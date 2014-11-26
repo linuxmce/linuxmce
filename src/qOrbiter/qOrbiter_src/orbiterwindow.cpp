@@ -51,11 +51,13 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     QObject(parent), deviceno(deviceid)
 {
 #ifdef QT4_8
+#ifndef ANDROID
     mainView.setAttribute(Qt::WA_TranslucentBackground);
     QPalette palette;
     palette.setColor(QPalette::Base, Qt::transparent);
     mainView.setPalette(palette);
     mainView.setAutoFillBackground(false);
+#endif
     if(frameless==true){
         mainView.window()->setWindowFlags(Qt::FramelessWindowHint);
     }
@@ -146,15 +148,15 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #ifndef Q_OS_ANDROID
 #ifndef QT5
 #ifndef QT5
-    //    QGLFormat format= QGLFormat::defaultFormat();
-    //    format.setAlpha(true);
-    //    glWidget = new QGLWidget(format);
-    //    glWidget->setStyleSheet("background:transparent;");
-    //    glWidget->setAutoFillBackground(false);
-    //    mainView.setViewport(glWidget);
-    //    glWidget->setAttribute(Qt::WA_TranslucentBackground, true);
-    //    glWidget->setBackgroundRole(QPalette::Base);
-    //    mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+//        QGLFormat format= QGLFormat::defaultFormat();
+//        format.setAlpha(true);
+//        glWidget = new QGLWidget(format);
+//        glWidget->setStyleSheet("background:transparent;");
+//        glWidget->setAutoFillBackground(false);
+//        mainView.setViewport(glWidget);
+//        glWidget->setAttribute(Qt::WA_TranslucentBackground, true);
+//        glWidget->setBackgroundRole(QPalette::Base);
+//        mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #endif
 #endif
 #endif
