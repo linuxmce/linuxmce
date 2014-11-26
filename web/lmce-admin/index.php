@@ -1834,6 +1834,12 @@ switch ($section) {
 	    include_once('operations/mediaBrowser/mainScreenSaver.php');
 	    mainScreenSaver($output,$mediadbADO,$dbADO);	    
 	break;
+        case 'photoBrowser':
+             $output = new Template($dbADO);
+             $output->setTemplateFileType('large');
+             include_once('operations/mediaBrowser/photoBrowser.php');
+             photoBrowser($output,$mediadbADO,$dbADO);
+        break;
 	case 'vdr':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
