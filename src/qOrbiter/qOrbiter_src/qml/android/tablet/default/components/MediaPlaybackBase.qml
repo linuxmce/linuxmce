@@ -1,7 +1,7 @@
 import QtQuick 1.0
 import "../../../../skins-common/lib/handlers"
 import org.linuxmce.enums 1.0
-import org.linuxmce.screens 1.0
+
 
 Panel{
     id:media_playback_base
@@ -303,81 +303,81 @@ Panel{
 
 
 
-Loader{
-    id:mediaTypeMetaData
-    width: parent.width *.35
-    source: metadataComponent
-    anchors{
-        left: npImage.left
-        top:npImage.bottom
-        bottom: mediaScrollerTarget.top
+    Loader{
+        id:mediaTypeMetaData
+        width: parent.width *.35
+        source: metadataComponent
+        anchors{
+            left: npImage.left
+            top:npImage.bottom
+            bottom: mediaScrollerTarget.top
+        }
     }
-}
 
-MediaScrollBar{
-    id:mediaScrollerTarget
-    state:dceTimecode.tcTotalTime!==0 ? "up" : "down"
-}
-
-PlaylistPanel{
-    id:playlistPanel
-    anchors{
-        top:media_playback_base.headerRect.bottom
-        bottom:mediaScrollerTarget.top
-        left:  parent.left
-        right:  undefined
-        leftMargin:  5
+    MediaScrollBar{
+        id:mediaScrollerTarget
+        state:dceTimecode.tcTotalTime!==0 ? "up" : "down"
     }
-    width: parent.width *.30
-    clip: true
-}
 
-states: [
-State {
-    name: "fallback"
-    extend: ""
-},
-State {
-    name: "localvideo"
-    PropertyChanges {
-        target: media_playback_base
-        showingPlaylist: playlistPanel.itemCount > 1 ? true : false
-
+    PlaylistPanel{
+        id:playlistPanel
+        anchors{
+            top:media_playback_base.headerRect.bottom
+            bottom:mediaScrollerTarget.top
+            left:  parent.left
+            right:  undefined
+            leftMargin:  5
+        }
+        width: parent.width *.30
+        clip: true
     }
-},
-State {
-    name: "localaudio"
 
-},
-State{
-    name:"dvd"
-},
-State{
-    name:"streamingaudio"
-},
-State{
-    name:"radio"
-},
-State{
-    name:"airplay"
-},
-State{
-    name:"networkmedia"
-}
+    states: [
+        State {
+            name: "fallback"
+            extend: ""
+        },
+        State {
+            name: "localvideo"
+            PropertyChanges {
+                target: media_playback_base
+                showingPlaylist: playlistPanel.itemCount > 1 ? true : false
 
-]
+            }
+        },
+        State {
+            name: "localaudio"
 
-transitions: [
-Transition {
-    from: "*"
-    to: "*"
-    AnchorAnimation{
-        duration:skinStyle.animation_medium
-        easing.type: skinStyle.animation_easing
+        },
+        State{
+            name:"dvd"
+        },
+        State{
+            name:"streamingaudio"
+        },
+        State{
+            name:"radio"
+        },
+        State{
+            name:"airplay"
+        },
+        State{
+            name:"networkmedia"
+        }
+
+    ]
+
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+            AnchorAnimation{
+                duration:skinStyle.animation_medium
+                easing.type: skinStyle.animation_easing
 
 
-    }
-}
-]
+            }
+        }
+    ]
 
 }
