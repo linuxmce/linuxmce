@@ -1,7 +1,7 @@
 import QtQuick 1.0
 import "../../../../skins-common/lib/handlers"
 import org.linuxmce.enums 1.0
-
+import org.linuxmce.screens 1.0
 
 Panel{
     id:media_playback_base
