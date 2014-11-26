@@ -13,6 +13,7 @@
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/QDeclarativeContext>
 #include <qmlapplicationviewer.h>
+
 #endif
 #include <QVariant>
 #ifdef GLENABLED
@@ -70,7 +71,7 @@ public:
 #ifdef QT5
     QtQuick2ApplicationViewer mainView;
 #else
-    QDeclarativeView  mainView;
+   QDeclarativeView  mainView;
 #endif
 
     QString buildType;

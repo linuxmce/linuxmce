@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
     QApplication::setGraphicsSystem("meego");
 #elif GLENABLED
 #ifndef QT5
-    QApplication::setGraphicsSystem("opengl");
+ //   QApplication::setGraphicsSystem("opengl");
 #endif
 #else
     QApplication::setGraphicsSystem("raster");
@@ -216,6 +216,7 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
     QCoreApplication::setOrganizationDomain("org.linuxmce.QOrbiter");
     QCoreApplication::setOrganizationName("www.linuxMCE.org");
+
 
 #ifdef __ANDROID__
     AndroidSystem androidHelper;

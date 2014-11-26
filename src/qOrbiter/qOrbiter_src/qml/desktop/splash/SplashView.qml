@@ -1,11 +1,11 @@
 // import QtQuick 1.1 // to target S60 5th Edition or Maemo 5
 import QtQuick 1.1
 
-Rectangle {
+Item {
     height:manager.appHeight
     width:manager.appWidth
     id:splashPage
-    color: "transparent"
+
     signal setupStart(string x, string y)
     signal splashLoaded()
 

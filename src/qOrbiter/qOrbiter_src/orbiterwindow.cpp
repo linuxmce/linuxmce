@@ -51,7 +51,11 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     QObject(parent), deviceno(deviceid)
 {
 #ifdef QT4_8
-
+    mainView.setAttribute(Qt::WA_TranslucentBackground);
+    QPalette palette;
+    palette.setColor(QPalette::Base, Qt::transparent);
+    mainView.setPalette(palette);
+    mainView.setAutoFillBackground(false);
     if(frameless==true){
         mainView.window()->setWindowFlags(Qt::FramelessWindowHint);
     }
@@ -139,16 +143,20 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     //  mainView.rootContext()->setContextProperty("orbiterList" , "");
 
 #ifdef GLENABLED
-    #ifndef Q_OS_ANDROID
-        #ifndef QT5
+#ifndef Q_OS_ANDROID
 #ifndef QT5
-    QGLFormat format= QGLFormat::defaultFormat();
-    glWidget = new QGLWidget(format);
-    glWidget->setAutoFillBackground(false);
-    mainView.setViewport(glWidget);
-    mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-        #endif
-    #endif
+#ifndef QT5
+    //    QGLFormat format= QGLFormat::defaultFormat();
+    //    format.setAlpha(true);
+    //    glWidget = new QGLWidget(format);
+    //    glWidget->setStyleSheet("background:transparent;");
+    //    glWidget->setAutoFillBackground(false);
+    //    mainView.setViewport(glWidget);
+    //    glWidget->setAttribute(Qt::WA_TranslucentBackground, true);
+    //    glWidget->setBackgroundRole(QPalette::Base);
+    //    mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+#endif
+#endif
 #endif
 #endif
 
@@ -211,7 +219,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     buildType = "/qml/qt5-desktop";
     qrcPath = "qrc:qml/Welcome2.qml";
     localPath = "qt5-desktop/";
-#endif   
+#endif
     qDebug() << "Adding "<< QApplication::applicationDirPath()+"/imports/";
     mainView.engine()->addImportPath(QApplication::applicationDirPath()+"/imports/");
 #elif defined (for_freemantle)
@@ -239,7 +247,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.engine()->addImportPath(QApplication::applicationDirPath()+"/imports/");
 #elif defined __ANDROID__
 #ifdef QT5
-qrcPath = "qrc:main/Welcome2.qml";
+    qrcPath = "qrc:main/Welcome2.qml";
 #else
     qrcPath = "assets:/qml/Base.qml";
 #endif
@@ -258,13 +266,13 @@ qrcPath = "qrc:main/Welcome2.qml";
 
 #endif
 
-#ifdef ANDROID    
-/* Android ifdef for loading initial qml file */
+#ifdef ANDROID
+    /* Android ifdef for loading initial qml file */
 
-    #ifdef QT4_8
+#ifdef QT4_8
     mainView.rootContext()->setContextProperty("appW", mainView.width());
     mainView.rootContext()->setContextProperty("appH", mainView.height());
-    #endif
+#endif
     mainView.engine()->addImportPath("assets:/imports/androidComponents");
     mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
     mainView.engine()->addPluginPath("assets:/lib");
@@ -272,9 +280,9 @@ qrcPath = "qrc:main/Welcome2.qml";
     qDebug() << "Plugin path list"; mainView.engine()->pluginPathList().join("\n");
     mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
 #endif
-/*End Special Android setup */
- qDebug() << "QML Import Path List::" << mainView.engine()->importPathList();
- mainView.setSource(qrcPath); /* Sets the initial qml file based on all the above switching */
+    /*End Special Android setup */
+    qDebug() << "QML Import Path List::" << mainView.engine()->importPathList();
+    mainView.setSource(qrcPath); /* Sets the initial qml file based on all the above switching */
 
 }
 

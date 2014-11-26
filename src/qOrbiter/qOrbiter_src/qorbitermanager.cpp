@@ -2513,6 +2513,7 @@ void qorbiterManager::processError(QString msg)
 void qorbiterManager::setActiveSkin(QString name)
 {
 
+    name ="STB";
     if(name=="splash_fallback"){
 
     }
@@ -2523,12 +2524,10 @@ void qorbiterManager::setActiveSkin(QString name)
     qDebug("Setting Skin");
 }
 
-void qorbiterManager::cleanupScreenie()
-{
+void qorbiterManager::cleanupScreenie(){
     //  mediaScreenShot = QImage();
     screenshotVars.clear();
     setDceResponse("Cleaned up Screenshot model");
-
 }
 
 void qorbiterManager::initializeConnections()
@@ -2594,10 +2593,8 @@ bool qorbiterManager::createAndroidConfig()
     else
     {
         QDir filePath;
-        if(filePath.mkpath(mobileStorageLocation))
-        {
+        if(filePath.mkpath(mobileStorageLocation)){
             setDceResponse("Made path");
-
         }
 
         QFile defaultConfig;
@@ -2629,9 +2626,7 @@ bool qorbiterManager::createAndroidConfig()
                 setDceResponse(droidConfig.errorString());
             }
         }
-        else
-        {
-
+        else{
             setDceResponse("Cannot install configuration!!");
             setDceResponse(defaultConfig.errorString());
             return false;
