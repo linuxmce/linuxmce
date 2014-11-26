@@ -402,13 +402,14 @@ Item {
 
     }
     function screenchange(screenname ){
-        pageLoader.nextScreen = "screens/"+screenname
+
+        if(pageLoader.currentScreen!=screenname)
+            pageLoader.nextScreen = screenname
     }
 
 
 
-    function checkStatus(component)
-    {
+    function checkStatus(component){
         console.log(component.progress)
     }
 
@@ -416,10 +417,10 @@ Item {
         id:pageLoader
         objectName: "loadbot"
         focus: true
-        source:"screens/Screen_1.qml"
+
         // visible:qml_root.uiOn
         property string nextScreen:""
-
+        property string currentScreen:""
         anchors{
             top: nav_row.bottom
             bottom:info_panel.top
@@ -430,16 +431,22 @@ Item {
 
         onNextScreenChanged: {
 
-            if(!screenPointer){
-                console.log("Last screen likely had errors, loading next screen==>"+nextScreen)
-               loadNext()
+            if(!nextScreen.match(".qml")){
+                return
+            } else {
+
             }
 
-            if( screenPointer.noForce===true){
-                console.log("pageloader::"+source+" declares noforce::"+screenPointer.noForce+", ignoring "+nextScreen)
+            if(!pageLoader.item){
+                console.log("Last screen likely had errors, loading next screen==>"+nextScreen)
+                loadNext()
+            }
+
+            if( pageLoader.item.noForce===true){
+                console.log("pageloader::"+source+" declares noforce::"+pageLoader.item.noForce+", ignoring "+nextScreen)
                 return;
             }else {
-                console.log("pageloader::"+source+" noforce::"+screenPointer.noForce+" , loading next screen.")
+                console.log("pageloader::"+source+" noforce::"+pageLoader.item.noForce+" , loading next screen.")
                 console.log("next screen==>"+nextScreen)
                 startChange()
             }
@@ -448,8 +455,9 @@ Item {
 
         function startChange(){
 
-            if(screenPointer.screen){
-                console.log("pageloader::closing page")
+
+            if(!pageLoader.item || pageLoader.item.scree){
+                console.log("pageloader::closing page "+ manager.currentScreen)
                 pageLoader.item.state="closing"
             } else{
                 console.log("pageloader::no page jumping to next ==>"+nextScreen)
@@ -460,13 +468,14 @@ Item {
 
         function loadNext(){
 
-            console.log("pageloader::loading next screen")
+
             if(nextScreen===""){
-                nextScreen="screens/Screen_1.qml"
+                nextScreen="Screen_1.qml"
                 return
             }
 
-            pageLoader.source=nextScreen
+            console.log("pageloader::loading next screen screens/"+nextScreen)
+            pageLoader.source="screens/"+nextScreen
         }
 
         opacity: uiOn ? 1 : 0
@@ -483,8 +492,11 @@ Item {
         }
         onStatusChanged:  if (pageLoader.status == Component.Ready)
                           {
+
                               manager.setDceResponse("Command to change to:" + source+ " was successfull")
-                                screenfile = source
+                              screenfile = source
+                              currentScreen=nextScreen
+
                               // contentItem=item.screen_root
                           }
                           else if (pageLoader.status == Component.Loading)

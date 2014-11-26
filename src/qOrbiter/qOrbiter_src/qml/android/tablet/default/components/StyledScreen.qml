@@ -27,14 +27,15 @@ Item {
     onOpacityChanged: {
         if(opacity===0 &&state==="closing"){
             state="closed"
+            readyToClose()
         }
     }
 
     onStateChanged: {
         if(state==="closed"){
-            console.log("closed")
+            console.log("screen closed.")
 
-            readyToClose()
+
         } else if(state==="closing"){
             raiseNavigation(true)
         }
