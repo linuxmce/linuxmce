@@ -25,7 +25,7 @@ Item{
 
         StyledText {
             id: name
-            text: "Orbiter "+ manager.m_dwPK_Device + " is connected to "+ manager.m_ipAddress
+            text: "Orbiter "+ manager.iPK_Device + " is connected to "+ manager.m_ipAddress
             fontSize: mediumText
             color: "white"
         }        

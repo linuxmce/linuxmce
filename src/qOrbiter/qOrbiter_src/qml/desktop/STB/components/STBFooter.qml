@@ -206,7 +206,7 @@ Item{
                                     manager.quickReload()
                                     break;
                                 case 2:
-                                    manager.regenOrbiter(manager.m_dwPK_Device)
+                                    manager.regenOrbiter(manager.iPK_Device)
                                     break;
                                 case 3:
                                     console.log("Show Power!")
@@ -241,7 +241,7 @@ Item{
                                     manager.quickReload()
                                     break;
                                 case 2:
-                                    manager.regenOrbiter(manager.m_dwPK_Device)
+                                    manager.regenOrbiter(manager.iPK_Device)
                                     break;
                                 case 3:
                                     console.log("Show Power!")

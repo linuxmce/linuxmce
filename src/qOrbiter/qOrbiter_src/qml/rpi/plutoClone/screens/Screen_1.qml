@@ -35,7 +35,7 @@ Item
 
         StyledText{
             id:connectstatus
-            text: "Orbiter "+ manager.m_dwPK_Device + " is connected."
+            text: "Orbiter "+ manager.iPK_Device + " is connected."
             color: "aliceblue"
             font.letterSpacing: 2
             font.family: keyFont.name

@@ -27,7 +27,7 @@ Item{
         spacing: 5
         StyledText {
             id: name
-            text: "Orbiter "+ manager.m_dwPK_Device + " is connected "
+            text: "Orbiter "+ manager.iPK_Device + " is connected "
             fontSize: mediumText
             color: "white"
         }

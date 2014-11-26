@@ -9,7 +9,6 @@
 
 import QtQuick 1.1
 import AudioVisual 1.0
-import DceScreenSaver 1.0
 import "../../skins-common/lib/components"
 import "../../skins-common/lib/handlers"
 import "components"
@@ -34,9 +33,9 @@ Item {
         pageLoader.forceActiveFocus()
     }
 
-    Component.onCompleted: {
-        dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-    }
+    //    Component.onCompleted: {
+    //        dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+    //    }
 
     Connections{
         target: manager
@@ -187,29 +186,20 @@ Item {
     }
 
     Timer{
-            id:hideUiTimer
-            interval:screensaverTimer
-            running: false
-            repeat: false
-            onTriggered: {
-                if(uiOn){
-                    uiOn=false
-                    if(glScreenSaver.active){
-                        glScreenSaver.forceActiveFocus()
-                    } else {
-                        uiOn=true
-                      ftr.forceActiveFocus()
-                    }
-                }
+        id:hideUiTimer
+        interval:screensaverTimer
+        running: false
+        repeat: false
+        onTriggered: {
+            if(uiOn){
+                uiOn=false
+            } else {
+                uiOn = true
+                ftr.forceActiveFocus()
             }
+
         }
-
-    Rectangle{
-        id:filler
-        anchors.fill: qmlroot
-        color: "black"
     }
-
 
     ListModel{
         id:scenarios
@@ -339,34 +329,12 @@ Item {
 
 
 
-    DceScreenSaver{
-        id:glScreenSaver
-        height: manager.appHeight
-        width: manager.appWidth
-        focus:true
-        interval:30000
-        anchors.centerIn: parent
-        requestUrl:manager.m_ipAddress
-        Component.onCompleted: {
-            glScreenSaver.setImageList(manager.screensaverImages)
-        }
 
-        Connections{
-            target:manager
-            onScreenSaverImagesReady:glScreenSaver.setImageList(manager.screensaverImages)
-        }
-        MouseArea{
-            anchors.fill: parent
-            hoverEnabled: true
-            onPressed:if(glScreenSaver.activeFocus) { uiOn=!uiOn}
-        }
-
-    }
 
     MediaManager{
         id:dceplayer
-        anchors.top: dceplayer.videoStream ? parent.top : parent.bottom
-        anchors.left:parent.left
+        height: 0
+        width: 0
         flipColors: true
         focus:true
         // onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
@@ -518,13 +486,18 @@ Item {
         }
 
         onActiveFocusChanged: {
-            if(activeFocus)
-            {  console.log("Pageloader gained active focus");   }
-            else if (pageLoader.item.activeFocus){
-                console.log("Pageloader content gained active focus");
+
+            if(pageLoader.item ==null ){
+                pageLoader.source=manager.currentScreen
+            }
+
+            if( activeFocus){
+                manager.logSkinMessage("Pageloader gained active focus");
+            } else if (pageLoader.item.activeFocus){
+                manager.logSkinMessage("Pageloader content gained active focus");
             }
             else{
-                console.log("Page loader lost active focus ::"+ pageLoader.activeFocus);
+                manager.logSkinMessage("Page loader lost active focus ::"+ pageLoader.activeFocus);
             }
         }
         onIsActiveChanged: console.log("New pageloader content focus is "+isActive)
@@ -572,17 +545,17 @@ Item {
 
     //floorplans
     MouseArea{
-         id:mst
-         anchors.fill: parent
+        id:mst
+        anchors.fill: parent
 
-         onPressed: {
-             mouse.accepted=false
-             console.log("Mouse X: "+mouse.x)
-             console.log("Mouse Y:"+mouse.y)
-             console.log("\n")
-          //   hideUiTimer.restart()
-         }
-     }
+        onPressed: {
+            mouse.accepted=false
+            console.log("Mouse X: "+mouse.x)
+            console.log("Mouse Y:"+mouse.y)
+            console.log("\n")
+            //   hideUiTimer.restart()
+        }
+    }
 }
 
 

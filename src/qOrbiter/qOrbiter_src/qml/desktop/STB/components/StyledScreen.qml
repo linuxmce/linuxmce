@@ -11,11 +11,11 @@ Item {
         bottom: pageLoader.bottom
     }
 
-    Rectangle{
-        anchors.fill: parent
-        gradient: appStyle.contentGradient
-        opacity: .25
-    }
+//    Rectangle{
+//        anchors.fill: parent
+//        gradient: appStyle.contentGradient
+//        opacity: .25
+//    }
 
     MouseArea{
         anchors.fill: parent
