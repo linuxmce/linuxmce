@@ -10,7 +10,7 @@ $imagepath=cleanString($_REQUEST['imagepath']);
 $imageinfo = getimagesize( $imagepath );
 switch ($imageinfo[2]){
 	case 2:
-		$imagetype = "jpg";
+		$imagetype = "jpeg";
 	break;
 	case 3:
 		$imagetype = "png";
