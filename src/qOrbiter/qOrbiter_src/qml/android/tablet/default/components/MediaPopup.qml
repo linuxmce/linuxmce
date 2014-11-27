@@ -79,16 +79,8 @@ Item {
             left:parent.right
             verticalCenter: parent.verticalCenter
         }
-        opacity: .65
-        clockFontSize: 53
-        boldClock: true
-        Clock{
-            id:time_keeper2
-            anchors.centerIn: parent
-            clockFontSize: 54
-            boldClock: true
-            clockColor: "green"
-        }
+        opacity: .65       
+        boldClock: true        
     }
 
 

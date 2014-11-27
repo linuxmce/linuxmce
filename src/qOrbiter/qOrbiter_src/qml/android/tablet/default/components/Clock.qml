@@ -2,8 +2,7 @@ import QtQuick 1.0
 
 Item {
     property bool verticalMirror: false
-    property color clockColor:"white"
-    property int clockFontSize: 32
+    property color clockColor:"white"   
     property bool boldClock:false
     function getDate(){
         var d = new Date();
@@ -25,7 +24,7 @@ Item {
         smooth: true
         width: parent.width
         anchors.centerIn: parent
-        font.pixelSize: clockFontSize
+        font.pixelSize: largeFontSize
         horizontalAlignment: Text.AlignHCenter
         font.bold: boldClock
     }

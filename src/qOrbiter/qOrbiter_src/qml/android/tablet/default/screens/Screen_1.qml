@@ -8,7 +8,7 @@ StyledScreen {
     Component.onCompleted:{
         current_header_model=scenarios;
         if(dcenowplaying.b_mediaPlaying){
-           manager.setBoundStatus(false)
+            manager.setBoundStatus(false)
         }
         setNavigation(nav_row.defaultSource)
         info_panel.state="retracted";
@@ -33,19 +33,18 @@ StyledScreen {
             }
 
             model:current_scenario_model
-            cellWidth:scaleX(20)
-            cellHeight:scaleY(20)
+            cellWidth:manager.isProfile ? scaleX(30) : scaleX(20)
+            cellHeight:manager.isProfile ? scaleY(17) : scaleY(22)
 
             delegate: Item{
-                height: scaleY(20)
-                width: scaleX(20)
+                height:scenario_display.cellHeight -5
+                width: scenario_display.cellWidth -5
 
                 StyledButton{
                     id:button
-                    height: scaleY(20)
-                    width: scaleX(20)
+                    anchors.fill: parent
                     buttonText: title
-                    textSize: 38
+                    textSize: manager.isProfile ? scaleY(3) : scaleY(5)
                     hitArea.onReleased: manager.execGrp(params)
 
                 }

@@ -2,7 +2,7 @@ import QtQuick 1.0
 
 Item{
     id:styled_button
-    height: button_label.paintedHeight < scaleY(5) ? scaleY(5) : button_label.paintedHeight+(button_label.paintedHeight*.02)
+    height: button_label.paintedHeight < scaleY(4) ? scaleY(4) : button_label.paintedHeight+(button_label.paintedHeight*.02)
     width:opacity ? button_label.paintedWidth < scaleX(12) ? scaleX(12) : (button_label.paintedWidth) + (button_label.paintedWidth*.02) :0
 
     //    anchors{
@@ -22,7 +22,7 @@ Item{
     smooth: true
 
     property string phil:useHandler ? dceHandler.item.pressed ? "yellow" : "black" :  fly_trap.pressed ? "green": "black"
-    property int textSize:28
+    property int textSize:manager.isProfile ? scaleY(2) : scaleY(4)
     property alias buttonText:button_label.text
     property alias txtObj:button_label
     property alias hitArea:fly_trap
@@ -55,9 +55,11 @@ Item{
         id:button_label
         text:"ipsum"
         isBold: false
+        width: parent.width
         font.weight: Font.Light
         fontSize: textSize
         anchors.centerIn: parent
+        anchors.margins: 5
         color:"antiquewhite"
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     }

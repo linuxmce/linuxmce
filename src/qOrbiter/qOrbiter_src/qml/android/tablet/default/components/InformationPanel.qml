@@ -36,7 +36,7 @@ Item{
             bottom:parent.bottom
         }
 
-        font.pixelSize:36
+        font.pixelSize:largeFontSize
         font.bold: true
         color:"green"
         Behavior on opacity {

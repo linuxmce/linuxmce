@@ -31,6 +31,7 @@ Item{
             top:parent.top
             left: parent.left
             right:commonButtons.left
+            rightMargin: scaleX(1)
         }
         onSourceChanged: {
             if(nav.status===Component.Ready){

@@ -57,7 +57,7 @@ StyledScreen {
 
                 StyledButton{
                     buttonText: "Users"
-                     onActivated: {attributeSelector.currentModel=userList; attributeSelector.selectingUser=true; }
+                    onActivated: {attributeSelector.currentModel=userList; attributeSelector.selectingUser=true; }
                 }
 
                 StyledButton{
@@ -147,23 +147,20 @@ StyledScreen {
                 height:parent.height / 2
                 width: parent.width *.85
                 model:mediatypefilter
-                cellWidth:scaleX(25)
-                cellHeight:scaleY(15)
+                cellWidth:manager.isProfile ? scaleX(30) : scaleX(20)
+                cellHeight:manager.isProfile ? scaleY(15) : scaleY(22)
                 delegate:
-                    Item{
-                    height:scaleY(8)
-                    width: parent.width
-
                     StyledButton{
-                        buttonText: name
-                        textSize: 48
-                        hitArea.onReleased:{
-                            mediatypefilter.setSelectionStatus(name);
-                            content.state="viewing"
-
-                        }
+                    height:typeSelection.cellHeight -5
+                    width: typeSelection.cellWidth -5
+                    buttonText: name
+                    textSize: txtObj.largeFontSize
+                    hitArea.onReleased:{
+                        mediatypefilter.setSelectionStatus(name);
+                        content.state="viewing"
                     }
                 }
+
             }
 
 
