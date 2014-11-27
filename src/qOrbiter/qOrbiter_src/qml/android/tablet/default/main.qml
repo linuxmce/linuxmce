@@ -13,13 +13,11 @@ Item {
     property alias skinStyle:style
     property int screensaverTimer:manager.screenSaverTimeout*1000
     property bool uiOn:true
-    property alias contentItem:pageLoader.item
+
     property variant current_scenario_model:currentRoomLights
     property variant current_header_model:scenarios
     property string locationinfo: "standby"
-    property string screenfile
-    property variant screenPointer: pageLoader.item
-
+    property string screenfile:""
 
     signal showMetadata()
     signal showPlaylist()
@@ -373,6 +371,7 @@ Item {
             left: qml_root.left
             right: qml_root.right
         }
+        enableDebug: true
         interval:60*1000
         useAnimation: true
         onDebugInfoChanged: console.log(debugInfo)
@@ -380,6 +379,8 @@ Item {
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)
+            console.log("Orbiter Consume Screensaver images")
+            console.log("Orbiter counts " + glScreenSaver.pictureCount)
         }
 
         Connections{
@@ -394,7 +395,8 @@ Item {
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                if(!uiOn){                    console.log("screensaver revive")
+                if(!uiOn){
+                    console.log("screensaver revive")
                     uiOn=true
                 }
             }
@@ -417,9 +419,9 @@ Item {
         id:pageLoader
         objectName: "loadbot"
         focus: true
-
+        source: "screens/Screen_1.qml"
         // visible:qml_root.uiOn
-        property string nextScreen:""
+        property string nextScreen:"Screen_1.qml"
         property string currentScreen:""
         anchors{
             top: nav_row.bottom

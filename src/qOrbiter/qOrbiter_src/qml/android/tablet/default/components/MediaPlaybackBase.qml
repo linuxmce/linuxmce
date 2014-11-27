@@ -33,9 +33,44 @@ Panel{
         StyledButton{
             id:options
             anchors.verticalCenter: parent.verticalCenter
-            buttonText: qsTr("Media Options")
+            buttonText: media_playback_base.state==="options" ? "Remote" : qsTr("Media Options")
             onActivated: {
-                manager.setCurrentScreen(Screens.Main)
+                if(media_playback_base.state==="options"){
+                    switch(manager.i_current_mediaType){
+                    case MediaTypes.LMCE_StoredAudio:
+                        media_playback_base.state="localaudio"
+                        break;
+
+                    case MediaTypes.LMCE_StoredVideo:
+                        media_playback_base.state="localvideo"
+                        break;
+
+                    case MediaTypes.LMCE_StreamedAudio:
+                        media_playback_base.state="streamingaudio"
+                        break;
+
+                    case MediaTypes.LMCE_DVD:
+                        media_playback_base.state="dvd"
+                        break;
+
+                    case MediaTypes.LMCE_LiveRadio:
+                        media_playback_base.state="radio"
+                        break;
+
+                    case MediaTypes.LMCE_AirPlay_photos:
+                        media_playback_base.state="airplay"
+                        break;
+                    case MediaTypes.NP_NetworkMedia:
+                        media_playback_base.state="networkmedia"
+                        break;
+
+                    default:
+                        media_playback_base.state="fallback"
+                        break;
+                    }
+                } else {
+                    media_playback_base.state="options"
+                }
             }
         }
 
@@ -177,6 +212,7 @@ Panel{
 
 
     ControlDiamond{
+        id:arrows
         anchors.bottom: mediaScrollerTarget.top
         visible:true
     }
@@ -231,6 +267,7 @@ Panel{
         },
         State {
             name: "localvideo"
+            extend:""
             PropertyChanges {
                 target: media_playback_base
                 showingPlaylist: playlistPanel.itemCount > 1 ? true : false
@@ -259,9 +296,45 @@ Panel{
         State{
             name:"options"
             PropertyChanges{
+                target: npImage
+                opacity:0
+            }
+            PropertyChanges{
+                target: dvdImage
+                opacity:0
+            }
+            PropertyChanges{
+                target:arrows
+                opacity:0
+            }
+            PropertyChanges {
+                target: directionDiamond
+                opacity:0
+            }
+            PropertyChanges {
+                target: lightingAudioControls
+                opacity:0
+            }
+            PropertyChanges {
+                target: mediaTypeMetaData
+                opacity:0
+            }
+            PropertyChanges {
+                target: mediaScrollerTarget
+                opacity:0
+            }
+            PropertyChanges {
+                target: playlistPanel
+                opacity:0
+            }
+            PropertyChanges {
+                target: controlPanel
+                state:"loaded"
 
             }
+
         }
+
 
     ]
 
@@ -273,6 +346,15 @@ Panel{
                 duration:skinStyle.animation_medium
                 easing.type: skinStyle.animation_easing
             }
+        },
+        Transition {
+            from: "*"
+            to: "options"
+            PropertyAnimation{
+                duration:skinStyle.animation_medium
+                easing.type: skinStyle.animation_easing
+            }
+
         }
     ]
 

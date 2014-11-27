@@ -3,8 +3,8 @@ import "../components"
 
 Item{
     id:controlDiamond
-    height: manager.appHeight *.45
-    width: manager.appHeight *.45
+    height: manager.appHeight *.40
+    width: manager.appHeight *.40
     anchors.right: parent.right
     anchors.rightMargin: scaleX(2)
     anchors.bottom: parent.bottom
