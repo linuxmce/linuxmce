@@ -1,29 +1,31 @@
 import QtQuick 1.1
 
-Item {
+Panel {
     id:attributeSelector
     property variant currentModel:undefined
     property int modelCount: filterlist.count
+    property bool selectingUser:false
     state:"inactive"
-
+    headerTitle: "Filter"
     anchors{
-        top:parent.top
-        left:undefined
-        right: parent.left
+        top:content.top
+        left: parent.left
+        right:parent.right
     }
 
-    width: parent.width
     onCurrentModelChanged: {
+        console.log("AttributeSelector::ModelChanged")
         if(currentModel!==undefined){
+            selectingUser=false;
+            console.log("AttributeSelector::Opening")
             open()
         }
-        else
-        {
+        else {
+            console.log("AttributeSelector::Closing")
+
             close()
         }
     }
-
-
 
     function open(){
         attributeSelector.state = "active"
@@ -33,24 +35,21 @@ Item {
         attributeSelector.state = "inactive"
     }
 
-    Rectangle{
-        id:phil
-        color:"black"
+
+    MouseArea{
         anchors.fill: parent
-
-        MouseArea{
-            anchors.fill: parent
-            onClicked:attributeSelector.state = "closing"
-        }
+        onClicked:currentModel=undefined
     }
-
     ListView{
         id:filterlist
-        height: scaleY(75)
-        width:scaleX(95)
         model:currentModel
-        anchors.top: heading.bottom
-        anchors.left: heading.left
+        clip:true
+        anchors{
+            top:headerRect.bottom
+            left:parent.left
+            right: parent.right
+            bottom:parent.bottom
+        }
         spacing:scaleY(2)
         opacity: attributeSelector.state === "active" ? 1 :0
         delegate:Item{
@@ -70,7 +69,7 @@ Item {
                 width: parent.width
 
                 StyledText{
-                    text: name
+                    text:selectingUser? username: name
                     color: "white"
                     elide: Text.ElideRight
                     width:parent.width *.75
@@ -91,7 +90,10 @@ Item {
                     id:ms
                     anchors.fill: parent
                     property bool itemActive:model.status
-                    onClicked:{filterlist.model.setSelectionStatus(name); itemActive =  filterlist.model.getSelectionStatus(name)}
+                    onClicked:{
+                        filterlist.model.setSelectionStatus(name);
+                        itemActive =  filterlist.model.getSelectionStatus(name)
+                    }
 
                 }
             }
@@ -106,23 +108,28 @@ Item {
                 target:phil
                 opacity:0
             }
-            PropertyChanges{
-                target: attributeSelector
-                width: 0
-                height:0
+
+            AnchorChanges{
+                target:attributeSelector
+                anchors{
+                    bottom:content.top
+                }
             }
+
 
         },
         State {
             name: "active"
-            PropertyChanges{
-                target: attributeSelector
-                width: manager.appWidth
-                height:manager.appHeight
-            }
+
             PropertyChanges{
                 target:phil
                 opacity:.65
+            }
+            AnchorChanges{
+                target:attributeSelector
+                anchors{
+                    bottom:content.bottom
+                }
             }
 
         }

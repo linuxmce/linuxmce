@@ -13,46 +13,83 @@ StyledScreen {
     Panel{
         id:container
         anchors.fill: parent
-        Row {
-            id:btnRow
-            width: childrenRect.width
-            height: scaleY(7)
-            spacing: scaleX(1)
-            parent:headerRect
-            StyledButton{
-                buttonText: "Attribute"
-                onActivated: {attributeSelector.currentModel=attribfilter; }
+        headerTitle: ""
+
+        Flickable{
+            height:scaleY(6)
+            width: media_goback.x - x
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.rightMargin: scaleX(1)
+            parent:container.headerRect
+            contentWidth: btnRow.width
+            clip:true
+
+            Row {
+                id:btnRow
+                width: childrenRect.width
+                height: scaleY(7)
+                spacing: scaleX(1)
+
+                StyledButton{
+                    buttonText: "Attribute"
+                    onActivated: {attributeSelector.currentModel=attribfilter; }
+                }
+
+                StyledButton{
+                    buttonText: "Genre"
+                    onActivated: {attributeSelector.currentModel=genrefilter; }
+                }
+
+                StyledButton{
+                    buttonText: "MediaType"
+                    onActivated: {attributeSelector.currentModel=mediatypefilter; }
+                }
+
+                StyledButton{
+                    buttonText: "Resolution"
+                    onActivated: {attributeSelector.currentModel=fileformatmodel; }
+                }
+                StyledButton{
+                    buttonText: "Sources"
+                    // onActivated: {attributeSelector.currentModel=undefined; }
+                }
+
+                StyledButton{
+                    buttonText: "Users"
+                     onActivated: {attributeSelector.currentModel=userList; attributeSelector.selectingUser=true; }
+                }
+
+                StyledButton{
+                    buttonText: "Play All"
+                    onActivated:  manager.playMedia("!G"+iPK_Device)
+                }
             }
 
-            StyledButton{
-                buttonText: "Genre"
-                onActivated: {attributeSelector.currentModel=genrefilter; }
-            }
+        }
 
-            StyledButton{
-                buttonText: "MediaType"
-                onActivated: {attributeSelector.currentModel=mediatypefilter; }
-            }
+        StyledButton {
+            id: home_label
+            buttonText: qsTr("Home")
+            parent:container.headerRect
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            hitArea.onReleased: manager.setCurrentScreen("Screen_1.qml")
+        }
 
-            StyledButton{
-                buttonText: "Resolution"
-                onActivated: {attributeSelector.currentModel=fileformatmodel; }
-            }
-            StyledButton{
-                buttonText: "Sources"
-                // onActivated: {attributeSelector.currentModel=undefined; }
-            }
-
-            StyledButton{
-                buttonText: "Users"
-                // onActivated: {attributeSelector.currentModel=undefined; }
-            }
-
-            StyledButton{
-                buttonText: "Play All"
-                onActivated:  manager.playMedia("!G"+iPK_Device)
+        StyledButton{
+            id:media_goback
+            buttonText: "Back"
+            parent:container.headerRect
+            anchors.right: home_label.left
+            anchors.rightMargin: scaleX(1)
+            anchors.verticalCenter: parent.verticalCenter
+            hitArea.onReleased:{
+                manager.goBackGrid();
             }
         }
+
+
         Keys.onReleased: {
 
             switch(event.key){
@@ -85,7 +122,12 @@ StyledScreen {
         }
         Item{
             id:content
-            anchors.fill: parent
+            anchors{
+                left:parent.left
+                right:parent.right
+                top:container.headerRect.bottom
+                bottom:parent.bottom
+            }
 
             state: manager.q_mediaType =="5" ? "selection" : "viewing"
             Connections{
@@ -137,7 +179,9 @@ StyledScreen {
 
             GenericAttributeSelector{
                 id:attributeSelector
+
             }
+
 
             states: [
                 State {
@@ -215,7 +259,6 @@ StyledScreen {
 
         }
     }
-
 
 
 

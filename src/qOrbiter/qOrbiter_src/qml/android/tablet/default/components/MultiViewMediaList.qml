@@ -131,7 +131,7 @@ Item{
         },
         State {
             name: "default"
-            when:manager.q_mediaType != Mediatypes.STORED_VIDEO && manager.q_mediaType != Mediatypes.STORED_AUDIO
+            when:manager.q_mediaType != MediaTypes.STORED_VIDEO && manager.q_mediaType != MediaTypes.STORED_AUDIO
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: scaleY(24)
