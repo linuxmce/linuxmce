@@ -7,7 +7,7 @@
 #ANDROIDNDKPLATFORM is for use by the build system and must be set. no need to change.
 #ANTPATH=if you are not using necessitas or this var is empty, it will be set here.
 #JAVAHOME points to the java library needed to compile java classes.
-NECESSITAS_ROOT=~/necessitas
+NECESSITAS_ROOT=/home/langston/necessitas
 ANDROID_SDK_PATH=/home/langston/necessitas
 ANDROIDNDKPLATFORM=android-9
 ANDROIDNDKROOT=$ANDROID_SDK_PATH/android-ndk
