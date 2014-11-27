@@ -175,8 +175,15 @@ void DceScreenSaver::getNextImage()
     if(urlList.isEmpty()){
         return;
     }
-     setDebugInfo("Getting random image");
-    requestImage(urlList.at(rand()%urlList.length()));
+     setDebugInfo("Getting random image from list of "+urlList.count());
+
+    int listNumber = rand()%urlList.length()-1;
+    if(listNumber!=-1 && listNumber <= urlList.count()){
+       requestImage(urlList.at(listNumber));
+    } else {
+        requestImage(urlList.at(0));
+    }
+
 
 }
 
