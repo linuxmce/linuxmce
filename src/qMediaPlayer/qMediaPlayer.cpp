@@ -31,6 +31,7 @@ using namespace DCE;
 #include <mediamanager.h>
 #include <QDebug>
 #include <QNetworkInterface>
+#include <QBuffer>
 //<-dceag-const-b->
 
 // The primary constructor when the class is created as a stand-alone device
@@ -98,7 +99,7 @@ bool qMediaPlayer::GetConfig()
                 qDebug() << "QMediaPlayer::My Ip's" << address.toString() << ":: badMatch==>"<<badMatch;
                 QString t = address.toString();
                 DATA_Set_TCP_Address(t.toStdString(), true);
-               return true;
+                return true;
             }
         //CMD_Set_Device_Data setIp(this->m_dwPK_Device, 8, m_dwPK_Device, t.toStdString(), )
     }
@@ -165,7 +166,7 @@ void qMediaPlayer::run()
 void qMediaPlayer::init()
 {
     Disconnect();
-qWarning() << "QMediaPlayer Reinit--------------";
+    qWarning() << "QMediaPlayer Reinit--------------";
     if(GetConfig() && Connect(DEVICETEMPLATE_qMediaPlayer_CONST)){
         setCommandResponse("qMediaPlayer::Device "+QString::number(m_dwPK_Device)+" Connected.");
         connected = true;
@@ -538,6 +539,7 @@ void qMediaPlayer::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpe
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
     cout << "Parm #220 - Report=" << bReport << endl;
+
 }
 
 //<-dceag-c42-b->
@@ -659,24 +661,46 @@ void qMediaPlayer::CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message *
 void qMediaPlayer::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat,string &sCMD_Result,Message *pMessage)
 //<-dceag-c84-e->
 {
-    cout << "Need to implement command #84 - Get Video Frame" << endl;
-    cout << "Parm #19 - Data  (data value)" << endl;
-    cout << "Parm #20 - Format=" << sFormat << endl;
-    cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
-    cout << "Parm #41 - StreamID=" << iStreamID << endl;
-    cout << "Parm #60 - Width=" << iWidth << endl;
-    cout << "Parm #61 - Height=" << iHeight << endl;
+    //    cout << "Need to implement command #84 - Get Video Frame" << endl;
+    //    cout << "Parm #19 - Data  (data value)" << endl;
+    //    cout << "Parm #20 - Format=" << sFormat << endl;
+    //    cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
+    //    cout << "Parm #41 - StreamID=" << iStreamID << endl;
+    //    cout << "Parm #60 - Width=" << iWidth << endl;
+    //    cout << "Parm #61 - Height=" << iHeight << endl;
+    iData_Size=0;
 #ifndef RPI
 #if defined QT4 && ! defined (__ANDROID__)
     QImage t = mp_manager->getScreenShot();
+    // bool saved=t.save("/tmp/qorbiter-snap.png", "PNG");
     // t.copy(0, 0, mp_manager->videoSurface->width(), mp_manager->videoSurface->height());
     qWarning() << "ScreenShot Size==>" << t.size();
+    qWarning() << "ScreenShot null==>" << t.isNull();
 
-    char **mData =(char**)t.bits();
-    int mIdata_size =  t.byteCount();
+    QFile tmp;
+    tmp.setFileName("/tmp/qorbiter-snap.png");
+    if(tmp.open(QFile::ReadWrite)){
+        tmp.resize(0);
+        tmp.close();
+    }
 
-    pData =mData;
-    iData_Size = &mIdata_size;
+    if(t.save(tmp.fileName())){
+        qDebug() << "image written out to " <<  tmp.fileName();
+    }
+
+    char** oData;
+
+
+
+    size_t mSize;
+    char * str = FileUtils::ReadFileIntoBuffer("/tmp/qorbiter-snap.png",mSize);
+   *pData =(char*) str;
+
+FileUtils::WriteBufferIntoFile("/tmp/qorbiter-out.png", str, mSize );
+    iData_Size =reinterpret_cast<int*>(&mSize);
+      qDebug() <<"out size::" << iData_Size;
+    *sFormat="3";
+    sCMD_Result="OK";
 #endif
 #endif
 
@@ -1705,11 +1729,11 @@ void qMediaPlayer::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *p
 #endif
 
 #ifdef NECESSITAS
- androidVolumeUp();
+    androidVolumeUp();
 #endif
 
     qWarning("Set audio level Up.");
-  //  emit volumeDown(iRepeat_Command);
+    //  emit volumeDown(iRepeat_Command);
 }
 
 //<-dceag-c89-e->
@@ -1736,7 +1760,7 @@ void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message 
     androidVolumeDown();
 #endif
 
-     sCMD_Result = "OK -Volume Down.";
+    sCMD_Result = "OK -Volume Down.";
     qWarning("Set audio level down.");
 
 }
