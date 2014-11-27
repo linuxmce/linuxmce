@@ -5,8 +5,8 @@ import org.linuxmce.screens 1.0
 
 Item{
     id:lightingAudioControls
-    height:scaleY(8*3.2)
-    width:scaleX(15)
+    height:scaleY(8*3.5)
+    width:(volUp.width+lightUp.width)+scaleX(4)
 
     
     Rectangle{
@@ -26,8 +26,8 @@ Item{
         
         StyledButton{
             buttonText: ""
-            height: volUp.height
-            width: volUp.width
+            height: volUp.height+2
+            width: height
             onActivated: manager.adjustVolume(1)
             Image {
                 id: volUp
@@ -35,36 +35,45 @@ Item{
                 height: scaleY(8)
                 fillMode: Image.PreserveAspectFit
                 width: height
+                smooth:true                
+            }
+        }
+        StyledButton{
+            buttonText: ""
+            height: volmute.height+2
+            width: height
+            Image {
+                id: volmute
+                source: "../images/mute_up.png"
+                height: scaleY(8)
+                fillMode: Image.PreserveAspectFit
+                width: height
                 smooth:true
-                
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: manager.mute()
+                }
             }
         }
         
-        
-        Image {
-            id: volmute
-            source: "../images/mute_up.png"
-            height: scaleY(8)
-            fillMode: Image.PreserveAspectFit
-            width: height
-            smooth:true
-            MouseArea{
-                anchors.fill: parent
-                onClicked: manager.mute()
-            }
+StyledButton{
+    buttonText: ""
+    height: voldn.height+2
+    width: height
+    Image {
+        id: voldn
+        source: "../images/voldown_up.png"
+        height: scaleY(8)
+        fillMode: Image.PreserveAspectFit
+        width: height
+        smooth:true
+        MouseArea{
+            anchors.fill: parent
+            onClicked: manager.adjustVolume(-5)
         }
-        Image {
-            id: voldn
-            source: "../images/voldown_up.png"
-            height: scaleY(8)
-            fillMode: Image.PreserveAspectFit
-            width: height
-            smooth:true
-            MouseArea{
-                anchors.fill: parent
-                onClicked: manager.adjustVolume(-5)
-            }
-        }
+    }
+}
+
     }
     
     Column{
@@ -77,38 +86,52 @@ Item{
             margins: 10
         }
         spacing:5
-        
-        Image {
-            id: lightUp
-            source: "../images/lightsup_up.png"
-            height: scaleY(8)
-            fillMode: Image.PreserveAspectFit
+
+        StyledButton{
+            buttonText: ""
+            height: lightUp.height+5
             width: height
-            smooth:true
-            MouseArea{
-                anchors.fill: parent
-                onClicked: manager.adjustLights("+10")
+            Image {
+                id: lightUp
+                source: "../images/lightsup_up.png"
+                height: scaleY(8)
+                fillMode: Image.PreserveAspectFit
+                width: height
+                smooth:true
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: manager.adjustLights("+10")
+                }
             }
         }
+
+
         StyledButton{
             height: lightUp.height
             width: height
             buttonText: " F "
             onActivated: manager.setCurrentScreen("Screen_2.qml")
         }
-        
-        Image {
-            id: lightdn
-            source: "../images/lightsdown_up.png"
-            height: scaleY(8)
-            fillMode: Image.PreserveAspectFit
+
+        StyledButton{
+            buttonText: ""
+            height: lightdn.height+2
             width: height
-            smooth:true
-            MouseArea{
-                anchors.fill: parent
-                onClicked: manager.adjustLights("-10")
+            Image {
+                id: lightdn
+                source: "../images/lightsdown_up.png"
+                height: scaleY(8)
+                fillMode: Image.PreserveAspectFit
+                width: height
+                smooth:true
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: manager.adjustLights("-10")
+                }
             }
         }
+        
+
         
     }
 }
