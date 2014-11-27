@@ -397,7 +397,7 @@ void qorbiterManager::gotoQScreen(QString s){
     {
         logQtMessage("QOrbiter clearing models because screen is 1");
         clearDataGrid("sleepingAlarms");
-        clearDataGrid("Playlist");
+
         mediaFilter.setGenericOptions("");
         emit keepLoading(false);
         emit cancelRequests();
@@ -1857,7 +1857,7 @@ bool qorbiterManager::loadSkins(QUrl base)
 
         qDebug() << localSkins.count();
         qDebug()<<"inside of skins we find" << localSkins.join(",");
-        if(localSkins.count()==0){            
+        if(localSkins.count()==0){
             tskinModel->addSkin("default,aeon,STB");
         } else {
             tskinModel->addSkin(localSkins.join(","));
@@ -2232,6 +2232,60 @@ bool qorbiterManager::writeConfig()
 void qorbiterManager::setStringParam(int paramType, QString param)
 {
     mediaFilter.setStringParam(paramType, param);
+
+    switch (paramType)
+    {
+    case 0:
+        setGridMediaType(param);
+        break;
+    case 1:
+        setSubType(param);
+        break;
+    case 2:
+        setGridFileFormat(param);
+        break;
+    case 3:
+        setGridAttributeGenres(param);
+        break;
+    case 4:
+        if (!param.contains("!D")){
+
+            if(param.contains("!F") || param.contains("!P")){
+                break;
+            } else{
+                setGridPkAttribute(param.remove("!A"));
+            }
+        }else{                                  // 5||||1,2	!D'/home/public/data/videos/1.82 TB (sdd1) ST2000DL003-9VT [51]'|0|0|0 | 2 |
+            int t = param.indexOf("\t");
+            QString apnd = param.mid(t);
+            setGridMediaSources(apnd);
+        }
+        break;
+
+    case 5:
+        setGridUsersPrivate(param+",0");
+        break;
+    case 6:
+        if (param.contains("!P"))    {
+            break;
+        } else {
+            setGridAttributeTypeSort(param);
+            break;
+        }
+    case 7:
+        setGridPkUsers(param);
+        break;
+    case 8:
+        setGridLastViewed(param);
+        break;
+    case 9:
+        if(param.contains("!F") || param.contains("!P")){
+            break;
+        } else {
+            setGridPkAttribute(param.remove("!A"));
+            break;
+        }
+    }
 }
 
 void qorbiterManager::initializeGridModel()

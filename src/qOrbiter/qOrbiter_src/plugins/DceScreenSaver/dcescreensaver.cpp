@@ -175,12 +175,9 @@ void DceScreenSaver::getNextImage()
     if(urlList.isEmpty()){
         return;
     }
+     setDebugInfo("Getting random image");
+    requestImage(urlList.at(rand()%urlList.length()));
 
-#ifdef ANDROID
-    requestImage(urlList.at(rand()%urlList.count()));
-#else
-    requestImage(urlList.at(rand()%urlList.count()));
-#endif
 }
 
 

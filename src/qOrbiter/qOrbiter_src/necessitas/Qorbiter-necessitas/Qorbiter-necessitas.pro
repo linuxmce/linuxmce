@@ -175,8 +175,7 @@ SOURCES += \
         ../../datamodels/attributesortmodel.cpp \
         ../../datamodels/DataModelItems/mediatypeitem.cpp \
         ../../contextobjects/nowplayingclass.cpp \
-        ../../contextobjects/screenparamsclass.cpp \
-        ../../contextobjects/playlistclass.cpp \
+        ../../contextobjects/screenparamsclass.cpp \       
         ../../contextobjects/playlistitemclass.cpp \
         ../../contextobjects/securityvideoclass.cpp \
         ../../contextobjects/epgchannellist.cpp \
@@ -275,8 +274,7 @@ HEADERS += \
         ../../datamodels/DataModelItems/mediatypeitem.h \
         ../../contextobjects/filedetailsclass.h \
         ../../contextobjects/nowplayingclass.h \
-        ../../contextobjects/screenparamsclass.h \
-        ../../contextobjects/playlistclass.h \
+        ../../contextobjects/screenparamsclass.h \        
         ../../contextobjects/playlistitemclass.h \
         ../../contextobjects/securityvideoclass.h \
         ../../contextobjects/epgchannellist.h \

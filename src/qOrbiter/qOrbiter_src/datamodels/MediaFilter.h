@@ -202,6 +202,7 @@ public:
 
         emit filterChanged(q_mediaType);
         emit filterStringChanged(dataGridId);
+
         newMediaFilter();
     }
 

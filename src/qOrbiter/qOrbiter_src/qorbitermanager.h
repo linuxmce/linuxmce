@@ -1442,6 +1442,10 @@ public slots:
         return rVal;
     }
 
+
+    void setMediaType(int m) {i_current_mediaType = m; emit mediaTypeChanged();}
+    int getMediaType(){return i_current_mediaType;}
+
     /*! Resets the datagrid parameters to default */
     void resetModelAttributes(){emit resetFilter(); }
 
@@ -1456,9 +1460,6 @@ public slots:
 
     void setSubType(QString t) {q_subType = t; emit subTypeChanged();}
     QString getSubType(){return q_subType;}
-
-    void setMediaType(int m) {i_current_mediaType = m; emit mediaTypeChanged();}
-    int getMediaType(){return i_current_mediaType;}
 
     void setGridMediaType(QString t){ if(q_mediaType!= t) {q_mediaType = t; setMediaResponse("Current Mediatype changed to " + q_mediaType); emit mediaGridTypeChanged() ;}}
     QString getSorting() {return q_mediaType;}
