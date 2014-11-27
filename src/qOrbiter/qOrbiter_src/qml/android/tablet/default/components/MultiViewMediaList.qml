@@ -11,8 +11,8 @@ Item{
         bottom:parent.bottom
     }
 
-    property int currentCellHeight:scaleX(30)
-    property int currentCellWidth:scaleX(30)
+    property int currentCellHeight:currentCellWidth
+    property int currentCellWidth:scaleX(25)
 
     property variant dvdPosterDimensions:{"w":755, "h":1080 }
     property variant hdPosterDimensions:{"w":955, "h":1080 }
@@ -56,7 +56,7 @@ Item{
             multi_view_list.state="video"
             manager.setGridStatus(false);
         } else {
-            multi_view_list.state="default"
+
         }
         console.log("Getting grid for "+manager.q_mediaType);
 
@@ -130,15 +130,6 @@ Item{
             }
         },
         State {
-            name: "default"
-            when:manager.q_mediaType != MediaTypes.STORED_VIDEO && manager.q_mediaType != MediaTypes.STORED_AUDIO
-            PropertyChanges {
-                target: multi_view_list
-                currentCellHeight: scaleY(24)
-                currentCellWidth:scaleX(19)
-            }
-        },
-        State {
             name: "video-default"
             extend:"video"
             PropertyChanges {
@@ -166,6 +157,12 @@ Item{
                 currentCellHeight: currentCellWidth*hdPosterRatio
                 currentCellWidth:scaleX(25)
             }
+        },
+        State {
+            name: "music-video"
+            when: manager.q_subType==MediaSubtypes.MUSICVIDEOS && manager.q_mediaType==MediaTypes.LMCE_StoredVideo
+            extend:"tv"
+
         },
         State {
             name: "seasons"
