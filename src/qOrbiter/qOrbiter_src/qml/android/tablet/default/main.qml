@@ -585,9 +585,7 @@ Item {
         }
     }
 
-    GenericAttributeSelector{
-        id:attributeSelector
-    }
+
 
     Loader{
         id:componentLoader
