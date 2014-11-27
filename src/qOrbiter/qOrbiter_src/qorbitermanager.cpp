@@ -397,7 +397,6 @@ void qorbiterManager::gotoQScreen(QString s){
     {
         logQtMessage("QOrbiter clearing models because screen is 1");
         clearDataGrid("sleepingAlarms");
-
         mediaFilter.setGenericOptions("");
         emit keepLoading(false);
         emit cancelRequests();

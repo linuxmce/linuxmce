@@ -1095,6 +1095,11 @@ public slots:
     void addCommandToList(AvCommand* c) {deviceCommands->appendRow(c);}
 
     /*!
+     * \brief clearDevices. Cleans up the device command list.
+     */
+    void clearDevices(){devices->clear(); deviceCommands->clear();}
+
+    /*!
      * \brief moveDirection
      * \param d
      */
@@ -1334,7 +1339,7 @@ public slots:
     void toggleDisplay(bool display) { osdStatus = display; emit osdChanged(osdStatus); }
     bool getDisplayStatus() { return osdStatus; }
     void adjustLights(QString l) {emit newLightLevel(l); }
-    void showAvControl() {emit resendAvCodes();}
+    void showAvControl() {clearDevices(); emit resendAvCodes();}
     //@}
 
 
