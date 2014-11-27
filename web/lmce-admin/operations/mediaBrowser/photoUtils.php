@@ -28,23 +28,62 @@ function getScreensaverFiles($path,$attribute,$attribute2,$mediadbADO,$page,$rec
 	    $query.=' AND Path=?';
 	    $parameters[2] = $path;
 	}
-	return getFiles($mediadbADO, $query, $parameters, $page, $records_per_page);
+	return getFiles($mediadbADO, $query, $parameters, $page, $records_per_page, false);
 }
-function getPhotoFiles($attribute,$mediadbADO,$page,$records_per_page){
+function getPhotoFiles($criteria,$mediadbADO,$page,$records_per_page){
+	$i = 0;
 	$query='
 		SELECT PK_File,Filename,Path,fa1.FK_Attribute,fa2.FK_Attribute AS AttributeDisabled
-		FROM File 
-		JOIN File_Attribute fa3 ON fa3.FK_File=PK_File AND fa3.FK_Attribute=? 
-		LEFT JOIN File_Attribute fa1 ON fa1.FK_File=PK_File AND fa1.FK_Attribute=? 
+		FROM File ';
+	$dateCriteria = "";
+	for ($j = 0; $j < sizeof($criteria); $j++) {
+	    if ($criteria[$j]['type'] == "attr") {
+	       $query.='JOIN File_Attribute fac'.$i.' ON fac'.$i.'.FK_File=PK_File AND fac'.$i.'.FK_Attribute=? ';
+	       $parameters[$i] = $criteria[$j]['value'];
+	       $i++;
+	    } else if ($criteria[$j]['type'] == "date") {
+	       if ($dateCriteria == "") {
+	       	  // Add join for date attribute type
+		  $dateCriteria = 'faca'.$i;
+		  $query.='JOIN File_Attribute fac'.$i.' ON fac'.$i.'.FK_File=PK_File ';
+	       	  $query.=' JOIN Attribute faca'.$i.' ON faca'.$i.'.PK_Attribute=fac'.$i.'.FK_Attribute';
+		  $query.=' AND faca'.$i.'.FK_AttributeType=? ';
+	      	  $parameters[$i++] = 48; // Year Attribute Type
+	       }
+	    }
+	       		       
+	}
+	// Always add screen save attributes
+	$query.='LEFT JOIN File_Attribute fa1 ON fa1.FK_File=PK_File AND fa1.FK_Attribute=? 
 		LEFT JOIN File_Attribute fa2 ON fa2.FK_File=PK_File AND fa2.FK_Attribute=? 
 		WHERE EK_MediaType IN (7,26) AND IsDirectory=0 AND Missing=0';
-	$parameters[0] = $attribute;
-	$parameters[1] = getScreenSaverAttribute($mediadbADO);
-	$parameters[2] = getScreenSaverAttribute($mediadbADO,46);
-	return getFiles($mediadbADO, $query, $parameters, $page, $records_per_page);
+	$parameters[$i++] = getScreenSaverAttribute($mediadbADO);
+	$parameters[$i++] = getScreenSaverAttribute($mediadbADO,46);
+	// Add date criteria
+	for ($j = 0; $j < sizeof($criteria); $j++) {
+	    if ($criteria[$j]['type'] == "date") {
+	       $query.=' AND STR_TO_DATE('.$dateCriteria.'.Name, \'%Y:%m:%d\') ';
+	       $value = $criteria[$j]['value'];
+	       if (strpos($value, "=") !== false) {
+	           $query.=' = ? ';
+		   $value = substr($value, strpos($value, "=")+1);
+	       } else if (strpos($value, "<") !== false) {
+	           $query.=' < ? ';
+		   $value = substr($value, strpos($value, "<")+1);
+	       } else if (strpos($value, ">") !== false) {
+	       	   $query.=' > ? ';
+		   $value = substr($value, strpos($value, ">")+1);
+	       } else {
+	       	   $query.=' > ? ';
+	       }
+	       $parameters[$i] = $value;
+	       $i++;
+	    }
+	}
+	return getFiles($mediadbADO, $query, $parameters, $page, $records_per_page, true);
 }
 
-function getFiles($mediadbADO,$query, $parameters, $page,$records_per_page){
+function getFiles($mediadbADO,$query, $parameters, $page,$records_per_page,$isSearching){
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/screenSaver.lang.php');
 
 	$res=$mediadbADO->Execute($query, $parameters);
@@ -53,17 +92,24 @@ function getFiles($mediadbADO,$query, $parameters, $page,$records_per_page){
 	$start=($page-1)*$records_per_page;
 	$end=$page*$records_per_page-1;
 	$end=($end>$records)?$records:$end;	
-	
+
+	if ($isSearching) {
+	   $out.='Number of hits: '.$records;
+	}	
 	$pageLinks='Pages: ';
 	for($i=1;$i<=$noPages;$i++){
-		$pageLinks.=($i==$page)?' '.$i:' <a href="'.$_SERVER['PHP_SELF'].'?'.str_replace('&page='.$page,'',$_SERVER['QUERY_STRING']).'&page='.$i.'">'.$i.'</a>';
+		if ($isSearching) {
+		    // We need to POST values to bring all with us to next page
+		    $pageLinks.=($i==$page)?' '.$i:' <a href="javascript:" onclick="$(\'page\').value=\''.$i.'\';document.getElementById(\'photoBrowserForm\').submit();">'.$i.'</a>';
+		} else {
+		    $pageLinks.=($i==$page)?' '.$i:' <a href="'.$_SERVER['PHP_SELF'].'?'.str_replace('&page='.$page,'',$_SERVER['QUERY_STRING']).'&page='.$i.'">'.$i.'</a>';
+		}
 	}	
-	
 	$res=$mediadbADO->Execute($query.' LIMIT '.$start.','.$records_per_page, $parameters);
 	if($res->RecordCount()==0){
 		return $TEXT_NO_IMAGES_IN_DIRECTORY_CONST;
 	}
-	$out='
+	$out.='
 		<table celspacing="0" cellpadding="3" align="center" width="650">
 			<tr class="tablehead">
 				<td width="20">&nbsp;</td>
@@ -104,19 +150,21 @@ function getFiles($mediadbADO,$query, $parameters, $page,$records_per_page){
 			</tr>		
 		';
 	}
-	$out.='
+	if (!$isSearching) {
+		$out.='
 			<tr>
 				<td colspan="2"><input type="checkbox" name="sel_all" value="1" onClick="set_checkboxes();"> Select/unselect all<br>
 				<input type="submit" class="button" name="save" value="Save">	
 			</td>
-			</tr>
+			</tr>';
+	}
+	$out.='
 			<tr>
 				<td colspan="2" align="right">'.$pageLinks.'</td>
 			</tr>		
 	
 	</table>
 	<input type="hidden" name="displayedFiles" value="'.join(',',$displayedFiles).'">';
-	
 	return $out;
 }
 
