@@ -1,11 +1,18 @@
 import QtQuick 1.1
 
 Item {
-    id:attributeSelector  
+    id:attributeSelector
     property variant currentModel:undefined
     property int modelCount: filterlist.count
     state:"inactive"
 
+    anchors{
+        top:parent.top
+        left:undefined
+        right: parent.left
+    }
+
+    width: parent.width
     onCurrentModelChanged: {
         if(currentModel!==undefined){
             open()
@@ -98,7 +105,7 @@ Item {
             PropertyChanges{
                 target:phil
                 opacity:0
-            }       
+            }
             PropertyChanges{
                 target: attributeSelector
                 width: 0

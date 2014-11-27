@@ -8,272 +8,215 @@ StyledScreen {
     property int current_view_type:1
     property string currentSeekLetter:""
     property bool showDetails: false
-    Keys.onReleased: {
+    keepHeader: false
 
-        switch(event.key){
-        case Qt.Key_Back:
-            manager.goBackGrid();
-            event.accepted=true
-            break;
-        case Qt.Key_MediaPrevious:
-            if (!manager.goBackGrid())
-                event.accepted=false
-            else
-                event.accepted=true
-            break;
-        default:
-            console.log(event.key)
-            break
-        }
-    }
-
-
-    ListModel{
-        id:alphabetlist
-
-        ListElement{
-            name:"0"
-        }
-
-        ListElement{
-            name:"A"
-        }
-
-        ListElement{
-            name:"B"
-        }
-
-        ListElement{
-            name:"C"
-        }
-
-        ListElement{
-            name:"D"
-        }
-
-        ListElement{
-            name:"E"
-        }
-
-        ListElement{
-            name:"F"
-        }
-
-        ListElement{
-            name:"G"
-        }
-
-        ListElement{
-            name:"H"
-        }
-
-        ListElement{
-            name:"I"
-        }
-
-        ListElement{
-            name:"J"
-        }
-
-        ListElement{
-            name:"K"
-        }
-
-        ListElement{
-            name:"L"
-        }
-
-        ListElement{
-            name:"M"
-        }
-        ListElement{
-            name:"N"
-        }
-
-        ListElement{
-            name:"O"
-        }
-
-        ListElement{
-            name:"P"
-        }
-
-        ListElement{
-            name:"Q"
-        }
-
-        ListElement{
-            name:"R"
-        }
-
-        ListElement{
-            name:"S"
-        }
-
-        ListElement{
-            name:"T"
-        }
-
-        ListElement{
-            name:"U"
-        }
-
-        ListElement{
-            name:"V"
-        }
-
-        ListElement{
-            name:"W"
-        }
-
-        ListElement{
-            name:"X"
-        }
-
-        ListElement{
-            name:"Y"
-        }
-
-        ListElement{
-            name:"Z"
-        }
-    }
-
-    Component.onCompleted: {
-        setNavigation("MedialistNav.qml")
-        hideInfoPanel()
-        manager.setStringParam(0, manager.q_mediaType)
-        forceActiveFocus()
-    }
-    Item{
-        id:content
+    Panel{
+        id:container
         anchors.fill: parent
+        Row {
+            id:btnRow
+            width: childrenRect.width
+            height: scaleY(7)
+            spacing: scaleX(1)
+            parent:headerRect
+            StyledButton{
+                buttonText: "Attribute"
+                onActivated: {attributeSelector.currentModel=attribfilter; }
+            }
 
-        state: manager.q_mediaType =="5" ? "selection" : "viewing"
-        Connections{
-            target: filedetailsclass
-            onShowDetailsChanged:{
-                content.state="detail"
+            StyledButton{
+                buttonText: "Genre"
+                onActivated: {attributeSelector.currentModel=genrefilter; }
+            }
+
+            StyledButton{
+                buttonText: "MediaType"
+                onActivated: {attributeSelector.currentModel=mediatypefilter; }
+            }
+
+            StyledButton{
+                buttonText: "Resolution"
+                onActivated: {attributeSelector.currentModel=fileformatmodel; }
+            }
+            StyledButton{
+                buttonText: "Sources"
+                // onActivated: {attributeSelector.currentModel=undefined; }
+            }
+
+            StyledButton{
+                buttonText: "Users"
+                // onActivated: {attributeSelector.currentModel=undefined; }
+            }
+
+            StyledButton{
+                buttonText: "Play All"
+                onActivated:  manager.playMedia("!G"+iPK_Device)
             }
         }
-        MultiViewMediaList{
-            id:media_view
+        Keys.onReleased: {
+
+            switch(event.key){
+            case Qt.Key_Back:
+                manager.goBackGrid();
+                event.accepted=true
+                break;
+            case Qt.Key_MediaPrevious:
+                if (!manager.goBackGrid())
+                    event.accepted=false
+                else
+                    event.accepted=true
+                break;
+            default:
+                console.log(event.key)
+                break
+            }
         }
 
 
-        GridView{
-            id:typeSelection
-            anchors.centerIn: parent
-            height:parent.height / 2
-            width: parent.width *.85
-            model:mediatypefilter
-            cellWidth:scaleX(25)
-            cellHeight:scaleY(15)
-            delegate:
-                Item{
-                height:scaleY(8)
-                width: parent.width
+        Alphabetlist {
+            id: alphabetlist
+        }
 
-                StyledButton{
-                    buttonText: name
-                    textSize: 48
-                    hitArea.onReleased:{
-                        mediatypefilter.setSelectionStatus(name);
-                        content.state="viewing"
+        Component.onCompleted: {
+            //setNavigation("MedialistNav.qml")
+            hideInfoPanel()
+            manager.setStringParam(0, manager.q_mediaType)
+            forceActiveFocus()
+        }
+        Item{
+            id:content
+            anchors.fill: parent
 
+            state: manager.q_mediaType =="5" ? "selection" : "viewing"
+            Connections{
+                target: filedetailsclass
+                onShowDetailsChanged:{
+                    content.state="detail"
+                }
+            }
+            MultiViewMediaList{
+                id:media_view
+            }
+
+
+            GridView{
+                id:typeSelection
+                anchors.centerIn: parent
+                height:parent.height / 2
+                width: parent.width *.85
+                model:mediatypefilter
+                cellWidth:scaleX(25)
+                cellHeight:scaleY(15)
+                delegate:
+                    Item{
+                    height:scaleY(8)
+                    width: parent.width
+
+                    StyledButton{
+                        buttonText: name
+                        textSize: 48
+                        hitArea.onReleased:{
+                            mediatypefilter.setSelectionStatus(name);
+                            content.state="viewing"
+
+                        }
                     }
                 }
             }
-        }
 
 
-        MediaListProgressBar{
-            id:progress_bar
-            anchors.bottom: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
+            MediaListProgressBar{
+                id:progress_bar
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
 
-        FileDetailsGeneric{
-            id:fileDetails
-        }
+            FileDetailsGeneric{
+                id:fileDetails
+            }
 
+            GenericAttributeSelector{
+                id:attributeSelector
+            }
 
+            states: [
+                State {
+                    name: "selection"
+                    PropertyChanges {
+                        target: media_view
+                        visible:false
+                    }
+                    PropertyChanges {
+                        target: progress_bar
+                        visible:false
+                    }
+                    PropertyChanges {
+                        target: typeSelection
+                        visible:true
+                    }
 
-        states: [
-            State {
-                name: "selection"
-                PropertyChanges {
-                    target: media_view
-                    visible:false
-                }
-                PropertyChanges {
-                    target: progress_bar
-                    visible:false
-                }
-                PropertyChanges {
-                    target: typeSelection
-                    visible:true
-                }
+                    PropertyChanges {
+                        target: fileDetails
+                        state:"closed"
+                    }
 
-                PropertyChanges {
-                    target: fileDetails
-                    state:"closed"
-                }
+                    StateChangeScript{
+                        script: {
+                            manager.resetModelAttributes;
+                            mediatypefilter.resetStates();
+                            attribfilter.resetStates();
+                        }
+                    }
+                    //("5", "", "", "", "1,2", "", "13", "", "2", "")
+                    //("5", "1", "", "", "1,2", "", "12", "", "2", "")
+                    //("5", "1", "", "", "1,2", "", "52", "", "2", "7691")
+                    //("5", "1", "", "", "1,2", "", "12", "", "2", "")
+                },
+                State {
+                    name: "viewing"
+                    PropertyChanges {
+                        target: progress_bar
+                        visible:true
+                    }
+                    PropertyChanges {
+                        target: media_view
+                        visible:true
+                    }
+                    PropertyChanges{
+                        target:typeSelection
+                        visible:false
+                    }
+                    PropertyChanges {
+                        target: fileDetails
+                        state:"closed"
+                    }
 
-                StateChangeScript{
-                    script: {
-                        manager.resetModelAttributes;
-                        mediatypefilter.resetStates();
-                        attribfilter.resetStates();
+                },
+                State {
+                    name: "detail"
+                    PropertyChanges {
+                        target: progress_bar
+                        visible:false
+                    }
+                    PropertyChanges {
+                        target: media_view
+                        visible:false
+                    }
+                    PropertyChanges{
+                        target:typeSelection
+                        visible:false
+                    }
+                    PropertyChanges {
+                        target: fileDetails
+                        state:"open"
                     }
                 }
-                //("5", "", "", "", "1,2", "", "13", "", "2", "")
-                //("5", "1", "", "", "1,2", "", "12", "", "2", "")
-                //("5", "1", "", "", "1,2", "", "52", "", "2", "7691")
-                //("5", "1", "", "", "1,2", "", "12", "", "2", "")
-            },
-            State {
-                name: "viewing"
-                PropertyChanges {
-                    target: progress_bar
-                    visible:true
-                }
-                PropertyChanges {
-                    target: media_view
-                    visible:true
-                }
-                PropertyChanges{
-                    target:typeSelection
-                    visible:false
-                }
-                PropertyChanges {
-                    target: fileDetails
-                    state:"closed"
-                }
+            ]
 
-            },
-            State {
-                name: "detail"
-                PropertyChanges {
-                    target: progress_bar
-                    visible:false
-                }
-                PropertyChanges {
-                    target: media_view
-                    visible:false
-                }
-                PropertyChanges{
-                    target:typeSelection
-                    visible:false
-                }
-                PropertyChanges {
-                    target: fileDetails
-                    state:"open"
-                }
-            }
-        ]
-
+        }
     }
+
+
 
 
 }
