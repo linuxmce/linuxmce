@@ -48,12 +48,9 @@ Item{
                 height: scaleY(8)
                 fillMode: Image.PreserveAspectFit
                 width: height
-                smooth:true
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked: manager.mute()
-                }
-            }
+                smooth:true               
+            }            
+            onActivated: manager.mute()
         }
         
 StyledButton{
@@ -66,12 +63,9 @@ StyledButton{
         height: scaleY(8)
         fillMode: Image.PreserveAspectFit
         width: height
-        smooth:true
-        MouseArea{
-            anchors.fill: parent
-            onClicked: manager.adjustVolume(-5)
-        }
+        smooth:true       
     }
+    onActivated: manager.adjustVolume(-5)
 }
 
     }

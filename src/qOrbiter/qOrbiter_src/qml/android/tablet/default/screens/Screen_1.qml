@@ -7,6 +7,9 @@ StyledScreen {
     keepHeader: true
     Component.onCompleted:{
         current_header_model=scenarios;
+        manager.clearDataGrid("Playlist")
+        manager.clearDataGrid("sleepingAlarms")
+
         if(dcenowplaying.b_mediaPlaying){
             manager.setBoundStatus(false)
         }

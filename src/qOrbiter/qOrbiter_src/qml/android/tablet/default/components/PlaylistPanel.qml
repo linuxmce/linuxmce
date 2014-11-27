@@ -26,8 +26,13 @@ Panel{
     Connections{
         target: dcenowplaying
         onPlayListPositionChanged:{
-            console.log("Playlist position changed!")
+            console.log("Playlist position changed to "+dcenowplaying.m_iplaylistPosition)
             playlistView.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+            if(dcenowplaying.m_iplaylistPosition > playlistView.count-1){
+                console.log("refresh playlist")
+                manager.clearDataGrid("Playlist")
+                playlistView.model = manager.getDataGridModel("Playlist", 18)
+            }
         }
     }
     
