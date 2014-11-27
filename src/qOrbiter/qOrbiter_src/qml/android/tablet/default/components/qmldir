@@ -21,15 +21,12 @@ GenericAttributeSelector             GenericAttributeSelector.qml               
 GenericFileDetails             GenericFileDetails.qml                        #no comment
 GradientFiller             GradientFiller.qml                        #no comment
 HeaderControls             HeaderControls.qml                        #no comment
-HeaderControls.qml             HeaderControls.qml.cJ3572                        #no comment
-HeaderControls.qml             HeaderControls.qml.Jb3572                        #no comment
-HeaderControls.qml             HeaderControls.qml.rc3572                        #no comment
-HeaderControls.qml             HeaderControls.qml.UO3572                        #no comment
 HeaderListView             HeaderListView.qml                        #no comment
 HomeScreenContent             HomeScreenContent.qml                        #no comment
 ImageButton             ImageButton.qml                        #no comment
 InformationPanel             InformationPanel.qml                        #no comment
 Jog             Jog.qml                        #no comment
+LightingAudioControls             LightingAudioControls.qml                        #no comment
 ListDisplay             ListDisplay.qml                        #no comment
 MediaListGridView             MediaListGridView.qml                        #no comment
 MediaListListView             MediaListListView.qml                        #no comment
