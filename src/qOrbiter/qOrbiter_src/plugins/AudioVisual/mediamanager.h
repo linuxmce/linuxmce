@@ -359,7 +359,8 @@ public slots:
     int getDeviceNumber() {return deviceNumber;}
 
     void updateMetaData(){
-
+#ifndef __ANDROID__
+#ifndef QT5
         qDebug() <<"Artist::"<< mediaObject->metaData(Phonon::ArtistMetaData);
         qDebug() <<"Album::"<< mediaObject->metaData(Phonon::AlbumMetaData);
         qDebug() <<"Title::"<< mediaObject->metaData(Phonon::TitleMetaData);
@@ -367,6 +368,8 @@ public slots:
         qDebug() <<"Genre::"<< mediaObject->metaData(Phonon::GenreMetaData);
         qDebug() <<"Track::"<< mediaObject->metaData(Phonon::TracknumberMetaData);
         qDebug() <<"Description::"<< mediaObject->metaData(Phonon::DescriptionMetaData);
+#endif
+#endif
 
     }
 
@@ -413,9 +416,6 @@ public slots:
     void setFileReference(QString f){
 
 #ifdef ANDROID
-
-
-
 
 #endif
 

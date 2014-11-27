@@ -266,11 +266,12 @@ void MediaManager::setAspectRatio(QString aspect)
 
 QImage MediaManager::getScreenShot(){
 #if defined (QT4) && ! defined (ANDROID)
-
+return videoSurface->snapshot();
 #else
     QImage screenShot;
+    return screenShot;
 #endif
-    return videoSurface->snapshot();
+
 
 }
 
