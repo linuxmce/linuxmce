@@ -75,6 +75,7 @@ for skin in $CURRENT_SKIN_PATH/*
                        						 fi
                			  		 touch qmldir
 				                 svn add qmldir
+						svn add *.qml
               					 echo "$QMLDIR_HEADING" >> qmldir
                        			             for embeddedFile in "$subFile"/*
                        				      do
