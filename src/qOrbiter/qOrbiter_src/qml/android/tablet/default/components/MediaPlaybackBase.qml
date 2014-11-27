@@ -33,7 +33,7 @@ Panel{
         StyledButton{
             id:options
             anchors.verticalCenter: parent.verticalCenter
-            buttonText: media_playback_base.state==="options" ? "Remote" : qsTr("Media Options")
+            buttonText: media_playback_base.state==="options" ? "Remote" : qsTr("Options")
             onActivated: {
                 if(media_playback_base.state==="options"){
                     switch(manager.i_current_mediaType){

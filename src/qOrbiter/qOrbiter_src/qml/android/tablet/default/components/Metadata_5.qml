@@ -28,7 +28,7 @@ Item{
             text:dcenowplaying.episode =="" ? qsTr("Title: ")+ dcenowplaying.qs_mainTitle :qsTr("Program: ")+ dcenowplaying.tvProgram
             font.italic: false
             smooth: true
-            fontSize: scaleY(4)
+            fontSize: largeFontSize
             visible:  dcenowplaying.qs_mainTitle =="" ? false: true
 
         }

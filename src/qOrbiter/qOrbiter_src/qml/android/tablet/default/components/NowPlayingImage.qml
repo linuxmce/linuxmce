@@ -71,7 +71,7 @@ Item{
             PropertyChanges {
                 target: imgContainer
                 height: manager.isProfile ? hdPosterRatio*width : hdPosterRatio*width
-                width: manager.isProfile ? scaleX(14) : scaleX(30)
+                width: manager.isProfile ? scaleX(33) : scaleX(30)
             }
         },
         State {
