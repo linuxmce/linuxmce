@@ -42,12 +42,11 @@ OPTIND=1
 
 START=$(pwd)
 
-
 export JAVA_HOME=$JAVAHOME
 export ANDROID_NDK_PLATFORM=android-9
 export ANDROID_NDK_ROOT=$NECESSITAS_ROOT/android-ndk
 export ANDROID_SDK_ROOT=$NECESSITAS_ROOT/android-sdk
-
+export ANDROID_HOME=$ANDROIDSDKROOT
 OLDPATH=$PATH
 NEWPATH=$OLDPATH:$ANDROID_NDK_ROOT:$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin
 NEWPATH=$NEWPATH:$ANDROID_SDK_ROOT/tools:$ANDROID_SDK_ROOT/platform-tools
@@ -97,7 +96,7 @@ make  -j$PCOUNT
 make INSTALL_ROOT="android" install
 
 cd android
-android update project --path .
+$ANDROID_SDK_ROOT/tools/android update project --path .
 $NECESSITAS_ROOT/apache-ant-1.8.4/bin/ant clean $TARGET
 
 if [ -n "$INSTALLTODEVICE" ]; then
