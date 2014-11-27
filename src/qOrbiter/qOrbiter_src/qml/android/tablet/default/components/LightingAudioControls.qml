@@ -91,11 +91,10 @@ StyledButton{
                 height: scaleY(8)
                 fillMode: Image.PreserveAspectFit
                 width: height
-                smooth:true
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked: manager.adjustLights("+10")
-                }
+                smooth:true             
+            }
+            onActivated: {
+                 onClicked: manager.adjustLights("+10")
             }
         }
 
@@ -117,12 +116,9 @@ StyledButton{
                 height: scaleY(8)
                 fillMode: Image.PreserveAspectFit
                 width: height
-                smooth:true
-                MouseArea{
-                    anchors.fill: parent
-                    onClicked: manager.adjustLights("-10")
-                }
+                smooth:true               
             }
+            onActivated: manager.adjustLights("-10")
         }
         
 
