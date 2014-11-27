@@ -26,28 +26,8 @@ Item {
         x:scroll_tab.x
         onXChanged: {
             if(opacity===1){
-                testPop.source=""
-                sanity.start()
-            }
-        }
-        Timer{
-            id:sanity
-            interval: 350
-            triggeredOnStart: false
-            onTriggered: {
-                if(drag_indicator.opacity!==0){
-                    testPop.source = "http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=jogimage&val="+dcenowplaying.path+"/"+dcenowplaying.filepath+"&time=0"+dceTimecode.dragTime+".000"
-                }
-            }
-        }
 
-        Image {
-            id: testPop
-            fillMode: Image.PreserveAspectCrop
-            anchors.centerIn: parent
-            onSourceChanged: console.log(source)
-            sourceSize.height: parent.height
-            sourceSize.width:parent.width
+            }
         }
 
         StyledText {

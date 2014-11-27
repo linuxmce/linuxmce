@@ -363,6 +363,9 @@ Panel{
         },
         State{
             name:"networkmedia"
+        },
+        State{
+            name:"options"
         }
 
     ]
@@ -374,8 +377,6 @@ Panel{
             AnchorAnimation{
                 duration:skinStyle.animation_medium
                 easing.type: skinStyle.animation_easing
-
-
             }
         }
     ]
