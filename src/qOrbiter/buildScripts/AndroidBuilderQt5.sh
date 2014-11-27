@@ -6,9 +6,23 @@
 #ANDROIDNDKPLATFORM is for use by the build system and must be set. no need to change.
 #ANTPATH=if you are not using necessitas or this var is empty, it will be set here.
 #JAVAHOME points to the java library needed to compile java classes.
-#
-#
-#
+ANDROID_INSTALL=/home/langston/Qt5.3.1/5.3/android_armv7/bin
+ANDROID_SDK_PATH=/home/langston/necessitas
+NECESSITAS_ROOT=~/necessitas
+ANDROIDNDKPLATFORM=android-9
+ANDROIDNDKROOT=$ANDROID_SDK_PATH/android-ndk
+ANDROIDSDKROOT=$ANDROID_SDK_PATH/android-sdk
+TOOLCHAINVERSION=4.6
+TOOLCHAINPATH=$ANDROIDNDKROOT/toolchains/arm-linux-androideabi-$TOOLCHAINVERSION/prebuilt/linux-x86/bin
+ANTPATH=$NECESSITAS_ROOT/apache-ant-1.8.4/bin/ant
+JAVAHOME=/usr/lib/jvm/java-6-openjdk-i386
+# We stop whenever an error happens.
+set -e
+
+# INSTALLTODEVICE command line flag -i will install to the first found devices via adb.
+# CLEANBUILD command line flag -c will clean before building.
+# PCOUNT command line arg for processor count
+# the local installation.
 INSTALLTODEVICE=""
 CLEANBUILD=""
 PCOUNT=1
@@ -27,17 +41,9 @@ OPTIND=1
         
 
 START=$(pwd)
-ANDROID_INSTALL=/home/langston/Qt5.3.2/5.3/android_armv7/bin
-ANDROID_SDK_PATH=/home/langston/necessitas
-ANDROIDNDKPLATFORM=android-9
-ANDROIDNDKROOT=$ANDROID_SDK_PATH/android-ndk
-ANDROIDSDKROOT=$ANDROID_SDK_PATH/android-sdk
-TOOLCHAINVERSION=4.6
-PATHADDS=:/home/langston/necessitas/android-ndk:/home/langston/necessitas/android-ndk/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86/bin:/home/langston/necessitas/android-sdk/tools:/home/langston/necessitas/android-sdk/platform-tools
-
+PATHADDS=:$ANDROIDNDKROOT:$TOOLCHAINPATH:$ANDROIDSDKROOT/tools:$ANDROIDSDKROOT/platform-tools
 BUILTPLUGINS=$START/../platforms/Android/androidPlugins/Qt5/armeabi-v7a
-ANTPATH=/home/langston/necessitas/apache-ant-1.8.4/bin/ant
-JAVAHOME=/usr/lib/jvm/java-6-openjdk-i386
+
 export ANDROID_NDK_PLATFORM=$ANDROIDNDKPLATFORM
 export ANDROID_NDK_ROOT=$ANDROIDNDKROOT
 export ANDROID_SDK_ROOT=$ANDROIDSDKROOT
@@ -45,13 +51,16 @@ export SDK_BASE=$ANDROIDSDKBASE
 export ANDROID_NDK_TOOLCHAIN_VERSION=$TOOLCHAINVERSION
 export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games$PATHADDS
 export JAVA_HOME=$JAVAHOME
+
+
+
 echo "Removing old plugins"
-rm -v ../platforms/Android/Qt5/armeabi-v7a/*.so
+
 
 clear
 cd ../qOrbiter_src/plugins/AudioVisual
 
-if [ -e "moc*" ]; then
+if [ "$CLEANBUILD" == "Y" ]; then
 make clean 
 echo "Cleaning up"
 fi
@@ -70,9 +79,9 @@ fi
 clear
 cd $START
 cd ../qOrbiter_src/plugins/DceScreenSaver
+
+if [ "$CLEANBUILD" == "Y" ]; then
 make clean
-if [ -e "moc*" ]; then
-make clean 
 echo "Cleaning up"
 fi
 
@@ -82,21 +91,18 @@ if [ -e $BUILTPLUGINS/libDceScreenSaver.so ];then
 echo "ScreenSaver Build Complete."
 else
 echo "Failed to build Screen Saver Plugin!"
-exit 1;
-fi
 
+fi
 
 
 cd $START
 cd ../qOrbiter_src/qt5droid/Qt5Android
 rm -rf android-build
 mkdir -p  android-build/bin
-if [ -e "moc_*" ]; then
+if [ "$CLEANBUILD" == "Y" ]; then
 make clean 
 echo "Cleaning up"
 fi
-
-
 $ANDROID_INSTALL/qmake Qt5Android.pro -r -spec android-g++ CONFIG+=debug
 make -j$PCOUNT
 make install INSTALL_ROOT=android-build

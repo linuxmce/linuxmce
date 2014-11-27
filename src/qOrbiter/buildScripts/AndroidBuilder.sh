@@ -1,8 +1,27 @@
 #!/bin/bash
+#!/bin/bash
+#This script will build the Qt for Android (Qt5) variant of QOrbiter assuming the prerequsites are in place.
+#Below are the environment variables which you should fill in to adjust for your local machine.
+#
+#ANDROID_INSTALL should point to qmake for Android. See current example.
+#ANDROIDNDKPLATFORM is for use by the build system and must be set. no need to change.
+#ANTPATH=if you are not using necessitas or this var is empty, it will be set here.
+#JAVAHOME points to the java library needed to compile java classes.
+NECESSITAS_ROOT=~/necessitas
+ANDROID_SDK_PATH=/home/langston/necessitas
+ANDROIDNDKPLATFORM=android-9
+ANDROIDNDKROOT=$ANDROID_SDK_PATH/android-ndk
+ANDROIDSDKROOT=$ANDROID_SDK_PATH/android-sdk
+TOOLCHAINVERSION=4.6
+TOOLCHAINPATH=$ANDROIDNDKROOT/toolchains/arm-linux-androideabi-$TOOLCHAINVERSION/prebuilt/linux-x86/bin
+JAVAHOME=/usr/lib/jvm/java-6-openjdk-i386
+ANTPATH=$NECESSITAS_ROOT/apache-ant-1.8.4/bin/ant
 # We stop whenever an error happens.
 set -e
 
-# The following vars need to be modified to reflect
+# INSTALLTODEVICE command line flag -i will install to the first found devices via adb.
+# CLEANBUILD command line flag -c will clean before building.
+# PCOUNT command line arg for processor count
 # the local installation.
 INSTALLTODEVICE=""
 CLEANBUILD=""
@@ -23,13 +42,12 @@ OPTIND=1
 
 START=$(pwd)
 
-JAVAHOME=/usr/lib/jvm/java-6-openjdk-i386
+
 export JAVA_HOME=$JAVAHOME
-NECESSITAS_ROOT=~/necessitas
 export ANDROID_NDK_PLATFORM=android-9
 export ANDROID_NDK_ROOT=$NECESSITAS_ROOT/android-ndk
-
 export ANDROID_SDK_ROOT=$NECESSITAS_ROOT/android-sdk
+
 OLDPATH=$PATH
 NEWPATH=$OLDPATH:$ANDROID_NDK_ROOT:$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin
 NEWPATH=$NEWPATH:$ANDROID_SDK_ROOT/tools:$ANDROID_SDK_ROOT/platform-tools
@@ -39,25 +57,41 @@ TARGET=debug
 
 # We reset the path at the end of the script.
 trap 'export PATH=$OLDPATH' EXIT
+BUILTPLUGINS=$START/../platforms/Android/androidPlugins/armeabi-v7a
+echo "Removing old plugins"
 
+
+clear	
 cd ../qOrbiter_src/plugins/AudioVisual
  
-$NECESSITAS_ROOT/Android/Qt/482/armeabi-v7a/bin/qmake AudioVisual.pro -r -spec android-g++ "CONFIG+=opengl"
+ if [ "$CLEANBUILD" == "Y" ]; then
+echo "Cleaning"
 make clean -j$PCOUNT
+fi
+$NECESSITAS_ROOT/Android/Qt/482/armeabi-v7a/bin/qmake AudioVisual.pro -r -spec android-g++ "CONFIG+=opengl"
+make -j$PCOUNT
 clear
 
 cd $START
-cd ../qOrbiter_src/plugins/DceScreenSaver
- 
-$NECESSITAS_ROOT/Android/Qt/482/armeabi-v7a/bin/qmake DceScreenSaver.pro -r -spec android-g++ "CONFIG+=opengl"
+cd ../qOrbiter_src/plugins/DceScreenSaver 
+ if [ "$CLEANBUILD" == "Y" ]; then
+echo "Cleaning"
 make clean -j$PCOUNT
+fi
+$NECESSITAS_ROOT/Android/Qt/482/armeabi-v7a/bin/qmake DceScreenSaver.pro -r -spec android-g++ "CONFIG+=opengl"
+make -j$PCOUNT
 
 clear
-cd $START	
+cd $START
+
 cd ../qOrbiter_src/necessitas/Qorbiter-necessitas
 rm -rf installdir
 mkdir installdir
  
+  if [ "$CLEANBUILD" == "Y" ]; then
+echo "Cleaning"
+make clean -j$PCOUNT
+fi
 $NECESSITAS_ROOT/Android/Qt/482/armeabi-v7a/bin/qmake Qorbiter-necessitas.pro -r -spec android-g++ "CONFIG+=opengl"
 make  -j$PCOUNT
 make INSTALL_ROOT="android" install
