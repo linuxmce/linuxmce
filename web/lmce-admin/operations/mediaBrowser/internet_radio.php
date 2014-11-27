@@ -6,7 +6,13 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 	
 	/* @var $dbADO ADOConnection */
 	/* @var $res ADORecordSet */
+	
+	#define vars what later will be overwritten
 	$out='';
+	$continet='';
+	$city='';
+	$stations='';
+	
 	$action = isset($_REQUEST['action'])?cleanString($_REQUEST['action']):'form';
 	if ($action == 'form') {
 		
