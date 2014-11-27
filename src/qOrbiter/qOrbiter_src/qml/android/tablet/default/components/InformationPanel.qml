@@ -32,7 +32,7 @@ Item{
         id:orbiter_status_text
         text:"LinuxMCE Orbiter: "+manager.iPK_Device
         anchors{
-            left:parent.left
+            right:parent.right
             bottom:parent.bottom
         }
 
@@ -66,7 +66,7 @@ Item{
        }
     }
 
-    Column{
+    Row{
         id:user_info
         width: childrenRect.width
         height: parent.height
@@ -74,14 +74,14 @@ Item{
         anchors.rightMargin: scaleX(2)
         spacing: scaleY(2)
         StyledButton{
+            buttonText: "Power"
+            onActivated: info_panel.state="power"
+        }
+        StyledButton{
             buttonText: manager.sPK_User
             hitArea.onReleased: info_panel.state="user"
         }
-        StyledButton{
-            id:location_info
-            buttonText: roomList.currentRoom//+"::"+roomList.currentEA
-            hitArea.onReleased: info_panel.state="room"
-        }
+
     }
 
     RoomSelector{

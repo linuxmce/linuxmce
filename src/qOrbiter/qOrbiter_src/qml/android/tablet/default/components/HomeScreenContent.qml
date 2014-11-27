@@ -8,11 +8,11 @@ Item{
     Row{
         height: parent.height
         width: parent.width
-        spacing:scaleX(2)
-
+        spacing:scaleX(2)       
         StyledButton{
-            buttonText: "Power"
-            onActivated: info_panel.state="power"
+            id:location_info
+            buttonText: roomList.currentRoom//+"::"+roomList.currentEA
+            hitArea.onReleased: info_panel.state="room"
         }
         StyledButton{
             buttonText: "Sleeping Menu"
