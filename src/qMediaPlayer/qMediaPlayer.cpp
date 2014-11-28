@@ -31,7 +31,6 @@ using namespace DCE;
 #include <mediamanager.h>
 #include <QDebug>
 #include <QNetworkInterface>
-#include <QBuffer>
 //<-dceag-const-b->
 
 // The primary constructor when the class is created as a stand-alone device
@@ -152,31 +151,41 @@ void qMediaPlayer::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
     sCMD_Result = "UNKNOWN COMMAND";
 }
 
-void qMediaPlayer::OnDisconnect(){
-    connected= false;
-    mp_manager->setConnectionStatus(connected);
-
-}
-
-void qMediaPlayer::run()
+void qMediaPlayer::restart()
 {
-
-}
-
-void qMediaPlayer::init()
-{
-    Disconnect();
-    qWarning() << "QMediaPlayer Reinit--------------";
-    if(GetConfig() && Connect(DEVICETEMPLATE_qMediaPlayer_CONST)){
+    if((GetConfig() ==true) && Connect(PK_DeviceTemplate_get())==true){
         setCommandResponse("qMediaPlayer::Device "+QString::number(m_dwPK_Device)+" Connected.");
         connected = true;
     }else{
         connected = false;
-        setCommandResponse("qMediaPlayer::Connection failed for "+QString::fromStdString(this->m_sIPAddress)+" and device number"+QString::number(m_dwPK_Device));
-        setConnectionStatus(false);
+        setCommandResponse("qMediaPlayer::Connection failed for "+QString::fromStdString(this->m_sIPAddress)+" and device number "+QString::number(m_dwPK_Device));
 
     }
     mp_manager->setConnectionStatus(connected);
+}
+
+void qMediaPlayer::OnDisconnect()
+{
+    connected= false;
+    mp_manager->setConnectionStatus(connected);
+}
+
+void qMediaPlayer::onReload()
+{
+    connected=false;
+    mp_manager->setConnectionStatus(connected);
+}
+
+void qMediaPlayer::OnUnexpectedDisconnect()
+{
+    connected=false;
+    mp_manager->setConnectionStatus(connected);
+}
+
+
+void qMediaPlayer::run()
+{
+
 }
 
 //<-dceag-sample-b->
@@ -477,6 +486,7 @@ void qMediaPlayer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &s
 void qMediaPlayer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c39-e->
 {
+    qDebug() << "qMediaPlayer::CMD_Pause_Media";
     setCommandResponse("Need to implement command #39 - Pause Media");
 #ifndef RPI
 
@@ -505,6 +515,10 @@ void qMediaPlayer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pM
     m_bPaused = !m_bPaused;
 #endif
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
+    sCMD_Result="OK";
+#ifdef __ANDROID__
+    emit pausePlayback();
+#endif
 }
 
 //<-dceag-c40-b->
@@ -539,7 +553,6 @@ void qMediaPlayer::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpe
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
     cout << "Parm #220 - Report=" << bReport << endl;
-
 }
 
 //<-dceag-c42-b->
@@ -558,14 +571,19 @@ void qMediaPlayer::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iS
     cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     // emit jumpToStreamPosition(QString::fromStdString(sValue_To_Assign).toInt());
-    qDebug() << sValue_To_Assign.c_str();
+    qDebug() << "qMediaPlayer::Jump_to_position_in_stream "<< sValue_To_Assign.c_str();
     quint64 tg = QString::fromStdString(sValue_To_Assign.c_str()).toInt();
+
+#ifdef ANDROID
+    emit newMediaPosition(QString::fromStdString(sValue_To_Assign.c_str()).toInt());
+#endif
 
 #ifndef RPI
 #if defined (QT4) && ! defined (ANDROID)
     mp_manager->mediaObject->seek(tg*1000);
 #endif
 #endif
+    sCMD_Result="OK";
 }
 
 //<-dceag-c63-b->
@@ -661,46 +679,24 @@ void qMediaPlayer::CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message *
 void qMediaPlayer::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,int iWidth,int iHeight,char **pData,int *iData_Size,string *sFormat,string &sCMD_Result,Message *pMessage)
 //<-dceag-c84-e->
 {
-    //    cout << "Need to implement command #84 - Get Video Frame" << endl;
-    //    cout << "Parm #19 - Data  (data value)" << endl;
-    //    cout << "Parm #20 - Format=" << sFormat << endl;
-    //    cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
-    //    cout << "Parm #41 - StreamID=" << iStreamID << endl;
-    //    cout << "Parm #60 - Width=" << iWidth << endl;
-    //    cout << "Parm #61 - Height=" << iHeight << endl;
-    iData_Size=0;
+    cout << "Need to implement command #84 - Get Video Frame" << endl;
+    cout << "Parm #19 - Data  (data value)" << endl;
+    cout << "Parm #20 - Format=" << sFormat << endl;
+    cout << "Parm #23 - Disable_Aspect_Lock=" << sDisable_Aspect_Lock << endl;
+    cout << "Parm #41 - StreamID=" << iStreamID << endl;
+    cout << "Parm #60 - Width=" << iWidth << endl;
+    cout << "Parm #61 - Height=" << iHeight << endl;
 #ifndef RPI
 #if defined QT4 && ! defined (__ANDROID__)
     QImage t = mp_manager->getScreenShot();
-    // bool saved=t.save("/tmp/qorbiter-snap.png", "PNG");
     // t.copy(0, 0, mp_manager->videoSurface->width(), mp_manager->videoSurface->height());
     qWarning() << "ScreenShot Size==>" << t.size();
-    qWarning() << "ScreenShot null==>" << t.isNull();
 
-    QFile tmp;
-    tmp.setFileName("/tmp/qorbiter-snap.png");
-    if(tmp.open(QFile::ReadWrite)){
-        tmp.resize(0);
-        tmp.close();
-    }
+    char **mData =(char**)t.bits();
+    int mIdata_size =  t.byteCount();
 
-    if(t.save(tmp.fileName())){
-        qDebug() << "image written out to " <<  tmp.fileName();
-    }
-
-    char** oData;
-
-
-
-    size_t mSize;
-    char * str = FileUtils::ReadFileIntoBuffer("/tmp/qorbiter-snap.png",mSize);
-   *pData =(char*) str;
-
-FileUtils::WriteBufferIntoFile("/tmp/qorbiter-out.png", str, mSize );
-    iData_Size =reinterpret_cast<int*>(&mSize);
-      qDebug() <<"out size::" << iData_Size;
-    *sFormat="3";
-    sCMD_Result="OK";
+    pData =mData;
+    iData_Size = &mIdata_size;
 #endif
 #endif
 
@@ -715,7 +711,7 @@ FileUtils::WriteBufferIntoFile("/tmp/qorbiter-out.png", str, mSize );
 /** @param #64 MenuType */
 /** The type of menu that the user want to jump to.
 (For DVD handlers usually this applies)
-0 - Root menu 
+0 - Root menu
 1 - Title menu
 2 - Media menu */
 
@@ -737,8 +733,40 @@ void qMediaPlayer::CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_
 void qMediaPlayer::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
 //<-dceag-c92-e->
 {
-    cout << "Need to implement command #92 - Pause" << endl;
+    qDebug() << "qMediaPlayer::CMD_Pause";
+    setCommandResponse("Need to implement command #92 - Pause");
+#ifndef RPI
+
+#if defined (QT4) && ! defined (ANDROID)
+    if(mp_manager->mediaObject->state()==Phonon::PausedState){
+        mp_manager->mediaObject->play();
+        m_bPaused=false;
+    } else {
+        mp_manager->mediaObject->pause();
+        m_bPaused=true;
+    }
+
+#endif
+
+#else
+    if(!m_bPaused){
+        emit pausePlayback();
+        setCommandResponse("Need to implement command #39 - Pause Media");
+    }
+    else
+    {
+        emit startPlayback();
+
+    }
+
+    m_bPaused = !m_bPaused;
+#endif
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+#ifdef __ANDROID__
+    emit pausePlayback();
+#endif
+     sCMD_Result="OK";
 }
 
 //<-dceag-c95-b->
@@ -1144,6 +1172,7 @@ void qMediaPlayer::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sM
     cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
     cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
     cout << "Parm #105 - StreamingTargets=" << sStreamingTargets << endl;
+    CMD_Play_Media(iPK_MediaType,iStreamID, sMediaPostion, sMediaURL, sCMD_Result, pMessage);
 }
 
 //<-dceag-c259-b->
@@ -1164,6 +1193,8 @@ void qMediaPlayer::CMD_Report_Playback_Position(int iStreamID,string *sText,stri
     cout << "Parm #9 - Text=" << sText << endl;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+    sMediaPosition = mp_manager->current_position;
+    sCMD_Result="OK";
 }
 
 //<-dceag-c269-b->
@@ -1223,9 +1254,9 @@ void qMediaPlayer::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,st
     cout << "Need to implement command #412 - Set Media Position" << endl;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-    qDebug() << sMediaPosition.c_str();
-    emit newMediaPosition(QString::fromStdString(sMediaPosition));
-
+    qDebug() << "Qmediaplayer::set_media_position::"<< sMediaPosition.c_str();
+    QString val = QString::fromStdString(sMediaPosition);
+    emit newMediaPosition(val.toInt());
 }
 
 //<-dceag-c455-b->
@@ -1720,20 +1751,21 @@ void qMediaPlayer::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *p
     cout << "Repeat Count=" << iRepeat_Command << endl;
 #ifndef RPI
 #if defined (QT4) && ! defined (ANDROID)
-    qreal c = mp_manager->displayVolume;
+    qreal c = mp_manager->audioSink->volume();
     qWarning() << "Current volume" << c;
-    qreal d = c+0.1;
+    qreal d = c+1.0;
     qWarning() << "New volume" << d;
-    mp_manager->setVolume(d);
+    mp_manager->audioSink->setVolume(d);
 #endif
 #endif
 
-#ifdef NECESSITAS
+#ifdef ANDROID
     androidVolumeUp();
 #endif
 
     qWarning("Set audio level Up.");
     //  emit volumeDown(iRepeat_Command);
+    sCMD_Result="OK";
 }
 
 //<-dceag-c89-e->
@@ -1747,16 +1779,15 @@ void qMediaPlayer::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *p
 void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMessage){
 #ifndef RPI
 #if defined (QT4) && ! defined (ANDROID)
-    qreal c = mp_manager->displayVolume;
-    qWarning() << "Current volume==>" << c;
-    qreal d = c+-0.1;
-    qWarning() << "New volume==>" << d;
-    mp_manager->setVolume(d);
-
+    qreal c = mp_manager->audioSink->volume();
+    qWarning() << "Current volume" << c;
+    qreal d = c-1.0;
+    mp_manager->audioSink->setVolume(d);
+    qWarning() << "New volume" << d;
 #endif
 #endif
 
-#ifdef NECESSITAS
+#ifdef ANDROID
     androidVolumeDown();
 #endif
 
@@ -1778,29 +1809,32 @@ void qMediaPlayer::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMes
 #if defined (QT4) && ! defined (ANDROID)
     if(t.contains("+") || t.contains("-")){
         if(t.contains("+")){
-            qreal e = mp_manager->displayVolume;
+            qreal e = mp_manager->audioSink->volume();
             qreal inc = t.remove("+").toDouble()/100;
             qreal n = e+inc;
-            mp_manager->setVolume(n);
+            mp_manager->audioSink->setVolume(n);
         }
         else if( t.contains("-")){
-            qreal e = mp_manager->displayVolume;
+            qreal e = mp_manager->audioSink->volume();
             qreal inc = t.remove("-").toInt();
             qreal n = e-inc;
             if(n>0)
-                mp_manager->setVolume(n);
+                mp_manager->audioSink->setVolume(n);
             else
-                mp_manager->setVolume(0);
+                mp_manager->audioSink->setVolume(0);
+
         }
 
     }
     else{
         int csLevl = t.toInt();
-        mp_manager->setVolume(csLevl);
+        mp_manager->audioSink->setVolume(csLevl);
         sCMD_Result = "OK -Level Set.";
     }
 
 #endif
 #endif
+    sCMD_Result="OK-No level change";
+
 }
 //<-dceag-c184-e->
