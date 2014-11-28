@@ -474,6 +474,7 @@ void qMediaPlayer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &s
     sMediaPosition =&endPosition;
     emit stopCurrentMedia();
     setCurrentMediaUrl("");
+    sCMD_Result="OK";
 }
 
 //<-dceag-c39-b->
@@ -766,7 +767,7 @@ void qMediaPlayer::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage
 #ifdef __ANDROID__
     emit pausePlayback();
 #endif
-     sCMD_Result="OK";
+    sCMD_Result="OK";
 }
 
 //<-dceag-c95-b->
@@ -1172,7 +1173,7 @@ void qMediaPlayer::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sM
     cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
     cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
     cout << "Parm #105 - StreamingTargets=" << sStreamingTargets << endl;
-    CMD_Play_Media(iPK_MediaType,iStreamID, sMediaPostion, sMediaURL, sCMD_Result, pMessage);
+    CMD_Play_Media(iPK_MediaType,iStreamID, sMediaPosition, sMediaURL, sCMD_Result, pMessage);
 }
 
 //<-dceag-c259-b->
@@ -1193,7 +1194,13 @@ void qMediaPlayer::CMD_Report_Playback_Position(int iStreamID,string *sText,stri
     cout << "Parm #9 - Text=" << sText << endl;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-    sMediaPosition = mp_manager->current_position;
+    if(iStreamID==this->i_StreamId){
+        string sTextReturn=mp_manager->current_position.toStdString().c_str();
+        sText= &sTextReturn;
+        string returnString = mp_manager->current_position.toStdString().c_str();
+        sMediaPosition = &returnString;
+    }
+
     sCMD_Result="OK";
 }
 
