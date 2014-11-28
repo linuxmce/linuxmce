@@ -134,11 +134,12 @@ Item {
             running:dceplayer.mediaPlaying
             interval: 1000
             repeat: true
-            onTriggered: {dceplayer.processTimeCode(androidSystem.getMediaPosition())}
+            onTriggered: {dceplayer.processTimeCode(androidSystem.getMediaPosition()); console.log("tick")}
         }
 
         onTotalTimeChanged: {
             if(androidUrl.length==0){
+
                 tcCallback.stop()
             } else {
                 tcCallback.start()
@@ -151,10 +152,12 @@ Item {
             }
         }
         onAndroidVolumeUp:{
+             console.log("dceplayer::vol up")
             androidSystem.mediaSetVol(1)
         }
 
         onAndroidVolumeDown:{
+            console.log("dceplayer::vol down")
             androidSystem.mediaSetVol(-1)
         }
 
@@ -164,7 +167,7 @@ Item {
         }
         onUpdatePluginSeek:{
             console.log("dceplayer::seek to"+pos)
-            androidSystem.mediaSeek(pos);
+            androidSystem.mediaSeek(pos*1000);
         }
         onAndroidUrlUpdated:{
             console.log("NEW ANDROID URL")
