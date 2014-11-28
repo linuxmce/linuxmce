@@ -455,7 +455,46 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
   cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
 
   if (m_pEmulatorController)
-    m_pEmulatorController_prev = m_pEmulatorController;
+    {
+      m_pEmulatorController_prev = m_pEmulatorController;
+      m_pEmulatorController_prev->ejectAllMedia();
+
+      if (m_pEmulatorController_prev->m_pEmulatorModel)
+	{
+	  if (m_pEmulatorController_prev->m_pEmulatorModel->emulatorHasCrashed())
+	    {
+	      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Play_Media - Emulator has crashed. Reporting it to Orbiters.");
+	      string sText = "I am sorry, the Game you were playing has unexpectedly crashed. If this persists, please try a different game.";
+	      string sOptions = "Ok|";
+	      // CMD_Display_Dialog_Box_On_Orbiter_Cat db(m_dwPK_Device,DEVICECATEGORY_Orbiter_Plugins_CONST,
+	      //				       false, BL_SameHouse,
+	      //				       sText,
+	      // 				       sOptions,
+	      //				       ""); // FIXME: make proper list.
+	      // SendCommandNoResponse(db);
+	      if (m_bIsRecording)
+		{
+		  m_bIsRecording = !m_bIsRecording;
+		  // This is simply a toggle, the EmulatorController will do the right thing.
+		  m_pEmulatorController_prev->record();
+		}
+	      m_pEmulatorController_prev->setStreaming(false);
+	      m_pEmulatorController_prev->setStreamingMaster(false);
+	      return;
+	    }
+	}
+      
+      if (m_bIsRecording)
+	{
+	  m_bIsRecording = !m_bIsRecording;
+	  // This is simply a toggle, the EmulatorController will do the right thing.
+	  m_pEmulatorController_prev->record();
+	}
+
+      m_pEmulatorController_prev->stop(); // finally, stop everything.
+      m_pEmulatorController_prev->setStreaming(false);
+      m_pEmulatorController_prev->setStreamingMaster(false);   
+    }
 
   m_pEmulatorController = m_pEmulatorFactory->getEmulatorForMediaType(iPK_MediaType);
 
