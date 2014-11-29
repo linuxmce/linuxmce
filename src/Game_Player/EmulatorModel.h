@@ -46,12 +46,15 @@ namespace DCE
     bool m_bRunning;
     bool m_bIsPaused;
     bool m_bHasArgs;
+    bool m_bQuitting;
     bool m_bIsStreaming; // Are we streaming game to multiple media directors?
     bool m_bIsStreamingSource; // Are we the master machine?
     bool m_bCanSaveState; // Can this emulation save state?
     string m_sArgs;
     bool m_bRunning_get() { return m_bRunning; }
     void m_bRunning_set(bool bRunning) { m_bRunning = bRunning; }
+    bool m_bQuitting_get() { return m_bQuitting; }
+    void m_bQuitting_set(bool bQuitting) { m_bQuitting = bQuitting; }
     int m_iActiveMenu;
     bool m_bIsRecording;
     string m_sRecordingFilename;

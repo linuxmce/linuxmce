@@ -296,14 +296,14 @@ namespace DCE
    
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"EmulatorController::stop() called.");
 
-    if (!m_pEmulatorModel->emulatorHasCrashed() && m_pEmulatorModel->m_iActiveMenu > 0)
+    /* if (!m_pEmulatorModel->emulatorHasCrashed() && m_pEmulatorModel->m_iActiveMenu > 0)
       {
 	gotoMenu(0);
-      }
+      } */
 
-    if (m_pEmulatorModel->emulatorHasCrashed())
-      gracefulExit(); // Attempt a Graceful exit. If it doesn't, KillEmulator() will try other means.
-
+    /* if (m_pEmulatorModel->emulatorHasCrashed())
+      gracefulExit(); // Attempt a Graceful exit. If it doesn't, KillEmulator() will try other means. */
+                                          
     m_pGame_Player->KillEmulator();
     setMediaPosition(""); // clear it.
 
@@ -313,7 +313,7 @@ namespace DCE
     // m_pEmulatorModel->m_mapMedia.clear();
 
     // any further deinitialization should be handled in the subclasses.
-
+    m_pEmulatorModel->m_bQuitting_set(false);
     return true;
   }
 
