@@ -103,7 +103,8 @@ if [ -n "$INSTALLTODEVICE" ]; then
 
 clear
 echo "Installing APK"
-$ANDROID_SDK_ROOT/platform-tools/./adb install bin/Qorbiter-necessitas-debug.apk
+ls -lha bin
+$ANDROID_SDK_ROOT/platform-tools/./adb install bin/qOrbiterQt4-debug.apk
 fi;
 
 exit 0; 
