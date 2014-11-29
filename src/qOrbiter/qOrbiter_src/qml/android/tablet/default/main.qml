@@ -134,7 +134,7 @@ Item {
             running:dceplayer.mediaPlaying
             interval: 1000
             repeat: true
-            onTriggered: {dceplayer.processTimeCode(androidSystem.getMediaPosition()); console.log("tick")}
+            onTriggered: {dceplayer.processTimeCode(androidSystem.getMediaPosition());}
         }
 
         onTotalTimeChanged: {
