@@ -17,6 +17,8 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <math.h>
+#include "utilities/linux/window_manager/WMController/WMController.h"
+#include "utilities/linux/window_manager/wmctrl/wmctrl.h"
 
 /**
  * The Window ID Thread. Called from X11EmulatorController::run().
@@ -60,9 +62,27 @@ namespace DCE
   void X11EmulatorController::pleaseResend()
   {
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXX PLEASERESEND!");
-    PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);
+    pthread_join(m_windowIdThread,NULL);
+//    PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"Asking parent to please re-send the key.");
     m_bResend=true;
+  }
+
+  bool X11EmulatorController::getWindowCalled(string sWindowName,Window& windowId)
+  {
+    WmCtrl wmctrl;
+    list<WinInfo> listWinInfo;
+    wmctrl.ActionCommand('l',NULL,NULL,true,&listWinInfo);
+    for (list<WinInfo>::iterator it = listWinInfo.begin(); it != listWinInfo.end();++it)
+      {
+	if (it->sClassName.find(sWindowName) != string::npos)
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Found Window! %x",static_cast<unsigned int>(it->ulWindowId));
+	    windowId = it->ulWindowId;
+	    return true;
+	  }
+      }
+    return false;
   }
 
   /**
@@ -74,65 +94,35 @@ namespace DCE
    */
   void X11EmulatorController::findWindow()
   {
-    m_bFindWindowRunLoop=true;
     PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);
-    // If we're being called, we need to make double sure that we find the new window,
-    // so zero out the old one.
-    LoggerWrapper::GetInstance()->Write(LV_WARNING,"X11EmulatorController::findWindow() - pleaseResend %d",m_bResend);
-    int iRetry=0; // number of times to retry despite a duplicate window returned.
-    while (m_bFindWindowRunLoop==true)
-      {
-	cout << m_bFindWindowRunLoop << endl;
-	if (m_pEmulatorModel->m_iWindowId != 0)
-	  {
-	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Previous Window Id was %x setting to 0 to reacquire new window.",m_pEmulatorModel->m_iWindowId);
-	    m_pEmulatorModel->m_iPreviousWindowId = m_pEmulatorModel->m_iWindowId;
-	    m_pEmulatorModel->m_iWindowId=0;
-	  }
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Finding a window named %s",m_pEmulatorModel->m_sWindowName.c_str());
-	while (m_pEmulatorModel->m_iWindowId == 0)
-	  {
-	    char *cWindowName = strdup(m_pEmulatorModel->m_sWindowName.c_str());
-	    if (!WindowUtils::FindWindowMatchingWMCLASS(m_pEmulatorModel->m_pDisplay,
-							cWindowName,
-							0,
-							m_pEmulatorModel->m_iWindowId))
-	      {
-		// Wait just a bit.
-		LoggerWrapper::GetInstance()
-		  ->Write(LV_STATUS,"X11EmulatorController::findWindow() thread - Can't find window %s yet. Trying again.",m_pEmulatorModel->m_sWindowName.c_str());
-		usleep(100000);
-	      }
-	    free(cWindowName);
-	  }
+    m_bWindowIdThreadIsRunning=true;
 
-	if (m_pEmulatorModel->m_iWindowId == m_pEmulatorModel->m_iPreviousWindowId)
+    int iRetry=0;
+
+    Sleep(1000);
+
+    // Try to fetch the window
+    while ((iRetry<20) && (m_pEmulatorModel->m_iWindowId == 0))
+      {
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Attempting to fetch window %s, Try #%d",m_pEmulatorModel->m_sWindowName.c_str(),iRetry);
+	// LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"XXXXXXX Window ID IS %s",sWindowId.c_str());
+	if (!getWindowCalled(m_pEmulatorModel->m_sWindowName,m_pEmulatorModel->m_iWindowId))
 	  {
-	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Got Same Window ID %x as last time. Waiting a bit, and trying again!",m_pEmulatorModel->m_iWindowId);
-	    if (iRetry>20)
-	      {
-		LoggerWrapper::GetInstance()->Write(LV_STATUS,"Apparently got the same Window # again, ok. Let's use it.");
-		m_bFindWindowRunLoop=false;
-	      }
-	    else
-	      {
-		iRetry++;
-	      }
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"X11EmulatorController::findWindow(%s) - could not find window yet, retrying.",m_pEmulatorModel->m_sWindowName.c_str());
 	    usleep(100000);
+	    ++iRetry;
 	  }
 	else
 	  {
-	    // We got a new window, let the loop break;
-	    LoggerWrapper::GetInstance()
-	      ->Write(LV_STATUS,"X11EmulatorController::findWindow() thread - Window %s found as %x",m_pEmulatorModel->m_sWindowName.c_str(),m_pEmulatorModel->m_iWindowId);
-	    m_bFindWindowRunLoop=false;
+	    // Window has been acquired.
+	    usleep(100000);
+	    m_pGame_Player->EVENT_Menu_Onscreen(m_pEmulatorModel->m_iStreamID,false);
+	    LoggerWrapper::GetInstance()->Write(LV_WARNING,"X11EmulatorController::findWindow(%s) - new window is %x",m_pEmulatorModel->m_sWindowName.c_str(),m_pEmulatorModel->m_iWindowId);
+	    continue;
 	  }
       }
-    // magic to make emulator windows always get swallowed by orbiter, but only
-    // once the window is present and acquired.
-    usleep(100000);
-    m_pGame_Player->EVENT_Menu_Onscreen(m_pEmulatorModel->m_iStreamID,false);
-    LoggerWrapper::GetInstance()->Write(LV_WARNING,"X11EmulatorController::findWindow() - new window is %x",m_pEmulatorModel->m_iWindowId);
+    // thread exit.
+    m_bWindowIdThreadIsRunning=false;
   }
 
   bool X11EmulatorController::init()
@@ -211,7 +201,7 @@ namespace DCE
       }
    
     usleep(40000); 
-    m_pAlarmManager->AddRelativeAlarm(1,this,CHECK_RESEND,NULL);
+    // m_pAlarmManager->AddRelativeAlarm(1,this,CHECK_RESEND,NULL);
 
     return true;
 
@@ -222,7 +212,7 @@ namespace DCE
     PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);
     m_pEmulatorModel->m_iWindowId = 0; // reset Window ID as it is no longer valid.
  
-    if (m_pEmulatorModel->m_iExit_Code > -1)
+    if (m_pEmulatorModel->m_iExit_Code > 0)
       {
 	// There was an emulator crash. No need to do the rest of this, as it has already been fired.
 	return EmulatorController::stop();
@@ -239,11 +229,9 @@ namespace DCE
 	m_pAlarmManager->CancelAlarmByType(CHECK_RESEND);
       }
     m_pAlarmManager->Stop();
-    m_bFindWindowRunLoop=false;
     pthread_join(m_windowIdThread,NULL);
     delete m_pAlarmManager;
     m_pAlarmManager=NULL;
-
     return EmulatorController::stop(); // superclass, unsets running flag.
 
   }
@@ -263,7 +251,7 @@ namespace DCE
 	doAction(m_sLastAction);
       }
 
-    m_pAlarmManager->AddRelativeAlarm(5, this, CHECK_RESEND, NULL);
+    // m_pAlarmManager->AddRelativeAlarm(5, this, CHECK_RESEND, NULL);
   }
 
   void X11EmulatorController::EmulatorHasExited(int iExit_Code)
@@ -495,4 +483,37 @@ namespace DCE
     return EmulatorController::gotoMenu(iMenu);
   }
 
+  void X11EmulatorController::waitForEmulatorExit()
+  {
+    /* 
+    PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);
+    int iRetry=0;
+
+    // Try to fetch the window
+    while ((iRetry<20) && (m_pEmulatorModel->m_iWindowId != 0))
+      {
+	char *cWindowName=strdup(m_pEmulatorModel->m_sWindowName.c_str());
+	
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Attempting to fetch window %s, Try #%d",cWindowName,iRetry);
+
+	if (WindowUtils::FindWindowMatchingWMCLASS(m_pEmulatorModel->m_pDisplay,
+						    cWindowName,
+						    0,
+						    m_pEmulatorModel->m_iWindowId))
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_STATUS,"X11EmulatorController::waitForEmulatorExit(%s) - window still here. Retrying..",cWindowName);
+	    usleep(100000);
+	    ++iRetry;
+	  }
+	else
+	  {
+	    // Window is gone
+	    usleep(100000);
+	    LoggerWrapper::GetInstance()->Write(LV_WARNING,"X11EmulatorController::findWindow(%s) - window is gone.");
+	    continue;
+	  }
+	free(cWindowName);
+      }
+    */
+  }
 }

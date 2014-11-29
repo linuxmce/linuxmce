@@ -32,8 +32,8 @@ namespace DCE
 
   EmulatorController::~EmulatorController()
   {
-    delete m_pGame_Player;
-    m_pGame_Player = NULL;
+    stop();
+    m_pGame_Player = NULL;	// DO NOT DELETE THE GAME PLAYER PARENT!
     delete m_pEmulatorModel;
     m_pEmulatorModel = NULL;
   }
@@ -293,7 +293,7 @@ namespace DCE
 	LoggerWrapper::GetInstance()
 	  ->Write(LV_CRITICAL,"EmulatorController::stop() - Sanity checks failed.");
       }
-    
+   
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"EmulatorController::stop() called.");
 
     if (!m_pEmulatorModel->emulatorHasCrashed() && m_pEmulatorModel->m_iActiveMenu > 0)
@@ -308,7 +308,7 @@ namespace DCE
     setMediaPosition(""); // clear it.
 
     m_pEmulatorModel->m_bRunning_set(false);
-
+    pthread_join(m_stateDirThread,NULL);
     // Clear all media from slots.
     // m_pEmulatorModel->m_mapMedia.clear();
 
@@ -572,6 +572,11 @@ namespace DCE
   {
     // pMessage not used in base class
     m_pEmulatorModel->m_mapOptions[sPath]=sValue_To_Assign;
+  }
+
+  void EmulatorController::waitForEmulatorExit()
+  {
+    // Unimplemented here.
   }
 
 }

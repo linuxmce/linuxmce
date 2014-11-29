@@ -48,6 +48,7 @@ namespace DCE
     virtual bool gotoMenu(int iMenu);
     virtual bool saveState(string& sPosition, string& sText, bool bAutoSave=false, string sAutoSaveName="");
     virtual bool loadState(string sPosition);
+    virtual void waitForEmulatorExit();
 
     class AlarmManager *m_pAlarmManager;
     void AlarmCallback(int id, void* param);
@@ -58,8 +59,9 @@ namespace DCE
     pthread_t m_windowIdThread;
     string m_sLastAction;
     bool m_bResend; // Resend keystroke if needed. Set by default window handler.
-    bool m_bFindWindowRunLoop;
+    bool m_bWindowIdThreadIsRunning;
     bool m_bResendFired;
+    bool getWindowCalled(string sWindowName, Window& windowId);
   };
 }
 

@@ -17,6 +17,8 @@ MYDEVTEMPLATEID = 1965mplateID
 
 Gen_Dev_Files = $(GENDEV)/Game_PlayerBase.cpp
 sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files) \
+	../utilities/linux/window_manager/WMController/WMController.cpp \
+	../utilities/linux/window_manager/wmctrl/wmctrl.cpp \
         ConfigurationWriter.cpp \
 	VideoFrameGeometry.cpp \
 	EmulatorFactory.cpp \
@@ -78,8 +80,8 @@ sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files) \
 #<-dceag-mh-e->
 
 CXXFLAGS += 
-CPPFLAGS += `pkg-config libxml-2.0 --cflags`
-LDFLAGS +=  -lX11 -lXmu -lXtst -lWindowUtils -lmysqlclient_r -lpthread `pkg-config libxml-2.0 --libs`
+CPPFLAGS += `pkg-config libxml-2.0 --cflags` `pkg-config glib-2.0 --cflags`
+LDFLAGS +=  -lX11 -lXmu -lXtst -lWindowUtils -lmysqlclient_r -lpthread `pkg-config glib-2.0 --libs` `pkg-config libxml-2.0 --libs`
 XTRALDLIBS = -lm
 
 Gen_Dev_Files +=

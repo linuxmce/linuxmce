@@ -76,7 +76,7 @@ namespace DCE
     EmulatorFactory *m_pEmulatorFactory;
     EmulatorController *m_pEmulatorController;
     EmulatorController *m_pEmulatorController_prev;
-    int m_iStreamID;
+    int m_iStreamID, m_iPreviousStreamID;
     DeviceData_Base *m_pDevice_Game_Plugin;
     DeviceData_Base *m_pDevice_App_Server;
     DeviceData_Base *m_pDevice_Joystick;
@@ -88,6 +88,9 @@ namespace DCE
   public:
     virtual void PrepareToDelete ();
     virtual void CreateChildren();
+    virtual void OnReload();
+    virtual void OnQuit();
+    void DoExitActions();
     bool Connect (int iPK_DeviceTemplate);
     void pleaseResend();
 

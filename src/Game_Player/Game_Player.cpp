@@ -92,7 +92,6 @@ Game_Player::Game_Player(int DeviceID, string ServerAddress,bool bConnectEventHa
 Game_Player::~Game_Player()
 //<-dceag-dest-e->
 {
-
   EVENT_Playback_Completed ("", 0, false);	// In case media plugin thought something was playing, let it know that there's not
 
 }
@@ -112,6 +111,40 @@ bool Game_Player::Connect (int iPK_DeviceTemplate)
 
   return true;
 
+}
+
+void Game_Player::DoExitActions()
+{
+  delete m_pAlarmManager;
+  delete m_pEmulatorFactory;
+  m_pAlarmManager = NULL;
+  m_pDevice_App_Server = NULL;
+  m_iPK_MediaType = 0;
+  XSetErrorHandler(NULL);
+  if (FileUtils::DirExists(GAME_PLAYER_STATE_DIR))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"Game Player State directory exists. Cleaning up, and deleting.");
+      if (!FileUtils::DelDir(GAME_PLAYER_STATE_DIR))
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game Player State directory could not be deleted.");
+	}
+      else
+	{
+	  m_bStateDirExists=false;
+	}
+    }
+}
+
+void Game_Player::OnQuit()
+{
+  DoExitActions();
+  Command_Impl::OnQuit();
+}
+
+void Game_Player::OnReload()
+{
+  DoExitActions();
+  Command_Impl::OnReload();
 }
 
 void
@@ -333,8 +366,6 @@ void Game_Player::KillEmulator()
 						   false);
     
     SendCommand(CMD_Kill_Application);
-    Sleep(2000); // Hack, but maybe this will stop some problems.
-
 }
 
 //<-dceag-sample-b->!
@@ -454,48 +485,21 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
   cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
 
-  if (m_pEmulatorController)
+  m_iPreviousStreamID = m_iStreamID;
+  m_iStreamID = iStreamID;
+
+  if (m_iPreviousStreamID == m_iStreamID) // We are on the same stream, wait for emulator to exit.
     {
-      m_pEmulatorController_prev = m_pEmulatorController;
-      m_pEmulatorController_prev->ejectAllMedia();
-
-      if (m_pEmulatorController_prev->m_pEmulatorModel)
+      if (m_pEmulatorController)
 	{
-	  if (m_pEmulatorController_prev->m_pEmulatorModel->emulatorHasCrashed())
-	    {
-	      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Game_Player::CMD_Play_Media - Emulator has crashed. Reporting it to Orbiters.");
-	      string sText = "I am sorry, the Game you were playing has unexpectedly crashed. If this persists, please try a different game.";
-	      string sOptions = "Ok|";
-	      // CMD_Display_Dialog_Box_On_Orbiter_Cat db(m_dwPK_Device,DEVICECATEGORY_Orbiter_Plugins_CONST,
-	      //				       false, BL_SameHouse,
-	      //				       sText,
-	      // 				       sOptions,
-	      //				       ""); // FIXME: make proper list.
-	      // SendCommandNoResponse(db);
-	      if (m_bIsRecording)
-		{
-		  m_bIsRecording = !m_bIsRecording;
-		  // This is simply a toggle, the EmulatorController will do the right thing.
-		  m_pEmulatorController_prev->record();
-		}
-	      m_pEmulatorController_prev->setStreaming(false);
-	      m_pEmulatorController_prev->setStreamingMaster(false);
-	      return;
-	    }
+	  m_pEmulatorController->stop();
+	  m_pEmulatorController->waitForEmulatorExit();
 	}
-      
-      if (m_bIsRecording)
-	{
-	  m_bIsRecording = !m_bIsRecording;
-	  // This is simply a toggle, the EmulatorController will do the right thing.
-	  m_pEmulatorController_prev->record();
-	}
-
-      m_pEmulatorController_prev->stop(); // finally, stop everything.
-      m_pEmulatorController_prev->setStreaming(false);
-      m_pEmulatorController_prev->setStreamingMaster(false);   
     }
 
+  if (m_pEmulatorController)
+    m_pEmulatorController=NULL; 
+ 
   m_pEmulatorController = m_pEmulatorFactory->getEmulatorForMediaType(iPK_MediaType);
 
   if (!m_pEmulatorController)
@@ -506,7 +510,6 @@ void Game_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 
   // Eject all media from all slots.
   m_pEmulatorController->ejectAllMedia();
-
   // Detect if we are a streaming slave, and if so, parse URL, and point back to server.
   if (sMediaURL.find("slave://") != string::npos)
     {
@@ -612,9 +615,10 @@ void Game_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
       *sMediaPosition  = sSavedMediaPosition; // sSavedText ultimately not used.
     }
 
-  m_pEmulatorController->stop(); // finally, stop everything.
+  m_pEmulatorController->stop();
   m_pEmulatorController->setStreaming(false);
   m_pEmulatorController->setStreamingMaster(false);
+  m_pEmulatorController=NULL;
 }
 
 //<-dceag-c39-b->

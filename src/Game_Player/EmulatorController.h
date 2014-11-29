@@ -109,7 +109,7 @@ namespace DCE
     bool canSaveState();
     virtual void getOption(string sPath, string &sValue_To_Assign, Message *pMessage);
     virtual void setOption(string sPath, string sValue_To_Assign, Message *pMessage);
-
+    virtual void waitForEmulatorExit();
   };
 
 }
