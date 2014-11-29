@@ -6,10 +6,10 @@ import "../components"
  *\ingroup qml_desktop_default
  *\bug Needs label and function definition.
  */
-Rectangle {
+Item {
 
     // property alias synText:
-    id: satcableboxremote
+    id: vdr_screen
     anchors.centerIn: parent
 
     Timer{
@@ -27,11 +27,9 @@ Rectangle {
         onPlayListPositionChanged: nowplayingimage.source = "image://updateobject/"+securityvideo.timestamp
     }
 
-    height: style.orbiterH
-    width: style.orbiterW
-    radius: 0
+    anchors.fill: parent
     opacity: 1
-    color: style.darkhighlight
+
     Component.onCompleted:setNowPlayingTv()
 
     //main 'now playing rect containing all the other items
@@ -46,62 +44,62 @@ Rectangle {
         anchors.top:parent.top
         anchors.topMargin: scaleY(10)
         anchors.horizontalCenter: parent.horizontalCenter
-	Column {
-                id: epgandColouredButtons
-                EPGPlaylist{
-                        id:tvchannellist
-                }
+        Column {
+            id: epgandColouredButtons
+            EPGPlaylist{
+                id:tvchannellist
+            }
+
+            Rectangle {
+                height: scaleY(5)
+                color: "#00000000"
+                width: tvchannellist.width
+                anchors.margins: scaleY(5)
 
                 Rectangle {
-                        height: scaleY(5)
-                        color: "#00000000"
-                        width: tvchannellist.width
-                        anchors.margins: scaleY(5)
-
-                        Rectangle {
-                            color: "#ff0000"
-                            x: parent.width / 40
-                            id: redbutton
-                            width: parent.width / 5
-                            height: parent.height
-                            MouseArea{
-                                onClicked: manager.redButton()
-                            }
-                        }
-                        Rectangle {
-                            anchors.left: redbutton.right
-                            anchors.leftMargin: parent.width / 20
-                            color: "#00ff00"
-                            id: greenbutton
-                            width: parent.width / 5
-                            height: parent.height
-                            MouseArea{
-                                onClicked: manager.greenButton()
-                            }
-                        }
-                        Rectangle {
-                            anchors.left: greenbutton.right
-                            anchors.leftMargin: parent.width / 20
-                            color: "#ffff00"
-                            id: yellowbutton
-                            width: parent.width / 5
-                            height: parent.height
-                            MouseArea{
-                                onClicked: manager.yellowButton()
-                            }
-                        }
-                        Rectangle {
-                            anchors.left: yellowbutton.right
-                            anchors.leftMargin: parent.width / 20
-                            color: "#0000ff"
-                            id: bluebutton
-                            width: parent.width / 5
-                            height: parent.height
-                            MouseArea{
-                                onClicked: manager.blueButton()
-                            }
-                        }
+                    color: "#ff0000"
+                    x: parent.width / 40
+                    id: redbutton
+                    width: parent.width / 5
+                    height: parent.height
+                    MouseArea{
+                        onClicked: manager.redButton()
+                    }
                 }
+                Rectangle {
+                    anchors.left: redbutton.right
+                    anchors.leftMargin: parent.width / 20
+                    color: "#00ff00"
+                    id: greenbutton
+                    width: parent.width / 5
+                    height: parent.height
+                    MouseArea{
+                        onClicked: manager.greenButton()
+                    }
+                }
+                Rectangle {
+                    anchors.left: greenbutton.right
+                    anchors.leftMargin: parent.width / 20
+                    color: "#ffff00"
+                    id: yellowbutton
+                    width: parent.width / 5
+                    height: parent.height
+                    MouseArea{
+                        onClicked: manager.yellowButton()
+                    }
+                }
+                Rectangle {
+                    anchors.left: yellowbutton.right
+                    anchors.leftMargin: parent.width / 20
+                    color: "#0000ff"
+                    id: bluebutton
+                    width: parent.width / 5
+                    height: parent.height
+                    MouseArea{
+                        onClicked: manager.blueButton()
+                    }
+                }
+            }
         }
         RemoteNumberPad {id: remotenumberpad1;}
         Rectangle {

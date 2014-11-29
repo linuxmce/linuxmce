@@ -12,7 +12,7 @@ Row{
     id:label_row
     width: visible ? childrenRect.width : 0
     height: visible ? scaleY(5) :0
-    anchors.centerIn: pos_label
+    anchors.centerIn: parent
     spacing: scaleX(1)
     StyledText {
         id: grid_position_label
