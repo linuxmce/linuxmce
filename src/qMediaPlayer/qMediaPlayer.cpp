@@ -534,6 +534,15 @@ void qMediaPlayer::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *
 {
     cout << "Need to implement command #40 - Restart Media" << endl;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
+#ifdef ANDROID
+    emit newMediaPosition(0);
+#endif
+
+#ifndef RPI
+#if defined (QT4) && ! defined (ANDROID)
+    mp_manager->mediaObject->seek(0);
+#endif
+#endif
 }
 
 //<-dceag-c41-b->
@@ -554,6 +563,14 @@ void qMediaPlayer::CMD_Change_Playback_Speed(int iStreamID,int iMediaPlaybackSpe
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     cout << "Parm #43 - MediaPlaybackSpeed=" << iMediaPlaybackSpeed << endl;
     cout << "Parm #220 - Report=" << bReport << endl;
+    if(iStreamID==i_StreamId){
+        if(iMediaPlaybackSpeed==0){
+            pausePlayback();
+        } else if(iMediaPlaybackSpeed==1000) {
+            pausePlayback();
+        }
+    }
+    sCMD_Result="OK";
 }
 
 //<-dceag-c42-b->
@@ -1845,3 +1862,10 @@ void qMediaPlayer::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMes
 
 }
 //<-dceag-c184-e->
+
+
+void qMediaPlayer::updateMetadata()
+{
+    DeviceData_Base *p = this->m_pData->m_pDevice_Core->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
+    CMD_Set_Now_Playing setNowPlaying(this->m_dwPK_Device,p->m_dwPK_Device,"54,4962,47,244,224,230","FOO","BAR",this->i_pkMediaType,this->i_StreamId,0,"NAME",QString::number(this->m_dwPK_Device).toStdString().c_str(), false);
+}

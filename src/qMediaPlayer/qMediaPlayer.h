@@ -980,6 +980,8 @@ public:
 
     public slots:
 
+        void updateMetadata();
+
         void setConnectionStatus(bool b) {connected = b; emit connectionStatusChanged(connected);}
 
         void run();
