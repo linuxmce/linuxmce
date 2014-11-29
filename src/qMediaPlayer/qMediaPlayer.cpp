@@ -451,6 +451,8 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
 #ifndef __ANDROID__
     //  pthread_yield();
 #endif
+
+    sCMD_Result="OK";
 }
 
 //<-dceag-c38-b->
@@ -1184,13 +1186,112 @@ void qMediaPlayer::CMD_Back_Prior_Menu(int iStreamID,string &sCMD_Result,Message
 void qMediaPlayer::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMediaPosition,string sMediaURL,string sStreamingTargets,string &sCMD_Result,Message *pMessage)
 //<-dceag-c249-e->
 {
-    cout << "Need to implement command #249 - Start Streaming" << endl;
-    cout << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
-    cout << "Parm #41 - StreamID=" << iStreamID << endl;
-    cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
-    cout << "Parm #59 - MediaURL=" << sMediaURL << endl;
-    cout << "Parm #105 - StreamingTargets=" << sStreamingTargets << endl;
-    CMD_Play_Media(iPK_MediaType,iStreamID, sMediaPosition, sMediaURL, sCMD_Result, pMessage);
+    qWarning() << "Need to implement command #249 - Start Streaming" << endl;
+    qWarning() << "Parm #29 - PK_MediaType=" << iPK_MediaType << endl;
+    qWarning() << "Parm #41 - StreamID=" << iStreamID << endl;
+    qWarning() << "Parm #42 - MediaPosition=" << sMediaPosition.c_str() << endl;
+    qWarning() << "Parm #59 - MediaURL=" << sMediaURL.c_str() << endl;
+    qWarning() << "Parm #105 - StreamingTargets=" << sStreamingTargets.c_str() << endl;
+
+    QStringList spl= QString::fromStdString(sStreamingTargets).split(",");
+    QStringList::const_iterator it;
+         for (it = spl.constBegin(); it != spl.constEnd();++it){
+              qWarning()<< "\t Target::"<< (*it).toLocal8Bit().constData();
+         }
+
+    //DCE::CMD_Play_Media slavePlay(this->m_dwPK_Device, tDevice,iPK_MediaType, sMediaPosition, sMediaURL);
+    sCMD_Result="OK";
+    qWarning() << "qMediaPlayer::Got Stream Play Command";
+    setCommandResponse("Recieved stream play command!");
+    setMediaType(iPK_MediaType);
+    setStreamID(iStreamID);
+    setStartPosition(QString::fromStdString(sMediaPosition));
+
+    QString deviceNumber;
+    QString path;
+    QString finishedPath;
+    QString localPath;
+
+    if(iPK_MediaType==5)
+    {
+        path = "/public/data/videos/";
+    }
+    else if(iPK_MediaType ==4){
+        path = "/public/data/audio/";
+    }
+
+    if(QString::fromStdString(sMediaURL).contains("http")){
+        finishedPath = QString::fromStdString(sMediaURL);
+    }else if(iPK_MediaType==43){
+        if(QString::fromStdString(sMediaURL).contains("http://")){
+            finishedPath = QString::fromStdString(sMediaURL);
+        }else{
+            finishedPath = "http://"+QString::fromStdString(sMediaURL);
+        }
+    }
+    else
+    {
+        //begin ugly bit to determine the storage device for later use. its not passed explicitly, so i use a regex to determine it for media files
+        QRegExp deviceNo("(\\\[\\\d+\\\]/)");
+        int l = deviceNo.indexIn(QString::fromStdString(sMediaURL));
+
+        if (l ==-1){
+            setCommandResponse("Stored in /mediaType");
+        } else {
+            if(!deviceNo.isEmpty()){
+                qDebug() << deviceNo.capturedTexts();
+                QString f = deviceNo.cap(0);
+                f.remove("["); f.remove("/"); f.remove("]");
+                deviceNumber = f;
+                localPath = (QString::fromStdString(sMediaURL)).split(deviceNo).at(1);
+#ifndef ANDROID
+                mp_manager->setCurrentDevice(f.toLong());
+#endif
+            }
+            else
+            {
+
+            }
+        }
+        //end ugly bit of regex. pretty because it works unless a user decides to also have [\d\d\d] type directories. I try to counter that by choosing only
+        //the first match as that will be the first indexed by the regex engine.
+        QString adjPath = QString::fromStdString(sMediaURL).remove("//home");
+        finishedPath = "/mnt/remote/"+deviceNumber+path+localPath;
+    }
+
+
+#ifdef __ANDROID__
+    QString cmp = QString::fromStdString(sMediaURL.c_str());
+
+    if(iPK_MediaType==43){
+        if(cmp.contains("http://")){
+            setCurrentMediaUrl(QString::fromStdString(sMediaURL));
+        }else{
+            setCurrentMediaUrl("http://"+QString::fromStdString(sMediaURL));
+        }
+
+    } else if(cmp.contains("http://")){
+        setCurrentMediaUrl(QString::fromStdString(sMediaURL));
+
+    }else{
+        QString androidPath = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/qOrbiterGenerator.php?id="+QString::fromStdString(sMediaURL);
+        qWarning() << "Sending android modified original MRL==>" << androidPath;
+        setCurrentMediaUrl(androidPath);
+    }
+#else
+    qWarning() << "Sending string URL::" << finishedPath;
+
+    setCurrentMediaUrl(finishedPath);
+    //EVENT_Playback_Started(sMediaURL, i_StreamId, "Stored Media", "", "");
+    emit startPlayback();
+
+#endif
+    emit startPlayback();
+#ifndef __ANDROID__
+    //  pthread_yield();
+#endif
+
+    sCMD_Result="OK";
 }
 
 //<-dceag-c259-b->
@@ -1777,9 +1878,14 @@ void qMediaPlayer::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *p
 #if defined (QT4) && ! defined (ANDROID)
     qreal c = mp_manager->audioSink->volume();
     qWarning() << "Current volume" << c;
-    qreal d = c+1.0;
-    qWarning() << "New volume" << d;
-    mp_manager->audioSink->setVolume(d);
+    qreal d = c+.10;
+    if(d > 1.5){
+        mp_manager->setErrorStatus("Max volume");
+    } else {
+        qWarning() << "New volume" << d;
+        mp_manager->audioSink->setVolume(d);
+    }
+
 #endif
 #endif
 
@@ -1805,9 +1911,14 @@ void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message 
 #if defined (QT4) && ! defined (ANDROID)
     qreal c = mp_manager->audioSink->volume();
     qWarning() << "Current volume" << c;
-    qreal d = c-1.0;
-    mp_manager->audioSink->setVolume(d);
-    qWarning() << "New volume" << d;
+    qreal d = c-0.10;
+    if(d < 0 ){
+        mp_manager->setErrorStatus("Min volume");
+    } else {
+        mp_manager->audioSink->setVolume(d);
+        qWarning() << "New volume" << d;
+    }
+
 #endif
 #endif
 
@@ -1815,7 +1926,7 @@ void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message 
     androidVolumeDown();
 #endif
 
-    sCMD_Result = "OK -Volume Down.";
+    sCMD_Result = "OK";
     qWarning("Set audio level down.");
 
 }
@@ -1846,14 +1957,13 @@ void qMediaPlayer::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMes
                 mp_manager->audioSink->setVolume(n);
             else
                 mp_manager->audioSink->setVolume(0);
-
         }
 
     }
     else{
         int csLevl = t.toInt();
         mp_manager->audioSink->setVolume(csLevl);
-        sCMD_Result = "OK -Level Set.";
+        sCMD_Result = "OK";
     }
 
 #endif
