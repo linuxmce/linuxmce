@@ -400,8 +400,8 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 
 
         // Cannot be both a playback and recording device, but a recording device provides playback capabilities
-//	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_PLAYBACK_DEVICE);
-	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_RECORDING_DEVICE);
+	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_PLAYBACK_DEVICE);
+//	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_RECORDING_DEVICE);
 //	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_TUNER);
 
 	m_pParser = LibCecInitialise(&g_config);
@@ -439,15 +439,18 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 
 //this fails in libcec2
 	//LoggerWrapper::GetInstance()->Write(LV_STATUS,"Attempting to set logical address");
-	// Tweak with this until we like it -tschak
-//	m_pParser->SetLogicalAddress(CECDEVICE_PLAYBACK1);
-
 	if (!m_pParser->Open(m_sPort.c_str()))
 	  {
 	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not open serial port %s",m_sPort.c_str());
 	    UnloadLibCec(m_pParser);
 	    return false;
 	  }
+
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Setting Physical Address to: %s, %u", DATA_Get_PortChannel_Number().c_str() ,  strtol( DATA_Get_PortChannel_Number().c_str(), NULL, 16) );
+	m_pParser->SetPhysicalAddress( strtol( DATA_Get_PortChannel_Number().c_str(), NULL, 16) );
+
+//	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Setting Logical Address to: %s, %u", m_pParser->ToString( CECDEVICE_RECORDINGDEVICE1),  (int) CECDEVICE_RECORDINGDEVICE1 );
+//	m_pParser->SetLogicalAddress(CECDEVICE_RECORDINGDEVICE1);
 
 	m_myCECAddresses = m_pParser->GetLogicalAddresses(); // Seems to return logical addresses for *this* device
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Primary CEC Logical Address   : %s",m_pParser->ToString( (cec_logical_address) m_myCECAddresses.primary ) );
@@ -702,9 +705,11 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Make input active: %s",  sPhysicalAddress.c_str() );
 
       // TODO: get our address from m_myCECAddresses and remove hardcode
-      uint8_t from = ( m_myCECAddresses.primary << 4 ) & 0xFF;
+      uint8_t from = ( m_myCECAddresses.primary << 4 ) | 0x0F;
 //      sArguments = "4F 82" + sPhysicalAddress.substr(0, 2) + " " + sPhysicalAddress.substr(2, 2);
 //      cmd.PushBack(0x4F); /* from - to */
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Make input active from/to: %u",  from );
+
       cmd.PushBack(from); /* from - to */
       cmd.PushBack(0x82); /* cmd number */
       cmd.PushBack( strtol( sPhysicalAddress.substr(0, 2).c_str(), NULL, 16) );
