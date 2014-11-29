@@ -209,6 +209,7 @@ namespace DCE
 
   bool X11EmulatorController::stop()
   {
+    pthread_join(m_windowIdThread,NULL); // Let's make sure that we close out the window ID thread cleanly, first.
     PLUTO_SAFETY_LOCK (gm, m_pGame_Player->m_X11ControllerMutex);
     m_pEmulatorModel->m_iWindowId = 0; // reset Window ID as it is no longer valid.
  
