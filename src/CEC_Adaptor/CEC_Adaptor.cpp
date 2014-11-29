@@ -113,12 +113,30 @@ int CecCommand(void *cbParam, const cec_command command)
 
   switch ( op_code )
   {
+    case CEC_OPCODE_GIVE_OSD_NAME:
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! From: %i, To: %i, set=%i, Opcode: %i/%s, Parm1=%i, sParms: '%s'", 
+	(int) command.initiator, (int) command.destination, command.opcode_set, (int) op_code, sop_code.c_str(), command.parameters[0], sParms );
+
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! From         : %i", (int) command.initiator );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! To           : %i", (int) command.destination );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! Give OSD Name: %i", command.parameters[0] );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! sParms       : %s", sParms );
+      break;
+    case CEC_OPCODE_SET_OSD_NAME:
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! From: %i, To: %i, set=%i, Opcode: %i/%s, Parm1=%i, sParms: '%s'", 
+	(int) command.initiator, (int) command.destination, command.opcode_set, (int) op_code, sop_code.c_str(), command.parameters[0], sParms );
+
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! From         : %i", (int) command.initiator );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! To           : %i", (int) command.destination );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! Set OSD Name : %i", command.parameters[0] );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! sParms       : %s", sParms );
+      break;
     case CEC_OPCODE_ACTIVE_SOURCE:
   LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! From: %i, To: %i, set=%i, Opcode: %i/%s, Parm1=%i, sParms: '%s'", 
 	(int) command.initiator, (int) command.destination, command.opcode_set, (int) op_code, sop_code.c_str(), command.parameters[0], sParms );
 
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! From: %i", (int) command.initiator );
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! To  : %i", (int) command.destination );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! From         : %i", (int) command.initiator );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! To           : %i", (int) command.destination );
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! Active Source: %i", command.parameters[0] );
       break;
     case CEC_OPCODE_DEVICE_VENDOR_ID:
@@ -127,7 +145,7 @@ int CecCommand(void *cbParam, const cec_command command)
 	(int) command.initiator, (int) command.destination, command.opcode_set, (int) op_code, sop_code.c_str(), command.parameters[0], sParms );
 
       cec_vendor_id VendorId=(cec_vendor_id) command.parameters[0];
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! VendorID: %i/%s", (int) VendorId,  pCEC_Adaptor->m_pParser->ToString(VendorId) );
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"CECCommand: CALLBACK! VendorID     : %i/%s", (int) VendorId,  pCEC_Adaptor->m_pParser->ToString(VendorId) );
       break;
       }
     case CEC_OPCODE_NONE:
@@ -381,7 +399,7 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 	g_config.callbackParam = this;
 
 
-        // Cannot be both a playerback and recording device, recording device provides playback capabilities
+        // Cannot be both a playback and recording device, but a recording device provides playback capabilities
 //	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_PLAYBACK_DEVICE);
 	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_RECORDING_DEVICE);
 //	g_config.deviceTypes.Add(CEC_DEVICE_TYPE_TUNER);
@@ -432,6 +450,12 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 	  }
 
 	m_myCECAddresses = m_pParser->GetLogicalAddresses(); // Seems to return logical addresses for *this* device
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Primary CEC Logical Address   : %s",m_pParser->ToString( (cec_logical_address) m_myCECAddresses.primary ) );
+	for ( uint8_t iPtr = 0; iPtr <= 11; iPtr++ ) {
+		if ( m_myCECAddresses.addresses[iPtr] ) {
+			LoggerWrapper::GetInstance()->Write(LV_STATUS,"Secondary CEC Logical Address: %s",m_pParser->ToString( (cec_logical_address) m_myCECAddresses.addresses[iPtr] ) );
+		}
+	}
 
 	// check all active devices on the CEC bus, let's try to match them to DTs in our tree
 	m_CECAddresses.Clear();
@@ -440,11 +464,10 @@ m_mapLMCEtoCECcodes[COMMAND_Yellow_CONST] = CEC_USER_CONTROL_CODE_F4_YELLOW; // 
 	m_mapPhysicalAddress_to_LA.clear();
 	m_mapPK_Device_to_PA.clear();
 
-	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Primary CEC Logical Address: %s",m_pParser->ToString( m_CECAddresses.primary ) );
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Primary CEC bus Logical Address: %s",m_pParser->ToString( m_CECAddresses.primary ) );
 	for ( uint8_t iPtr = 0; iPtr <= 11; iPtr++ ) {
 		if ( m_CECAddresses[iPtr] ) {
 			// iPtr = Logical Address
-			// m_mapAddresses[i] = Physical Address
 
 			uint64_t iPhysicalAddress = m_pParser->GetDevicePhysicalAddress( (cec_logical_address) iPtr );
 			m_mapPhysicalAddress_to_LA[iPhysicalAddress] = iPtr;
@@ -604,28 +627,6 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       }
       return;
       break;
-/*
-    case COMMAND_Vol_Up_CONST:
-    case COMMAND_Vol_Down_CONST:
-    case COMMAND_Mute_CONST:
-      {
-      cec_logical_address LogicalAddressForVolume = LogicalAddress;
-      // TODO: CHECK SYSTEM AUDIO MODE STATE HERE (standard cec data)
-      if ( (int) LogicalAddress != 5 && m_CECAddresses[5] )
-        LogicalAddressForVolume = (cec_logical_address) 5;
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild - VOL - UCP - To LA: %i, Code: %i", (int) LogicalAddressForVolume, m_mapLMCEtoCECcodes[pMessage->m_dwID] );
-      if ( m_pParser->SendKeypress( LogicalAddressForVolume, m_mapLMCEtoCECcodes[pMessage->m_dwID] ) )
-      {
-	if ( m_pParser->SendKeyRelease( LogicalAddressForVolume ) ) 
-        {
-	  LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: UCP - successful");
-	  sCMD_Result = "OK";
-        }
-      }
-      return;
-      break;
-      }
-*/
     case COMMAND_Generic_On_CONST:
       if ( m_pParser->PowerOnDevices( LogicalAddress ) )
       {
@@ -643,7 +644,7 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       return;
       break;
     case COMMAND_Vol_Up_CONST:
-      if ( ((int) LogicalAddress == 0 || (int) LogicalAddress == 5) && m_pParser->VolumeUp() )
+      if ( m_pParser->VolumeUp() )
       {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Volume Up");
         sCMD_Result = "OK";
@@ -651,8 +652,7 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       return;
       break;
     case COMMAND_Vol_Down_CONST:
-	// TODO: USE CONST
-      if ( ((int) LogicalAddress == 0 || (int) LogicalAddress == 5) && m_pParser->VolumeDown() )
+      if ( m_pParser->VolumeDown() )
       {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Volume Down");
         sCMD_Result = "OK";
@@ -660,8 +660,7 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       return;
       break;
     case COMMAND_Mute_CONST:
-	// TODO: USE CONST
-      if ( ((int) LogicalAddress == 0 || (int) LogicalAddress == 5) && m_pParser->AudioToggleMute() )
+      if ( m_pParser->AudioToggleMute() )
       {
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Mute");
         sCMD_Result = "OK";
@@ -703,8 +702,10 @@ void CEC_Adaptor::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,stri
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"ReceivedCommandForChild: Make input active: %s",  sPhysicalAddress.c_str() );
 
       // TODO: get our address from m_myCECAddresses and remove hardcode
+      uint8_t from = ( m_myCECAddresses.primary << 4 ) & 0xFF;
 //      sArguments = "4F 82" + sPhysicalAddress.substr(0, 2) + " " + sPhysicalAddress.substr(2, 2);
-      cmd.PushBack(0x4F); /* from - to */
+//      cmd.PushBack(0x4F); /* from - to */
+      cmd.PushBack(from); /* from - to */
       cmd.PushBack(0x82); /* cmd number */
       cmd.PushBack( strtol( sPhysicalAddress.substr(0, 2).c_str(), NULL, 16) );
       cmd.PushBack( strtol( sPhysicalAddress.substr(2, 2).c_str(), NULL, 16) );
