@@ -266,6 +266,7 @@ MD_System_Level_Prep () {
 			cat <<-EOF > $TEMP_DIR/etc/apt/sources.list
 				deb file:/usr/pluto/deb-cache/$DEB_CACHE ./
 				deb http://deb.linuxmce.org/ubuntu/ $TARGET_RELEASE $TARGET_REPO_NAME
+				#deb http://deb.linuxmce.org/ $TARGET_RELEASE $TARGET_REPO_NAME
 				deb $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
 				deb $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
 				deb http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restricted universe multiverse
@@ -473,7 +474,8 @@ MD_Install_Packages () {
 			StatsMessage "Installing kernel headers"
 			#Install headers and run depmod for the seamless integraton function, ensure no errors exist
 			TARGET_KVER_LTS_HES=""
-			#[[ "precise" = "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-raring"
+			[[ "precise" = "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-trusty"
+			#[[ "trusty" = "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-utopic"
 			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-headers-generic"$TARGET_KVER_LTS_HES"
 			VerifyExitCode "Install linux headers package failed"
 
@@ -540,7 +542,7 @@ MD_Install_Packages () {
 	## FIXME: get this list from the database
 	case "$TARGET_DISTRO" in
 		"ubuntu")
-			DEVICE_LIST="28 62 1759 5 11 1825 26 1808 1901 2122"
+			DEVICE_LIST="28 62 1759 5 11 1825 26 1808 1901 2122 2278"
 			;;
 		"raspbian")
 			# Classic MD/qMD/squeezelite
