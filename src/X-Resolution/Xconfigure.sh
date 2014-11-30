@@ -17,7 +17,6 @@ Modeline_640x480_60='"640x480" 25.18 640 656 752 800 480 490 492 525'
 . /usr/pluto/bin/Utils.sh
 . /usr/pluto/bin/LockUtils.sh
 . /usr/pluto/bin/X-Common.sh
-#. /usr/pluto/bin/VideoDetectSetup
 
 ConfigFile="/etc/X11/xorg.conf"
 Output="VGA"
