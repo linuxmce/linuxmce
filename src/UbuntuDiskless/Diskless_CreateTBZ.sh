@@ -476,7 +476,7 @@ MD_Install_Packages () {
 			TARGET_KVER_LTS_HES=""
 			[[ "precise" = "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-trusty"
 			[[ "trusty" = "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-utopic"
-			echo "TARGET_KVER_LTS_HES=$TARGET_KVER_LTS_HES" >> /etc/pluto.conf
+			echo "LTS_HES=$TARGET_KVER_LTS_HES" >> /etc/pluto.conf
 			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-headers-generic"$TARGET_KVER_LTS_HES"
 			VerifyExitCode "Install linux headers package failed"
 
