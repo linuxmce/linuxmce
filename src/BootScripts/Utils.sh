@@ -809,15 +809,15 @@ InstallVideoDriver () {
 				ConfSet "AVWizardOverride" "1"
 			fi ;;
 		nouveau)
-			if ! PackageIsInstalled xserver-xorg-video-nouveau; then
-				apt-get -yf install xserver-xorg-video-nouveau
+			if ! PackageIsInstalled xserver-xorg-video-nouveau"$LTS_HES"; then
+				apt-get -yf install xserver-xorg-video-nouveau"$LTS_HES"
 				VerifyExitCode "Install nouveau Driver"
 			fi ;;
 
 		# ATI cards
 		radeon)
-			if ! PackageIsInstalled xserver-xorg-video-radeon; then 
-				apt-get -yf install xserver-xorg-video-radeon
+			if ! PackageIsInstalled xserver-xorg-video-radeon"$LTS_HES"; then 
+				apt-get -yf install xserver-xorg-video-radeon"$LTS_HES"
 				VerifyExitCode "Install radeon Driver"
 			fi ;;
 		fglrx)
@@ -837,58 +837,58 @@ InstallVideoDriver () {
 				reboot
 			fi ;;
 		mach64)
-			if ! PackageIsInstalled xserver-xorg-video-mach64; then 
-				apt-get -yf install xserver-xorg-video-mach64
+			if ! PackageIsInstalled xserver-xorg-video-mach64"$LTS_HES"; then 
+				apt-get -yf install xserver-xorg-video-mach64"$LTS_HES"
 				VerifyExitCode "Install mach64 Driver"
 				ConfSet "AVWizardOverride" "1"
 			fi ;;
 
 		# Intel cards
 		intel)
-			if ! PackageIsInstalled xserver-xorg-video-intel; then 
-				apt-get -yf install xserver-xorg-video-intel
+			if ! PackageIsInstalled xserver-xorg-video-intel"$LTS_HES"; then 
+				apt-get -yf install xserver-xorg-video-intel"$LTS_HES"
 				VerifyExitCode "Install Intel Driver"
 			fi ;;
 		i128)
-			if ! PackageIsInstalled xserver-xorg-video-i128; then 
-				apt-get -yf install xserver-xorg-video-i128
+			if ! PackageIsInstalled xserver-xorg-video-i128"$LTS_HES"; then 
+				apt-get -yf install xserver-xorg-video-i128"$LTS_HES"
 				VerifyExitCode "Install i128 Driver"
 			fi ;;
 		i740)
-			if ! PackageIsInstalled xserver-xorg-video-i740; then 
-				apt-get -yf install xserver-xorg-video-i740
+			if ! PackageIsInstalled xserver-xorg-video-i740"$LTS_HES"; then 
+				apt-get -yf install xserver-xorg-video-i740"$LTS_HES"
 				VerifyExitCode "Install i740 Driver"
 			fi ;; 
 
 		# VIA cards
 		openchrome)
-			if ! PackageIsInstalled xserver-xorg-video-openchrome; then 
-				apt-get -yf install xserver-xorg-video-openchrome
+			if ! PackageIsInstalled xserver-xorg-video-openchrome"$LTS_HES"; then 
+				apt-get -yf install xserver-xorg-video-openchrome"$LTS_HES"
 				VerifyExitCode "Install opencrhome Driver"
 			fi ;; 
 		savage)
-			if ! PackageIsInstalled xserver-xorg-video-savage; then 
-				apt-get -yf install xserver-xorg-video-savage
+			if ! PackageIsInstalled xserver-xorg-video-savage"$LTS_HES"; then 
+				apt-get -yf install xserver-xorg-video-savage"$LTS_HES"
 				VerifyExitCode "Install VIA Savage Driver"
 				ConfSet "AVWizardOverride" "1"
 			fi ;;
 		via)
-			if ! PackageIsInstalled xserver-xorg-video-via; then 
-				apt-get -yf install xserver-xorg-video-via
+			if ! PackageIsInstalled xserver-xorg-video-via"$LTS_HES"; then 
+				apt-get -yf install xserver-xorg-video-via"$LTS_HES"
 				VerifyExitCode "Install VIA S3 Driver"
 				ConfSet "AVWizardOverride" "1"
 			fi ;;
 		virge)
-			if ! PackageIsInstalled xserver-xorg-video-s3virge; then 
-				apt-get -yf install xserver-xorg-video-s3virge
+			if ! PackageIsInstalled xserver-xorg-video-s3virge"$LTS_HES"; then 
+				apt-get -yf install xserver-xorg-video-s3virge"$LTS_HES"
 				VerifyExitCode "Install VIA S3 Virge Driver"
 				ConfSet "AVWizardOverride" "1"
 			fi ;;
 
 		# VMWare
 		cirrus)
-			if ! PackageIsInstalled xserver-xorg-video-cirrus; then
-				apt-get -yf install xserver-xorg-video-cirrus
+			if ! PackageIsInstalled xserver-xorg-video-cirrus"$LTS_HES"; then
+				apt-get -yf install xserver-xorg-video-cirrus"$LTS_HES"
 				VerifyExitCode "Install Cirrus Driver"
 			fi ;;
 	esac
@@ -902,6 +902,7 @@ CheckVideoDriver() {
 InstallRoutine() {
 	vga_pci="$1"
 	card_detail="$2"
+	# FIXME: is there a better way? a builtin somewhere?
 	online=$(ping -c 2 google.com)
 	offline_mismatch="false"
 	online_mismatch="false"

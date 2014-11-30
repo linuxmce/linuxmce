@@ -1,3 +1,5 @@
+## This script is obsolete and functionality returned to Utils.sh to fix big bugs - phenigma
+
 #!/bin/bash
 . /usr/pluto/bin/Utils.sh
 
