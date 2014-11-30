@@ -20,7 +20,6 @@ CheckAVWizard () {
 
 	if [[ "$AVWizardOverride" != "0" || "$AVWizardDone" != "1" ]] && [[ "$AutostartMedia" == "1" ]] ;then
 		## Install driver based on the type of video card used
-		. /usr/pluto/bin/VideoDetectSetup
 		CheckVideoDriver
 
 		## Run the AVWizard
