@@ -1,5 +1,4 @@
 #!/bin/bash
-#!/bin/bash
 #This script will build the Qt for Android (Qt5) variant of QOrbiter assuming the prerequsites are in place.
 #Below are the environment variables which you should fill in to adjust for your local machine.
 #
@@ -9,13 +8,18 @@
 #JAVAHOME points to the java library needed to compile java classes.
 NECESSITAS_ROOT=/home/langston/necessitas
 ANDROID_SDK_PATH=/home/langston/necessitas
+ANTPATH=$NECESSITAS_ROOT/apache-ant-1.8.4/bin/ant
+if [[ -f /etc/lmce-build/builder.conf ]]; then
+	NECESSITAS_ROOT=/opt/necessitas
+	ANDROID_SDK_PATH=/opt/necessitas
+	ANTPATH=/usr/bin/ant
+fi
 ANDROIDNDKPLATFORM=android-9
 ANDROIDNDKROOT=$ANDROID_SDK_PATH/android-ndk
 ANDROIDSDKROOT=$ANDROID_SDK_PATH/android-sdk
 TOOLCHAINVERSION=4.6
 TOOLCHAINPATH=$ANDROIDNDKROOT/toolchains/arm-linux-androideabi-$TOOLCHAINVERSION/prebuilt/linux-x86/bin
 JAVAHOME=/usr/lib/jvm/java-6-openjdk-i386
-ANTPATH=$NECESSITAS_ROOT/apache-ant-1.8.4/bin/ant
 # We stop whenever an error happens.
 set -e
 
@@ -97,7 +101,7 @@ make INSTALL_ROOT="android" install
 
 cd android
 $ANDROID_SDK_ROOT/tools/android update project --path .
-$NECESSITAS_ROOT/apache-ant-1.8.4/bin/ant clean $TARGET
+$ANTPATH clean $TARGET
 
 if [ -n "$INSTALLTODEVICE" ]; then
 

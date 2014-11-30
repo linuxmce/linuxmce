@@ -6,15 +6,24 @@
 #ANDROIDNDKPLATFORM is for use by the build system and must be set. no need to change.
 #ANTPATH=if you are not using necessitas or this var is empty, it will be set here.
 #JAVAHOME points to the java library needed to compile java classes.
+
 ANDROID_INSTALL=/home/langston/Qt5.3.1/5.3/android_armv7/bin
 ANDROID_SDK_PATH=/home/langston/necessitas
-NECESSITAS_ROOT=~/necessitas
-ANDROIDNDKPLATFORM=android-9
 ANDROIDNDKROOT=$ANDROID_SDK_PATH/android-ndk
+NECESSITAS_ROOT=~/necessitas
+ANTPATH=$NECESSITAS_ROOT/apache-ant-1.8.4/bin/ant
+
+if [[ -f /etc/lmce-build/builder.conf ]]; then
+	ANDROID_INSTALL=/opt/Qt5.3.2/5.3/android_armv7/bin
+	ANDROID_SDK_PATH=/opt/necessitas
+	ANDROIDNDKROOT=$ANDROID_SDK_PATH/android-ndk-r10c
+	ANTPATH=/usr/bin/ant
+fi
+
+ANDROIDNDKPLATFORM=android-9
 ANDROIDSDKROOT=$ANDROID_SDK_PATH/android-sdk
 TOOLCHAINVERSION=4.6
 TOOLCHAINPATH=$ANDROIDNDKROOT/toolchains/arm-linux-androideabi-$TOOLCHAINVERSION/prebuilt/linux-x86/bin
-ANTPATH=$NECESSITAS_ROOT/apache-ant-1.8.4/bin/ant
 JAVAHOME=/usr/lib/jvm/java-6-openjdk-i386
 # We stop whenever an error happens.
 set -e
