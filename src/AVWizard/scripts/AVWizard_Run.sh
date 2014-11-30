@@ -4,7 +4,6 @@
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/Utils.sh
 . /usr/pluto/bin/X-Common.sh
-#. /usr/pluto/bin/VideoDetectSetup
 
 ###########################################################
 ### Setup global variables
@@ -97,7 +96,7 @@ SetupX () {
 
 DualBus () {
 	if [[ $(lspci | grep -w 'VGA' | sort -u | wc -l) -gt "1" ]]; then
-		BestGPU
+		CheckVideoDriver # BestGPU
 		vga_pci="$1"
 		if [[ -e "$XF86Config" ]]; then
 			XorgConfig="$XF86Config"
