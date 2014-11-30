@@ -14,10 +14,11 @@ Item{
     }
 
     Image{
+        id:img
         source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        height: parent.height*.75
+       anchors.centerIn: fillah
+        width: height
+        height: fillah.height
         anchors.margins: 5
         fillMode: Image.PreserveAspectCrop
         smooth: true
@@ -39,13 +40,13 @@ Item{
     StyledText{
         id:textBox
         text: name
-        anchors.bottom: parent.bottom
-        fontSize: 36
+        anchors.bottom: fillah.bottom
         color: "White"
-        isBold: false
+        fontSize: cellFontSize
+        isBold: true
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         width: fillah.width
-        height: parent.height /4
+        height: parent.height /3
     }
 
     MouseArea{

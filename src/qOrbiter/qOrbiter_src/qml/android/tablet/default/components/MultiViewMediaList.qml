@@ -30,8 +30,7 @@ Item{
 
     Component{
         id:audioItem
-        AudioDelegate{}
-    }
+        AudioDelegate{}    }
 
     Component{
         id:videoItem
@@ -112,8 +111,8 @@ Item{
             //  when:manager.q_mediaType == Mediatypes.STORED_AUDIO
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleX(25)
-                currentCellWidth:scaleX(25)
+                currentCellHeight:manager.isProfile ? scaleX(18) : scaleX(14)
+                currentCellWidth:currentCellHeight
             }
 
         },
@@ -134,8 +133,8 @@ Item{
             extend:"video"
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleY(24)
-                currentCellWidth:scaleX(19)
+                currentCellHeight: scaleY(23)
+                currentCellWidth:scaleX(17)
             }
         },
         State {
@@ -144,8 +143,8 @@ Item{
             extend:"video"
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleY(33)
-                currentCellWidth:scaleX(33)
+                currentCellHeight: scaleY(24)
+                currentCellWidth:scaleX(25)
             }
         },
         State {
@@ -155,7 +154,7 @@ Item{
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: currentCellWidth*hdPosterRatio
-                currentCellWidth:scaleX(25)
+                currentCellWidth:manager.b_orientation ? scaleX(10) : scaleX(14.25)
             }
         },
         State {

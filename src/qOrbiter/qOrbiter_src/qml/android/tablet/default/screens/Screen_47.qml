@@ -140,6 +140,22 @@ StyledScreen {
                 id:media_view
             }
 
+            StyledButton{
+                id:all_media
+                anchors{
+                    bottom: typeSelection.top
+                    left: typeSelection.left
+                    right:typeSelection.right
+                   margins: scaleY(8)
+                }
+                visible: typeSelection.visible
+                height: scaleY(8)
+                buttonText: "All Videos"
+                onActivated: {
+                   content.state="viewing"
+                }
+            }
+
 
             GridView{
                 id:typeSelection

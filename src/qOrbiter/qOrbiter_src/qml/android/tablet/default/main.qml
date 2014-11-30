@@ -133,6 +133,7 @@ Item {
             id:tcCallback
             running:dceplayer.mediaPlaying
             interval: 1000
+            triggeredOnStart: false
             repeat: true
             onTriggered: {dceplayer.processTimeCode(androidSystem.getMediaPosition());}
         }
