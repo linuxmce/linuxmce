@@ -44,7 +44,17 @@ function orbitersWin($output,$dbADO) {
 		</tr>
 		<tr>
 			<td>Android</td>
-			<td>Orbiter For Android</td>
+			<td>Orbiter For Android Qt4 (recommended)</td>
+			<td><a href="fdownload.php?filepath=installers/qOrbiterQt4-debug.apk" target="_blank">('.$TEXT_DOWNLOAD_CONST.')</td>
+		</tr>
+		<tr>
+			<td>Android</td>
+			<td>Orbiter For Android Qt5</td>
+			<td><a href="fdownload.php?filepath=installers/linuxmce-qorbiter-qt5-debug.apk" target="_blank">('.$TEXT_DOWNLOAD_CONST.')</td>
+		</tr>
+		<tr>
+			<td>Android</td>
+			<td>Orbiter For Android (Qt4 dev builds)</td>
 			<td><a href="http://deb.linuxmce.org/LinuxMCE-Orbiter.apk" target="_blank">('.$TEXT_DOWNLOAD_CONST.')</td>
 		</tr>
 		<tr bgcolor="#F0F3F8">
