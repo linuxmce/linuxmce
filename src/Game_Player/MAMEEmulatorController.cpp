@@ -120,6 +120,7 @@ namespace DCE
 	m_pEmulatorModel->m_sProcessName="csmame";
 	m_pEmulatorModel->m_sWindowName="csmame.csmame";
 	m_pEmulatorModel->m_sEmulatorBinary="/usr/bin/csmame";
+	m_pEmulatorModel->m_sState="";
 	if (m_pEmulatorModel->m_bIsStreamingSource)
 	  {
 	    // This is the server, set args as needed

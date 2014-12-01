@@ -107,6 +107,9 @@ bool Game_Player::Connect (int iPK_DeviceTemplate)
   if (!Command_Impl::Connect (iPK_DeviceTemplate))
     return false;
 
+  DeviceData_Base *pDevice = m_pData->GetTopMostDevice();
+  m_sIPofMD = pDevice->m_sIPAddress;
+
   EVENT_Playback_Completed ("", 0, false);	// In case media plugin thought something was playing, let it know that there's not
 
   return true;
@@ -1183,6 +1186,8 @@ void Game_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMe
   
   string sFinalURL;
 
+  m_pEmulatorController = m_pEmulatorFactory->getEmulatorForMediaType(iPK_MediaType);
+
   if (!sStreamingTargets.empty())
     {
       m_pEmulatorController->setStreaming(true);
@@ -1203,7 +1208,7 @@ void Game_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMe
 	      if (m_sIPAddress == "127.0.0.1")
 		m_sIPAddress = "192.168.80.1";   // derp!
 	      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SLAVE Device %d sending Remote play",atoi(sCurrentTarget.c_str()));
-	      sFinalURL = "slave://" + m_sIPAddress + "/" + sMediaURL;
+	      sFinalURL = "slave://" + m_sIPofMD + "/" + sMediaURL;
 	      DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
 					    atoi(sCurrentTarget.c_str()),
 					    iPK_MediaType,iStreamID,

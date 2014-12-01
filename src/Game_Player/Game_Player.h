@@ -72,6 +72,7 @@ namespace DCE
   private:
     bool m_bIsRecording;
     bool m_bStateDirExists;
+    string m_sIPofMD;
     pluto_pthread_mutex_t m_GameMutex;
     EmulatorFactory *m_pEmulatorFactory;
     EmulatorController *m_pEmulatorController;
