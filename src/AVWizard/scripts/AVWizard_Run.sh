@@ -379,6 +379,9 @@ Video_Driver_Detection () {
 				driverConfig="aticonfig"
 				driverLine="--initial"
 			;;
+			vboxvideo)
+				: # Xorg -configure crashes under vboxvideo for some reason 2014/12/01 - phenigma
+			;;
 			*)
 				driverConfig="Xorg"
 				driverLine="-configure"
