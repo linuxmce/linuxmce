@@ -145,8 +145,8 @@ libxv-dev
 libxvmc-dev
 libxxf86vm-dev
 libzvbi-dev
-linux-headers-generic
-linux-image-generic
+linux-headers-generic-lts-trusty
+linux-image-generic-lts-trusty
 linux-source
 lirc
 module-assistant
