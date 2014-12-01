@@ -36,7 +36,8 @@ function setup_tftp_boot
 			local BootParams="splash"
 			;;
 		*)
-			local BootParams="quiet splash"
+			#local BootParams="quiet splash"
+			local BootParams="splash"
 			;;
 	esac
 	local BootParams_Extra=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device = $Moon_DeviceID AND FK_DeviceData = $DEVICEDATA_Extra_Parameters")
