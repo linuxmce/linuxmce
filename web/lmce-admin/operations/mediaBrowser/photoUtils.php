@@ -28,9 +28,9 @@ function getScreensaverFiles($path,$attribute,$attribute2,$mediadbADO,$page,$rec
 	    $query.=' AND Path=?';
 	    $parameters[2] = $path;
 	}
-	return getFiles($mediadbADO, $query, $parameters, $page, $records_per_page, false);
+	return getFiles($mediadbADO, $query, $parameters, $page, $records_per_page, false, false);
 }
-function getPhotoFiles($criteria,$mediadbADO,$page,$records_per_page){
+function getPhotoFiles($criteria,$mediadbADO,$page,$records_per_page, $returnFileList){
 	$i = 0;
 	$query='
 		SELECT PK_File,Filename,Path,fa1.FK_Attribute,fa2.FK_Attribute AS AttributeDisabled
@@ -80,14 +80,21 @@ function getPhotoFiles($criteria,$mediadbADO,$page,$records_per_page){
 	       $i++;
 	    }
 	}
-	return getFiles($mediadbADO, $query, $parameters, $page, $records_per_page, true);
+	return getFiles($mediadbADO, $query, $parameters, $page, $records_per_page, true, $returnFileList);
 }
 
-function getFiles($mediadbADO,$query, $parameters, $page,$records_per_page,$isSearching){
+function getFiles($mediadbADO,$query, $parameters, $page,$records_per_page,$isSearching, $returnFileList){
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/screenSaver.lang.php');
 
 	$res=$mediadbADO->Execute($query, $parameters);
 	$records=$res->RecordCount();
+	if ($returnFileList) {
+	   	$files = "";
+		while($row=$res->FetchRow()){
+			$files.='"'.$row['Path'].'/'.$row['Filename'].'" ';
+		}
+	   	return $files;
+	}
 	$noPages=ceil($records/$records_per_page);
 	$start=($page-1)*$records_per_page;
 	$end=$page*$records_per_page-1;

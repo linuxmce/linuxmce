@@ -27,9 +27,7 @@ function mainScreenSaver($output,$mediadbADO,$dbADO) {
 			$out.=getJS();
 			$out.=getCSS();
 $out.='
-			<a href="javascript:syncPath(\''.substr($path,0,strrpos($path,'/')).'\')">Up one level</a>
-			<a href="index.php?section=photoBrowser">Photo Browser</a>			
-			<div align="center" class="confirm"><B>'.@$_REQUEST['msg'].'</B></div><br>
+			<a href="javascript:syncPath(\''.substr($path,0,strrpos($path,'/')).'\')">Up one level</a>  <a href="index.php?section=photoBrowser">Photo Browser</a><div align="center" class="confirm"><B>'.@$_REQUEST['msg'].'</B></div><br>
 			<div align="center" class="err"><B>'.@$_REQUEST['error'].'</B></div><br>
 			<form action="index.php" method="POST" name="mainScreenSaver">
 			<input type="hidden" name="section" value="mainScreenSaver">

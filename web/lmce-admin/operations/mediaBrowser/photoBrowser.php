@@ -30,6 +30,10 @@ function photoBrowser($output,$mediadbADO,$dbADO) {
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/common.lang.php');
 	include(APPROOT.'/languages/'.$GLOBALS['lang'].'/screenSaver.lang.php');
 
+	$PROTOCOL="smb:";
+	$DCESHARE="//dcerouter";
+	$TMP_DIR="/home/public/.tmp_pictures";
+
 	if ($_REQUEST['action'] == "loadCriteria") {
 	       header('Content-type: text/html');
                print(getCriteriaField($mediadbADO, $_REQUEST['type'], $_REQUEST['index'], ""));
@@ -45,6 +49,9 @@ function photoBrowser($output,$mediadbADO,$dbADO) {
 	      	 $criteria[] = $item;
 	      }
 	      $i++;
+	}
+	if ($_REQUEST['action'] == "preparefolder") {
+	   exec('sudo -u root /usr/pluto/bin/linkPhotosToDir.sh '.$TMP_DIR.' '.getPhotoFiles($criteria,$mediadbADO,1,-1,true));
 	}
 	$out.=getJS();
 	$out.=getCSS();
@@ -63,10 +70,17 @@ function addCriteria(type) {
 			   $("attributeDiv").insert(response);
 		} });
 }
+function prepareFolder() 
+{
+	$("action").value = "preparefolder";
+	$("photoBrowserForm").submit();
+}';
+$out.='
 </script>
 <form action="index.php?section=photoBrowser" method="POST" name="photoBrowserForm" id="photoBrowserForm">
 <input type="hidden" name="section" value="photoBrowser" />
 <input type="hidden" name="page" id="page" value="'.$page.'" />
+<input type="hidden" name="action" id="action" value="" />
 <div id="attributeDiv">';
 for ($i = 0; $i < sizeof($criteria); $i++) {
     $out.=getCriteriaField($mediadbADO, $criteria[$i]['type'], $i, $criteria[$i]['value']);
@@ -76,6 +90,13 @@ $out.='
 <input name="submitbt" type="submit" value="Search" />
 <input type="button" name="addAttribute" value="New Attribute" onclick="addCriteria(\'attr\');" />
 <input type="button" name="addDate" value="New Date" onclick="addCriteria(\'date\');" />
+<input type="button" name="linkFilesToDir" value="Prepare Folder" onclick="prepareFolder();" />
+';
+if ($_REQUEST['action'] == "preparefolder") {
+   $out.='<a href="'.$PROTOCOL.''.$DCESHARE.''.$TMP_DIR.'">'.$DCESHARE.''.$TMP_DIR.'</a>(You will have to copy the link due to browser limitations)';
+}
+
+$out.='
 <select id="newkw_lookup" size="8" style="display: none;"><option value="0"></option></select>
 ';
 $page = 1;
@@ -86,7 +107,7 @@ if (sizeof($criteria) > 0) {
       $out.='
 	<table cellpading="0" cellspacing="0">
 		<tr>
-			<td>'.getPhotoFiles($criteria,$mediadbADO,$page,50).'</td>
+			<td>'.getPhotoFiles($criteria,$mediadbADO,$page,50, false).'</td>
 		</tr>
 	</table>';
 }
