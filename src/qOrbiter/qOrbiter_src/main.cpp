@@ -264,10 +264,10 @@ int main(int argc, char* argv[])
             break;
         case 's':
             screen="fullscreen";
+             deviceType=0;
             break;
         case 'o':
-            screen="fullscreen";            
-            deviceType=0;
+            screen="fullscreen";
             break;
         default:
             bError=true;
@@ -376,6 +376,7 @@ int main(int argc, char* argv[])
         qorbiterManager  w(&orbiterWin.mainView);
         if(deviceType==0){
             w.setDeviceTemplate(DEVICETEMPLATE_OnScreen_qOrbiter_CONST);
+            pqOrbiter.m_bIsOSD=true;
             qDebug() <<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!SETTING ON SCREEN FLAG!!!!!!!!!!!!!!!!!!!!!!!!";
         }
 #else
