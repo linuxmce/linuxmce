@@ -13,7 +13,8 @@ QOrbiterLogger::QOrbiterLogger(QObject *parent) :
 {
     loggingEnabled = false;
 #ifndef ANDROID
-    logLocation = QDir::homePath()+"/QOrbiter-log/";
+    logLocation = QDir::homePath()+"/linuxmce/";
+    qDebug() << logLocation;
     setLogLocation(logLocation);
 #else
     logLocation="";
@@ -21,48 +22,61 @@ QOrbiterLogger::QOrbiterLogger(QObject *parent) :
 }
 
 
-void QOrbiterLogger::setLogLocation(QString l)
-{
+void QOrbiterLogger::setLogLocation(QString l){
+
     if(l != ""){
         logLocation = l;
-
-
         if(!logLocation.endsWith("/")){
             logLocation.append("/");
         }
 #ifdef __ANDROID__
         logLocation.append("LinuxMCE/");
 #endif
-        qDebug() << "New Log Location! " << logLocation;
+
         QDir fileLocation;
         fileLocation.setPath(logLocation);
+        qDebug() << "New Log Location! " << fileLocation;
 
-        if(!fileLocation.exists())
-        {
-            qDebug() << "-----------------log directory doesnt exit, setting up.";
+        if(!fileLocation.exists()){
+            qDebug() <<fileLocation.path()<< "-----------------log directory doesnt exist, setting up.";
 
-        }
-        else
-        {
-            qDebug() << "Log Location sucessfully set. ";
             if(!fileLocation.mkpath(logLocation)){
                 qDebug() << "---------------------------Cant create logfile directory!";
-                return;
-            }
-            else{
-                qDebug() << "Log Location sucessfully created. " << fileLocation.exists();
-                loggingEnabled = true;
-            }
-        }
 
-        emit logLocationChanged(logLocation);
-        if(loggingEnabled)
-            initLogs();
+            } else{
+
+                qDebug() << "Log Location sucessfully created? " << fileLocation.exists();
+                loggingEnabled = true;
+
+                QFile configFile(fileLocation.path()+"/config.xml");
+                qDebug() << configFile.fileName();
+                if(!configFile.exists()){
+                    QFile defaultConfig;
+                    defaultConfig.setFileName(":/main/config.xml");
+
+                    if(!defaultConfig.open(QFile::ReadOnly)){
+                        qDebug() << "Cannot find config in QRC";
+                        qDebug() << defaultConfig.errorString();
+                    } else {
+                        if(defaultConfig.copy(fileLocation.path()+"/config.xml")){
+
+
+
+                            qDebug() << configFile.permissions();
+                        }
+                    }
+                }
+            }
+        } else {
+            qDebug() << "Log Location sucessfully set. ";
+        }
     }
-    else
-    {
+    else{
         qDebug() << "Bad Location " << logLocation;
     }
+    emit logLocationChanged(logLocation);
+    if(loggingEnabled)
+        initLogs();
 }
 
 
@@ -146,9 +160,7 @@ bool QOrbiterLogger::writeToFile(QString msg)
 
 bool QOrbiterLogger::initializeCommandFile()
 {
-   commandFile.setFileName(logLocation+"qorbiter-command.log");
-
-
+    commandFile.setFileName(logLocation+"qorbiter-command.log");
     qDebug()<< "-----------------------Attempting to open logfile " << commandFile.fileName()  ;
     if(commandFile.exists()){
         qDebug() << commandFile.fileName() << " exists and its open state is "<<commandFile.isOpen();
@@ -180,7 +192,7 @@ bool QOrbiterLogger::initializeCommandFile()
         if(commandFile.exists()){
             return true;
         } else{
-             return false;
+            return false;
         }
 
     }
@@ -197,7 +209,7 @@ bool QOrbiterLogger::initializeGuiFile()
             QDir t;
             t.setPath(logLocation);
             t.remove(guiFile.fileName());
-             qDebug() << "Rotating logfile";
+            qDebug() << "Rotating logfile";
         } else {
             qDebug() << "File size is " << guiFile.size() << " and wont be rotated";
         }
@@ -219,7 +231,7 @@ bool QOrbiterLogger::initializeGuiFile()
         if(guiFile.exists()){
             return true;
         } else{
-             return false;
+            return false;
         }
     }
 }
@@ -237,7 +249,7 @@ bool QOrbiterLogger::initializeSkinFile()
             QDir t;
             t.setPath(logLocation);
             t.remove(skinFile.fileName());
-             qDebug() << "Rotating logfile";
+            qDebug() << "Rotating logfile";
         } else {
             qDebug() << "File size is " << skinFile.size() << " and wont be rotated";
         }
@@ -259,7 +271,7 @@ bool QOrbiterLogger::initializeSkinFile()
         if(skinFile.exists()){
             return true;
         } else{
-             return false;
+            return false;
         }
     }
 }

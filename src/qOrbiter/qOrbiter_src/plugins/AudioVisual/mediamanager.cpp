@@ -266,7 +266,7 @@ void MediaManager::setAspectRatio(QString aspect)
 
 QImage MediaManager::getScreenShot(){
 #if defined (QT4) && ! defined (ANDROID)
-return videoSurface->snapshot();
+    return videoSurface->snapshot();
 #else
     QImage screenShot;
     return screenShot;
@@ -374,7 +374,7 @@ void MediaManager::processTimeCode(qint64 f)
 
     QString timeCodeTick = "0/"+QString::number(1000)+","+t+","+qs_totalTime+","+QString::number(streamId)+",0,0,"+fileReference+","+QString::number(fileno)+","+filepath;
     transmit(timeCodeTick);
-
+    current_position=timeCodeTick;
     //  setCurrentStatus("Current position::" +QString::number(displayHours) + ":" + QString::number(minutes) + ":" +QString::number(forseconds));
 }
 

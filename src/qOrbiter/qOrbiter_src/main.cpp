@@ -266,7 +266,7 @@ int main(int argc, char* argv[])
             screen="fullscreen";
             break;
         case 'o':
-            screen="fullscreen";
+            screen="fullscreen";            
             deviceType=0;
             break;
         default:
@@ -374,6 +374,10 @@ int main(int argc, char* argv[])
 
 #ifndef ANDROID
         qorbiterManager  w(&orbiterWin.mainView);
+        if(deviceType==0){
+            w.setDeviceTemplate(DEVICETEMPLATE_OnScreen_qOrbiter_CONST);
+            qDebug() <<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!SETTING ON SCREEN FLAG!!!!!!!!!!!!!!!!!!!!!!!!";
+        }
 #else
         qorbiterManager w(&orbiterWin.mainView, &androidHelper);
         orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
@@ -768,9 +772,8 @@ int main(int argc, char* argv[])
             }
             orbiterWin.setDeviceNumber(PK_Device); orbiterWin.setRouterAddress(QString::fromStdString(sRouter_IP));
 
-        }else if(sRouter_IP =="" && w.getInternalIp() != ""){
-            qDebug() << "No Command line opt set but config file located";
-
+        }else if(!w.getInternalIp().isEmpty() && w.getDeviceNumber() != -1){
+            qDebug() << "No Command line opt set but config file located for device " << w.getDeviceNumber();
             sRouter_IP = w.getInternalIp().toStdString();                                          //use internal ip first
             PK_Device = w.getDeviceNumber();
             orbiterWin.setDeviceNumber(PK_Device);
@@ -779,7 +782,10 @@ int main(int argc, char* argv[])
         }
         else{
             qDebug() << "Nothing set, using defaults.";
-            orbiterWin.setDeviceNumber(PK_Device); orbiterWin.setRouterAddress(w.getInternalIp());
+            orbiterWin.setDeviceNumber(w.getDeviceNumber());
+            orbiterWin.setRouterAddress(w.getInternalIp());
+            sRouter_IP = w.getInternalIp().toStdString();
+            PK_Device=w.getDeviceNumber();
         }
 
         QList<QString*> myHosts;
@@ -810,7 +816,7 @@ int main(int argc, char* argv[])
             QApplication::processEvents(QEventLoop::AllEvents);
         }
 #endif
-        pqOrbiter.qmlSetup(PK_Device, QString::fromStdString(sRouter_IP));
+        pqOrbiter.qmlSetup(w.getDeviceNumber(), QString::fromStdString(sRouter_IP));
         a.exec();
 
         //        localLogger.deleteLater();

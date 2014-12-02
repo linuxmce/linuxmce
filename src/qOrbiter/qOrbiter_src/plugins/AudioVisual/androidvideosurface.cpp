@@ -1,20 +1,30 @@
 /*
-    This file is part of QOrbiter for use with the LinuxMCE project found at http://www.linuxmce.org
-    Author: Langston Ball
-   Langston Ball  golgoj4@gmail.com
-    QOrbiter is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+ * Author:  Luca Carlon
+ * Company: -
+ * Date:    02.09.2013
+ * Project: TextureStreaming
+ *
+ * Copyright (c) 2012, 2013 Luca Carlon. All rights reserved.
+ *
+ * This file is part of TextureStreaming.
+ *
+ * TextureStreaming is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TextureStreaming is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with TextureStreaming.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-    QOrbiter is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
-*/
+/*----------------------------------------------------------------------
+|    includes
++---------------------------------------------------------------------*/
 #include "androidvideosurface.h"
 #include <QGLWidget>
 #include <QTimer>
@@ -23,7 +33,9 @@
 #include <jni.h>
 #include <android/log.h>
 
-/* Definitions */
+/*----------------------------------------------------------------------
+|    definitions
++---------------------------------------------------------------------*/
 #define ATTACH_TO_CURRENT_THREAD_THEN_RET(ret_statement)     \
    JNIEnv* env;                                              \
    if (m_javaVM->AttachCurrentThread(&env, NULL) < 0) {      \
@@ -37,7 +49,6 @@
        ret_statement;                                            \
    }
 
-/* Static jni variables */
 static JavaVM* m_javaVM;
 static JNIEnv* m_env;
 static jmethodID mid_loadVideoTexture;
@@ -45,16 +56,14 @@ static jmethodID mid_updateTexture;
 static jclass class_TextureHelper;
 static jclass class_SurfaceTexture;
 
-/*!
- * \brief load_custom_java_classes. Attempts to load the custom java classes that operate on the other side of this class
- * so to speak that deal with interfacing with the media player. Classnames are hardcoded.
- * \param env
- * \return
- */
+
+/*----------------------------------------------------------------------
+|    load_custom_java_classes
++---------------------------------------------------------------------*/
 int load_custom_java_classes(JNIEnv* env)
 {
     const char* classNameTexHelper =   "org/kde/necessitas/origo/TextureHelper";
-    const char* classNameSurfTexture = "org/kde/necessitas/origo/MySurfaceTexture";
+    const char* classNameSurfTexture = "org/kde/necessitas/origo/QtSurfaceTexture";
 
     // TODO: remember to free.
     jclass local_class_java_delegate = env->FindClass(classNameTexHelper);
@@ -85,9 +94,9 @@ int load_custom_java_classes(JNIEnv* env)
     return JNI_TRUE;
 }
 
-/*! \brief. JNI_OnLoad is called when first initialized, allowing it to ascertain certain environment variables.
- *
- */
+/*----------------------------------------------------------------------
+|    JNI_OnLoad
++---------------------------------------------------------------------*/
 Q_DECL_EXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 {
    qDebug("JNI_OnLoad invoked!");
@@ -107,56 +116,61 @@ Q_DECL_EXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
    return JNI_VERSION_1_4;
 }
 
-
-AndroidVideoSurface::AndroidVideoSurface(QDeclarativeItem *parent) :
-    QDeclarativeItem(parent)
+/*----------------------------------------------------------------------
+|    VideoSurface::VideoSurface
++---------------------------------------------------------------------*/
+VideoSurface::VideoSurface(QDeclarativeItem *parent) :
+   QDeclarativeItem(parent)
 {
-    setFlag(QDeclarativeItem::ItemHasNoContents(false));
-    mTex = 0;
-    mj_surfaceTexture=0;
+   setFlag(QDeclarativeItem::ItemHasNoContents, false);
+   mTex = 0;
+   mSurfaceTexture = 0;
 
-    QTimer *updateTimer = new QTimer();
-    connect(updateTimer, SIGNAL(timeout()), this, SLOT(doUpdate()));
-    updateTimer->setSingleShot(false);
-    updateTimer->start(40);
+   QTimer* timer = new QTimer;
+   connect(timer, SIGNAL(timeout()), this, SLOT(doUpdate()));
+   timer->setSingleShot(false);
+   timer->start(40);
 }
 
-/*!
- * \brief AndroidVideoSurface::paint. Overriding the native paint function to show our video.
- */
-void AndroidVideoSurface::paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *)
+/*----------------------------------------------------------------------
+|    VideoSurface::paint
++---------------------------------------------------------------------*/
+void VideoSurface::paint(QPainter* painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
-    Q_UNUSED(painter);
+   Q_UNUSED(painter);
 
-      static bool init = false;
-      if (!init) {
-         init = true;
-         glGenTextures(1, &mTex);
-         //glBindTexture(GL_TEXTURE_2D, mTex);
-         glBindTexture(GL_TEXTURE_EXTERNAL_OES, mTex);
-         glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-         glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-         glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-         glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-         ATTACH_TO_CURRENT_THREAD_THEN_RET((void)0);
-         jobject surfTexture = env->CallStaticObjectMethod(class_TextureHelper, mid_loadVideoTexture, mTex);/* Important piece. here the method is called that begins playback. it is passed an opengl texture id. url should be set first, then the initial methodd called internally. */
-         if (!surfTexture)
-            qWarning("Failed to instantiate SurfaceTexture.");
-         mj_surfaceTexture = env->NewGlobalRef(surfTexture);
-         DETACH_FROM_CURRENT_THREAD_THEN_RET((void)0);
-      }
+   static bool init = false;
+   if (!init) {
+      init = true;
+      glGenTextures(1, &mTex);
+      //glBindTexture(GL_TEXTURE_2D, mTex);
+      glBindTexture(GL_TEXTURE_EXTERNAL_OES, mTex);
+      glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      ATTACH_TO_CURRENT_THREAD_THEN_RET((void)0);
+      jobject surfTexture = env->CallStaticObjectMethod(class_TextureHelper, mid_loadVideoTexture, mTex);
+      if (!surfTexture)
+         qWarning("Failed to instantiate SurfaceTexture.");
+      mSurfaceTexture = env->NewGlobalRef(surfTexture);
+      DETACH_FROM_CURRENT_THREAD_THEN_RET((void)0);
+   }
 
-      if (mj_surfaceTexture) {
-         ATTACH_TO_CURRENT_THREAD_THEN_RET(return);
-         env->CallVoidMethod(mj_surfaceTexture, mid_updateTexture);
-         DETACH_FROM_CURRENT_THREAD_THEN_RET(return);
-      }
+   if (mSurfaceTexture) {
+      ATTACH_TO_CURRENT_THREAD_THEN_RET(return);
+      env->CallVoidMethod(mSurfaceTexture, mid_updateTexture);
+      DETACH_FROM_CURRENT_THREAD_THEN_RET(return);
+   }
 
-      QGLContext* context = const_cast<QGLContext*>(QGLContext::currentContext());
-      context->drawTexture(QRectF(0, height(), width(), -height()), mTex, GL_TEXTURE_EXTERNAL_OES);
+   QGLContext* context = const_cast<QGLContext*>(QGLContext::currentContext());
+   context->drawTexture(QRectF(0, height(), width(), -height()), mTex, GL_TEXTURE_EXTERNAL_OES);
 }
 
-void AndroidVideoSurface::doUpdate()
+/*----------------------------------------------------------------------
+|    VideoSurface::doUpdate
++---------------------------------------------------------------------*/
+void VideoSurface::doUpdate()
 {
-    update(0,0, width(), height());
+   update(0, 0, width(), height());
 }

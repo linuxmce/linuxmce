@@ -350,15 +350,13 @@ OTHER_FILES += ../../Readme.txt \
     ../../../platforms/Android/android/res/drawable-hdpi/icon.png \
     ../../../platforms/Android/android/res/values-et/strings.xml \
     ../../../platforms/Android/android/version.xml \
-    ../../../platforms/Android/android/project.properties \
-    ../../../platforms/Android/android/src/org/kde/necessitas/origo/QtActivity.java \
-    ../../../platforms/Android/android/src/org/kde/necessitas/origo/QtApplication.java \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
+    ../../../platforms/Android/android/project.properties \       
     ../../../platforms/Android/android/src/org/kde/necessitas/origo/VideoActivity.java \
     ../../../platforms/Android/android/src/org/kde/necessitas/origo/LinuxmceAudioService.java \
     ../../qml/android/phoneConfig/BaseLoaded.qml \
-    android/version.xml \
+    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
+    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
+    android/version.xml
 
 
 

@@ -324,19 +324,16 @@ public slots:
     }
 
     void setVolume(qreal vol){
-
 #ifdef QT4
 #ifndef Q_OS_ANDROID
-
         audioSink->setVolume(vol);
 #else
         setPluginVolume((double)vol);
 #endif
-
 #endif
-        qDebug() << vol;
         volume = vol;
         displayVolume=vol;
+        qWarning() << "Vol level :: " << vol;
         emit displayVolumeChanged();
         emit volumeChanged();
     }

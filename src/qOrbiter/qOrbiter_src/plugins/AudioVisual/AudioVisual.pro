@@ -167,7 +167,8 @@ SOURCES += \
 	../../../../DCE/DeviceData_Impl.cpp \
 	../../../../PlutoUtils/getch.cpp \
 	../../../../Gen_Devices/qMediaPlayerBase.cpp \
-	../../../../Gen_Devices/qOrbiterBase.cpp \
+        ../../../../Gen_Devices/qOrbiterBase.cpp
+
 
 
 
@@ -198,9 +199,20 @@ HEADERS += \
 	../../../../pluto_main/Define_DeviceCategory.h \
 	../../../../pluto_main/Define_DeviceTemplate.h \
 	../../../../Gen_Devices/qMediaPlayerBase.h \
-	../../../../Gen_Devices/qOrbiterBase.h \
+        ../../../../Gen_Devices/qOrbiterBase.h
 
 
+android-g++{
+    contains(QT_VERSION,4.*.*){
+    HEADERS+= \
+        androidjniplayer.h \
+        androidvideosurface.h
+
+    SOURCES+= \
+         androidjniplayer.cpp \
+        androidvideosurface.cpp
+    }
+}
 
 
 !equals(_PRO_FILE_PWD_, $$DESTDIR) {

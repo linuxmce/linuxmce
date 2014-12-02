@@ -19,12 +19,12 @@ SkinDataModel::SkinDataModel(QUrl &baseUrl, SkinDataItem* prototype, qorbiterMan
     clear();
 
 
-//    if(m_baseUrl.scheme() == "http"){
-//        m_baseUrl.setScheme("https");
-//    }
+    //    if(m_baseUrl.scheme() == "http"){
+    //        m_baseUrl.setScheme("https");
+    //    }
 
     uiRef->setDceResponse("Setting skin source: " + m_baseUrl.toString());
-   #ifndef QT5
+#ifndef QT5
     setRoleNames(m_prototype->roleNames());
 #endif
     qRegisterMetaType<QModelIndex>("QModelIndex");
@@ -58,13 +58,13 @@ QVariant SkinDataModel::data(const QModelIndex &index, int role) const
 }
 
 SkinDataModel::~SkinDataModel() {
-     clear();
+    clear();
     delete m_prototype;
 
 }
 
 void SkinDataModel::appendRow(SkinDataItem *item){
-            appendRows(QList<SkinDataItem*>() << item);
+    appendRows(QList<SkinDataItem*>() << item);
 }
 
 void SkinDataModel::appendRows(const QList<SkinDataItem *> &items)
@@ -102,13 +102,13 @@ SkinDataItem * SkinDataModel::find(const QString &id) const
         //qDebug() << "Skin Item" << item->id();
         if(item->id().toLower() == id.toLower())
         {
-             //qDebug()<< "Found:" << item->id() << "of" << m_list.size();
+            //qDebug()<< "Found:" << item->id() << "of" << m_list.size();
             return item;
-        }       
+        }
     }
-         ui_reference->setDceResponse("SKIN ERROR");
+    ui_reference->setDceResponse("SKIN ERROR");
 
-         return 0;
+    return 0;
 }
 
 QModelIndex SkinDataModel::indexFromItem(const SkinDataItem *item) const
@@ -175,18 +175,18 @@ void SkinDataModel::setActiveSkin(QString name)
     QString skinURL = m_baseUrl.toString() + "/" + name+"/Style.qml";
     m_entryUrl = m_baseUrl.toString()+"/"+name+"/main.qml";
 
-     qDebug() << "Skin url" << skinURL;
+    qDebug() << "Skin url" << skinURL;
 
-   //dir -l qDebug() << skinURL;
+    //dir -l qDebug() << skinURL;
 
 #ifdef QT5
-     current_style = new QQmlComponent(ui_reference->qorbiterUIwin->engine(), QUrl(skinURL));
+    current_style = new QQmlComponent(ui_reference->qorbiterUIwin->engine(), QUrl(skinURL));
 #elif __ANDROID__
-     current_style = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), QUrl(skinURL));
+    current_style = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), QUrl(skinURL));
 #else
-     current_style = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), QUrl(skinURL));
+    current_style = new QDeclarativeComponent(ui_reference->qorbiterUIwin->engine(), QUrl(skinURL));
 #endif
-qDebug("eggs");
+    qDebug("eggs");
     if (current_style->isError()) {
         qDebug() << current_style->errorString();
         // this dir does not contain a Style.qml; ignore it
@@ -200,17 +200,17 @@ qDebug("eggs");
         ready=true;
 
     }
-        qDebug("bacon");
+    qDebug("bacon");
 }
 
 void SkinDataModel::checkStatus()
 {
     qDebug("Finished loading skins") ;
-        emit skinsFinished(true);
+    emit skinsFinished(true);
 }
 #ifdef QT5
 QHash<int, QByteArray> SkinDataModel::roleNames() const
 {
-     return m_prototype->roleNames();
+    return m_prototype->roleNames();
 }
 #endif

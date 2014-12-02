@@ -96,7 +96,7 @@ public slots:
      * \param key
      * \warning system use only
      */
-    void addParam(const QString val, int key) {paramDevices.insert(key, val); qDebug() << val << "::" << key; }
+    void addParam(const QString val, int key) {paramDevices.insert(key, val); qDebug() << key << "::" << val; }
 
     /*!
      * \brief clear

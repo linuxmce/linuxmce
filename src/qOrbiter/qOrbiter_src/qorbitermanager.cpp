@@ -1034,6 +1034,8 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     }
 
     alreadyConfigured=true;
+
+
 }
 
 void qorbiterManager::getConfiguration()
@@ -1959,10 +1961,7 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
  *
  * \return
  */
-bool qorbiterManager::readLocalConfig()
-{
-
-
+bool qorbiterManager::readLocalConfig(){
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
@@ -1991,7 +1990,7 @@ bool qorbiterManager::readLocalConfig()
 #elif RPI
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #else
-    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
+    QString xmlPath = QDir::homePath()+"/linuxmce/config.xml";
 #endif
     QFile localConfigFile;
     //**todo!! - add function for 1st run on android that copies the file to the xml path, then performs checks. we cannot install directly there.
@@ -2016,6 +2015,7 @@ bool qorbiterManager::readLocalConfig()
 #endif
 
 
+
     // existence check
     QFileInfo chk(xmlPath);
 
@@ -2026,15 +2026,16 @@ bool qorbiterManager::readLocalConfig()
         appConfigPath="/usr/pluto/bin/config.xml";
     } else {
         localConfigFile.setFileName(xmlPath);
-        setDceResponse("Found config.xml in app path, reading.");
+        setDceResponse("Found config.xml in app path, reading "+localConfigFile.fileName());
         appConfigPath=xmlPath;
     }
 
     if (!localConfigFile.open(QFile::ReadWrite)) {
+
         setDceResponse("No Config Found.");
         setDceResponse("config not found!::"+localConfigFile.fileName());
         setInternalIp("192.168.80.1");
-        currentSkin="default";
+        currentSkin=deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "STB" : "default";
         setDeviceNumber(-1);
         return false;
     } else {
@@ -2082,11 +2083,17 @@ bool qorbiterManager::readLocalConfig()
 #elif QT5
                 currentSkin = "noir";
 #else
-                currentSkin = "default";
+                currentSkin = deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "STB" : "default";
 #endif
             }
             else{
-                currentSkin =configSkin;
+
+                if(configSkin=="default" && deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST){
+                    currentSkin="STB";
+                } else {
+                     currentSkin =configSkin;
+                }
+
             }
             QString tRp = configVariables.namedItem("routerport").attributes().namedItem("id").nodeValue();
             if(tRp.isEmpty()){
@@ -2150,8 +2157,10 @@ bool qorbiterManager::readLocalConfig()
 #ifdef __ANDROID__
         setDceResponse("Finished READ of config.xml at::"+mobileStorageLocation);
 #else
-        setDceResponse("Finished READ of config.xml at::"+mobileStorageLocation);
+        setDceResponse("Finished READ of config.xml at::"+appConfigPath);
 #endif
+
+
         return true;
     }
 }
@@ -2422,9 +2431,9 @@ void qorbiterManager::toggleSkinType()
         qDebug() << tskinModel->m_baseUrl;
         loadSkins(tskinModel->m_baseUrl);
 
-        currentSkin="default";
+        currentSkin=deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "STB" : "default";
         if(writeConfig()){
-            swapSkins("default");
+            swapSkins(deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "STB" : "default");
         }
     }
 }
@@ -2565,12 +2574,12 @@ void qorbiterManager::processError(QString msg)
 
 void qorbiterManager::setActiveSkin(QString name){
 
-
+qDebug() <<"qOrbiterManager::setActiveSkin("<<name<<")";
     if(name=="splash_fallback"){
 
     }
     else {
-        tskinModel->setActiveSkin(name);
+        tskinModel->setActiveSkin(deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "STB" : name);
     }
 
     qDebug("Setting Skin");
