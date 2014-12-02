@@ -113,7 +113,7 @@ linux-g++{
                 QT += script opengl
                 folder_01.source = qml/desktop
                 folder_01.target = $$DESTDIR/qml
-                target.path=/usr/pluto/bin/
+
         }
 
         contains(QT_VERSION,5.*.*){
@@ -127,11 +127,11 @@ linux-g++{
 !RPI{
         plugins_folder.source = imports
         plugins_folder.target = $$DESTDIR
-       # DEPLOYMENTFOLDERS+= plugins_folder
+        DEPLOYMENTFOLDERS+= plugins_folder
 
         folder_03.source = config.xml
         folder_03.target = $$DESTDIR
-       # DEPLOYMENTFOLDERS+= folder_03
+       DEPLOYMENTFOLDERS+= folder_03
         QML_IMPORT_PATH=imports
 }
 
