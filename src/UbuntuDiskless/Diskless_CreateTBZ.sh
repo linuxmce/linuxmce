@@ -474,8 +474,9 @@ MD_Install_Packages () {
 			StatsMessage "Installing kernel headers"
 			#Install headers and run depmod for the seamless integraton function, ensure no errors exist
 			TARGET_KVER_LTS_HES=""
-			[[ "precise" = "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-trusty"
-			[[ "trusty" = "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-utopic"
+			TARGET_XVER_LTS_HES=""
+			[[ "precise" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-trusty"
+			[[ "trusty" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-utopic"
 			echo "LTS_HES=$TARGET_KVER_LTS_HES" >> /etc/pluto.conf
 			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install linux-headers-generic"$TARGET_KVER_LTS_HES"
 			VerifyExitCode "Install linux headers package failed"
@@ -635,9 +636,9 @@ MD_Install_Packages () {
 			LC_ALL=C chroot $TEMP_DIR update-rc.d -f NetworkManager remove
 
 			#Install ancillary programs
-			LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg"$TARGET_KVER_LTS_HES"
-			VerifyExitCode "xserver-xorg$TARGET_KVER_LTS_HES install failed"
-			LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all"$TARGET_KVER_LTS_HES" linux-firmware
+			LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg"$TARGET_XVER_LTS_HES"
+			VerifyExitCode "xserver-xorg$TARGET_XVER_LTS_HES install failed"
+			LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all"$TARGET_XVER_LTS_HES" linux-firmware
 			VerifyExitCode "Ancillary programs install failed"
 
 			## Install plymouth theme on MD in Ubuntu
@@ -648,10 +649,6 @@ MD_Install_Packages () {
 	                sed -i".pbackup" 's/ and static-network-up//g' "$TEMP_DIR/etc/init/rc-sysinit.conf"
 			;;
 		"raspbian")
-			#Install nfs-common and openssh-server
-			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install nfs-common openssh-server
-			VerifyExitCode "nfs-common or openssh-server programs install failed"
-
 			#FIXME: why is this required, something missing?
 			#LC_ALL=C chroot $TEMP_DIR addgroup --force-badname Debian-exim
 			#VerifyExitCode "addgroup Debian-Exim failed"
@@ -661,7 +658,12 @@ MD_Install_Packages () {
 			;;
 	esac
 
+	#Install nfs-common and openssh-server
+	LC_ALL=C chroot "$TEMP_DIR" apt-get -y install nfs-common openssh-server
+	VerifyExitCode "nfs-common or openssh-server programs install failed"
+
 	LC_ALL=C chroot "$TEMP_DIR" apt-get -y install pastebinit
+	VerifyExitCode "pastebinit"
 
 	#implement external_media_identifier fix
 	LC_ALL=C chroot $TEMP_DIR ln -s /usr/lib/libdvdread.so.4 /usr/lib/libdvdread.so.3
