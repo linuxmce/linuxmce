@@ -701,7 +701,7 @@ MD_Cleanup () {
 	rm -f "$TEMP_DIR"/etc/X11/xorg.conf*
 
 	#Clean up apt from the installs
-	LC_ALL=C chroot "$TEMP_DIR" apt-get -f -y clean
+	LC_ALL=C chroot "$TEMP_DIR" apt-get -y clean
 	VerifyExitCode "APT Clean"
 
 	#Create a list of installed packages
