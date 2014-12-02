@@ -14,7 +14,9 @@ $allowedFiles=array(
 	'binaries/Orbiter.MD5',
 	'binaries/OrbiterCE.exe',
 	'PlutoBaSInstaller.msi',
-	'PlutoRebootSetup.msi'
+	'PlutoRebootSetup.msi',
+	'installers/qOrbiterQt4-debug.apk',
+	'installers/linuxmce-qorbiter-qt5-debug.apk'
 );
 
 $allowedDirectories=array(
