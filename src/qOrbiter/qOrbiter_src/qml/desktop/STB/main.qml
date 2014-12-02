@@ -8,7 +8,7 @@
  */
 
 import QtQuick 1.1
-import AudioVisual 1.0
+
 import "../../skins-common/lib/components"
 import "../../skins-common/lib/handlers"
 import "components"
