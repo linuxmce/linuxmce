@@ -653,14 +653,15 @@ MD_Install_Packages () {
 			#LC_ALL=C chroot $TEMP_DIR addgroup --force-badname Debian-exim
 			#VerifyExitCode "addgroup Debian-Exim failed"
 			LC_ALL=C chroot "$TEMP_DIR" sed -i '/Debian-exim/d' /var/lib/dpkg/statoverride
-
-			LC_ALL=C chroot "$TEMP_DIR" apt-get -y install xinit
 			;;
 	esac
 
 	#Install nfs-common and openssh-server
 	LC_ALL=C chroot "$TEMP_DIR" apt-get -y install nfs-common openssh-server
 	VerifyExitCode "nfs-common or openssh-server programs install failed"
+
+	LC_ALL=C chroot "$TEMP_DIR" apt-get -y install xinit
+	VerifyExitCode "xinit"
 
 	LC_ALL=C chroot "$TEMP_DIR" apt-get -y install pastebinit
 	VerifyExitCode "pastebinit"
