@@ -37,7 +37,7 @@ Item{
 
     Item{
         id:npOptions
-        width: (dcenowplaying.b_mediaPlaying || dceplayer.mediaPlaying) ? scaleX(8) :0
+        width: (dcenowplaying.b_mediaPlaying ) ? scaleX(8) :0
         anchors{
             top:parent.top
             bottom:parent.bottom
