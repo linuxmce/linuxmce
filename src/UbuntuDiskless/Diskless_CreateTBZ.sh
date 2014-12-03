@@ -786,6 +786,11 @@ for TARGET in "$TARGET_TYPES" ; do
 					TARGET_REPO_DISTRO_SRC=24
 					TARGET_REPO_LMCE_SRC=25
 					;;
+				trusty)
+					TARGET_DISTRO_ID=21
+					TARGET_REPO_DISTRO_SRC=24
+					TARGET_REPO_LMCE_SRC=25
+					;;
 			esac
 			;;
 		"raspbian-armhf")
