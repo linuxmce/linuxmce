@@ -203,7 +203,7 @@ function do_debootstrap {
 	esac
 
 	[[ -f $(which "qemu-$qemu_arch-static") ]] && qemu_static_bin=$(which "qemu-$qemu_arch-static")
-	$PROXY debootstrap --arch "$TARGET_ARCH" --foreign --no-check-gpg "$release_name" "$temp_dir" "$repository"
+	debootstrap --arch "$TARGET_ARCH" --foreign --no-check-gpg "$release_name" "$temp_dir" "$repository"
 	mkdir -p "$temp_dir/usr/bin"
 	[[ -f "$qemu_static_bin" ]] && cp "$qemu_static_bin" "$temp_dir/usr/bin"
 	chroot "$temp_dir" /debootstrap/debootstrap --second-stage
