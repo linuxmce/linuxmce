@@ -4,10 +4,12 @@ Item {
     property bool verticalMirror: false
     property color clockColor:"white"   
     property bool boldClock:false
+    width:manager.appWidth /3
     function getDate(){
         var d = new Date();
         return Qt.formatDateTime(d, "dddd ,MMMM d \n hh:mm:ss -- yyyy ");
     }
+
     Timer { // Update the clock element periodically
         interval: 5; running: true; repeat: true
         onTriggered: txtDate.text = getDate()

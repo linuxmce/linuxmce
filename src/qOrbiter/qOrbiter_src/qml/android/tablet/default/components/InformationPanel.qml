@@ -61,7 +61,7 @@ Item{
         id:time_keeper
        anchors{
            verticalCenter: parent.verticalCenter
-           horizontalCenterOffset: scaleY(-15)
+         //  horizontalCenterOffset: scaleX(-5)
            horizontalCenter: parent.horizontalCenter
        }
     }
