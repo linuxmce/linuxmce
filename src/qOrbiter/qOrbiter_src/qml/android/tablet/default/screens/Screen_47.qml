@@ -10,6 +10,7 @@ StyledScreen {
     property bool showDetails: false
     keepHeader: false
 
+
     Panel{
         id:container
         anchors.fill: parent
@@ -86,26 +87,6 @@ StyledScreen {
             anchors.verticalCenter: parent.verticalCenter
             hitArea.onReleased:{
                 manager.goBackGrid();
-            }
-        }
-
-
-        Keys.onReleased: {
-
-            switch(event.key){
-            case Qt.Key_Back:
-                manager.goBackGrid();
-                event.accepted=true
-                break;
-            case Qt.Key_MediaPrevious:
-                if (!manager.goBackGrid())
-                    event.accepted=false
-                else
-                    event.accepted=true
-                break;
-            default:
-                console.log(event.key)
-                break
             }
         }
 
@@ -274,5 +255,24 @@ StyledScreen {
     }
 
 
+
+    Keys.onReleased: {
+
+        switch(event.key){
+        case Qt.Key_Back:
+            manager.goBackGrid();
+            event.accepted=true
+            break;
+        case Qt.Key_MediaPrevious:
+            if (!manager.goBackGrid())
+                event.accepted=false
+            else
+                event.accepted=true
+            break;
+        default:
+            console.log(event.key)
+            break
+        }
+    }
 
 }

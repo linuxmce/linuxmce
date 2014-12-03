@@ -2,7 +2,7 @@ import QtQuick 1.1
 Item{
     id:audioDelegate
     height: currentCellHeight
-    width:currentCellWidth
+    width: currentCellWidth
     clip:true
 
     Rectangle{
@@ -52,6 +52,13 @@ Item{
     MouseArea{
         id:trap
         anchors.fill: parent
-        onReleased:{manager.addRestoreIndex(model.index); manager.setStringParam(4, id);}
+        onReleased: {
+            if(name==="back (..)"){
+                manager.goBackGrid()
+            } else {
+                manager.addRestoreIndex(model.index);
+                manager.setStringParam(4, id);
+            }
+        }
     }
 }

@@ -11,9 +11,13 @@ import "../components"
   *Audio Control
   *Advanced Device Controls
   */
-MediaPlaybackBase{
-id:screen_176
-objectName: "Cannot Play Media"
-screenLabel: qsTr("Cannot play media")
+StyledScreen{
+    MediaPlaybackBase{
+    id:screen_176
+    objectName: "Cannot Play Media"
+    screenLabel: qsTr("Cannot play media")
 
+    }
 }
+
+

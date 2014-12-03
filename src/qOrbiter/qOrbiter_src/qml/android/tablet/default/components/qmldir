@@ -42,7 +42,6 @@ Metadata_43             Metadata_43.qml                        #no comment
 Metadata_4             Metadata_4.qml                        #no comment
 Metadata_5             Metadata_5.qml                        #no comment
 MultiViewMediaList             MultiViewMediaList.qml                        #no comment
-MultiViewMediaList.qml             MultiViewMediaList.qml.autosave                        #no comment
 NavigationRow             NavigationRow.qml                        #no comment
 NavOptions43             NavOptions43.qml                        #no comment
 NavOptions5             NavOptions5.qml                        #no comment
@@ -52,6 +51,7 @@ PlaylistEditor             PlaylistEditor.qml                        #no comment
 PlaylistPanel             PlaylistPanel.qml                        #no comment
 PlaylistView             PlaylistView.qml                        #no comment
 PowerControl             PowerControl.qml                        #no comment
+PSMediaSquare             PSMediaSquare.qml                        #no comment
 Resend             Resend.qml                        #no comment
 RoomSelector             RoomSelector.qml                        #no comment
 ScenarioComponent             ScenarioComponent.qml                        #no comment
