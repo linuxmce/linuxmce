@@ -1559,7 +1559,7 @@ void MPlayer_Player::UpdateTracksInfo()
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "MPlayer_Player::UpdateTracksInfo - detecting count of tracks");
 	
 	string sInfoFile = "/tmp/MPlayer_" + StringUtils::itos(m_dwPK_Device)+".ffmpeg.info";
-	string sCMD = "/opt/pluto-ffmpeg/bin/ffmpeg -i \"" + m_sCurrentFileName + "\" 2>&1 | grep \"Stream.*Audio\" > " + sInfoFile;
+	string sCMD = "/usr/bin/ffmpeg -i \"" + m_sCurrentFileName + "\" 2>&1 | grep \"Stream.*Audio\" > " + sInfoFile;
 	
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "MPlayer_Player::UpdateTracksInfo - detect command: %s", sCMD.c_str());
 	int iRetCode = system(sCMD.c_str());
