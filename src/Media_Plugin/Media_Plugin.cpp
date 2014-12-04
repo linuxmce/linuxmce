@@ -5156,8 +5156,9 @@ bool Media_Plugin::SubtitleTrackChanged( class Socket *pSocket, class Message *p
 	PLUTO_SAFETY_LOCK( mm, m_MediaMutex );
 	string sTrackID = pMessage->m_mapParameters[EVENTPARAMETER_ID_CONST];
 	int iStreamID = atoi( pMessage->m_mapParameters[EVENTPARAMETER_Stream_ID_CONST].c_str( ) );
+	string sLanguage = pMessage->m_mapParameters[EVENTPARAMETER_Language_CONST];
 
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::SubtitleTrackChanged to Track: %s, for StreamID %i", sTrackID.c_str(), iStreamID);
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::SubtitleTrackChanged to Track: %s, Lang: '%s', StreamID: %i", sTrackID.c_str(), sLanguage.c_str(), iStreamID);
 	return true;
 }
 
@@ -5166,8 +5167,9 @@ bool Media_Plugin::AudioTrackChanged( class Socket *pSocket, class Message *pMes
 	PLUTO_SAFETY_LOCK( mm, m_MediaMutex );
 	string sTrackID = pMessage->m_mapParameters[EVENTPARAMETER_ID_CONST];
 	int iStreamID = atoi( pMessage->m_mapParameters[EVENTPARAMETER_Stream_ID_CONST].c_str( ) );
+	string sLanguage = pMessage->m_mapParameters[EVENTPARAMETER_Language_CONST];
 
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::AudioTrackChanged to Track: %s, for StreamID %i", sTrackID.c_str(), iStreamID);
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::AudioTrackChanged to Track: %s, Lang: '%s', StreamID: %i", sTrackID.c_str(), sLanguage.c_str(), iStreamID);
 	return true;
 }
 
@@ -5176,8 +5178,9 @@ bool Media_Plugin::VideoTrackChanged( class Socket *pSocket, class Message *pMes
 	PLUTO_SAFETY_LOCK( mm, m_MediaMutex );
 	string sTrackID = pMessage->m_mapParameters[EVENTPARAMETER_ID_CONST];
 	int iStreamID = atoi( pMessage->m_mapParameters[EVENTPARAMETER_Stream_ID_CONST].c_str( ) );
+	string sLanguage = pMessage->m_mapParameters[EVENTPARAMETER_Language_CONST];
 
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::VideoTrackChanged to Track: %s, for StreamID %i", sTrackID.c_str(), iStreamID);
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::VideoTrackChanged to Track: %s, Lang: '%s', StreamID: %i", sTrackID.c_str(), sLanguage.c_str(), iStreamID);
 	return true;
 }
 
