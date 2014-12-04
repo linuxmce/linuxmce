@@ -659,6 +659,21 @@ public:
 	 */
 	bool VolumeChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
 
+	/**
+	 * @brief Interceptor for subtitle track changed event
+	 */
+	bool SubtitleTrackChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
+
+	/**
+	 * @brief Interceptor for audio track changed event
+	 */
+	bool AudioTrackChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
+
+	/**
+	 * @brief Interceptor for video track changed event
+	 */
+	bool VideoTrackChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo );
+
 	// Sometimes when MediaHanderBase::GetRenderDevices is called, only the top-level render devices (ie the media source)
 	// is desired.  However, HandleOnOffs wants everything in the pipe, and the following function
 	// can be used to add the other devices into the map

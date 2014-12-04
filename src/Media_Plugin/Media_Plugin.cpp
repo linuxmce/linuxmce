@@ -1253,6 +1253,10 @@ bool Media_Plugin::Register()
     RegisterMsgInterceptor( ( MessageInterceptorFn )( &Media_Plugin::VolumeChanged ), 0, 0, 0, 0, MESSAGETYPE_COMMAND, COMMAND_Set_Volume_CONST );
     RegisterMsgInterceptor( ( MessageInterceptorFn )( &Media_Plugin::VolumeChanged ), 0, 0, 0, 0, MESSAGETYPE_COMMAND, COMMAND_Mute_CONST );
 
+    RegisterMsgInterceptor( ( MessageInterceptorFn )( &Media_Plugin::SubtitleTrackChanged ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Subtitle_Track_Changed_CONST );
+    RegisterMsgInterceptor( ( MessageInterceptorFn )( &Media_Plugin::AudioTrackChanged ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Audio_Track_Changed_CONST );
+    RegisterMsgInterceptor( ( MessageInterceptorFn )( &Media_Plugin::VideoTrackChanged ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Video_Track_Changed_CONST );
+
 
     m_pDatagrid_Plugin->RegisterDatagridGenerator(
         new DataGridGeneratorCallBack( this, ( DCEDataGridGeneratorFn )( &Media_Plugin::MediaBrowser) )
@@ -5145,6 +5149,24 @@ bool Media_Plugin::AvInputChanged( class Socket *pSocket, class Message *pMessag
 	}
 
 	return false;
+}
+
+bool Media_Plugin::SubtitleTrackChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo )
+{
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::SubtitleTrackChanged");
+	return true;
+}
+
+bool Media_Plugin::AudioTrackChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo )
+{
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::AudioTrackChanged");
+	return true;
+}
+
+bool Media_Plugin::VideoTrackChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo )
+{
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Media_Plugin::VideoTrackChanged");
+	return true;
 }
 
 bool Media_Plugin::VolumeChanged( class Socket *pSocket, class Message *pMessage, class DeviceData_Base *pDeviceFrom, class DeviceData_Base *pDeviceTo )
