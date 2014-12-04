@@ -90,6 +90,42 @@ public:
 			EVENTPARAMETER_Speed_CONST, StringUtils::itos(iSpeed).c_str()));
 	}
 
+	virtual void Subtitle_Track_Changed(string sID,int iStream_ID,string sName,string sFormat,string sLanguage)
+	{
+		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
+			EVENT_Subtitle_Track_Changed_CONST,
+			5 /* number of parameter's pairs (id, value) */,
+			EVENTPARAMETER_ID_CONST, sID.c_str(),
+			EVENTPARAMETER_Stream_ID_CONST, StringUtils::itos(iStream_ID).c_str(),
+			EVENTPARAMETER_Name_CONST, sName.c_str(),
+			EVENTPARAMETER_Format_CONST, sFormat.c_str(),
+			EVENTPARAMETER_Language_CONST, sLanguage.c_str()));
+	}
+
+	virtual void Audio_Track_Changed(string sID,int iStream_ID,string sName,string sFormat,string sLanguage)
+	{
+		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
+			EVENT_Audio_Track_Changed_CONST,
+			5 /* number of parameter's pairs (id, value) */,
+			EVENTPARAMETER_ID_CONST, sID.c_str(),
+			EVENTPARAMETER_Stream_ID_CONST, StringUtils::itos(iStream_ID).c_str(),
+			EVENTPARAMETER_Name_CONST, sName.c_str(),
+			EVENTPARAMETER_Format_CONST, sFormat.c_str(),
+			EVENTPARAMETER_Language_CONST, sLanguage.c_str()));
+	}
+
+	virtual void Video_Track_Changed(string sID,int iStream_ID,string sName,string sFormat,string sLanguage)
+	{
+		SendMessage(new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, 
+			EVENT_Video_Track_Changed_CONST,
+			5 /* number of parameter's pairs (id, value) */,
+			EVENTPARAMETER_ID_CONST, sID.c_str(),
+			EVENTPARAMETER_Stream_ID_CONST, StringUtils::itos(iStream_ID).c_str(),
+			EVENTPARAMETER_Name_CONST, sName.c_str(),
+			EVENTPARAMETER_Format_CONST, sFormat.c_str(),
+			EVENTPARAMETER_Language_CONST, sLanguage.c_str()));
+	}
+
 };
 
 
@@ -322,6 +358,9 @@ public:
 	void EVENT_Playback_Completed(string sMRL,int iStream_ID,bool bWith_Errors) { GetEvents()->Playback_Completed(sMRL.c_str(),iStream_ID,bWith_Errors); }
 	void EVENT_Playback_Started(string sMRL,int iStream_ID,string sSectionDescription,string sAudio,string sVideo) { GetEvents()->Playback_Started(sMRL.c_str(),iStream_ID,sSectionDescription.c_str(),sAudio.c_str(),sVideo.c_str()); }
 	void EVENT_Media_Position_Changed(int iFK_MediaType,string sMRL,string sID,int iStream_ID,string sDateTime,string sCurrent_Time,int iSpeed) { GetEvents()->Media_Position_Changed(iFK_MediaType,sMRL.c_str(),sID.c_str(),iStream_ID,sDateTime.c_str(),sCurrent_Time.c_str(),iSpeed); }
+	void EVENT_Subtitle_Track_Changed(string sID,int iStream_ID,string sName,string sFormat,string sLanguage) { GetEvents()->Subtitle_Track_Changed(sID.c_str(),iStream_ID,sName.c_str(),sFormat.c_str(),sLanguage.c_str()); }
+	void EVENT_Audio_Track_Changed(string sID,int iStream_ID,string sName,string sFormat,string sLanguage) { GetEvents()->Audio_Track_Changed(sID.c_str(),iStream_ID,sName.c_str(),sFormat.c_str(),sLanguage.c_str()); }
+	void EVENT_Video_Track_Changed(string sID,int iStream_ID,string sName,string sFormat,string sLanguage) { GetEvents()->Video_Track_Changed(sID.c_str(),iStream_ID,sName.c_str(),sFormat.c_str(),sLanguage.c_str()); }
 	//Commands - Override these to handle commands from the server
 	virtual void CMD_Simulate_Keypress(string sPK_Button,int iStreamID,string sName,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Update_Object_Image(string sPK_DesignObj,string sType,char *pData,int iData_Size,string sDisable_Aspect_Lock,string &sCMD_Result,class Message *pMessage) {};
