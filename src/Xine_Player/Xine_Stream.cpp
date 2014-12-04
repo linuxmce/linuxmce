@@ -1803,6 +1803,17 @@ bool Xine_Stream::setSubtitle( int Value )
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "SPU was %d now %d", getSubtitle(), Value );
 	xine_set_param( m_pXineStream, XINE_PARAM_SPU_CHANNEL, Value );
 
+	int channel = -1; // the current channel
+	char lang[XINE_LANG_MAX];
+	if ( xine_get_spu_lang( m_pXineStream, channel, lang) ) {
+		// TODO: Display current audio lang on all bound orbiter displays
+		string sID = StringUtils::itos(Value);
+		string sName = "";
+		string sFormat = "";
+		string sLanguage = lang;
+		m_pFactory->m_pPlayer->EVENT_Subtitle_Track_Changed( sID, m_iStreamID, sName, sFormat, sLanguage );
+	}
+
 	return true;
 }
 
@@ -1822,6 +1833,17 @@ bool Xine_Stream::setAudio( int Value )
 
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "AUDIO was %d now %d", xine_get_param ( m_pXineStream, XINE_PARAM_AUDIO_CHANNEL_LOGICAL ), Value );
 	xine_set_param( m_pXineStream, XINE_PARAM_AUDIO_CHANNEL_LOGICAL, Value );
+
+	int channel = -1; // the current channel
+	char lang[XINE_LANG_MAX];
+	if ( xine_get_audio_lang( m_pXineStream, channel, lang) ) {
+		// TODO: Display current audio lang on all bound orbiter displays
+		string sID = StringUtils::itos(Value);
+		string sName = "";
+		string sFormat = "";
+		string sLanguage = lang;
+		m_pFactory->m_pPlayer->EVENT_Audio_Track_Changed( sID, m_iStreamID, sName, sFormat, sLanguage );
+	}
 
 	return true;
 }
