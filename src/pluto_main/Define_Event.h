@@ -99,6 +99,9 @@
 #define EVENT_Outside_Feels_Like_Change_CONST 98
 #define EVENT_Radar_Images_Changed_CONST 99
 #define EVENT_Battery_Level_Changed_CONST 100
+#define EVENT_Subtitle_Track_Changed_CONST 101
+#define EVENT_Audio_Track_Changed_CONST 102
+#define EVENT_Video_Track_Changed_CONST 103
 
 #define EVENT_TABLE "Event"
 #define EVENT_PK_EVENT_FIELD "PK_Event"
