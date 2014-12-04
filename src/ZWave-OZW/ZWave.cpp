@@ -198,8 +198,8 @@ void ZWave::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sC
 			case COMMAND_Set_Temperature_CONST:
 			{
 				temp = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST].c_str());
-				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET TEMPERATURE RECEIVED FOR CHILD %d, temperature: %d",node_id,temp);
-				string unit = GetCurrentDeviceData(pDeviceData_Impl->m_dwPK_Device, DEVICEDATA_Units_CONST);
+				string unit = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_Units_CONST);
+				LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"SET TEMPERATURE RECEIVED FOR CHILD %d, temperature: %d, unit = %s",node_id,temp, unit.c_str());
 				if (unit == "F")
 				{
 					temp = (int)( (9.0/5.0) * (float)temp + 32.0 );
