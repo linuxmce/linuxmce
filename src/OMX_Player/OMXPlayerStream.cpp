@@ -227,16 +227,18 @@ int OMXPlayerStream::setAudio(int track) {
 	if ( track >= iMaxAudio )
 		track = 0;
 
+	// TODO: Display current audio lang on all bound orbiter displays
+	string sID = StringUtils::itos(track);
+	string sName = "";
+	string sFormat = "";
+	string sLanguage = "";
+
 	Log("OMXPlayerStream::setAudio - " + to_string(track) );
 	if ( OMXPlayerInterface::setAudio(track) ) {
-		// TODO: Display current audio lang on all bound orbiter displays
-		string sID = StringUtils::itos(track);
-		string sName = "";
-		string sFormat = "";
-		string sLanguage = "";
 		m_pPlayer->EVENT_Audio_Track_Changed( sID, m_iStreamID, sName, sFormat, sLanguage );
 		return track;
 	}
+	m_pPlayer->EVENT_Audio_Track_Changed( sID, m_iStreamID, sName, sFormat, sLanguage );
 	Log("OMXPlayerStream::setAudio - track not available");
 	return -1;
 }
@@ -251,6 +253,13 @@ int OMXPlayerStream::getCurrentSubtitle() {
 int OMXPlayerStream::setSubtitle(int track) {
 	if ( !OMXPlayerInterface::getSubtitlesShowing() ) track = 0;
 
+	// TODO: Display current subtitle lang on all bound orbiter displays
+	string sID = StringUtils::itos(track);
+	string sName = "";
+	string sFormat = "";
+	string sLanguage = "";
+
+
 	int numsubs = OMXPlayerInterface::getMaxSubtitle();
 	Log("OMXPlayerStream::setSubtitle - " + to_string(track) + " of " + to_string(numsubs) );
 	if ( track < numsubs ) {
@@ -258,22 +267,14 @@ int OMXPlayerStream::setSubtitle(int track) {
 		{
 			Log("OMXPlayerStream::setSubtitle - track available, subtitles showing");
 			OMXPlayerInterface::ShowSubtitles();
-
-			// TODO: Display current subtitle lang on all bound orbiter displays
-			string sID = StringUtils::itos(track);
-			string sName = "";
-			string sFormat = "";
-			string sLanguage = "";
 			m_pPlayer->EVENT_Subtitle_Track_Changed( sID, m_iStreamID, sName, sFormat, sLanguage );
-
 			return track;
 		}
-
-//		if (numsubs > 0)
-//			OMXPlayerInterface::setSubtitle(0);
 	}
+
 	OMXPlayerInterface::HideSubtitles();
 	Log("OMXPlayerStream::setSubtitle - track not available, subtitles hidden");
+	m_pPlayer->EVENT_Subtitle_Track_Changed( sID, m_iStreamID, sName, sFormat, sLanguage );
 	return -1;
 }
 
