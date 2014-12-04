@@ -228,8 +228,15 @@ int OMXPlayerStream::setAudio(int track) {
 		track = 0;
 
 	Log("OMXPlayerStream::setAudio - " + to_string(track) );
-	if ( OMXPlayerInterface::setAudio(track) )
+	if ( OMXPlayerInterface::setAudio(track) ) {
+		// TODO: Display current audio lang on all bound orbiter displays
+		string sID = StringUtils::itos(track);
+		string sName = "";
+		string sFormat = "";
+		string sLanguage = "";
+		m_pPlayer->EVENT_Audio_Track_Changed( sID, m_iStreamID, sName, sFormat, sLanguage );
 		return track;
+	}
 	Log("OMXPlayerStream::setAudio - track not available");
 	return -1;
 }
@@ -251,6 +258,14 @@ int OMXPlayerStream::setSubtitle(int track) {
 		{
 			Log("OMXPlayerStream::setSubtitle - track available, subtitles showing");
 			OMXPlayerInterface::ShowSubtitles();
+
+			// TODO: Display current subtitle lang on all bound orbiter displays
+			string sID = StringUtils::itos(track);
+			string sName = "";
+			string sFormat = "";
+			string sLanguage = "";
+			m_pPlayer->EVENT_Subtitle_Track_Changed( sID, m_iStreamID, sName, sFormat, sLanguage );
+
 			return track;
 		}
 
