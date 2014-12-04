@@ -87,6 +87,9 @@ public:
 	void EVENT_Media_Description_Changed(string sText);
 	void EVENT_Playback_Started(string sMRL,int iStream_ID,string sSectionDescription,string sAudio,string sVideo);
 	void EVENT_Media_Position_Changed(int iFK_MediaType,string sMRL,string sID,int iStream_ID,string sDateTime,string sCurrent_Time,int iSpeed);
+	void EVENT_Subtitle_Track_Changed(string sID,string sName,string sFormat,string sLanguage);
+	void EVENT_Audio_Track_Changed(string sID,string sName,string sFormat,string sLanguage);
+	void EVENT_Video_Track_Changed(string sID,string sName,string sFormat,string sLanguage);
 
 			*****COMMANDS***** we need to implement
 	*/
