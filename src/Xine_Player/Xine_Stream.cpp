@@ -1797,7 +1797,7 @@ bool Xine_Stream::setSubtitle( int Value )
 	}
 
 	int numsubtitle = xine_get_stream_info( m_pXineStream, XINE_STREAM_INFO_MAX_SPU_CHANNEL );
-	if ( Value > (numsubtitle - 1) )
+	if ( Value > numsubtitle )
 		Value = -1;
 
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "SPU was %d now %d", getSubtitle(), Value );
