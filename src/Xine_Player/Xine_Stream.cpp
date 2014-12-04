@@ -1804,13 +1804,12 @@ bool Xine_Stream::setSubtitle( int Value )
 	xine_set_param( m_pXineStream, XINE_PARAM_SPU_CHANNEL, Value );
 
 	// TODO: Display current audio lang on all bound orbiter displays
-	int channel = -1; // the current channel
 	char lang[XINE_LANG_MAX];
 	string sID = StringUtils::itos(Value);
 	string sName = "";
 	string sFormat = "";
 	string sLanguage = "";
-	if ( xine_get_spu_lang( m_pXineStream, channel, lang) ) {
+	if ( xine_get_spu_lang( m_pXineStream, Value, lang) ) {
 		sLanguage = lang;
 	}
 	m_pFactory->m_pPlayer->EVENT_Subtitle_Track_Changed( sID, m_iStreamID, sName, sFormat, sLanguage );
