@@ -272,10 +272,12 @@ int OMXPlayerStream::setSubtitle(int track) {
 		}
 	}
 
+	track = -1;
+	sID = StringUtils::itos(track);
 	OMXPlayerInterface::HideSubtitles();
 	Log("OMXPlayerStream::setSubtitle - track not available, subtitles hidden");
 	m_pPlayer->EVENT_Subtitle_Track_Changed( sID, m_iStreamID, sName, sFormat, sLanguage );
-	return -1;
+	return track;
 }
 
 
