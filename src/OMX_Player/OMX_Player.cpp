@@ -925,6 +925,7 @@ void OMX_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,stri
 	cout << "Need to implement command #412 - Set Media Position" << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 	cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+	LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Set_Media_Positon - %s", sMediaPosition.c_str() );
 
 	map<string,string> mapMediaInfo;
 
@@ -952,6 +953,9 @@ void OMX_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,stri
 	xTime = (xTime>0) ? xTime : 0;
 	xTime = (xTime < xDuration) ? xTime : 0;
 
+	int iAudioTrack = strtoul( mapMediaInfo["AUDIO"].c_str(), NULL, 10 );
+	int iSubtitle =  strtoul( mapMediaInfo["SUBTITLE"].c_str(), NULL, 10 );
+
 	cout << "POS: " << mapMediaInfo["POS"] << ", " << xTime << endl;
 	cout << "AUDIO: " << mapMediaInfo["AUDIO"] << endl;
 	cout << "SUBTITLE: " << mapMediaInfo["SUBTITLE"] << endl;
@@ -960,6 +964,20 @@ void OMX_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,stri
 	string sMediaURL = "";
 	m_pOMXPlayer->Do_Seek(xTime);
 //	m_pOMXPlayer->Do_SetPosition(sMediaURL, xTime);
+
+
+	if ( m_pOMXPlayer->getCurrentSubtitle() != iSubtitle )
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Set_Media_Positon - Current Sub: %i, New Sub: %i", m_pOMXPlayer->getCurrentSubtitle(), iSubtitle );
+	m_pOMXPlayer->setSubtitle(iSubtitle);
+
+	if ( m_pOMXPlayer->getCurrentAudio() != iAudioTrack ) {
+		LoggerWrapper::GetInstance ()->Write (LV_CRITICAL,"OMX_Player::CMD_Set_Media_Positon - Current Audio: %i, New Audio: %i", m_pOMXPlayer->getCurrentAudio(), iAudioTrack );
+		m_pOMXPlayer->setAudio(iAudioTrack);
+	}
+
+	// TODO: implement angle/video track set
+	//if getvideo != videotrack
+	//	m_pOMXPlayer->Set_VideoTrack(XX);
 }
 
 //<-dceag-c548-b->

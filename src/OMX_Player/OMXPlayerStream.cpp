@@ -224,7 +224,7 @@ int OMXPlayerStream::setVideo(int track) {
 
 int OMXPlayerStream::setAudio(int track) {
 	int iMaxAudio = OMXPlayerInterface::getMaxAudio();
-	if ( track >= iMaxAudio )
+	if ( track >= iMaxAudio || track < 0)
 		track = 0;
 
 	// TODO: Display current audio lang on all bound orbiter displays
@@ -244,6 +244,11 @@ int OMXPlayerStream::setAudio(int track) {
 }
 
 
+int OMXPlayerStream::getCurrentAudioTrack() {
+
+	return OMXPlayerInterface::getCurrentAudio();
+}
+
 int OMXPlayerStream::getCurrentSubtitle() {
 	if ( !OMXPlayerInterface::getSubtitlesShowing() ) return -1;
 
@@ -251,7 +256,7 @@ int OMXPlayerStream::getCurrentSubtitle() {
 }
 
 int OMXPlayerStream::setSubtitle(int track) {
-	if ( !OMXPlayerInterface::getSubtitlesShowing() ) track = 0;
+//	if ( !OMXPlayerInterface::getSubtitlesShowing() ) track = 0;
 
 	// TODO: Display current subtitle lang on all bound orbiter displays
 	string sID = StringUtils::itos(track);
