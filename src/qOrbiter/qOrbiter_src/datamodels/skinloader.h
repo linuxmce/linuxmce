@@ -6,7 +6,7 @@
 #include <QStringList>
 #if (QT5)
 #include <QtQuick/QQuickItem>
-#include <QQmlComponent>
+#include <QtQml/QQmlComponent>
 #else
 #include <QtDeclarative/QDeclarativeComponent>
 #include <QDeclarativeItem>

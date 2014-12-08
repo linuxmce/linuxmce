@@ -4,7 +4,7 @@
 
 #include <QtGlobal>
 #ifdef QT5
-#include <QQuickImageProvider>
+#include <QtQml/QQmlImageProviderBase>
 
 #else
 #include <QtDeclarative/QDeclarativeImageProvider>

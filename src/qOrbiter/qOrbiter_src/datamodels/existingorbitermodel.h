@@ -2,7 +2,7 @@
 #define EXISTINGORBITERMODEL_H
 
 #include <QAbstractListModel>
-#include <contextobjects/existingorbiter.h>
+#include "contextobjects/existingorbiter.h"
 
 class ExistingOrbiterModel : public QAbstractListModel
 {

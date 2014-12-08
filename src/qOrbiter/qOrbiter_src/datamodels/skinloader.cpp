@@ -4,8 +4,8 @@
 #include <QDeclarativeEngine>
 #include  <QDeclarativeContext>
 #else
-#include <QQmlEngine>
-#include <QQmlContext>
+#include <QtQml/QQmlEngine>
+
 #endif
 SkinLoader::SkinLoader(QUrl baseUrl, qorbiterManager *uiRef, SkinDataModel *parent): ui_reference(uiRef), m_base_url(baseUrl), m_parent(parent)
 {

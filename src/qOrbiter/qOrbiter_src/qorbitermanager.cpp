@@ -114,7 +114,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
         emit localConfigReady(false);
     }
 
-    
+
     
     QApplication::processEvents(QEventLoop::AllEvents);
     
@@ -250,10 +250,16 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     
     qrcPath = ":android/Splash.qml";
     droidPath = "/";
+#elif defined Q_OS_IOS
+    setHostDevice(HostSystemData::IOS_TABLET);
+    buildType = "/qml/ios";
+    qrcPath = "qrc:main/IosWelcome.qml";
 #else
+
     buildType = "/qml/desktop";
     qrcPath = ":desktop/Splash.qml";
 #endif
+
 
 #ifdef QANDROID
     // qDebug() << "Resolution::"<<QApplication::desktop()->width()<<"w x "<<QApplication::desktop()->height()<<"h";
@@ -297,11 +303,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
         setCommandResponse("Form factor for Qt5 set from config, using "+ buildType);
     }
 #endif
-
-
     qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     setApplicationPath(QApplication::applicationDirPath());
-    localDir = qmlPath.append(buildType);
+    localDir = qmlPath.append(buildType.remove("/qml"));
     remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins"+buildType.remove("/qml");
     if(b_localLoading){
         finalPath=localDir;
@@ -309,8 +313,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
         finalPath=remoteDirectoryPath;
     }
 
-#ifndef ANDROID
-    qorbiterUIwin->setSource(finalPath+"/splash/Splash.qml"); /*! We dont set android because it has its own bootstrap */
+#if !defined(ANDROID)
+    qDebug() << "Android should not see this";
+    qorbiterUIwin->setSource(finalPath+"/splash/Splash.qml"); /*! We dont set android/iOS because it has its own bootstrap */
+
 #else
 
 #endif
@@ -381,6 +387,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     //    QObject::connect(&mediaFilter, SIGNAL(lastViewedChanged(QString)), this, SLOT(setGridLastViewed(QString)));
 
     emit orbiterInitialized();
+
 }
 
 qorbiterManager::~qorbiterManager(){
@@ -1612,32 +1619,24 @@ void qorbiterManager::regenComplete(int i)
 QString qorbiterManager::adjustPath(const QString &path)
 {
 
+qDebug() <<Q_FUNC_INFO << "::Incoming Path" << path;
+
 #ifdef __ANDROID__
     return path+"android";
-#endif
+#elif defined(Q_OS_UNIX) && !defined(Q_OS_IOS)
 
-#ifdef Q_OS_UNIX
-
-#endif
-
-#ifdef Q_OS_MAC
+#elif defined(Q_OS_MAC) && !defined(Q_OS_IOS)
     return QCoreApplication::applicationDirPath().remove("MacOS").append("Resources");
 
-#endif
-
-#ifdef for_harmattan
+#elif for_harmattan
     QString p = path;
     return p.remove("bin");
+
+#elif defined(Q_OS_IOS)
+    return "";
+
 #endif
 
-    //#else  !RPI
-    //    const QString pathInShareDir = QCoreApplication::applicationDirPath()
-    //            + QLatin1String("/../share/")
-    //            + QFileInfo(QCoreApplication::applicationFilePath()).fileName()
-    //            + QLatin1Char('/') + path;
-    //    if (QFileInfo(pathInShareDir).exists())
-    //        return pathInShareDir;
-    //#endif
     return path;
 
 }
@@ -1823,32 +1822,35 @@ bool qorbiterManager::loadSkins(QUrl base)
     QStringList excludes;
     excludes << "!lib" << "!startup";
     tskinModel->clear();
-#ifdef for_harmattan
-    tskinModel->addSkin("default");
 
-#elif __ANDROID__
+
+#ifdef __ANDROID__
     if(hostDevice == HostSystemData::ANDROID_PHONE){
-#ifdef QT5
+    #ifdef QT5
         tskinModel->addSkin("default");
-#elif NECESSITAS
+    #elif NECESSITAS
         tskinModel->addSkin("default");
-#endif
-    }else{
-#ifdef QT5
+    #endif
+      }else{
+    #ifdef QT5
         tskinModel->addSkin("default,data");
-#else
+    #else
         tskinModel->addSkin("default,data,smokey");
-#endif
+    #endif
     }
-#elif for_android
+#elif defined(for_harmattan)
     tskinModel->addSkin("default");
-#elif RPI
+#elif defined(for_android)
+    tskinModel->addSkin("default");
+#elif defined(RPI)
     //    QDir desktopQmlPath(QString(base.toString()),"",QDir::Name, QDir::NoDotAndDotDot);
     //    desktopQmlPath.setNameFilters(excludes);
     //    setDceResponse("Skin Search Path:"+ desktopQmlPath.dirName());
     //    localSkins = desktopQmlPath.entryList(QDir::Dirs |QDir::NoDotAndDotDot);
 
     //    qDebug()<<"inside of skins we find" << localSkins.join(",");
+    tskinModel->addSkin("default");
+#elif defined(Q_OS_IOS)
     tskinModel->addSkin("default");
 #else
     if(b_localLoading ){
@@ -1963,7 +1965,7 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
  */
 bool qorbiterManager::readLocalConfig(){
     QDomDocument localConfig;
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MAC && defined Q_OS_IOS
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif __ANDROID__
     QString xmlPath ;
@@ -1984,13 +1986,16 @@ bool qorbiterManager::readLocalConfig(){
     }
 #endif
 
+#endif
 
-#elif WIN32
+#ifdef WIN32
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #elif RPI
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
+
+
 #else
-    QString xmlPath = QDir::homePath()+"/linuxmce/config.xml";
+     xmlPath = QDir::homePath()+"/linuxmce/config.xml";
 #endif
     QFile localConfigFile;
     //**todo!! - add function for 1st run on android that copies the file to the xml path, then performs checks. we cannot install directly there.
@@ -2035,8 +2040,9 @@ bool qorbiterManager::readLocalConfig(){
         setDceResponse("No Config Found.");
         setDceResponse("config not found!::"+localConfigFile.fileName());
         setInternalIp("192.168.80.1");
-        currentSkin=deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "STB" : "default";
+        currentSkin= deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "STB" : "default";
         setDeviceNumber(-1);
+        setDceResponse("Failed to read config, exiting func");
         return false;
     } else {
         setDceResponse("Reading Local Config");
@@ -2091,7 +2097,7 @@ bool qorbiterManager::readLocalConfig(){
                 if(configSkin=="default" && deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST){
                     currentSkin="STB";
                 } else {
-                     currentSkin =configSkin;
+                    currentSkin =configSkin;
                 }
 
             }
@@ -2169,7 +2175,8 @@ bool qorbiterManager::readLocalConfig(){
 
 bool qorbiterManager::writeConfig()
 {
-
+qDebug() << Q_FUNC_INFO;
+ //   setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
@@ -2574,7 +2581,7 @@ void qorbiterManager::processError(QString msg)
 
 void qorbiterManager::setActiveSkin(QString name){
 
-qDebug() <<"qOrbiterManager::setActiveSkin("<<name<<")";
+    qDebug() <<"qOrbiterManager::setActiveSkin("<<name<<")";
     if(name=="splash_fallback"){
 
     }

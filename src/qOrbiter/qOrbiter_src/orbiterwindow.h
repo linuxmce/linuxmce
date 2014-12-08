@@ -5,8 +5,7 @@
 #include <QDebug>
 #include <contextobjects/existingorbiter.h>
 #ifdef QT5
-#include <QQmlEngine>
-#include <QQmlContext>
+#include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickView>
 #include <qtquick2applicationviewer/qtquick2applicationviewer.h>
 #else
@@ -69,7 +68,7 @@ public:
 
     QString message;
 #ifdef QT5
-    QtQuick2ApplicationViewer mainView;
+    QQuickView mainView;
 #else
    QDeclarativeView  mainView;
 #endif
@@ -129,7 +128,7 @@ public slots:
     void loadSetupPage();
 
     bool getOrbiterInitialized(){return orbiterInitialized;}
-    void setOrbiterInitialized(){orbiterInitialized = true; emit beginLoading(); qDebug("Orbiter Initialized!");}
+    void setOrbiterInitialized(){orbiterInitialized = true; qDebug() <<Q_FUNC_INFO << "::Orbiter Initialized!";emit beginLoading(); ;}
 
 
 

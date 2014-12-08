@@ -4,7 +4,7 @@
 #include <QAbstractListModel>
 #include <QList>
 #include <QVariant>
-#include <datamodels/gridItem.h>
+#include "gridItem.h"
 #include <qorbitermanager.h>
 #include <QKeyEvent>
 

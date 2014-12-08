@@ -7,6 +7,7 @@
         <file alias="Welcome.qml">qml/Welcome.qml</file>
         <file alias="Welcome2.qml">qml/Welcome2.qml</file>
         <file>config.xml</file>
+        <file alias="IosWelcome.qml">qml/IosWelcome.qml</file>
     </qresource>
     <qresource prefix="/desktop"/>
     <qresource prefix="/osx"/>
@@ -30,5 +31,8 @@
         <file alias="GenericReload.qml">qml/skins-common/lib/startup/DesktopReload.qml</file>
         <file>qml/skins-common/lib/startup/IoSReload.qml</file>
         <file alias="Refresh.qml">qml/Refresh.qml</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>iOS/ImportedItems.qml</file>
     </qresource>
 </RCC>

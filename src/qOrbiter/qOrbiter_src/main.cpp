@@ -52,8 +52,8 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <QtGlobal>
 #ifdef QT5
 #include <QtWidgets/QApplication>
-#include <QQmlContext>
-#include <QQmlEngine>
+
+#include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickView>
 #include <QtCore/QThread>
 
@@ -62,10 +62,10 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <QtDeclarative/QDeclarativeEngine>
 #endif
 
-#include <logger/qorbiterlogger.h>
-#include <datamodels/listModel.h>
-#include <datamodels/gridItem.h>
-#include <qOrbiter/qOrbiter.h>
+#include "logger/qorbiterlogger.h"
+#include "datamodels/listModel.h"
+
+#include "qOrbiter/qOrbiter.h"
 #include <orbiterwindow.h>
 #include <qorbitermanager.h>
 #include "DCE/Logger.h"
@@ -186,7 +186,11 @@ extern "C" {
 
 */
 
+#if defined(Q_OS_IOS)
+extern "C" int qtmn(int argc, char* argv[])
+#else
 int main(int argc, char* argv[])
+#endif
 {
     int deviceType =-1; /*!< deviceType can be 0 for osd(onscreen qorbiter), 1 for desktop(linux,mac,windows),2 for android, 3 for i0S */
 
@@ -284,9 +288,7 @@ int main(int argc, char* argv[])
              << "-d -- This device's ID number.  If not specified, it will be requested from the router based on our IP address." << endl
              << "-l -- Where to save the log files.  Specify 'dcerouter' to have the messages logged to the DCE Router.  Defaults to stdout." << endl
              << "-o --Switch for frameless MD and desktops." << endl;
-#ifndef __ANDROID__
-        exit(1);
-#endif
+
     }
 
 #ifdef WIN32
@@ -358,13 +360,14 @@ int main(int argc, char* argv[])
         qmlRegisterType<HouseModesHelper>("org.linuxmce.enums", 1,0, "HouseModes");
         qmlRegisterType<RoomTypeHelper>("org.linuxmce.enums", 1,0, "RoomTypes");
         qmlRegisterType<ScreenList>("org.linuxmce.screens", 1,0, "Screens");
+        qmlRegisterType<GenericFlatListModel>();
         if(deviceType==0){
 
         } else {
 
         }
 
-
+ qDebug() << "Eggs n Toast";
         orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm);
 #ifdef __ANDROID__
         orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
@@ -373,6 +376,7 @@ int main(int argc, char* argv[])
         orbiterWin.setMessage("Setting up Lmce");
 
 #ifndef ANDROID
+
         qorbiterManager  w(&orbiterWin.mainView);
         if(deviceType==0){
             w.setDeviceTemplate(DEVICETEMPLATE_OnScreen_qOrbiter_CONST);
@@ -382,10 +386,12 @@ int main(int argc, char* argv[])
 #else
         qorbiterManager w(&orbiterWin.mainView, &androidHelper);
         orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
-        orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
+
 #endif
+orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
 
 #ifndef ANDROID
+#ifndef Q_OS_IOS
         if(!sRouter_IP.empty()){
             orbiterWin.setRouterAddress(QString::fromStdString(sRouter_IP));
             w.m_ipAddress = QString::fromStdString(sRouter_IP);
@@ -393,27 +399,35 @@ int main(int argc, char* argv[])
         orbiterWin.setDeviceNumber(PK_Device);
         w.iPK_Device=PK_Device;
 #endif
+#endif
+
         AbstractImageProvider* modelimageprovider = new AbstractImageProvider(&w);
         orbiterWin.mainView.engine()->addImageProvider("listprovider", modelimageprovider);
         pqOrbiter.moveToThread(&dceThread);
         QObject::connect(&dceThread, SIGNAL(started()), &pqOrbiter, SLOT(beginSetup()));
 
-        //epg listmodel, no imageprovider as of yet
+
+
+ //epg listmodel, no imageprovider as of yet
+
         EPGChannelList *simpleEPGmodel = new EPGChannelList(new EPGItemClass);
 
-        ListModel *mediaModel = new ListModel(new gridItem);
-
+       // ListModel *mediaModel = new ListModel(new gridItem);
+        qDebug() << "!!!!!!!!!!!BREAK!!!!!!!!!!!!!!!!!!";
         TimeCodeManager *timecode = new TimeCodeManager();
+
+
         orbiterWin.mainView.rootContext()->setContextProperty("logger", &localLogger);
         orbiterWin.mainView.rootContext()->setContextProperty("dceTimecode", timecode);
-        orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
+       // orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
 
         orbiterWin.mainView.rootContext()->setContextProperty("simpleepg", simpleEPGmodel);
         orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
 
-        qmlRegisterType<GenericFlatListModel>();
+
 
         qRegisterMetaType<QHash<int, QVariant> >("QHash<int, QVariant>");
+
 
         // connnect local logger
         QObject::connect(&pqOrbiter, SIGNAL(commandResponseChanged(QString)), &localLogger, SLOT(logCommandMessage(QString)));
@@ -546,7 +560,7 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(qMediaPlayerIDChanged(int)), &w, SLOT(setMediaPlayerID(int)), Qt::QueuedConnection);
 
         //messaging
-        QObject::connect(mediaModel, SIGNAL(statusMessage(QString)), &w, SLOT(setDceResponse(QString)),Qt::QueuedConnection);
+      //  QObject::connect(mediaModel, SIGNAL(statusMessage(QString)), &w, SLOT(setDceResponse(QString)),Qt::QueuedConnection);
         QObject::connect(w.nowPlayingButton, SIGNAL(statusMessage(QString)), &w, SLOT(setDceResponse(QString)));
         QObject::connect(&pqOrbiter, SIGNAL(statusMessage(QString)), &w , SLOT(setDceResponse(QString)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::DirectConnection);
@@ -590,25 +604,25 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(gridStatus(bool)), &pqOrbiter, SLOT(setGridStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(resetSearchParams()), &pqOrbiter, SLOT(initializeGrid()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(cancelRequests()), &pqOrbiter, SLOT(cancelAllRequests()), Qt::QueuedConnection);
-        QObject::connect(mediaModel, SIGNAL(pagingCleared()), &pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::QueuedConnection);
-        QObject::connect(mediaModel, SIGNAL(itemAdded(int)), &pqOrbiter, SLOT(setCurrentRow(int)),Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(clearModel()), mediaModel,SLOT(clear()), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter,SIGNAL(addItem(gridItem*)), mediaModel, SLOT(appendRow(gridItem*)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(clearModel()), mediaModel, SLOT(reset()), Qt::QueuedConnection);
+       // QObject::connect(mediaModel, SIGNAL(pagingCleared()), &pqOrbiter,SLOT(populateAdditionalMedia()), Qt::QueuedConnection);
+       // QObject::connect(&pqOrbiter, SIGNAL(clearPageGrid()), mediaModel, SLOT(clearForPaging()), Qt::QueuedConnection);
+       // QObject::connect(mediaModel, SIGNAL(itemAdded(int)), &pqOrbiter, SLOT(setCurrentRow(int)),Qt::QueuedConnection);
+      //  QObject::connect(&w, SIGNAL(clearModel()), mediaModel,SLOT(clear()), Qt::QueuedConnection);
+      //  QObject::connect(&pqOrbiter,SIGNAL(addItem(gridItem*)), mediaModel, SLOT(appendRow(gridItem*)),Qt::QueuedConnection);
+      //  QObject::connect(&pqOrbiter,SIGNAL(gridModelSizeChange(int)), mediaModel, SLOT(setTotalCells(int)), Qt::QueuedConnection);
+      //  QObject::connect(&pqOrbiter, SIGNAL(clearModel()), mediaModel, SLOT(reset()), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(clearFileDetails()), w.attribFilter, SLOT(clear()));
 
-        QObject::connect(&w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
+       // QObject::connect(&w, SIGNAL(gridTypeChanged(int)), mediaModel, SLOT(setGridType(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(authUserMedia(int,QString,int)), &pqOrbiter, SLOT(authorizePrivateMedia(int,QString,int)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(mediaAuthChanged(int)), w.userList, SLOT(setCurrentPrivateUser(int)), Qt::QueuedConnection);
         //  QObject::connect(w.userList, SIGNAL(privateUserChanged(int, QString)), &pqOrbiter, SLOT(setStringParam(int,QString)),Qt::QueuedConnection);
-        QObject::connect(mediaModel,SIGNAL(gridTypeChanged(int)), w.userList, SLOT(unsetPrivate()));
+       // QObject::connect(mediaModel,SIGNAL(gridTypeChanged(int)), w.userList, SLOT(unsetPrivate()));
 
-        QObject::connect(mediaModel, SIGNAL(pauseChanged(bool)), &pqOrbiter, SLOT(setGridPause(bool)), Qt::QueuedConnection);
+       // QObject::connect(mediaModel, SIGNAL(pauseChanged(bool)), &pqOrbiter, SLOT(setGridPause(bool)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(keepLoading(bool)), &pqOrbiter,SLOT(setGridStatus(bool)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(modelPagesChanged(int)), mediaModel, SLOT(setTotalPages(int)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(pageSeperatorChanged(int)) , mediaModel, SLOT(setSeperator(int)), Qt::QueuedConnection);
+      //  QObject::connect(&pqOrbiter, SIGNAL(modelPagesChanged(int)), mediaModel, SLOT(setTotalPages(int)),Qt::QueuedConnection);
+       // QObject::connect(&pqOrbiter, SIGNAL(pageSeperatorChanged(int)) , mediaModel, SLOT(setSeperator(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(requestDcePages(int)), &pqOrbiter, SLOT(requestPage(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(seekGrid(QString)), &pqOrbiter, SLOT(seekToGridPosition(QString)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(pageSeperatorChanged(int)), &w, SLOT(setGridSeperator(int)),Qt::QueuedConnection);
@@ -752,6 +766,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(internalIpChanged(QString)), &orbiterWin, SLOT(setRouterAddress(QString)));
 
         /*Remote command signal */
+
         QObject::connect(&pqOrbiter, SIGNAL(dceGuiCommand(int)), &w, SLOT(handleDceGuiCommand(int)), Qt::QueuedConnection);
         dceThread.start();
 

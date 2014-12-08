@@ -25,7 +25,7 @@
 #include <QVariant>
 #include <QImage>
 #include <QMap>
-#include "../DCE/DataGrid.h"
+#include "DCE/DataGrid.h"
 #include "genericmodelitem.h"
 using namespace DCE;
 

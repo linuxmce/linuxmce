@@ -6,7 +6,7 @@
 #ifndef QT5
 #include <QDeclarativeError>
 #else
-#include <QQmlError>
+#include <QtQml/QQmlError>
 #endif
 /*!
  * \brief qorbiterLogger - C++ logging context object.

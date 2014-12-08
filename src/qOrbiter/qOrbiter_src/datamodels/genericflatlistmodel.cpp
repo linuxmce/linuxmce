@@ -356,7 +356,7 @@ bool GenericFlatListModel::removeRows(int row, int count, const QModelIndex &par
 
 GenericModelItem* GenericFlatListModel::takeRow(int row)
 {
-    if(row < m_windowStart || row > (m_windowStart+m_list.size())) return false;
+    if(row < m_windowStart || row > (m_windowStart+m_list.size())) return new GenericModelItem();
     beginRemoveRows(QModelIndex(), row, row);
     GenericModelItem* item = m_list.takeAt(row-m_windowStart);
     endRemoveRows();

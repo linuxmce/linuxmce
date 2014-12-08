@@ -65,6 +65,13 @@ macx-clang{
     DESTDIR=../../imports/AudioVisual
 }
 
+macx-ios-clang{
+QMAKE_CXXFLAGS+=-Wno-c++11-narrowing
+DESTDIR=../../imports/AudioVisual
+}
+
+
+
 OTHER_FILES = qmldir \
     android/res/values-ja/strings.xml \
     android/res/values-ru/strings.xml \

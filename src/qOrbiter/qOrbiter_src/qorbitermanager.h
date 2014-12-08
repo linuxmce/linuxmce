@@ -53,9 +53,9 @@
 #include <QMainWindow>
 #endif
 
-#include<datamodels/existingorbitermodel.h>
-#include<datamodels/attributeobject.h>
-#include <datamodels/genericflatlistmodel.h>
+#include "datamodels/existingorbitermodel.h"
+#include "datamodels/attributeobject.h"
+#include "datamodels/genericflatlistmodel.h"
 
 #include <QStringList>
 #include <QThread>
@@ -1550,7 +1550,7 @@ public slots:
     void checkConnection();
     void processError(QString msg);
 
-    void setDeviceNumber(int d) {iPK_Device = d; qDebug() <<"New Device number!!!!"<< iPK_Device; emit deviceNumberChanged(iPK_Device);}
+    void setDeviceNumber(int d) {iPK_Device = d; qDebug() << Q_FUNC_INFO <<"New Device number:"<< iPK_Device; emit deviceNumberChanged(iPK_Device);}
     int getDeviceNumber() {return iPK_Device;}
 
     void setDeviceTemplate(int dt){if(deviceTemplate!=dt) {deviceTemplate=dt; emit deviceTemplateChanged(deviceTemplate);} }

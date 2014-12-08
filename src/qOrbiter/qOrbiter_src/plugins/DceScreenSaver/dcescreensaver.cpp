@@ -175,7 +175,7 @@ void DceScreenSaver::getNextImage()
     if(urlList.isEmpty()){
         return;
     }
-     setDebugInfo("Getting random image from list of "+urlList.count());
+     setDebugInfo("Getting random image from list of "+ QString::number(urlList.count()));
 
     int listNumber = rand()%urlList.length()-1;
     if(listNumber!=-1 && listNumber <= urlList.count()){

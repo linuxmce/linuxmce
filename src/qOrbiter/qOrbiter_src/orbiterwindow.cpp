@@ -32,6 +32,7 @@
 #include <QtQml/QQmlEngine>
 #include <QtWidgets/QApplication>
 
+
 #else
 #include <qmlapplicationviewer.h>
 #include <QtDeclarative/QDeclarativeView>
@@ -63,6 +64,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     }
 #elif QT5
 #ifndef  ANDROID
+#ifndef Q_OS_IOS
     mainView.setSurfaceType(QSurface::OpenGLSurface);
 
     QSurfaceFormat format;
@@ -72,6 +74,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.setFormat(format);
     mainView.setColor(QColor(Qt::transparent));
     mainView.setClearBeforeRendering(true);
+#endif
 #endif
 
     if(frameless == true){
@@ -111,13 +114,13 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     userList.append(new PromptData("No Users",0));
     roomList.append(new PromptData("No Rooms",0));
 
-    mainView.engine()->addImportPath("imports");
-
 
     mainView.engine()->addPluginPath("lib");
     mainView.engine()->addPluginPath("imports");
+    //qDebug() << "Qt Plugin Paths::"<<mainView.engine()->pluginPathList();
 
-    qDebug() << "Qt Plugin Paths::"<<mainView.engine()->pluginPathList();
+    mainView.engine()->addImportPath("imports");
+    mainView.engine()->addImportPath("lib");
 
     mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
     mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
@@ -262,7 +265,19 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     buildType = "/qml/qt5-desktop";
     qrcPath = "qrc:main/Welcome2.qml";
     localPath = "qt5-desktop/";
+#elif defined Q_OS_IOS
+    buildType = "/qml/ios";
+    qrcPath = "qrc:main/IosWelcome.qml";
+    localPath = "ios/";
+   // mainView.engine()->setBaseUrl(QUrl("."));
+//    QStringList sPaths; sPaths.append(QApplication::applicationDirPath()+"/qt_qml");
+//QDir dir;
+//dir.setPath(QApplication::applicationDirPath()+"");
+//dir.cdUp();
+//qDebug() << dir.entryList();
+  //  mainView.engine()->setImportPathList(sPaths);
 #else
+
     buildType = "/qml/desktop";
     qrcPath = "qrc:desktop/Splash.qml";
 
