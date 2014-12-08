@@ -12,13 +12,15 @@ message("$$QT_VERSION DCE-ScreenSaver-Plugin")
 
 contains(QT_VERSION,5.*.*){
         message("$$QT_VERSION DCE-ScreenSaver-Plugin")
+message(Qt is installed in $$[QT_INSTALL_PREFIX])
         QT += quick multimedia network
         DEFINES+=QT5
 }
 
 
 uri = DceScreenSaver
-TARGET = $$qtLibraryTarget($$TARGET)
+TARGET = DceScreenSaver #$$qtLibraryTarget($$TARGET)
+qmldir.files = qmldir
 
 linux-g++{
     DESTDIR=../../imports/DceScreenSaver
@@ -34,8 +36,10 @@ linux-rasp-pi-g++{
     RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
 }
 
-macx-clang{
-DESTDIR=../../imports/DceScreenSaver
+macx-g++{
+message( Building for OS x )
+DESTDIR=$$[QT_INSTALL_IMPORTS]/DceScreenSaver
+QMLDIR_TARGET = $$DESTDIR
 
 }
 
@@ -93,7 +97,7 @@ OTHER_FILES = qmldir \
     android/version.xml \
     android/AndroidManifest.xml
 
-!equals(_PRO_FILE_PWD_, $$DESTDIR) {
+!equals(_PRO_FILE_PWD_, $$OUT_PWD) {
 
 android-g++{
 
@@ -113,26 +117,39 @@ linux-rasp-pi-g++{
 QMLDIR_TARGET=$$DESTDIR
 }
 
-copy_qmldir.target=$$QMLDIR_TARGET
-    copy_qmldir.depends = $$_PRO_FILE_PWD_/qmldir
+macx-g++{
+
+QMLDIR_TARGET = $$DESTDIR
+
+}
+
+DEPLOYMENTFOLDERS+=qmldir
+
+copy_qmldir.target=$$DESTDIR
+    copy_qmldir.depends = qmldir
     copy_qmldir.commands = $(COPY_FILE) \"$$replace(copy_qmldir.depends, /, $$QMAKE_DIR_SEP)\" \"$$replace(copy_qmldir.target, /, $$QMAKE_DIR_SEP)\"
     QMAKE_EXTRA_TARGETS += copy_qmldir
     PRE_TARGETDEPS += $$copy_qmldir.target
 }
 
-message("Plugin install path at" $$DESTDIR)
-qmldir.files = qmldir
+
+
 unix {
     maemo5 | !isEmpty(MEEGO_VERSION_MAJOR) {
        installPath = /usr/lib/qt4/imports/$$replace(uri, \\., /)
     } else {
         installPath = $$[QT_INSTALL_IMPORTS]/$$replace(uri, \\., /)
     }
+
     linux-rasp-pi-g++{
     installPath=/opt/qt5.2-rpi/qml/$$replace(uri, \\., /) #$$RASP_INSTALL_TARGET/$$replace(uri, \\., /)
-}
-    qmldir.path = $$installPath
+    }
+
+
     target.path = $$installPath
-   INSTALLS += target qmldir
+   INSTALLS += target DEPLOYMENTFOLDERS
+message("Plugin install path at" $$DESTDIR)
+message("qmldir target path at" $$QMLDIR_TARGET)
+
 }
 

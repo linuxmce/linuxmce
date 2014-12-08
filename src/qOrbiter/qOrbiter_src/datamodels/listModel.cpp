@@ -46,6 +46,8 @@ ListModel::ListModel(gridItem* prototype, QObject* parent) :
     setTotalPages(0);
 }
 
+
+
 int ListModel::rowCount(const QModelIndex &parent) const
 {
     if(parent.isValid()){
