@@ -36,6 +36,8 @@ using namespace DCE;
 #include <pthread.h>
 #ifdef QT5
 #include <QtWidgets/QApplication>
+#else
+#include <QX11EmbedWidget>
 #endif
 
 #include "pluto_main/Define_DataGrid.h"
@@ -50,6 +52,7 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
 {
     qDebug() << "Constructing";
     QObject::connect(this, SIGNAL(dceIPChanged()), this, SLOT(pingCore()));
+    m_bIsOSD=false;
 }
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
@@ -992,6 +995,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     cout << "Parm #103 - List_PK_Device=" << sList_PK_Device << endl;
     cout << "Parm #120 - Retransmit=" << bRetransmit << endl;
 
+
+
     if(i_current_mediaType !=iPK_MediaType){
         emit clearPlaylist();
     }
@@ -1023,6 +1028,11 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     m_dwPK_Device_NowPlaying_Video = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_NowPlaying_Audio = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_CaptureCard = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
+
+
+    if(this->m_bIsOSD ){
+
+    }
 
     if(m_dwPK_Device_CaptureCard != 0)
     {
@@ -1118,8 +1128,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     }
     //todo - fix livetv playlist to adjust position from clicking on the grid.
     else if(iPK_MediaType== 11){
-       // emit np_channelID(QString::number(iValue));
-       // emit np_network(QString::fromStdString(sValue_To_Assign));
+        // emit np_channelID(QString::number(iValue));
+        // emit np_network(QString::fromStdString(sValue_To_Assign));
         if(bRetransmit == 0){
 
         }
@@ -1127,8 +1137,8 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 
     }  else if(iPK_MediaType == 5) {
         b_mediaPlaying = true;
-          emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
-          emit np_title2Changed(QString::fromStdString(sText));
+        emit np_title1Changed(QString::fromStdString(sValue_To_Assign ));
+        emit np_title2Changed(QString::fromStdString(sText));
         emit playlistPositionChanged(iValue);
         GetNowPlayingAttributes();
         if(bRetransmit==1){
@@ -1967,6 +1977,7 @@ void qOrbiter::registerDevice(int user, QString ea, int room)
 void qOrbiter::qmlSetup(int device, QString address)
 {
     m_dwPK_Device = device;
+    qWarning() << "Device Number::"<< device;
     qWarning() << "DCE IP::" << address;
     m_sHostName = address.toStdString();
     dceIP = address;
@@ -3891,7 +3902,7 @@ void DCE::qOrbiter::moveDirection(int d) //connects ui buttons to dce commands
     }
     else if(d==2)
     {
-         qDebug() << "Moving " << "down";
+        qDebug() << "Moving " << "down";
         DCE::CMD_Move_Down moveDown(m_dwPK_Device, iMediaPluginID, internal_streamID);
         if(!SendCommand(moveDown))
         {
@@ -3899,7 +3910,7 @@ void DCE::qOrbiter::moveDirection(int d) //connects ui buttons to dce commands
         }
     }
     else if(d==3){
-         qDebug() << "Moving " << "left";
+        qDebug() << "Moving " << "left";
         DCE::CMD_Move_Left moveLeft(m_dwPK_Device, iMediaPluginID, internal_streamID);
         if(!SendCommand(moveLeft))
         {
@@ -3907,7 +3918,7 @@ void DCE::qOrbiter::moveDirection(int d) //connects ui buttons to dce commands
         }
     }
     else if(d==4){
-         qDebug() << "Moving " << "right";
+        qDebug() << "Moving " << "right";
         DCE::CMD_Move_Right move(m_dwPK_Device, iMediaPluginID, internal_streamID);
         if(!SendCommand(move))
         {
@@ -4386,7 +4397,7 @@ void DCE::qOrbiter::extraButtons(QString button){
     }if(button.toLower() == "exit"){
         CMD_Exit exitAVscreen(m_dwPK_Device, m_dwPK_Device_NowPlaying);
         SendCommand(exitAVscreen);
-          return;
+        return;
     } else if(button.toLower()=="l2"){
         CMD_L2 ps3_l2(this->m_dwPK_Device, m_dwPK_Device_NowPlaying);
         if(SendCommand(ps3_l2, &cResp) && cResp=="OK"){
@@ -4394,7 +4405,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         } else {
             emit commandFailed();
         }
-          return;
+        return;
     } else if(button.toLower()=="l1"){
         CMD_L1 ps3_l1(this->m_dwPK_Device, iMediaPluginID);
         if(SendCommand(ps3_l1, &cResp) && cResp=="OK"){
@@ -4402,7 +4413,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         } else {
             emit commandFailed();
         }
-          return;
+        return;
     }else if(button.toLower()=="l3"){
         CMD_L3 ps3_l3(this->m_dwPK_Device, iMediaPluginID);
         if(SendCommand(ps3_l3, &cResp) && cResp=="OK"){
@@ -4410,7 +4421,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         } else {
             emit commandFailed();
         }
-          return;
+        return;
     }else if(button.toLower()=="r1"){
         CMD_R1 ps3_r1(this->m_dwPK_Device, iMediaPluginID);
         if(SendCommand(ps3_r1, &cResp) && cResp=="OK"){
@@ -4418,7 +4429,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         } else {
             emit commandFailed();
         }
-          return;
+        return;
     }else if(button.toLower()=="r2"){
         CMD_R2 ps3_r2(this->m_dwPK_Device, iMediaPluginID);
         if(SendCommand(ps3_r2, &cResp) && cResp=="OK"){
@@ -4426,7 +4437,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         } else {
             emit commandFailed();
         }
-          return;
+        return;
     }else if(button.toLower()=="r3"){
         CMD_R3 ps3_r3(this->m_dwPK_Device, iMediaPluginID);
         if(SendCommand(ps3_r3, &cResp) && cResp=="OK"){
@@ -4434,7 +4445,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         } else {
             emit commandFailed();
         }
-          return;
+        return;
     }else if(button.toLower()=="psbutton"){
         CMD_PS_Playstation ps3_btn(this->m_dwPK_Device, iMediaPluginID);
         if(SendCommand(ps3_btn, &cResp) && cResp=="OK"){
@@ -4442,7 +4453,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         } else {
             emit commandFailed();
         }
-          return;
+        return;
     }else if(button.toLower()=="start"){
         CMD_Start start(this->m_dwPK_Device, iMediaPluginID);
         if(SendCommand(start, &cResp) && cResp=="OK"){
@@ -4450,7 +4461,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         } else {
             emit commandFailed();
         }
-          return;
+        return;
     }else if(button.toLower()=="select"){
         CMD_Select select_cmd(this->m_dwPK_Device, iMediaPluginID);
         if(SendCommand(select_cmd, &cResp) && cResp=="OK"){
@@ -4458,7 +4469,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         } else {
             emit commandFailed();
         }
-          return;
+        return;
     }else if(button.toLower()=="triangle"){
         CMD_Triangle triangle (this->m_dwPK_Device, iMediaPluginID);
         if(SendCommand(triangle, &cResp) && cResp=="OK"){
@@ -4466,7 +4477,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         } else {
             emit commandFailed();
         }
-          return;
+        return;
     }else if(button.toLower()=="square"){
         CMD_Square square(this->m_dwPK_Device, iMediaPluginID);
         if(SendCommand(square, &cResp) && cResp=="OK"){
@@ -4474,7 +4485,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         } else {
             emit commandFailed();
         }
-          return;
+        return;
     }else if(button.toLower()=="x"){
         CMD_X x(this->m_dwPK_Device, iMediaPluginID);
         if(SendCommand(x, &cResp) && cResp=="OK"){
@@ -4482,7 +4493,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         } else {
             emit commandFailed();
         }
-          return;
+        return;
     }else if(button.toLower()=="circle"){
         CMD_Circle circle(this->m_dwPK_Device, iMediaPluginID);
         if(SendCommand(circle, &cResp) && cResp=="OK"){
@@ -4490,7 +4501,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         } else {
             emit commandFailed();
         }
-          return;
+        return;
     }else if(button.toLower()=="home"){
         CMD_Home home(this->m_dwPK_Device, iMediaPluginID);
         if(SendCommand(home, &cResp) && cResp=="OK"){
@@ -4498,7 +4509,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         } else {
             emit commandFailed();
         }
-          return;
+        return;
     }else if(button.toLower()=="y"){
         CMD_Yellow y(this->m_dwPK_Device, iMediaPluginID);
         if(SendCommand(y, &cResp) && cResp=="OK"){
@@ -4506,7 +4517,7 @@ void DCE::qOrbiter::extraButtons(QString button){
         } else {
             emit commandFailed();
         }
-          return;
+        return;
     }else if(button.toLower()=="a"){
         CMD_A a(this->m_dwPK_Device, iMediaPluginID);
         if(SendCommand(a, &cResp) && cResp=="OK"){
@@ -4615,15 +4626,17 @@ int qOrbiter::PromptUser(std::string sPrompt, int iTimeoutSeconds, map<int, std:
     return 0;
 }
 
-int qOrbiter::DeviceIdInvalid()
-{
+int qOrbiter::DeviceIdInvalid(){
     emit commandResponseChanged("Device ID is invalid. Finding Existing Orbiters of this type");
     //QApplication::processEvents(QEventLoop::AllEvents);
     QList<QObject*> * temp_orbiter_list = new QList<QObject*>;
 
     map<int,string> mapDevices;
-    GetDevicesByTemplate(PK_DeviceTemplate_get(),&mapDevices);
-
+    int dt = DEVICETEMPLATE_qOrbiter_CONST;
+    if(m_bIsOSD){
+        dt = DEVICETEMPLATE_OnScreen_qOrbiter_CONST;
+    }
+    GetDevicesByTemplate(dt,&mapDevices);
     if( mapDevices.size()==0 )
     {
         emit commandResponseChanged("No orbiters of this type found. Would you like to setup a new one?");
@@ -4727,27 +4740,60 @@ int qOrbiter::SetupNewOrbiter()
 }
 
 
-void qOrbiter::CreateChildren()
-{
-    if(PK_DeviceTemplate_get()==DEVICETEMPLATE_OnScreen_qOrbiter_CONST){
-        this->m_pPrimaryDeviceCommand->CreateChildren();
-    } else {
-        emit commandResponseChanged("Creating Children");
-        emit commandResponseChanged("Size of children devices::"+QString::number((int)m_pData->m_vectDeviceData_Impl_Children.size()));
+void qOrbiter::CreateChildren(){
+    if(m_bIsOSD){
+        emit commandResponseChanged("OSD QOrbiter ::creating children");
         for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ )
         {
-
-            emit commandResponseChanged("Finding Child devices...");
             DeviceData_Impl *pDeviceData_Impl_Child = m_pData->m_vectDeviceData_Impl_Children[i];
-
+          //  childrenDeviceList.insert(pDeviceData_Impl_Child->m_dwPK_Device, QString::fromStdString(pDeviceData_Impl_Child->m_sDescription));
             // This device was marked as disabled
             if (pDeviceData_Impl_Child->m_bDisabled)
             {
                 LoggerWrapper::GetInstance()->Write(LV_WARNING, "Child device %d is disabled", pDeviceData_Impl_Child->m_dwPK_Device);
                 continue;
             }
-            emit commandResponseChanged("Current device template::"+QString::number(pDeviceData_Impl_Child->m_dwPK_DeviceTemplate));
+            LoggerWrapper::GetInstance()->Write(LV_WARNING, "Creating child %d", pDeviceData_Impl_Child->m_dwPK_Device);
 
+            // This device has it's own executible. Try to spawn it. If that fails, we will try to create it ourselves
+            if( pDeviceData_Impl_Child->m_bImplementsDCE && !pDeviceData_Impl_Child->m_bIsEmbedded )
+            {
+                if( SpawnChildDevice(pDeviceData_Impl_Child->m_dwPK_Device,pDeviceData_Impl_Child->m_sCommandLine) )
+                    continue;
+            }
+            Event_Impl *pEvent = m_pEvent->CreateEvent( pDeviceData_Impl_Child->m_dwPK_DeviceTemplate, m_pPrimaryDeviceCommand->m_pEvent->m_pClientSocket, pDeviceData_Impl_Child->m_dwPK_Device );
+            if ( !pEvent )
+            {
+                pEvent = new Event_Impl( m_pPrimaryDeviceCommand->m_pEvent->m_pClientSocket, pDeviceData_Impl_Child->m_dwPK_Device );
+                LoggerWrapper::GetInstance()->Write( LV_WARNING, "Note: Device manager has attached a device of type %d that this has no custom event handler for.  It will not fire events.",
+                                                     pDeviceData_Impl_Child->m_dwPK_DeviceTemplate);
+            }
+            Command_Impl *pCommand = m_pPrimaryDeviceCommand->CreateCommand( pDeviceData_Impl_Child->m_dwPK_DeviceTemplate, m_pPrimaryDeviceCommand, pDeviceData_Impl_Child, pEvent );
+            if ( !pCommand )
+            {
+                pCommand = new Command_Impl(m_pPrimaryDeviceCommand, pDeviceData_Impl_Child, pEvent, m_pRouter);
+                pCommand->m_bGeneric=true;
+                LoggerWrapper::GetInstance()->Write(LV_WARNING, "Note: Device manager has attached a device of type %d that this has no custom handler for.  This is normal for IR.", pDeviceData_Impl_Child->m_dwPK_DeviceTemplate);
+            }
+            pCommand->m_pParent = this;
+            // pCommand->CreateChildren();
+            m_mapCommandImpl_Children[pDeviceData_Impl_Child->m_dwPK_Device] = pCommand;
+        }
+
+    } else {
+        emit commandResponseChanged("Non OSD QOrbiter::Creating Children");
+        emit commandResponseChanged("Size of children devices::"+QString::number((int)m_pData->m_vectDeviceData_Impl_Children.size()));
+        for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ ){
+
+            emit commandResponseChanged("Finding Child devices...");
+            DeviceData_Impl *pDeviceData_Impl_Child = m_pData->m_vectDeviceData_Impl_Children[i];
+
+            // This device was marked as disabled
+            if (pDeviceData_Impl_Child->m_bDisabled){
+                LoggerWrapper::GetInstance()->Write(LV_WARNING, "Child device %d is disabled", pDeviceData_Impl_Child->m_dwPK_Device);
+                continue;
+            }
+            emit commandResponseChanged("Current device template::"+QString::number(pDeviceData_Impl_Child->m_dwPK_DeviceTemplate));
             if (pDeviceData_Impl_Child->m_dwPK_DeviceTemplate == 2205){
                 int t = pDeviceData_Impl_Child->m_dwPK_Device;
                 setqMediaPlayerID(t);
@@ -4755,9 +4801,9 @@ void qOrbiter::CreateChildren()
                 //   emit qMediaPlayerIDChanged(qMediaPlayerID);
             }
         }
-        emit commandResponseChanged("Finished spawning children!");
-        emit routerConnectionChanged(true);
     }
+    emit commandResponseChanged("Finished spawning children!");
+    emit routerConnectionChanged(true);
 
 }
 

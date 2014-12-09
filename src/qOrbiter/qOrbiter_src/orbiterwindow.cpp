@@ -315,7 +315,7 @@ void orbiterWindow::initView(){
     mainView.showFullScreen();
 #elif defined(for_desktop)
     if(fullScreenOrbiter==true){
-        mainView.showFullScreen();
+        mainView.showMaximized();
     }
     else{
         mainView.show();

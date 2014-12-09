@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
     QApplication::setGraphicsSystem("meego");
 #elif GLENABLED
 #ifndef QT5
- //   QApplication::setGraphicsSystem("opengl");
+ // QApplication::setGraphicsSystem("opengl");
 #endif
 #else
     QApplication::setGraphicsSystem("raster");
@@ -335,8 +335,7 @@ int main(int argc, char* argv[])
 #endif
         bool fs = false;
         bool fm = false;
-        if(screen =="fullscreen")
-        {
+        if(screen =="fullscreen"){
             fs=true;
             fm=true;
         }
@@ -349,7 +348,6 @@ int main(int argc, char* argv[])
         QThread dceThread;
 
         qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
-
         qmlRegisterType<MediaTypesHelper>("org.linuxmce.enums",1,0,"MediaTypes");
         qmlRegisterType<SubTypesHelper>("org.linuxmce.enums",1,0,"MediaSubtypes");
         qmlRegisterType<AttributeTypeHelper>("org.linuxmce.enums",1,0,"Attributes");
@@ -380,6 +378,7 @@ int main(int argc, char* argv[])
         qorbiterManager  w(&orbiterWin.mainView);
         if(deviceType==0){
             w.setDeviceTemplate(DEVICETEMPLATE_OnScreen_qOrbiter_CONST);
+            //pqOrbiter.m_pData->m_dwPK_DeviceTemplate=DEVICETEMPLATE_OnScreen_qOrbiter_CONST;
             pqOrbiter.m_bIsOSD=true;
             qDebug() <<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!SETTING ON SCREEN FLAG!!!!!!!!!!!!!!!!!!!!!!!!";
         }

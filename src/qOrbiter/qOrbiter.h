@@ -45,6 +45,10 @@
 #include <QtNetwork/QNetworkReply>
 #include <QVariant>
 
+#ifndef QT5
+#include <QX11EmbedWidget>
+#endif
+
 //<-dceag-d-b->!
 
 
@@ -188,6 +192,10 @@ public:
     int  iMediaPluginID;
     int iPK_Device_eventPlugin;
     int m_pOrbiterCat;
+    QMap<int, QString> childrenDeviceList;
+#ifndef QT5
+    QMap<int, QX11EmbedContainer*> windowList;
+#endif
     //@}
 
     /*! @name Location, user, and Floorplan Member Variables */

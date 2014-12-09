@@ -113,6 +113,7 @@ linux-g++{
                 QT += script opengl
                 folder_01.source = qml/desktop
                 folder_01.target = $$DESTDIR/qml
+target.path=/usr/pluto/bin
 
         }
 

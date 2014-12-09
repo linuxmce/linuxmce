@@ -1995,7 +1995,7 @@ bool qorbiterManager::readLocalConfig(){
 
 
 #else
-     xmlPath = QDir::homePath()+"/linuxmce/config.xml";
+     QString xmlPath = QDir::homePath()+"/linuxmce/config.xml";
 #endif
     QFile localConfigFile;
     //**todo!! - add function for 1st run on android that copies the file to the xml path, then performs checks. we cannot install directly there.

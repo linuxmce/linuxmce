@@ -53,6 +53,6 @@ contains( QT, multimedia ) {
 }
 
 INCLUDEPATH += $$PWD
-LIBS -lvlc
+LIBS += -lvlc
 
 include(libvlc_wrapper/libvlc_wrapper.pri)

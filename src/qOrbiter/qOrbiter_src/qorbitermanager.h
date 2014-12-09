@@ -204,7 +204,6 @@ class qorbiterManager : public QObject
     Q_PROPERTY (bool usingLiveAvPath READ getLiveAvPath WRITE setLiveAvPath NOTIFY usingLiveAvPathChanged)/*! \brief If the current media player is using the live av path */
     Q_PROPERTY (bool m_bIsOSD READ getOsd WRITE setOsd NOTIFY isOsd) /*! \brief If this device is an On Screen Display */
     Q_PROPERTY (bool monitorAvailible READ getMonitorStatus WRITE setMonitorStatus NOTIFY monitorStatusChanged) /*! \brief If monitor mode is available */
-    Q_PROPERTY(int deviceVolume READ getDeviceVolume WRITE setDeviceVolume NOTIFY deviceVolumeChanged) /*! \brief the current device now playing device, assuming it can provide discrete audio levels */
     Q_PROPERTY(bool first_run  READ getRunStatus NOTIFY firstRunChanged) /*! \brief If this is the orbiters' first time being run */
     Q_PROPERTY (QString mediaResponse READ getMediaResponse WRITE setMediaResponse NOTIFY mediaResponseChanged)
     Q_PROPERTY (QString commandResponse READ getCommandResponse WRITE setCommandResponse NOTIFY commandResponseChanged)//for use in displaying command related dce replies.
