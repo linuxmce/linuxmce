@@ -45,7 +45,7 @@
 #include <QtNetwork/QNetworkReply>
 #include <QVariant>
 
-#ifndef QT5
+#if !defined(QT5) && !defined(Q_OS_ANDROID)
 #include <QX11EmbedWidget>
 #endif
 
@@ -193,7 +193,7 @@ public:
     int iPK_Device_eventPlugin;
     int m_pOrbiterCat;
     QMap<int, QString> childrenDeviceList;
-#ifndef QT5
+#if !defined(QT5) && !defined(Q_OS_ANDROID)
     QMap<int, QX11EmbedContainer*> windowList;
 #endif
     //@}

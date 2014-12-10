@@ -37,7 +37,9 @@ using namespace DCE;
 #ifdef QT5
 #include <QtWidgets/QApplication>
 #else
+#if !defined(Q_OS_ANDROID)
 #include <QX11EmbedWidget>
+#endif
 #endif
 
 #include "pluto_main/Define_DataGrid.h"

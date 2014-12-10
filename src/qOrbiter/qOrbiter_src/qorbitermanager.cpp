@@ -1965,12 +1965,12 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
  */
 bool qorbiterManager::readLocalConfig(){
     QDomDocument localConfig;
-#ifdef Q_OS_MAC && defined Q_OS_IOS
-    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
-#elif __ANDROID__
-    QString xmlPath ;
+    QString xmlPath;
 
-#ifdef NECESSITAS
+#if defined(Q_OS_MAC) && defined Q_OS_IOS
+     xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
+#elif defined(Q_OS_ANDROID)
+    #ifdef NECESSITAS
 
     qDebug() << "Mobile Storage Location::" << mobileStorageLocation;
     if(setupMobileStorage(androidHelper->externalStorageLocation)){
@@ -1979,24 +1979,20 @@ bool qorbiterManager::readLocalConfig(){
     else{
 
     }
-#elif QT5 && ANDROID
+    #elif QT5 && ANDROID
     if(setupMobileStorage(androidHelper->externalStorageLocation)){
         xmlPath = mobileStorageLocation+"/config.xml" ;
         qCritical() <<xmlPath;
     }
-#endif
-
-#endif
-
-#ifdef WIN32
-    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
+    #endif
+#elif defined(WIN32)
+     xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #elif RPI
-    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
-
-
+     xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #else
-     QString xmlPath = QDir::homePath()+"/linuxmce/config.xml";
+      xmlPath = QDir::homePath()+"/linuxmce/config.xml";
 #endif
+
     QFile localConfigFile;
     //**todo!! - add function for 1st run on android that copies the file to the xml path, then performs checks. we cannot install directly there.
     qDebug() << "Xml Path is " << xmlPath;
