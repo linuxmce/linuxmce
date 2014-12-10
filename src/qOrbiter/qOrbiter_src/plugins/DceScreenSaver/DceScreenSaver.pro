@@ -103,7 +103,7 @@ android-g++{
 
 
     QT5{
- QMLDIR_TARGET=../../../platforms/Android/androidComponents/Qt5/DceScreenSaver/qmldir
+    QMLDIR_TARGET=../../../platforms/Android/androidComponents/Qt5/DceScreenSaver/qmldir
     } else{
     QMLDIR_TARGET=../../../platforms/Android/androidComponents/DceScreenSaver/qmldir
     }
@@ -125,8 +125,8 @@ QMLDIR_TARGET = $$DESTDIR
 
 DEPLOYMENTFOLDERS+=qmldir
 
-copy_qmldir.target=$$DESTDIR
-    copy_qmldir.depends = qmldir
+copy_qmldir.target=$$QMLDIR_TARGER
+    copy_qmldir.depends = $$_PRO_FILE_PWD_/qmldir
     copy_qmldir.commands = $(COPY_FILE) \"$$replace(copy_qmldir.depends, /, $$QMAKE_DIR_SEP)\" \"$$replace(copy_qmldir.target, /, $$QMAKE_DIR_SEP)\"
     QMAKE_EXTRA_TARGETS += copy_qmldir
     PRE_TARGETDEPS += $$copy_qmldir.target
@@ -145,9 +145,9 @@ unix {
     installPath=/opt/qt5.2-rpi/qml/$$replace(uri, \\., /) #$$RASP_INSTALL_TARGET/$$replace(uri, \\., /)
     }
 
-
+    qmldir.path = $$installPath
     target.path = $$installPath
-   INSTALLS += target DEPLOYMENTFOLDERS
+   INSTALLS += target qmldir
 message("Plugin install path at" $$DESTDIR)
 message("qmldir target path at" $$QMLDIR_TARGET)
 
