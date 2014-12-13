@@ -51,11 +51,15 @@
 
 static JavaVM *m_pvm = 0;
 
-
+/** @defgroup Qt4JNIvariables Qt4 JNI methods and variables
+ *  This group contains the method ids and classes to interface with android via the JNI to obtain information.
+ *  Note that the Qt4 build uses necessitas and a more hands on method for accessing the JNI.
+ *  @{
+ *
+ */
 static jclass buildVersionClass = 0;
 static jclass buildVersionSDKClass = 0;
 
-/* Cache of class ids and methodID lookups for use later for finding sdcard path. */
 static jclass externalStorageClass =0;
 static jclass fileClass = 0;
 static jclass linuxmceMediaService=0;
@@ -87,6 +91,16 @@ static jmethodID s_qtActivity_SeekMediaMethod=0;
 static jmethodID s_qtActivity_MediaControlMethod=0;
 static jmethodID s_qtActivity_VolumeControlMethod=0;
 
+
+/** @defgroup Qt5JNIvariables Qt5 JNI methods and variables
+ *  This group contains the QT5 method ids and classes to interface with android via the JNI to obtain information.
+ *  Note that the Qt4 build uses necessitas and a more hands on method for accessing the JNI.
+ *  @{
+ *
+ */
+
+
+/** @} */
 
 AndroidSystem::AndroidSystem(QObject *parent) :
     QObject(parent)

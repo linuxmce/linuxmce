@@ -193,7 +193,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #elif defined (RPI)
     buildType="/qml/qt5-desktop";
     setHostDevice(HostSystemData::RASPBERRY_PI);
-#elif defined ANDROID    
+#elif defined ANDROID
 #ifndef QT5
     qDebug() << "Resolution::"<<QApplication::desktop()->width()<<"w x "<<QApplication::desktop()->height()<<"h";
     int h = QApplication::desktop()->height();
@@ -232,11 +232,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
         }
         setCommandResponse("Form factor set from config, using "+ buildType);
     }
-#endif
-
     qrcPath = ":android/Splash.qml";
     droidPath = "/";
-
+#endif
 #elif defined (for_android)
     if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
     {
@@ -265,9 +263,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     // qDebug() << "Resolution::"<<QApplication::desktop()->width()<<"w x "<<QApplication::desktop()->height()<<"h";
     int h = qorbiterUIwin->height();
     int w = qorbiterUIwin->width();
-
-
-
     if(isPhone==0){ //no default set
         setCommandResponse("No default form factor set, making initial selection");
         if (w > 480 && h > 854 || h > 480 && w > 854 ){
@@ -302,7 +297,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
         }
         setCommandResponse("Form factor for Qt5 set from config, using "+ buildType);
     }
+    qrcPath = ":android/Splash.qml";
+    droidPath = "/";
 #endif
+
     qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
     setApplicationPath(QApplication::applicationDirPath());
     localDir = qmlPath.append(buildType.remove("/qml"));
@@ -316,7 +314,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #if !defined(ANDROID)
     qDebug() << "Android should not see this";
     qorbiterUIwin->setSource(finalPath+"/splash/Splash.qml"); /*! We dont set android/iOS because it has its own bootstrap */
-
 #else
 
 #endif
@@ -1619,7 +1616,7 @@ void qorbiterManager::regenComplete(int i)
 QString qorbiterManager::adjustPath(const QString &path)
 {
 
-qDebug() <<Q_FUNC_INFO << "::Incoming Path" << path;
+    qDebug() <<Q_FUNC_INFO << "::Incoming Path" << path;
 
 #ifdef __ANDROID__
     return path+"android";
@@ -1826,17 +1823,17 @@ bool qorbiterManager::loadSkins(QUrl base)
 
 #ifdef __ANDROID__
     if(hostDevice == HostSystemData::ANDROID_PHONE){
-    #ifdef QT5
+#ifdef QT5
         tskinModel->addSkin("default");
-    #elif NECESSITAS
+#elif NECESSITAS
         tskinModel->addSkin("default");
-    #endif
-      }else{
-    #ifdef QT5
+#endif
+    }else{
+#ifdef QT5
         tskinModel->addSkin("default,data");
-    #else
+#else
         tskinModel->addSkin("default,data,smokey");
-    #endif
+#endif
     }
 #elif defined(for_harmattan)
     tskinModel->addSkin("default");
@@ -1968,9 +1965,9 @@ bool qorbiterManager::readLocalConfig(){
     QString xmlPath;
 
 #if defined(Q_OS_MAC) && defined Q_OS_IOS
-     xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
+    xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif defined(Q_OS_ANDROID)
-    #ifdef NECESSITAS
+#ifdef NECESSITAS
 
     qDebug() << "Mobile Storage Location::" << mobileStorageLocation;
     if(setupMobileStorage(androidHelper->externalStorageLocation)){
@@ -1979,18 +1976,18 @@ bool qorbiterManager::readLocalConfig(){
     else{
 
     }
-    #elif QT5 && ANDROID
+#elif QT5 && ANDROID
     if(setupMobileStorage(androidHelper->externalStorageLocation)){
         xmlPath = mobileStorageLocation+"/config.xml" ;
         qCritical() <<xmlPath;
     }
-    #endif
+#endif
 #elif defined(WIN32)
-     xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
+    xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #elif RPI
-     xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
+    xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #else
-      xmlPath = QDir::homePath()+"/linuxmce/config.xml";
+    xmlPath = QDir::homePath()+"/linuxmce/config.xml";
 #endif
 
     QFile localConfigFile;
@@ -2171,8 +2168,8 @@ bool qorbiterManager::readLocalConfig(){
 
 bool qorbiterManager::writeConfig()
 {
-qDebug() << Q_FUNC_INFO;
- //   setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
+    qDebug() << Q_FUNC_INFO;
+    //   setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
     QDomDocument localConfig;
 #ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());

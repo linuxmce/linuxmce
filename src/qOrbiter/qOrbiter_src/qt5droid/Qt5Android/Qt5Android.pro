@@ -26,7 +26,7 @@ TARGET=qorbiterqt5
 
         DEFINES+=GLENABLED ANDROID QT5 QANDROID
         QT+= opengl script network xml core
-        QT+= quick qml multimedia
+        QT+= quick qml multimedia androidextras
         glmsg= yes
 
 

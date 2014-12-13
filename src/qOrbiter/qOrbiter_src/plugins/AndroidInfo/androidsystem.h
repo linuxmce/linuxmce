@@ -4,13 +4,18 @@
 #include <QObject>
 #include <jni.h>
 
-#ifndef QT5
+#if defined(QT4)
 #include <QPlatformNativeInterface>
-
+#elif defined(QT5)
+#include <QtAndroidExtras>
 #endif
 #include <QColor>
 
-
+/*!
+ * \brief The AndroidSystem class
+ * This class is a frankenstein of sorts because of the two different ways one can access the JNI. In qt4, its used for the media player
+ * and to obtain some system informaton. In Qt5 it is exclusively used for system information at the moment.
+ */
 class AndroidSystem : public QObject
 {
     Q_OBJECT

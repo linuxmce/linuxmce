@@ -8,6 +8,7 @@
         <file alias="Welcome2.qml">qml/Welcome2.qml</file>
         <file>config.xml</file>
         <file alias="IosWelcome.qml">qml/IosWelcome.qml</file>
+        <file alias="AndroidBase.qml">qml/android/AndroidBase.qml</file>
     </qresource>
     <qresource prefix="/desktop"/>
     <qresource prefix="/osx"/>

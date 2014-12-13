@@ -252,11 +252,13 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.engine()->addImportPath(QApplication::applicationDirPath()+"/imports/");
 #elif defined __ANDROID__
 #ifdef QT5
-    qrcPath = "qrc:main/Welcome2.qml";
+    qrcPath = "qrc:main/AndroidBase.qml";
+    localPath = "android/qt5";
 #else
     qrcPath = "assets:/qml/Base.qml";
-#endif
     localPath = "android/";
+#endif
+
 #elif defined for_android
     buildType = "/qml/android";
     qrcPath = "qrc:android/Splash.qml";
