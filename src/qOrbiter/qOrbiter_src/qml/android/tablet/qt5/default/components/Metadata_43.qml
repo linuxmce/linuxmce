@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 
 Item{
     id:textrect
@@ -39,7 +39,7 @@ Item{
             smooth: true
             fontSize: scaleY(4)
             visible:  dcenowplaying.episode =="" ? false: true
-           // color:appStyle.accentcolor
+            // color:appStyle.accentcolor
         }
 
 

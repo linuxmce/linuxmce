@@ -1,8 +1,8 @@
-import QtQuick 2.0
+import QtQuick 2.2
 
 Item {
     id: filedetailrect
-    width: manager.appWidth
+    width: parent.width
     height:0
 
     property int bgImageProp:manager.q_subType ===("1"||"13") ? 43 : manager.q_attributetype_sort===53 ? 43 :36
@@ -30,15 +30,15 @@ Item {
 
     }
 
-//    Image {
-//        id: fdbg
-//        source: "../img/icons/nowplaying.png"
-//        anchors.fill: filedetailrect
-//        MouseArea{
-//            anchors.fill: filedetailrect
+    Image {
+        id: fdbg
+        source: "../img/icons/nowplaying.png"
+        anchors.fill: filedetailrect
+        MouseArea{
+            anchors.fill: filedetailrect
 
-//        }
-//    }
+        }
+    }
 
     Image{
         id:imdb
@@ -67,7 +67,15 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.leftMargin: scaleX(2)
-
+        BorderImage {
+            id: borderimg
+            horizontalTileMode: BorderImage.Repeat
+            source: "../img/icons/drpshadow.png"
+            anchors.fill: filedetailsimage
+            anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
+            border { left: 10; top: 10; right: 10; bottom: 10 }
+            smooth: true
+        }
         Image {
             id: filedetailsimage
             property bool profile : filedetailsimage.sourceSize.height > filedetailsimage.sourceSize.width ? true : false
@@ -77,7 +85,12 @@ Item {
             smooth: true
         }
 
-
+        Image {
+            id: npmask
+            source: "../img/icons/transparencymask.png"
+            anchors.fill: filedetailsimage
+            opacity: .5
+        }
     }
 
 
@@ -197,12 +210,12 @@ Item {
         width: parent.width
 
         StyledButton{
-            buttonText.text: "Play"
-            hitArea.onReleased:{ manager.playMedia(filedetailsclass.file)}
+            buttonText: "Play"
+            hitArea.onReleased: manager.playMedia(filedetailsclass.file)
         }
 
         StyledButton{
-            buttonText.text: "Close"
+            buttonText: "Close"
             hitArea.onReleased: {files_view_screen.state="viewing"; filedetailsclass.clear()}
         }
     }

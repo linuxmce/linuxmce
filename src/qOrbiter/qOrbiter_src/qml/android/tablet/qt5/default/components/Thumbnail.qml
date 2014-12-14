@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 
 Item {
     anchors{
@@ -38,6 +38,7 @@ Item {
 
     HeaderListView{
         id:propertyList
+        isUsingIndex: true
         anchors{
             top:parent.top
             left:parent.left
@@ -54,47 +55,5 @@ Item {
 
     }
 
-    //    Rectangle{
-    //        id:propertyList
-    //        width: parent.width*.25
-    //        anchors{
-    //            top:parent.top
-    //            left:parent.left
-    //            bottom:parent.bottom
-    //            leftMargin: scaleX(10)
-    //        }
-    //        color:"green"
-    //        StyledText{
-    //            id:propLabel
-    //            text:"Attribtes"
-    //            anchors.top: parent.top
-    //            anchors.horizontalCenter: parent.horizontalCenter
-    //        }
-
-    //        ListView{
-    //            id:propView
-    //            spacing:scaleY(2)
-    //            anchors{
-    //                top:propLabel.bottom
-    //                left:parent.left
-    //                right:parent.right
-    //                bottom:parent.bottom
-    //            }
-    //            model:screenshotAttributes
-    //            delegate: StyledButton{
-    //                label: attributeType
-    //                anchors{
-    //                    left:parent.left
-    //                    right:parent.right
-    //                }
-
-    //                onActivated: {
-    //                    manager.saveScreenShot(attributeNo)
-    //                    manager.cleanupScreenie()
-    //                    slideOut.source=""
-    //                }
-    //            }
-    //        }
-    //    }
 
 }

@@ -1,7 +1,5 @@
-import QtQuick 2.0
+import QtQuick 2.2
 import "../components"
 MediaPlaybackBase {
-    id:otar_radio
-    objectName: "screen_77"
 
 }

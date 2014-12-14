@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 
 ListView
 {
@@ -71,7 +71,7 @@ ListView
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing:scaleX(2)
                 delegate:StyledButton{
-                    buttonText.text: commandlist["commands"][index].command_name
+                    buttonText: commandlist["commands"][index].command_name
                     hitArea.onReleased: {fp_submodel.currentIndex = index;
                         console.log(JSON.stringify(commandlist["commands"][index]));
                         requestParamManager.getParams(commandlist["commands"][index].command_number, deviceno)
@@ -119,7 +119,7 @@ ListView
                                 width: parent.width
                                 height: parent.height
                                 font.pixelSize: scaleY(4)
-                                color: "white"
+                                fillColor: "white"
                                 text:parameters.model[index].value
                                 focus:true
                                 Keys.onPressed:
@@ -154,7 +154,7 @@ ListView
                 visible:floorplanDevices.currentIndex===index
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                buttonText.text: qsTr("Send")
+                buttonText: qsTr("Send")
                 textSize: scaleY(8)
                 hitArea.onReleased: send()
                 function send(){

@@ -83,9 +83,12 @@ Item{
             lmceData.setTotalTime(duration)
         }
         onErrorChanged: {
+
         }
 
-        onPositionChanged: {lmceData.processTimeCode(position); console.log(position)}
+        onPositionChanged: {
+            //lmceData.processTimeCode(position); console.log(position)
+        }
 
     }
 

@@ -1,78 +1,143 @@
-import QtQuick 2.0
-import "../../../../../skins-common/lib/handlers"
+import QtQuick 2.2
 
-Row{
+Item{
     id:nav_row
     height: scaleY(8)
-    width: manager.appWidth
-    anchors{      
-        top:parent.top
-    }
-    Connections{
-        target:qml_root
-        onShowUi:{
-            if(uiState){
-                state="active"
-            }else{
-                state="hidden"
-            }
-        }
-    }
+    state:"extended"
+    property double loadingProgress: nav.progress
+    onLoadingProgressChanged: console.log(loadingProgress)
     property alias navigation:nav
     property string defaultSource:"ScenarioComponent.qml"
     property string navSource:"ScenarioComponent.qml"
-    spacing:scaleX(2)
+    signal goingBack()
+    anchors{
+        top:qml_root.top
+        left:qml_root.left
+        right:qml_root.right
+
+    }
+
+    Rectangle{
+        anchors.fill: nav_row
+        color:manager.connectedState ? style.darkColor : style.alertcolor
+        opacity:style.shadeOpacity
+    }
+
     Loader{
         id:nav
         source:navSource
         height: parent.height
-        width: item.width
-    }
-    StyledButton{
-        buttonText.text:"Advanced"
-        opacity: manager.currentScreen === "Screen_1.qml" ? 1 : 0
-        hitArea.onReleased: manager.currentScreen="Screen_44.qml"
-    }
-
-    StyledButton {
-        id: exit_label
-        buttonText.text: qsTr("Exit")
-        hitArea.onReleased: manager.exitApp()
-        opacity:manager.currentScreen ==="Screen_1.qml" ? 1 : 0
-    }
-    StyledButton {
-        id: home_label
-        buttonText.text: qsTr("Home")
-        hitArea.onReleased: manager.setCurrentScreen("Screen_1.qml")
-        opacity: manager.currentScreen !=="Screen_1.qml" ? 1 : 0
-    }
-    StyledButton{
-        id:media_goback
-        buttonText.text: "Back"
-        hitArea.onReleased:{ manager.goBackGrid()
+        anchors{
+            top:parent.top
+            left: parent.left
+            right:commonButtons.left
+            rightMargin: scaleX(1)
         }
-        visible: manager.currentScreen==="Screen_47.qml"
+        onSourceChanged: {
+            if(nav.status===Component.Ready){
+                console.log("Header Navigation loaded")
+            }else if(nav.status===Component.Loading){
+                console.log("Header Navigation Loading")
+            } else if(nav.status===Component.Error){
+                console.log("Header Navigation failed to load, falling back.")
+            }
+        }
+
+
     }
 
 
+    Flickable{
+        id:commonButtons
+        height: parent.height
+        width: manager.appWidth *.30
+        anchors.right: parent.right
+
+
+        Row{
+            width: 5*50
+            height: scaleY(7)
+            spacing:scaleX(1)
+            anchors.verticalCenter: parent.verticalCenter
+            StyledButton{
+                buttonText:"Advanced"
+                opacity: manager.currentScreen === "Screen_1.qml" ? 1 : 0
+                onActivated: manager.setCurrentScreen("Screen_44.qml")
+            }
+            StyledButton {
+                id: showFloorplanCommand
+                buttonText: qsTr("Commands")
+                hitArea.onReleased: pageLoader.item.state==="commandView" ?pageLoader.item.state="floorplanView" :pageLoader.item.state="commandView"
+                visible:navSource==="FloorplanNav.qml" &&  pageLoader.item.selectedDevices.count !== 0? true : false
+                opacity: visible ? 1 : 0
+            }
+
+            StyledButton {
+                id: exit_label
+                buttonText: qsTr("Exit")
+                hitArea.onReleased: manager.closeOrbiter()
+                opacity:manager.currentScreen ==="Screen_1.qml" ? 1 : 0
+            }
+            StyledButton {
+                id: home_label
+                buttonText: qsTr("Home")
+                hitArea.onReleased: manager.setCurrentScreen("Screen_1.qml")
+                opacity: manager.currentScreen !=="Screen_1.qml" ? 1 : 0
+            }
+
+            StyledButton{
+                id:media_goback
+                buttonText: "Back"
+                hitArea.onReleased:{
+                    manager.goBackGrid();
+                }
+                visible: manager.currentScreen==="Screen_47.qml"
+            }
+        }
+
+
+    }
     states: [
         State {
-            name: "active"
-           AnchorChanges{
-               target: nav_row
-               anchors{
-                   bottom:undefined
-                   top:parent.top
-               }
-           }
+            name: "extended"
+            when:uiOn
+
+            AnchorChanges{
+                target: nav_row
+                anchors{
+                    bottom:undefined
+                    top:parent.top
+                }
+            }
         },
         State {
-            name: "hidden"
+            when:!uiOn
+            name: "retracted"
             AnchorChanges{
                 target: nav_row
                 anchors{
                     top:undefined
                     bottom:parent.top
+                }
+            }
+        },
+        State {
+            name: "lowered"
+            AnchorChanges{
+                target: nav_row
+                anchors{
+                    top:undefined
+                    bottom:parent.top
+                }
+            }
+        },
+        State {
+            name:"raised"
+            AnchorChanges{
+                target: nav_row
+                anchors{
+                    bottom:undefined
+                    top:parent.top
                 }
             }
         }
@@ -83,8 +148,8 @@ Row{
             from: "*"
             to: "*"
             AnchorAnimation{
-                duration:style.quickAnimation
-                easing.type:style.animationEasing
+                duration: 350
+                easing.type: Easing.InCurve
             }
         }
     ]

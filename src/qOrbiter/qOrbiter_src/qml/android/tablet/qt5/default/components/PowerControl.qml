@@ -1,10 +1,21 @@
-import QtQuick 2.0
-import "../../../../../skins-common/lib/handlers"
+import QtQuick 2.2
 
-GenericContainer{
+Item{
     id:powerControl
-    headerLabel: "Power Control"
-    fullscreen: true
+    anchors{
+        top:parent.top
+        bottom:parent.bottom
+        left:parent.left
+        right:parent.right
+    }
+    
+    StyledText{
+        anchors.bottom: btnRow.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: qsTr("Power Control")
+        fontSize: scaleY(9)
+    }
+
     Row{
         id:btnRow
         height:140
@@ -18,19 +29,19 @@ GenericContainer{
         anchors.leftMargin: 50
 
         StyledButton{
-            label: qsTr("Display On")
+            buttonText: qsTr("Display On")
             height: 120
             width: 200
-            onActivated: manager.toggleDisplay(1)
-
+            handler:manager.toggleDisplay(1)
+            useHandler: true
         }
 
         StyledButton{
-            label: qsTr("Display Off")
+            buttonText: qsTr("Display Off")
             height: 120
             width: 200
-            onActivated: manager.toggleDisplay(0)
-
+            handler:manager.toggleDisplay(0)
+            useHandler: true
         }
     }
     Row{
@@ -42,18 +53,18 @@ GenericContainer{
         spacing:scaleX(10)
         height: 140
         StyledButton{
-            label: qsTr("Turn Off MD")
+            buttonText: qsTr("Turn Off MD")
             height: 120
             width: 200
-            //            handler:PowerToggleHandler{mode:0}
-            //            useHandler: true
+//            handler:PowerToggleHandler{mode:0}
+//            useHandler: true
         }
         StyledButton{
-            label: qsTr("Turn On MD")
+            buttonText: qsTr("Turn On MD")
             height: 120
             width: 200
-            //            handler:PowerToggleHandler{mode:0}
-            //            useHandler: true
+//            handler:PowerToggleHandler{mode:0}
+//            useHandler: true
         }
     }
 }

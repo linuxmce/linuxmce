@@ -1,42 +1,51 @@
-import QtQuick 2.0
+import QtQuick 2.2
+Flickable{
+    height:scaleY(7)
+    width:scaleX(69)
+    anchors.verticalCenter: parent.verticalCenter
+    contentWidth: btnRow.width
+    clip:true
 
+    Row {
+        id:btnRow
+        width: childrenRect.width
+        height: scaleY(7)
+        spacing: scaleX(1)
 
-Row {
-    width: childrenRect.width
-    height: scaleY(7)
-    spacing: scaleX(1)
+        StyledButton{
+            buttonText: "Attribute"
+            onActivated: {attributeSelector.currentModel=attribfilter; }
+        }
 
-    StyledButton{
-        label: "Attribute"
-        onActivated: {attributeSelector.currentModel=attribfilter; }
-    }
+        StyledButton{
+            buttonText: "Genre"
+            onActivated: {attributeSelector.currentModel=genrefilter; }
+        }
 
-    StyledButton{
-        label: "Genre"
-        onActivated: {attributeSelector.currentModel=genrefilter; }
-    }
+        StyledButton{
+            buttonText: "MediaType"
+            onActivated: {attributeSelector.currentModel=mediatypefilter; }
+        }
 
-    StyledButton{
-        label: "MediaType"
-        onActivated: {attributeSelector.currentModel=mediatypefilter; }
-    }
+        StyledButton{
+            buttonText: "Resolution"
+            onActivated: {attributeSelector.currentModel=fileformatmodel; }
+        }
+        StyledButton{
+            buttonText: "Sources"
+            // onActivated: {attributeSelector.currentModel=undefined; }
+        }
 
-    StyledButton{
-        label: "Resolution"
-        onActivated: {attributeSelector.currentModel=fileformatmodel; }
-    }
-    StyledButton{
-        label: "Sources"
-        // onActivated: {attributeSelector.currentModel=undefined; }
-    }
+        StyledButton{
+            buttonText: "Users"
+            // onActivated: {attributeSelector.currentModel=undefined; }
+        }
 
-    StyledButton{
-        label: "Users"
-        // onActivated: {attributeSelector.currentModel=undefined; }
-    }
-
-    StyledButton{
-        label: "Play All"
-        onActivated:  manager.playMedia("!G"+iPK_Device)
+        StyledButton{
+            buttonText: "Play All"
+            onActivated:  manager.playMedia("!G"+iPK_Device)
+        }
     }
 }
+
+

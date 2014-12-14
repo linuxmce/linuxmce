@@ -1,5 +1,12 @@
-import QtQuick 2.0
+import QtQuick 2.2
 import "../components"
-Item{
+
+TabletFloorplanLayout{
+    id: mediaFloorplan
+    Component.onCompleted: {
+        hideInfoPanel();
+        setNavigation("FloorplanNav.qml");
+        floorplan_devices.clearAllSelections()
+    }
 
 }

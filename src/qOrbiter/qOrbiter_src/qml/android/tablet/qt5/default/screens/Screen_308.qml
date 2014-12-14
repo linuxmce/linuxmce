@@ -1,10 +1,9 @@
- 
-import QtQuick 2.0
+import QtQuick 2.2
 import "../components"
-
-MediaPlaybackBase{
-id:chromecast_screen
-objectName: "screen_308"
-
+StyledScreen{
+screen:qsTr("WD Live Remote")
+    MediaPlaybackBase {
+        screenLabel: screen
+    }
 
 }

@@ -1,8 +1,8 @@
-import QtQuick 2.0
+import QtQuick 2.2
 Item{
     id:audioDelegate
     height: currentCellHeight
-    width:currentCellWidth
+    width: currentCellWidth
     clip:true
 
     Rectangle{
@@ -11,14 +11,14 @@ Item{
         opacity: .65
         color:trap.pressed ? "darkgreen" : "black"
         anchors.margins: 10
-
     }
 
     Image{
+        id:img
         source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        height: parent.height*.75
+       anchors.centerIn: fillah
+        width: height
+        height: fillah.height
         anchors.margins: 5
         fillMode: Image.PreserveAspectCrop
         smooth: true
@@ -40,18 +40,25 @@ Item{
     StyledText{
         id:textBox
         text: name
-        anchors.bottom: parent.bottom
-        fontSize: 36
+        anchors.bottom: fillah.bottom
         color: "White"
+        fontSize: cellFontSize
         isBold: true
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         width: fillah.width
+        height: parent.height /3
     }
 
     MouseArea{
         id:trap
         anchors.fill: parent
-        onReleased: manager.setStringParam(4, id);
+        onReleased: {
+            if(name==="back (..)"){
+                manager.goBackGrid()
+            } else {
+                manager.addRestoreIndex(model.index);
+                manager.setStringParam(4, id);
+            }
+        }
     }
 }
-

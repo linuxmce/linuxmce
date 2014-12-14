@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 import "../components"
 /*!
   This is screen 70, the stored video file remote screen.
@@ -11,7 +11,16 @@ import "../components"
   *Audio Control
   *Advanced Device Controls
   */
-MediaPlaybackBase{
-id:screen_70
+StyledScreen{
+    onScreenOpening: {
+       // screen_70.playlistSource=manager.getDataGridModel("Playlist", 18)
+    }
 
+    keepHeader: false
+    MediaPlaybackBase{
+        id:screen_70
+        headerTitle: manager.translateMediaType(manager.i_current_mediaType)
+    }
 }
+
+

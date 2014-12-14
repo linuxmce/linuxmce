@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 
 Item{
     id:homeScreenItems
@@ -8,17 +8,15 @@ Item{
     Row{
         height: parent.height
         width: parent.width
-        spacing:scaleX(2)
-
+        spacing:scaleX(2)       
         StyledButton{
-            buttonText.text: "Power"
-            onActivated: loadComponent("PowerControl.qml")
+            id:location_info
+            buttonText: roomList.currentRoom//+"::"+roomList.currentEA
+            hitArea.onReleased: info_panel.state="room"
         }
         StyledButton{
-            buttonText.text: "Sleeping Menu"
-            onActivated: {
-
-            }
+            buttonText: "Sleeping Menu"
+            onActivated: manager.setCurrentScreen("Screen_29.qml")
         }
 
     }

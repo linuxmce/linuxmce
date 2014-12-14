@@ -1,5 +1,5 @@
-import QtQuick 2.0
-
+import QtQuick 2.2
+import org.linuxmce.enums 1.0
 Item {
     id: filedetailrect
     width: manager.appWidth
@@ -32,7 +32,7 @@ Item {
 
     Image {
         id: fdbg
-      //  source: "../img/icons/nowplaying.png"
+        //  source: "../img/icons/nowplaying.png"
         anchors.fill: filedetailrect
         MouseArea{
             anchors.fill: filedetailrect
@@ -70,7 +70,7 @@ Item {
         BorderImage {
             id: borderimg
             horizontalTileMode: BorderImage.Repeat
-          //  source: "../img/icons/drpshadow.png"
+            //  source: "../img/icons/drpshadow.png"
             anchors.fill: filedetailsimage
             anchors { leftMargin: -6; topMargin: -6; rightMargin: -8; bottomMargin: -8 }
             border { left: 10; top: 10; right: 10; bottom: 10 }
@@ -87,7 +87,7 @@ Item {
 
         Image {
             id: npmask
-           // source: "../img/icons/transparencymask.png"
+            // source: "../img/icons/transparencymask.png"
             anchors.fill: filedetailsimage
             opacity: .5
         }
@@ -210,13 +210,13 @@ Item {
         width: parent.width
 
         StyledButton{
-            buttonText.text: "Play"
-            hitArea.onReleased: manager.playMedia(filedetailsclass.file)
+            buttonText: "Play"
+            hitArea.onReleased: {manager.playMedia(filedetailsclass.file); content.state="viewing"}
         }
 
         StyledButton{
-            buttonText.text: "Close"
-            hitArea.onReleased: {files_view_screen.state="viewing"; filedetailsclass.clear()}
+            buttonText: "Close"
+            hitArea.onReleased: {content.state="viewing"; filedetailsclass.clear()}
         }
     }
 

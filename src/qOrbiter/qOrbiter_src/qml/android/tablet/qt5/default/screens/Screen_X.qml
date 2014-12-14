@@ -1,24 +1,33 @@
-import QtQuick 2.0
+import QtQuick 2.2
 import "../components"
 StyledScreen{
     id:screen_x_root
 
 
     Rectangle{
-        id:mask
-        width: parent.width*85
-        height: scaleY(15)
-        color: "black"
-        opacity: .85
-        anchors.centerIn: parent
+        height: scaleY(25)
+        width: parent.width
+        gradient: style.buttonGradient
+        anchors.verticalCenter: parent.verticalCenter
+        border.width:2
+        border.color: "white"
+        Rectangle{
+            anchors.fill: parent
+            color:"yellow"
+            opacity: .65
+        }
+
+        StyledText {
+            id: screen_loading_error
+            text: qsTr("I Cannot load this screen at this time. Please ensure that it exists and is error free.")
+            anchors.centerIn: parent
+            color: "Black"
+            font.pixelSize: 32
+            font.bold: true
+            font.weight: Font.Bold
+        }
     }
 
-    StyledText {
-        id: screen_loading_error
-        text: qsTr("I Cannot load this screen at this time. Please ensure that it exists and is error free.")
-        anchors.centerIn: mask
-        color: "Red"
-        font.pixelSize: 32
-        font.bold: false
-    }
+
+
 }

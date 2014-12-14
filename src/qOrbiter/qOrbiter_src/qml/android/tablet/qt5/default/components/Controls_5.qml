@@ -1,9 +1,9 @@
-import QtQuick 2.0
-import "../../../skins-common/lib/handlers"
+import QtQuick 2.2
+
 Item {
     width: childrenRect.width
     height: childrenRect.height
-
+    property bool useDvd:media_playback_base.state==="dvdmenu"
     Rectangle{
         anchors.fill: parent
         color: "black"
@@ -14,45 +14,45 @@ Item {
         spacing: 5
         height: childrenRect.height
         StyledButton{
-            buttonText.text: "Back"
+            buttonText: "Back"
             hitArea.onReleased: manager.newTrack("-1")
         }
 
         StyledButton{
-            buttonText.text: "RW"
+            buttonText: "RW"
             hitArea.onReleased: manager.setPlaybackSpeed(-1)
         }
 
         StyledButton{
-            buttonText.text:dceTimecode.playbackSpeed === 0 ? "Play" : "Pause"
+            buttonText:dceTimecode.playbackSpeed === 0 ? "Play" : "Pause"
             hitArea.onReleased: manager.pauseMedia()
         }
 
         StyledButton{
-            buttonText.text: "FF"
+            buttonText: "FF"
             hitArea.onReleased: manager.setPlaybackSpeed(+2)
         }
 
         StyledButton{
-            buttonText.text: "Next"
+            buttonText: "Next"
             hitArea.onReleased: manager.newTrack("+1")
         }
 
         StyledButton{
-            buttonText.text: "Stop"
+            buttonText: "Stop"
             hitArea.onReleased: manager.stopMedia()
         }
 
         StyledButton{
-            buttonText.text: "+"
+            buttonText: "+"
             hitArea.onReleased: manager.adjustVolume(5)
         }
         StyledButton{
-            buttonText.text: "Mute"
+            buttonText: "Mute"
             hitArea.onReleased: manager.mute()
         }
         StyledButton{
-            buttonText.text: "-"
+            buttonText: "-"
             hitArea.onReleased: manager.adjustVolume(-5)
         }
     }

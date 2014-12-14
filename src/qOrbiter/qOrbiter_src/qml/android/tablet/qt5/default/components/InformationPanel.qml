@@ -1,35 +1,23 @@
-import QtQuick 2.0
-import "../components"
-import "../../../../../skins-common/lib/handlers"
+import QtQuick 2.2
+
 
 Item{
     id:info_panel
-    width:parent.width
-    anchors.left:parent.left
-    anchors.right: parent.right
-    anchors.bottom: parent.bottom
+    property bool restore:false
+    anchors{
+        top:undefined
+        left:parent.left
+        right:parent.right
+        bottom:parent.bottom
+    }
+
+    MouseArea{
+        anchors.fill: parent
+        onClicked: uiOn=!uiOn
+    }
+
     Component.onCompleted:{
         info_panel.state="retracted";
-        statusTimer.start()
-    }
-    Connections{
-        target:qml_root
-        onShowUi:{
-            if(uiState){
-                state="retracted"
-            }else{
-                state="hidden"
-            }
-        }
-    }
-    Timer{
-        id:statusTimer
-        interval: 5000
-        triggeredOnStart: false
-        onTriggered: {
-            orbiter_status_text.opacity = 0;
-        }
-
     }
 
     Rectangle{
@@ -41,10 +29,13 @@ Item{
     
     StyledText{
         id:orbiter_status_text
-        text:"LinuxMCE Orbiter "+manager.iPK_Device + " connected."
-        anchors.top: parent.top
-        anchors.left: parent.left
-        font.pixelSize:36
+        text:"LinuxMCE Orbiter: "+manager.iPK_Device
+        anchors{
+            right:parent.right
+            bottom:parent.bottom
+        }
+
+        font.pixelSize:largeFontSize
         font.bold: true
         color:"green"
         Behavior on opacity {
@@ -53,12 +44,7 @@ Item{
                 PropertyAnimation{
                     duration: 250
                 }
-                ScriptAction{
-                    script: homeContent.source = "HomeScreenContent.qml"
-                }
             }
-
-
         }
     }
 
@@ -66,37 +52,53 @@ Item{
         id:homeContent
         anchors.top: parent.top
         anchors.left: parent.left
-        source:""
+        source:"HomeScreenContent.qml"
+        visible:(info_panel.state === "hidden" || info_panel.state==="retracted" )
     }
 
     Clock{
         id:time_keeper
-        anchors.top: orbiter_status_text.bottom
-        anchors.left: orbiter_status_text.left
+       anchors{
+           verticalCenter: parent.verticalCenter
+         //  horizontalCenterOffset: scaleX(-5)
+           horizontalCenter: parent.horizontalCenter
+       }
     }
-    Column{
+
+    Row{
         id:user_info
         width: childrenRect.width
         height: parent.height
         anchors.right: parent.right
+        anchors.rightMargin: scaleX(2)
+        spacing: scaleY(2)
         StyledButton{
-            buttonText.text: "User: "+manager.sPK_User
+            buttonText: "Power"
+            onActivated: info_panel.state="power"
+        }
+        StyledButton{
+            buttonText: manager.sPK_User
             hitArea.onReleased: info_panel.state="user"
         }
-        StyledButton{
-            id:location_info
-            buttonText.text: "Location: "+roomList.currentRoom+"::"+roomList.currentEA
-            hitArea.onReleased: info_panel.state="room"
-        }
+
     }
 
     RoomSelector{
+        id:locaton_info
         visible: info_panel.state==="room"
+    }
+    UserSelector{
+        visible: info_panel.state==="user"
+    }
+
+    PowerControl {
+        id: powerControl
+        visible: info_panel.state==="power"
     }
 
     StyledButton{
         id:close
-        buttonText.text: "Close"
+        buttonText: "Close"
         hitArea.onReleased: info_panel.state="retracted"
         anchors.right: parent.right
     }
@@ -115,7 +117,7 @@ Item{
             }
             PropertyChanges{
                 target: orbiter_status_text
-                visible:true
+                opacity:1
             }
             PropertyChanges{
                 target:close
@@ -123,7 +125,7 @@ Item{
             }
             PropertyChanges{
                 target:pageLoader
-                state:"active"
+                visible:true
             }
             PropertyChanges{
                 target:location_info
@@ -154,7 +156,7 @@ Item{
             }
             PropertyChanges{
                 target: orbiter_status_text
-                visible:false
+                opacity:0
             }
             PropertyChanges{
                 target:close
@@ -162,7 +164,7 @@ Item{
             }
             PropertyChanges{
                 target:pageLoader
-                state:"hidden"
+                visible:false
             }
             PropertyChanges{
                 target:location_info
@@ -179,9 +181,17 @@ Item{
                 target: info_panel
                 height:scaleY(92)
             }
+            PropertyChanges{
+                target:homeContent
+                source:""
+            }
             PropertyChanges {
                 target: time_keeper
                 visible:false
+            }
+            PropertyChanges{
+                target: orbiter_status_text
+                opacity:0
             }
             PropertyChanges{
                 target: orbiter_status_text
@@ -209,13 +219,48 @@ Item{
             }
             PropertyChanges{
                 target:pageLoader
-                state:"hidden"
+                visible:false
             }
 
         },
         State {
+            name: "power"
+            PropertyChanges {
+                target: info_panel
+                height:scaleY(92)
+            }
+            PropertyChanges {
+                target: time_keeper
+                visible:false
+            }
+            PropertyChanges {
+                target: info_fill
+                color:"green"
+            }
+            PropertyChanges{
+                target: orbiter_status_text
+                opacity:0
+            }
+            PropertyChanges{
+                target:close
+                visible:true
+            }
+            PropertyChanges{
+                target:pageLoader
+                visible:false
+            }
+            PropertyChanges{
+                target:location_info
+                visible:false
+            }
+            PropertyChanges{
+                target:user_info
+                visible:false
+            }
+        },
+        State {
             name: "hidden"
-            //   when: screenfile !=="Screen_1.qml"
+             when: manager.currentScreen !=="Screen_1.qml" || !uiOn
             PropertyChanges {
                 target: time_keeper
                 visible:false
@@ -227,7 +272,7 @@ Item{
             PropertyChanges {
                 target: info_panel
                 height:scaleY(0)
-                visible:false
+
             }
 
             PropertyChanges{
@@ -242,22 +287,36 @@ Item{
                 target:close
                 visible:false
             }
-
+            PropertyChanges{
+                target:pageLoader
+                visible:true
+            }
         }
-
         
     ]
     transitions: [
         
         Transition {
-            from: "*"
+            from: "retracted"
             to: "*"
             PropertyAnimation{
                 target:info_panel
                 properties:"height"
-                duration:style.quickAnimation
-                easing.type:style.animationEasing
+                duration:skinStyle.animation_medium
+                easing.type: skinStyle.animation_easing
             }
+        },
+        Transition {
+            from: "*"
+            to: "retracted"
+            PropertyAnimation{
+                target:info_panel
+                properties:"height"
+                duration:skinStyle.animation_medium
+                easing.type: skinStyle.animation_easing
+            }
+
+
         }
     ]
 }

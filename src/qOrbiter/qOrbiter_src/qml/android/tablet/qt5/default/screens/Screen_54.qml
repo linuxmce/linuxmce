@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 import "../components"
 /*!
   This is screen 54, the stored audio remote screen.
@@ -12,10 +12,15 @@ import "../components"
   *Advanced Device Controls
 
   */
-StyledScreen
-{
+StyledScreen{
+    id:stored_audio
+    Component.onCompleted: manager.setBoundStatus(true)
+    navigation: "HeaderControls.qml"
+    keepHeader: false
     MediaPlaybackBase{
-        id:screen_54
 
     }
+
+
 }
+

@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 
 Item {
     anchors.fill: parent
@@ -30,6 +30,7 @@ Item {
     }
     HeaderListView {
         id: headerListView
+        isUsingIndex: false
         anchors{
             left:parent.left
             right:parent.horizontalCenter

@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 import org.linuxmce.enums 1.0
 import "../components"
 
@@ -11,9 +11,8 @@ Item{
         bottom:parent.bottom
     }
 
-    property int itemBuffer:25
-    property int currentCellHeight:scaleX(20)
-       property int currentCellWidth:scaleX(20)
+    property int currentCellHeight:currentCellWidth
+    property int currentCellWidth:scaleX(25)
 
     property variant dvdPosterDimensions:{"w":755, "h":1080 }
     property variant hdPosterDimensions:{"w":955, "h":1080 }
@@ -26,36 +25,47 @@ Item{
     property double cdCoverRatioBack:1080/1264
     property double vcdRatio:1080/1080
     property double vhsRatio:1280/620
+    property int itemBuffer:25
     clip:true
 
     Component{
         id:audioItem
-        AudioDelegate{}
-    }
+        AudioDelegate{}    }
 
     Component{
         id:videoItem
         VideoDelegate{}
     }
 
-    property variant currentDelegate:multi_view_list.state==="video"? videoItem :audioItem
+    property variant currentDelegate:manager.q_mediaType==5 ? videoItem :audioItem
+
+    Connections{
+        target:manager
+        onModelChanged:{
+            media_grid.positionViewAtIndex(manager.currentIndex, GridView.Beginning)
+            manager.currentIndex=-1
+        }
+    }
+
     Component.onCompleted: {
+
         if(manager.q_mediaType=="4"){
-                  multi_view_list.state="audio"
-              } else if(manager.q_mediaType=="5"){
-                  multi_view_list.state="video"
-                  manager.setGridStatus(false);
-              } else {
-                  multi_view_list.state="default"
-              }
-        media_grid.model=manager.getDataGridModel("MediaFile", 63)
-        media_grid.positionViewAtIndex(item, ListView.Beginning)
+            multi_view_list.state="audio"
+        } else if(manager.q_mediaType=="5"){
+            multi_view_list.state="video"
+            manager.setGridStatus(false);
+        } else {
+
+        }
+        console.log("Getting grid for "+manager.q_mediaType);
+
+        media_grid.positionViewAtIndex(0, ListView.Beginning)
     }
 
     Connections {
         target: manager.getDataGridModel("MediaFile", 63)
         onScrollToItem: {
-            console.log("scroll to item : " + item);
+            console.log("scroll to item : " + item+ " of "+media_grid.count);
             media_grid.positionViewAtIndex(item, ListView.Beginning);
         }
     }
@@ -73,7 +83,7 @@ Item{
         spacing:scaleY(2)
         clip:true
     }
-    
+
     GridView{
         id:media_grid
         anchors{
@@ -82,48 +92,40 @@ Item{
             bottom:parent.bottom
             top:parent.top
         }
-
-        model:manager.getDataGridModel("MediaFile", 63)
-        visible:current_view_type===1
-        delegate:currentDelegate
         cellHeight: currentCellHeight
         cellWidth:currentCellWidth
+        model:manager.getDataGridModel("MediaFile", 63)
+        visible:true //current_view_type===1
+        delegate:currentDelegate
     }
-    
+
     PathView{
         id:media_path
         anchors.fill: parent
         // model:manager.getDataGridModel("MediaFile", 63)
         visible:current_view_type===3
     }
-
     states: [
         State {
             name: "audio"
-            when:manager.q_mediaType == Mediatypes.STORED_AUDIO
+            //  when:manager.q_mediaType == Mediatypes.STORED_AUDIO
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleY(24)
-                currentCellWidth:scaleX(19)
+                currentCellHeight:manager.isProfile ? scaleX(18) : scaleX(14)
+                currentCellWidth:currentCellHeight
             }
 
         },
         State {
             name: "video"
-            when:manager.q_mediaType == Mediatypes.STORED_VIDEO
+            //  when:manager.q_mediaType == Mediatypes.STORED_VIDEO
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: scaleY(24)
                 currentCellWidth:scaleX(19)
             }
-        },
-        State {
-            name: "default"
-            when:manager.q_mediaType != Mediatypes.STORED_VIDEO && manager.q_mediaType != Mediatypes.STORED_AUDIO
-            PropertyChanges {
-                target: multi_view_list
-                currentCellHeight: scaleY(24)
-                currentCellWidth:scaleX(19)
+            StateChangeScript{
+                script: manager.setGridStatus(false)
             }
         },
         State {
@@ -131,8 +133,8 @@ Item{
             extend:"video"
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleY(24)
-                currentCellWidth:scaleX(19)
+                currentCellHeight: scaleY(23)
+                currentCellWidth:scaleX(17)
             }
         },
         State {
@@ -141,19 +143,25 @@ Item{
             extend:"video"
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleY(20)
-                currentCellWidth:scaleX(19)
+                currentCellHeight: scaleY(24)
+                currentCellWidth:scaleX(25)
             }
         },
         State {
             name: "movies"
-            when:  manager.q_subType==MediaSubtypes.MOVIES && manager.q_mediaType==Mediatypes.STORED_VIDEO
+            when: manager.q_subType==MediaSubtypes.MOVIES && manager.q_mediaType==MediaTypes.LMCE_StoredVideo
             extend:"video"
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleY(24)
-                currentCellWidth:scaleX(16)
+                currentCellHeight: currentCellWidth*hdPosterRatio
+                currentCellWidth:manager.b_orientation ? scaleX(10) : scaleX(14.25)
             }
+        },
+        State {
+            name: "music-video"
+            when: manager.q_subType==MediaSubtypes.MUSICVIDEOS && manager.q_mediaType==MediaTypes.LMCE_StoredVideo
+            extend:"tv"
+
         },
         State {
             name: "seasons"
@@ -171,9 +179,21 @@ Item{
             extend:"tv"
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleY(20)
-                currentCellWidth:scaleX(19)
+                currentCellHeight: scaleY(33)
+                currentCellWidth:scaleX(33)
+            }
+        }
+        ,
+        State {
+            name: "radio"
+            when:manager.q_mediaType == MediaTypes.NP_OTARadio
+            extend:"audio"
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(33)
+                currentCellWidth:scaleX(33)
             }
         }
     ]
+
 }

@@ -1,17 +1,16 @@
-import QtQuick 2.0
-
+import QtQuick 2.2
 Item{
     id:controlPanel
-    height: parent.height
-    width: parent.width
-    clip:true
-    visible:state!=="unloaded"
-    anchors.right: metaDataPanel.left
-    state:"unloaded"
-    MouseArea{
-        anchors.fill: parent
-        onReleased: media_playback_base.state="metadata"
+    anchors{
+        top:headerRect.bottom
+        left:parent.left
+        right:parent.right
+        bottom: parent.bottom
     }
+
+    clip:true
+    visible:state!=="unloaded"  
+    state:"unloaded"
 
     Rectangle{
         id:fil
@@ -25,8 +24,8 @@ Item{
         anchors{
             left:optionContainer.right
             right:optionContainer.right
-            top:parent.top
-            bottom:parent.bottom
+            top:controlPanel.top
+            bottom:controlPanel.bottom
         }
         source: ""
 
@@ -39,6 +38,13 @@ Item{
                 slideOut.anchors.right = parent.right
             }
         }
+
+//        Behavior on {
+//            AnchorAnimation{
+//                duration: 350
+//                easing.type: Easing.InCubic
+//            }
+//        }
     }
 
     Rectangle{

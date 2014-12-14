@@ -1,5 +1,5 @@
-import QtQuick 2.0
-import "../../../../../skins-common/lib/handlers"
+import QtQuick 2.2
+
 
 Item{
     id:styledHdr
@@ -16,12 +16,13 @@ Item{
         id:hdrFill
         anchors.fill: parent
         color:style.headerBgColor
-        gradient:style.bgHeaderGradient
+        opacity: style.bgLightOpacity
     }
 
     StyledText{
         anchors.centerIn: parent
         text:labelText
+        color: "white"
     }
 
     StyledButton{
@@ -29,7 +30,7 @@ Item{
         visible:useClose
         label:"Close"
         onActivated: {
-        closeSignal()
+            closeSignal()
         }
     }
 }

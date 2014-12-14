@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 
 /*!
  *\class Style
@@ -16,14 +16,14 @@ QtObject{
     id:classicstyle
     objectName: "orbiter_style"
     //skin description
-    property string skincreator: "Langston Ball (aka golgoj4)"
-    property string skinname: "qt5default"
-    property string skindir: "qt5default"
-    property string skindescription: "Skin using qt5."
+    property string skincreator: "Langston Ball "
+    property string skinname: "Smokey"
+    property string skindir: "smokey"
+    property string skindescription: "Defualt QOrbiter Skin"
     property string skinversion: "1.0"
-    property string skinvariation: "Tablet"
-    property string maincolor: "black - green"
-
+    property string skinvariation: "Tablet -Android"
+    property string maincolor: "black"
+    property bool profile:!manager.isProfile
     //scale function
     function scaleX(x){
         return x/100*manager.appWidth
@@ -31,10 +31,6 @@ QtObject{
     function scaleY(y){
         return y/100*manager.appHeight
     }
-
-    //end scale function
-
-
 
     //New style //
     /* Overall */
@@ -49,10 +45,12 @@ QtObject{
     property int listItemHeight:scaleY(8)
     property color listItemBgColor:"green"
     property color listItemActiveBgColor: "white"
-     property color listItemPressedBgColor: "limegreen"
+    property color listItemPressedBgColor: "limegreen"
+    property color listItemTextInactiveColor:"white"
+    property color listItemTextActiveColor:"black"
     property Gradient bgHeaderGradient: Gradient{
         GradientStop{ position:0.0;color:"transparent"}
-        GradientStop{ position:0.65;color:"black"}
+        GradientStop{ position:0.65;color:manager.connectedState ? "black" : "red"}
     }
     property Gradient bgContentGradient: Gradient{
 
@@ -64,9 +62,10 @@ QtObject{
     property int buttonHeight:scaleY(4)
     property int  buttonWidth: scaleX(12)
     property int buttonLabelSize:scaleY(2)
-    property color buttonColor:"green"
+    property color buttonColor:"darkgreen"
     property color buttonPressedColor:"white"
     property color buttonBorderColor:"white"
+    property double buttonOpacity:.55
     property int buttonBorderWidth:1
     property Gradient buttonGradient: Gradient{
         GradientStop{ position:0.0;color:"transparent"}
@@ -75,53 +74,52 @@ QtObject{
 
 
     /* Animation Speeds */
-    property int quickAnimation:350
-    property int mediumAnimation:500
-    property int longAnimation:750
-    property int animationEasing:Easing.OutBack
+
 
     property int animation_quick:350
     property int animation_medium:500
     property int animation_long:750
     property int animation_easing:Easing.OutBack
 
+    /* Sizes */
+    property int headerButtonHeight:profile ? scaleY(8) : scaleY(10)
+    property int clockHeight:profile ? scaleY(12) : scaleY(10)
+    property int clockWidth:scaleX(50)
 
-    //----old style---//
     //-color definitions
-
-    property color accentcolor: "orange"
+    property color accentcolor: "green"
     property color highlight1: "silver"
     property color highlight2: "orange"
     property color alertcolor: "red"
     property color warncolor:"yellow"
+    property color darkColor:"black"
+    property double shadeOpacity:.65
 
     property color darkhighlight: "darkgrey"
-    property color lighthighlight: "green"
+    property color lighthighlight: "lightgreen"
     //--end color definitions
+
     //main stage styles
-    property int orbiterH:appH
-    property int orbiterW: appW
+    property int orbiterH:manager.appHeight
+    property int orbiterW: manager.appWidth
     property int orbiterWp: 480
     property int orbiterHp: 320
     property color stageBG: "slategray"
     property int homescreenrowheight:100
     property int homescreenbuttonheight: scaleX(12)
     property int homesreenbuttonwidth: scaleY(12)
-    property color homescreenscenariobuttoncolor: "aliceblue"
-    property color homescreenfloorplanbuttoncolor: "lightsteelblue"
-    property color homeScreenNowPlayingColorInActive: "indianred"
-    property color homeScreenNowPlayingColorActive: "lightcyan"
+
 
     property int homeselectorh: scaleY(15)
     property int homeselectorw: scaleY(15)
 
 
     //icon sizes
-    property int iconHeight: manager.isProfile ? scaleY(22) :scaleY(16)
-    property int iconWidth: manager.isProfile ? scaleY(22) :scaleY(16)
-    property int  stdbuttonh: manager.isProfile ? scaleY(15) :scaleY(12)
-    property int  stdbuttonw: manager.isProfile ? scaleY(15) :scaleY(12)
-    property int buttonLabelText : manager.isProfile ? scaleY(3) : scaleY(2.5)
+    property int iconHeight: profile ? scaleY(22) :scaleY(16)
+    property int iconWidth: profile ? scaleY(22) :scaleY(16)
+    property int  stdbuttonh: profile ? scaleY(15) :scaleY(12)
+    property int  stdbuttonw: profile ? scaleY(15) :scaleY(12)
+    property int buttonLabelText : profile ? scaleY(3) : scaleY(2.5)
 
     //textStyles
     property string stylebuttonimage: ""
@@ -164,7 +162,7 @@ QtObject{
     property color rowbgColor: "transparent"
 
     //Notifications bar
-  //  property int width: orbiterW - 5
+    property int width: orbiterW - 5
     property color not_color: "aliceblue"
     property string not_pos: "anchors: parent.top"
 
@@ -179,5 +177,4 @@ QtObject{
     //stage
     property color stage_bg: "lightSteelblue"
     property color bgcolor: "lightsteelblue"
-
 }

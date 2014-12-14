@@ -1,48 +1,61 @@
-import QtQuick 2.0
+import QtQuick 2.2
 
 Item {
     id:screen_root
-    state:"opening"
-    opacity:0
+    focus:true
+    opacity: 0
 
+    Component.onCompleted: {
+        console.log("screen opening")
+        forceActiveFocus()
+        state="opening"
+        screenOpening()
+    }
     Behavior on opacity {
-        PropertyAnimation{ duration: 250}
+        PropertyAnimation{
+            duration: 300
+        }
+    }
+
+    onScreenOpening: {
+        raiseNavigation(manager.currentScreen==="Screen_1.qml" ? true :keepHeader )
+        if(keepHeader){
+            setNavigation(navigation)
+        }
     }
 
     onOpacityChanged: {
-        if(state=="closing" && opacity==0){
-            close()
+        if(opacity===0 &&state==="closing"){
+            state="closed"
+            readyToClose()
         }
     }
 
-    Component.onCompleted: {
-        opacity=1
-        console.log(manager.currentScreen+" is opening")
-        setNavigation(navigationComponent)
-        if(manager.currentScreen != "Screen_1.qml"){
-             lowerInfoPanel();
-        } else {
-            showInfoPanel();
+    onStateChanged: {
+        if(state==="closed"){
+            console.log("screen closed.")
+
+
+        } else if(state==="closing"){
+            raiseNavigation(true)
         }
-
-
-        //info_panel.state="retracted";
     }
 
-    function close(){
-        console.log("Loader Request close")
-        pageLoader.loadNext();
+    function setNavigation(navFile){
+        nav_row.navSource=navFile
     }
 
-    property string screen:manager.currentScreen
+    property string screen:"screenum ipsum"
+    property string navigation:"ScenarioComponent.qml"
+    property bool keepHeader:true
+    property bool keepFooter:false;
+    property bool noForce:false
     signal readyToClose()
     signal screenClosing()
     signal screenOpening()
-    property string navigationComponent:""
 
     onReadyToClose: {
-        console.log("Closed, loading next!");
-        pageLoader.loadNext()
+        pageLoader.loadNext();
     }
 
     anchors{
@@ -57,12 +70,16 @@ Item {
             name: "opening"
             PropertyChanges {
                 target: screen_root
-                opacity:0
+                opacity:1
             }
+
         },
         State {
             name: "opened"
-            when:screen_root.opacity==1
+            PropertyChanges {
+                target: screen_root
+                opacity:1
+            }
         },
         State {
             name: "closing"
@@ -71,11 +88,10 @@ Item {
                 opacity:0
             }
 
-
         },
         State {
             name: "closed"
-            when:screen_root.opacity==0
+
         }
     ]
 

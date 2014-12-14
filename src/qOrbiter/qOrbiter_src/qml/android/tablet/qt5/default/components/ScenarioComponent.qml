@@ -1,10 +1,12 @@
-import QtQuick 2.0
-import "../../../../../skins-common/lib/handlers"
+import QtQuick 2.2
+
+
 
 ListView{
     id:scenarioList
     height:scaleY(7)
     width:  (scaleX(10)*8)
+    visible:manager.currentScreen==="Screen_1.qml"
     spacing: scaleY(2)
     model:current_header_model
     clip:true
@@ -16,11 +18,16 @@ ListView{
         width: childrenRect.width
         StyledButton{
             id:dummy
-            buttonText.text: name
-            buttonText.color: "antiquewhite"
-            hitArea.onPressAndHold: manager.showfloorplan(index+2)
+            buttonText: name
+            txtObj.color: "antiquewhite"
+            hitArea.onPressAndHold:{
+                manager.showfloorplan(floorplantype)
+                manager.setFloorplanType(floorplantype)
+            }
+
             hitArea.onReleased: {
-                if(manager.currentScreen==="Screen_1.qml"){
+                console.log(manager.currentScreen)
+                if(manager.currentScreen=="Screen_1.qml"){
                     if(modelName==="currentRoomLights")
                         current_scenario_model = currentRoomLights
                     else if(modelName==="currentRoomMedia")
@@ -31,15 +38,16 @@ ListView{
                         current_scenario_model=currentRoomTelecom
                     else if(modelName==="currentRoomSecurity")
                         current_scenario_model = currentRoomSecurity
-                }else if (manager.currentScreen==="Screen_47.qml"){
+                }else if (manager.currentScreen==="Screen_47"){
                     if(name==="Attribute")
                         console.log("attribute selected")
                 }
                 else{
+                    console.log("Manager currentScreen is not Screen 1::"+manager.currentScreen)
                     current_scenario_model = []
                 }
-                 console.log(manager.currentScreen)
-                scenarioList.currentModelName = modelName
+                 scenarioList.currentModelName = modelName
+                console.log(scenarioList.currentModelName)
             }
         }
     }
