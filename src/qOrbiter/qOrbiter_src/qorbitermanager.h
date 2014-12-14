@@ -1000,14 +1000,14 @@ public slots:
     void goBacktoQScreen();
 
     //! This function is called when the application window size changes.
-    void checkOrientation(QSize);
+    void checkOrientation(QSize s);
 
     bool getOrientation (){return isProfile;}
     /*!
      * \brief setOrientation. true if height < width (wide) or false if profile.
      * \param s
      */
-    void setOrientation (bool s) {  appHeight = qorbiterUIwin->height(); appWidth=qorbiterUIwin->width();  isProfile = s; setDceResponse("setOrientation::orientation changed to  "+isProfile ? " Profile." : " Wide."); emit orientationChanged();}
+    void setOrientation (bool s) {  /*appHeight = qorbiterUIwin->height(); appWidth=qorbiterUIwin->width();*/  isProfile = s; setDceResponse("setOrientation::orientation changed to  "+isProfile ? " Profile." : " Wide."); emit orientationChanged();}
     //! Returns the current screen in string format
     QString getCurrentScreen();
     //! Sets the current screen in string format.

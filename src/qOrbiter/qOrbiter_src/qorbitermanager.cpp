@@ -2705,7 +2705,7 @@ bool qorbiterManager::createAndroidConfig()
  * the \ref setOrientation() function is called.
  *
  */
-void qorbiterManager::checkOrientation(QSize)
+void qorbiterManager::checkOrientation(QSize s)
 {
     setDceResponse("checkOrientation(QSize)::start");
     //NOTE: Is this not handled by the window manager and Orientation change signals?
@@ -2723,8 +2723,8 @@ void qorbiterManager::checkOrientation(QSize)
     }
 
 #else
-    appHeight = qorbiterUIwin->height();
-    appWidth = qorbiterUIwin->width();
+        appHeight=s.height();
+        appWidth = s.width();
     if(appHeight < appWidth){
 
         setOrientation(false);
