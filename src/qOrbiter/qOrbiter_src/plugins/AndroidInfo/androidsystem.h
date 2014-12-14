@@ -112,7 +112,6 @@ public slots:
     QColor getRedStandard() {return redStandard;}
     QColor getRedHighlight() {return redHighlight;}
 
-
     void setDeviceBrand(QString b) {deviceBrand = b; emit deviceBrandChanged();}
     QString getDeviceBrand() {return deviceBrand;}
 
@@ -153,6 +152,15 @@ private:
     bool getDisplayInfo();
     jobject m_qtActivity;
     jobject m_audioService;
+
+    QString lmceDataClass;
+    QString locationFunction;
+    QString deviceDataClass;
+
+#ifdef QT5
+ QAndroidJniObject *j_lmceData;
+
+#endif
 
 };
 

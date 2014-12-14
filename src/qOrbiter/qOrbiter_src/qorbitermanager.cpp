@@ -1864,7 +1864,12 @@ bool qorbiterManager::loadSkins(QUrl base)
         }
     } else {
         if(deviceTemplate==DEVICETEMPLATE_OnScreen_qOrbiter_CONST){
+#if defined (QT5)
+            tskinModel->addSkin("default");
+#else
             tskinModel->addSkin("STB");
+#endif
+
         } else {
             tskinModel->addSkin("default,aeon,STB");
         }

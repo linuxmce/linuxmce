@@ -117,7 +117,9 @@ AndroidSystem::AndroidSystem(QObject *parent) :
     redStandard="#FF4444";
     redHighlight="#CC0000";
     externalStorageLocation = "";
-
+    locationFunction = "getStorageLocation";
+    lmceDataClass = "org/qtproject/qt5/android/bindings/SystemData";
+    deviceDataClass ="android/os/Build";
 #ifndef QT5
     if(m_pvm)
     {
@@ -140,6 +142,23 @@ AndroidSystem::AndroidSystem(QObject *parent) :
         setReadyStatus(false);
         setStatusMessage("Android Plugin malfunction. Unable to get env.");
     }
+
+#elif defined (QT5)
+    bool activated;
+    j_lmceData = new QAndroidJniObject(lmceDataClass.toLatin1());
+    if(j_lmceData->isValid()){
+        qDebug() << "Found System interface class.";
+        activated = j_lmceData->callMethod<jboolean>("getActivated");
+        qDebug() << " getActivated() " << activated;
+    } else {
+        activated=false;
+        qCritical() << "No class " << lmceDataClass << " found!";
+    }
+    setReadyStatus(activated);
+
+    deviceDataClass="android/os/Build";
+    updateExternalStorageLocation();
+    updateBuildInformation();
 
 #endif
 }
@@ -297,6 +316,16 @@ bool AndroidSystem::updateExternalStorageLocation()
 
     qCritical("Storage Search Complete");
     m_pvm->DetachCurrentThread();
+#elif defined (QT5)
+    if(j_lmceData->isValid()){
+        QAndroidJniObject exLoc = j_lmceData->callObjectMethod<jstring>( locationFunction.toLatin1());
+        qDebug() << Q_FUNC_INFO << " - location " << exLoc.toString();
+        setExternalStorageLocation(exLoc.toString());
+    } else {
+        qCritical() << Q_FUNC_INFO << " no class " << lmceDataClass << " found!";
+        return false;
+    }
+
 #endif
     return true;
 
@@ -348,6 +377,18 @@ bool AndroidSystem::updateBuildInformation()
 
 
     m_pvm->DetachCurrentThread();
+#elif defined (QT5)
+
+        int apilvl = QAndroidJniObject::getStaticField<jint>("android/os/Build$VERSION", "SDK_INT" );
+        setApiLevel(apilvl);
+
+        QString bd =QAndroidJniObject::getStaticObjectField<jstring>(deviceDataClass.toLatin1(), "BRAND").toString();
+        setDeviceBrand(bd);
+
+        QString dn = QAndroidJniObject::getStaticObjectField<jstring>(deviceDataClass.toLatin1(), "MODEL").toString();
+        setDeviceName(dn);
+
+
 #endif
     return true;
 
