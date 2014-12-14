@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.3
 import DceScreenSaver 1.0
 
 import "../../../../skins-common/lib/handlers"
@@ -7,9 +7,7 @@ import "components"
 Item {
     id: qml_root
 
-    height: manager.appHeight
-    width: manager.appHeight
-
+    anchors.fill: parent
     Connections{
         target:manager
         onOrientationChanged:{

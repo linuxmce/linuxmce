@@ -52,7 +52,7 @@ Item {
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         font.weight: Font.DemiBold
         isBold: true
-        font.pixelSize: largeFontSize
+        font.pixelSize:scaleY(parent.height*.010)
         color:skinStyle.listItemActiveBgColor
     }
 

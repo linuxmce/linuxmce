@@ -26,10 +26,10 @@ QtObject{
 
     //scale function
     function scaleX(x){
-        return x/100*appH
+        return x/100*manager.appWidth
     }
     function scaleY(y){
-        return y/100*appW
+        return y/100*manager.appHeight
     }
 
     //end scale function
