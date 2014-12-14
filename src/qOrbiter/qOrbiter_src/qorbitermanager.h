@@ -1001,6 +1001,7 @@ public slots:
 
     //! This function is called when the application window size changes.
     void checkOrientation(QSize s);
+    void checkOrientation(Qt::ScreenOrientation o);
 
     bool getOrientation (){return isProfile;}
     /*!

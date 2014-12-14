@@ -3005,7 +3005,7 @@ void qOrbiter::checkTimeCode(int npDevice)
         emit stopTimeCode();
         qDebug() <<"Not Getting timecode";
     }
-    qWarning() << " New ip :: " << sIPAddress.c_str();
+    qWarning() << " New timecode device ip :: " << sIPAddress.c_str();
 }
 
 void qOrbiter::getStreamingVideo()

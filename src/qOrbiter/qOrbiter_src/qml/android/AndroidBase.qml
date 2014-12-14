@@ -1,7 +1,8 @@
 import QtQuick 2.2
 
 Item {
-    anchors.fill: parent
+    height: manager.appHeight
+    width: manager.appWidth
 
     Component.onCompleted: {
         state="init"

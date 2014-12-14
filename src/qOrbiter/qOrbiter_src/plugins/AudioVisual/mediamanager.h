@@ -143,8 +143,11 @@ public:
 
 
     QTcpServer *timeCodeServer;
+#ifndef QT5
     QTcpServer *infoSocket;
     QTcpServer *tcCallback;
+#endif
+
     QString current_position;
     int iCurrent_Position;
 

@@ -209,6 +209,7 @@ void MediaManager::newClientConnected(){
 
 void MediaManager::callBackClientConnected()
 {
+#ifndef QT5
     if(tcCallback->hasPendingConnections()){
         callbackClient = tcCallback->nextPendingConnection();
         if(callbackClient->isValid()){
@@ -216,6 +217,7 @@ void MediaManager::callBackClientConnected()
             QObject::connect(callbackClient, SIGNAL(readyRead()), this, SLOT(forwardCallbackData()),Qt::QueuedConnection);
         }
     }
+#endif
 }
 
 void MediaManager::startTimeCodeServer(){
@@ -239,6 +241,7 @@ void MediaManager::stopTimeCodeServer()
 
 void MediaManager::forwardCallbackData(){
 
+#ifndef QT5
     QString callbackTc = callbackClient->readAll();
     if(!callbackTc.isEmpty() && callbackTc.length() > 2){
         int f = callbackTc.indexOf("|", 0);
@@ -248,6 +251,7 @@ void MediaManager::forwardCallbackData(){
         processTimeCode(callbackTc.toInt());
 
     }
+#endif
 }
 
 void MediaManager::setZoomLevel(QString zoom)
@@ -516,7 +520,7 @@ bool MediaManager::mountDrive(long device){
 
 void MediaManager::infoConnectHandler()
 {
-
+#ifndef QT5
     if(infoSocket->hasPendingConnections()){
         lastClient=infoSocket->nextPendingConnection();
         setCurrentStatus("IPC Client Connected::"+lastClient->localAddress().toString());
@@ -524,11 +528,12 @@ void MediaManager::infoConnectHandler()
             QObject::connect(lastClient,SIGNAL(readyRead()), this, SLOT(processSocketdata()));
         }
     }
+#endif
 }
 
 void MediaManager::connectInfoSocket()
 {
-
+#ifndef QT5
     if(!tcCallback){
         tcCallback = new QTcpServer();
         QObject::connect(tcCallback, SIGNAL(newConnection()), this, SLOT(callBackClientConnected()), Qt::QueuedConnection);
@@ -542,7 +547,7 @@ void MediaManager::connectInfoSocket()
 
     infoSocket->listen(QHostAddress::Any, 12001);
     QObject::connect(infoSocket, SIGNAL(newConnection()), this, SLOT(infoConnectHandler()));
-
+#endif
 
 }
 

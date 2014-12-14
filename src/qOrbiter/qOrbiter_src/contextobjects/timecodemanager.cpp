@@ -54,72 +54,70 @@ QString TimeCodeManager::ObjectToString(const QObject *obj)
 
 void TimeCodeManager::start(QString server, int iport)
 {
-#ifdef QT_DEBUG
-    qDebug("Starting timecode...");
-#endif
 
-if(dceMediaSocket->isOpen()){
-    return;
-}
+    qDebug()<< Q_FUNC_INFO << "Starting timecode...";
 
-   dceMediaSocket->close();
-//    dceMediaSocket->disconnectFromHost();
+
+    if(dceMediaSocket->isOpen()){
+        return;
+    }
+
+    dceMediaSocket->close();
+    //    dceMediaSocket->disconnectFromHost();
     port = iport;
     mediaPlayerIp = server;
+    qDebug() <<"opening connection to " << server + ":" + QString::number(iport);
 
-#ifdef QT_DEBUG
-        qDebug() <<"opening connection to " << server + ":" + QString::number(iport);
-#endif
-        dceMediaSocket->connectToHost(mediaPlayerIp, port, QFile::ReadOnly );
-        if ( dceMediaSocket->isValid() )
-        {
-            //qDebug() << "Time Code Socket connected! " << QString::fromStdString(qs_routerip.toStdString());
-            QObject::connect(dceMediaSocket,SIGNAL(readyRead()), this, SLOT(updateTimeCode()));
-            portConnected= true;
-        }
-        else
-        {
-            qDebug("couldnt start timecode");
-#ifdef QT_DEBUG
-            qDebug() << dceMediaSocket->errorString();
-#endif
-            portConnected = false;
-            stop();
-        }
+    dceMediaSocket->connectToHost(mediaPlayerIp, port, QFile::ReadOnly );
+    if ( dceMediaSocket->isValid() )
+    {
+        //qDebug() << "Time Code Socket connected! " << QString::fromStdString(qs_routerip.toStdString());
+        QObject::connect(dceMediaSocket,SIGNAL(readyRead()), this, SLOT(updateTimeCode()));
+        portConnected= true;
+    }
+    else
+    {
+        qDebug("couldnt start timecode");
+
+        qDebug() << dceMediaSocket->errorString();
+
+        portConnected = false;
+        stop();
+    }
 
 
-//    if(!dceMediaSocket->canReadLine() && portConnected==false)
-//    {
+    //    if(!dceMediaSocket->canReadLine() && portConnected==false)
+    //    {
 
-//    }
-//    else
-//    {
-//        if(dceMediaSocket->isOpen() || portConnected == true){
+    //    }
+    //    else
+    //    {
+    //        if(dceMediaSocket->isOpen() || portConnected == true){
 
-//            if(dceMediaSocket->peerName()== server)
-//            {
-//                qDebug() << "Its already connected";
-//                // break;
-//            }
-//            else
-//            {
-//                qDebug() << dceMediaSocket->peerName() << "is different from " << server << ". reconnecting";
-//                dceMediaSocket->close();
-//                dceMediaSocket->connectToHost(server, 12000);
-//                mediaPlayerIp = server;
-//                restart();
-//                //break;
-//            }
-//        }
-//        else
-//        {
-//            qDebug() << "Cannot connect to server, check internals";
-//            qDebug()<< dceMediaSocket->peerAddress();
-//            qDebug() << dceMediaSocket->peerPort();
-//            qDebug()<< dceMediaSocket->errorString();
-//            stop();
-//        }
-//    }
+    //            if(dceMediaSocket->peerName()== server)
+    //            {
+    //                qDebug() << "Its already connected";
+    //                // break;
+    //            }
+    //            else
+    //            {
+    //                qDebug() << dceMediaSocket->peerName() << "is different from " << server << ". reconnecting";
+    //                dceMediaSocket->close();
+    //                dceMediaSocket->connectToHost(server, 12000);
+    //                mediaPlayerIp = server;
+    //                restart();
+    //                //break;
+    //            }
+    //        }
+    //        else
+    //        {
+    //            qDebug() << "Cannot connect to server, check internals";
+    //            qDebug()<< dceMediaSocket->peerAddress();
+    //            qDebug() << dceMediaSocket->peerPort();
+    //            qDebug()<< dceMediaSocket->errorString();
+    //            stop();
+    //        }
+    //    }
 
 }
 
@@ -152,7 +150,7 @@ void TimeCodeManager::restart()
 void TimeCodeManager::updateTimeCode()
 {
     socketData = dceMediaSocket->readAll();
-  //  qDebug() <<"INC SOCKET DATA \n"<< QString::fromLocal8Bit(socketData, socketData.size());
+    //  qDebug() <<"INC SOCKET DATA \n"<< QString::fromLocal8Bit(socketData, socketData.size());
 
     std::string sLine = QString::fromLocal8Bit(socketData.data(), socketData.size()).toStdString();
     if (sLine.length() > 0)
@@ -195,7 +193,7 @@ void TimeCodeManager::updateTimeCode()
         QString f = QString::fromStdString(sLine).split(",").first();
 
         if(f.length()>4)
-        iSpeed= 1000;
+            iSpeed= 1000;
 
         //end hack
 
