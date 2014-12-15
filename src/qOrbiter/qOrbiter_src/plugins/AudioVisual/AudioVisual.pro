@@ -14,7 +14,7 @@ contains(QT_VERSION,4.*.*){
 
         android-g++{
          QT-= phonon
-DEFINES+=ANDROID
+        DEFINES+=ANDROID
         message("For Android")
          }
 
@@ -29,6 +29,8 @@ contains(QT_VERSION,5.*.*){
 
 
 uri = AudioVisual
+URI=$$uri
+
 TARGET = $$qtLibraryTarget($$TARGET)
 
 
@@ -71,75 +73,7 @@ QMAKE_CXXFLAGS+=-Wno-c++11-narrowing
 DESTDIR=../../imports/AudioVisual
 }
 
-
-
-OTHER_FILES = qmldir \
-    android/res/values-ja/strings.xml \
-    android/res/values-ru/strings.xml \
-    android/res/drawable/logo.png \
-    android/res/drawable/icon.png \
-    android/res/values-pl/strings.xml \
-    android/res/values-fa/strings.xml \
-    android/res/values-zh-rCN/strings.xml \
-    android/res/layout/splash.xml \
-    android/res/drawable-ldpi/icon.png \
-    android/res/values-rs/strings.xml \
-    android/res/drawable-hdpi/icon.png \
-    android/res/values/strings.xml \
-    android/res/values/libs.xml \
-    android/res/values-nl/strings.xml \
-    android/res/values-it/strings.xml \
-    android/res/values-nb/strings.xml \
-    android/res/values-ms/strings.xml \
-    android/res/values-ro/strings.xml \
-    android/res/values-id/strings.xml \
-    android/res/values-pt-rBR/strings.xml \
-    android/res/values-es/strings.xml \
-    android/res/values-fr/strings.xml \
-    android/res/values-et/strings.xml \
-    android/res/values-zh-rTW/strings.xml \
-    android/res/values-el/strings.xml \
-    android/res/drawable-mdpi/icon.png \
-    android/res/values-de/strings.xml \
-    android/AndroidManifest.xml \
-    android/src/org/kde/necessitas/origo/QtApplication.java \
-    android/src/org/kde/necessitas/origo/QtActivity.java \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/version.xml \
-    android/res/values-es/strings.xml \
-    android/res/values-rs/strings.xml \
-    android/res/values-fa/strings.xml \
-    android/res/values/strings.xml \
-    android/res/values/libs.xml \
-    android/res/values-ms/strings.xml \
-    android/res/values-ja/strings.xml \
-    android/res/values-id/strings.xml \
-    android/res/values-pl/strings.xml \
-    android/res/values-et/strings.xml \
-    android/res/values-fr/strings.xml \
-    android/res/values-zh-rTW/strings.xml \
-    android/res/drawable-ldpi/icon.png \
-    android/res/values-de/strings.xml \
-    android/res/values-it/strings.xml \
-    android/res/values-el/strings.xml \
-    android/res/values-nl/strings.xml \
-    android/res/values-pt-rBR/strings.xml \
-    android/res/values-zh-rCN/strings.xml \
-    android/res/values-ro/strings.xml \
-    android/res/layout/splash.xml \
-    android/res/values-ru/strings.xml \
-    android/res/values-nb/strings.xml \
-    android/res/drawable-hdpi/icon.png \
-    android/res/drawable/icon.png \
-    android/res/drawable/logo.png \
-    android/res/drawable-mdpi/icon.png \
-    android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    android/src/org/kde/necessitas/origo/QtApplication.java \
-    android/src/org/kde/necessitas/origo/QtActivity.java \
-    android/version.xml \
-    android/AndroidManifest.xml
+OTHER_FILES = qmldir
 
 # Input
 SOURCES += \
@@ -176,10 +110,6 @@ SOURCES += \
 	../../../../PlutoUtils/getch.cpp \
 	../../../../Gen_Devices/qMediaPlayerBase.cpp \
         ../../../../Gen_Devices/qOrbiterBase.cpp
-
-
-
-
 	
 HEADERS += \
 	audiovisual_plugin.h \  
@@ -264,38 +194,5 @@ unix {
 
 message("Plugin install path at" $$DESTDIR)
 
-OTHER_FILES += \
-    ../../../platforms/Android/android/res/values-rs/strings.xml \
-    ../../../platforms/Android/android/res/values-de/strings.xml \
-    ../../../platforms/Android/android/res/values-ro/strings.xml \
-    ../../../platforms/Android/android/res/values-zh-rTW/strings.xml \
-    ../../../platforms/Android/android/res/values-ru/strings.xml \
-    ../../../platforms/Android/android/res/values-fa/strings.xml \
-    ../../../platforms/Android/android/res/values-ja/strings.xml \
-    ../../../platforms/Android/android/res/layout/splash.xml \
-    ../../../platforms/Android/android/res/values-it/strings.xml \
-    ../../../platforms/Android/android/res/values-nl/strings.xml \
-    ../../../platforms/Android/android/res/values-fr/strings.xml \
-    ../../../platforms/Android/android/res/values-pl/strings.xml \
-    ../../../platforms/Android/android/res/values-el/strings.xml \
-    ../../../platforms/Android/android/res/values-nb/strings.xml \
-    ../../../platforms/Android/android/res/values-es/strings.xml \
-    ../../../platforms/Android/android/res/values-id/strings.xml \
-    ../../../platforms/Android/android/res/values-zh-rCN/strings.xml \
-    ../../../platforms/Android/android/res/values-pt-rBR/strings.xml \
-    ../../../platforms/Android/android/res/values-ms/strings.xml \
-    ../../../platforms/Android/android/res/values/strings.xml \
-    ../../../platforms/Android/android/res/values-et/strings.xml \
-    ../../../platforms/Android/android/version.xml \
-    ../../../platforms/Android/android/src/org/kde/necessitas/origo/QtActivity.java \
-    ../../../platforms/Android/android/src/org/kde/necessitas/origo/QtApplication.java \
-    ../../../platforms/Android/android/src/org/kde/necessitas/ministro/IMinistro.aidl \
-    ../../../platforms/Android/android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
-    ../../../platforms/Android/android/AndroidManifest.xml \
-    ../../../platforms/Android/android/res/drawable-ldpi/icon.png \
-    ../../../platforms/Android/android/res/drawable/icon.png \
-    ../../../platforms/Android/android/res/drawable/logo.png \
-    ../../../platforms/Android/android/res/drawable-mdpi/icon.png \
-    ../../../platforms/Android/android/res/values/libs.xml \
-    ../../../platforms/Android/android/res/drawable-hdpi/icon.png
+
 
