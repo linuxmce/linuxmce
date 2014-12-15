@@ -9,7 +9,10 @@
 
 void DceScreenSaverPlugin::registerTypes(const char *uri)
 {
+#ifndef QT5
     // @uri DceScreenSaver
+#endif
+    Q_ASSERT(uri==QLatin1String("DceScreenSaver"));
     qmlRegisterType<DceScreenSaver>(uri, 1, 0, "DceScreenSaver");
 }
 

@@ -23,7 +23,7 @@
 
 
 class qorbiterManager;
-class ListModel;
+class DceListModel;
 
 #if (QT5)
 class GridIndexProvider :public QObject , public QQuickImageProvider
@@ -33,7 +33,7 @@ class GridIndexProvider :public QObject , public QDeclarativeImageProvider
 {
     Q_OBJECT
 public:
-    GridIndexProvider( ListModel* model, int pathRole, int pixmapRole);
+    GridIndexProvider( DceListModel* model, int pathRole, int pixmapRole);
    virtual ~GridIndexProvider();
     QImage requestImage(const QString& id, QSize* size, const QSize& requestedSize);
 
@@ -44,7 +44,7 @@ public slots:
 
 private:
 
-    ListModel& mModel;
+    DceListModel& mModel;
     int mPathRole;
     int mPixmapRole;
     QMap<QString, QModelIndex> mPixmapIndex;

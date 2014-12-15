@@ -28,7 +28,7 @@
 
 #include "datamodels/listModel.h"
 
-ListModel::ListModel(gridItem* prototype, QObject* parent) :
+DceListModel::DceListModel(gridItem* prototype, QObject* parent) :
     QAbstractListModel(parent),  m_prototype(prototype)
 {
 #ifndef QT5
@@ -48,7 +48,7 @@ ListModel::ListModel(gridItem* prototype, QObject* parent) :
 
 
 
-int ListModel::rowCount(const QModelIndex &parent) const
+int DceListModel::rowCount(const QModelIndex &parent) const
 {
     if(parent.isValid()){
         return 0;
@@ -59,21 +59,21 @@ int ListModel::rowCount(const QModelIndex &parent) const
 
 }
 
-QVariant ListModel::data(const QModelIndex &index, int role) const
+QVariant DceListModel::data(const QModelIndex &index, int role) const
 {
     if(index.row() < 0 || index.row() >= m_list.size())
         return QVariant();
     return m_list.at(index.row())->data(role);
 }
 
-QHash<int, QByteArray> ListModel::roleNames() const
+QHash<int, QByteArray> DceListModel::roleNames() const
 {
     return m_prototype->roleNames();
 }
 
 
 
-void ListModel::appendRow(gridItem *item)
+void DceListModel::appendRow(gridItem *item)
 {
     setLoadingStatus(true);   
     appendRows(QList<gridItem*>() << new gridItem(item->id(), item->name(), item->path(), item->index(), this ));
@@ -81,11 +81,11 @@ void ListModel::appendRow(gridItem *item)
     //  item->destruct();
 }
 
-void ListModel::appendRows(const QList<gridItem *> &items)
+void DceListModel::appendRows(const QList<gridItem *> &items)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(gridItem *item, items) {
-     // qWarning() << "Listmodel Active Item::" << item->index();
+     // qWarning() << "DceListModel Active Item::" << item->index();
         //setCurrentItemIndex(item->index());
         QObject::connect(item, SIGNAL(destroyed()), this, SLOT(itemDeleted()),Qt::QueuedConnection);
         QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
@@ -106,7 +106,7 @@ void ListModel::appendRows(const QList<gridItem *> &items)
 
 }
 
-void ListModel::insertRow(int row, gridItem *item)
+void DceListModel::insertRow(int row, gridItem *item)
 {
 
     beginInsertRows(QModelIndex(), row, row);
@@ -117,7 +117,7 @@ void ListModel::insertRow(int row, gridItem *item)
 
 }
 
-void ListModel::handleItemChange()
+void DceListModel::handleItemChange()
 {
     gridItem* item = static_cast<gridItem*>(sender());
     QModelIndex index = indexFromItem(item);
@@ -128,7 +128,7 @@ void ListModel::handleItemChange()
     }
 }
 
-void ListModel::reset()
+void DceListModel::reset()
 {
     clearing = true;
 
@@ -143,7 +143,7 @@ void ListModel::reset()
     QApplication::processEvents(QEventLoop::AllEvents);
 }
 
-bool ListModel::resetInternalData()
+bool DceListModel::resetInternalData()
 {
     qDebug("Resetting Media Listmodel data");
     qDebug() <<  "::Items to be cleared:: "<< m_list.size();
@@ -155,7 +155,7 @@ bool ListModel::resetInternalData()
     return true;
 }
 
-gridItem * ListModel::find(const QString &id) const
+gridItem * DceListModel::find(const QString &id) const
 {
     foreach(gridItem* item, m_list) {
         if(item->id() == id) return item;
@@ -163,7 +163,7 @@ gridItem * ListModel::find(const QString &id) const
     return 0;
 }
 
-QVariant ListModel::get(int index, const QString &name) const
+QVariant DceListModel::get(int index, const QString &name) const
 {
     if (index>=0 && index<m_list.size()) {
         gridItem* myItem = m_list.at(index);
@@ -182,7 +182,7 @@ QVariant ListModel::get(int index, const QString &name) const
     }
 }
 
-QModelIndex ListModel::indexFromItem(const gridItem *item) const
+QModelIndex DceListModel::indexFromItem(const gridItem *item) const
 {
     Q_ASSERT(item);
     for(int row=0; row<m_list.size(); ++row) {
@@ -191,7 +191,7 @@ QModelIndex ListModel::indexFromItem(const gridItem *item) const
     return QModelIndex();
 }
 
-void ListModel::clear()
+void DceListModel::clear()
 {
     clearing = true;
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -212,7 +212,7 @@ void ListModel::clear()
 
 }
 
-bool ListModel::removeRow(int row, const QModelIndex &parent)
+bool DceListModel::removeRow(int row, const QModelIndex &parent)
 {
     Q_UNUSED(parent);
     if(row < 0 || row >= m_list.size()) return false;
@@ -222,7 +222,7 @@ bool ListModel::removeRow(int row, const QModelIndex &parent)
     return true;
 }
 
-bool ListModel::removeRows(int row, int count, const QModelIndex &parent)
+bool DceListModel::removeRows(int row, int count, const QModelIndex &parent)
 {
     Q_UNUSED(parent);
     if(row < 0 || (row+count) > m_list.size()) return false;
@@ -234,7 +234,7 @@ bool ListModel::removeRows(int row, int count, const QModelIndex &parent)
     return true;
 }
 
-gridItem * ListModel::takeRow(int row)
+gridItem * DceListModel::takeRow(int row)
 {
     beginRemoveRows(QModelIndex(), row, row);
     gridItem* item = m_list.takeAt(row);
@@ -242,29 +242,29 @@ gridItem * ListModel::takeRow(int row)
     return item;
 }
 
-gridItem * ListModel::currentRow()
+gridItem * DceListModel::currentRow()
 {
     gridItem* item = m_list.at(0);
     return item;
 }
 
-void ListModel::sortModel(int column, Qt::SortOrder order)
+void DceListModel::sortModel(int column, Qt::SortOrder order)
 {
 
 }
 
-void ListModel::checkForMore()
+void DceListModel::checkForMore()
 {
 
 
 }
 
-void ListModel::populateGrid(int mediaType)
+void DceListModel::populateGrid(int mediaType)
 {
     //manager_ref->pqOrbiter->prepareFileList(mediaType);
 }
 
-void ListModel::setTotalCells(int cells)
+void DceListModel::setTotalCells(int cells)
 {
     totalcells = cells;
     emit statusMessage("Size Changed to" + QString::number(totalcells));
@@ -281,12 +281,12 @@ void ListModel::setTotalCells(int cells)
 
 }
 
-int ListModel::getTotalCells()
+int DceListModel::getTotalCells()
 {
     return totalcells;
 }
 
-void ListModel::setGridType(int type)
+void DceListModel::setGridType(int type)
 {
     gridType = type;
     //emit gridTypeChanged(gridType);
@@ -294,23 +294,23 @@ void ListModel::setGridType(int type)
 
 }
 
-int ListModel::getGridType()
+int DceListModel::getGridType()
 {
     return gridType;
 }
 
-void ListModel::setLoadingStatus(bool b)
+void DceListModel::setLoadingStatus(bool b)
 {
     loadingStatus = b;
     emit loadingStatusChanged(loadingStatus);
 }
 
-bool ListModel::getLoadingStatus()
+bool DceListModel::getLoadingStatus()
 {
     return loadingStatus;
 }
 
-void ListModel::setProgress(double n_progress)
+void DceListModel::setProgress(double n_progress)
 {
     progress = n_progress;
     emit progressChanged( progress );
@@ -319,18 +319,18 @@ void ListModel::setProgress(double n_progress)
 
 }
 
-double ListModel::getProgress()
+double DceListModel::getProgress()
 {
     return progress;
 }
 
-void ListModel::attributeSort()
+void DceListModel::attributeSort()
 {
 
 
 }
 
-void ListModel::clearAndRequest(int type)
+void DceListModel::clearAndRequest(int type)
 {
     clearing = true;
     gridType = type;
@@ -353,7 +353,7 @@ void ListModel::clearAndRequest(int type)
     }
 }
 
-void ListModel::clearForPaging()
+void DceListModel::clearForPaging()
 {
     if(m_list.size() > 0){
 

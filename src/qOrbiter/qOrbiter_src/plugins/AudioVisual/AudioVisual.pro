@@ -29,9 +29,8 @@ contains(QT_VERSION,5.*.*){
 
 
 uri = AudioVisual
-URI=$$uri
-
-TARGET = $$qtLibraryTarget($$TARGET)
+URI = $$TARGET
+#TARGET = $$qtLibraryTarget($$TARGET)
 
 
 
@@ -69,8 +68,16 @@ DESTDIR=$$[QT_INSTALL_PREFIX]/qml
 }
 
 macx-ios-clang{
+message("Building in static mode for iOS")
 QMAKE_CXXFLAGS+=-Wno-c++11-narrowing
-DESTDIR=../../imports/AudioVisual
+DESTDIR=$$[QT_INSTALL_IMPORTS]/AudioVisual
+QMLDIR_TARGET=$$DESTDIR
+CONFIG+=static
+QMAKE_MOC_OPTIONS += -Muri=$$URI
+
+macx-ios-clang{
+QMAKE_POST_LINK= $${QMAKE_COPY} $${_PRO_FILE_PWD_}/qmldir $${DESTDIR}$$escape_expand(\n\t)
+    }
 }
 
 OTHER_FILES = qmldir
@@ -174,7 +181,7 @@ copy_qmldir.target=$$QMLDIR_TARGET
     PRE_TARGETDEPS += $$copy_qmldir.target
 }
 
-qmldir.files = qmldir
+qmldir.files = \ qmldir
 unix {
 	maemo5 | !isEmpty(MEEGO_VERSION_MAJOR) {
 		installPath = /usr/lib/qt4/imports/$$replace(uri, \\., /)

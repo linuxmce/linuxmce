@@ -1192,6 +1192,7 @@ void qorbiterManager::prepareDataGrid(QString dataGridId, QString dgName, int he
         m_mapDataGridModels[dataGridId]->setWindowSize(media_pageSeperator);
         m_mapDataGridModels[dataGridId]->setTotalCols(width);
         // set total row count last, as this will make the model look populated to the view
+
         m_mapDataGridModels[dataGridId]->setTotalRows(height);
     }
     modelPoolLock.unlock();

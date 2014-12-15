@@ -92,9 +92,13 @@ void ScreenSaverClass::pickImage()
 
 void ScreenSaverClass::selectNew()
 {
+    if(images.isEmpty())
+    {
+        return;
+    }
     int index = images.lastIndexOf(currentImage);
 
-    if (index+1 < images.count())
+    if (index!= images.count())
     {
         setImage(images.at(index+1));
     }

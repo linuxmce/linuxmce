@@ -10,9 +10,10 @@ OTHER_FILES += \
     qtc_packaging/debian_harmattan/changelog \
 
 
-
+!macx-ios-clang{
 SUBDIRS += ../qOrbiter_src/plugins/AudioVisual \
              ../qOrbiter_src/plugins/DceScreenSaver
+}
 SUBDIRS += ../qOrbiter_src
 
 
@@ -40,6 +41,8 @@ INSTALLS +=target
 target.path=$HOME
 INSTALLS=target
 }
+
+
 
 # SUBDIRS = plugins/AudioVisual
 

@@ -185,6 +185,11 @@ extern "C" {
 //<-dceag-main-b->
 
 */
+#ifdef Q_OS_IOS
+        Q_IMPORT_PLUGIN(DceScreenSaverPlugin)
+        Q_IMPORT_PLUGIN(AudioVisualPlugin)
+#endif
+
 
 #if defined(Q_OS_IOS)
 extern "C" int qtmn(int argc, char* argv[])
@@ -346,6 +351,7 @@ int main(int argc, char* argv[])
         /*! UI will need to be created to allow the device to make the selections before the device tries to connect */
 
         QThread dceThread;
+
 
         qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
         qmlRegisterType<MediaTypesHelper>("org.linuxmce.enums",1,0,"MediaTypes");

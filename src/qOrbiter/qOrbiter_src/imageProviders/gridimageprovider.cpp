@@ -2,7 +2,7 @@
 #include "qorbitermanager.h"
 
 
-GridIndexProvider::GridIndexProvider(ListModel *model  , int pathRole, int pixmapRole) :
+GridIndexProvider::GridIndexProvider(DceListModel *model  , int pathRole, int pixmapRole) :
     #if (QT5)
     QQuickImageProvider(QQuickImageProvider::Image), mModel(*model),  mPathRole(pathRole), mPixmapRole(pixmapRole)
   #else

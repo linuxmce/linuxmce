@@ -117,7 +117,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 
     mainView.engine()->addPluginPath("lib");
     mainView.engine()->addPluginPath("imports");
-    //qDebug() << "Qt Plugin Paths::"<<mainView.engine()->pluginPathList();
+    qDebug() << "Qt Plugin Paths::"<<mainView.engine()->pluginPathList();
 
     mainView.engine()->addImportPath("imports");
     mainView.engine()->addImportPath("lib");
@@ -271,13 +271,8 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     buildType = "/qml/ios";
     qrcPath = "qrc:main/IosWelcome.qml";
     localPath = "ios/";
-   // mainView.engine()->setBaseUrl(QUrl("."));
-//    QStringList sPaths; sPaths.append(QApplication::applicationDirPath()+"/qt_qml");
-//QDir dir;
-//dir.setPath(QApplication::applicationDirPath()+"");
-//dir.cdUp();
-//qDebug() << dir.entryList();
-  //  mainView.engine()->setImportPathList(sPaths);
+
+
 #else
 
     buildType = "/qml/desktop";
@@ -326,6 +321,8 @@ void orbiterWindow::initView(){
     mainView.showMaximized();
 #elif defined(for_android)
     mainView.show();
+#elif defined(Q_OS_IOS)
+    mainView.showMaximized();
 #elif RPI
     mainView.showFullScreen();
 #else

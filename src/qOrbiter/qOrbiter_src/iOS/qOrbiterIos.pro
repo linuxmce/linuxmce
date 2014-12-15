@@ -36,19 +36,17 @@ TRANSLATIONS += app_de.ts
 #Configuration & Flags
                 QT+= qml quick script widgets xml network
 
-               folder_01.source = ImportedItems.qml
+                folder_01.source = ImportedItems.qml
                 folder_01.target = $$DESTDIR/qml/
                 DEFINES += GLENABLED QT5
                 glmsg=yes
                 ICON = ../platforms/osx/osxicons.icns
-                QMAKE_CXXFLAGS+=-Wno-c++11-narrowing -DUSE_LZO_DATAGRID
-               # QMAKE_INFO_PLIST = $$_PRO_FILE_PWD_/QOrbiter.plist
+                QMAKE_CXXFLAGS+=-Wno-c++11-narrowing -DUSE_LZO_DATAGRID            
                 CONFIG +=warn_off
-                #QML_IMPORT_PATH= imports #../../../$$DESTDIR/$$TARGET".app"/Contents/MacOS/importsICON = ../platforms/osx/osxicons.icns
-               # QML2_IMPORT_PATH=./qt_qml
+
                 DEPLOYMENTFOLDERS+=folder_01
-#APP_RESOURCES_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/resources
-QML_IMPORT_PATH=#../../../$$DESTDIR/$$TARGET".app"/Contents/MacOS/imports
+                #APP_RESOURCES_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/resources
+                QML_IMPORT_PATH=imports #../../../$$DESTDIR/$$TARGET".app"/Contents/MacOS/imports
 
       message("You Must copy the libraries at $$[QT_INSTALL_PREFIX]/qml to $$QTDIR/imports before deploying" )
       message("Target folder::" $$plugins_folder.target)
@@ -63,18 +61,20 @@ QML_IMPORT_PATH=#../../../$$DESTDIR/$$TARGET".app"/Contents/MacOS/imports
 
 # Additional import path used to resolve QML modules in Creator's code model
 
-#QML_IMPORT_TRACE = 1
+QML_IMPORT_TRACE = 1
 
 
 #LinuxMCE Specific include path. Linking in the app instead of against dce libs for multi-platform expediency.
 INCLUDEPATH += ../../../ ../../../../DCE/ ../
 
+LIBS+=-L$$[QT_INSTALL_IMPORTS]/DceScreenSaver -lDceScreenSaver
+LIBS+=-L$$[QT_INSTALL_IMPORTS]/AudioVisual -lAudioVisual
 
 message(QOrbiter for iOS  - version: $$[QT_VERSION])
 message(Qt is installed in $$[QT_INSTALL_PREFIX])
 message (Build Definitions: $$DEFINES)
 message( Opengl Status: $$glmsg )
-message( Target import path: $$QML_IMPORT_PATH)
+message( Target import path: $$[QT_INSTALL_IMPORTS])
 message( Binary name: $$TARGET )
 message( Output Path $$DESTDIR )
 message ( Plist file::$$QMAKE_INFO_PLIST )

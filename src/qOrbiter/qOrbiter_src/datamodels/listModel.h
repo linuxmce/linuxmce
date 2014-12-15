@@ -16,7 +16,7 @@
  *
  *  \ingroup data_model
  */
-class ListModel : public QAbstractListModel
+class DceListModel : public QAbstractListModel
 {
     Q_OBJECT
     Q_PROPERTY (double progress READ getProgress WRITE setProgress NOTIFY progressChanged)
@@ -28,7 +28,7 @@ class ListModel : public QAbstractListModel
 
 
 public:
-    explicit ListModel(gridItem* prototype, QObject* parent = 0);
+    explicit DceListModel(gridItem* prototype, QObject* parent = 0);
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     //int columnCount(const QModelIndex &parent) const {return 1;}
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;

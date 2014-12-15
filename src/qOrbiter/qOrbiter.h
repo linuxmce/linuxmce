@@ -28,7 +28,7 @@
 //<-dceag-d-e->
 #include <DataGrid.h>
 #include "Virtual_Device_Translator.h"
-#include <contextobjects/bookmarkitem.h>
+
 #include <contextobjects/floorplandevice.h>
 #include <contextobjects/modelpage.h>
 #include <datamodels/gridItem.h>

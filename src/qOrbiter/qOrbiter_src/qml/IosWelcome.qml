@@ -1,8 +1,8 @@
 import QtQuick 2.2
-
-
-Item {
-   anchors.fill: parent
+import QtQuick.Window 2.2
+import DceScreenSaver 1.0
+Window {
+   flags:Qt.WindowFullScreen
    Rectangle{
    anchors.fill: parent
    color: "white"

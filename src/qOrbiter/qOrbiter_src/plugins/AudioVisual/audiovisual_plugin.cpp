@@ -24,7 +24,10 @@
 
 void AudioVisualPlugin::registerTypes(const char *uri)
 {
+#ifndef QT5
     // @uri AudioVisual
+#endif
+    Q_ASSERT(uri==QLatin1String("AudioVisual"));
     qmlRegisterType<MediaManager>(uri, 1, 0, "MediaManager");
 }
 #if QT_VERSION < 0x050000

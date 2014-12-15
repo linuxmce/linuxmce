@@ -129,7 +129,7 @@
 class EPGChannelList;
 class basicImageProvider;
 
-class ListModel;
+class DceListModel;
 class GridIndexProvider;
 class LightingScenarioModel;
 
@@ -434,7 +434,7 @@ Param 10 - pk_attribute
     //listmodels
     AvCodeGrid *deviceCommands;
     LocationModel *m_lRooms;
-    ListModel *model;      //media grid model
+    DceListModel *model;      //media grid model
     UserModel *userList;
     DeviceModel *devices;
     SkinDataModel *skinModel;
@@ -1318,12 +1318,11 @@ public slots:
         }
         else {
 
-            QString search = current.split("&val=").at(1);
-            int index = screensaverImages.lastIndexOf(search);
-            if (index+1 < screensaverImages.count()){
-                return  screensaverImages.at(index+1);
-            }else{
-                return screensaverImages.at(0);
+            int listNumber = rand()%screensaverImages.length()-1;
+            if(listNumber!=-1 && listNumber <= screensaverImages.count()){
+               return  screensaverImages.at(listNumber);
+            } else {
+                  return screensaverImages.at(0);
             }
         }
 

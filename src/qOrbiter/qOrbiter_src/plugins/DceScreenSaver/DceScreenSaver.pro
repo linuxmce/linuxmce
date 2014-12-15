@@ -1,6 +1,5 @@
 TEMPLATE = lib
 TARGET = DceScreenSaver
-
 CONFIG += qt plugin
 
 contains(QT_VERSION,4.*.*){
@@ -17,9 +16,12 @@ message(Qt is installed in $$[QT_INSTALL_PREFIX])
         DEFINES+=QT5
 }
 
-
+#TARGET = $$qtLibraryTarget($$TARGET)
 uri = DceScreenSaver
-TARGET = DceScreenSaver #$$qtLibraryTarget($$TARGET)
+URI = $$TARGET#$$replace(TARGETPATH, "/", ".")
+QMAKE_MOC_OPTIONS += -Muri=$$URI
+
+
 qmldir.files = qmldir
 
 linux-g++{
@@ -52,6 +54,14 @@ android-g++{
     }
 }
 
+macx-ios-clang{
+message("Building static for iOS")
+QMAKE_CXXFLAGS+=-Wno-c++11-narrowing
+DESTDIR = $$[QT_INSTALL_IMPORTS]/DceScreenSaver
+QMLDIR_TARGET=$$DESTDIR
+CONFIG+=static
+QMAKE_POST_LINK= $${QMAKE_COPY} $${_PRO_FILE_PWD_}/qmldir $${DESTDIR}$$escape_expand(\n\t)
+}
 
 # Input
 SOURCES += \
@@ -117,6 +127,8 @@ linux-rasp-pi-g++{
 QMLDIR_TARGET=$$DESTDIR
 }
 
+
+
 macx-g++{
 
 QMLDIR_TARGET = $$DESTDIR
@@ -125,7 +137,7 @@ QMLDIR_TARGET = $$DESTDIR
 
 DEPLOYMENTFOLDERS+=qmldir
 
-copy_qmldir.target=$$QMLDIR_TARGER
+copy_qmldir.target=$$OUT_PWD
     copy_qmldir.depends = $$_PRO_FILE_PWD_/qmldir
     copy_qmldir.commands = $(COPY_FILE) \"$$replace(copy_qmldir.depends, /, $$QMAKE_DIR_SEP)\" \"$$replace(copy_qmldir.target, /, $$QMAKE_DIR_SEP)\"
     QMAKE_EXTRA_TARGETS += copy_qmldir
@@ -147,9 +159,10 @@ unix {
 
     qmldir.path = $$installPath
     target.path = $$installPath
-   INSTALLS += target qmldir
-message("Plugin install path at" $$DESTDIR)
-message("qmldir target path at" $$QMLDIR_TARGET)
+    INSTALLS += target qmldir
 
 }
+message("Plugin install path at" $$DESTDIR)
+message("qmldir target path at" $$QMLDIR_TARGET)
+message("$$URI")
 
