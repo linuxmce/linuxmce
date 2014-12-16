@@ -150,7 +150,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
 
 #else
-    QObject::connect(qorbiterUIwin->screen(), SIGNAL(orientationChanged(Qt::ScreenOrientation)), this, SLOT(checkOrientation(QSize)));
+
     QObject::connect(qorbiterUIwin, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
     QObject::connect(qorbiterUIwin, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
     
@@ -2740,6 +2740,7 @@ void qorbiterManager::checkOrientation(QSize s)
 
 }
 
+#ifdef QT5
 void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
 {
     appHeight=qorbiterUIwin->size().height();
@@ -2754,6 +2755,7 @@ void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
         setOrientation( true);
     }
 }
+#endif
 
 void qorbiterManager::getGrid(int i)
 {

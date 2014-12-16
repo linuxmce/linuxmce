@@ -181,7 +181,7 @@ copy_qmldir.target=$$QMLDIR_TARGET
     PRE_TARGETDEPS += $$copy_qmldir.target
 }
 
-qmldir.files = \ qmldir
+qmldir.files = qmldir
 unix {
 	maemo5 | !isEmpty(MEEGO_VERSION_MAJOR) {
 		installPath = /usr/lib/qt4/imports/$$replace(uri, \\., /)
