@@ -99,6 +99,7 @@ void SyncAttributes()
 {
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Synchronizing pictures for attributes... "); 
 
+	// Assign all file pictures to the corresponding title attribute
 	string sqlTitle = "SELECT PK_Attribute,min(Picture_File.FK_Picture) as FK_Picture, Attribute.Name, AttributeType.Description, File.Filename, File.Path FROM Attribute "
 		"JOIN File_Attribute ON File_Attribute.FK_Attribute=PK_Attribute "
 		"JOIN Picture_File ON Picture_File.FK_File=File_Attribute.FK_File "
@@ -115,7 +116,7 @@ void SyncAttributes()
 	{
 		while((row = db_wrapper_fetch_row(result.r)))
 		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Assigning Picture PK=%d from File '%s/%s' to Attribute '%s'(%s)",
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "Assigning Picture PK=%d from File '%s/%s' to Title Attribute '%s'(%s)",
 							    row[1], row[5], row[4], row[2], row[3]);
 		}
 	}
@@ -176,10 +177,10 @@ void SyncAttributes()
 			} else if (atoi(row[7]) == 3)
 			{
 				// Album
-				// If assigning to performer, make sure all files have the same picture
-				sqlCheck = "SELECT (SELECT count(distinct pf.FK_Picture) FROM Picture_File pf " 
-					"JOIN File_Attribute f2 ON f2.FK_File = pf.FK_File WHERE f2.FK_Attribute = "+string(row[0])+ " "
-					") - 1";
+				// If assigning to album, make sure all files have the same picture
+				sqlCheck = "SELECT 0 FROM DUAL"; //(SELECT count(distinct pf.FK_Picture) FROM Picture_File pf " 
+			  //					"JOIN File_Attribute f2 ON f2.FK_File = pf.FK_File WHERE f2.FK_Attribute = "+string(row[0])+ " "
+			  //		") - 1";
 			}
 			
 			PlutoSqlResult result2;
@@ -219,6 +220,52 @@ void SyncAttributes()
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Attributes sync succeeded! Records affected %d", nAffectedRecords); 
 }
 
+void CombineAttributes(int PK_Attribute, int PK_AttributeType, string Name) {
+	LoggerWrapper::GetInstance()->Write(LV_WARNING, "DISABLED -- Found duplicated attribute %s, pk %d, type %d. Won't touch it.",
+					    Name.c_str(), PK_Attribute, PK_AttributeType);
+
+	//char *AffectedTables[] =
+	//{
+	//	"File_Attribute", 
+	//	"Attribute_Settings", 
+	//	"CoverArtScan", 
+	//	"Disc_Attribute", 
+	//	"Download_Attribute", 
+	//	"LongAttribute", 
+	//	"Picture_Attribute", 
+	//	"SearchToken_Attribute"
+	//};
+	
+	//for(int i = 0; i < sizeof(AffectedTables) / sizeof(char *); ++i)
+	//{
+	//	string sSqlMoveRowsFromDuplicates = 
+	//		"UPDATE Attribute JOIN File_Attribute ON FK_Attribute = PK_Attribute\n"
+	//		"SET FK_Attribute = " + string(row[dafAttribute]) + "\n"
+	//		"WHERE FK_AttributeType = " + string(row[dafAttributerType]) + "\n"
+	//		"AND Name = '" + StringUtils::SQLEscape(row[dafName]) + "'\n"
+	//		"AND PK_Attribute <> " + row[dafAttribute];
+	//	g_pDatabase_pluto_media->threaded_db_wrapper_query(sSqlMoveRowsFromDuplicates);
+	//}
+	
+	//string sSqlDeleteDuplicates = 
+	//	"DELETE FROM Attribute\n"
+	//	"WHERE FK_AttributeType = " + string(row[dafAttributerType]) + "\n"
+	//	"AND Name = '" + StringUtils::SQLEscape(row[dafName]) + "'\n"
+	//	"AND PK_Attribute <> " + row[dafAttribute];
+	
+	//            int nAffectedRecords = g_pDatabase_pluto_media->threaded_db_wrapper_query(sSqlDeleteDuplicates);
+	//if(nAffectedRecords == -1)
+	//{
+	//	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Failed to remove duplicated attributes! Query: %s",
+	//		sSqlDeleteDuplicates.c_str());
+	//}
+	//else
+	//{
+	//	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Removed %d duplicated attributes for '%s'", 
+	//		nAffectedRecords, row[dafName]); 
+	//}
+
+}
 void RemoveDuplicatedAttributes()
 {
 	string sSqlDuplicatedAttributes = 
@@ -243,49 +290,7 @@ void RemoveDuplicatedAttributes()
 		{
 			if(NULL != row[dafName] && NULL != row[dafAttributerType] && NULL != row[dafAttribute])
 			{
-				LoggerWrapper::GetInstance()->Write(LV_WARNING, "DISABLED -- Found duplicated attribute %s, pk %s, type %s. Won't touch it.",
-					row[dafName], row[dafAttribute], row[dafAttributerType]);
-
-				//char *AffectedTables[] =
-				//{
-				//	"File_Attribute", 
-				//	"Attribute_Settings", 
-				//	"CoverArtScan", 
-				//	"Disc_Attribute", 
-				//	"Download_Attribute", 
-				//	"LongAttribute", 
-				//	"Picture_Attribute", 
-				//	"SearchToken_Attribute"
-				//};
-
-				//for(int i = 0; i < sizeof(AffectedTables) / sizeof(char *); ++i)
-				//{
-				//	string sSqlMoveRowsFromDuplicates = 
-				//		"UPDATE Attribute JOIN File_Attribute ON FK_Attribute = PK_Attribute\n"
-				//		"SET FK_Attribute = " + string(row[dafAttribute]) + "\n"
-				//		"WHERE FK_AttributeType = " + string(row[dafAttributerType]) + "\n"
-				//		"AND Name = '" + StringUtils::SQLEscape(row[dafName]) + "'\n"
-				//		"AND PK_Attribute <> " + row[dafAttribute];
-				//	g_pDatabase_pluto_media->threaded_db_wrapper_query(sSqlMoveRowsFromDuplicates);
-				//}
-
-				//string sSqlDeleteDuplicates = 
-				//	"DELETE FROM Attribute\n"
-				//	"WHERE FK_AttributeType = " + string(row[dafAttributerType]) + "\n"
-				//	"AND Name = '" + StringUtils::SQLEscape(row[dafName]) + "'\n"
-				//	"AND PK_Attribute <> " + row[dafAttribute];
-
-    //            int nAffectedRecords = g_pDatabase_pluto_media->threaded_db_wrapper_query(sSqlDeleteDuplicates);
-				//if(nAffectedRecords == -1)
-				//{
-				//	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Failed to remove duplicated attributes! Query: %s",
-				//		sSqlDeleteDuplicates.c_str());
-				//}
-				//else
-				//{
-				//	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Removed %d duplicated attributes for '%s'", 
-				//		nAffectedRecords, row[dafName]); 
-				//}
+				CombineAttributes(atoi(row[dafAttribute]), atoi(row[dafAttributerType]), row[dafName]);
 			}
 		}
 	}
