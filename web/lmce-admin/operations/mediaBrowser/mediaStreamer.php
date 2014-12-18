@@ -7,9 +7,10 @@ class VideoStream
     private $start  = -1;
     private $end    = -1;
     private $size   = 0;
+    private $mime   = "" ;
  
-    function __construct($filePath)     {
-        $this->path = $filePath; 
+ function __construct($filePath)     {
+$this->path=$filePath;
 $this->start();
    }
      
@@ -30,7 +31,14 @@ $this->start();
     private function setHeader()
     {
         ob_get_clean();
-        header("Content-Type: audio/mpeg");
+$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type ala mimetype extension
+
+$t= finfo_file($finfo, $this->path) . "\n";
+
+finfo_close($finfo);
+
+
+	header("Content-Type: ".$t);
         header("Cache-Control: max-age=2592000, public");
         header("Expires: ".gmdate('D, d M Y H:i:s', time()+2592000) . ' GMT');
         header("Last-Modified: ".gmdate('D, d M Y H:i:s', @filemtime($this->path)) . ' GMT' );
