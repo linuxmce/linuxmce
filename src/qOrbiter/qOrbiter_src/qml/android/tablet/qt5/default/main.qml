@@ -123,9 +123,6 @@ Item {
 
 
 
-   MediaInterface{
-    id:dceplayer
-   }
 
 
 
@@ -324,13 +321,15 @@ Item {
         }
 
     }
+    MediaInterface{
+     id:dceplayer
+    }
+
     function screenchange(screenname ){
 
         if(pageLoader.currentScreen!=screenname)
             pageLoader.nextScreen = screenname
     }
-
-
 
     function checkStatus(component){
         console.log(component.progress)
@@ -517,6 +516,8 @@ Item {
             console.log("Component is loaded")
         }
     }
+
+
 
     MouseArea{
         id:mst

@@ -13,7 +13,8 @@ Item{
             lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
         }
     }
-
+height: manager.appHeight
+width: manager.appWidth
 
 
     Timer{
@@ -79,6 +80,7 @@ Item{
         id:androidPlayer
         autoPlay: true
         autoLoad: true
+
         onDurationChanged: {
             lmceData.setTotalTime(duration)
         }
@@ -94,8 +96,9 @@ Item{
 
     VideoOutput{
         id:videoPlane
-        anchors.fill: parent
-        source:androidPlayer.hasVideo ? androidPlayer : null
+        height: manager.appHeight
+        width: manager.appWidth
+        source:androidPlayer
         visible: source != null ? true : false
     }
 
