@@ -1,16 +1,17 @@
 import QtQuick 2.2
 import QtQuick.Window 2.2
 import DceScreenSaver 1.0
-Window {
-   flags:Qt.WindowFullScreen
+Item {
+   anchors.fill: parent
+
    Rectangle{
    anchors.fill: parent
-   color: "white"
+   color: "lightgrey"
    }
 
     Rectangle{
         anchors.fill: parent
-        opacity:.35
+        opacity:.55
         gradient:  Gradient{
             GradientStop{
                 position: 0.0
