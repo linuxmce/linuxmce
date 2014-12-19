@@ -101,7 +101,7 @@ Panel{
     property Item playlistSource
     property Item playlistDelegate
     property bool enableScrollbar:true
-    property Component playListComponent:playlistPanel
+   // property Component playListComponent:playlistPanel
     property bool showingPlaylist:true;
 
     onShowingPlaylistChanged: {

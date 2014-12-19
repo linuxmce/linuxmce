@@ -3,41 +3,24 @@ import QtMultimedia 5.0
 import AudioVisual 1.0
 Item{
     id:mediaPlayerRoot
+    height: manager.appHeight
+    width: manager.appWidth
 
     property bool dceConnected:manager.connectedState
     property bool mediaPlayerConnected:lmceData.connected
     property int mediaPlayerId:manager.mediaPlayerID
-
-    onDceConnectedChanged: {
-        if(!dceConnected && manager.mediaPlayerID!==-1){
-            lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-        }
-    }
-height: manager.appHeight
-width: manager.appWidth
-
-
-    Timer{
-        id:reconnect
-        running:!dceConnected && manager.connectedState
-        repeat: true
-        interval: 10000
-        onTriggered: {
-            console.log("Connecting media player "+lmceId+" at "+manager.m_ipAddress)
-            setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-        }
-    }
-
-
-    function restart(){
-         lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-    }
+    property bool active:lmceData.mediaPlaying
 
     MediaManager{
         id:lmceData
         onMediaPlayingChanged: {
-            if(!mediaPlaying && androidPlayer.source!=="")
-                androidPlayer.stop()
+            if(!mediaPlaying && qmlPlayer.source!==""){
+                qmlPlayer.stop()
+                videoPlane.visible = false
+            } else {
+
+            }
+
         }
 
         /* TODO Add reconnect handler in cpp and here */
@@ -46,7 +29,7 @@ width: manager.appWidth
             console.log("NEW ANDROID URL")
             if(androidUrl.length > 4){
                 console.log("URL ok!")
-                androidPlayer.source = lmceData.androidUrl
+                qmlPlayer.source = lmceData.androidUrl
             }
             else{
                 console.log("Url Malformed!")
@@ -54,42 +37,80 @@ width: manager.appWidth
             }
         }
 
-        //  onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
+        onAndroidVolumeUp:{
+            console.log("dceplayer::vol up")
+            qmlPlayer.volume= qmlPlayer.volume+1
+        }
 
+        onAndroidVolumeDown:{
+            console.log("dceplayer::vol down")
+            qmlPlayer.volume= qmlPlayer.volume-1
+        }
+
+
+        onPauseMedia:{
+            console.log("dceplayer::pause")
+            if(qmlPlayer.playbackState == MediaPlayer.PausedState)
+                qmlPlayer.play()
+            else
+                qmlPlayer.pause()
+        }
+        onUpdatePluginSeek:{
+            console.log("dceplayer::seek to"+pos)
+            qmlPlayer.seek(pos*1000);
+        }
 
         Component.onCompleted: {
             if(manager.mediaPlayerID!==-1){
                 lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-                // androidSystem.startAudioService(lmceData.callbackAddress);
                 console.log("onCompleted::initializing qml media player::"+manager.mediaPlayerID+"::"+manager.m_ipAddress)
             }
         }
 
-                Connections{
-                    target:manager
-                    onMediaPlayerIdChanged:{
-                        if(manager.mediaPlayerID!==-1){
-                            console.log("onIdChanged::initializing qml media player::"+manager.mediaPlayerID)
-                            lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-                        }
-                    }
+        Connections{
+            target:manager
+            onMediaPlayerIdChanged:{
+                if(manager.mediaPlayerID!==-1){
+                    console.log("onIdChanged::initializing qml media player::"+manager.mediaPlayerID)
+                    lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
                 }
+            }
+            onConnectedStateChanged:{
+                if(manager.connectedState ){
+                    lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                    dceplayer.reInit();
+                }
+            }
+        }
     }
 
     MediaPlayer{
-        id:androidPlayer
+        id:qmlPlayer
         autoPlay: true
         autoLoad: true
 
+        onStopped: lmceData.qmlPlaybackEnded(true)
+
         onDurationChanged: {
-            lmceData.setTotalTime(duration)
+             console.log(qmlPlayer.duration)
+             lmceData.setQmlTotalTime(duration)
+            //   lmceData.setTotalTime(duration)
         }
         onErrorChanged: {
-
+            console.log(error)
         }
 
         onPositionChanged: {
-            //lmceData.processTimeCode(position); console.log(position)
+
+           lmceData.processTimeCode(position);
+        }
+
+        onHasVideoChanged: {
+            if(hasVideo){
+                videoPlane.visible=true
+            } else {
+                videoPlane.visible=false
+            }
         }
 
     }
@@ -98,8 +119,7 @@ width: manager.appWidth
         id:videoPlane
         height: manager.appHeight
         width: manager.appWidth
-        source:androidPlayer
-        visible: source != null ? true : false
+        source:qmlPlayer
     }
 
 }
