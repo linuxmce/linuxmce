@@ -107,7 +107,7 @@ MediaManager::MediaManager(QQuickItem *parent):
 
 void MediaManager::initializePlayer()
 {
-    setCurrentStatus("Initializing Media Player");
+    setCurrentStatus("Initializing Media Player "+ QString::number(deviceNumber));
 
     if(!mediaPlayer){
         mediaPlayer = new qMediaPlayer(deviceNumber, serverAddress.toStdString(), this, true, false);
@@ -341,6 +341,9 @@ void MediaManager::setMediaUrl(QString url)
 
 void MediaManager::processTimeCode(qint64 f)
 {
+    if(!f){
+        return;
+    }
     /*
      *
      *socket template - comma dilineated
@@ -408,7 +411,7 @@ void MediaManager::processSocketdata()
 
     if(cmd=="time"){
         int i = QString(cmdList.last()).toInt();
-        setAndroidTotalTime(i);
+        setQmlTotalTime(i);
     }
 
     if(cmd=="currenttime"){
@@ -427,10 +430,10 @@ void MediaManager::processSocketdata()
             setMediaPlaying(false);
 
         }else if(eventT=="play"){
-            androidPlaybackEnded(false);
+            qmlPlaybackEnded(false);
         }
         else if(eventT=="completed"){
-            androidPlaybackEnded(true);
+            qmlPlaybackEnded(true);
 
         }
     }
@@ -451,6 +454,7 @@ void MediaManager::transmit(QString d)
     if(!clientList.isEmpty()){
         for(int s = 0; s< clientList.length(); s++)
         {
+
             QTcpSocket *tr = clientList.at(s);
             tr->write(chunk);
         }

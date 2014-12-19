@@ -288,7 +288,7 @@ public slots:
         setMediaPlaying(false);
     }
 
-    void androidPlaybackEnded(bool ended){
+    void qmlPlaybackEnded(bool ended){
         mediaPlayer->mediaEnded();
     }
 
@@ -537,7 +537,7 @@ public slots:
 #endif
     }
 
-    void setAndroidTotalTime(int inSec){
+    void setQmlTotalTime(int inSec){
         qDebug("Android Time call in Audio Visual Plugin::"+inSec);
         int s = inSec ;
 

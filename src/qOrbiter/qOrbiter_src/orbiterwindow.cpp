@@ -150,7 +150,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #ifdef GLENABLED
 #ifndef Q_OS_ANDROID
 #ifndef QT5
-#ifndef QT5
+
 //        QGLFormat format= QGLFormat::defaultFormat();
 //        format.setAlpha(true);
 //        glWidget = new QGLWidget(format);
@@ -161,13 +161,13 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 //        glWidget->setBackgroundRole(QPalette::Base);
 //        mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #endif
-#endif
+
 #endif
 #endif
 
 #ifdef RPI
     mainView.setSurfaceType(QSurface::OpenGLSurface);
-    qDebug() << "Surface id " <<mainView.OpenGLSurface;
+    qDebug() << "Surface id " <<mainView.;
     qDebug() << "is opengl? " << mainView.openglContext();
     qDebug() << "surface type " << mainView.surfaceType();
     //mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
