@@ -41,6 +41,7 @@ MediaScrollBar             MediaScrollBar.qml                        #no comment
 Metadata_43             Metadata_43.qml                        #no comment
 Metadata_4             Metadata_4.qml                        #no comment
 Metadata_5             Metadata_5.qml                        #no comment
+MediaInterface           MediaInterface.qml                        #no comment
 MultiViewMediaList             MultiViewMediaList.qml                        #no comment
 NavigationRow             NavigationRow.qml                        #no comment
 NavOptions43             NavOptions43.qml                        #no comment

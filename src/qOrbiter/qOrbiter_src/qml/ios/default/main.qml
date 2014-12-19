@@ -419,6 +419,10 @@ Item {
                               manager.currentScreen="Screen_X.qml"
                           }
     }
+    MediaInterface{
+
+    }
+
     MediaPopup{
         id:media_notification
     }
