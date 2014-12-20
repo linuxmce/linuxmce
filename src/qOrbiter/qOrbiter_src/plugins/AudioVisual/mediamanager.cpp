@@ -122,7 +122,7 @@ void MediaManager::initializeConnections()
 
 
     /*From Dce MediaPlayer*/
-#ifndef ANDROID
+#if defined(ANDROID) || defined(Q_OS_IOSß)
     QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)));
 
 #ifdef QT4
@@ -155,6 +155,15 @@ void MediaManager::initializeConnections()
 #endif
     QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
     QObject::connect(mediaPlayer,SIGNAL(jumpToStreamPosition(int)), this, SLOT(setMediaPosition(int)));
+
+#ifdef Q_OS_IOS
+      QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString)));
+      QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopAndroidMedia()));
+      QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), this, SLOT(setPaused()));
+      QObject::connect(mediaPlayer, SIGNAL(androidVolumeDown()), this, SIGNAL(androidVolumeDown()));
+      QObject::connect(mediaPlayer, SIGNAL(androidVolumeUp()), this, SIGNAL(androidVolumeUp()));
+      QObject::connect(mediaPlayer, SIGNAL(newMediaPosition(int)), this, SLOT(setMediaPosition(int)));
+#endif
 
 #ifndef ANDROID
     /*From internal plugin*/

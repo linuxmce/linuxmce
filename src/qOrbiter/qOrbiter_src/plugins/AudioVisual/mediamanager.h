@@ -26,7 +26,7 @@
 #include <QDeclarativeItem>
 #include <QGLWidget>
 
-#ifndef Q_OS_ANDROID
+#ifndef Q_OS_ANDROID && !defined(Q_OS_IOS)
 #include <QBoxLayout>
 #include <phonon>
 #include <QHBoxLayout>
@@ -415,13 +415,9 @@ public slots:
 
     void setFileReference(QString f){
 
-#ifdef ANDROID
-
-#endif
-
         fileReference = f;
         androidUrl = fileReference;
-#ifdef ANDROID
+#if defined(ANDROID) || defined(Q_OS_IOS)
         emit androidUrlUpdated();
         connectInfoSocket();
         startTimeCodeServer();
@@ -512,7 +508,7 @@ public slots:
         mediaObject->seek((qint64)msec);
 #endif
 
-#ifdef ANDROID
+#if def ANDROID
         updatePluginSeek(msec);
 #endif
 

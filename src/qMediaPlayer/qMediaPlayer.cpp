@@ -421,7 +421,7 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
     }
 
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(Q_OS_IOS)
     QString cmp = QString::fromStdString(sMediaURL.c_str());
 
     if(iPK_MediaType==43){
@@ -435,9 +435,9 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
         setCurrentMediaUrl(QString::fromStdString(sMediaURL));
 
     }else{
-        QString androidPath = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/qOrbiterGenerator.php?id="+QString::fromStdString(sMediaURL);
-        qWarning() << "Sending android modified original MRL==>" << androidPath;
-        setCurrentMediaUrl(androidPath);
+        QString externalPlayerPath = "http://"+QString::fromStdString(m_sIPAddress)+"/lmce-admin/qOrbiterGenerator.php?id="+QString::fromStdString(sMediaURL);
+        qWarning() << "Sending plugin modified original MRL==>" << externalPlayerPath;
+        setCurrentMediaUrl(externalPlayerPath);
     }
 #else
     qWarning() << "Sending string URL::" << finishedPath;
@@ -491,7 +491,7 @@ void qMediaPlayer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pM
 {
     qDebug() << "qMediaPlayer::CMD_Pause_Media";
     setCommandResponse("Need to implement command #39 - Pause Media");
-#ifndef RPI
+
 
 #if defined (QT4) && ! defined (ANDROID)
     if(mp_manager->mediaObject->state()==Phonon::PausedState){
@@ -502,7 +502,7 @@ void qMediaPlayer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pM
         m_bPaused=true;
     }
 
-#endif
+
 
 #else
     if(!m_bPaused){
@@ -536,12 +536,12 @@ void qMediaPlayer::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *
 {
     cout << "Need to implement command #40 - Restart Media" << endl;
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
-#ifdef ANDROID
+#if defined(ANDROID) || defined(Q_OS_IOS)
     emit newMediaPosition(0);
 #endif
 
 #ifndef RPI
-#if defined (QT4) && ! defined (ANDROID)
+#if defined (QT4) && !defined (ANDROID)
     mp_manager->mediaObject->seek(0);
 #endif
 #endif
@@ -594,7 +594,7 @@ void qMediaPlayer::CMD_Jump_to_Position_in_Stream(string sValue_To_Assign,int iS
     qDebug() << "qMediaPlayer::Jump_to_position_in_stream "<< sValue_To_Assign.c_str();
     quint64 tg = QString::fromStdString(sValue_To_Assign.c_str()).toInt();
 
-#ifdef ANDROID
+#if defined(ANDROID) || defined(Q_OS_IOS)
     emit newMediaPosition(QString::fromStdString(sValue_To_Assign.c_str()).toInt());
 #endif
 
@@ -755,7 +755,7 @@ void qMediaPlayer::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage
 {
     qDebug() << "qMediaPlayer::CMD_Pause";
     setCommandResponse("Need to implement command #92 - Pause");
-#ifndef RPI
+
 
 #if defined (QT4) && ! defined (ANDROID)
     if(mp_manager->mediaObject->state()==Phonon::PausedState){
@@ -766,7 +766,7 @@ void qMediaPlayer::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage
         m_bPaused=true;
     }
 
-#endif
+
 
 #else
     if(!m_bPaused){
@@ -1260,7 +1260,7 @@ void qMediaPlayer::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sM
     }
 
 
-#ifdef __ANDROID__
+#if defined(ANDROID) || defined(Q_OS_IOS)
     QString cmp = QString::fromStdString(sMediaURL.c_str());
 
     if(iPK_MediaType==43){
@@ -1280,7 +1280,6 @@ void qMediaPlayer::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sM
     }
 #else
     qWarning() << "Sending string URL::" << finishedPath;
-
     setCurrentMediaUrl(finishedPath);
     //EVENT_Playback_Started(sMediaURL, i_StreamId, "Stored Media", "", "");
     emit startPlayback();
@@ -1889,8 +1888,8 @@ void qMediaPlayer::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *p
 #endif
 #endif
 
-#ifdef ANDROID
-    androidVolumeUp();
+#if defined(ANDROID) || defined(Q_OS_IOS)
+    pluginVolumeUp();
 #endif
 
     qWarning("Set audio level Up.");
@@ -1922,8 +1921,8 @@ void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message 
 #endif
 #endif
 
-#ifdef ANDROID
-    androidVolumeDown();
+#if defined(ANDROID) || defined(Q_OS_IOS)
+    pluginVolumeDown();
 #endif
 
     sCMD_Result = "OK";

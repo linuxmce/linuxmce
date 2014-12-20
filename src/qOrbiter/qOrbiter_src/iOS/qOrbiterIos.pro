@@ -34,7 +34,7 @@ CONFIG += thread static
 TRANSLATIONS += app_de.ts
 
 #Configuration & Flags
-                QT+= qml quick script widgets xml network
+                QT+= qml quick script widgets xml network multimedia
 
                 folder_01.source = ImportedItems.qml
                 folder_01.target = $$DESTDIR/qml/
@@ -43,7 +43,7 @@ TRANSLATIONS += app_de.ts
                 ICON = ../platforms/osx/osxicons.icns
                 QMAKE_CXXFLAGS+=-Wno-c++11-narrowing -DUSE_LZO_DATAGRID            
                 CONFIG +=warn_off
-
+             QMAKE_INFO_PLIST = QOrbiter.plist
                 DEPLOYMENTFOLDERS+=folder_01
                 #APP_RESOURCES_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/resources
                 QML_IMPORT_PATH=imports #../../../$$DESTDIR/$$TARGET".app"/Contents/MacOS/imports
@@ -69,6 +69,7 @@ INCLUDEPATH += ../../../ ../../../../DCE/ ../
 
 LIBS+=-L$$[QT_INSTALL_IMPORTS]/DceScreenSaver -lDceScreenSaverPlugin
 LIBS+=-L$$[QT_INSTALL_IMPORTS]/AudioVisual -lAudioVisualPlugin
+
 
 
 
@@ -280,7 +281,8 @@ HEADERS += \
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
-    ../qml/IosWelcome.qml
+    ../qml/IosWelcome.qml \
+    QOrbiter.plist
 
 
 RESOURCES += \
