@@ -15,10 +15,9 @@ class DceScreenSaverPlugin :
 #endif
 {
     Q_OBJECT
-#if QT_VERSION >= 0x050000
-    Q_PLUGIN_METADATA(IID "DceScreenSaver")
-#endif
-    
+
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionPlugin")
+
 public:
     void registerTypes(const char *uri);
 };

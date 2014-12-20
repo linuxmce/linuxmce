@@ -29,7 +29,7 @@ contains(QT_VERSION,5.*.*){
 
 
 uri = AudioVisual
-URI = $$TARGET
+URI = AudioVisual #$$TARGET
 #TARGET = $$qtLibraryTarget($$TARGET)
 
 
@@ -70,14 +70,15 @@ DESTDIR=$$[QT_INSTALL_PREFIX]/qml
 macx-ios-clang{
 message("Building in static mode for iOS")
 QMAKE_CXXFLAGS+=-Wno-c++11-narrowing
+TARGET= audiovisualplugin
 DESTDIR=$$[QT_INSTALL_IMPORTS]/AudioVisual
 QMLDIR_TARGET=$$DESTDIR
-CONFIG+=static
+CONFIG+=staticlib
 QMAKE_MOC_OPTIONS += -Muri=$$URI
 
-macx-ios-clang{
+
 QMAKE_POST_LINK= $${QMAKE_COPY} $${_PRO_FILE_PWD_}/qmldir $${DESTDIR}$$escape_expand(\n\t)
-    }
+
 }
 
 OTHER_FILES = qmldir

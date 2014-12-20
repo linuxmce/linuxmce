@@ -16,11 +16,10 @@ message(Qt is installed in $$[QT_INSTALL_PREFIX])
         DEFINES+=QT5
 }
 
-#TARGET = $$qtLibraryTarget($$TARGET)
-uri = DceScreenSaver
-URI = $$TARGET#$$replace(TARGETPATH, "/", ".")
-QMAKE_MOC_OPTIONS += -Muri=$$URI
 
+#uri = DceScreenSaver
+#URI = DceScreenSaver #$$TARGET#$$replace(TARGETPATH, "/", ".")
+#QMAKE_MOC_OPTIONS += -Muri=$$URI
 
 qmldir.files = qmldir
 
@@ -56,6 +55,12 @@ android-g++{
 
 macx-ios-clang{
 message("Building static for iOS")
+uri = DceScreenSaver
+URI = DceScreenSaver #$$TARGET#$$replace(TARGETPATH, "/", ".")
+QMAKE_MOC_OPTIONS = -Muri=DceScreenSaver
+
+TARGET = dcescreensaverplugin
+TARGET = $$qtLibraryTarget($$TARGET)
 QMAKE_CXXFLAGS+=-Wno-c++11-narrowing
 DESTDIR = $$[QT_INSTALL_IMPORTS]/DceScreenSaver
 QMLDIR_TARGET=$$DESTDIR

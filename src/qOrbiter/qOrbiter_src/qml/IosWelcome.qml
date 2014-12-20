@@ -1,6 +1,6 @@
 import QtQuick 2.2
 import QtQuick.Window 2.2
-import DceScreenSaver 1.0
+
 Item {
    anchors.fill: parent
 

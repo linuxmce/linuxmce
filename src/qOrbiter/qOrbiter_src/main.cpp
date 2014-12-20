@@ -52,7 +52,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <QtGlobal>
 #ifdef QT5
 #include <QtWidgets/QApplication>
-
+#include <QQmlExtensionPlugin>
 #include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickView>
 #include <QtCore/QThread>
@@ -186,8 +186,10 @@ extern "C" {
 
 */
 #ifdef Q_OS_IOS
+
         Q_IMPORT_PLUGIN(DceScreenSaverPlugin)
         Q_IMPORT_PLUGIN(AudioVisualPlugin)
+
 #endif
 
 
@@ -221,8 +223,12 @@ int main(int argc, char* argv[])
 #else
     QApplication  a(argc, argv);
 #endif
+#ifdef Q_OS_IOS
+    qobject_cast<QQmlExtensionPlugin*>(qt_static_plugin_DceScreenSaverPlugin().instance())->registerTypes("DceScreenSaver");
+    qobject_cast<QQmlExtensionPlugin*>(qt_static_plugin_AudioVisualPlugin().instance())->registerTypes("AudioVisual");
+#endif
 
-    QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
+QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
     QCoreApplication::setOrganizationDomain("org.linuxmce.QOrbiter");
     QCoreApplication::setOrganizationName("www.linuxMCE.org");
 
@@ -328,7 +334,8 @@ int main(int argc, char* argv[])
     bool bReload=false;
     try
     {
-#ifdef IOS
+#ifdef Q_OS_IOS
+        qDebug() << qt_static_plugin_DceScreenSaverPlugin().metaData();
         deviceType=3;
         //        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 #endif

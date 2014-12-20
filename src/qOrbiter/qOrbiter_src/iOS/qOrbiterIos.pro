@@ -22,7 +22,7 @@
 #		possy
 
 TEMPLATE=app
-CONFIG += thread
+CONFIG += thread static
 # define deployment destination and target executable name
 #TARGET=qorbiter
 
@@ -67,8 +67,10 @@ QML_IMPORT_TRACE = 1
 #LinuxMCE Specific include path. Linking in the app instead of against dce libs for multi-platform expediency.
 INCLUDEPATH += ../../../ ../../../../DCE/ ../
 
-LIBS+=-L$$[QT_INSTALL_IMPORTS]/DceScreenSaver -lDceScreenSaver
-LIBS+=-L$$[QT_INSTALL_IMPORTS]/AudioVisual -lAudioVisual
+LIBS+=-L$$[QT_INSTALL_IMPORTS]/DceScreenSaver -lDceScreenSaverPlugin
+LIBS+=-L$$[QT_INSTALL_IMPORTS]/AudioVisual -lAudioVisualPlugin
+
+
 
 message(QOrbiter for iOS  - version: $$[QT_VERSION])
 message(Qt is installed in $$[QT_INSTALL_PREFIX])
