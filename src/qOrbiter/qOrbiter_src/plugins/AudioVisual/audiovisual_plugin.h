@@ -14,8 +14,9 @@ class AudioVisualPlugin : public QDeclarativeExtensionPlugin
  #endif
 {
     Q_OBJECT
-
+#ifdef QT5
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionPlugin")
+#endif
 
 public:
     void registerTypes(const char *uri);
