@@ -21,14 +21,14 @@
 #include <QProcess>
 #include <QDir>
 #ifndef Q_OS_ANDROID
-    #ifdef QT4
+#ifdef QT4
 #include <QGraphicsScene>
 #include <QtOpenGL/QGLWidget>
 #include <QGraphicsView>
-    #elif QT5
+#elif QT5
 #include <QQuickItem>
 #include <QImage>
-    #endif
+#endif
 #endif
 
 
@@ -126,53 +126,14 @@ void MediaManager::initializeConnections()
 
 
     /*From Dce MediaPlayer*/
-#if defined(ANDROID) || defined(Q_OS_IOS)
-    QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)));
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(QT5)
 
 #if defined (QT4) && !defined(Q_OS_ANDROID)
+    QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)));
     QObject::connect(mediaPlayer,SIGNAL(startPlayback()), mediaObject, SLOT(play()));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(showFullScreen()));
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), mediaObject, SLOT(stop()));
-    QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), mediaObject, SLOT(pause()));
-#elif QT5
-
-#endif
-
-    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(mediaStarted()));
-    QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopTimeCodeServer()));
-    QObject::connect(mediaPlayer,SIGNAL(commandResponseChanged(QString)), this ,SLOT(setCurrentStatus(QString)));
-    QObject::connect(mediaPlayer,SIGNAL(setZoomLevel(QString)), this, SLOT(setZoomLevel(QString)));
-    QObject::connect(mediaPlayer,SIGNAL(streamIdChanged(int)), this , SLOT(setStreamId(int)));
-   // QObject::connect(mediaPlayer, SIGNAL(mediaIdChanged(QString)), this, SLOT(setFileReference(QString)));
-    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()));
-
-
-#elif defined ANDROID
-    QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString))); //effectively play for android.
-    QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopAndroidMedia()));
-    QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), this, SLOT(setPaused()));
-    QObject::connect(mediaPlayer, SIGNAL(pluginVolumeDown()), this, SIGNAL(androidVolumeDown()));
-    QObject::connect(mediaPlayer, SIGNAL(pluginVolumeUp()), this, SIGNAL(androidVolumeUp()));
-    QObject::connect(mediaPlayer, SIGNAL(newMediaPosition(int)), this, SLOT(setMediaPosition(int)));
-
-
-#endif
-    QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
-    QObject::connect(mediaPlayer,SIGNAL(jumpToStreamPosition(int)), this, SLOT(setMediaPosition(int)));
-
-#ifdef Q_OS_IOS
-      QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString)));
-      QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopAndroidMedia()));
-      QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), this, SLOT(setPaused()));
-      QObject::connect(mediaPlayer, SIGNAL(pluginVolumeDown()), this, SIGNAL(pluginVolumeDown()));
-      QObject::connect(mediaPlayer, SIGNAL(pluginVolumeUp()), this, SIGNAL(pluginVolumeUp()));
-      QObject::connect(mediaPlayer, SIGNAL(newMediaPosition(int)), this, SLOT(setMediaPosition(int)));
-#endif
-
-#ifndef ANDROID
-    /*From internal plugin*/
-#ifdef QT4
-    QObject::connect(mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(setState()));
+    QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), mediaObject, SLOT(pause()));  QObject::connect(mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)), this, SLOT(setState()));
     QObject::connect(mediaObject, SIGNAL(finished()), mediaPlayer, SLOT(mediaEnded()));
     QObject::connect(mediaObject, SIGNAL(tick(qint64)), this, SLOT(processTimeCode(qint64)));
     QObject::connect(mediaObject, SIGNAL(finished()), videoSurface, SLOT(lower()));
@@ -189,7 +150,32 @@ void MediaManager::initializeConnections()
 #elif QT5
     QObject::connect(this, SIGNAL(incomingTick(quint64)), this, SLOT(processTimeCode(qint64)));
 #endif
+#elif  ( defined ANDROID || defined(Q_OS_IOS) ) && defined(QT5)
+    QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString))); //effectively play for android.
+    QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopPluginMedia()));
+    QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), this, SLOT(setPaused()));
+    QObject::connect(mediaPlayer, SIGNAL(pluginVolumeDown()), this, SIGNAL(androidVolumeDown()));
+    QObject::connect(mediaPlayer, SIGNAL(pluginVolumeUp()), this, SIGNAL(androidVolumeUp()));
+
+    QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString)));
+    QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopAndroidMedia()));
+    QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), this, SLOT(setPaused()));
+    QObject::connect(mediaPlayer, SIGNAL(pluginVolumeDown()), this, SIGNAL(pluginVolumeDown()));
+    QObject::connect(mediaPlayer, SIGNAL(pluginVolumeUp()), this, SIGNAL(pluginVolumeUp()));
+    QObject::connect(mediaPlayer, SIGNAL(newMediaPosition(int)), this, SLOT(setMediaPosition(int)));
+    QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopPluginMedia()));
 #endif
+
+
+    QObject::connect(mediaPlayer, SIGNAL(connectionStatusChanged(bool)), this, SLOT(setConnectionStatus(bool)));
+    QObject::connect(mediaPlayer,SIGNAL(jumpToStreamPosition(int)), this, SLOT(setMediaPosition(int)));
+    QObject::connect(mediaPlayer, SIGNAL(newMediaPosition(int)), this, SLOT(setMediaPosition(int)));
+    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(mediaStarted()));
+    QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopTimeCodeServer()));
+    QObject::connect(mediaPlayer,SIGNAL(commandResponseChanged(QString)), this ,SLOT(setCurrentStatus(QString)));
+    QObject::connect(mediaPlayer,SIGNAL(setZoomLevel(QString)), this, SLOT(setZoomLevel(QString)));
+    QObject::connect(mediaPlayer,SIGNAL(streamIdChanged(int)), this , SLOT(setStreamId(int)));
+    QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()));
     setCurrentStatus("Connections initialized.");
 }
 
@@ -358,7 +344,7 @@ void MediaManager::setMediaUrl(QString url)
 
 void MediaManager::processTimeCode(qint64 f)
 {
-    if(!f || f==NULL){
+    if(!f ){
         f=0;
         return;
     }
@@ -395,9 +381,15 @@ void MediaManager::processTimeCode(qint64 f)
         sec.prepend("0");
 
     currentTime =f;
-    QString t = hrs + ":" + min + ":" +sec;
 
+    QString t = hrs + ":" + min + ":" +sec;
+    qDebug() << "Raw time code "<< t;
+    if(t=="::"){
+        qWarning() << Q_FUNC_INFO << " Has no time set, adjusting to 00:00:00";
+        t="00:00:00";
+    }
     QString timeCodeTick = "0/"+QString::number(1000)+","+t+","+qs_totalTime+","+QString::number(streamId)+",0,0,"+fileReference+","+QString::number(fileno)+","+filepath;
+
     transmit(timeCodeTick);
     current_position=timeCodeTick;
     //  setCurrentStatus("Current position::" +QString::number(displayHours) + ":" + QString::number(minutes) + ":" +QString::number(forseconds));
@@ -405,6 +397,9 @@ void MediaManager::processTimeCode(qint64 f)
 
 void MediaManager::processSocketdata()
 {
+#ifdef QT5
+    return;
+#endif
 
     QString tmp;
     while(lastClient->bytesAvailable()!=0){
@@ -437,8 +432,8 @@ void MediaManager::processSocketdata()
     }
 
     if(cmd=="error"){
-        stopAndroidMedia();
-        mediaPlayer->mediaEnded();
+        stopPluginMedia();
+        mediaPlayer->mediaEnded(false);
     }
 
     else if(cmd=="event"){

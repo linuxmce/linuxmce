@@ -182,6 +182,7 @@ void TimeCodeManager::updateTimeCode()
         if (qsTotalTime != QString::fromStdString(m_sTotalTime))
         {
             setStringTotalTime(QString::fromStdString(m_sTotalTime));
+
             convertToSeconds();
         }
 
@@ -220,6 +221,10 @@ void TimeCodeManager::updateTimeCode()
 void TimeCodeManager::convertToSeconds()
 {
     QStringList times = qsTotalTime.split(":");
+    if(times.isEmpty() || times.length() < 3){
+        qWarning()<< Q_FUNC_INFO << "Time code parse error. Avoided galactic destruction";
+        return;
+    }
     int hoursToSec = times.at(0).toInt() * 3600 ;
     int minuteToSec = (times.at(1).toInt() * 60);
     int seconds = times.at(2).toInt();

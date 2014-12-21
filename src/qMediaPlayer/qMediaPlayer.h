@@ -986,7 +986,7 @@ public:
 
         void run();
 
-        void mediaEnded();
+        void mediaEnded(bool status);
 
         void setMediaID(QString id) {mediaID = id; emit mediaIdChanged(mediaID);}
 

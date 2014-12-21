@@ -404,7 +404,7 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
                 f.remove("["); f.remove("/"); f.remove("]");
                 deviceNumber = f;
                 localPath = (QString::fromStdString(sMediaURL)).split(deviceNo).at(1);
-#if defined(ANDROID) || !defined(Q_OS_IOS)
+#if !defined(ANDROID) || !defined(Q_OS_IOS)
                 mp_manager->setCurrentDevice(f.toLong());
 #endif
             }
@@ -1836,12 +1836,12 @@ void qMediaPlayer::CMD_Get_Game_Options(string sPath,string *sValue_To_Assign,st
 {}
 
 
-void qMediaPlayer::mediaEnded()
+void qMediaPlayer::mediaEnded(bool status)
 {
     qDebug("Stream Ended");
     // DCE::CMD_Stop finished(this->m_dwPK_Device, this->m_dwPK_Device, i_StreamId, false );
     //    SendCommand(finished);
-    EVENT_Playback_Completed(currentMediaUrl.toStdString(), i_StreamId, false);
+    EVENT_Playback_Completed(currentMediaUrl.toStdString(), i_StreamId, status);
     // EVENT_Playback_Started(currentMediaUrl.toStdString(), i_StreamId, "Media", "none", "none");
 }
 //<-dceag-c616-b->

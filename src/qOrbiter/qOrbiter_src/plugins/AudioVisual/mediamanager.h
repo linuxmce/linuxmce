@@ -284,12 +284,12 @@ public slots:
 
     QString getPluginUrl(){ return pluginUrl;}
 
-    void stopAndroidMedia(){
+    void stopPluginMedia(){
         setMediaPlaying(false);
     }
 
     void qmlPlaybackEnded(bool ended){
-        mediaPlayer->mediaEnded();
+        mediaPlayer->mediaEnded(ended);
     }
 
 
@@ -534,7 +534,7 @@ public slots:
     }
 
     void setQmlTotalTime(int inSec){
-        qDebug("Android Time call in Audio Visual Plugin::"+inSec);
+        setCurrentStatus("Android Time call in Audio Visual Plugin::"+QString::number(inSec));
         int s = inSec ;
 
         int seconds = s / 1000;
