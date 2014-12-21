@@ -66,7 +66,7 @@ class MediaManager :
 {
 
     Q_PROPERTY(bool connected READ getConnectionStatus WRITE setConnectionStatus NOTIFY connectedChanged)
-    Q_PROPERTY(QString androidUrl READ getAndroidUrl NOTIFY androidUrlUpdated)
+    Q_PROPERTY(QString pluginUrl READ getPluginUrl NOTIFY pluginUrlUpdated)
     Q_PROPERTY(QString currentStatus READ getCurrentStatus WRITE setCurrentStatus NOTIFY currentStatusChanged)
     Q_PROPERTY(bool mediaPlaying READ getMediaPlaying WRITE setMediaPlaying NOTIFY mediaPlayingChanged)
     Q_PROPERTY(bool hasError READ getErrorStatus WRITE setErrorStatus NOTIFY hasErrorChanged)
@@ -179,7 +179,7 @@ public:
     QString serverAddress;
     int deviceNumber;
 
-    QString androidUrl;
+    QString pluginUrl;
 
     bool connected;
 
@@ -232,7 +232,7 @@ signals:
 
     void availibleAudioOutputsChanged();
 
-    void androidUrlUpdated();
+    void pluginUrlUpdated();
     void asyncStop();
     void asyncPositionRequest(int r);
     void callbackChanged();
@@ -248,8 +248,8 @@ signals:
     void requestPosition();
     void requestDuration();
     void displayVolumeChanged();
-    void androidVolumeUp();
-    void androidVolumeDown();
+    void pluginVolumeUp();
+    void pluginVolumeDown();
 
 public slots:
 #ifdef QT4
@@ -282,7 +282,7 @@ public slots:
     void setIncomingTime(int i){ incomingTime = i; emit incomingTimeChanged();}
     int getIncomingTime() { return incomingTime;}
 
-    QString getAndroidUrl(){ return androidUrl;}
+    QString getPluginUrl(){ return pluginUrl;}
 
     void stopAndroidMedia(){
         setMediaPlaying(false);
@@ -416,9 +416,9 @@ public slots:
     void setFileReference(QString f){
 
         fileReference = f;
-        androidUrl = fileReference;
+        pluginUrl = fileReference;
 #if defined(ANDROID) || defined(Q_OS_IOS)
-        emit androidUrlUpdated();
+        emit pluginUrlUpdated();
         connectInfoSocket();
         startTimeCodeServer();
         qDebug() << "CPP Url Updated";
@@ -596,6 +596,8 @@ public slots:
         initializePlayer();
     }
 
+    void pluginNotifyStart(){startTimeCodeServer(); mediaPlayer->EVENT_Playback_Started(this->fileReference.toStdString(), mediaPlayer->i_StreamId, "", "", "");}
+    void pluginNotifyEnd(){mediaPlayer->EVENT_Playback_Completed(this->fileReference.toStdString(), mediaPlayer->i_StreamId, true);}
 
 #ifndef __ANDROID__
 #ifdef QT4

@@ -404,7 +404,7 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
                 f.remove("["); f.remove("/"); f.remove("]");
                 deviceNumber = f;
                 localPath = (QString::fromStdString(sMediaURL)).split(deviceNo).at(1);
-#ifndef ANDROID
+#if defined(ANDROID) || !defined(Q_OS_IOS)
                 mp_manager->setCurrentDevice(f.toLong());
 #endif
             }

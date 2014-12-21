@@ -143,7 +143,7 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaPlayer,SIGNAL(commandResponseChanged(QString)), this ,SLOT(setCurrentStatus(QString)));
     QObject::connect(mediaPlayer,SIGNAL(setZoomLevel(QString)), this, SLOT(setZoomLevel(QString)));
     QObject::connect(mediaPlayer,SIGNAL(streamIdChanged(int)), this , SLOT(setStreamId(int)));
-    QObject::connect(mediaPlayer, SIGNAL(mediaIdChanged(QString)), this, SLOT(setFileReference(QString)));
+   // QObject::connect(mediaPlayer, SIGNAL(mediaIdChanged(QString)), this, SLOT(setFileReference(QString)));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), this, SLOT(startTimeCodeServer()));
 
 
@@ -151,8 +151,8 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString))); //effectively play for android.
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopAndroidMedia()));
     QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), this, SLOT(setPaused()));
-    QObject::connect(mediaPlayer, SIGNAL(androidVolumeDown()), this, SIGNAL(androidVolumeDown()));
-    QObject::connect(mediaPlayer, SIGNAL(androidVolumeUp()), this, SIGNAL(androidVolumeUp()));
+    QObject::connect(mediaPlayer, SIGNAL(pluginVolumeDown()), this, SIGNAL(androidVolumeDown()));
+    QObject::connect(mediaPlayer, SIGNAL(pluginVolumeUp()), this, SIGNAL(androidVolumeUp()));
     QObject::connect(mediaPlayer, SIGNAL(newMediaPosition(int)), this, SLOT(setMediaPosition(int)));
 
 
@@ -164,8 +164,8 @@ void MediaManager::initializeConnections()
       QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString)));
       QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopAndroidMedia()));
       QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), this, SLOT(setPaused()));
-      QObject::connect(mediaPlayer, SIGNAL(androidVolumeDown()), this, SIGNAL(androidVolumeDown()));
-      QObject::connect(mediaPlayer, SIGNAL(androidVolumeUp()), this, SIGNAL(androidVolumeUp()));
+      QObject::connect(mediaPlayer, SIGNAL(pluginVolumeDown()), this, SIGNAL(pluginVolumeDown()));
+      QObject::connect(mediaPlayer, SIGNAL(pluginVolumeUp()), this, SIGNAL(pluginVolumeUp()));
       QObject::connect(mediaPlayer, SIGNAL(newMediaPosition(int)), this, SLOT(setMediaPosition(int)));
 #endif
 
@@ -235,6 +235,10 @@ void MediaManager::callBackClientConnected()
 
 void MediaManager::startTimeCodeServer(){
 
+    if(timeCodeServer->isListening()){
+        setCurrentStatus("TimeCodeServer already listening on port "+timeCodeServer->serverAddress().toString()+":"+QString::number(timeCodeServer->serverPort()));
+        return;
+    }
     setCurrentStatus("Starting timecode server on port 12000");
     timeCodeServer->listen(QHostAddress::Any,12000);
     QObject::connect(timeCodeServer, SIGNAL(newConnection()), this , SLOT(newClientConnected()));
@@ -301,7 +305,7 @@ void MediaManager::setMediaUrl(QString url)
     fileUrl=url;
     emit fileUrlChanged();
 
-#if defined (QT4) && ! defined (ANDROID) //only for non android qt4
+#if defined (QT4) && ! defined (ANDROID) //only for phonon
 
     QString mediaPath;
     if(url.toLower().endsWith(".iso",Qt::CaseInsensitive)||url.toLower().endsWith(".dvd", Qt::CaseInsensitive)){
@@ -354,7 +358,8 @@ void MediaManager::setMediaUrl(QString url)
 
 void MediaManager::processTimeCode(qint64 f)
 {
-    if(!f){
+    if(!f || f==NULL){
+        f=0;
         return;
     }
     /*
