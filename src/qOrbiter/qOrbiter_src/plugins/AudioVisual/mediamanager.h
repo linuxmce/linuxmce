@@ -508,7 +508,7 @@ public slots:
         mediaObject->seek((qint64)msec);
 #endif
 
-#if def ANDROID
+#if defined ANDROID
         updatePluginSeek(msec);
 #endif
 
@@ -591,7 +591,7 @@ public slots:
     void processSocketdata();
 
     void reInit(){
-
+        setConnectionStatus(false);
         mediaPlayer=NULL;
         initializePlayer();
     }

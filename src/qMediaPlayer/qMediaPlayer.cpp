@@ -44,13 +44,12 @@ qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress, MediaManager *man
 
     if(GetConfig() && Connect(DEVICETEMPLATE_qMediaPlayer_CONST)){
         setCommandResponse("qMediaPlayer::Device "+QString::number(m_dwPK_Device)+" Connected.");
-        connected = true;
-    }else{
-        connected = false;
+     setConnectionStatus(true);
+    }else{        
         setCommandResponse("qMediaPlayer::Connection failed for "+QString::fromStdString(this->m_sIPAddress)+" and device number"+QString::number(m_dwPK_Device));
         setConnectionStatus(false);
     }
-    mp_manager->setConnectionStatus(connected);
+
 }
 
 //<-dceag-const2-b->

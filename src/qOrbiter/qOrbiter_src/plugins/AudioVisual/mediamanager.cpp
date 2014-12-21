@@ -107,6 +107,10 @@ MediaManager::MediaManager(QQuickItem *parent):
 
 void MediaManager::initializePlayer()
 {
+
+    if(deviceNumber==-1){
+        return;
+    }
     setCurrentStatus("Initializing Media Player "+ QString::number(deviceNumber));
 
     if(!mediaPlayer){

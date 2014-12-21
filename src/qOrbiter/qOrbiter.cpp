@@ -4544,7 +4544,7 @@ void DCE::qOrbiter::extraButtons(QString button){
             emit commandFailed();
         }
         return;
-    }else if (button.toLower()=="p1"){
+    } else if (button.toLower()=="p1"){
 	CMD_Game_1P_Start CMD_Game_1P_Start(this->m_dwPK_Device,iMediaPluginID);
 	if(SendCommand(CMD_Game_1P_Start,&cResp) && cResp=="OK"){
 		emit commandComplete();
@@ -4552,7 +4552,7 @@ void DCE::qOrbiter::extraButtons(QString button){
 		emit commandFailed();
 	}
 	return;
-    }
+
     }else if (button.toLower()=="p2"){
         CMD_Game_2P_Start CMD_Game_2P_Start(this->m_dwPK_Device,iMediaPluginID);
         if(SendCommand(CMD_Game_2P_Start,&cResp) && cResp=="OK"){
@@ -4561,7 +4561,7 @@ void DCE::qOrbiter::extraButtons(QString button){
                 emit commandFailed();
         }
         return;
-    }
+
     }else if (button.toLower()=="p3"){
         CMD_Game_3P_Start CMD_Game_3P_Start(this->m_dwPK_Device,iMediaPluginID);
         if(SendCommand(CMD_Game_3P_Start,&cResp) && cResp=="OK"){
@@ -4570,7 +4570,7 @@ void DCE::qOrbiter::extraButtons(QString button){
                 emit commandFailed();
         }
         return;
-    }
+
     }else if (button.toLower()=="p4"){
         CMD_Game_4P_Start CMD_Game_4P_Start(this->m_dwPK_Device,iMediaPluginID);
         if(SendCommand(CMD_Game_4P_Start,&cResp) && cResp=="OK"){
