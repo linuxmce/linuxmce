@@ -1972,8 +1972,12 @@ bool qorbiterManager::readLocalConfig(){
     QString xmlPath;
 
 #if defined(Q_OS_MAC) && defined Q_OS_IOS
-    xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
-#elif defined(Q_OS_ANDROID)
+
+    QDir dir;
+    dir.setPath(QDir::homePath());
+    qDebug() << dir.absolutePath()+"/Library/Application_Support/LinuxMCE/";
+    xmlPath =dir.absolutePath()+"/Library/Application_Support/LinuxMCE/config.xml";
+        #elif defined(Q_OS_ANDROID)
 #ifdef NECESSITAS
 
     qDebug() << "Mobile Storage Location::" << mobileStorageLocation;
@@ -2025,6 +2029,7 @@ bool qorbiterManager::readLocalConfig(){
     QFileInfo chk(xmlPath);
 
     if(!chk.exists()){
+
         setDceResponse("Did not find config.xml file in application path, searching /usr/pluto/bin");
         this->logQtMessage("Did not find config.xml file in application path, searching /usr/pluto/bin");
         localConfigFile.setFileName("/usr/pluto/bin/config.xml");
@@ -2036,9 +2041,9 @@ bool qorbiterManager::readLocalConfig(){
     }
 
     if (!localConfigFile.open(QFile::ReadWrite)) {
+        setDceResponse(localConfigFile.errorString());
+        setDceResponse("Not Able to read config"+localConfigFile.fileName());
 
-        setDceResponse("No Config Found.");
-        setDceResponse("config not found!::"+localConfigFile.fileName());
         setInternalIp("192.168.80.1");
         currentSkin= deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "STB" : "default";
         setDeviceNumber(-1);

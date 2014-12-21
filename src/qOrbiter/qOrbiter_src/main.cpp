@@ -386,6 +386,7 @@ QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
 #endif
         orbiterWin.setMessage("Setting up Lmce");
 
+
 #ifndef ANDROID
 
         qorbiterManager  w(&orbiterWin.mainView);
@@ -401,6 +402,12 @@ QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
 
 #endif
 orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
+
+
+#if defined(Q_OS_IOS)
+ w.setMobileStorage(localLogger.logLocation);
+#endif
+
 
 #ifndef ANDROID
 #ifndef Q_OS_IOS

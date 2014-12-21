@@ -12,12 +12,19 @@ QOrbiterLogger::QOrbiterLogger(QObject *parent) :
     QObject(parent)
 {
     loggingEnabled = false;
-#ifndef ANDROID
+#if defined(ANDROID)
+    logLocation="";
+#elif defined (Q_OS_IOS)
+    QDir dir;
+    dir.setPath(QDir::homePath());
+    qDebug()<<"iOS current Path::" << dir.absolutePath();
+    qDebug() << "Directories::"<< dir.entryList().join("\n");
+    setLogLocation(dir.absolutePath()+"/Library/Application_Support/LinuxMCE");
+#else
     logLocation = QDir::homePath()+"/linuxmce/";
     qDebug() << logLocation;
     setLogLocation(logLocation);
-#else
-    logLocation="";
+
 #endif
 }
 
@@ -36,7 +43,7 @@ void QOrbiterLogger::setLogLocation(QString l){
         QDir fileLocation;
         fileLocation.setPath(logLocation);
         qDebug() << "New Log Location! " << fileLocation;
-
+  QFile configFile(fileLocation.path()+"/config.xml");
         if(!fileLocation.exists()){
             qDebug() <<fileLocation.path()<< "-----------------log directory doesnt exist, setting up.";
 
@@ -48,7 +55,7 @@ void QOrbiterLogger::setLogLocation(QString l){
                 qDebug() << "Log Location sucessfully created? " << fileLocation.exists();
                 loggingEnabled = true;
 
-                QFile configFile(fileLocation.path()+"/config.xml");
+
                 qDebug() << configFile.fileName();
                 if(!configFile.exists()){
                     QFile defaultConfig;
@@ -59,16 +66,19 @@ void QOrbiterLogger::setLogLocation(QString l){
                         qDebug() << defaultConfig.errorString();
                     } else {
                         if(defaultConfig.copy(fileLocation.path()+"/config.xml")){
+                           qDebug() <<"Intalled Config.";
 
-
-
-                            qDebug() << configFile.permissions();
                         }
                     }
+
                 }
             }
         } else {
             qDebug() << "Log Location sucessfully set. ";
+
+            configFile.setPermissions(fileLocation.path()+"/config.xml", QFile::WriteGroup | QFile::ReadGroup | QFile::ReadOwner | QFile::WriteOwner);
+
+             qDebug() << "Config Permissions:"<< configFile.permissions();
         }
     }
     else{
