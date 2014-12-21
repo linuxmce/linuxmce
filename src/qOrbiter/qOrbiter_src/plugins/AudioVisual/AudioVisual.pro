@@ -86,7 +86,6 @@ OTHER_FILES = qmldir
 # Input
 SOURCES += \
 	audiovisual_plugin.cpp \   
-	colorfilterproxywidget.cpp \
 	mediamanager.cpp \
 	../../../../qMediaPlayer/qMediaPlayer.cpp \
 	../../../../PlutoUtils/uuencode.cpp \
@@ -147,6 +146,12 @@ HEADERS += \
 	../../../../Gen_Devices/qMediaPlayerBase.h \
         ../../../../Gen_Devices/qOrbiterBase.h
 
+!macx-ios-clang || !QT5{
+
+SOURCES+= \
+colorfilterproxywidget.cpp
+
+}
 
 android-g++{
     contains(QT_VERSION,4.*.*){
