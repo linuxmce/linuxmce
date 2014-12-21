@@ -21,14 +21,14 @@
 #include <QProcess>
 #include <QDir>
 #ifndef Q_OS_ANDROID
-#ifdef QT4
+    #ifdef QT4
 #include <QGraphicsScene>
 #include <QtOpenGL/QGLWidget>
 #include <QGraphicsView>
-#elif QT5
+    #elif QT5
 #include <QQuickItem>
 #include <QImage>
-#endif
+    #endif
 #endif
 
 
@@ -122,10 +122,10 @@ void MediaManager::initializeConnections()
 
 
     /*From Dce MediaPlayer*/
-#if defined(ANDROID) || defined(Q_OS_IOSß)
+#if defined(ANDROID) || defined(Q_OS_IOS)
     QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)));
 
-#ifdef QT4
+#if defined (QT4) && !defined(Q_OS_ANDROID)
     QObject::connect(mediaPlayer,SIGNAL(startPlayback()), mediaObject, SLOT(play()));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(showFullScreen()));
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), mediaObject, SLOT(stop()));
