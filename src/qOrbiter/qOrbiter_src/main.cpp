@@ -38,8 +38,8 @@
  * \ingroup qt_controllers
  */
 
-#ifdef IOS
-# <UIKit/UIKit.h>
+#ifdef Q_OS_IOS
+# include <UIKit/UIKit.h>
 
 #include "ioshelpers.h"
 #include <QtGui/QApplication>
