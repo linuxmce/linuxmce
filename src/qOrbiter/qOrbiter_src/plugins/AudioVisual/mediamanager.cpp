@@ -159,7 +159,6 @@ void MediaManager::initializeConnections()
 
     QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString)));
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopAndroidMedia()));
-    QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), this, SLOT(setPaused()));
     QObject::connect(mediaPlayer, SIGNAL(pluginVolumeDown()), this, SIGNAL(pluginVolumeDown()));
     QObject::connect(mediaPlayer, SIGNAL(pluginVolumeUp()), this, SIGNAL(pluginVolumeUp()));
     QObject::connect(mediaPlayer, SIGNAL(newMediaPosition(int)), this, SLOT(setMediaPosition(int)));
@@ -383,7 +382,7 @@ void MediaManager::processTimeCode(qint64 f)
     currentTime =f;
 
     QString t = hrs + ":" + min + ":" +sec;
-    qDebug() << "Raw time code "<< t;
+
     if(t=="::"){
         qWarning() << Q_FUNC_INFO << " Has no time set, adjusting to 00:00:00";
         t="00:00:00";

@@ -44,8 +44,8 @@ qMediaPlayer::qMediaPlayer(int DeviceID, string ServerAddress, MediaManager *man
 
     if(GetConfig() && Connect(DEVICETEMPLATE_qMediaPlayer_CONST)){
         setCommandResponse("qMediaPlayer::Device "+QString::number(m_dwPK_Device)+" Connected.");
-     setConnectionStatus(true);
-    }else{        
+        setConnectionStatus(true);
+    }else{
         setCommandResponse("qMediaPlayer::Connection failed for "+QString::fromStdString(this->m_sIPAddress)+" and device number"+QString::number(m_dwPK_Device));
         setConnectionStatus(false);
     }
@@ -491,7 +491,6 @@ void qMediaPlayer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pM
     qDebug() << "qMediaPlayer::CMD_Pause_Media";
     setCommandResponse("Need to implement command #39 - Pause Media");
 
-
 #if defined (QT4) && ! defined (ANDROID)
     if(mp_manager->mediaObject->state()==Phonon::PausedState){
         mp_manager->mediaObject->play();
@@ -504,23 +503,12 @@ void qMediaPlayer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pM
 
 
 #else
-    if(!m_bPaused){
-        emit pausePlayback();
-        setCommandResponse("Need to implement command #39 - Pause Media");
-    }
-    else
-    {
-        emit startPlayback();
-
-    }
-
-    m_bPaused = !m_bPaused;
+    emit pausePlayback();
+    setCommandResponse("Need to implement command #39 - Pause Media");
 #endif
     cout << "Parm #41 - StreamID=" << iStreamID << endl;
     sCMD_Result="OK";
-#ifdef __ANDROID__
-    emit pausePlayback();
-#endif
+
 }
 
 //<-dceag-c40-b->
@@ -826,8 +814,10 @@ void qMediaPlayer::CMD_Mute(string &sCMD_Result,Message *pMessage)
     } else {
         mp_manager->audioSink->setMuted(true);
     }
-
+#else
+    mp_manager->setMuted(true);
 #endif
+
 #endif
     qWarning("Toggled Mute");
 }
@@ -1194,9 +1184,9 @@ void qMediaPlayer::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sM
 
     QStringList spl= QString::fromStdString(sStreamingTargets).split(",");
     QStringList::const_iterator it;
-         for (it = spl.constBegin(); it != spl.constEnd();++it){
-              qWarning()<< "\t Target::"<< (*it).toLocal8Bit().constData();
-         }
+    for (it = spl.constBegin(); it != spl.constEnd();++it){
+        qWarning()<< "\t Target::"<< (*it).toLocal8Bit().constData();
+    }
 
     //DCE::CMD_Play_Media slavePlay(this->m_dwPK_Device, tDevice,iPK_MediaType, sMediaPosition, sMediaURL);
     sCMD_Result="OK";
@@ -1840,8 +1830,8 @@ void qMediaPlayer::mediaEnded(bool status)
 {
     qDebug("Stream Ended");
     // DCE::CMD_Stop finished(this->m_dwPK_Device, this->m_dwPK_Device, i_StreamId, false );
-    //    SendCommand(finished);
-    EVENT_Playback_Completed(currentMediaUrl.toStdString(), i_StreamId, status);
+
+    EVENT_Playback_Completed(currentMediaUrl.toStdString(), i_StreamId, false);
     // EVENT_Playback_Started(currentMediaUrl.toStdString(), i_StreamId, "Media", "none", "none");
 }
 //<-dceag-c616-b->

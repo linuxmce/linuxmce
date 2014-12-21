@@ -409,7 +409,6 @@ public slots:
         }
         emit mediaPlayingChanged();
 
-
     }
     bool getMediaPlaying() {return mediaPlaying;}
 
