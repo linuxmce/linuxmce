@@ -234,10 +234,10 @@ function Build_Replacements_Precise
 	Build_Replacement_Package libopenzwave1.0 external/open-zwave
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb
 
-	Build_Replacement_Package libhupnp-core external/hupnp/hupnp
+	QT_SELECT=4 Build_Replacement_Package libhupnp-core external/hupnp/hupnp
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-core*.deb
 
-	Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
+	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
 
 	# ola needs to be configured to the current build environment
