@@ -467,8 +467,6 @@ function mediaDirectors($output,$dbADO) {
 				$cmd='sudo -u root /usr/pluto/bin/Diskless_DeleteFS.sh "'.$mdData['IPaddress'][0].'" "'.$mdData['MACaddress'][0].'"';
 				exec_batch_command($cmd);
 				$dbADO->Execute('UPDATE Device SET NeedConfigure=1 WHERE PK_Device=?',array($value));
-				$cmd='sudo -u root /usr/pluto/bin/Diskless_Setup.sh';
-				exec_batch_command($cmd);
 
 				header('Location: index.php?section=setupDisklessMD');
 				exit();
