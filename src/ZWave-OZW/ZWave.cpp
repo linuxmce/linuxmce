@@ -25,6 +25,8 @@ using namespace DCE;
 #include "ZWInterface.h"
 #include <math.h>
 
+#define ALARM_NODE_DEAD	1
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 ZWave::ZWave(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -34,7 +36,10 @@ ZWave::ZWave(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool b
 	m_pZWInterface = NULL;
 	m_bReady = false;
 	m_setRecentlyAddedDevices.clear();
-	
+	m_pAlarmManager=NULL;
+	m_pAlarmManager = new AlarmManager();
+	m_pAlarmManager->Start(1);
+
 	m_dwPK_ClimateInterface = 0;
 	m_dwPK_SecurityInterface = 0;
 
@@ -542,6 +547,10 @@ void ZWave::CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMes
 	} else if (StringUtils::StartsWith(sArguments,"HN")) {
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() HealNetwork");
 		OpenZWave::Manager::Get()->HealNetwork(m_pZWInterface->GetHomeId(), true);
+	} else if (StringUtils::StartsWith(sArguments,"RFN")) {
+		uint8 nodeId = atoi(sArguments.substr(3).c_str());
+		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() ReplaceFailedNode node %d", nodeId);
+		OpenZWave::Manager::Get()->BeginControllerCommand(m_pZWInterface->GetHomeId(), OpenZWave::Driver::ControllerCommand_ReplaceFailedNode, controller_update, NULL, false, nodeId, 0);
 	} else if (StringUtils::StartsWith(sArguments,"TNN")) {
 		uint8 nodeId = atoi(sArguments.substr(3).c_str());
 		DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"ZWave::StatusReport() TestNetworkNode node %d", nodeId);
@@ -992,11 +1001,8 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 		if (_notification->GetNotification() == OpenZWave::Notification::Code_Dead)
 		{
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "ZWInterface::OnNotification() : Node presumed dead, node id = %d", nodeInfo->m_nodeId);
-			// Trying to revive the node by issuing a test node command
-//			OpenZWave::Manager::Get()->TestNetworkNode(m_pZWInterface->GetHomeId(), nodeInfo->m_nodeId, 1);
-			// TODO: implement more logic around this. here are some ideas:
-			// - revive node X times - then alert user (email/popup)
-			// - if node is brought back to life, try heal node to improve network?
+			// add a alarm in 3 minutes that will react to the dead node - we should wait for a while for the network to have recovered from a failed transmission
+			m_pAlarmManager->AddRelativeAlarm(180,this,ALARM_NODE_DEAD,nodeInfo);
 		}
 		else if (_notification->GetNotification() == OpenZWave::Notification::Code_Alive)
 		{
@@ -1256,7 +1262,6 @@ void ZWave::MapNodeToDevices(NodeInfo* node)
 void ZWave::SetDeviceTemplate(LMCEDevice* pLmceDevice)
 {
 	// Find the value that fits most nicely with the node type and use that as main value
-	// Not used for other devices than temperature sensors atm.
 	int i = 0;
 	for (vector<OpenZWave::ValueID>::iterator it = pLmceDevice->m_vectValues.begin(); it != pLmceDevice->m_vectValues.end(); ++it)
 	{
@@ -1266,6 +1271,12 @@ void ZWave::SetDeviceTemplate(LMCEDevice* pLmceDevice)
 		     pLmceDevice->m_pNodeInfo->m_generic == GENERIC_TYPE_SENSOR_BINARY) &&
 		    (ourLabel == "Temperature" || ourLabel == "Luminance"))
 		{
+			pLmceDevice->SetMainValue(i);
+		} else if (ourLabel == "Sensor")
+		{
+			// There are some devices that is a binary switch, but also have a Sensor input,
+			// which we need to map. When selecting the main label here, GetDeviceTemplate will give us
+			// a generic sensor device - if not we would get the default, which is binary switch.
 			pLmceDevice->SetMainValue(i);
 		}
 		i++;
@@ -1288,14 +1299,17 @@ unsigned long ZWave::GetDeviceTemplate(LMCEDevice *pLmceDevice, int& PK_Device_P
 		{
 			devicetemplate = DEVICETEMPLATE_Temperature_sensor_CONST;
 			PK_Device_Parent = m_dwPK_ClimateInterface;
-			return devicetemplate;
 		} else if ( label == "Luminance" )
 		{
 			devicetemplate = DEVICETEMPLATE_Brightness_sensor_CONST;
 			PK_Device_Parent = m_dwPK_ClimateInterface;
-			return devicetemplate;
+		} else if ( label == "Sensor" )
+		{
+			devicetemplate = DEVICETEMPLATE_Generic_Sensor_CONST;
+			PK_Device_Parent = m_dwPK_SecurityInterface;
 		}
-
+		if (devicetemplate > 0)
+			return devicetemplate;
 	}
 	NodeInfo* node = pLmceDevice->m_pNodeInfo;
 	switch(node->m_generic) {
@@ -1710,4 +1724,19 @@ void ZWave::CMD_Get_Data(string sText,char **pData,int *iData_Size,string &sCMD_
 	(*pData) = new char[s.length()+1];
 	strcpy((*pData), s.c_str());
 	(*iData_Size) = s.length();
+}
+
+void ZWave::AlarmCallback(int id, void* param)
+{
+	if( id==ALARM_NODE_DEAD )
+	{
+		NodeInfo* nodeInfo = (NodeInfo*)param;
+		nodeInfo->m_iDeadCount++;
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"AlarmCallback(): trying to revive node %d for the %d time", nodeInfo->m_nodeId, nodeInfo->m_iDeadCount);
+		// Trying to revive the node by issuing a test node command
+		OpenZWave::Manager::Get()->TestNetworkNode(m_pZWInterface->GetHomeId(), nodeInfo->m_nodeId, 1);
+		// TODO: implement more logic around this. here are some ideas:
+		// - revive node X times - then alert user (email/popup)
+		// - if node is brought back to life, try heal node to improve network?
+	}
 }

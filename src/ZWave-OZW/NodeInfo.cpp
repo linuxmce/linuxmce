@@ -19,6 +19,7 @@ NodeInfo::NodeInfo() {
 	m_vectDevices.push_back(new LMCEDevice(this));
 	m_generic = 0;
 	m_specific = 0;
+	m_iDeadCount = 0;
 }
 
 NodeInfo::~NodeInfo() {

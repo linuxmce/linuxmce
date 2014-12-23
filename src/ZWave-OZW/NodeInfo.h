@@ -29,6 +29,7 @@ namespace DCE {
 		uint8			m_generic;
 		uint8			m_specific;
 		bool			m_polled;
+		uint32			m_iDeadCount;
 		// List of devices that this node is mapped to
 		vector<LMCEDevice*>              m_vectDevices;
 		// list of values for this node

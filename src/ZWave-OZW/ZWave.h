@@ -26,6 +26,7 @@
 #include <openzwave/value_classes/Value.h>
 #include <openzwave/value_classes/ValueBool.h>
 
+#include "AlarmManager.h"
 #include "ZWConfigData.h"
 #include "NodeInfo.h"
 #include "LMCEDevice.h"
@@ -36,7 +37,7 @@ class ZWInterface;
 //<-dceag-decl-b->
 namespace DCE
 {
-	class ZWave : public ZWave_Command
+	class ZWave : public ZWave_Command, public AlarmEvent
 	{
 //<-dceag-decl-e->
 		// Private member variables
@@ -47,6 +48,8 @@ namespace DCE
 		long m_dwPK_ClimateInterface;
 		long m_dwPK_SecurityInterface;
 		map<string, int> m_mapLabels;
+		class AlarmManager *m_pAlarmManager;
+
 		// Private methods
 
 		static void controller_update(OpenZWave::Driver::ControllerState state, OpenZWave::Driver::ControllerError error, void *context);
@@ -54,6 +57,7 @@ namespace DCE
 
 public:
 		// Public member variables
+		void AlarmCallback(int id, void* param);
 		void OnNotification(OpenZWave::Notification const* _notification, NodeInfo* nodeInfo);
 		ZWConfigData* GetConfigData();
 		void SetInterface(ZWInterface* pZWInterface);

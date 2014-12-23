@@ -341,8 +341,33 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 	}
 	case OpenZWave::Notification::Type_Notification:
 	{
-		LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::OnNotification() : Type_Notification, code = %d", _notification->GetNotification());
+		switch (_notification->GetNotification()) {
+		case OpenZWave::Notification::Code_MsgComplete:
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::OnNotification() : Message complete, node %d", _notification->GetNodeId());
+			break;
+		case OpenZWave::Notification::Code_Timeout:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Message timed out, node %d", _notification->GetNodeId());
+			break;
+		case OpenZWave::Notification::Code_NoOperation:
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::OnNotification() : NoOperation message completed, node %d", _notification->GetNodeId());
+			break;
+		case OpenZWave::Notification::Code_Awake:
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::OnNotification() : Node %d has woken up", _notification->GetNodeId());
+			break;
+		case OpenZWave::Notification::Code_Sleep:
+			LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::OnNotification() : Node %d went to sleep", _notification->GetNodeId());
+			break;
+		case OpenZWave::Notification::Code_Dead:
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "ZWInterface::OnNotification() : Node %d presumed dead!", _notification->GetNodeId());
+			break;
+		case OpenZWave::Notification::Code_Alive:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Node %d revived", _notification->GetNodeId());
+			break;
+		default:
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Type_Notification, unhandled/new code = %d", _notification->GetNotification());
 		break;
+		}
+
 	}	
 	default:
 	{
