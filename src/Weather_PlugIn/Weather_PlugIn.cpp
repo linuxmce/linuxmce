@@ -112,6 +112,7 @@ bool Weather_PlugIn::GetConfig()
           LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather_PlugIn::GetConfig() - Setting placeholder.");
           string sPlaceHolderImage=string(pData,nSize);
           m_dequeRadarFrames.push_back(RadarFrame(0,0,1,sPlaceHolderImage));
+	}
 #endif
 
 	// Put your code here to initialize the data in this class
