@@ -397,7 +397,8 @@ for Row in $R; do
 	cat /usr/pluto/keys/id_dsa_pluto.pub > ${Moon_RootLocation}/root/.ssh/authorized_keys
 
 	## Dome configuring this MD
-	RunSQL "UPDATE Device SET NeedConfigure = 0 WHERE PK_Device=$Moon_DeviceID"
+	# Do not reset this here or Config_Device_Changes.sh will not run to install pkgs for devices in the dev tree
+	#RunSQL "UPDATE Device SET NeedConfigure = 0 WHERE PK_Device=$Moon_DeviceID"
 
 	if [[ -n "$(find ${Moon_RootLocation}/var/cache/apt/archives/ -iname '*.deb')" ]]; then
 		TARGET_DISTRO=$(LC_ALL="C" chroot ${Moon_RootLocation} lsb_release -i -s | tr '[:upper:]' '[:lower:]')
