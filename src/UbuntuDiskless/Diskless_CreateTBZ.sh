@@ -474,7 +474,6 @@ MD_Install_Packages () {
 			StatsMessage "Installing kernel headers"
 			#Install headers and run depmod for the seamless integraton function, ensure no errors exist
 			TARGET_KVER_LTS_HES=""
-			TARGET_XVER_LTS_HES=""
 			[[ "precise" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-trusty"
 			[[ "trusty" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-utopic"
 			echo "LTS_HES=$TARGET_KVER_LTS_HES" >> $TEMP_DIR/etc/pluto.conf
@@ -636,9 +635,9 @@ MD_Install_Packages () {
 			LC_ALL=C chroot $TEMP_DIR update-rc.d -f NetworkManager remove
 
 			#Install ancillary programs
-			LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg"$TARGET_XVER_LTS_HES"
-			VerifyExitCode "xserver-xorg$TARGET_XVER_LTS_HES install failed"
-			LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all"$TARGET_XVER_LTS_HES" linux-firmware
+			LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg"$TARGET_KVER_LTS_HES"
+			VerifyExitCode "xserver-xorg$TARGET_KVER_LTS_HES install failed"
+			LC_ALL=C chroot $TEMP_DIR apt-get -y install xserver-xorg-video-all"$TARGET_KVER_LTS_HES" linux-firmware
 			VerifyExitCode "Ancillary programs install failed"
 
 			## Install plymouth theme on MD in Ubuntu

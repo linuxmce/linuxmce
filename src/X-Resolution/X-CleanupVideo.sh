@@ -35,7 +35,7 @@ CleanupVideo()
 	local Pkgs_ATI
 	Pkgs_ATI=(pluto-ati-video-drivers)
 	local Pkgs_VIA
-	Pkgs_VIA=(xserver-xorg-video-viaprop)
+	Pkgs_VIA=(xserver-xorg-video-viaprop*)
 	local nV_inst ATI_inst VIA_inst
 	local nV_dev ATI_dev VIA_dev
 	local Pkg
