@@ -328,8 +328,15 @@ Setup_XineConf()
 		XineConfSet audio.device.alsa_default_device "$PlaybackCard" "$XineConf"
 		case "$AudioSetting" in
 			*[COH]*)
+				XineConfSet audio.device.alsa_pcm_device "$PlaybackCard" "$XineConf"
+
 				XineConfSet audio.output.speaker_arrangement 'Pass Through' "$XineConf"
 				XineConfSet audio.device.alsa_passthrough_device "$PlaybackCard" "$XineConf"
+
+				XineConfSet audio.device.alsa_surround40_device "$PlaybackCard" "$XineConf"
+				XineConfSet audio.device.alsa_surround41_device "$PlaybackCard" "$XineConf"
+				XineConfSet audio.device.alsa_surround50_device "$PlaybackCard" "$XineConf"
+				XineConfSet audio.device.alsa_surround51_device "$PlaybackCard" "$XineConf"
 				;;
 		esac
 	else
