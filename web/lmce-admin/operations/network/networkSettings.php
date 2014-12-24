@@ -41,10 +41,16 @@ function getIPv6MASK($int) {
 }
 
 function getOutSideIP() {
+
 	$ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, 'http://automation.whatismyip.com/n09230945.asp');
+    curl_setopt($ch, CURLOPT_URL, 'http://www.linuxmce.org/remote');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    $internetip = curl_exec($ch);
+    $response = curl_exec($ch);
+
+	// GET EXTERNAL IP SERVED BY www.linuxmce.org - TYPO3 PAGE ID: 48
+	$json = json_decode($response, true);
+	$internetip = $json['ip'];
+
 	if(!filter_var($internetip, FILTER_VALIDATE_IP)) {
 		$internetip='';
 	}
