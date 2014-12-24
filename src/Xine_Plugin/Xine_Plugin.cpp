@@ -287,6 +287,10 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 		if( pMediaFile && pMediaFile->m_iTrack )
 			mediaURL += "/" + StringUtils::itos(pMediaFile->m_iTrack);
 	}
+	else if( mediaURL.size()>5 && mediaURL.substr(0,5)=="/dev/" && pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_BD_CONST )
+	{
+		mediaURL = "bluray://" + mediaURL;
+	}
 
 #ifdef WIN32
 	mediaURL = StringUtils::Replace(mediaURL, "\\", "/"); // replacing all the \ in a windows path with /
@@ -294,12 +298,15 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 
 	// hack: redirect MOV, EVO, M2TS files to MPlayer_Player
 	// TODO rework Media Dispatcher to make it more clear - later
+	bool bRedirectToMPlayer = false;
+/*
 	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Doing MPlayer redirection check...");
-	bool bRedirectToMPlayer = ( pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_HDDVD_CONST ) ||
+	bRedirectToMPlayer = ( pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_HDDVD_CONST ) ||
 			( pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_BD_CONST ) ||
 			( (pXineMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_StoredVideo_CONST) && 
 			( StringUtils::EndsWith(mediaURL, ".EVO", true) || StringUtils::EndsWith(mediaURL, ".M2TS", true) ) 
 			);
+*/
 
 	// hack: VDR recordings are detected by the info.vdr or info in the recording dir. T
 	bool bVDRRecording = ( StringUtils::EndsWith(mediaURL,"INFO.VDR", true) || 
@@ -308,8 +315,7 @@ bool Xine_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
 					 );
 
 	// hack: redirect MythTV recordings to MythTV_Player
-	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Doing MythTV redirection check...");
-
+//	LoggerWrapper::GetInstance()->Write(LV_WARNING, "Doing MythTV redirection check...");
 //	MediaDevice *pMediaDevice_CheckMythTV = m_pMedia_Plugin->m_mapMediaDevice_Find(m_pRouter->FindClosestRelative(DEVICETEMPLATE_MythTV_Player_CONST, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device));
 //
 //	bool bMythTVExists = false;
