@@ -1480,6 +1480,7 @@ bool Media_Plugin::MediaInserted( class Socket *pSocket, class Message *pMessage
         return false; // Let someone else handle it
     }
 
+/*
     if ( PK_MediaType == MEDIATYPE_pluto_HDDVD_CONST || PK_MediaType == MEDIATYPE_pluto_BD_CONST )
     {
 	    LoggerWrapper::GetInstance()->Write( LV_STATUS, "Detected HD-DVD/Bluray disk inserted at drive %d, asking user if he wants to rip it", pDeviceFrom->m_dwPK_Device );
@@ -1545,6 +1546,7 @@ bool Media_Plugin::MediaInserted( class Socket *pSocket, class Message *pMessage
 
 	    return true;
     }
+*/
 
     // If there are more than one entertainment areas for this drive there's nothing we can do since we can't know the
     // destination based on the media inserted event. No matter what, we'll just pick the first one
@@ -6585,11 +6587,13 @@ int Media_Plugin::CheckForAutoResume(MediaStream *pMediaStream)
 
 	// HACK this should be refactored, but duplicating code for now with Xine_Plugin to make bookmarks work
 	string mediaURL = pMediaStream->GetFilenameToPlay("Empty file name");
-	bool bRedirectToMPlayer = ( pMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_HDDVD_CONST ) ||
+	bool bRedirectToMPlayer = false;
+/*
+	bRedirectToMPlayer = ( pMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_HDDVD_CONST ) ||
 		( pMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_BD_CONST ) ||
 		( (pMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_StoredVideo_CONST) &&
 		  ( StringUtils::EndsWith(mediaURL, ".EVO", true) || StringUtils::EndsWith(mediaURL, ".M2TS", true) ) );
-
+*/
 	MediaDevice *pMediaDevice_MPlayer = NULL;
 	if (bRedirectToMPlayer)
 	{
