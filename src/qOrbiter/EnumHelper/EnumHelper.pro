@@ -15,4 +15,10 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    genericdefineparser.cpp \
+    parsermanager.cpp
+
+HEADERS += \
+    genericdefineparser.h \
+    parsermanager.h

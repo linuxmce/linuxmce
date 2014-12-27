@@ -4,9 +4,31 @@
 #include <QByteArray>
 #include <QRegExp>
 #include <QStringList>
+#include <parsermanager.h>
+typedef QMap <QString, QString> ReplacementMap;
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+
+    ParserManager *m_defineParser = new ParserManager();
+
+    GenericDefineParser *datagrids_dg = new GenericDefineParser("datagrids");
+    datagrids_dg->setSourceFile("../../pluto_main/Define_DataGrid.h");
+    datagrids_dg->setDefinePattern("(#define DATAGRID_.*\\d(|\\d)\n)");
+    datagrids_dg->setOutFile("../qOrbiter_src/datagrids.h");
+    datagrids_dg->setUsingTags(false);
+    QStringList removals;
+    removals << "#define", "DATAGRID_", "\n";
+    datagrids_dg->setStripList(removals);
+
+    ReplacementMap m_replacements;
+    m_replacements.insert(" ", " = ");
+    m_replacements.insert("_CONST","");
+    datagrids_dg->setReplacements(m_replacements);
+
+    m_defineParser->addParserItem(datagrids_dg);
+    m_defineParser->start();
+    return a.exec();
 
     /* Dg defines */
 
@@ -192,5 +214,5 @@ int main(int argc, char *argv[])
     }
     /*end screen defines*/
 
-    return a.exec();
+
 }
