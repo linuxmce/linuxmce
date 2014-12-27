@@ -85,12 +85,12 @@ TRANSLATIONS += app_de.ts
 
         INSTALLS+= qmlplugins
         HEADERS += ../../plugins/AndroidInfo/androidsystem.h \
-    ../../contextobjects/mediatypehelper.h \
+    ../../defineObjects/mediatypehelper.h \
     ../../RemoteCommands.h \
-    ../../datagrids.h
+    ../../defineObjects/datagrids.h
         SOURCES += ../../plugins/AndroidInfo/androidsystem.cpp \
-    ../../contextobjects/mediatypehelper.cpp \
-    ../../datagrids.cpp
+    ../../defineObjects/mediatypehelper.cpp \
+    ../../defineObjects/datagrids.cpp
 
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH = imports
@@ -212,8 +212,8 @@ SOURCES += ../../main.cpp \
         ../../datamodels/genericmodelitem.cpp \
         ../../datamodels/ActiveMediaStreams.cpp \
         ../../datamodels/listitembase.cpp \
-        ../../contextobjects/linuxmcedata.cpp \
-../../contextobjects/mediatypehelper.h
+        ../../defineObjects/linuxmcedata.cpp \
+../../defineObjects/mediatypehelper.h
 
 
 
@@ -328,8 +328,8 @@ HEADERS += \
     ../../datamodels/ActiveMediaStreams.h \
     ../../datamodels/MediaFilter.h \
     ../../datamodels/listitembase.h \
-        ../../contextobjects/linuxmcedata.h \
-../../contextobjects/mediatypehelper.h
+        ../../defineObjects/linuxmcedata.h \
+../../defineObjects/mediatypehelper.h
 
 RESOURCES += \
         ../../skinData.qrc

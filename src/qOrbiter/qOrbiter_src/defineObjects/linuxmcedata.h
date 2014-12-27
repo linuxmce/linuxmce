@@ -2,6 +2,7 @@
 #define LINUXMCEDATA_H
 
 #include <QObject>
+#include <QString>
 
 class LinuxmceData : public QObject{
     Q_OBJECT
@@ -81,6 +82,67 @@ public:
         Armed_Extended_away=6
     };
     Q_ENUMS(HouseModes)
+
+public slots:
+     static const QString translateType(int m){
+        switch (m) {
+        case Unarmed_at_home:
+            return tr("Unarmed, at home.", "UserMode status");
+            break;
+        case Armed_away:
+            return tr("Armed, Away.", "UserMode status");
+            break;
+        case Armed_at_home:
+            return tr("Armed, at home.", "UserMode status");
+            break;
+        case Sleeping:
+            return tr("Sleeping.", "UserMode status");
+            break;
+        case Entertaining:
+            return tr("Entertaining.", "UserMode status");
+            break;
+        case Armed_Extended_away:
+            return tr("Armed, Extended Away.", "UserMode status");
+            break;
+        default:
+            break;
+        }
+    }
+};
+
+class UserModesHelper : public QObject
+{
+    Q_OBJECT
+public:
+    UserModesHelper(){}
+    virtual ~UserModesHelper(){}
+    enum UserModes{
+        USERMODE_At_Home =1,
+        USERMODE_Away,
+        USERMODE_Sleeping,
+        USERMODE_Do_not_disturb
+    };
+    Q_ENUMS(UserModes)
+
+public slots:
+   static const QString translateType(int m){
+        switch (m) {
+        case USERMODE_At_Home:
+            return tr("Home.", "UserMode status");
+            break;
+        case USERMODE_Away:
+            return tr("Away.", "UserMode status");
+            break;
+        case USERMODE_Sleeping:
+            return tr("Sleeping.", "UserMode status");
+            break;
+        case USERMODE_Do_not_disturb:
+            return tr("Do Not Disturb.", "UserMode status");
+            break;
+        default:
+            break;
+        }
+    }
 };
 
 class RoomTypeHelper : public QObject
@@ -107,6 +169,57 @@ public:
         Unmanaged=15
     };
     Q_ENUMS(RoomTypes)
+
+public slots:
+   static const QString translateType(int m){
+        switch (m) {
+        case Living_RoomFamily_Room:
+            return tr("Living/Family Room", "Room Type");
+            break;
+        case ClosetStorage_Space:
+            return tr("Closet Storage space.", "Room Type");
+            break;
+        case Bedroom_Other:
+            return tr("Bedroom, Other.", "Room Type");
+            break;
+        case Bedroom_Master:
+            return tr("Master Bedroom", "Room Type");
+            break;
+        case Garage:
+            return tr("Garage", "Room Type");
+            break;
+        case Kitchen:
+            return tr("Kitchen", "Room Type");
+            break;
+        case Patio:
+            return tr("Patio", "Room Type");
+            break;
+        case Dining_Room:
+            return tr("Dining Room", "Room Type");
+            break;
+        case Outside_Area:
+            return tr("Outside Area", "Room Type");
+            break;
+        case Miscellaneous:
+            return tr("Miscellaneous", "Room Type");
+            break;
+        case Hallway:
+            return tr("Hallway", "Room Type");
+            break;
+        case Home_Theater:
+            return tr("Home Theater", "Room Type");
+            break;
+        case FoyerEntrance:
+            return tr("Foyer/Entrance", "Room Type");
+            break;
+        case Unmanaged:
+            return tr("Unmanaged Area", "Room Type");
+            break;
+        default:
+            return "Langston is lazy or out of range.";
+            break;
+        }
+    }
 };
 
 class ScreenList : public QObject
@@ -414,6 +527,15 @@ public:
         /*<-SAE->*/
     };
     Q_ENUMS(Screens)
+
+    QString static const translateType(int m){
+        switch (m) {
+
+        default:
+            return tr("Nope");
+            break;
+        }
+    }
 };
 
 #endif // LINUXMCEDATA_H

@@ -77,9 +77,9 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <contextobjects/epgchannellist.h>
 #include <contextobjects/playlistclass.h>
 #include <contextobjects/timecodemanager.h>
-#include <contextobjects/linuxmcedata.h>
-#include <contextobjects/mediatypehelper.h>
-#include <datagrids.h>
+#include <defineObjects/linuxmcedata.h>
+#include <defineObjects/mediatypehelper.h>
+#include <defineObjects/datagrids.h>
 #include <RemoteCommands.h>
 #ifdef debug
 #include <QDebug>

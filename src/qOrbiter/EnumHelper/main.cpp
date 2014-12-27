@@ -10,25 +10,25 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    ParserManager *m_defineParser = new ParserManager();
+//    ParserManager *m_defineParser = new ParserManager();
 
-    GenericDefineParser *datagrids_dg = new GenericDefineParser("datagrids");
-    datagrids_dg->setSourceFile("../../pluto_main/Define_DataGrid.h");
-    datagrids_dg->setDefinePattern("(#define DATAGRID_.*\\d(|\\d)\n)");
-    datagrids_dg->setOutFile("../qOrbiter_src/datagrids.h");
-    datagrids_dg->setUsingTags(false);
-    QStringList removals;
-    removals << "#define", "DATAGRID_", "\n";
-    datagrids_dg->setStripList(removals);
+//    GenericDefineParser *datagrids_dg = new GenericDefineParser("datagrids");
+//    datagrids_dg->setSourceFile("../../pluto_main/Define_DataGrid.h");
+//    datagrids_dg->setDefinePattern("(#define DATAGRID_.*\\d(|\\d)\n)");
+//    datagrids_dg->setOutFile("../qOrbiter_src/datagrids.h");
+//    datagrids_dg->setUsingTags(false);
+//    QStringList removals;
+//    removals << "#define", "DATAGRID_", "\n";
+//    datagrids_dg->setStripList(removals);
 
-    ReplacementMap m_replacements;
-    m_replacements.insert(" ", " = ");
-    m_replacements.insert("_CONST","");
-    datagrids_dg->setReplacements(m_replacements);
+//    ReplacementMap m_replacements;
+//    m_replacements.insert(" ", " = ");
+//    m_replacements.insert("_CONST","");
+//    datagrids_dg->setReplacements(m_replacements);
 
-    m_defineParser->addParserItem(datagrids_dg);
-    m_defineParser->start();
-    return a.exec();
+//    m_defineParser->addParserItem(datagrids_dg);
+//    m_defineParser->start();
+//    return a.exec();
 
     /* Dg defines */
 
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
         qDebug() << "Found :: " << dgDefines.captureCount();
         qDebug() << defineStrings.join(",\n");
 
-        QFile out("../qOrbiter_src/datagrids.h");
+        QFile out("../qOrbiter_src/defineObjects/datagrids.h");
         if(out.exists()){
             out.open(QFile::ReadWrite);
             if(out.isOpen()){
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
         QString endTag= "/*<-AGE->*/";
         QByteArray tmp;
 
-        QFile mediaTypeEnumFile("../qOrbiter_src/contextobjects/mediatypehelper.h");
+        QFile mediaTypeEnumFile("../qOrbiter_src/defineObjects/mediatypehelper.h");
         if(mediaTypeEnumFile.exists() && mediaTypeEnumFile.open(QFile::ReadWrite)){
             qDebug() << mediaTypeEnumFile.fileName() << " open for read / write.";
             tmp = mediaTypeEnumFile.readAll();
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
         QString endTag= "/*<-SAE->*/";
         QByteArray tmp;
 
-        QFile screenEnumFile("../qOrbiter_src/contextobjects/linuxmcedata.h");
+        QFile screenEnumFile("../qOrbiter_src/defineObjects/linuxmcedata.h");
         if(screenEnumFile.exists() && screenEnumFile.open(QFile::ReadWrite)){
             qDebug() << screenEnumFile.fileName() << " open for read / write.";
             tmp = screenEnumFile.readAll();
@@ -214,5 +214,5 @@ int main(int argc, char *argv[])
     }
     /*end screen defines*/
 
-
+a.exec();
 }

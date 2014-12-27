@@ -457,9 +457,9 @@ SOURCES += main.cpp \
         datamodels/genericmodelitem.cpp \
         datamodels/ActiveMediaStreams.cpp \
         datamodels/listitembase.cpp \
-        contextobjects/linuxmcedata.cpp \
-        contextobjects/mediatypehelper.cpp \
-    datagrids.cpp
+        defineObjects/linuxmcedata.cpp \
+        defineObjects/mediatypehelper.cpp \
+        defineObjects/datagrids.cpp
 
 
 # Please do not modify the following two lines. Required for deployment.
@@ -566,10 +566,10 @@ HEADERS += \
         datamodels/MediaFilter.h \
         datamodels/DataGridHandler.h \
         datamodels/listitembase.h \
-        contextobjects/linuxmcedata.h \
-        contextobjects/mediatypehelper.h \
+        defineObjects/linuxmcedata.h \
+        defineObjects/mediatypehelper.h \
         RemoteCommands.h \
-    datagrids.h
+        defineObjects/datagrids.h
 
 
 
