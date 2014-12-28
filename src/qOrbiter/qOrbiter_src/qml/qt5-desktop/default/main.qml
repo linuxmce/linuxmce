@@ -383,74 +383,9 @@ Item {
 
         }
 
-        onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
-        onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
-        onMediaPlayingChanged: console.log("Media Playback status changed locally to "+dceplayer.mediaPlaying)
-        onVolumeChanged:console.log(volume)
-        Keys.onVolumeDownPressed: manager.adjustVolume("-1")
-        Keys.onVolumeUpPressed:  manager.adjustVolume("+1")
-        Keys.onTabPressed: ftr.forceActiveFocus()
 
-        Keys.onPressed: {
-            hideUiTimer.restart()
-            switch(event.key){
-            case Qt.Key_Back:
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1));
-                break;
-            case Qt.Key_Forward:
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1))
-                break;
-            case 16777347: /* Keycode Track forward */
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex+1));
-                break;
-            case 16777346: /* Keycode Track Backwards */
-                manager.changedPlaylistPosition((mediaplaylist.currentIndex-1))
-                break;
-            case Qt.Key_Plus: /*Plus sign */
-                manager.adjustVolume(+1)
-                break;
-            case Qt.Key_VolumeMute:
-                manager.mute()
-                break;
-            case Qt.Key_M:
-                manager.mute()
-                break;
-            case Qt.Key_Minus: /* Minus Sign */
-                manager.adjustVolume(-1)
-                break;
-            case Qt.Key_T:
-                showMetaData()
-                break;
-            case Qt.Key_Tab:
-                swapFocus()
-                break;
-            case Qt.Key_S:
-                manager.stopMedia()
-                break;
-            case Qt.Key_Menu:
-                manager.setCurrentScreen("Screen_1.qml")
-                break;
-            case Qt.Key_Pause:
-                manager.pauseMedia()
-                break;
-            case Qt.Key_P:
-                manager.pauseMedia()
-                break;
 
-            case Qt.Key_PageUp:
-                manager.changedPlaylistPosition(mediaplaylist.currentIndex-1)
-                break;
 
-            case Qt.Key_PageDown:
-                manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
-                break;
-            default:
-                console.log(manager.dumpKey(event.key))
-                break
-            }
-
-            event.accepted=true;
-        }
     }
 
     Item{
