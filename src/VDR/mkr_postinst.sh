@@ -5,7 +5,6 @@
 . /usr/pluto/bin/Config_Ops.sh
 ConfEval
 
-
 # Get the video dir of VDR
 VIDEO_DIR="/home/public/data/pvr"
 
