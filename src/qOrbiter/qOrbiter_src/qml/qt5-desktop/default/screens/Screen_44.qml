@@ -1,8 +1,8 @@
 import QtQuick 2.1
 import "../components"
 StyledScreen {
-    screenName: "Advanced Screen"
-    screenDescription: "Advanced options"
+    screen: "Advanced Screen"
+    description: "Advanced options"
     focusTarget: advanced_flow
 
     Flow{

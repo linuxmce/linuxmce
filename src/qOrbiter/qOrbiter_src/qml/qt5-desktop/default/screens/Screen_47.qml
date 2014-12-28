@@ -2,8 +2,8 @@ import QtQuick 2.1
 import "../components"
 StyledScreen {
     id:screen_forty_seven_of_nine
-    screenDescription: "Browse media library"
-    screenName: "Media Browser"
+    description: "Browse media library"
+    screen: "Media Browser"
     property int depth:0
     focusTarget: content
 

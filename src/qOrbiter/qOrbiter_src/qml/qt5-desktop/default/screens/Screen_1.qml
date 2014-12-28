@@ -2,7 +2,7 @@ import QtQuick 2.1
 import "../components"
 StyledScreen {
     id:screen1
-
+    focusTarget: screen1
 
     Component.onCompleted: {
         manager.setBoundStatus(true)

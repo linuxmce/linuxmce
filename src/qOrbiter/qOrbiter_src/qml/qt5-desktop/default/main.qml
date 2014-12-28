@@ -30,15 +30,17 @@ Item {
     property string dynamic_height
     property string dynamic_width
     property bool uiOn:true
+    property bool screenSaverOn:false
     property int screensaverTimer:15000 //manager.screenSaverTimeout*1000
 
 
     function resetUiTimeout(){
         hideUiTimer.restart()
+        screenSaverOn=false
     }
 
     onActiveFocusChanged: {
-        uiOn=true
+        //  uiOn=true
     }
 
     Component.onCompleted: {
@@ -50,6 +52,7 @@ Item {
         onOrientationChanged: checkLayout()
         onDceRemoteCommand:{
             resetUiTimeout()
+
 
             if(manager.currentScreen=="Screen_1.qml" && !ftr.isActive){
                 uiOn=!uiOn
@@ -94,82 +97,6 @@ Item {
     }
 
 
-    function screenchange(screenname )
-    {
-        pageLoader.source = "screens/"+screenname
-        if (pageLoader.status == Component.Ready)
-        {
-            manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-            manager.currentScreen = screenname
-        }
-        else if (pageLoader.status == Component.Loading)
-        {
-            console.log("loading page from network")
-            finishLoading(screenname)
-        }
-        else
-        {
-            console.log("Command to change to:" + screenname + " failed!")
-            screenfile = screenname
-            pageLoader.source = "screens/Screen_x.qml"
-            manager.currentScreen="ErrorScreen.qml"
-        }
-    }
-
-    function finishLoading (screenname)
-    {
-        if(pageLoader.status != Component.Ready)
-        {
-            console.log("finishing load")
-            pageLoader.source = "screens/"+screenname
-            console.log("screen" + screenname + " loaded.")
-        }
-        else
-        {
-            finishLoading(screenname)
-        }
-
-    }
-
-    function checkStatus(component)
-    {
-        console.log(component.progress)
-    }
-    //=================Components==================================================//
-    function loadComponent(componentName )
-    {
-        componentLoader.source = "components/"+componentName
-        if (componentLoader.status === Component.Ready)
-        {
-            manager.setDceResponse("Command to change to:" + componentName+ " was successfull")
-        }
-        else if (componentLoader.status === Component.Loading)
-        {
-            console.log("loading page from network")
-            finishLoadingComponent(componentName)
-        }
-        else
-        {
-            console.log("Command to add: " + componentName + " failed!")
-
-        }
-    }
-
-    function finishLoadingComponent (componentName)
-    {
-        if(componentLoader.status !== Component.Ready)
-        {
-            console.log("finishing network load")
-            componentLoader.source = "components/"+componentName
-            console.log("screen" + componentName + " loaded.")
-        }
-        else
-        {
-            finishLoadingComponent(componentName)
-        }
-
-    }
-
     function swapFocus(){
         uiOn =!uiOn
         console.log("Swap Focus Function.")
@@ -205,9 +132,9 @@ Item {
         repeat: true
         onTriggered: {
             uiOn=false
+            screenSaverOn=true
         }
     }
-
 
 
     ListModel{
@@ -380,11 +307,7 @@ Item {
 
         Component.onCompleted: {
             setWindowSize(manager.appHeight, manager.appWidth);
-
         }
-
-
-
 
     }
 
@@ -431,11 +354,72 @@ Item {
         id: hdr
     }
 
+    function screenchange(screenname ){
+        if(pageLoader.currentScreen!=screenname)
+            pageLoader.nextScreen = screenname
+    }
+
+    function checkStatus(component){
+        console.log(component.progress)
+    }
+
     Loader {
         id:pageLoader
         objectName: "loadbot"
-        onSourceChanged:  loadin
+
         property bool isActive:false
+        property string nextScreen:"Screen_1.qml"
+        property string currentScreen:""
+
+        onNextScreenChanged: {
+
+            if(!nextScreen.match(".qml")){
+                return
+            } else {
+
+            }
+
+            if(!pageLoader.item){
+                console.log("Last screen likely had errors, loading next screen==>"+nextScreen)
+                loadNext()
+            }
+
+            if( pageLoader.item.noForce===true){
+                console.log("pageloader::"+source+"\n\tdeclares noforce::"+pageLoader.item.noForce+",\n\tignoring "+nextScreen)
+                return;
+            }else {
+                console.log("pageloader::"+source+"\n\tnoforce::"+pageLoader.item.noForce+"\n\tloading next screen.")
+                console.log("next screen==>"+nextScreen)
+                startChange()
+            }
+
+        }
+
+        function startChange(){
+
+            if(pageLoader.item || pageLoader.item.screen){
+                console.log("pageloader::closing page "+ pageLoader.item.screen)
+                pageLoader.item.state="closing"
+            } else{
+                console.log("pageloader::no page jumping to next ==>"+nextScreen)
+                loadNext()
+            }
+
+        }
+
+        function loadNext(){
+
+
+            if(nextScreen===""){
+                nextScreen="Screen_1.qml"
+                return
+            }
+
+            console.log("pageloader::loading next screen screens/"+nextScreen)
+            pageLoader.source="screens/"+nextScreen
+        }
+
+        source: "screens/Screen_1.qml"
         focus:true
         anchors{
             top:hdr.bottom
@@ -443,16 +427,42 @@ Item {
             bottom:ftr.top
             right:qmlroot.right
         }
+      //  opacity: !screenSaverOn ? 1 : 0
+        Behavior on opacity {
+            PropertyAnimation{
+                duration: 750
+            }
+        }
+        onStatusChanged: {
+            switch(pageLoader.status){
+            case Component.Ready:
+                manager.setDceResponse("Command to change to:" + source+ " was successfull")
+                screenfile = source
+                currentScreen=nextScreen
 
-        onLoaded: {
-            console.log("Screen Changed:" + pageLoader.source)
+               // pageLoader.item.forceActiveFocus();
 
-            pageLoader.forceActiveFocus()
+//                if(currentScreen==="Screen_1.qml")
+//                    uiOn=true
+//                else
+//                    uiOn=false
+                // contentItem=item.screen_root
+                break;
+            case Component.Loading:
+                console.log("loading page from network")
+                break;
+            case Component.Error:
+                console.log("Command to change to:" + source + " failed!")
+                manager.currentScreen="Screen_x.qml"
+                break;
+            default:
+                logger.logSkinMessage("Unhandled loader state. please fix asap::State::"+Component.status)
+                break;
+            }
         }
 
         onActiveFocusChanged: {
             if(activeFocus){
-
                 isActive=true
                 console.log("Pageloader gained active focus");
                 item.forceActiveFocus()
@@ -487,27 +497,6 @@ Item {
         id:appStyle
     }
 
-    SequentialAnimation{
-        id:loadin
-
-        PropertyAnimation{
-            id:fadeout
-            target:pageLoader
-            properties: "opacity"; to: "0"; duration: 5000
-
-        }
-        PropertyAnimation{
-            id: fadein
-            target:pageLoader
-            properties: "opacity"; to: "1"; duration: 5000
-        }
-
-    }
-
-    //-----------------------------shader related---------------------------//
-
-
-    //floorplans
     MouseArea{
         id:mst
         anchors.fill: parent

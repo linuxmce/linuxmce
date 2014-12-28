@@ -1,38 +1,121 @@
-import QtQuick 2.1
+import QtQuick 2.3
 
 Item {
-    property string screenName:"lorem ipsum foo"
-    property string screenDescription:"basic description"
-    property bool isActive:false
-    property Item focusTarget:undefined
+    id:screen_root
     focus:true
+    opacity: 0
 
-    onFocusTargetChanged: {
-        if(focusTarget && !focusTarget.activeFocus){
-            console.log("focus target updated, activating.")
-            focusTarget.forceActiveFocus()
+    Component.onCompleted: {
+        console.log("screen opening")
+        forceActiveFocus()
+        state="opening"
+        screenOpening()
+    }
+    Behavior on opacity {
+        PropertyAnimation{
+            duration: 300
         }
+    }
+
+    onScreenOpening: {
+       // raiseNavigation(manager.currentScreen==="Screen_1.qml" ? true :keepHeader )
+        if(keepHeader){
+            setNavigation(navigation)
+        }
+    }
+
+    onOpacityChanged: {
+        if(opacity===0 &&state==="closing"){
+            state="closed"
+            readyToClose()
+        }
+    }
+
+    onStateChanged: {
+        if(state==="closed"){
+            console.log("screen closed.")
+
+
+        } else if(state==="closing"){
+
+        }
+    }
+
+    function setNavigation(navFile){
+       // nav_row.navSource=navFile
+    }
+
+    property string screen:"screenum ipsum"
+    property string description:"opsum lumpsum"
+    property string navigation:"ScenarioComponent.qml"
+    property bool keepHeader:true
+    property bool keepFooter:false;
+    property bool noForce:false
+    property Item focusTarget:undefined
+    signal readyToClose()
+    signal screenClosing()
+    signal screenOpening()
+
+    onActiveFocusChanged: {
+        if(activeFocus)
+            focusTarget.forceActiveFocus()
+    }
+
+    onReadyToClose: {
+        pageLoader.loadNext();
     }
 
     anchors{
         top:pageLoader.top
         left:pageLoader.left
         right:pageLoader.right
-        bottom: pageLoader.bottom
+        bottom:pageLoader.bottom
     }
-    onActiveFocusChanged: if(activeFocus && !focusTarget.activeFocus){
-                              uiOn=false
-                              isActive=true
-                              if(focusTarget){
-                                  console.log("using focus target")
-                                  focusTarget.forceActiveFocus()
-                              } else if(children.length!==0 ){
-                                  console.log("activating first child object for "+screenName)
-                                  children[0].forceActiveFocus()
-                              }
 
+    states: [
+        State {
+            name: "opening"
+            PropertyChanges {
+                target: screen_root
+                opacity:1
+            }
 
-                          }
+        },
+        State {
+            name: "opened"
+            PropertyChanges {
+                target: screen_root
+                opacity:1
+            }
+            StateChangeScript{
+                script: {
+                    uiOn=false
+                    if(focusTarget)
+                        focusTarget.forceActiveFocus()
+                }
+            }
+        },
+        State {
+            name: "closing"
+            PropertyChanges {
+                target: screen_root
+                opacity:0
+            }
+
+        },
+        State {
+            name: "closed"
+
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+            PropertyAnimation{
+                duration: 500
+            }
+        }
+    ]
 }
-
-
