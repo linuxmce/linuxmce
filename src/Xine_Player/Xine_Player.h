@@ -583,6 +583,11 @@ public:
 	pair<int, string> ExtractComputerAndDeviceFromRemoteDVD(string sURL, bool &bResult);
 	bool IsRemoteDVD(string sURL);
         
+
+	bool IsLocalBD(string sURL);
+	bool MountLocalBD(string sURL);
+	bool UnmountLocalBD(string sURL);
+
         void SendMessageToOrbiter(string sMessage);
 	
 private:

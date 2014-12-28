@@ -294,6 +294,7 @@ void Xine_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 	else	
 	{
 		UnmountRemoteDVD();
+		UnmountLocalBD(sMediaURL);
 		EVENT_Playback_Completed(sMediaURL,iStreamID,true);  // true = there was an error, don't keep repeating
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Xine_Player::CMD_Play_Media() stream is NULL, aborting - init failure?");
 		return;
@@ -337,6 +338,10 @@ void Xine_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 	{
 		MountRemoteDVD(sMediaURL);
 	}
+	else if (IsLocalBD(sMediaURL))
+	{
+		MountLocalBD(sMediaURL);
+	}
 
 	if (pStream->OpenMedia( sMediaURL, sMediaInfo,  sMediaPosition))
 	{
@@ -358,6 +363,7 @@ void Xine_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Xine_Player::CMD_Play_Media() failed to play %s without position info",sMediaURL.c_str());
 				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Xine_Player::EVENT_Playback_Completed(streamID=%i)", iStreamID);
 				UnmountRemoteDVD();
+				UnmountLocalBD(sMediaURL);
 				EVENT_Playback_Completed(sMediaURL,iStreamID,true);  // true = there was an error, don't keep repeating
 			}
 		}
@@ -365,6 +371,7 @@ void Xine_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPo
 	else
 	{
 		UnmountRemoteDVD();
+		UnmountLocalBD(sMediaURL);
 		EVENT_Playback_Completed(sMediaURL,iStreamID,true);  // true = there was an error, don't keep repeating
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Xine_Player::CMD_Play_Media() Failed to open media");
 	}
@@ -1478,8 +1485,43 @@ void Xine_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMe
 	}
 }
 
+bool Xine_Player::IsLocalBD(string sURL) {
+	// TODO: Add .BD extension or whatever extension lmce things BD disks are in file format
+	return StringUtils::StartsWith(sURL,"bluray:",true);
+}
+
+bool Xine_Player::MountLocalBD(string sURL) {
+	// for simplicity (for now) we'll assume a single BD drive is possible
+	string sDrive = sURL.substr(10);
+	string sMount = FileUtils::ExcludeTrailingSlash("/tmp" + sDrive);
+
+	if (FileUtils::DirExists(sMount)) {
+		// unmount
+		string sUmountCommand = "umount " + sMount;
+		system(sUmountCommand.c_str());
+		usleep(100);
+	}
+
+	FileUtils::MakeDir(sMount);
+	// mount
+	string sMountCommand = "mount " + sDrive + " " + sMount;
+	system(sMountCommand.c_str());
+}
+
+bool Xine_Player::UnmountLocalBD(string sURL) {
+	string sDrive = sURL.substr(10);
+	string sMount = FileUtils::ExcludeTrailingSlash("/tmp" + sDrive);
+
+	if (FileUtils::DirExists(sMount)) {
+		// unmount
+		string sUmountCommand = "umount " + sMount;
+		system(sUmountCommand.c_str());
+	}
+}
+
 // sURL format is:
 // dvd:///mnt/optical/computerID_device
+// bluray:///mnt/optical/computerID_device
 
 // where computerID is int, for core - 1, or the computer ID of M/D
 // device is from /dev/device on serving machine
@@ -1541,10 +1583,12 @@ int Xine_Player::InvokeRemoteDVDHelper(int iComputerID, string sDevice, string s
 // extracts computerID and device name from URL, sets bResult to true if succeeds, false otherwise
 pair<int, string> Xine_Player::ExtractComputerAndDeviceFromRemoteDVD(string sURL, bool &bResult) {
 	const char prefix[] = "dvd:///mnt/optical/";
+	const char bd_prefix[] = "bluray:///mnt/optical/";
+
 	bResult = false;
 	pair<int, string> pResult = make_pair(-1, "");
 	
-	if ( !StringUtils::StartsWith(sURL, prefix) )
+	if ( !StringUtils::StartsWith(sURL, prefix) && !StringUtils::StartsWith(sURL, bd_prefix) )
 		return pResult;
 	
 	sURL.erase(0, sizeof(prefix)-1);
