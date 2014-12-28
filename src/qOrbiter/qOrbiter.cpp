@@ -1170,10 +1170,13 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
 void qOrbiter::CMD_Bind_Icon(string sPK_DesignObj,string sType,bool bChild,string &sCMD_Result,Message *pMessage)
 //<-dceag-c254-e->
 {
+
     cout << "Need to implement command #254 - Bind Icon" << endl;
     cout << "Parm #3 - PK_DesignObj=" << sPK_DesignObj << endl;
     cout << "Parm #14 - Type=" << sType << endl;
     cout << "Parm #104 - Child=" << bChild << endl;
+    qWarning() << "Bind icon, item #" << sPK_DesignObj.c_str();
+    qWarning() << "Bind icon, type: " << sType.c_str();
 }
 
 //<-dceag-c258-b->
@@ -1769,6 +1772,11 @@ void qOrbiter::CMD_Assisted_Make_Call(int iPK_Users,string sPhoneExtension,strin
     cout << "Parm #83 - PhoneExtension=" << sPhoneExtension << endl;
     cout << "Parm #184 - PK_Device_From=" << sPK_Device_From << endl;
     cout << "Parm #263 - PK_Device_To=" << iPK_Device_To << endl;
+}
+
+void qOrbiter::getHouseState()
+{
+
 }
 
 bool DCE::qOrbiter::initDceVars(){

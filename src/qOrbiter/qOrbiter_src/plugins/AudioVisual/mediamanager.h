@@ -413,10 +413,10 @@ public slots:
     bool getMediaPlaying() {return mediaPlaying;}
 
     void setFileReference(QString f){
-
+qDebug() << "Updating file url.";
         fileReference = f;
         pluginUrl = fileReference;
-#if defined(ANDROID) || defined(Q_OS_IOS)
+#if defined(ANDROID) || defined(Q_OS_IOS) || defined(QT5)
         emit pluginUrlUpdated();
         connectInfoSocket();
         startTimeCodeServer();

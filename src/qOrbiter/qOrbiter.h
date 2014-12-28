@@ -1750,6 +1750,8 @@ signals:
 
 public slots:
 
+    void getHouseState(); /*! Used to update user status, weather, housemode, voicemails */
+
     void setGridPause(bool g){ gridPaused =g; emit gridPauseChanged(gridPaused); if(!gridPaused){populateAdditionalMedia();} qDebug() << "Grid is paused ::" << gridPaused; }
     bool getGridPause(){ return gridPaused;}
 

@@ -359,7 +359,6 @@ QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
 
         QThread dceThread;
 
-
         qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
         qmlRegisterType<MediaTypesHelper>("org.linuxmce.enums",1,0,"MediaTypes");
         qmlRegisterType<SubTypesHelper>("org.linuxmce.enums",1,0,"MediaSubtypes");
@@ -369,6 +368,7 @@ QCoreApplication::setApplicationName("LinuxMCE QOrbiter");
         qmlRegisterType<DataGrids>("org.linuxmce.grids", 1,0, "DataGrids");
         qmlRegisterType<UtilityCommands>("org.linuxmce.enums", 1,0, "UtilityCommands");
         qmlRegisterType<HouseModesHelper>("org.linuxmce.enums", 1,0, "HouseModes");
+        qmlRegisterType<UserModesHelper>("org.linuxmce.enums",1,0,"HouseModes");
         qmlRegisterType<RoomTypeHelper>("org.linuxmce.enums", 1,0, "RoomTypes");
         qmlRegisterType<ScreenList>("org.linuxmce.screens", 1,0, "Screens");
         qmlRegisterType<GenericFlatListModel>();

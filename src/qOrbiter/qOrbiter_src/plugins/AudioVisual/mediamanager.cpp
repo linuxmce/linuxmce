@@ -128,7 +128,7 @@ void MediaManager::initializeConnections()
     /*From Dce MediaPlayer*/
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(QT5)
 
-#if defined (QT4) && !defined(Q_OS_ANDROID)
+    #if defined (QT4) && !defined(Q_OS_ANDROID)
     QObject::connect(mediaPlayer,SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setMediaUrl(QString)));
     QObject::connect(mediaPlayer,SIGNAL(startPlayback()), mediaObject, SLOT(play()));
     QObject::connect(mediaPlayer, SIGNAL(startPlayback()), videoSurface, SLOT(showFullScreen()));
@@ -147,17 +147,17 @@ void MediaManager::initializeConnections()
     QObject::connect(audioSink, SIGNAL(volumeChanged(qreal)), this, SLOT(setDisplayVolume(qreal)));
     QObject::connect(audioSink, SIGNAL(mutedChanged(bool)), this, SLOT(setMuted(bool)));
     mediaObject->setTickInterval(quint32(1000));
-#elif QT5
+    #elif QT5
     QObject::connect(this, SIGNAL(incomingTick(quint64)), this, SLOT(processTimeCode(qint64)));
-#endif
-#elif  ( defined ANDROID || defined(Q_OS_IOS) ) && defined(QT5)
+    #endif
+#elif  ( defined ANDROID || defined(Q_OS_IOS) ) && defined(QT5) || defined(QT5)
     QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString))); //effectively play for android.
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopPluginMedia()));
     QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), this, SLOT(setPaused()));
     QObject::connect(mediaPlayer, SIGNAL(pluginVolumeDown()), this, SIGNAL(androidVolumeDown()));
     QObject::connect(mediaPlayer, SIGNAL(pluginVolumeUp()), this, SIGNAL(androidVolumeUp()));
 
-    QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString)));
+   // QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString)));
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopAndroidMedia()));
     QObject::connect(mediaPlayer, SIGNAL(pluginVolumeDown()), this, SIGNAL(pluginVolumeDown()));
     QObject::connect(mediaPlayer, SIGNAL(pluginVolumeUp()), this, SIGNAL(pluginVolumeUp()));
