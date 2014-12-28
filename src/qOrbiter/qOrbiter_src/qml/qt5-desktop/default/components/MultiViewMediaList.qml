@@ -80,27 +80,6 @@ Item{
             activeView.positionViewAtIndex(item, ListView.Beginning);
         }
     }
-//    ListView{
-//        id:media_list
-//        focus:true
-//        anchors{
-//            left:parent.left
-//            right:parent.right
-//            bottom:parent.bottom
-//            top:parent.top
-//            margins: scaleX(2)
-//        }
-//        delegate:currentDelegate
-//        visible: current_view_type===2
-//        spacing:scaleY(2)
-//        clip:true
-//        model:visible ? manager.getDataGridModel("MediaFile", 63) : undefined
-//        onVisibleChanged: {
-//            if(visible){
-//                activeView = media_list
-//            }
-//        }
-//    }
 
     GridView{
         id:media_grid
@@ -194,26 +173,14 @@ Item{
         }
     }
 
-//    PathView{
-//        id:media_path
-//        focus:true
-//        anchors.fill: parent
-//        model:visible ? manager.getDataGridModel("MediaFile", 63) : undefined
-//        visible:current_view_type===3
-//        onVisibleChanged: {
-//            if(visible){
-//                activeView = media_path
-//            }
-//        }
-//    }
     states: [
         State {
             name: "audio"
             //  when:manager.q_mediaType == Mediatypes.STORED_AUDIO
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleX(25)
-                currentCellWidth:scaleX(25)
+                currentCellHeight:manager.isProfile ? scaleX(18) : scaleX(14)
+                currentCellWidth:currentCellHeight
             }
 
         },
@@ -230,21 +197,12 @@ Item{
             }
         },
         State {
-            name: "default"
-            when:manager.q_mediaType != Mediatypes.STORED_VIDEO && manager.q_mediaType != Mediatypes.STORED_AUDIO
-            PropertyChanges {
-                target: multi_view_list
-                currentCellHeight: scaleY(24)
-                currentCellWidth:scaleX(19)
-            }
-        },
-        State {
             name: "video-default"
             extend:"video"
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleY(24)
-                currentCellWidth:scaleX(19)
+                currentCellHeight: scaleY(23)
+                currentCellWidth:scaleX(17)
             }
         },
         State {
@@ -253,19 +211,25 @@ Item{
             extend:"video"
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleY(20)
-                currentCellWidth:scaleX(19)
+                currentCellHeight: scaleY(24)
+                currentCellWidth:scaleX(25)
             }
         },
         State {
             name: "movies"
-            when: manager.q_subType==MediaSubtypes.MOVIES && manager.q_mediaType==Mediatypes.STORED_VIDEO
+            when: manager.q_subType==MediaSubtypes.MOVIES && manager.q_mediaType==MediaTypes.LMCE_StoredVideo
             extend:"video"
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: currentCellWidth*hdPosterRatio
-                currentCellWidth:scaleX(20)
+                currentCellWidth:manager.b_orientation ? scaleX(10) : scaleX(14.25)
             }
+        },
+        State {
+            name: "music-video"
+            when: manager.q_subType==MediaSubtypes.MUSICVIDEOS && manager.q_mediaType==MediaTypes.LMCE_StoredVideo
+            extend:"tv"
+
         },
         State {
             name: "seasons"
@@ -283,8 +247,19 @@ Item{
             extend:"tv"
             PropertyChanges {
                 target: multi_view_list
-                currentCellHeight: scaleY(20)
-                currentCellWidth:scaleX(19)
+                currentCellHeight: scaleY(33)
+                currentCellWidth:scaleX(33)
+            }
+        }
+        ,
+        State {
+            name: "radio"
+            when:manager.q_mediaType == MediaTypes.NP_OTARadio
+            extend:"audio"
+            PropertyChanges {
+                target: multi_view_list
+                currentCellHeight: scaleY(33)
+                currentCellWidth:scaleX(33)
             }
         }
     ]

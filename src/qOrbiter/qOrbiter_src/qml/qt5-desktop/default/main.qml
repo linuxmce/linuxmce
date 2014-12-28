@@ -31,7 +31,7 @@ Item {
     property string dynamic_width
     property bool uiOn:true
     property bool screenSaverOn:false
-    property int screensaverTimer:15000 //manager.screenSaverTimeout*1000
+    property int screensaverTimer:manager.screenSaverTimeout*1000
 
 
     function resetUiTimeout(){
@@ -397,7 +397,7 @@ Item {
 
         function startChange(){
 
-            if(pageLoader.item || pageLoader.item.screen){
+            if(pageLoader.item && pageLoader.item.screen){
                 console.log("pageloader::closing page "+ pageLoader.item.screen)
                 pageLoader.item.state="closing"
             } else{
