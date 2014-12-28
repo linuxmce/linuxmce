@@ -3,7 +3,7 @@ import "../components"
 
 StyledScreen {
     Component.onCompleted: failTimeout.start()
-
+    screen:"error screen"
     Item{
         width: parent.width *.85
         height: parent.height *.65
@@ -40,6 +40,7 @@ StyledScreen {
                 anchors.centerIn: parent
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 width: content.width
+                color:"white"
             }
         }
 
@@ -48,7 +49,7 @@ StyledScreen {
     Timer{
         id:failTimeout
         interval: 5000
-        onTriggered: manager.goBacktoQScreen()
+        onTriggered: manager.gotoQScreen("Screen_1.qml")
     }
 
 }
