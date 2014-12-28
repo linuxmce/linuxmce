@@ -1487,21 +1487,27 @@ void Xine_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMe
 
 bool Xine_Player::IsLocalBD(string sURL) {
 	// TODO: Add .BD extension or whatever extension lmce things BD disks are in file format
-	return StringUtils::StartsWith(sURL,"bluray:",true);
+	bool bResult = StringUtils::StartsWith(sURL,"bluray:",true);
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Xine_Player::IsLocalBD() - %s (%s)", bResult ? "YES" : "NO", sURL.c_str() );
+	return bResult;
 }
 
 bool Xine_Player::MountLocalBD(string sURL) {
 	// for simplicity (for now) we'll assume a single BD drive is possible
-	string sDrive = sURL.substr(10);
+	string sDrive = sURL.substr(9);
 	string sMount = FileUtils::ExcludeTrailingSlash("/tmp" + sDrive);
 
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Xine_Player::MountLocalBD(1) - Drive: %s, Mount: %s (%s)", sDrive.c_str(), sMount.c_str(), sURL.c_str() );
 	if (FileUtils::DirExists(sMount)) {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Xine_Player::MountLocalBD(2) - Drive: %s, Mount: %s (%s)", sDrive.c_str(), sMount.c_str(), sURL.c_str() );
 		// unmount
 		string sUmountCommand = "umount " + sMount;
 		system(sUmountCommand.c_str());
-		usleep(100);
+		sUmountCommand = "umount " + sDrive;
+		system(sUmountCommand.c_str());
 	}
 
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Xine_Player::MountLocalBD(3) - Drive: %s, Mount: %s (%s)", sDrive.c_str(), sMount.c_str(), sURL.c_str() );
 	FileUtils::MakeDir(sMount);
 	// mount
 	string sMountCommand = "mount " + sDrive + " " + sMount;
@@ -1509,12 +1515,16 @@ bool Xine_Player::MountLocalBD(string sURL) {
 }
 
 bool Xine_Player::UnmountLocalBD(string sURL) {
-	string sDrive = sURL.substr(10);
+	string sDrive = sURL.substr(9);
 	string sMount = FileUtils::ExcludeTrailingSlash("/tmp" + sDrive);
 
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Xine_Player::UnmountLocalBD(1) - Drive: %s, Mount: %s (%s)", sDrive.c_str(), sMount.c_str(), sURL.c_str() );
 	if (FileUtils::DirExists(sMount)) {
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Xine_Player::UnmountLocalBD(2) - Drive: %s, Mount: %s (%s)", sDrive.c_str(), sMount.c_str(), sURL.c_str() );
 		// unmount
 		string sUmountCommand = "umount " + sMount;
+		system(sUmountCommand.c_str());
+		sUmountCommand = "umount " + sDrive;
 		system(sUmountCommand.c_str());
 	}
 }
