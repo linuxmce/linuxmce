@@ -430,6 +430,8 @@ void Xine_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sC
 	
 	pStream->CloseMedia();
 	
+	UnmountLocalBD(pStream->m_sCurrentFile);
+
 	ptrFactory->CloseStreamAV( pStream->m_iStreamID );
 	//ptrFactory->HideStreamWindows( 1 );
 }
