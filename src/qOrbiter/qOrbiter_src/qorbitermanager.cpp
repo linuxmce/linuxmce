@@ -424,7 +424,7 @@ void qorbiterManager::gotoQScreen(QString s){
         }
 
     } else {
-        setDceResponse("screenchange() FAILED");
+        setDceResponse("screenchange() FAILED, sending request screen");
 
     }
 }
@@ -444,7 +444,6 @@ void qorbiterManager::goBacktoQScreen()
         QObject *item = qorbiterUIwin->rootObject();
         setDceResponse("About to call screenchange() for " + gotoScreenList->last());
         if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
-
             setDceResponse("Done call to backwards screenchange()");
             currentScreen=gotoScreenList->last();
             screenChange(currentScreen);
@@ -599,12 +598,8 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 void qorbiterManager::initiateRestart()
 {
     emit restartOrbiter();
+    screenChange("Screen_1.qml");
 
-#ifdef Q_OS_ANDROID
-    screenChange("Screen_1.qml");
-#else
-    screenChange("Screen_1.qml");
-#endif
 
 }
 

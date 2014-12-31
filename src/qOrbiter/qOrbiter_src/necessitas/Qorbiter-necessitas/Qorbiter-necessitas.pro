@@ -188,8 +188,8 @@ SOURCES += \
         ../../datamodels/avcodegrid.cpp \
         ../../contextobjects/floorplandevice.cpp \
         ../../contextobjects/screenshotattributes.cpp \
-        ../../contextobjects/linuxmcedata.cpp \
-        ../../contextobjects/mediatypehelper.cpp \
+        ../../defineObjects/linuxmcedata.cpp \
+        ../../defineObjects/mediatypehelper.cpp \
         ../../orbiterwindow.cpp \
         ../../contextobjects/screensaverclass.cpp \
         ../../datamodels/skinloader.cpp \
@@ -213,7 +213,7 @@ SOURCES += \
         ../../datamodels/genericmodelitem.cpp \
         ../../datamodels/ActiveMediaStreams.cpp \
         ../../datamodels/listitembase.cpp \
-../../datagrids.cpp
+../../defineObjects/datagrids.cpp
 
 
 # Please do not modify the following two lines. Required for deployment.
@@ -286,8 +286,8 @@ HEADERS += \
         ../../datamodels/floorplanimageitem.h \
         ../../contextobjects/floorplandevice.h \
         ../../contextobjects/screenshotattributes.h \
-        ../../contextobjects/linuxmcedata.h \
-        ../../contextobjects/mediatypehelper.h \
+        ../../defineObjects/linuxmcedata.h \
+        ../../defineObjects/mediatypehelper.h \
         ../../orbiterwindow.h \
         ../../contextobjects/screensaverclass.h \
         ../../datamodels/skinloader.h  \
@@ -314,7 +314,7 @@ HEADERS += \
     ../../datamodels/MediaFilter.h \
     ../../datamodels/DataGridHandler.h \
     ../../datamodels/listitembase.h \
-        ../../datagrids.h
+        ../../defineObjects/datagrids.h
 
 
 OTHER_FILES += ../../Readme.txt \

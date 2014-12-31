@@ -690,6 +690,7 @@ signals:
     void userChanged(int user);
     void locationChanged(int cRoom, int cEA);
     void screenChange(QString s);
+    void screenRequest(QString s);
     void localConfigReady(bool b);
     void orbiterConfigReady(bool b);
     void deviceValid(bool b);
@@ -995,6 +996,8 @@ public slots:
      *\todo Look into the addition of possible designer set options / custom actions
      */
     void gotoQScreen(QString ) ;
+
+
 
 
     void goBacktoQScreen();
