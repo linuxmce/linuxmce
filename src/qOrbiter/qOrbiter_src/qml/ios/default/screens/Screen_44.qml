@@ -79,6 +79,16 @@ StyledScreen {
             state: "large-fixed"
             buttonText: "Ping\nTest"
         }     
+        StyledButton{
+            id:mediaPlayerState
+            state: "large-fixed"
+            buttonText: dcePlayer.mediaPlayerConnected ? "Media Player\nConnected":"Enable\nMedia Player"
+            onActivated: {
+                if(!dcePlayer.mediaPlayerConnected){
+                    dcePlayer.restart()
+                }
+            }
+        }
 
     }
 }

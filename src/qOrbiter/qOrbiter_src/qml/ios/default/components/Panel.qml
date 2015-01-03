@@ -50,9 +50,9 @@ Item {
         text:useHeader ? headerTitle : ""
         height: panelHeader.height
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        font.weight: Font.DemiBold
-        isBold: true
-        font.pixelSize:scaleY(parent.height*.010)
+        font.weight: Font.Light
+        isBold: false
+        font.pixelSize:headerFontSize
         color:skinStyle.listItemActiveBgColor
     }
 

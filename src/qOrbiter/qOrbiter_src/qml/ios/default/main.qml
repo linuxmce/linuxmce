@@ -15,7 +15,6 @@ Item {
         }
     }
 
-
     property alias skinStyle:style
     property int screensaverTimer:manager.screenSaverTimeout*1000
     property bool uiOn:true
@@ -267,50 +266,55 @@ Item {
             }
         }
     }
-    QmlPictureFrame{
-        id:glscreenSaver
+
+
+QmlPictureFrame{
+    anchors.fill: parent
+}
+
+//    DceScreenSaver{
+//        id:glScreenSaver
+//        anchors{
+//            top:qml_root.top
+//            bottom:qml_root.bottom
+//            left: qml_root.left
+//            right: qml_root.right
+//        }
+//        enableDebug: true
+//        interval:60*1000
+//        useAnimation: true
+//        onDebugInfoChanged: console.log(debugInfo)
+//        active:manager.m_ipAddress==="192.168.80.1"
+//        requestUrl:manager.m_ipAddress
+//        Component.onCompleted: {
+//            glScreenSaver.setImageList(manager.screensaverImages)
+//            console.log("Orbiter Consume Screensaver images")
+//            console.log("Orbiter counts " + glScreenSaver.pictureCount)
+//        }
+
+//        Connections{
+//            target:manager
+//            onScreenSaverImagesReady:{
+//                glScreenSaver.setImageList(manager.screensaverImages)
+//                console.log("Orbiter Consume Screensaver images")
+//                console.log("Orbiter counts " + glScreenSaver.pictureCount)
+//            }
+//        }
+
+//        MouseArea{
+//            anchors.fill: parent
+//            onClicked: {
+//                if(!uiOn){
+//                    console.log("screensaver revive")
+//                    uiOn=true
+//                }
+//            }
+//        }
+
+//    }
+    MediaInterface{
+        id:dcePlayer
     }
-
-    //    DceScreenSaver{
-    //        id:glScreenSaver
-    //        anchors{
-    //            top:qml_root.top
-    //            bottom:qml_root.bottom
-    //            left: qml_root.left
-    //            right: qml_root.right
-    //        }
-    //        enableDebug: true
-    //        interval:60*1000
-    //        useAnimation: true
-    //        onDebugInfoChanged: console.log(debugInfo)
-    //        active:manager.m_ipAddress==="192.168.80.1"
-    //        requestUrl:manager.m_ipAddress
-    //        Component.onCompleted: {
-    //            glScreenSaver.setImageList(manager.screensaverImages)
-    //            console.log("Orbiter Consume Screensaver images")
-    //            console.log("Orbiter counts " + glScreenSaver.pictureCount)
-    //        }
-
-    //        Connections{
-    //            target:manager
-    //            onScreenSaverImagesReady:{
-    //                glScreenSaver.setImageList(manager.screensaverImages)
-    //                console.log("Orbiter Consume Screensaver images")
-    //                console.log("Orbiter counts " + glScreenSaver.pictureCount)
-    //            }
-    //        }
-
-    //        MouseArea{
-    //            anchors.fill: parent
-    //            onClicked: {
-    //                if(!uiOn){
-    //                    console.log("screensaver revive")
-    //                    uiOn=true
-    //                }
-    //            }
-    //        }
-
-    //    }
     function screenchange(screenname ){
 
         if(pageLoader.currentScreen!=screenname)
@@ -420,9 +424,7 @@ Item {
                               manager.currentScreen="Screen_X.qml"
                           }
     }
-    MediaInterface{
 
-    }
 
     MediaPopup{
         id:media_notification
@@ -454,12 +456,9 @@ Item {
         appBackground.wSource = wide
     }
 
-
-
-
     FontLoader{
         id:appFont
-        name:"Roboto"
+        source:"../../skins-common/fonts/Sawasdee.ttf"
     }
 
     //=================Components==================================================//
