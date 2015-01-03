@@ -267,27 +267,42 @@ Item {
 
     DceScreenSaver{
         id:glScreenSaver
-        height: manager.appHeight
-        width: manager.appWidth
-        focus:true
-        active: true
-        useAnimation:true
-        zoomEnabled: false
-
-        interval:30000
-        enableDebug:false
-        anchors.centerIn: parent
+        anchors{
+            top:qmlroot.top
+            bottom:qmlroot.bottom
+            left: qmlroot.left
+            right: qmlroot.right
+        }
+        enableDebug: true
+        interval:60*1000
+        useAnimation: true
+        onDebugInfoChanged: console.log(debugInfo)
+        active:true //manager.m_ipAddress==="192.168.80.1"
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)
+            console.log("Orbiter Consume Screensaver images")
+            console.log("Orbiter counts " + glScreenSaver.pictureCount)
         }
 
-
-        MouseArea{
-            anchors.fill: parent
-            hoverEnabled: true
-            onPressed:swapFocus()
+        Connections{
+            target:manager
+            onScreenSaverImagesReady:{
+                glScreenSaver.setImageList(manager.screensaverImages)
+                console.log("Orbiter Consume Screensaver images")
+                console.log("Orbiter counts " + glScreenSaver.pictureCount)
+            }
         }
+
+//        MouseArea{
+//            anchors.fill: parent
+//            onClicked: {
+//                if(!uiOn){
+//                    console.log("screensaver revive")
+//                    uiOn=true
+//                }
+//            }
+//        }
 
     }
 

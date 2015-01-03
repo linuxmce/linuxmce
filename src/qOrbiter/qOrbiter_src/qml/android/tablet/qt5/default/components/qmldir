@@ -17,6 +17,7 @@ FloorplanDisplay             FloorplanDisplay.qml                        #no com
 FloorplanNav             FloorplanNav.qml                        #no comment
 FloorPlanOptions             FloorPlanOptions.qml                        #no comment
 FpSprite             FpSprite.qml                        #no comment
+GamePlaybackBase             GamePlaybackBase.qml                        #no comment
 GenericAttributeSelector             GenericAttributeSelector.qml                        #no comment
 GenericContainer             GenericContainer.qml                        #no comment
 GenericFileDetails             GenericFileDetails.qml                        #no comment

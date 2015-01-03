@@ -2,7 +2,7 @@ import QtQuick 2.2
 import DceScreenSaver 1.0
 import AudioVisual 1.0
 
-import "components"
+import "../../../../skins-common/qt5/default/components"
 //Tablet - Smokey
 
 Item {
@@ -292,7 +292,7 @@ Item {
         enableDebug: true
         interval:60*1000
         useAnimation: true
-        onDebugInfoChanged: console.log(debugInfo)
+        //onDebugInfoChanged: console.log(debugInfo)
         active:manager.m_ipAddress==="192.168.80.1"
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
@@ -339,7 +339,7 @@ Item {
         id:pageLoader
         objectName: "loadbot"
         focus: true
-        source: "screens/Screen_1.qml"
+        source: style.commonQmlPath+"screens/Screen_1.qml"
         // visible:qml_root.uiOn
         property string nextScreen:"Screen_1.qml"
         property string currentScreen:""
@@ -396,8 +396,8 @@ Item {
                 return
             }
 
-            console.log("pageloader::loading next screen screens/"+nextScreen)
-            pageLoader.source="screens/"+nextScreen
+            console.log("pageloader::loading next screen::\n"+style.commonQmlPath+"screens/"+nextScreen)
+            pageLoader.source=style.commonQmlPath+"screens/"+nextScreen
         }
 
         opacity: uiOn ? 1 : 0
@@ -496,7 +496,7 @@ Item {
         if(componentLoader.status != Component.Ready)
         {
             console.log("finishing network load")
-            componentLoader.source = "components/"+comp
+            componentLoader.source = style.commonQmlPath+"components/"+comp
             console.log("item " + comp + " loaded.")
         }
         else

@@ -8,7 +8,7 @@
  */
 
 import QtQuick 1.1
-
+import DceScreenSaver 1.0
 import "../../skins-common/lib/components"
 import "../../skins-common/lib/handlers"
 import "components"
@@ -28,6 +28,48 @@ Item {
     property string dynamic_width
     property bool uiOn:true
     property int screensaverTimer:15000 //manager.screenSaverTimeout*1000
+
+    DceScreenSaver{
+        id:glScreenSaver
+        height: manager.appHeight
+        width: manager.appWidth
+        x:dcenowplaying.b_mediaPlaying ? parent.x + width :parent.x
+        y:parent.y
+        interval:30000
+
+        Behavior on x{
+            PropertyAnimation{
+                duration: 350
+                easing.type: appStyle.animationEasing
+            }
+        }
+
+        useAnimation: true
+        onDebugInfoChanged: console.log(debugInfo)
+        active:true//manager.m_ipAddress==="192.168.80.1"
+        requestUrl:manager.m_ipAddress
+
+        Component.onCompleted: {
+            glScreenSaver.setImageList(manager.screensaverImages)
+        }
+
+        Connections{
+            target:manager
+            onScreenSaverImagesReady:{
+                glScreenSaver.setImageList(manager.screensaverImages)
+                console.log("Orbiter Consume Screensaver images")
+                console.log("Orbiter counts " + glScreenSaver.pictureCount)
+            }
+        }
+
+
+//        MouseArea{
+//            anchors.fill: parent
+//            hoverEnabled: true
+//            onPressed:if(glScreenSaver.activeFocus) hideUI()
+//        }
+
+    }
 
     onActiveFocusChanged: {
         pageLoader.forceActiveFocus()
@@ -324,102 +366,6 @@ Item {
     }
 
 
-
-
-
-//    MediaManager{
-//        id:dceplayer
-//        height: 0
-//        width: 0
-//        flipColors: true
-//        focus:true
-//        // onFocusChanged: console.log("DCEPlayer Internal focus::"+focus)
-//        onActiveFocusChanged: {
-//            if(activeFocus){
-//                console.log("Media Player has focus")
-//                //  pageLoader.forceActiveFocus()
-//            }
-//        }
-
-//        Component.onCompleted: {
-//            setWindowSize(manager.appHeight, manager.appWidth);
-//        }
-
-//        Connections{
-//            target:manager
-//            onOrientationChanged:dceplayer.setWindowSize(manager.appHeight, manager.appWidth)
-//            onMediaPlayerIdChanged:{
-//                console.log("initializing media player"+manager.mediaPlayerID)
-//                dceplayer.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-//            }
-//        }
-
-//        onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)
-//        onMediaBufferChanged: console.log("media buffer change:"+mediaBuffer)
-//        onMediaPlayingChanged: console.log("Media Playback status changed locally to "+dceplayer.mediaPlaying)
-//        onVolumeChanged:console.log(volume)
-//        Keys.onVolumeDownPressed: manager.adjustVolume("-1")
-//        Keys.onVolumeUpPressed:  manager.adjustVolume("+1")
-//        Keys.onTabPressed: ftr.forceActiveFocus()
-
-//        Keys.onPressed: {
-
-//            switch(event.key){
-//            case Qt.Key_Back:
-//                manager.changedPlaylistPosition((dcenowplaying.m_iplaylistPosition+1));
-//                break;
-//            case Qt.Key_Forward:
-//                manager.changedPlaylistPosition((dcenowplaying.m_iplaylistPosition+1))
-//                break;
-//            case 16777347: /* Keycode Track forward */
-//                manager.changedPlaylistPosition((dcenowplaying.m_iplaylistPosition+1));
-//                break;
-//            case 16777346: /* Keycode Track Backwards */
-//                manager.changedPlaylistPosition((dcenowplaying.m_iplaylistPosition-1))
-//                break;
-//            case Qt.Key_Plus: /*Plus sign */
-//                manager.adjustVolume(+1)
-//                break;
-//            case Qt.Key_VolumeMute:
-//                manager.mute()
-//                break;
-//            case Qt.Key_M:
-//                manager.mute()
-//                break;
-//            case Qt.Key_Minus: /* Minus Sign */
-//                manager.adjustVolume(-1)
-//                break;
-//            case Qt.Key_T:
-//                showMetaData()
-//                break;
-//            case Qt.Key_Tab:
-//                swapFocus()
-//                break;
-//            case Qt.Key_S:
-//                manager.stopMedia()
-//                break;
-
-//            case Qt.Key_Pause:
-//                manager.pauseMedia()
-//                break;
-//            case Qt.Key_P:
-//                manager.pauseMedia()
-//                break;
-
-//            case Qt.Key_PageUp:
-//                manager.changedPlaylistPosition(mediaplaylist.currentIndex-1)
-//                break;
-
-//            case Qt.Key_PageDown:
-//                manager.changedPlaylistPosition(mediaplaylist.currentIndex+1)
-//                break;
-//            default:
-//                console.log(event.key)
-//                break
-//            }
-//        }
-//    }
-
     Item{
         id:vIndicator
         height: volLevel.paintedHeight
@@ -442,7 +388,7 @@ Item {
             id:volLevel
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-           // text:dceplayer.volume
+           // texyer.volume
             color: "white"
             fontSize: 42
             font.bold: true

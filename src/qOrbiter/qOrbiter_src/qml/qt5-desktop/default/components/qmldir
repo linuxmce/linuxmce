@@ -12,6 +12,7 @@ GradientFiller             GradientFiller.qml                        #no comment
 ListDisplay             ListDisplay.qml                        #no comment
 MediaFilterRow             MediaFilterRow.qml                        #no comment
 MediaFilters             MediaFilters.qml                        #no comment
+MediaInterface             MediaInterface.qml                        #no comment
 MediaListGridDelagate             MediaListGridDelagate.qml                        #no comment
 MediaListProgressBar             MediaListProgressBar.qml                        #no comment
 MediaNavHeader             MediaNavHeader.qml                        #no comment

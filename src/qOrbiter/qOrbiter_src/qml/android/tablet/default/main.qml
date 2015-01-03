@@ -1,6 +1,6 @@
 import QtQuick 1.1
 import DceScreenSaver 1.0
-import AudioVisual 1.0
+
 import "../../../skins-common/lib/handlers"
 import "components"
 //Tablet - Smokey
@@ -408,7 +408,6 @@ Item {
 
     }
     function screenchange(screenname ){
-
         if(pageLoader.currentScreen!=screenname)
             pageLoader.nextScreen = screenname
     }
@@ -462,7 +461,7 @@ Item {
         function startChange(){
 
 
-            if(!pageLoader.item || pageLoader.item.scree){
+            if(!pageLoader.item || pageLoader.item.screen){
                 console.log("pageloader::closing page "+ manager.currentScreen)
                 pageLoader.item.state="closing"
             } else{

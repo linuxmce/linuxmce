@@ -1,6 +1,5 @@
 import QtQuick 2.3
-
-import "components"
+import "../../skins-common/qt5/default/components"
 //Tablet - Smokey
 
 Item {
@@ -331,7 +330,7 @@ QmlPictureFrame{
         id:pageLoader
         objectName: "loadbot"
         focus: true
-        source: "screens/Screen_1.qml"
+        source: style.commonQmlPath+"screens/Screen_1.qml"
         // visible:qml_root.uiOn
         property string nextScreen:"Screen_1.qml"
         property string currentScreen:""
@@ -370,7 +369,7 @@ QmlPictureFrame{
         function startChange(){
 
 
-            if(!pageLoader.item || pageLoader.item.scree){
+            if(!pageLoader.item || pageLoader.item.screen){
                 console.log("pageloader::closing page "+ manager.currentScreen)
                 pageLoader.item.state="closing"
             } else{
@@ -382,14 +381,13 @@ QmlPictureFrame{
 
         function loadNext(){
 
-
             if(nextScreen===""){
                 nextScreen="Screen_1.qml"
                 return
             }
 
-            console.log("pageloader::loading next screen screens/"+nextScreen)
-            pageLoader.source="screens/"+nextScreen
+            console.log("pageloader::loading next screen:: \n"+style.commonQmlPath+"screens/"+nextScreen)
+            pageLoader.source=style.commonQmlPath+"screens/"+nextScreen
         }
 
         opacity: uiOn ? 1 : 0
@@ -487,7 +485,7 @@ QmlPictureFrame{
         if(componentLoader.status != Component.Ready)
         {
             console.log("finishing network load")
-            componentLoader.source = "components/"+comp
+            componentLoader.source = style.commonQmlPath+"components/"+comp
             console.log("item " + comp + " loaded.")
         }
         else

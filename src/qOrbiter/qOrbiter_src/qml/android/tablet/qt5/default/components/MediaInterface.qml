@@ -3,13 +3,22 @@ import QtMultimedia 5.0
 import AudioVisual 1.0
 Item{
     id:mediaPlayerRoot
-    height: manager.appHeight
-    width: manager.appWidth
+    anchors{
+        left:qml_root.left
+        top:nav_row.bottom
+        right:parent.right
+        bottom: info_panel.top
+    }
 
     property bool dceConnected:manager.connectedState
     property bool mediaPlayerConnected:lmceData.connected
     property int mediaPlayerId:manager.mediaPlayerID
     property bool active:lmceData.mediaPlaying
+
+
+    function restart(){
+        lmceData.reInit();
+    }
 
     MediaManager{
         id:lmceData
@@ -25,27 +34,42 @@ Item{
 
         /* TODO Add reconnect handler in cpp and here */
         /* TODO Change android url to streaming url, generic for other devices. */
-        onAndroidUrlUpdated:{
-            console.log("NEW ANDROID URL")
-            if(androidUrl.length > 4){
+        onPluginUrlUpdated:{
+            console.log("New QML media Url ==>"+pluginUrl)
+            if(pluginUrl.length > 4){
                 console.log("URL ok!")
-                qmlPlayer.source = lmceData.androidUrl
+                qmlPlayer.source = lmceData.pluginUrl
             }
             else{
                 console.log("Url Malformed!")
-                console.log("Url::"+androidUrl)
+                console.log("Url::"+pluginUrl)
+
             }
         }
 
-        onAndroidVolumeUp:{
-            console.log("dceplayer::vol up")
-            qmlPlayer.volume= qmlPlayer.volume+1
+        onMutedChanged: {
+            if(qmlPlayer.muted)
+                qmlPlayer.muted=false
+            else
+                qmlPlayer.muted=true
         }
 
-        onAndroidVolumeDown:{
-            console.log("dceplayer::vol down")
-            qmlPlayer.volume= qmlPlayer.volume-1
+        onPluginVolumeUp:{
+            console.log("dceplayer::vol up")
+            if(qmlPlayer.volume < 1.0){
+                qmlPlayer.volume+.10
+            }
+
+
         }
+
+        onPluginVolumeDown:{
+            console.log("dceplayer::vol down")
+            if(qmlPlayer.volume > 0.0){
+                qmlPlayer.volume-.10
+            }
+        }
+
 
 
         onPauseMedia:{
@@ -55,6 +79,7 @@ Item{
             else
                 qmlPlayer.pause()
         }
+
         onUpdatePluginSeek:{
             console.log("dceplayer::seek to"+pos)
             qmlPlayer.seek(pos*1000);
@@ -77,8 +102,8 @@ Item{
             }
             onConnectedStateChanged:{
                 if(manager.connectedState ){
-                    lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-                    dceplayer.reInit();
+                    //lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
+                    dcePlayer.reInit();
                 }
             }
         }
@@ -89,20 +114,36 @@ Item{
         autoPlay: true
         autoLoad: true
 
-        onStopped: lmceData.qmlPlaybackEnded(true)
+        onStopped: {
+            if(duration==position){
+
+                lmceData.qmlPlaybackEnded(false)
+            }
+        }
+
+        onMediaObjectChanged: {
+            console.log(JSON.stringify(metaData, null, "\t"))
+
+        }
+
 
         onDurationChanged: {
-             console.log(qmlPlayer.duration)
-             lmceData.setQmlTotalTime(duration)
+            if(!duration)
+                return;
+
+            console.log("Track duration "+duration)
+            lmceData.setQmlTotalTime(Number(duration))
             //   lmceData.setTotalTime(duration)
         }
         onErrorChanged: {
-            console.log(error)
+            console.log("QML Media player error::"+error)
         }
 
         onPositionChanged: {
+            if(!position)
+                return;
 
-           lmceData.processTimeCode(position);
+            lmceData.processTimeCode(position);
         }
 
         onHasVideoChanged: {
@@ -117,8 +158,7 @@ Item{
 
     VideoOutput{
         id:videoPlane
-        height: manager.appHeight
-        width: manager.appWidth
+        anchors.fill: parent
         source:qmlPlayer
     }
 

@@ -4,7 +4,7 @@ import org.linuxmce.enums 1.0
 import org.linuxmce.screens 1.0
 
 Panel{
-    id:media_playback_base
+    id:game_playback_base
     headerTitle: manager.translateMediaType(manager.i_current_mediaType)
     fillColor: "grey"
     headerFillColor: "black"
@@ -126,7 +126,7 @@ Panel{
         info_panel.state="hidden";      ;
 
         switch(manager.i_current_mediaType){
-        case MediaTypes.LMCE_StoredAudio:
+        case MediaTypes.LMCE_Game_genesis:
             media_playback_base.state="localaudio"
             break;
 
@@ -275,7 +275,7 @@ Panel{
             }
         },
         State {
-            name: "localaudio"
+            name: "genesis"
 
         },
         State{

@@ -24,6 +24,7 @@ QtObject{
     property string skinvariation: "Tablet -Android"
     property string maincolor: "black"
     property bool profile:!manager.isProfile
+    property string commonQmlPath:"../../../../skins-common/qt5/default/"
     //scale function
     function scaleX(x){
         return x/100*manager.appWidth
