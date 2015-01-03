@@ -15,12 +15,12 @@ import "../components"
   */
 StyledScreen{
     onScreenOpening: {
-       // screen_70.playlistSource=manager.getDataGridModel("Playlist", 18)
+       // screen_117.playlistSource=manager.getDataGridModel("Playlist", 18)
     }
 
     keepHeader: false
     MediaPlaybackBase{
-        id:screen_70
+        id:screen_117
         headerTitle: manager.translateMediaType(manager.i_current_mediaType)
     }
 }
