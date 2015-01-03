@@ -558,6 +558,7 @@ signals:
     void updateDceScreenPowerTimeout(int t);
 
     void sendDceCommand(DCE::PreformedCommand cmd);
+    void sendDceCommandResponse(DCE::PreformedCommand cmd, string* p_sResponse);
 
     void skinMessage(QString s);
     void qtMessage(QString s);
@@ -1252,7 +1253,9 @@ public slots:
     void playResume(){ emit simplePlay(); }
     void stopMedia() {/*emit stopPlayback();*/ 
       CMD_MH_Stop_Media endMedia(iPK_Device, iMediaPluginID,0,i_current_mediaType ,0,StringUtils::itos(iea_area),false);
-      emit sendDceCommand(endMedia);
+      string response;
+      emit sendDceCommandResponse(endMedia, &response);
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Response: %s", response.c_str());
       setDirectAv(false);
     }
 

@@ -2301,6 +2301,10 @@ void qOrbiter::sendDCECommand(PreformedCommand cmd) {
 	SendCommand(cmd);
 }
 
+void qOrbiter::sendDCECommandResponse(PreformedCommand cmd, string* p_sResponse) {
+	SendCommand(cmd, p_sResponse);
+}
+
 void qOrbiter::updateScreenSaverTimeout(int t)
 {
 

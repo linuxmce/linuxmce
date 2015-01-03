@@ -473,7 +473,10 @@ orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
         QObject::connect(&a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()));
         // QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));
 
+	// Generic DCE command sending signal/slots
         QObject::connect(&w, SIGNAL(sendDceCommand(DCE::PreformedCommand)), &pqOrbiter, SLOT(sendDCECommand(DCE::PreformedCommand)), Qt::DirectConnection);
+        QObject::connect(&w, SIGNAL(sendDceCommandResponse(DCE::PreformedCommand, string*)), &pqOrbiter, SLOT(sendDCECommandResponse(DCE::PreformedCommand, string*)), Qt::DirectConnection);
+
 
         QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
 
