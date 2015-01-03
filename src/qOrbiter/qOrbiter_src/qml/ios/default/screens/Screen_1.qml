@@ -3,7 +3,7 @@ import "../components"
 import "../../../skins-common/lib/handlers"
 
 StyledScreen {
-    navigation: "ScenarioCompnent.qml"
+    navigation: "ScenarioComponent.qml"
     keepHeader: true
     Component.onCompleted:{
         current_header_model=scenarios;
