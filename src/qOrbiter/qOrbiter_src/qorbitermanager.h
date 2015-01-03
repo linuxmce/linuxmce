@@ -123,7 +123,7 @@
 #include <DCE/DataGrid.h>
 
 #include <defineObjects/linuxmcedata.h>
-
+#include "Gen_Devices/AllCommandsRequests.h"
 
 #include <qOrbiter/qOrbiter.h>
 class EPGChannelList;
@@ -557,6 +557,7 @@ signals:
     void screenPowerTimeoutChanged();
     void updateDceScreenPowerTimeout(int t);
 
+    void sendDceCommand(DCE::PreformedCommand cmd);
 
     void skinMessage(QString s);
     void qtMessage(QString s);
@@ -843,8 +844,6 @@ public slots:
      *  Allows you to send a qml / javascript object to dce which will then be converted to a properly formatted dce command.
      */
     void sendDceMessage(QVariantMap m) {if(!m.isEmpty()) emit newMessageSend(m);}
-
-
 
     /*!
      * \brief setRunStatus
@@ -1251,7 +1250,12 @@ public slots:
     void playMedia(QString FK_Media) { emit startPlayback(FK_Media);}
     void mythTvPlay(){emit play();}
     void playResume(){ emit simplePlay(); }
-    void stopMedia() {emit stopPlayback(); setDirectAv(false);}
+    void stopMedia() {/*emit stopPlayback();*/ 
+      CMD_MH_Stop_Media endMedia(iPK_Device, iMediaPluginID,0,i_current_mediaType ,0,StringUtils::itos(iea_area),false);
+      emit sendDceCommand(endMedia);
+      setDirectAv(false);
+    }
+
     void setPlaybackSpeed(int s) {emit setStreamSpeed(s);}
     void pauseMedia() {emit pause();}
     void adjustVolume(int vol) {emit setVolume(vol);}

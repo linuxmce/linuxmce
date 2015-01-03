@@ -28,6 +28,7 @@
 //<-dceag-d-e->
 #include <DataGrid.h>
 #include "Virtual_Device_Translator.h"
+#include "PreformedCommand.h"
 
 #include <contextobjects/floorplandevice.h>
 #include <contextobjects/modelpage.h>
@@ -1819,6 +1820,8 @@ public slots:
 
     void setqCommunicatorID(int deviceID ) {qMediaPlayerID = deviceID; emit qCommunicatorIDChanged(qCommunicatorID);}
     int getqCommunicatorID(){return qCommunicatorID;}
+
+    void sendDCECommand(DCE::PreformedCommand cmd);
 
     void getAttributeImage(QString param);
 

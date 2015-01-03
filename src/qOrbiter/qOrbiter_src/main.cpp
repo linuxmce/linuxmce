@@ -473,6 +473,7 @@ orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
         QObject::connect(&a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()));
         // QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));
 
+        QObject::connect(&w, SIGNAL(sendDceCommand(DCE::PreformedCommand)), &pqOrbiter, SLOT(sendDCECommand(DCE::PreformedCommand)), Qt::DirectConnection);
 
         QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
 
@@ -594,7 +595,6 @@ orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
         QObject::connect(&w, SIGNAL(startPlayback(QString)), &pqOrbiter, SLOT(playMedia(QString)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(pause()), &pqOrbiter, SLOT(PauseMedia()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(setStreamSpeed(int)), &pqOrbiter, SLOT(setPlaybackSpeed(int)), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(stopPlayback()), &pqOrbiter,SLOT(StopMedia()),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(stopMediaInEa(int)), &pqOrbiter,SLOT(StopMediaInEA(int)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(stop_AV()), &pqOrbiter,SLOT(stop_AV()),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(moveMedia(QString,int)), &pqOrbiter,SLOT(moveMedia(QString,int)),Qt::QueuedConnection);
