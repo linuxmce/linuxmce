@@ -317,8 +317,6 @@ Item {
             pageLoader.nextScreen = screenname
     }
 
-
-
     function checkStatus(component){
         console.log(component.progress)
     }

@@ -97,6 +97,7 @@ QtObject{
 
     property color darkhighlight: "darkgrey"
     property color lighthighlight: "lightgreen"
+    property color lightHighlightColor:lighthighlight
     //--end color definitions
 
     //main stage styles
@@ -177,4 +178,16 @@ QtObject{
     //stage
     property color stage_bg: "lightSteelblue"
     property color bgcolor: "lightsteelblue"
+
+    /*! Text */
+    property int smallTextSize:manager.isProfile ? scaleY(2) : scaleY(3)
+    property int mediumTextSize:manager.isProfile ? scaleY (4) : scaleY(5)
+    property int largeTextSize:manager.isProfile ? scaleY(6) : scaleY(7)
+
+    /*! Clock */
+    property int clockFontSize:manager.isProfile ? scaleY(3) : scaleY(5)
+
+    /*! Buttons */
+    property int buttonHeightSmall:manager.isProfile ? scaleY(8) : scaleY(10)
+    property int buttonWidthSmall:manager.isProfile ? scaleX(12) : scaleX(10)
 }

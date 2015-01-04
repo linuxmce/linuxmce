@@ -293,7 +293,7 @@ Item {
         interval:60*1000
         useAnimation: true
         //onDebugInfoChanged: console.log(debugInfo)
-        active:manager.m_ipAddress==="192.168.80.1"
+       active:manager.connectedState
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)

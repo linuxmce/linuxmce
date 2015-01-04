@@ -21,7 +21,7 @@ Item {
 
 
     function setConnectionDetails(deviceID, router){
-        dceMediaController.setConnectionDetails(deviceID, router)
+        lmceData.setConnectionDetails(deviceID, router)
     }
 
     onCurrentStatusChanged:logger.logMediaMessage("Media Player Status::"+dceplayer.currentStatus)

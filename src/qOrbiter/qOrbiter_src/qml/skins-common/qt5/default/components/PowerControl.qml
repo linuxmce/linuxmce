@@ -1,6 +1,5 @@
 import QtQuick 2.2
 
-
 Item{
     id:powerControl
     anchors{
@@ -34,7 +33,7 @@ Item{
             height: 120
             width: 200
             onActivated: manager.toggleDisplay(1)
-            useHandler: true
+
         }
 
         StyledButton{
@@ -42,7 +41,7 @@ Item{
             height: 120
             width: 200
             onActivated: manager.toggleDisplay(0)
-            useHandler: true
+
         }
     }
     Row{
