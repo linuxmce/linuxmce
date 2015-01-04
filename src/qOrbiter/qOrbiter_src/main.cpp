@@ -537,8 +537,7 @@ orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
         QObject::connect(&pqOrbiter, SIGNAL(monitorStatusChanged(bool)), &w, SLOT(setMonitorStatus(bool)));
         QObject::connect(&w, SIGNAL(newMessageSend(QVariantMap)), &pqOrbiter, SLOT(executeMessageSend(QVariantMap)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(liveAvPath(int)), &pqOrbiter, SLOT(setDirectAv(int)), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(setText(QString,QString,int)), &w, SLOT(setText(QString,QString,int)), Qt::QueuedConnection);
-        //  QObject::connect(&w, SIGNAL(show_linuxmce_menu()), &pqOrbiter, SLOT(setDirectAv()), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(setText(QString,QString,int)), &w, SLOT(setText(QString,QString,int)), Qt::QueuedConnection);       
         //timecodemanager signals / slots
         QObject::connect(&pqOrbiter, SIGNAL(updateTimeCode(QString,int)), timecode, SLOT(start(QString,int)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(stopTimeCode()), timecode, SLOT(stop()), Qt::QueuedConnection);
@@ -592,14 +591,11 @@ orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
         QObject::connect(&pqOrbiter, SIGNAL(addScreenParam(QString,int)), w.ScreenParameters, SLOT(addParam(QString, int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(locationChanged(int,int)), &pqOrbiter, SLOT(setLocation(int,int)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(userChanged(int)), &pqOrbiter, SLOT(setUser(int)),Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(bindMediaRemote(bool)), &pqOrbiter, SLOT(BindMediaRemote(bool)), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(play()), &pqOrbiter, SLOT(mythtvPlayMedia()), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(simplePlay()), &pqOrbiter, SLOT(simplePlayMedia()), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(startPlayback(QString)), &pqOrbiter, SLOT(playMedia(QString)),Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(pause()), &pqOrbiter, SLOT(PauseMedia()), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(setStreamSpeed(int)), &pqOrbiter, SLOT(setPlaybackSpeed(int)), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(stopMediaInEa(int)), &pqOrbiter,SLOT(StopMediaInEA(int)),Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(stop_AV()), &pqOrbiter,SLOT(stop_AV()),Qt::QueuedConnection);
+
+
+
+
+
         QObject::connect(&w, SIGNAL(moveMedia(QString,int)), &pqOrbiter,SLOT(moveMedia(QString,int)),Qt::QueuedConnection);
 
         QObject::connect(w.ScreenSaver, SIGNAL(requestNewImage(QString)), &pqOrbiter, SLOT(getScreenSaverImage(QString)), Qt::QueuedConnection);
@@ -676,6 +672,7 @@ orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
         QObject::connect(&w, SIGNAL(loadDataForDataGrid(QString,QString,int,QString,int,int,int,QString)), &pqOrbiter, SLOT(loadDataForDataGrid(QString,QString,int,QString,int,int,int,QString)), Qt::QueuedConnection);
 
         //now playing signals
+        QObject::connect(&pqOrbiter, SIGNAL(nowPlayingDeviceListChanged(QVariantList)), w.nowPlayingButton, SLOT(setNowPlayingDeviceList(QVariantList)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(setNowPlaying(bool)), w.nowPlayingButton,SLOT(setStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(streamIdChanged(int)), w.nowPlayingButton, SLOT(setStreamID(int)),Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(currentScreenChanged(QString)), w.nowPlayingButton, SLOT(setScreen(QString)),Qt::QueuedConnection);

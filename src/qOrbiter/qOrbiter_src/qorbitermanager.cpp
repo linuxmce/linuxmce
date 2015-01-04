@@ -1583,6 +1583,7 @@ void qorbiterManager:: setLocation(const int &room, const int &ea)
 {
     iFK_Room = room;
     iea_area = ea;
+    sEntertainArea = QString::number(iea_area).toStdString();
     emit locationChanged(room, ea);
     // pqOrbiter->setLocation(room, ea);
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -1645,10 +1646,7 @@ void qorbiterManager::setNowPlayingIcon(bool b)
 {
 }
 
-void qorbiterManager::nowPlayingChanged(bool b)
-{
-    nowPlayingButton->setStatus(b);
-}
+
 
 void qorbiterManager::mountMediaDevices()
 {

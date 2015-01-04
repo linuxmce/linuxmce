@@ -1588,6 +1588,7 @@ signals:
  */
     ///@{
     void setNowPlaying(bool status);
+    void nowPlayingDeviceListChanged(QVariantList devices);
     void addScreenParam(QString, int);
     void currentScreenChanged(QString screen);
     void playlistPositionChanged(int position);
@@ -1826,7 +1827,7 @@ public slots:
 
     void getAttributeImage(QString param);
 
-    void setDirectAv(int truth);
+
     void showUiMenu();
 
     void setDeviceId(int d) {m_dwPK_Device = d; emit deviceIdChanged();}
@@ -1926,11 +1927,7 @@ public slots:
     void requestPage(int page);
     void setMediaType(int t) { i_current_mediaType = t; emit mediaTypeChanged( i_current_mediaType);}
     int getMediaType () {return i_current_mediaType;}
-    void setPlaybackSpeed(int s) {
-        if (s < 0)
-        {RwMedia();} else
-        { FfMedia();}
-    }
+
     void jumpMobileGrid(int page);
     void getGridView(bool direction);
     void seekToGridPosition(QString s);
@@ -1946,16 +1943,13 @@ public slots:
     void GetFileInfoForQml(QString qs_file_reference);
     void GetMediaAttributeGrid(QString qs_fk_fileno);
     void GetSecurityCam(int i_inc_pkdevice);
-    void playMedia(QString inc_FKFile);
-    void mythtvPlayMedia();
-    void simplePlayMedia();
 
-    void StopMedia();
-    void StopMediaInEA(int PK_EntertainArea);
+
+
+
     void stop_AV();
-    void RwMedia();
-    void FfMedia();
-    void PauseMedia();
+
+
     void moveMedia(QString eas, int streamID);
 
     void checkTimeCode(int npDevice);

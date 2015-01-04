@@ -77,7 +77,8 @@ class NowPlayingClass : public QDeclarativeItem
 {
     Q_OBJECT
 
-    Q_PROPERTY (bool b_mediaPlaying READ getStatus WRITE setStatus NOTIFY mediaStatusChanged)/*!< \brief The current playing status of media \ingroup now_playing*/
+    Q_PROPERTY (bool b_mediaPlaying READ getStatus  NOTIFY mediaStatusChanged)/*!< \brief The current playing status of media \ingroup now_playing*/
+    Q_PROPERTY (int stream READ getStreamID NOTIFY streamIdChanged)
 
     Q_PROPERTY (QImage fileImage READ getImage WRITE setImage NOTIFY imageChanged)/*!< \brief The image associated with this file \ingroup now_playing*/
     Q_PROPERTY (QImage streamImage READ getStreamImage WRITE setStreamImage NOTIFY streamImageChanged)/*!< \brief Streamed image. \ingroup now_playing*/
@@ -182,6 +183,8 @@ public:
 
 
 signals:
+   void nowPlayingDevicesChanged();
+    void streamIdChanged();
     //general signals
     void storageDeviceChanged();
     void mediaTitleChanged();
@@ -251,31 +254,115 @@ public slots:
         emit storageDeviceChanged();
     }
 
-    void setImageAspectRatio(float r){ imageAspectRatio = r; emit imageAspectRatioChanged(); qDebug() << "Aspect Ratio" << imageAspectRatio;}
-    double getImageAspectRatio(){ return imageAspectRatio;}
 
-    inline QString getFilename() {return filename;}
-    inline void setFilename (QString f) {filename = f; emit fileNameChanged();}
-
+    QString getFilename() {return filename;}
     inline QString getPath() {return path;}
-    inline void setPath (QString f) {path = f; emit pathChanged();}
-
     QString getStorageDevice() {return qs_storageDevice;}
-
-    void setNetwork(const QString bcast_network) {network = bcast_network; emit networkChanged();}
     QString getNetwork() {return network;}
-
-    void setImageAspect(const QString i_aspect) { aspect = i_aspect; emit imageAspectChanged();}
     QString getImageAspect() { return aspect;}
-
-    void setProgram(const QString newProgram) {tvProgram = newProgram; emit programChanged();}
     QString getProgram () {return tvProgram;}
 
-    void setImageUrl(const QUrl incImage) {nowPlayingImageUrl = incImage;}
 
     QUrl getImageUrl () { return nowPlayingImageUrl;}
 
 
+
+    QImage getImage() {return fileImage;}
+    /*!
+     * \brief setStreamImage this function sets the stream image only.
+     * This function sets the stream image as opposed to the screenshot, or media image. A stream image is unique in that
+     * it is a screen grab from a current playing media device and instead of triggering the screenshotAttributes, it just
+     * updates the image.
+     * \warning do not request images too quickly
+     * \todo add frame govonor for Now playing stream image grab?
+     * \param t
+     *
+     */
+    void setStreamImage(QImage t){
+        qDebug("Setting stream image");
+        streamImage = t;
+        emit streamImageChanged();
+    }
+    QImage getStreamImage() { return streamImage;}
+    QString getScreen () {return qs_screen;}
+    void setUrl (QString inc_url) {qs_imagePath = inc_url; emit imageUrlChanged();}
+    QString getUrl () {return qs_imagePath;}
+    QString getTitle () {return qs_mainTitle;}
+    QString getTitle2 () {return qs_mainTitle2;}
+    QString getSubTitle () {return qs_subTitle;}
+    bool getStatus () {return b_mediaPlaying;}
+    int  getMediaType () {return i_mediaType;}
+    QString getFilePath () {return filepath;}
+    //general media getters and setters ----//
+    QString getMediaTitle () {return mediatitle;}
+    int getPlaylistPosition() {return m_iplaylistPosition;}
+    //--tv getters and setters-------------//
+    QString getChannel () {return channel;}
+    QString getChannelID () {return channelID;}
+    QString getEpisode () {return episode;}
+    QString getAlbum () {return album;}
+
+    QString getTrack() {return track;}
+    QString getPerformers() { return performerlist;}
+    QString getDirector() {director = directors.join(" | "); return director;}
+    QString getGenre() { return genre;}
+    QString getRelease() {return releasedate;}
+    inline QString getSynop() {return synop;}
+    int getStreamID() {return i_streamID;}
+
+    void clearGraphics(){
+        setImage(QImage());
+    }
+
+    Q_INVOKABLE int nowPlayingDevice() {return m_NowPlayingDevice;}
+    Q_INVOKABLE int nowPlayingAudioDevice(){return m_nowPlayingAudioDevice;}
+    Q_INVOKABLE int nowPlayingVideoDevice() {return m_nowPlayingVideoDevice;}
+    Q_INVOKABLE int nowPlayingCaptureCard() {return m_nowPlayingCaptureCard;}
+
+     void setImageAspect(const QString i_aspect) { aspect = i_aspect; emit imageAspectChanged();}
+
+private slots:
+    void setStreamID(int stream) {i_streamID = stream; emit streamIdChanged();}
+    void setSynop(QString s) { synop = s;  emit synopChanged(); }
+    void setRelease (QString inc_rls) {releasedate = inc_rls;  emit rlsChanged();}
+    void setGenre (QString inc_genre) { if(!genre.contains(inc_genre)) {genre.append(inc_genre+" | "); emit genreChanged();} }
+    void setDirector (QString inc_director) {directors << inc_director;  emit directorChanged();}
+    void setPerformers (QString inc_performer) { if(!performerlist.contains(inc_performer)) {performerlist.append( inc_performer + " | "); emit performersChanged();}}
+
+    void setScreen(QString inc_screen) {qs_screen = inc_screen; emit screenTypeChanged();}
+    void setTitle (QString inc_title) {qs_mainTitle = inc_title; emit titleChanged();}
+    void setTitle2 (QString inc_title) {qs_mainTitle2 = inc_title; emit titleChanged2();}
+    void setSubTitle (QString inc_subTitle) {qs_subTitle = inc_subTitle; emit titleChanged();}
+    void setStatus (bool status) {resetData(); b_mediaPlaying = status; if(b_mediaPlaying==false){clearGraphics(); }  emit mediaStatusChanged(); }
+    void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaTypeChanged();}
+    void setFilePath (QString inc_fp) {filepath = inc_fp;  emit filePathChanged();}
+    void setMediaTitle (QString inc_mediaTitle) {mediatitle = inc_mediaTitle;  emit mediaTitleChanged();}
+    void setPlaylistPostion(int i_pls) { m_iplaylistPosition = i_pls;  emit playListPositionChanged( m_iplaylistPosition);}
+    void setChannel (QString inc_channel) {channel = inc_channel;  emit channelChanged();}
+    void setChannelID (QString inc_channelID) {channelID = inc_channelID;  emit chanIDchanged();}
+    void setEpisode (QString inc_episode) {episode = inc_episode;  emit episodeChanged();}
+    void setAlbum (QString inc_album) {  album = inc_album;  emit albumChanged();}
+    void setTrack (QString inc_track) {track = inc_track;  emit trackChanged();}
+    void setNowPlayingDeviceList(QVariantList d){
+        if(d.isEmpty())
+            return;
+
+        QVariantMap npDevices = d.at(0).toMap();
+        m_NowPlayingDevice = npDevices.value("Now Playing").toInt();
+        m_nowPlayingAudioDevice= npDevices.value("Now Playing Audio").toInt();
+        m_nowPlayingCaptureCard = npDevices.value("Capture Card").toInt();
+        m_nowPlayingVideoDevice = npDevices.value("Video Device").toInt();
+        emit nowPlayingDevicesChanged();
+    }
+
+    void setImageAspectRatio(float r){ imageAspectRatio = r; emit imageAspectRatioChanged(); qDebug() << "Aspect Ratio" << imageAspectRatio;}
+    void setFilename (QString f) {filename = f; emit fileNameChanged();}
+    void setPath (QString f) {path = f; emit pathChanged();}
+    void setNetwork(const QString bcast_network) {network = bcast_network; emit networkChanged();}
+
+    double getImageAspectRatio(){ return imageAspectRatio;}
+    void setProgram(const QString newProgram) {tvProgram = newProgram; emit programChanged();}
+    void setImageUrl(const QUrl incImage) {nowPlayingImageUrl = incImage;}
     void setImageData(  QByteArray b) {
         QImage t;
         if( t.loadFromData(b))
@@ -288,7 +375,6 @@ public slots:
             emit statusMessage("Now Playing Class::Update Object Image Conversion Failed:");
         }
     }
-
     void setImage(QImage img) {
         fileImage = img;
 
@@ -310,96 +396,12 @@ public slots:
         }
 
     }
-    QImage getImage() {return fileImage;}
-    /*!
-     * \brief setStreamImage this function sets the stream image only.
-     * This function sets the stream image as opposed to the screenshot, or media image. A stream image is unique in that
-     * it is a screen grab from a current playing media device and instead of triggering the screenshotAttributes, it just
-     * updates the image.
-     * \warning do not request images too quickly
-     * \todo add frame govonor for Now playing stream image grab?
-     * \param t
-     *
-     */
-    void setStreamImage(QImage t){
-        qDebug("Setting stream image");
-        streamImage = t;
-        emit streamImageChanged();
-    }
-    QImage getStreamImage() { return streamImage;}
 
-
-    void setScreen(QString inc_screen) {qs_screen = inc_screen; emit screenTypeChanged();}
-    QString getScreen () {return qs_screen;}
-
-    void setUrl (QString inc_url) {qs_imagePath = inc_url; emit imageUrlChanged();}
-    QString getUrl () {return qs_imagePath;}
-
-    void setTitle (QString inc_title) {qs_mainTitle = inc_title; emit titleChanged();}
-    QString getTitle () {return qs_mainTitle;}
-
-    void setTitle2 (QString inc_title) {qs_mainTitle2 = inc_title; emit titleChanged2();}
-    QString getTitle2 () {return qs_mainTitle2;}
-
-    void setSubTitle (QString inc_subTitle) {qs_subTitle = inc_subTitle; emit titleChanged();}
-    QString getSubTitle () {return qs_subTitle;}
-
-    void setStatus (bool status) {resetData(); b_mediaPlaying = status; if(b_mediaPlaying==false){clearGraphics(); }  emit mediaStatusChanged(); }
-    bool getStatus () {return b_mediaPlaying;}
-
-    void setMediaType (int inc_mediaType) {i_mediaType = inc_mediaType; emit mediaTypeChanged();}
-    int  getMediaType () {return i_mediaType;}
-
-    void setFilePath (QString inc_fp) {filepath = inc_fp;  emit filePathChanged();}
-    QString getFilePath () {return filepath;}
-
-    //general media getters and setters ----//
-
-    void setMediaTitle (QString inc_mediaTitle) {mediatitle = inc_mediaTitle;  emit mediaTitleChanged();}
-    QString getMediaTitle () {return mediatitle;}
-
-    void setPlaylistPostion(int i_pls) { m_iplaylistPosition = i_pls;  emit playListPositionChanged( m_iplaylistPosition);}
-    int getPlaylistPosition() {return m_iplaylistPosition;}
-
-    //--tv getters and setters-------------//
-
-    void setChannel (QString inc_channel) {channel = inc_channel;  emit channelChanged();}
-    QString getChannel () {return channel;}
-
-    void setChannelID (QString inc_channelID) {channelID = inc_channelID;  emit chanIDchanged();}
-    QString getChannelID () {return channelID;}
-
-    void setEpisode (QString inc_episode) {episode = inc_episode;  emit episodeChanged();}
-    QString getEpisode () {return episode;}
-
-    //-----audio getters and setter--------//
-    void setAlbum (QString inc_album) {  album = inc_album;  emit albumChanged();}
-    QString getAlbum () {return album;}
-
-    void setTrack (QString inc_track) {track = inc_track;  emit trackChanged();}
-    QString getTrack() {return track;}
-
-    void setPerformers (QString inc_performer) { if(!performerlist.contains(inc_performer)) {performerlist.append( inc_performer + " | "); emit performersChanged();}}
-    QString getPerformers() { return performerlist;}
-
-    void setDirector (QString inc_director) {directors << inc_director;  emit directorChanged();}
-    QString getDirector() {director = directors.join(" | "); return director;}
-
-    void setGenre (QString inc_genre) { if(!genre.contains(inc_genre)) {genre.append(inc_genre+" | "); emit genreChanged();} }
-    QString getGenre() { return genre;}
-
-    void setRelease (QString inc_rls) {releasedate = inc_rls;  emit rlsChanged();}
-    QString getRelease() {return releasedate;}
-
-    inline QString getSynop() {return synop;}
-    inline void setSynop(QString s) { synop = s;  emit synopChanged(); }
-
-    void setStreamID(int stream) {i_streamID = stream;}
-    int getStreamID() {return i_streamID;}
-
-    void clearGraphics(){
-        setImage(QImage());
-    }
+private:
+    long m_NowPlayingDevice;
+    long m_nowPlayingAudioDevice;
+    long m_nowPlayingVideoDevice;
+    long m_nowPlayingCaptureCard;
 };
 
 #endif // NOWPLAYINGCLASS_H

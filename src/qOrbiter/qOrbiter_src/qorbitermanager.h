@@ -517,6 +517,7 @@ Param 10 - pk_attribute
     int iPK_User;                    //current user
     int iFK_Room;                    //current room
     int iea_area;
+
     QString sPK_Room;
     QString s_onOFF;
 
@@ -1050,7 +1051,7 @@ public slots:
      * \brief This requests the current playlist of stored media.
      * \ingroup qorbiter_properties
      */
-    void getStoredPlaylist() { emit bindMediaRemote(true);}
+    void getStoredPlaylist() { setBoundStatus(true);}
 
     /*!
      * \brief This slot is called the PlaylistClickedHandler
@@ -1073,7 +1074,9 @@ public slots:
      * \brief setBoundStatus
      * \param b
      */
-    void setBoundStatus(bool b) {emit bindMediaRemote(b);}
+    void setBoundStatus(bool b) {
+        this->sendDceCommand(CMD_Bind_to_Media_Remote(iPK_Device, iMediaPluginID, iPK_Device,string("2355") ,b ? "1" :"0", string(""), sEntertainArea, 0, 0));
+    }
 
     /*!
      * \brief setNowPlayingIcon
@@ -1081,11 +1084,7 @@ public slots:
      */
     void setNowPlayingIcon(bool b);
 
-    /*!
-     * \brief nowPlayingChanged
-     * \param b
-     */
-    void nowPlayingChanged(bool b);
+
 
     /*!
      * \brief addDeviceToList
@@ -1139,7 +1138,12 @@ public slots:
      */
     bool getLiveAvPath() { return usingLiveAvPath;}
 
-    void setDirectAv(bool avState){ emit liveAvPath(avState ? 1 : 0);}
+    void setDirectAv(bool avState){
+
+        this->sendDceCommand( CMD_Live_AV_Path(iPK_Device, iMediaPluginID, sEntertainArea, avState) );
+        if(usingLiveAvPath !=avState)
+            setLiveAvPath(avState);
+    }
     /*!
      * \brief setContainsVideo
      * \param video
@@ -1248,20 +1252,38 @@ public slots:
 
     /*! @name Media Control Slots*/
     //{@
-    void playMedia(QString FK_Media) { emit startPlayback(FK_Media);}
-    void mythTvPlay(){emit play();}
-    void playResume(){ emit simplePlay(); }
-    void stopMedia() {/*emit stopPlayback();*/ 
-      CMD_MH_Stop_Media endMedia(iPK_Device, iMediaPluginID,0,i_current_mediaType ,0,StringUtils::itos(iea_area),false);
-      string response;
-      emit sendDceCommandResponse(endMedia, &response);
-      LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Response: %s", response.c_str());
-      setDirectAv(false);
+    Q_INVOKABLE void playMedia(QString FK_Media) {
+        if(FK_Media == "!G"){
+            FK_Media.append(QString::number(iPK_Device));
+        }
+        //changed to remove media type as that is decided on by the media plugin and passed back
+        this->sendDceCommand(CMD_MH_Play_Media(iPK_Device, iMediaPluginID, 0 , FK_Media.toStdString(), 0, 0, sEntertainArea, false, false, false, false, false));
     }
 
-    void setPlaybackSpeed(int s) {emit setStreamSpeed(s);}
-    void pauseMedia() {emit pause();}
-    void adjustVolume(int vol) {emit setVolume(vol);}
+    void mythTvPlay(){
+        qDebug() << "Sending play to mythtv";
+        sendDceCommand(CMD_Change_Playback_Speed (iPK_Device, iMediaPluginID, this->nowPlayingButton->getStreamID() , 1000, true));
+    }
+
+    void playResume(){
+        if(nowPlayingButton->getStreamID() != -1){
+            sendDceCommand(CMD_Play(iPK_Device, nowPlayingButton->nowPlayingDevice(), nowPlayingButton->getStreamID()));
+        }
+    }
+
+    void stopMedia() {/*emit stopPlayback();*/
+        CMD_MH_Stop_Media endMedia(iPK_Device, iMediaPluginID,0,i_current_mediaType ,0,sEntertainArea,false);
+        string response;
+        emit sendDceCommandResponse(endMedia, &response);
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Response: %s", response.c_str());
+        setDirectAv(false);
+    }
+
+    void stopMediaOtherLocation(int PK_EntertainArea){ sendDceCommand(CMD_MH_Stop_Media (iPK_Device, iMediaPluginID,0,i_current_mediaType ,0,StringUtils::itos(PK_EntertainArea),false));}
+    void setPlaybackSpeed(int s) { sendDceCommand(CMD_Change_Playback_Speed(iPK_Device, iMediaPluginID, nowPlayingButton->getStreamID() , s<0 ? -2 : +2, true));  }
+    void pauseMedia() { sendDceCommand( CMD_Pause_Media(iPK_Device, iMediaPluginID ,nowPlayingButton->getStreamID())); }
+
+    void adjustVolume(int vol) {emit setVolume(vol); }
     void newTrack(QString track) { emit changeTrack(track); }
     void jogPosition(QString jog) {emit jogToPosition(jog);}
     void showBookmarks(QList<QObject*> t);
@@ -1281,7 +1303,7 @@ public slots:
     void startRecordingPress(){emit tvRecord();}
     void showRecordingsPress(){emit showRecordings();}
     void mute(){emit muteSound();}
-    void doMoveMedia(QString eas, int streamID) { emit moveMedia(eas, streamID); }
+    void doMoveMedia(QString eas, int streamID) { sendDceCommand( CMD_MH_Move_Media (iPK_Device, iMediaPluginID, streamID, eas.toStdString()));}
 
     void movePlaylistEntry(QString d, int index) {emit movePlistEntry(d, index); }
     void removePlaylistEntry(int index) {emit removePlistEntry(index);}
@@ -1332,9 +1354,9 @@ public slots:
 
             int listNumber = rand()%screensaverImages.length()-1;
             if(listNumber!=-1 && listNumber <= screensaverImages.count()){
-               return  screensaverImages.at(listNumber);
+                return  screensaverImages.at(listNumber);
             } else {
-                  return screensaverImages.at(0);
+                return screensaverImages.at(0);
             }
         }
 
@@ -1658,6 +1680,7 @@ public slots:
 private:
     void initializeConnections();
     void setupQMLview();
+
 
 
 };
