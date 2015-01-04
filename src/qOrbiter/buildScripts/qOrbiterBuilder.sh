@@ -12,7 +12,7 @@ buildenv=/opt/pos/QtSDK.121/Desktop/Qt/4.8.1/gcc/bin
 spec=linux-g++
 #-64
 srcroot=~/lmce-1004
-projectdir=$srcroot/qOrbiter/qOrbiter_src
+projectdir=$srcroot/qOrbiter/qOrbiterMaster
 buildoutput=$srcroot/qOrbiter/build-output
 config="CONFIG+=debug CONFIG+=for_desktop"
 qmake="$buildenv"+/qmake
@@ -27,7 +27,7 @@ echo "Starting the QMake process"
 pushd $buildenv
 #buildoutput=$projectdir
 
-$qmake -makefile -nocache $projectdir/qOrbiter_src.pro -o $buildoutput/Makefile -r -spec $spec $config
+$qmake -makefile -nocache $projectdir/qOrbiterMaster.pro -o $buildoutput/Makefile -r -spec $spec $config
 if  ! [ -f $buildoutput/Makefile ] ; then
 	echo "$buildoutput/Makefile does not exist - Aborting!"
 	exit 1
