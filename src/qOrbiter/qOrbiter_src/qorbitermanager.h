@@ -583,25 +583,20 @@ signals:
     void dceRemoteCommand(int cmd, QString name);
 
     /* Media Playback Controls */
-    void muteSound();
-    void setVolume(int vol);
+
+
     void extraButton(QString b);
     void changeTrack(QString track);
-    void pause();
     void newChannel(QString channel);
     void newGridChannel(QString channel, QString chanid);
     void setStreamSpeed(int speed);
-    void stopPlayback();
-    void stopMediaInEa(int PK_EntertainArea);
-    void stop_AV();
+
     void seekGrid(QString s);
     void newPlaylistPosition(QString pos);
     void playlistSizeChanged();
     void bindMediaRemote(bool b);
-    void startPlayback(QString file);
-    void play();
-    void simplePlay();
-    void moveMedia(QString eas, int streamID);
+
+
     void zoomLevelChanged(QString zoom);
     void aspectRatioChanged(QString ratio);
     void mobileStorageChanged(QString location);
@@ -611,10 +606,7 @@ signals:
     void restartOrbiter();
 
 
-    void redButton();
-    void blueButton();
-    void greenButton();
-    void yellowButton();
+
     void tvRecord();
     void showRecordings();
 
@@ -1283,7 +1275,16 @@ public slots:
     void setPlaybackSpeed(int s) { sendDceCommand(CMD_Change_Playback_Speed(iPK_Device, iMediaPluginID, nowPlayingButton->getStreamID() , s<0 ? -2 : +2, true));  }
     void pauseMedia() { sendDceCommand( CMD_Pause_Media(iPK_Device, iMediaPluginID ,nowPlayingButton->getStreamID())); }
 
-    void adjustVolume(int vol) {emit setVolume(vol); }
+    void adjustVolume(int vol) {
+        if(discreteAudio) {
+            sendDceCommand(CMD_Set_Volume (iPK_Device, iMediaPluginID, StringUtils::itos(vol)));
+        } else {
+            if(vol > 0)
+                sendDceCommand( DCE::CMD_Vol_Up(iPK_Device, iMediaPluginID, vol));
+            else
+                sendDceCommand( DCE::CMD_Vol_Down(iPK_Device, iMediaPluginID, vol));
+        }
+    }
     void newTrack(QString track) { emit changeTrack(track); }
     void jogPosition(QString jog) {emit jogToPosition(jog);}
     void showBookmarks(QList<QObject*> t);
@@ -1296,13 +1297,13 @@ public slots:
     void setZoomLevel(QString zoom) {emit zoomLevelChanged(zoom);}
     void setAspectRatio(QString r) {emit aspectRatioChanged(r);}
     void getVideoFrame() { emit requestVideoFrame();}
-    void redButtonPress(){emit redButton(); }
-    void blueButtonPress(){emit blueButton();}
-    void greenButtonPress(){emit greenButton();}
-    void yellowButtonPress(){emit yellowButton();}
-    void startRecordingPress(){emit tvRecord();}
-    void showRecordingsPress(){emit showRecordings();}
-    void mute(){emit muteSound();}
+    void redButtonPress(){sendDceCommand(CMD_Red(iPK_Device, iMediaPluginID)); }
+    void blueButtonPress(){ sendDceCommand(CMD_Blue(iPK_Device, iMediaPluginID));}
+    void greenButtonPress(){ sendDceCommand( CMD_Green (iPK_Device, iMediaPluginID) );}
+    void yellowButtonPress(){ sendDceCommand(  CMD_Yellow(iPK_Device, iMediaPluginID));}
+    void startRecordingPress(){CMD_Record(iPK_Device, iMediaPluginID);}
+    void showRecordingsPress(){sendDceCommand( CMD_Recorded_TV_Menu(iPK_Device, iMediaPluginID));}
+    void mute(){sendDceCommand(DCE::CMD_Mute(iPK_Device, iMediaPluginID));}
     void doMoveMedia(QString eas, int streamID) { sendDceCommand( CMD_MH_Move_Media (iPK_Device, iMediaPluginID, streamID, eas.toStdString()));}
 
     void movePlaylistEntry(QString d, int index) {emit movePlistEntry(d, index); }

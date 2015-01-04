@@ -536,7 +536,7 @@ orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
         QObject::connect(&pqOrbiter, SIGNAL(isOsd(bool)), &w, SLOT(setOsd(bool)));
         QObject::connect(&pqOrbiter, SIGNAL(monitorStatusChanged(bool)), &w, SLOT(setMonitorStatus(bool)));
         QObject::connect(&w, SIGNAL(newMessageSend(QVariantMap)), &pqOrbiter, SLOT(executeMessageSend(QVariantMap)), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(liveAvPath(int)), &pqOrbiter, SLOT(setDirectAv(int)), Qt::QueuedConnection);
+
         QObject::connect(&pqOrbiter, SIGNAL(setText(QString,QString,int)), &w, SLOT(setText(QString,QString,int)), Qt::QueuedConnection);       
         //timecodemanager signals / slots
         QObject::connect(&pqOrbiter, SIGNAL(updateTimeCode(QString,int)), timecode, SLOT(start(QString,int)), Qt::QueuedConnection);
@@ -591,13 +591,6 @@ orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
         QObject::connect(&pqOrbiter, SIGNAL(addScreenParam(QString,int)), w.ScreenParameters, SLOT(addParam(QString, int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(locationChanged(int,int)), &pqOrbiter, SLOT(setLocation(int,int)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(userChanged(int)), &pqOrbiter, SLOT(setUser(int)),Qt::QueuedConnection);
-
-
-
-
-
-        QObject::connect(&w, SIGNAL(moveMedia(QString,int)), &pqOrbiter,SLOT(moveMedia(QString,int)),Qt::QueuedConnection);
-
         QObject::connect(w.ScreenSaver, SIGNAL(requestNewImage(QString)), &pqOrbiter, SLOT(getScreenSaverImage(QString)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter, SIGNAL(currentScreenSaverImage(QByteArray)), w.ScreenSaver, SLOT(setImageData(QByteArray)),Qt::QueuedConnection);
 
@@ -745,7 +738,7 @@ orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
         QObject::connect(&w, SIGNAL(extraButton(QString)), &pqOrbiter, SLOT(extraButtons(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(resendAvCodes()), &pqOrbiter, SLOT(showAdvancedButtons()), Qt::QueuedConnection );
         QObject::connect(&pqOrbiter, SIGNAL(deviceAudioLevelChanged(int)), &w, SLOT(setDeviceVolume(int)));
-        QObject::connect(&w, SIGNAL(muteSound()), &pqOrbiter, SLOT(mute()), Qt::QueuedConnection);
+
         QObject::connect(&w, SIGNAL(moveArrowDirection(int)), &pqOrbiter, SLOT(moveDirection(int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(signalGoBack()), &pqOrbiter, SLOT(osdBack()), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(show_dvdMenu()), &pqOrbiter, SLOT(showMenu()));
@@ -760,7 +753,7 @@ orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
 
 
         /*Device control related*/
-        QObject::connect(&w, SIGNAL(setVolume(int)), &pqOrbiter,SLOT(adjustVolume(int)), Qt::QueuedConnection);
+
         QObject::connect(&w, SIGNAL(resendDeviceCode(int,int)), &pqOrbiter, SLOT(sendAvCommand(int,int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(osdChanged(bool)), &pqOrbiter, SLOT(displayToggle(bool)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(setDceVar(int,QString)), &pqOrbiter, SLOT(setVariable(int,QString)), Qt::QueuedConnection);
@@ -768,10 +761,7 @@ orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
         QObject::connect(&w, SIGNAL(newLightLevel(QString)), &pqOrbiter, SLOT(adjustRoomLights(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(zoomLevelChanged(QString)), &pqOrbiter, SLOT(setZoom(QString)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(aspectRatioChanged(QString)), &pqOrbiter, SLOT(setAspect(QString)), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(redButton()), &pqOrbiter, SLOT(redButton()), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(greenButton()), &pqOrbiter, SLOT(greenButton()), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(yellowButton()), &pqOrbiter, SLOT(yellowButton()), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(blueButton()), &pqOrbiter, SLOT(blueButton()), Qt::QueuedConnection);
+
         QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
 
         //FIXME: below emits error: QObject::connect: Attempt to bind non-signal orbiterWindow::close()

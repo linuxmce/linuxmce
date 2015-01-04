@@ -3452,13 +3452,6 @@ void DCE::qOrbiter::TuneToChannel(QString channel, QString chanid) //tunes to ch
 }
 
 
-void DCE::qOrbiter::mute()
-{
-    DCE::CMD_Mute  muteAudio(m_dwPK_Device, iMediaPluginID);
-    SendCommand(muteAudio);
-}
-
-
 void DCE::qOrbiter::changedTrack(QString direction)
 {
     string pResponse="";
@@ -4102,44 +4095,6 @@ void DCE::qOrbiter::grabScreenshot(QString fileWithPath)
 
 }
 
-/*
-   Default color buttons for the sat settop boxes and VDR remotes.
-*/
-void DCE::qOrbiter::redButton()
-{
-    CMD_Red pressRed(m_dwPK_Device, iMediaPluginID);
-    SendCommand(pressRed);
-}
-
-void DCE::qOrbiter::greenButton()
-{
-    CMD_Green pressGreen(m_dwPK_Device, iMediaPluginID);
-    SendCommand(pressGreen);
-}
-
-void DCE::qOrbiter::yellowButton()
-{
-    CMD_Yellow pressYellow(m_dwPK_Device, iMediaPluginID);
-    SendCommand(pressYellow);
-}
-
-void DCE::qOrbiter::blueButton()
-{
-    CMD_Blue pressBlue(m_dwPK_Device, iMediaPluginID);
-    SendCommand(pressBlue);
-}
-
-void qOrbiter::mediaRecord()
-{
-    CMD_Record startRecording(this->m_dwPK_Device, iMediaPluginID);
-    SendCommand(startRecording);
-}
-
-void qOrbiter::showRecordedTv()
-{
-    CMD_Recorded_TV_Menu recordedTv(this->m_dwPK_Device, iMediaPluginID);
-}
-
 
 void DCE::qOrbiter::powerOff(QString deviceType)
 {
@@ -4220,31 +4175,6 @@ void DCE::qOrbiter::ShowBookMarks()
 }
 
 
-
-
-
-void DCE::qOrbiter::adjustVolume(int vol)
-{
-    if(m_bPK_Device_NowPlaying_Audio_DiscreteVolume){
-        CMD_Set_Volume raiseVol(m_dwPK_Device, iMediaPluginID, StringUtils::itos(vol));
-        SendCommand(raiseVol);
-    }
-    else
-    {
-        if (vol > 0)
-        {
-            DCE::CMD_Vol_Up raiseVol(m_dwPK_Device, iMediaPluginID, vol);
-            SendCommand(raiseVol);
-        }
-        else
-        {
-            DCE::CMD_Vol_Down lowerVolume(m_dwPK_Device, iMediaPluginID, vol);
-            SendCommand(lowerVolume);
-
-        }
-    }
-
-}
 
 void qOrbiter::OnDisconnect()
 {

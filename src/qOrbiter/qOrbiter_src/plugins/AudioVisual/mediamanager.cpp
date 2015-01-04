@@ -154,11 +154,10 @@ void MediaManager::initializeConnections()
     QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString))); //effectively play for android.
     QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopPluginMedia()));
     QObject::connect(mediaPlayer, SIGNAL(pausePlayback()), this, SLOT(setPaused()));
-    QObject::connect(mediaPlayer, SIGNAL(pluginVolumeDown()), this, SIGNAL(androidVolumeDown()));
-    QObject::connect(mediaPlayer, SIGNAL(pluginVolumeUp()), this, SIGNAL(androidVolumeUp()));
+
 
    // QObject::connect(mediaPlayer, SIGNAL(currentMediaUrlChanged(QString)), this, SLOT(setFileReference(QString)));
-    QObject::connect(mediaPlayer, SIGNAL(stopCurrentMedia()), this, SLOT(stopAndroidMedia()));
+
     QObject::connect(mediaPlayer, SIGNAL(pluginVolumeDown()), this, SIGNAL(pluginVolumeDown()));
     QObject::connect(mediaPlayer, SIGNAL(pluginVolumeUp()), this, SIGNAL(pluginVolumeUp()));
     QObject::connect(mediaPlayer, SIGNAL(newMediaPosition(int)), this, SLOT(setMediaPosition(int)));

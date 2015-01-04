@@ -1874,13 +1874,8 @@ public slots:
     void addToPlaylist(bool now, string playlist);
     //-------------------------------------------------------
     void grabScreenshot(QString fileWithPath);
-    // Default colored settop box and VDR buttons.
-    void redButton();
-    void greenButton();
-    void yellowButton();
-    void blueButton();
-    void mediaRecord();
-    void showRecordedTv();
+
+
 
 
     //buttons from the more screen
@@ -1970,8 +1965,8 @@ public slots:
     void TuneToChannel(QString channel, QString chanid);
     void adjustLighting(int level, myMap devices);
     void adjustRoomLights(QString level);
-    void adjustVolume( int vol);
-    void mute();
+
+
     void changedTrack(QString direction);
     void SetSecurityMode(QString pass, int mode);
     void setLocation(int location, int ea);
