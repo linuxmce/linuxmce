@@ -1031,6 +1031,26 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     m_dwPK_Device_NowPlaying_Audio = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
     m_dwPK_Device_CaptureCard = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
 
+    DeviceData_Base *npd = this->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_dwPK_Device_NowPlaying);
+    QVariantMap infoMap;
+
+
+    if(npd && iPK_MediaType != 0){
+        int dt = npd->m_dwPK_DeviceTemplate;
+        int cat = npd->m_dwPK_DeviceCategory;
+        infoMap.insert("isEmbedded", npd->m_bIsEmbedded);
+        infoMap.insert("device_template", dt);
+        infoMap.insert("category", cat);
+        infoMap.insert("name", QString::fromStdString(npd->m_sDescription));
+    } else {
+        infoMap.insert("isEmbedded",false);
+        infoMap.insert("device_template", -1);
+        infoMap.insert("category", -1);
+        infoMap.insert("name", "");
+    }
+
+    qDebug() << infoMap;
+
     QVariantList np_deviceList;
     QVariantMap deviceMap;
     deviceMap.insert("Now Playing", m_dwPK_Device_NowPlaying);
@@ -1039,6 +1059,7 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     deviceMap.insert("Capture Card", m_dwPK_Device_CaptureCard);
 
     np_deviceList.append(deviceMap);
+    np_deviceList.append(infoMap);
     emit nowPlayingDeviceListChanged(np_deviceList);
 
     if(this->m_bIsOSD ){
