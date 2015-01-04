@@ -322,7 +322,7 @@ Item {
 
     }
     MediaInterface{
-     id:dceplayer
+     id:dcePlayer
     }
 
     function screenchange(screenname ){

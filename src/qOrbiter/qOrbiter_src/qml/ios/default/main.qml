@@ -1,4 +1,5 @@
 import QtQuick 2.3
+import DceScreenSaver 1.0
 import "../../skins-common/qt5/default/components"
 //Tablet - Smokey
 
@@ -267,50 +268,46 @@ Item {
     }
 
 
-QmlPictureFrame{
-    anchors.fill: parent
-}
 
-//    DceScreenSaver{
-//        id:glScreenSaver
-//        anchors{
-//            top:qml_root.top
-//            bottom:qml_root.bottom
-//            left: qml_root.left
-//            right: qml_root.right
-//        }
-//        enableDebug: true
-//        interval:60*1000
-//        useAnimation: true
-//        onDebugInfoChanged: console.log(debugInfo)
-//        active:manager.m_ipAddress==="192.168.80.1"
-//        requestUrl:manager.m_ipAddress
-//        Component.onCompleted: {
-//            glScreenSaver.setImageList(manager.screensaverImages)
-//            console.log("Orbiter Consume Screensaver images")
-//            console.log("Orbiter counts " + glScreenSaver.pictureCount)
-//        }
 
-//        Connections{
-//            target:manager
-//            onScreenSaverImagesReady:{
-//                glScreenSaver.setImageList(manager.screensaverImages)
-//                console.log("Orbiter Consume Screensaver images")
-//                console.log("Orbiter counts " + glScreenSaver.pictureCount)
-//            }
-//        }
+    DceScreenSaver{
+        id:glScreenSaver
+        anchors{
+            top:qml_root.top
+            bottom:qml_root.bottom
+            left: qml_root.left
+            right: qml_root.right
+        }
+        enableDebug: true
+        interval:60*1000
+        useAnimation: false
+        requestUrl:manager.m_ipAddress
+        Component.onCompleted: {
+            glScreenSaver.setImageList(manager.screensaverImages)
+            console.log("Orbiter Consume Screensaver images")
+            console.log("Orbiter counts " + glScreenSaver.pictureCount)
+        }
 
-//        MouseArea{
-//            anchors.fill: parent
-//            onClicked: {
-//                if(!uiOn){
-//                    console.log("screensaver revive")
-//                    uiOn=true
-//                }
-//            }
-//        }
+        Connections{
+            target:manager
+            onScreenSaverImagesReady:{
+                glScreenSaver.setImageList(manager.screensaverImages)
+                console.log("Orbiter Consume Screensaver images")
+                console.log("Orbiter counts " + glScreenSaver.pictureCount)
+            }
+        }
 
-//    }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                if(!uiOn){
+                    console.log("screensaver revive")
+                    uiOn=true
+                }
+            }
+        }
+
+    }
     MediaInterface{
         id:dcePlayer
     }
