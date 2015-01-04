@@ -353,6 +353,9 @@ private slots:
         m_nowPlayingCaptureCard = npDevices.value("Capture Card").toInt();
         m_nowPlayingVideoDevice = npDevices.value("Video Device").toInt();
         emit nowPlayingDevicesChanged();
+
+        qDebug() << d.at(0).toMap();
+        qDebug() << d.at(1).toMap();
     }
 
     void setImageAspectRatio(float r){ imageAspectRatio = r; emit imageAspectRatioChanged(); qDebug() << "Aspect Ratio" << imageAspectRatio;}

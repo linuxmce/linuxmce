@@ -1032,12 +1032,20 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
     m_dwPK_Device_CaptureCard = atoi(StringUtils::Tokenize(sList_PK_Device,",",pos).c_str());
 
     DeviceData_Base *npd = this->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_dwPK_Device_NowPlaying);
+
     QVariantMap infoMap;
 
 
     if(npd && iPK_MediaType != 0){
+        QVariantMap cmdMap;
+        for(std::map<int, std::string>::iterator cmd_it  =npd->m_mapCommands.begin(); cmd_it!=npd->m_mapCommands.end(); cmd_it++){
+            cmdMap.insert(QString::fromStdString(cmd_it->second), cmd_it->first);
+        }
+        qDebug() << cmdMap;
         int dt = npd->m_dwPK_DeviceTemplate;
         int cat = npd->m_dwPK_DeviceCategory;
+        int dv = npd->m_dwPK_Device;
+        infoMap.insert("device", dv);
         infoMap.insert("isEmbedded", npd->m_bIsEmbedded);
         infoMap.insert("device_template", dt);
         infoMap.insert("category", cat);
@@ -1048,8 +1056,6 @@ void qOrbiter::CMD_Set_Now_Playing(string sPK_DesignObj,string sValue_To_Assign,
         infoMap.insert("category", -1);
         infoMap.insert("name", "");
     }
-
-    qDebug() << infoMap;
 
     QVariantList np_deviceList;
     QVariantMap deviceMap;
@@ -4246,7 +4252,6 @@ void qOrbiter::OnReload()
     emit routerReloading("Reloading");
     emit routerConnectionChanged(false);
     Disconnect();
-
 }
 
 bool qOrbiter::OnReplaceHandler(string msg)

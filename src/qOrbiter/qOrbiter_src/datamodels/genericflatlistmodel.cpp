@@ -375,13 +375,11 @@ void GenericFlatListModel::sortModel(int column, Qt::SortOrder order)
 
 void GenericFlatListModel::setTotalRows(int rows)
 {
-    if(rows==0){
-        rows++;
-    }
+
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.setTotalRows rows = %d", rows);
     loaded = true; // tie into this method, as this is always called after a populate datagrid
     // ok, so the fakery starts here - once we got the number of rows, immediately say that we got them all..
-    beginInsertRows(QModelIndex(), 0, (rows-1));
+    beginInsertRows(QModelIndex(), 0, (rows));
     totalRows = rows;
 
     // TODO ?? what are these for? standard list api?

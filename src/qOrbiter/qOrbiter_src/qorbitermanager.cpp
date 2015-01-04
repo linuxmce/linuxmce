@@ -2789,7 +2789,7 @@ void qorbiterManager::setCurrentScreen(int s)
 void qorbiterManager::connectionWatchdog()
 {
     status="reconnect";
-    QTimer::singleShot(15000, this, SIGNAL(reInitialize()));
+    QTimer::singleShot(5000, this, SIGNAL(reInitialize()));
     emit qtMessage("Starting Watchdog");
 }
 
