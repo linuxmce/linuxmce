@@ -14,12 +14,8 @@ import "../components"
   *Advanced Device Controls
   */
 StyledScreen{
-    onScreenOpening: {
-       // screen_117.playlistSource=manager.getDataGridModel("Playlist", 18)
-    }
-
     keepHeader: false
-    MediaPlaybackBase{
+    BroadcastMediaBase{
         id:screen_117
         headerTitle: manager.translateMediaType(manager.i_current_mediaType)
     }

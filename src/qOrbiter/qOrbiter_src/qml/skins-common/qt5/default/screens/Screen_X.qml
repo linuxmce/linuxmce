@@ -20,11 +20,17 @@ StyledScreen{
         StyledText {
             id: screen_loading_error
             text: qsTr("I Cannot load this screen at this time. Please ensure that it exists and is error free.")
-            anchors.centerIn: parent
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
             color: "Black"
-            font.pixelSize: 32
+            font.pixelSize: 28
             font.bold: true
             font.weight: Font.Bold
+        }
+        StyledText{
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            text:"Error:"+ pageLoader.errorString
         }
     }
 

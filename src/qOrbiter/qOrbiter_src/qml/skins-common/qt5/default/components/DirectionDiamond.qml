@@ -5,10 +5,7 @@ Item {
     id: mediaSquare
     height: manager.isProfile ? scaleY(33) : scaleY(50)
     width:manager.isProfile ? scaleX(50) : scaleX(33)
-    Rectangle{
-        opacity: .25
-        anchors.fill: parent
-    }
+
     anchors{
         verticalCenter: parent.verticalCenter
         left:parent.left

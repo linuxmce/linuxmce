@@ -2,6 +2,7 @@
 AdvancedMediaOptions             AdvancedMediaOptions.qml                        #no comment
 AudioDelegate             AudioDelegate.qml                        #no comment
 Bookmarks             Bookmarks.qml                        #no comment
+BroadcastMediaBase             BroadcastMediaBase.qml                        #no comment
 Clock             Clock.qml                        #no comment
 ControlButton             ControlButton.qml                        #no comment
 ControlDiamond             ControlDiamond.qml                        #no comment
@@ -65,6 +66,8 @@ StyledScreen             StyledScreen.qml                        #no comment
 StyledText             StyledText.qml                        #no comment
 TabletFloorplanLayout             TabletFloorplanLayout.qml                        #no comment
 Thumbnail             Thumbnail.qml                        #no comment
+TvButtonPanel             TvButtonPanel.qml                        #no comment
+TvChannelPanel             TvChannelPanel.qml                        #no comment
 TvChannelView             TvChannelView.qml                        #no comment
 UserSelector             UserSelector.qml                        #no comment
 VideoDelegate             VideoDelegate.qml                        #no comment
