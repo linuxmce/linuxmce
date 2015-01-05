@@ -1,0 +1,5070 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+		5E618435888B9D49F8540165 = {
+			buildActionMask = 2147483647;
+			files = (
+				);
+			isa = PBXShellScriptBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+			name = "Qt Qmake";
+			shellPath = "/bin/sh";
+			shellScript = "make -C /Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS -f qOrbiterIos.xcodeproj/qt_makeqmake.mak";
+		};
+		28ACFF661E3927F125507D1E = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/main.cpp";
+			name = "main.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		35CDB39BF1F4AF96A45FB94D = {
+			fileRef = "28ACFF661E3927F125507D1E";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		6FCD01BB5DA89D4F07E3F64B = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter.cpp";
+			name = "qOrbiter.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		8E6F1CFECF6C67F877D1785B = {
+			fileRef = "6FCD01BB5DA89D4F07E3F64B";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		F495532813F30C1067ADBDA5 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/Gen_Devices/qOrbiterBase.cpp";
+			name = "qOrbiterBase.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		A90661F9F4D9863688EADF05 = {
+			fileRef = "F495532813F30C1067ADBDA5";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		CBC5A08DD5C896AB2C63D52D = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/qorbitermanager.cpp";
+			name = "qorbitermanager.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		C27FAE00BF32D5CA78B5541B = {
+			fileRef = "CBC5A08DD5C896AB2C63D52D";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		46612E353B86D76FC2B14307 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/listModel.cpp";
+			name = "listModel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		7D134E32D71EFC1685B71EEA = {
+			fileRef = "46612E353B86D76FC2B14307";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		DC832FCE508439AAEB36E0A3 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/gridItem.cpp";
+			name = "gridItem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		10D925674C7FF4EA7BF851F0 = {
+			fileRef = "DC832FCE508439AAEB36E0A3";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		33370D1FDB809AEE67D51FE5 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/imageProviders/gridimageprovider.cpp";
+			name = "gridimageprovider.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		E8BB021F19C5A05715D6C464 = {
+			fileRef = "33370D1FDB809AEE67D51FE5";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		E9DACEBF3304D829E7BCD57F = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/imageProviders/basicImageProvider.cpp";
+			name = "basicImageProvider.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		694C7CAB5A27A5C1300C2CC6 = {
+			fileRef = "E9DACEBF3304D829E7BCD57F";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		03C3CE925D8F5ADEBE35DA91 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/locationmodel.cpp";
+			name = "locationmodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		2E0B92C55EAEF4163DA998C3 = {
+			fileRef = "03C3CE925D8F5ADEBE35DA91";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		22C26CA9C12155CA04E2CB48 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/locationitem.cpp";
+			name = "locationitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		87BDE39EB06E917D25CE797E = {
+			fileRef = "22C26CA9C12155CA04E2CB48";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		352BD2264B4830F531C9836C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/usermodel.cpp";
+			name = "usermodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		ECE3020D379A8DB2332FBE52 = {
+			fileRef = "352BD2264B4830F531C9836C";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		9E676107C7A26360D4BA3C4B = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/useritem.cpp";
+			name = "useritem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		3433C598209CBFD49E9ADA4C = {
+			fileRef = "9E676107C7A26360D4BA3C4B";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		F4B480289792323B415240C6 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/lightingscenariomodel.cpp";
+			name = "lightingscenariomodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		C2FBDB32C022E6C7EEE550F8 = {
+			fileRef = "F4B480289792323B415240C6";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		7427CD3741C5F130E109A5F4 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/lightingscenarioitem.cpp";
+			name = "lightingscenarioitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		5BAEB48518C8C5B5E97A6F1A = {
+			fileRef = "7427CD3741C5F130E109A5F4";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		88DE547DBAA78EA7D540666E = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/mediascenariomodel.cpp";
+			name = "mediascenariomodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		7EB5C4948B87EF3CC2CAA030 = {
+			fileRef = "88DE547DBAA78EA7D540666E";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		18947B22E4DC1E425CE1747C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/mediascenarioitem.cpp";
+			name = "mediascenarioitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		E956E491BEE79D0BD2B35190 = {
+			fileRef = "18947B22E4DC1E425CE1747C";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		775EE407944F4BA7139F40BD = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/telecomscenariomodel.cpp";
+			name = "telecomscenariomodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		B30E22CE1CF031C4178B21B0 = {
+			fileRef = "775EE407944F4BA7139F40BD";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		5F3E2528BD6AC695A704513D = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/climatescenariomodel.cpp";
+			name = "climatescenariomodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		89340A52370B21D7BC4B573A = {
+			fileRef = "5F3E2528BD6AC695A704513D";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		122B0AFC1A19178268144BC2 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/securityscenariomodel.cpp";
+			name = "securityscenariomodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		B59C320B845269DD549289FC = {
+			fileRef = "122B0AFC1A19178268144BC2";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		905BC21FA1F632D3F2F3D62E = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/climatescenarioitem.cpp";
+			name = "climatescenarioitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		D285FEF62AB5F042D7110253 = {
+			fileRef = "905BC21FA1F632D3F2F3D62E";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		41F7E3BBE70358A44D1580FC = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/securityscenarioitem.cpp";
+			name = "securityscenarioitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		B1A172F31DDDB250385A6B6C = {
+			fileRef = "41F7E3BBE70358A44D1580FC";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		E7EC6394F0DEC98DE1D66C0A = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/telecomscenarioitem.cpp";
+			name = "telecomscenarioitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		20B1C93F5A777E87DB395097 = {
+			fileRef = "E7EC6394F0DEC98DE1D66C0A";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		4E1DBBCBE26754F60BACC8A3 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/screensaver/screensavermodule.cpp";
+			name = "screensavermodule.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		AC20FD60A85FB63FDD1D59A3 = {
+			fileRef = "4E1DBBCBE26754F60BACC8A3";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		CD138DB9F523B91546B47521 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/uuencode.cpp";
+			name = "uuencode.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		18B21591AE1895964E1131CA = {
+			fileRef = "CD138DB9F523B91546B47521";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		C313E428A0FBC3EA627EB6A5 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/ThreadedClass.cpp";
+			name = "ThreadedClass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		4095ED89A3AA5BA97C07DBC7 = {
+			fileRef = "C313E428A0FBC3EA627EB6A5";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		8299EBA6B43AB1C0D124E23C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/Other.cpp";
+			name = "Other.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		CF859A35FCFE2596926E1413 = {
+			fileRef = "8299EBA6B43AB1C0D124E23C";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		8E65410858F96878811C0396 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/MultiThreadIncludes.cpp";
+			name = "MultiThreadIncludes.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		66AD9B1FDDBBC818D12DA9B7 = {
+			fileRef = "8E65410858F96878811C0396";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		DDC8D2A9A1BAC4B71ED2E8B8 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/minilzo.cpp";
+			name = "minilzo.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		8BB5647D0710B06965587D0F = {
+			fileRef = "DDC8D2A9A1BAC4B71ED2E8B8";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		CE239D5BC805ADF7A61D936B = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/md5c.cpp";
+			name = "md5c.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		AD9C7120AC4B832600D3FECF = {
+			fileRef = "CE239D5BC805ADF7A61D936B";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		A041FA31436561C13789172A = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/FileUtils.cpp";
+			name = "FileUtils.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		369270983E81F1F1EE986332 = {
+			fileRef = "A041FA31436561C13789172A";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		C4E9042FFF9C88D6F6EB4C38 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/CommonIncludes.cpp";
+			name = "CommonIncludes.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		F8927EC232B651FF91BBC5BC = {
+			fileRef = "C4E9042FFF9C88D6F6EB4C38";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		285688F26BB4979667C2C4B4 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/SerializeClass/SerializeClass.cpp";
+			name = "SerializeClass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		56AA201BEFF14032D88294D2 = {
+			fileRef = "285688F26BB4979667C2C4B4";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		382D3B3AEC22309328DFD71F = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/Virtual_Device_Translator.cpp";
+			name = "Virtual_Device_Translator.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		F82809048F6E0918B61E6888 = {
+			fileRef = "382D3B3AEC22309328DFD71F";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		168EE61BE39F9703E231D462 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/Socket.cpp";
+			name = "Socket.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		2281FC34CDE72BAF64ADDC7D = {
+			fileRef = "168EE61BE39F9703E231D462";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		664AD69E3404ADF1EF90B932 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/ServerLogger.cpp";
+			name = "ServerLogger.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		05CAFBF373AA5E96FFE834CC = {
+			fileRef = "664AD69E3404ADF1EF90B932";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		5F5A872DBFB6DECC2D7D3446 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/PlainClientSocket.cpp";
+			name = "PlainClientSocket.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		6B6315F7A65581D3FB76F490 = {
+			fileRef = "5F5A872DBFB6DECC2D7D3446";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		26D762AE4E1E8134375DC02A = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/MessageBuffer.cpp";
+			name = "MessageBuffer.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		D0144B7E03BFCBF5107D6BF2 = {
+			fileRef = "26D762AE4E1E8134375DC02A";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		122B237F222FC4CAC10B445F = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/Message.cpp";
+			name = "Message.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		64F4044A25E1AF334F3E3AA8 = {
+			fileRef = "122B237F222FC4CAC10B445F";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		F44B1F806D4F5A6C01170466 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/HandleRequestSocket.cpp";
+			name = "HandleRequestSocket.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		2942CFAA6EDA51107711408F = {
+			fileRef = "F44B1F806D4F5A6C01170466";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		48D0CA7E044832550A4CBF68 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/Logger.cpp";
+			name = "Logger.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		304FA5BCF2A0C839E223370D = {
+			fileRef = "48D0CA7E044832550A4CBF68";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		8F9B7CCEB5EA3974AADDAE99 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/Event_Impl.cpp";
+			name = "Event_Impl.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		6F7B7AA2CB8022AA879B79F5 = {
+			fileRef = "8F9B7CCEB5EA3974AADDAE99";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		E5FD61B9A2CD58657A87CE37 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/DCEConfig.cpp";
+			name = "DCEConfig.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		55C4A651B15456356A89B288 = {
+			fileRef = "E5FD61B9A2CD58657A87CE37";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		E01C561B3FBBF858DB2389A0 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/DataGrid.cpp";
+			name = "DataGrid.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		57D70D01363CF78D6C8378C0 = {
+			fileRef = "E01C561B3FBBF858DB2389A0";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		8E78EBE1066D8631678D2024 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/Command_Impl.cpp";
+			name = "Command_Impl.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		DC1FDF4565D8091ACF214168 = {
+			fileRef = "8E78EBE1066D8631678D2024";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		BD9C9EDBA57FF8BAADE50F18 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/AlarmManager.cpp";
+			name = "AlarmManager.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		F2A953B57EECCB94BDAC0DFF = {
+			fileRef = "BD9C9EDBA57FF8BAADE50F18";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		EAD87F5AEC81C0829F09FC78 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/StringUtils.cpp";
+			name = "StringUtils.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		4DA323B8485F3DCE84C303D3 = {
+			fileRef = "EAD87F5AEC81C0829F09FC78";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		27CBCC109BCB66ED6EAF0FBB = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/ClientSocket.cpp";
+			name = "ClientSocket.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		E0612B8E4C89CFC9C6C88BFE = {
+			fileRef = "27CBCC109BCB66ED6EAF0FBB";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		9663B5914D28543E709FC2D2 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/DeviceData_Base.cpp";
+			name = "DeviceData_Base.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		C32B08D1350F63F2C318E347 = {
+			fileRef = "9663B5914D28543E709FC2D2";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		80E6DC80095CCA01088ACB93 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/DeviceData_Impl.cpp";
+			name = "DeviceData_Impl.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		515CE2B9E9D60F4AA5850AE1 = {
+			fileRef = "80E6DC80095CCA01088ACB93";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		A5567D6BDF61E67433CEE1F6 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/skindatamodel.cpp";
+			name = "skindatamodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		E4091238CA53F79B7647C9EB = {
+			fileRef = "A5567D6BDF61E67433CEE1F6";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		A9ACD8171E7027DF387E396C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/skindataitem.cpp";
+			name = "skindataitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		74E1CCAE34D12158B72B2666 = {
+			fileRef = "A9ACD8171E7027DF387E396C";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		D2ADEC14CDD2B7E391CFDAD9 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/DataModelItems/filtermodelitem.cpp";
+			name = "filtermodelitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		DC3B0B2AA2CBE243787157AE = {
+			fileRef = "D2ADEC14CDD2B7E391CFDAD9";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		C51240F2DD3FAD5BC567ABE4 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/DataModelItems/genreitem.cpp";
+			name = "genreitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		9441E86247ECBB0998515976 = {
+			fileRef = "C51240F2DD3FAD5BC567ABE4";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		45C090D218298E217A1D3643 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/getch.cpp";
+			name = "getch.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		13119192455F5AB0473D45AE = {
+			fileRef = "45C090D218298E217A1D3643";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		C494181E3172075F53326C08 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/DataModelItems/attributesortitem.cpp";
+			name = "attributesortitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		35E4BCCB87C873BB281CC709 = {
+			fileRef = "C494181E3172075F53326C08";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		80A2B0DFEA78706FBFDF1AA9 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/attributesortmodel.cpp";
+			name = "attributesortmodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		02A3D5BEADDAABD1BFA84DB1 = {
+			fileRef = "80A2B0DFEA78706FBFDF1AA9";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		3CA235AE42894FE55DAFF2ED = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/DataModelItems/mediatypeitem.cpp";
+			name = "mediatypeitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		38024B6422394AA4E4C6583B = {
+			fileRef = "3CA235AE42894FE55DAFF2ED";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		9369F1A988E11FBD0D249B1D = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/nowplayingclass.cpp";
+			name = "nowplayingclass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		4EA9769FE6A4DD8676E8DD84 = {
+			fileRef = "9369F1A988E11FBD0D249B1D";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		FD971F576D0B67B47A431DCB = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/screenparamsclass.cpp";
+			name = "screenparamsclass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		F47F2A63A8E69EB568C34F43 = {
+			fileRef = "FD971F576D0B67B47A431DCB";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		252F290C80A2DE4C9C4435D2 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/playlistclass.cpp";
+			name = "playlistclass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		2A7381D1A00D57F0DC54BAAD = {
+			fileRef = "252F290C80A2DE4C9C4435D2";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		F386877079FE60CFC645E840 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/playlistitemclass.cpp";
+			name = "playlistitemclass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		59D6F93809B840D6C5C44011 = {
+			fileRef = "F386877079FE60CFC645E840";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		F93A72ABC3CDCD7337F8EFCF = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/securityvideoclass.cpp";
+			name = "securityvideoclass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		5529A777A835ADA0F84DC6DA = {
+			fileRef = "F93A72ABC3CDCD7337F8EFCF";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		98197E0EE53E0C0DEFF11B30 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/epgchannellist.cpp";
+			name = "epgchannellist.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		67F3362375B3ABC39C345298 = {
+			fileRef = "98197E0EE53E0C0DEFF11B30";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		2129F3692370D1EA9932AA2A = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/playlists/epgitemclass.cpp";
+			name = "epgitemclass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		356B4EB0447F526CE2134568 = {
+			fileRef = "2129F3692370D1EA9932AA2A";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		5FC7CAE3B553E8BD2B44640B = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/floorplanmodel.cpp";
+			name = "floorplanmodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		0A18CF2D6E3AB5E12C59D8E6 = {
+			fileRef = "5FC7CAE3B553E8BD2B44640B";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		C4DBE8524D9DBC4337B6767C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/floorplanitem.cpp";
+			name = "floorplanitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		14959BED34FC67EF07A4F504 = {
+			fileRef = "C4DBE8524D9DBC4337B6767C";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		95159A718F3C06C34E78DE7E = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/imageProviders/abstractimageprovider.cpp";
+			name = "abstractimageprovider.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		9606D629BB253BF3201A0991 = {
+			fileRef = "95159A718F3C06C34E78DE7E";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		42613D0980E94FC871440A8F = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/DataModelItems/sleepingalarm.cpp";
+			name = "sleepingalarm.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		DF947D11F4EDFB47208A161C = {
+			fileRef = "42613D0980E94FC871440A8F";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		500C93B407FD27D530FAE5AD = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/filedetailsclass.cpp";
+			name = "filedetailsclass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		030701211EA408F67F26EA30 = {
+			fileRef = "500C93B407FD27D530FAE5AD";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		A1335EDF6E98D2AFBD43423B = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/avcodegrid.cpp";
+			name = "avcodegrid.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		C8FAD301FC63DD4CB99CBE7A = {
+			fileRef = "A1335EDF6E98D2AFBD43423B";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		F648A3DED432D5ADED20DFF1 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/floorplandevice.cpp";
+			name = "floorplandevice.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		727FADFB24693143F5E3496B = {
+			fileRef = "F648A3DED432D5ADED20DFF1";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		5A776C74BFB6D1F391F6FD0A = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/screenshotattributes.cpp";
+			name = "screenshotattributes.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		AF949B12FABF62F205FB56B4 = {
+			fileRef = "5A776C74BFB6D1F391F6FD0A";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		6F08F0DB091C161D5AA5F4F9 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/orbiterwindow.cpp";
+			name = "orbiterwindow.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		7A4772AABDFD21F94C753239 = {
+			fileRef = "6F08F0DB091C161D5AA5F4F9";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		C5FAE58F1781E6A48E086310 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/screensaverclass.cpp";
+			name = "screensaverclass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		245FD274B3FA1A666CD0E94E = {
+			fileRef = "C5FAE58F1781E6A48E086310";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		B062A83F202A91C6D3E05C43 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/skinloader.cpp";
+			name = "skinloader.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		BDCB96BE60A6490A60F6BB5B = {
+			fileRef = "B062A83F202A91C6D3E05C43";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		CAD36DA4BD67F0E141BFD56F = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/genericsetupmodel.cpp";
+			name = "genericsetupmodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		BF65D22B5E74CF48CD0C2F57 = {
+			fileRef = "CAD36DA4BD67F0E141BFD56F";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		87A7BA46B196A336A46244A6 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/genericsetupitem.cpp";
+			name = "genericsetupitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		9DE7FB5BC34A6B17651435D6 = {
+			fileRef = "87A7BA46B196A336A46244A6";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		181E9AE53E45D944D4506506 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/avdevice.cpp";
+			name = "avdevice.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		DC1F94E2934052E18D3A3E30 = {
+			fileRef = "181E9AE53E45D944D4506506";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		014D6A96C828822B91D29506 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/existingorbiter.cpp";
+			name = "existingorbiter.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		1FE99B2BDDFF136DC67CFC64 = {
+			fileRef = "014D6A96C828822B91D29506";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		F2831439FAD55FDCA76F3268 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/modelpage.cpp";
+			name = "modelpage.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		F8B7582105415FF26DBC4D6D = {
+			fileRef = "F2831439FAD55FDCA76F3268";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		D60521B485BFE6022ADE4088 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/avcommand.cpp";
+			name = "avcommand.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		B465D0161E245CF7C451B6AC = {
+			fileRef = "D60521B485BFE6022ADE4088";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		43535BA17AB4664CC9514251 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/shaders/filereader.cpp";
+			name = "filereader.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		BE1D750C1CBF572D6F0A2C76 = {
+			fileRef = "43535BA17AB4664CC9514251";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		E556052418D75853C5BA21A2 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/timecodemanager.cpp";
+			name = "timecodemanager.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		5426EB1268AF44E96DFC13AE = {
+			fileRef = "E556052418D75853C5BA21A2";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		BE3A139F2FD694B185452509 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/imageProviders/floorplandeviceprovider.cpp";
+			name = "floorplandeviceprovider.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		36642A94D26CA91C13A54C7A = {
+			fileRef = "BE3A139F2FD694B185452509";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		B726E9C11F03344B33BE657F = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/bookmarkitem.cpp";
+			name = "bookmarkitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		51D41383D088D5467C1C9212 = {
+			fileRef = "B726E9C11F03344B33BE657F";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		EA5F4150A73392CF10B737D9 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/promptdata.cpp";
+			name = "promptdata.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		157ED7F17D1453154C722B15 = {
+			fileRef = "EA5F4150A73392CF10B737D9";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		41704473A619822E5FBF1E24 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/existingorbitermodel.cpp";
+			name = "existingorbitermodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		6E7F95FBC3645694F7CE72DF = {
+			fileRef = "41704473A619822E5FBF1E24";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		6FF386B3D20551EB22C465C2 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/devicemodel.cpp";
+			name = "devicemodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		341D5056814110F5C3E3ACC5 = {
+			fileRef = "6FF386B3D20551EB22C465C2";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		AC6D85BB10621707CD4E7AAC = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/attributeobject.cpp";
+			name = "attributeobject.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		CBE412587BF796E6D33068FD = {
+			fileRef = "AC6D85BB10621707CD4E7AAC";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		E4CD8265F307BFA9A3EE4B61 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/logger/qorbiterlogger.cpp";
+			name = "qorbiterlogger.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		560F134C4483FC2BEFFD8E98 = {
+			fileRef = "E4CD8265F307BFA9A3EE4B61";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		E91244AAB351294047F543B1 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/genericflatlistmodel.cpp";
+			name = "genericflatlistmodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		895C2A7D0CDEDF7E0950617C = {
+			fileRef = "E91244AAB351294047F543B1";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		D008FD4FAFF4DB6BA2C2207E = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/genericmodelitem.cpp";
+			name = "genericmodelitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		DF862B057104848A7FF5E154 = {
+			fileRef = "D008FD4FAFF4DB6BA2C2207E";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		6594542638ABC62B104948A2 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/ActiveMediaStreams.cpp";
+			name = "ActiveMediaStreams.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		9B8881CE3AD88A07392C159D = {
+			fileRef = "6594542638ABC62B104948A2";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		B6A9C077CDE4084B235F9355 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/listitembase.cpp";
+			name = "listitembase.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		4ECC13CD4EE7246C596C138E = {
+			fileRef = "B6A9C077CDE4084B235F9355";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		A9121375E27F2A9BFFBB8312 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/defineObjects/linuxmcedata.cpp";
+			name = "linuxmcedata.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		AEF03831EA3C1CCE26C7F56B = {
+			fileRef = "A9121375E27F2A9BFFBB8312";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		B12A337C805F48D5644BF62B = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/defineObjects/mediatypehelper.cpp";
+			name = "mediatypehelper.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		86753781D027C130C29DE5A0 = {
+			fileRef = "B12A337C805F48D5644BF62B";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		6C32646F41AEFB5F917DE2C3 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/defineObjects/datagrids.cpp";
+			name = "datagrids.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		AE57E7D5F191ED81913A360C = {
+			fileRef = "6C32646F41AEFB5F917DE2C3";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		52735B11C3413A01A81FF30F = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/qorbiterios_qml_plugin_import.cpp";
+			name = "qorbiterios_qml_plugin_import.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		596A5FD5B2669DEBBDF53D63 = {
+			fileRef = "52735B11C3413A01A81FF30F";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		52CCD37585E9C719F86FC310 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/qorbiterios_plugin_import.cpp";
+			name = "qorbiterios_plugin_import.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		B44D0E3ACBC1AB32692864CC = {
+			fileRef = "52CCD37585E9C719F86FC310";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		BFE5525268264058F2023B77 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/platforms/ios/assets/icons/*.png";
+			name = "*.png";
+			sourceTree = "<absolute>";
+		};
+		08A3B4B74ABE3154E038A749 = {
+			fileRef = "BFE5525268264058F2023B77";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		C603082FEDA1010D8A22CAB9 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/qrc_skinData.cpp";
+			name = "qrc_skinData.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		EED63EDCB63AFBFC0D899A85 = {
+			fileRef = "C603082FEDA1010D8A22CAB9";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		D7921EA4A255A8E908247E43 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_qOrbiter.cpp";
+			name = "moc_qOrbiter.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		DE88CDC31AC2B17EE91ABA4D = {
+			fileRef = "D7921EA4A255A8E908247E43";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		203D39077966CE83A5F3ED80 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_qorbitermanager.cpp";
+			name = "moc_qorbitermanager.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		C57004E6C67C88F522633227 = {
+			fileRef = "203D39077966CE83A5F3ED80";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		B488C7FE29049FE40A6EC06C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_listModel.cpp";
+			name = "moc_listModel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		F790EFDDC6078322F94463EC = {
+			fileRef = "B488C7FE29049FE40A6EC06C";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		10C9DCFC0319E2248EE4F676 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_gridItem.cpp";
+			name = "moc_gridItem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		6707E1BFE6C25975E455127E = {
+			fileRef = "10C9DCFC0319E2248EE4F676";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		928B972613E0AA220D64817E = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_gridimageprovider.cpp";
+			name = "moc_gridimageprovider.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		5C37058206DE7B087AC5EC01 = {
+			fileRef = "928B972613E0AA220D64817E";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		367759B5498CE7CB5B197B2C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_locationmodel.cpp";
+			name = "moc_locationmodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		8262497BED9DCB17C1EB0AC9 = {
+			fileRef = "367759B5498CE7CB5B197B2C";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		932415A2444DF20821BBCAC9 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_locationitem.cpp";
+			name = "moc_locationitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		8A7ADBB02F82A2634DA27437 = {
+			fileRef = "932415A2444DF20821BBCAC9";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		699B396FD238F1637DC4D0EE = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_usermodel.cpp";
+			name = "moc_usermodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		5A0312947A1C5F40AF8931E3 = {
+			fileRef = "699B396FD238F1637DC4D0EE";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		0B6361BD595BF7120EFE6E96 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_useritem.cpp";
+			name = "moc_useritem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		C64BAFB623249C5D3FA4F7E6 = {
+			fileRef = "0B6361BD595BF7120EFE6E96";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		8F0C00D5A7BCEA1F9AA588D5 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_lightingscenariomodel.cpp";
+			name = "moc_lightingscenariomodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		5BBC129389D5513E597665DC = {
+			fileRef = "8F0C00D5A7BCEA1F9AA588D5";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		D2D56BE5275459F522C2CE75 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_lightingscenarioitem.cpp";
+			name = "moc_lightingscenarioitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		C89B48EDE52AFA5A18A7F48B = {
+			fileRef = "D2D56BE5275459F522C2CE75";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		66586104F90A140D0FCB585A = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_mediascenariomodel.cpp";
+			name = "moc_mediascenariomodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		BAE01D6A16744EE2F4D7AAE6 = {
+			fileRef = "66586104F90A140D0FCB585A";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		B468267C58A30FF410D5A05F = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_mediascenarioitem.cpp";
+			name = "moc_mediascenarioitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		4FBDD25DC40CE2F7B3574A01 = {
+			fileRef = "B468267C58A30FF410D5A05F";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		838D242F46885A0FFD8B87F1 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_telecomscenariomodel.cpp";
+			name = "moc_telecomscenariomodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		1C5DDA1C27AB682CBAC7D1D7 = {
+			fileRef = "838D242F46885A0FFD8B87F1";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		E075D5E512D52B8EBC9DE5FE = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_climatescenariomodel.cpp";
+			name = "moc_climatescenariomodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		58EB5660435BDED1DAA74F83 = {
+			fileRef = "E075D5E512D52B8EBC9DE5FE";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		EB5E7C0E7C966494862C0D89 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_securityscenariomodel.cpp";
+			name = "moc_securityscenariomodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		FFB6040B5689A87F0544B4E8 = {
+			fileRef = "EB5E7C0E7C966494862C0D89";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		BFE57E0678742F60D273ED1F = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_climatescenarioitem.cpp";
+			name = "moc_climatescenarioitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		57430F76E52F899D71362B70 = {
+			fileRef = "BFE57E0678742F60D273ED1F";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		3686E178D53C474CA7B0F6B2 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_securityscenarioitem.cpp";
+			name = "moc_securityscenarioitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		F52C15AC4D81E25D72EE46BC = {
+			fileRef = "3686E178D53C474CA7B0F6B2";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		54726BD19A55EE7C290AE66F = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_telecomscenarioitem.cpp";
+			name = "moc_telecomscenarioitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		11D3E3B56318148A85FCE2EE = {
+			fileRef = "54726BD19A55EE7C290AE66F";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		7FDD1C45A7D6B6AE4E3E9E49 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_screensavermodule.cpp";
+			name = "moc_screensavermodule.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		1FC6CC875DCD676D39AECD12 = {
+			fileRef = "7FDD1C45A7D6B6AE4E3E9E49";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		109EE65E63BF887F39F6935E = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_skindatamodel.cpp";
+			name = "moc_skindatamodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		08123D2AB5496EE25AD6DAFB = {
+			fileRef = "109EE65E63BF887F39F6935E";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		31B587B1B4E88F94797814B8 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_skindataitem.cpp";
+			name = "moc_skindataitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		ADB6873DC7DA7F96B3792532 = {
+			fileRef = "31B587B1B4E88F94797814B8";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		16138694EA0EEC06229B627B = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_filtermodelitem.cpp";
+			name = "moc_filtermodelitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		6929909F1874064EE143523F = {
+			fileRef = "16138694EA0EEC06229B627B";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		B4A4168E4347A0CA0E0E07CC = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_genreitem.cpp";
+			name = "moc_genreitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		002355DCDE91CBAB52DB3025 = {
+			fileRef = "B4A4168E4347A0CA0E0E07CC";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		5F775BE170DF7FD37688375A = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_attributesortitem.cpp";
+			name = "moc_attributesortitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		A62AD70068C9F98957205B46 = {
+			fileRef = "5F775BE170DF7FD37688375A";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		8DD0C1342C95FD64C9838B94 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_attributesortmodel.cpp";
+			name = "moc_attributesortmodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		976F1E756772230FE1AB8F31 = {
+			fileRef = "8DD0C1342C95FD64C9838B94";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		3EEFF1836EACB5EEFC204907 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_mediatypeitem.cpp";
+			name = "moc_mediatypeitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		189D85F06DD74C2761274C9F = {
+			fileRef = "3EEFF1836EACB5EEFC204907";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		38BA5CBFBA84F5B5D2DD926C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_filedetailsclass.cpp";
+			name = "moc_filedetailsclass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		41C1D85D50FA354AF916D5BF = {
+			fileRef = "38BA5CBFBA84F5B5D2DD926C";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		878A7AB5AAD754183EFB7514 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_nowplayingclass.cpp";
+			name = "moc_nowplayingclass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		E6B152F5A23578B754DAFFB5 = {
+			fileRef = "878A7AB5AAD754183EFB7514";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		FD03E8FA92098CE8C0F60571 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_screenparamsclass.cpp";
+			name = "moc_screenparamsclass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		91E9D1CFC2EB2B46773358D4 = {
+			fileRef = "FD03E8FA92098CE8C0F60571";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		6EAF182E5B9B6DE9B7BAFCD6 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_playlistclass.cpp";
+			name = "moc_playlistclass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		7F89FE94AD99CF78522860ED = {
+			fileRef = "6EAF182E5B9B6DE9B7BAFCD6";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		B59FD630F300BDD97C06D2B8 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_playlistitemclass.cpp";
+			name = "moc_playlistitemclass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		F9F76C95B036BE8DA98CAE23 = {
+			fileRef = "B59FD630F300BDD97C06D2B8";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		C75A353F349A9A23C0D0BB4F = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_securityvideoclass.cpp";
+			name = "moc_securityvideoclass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		9E454FAB314E5C19F50A382A = {
+			fileRef = "C75A353F349A9A23C0D0BB4F";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		F18E17C83B5F6AEA3BDA86B0 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_epgchannellist.cpp";
+			name = "moc_epgchannellist.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		4824B2E7D973B461D75CE5C8 = {
+			fileRef = "F18E17C83B5F6AEA3BDA86B0";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		D07BF3E2B1744B1F5E51D993 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_epgitemclass.cpp";
+			name = "moc_epgitemclass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		30DBB21FD4C5AFB1085AEE7C = {
+			fileRef = "D07BF3E2B1744B1F5E51D993";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		3DBDE9E60288B3A3E4B0DA17 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_floorplanmodel.cpp";
+			name = "moc_floorplanmodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		05EE23501CE0B89DFEDC1F17 = {
+			fileRef = "3DBDE9E60288B3A3E4B0DA17";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		C9FFAA565C050545A7C14B90 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_sleepingalarm.cpp";
+			name = "moc_sleepingalarm.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		8DFDA80CFE5FCF033885F183 = {
+			fileRef = "C9FFAA565C050545A7C14B90";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		B84C3B18F84E135F38A6D8D7 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_avcodegrid.cpp";
+			name = "moc_avcodegrid.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		D7F1DEED21D201F70E0EAD23 = {
+			fileRef = "B84C3B18F84E135F38A6D8D7";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		03888618C72B5ABC6B93AD7A = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_floorplanimageitem.cpp";
+			name = "moc_floorplanimageitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		4564763704CD985AC4123756 = {
+			fileRef = "03888618C72B5ABC6B93AD7A";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		61174939AC113D3EE721D31D = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_floorplandevice.cpp";
+			name = "moc_floorplandevice.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		79D50C0CCD12BC55515DDBCF = {
+			fileRef = "61174939AC113D3EE721D31D";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		6AF8B634B6D41298628FB0DF = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_screenshotattributes.cpp";
+			name = "moc_screenshotattributes.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		22959365736068EF92E864D1 = {
+			fileRef = "6AF8B634B6D41298628FB0DF";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		EC3A513C431501F7A9A41686 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_orbiterwindow.cpp";
+			name = "moc_orbiterwindow.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		C1F488E439F5761E2122B21B = {
+			fileRef = "EC3A513C431501F7A9A41686";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		EFD18368C260AFEA2264A5DB = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_screensaverclass.cpp";
+			name = "moc_screensaverclass.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		D45B28EF4F1DCEF8FC066E17 = {
+			fileRef = "EFD18368C260AFEA2264A5DB";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		2F0469275C7041231C888536 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_skinloader.cpp";
+			name = "moc_skinloader.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		6C8E822DE209DB119F9363D0 = {
+			fileRef = "2F0469275C7041231C888536";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		005677DE10325C3E55B1A39C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_genericsetupmodel.cpp";
+			name = "moc_genericsetupmodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		9574E3C85EC4BC7D7F4F12E2 = {
+			fileRef = "005677DE10325C3E55B1A39C";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		EEECEDD55075EC2FE9789794 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_genericsetupitem.cpp";
+			name = "moc_genericsetupitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		4137BAA07A6E992A63AEC29E = {
+			fileRef = "EEECEDD55075EC2FE9789794";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		A57FC1C5635474D788991EF4 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_avdevice.cpp";
+			name = "moc_avdevice.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		FDB61BA981C4A6AA9366C5BD = {
+			fileRef = "A57FC1C5635474D788991EF4";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		709D3861BC3DFD0E29D93B52 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_existingorbiter.cpp";
+			name = "moc_existingorbiter.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		F705003726B8BC3EDC381B9E = {
+			fileRef = "709D3861BC3DFD0E29D93B52";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		834C12F586BE85F83FCAF5A0 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_modelpage.cpp";
+			name = "moc_modelpage.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		F2A0638FE4CDD3527654F3C5 = {
+			fileRef = "834C12F586BE85F83FCAF5A0";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		740B114E59F066AFB8E94ED8 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_avcommand.cpp";
+			name = "moc_avcommand.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		9C65CBA96DA0ACFEB10B6410 = {
+			fileRef = "740B114E59F066AFB8E94ED8";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		7541ADB2F0748C914A2167A2 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_filereader.cpp";
+			name = "moc_filereader.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		507D34B757A91821C12CD147 = {
+			fileRef = "7541ADB2F0748C914A2167A2";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		E19C81AF97D73B8F5169243C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_timecodemanager.cpp";
+			name = "moc_timecodemanager.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		945C3B0B1C71464468238099 = {
+			fileRef = "E19C81AF97D73B8F5169243C";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		D60CC0AEAAF12CA154CD642F = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_floorplandeviceprovider.cpp";
+			name = "moc_floorplandeviceprovider.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		3A3F3F16669E0AEE28A2F4A2 = {
+			fileRef = "D60CC0AEAAF12CA154CD642F";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		1E10161373AFA5F5B050A414 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_bookmarkitem.cpp";
+			name = "moc_bookmarkitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		7CEC91D561930B81DE3D3633 = {
+			fileRef = "1E10161373AFA5F5B050A414";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		03CF59EC6A1EEB340E14692B = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_promptdata.cpp";
+			name = "moc_promptdata.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		9EDA6E90DF12CE60D9E869C6 = {
+			fileRef = "03CF59EC6A1EEB340E14692B";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		5155A3EDCFC9CA2D6CFEB47A = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_existingorbitermodel.cpp";
+			name = "moc_existingorbitermodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		BACBDFCE18AFDA1943530BAF = {
+			fileRef = "5155A3EDCFC9CA2D6CFEB47A";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		B7C71FFD6D48D95F8DDB83CE = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_devicemodel.cpp";
+			name = "moc_devicemodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		3030BFCC948209C6017B52DB = {
+			fileRef = "B7C71FFD6D48D95F8DDB83CE";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		EE900F3FFE88C5811952206E = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_attributeobject.cpp";
+			name = "moc_attributeobject.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		0CD993E96D794C6B17C6DBC8 = {
+			fileRef = "EE900F3FFE88C5811952206E";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		89F58758091950977ED4F7CB = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_qorbiterlogger.cpp";
+			name = "moc_qorbiterlogger.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		915FBD8711768E4DEA736623 = {
+			fileRef = "89F58758091950977ED4F7CB";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		DCB548555EE7C4F0721E4CC0 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_genericflatlistmodel.cpp";
+			name = "moc_genericflatlistmodel.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		8A0E9CEDAD67C1F8DE246E56 = {
+			fileRef = "DCB548555EE7C4F0721E4CC0";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		C97AA999D8C7CAEDB9F62C74 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_genericmodelitem.cpp";
+			name = "moc_genericmodelitem.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		CFED5E582780C65DF55BB187 = {
+			fileRef = "C97AA999D8C7CAEDB9F62C74";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		93A5EE5D66D826ED06F05ADC = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_ActiveMediaStreams.cpp";
+			name = "moc_ActiveMediaStreams.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		A0625E439FA7F2459442CA50 = {
+			fileRef = "93A5EE5D66D826ED06F05ADC";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		C65AF5EC943891CD28A240D8 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_MediaFilter.cpp";
+			name = "moc_MediaFilter.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		56434AEFBDDCD833B66C1C31 = {
+			fileRef = "C65AF5EC943891CD28A240D8";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		67A29B79A1F4771E81C91143 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_listitembase.cpp";
+			name = "moc_listitembase.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		9AB069E53CB905310B2489B6 = {
+			fileRef = "67A29B79A1F4771E81C91143";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		48A9B0D4EC7121346639077D = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_linuxmcedata.cpp";
+			name = "moc_linuxmcedata.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		BB6FE3C375B31483CC0CF12E = {
+			fileRef = "48A9B0D4EC7121346639077D";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		D145CC4172AA25908D0AFE8C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_mediatypehelper.cpp";
+			name = "moc_mediatypehelper.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		A4E9F0CA8F4EEE376F1B223C = {
+			fileRef = "D145CC4172AA25908D0AFE8C";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		B2A0C4C6CD8D4117E310F9A6 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_RemoteCommands.cpp";
+			name = "moc_RemoteCommands.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		25D9EA38C4763FEEF4E83044 = {
+			fileRef = "B2A0C4C6CD8D4117E310F9A6";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		21BBA67C57279545EB85AF8C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_datagrids.cpp";
+			name = "moc_datagrids.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		0E421388EEFD809BB4B16B16 = {
+			fileRef = "21BBA67C57279545EB85AF8C";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		31E541C4FEB79B354FCEF3D8 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/ThreadedClass.h";
+			name = "ThreadedClass.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		4FAD01450FF3CD32D4141EF3 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/MultiThreadIncludes.h";
+			name = "MultiThreadIncludes.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		39821C3390248E733EB51907 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/StringUtils.h";
+			name = "StringUtils.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		33C938289D88848E3AF201AB = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/CommonIncludes.h";
+			name = "CommonIncludes.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		04ADC7F271B97540BC123A89 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/Other.h";
+			name = "Other.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		3039B302353D32B721F33DE0 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/getch.h";
+			name = "getch.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		D8C9B02DB9B1A0CA8D075886 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/MyStl.h";
+			name = "MyStl.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		E373AE409A400432863747FB = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/DeviceData_Base.h";
+			name = "DeviceData_Base.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		047592811AB1E0744B08706B = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/Message.h";
+			name = "Message.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		24BF9666C57F49CFC3781C1D = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/ServerLogger.h";
+			name = "ServerLogger.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		A64152A43AA202E3CC355D8E = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/Logger.h";
+			name = "Logger.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		300CF5F896A29D6FC50D2459 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/Virtual_Device_Translator.h";
+			name = "Virtual_Device_Translator.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		70F27ED69A71DB64C1C4E41B = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/PlutoLockLogger.h";
+			name = "PlutoLockLogger.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		710974309B4B857638C05D6E = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/ClientSocket.h";
+			name = "ClientSocket.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		E438C97775551FFE65FF3E45 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/PlainClientSocket.h";
+			name = "PlainClientSocket.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		34358BF81222B3481E161388 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/DCE/AlarmManager.h";
+			name = "AlarmManager.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		76C46A6524C6A5ABED07A433 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/SerializeClass/SerializeClass.h";
+			name = "SerializeClass.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		2387B068248BC68126B086EF = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/PlutoUtils/FileUtils.h";
+			name = "FileUtils.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		81CB8EE51B405692DFD6B7AC = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/pluto_main/Define_DeviceCategory.h";
+			name = "Define_DeviceCategory.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		C50A22347026E2F1A0274974 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/pluto_main/Define_DeviceTemplate.h";
+			name = "Define_DeviceTemplate.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		87E5872CA38B506E7387FD1E = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter.h";
+			name = "qOrbiter.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		195D925CA277EBBF62EBF75D = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/Gen_Devices/qOrbiterBase.h";
+			name = "qOrbiterBase.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		53D1911065ADB6BADBB4BDEB = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/qorbitermanager.h";
+			name = "qorbitermanager.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		6AF66B31304820D4583E7989 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/qOrbiterData.h";
+			name = "qOrbiterData.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		3E68B7453128ECC18E6C62F1 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/listModel.h";
+			name = "listModel.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		A16B2463CBCAB9D02F33BB5E = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/gridItem.h";
+			name = "gridItem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		43BE510B21EEBA806F5F9807 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/imageProviders/gridimageprovider.h";
+			name = "gridimageprovider.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		BF8F21B6F8842AA533F2B4C8 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/imageProviders/basicImageProvider.h";
+			name = "basicImageProvider.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		F229905ED50EE62EC4030CB8 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/locationmodel.h";
+			name = "locationmodel.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		35E8B7EFAF03812DD7E1D0AB = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/locationitem.h";
+			name = "locationitem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		8F98A29FA11BA85BEFF7FC8C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/usermodel.h";
+			name = "usermodel.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		15B75799DA0262FD61E82A88 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/useritem.h";
+			name = "useritem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		4462DE35B7906D59D5798D17 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/lightingscenariomodel.h";
+			name = "lightingscenariomodel.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		23F55CE18FCC0F81D0BFA6FE = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/lightingscenarioitem.h";
+			name = "lightingscenarioitem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		5775283E1CE6B1E5477FDCB9 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/mediascenariomodel.h";
+			name = "mediascenariomodel.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		C579989840BAB34726CB6176 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/mediascenarioitem.h";
+			name = "mediascenarioitem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		5174AF1872A76006CF8B35A8 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/telecomscenariomodel.h";
+			name = "telecomscenariomodel.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		451C911C6001D65666A16189 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/climatescenariomodel.h";
+			name = "climatescenariomodel.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		F6D1CFAA1137DA5DEBC332F1 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/securityscenariomodel.h";
+			name = "securityscenariomodel.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		C01F097E030EDFF632238AE3 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/climatescenarioitem.h";
+			name = "climatescenarioitem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		963398E392912AD7D5A9A1CB = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/securityscenarioitem.h";
+			name = "securityscenarioitem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		6EAC348A1A9E582785388598 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/telecomscenarioitem.h";
+			name = "telecomscenarioitem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		92DBD94FB1286ABDBCF9DF3F = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/screensaver/screensavermodule.h";
+			name = "screensavermodule.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		23CD4400BF81A08C1986102A = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/skindatamodel.h";
+			name = "skindatamodel.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		5DAF67ACFDA5C13E0D2639A1 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/skindataitem.h";
+			name = "skindataitem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		361A6DAC5925047D8C2DE01D = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/DataModelItems/filtermodelitem.h";
+			name = "filtermodelitem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		67537FB7E160637C17FE0098 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/DataModelItems/genreitem.h";
+			name = "genreitem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		C3F206EB5491B1326218763B = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/DataModelItems/attributesortitem.h";
+			name = "attributesortitem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		A7C15C4177AB7BA42738D87A = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/attributesortmodel.h";
+			name = "attributesortmodel.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		87C11FECC758A08435405789 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/DataModelItems/mediatypeitem.h";
+			name = "mediatypeitem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		10C648251367F7CF1281B41F = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/filedetailsclass.h";
+			name = "filedetailsclass.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		1FCB69E7F69FE20F4752A964 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/nowplayingclass.h";
+			name = "nowplayingclass.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		8C4DECB1DB6085465CBB5F90 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/screenparamsclass.h";
+			name = "screenparamsclass.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		8621DF85C2020FF5882C7C8A = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/playlistclass.h";
+			name = "playlistclass.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		7D6AA77F98966DDBB632AD0C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/playlistitemclass.h";
+			name = "playlistitemclass.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		C6268C8F2B2E11A90BF311B4 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/securityvideoclass.h";
+			name = "securityvideoclass.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		BD6395C47802147C836CBA0F = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/epgchannellist.h";
+			name = "epgchannellist.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		3807F988F20742AEC5304681 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/playlists/epgitemclass.h";
+			name = "epgitemclass.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		FD87886DFAAF78073809C6BC = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/floorplanmodel.h";
+			name = "floorplanmodel.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		3761410239EED5B9941F9BA0 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/imageProviders/abstractimageprovider.h";
+			name = "abstractimageprovider.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		97CBA8FBFF725907FA226647 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/DataModelItems/sleepingalarm.h";
+			name = "sleepingalarm.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		DE1D017E7F166F204A5DD189 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/avcodegrid.h";
+			name = "avcodegrid.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		A22EF9B39E3C53FED2E25AF0 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/floorplanimageitem.h";
+			name = "floorplanimageitem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		94D4E8CE95035D561C8A8FDE = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/floorplandevice.h";
+			name = "floorplandevice.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		584B5205171A390D7A7B4CAC = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/screenshotattributes.h";
+			name = "screenshotattributes.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		0D639FD9212B15CE94080EF0 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/orbiterwindow.h";
+			name = "orbiterwindow.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		1D6AA1668A08D90A84A6278C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/screensaverclass.h";
+			name = "screensaverclass.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		297EA7AAEF06C6394B5D6F11 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/skinloader.h";
+			name = "skinloader.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		8D99FA1349045151DA42B6AE = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/genericsetupmodel.h";
+			name = "genericsetupmodel.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		BAA4D58DF58F2C6C9528E598 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/genericsetupitem.h";
+			name = "genericsetupitem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		E8D405F2E65316C1957E6704 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/avdevice.h";
+			name = "avdevice.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		9973B1DDB1B34C7908D7107D = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/existingorbiter.h";
+			name = "existingorbiter.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		841F072BE4D5170C757C91AF = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/modelpage.h";
+			name = "modelpage.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		88875CB8F78CB1DA383909AB = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/avcommand.h";
+			name = "avcommand.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		2FFB315C2BE76BF28F28BEA1 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/shaders/filereader.h";
+			name = "filereader.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		24256ED8E965025CB3E5521C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/shaders/trace.h";
+			name = "trace.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		FC6618AFA1D6C952464DF7E2 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/timecodemanager.h";
+			name = "timecodemanager.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		3734C5F9D40DEBE79DAB837B = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/imageProviders/floorplandeviceprovider.h";
+			name = "floorplandeviceprovider.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		9BB874234DDA2839FE60C131 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/bookmarkitem.h";
+			name = "bookmarkitem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		99F3A5144D4001142CFFAB53 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/promptdata.h";
+			name = "promptdata.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		63E37559A3DFD188FF876885 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/existingorbitermodel.h";
+			name = "existingorbitermodel.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		05ADAB972654CAAB8D6DC7C7 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/devicemodel.h";
+			name = "devicemodel.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		0504045205A949EA30B0FC31 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/attributeobject.h";
+			name = "attributeobject.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		B462950E29A51291E85EF685 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/logger/qorbiterlogger.h";
+			name = "qorbiterlogger.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		6DF77978E6249505DB76BF2D = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/genericflatlistmodel.h";
+			name = "genericflatlistmodel.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		8024CE8A4240D6BE3089CC5B = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/genericmodelitem.h";
+			name = "genericmodelitem.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		9F73D94A80AAEB365191C708 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/ActiveMediaStreams.h";
+			name = "ActiveMediaStreams.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		533B2929540EBB2941D47F14 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/MediaFilter.h";
+			name = "MediaFilter.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		C580317C98003CEEA427D7BE = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/DataGridHandler.h";
+			name = "DataGridHandler.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		901EB47AEBC82AE3664594E6 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/datamodels/listitembase.h";
+			name = "listitembase.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		55990D4589BA816F9BFC6858 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/defineObjects/linuxmcedata.h";
+			name = "linuxmcedata.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		DBF7579BAA5040056E10F24C = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/defineObjects/mediatypehelper.h";
+			name = "mediatypehelper.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		44B670CB4484A810F4FB83D7 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/RemoteCommands.h";
+			name = "RemoteCommands.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		E7887828EA3F74D37340678B = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/defineObjects/datagrids.h";
+			name = "datagrids.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		C39D924CEC7982E2DEBA4618 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/datamodels/DataGridHandler.h";
+			name = "DataGridHandler.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
+		6E4BA2902CCB87D39E8BCD00 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/qOrbiterIos.pro";
+			name = "qOrbiterIos.pro";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "text";
+		};
+		13C680053B5E80ED0A4B0C7D = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/.qmake.stash";
+			name = ".qmake.stash";
+			sourceTree = "<absolute>";
+		};
+		45F726C0B99F573FB5EBDAB8 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/deployment.pri";
+			name = "deployment.pri";
+			sourceTree = "<absolute>";
+		};
+		904D1DA9B39EFA930E455BC1 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/skinData.qrc";
+			name = "skinData.qrc";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "text";
+		};
+		904D1DA9B39EFA930E455BC1 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/skinData.qrc";
+			name = "skinData.qrc";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "text";
+		};
+		4AF2D901178434556CF0F1DD = {
+			fileRef = "904D1DA9B39EFA930E455BC1";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
+		25B08E2869634E9BCBA333A2 = {
+			isa = PBXGroup;
+			children = (
+				"C603082FEDA1010D8A22CAB9",
+				"D7921EA4A255A8E908247E43",
+				"203D39077966CE83A5F3ED80",
+				"B488C7FE29049FE40A6EC06C",
+				"10C9DCFC0319E2248EE4F676",
+				"928B972613E0AA220D64817E",
+				"367759B5498CE7CB5B197B2C",
+				"932415A2444DF20821BBCAC9",
+				"699B396FD238F1637DC4D0EE",
+				"0B6361BD595BF7120EFE6E96",
+				"8F0C00D5A7BCEA1F9AA588D5",
+				"D2D56BE5275459F522C2CE75",
+				"66586104F90A140D0FCB585A",
+				"B468267C58A30FF410D5A05F",
+				"838D242F46885A0FFD8B87F1",
+				"E075D5E512D52B8EBC9DE5FE",
+				"EB5E7C0E7C966494862C0D89",
+				"BFE57E0678742F60D273ED1F",
+				"3686E178D53C474CA7B0F6B2",
+				"54726BD19A55EE7C290AE66F",
+				"7FDD1C45A7D6B6AE4E3E9E49",
+				"109EE65E63BF887F39F6935E",
+				"31B587B1B4E88F94797814B8",
+				"16138694EA0EEC06229B627B",
+				"B4A4168E4347A0CA0E0E07CC",
+				"5F775BE170DF7FD37688375A",
+				"8DD0C1342C95FD64C9838B94",
+				"3EEFF1836EACB5EEFC204907",
+				"38BA5CBFBA84F5B5D2DD926C",
+				"878A7AB5AAD754183EFB7514",
+				"FD03E8FA92098CE8C0F60571",
+				"6EAF182E5B9B6DE9B7BAFCD6",
+				"B59FD630F300BDD97C06D2B8",
+				"C75A353F349A9A23C0D0BB4F",
+				"F18E17C83B5F6AEA3BDA86B0",
+				"D07BF3E2B1744B1F5E51D993",
+				"3DBDE9E60288B3A3E4B0DA17",
+				"C9FFAA565C050545A7C14B90",
+				"B84C3B18F84E135F38A6D8D7",
+				"03888618C72B5ABC6B93AD7A",
+				"61174939AC113D3EE721D31D",
+				"6AF8B634B6D41298628FB0DF",
+				"EC3A513C431501F7A9A41686",
+				"EFD18368C260AFEA2264A5DB",
+				"2F0469275C7041231C888536",
+				"005677DE10325C3E55B1A39C",
+				"EEECEDD55075EC2FE9789794",
+				"A57FC1C5635474D788991EF4",
+				"709D3861BC3DFD0E29D93B52",
+				"834C12F586BE85F83FCAF5A0",
+				"740B114E59F066AFB8E94ED8",
+				"7541ADB2F0748C914A2167A2",
+				"E19C81AF97D73B8F5169243C",
+				"D60CC0AEAAF12CA154CD642F",
+				"1E10161373AFA5F5B050A414",
+				"03CF59EC6A1EEB340E14692B",
+				"5155A3EDCFC9CA2D6CFEB47A",
+				"B7C71FFD6D48D95F8DDB83CE",
+				"EE900F3FFE88C5811952206E",
+				"89F58758091950977ED4F7CB",
+				"DCB548555EE7C4F0721E4CC0",
+				"C97AA999D8C7CAEDB9F62C74",
+				"93A5EE5D66D826ED06F05ADC",
+				"C65AF5EC943891CD28A240D8",
+				"67A29B79A1F4771E81C91143",
+				"48A9B0D4EC7121346639077D",
+				"D145CC4172AA25908D0AFE8C",
+				"B2A0C4C6CD8D4117E310F9A6",
+				"21BBA67C57279545EB85AF8C");
+			name = "Generated Sources";
+			sourceTree = "<Group>";
+		};
+		87DF60DE337FB58864343E39 = {
+			isa = PBXGroup;
+			children = (
+				"904D1DA9B39EFA930E455BC1");
+			name = "Resources";
+			sourceTree = "<Group>";
+		};
+		2EB56BE3C2D93CDAB0C52E67 = {
+			isa = PBXGroup;
+			children = (
+				"28ACFF661E3927F125507D1E",
+				"6FCD01BB5DA89D4F07E3F64B",
+				"F495532813F30C1067ADBDA5",
+				"CBC5A08DD5C896AB2C63D52D",
+				"46612E353B86D76FC2B14307",
+				"DC832FCE508439AAEB36E0A3",
+				"33370D1FDB809AEE67D51FE5",
+				"E9DACEBF3304D829E7BCD57F",
+				"03C3CE925D8F5ADEBE35DA91",
+				"22C26CA9C12155CA04E2CB48",
+				"352BD2264B4830F531C9836C",
+				"9E676107C7A26360D4BA3C4B",
+				"F4B480289792323B415240C6",
+				"7427CD3741C5F130E109A5F4",
+				"88DE547DBAA78EA7D540666E",
+				"18947B22E4DC1E425CE1747C",
+				"775EE407944F4BA7139F40BD",
+				"5F3E2528BD6AC695A704513D",
+				"122B0AFC1A19178268144BC2",
+				"905BC21FA1F632D3F2F3D62E",
+				"41F7E3BBE70358A44D1580FC",
+				"E7EC6394F0DEC98DE1D66C0A",
+				"4E1DBBCBE26754F60BACC8A3",
+				"CD138DB9F523B91546B47521",
+				"C313E428A0FBC3EA627EB6A5",
+				"8299EBA6B43AB1C0D124E23C",
+				"8E65410858F96878811C0396",
+				"DDC8D2A9A1BAC4B71ED2E8B8",
+				"CE239D5BC805ADF7A61D936B",
+				"A041FA31436561C13789172A",
+				"C4E9042FFF9C88D6F6EB4C38",
+				"285688F26BB4979667C2C4B4",
+				"382D3B3AEC22309328DFD71F",
+				"168EE61BE39F9703E231D462",
+				"664AD69E3404ADF1EF90B932",
+				"5F5A872DBFB6DECC2D7D3446",
+				"26D762AE4E1E8134375DC02A",
+				"122B237F222FC4CAC10B445F",
+				"F44B1F806D4F5A6C01170466",
+				"48D0CA7E044832550A4CBF68",
+				"8F9B7CCEB5EA3974AADDAE99",
+				"E5FD61B9A2CD58657A87CE37",
+				"E01C561B3FBBF858DB2389A0",
+				"8E78EBE1066D8631678D2024",
+				"BD9C9EDBA57FF8BAADE50F18",
+				"EAD87F5AEC81C0829F09FC78",
+				"27CBCC109BCB66ED6EAF0FBB",
+				"9663B5914D28543E709FC2D2",
+				"80E6DC80095CCA01088ACB93",
+				"A5567D6BDF61E67433CEE1F6",
+				"A9ACD8171E7027DF387E396C",
+				"D2ADEC14CDD2B7E391CFDAD9",
+				"C51240F2DD3FAD5BC567ABE4",
+				"45C090D218298E217A1D3643",
+				"C494181E3172075F53326C08",
+				"80A2B0DFEA78706FBFDF1AA9",
+				"3CA235AE42894FE55DAFF2ED",
+				"9369F1A988E11FBD0D249B1D",
+				"FD971F576D0B67B47A431DCB",
+				"252F290C80A2DE4C9C4435D2",
+				"F386877079FE60CFC645E840",
+				"F93A72ABC3CDCD7337F8EFCF",
+				"98197E0EE53E0C0DEFF11B30",
+				"2129F3692370D1EA9932AA2A",
+				"5FC7CAE3B553E8BD2B44640B",
+				"C4DBE8524D9DBC4337B6767C",
+				"95159A718F3C06C34E78DE7E",
+				"42613D0980E94FC871440A8F",
+				"500C93B407FD27D530FAE5AD",
+				"A1335EDF6E98D2AFBD43423B",
+				"F648A3DED432D5ADED20DFF1",
+				"5A776C74BFB6D1F391F6FD0A",
+				"6F08F0DB091C161D5AA5F4F9",
+				"C5FAE58F1781E6A48E086310",
+				"B062A83F202A91C6D3E05C43",
+				"CAD36DA4BD67F0E141BFD56F",
+				"87A7BA46B196A336A46244A6",
+				"181E9AE53E45D944D4506506",
+				"014D6A96C828822B91D29506",
+				"F2831439FAD55FDCA76F3268",
+				"D60521B485BFE6022ADE4088",
+				"43535BA17AB4664CC9514251",
+				"E556052418D75853C5BA21A2",
+				"BE3A139F2FD694B185452509",
+				"B726E9C11F03344B33BE657F",
+				"EA5F4150A73392CF10B737D9",
+				"41704473A619822E5FBF1E24",
+				"6FF386B3D20551EB22C465C2",
+				"AC6D85BB10621707CD4E7AAC",
+				"E4CD8265F307BFA9A3EE4B61",
+				"E91244AAB351294047F543B1",
+				"D008FD4FAFF4DB6BA2C2207E",
+				"6594542638ABC62B104948A2",
+				"B6A9C077CDE4084B235F9355",
+				"A9121375E27F2A9BFFBB8312",
+				"B12A337C805F48D5644BF62B",
+				"6C32646F41AEFB5F917DE2C3",
+				"52735B11C3413A01A81FF30F",
+				"52CCD37585E9C719F86FC310",
+				"BFE5525268264058F2023B77",
+				"31E541C4FEB79B354FCEF3D8",
+				"4FAD01450FF3CD32D4141EF3",
+				"39821C3390248E733EB51907",
+				"33C938289D88848E3AF201AB",
+				"04ADC7F271B97540BC123A89",
+				"3039B302353D32B721F33DE0",
+				"D8C9B02DB9B1A0CA8D075886",
+				"E373AE409A400432863747FB",
+				"047592811AB1E0744B08706B",
+				"24BF9666C57F49CFC3781C1D",
+				"A64152A43AA202E3CC355D8E",
+				"300CF5F896A29D6FC50D2459",
+				"70F27ED69A71DB64C1C4E41B",
+				"710974309B4B857638C05D6E",
+				"E438C97775551FFE65FF3E45",
+				"34358BF81222B3481E161388",
+				"76C46A6524C6A5ABED07A433",
+				"2387B068248BC68126B086EF",
+				"81CB8EE51B405692DFD6B7AC",
+				"C50A22347026E2F1A0274974",
+				"87E5872CA38B506E7387FD1E",
+				"195D925CA277EBBF62EBF75D",
+				"53D1911065ADB6BADBB4BDEB",
+				"6AF66B31304820D4583E7989",
+				"3E68B7453128ECC18E6C62F1",
+				"A16B2463CBCAB9D02F33BB5E",
+				"43BE510B21EEBA806F5F9807",
+				"BF8F21B6F8842AA533F2B4C8",
+				"F229905ED50EE62EC4030CB8",
+				"35E8B7EFAF03812DD7E1D0AB",
+				"8F98A29FA11BA85BEFF7FC8C",
+				"15B75799DA0262FD61E82A88",
+				"4462DE35B7906D59D5798D17",
+				"23F55CE18FCC0F81D0BFA6FE",
+				"5775283E1CE6B1E5477FDCB9",
+				"C579989840BAB34726CB6176",
+				"5174AF1872A76006CF8B35A8",
+				"451C911C6001D65666A16189",
+				"F6D1CFAA1137DA5DEBC332F1",
+				"C01F097E030EDFF632238AE3",
+				"963398E392912AD7D5A9A1CB",
+				"6EAC348A1A9E582785388598",
+				"92DBD94FB1286ABDBCF9DF3F",
+				"23CD4400BF81A08C1986102A",
+				"5DAF67ACFDA5C13E0D2639A1",
+				"361A6DAC5925047D8C2DE01D",
+				"67537FB7E160637C17FE0098",
+				"C3F206EB5491B1326218763B",
+				"A7C15C4177AB7BA42738D87A",
+				"87C11FECC758A08435405789",
+				"10C648251367F7CF1281B41F",
+				"1FCB69E7F69FE20F4752A964",
+				"8C4DECB1DB6085465CBB5F90",
+				"8621DF85C2020FF5882C7C8A",
+				"7D6AA77F98966DDBB632AD0C",
+				"C6268C8F2B2E11A90BF311B4",
+				"BD6395C47802147C836CBA0F",
+				"3807F988F20742AEC5304681",
+				"FD87886DFAAF78073809C6BC",
+				"3761410239EED5B9941F9BA0",
+				"97CBA8FBFF725907FA226647",
+				"DE1D017E7F166F204A5DD189",
+				"A22EF9B39E3C53FED2E25AF0",
+				"94D4E8CE95035D561C8A8FDE",
+				"584B5205171A390D7A7B4CAC",
+				"0D639FD9212B15CE94080EF0",
+				"1D6AA1668A08D90A84A6278C",
+				"297EA7AAEF06C6394B5D6F11",
+				"8D99FA1349045151DA42B6AE",
+				"BAA4D58DF58F2C6C9528E598",
+				"E8D405F2E65316C1957E6704",
+				"9973B1DDB1B34C7908D7107D",
+				"841F072BE4D5170C757C91AF",
+				"88875CB8F78CB1DA383909AB",
+				"2FFB315C2BE76BF28F28BEA1",
+				"24256ED8E965025CB3E5521C",
+				"FC6618AFA1D6C952464DF7E2",
+				"3734C5F9D40DEBE79DAB837B",
+				"9BB874234DDA2839FE60C131",
+				"99F3A5144D4001142CFFAB53",
+				"63E37559A3DFD188FF876885",
+				"05ADAB972654CAAB8D6DC7C7",
+				"0504045205A949EA30B0FC31",
+				"B462950E29A51291E85EF685",
+				"6DF77978E6249505DB76BF2D",
+				"8024CE8A4240D6BE3089CC5B",
+				"9F73D94A80AAEB365191C708",
+				"533B2929540EBB2941D47F14",
+				"C580317C98003CEEA427D7BE",
+				"901EB47AEBC82AE3664594E6",
+				"55990D4589BA816F9BFC6858",
+				"DBF7579BAA5040056E10F24C",
+				"44B670CB4484A810F4FB83D7",
+				"E7887828EA3F74D37340678B",
+				"C39D924CEC7982E2DEBA4618");
+			name = "Sources";
+			sourceTree = "<Group>";
+		};
+		74B182DB50CB5611B5C1C297 = {
+			isa = PBXGroup;
+			children = (
+				"6E4BA2902CCB87D39E8BCD00",
+				"13C680053B5E80ED0A4B0C7D",
+				"45F726C0B99F573FB5EBDAB8",
+				"904D1DA9B39EFA930E455BC1");
+			name = "Supporting Files";
+			sourceTree = "<Group>";
+		};
+		7EF0942E79C014DCEC8976BC = {
+			buildActionMask = 2147483647;
+			files = (
+				);
+			isa = PBXShellScriptBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+			name = "Qt Preprocessors";
+			shellPath = "/bin/sh";
+			shellScript = "make -C /Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS -f qOrbiterIos.xcodeproj/qt_preprocess.mak";
+		};
+		F7E50F631C51CD5B5DC0BC43 = {
+			buildActionMask = 2147483647;
+			files = (
+				"35CDB39BF1F4AF96A45FB94D",
+				"8E6F1CFECF6C67F877D1785B",
+				"A90661F9F4D9863688EADF05",
+				"C27FAE00BF32D5CA78B5541B",
+				"7D134E32D71EFC1685B71EEA",
+				"10D925674C7FF4EA7BF851F0",
+				"E8BB021F19C5A05715D6C464",
+				"694C7CAB5A27A5C1300C2CC6",
+				"2E0B92C55EAEF4163DA998C3",
+				"87BDE39EB06E917D25CE797E",
+				"ECE3020D379A8DB2332FBE52",
+				"3433C598209CBFD49E9ADA4C",
+				"C2FBDB32C022E6C7EEE550F8",
+				"5BAEB48518C8C5B5E97A6F1A",
+				"7EB5C4948B87EF3CC2CAA030",
+				"E956E491BEE79D0BD2B35190",
+				"B30E22CE1CF031C4178B21B0",
+				"89340A52370B21D7BC4B573A",
+				"B59C320B845269DD549289FC",
+				"D285FEF62AB5F042D7110253",
+				"B1A172F31DDDB250385A6B6C",
+				"20B1C93F5A777E87DB395097",
+				"AC20FD60A85FB63FDD1D59A3",
+				"18B21591AE1895964E1131CA",
+				"4095ED89A3AA5BA97C07DBC7",
+				"CF859A35FCFE2596926E1413",
+				"66AD9B1FDDBBC818D12DA9B7",
+				"8BB5647D0710B06965587D0F",
+				"AD9C7120AC4B832600D3FECF",
+				"369270983E81F1F1EE986332",
+				"F8927EC232B651FF91BBC5BC",
+				"56AA201BEFF14032D88294D2",
+				"F82809048F6E0918B61E6888",
+				"2281FC34CDE72BAF64ADDC7D",
+				"05CAFBF373AA5E96FFE834CC",
+				"6B6315F7A65581D3FB76F490",
+				"D0144B7E03BFCBF5107D6BF2",
+				"64F4044A25E1AF334F3E3AA8",
+				"2942CFAA6EDA51107711408F",
+				"304FA5BCF2A0C839E223370D",
+				"6F7B7AA2CB8022AA879B79F5",
+				"55C4A651B15456356A89B288",
+				"57D70D01363CF78D6C8378C0",
+				"DC1FDF4565D8091ACF214168",
+				"F2A953B57EECCB94BDAC0DFF",
+				"4DA323B8485F3DCE84C303D3",
+				"E0612B8E4C89CFC9C6C88BFE",
+				"C32B08D1350F63F2C318E347",
+				"515CE2B9E9D60F4AA5850AE1",
+				"E4091238CA53F79B7647C9EB",
+				"74E1CCAE34D12158B72B2666",
+				"DC3B0B2AA2CBE243787157AE",
+				"9441E86247ECBB0998515976",
+				"13119192455F5AB0473D45AE",
+				"35E4BCCB87C873BB281CC709",
+				"02A3D5BEADDAABD1BFA84DB1",
+				"38024B6422394AA4E4C6583B",
+				"4EA9769FE6A4DD8676E8DD84",
+				"F47F2A63A8E69EB568C34F43",
+				"2A7381D1A00D57F0DC54BAAD",
+				"59D6F93809B840D6C5C44011",
+				"5529A777A835ADA0F84DC6DA",
+				"67F3362375B3ABC39C345298",
+				"356B4EB0447F526CE2134568",
+				"0A18CF2D6E3AB5E12C59D8E6",
+				"14959BED34FC67EF07A4F504",
+				"9606D629BB253BF3201A0991",
+				"DF947D11F4EDFB47208A161C",
+				"030701211EA408F67F26EA30",
+				"C8FAD301FC63DD4CB99CBE7A",
+				"727FADFB24693143F5E3496B",
+				"AF949B12FABF62F205FB56B4",
+				"7A4772AABDFD21F94C753239",
+				"245FD274B3FA1A666CD0E94E",
+				"BDCB96BE60A6490A60F6BB5B",
+				"BF65D22B5E74CF48CD0C2F57",
+				"9DE7FB5BC34A6B17651435D6",
+				"DC1F94E2934052E18D3A3E30",
+				"1FE99B2BDDFF136DC67CFC64",
+				"F8B7582105415FF26DBC4D6D",
+				"B465D0161E245CF7C451B6AC",
+				"BE1D750C1CBF572D6F0A2C76",
+				"5426EB1268AF44E96DFC13AE",
+				"36642A94D26CA91C13A54C7A",
+				"51D41383D088D5467C1C9212",
+				"157ED7F17D1453154C722B15",
+				"6E7F95FBC3645694F7CE72DF",
+				"341D5056814110F5C3E3ACC5",
+				"CBE412587BF796E6D33068FD",
+				"560F134C4483FC2BEFFD8E98",
+				"895C2A7D0CDEDF7E0950617C",
+				"DF862B057104848A7FF5E154",
+				"9B8881CE3AD88A07392C159D",
+				"4ECC13CD4EE7246C596C138E",
+				"AEF03831EA3C1CCE26C7F56B",
+				"86753781D027C130C29DE5A0",
+				"AE57E7D5F191ED81913A360C",
+				"596A5FD5B2669DEBBDF53D63",
+				"B44D0E3ACBC1AB32692864CC",
+				"EED63EDCB63AFBFC0D899A85",
+				"DE88CDC31AC2B17EE91ABA4D",
+				"C57004E6C67C88F522633227",
+				"F790EFDDC6078322F94463EC",
+				"6707E1BFE6C25975E455127E",
+				"5C37058206DE7B087AC5EC01",
+				"8262497BED9DCB17C1EB0AC9",
+				"8A7ADBB02F82A2634DA27437",
+				"5A0312947A1C5F40AF8931E3",
+				"C64BAFB623249C5D3FA4F7E6",
+				"5BBC129389D5513E597665DC",
+				"C89B48EDE52AFA5A18A7F48B",
+				"BAE01D6A16744EE2F4D7AAE6",
+				"4FBDD25DC40CE2F7B3574A01",
+				"1C5DDA1C27AB682CBAC7D1D7",
+				"58EB5660435BDED1DAA74F83",
+				"FFB6040B5689A87F0544B4E8",
+				"57430F76E52F899D71362B70",
+				"F52C15AC4D81E25D72EE46BC",
+				"11D3E3B56318148A85FCE2EE",
+				"1FC6CC875DCD676D39AECD12",
+				"08123D2AB5496EE25AD6DAFB",
+				"ADB6873DC7DA7F96B3792532",
+				"6929909F1874064EE143523F",
+				"002355DCDE91CBAB52DB3025",
+				"A62AD70068C9F98957205B46",
+				"976F1E756772230FE1AB8F31",
+				"189D85F06DD74C2761274C9F",
+				"41C1D85D50FA354AF916D5BF",
+				"E6B152F5A23578B754DAFFB5",
+				"91E9D1CFC2EB2B46773358D4",
+				"7F89FE94AD99CF78522860ED",
+				"F9F76C95B036BE8DA98CAE23",
+				"9E454FAB314E5C19F50A382A",
+				"4824B2E7D973B461D75CE5C8",
+				"30DBB21FD4C5AFB1085AEE7C",
+				"05EE23501CE0B89DFEDC1F17",
+				"8DFDA80CFE5FCF033885F183",
+				"D7F1DEED21D201F70E0EAD23",
+				"4564763704CD985AC4123756",
+				"79D50C0CCD12BC55515DDBCF",
+				"22959365736068EF92E864D1",
+				"C1F488E439F5761E2122B21B",
+				"D45B28EF4F1DCEF8FC066E17",
+				"6C8E822DE209DB119F9363D0",
+				"9574E3C85EC4BC7D7F4F12E2",
+				"4137BAA07A6E992A63AEC29E",
+				"FDB61BA981C4A6AA9366C5BD",
+				"F705003726B8BC3EDC381B9E",
+				"F2A0638FE4CDD3527654F3C5",
+				"9C65CBA96DA0ACFEB10B6410",
+				"507D34B757A91821C12CD147",
+				"945C3B0B1C71464468238099",
+				"3A3F3F16669E0AEE28A2F4A2",
+				"7CEC91D561930B81DE3D3633",
+				"9EDA6E90DF12CE60D9E869C6",
+				"BACBDFCE18AFDA1943530BAF",
+				"3030BFCC948209C6017B52DB",
+				"0CD993E96D794C6B17C6DBC8",
+				"915FBD8711768E4DEA736623",
+				"8A0E9CEDAD67C1F8DE246E56",
+				"CFED5E582780C65DF55BB187",
+				"A0625E439FA7F2459442CA50",
+				"56434AEFBDDCD833B66C1C31",
+				"9AB069E53CB905310B2489B6",
+				"BB6FE3C375B31483CC0CF12E",
+				"A4E9F0CA8F4EEE376F1B223C",
+				"25D9EA38C4763FEEF4E83044",
+				"0E421388EEFD809BB4B16B16");
+			isa = PBXSourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+			name = "Compile Sources";
+		};
+		831FE6F6AD514D96DAF3A3DC = {
+			isa = PBXFileReference;
+			name = "DceScreenSaverPlugin";
+			path = "../../../../Qt/5.4/ios/imports/DceScreenSaver/libdcescreensaverplugin.a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		3329B9E5B7954212383BC5AB = {
+			fileRef = "831FE6F6AD514D96DAF3A3DC";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		0502EA1CC3D6902F1D0A4B34 = {
+			isa = PBXFileReference;
+			name = "AudioVisualPlugin";
+			path = "../../../../Qt/5.4/ios/imports/AudioVisual/libaudiovisualplugin.a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		CD2EB276BED0EC65B9837336 = {
+			fileRef = "0502EA1CC3D6902F1D0A4B34";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		021BBDD573CC2FB716B07B67 = {
+			isa = PBXFileReference;
+			name = "qios";
+			path = "../../../../Qt/5.4/ios/plugins/platforms/libqios$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		7A492BA3E98B6144A4855A06 = {
+			fileRef = "021BBDD573CC2FB716B07B67";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		FCC237CA5AD60B9BA4447615 = {
+			isa = PBXFileReference;
+			name = "Foundation.framework";
+			path = "/System/Library/Frameworks/Foundation.framework";
+			refType = 0;
+			sourceTree = "<absolute>";
+			lastKnownFileType = "wrapper.framework";
+		};
+		F26454630C80841CBDCFE1CA = {
+			fileRef = "FCC237CA5AD60B9BA4447615";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7EC00404ACD5AB0E97726B0E = {
+			isa = PBXFileReference;
+			name = "QuartzCore.framework";
+			path = "/System/Library/Frameworks/QuartzCore.framework";
+			refType = 0;
+			sourceTree = "<absolute>";
+			lastKnownFileType = "wrapper.framework";
+		};
+		B460F624007324313696BE86 = {
+			fileRef = "7EC00404ACD5AB0E97726B0E";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		4D765E1B1EA6C757220C63E7 = {
+			isa = PBXFileReference;
+			name = "CoreFoundation.framework";
+			path = "/System/Library/Frameworks/CoreFoundation.framework";
+			refType = 0;
+			sourceTree = "<absolute>";
+			lastKnownFileType = "wrapper.framework";
+		};
+		F8B465CE34D8DF87AAE95913 = {
+			fileRef = "4D765E1B1EA6C757220C63E7";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7D7B02101166B76FD2D4F8B4 = {
+			isa = PBXFileReference;
+			name = "CoreText.framework";
+			path = "/System/Library/Frameworks/CoreText.framework";
+			refType = 0;
+			sourceTree = "<absolute>";
+			lastKnownFileType = "wrapper.framework";
+		};
+		2B02D9DC58A01E45248DDBCE = {
+			fileRef = "7D7B02101166B76FD2D4F8B4";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		6AE3EC31EE5BB1FCEE84137C = {
+			isa = PBXFileReference;
+			name = "CoreGraphics.framework";
+			path = "/System/Library/Frameworks/CoreGraphics.framework";
+			refType = 0;
+			sourceTree = "<absolute>";
+			lastKnownFileType = "wrapper.framework";
+		};
+		0CE02722F00CAD43741297B5 = {
+			fileRef = "6AE3EC31EE5BB1FCEE84137C";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		773526C7141343CA6BE6C425 = {
+			isa = PBXFileReference;
+			name = "Qt5PlatformSupport";
+			path = "../../../../Qt/5.4/ios/lib/libQt5PlatformSupport$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		6B3B7AF3E3AEBA54B5687D26 = {
+			fileRef = "773526C7141343CA6BE6C425";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		205259EEEE2BADA5E64741E3 = {
+			isa = PBXFileReference;
+			name = "Security.framework";
+			path = "/System/Library/Frameworks/Security.framework";
+			refType = 0;
+			sourceTree = "<absolute>";
+			lastKnownFileType = "wrapper.framework";
+		};
+		15364689D2AB5A30E87A689F = {
+			fileRef = "205259EEEE2BADA5E64741E3";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		FF5BDAB0076F3391B219EA52 = {
+			isa = PBXFileReference;
+			name = "SystemConfiguration.framework";
+			path = "/System/Library/Frameworks/SystemConfiguration.framework";
+			refType = 0;
+			sourceTree = "<absolute>";
+			lastKnownFileType = "wrapper.framework";
+		};
+		D4639595C3BCF2A39D88DF6E = {
+			fileRef = "FF5BDAB0076F3391B219EA52";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		595B407CD9ED0D6A825F70BB = {
+			isa = PBXFileReference;
+			name = "Qt5Script";
+			path = "../../../../Qt/5.4/ios/lib/libQt5Script$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		D819D88501AD7127C6F0CEDB = {
+			fileRef = "595B407CD9ED0D6A825F70BB";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E755F57B539C52FF412C6733 = {
+			isa = PBXFileReference;
+			name = "Qt5Xml";
+			path = "../../../../Qt/5.4/ios/lib/libQt5Xml$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		020F309893860D6052B2E912 = {
+			fileRef = "E755F57B539C52FF412C6733";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		EB3DDE0234E897911B8D641D = {
+			isa = PBXFileReference;
+			name = "qtquick2plugin";
+			path = "../../../../Qt/5.4/ios/qml/QtQuick.2/libqtquick2plugin$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		5417BEC910AD2FC873D66180 = {
+			fileRef = "EB3DDE0234E897911B8D641D";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		989EE6B75DE7C838140E9694 = {
+			isa = PBXFileReference;
+			name = "windowplugin";
+			path = "../../../../Qt/5.4/ios/qml/QtQuick/Window.2/libwindowplugin$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		7796340EDD73581E199451AD = {
+			fileRef = "989EE6B75DE7C838140E9694";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		547017201DB21DA903C169B9 = {
+			isa = PBXFileReference;
+			name = "declarative_multimedia";
+			path = "../../../../Qt/5.4/ios/qml/QtMultimedia/libdeclarative_multimedia$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		36B6CD2C5BDC0F18973558E0 = {
+			fileRef = "547017201DB21DA903C169B9";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		1C087CEE08B009E5DFE9A1DD = {
+			isa = PBXFileReference;
+			name = "Qt5MultimediaQuick_p";
+			path = "../../../../Qt/5.4/ios/lib/libQt5MultimediaQuick_p$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		3B6E00A9C05F7CF33F903627 = {
+			fileRef = "1C087CEE08B009E5DFE9A1DD";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		40443711BE83A59D2D0B4451 = {
+			isa = PBXFileReference;
+			name = "qavfcamera";
+			path = "../../../../Qt/5.4/ios/plugins/mediaservice/libqavfcamera$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		4206785EE2CA30B462154664 = {
+			fileRef = "40443711BE83A59D2D0B4451";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3C44131FDCFEF4396B9EA2BA = {
+			isa = PBXFileReference;
+			name = "AudioToolbox.framework";
+			path = "/System/Library/Frameworks/AudioToolbox.framework";
+			refType = 0;
+			sourceTree = "<absolute>";
+			lastKnownFileType = "wrapper.framework";
+		};
+		4EB68D0C8182BCE33529C421 = {
+			fileRef = "3C44131FDCFEF4396B9EA2BA";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		BEF9DFDA6822604126A7E233 = {
+			isa = PBXFileReference;
+			name = "CoreAudio.framework";
+			path = "/System/Library/Frameworks/CoreAudio.framework";
+			refType = 0;
+			sourceTree = "<absolute>";
+			lastKnownFileType = "wrapper.framework";
+		};
+		35A1A39F8EAB37889EB3D397 = {
+			fileRef = "BEF9DFDA6822604126A7E233";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		21F907AB8D19BD779147A085 = {
+			isa = PBXFileReference;
+			name = "AVFoundation.framework";
+			path = "/System/Library/Frameworks/AVFoundation.framework";
+			refType = 0;
+			sourceTree = "<absolute>";
+			lastKnownFileType = "wrapper.framework";
+		};
+		CCA737EE379CDB10CC9A0F23 = {
+			fileRef = "21F907AB8D19BD779147A085";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		547CCADBD1CC5050167EF948 = {
+			isa = PBXFileReference;
+			name = "CoreMedia.framework";
+			path = "/System/Library/Frameworks/CoreMedia.framework";
+			refType = 0;
+			sourceTree = "<absolute>";
+			lastKnownFileType = "wrapper.framework";
+		};
+		B78304F135DEF1F7A68393A6 = {
+			fileRef = "547CCADBD1CC5050167EF948";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		F923F38E989CF0F61A164DD8 = {
+			isa = PBXFileReference;
+			name = "CoreVideo.framework";
+			path = "/System/Library/Frameworks/CoreVideo.framework";
+			refType = 0;
+			sourceTree = "<absolute>";
+			lastKnownFileType = "wrapper.framework";
+		};
+		6602E41D28CF886E694AD752 = {
+			fileRef = "F923F38E989CF0F61A164DD8";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		EAB3F99882064DEA69A4A7D5 = {
+			isa = PBXFileReference;
+			name = "qavfmediaplayer";
+			path = "../../../../Qt/5.4/ios/plugins/mediaservice/libqavfmediaplayer$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		3EB529A4C1300F6B73FBBFAF = {
+			fileRef = "EAB3F99882064DEA69A4A7D5";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		98D437DED112EB0BA02B4438 = {
+			isa = PBXFileReference;
+			name = "Qt5MultimediaWidgets";
+			path = "../../../../Qt/5.4/ios/lib/libQt5MultimediaWidgets$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		50819380A0BE6BAD78C94FA6 = {
+			fileRef = "98D437DED112EB0BA02B4438";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		84CAF5FCCD7461B24D79959F = {
+			isa = PBXFileReference;
+			name = "Qt5OpenGL";
+			path = "../../../../Qt/5.4/ios/lib/libQt5OpenGL$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		02F894177969056A1A8BA630 = {
+			fileRef = "84CAF5FCCD7461B24D79959F";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		D3157A15F344263B9E64E85B = {
+			isa = PBXFileReference;
+			name = "Qt5Widgets";
+			path = "../../../../Qt/5.4/ios/lib/libQt5Widgets$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		FEE45E63051DEC5545A91C10 = {
+			fileRef = "D3157A15F344263B9E64E85B";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		AD6C7F11AF780EC8B9189F97 = {
+			isa = PBXFileReference;
+			name = "qtmedia_audioengine";
+			path = "../../../../Qt/5.4/ios/plugins/mediaservice/libqtmedia_audioengine$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		7E7451161DBBC746AEA4F1B0 = {
+			fileRef = "AD6C7F11AF780EC8B9189F97";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		566AD7302083D85E3104B09C = {
+			isa = PBXFileReference;
+			name = "qtaudio_coreaudio";
+			path = "../../../../Qt/5.4/ios/plugins/audio/libqtaudio_coreaudio$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		ABC6977935121CE0F6A81582 = {
+			fileRef = "566AD7302083D85E3104B09C";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		9964B172B74528D1A26D92F3 = {
+			isa = PBXFileReference;
+			name = "qtmultimedia_m3u";
+			path = "../../../../Qt/5.4/ios/plugins/playlistformats/libqtmultimedia_m3u$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		B3B5976F8AB35AC4FFFC0C55 = {
+			fileRef = "9964B172B74528D1A26D92F3";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7555F437AB3E10D6B458DC90 = {
+			isa = PBXFileReference;
+			name = "Qt5Multimedia";
+			path = "../../../../Qt/5.4/ios/lib/libQt5Multimedia$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		E777CD559E80A39472156804 = {
+			fileRef = "7555F437AB3E10D6B458DC90";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		806536F51BB191595379E0B3 = {
+			isa = PBXFileReference;
+			name = "qdds";
+			path = "../../../../Qt/5.4/ios/plugins/imageformats/libqdds$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		17012A69C1BDFBABF2B7172A = {
+			fileRef = "806536F51BB191595379E0B3";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		5267FD0AEA6DE3B1047BCDEB = {
+			isa = PBXFileReference;
+			name = "qicns";
+			path = "../../../../Qt/5.4/ios/plugins/imageformats/libqicns$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		98D0E491CBD15FD7EC54DB9C = {
+			fileRef = "5267FD0AEA6DE3B1047BCDEB";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		13BD8ADCE887E34EF7987033 = {
+			isa = PBXFileReference;
+			name = "qico";
+			path = "../../../../Qt/5.4/ios/plugins/imageformats/libqico$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		DC809000F3FBFADFC862C6F3 = {
+			fileRef = "13BD8ADCE887E34EF7987033";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		E37567DFF7FF9B0F4D625EBD = {
+			isa = PBXFileReference;
+			name = "qjp2";
+			path = "../../../../Qt/5.4/ios/plugins/imageformats/libqjp2$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		82E46936979DAC9BF4958EF1 = {
+			fileRef = "E37567DFF7FF9B0F4D625EBD";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		44FFD4F2E11ADB7426BC0623 = {
+			isa = PBXFileReference;
+			name = "qmng";
+			path = "../../../../Qt/5.4/ios/plugins/imageformats/libqmng$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		BE8959589CE2E3BB0DAA6BDF = {
+			fileRef = "44FFD4F2E11ADB7426BC0623";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		DD09DA9BD5985F8ED60CAF07 = {
+			isa = PBXFileReference;
+			name = "qtga";
+			path = "../../../../Qt/5.4/ios/plugins/imageformats/libqtga$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		7304CCDBDFE00322D3D8520B = {
+			fileRef = "DD09DA9BD5985F8ED60CAF07";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7B3CA7B01535405D32282A9D = {
+			isa = PBXFileReference;
+			name = "qtiff";
+			path = "../../../../Qt/5.4/ios/plugins/imageformats/libqtiff$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		513538FE22FA9288DAFFCBAC = {
+			fileRef = "7B3CA7B01535405D32282A9D";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		050CC7857DA206655AF7D6A7 = {
+			isa = PBXFileReference;
+			name = "qwbmp";
+			path = "../../../../Qt/5.4/ios/plugins/imageformats/libqwbmp$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		27207932E3282BF2C912FDB4 = {
+			fileRef = "050CC7857DA206655AF7D6A7";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		51AD51E794F4C8BB82950262 = {
+			isa = PBXFileReference;
+			name = "qmldbg_qtquick2";
+			path = "../../../../Qt/5.4/ios/plugins/qmltooling/libqmldbg_qtquick2$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		2AFB8B7C6F038AD0CE8CDA77 = {
+			fileRef = "51AD51E794F4C8BB82950262";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7BA440993B4105FE1BBF5BBA = {
+			isa = PBXFileReference;
+			name = "Qt5Quick";
+			path = "../../../../Qt/5.4/ios/lib/libQt5Quick$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		B497703E34E178F1FC8BB316 = {
+			fileRef = "7BA440993B4105FE1BBF5BBA";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		709170AD3BD93BA239AAB435 = {
+			isa = PBXFileReference;
+			name = "Qt5Gui";
+			path = "../../../../Qt/5.4/ios/lib/libQt5Gui$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		189D49C22E74CEE3BF235047 = {
+			fileRef = "709170AD3BD93BA239AAB435";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		B5924CD70A27870631808973 = {
+			isa = PBXFileReference;
+			name = "qtharfbuzzng";
+			path = "../../../../Qt/5.4/ios/lib/libqtharfbuzzng$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		861EBFBC8C4452CA9C5E818F = {
+			fileRef = "B5924CD70A27870631808973";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		96AE869440AA0514DD4ED078 = {
+			isa = PBXFileReference;
+			name = "qmldbg_tcp";
+			path = "../../../../Qt/5.4/ios/plugins/qmltooling/libqmldbg_tcp$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		66EEF62449361A2813045C23 = {
+			fileRef = "96AE869440AA0514DD4ED078";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		AE490D3EB3AA3A5F25EF0CED = {
+			isa = PBXFileReference;
+			name = "Qt5Qml";
+			path = "../../../../Qt/5.4/ios/lib/libQt5Qml$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		CE0D27C34469CA78BBA6A64C = {
+			fileRef = "AE490D3EB3AA3A5F25EF0CED";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3C63E65142E4019B966E05B6 = {
+			isa = PBXFileReference;
+			name = "qgenericbearer";
+			path = "../../../../Qt/5.4/ios/plugins/bearer/libqgenericbearer$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		5C2E69F5260429D31645EB2E = {
+			fileRef = "3C63E65142E4019B966E05B6";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3999C65495DE899FBBB7D296 = {
+			isa = PBXFileReference;
+			name = "Qt5Network";
+			path = "../../../../Qt/5.4/ios/lib/libQt5Network$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		A0BBECF4EC99A738F6C512B9 = {
+			fileRef = "3999C65495DE899FBBB7D296";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		40CBF7847B5A4D6B506D6970 = {
+			isa = PBXFileReference;
+			name = "Qt5Core";
+			path = "../../../../Qt/5.4/ios/lib/libQt5Core$(QT_LIBRARY_SUFFIX).a";
+			refType = 4;
+			sourceTree = "<absolute>";
+		};
+		F5F34D5A366A36DB24DC2249 = {
+			fileRef = "40CBF7847B5A4D6B506D6970";
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		3DA90DAE39A0C9D07C6F6B0F = {
+			buildActionMask = 2147483647;
+			files = (
+				);
+			inputPaths = (
+				"$(OBJECT_FILE_DIR_$(CURRENT_VARIANT))/armv7/",
+				"$(OBJECT_FILE_DIR_$(CURRENT_VARIANT))/arm64/",
+				"$(OBJECT_FILE_DIR_$(CURRENT_VARIANT))/i386/",
+				"$(OBJECT_FILE_DIR_$(CURRENT_VARIANT))/x86_64/");
+			outputPaths = (
+				"$(LINK_FILE_LIST_$(CURRENT_VARIANT)_armv7)",
+				"$(LINK_FILE_LIST_$(CURRENT_VARIANT)_arm64)",
+				"$(LINK_FILE_LIST_$(CURRENT_VARIANT)_i386)",
+				"$(LINK_FILE_LIST_$(CURRENT_VARIANT)_x86_64)");
+			isa = PBXShellScriptBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+			name = "Qt Prelink";
+			shellPath = "/bin/sh";
+			shellScript = "/Users/Langstonius/Qt/5.4/ios/mkspecs/macx-ios-clang/rename_main.sh ${OBJECT_FILE_DIR}-${CURRENT_VARIANT} \"${ARCHS}\"";
+		};
+		AF39DD055C3EF8226FBE929D = {
+			children = (
+				"831FE6F6AD514D96DAF3A3DC",
+				"0502EA1CC3D6902F1D0A4B34",
+				"021BBDD573CC2FB716B07B67",
+				"FCC237CA5AD60B9BA4447615",
+				"7EC00404ACD5AB0E97726B0E",
+				"4D765E1B1EA6C757220C63E7",
+				"7D7B02101166B76FD2D4F8B4",
+				"6AE3EC31EE5BB1FCEE84137C",
+				"773526C7141343CA6BE6C425",
+				"205259EEEE2BADA5E64741E3",
+				"FF5BDAB0076F3391B219EA52",
+				"595B407CD9ED0D6A825F70BB",
+				"E755F57B539C52FF412C6733",
+				"EB3DDE0234E897911B8D641D",
+				"989EE6B75DE7C838140E9694",
+				"547017201DB21DA903C169B9",
+				"1C087CEE08B009E5DFE9A1DD",
+				"40443711BE83A59D2D0B4451",
+				"3C44131FDCFEF4396B9EA2BA",
+				"BEF9DFDA6822604126A7E233",
+				"21F907AB8D19BD779147A085",
+				"547CCADBD1CC5050167EF948",
+				"F923F38E989CF0F61A164DD8",
+				"EAB3F99882064DEA69A4A7D5",
+				"98D437DED112EB0BA02B4438",
+				"84CAF5FCCD7461B24D79959F",
+				"D3157A15F344263B9E64E85B",
+				"AD6C7F11AF780EC8B9189F97",
+				"566AD7302083D85E3104B09C",
+				"9964B172B74528D1A26D92F3",
+				"7555F437AB3E10D6B458DC90",
+				"806536F51BB191595379E0B3",
+				"5267FD0AEA6DE3B1047BCDEB",
+				"13BD8ADCE887E34EF7987033",
+				"E37567DFF7FF9B0F4D625EBD",
+				"44FFD4F2E11ADB7426BC0623",
+				"DD09DA9BD5985F8ED60CAF07",
+				"7B3CA7B01535405D32282A9D",
+				"050CC7857DA206655AF7D6A7",
+				"51AD51E794F4C8BB82950262",
+				"7BA440993B4105FE1BBF5BBA",
+				"709170AD3BD93BA239AAB435",
+				"B5924CD70A27870631808973",
+				"96AE869440AA0514DD4ED078",
+				"AE490D3EB3AA3A5F25EF0CED",
+				"3C63E65142E4019B966E05B6",
+				"3999C65495DE899FBBB7D296",
+				"40CBF7847B5A4D6B506D6970");
+			isa = PBXGroup;
+			name = "Frameworks";
+			sourceTree = "<Group>";
+		};
+		D1C883685E82D5676953459A = {
+			buildActionMask = 2147483647;
+			files = (
+				"3329B9E5B7954212383BC5AB",
+				"CD2EB276BED0EC65B9837336",
+				"7A492BA3E98B6144A4855A06",
+				"F26454630C80841CBDCFE1CA",
+				"B460F624007324313696BE86",
+				"F8B465CE34D8DF87AAE95913",
+				"2B02D9DC58A01E45248DDBCE",
+				"0CE02722F00CAD43741297B5",
+				"6B3B7AF3E3AEBA54B5687D26",
+				"15364689D2AB5A30E87A689F",
+				"D4639595C3BCF2A39D88DF6E",
+				"D819D88501AD7127C6F0CEDB",
+				"020F309893860D6052B2E912",
+				"5417BEC910AD2FC873D66180",
+				"7796340EDD73581E199451AD",
+				"36B6CD2C5BDC0F18973558E0",
+				"3B6E00A9C05F7CF33F903627",
+				"4206785EE2CA30B462154664",
+				"4EB68D0C8182BCE33529C421",
+				"35A1A39F8EAB37889EB3D397",
+				"CCA737EE379CDB10CC9A0F23",
+				"B78304F135DEF1F7A68393A6",
+				"6602E41D28CF886E694AD752",
+				"3EB529A4C1300F6B73FBBFAF",
+				"50819380A0BE6BAD78C94FA6",
+				"02F894177969056A1A8BA630",
+				"FEE45E63051DEC5545A91C10",
+				"7E7451161DBBC746AEA4F1B0",
+				"ABC6977935121CE0F6A81582",
+				"B3B5976F8AB35AC4FFFC0C55",
+				"E777CD559E80A39472156804",
+				"17012A69C1BDFBABF2B7172A",
+				"98D0E491CBD15FD7EC54DB9C",
+				"DC809000F3FBFADFC862C6F3",
+				"82E46936979DAC9BF4958EF1",
+				"BE8959589CE2E3BB0DAA6BDF",
+				"7304CCDBDFE00322D3D8520B",
+				"513538FE22FA9288DAFFCBAC",
+				"27207932E3282BF2C912FDB4",
+				"2AFB8B7C6F038AD0CE8CDA77",
+				"B497703E34E178F1FC8BB316",
+				"189D49C22E74CEE3BF235047",
+				"861EBFBC8C4452CA9C5E818F",
+				"66EEF62449361A2813045C23",
+				"CE0D27C34469CA78BBA6A64C",
+				"5C2E69F5260429D31645EB2E",
+				"A0BBECF4EC99A738F6C512B9",
+				"F5F34D5A366A36DB24DC2249");
+			isa = PBXFrameworksBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+			name = "Link Binary With Libraries";
+		};
+		776D5E25B18ED6FE9A43064F = {
+			buildActionMask = 2147483647;
+			files = (
+				);
+			inputPaths = (
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)");
+			isa = PBXShellScriptBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+			name = "Qt Postlink";
+			shellPath = "/bin/sh";
+			shellScript = "cp /Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/qt.conf $CODESIGNING_FOLDER_PATH/qt.conf;  test -d $CODESIGNING_FOLDER_PATH/qt_qml && rm -r $CODESIGNING_FOLDER_PATH/qt_qml;  mkdir -p $CODESIGNING_FOLDER_PATH/qt_qml &&  for p in /Users/Langstonius/Qt/5.4/ios/qml; do rsync -r --exclude='*.a' --exclude='*.prl' --exclude='*.qmltypes'  $p/ $CODESIGNING_FOLDER_PATH/qt_qml; done";
+		};
+		C0FE3798174C2AD6741C3E55 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/qOrbiterIos.xcodeproj/Default-568h@2x.png";
+			name = "Default-568h@2x.png";
+			sourceTree = "<absolute>";
+		};
+		3E69676466365513F901633E = {
+			fileRef = "C0FE3798174C2AD6741C3E55";
+			isa = PBXBuildFile;
+		};
+		EEDDE023D4C2E2A4322EEBED = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/qOrbiterIos.xcodeproj/LaunchScreen.xib";
+			name = "LaunchScreen.xib";
+			sourceTree = "<absolute>";
+		};
+		2DA162F5B106928313E2EF58 = {
+			fileRef = "EEDDE023D4C2E2A4322EEBED";
+			isa = PBXBuildFile;
+		};
+		858FCAB0EB1F29CF8B07677C = {
+			children = (
+				"C0FE3798174C2AD6741C3E55",
+				"EEDDE023D4C2E2A4322EEBED");
+			isa = PBXGroup;
+			name = "Bundle Data";
+			sourceTree = "<Group>";
+		};
+		30414803F31797EB689AE508 = {
+			buildActionMask = 2147483647;
+			files = (
+				"3E69676466365513F901633E",
+				"2DA162F5B106928313E2EF58",
+				"F3D0140BCAA3A3EFB8A3F606");
+			isa = PBXResourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+			name = "Copy Bundle Resources";
+		};
+		2F00997F116FA428D7D1E5F6 = {
+			isa = PBXFileReference;
+			includeInIndex = 0;
+			explicitFileType = "wrapper.application";
+			path = "qOrbiterIos.app";
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		FE0A091FDBFB3E9C31B7A1BD = {
+			children = (
+				"2F00997F116FA428D7D1E5F6");
+			isa = PBXGroup;
+			name = "Products";
+			sourceTree = "<Group>";
+		};
+		E8C543AB96796ECAA2E65C57 = {
+			children = (
+				"2EB56BE3C2D93CDAB0C52E67",
+				"25B08E2869634E9BCBA333A2",
+				"74B182DB50CB5611B5C1C297",
+				"87DF60DE337FB58864343E39",
+				"AF39DD055C3EF8226FBE929D",
+				"858FCAB0EB1F29CF8B07677C",
+				"FE0A091FDBFB3E9C31B7A1BD");
+			isa = PBXGroup;
+			name = "qOrbiterIos";
+			sourceTree = "<Group>";
+		};
+		BEC6316A06FC00AE641E372E = {
+			buildPhases = (
+				"5E618435888B9D49F8540165",
+				"7EF0942E79C014DCEC8976BC");
+			dependencies = (
+				);
+			buildConfigurationList = 6CC3B5D2136C7CD6A5CF5A59;
+			isa = PBXAggregateTarget;
+			buildRules = (
+);
+			productName = "Qt Preprocess";
+			name = "Qt Preprocess";
+		};
+		F049A358EFCF663FF954A432 = {
+			isa = PBXTargetDependency;
+			target = "BEC6316A06FC00AE641E372E";
+		};
+		BED688E835FAEB32977D1E82 = {
+			buildPhases = (
+				"F7E50F631C51CD5B5DC0BC43",
+				"3DA90DAE39A0C9D07C6F6B0F",
+				"D1C883685E82D5676953459A",
+				"776D5E25B18ED6FE9A43064F",
+				"30414803F31797EB689AE508");
+			dependencies = (
+				"F049A358EFCF663FF954A432");
+			productReference = "2F00997F116FA428D7D1E5F6";
+			buildConfigurationList = 6CC3B5D2136C7CD6A5CF5A59;
+			isa = PBXNativeTarget;
+			buildRules = (
+);
+			productType = "com.apple.product-type.application";
+			name = "qOrbiterIos";
+			productName = "qOrbiterIos";
+		};
+		3AA6C32AC930069E80220CF1 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"ARCHS[sdk=iphoneos*]" = "armv7 arm64";
+				"ARCHS[sdk=iphonesimulator*]" = "i386 x86_64";
+				COPY_PHASE_STRIP = "NO";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = "YES";
+				GCC_OPTIMIZATION_LEVEL = "0";
+				ONLY_ACTIVE_ARCH = "YES";
+				PRODUCT_NAME = "qOrbiterIos";
+				QT_LIBRARY_SUFFIX = "_debug";
+				"QT_LIBRARY_SUFFIX[sdk=iphonesimulator*]" = "_iphonesimulator$(QT_LIBRARY_SUFFIX)";
+				SDKROOT = "iphoneos";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				CC = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang";
+				LDPLUSPLUS = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++";
+				INFOPLIST_FILE = "QOrbiter.plist";
+				SYMROOT = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS";
+				DYLIB_CURRENT_VERSION = "1.0.0";
+				DYLIB_COMPATIBILITY_VERSION = "1.0";
+				IPHONEOS_DEPLOYMENT_TARGET = "5.0";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				HEADER_SEARCH_PATHS = (
+					"/Users/Langstonius/Qt/5.4/ios/mkspecs/macx-ios-clang/ios",
+					"../../..",
+					"../../../../DCE/",
+					"..",
+					"../../../../Qt/5.4/ios/include",
+					"../../../../Qt/5.4/ios/include/QtQuick",
+					"../../../../Qt/5.4/ios/include/QtWidgets",
+					"../../../../Qt/5.4/ios/include/QtMultimedia",
+					"../../../../Qt/5.4/ios/include/QtGui",
+					"../../../../Qt/5.4/ios/include/QtQml",
+					"../../../../Qt/5.4/ios/include/QtNetwork",
+					"../../../../Qt/5.4/ios/include/QtScript",
+					"../../../../Qt/5.4/ios/include/QtXml",
+					"../../../../Qt/5.4/ios/include/QtCore",
+					".",
+					"../../../../Qt/5.4/ios/mkspecs/macx-ios-clang");
+				LIBRARY_SEARCH_PATHS = (
+					"/Users/Langstonius/Qt/5.4/ios/imports/DceScreenSaver",
+					"/Users/Langstonius/Qt/5.4/ios/imports/AudioVisual",
+					"/Users/Langstonius/Qt/5.4/ios/plugins/platforms",
+					"/System/Library/Frameworks/",
+					"/Users/Langstonius/Qt/5.4/ios/lib",
+					"/Users/Langstonius/Qt/5.4/ios/qml/QtQuick.2",
+					"/Users/Langstonius/Qt/5.4/ios/qml/QtQuick/Window.2",
+					"/Users/Langstonius/Qt/5.4/ios/qml/QtMultimedia",
+					"/Users/Langstonius/Qt/5.4/ios/plugins/mediaservice",
+					"/Users/Langstonius/Qt/5.4/ios/plugins/audio",
+					"/Users/Langstonius/Qt/5.4/ios/plugins/playlistformats",
+					"/Users/Langstonius/Qt/5.4/ios/plugins/imageformats",
+					"/Users/Langstonius/Qt/5.4/ios/plugins/qmltooling",
+					"/Users/Langstonius/Qt/5.4/ios/plugins/bearer");
+				FRAMEWORK_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-pipe",
+					"-fvisibility=hidden",
+					"-fpascal-strings",
+					"-fmessage-length=0",
+					"-Wno-trigraphs",
+					"-Wreturn-type",
+					"-Wparentheses",
+					"-Wswitch",
+					"-Wno-unused-parameter",
+					"-Wunused-variable",
+					"-Wunused-value",
+					"-Wno-shorten-64-to-32",
+					"-Wno-sign-conversion",
+					"-fexceptions",
+					"-fasm-blocks",
+					"-Wno-missing-field-initializers",
+					"-Wno-missing-prototypes",
+					"-Wno-implicit-atomic-properties",
+					"-Wformat",
+					"-Wno-missing-braces",
+					"-Wno-unused-function",
+					"-Wno-unused-label",
+					"-Wuninitialized",
+					"-Wno-unknown-pragmas",
+					"-Wno-shadow",
+					"-Wno-four-char-constants",
+					"-Wno-sign-compare",
+					"-Wpointer-sign",
+					"-Wno-newline-eof",
+					"-Wdeprecated-declarations",
+					"-Winvalid-offsetof",
+					"-Wno-conversion",
+					"-g",
+					"-w",
+					"-fPIE",
+					"-DDARWIN_NO_CARBON",
+					"-DQT_NO_PRINTER",
+					"-DQT_NO_PRINTDIALOG",
+					"-DGLENABLED",
+					"-DQT5",
+					"-DQT_QML_DEBUG",
+					"-DQT_DECLARATIVE_DEBUG",
+					"-DQT_QUICK_LIB",
+					"-DQT_WIDGETS_LIB",
+					"-DQT_MULTIMEDIA_LIB",
+					"-DQT_GUI_LIB",
+					"-DQT_QML_LIB",
+					"-DQT_NETWORK_LIB",
+					"-DQT_SCRIPT_LIB",
+					"-DQT_XML_LIB",
+					"-DQT_CORE_LIB");
+				OTHER_CPLUSPLUSFLAGS = (
+					"-pipe",
+					"-fvisibility=hidden",
+					"-fpascal-strings",
+					"-fmessage-length=0",
+					"-Wno-trigraphs",
+					"-Wreturn-type",
+					"-Wparentheses",
+					"-Wswitch",
+					"-Wno-unused-parameter",
+					"-Wunused-variable",
+					"-Wunused-value",
+					"-Wno-shorten-64-to-32",
+					"-Wno-sign-conversion",
+					"-fexceptions",
+					"-fasm-blocks",
+					"-Wno-missing-field-initializers",
+					"-Wno-missing-prototypes",
+					"-Wno-implicit-atomic-properties",
+					"-Wformat",
+					"-Wno-missing-braces",
+					"-Wno-unused-function",
+					"-Wno-unused-label",
+					"-Wuninitialized",
+					"-Wno-unknown-pragmas",
+					"-Wno-shadow",
+					"-Wno-four-char-constants",
+					"-Wno-sign-compare",
+					"-Wpointer-sign",
+					"-Wno-newline-eof",
+					"-Wdeprecated-declarations",
+					"-Winvalid-offsetof",
+					"-Wno-conversion",
+					"-fvisibility-inlines-hidden",
+					"-Wno-non-virtual-dtor",
+					"-Wno-overloaded-virtual",
+					"-Wno-exit-time-destructors",
+					"-Wno-c++11-narrowing",
+					"-DUSE_LZO_DATAGRID",
+					"-g",
+					"-std=c++11",
+					"-stdlib=libc++",
+					"-w",
+					"-fPIE",
+					"-DDARWIN_NO_CARBON",
+					"-DQT_NO_PRINTER",
+					"-DQT_NO_PRINTDIALOG",
+					"-DGLENABLED",
+					"-DQT5",
+					"-DQT_QML_DEBUG",
+					"-DQT_DECLARATIVE_DEBUG",
+					"-DQT_QUICK_LIB",
+					"-DQT_WIDGETS_LIB",
+					"-DQT_MULTIMEDIA_LIB",
+					"-DQT_GUI_LIB",
+					"-DQT_QML_LIB",
+					"-DQT_NETWORK_LIB",
+					"-DQT_SCRIPT_LIB",
+					"-DQT_XML_LIB",
+					"-DQT_CORE_LIB");
+				OTHER_LDFLAGS = (
+						"-headerpad_max_install_names",
+						"-stdlib=libc++",
+						"-u",
+						"_qt_registerPlatformPlugin",
+						"-L/Users/Langstonius/Qt/5.4/ios/imports/DceScreenSaver",
+						"-L/Users/Langstonius/Qt/5.4/ios/imports/AudioVisual",
+						"-L/Users/Langstonius/Qt/5.4/ios/plugins/platforms",
+						"-framework",
+						"UIKit",
+						"-L/Users/Langstonius/Qt/5.4/ios/lib",
+						"-framework",
+						"OpenGLES",
+						"-L/Users/Langstonius/Qt/5.4/ios/qml/QtQuick.2",
+						"-L/Users/Langstonius/Qt/5.4/ios/qml/QtQuick/Window.2",
+						"-L/Users/Langstonius/Qt/5.4/ios/qml/QtMultimedia",
+						"-L/Users/Langstonius/Qt/5.4/ios/plugins/mediaservice",
+						"-L/Users/Langstonius/Qt/5.4/ios/plugins/audio",
+						"-L/Users/Langstonius/Qt/5.4/ios/plugins/playlistformats",
+						"-L/Users/Langstonius/Qt/5.4/ios/plugins/imageformats",
+						"-L/Users/Langstonius/Qt/5.4/ios/plugins/qmltooling",
+						"-L/Users/Langstonius/Qt/5.4/ios/plugins/bearer",
+						"-lz",
+						"-lm");
+				ARCHS = "armv7 arm64 i386 x86_64";
+			};
+			name = "Debug";
+		};
+		77418F46922677BB04ED38DD = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"ARCHS[sdk=iphoneos*]" = "armv7 arm64";
+				"ARCHS[sdk=iphonesimulator*]" = "i386 x86_64";
+				COPY_PHASE_STRIP = "NO";
+				DEBUG_INFORMATION_FORMAT = "dwarf";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = "YES";
+				GCC_OPTIMIZATION_LEVEL = "0";
+				ONLY_ACTIVE_ARCH = "YES";
+				PRODUCT_NAME = "qOrbiterIos";
+				QT_LIBRARY_SUFFIX = "_debug";
+				"QT_LIBRARY_SUFFIX[sdk=iphonesimulator*]" = "_iphonesimulator$(QT_LIBRARY_SUFFIX)";
+				SDKROOT = "iphoneos";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "qOrbiterIos";
+			};
+			name = "Debug";
+		};
+		339EE1B2CC4FC24589A0EA95 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"ARCHS[sdk=iphoneos*]" = "armv7 arm64";
+				"ARCHS[sdk=iphonesimulator*]" = "i386 x86_64";
+				COPY_PHASE_STRIP = "YES";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = "NO";
+				PRODUCT_NAME = "qOrbiterIos";
+				QT_LIBRARY_SUFFIX = "";
+				"QT_LIBRARY_SUFFIX[sdk=iphonesimulator*]" = "_iphonesimulator$(QT_LIBRARY_SUFFIX)";
+				SDKROOT = "iphoneos";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				CC = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang";
+				LDPLUSPLUS = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++";
+				INFOPLIST_FILE = "QOrbiter.plist";
+				SYMROOT = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS";
+				DYLIB_CURRENT_VERSION = "1.0.0";
+				DYLIB_COMPATIBILITY_VERSION = "1.0";
+				IPHONEOS_DEPLOYMENT_TARGET = "5.0";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				HEADER_SEARCH_PATHS = (
+					"/Users/Langstonius/Qt/5.4/ios/mkspecs/macx-ios-clang/ios",
+					"../../..",
+					"../../../../DCE/",
+					"..",
+					"../../../../Qt/5.4/ios/include",
+					"../../../../Qt/5.4/ios/include/QtQuick",
+					"../../../../Qt/5.4/ios/include/QtWidgets",
+					"../../../../Qt/5.4/ios/include/QtMultimedia",
+					"../../../../Qt/5.4/ios/include/QtGui",
+					"../../../../Qt/5.4/ios/include/QtQml",
+					"../../../../Qt/5.4/ios/include/QtNetwork",
+					"../../../../Qt/5.4/ios/include/QtScript",
+					"../../../../Qt/5.4/ios/include/QtXml",
+					"../../../../Qt/5.4/ios/include/QtCore",
+					".",
+					"../../../../Qt/5.4/ios/mkspecs/macx-ios-clang");
+				LIBRARY_SEARCH_PATHS = (
+					"/Users/Langstonius/Qt/5.4/ios/imports/DceScreenSaver",
+					"/Users/Langstonius/Qt/5.4/ios/imports/AudioVisual",
+					"/Users/Langstonius/Qt/5.4/ios/plugins/platforms",
+					"/System/Library/Frameworks/",
+					"/Users/Langstonius/Qt/5.4/ios/lib",
+					"/Users/Langstonius/Qt/5.4/ios/qml/QtQuick.2",
+					"/Users/Langstonius/Qt/5.4/ios/qml/QtQuick/Window.2",
+					"/Users/Langstonius/Qt/5.4/ios/qml/QtMultimedia",
+					"/Users/Langstonius/Qt/5.4/ios/plugins/mediaservice",
+					"/Users/Langstonius/Qt/5.4/ios/plugins/audio",
+					"/Users/Langstonius/Qt/5.4/ios/plugins/playlistformats",
+					"/Users/Langstonius/Qt/5.4/ios/plugins/imageformats",
+					"/Users/Langstonius/Qt/5.4/ios/plugins/qmltooling",
+					"/Users/Langstonius/Qt/5.4/ios/plugins/bearer");
+				FRAMEWORK_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-pipe",
+					"-fvisibility=hidden",
+					"-fpascal-strings",
+					"-fmessage-length=0",
+					"-Wno-trigraphs",
+					"-Wreturn-type",
+					"-Wparentheses",
+					"-Wswitch",
+					"-Wno-unused-parameter",
+					"-Wunused-variable",
+					"-Wunused-value",
+					"-Wno-shorten-64-to-32",
+					"-Wno-sign-conversion",
+					"-fexceptions",
+					"-fasm-blocks",
+					"-Wno-missing-field-initializers",
+					"-Wno-missing-prototypes",
+					"-Wno-implicit-atomic-properties",
+					"-Wformat",
+					"-Wno-missing-braces",
+					"-Wno-unused-function",
+					"-Wno-unused-label",
+					"-Wuninitialized",
+					"-Wno-unknown-pragmas",
+					"-Wno-shadow",
+					"-Wno-four-char-constants",
+					"-Wno-sign-compare",
+					"-Wpointer-sign",
+					"-Wno-newline-eof",
+					"-Wdeprecated-declarations",
+					"-Winvalid-offsetof",
+					"-Wno-conversion",
+					"-g",
+					"-w",
+					"-fPIE",
+					"-DDARWIN_NO_CARBON",
+					"-DQT_NO_PRINTER",
+					"-DQT_NO_PRINTDIALOG",
+					"-DGLENABLED",
+					"-DQT5",
+					"-DQT_QML_DEBUG",
+					"-DQT_DECLARATIVE_DEBUG",
+					"-DQT_QUICK_LIB",
+					"-DQT_WIDGETS_LIB",
+					"-DQT_MULTIMEDIA_LIB",
+					"-DQT_GUI_LIB",
+					"-DQT_QML_LIB",
+					"-DQT_NETWORK_LIB",
+					"-DQT_SCRIPT_LIB",
+					"-DQT_XML_LIB",
+					"-DQT_CORE_LIB");
+				OTHER_CPLUSPLUSFLAGS = (
+					"-pipe",
+					"-fvisibility=hidden",
+					"-fpascal-strings",
+					"-fmessage-length=0",
+					"-Wno-trigraphs",
+					"-Wreturn-type",
+					"-Wparentheses",
+					"-Wswitch",
+					"-Wno-unused-parameter",
+					"-Wunused-variable",
+					"-Wunused-value",
+					"-Wno-shorten-64-to-32",
+					"-Wno-sign-conversion",
+					"-fexceptions",
+					"-fasm-blocks",
+					"-Wno-missing-field-initializers",
+					"-Wno-missing-prototypes",
+					"-Wno-implicit-atomic-properties",
+					"-Wformat",
+					"-Wno-missing-braces",
+					"-Wno-unused-function",
+					"-Wno-unused-label",
+					"-Wuninitialized",
+					"-Wno-unknown-pragmas",
+					"-Wno-shadow",
+					"-Wno-four-char-constants",
+					"-Wno-sign-compare",
+					"-Wpointer-sign",
+					"-Wno-newline-eof",
+					"-Wdeprecated-declarations",
+					"-Winvalid-offsetof",
+					"-Wno-conversion",
+					"-fvisibility-inlines-hidden",
+					"-Wno-non-virtual-dtor",
+					"-Wno-overloaded-virtual",
+					"-Wno-exit-time-destructors",
+					"-Wno-c++11-narrowing",
+					"-DUSE_LZO_DATAGRID",
+					"-g",
+					"-std=c++11",
+					"-stdlib=libc++",
+					"-w",
+					"-fPIE",
+					"-DDARWIN_NO_CARBON",
+					"-DQT_NO_PRINTER",
+					"-DQT_NO_PRINTDIALOG",
+					"-DGLENABLED",
+					"-DQT5",
+					"-DQT_QML_DEBUG",
+					"-DQT_DECLARATIVE_DEBUG",
+					"-DQT_QUICK_LIB",
+					"-DQT_WIDGETS_LIB",
+					"-DQT_MULTIMEDIA_LIB",
+					"-DQT_GUI_LIB",
+					"-DQT_QML_LIB",
+					"-DQT_NETWORK_LIB",
+					"-DQT_SCRIPT_LIB",
+					"-DQT_XML_LIB",
+					"-DQT_CORE_LIB");
+				OTHER_LDFLAGS = (
+						"-headerpad_max_install_names",
+						"-stdlib=libc++",
+						"-u",
+						"_qt_registerPlatformPlugin",
+						"-L/Users/Langstonius/Qt/5.4/ios/imports/DceScreenSaver",
+						"-L/Users/Langstonius/Qt/5.4/ios/imports/AudioVisual",
+						"-L/Users/Langstonius/Qt/5.4/ios/plugins/platforms",
+						"-framework",
+						"UIKit",
+						"-L/Users/Langstonius/Qt/5.4/ios/lib",
+						"-framework",
+						"OpenGLES",
+						"-L/Users/Langstonius/Qt/5.4/ios/qml/QtQuick.2",
+						"-L/Users/Langstonius/Qt/5.4/ios/qml/QtQuick/Window.2",
+						"-L/Users/Langstonius/Qt/5.4/ios/qml/QtMultimedia",
+						"-L/Users/Langstonius/Qt/5.4/ios/plugins/mediaservice",
+						"-L/Users/Langstonius/Qt/5.4/ios/plugins/audio",
+						"-L/Users/Langstonius/Qt/5.4/ios/plugins/playlistformats",
+						"-L/Users/Langstonius/Qt/5.4/ios/plugins/imageformats",
+						"-L/Users/Langstonius/Qt/5.4/ios/plugins/qmltooling",
+						"-L/Users/Langstonius/Qt/5.4/ios/plugins/bearer",
+						"-lz",
+						"-lm");
+				ARCHS = "armv7 arm64 i386 x86_64";
+			};
+			name = "Release";
+		};
+		6666AA5E688052234F6758D8 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"ARCHS[sdk=iphoneos*]" = "armv7 arm64";
+				"ARCHS[sdk=iphonesimulator*]" = "i386 x86_64";
+				COPY_PHASE_STRIP = "YES";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = "NO";
+				PRODUCT_NAME = "qOrbiterIos";
+				QT_LIBRARY_SUFFIX = "";
+				"QT_LIBRARY_SUFFIX[sdk=iphonesimulator*]" = "_iphonesimulator$(QT_LIBRARY_SUFFIX)";
+				SDKROOT = "iphoneos";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				PRODUCT_NAME = "qOrbiterIos";
+			};
+			name = "Release";
+		};
+		DAC4C1AA5EDEA1C85E9CA5E6 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"3AA6C32AC930069E80220CF1",
+				"339EE1B2CC4FC24589A0EA95");
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Debug";
+		};
+		6CC3B5D2136C7CD6A5CF5A59 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				"77418F46922677BB04ED38DD",
+				"6666AA5E688052234F6758D8");
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Debug";
+		};
+		6DB9C3763D02B1415CD9D565 = {
+			hasScannedForEncodings = 1;
+			compatibilityVersion = "Xcode 3.2";
+			isa = PBXProject;
+			mainGroup = "E8C543AB96796ECAA2E65C57";
+			productRefGroup = "FE0A091FDBFB3E9C31B7A1BD";
+			buildConfigurationList = "DAC4C1AA5EDEA1C85E9CA5E6";
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				"BED688E835FAEB32977D1E82",
+				"BEC6316A06FC00AE641E372E");
+		};
+	};
+	rootObject = "6DB9C3763D02B1415CD9D565";
+}

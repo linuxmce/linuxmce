@@ -40,10 +40,11 @@ TRANSLATIONS += app_de.ts
                 folder_01.target = $$DESTDIR/qml/
                 DEFINES += GLENABLED QT5
                 glmsg=yes
-                ICON = ../platforms/osx/osxicons.icns
+                ICON = ../../platforms/ios/assets/icons/*.png
+                QMAKE_BUNDLE_DATA+=ICON
                 QMAKE_CXXFLAGS+=-Wno-c++11-narrowing -DUSE_LZO_DATAGRID            
                 CONFIG +=warn_off
-             QMAKE_INFO_PLIST = QOrbiter.plist
+                QMAKE_INFO_PLIST = QOrbiter.plist
                 DEPLOYMENTFOLDERS+=folder_01
                 #APP_RESOURCES_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/resources
                 QML_IMPORT_PATH=imports #../../../$$DESTDIR/$$TARGET".app"/Contents/MacOS/imports
@@ -176,9 +177,9 @@ SOURCES += ../main.cpp \
         ../datamodels/genericmodelitem.cpp \
         ../datamodels/ActiveMediaStreams.cpp \
         ../datamodels/listitembase.cpp \
-        ../contextobjects/linuxmcedata.cpp \
-        ../contextobjects/mediatypehelper.cpp \
-        ../datagrids.cpp
+        ../defineObjects/linuxmcedata.cpp \
+        ../defineObjects/mediatypehelper.cpp \
+        ../defineObjects/datagrids.cpp
 
 HEADERS += \
         ../../../PlutoUtils/ThreadedClass.h \
@@ -271,10 +272,10 @@ HEADERS += \
         ../datamodels/MediaFilter.h \
         ../datamodels/DataGridHandler.h \
         ../datamodels/listitembase.h \
-        ../contextobjects/linuxmcedata.h \
-        ../contextobjects/mediatypehelper.h \
+        ../defineObjects/linuxmcedata.h \
+        ../defineObjects/mediatypehelper.h \
         ../RemoteCommands.h \
-        ../datagrids.h \
+        ../defineObjects/datagrids.h \
         ../../datamodels/DataGridHandler.h \
 
 
