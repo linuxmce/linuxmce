@@ -11,7 +11,7 @@
 buildenv=/opt/pos/QtSDK.121/Desktop/Qt/4.8.1/gcc/bin
 spec=linux-g++
 #-64
-srcroot=~/lmce-1004
+srcroot=~/lmce-src/1204/src
 projectdir=$srcroot/qOrbiter/qOrbiterMaster
 buildoutput=$srcroot/qOrbiter/build-output
 config="CONFIG+=debug CONFIG+=for_desktop"

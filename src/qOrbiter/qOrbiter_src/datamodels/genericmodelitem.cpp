@@ -20,6 +20,7 @@ GenericModelItem::GenericModelItem(QObject *parent) :
 
 QVariant GenericModelItem::data(int role) const
 {
+
     if (m_data.contains(role)) {
         return m_data[role];
     } else {
@@ -31,8 +32,11 @@ QVariant GenericModelItem::data(int role) const
 bool GenericModelItem::setData(int role, const QVariant &value)
 {
   //    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericModelItem.setData");
-    if(!m_data.contains(role))
+    if(!m_roleNames.contains(role)){
+        qDebug() << "Data Role ";
         return false;
+    }
+
 
     m_data.insert(role, value);
     emit dataChanged();

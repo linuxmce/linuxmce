@@ -49,24 +49,25 @@ public:
         switch (PK_DataGrid) {
 
         case DATAGRID_Media_Browser_CONST: /*!< Case specific role for media browser */
+
             names[gridItem::NameRole] = "name";
             names[gridItem::IndexRole] = "dceindex";
             names[gridItem::PathRole] = "path";
             names[gridItem::FKRole]= "id";
             break;
 
-        case DATAGRID_EPG_All_Shows_CONST:
-            names[EPGItemClass::NameRole] = "name";                 /** Maps to channel name */
-            names[EPGItemClass::ProgramRole] = "program";           /** Maps to program on channel */
-            names[EPGItemClass::ChannelRole] = "channel";           /** Numeric channel number, user facing */
-            names[EPGItemClass::ChannelIdRole] = "channelid";       /** Numeric number, internal representation. It has the source number prepended to the actual string of digits. Ie. the last three are the tunable digits */
-            names[EPGItemClass::TimeSlotRole] = "timeslot";         /** String representation of the time slot data */
-            names[EPGItemClass::ProgramIdRole] = "programid";       /** Experimental */
-            names[EPGItemClass::SeriesIdRole] = "seriesid";         /** Experimental */
-            names[EPGItemClass::BroadcastSourceRole] = "sourceid";  /** The current source being used */
-            names[EPGItemClass::BroadcastSourceNameRole] = "source";/** The Source name */
-            names[EPGItemClass::IdRole] = "id";
-            break;
+//        case DATAGRID_EPG_All_Shows_CONST:
+//            names[EPGItemClass::NameRole] = "name";                 /** Maps to channel name */
+//            names[EPGItemClass::ProgramRole] = "program";           /** Maps to program on channel */
+//            names[EPGItemClass::ChannelRole] = "channel";           /** Numeric channel number, user facing */
+//            names[EPGItemClass::ChannelIdRole] = "channelid";       /** Numeric number, internal representation. It has the source number prepended to the actual string of digits. Ie. the last three are the tunable digits */
+//            names[EPGItemClass::TimeSlotRole] = "timeslot";         /** String representation of the time slot data */
+//            names[EPGItemClass::ProgramIdRole] = "programid";       /** Experimental */
+//            names[EPGItemClass::SeriesIdRole] = "seriesid";         /** Experimental */
+//            names[EPGItemClass::BroadcastSourceRole] = "sourceid";  /** The current source being used */
+//            names[EPGItemClass::BroadcastSourceNameRole] = "source";/** The Source name */
+//            names[EPGItemClass::IdRole] = "id";
+//            break;
 
         default: /*!< Generic Roles */
             names[DescriptionRole] = "description";
@@ -84,11 +85,12 @@ public:
         } else if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
             return new SleepingAlarm(parent);
         } else if (PK_DataGrid  == DATAGRID_EPG_All_Shows_CONST){
-        return new EPGItemClass(parent);
-        }else   {
+         return new EPGItemClass(parent);
+        } else {
             // uses generic model item
             GenericModelItem* pItem = new GenericModelItem(parent);
             pItem->setRoleNames(getRoleNames(PK_DataGrid));
+
             return pItem;
         }
     }
@@ -102,10 +104,14 @@ public:
 
     static void LoadDataFromTable(int PK_DataGrid, GenericModelItem* pItem, DataGridTable* pTable, int row)
     {
+
         int col = 0;
         DataGridCell *pCell = pTable->GetData(col, row);
         if(!pCell){
             return;
+        }
+        for (map<string,string>::iterator i= pCell->m_mapAttributes.begin(); i!= pCell->m_mapAttributes.end(); ++i){
+            qDebug() << i->first.c_str() <<"::"<< i->second.c_str();
         }
         if (PK_DataGrid == DATAGRID_Media_Browser_CONST) {
             const char *pPath = pCell->GetImagePath();
@@ -118,6 +124,7 @@ public:
             pItem->setData(gridItem::FKRole, fk_file);
             pItem->setData(gridItem::NameRole, cellTitle);
             pItem->setData(gridItem::PathRole, filePath.remove("/home/mediapics/"));
+
         } else if (PK_DataGrid == DATAGRID_Floorplan_Media_Streams_CONST) {
             (static_cast<ActiveMediaStreamItem*>(pItem))->setFromDataGridCell(pCell);
         } else if (PK_DataGrid == DATAGRID_Alarms_In_Room_CONST) {
@@ -146,9 +153,7 @@ public:
             (static_cast<SleepingAlarm*>(pItem))->setAlarmData(eventgrp, name, alarmtime, state, timeleft, days);
         } else if(PK_DataGrid == DATAGRID_EPG_All_Shows_CONST) {
 
-            for (map<string,string>::iterator i= pCell->m_mapAttributes.begin(); i!= pCell->m_mapAttributes.end(); ++i){
-                qDebug() << i->first.c_str() <<"::"<< i->second.c_str();
-            }
+
 
             QString channelIndex = QString::fromStdString(pCell->m_mapAttributes_Find("Number"));
             QString timeSlot = QString::fromStdString(pCell->m_mapAttributes_Find("Time"));
@@ -166,16 +171,6 @@ public:
             channelIndex = pCell->GetValue();
             program = QString::fromStdString(pCell->m_mapAttributes_Find("Info"));
 
-//            pItem->setData(EPGItemClass::NameRole, channelName);
-//            pItem->setData(EPGItemClass::ChannelRole, channelNumber);
-//            pItem->setData(EPGItemClass::ChannelIdRole, channelIndex);
-//            pItem->setData(EPGItemClass::IdRole, channelNumber);
-//            pItem->setData(EPGItemClass::ProgramRole, program);
-//            pItem->setData(EPGItemClass::ProgramIdRole, progId);
-//            pItem->setData(EPGItemClass::TimeSlotRole, timeSlot);
-//            pItem->setData(EPGItemClass::SeriesIdRole, sId);
-//            pItem->setData(EPGItemClass::BroadcastSourceRole, src.split(" ").at(0));
-//            pItem->setData(EPGItemClass::BroadcastSourceNameRole, src.split(" ").at(1));
             (static_cast<EPGItemClass*>(pItem))->setEpgItemData(
                         channelName,
                         program,

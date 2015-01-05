@@ -15,11 +15,11 @@ class gridItem: public QObject
     Q_OBJECT
 public:
     enum Roles {
-        NameRole = Qt::UserRole+1,
-        IndexRole =Qt::UserRole+2,
+        NameRole = Qt::DisplayRole+1,
+        IndexRole =Qt::DisplayRole+2,
         PathRole= Qt::DisplayRole+3,
         ImageRole = Qt::DisplayRole+4,
-        AttributeRole = Qt::UserRole+5,
+        AttributeRole = Qt::DisplayRole+5,
         FKRole = Qt::DisplayRole+6,
         AspectRole= Qt::DisplayRole+7,
         TrackerRole=Qt::DisplayRole+8

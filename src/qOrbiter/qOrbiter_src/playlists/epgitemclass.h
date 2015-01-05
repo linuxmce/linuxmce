@@ -33,6 +33,7 @@ public:
 public:
     EPGItemClass() {}
     void setEpgItemData(QString channelName, QString programName, QString channelNumber, QString channelId, QString timeSlot, QString programId, QString seriesId, QString sourceId, QString sourceName);
+    bool setData(int role, const QVariant &value);
     // explicit EPGItemClass( QString chanName, int chanIndex,  QString channel, QString program, int dceIndex, QString timeSlot, QString seriesId, QString programId, QString broadcastSource, int broadcastSourceIndex, QString chanImage, QString progImag, QObject *parent = 0);
     explicit EPGItemClass(QObject *parent = NULL);
 

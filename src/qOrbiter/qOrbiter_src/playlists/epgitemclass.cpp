@@ -32,3 +32,14 @@ void EPGItemClass::setEpgItemData(QString channelName, QString programName, QStr
     m_data.insert(BroadcastSourceRole, sourceId);
     m_data.insert(IdRole,channelNumber);
 }
+
+bool EPGItemClass::setData(int role, const QVariant &value)
+{
+  //    LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericModelItem.setData");
+    if(!m_data.contains(role))
+        return false;
+
+    m_data.insert(role, value);
+    emit dataChanged();
+    return true;
+}
