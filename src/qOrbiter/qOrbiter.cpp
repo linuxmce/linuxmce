@@ -2653,7 +2653,6 @@ void DCE::qOrbiter::loadDataForDataGrid(QString dataGridId, QString dgName, int 
         gridName.remove("plist_");
     }
 
-
     //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
     DCE::CMD_Request_Datagrid_Contents requestGrid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn),
                                                     StringUtils::itos( m_dwIDataGridRequestCounter ),
@@ -2661,7 +2660,8 @@ void DCE::qOrbiter::loadDataForDataGrid(QString dataGridId, QString dgName, int 
                                                     false, false,
                                                     true,  seek.toStdString(),    iOffset,
                                                     &pData, &iData_Size, &GridCurRow, &GridCurCol );
-    if(SendCommand(requestGrid))
+    std::string pRes="";
+    if(SendCommand(requestGrid, &pRes) && pRes=="OK" )
     {
 
         DataGridTable *pDataGridTable = new DataGridTable(iData_Size,pData,false);
@@ -3385,7 +3385,19 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
 #elif for_android
     CMD_Populate_Datagrid cmd_populate_livetv_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID),11, m_UserID + "," + m_EA, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
 #else
-    CMD_Populate_Datagrid cmd_populate_livetv_grid(m_dwPK_Device, iPK_Device_DatagridPlugIn, StringUtils::itos( m_dwIDataGridRequestCounter ), string(m_sGridID), 11, m_UserID + "," + m_EA, 0, &pkVar, &valassign,  &isSuccessfull, &gHeight, &gWidth );
+    CMD_Populate_Datagrid cmd_populate_livetv_grid(
+                m_dwPK_Device,
+                iPK_Device_DatagridPlugIn,
+                StringUtils::itos( m_dwIDataGridRequestCounter ),
+                string(m_sGridID),
+                11, m_UserID + "," + m_EA,
+                0,
+                &pkVar,
+                &valassign,
+                &isSuccessfull,
+                &gHeight,
+                &gWidth
+                );
 #endif
     qDebug() << "Userid::" <<m_UserID.c_str();
     if (SendCommand(cmd_populate_livetv_grid))    {
@@ -3422,8 +3434,8 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 program = QString::fromStdString(pCell->GetText());
                 program.remove(channelName);
                 program.remove(breaker.at(0));
-                EPGItemClass *t = new EPGItemClass(channelName, channelNumber, channelIndex, program, index, QString("na"), QString("na"));
-                emit addChannel(t);
+//                EPGItemClass *t = new EPGItemClass(channelName, channelNumber, channelIndex, program, index, QString("na"), QString("na"));
+//                emit addChannel(t);
                 index++;
                 QApplication::processEvents(QEventLoop::AllEvents);
             }

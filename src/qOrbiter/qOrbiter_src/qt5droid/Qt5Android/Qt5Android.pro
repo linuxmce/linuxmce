@@ -99,6 +99,7 @@ QML_IMPORT_PATH = imports
 
 
 QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
+
 #LinuxMCE Specific include path. Linking in the app instead of against dce libs for multi-platform expediency.
 INCLUDEPATH += ../../../../ ../../../../DCE/ ../../
 
@@ -329,7 +330,8 @@ HEADERS += \
     ../../datamodels/MediaFilter.h \
     ../../datamodels/listitembase.h \
         ../../defineObjects/linuxmcedata.h \
-../../defineObjects/mediatypehelper.h
+../../defineObjects/mediatypehelper.h \
+../../datamodels/DataGridHandler.h
 
 RESOURCES += \
         ../../skinData.qrc

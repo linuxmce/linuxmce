@@ -274,7 +274,8 @@ HEADERS += \
         ../contextobjects/linuxmcedata.h \
         ../contextobjects/mediatypehelper.h \
         ../RemoteCommands.h \
-        ../datagrids.h
+        ../datagrids.h \
+        ../../datamodels/DataGridHandler.h \
 
 
 

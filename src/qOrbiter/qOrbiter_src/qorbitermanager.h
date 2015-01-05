@@ -1271,10 +1271,13 @@ public slots:
         setDirectAv(false);
     }
 
+    void tvChannelUp(){sendDceCommand(CMD_Channel_up(iPK_Device, iMediaPluginID));}
+    void tvChannelDown(){sendDceCommand(CMD_Channel_down(iPK_Device, iMediaPluginID));}
     void stopMediaOtherLocation(int PK_EntertainArea){ sendDceCommand(CMD_MH_Stop_Media (iPK_Device, iMediaPluginID,0,i_current_mediaType ,0,StringUtils::itos(PK_EntertainArea),false));}
     void setPlaybackSpeed(int s) { sendDceCommand(CMD_Change_Playback_Speed(iPK_Device, iMediaPluginID, nowPlayingButton->getStreamID() , s<0 ? -2 : +2, true));  }
     void pauseMedia() { sendDceCommand( CMD_Pause_Media(iPK_Device, iMediaPluginID ,nowPlayingButton->getStreamID())); }
-
+    void fastForwardMedia() {sendDceCommand(CMD_Scan_FwdFast_Fwd(iPK_Device, iMediaPluginID));}
+    void rewindMedia(){sendDceCommand(CMD_Scan_BackRewind(iPK_Device, iMediaPluginID));}
     void adjustVolume(int vol) {
         if(discreteAudio) {
             sendDceCommand(CMD_Set_Volume (iPK_Device, iMediaPluginID, StringUtils::itos(vol)));
@@ -1288,12 +1291,24 @@ public slots:
     void newTrack(QString track) { emit changeTrack(track); }
     void jogPosition(QString jog) {emit jogToPosition(jog);}
     void showBookmarks(QList<QObject*> t);
-    void changeChannels(QString chan) {emit newChannel(chan);  }
-    void gridChangeChannel(QString chan, QString chanid) {emit newGridChannel(chan, chanid);}
+    void changeChannels(QString chan) {
+        GenericFlatListModel *src = this->getDataGridModel("Channels", 11);
+        if(src){
+            GenericModelItem *itm = src->find(chan);
+            if(itm){
+             QString cid =itm->data(EPGItemClass::ChannelIdRole).toString();
+              gridChangeChannel(cid, cid);
+            }
+
+        }
+        emit newChannel(chan);
+    }
+    Q_INVOKABLE void gridChangeChannel(QString chan, QString chanid) {emit newGridChannel(chan, chanid);}
     void extraButtonPressed(QString b) {emit extraButton(b);}
     void dvd_showMenu(bool b) { dvdMenuShowing = b ; emit show_dvdMenu();}
     void showLinuxmceMenu(){emit show_linuxmce_menu();}
 
+    void exitMediaMenu(){sendDceCommand(CMD_Exit(iPK_Device, iMediaPluginID));}
     void setZoomLevel(QString zoom) {emit zoomLevelChanged(zoom);}
     void setAspectRatio(QString r) {emit aspectRatioChanged(r);}
     void getVideoFrame() { emit requestVideoFrame();}

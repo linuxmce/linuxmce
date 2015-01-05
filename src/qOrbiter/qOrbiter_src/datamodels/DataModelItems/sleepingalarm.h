@@ -25,7 +25,6 @@ class SleepingAlarm : public GenericModelItem
 public:
 
     explicit SleepingAlarm(QObject* parent = NULL);
-
     void setAlarmData(int i, QString n, QString f, bool u, QString c, QString k);
     virtual bool setData(int role, const QVariant &value);
 

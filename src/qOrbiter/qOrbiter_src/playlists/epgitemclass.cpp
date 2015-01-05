@@ -1,46 +1,34 @@
 #include "epgitemclass.h"
+#include "qdebug.h"
 
-EPGItemClass::EPGItemClass( QString chanName, int chanIndex,  QString channel, QString program, int dceIndex, QString chanImage, QString progImag, QObject *parent ) :
-     m_channame(chanName), m_dceIndex(dceIndex), m_channel(channel), m_program(program), channel_image(chanImage), program_image(progImag), channel_number(chanIndex)
+EPGItemClass::EPGItemClass( QObject *parent ) : GenericModelItem(parent)
 {
-
+    QHash<int, QByteArray> names;
+    names[NameRole] = "name";                 /** Maps to channel name */
+    names[ProgramRole] = "program";           /** Maps to program on channel */
+    names[ChannelRole] = "channel";           /** Numeric channel number, user facing */
+    names[ChannelIdRole] = "channelid";       /** Numeric number, internal representation. It has the source number prepended to the actual string of digits. Ie. the last three are the tunable digits */
+    names[TimeSlotRole] = "timeslot";         /** String representation of the time slot data */
+    names[ProgramIdRole] = "programid";       /** Experimental */
+    names[SeriesIdRole] = "seriesid";         /** Experimental */
+    names[BroadcastSourceRole] = "sourceid";  /** The current source being used */
+    names[BroadcastSourceNameRole] = "source";/** The Source name */
+    names[IdRole] = "id";
+     setRoleNames(names);
 }
 
-QHash<int, QByteArray> EPGItemClass::roleNames() const
+
+void EPGItemClass::setEpgItemData(QString channelName, QString programName, QString channelNumber, QString channelId, QString timeSlot, QString programId, QString seriesId, QString sourceId, QString sourceName)
 {
 
-  QHash<int, QByteArray> names;
-  names[NameRole] = "name";
-  names[IndexRole] = "index";
-  names[ChannelRole] = "channelnumber";
-  names[ProgramRole] = "program";
-  names[IdRole]= "id";
-  names[ChanImageRole] = "channelimage";
-  names[ProgImageRole] = "programimage";
-  names[ChannelIdRole] = "channelid";
-  return names;
-}
-
-QVariant EPGItemClass::data(int role) const
-{
-  switch(role) {
-  case NameRole:
-    return name();
-  case IndexRole:
-    return index();
-  case ChannelRole:
-    return channel();
-  case IdRole:
-    return id();
-  case ChanImageRole:
-    return channelImage();
-  case ProgImageRole:
-    return programImage();
-  case ChannelIdRole:
-    return mythid();
-  case ProgramRole:
-  return program();
-  default:
-    return QVariant();
-  }
+    m_data.insert(NameRole, channelName);
+    m_data.insert(ProgramRole, programName);
+    m_data.insert(ChannelRole, channelNumber);
+    m_data.insert(ChannelIdRole, channelId);
+    m_data.insert(TimeSlotRole, timeSlot);
+    m_data.insert(ProgramIdRole, programId);
+    m_data.insert(SeriesIdRole, seriesId);
+    m_data.insert(BroadcastSourceNameRole, sourceName);
+    m_data.insert(BroadcastSourceRole, sourceId);
+    m_data.insert(IdRole,channelNumber);
 }

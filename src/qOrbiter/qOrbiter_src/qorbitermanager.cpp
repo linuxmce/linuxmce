@@ -1360,6 +1360,11 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
                 option="38";
                 break;
 
+            case DATAGRID_EPG_All_Shows_CONST:
+            case DATAGRID_EPG_Current_Shows_CONST:
+                option = QString::number(iPK_User-1)+","+QString::number(this->iea_area);
+                break;
+
 
             default:
                 setMediaResponse("qOrbiterManager::getDataGridModel()::No Grid option set");
