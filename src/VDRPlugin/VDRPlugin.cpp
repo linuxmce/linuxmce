@@ -1111,7 +1111,7 @@ void VDRPlugin::BuildChannelList()
 	}
 
 	sVDRResponse="";
-	if( !SendVDRCommand(m_sVDRIp,"LSTE",sVDRResponse) )
+	if( !SendVDRCommand(m_sVDRIp,"LSTE NOW",sVDRResponse) )
 
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::BuildChannelList cannot get epg");
