@@ -10,20 +10,21 @@ Panel {
     headerTitle: qsTr("Channel:", "Tv Channel Entry") + targetChannel
 
     function submit(){
-        var pad = 3 - targetChannel.length
-        switch (pad){
-        case 1:
-            targetChannel= "0"+targetChannel;
-            break;
-        case 2:
-            targetChannel = "00"+targetChannel;
-            break;
-        default:
-            break;
-        }
+        manager.gridChangeChannel(targetChannel, targetChannel)
+//        var pad = 3 - targetChannel.length
+//        switch (pad){
+//        case 1:
+//            targetChannel= "0"+targetChannel;
+//            break;
+//        case 2:
+//            targetChannel = "00"+targetChannel;
+//            break;
+//        default:
+//            break;
+//        }
 
-        var chan ="i"+String(playlistPanel.bcastSource)+targetChannel
-        manager.gridChangeChannel(chan, chan)
+//        var chan ="i"+String(playlistPanel.bcastSource)+targetChannel
+//        manager.gridChangeChannel(chan, chan)
         targetChannel=""
     }
 
