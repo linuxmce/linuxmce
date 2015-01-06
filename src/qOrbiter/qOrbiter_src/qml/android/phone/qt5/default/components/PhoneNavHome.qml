@@ -17,6 +17,7 @@ Row{
         txtObj.color: "antiquewhite"
         txtObj.isBold: false
         hitArea.onReleased: {
+	    showRoomSelector();
             console.log(manager.currentScreen)
         }
     }

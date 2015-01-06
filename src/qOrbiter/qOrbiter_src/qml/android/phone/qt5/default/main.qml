@@ -185,7 +185,7 @@ Item {
         property string nextScreen:"Screen_1.qml"
         property string currentScreen:""
         anchors{
-            top: nav_row.bottom
+            top: dcenowplaying.b_mediaPlaying ? media_notification.bottom : nav_row.bottom
             bottom:info_panel.top
             left:qml_root.left
             right:qml_root.right
@@ -281,8 +281,13 @@ Item {
 	navSource: "../../../../android/phone/qt5/default/components/PhoneNavHome.qml"
     }
 
+    function showRoomSelector() {
+	info_panel.state = "room"
+    }
+
     InformationPanel {
         id: info_panel
+	state:"hidden"
     }
 
     function hideInfoPanel(){
