@@ -25,6 +25,7 @@ Item {
     signal showMetaData()
     signal changeScreen(string s)
     signal setupStart(int x, string y)
+    property alias appStyle:skinStyle
     property string locationinfo: "standby"
     property string screenfile
     property string dynamic_height
@@ -509,7 +510,7 @@ Item {
     }
 
     Style{
-        id:appStyle
+        id:skinStyle
     }
 
     MouseArea{

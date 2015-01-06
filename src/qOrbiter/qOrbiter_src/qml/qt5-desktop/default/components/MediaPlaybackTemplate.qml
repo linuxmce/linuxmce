@@ -2,7 +2,7 @@ import QtQuick 2.1
 import "../../../skins-common/qt5-lib/handlers"
 Item {
     id:template
-    state:dceplayer.mediaPlaying ? "hidden" : "info"
+    state:"info"
     anchors{
         top:pageLoader.top
         left:pageLoader.left
@@ -140,6 +140,7 @@ Item {
         }
     }
 
+
     NowPlayingImage {
         id: imageholder
         anchors.top: infoHdr.bottom
@@ -231,9 +232,16 @@ Item {
         }
     }
 
-    TemplateListView {
-        id: playlist
+    TemplateListView{
+        id:playlist
+        anchors{
+            top:infoHdr.bottom
+            bottom:parent.bottom
+            margins: scaleX(1)
+
+        }
     }
+
 
     states: [
         State {

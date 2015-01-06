@@ -54,19 +54,19 @@ useHeader: false
                 id: btChannelUp
                 state:"fixed"
                 buttonText: "Ch+"
-                onActivated: manager.changeTrack("+1")
+                onActivated: manager.tvChannelUp()
             }
             StyledButton {
                 id: btSkipNext
                 state:"fixed"
                 buttonText: "Mute"
-                onActivated: manager.muteSound()
+                onActivated: manager.mute()
             }
             StyledButton {
                 state:"fixed"
                 id: btChannelDown
                 buttonText: "Ch-"
-                onActivated: manager.changeTrack("-1")
+                onActivated: manager.tvChannelDown()
             }
 
 
@@ -150,7 +150,7 @@ useHeader: false
                 state:"fixed"
                 id: btExit
                 buttonText: "Exit"
-                onActivated: manager.extraButton("exit")
+                onActivated: manager.exitMediaMenu()
             }
 
             StyledButton {
@@ -198,25 +198,25 @@ useHeader: false
                 id: btRewind
                 state:"fixed"
                 buttonText: "Rewind"
-                onActivated: manager.setPlaybackSpeed(-1)
+                onActivated: manager.rewindMedia()
             }
             StyledButton {
                 id: btPause
                 state:"fixed"
                 buttonText: "Pause"
-                onActivated: manager.pause()
+                onActivated: manager.pauseMedia()
             }
             StyledButton {
                 id: btPlay
                 state:"fixed"
                 buttonText: "Play"
-                onActivated: manager.play()
+                onActivated: manager.playResume()
             }
             StyledButton {
                 id: btFFwd
                 state:"fixed"
                 buttonText: "FFwd"
-                onActivated: manager.setPlaybackSpeed(1)
+                onActivated: manager.fastForwardMedia();
             }
 
         }
@@ -244,7 +244,7 @@ useHeader: false
                 buttonText: "Green"
                 phil: "green"
 
-                onActivated: manager.greenButton()
+                onActivated: manager.greenButtonPress()
             }
             StyledButton {
                 id: btYellow
@@ -252,14 +252,14 @@ useHeader: false
                 buttonText: "Yellow"
                 phil: "yellow"
 
-                onActivated: manager.yellowButton()
+                onActivated: manager.yellowButtonPress()
             }
             StyledButton {
                 id: btBlue
                 state:"fixed"
                 buttonText: "Blue"
                 phil: "blue"
-                onActivated: manager.blueButton()
+                onActivated: manager.blueButtonPress()
             }
         }
 

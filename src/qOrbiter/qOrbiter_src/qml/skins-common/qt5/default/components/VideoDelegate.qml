@@ -49,7 +49,7 @@ Item{
             bottom:bgExtent.bottom
         }
         wrapMode: Text.WrapAnywhere
-        fontSize: 32
+        fontSize: cellFontSize
         visible:true //path==="" ? true : false
         isBold: false
         color: "White"

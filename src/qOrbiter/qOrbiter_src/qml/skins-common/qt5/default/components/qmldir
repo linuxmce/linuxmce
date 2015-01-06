@@ -35,6 +35,7 @@ MediaListListView             MediaListListView.qml                        #no c
 MedialistNav             MedialistNav.qml                        #no comment
 MediaListPathView             MediaListPathView.qml                        #no comment
 MediaListProgressBar             MediaListProgressBar.qml                        #no comment
+MediaNumberPad             MediaNumberPad.qml                        #no comment
 MediaOptions4             MediaOptions4.qml                        #no comment
 MediaOptions5             MediaOptions5.qml                        #no comment
 MediaPlaybackBase             MediaPlaybackBase.qml                        #no comment

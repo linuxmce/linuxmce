@@ -154,7 +154,7 @@ Item{
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: currentCellWidth*hdPosterRatio
-                currentCellWidth:manager.b_orientation ? scaleX(15) : scaleX(19.25)
+                currentCellWidth:manager.b_orientation ? scaleX(24.25) : scaleX(19.25)
             }
         },
         State {

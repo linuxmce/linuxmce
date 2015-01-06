@@ -74,7 +74,7 @@ StyledButton{
         
         anchors{
             top:parent.top
-            left:parent.verticalCenter
+            left:parent.horizontalCenter
             right:parent.right
             bottom: parent.bottom
             margins: 10

@@ -1,17 +1,20 @@
- 
+
 import QtQuick 2.2
 import "../components"
 /*!
   Device Reload Screen
   */
 StyledScreen{
-  id:new_device_reload
+    id:message
 
-  StyledText{
-          text: qsTr("I finished installing the software for your new devices. You will need to restart the router before you can use them.")
-          font.pointSize: 18
-          anchors.centerIn: parent
-          font.bold: true
-      }
+    Panel{
+        headerTitle: qsTr("System Message")
+        StyledText{
+            text: screenparams.getParam(9)
+            font.pointSize: largeFontSize
+            anchors.centerIn: parent
+            font.bold: true
+        }
+    }
 
 }

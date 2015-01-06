@@ -23,7 +23,7 @@ QtObject{
     property string skinversion: "1.0"
     property string skinvariation: "Tablet 1280 x 736"
     property string maincolor: "black"
-    property bool profile:!manager.isProfile
+    property bool profile:manager.isProfile
     //scale function
     function scaleX(x){
         return x/100*appH
@@ -83,8 +83,11 @@ QtObject{
 
     /* Sizes */
     property int headerButtonHeight:profile ? scaleY(8) : scaleY(10)
+
+    /*! Clock */
     property int clockHeight:profile ? scaleY(12) : scaleY(10)
     property int clockWidth:scaleX(50)
+    property int clockFontSize:profile ? scaleY(4) : scaleY(5)
 
     //-color definitions
     property color accentcolor: "green"

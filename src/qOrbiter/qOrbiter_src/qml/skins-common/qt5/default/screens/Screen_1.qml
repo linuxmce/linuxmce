@@ -1,6 +1,6 @@
 import QtQuick 2.2
 import "../components"
-import "../../../skins-common/lib/handlers"
+
 
 StyledScreen {
     navigation: "ScenarioComponent.qml"

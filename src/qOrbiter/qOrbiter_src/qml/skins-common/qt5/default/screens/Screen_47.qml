@@ -125,10 +125,11 @@ StyledScreen {
                 id:all_media
                 anchors{
                     bottom: typeSelection.top
-                    left: typeSelection.left
-                    right:typeSelection.right
-                   margins: scaleY(8)
+                    bottomMargin: scaleY(8)
+                    horizontalCenter: typeSelection.horizontalCenter
                 }
+                width: typeSelection.width/2
+
                 visible: typeSelection.visible
                 height: scaleY(8)
                 buttonText: "All Videos"
@@ -144,14 +145,14 @@ StyledScreen {
                 height:parent.height / 2
                 width: parent.width *.85
                 model:mediatypefilter
-                cellWidth:manager.isProfile ? scaleX(30) : scaleX(20)
-                cellHeight:manager.isProfile ? scaleY(15) : scaleY(22)
+                cellHeight:manager.isProfile ? scaleY(15) : scaleY(20)
+                cellWidth:manager.isProfile ? scaleX(28) : scaleX(25)
                 delegate:
                     StyledButton{
                     height:typeSelection.cellHeight -5
                     width: typeSelection.cellWidth -5
                     buttonText: name
-                    textSize: txtObj.largeFontSize
+                   state:"large-fixed"
                     hitArea.onReleased:{
                         mediatypefilter.setSelectionStatus(name);
                         content.state="viewing"

@@ -78,7 +78,8 @@ Panel{
             anchors.verticalCenter: parent.verticalCenter
             buttonText: qsTr("Channels", "Tv Channel listing")
             onActivated: {
-                showingPlaylist=!showingPlaylist
+                if(directionDiamond.visible)
+                    showingPlaylist=!showingPlaylist
             }
         }
         StyledButton{
@@ -195,6 +196,13 @@ Panel{
         visible:true
     }
 
+    MediaNumberPad{
+        id:numbers
+        anchors.centerIn: parent
+        visible:!showingPlaylist
+
+    }
+
     DirectionDiamond {
         id: directionDiamond
         visible:false
@@ -266,6 +274,10 @@ Panel{
             PropertyChanges {
                 target: directionDiamond
                 visible:true
+            }
+            PropertyChanges {
+                target: mediaScrollerTarget
+                visible:false
 
             }
         },
@@ -292,46 +304,60 @@ Panel{
                 target: plst
                 visible:false
             }
+            PropertyChanges {
+                target: mediaScrollerTarget
+                visible:false
+
+            }
         },
         State{
             name:"streamingaudio"
         },
         State{
             name:"radio"
+            PropertyChanges {
+                target: mediaScrollerTarget
+                visible:false
+
+            }
         },
         State{
             name:"options"
             PropertyChanges{
                 target: npImage
-                opacity:0
+                visible:false
+            }
+            PropertyChanges{
+                target: numbers
+                visible:false
             }
             PropertyChanges{
                 target: dvdImage
-                opacity:0
+                visible:false
             }
             PropertyChanges{
                 target:arrows
-                opacity:0
+                visible:false
             }
             PropertyChanges {
                 target: directionDiamond
-                opacity:0
+                visible:false
             }
-            PropertyChanges {
-                target: lightingAudioControls
-                opacity:0
-            }
+           PropertyChanges{
+            target: lightingAudioControls
+            visible:false
+           }
             PropertyChanges {
                 target: mediaTypeMetaData
-                opacity:0
+                visible:false
             }
             PropertyChanges {
                 target: mediaScrollerTarget
-                opacity:0
+                visible:false
             }
             PropertyChanges {
                 target: playlistPanel
-                opacity:0
+                visible:false
             }
             PropertyChanges {
                 target: controlPanel

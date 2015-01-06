@@ -12,7 +12,7 @@ ListView{
     spacing:scaleX(1)
     Component.onCompleted: {manager.setBoundStatus(true);}
     highlightFollowsCurrentItem: true
-    model: dcenowplaying.qs_screen==="Screen_63.qml" ? simpleepg : manager.getDataGridModel("Playlist", 18)
+    model: dcenowplaying.qs_screen==="Screen_63.qml" ? manager.getDataGridModel("Channels", 11) : manager.getDataGridModel("Playlist", 18)
     clip:true
 
 
@@ -62,7 +62,7 @@ ListView{
 
         StyledText{
             id:label
-            text:index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + description : description
+            text:/*index === dcenowplaying.m_iplaylistPosition ? "Now Playing - " + description : */program
             fontSize:index === dcenowplaying.m_iplaylistPosition ? headerText :mediumText
             color:"white"
             width: parent.width

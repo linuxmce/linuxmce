@@ -22,7 +22,7 @@ QtObject{
     property string skinversion: "2.2"
     property string skinvariation: "Tablet 1280 x 736"
     property string maincolor: "black"
-    property bool profile:!manager.isProfile
+    property bool profile:manager.isProfile
     property string commonQmlPath:"../../skins-common/qt5/default/"
     //scale function
     function scaleX(x){
@@ -83,8 +83,7 @@ QtObject{
 
     /* Sizes */
     property int headerButtonHeight:profile ? scaleY(8) : scaleY(10)
-    property int clockHeight:profile ? scaleY(12) : scaleY(10)
-    property int clockWidth:scaleX(50)
+
 
     //-color definitions
     property color accentcolor: "green"
@@ -185,9 +184,11 @@ QtObject{
     property int largeTextSize:manager.isProfile ? scaleY(6) : scaleY(7)
 
     /*! Clock */
-    property int clockFontSize:manager.isProfile ? scaleY(3) : scaleY(5)
-
+    property int clockFontSize:profile ? scaleY(3) : scaleY(4)
+    property int clockHeight:profile ? scaleY(12) : scaleY(10)
+    property int clockWidth:scaleX(50)
     /*! Buttons */
     property int buttonHeightSmall:manager.isProfile ? scaleY(8) : scaleY(10)
-    property int buttonWidthSmall:manager.isProfile ? scaleX(12) : scaleX(10)
+
+
 }
