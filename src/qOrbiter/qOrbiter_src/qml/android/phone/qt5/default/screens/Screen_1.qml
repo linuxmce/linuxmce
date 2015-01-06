@@ -1,41 +1,112 @@
-import QtQuick 2.0
+import QtQuick 2.2
 import "../components"
-import "../js/ComponentLoader.js" as MyJs
+import "../../../../../skins-common/qt5/default/components"
 
-Item {
-    id:stage
-    anchors.centerIn: parent
-    signal swapStyle()
-    property bool showOptions:false
-    width:manager.appWidth
-    height:manager.appHeight
-    Component.onCompleted: forceActiveFocus()
-    focus:true
+StyledScreen {
+    navigation: "../../../../android/phone/qt5/default/components/PhoneNavHome.qml"
+    keepHeader: true
+    property int rowHeight: 15
 
-    Keys.onReleased: {
-        event.accepted=true
-        switch(event.key){
-        case Qt.Key_Back:
-            console.log("show exit")
-            popExit.opacity = 1;
-            exitTimer.start()
-            break;
-        case Qt.Key_Menu :
-            showOptions = !showOptions
-            console.log("toggle menu")
-            break;
-        case Qt.Key_M:
-            showOptions = !showOptions
-            break;
-        case Qt.Key_MediaPrevious:
-            console.log("Media previous")
-            break;
-        default:
-            console.log(event.key)
-            break;
+    Rectangle {
+	anchors.fill: parent
+        color: "black"
+        opacity: .65
+    }
+    ListModel{
+        id: topMenuItems
+        ListElement{
+            name:"Lights"
+            modelName:"currentRoomLights"
+	    modelIndex: 0
+            floorplantype:2
+        }
+        ListElement{
+            name:"Media"
+            modelName:"currentRoomMedia"
+	    modelIndex: 1
+            floorplantype:5
+        }
+        ListElement{
+            name:"Climate"
+            modelName:"currentRoomClimate"
+	    modelIndex: 2
+            floorplantype:3
+        }
+        ListElement{
+            name:"Telecom"
+            modelName:"currentRoomTelecom"
+	    modelIndex: 3
+            floorplantype:6
+        }
+        ListElement{
+            name:"Security"
+            modelName:"currentRoomSecurity"
+	    modelIndex: 4
+            floorplantype:4
         }
     }
 
+    property variant scenarioModel: [ currentRoomLights, currentRoomMedia, currentRoomClimate, currentRoomTelecom, currentRoomSecurity ]
+
+    // ListView to contain different scenarios vertically
+    ListView {
+	id: scenarioView
+	anchors.fill: parent
+	model: topMenuItems
+	orientation: ListView.Vertical
+	flickableDirection: Flickable.VerticalFlick
+	focus: false
+	spacing: 5
+	delegate: Row {
+	    height: scaleY(rowHeight)
+	    width: parent.width
+	    anchors.leftMargin:5
+	    Item {
+		width: scaleX(12)
+		height: parent.height
+
+		StyledButton {
+		    id: scenarioBt
+		    buttonText: name
+		    width: manager.isProfile ? parent.height : scaleX(12)
+		    height: manager.isProfile ? scaleX(12) : parent.height
+		    transform: Rotation { angle: manager.isProfile ? -90 : 0; origin.y: scaleX(12); origin.x: scaleX(11.5) }
+		    hitArea.onReleased:{
+			manager.setFloorplanType(floorplantype)
+			manager.showfloorplan(floorplantype)
+		    }
+		}
+	    }
+	    Item {
+		height: parent.height
+		width: scaleX(80)
+		ListView {
+		    height: parent.height
+		    width: parent.width
+		    model: scenarioModel[modelIndex]
+		    orientation: ListView.Horizontal
+		    flickableDirection: Flickable.HorizontalFlick
+		    spacing: 5
+		    delegate: Item{
+			width: manager.isProfile ? scaleY(rowHeight) : scaleY(rowHeight*1.5)
+			height: parent.height
+			
+			StyledButton{
+			    id:button
+			    anchors.fill: parent
+			    buttonText: title
+			    textSize: manager.isProfile ? scaleY(3) : scaleY(5)
+			    hitArea.onReleased: manager.execGrp(params)
+			    
+			}
+		    }
+		}
+	    }
+	}
+
+    }
+
+/*
     NowPlayingButton{
         id:fs_npButton
         anchors.top: parent.top
@@ -101,7 +172,7 @@ Item {
         }
 
     }
-
+*/
 }
 
 

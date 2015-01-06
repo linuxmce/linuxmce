@@ -1,48 +1,93 @@
-import QtQuick 2.3
-import DceScreenSaver 1.0
-import "components"
-import "js/ComponentLoader.js" as MyJs
+import QtQuick 2.2
+import "../../../../skins-common/qt5/default/components"
 
+//android-phone (qt5)
 
 Item {
     id: qml_root
-    width:manager.appWidth
     height:manager.appHeight
-    focus:true
+    width: manager.appWidth
 
-    Style{
-        id:appStyle
+    property alias skinStyle:style
+    property bool uiOn:true
+
+    property variant current_scenario_model:currentRoomLights
+    property variant current_header_model:scenarios
+    property string locationinfo: "standby"
+    property string screenfile:""
+
+    signal showMetadata()
+    signal showPlaylist()
+    signal showAdvanced()
+    signal close()
+    signal changeScreen(string s)
+    signal setupStart(int x, string y)
+
+    function scaleX(x){
+        return x/100*qml_root.width
+    }
+    function scaleY(y){
+        return y/100*qml_root.height
     }
 
-    FontLoader{
-        id:appFont
-        name: "Sawasdee"
-        source:"../../../../skins-common/fonts/Sawasdee.ttf"
+    function dumpObj(obj, message){
+        console.log((message? message+"\n\t" : "No Message \n\t")+ JSON.stringify(obj, null, "\t"))
     }
 
-    DceScreenSaver{
-        id:glScreenSaver
-        height:qml_root.height
-        width: qml_root.width
-        interval:30000
-        anchors.centerIn: qmlroot
-        active:manager.m_ipAddress = manager.internalHost
-        requestUrl:manager.m_ipAddress
-
-        Component.onCompleted: {
-            if(glScreenSaver.pictureCount===0 && glScreenSaver.active){
-                glScreenSaver.setImageList(manager.screensaverImages)
-            }
+    function raiseNavigation(raised){
+        if(raised ){
+            nav_row.state="raised"
+        } else {
+            nav_row.state="lowered"
         }
     }
 
 
-//    Component.onCompleted: {
-//        androidSystem.updateBuildInformation()
-//    }
+    focus:true
 
-    Keys.onReleased: {
+    Rectangle{
+        anchors.fill: parent
+        id:bgFill
+        color:"black"
+    }
+
+    onUiOnChanged: {
+        console.log("UiOn::"+uiOn)
+        if(uiOn){
+            if(info_panel.restore){
+                info_panel.state="retracted"
+                info_panel.restore=false
+            }
+        } else {
+            if(info_panel.state==="retracted"){
+                info_panel.restore=true
+            } else {
+                info_panel.restore=false
+            }
+
+            info_panel.state="hidden"
+        }
+    }
+
+
+
+    Rectangle{
+        id:canary
+        height: 1
+        width: 1
+        color:"white"
+    }
+    Style{
+        id:style
+    }
+
+    Keys.onReleased:{
         switch(event.key){
+
+        case Qt.Key_Menu:
+            showOptions=!showOptions
+            console.log("menu button caught in root")
+            break;
 
         case Qt.Key_Back:
             if(manager.currentScreen==="Screen_1.qml"){
@@ -50,6 +95,7 @@ Item {
             } else{
                 manager.goBacktoQScreen()
             }
+            console.log("Caught Back Key")
             break
         case Qt.Key_MediaPrevious:
             if(manager.currentScreen==="Screen_1.qml"){
@@ -57,107 +103,209 @@ Item {
             } else{
                 manager.goBacktoQScreen()
             }
-            break
+            break;
+        case Qt.Key_VolumeDown:
+            androidSystem.mediaSetVol(-1)
+            console.log("vol-")
+            break;
+        case Qt.Key_VolumeUp:
+            androidSystem.mediaSetVol(+1)
+            console.log("vol+")
+            break;
+
         default:
             console.log(event.key)
         }
+        event.accepted=true
     }
 
-    signal close()
-    signal changeScreen(string s)
-    signal setupStart(int x, string y)
-
-    property string locationinfo: "standby"
-    property string screenfile
-    property string dynamic_height
-    property string dynamic_width
-
-    Connections{
-        target:manager
-        onChangeScreen:screenchange(screenname)
-    }
-
-    function scaleX(x){
-        return x/100*manager.appWidth
-    }
-    function scaleY(y){
-        return y/100*manager.appHeight
-    }
-
-    //    Rectangle{
-    //        anchors.fill: parent
-    //        id:bgFill
-    //        gradient: Gradient{
-    //            GradientStop{position: 0.0; color: "Black"}
-    //            GradientStop{position: .45; color: "darkgrey"}
-    //            GradientStop{position: .65; color: "black"}
-    //        }
-    //    }
-
-
-
-    //    function updateBackground(portait, wide){
-    //        appBackground.pSource = portait
-    //        appBackground.wSource = wide
-    //    }
-
-    function showExitConfirm(){
-
-    } 
-
-
-    function screenchange(screenname)
-    {
-        pageLoader.source = "screens/"+screenname
-//        if (pageLoader.status == Component.Ready)
-//        {
-//            manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-//        }
-//        else if (pageLoader.status == Component.Loading)
-//        {
-//            console.log("loading page from network")
-//            finishLoading(screenname)
-//        }
-//        else
-//        {
-//            console.log("Command to change to:" + screenname + " failed!")
-
-//            screenfile = screenname
-//            pageLoader.source = "screens/Screen_x.qml"
-//        }
-    }
-
-    function finishLoading (screenname)
-    {
-        if(pageLoader.status != Component.Ready)
-        {
-            console.log("finishing load")
-            pageLoader.source = "screens/"+screenname
-            console.log("screen" + screenname + " loaded.")
+    ListModel{
+        id:media_filters
+        ListElement{
+            name:"Attribute"
+            pksort:10
         }
-        else
-        {
-            finishLoading(screenname)
+        ListElement{
+            name:"Genre"
+            pksort:4
         }
+        ListElement{
+            name:"MediaType"
+            pksort:7
 
+        }
+        ListElement{
+            name:"Resolution"
+            pksort:-1
+        }
+        ListElement{
+            name:"Source"
+            pksort:5
+        }
+        ListElement{
+            name:"View"
+            pksort:-1
+        }
     }
 
-    function checkStatus(component)
-    {
+    property color mobilegradientone:"darkgreen"
+    property color mobilegradienttwo:style.contentBgColor
+    property variant colorArray:["darkblue", "black", "grey", "darkcyan" ,"purple", "slategrey", "crimson", "gold", "dodgerblue"]
+
+    Rectangle{
+        id:mobileGradient
+        anchors.fill: parent
+	color: black
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                if(!uiOn){
+                    console.log("screensaver revive")
+                    uiOn=true
+                }
+            }
+        }
+    }
+    function screenchange(screenname ){
+
+        if(pageLoader.currentScreen!=screenname)
+            pageLoader.nextScreen = screenname
+    }
+
+    function checkStatus(component){
         console.log(component.progress)
     }
-
 
     Loader {
         id:pageLoader
         objectName: "loadbot"
         focus: true
-        source:"screens/Screen_1.qml"
+        source: "screens/Screen_1.qml"
+        // visible:qml_root.uiOn
+        property string nextScreen:"Screen_1.qml"
+        property string currentScreen:""
+        anchors{
+            top: nav_row.bottom
+            bottom:info_panel.top
+            left:qml_root.left
+            right:qml_root.right
+
+        }
+
+        onNextScreenChanged: {
+
+            if(!nextScreen.match(".qml")){
+                return
+            } else {
+
+            }
+
+            if(!pageLoader.item){
+                console.log("Last screen likely had errors, loading next screen==>"+nextScreen)
+                loadNext()
+            }
+
+            if( pageLoader.item.noForce===true){
+                console.log("pageloader::"+source+" declares noforce::"+pageLoader.item.noForce+", ignoring "+nextScreen)
+                return;
+            }else {
+                console.log("pageloader::"+source+" noforce::"+pageLoader.item.noForce+" , loading next screen.")
+                console.log("next screen==>"+nextScreen)
+                startChange()
+            }
+
+        }
+
+        function startChange(){
+
+
+            if(!pageLoader.item || pageLoader.item.scree){
+                console.log("pageloader::closing page "+ manager.currentScreen)
+                pageLoader.item.state="closing"
+            } else{
+                console.log("pageloader::no page jumping to next ==>"+nextScreen)
+                loadNext()
+            }
+
+        }
+
+        function loadNext(){
+
+
+            if(nextScreen===""){
+                nextScreen="Screen_1.qml"
+                return
+            }
+
+            console.log("pageloader::loading next screen::\n"+style.commonQmlPath+"screens/"+nextScreen)
+            pageLoader.source=style.commonQmlPath+"screens/"+nextScreen
+        }
+
+        opacity: uiOn ? 1 : 0
+        Behavior on opacity {
+            PropertyAnimation{
+                duration: 750
+            }
+        }
+
         Keys.onBackPressed: console.log("back")
-        onSourceChanged:  loadin
+
         onLoaded: {
             console.log("Screen Changed:" + pageLoader.source)
         }
+        onStatusChanged:  if (pageLoader.status == Component.Ready)
+                          {
+
+                              manager.setDceResponse("Command to change to:" + source+ " was successfull")
+                              screenfile = source
+                              currentScreen=nextScreen
+
+                              // contentItem=item.screen_root
+                          }
+                          else if (pageLoader.status == Component.Loading)
+                          {
+                              console.log("loading page from network")
+
+                          }
+                          else if(pageLoader.status == Component.Error)
+                          {
+                              console.log("Command to change to:" + source + " failed!")
+                              manager.currentScreen="Screen_X.qml"
+                          }
+    }
+    MediaPopup{
+        id:media_notification
+    }
+    NavigationRow {
+        id: nav_row
+	navSource: "../../../../android/phone/qt5/default/components/PhoneNavHome.qml"
+    }
+
+    InformationPanel {
+        id: info_panel
+    }
+
+    function hideInfoPanel(){
+        info_panel.state = "hidden"
+    }
+
+    function showInfoPanel(){
+        info_panel.state = "retracted"
+    }
+
+    function setNavigation(n){
+        nav_row.navSource=""
+        nav_row.navSource = n
+    }
+
+    function updateBackground(portait, wide){
+        appBackground.pSource = portait
+        appBackground.wSource = wide
+    }
+
+    FontLoader{
+        id:appFont
+        source:".././../../../skins-common/fonts/Sawasdee.ttf"
     }
 
     //=================Components==================================================//
@@ -166,18 +314,18 @@ Item {
         componentLoader.source = "components/"+componentName
         if (componentLoader.status == Component.Ready)
         {
-            manager.setDceResponse("Command to change to:" + componentName+ " was successfull")
+            manager.setDceResponse("Command to load:" + componentName+ " was successfull")
+
         }
         else if (componentLoader.status == Component.Loading)
         {
-            console.log("loading page from network")
+            console.log("loading item from network")
             finishLoadingComponent(componentName)
         }
         else
         {
-            console.log("Command to add: " + componentName + " failed!")
+            console.log("Command to load: " + componentName + " failed!")
             componentFile = componentName
-
         }
     }
 
@@ -186,42 +334,38 @@ Item {
         if(componentLoader.status != Component.Ready)
         {
             console.log("finishing network load")
-            componentLoader.source = "components/"+comp
-            console.log("screen" + comp + " loaded.")
+            componentLoader.source = style.commonQmlPath+"components/"+comp
+            console.log("item " + comp + " loaded.")
         }
         else
         {
             finishLoadingComponent(comp)
         }
-
     }
 
-//    Rectangle{
-//        id:mask
-//        height: parent.height
-//        width: parent.width
-//        color: "black"
-//        opacity:0
-//        MouseArea{
-//            anchors.fill: parent
-//            onClicked: {}
-//        }
 
-//    }
 
     Loader{
-        id:componentLoader       
-        source:""
+        id:componentLoader
+        height: parent.height
+        width: parent.width
         objectName: "componentbot"
-        onSourceChanged:  {
-            if(source!==""){
-             //   mask.opacity = .65
-                console.log("Component is loaded")
-            }else {
-             //   mask.opacity=0
-            }
+        onLoaded: {
+            console.log("Component is loaded")
         }
     }
 
 
+
+    MouseArea{
+        id:mst
+        anchors.fill: parent
+
+        onPressed: {
+            mouse.accepted=false
+            console.log("Mouse X: "+mouse.x)
+            console.log("Mouse Y:"+mouse.y)
+            console.log("\n")
+        }
+    }
 }

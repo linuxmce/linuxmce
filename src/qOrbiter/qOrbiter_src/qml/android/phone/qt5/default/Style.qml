@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 
 /*!
  *\class Style
@@ -22,7 +22,9 @@ QtObject{
     property string skindescription: "Android phone skin, work in progress"
     property string skinversion: "1.0"
     property string skinvariation: "Android 320X480"
-    property string maincolor: "grey"
+    property string maincolor: "black"
+    property bool profile:!manager.isProfile
+    property string commonQmlPath:"./"
 
     //scale function
     function scaleX(x){
