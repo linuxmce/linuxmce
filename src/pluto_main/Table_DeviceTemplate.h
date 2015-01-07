@@ -306,6 +306,7 @@ void DeviceTemplate_Output_FK_DeviceTemplate_getrows(vector <class Row_DeviceTem
 void DeviceTemplate_PageSetup_FK_DeviceTemplate_getrows(vector <class Row_DeviceTemplate_PageSetup*> *rows);
 void InfraredGroup_Command_FK_DeviceTemplate_getrows(vector <class Row_InfraredGroup_Command*> *rows);
 void InstallWizard_FK_DeviceTemplate_getrows(vector <class Row_InstallWizard*> *rows);
+void InstallWizard_Distro_FK_DeviceTemplate_Required_getrows(vector <class Row_InstallWizard_Distro*> *rows);
 void PnpQueue_FK_DeviceTemplate_getrows(vector <class Row_PnpQueue*> *rows);
 void Screen_DesignObj_FK_DeviceTemplate_getrows(vector <class Row_Screen_DesignObj*> *rows);
 void StartupScript_FK_DeviceTemplate_getrows(vector <class Row_StartupScript*> *rows);

@@ -97,6 +97,7 @@ class DECLSPECIFIER Row_InstallWizard_Distro : public TableRow, public Serialize
 long int m_FK_InstallWizard;
 long int m_FK_OperatingSystem;
 long int m_FK_Distro;
+long int m_FK_DeviceTemplate_Required;
 string m_Comments;
 long int m_psc_id;
 long int m_psc_batch;
@@ -105,13 +106,14 @@ short int m_psc_frozen;
 string m_psc_mod;
 long int m_psc_restrict;
 
-		bool is_null[11];
+		bool is_null[12];
 	
 	public:
 		long int PK_InstallWizard_Distro_get();
 long int FK_InstallWizard_get();
 long int FK_OperatingSystem_get();
 long int FK_Distro_get();
+long int FK_DeviceTemplate_Required_get();
 string Comments_get();
 long int psc_id_get();
 long int psc_batch_get();
@@ -125,6 +127,7 @@ long int psc_restrict_get();
 void FK_InstallWizard_set(long int val);
 void FK_OperatingSystem_set(long int val);
 void FK_Distro_set(long int val);
+void FK_DeviceTemplate_Required_set(long int val);
 void Comments_set(string val);
 void psc_id_set(long int val);
 void psc_batch_set(long int val);
@@ -137,6 +140,7 @@ void psc_restrict_set(long int val);
 		bool FK_InstallWizard_isNull();
 bool FK_OperatingSystem_isNull();
 bool FK_Distro_isNull();
+bool FK_DeviceTemplate_Required_isNull();
 bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
@@ -147,6 +151,7 @@ bool psc_restrict_isNull();
 		void FK_InstallWizard_setNull(bool val);
 void FK_OperatingSystem_setNull(bool val);
 void FK_Distro_setNull(bool val);
+void FK_DeviceTemplate_Required_setNull(bool val);
 void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
@@ -167,6 +172,7 @@ void psc_restrict_setNull(bool val);
 		class Row_InstallWizard* FK_InstallWizard_getrow();
 class Row_OperatingSystem* FK_OperatingSystem_getrow();
 class Row_Distro* FK_Distro_getrow();
+class Row_DeviceTemplate* FK_DeviceTemplate_Required_getrow();
 
 
 		// Return the rows in other tables with foreign keys pointing here
@@ -174,7 +180,7 @@ class Row_Distro* FK_Distro_getrow();
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_InstallWizard_Distro+ m_FK_InstallWizard+ m_FK_OperatingSystem+ m_FK_Distro+ m_Comments+ m_psc_id+ m_psc_batch+ m_psc_user+ m_psc_frozen+ m_psc_mod+ m_psc_restrict;
+			StartSerializeList() + m_PK_InstallWizard_Distro+ m_FK_InstallWizard+ m_FK_OperatingSystem+ m_FK_Distro+ m_FK_DeviceTemplate_Required+ m_Comments+ m_psc_id+ m_psc_batch+ m_psc_user+ m_psc_frozen+ m_psc_mod+ m_psc_restrict;
 		}
 	private:
 		void SetDefaultValues();
@@ -183,6 +189,7 @@ class Row_Distro* FK_Distro_getrow();
 string FK_InstallWizard_asSQL();
 string FK_OperatingSystem_asSQL();
 string FK_Distro_asSQL();
+string FK_DeviceTemplate_Required_asSQL();
 string Comments_asSQL();
 string psc_id_asSQL();
 string psc_batch_asSQL();

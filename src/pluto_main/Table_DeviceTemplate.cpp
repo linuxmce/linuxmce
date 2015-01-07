@@ -65,6 +65,7 @@ using namespace std;
 #include "Table_DeviceTemplate_PageSetup.h"
 #include "Table_InfraredGroup_Command.h"
 #include "Table_InstallWizard.h"
+#include "Table_InstallWizard_Distro.h"
 #include "Table_PnpQueue.h"
 #include "Table_Screen_DesignObj.h"
 #include "Table_StartupScript.h"
@@ -2464,6 +2465,13 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 class Table_InstallWizard *pTable = table->database->InstallWizard_get();
 pTable->GetRows("`FK_DeviceTemplate`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
+}
+void Row_DeviceTemplate::InstallWizard_Distro_FK_DeviceTemplate_Required_getrows(vector <class Row_InstallWizard_Distro*> *rows)
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+class Table_InstallWizard_Distro *pTable = table->database->InstallWizard_Distro_get();
+pTable->GetRows("`FK_DeviceTemplate_Required`=" + StringUtils::itos(m_PK_DeviceTemplate),rows);
 }
 void Row_DeviceTemplate::PnpQueue_FK_DeviceTemplate_getrows(vector <class Row_PnpQueue*> *rows)
 {
