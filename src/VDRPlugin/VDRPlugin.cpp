@@ -1064,7 +1064,9 @@ void VDRPlugin::BuildChannelList()
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::BuildChannelList cannot get channel list");
 		return;
-	}
+	} 
+	LoggerWrapper::GetInstance()->Write(LV_RECEIVE_DATA,"VDRPlugin::BuildChannelList received channel list");
+	        
 	string::size_type pos_line=0;
 	string sLine;
 	while( true )
@@ -1117,6 +1119,7 @@ void VDRPlugin::BuildChannelList()
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::BuildChannelList cannot get epg");
 		return;
 	}
+	LoggerWrapper::GetInstance()->Write(LV_RECEIVE_DATA,"VDRPlugin::BuildChannelList received epg");
 
 	VDRChannel *pVDRChannel = NULL;
 	VDRProgramInstance *pVDRProgramInstance = NULL, *pVDRProgramInstance_Last = NULL;
@@ -1137,7 +1140,14 @@ void VDRPlugin::BuildChannelList()
 				string sChannelID = sLine.substr(2,pos_space-2);
 				pVDRChannel = m_mapVDRChannel_Find(sChannelID);
 				if( !pVDRChannel )
-					LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::BuildChannelList cannot find channel %s",sLine.c_str());
+				{	
+				        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VDRPlugin::BuildChannelList cannot find channel %s",sLine.c_str());
+				}
+                                else
+                                {
+                                        LoggerWrapper::GetInstance()->Write(LV_DEBUG,"VDRPlugin::BuildChannelList found channel %s",sLine.c_str());
+                                }
+
 			}
 		}
 
