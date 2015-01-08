@@ -167,7 +167,8 @@ public:
             QStringList breaker = QString::fromStdString(pCell->m_mapAttributes_Find("Name").c_str()).split(" ");
             QString channelName = breaker.at(1);
             int channelNumber = breaker.at(0).toInt();
-
+            qDebug() << pCell->GetText();
+            qDebug() << pCell->GetValue();
             channelIndex = pCell->GetValue();
             program = QString::fromStdString(pCell->m_mapAttributes_Find("Info"));
 

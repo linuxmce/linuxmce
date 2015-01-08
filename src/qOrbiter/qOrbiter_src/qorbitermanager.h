@@ -168,6 +168,8 @@ class qorbiterManager : public QObject
     Q_PROPERTY (int deviceVolume READ getDeviceVolume WRITE setDeviceVolume NOTIFY deviceVolumeChanged)
     Q_PROPERTY (int appHeight READ getAppH WRITE setAppH NOTIFY orientationChanged)/*!< \brief Contains the application height \ingroup qorbiter_properties */
     Q_PROPERTY (int appWidth READ getAppW WRITE setAppW NOTIFY orientationChanged)/*!< \brief Contains the application width \ingroup qorbiter_properties */
+    Q_PROPERTY (int entertainArea READ entertainArea NOTIFY locationChanged )
+    Q_PROPERTY (int room READ room NOTIFY locationChanged)
 
     Q_PROPERTY(int i_current_mediaType READ getMediaType WRITE setMediaType NOTIFY mediaTypeChanged)/*!< \brief Contains the current media type of the playing media. \ingroup qorbiter_properties */
     Q_PROPERTY (QString q_mediaType READ getSorting WRITE setGridMediaType NOTIFY mediaGridTypeChanged) /*!< \brief Contains the current media type of the media grid being browsed \ingroup qorbiter_properties */
@@ -778,8 +780,8 @@ signals:
     void CMD_makeCall(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To);
 
 public slots:
-
-
+    int entertainArea() {return iea_area;}
+    int room() {return iFK_Room;}
     void setHostDevice(int d){ if(hostDevice != d ) {hostDevice=d; emit hostDeviceChanged(); }  }
     int getHostDevice(){return hostDevice;}
     QString getHostDeviceName(){return HostSystemData::getSystemName(hostDevice); }

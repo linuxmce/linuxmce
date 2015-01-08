@@ -1362,7 +1362,7 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
 
             case DATAGRID_EPG_All_Shows_CONST:
             case DATAGRID_EPG_Current_Shows_CONST:
-                option = QString::number(iPK_User-1)+","+QString::number(this->iea_area);
+                option = QString::number(iPK_User)+","+QString::number(this->iea_area);
                 break;
 
 

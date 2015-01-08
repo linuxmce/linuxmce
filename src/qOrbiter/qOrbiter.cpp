@@ -81,6 +81,7 @@ bool qOrbiter::Register()
 qOrbiter_Command *Create_qOrbiter(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 {
     return new qOrbiter(pPrimaryDeviceCommand, pData, pEvent, pRouter);
+
 }
 //<-dceag-createinst-e->
 
@@ -2619,6 +2620,8 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString op
         } else if (PK_DataGrid == DATAGRID_Current_Media_Sections_CONST){
             //  LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGrid() playists , using plist_<dgname>");
             //  dgN = QString("plist_")+dgN;
+        } else if (PK_DataGrid == DATAGRID_Current_Media_Sections_CONST){
+
         }
 
         // hack/fixme: need to sleep a short while here, because if we emit prepareDataGrid too soon,
@@ -2652,6 +2655,10 @@ void DCE::qOrbiter::loadDataForDataGrid(QString dataGridId, QString dgName, int 
     if(PK_DataGrid == DATAGRID_Current_Media_Sections_CONST && !seek.isEmpty()){
         gridName.remove("plist_");
     }
+    if(PK_DataGrid == DATAGRID_EPG_All_Shows_CONST && !seek.isEmpty()){
+
+    }
+
 
     //CMD_Request_Datagrid_Contents(long DeviceIDFrom, long DeviceIDTo,                   string sID,                                              string sDataGrid_ID,int iRow_count,int iColumn_count,bool bKeep_Row_Header,bool bKeep_Column_Header,bool bAdd_UpDown_Arrows,string sSeek,int iOffset,    char **pData,int *iData_Size,int *iRow,int *iColumn
     DCE::CMD_Request_Datagrid_Contents requestGrid( long(m_dwPK_Device), long(iPK_Device_DatagridPlugIn),
