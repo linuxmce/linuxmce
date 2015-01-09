@@ -172,7 +172,7 @@ public:
             QString channelName;
             int channelNumber = -1;
             if (tmp.indexOf(" ") > 0) {
-                 channelNumber = tmp.left(tmp.indexOf(" ")-1).toInt();
+                 channelNumber = tmp.left(tmp.indexOf(" ")).toInt();
                  channelName = tmp.right(tmp.length()-tmp.indexOf(" "));
             }
             qDebug() << pCell->GetText();
