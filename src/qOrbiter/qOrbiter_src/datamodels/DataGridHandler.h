@@ -161,12 +161,20 @@ public:
             QString sId = QString::fromStdString(pCell->m_mapAttributes_Find("Series"));
             QString src = QString::fromStdString(pCell->m_mapAttributes_Find("Source"));
             QStringList srcInfo = src.split(" ");
+            QString sourceId, sourceName;
+            sourceId = srcInfo.at(0);
+            if (srcInfo.length() > 1)
+                sourceName = srcInfo.at(1);
             QString program;
             int index = 0;
 
-            QStringList breaker = QString::fromStdString(pCell->m_mapAttributes_Find("Name").c_str()).split(" ");
-            QString channelName = breaker.at(1);
-            int channelNumber = breaker.at(0).toInt();
+            QString tmp = QString::fromStdString(pCell->m_mapAttributes_Find("Name").c_str());
+            QString channelName;
+            int channelNumber = -1;
+            if (tmp.indexOf(" ") > 0) {
+                 channelNumber = tmp.left(tmp.indexOf(" ")-1).toInt();
+                 channelName = tmp.right(tmp.length()-tmp.indexOf(" "));
+            }
             qDebug() << pCell->GetText();
             qDebug() << pCell->GetValue();
             channelIndex = pCell->GetValue();
@@ -180,8 +188,8 @@ public:
                         timeSlot,
                         progId,
                         sId,
-                        src.split(" ").at(0),
-                        src.split(" ").at(1)
+                        sourceId,
+                        sourceName
                         );
         }else {
 
