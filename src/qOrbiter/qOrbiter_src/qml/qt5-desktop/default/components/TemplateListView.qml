@@ -12,7 +12,7 @@ ListView{
     spacing:scaleX(1)
     Component.onCompleted: {manager.setBoundStatus(true);}
     highlightFollowsCurrentItem: true
-    model: dcenowplaying.qs_screen==="Screen_63.qml" ? manager.getDataGridModel("Channels", 11) : manager.getDataGridModel("Playlist", 18)
+   // model: dcenowplaying.qs_screen==="Screen_63.qml" ? manager.getDataGridModel("Channels", 11) : manager.getDataGridModel("Playlist", 18)
     clip:true
 
 

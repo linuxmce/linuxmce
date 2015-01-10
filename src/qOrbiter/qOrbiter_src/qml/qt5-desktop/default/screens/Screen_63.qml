@@ -1,4 +1,5 @@
 import QtQuick 2.3
+import org.linuxmce.grids 1.0
 import "../components"
 StyledScreen {
     id:screen_fiddy_fo
@@ -36,7 +37,7 @@ StyledScreen {
             bottom:parent.bottom
         }
         spacing: 5
-        model:manager.getDataGridModel("Channels",11 )
+        model:manager.getDataGridModel("tvchan_"+String(manager.iPK_Device),DataGrids.EPG_All_Shows )
       //  onCountChanged: positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
 
 

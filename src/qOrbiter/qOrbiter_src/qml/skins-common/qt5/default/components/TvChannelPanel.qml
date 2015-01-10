@@ -48,7 +48,7 @@ Panel{
             bottom:parent.bottom
         }
         spacing: 5
-        model:manager.getDataGridModel("Channels", DataGrids.EPG_All_Shows )
+        model:manager.getDataGridModel("channels", 11, "1,1" )
       //  onCountChanged: positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
 
         
@@ -81,7 +81,7 @@ Panel{
             }
             
             StyledText{
-                text:name + "\n"+channelid //program
+                text:name + "\n"+program
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
                 font.pixelSize: 22

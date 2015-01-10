@@ -26,6 +26,7 @@ Panel {
 //        var chan ="i"+String(playlistPanel.bcastSource)+targetChannel
 //        manager.gridChangeChannel(chan, chan)
         targetChannel=""
+
     }
 
     function addNumber(newNum){
