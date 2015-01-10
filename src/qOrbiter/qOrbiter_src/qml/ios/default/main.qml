@@ -280,7 +280,7 @@ Item {
         }
         enableDebug: true
         interval:60*1000
-        useAnimation: false
+        useAnimation: true
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)

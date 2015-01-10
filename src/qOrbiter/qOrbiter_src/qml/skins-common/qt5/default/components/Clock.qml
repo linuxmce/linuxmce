@@ -11,7 +11,7 @@ Item {
     }
 
     Timer { // Update the clock element periodically
-        interval: 5; running: true; repeat: true
+        interval: 1000; running: true; repeat: true
         onTriggered: txtDate.text = getDate()
     }
 
@@ -19,7 +19,7 @@ Item {
 
     StyledText{
         id: txtDate
-        text: getDate()
+
         color: clockColor
         font.letterSpacing: 2
         font.family: appFont.name
