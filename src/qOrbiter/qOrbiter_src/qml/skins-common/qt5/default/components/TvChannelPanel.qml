@@ -48,7 +48,7 @@ Panel{
             bottom:parent.bottom
         }
         spacing: 5
-        model:manager.getDataGridModel("channels", 11, "1,1" )
+        model:manager.getDataGridModel("channels", DataGrids.EPG_All_Shows  )
       //  onCountChanged: positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
 
         
