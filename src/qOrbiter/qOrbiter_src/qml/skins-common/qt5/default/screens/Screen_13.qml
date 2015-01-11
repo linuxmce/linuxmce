@@ -105,7 +105,7 @@ StyledScreen{
                 text: ""
                 echoMode: TextInput.Password
                 color: "white"
-                fillColor: "green"
+
                 cursorVisible: true
                 readOnly: false
                 horizontalAlignment: TextInput.AlignHCenter
