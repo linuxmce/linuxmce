@@ -25,6 +25,7 @@ Item{
         onMediaPlayingChanged: {
             if(!mediaPlaying && qmlPlayer.source!==""){
                 qmlPlayer.stop()
+                qmlPlayer.source=""
                 videoPlane.visible = false
             } else {
 
@@ -41,6 +42,7 @@ Item{
                 qmlPlayer.source = lmceData.pluginUrl
             }
             else{
+                qmlPlayer.source=""
                 console.log("Url Malformed!")
                 console.log("Url::"+pluginUrl)
 
@@ -66,7 +68,7 @@ Item{
         onPluginVolumeDown:{
             console.log("dceplayer::vol down")
             if(qmlPlayer.volume > 0.0){
-                qmlPlayer.volume-.10
+                qmlPlayer.volume= qmlPlayer.volume-.10
             }
         }
 
@@ -116,7 +118,6 @@ Item{
 
         onStopped: {
             if(duration==position){
-
                 lmceData.qmlPlaybackEnded(false)
             }
         }

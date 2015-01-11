@@ -100,7 +100,7 @@ Panel{
             MouseArea{
                 id:ms
                 anchors.fill: parent
-                onClicked: {manager.gridChangeChannel(channel, channelid)}
+                onClicked: {manager.gridChangeChannel(channelNumber, channelid)}
             }
         }
         
