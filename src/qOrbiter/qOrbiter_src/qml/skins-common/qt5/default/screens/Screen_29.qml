@@ -1,19 +1,14 @@
 import QtQuick 2.2
 import "../components"
 
-Item {
+StyledScreen {
     id:alarms_screen
-    height: pageLoader.height
-    width:manager.appWidth
+    screen:qsTr("Sleeping Alarms")
+    keepHeader: true
     focus:true
+
     Component.onCompleted: {
         forceActiveFocus()
-    }
-
-    StyledText{
-        id:alarms_label
-        text:qsTr("Sleeping Alarms")
-        fontSize: 32
     }
 
     ListView{
