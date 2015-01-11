@@ -90,5 +90,16 @@ StyledScreen {
             }
         }
 
+        StyledButton{
+            id:resetId
+            state:"large-fixed"
+            buttonText: "Reset Device Id"
+            onActivated: {
+                manager.setDeviceNumber(-1)
+                manager.writeConfig()
+                manager.exitApp()
+            }
+        }
+
     }
 }
