@@ -1,5 +1,10 @@
-import QtQuick 2.0
-import "../components"
+import QtQuick 2.2
+//import "../components"
+import "../../../../../skins-common/qt5/default/screens" as Common
+Common.Screen_2 {
+
+}
+/*
 Item{
     id:lights
 
@@ -20,3 +25,4 @@ Item{
     }
 
 }
+*/

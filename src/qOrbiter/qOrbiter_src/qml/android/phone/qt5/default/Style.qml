@@ -41,6 +41,7 @@ QtObject{
     property color highlight1: "silver"
     property color highlight2: "orange"
     property color alertcolor: "red"
+    property color darkColor:"black"
     property color warncolor:"yellow"
 
     property color darkhighlight: "darkgrey"

@@ -155,7 +155,7 @@ Item {
     Rectangle{
         id:mobileGradient
         anchors.fill: parent
-	color: black
+	color: "black"
         MouseArea{
             anchors.fill: parent
             onClicked: {

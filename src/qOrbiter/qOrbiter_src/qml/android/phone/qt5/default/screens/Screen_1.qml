@@ -62,15 +62,16 @@ StyledScreen {
 	    width: parent.width
 	    anchors.leftMargin:5
 	    Item {
-		width: scaleX(12)
+		width: scaleX(14)
 		height: parent.height
 
 		StyledButton {
 		    id: scenarioBt
-		    buttonText: name
-		    width: manager.isProfile ? parent.height : scaleX(12)
-		    height: manager.isProfile ? scaleX(12) : parent.height
-		    transform: Rotation { angle: manager.isProfile ? -90 : 0; origin.y: scaleX(12); origin.x: scaleX(11.5) }
+		    buttonText: name    
+		    width: manager.isProfile ? parent.height : scaleX(14)
+		    height: manager.isProfile ? scaleX(14) : parent.height
+		    transformOrigin: Item.TopRight
+		    transform: [Rotation { angle: manager.isProfile ? -90 : 0; }, Translate{ y: manager.isProfile ? scaleY(rowHeight) : 0 } ]
 		    hitArea.onReleased:{
 			manager.setFloorplanType(floorplantype)
 			manager.showfloorplan(floorplantype)
@@ -79,7 +80,7 @@ StyledScreen {
 	    }
 	    Item {
 		height: parent.height
-		width: scaleX(80)
+		width: scaleX(86)
 		ListView {
 		    height: parent.height
 		    width: parent.width
@@ -87,6 +88,7 @@ StyledScreen {
 		    orientation: ListView.Horizontal
 		    flickableDirection: Flickable.HorizontalFlick
 		    spacing: 5
+		    clip: true
 		    delegate: Item{
 			width: manager.isProfile ? scaleY(rowHeight) : scaleY(rowHeight*1.5)
 			height: parent.height
