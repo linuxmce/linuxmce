@@ -12,7 +12,7 @@ Item {
     property bool uiOn:true
 
     property variant current_scenario_model:currentRoomLights
-    property variant current_header_model:scenarios
+    //property variant current_header_model:scenarios
     property string locationinfo: "standby"
     property string screenfile:""
 
@@ -90,7 +90,7 @@ Item {
             break;
 
         case Qt.Key_Back:
-            if(manager.currentScreen==="Screen_1.qml"){
+            if(manager.currentScreen===1){
                 showExitConfirm()
             } else{
                 manager.goBacktoQScreen()
@@ -98,7 +98,7 @@ Item {
             console.log("Caught Back Key")
             break
         case Qt.Key_MediaPrevious:
-            if(manager.currentScreen==="Screen_1.qml"){
+            if(manager.currentScreen===1){
                 showExitConfirm()
             } else{
                 manager.goBacktoQScreen()
@@ -167,14 +167,27 @@ Item {
         }
     }
     function screenchange(screenname ){
-
-        if(pageLoader.currentScreen!=screenname)
-            pageLoader.nextScreen = screenname
+        var num = screenname.slice(7, screenname.indexOf("."))
+        if(pageLoader.currentScreen!=num)
+            pageLoader.nextScreen = num
     }
 
     function checkStatus(component){
         console.log(component.progress)
     }
+
+    function getSkinPath(num) {
+        if (style.customScreens.indexOf(num) !== -1) {
+            return "./";
+        } else {
+            return style.commonQmlPath;
+        }
+    }
+
+    function getScreen(num) {
+        return getSkinPath(num) + "screens/Screen_"+(num > 0 ? num : "X")+".qml";
+    }
+
 
     Loader {
         id:pageLoader
@@ -182,8 +195,8 @@ Item {
         focus: true
         source: "screens/Screen_1.qml"
         // visible:qml_root.uiOn
-        property string nextScreen:"Screen_1.qml"
-        property string currentScreen:""
+        property int nextScreen:1
+        property int currentScreen:1
         anchors{
             top: dcenowplaying.b_mediaPlaying ? media_notification.bottom : nav_row.bottom
             bottom:info_panel.top
@@ -194,12 +207,12 @@ Item {
 
         onNextScreenChanged: {
 
-            if(!nextScreen.match(".qml")){
+       /*     if(!nextScreen.match(".qml")){
                 return
             } else {
 
             }
-
+*/
             if(!pageLoader.item){
                 console.log("Last screen likely had errors, loading next screen==>"+nextScreen)
                 loadNext()
@@ -233,12 +246,12 @@ Item {
 
 
             if(nextScreen===""){
-                nextScreen="Screen_1.qml"
+                nextScreen=1
                 return
             }
 
-            console.log("pageloader::loading next screen::\n"+style.commonQmlPath+"screens/"+nextScreen)
-            pageLoader.source=style.commonQmlPath+"screens/"+nextScreen
+            console.log("pageloader::loading next screen::\n"+getScreen(nextScreen)) //style.commonQmlPath+"screens/"+nextScreen)
+            pageLoader.source=getScreen(nextScreen) //style.commonQmlPath+"screens/"+nextScreen
         }
 
         opacity: uiOn ? 1 : 0
@@ -270,7 +283,7 @@ Item {
                           else if(pageLoader.status == Component.Error)
                           {
                               console.log("Command to change to:" + source + " failed!")
-                              manager.currentScreen="Screen_X.qml"
+                              manager.currentScreen=0
                           }
     }
     MediaPopup{

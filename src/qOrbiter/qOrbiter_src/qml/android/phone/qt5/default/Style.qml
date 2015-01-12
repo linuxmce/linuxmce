@@ -24,7 +24,8 @@ QtObject{
     property string skinvariation: "Android 320X480"
     property string maincolor: "black"
     property bool profile:!manager.isProfile
-    property string commonQmlPath:"./"
+    property string commonQmlPath:"../../../../skins-common/qt5/default/"
+    property variant customScreens: [ 1 ]
 
     //scale function
     function scaleX(x){
