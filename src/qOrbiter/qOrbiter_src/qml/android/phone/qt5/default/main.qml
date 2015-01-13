@@ -198,7 +198,7 @@ Item {
         property int nextScreen:1
         property int currentScreen:1
         anchors{
-            top: dcenowplaying.b_mediaPlaying ? media_notification.bottom : nav_row.bottom
+            top: nav_row.bottom
             bottom:info_panel.top
             left:qml_root.left
             right:qml_root.right
@@ -286,12 +286,11 @@ Item {
                               manager.currentScreen=0
                           }
     }
-    MediaPopup{
-        id:media_notification
-    }
     NavigationRow {
         id: nav_row
-	navSource: "../../../../android/phone/qt5/default/components/PhoneNavHome.qml"
+        rowheight: manager.isProfile ? scaleY(8) : scaleY(15)
+        navSource: "../../../../android/phone/qt5/default/components/PhoneNavHome.qml"
+        commonButtonVisible: pageLoader.currentScreen != 1
     }
 
     function showRoomSelector() {
