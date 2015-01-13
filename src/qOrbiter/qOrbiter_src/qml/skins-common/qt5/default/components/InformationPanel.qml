@@ -3,6 +3,7 @@ import QtQuick 2.2
 Item{
     id:info_panel
     property bool restore:false
+    property string defaultState: "retracted"
     anchors{
         top:undefined
         left:parent.left
@@ -16,7 +17,7 @@ Item{
     }
 
     Component.onCompleted:{
-        info_panel.state="retracted";
+        info_panel.state=defaultState;
     }
 
     Rectangle{
@@ -57,7 +58,7 @@ Item{
 
     Clock{
         id:time_keeper
-       anchors{
+            anchors{
            verticalCenter: parent.verticalCenter
          //  horizontalCenterOffset: scaleX(-5)
            horizontalCenter: parent.horizontalCenter
@@ -103,6 +104,41 @@ Item{
 
     
     states: [
+        State {
+            name: "minimal"
+            PropertyChanges {
+                target: info_panel
+                height:scaleY(10)
+            }
+            PropertyChanges {
+                target: time_keeper
+                visible:true
+            }
+            PropertyChanges{
+                target: orbiter_status_text
+                opacity:1
+            }
+            PropertyChanges{
+                target:close
+                visible:false
+            }
+            PropertyChanges{
+                target:pageLoader
+                visible:true
+            }
+            PropertyChanges{
+                target:location_info
+                visible:false
+            }
+            PropertyChanges{
+                target:user_info
+                visible:false
+            }
+            PropertyChanges {
+                target: info_fill
+                color:"black"
+            }
+        },
         State {
             name: "retracted"
             PropertyChanges {

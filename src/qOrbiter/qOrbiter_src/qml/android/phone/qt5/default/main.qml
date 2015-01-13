@@ -12,7 +12,7 @@ Item {
     property bool uiOn:true
 
     property variant current_scenario_model:currentRoomLights
-    //property variant current_header_model:scenarios
+    property variant current_header_model
     property string locationinfo: "standby"
     property string screenfile:""
 
@@ -300,7 +300,7 @@ Item {
 
     InformationPanel {
         id: info_panel
-	state:"hidden"
+        defaultState: "minimal"
     }
 
     function hideInfoPanel(){
