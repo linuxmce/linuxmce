@@ -2,6 +2,8 @@ import QtQuick 2.2
 
 Item{
     id:powerControl
+    property int btWidth: scaleX(40)
+    property int btHeight: scaleY(20)
     anchors{
         top:parent.top
         bottom:parent.bottom
@@ -18,28 +20,26 @@ Item{
 
     Row{
         id:btnRow
-        height:140
+        height: btHeight
         spacing:scaleX(10)
-        width: scaleX(50)
         anchors{
-            verticalCenter: parent.verticalCenter
+            bottom: parent.verticalCenter
             horizontalCenter: parent.horizontalCenter
         }
-        anchors.rightMargin: 50
-        anchors.leftMargin: 50
+        anchors.bottomMargin: scaleY(5)
 
         StyledButton{
             buttonText: qsTr("Display On")
-            height: 120
-            width: 200
+            height: btHeight
+            width: btWidth
             onActivated: manager.toggleDisplay(1)
 
         }
 
         StyledButton{
             buttonText: qsTr("Display Off")
-            height: 120
-            width: 200
+            height: btHeight
+            width: btWidth
             onActivated: manager.toggleDisplay(0)
 
         }
@@ -50,19 +50,20 @@ Item{
             left:btnRow.left
             right:btnRow.right
         }
+        anchors.topMargin: scaleY(5)
         spacing:scaleX(10)
-        height: 140
+        height: btnRow.height
         StyledButton{
             buttonText: qsTr("Turn Off MD")
-            height: 120
-            width: 200
+            height: btHeight
+            width: btWidth
             //            handler:PowerToggleHandler{mode:0}
             //            useHandler: true
         }
         StyledButton{
             buttonText: qsTr("Turn On MD")
-            height: 120
-            width: 200
+            height: btHeight
+            width: btWidth
             //            handler:PowerToggleHandler{mode:0}
             //            useHandler: true
         }
