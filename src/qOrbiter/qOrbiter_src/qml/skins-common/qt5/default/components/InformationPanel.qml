@@ -98,7 +98,7 @@ Item{
     StyledButton{
         id:close
         buttonText: "Close"
-        hitArea.onReleased: info_panel.state="retracted"
+        hitArea.onReleased: info_panel.state=defaultState
         anchors.right: parent.right
     }
 

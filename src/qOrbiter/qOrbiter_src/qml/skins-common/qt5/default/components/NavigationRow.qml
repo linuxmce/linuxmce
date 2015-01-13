@@ -7,6 +7,8 @@ Item{
     property double loadingProgress: nav.progress
     onLoadingProgressChanged: console.log(loadingProgress)
     property alias navigation:nav
+    property alias rowheight: nav_row.height
+    property alias commonButtonVisible: commonButtons.visible
     property string defaultSource:"ScenarioComponent.qml"
     property string navSource:"ScenarioComponent.qml"
     signal goingBack()
@@ -29,7 +31,7 @@ Item{
         anchors{
             top:parent.top
             left: parent.left
-            right:commonButtons.left
+            right: commonButtons.visible ? commonsButton.left : parent.right
             bottom:parent.bottom
             rightMargin: scaleX(1)
         }
@@ -46,12 +48,12 @@ Item{
 
     }
 
-
     Flickable{
         id:commonButtons
         height: parent.height
         width: manager.appWidth *.30
         anchors.right: parent.right
+        visible: true
 
 
         Row{
@@ -62,7 +64,7 @@ Item{
             StyledButton{
                 buttonText:"Advanced"
                 width: scaleX(14)
-                opacity: manager.currentScreen === "Screen_1.qml" ? 1 : 0
+                opacity: manager.currentScreen === "Screen_1.qml" || manager.currentScreen === "Screen_X.qml" ? 1 : 0
                 onActivated: manager.setCurrentScreen("Screen_44.qml")
             }
             StyledButton {
@@ -77,7 +79,7 @@ Item{
                 id: exit_label
                 buttonText: qsTr("Exit")
                 hitArea.onReleased: manager.closeOrbiter()
-                opacity:manager.currentScreen ==="Screen_1.qml" ? 1 : 0
+                opacity:manager.currentScreen ==="Screen_1.qml" || manager.currentScreen === "Screen_X.qml" ? 1 : 0
             }
             StyledButton {
                 id: home_label
