@@ -23,7 +23,7 @@ StyledScreen {
             id:pending
             state: "large-fixed"
             buttonText: "Pending\nTasks"
-
+            onActivated:  manager.gotoQScreen("Screen_82.qml")
         }
 
         StyledButton{
