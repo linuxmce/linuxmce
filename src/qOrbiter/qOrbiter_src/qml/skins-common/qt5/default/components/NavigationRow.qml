@@ -31,7 +31,7 @@ Item{
         anchors{
             top:parent.top
             left: parent.left
-            right: commonButtons.visible ? commonsButton.left : parent.right
+            right: commonButtons.visible ? commonButtons.left : parent.right
             bottom:parent.bottom
             rightMargin: scaleX(1)
         }

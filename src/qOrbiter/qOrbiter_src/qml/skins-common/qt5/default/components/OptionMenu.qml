@@ -7,6 +7,7 @@ Item{
     property alias text: menuButton.buttonText
     property alias btHeight: menuButton.height
     property alias btWidth: menuButton.width
+    property int menuWidth : scaleX(30)
     property string menuAlign : "left"
     height: manager.appHeight
     width: btWidth
@@ -37,7 +38,7 @@ Item{
         model: menuItems
         visible: false
         height: localButtonH*menuView.model.count
-        width: scaleX(30)
+        width: menuWidth
         spacing: 2
         interactive: false
         anchors.margins: 1

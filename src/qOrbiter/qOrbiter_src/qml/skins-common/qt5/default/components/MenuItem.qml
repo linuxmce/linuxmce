@@ -7,7 +7,7 @@ Item{
     width:opacity ? button_label.paintedWidth < scaleX(10) ? scaleX(10) : (button_label.paintedWidth) + (button_label.paintedWidth*.02) :0
 
     property string phil: fly_trap.pressed ? style.listItemPressedBgColor : style.maincolor
-    property int textSize: style.headerFontSize
+    property int textSize: manager.isProfile ? scaleY(3) : scaleY(4)
     property alias buttonText:button_label.text
     signal activated()
     signal held()
