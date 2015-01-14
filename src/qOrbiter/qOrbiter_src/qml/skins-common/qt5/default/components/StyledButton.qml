@@ -55,7 +55,6 @@ Item{
         id:button_label
         text:"ipsum"
         isBold: false
-        width: parent.width
         font.weight: Font.Light
         fontSize: textSize
         anchors.centerIn: parent
