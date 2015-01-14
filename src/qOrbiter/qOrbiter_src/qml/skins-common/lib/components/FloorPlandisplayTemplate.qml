@@ -1,20 +1,23 @@
-import QtQuick 1.1
+import QtQuick 2.3
 
 Item {
     objectName: "floorplan_display"
     id:floorplandisplay
     anchors.fill: parent
-    Component.onCompleted:{
-        floorplan_devices.setCurrentPage(1)
-    }
-    Connections{
-        target:manager
-        onOrientationChanged:floorplan_devices.setCurrentPage(1)
-    }
 
     property int scaleFactor:floorplanimage.scale
     property alias bg:phil
     property bool useList:true
+    property string backgroundColor: "white"
+
+    Component.onCompleted:{
+        floorplan_devices.setCurrentPage(1)
+    }
+
+    Connections{
+        target:manager
+        onOrientationChanged:floorplan_devices.setCurrentPage(1)
+    }
 
     function setScaleFactor(factor){
         console.log("Updating scale")
@@ -97,8 +100,8 @@ Item {
         border.width: scaleX(1) *.25
         radius: 5
         anchors.centerIn: parent
-        color:"black"
-        opacity:.25
+        color: backgroundColor
+        opacity:.5
     }
 
 
@@ -152,10 +155,9 @@ Item {
             id:floorplanlist
             anchors { top: parent.top; bottom: parent.bottom; left: parent.left; right: parent.right }
             width: scaleX(35)
-            model:floorplan_pages
+//            model:floorplan_pages
             clip:true
-            visible: floorplan_pages.count !==0 ? useList ? true : false : false
-
+            visible: floorplan_pages.count !==0 ? useList : false
 
             delegate:Rectangle{
                 height: scaleY(9)

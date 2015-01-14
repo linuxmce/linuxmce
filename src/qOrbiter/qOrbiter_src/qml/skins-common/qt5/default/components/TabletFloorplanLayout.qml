@@ -13,6 +13,7 @@ Item{
     property bool rotated:manager.isProfile
     property string imageDir:""
     property alias selectedDevices:selections
+
     state:"floorplanView"
     Component.onCompleted: {
         forceActiveFocus();
@@ -53,7 +54,6 @@ Item{
         target:floorplan_devices
         onSelectedDevicesChanged:processSelectedDevices()
     }
-
 
     ParamManager{
         id:requestParamManager

@@ -1,5 +1,5 @@
 // import QtQuick 1.1 // to target S60 5th Edition or Maemo 5
-import QtQuick 1.1
+import QtQuick 2.3
 
 Item {
     id:sprite_root
@@ -16,8 +16,8 @@ Item {
     property string deviceType: ""
     property string imgUrl: ""
     property bool selected:floorplan_devices.getDeviceSelection(deviceNum)
-    property int itemH:scaleY(4)
-    property int itemW: scaleY(4)
+    property int itemH:scaleY(3)
+    property int itemW: scaleY(3)
     property double iconScale: 1.5
     onSelectedChanged: {
         console.log(deviceNum+" changed to "+selected)
@@ -41,6 +41,7 @@ Item {
         source:"../img/floorplanitems/"+deviceType+".png"
         sourceSize:Qt.size(scaleY(6), scaleY(6))
         anchors.centerIn: parent
+	anchors.fill: parent
         cache: false
     }
 
