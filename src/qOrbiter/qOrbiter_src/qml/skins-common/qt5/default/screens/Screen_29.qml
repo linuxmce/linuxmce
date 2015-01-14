@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import "../components"
+import org.linuxmce.grids 1.0
 
 StyledScreen {
     id:alarms_screen
@@ -14,16 +15,18 @@ StyledScreen {
     ListView{
         id:alarmlist
         height: scaleY(70)
-        width: scaleX(75)
-        model: manager.getDataGridModel("sleepingAlarms", 29, String(manager.getlocation()))
+        width: scaleX(98)
+        model: manager.getDataGridModel("sleepingAlarms", DataGrids.Alarms_In_Room, String(manager.getlocation()))
 
         orientation: ListView.Vertical
         anchors.centerIn: parent
-        spacing:scaleY(5)
+        spacing:scaleY(2)
         delegate:
             Item{
-            height: scaleY(25)
-            width: scaleX(75)
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            height: 100
 
             Rectangle{
                 anchors.fill: parent
@@ -41,19 +44,19 @@ StyledScreen {
                     id: alarmname
                     text:name
                     color:"white"
-                    fontSize: 42
+                    fontSize: 25
                 }
                 StyledText {
                     id: alarmtimeLabel
                     text:qsTr("Alarm Set For: ") + alarmtime
                     color:"white"
-                    fontSize: 32
+                    fontSize: 16
                 }
                 StyledText {
                     id: daysactive
                     text: qsTr("Active on: ")+ active
                     color:"white"
-                    fontSize: 22
+                    fontSize: 16
                 }
             }
 
@@ -61,18 +64,20 @@ StyledScreen {
                 id: activeStatus
                 text: status ? qsTr("Enabled") : "Disabled"
                 color:"white"
-                fontSize: 42
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
+                fontSize: 25
+                anchors.right: parent.right
+                anchors.rightMargin: scaleX(2)
+                anchors.top: parent.top
             }
 
             StyledText {
                 id: countdown
                 text: qsTr("Time Left:\n ") +remaining
                 color:"white"
-                fontSize: 42
+                fontSize: 16
                 anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 10
             }
 
             MouseArea{
