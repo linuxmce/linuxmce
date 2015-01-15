@@ -2,8 +2,8 @@ import QtQuick 2.2
 
 Item{
     id:styled_button
-    height: button_label.paintedHeight < scaleY(4) ? scaleY(4) : button_label.paintedHeight+(button_label.paintedHeight*.02)
-    width:opacity ? button_label.paintedWidth < scaleX(12) ? scaleX(12) : (button_label.paintedWidth) + (button_label.paintedWidth*.02) :0
+    height: button_label.paintedHeight < style.buttonHeight ? style.buttonHeight : button_label.paintedHeight+(button_label.paintedHeight*.02)
+    width:opacity ? button_label.paintedWidth < style.buttonWidth ? style.buttonWidth : (button_label.paintedWidth) + (button_label.paintedWidth*.02) :0
 
     //    anchors{
     //        left: button_label.left

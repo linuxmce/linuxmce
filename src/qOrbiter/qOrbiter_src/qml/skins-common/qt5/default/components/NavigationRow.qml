@@ -2,7 +2,7 @@ import QtQuick 2.2
 
 Item{
     id:nav_row
-    height: scaleY(8)
+    height: style.rowH
     state:"extended"
     property double loadingProgress: nav.progress
     onLoadingProgressChanged: console.log(loadingProgress)

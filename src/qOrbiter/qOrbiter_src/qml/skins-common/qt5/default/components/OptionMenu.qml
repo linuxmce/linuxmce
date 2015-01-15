@@ -2,7 +2,7 @@ import QtQuick 2.3
 
 Item{
     id: optionMenu
-    property int localButtonH:scaleY(10)
+    property int localButtonH:style.buttonHeight
     property variant menuItems
     property alias text: menuButton.buttonText
     property alias btHeight: menuButton.height
