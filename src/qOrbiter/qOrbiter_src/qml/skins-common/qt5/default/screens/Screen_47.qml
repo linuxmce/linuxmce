@@ -17,7 +17,7 @@ StyledScreen {
         headerTitle: ""
 
         Flickable{
-            height:scaleY(6)
+            height:style.rowH
             width: media_goback.x - x
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left

@@ -4,6 +4,7 @@ Item{
     id:info_panel
     property bool restore:false
     property string defaultState: "retracted"
+    property int maxInfoPanelHeight : manager.appHeight - nav_row.height
     anchors{
         top:undefined
         left:parent.left
@@ -178,7 +179,7 @@ Item{
             name: "room"
             PropertyChanges {
                 target: info_panel
-                height:scaleY(92)
+                height: maxInfoPanelHeight
             }
             PropertyChanges {
                 target: time_keeper
@@ -213,7 +214,7 @@ Item{
             name: "user"
             PropertyChanges {
                 target: info_panel
-                height:scaleY(92)
+                height:maxInfoPanelHeight
             }
             PropertyChanges{
                 target:homeContent
@@ -261,7 +262,7 @@ Item{
             name: "power"
             PropertyChanges {
                 target: info_panel
-                height:scaleY(92)
+                height:maxInfoPanelHeight
             }
             PropertyChanges {
                 target: time_keeper
