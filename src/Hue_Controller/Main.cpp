@@ -203,14 +203,10 @@ int main(int argc, char* argv[])
 
     HueController *pHueController = new HueController(PK_Device, sRouter_IP,true,bLocalMode);
 
-    if ( pHueController->GetConfig() && pHueController->Connect(pHueController->PK_DeviceTemplate_get()) )
-    {
+    if ( pHueController->GetConfig() && pHueController->Connect(pHueController->PK_DeviceTemplate_get()) ){
         LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
         pHueController->CreateChildren();
-        return a.exec();
-    }
-    else
-    {
+    } else {
         bAppError = true;
         if( pHueController->m_pEvent && pHueController->m_pEvent->m_pClientSocket && pHueController->m_pEvent->m_pClientSocket->m_eLastError==ClientSocket::cs_err_CannotConnect )
         {
@@ -222,11 +218,8 @@ int main(int argc, char* argv[])
             LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connect() Failed");
     }
 
+    return a.exec();
 
-    if( pHueController->m_bReload )
-        bReload=true;
-
-    delete pHueController;
 
 
 
