@@ -2,23 +2,7 @@
 # Project created by QtCreator 2013-05-04T14:36:21
 # -------------------------------------------------
 QT       += core network
-#QT       -= gui
-
-contains(QT_VERSION,4.8.*){
-        DEFINES+=QT4_8
-}
-
-contains(QT_VERSION,4.7.*){
-        DEFINES+=QT4_7
-}
-
-
-contains(QT_VERSION,5.*.*){
-        DEFINES+=QT5
-        QT+= widgets
-}
-
-message("$$QT_VERSION Core")
+QT       -= gui
 
 
 TARGET = HueController
