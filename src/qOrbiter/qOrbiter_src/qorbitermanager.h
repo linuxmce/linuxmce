@@ -1294,12 +1294,12 @@ public slots:
     void jogPosition(QString jog) {emit jogToPosition(jog);}
     void showBookmarks(QList<QObject*> t);
     void changeChannels(QString chan) {
-        GenericFlatListModel *src = this->getDataGridModel("Channels", 11);
+        GenericFlatListModel *src = this->getDataGridModel("channels", 11 );
         if(src){
             GenericModelItem *itm = src->find(chan);
             if(itm){
-             QString cid =itm->data(EPGItemClass::ChannelIdRole).toString();
-              gridChangeChannel(cid, cid);
+
+              gridChangeChannel( itm->data(EPGItemClass::ChannelRole).toString(),  itm->data(EPGItemClass::ChannelIdRole).toString());
             }
 
         }

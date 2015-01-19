@@ -2965,7 +2965,7 @@ void qOrbiter::checkTimeCode(int npDevice)
                 }
             }
 
-        } else if(pDevice->m_dwPK_DeviceTemplate == 2205 ){
+        } else if(pDevice->m_dwPK_DeviceTemplate == DEVICETEMPLATE_qOrbiter_CONST ){
             sIPAddress = GetCurrentDeviceData(m_dwPK_Device_NowPlaying, DEVICEDATA_TCP_Address_CONST);
         }
         else
@@ -3473,10 +3473,11 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
 void DCE::qOrbiter::TuneToChannel(QString channel, QString chanid) //tunes to channel based on input, need some reworking for myth
 {
 
+    qDebug() << Q_FUNC_INFO << "MediaType::"<< i_current_mediaType << "\nchannel:: " << channel << "\nchannelid::"<<chanid;
     if(i_current_mediaType = 11)
     {
         emit mediaResponseChanged("Setting Channel! " + channel);
-        CMD_Tune_to_channel changeChannel(m_dwPK_Device, iMediaPluginID, chanid.toStdString(), chanid.toStdString());
+        CMD_Tune_to_channel changeChannel(m_dwPK_Device, iMediaPluginID, channel.toStdString(), channel.toStdString());
         SendCommand(changeChannel);
         emit np_channel(chanid);
         emit liveTvUpdate(chanid);
@@ -4752,7 +4753,7 @@ void qOrbiter::CreateChildren(){
                 continue;
             }
             emit commandResponseChanged("Current device template::"+QString::number(pDeviceData_Impl_Child->m_dwPK_DeviceTemplate));
-            if (pDeviceData_Impl_Child->m_dwPK_DeviceTemplate == 2205){
+            if (pDeviceData_Impl_Child->m_dwPK_DeviceTemplate == DEVICETEMPLATE_qMediaPlayer_CONST){
                 int t = pDeviceData_Impl_Child->m_dwPK_Device;
                 setqMediaPlayerID(t);
                 emit commandResponseChanged("QMediaPlayer ID::"+t);

@@ -162,9 +162,11 @@ public:
             QString src = QString::fromStdString(pCell->m_mapAttributes_Find("Source"));
             QStringList srcInfo = src.split(" ");
             QString sourceId, sourceName;
+
             sourceId = srcInfo.at(0);
             if (srcInfo.length() > 1)
                 sourceName = srcInfo.at(1);
+
             QString program;
             int index = 0;
 
