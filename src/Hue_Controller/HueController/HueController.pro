@@ -1,8 +1,8 @@
 # -------------------------------------------------
 # Project created by QtCreator 2013-05-04T14:36:21
 # -------------------------------------------------
-QT       += core network widgets
-QT       -= gui
+QT       += core network
+QT       += gui
 
 
 TARGET = HueController
