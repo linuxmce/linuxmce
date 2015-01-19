@@ -66,6 +66,8 @@ void StartMotion(pid_t * pid)
 	}
 }
 
+
+
 void sighandler(int sig)
 {
 	pid_t pid;
@@ -105,6 +107,10 @@ bool Motion_Wrapper::GetConfig()
 //<-dceag-getconfig-e->
 
 	return true;
+}
+
+void Motion_Wrapper::OnReload(){
+    exit(0);
 }
 
 //<-dceag-const2-b->

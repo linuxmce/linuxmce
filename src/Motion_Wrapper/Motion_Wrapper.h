@@ -52,6 +52,7 @@ public:
 		virtual bool Register();
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
+        virtual void OnReload();
 //<-dceag-const-e->
 		void AlarmCallback(int id, void* param);
 		virtual bool Connect(int iPK_DeviceTemplate);
