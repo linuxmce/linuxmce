@@ -1393,6 +1393,9 @@ public slots:
     void showAvControl() {clearDevices(); emit resendAvCodes();}
     //@}
 
+    void setLevel(int device, int level) { sendDceCommand(CMD_Set_Level(iPK_Device, device, StringUtils::itos(level))); }
+    void turnOn(int device, int PK_Pipe = 0) { sendDceCommand(CMD_On(iPK_Device, device, PK_Pipe, "")); }
+    void turnOff(int device, int PK_Pipe = 0) { sendDceCommand(CMD_Off(iPK_Device, device, PK_Pipe)); }
 
     /*! @name QML Skin Function slots*/
     //@{
