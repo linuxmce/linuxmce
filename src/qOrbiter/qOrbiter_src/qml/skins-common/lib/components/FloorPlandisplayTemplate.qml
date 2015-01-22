@@ -108,9 +108,13 @@ Item {
     Item{
         id:mainRect
         objectName: "main_rect"
+        anchors.fill: parent
+        anchors.margins: 15
         height: floorplandisplay.height
         width:floorplandisplay.width
+
         Flickable{
+            id: imageFlick
             anchors{
                 top:parent.top
                 left:parent.left
@@ -126,7 +130,8 @@ Item {
                 fillMode: Image.PreserveAspectCrop
                 source: ""
                 anchors.centerIn: parent
-                scale: floorplanimage.height > floorplanimage.width ? .60 : .65
+                transformOrigin: Item.Center
+                scale: (parent.height-40)/floorplanimage.height > (parent.width-40)/floorplanimage.width ? (parent.height-40)/floorplanimage.height : (parent.width-40)/floorplanimage.width
 
                 Behavior on scale {
                     PropertyAnimation{
@@ -136,7 +141,6 @@ Item {
                 }
             }
         }
-
     }
 
     Item{
