@@ -1,4 +1,38 @@
 <?php
+function Get_amount_interfaces() {
+	exec('cat /proc/net/dev | tail -n +3 | cut -d":" -f 1  | sed -e \'s/^[ \t]*//\'',$ifArray);
+	//todo remove multiple interfacs like sit0 and sit1 or ppp0 or ppp1 enz as they are virtual interfaces we don't need .
+	$ifArray = array_diff($ifArray, array("lo","sit~","sit0","br~","ppp~","ipv6tunnel"));
+	//remove PPP* interfaces from list.
+	//$ppp = preg_grep('PPP', '~');
+	//$out.=$ppp;
+	//$ifArray = array_diff($ifArray, $ppp);
+	$interfaces=count($ifArray);	 
+	return $interfaces;
+}
+function getInterfaceName($int){
+	exec('cat /proc/net/dev | tail -n +3 | cut -d":" -f 1  | sed -e \'s/^[ \t]*//\'',$ifName);
+	sort($ifName);
+	//todo remove multiple interfacs like sit0 and sit1 or ppp0 or ppp1 enz as they are virtual interfaces and we don't need .
+	$ifName = array_diff($ifName, array("lo","sit~","sit0","br~","ppp~","ipv6tunnel"));
+	$ifName = array_values($ifName);
+	$name=$ifName[$int];
+	return $name;
+}
+
+function CheckFor_wireless($card) {
+	
+	$iwconfigdata= shell_exec('/sbin/iwconfig'." ".escapeshellarg($card));
+	$iwconfigdata= str_replace(array("\n","\r"),array("  ","  "),$iwconfigdata);
+	$iwconfigdata= implode("  ",preg_split("/\s\s+/",$iwconfigdata));
+	if ($iwconfigdata == '') {
+		$wificheck='false';
+	} else {
+		$wificheck='true';
+	}
+	return $wificheck;
+}
+
 function getMAC($int){
 	$mac = exec("ip link show $int | awk '/ether/ {print $2}'");
  	return $mac;
@@ -41,20 +75,19 @@ function getIPv6MASK($int) {
 }
 
 function getOutSideIP() {
-
-	$ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, 'http://www.linuxmce.org/remote');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    $response = curl_exec($ch);
-
+    $ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, 'http://www.linuxmce.org/remote');
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	$response = curl_exec($ch);
+	
 	// GET EXTERNAL IP SERVED BY www.linuxmce.org - TYPO3 PAGE ID: 48
 	$json = json_decode($response, true);
 	$internetip = $json['ip'];
-
+	
 	if(!filter_var($internetip, FILTER_VALIDATE_IP)) {
-		$internetip='';
+	    $internetip='';
 	}
-	return $internetip;
+  return $internetip;
 }
 
 function getDNS() {
@@ -78,8 +111,9 @@ function networkSettings($output,$dbADO) {
 	/* @var $rs ADORecordSet */
 	//	$dbADO->debug=true;
 	// # TODO - We should take wlan adapters into account as well, especially for the external network
-	$number_of_cards = exec('/sbin/ifconfig -s | awk \'$1 != "Iface" && $1 != "lo" { print $1 }\' | wc -l');
-	$out='';
+	$number_of_cards = Get_amount_interfaces();
+	$test=$number_of_cards;
+	//$out=$test;
 	$action = isset($_REQUEST['action'])?cleanString($_REQUEST['action']):'form';
 	$installationID = (int)@$_SESSION['installationID'];
 		
@@ -136,13 +170,15 @@ function networkSettings($output,$dbADO) {
 	// extract VPN settings from DeviceData
 	$resVPN=$dbADO->Execute('SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData=295');
 	$rowVPN=$resVPN->FetchRow();
-	$VPN_data=explode(",", $rowVPN['IK_DeviceData']);
+	$VPN_dataArray=explode('|', $rowVPN['IK_DeviceData']);
+	$VPN_data=explode(",", $VPN_dataArray[0]);
 	$enableVPN = ($VPN_data[0]=='on')?1:0;
 	$VPNRange=explode('-',$VPN_data[1]);
 	$VPNRangeStart=$VPNRange[0];
 	$VPNRangeEnd=explode('.',$VPNRange[1]);
 	$VPNRangeEnd=$VPNRangeEnd[3];
 	$VPNPSK = $VPN_data[2];
+	
 	
 	// extract PPPoE settings from core
 	$resPPPoE=$dbADO->Execute('SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=1 AND FK_DeviceData='.$GLOBALS['PPPoeData']);
@@ -191,12 +227,22 @@ function networkSettings($output,$dbADO) {
 				$coreIPv4GW=$externalInterfaceArray[3];
 				$coreIPv4DNS1=$externalInterfaceArray[4];
 				$coreIPv4DNS2=$externalInterfaceArray[5];
-				break;			
+				break;
+			
+			case 'vlan';
+				$coreIPv4Status='vlan';
+				$coreIPv4=$externalInterfaceArray[2];
+				$coreIPv4NetMask=$externalInterfaceArray[3];
+				$coreIPv4GW=$externalInterfaceArray[4];
+				$coreIPv4DNS1=$externalInterfaceArray[5];
+				$coreIPv4DNS2=$externalInterfaceArray[6];
+			break;
 		}
 			   
 		// get internal NIC IPv4 settings
 		$internalInterfaceArray=explode(',',$interfacesArray[1]);
 		$internalMAC=getMAC($internalInterfaceArray[0]);
+		$internalCoreIPv4Status=$internalInterfaceArray[1];
 		$oldInternalCoreIP=$internalInterfaceArray[1];
 		
 		switch ($internalCoreIPv4Status) {
@@ -210,6 +256,86 @@ function networkSettings($output,$dbADO) {
 				$internalCoreIPv4IP=$internalInterfaceArray[1];
 				$internalCoreIPv4NM=$internalInterfaceArray[2];
 			break;
+			case 'vlan';
+				$internalCoreIPv4Status='vlan';
+				$internalCoreIPv4IP=$internalInterfaceArray[2];
+				$internalCoreIPv4NM=$internalInterfaceArray[3];
+			break;
+		}
+		
+		// get other interface settings
+		$countInterfaces=$number_of_cards;
+		if ($countInterfaces>2) {
+			$countotherInterfaces=$countInterfaces-2;
+			$h=0;//amount to countotherinterfaces.
+			$i=2;//interfaces
+			$j=0;
+			$k=2;
+			while ($h < $countotherInterfaces) { 
+					$otherInterfaceArray[$i]=explode(',',$interfacesArray[$i]);
+					if (strpos($otherInterfaceArray[$i][0], '.')==true) {
+						$i++;
+						$h--;
+					} else {
+						$otherInterfaceMAC[$j]=getMAC($otherInterfaceArray[$i][0]);
+						$otherInterfaceName[$j]=getInterfaceName($k);
+						$otherInterfaceWifi[$j]=CheckFor_wireless($otherInterfaceName[$j]);
+					
+
+						if ($otherInterfaceArray[$i][1] != '') {
+							if ($otherInterfaceArray[$i][1] == 'dhcp') {
+								$otherInterfaceIPv4Status[$i]='dhcp';
+							} elseif ($otherInterfaceArray[$i][1] == 'vlan') {
+								$otherInterfaceIPv4Status[$i]='vlan';
+							} else {
+								$otherInterfaceIPv4Status[$i]='static';
+							}
+						} else {
+							$otherInterfaceIPv4Status[$i]='disabled';
+						}
+						switch ($otherInterfaceIPv4Status[$i]) {
+							case 'disabled':
+								default:
+								$otherInterfaceIPv4Status[$j]='disabled';
+							break;
+							
+							case 'static';
+								$otherInterfaceIPv4Status[$j]='static';
+								$otherInterfaceIPv4IP[$j]=$otherInterfaceArray[$i][1];
+								$otherInterfaceIPv4NM[$j]=$otherInterfaceArray[$i][2];
+							break;
+							
+							case 'dhcp';
+								$otherInterfaceIPv4Status[$j]='dhcp';
+								$otherInterfaceIPv4IP[$j]=getIP($otherInterfaceArray[$i][0]);
+								$otherInterfaceIPv4NetMask[$j]=getMASK($otherInterfaceArray[$i][0]);
+								$otherInterfaceIPv4GW[$j]=getGW();
+								$DNS=explode(',',getDNS());
+								$otherInterfaceIPv4DNS1[$j]=trim($DNS[0]);
+								$otherInterfaceIPv4DNS2[$j]=trim($DNS[1]);
+								$otherInterfaceIPv4DNS3[$j]=trim($DNS[2]);
+							break;
+						
+							case 'vlan';
+								$otherInterfaceIPv4Status[$j]='vlan';
+								$otherInterfaceIPv4IP[$j]=$otherInterfaceArray[$i][2];
+								$otherInterfaceIPv4NM[$j]=$otherInterfaceArray[$i][3];
+								$otherInterfaceVlannumber[$j]=$otherInterfaceArray[$i][4];
+								$l=0;
+								while ( $l < $otherInterfaceVlannumber[$j] ) {
+									
+									$otherInterfaceVlanID[$j][$k]='2';
+								$l++;
+								}
+							break;
+						}
+						$j++;
+						$k++;
+					}
+				$h++;
+				$i++;
+				}
+			
 		}
 		$outsideIP = getOutsideIP();
 		
@@ -266,6 +392,43 @@ function networkSettings($output,$dbADO) {
 				$internalCoreIPv6=$internalIPv6InterfaceArray[1];
 				$internalCoreIPv6NetMask=$internalIPv6InterfaceArray[2];
 				break;
+		}
+		
+		// get otherinterfaces internal NIC IPv6 settings.
+		$countIPv6interfaces=$number_of_cards;
+		if ($countIPv6interfaces > 2) {
+			$countotherIPv6Interfaces=$countIPv6interfaces-2;
+			$i=0;
+			$j=2;
+			while ($i < $countIPv6interfaces) {
+				$otherIPv6InterfaceArray[$i]=explode(',',$IPv6interfacesArray[$j]);
+				$otherIPv6Status[$i]=$otherIPv6InterfaceArray[$i][1];
+				if ($otherIPv6InterfaceArray[$i][1] != '') {
+						if ($otherIPv6InterfaceArray[$i][1] == 'ra') {
+							$otherInterfaceIPv6Status[$i]='ra';
+						} else {
+							$otherInterfaceIPv6Status[$i]='static';
+						}
+					} else {
+						$otherInterfaceIPv6Status[$i]='disabled';
+					}
+				switch ($otherIPv6Status[$i]) {
+					case 'disabled':
+				break;
+				case 'ra':
+					$otherIPv6IP[$i]=getIPv6IP($otherIPv6InterfaceArray[$i][0]);
+					$otherIPv6NetMask[$i]=getIPv6MASK($otherIPv6InterfaceArray[$i][0]);
+					break;
+				case 'static':
+				default:
+					$otherIPv6Status[$i]='static';
+					$otherIPv6IP[$i]=$otherIPv6InterfaceArray[$i][1];
+					$otherIPv6NetMask[$i]=$otherIPv6InterfaceArray[$i][2];
+				break;
+				}
+			$j++;
+			$i++;
+			}
 		}
 
 	}else{
@@ -470,6 +633,20 @@ function networkSettings($output,$dbADO) {
 		eval("document.getElementById(\"internalCoreIPv"+ipVersion+"NM\").disabled="+newVal+";");
 	}
 	
+	function setStaticOtherIP(IfaceNumber,newVal,ipVersion)
+	{
+		newVal=!newVal;
+		newColor=(newVal==false)?"#000000":"#999999";
+
+		eval("document.getElementById(\"otherIPv"+ipVersion+"IPtext"+IfaceNumber+"\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"otherIPv"+ipVersion+"IP"+IfaceNumber+"\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"otherIPv"+ipVersion+"IP"+IfaceNumber+"\").disabled="+newVal+";");
+
+		eval("document.getElementById(\"otherIPv"+ipVersion+"NMtext"+IfaceNumber+"\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"otherIPv"+ipVersion+"NM"+IfaceNumber+"\").style.color=\""+newColor+"\";");
+		eval("document.getElementById(\"otherIPv"+ipVersion+"NM"+IfaceNumber+"\").disabled="+newVal+";");
+	}
+	
 	</script>
 	<div id="loading">
 		<div id="loading_picture">
@@ -484,6 +661,7 @@ function networkSettings($output,$dbADO) {
 	<form action="index.php" method="POST" name="networkSettings">
 	<input type="hidden" name="section" value="networkSettings">
 	<input type="hidden" name="action" value="add">
+	<input type="hidden" name="amount_otherInterfaces" value='.$countotherInterfaces.' />
 	<div align="center" class="confirm"><B>'.(isset($_GET['msg'])?strip_tags($_GET['msg']):'').'</B></div>
 	<table border="0">
 		<tr>
@@ -569,8 +747,8 @@ function networkSettings($output,$dbADO) {
 		<tr><td colspan="6">&nbsp;</td></tr>
 		<tr>
 			<td colspan="6" class="tablehead"><B>'.translate('TEXT_NUMBER_OF_NIC_CONST').': '.$number_of_cards.'</B></td>
-		</tr>
-		<tr>
+		</tr>'; 
+		$out.='<tr>
 			<td colspan="6"><B>1. '.translate('TEXT_EXTERNAL_NIC_CONST').' '.@$externalInterfaceArray[0].'</B> (MAC: '
 			.@$externalMAC.')</td>
 		</tr>
@@ -647,7 +825,10 @@ function networkSettings($output,$dbADO) {
 			<td>&nbsp;</td>
 			<td><span id="coreIPv6DNS2text" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_NAMESERVER_CONST').' #2:</span></td>
 			<td><input type="text" maxlength="39" id="coreIPv6DNS2" name="coreIPv6DNS2" size="50" style="color:'.(($coreIPv6Status!='static')?'#999999':'').'" value="'.@$coreIPv6DNS2.'" '.(($coreIPv6Status!='static')?'disabled':'').'></td>
-		</tr>		
+		</tr>
+		<tr>
+			<td colspan="6"><B>Vlan:</B> &nbsp;&nbsp;<input type="radio" name="extv4" value="vlan" onclick="setStaticIP(true,4);"'.(($coreIPv4Status=='vlan')?'checked':'').'>Vlan <!--'.translate('TEXT_INTERFACE_STATIC').'--> number of vlans <input type="number" name="extvlans" size="3"  value="'.$otherInterfaceVlannumber[$i].'" /></td>
+		</tr>
 		<tr><td colspan="6"><hr></td></tr>
 		<tr>
 			<td colspan="6"><B>2. '.translate('TEXT_INTERNAL_NIC_CONST').' '.@$internalInterfaceArray[0].'</B> (MAC: '.@$internalMAC.')</td>
@@ -664,7 +845,6 @@ function networkSettings($output,$dbADO) {
 				&nbsp;&nbsp;<input type="radio" name="intv6" value="static" onclick="setStaticIntIP(true,6);"'.(($internalCoreIPv6Status=='static')?'checked':'').'> '.translate('TEXT_INTERFACE_STATIC').'
 			</td>
 		</tr>
-
 		<tr>
 			<!-- Internal IPv4 address -->
 			<td>&nbsp;</td>
@@ -686,15 +866,150 @@ function networkSettings($output,$dbADO) {
 			<td><span id="internalCoreIPv6NMtext" style="color:'.(($internalCoreIPv6Status!='static')?'#999999':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
 			<td><input type="text" maxlength="2" id="internalCoreIPv6NM" name="internalCoreIPv6NM" size="5" style="color:'.(($internalCoreIPv6Status!='static')?'#999999':'').'" value="'.@$internalCoreIPv6NetMask.'" '.(($internalCoreIPv6Status!='static')?'disabled':'').'></td>
 		</tr>
-		
-		<tr><td colspan="6"><hr></td></tr>
+		<tr>
+			<td colspan="6"><B>Vlan:</B>&nbsp;&nbsp;<input type="radio" name="intv4" value="vlan" onclick="setStaticIntIP(true,4);"'.(($internalCoreIPv4Status=='vlan')?'checked':'').'>Vlan <!--'.translate('TEXT_INTERFACE_STATIC').'--> number of vlans <input type="number" name="extvlans" size="3"  value="'.$otherInterfaceVlannumber[$i].'" /></td>
+		</tr>';
+		$i=0;
+		$j=3;
+		while ($i < $countotherInterfaces) {
+			if ($otherInterfaceWifi[$i] == 'false') {
+			$out.='
+			<tr><td colspan="6"><hr></td></tr>
+			<tr>
+			<td colspan="6"><B>'.$j.'. '.translate('TEXT_INTERNAL_NIC_CONST').' '.@$otherInterfaceName[$i].'</B> (MAC: '.@$otherInterfaceMAC[$i].')
+			<input type="hidden" name="otherInterface'.$i.'" value="'.$otherInterfaceName[$i].'" /></td>
+		<tr>
+			<!-- Internal IPv4 NIC mode) -->
+			<td colspan="3"><B>IPv4:</B>&nbsp;
+				<input type="radio" name="otv4'.$i.'" value="disabled" onclick="setStaticOtherIP('.$i.',false,4);"'.(($otherInterfaceIPv4Status[$i]=='disabled')?'checked':'').'> '.translate('TEXT_INTERFACE_DISABLED').''.'
+				&nbsp;&nbsp;<input type="radio" name="otv4'.$i.'" value="dhcp" onclick="setStaticOtherIP('.$i.',false,4);"'.(($otherInterfaceIPv4Status[$i]=='dhcp')?'checked':'').'> '.translate('TEXT_INTERFACE_DHCP').'
+				&nbsp;&nbsp;<input type="radio" name="otv4'.$i.'" value="static" onclick="setStaticOtherIP('.$i.',true,4);"'.(($otherInterfaceIPv4Status[$i]=='static')?'checked':'').'> '.translate('TEXT_INTERFACE_STATIC').'
+			</td>
+			<!-- Internal IPv6 NIC mode) -->
+			<td colspan="3"><B>IPv6:</B>&nbsp;
+				<input type="radio" name="otv6'.$i.'" value="disabled" onclick="setStaticOtherIP('.$i.',false,6);"'.(($otherInterfaceIPv6Status[$i]=='disabled')?'checked':'').'> '.translate('TEXT_INTERFACE_DISABLED').''.'
+				&nbsp;&nbsp;<input type="radio" name="otv6'.$i.'" value="ra" onclick="setStaticOtherIP('.$i.',false,6);"'.(($otherInterfaceIPv6Status[$i]=='ra')?'checked':'').'> '.translate('TEXT_INTERFACE_RA').''.'
+				&nbsp;&nbsp;<input type="radio" name="otv6'.$i.'" value="static" onclick="setStaticOtherIP('.$i.',true,6);"'.(($otherInterfaceIPv6Status[$i]=='static')?'checked':'').'> '.translate('TEXT_INTERFACE_STATIC').'
+			</td>
+		</tr>
+		<tr>
+			<!-- Internal IPv4 address -->
+			<td>&nbsp;</td>
+			<td width="150"><span id="otherIPv4IPtext'.$i.'" style="color:'.(($otherInterfaceIPv4Status[$i]!='static')?'#999999':'').'">'.translate('TEXT_IP_ADDRESS_CONST').':</span></td>
+			<td><input type="text" maxlength="15" id="otherIPv4IP'.$i.'" name="otherIPv4IP'.$i.'" style="color:'.(($otherInterfaceIPv4Status[$i]!='static')?'#999999':'').'" size="20" value="'.@$otherInterfaceIPv4IP[$i].'" '.(($otherInterfaceIPv4Status[$i]!='static')?'disabled':'').'></td>
+			<!-- Internal IPv6 address -->
+			<td>&nbsp;</td>
+			<td width="150"><span id="otherIPv6IPtext'.$i.'" style="color:'.(($otherInterfaceIPv6Status[$i]!='static')?'#999999':'').'">'.translate('TEXT_IP_ADDRESS_CONST').':</span></td>
+			<td><input type="text" maxlength="39" id="otherIPv6IP'.$i.'" name="otherIPv6IP'.$i.'" size="50" style="color:'.(($otherInterfaceIPv6Status[$i]!='static')?'#999999':'').'" value="'.@$otherIPv6IP[$i].'" '.(($otherInterfaceIPv6Status[$i]!='static')?'disabled':'').'></td>	
+		</tr>						
+		<tr>
+			<!-- Internal IPv4 netmask -->
+			<td>&nbsp;</td>
+			<td><span id="otherIPv4NMtext'.$i.'" style="color:'.(($otherInterfaceIPv6Status[$i]!='static')?'#999999':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
+			<td><input type="text" maxlength="15" id="otherIPv4NM'.$i.'" name="otherIPv4NM'.$i.'" style="color:'.(($otherInterfaceIPv4Status[$i]!='static')?'#999999':'').'" size="20" value="'.@$otherInterfaceIPv4NM[$i].'"  '.(($otherInterfaceIPv4Status[$i]!='static')?'disabled':'').'></td>
+			<!-- Internal IPv6 netmask -->
+			<td>&nbsp;</td>
+			<td><span id="otherIPv6NMtext'.$i.'" style="color:'.(($otherInterfaceIPv6Status[$i]!='static')?'#999999':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
+			<td><input type="text" maxlength="2" id="otherIPv6NM'.$i.'" name="otherIPv6NM'.$i.'" size="5" style="color:'.(($otherInterfaceIPv6Status[$i]!='static')?'#999999':'').'" value="'.@$otherIPv6NetMask[$i].'" '.(($otherInterfaceIPv6Status[$i]!='static')?'disabled':'').'></td>
+		</tr>
+		<tr>
+			<td colspan="6"><B>Vlan:</B>&nbsp;&nbsp;<input type="radio" name="otv4'.$i.'" value="vlan" onclick="setStaticOtherIP('.$i.',true,4);"'.(($otherInterfaceIPv4Status[$i]=='vlan')?'checked':'').'> Vlan<!--'.translate('TEXT_INTERFACE_STATIC').'--> number of vlans <input type="number" name="vlans'.$i.'" size="3"  value="'.$otherInterfaceVlannumber[$i].'" /></td>
+		</tr>';
+		$k=0;
+		while ( $k < $otherInterfaceVlannumber[$i]) {
+			$out.='<tr>
+			<td>&nbsp;</td>
+			<td>Vlan ID</td>
+			<td><input type="number" name="VlanID'.$k.'" value="'.$otherInterfaceVlanID[$i][$k].'" /></td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+			</tr>
+			<tr>
+			<td>&nbsp;</td>
+			<td>Vlan IP</td>
+			<td><input type="text" name="VlanIP'.$k.'" value="" /></td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+			</tr>
+			<tr>
+			<td>&nbsp;</td>
+			<td>Vlan Netmask</td>
+			<td><input type="text" name="VlanNM'.$k.'" value="" /></td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+			</tr>';
+		$k++;
+		}
+		} else {
+		$out.='
+			<tr><td colspan="6"><hr></td></tr>
+			<tr>
+			<td colspan="6"><B>'.$j.'. '.translate('TEXT_INTERNAL_NIC_CONST').' '.@$otherInterfaceName[$i].'</B> (MAC: '.@$otherInterfaceMAC[$i].')
+			<input type="hidden" name="otherInterface'.$i.'" value="'.$otherInterfaceName[$i].'" /></td>
+		</tr>
+		<tr>
+			<td colspan="6"><B>Wifi:</B>&nbsp;<a href="?section=wifi_settings&interface='.$otherInterfaceName[$i].'">wifi settings</a> <a href="?section=wifi_statistics&interface='.$otherInterfaceName[$i].'">wifi statistics</a></td>
+		</tr>
+		<tr>
+			<!-- Internal IPv4 NIC mode) -->
+			<td colspan="3"><B>IPv4:</B>&nbsp;
+				<input type="radio" name="otv4'.$i.'" value="disabled" onclick="setStaticOtherIP('.$i.',false,4);"'.(($otherInterfaceIPv4Status[$i]=='disabled')?'checked':'').'> '.translate('TEXT_INTERFACE_DISABLED').''.'
+				&nbsp;&nbsp;<input type="radio" name="otv4'.$i.'" value="dhcp" onclick="setStaticOtherIP('.$i.',false,4);"'.(($otherInterfaceIPv4Status[$i]=='dhcp')?'checked':'').'> '.translate('TEXT_INTERFACE_DHCP').'
+				&nbsp;&nbsp;<input type="radio" name="otv4'.$i.'" value="static" onclick="setStaticOtherIP('.$i.',true,4);"'.(($otherInterfaceIPv4Status[$i]=='static')?'checked':'').'> '.translate('TEXT_INTERFACE_STATIC').'
+			</td>
+			<!-- Internal IPv6 NIC mode) -->
+			<td colspan="3"><B>IPv6:</B>&nbsp;
+				<input type="radio" name="otv6'.$i.'" value="disabled" onclick="setStaticOtherIP('.$i.',false,6);"'.(($otherInterfaceIPv6Status[$i]=='disabled')?'checked':'').'> '.translate('TEXT_INTERFACE_DISABLED').''.'
+				&nbsp;&nbsp;<input type="radio" name="otv6'.$i.'" value="ra" onclick="setStaticOtherIP('.$i.',false,6);"'.(($otherInterfaceIPv6Status[$i]=='ra')?'checked':'').'> '.translate('TEXT_INTERFACE_RA').''.'
+				&nbsp;&nbsp;<input type="radio" name="otv6'.$i.'" value="static" onclick="setStaticOtherIP('.$i.',true,6);"'.(($otherInterfaceIPv6Status[$i]=='static')?'checked':'').'> '.translate('TEXT_INTERFACE_STATIC').'
+			</td>
+		</tr>
+		<tr>
+			<!-- Internal IPv4 address -->
+			<td>&nbsp;</td>
+			<td width="150"><span id="otherIPv4IPtext'.$i.'" style="color:'.(($otherInterfaceIPv4Status[$i]!='static')?'#999999':'').'">'.translate('TEXT_IP_ADDRESS_CONST').':</span></td>
+			<td><input type="text" maxlength="15" id="otherIPv4IP'.$i.'" name="otherIPv4IP'.$i.'" style="color:'.(($otherInterfaceIPv4Status[$i]!='static')?'#999999':'').'" size="20" value="'.@$otherInterfaceIPv4IP[$i].'" '.(($otherInterfaceIPv4Status[$i]!='static')?'disabled':'').'></td>
+			<!-- Internal IPv6 address -->
+			<td>&nbsp;</td>
+			<td width="150"><span id="otherIPv6IPtext'.$i.'" style="color:'.(($otherInterfaceIPv6Status[$i]!='static')?'#999999':'').'">'.translate('TEXT_IP_ADDRESS_CONST').':</span></td>
+			<td><input type="text" maxlength="39" id="otherIPv6IP'.$i.'" name="otherIPv6IP'.$i.'" size="50" style="color:'.(($otherInterfaceIPv6Status[$i]!='static')?'#999999':'').'" value="'.@$otherIPv6IP[$i].'" '.(($otherInterfaceIPv6Status[$i]!='static')?'disabled':'').'></td>	
+
+		</tr>						
+		<tr>
+			<!-- Internal IPv4 netmask -->
+			<td>&nbsp;</td>
+			<td><span id="otherIPv4NMtext'.$i.'" style="color:'.(($otherInterfaceIPv6Status[$i]!='static')?'#999999':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
+			<td><input type="text" maxlength="15" id="otherIPv4NM'.$i.'" name="otherIPv4NM'.$i.'" style="color:'.(($otherInterfaceIPv4Status[$i]!='static')?'#999999':'').'" size="20" value="'.@$otherInterfaceIPv4NM[$i].'"  '.(($otherInterfaceIPv4Status[$i]!='static')?'disabled':'').'></td>
+			<!-- Internal IPv6 netmask -->
+			<td>&nbsp;</td>
+			<td><span id="otherIPv6NMtext'.$i.'" style="color:'.(($otherInterfaceIPv6Status[$i]!='static')?'#999999':'').'">'.translate('TEXT_NETMASK_CONST').':</span></td>
+			<td><input type="text" maxlength="2" id="otherIPv6NM'.$i.'" name="otherIPv6NM'.$i.'" size="5" style="color:'.(($otherInterfaceIPv6Status[$i]!='static')?'#999999':'').'" value="'.@$otherIPv6NetMask[$i].'" '.(($otherInterfaceIPv6Status[$i]!='static')?'disabled':'').'></td>
+		</tr>
+		<tr>
+			<td colspan="6"><B>Vlan:</B>&nbsp;&nbsp;<input type="radio" name="otv4'.$i.'" value="vlan" onclick="setStaticOtherIP('.$i.',true,4);"'.(($otherInterfaceIPv4Status[$i]=='vlan')?'checked':'').'> Vlan<!--'.translate('TEXT_INTERFACE_VLAN').'--> number of vlans <input type="number" name="vlans'.$i.'" size="3"  value="'.$otherInterfaceVlannumber[$i].'" /></td>
+		</tr>';
+		$k=0;
+		while ( $k < $otherInterfaceVlannumber[$i] ) {
+				$out.='<tr><td>test</td></tr>';
+		$k++;
+		}
+		}
+		$j++;
+		$i++;
+		}
+		$out.='<tr><td colspan="6"><hr></td></tr>
 		<tr>
 			<td colspan="3">
 				<input type="checkbox" name="OfflineMode" value="1" '.(($OfflineMode=='true')?'checked':'').'>
 				<B>'.translate('TEXT_OFFLINEMODE_CONST').'&nbsp;'.$swaphtml.'</B>	
 			</td>
 			<td colspan="3" bgcolor="#EEEEEE">
-				<input type="button" class="button" name="update" value="'.translate('TEXT_UPDATE_CONST').'" onClick="validateForm()"> <input type="reset" class="button" name="reset" value="'.translate('TEXT_RESET_CONST').'">
+				<input type="button" class="button" name="update" value="'.translate('TEXT_UPDATE_CONST').'"
+
+				onClick="validateForm()"> <input type="reset" class="button" name="reset" value="'.translate('TEXT_RESET_CONST').'">
 			</td>
 		</tr>			
 	<tr><td colspan="6">'.translate('TEXT_OPEN_FIREWALL_CONST').'</td></tr>	'
@@ -779,8 +1094,24 @@ function networkSettings($output,$dbADO) {
 			}
 			// Configure IPv4 internal interface
 			if ($internalInterface !== ""){
-				$networkInterfaces.=$internalInterface.','.$internalCoreIP.','.$_POST['internalCoreIPv4NM'];
+				$networkInterfaces.=$internalInterface.','.$internalCoreIP.','.$_POST['internalCoreIPv4NM'].'|';
 			}
+			// Configure IPv4 other interfaces
+			$amount_otherInterfaces=$_POST['amount_otherInterfaces'];
+			$amount_otherInterfaces--;
+			$i=0;
+			while ( $i <= $amount_otherInterfaces ) {
+			if ($_POST['otv4'.$i]=='disabled') {
+				$networkInterfaces.=$_POST['otherInterface'.$i].'|';
+			} elseif ($_POST['otv4'.$i]=='dhcp') {
+				$networkInterfaces.=$_POST['otherInterface'.$i].',dhcp|';
+			} else {
+				$networkInterfaces.=$_POST['otherInterface'.$i].','.$_POST['otherIPv4IP'.$i].','.$_POST['otherIPv4NM'.$i].'|';
+			}
+			$i++;
+			}
+
+			$networkInterfaces=rtrim($networkInterfaces, "|");
 			if($networkInterfaces!=$rowNC['IK_DeviceData']){
 				$SQL="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES(?,?,?)";
 				$dbADO->Execute($SQL,array($coreID,$GLOBALS['NetworkInterfaces'],$networkInterfaces));
@@ -806,24 +1137,40 @@ function networkSettings($output,$dbADO) {
 					$networkInterfaces.=',disabled|';
 				break;
 			}
-
 			// Configure IPv6 internal interface
 			if ($internalInterface !== ""){
 				switch ($_POST['intv6']) {
 					case 'static';
-						$networkInterfaces.=$internalInterface.','.$_POST['internalCoreIPv6IP'].','.$_POST['internalCoreIPv6NM'];
+						$networkInterfaces.=$internalInterface.','.$_POST['internalCoreIPv6IP'].','.$_POST['internalCoreIPv6NM'].'|';
 					break;
 					
 					case 'ra';
-						$networkInterfaces.=$internalInterface.',ra';
+						$networkInterfaces.=$internalInterface.',ra|';
 					break;
 					
 					default:
 					case 'disabled':
-						$networkInterfaces.=$internalInterface.',disabled';
+						$networkInterfaces.=$internalInterface.',disabled|';
 					break;
 				}
 			}
+			// Configure IPv6 other interfaces
+			$amount_otherInterfaces=$_POST['amount_otherInterfaces'];
+			$amount_otherInterfaces--;
+			$i=0;
+			while ( $i <= $amount_otherInterfaces ) {
+			if ($_POST['otv6'.$i]=='disabled') {
+				$networkInterfaces.=$_POST['otherInterface'.$i].'|';
+			} elseif ($_POST['otv6'.$i]=='ra') {
+				$networkInterfaces.=$_POST['otherInterface'.$i].',ra|';
+			} else {
+				$networkInterfaces.=$_POST['otherInterface'.$i].','.$_POST['otherIPv6IP'.$i].','.$_POST['otherIPv6NM'.$i].'|';
+			}
+			$i++;
+			}
+
+			$networkInterfaces=rtrim($networkInterfaces, "|");
+			$networkInterfaces1=$networkInterfaces;
 			if($networkInterfaces!=$rowNC['IK_DeviceData']){
 				$SQL="REPLACE INTO Device_DeviceData(FK_Device,FK_DeviceData,IK_DeviceData) VALUES(?,?,?)";
 				$dbADO->Execute($SQL,array($coreID,$GLOBALS['IPv6NetworkInterfaces'],$networkInterfaces));
@@ -913,7 +1260,7 @@ function networkSettings($output,$dbADO) {
 			$ipchanged_msg=' The system will reboot in the following moments.';
 		$msg=urlencode("Network settings updated.".@$ipchanged_msg);
 		
-		header("Location: index.php?section=networkSettings&msg=".$msg);
+		header("Location: index.php?section=networkSettings&msg=".$msg." ".$networkInterfaces1);
 		if ($needReboot)
 			exec_batch_command("sudo -u root /sbin/reboot");
 	}
@@ -952,5 +1299,4 @@ function getIPv6FromParts($partName,$startIndex=1)
 	if(count($ipArray) < 8) $tmp.='::'; 
 	return $tmp;
 }
-
 ?>
