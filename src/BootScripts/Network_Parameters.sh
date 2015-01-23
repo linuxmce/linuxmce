@@ -41,34 +41,42 @@ CalculateNetworkAddress()
 
 ExtractData()
 {
-	local R IntPart ExtPart
-	R="$*"
-	if [ -n "$R" ]; then
-		# format:
-		# <Ext If>,<Ext IP>,<Ext Netmask>,<Gateway>,<Ext DNS CSV>|<Int If>,<Int IP>,<Int Netmask>
-		# <Ext If>,DHCP|<Int If>,<Int IP>,<Int Netmask>
-		ExtPart=$(echo "$R" | cut -d'|' -f1)
-		IntPart=$(echo "$R" | cut -d'|' -sf2)
+        local R IntPart Extpart
+        R="$*"
 
-		if [ -n "$IntPart" ]; then
-			IntIf=$(CommaField 1 "$IntPart")
-			IntIP=$(CommaField 2 "$IntPart")
-			IntNetmask=$(CommaField 3 "$IntPart")
-		fi
+        if [ -n "$R" ]; then
+                # format:
+                # <Ext If>,<Ext IP>,<Ext Netmask>,<Gateway>,<Ext DNS CSV>|<Int IF>,<Int IP>,<Int Netmask>
+                # <Ext If>,DHCP|<Int IF>,<Int IP>,<Int Netmask>
+                ExtPart=$(echo "$R" | cut -d'|' -f1)
+                IntPart=$(echo "$R" | cut -d'|' -sf2)
+                IFS='|' read -a array <<< "$R"
+                echo ${#array[@]}
 
-		if [ -n "$ExtPart" ]; then
-			ExtIf=$(CommaField 1 "$ExtPart")
-			ExtIP=$(CommaField 2 "$ExtPart")
-			if [ "$ExtIP" != "DHCP" -a "$ExtIP" != "dhcp" ]; then
-				ExtNetmask=$(CommaField 3 "$ExtPart")
-				Gateway=$(CommaField 4 "$ExtPart")
-				DNS=$(CommaField 5- "$ExtPart")
-			fi
-		fi
-		NetIfConf=1
-		CalculateNetworkAddress
-	fi
+                if [ -n "$IntPart" ]; then
+                        IntIf=$(CommaField 1 "$IntPart")
+                        IntIP=$(CommaField 2 "$IntPart")
+                        IntNetmask=$(CommaField 3 "$IntPart")
+                fi
+
+                if [ -n "$ExtPart" ]; then
+                        ExtIf=$(CommaField 1 "$ExtPart")
+                        ExtIP=$(CommaField 2 "$ExtPart")
+                        if [ "ExtIP" != "DHCP" -a "$ExtIP" != "dhcp" ]; then
+                                ExtNetmask=$(CommaField 3 "$ExtPart")
+                                Gateway=$(CommaField 4 "$ExtPart")
+                                DNS=$(CommaField 5- "$ExtPart")
+                        fi
+                fi
+
+                IFS='|' read -a interfaces_array <<< "$R"
+                amount_Interfaces=${#interfaces_array[@]}
+                amount_otherInterfaces=$[$amount_Interfaces-2]
+                NetIfConf=1
+                CalculateNetworkAddress
+        fi
 }
+
 
 ExtractPPPoEData()
 {

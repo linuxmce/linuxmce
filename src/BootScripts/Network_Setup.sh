@@ -229,6 +229,37 @@ echo "        # DNS Settings for Internal Net
         dns-search $DomainName" >>"$File"
 echo "IPv4: External $ExtIf=$Setting, internal $IntIf=static"
 
+#other interfaces configuration
+i="0"
+j="2"
+while [ $i -lt $amount_otherInterfaces ] #traverse trough elements
+  do
+	otherinterfaceIf=$(CommaField 1 "${interfaces_array[$j]}")
+	otherinterfaceIP=$(CommaField 2 "${interfaces_array[$j]}")
+        if [ -n $otherinterfaceIP  -a $otherinterfaceIP != $otherinterfaceIf ]; then
+		if [ $otherinterfceIP == "DHCP" -a $otherinterfaceIP == "dhcp" ]; then
+			otherinterfaceModus="dhcp"
+        	elif [ $otherinterfaceIP == "vlan" ]; then
+			otherinterfaceModus="static"
+			otherinterfaceIP=$(CommaField 3 "${interfaces_array[$j]}")
+			otherinterfaceNM=$(CommaField 4 "${interfaces_array[$j]}")
+		else
+			otherinterfaceModus="static"
+			otherinterfaceNM=$(CommaField 3 "${interfaces_array[$j]}")
+		fi
+			auto=("${auto[@]}" $otherinterfaceIf)
+echo "
+# --- $otherinterfaceIf  ---
+iface $otherinterfaceIf inet $otherinterfaceModus" >>"$File"
+			if [ $otherinterfaceModus == "static" ]; then
+echo "	address $otherinterfaceIP
+        netmask $otherinterfaceNM" >>"$File"
+			fi
+	fi
+    i=$[$i+1]
+    j=$[$j+1]
+  done
+
 # IPv6 interfaces configuration
 v6=""
 case $Extv6IP in
@@ -485,23 +516,18 @@ if [[ "$VPNenabled" == "on" ]]; then
         sed -r "s,%CORE_INT_IP%,$IntIP,g" /usr/pluto/templates/options.xl2tpd.tmpl >/etc/ppp/options.xl2tpd
 
         # PPP users secret file
-        Q="SELECT UserName,Password,Use_VPN, VPN_Ip FROM Users"
+        Q="SELECT UserName,Password,Use_VPN,VPN_Ip FROM Users"
 		R=$(RunSQL "$Q")
 		echo "# Secrets for authentication using VPN and System Authentacation" > /etc/ppp/pap-secrets
 		for ROW in $R; do
 			User=$(Field 1 "$ROW")
 			username=$(echo $User | tr '[:upper:]' '[:lower:]');
 			Pass="\"\""
-			UseVPN=$(Field 3 "$ROW")
-			Ip=$(Field 4 "$ROW")
-			if [[ $Ip == '0' ]]; then
-				Ip='*'
-			fi
-			if [[ $UseVPN  == '0' ]]; then
-				echo "#pluto_$username	*	$Pass	$Ip" >> /etc/ppp/pap-secrets
+			use_vpn=$(Field 3 "$ROW")
+			if [[ "$use_vpn" == "0" ]]; then
+				echo "#pluto_$username	*	$Pass	*" >> /etc/ppp/pap-secrets
 			else
-
-				echo "pluto_$username  *       $Pass	$Ip" >> /etc/ppp/pap-secrets
+				echo "pluto_$username	*	$Pass	$(Field 4 "$ROW")" >> /etc/ppp/pap-secrets
 			fi
 		done
 	chmod 644 /etc/ppp/pap-secrets
@@ -511,10 +537,10 @@ if [[ "$VPNenabled" == "on" ]]; then
         if [[ "$?" -ne "0" ]]; then
                 echo "Setting up /etc/ppp/ip-up"
 
-                ipup="#Setup iptables  and update db
+                ipup=$"#Setup iptables  and update db
 if [[ ! "$6" == "" ]]; then
 	if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
-		R=$(mysql pluto_main -ss -e \"SELECT Protocol FROM Firewall WHERE RuleType='VPN' AND SourceIP='$5' AND Protocol='ip-ipv4' ORDER BY PK_Firewall\")
+		R=$(mysql pluto_main -ss -e\"SELECT Protocol FROM Firewall WHERE RuleType='VPN' AND SourceIP='$5' AND Protocol='ip-ipv4' ORDER BY PK_Firewall\")
 		if [ "$R" ]; then
 			mysql pluto_main -ss -e \"UPDATE Firewall SET Offline='0' WHERE RuleType='VPN' AND SourceIP='$5'\"
 		fi
@@ -528,10 +554,10 @@ fi"
         if [[ "$?" -ne "0" ]]; then
                 echo "Setting up /etc/ppp/ip-down"
 
-                ipdown="#Setup iptables  and update db
+                ipdown=$"#Setup iptables  and update db
 if [[ ! "$6" == "" ]]; then
         if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
-                R=$(mysql pluto_main -ss -e \"SELECT Protocol FROM Firewall WHERE RuleType='VPN' AND SourceIP='$5' AND Protocol='ip-ipv4' ORDER BY PK_Firewall\")
+                R=$(mysql pluto_main -ss -e\"SELECT Protocol FROM Firewall WHERE RuleType='VPN' AND SourceIP='$5' AND Protocol='ip-ipv4' ORDER BY PK_Firewall\")
                 if [ "$R" ]; then
                         mysql pluto_main -ss -e \"UPDATE Firewall SET Offline='1' WHERE RuleType='VPN' AND SourceIP='$5'\"
                 fi
