@@ -1146,6 +1146,9 @@ void Security_Plugin::SetHouseModeBoundIcon(int PK_DeviceGroup,OH_Orbiter *pOH_O
 				{
 					DCE::CMD_Set_Bound_Icon CMD_Set_Bound_Icon(m_dwPK_Device,pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device,StringUtils::itos(PK_HouseMode),"","housemode" + StringUtils::itos(itHM->first));
 					SendCommand(CMD_Set_Bound_Icon);
+					
+					DCE::CMD_Set_House_Mode CMD_Set_House_Mode(m_dwPK_Device,pOH_Orbiter->m_pDeviceData_Router->m_dwPK_Device,StringUtils::itos(PK_HouseMode),0,"",0,"");
+					SendCommand(CMD_Set_House_Mode);
 				}
 #ifdef DEBUG
 				else
