@@ -287,6 +287,7 @@ namespace DCE
   void VLC::SetPosition(float fPosition)
   {
     LoggerWrapper::GetInstance()->Write(LV_WARNING,"VLC::SetPosition(%f)",fPosition);
+    m_fPosition=fPosition;
     libvlc_media_player_set_position(m_pMp, fPosition);
   }
 
@@ -460,6 +461,22 @@ namespace DCE
     sFormat="3";
     sCMD_Result="OK";
     return true;
+  }
+
+  bool VLC::hasChapters()
+  {
+    if (!m_pMp)
+      return false;
+
+    return libvlc_media_player_get_chapter_count(m_pMp)>0;
+  }
+
+  int VLC::GetCurrentChapter()
+  {
+    if (!m_pMp)
+      return false;
+
+    return libvlc_media_player_get_chapter(m_pMp);
   }
 
 }

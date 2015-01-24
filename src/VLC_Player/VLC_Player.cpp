@@ -639,6 +639,50 @@ void VLC_Player::CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStre
   cout << "Need to implement command #65 - Jump Position In Playlist" << endl;
   cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  int iChaptersToSkip=0;
+  
+  if (sValue_To_Assign.size()==0)
+    return; // do nothing.
+
+  if (!m_pVLC)
+    return; // do nothing.
+
+  // Resume playback at normal speed, if needed.
+  if (m_iMediaPlaybackSpeed!=1000)
+    {
+      m_iMediaPlaybackSpeed=1000; // Play at normal speed.
+      DoTransportControls();
+    }
+
+
+  // Since we can only do single step chapter skips, we have to calculate a relative
+  // number of chapters to skip.
+  if (sValue_To_Assign[0]=='-' || sValue_To_Assign[0]=='+')
+    iChaptersToSkip=atoi(sValue_To_Assign.c_str());
+  else if (m_pVLC->GetCurrentChapter()==-1)
+    iChaptersToSkip=1;
+  else
+    iChaptersToSkip=atoi(sValue_To_Assign.c_str())-m_pVLC->GetCurrentChapter();
+
+  if (m_pVLC->hasChapters())
+    {
+      if (iChaptersToSkip<0)
+	for (int i=0; i>iChaptersToSkip;i--)
+	  m_pVLC->PreviousChapter();
+      else
+	for (int i=0; i<iChaptersToSkip;i++)
+	  m_pVLC->NextChapter();
+    }
+  else
+    {
+      // No chapters, skip ahead instead.
+      if (iChaptersToSkip<0)
+	m_pVLC->JumpBack(iChaptersToSkip);
+      else
+	m_pVLC->JumpFwd(iChaptersToSkip);
+    }
+
 }
 //<-dceag-c81-b->
 
