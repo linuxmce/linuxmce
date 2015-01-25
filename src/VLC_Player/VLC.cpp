@@ -479,4 +479,18 @@ namespace DCE
     return libvlc_media_player_get_chapter(m_pMp);
   }
 
+  void VLC::SetAudioTrack(int iAudioTrack)
+  {
+    if (!m_pMp)
+      return;
+    libvlc_audio_set_track(m_pMp,iAudioTrack);
+  }
+
+  int VLC::GetAudioTrack()
+  {
+    if (!m_pMp)
+      return -1;
+    return libvlc_audio_get_track(m_pMp);
+  }
+
 }

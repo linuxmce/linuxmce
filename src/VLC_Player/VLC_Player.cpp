@@ -859,6 +859,16 @@ void VLC_Player::CMD_Audio_Track(string sValue_To_Assign,int iStreamID,string &s
   cout << "Need to implement command #140 - Audio Track" << endl;
   cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  if (sValue_To_Assign=="")
+    {
+      m_pVLC->SetAudioTrack(m_pVLC->GetAudioTrack()+1);
+    }
+  else
+    {
+      m_pVLC->SetAudioTrack(atoi(sValue_To_Assign.c_str()));
+    }
+
 }
 
 //<-dceag-c141-b->

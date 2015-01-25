@@ -94,6 +94,8 @@ namespace DCE
     void GotoMediaMenu(int iMenu);
     bool hasChapters();
     int GetCurrentChapter();
+    void SetAudioTrack(int iAudioTrack);
+    int GetAudioTrack();
   };
 
 }
