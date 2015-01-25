@@ -796,6 +796,7 @@ void VLC_Player::CMD_Pause(int iStreamID,string &sCMD_Result,Message *pMessage)
 {
   cout << "Need to implement command #92 - Pause" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  CMD_Pause_Media(0);
 }
 
 //<-dceag-c95-b->
@@ -813,6 +814,8 @@ void VLC_Player::CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message 
   cout << "Need to implement command #95 - Stop" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #203 - Eject=" << bEject << endl;
+  string sMediaPosition;
+  CMD_Stop_Media(0,&sMediaPosition);
 }
 
 //<-dceag-c126-b->
@@ -838,6 +841,7 @@ void VLC_Player::CMD_Play(int iStreamID,string &sCMD_Result,Message *pMessage)
 {
   cout << "Need to implement command #139 - Play" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  CMD_Play_Media(0,1,"","");
 }
 
 //<-dceag-c140-b->
