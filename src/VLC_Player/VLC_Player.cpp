@@ -886,6 +886,16 @@ void VLC_Player::CMD_Subtitle(string sValue_To_Assign,int iStreamID,string &sCMD
   cout << "Need to implement command #141 - Subtitle" << endl;
   cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  if (sValue_To_Assign=="")
+    {
+      m_pVLC->SetSubtitle(m_pVLC->GetSubtitle()+1);
+    }
+  else
+    {
+      m_pVLC->SetSubtitle(atoi(sValue_To_Assign.c_str()));
+    }  
+
 }
 
 //<-dceag-c142-b->

@@ -493,4 +493,19 @@ namespace DCE
     return libvlc_audio_get_track(m_pMp);
   }
 
+  void VLC::SetSubtitle(int iSubtitle)
+  {
+    if (!m_pMp)
+      return;
+    libvlc_video_set_spu(m_pMp,iSubtitle);
+  }
+
+  int VLC::GetSubtitle()
+  {
+    if (!m_pMp)
+      return -1;
+    return libvlc_video_get_spu(m_pMp);
+  }
+
+
 }

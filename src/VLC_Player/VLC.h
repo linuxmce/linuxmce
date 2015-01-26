@@ -96,6 +96,8 @@ namespace DCE
     int GetCurrentChapter();
     void SetAudioTrack(int iAudioTrack);
     int GetAudioTrack();
+    void SetSubtitle(int iSubtitle);
+    int GetSubtitle();
   };
 
 }
