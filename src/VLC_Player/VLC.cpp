@@ -530,4 +530,10 @@ namespace DCE
       }
   }
 
+  void VLC::SetMediaType(string sMediaType, int iMediaID)
+  {
+    m_sMediaType=sMediaType;
+    m_iMediaID=iMediaID;
+  }
+
 }

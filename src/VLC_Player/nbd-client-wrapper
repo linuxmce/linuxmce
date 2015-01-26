@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# nbd-client wrapper script, creates/destroys nbd device if necessary 
+# and runs/stops nbd
+#
+# parameters
+# action:	add|del
+# deviceNumber:	number
+# hostIP:	IP-address
+#
+# device will be called /dev/device_deviceNumber
+
+deviceName="/dev/device_$2"
+deviceNumber=$2
+hostIP=$3
+
+create_device()
+{
+	i=0
+	for j in `ls -l /dev/device_* 2>/dev/null |cut -f2 -d',' | sed 's/^\ \+//' | cut -f1 -d' ' | sort -n`
+	do
+		if [ "$i" != "$j" ]
+		then
+			# found free MINOR
+			mknod $deviceName b 43 $i
+			return
+		else
+			i=$(( $i + 1 ))
+		fi
+	done
+
+	# found new MINOR
+	mknod $deviceName b 43 $i
+}
+
+case "$1" in
+	"add")
+		[ -e $deviceName ] || create_device
+		/sbin/nbd-client $hostIP $(( 18000 + $deviceNumber )) $deviceName
+	;;
+	"del")
+		/sbin/nbd-client -d $deviceName
+		[ -e $deviceName ] && rm $deviceName
+	;;
+	*)
+		echo "Unknown command"
+		exit 0
+	;;
+esac
+
+

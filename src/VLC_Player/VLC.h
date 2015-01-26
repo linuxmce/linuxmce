@@ -56,6 +56,9 @@ namespace DCE
     string m_sVideoInfo; // TBD: Compatible with Xine_Player
 
     string m_sWindowTitle;
+    string m_sMediaType;
+    int m_iMediaID;
+
     VLC(Config* pConfig, DCE::VLC_Player* pVLC_Player);
     ~VLC();
     bool init();
@@ -100,6 +103,7 @@ namespace DCE
     int GetSubtitle();
     void SetAspectRatio(string sAspectRatio);
     void SetZoomFactor(string sZoomFactor);
+    void SetMediaType(string sMediaType, int iMediaID);
 
   };
 

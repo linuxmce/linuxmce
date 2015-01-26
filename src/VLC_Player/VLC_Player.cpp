@@ -1251,6 +1251,17 @@ void VLC_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,M
   cout << "Need to implement command #920 - Set Media ID" << endl;
   cout << "Parm #10 - ID=" << sID << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+
+  m_pVLC->SetMediaType("N",-1);
+
+  if (!sID.empty())
+    {
+      string sMediaType = sID.substr(0,1);
+      sID.erase(0,1);
+      int iMediaID = atoi(sID.c_str());
+      m_pVLC->SetMediaType(sMediaType, iMediaID);
+    }
+  
 }
 
 /**
