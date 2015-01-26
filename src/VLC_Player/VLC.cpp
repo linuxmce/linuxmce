@@ -507,5 +507,27 @@ namespace DCE
     return libvlc_video_get_spu(m_pMp);
   }
 
+  void VLC::SetAspectRatio(string sAspectRatio)
+  {
+    if (!m_pMp)
+      return;
+    if (sAspectRatio == "auto")
+      libvlc_video_set_aspect_ratio(m_pMp,0);
+    else
+      libvlc_video_set_aspect_ratio(m_pMp,sAspectRatio.c_str());
+  }
+
+  void VLC::SetZoomFactor(string sZoomFactor)
+  {
+    float fZoomFactor=0.0;
+    if (!m_pMp)
+      return;
+    if (sZoomFactor == "auto")
+      fZoomFactor=0.0;
+    else
+      {
+	libvlc_video_set_scale(m_pMp,atof(sZoomFactor.c_str()));
+      }
+  }
 
 }

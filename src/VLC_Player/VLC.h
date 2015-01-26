@@ -98,6 +98,9 @@ namespace DCE
     int GetAudioTrack();
     void SetSubtitle(int iSubtitle);
     int GetSubtitle();
+    void SetAspectRatio(string sAspectRatio);
+    void SetZoomFactor(string sZoomFactor);
+
   };
 
 }

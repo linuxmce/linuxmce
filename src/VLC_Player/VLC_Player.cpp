@@ -827,6 +827,7 @@ void VLC_Player::CMD_Guide(string &sCMD_Result,Message *pMessage)
 //<-dceag-c126-e->
 {
   cout << "Need to implement command #126 - Guide" << endl;
+  CMD_Goto_Media_Menu(0,0);
 }
 
 //<-dceag-c139-b->
@@ -1192,6 +1193,7 @@ void VLC_Player::CMD_Menu(string sText,int iStreamID,string &sCMD_Result,Message
   cout << "Need to implement command #548 - Menu" << endl;
   cout << "Parm #9 - Text=" << sText << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
+  CMD_Goto_Media_Menu(0,0);
 }
 
 //<-dceag-c916-b->
@@ -1209,6 +1211,9 @@ void VLC_Player::CMD_Set_Aspect_Ratio(int iStreamID,string sAspect_Ratio,string 
   cout << "Need to implement command #916 - Set Aspect Ratio" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #260 - Aspect_Ratio=" << sAspect_Ratio << endl;
+
+  m_pVLC->SetAspectRatio(sAspect_Ratio);
+
 }
 
 //<-dceag-c917-b->
@@ -1226,6 +1231,9 @@ void VLC_Player::CMD_Set_Zoom(int iStreamID,string sZoom_Level,string &sCMD_Resu
   cout << "Need to implement command #917 - Set Zoom" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #261 - Zoom_Level=" << sZoom_Level << endl;
+
+  m_pVLC->SetZoomFactor(sZoom_Level);
+
 }
 
 //<-dceag-c920-b->
