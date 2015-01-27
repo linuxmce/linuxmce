@@ -227,6 +227,7 @@ namespace DCE
   {
     // libvlc_time_t iLength=0;
     string::size_type pos=0;
+    SetPlaying(false);
     libvlc_media_player_stop(m_pMp);
     if (sMediaURL.find("://") == string::npos)
       {
