@@ -197,6 +197,9 @@ namespace DCE
 
     VLC* self = reinterpret_cast<VLC*>(ptr);
 
+    if (!self->m_bIsPlaying)
+      return;  // Don't even come here, if the media player is stopped.
+
     switch(event->type)
       {
       case libvlc_MediaParsedChanged:
@@ -264,8 +267,12 @@ namespace DCE
 
   void VLC::Stop()
   {
-    libvlc_media_player_stop(m_pMp);
+    if (!m_pMp)
+      return;
+
     SetPlaying(false);
+    libvlc_media_player_stop(m_pMp);
+    // libvlc_media_player_release(m_pMp);
   }
 
   void VLC::SetDuration(libvlc_time_t newDuration)

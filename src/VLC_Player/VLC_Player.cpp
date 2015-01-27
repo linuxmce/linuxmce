@@ -376,7 +376,7 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
   if (!m_pVLC->IsPlaying())
     m_pAlarmManager->CancelAlarmByType(1);
 
-  UnmountRemoteDVD();
+  // UnmountRemoteDVD();
 
 }
 
