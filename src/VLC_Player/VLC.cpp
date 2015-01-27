@@ -193,6 +193,31 @@ namespace DCE
 
   }  
 
+  void VLC::UpdateMediaState(const libvlc_event_t* event)
+  {
+    switch (event->u.media_state_changed.new_state)
+      {
+      case libvlc_NothingSpecial:
+	break;
+      case libvlc_Opening:
+	break;
+      case libvlc_Buffering:
+	break;
+      case libvlc_Playing:
+	break;
+      case libvlc_Paused:
+	break;
+      case libvlc_Stopped:
+	break;
+      case libvlc_Ended:
+	m_pVLC_Player->EVENT_Playback_Completed(GetMediaURL(),GetStreamID(),false); // Normal end of playback
+	break;
+      case libvlc_Error:
+	m_pVLC_Player->EVENT_Playback_Completed(GetMediaURL(),GetStreamID(),true); // Something went wrong. 
+	break;
+      }
+  }
+
   void VLC::Media_Callbacks(const libvlc_event_t* event, void* ptr)
   {
 
@@ -208,7 +233,7 @@ namespace DCE
 	self->UpdateNav();
 	break;
       case libvlc_MediaStateChanged:
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC::Media_Callbacks(): MEDIA STATE CHANGED!!");
+	self->UpdateMediaState(event);
 	self->UpdateNav();
 	break;
       case libvlc_MediaPlayerPlaying:
@@ -219,11 +244,25 @@ namespace DCE
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC::Media_Callbacks(): MEDIA VOUT!!");
 	self->UpdateNav();
 	break;
+      case libvlc_MediaPlayerStopped:
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC::Media_Callbacks(): MEDIA STOPPED!!");
+	self->m_pVLC_Player->EVENT_Playback_Completed(self->GetMediaURL(),self->GetStreamID(),false);
+	break;
       }
     
   }
 
-  bool VLC::PlayURL(string sMediaURL, string sMediaPosition, string& sMediaInfo)
+  void VLC::SetMediaURL(string sMediaURL)
+  {
+    m_sMediaURL=sMediaURL;
+  }
+
+  string VLC::GetMediaURL()
+  {
+    return m_sMediaURL;
+  }
+
+  bool VLC::PlayURL(string sMediaURL, int iStreamID, string sMediaPosition, string& sMediaInfo)
   {
     // libvlc_time_t iLength=0;
     string::size_type pos=0;
@@ -241,6 +280,9 @@ namespace DCE
 	return false;
       }
 
+    SetStreamID(iStreamID);
+    SetMediaURL(sMediaURL);
+
     libvlc_media_player_set_media(m_pMp, m);
     
     m_pMediaEventManager=libvlc_media_event_manager(m);
@@ -250,6 +292,7 @@ namespace DCE
     libvlc_event_attach(m_pMediaEventManager,libvlc_MediaStateChanged,Media_Callbacks,this);
     libvlc_event_attach(m_pMediaPlayerEventManager,libvlc_MediaPlayerPlaying,Media_Callbacks,this);
     libvlc_event_attach(m_pMediaPlayerEventManager,libvlc_MediaPlayerVout,Media_Callbacks,this);
+    // libvlc_event_attach(m_pMediaPlayerEventManager,libvlc_MediaPlayerStopped,Media_Callbacks,this);
 
 
     libvlc_media_release(m);
@@ -273,6 +316,7 @@ namespace DCE
       return;
 
     SetPlaying(false);
+    SetMediaURL("");
     libvlc_media_player_stop(m_pMp);
     // libvlc_media_player_release(m_pMp);
   }

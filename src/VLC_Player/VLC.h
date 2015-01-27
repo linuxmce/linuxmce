@@ -57,6 +57,7 @@ namespace DCE
 
     string m_sWindowTitle;
     string m_sMediaType;
+    string m_sMediaURL;
     int m_iMediaID;
 
     VLC(Config* pConfig, DCE::VLC_Player* pVLC_Player);
@@ -64,7 +65,7 @@ namespace DCE
     bool init();
     bool CreateWindow();
     bool Minimize();
-    bool PlayURL(string sMediaURL, string sMediaPosition, string& sMediaInfo);
+    bool PlayURL(string sMediaURL, int iStreamID, string sMediaPosition, string& sMediaInfo);
     void Stop();
     float GetDuration();
     void SetDuration(libvlc_time_t newDuration);
@@ -91,8 +92,11 @@ namespace DCE
     void PreviousChapter();
     static void Media_Callbacks(const libvlc_event_t* event, void* ptr);
     void UpdateNav();
+    void UpdateMediaState(const libvlc_event_t* event);
     void SetStreamID(int iStreamID);
     int GetStreamID();
+    void SetMediaURL(string sMediaURL);
+    string GetMediaURL();
     bool GetScreenShot(int iWidth, int iHeight, string& sCMD_Result);
     void GotoMediaMenu(int iMenu);
     bool hasChapters();

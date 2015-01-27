@@ -325,14 +325,12 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
       sCMD_Result="ERROR";
     }
 
-  m_pVLC->SetStreamID(iStreamID);
-
   if (IsRemoteDVD(sMediaURL))
     {
       MountRemoteDVD(sMediaURL);
     }
 
-  if (m_pVLC->PlayURL(sMediaURL,sMediaPosition,sMediaInfo))
+  if (m_pVLC->PlayURL(sMediaURL,iStreamID,sMediaPosition,sMediaInfo))
     {
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::EVENT_Playback_Started(streamID=%i)",iStreamID);
       EVENT_Playback_Started(sMediaURL,iStreamID,sMediaInfo,m_pVLC->m_sAudioInfo,m_pVLC->m_sVideoInfo);
@@ -1184,6 +1182,9 @@ void VLC_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,stri
   cout << "Need to implement command #412 - Set Media Position" << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+
+  // Actually, I'm gonna think on this, and get back to it.. -tschak
+
 }
 
 //<-dceag-c548-b->
