@@ -106,7 +106,8 @@ namespace DCE
     m_pMp = libvlc_media_player_new_from_media(pInactive_media);
     libvlc_media_release(pInactive_media);
     libvlc_media_player_set_xwindow (m_pMp, m_Window);
-    libvlc_media_player_play(m_pMp);
+    libvlc_audio_output_device_set(m_pMp, "alsa", "plughw:0,3");
+    // libvlc_media_player_play(m_pMp);
     
     if (!Minimize()) 
       {
