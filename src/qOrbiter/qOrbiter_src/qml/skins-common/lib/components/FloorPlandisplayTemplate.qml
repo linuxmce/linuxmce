@@ -119,19 +119,38 @@ Item {
             contentHeight: floorplanimage.sourceSize.height * floorplanimage.scale + 50
             contentWidth: floorplanimage.sourceSize.width * floorplanimage.scale + 50
 
-            Image {
-                objectName: "floorplan_image"
-                id: floorplanimage
-                fillMode: Image.PreserveAspectCrop
-                source: ""
-                anchors.centerIn: parent
-                transformOrigin: Item.Center
-                scale: Math.min((mainRect.height-40)/floorplanimage.sourceSize.height,(mainRect.width-40)/floorplanimage.sourceSize.width)
+            PinchArea {
+                id: pinchArea
+                anchors.fill: parent
+                pinch.dragAxis: Pinch.NoDrag
 
-                Behavior on scale {
-                    PropertyAnimation{
-                        duration: 350
-                        easing.type: Easing.InBounce
+                onPinchStarted: {
+                    imageFlick.interactive = false;
+                }
+                onPinchFinished: {
+                    imageFlick.interactive = true;
+                    imageFlick.returnToBounds()
+                }
+                onPinchUpdated: {
+                    imageFlick.contentX += pinch.previousCenter.x - pinch.center.x;
+                    imageFlick.contentY += pinch.previousCenter.y - pinch.center.y;
+                    setScaleFactor((pinch.scale-pinch.previousScale)*3000)
+                }
+
+                Image {
+                    objectName: "floorplan_image"
+                    id: floorplanimage
+                    fillMode: Image.PreserveAspectCrop
+                    source: ""
+                    anchors.centerIn: parent
+                    transformOrigin: Item.Center
+                    scale: Math.min((mainRect.height-40)/floorplanimage.sourceSize.height,(mainRect.width-40)/floorplanimage.sourceSize.width)
+
+                    Behavior on scale {
+                        PropertyAnimation{
+                            duration: 350
+                            easing.type: Easing.InBounce
+                        }
                     }
                 }
             }
