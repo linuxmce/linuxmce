@@ -740,7 +740,7 @@ void VLC_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,i
   cout << "Parm #60 - Width=" << iWidth << endl;
   cout << "Parm #61 - Height=" << iHeight << endl;
 
-  iData_Size=0;
+  size_t size=0;
 
   if (!m_pVLC)
     {
@@ -749,7 +749,15 @@ void VLC_Player::CMD_Get_Video_Frame(string sDisable_Aspect_Lock,int iStreamID,i
       return;
     }
   
-  m_pVLC->GetScreenShot(iWidth,iHeight,pData,*iData_Size,*sFormat,sCMD_Result);
+  if (!m_pVLC->GetScreenShot(iWidth,iHeight,sCMD_Result))
+    {
+      return;
+    }
+
+  *pData = FileUtils::ReadFileIntoBuffer("/tmp/shot.png",size);
+  *iData_Size = size;
+  FileUtils::DelFile("/tmp/shot.png");
+  return;
 
 }
 
