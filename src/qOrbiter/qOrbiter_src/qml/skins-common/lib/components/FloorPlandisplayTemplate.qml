@@ -115,14 +115,9 @@ Item {
 
         Flickable{
             id: imageFlick
-            anchors{
-                top:parent.top
-                left:parent.left
-                right:parent.right
-                bottom:parent.bottom
-            }
-            contentHeight: floorplanimage.height
-            contentWidth: floorplanimage.width
+            anchors.fill: parent
+            contentHeight: floorplanimage.sourceSize.height * floorplanimage.scale + 50
+            contentWidth: floorplanimage.sourceSize.width * floorplanimage.scale + 50
 
             Image {
                 objectName: "floorplan_image"
@@ -131,7 +126,7 @@ Item {
                 source: ""
                 anchors.centerIn: parent
                 transformOrigin: Item.Center
-                scale: (parent.height-40)/floorplanimage.height > (parent.width-40)/floorplanimage.width ? (parent.height-40)/floorplanimage.height : (parent.width-40)/floorplanimage.width
+                scale: Math.min((mainRect.height-40)/floorplanimage.sourceSize.height,(mainRect.width-40)/floorplanimage.sourceSize.width)
 
                 Behavior on scale {
                     PropertyAnimation{
