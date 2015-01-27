@@ -84,8 +84,8 @@ QtObject{
     //title and other misc windo accents
     property color titletextcolor: "black"
     //button styling
-    property int buttonH:scaleY(15)
-    property int buttonW: scaleY(15)
+    property int buttonH: scaleY(12)
+    property int buttonW: scaleY(12)
 
     property int avoptionbuttonh :scaleY(12)
     property int avoptionbuttonw :scaleY(12)
@@ -110,7 +110,7 @@ QtObject{
 
     //row container styling
     property int rowWidth: orbiterW - 5
-    property int rowH: buttonH + 10
+    property int rowH: buttonHeight + 10
     property color rowbgColor: "transparent"
 
     //Notifications bar
@@ -157,7 +157,7 @@ QtObject{
     }
 
     /* Buttons and their junk */
-    property int buttonHeight:scaleY(4)
+    property int buttonHeight: scaleY(12) // minimum height to be able to hit it with a finger
     property int  buttonWidth: scaleX(12)
     property int buttonLabelSize:scaleY(2)
     property color buttonColor:"darkgreen"

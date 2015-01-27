@@ -3,7 +3,7 @@ import "../../../../../skins-common/qt5/default/components"
 
 Item {
     id:homeNav
-    height:scaleY(15)
+    height:style.buttonHeight
     width: manager.appWidth
     visible:manager.currentScreen==="Screen_1.qml"
     anchors.leftMargin: 3

@@ -288,7 +288,7 @@ Item {
     }
     NavigationRow {
         id: nav_row
-        rowheight: manager.isProfile ? scaleY(8) : scaleY(15)
+        rowheight: style.rowH
         navSource: "../../../../android/phone/qt5/default/components/PhoneNavHome.qml"
         commonButtonVisible: pageLoader.currentScreen != 1
     }
