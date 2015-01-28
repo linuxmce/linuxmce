@@ -1,12 +1,16 @@
 import QtQuick 2.2
 import "../components"
 
-TabletFloorplanLayout{
-    id: telecom
-    Component.onCompleted: {
-        hideInfoPanel();
-        setNavigation("FloorplanNav.qml");
-        floorplan_devices.clearAllSelections()
-    }
+StyledScreen {
+    navigation: "FloorplanNav.qml"
 
+    TabletFloorplanLayout{
+        id: telecom
+        Component.onCompleted: {
+            hideInfoPanel();
+            setNavigation();
+            floorplan_devices.clearAllSelections()
+        }
+
+    }
 }

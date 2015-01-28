@@ -17,32 +17,32 @@ StyledScreen {
         ListElement{
             name:"Lights"
             modelName:"currentRoomLights"
-	    modelIndex: 0
+            modelIndex: 0
             floorplantype:2
         }
         ListElement{
             name:"Media"
             modelName:"currentRoomMedia"
-	    modelIndex: 1
+            modelIndex: 1
             floorplantype:5
         }
         ListElement{
             name:"Climate"
             modelName:"currentRoomClimate"
-	    modelIndex: 2
+            modelIndex: 2
             floorplantype:3
         }
         ListElement{
             name:"Telecom"
             modelName:"currentRoomTelecom"
-	    modelIndex: 3
-            floorplantype:6
+            modelIndex: 3
+            floorplantype:7
         }
         ListElement{
             name:"Security"
             modelName:"currentRoomSecurity"
-	    modelIndex: 4
-            floorplantype:4
+            modelIndex: 4
+            floorplantype:1
         }
     }
 
@@ -73,8 +73,7 @@ StyledScreen {
 		    transformOrigin: Item.TopRight
 		    transform: [Rotation { angle: manager.isProfile ? -90 : 0; }, Translate{ y: manager.isProfile ? scaleY(rowHeight) : 0 } ]
 		    hitArea.onReleased:{
-			manager.setFloorplanType(floorplantype)
-			manager.showfloorplan(floorplantype)
+                manager.showfloorplan(floorplantype)
 		    }
 		}
 	    }
@@ -107,74 +106,6 @@ StyledScreen {
 	}
 
     }
-
-/*
-    NowPlayingButton{
-        id:fs_npButton
-        anchors.top: parent.top
-        anchors.left: manager.isProfile ? parent.horizontalCenter : parent.left
-        anchors.leftMargin: manager.isProfile ? (fs_npButton.width / 2) * -1 : scaleX(2)
-    }
-
-
-    DroidHomeSelector{
-        id:home_selector;
-        anchors.top: manager.isProfile ? fs_npButton.bottom : parent.top
-        anchors.left: manager.isProfile ? stage.left : fs_npButton.right
-        anchors.leftMargin: manager.isProfile ? scaleX(15) : scaleX(1)
-    }
-    ScenarioSelector{
-        id:scenarioPopup
-    }
-
-    HomeOptions {
-        id: advancedrow
-    }
-
-    Item{
-        id:popExit
-        height: scaleY(35)
-        width: scaleX(85)
-        opacity: 0
-
-        anchors.centerIn: parent
-
-        Behavior on opacity{
-
-            PropertyAnimation{
-                duration:500
-            }
-        }
-
-        Timer{
-            id:exitTimer
-            interval: 1250
-            onTriggered: popExit.opacity = 0
-        }
-
-        Rectangle{
-            anchors.fill: parent
-            color: ms.pressed ? androidSystem.greenStandard : androidSystem.redStandard
-        }
-        StyledText{
-            text:"Click Again to exit"
-            font.weight: Font.DemiBold
-            color: "White"
-            width: parent.width
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-            fontSize: scaleY(8)
-            anchors.centerIn: parent
-        }
-
-        MouseArea{
-            id:ms
-            anchors.fill: parent
-            enabled: parent.opacity != 0
-            onReleased: manager.closeOrbiter()
-        }
-
-    }
-*/
 }
 
 
