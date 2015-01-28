@@ -20,6 +20,10 @@ Item{
         processSelectedDevices()
     }
 
+    function toggleCommands() {
+        state= (state == "commandView" ? "floorplanView" : "commandView");
+    }
+
     Keys.onReleased: {
         event.accepted=true
         switch(event.key){

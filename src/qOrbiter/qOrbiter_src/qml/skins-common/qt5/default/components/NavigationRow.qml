@@ -51,13 +51,14 @@ Item{
     Flickable{
         id:commonButtons
         height: parent.height
-        width: manager.appWidth *.30
+        width: btRow.width //manager.appWidth *.30
         anchors.right: parent.right
         visible: true
 
 
-        Row{
-            width: 5*50
+        Row {
+            id: btRow
+            width: childrenRect.width
             height: childrenRect.height
             spacing:scaleX(1)
             anchors.verticalCenter: parent.verticalCenter
@@ -70,8 +71,8 @@ Item{
             StyledButton {
                 id: showFloorplanCommand
                 buttonText: qsTr("Commands")
-                hitArea.onReleased: pageLoader.item.state==="commandView" ?pageLoader.item.state="floorplanView" :pageLoader.item.state="commandView"
-                visible:navSource==="FloorplanNav.qml" &&  pageLoader.item.selectedDevices.count !== 0? true : false
+                hitArea.onReleased: pageLoader.item.floorplan.toggleCommands()
+                visible:navSource==="FloorplanNav.qml" &&  pageLoader.item.floorplan && pageLoader.item.floorplan.selectedDevices.count !== 0? true : false
                 opacity: visible ? 1 : 0
             }
 

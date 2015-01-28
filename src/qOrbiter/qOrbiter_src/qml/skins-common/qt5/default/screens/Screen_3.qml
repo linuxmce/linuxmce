@@ -4,6 +4,7 @@ import org.linuxmce.grids 1.0
 
 StyledScreen {
     navigation: "FloorplanNav.qml"
+    property alias floorplan: mediaFloorplan
 
     TabletFloorplanLayout{
         id: mediaFloorplan

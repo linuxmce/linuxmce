@@ -3,9 +3,10 @@ import "../components"
 
 StyledScreen {
     navigation: "FloorplanNav.qml"
+    property alias floorplan: telecomFloorplan
 
     TabletFloorplanLayout{
-        id: telecom
+        id: telecomFloorplan
         Component.onCompleted: {
             hideInfoPanel();
             setNavigation();

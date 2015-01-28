@@ -4,8 +4,9 @@ import QtQuick.Controls 1.3
 import "../components"
 StyledScreen{
     navigation: "FloorplanNav.qml"
+    property alias floorplan: lightsFloorplan
 
-    TabletFloorplanLayout{
+    TabletFloorplanLayout {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.bottom: manager.isProfile ? buttonRow.top : parent.bottom
@@ -17,7 +18,6 @@ StyledScreen{
         }
 
     }
-
     Item {
         id: buttonRow
         anchors.right: parent.right

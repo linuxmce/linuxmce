@@ -3,9 +3,10 @@ import "../components"
 
 StyledScreen {
     navigation: "FloorplanNav.qml"
+    property alias floorplan: securityFloorplan
 
     TabletFloorplanLayout{
-        id: securityfloorplan
+        id: securityFloorplan
         Component.onCompleted: {
             hideInfoPanel();
             floorplan_devices.clearAllSelections()
