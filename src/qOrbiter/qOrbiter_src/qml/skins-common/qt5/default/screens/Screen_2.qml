@@ -9,8 +9,8 @@ StyledScreen{
     TabletFloorplanLayout {
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.bottom: manager.isProfile ? buttonRow.top : parent.bottom
-        anchors.right: manager.isProfile ? parent.right : buttonRow.right
+        anchors.bottom: /*manager.isProfile ? buttonRow.top : */parent.bottom
+        anchors.right: /*manager.isProfile ?*/ parent.right //: buttonRow.right
         id: lightsFloorplan
         Component.onCompleted: {
             hideInfoPanel();
@@ -18,7 +18,7 @@ StyledScreen{
         }
 
     }
-    Item {
+/*    Item {
         id: buttonRow
         anchors.right: parent.right
         anchors.left: undefined
@@ -82,7 +82,7 @@ StyledScreen{
             }
         }
     }
-
+*/
 }
 
 
