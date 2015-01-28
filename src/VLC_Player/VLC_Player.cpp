@@ -26,6 +26,15 @@ using namespace DCE;
 //<-dceag-d-e->
 
 #include "pluto_main/Define_Button.h"
+#include "../Xine_Player/XineMediaInfo.h"
+
+void * SpawnTimecodeReportingThread(void * Arg)
+{
+  DCE::VLC_Player *pVLC_Player = (DCE::VLC_Player *) Arg;
+  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+  pVLC_Player->TimecodeReportingLoop();
+  return NULL;
+}
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -36,9 +45,14 @@ VLC_Player::VLC_Player(int DeviceID, string ServerAddress,bool bConnectEventHand
 {
   m_config=new VLC::Config();
   m_pVLC=NULL;
+  m_bTimecodeReporting=false;
   m_pAlarmManager=NULL;
   m_VLCMutex.Init(NULL);
   m_iPlaybackSpeed=0;
+
+  m_pNotificationSocket = new XineNotification_SocketListener(string("m_pNotificationSocket"));
+  m_pNotificationSocket->m_bSendOnlySocket = true; // one second
+
 }
 
 //<-dceag-dest-b->
@@ -70,6 +84,21 @@ VLC_Player::~VLC_Player()
       m_pAlarmManager=NULL;
     }
   
+}
+
+bool VLC_Player::Connect(int iPK_DeviceTemplate)
+{
+  if (!Command_Impl::Connect(iPK_DeviceTemplate))
+    return false;
+
+  DeviceData_Base *pDevice = m_pData->GetTopMostDevice();
+  m_sIPofMD = pDevice->m_sIPAddress;
+  int iPort = DATA_Get_Port();
+  LoggerWrapper::GetInstance()->Write(LV_STATUS, "Configured port for time/speed notification is: %i, IP is %s", iPort, m_sIPofMD.c_str());
+  m_pNotificationSocket->StartListening (iPort);
+  EVENT_Playback_Completed("",0,false);  // In case media plugin thought something was playing, let it know that there's not
+
+  return true;
 }
 
 string VLC_Player::MD_DeviceData_get(int iFK_DeviceData)
@@ -178,8 +207,9 @@ void VLC_Player::AlarmCallback(int id, void* param)
       // temporary hack.
       if (m_pVLC->IsPlaying())
       {
-	// m_pVLC->UpdateStatus();
-	// m_pAlarmManager->AddRelativeAlarm(1,this,1,NULL);
+	m_pAlarmManager->CancelAlarmByType(1);
+	m_pVLC->UpdateStatus();
+	m_pAlarmManager->AddRelativeAlarm(1,this,1,NULL);
       }
       else
 	{
@@ -196,6 +226,64 @@ void VLC_Player::AlarmCallback(int id, void* param)
 	{
 	  m_pAlarmManager->CancelAlarmByType(2);
 	}
+    }
+}
+
+void VLC_Player::ReportTimecodeViaIP(int iStreamID, int Speed)
+{  
+  // filling media info structure
+  XineMediaInfo mediaInfo;
+  
+  mediaInfo.m_iSpeed = Speed;
+  mediaInfo.m_iPositionInMilliseconds = (int)m_pVLC->GetTime();
+  mediaInfo.m_iTotalLengthInMilliseconds = (int)m_pVLC->GetCurrentDuration();
+  
+  mediaInfo.m_iStreamID = m_pVLC->GetStreamID();
+  mediaInfo.m_iTitle = m_pVLC->GetCurrentTitle();
+  mediaInfo.m_iChapter = m_pVLC->GetCurrentChapter();
+  mediaInfo.m_sFileName = m_pVLC->GetMediaURL();
+  mediaInfo.m_sMediaType = m_pVLC->GetMediaType();
+  mediaInfo.m_iMediaID = m_pVLC->GetMediaID();
+  
+  string sIPTimeCodeInfo = mediaInfo.ToString();
+  
+  LoggerWrapper::GetInstance()->Write(LV_STATUS,"reporting timecode stream %d speed %d %s", iStreamID, Speed, sIPTimeCodeInfo.c_str() );
+  EVENT_Media_Position_Changed(atoi(mediaInfo.m_sMediaType.c_str()), mediaInfo.m_sFileName, StringUtils::itos(mediaInfo.m_iMediaID), iStreamID, mediaInfo.FormatTotalTime(), mediaInfo.FormatCurrentTime(), Speed);
+  
+  m_pNotificationSocket->SendStringToAll( sIPTimeCodeInfo );
+}
+
+void VLC_Player::StartTimecodeReporting()
+{
+  if (m_bTimecodeReporting)
+    return; // Already running. There is no need to start another one.
+
+  if (pthread_create(&m_timecodeThread, NULL, SpawnTimecodeReportingThread, (void *)this))
+    {
+      // Failed.
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC_PlayeR::StartTimecodeReporting - Failed to spawn timecode thread.");
+      return;
+    }
+  m_bTimecodeReporting=true;
+  usleep(10000);
+  return;
+}
+
+void VLC_Player::StopTimecodeReporting()
+{
+  if (m_bTimecodeReporting && m_timecodeThread)
+    {
+      m_bTimecodeReporting=false;
+      pthread_join(m_timecodeThread,NULL);
+    }
+}
+
+void VLC_Player::TimecodeReportingLoop()
+{
+  while (m_bTimecodeReporting)
+    {
+      ReportTimecodeViaIP(m_pVLC->GetStreamID(),m_iMediaPlaybackSpeed);
+      Sleep(DATA_Get_Time_Code_Report_Frequency()*1000);
     }
 }
 
@@ -334,7 +422,8 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
     {
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::EVENT_Playback_Started(streamID=%i)",iStreamID);
       EVENT_Playback_Started(sMediaURL,iStreamID,sMediaInfo,m_pVLC->m_sAudioInfo,m_pVLC->m_sVideoInfo);
-      m_pAlarmManager->AddRelativeAlarm(1,this,1,NULL);
+      // m_pAlarmManager->AddRelativeAlarm(1,this,1,NULL);
+      m_iPlaybackSpeed=1000;
     }
   else
     {
@@ -370,9 +459,11 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 
   // Preliminary, needs to be amended to close multiple streams
   m_pVLC->Stop();
-  m_iPlaybackSpeed=0;
+  m_iMediaPlaybackSpeed=0;
   if (!m_pVLC->IsPlaying())
     m_pAlarmManager->CancelAlarmByType(1);
+
+  StopTimecodeReporting();
 
   // UnmountRemoteDVD();
 
@@ -407,7 +498,7 @@ void VLC_Player::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Message *pMes
     }
 
   m_pVLC->Pause();
-  m_iPlaybackSpeed=0;
+  m_iMediaPlaybackSpeed=0;
 
 }
 
@@ -441,7 +532,7 @@ void VLC_Player::CMD_Restart_Media(int iStreamID,string &sCMD_Result,Message *pM
     }
 
   m_pVLC->Restart();
-  m_iPlaybackSpeed=1000;
+  m_iMediaPlaybackSpeed=1000;
 }
 
 /**

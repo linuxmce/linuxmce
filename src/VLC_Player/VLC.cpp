@@ -65,7 +65,6 @@ namespace DCE
 
   bool VLC::init()
   {
-    libvlc_media_t* pInactive_media;
     XInitThreads();
     if ((m_pDisplay = XOpenDisplay(getenv("DISPLAY"))) == NULL)
       {
@@ -73,7 +72,7 @@ namespace DCE
 	return false;
       }
 
-    static const char* const args[] = {"--no-video-title-show"};
+    // static const char* const args[] = {"--no-video-title-show"};
 
     // m_pInst = libvlc_new(sizeof args / sizeof *args, args);
     m_pInst = libvlc_new(NULL, NULL);
@@ -102,11 +101,6 @@ namespace DCE
 	return false;
       }
 
-    pInactive_media = libvlc_media_new_path(m_pInst, INACTIVE_VIDEO);
-    m_pMp = libvlc_media_player_new_from_media(pInactive_media);
-    libvlc_media_release(pInactive_media);
-    libvlc_media_player_set_xwindow (m_pMp, m_Window);
-    libvlc_audio_output_device_set(m_pMp, "alsa", "plughw:0,3");
     // libvlc_media_player_play(m_pMp);
     
     if (!Minimize()) 
@@ -204,15 +198,19 @@ namespace DCE
       case libvlc_Buffering:
 	break;
       case libvlc_Playing:
+	m_pVLC_Player->StartTimecodeReporting();
 	break;
       case libvlc_Paused:
 	break;
       case libvlc_Stopped:
+	m_pVLC_Player->StopTimecodeReporting();
 	break;
       case libvlc_Ended:
+	m_pVLC_Player->StopTimecodeReporting();
 	m_pVLC_Player->EVENT_Playback_Completed(GetMediaURL(),GetStreamID(),false); // Normal end of playback
 	break;
       case libvlc_Error:
+	m_pVLC_Player->StopTimecodeReporting();
 	m_pVLC_Player->EVENT_Playback_Completed(GetMediaURL(),GetStreamID(),true); // Something went wrong. 
 	break;
       }
@@ -265,15 +263,24 @@ namespace DCE
   bool VLC::PlayURL(string sMediaURL, int iStreamID, string sMediaPosition, string& sMediaInfo)
   {
     // libvlc_time_t iLength=0;
-    string::size_type pos=0;
-    SetPlaying(false);
-    libvlc_media_player_stop(m_pMp);
+    // string::size_type pos=0;
+    if (m_pMp)
+      {
+	SetPlaying(false);
+	libvlc_media_player_stop(m_pMp);
+	libvlc_media_player_release(m_pMp);
+      }
+
     if (sMediaURL.find("://") == string::npos)
       {
 	sMediaURL = "file://" + sMediaURL;
       }
     
     libvlc_media_t *m = libvlc_media_new_location (m_pInst, sMediaURL.c_str());
+    m_pMp = libvlc_media_player_new_from_media(m);
+    libvlc_media_player_set_xwindow (m_pMp, m_Window);
+    libvlc_audio_output_device_set(m_pMp, "alsa", "plughw:0,3");
+
     if (!m)
       {
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC::PlayURL() libvlc_media_new_location() returned NULL.");
@@ -331,6 +338,13 @@ namespace DCE
     return m_fDuration;
   }
 
+  int64_t VLC::GetCurrentDuration()
+  {
+    if (!m_pMp)
+      return -1;
+    return libvlc_media_player_get_length(m_pMp);
+  }
+
   float VLC::GetPosition()
   {
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"GETPOSITION %f",m_fPosition);
@@ -356,13 +370,7 @@ namespace DCE
 
   void VLC::UpdateStatus()
   {
-#ifdef TRANSPORT_DEBUG
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TIME: %d",libvlc_media_player_get_time(m_pMp));
-    m_fPosition = libvlc_media_player_get_time(m_pMp) / 1000;
-    m_fDuration = libvlc_media_player_get_length(m_pMp) / 1000;
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"POSITION: %f",m_fPosition);
-    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"DURATION: %f",m_fDuration);
-#endif
+    m_pVLC_Player->ReportTimecodeViaIP(GetStreamID(),m_pVLC_Player->m_iPlaybackSpeed);
   }
 
   void VLC::UpdateNav()
@@ -500,7 +508,7 @@ namespace DCE
 
   bool VLC::GetScreenShot(int iWidth, int iHeight, string& sCMD_Result)
   {
-    size_t size;
+    // size_t size;
     if (libvlc_video_take_snapshot(m_pMp,0,"/tmp/shot.png",iWidth,iHeight)==-1)
       {
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC::GetScreenShot(): Could not take snapshot.");
@@ -525,6 +533,13 @@ namespace DCE
       return false;
 
     return libvlc_media_player_get_chapter(m_pMp);
+  }
+
+  int VLC::GetCurrentTitle()
+  {
+    if (!m_pMp)
+      return -1;
+    return libvlc_media_player_get_title(m_pMp);
   }
 
   void VLC::SetAudioTrack(int iAudioTrack)
@@ -567,11 +582,11 @@ namespace DCE
 
   void VLC::SetZoomFactor(string sZoomFactor)
   {
-    float fZoomFactor=0.0;
+    // float fZoomFactor=0.0;
     if (!m_pMp)
       return;
-    if (sZoomFactor == "auto")
-      fZoomFactor=0.0;
+    // if (sZoomFactor == "auto")
+    //   fZoomFactor=0.0;
     else
       {
 	libvlc_video_set_scale(m_pMp,atof(sZoomFactor.c_str()));
@@ -582,6 +597,16 @@ namespace DCE
   {
     m_sMediaType=sMediaType;
     m_iMediaID=iMediaID;
+  }
+
+  string VLC::GetMediaType()
+  {
+    return m_sMediaType;
+  }
+
+  int VLC::GetMediaID()
+  {
+    return m_iMediaID;
   }
 
 }

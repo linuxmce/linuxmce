@@ -68,6 +68,7 @@ namespace DCE
     bool PlayURL(string sMediaURL, int iStreamID, string sMediaPosition, string& sMediaInfo);
     void Stop();
     float GetDuration();
+    int64_t GetCurrentDuration();
     void SetDuration(libvlc_time_t newDuration);
     float GetPosition();
     void SetPosition(float fPosition);
@@ -101,6 +102,7 @@ namespace DCE
     void GotoMediaMenu(int iMenu);
     bool hasChapters();
     int GetCurrentChapter();
+    int GetCurrentTitle();
     void SetAudioTrack(int iAudioTrack);
     int GetAudioTrack();
     void SetSubtitle(int iSubtitle);
@@ -108,7 +110,8 @@ namespace DCE
     void SetAspectRatio(string sAspectRatio);
     void SetZoomFactor(string sZoomFactor);
     void SetMediaType(string sMediaType, int iMediaID);
-
+    string GetMediaType();
+    int GetMediaID();
   };
 
 }

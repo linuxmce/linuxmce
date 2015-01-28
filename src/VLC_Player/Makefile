@@ -27,7 +27,8 @@ XTRALDLIBS = -lmysqlclient_r -lvlc -lX11 -lXmu
 Gen_Dev_Files +=
 sources += VLC.cpp \
 	../utilities/linux/window_manager/WMController/WMController.cpp \
-	../utilities/linux/window_manager/wmctrl/wmctrl.cpp
+	../utilities/linux/window_manager/wmctrl/wmctrl.cpp \
+	../Xine_Player/XineMediaInfo.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
