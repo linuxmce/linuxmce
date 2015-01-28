@@ -9945,7 +9945,8 @@ void Orbiter::UpdateTimeCodeLoop()
 			(
 				pDevice->m_dwPK_DeviceTemplate==DEVICETEMPLATE_Xine_Player_CONST ||
 				pDevice->m_dwPK_DeviceTemplate==DEVICETEMPLATE_MPlayer_Player_CONST ||
-				pDevice->m_dwPK_DeviceTemplate==DEVICETEMPLATE_OMX_Player_CONST
+				pDevice->m_dwPK_DeviceTemplate==DEVICETEMPLATE_OMX_Player_CONST ||
+				pDevice->m_dwPK_DeviceTemplate==DEVICETEMPLATE_VLC_Player_CONST
 			)
 		)
 		{
