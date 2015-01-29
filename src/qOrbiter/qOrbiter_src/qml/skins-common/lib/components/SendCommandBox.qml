@@ -98,6 +98,14 @@ Item{
         }
     }
 
+    function containsCmd(cmdNo) {
+        for(var i = 0; i < cmdView.model.count; i++) {
+            if (cmdView.model.get(i).command_number == cmdNo)
+                return true
+        }
+        return false;
+    }
+
     function getCmdDelegate(cmdNo) {
         if (cmdNo == "280")
             return setHeatCoolDelegate;
@@ -105,6 +113,10 @@ Item{
             return setTemperatureDelegate;
         else if (cmdNo == "279")
             return setFanDelegate;
+        else if (cmdNo == "192" && containsCmd("193"))
+            return onOffDelegate;
+        else if (cmdNo == "193" && containsCmd("192"))
+            return null;
         else
             return defaultCmdDelegate;
     }
@@ -116,6 +128,42 @@ Item{
         commandObj.count= params.length;
         commandObj.to = floorplan_devices.selectedDevices
         manager.sendDceMessage(commandObj)
+    }
+
+    Component {
+        id: onOffDelegate
+
+        Rectangle {
+            id:cmdEntry
+            height: style.buttonHeight+6
+            width: cmdView.width
+            color: "black"
+            border.color: "white"
+            border.width: 1
+            radius:5
+            StyledText {
+                anchors.left: parent.left
+                text: "On/Off"
+            }
+            Row {
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: childrenRect.width
+                spacing: 10
+                StyledButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    label: "On"
+                    onActivated: sendCommand(cmdNumber, []);
+                }
+                StyledButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    label: "Off"
+                    onActivated: sendCommand("193", []);
+                }
+            }
+
+        }
     }
 
     Component {
