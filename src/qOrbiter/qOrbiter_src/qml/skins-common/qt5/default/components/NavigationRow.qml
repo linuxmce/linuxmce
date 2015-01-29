@@ -65,7 +65,7 @@ Item{
             StyledButton{
                 buttonText:"Advanced"
                 width: scaleX(14)
-                opacity: manager.currentScreen === "Screen_1.qml" || manager.currentScreen === "Screen_X.qml" ? 1 : 0
+                visible: manager.currentScreen === "Screen_1.qml" || manager.currentScreen === "Screen_X.qml"
                 onActivated: manager.setCurrentScreen("Screen_44.qml")
             }
             StyledButton {
