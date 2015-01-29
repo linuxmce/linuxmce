@@ -101,33 +101,127 @@ Item{
     function getCmdDelegate(cmdNo) {
         if (cmdNo == "280")
             return setHeatCoolDelegate;
+        else if (cmdNo == "278")
+            return setTemperatureDelegate;
+        else if (cmdNo == "279")
+            return setFanDelegate;
         else
             return defaultCmdDelegate;
+    }
+
+    function sendCommand(cmdNo, params) {
+        var commandObj = {};
+        commandObj.command = cmdNo
+        commandObj.params = params;
+        commandObj.count= params.length;
+        commandObj.to = floorplan_devices.selectedDevices
+        manager.sendDceMessage(commandObj)
+    }
+
+    Component {
+        id: setFanDelegate
+
+        Rectangle {
+            id:cmdEntry
+            height: style.buttonHeight+6
+            width: cmdView.width
+            color: "black"
+            border.color: "white"
+            border.width: 1
+            radius:5
+            function sendFanCmd(param){
+                sendCommand(cmdNumber, [{'paramno': 5, 'val': param }]);
+            }
+            StyledText {
+                anchors.left: parent.left
+                text: cmdName
+            }
+            Row {
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: childrenRect.width
+                spacing: 10
+                StyledButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    label: "Auto"
+                    onActivated: sendTempCmd("0");
+                }
+                StyledButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    label: "On"
+                    onActivated: sendTempCmd("1");
+                }
+            }
+
+        }
+    }
+
+    Component {
+        id: setTemperatureDelegate
+
+        Rectangle {
+            id:cmdEntry
+            height: style.buttonHeight+6
+            width: cmdView.width
+            color: "black"
+            border.color: "white"
+            border.width: 1
+            radius:5
+            function sendTempCmd(param){
+                sendCommand(cmdNumber, [{'paramno': 5, 'val': param }]);
+            }
+            StyledText {
+                anchors.left: parent.left
+                text: cmdName
+            }
+            Row {
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: childrenRect.width
+                spacing: 10
+                StyledButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    label: "-2"
+                    onActivated: sendTempCmd("-2");
+                }
+                StyledButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    label: "-1"
+                    onActivated: sendTempCmd("-1");
+                }
+                StyledButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    label: "+1"
+                    onActivated: sendTempCmd("+1");
+                }
+                StyledButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    label: "+2"
+                    onActivated: sendTempCmd("+2");
+                }
+            }
+
+        }
     }
 
     Component {
         id: setHeatCoolDelegate
         Rectangle {
             id:cmdEntry
-            height: 75
+            height: style.buttonHeight+6
             width: cmdView.width
             color: "black"
             border.color: "white"
             border.width: 1
             radius:5
             function sendCmdHeatCool(param){
-                var commandObj = {};
-                commandObj.command = parent.command_number
-                var tParams = new Array
-                var tpObj = {}
-                tpObj.paramno=8
-                tpObj.val=param
-                tParams.push(tpObj)
-                commandObj.params = tParams;
-                commandObj.count= 1
-
-                commandObj.to = floorplan_devices.selectedDevices
-                manager.sendDceMessage(commandObj)
+                sendCommand(cmdNumber, [{'paramno': 8, 'val': param }]);
+            }
+            StyledText {
+                anchors.left: parent.left
+                text: cmdName
             }
             Row {
                 anchors.top: parent.top
@@ -158,7 +252,7 @@ Item{
         id: defaultCmdDelegate
         Rectangle{
                     id:cmdEntry
-                    height: 75
+                    height: style.buttonHeight+6
                     width: cmdView.width
                     state:"preselect"
                     color: "black"
@@ -274,8 +368,6 @@ Item{
                                     if(CommandParameter==="76"){
                                         controls_loader.source = "Slider.qml"
                                     }
-                                } else if(Command==="278") { // Set Temperature
-                                    // controls_loader.source = "NumberWheel?"
                                 } else if(Command==="279") { // Set Fan
                                     // controls_loader.source = "SlideOnOff?"
                                 }
