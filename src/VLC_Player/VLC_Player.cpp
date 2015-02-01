@@ -1257,6 +1257,21 @@ void VLC_Player::CMD_Report_Playback_Position(int iStreamID,string *sText,string
   cout << "Parm #9 - Text=" << sText << endl;
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
+
+  if (!m_pVLC)
+    return;
+
+  Position* pPosition = new Position(m_pVLC->GetCurrentTitle(),
+				     m_pVLC->GetCurrentChapter(),
+				     m_pVLC->GetTime(),
+				     m_pVLC->GetSubtitle(),
+				     m_pVLC->GetAudioTrack(),
+				     m_pVLC->GetCurrentDuration());
+
+  *sMediaPosition = pPosition->toString();
+
+  delete pPosition;
+
 }
 
 //<-dceag-c412-b->
