@@ -112,6 +112,8 @@ namespace DCE
     void SetMediaType(string sMediaType, int iMediaID);
     string GetMediaType();
     int GetMediaID();
+    void SetChapter(int iChapter);
+    void SetTitle(int iTitle);
   };
 
 }

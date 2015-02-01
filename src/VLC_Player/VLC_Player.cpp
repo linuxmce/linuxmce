@@ -1275,7 +1275,27 @@ void VLC_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,stri
   cout << "Parm #41 - StreamID=" << iStreamID << endl;
   cout << "Parm #42 - MediaPosition=" << sMediaPosition << endl;
 
-  // Actually, I'm gonna think on this, and get back to it.. -tschak
+  if (sMediaPosition.empty())
+    return;
+
+  if (!m_pVLC)
+    return;
+
+  Position* pPosition = new Position(sMediaPosition);
+
+  if (pPosition->hasOnlyPos())
+    {
+      // We only got a POS: indicator, just jump to position.
+      m_pVLC->SetTime(pPosition->getPosition());
+    }
+  else
+    {
+      // We are changing more than position, re-issue a play.
+      // If we are streaming, we should re-do the CMD_Start_Streaming here (FIXME)
+      CMD_Play_Media(0,m_pVLC->GetStreamID(),sMediaPosition,m_pVLC->GetMediaURL(),sCMD_Result,pMessage);
+    }
+
+  delete pPosition;
 
 }
 

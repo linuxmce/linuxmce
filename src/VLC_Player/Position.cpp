@@ -206,3 +206,12 @@ string Position::toString()
     }
   return sPosition;
 }
+
+bool Position::hasOnlyPos()
+{
+  return (getTitle()==-1 &&
+	  getChapter()==-1 &&
+	  getPosition()>-1 &&
+	  getSubtitle()==-1 &&
+	  getAudio()==-1);
+}

@@ -47,6 +47,8 @@ namespace DCE
     void ParseString(string sFromString);
     string toString();
 
+    bool hasOnlyPos();
+
   };
 
 }

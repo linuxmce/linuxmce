@@ -22,6 +22,7 @@
 #include <X11/keysym.h>
 
 #include "VLC_Player.h"
+#include "Position.h"
 
 // #define INACTIVE_VIDEO "/home/public/data/videos/rejected.dvd"
 #define INACTIVE_VIDEO "/usr/pluto/share/black.mpeg"
@@ -314,6 +315,30 @@ namespace DCE
       }
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"media player is seekable? %d",libvlc_media_player_is_seekable(m_pMp));
     SetPlaying(true);
+
+    // Parse Media Position, if available, and set state.
+    if (!sMediaPosition.empty())
+      {
+	Position* pPosition = new Position(sMediaPosition);
+	if (pPosition->getTitle()!=-1)
+	  {
+	    SetTitle(pPosition->getTitle());
+	  }
+	if (pPosition->getChapter()!=-1)
+	  {
+	    SetChapter(pPosition->getChapter());
+	  }
+	if (pPosition->getSubtitle()!=-1)
+	  {
+	    SetSubtitle(pPosition->getSubtitle());
+	  }
+	if (pPosition->getAudio()!=-1)
+	  {
+	    SetAudioTrack(pPosition->getAudio());
+	  }
+	delete pPosition;
+      }
+
     return true;
   }
 
@@ -607,6 +632,20 @@ namespace DCE
   int VLC::GetMediaID()
   {
     return m_iMediaID;
+  }
+
+  void VLC::SetChapter(int iChapter)
+  {
+    if (!m_pMp)
+      return;
+    libvlc_media_player_set_chapter(m_pMp,iChapter);
+  }
+
+  void VLC::SetTitle(int iTitle)
+  {
+    if (!m_pMp)
+      return;
+    libvlc_media_player_set_title(m_pMp,iTitle);
   }
 
 }
