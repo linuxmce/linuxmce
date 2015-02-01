@@ -27,6 +27,7 @@ using namespace DCE;
 
 #include "pluto_main/Define_Button.h"
 #include "../Xine_Player/XineMediaInfo.h"
+#include "Position.h"
 
 void * SpawnTimecodeReportingThread(void * Arg)
 {
@@ -149,7 +150,7 @@ bool VLC_Player::GetConfig()
       LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not initialize VLC. Bailing.");
       return false;
     }
-  
+
   m_pAlarmManager=new AlarmManager();
   m_pAlarmManager->Start(1); // Change this to more workers?
 
@@ -234,7 +235,7 @@ void VLC_Player::ReportTimecodeViaIP(int iStreamID, int Speed)
   // filling media info structure
   XineMediaInfo mediaInfo;
   
-  mediaInfo.m_iSpeed = Speed;
+  mediaInfo.m_iSpeed = m_iPlaybackSpeed;
   mediaInfo.m_iPositionInMilliseconds = (int)m_pVLC->GetTime();
   mediaInfo.m_iTotalLengthInMilliseconds = (int)m_pVLC->GetCurrentDuration();
   
