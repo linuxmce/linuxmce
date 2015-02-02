@@ -18,7 +18,7 @@ using namespace DCE;
 
 Position::Position()
 {
-  m_iTitle=m_iChapter=m_iPos=m_iSubtitle=m_iAudio=m_iTotal=-1;
+  m_iTitle=m_iChapter=m_iPos=m_iSubtitle=m_iAudio=m_iTotal=0;
 }
 
 Position::Position(int iTitle, int iChapter, int iPos, int iSubtitle, int iAudio, int iTotal)
@@ -36,16 +36,16 @@ Position::Position(int iTitle, int iChapter)
 {
   m_iTitle=iTitle;
   m_iChapter=iChapter;
-  m_iPos=-1;
-  m_iSubtitle=-1;
-  m_iAudio=-1;
-  m_iTotal=-1;
+  m_iPos=0;
+  m_iSubtitle=0;
+  m_iAudio=0;
+  m_iTotal=0;
 
 }
 
 Position::Position(string sFromString)
 {
-  m_iTitle=m_iChapter=m_iPos=m_iSubtitle=m_iAudio=m_iTotal=-1;
+  m_iTitle=m_iChapter=m_iPos=m_iSubtitle=m_iAudio=m_iTotal=0;
   ParseString(sFromString);
 }
 
@@ -180,27 +180,27 @@ void Position::ParseString(string sFromString)
 string Position::toString()
 {
   string sPosition="";
-  if (getTitle()!=-1)
+  if (getTitle()!=0)
     {
       sPosition += " TITLE:" + StringUtils::itos(getTitle());
     }
-  if (getChapter()!=-1)
+  if (getChapter()!=0)
     {
       sPosition += " CHAPTER:" + StringUtils::itos(getChapter());
     }
-  if (getPosition()!=-1)
+  if (getPosition()!=0)
     {
       sPosition += " POS:" + StringUtils::itos(getPosition());
     }
-  if (getSubtitle()!=-1)
+  if (getSubtitle()!=0)
     {
       sPosition += " SUBTITLE:" + StringUtils::itos(getSubtitle());
     }
-  if (getAudio()!=-1)
+  if (getAudio()!=0)
     {
       sPosition += " AUDIO:" + StringUtils::itos(getAudio());
     }
-  if (getTotal()!=-1)
+  if (getTotal()!=0)
     {
       sPosition += " TOTAL:"+StringUtils::itos(getTotal());
     }
@@ -209,9 +209,9 @@ string Position::toString()
 
 bool Position::hasOnlyPos()
 {
-  return (getTitle()==-1 &&
-	  getChapter()==-1 &&
-	  getPosition()>-1 &&
-	  getSubtitle()==-1 &&
-	  getAudio()==-1);
+  return (getTitle()==0 &&
+	  getChapter()==0 &&
+	  getPosition()>0 &&
+	  getSubtitle()==0 &&
+	  getAudio()==0);
 }

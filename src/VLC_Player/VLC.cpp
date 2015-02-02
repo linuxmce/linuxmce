@@ -320,19 +320,23 @@ namespace DCE
     if (!sMediaPosition.empty())
       {
 	Position* pPosition = new Position(sMediaPosition);
-	if (pPosition->getTitle()!=-1)
+	if (pPosition->getTitle()!=0)
 	  {
 	    SetTitle(pPosition->getTitle());
 	  }
-	if (pPosition->getChapter()!=-1)
+	if (pPosition->getChapter()!=0)
 	  {
 	    SetChapter(pPosition->getChapter());
 	  }
-	if (pPosition->getSubtitle()!=-1)
+	if (pPosition->getPosition()!=0)
+	  {
+	    SetTime(pPosition->getPosition());
+	  }
+	if (pPosition->getSubtitle()!=0)
 	  {
 	    SetSubtitle(pPosition->getSubtitle());
 	  }
-	if (pPosition->getAudio()!=-1)
+	if (pPosition->getAudio()!=0)
 	  {
 	    SetAudioTrack(pPosition->getAudio());
 	  }
@@ -610,12 +614,22 @@ namespace DCE
     // float fZoomFactor=0.0;
     if (!m_pMp)
       return;
-    // if (sZoomFactor == "auto")
-    //   fZoomFactor=0.0;
+    if (sZoomFactor[0] == '+')
+      {
+	sZoomFactor=sZoomFactor.substr(1);
+	libvlc_video_set_scale(m_pMp,libvlc_video_get_scale(m_pMp)+(atof(sZoomFactor.c_str())) / 100.00);
+      }
+    else if (sZoomFactor[0]=='-')
+      {
+	sZoomFactor=sZoomFactor.substr(1);
+	libvlc_video_set_scale(m_pMp,libvlc_video_get_scale(m_pMp)-(atof(sZoomFactor.c_str())) / 100.00);
+      }
     else
       {
-	libvlc_video_set_scale(m_pMp,atof(sZoomFactor.c_str()));
+	libvlc_video_set_scale(m_pMp,atof(sZoomFactor.c_str()) / 100.00);
       }
+    cout << "New scale factor is: " << libvlc_video_get_scale(m_pMp) << endl;
+
   }
 
   void VLC::SetMediaType(string sMediaType, int iMediaID)

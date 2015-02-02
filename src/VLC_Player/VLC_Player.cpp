@@ -458,6 +458,19 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
       return;
     }
 
+  m_pVLC->Pause();
+  
+  Position pPosition = Position(m_pVLC->GetCurrentTitle(),
+				m_pVLC->GetCurrentChapter(),
+				m_pVLC->GetTime(),
+				m_pVLC->GetSubtitle(),
+				m_pVLC->GetAudioTrack(),
+				m_pVLC->GetCurrentDuration());
+  
+  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Stop Position::toString(%s)",pPosition.toString().c_str());
+
+  *sMediaPosition=pPosition.toString();
+
   // Preliminary, needs to be amended to close multiple streams
   m_pVLC->Stop();
   m_iMediaPlaybackSpeed=0;
@@ -1261,16 +1274,14 @@ void VLC_Player::CMD_Report_Playback_Position(int iStreamID,string *sText,string
   if (!m_pVLC)
     return;
 
-  Position* pPosition = new Position(m_pVLC->GetCurrentTitle(),
-				     m_pVLC->GetCurrentChapter(),
-				     m_pVLC->GetTime(),
-				     m_pVLC->GetSubtitle(),
-				     m_pVLC->GetAudioTrack(),
-				     m_pVLC->GetCurrentDuration());
-
-  *sMediaPosition = pPosition->toString();
-
-  delete pPosition;
+  Position pPosition = Position(m_pVLC->GetCurrentTitle(),
+				m_pVLC->GetCurrentChapter(),
+				m_pVLC->GetTime(),
+				m_pVLC->GetSubtitle(),
+				m_pVLC->GetAudioTrack(),
+				m_pVLC->GetCurrentDuration());
+  
+  *sMediaPosition = pPosition.toString();
 
 }
 
