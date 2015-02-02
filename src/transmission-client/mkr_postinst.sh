@@ -11,7 +11,7 @@
 #       integrated into lmce, pakcaged, installation common to lmce
 
 transmissionSettings="/etc/transmission-daemon/settings.json"
-apachesettings="/etc/apache2/sites-available/LinuxMCE-ssl"
+apachesettings="/etc/apache2/sites-available/LinuxMCE-ssl.conf"
 
 addline()
 {
