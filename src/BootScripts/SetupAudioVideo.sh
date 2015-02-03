@@ -46,7 +46,7 @@ case "$PK_Distro" in
 		FBWIDTH=$(for arg in $(cat /proc/cmdline); do echo $arg |grep "fbwidth" | cut -d '=' -f 2; done)
 		FBHEIGHT=$(for arg in $(cat /proc/cmdline); do echo $arg |grep "fbheight" | cut -d '=' -f 2; done)
 
-		Video_settings = GetDeviceData "$PK_Device" "$DEVICEDATA_Video_settings"
+		Video_settings=$(GetDeviceData "$PK_Device" "$DEVICEDATA_Video_settings")
 		if [[ "$Video_settings" != "$FBWIDTH $FBHEIGHT/60" ]]; then
 			SetDeviceData "$PK_Device" "$DEVICEDATA_Video_settings" "$FBWIDTH $FBHEIGHT/60"
 
