@@ -177,6 +177,7 @@ bool UpdateEntArea::Connect(int PK_Installation,string host, string user, string
 	}
 	else
 		m_dwPK_Device_DCERouter=vectRow_Device[0]->PK_Device_get();
+	LoggerWrapper::GetInstance()->Write( LV_STATUS, "Connect/setup ok" );
 	return true;
 }
 

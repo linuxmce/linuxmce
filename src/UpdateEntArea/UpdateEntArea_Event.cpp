@@ -570,6 +570,9 @@ Row_Criteria *UpdateEntArea::SetWatchingMediaCriteria(Row_EventHandler *pRow_Eve
 		StringUtils::itos(EVENTPARAMETER_PK_Room_CONST),operatorEquals,
 		StringUtils::itos(pRow_EventHandler->TemplateParm1_get()));
 
+	pCriteriaParm = p_criteriaParmNesting_Top->new_CriteriaParm(CRITERIAPARMLIST_Time_of_day_CONST,
+	        "",operatorEquals, "NIGHT");
+
 	if( p_criteriaParmNesting_Top->Commit(NULL) )  // Returns false if the user made any changes
 	{
 		if( !pRow_Criteria )
