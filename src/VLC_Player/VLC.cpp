@@ -521,7 +521,8 @@ namespace DCE
     if (m_pMp)
       {
 	libvlc_media_player_set_title(m_pMp,0);
-	libvlc_media_player_set_chapter(m_pMp,iMenu);
+	// This is broken until the new API is finished.
+	//	libvlc_media_player_set_chapter(m_pMp,iMenu);
       }
   }
 
