@@ -56,6 +56,8 @@ class FloorplanDevice : public QObject
         YRole = Qt::UserRole+8,
         StatusRole = Qt::UserRole+9,
         CommandRole= Qt::UserRole+10,
+        ColorRole = Qt::UserRole+11,
+        TextRole = Qt::UserRole+12,
         ParamRole= Qt::EditRole+11,
         SelectedRole= Qt::EditRole+12
     };
@@ -121,6 +123,10 @@ public:
      */
     inline bool getStatus() const {return status;}
 
+    inline int getColor() const {return m_iColor;}
+    void setColor(int color) { m_iColor = color; }
+    inline QString getText() const {return m_sText;}
+    void setText(QString text) { m_sText = text; }
 
 
     QString mQS_name;                       //device name
@@ -140,6 +146,9 @@ public:
 
     QVariantMap deviceCommands;
     QVariantList commandParams;
+
+    int m_iColor;   // color to use in icon
+    QString m_sText;   // text to display next to icon
 
 signals:
     void statusChanged();

@@ -36,7 +36,6 @@ QVariant FloorPlanModel::data(const QModelIndex &index, int role) const
     return m_list.at(index.row())->data(role);
 }
 
-
 void FloorPlanModel::appendRow( FloorplanDevice *item)
 {
     appendRows(QList<FloorplanDevice*>() << new FloorplanDevice(item->id(), item->deviceNum(), item->deviceType(), item->floorplanType(), item->pagePosition(), this));
@@ -439,3 +438,34 @@ int FloorPlanModel::columnCount(const QModelIndex &parent) const
 
 }
 */
+
+void FloorPlanModel::updateDeviceData()
+{
+    foreach(FloorplanDevice* item, m_list) {
+
+        string sResult;
+        uiRef->getDeviceState(item->deviceNum(), &sResult);
+        item->setText(QString(sResult.c_str()));
+    }
+}
+
+int FloorPlanModel::getColor(int device) const
+{
+    FloorplanDevice *d = find(device);
+    if(d){
+        return d->getColor();
+    } else {
+        return 0;
+    }
+}
+
+QString FloorPlanModel::getText(int device) const
+{
+    FloorplanDevice *d = find(device);
+    if(d){
+        return d->getText();
+    } else {
+        return QString();
+    }
+}
+

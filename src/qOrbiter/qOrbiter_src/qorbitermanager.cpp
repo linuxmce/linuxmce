@@ -2384,7 +2384,13 @@ void qorbiterManager::setFloorPlanCommand(QVariantMap t)
     }
 }
 
-
+void qorbiterManager::getDeviceState(int PK_Device, string* data)
+{
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::getDeviceState");
+    CMD_Get_Device_State getDeviceState(iPK_Device, iPK_Device_GeneralInfoPlugin, PK_Device, data);
+    sendDceCommand(getDeviceState);
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::getDeviceState done");
+}
 
 
 void qorbiterManager::updateImageChanged(QImage img)

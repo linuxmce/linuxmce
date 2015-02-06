@@ -12,7 +12,7 @@ FloorplanDevice::FloorplanDevice(QString name, int deviceNo, int floorplan_devic
     setCurrentY(0);
    setStatus(false);
     setupFloorplanPositions();
-
+    setText("There is text");
 
 }
 
@@ -29,6 +29,8 @@ QHash<int, QByteArray> FloorplanDevice::roleNames() const
     names[XRole]= "x";
     names[YRole]= "y";
     names[CommandRole]="commandlist";
+    names[ColorRole]="color";
+    names[TextRole]="text";
     names[ParamRole]="paramlist";
     names[SelectedRole]="selected";
     return names;
@@ -60,6 +62,10 @@ QVariant FloorplanDevice::data(int role) const
         return getParams();
     case SelectedRole:
         return getStatus();
+    case ColorRole:
+        return getColor();
+    case TextRole:
+        return getText();
     default:
         return QVariant();
     }

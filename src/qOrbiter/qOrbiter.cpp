@@ -2334,11 +2334,11 @@ void qOrbiter::beginSetup()
 #endif
 }
 
-void qOrbiter::sendDCECommand(PreformedCommand cmd) {
+void qOrbiter::sendDCECommand(PreformedCommand& cmd) {
     SendCommand(cmd);
 }
 
-void qOrbiter::sendDCECommandResponse(PreformedCommand cmd, string* p_sResponse) {
+void qOrbiter::sendDCECommandResponse(PreformedCommand& cmd, string* p_sResponse) {
     SendCommand(cmd, p_sResponse);
 }
 

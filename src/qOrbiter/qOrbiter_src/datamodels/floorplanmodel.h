@@ -168,6 +168,10 @@ QVariantMap getDeviceCommands(int d);
 
 QVariantList getCommandParams(int device);
 
+    void updateDeviceData();
+    int getColor(int device) const;
+    QString getText(int device) const;
+
 private:
     FloorplanDevice* m_prototype;
     QList<FloorplanDevice*> m_list;
