@@ -18,6 +18,8 @@ DD_DEVICETEMPLATE_GenericPC_as_MD=28
 DD_DEVICETEMPLATE_GenericPC_as_qMD=2277
 DD_DEVICETEMPLATE_RPi_B_as_MD=2216
 DD_DEVICETEMPLATE_RPi_B_as_qMD=2281
+DD_DEVICETEMPLATE_rpib2_as_MD=XXXX
+DD_DEVICETEMPLATE_rpib2_as_qMD=XXXX
 
 
 # Source fuction library
@@ -251,17 +253,20 @@ start() {
 
 	StartService "Setting SSH Keys" "/usr/pluto/bin/SSH_Keys.sh" "&"
 	StartService "Setting Coredump Location" "/usr/pluto/bin/corefile.sh" "&"
-	StartService "Creating Firewire 2 Video4Linux Pipes" "/usr/pluto/bin/Firewire2Video4Linux.sh" "&"
-	StartService "Configuring Pluto Storage Devices" "/usr/pluto/bin/StorageDevices_Setup.sh" "&"
 	StartService "Detecting Timezone" "/usr/pluto/bin/Timezone_Detect.sh" "&"
+	StartService "Enable Wake-on-LAN" "/usr/pluto/bin/enable_wol.sh" "&"
+	StartService "Reporting Machine Status" "/usr/pluto/bin/Report_Machine_Status.sh" "&"
+
+	StartService "Configuring Pluto Storage Devices" "/usr/pluto/bin/StorageDevices_Setup.sh" "&"
 	StartService "Starting Status Radar" "/usr/pluto/bin/StorageDevices_StatusRadar.sh" "&"
 	StartService "Starting Samba Radar" "/usr/pluto/bin/StorageDevices_SambaRadar.sh" "&"
 	StartService "Starting NFS Radar" "/usr/pluto/bin/StorageDevices_NFSRadar.sh" "&"
-	StartService "Starting Gamepad Radar" "/usr/pluto/bin/Gamepad_Detect.sh" "&"
-	StartService "PVR-250 tuner restore" "/usr/pluto/bin/CaptureCards_BootConfig_PVR-250.sh" "&"
-	StartService "Enable Wake-on-LAN" "/usr/pluto/bin/enable_wol.sh" "&"
 
-	StartService "Reporting Machine Status" "/usr/pluto/bin/Report_Machine_Status.sh" "&"
+	StartService "Starting Gamepad Radar" "/usr/pluto/bin/Gamepad_Detect.sh" "&"
+
+	# Disable here, but turn into a start-up script for the individual devices.
+	#StartService "Creating Firewire 2 Video4Linux Pipes" "/usr/pluto/bin/Firewire2Video4Linux.sh" "&"
+	#StartService "PVR-250 tuner restore" "/usr/pluto/bin/CaptureCards_BootConfig_PVR-250.sh" "&"
 
 	## Setup ALSA mixers
 	#amixer sset Capture 90%
