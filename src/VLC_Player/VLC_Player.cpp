@@ -1307,22 +1307,19 @@ void VLC_Player::CMD_Set_Media_Position(int iStreamID,string sMediaPosition,stri
   if (!m_pVLC)
     return;
 
-  Position* pPosition = new Position(sMediaPosition);
+  Position position = Position(sMediaPosition);
 
-  if (pPosition->hasOnlyPos())
+  if (position.hasOnlyPos())
     {
       // We only got a POS: indicator, just jump to position.
-      m_pVLC->SetTime(pPosition->getPosition());
+      m_pVLC->SetTime(position.getPosition());
     }
   else
     {
       // We are changing more than position, re-issue a play.
       // If we are streaming, we should re-do the CMD_Start_Streaming here (FIXME)
-      CMD_Play_Media(0,m_pVLC->GetStreamID(),sMediaPosition,m_pVLC->GetMediaURL(),sCMD_Result,pMessage);
+      CMD_Play_Media(0,m_pVLC->GetStreamID(),position.toString(),m_pVLC->GetMediaURL(),sCMD_Result,pMessage);
     }
-
-  delete pPosition;
-
 }
 
 //<-dceag-c548-b->
