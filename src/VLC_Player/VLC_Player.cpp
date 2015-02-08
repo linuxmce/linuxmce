@@ -286,6 +286,7 @@ void VLC_Player::TimecodeReportingLoop()
   while (m_bTimecodeReporting)
     {
       ReportTimecodeViaIP(m_pVLC->GetStreamID(),m_iMediaPlaybackSpeed);
+      m_pVLC->UpdateTracks();
       Sleep(DATA_Get_Time_Code_Report_Frequency()*1000);
     }
 }

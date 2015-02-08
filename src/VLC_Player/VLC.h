@@ -108,6 +108,9 @@ namespace DCE
     int GetAudioTrack();
     void SetSubtitle(int iSubtitle);
     int GetSubtitle();
+    string GetAllSubtitles();
+    string GetAllAudioTracks();
+    string GetAllAngles();
     void SetAspectRatio(string sAspectRatio);
     void SetZoomFactor(string sZoomFactor);
     void SetMediaType(string sMediaType, int iMediaID);
@@ -116,6 +119,7 @@ namespace DCE
     void SetChapter(int iChapter);
     void SetTitle(int iTitle);
     bool GetSize(unsigned& iWidth, unsigned& iHeight);
+    void UpdateTracks();
   };
 
 }

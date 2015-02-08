@@ -251,6 +251,16 @@ namespace DCE
     
   }
 
+  void VLC::UpdateTracks()
+  {
+    if (!m_pMp)
+      return;
+
+    m_pVLC_Player->DATA_Set_Audio_Tracks(GetAllAudioTracks());
+    m_pVLC_Player->DATA_Set_Subtitles(GetAllSubtitles());
+    m_pVLC_Player->DATA_Set_Angles(GetAllAngles());
+  }
+
   void VLC::SetMediaURL(string sMediaURL)
   {
     m_sMediaURL=sMediaURL;
@@ -598,6 +608,65 @@ namespace DCE
     if (!m_pMp)
       return -1;
     return libvlc_video_get_spu(m_pMp);
+  }
+  
+  string VLC::GetAllSubtitles()
+  {
+    string sRet = "";
+    if (!m_pMp)
+      return sRet;
+
+    sRet += StringUtils::itos(GetSubtitle()) + "\n";
+
+    libvlc_track_description_t* track = libvlc_video_get_spu_description(m_pMp);
+
+    if (track == NULL)
+      return sRet;
+
+    while (track->p_next != NULL)
+      {
+	string sTrackName = string(track->psz_name);
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Adding subtitle: %s",track->psz_name);
+	sRet += sTrackName;
+	sRet += "\n";
+	track = track->p_next;
+      }
+
+    //    sRet += ProcessTrackDescriptions(track);
+    
+    return sRet;
+
+  }
+
+  string VLC::GetAllAudioTracks()
+  {
+    string sRet = "";
+    if (!m_pMp)
+      return sRet;
+
+    sRet += StringUtils::itos(GetAudioTrack()) + "\n";
+
+    libvlc_track_description_t* track = libvlc_audio_get_track_description(m_pMp);
+
+    if (track == NULL)
+      return sRet;
+
+    while (track->p_next != NULL)
+      {
+	string sTrackName = string(track->psz_name);
+	sRet += sTrackName;
+	sRet += "\n";
+	track = track->p_next;
+      }
+
+    //    sRet += ProcessTrackDescriptions(track);
+    
+    return sRet;
+  }
+
+  string VLC::GetAllAngles()
+  {
+    return "0\nNone\n";
   }
 
   void VLC::SetAspectRatio(string sAspectRatio)
