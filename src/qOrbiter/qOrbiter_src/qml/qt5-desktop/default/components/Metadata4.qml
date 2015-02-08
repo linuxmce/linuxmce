@@ -1,5 +1,5 @@
 import QtQuick 2.1
-import "../../../skins-common/lib/handlers"
+
 Column{
     id:textCol
     spacing: scaleY(.5)

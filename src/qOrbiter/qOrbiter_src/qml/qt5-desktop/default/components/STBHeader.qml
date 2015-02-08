@@ -1,5 +1,4 @@
 import QtQuick 2.1
-import "../../../skins-common/lib/components"
 
 Item{
     id:hdr

@@ -1,6 +1,6 @@
 import QtQuick 2.1
 import org.linuxmce.enums 1.0
-import "../../../skins-common/lib/components"
+
 Item{
     id:ftr
 

@@ -12,8 +12,6 @@ import AudioVisual 1.0
 import DceScreenSaver 1.0
 import org.linuxmce.enums 1.0
 
-import "../../skins-common/lib/components"
-import "../../skins-common/lib/handlers"
 import "components"
 
 Item {
