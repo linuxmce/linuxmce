@@ -49,8 +49,6 @@ VLC_Player::VLC_Player(int DeviceID, string ServerAddress,bool bConnectEventHand
   m_bTimecodeReporting=false;
   m_pAlarmManager=NULL;
   m_VLCMutex.Init(NULL);
-  m_iPlaybackSpeed=0;
-
   m_pNotificationSocket = new XineNotification_SocketListener(string("m_pNotificationSocket"));
   m_pNotificationSocket->m_bSendOnlySocket = true; // one second
 
@@ -62,7 +60,7 @@ VLC_Player::~VLC_Player()
 {
   EVENT_Playback_Completed("",0,false);  // In case media plugin thought something was playing, let it know that there's not
   
-  m_iPlaybackSpeed=0;
+  m_iMediaPlaybackSpeed=0;
 
   UnmountRemoteDVD();
   
@@ -235,7 +233,7 @@ void VLC_Player::ReportTimecodeViaIP(int iStreamID, int Speed)
   // filling media info structure
   XineMediaInfo mediaInfo;
   
-  mediaInfo.m_iSpeed = m_iPlaybackSpeed;
+  mediaInfo.m_iSpeed = m_iMediaPlaybackSpeed;
   mediaInfo.m_iPositionInMilliseconds = (int)m_pVLC->GetTime();
   mediaInfo.m_iTotalLengthInMilliseconds = (int)m_pVLC->GetCurrentDuration();
   
@@ -281,6 +279,8 @@ void VLC_Player::StopTimecodeReporting()
 
 void VLC_Player::TimecodeReportingLoop()
 {
+  unsigned iWidth=0;
+  unsigned iHeight=0;
   while (m_bTimecodeReporting)
     {
       ReportTimecodeViaIP(m_pVLC->GetStreamID(),m_iMediaPlaybackSpeed);
@@ -424,7 +424,7 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::EVENT_Playback_Started(streamID=%i)",iStreamID);
       EVENT_Playback_Started(sMediaURL,iStreamID,sMediaInfo,m_pVLC->m_sAudioInfo,m_pVLC->m_sVideoInfo);
       // m_pAlarmManager->AddRelativeAlarm(1,this,1,NULL);
-      m_iPlaybackSpeed=1000;
+      m_iMediaPlaybackSpeed=1000;
     }
   else
     {

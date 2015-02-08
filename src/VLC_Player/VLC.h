@@ -114,6 +114,7 @@ namespace DCE
     int GetMediaID();
     void SetChapter(int iChapter);
     void SetTitle(int iTitle);
+    bool GetSize(unsigned& iWidth, unsigned& iHeight);
   };
 
 }

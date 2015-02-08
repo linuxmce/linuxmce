@@ -73,7 +73,6 @@ namespace DCE
     class AlarmManager* m_pAlarmManager;
     void AlarmCallback(int id, void* param);
     pluto_pthread_mutex_t m_VLCMutex;
-    int m_iPlaybackSpeed;
     void StartTimecodeReporting();
     void StopTimecodeReporting();
     void TimecodeReportingLoop();

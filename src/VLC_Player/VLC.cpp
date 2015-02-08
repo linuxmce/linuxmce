@@ -399,7 +399,7 @@ namespace DCE
 
   void VLC::UpdateStatus()
   {
-    m_pVLC_Player->ReportTimecodeViaIP(GetStreamID(),m_pVLC_Player->m_iPlaybackSpeed);
+    m_pVLC_Player->ReportTimecodeViaIP(GetStreamID(),m_pVLC_Player->m_iMediaPlaybackSpeed);
   }
 
   void VLC::UpdateNav()
@@ -661,6 +661,27 @@ namespace DCE
     if (!m_pMp)
       return;
     libvlc_media_player_set_title(m_pMp,iTitle);
+  }
+
+  bool VLC::GetSize(unsigned& iWidth, unsigned& iHeight)
+  {
+    unsigned tiWidth, tiHeight;
+    tiWidth=tiHeight=0;
+    iWidth=iHeight=0;
+
+    if (!m_pMp)
+      return false;
+    
+    if (!libvlc_video_get_size(m_pMp,0,&tiWidth,&tiHeight))
+      {
+	return false;
+      }
+    else
+      {
+	iWidth=tiWidth;
+	iHeight=tiHeight;
+      }
+    return true;
   }
 
 }
