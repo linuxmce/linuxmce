@@ -32,6 +32,9 @@ Item {
     property bool screenSaverOn:false
     property int screensaverTimer:manager.screenSaverTimeout*1000
 
+    Style{
+        id:skinStyle
+    }
 
     function resetUiTimeout(){
         hideUiTimer.restart()
@@ -507,9 +510,6 @@ Item {
         id: ftr
     }
 
-    Style{
-        id:skinStyle
-    }
 
     MouseArea{
         id:mst

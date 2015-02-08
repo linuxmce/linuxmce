@@ -24,6 +24,7 @@ DceScreenSaver::DceScreenSaver(QQuickPaintedItem *parent):
 DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     QDeclarativeItem(parent)
   #endif
+  ,interval(60000)
 {
 #ifdef QT5
     setFlag(QQuickItem::ItemHasContents, true);
@@ -57,12 +58,11 @@ DceScreenSaver::DceScreenSaver(QDeclarativeItem *parent):
     currentUrl = "";
     active = true;
     running = false;
-    ready = false;
-    interval = 60000;
+    ready = false;  
     requestManager = new QNetworkAccessManager();
     intervalTimer = new QTimer();
     intervalTimer->setSingleShot(false);
-    intervalTimer->stop();
+
     QObject::connect(intervalTimer, SIGNAL(timeout()), this, SLOT(getNextImage()));
     QObject::connect(requestManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(processImageData(QNetworkReply*)));
 
@@ -98,7 +98,7 @@ void DceScreenSaver::setImageList(QStringList l){
 
     if(!urlList.isEmpty()){
         emit urlListReady();
-        pictureCount = l.count();
+        pictureCount = l.count()-1;
 
         if(active){
             getNextImage();
@@ -136,7 +136,9 @@ void DceScreenSaver::processImageData(QNetworkReply *r){
     if(r->bytesAvailable()){
         p = r->readAll();
     } else{
+        setDebugInfo("No image!");
         r=NULL;
+        getNextImage();
         return;
     }
 
@@ -177,8 +179,8 @@ void DceScreenSaver::getNextImage()
     }
      setDebugInfo("Getting random image from list of "+ QString::number(urlList.count()));
 
-    int listNumber = rand()%urlList.length()-1;
-    if(listNumber!=-1 && listNumber <= urlList.count()){
+    int listNumber = rand()%pictureCount;
+    if(listNumber!=-1 && listNumber <= pictureCount){
        requestImage(urlList.at(listNumber));
     } else {
         requestImage(urlList.at(0));

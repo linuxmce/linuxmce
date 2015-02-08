@@ -160,7 +160,7 @@ public slots:
     int getInterval(){return interval;}
 
     bool getRunning(){return running;}
-    void setRunning(bool r) {running = r; emit runningChanged();}
+    void setRunning(bool r) {running = r; emit runningChanged(); intervalTimer->start(); }
 
     void setReady(bool r){ready = r; readyChanged();}
     bool getReady() {return ready;}
