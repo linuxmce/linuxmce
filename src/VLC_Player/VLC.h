@@ -17,6 +17,7 @@
 
 #include <vlc/vlc.h>
 #include <X11/Xlib.h>
+#include <map>
 
 namespace DCE
 {
@@ -38,6 +39,8 @@ namespace DCE
     bool m_bIsPlaying;
     int m_iSerialNum;
     int m_iStreamID;
+    map<int, int> m_mapDgIndexToSubtitleId;
+    map<int, int> m_mapDgIndexToAudioTrackId;
     DCE::VLC_Player* m_pVLC_Player;
 
   public:

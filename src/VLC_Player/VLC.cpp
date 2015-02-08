@@ -586,7 +586,12 @@ namespace DCE
   {
     if (!m_pMp)
       return;
-    libvlc_audio_set_track(m_pMp,iAudioTrack);
+
+    if (m_mapDgIndexToAudioTrackId.find(iAudioTrack) == m_mapDgIndexToAudioTrackId.end())
+      return;
+
+    LoggerWrapper::GetInstance()->Write(LV_WARNING,"Setting Audio track to: %d",m_mapDgIndexToAudioTrackId[iAudioTrack]);
+    libvlc_audio_set_track(m_pMp,m_mapDgIndexToAudioTrackId[iAudioTrack]);
   }
 
   int VLC::GetAudioTrack()
@@ -600,7 +605,12 @@ namespace DCE
   {
     if (!m_pMp)
       return;
-    libvlc_video_set_spu(m_pMp,iSubtitle);
+    LoggerWrapper::GetInstance()->Write(LV_WARNING,"Setting Subtitle to: %d",m_mapDgIndexToSubtitleId[iSubtitle]);
+
+    if (m_mapDgIndexToSubtitleId.find(iSubtitle) == m_mapDgIndexToSubtitleId.end())
+      return;
+
+    libvlc_video_set_spu(m_pMp,m_mapDgIndexToSubtitleId[iSubtitle]);
   }
 
   int VLC::GetSubtitle()
@@ -613,12 +623,17 @@ namespace DCE
   string VLC::GetAllSubtitles()
   {
     string sRet = "";
+    int i=0;
+    
+    m_mapDgIndexToSubtitleId.clear();
+
     if (!m_pMp)
       return sRet;
 
     sRet += StringUtils::itos(GetSubtitle()) + "\n";
 
-    libvlc_track_description_t* track = libvlc_video_get_spu_description(m_pMp);
+    libvlc_track_description_t* first = libvlc_video_get_spu_description(m_pMp);
+    libvlc_track_description_t* track = first;
 
     if (track == NULL)
       return sRet;
@@ -626,14 +641,27 @@ namespace DCE
     while (track->p_next != NULL)
       {
 	string sTrackName = string(track->psz_name);
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Adding subtitle: %s",track->psz_name);
-	sRet += sTrackName;
-	sRet += "\n";
-	track = track->p_next;
+	if (sTrackName == "Disable")
+	  {
+	    m_mapDgIndexToSubtitleId[-1]=track->i_id;
+	    track = track->p_next;
+	    LoggerWrapper::GetInstance()->Write(LV_WARNING,"Adding DISABLED subtitle.");
+	    // Do not add this to the datagrid, because Off is already added. Stupid, I know...backward compatibility. 
+	  }
+	else
+	  {
+	    m_mapDgIndexToSubtitleId[i]=track->i_id;
+	    sRet += sTrackName;
+	    sRet += "\n";
+	    track = track->p_next;
+	    i++;
+	  }
       }
 
-    //    sRet += ProcessTrackDescriptions(track);
-    
+    libvlc_track_description_list_release(first); // clean up. 
+    track=NULL;
+    first=NULL;
+
     return sRet;
 
   }
@@ -641,12 +669,16 @@ namespace DCE
   string VLC::GetAllAudioTracks()
   {
     string sRet = "";
+    int i=0;
     if (!m_pMp)
       return sRet;
+
+    m_mapDgIndexToAudioTrackId.clear();
 
     sRet += StringUtils::itos(GetAudioTrack()) + "\n";
 
     libvlc_track_description_t* track = libvlc_audio_get_track_description(m_pMp);
+    libvlc_track_description_t* first = track;
 
     if (track == NULL)
       return sRet;
@@ -654,13 +686,25 @@ namespace DCE
     while (track->p_next != NULL)
       {
 	string sTrackName = string(track->psz_name);
+
+	if (sTrackName == "Disable")
+	  {
+	    sTrackName = "Off";
+	  }
+
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Adding audio track: %s, id %d",track->psz_name,track->i_id);
+
+	m_mapDgIndexToAudioTrackId[i]=track->i_id;
 	sRet += sTrackName;
 	sRet += "\n";
 	track = track->p_next;
+	i++;
       }
 
-    //    sRet += ProcessTrackDescriptions(track);
-    
+    libvlc_track_description_list_release(first);
+    first=NULL;
+    track=NULL;
+
     return sRet;
   }
 
