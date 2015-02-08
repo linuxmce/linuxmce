@@ -192,6 +192,7 @@ SOURCES += ../../main.cpp \
         ../../contextobjects/screenshotattributes.cpp \
         ../../orbiterwindow.cpp \
         ../../contextobjects/screensaverclass.cpp \
+        ../../contextobjects/screeninfo.cpp \
         ../../datamodels/skinloader.cpp \
         ../../datamodels/genericsetupmodel.cpp \
         ../../datamodels/genericsetupitem.cpp \
@@ -296,6 +297,7 @@ HEADERS += \
         ../../contextobjects/playlistitemclass.h \
         ../../contextobjects/securityvideoclass.h \
         ../../contextobjects/epgchannellist.h \
+        ../../contextobjects/screeninfo.h \
         ../../playlists/epgitemclass.h \
         ../../datamodels/floorplanmodel.h \
         ../../imageProviders/abstractimageprovider.h \

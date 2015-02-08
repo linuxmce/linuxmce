@@ -135,7 +135,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     
     //Resize to view as opposed to the root item
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
-    qorbiterUIwin->setResizeMode(QQuickView::SizeViewToRootObject);
+    qorbiterUIwin->setResizeMode(QQuickView::SizeViewToRootObject); 
+    m_screenInfo = new ScreenInfo();
+    qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);
 #else
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif

@@ -44,6 +44,7 @@
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QMainWindow>
 #include <QtQuick/QQuickItem>
+#include "contextobjects/screeninfo.h"
 
 #else
 #include <QtGui/QWidget>
@@ -337,6 +338,8 @@ public:
 
 #if QT5 || defined(QANDROID)
     QQuickView *qorbiterUIwin;
+    ScreenInfo *m_screenInfo;
+
 #else
     QDeclarativeView *qorbiterUIwin;    //Qml declarativeview
 #endif

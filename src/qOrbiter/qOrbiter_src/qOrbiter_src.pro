@@ -459,7 +459,8 @@ SOURCES += main.cpp \
         datamodels/listitembase.cpp \
         defineObjects/linuxmcedata.cpp \
         defineObjects/mediatypehelper.cpp \
-        defineObjects/datagrids.cpp
+        defineObjects/datagrids.cpp \
+    contextobjects/screeninfo.cpp
 
 
 # Please do not modify the following two lines. Required for deployment.
@@ -569,7 +570,8 @@ HEADERS += \
         defineObjects/linuxmcedata.h \
         defineObjects/mediatypehelper.h \
         RemoteCommands.h \
-        defineObjects/datagrids.h
+        defineObjects/datagrids.h \
+    contextobjects/screeninfo.h
 
 
 
