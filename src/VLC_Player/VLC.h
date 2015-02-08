@@ -103,6 +103,7 @@ namespace DCE
     bool hasChapters();
     int GetCurrentChapter();
     int GetCurrentTitle();
+    int GetCurrentAngle() { return 0; } 
     void SetAudioTrack(int iAudioTrack);
     int GetAudioTrack();
     void SetSubtitle(int iSubtitle);

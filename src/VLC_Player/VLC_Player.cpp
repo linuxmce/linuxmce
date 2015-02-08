@@ -243,7 +243,9 @@ void VLC_Player::ReportTimecodeViaIP(int iStreamID, int Speed)
   mediaInfo.m_sFileName = m_pVLC->GetMediaURL();
   mediaInfo.m_sMediaType = m_pVLC->GetMediaType();
   mediaInfo.m_iMediaID = m_pVLC->GetMediaID();
-  
+  mediaInfo.m_iAngle = m_pVLC->GetCurrentAngle();
+  mediaInfo.m_iAudio = m_pVLC->GetAudioTrack();
+  mediaInfo.m_iSubtitle = m_pVLC->GetSubtitle();
   string sIPTimeCodeInfo = mediaInfo.ToString();
   
   LoggerWrapper::GetInstance()->Write(LV_STATUS,"reporting timecode stream %d speed %d %s", iStreamID, Speed, sIPTimeCodeInfo.c_str() );
