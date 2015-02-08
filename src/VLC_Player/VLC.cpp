@@ -42,6 +42,7 @@ namespace DCE
     m_sAudioInfo="";
     m_sVideoInfo="";
     m_iStreamID=0;
+    m_iPreviousAudioTrack=1;
   }
 
   VLC::~VLC()
@@ -442,14 +443,22 @@ namespace DCE
 
   void VLC::Pause()
   {
-    if (m_pMp)
-      libvlc_media_player_set_pause(m_pMp, 1);
+    if (!m_pMp)
+      return;
+
+    m_iPreviousAudioTrack=GetAudioTrack();
+    cout << "Previous Audio Track: " << m_iPreviousAudioTrack << endl;
+    SetAudioTrack(0); // Temporarily disable audio, free sound card for other uses.
+    libvlc_media_player_set_pause(m_pMp, 1);
   }
   
   void VLC::Restart()
   {
-    if (m_pMp)
-      libvlc_media_player_set_pause(m_pMp, 0);
+    if (!m_pMp)
+      return;
+    cout << "Previous Audio Track: " << m_iPreviousAudioTrack << endl;
+    libvlc_audio_set_track(m_pMp,m_iPreviousAudioTrack);
+    libvlc_media_player_set_pause(m_pMp, 0);
   }
 
   void VLC::SetRate(float fMediaPlayBackSpeed)

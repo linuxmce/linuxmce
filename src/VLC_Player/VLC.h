@@ -39,6 +39,7 @@ namespace DCE
     bool m_bIsPlaying;
     int m_iSerialNum;
     int m_iStreamID;
+    int m_iPreviousAudioTrack;
     map<int, int> m_mapDgIndexToSubtitleId;
     map<int, int> m_mapDgIndexToAudioTrackId;
     DCE::VLC_Player* m_pVLC_Player;
