@@ -428,6 +428,7 @@ Item {
                           }
                           else if(pageLoader.status == Component.Error)
                           {
+                            pageLoader.e
                               console.log("Command to change to:" + source + " failed!")
                               manager.currentScreen="Screen_X.qml"
                           }

@@ -270,17 +270,16 @@ Item {
 
 
 
+
+
     DceScreenSaver{
         id:glScreenSaver
-        anchors{
-            top:qml_root.top
-            bottom:qml_root.bottom
-            left: qml_root.left
-            right: qml_root.right
-        }
+        anchors.fill: parent
         enableDebug: true
-        interval:60*1000
-        useAnimation: true
+        interval:10000
+        useAnimation: false
+        onDebugInfoChanged: console.log(debugInfo)
+        active:true //manager.m_ipAddress==="192.168.80.1"
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)
@@ -297,15 +296,15 @@ Item {
             }
         }
 
-        MouseArea{
-            anchors.fill: parent
-            onClicked: {
-                if(!uiOn){
-                    console.log("screensaver revive")
-                    uiOn=true
-                }
-            }
-        }
+//        MouseArea{
+//            anchors.fill: parent
+//            onClicked: {
+//                if(!uiOn){
+//                    console.log("screensaver revive")
+//                    uiOn=true
+//                }
+//            }
+//        }
 
     }
     MediaInterface{

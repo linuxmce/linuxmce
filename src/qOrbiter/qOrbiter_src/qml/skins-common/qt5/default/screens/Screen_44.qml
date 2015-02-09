@@ -5,11 +5,15 @@ import org.linuxmce.enums 1.0
 StyledScreen {
     anchors.fill: parent
     id:advancedScreen
-
-
+Flickable{
+    anchors.centerIn: parent
+    anchors.fill: parent
+    contentWidth: parent.width
+    contentHeight:advancedFlick.height
     Flow{
-        anchors.centerIn: parent
-        anchors.fill: parent
+        id:advancedFlick
+        width: parent.width
+
         spacing: 25
 
         StyledButton{
@@ -78,7 +82,7 @@ StyledScreen {
             id:ping
             state: "large-fixed"
             buttonText: "Ping\nTest"
-        }     
+        }
         StyledButton{
             id:mediaPlayerState
             state: "large-fixed"
@@ -100,6 +104,19 @@ StyledScreen {
                 manager.exitApp()
             }
         }
+        StyledButton{
+            id:dpi
+            state:"large-fixed"
+            buttonText: "Physical DPI::"+screenInfo.primaryScreen.physicalDpi+"\n"+"Logical DPI::"+screenInfo.primaryScreen.logicalDpi
+            onActivated: {
+                manager.setDeviceNumber(-1)
+                manager.writeConfig()
+                manager.exitApp()
+            }
+        }
 
     }
+}
+
+
 }

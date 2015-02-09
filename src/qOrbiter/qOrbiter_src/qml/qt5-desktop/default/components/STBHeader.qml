@@ -36,6 +36,13 @@ Item{
             fontSize: mediumText
             color: "white"
         }
+
+        StyledText {
+            id: dp
+            text: "current screen "+ screenInfo.primaryScreen.logicalDpi
+            fontSize: mediumText
+            color: "white"
+        }
     }
 
 

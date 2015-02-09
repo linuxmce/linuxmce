@@ -10,6 +10,8 @@ Item {
     height:manager.appHeight
     width: manager.appWidth
 
+
+
     property alias skinStyle:style
     property int screensaverTimer:manager.screenSaverTimeout*1000
     property bool uiOn:true
@@ -376,10 +378,10 @@ Item {
             right: qml_root.right
         }
         enableDebug: true
-        interval:60*1000
+        interval:10000
         useAnimation: true
         onDebugInfoChanged: console.log(debugInfo)
-        active:manager.m_ipAddress==="192.168.80.1"
+        active:true
         requestUrl:manager.m_ipAddress
         Component.onCompleted: {
             glScreenSaver.setImageList(manager.screensaverImages)

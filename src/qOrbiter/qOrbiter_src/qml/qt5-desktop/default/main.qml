@@ -32,9 +32,7 @@ Item {
     property bool screenSaverOn:false
     property int screensaverTimer:manager.screenSaverTimeout*1000
 
-    Style{
-        id:skinStyle
-    }
+    property string currentWindow:screenInfo.screenName
 
     function resetUiTimeout(){
         hideUiTimer.restart()
@@ -276,7 +274,7 @@ Item {
             right: qmlroot.right
         }
         enableDebug: true
-        interval:60*1000
+        interval:10000
         useAnimation: true
         onDebugInfoChanged: console.log(debugInfo)
         active:true //manager.m_ipAddress==="192.168.80.1"
