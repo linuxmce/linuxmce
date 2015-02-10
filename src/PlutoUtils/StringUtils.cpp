@@ -247,10 +247,13 @@ string StringUtils::RepeatChar(char c,int count)
         return "";
 
     char *cBuffer = new char[count+1];
-    for(int i=0;i<count;++i)
-        cBuffer[i]=c;
+    memset(cBuffer, c, count);
     cBuffer[count]=0;
-    return cBuffer;
+
+    string sBuffer = cBuffer;
+    delete[] cBuffer;
+
+    return sBuffer;
 }
 
 string StringUtils::TrimSpaces(string &sInput)
