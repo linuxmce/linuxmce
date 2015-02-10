@@ -126,7 +126,7 @@ bool gc100::GetConfig()
 	if (!Open_gc100_Socket())
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Couldn't open socket connection to GC100");
-	    exit(1);
+		exit(2);
 	}
 	return true;
 }
