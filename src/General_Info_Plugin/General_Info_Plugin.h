@@ -255,9 +255,13 @@ public:
 
 	/** @brief COMMAND: #248 - Get Device Status */
 	/** Gets the status for a device */
+		/** @param #2 PK_Device */
+			/** The device id which you need information for. */
+		/** @param #5 Value To Assign */
+			/** The status data for the device. */
 
-	virtual void CMD_Get_Device_Status() { string sCMD_Result; CMD_Get_Device_Status(sCMD_Result,NULL);};
-	virtual void CMD_Get_Device_Status(string &sCMD_Result,Message *pMessage);
+	virtual void CMD_Get_Device_Status(int iPK_Device,string *sValue_To_Assign) { string sCMD_Result; CMD_Get_Device_Status(iPK_Device,sValue_To_Assign,sCMD_Result,NULL);};
+	virtual void CMD_Get_Device_Status(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #272 - Restart DCERouter */

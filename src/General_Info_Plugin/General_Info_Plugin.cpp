@@ -544,10 +544,25 @@ void General_Info_Plugin::CMD_Get_Device_State(int iPK_Device,string *sValue_To_
 
 	/** @brief COMMAND: #248 - Get Device Status */
 	/** Gets the status for a device */
+		/** @param #2 PK_Device */
+			/** The device id which you need information for. */
+		/** @param #5 Value To Assign */
+			/** The status data for the device. */
 
-void General_Info_Plugin::CMD_Get_Device_Status(string &sCMD_Result,Message *pMessage)
+void General_Info_Plugin::CMD_Get_Device_Status(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,Message *pMessage)
 //<-dceag-c248-e->
 {
+	DeviceData_Router *pDeviceData_Router = m_pRouter->m_mapDeviceData_Router_Find(iPK_Device);
+	if( !pDeviceData_Router )
+	{
+		sCMD_Result = "BAD DEVICE";
+		*sValue_To_Assign = "";
+	}
+	else
+	{
+		sCMD_Result = "OK";
+		*sValue_To_Assign = pDeviceData_Router->m_sStatus_get();
+	}
 }
 //<-dceag-createinst-b->!
 //<-dceag-c272-b->

@@ -191,7 +191,7 @@ public:
 	virtual void CMD_Request_File_And_Checksum(string sFilename,char **pData,int *iData_Size,string *sChecksum,bool *bChecksum_Only,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Device_Data(int iPK_Device,string sValue_To_Assign,int iPK_DeviceData,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Get_Device_State(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,class Message *pMessage) {};
-	virtual void CMD_Get_Device_Status(string &sCMD_Result,class Message *pMessage) {};
+	virtual void CMD_Get_Device_Status(int iPK_Device,string *sValue_To_Assign,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Restart_DCERouter(string sForce,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Set_Room_For_Device(int iPK_Device,string sName,int iPK_Room,string &sCMD_Result,class Message *pMessage) {};
 	virtual void CMD_Wake_Device(int iPK_Device,string &sCMD_Result,class Message *pMessage) {};
@@ -408,11 +408,14 @@ public:
 				case COMMAND_Get_Device_Status_CONST:
 					{
 						string sCMD_Result="OK";
-						CMD_Get_Device_Status(sCMD_Result,pMessage);
+						int iPK_Device=atoi(pMessage->m_mapParameters[COMMANDPARAMETER_PK_Device_CONST].c_str());
+						string sValue_To_Assign=pMessage->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST];
+						CMD_Get_Device_Status(iPK_Device,&sValue_To_Assign,sCMD_Result,pMessage);
 						if( pMessage->m_eExpectedResponse==ER_ReplyMessage && !pMessage->m_bRespondedToMessage )
 						{
 							pMessage->m_bRespondedToMessage=true;
 							Message *pMessageOut=new Message(m_dwPK_Device,pMessage->m_dwPK_Device_From,PRIORITY_NORMAL,MESSAGETYPE_REPLY,0,0);
+						pMessageOut->m_mapParameters[COMMANDPARAMETER_Value_To_Assign_CONST]=sValue_To_Assign;
 							pMessageOut->m_mapParameters[0]=sCMD_Result;
 							SendMessage(pMessageOut);
 						}
@@ -425,7 +428,7 @@ public:
 						{
 							int iRepeat=atoi(itRepeat->second.c_str());
 							for(int i=2;i<=iRepeat;++i)
-								CMD_Get_Device_Status(sCMD_Result,pMessage);
+								CMD_Get_Device_Status(iPK_Device,&sValue_To_Assign,sCMD_Result,pMessage);
 						}
 					};
 					iHandled++;
