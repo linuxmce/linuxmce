@@ -58,6 +58,7 @@ namespace DCE
     Config *m_pConfig;
     string m_sAudioInfo; // TBD: Compatible with Xine_Player
     string m_sVideoInfo; // TBD: Compatible with Xine_Player
+    string m_sMediaInfo; // Section description info.
 
     string m_sWindowTitle;
     string m_sMediaType;
@@ -124,6 +125,8 @@ namespace DCE
     void SetTitle(int iTitle);
     bool GetSize(unsigned& iWidth, unsigned& iHeight);
     void UpdateTracks();
+    string GetMediaInfo();
+    void ReportPlaybackStarted();
   };
 
 }

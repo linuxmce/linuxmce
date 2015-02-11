@@ -242,6 +242,7 @@ namespace DCE
 	break;
       case libvlc_MediaPlayerVout:
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"VLC::Media_Callbacks(): MEDIA VOUT!!");
+	self->ReportPlaybackStarted();
 	self->UpdateNav();
 	break;
       case libvlc_MediaPlayerStopped:
@@ -805,6 +806,37 @@ namespace DCE
 	iHeight=tiHeight;
       }
     return true;
+  }
+
+  string VLC::GetMediaInfo()
+  {
+    if (!m_pMp)
+      return "";
+
+    m_sMediaInfo = "";
+    for (int i=1; i<=libvlc_media_player_get_title_count(m_pMp); i++)
+      {
+	if (libvlc_media_player_get_chapter_count_for_title(m_pMp,i) == 0)
+	  {
+	    m_sMediaInfo += "Title " + StringUtils::itos(i) + "\t\t" + StringUtils::itos(i) + "\n";
+	  }
+	else
+	  {
+	    for (int j=1; j<=libvlc_media_player_get_chapter_count(m_pMp); j++)
+	      {
+		m_sMediaInfo += "Title " + StringUtils::itos(i) + " Chapter " + StringUtils::itos(j) + "\t" + StringUtils::itos(j) + "\t" + StringUtils::itos(i) + "\n";
+	      }
+	  }
+      }
+    return m_sMediaInfo;
+  }
+
+  void VLC::ReportPlaybackStarted()
+  {
+    if (!m_pMp)
+      return;
+
+    m_pVLC_Player->EVENT_Playback_Started(m_sMediaURL,m_iStreamID,GetMediaInfo(),"","");
   }
 
 }
