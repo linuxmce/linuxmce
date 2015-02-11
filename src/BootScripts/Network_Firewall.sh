@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Define paths, as just "iptables" won't do it when run from apache
+IPTABLES=/sbin/iptables
+IP6TABLES=/sbin/ip6tables
+
 #Set defaults settings to conf file (pluto.conf
 #Set default blocklist on
 blocklist=$(cat /etc/pluto.conf | grep fw_blocklist)
@@ -343,17 +347,17 @@ IPTables ()
 		if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
 			if [[ ! "$Protocol" == "all" ]]; then
 				echo iptables $RuleType $parmIntIf $parmExtIf $Matchname $Protocol $FilterIP4 $parmSPort $DestIP4 $parmDPort -j $RPolicy $parmDescription
-				iptables $RuleType $parmIntIf $parmExtIf $Matchname $Protocol $FilterIP4 $parmSPort $DestIP4 $parmDPort -j $RPolicy $parmDescription
+				$IPTABLES $RuleType $parmIntIf $parmExtIf $Matchname $Protocol $FilterIP4 $parmSPort $DestIP4 $parmDPort -j $RPolicy $parmDescription
 				# samba 139/tcp ports come paired with explicit rejects on 445/tcp
 				# reason: to avoid timeout connecting to 445/tcp in smbclient
 				if [[ "$Protocol" == tcp && ( "$PortBegin" -le 139 && "$PortEnd" -ge 139 ) ]]; then
-					iptables -A INPUT -p tcp -s "$FilterIP4" --dport 445 -j REJECT
+					$IPTABLES -A INPUT -p tcp -s "$FilterIP4" --dport 445 -j REJECT
 				fi
 			else
 				echo iptables $RuleType $parmIntIf $parmExtIf $Matchname -p tcp $FilterIP4 $parmSPort $DestIP4 $parmDPort -j $RPolicy $parmDescription
-					 iptables $RuleType $parmIntIf $parmExtIf $Matchname -p tcp $FilterIP4 $parmSPort $DestIP4 $parmDPort -j $RPolicy $parmDescription
+				$IPTABLES $RuleType $parmIntIf $parmExtIf $Matchname -p tcp $FilterIP4 $parmSPort $DestIP4 $parmDPort -j $RPolicy $parmDescription
 				echo iptables $RuleType $parmIntIf $parmExtIf $Matchname -p udp $FilterIP4 $parmSPort $DestIP4 $parmDPort -j $RPolicy $parmDescription
-				     iptables $RuleType $parmIntIf $parmExtIf $Matchname -p udp $FilterIP4 $parmSPort $DestIP4 $parmDPort -j $RPolicy $parmDescription
+				$IPTABLES $RuleType $parmIntIf $parmExtIf $Matchname -p udp $FilterIP4 $parmSPort $DestIP4 $parmDPort -j $RPolicy $parmDescription
 			fi
 			
 		fi
@@ -364,17 +368,17 @@ IPTables ()
 		if [[ ! "$DisableIPv6Firewall" == "1" ]]; then
 			if [[ ! "$Protocol" == "all" ]]; then
 				echo ip6tables $RuleType $parmIntIf $parmExtIf $Matchname $Protocol $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
-					ip6tables $RuleType $parmIntIf $parmExtIf $Matchname $Protocol $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
+					$IP6TABLES $RuleType $parmIntIf $parmExtIf $Matchname $Protocol $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
 				# samba 139/tcp ports come paired with explicit rejects on 445/tcp
 				# reason: to avoid timeout connecting to 445/tcp in smbclient
 				if [[ "$Protocol" == tcp && ( "$PortBegin" -le 139 && "$PortEnd" -ge 139 ) ]]; then
-					ip6tables -A INPUT -p tcp -s "$FilterIP6" --dport 445 -j REJECT
+					$IP6TABLES -A INPUT -p tcp -s "$FilterIP6" --dport 445 -j REJECT
 				fi
 			else
 				echo ip6tables $RuleType $parmIntIf $parmExtIf $Matchname -p tcp $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
-					 ip6tables $RuleType $parmIntIf $parmExtIf $Matchname -p tcp $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
+				$IP6TABLES $RuleType $parmIntIf $parmExtIf $Matchname -p tcp $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
 				echo ip6tables $RuleType $parmIntIf $parmExtIf $Matchname -p udp $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
-				     ip6tables $RuleType $parmIntIf $parmExtIf $Matchname -p udp $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
+				$IP6TABLES $RuleType $parmIntIf $parmExtIf $Matchname -p udp $FilterIP6 $parmSPort $DestIP6 $parmDPort -j $RPolicy $parmDescription
 			fi
 		fi
 	fi
@@ -424,19 +428,19 @@ ClearFirewall()
 
 	echo "Clearing IPv4 firewall"
 	for table in $(< /proc/net/ip_tables_names); do
-		iptables -t "$table" -F
-		iptables -t "$table" -X
-		for chain in $(iptables -t "$table" -nL|grep ^Chain|cut -d' ' -f2); do
-			iptables -t "$table" -P "$chain" ACCEPT
+		$IPTABLES -t "$table" -F
+		$IPTABLES -t "$table" -X
+		for chain in $($IPTABLES -t "$table" -nL|grep ^Chain|cut -d' ' -f2); do
+			$IPTABLES -t "$table" -P "$chain" ACCEPT
 		done
 	done
 
 	echo "Clearing IPv6 firewall"
 	for table in $(< /proc/net/ip6_tables_names); do
-		ip6tables -t "$table" -F
-		ip6tables -t "$table" -X
-		for chain in $(ip6tables -t "$table" -nL|grep ^Chain|cut -d' ' -f2); do
-			ip6tables -t "$table" -P "$chain" ACCEPT
+		$IP6TABLES -t "$table" -F
+		$IP6TABLES -t "$table" -X
+		for chain in $($IP6TABLES -t "$table" -nL|grep ^Chain|cut -d' ' -f2); do
+			$IP6TABLES -t "$table" -P "$chain" ACCEPT
 		done
 	done
 
@@ -465,38 +469,38 @@ echo 1 >/proc/sys/net/ipv6/conf/all/forwarding
 
 # Set some default firewall parameters before opening ports
 echo "Setting up ipv4 firewall"
-iptables -F INPUT
-iptables -F FORWARD
-iptables -F OUTPUT
-iptables -t nat -F POSTROUTING
-iptables -t nat -F PREROUTING
+$IPTABLES -F INPUT
+$IPTABLES -F FORWARD
+$IPTABLES -F OUTPUT
+$IPTABLES -t nat -F POSTROUTING
+$IPTABLES -t nat -F PREROUTING
 #if ipv4 firewall are not disabled drop illegal ipv4 packets
 if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
-iptables -A INPUT -p tcp --tcp-flags ALL FIN,URG,PSH -j DROP
-iptables -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
-iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP # NULL packets
-iptables -A INPUT -p tcp --tcp-flags SYN,RST SYN,RST -j DROP
-iptables -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j DROP #XMAS
-iptables -A INPUT -p tcp --tcp-flags FIN,ACK FIN -j DROP # FIN packet scans
-iptables -A INPUT -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
-iptables -A INPUT -m mark --mark "$AllowMark" -j ACCEPT
+$IPTABLES -A INPUT -p tcp --tcp-flags ALL FIN,URG,PSH -j DROP
+$IPTABLES -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
+$IPTABLES -A INPUT -p tcp --tcp-flags ALL NONE -j DROP # NULL packets
+$IPTABLES -A INPUT -p tcp --tcp-flags SYN,RST SYN,RST -j DROP
+$IPTABLES -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j DROP #XMAS
+$IPTABLES -A INPUT -p tcp --tcp-flags FIN,ACK FIN -j DROP # FIN packet scans
+$IPTABLES -A INPUT -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
+$IPTABLES -A INPUT -m mark --mark "$AllowMark" -j ACCEPT
 fi
 
 echo "Setting up ipv6 firewall"
-ip6tables -F INPUT
-ip6tables -F FORWARD
-ip6tables -F OUTPUT
+$IP6TABLES -F INPUT
+$IP6TABLES -F FORWARD
+$IP6TABLES -F OUTPUT
 
 #if ipv6 firewall are not disabled drop illegal ipv6 packets
 if [[ ! "$DisableIPv6Firewall" == "1" ]]; then
-ip6tables -A INPUT -p tcp --tcp-flags ALL FIN,URG,PSH -j DROP
-ip6tables -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
-ip6tables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP # NULL packets
-ip6tables -A INPUT -p tcp --tcp-flags SYN,RST SYN,RST -j DROP
-ip6tables -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j DROP #XMAS
-ip6tables -A INPUT -p tcp --tcp-flags FIN,ACK FIN -j DROP # FIN packet scans
-ip6tables -A INPUT -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
-ip6tables -A INPUT -m mark --mark "$AllowMark" -j ACCEPT
+$IP6TABLES -A INPUT -p tcp --tcp-flags ALL FIN,URG,PSH -j DROP
+$IP6TABLES -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
+$IP6TABLES -A INPUT -p tcp --tcp-flags ALL NONE -j DROP # NULL packets
+$IP6TABLES -A INPUT -p tcp --tcp-flags SYN,RST SYN,RST -j DROP
+$IP6TABLES -A INPUT -p tcp --tcp-flags SYN,FIN SYN,FIN -j DROP #XMAS
+$IP6TABLES -A INPUT -p tcp --tcp-flags FIN,ACK FIN -j DROP # FIN packet scans
+$IP6TABLES -A INPUT -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
+$IP6TABLES -A INPUT -m mark --mark "$AllowMark" -j ACCEPT
 fi
 
 
@@ -515,24 +519,24 @@ echo "Setting default Policy"
 		Chain=$(echo $Chain | tr '[:lower:]' '[:upper:]')
 		if [[ "$IPVersion" == "ipv4" ]]; then
 			if [[ "$DisableIPv4Firewall" == 1 ]]; then
-				iptables -P $Chain ACCEPT
+				$IPTABLES -P $Chain ACCEPT
 			else
 				if [ $Policy = "REJECT" ]; then
-					iptables -P $Chain DROP
-					iptables -A $Chain -j REJECT --reject-with icmp-port-unreachable
+					$IPTABLES -P $Chain DROP
+					$IPTABLES -A $Chain -j REJECT --reject-with icmp-port-unreachable
 				else
-					iptables -P $Chain $Policy
+					$IPTABLES -P $Chain $Policy
 				fi
 			fi
 		else
 			if [[ "$DisableIPv6Firewall" == 1 ]]; then
-				ip6tables -P $Chain ACCEPT
+				$IP6TABLES -P $Chain ACCEPT
 			else
 				if [ $Policy = "REJECT" ]; then
-					ip6tables -P $Chain DROP
-					ip6tables -A $Chain -j REJECT --reject-with icmp-port-unreachable
+					$IP6TABLES -P $Chain DROP
+					$IP6TABLES -A $Chain -j REJECT --reject-with icmp-port-unreachable
 				else
-					ip6tables -P $Chain $Policy
+					$IP6TABLES -P $Chain $Policy
 				fi
 			fi
 		fi
@@ -540,19 +544,19 @@ echo "Setting default Policy"
 
 	# If on multiple NIC's, accept incoming on LAN and NAT or masquerade on external
 	## Workaround for some ISPs that don't allow routers and drop packets based on TTL.
-	iptables -t mangle -A POSTROUTING -o $ExtIf -j TTL --ttl-set 255
-	ip6tables -t mangle -A POSTROUTING -o $ExtIf -j HL --hl-set 255
+	$IPTABLES -t mangle -A POSTROUTING -o $ExtIf -j TTL --ttl-set 255
+	$IP6TABLES -t mangle -A POSTROUTING -o $ExtIf -j HL --hl-set 255
 
 	# If on static external interface do source nating. If on DHCP do masquerading
 	if [[ "$ExtIP" != "dhcp" ]]; then
-		iptables -t nat -A POSTROUTING -s "$IntNet/$IntBitmask" \! -d "$IntNet/$IntBitmask" -o $OldExtIf -j SNAT --to-source $ExtIP
+		$IPTABLES -t nat -A POSTROUTING -s "$IntNet/$IntBitmask" \! -d "$IntNet/$IntBitmask" -o $OldExtIf -j SNAT --to-source $ExtIP
 	else
-		iptables -t nat -A POSTROUTING -s "$IntNet/$IntBitmask" \! -d "$IntNet/$IntBitmask" -o $OldExtIf -j MASQUERADE
+		$IPTABLES -t nat -A POSTROUTING -s "$IntNet/$IntBitmask" \! -d "$IntNet/$IntBitmask" -o $OldExtIf -j MASQUERADE
 	fi
 
 	# If PPPoE is used masquerade to that interface too
 	if [[ "$ExtIf" == "ppp0" ]]; then
-		iptables -t nat -A POSTROUTING -s "$IntNet/$IntBitmask" \! -d "$IntNet/$IntBitmask" -o $ExtIf -j MASQUERADE
+		$IPTABLES -t nat -A POSTROUTING -s "$IntNet/$IntBitmask" \! -d "$IntNet/$IntBitmask" -o $ExtIf -j MASQUERADE
 	fi
 
 #Create all the chains manual defined created.
@@ -565,7 +569,7 @@ if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
 	for Chain in $R; do
 		chain=$(Field 1 "$Chain")
 		echo "iptables -N " $chain 
-		iptables -N $chain
+		$IPTABLES -N $chain
 
 		Manual_CHain_Rules "ipv4" "$chain"
 	done
@@ -581,7 +585,7 @@ if [[ ! "$DisableIPv6Firewall" == "1" ]]; then
 	for Chain in $R; do
 		chain=$(Field 1 "$Chain")
 		echo "ip6tables -N " $chain
-		iptables -N $chain
+		$IP6TABLES -N $chain
 	
 		Manual_CHain_Rules "ipv6" "$chain"
 	done
@@ -599,7 +603,7 @@ for Protocol in $R; do
 	RuleType=$(Field 2 "$Protocol")
 	IPVersion=$(echo $RuleType | cut -dy -f2)
 
-			Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType='input' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY Place, PK_Firewall"
+			Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType='input' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY PK_Firewall"
 			   
 			R=$(RunSQL "$Q")
 
@@ -651,7 +655,7 @@ for Protocol in $R; do
 	RuleType=$(Field 2 "$Protocol")
 	IPVersion=$(echo $RuleType | cut -dy -f2)
 
-		Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType='forward' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY Place, PK_Firewall"
+		Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType='forward' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY PK_Firewall"
 		R=$(RunSQL "$Q")
 
 			for Port in $R; do
@@ -696,7 +700,7 @@ echo "Setting up Port_forwarding (NAT)"
 ForwardTypeArr=('PREROUTING' 'POSTROUTING' 'OUTPUT' 'MASQUERADE')
 for ForwardType in "${ForwardTypeArr[@]}"; do
 	echo $ForwardType
-	Q="SELECT RuleType,IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType LIKE '%-$ForwardType' AND Protocol LIKE '%ipv4' AND Disabled='0' AND Offline='0' ORDER BY Place, PK_Firewall"
+	Q="SELECT RuleType,IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType LIKE '%-$ForwardType' AND Protocol LIKE '%ipv4' AND Disabled='0' AND Offline='0' ORDER BY PK_Firewall"
 	R=$(RunSQL "$Q")
 			for Port in $R; do
 				IPVersion="ipv4"
@@ -788,7 +792,7 @@ for Protocol in $R; do
 	RuleType=$(Field 2 "$Protocol")
 	IPVersion=$(echo $RuleType | cut -dy -f2)
 
-		Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType='output' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY Place, PK_Firewall"
+		Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType='output' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY PK_Firewall"
 		R=$(RunSQL "$Q")
 
 		for Port in $R; do
@@ -829,8 +833,8 @@ done
 
 # Set discovered MSS to make PMTU work on PPPoE interfaces
 if [[ "$PPPoEEnabled" == "on" ]]; then
-	iptables --append FORWARD -o ppp+ --protocol tcp --tcp-flags SYN,RST SYN --jump TCPMSS --clamp-mss-to-pmtu
-	ip6tables --append FORWARD -o ppp+ --protocol tcp --tcp-flags SYN,RST SYN --jump TCPMSS --clamp-mss-to-pmtu
+	$IPTABLES --append FORWARD -o ppp+ --protocol tcp --tcp-flags SYN,RST SYN --jump TCPMSS --clamp-mss-to-pmtu
+	$IP6TABLES --append FORWARD -o ppp+ --protocol tcp --tcp-flags SYN,RST SYN --jump TCPMSS --clamp-mss-to-pmtu
 fi
 
 	# Add TOP 20 known attackers to blocklist
