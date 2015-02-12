@@ -446,6 +446,9 @@ void FloorPlanModel::updateDeviceData()
         string sResult;
         uiRef->getDeviceState(item->deviceNum(), &sResult);
         item->setText(QString(sResult.c_str()));
+        string sStatus;
+        uiRef->getDeviceStatus(item->deviceNum(), &sStatus);
+        item->setDeviceStatus(QString(sStatus.c_str()));
     }
 }
 
@@ -469,3 +472,12 @@ QString FloorPlanModel::getText(int device) const
     }
 }
 
+QString FloorPlanModel::getDeviceStatus(int device) const
+{
+    FloorplanDevice *d = find(device);
+    if(d){
+        return d->getDeviceStatus();
+    } else {
+        return QString();
+    }
+}

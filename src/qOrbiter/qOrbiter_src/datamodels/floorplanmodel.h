@@ -171,6 +171,7 @@ QVariantList getCommandParams(int device);
     void updateDeviceData();
     int getColor(int device) const;
     QString getText(int device) const;
+    QString getDeviceStatus(int device) const;
 
 private:
     FloorplanDevice* m_prototype;

@@ -1652,6 +1652,7 @@ public slots:
 
     // generic device
     void getDeviceState(int PK_Device, string* data);
+    void getDeviceStatus(int PK_Device, string* data);
 
     // telecom
     void makeCall(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To);

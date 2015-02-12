@@ -127,6 +127,8 @@ public:
     void setColor(int color) { m_iColor = color; }
     inline QString getText() const {return m_sText;}
     void setText(QString text) { m_sText = text; }
+    inline QString getDeviceStatus() const {return m_sDeviceStatus;}
+    void setDeviceStatus(QString status) { m_sDeviceStatus = status; }
 
 
     QString mQS_name;                       //device name
@@ -149,6 +151,7 @@ public:
 
     int m_iColor;   // color to use in icon
     QString m_sText;   // text to display next to icon
+    QString m_sDeviceStatus;   // The status device data field
 
 signals:
     void statusChanged();
