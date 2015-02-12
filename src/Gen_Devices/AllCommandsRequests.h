@@ -26912,28 +26912,28 @@ namespace DCE
 			1 /* number of parameters */,
 			COMMANDPARAMETER_Path_CONST, sPath.c_str()); }
 	};
-	class CMD_HDMI1 : public PreformedCommand {
+	class CMD_HDMI_1 : public PreformedCommand {
 	public:
-		CMD_HDMI1(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, 
-			COMMAND_HDMI1_CONST,
+		CMD_HDMI_1(long DeviceIDFrom, long DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, 
+			COMMAND_HDMI_1_CONST,
 			0 /* number of parameters */); }
 	};
-	class CMD_HDMI1_DL : public PreformedCommand {
+	class CMD_HDMI_1_DL : public PreformedCommand {
 	public:
-		CMD_HDMI1_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
-			COMMAND_HDMI1_CONST,
+		CMD_HDMI_1_DL(long DeviceIDFrom, string DeviceIDTo) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_HDMI_1_CONST,
 			0 /* number of parameters */); }
 	};
-	class CMD_HDMI1_DT : public PreformedCommand {
+	class CMD_HDMI_1_DT : public PreformedCommand {
 	public:
-		CMD_HDMI1_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
-			COMMAND_HDMI1_CONST,
+		CMD_HDMI_1_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_HDMI_1_CONST,
 			0 /* number of parameters */); }
 	};
-	class CMD_HDMI1_Cat : public PreformedCommand {
+	class CMD_HDMI_1_Cat : public PreformedCommand {
 	public:
-		CMD_HDMI1_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
-			COMMAND_HDMI1_CONST,
+		CMD_HDMI_1_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_HDMI_1_CONST,
 			0 /* number of parameters */); }
 	};
 	class CMD_HDMI_4 : public PreformedCommand {
