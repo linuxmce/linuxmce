@@ -893,7 +893,7 @@ void gc100::parse_gc100_reply(std::string message)
 	}
 }
 
-std::string gc100::read_from_gc100()
+std::string gc100::read_from_gc100(struct timeval *timeout)
 {
 	std::string return_value;
 	return_value = "";
@@ -903,7 +903,21 @@ std::string gc100::read_from_gc100()
 	while (1)
 	{
 		pthread_testcancel();
-		if (recv(gc100_socket, &recv_buffer[recv_pos], 1, 0) <= 0)
+
+		fd_set fdset;
+
+		FD_ZERO(&fdset);
+		FD_SET(gc100_socket, &fdset);
+
+		struct timeval tv;
+		if (timeout != NULL)
+			tv = *timeout;
+
+		if (
+			select(gc100_socket + 1, &fdset, NULL, NULL, timeout != NULL ? &tv : NULL) <= 0
+			|| !FD_ISSET(gc100_socket, &fdset)
+			|| recv(gc100_socket, &recv_buffer[recv_pos], 1, 0) <= 0
+		)
 		{
 			return_value = "error";
 			break;
@@ -1579,7 +1593,14 @@ void gc100::CreateChildren()
 
 	do
 	{
-	    device_data = read_from_gc100();
+		struct timeval tv;
+		tv.tv_sec = 5;
+		tv.tv_usec = 0;
+		device_data = read_from_gc100(&tv);
+		if (device_data == "error") {
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Failed to get devices from gc100");
+			exit(2);
+		}
 	} while (device_data != "endlistdevices");
 
 	Start_seriald(); // Start gc_seriald processes according to serial port inventory

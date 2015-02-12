@@ -191,7 +191,7 @@ public:
 
 		bool Open_gc100_Socket();
 		bool send_to_gc100(string Cmd);
-		std::string read_from_gc100();
+		std::string read_from_gc100(struct timeval *timeout = NULL);
 		bool ConvertPronto(string ProntoCode, string &gc_code, int Repeat = 1);
 
 		// For a given device find the pin and device id.  return false if it's not found
