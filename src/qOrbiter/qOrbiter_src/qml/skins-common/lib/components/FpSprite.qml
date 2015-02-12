@@ -45,9 +45,25 @@ Item {
         cache: false
     }
 
+    function getColor(deviceNum) {
+        var t = floorplan_devices.getText(deviceNum)
+        t = t.substring(0, t.indexOf("|"))
+        if (t === 'ON')
+            return "#00FFFF"
+        else if (t === 'OFF')
+            return "#000000"
+    }
+
+/*    ColorOverlay {
+        anchors.fill: fpDevice_image
+        source: bug
+//        visible: getColor(deviceNum) != 0
+        color: getColor(deviceNum)
+    }
+*/
     Text {
         id: device_number
-        text: deviceNum
+        text: floorplan_devices.getText(deviceNum) + " " + floorplan_devices.getDeviceStatus(deviceNum)
         anchors.centerIn: parent
         font.pixelSize: scaleY(2)
     }
