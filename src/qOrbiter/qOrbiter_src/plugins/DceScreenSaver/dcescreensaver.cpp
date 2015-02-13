@@ -236,7 +236,7 @@ void DceScreenSaver::paint(QPainter *painter){
     }
 
     if(fadeOpacity==1){
-        painter->drawPixmap(tgtRect, surface, tgtRect);
+        painter->drawPixmap(tgtRect, currentImage, tgtRect);
     }else{
         painter->drawPixmap(tgtRect, surface, tgtRect);
         //setup and new pix map over it
