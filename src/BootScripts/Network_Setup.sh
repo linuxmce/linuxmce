@@ -532,41 +532,6 @@ if [[ "$VPNenabled" == "on" ]]; then
 		done
 	chmod 644 /etc/ppp/pap-secrets
 
-	#Setup ip-up and ip-down script for pppd
-        grep -w "^#Setup iptables" /etc/ppp/ip-up >/dev/null
-        if [[ "$?" -ne "0" ]]; then
-                echo "Setting up /etc/ppp/ip-up"
-
-                ipup=$"#Setup iptables  and update db
-if [[ ! "$6" == "" ]]; then
-	if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
-		R=$(mysql pluto_main -ss -e\"SELECT Protocol FROM Firewall WHERE RuleType='VPN' AND SourceIP='$5' AND Protocol='ip-ipv4' ORDER BY PK_Firewall\")
-		if [ "$R" ]; then
-			mysql pluto_main -ss -e \"UPDATE Firewall SET Offline='0' WHERE RuleType='VPN' AND SourceIP='$5'\"
-		fi
-		/usr/pluto/bin/Network_Firewall.sh
-	fi
-fi"
-
-                echo "$ipup" >> /etc/ppp/ip-up
-        fi
-        grep -w "^#Setup iptables" /etc/ppp/ip-down >/dev/null
-        if [[ "$?" -ne "0" ]]; then
-                echo "Setting up /etc/ppp/ip-down"
-
-                ipdown=$"#Setup iptables  and update db
-if [[ ! "$6" == "" ]]; then
-        if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
-                R=$(mysql pluto_main -ss -e\"SELECT Protocol FROM Firewall WHERE RuleType='VPN' AND SourceIP='$5' AND Protocol='ip-ipv4' ORDER BY PK_Firewall\")
-                if [ "$R" ]; then
-                        mysql pluto_main -ss -e \"UPDATE Firewall SET Offline='1' WHERE RuleType='VPN' AND SourceIP='$5'\"
-                fi
-                /usr/pluto/bin/Network_Firewall.sh
-        fi
-fi"
-
-                echo "$ipdown" >> /etc/ppp/ip-down
-        fi
 fi
 
 
