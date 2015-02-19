@@ -156,6 +156,12 @@ void EventMethod::MethodURL()
 		if (res != 0)
 		{
 			LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodURL(): failed to get connection: curl error: %s", curl_easy_strerror(res));
+			// Sleep and retry
+			struct timespec req;
+			struct timespec rem;
+			req.tv_sec = 120;
+			req.tv_nsec = 0;
+			nanosleep(&req, &rem);
 			
 		} else {
 			long code;
@@ -170,24 +176,22 @@ void EventMethod::MethodURL()
 				LoggerWrapper::GetInstance ()->Write (LV_CRITICAL, "EventMethod::MethodURL(): Error? http code: %d",  code);
 
 			}
-		}
-		
-		if (usePolling) {
-			// polling, close connection and restart it after a short timeout
-			curl_easy_cleanup(eventCurl);
-			struct timespec req;
-			struct timespec rem;
-			req.tv_sec = m_iInterval;
-			req.tv_nsec = 0;
-			nanosleep(&req, &rem);
-		} else {
-			// Keep-alive connection and camera sends new data on same connection
-			while (m_bRunning)
-			{
-				// http url client does nothing here
+			if (usePolling) {
+				// polling, close connection and restart it after a short timeout
+				curl_easy_cleanup(eventCurl);
+				struct timespec req;
+				struct timespec rem;
+				req.tv_sec = m_iInterval;
+				req.tv_nsec = 0;
+				nanosleep(&req, &rem);
+			} else {
+				// Keep-alive connection and camera sends new data on same connection
+				while (m_bRunning)
+				{
+					// http url client does nothing here
+				}
 			}
 		}
-
 	}
 }
 
