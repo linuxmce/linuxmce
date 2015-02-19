@@ -222,7 +222,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     qrcPath = "qrc:main/Welcome.qml";
 #else
     buildType = "/qml/qt5-desktop";
-    qrcPath = "qrc:qml/Welcome2.qml";
+    qrcPath = "qrc:main/Welcome2.qml";
     localPath = "qt5-desktop/";
 #endif
     qDebug() << "Adding "<< QApplication::applicationDirPath()+"/imports/";
@@ -271,12 +271,9 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     buildType = "/qml/ios";
     qrcPath = "qrc:main/IosWelcome.qml";
     localPath = "ios/";
-
-
 #else
-
     buildType = "/qml/desktop";
-    qrcPath = "qrc:desktop/Splash.qml";
+    qrcPath = "qrc:main/Welcome2.qml";
 
 #endif
 

@@ -581,6 +581,8 @@ OTHER_FILES += Readme.txt \
         qml/Welcome.qml \
         qml/Welcome2.qml \
         qml/Refresh.qml \
+    qml/linux/Welcome.qml \
+    qml/Themes.json
 
 
 for_harmattan{

@@ -67,6 +67,9 @@ public slots:
     }
 
 };
+
+
+
 class HouseModesHelper : public QObject
 {
     Q_OBJECT

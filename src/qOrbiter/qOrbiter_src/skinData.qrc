@@ -36,4 +36,9 @@
     <qresource prefix="/">
         <file>iOS/ImportedItems.qml</file>
     </qresource>
+    <qresource prefix="/tablet"/>
+    <qresource prefix="/phone"/>
+    <qresource prefix="/qml">
+        <file>qml/linux/Welcome.qml</file>
+    </qresource> 
 </RCC>

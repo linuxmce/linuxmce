@@ -47,25 +47,25 @@ TRANSLATIONS += app_de.ts
 #Tip - Use the subprojects or setup and external qml plugins to place their output into one location you main application will
 #look at to find the external libraries it needs.
     x86 {
-        qmlplugins.files = ../../../platforms/Android/androidPlugins/x86/libqmlshadersplugin.so
-        qmlplugins.files += ../../../platforms/Android/androidPlugins/x86/libandroidplugin_1_1.so
-        qmlplugins.path = /libs/x86
-
+        #qmlplugins.files = ../../../platforms/Android/androidPlugins/x86/libqmlshadersplugin.so
+      #  qmlplugins.files += ../../../platforms/Android/androidPlugins/x86/libandroidplugin_1_1.so
+       # qmlplugins.path = /libs/x86
+#
         } armeabi-v7a {
-        qmlplugins.files = ../../../platforms/Android/androidPlugins/armeabi-v7a/libqmlshadersplugin.so
-        qmlplugins.files += ../../../platforms/Android/androidPlugins/armeabi-v7a/libandroidplugin_1_1.so
-                qmlplugins.path = /libs/armeabi-v7a
+       # qmlplugins.files = ../../../platforms/Android/androidPlugins/armeabi-v7a/libqmlshadersplugin.so
+      #  qmlplugins.files += ../../../platforms/Android/androidPlugins/armeabi-v7a/libandroidplugin_1_1.so
+       #         qmlplugins.path = /libs/armeabi-v7a
 
         } else {
-        qmlplugins.files = ../../../platforms/Android/androidPlugins/armeabi/libqmlshadersplugin.so
-        qmlplugins.files += ../../../platforms/Android/androidPlugins/armeabi/libandroidplugin_1_1.so
-        qmlplugins.path = /libs/armeabi
+      # qmlplugins.files = ../../../platforms/Android/androidPlugins/armeabi/libqmlshadersplugin.so
+       # qmlplugins.files += ../../../platforms/Android/androidPlugins/armeabi/libandroidplugin_1_1.so
+       # qmlplugins.path = /libs/armeabi
         }
 
         #This is the only locally deployed qml file. Its purpose is to provide initial logic for connecting to the core,
         #and error handling, etc. It is not designer editable and should be considered as and .h / .cpp file when changing
         #and the implications of such.
-        base.source = ../../qml/android/Welcome.qml
+        base.source = ../../qml/android/AndroidBase.qml
         base.target = qml/
 
         #The Configuration file read on startup and used subsequently.
@@ -83,7 +83,7 @@ TRANSLATIONS += app_de.ts
         DEPLOYMENTFOLDERS = qmlcomponents base #folder_01
         QML_IMPORT_PATH = "androidComponents"
 
-        INSTALLS+= qmlplugins
+       # INSTALLS+= qmlplugins
         HEADERS += ../../plugins/AndroidInfo/androidsystem.h \
     ../../defineObjects/mediatypehelper.h \
     ../../RemoteCommands.h \

@@ -371,6 +371,7 @@ int main(int argc, char* argv[])
         qmlRegisterType<UserModesHelper>("org.linuxmce.enums",1,0,"HouseModes");
         qmlRegisterType<RoomTypeHelper>("org.linuxmce.enums", 1,0, "RoomTypes");
         qmlRegisterType<ScreenList>("org.linuxmce.screens", 1,0, "Screens");
+        qmlRegisterType<ScreenData>("org.linuxmce.screeninfo", 1,0, "ScreenData");
         qmlRegisterType<GenericFlatListModel>();
         if(deviceType==0){
 

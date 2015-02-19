@@ -114,8 +114,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
         emit localConfigReady(false);
     }
 
-
-    
     QApplication::processEvents(QEventLoop::AllEvents);
     
     myOrbiters = new ExistingOrbiterModel(new ExistingOrbiter(), this);
@@ -135,7 +133,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     
     //Resize to view as opposed to the root item
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
-    qorbiterUIwin->setResizeMode(QQuickView::SizeViewToRootObject); 
+    qorbiterUIwin->setResizeMode(QQuickView::SizeViewToRootObject);
     m_screenInfo = new ScreenInfo();
     qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);
 #else
@@ -308,15 +306,30 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     setApplicationPath(QApplication::applicationDirPath());
     localDir = qmlPath.append(buildType.remove("/qml"));
     remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins"+buildType.remove("/qml");
+
     if(b_localLoading){
-        finalPath=localDir;
+
+#ifdef __ANDROID__
+        finalPath="qrc:///qml/android";
+#elif defined Q_OS_IOS
+        finalPath="qrc:///qml/ios";
+#elif defined WIN32
+        finalPath="qrc:///qml/windows";
+#elif defined Q_OS_MACX
+        finalPath="qrc:///qml/osx";
+#elif defined Q_OS_LINUX
+        finalPath="qrc:///qml/qml/linux";
+#endif
+         qorbiterUIwin->setSource( QUrl(finalPath+"/Welcome.qml")); /*! We dont set android/iOS because it has its own bootstrap */
     }else{
         finalPath=remoteDirectoryPath;
+         qorbiterUIwin->setSource( finalPath+"/splash/Splash.qml"); /*! We dont set android/iOS because it has its own bootstrap */
+
     }
 
 #if !defined(ANDROID)
     qDebug() << "Android should not see this";
-    qorbiterUIwin->setSource(finalPath+"/splash/Splash.qml"); /*! We dont set android/iOS because it has its own bootstrap */
+
 #else
 
 #endif
@@ -1977,7 +1990,7 @@ bool qorbiterManager::readLocalConfig(){
     dir.setPath(QDir::homePath());
     qDebug() << dir.absolutePath()+"/Library/Application_Support/LinuxMCE/";
     xmlPath =dir.absolutePath()+"/Library/Application_Support/LinuxMCE/config.xml";
-        #elif defined(Q_OS_ANDROID)
+#elif defined(Q_OS_ANDROID)
 #ifdef NECESSITAS
 
     qDebug() << "Mobile Storage Location::" << mobileStorageLocation;
