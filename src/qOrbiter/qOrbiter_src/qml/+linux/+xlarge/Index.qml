@@ -2,30 +2,33 @@ import QtQuick 2.3
 import QtGraphicalEffects 1.0
 import AudioVisual 1.0
 import DceScreenSaver 1.0
+
 Item {
     anchors.fill: parent
     height: 720
-    width:1280
-
+    width: 1280
     Component.onCompleted: {
         if(window.orbiterInitialized){
             state="init"
+
         } else {
             state="preinit"
         }
     }
 
+
+
     Timer{
         id:pusher
         interval: 3000
-        onTriggered: bootStrap.source="BaseLoaded.qml"
+        onTriggered: bootStrap.source = "http://192.168.80.1/lmce-admin/skins/Index.qml"
         running:true
     }
-
-    Image {
-        id: bg
-        source: "qrc:../img/Splash.png"
+    Image{
+        source: "images/splash-bg.png"
+        anchors.fill:parent
     }
+
 
     Rectangle{
         anchors.fill: parent
@@ -54,7 +57,9 @@ Item {
 
     Text {
         id: splashText
-        text: qsTr("QOrbiter for Android")
+        text: qsTr("QOrbiter for Linux")
+        color:"white"
+        font.pointSize: 42
         anchors{
             top:parent.top
             horizontalCenter: parent.horizontalCenter
@@ -63,10 +68,11 @@ Item {
 
     Text{
         id:loadingText
-        text:"Please Wait, Loading"
+        text:"Please Wait"
         color:"white"
         anchors.centerIn: parent
         font.pointSize: 32
+        font.weight: Font.Light
     }
 
     states: [

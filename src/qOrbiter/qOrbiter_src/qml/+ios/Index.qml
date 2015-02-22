@@ -1,11 +1,7 @@
-import QtQuick 2.3
+import QtQuick 2.2
 import QtGraphicalEffects 1.0
-import AudioVisual 1.0
-import DceScreenSaver 1.0
 Item {
     anchors.fill: parent
-    height: 720
-    width:1280
 
     Component.onCompleted: {
         if(window.orbiterInitialized){
@@ -14,6 +10,8 @@ Item {
             state="preinit"
         }
     }
+
+
 
     Timer{
         id:pusher

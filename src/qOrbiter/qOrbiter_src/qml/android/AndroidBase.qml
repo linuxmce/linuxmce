@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import QtGraphicalEffects 1.0
+import QtMultimedia 5.0
 Item {
     height: manager.appHeight
     width: manager.appWidth

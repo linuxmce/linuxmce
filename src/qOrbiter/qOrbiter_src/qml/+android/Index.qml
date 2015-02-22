@@ -1,11 +1,7 @@
-import QtQuick 2.3
+import QtQuick 2.2
 import QtGraphicalEffects 1.0
-import AudioVisual 1.0
-import DceScreenSaver 1.0
 Item {
     anchors.fill: parent
-    height: 720
-    width:1280
 
     Component.onCompleted: {
         if(window.orbiterInitialized){
@@ -22,14 +18,15 @@ Item {
         running:true
     }
 
-    Image {
-        id: bg
-        source: "qrc:../img/Splash.png"
+
+    Rectangle{
+        color: "red"
+        anchors.fill: parent
     }
 
     Rectangle{
         anchors.fill: parent
-        opacity:.85
+        opacity:1
         gradient: Gradient{
             GradientStop{
                 position: 0.0
@@ -55,6 +52,7 @@ Item {
     Text {
         id: splashText
         text: qsTr("QOrbiter for Android")
+        color:"red"
         anchors{
             top:parent.top
             horizontalCenter: parent.horizontalCenter
@@ -63,7 +61,7 @@ Item {
 
     Text{
         id:loadingText
-        text:"Please Wait, Loading"
+        text:"Please Wait, Loading for Android..."
         color:"white"
         anchors.centerIn: parent
         font.pointSize: 32

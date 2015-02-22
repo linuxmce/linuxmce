@@ -1,12 +1,10 @@
-import QtQuick 2.3
+import QtQuick 2.2
 import QtGraphicalEffects 1.0
-import AudioVisual 1.0
-import DceScreenSaver 1.0
+
 Item {
     anchors.fill: parent
     height: 720
-    width:1280
-
+    width: 1280
     Component.onCompleted: {
         if(window.orbiterInitialized){
             state="init"
@@ -26,10 +24,14 @@ Item {
         id: bg
         source: "qrc:../img/Splash.png"
     }
+    Rectangle{
+        color: "green"
+        anchors.fill: parent
+    }
 
     Rectangle{
         anchors.fill: parent
-        opacity:.85
+        opacity:1
         gradient: Gradient{
             GradientStop{
                 position: 0.0
@@ -63,7 +65,7 @@ Item {
 
     Text{
         id:loadingText
-        text:"Please Wait, Loading"
+        text:"Please Wait, Loading for Linux..."
         color:"white"
         anchors.centerIn: parent
         font.pointSize: 32
