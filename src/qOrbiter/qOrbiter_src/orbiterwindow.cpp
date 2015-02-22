@@ -209,91 +209,13 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.rootContext()->setContextProperty("appH", 600);
 #endif
 
-#if (QT5)
-  //  mainView.rootContext()->setContextProperty("appW", 1280);
-  // mainView.rootContext()->setContextProperty("appH", 720);
-#endif
-
-
-
-#ifdef for_desktop
-#ifndef QT5
-    buildType = "/qml/desktop";
-    qrcPath = "qrc:main/Welcome.qml";
-#else
-    buildType = "/qml/qt5-desktop";
-    qrcPath = "qrc:main/Welcome2.qml";
-    localPath = "qt5-desktop/";
-#endif
-    qDebug() << "Adding "<< QApplication::applicationDirPath()+"/imports/";
-    mainView.engine()->addImportPath(QApplication::applicationDirPath()+"/imports/");
-#elif defined (for_freemantle)
-    buildType = "/qml/freemantle";
-    qrcPath = "qrc:freemantle/Splash.qml";
-    localPath = "freemantle/";
-#elif defined (WIN32)
-    buildType="/qml/desktop";
-    qrcPath = "qrc:desktop/Splash.qml";
-    localPath = "desktop/";
-#elif defined (for_harmattan)
-    buildType="/qml/harmattan";
-    qrcPath = "qrc:harmattan/Splash.qml";
-    localPath = "harmattan/";
-#elif defined (IOS)
-    buildType="/qml/desktop";
-    NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
-    qrcPath = qStringFromNSString([resourcePath stringByAppendingPathComponent:@"qml/Splash.qml"]);
-    localPath = "desktop/";
-#elif defined(Q_OS_MACX)
-    buildType="/qml/qt5-desktop";
-    qrcPath = "qrc:main/Welcome2.qml";
-    localPath = "desktop/";
-    qDebug() << "Adding "<< QApplication::applicationDirPath()+"/imports/";
-    mainView.engine()->addImportPath(QApplication::applicationDirPath()+"/imports/");
-#elif defined __ANDROID__
-#ifdef QT5
-    qrcPath = "qrc:main/AndroidBase.qml";
-    localPath = "android/qt5";
-#else
-    qrcPath = "assets:/qml/Base.qml";
-    localPath = "android/";
-#endif
-
-#elif defined for_android
-    buildType = "/qml/android";
-    qrcPath = "qrc:android/Splash.qml";
-    localPath = "android/";
-#elif defined RPI
-    buildType = "/qml/qt5-desktop";
-    qrcPath = "qrc:main/Welcome2.qml";
-    localPath = "qt5-desktop/";
-#elif defined Q_OS_IOS
-    buildType = "/qml/ios";
-    qrcPath = "qrc:main/IosWelcome.qml";
-    localPath = "ios/";
-#else
-    buildType = "/qml/desktop";
-    qrcPath = "qrc:main/Welcome2.qml";
-
-#endif
-
 #ifdef ANDROID
-    /* Android ifdef for loading initial qml file */
-
-#ifdef QT4_8
-    mainView.rootContext()->setContextProperty("appW", mainView.width());
-    mainView.rootContext()->setContextProperty("appH", mainView.height());
-#endif
     mainView.engine()->addImportPath("assets:/imports/androidComponents");
     mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
     mainView.engine()->addPluginPath("assets:/lib");
-
-    qDebug() << "Plugin path list"; mainView.engine()->pluginPathList().join("\n");
-    mainView.rootContext()->setBaseUrl(QUrl::fromLocalFile("/"));
 #endif
-    /*End Special Android setup */
-    qDebug() << "QML Import Path List::" << mainView.engine()->importPathList();
-    mainView.setSource(qrcPath); /* Sets the initial qml file based on all the above switching */
+qrcPath="qrc:/qml/qml/Index.qml";
+//mainView.setSource(qrcPath); /* Sets the initial qml file based on all the above switching */
 
 }
 
@@ -301,31 +223,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
  * \brief orbiterWindow::initView This function is used to provide any special handling needed for window setup on start.
  */
 void orbiterWindow::initView(){
-#ifdef Q_OS_SYMBIAN
-    mainView.showFullScreen();
-#elif defined(Q_WS_MAEMO_5)
-    mainView.showMaximized();
-#elif defined(for_harmattan)
-    mainView.showFullScreen();
-#elif defined(for_desktop)
-    if(fullScreenOrbiter==true){
-        mainView.showMaximized();
-    }
-    else{
-        mainView.show();
-    }
-#elif defined(__ANDROID__)
-    mainView.showMaximized();
-#elif defined(for_android)
-    mainView.show();
-#elif defined(Q_OS_IOS)
-    mainView.showMaximized();
-#elif RPI
-    mainView.showFullScreen();
-#else
-    mainView.showNormal();
-    // mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
-#endif
+//mainView.showMaximized();
 
 }
 

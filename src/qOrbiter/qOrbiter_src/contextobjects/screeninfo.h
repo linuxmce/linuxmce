@@ -5,6 +5,7 @@
 #include <QScreen>
 #include <QMap>
 #include <QDebug>
+#include "math.h"
 
 class ScreenData : public QObject
 {
@@ -23,20 +24,28 @@ public:
 
     Q_ENUMS(PixelDensityScale)
 
-    enum DeviceSizes{
-        Device_240,
-        Device_320,
-        Device_480,
-        Device_540,
-        Device_600,
-        Device_768,
-        Device_800,
-        Device_960,
-        Device_1024,
-        Device_1280
+    enum DeviceSizes{ //portrait width
+        Device_240 =240,  //* Small
+        Device_320 =320,
+        Device_480 =480,
+        Device_540 =540,  //* Medium
+        Device_600 =600,
+        Device_768 =768,
+        Device_800 =800,
+        Device_960 =960,  //* large
+        Device_1024=1024,
+        Device_1280=1280
     };
 
     Q_ENUMS(DeviceSizes)
+
+    enum DeviceRange{
+        Device_Small    = 4,    //Phones small
+        Device_Medium   = 7,    //Normal Tablets
+        Device_Large    = 10,   //Big Tablets
+        Device_XLarge   = 13    //Computer Monitors
+    };
+
     virtual ~ScreenData() {}
 };
 
@@ -51,6 +60,11 @@ class ScreenObject : public QObject
     Q_PROPERTY(QString nativeOrientation READ nativeOrientation() NOTIFY nativeOrientationChanged)
     Q_PROPERTY(int heightMM READ heightMM() NOTIFY measurementChanged  )
     Q_PROPERTY(int widthMM READ widthMM() NOTIFY measurementChanged)
+    Q_PROPERTY(int heightInches READ heightInches() NOTIFY measurementChanged  )
+    Q_PROPERTY(int widthInches READ widthInches() NOTIFY measurementChanged  )
+
+    Q_PROPERTY(double diagonalSize READ diagonalSize() NOTIFY diagonalSizeChanged)
+    Q_PROPERTY(double diagonalInches READ diagonalInches() NOTIFY diagonalSizeChanged)
     Q_PROPERTY(int width READ width() NOTIFY sizeChanged)
     Q_PROPERTY(int height READ height() NOTIFY sizeChanged)
 
@@ -79,16 +93,73 @@ public:
         m_heightMM(height_mm),
         m_widthMM(width_mm),
         m_height(pixel_height),
-        m_width(pixel_width)
-    {}
+        m_width(pixel_width),
+        m_deviceSize(ScreenData::Device_Small)
+    {
+        setDiagonalSize(sqrt( pow( (double)m_heightMM,2.0)+pow((double)m_widthMM, 2.0) ));
+
+        qDebug() << " Handling Device " <<  heightInches() << "h x " << widthInches() << "w  device measured at " << diagonalInches() << " descriptively";
+        if(  diagonalInches() <= 4.5 ){
+            setScreenSize(ScreenData::Device_Small);
+            qDebug() << "Set Size Selector to small";
+
+        } else if (diagonalInches() <= 7){
+            setScreenSize(ScreenData::Device_Medium);
+             qDebug() << "Set Size Selector to medium";
+
+        } else if (diagonalInches() <= 10 ) {
+            setScreenSize(ScreenData::Device_Large);
+             qDebug() << "Set Size Selector to large";
+
+        } else if ( diagonalInches() <= 12 ) {
+            setScreenSize(ScreenData::Device_XLarge);
+             qDebug() << "Set Size Selector to xlarge";
+        } else {
+            setScreenSize(ScreenData::Device_XLarge);
+             qDebug() << "Set Size Selector to xlarge";
+        }
+    }
 
     virtual ~ScreenObject() {}
 
+    double diagonalSize(){return m_diagonalSize;}
     double logicalDpi(){return m_logicalDpi;}
     double physicalDpi(){return m_phisicalDpi;}
     int height(){return m_height;}
     int width() {return m_width;}
     QString screenName(){return m_screenName;}
+    int heightMM(){return m_heightMM;}
+    int widthMM(){return m_widthMM;}
+    int heightInches(){ return m_heightMM *0.0393701; }
+    int widthInches(){ return m_widthMM * 0.0393701; }
+    double diagonalInches(){return m_diagonalSize*0.0393701;}
+
+    QString orientation() { return getOrientationString(m_orientation); }
+    QString primaryOrientation(){ return getOrientationString(m_primaryOrientation); }
+    QString nativeOrientation(){ return getOrientationString(m_nativeOrientation); }
+
+    ScreenData::DeviceRange deviceSize(){return m_deviceSize;}
+    QStringList DeviceSizeList(){ return QStringList(); }
+
+public slots:
+    QString deviceSizeToString(ScreenData::DeviceSizes sz){
+        switch (sz) {
+        case ScreenData::Device_240: return "+240";break;
+        case ScreenData::Device_320: return "+320";break;
+        case ScreenData::Device_480: return "+480";break;
+        case ScreenData::Device_540: return "+540";break;
+        case ScreenData::Device_600: return "+600";break;
+        case ScreenData::Device_768: return "+768";break;
+        case ScreenData::Device_800: return "+800";break;
+        case ScreenData::Device_960: return "+960";break;
+        case ScreenData::Device_1024: return "+1024";break;
+        case ScreenData::Device_1280: return "+1280";break;
+        default:
+            return "+240";
+            break;
+        }
+    }
+
     QString getOrientationString(Qt::ScreenOrientation o){
         switch (o) {
         case Qt::PrimaryOrientation: return tr("Primary"); break;
@@ -100,37 +171,6 @@ public:
         }
     }
 
-    int heightMM(){return m_heightMM;}
-    int widthMM(){return m_widthMM;}
-
-    QString orientation() {
-        return getOrientationString(m_orientation);
-    }
-    QString primaryOrientation(){
-        return getOrientationString(m_primaryOrientation);
-    }
-    QString nativeOrientation(){
-        return getOrientationString(m_nativeOrientation);
-    }
-
-public slots:
-    void setScreenData(double log, double phys, Qt::ScreenOrientation ori, QString na){
-
-        m_logicalDpi=log;
-        emit logicalDpiChanged();
-
-        m_phisicalDpi = phys;
-        emit physicalDpiChanged();
-
-        m_orientation = ori;
-        emit orientationChanged();
-
-        m_screenName = na;
-        emit screenChanged();
-    }
-    void setScreenGeometry(QRect s){m_height= s.height(); m_width = s.width(); emit geometryChanged(); }
-    void setOrientation(Qt::ScreenOrientation e) {m_orientation = e; emit orientationChanged();}
-    void setRefreshRate(qreal r) {m_refreshRate = r; emit refreshRateChanged();}
 
 signals:
     void logicalDpiChanged();
@@ -146,9 +186,17 @@ signals:
     void primaryOrientationChanged();
     void measurementChanged();
     void sizeChanged();
+    void screenSizeChanged();
+    void pixelDensityChanged();
+    void diagonalSizeChanged();
+
 private slots:
-
-
+    void setDiagonalSize(double dg){m_diagonalSize=dg; emit diagonalSizeChanged(); }
+    void setScreenSize(ScreenData::DeviceRange sz){m_deviceSize=sz; emit screenSizeChanged();  }
+    void setPixelScale(ScreenData::PixelDensityScale pz){m_pixelScale = pz; emit pixelDensityChanged(); }
+    void setScreenGeometry(QRect s){m_height= s.height(); m_width = s.width(); emit geometryChanged(); }
+    void setOrientation(Qt::ScreenOrientation e) {m_orientation = e; emit orientationChanged();}
+    void setRefreshRate(qreal r) {m_refreshRate = r; emit refreshRateChanged();}
 
 private:
     /** Current Screen */
@@ -167,7 +215,9 @@ private:
     int m_physicalDpiY;
     int m_logicalDpiX;
     int m_logicalDpiY;
-
+    double m_diagonalSize;
+    ScreenData::DeviceRange m_deviceSize;
+    ScreenData::PixelDensityScale m_pixelScale;
 };
 
 class ScreenInfo : public QObject
@@ -192,6 +242,7 @@ signals:
     void primaryScreenChanged();
     void screenCountChanged();
     void screenListChanged();
+    void screenSizeChanged();
 
 
 public slots:

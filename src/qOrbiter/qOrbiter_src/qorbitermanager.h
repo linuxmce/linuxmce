@@ -554,7 +554,7 @@ Param 10 - pk_attribute
     int hostDevice;
 signals:
 
-
+    void skinSelectorChanged();
     void hostDeviceChanged();
 
     /*ScreenSaver*/
@@ -1713,10 +1713,37 @@ public slots:
 
     }
 
+private slots:
+    void resetScreenSize(){
+
+        m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
+        switch (m_deviceSize) {
+        case ScreenData::Device_Small: m_selector->setExtraSelectors(QStringList("small")); break;
+        case ScreenData::Device_Medium:m_selector->setExtraSelectors(QStringList("medium")); break;
+        case ScreenData::Device_Large:m_selector->setExtraSelectors(QStringList("large")); break;
+        case ScreenData::Device_XLarge: m_selector->setExtraSelectors(QStringList("xlarge")); break;
+            break;
+        default:
+            break;
+        }
+        qDebug() << Q_FUNC_INFO << " Set to "<< m_selector->allSelectors();
+         qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
+       // qorbiterUIwin->setSource(qorbiterUIwin->source());
+    }
+
 private:
     void initializeConnections();
     void setupQMLview();
+    void setSkinSelector(QString s){if(m_skinSelector==s)return ; m_skinSelector=s; emit skinSelectorChanged(); }
+    void reloadQmlSkin() { }
+    void setSelectors(QList<QString> selections){selector->setExtraSelectors(selections);}
 
+
+private:
+    QString m_skinSelector;
+    QQmlFileSelector *selector;
+    QFileSelector *m_selector;
+    ScreenData::DeviceRange m_deviceSize;
 
 
 };

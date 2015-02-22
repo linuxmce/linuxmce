@@ -1,44 +1,10 @@
 <RCC>
-    <qresource prefix="/img">
-        <file alias="harmattan_splash.png">img/harmattan_splash.png</file>
-        <file alias="Splash.png">qml/desktop/default/img/icons/backgrounds/bedroom.png</file>
-    </qresource>
-    <qresource prefix="/main">
-        <file alias="Welcome.qml">qml/Welcome.qml</file>
-        <file alias="Welcome2.qml">qml/Welcome2.qml</file>
-        <file>config.xml</file>
-        <file alias="IosWelcome.qml">qml/IosWelcome.qml</file>
-        <file alias="AndroidBase.qml">qml/android/AndroidBase.qml</file>
-    </qresource>
-    <qresource prefix="/desktop"/>
-    <qresource prefix="/osx"/>
-    <qresource prefix="/harmattan"/>
-    <qresource prefix="/android"/>
-    <qresource prefix="/icons">
-        <file alias="icon.png">img/harmattan_splash.png</file>
-        <file alias="audio.png">qml/desktop/default/img/icons/kmix.png</file>
-        <file alias="video.png">qml/desktop/default/img/icons/xine.png</file>
-        <file alias="games.png">qml/desktop/default/img/icons/Games.png</file>
-        <file alias="playlist.png">qml/desktop/default/img/icons/kedit.png</file>
-    </qresource>
-    <qresource prefix="/components">
-        <file alias="FpSprite.qml">qml/desktop/default/components/FpSprite.qml</file>
-    </qresource>
-    <qresource prefix="/qt5-desktop">
-        <file alias="Welcome2.qml">qml/Welcome2.qml</file>
-    </qresource>
-    <qresource prefix="/reload">
-        <file alias="AndroidReload.qml">qml/skins-common/lib/startup/AndroidReload.qml</file>
-        <file alias="GenericReload.qml">qml/skins-common/lib/startup/DesktopReload.qml</file>
-        <file>qml/skins-common/lib/startup/IoSReload.qml</file>
-        <file alias="Refresh.qml">qml/Refresh.qml</file>
-    </qresource>
-    <qresource prefix="/">
-        <file>iOS/ImportedItems.qml</file>
-    </qresource>
-    <qresource prefix="/tablet"/>
-    <qresource prefix="/phone"/>
     <qresource prefix="/qml">
-        <file>qml/linux/Welcome.qml</file>
-    </qresource> 
+        <file>qml/Index.qml</file>
+        <file>qml/images/splash-bg.png</file>     
+        <file>qml/IndexContent.qml</file>
+        <file>qml/+linux/IndexContent.qml</file>
+        <file>qml/+android/IndexContent.qml</file>
+        <file>qml/+android/+small/IndexContent.qml</file>
+    </qresource>
 </RCC>

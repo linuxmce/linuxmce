@@ -30,6 +30,7 @@
 #include <QtScript/QScriptEngine>
 #include <QtScript/QScriptValue>
 #include <QtScriptTools/QtScriptTools>
+#include <QQmlFileSelector>
 #else
 #include <QtDeclarative/QDeclarativeProperty>
 #include <QFile>
@@ -79,10 +80,21 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     #endif
     QObject(parent),qorbiterUIwin(view)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
+    selector=new QQmlFileSelector(view->engine());
+    m_selector=new QFileSelector(this);
+    selector->setSelector(m_selector);
+    m_screenInfo = new ScreenInfo();
+    connect(m_screenInfo, SIGNAL(screenSizeChanged()), this, SLOT(resetScreenSize()));
+    resetScreenSize();
+    qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);   
+    qorbiterUIwin->showMaximized();
+#endif
+
+
     mediaPlayerID=-1;
     orbiterInit=true;
     m_ipAddress="";
-
     m_bStartingUp= true;
     homeNetwork=false;
     alreadyConfigured = false;
@@ -132,7 +144,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     appWidth = qorbiterUIwin->width() ;
     
     //Resize to view as opposed to the root item
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
     qorbiterUIwin->setResizeMode(QQuickView::SizeViewToRootObject);
     m_screenInfo = new ScreenInfo();
     qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);
@@ -195,6 +207,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     buildType="/qml/qt5-desktop";
     setHostDevice(HostSystemData::RASPBERRY_PI);
 #elif defined ANDROID
+
 #ifndef QT5
     qDebug() << "Resolution::"<<QApplication::desktop()->width()<<"w x "<<QApplication::desktop()->height()<<"h";
     int h = QApplication::desktop()->height();
@@ -320,10 +333,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
 #elif defined Q_OS_LINUX
         finalPath="qrc:///qml/qml/linux";
 #endif
-         qorbiterUIwin->setSource( QUrl(finalPath+"/Welcome.qml")); /*! We dont set android/iOS because it has its own bootstrap */
+        // qorbiterUIwin->setSource( QUrl(finalPath+"/Welcome.qml")); /*! We dont set android/iOS because it has its own bootstrap */
     }else{
         finalPath=remoteDirectoryPath;
-         qorbiterUIwin->setSource( finalPath+"/splash/Splash.qml"); /*! We dont set android/iOS because it has its own bootstrap */
+        //  qorbiterUIwin->setSource( finalPath+"/splash/Splash.qml"); /*! We dont set android/iOS because it has its own bootstrap */
 
     }
 

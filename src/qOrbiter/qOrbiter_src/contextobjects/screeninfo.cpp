@@ -5,6 +5,7 @@ ScreenInfo::ScreenInfo(QObject *parent) :
     QObject(parent)
 {
     qRegisterMetaType<ScreenObject*>("ScreenObject");
+   // connect(this, SIGNAL(primaryScreenChanged()), this, SIGNAL(screenSizeChanged()));
 
     m_primaryScreen = new ScreenObject();
     foreach (QScreen *screen, QGuiApplication::screens()){
@@ -20,10 +21,6 @@ ScreenInfo::ScreenInfo(QObject *parent) :
         connect(screen, SIGNAL(refreshRateChanged(qreal)), newScreen, SLOT(setRefreshRate(qreal)));
         connect(screen, SIGNAL(orientationChanged(Qt::ScreenOrientation)), newScreen, SLOT(setOrientation(Qt::ScreenOrientation)));
         connect(screen, SIGNAL(geometryChanged(QRect)), newScreen, SLOT(setScreenGeometry(QRect)));
-
-        newScreen->setRefreshRate(screen->refreshRate());
-        newScreen->setScreenGeometry(screen->geometry());
-
         m_screenList.insert(screen->name(), newScreen);
         qDebug() << Q_FUNC_INFO << " Processed screen" << newScreen->screenName();
     }
@@ -31,6 +28,8 @@ ScreenInfo::ScreenInfo(QObject *parent) :
     if(!m_screenList.isEmpty()){
         m_primaryScreen=m_screenList.first();
         emit primaryScreenChanged();
+         qDebug() << Q_FUNC_INFO << " Screen size " << primaryScreen()->deviceSize();
+        emit screenSizeChanged();
     }
 
 }
