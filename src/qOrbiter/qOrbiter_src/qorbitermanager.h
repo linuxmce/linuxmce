@@ -1310,7 +1310,7 @@ public slots:
             GenericModelItem *itm = src->find(chan);
             if(itm){
 
-              gridChangeChannel( itm->data(EPGItemClass::ChannelRole).toString(),  itm->data(EPGItemClass::ChannelIdRole).toString());
+                gridChangeChannel( itm->data(EPGItemClass::ChannelRole).toString(),  itm->data(EPGItemClass::ChannelIdRole).toString());
             }
 
         }
@@ -1717,18 +1717,13 @@ private slots:
     void resetScreenSize(){
 
         m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
-        switch (m_deviceSize) {
-        case ScreenData::Device_Small: m_selector->setExtraSelectors(QStringList("small")); break;
-        case ScreenData::Device_Medium:m_selector->setExtraSelectors(QStringList("medium")); break;
-        case ScreenData::Device_Large:m_selector->setExtraSelectors(QStringList("large")); break;
-        case ScreenData::Device_XLarge: m_selector->setExtraSelectors(QStringList("xlarge")); break;
-            break;
-        default:
-            break;
-        }
+        QString psize = m_screenInfo->primaryScreen()->pixelDensityString();
+        QStringList t;
+        t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
+        m_selector->setExtraSelectors(t);
         qDebug() << Q_FUNC_INFO << " Set to "<< m_selector->allSelectors();
-         qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
-       // qorbiterUIwin->setSource(qorbiterUIwin->source());
+        qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
+        // qorbiterUIwin->setSource(qorbiterUIwin->source());
     }
 
 private:

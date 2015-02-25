@@ -9,9 +9,14 @@ Item{
     id:indexContent
     anchors.fill: parent
     
+    Image{
+        fillMode: Image.PreserveAspectCrop
+        source: "images/splash-bg.png"
+        anchors.fill:parent
+    }
     Rectangle{
         anchors.fill: parent
-        opacity:.85
+        opacity:.65
         gradient: Gradient{
             GradientStop{
                 position: 0.0
@@ -27,26 +32,29 @@ Item{
             }
         }
     }
-    
-    Image{
-        source: "images/splash-bg.png"
-        anchors.fill:parent
-    }
+
     
     Text {
         id: splashText
-        text: qsTr("QOrbiter ")
+        text: qsTr("QOrbiter For Android - Small UI")
+        color:"black"
+        font.weight:Font.Light
         anchors{
-            top:parent.top
-            horizontalCenter: parent.horizontalCenter
+           horizontalCenter: parent.horizontalCenter
+           verticalCenter: parent.verticalCenter
         }
     }
     
     Text{
         id:loadingText
-        text:"Please Wait, Loading"
-        color:"white"
-        anchors.centerIn: parent
+        text:"Getting Started."
+        color:"black"
+        font.weight:Font.Light
+        anchors{
+            horizontalCenter: splashText.horizontalCenter
+            top:splashText.bottom
+        }
+
         font.pointSize: 32
     }
     

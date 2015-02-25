@@ -1,10 +1,22 @@
 <RCC>
     <qresource prefix="/qml">
         <file>qml/Index.qml</file>
-        <file>qml/images/splash-bg.png</file>     
+        <file>qml/images/splash-bg.png</file>
         <file>qml/IndexContent.qml</file>
         <file>qml/+linux/IndexContent.qml</file>
         <file>qml/+android/IndexContent.qml</file>
         <file>qml/+android/+small/IndexContent.qml</file>
+        <file>qml/+ios/+iphone/IndexContent.qml</file>
+        <file>qml/+ios/+ipad/IndexContent.qml</file>
+        <file>qml/splash/StatusRow.qml</file>
+        <file>qml/splash/SplashView.qml</file>
+        <file>qml/splash/Splash.qml</file>
+        <file>qml/splash/SetupNewOrbiter.qml</file>
+        <file>qml/splash/qmldir</file>
+        <file>qml/splash/NewOrbiterButton.qml</file>
+        <file>qml/splash/ExistingOrbiters.qml</file>
+        <file>qml/splash/ConnectionBox.qml</file>
+        <file>qml/images/login-bg.png</file>
+        <file>qml/+linux/+xlarge/IndexContent.qml</file>
     </qresource>
 </RCC>

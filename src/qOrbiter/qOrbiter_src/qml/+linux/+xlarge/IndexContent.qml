@@ -8,7 +8,11 @@ import DceScreenSaver 1.0
 Item{
     id:indexContent
     anchors.fill: parent
-    
+    Component.onCompleted: console.log("Linux window open")
+    Image{
+        source: "images/splash-bg.png"
+        anchors.fill:parent
+    }
     Rectangle{
         anchors.fill: parent
         opacity:.85
@@ -27,15 +31,12 @@ Item{
             }
         }
     }
-    
-    Image{
-        source: "images/splash-bg.png"
-        anchors.fill:parent
-    }
-    
+
     Text {
         id: splashText
-        text: qsTr("QOrbiter For Linux")
+        text: qsTr("QOrbiter For Linux Desktop")
+        font.pointSize: 55
+        color:"black"
         anchors{
             top:parent.top
             horizontalCenter: parent.horizontalCenter

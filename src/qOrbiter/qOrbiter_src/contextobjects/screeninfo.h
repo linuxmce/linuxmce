@@ -94,7 +94,9 @@ public:
         m_widthMM(width_mm),
         m_height(pixel_height),
         m_width(pixel_width),
-        m_deviceSize(ScreenData::Device_Small)
+        m_deviceSize(ScreenData::Device_Small),
+        m_devicePixelSize(ScreenData::Device_240),
+        m_pixelScale(ScreenData::PixelDensity_LOW)
     {
         setDiagonalSize(sqrt( pow( (double)m_heightMM,2.0)+pow((double)m_widthMM, 2.0) ));
 
@@ -105,19 +107,42 @@ public:
 
         } else if (diagonalInches() <= 7){
             setScreenSize(ScreenData::Device_Medium);
-             qDebug() << "Set Size Selector to medium";
+            qDebug() << "Set Size Selector to medium";
 
         } else if (diagonalInches() <= 10 ) {
             setScreenSize(ScreenData::Device_Large);
-             qDebug() << "Set Size Selector to large";
+            qDebug() << "Set Size Selector to large";
 
         } else if ( diagonalInches() <= 12 ) {
             setScreenSize(ScreenData::Device_XLarge);
-             qDebug() << "Set Size Selector to xlarge";
+            qDebug() << "Set Size Selector to xlarge";
         } else {
             setScreenSize(ScreenData::Device_XLarge);
-             qDebug() << "Set Size Selector to xlarge";
+            qDebug() << "Set Size Selector to xlarge";
         }
+
+        if (m_logicalDpi <= ScreenData::PixelDensity_LOW){ setPixelScale(ScreenData::PixelDensity_LOW);}
+        else if (m_logicalDpi <= ScreenData::PixelDensity_MEDIUM){ setPixelScale(ScreenData::PixelDensity_MEDIUM);}
+        else if (m_logicalDpi <= ScreenData::PixelDensity_TV){ setPixelScale(ScreenData::PixelDensity_TV);}
+        else if (m_logicalDpi <= ScreenData::PixelDensity_HDPI){ setPixelScale(ScreenData::PixelDensity_HDPI);}
+        else if (m_logicalDpi <= ScreenData::PixelDensity_XHDPI){ setPixelScale(ScreenData::PixelDensity_XHDPI);}
+        else if (m_logicalDpi <= ScreenData::PixelDensity_XXHDPI){ setPixelScale(ScreenData::PixelDensity_XXHDPI);}
+        else if (m_logicalDpi <= ScreenData::PixelDensity_XXXHDPI){ setPixelScale(ScreenData::PixelDensity_XXXHDPI);}
+
+        int cmp = m_height < m_width ? m_height : m_width;
+        if(cmp <= ScreenData::Device_240) { m_devicePixelSize = ScreenData::Device_240; }
+        else  if(cmp <= ScreenData::Device_320) { m_devicePixelSize = ScreenData::Device_320; }
+         else  if(cmp <= ScreenData::Device_480) { m_devicePixelSize = ScreenData::Device_480; }
+         else  if(cmp <= ScreenData::Device_540) { m_devicePixelSize = ScreenData::Device_540; }
+         else  if(cmp <= ScreenData::Device_600) { m_devicePixelSize = ScreenData::Device_600; }
+         else  if(cmp <= ScreenData::Device_768) { m_devicePixelSize = ScreenData::Device_768; }
+         else  if(cmp <= ScreenData::Device_800) { m_devicePixelSize = ScreenData::Device_800; }
+         else  if(cmp <= ScreenData::Device_960) { m_devicePixelSize = ScreenData::Device_960; }
+         else  if(cmp <= ScreenData::Device_1024) { m_devicePixelSize = ScreenData::Device_1024; }
+         else  if(cmp <= ScreenData::Device_1280) { m_devicePixelSize = ScreenData::Device_1280; }
+
+
+
     }
 
     virtual ~ScreenObject() {}
@@ -134,28 +159,61 @@ public:
     int widthInches(){ return m_widthMM * 0.0393701; }
     double diagonalInches(){return m_diagonalSize*0.0393701;}
 
+
     QString orientation() { return getOrientationString(m_orientation); }
     QString primaryOrientation(){ return getOrientationString(m_primaryOrientation); }
     QString nativeOrientation(){ return getOrientationString(m_nativeOrientation); }
+
+    QString deviceSizeString(){ return deviceSizeToString(m_deviceSize);}
+    QString pixelDensityString(){return pixelDensityToString(m_pixelScale);}
+    QString resolutionString() {return deviceResolutionToString(m_devicePixelSize);}
 
     ScreenData::DeviceRange deviceSize(){return m_deviceSize;}
     QStringList DeviceSizeList(){ return QStringList(); }
 
 public slots:
-    QString deviceSizeToString(ScreenData::DeviceSizes sz){
+
+    QString deviceResolutionToString(ScreenData::DeviceSizes sz){
         switch (sz) {
-        case ScreenData::Device_240: return "+240";break;
-        case ScreenData::Device_320: return "+320";break;
-        case ScreenData::Device_480: return "+480";break;
-        case ScreenData::Device_540: return "+540";break;
-        case ScreenData::Device_600: return "+600";break;
-        case ScreenData::Device_768: return "+768";break;
-        case ScreenData::Device_800: return "+800";break;
-        case ScreenData::Device_960: return "+960";break;
-        case ScreenData::Device_1024: return "+1024";break;
-        case ScreenData::Device_1280: return "+1280";break;
+        case ScreenData::Device_240: return "240";break;
+        case ScreenData::Device_320: return "320";break;
+        case ScreenData::Device_480: return "480";break;
+        case ScreenData::Device_540: return "540";break;
+        case ScreenData::Device_600: return "600";break;
+        case ScreenData::Device_768: return "768";break;
+        case ScreenData::Device_800: return "800";break;
+        case ScreenData::Device_960: return "960";break;
+        case ScreenData::Device_1024: return "1024";break;
+        case ScreenData::Device_1280: return "1280";break;
         default:
             return "+240";
+            break;
+        }
+    }
+
+    QString deviceSizeToString(ScreenData::DeviceRange d){
+        switch(d){
+        case ScreenData::Device_Small: return "small"; break;
+        case ScreenData::Device_Medium: return "medium"; break;
+        case ScreenData::Device_Large: return "large"; break;
+        case ScreenData::Device_XLarge: return "xlarge"; break;
+        default:
+            return QString();
+            break;
+        }
+    }
+
+    QString pixelDensityToString(ScreenData::PixelDensityScale sz){
+        switch (sz) {
+        case ScreenData::PixelDensity_LOW: return "ldpi";break;
+        case ScreenData::PixelDensity_MEDIUM: return "mdpi";break;
+        case ScreenData::PixelDensity_TV: return "tvdpi";break;
+        case ScreenData::PixelDensity_HDPI: return "hdpi";break;
+        case ScreenData::PixelDensity_XHDPI: return "xhdpi";break;
+        case ScreenData::PixelDensity_XXHDPI: return "xxhdpi";break;
+        case ScreenData::PixelDensity_XXXHDPI: return "xxxhdpi";break;
+        default:
+            return "+ldpi";
             break;
         }
     }
@@ -217,6 +275,7 @@ private:
     int m_logicalDpiY;
     double m_diagonalSize;
     ScreenData::DeviceRange m_deviceSize;
+    ScreenData::DeviceSizes m_devicePixelSize;
     ScreenData::PixelDensityScale m_pixelScale;
 };
 
@@ -266,6 +325,7 @@ private:
     double m_phisicalDpi;
     QString m_orientation;
     QString m_screenName;
+
 
 };
 

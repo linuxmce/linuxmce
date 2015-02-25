@@ -2,9 +2,7 @@
 import QtQuick 2.0
 
 Item {
-  height: appH
-  width: appW
-
+    anchors.fill: parent
     id:splashPage
 
     signal setupStart(string x, string y)

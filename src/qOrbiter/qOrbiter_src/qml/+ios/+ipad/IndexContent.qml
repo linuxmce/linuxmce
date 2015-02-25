@@ -15,7 +15,7 @@ Item{
         gradient: Gradient{
             GradientStop{
                 position: 0.0
-                color:"black"
+                color:"darkgrey"
             }
             GradientStop{
                 position: .56
@@ -35,7 +35,9 @@ Item{
     
     Text {
         id: splashText
-        text: qsTr("QOrbiter For Linux")
+        text: qsTr("QOrbiter for ipad ")
+        color:"white"
+        font.pointSize: 22
         anchors{
             top:parent.top
             horizontalCenter: parent.horizontalCenter
