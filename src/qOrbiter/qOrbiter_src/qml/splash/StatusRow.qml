@@ -32,7 +32,7 @@ Item{
                 id: connection_label
                 text: qsTr("Connection")
                 color: window.b_connectionPresent ? "green" : "red"
-                font.pixelSize: window.b_connectionPresent ? 14 : 12
+                font.pointSize: window.b_connectionPresent ? 14 : 12
                 font.family: myFont.name
             }
         }
@@ -51,7 +51,7 @@ Item{
                 id: device_Label
                 text: qsTr("Device")
                 color: window.b_devicePresent ? "green" : "red"
-                font.pixelSize: window.b_devicePresent ? 14 : 12
+                font.pointSize: window.b_devicePresent ? 14 : 12
                 font.family: myFont.name
             }
         }
@@ -70,7 +70,7 @@ Item{
                 id: config_label
                 text: qsTr("Config")
                 color: window.b_localConfigReady ? "green" : "red"
-                font.pixelSize: window.b_localConfigReady ? 14 : 12
+                font.pointSize: window.b_localConfigReady ? 14 : 12
             }
         }
         
@@ -88,7 +88,7 @@ Item{
                 id: skin_label
                 text: qsTr("Skins")
                 color: window.b_skinIndexReady ? "green" : "red"
-                font.pixelSize: window.b_skinIndexReady ? 14 : 12
+                font.pointSize: window.b_skinIndexReady ? 14 : 12
             }
         }
         
@@ -106,7 +106,7 @@ Item{
                 id: skin_data_label
                 text: qsTr("Orbiter Ready")
                 color: window.b_orbiterConfigReady ? "green" : "red"
-                font.pixelSize: window.b_orbiterConfigReady ? 14 : 12
+                font.pointSize: window.b_orbiterConfigReady ? 14 : 12
             }
         }
 

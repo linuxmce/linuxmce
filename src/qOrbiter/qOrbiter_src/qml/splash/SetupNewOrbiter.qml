@@ -265,7 +265,7 @@ Rectangle {
 //                    text: qsTr("Please Select a Default User")
 //                    font.bold: true
 //                    color: deYork
-//                    font.pixelSize: 14
+//                    font.pointSize: 14
 //                    font.family: myFont.name
 //                    x:0
 //                    onTextChanged: {

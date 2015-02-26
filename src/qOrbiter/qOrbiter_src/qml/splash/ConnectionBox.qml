@@ -138,7 +138,7 @@ Rectangle{
                 anchors.centerIn: parent
                 anchors.fill: parent
                 text: qsTr("Exit")
-                font.pixelSize: 11
+                font.pointSize: 11
                 font.family: myFont.name
             }
             radius:  4

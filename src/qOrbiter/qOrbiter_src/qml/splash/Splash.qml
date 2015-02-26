@@ -1,16 +1,17 @@
 /*
   Splash.qml This is the general linuxmce splash screen and should be used for all devices on startup.
   */
-import QtQuick 2.0
+import QtQuick 2.3
 Item {
     id: splashLogic
-    anchors.fill: parent
 
+    width: manager.appWidth
+    height: manager.appHeight
     function scaleX(x){
-        return x/100*appW
+        return x/100*manager.appWidth
     }
     function scaleY(y){
-        return y/100*appH
+        return y/100*manager.appHeight
     }
     function screenchange(screenname )
     {
@@ -27,7 +28,7 @@ Item {
     }
 
     Component.onCompleted: {
-        pageLoader.source= "SplashView.qml"
+       // pageLoader.source= "SplashView.qml"
     }
 
     Image {
@@ -43,9 +44,13 @@ Item {
         color:"black"
         opacity: .55
     }
+    SplashView{
+        anchors.fill: parent
+    }
 
     Loader {
         id:pageLoader
+        anchors.fill: parent
         objectName: "loadbot"
         //  source:
         onLoaded: {

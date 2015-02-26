@@ -44,7 +44,7 @@ ListView{
             Text {
                 id: orbiter_label
                 text: qsTr("Orbiter:")+ label
-                font.pixelSize: 18
+                font.pointSize: 18
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 font.family: myFont.name
 
@@ -54,7 +54,7 @@ ListView{
             Text {
                 id: dev_num
                 text:qsTr("Device:")+ device
-                font.pixelSize: 12
+                font.pointSize: 12
                 font.italic: true
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 font.family: myFont.name

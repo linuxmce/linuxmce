@@ -18,5 +18,11 @@
         <file>qml/splash/ConnectionBox.qml</file>
         <file>qml/images/login-bg.png</file>
         <file>qml/+linux/+xlarge/IndexContent.qml</file>
+        <file>qml/splash/+android/+small/SplashView.qml</file>
+        <file>qml/splash/+linux/+xlarge/+ldpi/SplashView.qml</file>
+        <file>qml/splash/+linux/+xlarge/SplashView.qml</file>
+        <file>qml/splash/+linux/+xlarge/+ldpi/NewOrbiterButton.qml</file>
+        <file>qml/splash/+android/+large/+ldpi/SplashView.qml</file>
+        <file>qml/splash/+android/+large/+hdpi/SplashView.qml</file>
     </qresource>
 </RCC>

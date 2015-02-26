@@ -2,7 +2,7 @@
 import QtQuick 2.0
 
 Item {
-    anchors.fill: parent
+   anchors.fill: parent
     id:splashPage
 
     signal setupStart(string x, string y)
@@ -62,7 +62,7 @@ Item {
         id: loadingStatus
         text: "Status " + manager.commandResponse
         anchors.topMargin: scaleY(15)
-        font.pixelSize: 14
+        font.pointSize: 14
         font.family: myFont.name
         color: "white"
         anchors.top: connectionBox.bottom

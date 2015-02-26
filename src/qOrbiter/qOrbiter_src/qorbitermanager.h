@@ -1731,7 +1731,7 @@ private:
     void setupQMLview();
     void setSkinSelector(QString s){if(m_skinSelector==s)return ; m_skinSelector=s; emit skinSelectorChanged(); }
     void reloadQmlSkin() { }
-    void setSelectors(QList<QString> selections){selector->setExtraSelectors(selections);}
+    void setSelectors(QStringList selections){selector->setExtraSelectors(selections);}
 
 
 private:
