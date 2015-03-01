@@ -261,15 +261,24 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
  
 	string sFileToPlay;
 	MediaFile *pMediaFile = NULL;
+	string sSystemConfiguration;
 
 	if (pGameMediaStream->m_dequeMediaFile.size()>pGameMediaStream->m_iDequeMediaFile_Pos)
 	  pMediaFile = pGameMediaStream->m_dequeMediaFile[pGameMediaStream->m_iDequeMediaFile_Pos];
  
 	sFileToPlay = pGameMediaStream->GetFilenameToPlay("Empty file name");
- 
+	
+	if (pMediaFile->m_mapPK_Attribute.find(ATTRIBUTETYPE_System_Configuration_CONST) != pMediaFile->m_mapPK_Attribute.end())
+	  {
+	    list_int *listPK_Attribute_System_Configuration = pMediaFile->m_mapPK_Attribute_Find(ATTRIBUTETYPE_System_Configuration_CONST);
+	    int PK_Attribute_System_Configuration = listPK_Attribute_System_Configuration && 
+	      listPK_Attribute_System_Configuration->size() ? *(listPK_Attribute_System_Configuration->begin()) : 0;
+	    sSystemConfiguration = m_pMedia_Plugin->m_pMediaAttributes->m_pMediaAttributes_LowLevel->GetAttributeName(PK_Attribute_System_Configuration);
+ 	  }
+
 	LoggerWrapper::GetInstance()->Write( LV_STATUS, "Game_PlugIn::StartMedia() Media type %d %s", pMediaStream->m_iPK_MediaType, sFileToPlay.c_str());
  
-	string mediaURL;
+	string mediaURL = (sSystemConfiguration.empty() ? sFileToPlay + "~" + sSystemConfiguration : sFileToPlay);
 	string Response;
  
 	mediaURL = sFileToPlay;
