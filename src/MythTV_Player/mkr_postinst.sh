@@ -7,6 +7,13 @@
 ln -s /usr/lib/libXmu.so.6.2.0 /usr/lib/libXmu.so || :
 # END  : Hack to get mythtv working
 
+# START: Hack to transpose xml
+echo $(grep -e '<Host>' /etc/mythtv/config.xml | sed -e 's#<Host>#DBHostName=#' -e 's#</Host>#\n#') > /etc/mythtv/mysql.txt
+echo $(grep -e '<UserName>' /etc/mythtv/config.xml | sed -e 's#<UserName>#DBUserName=#' -e 's#</UserName>#\n#') >> /etc/mythtv/mysql.txt
+echo $(grep -e '<DatabaseName>' /etc/mythtv/config.xml | sed -e 's#<DatabaseName>#DBName=#' -e 's#</DatabaseName>#\n#') >> /etc/mythtv/mysql.txt
+echo $(grep -e '<Password>' /etc/mythtv/config.xml | sed -e 's#<Password>#DBPassword=#' -e 's#</Password>#\n#') >> /etc/mythtv/mysql.txt
+# END: Hack to transpose xml
+
 # If this is not the hybrid, copy the mysql.txt file from hybrid
 if [[ "$PK_Device" != "1" ]] ;then
 	scp -o 'StrictHostKeyChecking no' -o 'PasswordAuthentication no' root@dcerouter:/etc/mythtv/mysql.txt /etc/mythtv/ || :
