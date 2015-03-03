@@ -1,4 +1,5 @@
-import QtQuick 2.0
+import QtQuick 2.3
+import "."
 
 Rectangle{
     id:newOrbiterButton
@@ -24,7 +25,7 @@ Rectangle{
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         font.family: myFont.name
         font.bold: true
-        color:"#99CC99"
+        color:Style.appbutton_confirm_color
     }
     
     MouseArea{

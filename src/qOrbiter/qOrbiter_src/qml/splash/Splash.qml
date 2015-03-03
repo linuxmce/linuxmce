@@ -2,72 +2,64 @@
   Splash.qml This is the general linuxmce splash screen and should be used for all devices on startup.
   */
 import QtQuick 2.3
+import "."
 Item {
     id: splashLogic
-
     width: manager.appWidth
     height: manager.appHeight
+    Component.onCompleted: {
+        splashLogic.state="connecting"
+        window.qmlSetupLmce(window.deviceno, window.router)
+
+    }
+
     function scaleX(x){
         return x/100*manager.appWidth
     }
     function scaleY(y){
         return y/100*manager.appHeight
     }
-    function screenchange(screenname )
-    {
-        pageLoader.source = screenname
-        if (pageLoader.status == 1)
-        {
-            //manager.setDceResponse("Command to change to:" + screenname+ " was successfull")
-        }
-        else
-        {
-            console.log("Command to change to:" + screenname + " failed!")
 
-        }
+    function screenchange(screenname ){
+        console.log(screenname)
     }
 
-    Component.onCompleted: {
-       // pageLoader.source= "SplashView.qml"
+    Connections{
+        target: window
+        onShowList:{
+            if(!window.hasOrbiters()){
+              splashLogic.state="connected-nodevices"
+            }
+            else{
+               splashLogic.state="connected-devices"
+            }
+        }
     }
 
     Image {
         id: splash
         anchors.centerIn: parent
         fillMode: Image.PreserveAspectCrop
-        source: "../images/login-bg.png"
+        source: "images/splash_bg.png"
         anchors.fill: parent
     }
 
     Rectangle{
         anchors.fill: parent
         color:"black"
-        opacity: .55
+        opacity: .15
     }
+
     SplashView{
+        id:splash_content
         anchors.fill: parent
     }
-
-    Loader {
-        id:pageLoader
-        anchors.fill: parent
-        objectName: "loadbot"
-        //  source:
-        onLoaded: {
-            console.log("Screen Changed:" + pageLoader.source)
-        }
-    }
-
 
     property bool orbiterSetup:false
     property string router_ip: ""
 
     onOrbiterSetupChanged:{
-        console.log(orbiterSetup);
-       // existing_orbiters.visible = false;
-       // orbiter_options.visible = true;
-       // newOrbiterOptionContainer.visible=true;
-        window.showSetup()
+       splashLogic.state="new-orbiter"
     }
 
     onWidthChanged: console.log("detected size change")
@@ -78,9 +70,33 @@ Item {
         source: "../../skins-common/fonts/Sawasdee.ttf"
     }
 
-//    Connections{
-//        target:window
-//        onMessageChanged:loadingStatus.text = window.message
-//        //onStatusChanged: screenchange("SetupNewOrbiter.qml")
-//    }
+    states: [
+        State {
+            name: "connecting"
+            PropertyChanges {
+                target: object
+
+            }
+        },State {
+            name: "connected-nodevices"
+            PropertyChanges {
+                target: object
+
+            }
+        }, State {
+            name: "connected-devices"
+            PropertyChanges {
+                target: object
+
+            }
+        },
+        State {
+            name: "new-orbiter"
+            PropertyChanges {
+                target: object
+
+            }
+        }
+
+    ]
 }

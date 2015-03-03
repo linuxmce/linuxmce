@@ -1,5 +1,5 @@
 // import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
-import QtQuick 2.0
+import QtQuick 2.3
 
 Item {
    anchors.fill: parent
@@ -23,17 +23,45 @@ Item {
         }
         onPageChanged:screenchange(qmlPage)
     }
-    Text {
-        id: welcome
-        text: qsTr("LinuxMCE +android+large+hdpi")
-        font.family: myFont.name
-        font.pointSize: 42
-        anchors.top: parent.top
-        anchors.topMargin: scaleY(5)
-        anchors.horizontalCenter: parent.horizontalCenter
-        color:"white"
-    }
 
+    Item{
+        anchors{
+            top:parent.top
+            left:parent.left
+            right:parent.right
+        }
+        height:parent.height *.08
+
+        Rectangle{
+            id:welcome_container
+            color:"black"
+            anchors.fill: parent
+        }
+
+        Text {
+            id: welcome
+            text: qsTr(" Welcome to LinuxMCE")
+            //font.family: myFont.name
+            font.pointSize: 42
+            anchors.top: parent.top
+            anchors.left:parent.left
+            anchors.margins: scaleX(5)
+            anchors.horizontalCenter: parent.horizontalCenter
+            color:"white"
+        }
+        Text {
+            id: welcome_select
+            text: qsTr("Please Choose an orbiter")
+            //font.family: myFont.name
+            font.pointSize: 42
+            font.weight: Font.Light
+            anchors.top: welcome.bottom
+            anchors.left:parent.left
+            anchors.margins: scaleX(5)
+            anchors.horizontalCenter: parent.horizontalCenter
+            color:"white"
+        }
+    }
 
     StatusRow {
         id: statusRow

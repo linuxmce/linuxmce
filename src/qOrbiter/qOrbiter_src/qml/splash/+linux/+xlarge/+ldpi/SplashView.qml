@@ -1,12 +1,13 @@
 // import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
-import QtQuick 2.0
-
+import QtQuick 2.3
+import "."
 Item {
    anchors.fill: parent
     id:splashPage
 
     signal setupStart(string x, string y)
     signal splashLoaded()
+
 
     Connections{
         target: window
@@ -23,21 +24,60 @@ Item {
         }
         onPageChanged:screenchange(qmlPage)
     }
-    Text {
-        id: welcome
-        text: qsTr("LinuxMCE +x11/+large/+ldpi")
-        font.family: myFont.name
-        font.pointSize: 42
-        anchors.top: parent.top
-        anchors.topMargin: scaleY(5)
-        anchors.horizontalCenter: parent.horizontalCenter
-        color:"white"
+
+    Item{
+        anchors{
+            top:parent.top
+            left:parent.left
+            right:parent.right
+        }
+        height:parent.height *.08
+
+        Rectangle{
+            id:welcome_container
+            color:"#0088ff"
+            anchors.fill: parent
+        }
+
+        Text {
+            id: welcome
+            text: qsTr(" Welcome to LinuxMCE")
+            //font.family: myFont.name
+            color:Style.appbutton_confirm_color
+            font.pointSize: 22
+            anchors.top: parent.top
+            anchors.left:parent.left
+            anchors.margins:10
+            anchors.horizontalCenter: parent.horizontalCenter
+
+        }
+        Text {
+            id: welcome_select
+            text: qsTr("Please Choose an orbiter")
+            //font.family: myFont.name
+            font.pointSize: 12
+            font.weight: Font.Light
+            anchors.top: welcome.bottom
+            anchors.left:parent.left
+            anchors.margins: 10
+            anchors.horizontalCenter: parent.horizontalCenter
+            color:"white"
+        }
+
+        Image {
+            id: settingsIcn
+            source: "images/options.png"
+            anchors{
+                verticalCenter: parent.verticalCenter
+                right:parent.right
+                rightMargin:20
+            }
+        }
     }
 
-
-    StatusRow {
-        id: statusRow
-    }
+//    StatusRow {
+//        id: statusRow
+//    }
 
 
     Connections{

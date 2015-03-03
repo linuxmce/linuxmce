@@ -6,3 +6,4 @@ SetupNewOrbiter		SetupNewOrbiter.qml
 Splash		Splash.qml
 SplashView		SplashView.qml
 StatusRow		StatusRow.qml
+singleton Style 1.0 Style.qml
