@@ -74,26 +74,26 @@ Item {
         State {
             name: "connecting"
             PropertyChanges {
-                target: object
+                //target: object
 
             }
         },State {
             name: "connected-nodevices"
             PropertyChanges {
-                target: object
+               // target: object
 
             }
         }, State {
             name: "connected-devices"
             PropertyChanges {
-                target: object
+              //  target: object
 
             }
         },
         State {
             name: "new-orbiter"
             PropertyChanges {
-                target: object
+               // target: object
 
             }
         }

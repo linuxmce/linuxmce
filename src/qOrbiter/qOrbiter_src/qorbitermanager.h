@@ -1728,6 +1728,9 @@ private slots:
 
 private:
     void initializeConnections();
+    void setupContextObjects();
+    void setupEarlyContexts();
+    void setupUiSelectors();
     void setupQMLview();
     void setSkinSelector(QString s){if(m_skinSelector==s)return ; m_skinSelector=s; emit skinSelectorChanged(); }
     void reloadQmlSkin() { }

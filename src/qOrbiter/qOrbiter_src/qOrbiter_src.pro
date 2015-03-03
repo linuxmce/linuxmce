@@ -120,7 +120,7 @@ target.path=/usr/pluto/bin
         contains(QT_VERSION,5.*.*){
                 QT+= qml quick script widgets
                 QT-= declarative
-                folder_01.source = qml/qt5-desktop
+                folder_01.source = qml/skins
                 folder_01.target = $$DESTDIR/qml/
                 DEFINES += for_desktop GLENABLED
                 glmsg=scenegraph
@@ -132,7 +132,7 @@ target.path=/usr/pluto/bin
 
         folder_03.source = config.xml
         folder_03.target = $$DESTDIR
-       DEPLOYMENTFOLDERS+= folder_03
+       DEPLOYMENTFOLDERS+= folder_01 folder_03
         QML_IMPORT_PATH=imports
 }
 
@@ -578,13 +578,6 @@ HEADERS += \
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
-        qml/Welcome.qml \
-        qml/Welcome2.qml \
-        qml/Refresh.qml \
-        qml/linux/Welcome.qml \
-        qml/Themes.json \
-    qml/helpers/StartupHelpers.js
-
 
 for_harmattan{
         OTHER_FILES= \

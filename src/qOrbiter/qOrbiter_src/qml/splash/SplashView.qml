@@ -1,6 +1,6 @@
 // import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
-import QtQuick 2.0
-
+import QtQuick 2.3
+import "."
 Item {
    anchors.fill: parent
     id:splashPage
@@ -42,10 +42,9 @@ Item {
             id: welcome
             text: qsTr(" Welcome to LinuxMCE")
             //font.family: myFont.name
-            font.pointSize: 42
+            font.pointSize: Style.appFontSize_header
             anchors.top: parent.top
             anchors.left:parent.left
-            anchors.margins: scaleX(5)
             anchors.horizontalCenter: parent.horizontalCenter
             color:"white"
         }
@@ -53,11 +52,10 @@ Item {
             id: welcome_select
             text: qsTr("Please Choose an orbiter")
             //font.family: myFont.name
-            font.pointSize: 42
+            font.pointSize: Style.appFontSize_description
             font.weight: Font.Light
             anchors.top: welcome.bottom
-            anchors.left:parent.left
-            anchors.margins: scaleX(5)
+            anchors.left:parent.left            
             anchors.horizontalCenter: parent.horizontalCenter
             color:"white"
         }
@@ -90,8 +88,7 @@ Item {
         id: loadingStatus
         text: "Status " + manager.commandResponse
         anchors.topMargin: scaleY(15)
-        font.pointSize: 14
-        font.family: myFont.name
+        font.pointSize: Style.appFontSize_description
         color: "white"
         anchors.top: connectionBox.bottom
         anchors.horizontalCenter: connectionBox.horizontalCenter

@@ -91,23 +91,12 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     qorbiterUIwin->showMaximized();
 #endif
 
+    mediaPlayerID=-1; orbiterInit=true; m_ipAddress="";  m_bStartingUp= true;  homeNetwork=false;  alreadyConfigured = false;  iFK_Room = -1;
+    iea_area= -1; bAppError = false; isPhone = 0; hostDevice=HostSystemData::OTHER_EMBEDDED; appConfigPath=""; status="starting";
+    setUsingExternal(false); disconnectCount=0;  reloadCount=0;
+    i_current_command_grp = 0;  i_current_mediaType =0;  videoDefaultSort = "13";  audioDefaultSort = "2"; photoDefaultSort = "13";
+    gamesDefaultSort = "49"; i_currentFloorplanType = 0; backwards = false;  screenSaverTimeout = 60; screenPowerOffTimeout = 60;
 
-    mediaPlayerID=-1;
-    orbiterInit=true;
-    m_ipAddress="";
-    m_bStartingUp= true;
-    homeNetwork=false;
-    alreadyConfigured = false;
-    iFK_Room = -1;
-    iea_area= -1;
-    bAppError = false;
-    isPhone = 0;
-    hostDevice=HostSystemData::OTHER_EMBEDDED;
-    appConfigPath="";
-    status="starting";
-    setUsingExternal(false);
-    disconnectCount=0;
-    reloadCount=0;
 #ifndef __ANDROID__
     b_localLoading = false; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
 #elif defined QT5 && ANDROID || defined(ANDROID)
@@ -126,281 +115,21 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
         emit localConfigReady(false);
     }
 
-    QApplication::processEvents(QEventLoop::AllEvents);
-    
-    myOrbiters = new ExistingOrbiterModel(new ExistingOrbiter(), this);
-    devices = new DeviceModel(new AvDevice(), this );
-    deviceCommands = new AvCodeGrid(new AvCommand(), this);
-    
-    //  qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
-    //  qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
-    qorbiterUIwin->rootContext()->setContextProperty("extip", qs_ext_routerip );
-    qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
-    qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse);
-    qorbiterUIwin->rootContext()->setContextProperty("orbiterList", myOrbiters);
-    qorbiterUIwin->rootContext()->setContextProperty("deviceList", devices);
-    qorbiterUIwin->rootContext()->setContextProperty("deviceCommands", deviceCommands);
+    setupEarlyContexts();
+    setupUiSelectors();
+    initializeGridModel();
+    setupContextObjects();
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
-    
-    //Resize to view as opposed to the root item
-#if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
-    qorbiterUIwin->setResizeMode(QQuickView::SizeViewToRootObject);
-    m_screenInfo = new ScreenInfo();
-    qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);
-#else
-    qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
-#endif
-    
-#ifdef QT4
-    qorbiterUIwin->rootContext()->setContextProperty("appH", QApplication::desktop()->height());
-    qorbiterUIwin->rootContext()->setContextProperty("appW", QApplication::desktop()->width());
-#endif
-    
-    //Don't think we need this with Qt5 QQuickView as it resizes Object to View above
-#ifndef QT5
-    QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
-
-#else
-
-    QObject::connect(qorbiterUIwin, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
-    QObject::connect(qorbiterUIwin, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
-    
-#endif
-    
-    QObject::connect(this, SIGNAL(orbiterReady(bool)), this, SLOT(showUI(bool)));
-    QObject::connect(this, SIGNAL(skinDataLoaded(bool)), SLOT(showUI(bool)));
-    QObject::connect(view->engine(), SIGNAL(quit()), this, SLOT(closeOrbiter()));
-    
-    /*!
-     * \todo move buildtype / qrc path code to its own function and return it here
-     */
-    
-#ifdef for_desktop
-    
-#ifdef QT4_8
-    buildType = "/qml/desktop";
-    setHostDevice(3);
-#elif QT5 && defined RPI
-    buildType = "/qml/qt5-desktop";
-    setHostDevice(1);
-#elif QT5 && !defined RPI && !defined ANDROID
-    setHostDevice(3);
-    buildType="/qml/qt5-desktop";
-#endif
-    qrcPath = buildType+"/Splash.qml";
-#elif  WIN32
-    setHostDevice(HostSystemData::WINDOWS_DESKTOP);
-    buildType="/qml/desktop";
-    qrcPath = "qrc:desktop/Splash.qml";
-#elif defined (for_freemantle)
-    buildType = "/qml/freemantle";
-    qrcPath = "qrc:freemantle/Splash.qml";
-#elif defined (for_harmattan)
-    buildType="/qml/harmattan";
-    qrcPath = "qrc:harmattan/Splash.qml";
-#elif defined (Q_OS_MACX)
-    setHostDevice(HostSystemData::OSX_DESKTOP);
-    buildType="/qml/qt5-desktop";
-    qrcPath = "qrc:osx/Splash.qml";
-#elif defined (RPI)
-    buildType="/qml/qt5-desktop";
-    setHostDevice(HostSystemData::RASPBERRY_PI);
-#elif defined ANDROID
-
-#ifndef QT5
-    qDebug() << "Resolution::"<<QApplication::desktop()->width()<<"w x "<<QApplication::desktop()->height()<<"h";
-    int h = QApplication::desktop()->height();
-    int w = QApplication::desktop()->width();
-    int pixelsX = QApplication::desktop()->physicalDpiX();
-    int pixelsY= QApplication::desktop()->physicalDpiY();
-    qDebug() << "Guessed DPI\n x::" << pixelsX << " Y::"<<pixelsY;
-
-    if(isPhone==0){ //no default set
-        setCommandResponse("No default form factor set, making initial selection");
-        if (w > 480 && h > 854 || h > 480 && w > 854 ){
-            setFormFactor(2);
-            buildType = "/qml/android/tablet";
-            setHostDevice(HostSystemData::ANDROID_TABLET);
-        }
-        else{
-            setFormFactor(1);
-            setHostDevice(HostSystemData::ANDROID_PHONE);
-            buildType = "/qml/android/phone";
-        }
-    } else{         //its set, overide setting
-
-        switch(isPhone){
-        case 1:
-            buildType = "/qml/android/phone";
-            qDebug() << buildType;
-            break;
-        case 2:
-            buildType = "/qml/android/tablet";
-            qDebug() << buildType;
-            break;
-        default:
-            setCommandResponse("Should not have gotten here, selecting phone for default");
-            buildType = "/qml/android/phone";
-            break;
-        }
-        setCommandResponse("Form factor set from config, using "+ buildType);
-    }
-    qrcPath = ":android/Splash.qml";
-    droidPath = "/";
-#endif
-#elif defined (for_android)
-    if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
-    {
-        buildType = "/qml/android/tablet";
-    }
-    else
-    {
-        buildType = "/qml/android/phone";
-        
-    }
-    
-    qrcPath = ":android/Splash.qml";
-    droidPath = "/";
-#elif defined Q_OS_IOS
-    setHostDevice(HostSystemData::IOS_TABLET);
-    buildType = "/qml/ios";
-    qrcPath = "qrc:main/IosWelcome.qml";
-#else
-
-    buildType = "/qml/desktop";
-    qrcPath = ":desktop/Splash.qml";
-#endif
-
-
-#ifdef QANDROID
-    // qDebug() << "Resolution::"<<QApplication::desktop()->width()<<"w x "<<QApplication::desktop()->height()<<"h";
-    int h = qorbiterUIwin->height();
-    int w = qorbiterUIwin->width();
-    if(isPhone==0){ //no default set
-        setCommandResponse("No default form factor set, making initial selection");
-        if (w > 480 && h > 854 || h > 480 && w > 854 ){
-            setFormFactor(2);
-            buildType = "/tablet";
-            setHostDevice(HostSystemData::ANDROID_TABLET);
-        }
-        else{
-            setFormFactor(1);
-            setHostDevice(HostSystemData::ANDROID_PHONE);
-            buildType = "/phone";
-        }
-    } else{         //its set, overide setting
-
-        switch(isPhone){
-        case 1:
-            buildType = "/phone";
-            qDebug() << buildType;
-            setHostDevice(HostSystemData::ANDROID_PHONE);
-            break;
-        case 2:
-            buildType = "/tablet";
-
-            setHostDevice(HostSystemData::ANDROID_TABLET);
-            qDebug() << buildType;
-            break;
-        default:
-            setCommandResponse("Should not have gotten here, selecting phone for default");
-            buildType = "/phone";
-            setHostDevice(HostSystemData::ANDROID_PHONE);
-            break;
-        }
-        setCommandResponse("Form factor for Qt5 set from config, using "+ buildType);
-    }
-    qrcPath = ":android/Splash.qml";
-    droidPath = "/";
-#endif
-
-    qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
-    setApplicationPath(QApplication::applicationDirPath());
-    localDir = qmlPath.append(buildType.remove("/qml"));
-    remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins"+buildType.remove("/qml");
-
-    if(b_localLoading){
-
-#ifdef __ANDROID__
-        finalPath="qrc:///qml/android";
-#elif defined Q_OS_IOS
-        finalPath="qrc:///qml/ios";
-#elif defined WIN32
-        finalPath="qrc:///qml/windows";
-#elif defined Q_OS_MACX
-        finalPath="qrc:///qml/osx";
-#elif defined Q_OS_LINUX
-        finalPath="qrc:///qml/qml/linux";
-#endif
-        // qorbiterUIwin->setSource( QUrl(finalPath+"/Welcome.qml")); /*! We dont set android/iOS because it has its own bootstrap */
-    }else{
-        finalPath=remoteDirectoryPath;
-        //  qorbiterUIwin->setSource( finalPath+"/splash/Splash.qml"); /*! We dont set android/iOS because it has its own bootstrap */
-
-    }
-
-#if !defined(ANDROID)
-    qDebug() << "Android should not see this";
-
-#else
-
-#endif
-
-    skinMessage("build type set to:: "+buildType);
-    initializeGridModel();  //begins setup of media grid listmodel and its properties
-
-    //managing where were are variables
-    i_current_command_grp = 0;
-    i_current_mediaType =0;
-    videoDefaultSort = "13";
-    audioDefaultSort = "2";
-    photoDefaultSort = "13";
-    gamesDefaultSort = "49";
-    i_currentFloorplanType = 0;
-    backwards = false;
-
-    //file details object and imageprovider setup
-    filedetailsclass = new FileDetailsClass(this);
-    qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
-    filedetailsclass->clear();
-
-    nowPlayingButton = new NowPlayingClass();
-    qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
-
-    //screen parameters class that could be extended as needed to fetch other data
-    ScreenParameters = new ScreenParamsClass(this);
-    qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
-
-    //floorplan model initialization for slots in main.cpp
-    floorplans = new FloorPlanModel( new FloorplanDevice , this);
-
-    //----------------Security Video setup
-    SecurityVideo = new SecurityVideoClass(this);
-    qorbiterUIwin->rootContext()->setContextProperty("securityvideo", SecurityVideo);
-
-    QApplication::processEvents(QEventLoop::AllEvents);
-    attribFilter = new AttributeSortModel(new AttributeSortItem,6, this);
-    uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, this);
-    mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, this);
-    genreFilter = new AttributeSortModel(new AttributeSortItem,3, this);
-
     gotoScreenList = new QStringList();
-    ScreenSaver = new ScreenSaverClass(this);
-    qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
-    screenSaverTimeout = 60;
-    screenPowerOffTimeout = 60;
-    /*!
-     * \todo move filters to their own initialization function, possibly multiple to account for dynamic setting of each one later.
-     */
-
+   // ScreenSaver = new ScreenSaverClass(this);
+   // qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
     // Prepares models in this qt thread so owner thread is not QML as they would have been if they were created later
     prepareModelPool(5);
 
     /*Needs Doin at construction */
     userList = new UserModel( new UserItem, this);
     orbiterInit=true;
-
     QObject::connect(&mediaFilter, SIGNAL( currentMediaTypeChanged(QString)), this, SLOT(setGridMediaType(QString)));
     QObject::connect(&mediaFilter, SIGNAL(newMediaFilter()), SLOT(updateMediaString()));
 
@@ -446,7 +175,6 @@ void qorbiterManager::gotoQScreen(QString s){
     setDceResponse("About to call screenchange()");
     if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
         setDceResponse("Done call to screenchange()");
-
         if(!currentScreen.contains("187")){
             gotoScreenList->append(currentScreen);
         }
@@ -623,12 +351,9 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 #endif
 }
 
-void qorbiterManager::initiateRestart()
-{
+void qorbiterManager::initiateRestart(){
     emit restartOrbiter();
     screenChange("Screen_1.qml");
-
-
 }
 
 //this functions purpose is to change the UI to the new skin pointed to. It will evolve to encompass orbiter regen to some extent
@@ -636,8 +361,7 @@ void qorbiterManager::initiateRestart()
  * \brief qorbiterManager::refreshUI: This function re-initializes the qml engines skin.
  * \param url - The relative or absolute path of the skin to the binary.
  */
-void qorbiterManager::refreshUI(QUrl url)
-{
+void qorbiterManager::refreshUI(QUrl url){
 
 #if (QT5)
     qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
@@ -2646,6 +2370,257 @@ void qorbiterManager::initializeConnections()
     QObject::connect(this, SIGNAL(continueSetup()), this, SLOT(startSetup()));
     setDceResponse("Connections Complete");
     emit continueSetup();
+}
+
+void qorbiterManager::setupContextObjects()
+{
+    //file details object and imageprovider setup
+    filedetailsclass = new FileDetailsClass(this);
+    qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
+    filedetailsclass->clear();
+
+    nowPlayingButton = new NowPlayingClass();
+    qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
+
+    //screen parameters class that could be extended as needed to fetch other data
+    ScreenParameters = new ScreenParamsClass(this);
+    qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
+
+    //floorplan model initialization for slots in main.cpp
+    floorplans = new FloorPlanModel( new FloorplanDevice , this);
+
+    //----------------Security Video setup
+    SecurityVideo = new SecurityVideoClass(this);
+    qorbiterUIwin->rootContext()->setContextProperty("securityvideo", SecurityVideo);
+
+    attribFilter = new AttributeSortModel(new AttributeSortItem,6, this);
+    uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, this);
+    mediaTypeFilter = new AttributeSortModel(new AttributeSortItem,1, this);
+    genreFilter = new AttributeSortModel(new AttributeSortItem,3, this);
+}
+
+void qorbiterManager::setupEarlyContexts()
+{
+    myOrbiters = new ExistingOrbiterModel(new ExistingOrbiter(), this);
+    devices = new DeviceModel(new AvDevice(), this );
+    deviceCommands = new AvCodeGrid(new AvCommand(), this);
+
+    //  qorbiterUIwin->rootContext()->setContextProperty("srouterip", QString(qs_routerip) );
+    //  qorbiterUIwin->rootContext()->setContextProperty("deviceid", QString::number((iPK_Device)) );
+    qorbiterUIwin->rootContext()->setContextProperty("extip", qs_ext_routerip );
+    qorbiterUIwin->rootContext()->setContextProperty("manager", this); //providing a direct object for qml to call c++ functions of this class
+    qorbiterUIwin->rootContext()->setContextProperty("dcemessage", dceResponse);
+    qorbiterUIwin->rootContext()->setContextProperty("orbiterList", myOrbiters);
+    qorbiterUIwin->rootContext()->setContextProperty("deviceList", devices);
+    qorbiterUIwin->rootContext()->setContextProperty("deviceCommands", deviceCommands);
+    //Resize to view as opposed to the root item
+#if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
+    qorbiterUIwin->setResizeMode(QQuickView::SizeViewToRootObject);
+    m_screenInfo = new ScreenInfo();
+    qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);
+#else
+    qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
+#endif
+
+#ifdef QT4
+    qorbiterUIwin->rootContext()->setContextProperty("appH", QApplication::desktop()->height());
+    qorbiterUIwin->rootContext()->setContextProperty("appW", QApplication::desktop()->width());
+#endif
+
+    //Don't think we need this with Qt5 QQuickView as it resizes Object to View above
+#ifndef QT5
+    QObject::connect(qorbiterUIwin, SIGNAL(sceneResized(QSize)),  SLOT(checkOrientation(QSize)) );
+
+#else
+
+    QObject::connect(qorbiterUIwin, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
+    QObject::connect(qorbiterUIwin, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
+
+#endif
+
+    QObject::connect(this, SIGNAL(orbiterReady(bool)), this, SLOT(showUI(bool)));
+    QObject::connect(this, SIGNAL(skinDataLoaded(bool)), SLOT(showUI(bool)));
+    QObject::connect(qorbiterUIwin->engine(), SIGNAL(quit()), this, SLOT(closeOrbiter()));
+}
+
+void qorbiterManager::setupUiSelectors()
+{
+    /*!
+     * \todo move buildtype / qrc path code to its own function and return it here
+     */
+
+#ifdef for_desktop
+
+#ifdef QT4_8
+    buildType = "/qml/desktop";
+    setHostDevice(3);
+#elif QT5 && defined RPI
+    buildType = "/qml/qt5-desktop";
+    setHostDevice(1);
+#elif QT5 && !defined RPI && !defined ANDROID
+    setHostDevice(3);
+    buildType="/qml/qt5-desktop";
+#endif
+    qrcPath = buildType+"/Splash.qml";
+#elif  WIN32
+    setHostDevice(HostSystemData::WINDOWS_DESKTOP);
+    buildType="/qml/desktop";
+    qrcPath = "qrc:desktop/Splash.qml";
+#elif defined (for_freemantle)
+    buildType = "/qml/freemantle";
+    qrcPath = "qrc:freemantle/Splash.qml";
+#elif defined (for_harmattan)
+    buildType="/qml/harmattan";
+    qrcPath = "qrc:harmattan/Splash.qml";
+#elif defined (Q_OS_MACX)
+    setHostDevice(HostSystemData::OSX_DESKTOP);
+    buildType="/qml/qt5-desktop";
+    qrcPath = "qrc:osx/Splash.qml";
+#elif defined (RPI)
+    buildType="/qml/qt5-desktop";
+    setHostDevice(HostSystemData::RASPBERRY_PI);
+#elif defined ANDROID
+
+#ifndef QT5
+    qDebug() << "Resolution::"<<QApplication::desktop()->width()<<"w x "<<QApplication::desktop()->height()<<"h";
+    int h = QApplication::desktop()->height();
+    int w = QApplication::desktop()->width();
+    int pixelsX = QApplication::desktop()->physicalDpiX();
+    int pixelsY= QApplication::desktop()->physicalDpiY();
+    qDebug() << "Guessed DPI\n x::" << pixelsX << " Y::"<<pixelsY;
+
+    if(isPhone==0){ //no default set
+        setCommandResponse("No default form factor set, making initial selection");
+        if (w > 480 && h > 854 || h > 480 && w > 854 ){
+            setFormFactor(2);
+            buildType = "/qml/android/tablet";
+            setHostDevice(HostSystemData::ANDROID_TABLET);
+        }
+        else{
+            setFormFactor(1);
+            setHostDevice(HostSystemData::ANDROID_PHONE);
+            buildType = "/qml/android/phone";
+        }
+    } else{         //its set, overide setting
+
+        switch(isPhone){
+        case 1:
+            buildType = "/qml/android/phone";
+            qDebug() << buildType;
+            break;
+        case 2:
+            buildType = "/qml/android/tablet";
+            qDebug() << buildType;
+            break;
+        default:
+            setCommandResponse("Should not have gotten here, selecting phone for default");
+            buildType = "/qml/android/phone";
+            break;
+        }
+        setCommandResponse("Form factor set from config, using "+ buildType);
+    }
+    qrcPath = ":android/Splash.qml";
+    droidPath = "/";
+#endif
+#elif defined (for_android)
+    if (qorbiterUIwin->width() > 480 && qorbiterUIwin-> height() > 854 || qorbiterUIwin->height() > 480 && qorbiterUIwin-> width() > 854 )
+    {
+        buildType = "/qml/android/tablet";
+    }
+    else
+    {
+        buildType = "/qml/android/phone";
+
+    }
+
+    qrcPath = ":android/Splash.qml";
+    droidPath = "/";
+#elif defined Q_OS_IOS
+    setHostDevice(HostSystemData::IOS_TABLET);
+    buildType = "/qml/ios";
+    qrcPath = "qrc:main/IosWelcome.qml";
+#else
+
+    buildType = "/qml/desktop";
+    qrcPath = ":desktop/Splash.qml";
+#endif
+
+
+#ifdef QANDROID
+    // qDebug() << "Resolution::"<<QApplication::desktop()->width()<<"w x "<<QApplication::desktop()->height()<<"h";
+    int h = qorbiterUIwin->height();
+    int w = qorbiterUIwin->width();
+    if(isPhone==0){ //no default set
+        setCommandResponse("No default form factor set, making initial selection");
+        if (w > 480 && h > 854 || h > 480 && w > 854 ){
+            setFormFactor(2);
+            buildType = "/tablet";
+            setHostDevice(HostSystemData::ANDROID_TABLET);
+        }
+        else{
+            setFormFactor(1);
+            setHostDevice(HostSystemData::ANDROID_PHONE);
+            buildType = "/phone";
+        }
+    } else{         //its set, overide setting
+
+        switch(isPhone){
+        case 1:
+            buildType = "/phone";
+            qDebug() << buildType;
+            setHostDevice(HostSystemData::ANDROID_PHONE);
+            break;
+        case 2:
+            buildType = "/tablet";
+
+            setHostDevice(HostSystemData::ANDROID_TABLET);
+            qDebug() << buildType;
+            break;
+        default:
+            setCommandResponse("Should not have gotten here, selecting phone for default");
+            buildType = "/phone";
+            setHostDevice(HostSystemData::ANDROID_PHONE);
+            break;
+        }
+        setCommandResponse("Form factor for Qt5 set from config, using "+ buildType);
+    }
+    qrcPath = ":android/Splash.qml";
+    droidPath = "/";
+#endif
+
+    qmlPath = adjustPath(QApplication::applicationDirPath().remove("/bin"));
+    setApplicationPath(QApplication::applicationDirPath());
+    localDir = qmlPath.append(buildType.remove("/qml"));
+    remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins"+buildType.remove("/qml");
+
+    if(b_localLoading){
+
+#ifdef __ANDROID__
+        finalPath="qrc:///qml/android";
+#elif defined Q_OS_IOS
+        finalPath="qrc:///qml/ios";
+#elif defined WIN32
+        finalPath="qrc:///qml/windows";
+#elif defined Q_OS_MACX
+        finalPath="qrc:///qml/osx";
+#elif defined Q_OS_LINUX
+        finalPath="qrc:///qml/qml/linux";
+#endif
+        // qorbiterUIwin->setSource( QUrl(finalPath+"/Welcome.qml")); /*! We dont set android/iOS because it has its own bootstrap */
+    }else{
+        finalPath=remoteDirectoryPath;
+        //  qorbiterUIwin->setSource( finalPath+"/splash/Splash.qml"); /*! We dont set android/iOS because it has its own bootstrap */
+
+    }
+
+#if !defined(ANDROID)
+    qDebug() << "Android should not see this";
+
+#else
+
+#endif
+
+    skinMessage("build type set to:: "+buildType);
 }
 
 void qorbiterManager::reloadHandler()

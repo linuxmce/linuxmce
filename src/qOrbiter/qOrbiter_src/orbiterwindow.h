@@ -125,6 +125,7 @@ public slots:
     QString getQmlPage() {return qmlPage;}
 
     Q_INVOKABLE void forceResponse (QString forced);
+    Q_INVOKABLE bool hasOrbiters() {return orbiterList.count() != 0;}
     void loadSetupPage();
 
     bool getOrbiterInitialized(){return orbiterInitialized;}

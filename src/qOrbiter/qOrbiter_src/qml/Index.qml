@@ -19,7 +19,7 @@ anchors.fill: parent
 
     Timer{
         id:pusher
-        interval: 6000
+        interval: 2000
         onTriggered: bootStrap.source="splash/Splash.qml"
        running:true
     }

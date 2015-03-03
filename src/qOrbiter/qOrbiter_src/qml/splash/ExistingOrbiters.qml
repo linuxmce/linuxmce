@@ -1,70 +1,92 @@
-import QtQuick 2.0
+import QtQuick 2.3
+import "."
 
-ListView{
+Item{
     id:existing_orbiters
     height: scaleY(65)
-    width: scaleX(55)
-    clip: true
+    width: Style.listViewWidth_large
     anchors.left: parent.right
     anchors.verticalCenter: parent.verticalCenter
-    model:orbiterList
     visible: true
-    spacing: scaleY(2)
     opacity: 0
-    Behavior on opacity{
-        PropertyAnimation{
-            duration: 1500
+
+    Rectangle{
+        id:hdr
+        anchors{
+            top:parent.top
+            left:parent.left
+            right:parent.right
         }
+        color:Style.appcolor_background
+        height:scaleY(10)
     }
 
-    delegate: Rectangle{
-        id:existing_orbiter_delegate
-        height: labelColumn.height
-        width: existing_orbiters.width
+    Text{
+        id:lbl
+        text:qsTr("Existing Orbiters", "list of existing qorbiters")
+        font.pointSize: Style.appFontSize_list
+        color:Style.apptext_color_active
+        anchors.centerIn: hdr
+    }
 
-        gradient: Gradient {
-            GradientStop {
-                position: 0
-                color: "transparent"
-            }
-            GradientStop {
-                position: 1
-                color: "#000000"
+    Rectangle{
+        id:fill
+        anchors{
+            left:parent.left
+            top:hdr.bottom
+            right: parent.right
+            bottom:parent.bottom
+        }
+        color: Style.appcolor_background_list
+    }
+
+    ListView{
+        id:existing_orbiters_view
+        clip: true
+        anchors.fill: fill
+        model:orbiterList
+
+        Behavior on opacity{
+            PropertyAnimation{
+                duration: 1500
             }
         }
-        border.color: "#99CC99"
-        border.width: 1
-        Column
-        {
-            id:labelColumn
-            height: childrenRect.height
-            width: parent.width *.65
-            anchors.centerIn: parent
 
-            Text {
-                id: orbiter_label
-                text: qsTr("Orbiter:")+ label
-                font.pointSize: 18
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                font.family: myFont.name
+        delegate: Item{
+            id:existing_orbiter_delegate
+            height: labelColumn.height
+            width: existing_orbiters.width
 
-                width: parent.width
-                color: "#99CC99"
+            Column{
+                id:labelColumn
+                height: childrenRect.height
+                width: parent.width *.95
+                anchors.centerIn: parent
+
+                Text {
+                    id: orbiter_label
+                    text: qsTr("Orbiter:")+ label
+                    font.pointSize: Style.appFontSize_list
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    width: parent.width
+                    color: "white"
+                }
+                Text {
+                    id: dev_num
+                    text:qsTr("Device:")+ device
+                    font.pointSize: Style.appFontSize_list
+                    font.weight: Font.Light
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    color:"white"
+                    width: parent.width
+                }
             }
-            Text {
-                id: dev_num
-                text:qsTr("Device:")+ device
-                font.pointSize: 12
-                font.italic: true
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                font.family: myFont.name
-                width: parent.width
+            MouseArea {
+                anchors.fill: parent
+                onClicked: window.qmlSetupLmce(device, window.router)
             }
         }
-        MouseArea {
-            anchors.fill: parent
-            onClicked: window.qmlSetupLmce(device, window.router)
-        }
+
     }
 
     states: [
@@ -89,4 +111,5 @@ ListView{
             }
         }
     ]
+
 }

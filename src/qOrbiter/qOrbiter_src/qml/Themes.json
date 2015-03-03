@@ -1,82 +1,13 @@
 /*
-  Themes shall consists of the following:
-
+ Experimental.
   */
 {
     "themelist":{
 
-        "platforms":{
-
-            "android":{
-                "default":{
-                    "displayName":"default",
-                    "description":"",
-                    "author":"",
-                    "low_dpi-support":true,
-                    "med_dpi-support":true,
-                    "high_dpi-support":true,
-                    "xhigh_dpi-support":true,
-                    "xxlow_dpi-support":true
-                },
-                "aeon":{
-                    "displayName":"aeon",
-                    "description":"",
-                    "author":"",
-                    "low_dpi-support":true,
-                    "med_dpi-support":true,
-                    "high_dpi-support":true,
-                    "xhigh_dpi-support":true,
-                    "xxlow_dpi-support":true
-                }
-            },
-            "ios":{
-                "default":{
-                    "displayName":"default",
-                    "description":"",
-                    "author":"",
-                    "low_dpi-support":true,
-                    "med_dpi-support":true,
-                    "high_dpi-support":true,
-                    "xhigh_dpi-support":true,
-                    "xxlow_dpi-support":true
-                },
-                "aeon":{
-                    "displayName":"aeon",
-                    "description":"",
-                    "author":"",
-                    "low_dpi-support":true,
-                    "med_dpi-support":true,
-                    "high_dpi-support":true,
-                    "xhigh_dpi-support":true,
-                    "xxlow_dpi-support":true
-                }
-            },
-            "desktop":{
-                "stb":{
-                    "displayName":"Set Top Box",
-                    "description":"",
-                    "author":"",
-                    "low_dpi-support":true,
-                    "med_dpi-support":true,
-                    "high_dpi-support":true,
-                    "xhigh_dpi-support":true,
-                    "xxlow_dpi-support":true
-                }
-            },
-            "mediadirector":{
-                "stb":{
-                    "displayName":"Set Top Box",
-                    "description":"",
-                    "author":"",
-                    "low_dpi-support":true,
-                    "med_dpi-support":true,
-                    "high_dpi-support":true,
-                    "xhigh_dpi-support":true,
-                    "xxlow_dpi-support":true
-                }
-            }
+        "theme":{
+            "name":"default",
+            "entrypoint":"default/Main.qml",
+            "description":"Default Skin for QOrbiter across all devices"
         }
-
     }
-
 }
