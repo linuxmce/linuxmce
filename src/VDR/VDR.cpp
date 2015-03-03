@@ -969,7 +969,9 @@ void VDR::CMD_Navigate_Prev(int iStreamID,string &sCMD_Result,Message *pMessage)
 void VDR::CMD_Goto_Media_Menu(int iStreamID,int iMenuType,string &sCMD_Result,Message *pMessage)
 //<-dceag-c87-e->
 {
-
+	string sCommand;
+	sCommand = "HITK Menu";
+        SendOnlyVDRCommand(m_sVDRIp,sCommand);
 }
 //<-dceag-c202-b->
 
