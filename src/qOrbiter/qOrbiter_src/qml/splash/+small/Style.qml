@@ -31,10 +31,10 @@ Item{
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
 
-    readonly property int appFontSize_list:scaleY(1)
-    readonly property int appFontSize_header:scaleY(4)
-    readonly property int appFontSize_description:scaleY(2)
-    readonly property int appFontSize_title:scaleY(2)
+    readonly property int appFontSize_list:manager.isProfile ? scaleY(1.5) : scaleY(2)
+    readonly property int appFontSize_header:manager.isProfile ? scaleY(4) : scaleY(4.5)
+    readonly property int appFontSize_description:manager.isProfile ? scaleY(2) : scaleY(2.5)
+    readonly property int appFontSize_title:manager.isProfile ? scaleY(2.5) : scaleY(3)
 
     readonly property int listViewWidth_large:scaleX(45)
     readonly property int listViewWidth_medium:scaleX(20)

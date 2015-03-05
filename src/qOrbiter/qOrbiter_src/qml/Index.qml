@@ -6,7 +6,9 @@ import DceScreenSaver 1.0
   Root Item.
   */
 Item {
-anchors.fill: parent
+    id:qml_index
+   height: manager.appHeight
+   width: manager.appWidth
     state:"preinit"
     Component.onCompleted: {
         console.log("Index Loaded")
@@ -21,7 +23,7 @@ anchors.fill: parent
         id:pusher
         interval: 2000
         onTriggered: bootStrap.source="splash/Splash.qml"
-       running:true
+        running:true
     }
 
     IndexContent {
@@ -40,7 +42,7 @@ anchors.fill: parent
             name: "preinit"
             PropertyChanges {
                 target: indexContent
-               // visible:true
+                // visible:true
 
             }
 

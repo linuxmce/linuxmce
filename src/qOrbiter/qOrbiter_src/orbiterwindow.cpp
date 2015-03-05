@@ -31,7 +31,7 @@
 #include <QtQml/QQmlContext>
 #include <QtQml/QQmlEngine>
 #include <QtWidgets/QApplication>
-
+#include <contextobjects/screeninfo.h>
 
 #else
 #include <qmlapplicationviewer.h>
@@ -48,9 +48,40 @@
 #include "../iOS/qOrbiter/ioshelpers.h"
 #endif
 
-orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen, bool frameless, QObject *parent) :
-    QObject(parent), deviceno(deviceid)
+orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen, bool frameless, int simScreenSize, QObject *parent) :
+    QObject(parent),
+    deviceno(deviceid), router(QString::fromStdString(routerip)), internalIp("0.0.0.0"), externalIp("0.0.0.0"),
+    usingExternal(false),
+    phoneSize(false),  localPath(""),  newOrbiter(false),
+    b_connectionPresent(false), b_localConfigReady(false),
+    b_orbiterConfigReady(false), b_devicePresent(false),
+    b_skinDataReady(false), b_skinIndexReady(false),
+    b_reloadStatus(false)
 {
+    if(simScreenSize!=-1){
+        switch (simScreenSize) {
+        case ScreenData::Device_Small:
+            mainView.setWidth(480);
+            mainView.setHeight(854);
+            break;
+        case ScreenData::Device_Medium:
+            mainView.setWidth(1280);
+            mainView.setHeight(720);
+            break;
+        case ScreenData::Device_Large:
+            mainView.setWidth(1600);
+            mainView.setHeight(900);
+        default:
+            mainView.setWidth(800);
+            mainView.setHeight(600);
+            break;
+        }
+    } else {
+        mainView.setWidth(800);
+        mainView.setHeight(600);
+    }
+    mainView.rootContext()->setContextProperty("appW", mainView.width());
+    mainView.rootContext()->setContextProperty("appH", mainView.height());
 #ifdef QT4_8
 #ifndef ANDROID
     mainView.setAttribute(Qt::WA_TranslucentBackground);
@@ -88,28 +119,6 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     else {
         fullScreenOrbiter = false;
     }
-    internalIp="0.0.0.0";
-    externalIp="0.0.0.0";
-    usingExternal=false;
-    router = QString::fromStdString(routerip);
-    phoneSize = false;
-    localPath = "";
-    newOrbiter = false;
-    setConnectionState(false);
-    setLocalConfigState(false);
-    setOrbiterConfigState(false);
-    setSkinDataState(false);
-    setSkinIndexState(false);
-    setDeviceState(false);
-    setReloadStatus(false);
-    //    this->b_connectionPresent = false;
-    //    this->b_localConfigReady = false;
-    //    this->b_orbiterConfigReady = false;
-    //    this->b_skinDataReady = false;
-    //    this->b_skinIndexReady = false;
-    //    this->b_devicePresent = false;
-
-    //qDebug() << mainView.size();
 
     userList.append(new PromptData("No Users",0));
     roomList.append(new PromptData("No Rooms",0));
@@ -132,7 +141,8 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #endif
 
 #ifdef QT5
-    mainView.setResizeMode(QQuickView::SizeViewToRootObject);
+
+    mainView.setResizeMode(QQuickView::SizeRootObjectToView);
 
 #else
     mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
@@ -151,15 +161,15 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #ifndef Q_OS_ANDROID
 #ifndef QT5
 
-//        QGLFormat format= QGLFormat::defaultFormat();
-//        format.setAlpha(true);
-//        glWidget = new QGLWidget(format);
-//        glWidget->setStyleSheet("background:transparent;");
-//        glWidget->setAutoFillBackground(false);
-//        mainView.setViewport(glWidget);
-//        glWidget->setAttribute(Qt::WA_TranslucentBackground, true);
-//        glWidget->setBackgroundRole(QPalette::Base);
-//        mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    //        QGLFormat format= QGLFormat::defaultFormat();
+    //        format.setAlpha(true);
+    //        glWidget = new QGLWidget(format);
+    //        glWidget->setStyleSheet("background:transparent;");
+    //        glWidget->setAutoFillBackground(false);
+    //        mainView.setViewport(glWidget);
+    //        glWidget->setAttribute(Qt::WA_TranslucentBackground, true);
+    //        glWidget->setBackgroundRole(QPalette::Base);
+    //        mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #endif
 
 #endif
@@ -172,7 +182,6 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     qDebug() << "surface type " << mainView.surfaceType();
     //mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 #endif
-
     //    #if defined (QT4) && defined (ANDROID)
     //        QGLFormat format= QGLFormat::defaultFormat();
     //        glWidget = new QGLWidget();
@@ -180,43 +189,17 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     //        mainView.setViewport(glWidget);
     //        mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     //    #endif
-
-
-
     // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
-
     //window sizing
-#ifdef ANDROID
 
-#ifdef QT4_8
-    mainView.rootContext()->setContextProperty("appW", mainView.width());
-    mainView.rootContext()->setContextProperty("appH", mainView.height());
-#endif
-
-#elif for_desktop
-    if(fullScreen==true){
-        mainView.rootContext()->setContextProperty("appW", 800);
-        mainView.rootContext()->setContextProperty("appH", 600);
-    }else{
-        mainView.rootContext()->setContextProperty("appW", 1280);
-        mainView.rootContext()->setContextProperty("appH", 720);
-        mainView.show();
-    }
-#elif RPI
-    mainView.rootContext()->setContextProperty("appW", mainView.height());
-    mainView.rootContext()->setContextProperty("appH", mainView.width());
-#else
-    mainView.rootContext()->setContextProperty("appW", 800);
-    mainView.rootContext()->setContextProperty("appH", 600);
-#endif
 
 #ifdef ANDROID
     mainView.engine()->addImportPath("assets:/imports/androidComponents");
     mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
     mainView.engine()->addPluginPath("assets:/lib");
 #endif
-qrcPath="qrc:/qml/qml/Index.qml";
-//mainView.setSource(qrcPath); /* Sets the initial qml file based on all the above switching */
+    qrcPath="qrc:/qml/qml/Index.qml";
+    //mainView.setSource(qrcPath); /* Sets the initial qml file based on all the above switching */
 
 }
 
@@ -224,7 +207,7 @@ qrcPath="qrc:/qml/qml/Index.qml";
  * \brief orbiterWindow::initView This function is used to provide any special handling needed for window setup on start.
  */
 void orbiterWindow::initView(){
-//mainView.showMaximized();
+    //mainView.showMaximized();
 
 }
 

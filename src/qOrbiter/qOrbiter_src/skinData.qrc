@@ -17,12 +17,19 @@
         <file>qml/splash/ExistingOrbiters.qml</file>
         <file>qml/splash/ConnectionBox.qml</file>
         <file>qml/images/login-bg.png</file>
-        <file>qml/+linux/+xlarge/IndexContent.qml</file>       
+        <file>qml/+linux/+xlarge/IndexContent.qml</file>
         <file>qml/Themes.json</file>
         <file>qml/splash/images/vertical_arrow.png</file>
         <file>qml/splash/images/splash_bg.png</file>
         <file>qml/splash/images/options.png</file>
         <file>qml/splash/images/arrow.png</file>
         <file>qml/splash/Style.qml</file>
+        <file>qml/splash/+small/ExistingOrbiters.qml</file>
+        <file>qml/splash/+small/Style.qml</file>
+        <file>qml/splash/+small/SplashView.qml</file>
+
+    </qresource>
+    <qresource prefix="/">
+     <file>config.xml</file>
     </qresource>
 </RCC>

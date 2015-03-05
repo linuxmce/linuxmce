@@ -8,7 +8,10 @@ import DceScreenSaver 1.0
 Item{
     id:indexContent
     anchors.fill: parent
-    
+    Component.onCompleted: {
+        console.log("Android Default Splash UI loaded.")
+    }
+
     Rectangle{
         anchors.fill: parent
         opacity:.85

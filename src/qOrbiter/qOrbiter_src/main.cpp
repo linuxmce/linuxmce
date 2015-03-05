@@ -248,7 +248,7 @@ int main(int argc, char* argv[])
     string graphicsmode="raster";
     string screen = "";
     int PK_Device=-1;
-
+    int screenSize=-1;
     string sLogger="stdout";
     bool bLocalMode=false,bError=false; // An error parsing the command line
     char c;
@@ -284,6 +284,9 @@ int main(int argc, char* argv[])
         case 'o':
             screen="fullscreen";
             break;
+        case 'z':
+            screenSize=atoi(argv[++optnum]);
+            break;
         default:
             bError=true;
             break;
@@ -298,7 +301,9 @@ int main(int argc, char* argv[])
              << "-r -- the IP address of the DCE Router  Defaults to 'dcerouter'." << endl
              << "-d -- This device's ID number.  If not specified, it will be requested from the router based on our IP address." << endl
              << "-l -- Where to save the log files.  Specify 'dcerouter' to have the messages logged to the DCE Router.  Defaults to stdout." << endl
-             << "-o --Switch for frameless MD and desktops." << endl;
+             << "-o --Switch for frameless MD and desktops." << endl
+             << "-s --Switch for fullscreen." << endl
+             << "-z --Screen size setting for testing 0 - small \n 1 - medium\n 2 - large\n 3 - xlarge" << endl;
 
     }
 
@@ -373,24 +378,18 @@ int main(int argc, char* argv[])
         qmlRegisterType<ScreenList>("org.linuxmce.screens", 1,0, "Screens");
         qmlRegisterType<ScreenData>("org.linuxmce.screeninfo", 1,0, "ScreenData");
         qmlRegisterType<GenericFlatListModel>();
-        if(deviceType==0){
 
-        } else {
+         orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm, screenSize);
 
-        }
-
-        qDebug() << "Eggs n Toast";
-        orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm);
 #ifdef __ANDROID__
         orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
-
 #endif
         orbiterWin.setMessage("Setting up Lmce");
 
 
 #ifndef ANDROID
 
-        qorbiterManager  w(&orbiterWin.mainView);
+        qorbiterManager  w(&orbiterWin.mainView, screenSize);
         if(deviceType==0){
             w.setDeviceTemplate(DEVICETEMPLATE_OnScreen_qOrbiter_CONST);
             //pqOrbiter.m_pData->m_dwPK_DeviceTemplate=DEVICETEMPLATE_OnScreen_qOrbiter_CONST;
@@ -400,7 +399,6 @@ int main(int argc, char* argv[])
 #else
         qorbiterManager w(&orbiterWin.mainView, &androidHelper);
         orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
-
 #endif
         orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
 
@@ -436,16 +434,10 @@ int main(int argc, char* argv[])
         qDebug() << "!!!!!!!!!!!BREAK!!!!!!!!!!!!!!!!!!";
         TimeCodeManager *timecode = new TimeCodeManager();
 
-
         orbiterWin.mainView.rootContext()->setContextProperty("logger", &localLogger);
         orbiterWin.mainView.rootContext()->setContextProperty("dceTimecode", timecode);
         // orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
-
-
         orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
-
-
-
         qRegisterMetaType<QHash<int, QVariant> >("QHash<int, QVariant>");
 
 
@@ -592,8 +584,8 @@ int main(int argc, char* argv[])
         QObject::connect(&pqOrbiter, SIGNAL(addScreenParam(QString,int)), w.ScreenParameters, SLOT(addParam(QString, int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(locationChanged(int,int)), &pqOrbiter, SLOT(setLocation(int,int)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(userChanged(int)), &pqOrbiter, SLOT(setUser(int)),Qt::QueuedConnection);
-        QObject::connect(w.ScreenSaver, SIGNAL(requestNewImage(QString)), &pqOrbiter, SLOT(getScreenSaverImage(QString)), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(currentScreenSaverImage(QByteArray)), w.ScreenSaver, SLOT(setImageData(QByteArray)),Qt::QueuedConnection);
+        //QObject::connect(w.ScreenSaver, SIGNAL(requestNewImage(QString)), &pqOrbiter, SLOT(getScreenSaverImage(QString)), Qt::QueuedConnection);
+        //QObject::connect(&pqOrbiter, SIGNAL(currentScreenSaverImage(QByteArray)), w.ScreenSaver, SLOT(setImageData(QByteArray)),Qt::QueuedConnection);
 
         // QObject::connect (&w, SIGNAL(liveTVrequest()), simpleEPGmodel, SLOT(populate()));
 
@@ -746,7 +738,7 @@ int main(int argc, char* argv[])
 
         //so does live tv
         //QObject::connect(&w, SIGNAL(clearModel()), simpleEPGmodel, SLOT(empty()),Qt::QueuedConnection);
-       // QObject::connect(&pqOrbiter, SIGNAL(liveTvUpdate(QString)), simpleEPGmodel, SLOT(setProgram(QString)), Qt::QueuedConnection);
+        // QObject::connect(&pqOrbiter, SIGNAL(liveTvUpdate(QString)), simpleEPGmodel, SLOT(setProgram(QString)), Qt::QueuedConnection);
         //epg specific
 
         //storemediaplaylist specific

@@ -230,13 +230,13 @@ class qorbiterManager : public QObject
 
 public:
 #if QT5 && !ANDROID
-    qorbiterManager(QQuickView * view, QObject *parent=0);  //constructor
+    qorbiterManager(QQuickView * view, int testSize, QObject *parent=0);  //constructor
 #elif ANDROID && QT5
-    qorbiterManager(QQuickView *view, AndroidSystem *jniHelper,  QObject *parent=0);
+    qorbiterManager(QQuickView *view, AndroidSystem *jniHelper, QObject *parent=0);
 #elif ANDROID
-    qorbiterManager(QDeclarativeView *view, AndroidSystem *jniHelper,  QObject *parent =0);
+    qorbiterManager(QDeclarativeView *view, AndroidSystem *jniHelper,   QObject *parent =0);
 #elif   QT4_8
-    qorbiterManager(QDeclarativeView * view, QObject *parent=0);  //constructor
+    qorbiterManager(QDeclarativeView * view, int testSize, QObject *parent=0);  //constructor
 #endif
 
     ~qorbiterManager();
@@ -1715,11 +1715,26 @@ public slots:
 
 private slots:
     void resetScreenSize(){
-
-        m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
         QString psize = m_screenInfo->primaryScreen()->pixelDensityString();
         QStringList t;
-        t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
+
+        if(m_testScreenSize==-1){
+            t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
+           m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
+        } else {
+            qDebug() << Q_FUNC_INFO << "Using test screen size";
+            QString testDeviceString;
+            switch(m_testScreenSize){
+            case ScreenData::Device_Small: testDeviceString="small";break;
+            case ScreenData::Device_Medium: testDeviceString="medium";break;
+            case ScreenData::Device_Large: testDeviceString="large"; break;
+            case ScreenData::Device_XLarge:testDeviceString="xlarge";break;
+            default: testDeviceString="large"; break;
+            }
+
+            t <<testDeviceString << psize << QString::number(qorbiterUIwin->height() );
+           m_deviceSize = ScreenData::Device_Small;
+        }
         m_selector->setExtraSelectors(t);
         qDebug() << Q_FUNC_INFO << " Set to "<< m_selector->allSelectors();
         qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
@@ -1742,6 +1757,8 @@ private:
     QQmlFileSelector *selector;
     QFileSelector *m_selector;
     ScreenData::DeviceRange m_deviceSize;
+
+    int m_testScreenSize;
 
 
 };

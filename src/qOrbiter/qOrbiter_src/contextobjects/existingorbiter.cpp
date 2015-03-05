@@ -1,9 +1,24 @@
 #include "existingorbiter.h"
+#include "qdebug.h"
 
 ExistingOrbiter::ExistingOrbiter(int deviceno, QString title, QObject *parent) :
-    QObject(parent), i_device_number(deviceno), label(title)
+    QObject(parent), i_device_number(deviceno), label("")
 {
+ QStringList metaData;
+ metaData = title.split(QRegExp("\\d\\d\\d "));
 
+
+ if(metaData.length()==1){
+     label=metaData.at(0).split("(").at(0);
+     location =metaData.at(0).split("(").at(1);
+     location.remove(")");
+ } else {
+     label=metaData.at(1).split("(").at(0);
+     location =metaData.at(1).split("(").at(1);
+     location.remove(")");
+ }
+
+qDebug() << Q_FUNC_INFO << metaData;
 }
 
 QVariant ExistingOrbiter::data(int role) const

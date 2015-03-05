@@ -54,6 +54,10 @@ contains(QT_VERSION,4.8.*){
 
 }
 
+simulate{
+DEFINES+=simulate
+}
+
 contains(QT_VERSION,4.7.*){
         message("$$QT_VERSION Core")
         DEFINES+=QT4_7

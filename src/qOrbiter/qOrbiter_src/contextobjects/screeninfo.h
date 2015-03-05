@@ -186,7 +186,7 @@ public slots:
         case ScreenData::Device_1024: return "1024";break;
         case ScreenData::Device_1280: return "1280";break;
         default:
-            return "+240";
+            return "240";
             break;
         }
     }
@@ -201,6 +201,10 @@ public slots:
             return QString();
             break;
         }
+    }
+
+    QString deviceSizeToString(int d){
+        return deviceSizeToString((ScreenData::DeviceRange)d);
     }
 
     QString pixelDensityToString(ScreenData::PixelDensityScale sz){

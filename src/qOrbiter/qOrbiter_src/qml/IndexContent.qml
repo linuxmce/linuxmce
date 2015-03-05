@@ -7,8 +7,8 @@ import DceScreenSaver 1.0
   */
 Item{
     id:indexContent
-    anchors.fill: parent
-    
+    height: manager.appHeight
+    width: manager.appWidth
     Rectangle{
         anchors.fill: parent
         opacity:.85
@@ -35,7 +35,7 @@ Item{
     
     Text {
         id: splashText
-        text: qsTr("QOrbiter ")
+        text: qsTr("QOrbiter")
         anchors{
             top:parent.top
             horizontalCenter: parent.horizontalCenter

@@ -69,17 +69,22 @@ using namespace DCE;
   messaging system will be the initial method of communication
 */
 #if (QT5) && !defined (ANDROID)
-qorbiterManager::qorbiterManager(QQuickView *view, QObject *parent) :
+qorbiterManager::qorbiterManager(QQuickView *view, int testSize, QObject *parent) :
     #elif ANDROID && QT5
 qorbiterManager::qorbiterManager(QQuickView *view, AndroidSystem *jniHelper,  QObject *parent) :
     #elif ANDROID
-qorbiterManager::qorbiterManager(QDeclarativeView *view, AndroidSystem *jniHelper,  QObject *parent) :
+qorbiterManager::qorbiterManager(QDeclarativeView *view, AndroidSystem *jniHelper,   QObject *parent) :
     #else
-qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
+qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,  QObject *parent) :
     
     #endif
     QObject(parent),qorbiterUIwin(view)
 {
+#ifdef __ANDROID__
+ int testSize=-1;
+#endif
+     m_testScreenSize =testSize;
+
 #if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
     selector=new QQmlFileSelector(view->engine());
     m_selector=new QFileSelector(this);
@@ -88,7 +93,12 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     connect(m_screenInfo, SIGNAL(screenSizeChanged()), this, SLOT(resetScreenSize()));
     resetScreenSize();
     qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);   
+    qorbiterUIwin->showNormal();
+#endif
+
+#ifdef __ANDROID__
     qorbiterUIwin->showMaximized();
+    checkOrientation(Qt::LandscapeOrientation);
 #endif
 
     mediaPlayerID=-1; orbiterInit=true; m_ipAddress="";  m_bStartingUp= true;  homeNetwork=false;  alreadyConfigured = false;  iFK_Room = -1;
@@ -119,6 +129,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, QObject *parent) :
     setupUiSelectors();
     initializeGridModel();
     setupContextObjects();
+
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
     gotoScreenList = new QStringList();
@@ -604,7 +615,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
             QString m_command = mScenarioRoom.at(innerIndex).attributes().namedItem("eaDescription").nodeValue();
             QString m_goto = mScenarioRoom.at(innerIndex).attributes().namedItem("FK_CommandGroup").nodeValue();
             QString imgName = mScenarioRoom.at(innerIndex).attributes().namedItem("Description").nodeValue();
-            QImage m_image = QImage("Qrc:/icons/"+imgName);
+            QImage m_image = QImage("qrc:/icons/"+imgName);
             mediaModelHolder->appendRow(new MediaScenarioItem(eaTitle,m_label, m_param, m_command, m_goto, m_image, mediaModelHolder));
         }
 
@@ -1721,6 +1732,13 @@ bool qorbiterManager::readLocalConfig(){
     QDomDocument localConfig;
     QString xmlPath;
 
+    QFile test(":///config.xml");
+    if(test.exists()){
+        qDebug() << "QRC file found";
+    } else {
+        qDebug() << "QRC file not found at " << test.fileName();
+    }
+
 #if defined(Q_OS_MAC) && defined Q_OS_IOS
 
     QDir dir;
@@ -2682,8 +2700,7 @@ bool qorbiterManager::createAndroidConfig()
             setDceResponse("Made path");
         }
 
-        QFile defaultConfig;
-        defaultConfig.setFileName(":/main/config.xml");
+        QFile defaultConfig(":///config.xml");
         if(!defaultConfig.open(QFile::ReadOnly)){
             qDebug() << "Cannot find config in QRC";
             qDebug() << defaultConfig.errorString();
@@ -2760,6 +2777,7 @@ void qorbiterManager::checkOrientation(QSize s)
 #ifdef QT5
 void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
 {
+    Q_UNUSED(o);
     appHeight=qorbiterUIwin->size().height();
     appWidth=qorbiterUIwin->size().width();
 

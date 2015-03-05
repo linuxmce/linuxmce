@@ -7,7 +7,11 @@ import DceScreenSaver 1.0
   */
 Item{
     id:indexContent
-    anchors.fill: parent
+    height:manager.appHeight
+    width: manager.appWidth
+    Component.onCompleted: {
+        console.log("SmallUI loaded")
+    }
     
     Image{
         fillMode: Image.PreserveAspectCrop
@@ -40,8 +44,8 @@ Item{
         color:"black"
         font.weight:Font.Light
         anchors{
-           horizontalCenter: parent.horizontalCenter
-           verticalCenter: parent.verticalCenter
+            horizontalCenter: parent.horizontalCenter
+            verticalCenter: parent.verticalCenter
         }
     }
     

@@ -19,7 +19,7 @@
 #   Qt version 5.*.*
 
 CONFIG += thread
-
+CONFIG-=depend_includepath
 
 # define deployment destination and target executable name
 TARGET=qorbiterqt5
@@ -65,8 +65,8 @@ TRANSLATIONS += app_de.ts
         #This is the only locally deployed qml file. Its purpose is to provide initial logic for connecting to the core,
         #and error handling, etc. It is not designer editable and should be considered as and .h / .cpp file when changing
         #and the implications of such.
-        base.source = ../../qml/android/AndroidBase.qml
-        base.target = qml/
+        base.source = ../../qml/skins
+        base.target = skins
 
         #The Configuration file read on startup and used subsequently.
         #Scheduled for replacement using sqlite.

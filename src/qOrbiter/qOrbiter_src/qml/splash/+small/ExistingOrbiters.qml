@@ -4,7 +4,7 @@ import "."
 Item{
     id:existing_orbiters
     height: scaleY(65)
-    width: Style.listViewWidth_large
+    width: parent.width
     anchors.left: parent.right
     anchors.verticalCenter: parent.verticalCenter
     visible: true
