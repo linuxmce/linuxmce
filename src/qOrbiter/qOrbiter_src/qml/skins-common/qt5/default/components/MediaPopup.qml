@@ -17,7 +17,7 @@ Item {
             onClicked: {
                 if(!uiOn){
                     uiOn=true
-                     manager.setCurrentScreen(dcenowplaying.qs_screen)
+                    manager.setCurrentScreen(dcenowplaying.qs_screen)
                 }
             }
         }
@@ -77,11 +77,19 @@ Item {
             left:parent.right
             verticalCenter: parent.verticalCenter
         }
-        opacity: .65       
-        boldClock: true        
+        opacity: .65
+        boldClock: true
     }
 
-
+    MouseArea{
+        anchors.fill: parent
+        onClicked: {
+            if(!uiOn){
+                uiOn=true
+            }
+             manager.setCurrentScreen(dcenowplaying.qs_screen)
+        }
+    }
     states: [
 
         State {
