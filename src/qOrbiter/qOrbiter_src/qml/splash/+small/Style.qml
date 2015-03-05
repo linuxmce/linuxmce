@@ -31,16 +31,16 @@ Item{
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
 
-    readonly property int appFontSize_list:scaleY(2)
-    readonly property int appFontSize_header:scaleY(5)
-    readonly property int appFontSize_description:scaleY(3)
-    readonly property int appFontSize_title:scaleY(4)
+    readonly property int appFontSize_list:scaleY(1)
+    readonly property int appFontSize_header:scaleY(4)
+    readonly property int appFontSize_description:scaleY(2)
+    readonly property int appFontSize_title:scaleY(2)
 
     readonly property int listViewWidth_large:scaleX(45)
     readonly property int listViewWidth_medium:scaleX(20)
     readonly property int listViewWidth_small:scaleX(15)
 
-    readonly property int appButtonHeight:scaleY(4)
-    readonly property int appButtonWidth:scaleX(6)
+    readonly property int appButtonHeight:manager.isProfile ? scaleY(4) : scaleY(6)
+    readonly property int appButtonWidth:manager.isProfile ? scaleX(6) : scaleX(4)
 
 }

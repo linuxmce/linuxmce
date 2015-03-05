@@ -96,10 +96,12 @@ Item {
 
     ExistingOrbiters {
         id:existing_orbiters
+
     }
 
     NewOrbiterButton {
         id:newOrbiterButton
+        width:parent.width *.85
     }
 
 }

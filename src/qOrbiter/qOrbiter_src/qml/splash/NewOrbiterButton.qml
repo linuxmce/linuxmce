@@ -1,30 +1,30 @@
-import QtQuick 2.0
+import QtQuick 2.3
 import "."
-Rectangle{
+Item{
     id:newOrbiterButton
-    height: scaleY(10)
+    height:0
     width:scaleX(55)
     opacity: 0
-    border.color: "#99CC99"
     anchors.bottom: parent.bottom
     Component.onCompleted: state="hidden"
     anchors.horizontalCenter: parent.horizontalCenter
-    color:"black"
-    Behavior on opacity{
-        PropertyAnimation{duration: 1000}
+
+    Rectangle{
+        radius:10
+        color:Style.appbutton_confirm_color
+        anchors.fill: parent
     }
 
-    
-    Text {
+
+        Text {
         id: newOrbiterLabel
-        text: qsTr("Create New Orbiter? \n Or choose and Existing Orbiter")
-        font.pointSize: 15
-        width: parent.width
+        text: qsTr("Would you like to create a new orbiter?", "Create a new orbiter.")
+        font.pointSize: Style.appFontSize_title
         anchors.centerIn: parent
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        font.family: myFont.name
-        font.bold: true
-        color:Style.appbutton_confirm_color
+        width: parent.width*.75
+        anchors.verticalCenter: parent.verticalCenter
+        wrapMode: Text.WrapAtWordBoundaryOrAnywhere      
+        color:"white"
     }
     
     MouseArea{
@@ -38,11 +38,9 @@ Rectangle{
             PropertyChanges {
                 target: newOrbiterButton
                 opacity:0
+                height:0
             }
-            AnchorChanges{
-                anchors.top: parent.bottom
 
-            }
         },
         State {
             name: "showing"
@@ -50,20 +48,16 @@ Rectangle{
                 target: newOrbiterButton
                 opacity:1
                 anchors.leftMargin: scaleX(25)
+                height:Style.appButtonHeight
             }
-            AnchorChanges{
-                target: newOrbiterButton
-                anchors.top: existing_orbiters.bottom
 
-            }
         }
     ]
 
     transitions: Transition {
         // smoothly reanchor myRect and move into new position
-        AnchorAnimation{
+        PropertyAnimation{
             duration: 1000
-
         }
     }
 }

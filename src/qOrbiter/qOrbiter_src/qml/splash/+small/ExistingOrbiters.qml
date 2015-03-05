@@ -25,9 +25,10 @@ Item{
     Text{
         id:lbl
         text:qsTr("Existing Orbiters", "list of existing qorbiters")
-        font.pointSize: Style.appFontSize_title
+        font.pointSize: Style.appFontSize_list
         color:Style.apptext_color_active
         anchors.centerIn: hdr
+        width: parent.width
     }
 
     Rectangle{
@@ -46,7 +47,7 @@ Item{
         clip: true
         anchors.fill: fill
         model:orbiterList
-        spacing:5
+        spacing:2
         Behavior on opacity{
             PropertyAnimation{
                 duration: 1500

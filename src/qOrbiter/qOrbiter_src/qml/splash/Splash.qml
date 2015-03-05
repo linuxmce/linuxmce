@@ -5,12 +5,11 @@ import QtQuick 2.3
 import "."
 Item {
     id: splashLogic
-    width: manager.appWidth
     height: manager.appHeight
+    width: manager.appWidth
     Component.onCompleted: {
         splashLogic.state="connecting"
         window.qmlSetupLmce(window.deviceno, window.router)
-
     }
 
     function scaleX(x){
@@ -28,10 +27,10 @@ Item {
         target: window
         onShowList:{
             if(!window.hasOrbiters()){
-              splashLogic.state="connected-nodevices"
+                splashLogic.state="connected-nodevices"
             }
             else{
-               splashLogic.state="connected-devices"
+                splashLogic.state="connected-devices"
             }
         }
     }
@@ -59,7 +58,7 @@ Item {
     property string router_ip: ""
 
     onOrbiterSetupChanged:{
-       splashLogic.state="new-orbiter"
+        splashLogic.state="new-orbiter"
     }
 
     onWidthChanged: console.log("detected size change")
@@ -80,20 +79,20 @@ Item {
         },State {
             name: "connected-nodevices"
             PropertyChanges {
-               // target: object
+                // target: object
 
             }
         }, State {
             name: "connected-devices"
             PropertyChanges {
-              //  target: object
+                //  target: object
 
             }
         },
         State {
             name: "new-orbiter"
             PropertyChanges {
-               // target: object
+                // target: object
 
             }
         }
