@@ -17,6 +17,7 @@ Item {
             onClicked: {
                 if(!uiOn){
                     uiOn=true
+                     manager.setCurrentScreen(dcenowplaying.qs_screen)
                 }
             }
         }
@@ -31,10 +32,7 @@ Item {
         anchors.bottom:parent.bottom
         anchors.left: parent.left
         sourceSize: Qt.size(200,300)
-        MouseArea{
-            anchors.fill: parent
-            onPressed: manager.setCurrentScreen(dcenowplaying.qs_screen)
-        }
+
     }
     Connections{
         target: dcenowplaying
