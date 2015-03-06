@@ -1,14 +1,13 @@
 import QtQuick 2.3
 import QtGraphicalEffects 1.0
-import AudioVisual 1.0
-import DceScreenSaver 1.0
+import QtMultimedia 5.0
 /*
   Root Item.
   */
 Item {
     id:qml_index
-   height: manager.appHeight
-   width: manager.appWidth
+   height: appH
+   width: appW
     state:"preinit"
     Component.onCompleted: {
         console.log("Index Loaded")

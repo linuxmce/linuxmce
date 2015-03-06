@@ -1,7 +1,5 @@
 import QtQuick 2.3
-import QtGraphicalEffects 1.0
-import AudioVisual 1.0
-import DceScreenSaver 1.0
+
 /*
   Root Item.
   */

@@ -385,10 +385,11 @@ OTHER_FILES += \
     ANDROID_EXTRA_LIBS = $$_PRO_FILE_PWD_/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7libAudioVisual.so
     }
 
+
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
     ANDROID_EXTRA_LIBS = \
-       $$PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libDceScreenSaver.so \
-       $$PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libAudioVisual.so
+        $$PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libAudioVisual.so \
+        $$PWD/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libDceScreenSaver.so
 }
 
 
