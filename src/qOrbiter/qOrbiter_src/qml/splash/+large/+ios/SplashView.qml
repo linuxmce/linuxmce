@@ -55,19 +55,17 @@ Item {
             text: qsTr("Please Choose an orbiter")
             //font.family: myFont.name
             font.pointSize: Style.appFontSize_description
-            font.weight: Font.Light            
+            font.weight: Font.Light
             anchors.left:welcome.right
-            anchors.verticalCenter: parent.verticalCenter
             color:"white"
         }
         Text {
             id: ui_name
-            text: "SmallUI"
+            text: "iOSUI"
             //font.family: myFont.name
             font.pointSize: Style.appFontSize_description
             font.weight: Font.Light
             anchors.left:parent.right
-            anchors.verticalCenter: parent.verticalCenter
             color:"white"
         }
     }
@@ -97,7 +95,7 @@ Item {
 
     Text {
         id: loadingStatus
-        text: "Status " + manager.commandResponse       
+        text: "Status " + manager.commandResponse
         font.pointSize: Style.appFontSize_description
         color: "white"
         anchors.top: topContainer.bottom

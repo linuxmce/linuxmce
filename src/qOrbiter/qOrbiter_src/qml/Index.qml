@@ -18,6 +18,8 @@ Item {
         }
     }
 
+    onWidthChanged: console.log("qml_index width::"+width)
+
     Timer{
         id:pusher
         interval: 2000

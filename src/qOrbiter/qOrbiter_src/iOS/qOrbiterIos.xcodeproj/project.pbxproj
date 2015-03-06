@@ -960,6 +960,21 @@
 					);
 			};
 		};
+		C8C1DAD3413380EA00D89510 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/screeninfo.cpp";
+			name = "screeninfo.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		3F318BBF315D07EA4CE38FF8 = {
+			fileRef = "C8C1DAD3413380EA00D89510";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
 		2129F3692370D1EA9932AA2A = {
 			isa = PBXFileReference;
 			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/playlists/epgitemclass.cpp";
@@ -2039,6 +2054,21 @@
 					);
 			};
 		};
+		22C4428D771A8E4A4B6D177B = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_screeninfo.cpp";
+			name = "moc_screeninfo.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		BF0BC4FE9D4DF3E101E3B0F7 = {
+			fileRef = "22C4428D771A8E4A4B6D177B";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
 		D07BF3E2B1744B1F5E51D993 = {
 			isa = PBXFileReference;
 			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_epgitemclass.cpp";
@@ -2948,6 +2978,13 @@
 			sourceTree = "<absolute>";
 			lastKnownFileType = "sourcecode.c.h";
 		};
+		BF955E8869073EA66D3B968F = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/screeninfo.h";
+			name = "screeninfo.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
 		3807F988F20742AEC5304681 = {
 			isa = PBXFileReference;
 			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/playlists/epgitemclass.h";
@@ -3293,6 +3330,7 @@
 				"B59FD630F300BDD97C06D2B8",
 				"C75A353F349A9A23C0D0BB4F",
 				"F18E17C83B5F6AEA3BDA86B0",
+				"22C4428D771A8E4A4B6D177B",
 				"D07BF3E2B1744B1F5E51D993",
 				"3DBDE9E60288B3A3E4B0DA17",
 				"C9FFAA565C050545A7C14B90",
@@ -3403,6 +3441,7 @@
 				"F386877079FE60CFC645E840",
 				"F93A72ABC3CDCD7337F8EFCF",
 				"98197E0EE53E0C0DEFF11B30",
+				"C8C1DAD3413380EA00D89510",
 				"2129F3692370D1EA9932AA2A",
 				"5FC7CAE3B553E8BD2B44640B",
 				"C4DBE8524D9DBC4337B6767C",
@@ -3497,6 +3536,7 @@
 				"7D6AA77F98966DDBB632AD0C",
 				"C6268C8F2B2E11A90BF311B4",
 				"BD6395C47802147C836CBA0F",
+				"BF955E8869073EA66D3B968F",
 				"3807F988F20742AEC5304681",
 				"FD87886DFAAF78073809C6BC",
 				"3761410239EED5B9941F9BA0",
@@ -3624,6 +3664,7 @@
 				"59D6F93809B840D6C5C44011",
 				"5529A777A835ADA0F84DC6DA",
 				"67F3362375B3ABC39C345298",
+				"3F318BBF315D07EA4CE38FF8",
 				"356B4EB0447F526CE2134568",
 				"0A18CF2D6E3AB5E12C59D8E6",
 				"14959BED34FC67EF07A4F504",
@@ -3695,6 +3736,7 @@
 				"F9F76C95B036BE8DA98CAE23",
 				"9E454FAB314E5C19F50A382A",
 				"4824B2E7D973B461D75CE5C8",
+				"BF0BC4FE9D4DF3E101E3B0F7",
 				"30DBB21FD4C5AFB1085AEE7C",
 				"05EE23501CE0B89DFEDC1F17",
 				"8DFDA80CFE5FCF033885F183",

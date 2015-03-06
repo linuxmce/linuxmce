@@ -5,11 +5,17 @@ import QtQuick 2.3
 import "."
 Item {
     id: splashLogic
-    height: manager.appHeight
-    width: manager.appWidth
+   height:manager.appHeight
+   width: manager.appWidth
     Component.onCompleted: {
+     console.log("Splash is loaded")
         splashLogic.state="connecting"
         window.qmlSetupLmce(window.deviceno, window.router)
+    }
+
+    onWidthChanged: {
+        console.log("Splash.qml width::"+width)
+
     }
 
     function scaleX(x){
@@ -61,7 +67,6 @@ Item {
         splashLogic.state="new-orbiter"
     }
 
-    onWidthChanged: console.log("detected size change")
 
     FontLoader{
         id:myFont

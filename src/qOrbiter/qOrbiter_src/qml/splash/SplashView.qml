@@ -45,7 +45,6 @@ Item {
             text: qsTr(" Welcome to LinuxMCE")
             //font.family: myFont.name
             font.pointSize: Style.appFontSize_header
-            anchors.top: parent.top
             anchors.left:parent.left
             anchors.horizontalCenter: parent.horizontalCenter
             color:"white"
@@ -55,9 +54,17 @@ Item {
             text: qsTr("Please Choose an orbiter")
             //font.family: myFont.name
             font.pointSize: Style.appFontSize_description
-            font.weight: Font.Light
-            anchors.top: welcome.top
+            //font.weight: Font.Light
             anchors.left:welcome.right
+            color:"white"
+        }
+        Text {
+            id: ui_name
+            text: "DefaultUI"
+            //font.family: myFont.name
+            font.pointSize: Style.appFontSize_description
+            font.weight: Font.Light
+            anchors.left:parent.right
             color:"white"
         }
     }
@@ -85,14 +92,14 @@ Item {
     }
 
 
-    Text {
-        id: loadingStatus
-        text: "Status " + manager.commandResponse       
-        font.pointSize: Style.appFontSize_description
-        color: "white"
-        anchors.top: topContainer.bottom
-        anchors.horizontalCenter: connectionBox.horizontalCenter
-    }
+//    Text {
+//        id: loadingStatus
+//        text: "Status " + manager.commandResponse
+//        font.pointSize: Style.appFontSize_description
+//        color: "white"
+//        anchors.top: topContainer.bottom
+//        anchors.horizontalCenter: connectionBox.horizontalCenter
+//    }
 
     ExistingOrbiters {
         id:existing_orbiters

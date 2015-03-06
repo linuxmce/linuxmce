@@ -146,6 +146,7 @@ SOURCES += ../main.cpp \
         ../contextobjects/playlistitemclass.cpp \
         ../contextobjects/securityvideoclass.cpp \
         ../contextobjects/epgchannellist.cpp \
+        ../contextobjects/screeninfo.cpp \
         ../playlists/epgitemclass.cpp \
         ../datamodels/floorplanmodel.cpp \
         ../datamodels/floorplanitem.cpp \
@@ -239,6 +240,7 @@ HEADERS += \
         ../contextobjects/playlistitemclass.h \
         ../contextobjects/securityvideoclass.h \
         ../contextobjects/epgchannellist.h \
+        ../contextobjects/screeninfo.h \
         ../playlists/epgitemclass.h \
         ../datamodels/floorplanmodel.h \
         ../imageProviders/abstractimageprovider.h \

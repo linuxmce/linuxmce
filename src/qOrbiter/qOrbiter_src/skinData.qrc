@@ -27,9 +27,10 @@
         <file>qml/splash/+small/ExistingOrbiters.qml</file>
         <file>qml/splash/+small/Style.qml</file>
         <file>qml/splash/+small/SplashView.qml</file>
-
+        <file>qml/splash/+large/+ios/SplashView.qml</file>
+        <file>qml/splash/+large/+ios/Style.qml</file>
     </qresource>
     <qresource prefix="/">
-     <file>config.xml</file>
+        <file>config.xml</file>
     </qresource>
 </RCC>

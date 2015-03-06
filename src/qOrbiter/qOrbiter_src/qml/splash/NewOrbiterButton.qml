@@ -3,8 +3,8 @@ import "."
 Item{
     id:newOrbiterButton
     height:0
-    width:scaleX(55)
-    opacity: 0
+    width:scaleX(100)
+
     anchors.bottom: parent.bottom
     Component.onCompleted: state="hidden"
     anchors.horizontalCenter: parent.horizontalCenter
@@ -46,7 +46,7 @@ Item{
             name: "showing"
             PropertyChanges {
                 target: newOrbiterButton
-                opacity:1
+
                 anchors.leftMargin: scaleX(25)
                 height:Style.appButtonHeight
             }

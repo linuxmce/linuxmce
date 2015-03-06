@@ -6,8 +6,7 @@ import QtQuick 2.3
   */
 Item{
     id:indexContent
-    height: manager.appHeight
-    width: manager.appWidth
+    anchors.fill: parent
     Rectangle{
         anchors.fill: parent
         opacity:.85
