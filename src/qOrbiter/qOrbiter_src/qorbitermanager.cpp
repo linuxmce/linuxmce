@@ -1742,12 +1742,18 @@ bool qorbiterManager::readLocalConfig(){
         qDebug() << "QRC file not found at " << test.fileName();
     }
 
-#if defined(Q_OS_MAC) && defined Q_OS_IOS
+#ifdef Q_OS_IOS
 
     QDir dir;
     dir.setPath(QDir::homePath());
     qDebug() << dir.absolutePath()+"/Library/Application_Support/LinuxMCE/";
     xmlPath =dir.absolutePath()+"/Library/Application_Support/LinuxMCE/config.xml";
+
+    setMobileStorage(dir.absolutePath()+"/Library/Application_Support/LinuxMCE");
+    if(createMobileConfig()){
+        xmlPath=mobileStorageLocation+"/config.xml";
+    }
+
 #elif defined(Q_OS_ANDROID)
 #ifdef NECESSITAS
 
@@ -1954,7 +1960,10 @@ bool qorbiterManager::writeConfig()
     qDebug() << Q_FUNC_INFO;
     //   setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
     QDomDocument localConfig;
-#ifdef Q_OS_MAC
+#ifdef Q_OS_IOS
+   QString xmlPath = mobileStorageLocation+"/config.xml";
+   appConfigPath = xmlPath;
+#elif Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif __ANDROID__
     QString xmlPath = mobileStorageLocation+"/config.xml";
@@ -2684,7 +2693,7 @@ int qorbiterManager::loadSplash()
  *This function tries to determine the external storage location for a given android device so that it can read / write the user settings.
  * \return
  */
-bool qorbiterManager::createAndroidConfig()
+bool qorbiterManager::createMobileConfig()
 {
 
 
@@ -2875,6 +2884,10 @@ bool qorbiterManager::setupMobileStorage(QString externalStorage)
     }
 
     return false;
+#elif defined(Q_OS_IOS)
+ setMobileStorage(externalStorage);
+ return true;
+
 #endif
 
 }

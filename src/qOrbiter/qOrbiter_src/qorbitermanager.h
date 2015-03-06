@@ -920,7 +920,7 @@ public slots:
     void showUI(bool b);
     int loadSplash();
     void startOrbiter();
-    bool createAndroidConfig();
+    bool createMobileConfig();
     void processConfig(QNetworkReply* config);
     void getConfiguration();
     bool writeConfig();
