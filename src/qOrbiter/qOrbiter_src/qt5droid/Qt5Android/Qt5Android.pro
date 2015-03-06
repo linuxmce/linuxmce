@@ -19,7 +19,6 @@
 #   Qt version 5.*.*
 
 CONFIG += thread
-CONFIG-=depend_includepath
 
 # define deployment destination and target executable name
 TARGET=qorbiterqt5
@@ -66,7 +65,7 @@ TRANSLATIONS += app_de.ts
         #and error handling, etc. It is not designer editable and should be considered as and .h / .cpp file when changing
         #and the implications of such.
         base.source = ../../qml/skins
-        base.target = skins
+        base.target = /
 
         #The Configuration file read on startup and used subsequently.
         #Scheduled for replacement using sqlite.
@@ -379,11 +378,11 @@ OTHER_FILES += \
 
 
     contains(QT_VERSION,5.*.*){
-   ANDROID_EXTRA_LIBS = $$_PRO_FILE_PWD_/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libDceScreenSaver.so \ #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
-    ANDROID_EXTRA_LIBS = $$_PRO_FILE_PWD_/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libAudioVisual.so #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
+   ANDROID_EXTRA_LIBS += $$_PRO_FILE_PWD_/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libDceScreenSaver.so \ #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
+    ANDROID_EXTRA_LIBS += $$_PRO_FILE_PWD_/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7a/libAudioVisual.so #On Android we have a special case where we need to split locations in necessitas of the lib and qmldir, unlike desktop versions.
  } else {
    ANDROID_EXTRA_LIBS = $$_PRO_FILE_PWD_/../../../platforms/Android/androidPlugins/armeabi-v7a/libDceScreenSaver.so \
-ANDROID_EXTRA_LIBS = $$_PRO_FILE_PWD_/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7libAudioVisual.so
+    ANDROID_EXTRA_LIBS = $$_PRO_FILE_PWD_/../../../platforms/Android/androidPlugins/Qt5/armeabi-v7libAudioVisual.so
     }
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {

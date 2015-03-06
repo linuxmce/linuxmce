@@ -56,8 +56,13 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     b_connectionPresent(false), b_localConfigReady(false),
     b_orbiterConfigReady(false), b_devicePresent(false),
     b_skinDataReady(false), b_skinIndexReady(false),
-    b_reloadStatus(false)
+    b_reloadStatus(false), fullScreenOrbiter(fullScreen)
 {
+    mainView.setResizeMode(QQuickView::SizeRootObjectToView);
+    QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
+    mainView.rootContext()->setContextProperty("window", this);
+        qrcPath="qrc:/qml/qml/Index.qml";
+
     if(simScreenSize!=-1){
         switch (simScreenSize) {
         case ScreenData::Device_Small:
@@ -77,11 +82,20 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
             break;
         }
     } else {
+
+#ifdef ANDROID
+        mainView.showFullScreen();
+#elif defined(Q_OS_IOS)
+        mainView.showFullScreen();
+#else
         mainView.setWidth(800);
         mainView.setHeight(600);
+#endif
     }
     mainView.rootContext()->setContextProperty("appW", mainView.width());
     mainView.rootContext()->setContextProperty("appH", mainView.height());
+
+mainView.setSource(qrcPath); /* Sets the initial qml file based on all the above switching */
 #ifdef QT4_8
 #ifndef ANDROID
     mainView.setAttribute(Qt::WA_TranslucentBackground);
@@ -107,22 +121,13 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.setClearBeforeRendering(true);
 #endif
 #endif
-
     if(frameless == true){
         mainView.setFlags(Qt::FramelessWindowHint);
     }
 #endif
 
-    if(fullScreen){
-        fullScreenOrbiter = true;
-    }
-    else {
-        fullScreenOrbiter = false;
-    }
-
     userList.append(new PromptData("No Users",0));
     roomList.append(new PromptData("No Rooms",0));
-
 
     mainView.engine()->addPluginPath("lib");
     mainView.engine()->addPluginPath("imports");
@@ -140,15 +145,6 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.rootContext()->setContextProperty("fileReader", fileReader);
 #endif
 
-#ifdef QT5
-
-    mainView.setResizeMode(QQuickView::SizeRootObjectToView);
-
-#else
-    mainView.setResizeMode(QDeclarativeView::SizeRootObjectToView);
-#endif
-
-    mainView.rootContext()->setContextProperty("window", this);
 
 #ifndef QT5
     mainView.setWindowTitle("LinuxMCE QOrbiter ");
@@ -189,7 +185,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     //        mainView.setViewport(glWidget);
     //        mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     //    #endif
-    // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
+
     //window sizing
 
 
@@ -198,8 +194,9 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
     mainView.engine()->addPluginPath("assets:/lib");
 #endif
-    qrcPath="qrc:/qml/qml/Index.qml";
-    //mainView.setSource(qrcPath); /* Sets the initial qml file based on all the above switching */
+
+
+
 
 }
 
