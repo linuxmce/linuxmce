@@ -61,7 +61,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     mainView.setResizeMode(QQuickView::SizeRootObjectToView);
     QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
     mainView.rootContext()->setContextProperty("window", this);
-        qrcPath="qrc:/qml/qml/Index.qml";
+   qrcPath="qrc:/qml/qml/Index.qml";
 
     if(simScreenSize!=-1){
         switch (simScreenSize) {
