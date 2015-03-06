@@ -58,45 +58,17 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
     b_skinDataReady(false), b_skinIndexReady(false),
     b_reloadStatus(false), fullScreenOrbiter(fullScreen)
 {
-    mainView.setResizeMode(QQuickView::SizeRootObjectToView);
-    QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
-    mainView.rootContext()->setContextProperty("window", this);
-   qrcPath="qrc:/qml/qml/Index.qml";
-
-    if(simScreenSize!=-1){
-        switch (simScreenSize) {
-        case ScreenData::Device_Small:
-            mainView.setWidth(480);
-            mainView.setHeight(854);
-            break;
-        case ScreenData::Device_Medium:
-            mainView.setWidth(1280);
-            mainView.setHeight(720);
-            break;
-        case ScreenData::Device_Large:
-            mainView.setWidth(1600);
-            mainView.setHeight(900);
-        default:
-            mainView.setWidth(800);
-            mainView.setHeight(600);
-            break;
-        }
-    } else {
-
 #ifdef ANDROID
-        mainView.showFullScreen();
-#elif defined(Q_OS_IOS)
-        mainView.showFullScreen();
-#else
-        mainView.setWidth(800);
-        mainView.setHeight(600);
-        mainView.showNormal();
+    mainView.engine()->addImportPath("assets:/imports/androidComponents");
+    mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
+    mainView.engine()->addPluginPath("assets:/lib");
 #endif
-    }
-    mainView.rootContext()->setContextProperty("appW", mainView.width());
-    mainView.rootContext()->setContextProperty("appH", mainView.height());
+    mainView.engine()->addPluginPath("lib");
+    mainView.engine()->addPluginPath("imports");
+    qDebug() << "Qt Plugin Paths::"<<mainView.engine()->pluginPathList();
+    mainView.engine()->addImportPath("imports");
+    mainView.engine()->addImportPath("lib");
 
-mainView.setSource(qrcPath); /* Sets the initial qml file based on all the above switching */
 #ifdef QT4_8
 #ifndef ANDROID
     mainView.setAttribute(Qt::WA_TranslucentBackground);
@@ -127,20 +99,50 @@ mainView.setSource(qrcPath); /* Sets the initial qml file based on all the above
     }
 #endif
 
+    mainView.setResizeMode(QQuickView::SizeRootObjectToView);
+    QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
+    mainView.rootContext()->setContextProperty("window", this);
+    qrcPath="qrc:/qml/qml/Index.qml";
+    mainView.setSource(qrcPath); /* Sets the initial qml file based on all the above switching */
+    if(simScreenSize!=-1){
+        switch (simScreenSize) {
+        case ScreenData::Device_Small:
+            mainView.setWidth(480);
+            mainView.setHeight(854);
+            break;
+        case ScreenData::Device_Medium:
+            mainView.setWidth(1280);
+            mainView.setHeight(720);
+            break;
+        case ScreenData::Device_Large:
+            mainView.setWidth(1600);
+            mainView.setHeight(900);
+        default:
+            mainView.setWidth(800);
+            mainView.setHeight(600);
+            break;
+        }
+        mainView.showNormal();
+    } else {
+
+#ifdef ANDROID
+        mainView.showFullScreen();
+#elif defined(Q_OS_IOS)
+        mainView.showFullScreen();
+#else
+        mainView.setWidth(800);
+        mainView.setHeight(600);
+        mainView.showNormal();
+#endif
+    }
+    mainView.rootContext()->setContextProperty("appW", mainView.width());
+    mainView.rootContext()->setContextProperty("appH", mainView.height());
+
     userList.append(new PromptData("No Users",0));
     roomList.append(new PromptData("No Rooms",0));
-
-    mainView.engine()->addPluginPath("lib");
-    mainView.engine()->addPluginPath("imports");
-    qDebug() << "Qt Plugin Paths::"<<mainView.engine()->pluginPathList();
-
-    mainView.engine()->addImportPath("imports");
-    mainView.engine()->addImportPath("lib");
-
     mainView.rootContext()->setContextProperty("users", QVariant::fromValue(userList));
     mainView.rootContext()->setContextProperty("rooms", QVariant::fromValue(roomList));
     mainView.rootContext()->setContextProperty("localPath", localPath);
-
 #if defined (GLENABLED) || (QT5)
     fileReader = new FileReader();
     mainView.rootContext()->setContextProperty("fileReader", fileReader);
@@ -188,17 +190,6 @@ mainView.setSource(qrcPath); /* Sets the initial qml file based on all the above
     //    #endif
 
     //window sizing
-
-
-#ifdef ANDROID
-    mainView.engine()->addImportPath("assets:/imports/androidComponents");
-    mainView.engine()->addPluginPath(QDir::homePath()+"/../lib");
-    mainView.engine()->addPluginPath("assets:/lib");
-#endif
-
-
-
-
 }
 
 /*!
