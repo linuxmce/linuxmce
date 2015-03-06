@@ -5,12 +5,16 @@ import QtQuick 2.3
 import "."
 Item {
     id: splashLogic
-   height:manager.appHeight
-   width: manager.appWidth
+    anchors.fill: parent
     Component.onCompleted: {
-     console.log("Splash is loaded")
+        console.log("Splash is loaded")
         splashLogic.state="connecting"
         window.qmlSetupLmce(window.deviceno, window.router)
+    }
+    Connections{
+        target:manager
+        onAppWidthChanged:console.log("!!")
+        onOrientationChanged:console.log("EEP!")
     }
 
     onWidthChanged: {

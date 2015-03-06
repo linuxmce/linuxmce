@@ -90,6 +90,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #else
         mainView.setWidth(800);
         mainView.setHeight(600);
+        mainView.showNormal();
 #endif
     }
     mainView.rootContext()->setContextProperty("appW", mainView.width());

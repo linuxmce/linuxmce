@@ -24,7 +24,7 @@ Item {
         id:pusher
         interval: 2000
         onTriggered: bootStrap.source="splash/Splash.qml"
-        running:true
+        //running:true
     }
 
     IndexContent {

@@ -78,7 +78,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, AndroidSystem *jniHelpe
 qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,  QObject *parent) :
     
     #endif
-    QObject(parent),qorbiterUIwin(view)
+    QObject(parent),qorbiterUIwin(view),
+    appHeight(view->height()),
+    appWidth(view->width())
 {
 #ifdef __ANDROID__
  int testSize=-1;
@@ -91,13 +93,14 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,  QObject 
     selector->setSelector(m_selector);
     m_screenInfo = new ScreenInfo();
     connect(m_screenInfo, SIGNAL(screenSizeChanged()), this, SLOT(resetScreenSize()));
+    connect(qorbiterUIwin, SIGNAL(screenChanged(QScreen*)), this , SLOT(handleScreenChanged(QScreen*)));
     resetScreenSize();
     qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);   
-    qorbiterUIwin->showNormal();
+
 #endif
 
-#ifdef __ANDROID__
-    qorbiterUIwin->showMaximized();
+#ifdef __ANDROID__ || defined(Q_OS_IOS)
+    //qorbiterUIwin->showMaximized();
     checkOrientation(Qt::LandscapeOrientation);
 #endif
 
@@ -375,7 +378,7 @@ void qorbiterManager::initiateRestart(){
 void qorbiterManager::refreshUI(QUrl url){
 
 #if (QT5)
-    qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
+   // qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
 #else
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
@@ -2340,7 +2343,7 @@ void qorbiterManager::startOrbiter()
 
 #if (QT5)
         qorbiterUIwin->setTitle("LinuxMCE Orbiter "+ QString::number(iPK_Device));
-        qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
+       // qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
 #else
         qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
         qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
@@ -2433,7 +2436,7 @@ void qorbiterManager::setupEarlyContexts()
     qorbiterUIwin->rootContext()->setContextProperty("deviceCommands", deviceCommands);
     //Resize to view as opposed to the root item
 #if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
-    qorbiterUIwin->setResizeMode(QQuickView::SizeViewToRootObject);
+   // qorbiterUIwin->setResizeMode(QQuickView::SizeViewToRootObject);
     m_screenInfo = new ScreenInfo();
     qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);
 #else
@@ -2637,6 +2640,7 @@ void qorbiterManager::setupUiSelectors()
 #endif
 
     skinMessage("build type set to:: "+buildType);
+    qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/splash/Splash.qml"));
 }
 
 void qorbiterManager::reloadHandler()
@@ -2776,6 +2780,7 @@ void qorbiterManager::checkOrientation(QSize s)
 void qorbiterManager::checkOrientation(Qt::ScreenOrientation o)
 {
     Q_UNUSED(o);
+
     appHeight=qorbiterUIwin->size().height();
     appWidth=qorbiterUIwin->size().width();
 
@@ -2881,4 +2886,10 @@ void qorbiterManager::setText(QString sDesignObj, QString sValue, int iPK_Text)
 
 void qorbiterManager::makeCall(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To) {
     emit CMD_makeCall(iPK_Users, sPhoneExtension, sPK_Device_From, iPK_Device_To);
+}
+
+void qorbiterManager::handleScreenChanged(QScreen *screen)
+{
+    qDebug() << Q_FUNC_INFO << screen->name() << " changed";
+    checkOrientation(screen->orientation());
 }

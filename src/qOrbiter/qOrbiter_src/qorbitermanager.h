@@ -1714,6 +1714,7 @@ public slots:
     }
 
 private slots:
+    void handleScreenChanged(QScreen* screen);
     void resetScreenSize(){
         QString psize = m_screenInfo->primaryScreen()->pixelDensityString();
         QStringList t;
