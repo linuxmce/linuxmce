@@ -99,7 +99,13 @@ symbian {
         INCLUDEPATH += $$EPOCROOT/epoc32/include/libc
         DEFINES += Q_OS_SYMBIAN
 }
-TRANSLATIONS += app_de.ts
+
+TRANSLATIONS = \
+        translations/en.ts \
+        translations/de.ts \
+        translations/fr.ts \
+        translations/es.ts \
+
 # Add more folders to ship with the application, here
 #linux deploy configuration
 

@@ -33,6 +33,7 @@
 #include <QtWidgets/QApplication>
 #include <contextobjects/screeninfo.h>
 
+
 #else
 #include <qmlapplicationviewer.h>
 #include <QtDeclarative/QDeclarativeView>

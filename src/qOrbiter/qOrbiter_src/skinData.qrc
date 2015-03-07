@@ -34,4 +34,7 @@
         <file>config.xml</file>
         <file>qml/splash/images/arrow.png</file>
     </qresource>
+    <qresource prefix="/lang">
+        <file>translations/de.qm</file>
+    </qresource>
 </RCC>
