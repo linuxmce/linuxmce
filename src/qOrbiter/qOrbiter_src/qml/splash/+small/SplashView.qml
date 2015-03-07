@@ -31,7 +31,7 @@ Item {
             left:parent.left
             right:parent.right
         }
-        height:parent.height *.08
+        height:Style.appNavigation_panelHeight
 
         Rectangle{
             id:welcome_container
@@ -42,33 +42,41 @@ Item {
 
         Text {
             id: welcome
-            text: qsTr(" Welcome to LinuxMCE")
-            //font.family: myFont.name
-            font.pointSize: Style.appFontSize_header
-
+            text: qsTr(" Welcome to LinuxMCE")            
+            font.pointSize: Style.appFontSize_title
             anchors.left:parent.left
-            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
             color:"white"
         }
         Text {
             id: welcome_select
-            text: qsTr("Please Choose an orbiter")
-            //font.family: myFont.name
+            text: qsTr("Please Choose an orbiter")     
             font.pointSize: Style.appFontSize_description
             font.weight: Font.Light            
-            anchors.left:welcome.right
-            anchors.verticalCenter: parent.verticalCenter
+           anchors{
+            left:parent.left
+            bottom:parent.bottom
+           }
             color:"white"
         }
         Text {
             id: ui_name
-            text: "SmallUI"
-            //font.family: myFont.name
+            text: "SmallUI"          
             font.pointSize: Style.appFontSize_description
             font.weight: Font.Light
-            anchors.left:parent.right
+            anchors.right:optionIcon.left
             anchors.verticalCenter: parent.verticalCenter
             color:"white"
+        }
+        Image{
+            id:optionIcon
+            source:"images/options.png"
+            height: parent.height /2
+            fillMode: Image.PreserveAspectFit
+            anchors{
+                right:parent.right
+                verticalCenter: parent.verticalCenter
+            }
         }
     }
 
@@ -95,14 +103,14 @@ Item {
     }
 
 
-    Text {
-        id: loadingStatus
-        text: "Status " + manager.commandResponse       
-        font.pointSize: Style.appFontSize_description
-        color: "white"
-        anchors.top: topContainer.bottom
-        anchors.horizontalCenter: connectionBox.horizontalCenter
-    }
+//    Text {
+//        id: loadingStatus
+//        text: "Status " + manager.commandResponse
+//        font.pointSize: Style.appFontSize_description
+//        color: "white"
+//        anchors.top: topContainer.bottom
+//        anchors.horizontalCenter: connectionBox.horizontalCenter
+//    }
 
     ExistingOrbiters {
         id:existing_orbiters

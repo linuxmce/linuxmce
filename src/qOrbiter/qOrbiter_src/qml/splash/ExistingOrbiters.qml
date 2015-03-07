@@ -25,10 +25,22 @@ Item{
     Text{
         id:lbl
         text:qsTr("Existing Orbiters", "list of existing qorbiters")
-        font.pointSize: Style.appFontSize_title
+        font.pointSize: Style.appFontSize_list
         color:Style.apptext_color_active
         anchors.centerIn: hdr
     }
+    Image{
+        id:icn
+        source:"images/vertical_arrow.png"
+        height: parent.height*.65
+        fillMode: Image.PreserveAspectFit
+        anchors{
+            right: parent.right
+            rightMargin:scaleX(10)
+            verticalCenter: parent.verticalCenter
+        }
+    }
+
 
     Rectangle{
         id:fill

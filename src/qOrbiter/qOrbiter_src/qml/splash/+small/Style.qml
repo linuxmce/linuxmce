@@ -24,6 +24,7 @@ Item{
     readonly property color appcolor_navigationBackgroundColor:"blue"
 
     readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(13) : scaleY(15)
+    readonly property string appNavigation_panelHeight:manager.isProfile ? scaleY(9) : scaleY(16)
     readonly property string appbutton_confirm_color:appcolor_background
     readonly property color appbutton_cancel_color:"#f26c4f"
     readonly property color appbutton_disabled_color:"#464646"
@@ -43,4 +44,5 @@ Item{
     readonly property int appButtonHeight:manager.isProfile ? scaleY(4) : scaleY(6)
     readonly property int appButtonWidth:manager.isProfile ? scaleX(6) : scaleX(4)
 
+    readonly property int appPanelHeight:manager.isProfile ? scaleY(12) :scaleY(14)
 }

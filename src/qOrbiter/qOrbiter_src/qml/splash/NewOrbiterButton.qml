@@ -3,28 +3,40 @@ import "."
 Item{
     id:newOrbiterButton
     height:0
-    width:scaleX(100)
-
-    anchors.bottom: parent.bottom
+    anchors{
+        left:parent.left
+        right:parent.right
+        bottom:parent.bottom
+    }
     Component.onCompleted: state="hidden"
-    anchors.horizontalCenter: parent.horizontalCenter
+
 
     Rectangle{
-        radius:10
-        color:Style.appbutton_confirm_color
+        opacity: .25
+        color:"black"
         anchors.fill: parent
     }
 
-
-        Text {
+    Text {
         id: newOrbiterLabel
         text: qsTr("Would you like to create a new orbiter?", "Create a new orbiter.")
-        font.pointSize: Style.appFontSize_title
+        font.pointSize: Style.appFontSize_list
         anchors.centerIn: parent
-        width: parent.width*.75
-        anchors.verticalCenter: parent.verticalCenter
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere      
+        width: parent.width*.85
+        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         color:"white"
+    }
+
+    Image{
+        id:click_icn
+        source:"images/vertical_arrow.png"
+        rotation:-90
+        height: parent.height /2
+        fillMode: Image.PreserveAspectFit
+        anchors{
+           right:parent.right
+            verticalCenter: parent.verticalCenter
+        }
     }
     
     MouseArea{
@@ -46,9 +58,8 @@ Item{
             name: "showing"
             PropertyChanges {
                 target: newOrbiterButton
-
-                anchors.leftMargin: scaleX(25)
-                height:Style.appButtonHeight
+                height:Style.appNavigation_panelHeight
+                opacity:1
             }
 
         }

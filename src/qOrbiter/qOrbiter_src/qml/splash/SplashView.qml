@@ -42,8 +42,7 @@ Item {
 
         Text {
             id: welcome
-            text: qsTr(" Welcome to LinuxMCE")
-            //font.family: myFont.name
+            text: qsTr(" Welcome to LinuxMCE")          
             font.pointSize: Style.appFontSize_header
             anchors.left:parent.left
             anchors.horizontalCenter: parent.horizontalCenter
@@ -51,21 +50,27 @@ Item {
         }
         Text {
             id: welcome_select
-            text: qsTr("Please Choose an orbiter")
-            //font.family: myFont.name
-            font.pointSize: Style.appFontSize_description
-            //font.weight: Font.Light
-            anchors.left:welcome.right
+            text: qsTr("Please Choose an orbiter")           
+            font.pointSize: Style.appFontSize_description           
+            anchors.centerIn: parent
             color:"white"
         }
         Text {
             id: ui_name
-            text: "DefaultUI"
-            //font.family: myFont.name
+            text: "DefaultUI"           
             font.pointSize: Style.appFontSize_description
             font.weight: Font.Light
             anchors.left:parent.right
+            anchors.verticalCenter: parent.verticalCenter
             color:"white"
+        }
+        Image{
+            id:optionIcon
+            source:"images/options.png"
+            anchors{
+                right:parent.right
+                verticalCenter: parent.verticalCenter
+            }
         }
     }
 

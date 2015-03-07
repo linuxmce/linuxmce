@@ -3,10 +3,12 @@ import "."
 
 Item{
     id:existing_orbiters
-    height: scaleY(65)
     width: parent.width
-    anchors.left: parent.right
-    anchors.verticalCenter: parent.verticalCenter
+    anchors{
+        top:topContainer.bottom
+        bottom:newOrbiterButton.top
+    }
+
     visible: true
     opacity: 0
 
@@ -18,7 +20,7 @@ Item{
             right:parent.right
         }
         color:Style.appcolor_background
-        height:scaleY(10)
+        height:Style.appPanelHeight
         opacity:.65
     }
 
@@ -28,7 +30,17 @@ Item{
         font.pointSize: Style.appFontSize_list
         color:Style.apptext_color_active
         anchors.centerIn: hdr
-        width: parent.width
+    }
+    Image{
+        id:icn
+        source:"images/vertical_arrow.png"
+        height: parent.height*.65
+        fillMode: Image.PreserveAspectFit
+        anchors{
+            right: hdr.right
+            rightMargin:Style.scaleX(10)
+            verticalCenter: hdr.verticalCenter
+        }
     }
 
     Rectangle{
@@ -66,6 +78,16 @@ Item{
                 color:"white"
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
+            }
+            Image{
+                source: "images/arrow.png"
+                width: parent.width*.10
+                fillMode: Image.PreserveAspectFit
+                anchors{
+                    left:parent.left
+                    verticalCenter: parent.verticalCenter
+                }
+
             }
 
             Column{
@@ -113,13 +135,8 @@ Item{
             PropertyChanges {
                 target: existing_orbiters
                 opacity:1
-                anchors.rightMargin: 10
             }
-            AnchorChanges{
-                target: existing_orbiters
-                anchors.left: undefined
-                anchors.right: parent.right
-            }
+
         }
     ]
 
