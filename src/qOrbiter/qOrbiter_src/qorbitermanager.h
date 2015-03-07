@@ -45,6 +45,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtQuick/QQuickItem>
 #include "contextobjects/screeninfo.h"
+#include <QTranslator>
 
 #else
 #include <QtGui/QWidget>
@@ -1761,6 +1762,7 @@ private:
 
     int m_testScreenSize;
 
+    QTranslator translator;
 
 };
 

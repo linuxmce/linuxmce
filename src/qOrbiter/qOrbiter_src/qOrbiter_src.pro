@@ -101,10 +101,10 @@ symbian {
 }
 
 TRANSLATIONS = \
-        translations/en.ts \
-        translations/de.ts \
-        translations/fr.ts \
-        translations/es.ts \
+        translations/en_US.ts \
+        translations/de_DE.ts \
+        translations/fr_FR.ts \
+        translations/es_ES.ts \
 
 # Add more folders to ship with the application, here
 #linux deploy configuration

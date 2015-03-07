@@ -31,6 +31,7 @@
 #include <QtScript/QScriptValue>
 #include <QtScriptTools/QtScriptTools>
 #include <QQmlFileSelector>
+#include <QTranslator>
 #else
 #include <QtDeclarative/QDeclarativeProperty>
 #include <QFile>
@@ -86,6 +87,11 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,  QObject 
  int testSize=-1;
 #endif
      m_testScreenSize =testSize;
+
+    QString mlocale = QLocale::system().name().append(".qm");
+    qDebug() << "Local set to "<< mlocale;
+    translator.load("qrc:/lang/de_DE.qm");
+    qApp->installTranslator(&translator);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
     selector=new QQmlFileSelector(view->engine());

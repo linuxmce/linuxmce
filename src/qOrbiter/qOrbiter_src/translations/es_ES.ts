@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1">
+<TS version="2.0" language="es_ES">
 <context>
     <name>AssignScreenShot</name>
     <message>
@@ -607,7 +607,8 @@
         <location filename="../qml/rpi/splash/NewOrbiterButton.qml" line="20"/>
         <source>Create New Orbiter? 
  Or choose and Existing Orbiter</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Crear nuevo Orbiter ?
+ O elegir y Orbiter existente</translation>
     </message>
 </context>
 <context>
@@ -1785,31 +1786,31 @@
         <location filename="../qml/rpi/noir/screens/Splash.qml" line="24"/>
         <location filename="../qml/rpi/plutoClone/screens/Splash.qml" line="24"/>
         <source>Welcome To LinuxMCE!</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Bienvenido a LinuxMCE</translation>
     </message>
     <message>
         <location filename="../qml/rpi/noir/screens/Splash.qml" line="61"/>
         <location filename="../qml/rpi/plutoClone/screens/Splash.qml" line="61"/>
         <source>Set Connection Details</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Set Connection Details</translation>
     </message>
     <message>
         <location filename="../qml/rpi/noir/screens/Splash.qml" line="72"/>
         <location filename="../qml/rpi/plutoClone/screens/Splash.qml" line="72"/>
         <source>Host:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Anfitrión:</translation>
     </message>
     <message>
         <location filename="../qml/rpi/noir/screens/Splash.qml" line="88"/>
         <location filename="../qml/rpi/plutoClone/screens/Splash.qml" line="88"/>
         <source>Device:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Dispositivo:</translation>
     </message>
     <message>
         <location filename="../qml/rpi/noir/screens/Splash.qml" line="105"/>
         <location filename="../qml/rpi/plutoClone/screens/Splash.qml" line="105"/>
         <source>Connect</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Conecte</translation>
     </message>
 </context>
 <context>
