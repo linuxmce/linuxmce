@@ -2,78 +2,78 @@
 import QtQuick 2.0
 import "../noir/components"
 Item {
-    anchors{
-        top:parent.top
-        left:parent.left
-        right:parent.right
-    }
+//    anchors{
+//        top:parent.top
+//        left:parent.left
+//        right:parent.right
+//    }
 
-    id:splashPage
+//    id:splashPage
 
-    signal setupStart(string x, string y)
-    signal splashLoaded()
+//    signal setupStart(string x, string y)
+//    signal splashLoaded()
 
-    Connections{
-        target: window
-        onShowList:{
+//    Connections{
+//        target: window
+//        onShowList:{
 
-            if(existing_orbiters.count === 0){
-                screenChange("NewOrbiterSetup.qml")
-            }
-            else{
-                existing_orbiters.state="showing"
-                newOrbiterButton.state="showing"
-                connectionBox.state="hidden"
-            }
-        }
-        onPageChanged:screenchange(qmlPage)
-    }
+//            if(existing_orbiters.count === 0){
+//                screenChange("NewOrbiterSetup.qml")
+//            }
+//            else{
+//                existing_orbiters.state="showing"
+//                newOrbiterButton.state="showing"
+//                connectionBox.state="hidden"
+//            }
+//        }
+//        onPageChanged:screenchange(qmlPage)
+//    }
 
-    StatusRow {
-        id: statusRow
-    }
+//    StatusRow {
+//        id: statusRow
+//    }
 
-    Text {
-        id: welcome
-        text: qsTr("LinuxMCE\n"+manager.appWidth+" x "+manager.appHeight)
-        font.family: myFont.name
-        font.pointSize: 42
-        anchors.top: statusRow.bottom
-        anchors.topMargin: scaleY(5)
-        anchors.horizontalCenter: parent.horizontalCenter
-        color:"white"
-    }
+//    Text {
+//        id: welcome
+//        text: qsTr("LinuxMCE\n"+manager.appWidth+" x "+manager.appHeight)
+//        font.family: myFont.name
+//        font.pointSize: 42
+//        anchors.top: statusRow.bottom
+//        anchors.topMargin: scaleY(5)
+//        anchors.horizontalCenter: parent.horizontalCenter
+//        color:"white"
+//    }
 
-    Connections{
-        target:window
-        onMessageChanged:loadingStatus.text = window.message
-        //onStatusChanged: screenchange("SetupNewOrbiter.qml")
-    }
-
-
-    ConnectionBox {
-        id: connectionBox
-    }
+//    Connections{
+//        target:window
+//        onMessageChanged:loadingStatus.text = window.message
+//        //onStatusChanged: screenchange("SetupNewOrbiter.qml")
+//    }
 
 
-    Text {
-        id: loadingStatus
-        text: "Status " + manager.commandResponse
-        anchors.topMargin: scaleY(15)
-        font.pixelSize: 14
-        font.family: myFont.name
-        color: "white"
-        anchors.top: connectionBox.bottom
-        anchors.horizontalCenter: connectionBox.horizontalCenter
-    }
+//    ConnectionBox {
+//        id: connectionBox
+//    }
 
-    ExistingOrbiters {
-        id: existing_orbiters
-    }
 
-    NewOrbiterButton {
-        id: newOrbiterButton
-    }
+//    Text {
+//        id: loadingStatus
+//        text: "Status " + manager.commandResponse
+//        anchors.topMargin: scaleY(15)
+//        font.pixelSize: 14
+//        font.family: myFont.name
+//        color: "white"
+//        anchors.top: connectionBox.bottom
+//        anchors.horizontalCenter: connectionBox.horizontalCenter
+//    }
+
+//    ExistingOrbiters {
+//        id: existing_orbiters
+//    }
+
+//    NewOrbiterButton {
+//        id: newOrbiterButton
+//    }
 
 }
 

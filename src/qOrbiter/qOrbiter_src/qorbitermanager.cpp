@@ -90,7 +90,12 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,  QObject 
 
     QString mlocale = QLocale::system().name().append(".qm");
     qDebug() << "Local set to "<< mlocale;
-    translator.load("qrc:/lang/de_DE.qm");
+    if(  translator.load(":/lang/translations/de_DE.qm") ) {
+        qDebug() << "Translator loaded default translation";
+    } else {
+        qDebug() << translator.isEmpty();
+    }
+
     qApp->installTranslator(&translator);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,2,0)

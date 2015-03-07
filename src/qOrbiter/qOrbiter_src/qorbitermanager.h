@@ -46,6 +46,7 @@
 #include <QtQuick/QQuickItem>
 #include "contextobjects/screeninfo.h"
 #include <QTranslator>
+#include <QScreen>
 
 #else
 #include <QtGui/QWidget>

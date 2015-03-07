@@ -121,28 +121,28 @@ linux-g++{
                 CONFIG+=opengl
                 DEFINES+= GLENABLED for_desktop
                 QT += script opengl
-                folder_01.source = qml/desktop
+                folder_01.source = qml
                 folder_01.target = $$DESTDIR/qml
-target.path=/usr/pluto/bin
+                target.path=/usr/pluto/bin
 
         }
 
         contains(QT_VERSION,5.*.*){
                 QT+= qml quick script widgets
                 QT-= declarative
-                folder_01.source = qml/skins
-                folder_01.target = $$DESTDIR/qml/
+             #   folder_01.source = qml
+               # folder_01.target = $$DESTDIR/qml/
                 DEFINES += for_desktop GLENABLED
                 glmsg=scenegraph
         }
 !RPI{
         plugins_folder.source = imports
         plugins_folder.target = $$DESTDIR
-        DEPLOYMENTFOLDERS+= plugins_folder
+      # DEPLOYMENTFOLDERS+= plugins_folder
 
-        folder_03.source = config.xml
-        folder_03.target = $$DESTDIR
-       DEPLOYMENTFOLDERS+= folder_01 folder_03
+       # folder_03.source = config.xml
+       # folder_03.target = $$DESTDIR
+      #  DEPLOYMENTFOLDERS+=folder_01
         QML_IMPORT_PATH=imports
 }
 
@@ -184,8 +184,7 @@ WIN32{
         DEFINES += for_windows
         plugins_folder.source = imports/
         plugins_folder.target = $$DESTDIR
-        DEPLOYMENTFOLDERS += plugins_folder
-        DEPLOYMENTFOLDERS += folder_01 files_01 folder_05
+        #DEPLOYMENTFOLDERS += folder_01
 }
 
 #android simulation config
@@ -216,10 +215,10 @@ for_android{
                 qmlplugins.path = /libs/armeabi
         }
 
-        DEPLOYMENTFOLDERS+= qmlcomponents
+      #  DEPLOYMENTFOLDERS+= qmlcomponents
         INSTALLS+= qmlplugins
         DEFINES+=for_android
-        DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
+      #  DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
         QT+=script
 }
 
@@ -237,7 +236,7 @@ for_freemantle{
         folder_03.source = config.xml
         folder_03.target = $$DESTDIR/config
         DEFINES += for_freemantle
-        DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
+     #   DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
 }
 
 #harmattan config
@@ -249,7 +248,7 @@ for_harmattan{
         folder_02.source= img
         folder_02.target=     #left blank so it will appear in the root
         DEFINES += for_harmattan
-        DEPLOYMENTFOLDERS += folder_01 folder_02 folder_05
+      #  DEPLOYMENTFOLDERS += folder_01 folder_02 folder_05
 }
 
 #mac desktop config
@@ -270,11 +269,10 @@ macx-clang{
         plugins_folder.target = ../../../$$DESTDIR/$$TARGET".app"/Contents/MacOS/imports
 
       message("You Must copy the libraries at $$[QT_INSTALL_PREFIX]/qml to $$QTDIR/imports before deploying" )
-        DEPLOYMENTFOLDERS +=  folder_03 plugins_folder
+       # DEPLOYMENTFOLDERS +=  folder_03 plugins_folder
         DEFINES+=MACBUILD
         QML_IMPORT_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/MacOS/imports
        # QT-=bundle
-
 }
 
 linux-rasp-pi-g++{
@@ -293,14 +291,18 @@ linux-rasp-pi-g++{
 
         DEFINES+=RPI GLENABLED
         DEFINES-=for_desktop
-        DEPLOYMENTFOLDERS += folder_02 screen_saver av_plugin #folder_01
+       # DEPLOYMENTFOLDERS += folder_02  #folder_01
         QT+= qml
         QT-=declarative
-
         target.path=/opt/QOrbiter
         QML_IMPORT_PATH=imports
         INSTALLS+=target
 }
+
+        folder_02.source=qml/skins
+        folder_04.source=qml/images
+        #folder_01.target=qml
+        DEPLOYMENTFOLDERS +=folder_02 folder_04
 
 # Additional import path used to resolve QML modules in Creator's code model
 

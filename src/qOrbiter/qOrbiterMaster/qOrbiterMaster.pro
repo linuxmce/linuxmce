@@ -42,7 +42,5 @@ target.path=$HOME
 INSTALLS=target
 }
 
-
-
 # SUBDIRS = plugins/AudioVisual
 
