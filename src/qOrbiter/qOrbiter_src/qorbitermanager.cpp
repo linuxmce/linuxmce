@@ -1795,7 +1795,7 @@ bool qorbiterManager::readLocalConfig(){
 
 
 #ifdef __ANDROID__
-    if (createAndroidConfig())
+    if (createMobileConfig())
     {
         localConfigFile.setFileName(xmlPath);
         if (!localConfigFile.exists())
