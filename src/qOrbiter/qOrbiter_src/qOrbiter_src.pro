@@ -301,8 +301,9 @@ linux-rasp-pi-g++{
 
         folder_02.source=qml/skins
         folder_04.source=qml/images
+        folder_03.source=qml/splash
         #folder_01.target=qml
-        DEPLOYMENTFOLDERS +=folder_02 folder_04
+        DEPLOYMENTFOLDERS +=folder_02 folder_04 folder_03
 
 # Additional import path used to resolve QML modules in Creator's code model
 
@@ -589,7 +590,8 @@ HEADERS += \
 
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
-        config.xml \
+        config.xml
+
 
 for_harmattan{
         OTHER_FILES= \

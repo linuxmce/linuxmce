@@ -28,11 +28,12 @@
         <file>qml/splash/+small/Style.qml</file>
         <file>qml/splash/+small/SplashView.qml</file>
         <file>qml/splash/+large/+ios/SplashView.qml</file>
-        <file>qml/splash/+large/+ios/Style.qml</file>
+        <file>qml/splash/+large/+ios/Style.qml</file>       
+        <file>qml/splash/OptionMenu.qml</file>
     </qresource>
     <qresource prefix="/">
         <file>config.xml</file>
-        <file>qml/splash/images/arrow.png</file>
+
     </qresource>
     <qresource prefix="/lang">
         <file>translations/de_DE.qm</file>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="de_DE">
+<TS version="2.0" language="de_DE">
 <context>
     <name>AssignScreenShot</name>
     <message>
@@ -309,7 +309,7 @@
     <name>FileDetails5</name>
     <message>
         <source>Filename</source>
-        <translation type="vanished">Dateinamen</translation>
+        <translation>Dateinamen</translation>
     </message>
     <message>
         <source>Located on: </source>
@@ -419,14 +419,6 @@
         <source>Armed, Extended Away.</source>
         <comment>UserMode status</comment>
         <translation type="unfinished">Bewaffnete , Lange abwesend .</translation>
-    </message>
-</context>
-<context>
-    <name>Index</name>
-    <message>
-        <location filename="../qml/+linux/+xlarge/Index.qml" line="60"/>
-        <source>QOrbiter for Linux</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -644,7 +636,7 @@
         <location filename="../qml/splash/NewOrbiterButton.qml" line="22"/>
         <source>Would you like to create a new orbiter?</source>
         <comment>Create a new orbiter.</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Möchten Sie einen neuen Ordner anlegen</translation>
     </message>
 </context>
 <context>
@@ -652,6 +644,24 @@
     <message>
         <source>Genre(s): </source>
         <translation type="obsolete">Art:</translation>
+    </message>
+</context>
+<context>
+    <name>OptionMenu</name>
+    <message>
+        <location filename="../qml/splash/OptionMenu.qml" line="7"/>
+        <source>Options</source>
+        <translation type="unfinished">Optionen</translation>
+    </message>
+    <message>
+        <location filename="../qml/splash/OptionMenu.qml" line="41"/>
+        <source>Use Network Skins?</source>
+        <translation type="unfinished">Verwenden Sie Netzwerk Skins ?</translation>
+    </message>
+    <message>
+        <location filename="../qml/splash/OptionMenu.qml" line="49"/>
+        <source>Language</source>
+        <translation type="unfinished">Sprache</translation>
     </message>
 </context>
 <context>
@@ -988,15 +998,19 @@
     <message>
         <location filename="../qml/splash/+large/+ios/SplashView.qml" line="45"/>
         <location filename="../qml/splash/+small/SplashView.qml" line="45"/>
-        <location filename="../qml/splash/SplashView.qml" line="45"/>
+        <location filename="../qml/splash/SplashView.qml" line="53"/>
         <source> Welcome to LinuxMCE</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Willkommen in LinuxMCE</translation>
     </message>
     <message>
         <location filename="../qml/splash/+large/+ios/SplashView.qml" line="55"/>
         <location filename="../qml/splash/+small/SplashView.qml" line="53"/>
-        <location filename="../qml/splash/SplashView.qml" line="53"/>
         <source>Please Choose an orbiter</source>
+        <translation type="unfinished">Bitte wählen Sie einen Orbiter</translation>
+    </message>
+    <message>
+        <location filename="../qml/splash/SplashView.qml" line="61"/>
+        <source>Please Choose an orbiter please</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

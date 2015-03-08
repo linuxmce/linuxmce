@@ -1,5 +1,6 @@
 // import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 2.3
+import QtGraphicalEffects 1.0
 import "."
 Item {
    anchors.fill: parent
@@ -7,6 +8,13 @@ Item {
 
     signal setupStart(string x, string y)
     signal splashLoaded()
+
+    Component{
+        id:options
+        OptionMenu{
+
+        }
+    }
 
     Connections{
         target: window
@@ -50,28 +58,34 @@ Item {
         }
         Text {
             id: welcome_select
-            text: qsTr("Please Choose an orbiter")           
+            text: qsTr("Please Choose an orbiter")
             font.pointSize: Style.appFontSize_description           
-            anchors.centerIn: parent
+            anchors.left: welcome.right
             color:"white"
         }
         Text {
             id: ui_name
             text: "DefaultUI"           
             font.pointSize: Style.appFontSize_description
-            font.weight: Font.Light
-            anchors.left:parent.right
-            anchors.verticalCenter: parent.verticalCenter
+           // font.weight: Font.Light
+            anchors.right: optionIcon.left
+            anchors.verticalCenter: optionIcon.verticalCenter
             color:"white"
         }
         Image{
             id:optionIcon
             source:"images/options.png"
+            visible: true
             anchors{
                 right:parent.right
                 verticalCenter: parent.verticalCenter
             }
+            MouseArea{
+                anchors.fill: parent
+                onClicked:{options.createObject(splashPage) }
+            }
         }
+
     }
 
 //    StatusRow {

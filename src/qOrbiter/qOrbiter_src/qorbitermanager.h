@@ -68,6 +68,7 @@
 #include <QKeyEvent>
 #include <QProcess>
 #include <QtXml/QDomDocument>
+#include <QSettings>
 
 #ifdef ANDROID
 #include "plugins/AndroidInfo/androidsystem.h"
@@ -1711,11 +1712,19 @@ public slots:
         default:
             qWarning()<< "unhandled command" << cmdOut;
         }
-
-
     }
+    Q_INVOKABLE void setLanguage(QString lang){
+        if(!translator.load(":/lang/translations/"+lang+".qm"))
+        return;
 
+       delayedReloadQml();
+    }
 private slots:
+    void delayedReloadQml() { QTimer *delayTimer= new QTimer(this); delayTimer->setInterval(100); delayTimer->setSingleShot(true); connect(delayTimer, SIGNAL(timeout()), this, SLOT(reloadQml())); delayTimer->start();}
+    void reloadQml(){  QString returnLocation=qorbiterUIwin->source().toString();
+                       qorbiterUIwin->setSource(QUrl(":/qml/qml/Index.qml"));
+                       qorbiterUIwin->setSource(QUrl(returnLocation));
+                    }
     void handleScreenChanged(QScreen* screen);
     void resetScreenSize(){
         QString psize = m_screenInfo->primaryScreen()->pixelDensityString();
@@ -1723,7 +1732,7 @@ private slots:
 
         if(m_testScreenSize==-1){
             t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
-           m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
+            m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
         } else {
             qDebug() << Q_FUNC_INFO << "Using test screen size";
             QString testDeviceString;
@@ -1736,7 +1745,7 @@ private slots:
             }
 
             t <<testDeviceString << psize << QString::number(qorbiterUIwin->height() );
-           m_deviceSize = ScreenData::Device_Small;
+            m_deviceSize = ScreenData::Device_Small;
         }
         m_selector->setExtraSelectors(t);
         qDebug() << Q_FUNC_INFO << " Set to "<< m_selector->allSelectors();
@@ -1764,6 +1773,7 @@ private:
     int m_testScreenSize;
 
     QTranslator translator;
+    QSettings m_appSettings;
 
 };
 

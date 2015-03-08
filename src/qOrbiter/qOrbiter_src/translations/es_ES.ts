@@ -103,14 +103,6 @@
     </message>
 </context>
 <context>
-    <name>Index</name>
-    <message>
-        <location filename="../qml/+linux/+xlarge/Index.qml" line="60"/>
-        <source>QOrbiter for Linux</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>MediaTypesHelper</name>
     <message>
         <location filename="../defineObjects/mediatypehelper.h" line="189"/>
@@ -220,6 +212,24 @@
         <location filename="../qml/splash/NewOrbiterButton.qml" line="22"/>
         <source>Would you like to create a new orbiter?</source>
         <comment>Create a new orbiter.</comment>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>OptionMenu</name>
+    <message>
+        <location filename="../qml/splash/OptionMenu.qml" line="7"/>
+        <source>Options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/splash/OptionMenu.qml" line="41"/>
+        <source>Use Network Skins?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/splash/OptionMenu.qml" line="49"/>
+        <source>Language</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -399,15 +409,19 @@
     <message>
         <location filename="../qml/splash/+large/+ios/SplashView.qml" line="45"/>
         <location filename="../qml/splash/+small/SplashView.qml" line="45"/>
-        <location filename="../qml/splash/SplashView.qml" line="45"/>
+        <location filename="../qml/splash/SplashView.qml" line="53"/>
         <source> Welcome to LinuxMCE</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../qml/splash/+large/+ios/SplashView.qml" line="55"/>
         <location filename="../qml/splash/+small/SplashView.qml" line="53"/>
-        <location filename="../qml/splash/SplashView.qml" line="53"/>
         <source>Please Choose an orbiter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/splash/SplashView.qml" line="61"/>
+        <source>Please Choose an orbiter please</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
