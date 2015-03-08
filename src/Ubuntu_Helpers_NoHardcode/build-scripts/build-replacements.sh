@@ -485,6 +485,12 @@ function Build_Replacements_trusty
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
 	cp $dir_/*hal*.deb "${replacements_dir}"
 
+	# Package: libruby1.8, ruby1.8-dev....  ugh.  GSD breaks on 1.9.1 && 2.0
+	Build_Replacement_Package ruby1.8 ubuntu/ruby1.8-1.8.7.375/
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*1.8_1.8.7.375*.deb
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
+	cp $dir_/*1.8_1.8.7.375*.deb "${replacements_dir}"
+
 	#Package: libxine2
 	Build_Replacement_Package libxine2 ubuntu/xine-lib-1.2.6
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb
