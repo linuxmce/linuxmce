@@ -24,6 +24,20 @@ using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
+#include "NOAA.h"
+#include "WWO.h"
+#include <vector>
+#include <string>
+#include <sstream>
+#include <unistd.h>
+#include <pthread.h>
+#include <curl/curl.h>
+#include <curl/easy.h>
+#include <curl/curlbuild.h>
+
+void * msgThread(void * Arg);
+void * initThread(void * Arg);
+size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream);
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -31,6 +45,8 @@ Weather::Weather(int DeviceID, string ServerAddress,bool bConnectEventHandler,bo
 	: Weather_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
+	  m_CurlMutex.Init (NULL);
+	  m_MsgMutex.Init (NULL);
 }
 
 //<-dceag-const2-b->
@@ -45,7 +61,19 @@ Weather::Weather(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Ev
 Weather::~Weather()
 //<-dceag-dest-e->
 {
-	
+	//pthread_mutex_unlock(&lock_x_);
+  	if (i_thr_ != (pthread_t) NULL)
+  	{
+  		pthread_kill(i_thr_, SIGABRT);
+  		pthread_join (i_thr_, NULL);
+  	}
+  	if (m_thr_ != (pthread_t) NULL)
+  	{
+  		pthread_kill(m_thr_, SIGABRT);
+  		pthread_join (m_thr_, NULL);
+  	}
+	curl_easy_cleanup(m_pCurl);
+	curl_global_cleanup();
 }
 
 //<-dceag-getconfig-b->
@@ -56,7 +84,78 @@ bool Weather::GetConfig()
 //<-dceag-getconfig-e->
 
 	// For now, for testing, we just fire off the testing harness!
-	system("/usr/pluto/bin/weather-test.sh");
+	//system("/usr/pluto/bin/weather-test.sh");
+
+	//Set defaults
+	string config=DATA_Get_Configuration();
+	timer_=25*60; //Default to 5 minutes
+	units_="0"; //Default imperial
+	lang_="english"; //Default english
+	lat_="28.5383355";
+	lon_="-81.37923649";
+	radar_="6";
+        api_key_="";
+	use_NOAA_=false;
+	use_WWO_=false;
+
+	if(config.size()){
+		vector<string> v_conf=split_C(config,',');
+		for(vector<string>::iterator it=v_conf.begin();it!=v_conf.end();++it){
+			vector<string> elem=split_C((*it),':');
+          		if(elem[0]=="API"){
+				LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Config: %s",elem[1].c_str());
+        			if(elem[1]=="NOAA"){
+					use_NOAA_=true;
+				        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use NOAA");
+					lang_=elem[2];
+                                        units_=elem[3];
+					lat_=elem[4];
+                                        lon_=elem[5];
+					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use NOAA language %s", lang_.c_str());        
+					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use NOAA units %s", units_.c_str());        
+					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use NOAA Lat %s", lat_.c_str());        
+					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use NOAA Lon %s", lon_.c_str());        
+				}
+				if(elem[1]=="WWO"){
+					use_WWO_=true;
+				        LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online");
+					lang_=elem[2];
+                                        api_key_=elem[3];
+					units_=elem[4];
+					city_=elem[5];
+					radar_=elem[6];
+					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online language %s", lang_.c_str());        
+					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online api key %s", api_key_.c_str());        
+					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online units %s", units_.c_str());        
+					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online city %s", city_.c_str());        
+					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online Radaar %s", radar_.c_str());        
+				}
+			}else if(elem[0]=="lat"){
+				lat_=elem[1];
+			}else if(elem[0]=="lon"){
+				lon_=elem[1];
+			}else if(elem[0]=="units"){
+				units_=elem[1];
+			}else if(elem[0]=="lang"){
+				lang_=elem[1];
+			}else if(elem[0]=="timer"){
+				timer_= strtod(elem[1].c_str(), NULL)*60;
+			}
+		}
+	}
+	curl_global_init (CURL_GLOBAL_ALL);
+	m_pCurl = curl_easy_init ();
+	if (!m_pCurl)
+		return false;
+
+
+	//while(true){
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Starting Init Thread");
+	if (pthread_create(&i_thr_,NULL, initThread,(void *) this)) {
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Get_Weather: Error creating initThread");
+		return false;
+	}
+
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
@@ -196,5 +295,113 @@ void Weather::SomeFunction()
 	COMMANDS TO IMPLEMENT
 
 */
+std::vector<std::string> &Weather::split_C(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
 
+std::vector<std::string> Weather::split_C(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    split_C(s, delim, elems);
+    return elems;
+}
 
+void * msgThread(void * Arg){
+	Weather * thr = (Weather *) Arg;
+	//LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Getting Weather Data using: %s", thr->use_NOAA_ ? "NOAA" : "WWO");
+	vector<vector<string> > msg;
+	if(thr->use_NOAA_ ) {
+    		LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Inside use_NOAA");
+		const string& Url="http://forecast.weather.gov/MapClick.php?lat="+thr->lat_+"&lon="+thr->lon_+"&unit="+thr->units_+"&lg="+thr->lang_+"&FcstType=json";
+		string res=thr->download(Url);
+		//LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Result: %s",res.c_str());
+		NOAA noaa;
+		if(noaa.Get_NOAA(res,thr->units_,thr->lang_)){
+			msg=noaa.get_msg();
+		}
+	}
+	if(thr->use_WWO_) {
+		LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Inside WWO");
+		const string& Url="http://api.worldweatheronline.com/free/v2/weather.ashx?q="+thr->city_+"&format=json&tp=24&extra=localObsTime,isDayTime&num_of_days=5&lang="+thr->lang_+"&key="+thr->api_key_;
+                string res=thr->download(Url);
+		WWO wwo;
+		if(wwo.Get_WWO(res,thr->units_,thr->lang_,thr->radar_)){
+			msg=wwo.get_msg();
+		}
+
+	}
+
+	thr->send_msg(msg);
+	return NULL;
+}
+
+void * initThread(void * Arg){
+	Weather * thr2 = (Weather *) Arg;
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Timer is set to: %f minutes",thr2->timer_/60);
+	while(true){
+
+        	if (pthread_create(&thr2->m_thr_,NULL, msgThread,(void *) thr2)) {
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Get_Weather: Error creating msgThread");
+				return NULL;
+	 	}
+             cout << thr2->timer_;
+             sleep(thr2->timer_);
+	}
+        return NULL;
+}
+
+void Weather::send_msg(vector<vector<string> > &msg){
+	//Iterate msg and send
+	PLUTO_SAFETY_LOCK (mm , m_MsgMutex);
+        for (vector<vector<string> >::iterator it = msg.begin() ; it != msg.end(); ++it) {
+          	 if(it->size()==3){
+                        if ( strcmp((*it)[2].c_str(),"Radar") ==0){
+			Message *p_Message = new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, EVENT_Radar_Images_Changed_CONST,2,40, (*it)[0].c_str(), 13, (*it)[1].c_str());
+			QueueMessageToRouter(p_Message);
+//                              cout << (*it)[0] << " : " << (*it)[1] << " : " << (*it)[2] << endl;
+                        } else {
+			//cout << (*it)[0] << " : " << (*it)[1] << " : " << (*it)[2] << endl;
+			Message *p_Message = new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, EVENT_Outside_Temp_Changed_CONST,
+					3, EVENTPARAMETER_Name_CONST, (*it)[0].c_str(), EVENTPARAMETER_Text_CONST, (*it)[1].c_str(), EVENTPARAMETER_Value_CONST, (*it)[2].c_str());
+			QueueMessageToRouter(p_Message);
+                       }
+		} else {
+			//cout << (*it)[0] << " : " << (*it)[1] << endl;
+			Message *p_Message = new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, EVENT_Outside_Temp_Changed_CONST,
+					2, EVENTPARAMETER_Name_CONST, (*it)[0].c_str(), EVENTPARAMETER_Text_CONST, (*it)[1].c_str());
+			QueueMessageToRouter(p_Message);
+		}
+	}
+
+}
+
+string Weather::download(const string & url){
+	PLUTO_SAFETY_LOCK (cm, m_CurlMutex);
+        cm.m_bIgnoreDeadlock=true;
+	curl_easy_setopt(m_pCurl, CURLOPT_URL, url.c_str());
+	curl_easy_setopt(m_pCurl, CURLOPT_FOLLOWLOCATION, 1L); //Follow redirect
+	curl_easy_setopt(m_pCurl, CURLOPT_NOSIGNAL, 1); //Prevent "longjmp causes uninitialized stack frame" bug
+	curl_easy_setopt(m_pCurl, CURLOPT_ACCEPT_ENCODING, "deflate");
+	stringstream out;
+	curl_easy_setopt(m_pCurl, CURLOPT_WRITEFUNCTION, write_data);
+	curl_easy_setopt(m_pCurl, CURLOPT_WRITEDATA, &out);
+	/* Perform the request, res will get the return code */
+	CURLcode res = curl_easy_perform(m_pCurl);
+	/* Check for errors */
+	if (res != CURLE_OK) {
+		fprintf(stderr, "curl_easy_perform() failed: %s\n",
+				curl_easy_strerror(res));
+	}
+	return out.str();
+
+}
+
+size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream) {
+    string data((const char*) ptr, (size_t) size * nmemb);
+    *((stringstream*) stream) << data << endl;
+    return size * nmemb;
+}

@@ -19,6 +19,9 @@
 
 #include "Gen_Devices/WeatherBase.h"
 //<-dceag-d-e->
+//class Database_pluto_main;
+#include <curl/curl.h>
+#include <curl/easy.h>
 
 //<-dceag-decl-b->
 namespace DCE
@@ -29,8 +32,26 @@ namespace DCE
 		// Private member variables
 
 		// Private methods
+		std::vector<std::string> &split_C(const std::string &s, char delim, std::vector<std::string> &elems);
+		std::vector<std::string> split_C(const std::string &s, char delim);
 public:
 		// Public member variables
+		pluto_pthread_mutex_t m_MsgMutex;
+		pthread_t m_thr_, i_thr_;
+		pthread_mutex_t lock_x_;
+		pthread_mutex_t m_p_mutx_;
+		bool use_NOAA_;
+		bool use_WWO_;
+		std::string lat_;
+		std::string lon_;
+		std::string units_;
+		std::string lang_;
+		std::string api_key_;
+		std::string city_;
+		std::string radar_;
+		double timer_;
+		pluto_pthread_mutex_t m_CurlMutex;
+		CURLM* m_pCurl;
 
 //<-dceag-const-b->
 public:
@@ -42,6 +63,9 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
+	   // Database_pluto_main *m_pDatabase_pluto_main;
+		void send_msg(vector<vector<string> > &v);
+		std::string download(const std::string& url);
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
@@ -57,6 +81,7 @@ public:
 
 	/*
 			*****DATA***** accessors inherited from base class
+	string DATA_Get_Configuration();
 
 			*****EVENT***** accessors inherited from base class
 	void EVENT_Outside_Temp_Changed(string sText,int iValue,string sName);

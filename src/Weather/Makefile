@@ -13,7 +13,7 @@ BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = Weather
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 2265mplateID
+MYDEVTEMPLATEID = 2265
 
 Gen_Dev_Files = $(GENDEV)/WeatherBase.cpp
 sources = Main.cpp Weather.cpp $(Gen_Dev_Files)
@@ -22,10 +22,10 @@ sources = Main.cpp Weather.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r
+XTRALDLIBS = -lmysqlclient_r -lcurl -ljsoncpp
 
 Gen_Dev_Files +=
-sources +=
+sources += NOAA.cpp WWO.cpp 
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
