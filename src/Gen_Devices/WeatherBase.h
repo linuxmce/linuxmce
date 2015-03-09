@@ -157,6 +157,14 @@ public:
 	* @brief Device data access methods:
 	*/
 
+	string Get_Configuration()
+	{
+		if( m_bRunningWithoutDeviceData )
+			return m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Configuration_CONST);
+		else
+			return m_mapParameters[DEVICEDATA_Configuration_CONST];
+	}
+
 };
 
 
@@ -261,6 +269,7 @@ public:
 	virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage) { };
 	Command_Impl *CreateCommand(int PK_DeviceTemplate, Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent);
 	//Data accessors
+	string DATA_Get_Configuration() { return GetData()->Get_Configuration(); }
 	//Event accessors
 	void EVENT_Outside_Temp_Changed(string sText,int iValue,string sName) { GetEvents()->Outside_Temp_Changed(sText.c_str(),iValue,sName.c_str()); }
 	void EVENT_Outside_Condition_Changed(string sText,int iValue,string sName) { GetEvents()->Outside_Condition_Changed(sText.c_str(),iValue,sName.c_str()); }
