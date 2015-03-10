@@ -40,7 +40,7 @@ RunSQL "$Q"
 
 #hack to fix broken mythweb package
 #FIXME: remove once mythtv packages are fixed
-chown -R www-data: /var/www/mythweb/data
+chown -R www-data: /var/www/mythweb/data || :
 
 # make sure that mythweb hasn't taken over web admin
 a2dissite default-mythbuntu || /bin/true
