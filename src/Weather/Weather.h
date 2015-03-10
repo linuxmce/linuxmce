@@ -48,7 +48,6 @@ public:
 		std::string lang_;
 		std::string api_key_;
 		std::string city_;
-		std::string radar_;
 		double timer_;
 		pluto_pthread_mutex_t m_CurlMutex;
 		CURLM* m_pCurl;

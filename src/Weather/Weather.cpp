@@ -42,7 +42,8 @@ size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream);
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Weather::Weather(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
-	: Weather_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+	: Weather_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter),
+	  m_CurlMutex("curl_mutex"),m_MsgMutex("wmsg_mutex")
 //<-dceag-const-e->
 {
 	  m_CurlMutex.Init (NULL);
@@ -52,7 +53,8 @@ Weather::Weather(int DeviceID, string ServerAddress,bool bConnectEventHandler,bo
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
 Weather::Weather(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: Weather_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
+	: Weather_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter),
+	  m_CurlMutex("curl_mutex"),m_MsgMutex("wmsg_mutex")
 //<-dceag-const2-e->
 {
 }
@@ -88,12 +90,11 @@ bool Weather::GetConfig()
 
 	//Set defaults
 	string config=DATA_Get_Configuration();
-	timer_=25*60; //Default to 5 minutes
+	timer_=3*60; //Default to 5 minutes
 	units_="0"; //Default imperial
 	lang_="english"; //Default english
 	lat_="28.5383355";
 	lon_="-81.37923649";
-	radar_="6";
         api_key_="";
 	use_NOAA_=false;
 	use_WWO_=false;
@@ -123,12 +124,10 @@ bool Weather::GetConfig()
                                         api_key_=elem[3];
 					units_=elem[4];
 					city_=elem[5];
-					radar_=elem[6];
 					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online language %s", lang_.c_str());        
 					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online api key %s", api_key_.c_str());        
 					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online units %s", units_.c_str());        
 					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online city %s", city_.c_str());        
-					LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Use World Weather Online Radaar %s", radar_.c_str());        
 				}
 			}else if(elem[0]=="lat"){
 				lat_=elem[1];
@@ -279,6 +278,7 @@ void Weather::SomeFunction()
 	// Get our IP address from our data
 	string sIP = DATA_Get_IP_Address();
 
+
 	// Set our data "Filename" to "myfile"
 	DATA_Set_Filename("myfile");
 
@@ -312,7 +312,7 @@ std::vector<std::string> Weather::split_C(const std::string &s, char delim) {
 
 void * msgThread(void * Arg){
 	Weather * thr = (Weather *) Arg;
-	//LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Getting Weather Data using: %s", thr->use_NOAA_ ? "NOAA" : "WWO");
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Getting Weather Data using: %s", thr->use_NOAA_ ? "NOAA" : "WWO");
 	vector<vector<string> > msg;
 	if(thr->use_NOAA_ ) {
     		LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Inside use_NOAA");
@@ -329,19 +329,20 @@ void * msgThread(void * Arg){
 		const string& Url="http://api.worldweatheronline.com/free/v2/weather.ashx?q="+thr->city_+"&format=json&tp=24&extra=localObsTime,isDayTime&num_of_days=5&lang="+thr->lang_+"&key="+thr->api_key_;
                 string res=thr->download(Url);
 		WWO wwo;
-		if(wwo.Get_WWO(res,thr->units_,thr->lang_,thr->radar_)){
+		if(wwo.Get_WWO(res,thr->units_,thr->lang_)){
 			msg=wwo.get_msg();
 		}
-
 	}
-
 	thr->send_msg(msg);
 	return NULL;
 }
 
 void * initThread(void * Arg){
 	Weather * thr2 = (Weather *) Arg;
+	double duration=thr2->timer_,t_check;//Seconds
 	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Timer is set to: %f minutes",thr2->timer_/60);
+        //cfernandes
+	//bool init=true;
 	while(true){
 
         	if (pthread_create(&thr2->m_thr_,NULL, msgThread,(void *) thr2)) {
@@ -351,24 +352,34 @@ void * initThread(void * Arg){
              cout << thr2->timer_;
              sleep(thr2->timer_);
 	}
-        return NULL;
+        //linuxmce	
+	//clock_t start,end;
+	//bool init=true;
+	//start=clock();
+	//while(true){
+	//	end=clock();
+	//	t_check=(end-start) / (double) CLOCKS_PER_SEC;
+	//	if(t_check>=duration || init){
+	//		if (pthread_create(&thr2->m_thr_,NULL, msgThread,(void *) thr2)) {
+	//			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Get_Weather: Error creating msgThread");
+	//			return NULL;
+	//		}
+	//		init=false;
+	//		start=clock();
+	//	}
+	//}
+	return NULL;
 }
 
 void Weather::send_msg(vector<vector<string> > &msg){
 	//Iterate msg and send
 	PLUTO_SAFETY_LOCK (mm , m_MsgMutex);
         for (vector<vector<string> >::iterator it = msg.begin() ; it != msg.end(); ++it) {
-          	 if(it->size()==3){
-                        if ( strcmp((*it)[2].c_str(),"Radar") ==0){
-			Message *p_Message = new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, EVENT_Radar_Images_Changed_CONST,2,40, (*it)[0].c_str(), 13, (*it)[1].c_str());
-			QueueMessageToRouter(p_Message);
-//                              cout << (*it)[0] << " : " << (*it)[1] << " : " << (*it)[2] << endl;
-                        } else {
+		if(it->size()==3){
 			//cout << (*it)[0] << " : " << (*it)[1] << " : " << (*it)[2] << endl;
 			Message *p_Message = new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, EVENT_Outside_Temp_Changed_CONST,
 					3, EVENTPARAMETER_Name_CONST, (*it)[0].c_str(), EVENTPARAMETER_Text_CONST, (*it)[1].c_str(), EVENTPARAMETER_Value_CONST, (*it)[2].c_str());
 			QueueMessageToRouter(p_Message);
-                       }
 		} else {
 			//cout << (*it)[0] << " : " << (*it)[1] << endl;
 			Message *p_Message = new Message(m_dwPK_Device, DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT, EVENT_Outside_Temp_Changed_CONST,

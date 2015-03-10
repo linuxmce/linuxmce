@@ -25,7 +25,7 @@ LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r -lcurl -ljsoncpp
 
 Gen_Dev_Files +=
-sources += NOAA.cpp WWO.cpp 
+sources += NOAA.cpp WWO.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
