@@ -1207,8 +1207,8 @@ void Game_Player::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sMe
 	    {
 	      if (m_sIPAddress == "127.0.0.1")
 		m_sIPAddress = "192.168.80.1";   // derp!
-	      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SLAVE Device %d sending Remote play",atoi(sCurrentTarget.c_str()));
 	      sFinalURL = "slave://" + m_sIPofMD + "/" + sMediaURL;
+	      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"SLAVE Device %d sending Remote play streamid=%d mediaType=%d sFinalURL=%s",atoi(sCurrentTarget.c_str()),iStreamID,iPK_MediaType,sFinalURL.c_str());
 	      DCE::CMD_Play_Media CMD_Play_Media(m_dwPK_Device,
 					    atoi(sCurrentTarget.c_str()),
 					    iPK_MediaType,iStreamID,

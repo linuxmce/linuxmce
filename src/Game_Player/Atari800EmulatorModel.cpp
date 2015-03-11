@@ -22,15 +22,15 @@ namespace DCE
   {
     m_sConfigFile = ATARI800_CONFIG_FILE;
     m_sConfigFileTemplate = ATARI800_CONFIG_FILE_TEMPLATE;
-    m_sWindowName = "Altirra.exe.Wine";
+    m_sWindowName = "atari800.atari800";
     initializeActionstoKeysyms();
     initializeButtontoKeysyms();
-    m_sEmulatorBinary = "/usr/pluto/bin/Altirra.sh";
+    m_sEmulatorBinary = "/usr/bin/atari800";
     m_sProcessName = "atari800";
     m_bChangeRequiresRestart=true;
     m_bRunning=false;
     m_bHasArgs=true;
-    m_sArgs="/portable\t/f\t";
+    m_sArgs="";
   }
 
   Atari800EmulatorModel::~Atari800EmulatorModel()
@@ -49,6 +49,8 @@ namespace DCE
   bool Atari800EmulatorModel::updateConfig()
   {
     ConfigurationWriter config(ATARI800_CONFIG_FILE_TEMPLATE, ATARI800_CONFIG_FILE, m_sSystemConfiguration);
+    config.Add("###WIDTH###",StringUtils::itos(m_iScreenWidth));
+    config.Add("###HEIGHT###",StringUtils::itos(m_iScreenHeight));
     return config.Write();
   }
 
