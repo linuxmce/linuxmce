@@ -188,9 +188,10 @@ function firewall($output,$dbADO) {
 	};
 	
 	$RuleTYPE=Array(
-	"0"=>"PREROUTING",
-	"1"=>"POSTROUTING",
-	"2"=>"OUTPUT",
+	"0"=>"",
+	"1"=>"PREROUTING",
+	"2"=>"POSTROUTING",
+	"3"=>"OUTPUT",
 	);
 	
 	$protocolarr=Array(
@@ -445,12 +446,12 @@ function firewall($output,$dbADO) {
 		';
 		if (@$AdvancedFirewall == 1) {
 			if (@$Show_all_rules == 1 || $chains[$i] != 'input' || $chains[$i] != 'forward' || $chains[$i] != 'output') {
-				$res=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType LIKE "'.$chains[$i].'%" AND Protocol LIKE \'%-'.$fwVersion.'\' ORDER BY PK_Firewall');
+				$res=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType LIKE "'.$chains[$i].'%" AND Protocol LIKE \'%-'.$fwVersion.'\' ORDER BY Place, PK_Firewall');
 			} else {
-				$res=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType="'.$chains[$i].'" AND RPolicy!=\''.$DPolicy.'\' AND Protocol LIKE \'%-'.$fwVersion.'\' ORDER BY PK_Firewall');
+				$res=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType="'.$chains[$i].'" AND RPolicy!=\''.$DPolicy.'\' AND Protocol LIKE \'%-'.$fwVersion.'\' ORDER BY  Place, PK_Firewall');
 			}
 		} else {
-			$res=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType="'.$chains[$i].'" AND RPolicy!=\''.$DPolicy.'\' AND Protocol LIKE \'%-'.$fwVersion.'\' ORDER BY SourcePort');
+			$res=$dbADO->Execute('SELECT * FROM Firewall WHERE RuleType="'.$chains[$i].'" AND RPolicy!=\''.$DPolicy.'\' AND Protocol LIKE \'%-'.$fwVersion.'\' ORDER BY Place, SourcePort');
 		}
 		$pos=0;
 		while($row=$res->FetchRow()){
@@ -490,6 +491,7 @@ function firewall($output,$dbADO) {
 						function saveRule()
 	{	
 		document.getElementById(\'firewall\').save_Rule.value;
+		document.getElementById(\'firewall\').save_place.value;
 		document.getElementById(\'firewall\').save_IntIf.value;
 		document.getElementById(\'firewall\').save_ExtIf.value;
 		document.getElementById(\'firewall\').save_Matchname.value;
@@ -512,8 +514,17 @@ function firewall($output,$dbADO) {
 						<option value="ipv4" '.($protocol[1]=='ipv4'?'selected':'').'>IPv4</option>
 						<option value="ipv6" '.($protocol[1]=='ipv6'?'selected':'').'>IPv6</option>
 						<!--<option value="both">both</option>-->
-					</select></td>';
-						$out.='<td align="center"><select name="save_Chain">
+					</select>';
+						if ($AdvancedFirewall == 1) {
+							$out.='
+							place<br />
+							<select name="save_place" STYLE="width:70px">
+								<option value="1">Middle</option>
+								<option value="0">First</option>
+								<option value="2">Last</option>
+							</select></td>';
+						}
+						$out.='</td><td align="center"><select name="save_Chain">
 							'.$save_chain_options.'
 							
 							</select>';
@@ -745,8 +756,17 @@ function firewall($output,$dbADO) {
 		}
 		    $out.='<option value="ipv4" '.((@$fwVersion!="ipv4")?'':'selected').'>IPv4</option>
                 <option value="ipv6" '.((@$fwVersion!="ipv6")?'':'selected').'>IPv6</option>
-			</select></td>
-			<td align="center" width="110"><select name="Chain" onChange="enableDestination()">
+			</select><br />';
+			if ($AdvancedFirewall == 1) {
+			$out.='
+			place<br />
+			<select name="place" STYLE="width:70px">
+			<option value="1">Middle</option>
+			<option value="0">First</option>
+			<option value="2">Last</option>
+			</select></td>';
+			}
+			$out.='<td align="center" width="110"><select name="Chain" onChange="enableDestination()">
 				'.$chain_options.'
 			</select>';
 			if (@$AdvancedFirewall == 1 && $fwVersion != "ipv6"){
@@ -829,6 +849,11 @@ function firewall($output,$dbADO) {
 			$IntIF=@$_POST['IntIf'];
 			$ExtIF=@$_POST['ExtIf'];
 			$Matchname=@$_POST['Matchname'];
+			if (!isset($_POST['place'])) {
+				$place='1';
+			} else {
+				$place=$_POST['place'];
+			}
 			if ($_POST['protocol'] == 'tcp & udp') {
 				$Protocol='all-'.@$_POST['IPVersion'];
 			} else {
@@ -854,15 +879,15 @@ function firewall($output,$dbADO) {
 			$RPolicy=@$_POST['RPolicy'];
 			$Description=@$_POST['Description'];
 			if ( $RuleType != "PREROUTING"){ // check if Ruletype is prerouting if not input one rule.
-				$insert='INSERT INTO Firewall (IntIF,ExtIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)';
-				$dbADO->Execute($insert,array($IntIF,$ExtIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$Chain,$SourceIP,$RPolicy,$Description));
+				$insert='INSERT INTO Firewall (Place,IntIF,ExtIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)';
+				$dbADO->Execute($insert,array($place,$IntIF,$ExtIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$Chain,$SourceIP,$RPolicy,$Description));
 			} else {
 					// Check for destinationip of it is the external interface ip then input or a system on the network(s) then forward.
 					 if ($coreIPv4 == $DestinationIP) {
 						//Insert the input rule.
 						$input='input';
-						$insert='INSERT INTO Firewall (IntIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?)';
-						$dbADO->Execute($insert,array($IntIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$input,$SourceIP,$RPolicy,$Description));
+						$insert='INSERT INTO Firewall (Place,IntIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?)';
+						$dbADO->Execute($insert,array('1',$IntIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$input,$SourceIP,$RPolicy,$Description));
 					} else {
 						if ($_POST['Chain'] == "port_forward (NAT)") {
 							$forward='forward';
@@ -871,18 +896,18 @@ function firewall($output,$dbADO) {
 							$queryChain='SELECT * FROM Firewall WHERE RuleType=? AND RPolicy=?';
 							$resChain=$dbADO->Execute($queryChain,array("forward",$forward));
 							if($resChain->RecordCount() ==0){
-								$insert='INSERT INTO Firewall (Protocol, RuleType,RPolicy,Description) VALUES (?,?,?,?)';
-								$dbADO->Execute($insert,array('all-'.$_POST['IPVersion'],'forward',$forward,'LINK TO '.$forward));
+								$insert='INSERT INTO Firewall (Place,Protocol, RuleType,RPolicy,Description) VALUES (?,?,?,?)';
+								$dbADO->Execute($insert,array('0','all-'.$_POST['IPVersion'],'forward',$forward,'LINK TO '.$forward));
 							}
 						}
 						//Insert the forward rule.
 						$msg.=$forward;
-						$insert='INSERT INTO Firewall (IntIF,ExtIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)';
-						$dbADO->Execute($insert,array($IntIF,$ExtIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$forward,$SourceIP,$RPolicy,$Description));
+						$insert='INSERT INTO Firewall (Place,IntIF,ExtIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)';
+						$dbADO->Execute($insert,array('1',$IntIF,$ExtIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$forward,$SourceIP,$RPolicy,$Description));
 					}
 				//Insert the prerouting rule.
-				$insert='INSERT INTO Firewall (IntIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?)';
-				$dbADO->Execute($insert,array($IntIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$Chain,$SourceIP,$RPolicy,$Description));
+				$insert='INSERT INTO Firewall (Place,IntIF,Matchname, Protocol, SourcePort, SourcePortEnd, DestinationPort, DestinationIP, RuleType,SourceIP,RPolicy,Description) VALUES (?,?,?,?,?,?,?,?,?,?,?)';
+				$dbADO->Execute($insert,array('1',$IntIF,$Matchname, $Protocol,$SourcePort,$SourcePortEnd,$DestinationPort,$DestinationIP,$Chain,$SourceIP,$RPolicy,$Description));
 			}
 		}
 		
@@ -891,6 +916,11 @@ function firewall($output,$dbADO) {
 			$IntIF=@$_POST['save_IntIf'];
 			$ExtIF=@$_POST['save_ExtIf'];
 			$Matchname=@$_POST['save_Matchname'];
+			if (!isset($_POST['save_place'])) {
+				$place='1';
+			} else {
+				$place=$_POST['save_place'];
+			}
 			if ($_POST['save_protocol'] == 'tcp & udp') {
 				$Protocol='all-'.@$_POST['save_IPVersion'];
 			} else {
@@ -910,7 +940,7 @@ function firewall($output,$dbADO) {
 			$SourceIP=@$_POST['save_SourceIP'];
 			$RPolicy=@$_POST['save_RPolicy'];
 			$Description=@$_POST['save_Description'];
-			$update="UPDATE Firewall SET IntIF='".$IntIF."' , ExtIF='".$ExtIF."' ,Matchname='".$Matchname."' , Protocol='".$Protocol."', SourcePort='".$SourcePort."', SourcePortEnd='".$SourcePortEnd."', DestinationPort='".$DestinationPort."', DestinationIP='".$DestinationIP."', RuleType='".$Chain."',SourceIP='".$SourceIP."',RPolicy='".$RPolicy."',Description='".$Description."' WHERE PK_Firewall='".$rule_nr."'";
+			$update="UPDATE Firewall SET Place='".$place."', IntIF='".$IntIF."' , ExtIF='".$ExtIF."' ,Matchname='".$Matchname."' , Protocol='".$Protocol."', SourcePort='".$SourcePort."', SourcePortEnd='".$SourcePortEnd."', DestinationPort='".$DestinationPort."', DestinationIP='".$DestinationIP."', RuleType='".$Chain."',SourceIP='".$SourceIP."',RPolicy='".$RPolicy."',Description='".$Description."' WHERE PK_Firewall='".$rule_nr."'";
 			$dbADO->Execute($update);
 		}
 		
