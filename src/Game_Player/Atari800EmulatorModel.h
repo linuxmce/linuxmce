@@ -18,8 +18,10 @@ namespace DCE
     Atari800EmulatorModel();
     ~Atari800EmulatorModel();
 
-  protected:
+    bool m_bCapsLockPressed;
 
+  protected:
+    
     virtual void initializeActionstoKeysyms(); // set key mappings for ATARI800.
     virtual void initializeButtontoKeysyms(); // keyboard mappings
     virtual bool updateConfig();

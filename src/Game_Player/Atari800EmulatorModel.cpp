@@ -30,6 +30,7 @@ namespace DCE
     m_bChangeRequiresRestart=true;
     m_bRunning=false;
     m_bHasArgs=true;
+    m_bCapsLockPressed=false;
     m_sArgs="";
   }
 
@@ -70,7 +71,10 @@ namespace DCE
     m_mapActionsToKeysyms["SAVE_STATE"] = make_pair(XK_s,XK_Alt_L);
     m_mapActionsToKeysyms["RESET"] = make_pair(XK_r,XK_Alt_L);
     m_mapActionsToKeysyms["UI_ENTER"] = make_pair(XK_F1,0);
-    m_mapActionsToKeysyms["UI_EXIT"] = make_pair(XK_F1,0);  
+    m_mapActionsToKeysyms["UI_EXIT"] = make_pair(XK_F1,0);
+    m_mapActionsToKeysyms["GET_SNAPSHOT"] = make_pair(XK_F10,0);
+    m_mapActionsToKeysyms["PAUSE"] = make_pair(XK_Pause,0);
+    m_mapActionsToKeysyms["UNPAUSE"] = make_pair(XK_Scroll_Lock,0);
     // overridden by subclass.
     // todo: come back here and fill this in.
 
@@ -78,7 +82,10 @@ namespace DCE
 
   void Atari800EmulatorModel::initializeButtontoKeysyms()
   {
-    // Come back here and fill in the special keys.
+    // Because Atari800 doesn't do "authentic" key mapping ala MAME/MESS/UME,
+    // I have decided instead to override pressButton, and handle the crazy 
+    // logic entirely there. I know I will regret it. -tschak
+
   }
 
 }

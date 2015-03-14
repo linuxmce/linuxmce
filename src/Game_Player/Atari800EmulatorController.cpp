@@ -7,6 +7,9 @@
 
 #include "Atari800EmulatorController.h"
 #include "PlutoUtils/FileUtils.h"
+#include "pluto_main/Define_Button.h"
+#include <X11/keysym.h>
+#include "WindowUtils/WindowUtils.h"
 
 namespace DCE
 {
@@ -126,6 +129,18 @@ namespace DCE
       return true;
   }
 
+  bool Atari800EmulatorController::pause()
+  {
+    doAction("PAUSE");
+    return true;
+  }
+
+  bool Atari800EmulatorController::unpause()
+  {
+    doAction("UNPAUSE");
+    return true;
+  }
+
   bool Atari800EmulatorController::setSpeed(int iSpeed)
   {
     switch (iSpeed)
@@ -148,7 +163,7 @@ namespace DCE
     switch(iMenu)
       {
       case 0:
-	if (m_pEmulatorModel->m_iActiveMenu > 1) // 2 and above is a UI of some sort.
+	if (m_pEmulatorModel->m_iActiveMenu == 2) // 2 and above is a UI of some sort.
 	  doAction("UI_EXIT");
 	break;
       case 1:
@@ -156,6 +171,9 @@ namespace DCE
 	break;
       case 2:
 	doAction("UI_ENTER");
+	break;
+
+	X11EmulatorController::gotoMenu(iMenu);
       }
     
     return X11EmulatorController::gotoMenu(iMenu); // and up the chain...
@@ -181,6 +199,441 @@ namespace DCE
   {
     // implement record.
     return false;
+  }
+
+  bool Atari800EmulatorController::getSnap(long int iPK_Device, int iWidth, int iHeight, char **pData, int& iData_Size)
+  {
+    if (m_pEmulatorModel->m_iActiveMenu == 2)
+      {
+	return X11EmulatorController::getSnap(iPK_Device,iWidth,iHeight,pData,iData_Size);
+      }
+    else
+      {
+	size_t size;
+	m_pEmulatorModel->updateVideoFrameGeometry(iPK_Device,iWidth,iHeight);
+	doAction("GET_SNAPSHOT");
+	// Currently, it winds up in /usr/pluto/bin, let's patch that later -tschak
+	string sCmd = "convert /run/Game_Player/atari_screenshot.png -trim -resize " + StringUtils::itos(iWidth) + "x" + StringUtils::itos(iHeight) + " -background black -gravity center -extent " + StringUtils::itos(iWidth) + "x" + StringUtils::itos(iHeight) + " +repage /run/Game_Player/atari_screenshot.jpg";
+	system(sCmd.c_str());
+	*pData = FileUtils::ReadFileIntoBuffer("/run/Game_Player/atari_screenshot.jpg",size);
+	iData_Size = size;
+	
+	FileUtils::DelFile("/run/Game_Player/atari_screenshot.png");
+	FileUtils::DelFile("/run/Game_Player/atari_screenshot.jpg");
+      }
+    return true;
+    
+  }
+
+  bool Atari800EmulatorController::pressButton(int iPK_Button, Message *pMessage)
+  {
+    PLUTO_SAFETY_LOCK(gm, m_pGame_Player->m_X11ControllerMutex);
+
+    int iKey=0;
+    bool bDoNotPressModifier=false;
+
+    if (!m_pEmulatorModel->m_pDisplay)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorModel::pressButton(%d) - No valid display pointer, bailing!",iPK_Button);
+	return false;
+      }
+    
+    if (!m_pEmulatorModel->m_iWindowId)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"X11EmulatorModel::pressButton(%d) - No valid window, bailing!",iPK_Button);
+	return false;
+      }
+
+    switch (iPK_Button)
+      {
+      case BUTTON_left_shift_CONST:
+	m_pEmulatorModel->m_iCurrentKeyModifier = XK_Shift_L;
+	break;
+      case BUTTON_right_shift_CONST:
+	m_pEmulatorModel->m_iCurrentKeyModifier = XK_Shift_R;
+	break;
+      case BUTTON_Control_CONST:
+	m_pEmulatorModel->m_iCurrentKeyModifier = XK_Control_L;
+	break;
+      case BUTTON_Shift_Left_CONST:
+	m_pEmulatorModel->m_iCurrentKeyModifier = XK_Shift_L;
+	break;
+      case BUTTON_Shift_Right_CONST:
+	m_pEmulatorModel->m_iCurrentKeyModifier = XK_Shift_R;
+	break;
+      case BUTTON_caps_lock_CONST:
+	m_pEmulatorModel->m_bCapsLockPressed=!m_pEmulatorModel->m_bCapsLockPressed;
+	break;
+      }
+
+    // Simulate Caps lock.
+    if (m_pEmulatorModel->m_bCapsLockPressed)
+      {
+	m_pEmulatorModel->m_iCurrentKeyModifier = XK_Shift_L;
+      }
+
+    switch (iPK_Button)
+      {
+      case BUTTON_escape_CONST:
+	iKey=XK_Escape;
+	break;
+      case BUTTON_1_CONST:
+	if ((m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L) || (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R))
+	  {
+	    iKey = XK_exclam;
+	    bDoNotPressModifier=true;
+	  }
+	else
+	  {
+	    iKey = XK_1;
+	  }
+	break;
+      case BUTTON_2_CONST:
+	if ((m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L) || (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R))
+	  {
+	    iKey = XK_quotedbl;
+	    bDoNotPressModifier=true;
+	  }
+	else
+	  {
+	    iKey = XK_2;
+	  }
+	break;
+      case BUTTON_3_CONST:
+	if ((m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L) || (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R))
+	  {
+	    iKey = XK_numbersign;
+	    bDoNotPressModifier=true;
+	  }
+	else
+	  {
+	    iKey = XK_3;
+	  }
+	break;
+      case BUTTON_4_CONST:
+	if ((m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L) || (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R))
+	  {
+	    iKey = XK_dollar;
+	    bDoNotPressModifier=true;
+	  }
+	else
+	  {
+	    iKey = XK_4;
+	  }
+	break;
+      case BUTTON_5_CONST:
+	if ((m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L) || (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R))
+	  {
+	    iKey = XK_percent;
+	    bDoNotPressModifier=true;
+	  }
+	else
+	  {
+	    iKey = XK_5;
+	  }
+	break;
+      case BUTTON_6_CONST:
+	if ((m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L) || (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R))
+	  {
+	    iKey = XK_ampersand;
+	    bDoNotPressModifier=true;
+	  }
+	else
+	  {
+	    iKey = XK_6;
+	  }
+	break;
+      case BUTTON_7_CONST:
+	if ((m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L) || (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R))
+	  {
+	    iKey = XK_apostrophe;
+	    bDoNotPressModifier=true;
+	  }
+	else
+	  {
+	    iKey = XK_7;
+	  }
+	break;
+      case BUTTON_8_CONST:
+	if ((m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L) || (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R))
+	  {
+	    iKey = XK_at;
+	    bDoNotPressModifier=true;
+	  }
+	else
+	  {
+	    iKey = XK_8;
+	  }
+	break;
+      case BUTTON_9_CONST:
+	if ((m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L) || (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R))
+	  {
+	    iKey = XK_parenleft;
+	    bDoNotPressModifier=true;
+	  }
+	else
+	  {
+	    iKey = XK_9;
+	  }
+	break;
+      case BUTTON_0_CONST:
+	if ((m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L) || (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R))
+	  {
+	    iKey = XK_parenright;
+	    bDoNotPressModifier=true;
+	  }
+	else
+	  {
+	    iKey = XK_0;
+	  }
+	break;
+      case BUTTON_atariltclr_CONST:
+	if ((m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L) || (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R))
+	  {
+	    iKey = XK_Delete;
+	    bDoNotPressModifier=true;
+	  }
+	else
+	  {
+	    iKey = XK_less;
+	  }
+	break;
+      case BUTTON_atarigtins_CONST:
+	if ((m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L) || (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R))
+	  {
+	    iKey = XK_Insert;
+	    bDoNotPressModifier=true;
+	  }
+	else
+	  {
+	    iKey = XK_greater;
+	  }
+	break;
+      case BUTTON_Back_CONST:
+	iKey = XK_BackSpace;
+	break;
+      case BUTTON_break_CONST:
+	iKey = XK_Break; // Shit, after I broke this key for pause...
+	break;
+      case BUTTON_tab_CONST:
+	iKey = XK_Tab;
+	break;
+      case BUTTON_Q_CONST:
+	iKey = XK_Q;
+	break;
+      case BUTTON_W_CONST:
+	iKey = XK_W;
+	break;
+      case BUTTON_E_CONST:
+	iKey = XK_E;
+	break;
+      case BUTTON_R_CONST:
+	iKey = XK_R;
+	break;
+      case BUTTON_T_CONST:
+	iKey = XK_T;
+	break;
+      case BUTTON_Y_CONST:
+	iKey = XK_Y;
+	break;
+      case BUTTON_U_CONST:
+	iKey = XK_U;
+	break;
+      case BUTTON_I_CONST:
+	iKey = XK_I;
+	break;
+      case BUTTON_O_CONST:
+	iKey = XK_O;
+	break;
+      case BUTTON_P_CONST:
+	iKey = XK_P;
+	break;
+      case BUTTON_a8dash_CONST:
+	if (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L || m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R)
+	  {
+	    iKey = XK_underscore;
+	  }
+	else if (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Control_L)
+	  {
+	    iKey = XK_Up;
+	  }
+	else
+	  {
+	    iKey = XK_minus;
+	  }
+	break;
+      case BUTTON_a8equals_CONST:
+	if (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L || m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R)
+	  {
+	    iKey = XK_bar;
+	  }
+	else if (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Control_L)
+	  {
+	    iKey = XK_Down;
+	  }
+	else
+	  {
+	    iKey = XK_equal;
+	  }
+	break;	
+      case BUTTON_Enter_CONST:
+	iKey = XK_Return;
+	break;
+      case BUTTON_A_CONST:
+	iKey = XK_A;
+	break;
+      case BUTTON_S_CONST:
+	iKey = XK_S;
+	break;
+      case BUTTON_D_CONST:
+	iKey = XK_D;
+	break;
+      case BUTTON_F_CONST:
+	iKey = XK_F;
+	break;
+      case BUTTON_G_CONST:
+	iKey = XK_G;
+	break;
+      case BUTTON_H_CONST:
+	iKey = XK_H;
+	break;
+      case BUTTON_J_CONST:
+	iKey = XK_J;
+	break;
+      case BUTTON_K_CONST:
+	iKey = XK_K;
+	break;
+      case BUTTON_L_CONST:
+	iKey = XK_L;
+	break;
+      case BUTTON_semicolumn_CONST:
+	if (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L || m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R)
+	  {
+	    iKey = XK_colon;
+	  }
+	else
+	  {
+	    iKey = XK_semicolon;
+	  }
+	break;
+      case BUTTON_a8plus_CONST:
+	if (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L || m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R)
+	  {
+	    iKey = XK_backslash;
+	  }
+	else if (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Control_L)
+	  {
+	    iKey = XK_Left;
+	  }
+	else
+	  {
+	    iKey = XK_plus;
+	  }
+	break;
+      case BUTTON_a8ast_CONST:
+	if (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L || m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R)
+	  {
+	    iKey = XK_asciicircum; // Seriously? You fucks couldn't simply have called it XK_caret?
+	  }
+	else if (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Control_L)
+	  {
+	    iKey = XK_Right;
+	  }
+	else
+	  {
+	    iKey = XK_asterisk;
+	  }
+	break;
+      case BUTTON_Z_CONST:
+	iKey = XK_Z;
+	break;
+      case BUTTON_X_CONST:
+	iKey = XK_X;
+	break;
+      case BUTTON_C_CONST:
+	iKey = XK_C;
+	break;
+      case BUTTON_V_CONST:
+	iKey = XK_V;
+	break;
+      case BUTTON_B_CONST:
+	iKey = XK_B;
+	break;
+      case BUTTON_N_CONST:
+	iKey = XK_N;
+	break;
+      case BUTTON_M_CONST:
+	iKey = XK_M;
+	break;
+      case BUTTON_comma_CONST:
+	if (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L || m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R)
+	  {
+	    iKey = XK_bracketleft;
+	  }
+	else
+	  {
+	    iKey = XK_comma;
+	  }
+	break;
+      case BUTTON_period_CONST:
+	if (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L || m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R)
+	  {
+	    iKey = XK_bracketright;
+	  }
+	else
+	  {
+	    iKey = XK_period;
+	  }
+	break;
+      case BUTTON_slash_CONST:
+	if (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L || m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R)
+	  {
+	    iKey = XK_question;
+	  }
+	else
+	  {
+	    iKey = XK_slash;
+	  }
+	break;
+      case BUTTON_a8logo_CONST:
+	iKey = XK_grave;
+	break;
+      case BUTTON_a8option_CONST:
+	iKey = XK_F2;
+	break;
+      case BUTTON_a8select_CONST:
+	iKey = XK_F3;
+	break;
+      case BUTTON_a8start_CONST:
+	iKey = XK_F4;
+	break;
+      }
+
+    // Will collapse this with a ternary, later. -tschak
+    if (bDoNotPressModifier)
+      {
+	WindowUtils::SendKeyToWindow(m_pEmulatorModel->m_pDisplay,
+				     m_pEmulatorModel->m_iWindowId,
+				     iKey,
+				     0);
+      }
+    else
+      {
+	XTestFakeKeyEvent( m_pEmulatorModel->m_pDisplay, XKeysymToKeycode( m_pEmulatorModel->m_pDisplay, m_pEmulatorModel->m_iCurrentKeyModifier),True, CurrentTime );
+	WindowUtils::SendKeyToWindow(m_pEmulatorModel->m_pDisplay,
+				     m_pEmulatorModel->m_iWindowId,
+				     iKey,
+				     m_pEmulatorModel->m_iCurrentKeyModifier);
+	XTestFakeKeyEvent( m_pEmulatorModel->m_pDisplay, XKeysymToKeycode( m_pEmulatorModel->m_pDisplay, m_pEmulatorModel->m_iCurrentKeyModifier),False, CurrentTime );
+      }
+
+    if (m_pEmulatorModel->m_iCurrentKeyModifier>0)
+      {
+	m_pEmulatorModel->m_iCurrentKeyModifier=0; // Unpress modifier after use. 
+      }
+
+    return true;
+
   }
 
 }

@@ -25,6 +25,9 @@ namespace DCE
     virtual bool init();
     virtual bool run();
     virtual bool stop();
+    virtual bool pause();
+    virtual bool unpause();
+    virtual bool getSnap(long int iPK_Device, int iWidth, int iHeight, char **pData, int& iData_Size);
     virtual bool setSpeed(int iSpeed);
     virtual bool gotoMenu(int iMenu);
     virtual void setMediaPosition(string sMediaPosition);
@@ -33,6 +36,7 @@ namespace DCE
     virtual void insertMediaNamed(string sMediaFile, string sSlot);
     bool getRecordingFilename(string sPath, string &sFilename);
     virtual bool record();
+    virtual bool pressButton(int iPK_Button, Message *pMessage);
 
   protected:
   private:
