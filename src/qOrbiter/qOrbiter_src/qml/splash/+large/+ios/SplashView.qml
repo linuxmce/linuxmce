@@ -75,11 +75,7 @@ Item {
 //    }
 
 
-    Connections{
-        target:window
-        onMessageChanged:loadingStatus.text = window.message
-        onStatusChanged: screenchange("SetupNewOrbiter.qml")
-    }
+
 
     Rectangle {
         width: parent.width
@@ -93,14 +89,7 @@ Item {
     }
 
 
-    Text {
-        id: loadingStatus
-        text: "Status " + manager.commandResponse
-        font.pointSize: Style.appFontSize_description
-        color: "white"
-        anchors.top: topContainer.bottom
-        anchors.horizontalCenter: connectionBox.horizontalCenter
-    }
+
 
     ExistingOrbiters {
         id:existing_orbiters

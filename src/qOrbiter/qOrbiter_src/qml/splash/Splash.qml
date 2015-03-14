@@ -5,12 +5,18 @@ import QtQuick 2.3
 import "."
 Item {
     id: splashLogic
-    anchors.fill: parent
+   anchors.fill: parent
     Component.onCompleted: {
         console.log("Splash is loaded")
         splashLogic.state="connecting"
         window.qmlSetupLmce(window.deviceno, window.router)
+        splashLogic.forceActiveFocus()
+        state="connecting"
     }
+    focus:true
+
+    Keys.onTabPressed: manager.setDesiredOrientation(manager.isProfile ? Qt.LandscapeOrientation : Qt.PortraitOrientation)
+
     Connections{
         target:manager
         onAppWidthChanged:console.log("!!")
@@ -75,7 +81,7 @@ Item {
     FontLoader{
         id:myFont
         name:"Sawasdee"
-        source: "../../skins-common/fonts/Sawasdee.ttf"
+      //  source: "../../skins-common/fonts/Sawasdee.ttf"
     }
 
     states: [

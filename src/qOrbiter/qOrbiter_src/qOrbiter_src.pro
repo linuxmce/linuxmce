@@ -112,6 +112,8 @@ TRANSLATIONS = \
 common-folder.source = qml/skins-common
 common-folder.target = $$DESTDIR/qml
 
+
+
 #DEPLOYMENTFOLDERS+=common-folder
 
 linux-g++{
@@ -264,7 +266,6 @@ macx-clang{
         folder_03.target = $$APP_RESOURCES_PATH
 
         ICON = ../platforms/osx/osxicons.icns
-
         plugins_folder.source = imports/
         plugins_folder.target = ../../../$$DESTDIR/$$TARGET".app"/Contents/MacOS/imports
 
@@ -276,7 +277,6 @@ macx-clang{
 }
 
 linux-rasp-pi-g++{
-
         folder_01.source= qml/rpi
         folder_01.target= qml
 
@@ -298,12 +298,20 @@ linux-rasp-pi-g++{
         QML_IMPORT_PATH=imports
         INSTALLS+=target
 }
+        index.source=qml/Index.qml
+        index.target=$$DESTDIR
 
         folder_02.source=qml/skins
-        folder_04.source=qml/images
+        folder_02.target=$$DESTDIR
+
         folder_03.source=qml/splash
+        folder_03.target=$$DESTDIR
+
+        folder_04.source=qml/images
+        folder_04.target=$$DESTDIR
+
         #folder_01.target=qml
-        DEPLOYMENTFOLDERS +=folder_02 folder_04 folder_03
+        DEPLOYMENTFOLDERS +=index folder_02 folder_04 folder_03 plugins_folder
 
 # Additional import path used to resolve QML modules in Creator's code model
 

@@ -6,8 +6,8 @@ import QtMultimedia 5.0
   */
 Item {
     id:qml_index
-   height: appH
-   width: appW
+   height:manager.appHeight
+   width: manager.appWidth
     state:"preinit"
     Component.onCompleted: {
         console.log("Index Loaded")

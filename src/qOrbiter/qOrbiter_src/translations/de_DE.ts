@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="de_DE">
+<TS version="2.1" language="de_DE">
 <context>
     <name>AssignScreenShot</name>
     <message>
@@ -309,7 +309,7 @@
     <name>FileDetails5</name>
     <message>
         <source>Filename</source>
-        <translation>Dateinamen</translation>
+        <translation type="vanished">Dateinamen</translation>
     </message>
     <message>
         <source>Located on: </source>
@@ -654,12 +654,12 @@
         <translation type="unfinished">Optionen</translation>
     </message>
     <message>
-        <location filename="../qml/splash/OptionMenu.qml" line="41"/>
+        <location filename="../qml/splash/OptionMenu.qml" line="64"/>
         <source>Use Network Skins?</source>
         <translation type="unfinished">Verwenden Sie Netzwerk Skins ?</translation>
     </message>
     <message>
-        <location filename="../qml/splash/OptionMenu.qml" line="49"/>
+        <location filename="../qml/splash/OptionMenu.qml" line="74"/>
         <source>Language</source>
         <translation type="unfinished">Sprache</translation>
     </message>
@@ -1005,13 +1005,9 @@
     <message>
         <location filename="../qml/splash/+large/+ios/SplashView.qml" line="55"/>
         <location filename="../qml/splash/+small/SplashView.qml" line="53"/>
+        <location filename="../qml/splash/SplashView.qml" line="61"/>
         <source>Please Choose an orbiter</source>
         <translation type="unfinished">Bitte wählen Sie einen Orbiter</translation>
-    </message>
-    <message>
-        <location filename="../qml/splash/SplashView.qml" line="61"/>
-        <source>Please Choose an orbiter please</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

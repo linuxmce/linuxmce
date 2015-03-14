@@ -4,9 +4,14 @@ import "."
 Item {
    anchors.fill: parent
     id:splashPage
-
+    anchors.centerIn: parent
     signal setupStart(string x, string y)
     signal splashLoaded()
+
+
+    onWidthChanged: console.log( "SmallUI"+height)
+
+    Component.onCompleted: console.log("smalluiLoaded"+manager.appHeight)
 
     Connections{
         target: window
@@ -33,16 +38,16 @@ Item {
         }
         height:Style.appNavigation_panelHeight
 
-        Rectangle{
-            id:welcome_container
-            color:Style.appcolor_background
-            anchors.fill: parent
-            opacity: .15
-        }
+//        Rectangle{
+//            id:welcome_container
+//            color:Style.appcolor_background
+//            anchors.fill: parent
+//            opacity: .15
+//        }
 
         Text {
             id: welcome
-            text: qsTr(" Welcome to LinuxMCE")            
+            text: qsTr(" Welcome to LinuxMCE")
             font.pointSize: Style.appFontSize_title
             anchors.left:parent.left
             anchors.top: parent.top
@@ -50,18 +55,18 @@ Item {
         }
         Text {
             id: welcome_select
-            text: qsTr("Please Choose an orbiter")     
+            text: qsTr("Please Choose an orbiter")
             font.pointSize: Style.appFontSize_description
-            font.weight: Font.Light            
-           anchors{
-            left:parent.left
-            bottom:parent.bottom
-           }
+            font.weight: Font.Light
+            anchors{
+                left:parent.left
+                bottom:parent.bottom
+            }
             color:"white"
         }
         Text {
             id: ui_name
-            text: "SmallUI"          
+            text: "SmallUI"
             font.pointSize: Style.appFontSize_description
             font.weight: Font.Light
             anchors.right:optionIcon.left
@@ -80,37 +85,16 @@ Item {
         }
     }
 
-//    StatusRow {
-//        id: statusRow
-//    }
+    //    StatusRow {
+    //        id: statusRow
+    //    }
 
 
-    Connections{
-        target:window
-        onMessageChanged:loadingStatus.text = window.message
-        onStatusChanged: screenchange("SetupNewOrbiter.qml")
-    }
 
-    Rectangle {
-        width: parent.width
-        height: scaleY(20)
-        opacity: 1
-        color: "transparent"
-
-    }
     ConnectionBox {
         id: connectionBox
     }
 
-
-//    Text {
-//        id: loadingStatus
-//        text: "Status " + manager.commandResponse
-//        font.pointSize: Style.appFontSize_description
-//        color: "white"
-//        anchors.top: topContainer.bottom
-//        anchors.horizontalCenter: connectionBox.horizontalCenter
-//    }
 
     ExistingOrbiters {
         id:existing_orbiters
