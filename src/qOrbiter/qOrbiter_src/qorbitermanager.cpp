@@ -1761,7 +1761,7 @@ bool qorbiterManager::readLocalConfig(){
 
     QDir dir;
     dir.setPath(QDir::homePath());
-    qDebug() << dir.absolutePath()+"/Library/Application_Support/LinuxMCE/";
+    qDebug() << dir.absolutePath()+"/Library/Application_Support";
     xmlPath =dir.absolutePath()+"/Library/Application_Support/LinuxMCE/config.xml";
 
     setMobileStorage(dir.absolutePath()+"/Library/Application_Support/LinuxMCE");
@@ -2668,7 +2668,14 @@ void qorbiterManager::setupUiSelectors()
 #ifdef simulate
     qorbiterUIwin->setSource(QUrl("../qOrbiter_src/qml/splash/Splash.qml"));
 #else
+    #ifdef ANDROID
+    qorbiterUIwin->setSource(QUrl(QDir::homePath()+"splash/Splash.qml"));
+    #elif Q_OS_IOS
+    qorbiterUIwin->setSource(QUrl(QDir::homePath()+"/Library/Application_Support/splash/Splash.qml"));
+    #else
     qorbiterUIwin->setSource(QUrl("splash/Splash.qml"));
+    #endif
+
 #endif
 
 }

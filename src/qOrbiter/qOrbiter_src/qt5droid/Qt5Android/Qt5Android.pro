@@ -86,10 +86,12 @@ TRANSLATIONS += app_de.ts
         HEADERS += ../../plugins/AndroidInfo/androidsystem.h \
     ../../defineObjects/mediatypehelper.h \
     ../../RemoteCommands.h \
-    ../../defineObjects/datagrids.h
+    ../../defineObjects/datagrids.h \
+    ../../contextobjects/settinginterface.h
         SOURCES += ../../plugins/AndroidInfo/androidsystem.cpp \
     ../../defineObjects/mediatypehelper.cpp \
-    ../../defineObjects/datagrids.cpp
+    ../../defineObjects/datagrids.cpp \
+    ../../contextobjects/settinginterface.cpp
 
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH = imports
