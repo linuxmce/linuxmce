@@ -1802,11 +1802,14 @@ public slots:
         updateProfileSelector();
     }
 
+     Q_INVOKABLE void qmlReload(){delayedReloadQml();}
+
 private slots:
-    void delayedReloadQml() { QTimer *delayTimer= new QTimer(this); delayTimer->setInterval(100); delayTimer->setSingleShot(true); connect(delayTimer, SIGNAL(timeout()), this, SLOT(reloadQml())); delayTimer->start();}
+    void delayedReloadQml() { QTimer *delayTimer= new QTimer(this); delayTimer->setInterval(250); delayTimer->setSingleShot(true); connect(delayTimer, SIGNAL(timeout()), this, SLOT(reloadQml())); delayTimer->start();}
     void reloadQml(){  QString returnLocation=qorbiterUIwin->source().toString();
                #ifdef simulate
                 qorbiterUIwin->setSource(QUrl("../qOrbiter_src/qml/Index.qml"));
+                qorbiterUIwin->engine()->clearComponentCache();
                #else
                        qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
                #endif

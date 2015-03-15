@@ -24,6 +24,12 @@ Item {
     focus:true
 
     Keys.onTabPressed: manager.setDesiredOrientation(manager.isProfile ? Qt.LandscapeOrientation : Qt.PortraitOrientation)
+    Keys.onPressed: {
+        switch(event.key){
+        case Qt.Key_F5 : manager.qmlReload(); break;
+        default: break;
+        }
+    }
 
     Connections{
         target:manager

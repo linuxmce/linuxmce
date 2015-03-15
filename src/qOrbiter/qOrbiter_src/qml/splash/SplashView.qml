@@ -65,7 +65,7 @@ Item {
         }
         Text {
             id: ui_name
-            text: "DefaultUI"           
+            text: "DefaultUI"
             font.pointSize: Style.appFontSize_description
            // font.weight: Font.Light
             anchors.right: optionIcon.left

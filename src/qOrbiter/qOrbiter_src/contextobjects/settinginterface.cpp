@@ -33,7 +33,7 @@ void SettingInterface::initializeSettings()
         log(tr("Finished Initializing Network Settings"));
     }
 
-    if(!m_settings->childGroups()->contains("text")){
+    if(!m_settings->childGroups().contains("textoptions")){
         log(tr("Initializing text settings"));
         m_settings->beginGroup("textoptions");
         m_settings->setValue("sizemodifier", 0);
@@ -76,7 +76,7 @@ void SettingInterface::setOption(QString grp, QString key, QVariant opt)
     if(!m_settings){
         emit writeError(tr("No settings object to write to!"));
         return;
-    } else if(grp.contains("network") || grp.contains("media") || grp.contains("text")){
+    } else if(grp.contains("network") || grp.contains("media") || grp.contains("textoptions")){
         emit writeError(tr("Not Allowed to change default settings through this interface."));
         return;
     }
@@ -111,7 +111,7 @@ void SettingInterface::setTextOption(QString key, QVariant opt)
         return;
     }
 
-    m_settings->beginGroup("text");
+    m_settings->beginGroup("textoptions");
     if(!m_settings->contains(key)){
         emit writeError(tr("Invalid settings option"));
     } else {
@@ -156,7 +156,7 @@ QVariant SettingInterface::getCustomOption(QString grp, QString opt)
         emit writeError(tr("No settings object to read from!"));
         return QVariant(tr("Nada"));
     }
-if(!m_settings->childGroups()->contains(grp)){
+if(!m_settings->childGroups().contains(grp)){
     emit writeError(tr("Custom Setting doesnt exist!"));
     return QVariant(tr("Nada"));
 }
