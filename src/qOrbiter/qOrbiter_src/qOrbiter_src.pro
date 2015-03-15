@@ -481,7 +481,8 @@ SOURCES += main.cpp \
         defineObjects/linuxmcedata.cpp \
         defineObjects/mediatypehelper.cpp \
         defineObjects/datagrids.cpp \
-    contextobjects/screeninfo.cpp
+    contextobjects/screeninfo.cpp \
+    contextobjects/settinginterface.cpp
 
 
 # Please do not modify the following two lines. Required for deployment.
@@ -592,7 +593,8 @@ HEADERS += \
         defineObjects/mediatypehelper.h \
         RemoteCommands.h \
         defineObjects/datagrids.h \
-    contextobjects/screeninfo.h
+    contextobjects/screeninfo.h \
+    contextobjects/settinginterface.h
 
 
 

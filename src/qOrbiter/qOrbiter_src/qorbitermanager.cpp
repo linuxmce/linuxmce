@@ -2664,7 +2664,13 @@ void qorbiterManager::setupUiSelectors()
 #endif
 
     skinMessage("build type set to:: "+buildType);
+
+#ifdef simulate
+    qorbiterUIwin->setSource(QUrl("../qOrbiter_src/qml/splash/Splash.qml"));
+#else
     qorbiterUIwin->setSource(QUrl("splash/Splash.qml"));
+#endif
+
 }
 
 void qorbiterManager::reloadHandler()

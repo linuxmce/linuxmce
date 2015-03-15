@@ -1805,8 +1805,12 @@ public slots:
 private slots:
     void delayedReloadQml() { QTimer *delayTimer= new QTimer(this); delayTimer->setInterval(100); delayTimer->setSingleShot(true); connect(delayTimer, SIGNAL(timeout()), this, SLOT(reloadQml())); delayTimer->start();}
     void reloadQml(){  QString returnLocation=qorbiterUIwin->source().toString();
+               #ifdef simulate
+                qorbiterUIwin->setSource(QUrl("../qOrbiter_src/qml/Index.qml"));
+               #else
                        qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
-                                      qorbiterUIwin->setSource(QUrl(returnLocation));
+               #endif
+               qorbiterUIwin->setSource(QUrl(returnLocation));
                     }
     void handleScreenChanged(QScreen* screen);
     void resetScreenSize(){
