@@ -2669,7 +2669,7 @@ void qorbiterManager::setupUiSelectors()
     qorbiterUIwin->setSource(QUrl("../qOrbiter_src/qml/splash/Splash.qml"));
 #else
     #ifdef ANDROID
-    qorbiterUIwin->setSource(QUrl(QDir::homePath()+"splash/Splash.qml"));
+    qorbiterUIwin->setSource(QUrl("assets:/splash/Splash.qml"));
     #elif Q_OS_IOS
     qorbiterUIwin->setSource(QUrl(QDir::homePath()+"/Library/Application_Support/splash/Splash.qml"));
     #else

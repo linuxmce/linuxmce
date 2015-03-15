@@ -14,7 +14,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
 
-#This is the .pro file for the QOrbiter application using the Qt 5.1.0 beta 1 toolchain for Qt on android.
+#This is the .pro file for the QOrbiter application using the Qt 5.4.1  toolchain for Qt on android.
 #   This file is to be used when you are intending to build the application using Qt for android targeting
 #   Qt version 5.*.*
 
@@ -25,7 +25,7 @@ TARGET=qorbiterqt5
 
         DEFINES+=GLENABLED ANDROID QT5 QANDROID
         QT+= opengl script network xml core
-        QT+= quick qml multimedia androidextras
+        QT+= quick multimedia androidextras
         glmsg= yes
 
 
@@ -67,6 +67,9 @@ TRANSLATIONS += app_de.ts
         base.source = ../../qml/skins
         base.target = /
 
+        splash.source =../../qml/splash
+        splash.target =/
+
         #The Configuration file read on startup and used subsequently.
         #Scheduled for replacement using sqlite.
         folder_03.source = ../../config.xml
@@ -79,7 +82,7 @@ TRANSLATIONS += app_de.ts
         #The defines that the variables listed will be deployed with the application assets. Since
         #Qt 5.1.0 on Android uses a similar deployment scheme to Necessitas, the same qmake tricks
         #apply. Mostly
-        DEPLOYMENTFOLDERS = qmlcomponents base #folder_01
+        DEPLOYMENTFOLDERS = qmlcomponents base splash #folder_01
         QML_IMPORT_PATH = "androidComponents"
 
        # INSTALLS+= qmlplugins
