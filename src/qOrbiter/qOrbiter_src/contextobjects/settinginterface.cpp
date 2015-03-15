@@ -9,9 +9,11 @@ SettingInterface::SettingInterface(QObject *parent) :
 {
     /** Note that application name, org, and domain are set via QCoreApplication in main.cpp */
     m_settings = new QSettings(this);
+  m_settings->setFallbacksEnabled(false);
 
     if(m_settings){
         connect(this, SIGNAL(settingsDataCleared()), this,SLOT(initializeSettings()));
+
         initializeSettings();
     }
 
@@ -20,26 +22,28 @@ SettingInterface::SettingInterface(QObject *parent) :
 
 void SettingInterface::initializeSettings()
 {
-    if(!m_settings->contains("network")){
-        log(tr("Initializing newtwork Settings"));
+    if(!m_settings->childGroups().contains("network")){
+        log(tr("Initializing network Settings"));
         m_settings->beginGroup("network");
         m_settings->setValue("router","192.168.80.1");
         m_settings->setValue("hostname", "dcerouter.linuxmce");
         m_settings->setValue("externalhostname", "");
         m_settings->setValue("webaccess", "80");
         m_settings->endGroup();
-        log(tr("Network Settings Written"));
+        log(tr("Finished Initializing Network Settings"));
     }
 
-    if(!m_settings->contains("text")){
+    if(!m_settings->childGroups()->contains("text")){
         log(tr("Initializing text settings"));
         m_settings->beginGroup("textoptions");
         m_settings->setValue("sizemodifier", 0);
         m_settings->setValue("font", "");
+        m_settings->setValue("language", QLocale::system().name());
         m_settings->endGroup();
+        log(tr("Finished Initializing text settings"));
     }
 
-    if(!m_settings->contains("media")){
+    if(!m_settings->childGroups().contains("media")){
         log(tr("Initializing Media Settings"));
         m_settings->beginGroup("media");
         m_settings->setValue("audiosorting",AttributeTypeHelper::Performer  );
@@ -72,7 +76,7 @@ void SettingInterface::setOption(QString grp, QString key, QVariant opt)
     if(!m_settings){
         emit writeError(tr("No settings object to write to!"));
         return;
-    } else if(grp =="network" || grp=="media" || grp == "text"){
+    } else if(grp.contains("network") || grp.contains("media") || grp.contains("text")){
         emit writeError(tr("Not Allowed to change default settings through this interface."));
         return;
     }
@@ -152,7 +156,7 @@ QVariant SettingInterface::getCustomOption(QString grp, QString opt)
         emit writeError(tr("No settings object to read from!"));
         return QVariant(tr("Nada"));
     }
-if(!m_settings->contains(grp)){
+if(!m_settings->childGroups()->contains(grp)){
     emit writeError(tr("Custom Setting doesnt exist!"));
     return QVariant(tr("Nada"));
 }
