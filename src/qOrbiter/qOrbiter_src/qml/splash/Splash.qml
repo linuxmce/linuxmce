@@ -31,17 +31,6 @@ Item {
         }
     }
 
-    Connections{
-        target:manager
-        onAppWidthChanged:console.log("!!")
-        onOrientationChanged:console.log("EEP!")
-    }
-
-    onWidthChanged: {
-        console.log("Splash.qml width::"+width)
-
-    }
-
 
     function screenchange(screenname ){
         console.log(screenname)

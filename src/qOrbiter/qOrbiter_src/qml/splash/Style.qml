@@ -56,6 +56,6 @@ Item{
     readonly property int listViewWidth_medium:scaleX(20)
     readonly property int listViewWidth_small:scaleX(15)
     readonly property int listViewItemHeight:manager.isProfile ? scaleY(12) : scaleY(15)
-
+    readonly property int listViewMargin:manager.isProfile ? scaleX(5) : scaleX(2.5)
 
 }

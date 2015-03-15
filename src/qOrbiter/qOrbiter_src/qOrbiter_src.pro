@@ -600,7 +600,9 @@ HEADERS += \
 
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
-        config.xml
+        config.xml \
+    qml/splash/Switch.qml \
+    qml/splash/LanguageList.qml
 
 
 for_harmattan{
