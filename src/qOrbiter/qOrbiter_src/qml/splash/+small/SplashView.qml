@@ -1,17 +1,20 @@
 // import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 2.3
+import QtGraphicalEffects 1.0
 import "."
 Item {
    anchors.fill: parent
     id:splashPage
-    anchors.centerIn: parent
+
     signal setupStart(string x, string y)
     signal splashLoaded()
 
+    Component{
+        id:options
+        OptionMenu{
 
-    onWidthChanged: console.log( "SmallUI"+height)
-
-    Component.onCompleted: console.log("smalluiLoaded"+manager.appHeight)
+        }
+    }
 
     Connections{
         target: window
@@ -36,58 +39,59 @@ Item {
             left:parent.left
             right:parent.right
         }
-        height:Style.appNavigation_panelHeight
+        height:parent.height *.08
 
-//        Rectangle{
-//            id:welcome_container
-//            color:Style.appcolor_background
-//            anchors.fill: parent
-//            opacity: .15
-//        }
+        Rectangle{
+            id:welcome_container
+            color:Style.appcolor_background
+            anchors.fill: parent
+            opacity: .15
+        }
 
         Text {
             id: welcome
             text: qsTr(" Welcome to LinuxMCE")
-            font.pointSize: Style.appFontSize_title
+            font.pointSize: Style.appFontSize_header
             anchors.left:parent.left
-            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
             color:"white"
         }
         Text {
             id: welcome_select
             text: qsTr("Please Choose an orbiter")
             font.pointSize: Style.appFontSize_description
-            font.weight: Font.Light
-            anchors{
-                left:parent.left
-                bottom:parent.bottom
-            }
+            anchors.left: welcome.right
             color:"white"
         }
         Text {
             id: ui_name
-            text: "SmallUI"
+            text: "smallUI"
             font.pointSize: Style.appFontSize_description
-            font.weight: Font.Light
-            anchors.right:optionIcon.left
-            anchors.verticalCenter: parent.verticalCenter
+           // font.weight: Font.Light
+            anchors.right: optionIcon.left
+            anchors.verticalCenter: optionIcon.verticalCenter
             color:"white"
         }
         Image{
             id:optionIcon
             source:"images/options.png"
-            height: parent.height /2
-            fillMode: Image.PreserveAspectFit
+            visible: true
             anchors{
                 right:parent.right
                 verticalCenter: parent.verticalCenter
             }
+            MouseArea{
+                anchors.fill: parent
+                onClicked:{options.createObject(splashPage) }
+            }
         }
+
     }
 
-    //    StatusRow {
-    //        id: statusRow
-    //    }
+//    StatusRow {
+//        id: statusRow
+//    }
+
 
 
 
@@ -96,14 +100,13 @@ Item {
     }
 
 
+
     ExistingOrbiters {
         id:existing_orbiters
-
     }
 
     NewOrbiterButton {
         id:newOrbiterButton
-        width:parent.width *.85
     }
 
 }

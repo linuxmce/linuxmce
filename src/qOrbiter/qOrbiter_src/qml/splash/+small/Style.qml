@@ -44,15 +44,15 @@ Item{
 
 
     /* Application Navigation bars */
-    readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(13) : scaleY(15)
-    readonly property string appNavigation_panelHeight:manager.isProfile ? scaleY(9) : scaleY(16)
+    readonly property int appbutton_navigationButtonHeight:manager.isProfile ? scaleY(13) : scaleY(15)
+    readonly property int appNavigation_panelHeight:manager.isProfile ? scaleY(9) : scaleY(16)
 
     /* Application Menu Panels */
     readonly property int appPanelHeight:manager.isProfile ? scaleY(12) :scaleY(14)
-    readonly property string appMenuPanel_height:manager.isProfile ? scaleY(12) :scaleY(14)
-    readonly property string appMenuPanel_widthSmall:scaleX(15)
-    readonly property string appMenuPanel_widthMedium:scaleX(45)
-    readonly property string appMenuPanel_widthLarge:scaleX(85)
+    readonly property int appMenuPanel_height:manager.isProfile ? scaleY(12) :scaleY(14)
+    readonly property int appMenuPanel_widthSmall:scaleX(15)
+    readonly property int appMenuPanel_widthMedium:scaleX(45)
+    readonly property int appMenuPanel_widthLarge:scaleX(85)
 
     /* Application list views */
     readonly property int listViewWidth_large:scaleX(45)

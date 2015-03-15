@@ -72,7 +72,7 @@ Item{
             Text {
                 id: dev_num
                 text: device
-                font.pointSize: Style.appFontSize_list
+                font.pointSize: scaleY(Style.appFontSize_list)
                 font.weight: Font.Light
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 color:"white"
@@ -99,7 +99,7 @@ Item{
                 Text {
                     id: orbiter_label
                     text: qsTr("Orbiter: ")+ label
-                    font.pointSize: Style.appFontSize_list
+                    font.pointSize:scaleY(Style.appFontSize_list)
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     anchors.horizontalCenter: parent.horizontalCenter
                     color: "white"
@@ -107,7 +107,7 @@ Item{
                 Text {
                     id: loc
                     text:qsTr("Location:")+ location
-                    font.pointSize: Style.appFontSize_list
+                    font.pointSize:scaleY(Style.appFontSize_list)
                     font.weight: Font.Light
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     color:"white"

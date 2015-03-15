@@ -46,10 +46,10 @@ Item{
     readonly property string appNavigation_panelHeight:manager.isProfile ? scaleY(9) : scaleY(16)
 
     /* Application Menu Panels */
-    readonly property string appMenuPanel_height:scaleY(90)
-    readonly property string appMenuPanel_widthSmall:scaleX(25)
-    readonly property string appMenuPanel_widthMedium:scaleX(45)
-    readonly property string appMenuPanel_widthLarge:scaleX(85)
+    readonly property int appMenuPanel_height:scaleY(90)
+    readonly property int appMenuPanel_widthSmall:scaleX(25)
+    readonly property int appMenuPanel_widthMedium:scaleX(45)
+    readonly property int appMenuPanel_widthLarge:scaleX(85)
 
     /* Application List Views */
     readonly property int listViewWidth_large:scaleX(55)

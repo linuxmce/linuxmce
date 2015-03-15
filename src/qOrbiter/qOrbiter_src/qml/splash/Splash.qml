@@ -5,7 +5,15 @@ import QtQuick 2.3
 import "."
 Item {
     id: splashLogic
-   anchors.fill: parent
+    anchors.fill: parent
+    function scaleX(w){
+        return w/100*manager.appWidth
+    }
+
+    function scaleY(y){
+        return y/100*manager.appHeight
+    }
+
     Component.onCompleted: {
         console.log("Splash is loaded")
         splashLogic.state="connecting"
@@ -28,12 +36,6 @@ Item {
 
     }
 
-    function scaleX(x){
-        return x/100*manager.appWidth
-    }
-    function scaleY(y){
-        return y/100*manager.appHeight
-    }
 
     function screenchange(screenname ){
         console.log(screenname)
@@ -81,7 +83,7 @@ Item {
     FontLoader{
         id:myFont
         name:"Sawasdee"
-      //  source: "../../skins-common/fonts/Sawasdee.ttf"
+        //  source: "../../skins-common/fonts/Sawasdee.ttf"
     }
 
     states: [

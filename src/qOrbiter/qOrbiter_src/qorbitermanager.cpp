@@ -103,8 +103,12 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,  QObject 
     m_selector=new QFileSelector(this);
     selector->setSelector(m_selector);
     m_screenInfo = new ScreenInfo();
+
     connect(m_screenInfo, SIGNAL(screenSizeChanged()), this, SLOT(resetScreenSize()));
     connect(qorbiterUIwin, SIGNAL(screenChanged(QScreen*)), this , SLOT(handleScreenChanged(QScreen*)));
+    connect(qorbiterUIwin, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
+    connect(qorbiterUIwin, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
+
     resetScreenSize();
     qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);   
 
