@@ -68,7 +68,7 @@
 #include <QKeyEvent>
 #include <QProcess>
 #include <QtXml/QDomDocument>
-#include <QSettings>
+
 
 #ifdef ANDROID
 #include "plugins/AndroidInfo/androidsystem.h"
@@ -1863,7 +1863,7 @@ private:
     int m_testScreenSize;
 
     QTranslator translator;
-    QSettings m_appSettings;
+
 
 };
 

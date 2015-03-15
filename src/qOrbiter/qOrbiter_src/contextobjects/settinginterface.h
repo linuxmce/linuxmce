@@ -13,9 +13,15 @@ public:
 signals:
     void newLogMessage(QString msg);
     void settingsDataCleared();
+    void writeError(QString error);
 
 public slots:
     void log(QString message);
+    void setOption(QString grp, QString key, QVariant opt);
+    void setNetworkOption(QString key, QVariant opt);
+    void setTextOption(QString key, QVariant opt);
+    void setMediaOption(QString key, QVariant opt);
+
 
 
 private slots:

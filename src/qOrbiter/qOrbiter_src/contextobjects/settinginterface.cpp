@@ -66,3 +66,68 @@ void SettingInterface::log(QString message)
     emit newLogMessage(logMsg);
     qDebug() << logMsg;
 }
+
+void SettingInterface::setOption(QString grp, QString key, QVariant opt)
+{
+    if(!m_settings){
+        emit writeError(tr("No settings object to write to!"));
+        return;
+    } else if(grp =="network" || grp=="media" || grp == "text"){
+        emit writeError(tr("Not Allowed to change default settings through this interface."));
+        return;
+    }
+
+   m_settings->beginGroup(grp);
+   m_settings->setValue(key, opt);
+   m_settings->endGroup();
+
+}
+
+void SettingInterface::setNetworkOption(QString key, QVariant opt)
+{
+    if(!m_settings){
+        emit writeError(tr("No settings object to write to!"));
+        return;
+    }
+
+    m_settings->beginGroup("network");
+    if(!m_settings->contains(key)){
+        emit writeError(tr("Invalid settings option"));
+    } else {
+        m_settings->setValue(key, opt);
+    }
+    m_settings->endGroup();
+
+}
+
+void SettingInterface::setTextOption(QString key, QVariant opt)
+{
+    if(!m_settings){
+        emit writeError(tr("No settings object to write to!"));
+        return;
+    }
+
+    m_settings->beginGroup("text");
+    if(!m_settings->contains(key)){
+        emit writeError(tr("Invalid settings option"));
+    } else {
+        m_settings->setValue(key, opt);
+    }
+    m_settings->endGroup();
+}
+
+void SettingInterface::setMediaOption(QString key, QVariant opt)
+{
+    if(!m_settings){
+        emit writeError(tr("No settings object to write to!"));
+        return;
+    }
+
+    m_settings->beginGroup("media");
+    if(!m_settings->contains(key)){
+        emit writeError(tr("Invalid settings option"));
+    } else {
+        m_settings->setValue(key, opt);
+    }
+    m_settings->endGroup();
+}
