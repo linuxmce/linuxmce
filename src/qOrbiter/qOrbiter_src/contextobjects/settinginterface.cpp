@@ -131,3 +131,33 @@ void SettingInterface::setMediaOption(QString key, QVariant opt)
     }
     m_settings->endGroup();
 }
+
+
+QVariant SettingInterface::getDefaultOption(QString grp, QString opt)
+{
+    if(!m_settings){
+        emit writeError(tr("No settings object to read from!"));
+        return QVariant(tr("Nada"));
+    }
+
+    m_settings->beginGroup(grp);
+    if(m_settings->contains(opt)){
+        return m_settings->value(opt);
+    }
+}
+
+QVariant SettingInterface::getCustomOption(QString grp, QString opt)
+{
+    if(!m_settings){
+        emit writeError(tr("No settings object to read from!"));
+        return QVariant(tr("Nada"));
+    }
+if(!m_settings->contains(grp)){
+    emit writeError(tr("Custom Setting doesnt exist!"));
+    return QVariant(tr("Nada"));
+}
+    m_settings->beginGroup(grp);
+    if(m_settings->contains(opt)){
+        return m_settings->value(opt);
+    }
+}
