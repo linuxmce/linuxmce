@@ -1,5 +1,6 @@
 // import QtQuick 2.0 // to target S60 5th Edition or Maemo 5
 import QtQuick 2.3
+import QtGraphicalEffects 1.0
 import "."
 Item {
    anchors.fill: parent
@@ -7,6 +8,13 @@ Item {
 
     signal setupStart(string x, string y)
     signal splashLoaded()
+
+    Component{
+        id:options
+        OptionMenu{
+
+        }
+    }
 
     Connections{
         target: window
@@ -43,9 +51,7 @@ Item {
         Text {
             id: welcome
             text: qsTr(" Welcome to LinuxMCE")
-            //font.family: myFont.name
             font.pointSize: Style.appFontSize_header
-
             anchors.left:parent.left
             anchors.horizontalCenter: parent.horizontalCenter
             color:"white"
@@ -53,27 +59,38 @@ Item {
         Text {
             id: welcome_select
             text: qsTr("Please Choose an orbiter")
-            //font.family: myFont.name
             font.pointSize: Style.appFontSize_description
-            font.weight: Font.Light
-            anchors.left:welcome.right
+            anchors.left: welcome.right
             color:"white"
         }
         Text {
             id: ui_name
-            text: "iOSUI"
-            //font.family: myFont.name
+            text: "ipadUI"
             font.pointSize: Style.appFontSize_description
-            font.weight: Font.Light
-            anchors.left:parent.right
+           // font.weight: Font.Light
+            anchors.right: optionIcon.left
+            anchors.verticalCenter: optionIcon.verticalCenter
             color:"white"
         }
+        Image{
+            id:optionIcon
+            source:"images/options.png"
+            visible: true
+            anchors{
+                right:parent.right
+                verticalCenter: parent.verticalCenter
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked:{options.createObject(splashPage) }
+            }
+        }
+
     }
 
 //    StatusRow {
 //        id: statusRow
 //    }
-
 
 
 
@@ -90,15 +107,12 @@ Item {
 
 
 
-
     ExistingOrbiters {
         id:existing_orbiters
-
     }
 
     NewOrbiterButton {
         id:newOrbiterButton
-        width:parent.width *.85
     }
 
 }

@@ -1485,6 +1485,21 @@
 					);
 			};
 		};
+		9F8DBD9BB6C4BAD0A993DF52 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/settinginterface.cpp";
+			name = "settinginterface.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		70C9EC6E001F531CC1CCCF4D = {
+			fileRef = "9F8DBD9BB6C4BAD0A993DF52";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
 		52735B11C3413A01A81FF30F = {
 			isa = PBXFileReference;
 			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/qorbiterios_qml_plugin_import.cpp";
@@ -2579,6 +2594,21 @@
 					);
 			};
 		};
+		A3DA08C9FF4871D02B11ABBA = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_settinginterface.cpp";
+			name = "moc_settinginterface.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		D9A211DF22020CBD31030438 = {
+			fileRef = "A3DA08C9FF4871D02B11ABBA";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
 		31E541C4FEB79B354FCEF3D8 = {
 			isa = PBXFileReference;
 			path = "/Users/Langstonius/linuxmce/PlutoUtils/ThreadedClass.h";
@@ -3251,6 +3281,13 @@
 			sourceTree = "<absolute>";
 			lastKnownFileType = "sourcecode.c.h";
 		};
+		460607F6CD1F65AA3D03B397 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/contextobjects/settinginterface.h";
+			name = "settinginterface.h";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.c.h";
+		};
 		6E4BA2902CCB87D39E8BCD00 = {
 			isa = PBXFileReference;
 			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/qOrbiterIos.pro";
@@ -3364,7 +3401,8 @@
 				"48A9B0D4EC7121346639077D",
 				"D145CC4172AA25908D0AFE8C",
 				"B2A0C4C6CD8D4117E310F9A6",
-				"21BBA67C57279545EB85AF8C");
+				"21BBA67C57279545EB85AF8C",
+				"A3DA08C9FF4871D02B11ABBA");
 			name = "Generated Sources";
 			sourceTree = "<Group>";
 		};
@@ -3476,6 +3514,7 @@
 				"A9121375E27F2A9BFFBB8312",
 				"B12A337C805F48D5644BF62B",
 				"6C32646F41AEFB5F917DE2C3",
+				"9F8DBD9BB6C4BAD0A993DF52",
 				"52735B11C3413A01A81FF30F",
 				"52CCD37585E9C719F86FC310",
 				"BFE5525268264058F2023B77",
@@ -3574,7 +3613,8 @@
 				"DBF7579BAA5040056E10F24C",
 				"44B670CB4484A810F4FB83D7",
 				"E7887828EA3F74D37340678B",
-				"C39D924CEC7982E2DEBA4618");
+				"C39D924CEC7982E2DEBA4618",
+				"460607F6CD1F65AA3D03B397");
 			name = "Sources";
 			sourceTree = "<Group>";
 		};
@@ -3699,6 +3739,7 @@
 				"AEF03831EA3C1CCE26C7F56B",
 				"86753781D027C130C29DE5A0",
 				"AE57E7D5F191ED81913A360C",
+				"70C9EC6E001F531CC1CCCF4D",
 				"596A5FD5B2669DEBBDF53D63",
 				"B44D0E3ACBC1AB32692864CC",
 				"EED63EDCB63AFBFC0D899A85",
@@ -3770,7 +3811,8 @@
 				"BB6FE3C375B31483CC0CF12E",
 				"A4E9F0CA8F4EEE376F1B223C",
 				"25D9EA38C4763FEEF4E83044",
-				"0E421388EEFD809BB4B16B16");
+				"0E421388EEFD809BB4B16B16",
+				"D9A211DF22020CBD31030438");
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
 			name = "Compile Sources";

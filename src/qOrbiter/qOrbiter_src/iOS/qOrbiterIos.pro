@@ -37,15 +37,26 @@ TRANSLATIONS += app_de.ts
                 QT+= qml quick script widgets xml network multimedia
 
                 folder_01.source = ImportedItems.qml
-                folder_01.target = $$DESTDIR/qml/
+                folder_01.path =/
+
+                splash.files=../qml/splash/
+                splash.path=/
+
+                skins.files=../qml/skins
+                skins.path=/
+
+                #QMAKE_BUNDLE_DATA+=ICON
+                QMAKE_BUNDLE_DATA+= skins splash
+
                 DEFINES += GLENABLED QT5
                 glmsg=yes
                 ICON = ../../platforms/ios/assets/icons/*.png
-                QMAKE_BUNDLE_DATA+=ICON
+
                 QMAKE_CXXFLAGS+=-Wno-c++11-narrowing -DUSE_LZO_DATAGRID            
                 CONFIG +=warn_off
                 QMAKE_INFO_PLIST = QOrbiter.plist
-                DEPLOYMENTFOLDERS+=folder_01
+                INSTALLS+= skins splash
+                DEPLOYMENTFOLDERS+=folder_01 skins splash
                 #APP_RESOURCES_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/resources
                 QML_IMPORT_PATH=imports #../../../$$DESTDIR/$$TARGET".app"/Contents/MacOS/imports
 
@@ -180,7 +191,8 @@ SOURCES += ../main.cpp \
         ../datamodels/listitembase.cpp \
         ../defineObjects/linuxmcedata.cpp \
         ../defineObjects/mediatypehelper.cpp \
-        ../defineObjects/datagrids.cpp
+        ../defineObjects/datagrids.cpp \
+    ../contextobjects/settinginterface.cpp
 
 HEADERS += \
         ../../../PlutoUtils/ThreadedClass.h \
@@ -279,18 +291,19 @@ HEADERS += \
         ../RemoteCommands.h \
         ../defineObjects/datagrids.h \
         ../../datamodels/DataGridHandler.h \
+    ../contextobjects/settinginterface.h
 
 
 
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
-    ../qml/IosWelcome.qml \
     QOrbiter.plist
 
 
 RESOURCES += \
         ../skinData.qrc
+
 
 include(deployment.pri)
 

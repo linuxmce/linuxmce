@@ -5,7 +5,7 @@ Item{
     id:om_root
     anchors.fill: parent
     property string title:qsTr("Options")
-   Component.onCompleted: state="switch"
+    Component.onCompleted: state="switch"
     ListModel{
         id:languages
         ListElement{

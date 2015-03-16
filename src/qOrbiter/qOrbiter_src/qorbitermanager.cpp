@@ -32,6 +32,7 @@
 #include <QtScriptTools/QtScriptTools>
 #include <QQmlFileSelector>
 #include <QTranslator>
+#include <QStandardPaths>
 #else
 #include <QtDeclarative/QDeclarativeProperty>
 #include <QFile>
@@ -2670,8 +2671,10 @@ void qorbiterManager::setupUiSelectors()
 #else
     #ifdef ANDROID
     qorbiterUIwin->setSource(QUrl("assets:/splash/Splash.qml"));
-    #elif Q_OS_IOS
-    qorbiterUIwin->setSource(QUrl(QDir::homePath()+"/Library/Application_Support/splash/Splash.qml"));
+    #elif defined(Q_OS_IOS)
+    QDir tDir(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
+    qDebug() << "!!!!!!!!!!!!!!!\n"<< tDir.entryList();
+    qorbiterUIwin->setSource(QUrl(tDir.path()+"/splash/Splash.qml"));
     #else
     qorbiterUIwin->setSource(QUrl("splash/Splash.qml"));
     #endif
