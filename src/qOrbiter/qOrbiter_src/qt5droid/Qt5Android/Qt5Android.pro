@@ -64,11 +64,9 @@ TRANSLATIONS += app_de.ts
         #This is the only locally deployed qml file. Its purpose is to provide initial logic for connecting to the core,
         #and error handling, etc. It is not designer editable and should be considered as and .h / .cpp file when changing
         #and the implications of such.
-        base.source = ../../qml/skins
+        base.source = ../../qml/Index.qml
         base.target = /
 
-        splash.source =../../qml/splash
-        splash.target =/
 
         #The Configuration file read on startup and used subsequently.
         #Scheduled for replacement using sqlite.
@@ -82,7 +80,7 @@ TRANSLATIONS += app_de.ts
         #The defines that the variables listed will be deployed with the application assets. Since
         #Qt 5.1.0 on Android uses a similar deployment scheme to Necessitas, the same qmake tricks
         #apply. Mostly
-        DEPLOYMENTFOLDERS = qmlcomponents base splash #folder_01
+        DEPLOYMENTFOLDERS = qmlcomponents base #folder_01
         QML_IMPORT_PATH = "androidComponents"
 
        # INSTALLS+= qmlplugins
@@ -340,7 +338,8 @@ HEADERS += \
 ../../datamodels/DataGridHandler.h
 
 RESOURCES += \
-        ../../skinData.qrc
+        ../../skinData.qrc \
+        ../../qmlFile.qrc
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/../../../platforms/Android/qt5-pkg-src
 message ($$ANDROID_PACKAGE_SOURCE_DIR)

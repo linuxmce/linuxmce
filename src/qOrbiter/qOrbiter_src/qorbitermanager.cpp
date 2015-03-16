@@ -85,9 +85,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,  QObject 
     appWidth(view->width())
 {
 #ifdef __ANDROID__
- int testSize=-1;
+    int testSize=-1;
 #endif
-     m_testScreenSize =testSize;
+    m_testScreenSize =testSize;
 
     QString mlocale = QLocale::system().name().append(".qm");
     qDebug() << "Local set to "<< mlocale;
@@ -109,9 +109,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,  QObject 
     connect(qorbiterUIwin, SIGNAL(screenChanged(QScreen*)), this , SLOT(handleScreenChanged(QScreen*)));
     connect(qorbiterUIwin, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
     connect(qorbiterUIwin, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
-
     resetScreenSize();
-    qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);   
+    qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);
 
 #endif
 
@@ -152,8 +151,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,  QObject 
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
     gotoScreenList = new QStringList();
-   // ScreenSaver = new ScreenSaverClass(this);
-   // qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
+    // ScreenSaver = new ScreenSaverClass(this);
+    // qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
     // Prepares models in this qt thread so owner thread is not QML as they would have been if they were created later
     prepareModelPool(5);
 
@@ -172,7 +171,6 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,  QObject 
     //    QObject::connect(&mediaFilter, SIGNAL(lastViewedChanged(QString)), this, SLOT(setGridLastViewed(QString)));
 
     emit orbiterInitialized();
-
 }
 
 qorbiterManager::~qorbiterManager(){
@@ -394,7 +392,7 @@ void qorbiterManager::initiateRestart(){
 void qorbiterManager::refreshUI(QUrl url){
 
 #if (QT5)
-   // qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
+    // qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
 #else
     qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
@@ -1977,8 +1975,8 @@ bool qorbiterManager::writeConfig()
     //   setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
     QDomDocument localConfig;
 #ifdef Q_OS_IOS
-   QString xmlPath = mobileStorageLocation+"/config.xml";
-   appConfigPath = xmlPath;
+    QString xmlPath = mobileStorageLocation+"/config.xml";
+    appConfigPath = xmlPath;
 #elif Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif __ANDROID__
@@ -2368,7 +2366,7 @@ void qorbiterManager::startOrbiter()
 
 #if (QT5)
         qorbiterUIwin->setTitle("LinuxMCE Orbiter "+ QString::number(iPK_Device));
-       // qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
+        // qorbiterUIwin->setResizeMode(QQuickView::SizeRootObjectToView);
 #else
         qorbiterUIwin->setWindowTitle("LinuxMCE Orbiter " + QString::number(iPK_Device));
         qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
@@ -2461,7 +2459,7 @@ void qorbiterManager::setupEarlyContexts()
     qorbiterUIwin->rootContext()->setContextProperty("deviceCommands", deviceCommands);
     //Resize to view as opposed to the root item
 #if QT_VERSION >= QT_VERSION_CHECK(5,2,0)
-   // qorbiterUIwin->setResizeMode(QQuickView::SizeViewToRootObject);
+    // qorbiterUIwin->setResizeMode(QQuickView::SizeViewToRootObject);
     m_screenInfo = new ScreenInfo();
     qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);
 #else
@@ -2487,8 +2485,7 @@ void qorbiterManager::setupEarlyContexts()
     QObject::connect(qorbiterUIwin->engine(), SIGNAL(quit()), this, SLOT(closeOrbiter()));
 }
 
-void qorbiterManager::setupUiSelectors()
-{
+void qorbiterManager::setupUiSelectors(){
     /*!
      * \todo move buildtype / qrc path code to its own function and return it here
      */
@@ -2669,15 +2666,11 @@ void qorbiterManager::setupUiSelectors()
 #ifdef simulate
     qorbiterUIwin->setSource(QUrl("../qOrbiter_src/qml/splash/Splash.qml"));
 #else
-    #ifdef ANDROID
-    qorbiterUIwin->setSource(QUrl("assets:/splash/Splash.qml"));
-    #elif defined(Q_OS_IOS)
-    QDir tDir(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
-    qDebug() << "!!!!!!!!!!!!!!!\n"<< tDir.entryList();
-    qorbiterUIwin->setSource(QUrl(tDir.path()+"/splash/Splash.qml"));
-    #else
+#ifdef ANDROID
+    qorbiterUIwin->setSource(QUrl("qrc:/qml/splash/Splash.qml"));
+#else
     qorbiterUIwin->setSource(QUrl("splash/Splash.qml"));
-    #endif
+#endif
 
 #endif
 
@@ -2916,8 +2909,8 @@ bool qorbiterManager::setupMobileStorage(QString externalStorage)
 
     return false;
 #elif defined(Q_OS_IOS)
- setMobileStorage(externalStorage);
- return true;
+    setMobileStorage(externalStorage);
+    return true;
 
 #endif
 
@@ -2934,6 +2927,7 @@ void qorbiterManager::makeCall(int iPK_Users,string sPhoneExtension,string sPK_D
 
 void qorbiterManager::handleScreenChanged(QScreen *screen)
 {
+    resetScreenSize();
     qDebug() << Q_FUNC_INFO << screen->name() << " changed";
-    checkOrientation(screen->orientation());
+
 }

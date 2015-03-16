@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.3
 Item{
     id: connectionBox
     anchors.verticalCenter: parent.verticalCenter
@@ -6,7 +6,6 @@ Item{
     anchors.verticalCenterOffset:10
     width: scaleX(65)
     height: scaleY(20)
-
     Rectangle {
         anchors.fill: connectionBox
         radius: 7

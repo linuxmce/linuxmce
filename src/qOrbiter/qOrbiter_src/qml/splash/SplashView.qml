@@ -65,7 +65,7 @@ Item {
         }
         Text {
             id: ui_name
-            text: "DefaultUI"
+            text: "defaultUI"
             font.pointSize: Style.appFontSize_description
            // font.weight: Font.Light
             anchors.right: optionIcon.left
@@ -84,6 +84,10 @@ Item {
                 anchors.fill: parent
                 onClicked:{options.createObject(splashPage) }
             }
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: manager.qmlReload()
         }
 
     }

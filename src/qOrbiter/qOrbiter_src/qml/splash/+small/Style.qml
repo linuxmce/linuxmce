@@ -3,6 +3,7 @@ pragma Singleton
 //this is a qml singleton example to use the style object as a singleton, thus allowing one to override the style based on the selectors
 Item{
     id:applicationStyle
+    property string description:"Small UI Style Definition for small devices."
 
     function scaleX(w){
          return w/100*manager.appWidth
@@ -19,7 +20,7 @@ Item{
 
     /*Application colors */
     readonly property color appcolor_background:"#0088ff"
-    readonly property color appcolor_background_light:"#80c4ff"
+    readonly property color appcolor_background_light: "#80c4ff"
     readonly property color appcolor_background_medium:"#43acff"
     readonly property color appcolor_background_list:"#222222"
     readonly property color appcolor_foregroundColor:"darkgreen"
@@ -37,10 +38,10 @@ Item{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:manager.isProfile ? scaleY(1.5) : scaleY(2)
-    readonly property int appFontSize_header:manager.isProfile ? scaleY(4) : scaleY(4.5)
-    readonly property int appFontSize_description:manager.isProfile ? scaleY(2) : scaleY(2.5)
-    readonly property int appFontSize_title:manager.isProfile ? scaleY(2.5) : scaleY(3)
+    readonly property int appFontSize_list:manager.isProfile ? scaleY(2.0) : scaleY(2.5)
+    readonly property int appFontSize_header:manager.isProfile ? scaleY(2.0) : scaleY(2.0)
+    readonly property int appFontSize_description:manager.isProfile ? scaleY(1.5) : scaleY(2.0)
+    readonly property int appFontSize_title:manager.isProfile ? scaleY(2.0) : scaleY(2.0)
 
 
     /* Application Navigation bars */
@@ -49,7 +50,7 @@ Item{
 
     /* Application Menu Panels */
     readonly property int appPanelHeight:manager.isProfile ? scaleY(12) :scaleY(14)
-    readonly property int appMenuPanel_height:manager.isProfile ? scaleY(12) :scaleY(14)
+    readonly property int appMenuPanel_height:scaleY(90)
     readonly property int appMenuPanel_widthSmall:scaleX(15)
     readonly property int appMenuPanel_widthMedium:scaleX(45)
     readonly property int appMenuPanel_widthLarge:scaleX(85)
@@ -58,5 +59,6 @@ Item{
     readonly property int listViewWidth_large:scaleX(45)
     readonly property int listViewWidth_medium:scaleX(20)
     readonly property int listViewWidth_small:scaleX(15)
-    readonly property int listViewItemHeight:manager.isProfile ? scaleY(12) : scaleY(15)
+    readonly property int listViewItemHeight:manager.isProfile ? scaleY(10) : scaleY(12)
+    readonly property int listViewMargin:manager.isProfile ? scaleX(5) : scaleX(1.5)
 }

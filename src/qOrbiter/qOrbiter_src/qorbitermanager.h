@@ -1722,6 +1722,11 @@ public slots:
     }
 
     void updateProfileSelector(){
+
+#ifndef simulate
+        m_testScreenSize = -1;
+        resetScreenSize();
+#else
         int tH = qorbiterUIwin->height();
         int tW = qorbiterUIwin->width() ;
         double diag= (((sqrt( pow( (double)tH,2.0)+pow((double)tW, 2.0) )) *0.0393701) / m_screenInfo->primaryScreen()->physicalDpi()) *10;
@@ -1765,7 +1770,7 @@ public slots:
             checkOrientation(qorbiterUIwin->size());
         }
 
-
+#endif
     }
 
     Q_INVOKABLE void setDesiredOrientation(Qt::ScreenOrientation o){
@@ -1796,51 +1801,50 @@ public slots:
         appHeight = qorbiterUIwin->height();
         appWidth= qorbiterUIwin->width();
         emit orientationChanged();
-
         qorbiterUIwin->engine()->clearComponentCache();
-
         updateProfileSelector();
     }
 
-     Q_INVOKABLE void qmlReload(){delayedReloadQml();}
+    Q_INVOKABLE void qmlReload(){delayedReloadQml();}
 
 private slots:
-    void delayedReloadQml() { QTimer *delayTimer= new QTimer(this); delayTimer->setInterval(250); delayTimer->setSingleShot(true); connect(delayTimer, SIGNAL(timeout()), this, SLOT(reloadQml())); delayTimer->start();}
+    void delayedReloadQml() { QTimer *delayTimer= new QTimer(this); delayTimer->setInterval(500); delayTimer->setSingleShot(true); connect(delayTimer, SIGNAL(timeout()), this, SLOT(reloadQml())); delayTimer->start();}
     void reloadQml(){  QString returnLocation=qorbiterUIwin->source().toString();
                #ifdef simulate
-                qorbiterUIwin->setSource(QUrl("../qOrbiter_src/qml/Index.qml"));
-                qorbiterUIwin->engine()->clearComponentCache();
+                       qorbiterUIwin->setSource(QUrl("../qOrbiter_src/qml/Index.qml"));
+                                      qorbiterUIwin->engine()->clearComponentCache();
                #else
                        qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
                #endif
-               qorbiterUIwin->setSource(QUrl(returnLocation));
+                                      qorbiterUIwin->setSource(QUrl(returnLocation));
                     }
     void handleScreenChanged(QScreen* screen);
     void resetScreenSize(){
+
         QString psize = m_screenInfo->primaryScreen()->pixelDensityString();
         QStringList t;
+       // m_testScreenSize = m_screenInfo->primaryScreen()->deviceSize();
 
         if(m_testScreenSize==-1){
+            qDebug () << Q_FUNC_INFO << "Using device information ";
             t <<  m_screenInfo->primaryScreen()->deviceSizeString() << psize  << m_screenInfo->primaryScreen()->resolutionString();
             m_deviceSize = m_screenInfo->primaryScreen()->deviceSize();
         } else {
             qDebug() << Q_FUNC_INFO << "Using test screen size";
             QString testDeviceString;
             switch(m_testScreenSize){
-            case ScreenData::Device_Small: testDeviceString="small";break;
-            case ScreenData::Device_Medium: testDeviceString="medium";break;
-            case ScreenData::Device_Large: testDeviceString="large"; break;
-            case ScreenData::Device_XLarge:testDeviceString="xlarge";break;
+            case ScreenData::Device_Small: testDeviceString="small";m_deviceSize = ScreenData::Device_Small;break;
+            case ScreenData::Device_Medium: testDeviceString="medium";m_deviceSize = ScreenData::Device_Medium;break;
+            case ScreenData::Device_Large: testDeviceString="large";m_deviceSize = ScreenData::Device_Large; break;
+            case ScreenData::Device_XLarge:testDeviceString="xlarge";m_deviceSize = ScreenData::Device_XLarge;break;
             default: testDeviceString="large"; break;
             }
 
             t <<testDeviceString << psize << QString::number(qorbiterUIwin->height() );
-            m_deviceSize = ScreenData::Device_Small;
         }
 
         m_selector->setExtraSelectors(t);
-        qDebug() << t ;
-        qDebug() << Q_FUNC_INFO << " Set to "<< m_selector->allSelectors();
+        qDebug() << Q_FUNC_INFO << "QQml File Selector Set to "<< m_selector->allSelectors();
         delayedReloadQml();
         // qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
         // qorbiterUIwin->setSource(qorbiterUIwin->source());

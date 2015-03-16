@@ -1,0 +1,25 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/splash/ConnectionBox.qml</file>
+        <file>qml/splash/Switch.qml</file>
+        <file>qml/splash/Style.qml</file>
+        <file>qml/splash/StatusRow.qml</file>
+        <file>qml/splash/SplashView.qml</file>
+        <file>qml/splash/Splash.qml</file>
+        <file>qml/splash/SetupNewOrbiter.qml</file>
+        <file>qml/splash/qmldir</file>
+        <file>qml/splash/OptionMenu.qml</file>
+        <file>qml/splash/NewOrbiterButton.qml</file>
+        <file>qml/splash/ExistingOrbiters.qml</file>
+        <file>qml/splash/LanguageList.qml</file>
+        <file>qml/splash/+small/qmldir</file>
+        <file>qml/splash/+small/SplashView.qml</file>
+        <file>qml/splash/+small/Style.qml</file>
+        <file>qml/splash/+large/+ios/SplashView.qml</file>
+        <file>qml/splash/+large/+ios/Style.qml</file>
+        <file>qml/splash/images/arrow.png</file>
+        <file>qml/splash/images/options.png</file>
+        <file>qml/splash/images/splash_bg.png</file>
+        <file>qml/splash/images/vertical_arrow.png</file>
+    </qresource>
+</RCC>

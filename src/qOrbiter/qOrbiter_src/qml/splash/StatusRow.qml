@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.3
 Item{
     anchors{
         left:parent.left
@@ -10,7 +10,6 @@ Item{
         anchors.fill: parent
         opacity:.85
     }
-
     Row{
         id:statusRow
         height: scaleX(10)
@@ -33,7 +32,7 @@ Item{
                 text: qsTr("Connection")
                 color: window.b_connectionPresent ? "green" : "red"
                 font.pointSize: window.b_connectionPresent ? 14 : 12
-                font.family: myFont.name
+//                font.family: myFont.name
             }
         }
 

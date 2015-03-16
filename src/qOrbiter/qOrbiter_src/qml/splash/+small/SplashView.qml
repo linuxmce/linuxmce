@@ -85,6 +85,10 @@ Item {
                 onClicked:{options.createObject(splashPage) }
             }
         }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: manager.qmlReload()
+        }
 
     }
 
@@ -94,7 +98,13 @@ Item {
 
 
 
+    Rectangle {
+        width: parent.width
+        height: scaleY(20)
+        opacity: 1
+        color: "transparent"
 
+    }
     ConnectionBox {
         id: connectionBox
     }

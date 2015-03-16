@@ -26,11 +26,12 @@ Item{
     readonly property color appcolor_navigationBackgroundColor:"blue"
 
     /*Application Buttons */
+    readonly property int appButtonHeight:scaleY(4)
+    readonly property int appButtonWidth:scaleX(6)
     readonly property string appbutton_confirm_color:appcolor_background
     readonly property color appbutton_cancel_color:"#f26c4f"
     readonly property color appbutton_disabled_color:"#464646"
-    readonly property int appButtonHeight:scaleY(4)
-    readonly property int appButtonWidth:scaleX(6)
+
 
     /* Application Fonts */
     readonly property color apptext_color_active:"white"
@@ -57,5 +58,4 @@ Item{
     readonly property int listViewWidth_small:scaleX(15)
     readonly property int listViewItemHeight:manager.isProfile ? scaleY(12) : scaleY(15)
     readonly property int listViewMargin:manager.isProfile ? scaleX(5) : scaleX(2.5)
-
 }
