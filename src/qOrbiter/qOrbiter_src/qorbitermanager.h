@@ -47,7 +47,7 @@
 #include "contextobjects/screeninfo.h"
 #include <QTranslator>
 #include <QScreen>
-
+#include <contextobjects/settinginterface.h>
 #else
 #include <QtGui/QWidget>
 #include <QtDeclarative/QDeclarativeView>
@@ -225,6 +225,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY(bool bReload READ getReloadStatus NOTIFY bReloadChanged) /*! \brief if reload is reqested */
     Q_PROPERTY(bool homeNetwork WRITE setHomeNetwork READ getHomeNetwork NOTIFY homeNetworkChanged) /*! \brief if the device is on it's 'Home network' */
     Q_PROPERTY(int hostDevice READ getHostDevice WRITE setHostDevice NOTIFY hostDeviceChanged)
+    Q_PROPERTY(bool useLocalSkins READ useLocalSkins WRITE setUseLocalSkins NOTIFY useLocalSkinsChanged)
 
     /*!
      * \warning enablescreensavermode - currently unused, should be built anyways
@@ -555,8 +556,10 @@ Param 10 - pk_attribute
     int mediaPlayerID;
     int communicatorID;
     int hostDevice;
+     SettingInterface settingsInterface;
 signals:
 
+    void useLocalSkinsChanged();
     void skinSelectorChanged();
     void hostDeviceChanged();
 
@@ -1434,6 +1437,9 @@ public slots:
     void setConfigSkin(QString skin){currentSkin = skin; emit currentSkinChanged(); }
     Q_INVOKABLE QString dumpKey(int key){QKeySequence seq(key) ; return seq.toString(); }
 
+    bool useLocalSkins(){return mb_useLocalSkins;}
+    void setUseLocalSkins(bool b){ if(b==mb_useLocalSkins)return; mb_useLocalSkins=b; emit useLocalSkinsChanged(); }
+
 #if (QT5)
     void skinLoaded(QQuickView::Status status);
 #else
@@ -1860,6 +1866,7 @@ private:
     void setSkinSelector(QString s){if(m_skinSelector==s)return ; m_skinSelector=s; emit skinSelectorChanged(); }
     void reloadQmlSkin() { }
     void setSelectors(QStringList selections){selector->setExtraSelectors(selections);}
+    bool restoreSettings();
 
 
 private:
@@ -1871,6 +1878,8 @@ private:
     int m_testScreenSize;
 
     QTranslator translator;
+
+    bool mb_useLocalSkins;
 
 
 };

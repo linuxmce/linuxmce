@@ -56,7 +56,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickView>
 #include <QtCore/QThread>
-#include <contextobjects/settinginterface.h>
+
 
 #else
 #include <QApplication>
@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("QOrbiter");
     QCoreApplication::setOrganizationDomain("org.linuxmce.QOrbiter");
     QCoreApplication::setOrganizationName("LinuxMCE");
-     SettingInterface settingsInterface;
+
 
 #ifdef __ANDROID__
     AndroidSystem androidHelper;
@@ -402,7 +402,7 @@ int main(int argc, char* argv[])
         orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
 #endif
         orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
-        orbiterWin.mainView.rootContext()->setContextProperty("settings", &settingsInterface);
+
 
 #if defined(Q_OS_IOS)
         w.setMobileStorage(localLogger.logLocation);

@@ -88,7 +88,10 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,  QObject 
     int testSize=-1;
 #endif
     m_testScreenSize =testSize;
+    qorbiterUIwin->rootContext()->setContextProperty("settings", &settingsInterface);
+if(restoreSettings()){
 
+}
     QString mlocale = QLocale::system().name().append(".qm");
     qDebug() << "Local set to "<< mlocale;
     if(  translator.load(":/lang/translations/"+mlocale) ) {
@@ -2673,6 +2676,11 @@ void qorbiterManager::setupUiSelectors(){
 #endif
 
 #endif
+
+}
+
+bool qorbiterManager::restoreSettings()
+{
 
 }
 

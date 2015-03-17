@@ -5,18 +5,32 @@
 
 SettingInterface::SettingInterface(QObject *parent) :
     QObject(parent),
-    m_settings(0)
+    m_settings(0),
+    ready(false)
 {
     /** Note that application name, org, and domain are set via QCoreApplication in main.cpp */
     m_settings = new QSettings(this);
-  m_settings->setFallbacksEnabled(false);
+    m_settings->setFallbacksEnabled(false);
+    m_lookup.insert(Setting_Network_Router, "router");
+    m_lookup.insert(Setting_Network_Hostname, "hostname");
+    m_lookup.insert(Setting_Network_ExternalHostname, "externalhostname");
+    m_lookup.insert(Setting_Network_WebPort, "webaccess");
+    m_lookup.insert(Setting_Ui_Skin, "skin");
+    m_lookup.insert(Setting_Ui_NetworkLoading, "usenetwork");
+    m_lookup.insert(Setting_Ui_PrefSize, "preferredsize");
+    m_lookup.insert(Setting_Text_sizemod, "sizemodifier");
+    m_lookup.insert(Setting_Text_font, "font");
+    m_lookup.insert(Setting_Text_language, "language");
+    m_lookup.insert(Setting_Media_AudioSort, "audiosorting");
+    m_lookup.insert(Setting_Media_AudioSubTypeSort, "audiosubtypesort");
+    m_lookup.insert(Setting_Media_VideoSort, "videosorting");
+    m_lookup.insert(Setting_Media_VideSubTypeSort, "videosubtypesort");
 
     if(m_settings){
         connect(this, SIGNAL(settingsDataCleared()), this,SLOT(initializeSettings()));
 
         initializeSettings();
     }
-
 }
 
 
@@ -31,6 +45,16 @@ void SettingInterface::initializeSettings()
         m_settings->setValue("webaccess", "80");
         m_settings->endGroup();
         log(tr("Finished Initializing Network Settings"));
+    }
+
+    if(!m_settings->childGroups().contains("ui")){
+        log(tr("Initializing UI Settings"));
+        m_settings->beginGroup("ui");
+        m_settings->setValue("skin","default");
+        m_settings->setValue("usenetwork", false);
+        m_settings->setValue("preferredsize", "small");
+        m_settings->endGroup();
+        log(tr("Finished Initializing UI Settings"));
     }
 
     if(!m_settings->childGroups().contains("textoptions")){
@@ -54,7 +78,7 @@ void SettingInterface::initializeSettings()
     }
 
     log(tr("Settings are ready"));
-
+    ready=true;
 }
 
 void SettingInterface::destroySettingsData()
@@ -81,9 +105,9 @@ void SettingInterface::setOption(QString grp, QString key, QVariant opt)
         return;
     }
 
-   m_settings->beginGroup(grp);
-   m_settings->setValue(key, opt);
-   m_settings->endGroup();
+    m_settings->beginGroup(grp);
+    m_settings->setValue(key, opt);
+    m_settings->endGroup();
 
 }
 
@@ -136,6 +160,84 @@ void SettingInterface::setMediaOption(QString key, QVariant opt)
     m_settings->endGroup();
 }
 
+void SettingInterface::setUiOption(QString key, QVariant opt)
+{
+    if(!m_settings){
+        emit writeError(tr("No settings object to write to!"));
+        return;
+    }
+
+    m_settings->beginGroup("ui");
+    if(!m_settings->contains(key)){
+        emit writeError(tr("Invalid settings option"));
+    } else {
+        m_settings->setValue(key, opt);
+    }
+    m_settings->endGroup();
+}
+
+void SettingInterface::setOption(SettingInterface::SettingsType st, SettingInterface::SettingKey sk, QVariant sval)
+{
+    QString grp="";
+    QString key = m_lookup.value(sk);
+    switch (st) {
+    case Settings_Network:grp="network"; break;
+    case Settings_Media:grp="media"; break;
+    case Settings_Text: grp="textoptions"; break;
+    case Settings_UI: grp="ui"; break;
+    default: grp="";
+        break;
+    }
+    if(grp=="")
+        return;
+
+    if(!m_settings){
+        emit writeError(tr("No settings object to write to!"));
+        return;
+    }
+
+    m_settings->beginGroup(grp);
+    if(!m_settings->contains(key)){
+        emit writeError(tr("Invalid settings option"));
+    } else {
+        m_settings->setValue(key, sval);
+    }
+    m_settings->endGroup();
+
+}
+
+QVariant SettingInterface::getOption(SettingInterface::SettingsType st, SettingInterface::SettingKey sk)
+{
+    QString grp="";
+    QString key = m_lookup.value(sk);
+    switch (st) {
+    case Settings_Network:grp="network"; break;
+    case Settings_Media:grp="media"; break;
+    case Settings_Text: grp="textoptions"; break;
+    case Settings_UI: grp="ui"; break;
+    default: grp="";
+        break;
+    }
+    if(grp=="")
+        return QVariant();
+
+    if(!m_settings){
+        emit writeError(tr("No settings object to read!"));
+        return QVariant();
+    }
+
+    m_settings->beginGroup(grp);
+    if(!m_settings->contains(key)){
+        emit writeError(tr("No  settings option for %1").arg(key));
+        return QVariant();
+    } else {
+
+       return m_settings->value(key);
+
+    }
+
+}
+
 
 QVariant SettingInterface::getDefaultOption(QString grp, QString opt)
 {
@@ -156,10 +258,10 @@ QVariant SettingInterface::getCustomOption(QString grp, QString opt)
         emit writeError(tr("No settings object to read from!"));
         return QVariant(tr("Nada"));
     }
-if(!m_settings->childGroups().contains(grp)){
-    emit writeError(tr("Custom Setting doesnt exist!"));
-    return QVariant(tr("Nada"));
-}
+    if(!m_settings->childGroups().contains(grp)){
+        emit writeError(tr("Custom Setting doesnt exist!"));
+        return QVariant(tr("Nada"));
+    }
     m_settings->beginGroup(grp);
     if(m_settings->contains(opt)){
         return m_settings->value(opt);

@@ -85,8 +85,8 @@ Item{
             }
             Switch {
                 switchLabel: qsTr("Use Network Skins?")
-                enabled: true
-                onTriggered: enabled=!enabled
+                enabled: manager.useLocalSkins
+                onTriggered: manager.setUseLocalSkins(!manager.useLocalSkins)
             }
             Item{
                 width: parent.width
