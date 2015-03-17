@@ -418,35 +418,35 @@ namespace DCE
       case BUTTON_tab_CONST:
 	iKey = XK_Tab;
 	break;
-      case BUTTON_Q_CONST:
-	iKey = XK_Q;
+      case BUTTON_q_CONST:
+	iKey = XK_q;
 	break;
-      case BUTTON_W_CONST:
-	iKey = XK_W;
+      case BUTTON_w_CONST:
+	iKey = XK_w;
 	break;
-      case BUTTON_E_CONST:
-	iKey = XK_E;
+      case BUTTON_e_CONST:
+	iKey = XK_e;
 	break;
-      case BUTTON_R_CONST:
-	iKey = XK_R;
+      case BUTTON_r_CONST:
+	iKey = XK_r;
 	break;
-      case BUTTON_T_CONST:
-	iKey = XK_T;
+      case BUTTON_t_CONST:
+	iKey = XK_t;
 	break;
-      case BUTTON_Y_CONST:
-	iKey = XK_Y;
+      case BUTTON_y_CONST:
+	iKey = XK_y;
 	break;
-      case BUTTON_U_CONST:
-	iKey = XK_U;
+      case BUTTON_u_CONST:
+	iKey = XK_u;
 	break;
-      case BUTTON_I_CONST:
-	iKey = XK_I;
+      case BUTTON_i_CONST:
+	iKey = XK_i;
 	break;
-      case BUTTON_O_CONST:
-	iKey = XK_O;
+      case BUTTON_o_CONST:
+	iKey = XK_o;
 	break;
-      case BUTTON_P_CONST:
-	iKey = XK_P;
+      case BUTTON_p_CONST:
+	iKey = XK_p;
 	break;
       case BUTTON_a8dash_CONST:
 	if (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L || m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R)
@@ -479,32 +479,32 @@ namespace DCE
       case BUTTON_Enter_CONST:
 	iKey = XK_Return;
 	break;
-      case BUTTON_A_CONST:
-	iKey = XK_A;
+      case BUTTON_a_CONST:
+	iKey = XK_a;
 	break;
-      case BUTTON_S_CONST:
-	iKey = XK_S;
+      case BUTTON_s_CONST:
+	iKey = XK_s;
 	break;
-      case BUTTON_D_CONST:
-	iKey = XK_D;
+      case BUTTON_d_CONST:
+	iKey = XK_d;
 	break;
-      case BUTTON_F_CONST:
-	iKey = XK_F;
+      case BUTTON_f_CONST:
+	iKey = XK_f;
 	break;
-      case BUTTON_G_CONST:
-	iKey = XK_G;
+      case BUTTON_g_CONST:
+	iKey = XK_g;
 	break;
-      case BUTTON_H_CONST:
-	iKey = XK_H;
+      case BUTTON_h_CONST:
+	iKey = XK_h;
 	break;
-      case BUTTON_J_CONST:
-	iKey = XK_J;
+      case BUTTON_j_CONST:
+	iKey = XK_j;
 	break;
-      case BUTTON_K_CONST:
-	iKey = XK_K;
+      case BUTTON_k_CONST:
+	iKey = XK_k;
 	break;
-      case BUTTON_L_CONST:
-	iKey = XK_L;
+      case BUTTON_l_CONST:
+	iKey = XK_l;
 	break;
       case BUTTON_semicolumn_CONST:
 	if (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L || m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R)
@@ -544,26 +544,26 @@ namespace DCE
 	    iKey = XK_asterisk;
 	  }
 	break;
-      case BUTTON_Z_CONST:
-	iKey = XK_Z;
+      case BUTTON_z_CONST:
+	iKey = XK_z;
 	break;
-      case BUTTON_X_CONST:
-	iKey = XK_X;
+      case BUTTON_x_CONST:
+	iKey = XK_x;
 	break;
-      case BUTTON_C_CONST:
-	iKey = XK_C;
+      case BUTTON_c_CONST:
+	iKey = XK_c;
 	break;
-      case BUTTON_V_CONST:
-	iKey = XK_V;
+      case BUTTON_v_CONST:
+	iKey = XK_v;
 	break;
-      case BUTTON_B_CONST:
-	iKey = XK_B;
+      case BUTTON_b_CONST:
+	iKey = XK_b;
 	break;
-      case BUTTON_N_CONST:
-	iKey = XK_N;
+      case BUTTON_n_CONST:
+	iKey = XK_n;
 	break;
-      case BUTTON_M_CONST:
-	iKey = XK_M;
+      case BUTTON_m_CONST:
+	iKey = XK_m;
 	break;
       case BUTTON_comma_CONST:
 	if (m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_L || m_pEmulatorModel->m_iCurrentKeyModifier == XK_Shift_R)
