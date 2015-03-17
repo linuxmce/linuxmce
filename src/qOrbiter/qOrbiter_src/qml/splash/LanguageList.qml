@@ -11,13 +11,25 @@ Item{
     ListView{
         anchors.fill: languageList
         model:languages
-        delegate: Text{
-            text:name
+        delegate: Item{
+            height: Style.listViewItemHeight
+            width: parent.width
+            Rectangle{
+                anchors.fill: parent
+                color:"black"
+                opacity: .55
+            }
+
+            Text{
+                anchors.centerIn: parent
+                font.pointSize: Style.appFontSize_list
+                text:name
+                color:"white"
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: manager.setLanguage(val)
+            }
         }
-    }
-    
-    MouseArea{
-        anchors.fill: parent
-        onClicked: om_root.state="switch"
     }
 }

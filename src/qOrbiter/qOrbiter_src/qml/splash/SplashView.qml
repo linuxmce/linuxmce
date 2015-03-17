@@ -85,10 +85,6 @@ Item {
                 onClicked:{options.createObject(splashPage) }
             }
         }
-        MouseArea{
-            anchors.fill: parent
-            onClicked: manager.qmlReload()
-        }
 
     }
 

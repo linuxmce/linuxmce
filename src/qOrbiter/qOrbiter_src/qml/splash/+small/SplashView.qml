@@ -12,7 +12,8 @@ Item {
     Component{
         id:options
         OptionMenu{
-
+            innerBoxWidth:parent.width
+            innerBoxHeight:scaleY(75)
         }
     }
 
@@ -85,10 +86,6 @@ Item {
                 onClicked:{options.createObject(splashPage) }
             }
         }
-        MouseArea{
-            anchors.fill: parent
-            onClicked: manager.qmlReload()
-        }
 
     }
 
@@ -113,6 +110,7 @@ Item {
 
     ExistingOrbiters {
         id:existing_orbiters
+        width:parent.width
     }
 
     NewOrbiterButton {

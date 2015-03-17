@@ -1715,8 +1715,9 @@ public slots:
     }
 
     Q_INVOKABLE void setLanguage(QString lang){
-        if(!translator.load(":/lang/translations/"+lang+".qm"))
-            return;
+        if(!translator.load(":/lang/translations/"+lang+".qm")){
+            qDebug() << "No Translation file!";
+        }
 
         delayedReloadQml();
     }

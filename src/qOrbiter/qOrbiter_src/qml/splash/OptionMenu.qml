@@ -6,6 +6,8 @@ Item{
     anchors.fill: parent
     property string title:qsTr("Options")
     Component.onCompleted: state="switch"
+    property int innerBoxWidth:Style.appMenuPanel_widthMedium
+    property int innerBoxHeight:scaleY(53)
     ListModel{
         id:languages
         ListElement{
@@ -31,8 +33,8 @@ Item{
 
     Item {
         id:om_content
-        height: scaleY(53)
-        width:Style.appMenuPanel_widthMedium
+        height: innerBoxHeight
+        width:innerBoxWidth
         anchors.centerIn: parent
         clip:true
         Rectangle{
@@ -68,12 +70,13 @@ Item{
             anchors.fill:customList
             color: Style.appcolor_background_list
             opacity:.85
+
         }
 
         Column{
             id:customList
             width: om_content.width
-            spacing:scaleY(1)
+            spacing:1
             anchors{
                 right:om_content.right
                 bottom:om_content.bottom
@@ -88,6 +91,11 @@ Item{
             Item{
                 width: parent.width
                 height: Style.listViewItemHeight
+                Rectangle{
+                    anchors.fill: parent
+                    color:"black"
+                    opacity: .55
+                }
                 Text {
                     id: langlabel
                     text: qsTr("Language Selection")
@@ -97,6 +105,19 @@ Item{
                         verticalCenter: parent.verticalCenter
                         left:parent.left
                         leftMargin: Style.listViewMargin
+                    }
+                }
+
+                Image {
+                    id: lng_pointer
+                    source: "images/vertical_arrow.png"
+                    height: parent.height /2
+                    fillMode: Image.PreserveAspectFit
+                    width: height
+                    rotation: -90
+                    anchors{
+                        right:parent.right
+                        verticalCenter: parent.verticalCenter
                     }
                 }
                 MouseArea{

@@ -8,7 +8,11 @@ Item{
     property bool enabled:false
     property string switchLabel:qsTr("Use Network Skins?")
     signal triggered()
-
+    Rectangle{
+        anchors.fill: parent
+        color:"black"
+        opacity: .55
+    }
     Text {
         id: skinsLabel
         text: switchLabel
@@ -24,10 +28,11 @@ Item{
 
     Rectangle{
         id:outerRect
-        radius: 5
+        radius: height
         color: "white"
-        width: scaleX(7)
-        height: scaleY(3.5)
+        width: parent.width*.15
+        height: Style.appButtonHeight
+
         anchors{
             right:parent.right
             rightMargin: Style.listViewMargin
@@ -39,10 +44,10 @@ Item{
         height: outerRect.height-1
         width: height
         radius: width
-        anchors.verticalCenter: outerRect.verticalCenter
+        anchors.verticalCenter: parent.verticalCenter
         anchors.left:outerRect.left
-        anchors.leftMargin:scaleX(.25)
-         anchors.rightMargin:scaleX(.25)
+        anchors.leftMargin:scaleX(.15)
+        anchors.rightMargin:scaleX(.15)
     }
     MouseArea{
         anchors.fill: parent
