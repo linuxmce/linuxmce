@@ -86,6 +86,7 @@ void SettingInterface::initializeSettings()
 void SettingInterface::destroySettingsData()
 {
     m_settings->clear();
+    initializeSettings();
 }
 
 void SettingInterface::log(QString message)

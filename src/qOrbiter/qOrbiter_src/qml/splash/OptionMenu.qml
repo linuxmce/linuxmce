@@ -125,6 +125,33 @@ Item{
                     onClicked: om_root.state="lang"
                 }
             }
+
+            Item {
+                width: parent.width
+                height: Style.listViewItemHeight
+                Rectangle{
+                    anchors.fill: parent
+                    color:"black"
+                    opacity: .55
+                }
+                Text {
+                    id: settingsLabel
+                    text: qsTr("Clear Settings")
+                    font.pointSize: Style.appFontSize_list
+                    color:Style.apptext_color_active
+                    anchors{
+                        verticalCenter: parent.verticalCenter
+                        left:parent.left
+                        leftMargin: Style.listViewMargin
+                    }
+                }
+
+
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: settings.destroySettingsData()
+                }
+            }
         }
 
     }

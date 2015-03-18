@@ -2696,7 +2696,6 @@ bool qorbiterManager::restoreSettings()
         qDebug() << Q_FUNC_INFO << "Read Device Number";
         setDeviceNumber(tId);
         setInternalIp(trouter);
-        qmlSetupLmce(QString::number(tId), trouter);
     }
     return true;
 }

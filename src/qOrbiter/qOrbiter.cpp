@@ -2423,7 +2423,12 @@ void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Executing Command Group %d", cmdGrp);
     string pResponse="";
     CMD_Execute_Command_Group execCommandGroup((long)m_dwPK_Device, (long)2, cmdGrp);
-    SendCommand(execCommandGroup);
+    if(SendCommand(execCommandGroup, &pResponse) ){
+
+    } else {
+
+    }
+    qDebug() << "Response for command grp " << pResponse.c_str();
     emit commandComplete();
 }
 
@@ -3441,8 +3446,8 @@ void DCE::qOrbiter::requestLiveTvPlaylist()
                 program = QString::fromStdString(pCell->GetText());
                 program.remove(channelName);
                 program.remove(breaker.at(0));
-//                EPGItemClass *t = new EPGItemClass(channelName, channelNumber, channelIndex, program, index, QString("na"), QString("na"));
-//                emit addChannel(t);
+                //                EPGItemClass *t = new EPGItemClass(channelName, channelNumber, channelIndex, program, index, QString("na"), QString("na"));
+                //                emit addChannel(t);
                 index++;
                 QApplication::processEvents(QEventLoop::AllEvents);
             }
