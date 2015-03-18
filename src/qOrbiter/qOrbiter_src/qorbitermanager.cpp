@@ -2695,6 +2695,8 @@ bool qorbiterManager::restoreSettings()
     if(tId && !trouter.isEmpty()){
         qDebug() << Q_FUNC_INFO << "Read Device Number";
         setDeviceNumber(tId);
+        setInternalIp(trouter);
+        qmlSetupLmce(QString::number(tId), trouter);
     }
     return true;
 }

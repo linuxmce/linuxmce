@@ -30,7 +30,6 @@ SettingInterface::SettingInterface(QObject *parent) :
     connect(this, SIGNAL(writeError(QString)), this, SLOT(log(QString)));
     if(m_settings){
         connect(this, SIGNAL(settingsDataCleared()), this,SLOT(initializeSettings()));
-
         initializeSettings();
     }
 }
@@ -97,86 +96,8 @@ void SettingInterface::log(QString message)
     qDebug() << logMsg;
 }
 
-void SettingInterface::setOption(QString grp, QString key, QVariant opt)
-{
-    if(!m_settings){
-        emit writeError(tr("No settings object to write to!"));
-        return;
-    } else if(grp.contains("network") || grp.contains("media") || grp.contains("textoptions")){
-        emit writeError(tr("Not Allowed to change default settings through this interface."));
-        return;
-    }
 
-    m_settings->beginGroup(grp);
-    m_settings->setValue(key, opt);
-    m_settings->endGroup();
 
-}
-
-void SettingInterface::setNetworkOption(QString key, QVariant opt)
-{
-    if(!m_settings){
-        emit writeError(tr("No settings object to write to!"));
-        return;
-    }
-
-    m_settings->beginGroup("network");
-    if(!m_settings->contains(key)){
-        emit writeError(tr("Invalid settings option"));
-    } else {
-        m_settings->setValue(key, opt);
-    }
-    m_settings->endGroup();
-
-}
-
-void SettingInterface::setTextOption(QString key, QVariant opt)
-{
-    if(!m_settings){
-        emit writeError(tr("No settings object to write to!"));
-        return;
-    }
-
-    m_settings->beginGroup("textoptions");
-    if(!m_settings->contains(key)){
-        emit writeError(tr("Invalid settings option"));
-    } else {
-        m_settings->setValue(key, opt);
-    }
-    m_settings->endGroup();
-}
-
-void SettingInterface::setMediaOption(QString key, QVariant opt)
-{
-    if(!m_settings){
-        emit writeError(tr("No settings object to write to!"));
-        return;
-    }
-
-    m_settings->beginGroup("media");
-    if(!m_settings->contains(key)){
-        emit writeError(tr("Invalid settings option"));
-    } else {
-        m_settings->setValue(key, opt);
-    }
-    m_settings->endGroup();
-}
-
-void SettingInterface::setUiOption(QString key, QVariant opt)
-{
-    if(!m_settings){
-        emit writeError(tr("No settings object to write to!"));
-        return;
-    }
-
-    m_settings->beginGroup("ui");
-    if(!m_settings->contains(key)){
-        emit writeError(tr("Invalid settings option"));
-    } else {
-        m_settings->setValue(key, opt);
-    }
-    m_settings->endGroup();
-}
 
 void SettingInterface::setOption(SettingInterface::SettingsType st, SettingInterface::SettingKey sk, QVariant sval)
 {
@@ -249,34 +170,4 @@ QVariant SettingInterface::getOption(SettingInterface::SettingsType st, SettingI
      m_settings->endGroup();
      return rtrn;
 
-}
-
-
-QVariant SettingInterface::getDefaultOption(QString grp, QString opt)
-{
-    if(!m_settings){
-        emit writeError(tr("No settings object to read from!"));
-        return QVariant(tr("Nada"));
-    }
-
-    m_settings->beginGroup(grp);
-    if(m_settings->contains(opt)){
-        return m_settings->value(opt);
-    }
-}
-
-QVariant SettingInterface::getCustomOption(QString grp, QString opt)
-{
-    if(!m_settings){
-        emit writeError(tr("No settings object to read from!"));
-        return QVariant(tr("Nada"));
-    }
-    if(!m_settings->childGroups().contains(grp)){
-        emit writeError(tr("Custom Setting doesnt exist!"));
-        return QVariant(tr("Nada"));
-    }
-    m_settings->beginGroup(grp);
-    if(m_settings->contains(opt)){
-        return m_settings->value(opt);
-    }
 }
