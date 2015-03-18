@@ -56,7 +56,7 @@ Q_IMPORT_PLUGIN(UIKit)
 #include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickView>
 #include <QtCore/QThread>
-
+#include <contextobjects/settinginterface.h>
 
 #else
 #include <QApplication>
@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("QOrbiter");
     QCoreApplication::setOrganizationDomain("org.linuxmce.QOrbiter");
     QCoreApplication::setOrganizationName("LinuxMCE");
-
+    SettingInterface settings;
 
 #ifdef __ANDROID__
     AndroidSystem androidHelper;
@@ -380,8 +380,8 @@ int main(int argc, char* argv[])
         qmlRegisterType<ScreenData>("org.linuxmce.screeninfo", 1,0, "ScreenData");
         qmlRegisterType<GenericFlatListModel>();
 
-         orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm, screenSize);
-
+        orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm, screenSize);
+        orbiterWin.mainView.rootContext()->setContextProperty("settings", &settings);
 #ifdef __ANDROID__
         orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
 #endif
@@ -390,7 +390,7 @@ int main(int argc, char* argv[])
 
 #ifndef ANDROID
 
-        qorbiterManager  w(&orbiterWin.mainView, screenSize);
+        qorbiterManager  w(&orbiterWin.mainView, screenSize, &settings);
         if(deviceType==0){
             w.setDeviceTemplate(DEVICETEMPLATE_OnScreen_qOrbiter_CONST);
             //pqOrbiter.m_pData->m_dwPK_DeviceTemplate=DEVICETEMPLATE_OnScreen_qOrbiter_CONST;
@@ -398,7 +398,7 @@ int main(int argc, char* argv[])
             qDebug() <<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!SETTING ON SCREEN FLAG!!!!!!!!!!!!!!!!!!!!!!!!";
         }
 #else
-        qorbiterManager w(&orbiterWin.mainView, &androidHelper);
+        qorbiterManager w(&orbiterWin.mainView, &androidHelper, &settings);
         orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
 #endif
         orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);

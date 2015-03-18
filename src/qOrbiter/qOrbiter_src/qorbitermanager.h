@@ -234,13 +234,13 @@ class qorbiterManager : public QObject
 
 public:
 #if QT5 && !ANDROID
-    qorbiterManager(QQuickView * view, int testSize, QObject *parent=0);  //constructor
+    qorbiterManager(QQuickView * view, int testSize, SettingInterface *appSettings, QObject *parent=0);  //constructor
 #elif ANDROID && QT5
-    qorbiterManager(QQuickView *view, AndroidSystem *jniHelper, QObject *parent=0);
+    qorbiterManager(QQuickView *view, AndroidSystem *jniHelper, SettingInterface *appSettings, QObject *parent=0);
 #elif ANDROID
-    qorbiterManager(QDeclarativeView *view, AndroidSystem *jniHelper,   QObject *parent =0);
+    qorbiterManager(QDeclarativeView *view, AndroidSystem *jniHelper, SettingInterface *appSettings,   QObject *parent =0);
 #elif   QT4_8
-    qorbiterManager(QDeclarativeView * view, int testSize, QObject *parent=0);  //constructor
+    qorbiterManager(QDeclarativeView * view, int testSize,SettingInterface *appSettings, QObject *parent=0);  //constructor
 #endif
 
     ~qorbiterManager();
@@ -556,7 +556,7 @@ Param 10 - pk_attribute
     int mediaPlayerID;
     int communicatorID;
     int hostDevice;
-     SettingInterface settingsInterface;
+     SettingInterface *settingsInterface;
 signals:
 
     void useLocalSkinsChanged();

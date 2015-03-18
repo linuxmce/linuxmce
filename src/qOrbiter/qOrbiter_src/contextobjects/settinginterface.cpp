@@ -2,6 +2,7 @@
 #include "qdebug.h"
 #include "qdatetime.h"
 #include "defineObjects/mediatypehelper.h"
+#include "qdebug.h"
 
 SettingInterface::SettingInterface(QObject *parent) :
     QObject(parent),
@@ -12,6 +13,7 @@ SettingInterface::SettingInterface(QObject *parent) :
     m_settings = new QSettings(this);
     m_settings->setFallbacksEnabled(false);
     m_lookup.insert(Setting_Network_Router, "router");
+    m_lookup.insert(Setting_Network_Device_ID, "device");
     m_lookup.insert(Setting_Network_Hostname, "hostname");
     m_lookup.insert(Setting_Network_ExternalHostname, "externalhostname");
     m_lookup.insert(Setting_Network_WebPort, "webaccess");
@@ -25,7 +27,7 @@ SettingInterface::SettingInterface(QObject *parent) :
     m_lookup.insert(Setting_Media_AudioSubTypeSort, "audiosubtypesort");
     m_lookup.insert(Setting_Media_VideoSort, "videosorting");
     m_lookup.insert(Setting_Media_VideSubTypeSort, "videosubtypesort");
-
+    connect(this, SIGNAL(writeError(QString)), this, SLOT(log(QString)));
     if(m_settings){
         connect(this, SIGNAL(settingsDataCleared()), this,SLOT(initializeSettings()));
 
@@ -43,6 +45,7 @@ void SettingInterface::initializeSettings()
         m_settings->setValue("hostname", "dcerouter.linuxmce");
         m_settings->setValue("externalhostname", "");
         m_settings->setValue("webaccess", "80");
+        m_settings->setValue("device", -1);
         m_settings->endGroup();
         log(tr("Finished Initializing Network Settings"));
     }
@@ -84,7 +87,6 @@ void SettingInterface::initializeSettings()
 void SettingInterface::destroySettingsData()
 {
     m_settings->clear();
-
 }
 
 void SettingInterface::log(QString message)
@@ -191,6 +193,8 @@ void SettingInterface::setOption(SettingInterface::SettingsType st, SettingInter
     if(grp=="")
         return;
 
+     log(QString("Setting option for GROUP: -=%1=- KEY: -=%2=- VALUE: %3").arg(grp).arg(m_lookup.value(sk)).arg(sval.toString()));
+
     if(!m_settings){
         emit writeError(tr("No settings object to write to!"));
         return;
@@ -199,6 +203,7 @@ void SettingInterface::setOption(SettingInterface::SettingsType st, SettingInter
     m_settings->beginGroup(grp);
     if(!m_settings->contains(key)){
         emit writeError(tr("Invalid settings option"));
+        log(QString("Options for this key are %1").arg(m_settings->childKeys().join("\n")));
     } else {
         m_settings->setValue(key, sval);
     }
@@ -210,6 +215,7 @@ QVariant SettingInterface::getOption(SettingInterface::SettingsType st, SettingI
 {
     QString grp="";
     QString key = m_lookup.value(sk);
+    QVariant rtrn= QVariant();
     switch (st) {
     case Settings_Network:grp="network"; break;
     case Settings_Media:grp="media"; break;
@@ -218,23 +224,30 @@ QVariant SettingInterface::getOption(SettingInterface::SettingsType st, SettingI
     default: grp="";
         break;
     }
+    log(QString("Getting option for group -=%1=-").arg(grp));
+
     if(grp=="")
-        return QVariant();
+        return rtrn;
 
     if(!m_settings){
         emit writeError(tr("No settings object to read!"));
-        return QVariant();
+        return rtrn;
     }
+
 
     m_settings->beginGroup(grp);
+
     if(!m_settings->contains(key)){
-        emit writeError(tr("No  settings option for %1").arg(key));
-        return QVariant();
+        emit writeError(tr("No  settings option for -=%1=-").arg(key));
+        log(QString("Options for this key are %1").arg(m_settings->childKeys().join("\n")));
+        m_settings->endGroup();
+
     } else {
-
-       return m_settings->value(key);
-
+        qDebug() << Q_FUNC_INFO << "Returning settings value for key" << key;
+        rtrn=m_settings->value(key);
     }
+     m_settings->endGroup();
+     return rtrn;
 
 }
 

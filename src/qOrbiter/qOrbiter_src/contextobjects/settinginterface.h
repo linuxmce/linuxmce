@@ -24,6 +24,7 @@ public:
 
     enum SettingKey{
         Setting_Network_Router,
+        Setting_Network_Device_ID,
         Setting_Network_Hostname,
         Setting_Network_ExternalHostname,
         Setting_Network_WebPort,
@@ -60,10 +61,10 @@ QVariant getOption(SettingsType st, SettingKey sk);
     QVariant getNetworkOption(QString opt){ return getDefaultOption("network", opt);}
     QVariant getTextOption(QString opt) {return getDefaultOption("text", opt);}
     QVariant getMediaOption(QString opt) {return getDefaultOption("media", opt);}
-
+ void destroySettingsData();
 private slots:
     void initializeSettings();
-    void destroySettingsData();
+
     QVariant getDefaultOption(QString grp, QString opt);
     QVariant getCustomOption(QString grp, QString opt);
 

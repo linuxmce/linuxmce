@@ -33,6 +33,7 @@
 #include <QQmlFileSelector>
 #include <QTranslator>
 #include <QStandardPaths>
+#include <contextobjects/settinginterface.h>
 #else
 #include <QtDeclarative/QDeclarativeProperty>
 #include <QFile>
@@ -71,27 +72,31 @@ using namespace DCE;
   messaging system will be the initial method of communication
 */
 #if (QT5) && !defined (ANDROID)
-qorbiterManager::qorbiterManager(QQuickView *view, int testSize, QObject *parent) :
+qorbiterManager::qorbiterManager(QQuickView *view, int testSize, SettingInterface *appSettings, QObject *parent) :
     #elif ANDROID && QT5
-qorbiterManager::qorbiterManager(QQuickView *view, AndroidSystem *jniHelper,  QObject *parent) :
+qorbiterManager::qorbiterManager(QQuickView *view, AndroidSystem *jniHelper,SettingInterface *appSettings,  QObject *parent) :
     #elif ANDROID
-qorbiterManager::qorbiterManager(QDeclarativeView *view, AndroidSystem *jniHelper,   QObject *parent) :
+qorbiterManager::qorbiterManager(QDeclarativeView *view, AndroidSystem *jniHelper, SettingInterface *appSettings,  QObject *parent) :
     #else
-qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,  QObject *parent) :
+qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,SettingInterface *appSettings,  QObject *parent) :
     
     #endif
     QObject(parent),qorbiterUIwin(view),
     appHeight(view->height()),
-    appWidth(view->width())
+    appWidth(view->width()),
+    settingsInterface(appSettings)
 {
 #ifdef __ANDROID__
     int testSize=-1;
 #endif
-    m_testScreenSize =testSize;
-    qorbiterUIwin->rootContext()->setContextProperty("settings", &settingsInterface);
-if(restoreSettings()){
+    if(settingsInterface->ready){
 
-}
+        if(restoreSettings()){
+
+        }
+    }
+    m_testScreenSize =testSize;
+
     QString mlocale = QLocale::system().name().append(".qm");
     qDebug() << "Local set to "<< mlocale;
     if(  translator.load(":/lang/translations/"+mlocale) ) {
@@ -1974,6 +1979,9 @@ bool qorbiterManager::readLocalConfig(){
 
 bool qorbiterManager::writeConfig()
 {
+    settingsInterface->setOption(SettingInterface::Settings_Network, SettingInterface::Setting_Network_Device_ID, iPK_Device);
+
+    /* old below this line and will be replaced */
     qDebug() << Q_FUNC_INFO;
     //   setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
     QDomDocument localConfig;
@@ -2022,6 +2030,7 @@ bool qorbiterManager::writeConfig()
             configVariables.namedItem("externalHost").attributes().namedItem("id").setNodeValue(externalHost);      //external host
 
             configVariables.namedItem("device").attributes().namedItem("id").setNodeValue(QString::number(iPK_Device));
+
             configVariables.namedItem("firstrun").attributes().namedItem("id").setNodeValue(QString("false"));
             configVariables.namedItem("debug").attributes().namedItem("id").setNodeValue(debugMode ==true? "true" : "false");
             setDceResponse("Writing device type as "+ QString::number(isPhone));
@@ -2681,7 +2690,13 @@ void qorbiterManager::setupUiSelectors(){
 
 bool qorbiterManager::restoreSettings()
 {
-
+    int tId= settingsInterface->getOption(SettingInterface::Settings_Network, SettingInterface::Setting_Network_Device_ID).toInt();
+    QString trouter = settingsInterface->getOption(SettingInterface::Settings_Network, SettingInterface::Setting_Network_Router).toString();
+    if(tId && !trouter.isEmpty()){
+        qDebug() << Q_FUNC_INFO << "Read Device Number";
+        setDeviceNumber(tId);
+    }
+    return true;
 }
 
 void qorbiterManager::reloadHandler()
