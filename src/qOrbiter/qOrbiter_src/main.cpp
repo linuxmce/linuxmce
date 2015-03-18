@@ -468,8 +468,8 @@ int main(int argc, char* argv[])
         // QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));
 
         // Generic DCE command sending signal/slots
-        QObject::connect(&w, SIGNAL(sendDceCommand(DCE::PreformedCommand&)), &pqOrbiter, SLOT(sendDCECommand(DCE::PreformedCommand&)), Qt::DirectConnection);
-        QObject::connect(&w, SIGNAL(sendDceCommandResponse(DCE::PreformedCommand&, string*)), &pqOrbiter, SLOT(sendDCECommandResponse(DCE::PreformedCommand&, string*)), Qt::DirectConnection);
+        QObject::connect(&w, SIGNAL(sendDceCommand(DCE::PreformedCommand&)), &pqOrbiter, SLOT(sendDCECommand(DCE::PreformedCommand&)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(sendDceCommandResponse(DCE::PreformedCommand&, string*)), &pqOrbiter, SLOT(sendDCECommandResponse(DCE::PreformedCommand&, string*)), Qt::QueuedConnection);
 
 
         QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
@@ -579,7 +579,7 @@ int main(int argc, char* argv[])
         //  QObject::connect(mediaModel, SIGNAL(statusMessage(QString)), &w, SLOT(setDceResponse(QString)),Qt::QueuedConnection);
         QObject::connect(w.nowPlayingButton, SIGNAL(statusMessage(QString)), &w, SLOT(setDceResponse(QString)));
         QObject::connect(&pqOrbiter, SIGNAL(statusMessage(QString)), &w , SLOT(setDceResponse(QString)),Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::DirectConnection);
+        QObject::connect(&w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(commandComplete()), &w, SIGNAL(commandCompleted()), Qt::QueuedConnection);
         //operations
         QObject::connect(&pqOrbiter, SIGNAL(addScreenParam(QString,int)), w.ScreenParameters, SLOT(addParam(QString, int)), Qt::QueuedConnection);
@@ -833,7 +833,7 @@ int main(int argc, char* argv[])
             QApplication::processEvents(QEventLoop::AllEvents);
         }
 #endif
-        pqOrbiter.qmlSetup(w.getDeviceNumber(), QString::fromStdString(sRouter_IP));
+       // pqOrbiter.qmlSetup(w.getDeviceNumber(), QString::fromStdString(sRouter_IP));
         a.exec();
 
         //        localLogger.deleteLater();

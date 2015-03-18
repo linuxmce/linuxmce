@@ -1985,7 +1985,7 @@ bool qorbiterManager::writeConfig()
     qDebug() << Q_FUNC_INFO;
     //   setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
     QDomDocument localConfig;
-#ifdef Q_OS_IOS
+#ifdef Q_OS_IOS &&
     QString xmlPath = mobileStorageLocation+"/config.xml";
     appConfigPath = xmlPath;
 #elif Q_OS_MAC

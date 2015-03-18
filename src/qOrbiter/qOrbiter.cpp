@@ -2420,15 +2420,16 @@ void qOrbiter::jumpMobileGrid(int page)
 
 void DCE::qOrbiter::executeCommandGroup(int cmdGrp)
 {
+    qDebug() << Q_FUNC_INFO << m_dwPK_Device;
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "Executing Command Group %d", cmdGrp);
     string pResponse="";
     CMD_Execute_Command_Group execCommandGroup((long)m_dwPK_Device, (long)2, cmdGrp);
-    if(SendCommand(execCommandGroup, &pResponse) ){
-
+    if(SendCommand(execCommandGroup) ){
+        qDebug() << "Command Sent";
     } else {
-
+        qDebug() << "could not send command! are you connected?";
     }
-    qDebug() << "Response for command grp " << pResponse.c_str();
+
     emit commandComplete();
 }
 
@@ -4230,7 +4231,7 @@ void DCE::qOrbiter::ShowBookMarks()
 
 void qOrbiter::OnDisconnect()
 {
-
+qDebug() <<Q_FUNC_INFO;
     emit routerConnectionChanged(false);
     qDebug("Router disconnected!");
     m_bOrbiterConnected = false;
@@ -4245,6 +4246,7 @@ void qOrbiter::OnUnexpectedDisconnect()
     LoggerWrapper::GetInstance()->Write(LV_STATUS,"QOrbiter::onUnexpectedDisconnect %d", m_dwPK_Device);
     emit routerConnectionChanged(false);
     pthread_cond_broadcast( &m_listMessageQueueCond );
+    qDebug() << Q_FUNC_INFO;
     Disconnect();
 
 }
