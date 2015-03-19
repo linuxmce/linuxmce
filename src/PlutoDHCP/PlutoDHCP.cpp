@@ -279,7 +279,7 @@ string PlutoDHCP::GetDHCPConfig()
 				+ " { hardware ethernet " + pd_1.m_sMacAddress + "; fixed-address " + ip.AsText() + "; }";
 		}
 
-		if ( (int)ip.AsInt() >= (int)ipAddressDhcpStart.AsInt()) {
+		if ((int)ip.AsInt() >= (int)ipAddressDhcpStart.AsInt() && (int)ip.AsInt() <= (int)ipAddressDhcpStop.AsInt()) {
 			p_iIpAddress[i_NoOfIpAdresses++] = ip.AsInt();
 		}
 	}
