@@ -27,13 +27,32 @@ Item{
     }
 
     Text{
-       anchors.horizontalCenter: parent.horizontalCenter
-       anchors.top: parent.top
-       text:"Main.qml"
-       color:"white"
-       font.pointSize: 65
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        text:"Main.qml"
+        color:"white"
+        font.pointSize: 65
     }
 
+    Rectangle{
+        width: parent.width *.75
+        height: parent.height *.25
+        radius:10
+        color:"grey"
+        Text{
+            anchors.centerIn: parent
+            text:"Main.qml"
+            color:"white"
+            font.pointSize: 65
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                settings.destroySettingsData()
+                manager.exitApp()
+            }
+        }
+    }
 
 
 }

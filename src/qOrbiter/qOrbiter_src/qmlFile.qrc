@@ -21,5 +21,8 @@
         <file>qml/splash/images/options.png</file>
         <file>qml/splash/images/splash_bg.png</file>
         <file>qml/splash/images/vertical_arrow.png</file>
+        <file>qml/skins/default/Main.qml</file>
+        <file>qml/skins/default/Style.qml</file>
+        <file>qml/skins/default/qmldir</file>
     </qresource>
 </RCC>
