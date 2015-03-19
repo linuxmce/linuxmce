@@ -1440,7 +1440,7 @@ public slots:
     bool useLocalSkins(){return mb_useLocalSkins;}
 
     void setUseLocalSkins(bool b){
-        if(b==mb_useLocalSkins)return; mb_useLocalSkins=b;
+        if(b==mb_useLocalSkins)return; mb_useLocalSkins=b;setupLocalSkins();
         settingsInterface->setOption(SettingInterface::Settings_UI, SettingInterface::Setting_Ui_NetworkLoading, QVariant(b));
         emit useLocalSkinsChanged();
     }
@@ -1880,6 +1880,7 @@ private:
     void setSelectors(QStringList selections){selector->setExtraSelectors(selections);}
     bool restoreSettings();
     bool setupNetworkSkins();
+    bool setupLocalSkins();
 
 
 private:
@@ -1896,6 +1897,7 @@ private:
 
     QString m_remoteQmlPath;
     QString m_localQmlPath;
+    QList<QVariant> m_localSkins;
 
 
 };

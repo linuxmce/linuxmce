@@ -265,6 +265,8 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)));
     if(!mb_useLocalSkins){
         setupNetworkSkins();
+    } else {
+
     }
 }
 
@@ -2552,6 +2554,7 @@ bool qorbiterManager::restoreSettings()
 {
     int tId= settingsInterface->getOption(SettingInterface::Settings_Network, SettingInterface::Setting_Network_Device_ID).toInt();
     QString trouter = settingsInterface->getOption(SettingInterface::Settings_Network, SettingInterface::Setting_Network_Router).toString();
+    mb_useLocalSkins = settingsInterface->getOption(SettingInterface::Settings_UI, SettingInterface::Setting_Ui_NetworkLoading).toBool();
     if(tId && !trouter.isEmpty()){
         qDebug() << Q_FUNC_INFO << "Read Device Number";
         setDeviceNumber(tId);
@@ -2592,17 +2595,8 @@ bool qorbiterManager::setupNetworkSkins()
 #endif
 
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("bin"));
-    QString localDir = qmlPath.append(buildType);
-
-
-    if(b_localLoading){
-        finalPath=localDir;
-    } else{
-        finalPath = remoteDirectoryPath;
-    }
-
+    finalPath = remoteDirectoryPath;
     QUrl base(finalPath);
-
     tskinModel = new SkinDataModel(base, new SkinDataItem, this);
     qorbiterUIwin->rootContext()->setContextProperty("skinsList", tskinModel);
     QObject::connect(tskinModel, SIGNAL(currentSkinReady()), this, SLOT(showSkin()));
@@ -2684,6 +2678,35 @@ bool qorbiterManager::setupNetworkSkins()
         return false;
     }
 #endif
+}
+
+bool qorbiterManager::setupLocalSkins()
+{
+    QFile themeFile(":///qml/qml/Themes.json");
+    QString themeJson;
+
+    if(themeFile.open(QFile::ReadOnly)){
+        themeJson = themeFile.readAll();
+        themeFile.close();
+    } else {
+        qDebug() << themeFile.errorString();
+        qDebug() << Q_FUNC_INFO << "failed to find Themes.json";
+        return false;
+    }
+
+    QJsonDocument themeDoc = QJsonDocument::fromJson(themeJson.toUtf8());
+
+    if(!themeDoc.isObject())
+        qDebug() << Q_FUNC_INFO << "invalid object ";
+
+    QJsonObject themeObject = themeDoc.object();
+
+    if(themeObject.isEmpty())
+        return false;
+
+   QVariantMap t = themeObject.toVariantMap();
+   qDebug() << Q_FUNC_INFO << themeObject.value("themelist");
+
 }
 
 void qorbiterManager::reloadHandler()

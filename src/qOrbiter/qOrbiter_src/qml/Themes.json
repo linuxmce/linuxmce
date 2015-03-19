@@ -1,13 +1,23 @@
-/*
- Experimental.
-  */
 {
     "themelist":{
 
-        "theme":{
-            "name":"default",
+        "default":{
+            "name":"Default",
+            "path":"default",
             "entrypoint":"default/Main.qml",
-            "description":"Default Skin for QOrbiter across all devices"
+            "description":"Default Skin for QOrbiter across all devices",
+            "variants":[
+                "small", "medium", "large","ios"
+            ]
+        },
+        "dummy":{
+            "name":"Dummy",
+            "path":"dummy",
+            "entrypoint":"dummy/Main.qml",
+            "description":"Dummy Skin for tests",
+            "variants":[
+                "small", "medium", "large","ios"
+            ]
         }
     }
 }
