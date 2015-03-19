@@ -556,7 +556,7 @@ Param 10 - pk_attribute
     int mediaPlayerID;
     int communicatorID;
     int hostDevice;
-     SettingInterface *settingsInterface;
+    SettingInterface *settingsInterface;
 signals:
 
     void useLocalSkinsChanged();
@@ -1438,7 +1438,18 @@ public slots:
     Q_INVOKABLE QString dumpKey(int key){QKeySequence seq(key) ; return seq.toString(); }
 
     bool useLocalSkins(){return mb_useLocalSkins;}
-    void setUseLocalSkins(bool b){ if(b==mb_useLocalSkins)return; mb_useLocalSkins=b; emit useLocalSkinsChanged(); }
+
+    void setUseLocalSkins(bool b){
+        if(b==mb_useLocalSkins)return; mb_useLocalSkins=b;
+        settingsInterface->setOption(SettingInterface::Settings_UI, SettingInterface::Setting_Ui_NetworkLoading, QVariant(b));
+        emit useLocalSkinsChanged();
+    }
+
+    void changeSkinBase(){
+        if(mb_useLocalSkins){
+
+        }
+    }
 
 #if (QT5)
     void skinLoaded(QQuickView::Status status);
@@ -1667,6 +1678,7 @@ public slots:
     void makeCall(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To);
 
 
+
     void handleDceGuiCommand(int c){
         QString cmdOut;
 
@@ -1830,7 +1842,7 @@ private slots:
 
         QString psize = m_screenInfo->primaryScreen()->pixelDensityString();
         QStringList t;
-       // m_testScreenSize = m_screenInfo->primaryScreen()->deviceSize();
+        // m_testScreenSize = m_screenInfo->primaryScreen()->deviceSize();
 
         if(m_testScreenSize==-1){
             qDebug () << Q_FUNC_INFO << "Using device information ";
@@ -1867,6 +1879,7 @@ private:
     void reloadQmlSkin() { }
     void setSelectors(QStringList selections){selector->setExtraSelectors(selections);}
     bool restoreSettings();
+    bool setupNetworkSkins();
 
 
 private:
@@ -1880,6 +1893,9 @@ private:
     QTranslator translator;
 
     bool mb_useLocalSkins;
+
+    QString m_remoteQmlPath;
+    QString m_localQmlPath;
 
 
 };
