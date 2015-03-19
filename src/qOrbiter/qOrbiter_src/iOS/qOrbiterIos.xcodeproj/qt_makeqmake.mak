@@ -162,6 +162,7 @@ qOrbiterIos.xcodeproj/project.pbxproj: qOrbiterIos.pro ../../../../Qt/5.4/ios/mk
 		../../../../Qt/5.4/ios/mkspecs/macx-ios-clang/Default-568h@2x.png \
 		../../../../Qt/5.4/ios/mkspecs/macx-ios-clang/LaunchScreen.xib \
 		../skinData.qrc \
+		../qmlFile.qrc \
 		/Users/Langstonius/Qt/5.4/ios/plugins/platforms/libqios_debug.prl \
 		/Users/Langstonius/Qt/5.4/ios/lib/libQt5PlatformSupport_debug.prl \
 		/Users/Langstonius/Qt/5.4/ios/lib/libQt5Gui_debug.prl \
@@ -350,6 +351,7 @@ qOrbiterIos.pro:
 ../../../../Qt/5.4/ios/mkspecs/macx-ios-clang/Default-568h@2x.png:
 ../../../../Qt/5.4/ios/mkspecs/macx-ios-clang/LaunchScreen.xib:
 ../skinData.qrc:
+../qmlFile.qrc:
 /Users/Langstonius/Qt/5.4/ios/plugins/platforms/libqios_debug.prl:
 /Users/Langstonius/Qt/5.4/ios/lib/libQt5PlatformSupport_debug.prl:
 /Users/Langstonius/Qt/5.4/ios/lib/libQt5Gui_debug.prl:

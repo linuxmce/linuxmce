@@ -46,12 +46,12 @@ TRANSLATIONS += app_de.ts
                 skins.path=/
 
                 #QMAKE_BUNDLE_DATA+=ICON
-                QMAKE_BUNDLE_DATA+= skins splash
+
 
                 DEFINES += GLENABLED QT5
                 glmsg=yes
                 ICON = ../../platforms/ios/assets/icons/*.png
-
+                QMAKE_BUNDLE_DATA+= skins splash ICON
                 QMAKE_CXXFLAGS+=-Wno-c++11-narrowing -DUSE_LZO_DATAGRID            
                 CONFIG +=warn_off
                 QMAKE_INFO_PLIST = QOrbiter.plist
@@ -302,7 +302,8 @@ OTHER_FILES += Readme.txt \
 
 
 RESOURCES += \
-        ../skinData.qrc
+        ../skinData.qrc \
+        ../qmlFile.qrc
 
 
 include(deployment.pri)

@@ -1876,10 +1876,13 @@ bool qorbiterManager::writeConfig()
     qDebug() << Q_FUNC_INFO;
     //   setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
     QDomDocument localConfig;
-#ifdef Q_OS_IOS &&
+
+#ifdef Q_OS_IOS
     QString xmlPath = mobileStorageLocation+"/config.xml";
     appConfigPath = xmlPath;
-#elif Q_OS_MAC
+#endif
+
+#ifdef Q_OS_MAC
     QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif __ANDROID__
     QString xmlPath = mobileStorageLocation+"/config.xml";
@@ -2540,10 +2543,10 @@ void qorbiterManager::setupUiSelectors(){
 #ifdef __ANDROID__
     m_localQmlPath="qrc:/qml/";
 #elif defined Q_OS_IOS
-    m_localQmlPath=mobileStorageLocation";
+   m_localQmlPath="qrc:/qml/"; // m_localQmlPath=QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first()+"/";
 #elif defined WIN32
     m_localQmlPath=qApp->applicationDirPath()+"/";
-#elif defined Q_OS_MACX
+#elif defined Q_OS_MACX && !defined(Q_OS_IOS)
     m_localQmlPath=qApp->applicationDirPath()+"/";
 #elif defined Q_OS_LINUX
     m_localQmlPath=qApp->applicationDirPath()+"/";

@@ -1559,6 +1559,21 @@
 					);
 			};
 		};
+		1F1165752AA0CCD72DD912FF = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/qrc_qmlFile.cpp";
+			name = "qrc_qmlFile.cpp";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "sourcecode.cpp.cpp";
+		};
+		D0830CD239A0CD01ABA7A4CB = {
+			fileRef = "1F1165752AA0CCD72DD912FF";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
 		D7921EA4A255A8E908247E43 = {
 			isa = PBXFileReference;
 			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/moc_qOrbiter.cpp";
@@ -3314,6 +3329,13 @@
 			sourceTree = "<absolute>";
 			lastKnownFileType = "text";
 		};
+		B08CDA8B711FA2F8B1208BCE = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/qmlFile.qrc";
+			name = "qmlFile.qrc";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "text";
+		};
 		904D1DA9B39EFA930E455BC1 = {
 			isa = PBXFileReference;
 			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/skinData.qrc";
@@ -3329,10 +3351,26 @@
 					);
 			};
 		};
+		B08CDA8B711FA2F8B1208BCE = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/qmlFile.qrc";
+			name = "qmlFile.qrc";
+			sourceTree = "<absolute>";
+			lastKnownFileType = "text";
+		};
+		A0850906CA95421976A7D3A4 = {
+			fileRef = "B08CDA8B711FA2F8B1208BCE";
+			isa = PBXBuildFile;
+			settings = {
+				ATTRIBUTES = (
+					);
+			};
+		};
 		25B08E2869634E9BCBA333A2 = {
 			isa = PBXGroup;
 			children = (
 				"C603082FEDA1010D8A22CAB9",
+				"1F1165752AA0CCD72DD912FF",
 				"D7921EA4A255A8E908247E43",
 				"203D39077966CE83A5F3ED80",
 				"B488C7FE29049FE40A6EC06C",
@@ -3409,7 +3447,8 @@
 		87DF60DE337FB58864343E39 = {
 			isa = PBXGroup;
 			children = (
-				"904D1DA9B39EFA930E455BC1");
+				"904D1DA9B39EFA930E455BC1",
+				"B08CDA8B711FA2F8B1208BCE");
 			name = "Resources";
 			sourceTree = "<Group>";
 		};
@@ -3624,7 +3663,8 @@
 				"6E4BA2902CCB87D39E8BCD00",
 				"13C680053B5E80ED0A4B0C7D",
 				"45F726C0B99F573FB5EBDAB8",
-				"904D1DA9B39EFA930E455BC1");
+				"904D1DA9B39EFA930E455BC1",
+				"B08CDA8B711FA2F8B1208BCE");
 			name = "Supporting Files";
 			sourceTree = "<Group>";
 		};
@@ -3743,6 +3783,7 @@
 				"596A5FD5B2669DEBBDF53D63",
 				"B44D0E3ACBC1AB32692864CC",
 				"EED63EDCB63AFBFC0D899A85",
+				"D0830CD239A0CD01ABA7A4CB",
 				"DE88CDC31AC2B17EE91ABA4D",
 				"C57004E6C67C88F522633227",
 				"F790EFDDC6078322F94463EC",
@@ -4594,6 +4635,46 @@
 			shellPath = "/bin/sh";
 			shellScript = "cp /Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/qt.conf $CODESIGNING_FOLDER_PATH/qt.conf;  test -d $CODESIGNING_FOLDER_PATH/qt_qml && rm -r $CODESIGNING_FOLDER_PATH/qt_qml;  mkdir -p $CODESIGNING_FOLDER_PATH/qt_qml &&  for p in /Users/Langstonius/Qt/5.4/ios/qml; do rsync -r --exclude='*.a' --exclude='*.prl' --exclude='*.qmltypes'  $p/ $CODESIGNING_FOLDER_PATH/qt_qml; done";
 		};
+		6064FA39C3A9D6B5C07D6693 = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/qml/skins";
+			name = "skins";
+			sourceTree = "<absolute>";
+		};
+		5C8C1B014EB245AB6BC85220 = {
+			fileRef = "6064FA39C3A9D6B5C07D6693";
+			isa = PBXBuildFile;
+		};
+		3E893B3E7726A3471CB23CB1 = {
+			name = "Copy 'skins' Files to Bundle";
+			buildActionMask = 2147483647;
+			dstPath = "/";
+			dstSubfolderSpec = 1;
+			isa = PBXCopyFilesBuildPhase;
+			files = (
+				"5C8C1B014EB245AB6BC85220");
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		06184CF2B6976FB676FDDBDD = {
+			isa = PBXFileReference;
+			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/qml/splash";
+			name = "splash";
+			sourceTree = "<absolute>";
+		};
+		8EEA5FFBD457B8187F6C5BEA = {
+			fileRef = "06184CF2B6976FB676FDDBDD";
+			isa = PBXBuildFile;
+		};
+		10A5CFCC1B13A4CF38ABC79C = {
+			name = "Copy 'splash' Files to Bundle";
+			buildActionMask = 2147483647;
+			dstPath = "/";
+			dstSubfolderSpec = 1;
+			isa = PBXCopyFilesBuildPhase;
+			files = (
+				"8EEA5FFBD457B8187F6C5BEA");
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C0FE3798174C2AD6741C3E55 = {
 			isa = PBXFileReference;
 			path = "/Users/Langstonius/linuxmce/qOrbiter/qOrbiter_src/iOS/qOrbiterIos.xcodeproj/Default-568h@2x.png";
@@ -4616,6 +4697,8 @@
 		};
 		858FCAB0EB1F29CF8B07677C = {
 			children = (
+				"6064FA39C3A9D6B5C07D6693",
+				"06184CF2B6976FB676FDDBDD",
 				"C0FE3798174C2AD6741C3E55",
 				"EEDDE023D4C2E2A4322EEBED");
 			isa = PBXGroup;
@@ -4682,6 +4765,8 @@
 				"3DA90DAE39A0C9D07C6F6B0F",
 				"D1C883685E82D5676953459A",
 				"776D5E25B18ED6FE9A43064F",
+				"3E893B3E7726A3471CB23CB1",
+				"10A5CFCC1B13A4CF38ABC79C",
 				"30414803F31797EB689AE508");
 			dependencies = (
 				"F049A358EFCF663FF954A432");

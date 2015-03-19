@@ -189,81 +189,12 @@ WIN32{
         #DEPLOYMENTFOLDERS += folder_01
 }
 
-#android simulation config
-for_android{
-        folder_01.source = qml/android/
-        folder_01.target = $$DESTDIR/qml
 
-        folder_05.source = qml/template
-        folder_05.target = $$DESTDIR/qml
-
-        folder_03.source = config.xml
-        folder_03.target = $$DESTDIR
-
-        qmlcomponents.source = androidComponents/Qt \ androidComponents/com
-        qmlcomponents.target = qml/imports/
-
-        qmlbase.source = qml/android/base.qml
-        qmlbase.target = $$DESTDIR/qml
-
-        qmlplugins.files = androidPlugins/libqmlshadersplugin.so
-        qmlplugins.files += androidPlugins/libandroidplugin_1_1.so
-
-        x86 {
-                qmlplugins.path = /libs/x86
-        } else: armeabi-v7a {
-                qmlplugins.path = /libs/armeabi-v7a
-        } else {
-                qmlplugins.path = /libs/armeabi
-        }
-
-      #  DEPLOYMENTFOLDERS+= qmlcomponents
-        INSTALLS+= qmlplugins
-        DEFINES+=for_android
-      #  DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
-        QT+=script
-}
-
-#freemantle config
-for_freemantle{
-        folder_01.source = qml/freemantle
-        folder_01.target = $$DESTDIR/qml
-
-        folder_05.source = qml/template
-        folder_05.target = $$DESTDIR/qml
-
-        folder_02.source= img
-        folder_02.target=     #left blank so it will appear in the root
-
-        folder_03.source = config.xml
-        folder_03.target = $$DESTDIR/config
-        DEFINES += for_freemantle
-     #   DEPLOYMENTFOLDERS += folder_01 folder_02 folder_03 folder_05
-}
-
-#harmattan config
-for_harmattan{
-        folder_01.source = qml/harmattan
-        folder_01.target =
-        folder_05.source = qml/template
-        folder_05.target = $$DESTDIR/qml
-        folder_02.source= img
-        folder_02.target=     #left blank so it will appear in the root
-        DEFINES += for_harmattan
-      #  DEPLOYMENTFOLDERS += folder_01 folder_02 folder_05
-}
 
 #mac desktop config
 macx-clang{
         APP_RESOURCES_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/resources
-        folder_01.source = qml/desktop
-        folder_01.target = $$APP_RESOURCES_PATH/qml
 
-        folder_02.source= img
-        folder_02.target= $$APP_RESOURCES_PATH   #left blank so it will appear in the root
-
-        folder_03.source = config.xml
-        folder_03.target = $$APP_RESOURCES_PATH
 
         ICON = ../platforms/osx/osxicons.icns
         plugins_folder.source = imports/
@@ -322,14 +253,6 @@ QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 #LinuxMCE Specific include path. Linking in the app instead of against dce libs for multi-platform expediency.
 INCLUDEPATH += ../../ ../../DCE/
 
-#turtlenecks and such
-macx{
-        contains(QT_VERSION,4.*.*){
-        QT += xml
-        QT += network
-        }
-
-}
 
 
 !macx{
