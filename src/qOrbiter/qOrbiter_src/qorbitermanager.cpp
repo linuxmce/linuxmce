@@ -267,6 +267,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
         setupNetworkSkins();
     } else {
 
+        swapSkins("default");
     }
 }
 
@@ -733,6 +734,13 @@ bool qorbiterManager::OrbiterGen()
 void qorbiterManager::swapSkins(QString incSkin)
 {
     emit skinMessage("swapping skin to::" + incSkin);
+
+    if(mb_useLocalSkins){
+        incSkin="default";
+        currentSkin=incSkin;
+        refreshUI(QUrl(m_localQmlPath+"skins/"+incSkin+"/Main.qml"));
+        return;
+    }
 
 #ifdef WIN32
     incSkin = "default";
@@ -2530,24 +2538,25 @@ void qorbiterManager::setupUiSelectors(){
     remoteDirectoryPath = "http://"+m_ipAddress+"/lmce-admin/skins"+buildType.remove("/qml");
     m_remoteQmlPath = remoteDirectoryPath;
 #ifdef __ANDROID__
-    m_localQmlPath="qrc:/qml/splash/";
+    m_localQmlPath="qrc:/qml/";
 #elif defined Q_OS_IOS
-    m_localQmlPath="";
+    m_localQmlPath=mobileStorageLocation";
 #elif defined WIN32
-    m_localQmlPath="splash/";
+    m_localQmlPath=qApp->applicationDirPath()+"/";
 #elif defined Q_OS_MACX
-    m_localQmlPath="qml";
+    m_localQmlPath=qApp->applicationDirPath()+"/";
 #elif defined Q_OS_LINUX
-    m_localQmlPath="splash/";
+    m_localQmlPath=qApp->applicationDirPath()+"/";
 
 #ifdef simulate
-    m_localQmlPath="../qOrbiter_src/splash/";
+    m_localQmlPath="../qOrbiter_src/qml/";
 #endif
 
 #endif
 
     skinMessage("build type set to:: "+buildType);
-    qorbiterUIwin->setSource(m_localQmlPath+"Splash.qml");
+    qDebug() << "Local path set to " << m_localQmlPath;
+    qorbiterUIwin->setSource(m_localQmlPath+"splash/Splash.qml");
 }
 
 bool qorbiterManager::restoreSettings()
@@ -2704,8 +2713,8 @@ bool qorbiterManager::setupLocalSkins()
     if(themeObject.isEmpty())
         return false;
 
-   QVariantMap t = themeObject.toVariantMap();
-   qDebug() << Q_FUNC_INFO << themeObject.value("themelist");
+    QVariantMap t = themeObject.toVariantMap();
+    qDebug() << Q_FUNC_INFO << themeObject.value("themelist");
 
 }
 

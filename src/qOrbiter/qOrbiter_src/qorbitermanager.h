@@ -1836,6 +1836,7 @@ private slots:
                        qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
                #endif
                                       qorbiterUIwin->setSource(QUrl(returnLocation));
+                                                     qDebug() << qorbiterUIwin->source();
                     }
     void handleScreenChanged(QScreen* screen);
     void resetScreenSize(){

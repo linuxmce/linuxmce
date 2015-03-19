@@ -233,6 +233,7 @@ int main(int argc, char* argv[])
     QCoreApplication::setOrganizationDomain("org.linuxmce.QOrbiter");
     QCoreApplication::setOrganizationName("LinuxMCE");
     SettingInterface settings;
+    settings.destroySettingsData();
 
 #ifdef __ANDROID__
     AndroidSystem androidHelper;
