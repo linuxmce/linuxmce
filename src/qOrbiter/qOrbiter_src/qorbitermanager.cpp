@@ -2578,29 +2578,29 @@ bool qorbiterManager::setupNetworkSkins()
 #ifdef __ANDROID__
 
 #ifdef QT5
-    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/android"+buildType+"/qt5";
+    remoteDirectoryPath = "http://"+QString::fromStdString(m_ipAddress)+"/lmce-admin/skins/android"+buildType+"/qt5";
 #endif
     qWarning()<< remoteDirectoryPath;
 #elif defined Q_OS_MACX
-    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/qt5-desktop";
+    remoteDirectoryPath = "http://"+QString::fromStdString(m_ipAddress)+"/lmce-admin/skins/qt5-desktop";
 #elif defined for_desktop
 #ifdef defined QT5
-    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/qt5-desktop";
+    remoteDirectoryPath = "http://"+QString::fromStdString(m_ipAddress)+"/lmce-admin/skins/qt5-desktop";
 #elif defined QT4
-    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
+    remoteDirectoryPath = "http://"+QString::fromStdString(m_ipAddress)+"/lmce-admin/skins/desktop";
 #endif
 
 #elif defined WIN32
-    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/desktop";
+    remoteDirectoryPath = "http://"+QString::fromStdString(m_ipAddress)+"/lmce-admin/skins/desktop";
 #elif defined RPI
-    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/qt5-desktop";
+    remoteDirectoryPath = "http://"+QString::fromStdString(m_ipAddress)+"/lmce-admin/skins/qt5-desktop";
 #elif defined for_harmattan
-    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins/harmattan";
+    remoteDirectoryPath = "http://"+QString::fromStdString(m_ipAddress)+"/lmce-admin/skins/harmattan";
 #elif defined for_android
 
 
 #else
-    remoteDirectoryPath = "http://"+QString::fromStdString(sRouterIP)+"/lmce-admin/skins"+qmlPath;
+    remoteDirectoryPath = "http://"+QString::fromStdString(m_ipAddress)+"/lmce-admin/skins"+qmlPath;
 #endif
 
     QString qmlPath = adjustPath(QApplication::applicationDirPath().remove("bin"));
