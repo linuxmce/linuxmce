@@ -38,7 +38,9 @@ Item {
         hideUiTimer.restart()
         screenSaverOn=false
     }
-
+Style{
+id:skinStyle
+}
     onActiveFocusChanged: {
         //  uiOn=true
     }

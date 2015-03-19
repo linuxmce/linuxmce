@@ -77,19 +77,23 @@ StyledScreen {
             buttonText: "Pending\nTasks"
 
         }
+        StyledButton{
+            id:clr_settings
+            state: "large-fixed"
+            buttonText: "Clear\nSettings"
+            onActivated: settings.destroySettingsData()
+        }
 
         StyledButton{
             id:networksettings
             state: "large-fixed"
             buttonText: "Network\nSettings"
-
         }
 
         StyledButton{
             id:avwizard
             state: "large-fixed"
             buttonText: "Av\nWizard"
-
         }
 
         StyledButton{
