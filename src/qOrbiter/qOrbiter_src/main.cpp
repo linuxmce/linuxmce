@@ -468,8 +468,8 @@ int main(int argc, char* argv[])
         // QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));
 
         // Generic DCE command sending signal/slots
-        QObject::connect(&w, SIGNAL(sendDceCommand(DCE::PreformedCommand&)), &pqOrbiter, SLOT(sendDCECommand(DCE::PreformedCommand&)), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(sendDceCommandResponse(DCE::PreformedCommand&, string*)), &pqOrbiter, SLOT(sendDCECommandResponse(DCE::PreformedCommand&, string*)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(sendDceCommand(DCE::PreformedCommand&)), &pqOrbiter, SLOT(sendDCECommand(DCE::PreformedCommand&)), Qt::DirectConnection);
+        QObject::connect(&w, SIGNAL(sendDceCommandResponse(DCE::PreformedCommand&, string*)), &pqOrbiter, SLOT(sendDCECommandResponse(DCE::PreformedCommand&, string*)), Qt::DirectConnection);
 
 
         QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
