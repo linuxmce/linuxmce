@@ -86,6 +86,7 @@ void SettingInterface::initializeSettings()
 void SettingInterface::destroySettingsData()
 {
     m_settings->clear();
+    qDebug() << m_settings->allKeys();
     initializeSettings();
 }
 
@@ -129,6 +130,7 @@ void SettingInterface::setOption(SettingInterface::SettingsType st, SettingInter
     } else {
         m_settings->setValue(key, sval);
     }
+    log("Option set");
     m_settings->endGroup();
 
 }

@@ -37,19 +37,27 @@ Item{
     Rectangle{
         width: parent.width *.75
         height: parent.height *.25
+        anchors{
+            bottom:parent.bottom
+            horizontalCenter: parent.horizontalCenter
+        }
+
         radius:10
         color:"grey"
         Text{
             anchors.centerIn: parent
-            text:"Main.qml"
+            text:"Switch to Newtwork Skins"
             color:"white"
             font.pointSize: 65
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+            width: parent.width
         }
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                settings.destroySettingsData()
-                manager.exitApp()
+               manager.setUseLocalSkins(!manager.useLocalSkins)
+                settings.destroySettingsData();
+
             }
         }
     }

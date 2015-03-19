@@ -2562,8 +2562,10 @@ void qorbiterManager::setupUiSelectors(){
 bool qorbiterManager::restoreSettings()
 {
     int tId= settingsInterface->getOption(SettingInterface::Settings_Network, SettingInterface::Setting_Network_Device_ID).toInt();
+    qDebug() << tId;
     QString trouter = settingsInterface->getOption(SettingInterface::Settings_Network, SettingInterface::Setting_Network_Router).toString();
     mb_useLocalSkins = settingsInterface->getOption(SettingInterface::Settings_UI, SettingInterface::Setting_Ui_NetworkLoading).toBool();
+    qDebug() << "Using local skins?" << mb_useLocalSkins;
     if(tId && !trouter.isEmpty()){
         qDebug() << Q_FUNC_INFO << "Read Device Number";
         setDeviceNumber(tId);
