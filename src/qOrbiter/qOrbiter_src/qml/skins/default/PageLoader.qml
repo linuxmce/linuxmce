@@ -41,7 +41,7 @@ Loader {
     function startChange(){
         
         
-        if(!pageLoader.item || pageLoader.item.scree){
+        if(!pageLoader.item || pageLoader.item.screen){
             console.log("pageloader::closing page "+ manager.currentScreen)
             pageLoader.item.state="closing"
         } else{
@@ -59,7 +59,7 @@ Loader {
             return
         }
         
-        console.log("pageloader::loading next screen::\n"+style.commonQmlPath+"screens/"+nextScreen)
+        console.log("pageloader::loading next screen::\n"+"screens/"+nextScreen)
         pageLoader.source="screens/"+nextScreen
     }
     
