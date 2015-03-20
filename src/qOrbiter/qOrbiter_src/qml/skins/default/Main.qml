@@ -18,8 +18,8 @@ Item{
         }
     }
 
- MainLayout{
-     id:layout
-     anchors.fill: parent
- }
+    MainLayout{
+        id:layout
+        anchors.fill: parent
+    }
 }
