@@ -1876,20 +1876,19 @@ bool qorbiterManager::writeConfig()
     qDebug() << Q_FUNC_INFO;
     //   setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
     QDomDocument localConfig;
+    QString xmlPath;
 
 #ifdef Q_OS_IOS
-    QString xmlPath = mobileStorageLocation+"/config.xml";
+    xmlPath = mobileStorageLocation+"/config.xml";
     appConfigPath = xmlPath;
-#endif
-
-#ifdef Q_OS_MAC
-    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
+#elif MACBUILD
+    xmlPath = QString::fromStdString(QApplication::applicationDirPath().remove("MacOS").append("Resources").append("/config.xml").toStdString());
 #elif __ANDROID__
-    QString xmlPath = mobileStorageLocation+"/config.xml";
+    xmlPath = mobileStorageLocation+"/config.xml";
 #elif WIN32
-    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
+    xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #else
-    QString xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
+    xmlPath = QString::fromStdString(QApplication::applicationDirPath().toStdString())+"/config.xml";
 #endif
     QFile localConfigFile;
 
@@ -2543,11 +2542,19 @@ void qorbiterManager::setupUiSelectors(){
 #ifdef __ANDROID__
     m_localQmlPath="qrc:/qml/";
 #elif defined Q_OS_IOS
-   m_localQmlPath="qrc:/qml/"; // m_localQmlPath=QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first()+"/";
+    m_localQmlPath="qrc:/qml/"; // m_localQmlPath=QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first()+"/";
 #elif defined WIN32
     m_localQmlPath=qApp->applicationDirPath()+"/";
-#elif defined Q_OS_MACX && !defined(Q_OS_IOS)
-    m_localQmlPath=qApp->applicationDirPath()+"/";
+#elif defined MACBUILD
+
+    m_localQmlPath=qApp->applicationDirPath()+"/../Resources/";
+#ifdef simulate
+    m_localQmlPath=qApp->applicationDirPath();
+    m_localQmlPath.remove("/build-output/");
+    m_localQmlPath.remove("qorbiter-core-gl.app/Contents/MacOS");
+    m_localQmlPath.append("/qOrbiter_src/qml/");
+#endif
+
 #elif defined Q_OS_LINUX
     m_localQmlPath=qApp->applicationDirPath()+"/";
 

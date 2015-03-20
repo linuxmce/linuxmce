@@ -64,7 +64,7 @@ android-g++{
 
 macx-g++{
 message( Building for OS x )
-DESTDIR=$$[QT_INSTALL_PREFIX]/qml
+DESTDIR=../../imports/AudioVisual #$$[QT_INSTALL_PREFIX]/qml
 }
 
 macx-ios-clang{

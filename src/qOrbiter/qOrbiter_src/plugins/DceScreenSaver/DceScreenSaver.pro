@@ -39,7 +39,7 @@ linux-rasp-pi-g++{
 
 macx-g++{
 message( Building for OS x )
-DESTDIR=$$[QT_INSTALL_IMPORTS]/DceScreenSaver
+DESTDIR=../../imports/DceScreenSaver#$$[QT_INSTALL_IMPORTS]/DceScreenSaver
 QMLDIR_TARGET = $$DESTDIR
 
 }

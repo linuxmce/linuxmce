@@ -192,13 +192,11 @@ WIN32{
 
 
 #mac desktop config
-macx-clang{
+macx-g++{
         APP_RESOURCES_PATH=../../../$$DESTDIR/$$TARGET".app"/Contents/resources
-
-
         ICON = ../platforms/osx/osxicons.icns
-        plugins_folder.source = imports/
-        plugins_folder.target = ../../../$$DESTDIR/$$TARGET".app"/Contents/MacOS/imports
+        plugins_folder.source = imports
+        plugins_folder.target = ../../../$$DESTDIR/$$TARGET".app"/Contents/MacOS/
 
       message("You Must copy the libraries at $$[QT_INSTALL_PREFIX]/qml to $$QTDIR/imports before deploying" )
        # DEPLOYMENTFOLDERS +=  folder_03 plugins_folder
@@ -244,6 +242,18 @@ linux-rasp-pi-g++{
         #folder_01.target=qml
         DEPLOYMENTFOLDERS +=index folder_02 folder_04 folder_03 plugins_folder
 
+macx-g++{
+        index.target=$$APP_RESOURCES_PATH
+
+        folder_02.source=qml/skins
+        folder_02.target=$$APP_RESOURCES_PATH
+
+        folder_03.source=qml/splash
+        folder_03.target=$$APP_RESOURCES_PATH
+
+        folder_04.source=qml/images
+        folder_04.target=$$APP_RESOURCES_PATH
+}
 # Additional import path used to resolve QML modules in Creator's code model
 
 #QML_IMPORT_TRACE = 1

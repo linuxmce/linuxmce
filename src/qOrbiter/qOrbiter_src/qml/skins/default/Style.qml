@@ -12,6 +12,12 @@ Item{
         return y/100*manager.appHeight
     }
 
+    function dumpObj(obj, message){
+        console.log((message? message+"\n\t" : "No Message \n\t")+ JSON.stringify(obj, null, "\t"))
+    }
+
+
+
     readonly property string appcolor_background:"grey"
     readonly property string appcolor_foregroundColor:"darkgreen"
     readonly property string appcolor_navigationBackgroundColor:"blue"

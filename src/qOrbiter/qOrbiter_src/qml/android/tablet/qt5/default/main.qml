@@ -281,46 +281,7 @@ Item {
             }
         }
     }
-    DceScreenSaver{
-        id:glScreenSaver
-        anchors{
-            top:qml_root.top
-            bottom:qml_root.bottom
-            left: qml_root.left
-            right: qml_root.right
-        }
-        enableDebug: true
-        interval:60*1000
-        useAnimation: true
-        //onDebugInfoChanged: console.log(debugInfo)
-       active:manager.connectedState
-        requestUrl:manager.m_ipAddress
-        Component.onCompleted: {
-            glScreenSaver.setImageList(manager.screensaverImages)
-            console.log("Orbiter Consume Screensaver images")
-            console.log("Orbiter counts " + glScreenSaver.pictureCount)
-        }
 
-        Connections{
-            target:manager
-            onScreenSaverImagesReady:{
-                glScreenSaver.setImageList(manager.screensaverImages)
-                console.log("Orbiter Consume Screensaver images")
-                console.log("Orbiter counts " + glScreenSaver.pictureCount)
-            }
-        }
-
-        MouseArea{
-            anchors.fill: parent
-            onClicked: {
-                if(!uiOn){
-                    console.log("screensaver revive")
-                    uiOn=true
-                }
-            }
-        }
-
-    }
     MediaInterface{
      id:dcePlayer
     }
