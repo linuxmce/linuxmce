@@ -52,18 +52,18 @@ void* SerialD::startUp(void * device)
 {
 	running = true;
 	stoprunning = false;
-	
+
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "SerialD::startUp  Waiting 10 seconds to let GSD devices start first and disable any invalid ports");
 	Sleep(10000);
 	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "SerialD::startUp pthread_create ############ SerialD Start ");
-	
+
 	if( device == NULL )
 	{
 		// error
 		running = false;
 		return NULL;
 	}
-	
+
 	halDevice = (HAL *)device;
 	if( halDevice->m_pData == NULL )
 	{
@@ -71,25 +71,26 @@ void* SerialD::startUp(void * device)
 		running = false;
 		return NULL;
 	}
-	
+
 	string sPort;
 	unsigned baud = 9600;
-	
+
 	string val2assign, response;
-	
+
 	if( running )
 	{
 		CMD_Get_Unused_Serial_Ports_DT cmd(halDevice->m_dwPK_Device, DEVICETEMPLATE_General_Info_Plugin_CONST, BL_SameHouse, halDevice->m_dwPK_Device, &val2assign);
 		halDevice->SendCommand(cmd, &response);
-		
+
 		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Serial ports %s -- %s\n", response.c_str(), val2assign.c_str());
-		
+
 		if( !val2assign.empty() )
 		{
 			StringUtils::Tokenize(val2assign, ",", serialDevices);
 		}
 	}
-	
+
+
 	// thread loop
 	while(!stoprunning)
 	{
@@ -101,11 +102,11 @@ void* SerialD::startUp(void * device)
 			try
 			{
 				CSerialPort serialPort(sPort, baud, epbsN81, true);
-				
+
 				if( serialPort.IsBusy() )
 				{
 					LoggerWrapper::GetInstance()->Write(LV_DEBUG, "++++++++++++ SerialD Busy %s", sPort.c_str());
-					// fire event 
+					// fire event
 					halDevice->EVENT_Device_Detected("", "", "", 0, "", 2, 0, "", "37|" + sPort, "serial", halDevice->m_sSignature_get());
 					// remove it from tests
 					it = serialDevices.erase(it);
@@ -118,18 +119,18 @@ void* SerialD::startUp(void * device)
 			}
 			catch(string sError)
 			{
-//				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Exception: %s", sError.c_str());
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Exception: %s", sError.c_str());
 			}
-			
+
 			++it;
 		}
-		
-		usleep(1000000);
+
+		usleep(3000000);
 	}
-	
+
 	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "############ SerialD END ");
 	running = false;
-	
+
 	return NULL;
 }
 

@@ -34,42 +34,42 @@ using namespace DCE;
 #include "DCE/DCEConfig.h"
 
 #include "main.h"
-#include "pluto-hald.h"
+#include "lmce-udevd.h"
 #include "seriald.h"
 
-class HAL::HalPrivate
+class HAL::UdevPrivate
 {
 	public:
-	
-		HalPrivate(HAL * parent);
-		
-		~HalPrivate();
-	
-		/** hald thread */
-		pthread_t hald_thread;
-		
-		/** serial connection thread */
+
+		UdevPrivate(HAL * parent);
+
+		~UdevPrivate();
+
+		/** udevd thread */
+		pthread_t udevd_thread;
+
+		/** seriald connection thread */
 		pthread_t serial_thread;
-		
-		/** hald thread flag */
+
+		/** udevd thread flag */
 		bool running;
-		
+
 		/** serial connection thread flag */
 		bool serial_running;
-		
+
 	private:
-	
+
 		HAL * parent_;
 };
 
-HAL::HalPrivate::HalPrivate(HAL * parent)
+HAL::UdevPrivate::UdevPrivate(HAL * parent)
 	: running(false),
 	  serial_running(false),
 	  parent_(parent)
 {
 }
 
-HAL::HalPrivate::~HalPrivate()
+HAL::UdevPrivate::~UdevPrivate()
 {
 }
 
@@ -79,10 +79,10 @@ HAL::HAL(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLoca
 	: HAL_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
-	m_sSignature = StringUtils::itos(DeviceID) + ",HAL"; // A unique signature for all the device we detect
+	m_sSignature = StringUtils::itos(DeviceID) + ",HAL"; // A unique signature for all the devices we detect
 
-	m_pHalPrivate = new HalPrivate(this);
-	if( m_pHalPrivate == NULL )
+	m_pUdevPrivate = new UdevPrivate(this);
+	if( m_pUdevPrivate == NULL )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "HAL(): Not enough memory!");
 	}
@@ -94,8 +94,8 @@ HAL::HAL(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl
 	: HAL_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
 {
-	m_pHalPrivate = new HalPrivate(this);
-	if( m_pHalPrivate == NULL )
+	m_pUdevPrivate = new UdevPrivate(this);
+	if( m_pUdevPrivate == NULL )
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "HAL(): Not enough memory!");
 	}
@@ -106,48 +106,48 @@ HAL::~HAL()
 //<-dceag-dest-e->
 {
 	// wait for thread finish
-	if( m_pHalPrivate->running )
+	if( m_pUdevPrivate->running )
 	{
-		if( PlutoHalD::shutDown()==false )
+		if( LmceUdevD::shutDown()==false )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "HAL::~HAL failed to stop pluto thread.  Doing a sigterm which will kill everything");
 			// This will kill everything and exit with an error code incrementing the reload count
-			if( 0 != pthread_kill( m_pHalPrivate->hald_thread, SIGTERM) )
+			if( 0 != pthread_kill( m_pUdevPrivate->udevd_thread, SIGTERM) )
 			{
 				//try KILL
-				pthread_kill( m_pHalPrivate->hald_thread, SIGKILL);
+				pthread_kill( m_pUdevPrivate->udevd_thread, SIGKILL);
 			}
 		}
-		if( 0 != pthread_join( m_pHalPrivate->hald_thread, NULL ) )
+		if( 0 != pthread_join( m_pUdevPrivate->udevd_thread, NULL ) )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "pthread_join hald failed");
 		}
 		
-		m_pHalPrivate->running = false;
+		m_pUdevPrivate->running = false;
 	}
 	
-	if( m_pHalPrivate->serial_running )
+	if( m_pUdevPrivate->serial_running )
 	{
 		if( SerialD::shutDown()==false )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "HAL::~HAL failed to stop serial thread.  Doing a sigterm which will kill everything");
-			if( 0 != pthread_kill( m_pHalPrivate->serial_thread, SIGTERM) )
+			if( 0 != pthread_kill( m_pUdevPrivate->serial_thread, SIGTERM) )
 			{
 				//try KILL
-				pthread_kill( m_pHalPrivate->serial_thread, SIGKILL);
+				pthread_kill( m_pUdevPrivate->serial_thread, SIGKILL);
 			}
 		}
 			
-		if( 0 != pthread_join( m_pHalPrivate->serial_thread, NULL ) )
+		if( 0 != pthread_join( m_pUdevPrivate->serial_thread, NULL ) )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_WARNING, "pthread_join seriald failed");
 		}
 		
-		m_pHalPrivate->serial_running = false;
+		m_pUdevPrivate->serial_running = false;
 	}
 	
-	delete m_pHalPrivate;
-	m_pHalPrivate = NULL;
+	delete m_pUdevPrivate;
+	m_pUdevPrivate = NULL;
 }
 
 //<-dceag-getconfig-b->
@@ -159,23 +159,23 @@ bool HAL::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
-	int ret = pthread_create( &m_pHalPrivate->hald_thread, NULL, PlutoHalD::startUp, (void *) this );
+	int ret = pthread_create( &m_pUdevPrivate->udevd_thread, NULL, LmceUdevD::startUp, (void *) this );
 	if( 0 != ret )
 	{
-		m_pHalPrivate->running = false;
+		m_pUdevPrivate->running = false;
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Couldn't create hald thread. return = %d", ret);
 		return false;
 	}
-	m_pHalPrivate->running = true;
+	m_pUdevPrivate->running = true;
 	
-	ret = pthread_create( &m_pHalPrivate->serial_thread, NULL, SerialD::startUp, (void *) this );
+	ret = pthread_create( &m_pUdevPrivate->serial_thread, NULL, SerialD::startUp, (void *) this );
 	if( 0 != ret )
 	{
-		m_pHalPrivate->serial_running = false;
+		m_pUdevPrivate->serial_running = false;
 		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Couldn't create seriald thread. return = %d", ret);
 		return false;
 	}
-	m_pHalPrivate->serial_running = true;
+	m_pUdevPrivate->serial_running = true;
 	
 	return true;
 }

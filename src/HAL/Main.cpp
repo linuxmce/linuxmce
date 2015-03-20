@@ -17,7 +17,9 @@
 
  */
 //<-dceag-incl-b->
+
 #include "HAL.h"
+#include "libudev.h"
 #include "DCE/Logger.h"
 #include "ServerLogger.h"
 #include "PlutoUtils/FileUtils.h"
@@ -26,6 +28,8 @@
 #include "DCERouter.h"
 
 #include "version.h"
+
+#include "udi-helper.h"
 
 using namespace DCE;
 

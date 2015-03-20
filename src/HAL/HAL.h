@@ -99,8 +99,8 @@ public:
 //<-dceag-h-e->
 private:
 
-	class HalPrivate;
-	HalPrivate * m_pHalPrivate;
+	class UdevPrivate;
+	UdevPrivate * m_pUdevPrivate;
 	
 	};
 
