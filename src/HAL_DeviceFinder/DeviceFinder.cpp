@@ -29,7 +29,7 @@ using namespace std;
 #include "PlutoUtils/StringUtils.h"
 
 #ifndef WIN32
-#include "hald_helper.h"
+#include "udev_helper.h"
 #endif
 
 int main(int argc, char* argv[])
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
 		}
 
 #ifndef WIN32
-		HalDHelper::FindDevice(mapDevices);
+		UdevHelper::FindDevice(mapDevices);
 #endif
 	}
 	else

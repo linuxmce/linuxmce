@@ -10,14 +10,14 @@ BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lSerial -lmysqlclient_r 
 MYNAME = hal_device_finder
 VERSION = 2.0.0
 
-CPPFLAGS +=  $(shell pkg-config --cflags hal dbus-1 glib-2.0) \
+CPPFLAGS +=  \
 	-DDBUS_API_SUBJECT_TO_CHANGE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
 	$(SNR_CPPFLAGS) -D_GNU_SOURCE
 CXXFLAGS += -Wno-deprecated
 LDFLAGS +=
-XTRALDLIBS = -ldbus-glib-1 -lgthread-2.0 -ldbus-1 -lglib-2.0 -lhal
+XTRALDLIBS = -ludev
 
-sources = hald_helper.cpp DeviceFinder.cpp
+sources = udev_helper.cpp DeviceFinder.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
@@ -34,7 +34,7 @@ hal_device_finder: $(sources:.cpp=.o)
 	cp $@ $(ROOT)/bin
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) hal_device_finder.bin >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) hal_device_finder >/dev/null
 
 include $(ROOT)/PlutoUtils/make.rules
 ifeq (,$(findstring clean, $(MAKECMDGOALS)))
