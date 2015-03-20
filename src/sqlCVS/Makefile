@@ -26,7 +26,7 @@ newthing: $(new_thing:.cpp=.o)
 distclean: clean
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) sqlCVS >/dev/null
+	rm -f $(call cpath,$(sqlCVS:.cpp=.o) $(sqlCVS:.cpp=.d)) sqlCVS >/dev/null
 
 include $(ROOT)/PlutoUtils/make.rules
 -include $(sources:.cpp=.d)
