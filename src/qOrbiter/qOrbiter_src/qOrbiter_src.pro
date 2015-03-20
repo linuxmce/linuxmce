@@ -535,7 +535,8 @@ OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
     qml/splash/Switch.qml \
-    qml/splash/LanguageList.qml
+    qml/splash/LanguageList.qml \
+    qml/skins/default/PageLoader.qml
 
 
 for_harmattan{

@@ -5,6 +5,7 @@ import DceScreenSaver 1.0
 import QtMultimedia 5.0
 /*! This File is designed to be the main layout that can be switched in and out for various forms */
 Item {
+    id:layout
     anchors.fill: qmlRoot
     Rectangle{
         anchors.fill: parent
@@ -50,39 +51,50 @@ Item {
 
     }
 
-    Text{
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        text:"Main Layout"
-        color:"white"
-        font.pointSize: 65
-    }
+//    Text{
+//        anchors.horizontalCenter: parent.horizontalCenter
+//        anchors.top: parent.top
+//        text:"Main Layout"
+//        color:"white"
+//        font.pointSize: 65
+//    }
 
-    Rectangle{
-        width: parent.width *.75
-        height: parent.height *.25
+//    Rectangle{
+//        width: parent.width *.75
+//        height: parent.height *.25
+//        anchors{
+//            bottom:parent.bottom
+//            horizontalCenter: parent.horizontalCenter
+//        }
+
+//        radius:10
+//        color:"grey"
+//        Text{
+//            anchors.centerIn: parent
+//            text:"Switch to Newtwork Skins"
+//            color:"white"
+//            font.pointSize: 65
+//            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+//            width: parent.width
+//        }
+//        MouseArea{
+//            anchors.fill: parent
+//            onClicked: {
+//                manager.setUseLocalSkins(!manager.useLocalSkins)
+//                settings.destroySettingsData();
+//            }
+//        }
+//    }
+
+    PageLoader {
+        id: pageLoader
         anchors{
-            bottom:parent.bottom
-            horizontalCenter: parent.horizontalCenter
-        }
-
-        radius:10
-        color:"grey"
-        Text{
-            anchors.centerIn: parent
-            text:"Switch to Newtwork Skins"
-            color:"white"
-            font.pointSize: 65
-            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-            width: parent.width
-        }
-        MouseArea{
-            anchors.fill: parent
-            onClicked: {
-                manager.setUseLocalSkins(!manager.useLocalSkins)
-                settings.destroySettingsData();
-
-            }
+            top: layout.bottom
+            bottom:layout.top
+            left:layout.left
+            right:layout.right
         }
     }
+
+
 }
