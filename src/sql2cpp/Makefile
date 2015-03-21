@@ -25,7 +25,7 @@ newthing: $(new_thing:.cpp=.o)
 	@echo "*** Something to do here ***"
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) sql2cpp >/dev/null
+	rm -f $(call cpath,$(sql2cpp:.cpp=.o) $(sql2cpp:.cpp=.d)) sql2cpp >/dev/null
 
 package:
 	./make_package.sh $(APPNAME) $(VERSION)
