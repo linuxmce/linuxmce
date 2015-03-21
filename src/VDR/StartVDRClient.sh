@@ -38,7 +38,6 @@ svdrpsend -p 2001 HITK Ok
 touch $LOCKFILE
 ERRORLEVEL=0
 while [ "$ERRORLEVEL" -ne "1" ] ; do
-	/usr/bin/vdr-sxfe --reconnect xvdr://$XINE_IP --post tvtime:method=use_vo_driver --fullscreen --tcp --syslog --verbose
+	/usr/bin/vdr-sxfe $XINE_IP --reconnect --post tvtime:method=use_vo_driver --fullscreen --tcp --syslog --verbose
 	ERRORLEVEL=$?
 done
-                                
