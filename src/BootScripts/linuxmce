@@ -262,7 +262,8 @@ start() {
 	StartService "Starting Samba Radar" "/usr/pluto/bin/StorageDevices_SambaRadar.sh" "&"
 	StartService "Starting NFS Radar" "/usr/pluto/bin/StorageDevices_NFSRadar.sh" "&"
 
-	StartService "Starting Gamepad Radar" "/usr/pluto/bin/Gamepad_Detect.sh" "&"
+	#Disable the GamePad Radar, hal takes care of this through udev now
+	#StartService "Starting Gamepad Radar" "/usr/pluto/bin/Gamepad_Detect.sh" "&"
 
 	# Disable here, but turn into a start-up script for the individual devices.
 	#StartService "Creating Firewire 2 Video4Linux Pipes" "/usr/pluto/bin/Firewire2Video4Linux.sh" "&"
