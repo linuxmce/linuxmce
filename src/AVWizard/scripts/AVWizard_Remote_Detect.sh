@@ -20,9 +20,10 @@ Q="
 	SELECT VendorModelID,PK_DeviceTemplate,DeviceTemplate.Description,CommandLine,Name
 	FROM DHCPDevice
 	JOIN DeviceTemplate ON FK_DeviceTemplate=PK_DeviceTemplate
-	LEFT JOIN Package_Source ON DeviceTemplate.FK_Package=Package_Source.FK_Package AND FK_RepositorySource=2
+	LEFT JOIN Package_Source ON DeviceTemplate.FK_Package=Package_Source.FK_Package AND FK_RepositorySource=25
 	WHERE DeviceTemplate.FK_DeviceCategory=132
-"
+	AND Name IS NOT NULL
+	"
 R=$(RunSQL "$Q")
 
 OutFile=/tmp/device_find.txt
@@ -37,52 +38,67 @@ for Row in $R; do
 	Log "Query result: $VendorModelID|$PK_DeviceTemplate|$DTDescription|$CmdName|$Name"
 done
 
-Remote=$(/usr/pluto/bin/hal_device_finder -f "$OutFile")
-RemotePort=$(PipeField 1 "$Remote")
-RemoteDT=$(PipeField 2 "$Remote")
-RemoteDescription=$(PipeField 3 "$Remote")
-RemotePkg=$(PipeField 4 "$Remote")
+Remotes=$(/usr/pluto/bin/hal_device_finder -f "$OutFile")
 
-Log "Device finder result: $Remote"
+OIFS="${IFS}"
+NIFS=$'\n'
+IFS=${NIFS}
 
-if ! PackageIsInstalled "$RemotePkg"; then
-	Log "Installing package '$RemotePkg'"
-	apt-get -y install "$RemotePkg"
-else
-	Log "Package is installed: '$RemotePkg'"
-fi
+for Remote in $Remotes
+do
+	IFS=${OIFS}
 
-PerlCommand="
-	chomp;
-	\$desc = \$_;
-	\$desc =~ s/[ :+=()<]/_/g;
-	\$desc =~ s/[->*?\\$\.%\\/]//g;
-	\$desc =~ s/#/Num/g;
-	\$desc =~ s/__/_/g;
-	\$desc =~ s/^_*//g;
-	\$desc =~ s/_*\$//g;
-	print \"\$desc\n\";
-"
+	RemotePort=$(PipeField 1 "$Remote")
+	RemoteDT=$(PipeField 2 "$Remote")
+	RemoteDescription=$(PipeField 3 "$Remote")
+	RemotePkg=$(PipeField 4 "$Remote")
 
-Q="
-	SELECT CommandLine,Description
-	FROM DeviceTemplate
-	WHERE PK_DeviceTemplate='$RemoteDT'
-"
-R=$(RunSQL "$Q")
-CommandLine=$(Field 1 "$R")
-Description=$(Field 2 "$R")
+	Log "Device finder result: $Remote"
 
-if [[ -z "$CommandLine" ]]; then
-	CommandLine=$(echo "$Description" | perl -n -e "$PerlCommand")
-fi
-Log "CommandLine: $CommandLine; Description: $Description"
+	if ! PackageIsInstalled "$RemotePkg"; then
+		Log "Installing package '$RemotePkg'"
+		apt-get -y install "$RemotePkg"
+	else
+		Log "Package is installed: '$RemotePkg'"
+	fi
 
-# Last line of output is our result
-if [[ -n "$RemotePort" ]]; then
-	echo "/usr/pluto/bin/$CommandLine -p $RemotePort -l /var/log/pluto/avremote.log -r $DCERouter -d -1003 -H localhost -P $AVWizard_Port"
-	Log "End result: /usr/pluto/bin/$CommandLine -p $RemotePort -l /var/log/pluto/avremote.log -r $DCERouter -d -1003 -H localhost -P $AVWizard_Port"
-else
-	echo "" # no remote
-	Log "End result: no remote"
-fi
+	PerlCommand="
+		chomp;
+		\$desc = \$_;
+		\$desc =~ s/[ :+=()<]/_/g;
+		\$desc =~ s/[->*?\\$\.%\\/]//g;
+		\$desc =~ s/#/Num/g;
+		\$desc =~ s/__/_/g;
+		\$desc =~ s/^_*//g;
+		\$desc =~ s/_*\$//g;
+		print \"\$desc\n\";
+	"
+
+	Q="
+		SELECT CommandLine,Description
+		FROM DeviceTemplate
+		WHERE PK_DeviceTemplate='$RemoteDT'
+	"
+	R=$(RunSQL "$Q")
+	CommandLine=$(Field 1 "$R")
+	Description=$(Field 2 "$R")
+
+	if [[ -z "$CommandLine" ]]; then
+		CommandLine=$(echo "$Description" | perl -n -e "$PerlCommand")
+	fi
+	Log "CommandLine: $CommandLine; Description: $Description"
+
+	# Last line of output is our result
+	if [[ -n "$RemotePort" ]]; then
+		echo "/usr/pluto/bin/$CommandLine -p $RemotePort -l /var/log/pluto/avremote.log -r $DCERouter -d -1003 -H localhost -P $AVWizard_Port"
+		Log "End result: /usr/pluto/bin/$CommandLine -p $RemotePort -l /var/log/pluto/avremote.log -r $DCERouter -d -1003 -H localhost -P $AVWizard_Port"
+	else
+		echo "" # no remote
+		Log "End result: no remote"
+	fi
+
+	IFS=${NIFS}
+done
+IFS=${OIFS}
+
+
