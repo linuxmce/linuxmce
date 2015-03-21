@@ -65,12 +65,14 @@ void UdevHelper::InternalFindDevice(struct udev * ctx, const std::map<unsigned l
 	{
 		const char *syspath = udev_list_entry_get_name(dev_list_entry);
 		struct udev_device *dev = udev_device_new_from_syspath(ctx, syspath);
+		struct udev_device *parent_dev = udev_device_get_parent_with_subsystem_devtype(dev, "usb", "usb_device");
 
-		struct udev_device *parent_dev = udev_device_get_parent_with_subsystem_devtype(dev, "usb", NULL);
 		if ( parent_dev != NULL )
 		{
-			const char *prod_Id = (udev_device_get_sysattr_value(dev,"idProduct") != NULL ? udev_device_get_sysattr_value(dev,"idProduct") : udev_device_get_sysattr_value(dev,"device"));
-			const char *vendor_Id = (udev_device_get_sysattr_value(dev,"idVendor") != NULL ? udev_device_get_sysattr_value(dev,"idVendor") : udev_device_get_sysattr_value(dev,"vendor"));
+			const char *prod_Id = (udev_device_get_sysattr_value(parent_dev,"idProduct") != NULL ? udev_device_get_sysattr_value(parent_dev,"idProduct") : udev_device_get_sysattr_value(parent_dev,"device"));
+			const char *vendor_Id = (udev_device_get_sysattr_value(parent_dev,"idVendor") != NULL ? udev_device_get_sysattr_value(parent_dev,"idVendor") : udev_device_get_sysattr_value(parent_dev,"vendor"));
+
+			//cerr << "searching for serial device: " << vendor_Id << ":" << prod_Id << " - " << syspath << endl;
 
 			int usb_device_product_id = ( prod_Id == NULL ? -1 : strtol(prod_Id, NULL, 16) );
 			int usb_device_vendor_id = ( vendor_Id == NULL ? -1 : strtol(vendor_Id, NULL, 16) );
@@ -81,7 +83,7 @@ void UdevHelper::InternalFindDevice(struct udev * ctx, const std::map<unsigned l
 			map<unsigned long, vector<string> >::const_iterator it = mapDevices.find(uiSerialID);
 			if( it != mapDevices.end() )
 			{
-				const char *serialDevice = udev_device_get_devpath(dev);
+				const char *serialDevice = udev_device_get_devnode(dev);
 
 //				const char *serial_port = udev_device_get_syspath(dev);
 //				string portID;
