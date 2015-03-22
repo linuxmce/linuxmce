@@ -2036,10 +2036,9 @@ void qOrbiter::qmlSetup(int device, QString address)
 
 }
 
-void qOrbiter::setCurrentScreen(QString s)
-{
-    currentScreen = s;
+void qOrbiter::setCurrentScreen(QString s){
 
+    currentScreen = s;
 }
 
 void qOrbiter::setOrbiterSetupVars(int users, int room, int skin, int lang, int height, int width)

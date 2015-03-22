@@ -7,6 +7,37 @@ Item{
     height: manager.appHeight
     width: manager.appWidth
     focus:true
+
+    property ListModel scenarios:ListModel{
+        id:scenariosList
+        ListElement{
+            name:qsTr("Lights")
+            modelName:0
+            floorplantype:2
+        }
+        ListElement{
+            name:qsTr("Media")
+            modelName:2
+            floorplantype:5
+        }
+        ListElement{
+            name:qsTr("Climate")
+            modelName:1
+            floorplantype:3
+        }
+        ListElement{
+            name:qsTr("Telecom")
+            modelName:3
+            floorplantype:3
+        }
+        ListElement{
+            name:qsTr("Security")
+            modelName:"currentRoomSecurity"
+            floorplantype:4
+        }
+    }
+
+
     Component.onCompleted: {
         manager.writeConfig()
     }
@@ -20,6 +51,8 @@ Item{
 
     MainLayout{
         id:layout
-        anchors.fill: parent
+        height: manager.appHeight
+        width: manager.appWidth
+        anchors.centerIn: parent
     }
 }

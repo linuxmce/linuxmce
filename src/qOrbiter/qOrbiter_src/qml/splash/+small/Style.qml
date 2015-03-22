@@ -2,7 +2,7 @@ import QtQuick 2.3
 pragma Singleton
 //this is a qml singleton example to use the style object as a singleton, thus allowing one to override the style based on the selectors
 Item{
-    id:applicationStyle
+    id:smallSplashStyle
     property string description:"Small UI Style Definition for small devices."
 
     function scaleX(w){

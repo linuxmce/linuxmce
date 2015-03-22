@@ -1870,19 +1870,19 @@ private slots:
         // qorbiterUIwin->setSource(qorbiterUIwin->source());
     }
 
-private:
+private slots:
+    bool restoreSettings();
+    bool setupNetworkSkins();
+    bool setupLocalSkins();
+    void handleViewError(QList<QQmlError>);
     void initializeConnections();
     void setupContextObjects();
     void setupEarlyContexts();
     void setupUiSelectors();
-    void setupQMLview();
+
     void setSkinSelector(QString s){if(m_skinSelector==s)return ; m_skinSelector=s; emit skinSelectorChanged(); }
     void reloadQmlSkin() { }
     void setSelectors(QStringList selections){selector->setExtraSelectors(selections);}
-    bool restoreSettings();
-    bool setupNetworkSkins();
-    bool setupLocalSkins();
-
 
 private:
     QString m_skinSelector;

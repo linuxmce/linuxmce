@@ -24,5 +24,7 @@
         <file>qml/skins/default/Main.qml</file>
         <file>qml/skins/default/Style.qml</file>
         <file>qml/skins/default/qmldir</file>
+        <file>qml/skins/default/MainLayout.qml</file>
+        <file>qml/skins/default/PageLoader.qml</file>
     </qresource>
 </RCC>

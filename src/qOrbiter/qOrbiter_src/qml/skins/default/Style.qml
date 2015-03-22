@@ -34,6 +34,12 @@ Item{
     readonly property color appbutton_disabled_color:"#464646"
     readonly property int appButtonHeight:scaleY(4)
     readonly property int appButtonWidth:scaleX(6)
+    readonly property int appButtonNumberPadHeight:manager.isProfile ? scaleY(12) : scaleY(18)
+    readonly property int appButtonNumberPadWidth: manager.isProfile ? scaleX(18) : scaleX(12)
+    readonly property int appButtonNumberPadSmallHeight:manager.isProfile ? scaleY(9) : scaleY(15)
+    readonly property int appButtonNumberPadSmallWidth:manager.isProfile ? scaleX(15) : scaleX(9)
+    readonly property int appButtonLargeHeight:manager.isProfile ? scaleY(15) : scaleY(20)
+    readonly property int appButtonLargeWidth:manager.isProfile ? scaleX(28) : scaleX(25)
 
     /* Application Fonts */
     readonly property color apptext_color_active:"white"

@@ -1,9 +1,11 @@
 import QtQuick 2.2
-
+import "../"
 Item {
     id:screen_root
     focus:true
     opacity: 0
+    anchors.fill: parent
+
 
     Component.onCompleted: {
         console.log("screen opening")
@@ -18,10 +20,10 @@ Item {
     }
 
     onScreenOpening: {
-//        raiseNavigation(manager.currentScreen==="Screen_1.qml" ? true :keepHeader )
-//        if(keepHeader){
-//            setNavigation(navigation)
-//        }
+        //        raiseNavigation(manager.currentScreen==="Screen_1.qml" ? true :keepHeader )
+        //        if(keepHeader){
+        //            setNavigation(navigation)
+        //        }
     }
 
     onOpacityChanged: {
@@ -37,7 +39,7 @@ Item {
 
 
         } else if(state==="closing"){
-            raiseNavigation(true)
+            //raiseNavigation(true)
         }
     }
 
@@ -58,12 +60,6 @@ Item {
         pageLoader.loadNext();
     }
 
-    anchors{
-        top:parent.top
-        left:parent.left
-        right:parent.right
-        bottom:parent.bottom
-    }
 
     states: [
         State {
@@ -100,7 +96,7 @@ Item {
             from: "*"
             to: "*"
             PropertyAnimation{
-                duration: 500
+                duration: Style.transition_animationTime
             }
         }
     ]

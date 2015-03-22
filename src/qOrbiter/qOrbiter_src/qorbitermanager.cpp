@@ -117,6 +117,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,SettingInt
     connect(qorbiterUIwin, SIGNAL(screenChanged(QScreen*)), this , SLOT(handleScreenChanged(QScreen*)));
     connect(qorbiterUIwin, SIGNAL(heightChanged(int)), this, SLOT(setAppH(int)));
     connect(qorbiterUIwin, SIGNAL(widthChanged(int)), this, SLOT(setAppW(int)));
+    connect(qorbiterUIwin->engine(), SIGNAL(warnings(QList<QQmlError>)), this, SLOT(handleViewError(QList<QQmlError>)));
     resetScreenSize();
     qorbiterUIwin->rootContext()->setContextProperty("screenInfo", m_screenInfo);
 
@@ -2727,6 +2728,12 @@ bool qorbiterManager::setupLocalSkins()
 
     QVariantMap t = themeObject.toVariantMap();
     qDebug() << Q_FUNC_INFO << themeObject.value("themelist");
+
+}
+
+void qorbiterManager::handleViewError(QList<QQmlError>)
+{
+
 
 }
 

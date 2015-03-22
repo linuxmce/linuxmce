@@ -7,14 +7,14 @@
         <file>qml/+android/IndexContent.qml</file>
         <file>qml/+android/+small/IndexContent.qml</file>
         <file>qml/+ios/+iphone/IndexContent.qml</file>
-        <file>qml/+ios/+ipad/IndexContent.qml</file>       
+        <file>qml/+ios/+ipad/IndexContent.qml</file>
         <file>qml/images/login-bg.png</file>
         <file>qml/+linux/+xlarge/IndexContent.qml</file>
-        <file>qml/Themes.json</file>       
+        <file>qml/Themes.json</file>
     </qresource>
     <qresource prefix="/">
         <file>config.xml</file>
-
+        <file>qml/SkinError.qml</file>
     </qresource>
     <qresource prefix="/lang">
         <file>translations/de_DE.qm</file>

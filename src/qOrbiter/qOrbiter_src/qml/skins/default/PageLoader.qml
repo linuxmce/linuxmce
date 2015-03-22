@@ -10,21 +10,32 @@ Loader {
     focus: true
     source:"screens/Screen_1.qml"
     // visible:qml_root.uiOn
-    property string nextScreen:"Screen_1.qml"
+    property string nextScreen:manager.currentScreen
     property string currentScreen:""
 
+    Connections{
+        target:manager
+        onScreenChange:{
+            console.log( manager.currentScreen)
+        }
+    }
     
     onNextScreenChanged: {
-        
+        console.log("Loading next screen")
         if(!nextScreen.match(".qml")){
             return
         } else {
             
         }
+
+        if(currentScreen==nextScreen){
+                return;
+        }
         
         if(!pageLoader.item){
             console.log("Last screen likely had errors, loading next screen==>"+nextScreen)
             loadNext()
+            return;
         }
         
         if( pageLoader.item.noForce===true){
@@ -42,7 +53,7 @@ Loader {
         
         
         if(!pageLoader.item || pageLoader.item.screen){
-            console.log("pageloader::closing page "+ manager.currentScreen)
+            console.log("pageloader::closing page "+ currentScreen)
             pageLoader.item.state="closing"
         } else{
             console.log("pageloader::no page jumping to next ==>"+nextScreen)
@@ -59,11 +70,11 @@ Loader {
             return
         }
         
-        console.log("pageloader::loading next screen::\n"+"screens/"+nextScreen)
+        console.log("pageloader::loading next screen::"+"screens/"+nextScreen)
         pageLoader.source="screens/"+nextScreen
     }
     
-    opacity: uiOn ? 1 : 0
+    //opacity: uiOn ? 1 : 0
     Behavior on opacity {
         PropertyAnimation{
             duration: 750
@@ -78,8 +89,7 @@ Loader {
     onStatusChanged:  if (pageLoader.status == Component.Ready)
                       {
                           
-                          manager.setDceResponse("Command to change to:" + source+ " was successfull")
-                          screenfile = source
+                          manager.setDceResponse("Command to change to:" + source+ " was successfull")                         
                           currentScreen=nextScreen
                           
                           // contentItem=item.screen_root
@@ -92,7 +102,9 @@ Loader {
                       else if(pageLoader.status == Component.Error)
                       {
                           // pageLoader.e
+                         // source="screens/Screen_X.qml"
                           console.log("Command to change to:" + source + " failed!")
-                          manager.currentScreen="Screen_X.qml"
+                         manager.currentScreen="Screen_X.qml"
+
                       }
 }

@@ -122,10 +122,6 @@ Item {
     //    }
 
 
-
-
-
-
     Keys.onReleased:{
         switch(event.key){
 
