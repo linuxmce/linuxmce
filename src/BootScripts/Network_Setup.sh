@@ -192,7 +192,7 @@ case $ExtIP in
 		fi
 	;;
 	*)
-		if [[ "$PPPoEEnabled" == "on" ]];then
+		if [[ ! "$PPPoEEnabled" == "on" ]];then
 			Setting="static"
 			auto=("${auto[@]}" $ExtIf)
 			IfConf="iface $ExtIf inet static
