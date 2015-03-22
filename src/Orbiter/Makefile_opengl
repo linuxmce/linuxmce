@@ -27,13 +27,21 @@ sources = Main.cpp Orbiter.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS += -g -O0
-CPPFLAGS += -DORBITER -DCACHE_IMAGES -DENABLE_MOUSE_BEHAVIOR -I$(ROOT)/Splitter -I$(ROOT)/OrbiterGen -I$(ROOT)/Orbiter -I/usr/include/SDL -DORBITER_OPENGL -DHID_REMOTE
+CPPFLAGS += -DORBITER -DCACHE_IMAGES -DENABLE_MOUSE_BEHAVIOR -I$(ROOT)/Splitter -I$(ROOT)/OrbiterGen -I$(ROOT)/Orbiter -I/usr/include/SDL -DORBITER_OPENGL
 LDFLAGS += -L/usr/X11R6/lib
-XTRALDLIBS += -lDCECommon -lSDL_Helpers -lXtst -lGL -lGLU -lXrender -lXext -lSDL -lSDL_ttf -lSDL_image -lusb -lz
+XTRALDLIBS += -lDCECommon -lSDL_Helpers -lXtst -lGL -lGLU -lXrender -lXext -lSDL -lSDL_ttf -lSDL_image -lz
 
 # wmctrl wrapper
 CPPFLAGS += -I/usr/X11R6/include `pkg-config --cflags glib-2.0`
 XTRALDLIBS += -lX11 -lXmu `pkg-config --libs glib-2.0`
+
+# Remove unnessesary libraries for Maemo Orbiter
+#ifneq (MAEMO_NOKIA770,$(findstring MAEMO_NOKIA770, $(SNR_CPPFLAGS)))
+#ifneq (RPI,$(findstring RPI, $(SNR_CPPFLAGS)))
+#XTRALDLIBS += -lusb -lGL -lGLU
+#CPPFLAGS += -DHID_REMOTE
+#endif
+#endif
 
 Gen_Dev_Files +=
 sources += \
@@ -43,8 +51,6 @@ sources += \
 	../utilities/linux/wrapper/wrapper_x11.cpp \
 	../utilities/linux/wrapper/image_file.cpp \
 	Linux/win_list_manager.cpp \
-	Linux/HIDInterface.cpp \
-	Linux/GenericHIDInterface.cpp \
 	Linux/OrbiterRenderer_Linux.cpp \
 	Linux/WindowContext.cpp \
 	DesignObj_Data.cpp \
@@ -139,6 +145,14 @@ sources += \
 	
 
 #$(ROOT)/utilities/linux/transparency/transparency.cpp
+
+# Remove unnessesary libraries for Maemo Orbiter
+#ifneq (MAEMO_NOKIA770,$(findstring MAEMO_NOKIA770, $(SNR_CPPFLAGS)))
+#ifneq (RPI,$(findstring RPI, $(SNR_CPPFLAGS)))
+#sources += Linux/HIDInterface.cpp \
+#          Linux/GenericHIDInterface.cpp
+#endif
+#endif
 
 ifneq (,$(findstring -DVIA_OVERLAY, $(CPPFLAGS)))
 XTRALDLIBS += -lddmpeg

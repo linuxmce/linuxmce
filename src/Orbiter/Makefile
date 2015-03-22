@@ -35,10 +35,12 @@ LDFLAGS += -L/usr/X11R6/lib
 XTRALDLIBS += -lDCECommon -lSDL -lSDL_ttf -lSDL_image -lSGE -lSDL_gfx -lXtst -lXext -lXrender -lSDL_Helpers -lX11 -lz
 
 # Remove unnessesary libraries for Maemo Orbiter
-ifneq (MAEMO_NOKIA770,$(findstring MAEMO_NOKIA770, $(SNR_CPPFLAGS)))
-XTRALDLIBS += -lusb -lGL -lGLU
-CPPFLAGS += -DHID_REMOTE
-endif
+#ifneq (MAEMO_NOKIA770,$(findstring MAEMO_NOKIA770, $(SNR_CPPFLAGS)))
+#ifneq (RPI,$(findstring RPI, $(SNR_CPPFLAGS)))
+#XTRALDLIBS += -lusb -lGL -lGLU
+#CPPFLAGS += -DHID_REMOTE
+#endif
+#endif
 
 # USE_GTK can be passed in as additional defines to SNR_CPPFLAGS to add support for GTK progress bars and prompt dialogues.
 ifeq (USE_GTK,$(findstring USE_GTK, $(SNR_CPPFLAGS)))
@@ -114,10 +116,12 @@ sources += \
 
 
 # Remove unnessesary libraries for Maemo Orbiter
-ifneq (MAEMO_NOKIA770,$(findstring MAEMO_NOKIA770, $(SNR_CPPFLAGS)))
-sources += Linux/HIDInterface.cpp \
-	   Linux/GenericHIDInterface.cpp
-endif
+#ifneq (MAEMO_NOKIA770,$(findstring MAEMO_NOKIA770, $(SNR_CPPFLAGS)))
+#ifneq (RPI,$(findstring RPI, $(SNR_CPPFLAGS)))
+#sources += Linux/HIDInterface.cpp \
+#	   Linux/GenericHIDInterface.cpp
+#endif
+#endif
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
