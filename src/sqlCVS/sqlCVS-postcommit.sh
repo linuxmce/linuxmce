@@ -4,9 +4,11 @@ echo "sqlCVS-postcommit hook running"
 
 # Make GolemIX shout !
 URL="http://schema.linuxmce.org/sqlCVS/?site=batch/detail&repository=$2&batchid=$1"
-URL=$(perl -MURI::Escape -e 'print uri_escape("'$URL'");')
+#URL=$(perl -MURI::Escape -e "print uri_escape('$URL');")
 MESSAGE="sqlCVS commit to repo $2 by $3 batch $1 - $4 ($URL)"
+MESSAGE=$(perl -MURI::Escape -e "print uri_escape('$MESSAGE');")
+
 echo "Send to Golem: $MESSAGE"
-wget "http://vt100.at/announce.php?text=$MESSAGE" -o /dev/null -O /dev/null
+wget --no-check-certificate http://vt100.at/announce.php?text=$MESSAGE -o /dev/null -O /dev/null
 
 # Insert commit into trac ticket
