@@ -180,35 +180,38 @@ case $ExtIP in
 	;;
 	"dhcp")
 		Setting="dhcp"
-		auto=("${auto[@]}" $ExtIf)
-		IfConf="iface $ExtIf inet dhcp"
-		echo "$IfConf" >>"$File"
-		if [[ "$Extv6IP" == "disabled" ]]; then
-			echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=1" >>"$File"
-		else
-			echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=0" >>"$File"
+		if [[ ! "$PPPoEEnabled" == "on" ]];then
+			auto=("${auto[@]}" $ExtIf)
+			IfConf="iface $ExtIf inet dhcp"
+			echo "$IfConf" >>"$File"
+			if [[ "$Extv6IP" == "disabled" ]]; then
+				echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=1" >>"$File"
+			else
+				echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=0" >>"$File"
+			fi
 		fi
-
 	;;
 	*)
-		Setting="static"
-		auto=("${auto[@]}" $ExtIf)
-		IfConf="iface $ExtIf inet static
+		if [[ "$PPPoEEnabled" == "on" ]];then
+			Setting="static"
+			auto=("${auto[@]}" $ExtIf)
+			IfConf="iface $ExtIf inet static
 	address $ExtIP
 	netmask $ExtNetmask
 	gateway $Gateway"
-		echo "$IfConf" >>"$File"
-		if [[ "$Extv6IP" == "disabled" ]]; then
-			echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=1" >>"$File"
-		else
-			echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=0" >>"$File"
-		fi
-		DNSservers=$(echo "$DNS,"; echo "$NetSettings" | tail -1)
-		DNSservers=$(echo "$DNSservers" | tr ',' '\n' | sort -u | tr '\n' ' ')
-		if ! BlacklistConfFiles '/etc/resolv.conf' ;then
-			for i in $DNSservers; do
-				echo "nameserver $i" >>/etc/resolv.conf
-			done
+			echo "$IfConf" >>"$File"
+			if [[ "$Extv6IP" == "disabled" ]]; then
+				echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=1" >>"$File"
+			else
+				echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=0" >>"$File"
+			fi
+			DNSservers=$(echo "$DNS,"; echo "$NetSettings" | tail -1)
+			DNSservers=$(echo "$DNSservers" | tr ',' '\n' | sort -u | tr '\n' ' ')
+			if ! BlacklistConfFiles '/etc/resolv.conf' ;then
+				for i in $DNSservers; do
+					echo "nameserver $i" >>/etc/resolv.conf
+				done
+			fi
 		fi
 	;;
 esac
