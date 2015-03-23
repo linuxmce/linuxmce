@@ -709,6 +709,7 @@ void Slim_Server_Streamer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,s
 	m_mapStreamsToPlayers.erase(iStreamID);
 	SendReceiveCommand(sControlledPlayerMac + " playlist clear");
 	SendReceiveCommand(sControlledPlayerMac + " stop");
+	SendReceiveCommand(sControlledPlayerMac + " power 0");
 }
 
 //<-dceag-c39-b->
