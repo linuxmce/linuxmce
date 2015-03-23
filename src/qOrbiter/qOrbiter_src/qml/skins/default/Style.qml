@@ -2,7 +2,7 @@ import QtQuick 2.3
 pragma Singleton
 Item{
     id:applicationStyle
-
+objectName: "style"
     function scaleX(w){
         return w/100*manager.appWidth
     }
@@ -52,7 +52,7 @@ Item{
 
     /* Application Navigation Bars */
     readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(13) : scaleY(15)
-    readonly property string appNavigation_panelHeight:manager.isProfile ? scaleY(9) : scaleY(16)
+    readonly property string appNavigation_panelHeight:manager.isProfile ? scaleY(7) : scaleY(8)
 
     /* Application Menu Panels */
     readonly property int appMenuPanel_height:scaleY(90)
@@ -66,5 +66,10 @@ Item{
     readonly property int listViewWidth_small:scaleX(15)
     readonly property int listViewItemHeight:manager.isProfile ? scaleY(12) : scaleY(15)
     readonly property int listViewMargin:manager.isProfile ? scaleX(5) : scaleX(2.5)
+
+    //opacity and accents
+    readonly property double appHeader_opacity:.55
+    readonly property double appPanel_opacity:.45
+    readonly property double appList_opacity:.45
 
 }

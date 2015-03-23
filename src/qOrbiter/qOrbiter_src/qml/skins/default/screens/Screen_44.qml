@@ -60,22 +60,50 @@ StyledScreen {
         StyledButton{
             id:diagnostic
             state: "large-fixed"
-            buttonText: "Diagnostics"
-            onActivated: content.state="diag"
+            buttonText: qsTr("Screen Information")
+            onActivated: {
+                qmlRoot.createPopup(settingsComponent)
+            }
 
         }
         StyledButton{
             id:refresh
             state: "large-fixed"
-            buttonText: "Clear\nCache"
-            onActivated:{ manager.clearSkinCache(); manager.goBacktoQScreen()}
+            buttonText: qsTr("Reload Local QML")
+            onActivated:{ manager.qmlReload()}
         }
         StyledButton{
             id:ping
             state: "large-fixed"
-            buttonText: "Ping\nTest"
+            buttonText: qsTr("Ping Test")
         }
+        StyledButton{
+            id:componentList
+            state: "large-fixed"
+            buttonText: qsTr("Component List")
+        }
+        StyledButton{
+            id:settings
+            state: "large-fixed"
+            buttonText: qsTr("Settings")
+            onActivated: qmlRoot.createPopup(settingsComponent)
+        }
+    }
 
+    Component{
+        id: settingsComponent
+        GenericPopup {
+            title:qsTr("Settings")
+            content: GenericDialog{
 
+            }
+        }
+    }
+
+    Component{
+        id:compList
+        GenericPopup{
+            title:qsTr("Components Sample")
+        }
     }
 }

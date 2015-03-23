@@ -8,6 +8,10 @@ Item{
     width: manager.appWidth
     focus:true
 
+    function createPopup(comp){
+        comp.createObject(qmlRoot)
+    }
+
     property ListModel scenarios:ListModel{
         id:scenariosList
         ListElement{
@@ -34,6 +38,11 @@ Item{
             name:qsTr("Security")
             modelName:"currentRoomSecurity"
             floorplantype:4
+        }
+        ListElement{
+            name:qsTr("Advanced")
+            modelName:"advancedMenu"
+            floorplantype:-1
         }
     }
 

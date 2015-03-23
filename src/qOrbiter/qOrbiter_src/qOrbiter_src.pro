@@ -536,7 +536,9 @@ OTHER_FILES += Readme.txt \
         config.xml \
     qml/splash/Switch.qml \
     qml/splash/LanguageList.qml \
-    qml/skins/default/PageLoader.qml
+    qml/skins/default/PageLoader.qml \
+    qml/skins/default/DefaultHeader.qml \
+    qml/skins/default/components/GenericPopup.qml
 
 
 for_harmattan{

@@ -1828,16 +1828,27 @@ public slots:
 
 private slots:
     void delayedReloadQml() { QTimer *delayTimer= new QTimer(this); delayTimer->setInterval(500); delayTimer->setSingleShot(true); connect(delayTimer, SIGNAL(timeout()), this, SLOT(reloadQml())); delayTimer->start();}
-    void reloadQml(){  QString returnLocation=qorbiterUIwin->source().toString();
-               #ifdef simulate
-                       qorbiterUIwin->setSource(QUrl("../qOrbiter_src/qml/Index.qml"));
-                                      qorbiterUIwin->engine()->clearComponentCache();
-               #else
-                       qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
-               #endif
-                                      qorbiterUIwin->setSource(QUrl(returnLocation));
-                                                     qDebug() << qorbiterUIwin->source();
-                    }
+    void reloadQml(){
+        const QString aName("style");
+        QQuickItem* st = qorbiterUIwin->rootContext()->findChild<QQuickItem*>(aName, Qt::FindChildrenRecursively);
+
+        if(st){
+            qDebug() << Q_FUNC_INFO << "Deleting style";
+            st->deleteLater();
+            QString filePath = m_selector->select(qorbiterUIwin->engine()->baseUrl()).toString()+"/Style.qml";
+            QQmlComponent *nustyle = new QQmlComponent(qorbiterUIwin->engine(), filePath);
+        }
+        st->deleteLater();
+        QString returnLocation=qorbiterUIwin->source().toString();
+#ifdef simulate
+        qorbiterUIwin->setSource(QUrl("../qOrbiter_src/qml/Index.qml"));
+        qorbiterUIwin->engine()->clearComponentCache();
+#else
+        qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
+#endif
+        qorbiterUIwin->setSource(QUrl(returnLocation));
+        qDebug() << qorbiterUIwin->source();
+    }
     void handleScreenChanged(QScreen* screen);
     void resetScreenSize(){
 

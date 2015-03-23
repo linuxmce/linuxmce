@@ -13,6 +13,7 @@ Item {
         anchors.fill: parent
         color:"black"
     }
+    property bool uiOn:true
 
     DceScreenSaver{
         id:glScreenSaver
@@ -44,64 +45,24 @@ Item {
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                if(!uiOn){
-                    console.log("screensaver revive")
-                    uiOn=true
-                }
+              uiOn=!uiOn
             }
         }
 
     }
 
-//    Text{
-//        anchors.horizontalCenter: parent.horizontalCenter
-//        anchors.top: parent.top
-//        text:"Main Layout"
-//        color:"white"
-//        font.pointSize: 65
-//    }
-
-//    Rectangle{
-//        width: parent.width *.75
-//        height: parent.height *.25
-//        anchors{
-//            bottom:parent.bottom
-//            horizontalCenter: parent.horizontalCenter
-//        }
-
-//        radius:10
-//        color:"grey"
-//        Text{
-//            anchors.centerIn: parent
-//            text:"Switch to Newtwork Skins"
-//            color:"white"
-//            font.pointSize: 65
-//            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-//            width: parent.width
-//        }
-//        MouseArea{
-//            anchors.fill: parent
-//            onClicked: {
-//                manager.setUseLocalSkins(!manager.useLocalSkins)
-//                settings.destroySettingsData();
-//            }
-//        }
-//    }
-
-
-
     PageLoader {
         id: pageLoader
-        anchors.fill: parent
+        anchors{
+            top:header.bottom
+            left:layout.left
+            right:layout.right
+            bottom:layout.bottom
+        }
     }
 
-    StyledButton{
-        anchors{
-            right:parent.right
-            top:parent.top
-        }
-        buttonText: qsTr("Home")
-        onActivated: manager.setCurrentScreen("Screen_1.qml")
+    DefaultHeader {
+        id: header
     }
 
 }
