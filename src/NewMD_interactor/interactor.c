@@ -177,6 +177,7 @@ int main(int argc, char * argv[])
 			{
 				// NOOP
 				// Server reported back to us our ID
+				// TODO: write deviceid to PK_Device in /etc/pluto.conf for disked based booting
 			}
 		}
 		
