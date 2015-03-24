@@ -1,4 +1,4 @@
-PROGRAMS=interactor interactor-server
+PROGRAMS=interactor interactor-disked interactor-server
 
 CPPFLAGS=-g -ggdb3 -W -Wall
 CXX=g++

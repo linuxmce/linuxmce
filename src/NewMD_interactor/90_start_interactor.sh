@@ -1,6 +1,10 @@
 #!/bin/dash
 
-if [ -f /etc/Disked_DeviceID ]; then
+DEVICEID_FILE="/etc/Disked_DeviceID"
+DTVENDOR_FILE="/etc/pluto/Disked_DTVendor"
+COMMAND_FILE="/etc/pluto/Disked_Command"
+
+if [ -f "$DEVICEID_FILE" ]; then
 	echo "We have a DeviceID already, bypassing interactor."
   exit 0
 fi
@@ -9,25 +13,63 @@ MyIP=$(/sbin/ifconfig eth0 | awk 'NR==2 { print substr($2, index($2, ":") + 1) }
 MyMAC=$(/sbin/ifconfig eth0 | awk 'NR==1 { print $5 }')
 Gateway=$(/sbin/route -n | awk '/^0\.0\.0\.0/ { print $2 }')
 
-ARCH=$(arch)
-case $ARCH in
-	i386|i686)
-		Architecture="i386"
+# DeviceData Section
+DEVICEDATA_Is_Diskless_Boot_CONST=9
+DEVICEDATA_PK_Distro_CONST=7
+DEVICEDATA_Operating_System_CONST=209
+DEVICEDATA_Diskless_Archives_CONST=258
+DEVICEDATA_Release_CONST=262
+
+DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
+DEVICEDATA_DISTRO_Ubuntu_Precise_CONST=20
+DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST=21
+
+DEVICETEMPLATE_Generic_PC_as_MD_CONST=28
+
+DD=""
+
+# Disable diskless creation/boot
+DD="$DD|$DEVICEDATA_Is_Diskless_Boot_CONST|0"
+
+# get PK_Distro from OS
+RELEASE=$(lsb_release -cs)
+case "$RELEASE" in
+	precise)
+		release=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST
 		;;
-	amd64)
-		Architecture="i386"
-		;;
-	armhf)
-		Architecture="armhf"
+	trusty)
+		release=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST
 		;;
 	*)
-		echo "ERR: unknown arch $ARCH"
-		return 1
+		echo "ERR: Unknown release (distro)"
+		;;
 esac
+[ -n "$release" ] && DD="$DD|$DEVICEDATA_PK_Distro_CONST|$release"
+[ -n "$RELEASE" ] && DD="$DD|$DEVICEDATA_Release_CONST|$RELEASE"
 
-devicedata=""
-MyDeviceData="$Architecture""$devicedata"
+# get PK_Distro from OS
+DISTRO=$(lsb_release -is)
+[ -n "$DISTRO" ] && DD="$DD|$DEVICEDATA_Operating_System_CONST|$DISTRO"
 
-echo "IP: $MyIP; MAC: $MyMAC; Gateway: $Gateway; DeviceData: $MyDeviceData"
+ARCH=$(arch)
+[ -n "$ARCH" ] && DD="$ARCH|$DD"
 
-/sbin/interactor "$Gateway" "$MyIP" "$MyMAC" "$MyDeviceData"
+# TODO: test this
+#archives=""
+#DD="$DD|$DEVICEDATA_Diskless_Archives_CONST|$archives"
+
+if [ -f "$DTVENDOR_FILE" ]; then
+	DTVendorID=$(cat "$DTVENDOR_FILE")
+fi
+if [ -f "$COMMAND_FILE" ]; then
+	Command=$(cat "$COMMAND_FILE")
+fi
+
+if ([ -n "$DTVendorID" ] || [ -n "$Command" ]); then
+	DTVendorID=$DEVICETEMPLATE_Generic_PC_as_MD_CONST
+	Command=""
+fi
+
+echo "IP: $MyIP; MAC: $MyMAC; Gateway: $Gateway; DeviceData: $DD; DT/Vendor: $DTVendorID; Command: $Command"
+
+/sbin/interactor-disked "$Gateway" "$MyIP" "$MyMAC" "$DD" "$DTVendorID" "$Command"
