@@ -1,8 +1,7 @@
 . /usr/pluto/bin/Config_Ops.sh
 
 setup_rpi2() {
-	echo -e "Setting up rpi2 specific boot scripts" >&2
-	update-rc.d -f switch_cpu_governor start 50 2 3 4 5 . >/dev/null
+	echo -e "Setting up rpi2 specific boot settings" >&2
 
 	ConfSet "AVWizardOverride" "0"
 	ConfSet "AVWizardDone" "1"
