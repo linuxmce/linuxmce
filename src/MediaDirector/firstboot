@@ -9,10 +9,13 @@ DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
 DEVICEDATA_DISTRO_Ubuntu_Precise_CONST=20
 DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST=21
 
+FSTAB_FILE="/etc/fstab"
+DEVID_FILE="/etc/Disked_DeviceID"
+
 setup_fstab() {
 	# Hmm, let's see if the mounts are here, if not add them
-	if [ ! $(grep "192.168.80.1" /etc/fstab) ]; then
-		cat <<-EOF >> /etc/fstab
+	if [ ! $(grep "192.168.80.1" "${FSTABFILE}") ]; then
+		cat <<-EOF >> "${FSTAB_FILE}"
 			192.168.80.1:/usr/pluto/var/                    /usr/pluto/var/         nfs4 retrans=10,timeo=50 1 1
 			192.168.80.1:/usr/pluto/orbiter                 /usr/pluto/orbiter      nfs4 retrans=10,timeo=50 1 1
 			192.168.80.1:/usr/pluto/keys                    /usr/pluto/keys         nfs4 retrans=10,timeo=50 1 1
@@ -26,26 +29,26 @@ setup_fstab() {
 
 setup_plutoconf() {
 	# get PK_Device from "/etc/Disked_DeviceID", created by interactor
-	device=$(cat /etc/Disked_DeviceID)
-	[ -n "$PK_Device" ] || ConfSet "PK_Device" "$device"
+	DEVICE=$(cat "$DEVID_FILE")
+	[ -n "$PK_Device" ] || ConfSet "PK_Device" "$DEVICE"
 
 	# get PK_Distro from OS
 	DISTRO=$(lsb_release -cs)
 	case "$DISTRO" in
 		precise)
-			device=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST
+			distro=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST
 	                ;;
 		trusty)
-			device=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST
+			distro=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST
 			;;
 		wheezy)
-			device=$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST
+			distro=$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST
 			;;
 		*)
 			echo "ERR: Unknown distro"
 			;;
 	esac
-	[ -n "$PK_Distro" ] || [ -n "$device" ] && Confset "PK_Distro" "$distro"
+	[ -n "$PK_Distro" ] || [ -n "$distro" ] && Confset "PK_Distro" "$distro"
 
 	[ -n "$MySqlHost" ] || ConfSet "MySqlHost" "192.168.80.1"
 	[ -n "$MySqlUser" ] || ConfSet "MySqlUser" "root"
@@ -61,8 +64,8 @@ setup_plutoconf() {
 }
 
 start() {
-	if [ ! -f /etc/Disked_DeviceID ]; then
-		echo "ERR: interactor has not yet created '/etc/Disked_DeviceID'."
+	if [ ! -f "$DEVID_FILE" ]; then
+		echo "ERR: interactor has not yet created '$DEVID_FILE'."
 		return 10
 	fi
 
