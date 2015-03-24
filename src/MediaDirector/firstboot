@@ -1,0 +1,108 @@
+#!/bin/dash
+
+set -e
+
+. /usr/pluto/bin/Config_Ops.sh
+#. /usr/pluto/bin/Network_Parameters.sh
+
+DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
+DEVICEDATA_DISTRO_Ubuntu_Precise_CONST=20
+DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST=21
+
+setup_fstab() {
+	# Hmm, let's see if the mounts are here, if not add them
+	if [ ! $(grep "192.168.80.1" /etc/fstab) ]; then
+		cat <<-EOF >> /etc/fstab
+			192.168.80.1:/usr/pluto/var/                    /usr/pluto/var/         nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/usr/pluto/orbiter                 /usr/pluto/orbiter      nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/usr/pluto/keys                    /usr/pluto/keys         nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/usr/pluto/deb-cache               /usr/pluto/deb-cache    nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/var/spool/asterisk                /var/spool/asterisk     nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/home                              /home                   nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/home/cameras                      /home/cameras           nfs4 retrans=10,timeo=50 1 1
+			EOF
+	fi
+}
+
+setup_plutoconf() {
+	# get PK_Device from "/etc/Disked_DeviceID", created by interactor
+	device=$(cat /etc/Disked_DeviceID)
+	[ -n "$PK_Device" ] || ConfSet "PK_Device" "$device"
+
+	# get PK_Distro from OS
+	DISTRO=$(lsb_release -cs)
+	case "$DISTRO" in
+		precise)
+			device=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST
+	                ;;
+		trusty)
+			device=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST
+			;;
+		wheezy)
+			device=$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST
+			;;
+		*)
+			echo "ERR: Unknown distro"
+			;;
+	esac
+	[ -n "$PK_Distro" ] || [ -n "$device" ] && Confset "PK_Distro" "$distro"
+
+	[ -n "$MySqlHost" ] || ConfSet "MySqlHost" "192.168.80.1"
+	[ -n "$MySqlUser" ] || ConfSet "MySqlUser" "root"
+	[ -n "$MySqlPassword" ] || ConfSet "MySqlPassword" ""
+	[ -n "$MySqlDBName" ] || ConfSet "MySqlDBName" "pluto_main"
+	[ -n "$DCERouter" ] || ConfSet "DCERouter" "192.168.80.1"
+	[ -n "$MySqlPort" ] || ConfSet "MySqlPort" "3306"
+	[ -n "$DCERouterPort" ] || ConfSet "DCERouterPort" "3450"
+	[ -n "$AutostartCore" ] || ConfSet "AutostartCore" "0"
+	[ -n "$AutostartMedia" ] || ConfSet "AutostartMedia" "1"
+	[ -n "$FirstBoot" ] || ConfSet "FirstBoot" "true"
+	[ -n "$AVWizardDone" ] || ConfSet "AVWizardDone" "0"
+}
+
+start() {
+	if [ ! -f /etc/Disked_DeviceID ]; then
+		echo "ERR: interactor has not yet created '/etc/Disked_DeviceID'."
+		return 10
+	fi
+
+	setup_fstab
+	setup_plutoconf
+
+	# run any device specific firstboot add-on scripts here
+	for f in /etc/init.d/firstboot-lmce-* ; do 
+		echo "Running device specific firstboot script: $f"
+		. /etc/init.d/$f
+	done
+
+	return 0
+}
+
+status() {
+        status_of_proc firstboot firstboot
+	return $?
+}
+
+case "$1" in
+  start|"")
+        $1
+	retval=$?
+        ;;
+  restart|reload|force-reload)
+        echo "Error: argument '$1' not supported" >&2
+	retval=3
+        ;;
+  stop)
+        : # No-op
+	retval=$?
+        ;;
+  status)
+        $1
+        retval=$?
+        ;;
+  *)
+        echo "Usage: $0 [start|stop|status]" >&2
+	retval=3
+esac
+return $retval
+
