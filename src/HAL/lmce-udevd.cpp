@@ -640,7 +640,7 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 
 	else if ( strcmp(subsystem, "usb") == 0 && strlen(subsystem) == strlen("usb") )
 	{
-		if ( devtype == NULL )
+		if ( udi != NULL && devtype == NULL )
 		{
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ USB dongle added %s = %s", buffer, udi);
 
