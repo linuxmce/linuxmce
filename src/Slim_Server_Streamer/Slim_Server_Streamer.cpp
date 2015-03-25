@@ -223,19 +223,21 @@ void Slim_Server_Streamer::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,s
 				pPlayerDeviceData->m_dwPK_Device, pPlayerDeviceData->m_sDescription.c_str(), currentPlayerAddress.c_str());
 			continue;
 		}
-		else
-		{
+//		else
+//		{
 			vectDevices.push_back(pPlayerDeviceData);
+			SendReceiveCommand(currentPlayerAddress + " power 1"); // Power on device.
 #if 0
 			SendReceiveCommand(currentPlayerAddress + " stop"); // stop playback (if any)
 			SendReceiveCommand(currentPlayerAddress + " playlist clear"); // clear previous playlist (if any)
 			SendReceiveCommand(currentPlayerAddress + " playlist repeat 0"); // set the playlist to non repeating.
 			SendReceiveCommand(currentPlayerAddress + " sync -"); // break previous syncronization;
 #endif
-		}
+//		}
 	}
 
 	// add this stream to the list of playing streams.
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Adding iStreamID %d to m_mapStreamsToPlayers.",iStreamID);
 	m_mapStreamsToPlayers[iStreamID] = make_pair(STATE_PAUSE, vectDevices);
 	pthread_cond_signal(&m_stateChangedCondition);
 }
@@ -479,6 +481,7 @@ string Slim_Server_Streamer::SendReceiveCommand(string command, bool bLogCommand
 void *Slim_Server_Streamer::checkForPlaybackCompleted(void *pSlim_Server_Streamer)
 {
     Slim_Server_Streamer *pStreamer = (Slim_Server_Streamer*)pSlim_Server_Streamer;
+    int iSleep=500;
 
     while ( true )
     {
@@ -532,12 +535,87 @@ void *Slim_Server_Streamer::checkForPlaybackCompleted(void *pSlim_Server_Streame
 			{
 				pStreamer->SetStateForStream((*itStreamsToPlayers).first, STATE_PAUSE);
 			}
+			else if ( itStreamsToPlayers->second.first == STATE_FFWD_2000 )
+			  {
+			    pStreamer->SendReceiveCommand(macAddress + " time +2");
+			    iSleep=250;
+			  }
+			else if ( itStreamsToPlayers->second.first == STATE_FFWD_4000 )
+			  {
+			    pStreamer->SendReceiveCommand(macAddress + " time +4");
+			    iSleep=125;
+			  }
+			else if ( itStreamsToPlayers->second.first == STATE_FFWD_8000 )
+			  {
+			    pStreamer->SendReceiveCommand(macAddress + " time +8");
+			    iSleep=62;
+			  }
+			else if ( itStreamsToPlayers->second.first == STATE_FFWD_16000 )
+			  {
+			    pStreamer->SendReceiveCommand(macAddress + " time +16");
+			    iSleep=31;
+			  }
+			else if ( itStreamsToPlayers->second.first == STATE_FFWD_32000 )
+			  {
+			    pStreamer->SendReceiveCommand(macAddress + " time +32");
+			    iSleep=31;
+			  }
+			else if ( itStreamsToPlayers->second.first == STATE_FFWD_64000 )
+			  {
+			    pStreamer->SendReceiveCommand(macAddress + " time +64");
+			    iSleep=31;
+			  }
+			else if ( itStreamsToPlayers->second.first == STATE_REW_250 )
+			  {
+			    pStreamer->SendReceiveCommand(macAddress + " time -0.25");
+			    iSleep=1000;
+			  }
+			else if ( itStreamsToPlayers->second.first == STATE_REW_500 )
+			  {
+			    pStreamer->SendReceiveCommand(macAddress + " time -0.5");
+			    iSleep=750;
+			  }
+			else if ( itStreamsToPlayers->second.first == STATE_REW_1000 )
+			  {
+			    pStreamer->SendReceiveCommand(macAddress + " time -1");
+			    iSleep=500;
+			  }
+			else if ( itStreamsToPlayers->second.first == STATE_REW_2000 )
+			  {
+			    pStreamer->SendReceiveCommand(macAddress + " time -2");
+			    iSleep=250;
+			  }
+			else if ( itStreamsToPlayers->second.first == STATE_REW_4000 )
+			  {
+			    pStreamer->SendReceiveCommand(macAddress + " time -4");
+			    iSleep=125;
+			  }
+			else if ( itStreamsToPlayers->second.first == STATE_REW_8000 )
+			  {
+			    pStreamer->SendReceiveCommand(macAddress + " time -8");
+			    iSleep=62;
+			  }
+			else if ( itStreamsToPlayers->second.first == STATE_REW_16000 )
+			  {
+			    pStreamer->SendReceiveCommand(macAddress + " time -16");
+			    iSleep=31;
+			  }
+			else if ( itStreamsToPlayers->second.first == STATE_REW_32000 )
+			  {
+			    pStreamer->SendReceiveCommand(macAddress + " time -32");
+			    iSleep=31;
+			  }
+			else if ( itStreamsToPlayers->second.first == STATE_REW_64000 )
+			  {
+			    pStreamer->SendReceiveCommand(macAddress + " time -64");
+			    iSleep=31;
+			  }
             itStreamsToPlayers++;
         }
 
         dataAccessLock.Release();
 
-        Sleep(500);
+        Sleep(iSleep);
     }
 
     return NULL;
@@ -731,7 +809,22 @@ void Slim_Server_Streamer::CMD_Pause_Media(int iStreamID,string &sCMD_Result,Mes
 
 	// SendReceiveCommand(lastPlayerAddress + " playlist play " + StringUtils::URLEncode(string("file://") + sFilename).c_str());
 
-	if ( GetStateForStream(iStreamID) == STATE_PLAY )
+	if ( GetStateForStream(iStreamID) == STATE_PLAY ||
+	     GetStateForStream(iStreamID) == STATE_FFWD_2000 ||
+	     GetStateForStream(iStreamID) == STATE_FFWD_4000 ||
+	     GetStateForStream(iStreamID) == STATE_FFWD_8000 ||
+	     GetStateForStream(iStreamID) == STATE_FFWD_16000 || 
+	     GetStateForStream(iStreamID) == STATE_FFWD_32000 ||
+	     GetStateForStream(iStreamID) == STATE_FFWD_64000 ||
+	     GetStateForStream(iStreamID) == STATE_REW_250 ||
+	     GetStateForStream(iStreamID) == STATE_REW_500 ||
+	     GetStateForStream(iStreamID) == STATE_REW_1000 ||
+	     GetStateForStream(iStreamID) == STATE_REW_2000 ||
+	     GetStateForStream(iStreamID) == STATE_REW_4000 ||
+	     GetStateForStream(iStreamID) == STATE_REW_8000 ||
+	     GetStateForStream(iStreamID) == STATE_REW_16000 ||
+	     GetStateForStream(iStreamID) == STATE_REW_32000 ||
+	     GetStateForStream(iStreamID) == STATE_REW_64000)
 	{
 		SendReceiveCommand(sControlledPlayerMac + " pause 1");
 		SetStateForStream(iStreamID, STATE_PAUSE);
@@ -771,11 +864,76 @@ void Slim_Server_Streamer::CMD_Change_Playback_Speed(int iStreamID,int iMediaPla
 	if ( (sControlledPlayerMac = FindControllingMacForStream(iStreamID)) == "" )
 		return;
 
-	if ( GetStateForStream(iStreamID) == STATE_PAUSE )
+	if ( GetStateForStream(iStreamID) == STATE_PAUSE)
 	{
 		SendReceiveCommand(sControlledPlayerMac + " pause 0");
 		SetStateForStream(iStreamID, STATE_PLAY);
 	}
+	else if ( iMediaPlaybackSpeed == 1000 )
+	  {
+	    SetStateForStream(iStreamID, STATE_PLAY);
+	  }
+	else if ( iMediaPlaybackSpeed == 2000 )
+	  {
+	    SetStateForStream(iStreamID, STATE_FFWD_2000);
+	  }
+	else if ( iMediaPlaybackSpeed == 4000 )
+	  {
+	    SetStateForStream(iStreamID, STATE_FFWD_4000);
+	  }
+	else if ( iMediaPlaybackSpeed == 8000 )
+	  {
+	    SetStateForStream(iStreamID, STATE_FFWD_8000);
+	  }
+	else if ( iMediaPlaybackSpeed == 16000 )
+	  {
+	    SetStateForStream(iStreamID, STATE_FFWD_16000);
+	  }
+	else if ( iMediaPlaybackSpeed == 32000 )
+	  {
+	    SetStateForStream(iStreamID, STATE_FFWD_32000);
+	  }
+	else if ( iMediaPlaybackSpeed == 64000 )
+	  {
+	    SetStateForStream(iStreamID, STATE_FFWD_64000);
+	  }
+	else if ( iMediaPlaybackSpeed == -250 )
+	  {
+	    SetStateForStream(iStreamID, STATE_REW_250);
+	  }
+	else if ( iMediaPlaybackSpeed == -500 )
+	  {
+	    SetStateForStream(iStreamID, STATE_REW_500);
+	  }
+	else if ( iMediaPlaybackSpeed == -1000 )
+	  {
+	    SetStateForStream(iStreamID, STATE_REW_1000);
+	  }
+	else if ( iMediaPlaybackSpeed == -2000 )
+	  {
+	    SetStateForStream(iStreamID, STATE_REW_2000);
+	  }
+	else if ( iMediaPlaybackSpeed == -4000 )
+	  {
+	    SetStateForStream(iStreamID, STATE_REW_4000);
+	  }
+	else if ( iMediaPlaybackSpeed == -8000 )
+	  {
+	    SetStateForStream(iStreamID, STATE_REW_8000);
+	  }
+ 	else if ( iMediaPlaybackSpeed == -16000 )
+	  {
+	    SetStateForStream(iStreamID, STATE_REW_16000);
+	  }
+	else if ( iMediaPlaybackSpeed == -32000 )
+	  {
+	    SetStateForStream(iStreamID, STATE_REW_32000);
+	  }
+	else if ( iMediaPlaybackSpeed == -64000 )
+	  {
+	    SetStateForStream(iStreamID, STATE_REW_64000);
+	  }
+
 }
 
 //<-dceag-c259-b->
