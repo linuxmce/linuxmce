@@ -9,7 +9,7 @@ Item{
     focus:true
 
     function createPopup(comp){
-        comp.createObject(qmlRoot)
+        comp.createObject(layout)
     }
 
     property ListModel scenarios:ListModel{

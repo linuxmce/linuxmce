@@ -1441,7 +1441,7 @@ public slots:
 
     void setUseLocalSkins(bool b){
         if(b==mb_useLocalSkins)return; mb_useLocalSkins=b;setupLocalSkins();
-        settingsInterface->setOption(SettingInterface::Settings_UI, SettingInterface::Setting_Ui_NetworkLoading, QVariant(b));
+        settingsInterface->setOption(SettingsInterfaceType::Settings_UI, SettingsKeyType::Setting_Ui_NetworkLoading, QVariant(b));
         emit useLocalSkinsChanged();
     }
 
@@ -1829,25 +1829,34 @@ public slots:
 private slots:
     void delayedReloadQml() { QTimer *delayTimer= new QTimer(this); delayTimer->setInterval(500); delayTimer->setSingleShot(true); connect(delayTimer, SIGNAL(timeout()), this, SLOT(reloadQml())); delayTimer->start();}
     void reloadQml(){
-        const QString aName("style");
-        QQuickItem* st = qorbiterUIwin->rootContext()->findChild<QQuickItem*>(aName, Qt::FindChildrenRecursively);
 
-        if(st){
+
+        if(m_style){
             qDebug() << Q_FUNC_INFO << "Deleting style";
-            st->deleteLater();
-            QString filePath = m_selector->select(qorbiterUIwin->engine()->baseUrl()).toString()+"/Style.qml";
-            QQmlComponent *nustyle = new QQmlComponent(qorbiterUIwin->engine(), filePath);
+            m_style->deleteLater();
         }
-        st->deleteLater();
+
+        QString filePath = m_selector->select(m_localQmlPath+"skins/"+currentSkin+"/Style.qml");
+        qDebug() << filePath;
+        QQmlComponent nustyle(qorbiterUIwin->engine(), filePath, QQmlComponent::PreferSynchronous);
+
+        m_style = nustyle.create();
+        if(m_style){
+            qDebug() << Q_FUNC_INFO << " New style applied. ";
+        }
+        qorbiterUIwin->engine()->rootContext()->setContextProperty("Style", m_style);
         QString returnLocation=qorbiterUIwin->source().toString();
 #ifdef simulate
-        qorbiterUIwin->setSource(QUrl("../qOrbiter_src/qml/Index.qml"));
+        qorbiterUIwin->setSource(QUrl(m_localQmlPath+"Index.qml"));
         qorbiterUIwin->engine()->clearComponentCache();
 #else
         qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
+
 #endif
+
+
         qorbiterUIwin->setSource(QUrl(returnLocation));
-        qDebug() << qorbiterUIwin->source();
+        qDebug() << Q_FUNC_INFO << qorbiterUIwin->source();
     }
     void handleScreenChanged(QScreen* screen);
     void resetScreenSize(){
@@ -1910,6 +1919,7 @@ private:
     QString m_remoteQmlPath;
     QString m_localQmlPath;
     QList<QVariant> m_localSkins;
+    QObject *m_style;
 
 
 };

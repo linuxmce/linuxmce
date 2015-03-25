@@ -84,7 +84,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,SettingInt
     QObject(parent),qorbiterUIwin(view),
     appHeight(view->height()),
     appWidth(view->width()),
-    settingsInterface(appSettings)
+    settingsInterface(appSettings),
+    m_style(0)
 {
 #ifdef __ANDROID__
     int testSize=-1;
@@ -739,6 +740,10 @@ void qorbiterManager::swapSkins(QString incSkin)
     if(mb_useLocalSkins){
         incSkin="default";
         currentSkin=incSkin;
+
+        QQmlComponent styleData(qorbiterUIwin->engine(), QUrl(m_localQmlPath+"skins/"+incSkin+"/Style.qml"), QQmlComponent::PreferSynchronous);
+        m_style=styleData.create();
+
         refreshUI(QUrl(m_localQmlPath+"skins/"+incSkin+"/Main.qml"));
         return;
     }
@@ -757,10 +762,12 @@ void qorbiterManager::swapSkins(QString incSkin)
         //load the actual skin entry point
         qDebug() << "skin break";
         currentSkin = incSkin;
+        m_style=tskinModel->currentItem;
 #ifdef __ANDROID__
         qorbiterUIwin->engine()->rootContext()->setContextProperty("style", tskinModel->currentItem);
+        qorbiterUIwin->engine()->rootContext()->setContextProperty("Style", m_style);
 #else
-        // qorbiterUIwin->engine()->rootContext()->setContextProperty("skinStyle", tskinModel->currentItem);
+        qorbiterUIwin->engine()->rootContext()->setContextProperty("Style", m_style);
 #endif
 
 #if (QT5)
@@ -1871,7 +1878,7 @@ bool qorbiterManager::readLocalConfig(){
 
 bool qorbiterManager::writeConfig()
 {
-    settingsInterface->setOption(SettingInterface::Settings_Network, SettingInterface::Setting_Network_Device_ID, iPK_Device);
+    settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID, iPK_Device);
 
     /* old below this line and will be replaced */
     qDebug() << Q_FUNC_INFO;
@@ -2572,10 +2579,10 @@ void qorbiterManager::setupUiSelectors(){
 
 bool qorbiterManager::restoreSettings()
 {
-    int tId= settingsInterface->getOption(SettingInterface::Settings_Network, SettingInterface::Setting_Network_Device_ID).toInt();
+    int tId= settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
     qDebug() << tId;
-    QString trouter = settingsInterface->getOption(SettingInterface::Settings_Network, SettingInterface::Setting_Network_Router).toString();
-    mb_useLocalSkins = settingsInterface->getOption(SettingInterface::Settings_UI, SettingInterface::Setting_Ui_NetworkLoading).toBool();
+    QString trouter = settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router).toString();
+    mb_useLocalSkins = settingsInterface->getOption(SettingsInterfaceType::Settings_UI, SettingsKeyType::Setting_Ui_NetworkLoading).toBool();
     qDebug() << "Using local skins?" << mb_useLocalSkins;
     if(tId && !trouter.isEmpty()){
         qDebug() << Q_FUNC_INFO << "Read Device Number";

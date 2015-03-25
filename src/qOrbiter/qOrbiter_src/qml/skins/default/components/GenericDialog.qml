@@ -1,11 +1,48 @@
 import QtQuick 2.3
 import "../"
 Item {
-    width: scaleX(65)
-    height: scaleY(65)
-    Rectangle{
-        anchors.fill: parent
-        color: Style.appcolor_background_medium
+    id:dlg
+    width: Style.scaleX(65)
+    height: Style.scaleY(65)
+    property string title:"Ipsum"
+    property Item dialogContent:undefined
+
+
+    Item{
+        anchors.centerIn: parent
+        width: Style.dialog_large_width
+        height: Style.dialog_large_height
+        Rectangle{
+            id:hdr
+            anchors{
+                top:parent.top
+                left: parent.left
+                right: parent.right
+            }
+            height: Style.scaleY(8)
+            color: Style.appcolor_background_medium
+        }
+        StyledText{
+            anchors.centerIn: hdr
+            font.pointSize: Style.appFontSize_header
+            text:dlg.title
+        }
+
+        Rectangle{
+            id:contentfill
+            anchors{
+                top:hdr.bottom
+                left:parent.left
+                right:parent.right
+                bottom:parent.bottom
+            }
+            color:Style.appcolor_background_list
+        }
+        Loader{
+            anchors.fill: contentfill
+            sourceComponent:dialogContent
+        }
+
     }
 
 }

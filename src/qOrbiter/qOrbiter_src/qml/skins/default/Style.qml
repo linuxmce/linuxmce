@@ -1,8 +1,8 @@
 import QtQuick 2.3
-pragma Singleton
-Item{
+
+QtObject{
     id:applicationStyle
-objectName: "style"
+    objectName: "style"
     function scaleX(w){
         return w/100*manager.appWidth
     }
@@ -66,6 +66,10 @@ objectName: "style"
     readonly property int listViewWidth_small:scaleX(15)
     readonly property int listViewItemHeight:manager.isProfile ? scaleY(12) : scaleY(15)
     readonly property int listViewMargin:manager.isProfile ? scaleX(5) : scaleX(2.5)
+
+    /* Dialogs */
+    readonly property int dialog_large_height:scaleY(75)
+    readonly property int dialog_large_width:scaleX(85)
 
     //opacity and accents
     readonly property double appHeader_opacity:.55

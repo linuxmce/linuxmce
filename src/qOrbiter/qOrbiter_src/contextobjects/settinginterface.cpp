@@ -12,21 +12,21 @@ SettingInterface::SettingInterface(QObject *parent) :
     /** Note that application name, org, and domain are set via QCoreApplication in main.cpp */
     m_settings = new QSettings(this);
     m_settings->setFallbacksEnabled(false);
-    m_lookup.insert(Setting_Network_Router, "router");
-    m_lookup.insert(Setting_Network_Device_ID, "device");
-    m_lookup.insert(Setting_Network_Hostname, "hostname");
-    m_lookup.insert(Setting_Network_ExternalHostname, "externalhostname");
-    m_lookup.insert(Setting_Network_WebPort, "webaccess");
-    m_lookup.insert(Setting_Ui_Skin, "skin");
-    m_lookup.insert(Setting_Ui_NetworkLoading, "usenetwork");
-    m_lookup.insert(Setting_Ui_PrefSize, "preferredsize");
-    m_lookup.insert(Setting_Text_sizemod, "sizemodifier");
-    m_lookup.insert(Setting_Text_font, "font");
-    m_lookup.insert(Setting_Text_language, "language");
-    m_lookup.insert(Setting_Media_AudioSort, "audiosorting");
-    m_lookup.insert(Setting_Media_AudioSubTypeSort, "audiosubtypesort");
-    m_lookup.insert(Setting_Media_VideoSort, "videosorting");
-    m_lookup.insert(Setting_Media_VideSubTypeSort, "videosubtypesort");
+    m_lookup.insert(SettingsKeyType::Setting_Network_Router, "router");
+    m_lookup.insert(SettingsKeyType::Setting_Network_Device_ID, "device");
+    m_lookup.insert(SettingsKeyType::Setting_Network_Hostname, "hostname");
+    m_lookup.insert(SettingsKeyType::Setting_Network_ExternalHostname, "externalhostname");
+    m_lookup.insert(SettingsKeyType::Setting_Network_WebPort, "webaccess");
+    m_lookup.insert(SettingsKeyType::Setting_Ui_Skin, "skin");
+    m_lookup.insert(SettingsKeyType::Setting_Ui_NetworkLoading, "usenetwork");
+    m_lookup.insert(SettingsKeyType::Setting_Ui_PrefSize, "preferredsize");
+    m_lookup.insert(SettingsKeyType::Setting_Text_sizemod, "sizemodifier");
+    m_lookup.insert(SettingsKeyType::Setting_Text_font, "font");
+    m_lookup.insert(SettingsKeyType::Setting_Text_language, "language");
+    m_lookup.insert(SettingsKeyType::Setting_Media_AudioSort, "audiosorting");
+    m_lookup.insert(SettingsKeyType::Setting_Media_AudioSubTypeSort, "audiosubtypesort");
+    m_lookup.insert(SettingsKeyType::Setting_Media_VideoSort, "videosorting");
+    m_lookup.insert(SettingsKeyType::Setting_Media_VideSubTypeSort, "videosubtypesort");
     connect(this, SIGNAL(writeError(QString)), this, SLOT(log(QString)));
     if(m_settings){
         connect(this, SIGNAL(settingsDataCleared()), this,SLOT(initializeSettings()));
@@ -98,18 +98,15 @@ void SettingInterface::log(QString message)
     qDebug() << logMsg;
 }
 
-
-
-
-void SettingInterface::setOption(SettingInterface::SettingsType st, SettingInterface::SettingKey sk, QVariant sval)
+void SettingInterface::setOption(SettingsInterfaceType::SettingsType st, SettingsKeyType::SettingKey sk, QVariant sval)
 {
     QString grp="";
     QString key = m_lookup.value(sk);
     switch (st) {
-    case Settings_Network:grp="network"; break;
-    case Settings_Media:grp="media"; break;
-    case Settings_Text: grp="textoptions"; break;
-    case Settings_UI: grp="ui"; break;
+    case SettingsInterfaceType::Settings_Network:grp="network"; break;
+    case SettingsInterfaceType::Settings_Media:grp="media"; break;
+    case SettingsInterfaceType::Settings_Text: grp="textoptions"; break;
+    case SettingsInterfaceType::Settings_UI: grp="ui"; break;
     default: grp="";
         break;
     }
@@ -135,16 +132,18 @@ void SettingInterface::setOption(SettingInterface::SettingsType st, SettingInter
 
 }
 
-QVariant SettingInterface::getOption(SettingInterface::SettingsType st, SettingInterface::SettingKey sk)
+QVariant SettingInterface::getOption(SettingsInterfaceType::SettingsType st, SettingsKeyType::SettingKey sk)
 {
+
+    qDebug() << Q_FUNC_INFO << "Incoming value " << (int)st;
     QString grp="";
     QString key = m_lookup.value(sk);
-    QVariant rtrn= QVariant();
+    QVariant rtrn= QVariant("invalid");
     switch (st) {
-    case Settings_Network:grp="network"; break;
-    case Settings_Media:grp="media"; break;
-    case Settings_Text: grp="textoptions"; break;
-    case Settings_UI: grp="ui"; break;
+    case SettingsInterfaceType::Settings_Network:grp="network"; break;
+    case SettingsInterfaceType::Settings_Media:grp="media"; break;
+    case SettingsInterfaceType::Settings_Text: grp="textoptions"; break;
+    case SettingsInterfaceType::Settings_UI: grp="ui"; break;
     default: grp="";
         break;
     }

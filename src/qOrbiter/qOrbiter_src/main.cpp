@@ -232,6 +232,10 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("QOrbiter");
     QCoreApplication::setOrganizationDomain("org.linuxmce.QOrbiter");
     QCoreApplication::setOrganizationName("LinuxMCE");
+   // qRegisterMetaType<SettingsInterfaceType>("SettingsInterfaceType");
+   // qRegisterMetaType<SettingsKeyType >("SettingKeyType");
+
+
     SettingInterface settings;    
 
 #ifdef __ANDROID__
@@ -378,6 +382,8 @@ int main(int argc, char* argv[])
         qmlRegisterType<RoomTypeHelper>("org.linuxmce.enums", 1,0, "RoomTypes");
         qmlRegisterType<ScreenList>("org.linuxmce.screens", 1,0, "Screens");
         qmlRegisterType<ScreenData>("org.linuxmce.screeninfo", 1,0, "ScreenData");
+        qmlRegisterType<SettingsInterfaceType>("org.linuxmce.settings", 1,0, "SettingsType");
+        qmlRegisterType<SettingsKeyType>("org.linuxmce.settings", 1,0, "SettingsKey");
         qmlRegisterType<GenericFlatListModel>();
 
         orbiterWindow orbiterWin(PK_Device, sRouter_IP, fs, fm, screenSize);
@@ -799,7 +805,7 @@ int main(int argc, char* argv[])
         }
         else{
             qDebug() << "Nothing set, using defaults.";
-            orbiterWin.setDeviceNumber(settings.getOption(SettingInterface::Settings_Network, SettingInterface::Setting_Network_Device_ID).toInt());
+            orbiterWin.setDeviceNumber(settings.getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt());
             orbiterWin.setRouterAddress(w.getInternalIp());
             sRouter_IP = w.getInternalIp().toStdString();
             PK_Device=w.getDeviceNumber();

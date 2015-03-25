@@ -29,5 +29,6 @@ Item{
         anchors.centerIn: parent
         anchors.fill: parent
         id:contentLoader
+        sourceComponent:content
     }
 }

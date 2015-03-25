@@ -83,7 +83,7 @@ StyledScreen {
             buttonText: qsTr("Component List")
         }
         StyledButton{
-            id:settings
+            id:settingsBtn
             state: "large-fixed"
             buttonText: qsTr("Settings")
             onActivated: qmlRoot.createPopup(settingsComponent)
@@ -95,7 +95,13 @@ StyledScreen {
         GenericPopup {
             title:qsTr("Settings")
             content: GenericDialog{
-
+                title: "Settings"
+                dialogContent:
+                    Component{
+                    SettingsOptions {
+                        id: settingsOption
+                    }
+                }
             }
         }
     }

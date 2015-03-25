@@ -4,23 +4,30 @@
 #include <QObject>
 #include <QSettings>
 
-class SettingInterface : public QObject
+class SettingsInterfaceType : public QObject
 {
     Q_OBJECT
 
-
 public:
-    explicit SettingInterface(QObject *parent = 0);
-    bool ready;
-
+    SettingsInterfaceType() {}
+    virtual ~SettingsInterfaceType() {}
     enum SettingsType{
-        Settings_Network=0,
+        Settings_Network,
         Settings_UI,
         Settings_Media,
         Settings_Text,
         Settings_Custom
     };
     Q_ENUMS(SettingsType)
+
+};
+
+class SettingsKeyType : public QObject
+{
+    Q_OBJECT
+public:
+    SettingsKeyType() {}
+    virtual ~SettingsKeyType() {}
 
     enum SettingKey{
         Setting_Network_Router,
@@ -41,6 +48,20 @@ public:
     };
     Q_ENUMS(SettingKey)
 
+};
+
+class SettingInterface : public QObject
+{
+    Q_OBJECT
+public:
+    explicit SettingInterface(QObject *parent = 0);
+    bool ready;
+
+
+
+    Q_INVOKABLE void setOption(SettingsInterfaceType::SettingsType st,  SettingsKeyType::SettingKey sk, QVariant sval);
+    Q_INVOKABLE QVariant getOption(SettingsInterfaceType::SettingsType st, SettingsKeyType::SettingKey sk);
+
 signals:
     void newLogMessage(QString msg);
     void settingsDataCleared();
@@ -49,18 +70,17 @@ signals:
 public slots:
     void log(QString message);
 
-    void setOption(SettingsType st, SettingKey sk, QVariant sval);
-    QVariant getOption(SettingsType st, SettingKey sk);
-
     void destroySettingsData();
-
+    QVariant getNumOption(int settingType, int keyType){
+        return getOption((SettingsInterfaceType::SettingsType)settingType, (SettingsKeyType::SettingKey)keyType);
+    }
 private slots:
     void initializeSettings();
 
 
 private:
     QSettings *m_settings;
-    QMap <SettingKey, QString> m_lookup;
+    QMap <SettingsKeyType::SettingKey, QString> m_lookup;
 
 };
 
