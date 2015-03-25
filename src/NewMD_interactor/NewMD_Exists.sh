@@ -9,4 +9,6 @@ Q="
 	FROM Device
 	WHERE MACaddress='$MAC'
 "
-RunSQL "$Q"
+R=$(RunSQL "$Q")
+
+[ -n "$R" ] && echo $R

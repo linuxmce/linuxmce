@@ -26,7 +26,7 @@ DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST=21
 
 DEVICETEMPLATE_Generic_PC_as_MD_CONST=28
 
-DD=""
+DD=$(arch)
 
 # Disable diskless creation/boot
 DD="$DD|$DEVICEDATA_Is_Diskless_Boot_CONST|0"
@@ -51,25 +51,18 @@ esac
 DISTRO=$(lsb_release -is)
 [ -n "$DISTRO" ] && DD="$DD|$DEVICEDATA_Operating_System_CONST|$DISTRO"
 
-ARCH=$(arch)
-[ -n "$ARCH" ] && DD="$ARCH|$DD"
-
 # TODO: test this
 #archives=""
 #DD="$DD|$DEVICEDATA_Diskless_Archives_CONST|$archives"
 
+DTVendorID=$DEVICETEMPLATE_Generic_PC_as_MD_CONST
+Command="newmd"
 if [ -f "$DTVENDOR_FILE" ]; then
 	DTVendorID=$(cat "$DTVENDOR_FILE")
 fi
 if [ -f "$COMMAND_FILE" ]; then
 	Command=$(cat "$COMMAND_FILE")
 fi
-
-if ([ -n "$DTVendorID" ] || [ -n "$Command" ]); then
-	DTVendorID=$DEVICETEMPLATE_Generic_PC_as_MD_CONST
-	Command=""
-fi
-
 echo "IP: $MyIP; MAC: $MyMAC; Gateway: $Gateway; DeviceData: $DD; DT/Vendor: $DTVendorID; Command: $Command"
 
 /sbin/interactor-disked "$Gateway" "$MyIP" "$MyMAC" "$DD" "$DTVendorID" "$Command"
