@@ -127,10 +127,16 @@ for Row in $R ;do
 		continue
 	fi
 
-	update_config_files
-	build_installer_script
-	#put_sample_movie
-	create_archive
+	# TODO: put in the disked md setup pkgs
+	#update_config_files
+
+	# TODO: create minimal disked installer script that pre-seeds apt-conf, etc...
+	#build_installer_script
+
+	# No archive to create anymore, apt-get install is the goal.
+	#create_archive
+
+	# Each MD must be granted access to the mysql database
 	setup_mysql_access
 done
 
