@@ -63,7 +63,6 @@ setup_plutoconf() {
 	[ -n "$DCERouterPort" ] || ConfSet "DCERouterPort" "3450"
 	[ -n "$AutostartCore" ] || ConfSet "AutostartCore" "0"
 	[ -n "$AutostartMedia" ] || ConfSet "AutostartMedia" "1"
-#	[ -n "$FirstBoot" ] || ConfSet "FirstBoot" "true"
 	[ -n "$AVWizardDone" ] || ConfSet "AVWizardDone" "0"
 }
 
@@ -76,11 +75,11 @@ start() {
 	setup_fstab
 	setup_plutoconf
 
-#	# run any device specific firstboot add-on scripts here
-#	for f in /etc/init.d/firstboot-lmce-* ; do
-#		echo "Running device specific firstboot script: $f"
-#		. /etc/init.d/$f
-#	done
+	# run any device specific firstboot add-on scripts here
+	for f in /etc/init.d/firstboot-lmce-* ; do
+		echo "Running device specific firstboot script: $f"
+		. "$f"
+	done
 
 	ConfSet "FirstBoot" "false"
 	return 0
