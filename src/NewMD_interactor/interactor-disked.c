@@ -183,6 +183,9 @@ int main(int argc, char * argv[])
 					fputs(buffer+9, f);
 					fclose(f);
 					gotid = 1;
+					printf("\n%s\n", buffer);
+				} else {
+					printf("\nERR: %s\n", buffer);
 				}
 			}
 		}
