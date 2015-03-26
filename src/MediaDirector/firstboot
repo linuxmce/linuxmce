@@ -4,7 +4,7 @@ set -e
 
 . /usr/pluto/bin/Config_Ops.sh
 
-if [ "$FirstBoot" = "false" ]; then
+if ([ "$FirstBoot" = "false" ] && [ -n "$PK_Device" ]) ; then
 	echo "Skipping firstboot, already completed."
 	exit 0
 fi
@@ -18,7 +18,7 @@ DEVID_FILE="/etc/Disked_DeviceID"
 
 setup_fstab() {
 	# Hmm, let's see if the mounts are here, if not add them
-	check=$(grep 192.168.80.1 "${FSTAB_FILE}")
+	check=$(grep 192.168.80.1 "${FSTAB_FILE}" || :)
 	if [ -z "$check" ]; then
 		cat <<-EOF >> "${FSTAB_FILE}"
 			192.168.80.1:/usr/pluto/var/                    /usr/pluto/var/         nfs4 retrans=10,timeo=50 1 1
@@ -82,6 +82,7 @@ start() {
 	done
 
 	ConfSet "FirstBoot" "false"
+	reboot
 	return 0
 }
 
