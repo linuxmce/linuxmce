@@ -177,14 +177,20 @@ int main(int argc, char * argv[])
 			{
 				// Server reported back to us our ID
 				FILE * f = fopen("/etc/Disked_DeviceID", "w");
-				fputs(buffer+9, f);
-				fclose(f);
+				if (f != NULL )
+				{
+//					printf("\n%s\n\n", buffer);
+					fputs(buffer+9, f);
+					fclose(f);
+//				} else {
+//					printf("ERR\n%s\n\n", buffer);
+				}
 			}
 		}
 		
 		close(s2);
 	}
-	reboot(RB_AUTOBOOT);
+//	reboot(RB_AUTOBOOT);
 	
 	return 0;
 }

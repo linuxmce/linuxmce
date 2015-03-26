@@ -63,6 +63,7 @@ fi
 if [ -f "$COMMAND_FILE" ]; then
 	Command=$(cat "$COMMAND_FILE")
 fi
+
 echo "IP: $MyIP; MAC: $MyMAC; Gateway: $Gateway; DeviceData: $DD; DT/Vendor: $DTVendorID; Command: $Command"
 
-/sbin/interactor-disked "$Gateway" "$MyIP" "$MyMAC" "$DD" "$DTVendorID" "$Command"
+/usr/pluto/bin/interactor-disked "$Gateway" "$MyIP" "$MyMAC" "$DD" "$DTVendorID" "$Command"
