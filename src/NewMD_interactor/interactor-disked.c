@@ -63,6 +63,7 @@ int main(int argc, char * argv[])
 	int bytes, tmp;
 	const char * Gateway, * myIP, * myMAC, * myArchitecture, * myDT_VendorModelID;
 	const char * myCommand;
+	int gotid = 0;
 
 	if (argc == 7)
 	{
@@ -181,13 +182,13 @@ int main(int argc, char * argv[])
 				{
 					fputs(buffer+9, f);
 					fclose(f);
-					gotid = true;
+					gotid = 1;
 				}
 			}
 		}
 		close(s2);
 	}
-	if ( !gotid )
+	if ( gotid != 0 )
 		reboot(RB_AUTOBOOT);
 
 	return 0;
