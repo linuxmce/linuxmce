@@ -37,20 +37,22 @@ setup_plutoconf() {
 	DEVICE=$(cat "$DEVID_FILE")
 	[ -n "$PK_Device" ] || ConfSet "PK_Device" "$DEVICE"
 
+	# TODO: start_interactor already did this and put it in the DB
+	# TODO: get the data from the DB instead?
 	# get PK_Distro from OS
-#	DISTRO=$(lsb_release -cs)
-#	case "$DISTRO" in
-#		precise)
-#			distro=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST
-#	                ;;
-#		trusty)
-#			distro=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST
-#			;;
-#		wheezy)
-#			distro=$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST
-#			;;
-#	esac
-#	[ -n "$PK_Distro" ] || [ -n "$distro" ] && Confset "PK_Distro" "$distro"
+	DISTRO=$(lsb_release -cs)
+	case "$DISTRO" in
+		precise)
+			distro=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST
+	                ;;
+		trusty)
+			distro=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST
+			;;
+		wheezy)
+			distro=$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST
+			;;
+	esac
+	[ -n "$PK_Distro" ] || [ -n "$distro" ] && ConfSet "PK_Distro" "$distro"
 
 	[ -n "$MySqlHost" ] || ConfSet "MySqlHost" "192.168.80.1"
 	[ -n "$MySqlUser" ] || ConfSet "MySqlUser" "root"
