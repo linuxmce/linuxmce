@@ -1,9 +1,13 @@
-#!/bin/dash
+#!/bin/bash
 
 set -e
 
 . /usr/pluto/bin/Config_Ops.sh
-#. /usr/pluto/bin/Network_Parameters.sh
+
+if [ "$FirstBoot" = "false" ]; then
+	echo "Skipping firstboot, already completed."
+	exit 0
+fi
 
 DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
 DEVICEDATA_DISTRO_Ubuntu_Precise_CONST=20
@@ -14,7 +18,8 @@ DEVID_FILE="/etc/Disked_DeviceID"
 
 setup_fstab() {
 	# Hmm, let's see if the mounts are here, if not add them
-	if [ ! $(grep "192.168.80.1" "${FSTABFILE}") ]; then
+	check=$(grep 192.168.80.1 "${FSTAB_FILE}")
+	if [ -z "$check" ]; then
 		cat <<-EOF >> "${FSTAB_FILE}"
 			192.168.80.1:/usr/pluto/var/                    /usr/pluto/var/         nfs4 retrans=10,timeo=50 1 1
 			192.168.80.1:/usr/pluto/orbiter                 /usr/pluto/orbiter      nfs4 retrans=10,timeo=50 1 1
@@ -33,22 +38,19 @@ setup_plutoconf() {
 	[ -n "$PK_Device" ] || ConfSet "PK_Device" "$DEVICE"
 
 	# get PK_Distro from OS
-	DISTRO=$(lsb_release -cs)
-	case "$DISTRO" in
-		precise)
-			distro=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST
-	                ;;
-		trusty)
-			distro=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST
-			;;
-		wheezy)
-			distro=$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST
-			;;
-		*)
-			echo "ERR: Unknown distro"
-			;;
-	esac
-	[ -n "$PK_Distro" ] || [ -n "$distro" ] && Confset "PK_Distro" "$distro"
+#	DISTRO=$(lsb_release -cs)
+#	case "$DISTRO" in
+#		precise)
+#			distro=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST
+#	                ;;
+#		trusty)
+#			distro=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST
+#			;;
+#		wheezy)
+#			distro=$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST
+#			;;
+#	esac
+#	[ -n "$PK_Distro" ] || [ -n "$distro" ] && Confset "PK_Distro" "$distro"
 
 	[ -n "$MySqlHost" ] || ConfSet "MySqlHost" "192.168.80.1"
 	[ -n "$MySqlUser" ] || ConfSet "MySqlUser" "root"
@@ -59,7 +61,7 @@ setup_plutoconf() {
 	[ -n "$DCERouterPort" ] || ConfSet "DCERouterPort" "3450"
 	[ -n "$AutostartCore" ] || ConfSet "AutostartCore" "0"
 	[ -n "$AutostartMedia" ] || ConfSet "AutostartMedia" "1"
-	[ -n "$FirstBoot" ] || ConfSet "FirstBoot" "true"
+#	[ -n "$FirstBoot" ] || ConfSet "FirstBoot" "true"
 	[ -n "$AVWizardDone" ] || ConfSet "AVWizardDone" "0"
 }
 
@@ -72,12 +74,13 @@ start() {
 	setup_fstab
 	setup_plutoconf
 
-	# run any device specific firstboot add-on scripts here
-	for f in /etc/init.d/firstboot-lmce-* ; do 
-		echo "Running device specific firstboot script: $f"
-		. /etc/init.d/$f
-	done
+#	# run any device specific firstboot add-on scripts here
+#	for f in /etc/init.d/firstboot-lmce-* ; do
+#		echo "Running device specific firstboot script: $f"
+#		. /etc/init.d/$f
+#	done
 
+	ConfSet "FirstBoot" "false"
 	return 0
 }
 
@@ -107,5 +110,5 @@ case "$1" in
         echo "Usage: $0 [start|stop|status]" >&2
 	retval=3
 esac
-return $retval
+exit $retval
 
