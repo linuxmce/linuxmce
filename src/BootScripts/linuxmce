@@ -190,12 +190,6 @@ start() {
 	rm -f /etc/rc{0,6}.d/S*{umountnfs.sh,portmap,networking}
 	service nis start
 
-	## workaround for gutsy bug #139155
-	if [[ ! -f /var/cache/hald/fdi-cache ]] ;then
-		/usr/lib/hal/hald-generate-fdi-cache
-		service hal stop
-	fi
-
 	if [[ -f /usr/pluto/bin/Config_Ops.sh ]]; then
 		 . /usr/pluto/bin/Config_Ops.sh
 	fi
@@ -213,7 +207,7 @@ start() {
 	#ConfEval
 
 	# We still need hal for device detection
-	StartService "Starting HAL daemon" "/usr/sbin/hald --daemon=yes --use-syslog"
+	#StartService "Starting HAL daemon" "/usr/sbin/hald --daemon=yes --use-syslog"
 
 	# Start core services
 	if [[ "$AutostartCore" -eq "1" ]] ; then
