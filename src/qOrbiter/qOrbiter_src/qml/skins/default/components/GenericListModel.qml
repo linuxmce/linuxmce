@@ -8,6 +8,7 @@ Item{
     property alias model:view.model
     property string label:"Ipsum"
     property alias delegate:view.delegate
+    property int modelSpacing: 1
 
     Rectangle{
         id:hdr
@@ -29,6 +30,7 @@ Item{
     ListView{
         id:view
         clip:true
+        spacing: modelSpacing
         anchors{
             left:parent.left
             top:hdr.bottom

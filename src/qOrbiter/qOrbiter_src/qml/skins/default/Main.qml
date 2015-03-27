@@ -27,7 +27,7 @@ Item{
         ListElement{
             name:qsTr("Climate")
             modelName:1
-            floorplantype:3
+            floorplantype:1
         }
         ListElement{
             name:qsTr("Telecom")

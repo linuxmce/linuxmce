@@ -8,7 +8,7 @@ Loader {
     id:pageLoader
     objectName: "loadbot"
     focus: true
-    source:"screens/Screen_1.qml"
+   // source:"screens/Screen_1.qml"
     // visible:qml_root.uiOn
     property string nextScreen:manager.currentScreen
     property string currentScreen:""
@@ -27,8 +27,10 @@ Loader {
         } else {
             
         }
+        console.log("current screen "+currentScreen)
+        console.log("next screen "+ nextScreen)
 
-        if(currentScreen==nextScreen){
+        if(currentScreen=="screens/"+nextScreen){
                 return;
         }
         
@@ -90,7 +92,7 @@ Loader {
                       {
                           
                           manager.setDceResponse("Command to change to:" + source+ " was successfull")                         
-                          currentScreen=nextScreen
+                          currentScreen=manager.currentScreen
                           
                           // contentItem=item.screen_root
                       }

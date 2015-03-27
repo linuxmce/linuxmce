@@ -273,6 +273,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     } else {
 
         swapSkins("default");
+        emit setSkinStatus(true);
     }
 }
 
@@ -706,7 +707,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     setDceResponse(" Remote Config Complete");
     emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
 
-    if(!alreadyConfigured){
+    if(!alreadyConfigured && !mb_useLocalSkins){
         setOrbiterStatus(true);
     }
 
@@ -741,6 +742,7 @@ void qorbiterManager::swapSkins(QString incSkin)
     emit skinMessage("swapping skin to::" + incSkin);
 
     if(mb_useLocalSkins){
+
         incSkin="default";
         currentSkin=incSkin;
 
