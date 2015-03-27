@@ -14,9 +14,9 @@ class AttributeTypeHelper : public QObject
 {
     Q_OBJECT
 public:
-    explicit AttributeTypeHelper(QObject *parent = 0);
+    AttributeTypeHelper(){}
+    virtual ~AttributeTypeHelper(){}
     enum Attributes{
-
         Director= 1,
         Performer= 2,
         Album= 3,
@@ -70,6 +70,24 @@ public:
         System_Configuration= 56
     };
     Q_ENUMS(Attributes)
+
+public slots:
+  Q_INVOKABLE static const QString translateType(int t){
+        switch (t) {
+        case Director: return tr("Director", "Movie Director"); break;
+        case Performer: return tr("Performer");                 break;
+        case Album: return tr("Album", "Music Album");          break;
+        case Track: return tr("Track", "Track on media");       break;
+        case Genre: return tr("Genre");                         break;
+        case Channel:return tr("Channel");                      break;
+        case Episode:return tr("Episode");                      break;
+        case Program:return tr("Program");                      break;
+        case Title:return tr("Title");                          break;
+        case Season_Number:return tr("Season Number");          break;
+        case Episode_Number:return tr("Episode Number");        break;
+        default: return tr("Unknown");                          break;
+        }
+    }
 };
 
 /*!
@@ -98,6 +116,23 @@ public:
         CONSOLE=12
     };
     Q_ENUMS(MediaSubTypes)
+
+public slots:
+  static const QString translateType(int t){
+        switch (t) {
+        case TVSHOWS: return tr("Tv Shows");            break;
+        case MOVIES: return tr("Movies");               break;
+        case HOMEVIDEOS: return tr("Home Videos");      break;
+        case SPORTSEVENTS: return tr("Sports Events");  break;
+        case MUSICVIDEOS: return tr("Music Videos");    break;
+        case ALTERNATIVE: return tr("Alternative");     break;
+        case POPULARMUSIC:return tr("Popular Music");   break;
+        case CLASSICALMUSIC:return tr("Classical Muisc"); break;
+        case ARCADE: return tr("Arcade");               break;
+        case CONSOLE: return tr("Console");             break;
+        default:return tr("Unknown");                   break;
+        }
+    }
 };
 
 class MediaTypesHelper : public QObject
@@ -183,7 +218,7 @@ public:
 public slots:
     int getInt(){return 1;}
 
-  static const QString translateType(int m){
+    static const QString translateType(int m){
         switch(m){
         case LMCE_LiveTV:
             return tr("LinuxMCE LiveTV");

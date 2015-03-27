@@ -1,6 +1,6 @@
 #include "mediatypehelper.h"
 
-AttributeTypeHelper::AttributeTypeHelper(QObject *parent) :
-    QObject(parent)
-{
-}
+//AttributeTypeHelper::AttributeTypeHelper(QObject *parent) :
+//    QObject(parent)
+//{
+//}

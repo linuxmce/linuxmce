@@ -1,8 +1,4 @@
 import QtQuick 2.3
-import QtGraphicalEffects 1.0
-import AudioVisual 1.0
-import DceScreenSaver 1.0
-import QtMultimedia 5.0
 import "../"
 /*! This File is designed to be the main layout that can be switched in and out for various forms */
 Item{

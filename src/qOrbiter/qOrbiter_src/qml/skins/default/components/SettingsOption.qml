@@ -8,7 +8,7 @@ Item{
     property int cat:SettingsType.Settings_Network
     property int val:SettingsKey.Setting_Network_Router
     property string settingName:""
-    property variant settingValue:settings.getNumOption( cat, val)
+    property variant settingValue:settings.getOption( cat, val)
     property bool useSwitch:false
     signal activated();
     StyledText{
@@ -27,19 +27,28 @@ Item{
             verticalCenter: parent.verticalCenter
             
         }
-        text:settingValue
+        text:useSwitch ? "" : settingValue
     }
 
     Switch {
         id: sw_root
         visible:useSwitch
-        enabled: useSwitch ? settingValue : false
+        switchLabel: settingName
+        enabled: settingValue
         anchors{
             right:parent.right
             verticalCenter: parent.verticalCenter
         }
         onTriggered: {
             activated()
+            settings.setOption(cat,val,!settingValue)
+            settingValue = settings.getOption( cat, val)
         }
+    }
+
+    MouseArea{
+        anchors.fill: parent
+        onClicked: activated()
+        enabled: !useSwitch
     }
 }

@@ -1826,12 +1826,14 @@ public slots:
 
     Q_INVOKABLE void qmlReload(){delayedReloadQml();}
 
+    Q_INVOKABLE QVariant systemFontList();
+
 private slots:
     void delayedReloadQml() { QTimer *delayTimer= new QTimer(this); delayTimer->setInterval(500); delayTimer->setSingleShot(true); connect(delayTimer, SIGNAL(timeout()), this, SLOT(reloadQml())); delayTimer->start();}
     void reloadQml(){
 
 
-        if(m_style){
+        if(m_style && mb_useLocalSkins ){
             qDebug() << Q_FUNC_INFO << "Deleting style";
             m_style->deleteLater();
         }
@@ -1839,7 +1841,6 @@ private slots:
         QString filePath = m_selector->select(m_localQmlPath+"skins/"+currentSkin+"/Style.qml");
         qDebug() << filePath;
         QQmlComponent nustyle(qorbiterUIwin->engine(), filePath, QQmlComponent::PreferSynchronous);
-
         m_style = nustyle.create();
         if(m_style){
             qDebug() << Q_FUNC_INFO << " New style applied. ";
@@ -1920,6 +1921,7 @@ private:
     QString m_localQmlPath;
     QList<QVariant> m_localSkins;
     QObject *m_style;
+    QDir m_fontDir;
 
 
 };

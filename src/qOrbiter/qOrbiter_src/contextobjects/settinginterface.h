@@ -57,10 +57,8 @@ public:
     explicit SettingInterface(QObject *parent = 0);
     bool ready;
 
-
-
-    Q_INVOKABLE void setOption(SettingsInterfaceType::SettingsType st,  SettingsKeyType::SettingKey sk, QVariant sval);
-    Q_INVOKABLE QVariant getOption(SettingsInterfaceType::SettingsType st, SettingsKeyType::SettingKey sk);
+    void setOption(SettingsInterfaceType::SettingsType st,  SettingsKeyType::SettingKey sk, QVariant sval);
+    QVariant getOption(SettingsInterfaceType::SettingsType st, SettingsKeyType::SettingKey sk);
 
 signals:
     void newLogMessage(QString msg);
@@ -71,7 +69,12 @@ public slots:
     void log(QString message);
 
     void destroySettingsData();
-    QVariant getNumOption(int settingType, int keyType){
+
+    Q_INVOKABLE void setOption(int settingType, int settingKey, QVariant val){
+        setOption( (SettingsInterfaceType::SettingsType)settingType, (SettingsKeyType::SettingKey)settingKey, val  );
+    }
+
+    Q_INVOKABLE  QVariant getOption(int settingType, int keyType){
         return getOption((SettingsInterfaceType::SettingsType)settingType, (SettingsKeyType::SettingKey)keyType);
     }
 private slots:

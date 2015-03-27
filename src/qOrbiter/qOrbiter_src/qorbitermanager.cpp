@@ -85,7 +85,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,SettingInt
     appHeight(view->height()),
     appWidth(view->width()),
     settingsInterface(appSettings),
-    m_style(0)
+    m_style(0),
+    m_fontDir("")
 {
 #ifdef __ANDROID__
     int testSize=-1;
@@ -97,6 +98,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,SettingInt
         }
     }
     m_testScreenSize =testSize;
+    m_fontDir.setPath(QStandardPaths::standardLocations(QStandardPaths::FontsLocation).first());
+    qDebug() <<m_fontDir.entryList();
 
     QString mlocale = QLocale::system().name().append(".qm");
     qDebug() << "Local set to "<< mlocale;
@@ -2991,6 +2994,12 @@ void qorbiterManager::setText(QString sDesignObj, QString sValue, int iPK_Text)
 
 void qorbiterManager::makeCall(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To) {
     emit CMD_makeCall(iPK_Users, sPhoneExtension, sPK_Device_From, iPK_Device_To);
+}
+
+QVariant qorbiterManager::systemFontList()
+{
+    qDebug() << m_fontDir.entryList();
+return QVariant(m_fontDir.entryList());
 }
 
 void qorbiterManager::handleScreenChanged(QScreen *screen)

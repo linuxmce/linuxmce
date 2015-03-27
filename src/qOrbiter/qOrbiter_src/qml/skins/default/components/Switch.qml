@@ -6,7 +6,7 @@ Item{
     width: Style.scaleX(12)
     height: Style.listViewItemHeight
     property bool enabled:false
-    property string switchLabel:qsTr("Use Network Skins?")
+    property string switchLabel:"ipsum"
     signal triggered()
 
     
@@ -38,8 +38,8 @@ Item{
         anchors{
             verticalCenter: inner_rect.verticalCenter
         }
-        text:enabled ? qsTr("Enabled") : qsTr("Disabled")
-        color:enabled ? "Black" : "Grey"
+        text:sw_root.state==="on" ? qsTr("Enabled") : qsTr("Disabled")
+        color:sw_root.state==="on" ? "green" : "red"
        anchors.margins: 5
     }
 

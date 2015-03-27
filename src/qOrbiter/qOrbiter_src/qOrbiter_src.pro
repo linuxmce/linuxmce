@@ -533,14 +533,7 @@ HEADERS += \
 
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
-        config.xml \
-    qml/splash/Switch.qml \
-    qml/splash/LanguageList.qml \
-    qml/skins/default/PageLoader.qml \
-    qml/skins/default/DefaultHeader.qml \
-    qml/skins/default/components/GenericPopup.qml \
-    qml/skins/default/components/SettingsOption.qml \
-    qml/skins/default/components/Switch.qml
+        config.xml
 
 
 for_harmattan{

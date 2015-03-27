@@ -1,6 +1,4 @@
-import QtQuick 2.2
-
-
+import QtQuick 2.3
 Item{
     id:styledHdr
     property string labelText:"lorem Ipsum foo"

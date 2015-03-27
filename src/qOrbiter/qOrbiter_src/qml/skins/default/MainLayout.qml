@@ -65,4 +65,8 @@ Item {
         id: header
     }
 
+    Footer {
+        id: footer
+    }
+
 }

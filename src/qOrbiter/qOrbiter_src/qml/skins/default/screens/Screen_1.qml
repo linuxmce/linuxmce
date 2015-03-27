@@ -3,7 +3,7 @@ import "../components"
 import "../"
 import org.linuxmce.screens 1.0
 StyledScreen {
-id:screen
+    id:screen
 
     StyledText{
         anchors{
@@ -22,23 +22,21 @@ id:screen
         onActivated: manager.setCurrentScreen(Screens.AdvancedOptions)
     }
 
-    ListView{
+    GenericListModel {
+        id: genericListContainer
+        label: qsTr("Scenarios")
         anchors{
             left:parent.left
             top:parent.top
             bottom:parent.bottom
         }
+
         model:qmlRoot.scenarios
-        width: Style.listViewWidth_medium
-        delegate: Item{
-            id:listViewLargeDelegate
-            height: Style.scaleY(8)
-            width: parent.width
+        delegate:  StyledDelegate {
             StyledText{
                 anchors.centerIn: parent
                 text:name
             }
         }
     }
-
 }
