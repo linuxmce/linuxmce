@@ -1,7 +1,8 @@
 #!/bin/bash
 . /usr/pluto/bin/SQL_Ops.sh
+. /usr/pluto/bin/Utils.sh
 
-HALDevice="$1"
+Device="$1"
 PNPQueue="$2"
 ScriptName="$4"
 ZWaveTemplate=1754
@@ -9,27 +10,17 @@ ZWaveTemplate=1754
 NotZWave()
 {
 	echo "It's not a ZWave interface"
-	/usr/pluto/bin/MessageSend dcerouter -r 0 $HALDevice 1 806 224 $PNPQueue 13 "$ScriptName" 44 0
+	/usr/pluto/bin/MessageSend dcerouter -r 0 $Device 1 806 224 $PNPQueue 13 "$ScriptName" 44 0
 	exit 0
 }
 
-SerialNumber=$(RunSQL "SELECT SerialNumber FROM PnpQueue WHERE PK_PnpQueue=$PNPQueue")
-if [[ -z "$SerialNumber" ]]; then
+ParmsData=$(RunSQL "SELECT Parms FROM PnpQueue WHERE PK_PnpQueue=$PNPQueue")
+if [[ -z "$ParmsData" ]]; then
 	NotZWave
 fi
 
-SysfsPath=$(hal-get-property --udi "$SerialNumber" --key "usb_device.linux.sysfs_path")
-if [[ -z "$SysfsPath" ]]; then
-	NotZWave
-fi
-
-SysfsDev=$(find "$SysfsPath" | egrep '/tty[:/]' | head -1)
-if [[ -z "$SysfsDev" ]]; then
-	NotZWave
-fi
-
-DevBase=$(basename "$SysfsDev")
-SerialPort=/dev/$DevBase
+SerialLocation=$(echo "$ParmsData" | cut -d'|' -f2)
+SerialPort=TranslateSerialPort "$SerialLocation"
 if [[ ! -c "$SerialPort" ]]; then
 	NotZWave
 fi
@@ -40,5 +31,5 @@ if [[ "$?" -ne 0 ]]; then
 	NotZWave
 else
 	echo "It is a ZWave interface"
-	/usr/pluto/bin/MessageSend dcerouter -r 0 $HALDevice 1 806 224 $PNPQueue 13 "$ScriptName" 44 $ZWaveTemplate
+	/usr/pluto/bin/MessageSend dcerouter -r 0 $Device 1 806 224 $PNPQueue 13 "$ScriptName" 44 $ZWaveTemplate
 fi
