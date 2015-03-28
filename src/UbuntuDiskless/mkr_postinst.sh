@@ -104,3 +104,5 @@ if [[ -n "$cache_name" ]]; then
 	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$cache_name || :
 fi
 done
+
+echo "Reboot to complete the LinuxMCE Disked MD Setup process."
