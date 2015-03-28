@@ -121,6 +121,60 @@ StatsMessage () {
 ###########################################################
 
 MD_System_Level_Prep () {
+	# Make sure, the root user is connecting to DCEROUTER for any MySQL connection
+	cat <<-EOF > /root/.my.cnf
+		[client]
+		host = dcerouter
+		EOF
+
+	## Setup apt in pluto style
+	case "$TARGET_DISTRO" in
+		"ubuntu")
+			# FIXME: don't overwrite on re-install, check prior to write
+			TARGET_REPO_NAME="main"
+			cat <<-EOF > /etc/apt/sources.list
+				deb file:/usr/pluto/deb-cache/$DEB_CACHE ./
+				deb http://deb.linuxmce.org/ubuntu/ $TARGET_RELEASE $TARGET_REPO_NAME
+				deb http://deb.linuxmce.org/ $TARGET_RELEASE $TARGET_REPO_NAME
+				deb $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
+				deb $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
+				deb http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restricted universe multiverse
+				deb http://archive.canonical.com/ubuntu $TARGET_RELEASE partner
+				deb http://debian.slimdevices.com/ stable  main
+				deb http://download.videolan.org/pub/debian/stable/ /
+				EOF
+			;;
+		"raspbian")
+			# FIXME: don't overwrite on re-install, check prior to write
+			cat <<-EOF > /etc/apt/sources.list
+				#deb http://10.10.42.99/raspbian/ ./
+				deb file:/usr/pluto/deb-cache/$DEB_CACHE ./
+				deb http://deb.linuxmce.org/raspbian/ $TARGET_RELEASE main
+				deb $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
+				deb http://archive.raspberrypi.org/debian $TARGET_RELEASE main
+				EOF
+			;;
+	esac
+
+	# FIXME: don't overwrite on re-install, check prior to write
+	## Setup kernel postinst script to repair vmlinuz/initrd.img symlinks in /
+	cat <<-"EOF" >/etc/kernel/postinst.d/update-symlinks
+		#!/bin/bash
+		# LinuxMCE post kernel image install.
+		#
+		# We make sure we can read the image and the kernel, and the softlink is correct.
+		chmod g+r /boot/* || :
+		chmod o+r /boot/* || :
+
+		pushd /
+		ln -sf boot/initrd.img-$1 initrd.img || :
+		ln -sf boot/vmlinuz-$1 vmlinuz || :
+		popd
+
+		exit 0
+		EOF
+	chmod +x /etc/kernel/postinst.d/update-symlinks
+
 	## Setup initial ssh access
 	StatsMessage "Setting up SSH"
 	[[ -f /usr/pluto/keys/id_dsa_pluto.pub ]] && mkdir -p /root/.ssh && cat /usr/pluto/keys/id_dsa_pluto.pub >> /root/.ssh/authorized_keys
@@ -132,12 +186,46 @@ MD_Seamless_Compatability () {
 			: # no-op
 			;;
 		raspbian)
-			: # no-op
+			# raspbian doesn't come with lsb-release by default???
+			cat <<-EOF > /etc/lsb-release
+				DISTRIB_ID=Raspbian
+				DISTRIB_CODENAME=$TARGET_RELEASE
+				EOF
 			;;
 	esac
 }
 
 MD_Preseed () {
+	## Setup debconf interface to 'noninteractive'
+	#create preseed file
+	cat <<-EOF >/tmp/preseed.cfg
+		debconf debconf/frontend	select Noninteractive
+		# Choices: critical, high, medium, low
+		debconf debconf/priority        select critical
+		msttcorefonts   msttcorefonts/http_proxy        string
+		msttcorefonts   msttcorefonts/defoma    note
+		msttcorefonts   msttcorefonts/dlurl     string
+		msttcorefonts   msttcorefonts/savedir   string
+		msttcorefonts   msttcorefonts/baddldir  note
+		msttcorefonts   msttcorefonts/dldir     string
+		msttcorefonts   msttcorefonts/blurb     note
+		msttcorefonts   msttcorefonts/accepted-mscorefonts-eula boolean true
+		msttcorefonts   msttcorefonts/present-mscorefonts-eula  boolean false
+		sun-java6-bin   shared/accepted-sun-dlj-v1-1    boolean true
+		sun-java6-jre   shared/accepted-sun-dlj-v1-1    boolean true
+		sun-java6-jre   sun-java6-jre/jcepolicy note
+		sun-java6-jre   sun-java6-jre/stopthread        boolean true
+		debconf debconf/frontend        select Noninteractive
+		# Choices: critical, high, medium, low
+		debconf debconf/priority        select critical
+		EOF
+	debconf-set-selections /tmp/preseed.cfg
+
+	#For some odd reason, set-selections adds a space for Noninteractive and Critical that needs to be removed - debconf doesn't handle extra white space well
+	sed -i 's/Value:  /Value: /g' /var/cache/debconf/config.dat
+
+	echo '/bin/false' >"/etc/X11/default-display-manager"
+
 	# This does an update, while adding gpg keys for any that are missing. This is primarily for vlc
 	# but will work for any source.
 	gpgs=$(apt-get -y update |& grep -s NO_PUBKEY | awk '{ print $NF }' | cut -c 9-16);
@@ -152,6 +240,8 @@ MD_Preseed () {
 	VerifyExitCode "apt update"
 
 	apt-get -f -y install
+
+	apt-get -f -y install pluto-boot-scripts
 }
 
 MD_Install_Packages () {
@@ -160,7 +250,7 @@ MD_Install_Packages () {
 	apt-get -f -y dist-upgrade
 	VerifyExitCode "Dist-upgrade failed"
 
-	apt-get -f -y install pluto-confirm-dependencies pluto-avwizard
+	apt-get -f -y install confirm-dependencies pluto-avwizard
 	VerifyExitCode "Install pluto-confirm-dependencies, pluto-avwizard failed"
 
 	# generate locales
@@ -314,13 +404,31 @@ start() {
 		return 10
 	fi
 
-	setup_fstab
-	setup_plutoconf
+	#TODO get as much of this from database as possible
+	case "$TARGET_DISTRO" in
+		"ubuntu")
+			case "$TARGET_ARCH" in
+				i386)
+					TARGET_REPO="http://archive.ubuntu.com/ubuntu/"
+					;;
+				armhf)
+					TARGET_REPO="http://ports.ubuntu.com/ubuntu/"
+					;;
+			esac
+			;;
+		"raspbian-armhf")
+			TARGET_REPO="http://archive.raspbian.org/raspbian/"
+			;;
+	esac
 
-	#Function execution
+	setup_fstab
 	MD_System_Level_Prep
 	MD_Seamless_Compatability
 	MD_Preseed
+. /usr/pluto/bin/Config_Ops.sh
+. /usr/pluto/bin/SQL_Ops.sh
+. /usr/pluto/bin/Utils.sh
+	setup_plutoconf
 	MD_Install_Packages
 	MD_Populate_Debcache
 	MD_Cleanup
