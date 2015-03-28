@@ -152,6 +152,18 @@ function ListTemplates_Category {
 }
 
 
+GetDevice_Template()
+{
+	local PK_Device="$1"
+
+	local R=$(RunSQL "SELECT FK_DeviceTemplate FROM Device WHERE PK_Device=$PK_Device")
+
+	if [[ "$R" == NULL ]]; then
+		R=""
+	fi
+	echo "$R"
+}
+
 FindDevice_Template()
 {
 	local PK_Device_Parent="${1//\'}" FK_DeviceTemplate="${2//\'}" NoRecursion="$3" IncludeParent="$4" All="$5"
