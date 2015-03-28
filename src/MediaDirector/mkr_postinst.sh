@@ -8,9 +8,9 @@ update-rc.d -f firstboot start 91 2 3 4 5 . >/dev/null
 ### Setup global variables
 ###########################################################
 
-HOST_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
-HOST_RELEASE=$(lsb_release -c -s)
-HOST_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
+TARGET_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
+TARGET_RELEASE=$(lsb_release -c -s)
+TARGET_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
 
 MD_System_Level_Prep () {
 	# Make sure, the root user is connecting to DCEROUTER for any MySQL connection
@@ -20,7 +20,7 @@ MD_System_Level_Prep () {
 		EOF
 
 	## Setup apt in pluto style
-	case "$HOST_DISTRO" in
+	case "$TARGET_DISTRO" in
 		"ubuntu")
 			# FIXME: don't overwrite on re-install, check prior to write
 			TARGET_REPO_NAME="main"
@@ -138,12 +138,12 @@ MD_Cleanup () {
 ### Main execution area
 ###########################################################
 
-TARGET_TYPES="$HOST_DISTRO-$HOST_ARCH"
+TARGET_TYPES="$TARGET_DISTRO-$TARGET_ARCH"
 
 #TODO get as much of this from database as possible
-case "$HOST_DISTRO" in
+case "$TARGET_DISTRO" in
 	"ubuntu")
-		case "$HOST_ARCH" in
+		case "$TARGET_ARCH" in
 			i386)
 				TARGET_REPO="http://archive.ubuntu.com/ubuntu/"
 				;;

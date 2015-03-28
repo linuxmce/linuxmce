@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 . /usr/pluto/bin/Config_Ops.sh
 
@@ -45,7 +45,7 @@ setup_fstab() {
 			192.168.80.1:/home                              /home                   nfs4 retrans=10,timeo=50 1 1
 			192.168.80.1:/home/cameras                      /home/cameras           nfs4 retrans=10,timeo=50 1 1
 			EOF
-		mount -a
+		mount -a || :
 	fi
 }
 
