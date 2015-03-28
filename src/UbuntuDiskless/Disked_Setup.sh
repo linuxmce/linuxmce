@@ -4,7 +4,7 @@ set -e
 
 . /usr/pluto/bin/SQL_Ops.sh 2>/dev/null
 . /usr/pluto/bin/Section_Ops.sh 2>/dev/null
-
+. /usr/pluto/bin/Config_Ops.sh 2>/dev/null
 
 DEVICEDATA_DisklessBoot=9
 DEVICEDATA_PK_Distro=7
@@ -56,7 +56,7 @@ function create_archive
 function setup_mysql_access 
 {
 	echo "* Setting up MySQL access for MD #${Moon_DeviceID}"
-	RunSQL "GRANT ALL PRIVILEGES ON *.* TO 'MySqlUser'@$Moon_IP; GRANT ALL PRIVILEGES ON *.* TO 'eib'@$Moon_IP"
+	RunSQL "GRANT ALL PRIVILEGES ON *.* TO '$MySqlUser'@$Moon_IP; GRANT ALL PRIVILEGES ON *.* TO 'eib'@$Moon_IP"
 	RunSQL "FLUSH PRIVILEGES"
 }
 
