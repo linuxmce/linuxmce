@@ -116,6 +116,14 @@ MD_Preseed () {
 	update-rc.d -f kdm remove
 	update-rc.d -f NetworkManager remove
 
+	cat <<-EOF > /etc/network/interfaces
+		auto lo
+		iface lo inet loopback
+
+		auto eth0
+		iface eth0 inet dhcp
+		EOF
+
 	echo '/bin/false' >"/etc/X11/default-display-manager"
 }
 
