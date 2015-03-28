@@ -5,8 +5,8 @@ DTVENDOR_FILE="/etc/pluto/Disked_DTVendor"
 COMMAND_FILE="/etc/pluto/Disked_Command"
 
 if [ -f "$DEVICEID_FILE" ]; then
-	echo "We have a DeviceID already, bypassing interactor."
-  exit 0
+	echo "Skipping interactor - we have a DeviceID already."
+	exit 0
 fi
 
 MyIP=$(/sbin/ifconfig eth0 | awk 'NR==2 { print substr($2, index($2, ":") + 1) }')
