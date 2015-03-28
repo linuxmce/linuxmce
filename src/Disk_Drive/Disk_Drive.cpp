@@ -41,7 +41,11 @@ using namespace DCE;
 #include "JobHandler/Job.h"
 #include "DCE/DCEConfig.h"
 DCEConfig g_DCEConfig;
+
+/*
+FIXME: refactor for udev to support local jukeboxes again.
 #include "HAL/HalTree.h"
+*/
 
 #include "Disk_Drive_Functions/RipJob.h"
 #include "Disk_Drive_Functions/RipTask.h"
@@ -655,6 +659,11 @@ void Disk_Drive::CMD_Get_Disk_Info(string *sRippingStatus,int *iPK_MediaType,int
 
 void Disk_Drive::VerifyDriveIsNotEmbedded(string &sDrive)
 {
+/*******************************************************************************************/
+/* FIXME: to support local jukeboxes this code needs to be refactored to use udev not hal. */
+/* FIXME: phenigma - 27/03/2015                                                            */
+/*******************************************************************************************/
+/*
 	// There's a problem in Linux that it often creates the /dev/cdrom symlinc
 	// to a drive that's really embedded in one of the jukeboxes, and not the main cdrom.
 	// Go through all embedded disk drives, and if this is a symlinc to one, change it to
@@ -721,6 +730,7 @@ void Disk_Drive::VerifyDriveIsNotEmbedded(string &sDrive)
 			}
 		}
 	}
+*/
 }
 
 bool Disk_Drive::SafeToReload(string &sReason)
