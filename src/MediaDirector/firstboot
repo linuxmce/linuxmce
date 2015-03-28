@@ -421,13 +421,13 @@ start() {
 			;;
 	esac
 
-	setup_fstab
 	MD_System_Level_Prep
 	MD_Seamless_Compatability
 	MD_Preseed
 . /usr/pluto/bin/Config_Ops.sh
 . /usr/pluto/bin/SQL_Ops.sh
 . /usr/pluto/bin/Utils.sh
+	setup_fstab
 	setup_plutoconf
 	MD_Install_Packages
 	MD_Populate_Debcache
