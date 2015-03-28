@@ -74,7 +74,11 @@ MD_Seamless_Compatability () {
 			: # no-op
 			;;
 		raspbian)
-			: # no-op
+			# raspbian doesn't come with lsb-release by default???
+			cat <<-EOF > /etc/lsb-release
+				DISTRIB_ID=Raspbian
+				DISTRIB_CODENAME=$TARGET_RELEASE
+				EOF
 			;;
 	esac
 }
@@ -126,15 +130,13 @@ MD_Cleanup () {
 
 	#Create a list of installed packages
 	#COLUMS=1024 dpkg -l | awk '/^ii/ {print $2}' >/tmp/pkglist-diskless.txt # used for deb-cache cleanup in the builder
+	: # no-op
 }
 
 
 ###########################################################
 ### Main execution area
 ###########################################################
-
-#Set up logging
-Setup_Logfile
 
 TARGET_TYPES="$HOST_DISTRO-$HOST_ARCH"
 

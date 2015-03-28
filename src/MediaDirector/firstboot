@@ -9,6 +9,13 @@ if ([ "$FirstBoot" = "false" ] && [ -n "$PK_Device" ]) ; then
 	exit 0
 fi
 
+. /usr/pluto/bin/SQL_Ops.sh
+. /usr/pluto/bin/Utils.sh
+
+###########################################################
+### Setup global variables
+###########################################################
+
 DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
 DEVICEDATA_DISTRO_Ubuntu_Precise_CONST=20
 DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST=21
@@ -16,10 +23,19 @@ DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST=21
 FSTAB_FILE="/etc/fstab"
 DEVID_FILE="/etc/Disked_DeviceID"
 
+INSTALL_KUBUNTU_DESKTOP="yes"
+#INSTALL_KUBUNTU_DESKTOP="no"
+
+TARGET_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
+TARGET_RELEASE=$(lsb_release -c -s)
+TARGET_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
+
+DEB_CACHE="$TARGET_DISTRO-$TARGET_RELEASE-$TARGET_ARCH"
+
 setup_fstab() {
 	# Hmm, let's see if the mounts are here, if not add them
 	check=$(grep 192.168.80.1 "${FSTAB_FILE}" || :)
-	if [ -z "$check" ]; then
+	if [ -z "$check" ] ; then
 		cat <<-EOF >> "${FSTAB_FILE}"
 			192.168.80.1:/usr/pluto/var/                    /usr/pluto/var/         nfs4 retrans=10,timeo=50 1 1
 			192.168.80.1:/usr/pluto/orbiter                 /usr/pluto/orbiter      nfs4 retrans=10,timeo=50 1 1
@@ -29,6 +45,7 @@ setup_fstab() {
 			192.168.80.1:/home                              /home                   nfs4 retrans=10,timeo=50 1 1
 			192.168.80.1:/home/cameras                      /home/cameras           nfs4 retrans=10,timeo=50 1 1
 			EOF
+		mount -a
 	fi
 }
 
@@ -66,6 +83,222 @@ setup_plutoconf() {
 	[ -n "$AVWizardDone" ] || ConfSet "AVWizardDone" "0"
 }
 
+
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+
+
+###########################################################
+### Setup Functions - Error checking and logging and trapping
+###########################################################
+
+VerifyExitCode () {
+        local EXITCODE=$?
+        if [ "$EXITCODE" != "0" ] ; then
+        	echo "An error (Exit code $EXITCODE) occured during the last action"
+        	echo "$1"
+                exit 1
+        fi
+}
+
+StatsMessage () {
+	printf "$(date) - $* \n"
+}
+
+###########################################################
+### Setup Functions - General functions
+###########################################################
+
+MD_System_Level_Prep () {
+	## Setup initial ssh access
+	StatsMessage "Setting up SSH"
+	[[ -f /usr/pluto/keys/id_dsa_pluto.pub ]] && mkdir -p /root/.ssh && cat /usr/pluto/keys/id_dsa_pluto.pub >> /root/.ssh/authorized_keys
+}
+
+MD_Seamless_Compatability () {
+	case "$TARGET_DISTRO" in
+		ubuntu)
+			: # no-op
+			;;
+		raspbian)
+			: # no-op
+			;;
+	esac
+}
+
+MD_Preseed () {
+	# This does an update, while adding gpg keys for any that are missing. This is primarily for vlc
+	# but will work for any source.
+	gpgs=$(apt-get -y update |& grep -s NO_PUBKEY | awk '{ print $NF }' | cut -c 9-16);
+	if [ -n "$gpgs" ]; then
+		echo "$gpgs" | while read gpgkeys ; do
+			gpg --keyserver pgp.mit.edu --recv-keys "$gpgkeys"
+			gpg --export --armor "$gpgkeys" | apt-key add -
+		done
+	fi
+
+	apt-get -y -qq update
+	VerifyExitCode "apt update"
+
+	apt-get -f -y install
+}
+
+MD_Install_Packages () {
+	StatsMessage "Installing packages to MD"
+	## Update the system
+	apt-get -f -y dist-upgrade
+	VerifyExitCode "Dist-upgrade failed"
+
+	# generate locales
+	StatsMessage "Generating locales"
+	echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
+	apt-get -f -y install locales
+
+	case "$TARGET_DISTRO" in
+		"ubuntu")
+			StatsMessage "Installing kernel headers"
+			#Install headers and run depmod for the seamless integraton function, ensure no errors exist
+			TARGET_KVER_LTS_HES=""
+			[[ "precise" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-trusty"
+			[[ "trusty" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-utopic"
+			echo "LTS_HES=$TARGET_KVER_LTS_HES" >> /etc/pluto.conf
+			apt-get -y install linux-headers-generic"$TARGET_KVER_LTS_HES"
+			VerifyExitCode "Install linux headers package failed"
+
+			TARGET_KVER=$(ls -vd /lib/modules/[0-9]* | sed 's/.*\///g' | tail -1)
+			depmod -v "$TARGET_KVER"
+			VerifyExitCode "depmod failed for $TARGET_KVER"
+
+			StatsMessage "Installing kernel"
+			apt-get -f -y --no-install-recommends install linux-image-generic"$TARGET_KVER_LTS_HES"
+			VerifyExitCode "Install linux kernel package failed"
+
+			## Prevent lpadmin from running as it blocks the system
+			apt-get -f -y install cups-client
+			cp /usr/sbin/lpadmin{,.disabled}
+			echo > /usr/sbin/lpadmin
+			apt-get -f -y install cups-pdf
+			mv /usr/sbin/lpadmin{.disabled,}
+			;;
+		"raspbian")
+			# raspbian doesn't come with lsb-release by default???
+			apt-get -y install lsb-release
+
+			# HACK: copy the foundation kernel.img to a normal linux kernal name with version
+			# FIXME: is there a better way to do this?  the raspbian kernels are missing the fdt.
+			#apt-get -y install linux-image-3.6-trunk-rpi
+			apt-get -y install libraspberrypi-bin raspberrypi-bootloader
+			#apt-get -y install rpi-update
+			#rpi-update
+			mkdir -p /tmp
+			cat <<-EOF > /tmp/symlink_kernel.sh
+				#!/bin/bash
+				cd /boot
+				ln -sf kernel.img vmlinuz-3.6-trunk-rpi
+				touch /boot/initrd.img-3.6-trunk-rpi
+				EOF
+			chmod +x /tmp/symlink_kernel.sh
+			/tmp/symlink_kernel.sh
+	                apt-get -y install alsa-base alsa-utils
+			# pulseaudio
+			VerifyExitCode "alsa-base, alsa-utils or pulseaudio packages install failed"
+			;;
+	esac
+
+	StatsMessage "Install other ancillary programs for MCE"
+	case "$TARGET_ARCH" in
+		i386|amd64)
+			## Packages that are marked as dependencies only in the database
+			apt-get -y install id-my-disc
+			;;
+	esac
+
+	## Install additional packages
+	case "$TARGET_DISTRO" in
+		"ubuntu")
+			if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
+				apt-get -y install kubuntu-desktop
+				#apt-get -y install kde-minimal
+			fi
+			echo '/bin/false' >/etc/X11/default-display-manager
+
+			# Update startup to remove kdm and network manager
+			update-rc.d -f kdm remove
+			update-rc.d -f NetworkManager remove
+
+			#Install ancillary programs
+			apt-get -y install xserver-xorg"$TARGET_KVER_LTS_HES"
+			VerifyExitCode "xserver-xorg$TARGET_KVER_LTS_HES install failed"
+			apt-get -y install xserver-xorg-video-all"$TARGET_KVER_LTS_HES" linux-firmware
+			VerifyExitCode "Ancillary programs install failed"
+
+			;;
+		"raspbian")
+			#FIXME: why is this required, something missing?
+			#addgroup --force-badname Debian-exim
+			#VerifyExitCode "addgroup Debian-Exim failed"
+			#sed -i '/Debian-exim/d' /var/lib/dpkg/statoverride
+			:
+			;;
+	esac
+
+	#Install nfs-common and openssh-server
+	apt-get -y install nfs-common openssh-server
+	VerifyExitCode "nfs-common or openssh-server programs install failed"
+
+	apt-get -y install xinit
+	VerifyExitCode "xinit"
+
+	apt-get -y install pastebinit
+	VerifyExitCode "pastebinit"
+
+	#implement external_media_identifier fix
+	ln -s /usr/lib/libdvdread.so.4 /usr/lib/libdvdread.so.3
+}
+
+MD_Populate_Debcache () {
+	find /var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/$DEB_CACHE \;
+	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
+}
+
+MD_Cleanup () {
+	StatsMessage "Cleaning up from package installations..."
+
+	#Make sure there is are Packages files on the MD so apt-get update does not fail
+	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
+	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
+
+	#Copy the orbiter activation command to the MD's desktop
+	mkdir -p /root/Desktop
+	cp -r /etc/skel/Desktop/* /root/Desktop
+
+	#Remove the xorg file(s) from installation, need to start with a fresh slate
+	rm -f /etc/X11/xorg.conf*
+
+	#Clean up apt from the installs
+	apt-get -y clean
+	VerifyExitCode "APT Clean"
+
+	#Create a list of installed packages
+	#COLUMNS=1024 dpkg -l | awk '/^ii/ {print $2}' >/tmp/pkglist-diskless.txt # used for deb-cache cleanup in the builder
+}
+
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+
+
+
+
+
 start() {
 	if [ ! -f "$DEVID_FILE" ]; then
 		echo "ERR: interactor has not yet created '$DEVID_FILE'."
@@ -74,6 +307,14 @@ start() {
 
 	setup_fstab
 	setup_plutoconf
+
+	#Function execution
+	MD_System_Level_Prep
+	MD_Seamless_Compatability
+	MD_Preseed
+	MD_Install_Packages
+	MD_Populate_Debcache
+	MD_Cleanup
 
 	# run any device specific firstboot add-on scripts here
 	for f in /etc/init.d/firstboot-lmce-* ; do
