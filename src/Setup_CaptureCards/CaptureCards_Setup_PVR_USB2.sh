@@ -113,14 +113,14 @@ if [[ -z "$CardDevice_PciID" ]];then
 	exit
 fi
 
-CardDevice_HalUDI=$(hal-find-by-property --key linux.sysfs_path --string "/sys/devices/$CardDevice_PciID")
-if [[ -z "$CardDevice_HalUDI" ]] ;then 
+CardDevice_HalUDI=$(udevadm info --query=property --path "/sys/devices/$CardDevice_PciID")
+if [[ -z "$CardDevice_HalUDI" ]] ;then
 	ls -l /dev/video*
 	DisableDevice "$1"
 	exit
 fi
 
-CardDevice_UsbSerial=$(hal-get-property --udi $CardDevice_HalUDI --key usb_device.serial)
+CardDevice_UsbSerial=$(udevadm info --query=property --path "/sys/devices/$CardDevice_PciID" | grep ID_SERIAL | cut -d'=' -f2)
 if [[ -z "$CardDevice_UsbSerial" ]] ;then
 	DisableDevice "$1"
 	exit
