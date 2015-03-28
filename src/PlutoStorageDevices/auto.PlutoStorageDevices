@@ -113,26 +113,27 @@ case "$Template" in
 			## Get the UUID of the device that we want to mount
 			Drive_UUID=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device=$StorageDevice AND FK_DeviceData=$DD_UUID")
 
-			## Find the drive udi
-			Drive_HalUDI=$(hal-find-by-property --key 'volume.uuid' --string "$Drive_UUID")
-			if [[ "$Drive_HalUDI" == "" ]] ;then
-				Log $LOG_WARN "Cannot find hal object with volume.uuid = $IDrive_UUID"
+			## Find the drive
+			if [[ ! -e "/dev/disk/by-uuid/$Drive_UUID" ]] ; then
+				Log $LOG_WARN "Cannot find disk with uuid = $Drive_UUID"
 			        # as in the StorageDevices_Radar.sh script, fall back to serial number and storage_device
-				Drive_HalUDI=$(hal-find-by-property --key 'storage.serial' --string "$Drive_UUID")
-				if [[ "$Drive_HalUDI" == "" ]] ;then
-				        Log $LOG_WARN "Cannot find hal object with storage.serial = $Drive_UUID either"
-					Drive_HalUDI=$(hal-find-by-property --key 'volume.label' --string "$Drive_UUID")
-					if [[ "$Drive_HalUDI" == "" ]] ;then
-					        Log $LOG_WARN "Cannot find hal object with volume.label = $Drive_UUID either, aborting!"
+				if [[ ! -e "/dev/disk/by-id/$Drive_UUID" ]] ; then
+				        Log $LOG_WARN "Cannot find disk with id = $Drive_UUID either"
+					if [[ ! -e "/dev/disk/by-label/$Drive_UUID" ]] ; then
+					        Log $LOG_WARN "Cannot find disk with label = $Drive_UUID either, aborting!"
 						exit 0
+					else
+						Drive_BlockDevice=$(readlink -f "/dev/disk/by-label/$Drive_UUID")
 					fi
+				else
+					Drive_BlockDevice=$(readlink -f "/dev/disk/by-id/$Drive_UUID")
 				fi
+			else
+				Drive_BlockDevice=$(readlink -f "/dev/disk/by-uuid/$Drive_UUID")
 			fi
 
-			## Convert udi to block device
-			Drive_BlockDevice=$(hal-get-property --udi "$Drive_HalUDI" --key 'block.device')
 			if [[ "$Drive_BlockDevice" == "" ]] ;then
-				Log $LOG_ERR "Cannot convert find block device associated with uuid $IDrive_UUID"
+				Log $LOG_ERR "Cannot find block device associated with uuid/id/label $IDrive_UUID"
 				exit 0
 			fi
 			
