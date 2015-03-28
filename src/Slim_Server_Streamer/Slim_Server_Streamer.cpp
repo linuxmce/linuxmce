@@ -317,7 +317,9 @@ void Slim_Server_Streamer::CMD_Stop_Streaming(int iStreamID,string sStreamingTar
 	}
 
 	if ( vectDevices.size() == 0 )
-		m_mapStreamsToPlayers.erase(iStreamID);
+	  {
+	    m_mapStreamsToPlayers.erase(iStreamID);
+	  }
 }
 
 bool Slim_Server_Streamer::ConnectToSlimServerCliCommandChannel()
@@ -784,7 +786,8 @@ void Slim_Server_Streamer::CMD_Stop_Media(int iStreamID,string *sMediaPosition,s
 	string sText;
 	CMD_Report_Playback_Position(iStreamID,&sText,sMediaPosition,sCMD_Result,pMessage);
 
-	m_mapStreamsToPlayers.erase(iStreamID);
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"CMD_Stop_Media - Erase StreamID %d from m_mapStreamsToPlayers",iStreamID);
+	// 	m_mapStreamsToPlayers.erase(iStreamID);
 	SendReceiveCommand(sControlledPlayerMac + " playlist clear");
 	SendReceiveCommand(sControlledPlayerMac + " stop");
 	SendReceiveCommand(sControlledPlayerMac + " power 0");
