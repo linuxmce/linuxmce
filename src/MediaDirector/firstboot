@@ -255,7 +255,7 @@ MD_Install_Packages () {
 	apt-get -f -y dist-upgrade
 	VerifyExitCode "Dist-upgrade failed"
 
-	apt-get -f -y install confirm-dependencies pluto-avwizard
+	apt-get -f -y install pluto-confirm-dependencies pluto-avwizard
 	VerifyExitCode "Install pluto-confirm-dependencies, pluto-avwizard failed"
 
 	# generate locales
