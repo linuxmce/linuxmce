@@ -1000,13 +1000,13 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 	{
 		if (_notification->GetNotification() == OpenZWave::Notification::Code_Dead)
 		{
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "ZWInterface::OnNotification() : Node presumed dead, node id = %d", nodeInfo->m_nodeId);
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "ZWave::OnNotification() : Node presumed dead, node id = %d", nodeInfo->m_nodeId);
 			// add a alarm in 3 minutes that will react to the dead node - we should wait for a while for the network to have recovered from a failed transmission
 			m_pAlarmManager->AddRelativeAlarm(180,this,ALARM_NODE_DEAD,nodeInfo);
 		}
 		else if (_notification->GetNotification() == OpenZWave::Notification::Code_Alive)
 		{
-			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWInterface::OnNotification() : Node brought back to life, node id = %d", nodeInfo->m_nodeId);
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "ZWave::OnNotification() : Node brought back to life, node id = %d", nodeInfo->m_nodeId);
 		}
 		break;
 

@@ -110,12 +110,11 @@ bool ZWInterface::Init(ZWConfigData* data) {
 		pLog->SetLoggingState(OpenZWave::LogLevel_Info, OpenZWave::LogLevel_Debug, OpenZWave::LogLevel_Error);
 	}
 
-
 	// Create the OpenZWave Manager.
 	// The first argument is the path to the config files (where the manufacturer_specific.xml file is located
 	// The second argument is the path for saved Z-Wave network state and the log file.  If you leave it NULL 
 	// the log file will appear in the program's working directory.
-	OpenZWave::Options::Create( "/etc/openzwave/config/", "/etc/openzwave/", "" );
+	OpenZWave::Options::Create( "/etc/openzwave/", "/etc/openzwave/", "" );
 	if (data->m_itimeout >= 10) {
 	        LoggerWrapper::GetInstance()->Write(LV_ZWAVE, "ZWInterface::Init() RetryTimeout = %d", data->m_itimeout);
 	        OpenZWave::Options::Get()->AddOptionInt("RetryTimeout", data->m_itimeout);
@@ -194,6 +193,10 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 	switch( _notification->GetType() )
 	{
 		
+	case OpenZWave::Notification::Type_ValueRefreshed:
+	case OpenZWave::Notification::Type_ValueGroup:
+	case OpenZWave::Notification::Type_NodeQueriesComplete:
+		break;
 	case OpenZWave::Notification::Type_DriverReady:
 	{
 		g_homeId = _notification->GetHomeId();
