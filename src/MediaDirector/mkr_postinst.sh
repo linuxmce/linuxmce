@@ -23,7 +23,7 @@ MD_Preseed () {
 
 	echo '/bin/false' >"/etc/X11/default-display-manager"
 
-	cat <<-EOF > /etc/apt/apt.cond.d/30pluto 
+	cat <<-EOF > /etc/apt/apt.conf.d/30pluto
 		// Pluto apt conf add-on
 		APT::Cache-Limit "43554432";
 		Dpkg::Options { "--force-confold"; };
