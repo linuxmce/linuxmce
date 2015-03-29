@@ -2,15 +2,15 @@
 
 #set -e
 
-. /usr/pluto/bin/Config_Ops.sh
+[[ -e /usr/pluto/bin/Config_Ops.sh ]] && . /usr/pluto/bin/Config_Ops.sh
 
 if ([ "$FirstBoot" = "false" ] && [ -n "$PK_Device" ]) ; then
 	echo "Skipping firstboot, already completed."
 	exit 0
 fi
 
-. /usr/pluto/bin/SQL_Ops.sh
-. /usr/pluto/bin/Utils.sh
+[[ -e /usr/pluto/bin/SQL_Ops.sh ]] && . /usr/pluto/bin/SQL_Ops.sh
+[[ -e /usr/pluto/bin/Utils.sh ]] && . /usr/pluto/bin/Utils.sh
 
 ###########################################################
 ### Setup global variables
@@ -155,6 +155,11 @@ MD_System_Level_Prep () {
 				EOF
 			;;
 	esac
+
+	#Make sure there is are Packages files on the MD so apt-get update does not fail
+	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
+	touch  /usr/pluto/deb-cache/$DEB_CACHE/Packages
+	gzip -9c < /usr/pluto/deb-cache/$DEB_CACHE/Packages > /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
 
 	# FIXME: don't overwrite on re-install, check prior to write
 	## Setup kernel postinst script to repair vmlinuz/initrd.img symlinks in /
