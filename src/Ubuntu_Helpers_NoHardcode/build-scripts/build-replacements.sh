@@ -11,7 +11,7 @@ cache_name=".cache"
 
 function Changed_Since_Last_Build
 {
-	return $(/bin/true) #Zaerc HACK
+#	return $(/bin/true) #Zaerc HACK
 
 	local fs_path="$1"
 	DisplayMessage "Checking build stamp on '$fs_path'"
@@ -216,7 +216,7 @@ function Build_Replacements_Precise
 #	Build_Replacement_Package shairport ubuntu/shairport-0.05
 
 	# lmce-asterisk
-	Build_Replacement_Package lmce-asterisk src/lmce-asterisk
+	Build_Replacement_Package lmce-asterisk src/lmce-asterisk &&
 	cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir}
 
 
@@ -234,32 +234,32 @@ function Build_Replacements_Precise
 	Build_Replacement_Package libopenzwave1.0 external/open-zwave-1.3.1025 &&
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb
 
-	QT_SELECT=4 Build_Replacement_Package libhupnp-core external/hupnp/hupnp
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-core*.deb
+#	QT_SELECT=4 Build_Replacement_Package libhupnp-core external/hupnp/hupnp
+#	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-core*.deb
 
-	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
+#	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
+#	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
 
 	# ola needs to be configured to the current build environment
 	cd ${svn_dir}/${svn_branch_name}/external/ola-0.9.0 && autoreconf -i || :
-	Build_Replacement_Package ola external/ola-0.9.0
+	Build_Replacement_Package ola external/ola-0.9.0 &&
 	# don't auto install as it pulls up whiptail...  need to pre-seed the values
 	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola_*.deb
 	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola-dev*.deb
-	dir_="${svn_dir}/${svn_branch_name}/external/"
+	dir_="${svn_dir}/${svn_branch_name}/external/" &&
 	cp $dir_/ola*.deb "${replacements_dir}"
 
 	#Package: libbluray1
-	Build_Replacement_Package libbluray1 ubuntu/libbluray-0.5.0
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*bluray*.deb
-	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
-	cp $dir_/*bluray*.deb "${replacements_dir}"
+	Build_Replacement_Package libbluray1 ubuntu/libbluray-0.5.0 &&
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*bluray*.deb &&
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu" &&
+	cp $dir_/*bluray*.deb "${replacements_dir}" &&
 
 	# precise libsmbclient doesn't ship a pkg-config file, but xine checks for it, so lets provide one
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/smbclient.pc /usr/lib/pkgconfig/
 	#Package: libxine2
-	Build_Replacement_Package libxine2 ubuntu/xine-lib-1.2.6
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb
+	Build_Replacement_Package libxine2 ubuntu/xine-lib-1.2.6 &&
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb &&
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
 	cp $dir_/*xine*.deb "${replacements_dir}"
 
@@ -288,21 +288,21 @@ function Build_Replacements_Precise
 
 #libsoxr-0.1.1/
 	#Package: libsoxr-0.1.1 - for squeezelite
-	Build_Replacement_Package libsoxr0 ubuntu/libsoxr-0.1.1
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*soxr*.deb
-	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
+	Build_Replacement_Package libsoxr0 ubuntu/libsoxr-0.1.1 &&
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*soxr*.deb &&
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu" &&
 	cp $dir_/*soxr*.deb "${replacements_dir}"
 
 #ubuntu/squeezelite-1.4
 	#Package: squeezelite-1.4
-	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.4
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.4*.deb
-	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
+	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.4 &&
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.4*.deb &&
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu" &&
 	cp $dir_/*squeezelite*.deb "${replacements_dir}"
 
 	#Package: libcec
-	Build_Replacement_Package libcec ubuntu/libcec-2.1.4
-	cp ${svn_dir}/${svn_branch_name}/ubuntu/cec*.deb ${replacements_dir}
+	Build_Replacement_Package libcec ubuntu/libcec-2.1.4 &&
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/cec*.deb ${replacements_dir} &&
 	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libcec*.deb
 }
 
@@ -432,7 +432,7 @@ function Build_Replacements_trusty
 	mkdir -pv "$replacements_dir"
 
 #	#Package: lirc
-	Build_Replacement_Package lirc ubuntu/lirc-0.9.0-0ubuntu1+lmce1
+	Build_Replacement_Package lirc ubuntu/lirc-0.9.0-0ubuntu1+lmce1 &&
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-x*.deb ${replacements_dir}
 	# We have no lirc-modules for 0.9
 #	cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-modules*.deb ${replacements_dir}
@@ -448,7 +448,7 @@ function Build_Replacements_trusty
 	Build_Replacement_Package shairport ubuntu/shairport-0.05
 
 	# lmce-asterisk
-	Build_Replacement_Package lmce-asterisk src/lmce-asterisk
+	Build_Replacement_Package lmce-asterisk src/lmce-asterisk &&
         cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir}
 
 	# qOrbiter doesn't have compatibility record yet.
@@ -464,37 +464,37 @@ function Build_Replacements_trusty
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb
 
 	# libhupnp and libhupnp-av need to build under qt4.
-	QT_SELECT=4 Build_Replacement_Package libhupnp-core external/hupnp/hupnp
+	QT_SELECT=4 Build_Replacement_Package libhupnp-core external/hupnp/hupnp &&
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-core*.deb
 
-	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
+	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av &&
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
 
         # ola needs to be configured to the current build environment
 	cd ${svn_dir}/${svn_branch_name}/external/ola-0.9.0 && autoreconf -i || :
-        Build_Replacement_Package ola external/ola-0.9.0
+        Build_Replacement_Package ola external/ola-0.9.0 &&
 	# don't auto install as it pulls up whiptail...  need to pre-seed the values
 	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola_*.deb
 	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola-dev*.deb
-	dir_="${svn_dir}/${svn_branch_name}/external"
+	dir_="${svn_dir}/${svn_branch_name}/external" &&
 	cp $dir_/ola*.deb "${replacements_dir}"
 
 	# Package: libhal1, libhal-dev....  ugh.  Need a new hw detection daemon!
-	Build_Replacement_Package hal ubuntu/hal-0.5.14
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*hal*.deb
-	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
+	Build_Replacement_Package hal ubuntu/hal-0.5.14 &&
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*hal*.deb &&
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu" &&
 	cp $dir_/*hal*.deb "${replacements_dir}"
 
 	# Package: libruby1.8, ruby1.8-dev....  ugh.  GSD breaks on 1.9.1 && 2.0
-	Build_Replacement_Package ruby1.8 ubuntu/ruby1.8-1.8.7.375/
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*1.8_1.8.7.375*.deb
-	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
+	Build_Replacement_Package ruby1.8 ubuntu/ruby1.8-1.8.7.375/ &&
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*1.8_1.8.7.375*.deb &&
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu" &&
 	cp $dir_/*1.8_1.8.7.375*.deb "${replacements_dir}"
 
 	#Package: libxine2
-	Build_Replacement_Package libxine2 ubuntu/xine-lib-1.2.6
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb
-	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
+	Build_Replacement_Package libxine2 ubuntu/xine-lib-1.2.6 &&
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb &&
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu" &&
 	cp $dir_/*xine*.deb "${replacements_dir}"
 
 	#Package: lshwd
@@ -514,8 +514,8 @@ function Build_Replacements_raspbian_wheezy
 	mkdir -pv "$replacements_dir"
 
 	#Package: libcec
-	Build_Replacement_Package libcec raspbian/libcec-2.1.4
-	cp ${svn_dir}/${svn_branch_name}/raspbian/cec*.deb ${replacements_dir}
+	Build_Replacement_Package libcec raspbian/libcec-2.1.4 &&
+	cp ${svn_dir}/${svn_branch_name}/raspbian/cec*.deb ${replacements_dir} &&
 	dpkg -i ${svn_dir}/${svn_branch_name}/raspbian/libcec*.deb
 }
 
