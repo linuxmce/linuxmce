@@ -11,7 +11,7 @@ cache_name=".cache"
 
 function Changed_Since_Last_Build
 {
-#	return $(/bin/true) #Zaerc HACK
+	return $(/bin/true) #Zaerc HACK
 
 	local fs_path="$1"
 	DisplayMessage "Checking build stamp on '$fs_path'"
