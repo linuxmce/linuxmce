@@ -5,15 +5,7 @@ import org.linuxmce.screens 1.0
 StyledScreen {
     id:screen
 
-    StyledText{
-        anchors{
-            top:screen.top
-            horizontalCenter: parent.horizontalCenter
-        }
-        color:"white"
-        text:"screen 1"
-        fontSize: Style.appFontSize_header
-    }
+
 
     StyledButton{
         buttonText: qsTr("Advanced")
@@ -33,8 +25,15 @@ StyledScreen {
         height: Style.scaleY(75)
 
         model:qmlRoot.scenarios
-        delegate:  StyledDelegate {
+        delegate:  Item {
             height: Style.scaleY(10)
+            width: parent.width
+            Rectangle{
+                anchors.fill: parent
+                color:Style.appcolor_background_list
+                opacity: Style.appList_opacity
+            }
+
             StyledText{
                 id:rowLabel
                 anchors{
@@ -52,20 +51,26 @@ StyledScreen {
                     verticalCenter: parent.verticalCenter
                 }
                 model: switch(floorplantype) {
-                        case 2: currentRoomLights; break;
-                        case 5: currentRoomMedia; break;
-                        case 1:currentRoomClimate; break
-                        case 3:currentRoomTelecom; break
-                        case  4:currentRoomSecurity; break;
-                        default: undefined;
+                       case 2:currentRoomLights; break;
+                       case 5:currentRoomMedia; break;
+                       case 1:currentRoomClimate; break
+                       case 3:currentRoomTelecom; break
+                       case 4:currentRoomSecurity; break;
+                       default: undefined;
                        }
 
                 orientation:ListView.Horizontal
-                delegate: StyledText{
-                    text:title
-                    width:Style.scaleX(12)
-                    anchors.verticalCenter: parent.verticalCenter
-                    elide: Text.ElideRight
+                delegate:Item{
+                    height: parent.height
+                    width: Style.scaleX(12)
+
+                    StyledButton{
+                        buttonText:title
+                        state:"scenario"
+                        anchors.fill: parent
+                        anchors.margins: 5
+                        onActivated: manager.execGrp(params)
+                    }
                 }
             }
 

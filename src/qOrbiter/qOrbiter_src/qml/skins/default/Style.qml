@@ -32,6 +32,7 @@ QtObject{
     readonly property string appbutton_confirm_color:appcolor_background
     readonly property color appbutton_cancel_color:"#f26c4f"
     readonly property color appbutton_disabled_color:"#464646"
+readonly property color appbutton_color:appcolor_background
     readonly property int appButtonHeight:scaleY(4)
     readonly property int appButtonWidth:scaleX(6)
     readonly property int appButtonNumberPadHeight:manager.isProfile ? scaleY(12) : scaleY(18)
@@ -74,6 +75,6 @@ QtObject{
     //opacity and accents
     readonly property double appHeader_opacity:.55
     readonly property double appPanel_opacity:.45
-    readonly property double appList_opacity:.45
+    readonly property double appList_opacity:.89
 
 }

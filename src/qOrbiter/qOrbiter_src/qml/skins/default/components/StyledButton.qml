@@ -22,7 +22,7 @@ Item{
     }
     smooth: true
 
-    property string phil:useHandler ? dceHandler.item.pressed ? "yellow" : "black" :  fly_trap.pressed ? "green": "black"
+    property string phil: fly_trap.pressed ? Style.appbutton_confirm_color: Style.appbutton_confirm_color
     property int textSize:Style.appFontSize_list
     property alias buttonText:button_label.text
     property alias txtObj:button_label
@@ -40,6 +40,10 @@ Item{
         }
     }
     clip:true
+    Rectangle{
+        anchors.fill: bg_fill
+        color: "black"
+    }
 
     Rectangle{
         id:bg_fill
@@ -48,7 +52,7 @@ Item{
         border.color: "white"
         border.width: buttonRadius == height ? 0 :1
         radius: 5
-        opacity:useHandler ? dceHandler.item.pressed ? 1 : .65 :  fly_trap.pressed ? 1 : .65
+        opacity:useHandler ? dceHandler.item.pressed ? 1 : .35 :  fly_trap.pressed ? 1 : .35
 
     }
 
@@ -57,11 +61,13 @@ Item{
         text:"ipsum"
         isBold: false
         width: parent.width
+        height: parent.height
         font.weight: Font.Light
         fontSize: textSize
-        anchors.centerIn: parent
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment:Text.AlignHCenter
         anchors.margins: 5
-        color:"antiquewhite"
+        color:Style.apptext_color_active
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     }
 
@@ -91,6 +97,20 @@ Item{
                 wrapMode:Text.WrapAtWordBoundaryOrAnywhere
             }
         },
+        State {
+            name: "scenario"
+            PropertyChanges {
+                target: styled_button
+                height:Style.scaleY(12)
+                width:Style.scaleX(18)
+                textSize:Style.scaleY(3)
+            }
+            PropertyChanges{
+                target: button_label
+                wrapMode:Text.WrapAtWordBoundaryOrAnywhere
+            }
+        }
+        ,
         State {
             name: "numberpad"
             PropertyChanges {

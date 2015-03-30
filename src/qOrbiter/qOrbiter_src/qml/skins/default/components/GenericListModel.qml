@@ -19,6 +19,7 @@ Item{
         }
         height: Style.appNavigation_panelHeight
         color:Style.appcolor_background_medium
+        opacity: Style.appList_opacity
     }
     StyledText{
         id:label
