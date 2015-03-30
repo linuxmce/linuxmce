@@ -4,6 +4,21 @@ const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 const int SCREEN_BPP = 32;
 
+
+bool        CApp::Running = false;
+
+SDL_Window      *CApp::window = nullptr;
+SDL_Renderer    *CApp::renderer = nullptr;
+SDL_Texture     *CApp::bkgTexture = nullptr;
+SDL_Surface     *CApp::bkgSurface = nullptr;
+SDL_Texture     *CApp::timeTexture = nullptr;
+SDL_Surface     *CApp::timeSurface = nullptr;
+TTF_Font        *CApp::timeFont = nullptr;
+SDL_Color       *CApp::colorTime = nullptr;
+time_t          CApp::timeCurrent;
+
+
+
 SDL_Texture *CApp::renderTime(const std::string &message, SDL_Color color, SDL_Renderer *renderer)
 {
 	//We need to first render to a surface as that's what TTF_RenderText
