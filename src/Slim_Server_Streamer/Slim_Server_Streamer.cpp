@@ -99,6 +99,7 @@ void Slim_Server_Streamer::PostConnect()
 		}
 	}
 	
+	TurnOffAllSqueezeboxes();
     pthread_create(&m_threadPlaybackCompletedChecker, NULL, checkForPlaybackCompleted, this);
 }
 
@@ -478,6 +479,32 @@ string Slim_Server_Streamer::SendReceiveCommand(string command, bool bLogCommand
     	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Got response: %s", StringUtils::URLDecode(result).c_str());
 
     return result;
+}
+
+/**
+ * Turn off all squeezeboxes listed in device tree, to reset.
+ */
+void Slim_Server_Streamer::TurnOffAllSqueezeboxes()
+{
+  DeviceData_Base *pSlim_Server_Streamer = m_pData->m_AllDevices.m_mapDeviceData_Base_Find(m_dwPK_Device); // Find the Slim Server Streamer
+  if (!pSlim_Server_Streamer)
+    {
+      // Could not find Slim Server Streamer
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"TurnOffAllSqueezeboxes - Could not find Slim Server Streamer device to query children.");
+      return;
+    }
+
+  vector<DeviceData_Base *> vectSlim_Server_Children = pSlim_Server_Streamer->m_vectDeviceData_Base_Children;
+
+  // Let's iterate over the children, and grab their devices, get their MAC addresses, and tell them to turn OFF.
+  for (vector<DeviceData_Base *>::iterator it=vectSlim_Server_Children.begin(); it!=vectSlim_Server_Children.end(); ++it)
+    {
+      DeviceData_Base *pCurrent = *it;
+      string sMacAddress = getMacAddressForDevice(pCurrent);
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"Slim_Server_Streamer::TurnOffAllSqueezeBoxes() - Sending Power off to device %d, MAC Address %s",pCurrent->m_dwPK_Device,sMacAddress.c_str());
+      SendReceiveCommand(sMacAddress + " power 0");
+    }
+
 }
 
 void *Slim_Server_Streamer::checkForPlaybackCompleted(void *pSlim_Server_Streamer)

@@ -86,6 +86,8 @@ namespace DCE
         bool ConnectToSlimServerCliCommandChannel();
         string SendReceiveCommand(string command, bool bLogCommand = true);
 
+	void TurnOffAllSqueezeboxes();
+
         static void *checkForPlaybackCompleted(void *pSlim_Server_Streamer);
 
 		string FindControllingMacForStream(int iStreamID);
