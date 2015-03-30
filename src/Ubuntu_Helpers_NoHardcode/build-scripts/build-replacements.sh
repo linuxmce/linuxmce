@@ -231,7 +231,7 @@ function Build_Replacements_Precise
 	Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2
 
 	# Open ZWave library
-	Build_Replacement_Package libopenzwave1.0 external/open-zwave-1.3.1025 &&
+	Build_Replacement_Package libopenzwave1.0 external/openzwave-1.3.1025 &&
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb
 
 #	QT_SELECT=4 Build_Replacement_Package libhupnp-core external/hupnp/hupnp
@@ -460,7 +460,7 @@ function Build_Replacements_trusty
 	#Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2
 
 	# Open ZWave library
-	Build_Replacement_Package libopenzwave1.0 external/open-zwave-1.3.1025 &&
+	Build_Replacement_Package libopenzwave1.0 external/openzwave-1.3.1025 &&
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb
 
 	# libhupnp and libhupnp-av need to build under qt4.
