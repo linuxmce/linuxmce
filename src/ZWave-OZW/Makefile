@@ -19,7 +19,7 @@ Gen_Dev_Files = $(GENDEV)/ZWaveBase.cpp
 sources = Main.cpp ZWave.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
-CXXFLAGS +=
+CXXFLAGS += -std=c++0x
 CPPFLAGS += -I/usr/include/openzwave -I/usr/include/openzwave/value_classes -I/usr/include/openzwave/platform -I/usr/include/openzwave/platform/unix
 LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r -lopenzwave -ludev
