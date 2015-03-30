@@ -231,8 +231,11 @@ linux-rasp-pi-g++{
         folder_04.target=$$DESTDIR
 
         #folder_01.target=qml
-        DEPLOYMENTFOLDERS +=index folder_02 folder_04 folder_03 #plugins_folder
+        DEPLOYMENTFOLDERS +=index folder_02 folder_04 folder_03 plugins_folder
 
+        linux-rasp-pi-g++{
+        DEPLOYMENTFOLDERS -= plugins_folder
+        }
 
 macx-g++{
         index.target=$$APP_RESOURCES_PATH
