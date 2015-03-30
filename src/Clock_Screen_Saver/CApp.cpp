@@ -5,12 +5,12 @@ enum BKG_STYLE { BKG_CENTERED, BKG_TILED, BKG_HOME, BKG_FIT };
 
 const std::string	DEFAULT_FONT_FILE = "/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf";
 const int		DEFAULT_FONT_SIZE = 180;
-const SDL_Color		DEFAULT_FONT_COLOR = { 255, 255, 255, 255 };
+const SDL_Color		DEFAULT_FONT_COLOR = { 255, 255, 0, 255 };
 
-const std::string	DEFAULT_BKG_FILE = "";
-//const BKG_STYLE		DEFAULT_BKG_STYLE = BKG_CENTERED;
-const BKG_STYLE		DEFAULT_BKG_STYLE = BKG_FIT;
-const SDL_Color		DEFAULT_BKG_COLOR = { 0, 0, 0, 255 };
+const std::string	DEFAULT_BKG_FILE = "./background.png";
+//const std::string	DEFAULT_BKG_FILE = "fd";
+const BKG_STYLE		DEFAULT_BKG_STYLE = BKG_CENTERED;
+const SDL_Color		DEFAULT_BKG_COLOR = { 0, 0, 255, 255 };
 
 bool		CApp::Running = false;
 bool		CApp::lmce_here = false;
@@ -36,13 +36,13 @@ SDL_Texture *CApp::renderTime(const std::string &message, SDL_Color color, SDL_R
 	//returns, then load that surface into a texture
 	SDL_Surface *surf = TTF_RenderText_Blended(timeFont, message.c_str(), color);
 	if (surf == nullptr){
-		error( std::cout, "TTF_RenderText" );
+		error( std::cout, "=renderTime - TTF_RenderText |" );
 		return nullptr;
 	}
 
 	SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surf);
 	if (texture == nullptr){
-		error( std::cout, "CreateTexture" );
+		error( std::cout, "=renderTime - CreateTexture |" );
 	}
 
 	//Clean up the surface and font
@@ -57,7 +57,7 @@ SDL_Texture *CApp::renderText(const std::string &message, const std::string &fon
 	//Open the font
 	TTF_Font *font = TTF_OpenFont(fontFile.c_str(), fontSize);
 	if (font == nullptr){
-		error( std::cout, "TTF_OpenFont" );
+		error( std::cout, "=renderText - TTF_OpenFont |" );
 		return nullptr;
 	}
 
@@ -66,13 +66,13 @@ SDL_Texture *CApp::renderText(const std::string &message, const std::string &fon
 	SDL_Surface *surf = TTF_RenderText_Blended(font, message.c_str(), color);
 	if (surf == nullptr){
 		TTF_CloseFont(font);
-		error( std::cout, "TTF_RenderText" );
+		error( std::cout, "=renderText - TTF_RenderText |" );
 		return nullptr;
 	}
 
 	SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surf);
 	if (texture == nullptr){
-		error( std::cout, "CreateTexture" );
+		error( std::cout, "=renderText - CreateTexture |" );
 	}
 
 	//Clean up the surface and font
@@ -109,10 +109,15 @@ void CApp::renderTexture(SDL_Texture *texture, SDL_Renderer *renderer, int x_pos
 
 SDL_Texture *CApp::loadTexture( const std::string &filename, SDL_Renderer *renderer)
 {
-	SDL_Texture *texture = IMG_LoadTexture(renderer, filename.c_str());
-	if ( texture == nullptr )
+	SDL_Texture *texture = nullptr;
+	// FIXME: need to check if file is valid prior to opening?
+	if ( filename != "" )
 	{
-		error ( std::cout, "loadTexture, IMG_LoadTexture" );
+		texture = IMG_LoadTexture(renderer, filename.c_str());
+		if ( texture == nullptr )
+		{
+			error ( std::cout, "=loadTexture - IMG_LoadTexture |" );
+		}
 	}
 	return texture;
 }
@@ -122,7 +127,7 @@ CApp::CApp() {
 
 void CApp::error( std::ostream &out_stream, const std::string &err_msg)
 {
-	out_stream << err_msg << " ERR: " << SDL_GetError() << std::endl;
+	out_stream << " ERR: " << err_msg << SDL_GetError() << std::endl;
 }
 
 void *CApp::OnExecute(void *device)
@@ -206,15 +211,17 @@ bool CApp::OnInit() {
 	}
 
 	// TODO: Check for selected image prior to loading?
-	bkgTexture = loadTexture ( "./background.png", renderer );
+	bkgTexture = loadTexture ( DEFAULT_BKG_FILE, renderer );
+/*
 	if (bkgTexture == nullptr){
 		SDL_DestroyRenderer(renderer);
 		SDL_DestroyWindow(window);
-		error ( std::cout, "SDL_CreateTextureFromSurface" );
+		error ( std::cout, "OnInit - SDL_CreateTextureFromSurface" );
 		TTF_Quit();
 		SDL_Quit();
 		return false;
 	}
+*/
 
 	// TODO: Check for font prior to opening?
 	std::string fontFile = DEFAULT_FONT_FILE;
@@ -246,13 +253,14 @@ void CApp::OnLoop() {
 	struct tm *timeinfo = localtime( &timeCurrent );
 	char buffer[80];
 
+/*
 	// 24 Hour
 	strftime(buffer, 80, "%H:%M", timeinfo);
+*/
 
-/*
 	// 12 Hour with AM/PM
 	strftime(buffer, 80, "%I:%M %p", timeinfo);
-*/
+
 	// Strip leading "0" from 12 Hour Time
 	timeText = buffer;
 	if ( timeText[0] == '0' )
@@ -313,10 +321,6 @@ void CApp::OnRender() {
 				SDL_RenderCopy(renderer, bkgTexture, NULL, NULL);
 				break;
 		}
-	}
-	else
-	{
-		// Create bkground colour?
 	}
 
 	// Render the time onscreen.
