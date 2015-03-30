@@ -25,12 +25,15 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include "CApp.h"
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Clock_Screen_Saver::Clock_Screen_Saver(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: Clock_Screen_Saver_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
+
 }
 
 //<-dceag-const2-b->
@@ -45,7 +48,22 @@ Clock_Screen_Saver::Clock_Screen_Saver(Command_Impl *pPrimaryDeviceCommand, Devi
 Clock_Screen_Saver::~Clock_Screen_Saver()
 //<-dceag-dest-e->
 {
-	
+	if ( clock_running )
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "CSS::~CSS (failed to) forcing stop clock thread.  Doing a sigterm which will kill everything");
+		// This will kill everything and exit with an error code incrementing the reload count
+		if( 0 != pthread_kill( clock_thread, SIGTERM) )
+		{
+			//try KILL
+			pthread_kill( clock_thread, SIGKILL);
+		}
+		if( 0 != pthread_join( clock_thread, NULL ) )
+		{
+			LoggerWrapper::GetInstance()->Write(LV_WARNING, "pthread_join clock_thread failed");
+		}
+
+		clock_running = false;
+	}
 }
 
 //<-dceag-getconfig-b->
@@ -57,6 +75,14 @@ bool Clock_Screen_Saver::GetConfig()
 
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+	int ret = pthread_create( &clock_thread, NULL, CApp::OnExecute, (void *) this );
+	if( 0 != ret )
+	{
+		clock_running = false;
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Couldn't create clock_thread. return = %d", ret);
+		return false;
+	}
+	clock_running = true;
 	return true;
 }
 

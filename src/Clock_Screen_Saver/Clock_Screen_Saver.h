@@ -20,6 +20,8 @@
 #include "Gen_Devices/Clock_Screen_SaverBase.h"
 //<-dceag-d-e->
 
+#include "CApp.h"
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -27,6 +29,9 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
+		pthread_t	clock_thread;
+		bool		clock_running;
+		CApp		ClockApp;
 
 		// Private methods
 public:

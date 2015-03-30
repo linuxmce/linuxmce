@@ -19,13 +19,15 @@ Gen_Dev_Files = $(GENDEV)/Clock_Screen_SaverBase.cpp
 sources = Main.cpp Clock_Screen_Saver.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
-CXXFLAGS +=
+
+CXXFLAGS += -std=c++11
 CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r
+XTRALDLIBS = -lmysqlclient_r -lSDL2 -lSDL2_ttf -lSDL2_image
 
 Gen_Dev_Files +=
-sources +=
+sources += CApp.cpp
+
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
