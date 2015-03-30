@@ -11,21 +11,22 @@
 
 class CApp {
 	private:
-static		bool		Running;
+static	bool		Running;
+static	SDL_Window	*window;
+static	SDL_Renderer	*renderer;
 
-static		SDL_Window	*window;
-static		SDL_Renderer	*renderer;
+static	SDL_Texture	*bkgTexture;
+static	SDL_Surface	*bkgSurface;;
 
-static		SDL_Texture	*bkgTexture;
-static		SDL_Surface	*bkgSurface;;
+static	SDL_Texture	*timeTexture;
+static	SDL_Surface	*timeSurface;
+static	TTF_Font	*timeFont;
+static	SDL_Color	*timeColor;
 
-static		SDL_Texture	*timeTexture;
-static		SDL_Surface	*timeSurface;
-static		TTF_Font	*timeFont;
+static	time_t		timeCurrent;
 
-static		SDL_Color	*colorTime;
-
-static		time_t		timeCurrent;
+static	int		windowWidth;
+static	int		windowHeight;
 
 	public:
 		CApp();

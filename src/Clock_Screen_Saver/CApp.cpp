@@ -1,22 +1,27 @@
 #include "CApp.h"
 
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
-const int SCREEN_BPP = 32;
+enum BKG_STYLE { BKG_CENTERED, BKG_TILED, BKG_HOME, BKG_FIT };
 
+const std::string	DEFAULT_FONT_FILE = "/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf";
+const int		DEFAULT_FONT_SIZE = 180;
+const SDL_Color		DEFAULT_FONT_COLOR = { 255, 255, 255, 255 };
 
-bool        CApp::Running = false;
+const std::string	DEFAULT_BKG_FILE = "";
+const BKG_STYLE		DEFAULT_BKG_STYLE = BKG_CENTERED;
+const SDL_Color		DEFAULT_BKG_COLOR = { 0, 0, 0, 255 };
 
-SDL_Window      *CApp::window = nullptr;
-SDL_Renderer    *CApp::renderer = nullptr;
-SDL_Texture     *CApp::bkgTexture = nullptr;
-SDL_Surface     *CApp::bkgSurface = nullptr;
-SDL_Texture     *CApp::timeTexture = nullptr;
-SDL_Surface     *CApp::timeSurface = nullptr;
-TTF_Font        *CApp::timeFont = nullptr;
-SDL_Color       *CApp::colorTime = nullptr;
-time_t          CApp::timeCurrent;
-
+bool		CApp::Running = false;
+SDL_Window	*CApp::window = nullptr;
+SDL_Renderer	*CApp::renderer = nullptr;
+SDL_Texture	*CApp::bkgTexture = nullptr;
+SDL_Surface	*CApp::bkgSurface = nullptr;
+SDL_Texture	*CApp::timeTexture = nullptr;
+SDL_Surface	*CApp::timeSurface = nullptr;
+TTF_Font	*CApp::timeFont = nullptr;
+SDL_Color	*CApp::timeColor = nullptr;
+time_t		CApp::timeCurrent;
+int		CApp::windowWidth = 0;
+int		CApp::windowHeight = 0;
 
 
 SDL_Texture *CApp::renderTime(const std::string &message, SDL_Color color, SDL_Renderer *renderer)
@@ -107,17 +112,6 @@ SDL_Texture *CApp::loadTexture( const std::string &filename, SDL_Renderer *rende
 }
 
 CApp::CApp() {
-	window = nullptr;
-	renderer = nullptr;
-
-	bkgSurface = nullptr;
-	bkgTexture = nullptr;
-
-	timeSurface = nullptr;
-	timeTexture = nullptr;
-	timeFont = nullptr;
-
-	Running = true;
 }
 
 void CApp::error( std::ostream &out_stream, const std::string &err_msg)
@@ -148,19 +142,16 @@ void *CApp::OnExecute(void *dev) {
 }
 
 bool CApp::OnInit() {
-	window = nullptr;
-	renderer = nullptr;
-
-	bkgSurface = nullptr;
-	bkgTexture = nullptr;
-
-	timeSurface = nullptr;
-	timeTexture = nullptr;
-	timeFont = nullptr;
-
 	Running = true;
 
 	if (SDL_Init(SDL_INIT_VIDEO) != 0 ) {
+		return false;
+	}
+
+	SDL_DisplayMode display_mode;
+	if (SDL_GetDesktopDisplayMode(0, &display_mode) != 0) {
+		error ( std::cout, "SDL_GetDesktopDisplayMode");
+		SDL_Quit();
 		return false;
 	}
 
@@ -169,8 +160,11 @@ bool CApp::OnInit() {
 		return false;
 	}
 
+	windowWidth = display_mode.w;
+	windowHeight = display_mode.h;
+
 	// Create SDL window, eventually fullscreen
-	window = SDL_CreateWindow("Clock_Screen_Saver", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+	window = SDL_CreateWindow("Clock_Screen_Saver", 0, 0, windowWidth, windowHeight, SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_BORDERLESS);
 	if (window == nullptr) {
 		error ( std::cout, "SDL_CreateWindow" );
 		TTF_Quit();
@@ -184,7 +178,7 @@ bool CApp::OnInit() {
 		SDL_DestroyWindow(window);
 		error ( std::cout, "SDL_CreateRenderer" );
 		TTF_Quit();
-		SDL_Quit;
+		SDL_Quit();
 		return false;
 	}
 
@@ -200,8 +194,8 @@ bool CApp::OnInit() {
 	}
 
 	// TODO: Check for font prior to opening?
-	std::string fontFile = "./lazy.ttf";
-	int fontSize = 180;
+	std::string fontFile = DEFAULT_FONT_FILE;
+	int fontSize = DEFAULT_FONT_SIZE;
 	timeFont = TTF_OpenFont(fontFile.c_str(), fontSize);
 	if (timeFont == nullptr){
 		SDL_DestroyRenderer(renderer);
@@ -230,38 +224,46 @@ void CApp::OnRender() {
 
 	if ( bkgTexture != nullptr )
 	{
-/*
-		// This will tile the bkgTexture
-		int bkgWidth, bkgHeight;
-		SDL_QueryTexture(bkgTexture, NULL, NULL, &bkgWidth, &bkgHeight);
+		switch (DEFAULT_BKG_STYLE) 
+		{
+			case BKG_CENTERED:
+				{
+				// This will place the bkgTexture centred on the screen, original size
+				int bkgWidth, bkgHeight;
+				SDL_QueryTexture(bkgTexture, NULL, NULL, &bkgWidth, &bkgHeight);
+				int x = windowWidth / 2 - bkgWidth / 2;
+				int y = windowHeight / 2 - bkgHeight / 2;
+				renderTexture(bkgTexture, renderer, x, y);
+				}
+				break;
+			case BKG_TILED:
+				{
+				// This will tile the bkgTexture
+				int bkgWidth, bkgHeight;
+				SDL_QueryTexture(bkgTexture, NULL, NULL, &bkgWidth, &bkgHeight);
 
-		//Determine how many tiles we'll need to fill the screen
-		int xTiles = SCREEN_WIDTH / bkgWidth;
-		int yTiles = SCREEN_HEIGHT / bkgHeight;
+				//Determine how many tiles we'll need to fill the screen
+				int xTiles = windowWidth / bkgWidth;
+				int yTiles = windowHeight / bkgHeight;
 
-		//Draw the tiles by calculating their positions
-		for (int i = 0; i < xTiles * yTiles; ++i){
-			int x = i % xTiles;
-			int y = i / xTiles;
-			renderTexture(bkgTexture, renderer, x * bkgWidth, y * bkgHeight, bkgWidth, bkgHeight);
+				//Draw the tiles by calculating their positions
+				for (int i = 0; i < xTiles * yTiles; ++i){
+					int x = i % xTiles;
+					int y = i / xTiles;
+					renderTexture(bkgTexture, renderer, x * bkgWidth, y * bkgHeight, bkgWidth, bkgHeight);
+				}
+				}
+				break;
+			case BKG_HOME:
+				// This will place the bkgTexture at 0,0 & original size
+				renderTexture(bkgTexture, renderer, 0, 0);
+				break;
+			case BKG_FIT:
+			default:
+				// This will place the bkgTexture strectched to fit the window
+				SDL_RenderCopy(renderer, bkgTexture, NULL, NULL);
+				break;
 		}
-*/
-
-		// This will place the bkgTexture centred on the screen, original size
-		int bkgWidth, bkgHeight;
-		SDL_QueryTexture(bkgTexture, NULL, NULL, &bkgWidth, &bkgHeight);
-		int x = SCREEN_WIDTH / 2 - bkgWidth / 2;
-		int y = SCREEN_HEIGHT / 2 - bkgHeight / 2;
-		renderTexture(bkgTexture, renderer, x, y);
-
-/*
-		// This will place the bkgTexture at 0,0 & original size
-		//renderTexture(bkgTexture, renderer, 0, 0);
-*/
-/*
-		// This will place the bkgTexture strectched to fit the window
-		//SDL_RenderCopy(renderer, bkgTexture, NULL, NULL);
-*/
 	}
 	else
 	{
@@ -277,13 +279,12 @@ void CApp::OnRender() {
 
 	// Render the time onscreen.
 	// TODO: get this from data
-	SDL_Color colorTime = { 255, 255, 255, 255 };
-	//timeTexture = renderText(timeText, "./lazy.ttf", colorTime, 180, renderer);
+	SDL_Color colorTime = DEFAULT_FONT_COLOR; // { 255, 255, 255, 255 };
 	timeTexture = renderTime(timeText, colorTime, renderer);
 	int timeWidth, timeHeight;
 	SDL_QueryTexture(timeTexture, NULL, NULL, &timeWidth, &timeHeight);
-	int x = SCREEN_WIDTH / 2 - timeWidth / 2;
-	int y = SCREEN_HEIGHT / 2 - timeHeight / 2;
+	int x = windowWidth / 2 - timeWidth / 2;
+	int y = windowHeight / 2 - timeHeight / 2;
 	renderTexture(timeTexture, renderer, x, y);
 	SDL_DestroyTexture(timeTexture);
 
