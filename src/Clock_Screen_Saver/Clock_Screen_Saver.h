@@ -62,6 +62,8 @@ public:
 
 	/*
 			*****DATA***** accessors inherited from base class
+	string DATA_Get_Configuration();
+	string DATA_Get_Name();
 
 			*****EVENT***** accessors inherited from base class
 
