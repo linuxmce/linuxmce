@@ -50,6 +50,8 @@ Clock_Screen_Saver::~Clock_Screen_Saver()
 {
 	if ( clock_running )
 	{
+	// FIXME: try to stop the thread before killing it
+
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "CSS::~CSS (failed to) forcing stop clock thread.  Doing a sigterm which will kill everything");
 		// This will kill everything and exit with an error code incrementing the reload count
 		if( 0 != pthread_kill( clock_thread, SIGTERM) )

@@ -1,4 +1,5 @@
 #include "CApp.h"
+#include "Clock_Screen_Saver.h"
 
 enum BKG_STYLE { BKG_CENTERED, BKG_TILED, BKG_HOME, BKG_FIT };
 
@@ -7,10 +8,12 @@ const int		DEFAULT_FONT_SIZE = 180;
 const SDL_Color		DEFAULT_FONT_COLOR = { 255, 255, 255, 255 };
 
 const std::string	DEFAULT_BKG_FILE = "";
-const BKG_STYLE		DEFAULT_BKG_STYLE = BKG_CENTERED;
+//const BKG_STYLE		DEFAULT_BKG_STYLE = BKG_CENTERED;
+const BKG_STYLE		DEFAULT_BKG_STYLE = BKG_FIT;
 const SDL_Color		DEFAULT_BKG_COLOR = { 0, 0, 0, 255 };
 
 bool		CApp::Running = false;
+bool		CApp::lmce_here = false;
 SDL_Window	*CApp::window = nullptr;
 SDL_Renderer	*CApp::renderer = nullptr;
 SDL_Texture	*CApp::bkgTexture = nullptr;
@@ -22,6 +25,9 @@ SDL_Color	*CApp::timeColor = nullptr;
 time_t		CApp::timeCurrent;
 int		CApp::windowWidth = 0;
 int		CApp::windowHeight = 0;
+DCE::Clock_Screen_Saver *CApp::CSSDevice = NULL;
+std::string 	CApp::timeText = ":";
+std::string 	CApp::timeLast = "";
 
 
 SDL_Texture *CApp::renderTime(const std::string &message, SDL_Color color, SDL_Renderer *renderer)
@@ -119,7 +125,24 @@ void CApp::error( std::ostream &out_stream, const std::string &err_msg)
 	out_stream << err_msg << " ERR: " << SDL_GetError() << std::endl;
 }
 
-void *CApp::OnExecute(void *dev) {
+void *CApp::OnExecute(void *device)
+{
+	if( device == NULL )
+	{
+		// not running under lmce, ignore all lmce associated stuffenz.
+		lmce_here = false;
+	}
+
+	if ( lmce_here )
+	{
+		CSSDevice = (Clock_Screen_Saver *)device;
+		if( CSSDevice->m_pData == NULL )
+		{
+			// error
+			lmce_here = false;
+		}
+	}
+
 	if (OnInit() == false) {
 		return NULL;
 	}
@@ -195,7 +218,8 @@ bool CApp::OnInit() {
 
 	// TODO: Check for font prior to opening?
 	std::string fontFile = DEFAULT_FONT_FILE;
-	int fontSize = DEFAULT_FONT_SIZE;
+//	int fontSize = DEFAULT_FONT_SIZE;
+	int fontSize = windowHeight / 3;
 	timeFont = TTF_OpenFont(fontFile.c_str(), fontSize);
 	if (timeFont == nullptr){
 		SDL_DestroyRenderer(renderer);
@@ -217,14 +241,39 @@ void CApp::OnEvent(SDL_Event* Event) {
 }
 
 void CApp::OnLoop() {
+	// Get the current time in a string
+	timeCurrent = time(0);
+	struct tm *timeinfo = localtime( &timeCurrent );
+	char buffer[80];
+
+	// 24 Hour
+	strftime(buffer, 80, "%H:%M", timeinfo);
+
+/*
+	// 12 Hour with AM/PM
+	strftime(buffer, 80, "%I:%M %p", timeinfo);
+*/
+	// Strip leading "0" from 12 Hour Time
+	timeText = buffer;
+	if ( timeText[0] == '0' )
+	{
+		timeText.erase(0, 1);
+	}
 }
 
 void CApp::OnRender() {
+	if ( timeText == timeLast )
+		return;
+	timeLast = timeText;
+
+	// Set render color to black ( background will be rendered in this color )
+	SDL_SetRenderDrawColor( renderer, DEFAULT_BKG_COLOR.r, DEFAULT_BKG_COLOR.g, DEFAULT_BKG_COLOR.b, DEFAULT_BKG_COLOR.a );
+
 	SDL_RenderClear(renderer);
 
 	if ( bkgTexture != nullptr )
 	{
-		switch (DEFAULT_BKG_STYLE) 
+		switch (DEFAULT_BKG_STYLE)
 		{
 			case BKG_CENTERED:
 				{
@@ -243,8 +292,8 @@ void CApp::OnRender() {
 				SDL_QueryTexture(bkgTexture, NULL, NULL, &bkgWidth, &bkgHeight);
 
 				//Determine how many tiles we'll need to fill the screen
-				int xTiles = windowWidth / bkgWidth;
-				int yTiles = windowHeight / bkgHeight;
+				int xTiles = (windowWidth / bkgWidth) + 1;
+				int yTiles = (windowHeight / bkgHeight) + 1;
 
 				//Draw the tiles by calculating their positions
 				for (int i = 0; i < xTiles * yTiles; ++i){
@@ -269,13 +318,6 @@ void CApp::OnRender() {
 	{
 		// Create bkground colour?
 	}
-
-	// Get the current time in a string
-	timeCurrent = time(0);
-	struct tm *timeinfo = localtime( &timeCurrent );
-	char buffer[80];
-	strftime(buffer, 80, "%I:%M", timeinfo);
-	std::string timeText = buffer;
 
 	// Render the time onscreen.
 	// TODO: get this from data
