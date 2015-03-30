@@ -524,6 +524,19 @@ void LmceUdevD::myDeviceAdded(struct udev *ctx, struct udev_device *dev)
 
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "+++++++ V4L device added %s = %s", buffer, udi);
 
+			const char *blockdevice =  udev_device_get_devnode(dev);
+			if( blockdevice != NULL )
+			{
+				if( !deviceData.empty() )
+				{
+					deviceData += "|";
+				}
+
+				deviceData += StringUtils::itos( DEVICEDATA_Block_Device_CONST );
+				deviceData += "|";
+				deviceData += blockdevice;
+			}
+
 			devicesMap[ (std::string) syspath ] = (std::string) udi;
 			HalDevice->EVENT_Device_Detected("", "", "", 0, buffer, iBusType, 0, udi, deviceData.c_str(), "video4linux" /*category*/, HalDevice->m_sSignature_get());
 
