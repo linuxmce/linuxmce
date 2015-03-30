@@ -2310,6 +2310,12 @@ void qorbiterManager::processError(QString msg)
 void qorbiterManager::setActiveSkin(QString name){
 
     qDebug() <<"qOrbiterManager::setActiveSkin("<<name<<")";
+    if(mb_useLocalSkins){
+        swapSkins(name);
+        return;
+    }
+
+
     if(name=="splash_fallback"){
 
     }
@@ -3001,7 +3007,7 @@ void qorbiterManager::makeCall(int iPK_Users,string sPhoneExtension,string sPK_D
 QVariant qorbiterManager::systemFontList()
 {
     qDebug() << m_fontDir.entryList();
-return QVariant(m_fontDir.entryList());
+    return QVariant(m_fontDir.entryList());
 }
 
 void qorbiterManager::handleScreenChanged(QScreen *screen)

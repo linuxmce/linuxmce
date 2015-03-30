@@ -66,10 +66,12 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #endif
     mainView.engine()->addPluginPath("lib");
     mainView.engine()->addPluginPath("imports");
-    qDebug() << "Qt Plugin Paths::"<<mainView.engine()->pluginPathList();
-    mainView.engine()->addImportPath("imports");
-    mainView.engine()->addImportPath("lib");
 
+    mainView.engine()->addImportPath(QApplication::applicationDirPath()+"/imports");
+    mainView.engine()->addImportPath("lib");
+    mainView.engine()->addImportPath("qml");
+
+    qDebug() << "Qt Import Paths::"<<mainView.engine()->importPathList();
 #ifdef QT4_8
 #ifndef ANDROID
     mainView.setAttribute(Qt::WA_TranslucentBackground);
@@ -84,15 +86,15 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #elif QT5
 #ifndef  ANDROID
 #ifndef Q_OS_IOS
-    mainView.setSurfaceType(QSurface::OpenGLSurface);
+//    mainView.setSurfaceType(QSurface::OpenGLSurface);
 
-    QSurfaceFormat format;
-    format.setAlphaBufferSize(8);
-    format.setRenderableType(QSurfaceFormat::OpenGL);
+//    QSurfaceFormat format;
+//    format.setAlphaBufferSize(8);
+//    format.setRenderableType(QSurfaceFormat::OpenGL);
 
-    mainView.setFormat(format);
-    mainView.setColor(QColor(Qt::transparent));
-    mainView.setClearBeforeRendering(true);
+//    mainView.setFormat(format);
+//    mainView.setColor(QColor(Qt::transparent));
+//    mainView.setClearBeforeRendering(true);
 #endif
 #endif
     if(frameless == true){
@@ -176,8 +178,8 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #endif
 
 #ifdef RPI
-    mainView.setSurfaceType(QSurface::OpenGLSurface);
-    qDebug() << "Surface id " <<mainView.;
+   // mainView.setSurfaceType(QSurface::OpenGLSurface);
+
     qDebug() << "is opengl? " << mainView.openglContext();
     qDebug() << "surface type " << mainView.surfaceType();
     //mainView.setViewportUpdateMode(QGraphicsView::FullViewportUpdate);

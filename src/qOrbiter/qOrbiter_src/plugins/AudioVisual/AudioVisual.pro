@@ -40,17 +40,18 @@ linux-g++{
     INCLUDEPATH+=$$[QT_INSTALL_PREFIX]/include/phonon/Phonon
     DESTDIR=../../imports/AudioVisual
     }
-
-    RPI{
-    DESTDIR=../../imports/AudioVisual
-    RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
-    }
 }
 
 linux-rasp-pi-g++{
     DESTDIR=../../imports/AudioVisual
     DEFINES+=RPI
-    RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
+    RASP_INSTALL_TARGET=/opt/qt5-rpi/qml/
+}
+
+linux-rasp-pi-g++{
+    DESTDIR=../../imports/AudioVisual
+    DEFINES+=RPI
+    RASP_INSTALL_TARGET=/opt/qt5-rpi/qml/
 }
 
 android-g++{
@@ -198,7 +199,7 @@ unix {
         }
 
     linux-rasp-pi-g++{
-    installPath=/opt/qt5.2-rpi/qml/$$replace(uri, \\., /) #$$RASP_INSTALL_TARGET/$$replace(uri, \\., /)
+    installPath=$$RASP_INSTALL_TARGET$$replace(uri, \\., /) #$$RASP_INSTALL_TARGET/$$replace(uri, \\., /)
 }
 	qmldir.path = $$installPath
 	target.path = $$installPath

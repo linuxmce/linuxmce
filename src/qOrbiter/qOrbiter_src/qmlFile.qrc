@@ -35,5 +35,14 @@
         <file>qml/skins/default/components/StyledHeader.qml</file>
         <file>qml/skins/default/components/StyledScreen.qml</file>
         <file>qml/skins/default/components/StyledText.qml</file>
+        <file>qml/skins/default/components/DefaultHeader.qml</file>
+        <file>qml/skins/default/components/Footer.qml</file>
+        <file>qml/skins/default/components/GenericDialog.qml</file>
+        <file>qml/skins/default/components/GenericListModel.qml</file>
+        <file>qml/skins/default/components/GenericPopup.qml</file>
+        <file>qml/skins/default/components/SettingsOption.qml</file>
+        <file>qml/skins/default/components/SettingsOptions.qml</file>
+        <file>qml/skins/default/components/StyledDelegate.qml</file>
+        <file>qml/skins/default/components/Switch.qml</file>
     </qresource>
 </RCC>

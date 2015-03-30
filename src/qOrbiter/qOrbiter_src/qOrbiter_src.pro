@@ -50,8 +50,6 @@ contains(QT_VERSION,4.8.*){
         QT+= webkit declarative phonon
 }
     include(qmlapplicationviewer/qmlapplicationviewer.pri)
-
-
 }
 
 simulate{
@@ -206,26 +204,19 @@ macx-g++{
 }
 
 linux-rasp-pi-g++{
-        folder_01.source= qml/rpi
-        folder_01.target= qml
-
-        folder_02.source = config.xml
-        folder_02.target =
-
-        screen_saver.source =  imports/DceScreenSaver
-        screen_saver.target =imports
-
-        av_plugin.source = imports/AudioVisual
-        av_plugin.target = imports
 
         DEFINES+=RPI GLENABLED
         DEFINES-=for_desktop
        # DEPLOYMENTFOLDERS += folder_02  #folder_01
         QT+= qml
         QT-=declarative
-        target.path=/opt/QOrbiter
-        QML_IMPORT_PATH=imports
+        target.path=/opt/QOrbiter      
         INSTALLS+=target
+
+        plugins_folder.source = imports
+        plugins_folder.target = $$DESTDIR
+
+       # DEPLOYMENTFOLDERS -= plugins_folder
 }
         index.source=qml/Index.qml
         index.target=$$DESTDIR
@@ -240,7 +231,8 @@ linux-rasp-pi-g++{
         folder_04.target=$$DESTDIR
 
         #folder_01.target=qml
-        DEPLOYMENTFOLDERS +=index folder_02 folder_04 folder_03 plugins_folder
+        DEPLOYMENTFOLDERS +=index folder_02 folder_04 folder_03 #plugins_folder
+
 
 macx-g++{
         index.target=$$APP_RESOURCES_PATH
@@ -316,6 +308,7 @@ message(Qt is installed in $$[QT_INSTALL_PREFIX])
 message (Build Type: $$DEFINES)
 message( Opengl Status: $$glmsg )
 message( Output Path $$DESTDIR )
+message(Deploying folders $$DEPLOYMENTFOLDERS)
 SOURCES += main.cpp \
         ../qOrbiter.cpp \
         ../../Gen_Devices/qOrbiterBase.cpp \

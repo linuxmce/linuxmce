@@ -25,16 +25,12 @@ qmldir.files = qmldir
 
 linux-g++{
     DESTDIR=../../imports/DceScreenSaver
-
-    RPI{
-    RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
-    }
 }
 
 linux-rasp-pi-g++{
     DESTDIR=../../imports/DceScreenSaver
     DEFINES+=RPI
-    RASP_INSTALL_TARGET=/opt/qt5.2-rpi/qml #$$[QT_INSTALL_PREFIX]/qml
+    RASP_INSTALL_TARGET=/opt/qt5-rpi/qml/DceScreenSaver
 }
 
 macx-g++{
@@ -159,7 +155,7 @@ unix {
     }
 
     linux-rasp-pi-g++{
-    installPath=/opt/qt5.2-rpi/qml/$$replace(uri, \\., /) #$$RASP_INSTALL_TARGET/$$replace(uri, \\., /)
+    installPath=$$RASP_INSTALL_TARGET$$replace(uri, \\., /) #$$RASP_INSTALL_TARGET/$$replace(uri, \\., /)
     }
 
     qmldir.path = $$installPath

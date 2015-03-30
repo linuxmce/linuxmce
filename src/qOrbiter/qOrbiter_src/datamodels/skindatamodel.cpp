@@ -168,7 +168,7 @@ void SkinDataModel::addSkin(QString name) {
 
 void SkinDataModel::setActiveSkin(QString name)
 {
-    delete current_style;
+
 
     ui_reference->setDceResponse("Loading Skin at " + m_baseUrl.toString() + "/" + name);
     qDebug() << "This is the base url::"<< m_baseUrl.toString();
@@ -177,8 +177,8 @@ void SkinDataModel::setActiveSkin(QString name)
 
     qDebug() << "Skin url" << skinURL;
 
-    //dir -l qDebug() << skinURL;
-
+    if(current_style)
+    delete current_style;
 #ifdef QT5
     current_style = new QQmlComponent(ui_reference->qorbiterUIwin->engine(), QUrl(skinURL));
 #elif __ANDROID__
