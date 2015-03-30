@@ -1347,6 +1347,7 @@
 #define TEXT_TIBackslash_CONST 2291
 #define TEXT_TIDown_CONST 2292
 #define TEXT_TIBacktick_CONST 2293
+#define TEXT_GOption_CONST 2294
 
 #define TEXT_TABLE "Text"
 #define TEXT_PK_TEXT_FIELD "PK_Text"

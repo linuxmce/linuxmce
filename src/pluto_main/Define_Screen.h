@@ -295,6 +295,8 @@
 #define SCREEN_XBOX_360_CONST 309
 #define SCREEN_TI_99_FS_CONST 310
 #define SCREEN_TI_99_FS_Options_CONST 311
+#define SCREEN_Game_Atari_800_CONST 312
+#define SCREEN_Game_Atari_800_Menu_Visible_CONST 313
 
 #define SCREEN_TABLE "Screen"
 #define SCREEN_PK_SCREEN_FIELD "PK_Screen"

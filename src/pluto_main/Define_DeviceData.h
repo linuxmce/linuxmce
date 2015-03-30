@@ -269,6 +269,7 @@
 #define DEVICEDATA_Polling_Enabled_CONST 316
 #define DEVICEDATA_Debug_CONST 317
 #define DEVICEDATA_Token_CONST 318
+#define DEVICEDATA_WIFIConfig_CONST 319
 
 #define DEVICEDATA_TABLE "DeviceData"
 #define DEVICEDATA_PK_DEVICEDATA_FIELD "PK_DeviceData"
