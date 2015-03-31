@@ -194,7 +194,7 @@ void ZWInterface::OnNotification(OpenZWave::Notification const* _notification) {
 	{
 		
 	case OpenZWave::Notification::Type_ValueRefreshed:
-	case OpenZWave::Notification::Type_ValueGroup:
+	case OpenZWave::Notification::Type_Group:
 	case OpenZWave::Notification::Type_NodeQueriesComplete:
 		break;
 	case OpenZWave::Notification::Type_DriverReady:
