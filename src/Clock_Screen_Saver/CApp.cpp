@@ -226,7 +226,7 @@ bool CApp::OnInit() {
 	// TODO: Check for font prior to opening?
 	std::string fontFile = DEFAULT_FONT_FILE;
 //	int fontSize = DEFAULT_FONT_SIZE;
-	int fontSize = windowHeight / 3;
+	int fontSize = windowWidth / 2;
 	timeFont = TTF_OpenFont(fontFile.c_str(), fontSize);
 	if (timeFont == nullptr){
 		SDL_DestroyRenderer(renderer);
