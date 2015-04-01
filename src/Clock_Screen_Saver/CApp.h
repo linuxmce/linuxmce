@@ -43,6 +43,7 @@ class CApp {
 		static std::string	timeText;
 		static std::string	timeLast;
 
+		static bool		event;
 	public:
 		CApp();
 

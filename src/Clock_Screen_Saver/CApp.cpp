@@ -2,9 +2,11 @@
 #include "Clock_Screen_Saver.h"
 
 enum BKG_STYLE { BKG_CENTERED, BKG_TILED, BKG_HOME, BKG_FIT };
+enum CLOCK_STYLE { HOUR12, HOUR24, HOURAMPM };
 
+const CLOCK_STYLE	DEFAULT_CLOCK_STYLE = HOURAMPM;
 const std::string	DEFAULT_FONT_FILE = "/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf";
-const int		DEFAULT_FONT_SIZE = 180;
+//const int		DEFAULT_FONT_SIZE = 180;
 const SDL_Color		DEFAULT_FONT_COLOR = { 255, 255, 0, 255 };
 
 const std::string	DEFAULT_BKG_FILE = "./background.png";
@@ -28,7 +30,7 @@ int		CApp::windowHeight = 0;
 DCE::Clock_Screen_Saver *CApp::CSSDevice = NULL;
 std::string 	CApp::timeText = ":";
 std::string 	CApp::timeLast = "";
-
+bool		CApp::event = false;
 
 SDL_Texture *CApp::renderTime(const std::string &message, SDL_Color color, SDL_Renderer *renderer)
 {
@@ -223,10 +225,23 @@ bool CApp::OnInit() {
 	}
 */
 
+	int fontSize = 0;
 	// TODO: Check for font prior to opening?
 	std::string fontFile = DEFAULT_FONT_FILE;
-//	int fontSize = DEFAULT_FONT_SIZE;
-	int fontSize = windowWidth / 2;
+//	fontSize = DEFAULT_FONT_SIZE;
+
+	switch (DEFAULT_CLOCK_STYLE) {
+		case HOURAMPM:
+			fontSize = windowWidth / 5;
+			break;
+		case HOUR12:
+		case HOUR24:
+		default:
+			fontSize = windowWidth / 3.5;
+	}
+
+	error ( std::cout, to_string(fontSize));
+
 	timeFont = TTF_OpenFont(fontFile.c_str(), fontSize);
 	if (timeFont == nullptr){
 		SDL_DestroyRenderer(renderer);
@@ -245,6 +260,7 @@ void CApp::OnEvent(SDL_Event* Event) {
 	if (Event->type == SDL_QUIT) {
 		Running = false;
 	}
+	event = true;
 }
 
 void CApp::OnLoop() {
@@ -253,13 +269,20 @@ void CApp::OnLoop() {
 	struct tm *timeinfo = localtime( &timeCurrent );
 	char buffer[80];
 
-/*
-	// 24 Hour
-	strftime(buffer, 80, "%H:%M", timeinfo);
-*/
-
-	// 12 Hour with AM/PM
-	strftime(buffer, 80, "%I:%M %p", timeinfo);
+	switch (DEFAULT_CLOCK_STYLE) {
+		case HOUR24:
+			// 24 Hour
+			strftime(buffer, 80, "%H:%M", timeinfo);
+			break;
+		case HOURAMPM:
+			// 12 Hour with AM/PM
+			strftime(buffer, 80, "%I:%M %p", timeinfo);
+			break;
+		case HOUR12:
+		default:
+			// 12 Hour
+			strftime(buffer, 80, "%I:%M", timeinfo);
+	}
 
 	// Strip leading "0" from 12 Hour Time
 	timeText = buffer;
@@ -267,12 +290,14 @@ void CApp::OnLoop() {
 	{
 		timeText.erase(0, 1);
 	}
+
 }
 
 void CApp::OnRender() {
-	if ( timeText == timeLast )
+	if ( !event && (timeText == timeLast) )
 		return;
 	timeLast = timeText;
+	event = false;
 
 	// Set render color to black ( background will be rendered in this color )
 	SDL_SetRenderDrawColor( renderer, DEFAULT_BKG_COLOR.r, DEFAULT_BKG_COLOR.g, DEFAULT_BKG_COLOR.b, DEFAULT_BKG_COLOR.a );
