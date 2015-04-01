@@ -411,7 +411,7 @@ start() {
 
 	#TODO get as much of this from database as possible
 	# run any device specific firstboot add-on scripts here
-	for f in /etc/init.d/firstboot-lmce-* ; do
+	for f in /etc/init.d/firstboot_lmce_* ; do
 		echo "Running device specific firstboot script: $f"
 		. "$f"
 		"$f"_preinst
@@ -446,7 +446,7 @@ start() {
 	MD_Cleanup
 
 	# run any device specific firstboot add-on scripts here
-	for f in /etc/init.d/firstboot-lmce-* ; do
+	for f in /etc/init.d/firstboot_lmce_* ; do
 		echo "Running device specific firstboot script: $f"
 		. "$f"
 		"$f"_postinst

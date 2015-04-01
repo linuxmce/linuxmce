@@ -6,7 +6,7 @@ HEADER_FB_RPI2=included
 
 . /usr/pluto/bin/Config_Ops.sh
 
-firstboot-lmce-rpi2_preinst() {
+firstboot_lmce_rpi2_preinst() {
 	ret=2;
 	if [ ! -e /etc/part_resized ] ; then
 		echo -e "Resizing the SD card" >&2
@@ -44,7 +44,7 @@ EOF
 }
 
 
-firstboot-lmce-rpi2_postinst() {
+firstboot_lmce_rpi2_postinst() {
 	echo -e "Setting up rpi2 specific boot settings" >&2
 
 	ConfSet "AVWizardOverride" "0"
