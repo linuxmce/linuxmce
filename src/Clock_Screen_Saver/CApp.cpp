@@ -4,15 +4,15 @@
 enum BKG_STYLE { BKG_CENTERED, BKG_TILED, BKG_HOME, BKG_FIT };
 enum CLOCK_STYLE { HOUR12, HOUR24, HOURAMPM };
 
-const CLOCK_STYLE	DEFAULT_CLOCK_STYLE = HOURAMPM;
+const CLOCK_STYLE	DEFAULT_CLOCK_STYLE = HOUR24;
 const std::string	DEFAULT_FONT_FILE = "/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf";
 //const int		DEFAULT_FONT_SIZE = 180;
-const SDL_Color		DEFAULT_FONT_COLOR = { 255, 255, 0, 255 };
+const SDL_Color		DEFAULT_FONT_COLOR = { 255, 255, 255, 255 };
 
-const std::string	DEFAULT_BKG_FILE = "./background.png";
-//const std::string	DEFAULT_BKG_FILE = "fd";
+//const std::string	DEFAULT_BKG_FILE = "./background.png";
+const std::string	DEFAULT_BKG_FILE = "";
 const BKG_STYLE		DEFAULT_BKG_STYLE = BKG_CENTERED;
-const SDL_Color		DEFAULT_BKG_COLOR = { 0, 0, 255, 255 };
+const SDL_Color		DEFAULT_BKG_COLOR = { 0, 0, 0, 255 };
 
 bool		CApp::Running = false;
 bool		CApp::lmce_here = false;
