@@ -410,6 +410,13 @@ start() {
 	fi
 
 	#TODO get as much of this from database as possible
+	# run any device specific firstboot add-on scripts here
+	for f in /etc/init.d/firstboot-lmce-* ; do
+		echo "Running device specific firstboot script: $f"
+		. "$f"
+		"$f"_preinst
+	done
+
 	case "$TARGET_DISTRO" in
 		"ubuntu")
 			case "$TARGET_ARCH" in
@@ -442,6 +449,7 @@ start() {
 	for f in /etc/init.d/firstboot-lmce-* ; do
 		echo "Running device specific firstboot script: $f"
 		. "$f"
+		"$f"_postinst
 	done
 
 	ConfSet "FirstBoot" "false"
