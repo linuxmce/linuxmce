@@ -16,7 +16,7 @@
  or FITNESS FOR A PARTICULAR PURPOSE. See the Pluto Public License for more details.
 
  */
-#include "common.h"
+#include "../common.h"
 
 #include <string.h>
 #include <malloc.h>
