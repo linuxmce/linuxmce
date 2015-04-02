@@ -11,7 +11,7 @@ Item {
     anchors.fill: qmlRoot
     Rectangle{
         anchors.fill: parent
-        color:"black"
+        color:"transparent"
     }
     property bool uiOn:true
     property alias scenarioModel:current_scenarios.model
@@ -43,40 +43,40 @@ Item {
         id: qmlPictureFrame
     }
 
-    DceScreenSaver{
-        id:glScreenSaver
-        visible: true
-        height:parent.height
-        width:parent.width
-        enableDebug: true
-        interval:60*1000
-        useAnimation: true
-        //onDebugInfoChanged: console.log(debugInfo)
-        active:manager.connectedState
-        requestUrl:manager.m_ipAddress
-        Component.onCompleted: {
-            glScreenSaver.setImageList(manager.screensaverImages)
-            console.log("Orbiter Consume Screensaver images")
-            console.log("Orbiter counts " + glScreenSaver.pictureCount)
-        }
+//    DceScreenSaver{
+//        id:glScreenSaver
+//        visible: true
+//        height:parent.height
+//        width:parent.width
+//        enableDebug: true
+//        interval:60*1000
+//        useAnimation: true
+//        //onDebugInfoChanged: console.log(debugInfo)
+//        active:manager.connectedState
+//        requestUrl:manager.m_ipAddress
+//        Component.onCompleted: {
+//            glScreenSaver.setImageList(manager.screensaverImages)
+//            console.log("Orbiter Consume Screensaver images")
+//            console.log("Orbiter counts " + glScreenSaver.pictureCount)
+//        }
 
-        Connections{
-            target:manager
-            onScreenSaverImagesReady:{
-                glScreenSaver.setImageList(manager.screensaverImages)
-                console.log("Orbiter Consume Screensaver images")
-                console.log("Orbiter counts " + glScreenSaver.pictureCount)
-            }
-        }
+//        Connections{
+//            target:manager
+//            onScreenSaverImagesReady:{
+//                glScreenSaver.setImageList(manager.screensaverImages)
+//                console.log("Orbiter Consume Screensaver images")
+//                console.log("Orbiter counts " + glScreenSaver.pictureCount)
+//            }
+//        }
 
-        MouseArea{
-            anchors.fill: parent
-            onClicked: {
-                uiOn=!uiOn
-            }
-        }
+//        MouseArea{
+//            anchors.fill: parent
+//            onClicked: {
+//                uiOn=!uiOn
+//            }
+//        }
 
-    }
+//    }
 
     PageLoader {
         id: pageLoader
@@ -135,22 +135,20 @@ Item {
 
     Item{
         id:centralScenarios
-        visible:manager.currentScreen=="Screen_1.qml"
-        height: Style.scaleY(65)
-        width: Style.scaleX(85)
-        anchors.centerIn: parent
-//        Rectangle{
-//            anchors.fill: parent
-//            color:Style.appcolor_background_light
-
-//        }
+        visible:manager.currentScreen=="Screen_1.qml" && uiOn
+        height: current_scenarios.count * Style.scaleY(13)
+        width:Style.scaleX(15)
+        anchors.bottom: footer.top
+        anchors.bottomMargin: 5
 
         ListView{
             id:current_scenarios
 
             anchors.fill: parent
+            spacing:5
             anchors.margins: Style.buttonSpacing
             delegate: LargeStyledButton{
+                arrow:current_scenarios.currentIndex===index
                 buttonText:title
                 height:Style.scaleY(13)
                 width:Style.scaleX(15)
@@ -170,6 +168,7 @@ Item {
             id:scenarioList
             visible:manager.currentScreen=="Screen_1.qml"
             focus:true
+            spacing: 5
             onActiveFocusChanged: {
                 if(activeFocus)
                     footer.activated=true
@@ -183,10 +182,19 @@ Item {
                 bottom:parent.bottom
                 margins: 5
             }
-            spacing:5
+            Keys.onUpPressed: {
+                current_scenarios.decrementCurrentIndex()
+            }
+
+            Keys.onDownPressed: {
+                current_scenarios.incrementCurrentIndex()
+            }
+
+
             orientation: ListView.Horizontal
             model:qmlRoot.scenarios
             delegate:  LargeStyledButton{
+                id:btn
                 buttonText:name
                 arrow:true
                 onActiveFocusChanged:{
@@ -197,9 +205,11 @@ Item {
                         case 1:scenarioModel=currentRoomClimate; break
                         case 3:scenarioModel=currentRoomTelecom; break
                         case 4:scenarioModel=currentRoomSecurity; break;
-                        case -1:manager.currentScreen="Screen_44.qml"; break;
+                        case -1:manager.currentScreen="Screen_44.qml";scenarioList.currentIndex=0; break;
                         default: undefined;
                         }
+                        console.log(btn.x)
+                        centralScenarios.x = x
                     }
                 }
                 onActivated:{
