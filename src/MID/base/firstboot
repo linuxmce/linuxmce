@@ -251,8 +251,8 @@ MD_Preseed () {
 MD_Install_Packages () {
 	StatsMessage "Installing packages to MD"
 	## Update the system
-	apt-get -f -y dist-upgrade
-	VerifyExitCode "Dist-upgrade failed"
+	#apt-get -f -y dist-upgrade
+	#VerifyExitCode "Dist-upgrade failed"
 
 	apt-get -f -y install pluto-confirm-dependencies pluto-avwizard
 	VerifyExitCode "Install pluto-confirm-dependencies, pluto-avwizard failed"
@@ -285,22 +285,11 @@ MD_Install_Packages () {
 	## Install additional packages
 	case "$TARGET_DISTRO" in
 		"ubuntu")
-			if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
-				apt-get -y install kubuntu-desktop
-				#apt-get -y install kde-minimal
-			fi
 			echo '/bin/false' >/etc/X11/default-display-manager
 
 			# Update startup to remove kdm and network manager
 			update-rc.d -f kdm remove
 			update-rc.d -f NetworkManager remove
-
-			#Install ancillary programs
-			apt-get -y install xserver-xorg"$TARGET_KVER_LTS_HES"
-			VerifyExitCode "xserver-xorg$TARGET_KVER_LTS_HES install failed"
-			apt-get -y install xserver-xorg-video-all"$TARGET_KVER_LTS_HES" linux-firmware
-			VerifyExitCode "Ancillary programs install failed"
-
 			;;
 		"raspbian")
 			#FIXME: why is this required, something missing?
@@ -374,7 +363,7 @@ start() {
 	for f in /etc/init.d/firstboot_lmce_* ; do
 		echo "Running device specific firstboot script: $f"
 		. "$f"
-		"$f"_preinst
+		$(basename "$f")_preinst
 	done
 
 	case "$TARGET_DISTRO" in
@@ -409,7 +398,7 @@ start() {
 	for f in /etc/init.d/firstboot_lmce_* ; do
 		echo "Running device specific firstboot script: $f"
 		. "$f"
-		"$f"_postinst
+		$(basename "$f")_postinst
 	done
 
 	ConfSet "FirstBoot" "false"

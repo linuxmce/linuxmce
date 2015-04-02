@@ -8,7 +8,6 @@ firstboot_lmce_joggler_preinst() {
 	: # no-op
 }
 
-
 firstboot_lmce_joggler_postinst() {
 	echo -e "Setting up joggler specific boot settings" >&2
 
