@@ -31,6 +31,8 @@ Item{
     ListView{
         id:view
         clip:true
+        visible: genericListContainer.visible
+        opacity: genericListContainer.opacity
         spacing: modelSpacing
         anchors{
             left:parent.left

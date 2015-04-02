@@ -5,15 +5,6 @@ import org.linuxmce.screens 1.0
 StyledScreen {
     id:screen
 
-
-
-    StyledButton{
-        buttonText: qsTr("Advanced")
-        state:"fixed"
-        anchors.centerIn: parent
-        onActivated: manager.setCurrentScreen(Screens.AdvancedOptions)
-    }
-
     GenericListModel {
         id: genericListContainer
         label: qsTr("Scenarios")

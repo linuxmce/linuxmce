@@ -64,12 +64,12 @@ Item {
         }
     }
 
-//    DefaultHeader {
-//        id: header
-//    }
+    DefaultHeader {
+        id: header
+    }
 
-//    Footer {
-//        id: footer
-//    }
+    Footer {
+        id: footer
+    }
 
 }

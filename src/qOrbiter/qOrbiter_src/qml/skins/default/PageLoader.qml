@@ -72,8 +72,10 @@ Loader {
             return
         }
         
-        console.log("pageloader::loading next screen::"+"screens/"+nextScreen)
-        pageLoader.source="screens/"+nextScreen
+        console.log("pageloader--default::loading next screen::"+"screens/"+nextScreen)
+        var path = manager.selectPath(Qt.resolvedUrl("screens/"+nextScreen))
+        console.log("pageloader--default::path" +Qt.resolvedUrl(path))
+        pageLoader.source=path
     }
     
     //opacity: uiOn ? 1 : 0
