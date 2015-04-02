@@ -93,7 +93,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 //    format.setRenderableType(QSurfaceFormat::OpenGL);
 
 //    mainView.setFormat(format);
-//    mainView.setColor(QColor(Qt::transparent));
+   mainView.setColor(QColor(Qt::transparent));
 //    mainView.setClearBeforeRendering(true);
 #endif
 #endif

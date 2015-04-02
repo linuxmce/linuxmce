@@ -1792,6 +1792,12 @@ public slots:
 #endif
     }
 
+    Q_INVOKABLE QString selectPath(QString p) {
+        QString pth =p;
+        qDebug() << Q_FUNC_INFO <<  m_selector->select(pth);
+        return  m_selector->select(pth);
+    }
+
     Q_INVOKABLE void setDesiredOrientation(Qt::ScreenOrientation o){
         int tH = qorbiterUIwin->height();
         int tW = qorbiterUIwin->width() ;
@@ -1848,7 +1854,7 @@ private slots:
         qorbiterUIwin->engine()->rootContext()->setContextProperty("Style", m_style);
         QString returnLocation=qorbiterUIwin->source().toString();
 #ifdef simulate
-        qorbiterUIwin->setSource(QUrl(m_localQmlPath+"Index.qml"));
+        qorbiterUIwin->setSource(QUrl(m_selector->select(m_localQmlPath+"Index.qml")));
         qorbiterUIwin->engine()->clearComponentCache();
 #else
         qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
@@ -1856,7 +1862,7 @@ private slots:
 #endif
 
 
-        qorbiterUIwin->setSource(QUrl(returnLocation));
+        qorbiterUIwin->setSource(QUrl(m_selector->select(returnLocation)));
         qDebug() << Q_FUNC_INFO << qorbiterUIwin->source();
     }
     void handleScreenChanged(QScreen* screen);
