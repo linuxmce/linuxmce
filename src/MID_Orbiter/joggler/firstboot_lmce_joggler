@@ -1,0 +1,53 @@
+#!/bin/bash
+if [[ -n "$HEADER_FB_JOGGLER" ]]; then
+	return 0
+fi
+HEADER_FB_JOGGLER=included
+
+. /usr/pluto/bin/Config_Ops.sh
+
+firstboot_lmce_joggler_preinst() {
+	ret=2;
+	if [ ! -e /etc/part_resized ] ; then
+		echo -e "Resizing the SD card" >&2
+
+#FIXME: These are rpi and need to be reworked for joggler
+		ROOT_PART=$(readlink /dev/root)
+		PART_NUM=${ROOT_PART#mmcblk0p}
+		PART_START=$(parted /dev/mmcblk0 -ms unit s p | grep "^${PART_NUM}" | cut -f 2 -d:)
+
+		fdisk /dev/mmcblk0 <<EOF
+p
+d
+$PART_NUM
+n
+p
+$PART_NUM
+$PART_START
+p
+w
+EOF
+		echo "done" > /etc/part_resized
+
+		# tell kernel about new partition table
+		partprobe
+		ret=$?
+
+		if [ ret != 0 ] ; then
+			reboot
+		fi
+	fi
+
+	if [ -e /etc/part_resized ] ; then
+		resize2fs $ROOT_PART
+		echo "done" > /etc/sd_resized
+	fi
+}
+
+
+firstboot_lmce_joggler_postinst() {
+	echo -e "Setting up joggler specific boot settings" >&2
+
+	ConfSet "AVWizardOverride" "0"
+	ConfSet "AVWizardDone" "1"
+}

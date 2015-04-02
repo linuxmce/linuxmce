@@ -1,0 +1,447 @@
+#!/bin/bash
+
+#set -e
+
+[[ -e /usr/pluto/bin/Config_Ops.sh ]] && . /usr/pluto/bin/Config_Ops.sh
+
+if ([ "$FirstBoot" = "false" ] && [ -n "$PK_Device" ]) ; then
+	echo "Skipping firstboot, already completed."
+	exit 0
+fi
+
+[[ -e /usr/pluto/bin/SQL_Ops.sh ]] && . /usr/pluto/bin/SQL_Ops.sh
+[[ -e /usr/pluto/bin/Utils.sh ]] && . /usr/pluto/bin/Utils.sh
+
+###########################################################
+### Setup global variables
+###########################################################
+
+DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST=19
+DEVICEDATA_DISTRO_Ubuntu_Precise_CONST=20
+DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST=21
+
+FSTAB_FILE="/etc/fstab"
+DEVID_FILE="/etc/Disked_DeviceID"
+
+#INSTALL_KUBUNTU_DESKTOP="yes"
+INSTALL_KUBUNTU_DESKTOP="no"
+
+TARGET_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
+TARGET_RELEASE=$(lsb_release -c -s)
+TARGET_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
+
+DEB_CACHE="$TARGET_DISTRO-$TARGET_RELEASE-$TARGET_ARCH"
+
+setup_fstab() {
+	# Hmm, let's see if the mounts are here, if not add them
+	check=$(grep 192.168.80.1 "${FSTAB_FILE}" || :)
+	if [ -z "$check" ] ; then
+		cat <<-EOF >> "${FSTAB_FILE}"
+			192.168.80.1:/usr/pluto/var/                    /usr/pluto/var/         nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/usr/pluto/orbiter                 /usr/pluto/orbiter      nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/usr/pluto/keys                    /usr/pluto/keys         nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/usr/pluto/deb-cache               /usr/pluto/deb-cache    nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/var/spool/asterisk                /var/spool/asterisk     nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/home                              /home                   nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/home/cameras                      /home/cameras           nfs4 retrans=10,timeo=50 1 1
+			EOF
+	fi
+	mkdir -p /usr/pluto/var/
+	mkdir -p /usr/pluto/orbiter
+	mkdir -p /usr/pluto/keys
+	mkdir -p /usr/pluto/deb-cache
+	mkdir -p /var/spool/asterisk
+	mkdir -p /home/cameras
+	mount -a || :
+}
+
+setup_plutoconf() {
+	# get PK_Device from "/etc/Disked_DeviceID", created by interactor
+	DEVICE=$(cat "$DEVID_FILE")
+	[ -n "$PK_Device" ] || ConfSet "PK_Device" "$DEVICE"
+
+	# TODO: start_interactor already did this and put it in the DB
+	# TODO: get the data from the DB instead?
+	# get PK_Distro from OS
+	DISTRO=$(lsb_release -cs)
+	case "$DISTRO" in
+		precise)
+			distro=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST
+	                ;;
+		trusty)
+			distro=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST
+			;;
+		wheezy)
+			distro=$DEVICEDATA_DISTRO_Raspbian_Wheezy_CONST
+			;;
+	esac
+	[ -n "$PK_Distro" ] || [ -n "$distro" ] && ConfSet "PK_Distro" "$distro"
+
+	[ -n "$MySqlHost" ] || ConfSet "MySqlHost" "192.168.80.1"
+	[ -n "$MySqlUser" ] || ConfSet "MySqlUser" "root"
+	[ -n "$MySqlPassword" ] || ConfSet "MySqlPassword" ""
+	[ -n "$MySqlDBName" ] || ConfSet "MySqlDBName" "pluto_main"
+	[ -n "$DCERouter" ] || ConfSet "DCERouter" "192.168.80.1"
+	[ -n "$MySqlPort" ] || ConfSet "MySqlPort" "3306"
+	[ -n "$DCERouterPort" ] || ConfSet "DCERouterPort" "3450"
+	[ -n "$AutostartCore" ] || ConfSet "AutostartCore" "0"
+	[ -n "$AutostartMedia" ] || ConfSet "AutostartMedia" "1"
+	[ -n "$AVWizardDone" ] || ConfSet "AVWizardDone" "0"
+}
+
+
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+
+
+###########################################################
+### Setup Functions - Error checking and logging and trapping
+###########################################################
+
+VerifyExitCode () {
+        local EXITCODE=$?
+        if [ "$EXITCODE" != "0" ] ; then
+        	echo "An error (Exit code $EXITCODE) occured during the last action"
+        	echo "$1"
+                exit 1
+        fi
+}
+
+StatsMessage () {
+	printf "$(date) - $* \n"
+}
+
+###########################################################
+### Setup Functions - General functions
+###########################################################
+
+MD_System_Level_Prep () {
+	# Make sure, the root user is connecting to DCEROUTER for any MySQL connection
+	cat <<-EOF > /root/.my.cnf
+		[client]
+		host = dcerouter
+		EOF
+
+	## Setup apt in pluto style
+	case "$TARGET_DISTRO" in
+		"ubuntu")
+			# FIXME: don't overwrite on re-install, check prior to write
+			TARGET_REPO_NAME="main"
+			cat <<-EOF > /etc/apt/sources.list
+				#deb http://10.10.42.99/trusty-i386/ ./
+				deb file:/usr/pluto/deb-cache/$DEB_CACHE ./
+				deb http://deb.linuxmce.org/ubuntu/ $TARGET_RELEASE $TARGET_REPO_NAME
+				deb http://deb.linuxmce.org/ $TARGET_RELEASE $TARGET_REPO_NAME
+				deb $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
+				deb $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
+				deb http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restricted universe multiverse
+				deb http://archive.canonical.com/ubuntu $TARGET_RELEASE partner
+				EOF
+			;;
+		"raspbian")
+			# FIXME: don't overwrite on re-install, check prior to write
+			cat <<-EOF > /etc/apt/sources.list
+				#deb http://10.10.42.99/raspbian/ ./
+				deb file:/usr/pluto/deb-cache/$DEB_CACHE ./
+				deb http://deb.linuxmce.org/raspbian/ $TARGET_RELEASE main
+				deb $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
+				deb http://archive.raspberrypi.org/debian $TARGET_RELEASE main
+				EOF
+			;;
+	esac
+
+	#Make sure there is are Packages files on the MD so apt-get update does not fail
+	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
+	touch  /usr/pluto/deb-cache/$DEB_CACHE/Packages
+	gzip -9c < /usr/pluto/deb-cache/$DEB_CACHE/Packages > /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
+
+	# FIXME: don't overwrite on re-install, check prior to write
+	## Setup kernel postinst script to repair vmlinuz/initrd.img symlinks in /
+	cat <<-"EOF" >/etc/kernel/postinst.d/update-symlinks
+		#!/bin/bash
+		# LinuxMCE post kernel image install.
+		#
+		# We make sure we can read the image and the kernel, and the softlink is correct.
+		chmod g+r /boot/* || :
+		chmod o+r /boot/* || :
+
+		pushd /
+		ln -sf boot/initrd.img-$1 initrd.img || :
+		ln -sf boot/vmlinuz-$1 vmlinuz || :
+		popd
+
+		exit 0
+		EOF
+	chmod +x /etc/kernel/postinst.d/update-symlinks
+
+	## Setup initial ssh access
+	StatsMessage "Setting up SSH"
+	[[ -f /usr/pluto/keys/id_dsa_pluto.pub ]] && mkdir -p /root/.ssh && cat /usr/pluto/keys/id_dsa_pluto.pub >> /root/.ssh/authorized_keys
+}
+
+MD_Seamless_Compatability () {
+	case "$TARGET_DISTRO" in
+		ubuntu)
+			: # no-op
+			;;
+		raspbian)
+			# raspbian doesn't come with lsb-release by default???
+			cat <<-EOF > /etc/lsb-release
+				DISTRIB_ID=Raspbian
+				DISTRIB_CODENAME=$TARGET_RELEASE
+				EOF
+			;;
+	esac
+}
+
+MD_Preseed () {
+	## Setup debconf interface to 'noninteractive'
+	#create preseed file
+	cat <<-EOF >/tmp/preseed.cfg
+		debconf debconf/frontend	select Noninteractive
+		# Choices: critical, high, medium, low
+		debconf debconf/priority        select critical
+		msttcorefonts   msttcorefonts/http_proxy        string
+		msttcorefonts   msttcorefonts/defoma    note
+		msttcorefonts   msttcorefonts/dlurl     string
+		msttcorefonts   msttcorefonts/savedir   string
+		msttcorefonts   msttcorefonts/baddldir  note
+		msttcorefonts   msttcorefonts/dldir     string
+		msttcorefonts   msttcorefonts/blurb     note
+		msttcorefonts   msttcorefonts/accepted-mscorefonts-eula boolean true
+		msttcorefonts   msttcorefonts/present-mscorefonts-eula  boolean false
+		sun-java6-bin   shared/accepted-sun-dlj-v1-1    boolean true
+		sun-java6-jre   shared/accepted-sun-dlj-v1-1    boolean true
+		sun-java6-jre   sun-java6-jre/jcepolicy note
+		sun-java6-jre   sun-java6-jre/stopthread        boolean true
+		debconf debconf/frontend        select Noninteractive
+		# Choices: critical, high, medium, low
+		debconf debconf/priority        select critical
+		EOF
+	debconf-set-selections /tmp/preseed.cfg
+
+	#For some odd reason, set-selections adds a space for Noninteractive and Critical that needs to be removed - debconf doesn't handle extra white space well
+	sed -i 's/Value:  /Value: /g' /var/cache/debconf/config.dat
+
+	echo '/bin/false' >"/etc/X11/default-display-manager"
+
+	# This does an update, while adding gpg keys for any that are missing. This is primarily for vlc
+	# but will work for any source.
+	gpgs=$(apt-get -y update |& grep -s NO_PUBKEY | awk '{ print $NF }' | cut -c 9-16);
+	if [ -n "$gpgs" ]; then
+		echo "$gpgs" | while read gpgkeys ; do
+			gpg --keyserver pgp.mit.edu --recv-keys "$gpgkeys"
+			gpg --export --armor "$gpgkeys" | apt-key add -
+		done
+	fi
+
+	apt-get -y -qq update
+	VerifyExitCode "apt update"
+
+	apt-get -f -y install
+
+	apt-get -f -y install pluto-boot-scripts
+}
+
+MD_Install_Packages () {
+	StatsMessage "Installing packages to MD"
+	## Update the system
+	apt-get -f -y dist-upgrade
+	VerifyExitCode "Dist-upgrade failed"
+
+	apt-get -f -y install pluto-confirm-dependencies pluto-avwizard
+	VerifyExitCode "Install pluto-confirm-dependencies, pluto-avwizard failed"
+
+	# generate locales
+	StatsMessage "Generating locales"
+	echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
+	apt-get -f -y install locales
+
+	case "$TARGET_DISTRO" in
+		"ubuntu")
+			: # no-op
+			;;
+		"raspbian")
+			apt-get -y install lsb-release
+	                apt-get -y install alsa-base alsa-utils
+			# pulseaudio
+			VerifyExitCode "alsa-base, alsa-utils or pulseaudio packages install failed"
+			;;
+	esac
+
+	StatsMessage "Install other ancillary programs for MCE"
+	case "$TARGET_ARCH" in
+		i386|amd64)
+			## Packages that are marked as dependencies only in the database
+			apt-get -y install id-my-disc
+			;;
+	esac
+
+	## Install additional packages
+	case "$TARGET_DISTRO" in
+		"ubuntu")
+			if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
+				apt-get -y install kubuntu-desktop
+				#apt-get -y install kde-minimal
+			fi
+			echo '/bin/false' >/etc/X11/default-display-manager
+
+			# Update startup to remove kdm and network manager
+			update-rc.d -f kdm remove
+			update-rc.d -f NetworkManager remove
+
+			#Install ancillary programs
+			apt-get -y install xserver-xorg"$TARGET_KVER_LTS_HES"
+			VerifyExitCode "xserver-xorg$TARGET_KVER_LTS_HES install failed"
+			apt-get -y install xserver-xorg-video-all"$TARGET_KVER_LTS_HES" linux-firmware
+			VerifyExitCode "Ancillary programs install failed"
+
+			;;
+		"raspbian")
+			#FIXME: why is this required, something missing?
+			#addgroup --force-badname Debian-exim
+			#VerifyExitCode "addgroup Debian-Exim failed"
+			#sed -i '/Debian-exim/d' /var/lib/dpkg/statoverride
+			:
+			;;
+	esac
+
+	#Install nfs-common and openssh-server
+	apt-get -y install nfs-common openssh-server
+	VerifyExitCode "nfs-common or openssh-server programs install failed"
+
+	apt-get -y install xinit
+	VerifyExitCode "xinit"
+
+	apt-get -y install pastebinit
+	VerifyExitCode "pastebinit"
+
+	#implement external_media_identifier fix
+	ln -s /usr/lib/libdvdread.so.4 /usr/lib/libdvdread.so.3
+}
+
+MD_Populate_Debcache () {
+	find /var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/$DEB_CACHE \;
+	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
+}
+
+MD_Cleanup () {
+	StatsMessage "Cleaning up from package installations..."
+
+	#Make sure there is are Packages files on the MD so apt-get update does not fail
+	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
+	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
+
+	#Copy the orbiter activation command to the MD's desktop
+	mkdir -p /root/Desktop
+	cp -r /etc/skel/Desktop/* /root/Desktop
+
+	#Remove the xorg file(s) from installation, need to start with a fresh slate
+	rm -f /etc/X11/xorg.conf*
+
+	#Clean up apt from the installs
+	apt-get -y clean
+	VerifyExitCode "APT Clean"
+
+	#Create a list of installed packages
+	#COLUMNS=1024 dpkg -l | awk '/^ii/ {print $2}' >/tmp/pkglist-diskless.txt # used for deb-cache cleanup in the builder
+}
+
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+
+
+
+
+
+start() {
+	if [ ! -f "$DEVID_FILE" ]; then
+		echo "ERR: interactor has not yet created '$DEVID_FILE'."
+		return 10
+	fi
+
+	#TODO get as much of this from database as possible
+	# run any device specific firstboot add-on scripts here
+	for f in /etc/init.d/firstboot_lmce_* ; do
+		echo "Running device specific firstboot script: $f"
+		. "$f"
+		"$f"_preinst
+	done
+
+	case "$TARGET_DISTRO" in
+		"ubuntu")
+			case "$TARGET_ARCH" in
+				i386)
+					TARGET_REPO="http://archive.ubuntu.com/ubuntu/"
+					;;
+				armhf)
+					TARGET_REPO="http://ports.ubuntu.com/ubuntu/"
+					;;
+			esac
+			;;
+		"raspbian-armhf")
+			TARGET_REPO="http://archive.raspbian.org/raspbian/"
+			;;
+	esac
+
+	MD_System_Level_Prep
+	MD_Seamless_Compatability
+	MD_Preseed
+. /usr/pluto/bin/Config_Ops.sh
+. /usr/pluto/bin/SQL_Ops.sh
+. /usr/pluto/bin/Utils.sh
+	setup_fstab
+	setup_plutoconf
+	MD_Install_Packages
+	MD_Populate_Debcache
+	MD_Cleanup
+
+	# run any device specific firstboot add-on scripts here
+	for f in /etc/init.d/firstboot_lmce_* ; do
+		echo "Running device specific firstboot script: $f"
+		. "$f"
+		"$f"_postinst
+	done
+
+	ConfSet "FirstBoot" "false"
+	reboot
+	return 0
+}
+
+status() {
+        status_of_proc firstboot firstboot
+	return $?
+}
+
+case "$1" in
+  start|"")
+        $1
+	retval=$?
+        ;;
+  restart|reload|force-reload)
+        echo "Error: argument '$1' not supported" >&2
+	retval=3
+        ;;
+  stop)
+        : # No-op
+	retval=$?
+        ;;
+  status)
+        $1
+        retval=$?
+        ;;
+  *)
+        echo "Usage: $0 [start|stop|status]" >&2
+	retval=3
+esac
+exit $retval
+
