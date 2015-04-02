@@ -10,6 +10,9 @@
 #include <SDL2/SDL_image.h>
 
 
+enum BKG_STYLE { BKG_CENTERED, BKG_TILED, BKG_HOME, BKG_FIT };
+enum CLOCK_STYLE { HOUR12, HOUR24, HOURAMPM };
+
 namespace DCE
 {
 	class Clock_Screen_Saver;
@@ -31,19 +34,24 @@ class CApp {
 		static	SDL_Texture	*timeTexture;
 		static	SDL_Surface	*timeSurface;
 		static	TTF_Font	*timeFont;
-		static	SDL_Color	*timeColor;
-
-		static	time_t		timeCurrent;
 
 		static	int		windowWidth;
 		static	int		windowHeight;
 
-		static DCE::Clock_Screen_Saver *CSSDevice;
-
+		static	time_t		timeCurrent;
 		static std::string	timeText;
 		static std::string	timeLast;
-
 		static bool		event;
+
+		static DCE::Clock_Screen_Saver *CSSDevice;
+		static CLOCK_STYLE	clockStyle;
+		static std::string	fontFilename;
+		static SDL_Color	timeColor;
+		static int		fontSize;
+		static std::string	bkgFilename;
+		static BKG_STYLE	bkgStyle;
+		static SDL_Color	bkgColor;
+
 	public:
 		CApp();
 
@@ -65,6 +73,8 @@ class CApp {
 
 		static		SDL_Texture 	*renderTime(const std::string &message, SDL_Color color,
 							SDL_Renderer *renderer);
+
+		static		void 		ParseConfiguration(std::string config);
 
 		static		bool		OnInit();
 		static		void		OnEvent(SDL_Event* Event);

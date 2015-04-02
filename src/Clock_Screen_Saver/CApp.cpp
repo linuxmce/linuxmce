@@ -1,12 +1,8 @@
 #include "CApp.h"
 #include "Clock_Screen_Saver.h"
 
-enum BKG_STYLE { BKG_CENTERED, BKG_TILED, BKG_HOME, BKG_FIT };
-enum CLOCK_STYLE { HOUR12, HOUR24, HOURAMPM };
-
 const CLOCK_STYLE	DEFAULT_CLOCK_STYLE = HOUR24;
 const std::string	DEFAULT_FONT_FILE = "/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf";
-//const int		DEFAULT_FONT_SIZE = 180;
 const SDL_Color		DEFAULT_FONT_COLOR = { 255, 255, 255, 255 };
 
 //const std::string	DEFAULT_BKG_FILE = "./background.png";
@@ -23,7 +19,6 @@ SDL_Surface	*CApp::bkgSurface = nullptr;
 SDL_Texture	*CApp::timeTexture = nullptr;
 SDL_Surface	*CApp::timeSurface = nullptr;
 TTF_Font	*CApp::timeFont = nullptr;
-SDL_Color	*CApp::timeColor = nullptr;
 time_t		CApp::timeCurrent;
 int		CApp::windowWidth = 0;
 int		CApp::windowHeight = 0;
@@ -31,6 +26,14 @@ DCE::Clock_Screen_Saver *CApp::CSSDevice = NULL;
 std::string 	CApp::timeText = ":";
 std::string 	CApp::timeLast = "";
 bool		CApp::event = false;
+
+CLOCK_STYLE	CApp::clockStyle = DEFAULT_CLOCK_STYLE;
+std::string	CApp::fontFilename = DEFAULT_FONT_FILE;
+SDL_Color	CApp::timeColor = DEFAULT_FONT_COLOR;
+int		CApp::fontSize = 0;
+std::string	CApp::bkgFilename = DEFAULT_BKG_FILE;
+BKG_STYLE	CApp::bkgStyle = DEFAULT_BKG_STYLE;
+SDL_Color	CApp::bkgColor = DEFAULT_BKG_COLOR;
 
 SDL_Texture *CApp::renderTime(const std::string &message, SDL_Color color, SDL_Renderer *renderer)
 {
@@ -132,8 +135,131 @@ void CApp::error( std::ostream &out_stream, const std::string &err_msg)
 	out_stream << " ERR: " << err_msg << SDL_GetError() << std::endl;
 }
 
+void CApp::ParseConfiguration(std::string config)
+{
+#ifdef KDE_LMCE
+	vector<string> vectLines;
+	// Split into \n and then split each into values.
+	StringUtils::Tokenize(config,"\n",vectLines);
+	for (vector<string>::iterator it=vectLines.begin(); it!=vectLines.end(); ++it)
+	{
+		std::string sItem = *it;
+		std::string::size_type pos=0;
+		std::string sParameter = StringUtils::Tokenize(sItem,"|",pos);
+		std::string sValue = StringUtils::Tokenize(sItem,"|",pos);
+
+		error ( std::cout, string("Configuration - Line ") + sItem );
+/*		if ( sValue == "\r" ) {
+			error (std::cout, "FUCKED!");
+		}
+		else
+*/
+		if ( sValue != "" && sValue != "\r" )
+		{
+			error ( std::cout, string("Configuration - sParameter: ") + sParameter + ", sValue: '" + sValue + "'");
+			/* check config parameters for valid values and set vars accordingly */
+			if ( sParameter == "time_style" )
+			{
+				// enum CLOCK_STYLE { HOUR12, HOUR24, HOURAMPM };
+				if ( sValue == "24" )
+				{
+					error ( std::cout, "Setting 24HR Display" );
+					clockStyle = HOUR24;
+				}
+				else if ( sValue == "12" )
+				{
+					error ( std::cout, "Setting 12HR Display" );
+					clockStyle = HOUR12;
+				}
+				else if ( sValue ==  "AMPM" )
+				{
+					error ( std::cout, "Setting AM/PM Display" );
+					clockStyle = HOURAMPM;
+				}
+			}
+			else if ( sParameter == "time_font" )
+			{
+				error ( std::cout, string("Checking fontFilename: ") + sValue );
+				// get and validate the font
+				if ( FileUtils::FileExists( sValue ) )
+				{
+					fontFilename = sValue;
+					error ( std::cout, string("Setting fontFilename: ") + fontFilename );
+				}
+			}
+			else if ( sParameter == "time_size" )
+			{
+				fontSize = atoi( sValue.c_str() );
+				if ( fontSize < 0 )
+					fontSize = 0;
+				else
+					error ( std::cout, string("Setting fontSize to: ") + sValue );
+
+			}
+			else if ( sParameter == "time_color" )
+			{
+				// tokenize the colour values
+				std::string::size_type pos=0;
+				std::string sR = StringUtils::Tokenize(sValue,",",pos);
+				std::string sG = StringUtils::Tokenize(sValue,",",pos);
+				std::string sB = StringUtils::Tokenize(sValue,",",pos);
+				std::string sA = StringUtils::Tokenize(sValue,",",pos);
+
+				timeColor = { (unsigned char) std::stoi(sR), (unsigned char) std::stoi(sG), 
+						(unsigned char) std::stoi(sB), (unsigned char) std::stoi(sA) };
+			}
+			else if ( sParameter == "bkg_color" )
+			{
+				// tokenize the colour values
+				std::string::size_type pos=0;
+				std::string sR = StringUtils::Tokenize(sValue,",",pos);
+				std::string sG = StringUtils::Tokenize(sValue,",",pos);
+				std::string sB = StringUtils::Tokenize(sValue,",",pos);
+				std::string sA = StringUtils::Tokenize(sValue,",",pos);
+
+				bkgColor = { (unsigned char) std::stoi(sR), (unsigned char) std::stoi(sG),
+						(unsigned char) std::stoi(sB), (unsigned char) std::stoi(sA) };
+			}
+			else if ( sParameter == "bkg_image" )
+			{
+				// get and validate the image
+				if ( FileUtils::FileExists( sValue ) )
+				{
+					bkgFilename = sValue;
+				}
+			}
+			else if ( sParameter == "bkg_location" )
+			{
+				if ( sValue == "centered" )
+				{
+					error ( std::cout, "Setting background Centered" );
+					bkgStyle = BKG_CENTERED;
+				}
+				else if ( sValue == "home" )
+				{
+					error ( std::cout, "Setting background Home" );
+					bkgStyle = BKG_HOME;
+				}
+				else if ( sValue == "tiled" )
+				{
+					error ( std::cout, "Setting background Tiled" );
+					bkgStyle = BKG_TILED;
+				}
+				else if ( sValue == "fit" )
+				{
+					error ( std::cout, "Setting background Fit" );
+					bkgStyle = BKG_FIT;
+				}
+			}
+		}
+	}
+#endif
+}
+
 void *CApp::OnExecute(void *device)
 {
+#ifdef KDE_LMCE
+	lmce_here = true;
 	if( device == NULL )
 	{
 		// not running under lmce, ignore all lmce associated stuffenz.
@@ -142,13 +268,25 @@ void *CApp::OnExecute(void *device)
 
 	if ( lmce_here )
 	{
+		error ( std:: cout, "IT'S HERE!!!!!!" );
 		CSSDevice = (Clock_Screen_Saver *)device;
-		if( CSSDevice->m_pData == NULL )
-		{
+//		if( CSSDevice->m_pData == NULL )
+//		{
 			// error
-			lmce_here = false;
-		}
+//			lmce_here = false;
+//		}
 	}
+
+	if ( lmce_here )
+	{
+		std::string config = CSSDevice->DATA_Get_Configuration();
+		error (std::cout, config );
+
+		ParseConfiguration(config);
+
+
+	}
+#endif
 
 	if (OnInit() == false) {
 		return NULL;
@@ -213,7 +351,7 @@ bool CApp::OnInit() {
 	}
 
 	// TODO: Check for selected image prior to loading?
-	bkgTexture = loadTexture ( DEFAULT_BKG_FILE, renderer );
+	bkgTexture = loadTexture ( bkgFilename, renderer );
 /*
 	if (bkgTexture == nullptr){
 		SDL_DestroyRenderer(renderer);
@@ -225,24 +363,23 @@ bool CApp::OnInit() {
 	}
 */
 
-	int fontSize = 0;
 	// TODO: Check for font prior to opening?
-	std::string fontFile = DEFAULT_FONT_FILE;
-//	fontSize = DEFAULT_FONT_SIZE;
-
-	switch (DEFAULT_CLOCK_STYLE) {
-		case HOURAMPM:
-			fontSize = windowWidth / 5;
-			break;
-		case HOUR12:
-		case HOUR24:
-		default:
-			fontSize = windowWidth / 3.5;
+	if ( fontSize == 0 )
+	{
+		switch (clockStyle) {
+			case HOURAMPM:
+				fontSize = windowWidth / 5;
+				break;
+			case HOUR12:
+			case HOUR24:
+			default:
+				fontSize = windowWidth / 3.5;
+		}
 	}
 
 	error ( std::cout, to_string(fontSize));
 
-	timeFont = TTF_OpenFont(fontFile.c_str(), fontSize);
+	timeFont = TTF_OpenFont(fontFilename.c_str(), fontSize);
 	if (timeFont == nullptr){
 		SDL_DestroyRenderer(renderer);
 		SDL_DestroyWindow(window);
@@ -269,7 +406,7 @@ void CApp::OnLoop() {
 	struct tm *timeinfo = localtime( &timeCurrent );
 	char buffer[80];
 
-	switch (DEFAULT_CLOCK_STYLE) {
+	switch (clockStyle) {
 		case HOUR24:
 			// 24 Hour
 			strftime(buffer, 80, "%H:%M", timeinfo);
@@ -279,9 +416,9 @@ void CApp::OnLoop() {
 			strftime(buffer, 80, "%I:%M %p", timeinfo);
 			break;
 		case HOUR12:
-		default:
 			// 12 Hour
 			strftime(buffer, 80, "%I:%M", timeinfo);
+			break;
 	}
 
 	// Strip leading "0" from 12 Hour Time
@@ -300,13 +437,13 @@ void CApp::OnRender() {
 	event = false;
 
 	// Set render color to black ( background will be rendered in this color )
-	SDL_SetRenderDrawColor( renderer, DEFAULT_BKG_COLOR.r, DEFAULT_BKG_COLOR.g, DEFAULT_BKG_COLOR.b, DEFAULT_BKG_COLOR.a );
+	SDL_SetRenderDrawColor( renderer, bkgColor.r, bkgColor.g, bkgColor.b, bkgColor.a );
 
 	SDL_RenderClear(renderer);
 
 	if ( bkgTexture != nullptr )
 	{
-		switch (DEFAULT_BKG_STYLE)
+		switch (bkgStyle)
 		{
 			case BKG_CENTERED:
 				{
@@ -350,7 +487,7 @@ void CApp::OnRender() {
 
 	// Render the time onscreen.
 	// TODO: get this from data
-	SDL_Color colorTime = DEFAULT_FONT_COLOR; // { 255, 255, 255, 255 };
+	SDL_Color colorTime = timeColor;
 	timeTexture = renderTime(timeText, colorTime, renderer);
 	int timeWidth, timeHeight;
 	SDL_QueryTexture(timeTexture, NULL, NULL, &timeWidth, &timeHeight);
