@@ -3,6 +3,7 @@
 DEVICEID_FILE="/etc/Disked_DeviceID"
 DTVENDOR_FILE="/etc/pluto/Disked_DTVendor"
 COMMAND_FILE="/etc/pluto/Disked_Command"
+DEVDATA_FILE="/etc/pluto/Disked_DevData"
 
 if [ -f "$DEVICEID_FILE" ]; then
 	echo "Skipping interactor - we have a DeviceID already."
@@ -62,6 +63,10 @@ if [ -f "$DTVENDOR_FILE" ]; then
 fi
 if [ -f "$COMMAND_FILE" ]; then
 	Command=$(cat "$COMMAND_FILE")
+fi
+if [ -f "$COMMAND_FILE" ]; then
+	Extra_DD=$(cat "$COMMAND_FILE")
+	DD="$DD|$Extra_DD"
 fi
 
 echo "IP: $MyIP; MAC: $MyMAC; Gateway: $Gateway; DeviceData: $DD; DT/Vendor: $DTVendorID; Command: $Command"
