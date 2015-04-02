@@ -393,7 +393,7 @@ start() {
 			;;
 	esac
 
-	MD_System_Level_Prep
+#	MD_System_Level_Prep
 	MD_Seamless_Compatability
 	MD_Preseed
 . /usr/pluto/bin/Config_Ops.sh
