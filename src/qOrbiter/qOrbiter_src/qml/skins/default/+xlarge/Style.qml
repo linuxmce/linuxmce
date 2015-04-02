@@ -32,7 +32,7 @@ QtObject{
     readonly property string appbutton_confirm_color:appcolor_background
     readonly property color appbutton_cancel_color:"#f26c4f"
     readonly property color appbutton_disabled_color:"#464646"
-readonly property color appbutton_color:appcolor_background
+    readonly property color appbutton_color:appcolor_background
     readonly property int appButtonHeight:scaleY(4)
     readonly property int appButtonWidth:scaleX(6)
     readonly property int appButtonNumberPadHeight:manager.isProfile ? scaleY(12) : scaleY(18)
@@ -41,7 +41,7 @@ readonly property color appbutton_color:appcolor_background
     readonly property int appButtonNumberPadSmallWidth:manager.isProfile ? scaleX(15) : scaleX(9)
     readonly property int appButtonLargeHeight:manager.isProfile ? scaleY(15) : scaleY(20)
     readonly property int appButtonLargeWidth:manager.isProfile ? scaleX(28) : scaleX(25)
-
+    readonly property int buttonSpacing:5
     /* Application Fonts */
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"

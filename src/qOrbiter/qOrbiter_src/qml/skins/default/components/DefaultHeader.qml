@@ -1,38 +1,43 @@
 import QtQuick 2.3
+import QtGraphicalEffects 1.0
 import "../"
 /*! This File is designed to be the main layout that can be switched in and out for various forms */
 Item{
     id:header
     height: Style.appNavigation_panelHeight
+
     state:uiOn ? "open" : "closed"
+    focus:true
+    activeFocusOnTab: false
+    onActiveFocusChanged: {
+        console.log("Header has focus ? "+ activeFocus)
+
+    }
+
+    Keys.onTabPressed: {
+        footer.forceActiveFocus()
+    }
     anchors{
         left:layout.left
         right:layout.right
     }
+
     Rectangle{
+        id:bg_fill
         anchors.fill: parent
         color:Style.appcolor_background_light
-        opacity: Style.appHeader_opacity
-        
-    }
-    StyledText{
-        id:orbiterId
-        anchors{
-            left:parent.left
-            verticalCenter: parent.verticalCenter
-            leftMargin:15
-        }
-        text:qsTr("Orbiter %1").arg(manager.iPK_Device)
+        opacity: Style.appHeader_opacity        
     }
 
-    StyledButton{
-        anchors{
-            right:parent.right
-            verticalCenter: parent.verticalCenter
-        }
-        buttonText: qsTr("Home")
-        onActivated: manager.setCurrentScreen("Screen_1.qml")
+    Glow{
+        anchors.fill:bg_fill
+        radius:8
+        samples:16
+        color:Style.apptext_color_active
+        source:bg_fill
+        visible:header.activeFocus
     }
+
     
     states: [
         State {

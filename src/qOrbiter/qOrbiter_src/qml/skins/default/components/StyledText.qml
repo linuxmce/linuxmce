@@ -15,6 +15,7 @@ Text {
     font.pixelSize: fontSize
     font.bold: isBold
     font.weight: isBold ? Font.Bold : Font.Light
+    verticalAlignment:Text.AlignVCenter
    // font.family: appFont.name
     color:Style.apptext_color_active
     wrapMode: Text.WrapAtWordBoundaryOrAnywhere

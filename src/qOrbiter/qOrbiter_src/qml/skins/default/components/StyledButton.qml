@@ -43,6 +43,7 @@ Item{
     Rectangle{
         anchors.fill: bg_fill
         color: "black"
+        radius: bg_fill.radius
     }
 
     Rectangle{
