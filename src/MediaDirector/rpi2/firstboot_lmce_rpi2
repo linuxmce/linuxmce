@@ -4,8 +4,6 @@ if [[ -n "$HEADER_FB_RPI2" ]]; then
 fi
 HEADER_FB_RPI2=included
 
-. /usr/pluto/bin/Config_Ops.sh
-
 firstboot_lmce_rpi2_preinst() {
 	ret=2;
 	if [ ! -e /etc/part_resized ] ; then
@@ -46,6 +44,8 @@ EOF
 
 firstboot_lmce_rpi2_postinst() {
 	echo -e "Setting up rpi2 specific boot settings" >&2
+
+	. /usr/pluto/bin/Config_Ops.sh
 
 	ConfSet "AVWizardOverride" "0"
 	ConfSet "AVWizardDone" "1"
