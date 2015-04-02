@@ -65,7 +65,7 @@ if [ -f "$COMMAND_FILE" ]; then
 	Command=$(cat "$COMMAND_FILE")
 fi
 if [ -f "$COMMAND_FILE" ]; then
-	Extra_DD=$(cat "$COMMAND_FILE")
+	Extra_DD=$(cat "$DEVDATA_FILE")
 	DD="$DD|$Extra_DD"
 fi
 
