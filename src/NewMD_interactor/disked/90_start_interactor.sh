@@ -12,7 +12,7 @@ fi
 
 MyIF=$(/sbin/route -n | awk '/^0\.0\.0\.0/ { print $8 }')
 MyIP=$(/sbin/ifconfig $MyIF | awk 'NR==2 { print substr($2, index($2, ":") + 1) }')
-MyMAC=$(/sbin/ifconfig $MyIf | awk 'NR==1 { print $5 }')
+MyMAC=$(/sbin/ifconfig $MyIF | awk 'NR==1 { print $5 }')
 Gateway=$(/sbin/route -n | awk '/^0\.0\.0\.0/ { print $2 }')
 
 # DeviceData Section
