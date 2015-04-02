@@ -5,15 +5,20 @@ import "../"
 Item {
     id:stbDelegate
     height:parent.height
-    width: Style.scaleX(15)
+    width: Style.scaleX(16)
     property bool arrow:false
     property bool rotateUp:false
+    property bool triggered:false
     property string buttonText:"ipsum"
     signal activated()
     focus: true
     onActiveFocusChanged: {
         if(activeFocus)
             console.log(buttonText+" button has focus")
+    }
+
+    Keys.onEnterPressed: {
+            activated()
     }
 
     Rectangle{
@@ -26,7 +31,6 @@ Item {
     StyledText{
         id:rowLabel
         text:buttonText
-
         font.pointSize:Style.appFontSize_title
         anchors.fill: parent
     }
@@ -48,7 +52,8 @@ Item {
             verticalCenter: parent.verticalCenter
             right:parent.right
         }
-        height: parent.height /2
+        height: Style.scaleY(3)
+        width: height+5
     }
     MouseArea{
         id:ms

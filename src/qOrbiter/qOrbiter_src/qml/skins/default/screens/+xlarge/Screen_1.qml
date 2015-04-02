@@ -5,11 +5,7 @@ import org.linuxmce.screens 1.0
 StyledScreen {
     id:screen
 
-    StyledText{
-        anchors.centerIn: parent
-        color:"white"
-        text:"This is BIG UX Screen 1\n qml_root height is"+qmlRoot.height
-    }
+
 
 //    GenericListModel {
 //        id: genericListContainer

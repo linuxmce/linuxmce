@@ -36,9 +36,6 @@ Item{
         visible:footer.activated
     }
 
-
-
-    
     states: [
         State {
             when:uiOn

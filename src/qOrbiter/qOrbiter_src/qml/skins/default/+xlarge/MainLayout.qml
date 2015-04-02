@@ -14,6 +14,7 @@ Item {
         color:"black"
     }
     property bool uiOn:true
+    property alias scenarioModel:current_scenarios.model
 
     Component.onCompleted: forceActiveFocus()
     focus:true
@@ -42,43 +43,44 @@ Item {
         id: qmlPictureFrame
     }
 
-        DceScreenSaver{
-            id:glScreenSaver
-            visible: true
-            height:parent.height
-            width:parent.width
-            enableDebug: true
-            interval:60*1000
-            useAnimation: true
-            //onDebugInfoChanged: console.log(debugInfo)
-            active:manager.connectedState
-            requestUrl:manager.m_ipAddress
-            Component.onCompleted: {
+    DceScreenSaver{
+        id:glScreenSaver
+        visible: true
+        height:parent.height
+        width:parent.width
+        enableDebug: true
+        interval:60*1000
+        useAnimation: true
+        //onDebugInfoChanged: console.log(debugInfo)
+        active:manager.connectedState
+        requestUrl:manager.m_ipAddress
+        Component.onCompleted: {
+            glScreenSaver.setImageList(manager.screensaverImages)
+            console.log("Orbiter Consume Screensaver images")
+            console.log("Orbiter counts " + glScreenSaver.pictureCount)
+        }
+
+        Connections{
+            target:manager
+            onScreenSaverImagesReady:{
                 glScreenSaver.setImageList(manager.screensaverImages)
                 console.log("Orbiter Consume Screensaver images")
                 console.log("Orbiter counts " + glScreenSaver.pictureCount)
             }
-
-            Connections{
-                target:manager
-                onScreenSaverImagesReady:{
-                    glScreenSaver.setImageList(manager.screensaverImages)
-                    console.log("Orbiter Consume Screensaver images")
-                    console.log("Orbiter counts " + glScreenSaver.pictureCount)
-                }
-            }
-
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    uiOn=!uiOn
-                }
-            }
-
         }
+
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                uiOn=!uiOn
+            }
+        }
+
+    }
 
     PageLoader {
         id: pageLoader
+        focus:true
         anchors{
             top:header.bottom
             left:layout.left
@@ -112,7 +114,7 @@ Item {
                 bottom:parent.bottom
                 margins: Style.buttonSpacing
             }
-            width: Style.scaleX(30)
+            width: Style.scaleX(45)
             spacing: Style.buttonSpacing
             LargeStyledButton{
                 buttonText: qsTr("Home")
@@ -123,6 +125,36 @@ Item {
                 buttonText:manager.sPK_User
             }
 
+            LargeStyledButton{
+                buttonText:manager.currentRoom
+                arrow:true
+            }
+
+        }
+    }
+
+    Item{
+        id:centralScenarios
+        visible:manager.currentScreen=="Screen_1.qml"
+        height: Style.scaleY(65)
+        width: Style.scaleX(85)
+        anchors.centerIn: parent
+//        Rectangle{
+//            anchors.fill: parent
+//            color:Style.appcolor_background_light
+
+//        }
+
+        ListView{
+            id:current_scenarios
+
+            anchors.fill: parent
+            anchors.margins: Style.buttonSpacing
+            delegate: LargeStyledButton{
+                buttonText:title
+                height:Style.scaleY(13)
+                width:Style.scaleX(15)
+            }
         }
     }
 
@@ -136,6 +168,7 @@ Item {
 
         ListView{
             id:scenarioList
+            visible:manager.currentScreen=="Screen_1.qml"
             focus:true
             onActiveFocusChanged: {
                 if(activeFocus)
@@ -156,8 +189,23 @@ Item {
             delegate:  LargeStyledButton{
                 buttonText:name
                 arrow:true
+                onActiveFocusChanged:{
+                    if(activeFocus){
+                        switch(floorplantype) {
+                        case 2:scenarioModel=currentRoomLights; break;
+                        case 5:scenarioModel=currentRoomMedia; break;
+                        case 1:scenarioModel=currentRoomClimate; break
+                        case 3:scenarioModel=currentRoomTelecom; break
+                        case 4:scenarioModel=currentRoomSecurity; break;
+                        case -1:manager.currentScreen="Screen_44.qml"; break;
+                        default: undefined;
+                        }
+                    }
+                }
+                onActivated:{
+                    forceActiveFocus()
+                }
             }
         }
     }
-
 }
