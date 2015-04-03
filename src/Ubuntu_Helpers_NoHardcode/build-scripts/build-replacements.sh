@@ -83,7 +83,8 @@ function Build_Replacements_Common_ubuntu
 	Build_Replacement_Package lirc-pluto ubuntu/lirc-pluto-0.1
 
 	#Package: mce-launcher
-	Build_Replacement_Package mce-launcher src/mce-launcher
+	# obsolete - un-used since intrepid
+	#Build_Replacement_Package mce-launcher src/mce-launcher
 
 	#Package: mce-installer
 	Build_Replacement_Package mce-installer src/mce-installer
