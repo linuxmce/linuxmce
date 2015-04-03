@@ -532,9 +532,9 @@ MD_Install_Packages () {
 	esac
 
 	## Prevent discover from running as it blocks the system
-	LC_ALL=C chroot "$TEMP_DIR" apt-get -y install discover
-	cp "$TEMP_DIR"/sbin/discover "$TEMP_DIR"/sbin/discover.disabled
-	echo > "$TEMP_DIR"/sbin/discover
+	#LC_ALL=C chroot "$TEMP_DIR" apt-get -y install discover
+	#cp "$TEMP_DIR"/sbin/discover "$TEMP_DIR"/sbin/discover.disabled
+	#echo > "$TEMP_DIR"/sbin/discover
 
 
 	########## START CREATE LIST OF DEVICES #################"
@@ -611,7 +611,7 @@ MD_Install_Packages () {
 	esac
 
 	## Put back discover
-	mv "$TEMP_DIR"/sbin/discover.disabled "$TEMP_DIR"/sbin/discover
+	#mv "$TEMP_DIR"/sbin/discover.disabled "$TEMP_DIR"/sbin/discover
 
 	## Install additional packages
 	case "$TARGET_DISTRO" in
