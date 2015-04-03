@@ -599,7 +599,7 @@ Install_DCERouter () {
 
 	#Install the router and media
 	StatsMessage "Installing LinuxMCE Base DCE Router Software"
-	apt-get -y -q --force-yes -f install pluto-dcerouter video-wizard-videos pluto-sample-media
+	apt-get -y -q --force-yes -f install lmce-core video-wizard-videos pluto-sample-media
 	VerifyExitCode "Initial media and dcerouter install"
 }
 
