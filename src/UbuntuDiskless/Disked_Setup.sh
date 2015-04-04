@@ -119,24 +119,15 @@ Q="
 
 R=$(RunSQL "$Q")
 for Row in $R ;do
-	Moon_DeviceID=$(Field "1" "$Row")
-	Moon_IP=$(Field "2" "$Row");
-	Moon_IP=$(/usr/pluto/bin/PlutoDHCP.sh -d "$Moon_DeviceID" -a)
-	if [[ -z "$Moon_IP" ]]; then
-		echo "WARNING : No free IP left to assign for moon$Moon_DeviceID"
+	DeviceID=$(Field "1" "$Row")
+	IP=$(Field "2" "$Row");
+	[[ -z "$IP" ]] && IP=$(/usr/pluto/bin/PlutoDHCP.sh -d "$DeviceID" -a)
+	if [[ -z "$IP" ]]; then
+		echo "WARNING : No free IP left to assign for moon$DeviceID"
 		continue
 	fi
 
-	# TODO: put in the disked md setup pkgs
-	#update_config_files
-
-	# TODO: create minimal disked installer script that pre-seeds apt-conf, etc...
-	#build_installer_script
-
-	# No archive to create anymore, apt-get install is the goal.
-	#create_archive
-
-	# Each MD must be granted access to the mysql database
+	# Each Device must be granted access to the mysql database
 	setup_mysql_access
 done
 
