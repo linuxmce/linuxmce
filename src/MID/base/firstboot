@@ -118,9 +118,8 @@ MD_System_Level_Prep () {
 		host = dcerouter
 		EOF
 
-	APT_CONFIG=$(cat /etc/apt/sources.list | grep "deb.linuxmce.org")
-	if [ -z "$APT_CONFIG ] ; then
-		# FIXME: don't overwrite on re-install, check prior to write
+	APT_CONFIG=$(grep "linuxmce" /etc/apt/sources.list)
+	if [ -z "$APT_CONFIG" ] ; then
 		TARGET_REPO_NAME="main"
 		cat <<-EOF > /etc/apt/sources.list
 			#deb http://10.10.42.99/trusty-i386/ ./
@@ -132,18 +131,23 @@ MD_System_Level_Prep () {
 			deb http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restricted universe multiverse
 			#deb http://archive.canonical.com/ubuntu $TARGET_RELEASE partner
 			EOF
+	fi
 
+	StatsMessage "Setting up SSH"
+	if [ ! -f /root/.ssh/authorized_keys ] ; then
 		## Setup initial ssh access
-		StatsMessage "Setting up SSH"
-		if [ -f /usr/pluto/keys/id_dsa_pluto.pub] ; then
+		if [ -f /usr/pluto/keys/id_dsa_pluto.pub ] ; then
 			mkdir -p /root/.ssh && cat /usr/pluto/keys/id_dsa_pluto.pub >> /root/.ssh/authorized_keys
 		fi
 	fi
 
+	StatsMessage "Setting up deb-cache"
 	#Make sure there is are Packages files on the MD so apt-get update does not fail
-	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
-	touch  /usr/pluto/deb-cache/$DEB_CACHE/Packages
-	gzip -9c < /usr/pluto/deb-cache/$DEB_CACHE/Packages > /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
+	if [ ! -f /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz ] ; then
+		mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
+		touch  /usr/pluto/deb-cache/$DEB_CACHE/Packages
+		gzip -9c < /usr/pluto/deb-cache/$DEB_CACHE/Packages > /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
+	fi
 
 	echo '/bin/false' > "/etc/X11/default-display-manager"
 }
@@ -188,8 +192,10 @@ MD_Preseed () {
 
 MD_Install_Packages () {
 	StatsMessage "Installing packages to MD"
+	apt-get -f -y dist-upgrade
+	VerifyExitCode "dist-upgrade failed"
 
-	apt-get -f -y install pluto-confirm-dependencies pluto-avwizard
+	apt-get -f -y install pluto-confirm-dependencies
 	VerifyExitCode "Install pluto-confirm-dependencies, pluto-avwizard failed"
 
 	# generate locales
@@ -202,13 +208,6 @@ MD_Install_Packages () {
 	# Update startup to remove kdm and network manager
 	update-rc.d -f kdm remove
 	update-rc.d -f NetworkManager remove
-
-	#Install nfs-common and openssh-server
-	apt-get -y install nfs-common openssh-server
-	VerifyExitCode "nfs-common or openssh-server programs install failed"
-
-	apt-get -y install xinit
-	VerifyExitCode "xinit"
 
 	apt-get -y install pastebinit
 	VerifyExitCode "pastebinit"
@@ -243,7 +242,7 @@ start() {
 	#TODO get as much of this from database as possible
 	# run any device specific firstboot add-on scripts here
 	for f in /etc/init.d/firstboot_lmce_* ; do
-		echo "Running device specific firstboot script: $f"
+			StatsMessage "Running device specific script: $f_preinst"
 		. "$f"
 		$(basename "$f")_preinst
 	done
@@ -268,7 +267,7 @@ start() {
 
 	# run any device specific firstboot add-on scripts here
 	for f in /etc/init.d/firstboot_lmce_* ; do
-		echo "Running device specific firstboot script: $f"
+			StatsMessage "Running device specific script: $f_postinst"
 		. "$f"
 		$(basename "$f")_postinst
 	done
