@@ -65,7 +65,7 @@ fi
 #fi
 
 ## Advertise SSH and file sharing via AVAHI
-test -d "/etc/avahi" || mkdir -p "/etc/avahi"
+test -d "/etc/avahi/services" || mkdir -p "/etc/avahi/services"
 if ! BlacklistConfFiles '/etc/avahi/services/ssh.service' ;then
         cp /usr/pluto/templates/ssh.service.tmpl /etc/avahi/services/ssh.service
 fi
