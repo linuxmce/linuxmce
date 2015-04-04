@@ -15,7 +15,7 @@ SQUEEZELITE=$(which squeezelite)
 
 #SQUEEZESLAVE=/usr/bin/squeezeslave
 SERVER="$DCERouter"
-DEVICE=0
+DEVICE="0"
 
 while getopts ":d:r:" optname
 	do
@@ -30,6 +30,8 @@ while getopts ":d:r:" optname
 				;;
 		esac
 	done
+
+[[ "$DEVICE" == "0" ]] && exit 3
 
 echo "Device $DEVICE server $SERVER"
 Q="
