@@ -6,6 +6,8 @@
 . /usr/pluto/bin/Utils.sh
 
 DEVICEDATA_Alsa_Output_Device=74
+DEVICEDATA_Pnp_Create_Without_Prompting=164
+DEVICETEMPLATE_Squeezebox_Player=58
 
 SQUEEZESLAVE=$(which squeezeslave)
 SQUEEZELITE=$(which squeezelite)
@@ -56,6 +58,10 @@ if [[ -n "$AUDIO_DEVICE" ]]; then
 fi
 [[ -z "$OUTPUT" ]] && exit 1
 
+# Announce our presence to the router
+# TODO: Pass Room/EntArea?
+/usr/pluto/bin/MessageSend "$DCERouter" 0 -1001 2 65 5 "$MAC" 52 3 53 5 49 "$DEVICETEMPLATE_Squeezebox_Player" 55 "$DEVICEDATA_Pnp_Create_Without_Prompting|0"
+
 # Build command parameters
 PARAMS=""
 if [[ "$SQUEEZESLAVE" = "$SQUEEZELITE" ]]; then
@@ -67,7 +73,6 @@ else
 	[[ -n "$MAC" ]] && MAC="-m$MAC"
 fi
 PARAMS="$OUTPUT $MAC $SERVER"
-
 
 echo "Starting squeezeslave: $SQUEEZESLAVE $PARAMS"
 $SQUEEZESLAVE $PARAMS
