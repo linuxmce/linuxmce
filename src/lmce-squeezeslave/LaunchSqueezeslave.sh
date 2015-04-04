@@ -31,17 +31,31 @@ while getopts ":d:r:" optname
 		esac
 	done
 
-# echo "Device $DEVICE server $SERVER"
-# Don't know how to get MAC address without SQL
+echo "Device $DEVICE server $SERVER"
 Q="
 	SELECT MACaddress
 	FROM Device
-	WHERE PK_Device='$PK_Device'
+	WHERE PK_Device='$DEVICE'
 "
 MAC=$(RunSQL "$Q")
-[[ -z "$MAC" ]] && exit 2
 
-MAC=$( awk -F: '{ print "00:00:00:"$4":"$5":"$6 }' <<<$MAC )
+if [[ -z "$MAC" ]] ; then
+	# If there is no MAC set in the DB, we'll get it from the system
+	MyIF=$(/sbin/route -n | awk '/^0\.0\.0\.0/ { print $8 }')
+	#MyIP=$(/sbin/ifconfig $MyIF | awk 'NR==2 { print substr($2, index($2, ":") + 1) }')
+	MAC=$(/sbin/ifconfig $MyIF | awk 'NR==1 { print $5 }')
+	#Gateway=$(/sbin/route -n | awk '/^0\.0\.0\.0/ { print $2 }')
+	MAC=$( awk -F: '{ print "00:00:00:"$4":"$5":"$6 }' <<<$MAC )
+
+	# Now write this to the database so user can see it in webadmin
+	Q="
+		UPDATE Device
+		SET MACaddress='$MAC'
+		WHERE PK_Device="$DEVICE"
+	"
+	R=$(RunSQL "$Q")
+fi
+[[ -z "$MAC" ]] && exit 2
 
 AUDIO_DEVICE=$(GetDeviceData "$DEVICE" "$DEVICEDATA_Alsa_Output_Device")
 OUTPUT=""
