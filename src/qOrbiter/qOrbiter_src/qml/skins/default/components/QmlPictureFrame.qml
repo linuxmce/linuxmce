@@ -8,9 +8,11 @@ Item{
     id:qmlPictureFrame
     anchors.fill: parent
     property variant pictureList:[]
+    property string pictureUrl:"http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="
+    property bool useList:true
+    property bool random:true
     property int currentPic:0
-    property bool switched:false
-    //  onPictureListChanged: console.log("Picture Count "+pictureList)
+
     property int switchTimer:10000
     readonly property int transitionTime:switchTimer-4500
 
@@ -21,10 +23,22 @@ Item{
         onScreenSaverImagesReady:{
             loadImageList()
 
-
         }
     }
-    function getNextImage(){
+
+    function transitionPlanes(){
+        if(img1.opacity==0){
+            img1.opacity=1
+            img2.opacity=0
+        } else {
+            img2.opacity=1
+            img1.opacity=0
+        }
+
+    }
+
+    function getNextImage(){ //Only used for debug. must uncomment return for it to function
+        return;
         console.log("get next image of " +pictureList.length+" images")
         // var picIndex=Math.floor((Math.random()* pictureList.length)+1)
         if(currentPic==pictureList.length){
@@ -68,7 +82,7 @@ Item{
     Timer{
         id:screenSaverTimer
         interval: transitionTime
-        onTriggered: getNextImage();
+        onTriggered: loadNextImage()
         running:false
         triggeredOnStart: false
         repeat: true
@@ -76,7 +90,22 @@ Item{
 
     function getImage(){
 
-        img1.source="http://"+manager.m_ipAddress+"/lmce-admin/imdbImage.php?type=screensaver&val="+pictureList[Math.floor((Math.random()* pictureList.length)+1)]
+        if(useList){
+
+            if(random){
+              currentPic=Math.floor((Math.random()* pictureList.length)+1)
+
+            }else {
+                if(currentPic==pictureList.length){
+                    currentPic=0
+                }
+                currentPic++
+            }
+
+           return pictureUrl+pictureList[currentPic]
+        } else {
+            return pictureUrl
+        }
 
     }
 
@@ -86,26 +115,37 @@ Item{
             return
 
         screenSaverTimer.start()
-        getNextImage()
+        loadNextImage()
         console.log("Orbiter Consume Screensaver images")
         console.log("Orbiter counts " + pictureList.length)
 
     }
 
     function loadNextImage(){
-
-        getImage()
+        var link = getImage()
+       // console.log("Getting "+link)
+        if(img1.closing) {
+            img2.source= link;
+        }
+        else{
+            img1.source=link;
+        }
     }
 
     function startScreenSaver(){
-
+        screenSaverTimer.start()
+        visible=true
     }
     function stopScreenSaver(){
-
+        screenSaverTimer.stop()
+        visible=false
     }
 
     FadeImage {
         id: img1
+        opacity: 1
+        onBadImageError: loadNextImage()
+        onReadyToShow: transitionPlanes()
         StyledButton{
             anchors.centerIn: parent
             buttonText: "Plane 1"
@@ -113,6 +153,9 @@ Item{
     }
     FadeImage{
         id:img2
+        opacity: 0
+        onBadImageError: loadNextImage()
+        onReadyToShow: transitionPlanes()
         StyledButton{
             anchors.centerIn: parent
             buttonText: "Plane 2"

@@ -5,15 +5,29 @@ import "."
 
 /*! QML based screensaver optimized for qt5 */
 Image{
-    id:img1
+    id:fade_img
     anchors.fill: parent
     asynchronous: true
     property bool closing:false
-    onOpacityChanged: if(opacity==0){source=""; closing=false}
+    signal readyToShow()
+    signal badImageError()
+
+    onOpacityChanged:{
+        if(opacity==0){                 //opacity 0 means this is now the 'off' image, we dump the source so it can be used later
+            source="";                  //source cleared
+            closing=false               //flag set for what phase of transition its in.
+        }
+
+        if(opacity==1){
+            closing=true                //flag set for transition phase
+        }
+    }
+
     onStatusChanged:{
-        if(img1.status==Image.Ready){
-            opacity=1
-            closing=true
+        if(fade_img.status==Image.Ready){
+                readyToShow()
+        } else if (fade_img.status==Image.Error){
+            badImageError()
         }
 
     }
