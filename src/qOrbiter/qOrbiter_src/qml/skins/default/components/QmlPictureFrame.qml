@@ -13,7 +13,7 @@ Item{
     property bool random:true
     property int currentPic:0
 
-    property int switchTimer:10000
+    property int switchTimer:60000
     readonly property int transitionTime:switchTimer-4500
 
     Component.onCompleted: loadImageList()
@@ -27,6 +27,7 @@ Item{
     }
 
     function transitionPlanes(){
+
         if(img1.opacity==0){
             img1.opacity=1
             img2.opacity=0
@@ -34,6 +35,7 @@ Item{
             img2.opacity=1
             img1.opacity=0
         }
+        screenSaverTimer.restart()
 
     }
 
@@ -114,8 +116,8 @@ Item{
         if(pictureList.length==0)
             return
 
+      img1.source=getImage();
         screenSaverTimer.start()
-        loadNextImage()
         console.log("Orbiter Consume Screensaver images")
         console.log("Orbiter counts " + pictureList.length)
 
@@ -143,7 +145,7 @@ Item{
 
     FadeImage {
         id: img1
-        opacity: 1
+        opacity: 0
         onBadImageError: loadNextImage()
         onReadyToShow: transitionPlanes()
         StyledButton{
@@ -153,7 +155,7 @@ Item{
     }
     FadeImage{
         id:img2
-        opacity: 0
+
         onBadImageError: loadNextImage()
         onReadyToShow: transitionPlanes()
         StyledButton{
@@ -161,6 +163,7 @@ Item{
             buttonText: "Plane 2"
         }
     }
+
 
 
 

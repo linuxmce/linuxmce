@@ -11,6 +11,8 @@ Image{
     property bool closing:false
     signal readyToShow()
     signal badImageError()
+    fillMode: Image.PreserveAspectCrop
+    smooth: true
 
     onOpacityChanged:{
         if(opacity==0){                 //opacity 0 means this is now the 'off' image, we dump the source so it can be used later
@@ -19,6 +21,9 @@ Image{
         }
 
         if(opacity==1){
+
+
+
             closing=true                //flag set for transition phase
         }
     }
@@ -26,6 +31,7 @@ Image{
     onStatusChanged:{
         if(fade_img.status==Image.Ready){
                 readyToShow()
+
         } else if (fade_img.status==Image.Error){
             badImageError()
         }
