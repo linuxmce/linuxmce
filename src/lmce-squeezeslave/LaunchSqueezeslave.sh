@@ -12,7 +12,7 @@ SQUEEZELITE=$(which squeezelite)
 [[ -n "$SQUEEZELITE" ]] && SQUEEZESLAVE="$SQUEEZELITE"
 
 #SQUEEZESLAVE=/usr/bin/squeezeslave
-SERVER=dcerouter
+SERVER="$DCERouter"
 DEVICE=0
 
 while getopts ":d:r:" optname
@@ -34,10 +34,12 @@ while getopts ":d:r:" optname
 Q="
 	SELECT MACaddress
 	FROM Device
-	WHERE PK_Device='$DEVICE'
+	WHERE PK_Device='$PK_Device'
 "
 MAC=$(RunSQL "$Q")
 [[ -z "$MAC" ]] && exit 2
+
+MAC=$( awk -F: '{ print "00:00:00:"$4":"$5":"$6 }' <<<$MAC )
 
 AUDIO_DEVICE=$(GetDeviceData "$DEVICE" "$DEVICEDATA_Alsa_Output_Device")
 OUTPUT=""
