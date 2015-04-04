@@ -529,7 +529,8 @@ HEADERS += \
 
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
-        config.xml
+        config.xml \
+    qml/skins/default/components/FadeImage.qml
 
 
 for_harmattan{
