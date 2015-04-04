@@ -44,6 +44,7 @@ if ! /usr/pluto/bin/Diskless_Setup.sh; then
 	exit 1
 fi
 
+FeedbackMD "Running Disked_Setup.sh"
 /usr/pluto/bin/Disked_Setup.sh
 
 FeedbackMD "Running DHCP_config.sh"
@@ -55,5 +56,6 @@ Logging "$TYPE" "$SEVERITY_NORMAL" "Finished running diskless MD setup command s
 Unlock "NewPnPMD" "NewPnPMD$MD_Device"
 
 Logging "$TYPE" "$SEVERITY_NORMAL" "Rebooting new MD"
-FeedbackMD "Rebooting"
+FeedbackMD "Rebooting in 5 seconds"
+sleep 5
 echo "reboot" | nc -n "$RemoteIP" "$Interactor_Port"

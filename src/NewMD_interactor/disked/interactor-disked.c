@@ -192,7 +192,7 @@ int main(int argc, char * argv[])
 		}
 		close(s2);
 	}
-	if ( ! gotid )
+//	if ( ! gotid )
 		reboot(RB_AUTOBOOT);
 
 	return 0;
