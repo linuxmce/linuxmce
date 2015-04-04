@@ -4,6 +4,9 @@ import "../"
 Item{
     id:genericPopup
     anchors.fill: parent
+    focus: true
+    Component.onCompleted: forceActiveFocus()
+    Keys.onEscapePressed: {layout.forceActiveFocus(); genericPopup.destroy()}
     property Component content:undefined
     property string title:qsTr("Generic Popup")
     Rectangle{

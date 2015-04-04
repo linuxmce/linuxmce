@@ -16,14 +16,24 @@ Item {
     property bool uiOn:true
     property alias scenarioModel:current_scenarios.model
 
+    function raiseNavigation(raise){
+        uiOn=raise;
+    }
+
+
     Component.onCompleted: forceActiveFocus()
     focus:true
     activeFocusOnTab: false
     onActiveFocusChanged: {
         console.log("Layout has focus ? "+ activeFocus)
+        if(pageLoader.item)
+            pageLoader.item.forceActiveFocus()
     }
 
+    Keys.onEscapePressed: uiOn=false
+
     Keys.onTabPressed: {
+        uiOn=true
         console.log("Shift Focus")
         if(layout.activeFocus){
             header.forceActiveFocus()
@@ -43,40 +53,40 @@ Item {
         id: qmlPictureFrame
     }
 
-//    DceScreenSaver{
-//        id:glScreenSaver
-//        visible: true
-//        height:parent.height
-//        width:parent.width
-//        enableDebug: true
-//        interval:60*1000
-//        useAnimation: true
-//        //onDebugInfoChanged: console.log(debugInfo)
-//        active:manager.connectedState
-//        requestUrl:manager.m_ipAddress
-//        Component.onCompleted: {
-//            glScreenSaver.setImageList(manager.screensaverImages)
-//            console.log("Orbiter Consume Screensaver images")
-//            console.log("Orbiter counts " + glScreenSaver.pictureCount)
-//        }
+    //    DceScreenSaver{
+    //        id:glScreenSaver
+    //        visible: true
+    //        height:parent.height
+    //        width:parent.width
+    //        enableDebug: true
+    //        interval:60*1000
+    //        useAnimation: true
+    //        //onDebugInfoChanged: console.log(debugInfo)
+    //        active:manager.connectedState
+    //        requestUrl:manager.m_ipAddress
+    //        Component.onCompleted: {
+    //            glScreenSaver.setImageList(manager.screensaverImages)
+    //            console.log("Orbiter Consume Screensaver images")
+    //            console.log("Orbiter counts " + glScreenSaver.pictureCount)
+    //        }
 
-//        Connections{
-//            target:manager
-//            onScreenSaverImagesReady:{
-//                glScreenSaver.setImageList(manager.screensaverImages)
-//                console.log("Orbiter Consume Screensaver images")
-//                console.log("Orbiter counts " + glScreenSaver.pictureCount)
-//            }
-//        }
+    //        Connections{
+    //            target:manager
+    //            onScreenSaverImagesReady:{
+    //                glScreenSaver.setImageList(manager.screensaverImages)
+    //                console.log("Orbiter Consume Screensaver images")
+    //                console.log("Orbiter counts " + glScreenSaver.pictureCount)
+    //            }
+    //        }
 
-//        MouseArea{
-//            anchors.fill: parent
-//            onClicked: {
-//                uiOn=!uiOn
-//            }
-//        }
+    //        MouseArea{
+    //            anchors.fill: parent
+    //            onClicked: {
+    //                uiOn=!uiOn
+    //            }
+    //        }
 
-//    }
+    //    }
 
     PageLoader {
         id: pageLoader
@@ -92,44 +102,52 @@ Item {
     DefaultHeader {
         id: header
         focus:true
+        property int currentItem:-1
 
-        StyledText{
-            id:orbiterId
-            anchors{
-                left:parent.left
-                verticalCenter: parent.verticalCenter
-                leftMargin:15
+        onActiveFocusChanged:{
+            if(activeFocus){
+                uiOn=true
+                currentItem=0
+                active=true
+            } else {
+                currentItem=0
             }
-            text:qsTr("Orbiter %1").arg(manager.iPK_Device)
+
+        }
+        onCurrentItemChanged: {
+            topControls.children[currentItem].forceActiveFocus()
         }
 
-
+        Keys.onLeftPressed: { if(currentItem==0)return; currentItem--}
+        Keys.onRightPressed: {if(currentItem===2)return; currentItem++}
+        Keys.onDownPressed:{ footer.forceActiveFocus() }
+        Keys.onEscapePressed: layout.forceActiveFocus()
 
         Row{
             id:topControls
             focus:true
             anchors{
-                right:parent.right
+                right:header.right
                 top:parent.top
                 bottom:parent.bottom
-                margins: Style.buttonSpacing
+                margins:10
             }
-            width: Style.scaleX(45)
+
             spacing: Style.buttonSpacing
+
             LargeStyledButton{
                 buttonText: qsTr("Home")
                 onActivated: manager.setCurrentScreen("Screen_1.qml")
             }
 
             LargeStyledButton{
-                buttonText:manager.sPK_User
+                id:room_display
+                buttonText: roomList.currentRoom
             }
 
             LargeStyledButton{
-                buttonText:manager.currentRoom
-                arrow:true
+                buttonText:manager.sPK_User
             }
-
         }
     }
 
@@ -149,6 +167,7 @@ Item {
             anchors.margins: Style.buttonSpacing
             delegate: LargeStyledButton{
                 arrow:current_scenarios.currentIndex===index
+                currentSelection:arrow
                 buttonText:title
                 height:Style.scaleY(13)
                 width:Style.scaleX(15)
@@ -161,6 +180,7 @@ Item {
 
         focus:true
         onActiveFocusChanged:{
+            header.active=false
             if(activeFocus)scenarioList.forceActiveFocus()
         }
 

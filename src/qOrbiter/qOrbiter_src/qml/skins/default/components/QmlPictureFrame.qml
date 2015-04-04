@@ -148,24 +148,13 @@ Item{
         opacity: 0
         onBadImageError: loadNextImage()
         onReadyToShow: transitionPlanes()
-        StyledButton{
-            anchors.centerIn: parent
-            buttonText: "Plane 1"
-        }
+
     }
     FadeImage{
         id:img2
-
         onBadImageError: loadNextImage()
-        onReadyToShow: transitionPlanes()
-        StyledButton{
-            anchors.centerIn: parent
-            buttonText: "Plane 2"
-        }
+        onReadyToShow: transitionPlanes()       
     }
-
-
-
 
     states: [
         State {

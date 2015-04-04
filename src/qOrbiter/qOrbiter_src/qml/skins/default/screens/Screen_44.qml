@@ -7,6 +7,7 @@ StyledScreen {
         anchors.centerIn: parent
         anchors.fill: parent
         spacing: 25
+        Component.onCompleted: forceActiveFocus()
 
         StyledButton{
             id:regenorbiter

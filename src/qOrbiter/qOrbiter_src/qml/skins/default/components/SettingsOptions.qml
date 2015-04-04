@@ -73,7 +73,7 @@ Item{
                 cat:SettingsType.Settings_Media
                 val:SettingsKey.Setting_Media_AudioSort
                 settingName: qsTr("Default Audio Sorting")
-                settingValue: Attributes.translateType(Number(settings.getOption( cat, val)))
+                //settingValue: Attributes.translateType(Number(settings.getOption( cat, val)))
             }
 
         }

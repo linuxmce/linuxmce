@@ -10,15 +10,24 @@ Item {
     property bool rotateUp:false
     property bool triggered:false
     property string buttonText:"ipsum"
+    property bool currentSelection:false
     signal activated()
     focus: true
     onActiveFocusChanged: {
-        if(activeFocus)
-            console.log(buttonText+" button has focus")
+        if(activeFocus){
+            currentSelection=true
+        } else{
+            currentSelection=false
+        }
+
+    }
+
+    Keys.onReturnPressed: {
+        activated()
     }
 
     Keys.onEnterPressed: {
-            activated()
+        activated()
     }
 
     Rectangle{
@@ -26,6 +35,8 @@ Item {
         color:Style.appcolor_background_list
         opacity: Style.appList_opacity
         radius: 5
+        border.color: "white"
+        border.width: stbDelegate.currentSelection ? 2 : 0
     }
     
     StyledText{
@@ -33,6 +44,7 @@ Item {
         text:buttonText
         font.pointSize:Style.appFontSize_title
         anchors.fill: parent
+        elide: Text.ElideRight
     }
     Glow{
         anchors.fill: rowLabel
@@ -41,7 +53,7 @@ Item {
         spread:0.1
         color:Style.apptext_color_active
         source:rowLabel
-        visible:stbDelegate.activeFocus
+        visible:stbDelegate.currentSelection
     }
     Image {
         id: arrow_icon
@@ -59,5 +71,6 @@ Item {
         id:ms
         anchors.fill: parent
         onPressed: activated()
+
     }
 }

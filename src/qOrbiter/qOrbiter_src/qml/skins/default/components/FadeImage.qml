@@ -21,9 +21,6 @@ Image{
         }
 
         if(opacity==1){
-
-
-
             closing=true                //flag set for transition phase
         }
     }

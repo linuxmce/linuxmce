@@ -5,13 +5,20 @@ Item {
     focus:true
     opacity: 0
     anchors.fill: parent
-
-
+    Keys.onTabPressed: header.forceActiveFocus()
     Component.onCompleted: {
         console.log("screen opening")
         forceActiveFocus()
         state="opening"
         screenOpening()
+    }
+    onActiveFocusChanged:{
+        if(activeFocus){
+            console.log("screen_root has focus")
+            raiseNavigation(false)
+        }
+
+
     }
     Behavior on opacity {
         PropertyAnimation{
@@ -20,6 +27,7 @@ Item {
     }
 
     onScreenOpening: {
+        raiseNavigation(false)
         //        raiseNavigation(manager.currentScreen==="Screen_1.qml" ? true :keepHeader )
         //        if(keepHeader){
         //            setNavigation(navigation)
@@ -39,12 +47,12 @@ Item {
 
 
         } else if(state==="closing"){
-            //raiseNavigation(true)
+            raiseNavigation(true)
         }
     }
 
     function setNavigation(navFile){
-        nav_row.navSource=navFile
+        // nav_row.navSource=navFile
     }
 
     property string screen:"screenum ipsum"

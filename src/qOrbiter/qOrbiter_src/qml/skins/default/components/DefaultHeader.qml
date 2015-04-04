@@ -5,7 +5,7 @@ import "../"
 Item{
     id:header
     height: Style.appNavigation_panelHeight
-
+    property bool active:false
     state:uiOn ? "open" : "closed"
     focus:true
     activeFocusOnTab: false
@@ -35,7 +35,7 @@ Item{
         samples:16
         color:Style.apptext_color_active
         source:bg_fill
-        visible:header.activeFocus
+        visible:header.active
     }
 
     
