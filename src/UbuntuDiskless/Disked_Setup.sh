@@ -92,7 +92,7 @@ function setup_hosts_file
 		Content="${Content}${IP}		moon${DeviceID}\n"
 	done
 	
-	PopulateSection "/etc/hosts" "DiskledMD" "$Content"
+	PopulateSection "/etc/hosts" "DiskedMD" "$Content"
 
 	## Export hosts file to other computer
 	echo | /usr/lib/yp/ypinit -m
