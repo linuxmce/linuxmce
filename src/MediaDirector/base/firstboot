@@ -56,6 +56,8 @@ setup_fstab() {
 }
 
 setup_plutoconf() {
+	. /usr/pluto/bin/Config_Ops.sh
+
 	# get PK_Device from "/etc/Disked_DeviceID", created by interactor
 	DEVICE=$(cat "$DEVID_FILE")
 	[ -n "$PK_Device" ] || ConfSet "PK_Device" "$DEVICE"
@@ -127,34 +129,22 @@ MD_System_Level_Prep () {
 		host = dcerouter
 		EOF
 
-	## Setup apt in pluto style
-	case "$TARGET_DISTRO" in
-		"ubuntu")
-			# FIXME: don't overwrite on re-install, check prior to write
-			TARGET_REPO_NAME="main"
-			cat <<-EOF > /etc/apt/sources.list
-				deb file:/usr/pluto/deb-cache/$DEB_CACHE ./
-				deb http://deb.linuxmce.org/ubuntu/ $TARGET_RELEASE $TARGET_REPO_NAME
-				deb http://deb.linuxmce.org/ $TARGET_RELEASE $TARGET_REPO_NAME
-				deb $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
-				deb $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
-				deb http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restricted universe multiverse
-				deb http://archive.canonical.com/ubuntu $TARGET_RELEASE partner
-				deb http://debian.slimdevices.com/ stable  main
-				deb http://download.videolan.org/pub/debian/stable/ /
-				EOF
-			;;
-		"raspbian")
-			# FIXME: don't overwrite on re-install, check prior to write
-			cat <<-EOF > /etc/apt/sources.list
-				#deb http://10.10.42.99/raspbian/ ./
-				deb file:/usr/pluto/deb-cache/$DEB_CACHE ./
-				deb http://deb.linuxmce.org/raspbian/ $TARGET_RELEASE main
-				deb $TARGET_REPO $TARGET_RELEASE main contrib non-free rpi
-				deb http://archive.raspberrypi.org/debian $TARGET_RELEASE main
-				EOF
-			;;
-	esac
+	APT_CONFIG=$(grep "linuxmce" /etc/apt/sources.list)
+	if [ -z "$APT_CONFIG" ] ; then
+		TARGET_REPO_NAME="main"
+		cat <<-EOF > /etc/apt/sources.list
+			#deb http://10.10.42.99/$TARGET_RELEASE-$TARGET_ARCH/ ./
+			deb file:/usr/pluto/deb-cache/$DEB_CACHE ./
+			deb http://deb.linuxmce.org/ubuntu/ $TARGET_RELEASE $TARGET_REPO_NAME
+			deb http://deb.linuxmce.org/ $TARGET_RELEASE $TARGET_REPO_NAME
+			deb $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
+			deb $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
+			deb http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restricted universe multiverse
+			#deb http://archive.canonical.com/ubuntu $TARGET_RELEASE partner
+			#deb http://debian.slimdevices.com/ stable  main
+			#deb http://download.videolan.org/pub/debian/stable/ /
+			EOF
+	fi
 
 	#Make sure there is are Packages files on the MD so apt-get update does not fail
 	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
@@ -241,7 +231,7 @@ MD_Preseed () {
 		done
 	fi
 
-	apt-get -y -qq update
+	apt-get -f -y -qq update
 	VerifyExitCode "apt update"
 
 	apt-get -f -y install
@@ -263,106 +253,53 @@ MD_Install_Packages () {
 	echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
 	apt-get -f -y install locales
 
-	case "$TARGET_DISTRO" in
-		"ubuntu")
-			StatsMessage "Installing kernel headers"
-			#Install headers and run depmod for the seamless integraton function, ensure no errors exist
-			TARGET_KVER_LTS_HES=""
-			[[ "precise" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-trusty"
-			[[ "trusty" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-utopic"
-			echo "LTS_HES=$TARGET_KVER_LTS_HES" >> /etc/pluto.conf
-			apt-get -y install linux-headers-generic"$TARGET_KVER_LTS_HES"
-			VerifyExitCode "Install linux headers package failed"
+	StatsMessage "Installing kernel headers"
+	#Install headers and run depmod for the seamless integraton function, ensure no errors exist
+	TARGET_KVER_LTS_HES=""
+	[[ "precise" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-trusty"
+	[[ "trusty" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-utopic"
+	echo "LTS_HES=$TARGET_KVER_LTS_HES" >> /etc/pluto.conf
+	apt-get -f -y install linux-headers-generic-"$TARGET_KVER_LTS_HES"
+	VerifyExitCode "Install linux headers package failed"
 
-			TARGET_KVER=$(ls -vd /lib/modules/[0-9]* | sed 's/.*\///g' | tail -1)
-			depmod -v "$TARGET_KVER"
-			VerifyExitCode "depmod failed for $TARGET_KVER"
+	#FIXME: most to rpi firstboot addon?
+	apt-get -f -y install linux-headers-rpi2 || :
+	VerifyExitCode "Install linux headers-rpi2 package failed" # will not occur due to || : above
 
-			StatsMessage "Installing kernel"
-			apt-get -f -y --no-install-recommends install linux-image-generic"$TARGET_KVER_LTS_HES"
-			VerifyExitCode "Install linux kernel package failed"
+	TARGET_KVER=$(ls -vd /lib/modules/[0-9]* | sed 's/.*\///g' | tail -1)
+	depmod -v "$TARGET_KVER"
+	VerifyExitCode "depmod failed for $TARGET_KVER"
 
-			## Prevent lpadmin from running as it blocks the system
-			apt-get -f -y install cups-client
-			cp /usr/sbin/lpadmin{,.disabled}
-			echo > /usr/sbin/lpadmin
-			apt-get -f -y install cups-pdf
-			mv /usr/sbin/lpadmin{.disabled,}
-			;;
-		"raspbian")
-			# raspbian doesn't come with lsb-release by default???
-			apt-get -y install lsb-release
+	StatsMessage "Installing kernel"
+	apt-get -f -y install linux-image-generic"$TARGET_KVER_LTS_HES"
+	VerifyExitCode "Install linux kernel package failed"
 
-			# HACK: copy the foundation kernel.img to a normal linux kernal name with version
-			# FIXME: is there a better way to do this?  the raspbian kernels are missing the fdt.
-			#apt-get -y install linux-image-3.6-trunk-rpi
-			apt-get -y install libraspberrypi-bin raspberrypi-bootloader
-			#apt-get -y install rpi-update
-			#rpi-update
-			mkdir -p /tmp
-			cat <<-EOF > /tmp/symlink_kernel.sh
-				#!/bin/bash
-				cd /boot
-				ln -sf kernel.img vmlinuz-3.6-trunk-rpi
-				touch /boot/initrd.img-3.6-trunk-rpi
-				EOF
-			chmod +x /tmp/symlink_kernel.sh
-			/tmp/symlink_kernel.sh
-	                apt-get -y install alsa-base alsa-utils
-			# pulseaudio
-			VerifyExitCode "alsa-base, alsa-utils or pulseaudio packages install failed"
-			;;
-	esac
+	#FIXME: most to rpi firstboot addon?
+	apt-get -f -y install linux-image-rpi2 || :
+	VerifyExitCode "Install linux image-rpi2 package failed" # will not occur due to || : above
 
-	StatsMessage "Install other ancillary programs for MCE"
-	case "$TARGET_ARCH" in
-		i386|amd64)
-			## Packages that are marked as dependencies only in the database
-			apt-get -y install id-my-disc
-			;;
-	esac
+	if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
+		apt-get -f -y --no-install-recommends install kubuntu-desktop
+		#apt-get -f -y --no-install-recommends install kde-minimal
+	fi
+	echo '/bin/false' >/etc/X11/default-display-manager
 
-	## Install additional packages
-	case "$TARGET_DISTRO" in
-		"ubuntu")
-			if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
-				apt-get -y install kubuntu-desktop
-				#apt-get -y install kde-minimal
-			fi
-			echo '/bin/false' >/etc/X11/default-display-manager
+	# Update startup to remove kdm and network manager
+	update-rc.d -f kdm remove
+	update-rc.d -f NetworkManager remove
 
-			# Update startup to remove kdm and network manager
-			update-rc.d -f kdm remove
-			update-rc.d -f NetworkManager remove
-
-			#Install ancillary programs
-			apt-get -y install xserver-xorg"$TARGET_KVER_LTS_HES"
-			VerifyExitCode "xserver-xorg$TARGET_KVER_LTS_HES install failed"
-			apt-get -y install xserver-xorg-video-all"$TARGET_KVER_LTS_HES" linux-firmware
-			VerifyExitCode "Ancillary programs install failed"
-
-			;;
-		"raspbian")
-			#FIXME: why is this required, something missing?
-			#addgroup --force-badname Debian-exim
-			#VerifyExitCode "addgroup Debian-Exim failed"
-			#sed -i '/Debian-exim/d' /var/lib/dpkg/statoverride
-			:
-			;;
-	esac
+	#Install ancillary programs
+	apt-get -f -y install xserver-xorg"$TARGET_KVER_LTS_HES"
+	VerifyExitCode "xserver-xorg$TARGET_KVER_LTS_HES install failed"
+	apt-get -f -y install xserver-xorg-video-all"$TARGET_KVER_LTS_HES" linux-firmware
+	VerifyExitCode "Ancillary programs install failed"
 
 	#Install nfs-common and openssh-server
-	apt-get -y install nfs-common openssh-server
+	apt-get -f -y install nfs-common openssh-server
 	VerifyExitCode "nfs-common or openssh-server programs install failed"
 
-	apt-get -y install xinit
-	VerifyExitCode "xinit"
-
-	apt-get -y install pastebinit
+	apt-get -f -y install pastebinit
 	VerifyExitCode "pastebinit"
-
-	#implement external_media_identifier fix
-	ln -s /usr/lib/libdvdread.so.4 /usr/lib/libdvdread.so.3
 }
 
 MD_Populate_Debcache () {
@@ -385,7 +322,7 @@ MD_Cleanup () {
 	rm -f /etc/X11/xorg.conf*
 
 	#Clean up apt from the installs
-	apt-get -y clean
+	apt-get -f -y clean
 	VerifyExitCode "APT Clean"
 
 	#Create a list of installed packages
@@ -412,33 +349,23 @@ start() {
 	#TODO get as much of this from database as possible
 	# run any device specific firstboot add-on scripts here
 	for f in /etc/init.d/firstboot_lmce_* ; do
-		echo "Running device specific firstboot script: $f"
+		echo "Running device specific script: $f_preinst"
 		. "$f"
-		"$f"_preinst
+		$(basename "$f")_preinst
 	done
 
-	case "$TARGET_DISTRO" in
-		"ubuntu")
-			case "$TARGET_ARCH" in
-				i386)
-					TARGET_REPO="http://archive.ubuntu.com/ubuntu/"
-					;;
-				armhf)
-					TARGET_REPO="http://ports.ubuntu.com/ubuntu/"
-					;;
-			esac
+	case "$TARGET_ARCH" in
+		i386)
+			TARGET_REPO="http://archive.ubuntu.com/ubuntu/"
 			;;
-		"raspbian-armhf")
-			TARGET_REPO="http://archive.raspbian.org/raspbian/"
+		armhf)
+			TARGET_REPO="http://ports.ubuntu.com/ubuntu/"
 			;;
 	esac
 
 	MD_System_Level_Prep
 	MD_Seamless_Compatability
 	MD_Preseed
-. /usr/pluto/bin/Config_Ops.sh
-. /usr/pluto/bin/SQL_Ops.sh
-. /usr/pluto/bin/Utils.sh
 	setup_fstab
 	setup_plutoconf
 	MD_Install_Packages
@@ -447,9 +374,9 @@ start() {
 
 	# run any device specific firstboot add-on scripts here
 	for f in /etc/init.d/firstboot_lmce_* ; do
-		echo "Running device specific firstboot script: $f"
+		echo "Running device specific script: $f_postinst"
 		. "$f"
-		"$f"_postinst
+		$(basename "$f")_postinst
 	done
 
 	ConfSet "FirstBoot" "false"
