@@ -149,7 +149,7 @@ int main(int argc, char * argv[])
 	if (strcmp(myCommand, "select") == 0)
 		DisplayPleaseChoose();
 
-	while (! gotid && ! do_reboot)
+	while (/*! gotid &&*/ ! do_reboot)
 	{
 		s2 = accept(s, NULL, NULL);
 		if (s2 == -1)
