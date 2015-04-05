@@ -348,6 +348,8 @@ bool CApp::OnInit() {
 		return false;
 	}
 
+	SDL_ShowCursor(SDL_DISABLE);
+
 	// TODO: Check for selected image prior to loading?
 	bkgTexture = loadTexture ( bkgFilename, renderer );
 /*
