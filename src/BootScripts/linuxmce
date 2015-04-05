@@ -18,8 +18,7 @@ DD_DEVICETEMPLATE_GenericPC_as_MD=28
 DD_DEVICETEMPLATE_GenericPC_as_qMD=2277
 DD_DEVICETEMPLATE_RPi_B_as_MD=2216
 DD_DEVICETEMPLATE_RPi_B_as_qMD=2281
-DD_DEVICETEMPLATE_rpib2_as_MD=XXXX
-DD_DEVICETEMPLATE_rpib2_as_qMD=XXXX
+DD_DEVICETEMPLATE_Joggler=2176
 
 
 # Source fuction library
@@ -242,7 +241,8 @@ start() {
 	if [[ "$FirstBoot" != "false" && ! -f /usr/pluto/install/.notdone ]] ;then
 		#StartService "Updating Software Database" "/usr/pluto/bin/getxmls" "&"
 		#/usr/pluto/bin/getxmls &> /var/log/pluto/add_software_debug.log &
-		ConfSet "FirstBoot" "false" 2>/dev/null 1>/dev/null
+		#ConfSet "FirstBoot" "false" 2>/dev/null 1>/dev/null
+		:
 	fi
 
 	StartService "Setting SSH Keys" "/usr/pluto/bin/SSH_Keys.sh" "&"
@@ -282,7 +282,8 @@ start() {
 		if [[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_GenericPC_as_MD" ]] ||
 			[[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_GenericPC_as_qMD" ]] ||
 			[[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_RPi_B_as_MD" ]] ||
-			[[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_Core" ]]; then
+			[[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_Core" ]] ||
+			[[ "$FK_DeviceTemplate" == "$DD_DEVICETEMPLATE_Joggler" ]]; then
 				StartX
 		fi
 	fi
@@ -310,7 +311,7 @@ start() {
 	        /bin/plymouth --hide-splash || :
 	fi
 
-	/usr/pluto/bin/SetupAudioVideo.sh
+#	/usr/pluto/bin/SetupAudioVideo.sh
 
 	:
 	return $?
