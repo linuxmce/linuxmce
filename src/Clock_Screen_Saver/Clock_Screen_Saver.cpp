@@ -85,6 +85,7 @@ bool Clock_Screen_Saver::GetConfig()
 		return false;
 	}
 	clock_running = true;
+	Active = false;
 	return true;
 }
 
