@@ -59,6 +59,8 @@ void PostCreateOptions::PostCreateDevice(Row_Device *pRow_Device, OH_Orbiter *pO
 		PostCreateSecurityDevice(pRow_Device,pOH_Orbiter);
 	else if( pDeviceCategory->WithinCategory(DEVICECATEGORY_Media_Director_CONST) )
 		PostCreateDevice_DisklessMD(pRow_Device,pOH_Orbiter);
+	else if( pDeviceCategory->WithinCategory(DEVICECATEGORY_Mobile_Internet_Devices_CONST) )
+		PostCreateDevice_DisklessMD(pRow_Device,pOH_Orbiter);
 	else if( pDeviceCategory->WithinCategory(DEVICECATEGORY_Capture_Cards_CONST) )
 		PostCreateDevice_CaptureCard(pRow_Device,pOH_Orbiter);
 	else if( pDeviceCategory->WithinCategory(DEVICECATEGORY_Lighting_Interface_CONST) )
