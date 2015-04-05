@@ -63,7 +63,6 @@ int main(int argc, char * argv[])
 	int bytes, tmp;
 	const char * Gateway, * myIP, * myMAC, * myArchitecture, * myDT_VendorModelID;
 	const char * myCommand;
-	int gotid = 0;
 
 	if (argc == 7)
 	{
@@ -149,7 +148,7 @@ int main(int argc, char * argv[])
 	if (strcmp(myCommand, "select") == 0)
 		DisplayPleaseChoose();
 
-	while (/*! gotid &&*/ ! do_reboot)
+	while (! do_reboot)
 	{
 		s2 = accept(s, NULL, NULL);
 		if (s2 == -1)
@@ -159,7 +158,7 @@ int main(int argc, char * argv[])
 		}
 		set_close_on_exec(s2);
 
-		while ( ! gotid && ! do_reboot && (bytes = read(s2, buffer, 1023)) > 0)
+		while (! do_reboot && (bytes = read(s2, buffer, 1023)) > 0)
 		{
 			buffer[bytes] = 0;
 			memset(cmd, 0, 1024);
@@ -184,7 +183,6 @@ int main(int argc, char * argv[])
 					fputs(buffer+9, f);
 					fclose(f);
 					sync();
-					gotid = 1;
 				} else {
 					printf("\nERR: %s\n", buffer);
 				}
@@ -192,8 +190,7 @@ int main(int argc, char * argv[])
 		}
 		close(s2);
 	}
-//	if ( ! gotid )
-		reboot(RB_AUTOBOOT);
+	reboot(RB_AUTOBOOT);
 
 	return 0;
 }
