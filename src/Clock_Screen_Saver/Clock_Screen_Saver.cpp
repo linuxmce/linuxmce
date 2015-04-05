@@ -234,9 +234,11 @@ void Clock_Screen_Saver::SomeFunction()
 void Clock_Screen_Saver::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCMD_Result,Message *pMessage)
 //<-dceag-c192-e->
 {
-	cout << "Need to implement command #192 - On" << endl;
+	cout << "Command #192 - On" << endl;
 	cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
 	cout << "Parm #98 - PK_Device_Pipes=" << sPK_Device_Pipes << endl;
+
+	Active = true;
 }
 
 //<-dceag-c193-b->
@@ -249,8 +251,10 @@ void Clock_Screen_Saver::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCM
 void Clock_Screen_Saver::CMD_Off(int iPK_Pipe,string &sCMD_Result,Message *pMessage)
 //<-dceag-c193-e->
 {
-	cout << "Need to implement command #193 - Off" << endl;
+	cout << "Command #193 - Off" << endl;
 	cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
+
+	Active = false;
 }
 
 

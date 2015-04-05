@@ -32,10 +32,10 @@ namespace DCE
 		pthread_t	clock_thread;
 		bool		clock_running;
 		CApp		ClockApp;
-
 		// Private methods
 public:
 		// Public member variables
+		bool		Active;
 
 //<-dceag-const-b->
 public:

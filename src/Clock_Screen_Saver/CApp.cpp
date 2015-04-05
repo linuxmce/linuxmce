@@ -149,11 +149,6 @@ void CApp::ParseConfiguration(std::string config)
 		std::string sValue = StringUtils::Tokenize(sItem,"|",pos);
 
 		error ( std::cout, string("Configuration - Line ") + sItem );
-/*		if ( sValue == "\r" ) {
-			error (std::cout, "FUCKED!");
-		}
-		else
-*/
 		if ( sValue != "" && sValue != "\r" )
 		{
 			error ( std::cout, string("Configuration - sParameter: ") + sParameter + ", sValue: '" + sValue + "'");
@@ -270,11 +265,6 @@ void *CApp::OnExecute(void *device)
 	{
 		error ( std:: cout, "IT'S HERE!!!!!!" );
 		CSSDevice = (Clock_Screen_Saver *)device;
-//		if( CSSDevice->m_pData == NULL )
-//		{
-			// error
-//			lmce_here = false;
-//		}
 	}
 
 	if ( lmce_here )
@@ -283,24 +273,32 @@ void *CApp::OnExecute(void *device)
 		error (std::cout, config );
 
 		ParseConfiguration(config);
-
-
 	}
 #endif
 
-	if (OnInit() == false) {
+
+	if ( OnInit() == false )
+	{
 		return NULL;
 	}
 
 	SDL_Event Event;
 
-	while (Running) {
-		while (SDL_PollEvent(&Event)) {
-			OnEvent(&Event);
+	while ( Running )
+	{
+#ifdef KDE_LMCE
+		if ( CSSDevice->Active )
+		{
+#endif
+			while (SDL_PollEvent(&Event))
+			{
+				OnEvent(&Event);
+			}
+			OnLoop();
+			OnRender();
+#ifdef KDE_LMCE
 		}
-		OnLoop();
-		OnRender();
-
+#endif
 		SDL_Delay(1000);
 	}
 
@@ -394,10 +392,15 @@ bool CApp::OnInit() {
 }
 
 void CApp::OnEvent(SDL_Event* Event) {
-	if (Event->type == SDL_QUIT) {
-		Running = false;
+	switch (Event->type)
+	{
+		case SDL_QUIT:
+			Running = false;
+			break;
+		case SDL_APP_WILLENTERFOREGROUND:
+		case SDL_APP_DIDENTERFOREGROUND:
+			event = true;
 	}
-	event = true;
 }
 
 void CApp::OnLoop() {
@@ -486,7 +489,6 @@ void CApp::OnRender() {
 	}
 
 	// Render the time onscreen.
-	// TODO: get this from data
 	SDL_Color colorTime = timeColor;
 	timeTexture = renderTime(timeText, colorTime, renderer);
 	int timeWidth, timeHeight;
