@@ -286,14 +286,14 @@ void *CApp::OnExecute(void *device)
 
 	while ( Running )
 	{
+		while (SDL_PollEvent(&Event))
+		{
+			OnEvent(&Event);
+		}
 #ifdef KDE_LMCE
 		if ( CSSDevice->Active )
 		{
 #endif
-			while (SDL_PollEvent(&Event))
-			{
-				OnEvent(&Event);
-			}
 			OnLoop();
 			OnRender();
 #ifdef KDE_LMCE
