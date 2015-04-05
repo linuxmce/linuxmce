@@ -179,7 +179,7 @@ int main(int argc, char * argv[])
 				FILE * f = fopen("/etc/Disked_DeviceID", "w");
 				if (f != NULL )
 				{
-					printf("\n%s\n", buffer);
+					//printf("\n%s\n", buffer);
 					fputs(buffer+9, f);
 					fclose(f);
 					sync();
