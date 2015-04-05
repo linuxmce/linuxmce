@@ -102,14 +102,18 @@ function setup_hosts_file
 
 
 Q="
-	SELECT 
-		PK_Device, 
-		IPaddress
-	FROM 
+	SELECT
+		PK_Device,
+		IPaddress,
+                MACaddress,
+                Device.Description,
+                Device.NeedConfigure,
+                Device.FK_DeviceTemplate
+	FROM
 		Device
 		JOIN Device_DeviceData ON PK_Device = FK_Device AND FK_DeviceData = $DEVICEDATA_DisklessBoot
 		JOIN DeviceTemplate ON FK_DeviceTemplate = PK_DeviceTemplate
-	WHERE 
+	WHERE
 		FK_DeviceCategory = '8'
 		AND
 		FK_Device_ControlledVia IS NULL
@@ -119,13 +123,40 @@ Q="
 
 R=$(RunSQL "$Q")
 for Row in $R ;do
-	DeviceID=$(Field "1" "$Row")
-	IP=$(Field "2" "$Row");
-	[[ -z "$IP" ]] && IP=$(/usr/pluto/bin/PlutoDHCP.sh -d "$DeviceID" -a)
-	if [[ -z "$IP" ]]; then
+	Moon_DeviceID=$(Field "1" "$Row")
+	Moon_IP=$(Field "2" "$Row");
+
+	[[ -z "$Moon_IP" ]] && IP=$(/usr/pluto/bin/PlutoDHCP.sh -d "$Moon_DeviceID" -a)
+	if [[ -z "$Moon_IP" ]]; then
 		echo "WARNING : No free IP left to assign for moon$DeviceID"
 		continue
 	fi
+
+        Moon_Description=$(Field 4 "$Row")
+        Moon_NeedConfigure=$(Field 5 "$Row")
+        if [[ "$Moon_NeedConfigure" != "1" ]] ;then
+                echo "INFO : Skiping moon${Moon_DeviceID} because NeedConfigure flag is not set"
+                continue
+        fi
+        echo "INFO : Processing moon${Moon_DeviceID} because NeedConfigure flag is set"
+
+	Moon_DeviceTemplate=$(Field 6 "$Row")
+	Moon_Architecture=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device='$Moon_DeviceID' AND FK_DeviceData='$DEVICEDATA_Architecture'")
+	if [[ "$Moon_Architecture" == "" ]] ;then
+		# Assume i386 if non is provided, this should not happen.
+		Moon_Architecture=i386
+	fi
+
+	Moon_Model=$(RunSQL "SELECT IK_DeviceData FROM Device_DeviceData WHERE FK_Device='$Moon_DeviceID' AND FK_DeviceData='$DEVICEDATA_Model'")
+	Moon_Model="${Moon_Model%_*}_${Moon_Architecture}"
+	RunSQL "UPDATE Device_DeviceData SET IK_DeviceData='$Moon_Model' WHERE FK_Device='$Moon_DeviceID' AND FK_DeviceData='$DEVICEDATA_Model'"
+
+
+
+
+
+
+########################
 
 	# Each Device must be granted access to the mysql database
 	setup_mysql_access

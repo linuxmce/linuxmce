@@ -430,34 +430,31 @@ MD_Install_Packages () {
 
 	echo "Disable all service invocation"
 	# disable service invocation and tools
-	mv -f $TEMP_DIR/usr/sbin/invoke-rc.d{,.orig}
 	mv -f $TEMP_DIR/sbin/start{,.orig}
+	mv -f $TEMP_DIR/usr/sbin/invoke-rc.d{,.orig}
 	mv -f $TEMP_DIR/sbin/restart{,.orig}
 	mv -f $TEMP_DIR/sbin/initctl{,.orig}
-
-	cat <<-EOF >$TEMP_DIR/usr/sbin/invoke-rc.d
-		#!/bin/bash
-		exit 0
-		EOF
-	chmod +x $TEMP_DIR/usr/sbin/invoke-rc.d
 
 	cat <<-EOF > $TEMP_DIR/sbin/start
 		#!/bin/bash
 		exit 0
 		EOF
 	chmod +x $TEMP_DIR/sbin/start
+	cp $TEMP_DIR/sbin/start $TEMP_DIR/sbin/invoke-rc.d
 	cp $TEMP_DIR/sbin/start $TEMP_DIR/sbin/restart
 	cp $TEMP_DIR/sbin/start $TEMP_DIR/sbin/initctl
 
 	### Disable invoke-rc.d scripts
-	#mv "$TEMP_DIR"/sbin/start-stop-daemon{,.pluto-install}
-	#[[ -f "$TEMP_DIR"/sbin/initctl ]] && mv "$TEMP_DIR"/sbin/initctl{,.pluto-install}
-	#echo -en '#!/bin/bash\necho "WARNING: we dont want invoke-rc.d to run right now"\nexit 101\n' >"$TEMP_DIR"/usr/sbin/policy-rc.d
-	#echo -en '#!/bin/bash\necho "WARNING: fake start-stop-daemon called"\n' >"$TEMP_DIR"/sbin/start-stop-daemon
-	#echo -en '#!/bin/bash\necho "WARNING: fake initctl called"\n' >"$TEMP_DIR"/sbin/initctl
-	#chmod +x "$TEMP_DIR/usr/sbin/policy-rc.d"
-	#chmod +x "$TEMP_DIR/sbin/start-stop-daemon"
-	#chmod +x "$TEMP_DIR/sbin/initctl"
+	mv "$TEMP_DIR"/sbin/start-stop-daemon{,.pluto-install}
+	[[ -f "$TEMP_DIR"/sbin/initctl ]] && mv "$TEMP_DIR"/sbin/initctl{,.pluto-install}
+	echo -en '#!/bin/bash\necho "WARNING: we dont want invoke-rc.d to run right now"\nexit 101\n' >"$TEMP_DIR"/usr/sbin/invoke-rc.d
+	echo -en '#!/bin/bash\necho "WARNING: fake start called"\n' >"$TEMP_DIR"/sbin/start
+	echo -en '#!/bin/bash\necho "WARNING: fake start-stop-daemon called"\n' >"$TEMP_DIR"/sbin/start-stop-daemon
+	echo -en '#!/bin/bash\necho "WARNING: fake initctl called"\n' >"$TEMP_DIR"/sbin/initctl
+	chmod +x "$TEMP_DIR/usr/sbin/invoke-rc.d"
+	chmod +x "$TEMP_DIR/sbin/start-stop-daemon"
+	chmod +x "$TEMP_DIR/sbin/start"
+	chmod +x "$TEMP_DIR/sbin/initctl"
 
 	StatsMessage "Installing packages to MD"
 	## Update the chrooted system (needed when created from archive)

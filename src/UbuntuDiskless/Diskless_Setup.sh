@@ -396,7 +396,7 @@ for Row in $R; do
 	fi
 	cat /usr/pluto/keys/id_dsa_pluto.pub > ${Moon_RootLocation}/root/.ssh/authorized_keys
 
-	## Dome configuring this MD
+	## Done configuring this MD
 	# Do not reset this here or Config_Device_Changes.sh will not run to install pkgs for devices in the dev tree
 	#RunSQL "UPDATE Device SET NeedConfigure = 0 WHERE PK_Device=$Moon_DeviceID"
 
@@ -445,12 +445,12 @@ if [[ $(CheckSectionExists "/etc/samba/smb.conf" "Home Hosts Allow") == "true" ]
 fi
 
 ## Do the update fix for current debian computers
-for dir in /usr/pluto/diskless/* ;do
-	if [[ -f "${dir}/debian/etc/init.d/fastboot/rcS" ]] ;then
-		sed -i 's/ApplyUpdates.sh/LMCEUpdate_Apply.sh/g' "${dir}/debian/etc/init.d/fastboot/rcS" || :
-		rm -f "${dir}/debian/etc/rc2.d/S98LMCEUpdate" || :
-	fi
-done
+#for dir in /usr/pluto/diskless/* ;do
+#	if [[ -f "${dir}/debian/etc/init.d/fastboot/rcS" ]] ;then
+#		sed -i 's/ApplyUpdates.sh/LMCEUpdate_Apply.sh/g' "${dir}/debian/etc/init.d/fastboot/rcS" || :
+#		rm -f "${dir}/debian/etc/rc2.d/S98LMCEUpdate" || :
+#	fi
+#done
 
 echo "Checking number of users, auto reload if less than 1"
 . /usr/pluto/bin/Config_Ops.sh
