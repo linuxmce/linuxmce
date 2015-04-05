@@ -276,7 +276,6 @@ void *CApp::OnExecute(void *device)
 	}
 #endif
 
-
 	if ( OnInit() == false )
 	{
 		return NULL;
@@ -402,6 +401,22 @@ void CApp::OnEvent(SDL_Event* Event) {
 		case SDL_APP_WILLENTERFOREGROUND:
 		case SDL_APP_DIDENTERFOREGROUND:
 			event = true;
+			break;
+		case SDL_WINDOWEVENT_SHOWN:
+#ifdef KDE_LMCE
+			if (!CSSDevice->Active) {
+				SDL_HideWindow(window);
+			}
+#endif
+			break;
+		case SDL_WINDOWEVENT_HIDDEN:
+#ifdef KDE_LMCE
+			if (CSSDevice->Active) {
+				SDL_ShowWindow(window);
+				event = true;
+			}
+#endif
+			break;
 	}
 }
 
