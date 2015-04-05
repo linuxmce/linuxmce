@@ -38,7 +38,7 @@ Image{
     
     Behavior on opacity {
         PropertyAnimation{
-            duration: 500
+            duration: 2000
         }
     }
 }

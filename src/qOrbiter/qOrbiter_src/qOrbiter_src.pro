@@ -547,5 +547,10 @@ for_harmattan{
 RESOURCES += \
         skinData.qrc
 
+use-qrc{
+DEFINES+=QRCTEST
+RESOURCES+=qmlFile.qrc
+}
+
 
 

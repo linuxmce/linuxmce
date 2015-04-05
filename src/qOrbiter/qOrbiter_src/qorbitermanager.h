@@ -1844,12 +1844,16 @@ private slots:
             m_style->deleteLater();
         }
 
-        QString filePath = m_selector->select(m_localQmlPath+"skins/"+currentSkin+"/Style.qml");
+        QString filePath = m_selector->select(m_localQmlPath+"skins/"+currentSkin+"/Style.qml");        
+        filePath.replace("qrc:/", "qrc:///");
         qDebug() << filePath;
-        QQmlComponent nustyle(qorbiterUIwin->engine(), filePath, QQmlComponent::PreferSynchronous);
+        QQmlComponent nustyle(qorbiterUIwin->engine(), QUrl(filePath), QQmlComponent::PreferSynchronous);
         m_style = nustyle.create();
         if(m_style){
             qDebug() << Q_FUNC_INFO << " New style applied. ";
+        } else {
+            qDebug() << nustyle.errors();
+            qDebug() << "Failed to create style!";
         }
         qorbiterUIwin->engine()->rootContext()->setContextProperty("Style", m_style);
         QString returnLocation=qorbiterUIwin->source().toString();

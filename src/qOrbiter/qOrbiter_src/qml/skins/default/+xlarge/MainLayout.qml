@@ -1,7 +1,6 @@
 import QtQuick 2.3
 import QtGraphicalEffects 1.0
 import AudioVisual 1.0
-import DceScreenSaver 1.0
 import QtMultimedia 5.0
 import "."
 import "components"
@@ -44,49 +43,12 @@ Item {
         }
     }
 
-    MouseArea{
-        anchors.fill: parent
-        onClicked: uiOn=!uiOn
-    }
+
 
     QmlPictureFrame {
         id: qmlPictureFrame
     }
 
-    //    DceScreenSaver{
-    //        id:glScreenSaver
-    //        visible: true
-    //        height:parent.height
-    //        width:parent.width
-    //        enableDebug: true
-    //        interval:60*1000
-    //        useAnimation: true
-    //        //onDebugInfoChanged: console.log(debugInfo)
-    //        active:manager.connectedState
-    //        requestUrl:manager.m_ipAddress
-    //        Component.onCompleted: {
-    //            glScreenSaver.setImageList(manager.screensaverImages)
-    //            console.log("Orbiter Consume Screensaver images")
-    //            console.log("Orbiter counts " + glScreenSaver.pictureCount)
-    //        }
-
-    //        Connections{
-    //            target:manager
-    //            onScreenSaverImagesReady:{
-    //                glScreenSaver.setImageList(manager.screensaverImages)
-    //                console.log("Orbiter Consume Screensaver images")
-    //                console.log("Orbiter counts " + glScreenSaver.pictureCount)
-    //            }
-    //        }
-
-    //        MouseArea{
-    //            anchors.fill: parent
-    //            onClicked: {
-    //                uiOn=!uiOn
-    //            }
-    //        }
-
-    //    }
 
     PageLoader {
         id: pageLoader
@@ -225,7 +187,6 @@ Item {
                         case 1:scenarioModel=currentRoomClimate; break
                         case 3:scenarioModel=currentRoomTelecom; break
                         case 4:scenarioModel=currentRoomSecurity; break;
-                        case -1:manager.currentScreen="Screen_44.qml";scenarioList.currentIndex=0; break;
                         default: undefined;
                         }
                         console.log(btn.x)
@@ -234,6 +195,8 @@ Item {
                 }
                 onActivated:{
                     forceActiveFocus()
+                    if(floorplantype===-1)
+                        manager.currentScreen="Screen_44.qml";scenarioList.currentIndex=0;
                 }
             }
         }

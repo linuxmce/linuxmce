@@ -44,5 +44,14 @@
         <file>qml/skins/default/components/SettingsOptions.qml</file>
         <file>qml/skins/default/components/StyledDelegate.qml</file>
         <file>qml/skins/default/components/Switch.qml</file>
+        <file>qml/skins/default/components/FadeImage.qml</file>
+        <file>qml/skins/default/components/LargeStyledButton.qml</file>
+        <file>qml/skins/default/components/QmlPictureFrame.qml</file>
+        <file>qml/skins/default/images/arrow.png</file>
+        <file>qml/skins/default/images/options.png</file>
+        <file>qml/skins/default/images/splash_bg.png</file>
+        <file>qml/skins/default/images/vertical_arrow.png</file>
+        <file>qml/skins/default/screens/+xlarge/Screen_1.qml</file>
+        <file>qml/skins/default/screens/+xlarge/Screen_44.qml</file>
     </qresource>
 </RCC>

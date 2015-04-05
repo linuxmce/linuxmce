@@ -13,7 +13,7 @@ Item{
     property bool random:true
     property int currentPic:0
 
-    property int switchTimer:60000
+    property int switchTimer:20000
     readonly property int transitionTime:switchTimer-4500
 
     Component.onCompleted: loadImageList()
