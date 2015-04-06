@@ -5,6 +5,8 @@ fi
 HEADER_FB_RPI2=included
 
 firstboot_lmce_rpi2_preinst() {
+	return # FIXME: HACK for now until it's tested
+
 	ret=2;
 	if [ ! -e /etc/part_resized ] ; then
 		echo -e "Resizing the SD card" >&2
@@ -41,6 +43,10 @@ EOF
 	fi
 }
 
+
+firstboot_lmce_rpi2_kernel() {
+	:
+}
 
 firstboot_lmce_rpi2_postinst() {
 	echo -e "Setting up rpi2 specific boot settings" >&2
