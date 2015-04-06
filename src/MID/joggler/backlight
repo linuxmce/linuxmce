@@ -1,0 +1,38 @@
+#!/bin/bash
+
+set -e
+
+start() {
+	/usr/pluto/bin/ambient-dimmer
+	return 0
+}
+
+status() {
+        status_of_proc backlight ambient-dimmer
+	return $?
+}
+
+case "$1" in
+  start|"")
+        start
+	retval=$?
+        ;;
+  restart|reload|force-reload)
+        echo "Error: argument '$1' not supported" >&2
+	retval=3
+        ;;
+  stop)
+	killall -9 ambient-dimmer
+        : # No-op
+	retval=$?
+        ;;
+  status)
+        $1
+        retval=$?
+        ;;
+  *)
+        echo "Usage: $0 [start|stop|status]" >&2
+	retval=3
+esac
+exit $retval
+

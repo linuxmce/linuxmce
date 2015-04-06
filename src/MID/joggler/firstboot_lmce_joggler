@@ -17,4 +17,6 @@ firstboot_lmce_joggler_postinst() {
 
 	ConfSet "AVWizardOverride" "0"
 	ConfSet "AVWizardDone" "1"
+
+	update-rc.d -f backlight start defaults >/dev/null
 }
