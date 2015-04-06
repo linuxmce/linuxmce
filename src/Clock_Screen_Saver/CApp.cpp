@@ -26,6 +26,7 @@ DCE::Clock_Screen_Saver *CApp::CSSDevice = NULL;
 std::string 	CApp::timeText = ":";
 std::string 	CApp::timeLast = "";
 bool		CApp::event = false;
+bool		CApp::Active = false;
 
 CLOCK_STYLE	CApp::clockStyle = DEFAULT_CLOCK_STYLE;
 std::string	CApp::fontFilename = DEFAULT_FONT_FILE;
@@ -251,6 +252,29 @@ void CApp::ParseConfiguration(std::string config)
 #endif
 }
 
+void CApp::ProcessCommand(std::string cmd)
+{
+	if (cmd == "ON")
+	{
+		error ( std::cout, "Turning ON" );
+		SDL_HideWindow(window);
+		SDL_ShowWindow(window);
+		SDL_RaiseWindow(window);
+		SDL_ShowCursor(SDL_DISABLE);
+		Active = true;
+		event = true;
+		timeLast = "";
+	}
+	else if (cmd == "OFF")
+	{
+		error ( std::cout, "Turning OFF" );
+		SDL_HideWindow(window);
+		SDL_ShowCursor(SDL_ENABLE);
+		Active = false;
+		timeLast = "";
+	}
+}
+
 void *CApp::OnExecute(void *device)
 {
 #ifdef KDE_LMCE
@@ -289,8 +313,9 @@ void *CApp::OnExecute(void *device)
 		{
 			OnEvent(&Event);
 		}
+
 #ifdef KDE_LMCE
-		if ( CSSDevice->Active )
+//		if ( Active || event )
 		{
 #endif
 			OnLoop();
@@ -329,7 +354,8 @@ bool CApp::OnInit() {
 	windowHeight = display_mode.h;
 
 	// Create SDL window, eventually fullscreen
-	window = SDL_CreateWindow("Clock_Screen_Saver", 0, 0, windowWidth, windowHeight, SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_BORDERLESS);
+	window = SDL_CreateWindow("Clock_Screen_Saver", 0, 0, windowWidth, windowHeight, 
+		SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_BORDERLESS | SDL_WINDOW_MAXIMIZED /*| SDL_WINDOW_HIDDEN */ );
 	if (window == nullptr) {
 		error ( std::cout, "SDL_CreateWindow" );
 		TTF_Quit();
@@ -347,20 +373,8 @@ bool CApp::OnInit() {
 		return false;
 	}
 
-	SDL_ShowCursor(SDL_DISABLE);
-
 	// TODO: Check for selected image prior to loading?
 	bkgTexture = loadTexture ( bkgFilename, renderer );
-/*
-	if (bkgTexture == nullptr){
-		SDL_DestroyRenderer(renderer);
-		SDL_DestroyWindow(window);
-		error ( std::cout, "OnInit - SDL_CreateTextureFromSurface" );
-		TTF_Quit();
-		SDL_Quit();
-		return false;
-	}
-*/
 
 	// TODO: Check for font prior to opening?
 	if ( fontSize == 0 )
@@ -389,6 +403,8 @@ bool CApp::OnInit() {
 		return false;
 	}
 
+	ProcessCommand("OFF");
+
 	return true;
 }
 
@@ -400,22 +416,8 @@ void CApp::OnEvent(SDL_Event* Event) {
 			break;
 		case SDL_APP_WILLENTERFOREGROUND:
 		case SDL_APP_DIDENTERFOREGROUND:
+			error ( std::cout, "SDL_WINDOWEVENT_SHOWN" );
 			event = true;
-			break;
-		case SDL_WINDOWEVENT_SHOWN:
-#ifdef KDE_LMCE
-			if (!CSSDevice->Active) {
-				SDL_HideWindow(window);
-			}
-#endif
-			break;
-		case SDL_WINDOWEVENT_HIDDEN:
-#ifdef KDE_LMCE
-			if (CSSDevice->Active) {
-				SDL_ShowWindow(window);
-				event = true;
-			}
-#endif
 			break;
 	}
 }
@@ -450,13 +452,35 @@ void CApp::OnLoop() {
 
 }
 
-void CApp::OnRender() {
-	if ( !event && (timeText == timeLast) )
-		return;
+void CApp::OnRender()
+{
+	Uint32 flags = SDL_GetWindowFlags(window);
+	if ( flags && SDL_WINDOW_SHOWN == SDL_WINDOW_SHOWN )
+	{
+		std::cout << "S" << std::flush;
+	}
+	if ( flags && SDL_WINDOW_HIDDEN == SDL_WINDOW_HIDDEN )
+	{
+		std::cout << "H" << std::flush;
+	}
+/*	else
+	{
+		std::cout << "." << std::flush;
+	}
+*/
+	if (Active)
+	{
+//		std::cout << "SHOW";
+		SDL_RaiseWindow(window);
+		SDL_ShowCursor(SDL_DISABLE);
+	}
+
+//	if ( (timeText == timeLast) && !event )
+//		return;
 	timeLast = timeText;
 	event = false;
 
-	// Set render color to black ( background will be rendered in this color )
+	// Set render color to bkgColor
 	SDL_SetRenderDrawColor( renderer, bkgColor.r, bkgColor.g, bkgColor.b, bkgColor.a );
 
 	SDL_RenderClear(renderer);

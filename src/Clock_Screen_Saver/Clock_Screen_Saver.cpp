@@ -239,6 +239,7 @@ void Clock_Screen_Saver::CMD_On(int iPK_Pipe,string sPK_Device_Pipes,string &sCM
 	cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
 	cout << "Parm #98 - PK_Device_Pipes=" << sPK_Device_Pipes << endl;
 
+	CApp::ProcessCommand("ON");
 	Active = true;
 }
 
@@ -255,6 +256,7 @@ void Clock_Screen_Saver::CMD_Off(int iPK_Pipe,string &sCMD_Result,Message *pMess
 	cout << "Command #193 - Off" << endl;
 	cout << "Parm #97 - PK_Pipe=" << iPK_Pipe << endl;
 
+	CApp::ProcessCommand("OFF");
 	Active = false;
 }
 

@@ -42,6 +42,7 @@ class CApp {
 		static std::string	timeText;
 		static std::string	timeLast;
 		static bool		event;
+		static bool		Active;
 
 		static DCE::Clock_Screen_Saver *CSSDevice;
 		static CLOCK_STYLE	clockStyle;
@@ -56,6 +57,8 @@ class CApp {
 		CApp();
 
 		static void 	*OnExecute(void *dev);
+
+		static		void		ProcessCommand(std::string cmd);
 
 	private:
 		static		void		error( std::ostream &out_stream, const std::string &err_msg);
