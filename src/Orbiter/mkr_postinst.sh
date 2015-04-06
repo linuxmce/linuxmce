@@ -39,16 +39,6 @@ DeviceCategory_MD=8
 
 if [[ -n "$DeviceCategory" ]]; then
 	if [[ $DeviceCategory -eq $DeviceCategory_MD ]]; then
-#		if ! update-rc.d -f discover remove; then
-#			:
-#		fi
-#		update-rc.d discover start 80 1 2 3 4 5 .
-#
-#		if ! update-rc.d -f hotplug remove; then
-#			:
-#		fi
-#		update-rc.d hotplug start 81 1 2 3 4 5 . stop 89 0 6 . || /bin/true
-		# Diskless machines should not drop portmap or networking at any point
 		rm -f /etc/rc{0,6}.d/{S32portmap,S35networking}
 	fi
 fi

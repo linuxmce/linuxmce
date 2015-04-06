@@ -225,6 +225,10 @@ MD_Cleanup () {
 	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
 	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
 
+	#Copy the orbiter activation command to the MD's desktop
+	mkdir -p /root/Desktop
+	cp -r /etc/skel/Desktop/* /root/Desktop
+
 	#Clean up apt from the installs
 	apt-get -y clean
 	VerifyExitCode "APT Clean"
