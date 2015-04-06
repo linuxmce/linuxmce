@@ -545,11 +545,12 @@ for_harmattan{
 
 
 RESOURCES += \
-        skinData.qrc
+        skinData.qrc \
+        qmlFile.qrc
 
-use-qrc{
-DEFINES+=QRCTEST
-RESOURCES+=qmlFile.qrc
+no-qrc{
+DEFINES+=NOQRC
+RESOURCES-=qmlFile.qrc
 }
 
 
