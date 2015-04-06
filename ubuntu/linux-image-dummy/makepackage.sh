@@ -9,7 +9,10 @@ else
 	Moon_KernelVersion=$(uname -r)
 fi
 #Moon_KernelArch="i386"
-Moon_KernelArch=$(apt-config dump | grep 'APT::Architecture ' | sed 's/APT::Architecture "\(.*\)".*/\1/g')
+#Moon_KernelArch=$(apt-config dump | grep 'APT::Architecture ' | sed 's/APT::Architecture "\(.*\)".*/\1/g')
+
+# We want to build the package for 'all' so this is the default diskless image regardless of core architecture.
+Moon_KernelArch="all"
 Moon_RootLocation='package/'
 # Remove old kernel images from package dir
 rm -fr $Moon_RootLocation/{boot,lib/modules}
