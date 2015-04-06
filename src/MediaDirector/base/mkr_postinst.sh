@@ -52,25 +52,25 @@ cat <<-EOF > /root/.my.cnf
 ## Setup debconf interface to 'noninteractive'
 #create preseed file
 cat <<-EOF >/tmp/preseed.cfg
-	debconf debconf/frontendselect Noninteractive
+	debconf	debconf/frontend	select	Noninteractive
 	# Choices: critical, high, medium, low
-	debconf debconf/priorityselect critical
-	msttcorefonts   msttcorefonts/http_proxystring
-	msttcorefonts   msttcorefonts/defoma    note
-	msttcorefonts   msttcorefonts/dlurl     string
-	msttcorefonts   msttcorefonts/savedir   string
-	msttcorefonts   msttcorefonts/baddldir  note
-	msttcorefonts   msttcorefonts/dldir     string
-	msttcorefonts   msttcorefonts/blurb     note
-	msttcorefonts   msttcorefonts/accepted-mscorefonts-eula boolean true
-	msttcorefonts   msttcorefonts/present-mscorefonts-eula  boolean false
-	sun-java6-bin   shared/accepted-sun-dlj-v1-1    boolean true
-	sun-java6-jre   shared/accepted-sun-dlj-v1-1    boolean true
-	sun-java6-jre   sun-java6-jre/jcepolicy note
-	sun-java6-jre   sun-java6-jre/stopthreadboolean true
-	debconf debconf/frontendselect Noninteractive
+	debconf	debconf/priority	select	critical
+	msttcorefonts	msttcorefonts/http_proxy	string
+	msttcorefonts	msttcorefonts/defoma	note
+	msttcorefonts	msttcorefonts/dlurl	string
+	msttcorefonts	msttcorefonts/savedir	string
+	msttcorefonts	msttcorefonts/baddldir	note
+	msttcorefonts	msttcorefonts/dldir	string
+	msttcorefonts	msttcorefonts/blurb	note
+	msttcorefonts	msttcorefonts/accepted-mscorefonts-eula	boolean	true
+	msttcorefonts	msttcorefonts/present-mscorefonts-eula	boolean	false
+	sun-java6-bin	shared/accepted-sun-dlj-v1-1	boolean	true
+	sun-java6-jre	shared/accepted-sun-dlj-v1-1	boolean	true
+	sun-java6-jre	sun-java6-jre/jcepolicy	note
+	sun-java6-jre	sun-java6-jre/stopthread	boolean	true
+	debconf	debconf/frontend	select	Noninteractive
 	# Choices: critical, high, medium, low
-	debconf debconf/priorityselect critical
+	debconf	debconf/priority	select	critical
 	EOF
 	debconf-set-selections /tmp/preseed.cfg
 
