@@ -578,19 +578,12 @@ int Disk_Drive_Functions::cdrom_checkdrive(const char * filename, int * flag, bo
 
 bool Disk_Drive_Functions::mountDVD(string fileName, string & strMediaUrl)
 {
-	string sDiskType;
-	switch (m_mediaDiskStatus)
-	{
-	DISCTYPE_DVD_VIDEO) sDiskType="dvd"	;;
-	DISCTYPE_BD) sDiskType="bluray"	;;
-	}
-
 	// True if we're playing a physical dir, false if it's a file
 	bool bDriveMount = StringUtils::StartsWith(fileName,"/dev/",true);
 
 	string sDrive = bDriveMount ? fileName : m_sDrive;
 
-	string cmd = "ln -sf " + sDrive + " /dev/" + sDiskType;
+	string cmd = "ln -sf " + sDrive + " /dev/dvd";
 	LoggerWrapper::GetInstance()->Write(LV_STATUS,"cmd drivemount: %d - %s",(int) bDriveMount,cmd.c_str());
 	system(cmd.c_str());  // Don't care about the return.  Just making sure it's not loop 5 so we can delete it
 	if (bDriveMount)
