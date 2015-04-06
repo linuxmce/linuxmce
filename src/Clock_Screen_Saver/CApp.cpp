@@ -257,7 +257,6 @@ void CApp::ProcessCommand(std::string cmd)
 	if (cmd == "ON")
 	{
 		error ( std::cout, "Turning ON" );
-		SDL_HideWindow(window);
 		SDL_ShowWindow(window);
 		SDL_RaiseWindow(window);
 		SDL_ShowCursor(SDL_DISABLE);
@@ -268,10 +267,9 @@ void CApp::ProcessCommand(std::string cmd)
 	else if (cmd == "OFF")
 	{
 		error ( std::cout, "Turning OFF" );
-		SDL_HideWindow(window);
 		SDL_ShowCursor(SDL_ENABLE);
+		SDL_HideWindow(window);
 		Active = false;
-		timeLast = "";
 	}
 }
 
@@ -314,16 +312,10 @@ void *CApp::OnExecute(void *device)
 			OnEvent(&Event);
 		}
 
-#ifdef KDE_LMCE
-//		if ( Active || event )
-		{
-#endif
-			OnLoop();
-			OnRender();
-#ifdef KDE_LMCE
-		}
-#endif
-		SDL_Delay(1000);
+		OnLoop();
+		OnRender();
+
+		SDL_Delay(100);
 	}
 
 	OnCleanup();
@@ -355,7 +347,7 @@ bool CApp::OnInit() {
 
 	// Create SDL window, eventually fullscreen
 	window = SDL_CreateWindow("Clock_Screen_Saver", 0, 0, windowWidth, windowHeight, 
-		SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_BORDERLESS | SDL_WINDOW_MAXIMIZED /*| SDL_WINDOW_HIDDEN */ );
+		SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_BORDERLESS | SDL_WINDOW_MAXIMIZED | SDL_WINDOW_HIDDEN );
 	if (window == nullptr) {
 		error ( std::cout, "SDL_CreateWindow" );
 		TTF_Quit();
@@ -417,12 +409,34 @@ void CApp::OnEvent(SDL_Event* Event) {
 		case SDL_APP_WILLENTERFOREGROUND:
 		case SDL_APP_DIDENTERFOREGROUND:
 			error ( std::cout, "SDL_WINDOWEVENT_SHOWN" );
-			event = true;
+			timeLast = "";
 			break;
 	}
 }
 
 void CApp::OnLoop() {
+
+	Uint32 flags = SDL_GetWindowFlags(window);
+	if ( (flags & SDL_WINDOW_SHOWN) == SDL_WINDOW_SHOWN )
+	{
+		if (!Active)
+		{
+			std::cout << "S" << std::flush;
+			SDL_ShowCursor(SDL_ENABLE);
+			SDL_HideWindow(window);
+		}
+	}
+	if ( (flags & SDL_WINDOW_HIDDEN) == SDL_WINDOW_HIDDEN )
+	{
+		if (Active)
+		{
+			std::cout << "H" << std::flush;
+			SDL_ShowWindow(window);
+			SDL_RaiseWindow(window);
+			SDL_ShowCursor(SDL_DISABLE);
+		}
+	}
+
 	// Get the current time in a string
 	timeCurrent = time(0);
 	struct tm *timeinfo = localtime( &timeCurrent );
@@ -449,36 +463,21 @@ void CApp::OnLoop() {
 	{
 		timeText.erase(0, 1);
 	}
-
 }
 
 void CApp::OnRender()
 {
-	Uint32 flags = SDL_GetWindowFlags(window);
-	if ( flags && SDL_WINDOW_SHOWN == SDL_WINDOW_SHOWN )
-	{
-		std::cout << "S" << std::flush;
-	}
-	if ( flags && SDL_WINDOW_HIDDEN == SDL_WINDOW_HIDDEN )
-	{
-		std::cout << "H" << std::flush;
-	}
-/*	else
-	{
-		std::cout << "." << std::flush;
-	}
-*/
-	if (Active)
-	{
-//		std::cout << "SHOW";
-		SDL_RaiseWindow(window);
-		SDL_ShowCursor(SDL_DISABLE);
-	}
+	static int i = 0;
+	if (!Active)
+		return;
 
-//	if ( (timeText == timeLast) && !event )
-//		return;
+	if ( (++i != 10) && !event && (timeText == timeLast) )
+		return;
 	timeLast = timeText;
 	event = false;
+	i = 0;
+
+	std::cout << "R" << std::flush;
 
 	// Set render color to bkgColor
 	SDL_SetRenderDrawColor( renderer, bkgColor.r, bkgColor.g, bkgColor.b, bkgColor.a );
