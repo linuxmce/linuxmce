@@ -67,6 +67,17 @@ setup_fstab() {
 			192.168.80.1:/home/cameras      /home/cameras   nfs4 retrans=10,timeo=50 1 1
 			EOF
 	fi
+
+#       ## Create /var/log/pluto for this device as a symlink
+#       mkdir -p "/home/logs/diskless_${Moon_DeviceID}"
+#       if [[ -d $Moon_RootLocation/var/log/pluto       ]] ;then
+#               mv $Moon_RootLocation/var/log/pluto/* /home/log/diskless_$Moon_DeviceID
+#               rm -rf $Moon_RootLocation/var/log/pluto/
+#       fi
+#       if [[ ! -e "$Moon_RootLocation"/var/log/pluto ]]; then
+#               ln -s "/home/logs/diskless_$Moon_DeviceID" "$Moon_RootLocation/var/log/pluto"
+#       fi
+
 	mkdir -p /usr/pluto/var/
 	mkdir -p /usr/pluto/orbiter
 	mkdir -p /usr/pluto/keys

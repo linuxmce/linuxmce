@@ -4449,6 +4449,27 @@ string Orbiter::SubstituteVariables( string Input,  DesignObj_Orbiter *pObj,  in
 			if( !pObj->m_pvectCurrentGraphic || pObj->m_pvectCurrentGraphic->size()==0 && !pObj->m_pGraphicToUndoSelect )
 				m_pOrbiterRenderer->SaveBackgroundForDeselect( pObj, pObj->m_pPopupPoint);  // Whether it's automatically unselected,  or done by selecting another object,  we should hold onto this
 		}
+		else if(  Variable=="NP_ANGLE" )
+		{
+			Output += m_sNowPlaying_Angle;
+			m_pObj_NowPlaying_Angle_OnScreen=pObj;
+			if( !pObj->m_pvectCurrentGraphic || pObj->m_pvectCurrentGraphic->size()==0 && !pObj->m_pGraphicToUndoSelect )
+				m_pOrbiterRenderer->SaveBackgroundForDeselect( pObj, pObj->m_pPopupPoint);  // Whether it's automatically unselected,  or done by selecting another object,  we should hold onto this
+		}
+		else if(  Variable=="NP_AUDIO" )
+		{
+			Output += m_sNowPlaying_Audio;
+			m_pObj_NowPlaying_Audio_OnScreen=pObj;
+			if( !pObj->m_pvectCurrentGraphic || pObj->m_pvectCurrentGraphic->size()==0 && !pObj->m_pGraphicToUndoSelect )
+				m_pOrbiterRenderer->SaveBackgroundForDeselect( pObj, pObj->m_pPopupPoint);  // Whether it's automatically unselected,  or done by selecting another object,  we should hold onto this
+		}
+		else if(  Variable=="NP_SUBTITLE" )
+		{
+			Output += m_sNowPlaying_Subtitle;
+			m_pObj_NowPlaying_Subtitle_OnScreen=pObj;
+			if( !pObj->m_pvectCurrentGraphic || pObj->m_pvectCurrentGraphic->size()==0 && !pObj->m_pGraphicToUndoSelect )
+				m_pOrbiterRenderer->SaveBackgroundForDeselect( pObj, pObj->m_pPopupPoint);  // Whether it's automatically unselected,  or done by selecting another object,  we should hold onto this
+		}
 		else if(  Variable=="NPD" )
 			Output += StringUtils::itos(m_dwPK_Device_NowPlaying);
 		else if(  Variable=="NPDT" )
@@ -8705,7 +8726,7 @@ void Orbiter::CMD_Update_Time_Code(int iStreamID,string sTime,string sTotal,stri
 	}
 	else
 	{
-		if( m_pObj_NowPlaying_TimeShort_OnScreen )
+		if( m_pObj_NowPlaying_TimeShort_OnScreen || m_pObj_NowPlaying_TimeLong_OnScreen )
 			m_sNowPlaying_TimeShort = sTime.substr(0,tabTime);
 
 		if( m_pObj_NowPlaying_TimeLong_OnScreen )
@@ -8725,7 +8746,7 @@ void Orbiter::CMD_Update_Time_Code(int iStreamID,string sTime,string sTotal,stri
 	m_sNowPlaying_Speed = sSpeed;
 
 	DesignObj_Orbiter *pObj_NowPlaying_TimeShort_OnScreen = m_pObj_NowPlaying_TimeShort_OnScreen && m_pObj_NowPlaying_TimeShort_OnScreen->m_bOnScreen ? m_pObj_NowPlaying_TimeShort_OnScreen : NULL;
-	DesignObj_Orbiter *pObj_NowPlaying_TimeLong_OnScreen = m_pObj_NowPlaying_TimeLong_OnScreen && m_pObj_NowPlaying_TimeLong_OnScreen->m_bOnScreen && m_pObj_NowPlaying_TimeShort_OnScreen!=m_pObj_NowPlaying_TimeShort_OnScreen ? m_pObj_NowPlaying_TimeLong_OnScreen : NULL;
+	DesignObj_Orbiter *pObj_NowPlaying_TimeLong_OnScreen = m_pObj_NowPlaying_TimeLong_OnScreen && m_pObj_NowPlaying_TimeLong_OnScreen->m_bOnScreen ? m_pObj_NowPlaying_TimeLong_OnScreen : NULL;
 	DesignObj_Orbiter *pObj_NowPlaying_Speed_OnScreen = m_pObj_NowPlaying_Speed_OnScreen && m_pObj_NowPlaying_Speed_OnScreen->m_bOnScreen && m_pObj_NowPlaying_Speed_OnScreen!=m_pObj_NowPlaying_TimeShort_OnScreen ? m_pObj_NowPlaying_Speed_OnScreen : NULL;
 
 	vm.Release();

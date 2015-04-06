@@ -70,6 +70,8 @@ void ProcessMediaIdentifiedJob::Run()
 				cMediaType='c';
 			else if( m_iPK_MediaType==MEDIATYPE_pluto_DVD_CONST )
 				cMediaType='d';
+			else if( m_iPK_MediaType==MEDIATYPE_pluto_BD_CONST )
+				cMediaType='b';
 			m_pDisk_Drive_Functions->UpdateDiscLocation(cMediaType,m_iEK_Disc);
 		}
 	}

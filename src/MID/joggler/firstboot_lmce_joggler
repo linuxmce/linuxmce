@@ -5,8 +5,8 @@ fi
 HEADER_FB_JOGGLER=included
 
 firstboot_lmce_joggler_preinst() {
-	mv /etc/init/tty1* ~/
-	cp -a /etc/init/tty2.conf /etc/init/tty1.conf
+	#mv /etc/init/tty1* ~/
+	#cp -a /etc/init/tty2.conf /etc/init/tty1.conf
 	: # no-op
 }
 

@@ -4385,7 +4385,7 @@ void Media_Plugin::HandleOnOffs(int PK_MediaType_Prior,int PK_MediaType_Current,
 				TurnDeviceOff(PK_Pipe_Prior,(*it).second->m_pDeviceData_Router,&mapMediaDevice_Current,pEntertainArea);
 			else
 			{
-				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Found a NULL associated device in the HandleOnOff: %d", (*it).first);
+				LoggerWrapper::GetInstance()->Write(LV_WARNING, "Media_Plugin::HandleOnOffs Found a NULL associated device in the HandleOnOff: %d", (*it).first);
 			}
 		}
 	}
@@ -4480,7 +4480,7 @@ void Media_Plugin::HandleOnOffs(int PK_MediaType_Prior,int PK_MediaType_Current,
 		       )
 		{
 #ifdef DEBUG
-			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Also turning on MD and OSD");
+			LoggerWrapper::GetInstance()->Write(LV_WARNING,"Media_Plugin::HandleOnOffs Also turning on MD and OSD");
 #endif
 
 			MediaDevice *pMediaDevice_MD = m_mapMediaDevice_Find(pMediaDevice->m_pDeviceData_Router->m_pDevice_MD->m_dwPK_Device);

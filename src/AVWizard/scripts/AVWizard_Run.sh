@@ -365,6 +365,7 @@ UpdateOrbiterDimensions () {
 Video_Driver_Detection () {
 	# Check if any driver is installed. If not, check what hardware is in the box, and install the relevant driver using
 	# the binary drivers
+	CheckVideoDriver
 	DriverInstalled="0"
 	driverConfig="none"
 	grep "Driver" /etc/X11/xorg.conf |grep -v "keyboard" | grep -v "#" | grep -v "vesa" | grep -v "mouse" | grep -vq "kbd" && DriverInstalled="1"

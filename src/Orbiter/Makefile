@@ -13,7 +13,7 @@ BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = Orbiter
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 8mplateID
+MYDEVTEMPLATEID = 8
 
 Gen_Dev_Files = $(GENDEV)/OrbiterBase.cpp
 sources = Main.cpp Orbiter.cpp $(Gen_Dev_Files)
