@@ -23,8 +23,8 @@ DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST=21
 FSTAB_FILE="/etc/fstab"
 DEVID_FILE="/etc/Disked_DeviceID"
 
-INSTALL_KUBUNTU_DESKTOP="yes"
-#INSTALL_KUBUNTU_DESKTOP="no"
+#INSTALL_KUBUNTU_DESKTOP="yes"
+INSTALL_KUBUNTU_DESKTOP="no"
 
 TARGET_DISTRO=$(lsb_release -i -s | tr '[:upper:]' '[:lower:]')
 TARGET_RELEASE=$(lsb_release -c -s)
@@ -32,18 +32,39 @@ TARGET_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\
 
 DEB_CACHE="$TARGET_DISTRO-$TARGET_RELEASE-$TARGET_ARCH"
 
+TARGET_KVER_LTS_HES=""
+[[ "precise" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-trusty"
+[[ "trusty" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-utopic"
+
+case "$TARGET_ARCH" in
+	i386|amd64)
+		TARGET_REPO="http://archive.ubuntu.com/ubuntu/"
+		;;
+	armhf)
+		TARGET_REPO="http://ports.ubuntu.com/"
+		;;
+esac
+
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+
 setup_fstab() {
 	# Hmm, let's see if the mounts are here, if not add them
 	check=$(grep 192.168.80.1 "${FSTAB_FILE}" || :)
 	if [ -z "$check" ] ; then
 		cat <<-EOF >> "${FSTAB_FILE}"
-			192.168.80.1:/usr/pluto/var/                    /usr/pluto/var/         nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/usr/pluto/orbiter                 /usr/pluto/orbiter      nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/usr/pluto/keys                    /usr/pluto/keys         nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/usr/pluto/deb-cache               /usr/pluto/deb-cache    nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/var/spool/asterisk                /var/spool/asterisk     nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/home                              /home                   nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/home/cameras                      /home/cameras           nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/usr/pluto/var/    /usr/pluto/var/ nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/usr/pluto/orbiter /usr/pluto/orbiter      nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/usr/pluto/keys    /usr/pluto/keys nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/usr/pluto/deb-cache       /usr/pluto/deb-cache    nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/var/spool/asterisk/var/spool/asterisk     nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/home      /home   nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/home/cameras      /home/cameras   nfs4 retrans=10,timeo=50 1 1
 			EOF
 	fi
 	mkdir -p /usr/pluto/var/
@@ -69,7 +90,7 @@ setup_plutoconf() {
 	case "$DISTRO" in
 		precise)
 			distro=$DEVICEDATA_DISTRO_Ubuntu_Precise_CONST
-	                ;;
+	;;
 		trusty)
 			distro=$DEVICEDATA_DISTRO_Ubuntu_Trusty_CONST
 			;;
@@ -106,12 +127,12 @@ setup_plutoconf() {
 ###########################################################
 
 VerifyExitCode () {
-        local EXITCODE=$?
-        if [ "$EXITCODE" != "0" ] ; then
-        	echo "An error (Exit code $EXITCODE) occured during the last action"
-        	echo "$1"
-                exit 1
-        fi
+	local EXITCODE=$?
+	if [ "$EXITCODE" != "0" ] ; then
+		echo "An error (Exit code $EXITCODE) occured during the last action"
+		echo "$1"
+		exit 1
+	fi
 }
 
 StatsMessage () {
@@ -123,12 +144,7 @@ StatsMessage () {
 ###########################################################
 
 MD_System_Level_Prep () {
-	# Make sure, the root user is connecting to DCEROUTER for any MySQL connection
-	cat <<-EOF > /root/.my.cnf
-		[client]
-		host = dcerouter
-		EOF
-
+	StatsMessage "Setting up /etc/apt/sources.list"
 	APT_CONFIG=$(grep "linuxmce" /etc/apt/sources.list)
 	if [ -z "$APT_CONFIG" ] ; then
 		TARGET_REPO_NAME="main"
@@ -140,35 +156,8 @@ MD_System_Level_Prep () {
 			deb $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
 			deb $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
 			deb http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restricted universe multiverse
-			#deb http://archive.canonical.com/ubuntu $TARGET_RELEASE partner
-			#deb http://debian.slimdevices.com/ stable  main
-			#deb http://download.videolan.org/pub/debian/stable/ /
 			EOF
 	fi
-
-	#Make sure there is are Packages files on the MD so apt-get update does not fail
-	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
-	touch  /usr/pluto/deb-cache/$DEB_CACHE/Packages
-	gzip -9c < /usr/pluto/deb-cache/$DEB_CACHE/Packages > /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
-
-	# FIXME: don't overwrite on re-install, check prior to write
-	## Setup kernel postinst script to repair vmlinuz/initrd.img symlinks in /
-	cat <<-"EOF" >/etc/kernel/postinst.d/update-symlinks
-		#!/bin/bash
-		# LinuxMCE post kernel image install.
-		#
-		# We make sure we can read the image and the kernel, and the softlink is correct.
-		chmod g+r /boot/* || :
-		chmod o+r /boot/* || :
-
-		pushd /
-		ln -sf boot/initrd.img-$1 initrd.img || :
-		ln -sf boot/vmlinuz-$1 vmlinuz || :
-		popd
-
-		exit 0
-		EOF
-	chmod +x /etc/kernel/postinst.d/update-symlinks
 
 	## Setup initial ssh access
 	StatsMessage "Setting up SSH"
@@ -176,51 +165,14 @@ MD_System_Level_Prep () {
 }
 
 MD_Seamless_Compatability () {
-	case "$TARGET_DISTRO" in
-		ubuntu)
-			: # no-op
-			;;
-		raspbian)
-			# raspbian doesn't come with lsb-release by default???
-			cat <<-EOF > /etc/lsb-release
-				DISTRIB_ID=Raspbian
-				DISTRIB_CODENAME=$TARGET_RELEASE
-				EOF
-			;;
-	esac
+	: # no-op
 }
 
 MD_Preseed () {
-	## Setup debconf interface to 'noninteractive'
-	#create preseed file
-	cat <<-EOF >/tmp/preseed.cfg
-		debconf debconf/frontend	select Noninteractive
-		# Choices: critical, high, medium, low
-		debconf debconf/priority        select critical
-		msttcorefonts   msttcorefonts/http_proxy        string
-		msttcorefonts   msttcorefonts/defoma    note
-		msttcorefonts   msttcorefonts/dlurl     string
-		msttcorefonts   msttcorefonts/savedir   string
-		msttcorefonts   msttcorefonts/baddldir  note
-		msttcorefonts   msttcorefonts/dldir     string
-		msttcorefonts   msttcorefonts/blurb     note
-		msttcorefonts   msttcorefonts/accepted-mscorefonts-eula boolean true
-		msttcorefonts   msttcorefonts/present-mscorefonts-eula  boolean false
-		sun-java6-bin   shared/accepted-sun-dlj-v1-1    boolean true
-		sun-java6-jre   shared/accepted-sun-dlj-v1-1    boolean true
-		sun-java6-jre   sun-java6-jre/jcepolicy note
-		sun-java6-jre   sun-java6-jre/stopthread        boolean true
-		debconf debconf/frontend        select Noninteractive
-		# Choices: critical, high, medium, low
-		debconf debconf/priority        select critical
-		EOF
-	debconf-set-selections /tmp/preseed.cfg
+	: # no-op
+}
 
-	#For some odd reason, set-selections adds a space for Noninteractive and Critical that needs to be removed - debconf doesn't handle extra white space well
-	sed -i 's/Value:  /Value: /g' /var/cache/debconf/config.dat
-
-	echo '/bin/false' >"/etc/X11/default-display-manager"
-
+MD_Update () {
 	# This does an update, while adding gpg keys for any that are missing. This is primarily for vlc
 	# but will work for any source.
 	gpgs=$(apt-get -y update |& grep -s NO_PUBKEY | awk '{ print $NF }' | cut -c 9-16);
@@ -231,12 +183,45 @@ MD_Preseed () {
 		done
 	fi
 
-	apt-get -f -y -qq update
-	VerifyExitCode "apt update"
+#	# TODO: remove, we just did an update ^^
+#	apt-get -f -y -qq update
+#	VerifyExitCode "apt update"
 
 	apt-get -f -y install
 
+	# FIXME: need to fix bootscripts, until then we need a couple util scripts
 	apt-get -f -y install pluto-boot-scripts
+}
+
+MD_Install_Kernel () {
+	StatsMessage "Installing kernel headers"
+	. /usr/pluto/bin/Config_Ops.sh
+	ConfSet "LTS_HES" "$TARGET_KVER_LTS_HES"
+
+	case "$TARGET_ARCH" in
+		i386|amd64)
+			#Install headers and run depmod for the seamless integraton function, ensure no errors exist
+			apt-get -f -y install linux-headers-generic"$TARGET_KVER_LTS_HES"
+			VerifyExitCode "Install linux headers package failed"
+
+			StatsMessage "Installing kernel"
+			apt-get -f -y install linux-image-generic"$TARGET_KVER_LTS_HES"
+			VerifyExitCode "Install linux kernel package failed"
+			;;
+		armhf)
+			#FIXME: move to rpi firstboot addon
+			apt-get -f -y install linux-headers-rpi2 || :
+			VerifyExitCode "Install linux headers-rpi2 package failed" # will not occur due to || : above
+
+			#FIXME: move to rpi firstboot addon? or md-rpi2 depends
+			apt-get -f -y install linux-image-rpi2 || :
+			VerifyExitCode "Install linux image-rpi2 package failed" # will not occur due to || : above
+			;;
+	esac
+
+	TARGET_KVER=$(ls -vd /lib/modules/[0-9]* | sed 's/.*\///g' | tail -1)
+	depmod -v "$TARGET_KVER"
+	VerifyExitCode "depmod failed for $TARGET_KVER"
 }
 
 MD_Install_Packages () {
@@ -245,43 +230,21 @@ MD_Install_Packages () {
 	apt-get -f -y dist-upgrade
 	VerifyExitCode "Dist-upgrade failed"
 
-	apt-get -f -y install pluto-confirm-dependencies pluto-avwizard
+	apt-get -f -y install pluto-md-meta
+	#pluto-confirm-dependencies pluto-avwizard
 	VerifyExitCode "Install pluto-confirm-dependencies, pluto-avwizard failed"
 
+	# FIXME: locales are already generated, trigger regen?
 	# generate locales
 	StatsMessage "Generating locales"
 	echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
 	apt-get -f -y install locales
 
-	StatsMessage "Installing kernel headers"
-	#Install headers and run depmod for the seamless integraton function, ensure no errors exist
-	TARGET_KVER_LTS_HES=""
-	[[ "precise" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-trusty"
-	[[ "trusty" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-utopic"
-	echo "LTS_HES=$TARGET_KVER_LTS_HES" >> /etc/pluto.conf
-	apt-get -f -y install linux-headers-generic-"$TARGET_KVER_LTS_HES"
-	VerifyExitCode "Install linux headers package failed"
-
-	#FIXME: most to rpi firstboot addon?
-	apt-get -f -y install linux-headers-rpi2 || :
-	VerifyExitCode "Install linux headers-rpi2 package failed" # will not occur due to || : above
-
-	TARGET_KVER=$(ls -vd /lib/modules/[0-9]* | sed 's/.*\///g' | tail -1)
-	depmod -v "$TARGET_KVER"
-	VerifyExitCode "depmod failed for $TARGET_KVER"
-
-	StatsMessage "Installing kernel"
-	apt-get -f -y install linux-image-generic"$TARGET_KVER_LTS_HES"
-	VerifyExitCode "Install linux kernel package failed"
-
-	#FIXME: most to rpi firstboot addon?
-	apt-get -f -y install linux-image-rpi2 || :
-	VerifyExitCode "Install linux image-rpi2 package failed" # will not occur due to || : above
-
 	if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
 		apt-get -f -y --no-install-recommends install kubuntu-desktop
-		#apt-get -f -y --no-install-recommends install kde-minimal
 	fi
+
+	#FIXME: dpkg-divert it so it does not get over-written?
 	echo '/bin/false' >/etc/X11/default-display-manager
 
 	# Update startup to remove kdm and network manager
@@ -294,26 +257,26 @@ MD_Install_Packages () {
 	apt-get -f -y install xserver-xorg-video-all"$TARGET_KVER_LTS_HES" linux-firmware
 	VerifyExitCode "Ancillary programs install failed"
 
+	# FIXME: these should come with lmce-md-meta?
 	#Install nfs-common and openssh-server
 	apt-get -f -y install nfs-common openssh-server
 	VerifyExitCode "nfs-common or openssh-server programs install failed"
 
+	# FIXME: make lmce-something depend on pastebinit so it's always included?
 	apt-get -f -y install pastebinit
 	VerifyExitCode "pastebinit"
 }
 
 MD_Populate_Debcache () {
-	find /var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/$DEB_CACHE \;
-	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
+	# FIXME: is this the correct point here?
+	mkdir =p /usr/pluto/deb-cache/$DEB_CACHE
+#	find /var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/$DEB_CACHE \;
+#	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
+	:
 }
 
 MD_Cleanup () {
 	StatsMessage "Cleaning up from package installations..."
-
-	#Make sure there is are Packages files on the MD so apt-get update does not fail
-	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
-	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
-
 	#Copy the orbiter activation command to the MD's desktop
 	mkdir -p /root/Desktop
 	cp -r /etc/skel/Desktop/* /root/Desktop
@@ -354,20 +317,13 @@ start() {
 		$(basename "$f")_preinst
 	done
 
-	case "$TARGET_ARCH" in
-		i386)
-			TARGET_REPO="http://archive.ubuntu.com/ubuntu/"
-			;;
-		armhf)
-			TARGET_REPO="http://ports.ubuntu.com/ubuntu/"
-			;;
-	esac
-
 	MD_System_Level_Prep
-	MD_Seamless_Compatability
-	MD_Preseed
+	#MD_Seamless_Compatability
+	#MD_Preseed
+	MD_Update
 	setup_fstab
 	setup_plutoconf
+	MD_Install_Kernel
 	MD_Install_Packages
 	MD_Populate_Debcache
 	MD_Cleanup
@@ -385,30 +341,30 @@ start() {
 }
 
 status() {
-        status_of_proc firstboot firstboot
+	status_of_proc firstboot firstboot
 	return $?
 }
 
 case "$1" in
-  start|"")
-        $1
-	retval=$?
-        ;;
-  restart|reload|force-reload)
-        echo "Error: argument '$1' not supported" >&2
-	retval=3
-        ;;
-  stop)
-        : # No-op
-	retval=$?
-        ;;
-  status)
-        $1
-        retval=$?
-        ;;
-  *)
-        echo "Usage: $0 [start|stop|status]" >&2
-	retval=3
+	start|"")
+		$1
+		retval=$?
+		;;
+	restart|reload|force-reload)
+		echo "Error: argument '$1' not supported" >&2
+		retval=3
+		;;
+	stop)
+		: # No-op
+		retval=$?
+		;;
+	status)
+		$1
+		retval=$?
+		;;
+	*)
+		echo "Usage: $0 [start|stop|status]" >&2
+		retval=3
 esac
 exit $retval
 
