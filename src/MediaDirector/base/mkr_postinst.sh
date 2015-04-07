@@ -10,6 +10,10 @@ TARGET_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\
 
 DEB_CACHE="$TARGET_DISTRO-$TARGET_RELEASE-$TARGET_ARCH"
 
+StatsMessage () {
+	printf "$(date) - $* \n"
+}
+
 ###########################################################
 ### Main execution area
 ###########################################################
@@ -23,9 +27,9 @@ update-rc.d -f kdm remove
 update-rc.d -f lightdm remove
 update-rc.d -f NetworkManager remove
 
+# FIXME: create a network selection application
 #MyIF=$(/sbin/route -n | awk '/^0\.0\.0\.0/ { print $8 }')
 #MyWPA=$( cat /etc/network/interfaces | grep wpa )
-
 #cat <<-EOF > /etc/network/interfaces
 #	auto lo
 #	iface lo inet loopback
