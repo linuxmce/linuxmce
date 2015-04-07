@@ -7,11 +7,15 @@
 
 set -e
 
+make_jobs=""
+# set NUMCORES=X in /etc/lmce-build/builder.conf to enable multi-job builds
+[[ -n "$NUM_CORES" ]] && [[ "$NUM_CORES" -gt 1 ]] && make_jobs="-j$NUM_CORES"
+
 cache_name=".cache"
 
 function Changed_Since_Last_Build
 {
-	return $(/bin/true) #Zaerc HACK
+#	return $(/bin/true) #Zaerc HACK
 
 	local fs_path="$1"
 	DisplayMessage "Checking build stamp on '$fs_path'"
@@ -53,7 +57,7 @@ function Build_Replacement_Package
 		DisplayMessage "Building ${pkg_name}"
 		pushd "$dir_"
 		echo "dpkg-buildpackage -rfakeroot -us -uc -b -tc"
-		dpkg-buildpackage -rfakeroot -us -uc -b
+		dpkg-buildpackage -rfakeroot -us -uc -b $make_jobs
 		cp -r ../${pkg_name}*.deb "${replacements_dir}"
 		popd
 		Update_Changed_Since_Last_Build "$dir_"
