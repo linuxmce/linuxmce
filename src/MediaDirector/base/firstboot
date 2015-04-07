@@ -226,7 +226,7 @@ MD_Install_Kernel () {
 MD_Install_Packages () {
 	StatsMessage "Installing packages to MD"
 	## Update the system
-	apt-get -f -y dist-upgrade
+	apt-get -y dist-upgrade
 	VerifyExitCode "Dist-upgrade failed"
 
 	#Install ancillary programs
@@ -276,7 +276,7 @@ MD_Cleanup () {
 	rm -f /etc/X11/xorg.conf*
 
 	#Clean up apt from the installs
-	apt-get -f -y clean
+	apt-get -y clean
 	VerifyExitCode "APT Clean"
 
 	#Create a list of installed packages
