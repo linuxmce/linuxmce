@@ -10,24 +10,24 @@ ln -s /usr/lib/libXmu.so.6.2.0 /usr/lib/libXmu.so || :
 # In case we have a later MythTV, we need to transpose the information
 # from the config.xml file.
 if [ -f /etc/mythtv/config.xml ] ; then
-	HOST='HostName'
-        USERNAME='UserName'
-        DATABASE='Name'
-        PASSWORD='Password'
-                                
-        WITHDB=`grep DBHostName -i /etc/mythtv/config.xml`
-                                        
-        if [ $WITHDB ] ; then
-        	HOST="DB$HOST"
-                USERNAME="DB$USERNAME"
-                DATABASE="DB$DATABASE"
-                PASSWORD="DB$PASSWORD"
+	HOST='Host'
+	USERNAME='UserName'
+	PASSWORD='Password'
+	DATABASE='DatabaseName'
+
+	WITHDB=`grep DBHostName -i /etc/mythtv/config.xml`
+
+	if [ $WITHDB ] ; then
+		HOST="DBHostName"
+		USERNAME="DBUserName"
+		DATABASE="DBPassword"
+		PASSWORD="DBName"
 	fi
-        # START: Hack to transpose xml
-        echo $(grep -e "<$HOST>" /etc/mythtv/config.xml | sed -e "s#<$HOST>#DBHostName=#" -e "s#</$HOST>#\n#") > /etc/mythtv/mysql.txt
-        echo $(grep -e "<$USERNAME>" /etc/mythtv/config.xml | sed -e "s#<$USERNAME>#DBUserName=#" -e "s#</$USERNAME>#\n#") >> /etc/mythtv/mysql.txt
-        echo $(grep -e "<$DATABASE>" /etc/mythtv/config.xml | sed -e "s#<$DATABASE>#DBName=#" -e "s#</$DATABASE>#\n#") >> /etc/mythtv/mysql.txt
-        echo $(grep -e "<$PASSWORD>" /etc/mythtv/config.xml | sed -e "s#<$PASSWORD>#DBPassword=#" -e "s#</$PASSWORD>#\n#") >> /etc/mythtv/mysql.txt
+	# START: Hack to transpose xml
+	echo $(grep -e "<$HOST>" /etc/mythtv/config.xml | sed -e "s#<$HOST>#DBHostName=#" -e "s#</$HOST>#\n#") > /etc/mythtv/mysql.txt
+	echo $(grep -e "<$USERNAME>" /etc/mythtv/config.xml | sed -e "s#<$USERNAME>#DBUserName=#" -e "s#</$USERNAME>#\n#") >> /etc/mythtv/mysql.txt
+	echo $(grep -e "<$DATABASE>" /etc/mythtv/config.xml | sed -e "s#<$DATABASE>#DBName=#" -e "s#</$DATABASE>#\n#") >> /etc/mythtv/mysql.txt
+	echo $(grep -e "<$PASSWORD>" /etc/mythtv/config.xml | sed -e "s#<$PASSWORD>#DBPassword=#" -e "s#</$PASSWORD>#\n#") >> /etc/mythtv/mysql.txt
 	# END: Hack to transpose xml
 fi
 
