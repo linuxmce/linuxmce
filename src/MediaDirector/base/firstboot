@@ -67,17 +67,6 @@ setup_fstab() {
 			192.168.80.1:/home/cameras      /home/cameras   nfs4 retrans=10,timeo=50 1 1
 			EOF
 	fi
-
-#       ## Create /var/log/pluto for this device as a symlink
-#       mkdir -p "/home/logs/diskless_${Moon_DeviceID}"
-#       if [[ -d $Moon_RootLocation/var/log/pluto       ]] ;then
-#               mv $Moon_RootLocation/var/log/pluto/* /home/log/diskless_$Moon_DeviceID
-#               rm -rf $Moon_RootLocation/var/log/pluto/
-#       fi
-#       if [[ ! -e "$Moon_RootLocation"/var/log/pluto ]]; then
-#               ln -s "/home/logs/diskless_$Moon_DeviceID" "$Moon_RootLocation/var/log/pluto"
-#       fi
-
 	mkdir -p /usr/pluto/var/
 	mkdir -p /usr/pluto/orbiter
 	mkdir -p /usr/pluto/keys
@@ -195,16 +184,13 @@ MD_Update () {
 		done
 	fi
 
-#	# TODO: remove, we just did an update ^^
-#	apt-get -f -y -qq update
-#	VerifyExitCode "apt update"
+	apt-get -f -y update
 
-	StatsMessage "Setting up any packages that are un-configured"
 	apt-get -f -y install
 
-	StatsMessage "Installing initial LinuxMCE helper scripts"
 	# FIXME: need to fix bootscripts, until then we need a couple util scripts
 	apt-get -f -y install pluto-boot-scripts
+	VerifyExitCode "pluto-boot-scripts failed"
 }
 
 MD_Install_Kernel () {
@@ -212,26 +198,25 @@ MD_Install_Kernel () {
 	. /usr/pluto/bin/Config_Ops.sh
 	ConfSet "LTS_HES" "$TARGET_KVER_LTS_HES"
 
-	case "$TARGET_ARCH" in
-		i386|amd64)
-			#Install headers and run depmod for the seamless integraton function, ensure no errors exist
-			apt-get -f -y install linux-headers-generic"$TARGET_KVER_LTS_HES"
-			VerifyExitCode "Install linux headers package failed"
+	#TODO get as much of this from database as possible
+	# run any device specific firstboot add-on scripts here
+	ret=""
+	for f in /etc/init.d/firstboot_lmce_* ; do
+		echo "Running device specific script: $f _kernel"
+		. "$f"
+		$(basename "$f")_kernel
+		ret=$?
+	done
 
-			StatsMessage "Installing kernel"
-			apt-get -f -y install linux-image-generic"$TARGET_KVER_LTS_HES"
-			VerifyExitCode "Install linux kernel package failed"
-			;;
-		armhf)
-			#FIXME: move to rpi firstboot addon
-			apt-get -f -y install linux-headers-rpi2 || :
-			VerifyExitCode "Install linux headers-rpi2 package failed" # will not occur due to || : above
+	if [[ -z "$ret" ]] ; then
+		#Install headers and run depmod for the seamless integraton function, ensure no errors exist
+		apt-get -f -y install linux-headers-generic"$TARGET_KVER_LTS_HES"
+		VerifyExitCode "Install linux headers package failed"
 
-			#FIXME: move to rpi firstboot addon? or md-rpi2 depends
-			apt-get -f -y install linux-image-rpi2 || :
-			VerifyExitCode "Install linux image-rpi2 package failed" # will not occur due to || : above
-			;;
-	esac
+		StatsMessage "Installing kernel"
+		apt-get -f -y install linux-image-generic"$TARGET_KVER_LTS_HES"
+		VerifyExitCode "Install linux kernel package failed"
+	fi
 
 	TARGET_KVER=$(ls -vd /lib/modules/[0-9]* | sed 's/.*\///g' | tail -1)
 	depmod -v "$TARGET_KVER"
@@ -239,43 +224,43 @@ MD_Install_Kernel () {
 }
 
 MD_Install_Packages () {
-	StatsMessage "Performing a dist-upgrade"
+	StatsMessage "Installing packages to MD"
 	## Update the system
 	apt-get -f -y dist-upgrade
 	VerifyExitCode "Dist-upgrade failed"
 
-	echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
-
-	StatsMessage "Installing LinuxMCE MD Packages"
-	apt-get -f -y install lmce-md-meta locales nfs-common openssh-server pastebinit
-	VerifyExitCode "Install pluto-confirm-dependencies, pluto-avwizard failed"
-
-	if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
-		StatsMessage "Installing kubuntu-desktop"
-		apt-get -f -y --no-install-recommends install kubuntu-desktop
-	fi
-
-	StatsMessage "Disabling display managers"
-	#FIXME: dpkg-divert it so it does not get over-written?
-	echo '/bin/false' >/etc/X11/default-display-manager
-
-	# Update startup to remove kdm and network manager
-	update-rc.d -f lightdm remove
-	update-rc.d -f kdm remove
-	update-rc.d -f NetworkManager remove
-
-	StatsMessage "Installing X"
 	#Install ancillary programs
 	apt-get -f -y install xserver-xorg"$TARGET_KVER_LTS_HES"
 	VerifyExitCode "xserver-xorg$TARGET_KVER_LTS_HES install failed"
 	apt-get -f -y install xserver-xorg-video-all"$TARGET_KVER_LTS_HES" linux-firmware
 	VerifyExitCode "Ancillary programs install failed"
 
+	# FIXME: locales are already generated, trigger regen?
+	# generate locales
+	StatsMessage "Generating locales"
+	echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
+
+	StatsMessage "Installing primary MD packages"
+	apt-get -f -y install lmce-md-meta nfs-common openssh-server pastebinit locales
+	VerifyExitCode "pluto-md-meta"
+
+	if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
+		StatsMessage "Installing kubuntu desktop packages"
+		apt-get -f -y --no-install-recommends install kubuntu-desktop
+		VerifyExitCode "kubuntu-desktop"
+	fi
+
+	#FIXME: dpkg-divert it so it does not get over-written?
+	echo '/bin/false' >/etc/X11/default-display-manager
+
+	# Update startup to remove kdm and network manager
+	update-rc.d -f kdm remove
+	update-rc.d -f NetworkManager remove
 }
 
 MD_Populate_Debcache () {
 	# FIXME: is this the correct point here?
-	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
+	mkdir =p /usr/pluto/deb-cache/$DEB_CACHE
 #	find /var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/$DEB_CACHE \;
 #	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
 	:
@@ -318,7 +303,7 @@ start() {
 	#TODO get as much of this from database as possible
 	# run any device specific firstboot add-on scripts here
 	for f in /etc/init.d/firstboot_lmce_* ; do
-		echo "Running device specific script: $f_preinst"
+		echo "Running device specific script: $f _preinst"
 		. "$f"
 		$(basename "$f")_preinst
 	done
@@ -336,7 +321,7 @@ start() {
 
 	# run any device specific firstboot add-on scripts here
 	for f in /etc/init.d/firstboot_lmce_* ; do
-		echo "Running device specific script: $f_postinst"
+		echo "Running device specific script: $f _postinst"
 		. "$f"
 		$(basename "$f")_postinst
 	done
