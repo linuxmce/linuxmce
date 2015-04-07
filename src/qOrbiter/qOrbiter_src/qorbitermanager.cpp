@@ -1522,9 +1522,9 @@ bool qorbiterManager::loadSkins(QUrl base)
 #endif
     }else{
 #ifdef QT5
-        tskinModel->addSkin("default,data");
+        tskinModel->addSkin("default");
 #else
-        tskinModel->addSkin("default,data,smokey");
+        tskinModel->addSkin("default");
 #endif
     }
 #elif defined(for_harmattan)
@@ -1550,7 +1550,7 @@ bool qorbiterManager::loadSkins(QUrl base)
         qDebug() << localSkins.count();
         qDebug()<<"inside of skins we find" << localSkins.join(",");
         if(localSkins.count()==0){
-            tskinModel->addSkin("default,aeon,STB");
+            tskinModel->addSkin("default");
         } else {
             tskinModel->addSkin(localSkins.join(","));
         }
@@ -1563,7 +1563,7 @@ bool qorbiterManager::loadSkins(QUrl base)
 #endif
 
         } else {
-            tskinModel->addSkin("default,aeon,STB");
+            tskinModel->addSkin("default,STB");
         }
 
     }
