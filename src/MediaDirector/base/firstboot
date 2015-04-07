@@ -184,6 +184,7 @@ MD_Preseed () {
 }
 
 MD_Update () {
+	StatsMessage "Setting up apt gpg keys"
 	# This does an update, while adding gpg keys for any that are missing. This is primarily for vlc
 	# but will work for any source.
 	gpgs=$(apt-get -y update |& grep -s NO_PUBKEY | awk '{ print $NF }' | cut -c 9-16);
@@ -198,8 +199,10 @@ MD_Update () {
 #	apt-get -f -y -qq update
 #	VerifyExitCode "apt update"
 
+	StatsMessage "Setting up any packages that are un-configured"
 	apt-get -f -y install
 
+	StatsMessage "Installing initial LinuxMCE helper scripts"
 	# FIXME: need to fix bootscripts, until then we need a couple util scripts
 	apt-get -f -y install pluto-boot-scripts
 }
@@ -236,51 +239,43 @@ MD_Install_Kernel () {
 }
 
 MD_Install_Packages () {
-	StatsMessage "Installing packages to MD"
+	StatsMessage "Performing a dist-upgrade"
 	## Update the system
 	apt-get -f -y dist-upgrade
 	VerifyExitCode "Dist-upgrade failed"
 
-	apt-get -f -y install pluto-md-meta
-	#pluto-confirm-dependencies pluto-avwizard
+	echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
+
+	StatsMessage "Installing LinuxMCE MD Packages"
+	apt-get -f -y install lmce-md-meta locales nfs-common openssh-server pastebinit
 	VerifyExitCode "Install pluto-confirm-dependencies, pluto-avwizard failed"
 
-	# FIXME: locales are already generated, trigger regen?
-	# generate locales
-	StatsMessage "Generating locales"
-	echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
-	apt-get -f -y install locales
-
 	if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
+		StatsMessage "Installing kubuntu-desktop"
 		apt-get -f -y --no-install-recommends install kubuntu-desktop
 	fi
 
+	StatsMessage "Disabling display managers"
 	#FIXME: dpkg-divert it so it does not get over-written?
 	echo '/bin/false' >/etc/X11/default-display-manager
 
 	# Update startup to remove kdm and network manager
+	update-rc.d -f lightdm remove
 	update-rc.d -f kdm remove
 	update-rc.d -f NetworkManager remove
 
+	StatsMessage "Installing X"
 	#Install ancillary programs
 	apt-get -f -y install xserver-xorg"$TARGET_KVER_LTS_HES"
 	VerifyExitCode "xserver-xorg$TARGET_KVER_LTS_HES install failed"
 	apt-get -f -y install xserver-xorg-video-all"$TARGET_KVER_LTS_HES" linux-firmware
 	VerifyExitCode "Ancillary programs install failed"
 
-	# FIXME: these should come with lmce-md-meta?
-	#Install nfs-common and openssh-server
-	apt-get -f -y install nfs-common openssh-server
-	VerifyExitCode "nfs-common or openssh-server programs install failed"
-
-	# FIXME: make lmce-something depend on pastebinit so it's always included?
-	apt-get -f -y install pastebinit
-	VerifyExitCode "pastebinit"
 }
 
 MD_Populate_Debcache () {
 	# FIXME: is this the correct point here?
-	mkdir =p /usr/pluto/deb-cache/$DEB_CACHE
+	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
 #	find /var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/$DEB_CACHE \;
 #	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
 	:

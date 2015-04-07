@@ -14,25 +14,28 @@ DEB_CACHE="$TARGET_DISTRO-$TARGET_RELEASE-$TARGET_ARCH"
 ### Main execution area
 ###########################################################
 
+StatsMessage "Setting up firstboot"
 # setup the firstboot script
 update-rc.d -f firstboot start 91 2 3 4 5 . >/dev/null
 
+StatsMessage "Disable NetworkManager and Display Managers"
 update-rc.d -f kdm remove
 update-rc.d -f lightdm remove
 update-rc.d -f NetworkManager remove
 
-MyIF=$(/sbin/route -n | awk '/^0\.0\.0\.0/ { print $8 }')
-MyWPA=$( cat /etc/network/interfaces | grep wpa )
+#MyIF=$(/sbin/route -n | awk '/^0\.0\.0\.0/ { print $8 }')
+#MyWPA=$( cat /etc/network/interfaces | grep wpa )
 
-cat <<-EOF > /etc/network/interfaces
-	auto lo
-	iface lo inet loopback
+#cat <<-EOF > /etc/network/interfaces
+#	auto lo
+#	iface lo inet loopback
+#
+#	allow hot-plug $MyIF
+#	iface $MyIF inet dhcp
+#	$MyWPA
+#	EOF
 
-	allow hot-plug $MyIF
-	iface $MyIF inet dhcp
-	$MyWPA
-	EOF
-
+StatsMessage "Setting up apt.conf.d"
 cat <<-EOF > /etc/apt/apt.conf.d/30pluto
 	// Pluto apt conf add-on
 	APT::Cache-Limit "43554432";
@@ -42,13 +45,14 @@ cat <<-EOF > /etc/apt/apt.conf.d/30pluto
 	APT::Get::AllowUnauthenticated "true";
 	EOF
 
+StatsMessage "Setting up mysql host"
 # Make sure, the root user is connecting to DCEROUTER for any MySQL connection
 cat <<-EOF > /root/.my.cnf
 	[client]
 	host = dcerouter
 	EOF
 
-#StatsMessage "Setting up debconf"
+StatsMessage "Setting up debconf"
 ## Setup debconf interface to 'noninteractive'
 #create preseed file
 cat <<-EOF >/tmp/preseed.cfg
@@ -74,14 +78,12 @@ cat <<-EOF >/tmp/preseed.cfg
 	EOF
 	debconf-set-selections /tmp/preseed.cfg
 
-#For some odd reason, set-selections adds a space for Noninteractive and Critical that needs to be removed - debconf $
-sed -i 's/Value:  /Value: /g' /var/cache/debconf/config.dat
-
-#TODO: add a dpkg-diverstion for default-display-manager so it is not overwritten
+StatsMessage "Dissabling display manager"
+#TODO: add a dpkg-diversion for default-display-manager so it is not overwritten
 echo '/bin/false' >"/etc/X11/default-display-manager"
 
 #FIXME: this should be in a pkg, not created in a postinst.
-#StatsMessage "Setting up kernel symlink fix"
+StatsMessage "Setting up kernel symlink fix"
 # FIXME: don't overwrite on re-install, check prior to write
 ## Setup kernel postinst script to repair vmlinuz/initrd.img symlinks in /
 cat <<-"EOF" >/etc/kernel/postinst.d/update-symlinks
@@ -101,7 +103,7 @@ cat <<-"EOF" >/etc/kernel/postinst.d/update-symlinks
 	EOF
 chmod +x /etc/kernel/postinst.d/update-symlinks
 
-#StatsMessage "Setting up $DEB_CACHE"
+StatsMessage "Setting up $DEB_CACHE"
 #Make sure there is are Packages files on the MD so apt-get update does not fail
 mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
 touch  /usr/pluto/deb-cache/$DEB_CACHE/Packages
