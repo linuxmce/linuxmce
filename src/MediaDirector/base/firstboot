@@ -184,7 +184,7 @@ MD_Update () {
 		done
 	fi
 
-	apt-get -f -y update
+	apt-get -y update
 
 	apt-get -f -y install
 
