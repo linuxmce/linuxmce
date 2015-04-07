@@ -9,7 +9,8 @@ ln -s /usr/lib/libXmu.so.6.2.0 /usr/lib/libXmu.so || :
 
 # In case we have a later MythTV, we need to transpose the information
 # from the config.xml file.
-if [ -f /etc/mythtv/config.xml ] ; then
+# If this is the hybrid, create the mysql.txt
+if [[ "$PK_Device" == "1" ]] && [[ -f /etc/mythtv/config.xml ]] ; then
 	HOST='Host'
 	USERNAME='UserName'
 	PASSWORD='Password'
@@ -43,6 +44,14 @@ chown mythtv /etc/mythtv/mysql.txt
 
 ## Get a valid mysql connection string to mythconvert
 eval `cat /etc/mythtv/mysql.txt | grep -v "^#" | grep -v "^$"`;
+
+if ( [[ -z "$DBUserName" ]] || [[ -z "$DBHostName" ]] || [[ -z "$DBPassword" ]] || [[ -z "$DBName" ]] ) ; then
+	echo "********";
+	echo "There is an error in the mythtv backend setup. It looks like /etc/mythtv/mysql.txt didn't create properly";
+	echo "********";
+	exit 0;
+fi
+
 mysql_command="mysql -s -B -u $DBUserName -h $DBHostName -p$DBPassword $DBName";
 
 Q="select IK_DeviceData from Device_DeviceData where FK_DeviceData=206"
@@ -52,7 +61,7 @@ if [[ "$AutoConf" == "1" ]]; then
     echo "Auto Configure is set"
 	exit 0
 fi
-		
+
 function addEntries
 {
 	if [ "$3" = "" ]; then
@@ -78,10 +87,10 @@ function addRootUser
 		else
 		    group_line="${group_line},root"
 		fi
-        grep -v "^mythtv:" /etc/group > /etc/group.$$
-        echo $group_line >> /etc/group.$$
-        mv /etc/group.$$ /etc/group
-	fi																																	
+		grep -v "^mythtv:" /etc/group > /etc/group.$$
+		echo $group_line >> /etc/group.$$
+		mv /etc/group.$$ /etc/group
+	fi
 }
 
 ## Force the backend to make the database structure
@@ -93,14 +102,14 @@ FOUND=0;
 TRIES=20;
 SLEEP=0.5;
 while [ $TRIES != 0 ]; do
-    RESULT=`echo show tables | $mysql_command | grep settings | wc -l`;
-    if [ "$RESULT" != "0" ]; then
-        TRIES=0;
-        FOUND=1;
-    else
-        sleep $SLEEP;
-        TRIES=$[$TRIES - 1];
-    fi;
+	RESULT=`echo show tables | $mysql_command | grep settings | wc -l`;
+	if [ "$RESULT" != "0" ]; then
+		TRIES=0;
+		FOUND=1;
+	else
+		sleep $SLEEP;
+		TRIES=$[$TRIES - 1];
+	fi;
 done;
 
 if [ "$FOUND" == "0" ]; then 
