@@ -70,7 +70,7 @@ EOF
 
 
 firstboot_lmce_rpi2_kernel() {
-	apt-get -f -y install linux-headers-rpi2 linux-image-rpi2
+	apt-get -f -y install linux-headers-rpi2 linux-image-rpi2 linux-firmware
 	VerifyExitCode "Install linux image & headers for rpi2 failed" 
 
 	return 0

@@ -188,7 +188,7 @@ MD_Update () {
 
 	apt-get -f -y install
 
-	# FIXME: need to fix bootscripts, until then we need a couple util scripts
+	# FIXME: need to fix bootscripts?  need to fix/update install-scripts
 	apt-get -f -y install pluto-boot-scripts
 	VerifyExitCode "pluto-boot-scripts failed"
 }
@@ -214,7 +214,7 @@ MD_Install_Kernel () {
 		VerifyExitCode "Install linux headers package failed"
 
 		StatsMessage "Installing kernel"
-		apt-get -f -y install linux-image-generic"$TARGET_KVER_LTS_HES"
+		apt-get -f -y install linux-image-generic"$TARGET_KVER_LTS_HES" linux-firmware
 		VerifyExitCode "Install linux kernel package failed"
 	fi
 
@@ -225,23 +225,23 @@ MD_Install_Kernel () {
 
 MD_Install_Packages () {
 	StatsMessage "Installing packages to MD"
+
+	StatsMessage "Setting locales"
+	# FIXME: locales are already generated, trigger regen?
+	echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
+
 	## Update the system
 	apt-get -y dist-upgrade
 	VerifyExitCode "Dist-upgrade failed"
 
-	#Install ancillary programs
+	#Install X prior to linuxmce to get lts_hwe pkgs.
 	apt-get -f -y install xserver-xorg"$TARGET_KVER_LTS_HES"
 	VerifyExitCode "xserver-xorg$TARGET_KVER_LTS_HES install failed"
-	apt-get -f -y install xserver-xorg-video-all"$TARGET_KVER_LTS_HES" linux-firmware
+	apt-get -f -y install xserver-xorg-video-all"$TARGET_KVER_LTS_HES"
 	VerifyExitCode "Ancillary programs install failed"
 
-	# FIXME: locales are already generated, trigger regen?
-	# generate locales
-	StatsMessage "Generating locales"
-	echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
-
 	StatsMessage "Installing primary MD packages"
-	apt-get -f -y install lmce-md-meta nfs-common openssh-server pastebinit locales
+	apt-get -f -y install lmce-md-meta nfs-common openssh-server pastebinit locales 
 	VerifyExitCode "pluto-md-meta"
 
 	if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
@@ -260,7 +260,7 @@ MD_Install_Packages () {
 
 MD_Populate_Debcache () {
 	# FIXME: is this the correct point here?
-	mkdir =p /usr/pluto/deb-cache/$DEB_CACHE
+	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
 #	find /var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/$DEB_CACHE \;
 #	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
 	:
