@@ -54,8 +54,8 @@ configure-stamp:
 	./configure $(configure_flags)
 	touch $@
 
-build: configure build-stamp
-build-stamp:
+build: build-stamp
+build-stamp: configure
 	dh_testdir
 	$(MAKE)
 	touch $@
