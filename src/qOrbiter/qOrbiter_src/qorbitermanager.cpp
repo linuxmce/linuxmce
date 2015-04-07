@@ -2577,13 +2577,13 @@ void qorbiterManager::setupUiSelectors(){
 #elif defined Q_OS_LINUX
   //  m_localQmlPath=qApp->applicationDirPath()+"/";
     m_localQmlPath="qrc:/qml/";
-#ifdef simulate
+    #ifdef simulate
 
-#ifdef NOQRC
+    #ifdef NOQRC
     m_localQmlPath="../qOrbiter_src/qml/";
-#else
+    #else
     m_localQmlPath="qrc:/qml/";
-#endif
+    #endif
 
 #endif
 

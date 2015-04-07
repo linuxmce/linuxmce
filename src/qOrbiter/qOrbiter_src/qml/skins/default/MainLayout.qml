@@ -7,10 +7,7 @@ import "components"
 Item {
     id:layout
     anchors.fill: qmlRoot
-    MouseArea{
-        anchors.fill: parent
-        onClicked: uiOn=!uiOn
-    }
+
     Rectangle{
         anchors.fill: parent
         color:"black"
@@ -22,6 +19,10 @@ Item {
 
     QmlPictureFrame {
         id: qmlPictureFrame
+        MouseArea{
+            anchors.fill: parent
+            onClicked: uiOn=!uiOn
+        }
     }
 
 
