@@ -22,10 +22,11 @@ sources = Main.cpp Media_Identifier.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r
+XTRALDLIBS = -lmysqlclient_r -lcdio
 
 Gen_Dev_Files +=
-sources +=
+sources += IdentifierBase.cpp \
+	IdentifierCDDB.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
@@ -45,7 +46,7 @@ Media_Identifier.so: $(sources:.cpp=.o)
 	cp $@ ../bin
 #	chmod +x post_make.sh
 #	./post_make.sh $@
-		
+
 Media_Identifier: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	mkdir -p ../bin
