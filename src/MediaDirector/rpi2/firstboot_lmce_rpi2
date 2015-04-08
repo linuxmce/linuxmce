@@ -49,7 +49,7 @@ EOF
 		partprobe
 		ret=$?
 
-		if [ ret != 0 ] ; then
+		if [ "$ret" != "0" ] ; then
 			reboot
 		fi
 	fi
@@ -59,7 +59,7 @@ EOF
 		ROOT_PART=$(find_linux_root_device)
 		resize2fs $ROOT_PART
 		ret=$?
-		if [ ret != 0 ] ; then
+		if [ "$ret" != "0" ] ; then
 			StatsMessage "Resizing filesystem failed!"
 		else
 			StatsMessage "Resizing filesystem completed"
