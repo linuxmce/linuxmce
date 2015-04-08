@@ -475,7 +475,7 @@ bool Game_PlugIn::StartMedia( MediaStream *pMediaStream,string &sError )
 	    || StringUtils::ToLower(mediaURL).find(".rom") != string::npos
 	    || StringUtils::ToLower(mediaURL).find(".xex") != string::npos)
 	  {
-	    pGameMediaStream->m_sAppName = "Altirra.exe.Wine";
+	    pGameMediaStream->m_sAppName = "atari800.atari800";
 	    pGameMediaStream->m_iPK_MediaType = MEDIATYPE_lmce_Game_Atari800_CONST;
 	  }
 
