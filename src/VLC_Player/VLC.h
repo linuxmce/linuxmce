@@ -127,6 +127,8 @@ namespace DCE
     void UpdateTracks();
     string GetMediaInfo();
     void ReportPlaybackStarted();
+    void EnumerateAudioDevices();
+    string PreProcessMediaURL(string sMediaURL);
   };
 
 }

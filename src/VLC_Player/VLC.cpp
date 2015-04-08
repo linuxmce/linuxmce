@@ -288,11 +288,21 @@ namespace DCE
       {
 	sMediaURL = "file://" + sMediaURL;
       }
+    else
+      {
+	sMediaURL = PreProcessMediaURL(sMediaURL);
+      }
     
     libvlc_media_t *m = libvlc_media_new_location (m_pInst, sMediaURL.c_str());
     m_pMp = libvlc_media_player_new_from_media(m);
     libvlc_media_player_set_xwindow (m_pMp, m_Window);
-    libvlc_audio_output_device_set(m_pMp, "alsa", "plughw:0,3");
+
+    for (int i=0; i<libvlc_audio_output_device_count(m_pInst,"alsa"); i++)
+      {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Found Sound card: %s",libvlc_audio_output_device_id(m_pInst,"alsa",i));
+      }
+
+    // libvlc_audio_output_device_set(m_pMp, "alsa", "plughw:0,3");
 
     if (!m)
       {
@@ -837,6 +847,18 @@ namespace DCE
       return;
 
     m_pVLC_Player->EVENT_Playback_Started(m_sMediaURL,m_iStreamID,GetMediaInfo(),"","");
+  }
+
+  string VLC::PreProcessMediaURL(string sMediaURL)
+  {
+    if (sMediaURL.find("cdda:") != string::npos)
+      {
+	if (sMediaURL.find("/1") != string::npos)
+	  {
+	    sMediaURL = sMediaURL.substr(0,sMediaURL.size()-2);
+	  }
+      }
+    return sMediaURL;
   }
 
 }
