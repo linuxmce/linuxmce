@@ -534,6 +534,7 @@ bool
 
   do
     {
+      XSync(disp,true);
       if (XQueryTree
 	  (disp, XDefaultRootWindow (disp), &root_return, &parent_return,
 	   &children_return, &nchildren_return))
