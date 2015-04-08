@@ -172,8 +172,6 @@ namespace DCE
       case 2:
 	doAction("UI_ENTER");
 	break;
-
-	X11EmulatorController::gotoMenu(iMenu);
       }
     
     return X11EmulatorController::gotoMenu(iMenu); // and up the chain...
@@ -181,6 +179,19 @@ namespace DCE
 
   bool Atari800EmulatorController::saveState(string& sPosition, string& sText, bool bAutoSave, string sAutoSaveName)
   {
+    if (!m_pEmulatorModel->m_bIsStreaming &&
+	m_pEmulatorModel->m_bCanSaveSTate)
+      {
+	doAction("SAVE_STATE");
+      }
+
+    	if (!FileUtils::FileExists("/run/Game_Player/atari800.state"))
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Atari800EmulatorController:saveState - Could not save state to /run/Game_Player/atari800.state");
+	    
+	  }
+
+
     return false;
   }
 

@@ -75,6 +75,10 @@ namespace DCE
     m_mapActionsToKeysyms["GET_SNAPSHOT"] = make_pair(XK_F10,0);
     m_mapActionsToKeysyms["PAUSE"] = make_pair(XK_Pause,0);
     m_mapActionsToKeysyms["UNPAUSE"] = make_pair(XK_Scroll_Lock,0);
+    m_mapActionsToKeysyms["RESET"] = make_pair(XK_F5,XK_Shift_L);
+    m_mapActionsToKeysyms["OPTION"] = make_pair(XK_F2,0);
+    m_mapActionsToKeysyms["SELECT"] = make_pair(XK_F3,0);
+    m_mapActionsToKeysyms["START"] = make_pair(XK_F4,0);
     // overridden by subclass.
     // todo: come back here and fill this in.
 
