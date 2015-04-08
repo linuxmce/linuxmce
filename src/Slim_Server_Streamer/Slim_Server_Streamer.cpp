@@ -31,6 +31,7 @@ using namespace DCE;
 #include "pluto_main/Define_CommandParameter.h"
 #include "pluto_main/Define_Command.h"
 #include "PlutoUtils/ProcessUtils.h"
+#include "Xine_Player/XineMediaInfo.h"
 
 #define SOCKET_TIMEOUT		30
 
@@ -57,6 +58,9 @@ Slim_Server_Streamer::Slim_Server_Streamer(int DeviceID, string ServerAddress,bo
 
 	pthread_cond_init( &m_stateChangedCondition, NULL );
 	m_stateChangedMutex.Init( &mutexAttr, &m_stateChangedCondition );
+
+	m_pNotificationSocket = new SlimServerStreamerNotification_SocketListener(string("m_pNotificationSocket"));
+	m_pNotificationSocket->m_bSendOnlySocket = true;
 
 }
 
@@ -113,6 +117,13 @@ Slim_Server_Streamer::~Slim_Server_Streamer()
 	pthread_cond_signal(&m_stateChangedCondition);
 	if( m_threadPlaybackCompletedChecker )
 		pthread_join(m_threadPlaybackCompletedChecker, NULL);
+
+	if (m_pNotificationSocket)
+	{
+		delete m_pNotificationSocket;
+		m_pNotificationSocket = NULL;
+	}
+
 }
 
 //<-dceag-reg-b->
@@ -638,6 +649,11 @@ void *Slim_Server_Streamer::checkForPlaybackCompleted(void *pSlim_Server_Streame
 			  {
 			    pStreamer->SendReceiveCommand(macAddress + " time -64");
 			    iSleep=31;
+			  }
+			else if ( strResult == macAddress + " mode play" && itStreamsToPlayers->second.first == STATE_PLAY )
+			  {
+			    // Just update the timecode.
+			    string strResultTimecode = pStreamer->SendReceiveCommand(macAddress + " time ?");
 			  }
             itStreamsToPlayers++;
         }

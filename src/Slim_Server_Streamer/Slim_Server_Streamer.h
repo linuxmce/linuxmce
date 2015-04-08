@@ -23,6 +23,8 @@
 //<-dceag-d-e->
 
 #include "SqueezeBox_Player.h"
+#include "DCE/SocketListener.h"
+#include "DCE/ServerSocket.h"
 
 #include <map>
 
@@ -304,6 +306,40 @@ public:
 	virtual void CMD_Menu(string sText,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
+
+	// socket listener for playback info notification
+	
+	class SlimServerStreamerNotification_SocketListener : public SocketListener
+	{
+	public:
+		SlimServerStreamerNotification_SocketListener(string sName):SocketListener(sName){};
+	
+		virtual void ReceivedMessage( Socket *pSocket, Message* pMessage ){};
+		virtual bool ReceivedString( Socket *pSocket, string sLine, int nTimeout = - 1 )
+		{
+			std::cout << "Socket got: " << sLine << std::endl; 
+			return true; 
+		};
+		
+		void SendStringToAll(string sString)
+		{
+			PLUTO_SAFETY_LOCK( lm, m_ListenerMutex );
+			for(std::vector<ServerSocket *>::iterator i=m_vectorServerSocket.begin(); i!=m_vectorServerSocket.end(); i++)
+			{
+				if ((*i)->SendString(sString))
+				{
+					LoggerWrapper::GetInstance()->Write(LV_STATUS,"Sending time code %s to %s",sString.c_str(),(*i)->m_sHostName.c_str());
+				}
+				else
+				{
+					std::cout << "Not sent timecode to " << (*i)->m_sHostName<<  std::endl;
+				}
+			}
+		}
+	};
+
+	SlimServerStreamerNotification_SocketListener *m_pNotificationSocket;
+
     };
 
 //<-dceag-end-b->
