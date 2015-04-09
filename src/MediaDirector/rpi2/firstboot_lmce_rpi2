@@ -65,7 +65,7 @@ EOF
 		fi
 	fi
 
-	if [ -f /etc/sd_resized ] ; then
+	if [ ! -f /etc/sd_resized ] ; then
 		StatsMessage "Resizing the SD Card filesystem"
 		ROOT_PART=$(find_linux_root_device)
 		resize2fs $ROOT_PART
