@@ -1857,9 +1857,9 @@ private slots:
         }
         qorbiterUIwin->engine()->rootContext()->setContextProperty("Style", m_style);
         QString returnLocation=qorbiterUIwin->source().toString();
+        qorbiterUIwin->engine()->clearComponentCache();
 #ifdef simulate
         qorbiterUIwin->setSource(QUrl(m_selector->select(m_localQmlPath+"Index.qml")));
-        qorbiterUIwin->engine()->clearComponentCache();
 #else
         qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
 

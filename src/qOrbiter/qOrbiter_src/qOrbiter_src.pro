@@ -258,6 +258,12 @@ QMAKE_CXXFLAGS += -DUSE_LZO_DATAGRID
 #LinuxMCE Specific include path. Linking in the app instead of against dce libs for multi-platform expediency.
 INCLUDEPATH += ../../ ../../DCE/
 
+noqrc{
+DEFINES+=NOQRC
+} else {
+RESOURCES+=qmlFile.qrc
+}
+
 
 
 !macx{
@@ -545,13 +551,10 @@ for_harmattan{
 
 
 RESOURCES += \
-        skinData.qrc \
-        qmlFile.qrc
+        skinData.qrc
 
-no-qrc{
-DEFINES+=NOQRC
-RESOURCES-=qmlFile.qrc
-}
+
+
 
 
 

@@ -16,6 +16,11 @@ Item{
     property int switchTimer:20000
     readonly property int transitionTime:switchTimer-4500
 
+    Rectangle{
+        anchors.fill: parent
+        color:"black"
+    }
+
     Component.onCompleted: loadImageList()
 
     Connections{

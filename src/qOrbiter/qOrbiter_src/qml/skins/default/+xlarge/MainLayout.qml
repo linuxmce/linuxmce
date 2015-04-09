@@ -9,10 +9,6 @@ Item {
     id:layout
     anchors.fill: qmlRoot
 
-    Rectangle{
-        anchors.fill: parent
-        color:"transparent"
-    }
     property bool uiOn:true
     property alias scenarioModel:current_scenarios.model
 

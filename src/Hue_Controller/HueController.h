@@ -35,24 +35,11 @@ class HueController : public HueController_Command
 {
     Q_OBJECT
     //<-dceag-decl-e->
-    // Private member variables
-    bool mb_isNew;
-    bool validated;
-    bool linkButton;
-    int triesLeft;
-    QString targetIpAddress;
-    QString authUser;
 
-    QList<HueControllerHardware*> hueControllers;
-    QList<HueBulb*> hueBulbs;
-    QNetworkAccessManager * linkButtonManager;
-    QNetworkAccessManager * commandManager;
-    QTimer *linkButtonTimer;
-
-
-    // Private methods
 public:
     // Public member variables
+    QList<HueControllerHardware*> hueControllers;
+    QList<HueBulb*> hueBulbs;
 
 
     //<-dceag-const-b->
@@ -65,19 +52,16 @@ public:
     virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
     virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
     virtual void CreateChildren();
-
-
+    virtual void OnReload();
     //<-dceag-const-e->
+
+
     void initBridgeConnection();
     bool findControllers();
     bool downloadControllerConfig(QUrl deviceIp, int index);
     void getScreenSaverColor();
     bool setupController(int controllerIndex);
-    virtual void OnReload();
     void setDeviceStatus(int device, QString status);
-
-
-
 
     //<-dceag-const2-b->
     // The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
@@ -218,6 +202,19 @@ public slots:
 
 protected:
     bool sendPowerMessage(QUrl message, QVariant params);
+
+private:
+    QNetworkAccessManager * linkButtonManager;
+    QNetworkAccessManager * commandManager;
+
+    bool mb_isNew;
+    bool validated;
+    bool linkButton;
+    int triesLeft;
+    QString targetIpAddress;
+    QString authUser;
+
+    QTimer *linkButtonTimer;
 
 };
 

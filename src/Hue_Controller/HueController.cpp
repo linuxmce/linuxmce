@@ -32,39 +32,41 @@ using namespace DCE;
 #include <qnetworkrequest.h>
 #include <qeventloop.h>
 #include <QVariantMap>
-#include <QApplication>
+#include <Qt/qapplication.h>
 #include <QStringList>
 #include <huecontrollerhardware.h>
 #include <huebulb.h>
 #include <pthread.h>
-#include <QColor>
+#include <QtGui/QColor>
 #include <math.h>
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 HueController::HueController(int DeviceID, string ServerAddress, bool bConnectEventHandler, bool bLocalMode, class Router *pRouter,QObject*parent)
-    : DCE::HueController_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+    : DCE::HueController_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter),
+      mb_isNew(true),
+      triesLeft(6),
+      linkButton(false),
+      validated(false),
+      linkButtonManager(new QNetworkAccessManager()),
+      commandManager(new QNetworkAccessManager()),
+      targetIpAddress(""),
+      authUser(""),
+      linkButtonTimer(new QTimer())
     //<-dceag-const-e->
 {
 
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "HueController, Device %d is alive!", this->m_dwPK_Device);
-    authUser ="";
-    triesLeft=6;
-    linkButton=false;
-    mb_isNew=true;
-    linkButtonManager = new QNetworkAccessManager();
-
 
     // QObject::connect(this, SIGNAL(initiateConfigDownload()), this, SLOT(getHueDataStore()), Qt::DirectConnection);
     // QObject::connect(this, SIGNAL(initiateConfigDownload()), this, SLOT(dummySlot()));
     //QObject::connect(this,SIGNAL(testSignal()), this, SLOT(dummySlot()));
 
-    linkButtonTimer = new QTimer();
     linkButtonTimer->setInterval(3000);
     QObject::connect(linkButtonTimer, SIGNAL(timeout()), this, SLOT(checkLinkButton()));
     linkButtonTimer->setSingleShot(false);
 
-   // pthread_yield();
+
 }
 
 //<-dceag-const2-b->
@@ -996,22 +998,20 @@ bool HueController::sendPowerMessage(QUrl message, QVariant params)
 {
     // LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending Message:: %s ",message.toString(), params.toString());
     qDebug() << "state message::"<<message;
-    QNetworkAccessManager * cmdMgr = new QNetworkAccessManager();
+
     QNetworkRequest pr(message);
     QJson::Serializer serializer;
     QByteArray serialized = serializer.serialize(params);
     qDebug()<< serialized;
     QEventLoop respWait;
-    QObject::connect(cmdMgr, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
-    QNetworkReply * ptx =  cmdMgr->put(pr, serialized);
+    QObject::connect(commandManager, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
+    QNetworkReply * ptx =  commandManager->put(pr, serialized);
     cout << "Waiting for Response" << endl;
     respWait.exec();
 
     qDebug()<< "Got Response";
-    qDebug() << ptx->readAll();
-    pr.~QNetworkRequest();
+    qDebug() << ptx->readAll();  
     ptx->deleteLater();
-    cmdMgr->deleteLater();
     /* Need to start returning status here */
     return true;
 }
