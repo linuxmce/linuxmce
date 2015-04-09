@@ -180,7 +180,7 @@ namespace DCE
   bool Atari800EmulatorController::saveState(string& sPosition, string& sText, bool bAutoSave, string sAutoSaveName)
   {
     if (!m_pEmulatorModel->m_bIsStreaming &&
-	m_pEmulatorModel->m_bCanSaveSTate)
+	m_pEmulatorModel->m_bCanSaveState)
       {
 	doAction("SAVE_STATE");
       }
