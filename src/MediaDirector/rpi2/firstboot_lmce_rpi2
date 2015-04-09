@@ -50,11 +50,22 @@ EOF
 		ret=$?
 
 		if [ "$ret" != "0" ] ; then
+			StatsMessage "partprobe failed, rebooting to complete resize"
+			StatsMessage "Rebooting in 5 seconds..."
+			sleep 1
+			StatsMessage "Rebooting in 4 seconds..."
+			sleep 1
+			StatsMessage "Rebooting in 3 seconds..."
+			sleep 1
+			StatsMessage "Rebooting in 2 seconds..."
+			sleep 1
+			StatsMessage "Rebooting in 1 seconds..."
+			sleep 1
 			reboot
 		fi
 	fi
 
-	if [ -f /etc/part_resized ] ; then
+	if [ -f /etc/sd_resized ] ; then
 		StatsMessage "Resizing the SD Card filesystem"
 		ROOT_PART=$(find_linux_root_device)
 		resize2fs $ROOT_PART
@@ -64,6 +75,17 @@ EOF
 		else
 			StatsMessage "Resizing filesystem completed"
 			echo "done" > /etc/sd_resized
+			StatsMessage "Rebooting in 5 seconds..."
+			sleep 1
+			StatsMessage "Rebooting in 4 seconds..."
+			sleep 1
+			StatsMessage "Rebooting in 3 seconds..."
+			sleep 1
+			StatsMessage "Rebooting in 2 seconds..."
+			sleep 1
+			StatsMessage "Rebooting in 1 seconds..."
+			sleep 1
+			reboot
 		fi
 	fi
 }
