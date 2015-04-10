@@ -58,13 +58,13 @@ setup_fstab() {
 	check=$(grep 192.168.80.1 "${FSTAB_FILE}" || :)
 	if [ -z "$check" ] ; then
 		cat <<-EOF >> "${FSTAB_FILE}"
-			192.168.80.1:/usr/pluto/var/    /usr/pluto/var/ nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/usr/pluto/orbiter /usr/pluto/orbiter      nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/usr/pluto/keys    /usr/pluto/keys nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/usr/pluto/deb-cache       /usr/pluto/deb-cache    nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/var/spool/asterisk/var/spool/asterisk     nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/home      /home   nfs4 retrans=10,timeo=50 1 1
-			192.168.80.1:/home/cameras      /home/cameras   nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/usr/pluto/var/		/usr/pluto/var/		nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/usr/pluto/orbiter		/usr/pluto/orbiter	nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/usr/pluto/keys		/usr/pluto/keys		nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/usr/pluto/deb-cache	/usr/pluto/deb-cache    nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/var/spool/asterisk	/var/spool/asterisk     nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/home			/home			nfs4 retrans=10,timeo=50 1 1
+			192.168.80.1:/home/cameras		/home/cameras		nfs4 retrans=10,timeo=50 1 1
 			EOF
 	fi
 	mkdir -p /usr/pluto/var/
