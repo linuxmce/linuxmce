@@ -203,8 +203,8 @@ MD_Install_Kernel () {
 	ret=""
 	for f in /etc/init.d/firstboot_lmce_* ; do
 		echo "Running device specific script: $f _kernel"
-		. "$f"
-		$(basename "$f")_kernel
+		. "$f" || :
+		$(basename "$f")_kernel || :
 		ret=$?
 	done
 
@@ -304,8 +304,8 @@ start() {
 	# run any device specific firstboot add-on scripts here
 	for f in /etc/init.d/firstboot_lmce_* ; do
 		echo "Running device specific script: $f _preinst"
-		. "$f"
-		$(basename "$f")_preinst
+		. "$f" || :
+		$(basename "$f")_preinst || :
 	done
 
 	MD_System_Level_Prep
@@ -322,8 +322,8 @@ start() {
 	# run any device specific firstboot add-on scripts here
 	for f in /etc/init.d/firstboot_lmce_* ; do
 		echo "Running device specific script: $f _postinst"
-		. "$f"
-		$(basename "$f")_postinst
+		. "$f" || :
+		$(basename "$f")_postinst || :
 	done
 
 	ConfSet "FirstBoot" "false"
