@@ -5,6 +5,11 @@ Item{
     id:genericPopup
     anchors.fill: parent
     focus: true
+    function close(){
+        layout.forceActiveFocus();
+        genericPopup.destroy()
+    }
+
     Component.onCompleted: forceActiveFocus()
     Keys.onEscapePressed: {layout.forceActiveFocus(); genericPopup.destroy()}
     property Component content:undefined
@@ -20,6 +25,7 @@ Item{
     }
 
     StyledText{
+        id:popup_label
         anchors{
             top:parent.top
             horizontalCenter: parent.horizontalCenter
@@ -29,8 +35,12 @@ Item{
     }
 
     Loader{
-        anchors.centerIn: parent
-        anchors.fill: parent
+        anchors{
+            top:popup_label.bottom
+            left:parent.left
+            right:parent.right
+            bottom:parent.bottom
+        }
         id:contentLoader
         sourceComponent:content
     }

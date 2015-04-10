@@ -58,7 +58,7 @@ Item{
                 height: scaleY(16)
                 width: scaleX(18)
                 buttonText: name
- visible:!hideFromOrbiter
+                visible:!hideFromOrbiter
                 hitArea.onReleased: {
                     console.log(ea_list[0].ea_number!==0)
 

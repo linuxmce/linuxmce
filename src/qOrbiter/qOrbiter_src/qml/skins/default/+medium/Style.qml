@@ -17,7 +17,7 @@ QtObject{
 
     /* Transitions */
     readonly property int transition_animationTime:350
-    readonly property int transition_accentTime:500
+    readonly property int transition_accentTime:350
     readonly property int transitionFadeTime:350
 
     /* Application Colors */
@@ -33,8 +33,8 @@ QtObject{
     readonly property color appbutton_cancel_color:"#f26c4f"
     readonly property color appbutton_disabled_color:"#464646"
     readonly property color appbutton_color:appcolor_background
-    readonly property int appButtonHeight:manager.isProfile ? scaleY(4) : scaleY(5.5)
-    readonly property int appButtonWidth: manager.isProfile ? scaleX(10) : scaleX(6)
+    property int appButtonHeight:manager.isProfile ? scaleY(12) : scaleY(16)
+    property int appButtonWidth: manager.isProfile ? scaleX(26) : scaleX(12)
     readonly property int appButtonNumberPadHeight:manager.isProfile ? scaleY(12) : scaleY(18)
     readonly property int appButtonNumberPadWidth: manager.isProfile ? scaleX(18) : scaleX(12)
     readonly property int appButtonNumberPadSmallHeight:manager.isProfile ? scaleY(9) : scaleY(15)
@@ -46,7 +46,7 @@ QtObject{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:manager.isProfile ? scaleY(2) : scaleY(4)
+    readonly property int appFontSize_list:scaleY(2)
     readonly property int appFontSize_header:scaleY(5)
     readonly property int appFontSize_description:scaleY(3)
     readonly property int appFontSize_title:scaleY(4)

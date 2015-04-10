@@ -7,17 +7,13 @@ StyledScreen {
 
     GenericListModel {
         id: genericListContainer
-        label: qsTr("Scenarios")
-        width: parent.width
-        anchors{
-            left:parent.left
-            verticalCenter: parent.verticalCenter
-        }
-        height: Style.scaleY(75)
+        label: qsTr("Scenarios %1").arg(manager.isProfile)
+       anchors.fill: parent
+        height: Style.scaleY(85)
 
         model:qmlRoot.scenarios
         delegate:  Item {
-            height: Style.scaleY(10)
+            height: Style.appButtonHeight
             width: parent.width
             Rectangle{
                 anchors.fill: parent
@@ -31,13 +27,14 @@ StyledScreen {
                     left:parent.left
                     verticalCenter: parent.verticalCenter
                 }
+                font.pointSize: manager.isProfile ? Style.scaleY(3) : Style.scaleY(5)
                 text:name
             }
             ListView{
                 height: parent.height
                 anchors{
-                    left:parent.left
-                    leftMargin: Style.scaleX(15)
+                    left:rowLabel.right
+                    leftMargin: Style.scaleX(5)
                     right:parent.right
                     verticalCenter: parent.verticalCenter
                 }
@@ -51,9 +48,10 @@ StyledScreen {
                        }
 
                 orientation:ListView.Horizontal
+                clip:true
                 delegate:Item{
                     height: parent.height
-                    width: Style.scaleX(12)
+                    width: Style.appButtonWidth
 
                     StyledButton{
                         buttonText:title

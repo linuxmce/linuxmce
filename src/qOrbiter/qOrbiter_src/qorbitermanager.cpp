@@ -2882,7 +2882,6 @@ void qorbiterManager::checkOrientation(QSize s)
     appHeight=s.height();
     appWidth = s.width();
     if(appHeight < appWidth){
-
         setOrientation(false);
     }
     else{
@@ -2936,7 +2935,7 @@ void qorbiterManager::setCurrentScreen(QString s)
 
 void qorbiterManager::setCurrentScreen(int s)
 {
-    QString i = "Screen_"+QString::number(s)+".qml";
+    QString i = QString("Screen_%1.qml").arg(QString::number(s));
 
     if(i!=currentScreen){
         currentScreen = i;

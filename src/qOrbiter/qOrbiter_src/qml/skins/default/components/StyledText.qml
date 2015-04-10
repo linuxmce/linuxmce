@@ -10,6 +10,7 @@ Text {
     property double largeFontSize:Style.appFontSize_title
     property double cellFontSize: Style.appFontSize_list
     horizontalAlignment: Text.AlignHCenter
+
     id:labelelement
     text: textLabel
     font.pixelSize: fontSize

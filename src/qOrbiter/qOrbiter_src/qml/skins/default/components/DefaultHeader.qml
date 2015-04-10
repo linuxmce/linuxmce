@@ -64,6 +64,7 @@ Item{
             to: "*"
             AnchorAnimation{
                 duration: Style.transition_accentTime
+                easing.type: Easing.OutExpo
             }
         }
     ]

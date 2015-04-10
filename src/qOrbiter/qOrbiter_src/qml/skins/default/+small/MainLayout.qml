@@ -2,11 +2,18 @@ import QtQuick 2.3
 import QtGraphicalEffects 1.0
 import AudioVisual 1.0
 import "."
+import "../"
 import "components"
 /*! This File is designed to be the main layout that can be switched in and out for various forms */
 Item {
     id:layout
     anchors.fill: qmlRoot
+    Component{
+        id:compList
+        RoomSelector {
+            id:room_selector
+        }
+    }
 
     Rectangle{
         anchors.fill: parent
@@ -38,11 +45,38 @@ Item {
 
     DefaultHeader {
         id: header
-
     }
 
     Footer {
         id: footer
+
+        StyledButton{
+            buttonText: manager.sPK_User
+            textSize:Style.appFontSize_list
+            anchors{
+                top:parent.top
+                left:parent.left
+                bottom:parent.bottom
+                margins:5
+            }
+            width:Style.scaleX(30)
+        }
+
+        StyledButton{
+            buttonText: roomList.currentRoom
+            textSize:Style.appFontSize_list
+            anchors{
+                top:parent.top
+                right:parent.right
+                bottom:parent.bottom
+                margins:5
+            }
+            width:Style.scaleX(45)
+            onActivated:{
+                qmlRoot.createPopup(compList)
+            }
+        }
     }
+
 
 }
