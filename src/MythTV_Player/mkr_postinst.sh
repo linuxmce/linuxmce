@@ -4,7 +4,7 @@
 . /usr/pluto/bin/SQL_Ops.sh
 
 # START: Hack to get mythtv working
-ln -s /usr/lib/libXmu.so.6.2.0 /usr/lib/libXmu.so || :
+#ln -s /usr/lib/libXmu.so.6.2.0 /usr/lib/libXmu.so || :
 # END  : Hack to get mythtv working
 
 # In case we have a later MythTV, we need to transpose the information
