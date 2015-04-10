@@ -447,7 +447,7 @@ MD_Install_Packages () {
 	### Disable invoke-rc.d scripts
 	mv "$TEMP_DIR"/sbin/start-stop-daemon{,.pluto-install}
 	[[ -f "$TEMP_DIR"/sbin/initctl ]] && mv "$TEMP_DIR"/sbin/initctl{,.pluto-install}
-	echo -en '#!/bin/bash\necho "WARNING: we dont want invoke-rc.d to run right now"\nexit 101\n' >"$TEMP_DIR"/usr/sbin/invoke-rc.d
+	echo -en '#!/bin/bash\necho "WARNING: we dont want invoke-rc.d to run right now"\n' >"$TEMP_DIR"/usr/sbin/invoke-rc.d
 	echo -en '#!/bin/bash\necho "WARNING: fake start called"\n' >"$TEMP_DIR"/sbin/start
 	echo -en '#!/bin/bash\necho "WARNING: fake start-stop-daemon called"\n' >"$TEMP_DIR"/sbin/start-stop-daemon
 	echo -en '#!/bin/bash\necho "WARNING: fake initctl called"\n' >"$TEMP_DIR"/sbin/initctl
