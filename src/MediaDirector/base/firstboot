@@ -195,8 +195,6 @@ MD_Update () {
 
 MD_Install_Kernel () {
 	StatsMessage "Installing kernel headers"
-	. /usr/pluto/bin/Config_Ops.sh
-	ConfSet "LTS_HES" "$TARGET_KVER_LTS_HES"
 
 	#TODO get as much of this from database as possible
 	# run any device specific firstboot add-on scripts here
@@ -208,7 +206,9 @@ MD_Install_Kernel () {
 		ret=$?
 	done
 
-	if [[ -z "$ret" ]] ; then
+	if [[ "$ret" != 0 ]] ; then
+		. /usr/pluto/bin/Config_Ops.sh
+		ConfSet "LTS_HES" "$TARGET_KVER_LTS_HES"
 		#Install headers and run depmod for the seamless integraton function, ensure no errors exist
 		apt-get -f -y install linux-headers-generic"$TARGET_KVER_LTS_HES"
 		VerifyExitCode "Install linux headers package failed"
