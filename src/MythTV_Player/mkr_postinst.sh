@@ -21,8 +21,8 @@ if [[ "$PK_Device" == "1" ]] && [[ -f /etc/mythtv/config.xml ]] ; then
 	if [ $WITHDB ] ; then
 		HOST="DBHostName"
 		USERNAME="DBUserName"
-		DATABASE="DBPassword"
-		PASSWORD="DBName"
+		DATABASE="DBName"
+		PASSWORD="DBPassword"
 	fi
 	# START: Hack to transpose xml
 	echo $(grep -e "<$HOST>" /etc/mythtv/config.xml | sed -e "s#<$HOST>#DBHostName=#" -e "s#</$HOST>#\n#") > /etc/mythtv/mysql.txt
