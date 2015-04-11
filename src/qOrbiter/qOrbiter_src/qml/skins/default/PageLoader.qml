@@ -65,8 +65,7 @@ Loader {
     }
     
     function loadNext(){
-        
-        
+
         if(nextScreen===""){
             nextScreen="Screen_1.qml"
             return

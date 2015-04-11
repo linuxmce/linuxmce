@@ -10,7 +10,6 @@ StyledScreen {
     property bool showDetails: false
     keepHeader: false
 
-
     Panel{
         id:container
         anchors.fill: parent

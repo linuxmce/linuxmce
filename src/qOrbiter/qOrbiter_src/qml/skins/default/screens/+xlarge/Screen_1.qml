@@ -5,6 +5,11 @@ import org.linuxmce.screens 1.0
 StyledScreen {
     id:screen
 
+    StyledText{
+        anchors.centerIn: parent
+        text:"LinuxMCE"
+        fontSize: 72
+    }
 
 
 //    GenericListModel {

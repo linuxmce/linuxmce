@@ -57,5 +57,8 @@
         <file>qml/skins/default/+small/Style.qml</file>
         <file>qml/skins/default/+small/MainLayout.qml</file>
         <file>qml/skins/default/components/RoomSelector.qml</file>
+        <file>qml/skins/default/components/MultiMediaView.qml</file>
+        <file>qml/skins/default/components/VideoDelegate.qml</file>
+        <file>qml/skins/default/components/AudioDelegate.qml</file>
     </qresource>
 </RCC>

@@ -4,32 +4,42 @@ import "../"
 Item{
     id:genericPopup
     anchors.fill: parent
+
     focus: true
     function close(){
         layout.forceActiveFocus();
         genericPopup.destroy()
     }
-
     Component.onCompleted: forceActiveFocus()
     Keys.onEscapePressed: {layout.forceActiveFocus(); genericPopup.destroy()}
+    onActiveFocusChanged: if(activeFocus) contentLoader.item.forceActiveFocus()
     property Component content:undefined
     property string title:qsTr("Generic Popup")
     Rectangle{
         anchors.fill: parent
         color:"black"
-        opacity: Style.appPanel_opacity
+        opacity: .65
         MouseArea{
             anchors.fill: parent
             onClicked: genericPopup.destroy()
         }
     }
 
-    StyledText{
-        id:popup_label
+    Rectangle{
+        id:hdr_bg
+        color:Style.appcolor_background_medium
         anchors{
             top:parent.top
-            horizontalCenter: parent.horizontalCenter
+            left:parent.left
+            right:parent.right
         }
+        height: Style.appNavigation_panelHeight
+    }
+
+    StyledText{
+        id:popup_label
+        width:parent.width
+        anchors.centerIn: hdr_bg
         text:genericPopup.title
         fontSize: Style.appFontSize_title
     }
@@ -40,6 +50,7 @@ Item{
             left:parent.left
             right:parent.right
             bottom:parent.bottom
+            margins: 10
         }
         id:contentLoader
         sourceComponent:content

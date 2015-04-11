@@ -6,7 +6,9 @@ Item {
     height: Style.scaleY(65)
     property string title:"Ipsum"
     property Item dialogContent:undefined
-
+    focus:true
+    Component.onCompleted:{ forceActiveFocus(); console.log(title+" is loaded.")}
+    onActiveFocusChanged: if(activeFocus)contentLoader.item.forceActiveFocus();
 
     Item{
         anchors.centerIn: parent
@@ -39,6 +41,7 @@ Item {
             color:Style.appcolor_background_list
         }
         Loader{
+            id:contentLoader
             anchors.fill: contentfill
             sourceComponent:dialogContent
         }

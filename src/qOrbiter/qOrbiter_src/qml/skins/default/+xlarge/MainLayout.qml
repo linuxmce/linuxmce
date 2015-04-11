@@ -16,6 +16,12 @@ Item {
         uiOn=raise;
     }
 
+    Component{
+        id:compList
+        RoomSelector {
+            id:room_selector
+        }
+    }
 
     Component.onCompleted: forceActiveFocus()
     focus:true
@@ -106,6 +112,9 @@ Item {
             LargeStyledButton{
                 id:room_display
                 buttonText: roomList.currentRoom
+                onActivated:{
+                    qmlRoot.createPopup(compList)
+                }
             }
 
             LargeStyledButton{
@@ -116,24 +125,37 @@ Item {
 
     Item{
         id:centralScenarios
-        visible:manager.currentScreen=="Screen_1.qml" && uiOn
+
         height: current_scenarios.count * Style.scaleY(13)
         width:Style.scaleX(15)
         anchors.bottom: footer.top
         anchors.bottomMargin: 5
+        visible: footer.activated
 
         ListView{
             id:current_scenarios
-
             anchors.fill: parent
             spacing:5
             anchors.margins: Style.buttonSpacing
+
             delegate: LargeStyledButton{
+                id:scenario_delegate
+                function execute(){
+                    console.log(title+" is executing")
+                    manager.execGrp(params)
+                }
                 arrow:current_scenarios.currentIndex===index
+
                 currentSelection:arrow
                 buttonText:title
                 height:Style.scaleY(13)
                 width:Style.scaleX(15)
+//                Keys.onEnterPressed: manager.execGrp(params)
+//                Keys.onReturnPressed: manager.execGrp(params)
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: execute()
+                }
             }
         }
     }
@@ -149,7 +171,7 @@ Item {
 
         ListView{
             id:scenarioList
-            visible:manager.currentScreen=="Screen_1.qml"
+
             focus:true
             spacing: 5
             onActiveFocusChanged: {
@@ -158,6 +180,19 @@ Item {
                 else
                     footer.activated = false
             }
+
+            function setModel(modelType){
+                scenarioModel=undefined
+                switch(modelType) {
+                case 2:scenarioModel=currentRoomLights; break;
+                case 5:scenarioModel=currentRoomMedia; break;
+                case 1:scenarioModel=currentRoomClimate; break
+                case 3:scenarioModel=currentRoomTelecom; break
+                case 4:scenarioModel=currentRoomSecurity; break;
+                default:scenarioModel= undefined;
+                }
+            }
+
             anchors{
                 top:parent.top
                 left:parent.left
@@ -172,7 +207,9 @@ Item {
             Keys.onDownPressed: {
                 current_scenarios.incrementCurrentIndex()
             }
-
+            Keys.onDigit1Pressed: {
+                current_scenarios.currentItem.execute()
+            }
 
             orientation: ListView.Horizontal
             model:qmlRoot.scenarios
@@ -181,19 +218,14 @@ Item {
                 buttonText:name
                 arrow:true
                 onActiveFocusChanged:{
+
                     if(activeFocus){
-                        switch(floorplantype) {
-                        case 2:scenarioModel=currentRoomLights; break;
-                        case 5:scenarioModel=currentRoomMedia; break;
-                        case 1:scenarioModel=currentRoomClimate; break
-                        case 3:scenarioModel=currentRoomTelecom; break
-                        case 4:scenarioModel=currentRoomSecurity; break;
-                        default: undefined;
-                        }
+                        scenarioList.setModel(floorplantype)
                         console.log(btn.x)
                         centralScenarios.x = x
                     }
                 }
+
                 onActivated:{
                     forceActiveFocus()
                     if(floorplantype===-1)
