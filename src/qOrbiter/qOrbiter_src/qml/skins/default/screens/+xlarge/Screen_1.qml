@@ -11,7 +11,6 @@ StyledScreen {
         fontSize: 72
     }
 
-
 //    GenericListModel {
 //        id: genericListContainer
 //        label: qsTr("Scenarios")
