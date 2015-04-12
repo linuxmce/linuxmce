@@ -39,9 +39,11 @@ TARGET_KVER_LTS_HES=""
 case "$TARGET_ARCH" in
 	i386|amd64)
 		TARGET_REPO="http://archive.ubuntu.com/ubuntu/"
+		SECURITY_REPO="http://security.ubuntu.com/ubuntu/"
 		;;
 	armhf)
 		TARGET_REPO="http://ports.ubuntu.com/"
+		SECURITY_REPO="http://ports.ubuntu.com/"
 		;;
 esac
 
@@ -155,7 +157,7 @@ MD_System_Level_Prep () {
 			deb http://deb.linuxmce.org/ $TARGET_RELEASE $TARGET_REPO_NAME
 			deb $TARGET_REPO $TARGET_RELEASE main restricted universe multiverse
 			deb $TARGET_REPO $TARGET_RELEASE-updates main restricted universe multiverse
-			deb http://security.ubuntu.com/ubuntu/ $TARGET_RELEASE-security main restricted universe multiverse
+			deb $SECURITY_REPO $TARGET_RELEASE-security main restricted universe multiverse
 			EOF
 	fi
 
