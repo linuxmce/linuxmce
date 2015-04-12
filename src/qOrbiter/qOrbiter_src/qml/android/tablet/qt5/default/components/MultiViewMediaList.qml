@@ -30,8 +30,7 @@ Item{
 
     Component{
         id:audioItem
-        AudioDelegate{}
-    }
+        AudioDelegate{}    }
 
     Component{
         id:videoItem
@@ -85,6 +84,7 @@ Item{
         clip:true
     }
 
+
     GridView{
         id:media_grid
         anchors{
@@ -93,6 +93,11 @@ Item{
             bottom:parent.bottom
             top:parent.top
         }
+        Keys.onBackPressed: {
+            manager.goBackGrid()
+        }
+
+
         cellHeight: currentCellHeight
         cellWidth:currentCellWidth
         model:manager.getDataGridModel("MediaFile", 63)

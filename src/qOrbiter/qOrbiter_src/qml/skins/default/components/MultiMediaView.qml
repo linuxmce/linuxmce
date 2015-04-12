@@ -24,10 +24,24 @@ Item{
     property double vhsRatio:1280/620
     property int itemBuffer:25
 
+    property alias currentView:media_grid
+
+    function load(){
+       media_grid.model= manager.getDataGridModel("MediaFile", 63)
+    }
+
     Component{
         id:videoItem
         VideoDelegate {
             id: videoDelegate
+        }
+    }
+
+    Connections {
+        target: manager.getDataGridModel("MediaFile", 63)
+        onScrollToItem: {
+            console.log("scroll to item : " + item+ " of "+media_grid.count);
+            media_grid.positionViewAtIndex(item, ListView.Beginning);
         }
     }
 
@@ -47,8 +61,7 @@ Item{
             top:parent.top
         }
         cellHeight: currentCellHeight
-        cellWidth:currentCellWidth
-        model:manager.getDataGridModel("MediaFile", 63)
+        cellWidth:currentCellWidth     
         visible:true //current_view_type===1
         delegate:currentDelegate
     }

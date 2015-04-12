@@ -60,5 +60,8 @@
         <file>qml/skins/default/components/MultiMediaView.qml</file>
         <file>qml/skins/default/components/VideoDelegate.qml</file>
         <file>qml/skins/default/components/AudioDelegate.qml</file>
+        <file>qml/skins/default/components/FileDetails.qml</file>
+        <file>qml/skins/default/+xlarge/MainLayout.qml</file>
+        <file>qml/skins/default/+xlarge/Style.qml</file>
     </qresource>
 </RCC>

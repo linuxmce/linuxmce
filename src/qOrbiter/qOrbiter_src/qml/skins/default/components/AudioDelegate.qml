@@ -1,59 +1,98 @@
 import QtQuick 2.3
 import org.linuxmce.enums 1.0
-
+import QtGraphicalEffects 1.0
+import "../"
 Item{
-    id:audioDelegate
-    height: currentCellHeight
-    width: currentCellWidth
+    id:videoDelegate
     clip:true
+    height: currentCellHeight
+    width:currentCellWidth
+    focus:true
+    property bool active: activeFocus ||trap.pressed
 
     Rectangle{
-        id:fillah
+        id:bgExtent
         anchors.fill: parent
-        opacity: .65
-        color:trap.pressed ? "darkgreen" : "black"
-        anchors.margins: 10
-    }
-
-    Image{
-        id:img
-        source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
-       anchors.centerIn: fillah
-        width: height
-        height: fillah.height
         anchors.margins: 5
+        opacity: path !=="" ? .70 : .85
+        color:trap.pressed ? Style.appcolor_background_medium : "black"
+        border.color: "white"
+        border.width: active ? 2 : 0
+    }
+    Image{
+        id:imdbImg
         fillMode: Image.PreserveAspectCrop
+        source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
+        anchors.fill: bgExtent
+        anchors.margins: 10
         smooth: true
         asynchronous: true
     }
 
     Rectangle{
-        id:subFiller
         anchors{
-            left:fillah.left
-            right:fillah.right
-            bottom:fillah.bottom
+            bottom:bgExtent.bottom
+            left:bgExtent.left
+            right:bgExtent.right
+            top:titleBlock.top
         }
-        height:textBox.height
-        color:"darkgreen"
-        opacity: .65
+        color:"black"
+        opacity:.65
+
     }
 
     StyledText{
-        id:textBox
+        id:titleBlock
         text: name
-        anchors.bottom: fillah.bottom
+        anchors{
+            left:bgExtent.left
+            right:bgExtent.right
+            bottom:bgExtent.bottom
+        }
+        wrapMode: Text.Wrap
+        fontSize: Style.appFontSize_title
+        visible:true //path==="" ? true : false
+        isBold: false
         color: "White"
-        fontSize: cellFontSize
-        isBold: true
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        width: fillah.width
-        height: parent.height /3
+        height: titleBlock.lineCount * 50
+    }
+    Glow{
+        anchors.fill: titleBlock
+        radius:16
+        samples:24
+        spread:0.1
+        color:Style.appcolor_background_medium
+        source:titleBlock
+        visible:videoDelegate.active
+    }
+    Keys.onEnterPressed: {
+        if(name==="back (..)"){
+            manager.goBackGrid()
+        } else {
+            manager.addRestoreIndex(model.index);
+            manager.setStringParam(4, id);
+        }
+    }
+
+    Keys.onReturnPressed: {
+        if(name==="back (..)"){
+            manager.goBackGrid()
+        } else {
+            manager.addRestoreIndex(model.index);
+            manager.setStringParam(4, id);
+        }
+
+    }
+    Keys.onEscapePressed: {
+        manager.goBackGrid()
+    }
+    Keys.onBackPressed: {
+        manager.goBackGrid()
     }
 
     MouseArea{
         id:trap
-        anchors.fill: parent
+        anchors.fill: bgExtent
         onReleased: {
             if(name==="back (..)"){
                 manager.goBackGrid()

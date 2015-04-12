@@ -49,8 +49,7 @@ Item{
             top:popup_label.bottom
             left:parent.left
             right:parent.right
-            bottom:parent.bottom
-            margins: 10
+            bottom:parent.bottom            
         }
         id:contentLoader
         sourceComponent:content

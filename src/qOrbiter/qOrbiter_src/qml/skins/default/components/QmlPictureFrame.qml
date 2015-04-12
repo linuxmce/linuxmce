@@ -129,6 +129,9 @@ Item{
     }
 
     function loadNextImage(){
+        if(manager.currentScreen !=="Screen_1.qml")
+            return;
+
         var link = getImage()
        // console.log("Getting "+link)
         if(img1.closing) {

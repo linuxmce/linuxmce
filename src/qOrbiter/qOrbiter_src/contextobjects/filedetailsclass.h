@@ -89,7 +89,7 @@ public:
     QString aspect;
 
     QString file;
-  ;
+
     QString season;
     QString imdb;
     QString qs_mainTitle;

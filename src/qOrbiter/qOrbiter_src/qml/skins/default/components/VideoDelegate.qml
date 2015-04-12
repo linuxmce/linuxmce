@@ -84,6 +84,14 @@ Item{
 
     }
 
+    Keys.onEscapePressed: {
+        manager.goBackGrid()
+    }
+    Keys.onBackPressed: {
+        manager.goBackGrid()
+    }
+
+
     MouseArea{
         id:trap
         anchors.fill: bgExtent

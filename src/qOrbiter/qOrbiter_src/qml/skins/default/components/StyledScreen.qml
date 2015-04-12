@@ -63,6 +63,7 @@ Item {
     signal readyToClose()
     signal screenClosing()
     signal screenOpening()
+    signal screenOpen()
 
     onReadyToClose: {
         pageLoader.loadNext();
