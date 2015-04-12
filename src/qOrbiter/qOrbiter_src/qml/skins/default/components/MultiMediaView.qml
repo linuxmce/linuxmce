@@ -4,7 +4,7 @@ import "../components"
 
 Item{
     id:multi_view_list
-    anchors.fill: parent
+
     focus:true
     onActiveFocusChanged: media_grid.forceActiveFocus()
      property variant currentDelegate:manager.q_mediaType==5 ? videoItem :audioItem
@@ -23,8 +23,9 @@ Item{
     property double vcdRatio:1080/1080
     property double vhsRatio:1280/620
     property int itemBuffer:25
-
     property alias currentView:media_grid
+
+    signal options()
 
     function load(){
        media_grid.model= manager.getDataGridModel("MediaFile", 63)
@@ -54,6 +55,7 @@ Item{
     
     GridView{
         id:media_grid
+        clip:true
         anchors{
             left:parent.left
             right:parent.right
@@ -64,6 +66,7 @@ Item{
         cellWidth:currentCellWidth     
         visible:true //current_view_type===1
         delegate:currentDelegate
+        Keys.onDigit1Pressed: options()
     }
     
     states: [
@@ -115,7 +118,7 @@ Item{
             PropertyChanges {
                 target: multi_view_list
                 currentCellHeight: currentCellWidth*hdPosterRatio
-                currentCellWidth:manager.b_orientation ? Style.scaleX(10) : Style.scaleX(14.25)
+                currentCellWidth:manager.isProfile ? Style.scaleX(10) : Style.scaleX(14.25)
             }
         },
         State {

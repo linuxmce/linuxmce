@@ -1,6 +1,7 @@
 import QtQuick 2.3
 import org.linuxmce.enums 1.0
 import "../components"
+import "../."
 
 StyledScreen {
     id:mediaFilesView
@@ -43,9 +44,19 @@ StyledScreen {
             else if(state=="filter")
                 console.log("filter focus")
         }
+        MediaOptionRow {
+            id: option_row
+        }
 
         MultiMediaView {
             id: multi_view_list
+            onOptions: option_row.forceActiveFocus()
+            anchors{
+                top:option_row.bottom
+                bottom: parent.bottom
+                left:parent.left
+                right:parent.right
+            }
         }
 
         GridView{
@@ -83,6 +94,10 @@ StyledScreen {
                     target: multi_view_list
                     visible:false
                 }
+                PropertyChanges {
+                    target: option_row
+                    visible:false
+                }
                 StateChangeScript{
                     script:typeSelection.forceActiveFocus()
                 }
@@ -92,6 +107,10 @@ StyledScreen {
                 PropertyChanges {
                     target: typeSelection
                     visible:false
+                }
+                PropertyChanges {
+                    target: option_row
+                    visible:true
                 }
                 PropertyChanges {
                     target: multi_view_list

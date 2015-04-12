@@ -536,7 +536,8 @@ HEADERS += \
 OTHER_FILES += Readme.txt \
         OrbiterVariables.txt \
         config.xml \
-    qml/skins/default/components/FadeImage.qml
+    qml/skins/default/components/FadeImage.qml \
+    qml/skins/default/components/FocusRow.qml
 
 
 for_harmattan{

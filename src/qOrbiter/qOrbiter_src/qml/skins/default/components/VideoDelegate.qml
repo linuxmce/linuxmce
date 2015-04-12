@@ -19,6 +19,7 @@ Item{
         border.color: "white"
         border.width: active ? 2 : 0
     }
+
     Image{
         id:imdbImg
         fillMode: Image.PreserveAspectCrop
@@ -30,15 +31,25 @@ Item{
     }
 
     Rectangle{
+        id:bg_fill
         anchors{
             bottom:bgExtent.bottom
             left:bgExtent.left
             right:bgExtent.right
             top:titleBlock.top
         }
+        visible:titleBlock.visible
         color:"black"
         opacity:.65
-
+    }
+    RectangularGlow{
+        anchors.fill: bg_fill
+      //  radius:16
+      //  samples:24
+        spread:0.1
+        color:Style.appcolor_background_medium
+       // source:bg_fill
+        visible:videoDelegate.active
     }
 
     StyledText{
@@ -51,7 +62,7 @@ Item{
         }
         wrapMode: Text.Wrap
         fontSize: Style.appFontSize_title
-        visible:true //path==="" ? true : false
+        visible: manager.q_subType!=MediaSubtypes.MOVIES && imdbImg.source!==""
         isBold: false
         color: "White"
         height: titleBlock.lineCount * 50
