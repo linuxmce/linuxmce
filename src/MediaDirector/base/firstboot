@@ -202,24 +202,31 @@ MD_Install_Kernel () {
 	# run any device specific firstboot add-on scripts here
 	ret=""
 	for f in /etc/init.d/firstboot_lmce_* ; do
-		echo "Running device specific script: $f _kernel"
+		StatsMessage "Running device specific script: $f _kernel - Begin"
 		. "$f" || :
 		$(basename "$f")_kernel || :
 		ret=$?
+		StatsMessage "Running device specific script: $f _kernel - End"
 	done
 
 	if [[ "$ret" != 0 ]] ; then
+		StatsMessage "Installing ubuntu kernel headers"
 		. /usr/pluto/bin/Config_Ops.sh
 		ConfSet "LTS_HES" "$TARGET_KVER_LTS_HES"
 		#Install headers and run depmod for the seamless integraton function, ensure no errors exist
-		apt-get -f -y install linux-headers-generic"$TARGET_KVER_LTS_HES"
+		apt-get -f -y --no-install-recommends install linux-headers-generic"$TARGET_KVER_LTS_HES"
 		VerifyExitCode "Install linux headers package failed"
 
 		StatsMessage "Installing kernel"
-		apt-get -f -y install linux-image-generic"$TARGET_KVER_LTS_HES" linux-firmware
+		apt-get -f -y install --no-install-recommends linux-image-generic"$TARGET_KVER_LTS_HES"
 		VerifyExitCode "Install linux kernel package failed"
 	fi
 
+	StatsMessage "Installing firmware"
+	apt-get -f -y install --no-install-recommends linux-firmware
+	VerifyExitCode "Install linux firmware failed"
+
+	StatsMessage "Running depmod"
 	TARGET_KVER=$(ls -vd /lib/modules/[0-9]* | sed 's/.*\///g' | tail -1)
 	depmod -v "$TARGET_KVER"
 	VerifyExitCode "depmod failed for $TARGET_KVER"
@@ -232,19 +239,19 @@ MD_Install_Packages () {
 	# FIXME: locales are already generated, trigger regen?
 	echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
 
+	StatsMessage "Running dist-upgrade"
 	## Update the system
-	apt-get -y dist-upgrade
+	apt-get -y --force-yes --no-install-recommends dist-upgrade
 	VerifyExitCode "Dist-upgrade failed"
 
+	StatsMessage "Installing X.Org"
 	#Install X prior to linuxmce to get lts_hwe pkgs.
-	apt-get -f -y install xserver-xorg"$TARGET_KVER_LTS_HES"
-	VerifyExitCode "xserver-xorg$TARGET_KVER_LTS_HES install failed"
-	apt-get -f -y install xserver-xorg-video-all"$TARGET_KVER_LTS_HES"
-	VerifyExitCode "Ancillary programs install failed"
+	apt-get -f -y --no-install-recommends install xserver-xorg"$TARGET_KVER_LTS_HES" xserver-xorg-video-all"$TARGET_KVER_LTS_HES"
+	VerifyExitCode "Installing X.Org failed"
 
 	StatsMessage "Installing primary MD packages"
-	apt-get -f -y install lmce-md-meta nfs-common openssh-server pastebinit locales 
-	VerifyExitCode "pluto-md-meta"
+	apt-get -f -y --no-install-recommends install lmce-md-meta nfs-common openssh-server pastebinit locales
+	VerifyExitCode "Installing pluto-md-meta failed"
 
 	if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
 		StatsMessage "Installing kubuntu desktop packages"
@@ -252,15 +259,19 @@ MD_Install_Packages () {
 		VerifyExitCode "kubuntu-desktop"
 	fi
 
+	StatsMessage "Disabling display manager"
 	#FIXME: dpkg-divert it so it does not get over-written?
 	echo '/bin/false' >/etc/X11/default-display-manager
 
 	# Update startup to remove kdm and network manager
 	update-rc.d -f kdm remove
+
+	StatsMessage "Disabling NetworkManager"
 	update-rc.d -f NetworkManager remove
 }
 
 MD_Populate_Debcache () {
+	StatsMessage "Creating deb-cache dir"
 	# FIXME: is this the correct point here?
 	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
 #	find /var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/$DEB_CACHE \;
@@ -305,9 +316,10 @@ start() {
 	#TODO get as much of this from database as possible
 	# run any device specific firstboot add-on scripts here
 	for f in /etc/init.d/firstboot_lmce_* ; do
-		echo "Running device specific script: $f _preinst"
+		StatsMessage "Running device specific script: $f _preinst - Begin"
 		. "$f" || :
 		$(basename "$f")_preinst || :
+		StatsMessage "Running device specific script: $f _preinst - End"
 	done
 
 	MD_System_Level_Prep
@@ -323,12 +335,27 @@ start() {
 
 	# run any device specific firstboot add-on scripts here
 	for f in /etc/init.d/firstboot_lmce_* ; do
-		echo "Running device specific script: $f _postinst"
+		StatsMessage "Running device specific script: $f _postinst - Begin"
 		. "$f" || :
 		$(basename "$f")_postinst || :
+		StatsMessage "Running device specific script: $f _postinst - End"
 	done
 
+	StatsMessage "Setting firstboot = false"
 	ConfSet "FirstBoot" "false"
+	sync
+
+	StatsMessage "Rebooting in 5 seconds"
+	sleep 1
+	StatsMessage "Rebooting in 4 seconds"
+	sleep 1
+	StatsMessage "Rebooting in 3 seconds"
+	sleep 1
+	StatsMessage "Rebooting in 2 seconds"
+	sleep 1
+	StatsMessage "Rebooting in 1 seconds"
+	sleep 1
+	StatsMessage "Rebooting"
 	reboot
 	return 0
 }
