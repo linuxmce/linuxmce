@@ -76,7 +76,7 @@ fi
 
 # Announce our presence to the router
 # TODO: Pass Room/EntArea?
-/usr/pluto/bin/MessageSend "$DCERouter" 0 -1001 2 65 5 "$MAC" 52 3 53 5 49 "$DEVICETEMPLATE_Squeezebox_Player" 55 "\"$DEVICEDATA_Pnp_Create_Without_Prompting|0\""
+/usr/pluto/bin/MessageSend "$DCERouter" 0 -1001 2 65 5 "$MAC" 52 3 53 5 49 "$DEVICETEMPLATE_Squeezebox_Player" 55 "\"$DEVICEDATA_Pnp_Create_Without_Prompting|1\""
 
 # Build command parameters
 PARAMS=""
