@@ -1,4 +1,4 @@
-import QtQuick 2.3
+import QtQuick 2.2
 
 import "." //used to import the style object as singleton
 

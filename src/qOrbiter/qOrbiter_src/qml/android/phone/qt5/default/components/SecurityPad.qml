@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 Item{
     width: scaleX(20)
     height: remotenumberpad.height

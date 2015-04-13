@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 import QtMultimedia 5.0
 import AudioVisual 1.0
 

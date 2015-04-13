@@ -1,4 +1,4 @@
-import QtQuick 2.3
+import QtQuick 2.2
 import DceScreenSaver 1.0
 import "../../skins-common/qt5/default/components"
 //Tablet - Smokey

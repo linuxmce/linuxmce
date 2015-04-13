@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 /*!
  *\class PauseButtonHandler
  *\brief Handler Component for up Arrow.

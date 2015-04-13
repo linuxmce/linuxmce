@@ -1,4 +1,4 @@
-import QtQuick 2.3
+import QtQuick 2.2
 import org.linuxmce.grids 1.0
 import "../components"
 StyledScreen {

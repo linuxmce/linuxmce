@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 /*!
  *\class PowerToggleHandler
  *\brief Handler Component for Toggling Display.

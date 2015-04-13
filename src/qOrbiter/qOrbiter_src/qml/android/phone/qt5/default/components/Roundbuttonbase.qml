@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 
 Rectangle {
     property alias rnd_but_label: rnd_but_text.text

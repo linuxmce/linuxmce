@@ -1,5 +1,5 @@
 // import QtQuick 1.1 // to target S60 5th Edition or Maemo 5
-import QtQuick 2.3
+import QtQuick 2.2
 
 Item {
     id:sprite_root

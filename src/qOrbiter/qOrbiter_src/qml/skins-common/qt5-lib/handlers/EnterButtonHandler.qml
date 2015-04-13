@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 /*!
  *\class EnterButtonHandler
  *\brief Handler Component for Enter Button.

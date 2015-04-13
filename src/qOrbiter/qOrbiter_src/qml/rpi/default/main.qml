@@ -7,7 +7,7 @@
  *This is a common component used to implement consistent persistent logic.
  */
 
-import QtQuick 2.0
+import QtQuick 2.2
 import QtGraphicalEffects 1.0
 import DceScreenSaver 1.0
 

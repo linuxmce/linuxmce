@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 import QtGraphicalEffects 1.0
 import "../../../skins-common/lib/components"
 Item{

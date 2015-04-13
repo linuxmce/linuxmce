@@ -6,7 +6,7 @@ Common.Screen_63 {
 
 /*
 
-import QtQuick 2.0
+import QtQuick 2.2
 import "../components"
 
 Rectangle {

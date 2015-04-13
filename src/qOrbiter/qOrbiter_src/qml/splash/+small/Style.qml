@@ -1,4 +1,4 @@
-import QtQuick 2.3
+import QtQuick 2.2
 pragma Singleton
 //this is a qml singleton example to use the style object as a singleton, thus allowing one to override the style based on the selectors
 Item{

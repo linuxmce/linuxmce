@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 /*!
  *\class ArrowRightHandler
  *\brief Handler Component for right Arrow.

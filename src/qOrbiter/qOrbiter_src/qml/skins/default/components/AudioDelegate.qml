@@ -1,4 +1,4 @@
-import QtQuick 2.3
+import QtQuick 2.2
 import org.linuxmce.enums 1.0
 import QtGraphicalEffects 1.0
 import "../"

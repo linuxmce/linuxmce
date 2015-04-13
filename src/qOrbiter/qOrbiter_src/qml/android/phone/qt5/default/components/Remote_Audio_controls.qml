@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 
 Column {
     id:audio_column

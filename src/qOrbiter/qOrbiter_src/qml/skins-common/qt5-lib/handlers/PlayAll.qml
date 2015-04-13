@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 /*!
  *\class PlayAll
  *\brief Handler Component for Play All button.

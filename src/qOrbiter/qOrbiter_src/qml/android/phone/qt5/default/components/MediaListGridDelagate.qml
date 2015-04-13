@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.2
 import "../effects"
 import "../components"
 import "../../../skins-common/lib/handlers"
