@@ -893,17 +893,17 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 					uint8 level=0;
 					OpenZWave::Manager::Get()->GetValueAsByte(id, &level);
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed event");
-					SendLightChangedEvents (PKDevice, level);
+					HandleDeviceChangedEvents (PKDevice, level);
 				} else if ( label == "Switch" ) {
 					bool state=false;
 					OpenZWave::Manager::Get()->GetValueAsBool(id, &state);
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed event");
-					SendLightChangedEvents (PKDevice, state ? 100 : 0);
+					HandleDeviceChangedEvents (PKDevice, state ? 100 : 0);
 				} else if ( label == "Level" ) {
 					uint8 level = 0;
 					OpenZWave::Manager::Get()->GetValueAsByte(id, &level);
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State(level) changed, send light changed event");
-					SendLightChangedEvents (PKDevice, level);
+					HandleDeviceChangedEvents (PKDevice, level);
 				} else if ( label == "Luminance" ) {
 					float level = 0;
 					OpenZWave::Manager::Get()->GetValueAsFloat(id, &level);
@@ -961,7 +961,7 @@ void ZWave::OnNotification(OpenZWave::Notification const* _notification, NodeInf
 					SendSensorTrippedEvent(PKDevice, value);
 				} else if (nodeInfo->m_generic == GENERIC_TYPE_SWITCH_BINARY || nodeInfo->m_generic == GENERIC_TYPE_SWITCH_MULTILEVEL) {
 					DCE::LoggerWrapper::GetInstance()->Write(LV_ZWAVE,"State changed, send light changed event: value = %d", value);
-					SendLightChangedEvents (PKDevice, value);
+					HandleDeviceChangedEvents (PKDevice, value);
 				} else {
 					DCE::LoggerWrapper::GetInstance()->Write(LV_WARNING,"No suitable event to send for node basic = %d, generic = %d", typeBasic, nodeInfo->m_generic);
 				}
@@ -1526,6 +1526,15 @@ void ZWave::SendSensorTrippedEvent(unsigned int PK_Device, bool value)
 {
 	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Sending sensor tripped event from PK_Device %d, value %s", PK_Device, (value ? "true" : "false"));
 	SendEvent(PK_Device, EVENT_Sensor_Tripped_CONST, EVENTPARAMETER_Tripped_CONST, value ? "1" : "0");
+}
+
+void ZWave::HandleDeviceChangedEvents(unsigned int PK_Device, int value) {
+	if (value == 0 || value == 100)
+	{
+		SendOnOffEvent(PK_Device, value);
+	} else {
+		SendLightChangedEvents(PK_Device, value);
+	}
 }
 
 void ZWave::SendLightChangedEvents(unsigned int PK_Device, int value)

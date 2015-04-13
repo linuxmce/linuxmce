@@ -87,6 +87,7 @@ public:
 		void SendPowerUsageChangedEvent(unsigned int PK_Device, int value);
 		void SendPowerUsageCumulativeChangedEvent(unsigned int PK_Device, float value);
 		void SendVoltageChangedEvent(unsigned int PK_Device, int value);
+		void HandleDeviceChangedEvents(unsigned int PK_Device, int value);
 		void SendLightChangedEvents(unsigned int PK_Device, int value);
 		void SendBrightnessChangedEvent(unsigned int PK_Device, float value);
 		void SendRelativeHumidityChangedEvent(unsigned int PK_Device, float value);
