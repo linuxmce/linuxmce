@@ -46,10 +46,10 @@ EOF
 		echo "done" > /etc/part_resized
 
 		# tell kernel about new partition table
-		partprobe
-		ret=$?
-
-		if [ "$ret" != "0" ] ; then
+#		partprobe
+#		ret=$?
+#
+#		if [ "$ret" != "0" ] ; then
 			StatsMessage "Rebooting to complete resize"
 			StatsMessage "Rebooting in 5 seconds..."
 			sleep 1
@@ -62,7 +62,7 @@ EOF
 			StatsMessage "Rebooting in 1 seconds..."
 			sleep 1
 			reboot
-		fi
+#		fi
 	fi
 
 	if [ ! -f /etc/sd_resized ] ; then
