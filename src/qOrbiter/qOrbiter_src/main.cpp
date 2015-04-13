@@ -308,7 +308,7 @@ int main(int argc, char* argv[])
              << "-l -- Where to save the log files.  Specify 'dcerouter' to have the messages logged to the DCE Router.  Defaults to stdout." << endl
              << "-o --Switch for frameless MD and desktops." << endl
              << "-s --Switch for fullscreen." << endl
-             << "-z --Screen size setting for testing 0 - small \n 1 - medium\n 2 - large\n 3 - xlarge" << endl;
+             << "-z --Screen size setting for testing 4 - small \n 7 - medium\n 10 - large" << endl;
 
     }
 

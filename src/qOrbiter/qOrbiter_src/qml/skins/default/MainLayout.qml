@@ -39,10 +39,71 @@ Item {
     DefaultHeader {
         id: header
 
+        Component{
+            id:roomSelector
+            RoomSelector{
+
+            }
+        }
+
+        FocusRow{
+            anchors.fill: parent
+            StyledButton{
+                buttonText: qsTr("Home")
+                anchors{
+                    top:parent.top
+                    bottom:parent.bottom
+                    margins: 5
+                }
+                onActivated: manager.currentScreen="Screen_1.qml"
+            }
+            StyledButton{
+                buttonText: roomList.currentRoom
+                anchors{
+                    top:parent.top
+                    bottom:parent.bottom
+                    margins: 5
+                }
+                onActivated: qmlRoot.createPopup(roomSelector)
+            }
+        }
+
     }
 
     Footer {
         id: footer
+
+        FocusRow{
+
+            anchors.fill: parent
+
+            StyledButton{
+                buttonText: qsTr("Sleeping Menu")
+                anchors{
+                    top:parent.top
+                    bottom:parent.bottom
+                    margins: 5
+                }
+            }
+            StyledButton{
+                anchors{
+                    top:parent.top
+                    bottom:parent.bottom
+                    margins: 5
+                }
+                buttonText: qsTr("Advanced Menu")
+                onActivated: manager.currentScreen = "Screen_44.qml"
+            }
+            StyledButton{
+                anchors{
+                    top:parent.top
+                    bottom:parent.bottom
+                    margins: 5
+                }
+
+                buttonText: qsTr("Power")
+            }
+        }
     }
 
 }

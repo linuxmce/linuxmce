@@ -7,7 +7,7 @@ StyledScreen {
 
     GenericListModel {
         id: genericListContainer
-        label: qsTr("Scenarios %1").arg(manager.isProfile)
+        label: qsTr("Scenarios in  %1").arg(roomList.currentRoom)
        anchors.fill: parent
         height: Style.scaleY(85)
 
