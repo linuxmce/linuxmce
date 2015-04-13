@@ -33,8 +33,6 @@ TARGET_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\
 DEB_CACHE="$TARGET_DISTRO-$TARGET_RELEASE-$TARGET_ARCH"
 
 TARGET_KVER_LTS_HES=""
-[[ "precise" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-trusty"
-[[ "trusty" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-utopic"
 
 case "$TARGET_ARCH" in
 	i386|amd64)
@@ -205,14 +203,18 @@ MD_Install_Kernel () {
 		StatsMessage "Running device specific script: $f _kernel - Begin"
 		. "$f" || :
 		$(basename "$f")_kernel || :
-		ret=$?
+		ret="0"
 		StatsMessage "Running device specific script: $f _kernel - End"
 	done
 
-	if [[ "$ret" != 0 ]] ; then
-		StatsMessage "Installing ubuntu kernel headers"
+	if [[ "$ret" != "0" ]] ; then
+		StatsMessage "Setting up HardWare Enablement stack"
 		. /usr/pluto/bin/Config_Ops.sh
+		[[ "precise" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-trusty"
+		[[ "trusty" == "$TARGET_RELEASE" ]] && TARGET_KVER_LTS_HES="-lts-utopic"
 		ConfSet "LTS_HES" "$TARGET_KVER_LTS_HES"
+
+		StatsMessage "Installing ubuntu kernel headers"
 		#Install headers and run depmod for the seamless integraton function, ensure no errors exist
 		apt-get -f -y --no-install-recommends install linux-headers-generic"$TARGET_KVER_LTS_HES"
 		VerifyExitCode "Install linux headers package failed"
@@ -241,7 +243,7 @@ MD_Install_Packages () {
 
 	StatsMessage "Running dist-upgrade"
 	## Update the system
-	apt-get -y --force-yes --no-install-recommends dist-upgrade
+	apt-get -y --no-install-recommends --allow-unauthenticated dist-upgrade
 	VerifyExitCode "Dist-upgrade failed"
 
 	StatsMessage "Installing X.Org"
@@ -251,7 +253,7 @@ MD_Install_Packages () {
 
 	StatsMessage "Installing primary MD packages"
 	apt-get -f -y --no-install-recommends install lmce-md-meta nfs-common openssh-server pastebinit locales
-	VerifyExitCode "Installing pluto-md-meta failed"
+	VerifyExitCode "Installing lmce-md-meta failed"
 
 	if [[ "$INSTALL_KUBUNTU_DESKTOP" != "no" ]]; then
 		StatsMessage "Installing kubuntu desktop packages"
