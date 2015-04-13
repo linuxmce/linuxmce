@@ -5,6 +5,9 @@ mkdir -p /etc/pluto
 DTVENDOR_FILE="/etc/pluto/Disked_DTVendor"
 COMMAND_FILE="/etc/pluto/Disked_Command"
 
+#StatsMessage "Creating softlink for libraspberypi"
+ln -f -s /usr /opt/vc || :
+
 echo "rpi_b" > $DTVENDOR_FILE
 echo "select" > $COMMAND_FILE
 
