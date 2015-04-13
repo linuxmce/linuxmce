@@ -11,6 +11,7 @@ Item {
     property bool triggered:false
     property string buttonText:"ipsum"
     property bool currentSelection:false
+    property alias fontSize:rowLabel.font.pointSize
     signal activated()
     focus: true
     onActiveFocusChanged: {

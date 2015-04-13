@@ -65,5 +65,6 @@
         <file>qml/skins/default/+xlarge/Style.qml</file>
         <file>qml/skins/default/components/MediaOptionRow.qml</file>
         <file>qml/skins/default/components/FocusRow.qml</file>
+        <file>qml/skins/default/components/+small/MultiMediaView.qml</file>
     </qresource>
 </RCC>

@@ -45,6 +45,22 @@ Item {
 
     DefaultHeader {
         id: header
+
+        FocusRow{
+            anchors.fill: parent
+
+            StyledButton{
+                buttonText: qsTr("Home")
+                textSize:Style.appFontSize_list
+                anchors{
+                    top:parent.top
+                    bottom:parent.bottom
+                    margins:5
+                }
+                width:Style.scaleX(30)
+                onActivated:manager.currentScreen="Screen_1.qml"
+            }
+        }
     }
 
     Footer {

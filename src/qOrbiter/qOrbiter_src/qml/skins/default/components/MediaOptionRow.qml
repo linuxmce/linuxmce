@@ -24,6 +24,7 @@ Item{
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
         text:qsTr("Options", "Media Grid Options")
+        fontSize: Style.appFontSize_list
     }
 
     FocusRow {
@@ -42,6 +43,7 @@ Item{
 
         LargeStyledButton{
             buttonText: qsTr("Filters", "Media Filters")
+            fontSize: Style.appFontSize_list
             anchors{
                 top:parent.top
                 bottom:parent.bottom
@@ -49,6 +51,7 @@ Item{
         }
         LargeStyledButton{
             buttonText: qsTr("Play All", "Play All Media on this Screen")
+             fontSize: Style.appFontSize_list
             anchors{
                 top:parent.top
                 bottom:parent.bottom

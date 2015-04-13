@@ -42,6 +42,7 @@ QtObject{
     readonly property int appButtonLargeHeight:manager.isProfile ? scaleY(15) : scaleY(20)
     readonly property int appButtonLargeWidth:manager.isProfile ? scaleX(28) : scaleX(25)
     readonly property int buttonSpacing:5
+
     /* Application Fonts */
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
@@ -50,6 +51,13 @@ QtObject{
     readonly property int appFontSize_header:scaleY(5)
     readonly property int appFontSize_description:scaleY(3)
     readonly property int appFontSize_title:scaleY(4)
+    property int fontSize_small:10
+    property int fontSize_medium:22
+    property int fontSize_large:36
+
+    property int fontSize_listItem:14
+    property int fontSize_listTitle:16
+    property int fontSize_listAccent:10
 
     /* Application Navigation Bars */
     readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(13) : scaleY(15)
