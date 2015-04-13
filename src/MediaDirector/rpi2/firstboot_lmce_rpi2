@@ -91,8 +91,20 @@ firstboot_lmce_rpi2_kernel() {
 }
 
 firstboot_lmce_rpi2_postinst() {
-	StatsMessage "Setting up rpi2 specific boot settings"
+	StatsMessage "Installing RPi X.Org driver fbturbo"
+	apt-get -f -y --no-install-recommends install xserver-xorg-video-fbturbo
 
+	StatsMessage "Setting up X.Org for fbturbo driver"
+	cat <<-EOF >> /etc/X11/xorg.conf
+		Section "Device"
+		    Identifier "Raspberry Pi FBDEV"
+		    Driver "fbturbo"
+		    Option "fbdev" "/dev/fb0"
+		    Option "SwapbuffersWait" "true"
+		EndSection
+		EOF
+
+	StatsMessage "Setting up rpi2 specific boot settings"
 	. /usr/pluto/bin/Config_Ops.sh
 
 	ConfSet "AVWizardOverride" "0"
