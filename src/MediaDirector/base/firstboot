@@ -189,7 +189,7 @@ MD_Update () {
 	apt-get -f -y install
 
 	# FIXME: need to fix bootscripts?  need to fix/update install-scripts
-	apt-get -f -y install pluto-boot-scripts
+	apt-get -f -y install --no-install-recommends pluto-boot-scripts
 	VerifyExitCode "pluto-boot-scripts failed"
 }
 
@@ -369,7 +369,7 @@ status() {
 
 case "$1" in
 	start|"")
-		$1
+		start
 		retval=$?
 		;;
 	restart|reload|force-reload)
