@@ -5,7 +5,7 @@ Item {
     width: Style.scaleX(65)
     height: Style.scaleY(65)
     property string title:"Ipsum"
-    property Item dialogContent:undefined
+    property Component dialogContent:undefined
     focus:true
     Component.onCompleted:{ forceActiveFocus(); console.log(title+" is loaded.")}
     onActiveFocusChanged: if(activeFocus)contentLoader.item.forceActiveFocus();

@@ -3,7 +3,10 @@ import QtGraphicalEffects 1.0
 import AudioVisual 1.0
 import QtMultimedia 5.0
 import "."
+import "../."
 import "components"
+
+
 /*! This File is designed to be the main layout that can be switched in and out for various forms */
 Item {
     id:layout

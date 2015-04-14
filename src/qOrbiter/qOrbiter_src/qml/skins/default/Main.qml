@@ -15,32 +15,32 @@ Item{
     property ListModel scenarios:ListModel{
         id:scenariosList
         ListElement{
-            name:qsTr("Lights")
+            name:"Lights"
             modelName:0
             floorplantype:2
         }
         ListElement{
-            name:qsTr("Media")
+            name:"Media"
             modelName:2
             floorplantype:5
         }
         ListElement{
-            name:qsTr("Climate")
+            name:"Climate"
             modelName:1
             floorplantype:1
         }
         ListElement{
-            name:qsTr("Telecom")
+            name:"Telecom"
             modelName:3
             floorplantype:3
         }
         ListElement{
-            name:qsTr("Security")
+            name:"Security"
             modelName:"currentRoomSecurity"
             floorplantype:4
         }
         ListElement{
-            name:qsTr("Advanced")
+            name:"Advanced"
             modelName:"advancedMenu"
             floorplantype:-1
         }
@@ -57,6 +57,7 @@ Item{
         case Qt.Key_R: console.log("Rotating"); manager.setDesiredOrientation(manager.isProfile ? Qt.LandscapeOrientation : Qt.PortraitOrientation); break;
         default:console.log("Key "+event.key+" is unhandled."); break;
         }
+
     }
 
     MainLayout{

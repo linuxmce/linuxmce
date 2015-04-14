@@ -30,6 +30,8 @@
         <file>qml/skins/default/screens/Screen_44.qml</file>
         <file>qml/skins/default/screens/Screen_47.qml</file>
         <file>qml/skins/default/screens/Screen_X.qml</file>
+        <file>qml/skins/default/screens/+xlarge/Screen_1.qml</file>
+        <file>qml/skins/default/screens/+xlarge/Screen_44.qml</file>
         <file>qml/SkinError.qml</file>
         <file>qml/skins/default/components/StyledButton.qml</file>
         <file>qml/skins/default/components/StyledHeader.qml</file>
@@ -47,24 +49,23 @@
         <file>qml/skins/default/components/FadeImage.qml</file>
         <file>qml/skins/default/components/LargeStyledButton.qml</file>
         <file>qml/skins/default/components/QmlPictureFrame.qml</file>
-        <file>qml/skins/default/images/arrow.png</file>
-        <file>qml/skins/default/images/options.png</file>
-        <file>qml/skins/default/images/splash_bg.png</file>
-        <file>qml/skins/default/images/vertical_arrow.png</file>
-        <file>qml/skins/default/screens/+xlarge/Screen_1.qml</file>
-        <file>qml/skins/default/screens/+xlarge/Screen_44.qml</file>
-        <file>qml/skins/default/+medium/Style.qml</file>
-        <file>qml/skins/default/+small/Style.qml</file>
-        <file>qml/skins/default/+small/MainLayout.qml</file>
+        <file>qml/skins/default/components/MediaOptionRow.qml</file>
+        <file>qml/skins/default/components/FocusRow.qml</file>
         <file>qml/skins/default/components/RoomSelector.qml</file>
         <file>qml/skins/default/components/MultiMediaView.qml</file>
         <file>qml/skins/default/components/VideoDelegate.qml</file>
         <file>qml/skins/default/components/AudioDelegate.qml</file>
         <file>qml/skins/default/components/FileDetails.qml</file>
+        <file>qml/skins/default/components/+small/MultiMediaView.qml</file>
+        <file>qml/skins/default/images/arrow.png</file>
+        <file>qml/skins/default/images/options.png</file>
+        <file>qml/skins/default/images/splash_bg.png</file>
+        <file>qml/skins/default/images/vertical_arrow.png</file>
+        <file>qml/skins/default/+medium/Style.qml</file>
+        <file>qml/skins/default/+small/Style.qml</file>
+        <file>qml/skins/default/+small/MainLayout.qml</file>
         <file>qml/skins/default/+xlarge/MainLayout.qml</file>
         <file>qml/skins/default/+xlarge/Style.qml</file>
-        <file>qml/skins/default/components/MediaOptionRow.qml</file>
-        <file>qml/skins/default/components/FocusRow.qml</file>
-        <file>qml/skins/default/components/+small/MultiMediaView.qml</file>
+        <file>qml/skins/default/components/WaitSpinner.qml</file>
     </qresource>
 </RCC>

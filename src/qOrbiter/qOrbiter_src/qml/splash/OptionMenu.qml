@@ -11,7 +11,7 @@ Item{
     ListModel{
         id:languages
         ListElement{
-            name:qsTr("English")
+            name:"English"
             val:"en_US"
         }
         ListElement{
