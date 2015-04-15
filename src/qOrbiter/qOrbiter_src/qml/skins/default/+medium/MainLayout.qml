@@ -47,7 +47,16 @@ Item {
         }
 
         FocusRow{
-            anchors.fill: parent
+            id:actions
+            anchors{
+                top:parent.top
+                left:parent.left
+                leftMargin:5
+                bottom:parent.bottom
+            }
+
+            spacing:5
+            width:childrenRect.width
             StyledButton{
                 buttonText: qsTr("Home")
                 anchors{
@@ -67,14 +76,13 @@ Item {
                 onActivated: qmlRoot.createPopup(roomSelector)
             }
         }
-
     }
 
     Footer {
         id: footer
 
         FocusRow{
-
+            spacing:5
             anchors.fill: parent
 
             StyledButton{

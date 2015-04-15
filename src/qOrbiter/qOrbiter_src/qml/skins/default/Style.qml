@@ -35,7 +35,7 @@ QtObject{
     readonly property color appbutton_cancel_color:"#f26c4f"
     readonly property color appbutton_disabled_color:"#464646"
     readonly property color appbutton_color:appcolor_background
-    readonly property int appButtonHeight:manager.isProfile ? scaleY(4) : scaleY(5.5)
+    readonly property int appButtonHeight:manager.isProfile ? scaleY(10) : scaleY(11)
     readonly property int appButtonWidth: manager.isProfile ? scaleX(10) : scaleX(6)
     readonly property int appButtonNumberPadHeight:manager.isProfile ? scaleY(12) : scaleY(18)
     readonly property int appButtonNumberPadWidth: manager.isProfile ? scaleX(18) : scaleX(12)
@@ -52,7 +52,7 @@ QtObject{
     readonly property int appFontSize_list:manager.isProfile ? scaleY(2) : scaleY(4)
     readonly property int appFontSize_header:scaleY(5)
     readonly property int appFontSize_description:scaleY(3)
-    readonly property int appFontSize_title:scaleY(4)
+    readonly property int appFontSize_title:manager.isProfile ? scaleY(4) :scaleY(6.5)
 
     property int fontSize_small:10
     property int fontSize_medium:22

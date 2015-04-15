@@ -4,7 +4,7 @@ import "../"
 Item{
     id:sw_root
     width: Style.scaleX(12)
-    height: Style.listViewItemHeight
+    height: Style.scaleY(6)
     property bool enabled:false
     property string switchLabel:"ipsum"
     signal triggered()
@@ -15,7 +15,7 @@ Item{
         radius: height
         color: "white"
         width: parent.width
-        height: Style.appButtonHeight
+        height: parent.height
         
         anchors{
             right:parent.right

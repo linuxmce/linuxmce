@@ -78,7 +78,7 @@ StyledScreen {
             height:Style.scaleY(15)
             buttonText: qsTr("Screen Information")
             onActivated: {
-                qmlRoot.createPopup(settingsComponent)
+                qmlRoot.createPopup(screen_info)
             }
 
         }
@@ -126,6 +126,24 @@ StyledScreen {
         id:compList
         GenericPopup{
             title:qsTr("Components Sample")
+        }
+    }
+
+    Component{
+        id:screen_info
+        GenericPopup{
+            title:qsTr("Screen Information")
+            content:Item{
+
+                Column{
+                    anchors.fill: parent
+
+                    StyledText{
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:screenInfo.primaryScreen.orientation
+                    }
+                }
+            }
         }
     }
 }

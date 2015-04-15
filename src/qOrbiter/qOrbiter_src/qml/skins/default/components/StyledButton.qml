@@ -6,13 +6,6 @@ Item{
     height: Style.appButtonHeight
     width:Style.appButtonWidth
 
-    //    anchors{
-    //        left: button_label.left
-    //        right: button_label.right
-    //        top:button_label.top
-    //        bottom:button_label.bottom
-    //    }
-
     Component.onCompleted: {
         if(useHandler ){
             fly_trap.anchors.fill = undefined
@@ -22,7 +15,7 @@ Item{
     }
     smooth: true
 
-    property string phil: fly_trap.pressed ? Style.appbutton_confirm_color: Style.appbutton_confirm_color
+    property string phil: fly_trap.pressed ? Style.appbutton_confirm_color: Style.appcolor_background_list
     property int textSize:Style.appFontSize_list
     property alias buttonText:button_label.text
     property alias txtObj:button_label

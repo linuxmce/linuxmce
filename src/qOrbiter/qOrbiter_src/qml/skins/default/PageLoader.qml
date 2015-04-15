@@ -12,7 +12,7 @@ Loader {
     // visible:qml_root.uiOn
     property string nextScreen:manager.currentScreen
     property string currentScreen:""
-
+    Component.onCompleted: manager.currentScreen="Screen_1.qml"
     Connections{
         target:manager
         onScreenChange:{

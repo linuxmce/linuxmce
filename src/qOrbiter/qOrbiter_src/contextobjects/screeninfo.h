@@ -62,7 +62,7 @@ class ScreenObject : public QObject
     Q_PROPERTY(int widthMM READ widthMM() NOTIFY measurementChanged)
     Q_PROPERTY(int heightInches READ heightInches() NOTIFY measurementChanged  )
     Q_PROPERTY(int widthInches READ widthInches() NOTIFY measurementChanged  )
-
+    Q_PROPERTY(QString stringDeviceSize READ stringDeviceSize()  NOTIFY diagonalSizeChanged)
     Q_PROPERTY(double diagonalSize READ diagonalSize() NOTIFY diagonalSizeChanged)
     Q_PROPERTY(double diagonalInches READ diagonalInches() NOTIFY diagonalSizeChanged)
     Q_PROPERTY(int width READ width() NOTIFY sizeChanged)
@@ -96,27 +96,34 @@ public:
         m_width(pixel_width),
         m_deviceSize(ScreenData::Device_Small),
         m_devicePixelSize(ScreenData::Device_240),
-        m_pixelScale(ScreenData::PixelDensity_LOW)
+        m_pixelScale(ScreenData::PixelDensity_LOW),
+        qs_deviceSize("small")
     {
         setDiagonalSize(sqrt( pow( (double)m_heightMM,2.0)+pow((double)m_widthMM, 2.0) ));
 
         qDebug() << " Handling Device " <<  heightInches() << "h x " << widthInches() << "w  device measured at " << diagonalInches() << " descriptively";
         if(  diagonalInches() <= 4.5 ){
+            setStringDeviceSize(tr("Small"));
             setScreenSize(ScreenData::Device_Small);
+
             qDebug() << "Set Size Selector to small";
 
         } else if (diagonalInches() <= 7){
-            setScreenSize(ScreenData::Device_Medium);
+            setStringDeviceSize(tr("Medium"));
+            setScreenSize(ScreenData::Device_Medium);            
             qDebug() << "Set Size Selector to medium";
 
         } else if (diagonalInches() <= 10 ) {
+            setStringDeviceSize(tr("Large"));
             setScreenSize(ScreenData::Device_Large);
             qDebug() << "Set Size Selector to large";
 
         } else if ( diagonalInches() <= 12 ) {
+            setStringDeviceSize(tr("XLarge"));
             setScreenSize(ScreenData::Device_XLarge);
             qDebug() << "Set Size Selector to xlarge";
         } else {
+            setStringDeviceSize(tr("XLarge"));
             setScreenSize(ScreenData::Device_XLarge);
             qDebug() << "Set Size Selector to xlarge";
         }
@@ -160,6 +167,7 @@ public:
     double diagonalInches(){return m_diagonalSize*0.0393701;}
 
 
+    QString stringDeviceSize(){return qs_deviceSize;}
     QString orientation() { return getOrientationString(m_orientation); }
     QString primaryOrientation(){ return getOrientationString(m_primaryOrientation); }
     QString nativeOrientation(){ return getOrientationString(m_nativeOrientation); }
@@ -259,7 +267,7 @@ private slots:
     void setScreenGeometry(QRect s){m_height= s.height(); m_width = s.width(); emit geometryChanged(); }
     void setOrientation(Qt::ScreenOrientation e) {m_orientation = e; emit orientationChanged();}
     void setRefreshRate(qreal r) {m_refreshRate = r; emit refreshRateChanged();}
-
+    void setStringDeviceSize(QString s){qs_deviceSize = s; }
 private:
     /** Current Screen */
     double m_logicalDpi;
@@ -268,6 +276,7 @@ private:
     QString m_screenName;
     Qt::ScreenOrientation m_primaryOrientation;
     Qt::ScreenOrientation m_nativeOrientation;
+    QString qs_deviceSize;
     qreal m_refreshRate;
     int m_height;
     int m_width;

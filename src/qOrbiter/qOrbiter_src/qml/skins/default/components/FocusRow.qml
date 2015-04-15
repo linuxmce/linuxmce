@@ -5,6 +5,7 @@ import "../."
 
 Row{
     id:optionContainer
+    spacing:5
     focus:true
     property int currentIndex:-1
     onActiveFocusChanged: if(activeFocus) currentIndex=0; else currentIndex = -1

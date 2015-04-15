@@ -67,5 +67,7 @@
         <file>qml/skins/default/+xlarge/MainLayout.qml</file>
         <file>qml/skins/default/+xlarge/Style.qml</file>
         <file>qml/skins/default/components/WaitSpinner.qml</file>
+        <file>qml/skins/default/+medium/MainLayout.qml</file>
+        <file>qml/skins/default/screens/+medium/Screen_1.qml</file>
     </qresource>
 </RCC>

@@ -8,8 +8,12 @@ StyledScreen {
     GenericListModel {
         id: genericListContainer
         label: qsTr("Scenarios in  %1").arg(roomList.currentRoom)
-       anchors.fill: parent
-        height: Style.scaleY(85)
+       anchors{
+           left:parent.left
+           top:parent.top
+           right:parent.right
+       }
+        height: Style.appButtonHeight *6
 
         model:qmlRoot.scenarios
         delegate:  Item {
@@ -27,7 +31,7 @@ StyledScreen {
                     left:parent.left
                     verticalCenter: parent.verticalCenter
                 }
-                font.pointSize: manager.isProfile ? Style.scaleY(3) : Style.scaleY(5)
+                font.pointSize: Style.appFontSize_list//manager.isProfile ? Style.scaleY(3) : Style.scaleY(5)
                 text:name
             }
             ListView{

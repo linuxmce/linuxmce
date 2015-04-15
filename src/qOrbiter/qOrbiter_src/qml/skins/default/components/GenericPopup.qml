@@ -4,7 +4,6 @@ import "../"
 Item{
     id:genericPopup
     anchors.fill: parent
-
     focus: true
     function close(){
         layout.forceActiveFocus();

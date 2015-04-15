@@ -25,7 +25,7 @@ Item{
         id:label
         anchors.centerIn: hdr
         text:genericListContainer.label
-        font.pointSize: Style.appFontSize_title
+        fontSize: Style.appFontSize_title
         color:"white"
     }
     ListView{
