@@ -203,7 +203,8 @@ void WWO::set_areadisc(const string &areadisc){
 
 string WWO::get_icon(const string &code){
 	string icon;
-	icon = icons_.find(code)->second;
+	if (icons_.find(code) != icons_.end())
+		icon = icons_.find(code)->second;
 	return icon;
 }
 
