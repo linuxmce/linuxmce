@@ -408,8 +408,6 @@ int main(int argc, char* argv[])
         orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
 #endif
         orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
-
-
 #if defined(Q_OS_IOS)
         w.setMobileStorage(localLogger.logLocation);
 #endif
@@ -421,8 +419,8 @@ int main(int argc, char* argv[])
             orbiterWin.setRouterAddress(QString::fromStdString(sRouter_IP));
             w.m_ipAddress = QString::fromStdString(sRouter_IP);
         }
-        orbiterWin.setDeviceNumber(PK_Device);
-        w.iPK_Device=PK_Device;
+       // orbiterWin.setDeviceNumber(PK_Device);
+
 #endif
 #endif
 
@@ -801,7 +799,6 @@ int main(int argc, char* argv[])
             PK_Device = w.getDeviceNumber();
             orbiterWin.setDeviceNumber(PK_Device);
             orbiterWin.setRouterAddress(w.getInternalIp());
-
         }
         else{
             qDebug() << "Nothing set, using defaults.";

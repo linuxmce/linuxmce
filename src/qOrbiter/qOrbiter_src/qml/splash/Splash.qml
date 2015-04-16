@@ -18,7 +18,7 @@ Item {
     Component.onCompleted: {
         console.log("Splash is loaded")
         splashLogic.state="connecting"
-        window.qmlSetupLmce(window.deviceno, window.router)
+        window.qmlSetupLmce(manager.iPK_Device, manager.m_ipAddress)
         splashLogic.forceActiveFocus()
         state="connecting"
     }

@@ -86,7 +86,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,SettingInt
     appWidth(view->width()),
     settingsInterface(appSettings),
     m_style(0),
-    m_fontDir("")
+    m_fontDir(""),
+    iPK_Device(-1)
 {
 #ifdef __ANDROID__
     int testSize=-1;
@@ -94,7 +95,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,SettingInt
     if(settingsInterface->ready){
 
         if(restoreSettings()){
-
+            qDebug() << "Settings Restored.";
         }
     }
     m_testScreenSize =testSize;
@@ -1745,11 +1746,9 @@ bool qorbiterManager::readLocalConfig(){
 
     if (!localConfigFile.open(QFile::ReadWrite)) {
         setDceResponse(localConfigFile.errorString());
-        setDceResponse("Not Able to read config"+localConfigFile.fileName());
-
+        setDceResponse("Not Able to read config::"+localConfigFile.fileName());
         setInternalIp("192.168.80.1");
         currentSkin="default";
-        setDeviceNumber(-1);
         setDceResponse("Failed to read config, exiting func");
         return false;
     } else {
@@ -1809,6 +1808,7 @@ bool qorbiterManager::readLocalConfig(){
                 b_localLoading=true;
             }
 
+            qDebug() << Q_FUNC_INFO << "Reading device number ";
             if(configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong() !=0)
             {
                 setDeviceNumber(iPK_Device = configVariables.namedItem("device").attributes().namedItem("id").nodeValue().toLong());}
@@ -1859,8 +1859,6 @@ bool qorbiterManager::readLocalConfig(){
 #else
         setDceResponse("Finished READ of config.xml at::"+appConfigPath);
 #endif
-
-
         return true;
     }
 }
@@ -1870,8 +1868,7 @@ bool qorbiterManager::readLocalConfig(){
 bool qorbiterManager::writeConfig()
 {
     settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID, iPK_Device);
-
-    qDebug() <<  settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
+    qDebug() <<  Q_FUNC_INFO << settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
     /* old below this line and will be replaced */
     qDebug() << Q_FUNC_INFO;
     //   setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
@@ -2583,7 +2580,6 @@ void qorbiterManager::setupUiSelectors(){
 
 bool qorbiterManager::restoreSettings()
 {
-
 
     int tId= settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
     qDebug() << Q_FUNC_INFO << "Settings device id" << tId;
