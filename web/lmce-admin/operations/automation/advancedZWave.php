@@ -83,6 +83,9 @@ function advancedZWave($output,$dbADO){
 			    dt.id = "statusTab_"+node.id;
 			    tabSectionEl.appendChild(dt);
 			    dt.insert("<p>Status: "+(node.isFailed ? "FAILED" : "ok")+"</p>");
+			    if (node.isFailed)
+			    	    dt.insert("<p class=\"command\" onclick=\"replaceNode("+node.id+");\">Replace node</p>");
+
 			    dt.insert("<p>Awake: "+(node.isAwake ? "Yes" : "No")+"</p>");
 			    dt.insert("<p>OpenZWave query stage: "+node.queryStage+"</p>");
 
@@ -229,6 +232,10 @@ function advancedZWave($output,$dbADO){
 		}
 		function healNode(id) {
 		    performCommand({healNode:id});
+		}
+		function replaceNode(id) {
+		    if (confirm("To replace a failed node, press OK, then perform the inclusion operation(se devices manual) on the new device."))
+		        performCommand({replaceNode:id});
 		}
 		function testNode(id) {
 		    performCommand({testNode:id});
@@ -550,7 +557,7 @@ td.cell_config:hover {
 	    print("{ \"ok\": ".($retArray[0].strrpos("OK") >= 0 ? 1 : 0)." }");
 	    exit;
 	}
-	if (isset($_POST['softReset']) || isset($_POST['healNetwork']) || isset($_POST['testNetwork']) || isset($_POST['networkUpdate']) || isset($_POST['addAssociation']) || isset($_POST['removeAssociation']) || isset($_POST['addNode']) || isset($_POST['removeNode']) || isset($_POST['cancelControllerCommand']) || isset($_POST['setPolling'])) {
+	if (isset($_POST['softReset']) || isset($_POST['healNetwork']) || isset($_POST['testNetwork']) || isset($_POST['networkUpdate']) || isset($_POST['addAssociation']) || isset($_POST['removeAssociation']) || isset($_POST['addNode']) || isset($_POST['removeNode']) || isset($_POST['cancelControllerCommand']) || isset($_POST['setPolling']) || isset($_POST['replaceNode'])) {
 
 	    header('Content-type: application/json');
 
@@ -583,6 +590,9 @@ td.cell_config:hover {
 		$label = $_POST['label'];
 		$state = $_POST['state'];
                 $cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 966 2 '.$pkDevice.' 5 "'.$label.'" 220 "'.($state == "true" ? '1' : '').'" 225 1';
+	    } else if (isset($_POST['replaceNode'])) {
+	        $id = $_POST['replaceNode'];
+	    	$cmd='/usr/pluto/bin/MessageSend localhost 0 '.$pkZWave.' 1 788 51 "RFN'.$id.'"';
 	    }
 	    $ret=exec_batch_command($cmd,1);
 	    $retArray=explode("\n",$ret);
