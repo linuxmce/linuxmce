@@ -1559,7 +1559,7 @@ bool qorbiterManager::loadSkins(QUrl base)
 #if defined (QT5)
             tskinModel->addSkin("default");
 #else
-            tskinModel->addSkin("STB");
+            tskinModel->addSkin("default");
 #endif
 
         } else {
