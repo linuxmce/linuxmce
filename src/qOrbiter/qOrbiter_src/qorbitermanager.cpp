@@ -6,12 +6,12 @@
    it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
+
     QOrbiter is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     along with QOrbiter.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -79,7 +79,7 @@ qorbiterManager::qorbiterManager(QQuickView *view, AndroidSystem *jniHelper,Sett
 qorbiterManager::qorbiterManager(QDeclarativeView *view, AndroidSystem *jniHelper, SettingInterface *appSettings,  QObject *parent) :
     #else
 qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,SettingInterface *appSettings,  QObject *parent) :
-    
+
     #endif
     QObject(parent),qorbiterUIwin(view),
     appHeight(view->height()),
@@ -148,7 +148,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,SettingInt
         androidHelper->updateBuildInformation();
     }
 #endif
-    
+
     setDceResponse("Starting...");
     if (readLocalConfig()){
         emit localConfigReady(true);
@@ -1748,7 +1748,7 @@ bool qorbiterManager::readLocalConfig(){
         setDceResponse("Not Able to read config"+localConfigFile.fileName());
 
         setInternalIp("192.168.80.1");
-        currentSkin= deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "STB" : "default";
+        currentSkin="default";
         setDeviceNumber(-1);
         setDceResponse("Failed to read config, exiting func");
         return false;
@@ -1792,23 +1792,9 @@ bool qorbiterManager::readLocalConfig(){
             QString configSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
 #endif
             if (configSkin.isEmpty()){
-#ifdef __ANDROID__
-                currentSkin = "default";
-#elif QT5
                 currentSkin = "noir";
-#else
-                currentSkin = deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "STB" : "default";
-#endif
             }
-            else{
 
-                if(configSkin=="default" && deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST){
-                    currentSkin="STB";
-                } else {
-                    currentSkin =configSkin;
-                }
-
-            }
             QString tRp = configVariables.namedItem("routerport").attributes().namedItem("id").nodeValue();
             if(tRp.isEmpty()){
                 setRouterPort("80");
@@ -2321,7 +2307,7 @@ void qorbiterManager::setActiveSkin(QString name){
 
     }
     else {
-        tskinModel->setActiveSkin(deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "STB" : name);
+        tskinModel->setActiveSkin(deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "default" : name);
     }
 
     qDebug("Setting Skin");
@@ -2576,15 +2562,15 @@ void qorbiterManager::setupUiSelectors(){
 #endif
 
 #elif defined Q_OS_LINUX
-  //  m_localQmlPath=qApp->applicationDirPath()+"/";
+    //  m_localQmlPath=qApp->applicationDirPath()+"/";
     m_localQmlPath="qrc:/qml/";
-    #ifdef simulate
+#ifdef simulate
 
-    #ifdef NOQRC
+#ifdef NOQRC
     m_localQmlPath="../qOrbiter_src/qml/";
-    #else
+#else
     m_localQmlPath="qrc:/qml/";
-    #endif
+#endif
 
 #endif
 
@@ -2602,7 +2588,7 @@ bool qorbiterManager::restoreSettings()
     int tId= settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
     qDebug() << Q_FUNC_INFO << "Settings device id" << tId;
     QString trouter = settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router).toString();
-    mb_useLocalSkins =true;// = settingsInterface->getOption(SettingsInterfaceType::Settings_UI, SettingsKeyType::Setting_Ui_NetworkLoading).toBool();
+    mb_useLocalSkins = settingsInterface->getOption(SettingsInterfaceType::Settings_UI, SettingsKeyType::Setting_Ui_NetworkLoading).toBool();
     qDebug() << "Using local skins?" << mb_useLocalSkins;
     if(tId && !trouter.isEmpty()){
         qDebug() << Q_FUNC_INFO << "Read Device Number";

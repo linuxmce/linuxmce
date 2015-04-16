@@ -86,15 +86,15 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #elif QT5
 #ifndef  ANDROID
 #ifndef Q_OS_IOS
-//    mainView.setSurfaceType(QSurface::OpenGLSurface);
+    //    mainView.setSurfaceType(QSurface::OpenGLSurface);
 
-//    QSurfaceFormat format;
-//    format.setAlphaBufferSize(8);
-//    format.setRenderableType(QSurfaceFormat::OpenGL);
+    //    QSurfaceFormat format;
+    //    format.setAlphaBufferSize(8);
+    //    format.setRenderableType(QSurfaceFormat::OpenGL);
 
-//    mainView.setFormat(format);
-   mainView.setColor(QColor(Qt::transparent));
-//    mainView.setClearBeforeRendering(true);
+    //    mainView.setFormat(format);
+    mainView.setColor(QColor(Qt::transparent));
+    //    mainView.setClearBeforeRendering(true);
 #endif
 #endif
     if(frameless == true){
@@ -133,9 +133,15 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #elif defined(Q_OS_IOS)
         mainView.showFullScreen();
 #else
-        mainView.setWidth(800);
-        mainView.setHeight(600);
-        mainView.showNormal();
+
+        if(fullScreen){
+             mainView.showFullScreen();
+        } else {
+            mainView.setWidth(800);
+            mainView.setHeight(600);
+            mainView.showNormal();
+        }
+
 #endif
     }
     mainView.rootContext()->setContextProperty("appW", mainView.width());
@@ -178,7 +184,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #endif
 
 #ifdef RPI
-   // mainView.setSurfaceType(QSurface::OpenGLSurface);
+    // mainView.setSurfaceType(QSurface::OpenGLSurface);
 
     qDebug() << "is opengl? " << mainView.openglContext();
     qDebug() << "surface type " << mainView.surfaceType();
