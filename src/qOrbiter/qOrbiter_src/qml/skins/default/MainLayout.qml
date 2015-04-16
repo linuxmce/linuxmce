@@ -95,6 +95,7 @@ Item {
                 onActivated: manager.currentScreen = "Screen_44.qml"
             }
             StyledButton{
+
                 anchors{
                     top:parent.top
                     bottom:parent.bottom
