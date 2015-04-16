@@ -10,5 +10,4 @@ case "$HOST_ARCH" in
 	armhf)
 		make distclean; qmake qOrbiterMaster.pro CONFIG+=RPI; make distclean; qmake qOrbiterMaster.pro CONFIG+=RPI; make clean; make $make_jobs
 		;;
-	fi
 fi
