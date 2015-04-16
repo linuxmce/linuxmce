@@ -45,7 +45,7 @@ Item{
 
     Loader{
         anchors{
-            top:popup_label.bottom
+            top:hdr_bg.bottom
             left:parent.left
             right:parent.right
             bottom:parent.bottom            

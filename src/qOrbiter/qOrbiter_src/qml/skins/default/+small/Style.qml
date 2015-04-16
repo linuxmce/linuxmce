@@ -49,7 +49,7 @@ QtObject{
     readonly property int appFontSize_list:manager.isProfile ? scaleY(2) : scaleY(4)
     readonly property int appFontSize_header:scaleY(5)
     readonly property int appFontSize_description:scaleY(3)
-    readonly property int appFontSize_title:scaleY(4)
+    readonly property int appFontSize_title:manager.isProfile ? scaleY(3) :scaleY(4)
     property int fontSize_small:10
     property int fontSize_medium:22
     property int fontSize_large:36
