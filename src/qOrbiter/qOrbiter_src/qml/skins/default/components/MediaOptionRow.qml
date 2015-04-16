@@ -51,7 +51,8 @@ Item{
         }
         LargeStyledButton{
             buttonText: qsTr("Play All", "Play All Media on this Screen")
-             fontSize: Style.appFontSize_list
+             fontSize: Style.appFontSize_description
+             width: Style.appButtonWidth
             anchors{
                 top:parent.top
                 bottom:parent.bottom

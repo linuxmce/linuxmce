@@ -805,7 +805,7 @@ int main(int argc, char* argv[])
         }
         else{
             qDebug() << "Nothing set, using defaults.";
-            orbiterWin.setDeviceNumber(settings.getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt());
+            //orbiterWin.setDeviceNumber(settings.getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt());
             orbiterWin.setRouterAddress(w.getInternalIp());
             sRouter_IP = w.getInternalIp().toStdString();
             PK_Device=w.getDeviceNumber();

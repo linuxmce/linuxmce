@@ -5,7 +5,7 @@ import "../"
 Item {
     id:stbDelegate
     height:parent.height
-    width: Style.scaleX(16)
+    width: Style.appButtonWidth
     property bool arrow:false
     property bool rotateUp:false
     property bool triggered:false

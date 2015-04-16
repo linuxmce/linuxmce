@@ -1563,7 +1563,7 @@ bool qorbiterManager::loadSkins(QUrl base)
 #endif
 
         } else {
-            tskinModel->addSkin("default,STB");
+            tskinModel->addSkin("default");
         }
 
     }
@@ -1885,6 +1885,7 @@ bool qorbiterManager::writeConfig()
 {
     settingsInterface->setOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID, iPK_Device);
 
+    qDebug() <<  settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
     /* old below this line and will be replaced */
     qDebug() << Q_FUNC_INFO;
     //   setDceResponse( QString::fromLocal8Bit(Q_FUNC_INFO) << "Writing Local Config");
@@ -2166,9 +2167,9 @@ void qorbiterManager::toggleSkinType()
         qDebug() << tskinModel->m_baseUrl;
         loadSkins(tskinModel->m_baseUrl);
 
-        currentSkin=deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "STB" : "default";
+        currentSkin= "default";
         if(writeConfig()){
-            swapSkins(deviceTemplate == DEVICETEMPLATE_OnScreen_qOrbiter_CONST ? "STB" : "default");
+            swapSkins( "default");
         }
     }
 }
@@ -2596,10 +2597,12 @@ void qorbiterManager::setupUiSelectors(){
 
 bool qorbiterManager::restoreSettings()
 {
+
+
     int tId= settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
-    qDebug() << tId;
+    qDebug() << Q_FUNC_INFO << "Settings device id" << tId;
     QString trouter = settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router).toString();
-    mb_useLocalSkins = settingsInterface->getOption(SettingsInterfaceType::Settings_UI, SettingsKeyType::Setting_Ui_NetworkLoading).toBool();
+    mb_useLocalSkins =true;// = settingsInterface->getOption(SettingsInterfaceType::Settings_UI, SettingsKeyType::Setting_Ui_NetworkLoading).toBool();
     qDebug() << "Using local skins?" << mb_useLocalSkins;
     if(tId && !trouter.isEmpty()){
         qDebug() << Q_FUNC_INFO << "Read Device Number";

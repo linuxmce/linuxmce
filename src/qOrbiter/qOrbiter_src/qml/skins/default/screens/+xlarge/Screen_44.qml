@@ -94,6 +94,16 @@ StyledScreen {
             buttonText: qsTr("Ping Test")
         }
         LargeStyledButton{
+            id:resetDev
+            height:Style.scaleY(15)
+            buttonText: qsTr("Reset Device Id")
+            onActivated:{
+                manager.setDeviceNumber(-1)
+                manager.writeConfig()
+                manager.exitApp()
+            }
+        }
+        LargeStyledButton{
             id:componentList
             height:Style.scaleY(15)
             buttonText: qsTr("Component List")

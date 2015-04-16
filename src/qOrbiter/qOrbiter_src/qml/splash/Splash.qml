@@ -5,8 +5,9 @@ import QtQuick 2.2
 import "."
 Item {
     id: splashLogic
-    anchors.fill: parent
-    function scaleX(w){
+   height: manager.appHeight
+   width: manager.appWidth
+   function scaleX(w){
         return w/100*manager.appWidth
     }
 
