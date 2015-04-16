@@ -1,0 +1,14 @@
+#!/bin/bash
+
+make_jobs="$1"
+HOST_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\1/g' | head -1)
+
+case "$HOST_ARCH" in
+	i386|amd64)
+		make distclean; qmake qOrbiterMaster.pro CONFIG+=opengl; make distclean; qmake qOrbiterMaster.pro CONFIG+=opengl; make clean; make $make_jobs
+		;;
+	armhf)
+		make distclean; qmake qOrbiterMaster.pro CONFIG+=RPI; make distclean; qmake qOrbiterMaster.pro CONFIG+=RPI; make clean; make $make_jobs
+		;;
+	fi
+fi
