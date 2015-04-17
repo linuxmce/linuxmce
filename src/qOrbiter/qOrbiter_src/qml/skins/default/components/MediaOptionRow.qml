@@ -42,7 +42,7 @@ Item{
                         width: parent.width
                         buttonRadius: 0
                         buttonText: name
-                        onActivated: selectionView.model.setSelectionStatus(name)
+                        onActivated: {selectionView.model.setSelectionStatus(name); arrow=!arrow}
                         arrow:selectionView.model.getSelectionStatus(name)
                     }
                 }

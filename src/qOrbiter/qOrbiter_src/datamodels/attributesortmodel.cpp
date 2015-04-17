@@ -187,6 +187,11 @@ bool AttributeSortModel::getSelectionStatus(QString format)
     return g;
 }
 
+bool AttributeSortModel::clearSelections()
+{
+
+}
+
 void AttributeSortModel::ReturnSelectedItems()
 {
     QStringList t_selected_items;

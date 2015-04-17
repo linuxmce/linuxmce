@@ -56,6 +56,8 @@ public:
   Q_INVOKABLE void setSelectionStatus(QString format);
   Q_INVOKABLE bool getSelectionStatus(QString format);
 
+  Q_INVOKABLE bool clearSelections();
+
 signals:
   void ItemAdded();
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const bool &state);
@@ -82,6 +84,7 @@ private slots:
 
 private:
   bool resetInternalData();
+  bool m_allowMulti;
 
   AttributeSortItem* m_prototype;
   QList<AttributeSortItem*> m_list;
