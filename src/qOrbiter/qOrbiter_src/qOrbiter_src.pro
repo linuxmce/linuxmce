@@ -203,7 +203,7 @@ macx-g++{
        # QT-=bundle
 }
 
-linux-rasp-pi-g++{
+linux-rasp-pi-g++ || pi{
 
         DEFINES+=RPI GLENABLED
         DEFINES-=for_desktop
@@ -234,7 +234,9 @@ linux-rasp-pi-g++{
         DEPLOYMENTFOLDERS +=index folder_02 folder_04 folder_03 plugins_folder
 
         linux-rasp-pi-g++{
+
         DEPLOYMENTFOLDERS -= plugins_folder
+
         }
 
 macx-g++{
