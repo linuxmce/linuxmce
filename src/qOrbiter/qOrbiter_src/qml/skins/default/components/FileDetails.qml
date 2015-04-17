@@ -81,7 +81,7 @@ GenericPopup{
             LargeStyledButton{
                 buttonText: qsTr("Delete", "Delete Media Selection")
                 height: parent.height
-                arrow: activeFocus
+
             }
             LargeStyledButton{
                 buttonText: qsTr("Close", "Close Window")

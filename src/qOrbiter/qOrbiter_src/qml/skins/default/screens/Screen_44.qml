@@ -89,6 +89,23 @@ StyledScreen {
             buttonText: qsTr("Settings")
             onActivated: qmlRoot.createPopup(settingsComponent)
         }
+        StyledButton{
+            id:resetDev
+            state: "large-fixed"
+            buttonText: qsTr("Reset Device Id")
+            onActivated:{
+                manager.setDeviceNumber(-1)
+                manager.writeConfig()
+            }
+        }
+        StyledButton{
+            id:exitBtn
+           state: "large-fixed"
+            buttonText: qsTr("Exit Application")
+            onActivated:{
+             manager.exitApp()
+            }
+        }
     }
 
     Component{

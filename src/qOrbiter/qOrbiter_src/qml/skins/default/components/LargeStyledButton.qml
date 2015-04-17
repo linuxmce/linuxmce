@@ -12,6 +12,7 @@ Item {
     property string buttonText:"ipsum"
     property bool currentSelection:false
     property alias fontSize:rowLabel.font.pointSize
+    property int buttonRadius:5
     signal activated()
     focus: true
     onActiveFocusChanged: {
@@ -35,7 +36,7 @@ Item {
         anchors.fill: parent
         color:Style.appcolor_background_list
         opacity: Style.appList_opacity
-        radius: 5
+        radius: buttonRadius
         border.color: "white"
         border.width: stbDelegate.currentSelection ? 2 : 0
     }

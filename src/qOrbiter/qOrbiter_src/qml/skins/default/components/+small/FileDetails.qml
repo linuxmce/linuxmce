@@ -111,26 +111,26 @@ GenericPopup{
             }
             height: Style.appNavigation_panelHeight
 
-            LargeStyledButton{
+            StyledButton{
                 buttonText: qsTr("Play", "Play Media Selection")
                 height: parent.height
-                arrow: activeFocus
+
                 onActivated: {manager.playMedia(filedetailsclass.file); fileDetails.close()}
             }
-            LargeStyledButton{
+            StyledButton{
                 buttonText: qsTr("Move", "Move Media Selection")
                 height: parent.height
-                arrow: activeFocus
+
             }
-            LargeStyledButton{
+            StyledButton{
                 buttonText: qsTr("Delete", "Delete Media Selection")
                 height: parent.height
-                arrow: activeFocus
+
             }
-            LargeStyledButton{
+            StyledButton{
                 buttonText: qsTr("Close", "Close Window")
                 height: parent.height
-                arrow: activeFocus
+
                 onActivated: fileDetails.close()
             }
         }
