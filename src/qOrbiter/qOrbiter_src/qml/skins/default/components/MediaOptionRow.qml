@@ -27,83 +27,71 @@ Item{
                     anchors.fill: parent
                     opacity: .85
                 }
+
                 GenericListModel{
-                    id:attribView
-                    label: qsTr("Attributes")
-                    width: manager.isProfile ? Style.scaleX(35) : Style.scaleX(30)
-                    height:manager.isProfile ? Style.scaleY(45) :Style.scaleY(45)
-                    model: attribfilter
+                    id:selectionView
+                    label: qsTr("Selections")
+                    anchors{
+                        right:parent.right
+                        top:parent.top
+                        bottom:parent.bottom
+                        left:selectionDisplay.right
+                    }
+                    delegate:  LargeStyledButton {
+                        height: Style.appButtonHeight /2
+                        width: parent.width
+                        buttonRadius: 0
+                        buttonText: name
+                        onActivated: selectionView.model.setSelectionStatus(name)
+                        arrow:selectionView.model.getSelectionStatus(name)
+                    }
+                }
+
+                Column{
+                    id:selectionDisplay
+                    width: Style.scaleX(35)
                     anchors{
                         left:parent.left
-                        top:parent.top
+                        verticalCenter: parent.verticalCenter
                     }
-
-                    delegate:  LargeStyledButton {
-                        height: Style.appButtonHeight /2
+                    spacing: 5
+                    height: childrenRect.height
+                    StyledButton{
                         width: parent.width
-                        buttonRadius: 0
-                        buttonText: name
+                        buttonText: qsTr("Attribute")
+                        height: Style.appButtonHeight / 2
+                        onActivated: selectionView.model=attribfilter
+                    }
+                    StyledButton{
+                        width: parent.width
+                        height: Style.appButtonHeight / 2
+                        buttonText: qsTr("Genre")
+                        onActivated: selectionView.model=genrefilter
+                    }
+                    StyledButton{
+                        width: parent.width
+                        buttonText: qsTr("MediaType")
+                        height: Style.appButtonHeight / 2
+                        onActivated: selectionView.model=mediatypefilter
+                    }
+                    StyledButton{
+                        width: parent.width
+                        buttonText: qsTr("Resolution")
+                        height: Style.appButtonHeight / 2
+
+                    }
+                    StyledButton{
+                        width: parent.width
+                        buttonText: qsTr("Sources")
+                        height: Style.appButtonHeight / 2
+
+                    }
+                    StyledButton{
+                        width: parent.width
+                        buttonText: qsTr("Users")
+                        height: Style.appButtonHeight / 2
                     }
                 }
-
-                GenericListModel{
-                    id:genreView
-                    label: qsTr("Genre")
-                    width: manager.isProfile ? Style.scaleX(35) : Style.scaleX(30)
-                    height:manager.isProfile ? Style.scaleY(45) :Style.scaleY(45)
-                    model: genrefilter
-                    anchors{
-                        left:attribView.right
-                        top:parent.top
-                    }
-
-                    delegate:  LargeStyledButton {
-                        height: Style.appButtonHeight /2
-                        width: parent.width
-                        buttonRadius: 0
-                        buttonText: name
-                    }
-                }
-
-                //                Column{
-                //                    width: Style.scaleX(25)
-                //                    anchors{
-                //                       left:parent.left
-                //                      verticalCenter: parent.verticalCenter
-                //                    }
-                //                    spacing: 5
-                //                    height: childrenRect.height
-                //                    StyledButton{
-                //                        width: parent.width
-                //                        buttonText: qsTr("Attribute")
-                //                        height: Style.appButtonHeight / 2
-                //                    }
-                //                    StyledButton{
-                //                        width: parent.width
-                //                        height: Style.appButtonHeight / 2
-                //                        buttonText: qsTr("Genre")
-                //                    }
-                //                    StyledButton{
-                //                        width: parent.width
-                //                        buttonText: qsTr("MediaType")
-                //                        height: Style.appButtonHeight / 2
-                //                    }
-                //                    StyledButton{
-                //                        width: parent.width
-                //                        buttonText: qsTr("Resolution")
-                //                        height: Style.appButtonHeight / 2
-                //                    }
-                //                    StyledButton{
-                //                        width: parent.width
-                //                        buttonText: qsTr("Sources")
-                //                        height: Style.appButtonHeight / 2
-                //                    }
-                //                    StyledButton{
-                //                        width: parent.width
-                //                        buttonText: qsTr("Users")
-                //                        height: Style.appButtonHeight / 2
-                //                    }
-                //                }
 
             }
         }
