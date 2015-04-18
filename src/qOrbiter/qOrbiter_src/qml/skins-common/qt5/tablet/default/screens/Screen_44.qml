@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import "../components"
+import org.linuxmce.settings 1.0
 import org.linuxmce.enums 1.0
 /*Android - tablet - defaut */
 StyledScreen {
@@ -108,6 +109,16 @@ Flickable{
             id:dpi
             state:"large-fixed"
             buttonText: "Physical DPI::"+screenInfo.primaryScreen.physicalDpi+"\n"+"Logical DPI::"+screenInfo.primaryScreen.logicalDpi
+            onActivated: {
+                manager.setDeviceNumber(-1)
+                manager.writeConfig()
+                manager.exitApp()
+            }
+        }
+        StyledButton{
+            id:internalExternal
+            state:"large-fixed"
+            buttonText: settings.getOption(SettingsType.Settings_UI,SettingsKey.Setting_Ui_NetworkLoading) ? "Use Network Skins" : "Use Local Skins"
             onActivated: {
                 manager.setDeviceNumber(-1)
                 manager.writeConfig()
