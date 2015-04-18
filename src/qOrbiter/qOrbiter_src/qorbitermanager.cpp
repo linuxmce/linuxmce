@@ -242,7 +242,7 @@ void qorbiterManager::goBacktoQScreen()
         QVariant screenname= QVariant::fromValue(gotoScreenList->last());
         QObject *item = qorbiterUIwin->rootObject();
         setDceResponse("About to call screenchange() for " + gotoScreenList->last());
-         setCurrentScreen(gotoScreenList->last());
+        setCurrentScreen(gotoScreenList->last());
         if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
             setDceResponse("Done call to backwards screenchange()");
 

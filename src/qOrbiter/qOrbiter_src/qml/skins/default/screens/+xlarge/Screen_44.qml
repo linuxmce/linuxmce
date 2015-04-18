@@ -99,8 +99,7 @@ StyledScreen {
             buttonText: qsTr("Reset Device Id")
             onActivated:{
                 manager.setDeviceNumber(-1)
-                manager.writeConfig()
-                manager.exitApp()
+                manager.writeConfig()              
             }
         }
         LargeStyledButton{
@@ -113,6 +112,12 @@ StyledScreen {
             height:Style.scaleY(15)
             buttonText: qsTr("Settings")
             onActivated: qmlRoot.createPopup(settingsComponent)
+        }
+        LargeStyledButton{
+            id:exitBtn
+            height:Style.scaleY(15)
+            buttonText: qsTr("Exit QOrbiter")
+            onActivated: manager.exitApp()
         }
     }
 

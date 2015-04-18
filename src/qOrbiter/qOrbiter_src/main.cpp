@@ -397,6 +397,14 @@ int main(int argc, char* argv[])
 #ifndef ANDROID
 
         qorbiterManager  w(&orbiterWin.mainView, screenSize, &settings);
+        if(!sRouter_IP.empty()){
+            w.setInternalIp(QString::fromStdString(sRouter_IP));
+            orbiterWin.setRouterAddress(QString::fromStdString(sRouter_IP));
+        }
+        if(PK_Device!=-1){
+            w.setDeviceNumber(PK_Device);
+        }
+
         if(deviceType==0){
             w.setDeviceTemplate(DEVICETEMPLATE_OnScreen_qOrbiter_CONST);
             //pqOrbiter.m_pData->m_dwPK_DeviceTemplate=DEVICETEMPLATE_OnScreen_qOrbiter_CONST;
@@ -413,27 +421,11 @@ int main(int argc, char* argv[])
 #endif
 
 
-#ifndef ANDROID
-#ifndef Q_OS_IOS
-        if(!sRouter_IP.empty()){
-            orbiterWin.setRouterAddress(QString::fromStdString(sRouter_IP));
-            w.m_ipAddress = QString::fromStdString(sRouter_IP);
-        }
-       // orbiterWin.setDeviceNumber(PK_Device);
-
-#endif
-#endif
-
         AbstractImageProvider* modelimageprovider = new AbstractImageProvider(&w);
         orbiterWin.mainView.engine()->addImageProvider("listprovider", modelimageprovider);
         pqOrbiter.moveToThread(&dceThread);
         QObject::connect(&dceThread, SIGNAL(started()), &pqOrbiter, SLOT(beginSetup()));
-
-
-
         //epg listmodel, no imageprovider as of yet
-
-
 
         // ListModel *mediaModel = new ListModel(new gridItem);
         qDebug() << "!!!!!!!!!!!BREAK!!!!!!!!!!!!!!!!!!";
