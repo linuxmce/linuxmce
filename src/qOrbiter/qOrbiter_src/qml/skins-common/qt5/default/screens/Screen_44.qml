@@ -1,6 +1,7 @@
 import QtQuick 2.2
 import "../components"
 import org.linuxmce.enums 1.0
+import org.linuxmce.settings 1.0
 /*Android - tablet - defaut */
 StyledScreen {
     anchors.fill: parent
@@ -112,6 +113,16 @@ Flickable{
                 manager.setDeviceNumber(-1)
                 manager.writeConfig()
                 manager.exitApp()
+            }
+        }
+        StyledButton{
+            id:internalExternal
+            property bool settingsValue:settings.getOption(SettingsType.Settings_UI,SettingsKey.Setting_Ui_NetworkLoading)
+            state:"large-fixed"
+            buttonText: settingsValue ? "Use Network Skins" : "Use Local Skins"
+            onActivated: {
+                settings.setOption( Number(SettingsType.Settings_UI),Number(SettingsKey.Setting_Ui_NetworkLoading), !settingsValue)
+                settingsValue = !settingsValue
             }
         }
 
