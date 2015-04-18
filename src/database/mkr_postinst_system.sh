@@ -21,12 +21,8 @@ if [ $PROCESS = "install" ]; then
 	Q="alter table \`Document_Comment\` ,change \`Date\` \`Date\` datetime   NOT NULL "
 	mysql $MYSQL_DB_CRED $MySqlDBName -e "$Q" || /bin/true
 	
-	(
-		cd /usr/pluto/database
-		/usr/pluto/bin/sqlCVS $PLUTO_DB_CRED -n -D $MySqlDBName -r constants,dce,designer,document,ir,website import
-	) || exit $?
-	mysql $MySqlDBName < /usr/pluto/database/city.dump
-	
+	mysql $MYSQL_DB_CRED $MySqlDBName < /usr/pluto/database/city.dump
+
 	Q="GRANT ALL PRIVILEGES ON $MySqlDBName.* TO '$MySqlUser'@'127.0.0.1' IDENTIFIED BY '$MySqlPassword';"
 	mysql $MYSQL_DB_CRED -e "$Q"
 	
@@ -35,6 +31,12 @@ if [ $PROCESS = "install" ]; then
 	
 	Q="FLUSH PRIVILEGES;"
 	mysql $MYSQL_DB_CRED -e "$Q"
+
+	(
+		cd /usr/pluto/database
+		/usr/pluto/bin/sqlCVS $PLUTO_DB_CRED -n -D $MySqlDBName -r constants,dce,designer,document,ir,website import
+	) || exit $?
+
 fi
 if [ $PROCESS = "upgrade" ]; then
 	echo
