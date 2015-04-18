@@ -25,6 +25,7 @@
 #include "SqueezeBox_Player.h"
 #include "DCE/SocketListener.h"
 #include "DCE/ServerSocket.h"
+#include "Xine_Player/XineMediaInfo.h"
 
 #include <map>
 
@@ -89,6 +90,10 @@ namespace DCE
         string SendReceiveCommand(string command, bool bLogCommand = true);
 
 	void TurnOffAllSqueezeboxes();
+	bool isValidTimecode(string strResultTimecode);
+	int stateToSpeed(StreamStateType state);
+
+	XineMediaInfo parseTimeCode(string strResultTimecode, string strDurationtimecode, int iStreamID, StreamStateType state);
 
         static void *checkForPlaybackCompleted(void *pSlim_Server_Streamer);
 

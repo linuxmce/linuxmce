@@ -31,7 +31,7 @@ using namespace DCE;
 #include "pluto_main/Define_CommandParameter.h"
 #include "pluto_main/Define_Command.h"
 #include "PlutoUtils/ProcessUtils.h"
-#include "Xine_Player/XineMediaInfo.h"
+#include <math.h>
 
 #define SOCKET_TIMEOUT		30
 
@@ -518,6 +518,139 @@ void Slim_Server_Streamer::TurnOffAllSqueezeboxes()
 
 }
 
+bool Slim_Server_Streamer::isValidTimecode(string strResultTimecode)
+{
+  // TODO: implement.
+  return true;
+}
+
+int Slim_Server_Streamer::stateToSpeed(StreamStateType state)
+{
+  int iState;
+
+  if (state == STATE_UNDEFINED)
+    {
+      iState = -1;
+    }
+  else if (state == STATE_STOP)
+    {
+      iState = -2;
+    }
+  else if (state == STATE_PAUSE)
+    {
+      iState = 0;
+    }
+  else if (state == STATE_PLAY)
+    {
+      iState = 1000;
+    }
+  else if (state == STATE_CHANGING)
+    {
+      iState = 0;
+    }
+  else if (state == STATE_FFWD_2000)
+    {
+      iState = 2000;
+    }
+  else if (state == STATE_FFWD_4000)
+    {
+      iState = 4000;
+    }
+  else if (state == STATE_FFWD_8000)
+    {
+      iState = 8000;
+    }
+  else if (state == STATE_FFWD_16000)
+    {
+      iState = 16000;
+    }
+  else if (state == STATE_FFWD_32000)
+    {
+      iState = 32000;
+    }
+  else if (state == STATE_FFWD_64000)
+    {
+      iState = 64000;
+    }
+  else if (state == STATE_REW_250)
+    {
+      iState = -250;
+    }
+  else if (state == STATE_REW_500)
+    {
+      iState = -500;
+    }
+  else if (state == STATE_REW_1000)
+    {
+      iState = -1000;
+    }
+  else if (state == STATE_REW_2000)
+    {
+      iState = -2000;
+    }
+  else if (state == STATE_REW_4000)
+    {
+      iState = -4000;
+    }
+  else if (state == STATE_REW_8000)
+    {
+      iState = -8000;
+    }
+  else if (state == STATE_REW_16000)
+    {
+      iState = -16000;
+    }
+  else if (state == STATE_REW_32000)
+    {
+      iState = -32000;
+    }
+  else if (state == STATE_REW_64000)
+    {
+      iState = -64000;
+    }
+
+  return iState;
+
+}
+
+XineMediaInfo Slim_Server_Streamer::parseTimeCode(string strResultTimecode, string strTotalTimecode, int iStreamID, StreamStateType state)
+{
+  XineMediaInfo mediaInfo;
+  string sTmp;
+  size_t pos=0;
+  bool bIsTimeCmd=false;
+  bool bIsDurCmd=false;
+  float fTime=0.0;
+  int iTime=0;
+  float fDur=0.0;
+  int iDur=0;
+
+  // Parse timecode.
+  sTmp = StringUtils::Tokenize(strResultTimecode, " ",pos);
+  bIsTimeCmd = (StringUtils::Tokenize(strResultTimecode, " ",pos) == "time" ? true : false);
+  fTime = atof(StringUtils::Tokenize(strResultTimecode, " ",pos).c_str())*1000;
+  iTime = ceil(fTime);
+
+  // Parse duration.
+  sTmp = StringUtils::Tokenize(strTotalTimecode, " ",pos);
+  bIsDurCmd = (StringUtils::Tokenize(strTotalTimecode, " ",pos) == "duration" ? true : false);
+  fDur = atof(StringUtils::Tokenize(strTotalTimecode, " ",pos).c_str())*1000;
+  iDur = ceil(fDur);
+  
+  // fill media info structure
+  mediaInfo.m_iSpeed = stateToSpeed(state);
+  mediaInfo.m_iPositionInMilliseconds = iTime;
+  mediaInfo.m_iTotalLengthInMilliseconds = iDur;
+  mediaInfo.m_iStreamID = iStreamID;
+  mediaInfo.m_iTitle = -1;
+  mediaInfo.m_iChapter = -1;
+  mediaInfo.m_sFileName = "";
+  mediaInfo.m_sMediaType = "4";
+  mediaInfo.m_iMediaID = 0;
+    
+  return mediaInfo;
+}
+
 void *Slim_Server_Streamer::checkForPlaybackCompleted(void *pSlim_Server_Streamer)
 {
     Slim_Server_Streamer *pStreamer = (Slim_Server_Streamer*)pSlim_Server_Streamer;
@@ -654,6 +787,14 @@ void *Slim_Server_Streamer::checkForPlaybackCompleted(void *pSlim_Server_Streame
 			  {
 			    // Just update the timecode.
 			    string strResultTimecode = pStreamer->SendReceiveCommand(macAddress + " time ?");
+			    if (pStreamer->isValidTimecode(strResultTimecode))
+			      {
+				string strTotalTimecode = pStreamer->SendReceiveCommand(macAddress + " duration ?");
+				XineMediaInfo mediaInfo = pStreamer->parseTimeCode(strResultTimecode,
+										   strTotalTimecode,
+										   itStreamsToPlayers->first, 
+										   itStreamsToPlayers->second.first);
+			      }
 			  }
             itStreamsToPlayers++;
         }

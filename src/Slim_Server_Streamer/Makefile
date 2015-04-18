@@ -24,7 +24,7 @@ LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r
 
 Gen_Dev_Files +=
-sources += SqueezeBox_Player.cpp $(GENDEV)/SqueezeBox_PlayerBase.cpp
+sources += ../Xine_Player/XineMediaInfo.cpp SqueezeBox_Player.cpp $(GENDEV)/SqueezeBox_PlayerBase.cpp
 
 
 #<-dceag-mf-b->
@@ -44,7 +44,7 @@ Slim_Server_Streamer.so: $(sources:.cpp=.o)
 	cp $@ ../bin
 	chmod +x post_make.sh
 	./post_make.sh $@
-		
+
 Slim_Server_Streamer: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	cp $@ ../bin
