@@ -21,9 +21,9 @@ Item{
                 }
                 property int authUser:-1
                 Connections{
-                    target:roomList
+                    target:userList
                     onPrivateUserChanged:{
-                        if(roomList.currentPrivateUser==authUser){
+                        if(userList.currentPrivateUser==authUser){
                             pop.close()
                         } else {
                             hdr.color="red"
@@ -64,7 +64,7 @@ Item{
                         buttonText: filterdlg.selectingUser? username: name
                         onActivated: {
                             if(filterdlg.selectingUser){
-                                filterdlg.authUser=index
+                                filterdlg.authUser=pkUser
                                 filterdlg.state="auth";
                                 return;
                             }
@@ -141,7 +141,7 @@ Item{
 
                     StyledText{
                         id:entryLabel
-                        text:qsTr("Enter Authorization")
+                        text:qsTr("Enter Authorization %1").arg(filterdlg.authUser)
                         anchors.left: hdr.left
                         anchors.verticalCenter: hdr.verticalCenter
                     }
@@ -158,7 +158,7 @@ Item{
 
                     Image {
                         id: back
-                        source: "../images/arrow.pngs"
+                        source: "../images/arrow.png"
                         height: hdr.height/2
                         width: hdr.height
                         anchors{
@@ -212,7 +212,7 @@ Item{
                                 manager.requestUserMediaAuth(
                                             manager.q_mediaType,
                                             keyPass.text,
-                                            authUser
+                                            filterdlg.authUser
                                             )
                             }
                         }

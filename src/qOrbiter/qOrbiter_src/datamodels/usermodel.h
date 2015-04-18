@@ -42,7 +42,7 @@ public:
     QString defaultUzer;
 
 signals:
-    void privateUserChanged();
+    void privateUserChanged(int u);
     void verifyPinForMedia(int userToValidate);
 
 public slots:
@@ -57,7 +57,7 @@ public slots:
         currentPrivateUser= -1;    
     }
 
-    void setCurrentPrivateUser(int p){  currentPrivateUser = p; emit privateUserChanged();}
+    void setCurrentPrivateUser(int p){  currentPrivateUser = p; emit privateUserChanged(p);}
     int getCurrentPrivateUser(){return currentPrivateUser;}
 
 private slots:

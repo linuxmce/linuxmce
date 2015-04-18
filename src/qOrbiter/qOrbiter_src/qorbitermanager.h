@@ -1567,7 +1567,7 @@ public slots:
     QString getGridMediaSources(){return q_mediaSources;}
 
     void setGridUsersPrivate(QString p){q_usersPrivate = p; emit gridPrivateUsersChanged();}
-    QString getGridUsersPrivate(){return q_usersPrivate;}
+    QString getGridUsersPrivate(){return QString::number(userList->currentPrivateUser);}
 
     void setGridPkAttribute(QString a){q_pk_attribute = a; emit gridPkAttributeChanged();}
     QString getGridPkAttribute(){return q_pk_attribute;}

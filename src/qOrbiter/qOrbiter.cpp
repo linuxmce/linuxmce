@@ -5502,6 +5502,7 @@ void qOrbiter::authorizePrivateMedia(int mediaType, QString pin, int user){
             setStringParam(mediaType, QString::number(user));
             emit mediaAuthChanged(user);
         }else{
+            qDebug() << Q_FUNC_INFO << pResp.c_str();
             emit mediaAuthChanged(-1);
             qDebug() << "invalid";
         }

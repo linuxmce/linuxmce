@@ -173,8 +173,9 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,SettingInt
     /*Needs Doin at construction */
     userList = new UserModel( new UserItem, this);
     orbiterInit=true;
-    QObject::connect(&mediaFilter, SIGNAL( currentMediaTypeChanged(QString)), this, SLOT(setGridMediaType(QString)));
+    QObject::connect(&mediaFilter, SIGNAL(currentMediaTypeChanged(QString)), this, SLOT(setGridMediaType(QString)));
     QObject::connect(&mediaFilter, SIGNAL(newMediaFilter()), SLOT(updateMediaString()));
+    QObject::connect(userList, SIGNAL(privateUserChanged(int)), &mediaFilter, SLOT(setPrivateUser(int)));
 
     //    QObject::connect(&mediaFilter, SIGNAL(attributeGenresChanged(QString)), this, SLOT(setGridAttributeGenres(QString)));
     //    QObject::connect(&mediaFilter, SIGNAL(attributeTypeSortChanged(QString)), this, SLOT(setAttributeTypeSort(QString)));
@@ -838,7 +839,7 @@ void qorbiterManager::updateSelectedAttributes(QString attributes)
     setGridPkAttribute(ta.at(9));
     setGridLastViewed(ta.at(8));
     setGridAttributeGenres(ta.at(3));
-    setGridUsersPrivate(ta.at(5));
+    setGridUsersPrivate(QString::number(userList->currentPrivateUser));
     setGridAttributeTypeSort(ta.at(6));
 }
 
@@ -1979,7 +1980,7 @@ void qorbiterManager::setStringParam(int paramType, QString param)
         break;
 
     case 5:
-        setGridUsersPrivate(param+",0");
+        setGridUsersPrivate(param+","+QString::number(userList->currentPrivateUser));
         break;
     case 6:
         if (param.contains("!P"))    {

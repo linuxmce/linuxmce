@@ -165,7 +165,7 @@ public:
             break;
 
         case 5:
-            q_usersPrivate = param+",0";
+            q_usersPrivate = "0,"+param;
             break;
         case 6:
             if (param.contains("!P"))
@@ -402,6 +402,11 @@ public slots:
             emit filterStringChanged(dataGridId);
             newMediaFilter();
         }
+    }
+
+    void setPrivateUser(int u){
+        qDebug() << Q_FUNC_INFO  << u;
+        setStringParam(5, QString::number(u));
     }
 
 signals:
