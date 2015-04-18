@@ -42,6 +42,7 @@ QtObject{
     readonly property int appButtonLargeHeight:manager.isProfile ? scaleY(15) : scaleY(20)
     readonly property int appButtonLargeWidth:manager.isProfile ? scaleX(28) : scaleX(25)
     readonly property int buttonSpacing:5
+
     /* Application Fonts */
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
