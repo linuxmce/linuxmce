@@ -29,7 +29,7 @@ Item {
     PageLoader {
         id: pageLoader
         anchors{
-            top:header.bottom
+            top:mediaNotification.bottom
             left:layout.left
             right:layout.right
             bottom:footer.top
@@ -68,6 +68,50 @@ Item {
             }
         }
 
+    }
+
+    Item{
+        id:mediaNotification
+        anchors{
+            top:header.bottom
+            left: parent.left
+            right:parent.right
+        }
+        Rectangle{
+        anchors.fill: parent
+        color:Style.appbutton_confirm_color
+        opacity: Style.appPanel_opacity
+        }
+
+        MouseArea{
+            anchors.fill: parent
+            onClicked:manager.setCurrentScreen(dcenowplaying.qs_screen)
+        }
+
+        height: dcenowplaying.b_mediaPlaying && manager.currentScreen=="Screen_1.qml" ? Style.appMenuPanel_height : 0
+
+        StyledText{
+            id:generaltitle
+            text: dcenowplaying.qs_mainTitle
+            height:parent.height
+            width:parent.width /2
+            anchors.left: parent.left
+            opacity: mediaNotification.height == Style.appMenuPanel_height ? 1 : 0
+            Behavior on opacity {
+                PropertyAnimation{
+                    duration: 350
+                }
+            }
+        }
+        StyledText {
+            id: updating_time
+            text:dcenowplaying.b_mediaPlaying ? dceTimecode.qsCurrentTime + " of " + dceTimecode.qsTotalTime :""
+            fontSize:Style.appFontSize_header
+            color: "white"
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            visible:manager.currentScreen=="Screen_1.qml"
+        }
     }
 
     Footer {

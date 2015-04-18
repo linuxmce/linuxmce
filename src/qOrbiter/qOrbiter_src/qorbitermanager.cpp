@@ -87,7 +87,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,SettingInt
     settingsInterface(appSettings),
     m_style(0),
     m_fontDir(""),
-    iPK_Device(-1)
+    iPK_Device(-1),
+    gotoScreenList( new QStringList())
 {
 #ifdef __ANDROID__
     int testSize=-1;
@@ -164,7 +165,7 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,SettingInt
 
     appHeight = qorbiterUIwin->height() ;
     appWidth = qorbiterUIwin->width() ;
-    gotoScreenList = new QStringList();
+
     // ScreenSaver = new ScreenSaverClass(this);
     // qorbiterUIwin->engine()->rootContext()->setContextProperty("screensaver", ScreenSaver);
     // Prepares models in this qt thread so owner thread is not QML as they would have been if they were created later
@@ -224,7 +225,6 @@ void qorbiterManager::gotoQScreen(QString s){
 
     } else {
         setDceResponse("screenchange() FAILED, sending request screen");
-
     }
 }
 
@@ -242,14 +242,31 @@ void qorbiterManager::goBacktoQScreen()
         QVariant screenname= QVariant::fromValue(gotoScreenList->last());
         QObject *item = qorbiterUIwin->rootObject();
         setDceResponse("About to call screenchange() for " + gotoScreenList->last());
+         setCurrentScreen(gotoScreenList->last());
         if (QMetaObject::invokeMethod(item, "screenchange", Qt::QueuedConnection, Q_ARG(QVariant, screenname))) {
             setDceResponse("Done call to backwards screenchange()");
-            currentScreen=gotoScreenList->last();
+
             screenChange(currentScreen);
         } else {
             setDceResponse(" backwards screenchange() FAILED");
         }
 
+    } else {
+        qDebug() << Q_FUNC_INFO << "No screens to go back to";
+    }
+}
+
+void qorbiterManager::addScreenToHistory(QString s)
+{
+
+    if(gotoScreenList->isEmpty()){
+        qDebug() << Q_FUNC_INFO << s << " added to history.";
+        gotoScreenList->append(s);
+    } else if( gotoScreenList->last() == s){
+        qDebug() << Q_FUNC_INFO << "Not adding duplicate screen in consecutive order.";
+    } else {
+        qDebug() << Q_FUNC_INFO << s << " added to history.";
+        gotoScreenList->append(s);
     }
 }
 

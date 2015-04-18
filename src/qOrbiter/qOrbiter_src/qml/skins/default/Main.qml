@@ -55,6 +55,7 @@ Item{
         switch(event.key){
         case Qt.Key_F5: console.log("Reloading qml"); manager.qmlReload(); break;
         case Qt.Key_R: console.log("Rotating"); manager.setDesiredOrientation(manager.isProfile ? Qt.LandscapeOrientation : Qt.PortraitOrientation); break;
+        case Qt.Key_Backspace: console.log("Back Button Hard Key"); manager.goBacktoQScreen();break;
         default:console.log("RootObject::Key "+event.key+" is unhandled."); break;
         }
 

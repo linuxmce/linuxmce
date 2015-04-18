@@ -94,6 +94,7 @@ Loader {
                           
                           manager.setDceResponse("Command to change to:" + source+ " was successfull")                         
                           currentScreen=manager.currentScreen
+                          manager.addScreenToHistory(currentScreen)
                           
                           // contentItem=item.screen_root
                       }

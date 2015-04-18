@@ -8,11 +8,11 @@ StyledScreen {
     GenericListModel {
         id: genericListContainer
         label: qsTr("Scenarios in  %1").arg(roomList.currentRoom)
-       anchors{
-           left:parent.left
-           top:parent.top
-           right:parent.right
-       }
+        anchors{
+            left:parent.left
+            top:parent.top
+            right:parent.right
+        }
         height: Style.appButtonHeight *6
 
         model:qmlRoot.scenarios
@@ -55,11 +55,11 @@ StyledScreen {
                 clip:true
                 delegate:Item{
                     height: parent.height
-                  // width: Style.appButtonWidth
-                     width: manager.isProfile ? Style.scaleX(26) : Style.scaleX(18)
+                    // width: Style.appButtonWidth
+                    width: manager.isProfile ? Style.scaleX(26) : Style.scaleX(18)
                     StyledButton{
                         buttonText:title
-                       width:parent.width
+                        width:parent.width
                         state:"scenario"
                         anchors.fill: parent
                         anchors.margins: 5

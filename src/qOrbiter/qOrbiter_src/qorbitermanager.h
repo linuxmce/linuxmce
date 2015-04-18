@@ -1003,6 +1003,8 @@ public slots:
 
     void goBacktoQScreen();
 
+    void addScreenToHistory(QString s);
+
     //! This function is called when the application window size changes.
     void checkOrientation(QSize s);
 #ifdef QT5
