@@ -16,7 +16,25 @@ Item{
             title: qsTr("Media Filters")
             content: Item{
                 id:filterdlg
+                Component.onCompleted: {
+                    state="filter"
+                }
+                property int authUser:-1
+                Connections{
+                    target:roomList
+                    onPrivateUserChanged:{
+                        if(roomList.currentPrivateUser==authUser){
+                            pop.close()
+                        } else {
+                            hdr.color="red"
+                            keyPass.text=""
+                        }
+                    }
+                }
+
+                property bool selectingUser:selectionView.model==userList
                 anchors.fill: parent
+
                 MouseArea{
                     anchors.fill: parent
                     onClicked: pop.close()
@@ -31,6 +49,8 @@ Item{
                 GenericListModel{
                     id:selectionView
                     label: qsTr("Selections")
+
+
                     anchors{
                         right:parent.right
                         top:parent.top
@@ -41,9 +61,17 @@ Item{
                         height: Style.appButtonHeight /2
                         width: parent.width
                         buttonRadius: 0
-                        buttonText: name
-                        onActivated: {selectionView.model.setSelectionStatus(name); arrow=!arrow}
-                        arrow:selectionView.model.getSelectionStatus(name)
+                        buttonText: filterdlg.selectingUser? username: name
+                        onActivated: {
+                            if(filterdlg.selectingUser){
+                                filterdlg.authUser=index
+                                filterdlg.state="auth";
+                                return;
+                            }
+
+                            selectionView.model.setSelectionStatus(name); arrow=!arrow
+                        }
+                        arrow:filterdlg.selectingUser ? "false" : selectionView.model.getSelectionStatus(name)
                     }
                 }
 
@@ -78,6 +106,7 @@ Item{
                         width: parent.width
                         buttonText: qsTr("Resolution")
                         height: Style.appButtonHeight / 2
+                        onActivated: selectionView.model=fileformatmodel
 
                     }
                     StyledButton{
@@ -90,9 +119,139 @@ Item{
                         width: parent.width
                         buttonText: qsTr("Users")
                         height: Style.appButtonHeight / 2
+                        onActivated:{/*filterdlg.selectingUser=true;*/ selectionView.model=userList}
                     }
                 }
 
+                Item{
+                    id:userEntryKeys
+                    height: parent.height *.75
+                    width: parent.width*.75
+                    anchors.centerIn: parent
+                    Rectangle{
+                        id:hdr
+                        height: Style.appNavigation_panelHeight
+                        color: Style.appcolor_background_light
+                        width: parent.width
+                        anchors{
+                            top:parent.top
+                            left:parent.left
+                        }
+                    }
+
+                    StyledText{
+                        id:entryLabel
+                        text:qsTr("Enter Authorization")
+                        anchors.left: hdr.left
+                        anchors.verticalCenter: hdr.verticalCenter
+                    }
+
+                    TextInput{
+                        id:keyPass
+                        anchors{
+                            left:entryLabel.right
+                            top:entryLabel.top
+                            bottom:entryLabel.bottom
+                            right:hdr.right
+                        }
+                    }
+
+                    Image {
+                        id: back
+                        source: "../images/arrow.pngs"
+                        height: hdr.height/2
+                        width: hdr.height
+                        anchors{
+                            right:hdr.right
+                            verticalCenter: hdr.verticalCenter
+                        }
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked: filterdlg.state="filter"
+                        }
+                    }
+
+                    Flow{
+                        id:numberFlow
+                        height: Style.appButtonHeight*3
+                        width: Style.appButtonWidth*3
+                        anchors{
+                            top:hdr.bottom
+                            horizontalCenter: hdr.horizontalCenter
+                        }
+
+                        Repeater{
+                            model:9
+                            delegate: StyledButton{
+                                buttonText: index+1
+                                onActivated: keyPass.text=keyPass.text+String(buttonText)
+                            }
+                        }
+                    }
+                    Row{
+                        id:extraBtns
+                        anchors{
+                            top:numberFlow.bottom
+                            left:numberFlow.left
+                        }
+
+                        StyledButton{
+                            id:del
+                            buttonText:"X"
+                            onActivated: keyPass.text=""
+                        }
+                        StyledButton{
+                            id:zeroBtn
+                            buttonText: "0"
+                            onActivated: keyPass.text=keyPass.text+String(buttonText)
+                        }
+                        StyledButton{
+                            id:goBtn
+                            buttonText: qsTr("Enter")
+                            onActivated: {
+                                manager.requestUserMediaAuth(
+                                            manager.q_mediaType,
+                                            keyPass.text,
+                                            authUser
+                                            )
+                            }
+                        }
+                    }
+                }
+
+                states: [
+                    State {
+                        name: "filter"
+                        PropertyChanges {
+                            target: selectionDisplay
+                            visible:true
+                        }
+                        PropertyChanges {
+                            target: selectionView
+                            visible:true
+                        }
+                        PropertyChanges {
+                            target: userEntryKeys
+                            visible:false
+                        }
+                    },
+                    State {
+                        name: "auth"
+                        PropertyChanges {
+                            target: selectionDisplay
+                            visible:false
+                        }
+                        PropertyChanges {
+                            target: selectionView
+                            visible:false
+                        }
+                        PropertyChanges {
+                            target: userEntryKeys
+                            visible:true
+                        }
+                    }
+
+                ]
             }
         }
     }
