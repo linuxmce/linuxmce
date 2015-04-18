@@ -75,7 +75,6 @@ Item{
                 settingName: qsTr("Default Audio Sorting")
                 //settingValue: Attributes.translateType(Number(settings.getOption( cat, val)))
             }
-
         }
     }
 

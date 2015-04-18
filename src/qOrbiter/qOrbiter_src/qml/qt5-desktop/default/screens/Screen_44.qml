@@ -1,5 +1,6 @@
 import QtQuick 2.1
 import "../components"
+import org.linuxmce.settings 1.0
 StyledScreen {
     screen: "Advanced Screen"
     description: "Advanced options"
@@ -137,7 +138,16 @@ StyledScreen {
             id:ping
             state: "large-fixed"
             buttonText: "Ping\nTest"
-
+        }
+        StyledButton{
+            id:internalExternal
+            property bool settingsValue:settings.getOption(SettingsType.Settings_UI,SettingsKey.Setting_Ui_NetworkLoading)
+            state:"large-fixed"
+            buttonText: settingsValue ? "Use Network Skins" : "Use Local Skins"
+            onActivated: {
+                settings.setOption( Number(SettingsType.Settings_UI),Number(SettingsKey.Setting_Ui_NetworkLoading), !settingsValue)
+                settingsValue = !settingsValue
+            }
         }
     }
 
