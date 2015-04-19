@@ -86,12 +86,41 @@ namespace DCE
 	return false;
       }
 
-    m_pEmulatorModel->m_sArgs = "/opengl\t/f\t/portable\t";
     m_pEmulatorModel->m_sArgs = getSlotsAndRoms();
 
     if (!m_pEmulatorModel->m_sMediaPosition.empty() && !m_pEmulatorModel->m_bIsStreamingSource)
       {
 	// Implement State loading if possible.
+	string sPath = "/home/mamedata/sta/atari800";
+	string sSource = sPath + "/" + m_pEmulatorModel->m_sMediaPosition;
+	string sDest = ATARI800_STATE_FILE;
+	
+	FileUtils::DelFile(sDest); // some basic house cleaning.
+	
+	if (m_pEmulatorModel->m_sMediaPosition.find("AutoSave") != string::npos)
+	  {
+	    // Autosave specified, just load the autosave file for this game.
+	    sSource = sPath + "/AutoSave";
+	  }
+	
+	if (!FileUtils::FileExists(sSource))
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Atari800EmulatorController::loadState() - Could not load state file %s as it does not exist.",sSource.c_str());
+	  }
+	
+	// move file into place.
+	string sCmd = "cp "+sSource+" "+sDest;
+	system(sCmd.c_str());
+	
+	if (!FileUtils::FileExists(sDest))
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Atari800EmulatorController::loadState() - Could not load copied state file %s as it does not exist. Bailing!",sDest.c_str());
+	  }
+	else
+	  {
+	    // tell emulator to start with state file. 
+	    m_pEmulatorModel->m_sArgs += "\t-state\t" ATARI800_STATE_FILE;
+	  }
       }
 
     if (m_pEmulatorModel->m_bIsStreaming)
