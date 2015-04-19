@@ -32,6 +32,7 @@ namespace DCE
     m_bHasArgs=true;
     m_bCapsLockPressed=false;
     m_sArgs="";
+    m_bCanSaveState=true;
   }
 
   Atari800EmulatorModel::~Atari800EmulatorModel()
@@ -67,9 +68,8 @@ namespace DCE
     m_mapActionsToKeysyms["7"] = make_pair(XK_7,0);
     m_mapActionsToKeysyms["8"] = make_pair(XK_8,0);
     m_mapActionsToKeysyms["9"] = make_pair(XK_9,0);
-    m_mapActionsToKeysyms["LOAD_STATE"] = make_pair(XK_l,XK_Alt_L);
-    m_mapActionsToKeysyms["SAVE_STATE"] = make_pair(XK_s,XK_Alt_L);
-    m_mapActionsToKeysyms["RESET"] = make_pair(XK_r,XK_Alt_L);
+    m_mapActionsToKeysyms["LOAD_STATE"] = make_pair(XK_F11,0);
+    m_mapActionsToKeysyms["SAVE_STATE"] = make_pair(XK_F11,XK_Shift_L);
     m_mapActionsToKeysyms["UI_ENTER"] = make_pair(XK_F1,0);
     m_mapActionsToKeysyms["UI_EXIT"] = make_pair(XK_F1,0);
     m_mapActionsToKeysyms["GET_SNAPSHOT"] = make_pair(XK_F10,0);
