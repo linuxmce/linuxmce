@@ -4,7 +4,6 @@
 # This script shows/adds/deletes local radio stations that it finds from the website http://www.radiotime.com
 # to/from the local media database.
 #
-
 #Var Declaraions
 if [[ "$2" == "" ]]; then
         DownloadURL="http://opml.radiotime.com/Browse.ashx?c=local&filter=s:popular"
@@ -34,8 +33,12 @@ case $1 in
                         #Get Genre
                         Genre=$(echo $LINE | gawk -F'"' '{ print $4}' | gawk -F'(' '{print $2}' | gawk -F')' '{print $1}')
                         echo  -e "Genre         : $Genre"
-                        echo
 
+			#Get Picture
+			Picture=$(echo $LINE | gawk -Fimage '{print $2}' | gawk -F'"' '{ print $2}')
+                        echo -e "Picture            : $Picture"
+
+                        echo
                 done
 
                 #Remove temp file
@@ -61,6 +64,10 @@ case $1 in
                         #Get Genre
                         Genre=$(echo $LINE | gawk -F'"' '{ print $4}' | gawk -F'(' '{print $2}' | gawk -F')' '{print $1}')
 
+			#Get Picture
+			Picture=$(echo $LINE | gawk -Fimage '{print $2}' | gawk -F'"' '{ print $2}')
+                        echo -e "Picture            : $Picture"
+
                         #Check if Url is already in Database
                         if ! [ $(mysql pluto_media -ss -e "select PK_File from File where Filename='$Url';") ]; then
 
@@ -82,9 +89,29 @@ case $1 in
 
                                 #Hook Genre to Url
                                 mysql pluto_media -e "insert into File_Attribute (FK_File,FK_Attribute,Track,Section) VALUES('$PK_File','$GenreID',0,0);"
+
+				#Download Picture
+		                wget -q --output-document=TempPic.png $Picture
+				#Convert Picture to jpg
+				mogrify -format jpg TempPic.png
+				#Insert Placeholder for Picture
+				PK_Picture=$(mysql pluto_media -e "insert into Picture (Extension,URL) VALUES('jpg','$Picture');select LAST_INSERT_ID() from Attribute;" | tail -n1)
+				#Move Picture to correct location
+				mv TempPic.jpg /home/mediapics/$PK_Picture.jpg
+				#Thumbnailify the Picture
+				convert -thumbnail 256 /home/mediapics/"$PK_Picture".jpg /home/mediapics/"$PK_Picture"_tn.jpg
+				#Hook Station Name to Picture
+                                mysql pluto_media -e "insert into Picture_Attribute (FK_Picture,FK_Attribute) VALUES('$PK_Picture','$FK_Attribute');"
+
+
+
                         else
                         echo -e "\e[00;31mError\e[00m : URL Already in Database"
                         fi
+
+
+
+		rm TempPic.png
                 done
 
                 #Remove temp file
