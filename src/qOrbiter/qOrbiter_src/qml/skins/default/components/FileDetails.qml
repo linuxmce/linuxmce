@@ -54,7 +54,7 @@ GenericPopup{
             id:media_options
             focus:true
             property int currentIndex:-1
-            spacing: Style.listViewMargin
+            spacing: 10
             property int max:media_options.children.length-1
             Keys.onLeftPressed: if(currentIndex === 0 ){ currentIndex= max;} else {currentIndex--}
             Keys.onRightPressed: if(currentIndex=== max) {  currentIndex=0   } else {currentIndex++}
@@ -70,25 +70,29 @@ GenericPopup{
             LargeStyledButton{
                 buttonText: qsTr("Play", "Play Media Selection")
                 height: parent.height
+                width: parent.width/4
                 arrow: activeFocus
                 onActivated: {manager.playMedia(filedetailsclass.file); fileDetails.close()}
             }
             LargeStyledButton{
                 buttonText: qsTr("Move", "Move Media Selection")
                 height: parent.height
+                width: parent.width/4
                 arrow: activeFocus
-            }
-            LargeStyledButton{
-                buttonText: qsTr("Delete", "Delete Media Selection")
-                height: parent.height
-
             }
             LargeStyledButton{
                 buttonText: qsTr("Close", "Close Window")
                 height: parent.height
+                width: parent.width/4
                 arrow: activeFocus
                 onActivated: fileDetails.close()
             }
+            LargeStyledButton{
+                buttonText: qsTr("Delete", "Delete Media Selection")
+                height: parent.height
+                width: parent.width/4
+            }
+
         }
 
         states: [

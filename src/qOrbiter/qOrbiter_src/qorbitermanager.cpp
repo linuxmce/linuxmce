@@ -470,12 +470,13 @@ void qorbiterManager::processConfig(QNetworkReply *config)
         }
 
         RroomMapping.insert(m_name, m_val);
+        QUrl imgFile;
         if(m_lRooms->check(m_val)){
             LocationItem *t= m_lRooms->find(m_name);
             t->addEa(ea, m_iEA);
         }
         else{
-            m_lRooms->appendRow(new LocationItem(m_name, m_val, m_iType, QString(""), m_isHidden, m_lRooms));
+            m_lRooms->appendRow(new LocationItem(m_name, m_val, m_iType, imgFile, m_isHidden, m_lRooms));
             LocationItem *t= m_lRooms->find(m_name);
             t->addEa(ea, m_iEA);
         }

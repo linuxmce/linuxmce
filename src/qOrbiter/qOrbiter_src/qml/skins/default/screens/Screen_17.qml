@@ -10,6 +10,7 @@ StyledScreen {
     property variant cameraList:[]
     property int tick:0
 
+
     Timer{
         id:picTimer
         repeat: true
@@ -22,7 +23,7 @@ StyledScreen {
             if(cameraLayout.currentIndex===cameraLayout.count-1){
                 cameraLayout.currentIndex=0
             }else {
-               cameraLayout.currentIndex++
+                cameraLayout.currentIndex++
             }
 
 
@@ -44,6 +45,7 @@ StyledScreen {
     }
     ContentHeader {
         id: hdr
+        label:qsTr("Security Cameras")
     }
 
 
@@ -52,10 +54,11 @@ StyledScreen {
         model:cameraList.length
         currentIndex: 0
         anchors{
-            top:parent.top
+            top:hdr.bottom
             left:parent.left
             right:parent.right
             bottom:parent.bottom
+            topMargin: 5
         }
         cellHeight:cameraLayout.height/2
         cellWidth:cameraLayout.width/2
@@ -64,18 +67,25 @@ StyledScreen {
             height: cameraLayout.height*.48
             width:cameraLayout.width*.48
             property int camera:cameraList[index]
-          //  fillColor: index===cameraLayout.currentIndex ? "green" :"white"
-          //  headerTitle:"Tap to view Camera "+ camera
+            Rectangle{
+                anchors.fill: parent
+                color:"black"
+            }
+
+            //  fillColor: index===cameraLayout.currentIndex ? "green" :"white"
+            //  headerTitle:"Tap to view Camera "+ camera
             Image {
                 id: securityimage
                 clip:true
-                anchors.top: parent.top
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.topMargin: 5
+                anchors.fill: parent
                 fillMode: Image.PreserveAspectFit
                 source:  "image://listprovider/securityimage/"+camera+"/"+securityvideo.timestamp
 
                 height: parent.height
+            }
+            ContentHeader{
+                label: qsTr("Camera # %1").arg(camera)
+                opacity: .65
             }
 
         }
