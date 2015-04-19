@@ -35,7 +35,7 @@ case $1 in
                         echo  -e "Genre         : $Genre"
 
 			#Get Picture
-			Picture=$(echo $LINE | gawk -Fimage '{print $2}' | gawk -F'"' '{ print $2}')
+			Picture=$(echo $LINE | gawk -F image '{print $2}' | gawk -F'"' '{ print $2}')
                         echo -e "Picture            : $Picture"
 
                         echo
@@ -65,8 +65,7 @@ case $1 in
                         Genre=$(echo $LINE | gawk -F'"' '{ print $4}' | gawk -F'(' '{print $2}' | gawk -F')' '{print $1}')
 
 			#Get Picture
-			Picture=$(echo $LINE | gawk -Fimage '{print $2}' | gawk -F'"' '{ print $2}')
-                        echo -e "Picture            : $Picture"
+			Picture=$(echo $LINE | gawk -F image '{print $2}' | gawk -F'"' '{ print $2}')
 
                         #Check if Url is already in Database
                         if ! [ $(mysql pluto_media -ss -e "select PK_File from File where Filename='$Url';") ]; then
@@ -111,7 +110,10 @@ case $1 in
 
 
 
+		if [ -f $TempPic.png ];
+		then
 		rm TempPic.png
+		fi
                 done
 
                 #Remove temp file
