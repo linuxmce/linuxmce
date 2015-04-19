@@ -156,18 +156,14 @@ Item{
                         }
                     }
 
-                    Image {
+                    BackButton {
                         id: back
-                        source: "../images/arrow.png"
+                        onActivated: filterdlg.state="filter"
                         height: hdr.height/2
                         width: hdr.height
                         anchors{
                             right:hdr.right
                             verticalCenter: hdr.verticalCenter
-                        }
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked: filterdlg.state="filter"
                         }
                     }
 
@@ -306,7 +302,16 @@ Item{
                 top:parent.top
                 bottom:parent.bottom
             }
-
         }
+    }
+    BackButton{
+        anchors{
+            right:parent.right
+            verticalCenter: parent.verticalCenter
+        }
+        height:parent.height
+        width:height
+        rotation: 180
+        onActivated: manager.goBackGrid()
     }
 }

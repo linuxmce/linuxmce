@@ -68,9 +68,9 @@
         <file>qml/skins/default/+xlarge/Style.qml</file>
         <file>qml/skins/default/components/WaitSpinner.qml</file>
         <file>qml/skins/default/+medium/MainLayout.qml</file>
-        <file>qml/skins/default/screens/+medium/Screen_1.qml</file>
         <file>qml/skins/default/screens/+small/Screen_47.qml</file>
         <file>qml/skins/default/components/GenericPlaybackScreen.qml</file>
         <file>qml/skins/default/screens/Screen_70.qml</file>
+        <file>qml/skins/default/components/BackButton.qml</file>
     </qresource>
 </RCC>

@@ -1,6 +1,5 @@
 import QtQuick 2.2
 import QtGraphicalEffects 1.0
-import AudioVisual 1.0
 import "."
 import "components"
 /*! This File is designed to be the main layout that can be switched in and out for various forms */
@@ -8,6 +7,16 @@ Item {
     id:layout
     anchors.fill: qmlRoot
 
+    Connections{
+        target: qmlRoot
+        onScreenSaverActivated:{
+            uiOn=false
+            pageLoader.toggleContent(false)
+        }
+        onResetTimeout:{
+            pageLoader.toggleContent(true)
+        }
+    }
     Rectangle{
         anchors.fill: parent
         color:"black"
@@ -28,6 +37,7 @@ Item {
 
     PageLoader {
         id: pageLoader
+
         anchors{
             top:mediaNotification.bottom
             left:layout.left
@@ -78,9 +88,9 @@ Item {
             right:parent.right
         }
         Rectangle{
-        anchors.fill: parent
-        color:Style.appbutton_confirm_color
-        opacity: Style.appPanel_opacity
+            anchors.fill: parent
+            color:Style.appbutton_confirm_color
+            opacity: Style.appPanel_opacity
         }
 
         MouseArea{

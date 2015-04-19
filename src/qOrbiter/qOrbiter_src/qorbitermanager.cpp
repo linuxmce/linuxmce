@@ -1809,7 +1809,7 @@ bool qorbiterManager::readLocalConfig(){
             QString configSkin = configVariables.namedItem("skin").attributes().namedItem("id").nodeValue();
 #endif
             if (configSkin.isEmpty()){
-                currentSkin = "noir";
+                currentSkin = "default";
             }
 
             QString tRp = configVariables.namedItem("routerport").attributes().namedItem("id").nodeValue();
@@ -2603,6 +2603,7 @@ bool qorbiterManager::restoreSettings()
     qDebug() << Q_FUNC_INFO << "Settings device id" << tId;
     QString trouter = settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router).toString();
     mb_useLocalSkins = settingsInterface->getOption(SettingsInterfaceType::Settings_UI, SettingsKeyType::Setting_Ui_NetworkLoading).toBool();
+   /*Fix Me! */ currentSkin="default";
     qDebug() << "Using local skins?" << mb_useLocalSkins;
     if(tId && !trouter.isEmpty()){
         qDebug() << Q_FUNC_INFO << "Read Device Number";

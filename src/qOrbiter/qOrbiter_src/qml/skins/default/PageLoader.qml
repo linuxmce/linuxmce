@@ -19,6 +19,14 @@ Loader {
             console.log( manager.currentScreen)
         }
     }
+
+
+    function toggleContent(toggle){
+        if(toggle)
+            pageLoader.opacity=1
+        else
+        pageLoader.opacity=0
+    }
     
     onNextScreenChanged: {
         console.log("Loading next screen")

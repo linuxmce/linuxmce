@@ -1837,7 +1837,6 @@ private slots:
     void delayedReloadQml() { QTimer *delayTimer= new QTimer(this); delayTimer->setInterval(500); delayTimer->setSingleShot(true); connect(delayTimer, SIGNAL(timeout()), this, SLOT(reloadQml())); delayTimer->start();}
     void reloadQml(){
 
-
         if(m_style && mb_useLocalSkins ){
             qDebug() << Q_FUNC_INFO << "Deleting style";
             m_style->deleteLater();

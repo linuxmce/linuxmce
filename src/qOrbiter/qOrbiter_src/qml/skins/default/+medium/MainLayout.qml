@@ -1,12 +1,24 @@
 import QtQuick 2.2
 import QtGraphicalEffects 1.0
-import AudioVisual 1.0
+
 import "."
 import "components"
 /*! This File is designed to be the main layout that can be switched in and out for various forms */
 Item {
     id:layout
     anchors.fill: qmlRoot
+    Connections{
+        target: qmlRoot
+        onScreenSaverActivated:{
+            uiOn=false
+            pageLoader.toggleContent(false)
+
+        }
+        onResetTimeout:{
+            pageLoader.toggleContent(true)
+        }
+
+    }
 
     Rectangle{
         anchors.fill: parent
@@ -14,6 +26,8 @@ Item {
     }
     property bool uiOn:true
     function raiseNavigation(raise){
+
+
         uiOn=raise;
     }
 
@@ -113,5 +127,4 @@ Item {
             }
         }
     }
-
 }

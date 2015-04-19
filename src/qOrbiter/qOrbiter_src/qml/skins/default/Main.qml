@@ -7,10 +7,27 @@ Item{
     height: manager.appHeight
     width: manager.appWidth
     focus:true
+    signal screenSaverActivated()
+    signal resetTimeout()
+
+    onResetTimeout: {
+        screenSaverTimeout.restart()
+    }
+
+    Timer{
+        id:screenSaverTimeout
+        interval: manager.screenSaverTimeout*1000
+        running: true
+        repeat: true
+        onTriggered: {
+            screenSaverActivated()
+        }
+    }
 
     function createPopup(comp){
         comp.createObject(layout)
     }
+
 
     property ListModel scenarios:ListModel{
         id:scenariosList
@@ -66,5 +83,12 @@ Item{
         height: manager.appHeight
         width: manager.appWidth
         anchors.centerIn: parent
+    }
+    MouseArea{
+        anchors.fill: parent
+        onPressed: {
+            mouse.accepted=false
+            qmlRoot.resetTimeout()
+        }
     }
 }
