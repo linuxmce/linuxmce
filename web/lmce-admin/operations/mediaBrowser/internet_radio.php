@@ -181,7 +181,9 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 		</script>
 		<form id="internet_radio" action="index.php" method="POST" name="internetRadio" >
 		<div class="err">'.(isset($_GET['error'])?strip_tags($_GET['error']):'').'</div>
-		<div align="center" class="confirm"><B>'.(isset($_GET['msg'])?strip_tags($_GET['msg']):'').'</B></div>';
+		<div align="center" class="confirm"><B>'.(isset($_GET['msg'])?strip_tags($_GET['msg']):'').'</B></div>
+		
+		<center><table><tr><td width="800">';
 		
 		// Media Sort Option
 		$rArray=array("Recently Used" => -1, "Filename" => "0", "Genre"=>8, "Channel"=>10);
@@ -190,43 +192,48 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 			$sortRow=$sortHandle->FetchRow();
 			$curOption=$sortRow['EK_AttributeType_DefaultSort'];
 		}
-		$out.='
-		<legend><b>Radio</b></legend>
-		<select name ="RadiosortOption">';
-		foreach ($rArray as $Option => $val )
-		{
-			$out.='
-                        <option value="'.$val.'"';
-                        if ($val == $curOption) {
-                                $out .= " selected";
-                        }
-                        $out .= '>'.$Option.'</option>';
-		};
-		$out.='<input type="submit" class="button" name="setDefaultSortRadio" value="'.translate('TEXT_DEFAULT_SORT_CONST').'"><HR>';
 		
-		$out.='<legend><b>Manually Add a Internet Radio Station:</b></legend>
+		$out.='
 		<table border="1">
 			   <input type="hidden" name="section" value="internetRadio">
+			   <tr>
+			   <td colspan="4" align="left"><legend><b>Manually Add an Internet Radio Station:</b></legend></td>
+			   <td colspan="2" align="right"><legend><b>Set Default Sorting for Radio</b></legend></td>
+			   </tr>
 			   <tr>
 			   <td></td>
 			   <td>Station Name</td>
 			   <td>Genre</td>
 			   <td>URL</td>
+			   <td align="right" width="200"><select name ="RadiosortOption">';
+			   foreach ($rArray as $Option => $val )
+			   {
+			   		   $out.='<option value="'.$val.'"';
+               		   if ($val == $curOption) {
+               		   	  $out .= " selected";
+               		   }
+               		   $out .= '>'.$Option.'</option>';
+			   };
+		       $out.='</td>
 			   </tr>
 			   <tr>
 			   <td><input type="button" class="button" value="add (manual)" onclick="add_manual()" /></td>
 			   <td><input type="text" name="station_name" value="" /></td>
 			   <td><span id="Genre">'.$manual_genres.'</span></td>
-			   <td><input type="text" name="stream_url" value="" /></td>
+			   <td><input size="30" type="text" name="stream_url" value="" /></td>
+			   <td align="right"><input type="submit" class="button" name="setDefaultSortRadio" value="'.translate('TEXT_DEFAULT_SORT_CONST').'"></td>
 			   </tr>
 		</table>
-		<hr>
-		<legend><b>Automaticly Add Internet Radio Stations based on location:</b></legend>
+		<br>
+		
 		<table border="1">
+		    <tr>
+			   <td colspan="4" align="left"><legend><b>Automaticly Add Internet Radio Stations based on location:</b></legend></td>
+			</tr>
 			<tr>
-				<td width="150">Continent:</td>
-				<td width="150">Country:</td>
-				<td width="150">City:</td>
+				<td width="250">Continent:</td>
+				<td width="250">Country:</td>
+				<td width="250">City:</td>
 		    </tr>
 			<tr>
 				<td>'.$continent.'</td>
@@ -240,14 +247,18 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 			</table>
 		<input type="hidden" name="deletepkfile" value="none" />	
 		</form>';
-		$out.='<hr><form title="delete">
-		<table border="1">		<legend><b>Current Internet Radio Stations that are int de LMCE Database</b></legend>
+		$out.='<br><form title="delete">
+		<table border="1">
+		<tr>
+			   <td colspan="5" align="left"><legend><b>Current Internet Radio Stations that are in the LMCE Database</b></legend></td>
+			   </tr>
 
 			   <tr>
 			   <td>Logo</td>
 			   <td>Station Name</td>
 			   <td>Genre</td>
 			   <td>URL</td>
+			   <td>Delete</td>
 			   </tr>';
 		$res=$mediadbADO->Execute('SELECT PK_File, Filename FROM File where EK_Mediatype = 43');
 
@@ -307,7 +318,9 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 				   $LLogoN='';
 				   $LURL='';
 		}
-		$out.='</table></form>';
+		$out.='</table></form>
+		
+		</td></tr></table></center>';
 
 	} else {
 		// check if the user has the right to modify installation
@@ -328,9 +341,9 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 			{
 				$sortVal =$_POST['RadiosortOption'];
 			}
-			$dbADO->Execute('UPDATE MediaType SET EK_AttributeType_DefaultSort=? WHERE PK_MediaType=43',$sortVal);
+			$dbADO->Execute("UPDATE MediaType SET EK_AttributeType_DefaultSort=? WHERE PK_MediaType=43",$sortVal);
 			header("Location: index.php?section=internetRadio&msg='Please Regen and Reload for changes to take effect'");
-			die;
+			exit(0);
 		}
 		
 		//add the radio stations by script.
