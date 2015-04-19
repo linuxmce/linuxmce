@@ -11,6 +11,8 @@
 #include <X11/keysym.h>
 #include "WindowUtils/WindowUtils.h"
 
+#define ATARI800_STATE_FILE "/run/Game_Player/atari800.state"
+
 namespace DCE
 {
   Atari800EmulatorController::Atari800EmulatorController(Game_Player *pGame_Player, Atari800EmulatorModel *pEmulatorModel)
@@ -179,22 +181,61 @@ namespace DCE
 
   bool Atari800EmulatorController::saveState(string& sPosition, string& sText, bool bAutoSave, string sAutoSaveName)
   {
-    if (!m_pEmulatorModel->m_bIsStreaming &&
+    if (!m_pEmulatorModel->m_bIsStreaming && 
 	m_pEmulatorModel->m_bCanSaveState)
       {
 	doAction("SAVE_STATE");
-      }
-
-    	if (!FileUtils::FileExists("/run/Game_Player/atari800.state"))
+	
+	// the save game is now in ATARI800_STATE_FILE
+	// make a copy of this to reference later.
+	
+	if (!FileUtils::FileExists(ATARI800_STATE_FILE))
 	  {
-	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Atari800EmulatorController:saveState - Could not save state to /run/Game_Player/atari800.state");
-	    
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Atari800EmulatorController::saveState() - State file " ATARI800_STATE_FILE " does not exist. Bailing.");
+	    sPosition="";
+	    sText="";
+	    return false;
 	  }
-
-
-    return false;
+	
+	// Autosave bookmark is always saved as AutoSave if bAutoSave is true
+	// otherwise, generate an md5 from the state file and use that as the
+	// saved filename on disk. 
+	string sBookmarkName;
+	if (!bAutoSave)
+	  {
+	    sBookmarkName = FileUtils::FileChecksum(ATARI800_STATE_FILE);
+	  }
+	else
+	  {
+	    sBookmarkName = "AutoSave";
+	  }
+	string sCmd0 = "mkdir -p /home/mamedata/sta/atari800";
+	system(sCmd0.c_str());
+	string sCmd = "mv " ATARI800_STATE_FILE " /home/mamedata/sta/atari800/"+sBookmarkName;
+	system(sCmd.c_str());
+	
+	if (!FileUtils::FileExists("/home/mamedata/sta/atari800/"+sBookmarkName))
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"MAMEEmulatorController::saveState() - Moving " ATARI800_STATE_FILE " to /home/mamedata/sta/atari800/%s failed, Bailing!",sBookmarkName.c_str());
+	    sPosition="";
+	    sText="";
+	    return false;
+	  }
+	
+	// all is successsful, set sPosition and sText for return.
+	sPosition = sBookmarkName;
+	sText = "Saved bookmark on "+StringUtils::SQLDateTime(0)+" at "+StringUtils::HourMinute(0,false);
+	
+	return true;
+      }
+    else
+      {
+	// State ignored in streaming mode.
+	return true;
+      }
+    
   }
-
+  
   void Atari800EmulatorController::setMediaPosition(string sMediaPosition)
   {
     EmulatorController::setMediaPosition(sMediaPosition);
@@ -203,6 +244,46 @@ namespace DCE
   
   bool Atari800EmulatorController::loadState(string sPosition)
   {
+    
+    if (!m_pEmulatorModel->m_bIsStreaming && m_pEmulatorModel->m_bCanSaveState)
+      {
+	string sPath = "/home/mamedata/sta/atari800";
+	string sSource = sPath + "/" + sPosition;
+	string sDest = ATARI800_STATE_FILE;
+	
+	FileUtils::DelFile(sDest); // some basic house cleaning.
+	
+	if (sPosition.find("AutoSave") != string::npos)
+	  {
+	    // Autosave specified, just load the autosave file for this game.
+	    sSource = sPath + "/AutoSave";
+	  }
+	
+	if (!FileUtils::FileExists(sSource))
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Atari800EmulatorController::loadState() - Could not load state file %s as it does not exist.",sSource.c_str());
+	    return false;
+	  }
+	
+	// move file into place.
+	string sCmd = "cp "+sSource+" "+sDest;
+	system(sCmd.c_str());
+	
+	if (!FileUtils::FileExists(sDest))
+	  {
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Atari800EmulatorController::loadState() - Could not load copied state file %s as it does not exist. Bailing!",sDest.c_str());
+	  }
+	
+	// File moved into place, save state.
+	doAction("LOAD_STATE");
+	
+	return true;
+      }
+    else
+      {
+	// No state pushed during streaming. csmame freaks.
+	return true;
+      }
     return false;
   }
   
