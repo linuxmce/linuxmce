@@ -88,7 +88,8 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,SettingInt
     m_style(0),
     m_fontDir(""),
     iPK_Device(-1),
-    gotoScreenList( new QStringList())
+    gotoScreenList( new QStringList()),
+    m_ipAddress("192.168.80.1")
 {
 #ifdef __ANDROID__
     int testSize=-1;
@@ -282,6 +283,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 {
     setDeviceNumber(device_id);
     setDceResponse("Starting Manager with connection to :"+QString::fromStdString(sRouterIP));
+
     if(sRouterIP.length() < 7){
         setDceResponse("Ip is empty, using alternate :"+this->m_ipAddress);
         sRouterIP = m_ipAddress.toStdString();
@@ -467,32 +469,13 @@ void qorbiterManager::processConfig(QNetworkReply *config)
             ea = roomListXml.at(index).attributes().namedItem("Description").nodeValue().append(QString::number(m_iEA));
         }
 
-        QUrl imagePath;
-
-        switch (m_iType){
-        case 1:
-            imagePath = QUrl("../img/icons/backgrounds/livingroom.png");
-            break;
-        case 3:
-            imagePath = QUrl("../img/icons/backgrounds/bedroom.png");
-            break;
-        case 5:
-            imagePath = QUrl("../img/icons/backgrounds/kitchen.png");
-            break;
-        case 11:
-            imagePath = QUrl("../img/icons/backgrounds/mstrbedroom.png");
-            break;
-        default:
-            imagePath = QUrl("../img/lmcesplash.png");
-            break;
-        }
         RroomMapping.insert(m_name, m_val);
         if(m_lRooms->check(m_val)){
             LocationItem *t= m_lRooms->find(m_name);
             t->addEa(ea, m_iEA);
         }
         else{
-            m_lRooms->appendRow(new LocationItem(m_name, m_val, m_iType, imagePath, m_isHidden, m_lRooms));
+            m_lRooms->appendRow(new LocationItem(m_name, m_val, m_iType, QString(""), m_isHidden, m_lRooms));
             LocationItem *t= m_lRooms->find(m_name);
             t->addEa(ea, m_iEA);
         }
@@ -1517,8 +1500,6 @@ bool qorbiterManager::loadSkins(QUrl base)
 {
 
     emit skinMessage("LoadSkins()::Skins path" +base.toString());
-
-
     /*
       TODO ASAP:
       Write feeder function that preceeds this call to creat a simple string list
@@ -2615,7 +2596,9 @@ bool qorbiterManager::restoreSettings()
 
 bool qorbiterManager::setupNetworkSkins()
 {
-
+if(m_ipAddress.isEmpty()){
+    m_ipAddress="192.168.80.1";
+}
 #ifdef __ANDROID__
 
 #ifdef QT5
