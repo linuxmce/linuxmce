@@ -62,7 +62,7 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 				$data.='<p class="err" >stations external found on your location (can be wrong).<br />
 				if stations already on the system they are not being installed again.</p>';
 				}
-				$data.='<input type="button" class="button" value="add" onclick="add()" />';
+				$data.='';
 				foreach( $lines as $line) {
 					if (preg_match('/^<outline/', $line)) {
 						preg_match('@^(?:<outline type="audio" text=")?([^"]+)@i', $line, $text);
@@ -71,7 +71,7 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 					}
 					$data.='</p>';
 				}
-				$data.='<input type="button" class="button" value="add" onclick="add()" />';
+				$data.='<input type="button" class="button" value="add (all)" onclick="add()" />';
 			}
 			return $data;
 		}
@@ -117,6 +117,11 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 			input2.setAttribute("type", "hidden");
 			input2.setAttribute("name", "action");
 			input2.setAttribute("value", "add_manual");
+			
+			var input3 = document.createElement("input");
+			input3.setAttribute("type", "hidden");
+			input3.setAttribute("name", "action");
+			input3.setAttribute("value", "del");
 
 			function IRcontinent()
 			{
@@ -157,6 +162,13 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 				document.getElementById(\'internet_radio\').stationsUrl.value;
 				document.getElementById(\'internet_radio\').submit();
 			}
+			function del(PK_File)
+			{
+				document.getElementById(\'internet_radio\').appendChild(input3);
+				document.getElementById(\'internet_radio\').deletepkfile.value = PK_File;
+				document.getElementById(\'internet_radio\').stationsUrl.value;
+				document.getElementById(\'internet_radio\').submit();
+			}
 
 			function add_manual()
 			{
@@ -169,42 +181,134 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 		</script>
 		<form id="internet_radio" action="index.php" method="POST" name="internetRadio" >
 		<div class="err">'.(isset($_GET['error'])?strip_tags($_GET['error']):'').'</div>
-		<div align="center" class="confirm"><B>'.(isset($_GET['msg'])?strip_tags($_GET['msg']):'').'</B></div>
-		<table>
+		<div align="center" class="confirm"><B>'.(isset($_GET['msg'])?strip_tags($_GET['msg']):'').'</B></div>';
+		
+		// Media Sort Option
+		$rArray=array("Recently Used" => -1, "Filename" => "0", "Genre"=>8, "Channel"=>10);
+		$sortHandle=$dbADO->Execute('select EK_AttributeType_DefaultSort from MediaType WHERE PK_MediaType=43');
+		if ($sortHandle) {
+			$sortRow=$sortHandle->FetchRow();
+			$curOption=$sortRow['EK_AttributeType_DefaultSort'];
+		}
+		$out.='
+		<legend><b>Radio</b></legend>
+		<select name ="RadiosortOption">';
+		foreach ($rArray as $Option => $val )
+		{
+			$out.='
+                        <option value="'.$val.'"';
+                        if ($val == $curOption) {
+                                $out .= " selected";
+                        }
+                        $out .= '>'.$Option.'</option>';
+		};
+		$out.='<input type="submit" class="button" name="setDefaultSortRadio" value="'.translate('TEXT_DEFAULT_SORT_CONST').'"><HR>';
+		
+		$out.='<legend><b>Manually Add a Internet Radio Station:</b></legend>
+		<table border="1">
+			   <input type="hidden" name="section" value="internetRadio">
+			   <tr>
+			   <td></td>
+			   <td>Station Name</td>
+			   <td>Genre</td>
+			   <td>URL</td>
+			   </tr>
+			   <tr>
+			   <td><input type="button" class="button" value="add (manual)" onclick="add_manual()" /></td>
+			   <td><input type="text" name="station_name" value="" /></td>
+			   <td><span id="Genre">'.$manual_genres.'</span></td>
+			   <td><input type="text" name="stream_url" value="" /></td>
+			   </tr>
+		</table>
+		<hr>
+		<legend><b>Automaticly Add Internet Radio Stations based on location:</b></legend>
+		<table border="1">
 			<tr>
-				<td></td>
-				<td><input type="hidden" name="section" value="internetRadio"><td>
-			</tr>
+				<td width="150">Continent:</td>
+				<td width="150">Country:</td>
+				<td width="150">City:</td>
+		    </tr>
 			<tr>
-			<td colspan="2">Manual add a station:</td>
-			</tr>
+				<td>'.$continent.'</td>
+				<td>'.$country.'</td>
+				<td>'.$city.'</td>
+				<td><input type="button" class="button" value="add (all)" onclick="add()" /></td>
+			</tr>	
 			<tr>
-				<td>Station name:</td><td><input type="text" name="station_name" value="" /></td>
-			</tr>
-			<tr>
-				<td>Station (stream)Url:</td><td><input type="text" name="stream_url" value="" /></td>
-			</tr>
-			<tr>
-				<td>Station Genre:</td><td><span id="Genre">'.$manual_genres.'</span></td>
-			</tr>
-			<tr>
-				<td colspan="2"><input type="button" class="button" value="add (manual)" onclick="add_manual()" /></td>
-			</tr>
-			<tr>
-				<td>continent:</td><td>'.$continent.'</td>
-			</tr>
-			<tr>
-				<td>Country:</td><td>'.$country.'</td>
-			</tr>
-			<tr>
-				<td>City:</td><td>'.$city.'</td>
-			</tr>
-			<tr>
-				<td colspan="2">Stations:</td>
+				<td colspan="4">Stations:<br>'.$stations.'</td>
 			</tr>
 			</table>
-			'.$stations.'
+		<input type="hidden" name="deletepkfile" value="none" />	
 		</form>';
+		$out.='<hr><form title="delete">
+		<table border="1">		<legend><b>Current Internet Radio Stations that are int de LMCE Database</b></legend>
+
+			   <tr>
+			   <td>Logo</td>
+			   <td>Station Name</td>
+			   <td>Genre</td>
+			   <td>URL</td>
+			   </tr>';
+		$res=$mediadbADO->Execute('SELECT PK_File, Filename FROM File where EK_Mediatype = 43');
+
+		while($row = $res->FetchRow()){
+				   $out.='<tr>';
+				   
+				   $res2=$mediadbADO->Execute("select FK_Attribute from File_Attribute where FK_File = '".$row["PK_File"]."'");
+				   while($row2 = $res2->FetchRow()){
+							  
+							  //Station Name
+							  $res3=$mediadbADO->Execute("select Name from Attribute where PK_Attribute = '".$row2["FK_Attribute"]."' and FK_AttributeType=10");
+				   			  while($row3 = $res3->FetchRow(0)){
+				   			  									 $LName=$row3["Name"];
+							  }
+							  
+							  //Genre
+							  $res4=$mediadbADO->query("select Name from Attribute where PK_Attribute = '".$row2["FK_Attribute"]."' and FK_AttributeType=8");
+				   			  while($row4 = $res4->FetchRow(0)){
+				   			  									 $LGenre=$row4["Name"];
+							  }
+				   
+				   			  //Logo
+							  $res5=$mediadbADO->query("select FK_Picture from Picture_Attribute where FK_Attribute = '".$row2["FK_Attribute"]."'");
+				   			  while($row5 = $res5->FetchRow()){
+				   			  			  					   	 $LLogoN=$row5["FK_Picture"];
+							  }
+							  
+							  //$res6=$mediadbADO->query("select URL from Picture where PK_Picture = '".$LLogoN."'");
+				   			  //while($row6 = $res6->FetchRow()){
+				   			  //	 			 				     $LLogo=$row6["URL"];
+							  //}
+							  
+							  
+							  
+								 
+				   
+				   
+				   
+				   			  //if (LLogoN != "") {
+							  $queryPictures='
+							  SELECT * FROM Picture_Attribute
+							  INNER JOIN Picture ON Picture_Attribute.FK_Picture=PK_Picture
+							  WHERE FK_Attribute=?';
+							  $resPictures=$mediadbADO->Execute($queryPictures,$row2["FK_Attribute"]);
+							  while($rowPictures=$resPictures->FetchRow()){
+							    $LURL='"mediapics/'.$rowPictures['PK_Picture'].'_tn.'.$rowPictures['Extension'].'"';
+							  }
+							  //}
+				   }
+				   //URL       		   
+				   $out.='<td><IMG HEIGHT=50 SRC='.$LURL.'></td>';
+				   $out.='<td>'.$LName.'</td>';
+				   $out.='<td>'.$LGenre.'</td>';
+				   $out.='<td>'.$row["Filename"].'</td>';
+				   $out.='<td><input type="button" class="button" value="Delete" onclick="del('.$row["PK_File"].')" /></td>';
+				   $out.='</tr>';
+				   $LLogoN='';
+				   $LURL='';
+		}
+		$out.='</table></form>';
+
 	} else {
 		// check if the user has the right to modify installation
 		$canModifyInstallation = getUserCanModifyInstallation($_SESSION['userID'],$_SESSION['installationID'],$dbADO);
@@ -213,9 +317,53 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 			exit(0);
 		}
 		
+		// Added in query to change default sort - Golgoj4
+		if(isset($_POST['setDefaultSortRadio']))
+		{
+			if ($_POST['RadiosortOption'] == 0)
+			{
+				$sortVal = 'null';;
+			}
+			else
+			{
+				$sortVal =$_POST['RadiosortOption'];
+			}
+			$dbADO->Execute('UPDATE MediaType SET EK_AttributeType_DefaultSort=? WHERE PK_MediaType=43',$sortVal);
+			header("Location: index.php?section=internetRadio&msg='Please Regen and Reload for changes to take effect'");
+			die;
+		}
+		
 		//add the radio stations by script.
 		if ($_POST['action'] == 'add') {
 		exec_batch_command('sudo -u root /usr/pluto/bin/radioscript.sh add '.$_POST['stationsUrl'].'');
+		header("Location: index.php?section=internetRadio&msg=".translate('TEXT_INTERNETRADIO_STATIONS_UPDATED_CONST'));
+		}
+		
+		//delete radio station.
+		if ($_POST['action'] == 'del') {
+		$PK_File=$_POST['deletepkfile'];
+		
+		#Delete Url from Database
+        $mediadbADO->Execute("delete from File where PK_File='".$PK_File."'");
+		
+		#Find Hook for Station Name
+		$StationName=$mediadbADO->Execute("SELECT FK_Attribute from File_Attribute where FK_File='".$PK_File."'");
+		
+        #Delete Station Name
+        $mediadbADO->Execute("delete from Attribute where PK_Attribute='".$StationName."'");
+
+        #Delete Hooks
+        $mediadbADO->Execute("delete from File_Attribute where FK_File='".$PK_File."'");
+		
+		#Find Picture Hook
+        $PicID=$mediadbADO->Execute("select FK_Picture from Picture_Attribute where FK_Attribute='".$StationName."'");
+		
+		#Delete Placeholder for Picture
+        $mediadbADO->Execute("delete from Picture where PK_Picture='".$PicID."'");
+
+		#Delete Picture Hooks
+        $mediadbADO->Execute("delete from Picture_Attribute where FK_File='".$PK_File."'");
+
 		header("Location: index.php?section=internetRadio&msg=".translate('TEXT_INTERNETRADIO_STATIONS_UPDATED_CONST'));
 		}
 		
