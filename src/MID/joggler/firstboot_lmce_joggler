@@ -5,9 +5,33 @@ fi
 HEADER_FB_JOGGLER=included
 
 firstboot_lmce_joggler_preinst() {
-	#mv /etc/init/tty1* ~/
-	#cp -a /etc/init/tty2.conf /etc/init/tty1.conf
-	: # no-op
+	cat <<-EEOF > /etc/asound.conf
+		pcm.!default {
+		    type plug
+		    slave.pcm "dmixer"
+		}
+
+		pcm.dmixer  {
+		    type dmix
+		    ipc_key 1024
+		    slave {
+		        pcm "hw:0,0"
+		        period_time 0
+		        period_size 1024
+		        buffer_size 4096
+		        rate 44100
+		    }
+		    bindings {
+		        0 0
+		        1 1
+		    }
+		}
+
+		ctl.dmixer {
+		    type hw
+		    card 0
+		}
+		EEOF
 }
 
 firstboot_lmce_joggler_postinst() {
