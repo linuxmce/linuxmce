@@ -61,58 +61,73 @@ case $1 in
                         #Get Url
                         Url=$(echo $LINE | gawk -F'&amp;f' '{print $1}' | gawk -F'"' '{system("curl --silent "$6" | head -n1")}')
 
+			#Check for [playlist] in stream URL (Needed for some stations)
+			Url2=$(curl --silent -m 1 "$Url" | grep -A 3 "\[playlist\]" | grep "File1" | gawk -F'=' '{ print $2 }')
+			if [[ $Url2 ]]; then
+				Url=$Url2
+			fi
+
+			echo "$Url"
+
                         #Get Genre
                         Genre=$(echo $LINE | gawk -F'"' '{ print $4}' | gawk -F'(' '{print $2}' | gawk -F')' '{print $1}')
 
 			#Get Picture
-			Picture=$(echo $LINE | gawk -F image '{print $2}' | gawk -F'"' '{ print $2}')
+			Picture=$(echo $LINE | gawk -F" image" '{print $2}' | gawk -F'"' '{ print $2}')
 
-                        #Check if Url is already in Database
-                        if ! [ $(mysql pluto_media -ss -e "select PK_File from File where Filename='$Url';") ]; then
+			#Check if stream is Active
+			curl --silent -m 1 "$Url" > /dev/null
+			if [[ $? -eq "28" ]]; then
+	                        #Check if Url is already in Database
+        	                if ! [ $(mysql pluto_media -ss -e "select PK_File from File where Filename='$Url';") ]; then
 
-                                #Add Url to Database
-                                PK_File=$(mysql pluto_media -ss -e "insert into File (EK_MediaType,DateAdded,Filename,Missing,IsDirectory,IsNew) VALUES(43,NOW(),'$Url',0,0,1);select LAST_INSERT_ID() from File;" | tail -n1)
+	                                #Add Url to Database
+        	                        PK_File=$(mysql pluto_media -ss -e "insert into File (EK_MediaType,DateAdded,Filename,Missing,IsDirectory,IsNew) VALUES(43,NOW(),'$Url',0,0,1);select LAST_INSERT_ID() from File;" | tail -n1)
 
-                                #Add Station Name to Database
-                                FK_Attribute=$(mysql pluto_media -ss -e "insert into Attribute (FK_AttributeType,Name) VALUES(10,'$Station');select LAST_INSERT_ID() from Attribute;" | tail -n1)
+                	                #Add Station Name to Database
+                        	        FK_Attribute=$(mysql pluto_media -ss -e "insert into Attribute (FK_AttributeType,Name) VALUES(10,'$Station');select LAST_INSERT_ID() from Attribute;" | tail -n1)
 
-                                #Hook Station Name to Url
-                                mysql pluto_media -e "insert into File_Attribute (FK_File,FK_Attribute,Track,Section) VALUES('$PK_File','$FK_Attribute',0,0);"
+                                	#Hook Station Name to Url
+	                                mysql pluto_media -e "insert into File_Attribute (FK_File,FK_Attribute,Track,Section) VALUES('$PK_File','$FK_Attribute',0,0);"
 
-                                #Check If Genre Exists in Database
-                                GenreID=$(mysql pluto_media -ss -e "select PK_Attribute from Attribute where FK_AttributeType=8 and Name='$Genre';"| tail -n1)
-                                if ! [ $(echo $GenreID) ]; then
-                                        #Add Genre to Database
-                                        GenreID=$(mysql pluto_media -ss -e "insert into Attribute (FK_AttributeType,Name) VALUES(8,'$Genre');select LAST_INSERT_ID() from Attribute;" | tail -n1)
-                                fi
+        	                        #Check If Genre Exists in Database
+                	                GenreID=$(mysql pluto_media -ss -e "select PK_Attribute from Attribute where FK_AttributeType=8 and Name='$Genre';"| tail -n1)
+                        	        if ! [ $(echo $GenreID) ]; then
+                                	        #Add Genre to Database
+                                        	GenreID=$(mysql pluto_media -ss -e "insert into Attribute (FK_AttributeType,Name) VALUES(8,'$Genre');select LAST_INSERT_ID() from Attribute;" | tail -n1)
+	                                fi
 
-                                #Hook Genre to Url
-                                mysql pluto_media -e "insert into File_Attribute (FK_File,FK_Attribute,Track,Section) VALUES('$PK_File','$GenreID',0,0);"
+        	                        #Hook Genre to Url
+                	                mysql pluto_media -e "insert into File_Attribute (FK_File,FK_Attribute,Track,Section) VALUES('$PK_File','$GenreID',0,0);"
 
-				#Download Picture
-		                wget -q --output-document=TempPic.png $Picture
-				#Convert Picture to jpg
-				mogrify -format jpg TempPic.png
-				#Insert Placeholder for Picture
-				PK_Picture=$(mysql pluto_media -e "insert into Picture (Extension,URL) VALUES('jpg','$Picture');select LAST_INSERT_ID() from Attribute;" | tail -n1)
-				#Move Picture to correct location
-				mv TempPic.jpg /home/mediapics/$PK_Picture.jpg
-				#Thumbnailify the Picture
-				convert -thumbnail 256 /home/mediapics/"$PK_Picture".jpg /home/mediapics/"$PK_Picture"_tn.jpg
-				#Hook Station Name to Picture
-                                mysql pluto_media -e "insert into Picture_Attribute (FK_Picture,FK_Attribute) VALUES('$PK_Picture','$FK_Attribute');"
-
-
-
-                        else
-                        echo -e "\e[00;31mError\e[00m : URL Already in Database"
-                        fi
+					#Download Picture
+		                	wget -q --output-document=TempPic.png $Picture
+					#Convert Picture to jpg
+					mogrify -format jpg TempPic.png
+					#Insert Placeholder for Picture
+					PK_Picture=$(mysql pluto_media -e "insert into Picture (Extension,URL) VALUES('jpg','$Picture');select LAST_INSERT_ID() from Attribute;" | tail -n1)
+					#Move Picture to correct location
+					mv TempPic.jpg /home/mediapics/$PK_Picture.jpg
+					#Thumbnailify the Picture
+					convert -thumbnail 256 /home/mediapics/"$PK_Picture".jpg /home/mediapics/"$PK_Picture"_tn.jpg
+					#Hook Station Name to Picture
+                                	mysql pluto_media -e "insert into Picture_Attribute (FK_Picture,FK_Attribute) VALUES('$PK_Picture','$FK_Attribute');"
 
 
 
-		if [ -f $TempPic.png ];
-		then
-		rm TempPic.png
+	                        else
+        	                echo -e "\e[00;31mError\e[00m : URL Already in Database"
+                	        fi
+
+
+
+			if [ -f $TempPic.png ];
+			then
+			rm TempPic.png
+			fi
+		else
+			echo -e "\e[00;31mError\e[00m : Stream not Active"
+
 		fi
                 done
 
