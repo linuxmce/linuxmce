@@ -284,7 +284,11 @@ namespace DCE
 	libvlc_media_player_release(m_pMp);
       }
 
-    if (sMediaURL.find("://") == string::npos)
+    if ((m_pVLC_Player->m_iPK_MediaType == 28) && (sMediaURL.find("/dev/") != string::npos))
+      {
+	sMediaURL = "bluray://" + sMediaURL;
+      }
+    else if (sMediaURL.find("://") == string::npos)
       {
 	sMediaURL = "file://" + sMediaURL;
       }
@@ -302,7 +306,7 @@ namespace DCE
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Found Sound card: %s",libvlc_audio_output_device_id(m_pInst,"alsa",i));
       }
 
-    // libvlc_audio_output_device_set(m_pMp, "alsa", "plughw:0,3");
+    libvlc_audio_output_device_set(m_pMp, "alsa", "plughw:0,3");
 
     if (!m)
       {
@@ -311,6 +315,8 @@ namespace DCE
       }
 
     SetStreamID(iStreamID);
+
+    LoggerWrapper::GetInstance()->Write(LV_WARNING,"VLC::playURL - Setting URL to %s",sMediaURL.c_str());
     SetMediaURL(sMediaURL);
 
     libvlc_media_player_set_media(m_pMp, m);
@@ -851,13 +857,12 @@ namespace DCE
 
   string VLC::PreProcessMediaURL(string sMediaURL)
   {
-    if (sMediaURL.find("cdda:") != string::npos)
-      {
-	if (sMediaURL.find("/1") != string::npos)
-	  {
-	    sMediaURL = sMediaURL.substr(0,sMediaURL.size()-2);
-	  }
-      }
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"PreProcessMediaUrl in %s",sMediaURL.c_str());
+    if (m_pVLC_Player->m_iPK_MediaType == 28 && sMediaURL.find("/dev/") != string::npos)
+	{
+		sMediaURL = "bluray://" + sMediaURL;	
+	}
+    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"PreProcessMediaUrl out %s",sMediaURL.c_str());
     return sMediaURL;
   }
 

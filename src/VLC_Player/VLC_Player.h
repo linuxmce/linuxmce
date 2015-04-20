@@ -65,6 +65,7 @@ namespace DCE
     void ReportTimecodeViaIP(int iStreamID, int Speed);
 
     int m_iMediaPlaybackSpeed;
+    int m_iPK_MediaType; 
     string MD_DeviceData_get(int iFK_DeviceData);
     string Soundcard_get();
     string Audiosettings_get();

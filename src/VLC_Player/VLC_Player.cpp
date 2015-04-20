@@ -422,6 +422,8 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
       MountRemoteDVD(sMediaURL);
     }
 
+  m_iPK_MediaType = iPK_MediaType;
+
   if (m_pVLC->PlayURL(sMediaURL,iStreamID,sMediaPosition,sMediaInfo))
     {
       LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::EVENT_Playback_Started(streamID=%i)",iStreamID);
