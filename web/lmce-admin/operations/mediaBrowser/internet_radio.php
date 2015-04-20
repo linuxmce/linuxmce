@@ -122,6 +122,11 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 			input3.setAttribute("type", "hidden");
 			input3.setAttribute("name", "action");
 			input3.setAttribute("value", "del");
+			
+			var input4 = document.createElement("input");
+			input4.setAttribute("type", "hidden");
+			input4.setAttribute("name", "action");
+			input4.setAttribute("value", "sort");
 
 			function IRcontinent()
 			{
@@ -162,6 +167,12 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 				document.getElementById(\'internet_radio\').stationsUrl.value;
 				document.getElementById(\'internet_radio\').submit();
 			}
+			function sort()
+			{
+				document.getElementById(\'internet_radio\').appendChild(input4);
+				document.getElementById(\'internet_radio\').setDefaultSortRadio.value = 1;
+				document.getElementById(\'internet_radio\').submit();
+			}
 			function del(PK_File)
 			{
 				document.getElementById(\'internet_radio\').appendChild(input3);
@@ -179,7 +190,7 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 				document.getElementById(\'internet_radio\').submit();
 			}
 		</script>
-		<form id="internet_radio" action="index.php" method="POST" name="internetRadio" >
+		
 		<div class="err">'.(isset($_GET['error'])?strip_tags($_GET['error']):'').'</div>
 		<div align="center" class="confirm"><B>'.(isset($_GET['msg'])?strip_tags($_GET['msg']):'').'</B></div>
 		
@@ -193,7 +204,7 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 			$curOption=$sortRow['EK_AttributeType_DefaultSort'];
 		}
 		
-		$out.='
+		$out.='<form id="internet_radio" action="index.php" method="POST" name="internetRadio" >
 		<table border="1">
 			   <input type="hidden" name="section" value="internetRadio">
 			   <tr>
@@ -221,7 +232,8 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 			   <td><input type="text" name="station_name" value="" /></td>
 			   <td><span id="Genre">'.$manual_genres.'</span></td>
 			   <td><input size="30" type="text" name="stream_url" value="" /></td>
-			   <td align="right"><input type="submit" class="button" name="setDefaultSortRadio" value="'.translate('TEXT_DEFAULT_SORT_CONST').'"></td>
+			   <td align="right"><input type="hidden" name="setDefaultSortRadio" value="none" />
+			   <input type="button" class="button" value="'.translate('TEXT_DEFAULT_SORT_CONST').'" onclick="sort()"></td>
 			   </tr>
 		</table>
 		<br>
@@ -330,22 +342,6 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 			exit(0);
 		}
 		
-		// Added in query to change default sort - Golgoj4
-		if(isset($_POST['setDefaultSortRadio']))
-		{
-			if ($_POST['RadiosortOption'] == 0)
-			{
-				$sortVal = 'null';;
-			}
-			else
-			{
-				$sortVal =$_POST['RadiosortOption'];
-			}
-			$dbADO->Execute("UPDATE MediaType SET EK_AttributeType_DefaultSort=? WHERE PK_MediaType=43",$sortVal);
-			header("Location: index.php?section=internetRadio&msg='Please Regen and Reload for changes to take effect'");
-			exit(0);
-		}
-		
 		//add the radio stations by script.
 		if ($_POST['action'] == 'add') {
 		exec_batch_command('sudo -u root /usr/pluto/bin/radioscript.sh add '.$_POST['stationsUrl'].'');
@@ -414,6 +410,20 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 			} else {
 				header("Location: index.php?section=internetRadio&msg=".translate('TEXT_INTERNETRADIO_STATIONS_NOT_UPDATED_STATION_AL_READY_EXIST_CONST'));
 			}
+		}
+		
+		if ($_POST['action'] == 'sort') {
+		// Added in query to change default sort
+			if ($_POST['RadiosortOption'] == 0)
+			{
+				$sortVal = 'null';;
+			}
+			else
+			{
+				$sortVal = $_POST['RadiosortOption'];
+			}
+			$dbADO->Execute("UPDATE MediaType SET EK_AttributeType_DefaultSort=? WHERE PK_MediaType=43",$sortVal);
+			header("Location: index.php?section=internetRadio&msg='Please Regen and Reload for changes to take effect'");
 		}
 	}
 	$output->setMenuTitle(translate('TEXT_ADVANCED_CONST').' |');
