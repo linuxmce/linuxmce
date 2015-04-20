@@ -200,6 +200,15 @@ MD_Install_Packages () {
 	apt-get -f -y install pluto-confirm-dependencies lmce-launch-manager
 	VerifyExitCode "Install pluto-confirm-dependencies, pluto-avwizard failed"
 
+/usr/pluto/bin/ConfirmDependencies -o $PK_Distro -n -h $MySqlHost -P $MySqlPort -u $MySqlUser -D $MySqlDBName -f -d $PK_Device listall | grep -v \\# > list
+pkg_list=""
+while read -r line
+do
+    name=$(echo $line | cut -d'|' -f2)
+    pkg_list+=" $name"
+done < list
+apt-get -f -y install $pkg_list
+
 	# generate locales
 	StatsMessage "Generating locales"
 	echo "en_US.UTF-8 UTF-8" >/etc/locale.gen
