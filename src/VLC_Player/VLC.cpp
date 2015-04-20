@@ -437,7 +437,7 @@ namespace DCE
     
     LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"hasMenu %d isNavMenu %d",hasMenu,isNavMenu);
     
-    if (isNavMenu)
+    if (isNavMenu && m_pVLC_Player->m_iPK_MediaType != 28)
       {
 	m_pVLC_Player->EVENT_Menu_Onscreen(GetStreamID(),true);
       }
