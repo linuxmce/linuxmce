@@ -10,6 +10,9 @@ StyledScreen {
     property variant cameraList:[]
     property int tick:0
 
+    onScreenClosing: {
+         manager.setActiveRoom(roomList.currentRoom, roomList.currentEA);
+    }
 
     Timer{
         id:picTimer
