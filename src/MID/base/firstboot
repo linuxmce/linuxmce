@@ -112,12 +112,14 @@ StatsMessage () {
 ###########################################################
 
 MD_System_Level_Prep () {
+	StatsMessage "Setting up my.cnf"
 	# Make sure, the root user is connecting to DCEROUTER for any MySQL connection
 	cat <<-EOF > /root/.my.cnf
 		[client]
 		host = dcerouter
 		EOF
 
+	StatsMessage "Setting up sources.list"
 	APT_CONFIG=$(grep "linuxmce" /etc/apt/sources.list)
 	if [ -z "$APT_CONFIG" ] ; then
 		TARGET_REPO_NAME="main"
@@ -149,6 +151,7 @@ MD_System_Level_Prep () {
 		gzip -9c < /usr/pluto/deb-cache/$DEB_CACHE/Packages > /usr/pluto/deb-cache/$DEB_CACHE/Packages.gz
 	fi
 
+	StatsMessage "Disabling Display Managers"
 	echo '/bin/false' > "/etc/X11/default-display-manager"
 }
 
@@ -157,6 +160,7 @@ MD_Seamless_Compatability () {
 }
 
 MD_Preseed () {
+	StatsMessage "Setting up debconf"
 	## Setup debconf interface to 'noninteractive'
 	#create preseed file
 	cat <<-EOF >/tmp/preseed.cfg
@@ -182,20 +186,23 @@ MD_Preseed () {
 		EOF
 	debconf-set-selections /tmp/preseed.cfg
 
+	StatsMessage "Updating the apt package lists"
 	apt-get -y -qq update
 	VerifyExitCode "apt update"
 
+	StatsMessage "Setting up and unconfigured packages"
 	apt-get -f -y install
 
-	apt-get -f -y install pluto-boot-scripts
+	StatsMessage "Setting Boot Scripts helper package"
+	apt-get -f -y --no-install-recommends install pluto-boot-scripts
 }
 
 MD_Install_Packages () {
 	StatsMessage "Installing packages to MD"
-	apt-get -y dist-upgrade
+	apt-get -y --no-install-recommends dist-upgrade
 	VerifyExitCode "dist-upgrade failed"
 
-	apt-get -f -y install pluto-confirm-dependencies lmce-launch-manager
+	apt-get -f -y --no-install-recommends install pluto-confirm-dependencies lmce-launch-manager
 	VerifyExitCode "Install pluto-confirm-dependencies, pluto-avwizard failed"
 
 /usr/pluto/bin/ConfirmDependencies -o $PK_Distro -n -h $MySqlHost -P $MySqlPort -u $MySqlUser -D $MySqlDBName -f -d $PK_Device listall | grep -v \\# > list
@@ -205,7 +212,7 @@ do
     name=$(echo $line | cut -d'|' -f2)
     pkg_list+=" $name"
 done < list
-apt-get -f -y install $pkg_list
+apt-get -f -y --no-install-recommends install $pkg_list
 
 	# generate locales
 	StatsMessage "Generating locales"
@@ -224,7 +231,7 @@ apt-get -f -y install $pkg_list
 
 MD_Populate_Debcache () {
 	find /var/cache/apt/archives/ -iname '*.deb' -exec mv {} /usr/pluto/deb-cache/$DEB_CACHE \;
-	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
+#	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
 }
 
 MD_Cleanup () {
@@ -232,7 +239,7 @@ MD_Cleanup () {
 
 	#Make sure there is are Packages files on the MD so apt-get update does not fail
 	mkdir -p /usr/pluto/deb-cache/$DEB_CACHE
-	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
+#	/usr/pluto/bin/update-debcache.sh /usr/pluto/deb-cache/$DEB_CACHE
 
 	#Copy the orbiter activation command to the MD's desktop
 	mkdir -p /root/Desktop
@@ -241,6 +248,21 @@ MD_Cleanup () {
 	#Clean up apt from the installs
 	apt-get -y clean
 	VerifyExitCode "APT Clean"
+}
+
+do_reboot () {
+	echo "Rebooting in 5 seconds..."
+	sleep 1
+	echo "Rebooting in 4 seconds..."
+	sleep 1
+	echo "Rebooting in 3 seconds..."
+	sleep 1
+	echo "Rebooting in 2 seconds..."
+	sleep 1
+	echo "Rebooting in 1 seconds..."
+	sleep 1
+	echo "Rebooting..."
+	reboot
 }
 
 ##########################################################################################################
@@ -255,9 +277,10 @@ start() {
 	#TODO get as much of this from database as possible
 	# run any device specific firstboot add-on scripts here
 	for f in /etc/init.d/firstboot_lmce_* ; do
-			StatsMessage "Running device specific script: $f_preinst"
+		StatsMessage "Running device specific script: ${f}_preinst - Begin"
 		. "$f"
 		$(basename "$f")_preinst
+		StatsMessage "Running device specific script: ${f}_preinst - End"
 	done
 
 	case "$TARGET_ARCH" in
@@ -280,13 +303,17 @@ start() {
 
 	# run any device specific firstboot add-on scripts here
 	for f in /etc/init.d/firstboot_lmce_* ; do
-			StatsMessage "Running device specific script: $f_postinst"
+		StatsMessage "Running device specific script: ${f}_postinst - Begin"
 		. "$f"
 		$(basename "$f")_postinst
+		StatsMessage "Running device specific script: ${f}_postinst - End"
 	done
 
+	StatsMessage "Setting Firstboot = false"
 	ConfSet "FirstBoot" "false"
-	reboot
+	sync
+
+	do_reboot
 	return 0
 }
 
