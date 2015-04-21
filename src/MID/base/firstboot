@@ -33,8 +33,6 @@ TARGET_ARCH=$(apt-config dump | grep 'APT::Architecture' | sed 's/.*"\(.*\)".*/\
 DEB_CACHE="$TARGET_DISTRO-$TARGET_RELEASE-$TARGET_ARCH"
 
 setup_fstab() {
-	return 0
-
 	# Hmm, let's see if the mounts are here, if not add them
 	check=$(grep 192.168.80.1 "${FSTAB_FILE}" || :)
 	if [ -z "$check" ] ; then
