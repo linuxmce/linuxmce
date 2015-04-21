@@ -44,4 +44,4 @@ cat <<-EEOF > /etc/network/if-pre-up.d/openframe-mac
 
 	exit 0
 	EEOF
-
+chmod +x /etc/network/if-pre-up.d/openframe-mac
