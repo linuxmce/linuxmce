@@ -305,7 +305,7 @@ Setup_AsoundConf()
 	sed -r "s#%CONNECT_TYPE%#${ConnectType}#g; s#%SOUND_OUT%#${SoundOut}#g; s#%MAIN_CARD%#${SoundCard}#g; s#%PLAYBACK_PCM%#${PlaybackPCM}#g;" "$AsoundConf" > /etc/asound.conf
 	Setup_XineConf "$AudioSetting" "$PlaybackCard"
 
-	/usr/pluto/bin/RestartALSA.sh
+	alsa force-reload
 
 	if pgrep AVWizard_Run.sh > /dev/null; then 
 		Enable_Audio_Channels
