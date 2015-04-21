@@ -5,6 +5,9 @@ fi
 HEADER_FB_JOGGLER=included
 
 firstboot_lmce_joggler_preinst() {
+	rm -f /etc/init/tty1.conf* || :
+	rm -f /home/joggler/.xinitrc || :
+
 	cat <<-EEOF > /etc/asound.conf
 		pcm.!default {
 		    type plug
@@ -42,5 +45,5 @@ firstboot_lmce_joggler_postinst() {
 	ConfSet "AVWizardOverride" "0"
 	ConfSet "AVWizardDone" "1"
 
-	update-rc.d -f backlight start defaults >/dev/null
+	update-rc.d -f backlight defaults 10 >/dev/null
 }
