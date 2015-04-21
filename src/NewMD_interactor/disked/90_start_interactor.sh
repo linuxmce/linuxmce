@@ -10,8 +10,15 @@ if [ -f "$DEVICEID_FILE" ]; then
 	exit 0
 fi
 
-MyIF=$(/sbin/route -n | awk '/^0\.0\.0\.0/ { print $8 }')
-MyIP=$(/sbin/ifconfig $MyIF | awk 'NR==2 { print substr($2, index($2, ":") + 1) }')
+MyIP=""
+while [ -z "$MyIP"]; do
+	MyIF=$(/sbin/route -n | awk '/^0\.0\.0\.0/ { print $8 }')
+	MyIP=$(/sbin/ifconfig $MyIF | awk 'NR==2 { print substr($2, index($2, ":") + 1) }')
+	if [ -z "$MyIP" ]; then
+		echo "Waiting for network configuration to complete..."
+		sleep 1
+	fi
+done
 MyMAC=$(/sbin/ifconfig $MyIF | awk 'NR==1 { print $5 }')
 Gateway=$(/sbin/route -n | awk '/^0\.0\.0\.0/ { print $2 }')
 
