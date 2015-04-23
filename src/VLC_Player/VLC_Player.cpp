@@ -484,7 +484,7 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
 
   StopTimecodeReporting();
 
-  // UnmountRemoteDVD();
+  UnmountRemoteDVD();
 
 }
 
@@ -1421,6 +1421,7 @@ bool VLC_Player::IsRemoteDVD(string sURL)
 {
 	bool bResult = false;
 	ExtractComputerAndDeviceFromRemoteDVD(sURL, bResult);
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"IsRemoteDVD - %s = %d",sURL.c_str(),bResult);
 	return bResult;
 }
 
@@ -1431,12 +1432,12 @@ bool VLC_Player::MountRemoteDVD(string sURL) {
   pair<int, string> remoteDVD = ExtractComputerAndDeviceFromRemoteDVD(sURL, bResult);
   
   if ( !bResult ) {
-    LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::MountRemoteDVD %s is not a remote DVD",sURL.c_str());
+    LoggerWrapper::GetInstance()->Write(LV_WARNING,"VLC_Player::MountRemoteDVD %s is not a remote DVD",sURL.c_str());
     return false;
   }
   else
     {
-      LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::MountRemoteDVD trying to mount %s",sURL.c_str());
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"VLC_Player::MountRemoteDVD trying to mount %s",sURL.c_str());
     }
   
   return MountRemoteDVD(remoteDVD.first, remoteDVD.second);
@@ -1448,7 +1449,7 @@ bool VLC_Player::UnmountRemoteDVD(string sURL) {
 
 bool VLC_Player::MountRemoteDVD(int iComputerID, string sDevice) {
   int iResult = InvokeRemoteDVDHelper(iComputerID, sDevice, "start");
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::MountRemoteDVD %s", ( (iResult==0)?"mounted OK":"failed to mount") );
+  LoggerWrapper::GetInstance()->Write(LV_WARNING,"VLC_Player::MountRemoteDVD %s", ( (iResult==0)?"mounted OK":"failed to mount") );
   
   if (iResult == 0)
     mountedRemoteDVDs.push_back(make_pair(iComputerID, sDevice));
@@ -1458,7 +1459,7 @@ bool VLC_Player::MountRemoteDVD(int iComputerID, string sDevice) {
 
 bool VLC_Player::UnmountRemoteDVD(int iComputerID, string sDevice) {
   int iResult = InvokeRemoteDVDHelper(iComputerID, sDevice, "stop");
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::UnmountRemoteDVD %s", ( (iResult==0)?"unmounted OK":"failed to unmount") );
+  LoggerWrapper::GetInstance()->Write(LV_WARNING,"VLC_Player::UnmountRemoteDVD %s", ( (iResult==0)?"unmounted OK":"failed to unmount") );
   
   return (iResult == 0) ;
 }
@@ -1466,7 +1467,7 @@ bool VLC_Player::UnmountRemoteDVD(int iComputerID, string sDevice) {
 int VLC_Player::InvokeRemoteDVDHelper(int iComputerID, string sDevice, string sCommand) {
   string sHelperCommand = "/usr/pluto/bin/StorageDevices_DVD.sh " + StringUtils::itos(iComputerID) + " " + sDevice + " " + sCommand;
   int iResult = system( sHelperCommand.c_str() );
-  LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::InvokeRemoteDVDHelper invoked [%s], return code %i", sHelperCommand.c_str(), iResult);
+  LoggerWrapper::GetInstance()->Write(LV_WARNING,"VLC_Player::InvokeRemoteDVDHelper invoked [%s], return code %i", sHelperCommand.c_str(), iResult);
   
   return iResult;
 }
