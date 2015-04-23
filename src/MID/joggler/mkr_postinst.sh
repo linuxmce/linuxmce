@@ -11,7 +11,7 @@ echo "newmd" > $COMMAND_FILE
 echo "100|800|101|480" > $DEVDATA_FILE
 
 # ensure the mac address stays consistent, without this it randomizes at boot
-cat <<-EEOF > /etc/network/if-pre-up.d/openframe-mac
+cat <<-"EEOF" > /etc/network/if-pre-up.d/openframe-mac
 	#!/bin/bash
 
 	# Ensure udev doesn't join the party.
