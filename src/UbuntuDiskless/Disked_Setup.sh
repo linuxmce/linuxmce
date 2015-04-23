@@ -73,11 +73,11 @@ function setup_hosts_file
 			JOIN Device_DeviceData ON PK_Device = FK_Device AND FK_DeviceData = $DEVICEDATA_DisklessBoot
 			JOIN DeviceTemplate ON FK_DeviceTemplate = PK_DeviceTemplate
 		WHERE 
-			FK_DeviceCategory = '8'
+			FK_DeviceCategory IN (8, 180)
 			AND
 			FK_Device_ControlledVia IS NULL
 			AND
-			IK_DeviceData = '0'
+			IK_DeviceData <> '1'
 	"
 	local R=$(RunSQL "$Q")
 	local Row
@@ -114,11 +114,11 @@ Q="
 		JOIN Device_DeviceData ON PK_Device = FK_Device AND FK_DeviceData = $DEVICEDATA_DisklessBoot
 		JOIN DeviceTemplate ON FK_DeviceTemplate = PK_DeviceTemplate
 	WHERE
-		FK_DeviceCategory = '8'
+		FK_DeviceCategory IN (8, 180)
 		AND
 		FK_Device_ControlledVia IS NULL
 		AND
-		IK_DeviceData = '0'
+		IK_DeviceData <> '1'
 "
 
 R=$(RunSQL "$Q")
