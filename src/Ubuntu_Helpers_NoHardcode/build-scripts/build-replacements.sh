@@ -61,6 +61,7 @@ function Build_Replacement_Package
 		echo "dpkg-buildpackage -rfakeroot -us -uc -b -tc"
 		dpkg-buildpackage -rfakeroot -us -uc -b -tc $make_jobs
 		cp -r ../${pkg_name}*.deb "${replacements_dir}"
+		cp -r ../${pkg_name}*.changes "${replacements_dir}"
 		Update_Changed_Since_Last_Build "$dir_"
 		popd
 
@@ -81,7 +82,8 @@ function Build_Replacements_Common_ubuntu
 		pushd "$dir_"
 		echo "dpkg-buildpackage -rfakeroot -uc -b"
 		dpkg-buildpackage -uc -b && \
-		cp ${svn_dir}/${svn_branch_name}/ubuntu/lirc-x*.deb ${replacements_dir} && \
+		cp ${svn_dir}/${svn_branch_name}/ubuntu/*lirc*.deb ${replacements_dir} && \
+		cp ${svn_dir}/${svn_branch_name}/ubuntu/*lirc*.changes ${replacements_dir} && \
 		Update_Changed_Since_Last_Build "$dir_" || :
 		popd
 	fi
@@ -99,6 +101,7 @@ function Build_Replacements_Common_ubuntu
 		cd $dir_ && autoreconf -i || :
 		dpkg-buildpackage -uc -b $make_jobs && \
 		cp ${svn_dir}/${svn_branch_name}/external/ola*.deb "${replacements_dir}" && \
+		cp ${svn_dir}/${svn_branch_name}/external/ola*.changes "${replacements_dir}" && \
 		Update_Changed_Since_Last_Build "$dir_" || :
 		# don't auto install as it pulls up whiptail...  need to pre-seed the values
 		#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola_*.deb
@@ -115,6 +118,7 @@ function Build_Replacements_Common_ubuntu
 		pushd "$dir_"
 		./make_package_ubuntu.sh $KVER && \
 		cp -r asterisk-pluto_*.deb ${replacements_dir} && \
+		cp -r asterisk-pluto_*.changes ${replacements_dir} && \
 		Update_Changed_Since_Last_Build "$dir_" || :
 		popd
 	fi
@@ -127,7 +131,8 @@ function Build_Replacements_Common_ubuntu
 
 	# lmce-asterisk
 	Build_Replacement_Package lmce-asterisk src/lmce-asterisk && \
-        cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir} || :
+        cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir} && \
+        cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.changes ${replacements_dir} || :
 
 	# TODO Fix this package so it builds against target kernel not running kernel
 	#Package: linux-image-diskless
@@ -137,6 +142,7 @@ function Build_Replacements_Common_ubuntu
 		DisplayMessage "Building linux-image-diskless for $KVER"
 		./makepackage.sh && \
 		cp linux-image-diskless_*.deb "${replacements_dir}" && \
+		cp linux-image-diskless_*.changes "${replacements_dir}" && \
 		Update_Changed_Since_Last_Build "$dir_" || :
 		popd
 	fi
@@ -148,7 +154,8 @@ function Build_Replacements_ubuntu_precise
 
 	# lmce-asterisk
 	Build_Replacement_Package lmce-asterisk src/lmce-asterisk && \
-	cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir} || :
+	cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir} && \
+	cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.changes ${replacements_dir} || :
 
         Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1 || :
 
@@ -168,7 +175,8 @@ function Build_Replacements_ubuntu_precise
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
 	Build_Replacement_Package libbluray1 ubuntu/libbluray-0.5.0 && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*bluray*.deb && \
-	cp $dir_/*bluray*.deb "${replacements_dir}" || :
+	cp $dir_/*bluray*.deb "${replacements_dir}" && \
+	cp $dir_/*bluray*.changes "${replacements_dir}" || :
 
 	# precise libsmbclient doesn't ship a pkg-config file, but xine checks for it, so lets provide one
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/smbclient.pc /usr/lib/pkgconfig/
@@ -176,7 +184,8 @@ function Build_Replacements_ubuntu_precise
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
 	Build_Replacement_Package libxine2 ubuntu/xine-lib-1.2.6 && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb && \
-	cp $dir_/*xine*.deb "${replacements_dir}" || :
+	cp $dir_/*xine*.deb "${replacements_dir}" && \
+	cp $dir_/*xine*.changes "${replacements_dir}" || :
 
 	#Package: protobuf
 	#Build_Replacement_Package protobuf ubuntu/ola/protobuf-2.3.0
@@ -206,19 +215,22 @@ function Build_Replacements_ubuntu_precise
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
 	Build_Replacement_Package libsoxr0 ubuntu/libsoxr-0.1.1 && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*soxr*.deb && \
-	cp $dir_/*soxr*.deb "${replacements_dir}" || :
+	cp $dir_/*soxr*.deb "${replacements_dir}" && \
+	cp $dir_/*soxr*.changes "${replacements_dir}" || :
 
 #ubuntu/squeezelite-1.4
 	#Package: squeezelite-1.4
 	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.4 && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.4*.deb && \
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu" && \
-	cp $dir_/*squeezelite*.deb "${replacements_dir}" || :
+	cp $dir_/*squeezelite*.deb "${replacements_dir}" && \
+	cp $dir_/*squeezelite*.changes "${replacements_dir}" || :
 
 	#Package: libcec
 	Build_Replacement_Package libcec ubuntu/libcec-2.1.4 && \
-	cp ${svn_dir}/${svn_branch_name}/ubuntu/cec*.deb ${replacements_dir} && \
-	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libcec*.deb || :
+	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libcec*.deb && \
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/*cec*.deb ${replacements_dir} && \
+	cp ${svn_dir}/${svn_branch_name}/ubuntu/*cec*.changes ${replacements_dir} || :
 }
 
 function Build_Replacements_ubuntu_trusty
@@ -247,13 +259,15 @@ function Build_Replacements_ubuntu_trusty
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
 	Build_Replacement_Package ruby1.8 ubuntu/ruby1.8-1.8.7.375/ && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*1.8_1.8.7.375*.deb && \
-	cp $dir_/*1.8_1.8.7.375*.deb "${replacements_dir}" || :
+	cp $dir_/*1.8_1.8.7.375*.deb "${replacements_dir}" && \
+	cp $dir_/*1.8_1.8.7.375*.changes "${replacements_dir}" || :
 
 	#Package: libxine2
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
 	Build_Replacement_Package libxine2 ubuntu/xine-lib-1.2.6 && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb && \
-	cp $dir_/*xine*.deb "${replacements_dir}" || :
+	cp $dir_/*xine*.deb "${replacements_dir}" && \
+	cp $dir_/*xine*.changes "${replacements_dir}" || :
 }
 
 function Build_Replacements_Common_raspbian
@@ -267,8 +281,9 @@ function Build_Replacements_raspbian_wheezy
 
 	#Package: libcec
 	Build_Replacement_Package libcec raspbian/libcec-2.1.4 && \
-	cp ${svn_dir}/${svn_branch_name}/raspbian/cec*.deb ${replacements_dir} && \
-	dpkg -i ${svn_dir}/${svn_branch_name}/raspbian/libcec*.deb || :
+	dpkg -i ${svn_dir}/${svn_branch_name}/raspbian/libcec*.deb && \
+	cp ${svn_dir}/${svn_branch_name}/raspbian/*cec*.deb ${replacements_dir} && \
+	cp ${svn_dir}/${svn_branch_name}/raspbian/*cec*.changes ${replacements_dir} || :
 }
 
 trap 'Error "Undefined error in $0" ; apt-get install libtool -y' EXIT
