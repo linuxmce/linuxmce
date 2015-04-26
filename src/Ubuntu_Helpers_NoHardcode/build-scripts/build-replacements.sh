@@ -60,8 +60,8 @@ function Build_Replacement_Package
 		DisplayMessage "Building ${pkg_name}"
 		echo "dpkg-buildpackage -rfakeroot -us -uc -b -tc"
 		dpkg-buildpackage -rfakeroot -us -uc -b -tc $make_jobs
-		cp -r ../${pkg_name}*.deb "${replacements_dir}"
-		cp -r ../${pkg_name}*.changes "${replacements_dir}"
+		cp -fr ../${pkg_name}*.deb "${replacements_dir}"
+		cp -fr ../${pkg_name}*.changes "${replacements_dir}"
 		Update_Changed_Since_Last_Build "$dir_"
 		popd
 
@@ -78,13 +78,13 @@ function Build_Replacements_Common_ubuntu
 	#Package: lirc
 	dir_=${svn_dir}/${svn_branch_name}/ubuntu/lirc-0.9.0-0ubuntu1+lmce1
 	if Changed_Since_Last_Build "$dir_" ;then
-		DisplayMessage "Building lirc-0.9.0-0ubuntu1+lmce1"
 		pushd "$dir_"
+		DisplayMessage "Building lirc-0.9.0-0ubuntu1+lmce1"
 		echo "dpkg-buildpackage -rfakeroot -uc -b"
 		dpkg-buildpackage -uc -b && \
-		cp ${svn_dir}/${svn_branch_name}/ubuntu/*lirc*.deb ${replacements_dir} && \
-		cp ${svn_dir}/${svn_branch_name}/ubuntu/*lirc*.changes ${replacements_dir} && \
-		Update_Changed_Since_Last_Build "$dir_" || :
+		cp -fr ${svn_dir}/${svn_branch_name}/ubuntu/*lirc*.deb ${replacements_dir} && \
+		cp -fr ${svn_dir}/${svn_branch_name}/ubuntu/*lirc*.changes ${replacements_dir} || :
+		Update_Changed_Since_Last_Build "$dir_"
 		popd
 	fi
 
@@ -94,18 +94,19 @@ function Build_Replacements_Common_ubuntu
 	Build_Replacement_Package squeezeslave ubuntu/squeezeslave-1.3-393 || :
 
 	# ola needs to be configured to the current build environment
-	dir_="${svn_dir}/${svn_branch_name}/external/ola-0.9.0"
+	dir_=${svn_dir}/${svn_branch_name}/external/ola-0.9.0
 	if Changed_Since_Last_Build "$dir_" ;then
-		DisplayMessage "Building ola-0.9.0"
 		pushd "$dir_"
-		cd $dir_ && autoreconf -i || :
-		dpkg-buildpackage -uc -b $make_jobs && \
-		cp ${svn_dir}/${svn_branch_name}/external/ola*.deb "${replacements_dir}" && \
-		cp ${svn_dir}/${svn_branch_name}/external/ola*.changes "${replacements_dir}" && \
-		Update_Changed_Since_Last_Build "$dir_" || :
+		DisplayMessage "Building ola-0.9.0"
+		autoreconf -i && \
+		dpkg-buildpackage -uc -b -tc $make_jobs && \
+		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.deb "${replacements_dir}" && \
+		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.changes "${replacements_dir}" || :
 		# don't auto install as it pulls up whiptail...  need to pre-seed the values
 		#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola_*.deb
 		#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola-dev*.deb
+		Update_Changed_Since_Last_Build "$dir_"
+		popd
 	fi
 
 	#Package: tee-pluto
@@ -114,11 +115,11 @@ function Build_Replacements_Common_ubuntu
 	#Package: pluto-asterisk
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu/asterisk"
 	if Changed_Since_Last_Build "$dir_" ;then
-		DisplayMessage "Building pluto-asterisk"
 		pushd "$dir_"
+		DisplayMessage "Building pluto-asterisk"
 		./make_package_ubuntu.sh $KVER && \
-		cp -r asterisk-pluto_*.deb ${replacements_dir} && \
-		cp -r asterisk-pluto_*.changes ${replacements_dir} && \
+		cp -fr asterisk-pluto_*.deb ${replacements_dir} && \
+		cp -fr asterisk-pluto_*.changes ${replacements_dir} && \
 		Update_Changed_Since_Last_Build "$dir_" || :
 		popd
 	fi
@@ -131,8 +132,8 @@ function Build_Replacements_Common_ubuntu
 
 	# lmce-asterisk
 	Build_Replacement_Package lmce-asterisk src/lmce-asterisk && \
-        cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir} && \
-        cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.changes ${replacements_dir} || :
+        cp -fr ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir} && \
+        cp -fr ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.changes ${replacements_dir} || :
 
 	# TODO Fix this package so it builds against target kernel not running kernel
 	#Package: linux-image-diskless
@@ -141,9 +142,9 @@ function Build_Replacements_Common_ubuntu
 		pushd "$dir_"
 		DisplayMessage "Building linux-image-diskless for $KVER"
 		./makepackage.sh && \
-		cp linux-image-diskless_*.deb "${replacements_dir}" && \
-		cp linux-image-diskless_*.changes "${replacements_dir}" && \
-		Update_Changed_Since_Last_Build "$dir_" || :
+		cp -fr linux-image-diskless_*.deb "${replacements_dir}" && \
+		cp -fr linux-image-diskless_*.changes "${replacements_dir}" || :
+		Update_Changed_Since_Last_Build "$dir_"
 		popd
 	fi
 }
