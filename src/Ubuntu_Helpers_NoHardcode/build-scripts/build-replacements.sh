@@ -147,6 +147,8 @@ function Build_Replacements_Common_ubuntu
 		Update_Changed_Since_Last_Build "$dir_"
 		popd
 	fi
+
+	Build_Replacement_Package lmce-mame-metadata extra/mamedata || :
 }
 
 function Build_Replacements_ubuntu_precise
