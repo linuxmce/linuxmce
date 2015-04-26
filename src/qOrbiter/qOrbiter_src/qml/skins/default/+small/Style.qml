@@ -15,6 +15,14 @@ QtObject{
         console.log((message? message+"\n\t" : "No Message \n\t")+ JSON.stringify(obj, null, "\t"))
     }
 
+    //picture ratios - will be moved to cpp class
+    property double dvdPosterRatio:955/1080
+    property double hdPosterRatio:755/1080
+    property double cdCoverRatioFront:1080/1080
+    property double cdCoverRatioBack:1080/1264
+    property double vcdRatio:1080/1080
+    property double vhsRatio:1280/620
+
     /* Transitions */
     readonly property int transition_animationTime:350
     readonly property int transition_accentTime:500
@@ -71,8 +79,8 @@ QtObject{
 
     /* Application List Views */
     readonly property int listViewWidth_large:scaleX(55)
-    readonly property int listViewWidth_medium:scaleX(20)
-    readonly property int listViewWidth_small:scaleX(15)
+    readonly property int listViewWidth_medium:manager.b_orientation ? scaleX(30) : scaleX(15)
+    readonly property int listViewWidth_small:manager.b_orientation ? scaleX(20) : scaleX(15)
     readonly property int listViewItemHeight:manager.isProfile ? scaleY(12) : scaleY(15)
     readonly property int listViewMargin:manager.isProfile ? scaleX(5) : scaleX(2.5)
 
@@ -84,5 +92,10 @@ QtObject{
     readonly property double appHeader_opacity:.55
     readonly property double appPanel_opacity:.45
     readonly property double appList_opacity:.89
+
+    //remote Screens
+    readonly property double remote_posterHeight:manager.isProfile ? scaleY(100) : scaleY(55)
+    readonly property double remote_posterWidth:remote_posterHeight*hdPosterRatio
+
 
 }

@@ -6,7 +6,13 @@ import "../."
 Item {
     id:generic_playback
     property bool showingPlaylist:false
-
+    NowPlayingImage {
+        id: imgContainer
+        anchors{
+            verticalCenter: parent.verticalCenter
+            left:!manager.isProfile ? playlistPanel.right :generic_playback.left
+        }
+    }
     Item{
         id:directionDiamond
     }
@@ -23,9 +29,8 @@ Item {
     Item{
         id:lightingAudioControls
         anchors.right: parent.right
-        width: Style.scaleX(12)
-        height: parent.height*.15
-
+        height:(manager.isProfile ? Style.scaleY(8) : Style.scaleY(10) ) *3
+        width:(manager.isProfile ? Style.scaleX(14) : Style.scaleX(10) ) *2
         Item{
             id:lightingControls
             width:parent.width/2
@@ -106,13 +111,7 @@ Item {
         id: transport_buttons
     }
 
-    NowPlayingImage {
-        id: imgContainer
-        anchors{
-            verticalCenter: parent.verticalCenter
-            left:playlistPanel.right
-        }
-    }
+
 
     states: [
         State {

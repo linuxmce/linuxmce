@@ -97,8 +97,8 @@ Item{
             name:"posterImage"
             PropertyChanges{
                 target: imgContainer
-                height: manager.isProfile ? Style.scaleY(75) : Style.scaleY(65)
-                width: height * hdPosterRatio
+                height:Style.remote_posterHeight
+                width: Style.remote_posterWidth
             }
         }
         

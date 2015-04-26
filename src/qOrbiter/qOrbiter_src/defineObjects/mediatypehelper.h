@@ -120,7 +120,7 @@ public:
 
 
 public slots:
-  static const QString translateType(int t){
+ Q_INVOKABLE static const QString translateType(int t){
         switch (t) {
         case TVSHOWS: return tr("Tv Shows");            break;
         case MOVIES: return tr("Movies");               break;
@@ -221,7 +221,7 @@ public:
 public slots:
  Q_INVOKABLE int getInt(){return 1;}
 
-    static const QString translateType(int m){
+ Q_INVOKABLE  static const QString translateType(int m){
         switch(m){
         case LMCE_LiveTV:
             return tr("LinuxMCE LiveTV");
