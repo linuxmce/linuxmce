@@ -88,4 +88,7 @@ QtObject{
     readonly property double appPanel_opacity:.45
     readonly property double appList_opacity:.89
 
+    //remote Screens
+
+
 }

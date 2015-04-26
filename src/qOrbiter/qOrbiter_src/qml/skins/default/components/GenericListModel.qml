@@ -6,9 +6,10 @@ Item{
     id:genericListContainer
     width: Style.listViewWidth_medium
     property alias model:view.model
-    property string label:"Ipsum"
+    property alias label:itemlabel.text
     property alias delegate:view.delegate
     property int modelSpacing: 1
+    property int modelCount:view.count
 
     Rectangle{
         id:hdr
@@ -22,7 +23,7 @@ Item{
         opacity: Style.appList_opacity
     }
     StyledText{
-        id:label
+        id:itemlabel
         anchors.centerIn: hdr
         text:genericListContainer.label
         fontSize: Style.appFontSize_title
@@ -31,6 +32,7 @@ Item{
     ListView{
         id:view
         clip:true
+
         visible: genericListContainer.visible
         opacity: genericListContainer.opacity
         spacing: modelSpacing

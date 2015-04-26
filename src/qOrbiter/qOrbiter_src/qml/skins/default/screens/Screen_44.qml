@@ -141,61 +141,61 @@ StyledScreen {
                     anchors.margins: 10
                     spacing:10
                     StyledText{
-                        isBold: true
+
                         fontSize: Style.appFontSize_list
                         anchors.horizontalCenter: parent.horizontalCenter
                         text:qsTr("Screen Name: %1").arg(screenInfo.primaryScreen.screenName)
                     }
                     StyledText{
-                        isBold: true
+
                         fontSize: Style.appFontSize_list
                         anchors.horizontalCenter: parent.horizontalCenter
                         text:qsTr("Current Orientation: %1").arg(screenInfo.primaryScreen.orientation)
                     }
                     StyledText{
-                        isBold: true
+
                         fontSize: Style.appFontSize_list
                         anchors.horizontalCenter: parent.horizontalCenter
                         text:qsTr("Native Orientation: %1").arg(screenInfo.primaryScreen.nativeOrientation)
                     }
                     StyledText{
-                        isBold: true
+
                         fontSize: Style.appFontSize_list
                         anchors.horizontalCenter: parent.horizontalCenter
                         text:qsTr("Logical DPI: %1").arg(screenInfo.primaryScreen.logicalDpi)
                     }
                     StyledText{
-                        isBold: true
+
                         fontSize: Style.appFontSize_list
                         anchors.horizontalCenter: parent.horizontalCenter
                         text:qsTr("Physical DPI: %1").arg(screenInfo.primaryScreen.physicalDpi)
                     }
                     StyledText{
-                        isBold: true
+
                         fontSize: Style.appFontSize_list
                         anchors.horizontalCenter: parent.horizontalCenter
                         text:qsTr("Height: %1 mm").arg(screenInfo.primaryScreen.heightMM)
                     }
                     StyledText{
-                        isBold: true
+
                         fontSize: Style.appFontSize_list
                         anchors.horizontalCenter: parent.horizontalCenter
                         text:qsTr("Width: %1 mm").arg(screenInfo.primaryScreen.widthMM)
                     }
                     StyledText{
-                        isBold: true
+
                         fontSize: Style.appFontSize_list
                         anchors.horizontalCenter: parent.horizontalCenter
                         text:qsTr("Diagonal Size: %1 (in) Screen Size:: %2").arg(screenInfo.primaryScreen.diagonalInches).arg(screenInfo.primaryScreen.stringDeviceSize)
                     }
                     StyledText{
-                        isBold: true
+
                         fontSize: Style.appFontSize_list
                         anchors.horizontalCenter: parent.horizontalCenter
                         text:qsTr("Width: %1 (px)").arg(screenInfo.primaryScreen.width)
                     }
                     StyledText{
-                        isBold: true
+
                         fontSize: Style.appFontSize_list
                         anchors.horizontalCenter: parent.horizontalCenter
                         text:qsTr("Height: %1 (px)").arg(screenInfo.primaryScreen.height)

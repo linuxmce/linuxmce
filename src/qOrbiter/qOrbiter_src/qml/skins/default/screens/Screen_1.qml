@@ -5,12 +5,16 @@ import org.linuxmce.screens 1.0
 StyledScreen {
     id:screen
 
+    NowPlayingButton {
+        id: now_playing_button
+    }
+
     GenericListModel {
         id: genericListContainer
         label: qsTr("Scenarios in  %1").arg(roomList.currentRoom)
         anchors{
             left:parent.left
-            top:parent.top
+            top:now_playing_button.bottom
             right:parent.right
         }
         height: Style.appButtonHeight *6

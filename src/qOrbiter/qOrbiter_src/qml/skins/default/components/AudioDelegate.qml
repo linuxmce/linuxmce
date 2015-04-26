@@ -51,8 +51,7 @@ Item{
         }
         wrapMode: Text.Wrap
         fontSize: Style.appFontSize_title
-        visible:true //path==="" ? true : false
-        isBold: false
+        visible:true //path==="" ? true : false      
         color: "White"
         height: titleBlock.lineCount * 50
     }

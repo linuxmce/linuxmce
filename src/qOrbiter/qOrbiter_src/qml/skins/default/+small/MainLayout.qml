@@ -39,7 +39,7 @@ Item {
         id: pageLoader
 
         anchors{
-            top:mediaNotification.bottom
+            top:header.bottom
             left:layout.left
             right:layout.right
             bottom:footer.top
@@ -80,7 +80,7 @@ Item {
 
     }
 
-    Item{
+    /*Item{
         id:mediaNotification
         anchors{
             top:header.bottom
@@ -122,7 +122,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             visible:manager.currentScreen=="Screen_1.qml"
         }
-    }
+    }*/
 
     Footer {
         id: footer

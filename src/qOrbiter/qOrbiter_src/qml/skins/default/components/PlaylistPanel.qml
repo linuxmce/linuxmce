@@ -1,0 +1,56 @@
+import QtQuick 2.2
+import org.linuxmce.enums 1.0
+import org.linuxmce.screens 1.0
+import QtGraphicalEffects 1.0
+import "../."
+Item{
+    id:playlistPanel
+    height: Style.scaleY(75)
+    width: Style.listViewWidth_medium
+    //  visible:showingPlaylist
+    
+    GenericListModel{
+        label: qsTr("%1 item(s)").arg(modelCount)
+        model:manager.getDataGridModel("Playlist", 18)
+        delegate: Item{
+            height:Style.scaleY(10)
+            anchors{
+                left:parent.left
+                right:parent.right
+            }
+            clip:true
+            
+            anchors.margins: 5
+            
+            
+            Rectangle{
+                id:fil
+                anchors.fill: parent
+                color:ms.pressed ? style.buttonPressedColor: "black"
+                opacity:Style.appList_opacity
+                
+            }
+            StyledText{
+                text:description
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                font.pixelSize: 22
+                width: parent.width
+            }
+            StyledText{
+                text:value
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                font.pixelSize: 36
+                opacity: value == dcenowplaying.m_iplaylistPosition ? 1 :.25
+            }
+            
+            MouseArea{
+                id:ms
+                anchors.fill: parent
+                onClicked: {manager.changedPlaylistPosition(index); console.log("Change track")}
+            }
+        }
+        anchors.fill: parent
+    }
+}

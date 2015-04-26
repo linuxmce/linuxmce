@@ -52,8 +52,7 @@ Item{
 
     StyledText{
         id:button_label
-        text:"ipsum"
-        isBold: false
+        text:"ipsum"    
         width: parent.width
         height: parent.height
         font.weight: Font.Light
@@ -161,6 +160,15 @@ Item{
                 wrapMode:Text.WrapAtWordBoundaryOrAnywhere
                 width:styled_button.width
                 horizontalAlignment:Text.AlignHCenter
+            }
+        },
+        State {
+            name: "remote"
+            PropertyChanges {
+                target: styled_button
+                height:manager.isProfile ? Style.scaleY(8) : Style.scaleY(10)
+                width:manager.isProfile ? Style.scaleX(14) : Style.scaleX(10)
+
             }
         }
     ]

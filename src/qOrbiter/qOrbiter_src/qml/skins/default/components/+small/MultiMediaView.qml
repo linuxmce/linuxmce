@@ -123,8 +123,7 @@ Item{
                 height:parent.height
                 verticalAlignment:Text.AlignVCenter
                 fontSize:Style.appFontSize_description
-                visible:true //path==="" ? true : false
-                isBold: false
+                visible:true //path==="" ? true : false              
                 color: "White"
             }
 

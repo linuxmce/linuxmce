@@ -72,5 +72,14 @@
         <file>qml/skins/default/components/GenericPlaybackScreen.qml</file>
         <file>qml/skins/default/screens/Screen_70.qml</file>
         <file>qml/skins/default/components/BackButton.qml</file>
+        <file>qml/skins/default/components/NowPlayingButton.qml</file>
+        <file>qml/skins/default/components/DirectionPad.qml</file>
+        <file>qml/skins/default/components/MediaTransport.qml</file>
+        <file>qml/skins/default/components/DirectionButton.qml</file>
+        <file>qml/skins/default/components/NowPlayingImage.qml</file>
+        <file>qml/skins/default/components/TransportButtons.qml</file>
+        <file>qml/skins/default/components/PlaylistPanel.qml</file>
+        <file>qml/skins/default/screens/Screen_17.qml</file>
+        <file>qml/skins/default/screens/Screen_207.qml</file>
     </qresource>
 </RCC>

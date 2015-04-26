@@ -62,8 +62,7 @@ Item{
         }
         wrapMode: Text.Wrap
         fontSize: Style.appFontSize_title
-        visible: manager.q_subType!=MediaSubtypes.MOVIES && imdbImg.source!==""
-        isBold: false
+        visible: manager.q_subType!=MediaSubtypes.MOVIES && imdbImg.source!==""       
         color: "White"
         height: titleBlock.lineCount * 50
     }

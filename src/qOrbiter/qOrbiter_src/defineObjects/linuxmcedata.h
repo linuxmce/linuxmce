@@ -20,6 +20,7 @@ public:
  */
 class HostSystemData : public QObject{
     Q_OBJECT
+    Q_ENUMS(HostTypes)
 public:
 
     HostSystemData(){}
@@ -36,8 +37,6 @@ public:
         OTHER_EMBEDDED=9,
         SAILFISH_OS=10
     };
-    Q_ENUMS(HostTypes)
-
 
 signals:
 
@@ -45,24 +44,14 @@ public slots:
 
     Q_INVOKABLE static const QString getSystemName(int s){
         switch(s){
-        case RASPBERRY_PI:
-            return "Raspberry Pi";
-            break;
-        case OSX_DESKTOP:
-            return "OS X Desktop";
-            break;
-        case LINUX_DESKTOP:
-            return "Linux Desktop";
-            break;
-        case ANDROID_TABLET:
-            return "Android Tablet";
-            break;
-        case ANDROID_PHONE:
-            return "Android Phone";
-            break;
-        default:
-            return "Dunno, Windows 98?";
-            break;
+        case RASPBERRY_PI: return tr("Raspberry Pi"); break;
+        case OSX_DESKTOP:  return tr("OS X Desktop"); break;
+        case LINUX_DESKTOP: return tr("Linux Desktop"); break;
+        case ANDROID_TABLET:  return tr("Android Tablet"); break;
+        case ANDROID_PHONE: return tr("Android Phone"); break;
+        case IOS_PHONE: return tr("IOS Phone"); break;
+        case IOS_TABLET: return tr("IOS Tablet"); break;
+        default: return tr("Dunno, Windows 98?"); break;
         }
     }
 
@@ -73,6 +62,7 @@ public slots:
 class HouseModesHelper : public QObject
 {
     Q_OBJECT
+    Q_ENUMS(HouseModes)
 public:
     HouseModesHelper() {}
     virtual ~HouseModesHelper() {}
@@ -84,10 +74,10 @@ public:
         Entertaining=5,
         Armed_Extended_away=6
     };
-    Q_ENUMS(HouseModes)
+
 
 public slots:
-     static const QString translateType(int m){
+  Q_INVOKABLE static const QString translateType(int m){
         switch (m) {
         case Unarmed_at_home:
             return tr("Unarmed, at home.", "UserMode status");
@@ -116,6 +106,7 @@ public slots:
 class UserModesHelper : public QObject
 {
     Q_OBJECT
+     Q_ENUMS(UserModes)
 public:
     UserModesHelper(){}
     virtual ~UserModesHelper(){}
@@ -125,10 +116,10 @@ public:
         USERMODE_Sleeping,
         USERMODE_Do_not_disturb
     };
-    Q_ENUMS(UserModes)
+
 
 public slots:
-   static const QString translateType(int m){
+   Q_INVOKABLE static const QString translateType(int m){
         switch (m) {
         case USERMODE_At_Home:
             return tr("Home.", "UserMode status");
@@ -151,6 +142,7 @@ public slots:
 class RoomTypeHelper : public QObject
 {
     Q_OBJECT
+     Q_ENUMS(RoomTypes)
 public:
     RoomTypeHelper() {}
     virtual ~RoomTypeHelper() {}
@@ -171,10 +163,10 @@ public:
         Bathroom=14,
         Unmanaged=15
     };
-    Q_ENUMS(RoomTypes)
+
 
 public slots:
-   static const QString translateType(int m){
+    static const QString translateType(int m){
         switch (m) {
         case Living_RoomFamily_Room:
             return tr("Living/Family Room", "Room Type");
@@ -228,6 +220,7 @@ public slots:
 class ScreenList : public QObject
 {
     Q_OBJECT
+     Q_ENUMS(Screens)
 public:
     ScreenList() {}
     virtual ~ScreenList() {}
@@ -529,9 +522,9 @@ public:
         TI_99_FS_Options = 311
         /*<-SAE->*/
     };
-    Q_ENUMS(Screens)
 
-    QString static const translateType(int m){
+
+  Q_INVOKABLE QString static const translateType(int m){
         switch (m) {
 
         default:

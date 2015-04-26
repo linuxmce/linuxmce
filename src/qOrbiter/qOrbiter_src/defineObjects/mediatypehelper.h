@@ -13,6 +13,7 @@
 class AttributeTypeHelper : public QObject
 {
     Q_OBJECT
+     Q_ENUMS(Attributes)
 public:
     AttributeTypeHelper(){}
     virtual ~AttributeTypeHelper(){}
@@ -69,7 +70,7 @@ public:
         TV_Season_ID =52,
         System_Configuration= 56
     };
-    Q_ENUMS(Attributes)
+
 
 public slots:
   Q_INVOKABLE static const QString translateType(int t){
@@ -98,6 +99,7 @@ public slots:
 class SubTypesHelper : public QObject
 {
     Q_OBJECT
+    Q_ENUMS(MediaSubTypes)
 public:
     SubTypesHelper() {}
     virtual ~SubTypesHelper() {}
@@ -115,7 +117,7 @@ public:
         ARCADE=11,
         CONSOLE=12
     };
-    Q_ENUMS(MediaSubTypes)
+
 
 public slots:
   static const QString translateType(int t){
@@ -138,6 +140,7 @@ public slots:
 class MediaTypesHelper : public QObject
 {
     Q_OBJECT
+    Q_ENUMS(MediaTypes)
 public:
     MediaTypesHelper() {}
     virtual ~MediaTypesHelper() {}
@@ -213,10 +216,10 @@ public:
         LMCE_Game_TI99 = 70
         /*<-AGE->*/
     };
-    Q_ENUMS(MediaTypes)
+
 
 public slots:
-    int getInt(){return 1;}
+ Q_INVOKABLE int getInt(){return 1;}
 
     static const QString translateType(int m){
         switch(m){
@@ -326,8 +329,6 @@ public slots:
             return tr("Unknown.");
             break;
         }
-
-
     }
 };
 #endif // MEDIATYPEHELPER_H
