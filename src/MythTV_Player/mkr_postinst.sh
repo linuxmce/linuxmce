@@ -16,9 +16,9 @@ if [[ "$PK_Device" == "1" ]] && [[ -f /etc/mythtv/config.xml ]] ; then
 	PASSWORD='Password'
 	DATABASE='DatabaseName'
 
-	WITHDB=`grep DBHostName -i /etc/mythtv/config.xml`
+	WITHDB=`grep DBHostName -i /etc/mythtv/config.xml` || :
 
-	if [ $WITHDB ] ; then
+	if [ -n "$WITHDB" ] ; then
 		HOST="DBHostName"
 		USERNAME="DBUserName"
 		DATABASE="DBName"
