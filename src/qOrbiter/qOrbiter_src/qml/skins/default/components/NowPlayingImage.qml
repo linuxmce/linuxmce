@@ -88,8 +88,8 @@ Item{
             when:manager.i_current_mediaType == MediaTypes.LMCE_StoredAudio
             PropertyChanges {
                 target: imgContainer
-                height: Style.scaleX(25)
-                width: height
+                height:Style.remote_albumHeight
+                width: Style.remote_albumWidth
                 
             }
         },

@@ -98,5 +98,7 @@ QtObject{
     readonly property double remote_posterHeight:manager.isProfile ? scaleY(34) : scaleY(55)
     readonly property double remote_posterWidth:remote_posterHeight*hdPosterRatio
 
+    readonly property double remote_albumHeight:manager.b_orientation ? scaleY(50) : scaleY(75)
+    readonly property double remote_albumWidth:remote_albumHeight
 
 }

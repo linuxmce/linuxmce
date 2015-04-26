@@ -1280,7 +1280,7 @@ public slots:
     void stopMedia() {/*emit stopPlayback();*/
         CMD_MH_Stop_Media endMedia(iPK_Device, iMediaPluginID,0,i_current_mediaType ,0,sEntertainArea,false);
         string response;
-        emit sendDceCommandResponse(endMedia, &response);
+        emit sendDceCommand(endMedia);
         LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Response: %s", response.c_str());
         setDirectAv(false);
     }
@@ -1862,10 +1862,9 @@ private slots:
         qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
 
 #endif
-
-
         qorbiterUIwin->setSource(QUrl(m_selector->select(returnLocation)));
         qDebug() << Q_FUNC_INFO << qorbiterUIwin->source();
+        emit screenChange(currentScreen);
     }
     void handleScreenChanged(QScreen* screen);
     void resetScreenSize(){

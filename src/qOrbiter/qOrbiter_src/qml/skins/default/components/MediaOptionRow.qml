@@ -303,6 +303,7 @@ Item{
                 top:parent.top
                 bottom:parent.bottom
             }
+            onActivated: manager.playMedia("!G")
         }
     }
     BackButton{

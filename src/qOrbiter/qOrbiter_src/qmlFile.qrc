@@ -81,5 +81,6 @@
         <file>qml/skins/default/components/PlaylistPanel.qml</file>
         <file>qml/skins/default/screens/Screen_17.qml</file>
         <file>qml/skins/default/screens/Screen_207.qml</file>
+        <file>qml/skins/default/components/ContentHeader.qml</file>
     </qresource>
 </RCC>

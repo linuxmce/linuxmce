@@ -128,7 +128,13 @@ Item {
             }
         },
         State {
+            when:manager.i_current_mediaType == MediaTypes.LMCE_StoredAudio
             name: "localaudio"
+
+            PropertyChanges {
+                target: arrows
+                visible:false
+            }
 
         },
         State{
