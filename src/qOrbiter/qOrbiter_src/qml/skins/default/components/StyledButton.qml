@@ -53,13 +53,19 @@ Item{
     StyledText{
         id:button_label
         text:"ipsum"    
-        width: parent.width
+        anchors{
+            left:parent.left
+            right:parent.right
+            bottom:parent.bottom
+            top:parent.top
+            margins: 5
+        }
+
         height: parent.height
         font.weight: Font.Light
         fontSize: textSize
         verticalAlignment: Text.AlignVCenter
-        horizontalAlignment:Text.AlignHCenter
-        anchors.margins: 5
+        horizontalAlignment:Text.AlignHCenter       
         color:Style.apptext_color_active
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     }
@@ -96,7 +102,7 @@ Item{
                 target: styled_button
                 height:Style.scaleY(12)
                 width:Style.scaleX(18)
-                textSize:Style.scaleY(3)
+                textSize:Style.fontSize_listItem
             }
             PropertyChanges{
                 target: button_label

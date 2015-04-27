@@ -59,7 +59,6 @@ StyledScreen {
                 clip:true
                 delegate:Item{
                     height: parent.height
-                    // width: Style.appButtonWidth
                     width: Style.appButtonWidth
                     StyledButton{
                         buttonText:title
