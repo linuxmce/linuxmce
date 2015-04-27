@@ -155,5 +155,6 @@
         <file>qml/skins/default/images/lightsdown_up.png</file>
         <file>qml/skins/default/images/lightsup_up.png</file>
         <file>qml/skins/default/images/ff_up.png</file>
+        <file>qml/skins/default/components/ImageButton.qml</file>
     </qresource>
 </RCC>
