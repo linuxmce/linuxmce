@@ -60,11 +60,12 @@ function Build_Replacement_Package
 		DisplayMessage "Building ${pkg_name}"
 		echo "dpkg-buildpackage -rfakeroot -us -uc -b -tc"
 		dpkg-buildpackage -rfakeroot -us -uc -b -tc $make_jobs
-		cp -fr ../${pkg_name}*.deb "${replacements_dir}"
-		cp -fr ../${pkg_name}*.changes "${replacements_dir}"
+		cp -fr ../*${pkg_name}*.deb "${replacements_dir}"
+		cp -fr ../*${pkg_name}*.changes "${replacements_dir}"
 		Update_Changed_Since_Last_Build "$dir_"
 		popd
 
+		return $(/bin/true)
 		return $(/bin/true)
 	fi
 
@@ -102,9 +103,6 @@ function Build_Replacements_Common_ubuntu
 		dpkg-buildpackage -uc -b -tc $make_jobs && \
 		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.deb "${replacements_dir}" && \
 		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.changes "${replacements_dir}" || :
-		# don't auto install as it pulls up whiptail...  need to pre-seed the values
-		#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola_*.deb
-		#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/ola-dev*.deb
 		Update_Changed_Since_Last_Build "$dir_"
 		popd
 	fi
@@ -131,9 +129,7 @@ function Build_Replacements_Common_ubuntu
 	Build_Replacement_Package mtx-pluto ubuntu/mtx-1.3.11 || :
 
 	# lmce-asterisk
-	Build_Replacement_Package lmce-asterisk src/lmce-asterisk && \
-        cp -fr ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir} && \
-        cp -fr ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.changes ${replacements_dir} || :
+	Build_Replacement_Package lmce-asterisk src/lmce-asterisk || :
 
 	# TODO Fix this package so it builds against target kernel not running kernel
 	#Package: linux-image-diskless
@@ -156,9 +152,7 @@ function Build_Replacements_ubuntu_precise
 	mkdir -pv "$replacements_dir"
 
 	# lmce-asterisk
-	Build_Replacement_Package lmce-asterisk src/lmce-asterisk && \
-	cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.deb ${replacements_dir} && \
-	cp ${svn_dir}/${svn_branch_name}/src/lmce-asterisk*.changes ${replacements_dir} || :
+	Build_Replacement_Package lmce-asterisk src/lmce-asterisk || :
 
         Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1 || :
 
@@ -168,27 +162,17 @@ function Build_Replacements_ubuntu_precise
 	Build_Replacement_Package libopenzwave1.0 external/openzwave-1.3.1025 && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb || :
 
-#	QT_SELECT=4 Build_Replacement_Package libhupnp-core external/hupnp/hupnp
-#	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-core*.deb
-
-#	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av
-#	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb
-
 	#Package: libbluray1
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
-	Build_Replacement_Package libbluray1 ubuntu/libbluray-0.5.0 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*bluray*.deb && \
-	cp $dir_/*bluray*.deb "${replacements_dir}" && \
-	cp $dir_/*bluray*.changes "${replacements_dir}" || :
+	Build_Replacement_Package bluray ubuntu/libbluray-0.5.0 && \
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*bluray*.deb || :
 
 	# precise libsmbclient doesn't ship a pkg-config file, but xine checks for it, so lets provide one
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/smbclient.pc /usr/lib/pkgconfig/
 	#Package: libxine2
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
-	Build_Replacement_Package libxine2 ubuntu/xine-lib-1.2.6 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb && \
-	cp $dir_/*xine*.deb "${replacements_dir}" && \
-	cp $dir_/*xine*.changes "${replacements_dir}" || :
+	Build_Replacement_Package xine ubuntu/xine-lib-1.2.6 && \
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb || :
 
 	#Package: protobuf
 	#Build_Replacement_Package protobuf ubuntu/ola/protobuf-2.3.0
@@ -202,38 +186,21 @@ function Build_Replacements_ubuntu_precise
 	#dir_="${svn_dir}/${svn_branch_name}/ubuntu/ola"
 	#cp $dir_/*ola*.deb "${replacements_dir}"
 
-	#Obsolete
-	#Package: lshwd
-	#Build_Replacement_Package lshwd_2.0 ubuntu/lshwd-2.0-rc4
-
-	#owfs 2.8p5 is no longer needed as it is in the ubuntu precise/universe repo
-	##Package: libowfs
-	#Build_Replacement_Package libowfs27 external/owfs-2.8p5
-	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/*ow*.deb
-	#dir_="${svn_dir}/${svn_branch_name}/external"
-	#cp $dir_/*ow*.deb "${replacements_dir}"
-
-#libsoxr-0.1.1/
+	#libsoxr-0.1.1/
 	#Package: libsoxr-0.1.1 - for squeezelite
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
-	Build_Replacement_Package libsoxr0 ubuntu/libsoxr-0.1.1 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*soxr*.deb && \
-	cp $dir_/*soxr*.deb "${replacements_dir}" && \
-	cp $dir_/*soxr*.changes "${replacements_dir}" || :
+	Build_Replacement_Package soxr ubuntu/libsoxr-0.1.1 && \
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*soxr*.deb || :
 
-#ubuntu/squeezelite-1.4
+	#ubuntu/squeezelite-1.4
 	#Package: squeezelite-1.4
 	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.4 && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.4*.deb && \
-	dir_="${svn_dir}/${svn_branch_name}/ubuntu" && \
-	cp $dir_/*squeezelite*.deb "${replacements_dir}" && \
-	cp $dir_/*squeezelite*.changes "${replacements_dir}" || :
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu" || :
 
 	#Package: libcec
-	Build_Replacement_Package libcec ubuntu/libcec-2.1.4 && \
-	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libcec*.deb && \
-	cp ${svn_dir}/${svn_branch_name}/ubuntu/*cec*.deb ${replacements_dir} && \
-	cp ${svn_dir}/${svn_branch_name}/ubuntu/*cec*.changes ${replacements_dir} || :
+	Build_Replacement_Package cec ubuntu/libcec-2.1.4 && \
+	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libcec*.deb || :
 }
 
 function Build_Replacements_ubuntu_trusty
@@ -248,7 +215,7 @@ function Build_Replacements_ubuntu_trusty
 	#Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2
 
 	# Open ZWave library
-	Build_Replacement_Package libopenzwave1.0 external/openzwave-1.3.1025 && \
+	Build_Replacement_Package zwave external/openzwave-1.3.1025 && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb || :
 
 	# libhupnp and libhupnp-av need to build under qt4.
@@ -260,17 +227,13 @@ function Build_Replacements_ubuntu_trusty
 
 	# Package: libruby1.8, ruby1.8-dev....  ugh.  GSD breaks on 1.9.1 && 2.0
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
-	Build_Replacement_Package ruby1.8 ubuntu/ruby1.8-1.8.7.375/ && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*1.8_1.8.7.375*.deb && \
-	cp $dir_/*1.8_1.8.7.375*.deb "${replacements_dir}" && \
-	cp $dir_/*1.8_1.8.7.375*.changes "${replacements_dir}" || :
+	Build_Replacement_Package 1.8_1.8.7.375 ubuntu/ruby1.8-1.8.7.375/ && \
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*1.8_1.8.7.375*.deb || :
 
 	#Package: libxine2
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
-	Build_Replacement_Package libxine2 ubuntu/xine-lib-1.2.6 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb && \
-	cp $dir_/*xine*.deb "${replacements_dir}" && \
-	cp $dir_/*xine*.changes "${replacements_dir}" || :
+	Build_Replacement_Package xine ubuntu/xine-lib-1.2.6 && \
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb || :
 }
 
 function Build_Replacements_Common_raspbian
