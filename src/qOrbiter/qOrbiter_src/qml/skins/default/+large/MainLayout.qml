@@ -106,6 +106,7 @@ Item {
                     bottom:parent.bottom
                     margins: 5
                 }
+                onActivated:manager.currentScreen="Screen_29.qml"
             }
             StyledButton{
                 anchors{

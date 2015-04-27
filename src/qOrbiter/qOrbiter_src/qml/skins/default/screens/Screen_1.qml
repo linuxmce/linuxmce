@@ -60,7 +60,7 @@ StyledScreen {
                 delegate:Item{
                     height: parent.height
                     // width: Style.appButtonWidth
-                    width: manager.isProfile ? Style.scaleX(26) : Style.scaleX(18)
+                    width: Style.appButtonWidth
                     StyledButton{
                         buttonText:title
                         width:parent.width

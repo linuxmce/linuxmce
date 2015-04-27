@@ -72,7 +72,7 @@ Item {
     MouseArea{
         id:ms
         anchors.fill: parent
-        onPressed: activated()
+        onPressed:{ stbDelegate.currentSelection=true; activated()}
 
     }
 }

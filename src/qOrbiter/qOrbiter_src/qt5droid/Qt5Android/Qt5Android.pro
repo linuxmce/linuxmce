@@ -378,9 +378,8 @@ OTHER_FILES += \
     android/src/org/kde/necessitas/ministro/IMinistro.aidl \
     android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
     android/src/org/kde/necessitas/origo/QtActivity.java \
-    android/src/org/kde/necessitas/origo/QtApplication.java \
-    ../../qml/skins/default/+large/MainLayout.qml \
-    ../../qml/skins/default/+large/Style.qml
+    android/src/org/kde/necessitas/origo/QtApplication.java
+
 
 
     contains(QT_VERSION,5.*.*){
