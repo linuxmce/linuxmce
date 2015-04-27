@@ -88,44 +88,134 @@ qrc_qmlFile.cpp: ../qmlFile.qrc \
 		../qml/skins/default/qmldir \
 		../qml/skins/default/MainLayout.qml \
 		../qml/skins/default/images/vertical_arrow.png \
+		../qml/skins/default/images/next_up.png \
 		../qml/skins/default/images/options.png \
+		../qml/skins/default/images/voldown_up.png \
+		../qml/skins/default/images/stop_up.png \
+		../qml/skins/default/images/lightsup_up.png \
+		../qml/skins/default/images/volup_up.png \
+		../qml/skins/default/images/rw_up.png \
+		../qml/skins/default/images/mute_up.png \
+		../qml/skins/default/images/prev_up.png \
+		../qml/skins/default/images/playpause_up.png \
+		../qml/skins/default/images/lightsdown_up.png \
+		../qml/skins/default/images/ff_up.png \
 		../qml/skins/default/images/arrow.png \
 		../qml/skins/default/images/splash_bg.png \
 		../qml/skins/default/+small/Style.qml \
 		../qml/skins/default/+small/MainLayout.qml \
 		../qml/skins/default/+xlarge/Style.qml \
 		../qml/skins/default/+xlarge/MainLayout.qml \
-		../qml/skins/default/screens/Screen_47.qml \
+		../qml/skins/default/screens/Screen_14.qml \
+		../qml/skins/default/screens/Screen_54.qml \
+		../qml/skins/default/screens/Screen_207.qml \
+		../qml/skins/default/screens/Screen_308.qml \
+		../qml/skins/default/screens/Screen_2.qml \
+		../qml/skins/default/screens/Screen_13.qml \
 		../qml/skins/default/screens/Screen_X.qml \
+		../qml/skins/default/screens/Screen_53.qml \
+		../qml/skins/default/screens/Screen_78.qml \
 		../qml/skins/default/screens/Screen_1.qml \
+		../qml/skins/default/screens/Screen_12.qml \
+		../qml/skins/default/screens/Screen_60.qml \
+		../qml/skins/default/screens/Screen_29.qml \
+		../qml/skins/default/screens/Screen_117.qml \
+		../qml/skins/default/screens/Screen_77.qml \
 		../qml/skins/default/screens/Screen_44.qml \
+		../qml/skins/default/screens/Screen_92.qml \
+		../qml/skins/default/screens/Screen_11.qml \
+		../qml/skins/default/screens/Screen_84.qml \
+		../qml/skins/default/screens/Screen_9.qml \
+		../qml/skins/default/screens/Screen_76.qml \
+		../qml/skins/default/screens/Screen_35.qml \
+		../qml/skins/default/screens/Screen_10.qml \
+		../qml/skins/default/screens/Screen_148.qml \
+		../qml/skins/default/screens/Screen_8.qml \
+		../qml/skins/default/screens/Screen_50.qml \
+		../qml/skins/default/screens/Screen_75.qml \
+		../qml/skins/default/screens/Screen_163.qml \
+		../qml/skins/default/screens/Screen_284.qml \
+		../qml/skins/default/screens/Screen_67.qml \
+		../qml/skins/default/screens/Screen_82.qml \
+		../qml/skins/default/screens/Screen_7.qml \
+		../qml/skins/default/screens/Screen_187.qml \
+		../qml/skins/default/screens/Screen_66.qml \
+		../qml/skins/default/screens/Screen_267.qml \
+		../qml/skins/default/screens/Screen_6.qml \
+		../qml/skins/default/screens/Screen_17.qml \
+		../qml/skins/default/screens/Screen_40.qml \
+		../qml/skins/default/screens/Screen_65.qml \
+		../qml/skins/default/screens/Screen_49.qml \
+		../qml/skins/default/screens/Screen_5.qml \
+		../qml/skins/default/screens/Screen_72.qml \
+		../qml/skins/default/screens/Screen_16.qml \
+		../qml/skins/default/screens/Screen_64.qml \
+		../qml/skins/default/screens/Screen_298.qml \
+		../qml/skins/default/screens/Screen_23.qml \
+		../qml/skins/default/screens/Screen_4.qml \
+		../qml/skins/default/screens/Screen_15.qml \
+		../qml/skins/default/screens/Screen_63.qml \
+		../qml/skins/default/screens/Screen_176.qml \
+		../qml/skins/default/screens/Screen_47.qml \
+		../qml/skins/default/screens/Screen_309.qml \
+		../qml/skins/default/screens/Screen_3.qml \
+		../qml/skins/default/screens/Screen_70.qml \
 		../qml/skins/default/screens/+xlarge/Screen_1.qml \
 		../qml/skins/default/screens/+xlarge/Screen_44.qml \
-		../qml/skins/default/components/VideoDelegate.qml \
-		../qml/skins/default/components/StyledText.qml \
-		../qml/skins/default/components/FadeImage.qml \
-		../qml/skins/default/components/GenericPopup.qml \
-		../qml/skins/default/components/LargeStyledButton.qml \
-		../qml/skins/default/components/SettingsOptions.qml \
-		../qml/skins/default/components/GenericListModel.qml \
-		../qml/skins/default/components/StyledHeader.qml \
+		../qml/skins/default/screens/+small/Screen_47.qml \
+		../qml/skins/default/components/GenericPlaybackScreen.qml \
 		../qml/skins/default/components/RoomSelector.qml \
-		../qml/skins/default/components/StyledDelegate.qml \
-		../qml/skins/default/components/MediaOptionRow.qml \
-		../qml/skins/default/components/AudioDelegate.qml \
-		../qml/skins/default/components/Switch.qml \
-		../qml/skins/default/components/QmlPictureFrame.qml \
+		../qml/skins/default/components/ControlDiamond.qml \
 		../qml/skins/default/components/SettingsOption.qml \
-		../qml/skins/default/components/StyledScreen.qml \
-		../qml/skins/default/components/GenericDialog.qml \
-		../qml/skins/default/components/FileDetails.qml \
+		../qml/skins/default/components/SettingsOptions.qml \
+		../qml/skins/default/components/WaitSpinner.qml \
+		../qml/skins/default/components/TvButtonPanel.qml \
+		../qml/skins/default/components/Resend.qml \
+		../qml/skins/default/components/DirectionPad.qml \
+		../qml/skins/default/components/Panel.qml \
+		../qml/skins/default/components/ImageButton.qml \
+		../qml/skins/default/components/DirectionButton.qml \
+		../qml/skins/default/components/PlaylistPanel.qml \
 		../qml/skins/default/components/MultiMediaView.qml \
-		../qml/skins/default/components/FocusRow.qml \
-		../qml/skins/default/components/DefaultHeader.qml \
+		../qml/skins/default/components/GenericPopup.qml \
+		../qml/skins/default/components/FadeImage.qml \
+		../qml/skins/default/components/Jog.qml \
+		../qml/skins/default/components/MediaOptionRow.qml \
+		../qml/skins/default/components/Thumbnail.qml \
+		../qml/skins/default/components/AudioDelegate.qml \
+		../qml/skins/default/components/DirectionDiamond.qml \
+		../qml/skins/default/components/PSMediaSquare.qml \
+		../qml/skins/default/components/TransportButtons.qml \
+		../qml/skins/default/components/GenericListModel.qml \
+		../qml/skins/default/components/StyledDelegate.qml \
+		../qml/skins/default/components/FileDetails.qml \
 		../qml/skins/default/components/StyledButton.qml \
+		../qml/skins/default/components/LightingAudioControls.qml \
+		../qml/skins/default/components/GenericDialog.qml \
+		../qml/skins/default/components/QmlPictureFrame.qml \
+		../qml/skins/default/components/FocusRow.qml \
+		../qml/skins/default/components/ControlButton.qml \
+		../qml/skins/default/components/StyledText.qml \
+		../qml/skins/default/components/StyledHeader.qml \
+		../qml/skins/default/components/VideoDelegate.qml \
+		../qml/skins/default/components/AdvancedMediaOptions.qml \
+		../qml/skins/default/components/Switch.qml \
+		../qml/skins/default/components/MediaNumberPad.qml \
+		../qml/skins/default/components/LargeStyledButton.qml \
+		../qml/skins/default/components/NowPlayingImage.qml \
+		../qml/skins/default/components/Bookmarks.qml \
+		../qml/skins/default/components/DefaultHeader.qml \
+		../qml/skins/default/components/ContentHeader.qml \
+		../qml/skins/default/components/MediaTransport.qml \
+		../qml/skins/default/components/BackButton.qml \
 		../qml/skins/default/components/Footer.qml \
+		../qml/skins/default/components/TvChannelPanel.qml \
+		../qml/skins/default/components/BroadcastMediaBase.qml \
+		../qml/skins/default/components/StyledScreen.qml \
+		../qml/skins/default/components/NowPlayingButton.qml \
 		../qml/skins/default/components/+small/MultiMediaView.qml \
 		../qml/skins/default/+medium/Style.qml \
+		../qml/skins/default/+medium/MainLayout.qml \
 		../qml/splash/ExistingOrbiters.qml \
 		../qml/splash/LanguageList.qml \
 		../qml/splash/SplashView.qml \
