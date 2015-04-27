@@ -33,6 +33,78 @@
         <file>qml/skins/default/screens/+xlarge/Screen_1.qml</file>
         <file>qml/skins/default/screens/+xlarge/Screen_44.qml</file>
         <file>qml/SkinError.qml</file>
+        <file>qml/skins/default/images/arrow.png</file>
+        <file>qml/skins/default/images/options.png</file>
+        <file>qml/skins/default/images/splash_bg.png</file>
+        <file>qml/skins/default/images/vertical_arrow.png</file>
+        <file>qml/skins/default/+medium/Style.qml</file>
+        <file>qml/skins/default/+small/Style.qml</file>
+        <file>qml/skins/default/+small/MainLayout.qml</file>
+        <file>qml/skins/default/+xlarge/MainLayout.qml</file>
+        <file>qml/skins/default/+xlarge/Style.qml</file>
+        <file>qml/skins/default/+medium/MainLayout.qml</file>
+        <file>qml/skins/default/screens/+small/Screen_47.qml</file>
+        <file>qml/skins/default/screens/Screen_70.qml</file>
+        <file>qml/skins/default/screens/Screen_17.qml</file>
+        <file>qml/skins/default/screens/Screen_207.qml</file>
+        <file>qml/skins/default/screens/Screen_2.qml</file>
+        <file>qml/skins/default/screens/Screen_3.qml</file>
+        <file>qml/skins/default/screens/Screen_4.qml</file>
+        <file>qml/skins/default/screens/Screen_5.qml</file>
+        <file>qml/skins/default/screens/Screen_6.qml</file>
+        <file>qml/skins/default/screens/Screen_7.qml</file>
+        <file>qml/skins/default/screens/Screen_8.qml</file>
+        <file>qml/skins/default/screens/Screen_9.qml</file>
+        <file>qml/skins/default/screens/Screen_10.qml</file>
+        <file>qml/skins/default/screens/Screen_11.qml</file>
+        <file>qml/skins/default/screens/Screen_12.qml</file>
+        <file>qml/skins/default/screens/Screen_14.qml</file>
+        <file>qml/skins/default/screens/Screen_13.qml</file>
+        <file>qml/skins/default/screens/Screen_15.qml</file>
+        <file>qml/skins/default/screens/Screen_16.qml</file>
+        <file>qml/skins/default/screens/Screen_23.qml</file>
+        <file>qml/skins/default/screens/Screen_29.qml</file>
+        <file>qml/skins/default/screens/Screen_35.qml</file>
+        <file>qml/skins/default/screens/Screen_40.qml</file>
+        <file>qml/skins/default/screens/Screen_49.qml</file>
+        <file>qml/skins/default/screens/Screen_50.qml</file>
+        <file>qml/skins/default/screens/Screen_53.qml</file>
+        <file>qml/skins/default/screens/Screen_54.qml</file>
+        <file>qml/skins/default/screens/Screen_60.qml</file>
+        <file>qml/skins/default/screens/Screen_63.qml</file>
+        <file>qml/skins/default/screens/Screen_64.qml</file>
+        <file>qml/skins/default/screens/Screen_65.qml</file>
+        <file>qml/skins/default/screens/Screen_66.qml</file>
+        <file>qml/skins/default/screens/Screen_67.qml</file>
+        <file>qml/skins/default/screens/Screen_72.qml</file>
+        <file>qml/skins/default/screens/Screen_75.qml</file>
+        <file>qml/skins/default/screens/Screen_76.qml</file>
+        <file>qml/skins/default/screens/Screen_77.qml</file>
+        <file>qml/skins/default/screens/Screen_78.qml</file>
+        <file>qml/skins/default/screens/Screen_82.qml</file>
+        <file>qml/skins/default/screens/Screen_84.qml</file>
+        <file>qml/skins/default/screens/Screen_92.qml</file>
+        <file>qml/skins/default/screens/Screen_117.qml</file>
+        <file>qml/skins/default/screens/Screen_148.qml</file>
+        <file>qml/skins/default/screens/Screen_163.qml</file>
+        <file>qml/skins/default/screens/Screen_176.qml</file>
+        <file>qml/skins/default/screens/Screen_187.qml</file>
+        <file>qml/skins/default/screens/Screen_267.qml</file>
+        <file>qml/skins/default/screens/Screen_284.qml</file>
+        <file>qml/skins/default/screens/Screen_298.qml</file>
+        <file>qml/skins/default/screens/Screen_308.qml</file>
+        <file>qml/skins/default/screens/Screen_309.qml</file>
+        <file>qml/skins/default/components/WaitSpinner.qml</file>
+        <file>qml/skins/default/components/GenericPlaybackScreen.qml</file>
+        <file>qml/skins/default/components/BackButton.qml</file>
+        <file>qml/skins/default/components/NowPlayingButton.qml</file>
+        <file>qml/skins/default/components/DirectionPad.qml</file>
+        <file>qml/skins/default/components/MediaTransport.qml</file>
+        <file>qml/skins/default/components/DirectionButton.qml</file>
+        <file>qml/skins/default/components/NowPlayingImage.qml</file>
+        <file>qml/skins/default/components/TransportButtons.qml</file>
+        <file>qml/skins/default/components/PlaylistPanel.qml</file>
+        <file>qml/skins/default/components/ContentHeader.qml</file>
         <file>qml/skins/default/components/StyledButton.qml</file>
         <file>qml/skins/default/components/StyledHeader.qml</file>
         <file>qml/skins/default/components/StyledScreen.qml</file>
@@ -57,30 +129,31 @@
         <file>qml/skins/default/components/AudioDelegate.qml</file>
         <file>qml/skins/default/components/FileDetails.qml</file>
         <file>qml/skins/default/components/+small/MultiMediaView.qml</file>
-        <file>qml/skins/default/images/arrow.png</file>
-        <file>qml/skins/default/images/options.png</file>
-        <file>qml/skins/default/images/splash_bg.png</file>
-        <file>qml/skins/default/images/vertical_arrow.png</file>
-        <file>qml/skins/default/+medium/Style.qml</file>
-        <file>qml/skins/default/+small/Style.qml</file>
-        <file>qml/skins/default/+small/MainLayout.qml</file>
-        <file>qml/skins/default/+xlarge/MainLayout.qml</file>
-        <file>qml/skins/default/+xlarge/Style.qml</file>
-        <file>qml/skins/default/components/WaitSpinner.qml</file>
-        <file>qml/skins/default/+medium/MainLayout.qml</file>
-        <file>qml/skins/default/screens/+small/Screen_47.qml</file>
-        <file>qml/skins/default/components/GenericPlaybackScreen.qml</file>
-        <file>qml/skins/default/screens/Screen_70.qml</file>
-        <file>qml/skins/default/components/BackButton.qml</file>
-        <file>qml/skins/default/components/NowPlayingButton.qml</file>
-        <file>qml/skins/default/components/DirectionPad.qml</file>
-        <file>qml/skins/default/components/MediaTransport.qml</file>
-        <file>qml/skins/default/components/DirectionButton.qml</file>
-        <file>qml/skins/default/components/NowPlayingImage.qml</file>
-        <file>qml/skins/default/components/TransportButtons.qml</file>
-        <file>qml/skins/default/components/PlaylistPanel.qml</file>
-        <file>qml/skins/default/screens/Screen_17.qml</file>
-        <file>qml/skins/default/screens/Screen_207.qml</file>
-        <file>qml/skins/default/components/ContentHeader.qml</file>
+        <file>qml/skins/default/components/Panel.qml</file>
+        <file>qml/skins/default/components/BroadcastMediaBase.qml</file>
+        <file>qml/skins/default/components/ControlButton.qml</file>
+        <file>qml/skins/default/components/ControlDiamond.qml</file>
+        <file>qml/skins/default/components/DirectionDiamond.qml</file>
+        <file>qml/skins/default/components/LightingAudioControls.qml</file>
+        <file>qml/skins/default/components/TvButtonPanel.qml</file>
+        <file>qml/skins/default/components/TvChannelPanel.qml</file>
+        <file>qml/skins/default/components/MediaNumberPad.qml</file>
+        <file>qml/skins/default/components/Bookmarks.qml</file>
+        <file>qml/skins/default/components/AdvancedMediaOptions.qml</file>
+        <file>qml/skins/default/components/Jog.qml</file>
+        <file>qml/skins/default/components/PSMediaSquare.qml</file>
+        <file>qml/skins/default/components/Resend.qml</file>
+        <file>qml/skins/default/components/Thumbnail.qml</file>
+        <file>qml/skins/default/images/rw_up.png</file>
+        <file>qml/skins/default/images/volup_up.png</file>
+        <file>qml/skins/default/images/voldown_up.png</file>
+        <file>qml/skins/default/images/stop_up.png</file>
+        <file>qml/skins/default/images/prev_up.png</file>
+        <file>qml/skins/default/images/playpause_up.png</file>
+        <file>qml/skins/default/images/next_up.png</file>
+        <file>qml/skins/default/images/mute_up.png</file>
+        <file>qml/skins/default/images/lightsdown_up.png</file>
+        <file>qml/skins/default/images/lightsup_up.png</file>
+        <file>qml/skins/default/images/ff_up.png</file>
     </qresource>
 </RCC>

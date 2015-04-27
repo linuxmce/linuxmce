@@ -29,6 +29,7 @@
 #if (QT5)
 #include <QtQml/QtQml>
 #include <QtQml/QQmlContext>
+#include <qquickitem.h>
 #include <QtQml/QQmlEngine>
 #include <QtWidgets/QApplication>
 #include <contextobjects/screeninfo.h>
@@ -112,10 +113,14 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
         case ScreenData::Device_Small:
             mainView.setWidth(480);
             mainView.setHeight(854);
+            mainView.rootObject()->setScale(.75);
+            mainView.setGeometry(0,0,480*.75, 854*.75);
             break;
         case ScreenData::Device_Medium:
             mainView.setWidth(1280);
             mainView.setHeight(720);
+            mainView.rootObject()->setScale(.65);
+            mainView.setGeometry(0,0,1280*.65, 720*.65);
             break;
         case ScreenData::Device_Large:
             mainView.setWidth(1600);

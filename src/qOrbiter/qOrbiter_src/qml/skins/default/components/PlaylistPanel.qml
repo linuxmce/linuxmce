@@ -18,10 +18,8 @@ Item{
                 left:parent.left
                 right:parent.right
             }
-            clip:true
-            
-            anchors.margins: 5
-            
+            clip:true            
+            anchors.margins: 5            
             
             Rectangle{
                 id:fil
@@ -34,14 +32,14 @@ Item{
                 text:description
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                font.pixelSize: 22
+                font.pixelSize: Style.fontSize_listItem
                 width: parent.width
             }
             StyledText{
                 text:value
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                font.pixelSize: 36
+                font.pixelSize: Style.fontSize_listItem
                 opacity: value == dcenowplaying.m_iplaylistPosition ? 1 :.25
             }
             

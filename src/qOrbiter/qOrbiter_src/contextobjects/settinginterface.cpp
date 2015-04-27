@@ -10,8 +10,8 @@ SettingInterface::SettingInterface(QObject *parent) :
     ready(false)
 {
     /** Note that application name, org, and domain are set via QCoreApplication in main.cpp */
-    m_settings = new QSettings(this);
-    m_settings->setFallbacksEnabled(false);
+
+    m_settings.setFallbacksEnabled(false);
     m_lookup.insert(SettingsKeyType::Setting_Network_Router, "router");
     m_lookup.insert(SettingsKeyType::Setting_Network_Device_ID, "device");
     m_lookup.insert(SettingsKeyType::Setting_Network_Hostname, "hostname");
@@ -28,54 +28,59 @@ SettingInterface::SettingInterface(QObject *parent) :
     m_lookup.insert(SettingsKeyType::Setting_Media_VideoSort, "videosorting");
     m_lookup.insert(SettingsKeyType::Setting_Media_VideSubTypeSort, "videosubtypesort");
     connect(this, SIGNAL(writeError(QString)), this, SLOT(log(QString)));
-    if(m_settings){
+
+    if(!m_settings.status()==QSettings::AccessError){
         connect(this, SIGNAL(settingsDataCleared()), this,SLOT(initializeSettings()));
-        initializeSettings();
+            initializeSettings();
+    }  else {
+            log(tr("Could not access settings in constructor"));
     }
+
+
 }
 
 
 void SettingInterface::initializeSettings()
 {
-    if(!m_settings->childGroups().contains("network")){
+    if(!m_settings.childGroups().contains("network")){
         log(tr("Initializing network Settings"));
-        m_settings->beginGroup("network");
-        m_settings->setValue("router","192.168.80.1");
-        m_settings->setValue("hostname", "dcerouter.linuxmce");
-        m_settings->setValue("externalhostname", "");
-        m_settings->setValue("webaccess", "80");
-        m_settings->setValue("device", -1);
-        m_settings->endGroup();
+        m_settings.beginGroup("network");
+        m_settings.setValue("router","192.168.80.1");
+        m_settings.setValue("hostname", "dcerouter.linuxmce");
+        m_settings.setValue("externalhostname", "");
+        m_settings.setValue("webaccess", "80");
+        m_settings.setValue("device", -1);
+        m_settings.endGroup();
         log(tr("Finished Initializing Network Settings"));
     }
 
-    if(!m_settings->childGroups().contains("ui")){
+    if(!m_settings.childGroups().contains("ui")){
         log(tr("Initializing UI Settings"));
-        m_settings->beginGroup("ui");
-        m_settings->setValue("skin","default");
-        m_settings->setValue("usenetwork", false);
-        m_settings->setValue("preferredsize", "small");
-        m_settings->endGroup();
+        m_settings.beginGroup("ui");
+        m_settings.setValue("skin","default");
+        m_settings.setValue("usenetwork", false);
+        m_settings.setValue("preferredsize", "small");
+        m_settings.endGroup();
         log(tr("Finished Initializing UI Settings"));
     }
 
-    if(!m_settings->childGroups().contains("textoptions")){
+    if(!m_settings.childGroups().contains("textoptions")){
         log(tr("Initializing text settings"));
-        m_settings->beginGroup("textoptions");
-        m_settings->setValue("sizemodifier", 0);
-        m_settings->setValue("font", "");
-        m_settings->setValue("language", QLocale::system().name());
-        m_settings->endGroup();
+        m_settings.beginGroup("textoptions");
+        m_settings.setValue("sizemodifier", 0);
+        m_settings.setValue("font", "");
+        m_settings.setValue("language", QLocale::system().name());
+        m_settings.endGroup();
         log(tr("Finished Initializing text settings"));
     }
 
-    if(!m_settings->childGroups().contains("media")){
+    if(!m_settings.childGroups().contains("media")){
         log(tr("Initializing Media Settings"));
-        m_settings->beginGroup("media");
-        m_settings->setValue("audiosorting",AttributeTypeHelper::Performer  );
-        m_settings->setValue("audiosubtypesort", -1);
-        m_settings->setValue("videosorting", AttributeTypeHelper::Title);
-        m_settings->setValue("videosubtypesort", SubTypesHelper::MOVIES );
+        m_settings.beginGroup("media");
+        m_settings.setValue("audiosorting",AttributeTypeHelper::Performer  );
+        m_settings.setValue("audiosubtypesort", -1);
+        m_settings.setValue("videosorting", AttributeTypeHelper::Title);
+        m_settings.setValue("videosubtypesort", SubTypesHelper::MOVIES );
         log(tr("Finished Initializing Media settings"));
     }
 
@@ -85,8 +90,8 @@ void SettingInterface::initializeSettings()
 
 void SettingInterface::destroySettingsData()
 {
-    m_settings->clear();
-    qDebug() << m_settings->allKeys();
+    m_settings.clear();
+    qDebug() << m_settings.allKeys();
     initializeSettings();
 }
 
@@ -113,22 +118,22 @@ void SettingInterface::setOption(SettingsInterfaceType::SettingsType st, Setting
     if(grp=="")
         return;
 
-     log(QString("Setting option for GROUP: -=%1=- KEY: -=%2=- VALUE: %3").arg(grp).arg(m_lookup.value(sk)).arg(sval.toString()));
+    log(QString("Setting option for GROUP: -=%1=- KEY: -=%2=- VALUE: %3").arg(grp).arg(m_lookup.value(sk)).arg(sval.toString()));
 
-    if(!m_settings){
+    if(m_settings.status()==QSettings::AccessError){
         emit writeError(tr("No settings object to write to!"));
         return;
     }
 
-    m_settings->beginGroup(grp);
-    if(!m_settings->contains(key)){
+    m_settings.beginGroup(grp);
+    if(!m_settings.contains(key)){
         emit writeError(tr("Invalid settings option"));
-        log(QString("Options for this key are %1").arg(m_settings->childKeys().join("\n")));
+        log(QString("Options for this key are %1").arg(m_settings.childKeys().join("\n")));
     } else {
-        m_settings->setValue(key, sval);
+        m_settings.setValue(key, sval);
     }
     log("Option set");
-    m_settings->endGroup();
+    m_settings.endGroup();
 
 }
 
@@ -152,24 +157,24 @@ QVariant SettingInterface::getOption(SettingsInterfaceType::SettingsType st, Set
     if(grp=="")
         return rtrn;
 
-    if(!m_settings){
+    if(m_settings.status()==QSettings::AccessError){
         emit writeError(tr("No settings object to read!"));
         return rtrn;
     }
 
 
-    m_settings->beginGroup(grp);
+    m_settings.beginGroup(grp);
 
-    if(!m_settings->contains(key)){
+    if(!m_settings.contains(key)){
         emit writeError(tr("No  settings option for -=%1=-").arg(key));
-        log(QString("Options for this key are %1").arg(m_settings->childKeys().join("\n")));
-        m_settings->endGroup();
+        log(QString("Options for this key are %1").arg(m_settings.childKeys().join("\n")));
+        m_settings.endGroup();
 
     } else {
         qDebug() << Q_FUNC_INFO << "Returning settings value for key" << key;
-        rtrn=m_settings->value(key);
+        rtrn=m_settings.value(key);
     }
-     m_settings->endGroup();
-     return rtrn;
+    m_settings.endGroup();
+    return rtrn;
 
 }

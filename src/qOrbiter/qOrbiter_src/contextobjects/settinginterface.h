@@ -82,7 +82,7 @@ private slots:
 
 
 private:
-    QSettings *m_settings;
+    QSettings m_settings;
     QMap <SettingsKeyType::SettingKey, QString> m_lookup;
 
 };
