@@ -6,6 +6,7 @@
 	$GLOBALS['rootComputerID'] = 6; 			// Computers
 	$GLOBALS['CategoryCore']=7;					// Core
 	$GLOBALS['rootMediaDirectors'] = 8; 		// Media Directors
+	$GLOBALS['rootMobileInternetDevice'] = 180; 		// Media Directors
 	$GLOBALS['rootInterfaces'] = 71; 			// Interfaces
 	$GLOBALS['rootLights'] = 73; 				// Lighting devices
 	$GLOBALS['rootAVEquipment'] = 76; 			// AV Equipment
@@ -59,7 +60,8 @@
 	$GLOBALS['OMXPlayer'] = 2259;				// OMX Player
 	$GLOBALS['rootMediaDirectorsID'] = 28;			// Media Directors
 	$GLOBALS['rootRPIMediaDirectorsID'] = 2216; 		// Raspberry PI Media Directors
-	$GLOBALS['rootJogglersID'] = 2266;				// Jogglers
+	$GLOBALS['rootJogglerID'] = 2176;				// Jogglers (full stack)
+	$GLOBALS['rootJogglersID'] = 2266;				// Jogglers (tschaks)
 	$GLOBALS['SecurityPlugin'] = 33;	 		// Security plugin
 	$GLOBALS['TelecomPlugin'] = 34;	 			// Telecom plugin
 	$GLOBALS['LightSwitchOnOff']=37;			// Light Switch (on/off)

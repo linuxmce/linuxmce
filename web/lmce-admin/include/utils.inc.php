@@ -2881,7 +2881,8 @@ function getTopLevelParentIP($deviceID,$dbADO)
 			$topParent=getTopLevelParentIP($row['FK_Device_ControlledVia'],$dbADO);
 		}else{
 //			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceTemplate']==$GLOBALS['rootMediaDirectorsID']){
-			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceCategory']==$GLOBALS['rootMediaDirectors']){
+			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceCategory']==$GLOBALS['rootMediaDirectors'] 
+			    || $row['FK_DeviceCategory']==$GLOBALS['rootMobileInternetDevice']){
 				$topParent=($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] && $row['IPaddress']=='')?'127.0.0.1':$row['IPaddress'];
 			}else{
 				$topParent=0;
@@ -2906,7 +2907,8 @@ function getTopLevelParent($deviceID,$dbADO)
 			$topParent=getTopLevelParent($row['FK_Device_ControlledVia'],$dbADO);
 		}else{
 //			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceTemplate']==$GLOBALS['rootMediaDirectorsID']){
-			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceCategory']==$GLOBALS['rootMediaDirectors'] || $row['FK_DeviceTemplate']==$GLOBALS['rootJogglersID']){
+			if($row['FK_DeviceCategory']==$GLOBALS['CategoryCore'] || $row['FK_DeviceCategory']==$GLOBALS['rootMediaDirectors'] || $row['FK_DeviceTemplate']==$GLOBALS['rootJogglersID']
+			    || $row['FK_DeviceCategory']==$GLOBALS['rootMobileInternetDevice']){
 				$topParent=$deviceID;
 			}else{
 				$topParent=0;
