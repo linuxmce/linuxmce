@@ -41,7 +41,7 @@ MediaOptions5             MediaOptions5.qml                        #no comment
 MediaPlaybackBase             MediaPlaybackBase.qml                        #no comment
 MediaPopup             MediaPopup.qml                        #no comment
 MediaScrollBar             MediaScrollBar.qml                        #no comment
-MenuItem		   MenuItem.qml				     #no comment
+MenuItem             MenuItem.qml                        #no comment
 Metadata_43             Metadata_43.qml                        #no comment
 Metadata_4             Metadata_4.qml                        #no comment
 Metadata_5             Metadata_5.qml                        #no comment
@@ -50,7 +50,7 @@ NavigationRow             NavigationRow.qml                        #no comment
 NavOptions43             NavOptions43.qml                        #no comment
 NavOptions5             NavOptions5.qml                        #no comment
 NowPlayingImage             NowPlayingImage.qml                        #no comment
-OptionMenu		    OptionMenu.qml			       #no comment
+OptionMenu             OptionMenu.qml                        #no comment
 Panel             Panel.qml                        #no comment
 PlaylistEditor             PlaylistEditor.qml                        #no comment
 PlaylistPanel             PlaylistPanel.qml                        #no comment

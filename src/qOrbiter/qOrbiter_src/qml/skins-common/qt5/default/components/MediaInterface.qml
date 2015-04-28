@@ -59,7 +59,7 @@ Item{
         onPluginVolumeUp:{
             console.log("dceplayer::vol up")
             if(qmlPlayer.volume < 1.0){
-                qmlPlayer.volume+.10
+               qmlPlayer.volume= qmlPlayer.volume+.10
             }
 
 

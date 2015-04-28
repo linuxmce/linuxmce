@@ -87,6 +87,8 @@ Item {
             if(!uiOn){
                 uiOn=true
             }
+
+            if(dcenowplaying.b_mediaPlaying)
              manager.setCurrentScreen(dcenowplaying.qs_screen)
         }
     }
