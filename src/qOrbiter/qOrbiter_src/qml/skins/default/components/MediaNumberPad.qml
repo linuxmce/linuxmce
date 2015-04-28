@@ -2,12 +2,8 @@ import QtQuick 2.2
 import "../."
 Panel {
     id:numberPad
-
-    anchors.verticalCenter: parent.verticalCenter
-    anchors.verticalCenterOffset: Style.scaleY(8)
-    anchors.horizontalCenter: parent.horizontalCenter
-    height: parent.height*.65
-    width: parent.width *.30
+    height: Style.appButtonHeight*5
+    width: manager.isProfile ? parent.width *.65 : parent.width *.30
     headerTitle: qsTr("Channel:", "Tv Channel Entry") + targetChannel
 
     function submit(){
@@ -41,12 +37,12 @@ Panel {
         anchors.top:headerRect.bottom
         anchors.horizontalCenter: headerRect.horizontalCenter
         width:headerRect.width
-        height:  Style.appButtonHeight *3
+        height: ( Style.appButtonHeight -1)*3
 
         Repeater{
             model: 9
             StyledButton {
-                height: Style.appButtonHeight
+                height: Style.appButtonHeight -1
                 width: headerRect.width/3
                 buttonText: (index+1)
                 onActivated: if(targetChannel.length!==3) {targetChannel = targetChannel+String(index+1); }else {submit()}
@@ -55,26 +51,28 @@ Panel {
     }
     Row{
         id:bottomRow
-        height: childrenRect.height
+
         width:flow1.width
         anchors.top: flow1.bottom
-        anchors.right: flow1.right
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 5
+        anchors.horizontalCenter: parent.horizontalCenter
 
         StyledButton {
-            height: Style.appButtonHeight
+            height: Style.appButtonHeight-1
             width: headerRect.width/3
             buttonText: "<"
 
         }
         StyledButton {
-            height: Style.appButtonHeight
+            height: Style.appButtonHeight-1
             width: headerRect.width/3
             buttonText: "0"
             onActivated:addNumber(0)
 
         }
         StyledButton {
-            height: Style.appButtonHeight
+            height: Style.appButtonHeight-1
             width: headerRect.width/3
             buttonText: qsTr("Enter", "Confirm Entry")
             onActivated: {

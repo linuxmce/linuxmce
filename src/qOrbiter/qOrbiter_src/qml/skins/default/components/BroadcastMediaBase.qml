@@ -181,34 +181,35 @@ Item{
 
     ControlDiamond{
         id:arrows
-        anchors.bottom: mediaScrollerTarget.top
-        visible:true
+        anchors{
+            verticalCenter:numbers.verticalCenter
+            horizontalCenter: numbers.horizontalCenter
+        }
+
+        visible:!numbers.visible
+    }
+
+    DirectionPad {
+        id: directionDiamond
+        anchors.left: manager.isProfile ? playlistPanel.right : numbers.right
+        anchors.bottom: parent.bottom
     }
 
     MediaNumberPad{
         id:numbers
-        anchors.centerIn: parent
-        visible:!media_playback_base.showingPlaylist
-
-    }
-
-    DirectionDiamond {
-        id: directionDiamond
-        visible:false
-        anchors.verticalCenter: undefined
         anchors.left: playlistPanel.right
-        anchors.bottom: parent.bottom
+        anchors.top: playlistPanel.top
+        visible:!media_playback_base.showingPlaylist
     }
 
     TvButtonPanel{
         id:buttonPanel
         anchors{
-            top:parent.bottom
+            top:controlRow.bottom
             left:parent.left
             right:parent.right
             bottom:parent.bottom
         }
-
         visible:false
     }
 
@@ -237,7 +238,7 @@ Item{
     }
 
     TvChannelPanel{
-        id:playlistPanel        
+        id:playlistPanel
         clip: true
         anchors{
             top:controlRow.bottom

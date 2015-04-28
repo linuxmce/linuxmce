@@ -3,12 +3,9 @@ import "../components"
 import "../."
 Item{
     id:controlDiamond
-    height:manager.isProfile ? parent.height *.20 : manager.appHeight *.40
-    width: height
-    anchors.right: parent.right
-    anchors.rightMargin: Style.scaleX(2)
-    anchors.bottom: parent.bottom
-    anchors.bottomMargin: Style.scaleY(2)
+    height:manager.isProfile ? parent.height *.35 : manager.appHeight *.40
+    width: height   
+    enabled: visible
    property int outsideButtonHeight: play.height*.65
 
 
@@ -88,7 +85,7 @@ Item{
         id:stop
         height: play.height/2
         buttonLabel: ""
-        onActivated: manager.stopMedia()
+        onActivated: { manager.exitMediaMenu(); manager.stopMedia()}
         anchors{
             right: parent.right
             bottom: parent.bottom

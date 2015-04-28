@@ -152,6 +152,7 @@ void GenericFlatListModel::appendRows(const QList<GenericModelItem *> &items)
   //  LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.appendRows start");
     beginInsertRows(QModelIndex(), rowCount(), rowCount()+items.size()-1);
     foreach(GenericModelItem *item, items) {
+        QApplication::processEvents(QEventLoop::AllEvents);
         item->setParent(this);
         QObject::connect(item, SIGNAL(dataChanged()), this , SLOT(handleItemChange()));
         m_list.append(item);
@@ -233,8 +234,7 @@ void GenericFlatListModel::reset()
     //    emit modelAboutToBeReset();
     beginResetModel();
     resetInternalData();
-    setProgress(0.0);
-    QApplication::processEvents(QEventLoop::AllEvents);
+    setProgress(0.0);   
     endResetModel();
     //    emit modelReset();
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -348,6 +348,7 @@ bool GenericFlatListModel::removeRows(int row, int count, const QModelIndex &par
     if(row < m_windowStart || (row+count) > (m_windowStart+m_list.size())) return false;
     beginRemoveRows(QModelIndex(), row, row+count-1);
     for(int i=0; i<count; ++i) {
+        QApplication::processEvents(QEventLoop::AllEvents);
         delete m_list.takeAt(row);
     }
     endRemoveRows();

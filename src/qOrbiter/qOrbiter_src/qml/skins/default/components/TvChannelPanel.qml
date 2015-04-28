@@ -10,7 +10,7 @@ GenericListModel{
     property int bcastSource:-1
     model: manager.getDataGridModel("channels", DataGrids.EPG_All_Shows  )
     delegate: Item{
-        height: Style.listViewItemHeight
+        height: Style.listViewItemHeight /2
         anchors{
             left:parent.left
             right:parent.right

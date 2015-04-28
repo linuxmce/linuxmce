@@ -913,7 +913,7 @@ void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, int i
                 GenericModelItem* pItem = DataGridHandler::GetModelItemForCell(PK_DataGrid, pTable, row);
                 // TODO: stop if datagrid model is reset or request stopped
                 m_mapDataGridModels[dataGridId]->insertRow(row, pItem);
-
+               QApplication::processEvents(QEventLoop::AllEvents);
                 count++;
             }
         }

@@ -3,11 +3,10 @@ import "../."
 Item {
     id:panelRoot
     height: Style.scaleY(85)
-    width: Style.scaleX(90)
-    anchors.centerIn: parent
+    width: Style.scaleX(90)    
 
     property alias headerRect:panelHeader
-    property int panelHeaderHeight: useHeader ? height*.10 : 0
+    property int panelHeaderHeight: useHeader ? Style.appNavigation_panelHeight : 0
     property string headerTitle:"Lorem Ipsum"
     property bool useHeader:true
     property alias fillColor:bgfill.color

@@ -26,6 +26,13 @@ Item {
         }
     }
 
+    ControlDiamond{
+        id:control_diamond
+        visible:false
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+    }
+
     Item{
         id:lightingAudioControls
         anchors.right: parent.right
@@ -47,11 +54,11 @@ Item {
                     onActivated: manager.adjustLights("+10")
                 }
                 StyledButton{
-                      state:"remote"
+                    state:"remote"
                     buttonText: "floorplan"
                 }
                 StyledButton{
-                      state:"remote"
+                    state:"remote"
                     buttonText: "-"
                     onActivated: manager.adjustLights("-10")
 
@@ -72,17 +79,17 @@ Item {
             Column{
                 anchors.fill: parent
                 StyledButton{
-                      state:"remote"
+                    state:"remote"
                     buttonText: "+"
                     onActivated: manager.adjustVolume(+1)
                 }
                 StyledButton{
-                      state:"remote"
+                    state:"remote"
                     buttonText: "Mute"
                     onActivated: manager.mute()
                 }
                 StyledButton{
-                      state:"remote"
+                    state:"remote"
                     buttonText: "-"
                     onActivated:manager.adjustVolume(-2)
                 }
@@ -150,7 +157,40 @@ Item {
             name:"airplay"
         },
         State{
+            when:manager.i_current_mediaType == MediaTypes.NP_NetworkMedia
             name:"networkmedia"
+
+            PropertyChanges{
+                target: playlistPanel
+                visible:false
+            }
+
+            PropertyChanges {
+                target: imgContainer
+                visible:false
+
+            }
+
+            PropertyChanges {
+                target: arrows
+                visible:true
+            }
+            PropertyChanges{
+                target: control_diamond
+                visible:true
+            }
+
+
+            PropertyChanges{
+                target: mediaScrollerTarget
+                visible:false
+            }
+
+            AnchorChanges{
+                target: transport_buttons
+                anchors.bottom: parent.bottom
+            }
+
         },
         State{
             name:"options"

@@ -173,7 +173,7 @@ Item{
             PropertyChanges {
                 target: styled_button
                 height:manager.isProfile ? Style.scaleY(8) : Style.scaleY(10)
-                width:manager.isProfile ? Style.scaleX(14) : Style.scaleX(10)
+                width:manager.isProfile ? Style.scaleX(20) : Style.scaleX(10)
 
             }
         }
