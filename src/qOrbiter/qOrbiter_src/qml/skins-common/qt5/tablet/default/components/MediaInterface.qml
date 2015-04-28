@@ -59,7 +59,7 @@ Item{
         onPluginVolumeUp:{
             console.log("dceplayer::vol up")
             if(qmlPlayer.volume < 1.0){
-                qmlPlayer.volume+.10
+                qmlPlayer.volume= qmlPlayer.volume+.10
             }
 
 
@@ -127,7 +127,6 @@ Item{
 
         }
 
-
         onDurationChanged: {
             if(!duration)
                 return;
@@ -143,10 +142,8 @@ Item{
         onPositionChanged: {
             if(!position)
                 return;
-
             lmceData.processTimeCode(position);
         }
-
         onHasVideoChanged: {
             if(hasVideo){
                 videoPlane.visible=true
@@ -154,7 +151,6 @@ Item{
                 videoPlane.visible=false
             }
         }
-
     }
 
     VideoOutput{
