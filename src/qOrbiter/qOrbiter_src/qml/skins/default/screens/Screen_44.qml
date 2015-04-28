@@ -2,111 +2,124 @@ import QtQuick 2.2
 import "../components"
 StyledScreen {
     id:advancedScreen
-
-    Flow{
+    Panel{
         anchors.centerIn: parent
-        anchors.fill: parent
-        spacing: 25
-        Component.onCompleted: forceActiveFocus()
 
-        StyledButton{
-            id:regenorbiter
-            state: "large-fixed"
-            buttonText: "Regen\nOrbiter"
-            onActivated:  regenOrbiter(manager.iPK_Device)
-        }
+        useHeader: true
 
-        StyledButton{
-            id:pending
-            state: "large-fixed"
-            buttonText: "Pending\nTasks"
+        content:  Flickable{
+            anchors.fill: parent
+            contentWidth: parent.width
+            contentHeight:parent.width
+            clip:true
+            Flow{
+                id:flow
+                anchors.centerIn: parent
+                anchors.fill: parent
+                spacing: 25
+                Component.onCompleted: forceActiveFocus()
 
-        }
+                StyledButton{
+                    id:regenorbiter
 
-        StyledButton{
-            id:networksettings
-            state: "large-fixed"
-            buttonText: "Network\nSettings"
+                    buttonText: "Regen\nOrbiter"
+                    onActivated:  regenOrbiter(manager.iPK_Device)
+                }
 
-        }
+                StyledButton{
+                    id:pending
 
-        StyledButton{
-            id:avwizard
-            state: "large-fixed"
-            buttonText: "Av\nWizard"
+                    buttonText: "Pending\nTasks"
 
-        }
+                }
 
-        StyledButton{
-            id:regenorbiters
-            state: "large-fixed"
-            buttonText: "Regen All\nOrbiters"
+                StyledButton{
+                    id:networksettings
 
-        }
+                    buttonText: "Network\nSettings"
 
-        StyledButton{
-            id:quickreload
-            state: "large-fixed"
-            buttonText: "Quick\n Reload"
-            onActivated: manager.quickReload()
+                }
 
-        }
+                StyledButton{
+                    id:avwizard
 
-        StyledButton{
-            id:changeStyle
-            state: "large-fixed"
-            buttonText: "Change\nStyles"
+                    buttonText: "Av\nWizard"
 
-        }
-        StyledButton{
-            id:diagnostic
-            state: "large-fixed"
-            buttonText: qsTr("Screen Information")
-            onActivated: {
-                qmlRoot.createPopup(screen_info)
-            }
+                }
 
-        }
-        StyledButton{
-            id:refresh
-            state: "large-fixed"
-            buttonText: qsTr("Reload Local QML")
-            onActivated:{ manager.qmlReload()}
-        }
-        StyledButton{
-            id:ping
-            state: "large-fixed"
-            buttonText: qsTr("Ping Test")
-        }
-        StyledButton{
-            id:componentList
-            state: "large-fixed"
-            buttonText: qsTr("Component List")
-        }
-        StyledButton{
-            id:settingsBtn
-            state: "large-fixed"
-            buttonText: qsTr("Settings")
-            onActivated: qmlRoot.createPopup(settingsComponent)
-        }
-        StyledButton{
-            id:resetDev
-            state: "large-fixed"
-            buttonText: qsTr("Reset Device Id")
-            onActivated:{
-                manager.setDeviceNumber(-1)
-                manager.writeConfig()
-            }
-        }
-        StyledButton{
-            id:exitBtn
-           state: "large-fixed"
-            buttonText: qsTr("Exit Application")
-            onActivated:{
-             manager.exitApp()
+                StyledButton{
+                    id:regenorbiters
+
+                    buttonText: "Regen All\nOrbiters"
+
+                }
+
+                StyledButton{
+                    id:quickreload
+
+                    buttonText: "Quick\n Reload"
+                    onActivated: manager.quickReload()
+
+                }
+
+                StyledButton{
+                    id:changeStyle
+
+                    buttonText: "Change\nStyles"
+
+                }
+                StyledButton{
+                    id:diagnostic
+
+                    buttonText: qsTr("Screen Information")
+                    onActivated: {
+                        qmlRoot.createPopup(screen_info)
+                    }
+
+                }
+                StyledButton{
+                    id:refresh
+
+                    buttonText: qsTr("Reload Local QML")
+                    onActivated:{ manager.qmlReload()}
+                }
+                StyledButton{
+                    id:ping
+
+                    buttonText: qsTr("Ping Test")
+                }
+                StyledButton{
+                    id:componentList
+
+                    buttonText: qsTr("Component List")
+                }
+                StyledButton{
+                    id:settingsBtn
+
+                    buttonText: qsTr("Settings")
+                    onActivated: qmlRoot.createPopup(settingsComponent)
+                }
+                StyledButton{
+                    id:resetDev
+
+                    buttonText: qsTr("Reset Device Id")
+                    onActivated:{
+                        manager.setDeviceNumber(-1)
+                        manager.writeConfig()
+                    }
+                }
+                StyledButton{
+                    id:exitBtn
+
+                    buttonText: qsTr("Exit Application")
+                    onActivated:{
+                        manager.exitApp()
+                    }
+                }
             }
         }
     }
+
 
     Component{
         id: settingsComponent

@@ -156,6 +156,7 @@
         <file>qml/skins/default/images/lightsup_up.png</file>
         <file>qml/skins/default/images/ff_up.png</file>
         <file>qml/skins/default/components/ImageButton.qml</file>
+        <file>qml/skins/default/components/MediaInterface.qml</file>
         <file>qml/skins/default/+large/MainLayout.qml</file>
         <file>qml/skins/default/+large/Style.qml</file>
     </qresource>

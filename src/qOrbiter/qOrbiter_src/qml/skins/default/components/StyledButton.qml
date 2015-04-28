@@ -16,7 +16,7 @@ Item{
     smooth: true
 
     property string phil: fly_trap.pressed ? Style.appbutton_confirm_color: Style.appcolor_background_list
-    property int textSize:Style.appFontSize_list
+    property int textSize:Style.fontSize_listItem
     property alias buttonText:button_label.text
     property alias txtObj:button_label
     property alias hitArea:fly_trap
@@ -62,7 +62,6 @@ Item{
         }
 
         height: parent.height
-        font.weight: Font.Light
         fontSize: textSize
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment:Text.AlignHCenter       

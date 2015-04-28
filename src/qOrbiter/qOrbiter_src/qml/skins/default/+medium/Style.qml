@@ -42,7 +42,7 @@ QtObject{
     readonly property color appbutton_disabled_color:"#464646"
     readonly property color appbutton_color:appcolor_background
     property int appButtonHeight:manager.isProfile ? scaleY(12) : scaleY(16)
-    property int appButtonWidth: manager.isProfile ? scaleX(26) : scaleX(12)
+    property int appButtonWidth: manager.isProfile ? scaleX(26) : scaleX(15)
     readonly property int appButtonNumberPadHeight:manager.isProfile ? scaleY(12) : scaleY(18)
     readonly property int appButtonNumberPadWidth: manager.isProfile ? scaleX(18) : scaleX(12)
     readonly property int appButtonNumberPadSmallHeight:manager.isProfile ? scaleY(9) : scaleY(15)

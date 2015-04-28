@@ -1826,7 +1826,7 @@ public slots:
         appWidth= qorbiterUIwin->width();
         emit orientationChanged();
         qorbiterUIwin->engine()->clearComponentCache();
-        updateProfileSelector();
+       // updateProfileSelector();
     }
 
     Q_INVOKABLE void qmlReload(){delayedReloadQml();}

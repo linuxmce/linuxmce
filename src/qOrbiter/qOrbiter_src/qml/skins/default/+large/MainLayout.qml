@@ -39,6 +39,14 @@ Item {
         }
     }
 
+    MediaInterface{
+        id:mediaPlayer
+        anchors.centerIn: parent
+        height:parent.height
+        width:parent.width
+
+    }
+
 
     PageLoader {
         id: pageLoader
