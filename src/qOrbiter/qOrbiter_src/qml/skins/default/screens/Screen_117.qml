@@ -17,7 +17,7 @@ StyledScreen{
     keepHeader: false
     BroadcastMediaBase{
         id:screen_117
-        headerTitle: manager.translateMediaType(manager.i_current_mediaType)
+        //headerTitle: manager.translateMediaType(manager.i_current_mediaType)
     }
 }
 

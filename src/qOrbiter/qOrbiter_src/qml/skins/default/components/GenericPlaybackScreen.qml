@@ -6,6 +6,7 @@ import "../."
 Item {
     id:generic_playback
     property bool showingPlaylist:false
+    anchors.fill: parent
     NowPlayingImage {
         id: imgContainer
         anchors{

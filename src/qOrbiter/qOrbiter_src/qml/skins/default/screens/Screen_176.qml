@@ -12,10 +12,10 @@ import "../components"
   *Advanced Device Controls
   */
 StyledScreen{
-    MediaPlaybackBase{
+    GenericPlaybackScreen{
     id:screen_176
     objectName: "Cannot Play Media"
-    screenLabel: qsTr("Cannot play media")
+
 
     }
 }

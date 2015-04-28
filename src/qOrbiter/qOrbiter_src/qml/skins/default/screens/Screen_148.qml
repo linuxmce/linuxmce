@@ -3,7 +3,7 @@ import "../components"
 StyledScreen {
    screen:qsTr("Roku Remote")
 
-   MediaPlaybackBase{
-       screenLabel: "Roku"
+   GenericPlaybackScreen{
+       anchors.fill: parent
    }
 }

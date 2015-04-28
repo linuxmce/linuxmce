@@ -5,7 +5,7 @@ StyledScreen{
     keepHeader: false
     BroadcastMediaBase {
         id:livetv_screen
-        playListComponent: TvChannelView{}
+        //playListComponent: TvChannelView{}
     }
 }
 

@@ -1,7 +1,11 @@
 import QtQuick 2.2
 import "../components"
 
-MediaPlaybackBase{
-    id:dvdMenu
+StyledScreen{
+    GenericPlaybackScreen{
+        id:dvdMenu
+
+    }
 
 }
+
