@@ -22,7 +22,7 @@ case $1 in
                 cat $NameOfTempFile | grep audio | grep station | while read LINE ; do
 
                         #Get Station Name
-                        Station=$(echo $LINE | gawk -F'"' '{ print $4}' | gawk -F'(' '{print $1}' | gawk -F"|" '{print $1}')
+                        Station=$(echo $LINE | gawk -F'"' '{ print $4}' | gawk -F'(' '{print $1}' | gawk -F"|" '{print $1 "-" $2}')
                         echo -e "Radio Station  : \e[01;33m$Station\e[00m"
 
                         #Get Url
@@ -53,7 +53,7 @@ case $1 in
                 cat $NameOfTempFile | grep audio | grep station | while read LINE ; do
 
                         #Get Station Name
-                        Station=$(echo $LINE | gawk -F'"' '{ print $4}' | gawk -F'(' '{print $1}' | gawk -F"|" '{print $1}')
+                        Station=$(echo $LINE | gawk -F'"' '{ print $4}' | gawk -F'(' '{print $1}' | gawk -F"|" '{print $1 "-" $2}')
 
                         #Display what we are doing
                         echo -e "Adding Radio Station : \e[01;33m$Station\e[00m To LinuxMCE"
@@ -67,7 +67,16 @@ case $1 in
 				Url=$Url2
 			fi
 
-			echo "$Url"
+			#Check for m3u playlist (Needed for some stations)
+			if [[ "$Url" == *m3u ]]; then
+				Url=$(wget -qO- "$Url" | grep http | tail -n 1)
+			fi
+
+			#Remove nonprintable characters from Url
+			Url=$(tr -dc '[[:print:]]' <<< "$Url")
+
+			#Strip URL of session information
+			Url=$(echo "$Url" | gawk -F'?' '{ print $1}')
 
                         #Get Genre
                         Genre=$(echo $LINE | gawk -F'"' '{ print $4}' | gawk -F'(' '{print $2}' | gawk -F')' '{print $1}')
@@ -75,11 +84,13 @@ case $1 in
 			#Get Picture
 			Picture=$(echo $LINE | gawk -F" image" '{print $2}' | gawk -F'"' '{ print $2}')
 
-			#Check if stream is Active
-			curl --silent -m 1 "$Url" > /dev/null
-			if [[ $? -eq "28" ]]; then
-	                        #Check if Url is already in Database
-        	                if ! [ $(mysql pluto_media -ss -e "select PK_File from File where Filename='$Url';") ]; then
+                        #Check if Url is already in Database
+       	                if ! [ $(mysql pluto_media -ss -e "select PK_File from File where Filename='$Url';") ]; then
+
+				#Check if stream is Active
+				curl --silent -m 1 "$Url" > /dev/null
+				Error=$?
+				if [[ $Error -eq "28" ]]; then
 
 	                                #Add Url to Database
         	                        PK_File=$(mysql pluto_media -ss -e "insert into File (EK_MediaType,DateAdded,Filename,Missing,IsDirectory,IsNew) VALUES(43,NOW(),'$Url',0,0,1);select LAST_INSERT_ID() from File;" | tail -n1)
@@ -114,10 +125,12 @@ case $1 in
                                 	mysql pluto_media -e "insert into Picture_Attribute (FK_Picture,FK_Attribute) VALUES('$PK_Picture','$FK_Attribute');"
 
 
-
-	                        else
-        	                echo -e "\e[00;31mError\e[00m : URL Already in Database"
-                	        fi
+				else
+        		        echo -e "\e[00;31mError\e[00m : Stream not Active"
+                		fi
+			else
+        	        echo -e "\e[00;31mError\e[00m : URL Already in Database"
+                	fi
 
 
 
@@ -125,10 +138,6 @@ case $1 in
 			then
 			rm TempPic.png
 			fi
-		else
-			echo -e "\e[00;31mError\e[00m : Stream not Active"
-
-		fi
                 done
 
                 #Remove temp file
@@ -151,6 +160,18 @@ case $1 in
 
                         #Get Url
                         echo "$LINE" | gawk -F'&amp;f' '{print $1}' | gawk -F'"' '{system("curl --silent "$6"")}' | while read Url ; do
+
+			#Check for [playlist] in stream URL (Needed for some stations)
+			Url2=$(curl --silent -m 1 "$Url" | grep -A 3 "\[playlist\]" | grep "File1" | gawk -F'=' '{ print $2 }')
+			if [[ $Url2 ]]; then
+				Url=$Url2
+			fi
+
+			#Check for m3u playlist (Needed for some stations)
+			if [[ "$Url" == *m3u ]]; then
+				Url=$(wget -qO- "$Url" | grep http | tail -n 1)
+			fi
+
 
                                 #Check if Url is in Database
                                 if [ $(mysql pluto_media -ss -e "select PK_File from File where Filename='$Url';" | tail -n1) ]; then
