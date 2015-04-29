@@ -2,6 +2,8 @@
 #define MEDIATYPEHELPER_H
 
 #include <QObject>
+#include <QQmlEngine>
+#include <QScriptEngine>
 
 /*!
  * \brief The MediaTypeHelper class. this class provides a simple enum
@@ -141,8 +143,18 @@ class MediaTypesHelper : public QObject
 {
     Q_OBJECT
     Q_ENUMS(MediaTypes)
+
+
 public:
-    MediaTypesHelper() {}
+    static QObject *mediatypes_provider(QQmlEngine *engine, QJSEngine *scriptEngine)
+    {
+        Q_UNUSED(engine)
+        Q_UNUSED(scriptEngine)
+
+        MediaTypesHelper *helper = new MediaTypesHelper();
+        return helper;
+    }
+    MediaTypesHelper(QObject*parent=0) {}
     virtual ~MediaTypesHelper() {}
 
     enum MediaTypes{
@@ -221,7 +233,7 @@ public:
 public slots:
  Q_INVOKABLE int getInt(){return 1;}
 
- Q_INVOKABLE  static const QString translateType(int m){
+ Q_INVOKABLE QString translateType(int m){
         switch(m){
         case LMCE_LiveTV:
             return tr("LinuxMCE LiveTV");

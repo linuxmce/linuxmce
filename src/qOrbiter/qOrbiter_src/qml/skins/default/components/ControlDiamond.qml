@@ -3,10 +3,10 @@ import "../components"
 import "../."
 Item{
     id:controlDiamond
-    height:manager.isProfile ? parent.height *.35 : manager.appHeight *.40
+    height:manager.isProfile ? parent.height *.35 : parent.height *.50
     width: height   
     enabled: visible
-   property int outsideButtonHeight: play.height*.65
+   property int outsideButtonHeight: manager.isPhone ? play.height*.65 : play.height*.55
 
 
     ControlButton{
@@ -103,7 +103,7 @@ Item{
     }
     ControlButton {
         id:play
-        height:manager.isProfile ? parent.height *.45: parent.height*.35
+        height:manager.isProfile ? parent.height *.40: parent.height*.45
         buttonLabel: ""
         anchors.centerIn: parent
         onActivated: manager.pauseMedia()
