@@ -1,50 +1,68 @@
 import QtQuick 2.2
 import "../."
 Panel {
-useHeader: false
+    useHeader: false
 
     Item {
         id: remote1
         height:parent.height
         width: parent.width
         property int rowHeight:Style.scaleY(12)
-        Column { // Info, Up, Menu, Ch+
+        Column {
             id:leftCol
-            spacing: manager.isProfile ? Style.scaleX(1) : Style.scaleY(1)
-            height: parent.height
-            width: Style.scaleX(18)
+            height: childrenRect.height
+            width: childrenRect.width
             anchors{
-                left:parent.left
-                top:parent.top
+               left:parent.left
+                top:mainDiamond.top
             }
 
             StyledButton {
-                state:"fixed"
+                state:"round"
                 id: btVolUp
-                buttonText: "Vol+"
+
+                buttonText: qsTr("Vol. +", "Media Volume")
                 onActivated: manager.adjustVolume(+1)
+            }
+
+            StyledButton {
+                id: mute
+                state:"round"
+                buttonText: ""
+
+                onActivated: manager.mute()
+                Image{
+                    anchors.centerIn: parent
+                    source: "../images/mute_up.png"
+                    anchors.fill: parent
+                }
             }
             StyledButton {
                 id: btVolDown
-                state:"fixed"
-                buttonText: "Vol-"
+                state:"round"
+                buttonText: qsTr("Vol. -", "Media Volume")
+
                 onActivated: manager.adjustVolume(-1)
             }
+        }
 
-            StyledButton {
-                id: off_btn
-                state:"fixed"
-                buttonText: "Off"
-                onActivated: manager.stopMedia()
+
+
+        DirectionPad{
+            id:mainDiamond
+            height: Style.scaleY(12)*3
+            width:  height
+            anchors{
+                top:parent.top
+                horizontalCenter: parent.horizontalCenter
             }
-
         }
 
         Column { // Info, Up, Menu, Ch+
             id:rightCol
             spacing: manager.isProfile ? Style.scaleX(1) : Style.scaleY(1)
-            height: parent.height
-            width: Style.scaleX(18)
+            height: childrenRect.height
+            width: childrenRect.width
             anchors{
                 right:parent.right
                 top:parent.top
@@ -52,123 +70,52 @@ useHeader: false
 
             StyledButton {
                 id: btChannelUp
-                state:"fixed"
-                buttonText: "Ch+"
+                state:"round"
+                buttonText: qsTr("Ch+", "Channel Up")
                 onActivated: manager.tvChannelUp()
             }
+
             StyledButton {
-                id: btSkipNext
-                state:"fixed"
-                buttonText: "Mute"
-                onActivated: manager.mute()
-            }
-            StyledButton {
-                state:"fixed"
+                state:"round"
                 id: btChannelDown
-                buttonText: "Ch-"
+                buttonText: qsTr("Ch-", "Channel Down")
                 onActivated: manager.tvChannelDown()
             }
-
-
         }
 
-        Rectangle{
-            id:mainDiamond
-            height: Style.scaleY(12)*3
-            width:  Style.scaleX(18)*3
-            color:"transparent"
-            anchors{
-                horizontalCenter: parent.horizontalCenter
-                top:parent.top
-            }
-            StyledButton {
-                id: btUp
-                anchors{
-                    top:parent.top
-                    horizontalCenter: parent.horizontalCenter
-
-                }
-                state:"fixed"
-                buttonText: "Up"
-                onActivated: manager.moveArrowDirection(1) //up
-            }
-
-            StyledButton {
-                state:"fixed"
-                anchors{
-                    bottom:parent.bottom
-                    horizontalCenter: parent.horizontalCenter
-                }
-                id: btDown
-                buttonText: "Down"
-                onActivated: manager.moveArrowDirection(2) //down
-            }
-            StyledButton {
-                id: btLeft
-                anchors{
-                    left:parent.left
-                    verticalCenter: parent.verticalCenter
-                }
-                state:"fixed"
-                buttonText: "Left"
-                onActivated: manager.moveArrowDirection(3)
-            }
-            StyledButton {
-                id: btOk
-                anchors{
-                    horizontalCenter: parent.horizontalCenter
-                    verticalCenter: parent.verticalCenter
-                }
-                state:"fixed"
-                buttonText: "Ok"
-                onActivated: manager.moveArrowDirection(5) //ok
-            }
-            StyledButton {
-                id: btRight
-                anchors{
-                    right:parent.right
-                    verticalCenter: parent.verticalCenter
-                }
-                state:"fixed"
-                buttonText: "Right"
-                onActivated: manager.moveArrowDirection(4)
-            }
-
-        }
 
 
         Row { // Exit, Down, Guide, VolUp
             id:dvrRow
-            spacing: manager.isProfile ? Style.scaleX(1) : Style.scaleY(1)
+            width: childrenRect.width
             height: Style.appButtonHeight
             anchors{
                 bottom:transports.top
-                left:parent.left
-                right:parent.right
+               horizontalCenter: parent.horizontalCenter
             }
             StyledButton {
-                state:"fixed"
+                state:"round"
                 id: btExit
                 buttonText: "Exit"
                 onActivated: manager.exitMediaMenu()
             }
 
             StyledButton {
-                state:"fixed"
+                state:"round"
                 id: btGuide
                 buttonText: "Guide"
                 onActivated: manager.extraButton("guide")
             }
             StyledButton {
                 id: btInfo
-                state:"fixed"
+                state:"round"
                 buttonText: "Info"
                 onActivated: manager.extraButton("info")
             }
 
             StyledButton {
                 id: btMenu
-                state:"fixed"
+                state:"round"
                 buttonText: "Menu"
                 onActivated: manager.extraButton("menu")
             }
@@ -176,46 +123,78 @@ useHeader: false
         }
 
 
+
         Row {
             id:transports// SkipBack, Rewind, FastForward, SkipFwd
 
-            spacing: manager.isProfile ? Style.scaleX(1) : Style.scaleY(1)
-
+            width: childrenRect.width
             height: Style.appButtonHeight
             anchors{
-                left:parent.left
-                right:parent.right
+               horizontalCenter: parent.horizontalCenter
                 bottom:colorButtons.top
             }
             StyledButton {
                 id: btStop
-                state:"fixed"
-                buttonText: "Stop"
+                state:"round"
+                buttonText: ""
+                 height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
                 // This is the Live TV remote, so we use the "Stop" CMD (AV control), and not the "Stop Media" CMD (DCE players)
                 onActivated: manager.stop_AV()
+                Image {
+                    id: stopImg
+                    source: "../images/stop_up.png"
+                    height: parent.height/2
+                    width: height
+                    anchors.centerIn: parent
+                }
             }
             StyledButton {
                 id: btRewind
-                state:"fixed"
-                buttonText: "Rewind"
+                state:"round"
+                 height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
+                buttonText: ""
+                Image {
+                    id: rwImg
+                    source: "../images/rw_up.png"
+                    height: parent.height*.65
+                    width: height
+                    anchors.centerIn: parent
+                }
                 onActivated: manager.rewindMedia()
             }
             StyledButton {
                 id: btPause
-                state:"fixed"
-                buttonText: "Pause"
+                state:"round"
+                Image {
+                    id: pauseImg
+                    source: "../images/playpause_up.png"
+                    height: parent.height*.65
+                    width: height
+                    anchors.centerIn: parent
+                }
+                 height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
+                buttonText: ""
                 onActivated: manager.pauseMedia()
             }
             StyledButton {
                 id: btPlay
-                state:"fixed"
+                state:"round"
+                 height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
                 buttonText: "Play"
                 onActivated: manager.playResume()
             }
             StyledButton {
                 id: btFFwd
-                state:"fixed"
-                buttonText: "FFwd"
+                state:"round"
+                 height: manager.isProfile ? Style.scaleY(10) : Style.scaleY(12)
+                buttonText: ""
+                Image {
+                    id: ffimg
+                    source: "../images/ff_up.png"
+                    height: parent.height*.65
+                    width: height
+                    anchors.centerIn: parent
+                }
                 onActivated: manager.fastForwardMedia();
             }
 
@@ -225,39 +204,40 @@ useHeader: false
             id:colorButtons
             spacing: manager.isProfile ? Style.scaleX(1) : Style.scaleY(1)
             height: Style.appButtonHeight
+            width: childrenRect.width
             anchors{
                 bottom:parent.bottom
-                left:parent.left
-                right:parent.right
+                horizontalCenter: parent.horizontalCenter
+                bottomMargin: 5
             }
             StyledButton {
                 id: btRed
-                state:"fixed"
-                buttonText: "Red"
+                state:"round"
+                buttonText: qsTr("Red")
                 phil: "red"
 
                 onActivated: manager.redButtonPress()
             }
             StyledButton {
                 id: btGreen
-                state:"fixed"
-                buttonText: "Green"
+                state:"round"
+                buttonText:qsTr( "Green")
                 phil: "green"
 
                 onActivated: manager.greenButtonPress()
             }
             StyledButton {
                 id: btYellow
-                state:"fixed"
-                buttonText: "Yellow"
+                state:"round"
+                buttonText: qsTr("Yellow")
                 phil: "yellow"
 
                 onActivated: manager.yellowButtonPress()
             }
             StyledButton {
                 id: btBlue
-                state:"fixed"
-                buttonText: "Blue"
+                state:"round"
+                buttonText: qsTr("Blue")
                 phil: "blue"
                 onActivated: manager.blueButtonPress()
             }

@@ -40,6 +40,11 @@ Item {
         id: backBtn
         source: "../images/vertical_arrow.png"
         rotation: 90
+        visible: useHeader
+        width: height
+        height:panelHeader.height
+        fillMode: Image.PreserveAspectFit
+
         anchors{
             left:panelHeader.left
             verticalCenter: panelHeader.verticalCenter

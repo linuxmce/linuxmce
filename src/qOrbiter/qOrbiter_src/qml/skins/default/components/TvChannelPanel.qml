@@ -6,9 +6,10 @@ import "../."
 GenericListModel{
     id:playlistPanel
     label: modelCount + qsTr(" Channels.", "Tv Channels")+bcastSource
-    property int itemCount:playlistView.count
-    property int bcastSource:-1
-    model: manager.getDataGridModel("channels", DataGrids.EPG_All_Shows  )
+    property int itemCount:modelCount
+    property int bcastSource:2
+    dataGrid:DataGrids.EPG_All_Shows
+    dataGridLabel:"channels"
     delegate: Item{
         height: Style.listViewItemHeight /2
         anchors{

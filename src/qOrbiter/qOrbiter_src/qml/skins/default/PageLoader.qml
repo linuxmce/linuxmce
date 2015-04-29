@@ -62,9 +62,10 @@ Loader {
     function startChange(){
         
         
-        if(!pageLoader.item || pageLoader.item.screen){
+        if(pageLoader.item.screen){
             console.log("pageloader::closing page "+ currentScreen)
             pageLoader.item.state="closing"
+
         } else{
             console.log("pageloader::no page jumping to next ==>"+nextScreen)
             loadNext()

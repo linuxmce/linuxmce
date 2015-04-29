@@ -6,7 +6,8 @@ import "../."
 Item{
     id:arrows
     
-    height: Style.scaleY(25)
+    height: manager.isProfile ? Style.scaleY(270
+                                             ) :Style.scaleY(50)
     width: height
     
 

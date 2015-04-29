@@ -2,6 +2,7 @@ import QtQuick 2.2
 import "../components"
 import "../"
 import org.linuxmce.screens 1.0
+import org.linuxmce.grids 1.0
 Item{
     id:genericListContainer
     width: Style.listViewWidth_medium
@@ -10,6 +11,25 @@ Item{
     property alias delegate:view.delegate
     property int modelSpacing: 1
     property int modelCount:view.count
+    property int dataGrid:-1
+    property string dataGridLabel:""
+
+    function refresh(){
+        if(dataGrid==-1 || dataGridLabel==="")
+            return;
+
+        manager.clearDataGrid(dataGrid);
+        view.model=manager.getDataGridModel(dataGridLabel, dataGrid)
+    }
+
+    Component.onCompleted: {
+        if(dataGrid==-1 || dataGridLabel==="")
+            return;
+
+            console.log("getting model "+dataGrid)
+            view.model=manager.getDataGridModel(dataGridLabel, dataGrid)
+    }
+    onVisibleChanged: if(!visible) manager.clearDataGrid(dataGrid)
 
     Rectangle{
         id:hdr

@@ -25,7 +25,7 @@ Item{
     property alias label:button_label.text
     property alias buttonRadius:bg_fill.radius
 
-
+    signal confirm()
     signal activated()
     Behavior on opacity{
         PropertyAnimation{
@@ -73,6 +73,7 @@ Item{
         id:fly_trap
         anchors.fill: styled_button
         onReleased: activated()
+        onPressAndHold: confirm()
     }
 
     Loader{

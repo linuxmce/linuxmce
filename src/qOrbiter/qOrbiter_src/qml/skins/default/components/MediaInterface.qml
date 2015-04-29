@@ -114,6 +114,7 @@ Item{
             if(duration==position){
                 lmceData.qmlPlaybackEnded(false)
             }
+            source=""
         }
 
         onMediaObjectChanged: {
