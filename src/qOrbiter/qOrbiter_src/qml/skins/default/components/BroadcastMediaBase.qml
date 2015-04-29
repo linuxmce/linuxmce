@@ -170,6 +170,7 @@ Panel{
             anchors.horizontalCenter: manager.isProfile ? numbers.horizontalCenter : undefined
             anchors.verticalCenter: manager.isProfile ? undefined: parent.verticalCenter
             anchors.bottom: manager.isProfile ? parent.bottom : undefined
+
         }
 
         MediaNumberPad{

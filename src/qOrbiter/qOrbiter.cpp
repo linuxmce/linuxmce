@@ -54,6 +54,7 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
 {
     qDebug() << "Constructing";
     QObject::connect(this, SIGNAL(dceIPChanged()), this, SLOT(pingCore()));
+    connect(this, SIGNAL(transmitDceCommand(PreformedCommand)), this, SLOT(sendDCECommand(PreformedCommand)));
     m_bIsOSD=false;
 }
 //<-dceag-const2-b->
@@ -2328,13 +2329,15 @@ void qOrbiter::beginSetup()
     qRegisterMetaType< QList<QObject*> >("QList<QObject*>");
 
 #endif
-#ifdef debug
-    emit commandResponse("Run function executed in thread"+thread()->currentThreadId());
-#endif
+
+    // emit commandResponseChanged("Run function executed in thread::"+thread()->currentThreadId());
+
 }
 
-void qOrbiter::sendDCECommand(PreformedCommand& cmd) {
-    SendCommand(cmd);
+void qOrbiter::sendDCECommand(PreformedCommand cmd) {
+
+    qDebug() << Q_FUNC_INFO ;
+    SendCommandNoResponse(cmd);
 }
 
 void qOrbiter::sendDCECommandResponse(PreformedCommand& cmd, string* p_sResponse) {
@@ -2348,6 +2351,12 @@ void qOrbiter::updateScreenSaverTimeout(int t)
     DCE::CMD_Set_Device_Data setTimeout((long)m_dwPK_Device, (long)iPK_Device_GeneralInfoPlugin, long(m_dwPK_Device), data, 56 );
     SendCommand(setTimeout);
 
+}
+
+void qOrbiter::handleDceCommand(DCE::PreformedCommand cmd)
+{
+    qDebug() << Q_FUNC_INFO ;
+    emit transmitDceCommand(cmd);
 }
 
 void qOrbiter::setRecievingStatus(bool b)
@@ -4230,7 +4239,7 @@ void DCE::qOrbiter::ShowBookMarks()
 
 void qOrbiter::OnDisconnect()
 {
-qDebug() <<Q_FUNC_INFO;
+    qDebug() <<Q_FUNC_INFO;
     emit routerConnectionChanged(false);
     qDebug("Router disconnected!");
     m_bOrbiterConnected = false;

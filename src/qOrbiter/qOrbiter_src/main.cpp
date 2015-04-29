@@ -436,6 +436,7 @@ int main(int argc, char* argv[])
         // orbiterWin.mainView.rootContext()->setContextProperty("dataModel", mediaModel);
         orbiterWin.mainView.rootContext()->setContextProperty("opengl", glpresent);
         qRegisterMetaType<QHash<int, QVariant> >("QHash<int, QVariant>");
+        qRegisterMetaType<DCE::PreformedCommand>("DCE::PreformedCommand");
 
 
         // connnect local logger
@@ -464,7 +465,7 @@ int main(int argc, char* argv[])
         // QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));
 
         // Generic DCE command sending signal/slots
-        QObject::connect(&w, SIGNAL(sendDceCommand(DCE::PreformedCommand&)), &pqOrbiter, SLOT(sendDCECommand(DCE::PreformedCommand&)), Qt::DirectConnection);
+        QObject::connect(&w, SIGNAL(sendDceCommand(DCE::PreformedCommand)), &pqOrbiter, SLOT(handleDceCommand(DCE::PreformedCommand)), Qt::QueuedConnection);
       //  NO! QObject::connect(&w, SIGNAL(sendDceCommandResponse(DCE::PreformedCommand&, string*)), &pqOrbiter, SLOT(sendDCECommandResponse(DCE::PreformedCommand&, string*)), Qt::QueuedConnection);
 
 

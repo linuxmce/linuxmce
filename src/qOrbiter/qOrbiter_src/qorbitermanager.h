@@ -569,7 +569,7 @@ signals:
     void screenPowerTimeoutChanged();
     void updateDceScreenPowerTimeout(int t);
 
-    void sendDceCommand(DCE::PreformedCommand &cmd);
+    void sendDceCommand(DCE::PreformedCommand cmd);
     void sendDceCommandResponse(DCE::PreformedCommand &cmd, string* p_sResponse);
 
     void skinMessage(QString s);
@@ -1078,7 +1078,7 @@ public slots:
      */
     void setBoundStatus(bool b) {
         CMD_Bind_to_Media_Remote cmd(iPK_Device, iMediaPluginID, iPK_Device,string("2355") ,b ? "1" :"0", string(""), sEntertainArea, 0, 0);
-        this->sendDceCommand(cmd);
+        emit emit sendDceCommand(cmd);
     }
 
     /*!
@@ -1143,7 +1143,7 @@ public slots:
 
     void setDirectAv(bool avState){
         CMD_Live_AV_Path cmd(iPK_Device, iMediaPluginID, sEntertainArea, avState);
-        this->sendDceCommand( cmd );
+        emit sendDceCommand( cmd );
         if(usingLiveAvPath !=avState)
             setLiveAvPath(avState);
     }
@@ -1261,19 +1261,19 @@ public slots:
         }
         //changed to remove media type as that is decided on by the media plugin and passed back
         CMD_MH_Play_Media cmd(iPK_Device, iMediaPluginID, 0 , FK_Media.toStdString(), 0, 0, sEntertainArea, false, false, false, false, false);
-        this->sendDceCommand(cmd);
+        emit emit sendDceCommand(cmd);
     }
 
     void mythTvPlay(){
         qDebug() << "Sending play to mythtv";
         CMD_Change_Playback_Speed cmd(iPK_Device, iMediaPluginID, this->nowPlayingButton->getStreamID() , 1000, true);
-        sendDceCommand(cmd);
+        emit sendDceCommand(cmd);
     }
 
     void playResume(){
         if(nowPlayingButton->getStreamID() != -1){
             CMD_Play cmd(iPK_Device, nowPlayingButton->nowPlayingDevice(), nowPlayingButton->getStreamID());
-            sendDceCommand(cmd);
+            emit sendDceCommand(cmd);
         }
     }
 
@@ -1285,21 +1285,21 @@ public slots:
         setDirectAv(false);
     }
 
-    void tvChannelUp(){CMD_Channel_up cmd(iPK_Device, iMediaPluginID); sendDceCommand(cmd);}
-    void tvChannelDown(){CMD_Channel_down cmd(iPK_Device, iMediaPluginID); sendDceCommand(cmd);}
-    void stopMediaOtherLocation(int PK_EntertainArea){ CMD_MH_Stop_Media cmd(iPK_Device, iMediaPluginID,0,i_current_mediaType ,0,StringUtils::itos(PK_EntertainArea),false); sendDceCommand(cmd);}
-    void setPlaybackSpeed(int s) { CMD_Change_Playback_Speed cmd(iPK_Device, iMediaPluginID, nowPlayingButton->getStreamID() , s<0 ? -2 : +2, true); sendDceCommand(cmd);  }
+    void tvChannelUp(){CMD_Channel_up cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
+    void tvChannelDown(){CMD_Channel_down cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
+    void stopMediaOtherLocation(int PK_EntertainArea){ CMD_MH_Stop_Media cmd(iPK_Device, iMediaPluginID,0,i_current_mediaType ,0,StringUtils::itos(PK_EntertainArea),false); emit sendDceCommand(cmd);}
+    void setPlaybackSpeed(int s) { CMD_Change_Playback_Speed cmd(iPK_Device, iMediaPluginID, nowPlayingButton->getStreamID() , s<0 ? -2 : +2, true); emit sendDceCommand(cmd);  }
     void pauseMedia() { CMD_Pause_Media cmd(iPK_Device, iMediaPluginID ,nowPlayingButton->getStreamID()); sendDceCommand( cmd); }
-    void fastForwardMedia() {CMD_Scan_FwdFast_Fwd cmd(iPK_Device, iMediaPluginID); sendDceCommand(cmd);}
-    void rewindMedia(){CMD_Scan_BackRewind cmd(iPK_Device, iMediaPluginID); sendDceCommand(cmd);}
+    void fastForwardMedia() {CMD_Scan_FwdFast_Fwd cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
+    void rewindMedia(){CMD_Scan_BackRewind cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void adjustVolume(int vol) {
         if(discreteAudio) {
             CMD_Set_Volume cmd(iPK_Device, iMediaPluginID, StringUtils::itos(vol));
-            sendDceCommand(cmd);
+            emit sendDceCommand(cmd);
         } else {
             if(vol > 0) {
                 DCE::CMD_Vol_Up cmd(iPK_Device, iMediaPluginID, vol);
-                sendDceCommand(cmd);
+                emit sendDceCommand(cmd);
             } else {
                 DCE::CMD_Vol_Down cmd(iPK_Device, iMediaPluginID, vol);
                 sendDceCommand( cmd);
@@ -1326,17 +1326,17 @@ public slots:
     void dvd_showMenu(bool b) { dvdMenuShowing = b ; emit show_dvdMenu();}
     void showLinuxmceMenu(){emit show_linuxmce_menu();}
 
-    void exitMediaMenu(){CMD_Exit cmd(iPK_Device, iMediaPluginID); sendDceCommand(cmd);}
+    void exitMediaMenu(){CMD_Exit cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void setZoomLevel(QString zoom) {emit zoomLevelChanged(zoom);}
     void setAspectRatio(QString r) {emit aspectRatioChanged(r);}
     void getVideoFrame() { emit requestVideoFrame();}
-    void redButtonPress(){CMD_Red cmd(iPK_Device, iMediaPluginID); sendDceCommand(cmd); }
-    void blueButtonPress(){ CMD_Blue cmd(iPK_Device, iMediaPluginID); sendDceCommand(cmd);}
-    void greenButtonPress(){  CMD_Green cmd(iPK_Device, iMediaPluginID); sendDceCommand(cmd);}
-    void yellowButtonPress(){ CMD_Yellow cmd(iPK_Device, iMediaPluginID); sendDceCommand(cmd);}
-    void startRecordingPress(){CMD_Record cmd(iPK_Device, iMediaPluginID); sendDceCommand(cmd); }
+    void redButtonPress(){CMD_Red cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd); }
+    void blueButtonPress(){ CMD_Blue cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
+    void greenButtonPress(){  CMD_Green cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
+    void yellowButtonPress(){ CMD_Yellow cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
+    void startRecordingPress(){CMD_Record cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd); }
     void showRecordingsPress(){CMD_Recorded_TV_Menu cmd(iPK_Device, iMediaPluginID); sendDceCommand( cmd);}
-    void mute(){DCE::CMD_Mute cmd(iPK_Device, iMediaPluginID); sendDceCommand(cmd);}
+    void mute(){DCE::CMD_Mute cmd(iPK_Device, iMediaPluginID); emit sendDceCommand(cmd);}
     void doMoveMedia(QString eas, int streamID) {CMD_MH_Move_Media cmd(iPK_Device, iMediaPluginID, streamID, eas.toStdString()); sendDceCommand( cmd);}
 
     void movePlaylistEntry(QString d, int index) {emit movePlistEntry(d, index); }
@@ -1409,9 +1409,9 @@ public slots:
     void showAvControl() {clearDevices(); emit resendAvCodes();}
     //@}
 
-    void setLevel(int device, int level) { CMD_Set_Level cmd(iPK_Device, device, StringUtils::itos(level)); sendDceCommand(cmd); }
-    void turnOn(int device, int PK_Pipe = 0) { CMD_On cmd(iPK_Device, device, PK_Pipe, ""); sendDceCommand(cmd); }
-    void turnOff(int device, int PK_Pipe = 0) { CMD_Off cmd(iPK_Device, device, PK_Pipe); sendDceCommand(cmd); }
+    void setLevel(int device, int level) { CMD_Set_Level cmd(iPK_Device, device, StringUtils::itos(level)); emit sendDceCommand(cmd); }
+    void turnOn(int device, int PK_Pipe = 0) { CMD_On cmd(iPK_Device, device, PK_Pipe, ""); emit sendDceCommand(cmd); }
+    void turnOff(int device, int PK_Pipe = 0) { CMD_Off cmd(iPK_Device, device, PK_Pipe); emit sendDceCommand(cmd); }
 
     /*! @name QML Skin Function slots*/
     //@{

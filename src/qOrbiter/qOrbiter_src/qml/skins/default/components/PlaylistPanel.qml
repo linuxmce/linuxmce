@@ -10,8 +10,9 @@ Item{
     //  visible:showingPlaylist
     
     GenericListModel{
-        label: qsTr("%1 item(s)").arg(modelCount)
-        model:manager.getDataGridModel("Playlist", 18)
+        label: qsTr("%1 item(s)").arg(modelCount)        
+        dataGrid:18
+        dataGridLabel:"Playlist"
         delegate: Item{
             height:Style.scaleY(10)
             anchors{

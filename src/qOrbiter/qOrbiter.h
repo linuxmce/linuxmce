@@ -1332,6 +1332,8 @@ light, climate, media, security, telecom */
 
 signals:
 
+    void transmitDceCommand(PreformedCommand cmd);
+
     void deviceTemplateChanged(int dt);
 
     void dceGuiCommand(int i);
@@ -1822,7 +1824,9 @@ public slots:
     void setqCommunicatorID(int deviceID ) {qMediaPlayerID = deviceID; emit qCommunicatorIDChanged(qCommunicatorID);}
     int getqCommunicatorID(){return qCommunicatorID;}
 
-    void sendDCECommand(DCE::PreformedCommand &cmd);
+    void handleDceCommand(DCE::PreformedCommand cmd);
+
+    void sendDCECommand(PreformedCommand cmd);
     void sendDCECommandResponse(DCE::PreformedCommand &cmd, string* p_sResponse);
 
     void getAttributeImage(QString param);

@@ -18,8 +18,7 @@ Item{
         id:lmceData
         onMediaPlayingChanged: {
             if(!mediaPlaying && qmlPlayer.source!==""){
-                qmlPlayer.stop()
-                qmlPlayer.source=""
+                qmlPlayer.stop()               
                 videoPlane.visible = false
             } else {
 
@@ -39,7 +38,6 @@ Item{
                 qmlPlayer.source=""
                 console.log("Url Malformed!")
                 console.log("Url::"+pluginUrl)
-
             }
         }
 
@@ -99,7 +97,7 @@ Item{
             onConnectedStateChanged:{
                 if(manager.connectedState ){
                     //lmceData.setConnectionDetails(manager.mediaPlayerID, manager.m_ipAddress)
-                    dcePlayer.reInit();
+                    mediaPlayerRoot.restart()
                 }
             }
         }
@@ -108,18 +106,18 @@ Item{
     MediaPlayer{
         id:qmlPlayer
         autoPlay: true
-        autoLoad: true
+        autoLoad: false
 
         onStopped: {
+
             if(duration==position){
                 lmceData.qmlPlaybackEnded(false)
             }
-            source=""
+
         }
 
         onMediaObjectChanged: {
             console.log(JSON.stringify(metaData, null, "\t"))
-
         }
 
         onDurationChanged: {
@@ -140,10 +138,11 @@ Item{
             lmceData.processTimeCode(position);
         }
         onHasVideoChanged: {
+
             if(hasVideo){
-              // videoPlane.visible=true
+               videoPlane.visible=true
             } else {
-             //  videoPlane.visible=false
+              videoPlane.visible=false
             }
         }
     }

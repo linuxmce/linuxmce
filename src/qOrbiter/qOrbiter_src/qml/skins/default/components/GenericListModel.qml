@@ -62,6 +62,5 @@ Item{
             bottom:parent.bottom
             right:parent.right
         }
-    }
-    
+    }    
 }

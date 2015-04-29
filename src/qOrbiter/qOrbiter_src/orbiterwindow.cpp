@@ -104,7 +104,7 @@ orbiterWindow::orbiterWindow(int deviceid, std::string routerip, bool fullScreen
 #endif
 
     mainView.setResizeMode(QQuickView::SizeRootObjectToView);
-    QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
+   // QObject::connect(&mainView, SIGNAL(sceneResized(QSize)), this, SIGNAL(orientationChanged(QSize)));
     mainView.rootContext()->setContextProperty("window", this);
     qrcPath="qrc:/qml/qml/Index.qml";
     mainView.setSource(qrcPath); /* Sets the initial qml file based on all the above switching */
