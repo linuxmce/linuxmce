@@ -1,3 +1,9 @@
+lmce-asterisk (0+0.3.3-5) precise; urgency=low
+
+  * Fixes #2347 - permit autoloading modules
+
+ -- phenigma <phenigma@linuxmce.org>  Wed, 29 Apr 2015 17:55:00 -0500
+
 lmce-asterisk (0+0.3.3-4) precise; urgency=low
 
   * Added qualify=5000 to orbiter embedded phones
