@@ -974,13 +974,14 @@ public:
         void volumeDown(int repeat);
         void pluginVolumeUp();
         void pluginVolumeDown();
+        void audioLevelChanged(QString lvl);
         void trackUp();
         void trackDown();
 
 
     public slots:
 
-        void updateMetadata();
+        void updateMetadata(QString mediaTitle, QString mediaSubtitle, QString name, int screen);
 
         void setConnectionStatus(bool b) {connected = b; emit connectionStatusChanged(connected);}
 

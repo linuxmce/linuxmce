@@ -372,6 +372,7 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
     QString finishedPath;
     QString localPath;
 
+#ifdef NULL
     if(iPK_MediaType==5)
     {
         path = "/public/data/videos/";
@@ -419,8 +420,8 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
         finishedPath = "/mnt/remote/"+deviceNumber+path+localPath;
     }
 
+#endif
 
-#if defined(__ANDROID__) || defined(Q_OS_IOS)
     QString cmp = QString::fromStdString(sMediaURL.c_str());
 
     if(iPK_MediaType==43){
@@ -438,19 +439,9 @@ void qMediaPlayer::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaP
         qWarning() << "Sending plugin modified original MRL==>" << externalPlayerPath;
         setCurrentMediaUrl(externalPlayerPath);
     }
-#else
-    qWarning() << "Sending string URL::" << finishedPath;
 
-    setCurrentMediaUrl(finishedPath);
     //EVENT_Playback_Started(sMediaURL, i_StreamId, "Stored Media", "", "");
     emit startPlayback();
-
-#endif
-    emit startPlayback();
-#ifndef __ANDROID__
-    //  pthread_yield();
-#endif
-
     sCMD_Result="OK";
 }
 
@@ -1218,8 +1209,7 @@ void qMediaPlayer::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sM
             finishedPath = "http://"+QString::fromStdString(sMediaURL);
         }
     }
-    else
-    {
+    else {
         //begin ugly bit to determine the storage device for later use. its not passed explicitly, so i use a regex to determine it for media files
         QRegExp deviceNo("(\\\[\\\d+\\\]/)");
         int l = deviceNo.indexIn(QString::fromStdString(sMediaURL));
@@ -1272,13 +1262,9 @@ void qMediaPlayer::CMD_Start_Streaming(int iPK_MediaType,int iStreamID,string sM
     setCurrentMediaUrl(finishedPath);
     //EVENT_Playback_Started(sMediaURL, i_StreamId, "Stored Media", "", "");
     emit startPlayback();
-
 #endif
+
     emit startPlayback();
-#ifndef __ANDROID__
-    //  pthread_yield();
-#endif
-
     sCMD_Result="OK";
 }
 
@@ -1877,9 +1863,7 @@ void qMediaPlayer::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *p
 #endif
 #endif
 
-#if defined(ANDROID) || defined(Q_OS_IOS)
     pluginVolumeUp();
-#endif
 
     qWarning("Set audio level Up.");
     //  emit volumeDown(iRepeat_Command);
@@ -1910,12 +1894,13 @@ void qMediaPlayer::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message 
 #endif
 #endif
 
-#if defined(ANDROID) || defined(Q_OS_IOS)
+
     pluginVolumeDown();
-#endif
+
 
     sCMD_Result = "OK";
     qWarning("Set audio level down.");
+    sCMD_Result="OK";
 
 }
 //<-dceag-c90-e->
@@ -1956,14 +1941,16 @@ void qMediaPlayer::CMD_Set_Level(string sLevel,string &sCMD_Result,Message *pMes
 
 #endif
 #endif
-    sCMD_Result="OK-No level change";
-
+    emit audioLevelChanged(t);
+    sCMD_Result="OK";
 }
 //<-dceag-c184-e->
 
 
-void qMediaPlayer::updateMetadata()
+void qMediaPlayer::updateMetadata(QString mediaTitle, QString mediaSubtitle, QString name, int screen)
 {
     DeviceData_Base *p = this->m_pData->m_pDevice_Core->m_AllDevices.m_mapDeviceData_Base_FindFirstOfTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
-    CMD_Set_Now_Playing setNowPlaying(this->m_dwPK_Device,p->m_dwPK_Device,"54,4962,47,244,224,230","FOO","BAR",this->i_pkMediaType,this->i_StreamId,0,"NAME",QString::number(this->m_dwPK_Device).toStdString().c_str(), false);
+    QString whatisthis(",4962,47,244,224,230");
+    whatisthis.prepend(QString::number(screen));
+    CMD_Set_Now_Playing setNowPlaying(this->m_dwPK_Device,p->m_dwPK_Device, whatisthis.toStdString() ,mediaTitle.toStdString(),mediaSubtitle.toStdString(),this->i_pkMediaType,this->i_StreamId,0,name.toStdString(),QString::number(this->m_dwPK_Device).toStdString().c_str(), false);
 }
