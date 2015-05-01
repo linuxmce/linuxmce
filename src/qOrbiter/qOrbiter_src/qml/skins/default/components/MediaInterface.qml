@@ -18,10 +18,10 @@ Item{
         id:lmceData
         onMediaPlayingChanged: {
             if(!mediaPlaying && qmlPlayer.source!==""){
-                qmlPlayer.stop()               
+                qmlPlayer.stop()
                 videoPlane.visible = false
             } else {
-
+                videoPlane.visible=true
             }
 
         }
@@ -140,17 +140,17 @@ Item{
         onHasVideoChanged: {
 
             if(hasVideo){
-               videoPlane.visible=true
+                videoPlane.visible=true
             } else {
-              videoPlane.visible=false
+                videoPlane.visible=false
             }
         }
     }
 
     VideoOutput{
         id:videoPlane
-        height: parent.height
-        width: parent.width
+        height: manager.appHeight
+        width: manager.appWidth
         anchors.centerIn: parent
         source:qmlPlayer
     }
