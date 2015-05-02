@@ -56,6 +56,7 @@ Item {
     }
 
     property string screen:"screenum ipsum"
+    readonly property bool styledScreen:true
     property string navigation:"ScenarioComponent.qml"
     property bool keepHeader:true
     property bool keepFooter:false;

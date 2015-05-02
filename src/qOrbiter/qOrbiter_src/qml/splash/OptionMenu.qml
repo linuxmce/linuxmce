@@ -84,9 +84,9 @@ Item{
                 topMargin: scaleY(1.8)
             }
             Switch {
-                switchLabel: qsTr("Use Local Skins?")
+                switchLabel: qsTr("Use Network Skins?")
                 enabled: manager.useLocalSkins
-                onTriggered: manager.setUseLocalSkins(!manager.useLocalSkins)
+                onTriggered: manager.setUseLocalSkins(!manager.useNetworkSkins)
             }
             Item{
                 width: parent.width

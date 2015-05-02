@@ -69,7 +69,7 @@ StyledScreen {
             model:mediatypefilter
             cellWidth:manager.isProfile ? Style.scaleX(30) : Style.scaleX(20)
             cellHeight:manager.isProfile ? Style.scaleY(15) : Style.scaleY(22)
-            cacheBuffer:50
+            cacheBuffer:25
             delegate:
                 LargeStyledButton{
                 height:typeSelection.cellHeight -5

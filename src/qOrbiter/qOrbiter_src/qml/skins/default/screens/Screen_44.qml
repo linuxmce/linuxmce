@@ -109,6 +109,13 @@ StyledScreen {
                     }
                 }
                 StyledButton{
+                    buttonText: qsTr("Clear Settings")
+                    onActivated:{
+                       settings.destroySettingsData()
+                    }
+                }
+
+                StyledButton{
                     id:exitBtn
 
                     buttonText: qsTr("Exit Application")
@@ -208,10 +215,14 @@ StyledScreen {
                         text:qsTr("Width: %1 (px)").arg(screenInfo.primaryScreen.width)
                     }
                     StyledText{
-
                         fontSize: Style.appFontSize_list
                         anchors.horizontalCenter: parent.horizontalCenter
                         text:qsTr("Height: %1 (px)").arg(screenInfo.primaryScreen.height)
+                    }
+                    StyledText{
+                        fontSize: Style.appFontSize_list
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text:qsTr("Pixel Ratio: %1").arg(screenInfo.primaryScreen.pixelRatio)
                     }
                 }
             }

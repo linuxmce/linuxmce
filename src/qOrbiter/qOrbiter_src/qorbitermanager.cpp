@@ -142,11 +142,11 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,SettingInt
     gamesDefaultSort = "49"; i_currentFloorplanType = 0; backwards = false;  screenSaverTimeout = 60; screenPowerOffTimeout = 60;
 
 #ifndef __ANDROID__
-    b_localLoading = false; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
+    b_localLoading = true; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
 #elif defined QT5 && ANDROID || defined(ANDROID)
     androidHelper = jniHelper;
     //   qorbiterUIwin->rootContext()->setContextProperty("android",androidHelper);
-    b_localLoading = false;
+    b_localLoading = true;
     if(androidHelper->updateExternalStorageLocation()){
         androidHelper->updateBuildInformation();
     }
@@ -289,7 +289,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
         sRouterIP = m_ipAddress.toStdString();
     }
     QObject::connect(this,SIGNAL(screenChange(QString)), this, SLOT(gotoQScreen(QString)));
-    if(!mb_useLocalSkins){
+    if(mb_useNetworkSkins){
         setupNetworkSkins();
     } else {
 
@@ -710,7 +710,7 @@ void qorbiterManager::processConfig(QNetworkReply *config)
     setDceResponse(" Remote Config Complete");
     emit registerOrbiter((userList->find(sPK_User)->data(4).toInt()), QString::number(iea_area), iFK_Room );
 
-    if(!alreadyConfigured && !mb_useLocalSkins){
+    if(!alreadyConfigured && mb_useNetworkSkins){
         setOrbiterStatus(true);
     }
 
@@ -744,7 +744,7 @@ void qorbiterManager::swapSkins(QString incSkin)
 {
     emit skinMessage("swapping skin to::" + incSkin);
 
-    if(mb_useLocalSkins){
+    if(!mb_useNetworkSkins){
 
         incSkin="default";
         currentSkin=incSkin;
@@ -2294,7 +2294,7 @@ void qorbiterManager::processError(QString msg)
 void qorbiterManager::setActiveSkin(QString name){
 
     qDebug() <<"qOrbiterManager::setActiveSkin("<<name<<")";
-    if(mb_useLocalSkins){
+    if(!mb_useNetworkSkins){
         swapSkins(name);
         return;
     }
@@ -2584,9 +2584,9 @@ bool qorbiterManager::restoreSettings()
     int tId= settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Device_ID).toInt();
     qDebug() << Q_FUNC_INFO << "Settings device id" << tId;
     QString trouter = settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router).toString();
-    mb_useLocalSkins = settingsInterface->getOption(SettingsInterfaceType::Settings_UI, SettingsKeyType::Setting_Ui_NetworkLoading).toBool();
+    mb_useNetworkSkins = settingsInterface->getOption(SettingsInterfaceType::Settings_UI, SettingsKeyType::Setting_Ui_NetworkLoading).toBool();
    /*Fix Me! */ currentSkin="default";
-    qDebug() << "Using local skins?" << mb_useLocalSkins;
+    qDebug() << "Using network skins?" << mb_useNetworkSkins;
     if(tId && !trouter.isEmpty()){
         qDebug() << Q_FUNC_INFO << "Read Device Number";
         setDeviceNumber(tId);

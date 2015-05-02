@@ -383,7 +383,7 @@ int main(int argc, char* argv[])
         qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
         qmlRegisterType<MediaTypesHelper>("org.linuxmce.enums",1,0,"MediaTypes");
         //qmlRegisterSingletonType<MediaTypesHelper>("media.enums",1,0,"MediaTypesHelper", "Data Only for linuxMCE MediaTypes");
-      qmlRegisterSingletonType<MediaTypesHelper>("enums.media", 1, 0, "MediaHelper", MediaTypesHelper::mediatypes_provider);
+        qmlRegisterSingletonType<MediaTypesHelper>("enums.media", 1, 0, "MediaHelper", MediaTypesHelper::mediatypes_provider);
         qmlRegisterType<SubTypesHelper>("org.linuxmce.enums",1,0,"MediaSubtypes");
         qmlRegisterType<AttributeTypeHelper>("org.linuxmce.enums",1,0,"Attributes");
         qmlRegisterType<HostSystemData>("org.linuxmce.enums",1,0,"HostDevices");

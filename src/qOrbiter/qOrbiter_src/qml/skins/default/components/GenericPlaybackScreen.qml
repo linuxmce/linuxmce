@@ -34,7 +34,6 @@ Panel{
         ControlDiamond{
             id:control_diamond
             visible:false
-
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
         }
@@ -165,15 +164,29 @@ Panel{
                     target: arrows
                     visible:false
                 }
+                PropertyChanges{
+                    target:directionDiamond
+                    visible:false
+                }
+                PropertyChanges{
+                    target: control_diamond
+                    visible:false
+                }
 
             },
             State{
                 name:"dvd"
             },
             State{
-                when:manager.i_current_mediaType==MediaTypes.LMCE_StreamedAudio
+                when:manager.i_current_mediaType== MediaTypes.LMCE_StreamedAudio || manager.i_current_mediaType == MediaTypes.NP_InternetMedia
                 name:"streamingaudio"
                 extend: "networkmedia"
+
+                PropertyChanges {
+                    target: transport_buttons
+                    visible:true
+                }
+
             },
             State{
                 name:"radio"
@@ -202,9 +215,11 @@ Panel{
 
                 PropertyChanges{
                     target: control_diamond
-                    visible:true
-                    height:manager.isProfile ? parent.height*.55 : parent.height *.75
-
+                    visible:false
+                }
+                PropertyChanges{
+                    target: directionDiamond
+                    visible:false
                 }
 
                 PropertyChanges{

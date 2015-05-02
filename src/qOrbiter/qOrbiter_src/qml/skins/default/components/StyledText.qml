@@ -11,7 +11,7 @@ Text {
     horizontalAlignment: Text.AlignHCenter
     id:labelelement
     text: textLabel
-    font.pointSize: fontSize
+    font.pixelSize: fontSize
     verticalAlignment:Text.AlignVCenter
    // font.family: appFont.name
     color:Style.apptext_color_active

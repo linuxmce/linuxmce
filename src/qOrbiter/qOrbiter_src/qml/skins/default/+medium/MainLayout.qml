@@ -121,7 +121,7 @@ Item {
                     margins: 5
                 }
                 buttonText: qsTr("Advanced Menu")
-                onActivated: manager.currentScreen = "Screen_44.qml"
+                onActivated: manager.currentScreen="Screen_44.qml"
             }
             StyledButton{
                 anchors{

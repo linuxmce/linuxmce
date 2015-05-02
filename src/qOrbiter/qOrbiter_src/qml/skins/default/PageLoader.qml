@@ -16,7 +16,7 @@ Loader {
     Connections{
         target:manager
         onScreenChange:{
-            console.log( manager.currentScreen)
+            console.log( "Manager screen::"+ manager.currentScreen)
         }
     }
 
@@ -29,7 +29,7 @@ Loader {
     }
     
     onNextScreenChanged: {
-        console.log("Loading next screen")
+        console.log("Loading next screen " +nextScreen)
         if(!nextScreen.match(".qml")){
             return
         } else {
@@ -38,7 +38,9 @@ Loader {
         console.log("current screen "+currentScreen)
         console.log("next screen "+ nextScreen)
 
-        if(currentScreen=="screens/"+nextScreen){
+        if(currentScreen==nextScreen){
+            console.log("duplicate screen error!")
+            nextScreen=manager.currentScreen
                 return;
         }
         
@@ -62,7 +64,7 @@ Loader {
     function startChange(){
         
         
-        if(pageLoader.item.screen){
+        if(pageLoader.item.styledScreen){
             console.log("pageloader::closing page "+ currentScreen)
             pageLoader.item.state="closing"
 
@@ -76,13 +78,14 @@ Loader {
     function loadNext(){
 
         if(nextScreen===""){
+            console.log("Next Screen error!")
             nextScreen="Screen_1.qml"
             return
         }
         
         console.log("pageloader--default::loading next screen::"+"screens/"+nextScreen)
         var path = manager.selectPath(Qt.resolvedUrl("screens/"+nextScreen))
-        console.log("pageloader--default::path" +Qt.resolvedUrl(path))
+        console.log("pageloader--default::path " +Qt.resolvedUrl(path))
         pageLoader.source=path
     }
     
@@ -100,11 +103,9 @@ Loader {
     }
     onStatusChanged:  if (pageLoader.status == Component.Ready)
                       {
-                          
-                          manager.setDceResponse("Command to change to:" + source+ " was successfull")                         
+                          manager.setDceResponse("Command to change to:" + source+ " was successfull")
                           currentScreen=manager.currentScreen
-                          manager.addScreenToHistory(currentScreen)
-                          
+                          manager.addScreenToHistory(currentScreen)                          
                           // contentItem=item.screen_root
                       }
                       else if (pageLoader.status == Component.Loading)

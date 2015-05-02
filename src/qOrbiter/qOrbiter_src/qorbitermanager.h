@@ -225,7 +225,7 @@ class qorbiterManager : public QObject
     Q_PROPERTY(bool bReload READ getReloadStatus NOTIFY bReloadChanged) /*! \brief if reload is reqested */
     Q_PROPERTY(bool homeNetwork WRITE setHomeNetwork READ getHomeNetwork NOTIFY homeNetworkChanged) /*! \brief if the device is on it's 'Home network' */
     Q_PROPERTY(int hostDevice READ getHostDevice WRITE setHostDevice NOTIFY hostDeviceChanged)
-    Q_PROPERTY(bool useLocalSkins READ useLocalSkins WRITE setUseLocalSkins NOTIFY useLocalSkinsChanged)
+    Q_PROPERTY(bool useNetworkSkins READ useNetworkSkins WRITE setUseNetworkSkins NOTIFY useNetworkSkinsChanged)
 
     /*!
      * \warning enablescreensavermode - currently unused, should be built anyways
@@ -559,7 +559,7 @@ Param 10 - pk_attribute
     SettingInterface *settingsInterface;
 signals:
 
-    void useLocalSkinsChanged();
+    void useNetworkSkinsChanged();
     void skinSelectorChanged();
     void hostDeviceChanged();
 
@@ -1436,16 +1436,16 @@ public slots:
     void setConfigSkin(QString skin){currentSkin = skin; emit currentSkinChanged(); }
     Q_INVOKABLE QString dumpKey(int key){QKeySequence seq(key) ; return seq.toString(); }
 
-    bool useLocalSkins(){return mb_useLocalSkins;}
+    bool useNetworkSkins(){return mb_useNetworkSkins;}
 
-    void setUseLocalSkins(bool b){
-        if(b==mb_useLocalSkins)return; mb_useLocalSkins=b;setupLocalSkins();
+    void setUseNetworkSkins(bool b){
+        if(b==mb_useNetworkSkins)return; mb_useNetworkSkins=b;setupLocalSkins();
         settingsInterface->setOption(SettingsInterfaceType::Settings_UI, SettingsKeyType::Setting_Ui_NetworkLoading, QVariant(b));
-        emit useLocalSkinsChanged();
+        emit useNetworkSkinsChanged();
     }
 
     void changeSkinBase(){
-        if(mb_useLocalSkins){
+        if(!mb_useNetworkSkins){
 
         }
     }
@@ -1837,7 +1837,7 @@ private slots:
     void delayedReloadQml() { QTimer *delayTimer= new QTimer(this); delayTimer->setInterval(500); delayTimer->setSingleShot(true); connect(delayTimer, SIGNAL(timeout()), this, SLOT(reloadQml())); delayTimer->start();}
     void reloadQml(){
 
-        if(m_style && mb_useLocalSkins ){
+        if(m_style && !mb_useNetworkSkins ){
             qDebug() << Q_FUNC_INFO << "Deleting style";
             m_style->deleteLater();
         }
@@ -1922,7 +1922,7 @@ private:
 
     QTranslator translator;
 
-    bool mb_useLocalSkins;
+    bool mb_useNetworkSkins;
 
     QString m_remoteQmlPath;
     QString m_localQmlPath;

@@ -23,6 +23,7 @@ ScreenInfo::ScreenInfo(QObject *parent) :
         connect(screen, SIGNAL(geometryChanged(QRect)), newScreen, SLOT(setScreenGeometry(QRect)));
         m_screenList.insert(screen->name(), newScreen);
         qDebug() << Q_FUNC_INFO << " Processed screen" << newScreen->screenName();
+        newScreen->setPixelRatio();
     }
 
     if(!m_screenList.isEmpty()){

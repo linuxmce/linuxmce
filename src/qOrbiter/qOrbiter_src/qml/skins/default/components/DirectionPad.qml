@@ -12,6 +12,7 @@ Item{
 
     Rectangle{
         id:centerOk
+
         anchors.centerIn: parent
         height: parent.height/3
         width: height

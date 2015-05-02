@@ -14,7 +14,7 @@ public:
     ScreenData() {}
     enum PixelDensityScale{
         PixelDensity_LOW=120,
-        PixelDensity_MEDIUM=160,
+        PixelDensity_MEDIUM=160, // baseline dpi
         PixelDensity_TV=213,
         PixelDensity_HDPI=240,
         PixelDensity_XHDPI=320,
@@ -67,6 +67,7 @@ class ScreenObject : public QObject
     Q_PROPERTY(double diagonalInches READ diagonalInches() NOTIFY diagonalSizeChanged)
     Q_PROPERTY(int width READ width() NOTIFY sizeChanged)
     Q_PROPERTY(int height READ height() NOTIFY sizeChanged)
+    Q_PROPERTY(double pixelRatio READ pixelRatio NOTIFY pixelRatioChanged)
 
 public:
     ScreenObject():
@@ -154,6 +155,7 @@ public:
 
     virtual ~ScreenObject() {}
 
+    double pixelRatio(){return m_pixelRatio;}
     double diagonalSize(){return m_diagonalSize;}
     double logicalDpi(){return m_logicalDpi;}
     double physicalDpi(){return m_phisicalDpi;}
@@ -241,6 +243,8 @@ public slots:
         }
     }
 
+    void setPixelRatio(){m_pixelRatio =  ( (double) m_phisicalDpi / m_logicalDpi) ; emit pixelRatioChanged(); qDebug() << Q_FUNC_INFO << m_pixelRatio;}
+
 
 signals:
     void logicalDpiChanged();
@@ -259,6 +263,7 @@ signals:
     void screenSizeChanged();
     void pixelDensityChanged();
     void diagonalSizeChanged();
+    void pixelRatioChanged();
 
 private slots:
     void setDiagonalSize(double dg){m_diagonalSize=dg; emit diagonalSizeChanged(); }
@@ -268,6 +273,7 @@ private slots:
     void setOrientation(Qt::ScreenOrientation e) {m_orientation = e; emit orientationChanged();}
     void setRefreshRate(qreal r) {m_refreshRate = r; emit refreshRateChanged();}
     void setStringDeviceSize(QString s){qs_deviceSize = s; }
+
 private:
     /** Current Screen */
     double m_logicalDpi;
@@ -287,6 +293,8 @@ private:
     int m_logicalDpiX;
     int m_logicalDpiY;
     double m_diagonalSize;
+    double m_pixelRatio;
+
     ScreenData::DeviceRange m_deviceSize;
     ScreenData::DeviceSizes m_devicePixelSize;
     ScreenData::PixelDensityScale m_pixelScale;

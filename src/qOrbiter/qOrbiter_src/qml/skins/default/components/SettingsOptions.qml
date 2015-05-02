@@ -32,7 +32,7 @@ Item{
                 cat:SettingsType.Settings_UI
                 val:SettingsKey.Setting_Ui_NetworkLoading
                 useSwitch: true
-                settingName: qsTr("Using Local Skins")
+                settingName: qsTr("Using Network Skins")
 
             }
             SettingsOption {
