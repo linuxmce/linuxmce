@@ -51,22 +51,16 @@ Item {
         Text {
             id: welcome
             text: qsTr(" Welcome to LinuxMCE")
-            font.pointSize: Style.appFontSize_header
+            font.pixelSize: Style.appFontSize_header
             anchors.left:parent.left
             anchors.horizontalCenter: parent.horizontalCenter
             color:"white"
         }
-        Text {
-            id: welcome_select
-            text: qsTr("Please Choose an orbiter")
-            font.pointSize: Style.appFontSize_description
-            anchors.left: welcome.right
-            color:"white"
-        }
+
         Text {
             id: ui_name
             text: "ipadUI"
-            font.pointSize: Style.appFontSize_description
+            font.pixelSize: Style.appFontSize_description
            // font.weight: Font.Light
             anchors.right: optionIcon.left
             anchors.verticalCenter: optionIcon.verticalCenter
@@ -87,6 +81,14 @@ Item {
         }
 
     }
+    Text {
+        id: welcome_select
+        text: qsTr("Please Choose an orbiter")
+        font.pixelSize: Style.appFontSize_description
+        anchors.left: parent.left
+        anchors.top: topContainer.bottom
+        color:"white"
+    }
 
 //    StatusRow {
 //        id: statusRow
@@ -105,10 +107,10 @@ Item {
         id: connectionBox
     }
 
-
-
     ExistingOrbiters {
         id:existing_orbiters
+        anchors.top: welcome_select.bottom
+        anchors.bottom: newOrbiterButton.top
     }
 
     NewOrbiterButton {
