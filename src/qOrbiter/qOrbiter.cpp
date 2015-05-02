@@ -3641,13 +3641,7 @@ void DCE::qOrbiter::populateAdditionalMedia() //additional media grid that popul
             if(!b_cancelRequest && requestMore && !gridPaused){
                 emit addItem(new gridItem(fk_file, cellTitle, filePath.remove("/home/mediapics/"), (index+1), this));
                 QApplication::processEvents(QEventLoop::AllEvents);
-#ifdef RPI
-                msleep(5);
-#elif ANDROID
-                msleep(20);
-#else
-                //                msleep(5);
-#endif
+
             }
             else if(!requestMore ){
                 logMediaMessage("Datagrid Pausing");

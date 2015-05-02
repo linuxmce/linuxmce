@@ -17,7 +17,7 @@ Item{
         id: skinsLabel
         text: switchLabel
         color:Style.apptext_color_active
-        font.pointSize: Style.appFontSize_list
+        font.pixelSize: Style.appFontSize_list
         anchors{
             verticalCenter: parent.verticalCenter
             leftMargin: Style.listViewMargin
@@ -30,8 +30,8 @@ Item{
         id:outerRect
         radius: height
         color: "white"
-        width: parent.width*.15
-        height: Style.appButtonHeight
+        width: parent.width *.30
+        height: parent.height/2
 
         anchors{
             right:parent.right

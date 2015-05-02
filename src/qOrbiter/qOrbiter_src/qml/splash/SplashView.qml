@@ -3,7 +3,7 @@ import QtQuick 2.2
 import QtGraphicalEffects 1.0
 import "."
 Item {
-   anchors.fill: parent
+    anchors.fill: parent
     id:splashPage
 
     signal setupStart(string x, string y)
@@ -43,31 +43,17 @@ Item {
 
         Rectangle{
             id:welcome_container
-            color:Style.appcolor_background
+            color:theme.appcolor_background
             anchors.fill: parent
             opacity: .15
         }
 
-        Text {
-            id: welcome
-            text: qsTr(" Welcome to LinuxMCE")          
-            font.pointSize: Style.appFontSize_header
-            anchors.left:parent.left
-            anchors.horizontalCenter: parent.horizontalCenter
-            color:"white"
-        }
-        Text {
-            id: welcome_select
-            text: qsTr("Please Choose an orbiter")
-            font.pointSize: Style.appFontSize_description           
-            anchors.left: welcome.right
-            color:"white"
-        }
+
         Text {
             id: ui_name
             text: "defaultUI"
-            font.pointSize: Style.appFontSize_description
-           // font.weight: Font.Light
+            font.pixelSize: theme.appFontSize_description
+            font.weight: Font.Light
             anchors.right: optionIcon.left
             anchors.verticalCenter: optionIcon.verticalCenter
             color:"white"
@@ -88,9 +74,32 @@ Item {
 
     }
 
-//    StatusRow {
-//        id: statusRow
-//    }
+    //    StatusRow {
+    //        id: statusRow
+    //    }
+
+    Text {
+        id: welcome
+        text: qsTr(" Welcome to LinuxMCE")
+        font.weight: Font.Light
+        font.pixelSize: theme.appFontSize_header
+        anchors{
+            top:topContainer.bottom
+            horizontalCenter: parent.horizontalCenter
+        }
+        color:"white"
+    }
+    Text {
+        id: welcome_select
+        text: qsTr("Please Choose an orbiter")
+        font.pixelSize: theme.appFontSize_description
+        font.weight: Font.Light
+        anchors{
+            top:welcome.bottom
+            horizontalCenter: welcome.horizontalCenter
+        }
+        color:"white"
+    }
 
 
 

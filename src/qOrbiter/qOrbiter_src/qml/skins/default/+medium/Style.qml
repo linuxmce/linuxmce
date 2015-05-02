@@ -55,10 +55,12 @@ QtObject{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:14*screenInfo.primaryScreen.pixelRatio//manager.isProfile ? scaleY(2) : scaleY(4)
-    readonly property int appFontSize_header:20*screenInfo.primaryScreen.pixelRatio//scaleY(5)
-    readonly property int appFontSize_description:16*screenInfo.primaryScreen.pixelRatio//manager.isProfile ? scaleY(2) : scaleY(3.5)
-    readonly property int appFontSize_title:22*screenInfo.primaryScreen.pixelRatio//manager.isProfile ? scaleY(3) :scaleY(4)
+
+    readonly property int appFontSize_list:14*screenInfo.primaryScreen.pixelRatio
+    readonly property int appFontSize_header:32*screenInfo.primaryScreen.pixelRatio
+    readonly property int appFontSize_description:16*screenInfo.primaryScreen.pixelRatio
+    readonly property int appFontSize_title:22*screenInfo.primaryScreen.pixelRatio
+
     property int fontSize_small:14*screenInfo.primaryScreen.pixelRatio
     property int fontSize_medium:16*screenInfo.primaryScreen.pixelRatio
     property int fontSize_large:22*screenInfo.primaryScreen.pixelRatio

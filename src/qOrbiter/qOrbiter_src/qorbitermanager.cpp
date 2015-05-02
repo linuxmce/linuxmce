@@ -300,7 +300,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 
 void qorbiterManager::initiateRestart(){
     emit restartOrbiter();
-    screenChange("Screen_1.qml");
+  //  screenChange("Screen_1.qml");
 }
 
 //this functions purpose is to change the UI to the new skin pointed to. It will evolve to encompass orbiter regen to some extent
@@ -2274,7 +2274,7 @@ void qorbiterManager::startOrbiter()
         qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
         //   QApplication::processEvents(QEventLoop::AllEvents);
-        setCurrentScreen("Screen_1.qml");
+     //  setCurrentScreen("Screen_1.qml");
         // QApplication::processEvents(QEventLoop::AllEvents);
     }
     else

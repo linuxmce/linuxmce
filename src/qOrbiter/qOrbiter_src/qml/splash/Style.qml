@@ -1,6 +1,5 @@
 import QtQuick 2.2
-pragma Singleton
-//this is a qml singleton example to use the style object as a singleton, thus allowing one to override the style based on the selectors
+
 Item{
     id:defaultSplashStyle
 
@@ -11,6 +10,8 @@ Item{
     function scaleY(y){
         return y/100*manager.appHeight
     }
+
+    readonly property double dpRatio:screenInfo.primaryScreen.pixelRatio
 
     /* Transitions */
     readonly property int transition_animationTime:350
@@ -37,10 +38,18 @@ Item{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:scaleY(2)
-    readonly property int appFontSize_header:scaleY(5)
-    readonly property int appFontSize_description:scaleY(3)
-    readonly property int appFontSize_title:scaleY(4)
+    readonly property int appFontSize_list:manager.isProfile ? scaleY(2) *dpRatio : scaleY(3)*dpRatio
+    readonly property int appFontSize_header:manager.isProfile ? scaleY(5) *dpRatio : scaleY(6)*dpRatio
+    readonly property int appFontSize_description:manager.isProfile ? scaleY(2) *dpRatio : scaleY(3)*dpRatio
+    readonly property int appFontSize_title:manager.isProfile ? scaleY(2.5) *dpRatio : scaleY(3.5)*dpRatio
+
+    property int fontSize_small:manager.isProfile ? scaleY(1.7) *dpRatio : scaleY(1.8)*dpRatio
+    property int fontSize_medium:manager.isProfile ? scaleY(1.5) *dpRatio : scaleY(2)*dpRatio
+    property int fontSize_large:22*screenInfo.primaryScreen.pixelRatio
+
+    property int fontSize_listItem:14*screenInfo.primaryScreen.pixelRatio
+    property int fontSize_listTitle:20*screenInfo.primaryScreen.pixelRatio
+    property int fontSize_listAccent:12*screenInfo.primaryScreen.pixelRatio
 
     /* Application Navigation Bars */
     readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(13) : scaleY(15)
@@ -49,7 +58,7 @@ Item{
     /* Application Menu Panels */
     readonly property int appMenuPanel_height:scaleY(90)
     readonly property int appMenuPanel_widthSmall:scaleX(25)
-    readonly property int appMenuPanel_widthMedium:scaleX(45)
+    readonly property int appMenuPanel_widthMedium:manager.isProfile ? scaleX(65):scaleX(55)
     readonly property int appMenuPanel_widthLarge:scaleX(85)
 
     /* Application List Views */

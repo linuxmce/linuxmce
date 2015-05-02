@@ -1,11 +1,13 @@
 import QtQuick 2.2
+import org.linuxmce.screeninfo 1.0
+
 Item{
     id: connectionBox
     anchors.verticalCenter: parent.verticalCenter
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.verticalCenterOffset:10
     width: scaleX(65)
-    height: scaleY(20)
+    height: scaleY(45)
     Rectangle {
         anchors.fill: connectionBox
         radius: 7
@@ -28,93 +30,114 @@ Item{
     Text {
         id: connectionlabel
         text: qsTr("Set Connection Details")
-        font.pointSize: 16
-        font.bold: false
+        font.pixelSize: theme.appFontSize_header
+        font.weight: Font.Light
+        color:theme.apptext_color_active
         anchors.top: connectionBox.top
         anchors.horizontalCenter: parent.horizontalCenter
         font.family: myFont.name
     }
 
-    Row{
+    Item{
         id:connectionVars
-            anchors.centerIn: connectionBox
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: connectionlabel.bottom
+        width: parent.width *.85
+        height: parent.height *.65
+
+        Text {
+            id:host_label
+            text: qsTr("Host:")
+            font.pixelSize: theme.appFontSize_title
+            color:theme.apptext_color_active
+            font.family: myFont.name
+            font.weight: Font.Light
             anchors.verticalCenter: parent.verticalCenter
-            spacing: 10
-            Text {
-                text: qsTr("Host:")
-                font.pointSize: 12
-                font.family: myFont.name
-                anchors.verticalCenter: parent.verticalCenter
-            }
+            anchors. left:parent.left
+        }
 
-            TextInput {
-                id: routerip
-                width: 80
-                color: "#030000"
-                text: window.router
-                font.pointSize: 12
-                font.family: myFont.name
+        Rectangle{
+            anchors.fill: routerip
+        }
 
-                //  onTextChanged: setRouterIp(routerip.text)
-
-                anchors.verticalCenter: parent.verticalCenter
-
-            }
-
-            TextInput {
-                id: ext_routerip
-                width: 80
-                text: extip
-                font.pointSize: 12
-                font.family: myFont.name
-                //  onTextChanged: setRouterIp(routerip.text)
-
-                anchors.verticalCenter: parent.verticalCenter
-                visible: false
-            }
-
-            Text {
-                text: qsTr("Device:")
-                font.pointSize: 12
-                font.family: myFont.name
-                anchors.verticalCenter: parent.verticalCenter
-            }
-            TextInput {
-                id: devicenumber
-                width: scaleX(10)
-                text: window.deviceno
-                font.family: myFont.name
-                font.pointSize: 12
-                //onTextChanged: setDeviceNo(devicenumber.text)
-
-                anchors.verticalCenter: parent.verticalCenter
+        TextInput {
+            id: routerip
+            width: scaleX(17) * theme.dpRatio
+            color: "#030000"
+            clip: true
+            text: window.router
+            font.pixelSize:theme.appFontSize_list
+            font.family: myFont.name
+            anchors{
+                top:host_label.bottom
+                left: host_label.left
             }
         }
 
+        TextInput {
+            id: ext_routerip
+            width: 80
+            text: extip
+            font.pixelSize: theme.appFontSize_list
+            font.family: myFont.name
+            //  onTextChanged: setRouterIp(routerip.text)
+            color:theme.apptext_color_active
+            anchors.verticalCenter: parent.verticalCenter
+            visible: false
+        }
+
+        Text {
+            id:device_label
+            text: qsTr("Device:")
+            color:theme.apptext_color_active
+            font.pixelSize: theme.appFontSize_title
+            font.family: myFont.name
+            anchors{
+                right:parent.right
+                verticalCenter: parent.verticalCenter
+            }
+        }
+        TextInput {
+            id: devicenumber
+            width: scaleX(10)
+            color:theme.apptext_color_active
+            text: window.deviceno
+            font.family: myFont.name
+            font.pixelSize: theme.appFontSize_list
+            anchors{
+                right:device_label.right
+                top:device_label.bottom
+            }
+        }
+    }
+
     Row{
         id:goBox
+        anchors.top: connectionVars.bottom
+        anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: connectionBox.bottom
-        anchors.bottomMargin: 15
+        width: parent.width *.65
         spacing: scaleX(15)
         Rectangle {
             id: connectbutton
-            height: scaleY(2)
-            width: scaleX(10)
-            color:"red"
+            height: theme.appButtonHeight*theme.dpRatio
+            width: theme.appButtonWidth*theme.dpRatio
+            radius:height
+            color:theme.appbutton_confirm_color
 
             Text {
                 id: name
                 anchors.centerIn: parent
-                anchors.fill: parent
+
                 text: qsTr("Go!")
-                font.pointSize: 12
+                font.pixelSize: theme.appFontSize_list
                 verticalAlignment: Text.AlignTop
                 font.bold: true
                 font.family: myFont.name
+                color:theme.apptext_color_active
             }
 
-            radius:  5
+
             MouseArea{
                 hoverEnabled: true
                 onEntered: parent.color="green"
@@ -127,22 +150,25 @@ Item{
 
         Rectangle {
             id: exitbutton
-            height: scaleY(3)
-            width: scaleX(6)
+            height: theme.appButtonHeight*screenInfo.primaryScreen.pixelRatio
+            width: theme.appButtonWidth*screenInfo.primaryScreen.pixelRatio
+            radius: height
+            color: "red"
 
             Text {
                 id: exitlabel
                 anchors.centerIn: parent
-                anchors.fill: parent
-                text: qsTr("Exit")
-                font.pointSize: 11
+                color:theme.apptext_color_active
+
+                text: qsTr("Exit!")
+                font.pixelSize: theme.appFontSize_list
                 font.family: myFont.name
             }
-            radius:  4
+
             MouseArea{
                 anchors.fill: parent
                 onClicked: manager.closeOrbiter()
-                anchors.verticalCenter: parent.verticalCenter
+
             }
         }
     }

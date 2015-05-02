@@ -20,7 +20,7 @@ Item{
     Text {
         id: newOrbiterLabel
         text: qsTr("Would you like to create a new orbiter?", "Create a new orbiter.")
-        font.pointSize: Style.appFontSize_list
+        font.pixelSize: theme.appFontSize_list
         anchors.centerIn: parent
         width: parent.width*.85
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -58,7 +58,7 @@ Item{
             name: "showing"
             PropertyChanges {
                 target: newOrbiterButton
-                height:Style.appNavigation_panelHeight
+                height:theme.appNavigation_panelHeight
                 opacity:1
             }
 

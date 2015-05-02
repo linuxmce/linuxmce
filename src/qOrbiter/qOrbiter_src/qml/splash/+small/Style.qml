@@ -38,10 +38,18 @@ Item{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:manager.isProfile ? scaleY(2.0) : scaleY(4.5)
-     property int appFontSize_header:manager.isProfile ? scaleY(2.0) : scaleY(2.0)
-     property int appFontSize_description:manager.isProfile ? scaleY(1.5) : scaleY(2.0)
-     property int appFontSize_title:manager.isProfile ? scaleY(4.0) : scaleY(1.5)
+    readonly property int appFontSize_list:14*screenInfo.primaryScreen.pixelRatio
+    readonly property int appFontSize_header:20*screenInfo.primaryScreen.pixelRatio
+    readonly property int appFontSize_description:16*screenInfo.primaryScreen.pixelRatio
+    readonly property int appFontSize_title:22*screenInfo.primaryScreen.pixelRatio
+
+    property int fontSize_small:14*screenInfo.primaryScreen.pixelRatio
+    property int fontSize_medium:16*screenInfo.primaryScreen.pixelRatio
+    property int fontSize_large:22*screenInfo.primaryScreen.pixelRatio
+
+    property int fontSize_listItem:14*screenInfo.primaryScreen.pixelRatio
+    property int fontSize_listTitle:20*screenInfo.primaryScreen.pixelRatio
+    property int fontSize_listAccent:12*screenInfo.primaryScreen.pixelRatio
 
 
     /* Application Navigation bars */

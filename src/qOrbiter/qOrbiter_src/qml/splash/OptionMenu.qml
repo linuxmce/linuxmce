@@ -6,7 +6,7 @@ Item{
     anchors.fill: parent
     property string title:qsTr("Options")
     Component.onCompleted: state="switch"
-    property int innerBoxWidth:Style.appMenuPanel_widthMedium
+    property int innerBoxWidth:theme.appMenuPanel_widthMedium
     property int innerBoxHeight:scaleY(53)
     ListModel{
         id:languages
@@ -39,7 +39,7 @@ Item{
         clip:true
         Rectangle{
             anchors.fill: parent
-            color: Style.appcolor_background
+            color: theme.appcolor_background
         }
 
         Text{
@@ -52,7 +52,7 @@ Item{
             }
             text:title
             font.weight: Font.Light
-            font.pointSize: Style.appFontSize_title
+            font.pixelSize: theme.appFontSize_title
         }
 
         LanguageList {
@@ -68,7 +68,7 @@ Item{
 
         Rectangle{
             anchors.fill:customList
-            color: Style.appcolor_background_list
+            color: theme.appcolor_background_list
             opacity:.85
 
         }
@@ -85,12 +85,12 @@ Item{
             }
             Switch {
                 switchLabel: qsTr("Use Network Skins?")
-                enabled: manager.useLocalSkins
-                onTriggered: manager.setUseLocalSkins(!manager.useNetworkSkins)
+                enabled: manager.useNetworkSkins
+                onTriggered: manager.setUseNetworkSkins(!manager.useNetworkSkins)
             }
             Item{
                 width: parent.width
-                height: Style.listViewItemHeight
+                height: theme.listViewItemHeight
                 Rectangle{
                     anchors.fill: parent
                     color:"black"
@@ -99,12 +99,12 @@ Item{
                 Text {
                     id: langlabel
                     text: qsTr("Language Selection")
-                    font.pointSize: Style.appFontSize_list
-                    color:Style.apptext_color_active
+                    font.pixelSize: theme.appFontSize_list
+                    color:theme.apptext_color_active
                     anchors{
                         verticalCenter: parent.verticalCenter
                         left:parent.left
-                        leftMargin: Style.listViewMargin
+                        leftMargin: theme.listViewMargin
                     }
                 }
 
@@ -128,7 +128,7 @@ Item{
 
             Item {
                 width: parent.width
-                height: Style.listViewItemHeight
+                height: theme.listViewItemHeight
                 Rectangle{
                     anchors.fill: parent
                     color:"black"
@@ -137,12 +137,12 @@ Item{
                 Text {
                     id: settingsLabel
                     text: qsTr("Clear Settings")
-                    font.pointSize: Style.appFontSize_list
-                    color:Style.apptext_color_active
+                    font.pixelSize: theme.appFontSize_list
+                    color:theme.apptext_color_active
                     anchors{
                         verticalCenter: parent.verticalCenter
                         left:parent.left
-                        leftMargin: Style.listViewMargin
+                        leftMargin: theme.listViewMargin
                     }
                 }
 
@@ -187,7 +187,7 @@ Item{
             from: "*"
             to: "*"
             AnchorAnimation{
-                duration: Style.transition_animationTime
+                duration: theme.transition_animationTime
                 easing.type: Easing.InCubic
             }
         }

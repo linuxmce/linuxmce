@@ -4,7 +4,7 @@ import "."
 Item{
     id:existing_orbiters
     height: scaleY(65)
-    width: Style.listViewWidth_large
+    width: theme.listViewWidth_large
     anchors.left: parent.right
     anchors.verticalCenter: parent.verticalCenter
     visible: true
@@ -17,7 +17,7 @@ Item{
             left:parent.left
             right:parent.right
         }
-        color:Style.appcolor_background
+        color:theme.appcolor_background
         height:scaleY(10)
         opacity:.65
     }
@@ -25,8 +25,8 @@ Item{
     Text{
         id:lbl
         text:qsTr("Existing Orbiters", "list of existing qorbiters")
-        font.pointSize: Style.appFontSize_list
-        color:Style.apptext_color_active
+        font.pixelSize: theme.appFontSize_list
+        color:theme.apptext_color_active
         anchors.centerIn: hdr
     }
     Image{
@@ -50,7 +50,7 @@ Item{
             right: parent.right
             bottom:parent.bottom
         }
-        color: Style.appcolor_background_list
+        color: theme.appcolor_background_list
     }
 
     ListView{
@@ -71,7 +71,7 @@ Item{
             Text {
                 id: dev_num
                 text: device
-                font.pointSize: Style.appFontSize_list
+                font.pixelSize: theme.appFontSize_list
                 font.weight: Font.Light
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 color:"white"
@@ -88,7 +88,7 @@ Item{
                 Text {
                     id: orbiter_label
                     text: qsTr("Orbiter: ")+ label
-                    font.pointSize: Style.appFontSize_list
+                    font.pixelSize: theme.appFontSize_list
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     anchors.horizontalCenter: parent.horizontalCenter
                     color: "white"
@@ -96,7 +96,7 @@ Item{
                 Text {
                     id: loc
                     text:qsTr("Location:")+ location
-                    font.pointSize: Style.appFontSize_list
+                    font.pixelSize: theme.appFontSize_list
                     font.weight: Font.Light
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     color:"white"

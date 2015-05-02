@@ -1,6 +1,5 @@
 import QtQuick 2.2
-pragma Singleton
-//this is a qml singleton example to use the style object as a singleton, thus allowing one to override the style based on the selectors
+
 Item{
     id:iosSplashStyle
 
@@ -36,10 +35,18 @@ Item{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:scaleY(2)
-    readonly property int appFontSize_header:scaleY(5)
-    readonly property int appFontSize_description:scaleY(3)
-    readonly property int appFontSize_title:scaleY(4)
+    readonly property int appFontSize_list:14*screenInfo.primaryScreen.pixelRatio
+    readonly property int appFontSize_header:20*screenInfo.primaryScreen.pixelRatio
+    readonly property int appFontSize_description:16*screenInfo.primaryScreen.pixelRatio
+    readonly property int appFontSize_title:22*screenInfo.primaryScreen.pixelRatio
+
+    property int fontSize_small:14*screenInfo.primaryScreen.pixelRatio
+    property int fontSize_medium:16*screenInfo.primaryScreen.pixelRatio
+    property int fontSize_large:22*screenInfo.primaryScreen.pixelRatio
+
+    property int fontSize_listItem:14*screenInfo.primaryScreen.pixelRatio
+    property int fontSize_listTitle:20*screenInfo.primaryScreen.pixelRatio
+    property int fontSize_listAccent:12*screenInfo.primaryScreen.pixelRatio
 
     /* Application Navigation Bars */
     readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(13) : scaleY(15)

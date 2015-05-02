@@ -159,5 +159,6 @@
         <file>qml/skins/default/components/MediaInterface.qml</file>
         <file>qml/skins/default/+large/MainLayout.qml</file>
         <file>qml/skins/default/+large/Style.qml</file>
+        <file>qml/skins/default/screens/Screen_17.qml</file>
     </qresource>
 </RCC>

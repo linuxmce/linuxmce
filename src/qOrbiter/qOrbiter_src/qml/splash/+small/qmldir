@@ -7,4 +7,4 @@ Splash                          Splash.qml
 SplashView                      SplashView.qml
 StatusRow                       StatusRow.qml
 OptionMenu                      OptionMenu.qml
-singleton Style         1.0     Style.qml
+Style         1.0     Style.qml
