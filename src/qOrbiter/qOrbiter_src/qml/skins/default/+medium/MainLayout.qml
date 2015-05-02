@@ -7,6 +7,8 @@ import "components"
 Item {
     id:layout
     anchors.fill: qmlRoot
+    property bool navigtionUp:true
+
     Connections{
         target: qmlRoot
         onScreenSaverActivated:{
@@ -26,8 +28,6 @@ Item {
     }
     property bool uiOn:true
     function raiseNavigation(raise){
-
-
         uiOn=raise;
     }
 

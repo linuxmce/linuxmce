@@ -52,22 +52,16 @@ Item {
         Text {
             id: welcome
             text: qsTr(" Welcome to LinuxMCE")
-            font.pointSize: theme.appFontSize_header
+            font.pixelSize: theme.appFontSize_header
             anchors.left:parent.left
             anchors.horizontalCenter: parent.horizontalCenter
             color:"white"
         }
-        Text {
-            id: welcome_select
-            text: qsTr("Please Choose an orbiter")
-            font.pointSize: theme.appFontSize_description
-            anchors.left: welcome.right
-            color:"white"
-        }
+
         Text {
             id: ui_name
             text: "smallUI"
-            font.pointSize: theme.appFontSize_description
+            font.pixelSize: theme.appFontSize_description
            // font.weight: Font.Light
             anchors.right: optionIcon.left
             anchors.verticalCenter: optionIcon.verticalCenter
@@ -87,6 +81,14 @@ Item {
             }
         }
 
+    }
+
+    Text {
+        id: welcome_select
+        text: qsTr("Please Choose an orbiter")
+        font.pixelSize: theme.appFontSize_description
+       anchors.top: topContainer.bottom
+        color:"white"
     }
 
 //    StatusRow {
@@ -111,6 +113,11 @@ Item {
     ExistingOrbiters {
         id:existing_orbiters
         width:parent.width
+        anchors{
+            top:welcome_select.bottom
+            bottom:newOrbiterButton.top
+        }
+
     }
 
     NewOrbiterButton {

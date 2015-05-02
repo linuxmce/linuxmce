@@ -44,9 +44,9 @@ Item{
     readonly property int appFontSize_description:10*dpRatio
     readonly property int appFontSize_title:16*dpRatio
 
-    property int fontSize_small:manager.isProfile ? scaleY(1.7) /dpRatio : scaleY(1.8)/dpRatio
-    property int fontSize_medium:manager.isProfile ? scaleY(1.5) /dpRatio : scaleY(2)/dpRatio
-    property int fontSize_large:manager.isProfile ? scaleY(3) /dpRatio : scaleY(2)/dpRatio
+    property int fontSize_small:appFontSize_list
+    property int fontSize_medium:appFontSize_description
+    property int fontSize_large:appFontSize_title
 
     property int fontSize_listItem:14*screenInfo.primaryScreen.pixelRatio
     property int fontSize_listTitle:20*screenInfo.primaryScreen.pixelRatio

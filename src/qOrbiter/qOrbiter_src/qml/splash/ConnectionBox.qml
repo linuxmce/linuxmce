@@ -32,6 +32,10 @@ Item{
         text: qsTr("Set Connection Details")
         font.pixelSize: theme.appFontSize_header
         font.weight: Font.Light
+        width:parent.width
+         horizontalAlignment: Text.AlignHCenter
+         verticalAlignment: Text.AlignVCenter
+        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         color:theme.apptext_color_active
         anchors.top: connectionBox.top
         anchors.horizontalCenter: parent.horizontalCenter

@@ -118,6 +118,8 @@ Item {
 
     ExistingOrbiters {
         id:existing_orbiters
+        anchors.top: welcome_select.bottom
+        anchors.bottom: newOrbiterButton.top
     }
 
     NewOrbiterButton {

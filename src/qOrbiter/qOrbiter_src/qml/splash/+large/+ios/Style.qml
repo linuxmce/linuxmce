@@ -11,6 +11,8 @@ Item{
         return y/100*manager.appHeight
     }
 
+      readonly property double dpRatio:screenInfo.primaryScreen.pixelRatio
+
     /* Transitions */
     readonly property int transition_animationTime:350
     readonly property int transition_accentTime:500

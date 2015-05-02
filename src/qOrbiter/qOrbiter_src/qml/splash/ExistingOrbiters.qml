@@ -3,10 +3,10 @@ import "."
 
 Item{
     id:existing_orbiters
-    height: scaleY(65)
+
     width: theme.listViewWidth_large
     anchors.left: parent.right
-    anchors.verticalCenter: parent.verticalCenter
+
     visible: true
     opacity: 0
 
