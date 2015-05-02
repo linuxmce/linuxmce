@@ -43,8 +43,8 @@ QtObject{
     readonly property color appbutton_cancel_color:"#f26c4f"
     readonly property color appbutton_disabled_color:"#464646"
     readonly property color appbutton_color:appcolor_background
-    property int appButtonHeight:manager.isProfile ? scaleY(12) : scaleY(16)
-    property int appButtonWidth: manager.isProfile ? scaleX(25) : scaleX(18)
+    property int appButtonHeight:manager.isProfile ? scaleY(15) : scaleY(17)
+    property int appButtonWidth: manager.isProfile ? scaleX(28) : scaleX(18)
     readonly property int appButtonNumberPadHeight:manager.isProfile ? scaleY(12) : scaleY(18)
     readonly property int appButtonNumberPadWidth: manager.isProfile ? scaleX(18) : scaleX(12)
     readonly property int appButtonNumberPadSmallHeight:manager.isProfile ? scaleY(9) : scaleY(15)
@@ -57,22 +57,22 @@ QtObject{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:12*dpRatio
-    readonly property int appFontSize_header:18*dpRatio
-    readonly property int appFontSize_description:14*dpRatio
-    readonly property int appFontSize_title:16*dpRatio
+    readonly property int appFontSize_list:11*dpRatio
+    readonly property int appFontSize_header:17*dpRatio
+    readonly property int appFontSize_description:13*dpRatio
+    readonly property int appFontSize_title:15*dpRatio
 
     property int fontSize_small:appFontSize_list
     property int fontSize_medium:appFontSize_description
     property int fontSize_large:appFontSize_title
 
-    property int fontSize_listItem:14*dpRatio
-    property int fontSize_listTitle:16*dpRatio
-    property int fontSize_listAccent:12*dpRatio
+    property int fontSize_listItem:appFontSize_list
+    property int fontSize_listTitle:appFontSize_title
+    property int fontSize_listAccent:10*dpRatio
 
     /* Application Navigation Bars */
-    readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(13) : scaleY(15)
-    readonly property string appNavigation_panelHeight:manager.isProfile ? scaleY(7) : scaleY(12)
+    readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(15) : scaleY(17)
+    readonly property string appNavigation_panelHeight:manager.isProfile ? scaleY(10) : scaleY(15)
 
     /* Application Menu Panels */
     readonly property int appMenuPanel_height:scaleY(9)

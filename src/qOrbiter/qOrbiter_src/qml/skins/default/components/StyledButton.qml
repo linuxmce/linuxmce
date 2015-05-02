@@ -63,6 +63,7 @@ Item{
 
         height: parent.height
         fontSize: textSize
+        font.weight: Font.Light
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment:Text.AlignHCenter       
         color:Style.apptext_color_active
