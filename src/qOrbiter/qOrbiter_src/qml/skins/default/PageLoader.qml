@@ -8,11 +8,11 @@ Loader {
     id:pageLoader
     objectName: "loadbot"
     focus: true
-   // source:"screens/Screen_1.qml"
+    // source:"screens/Screen_1.qml"
     // visible:qml_root.uiOn
     property string nextScreen:manager.currentScreen
     property string currentScreen:""
-  //  Component.onCompleted: manager.currentScreen="Screen_1.qml"
+    //  Component.onCompleted: manager.currentScreen="Screen_1.qml"
     Connections{
         target:manager
         onScreenChange:{
@@ -20,12 +20,18 @@ Loader {
         }
     }
 
+    Timer{
+        id:recovery
+        interval: 500
+        running:false
+        onTriggered: manager.qmlReload()
+    }
 
     function toggleContent(toggle){
         if(toggle)
             pageLoader.opacity=1
         else
-        pageLoader.opacity=0
+            pageLoader.opacity=0
     }
     
     onNextScreenChanged: {
@@ -41,7 +47,7 @@ Loader {
         if(currentScreen==nextScreen){
             console.log("duplicate screen error!")
             nextScreen=manager.currentScreen
-                return;
+            return;
         }
         
         if(!pageLoader.item){
@@ -63,11 +69,11 @@ Loader {
     
     function startChange(){
         
-        
+
         if(pageLoader.item.styledScreen){
             console.log("pageloader::closing page "+ currentScreen)
             pageLoader.item.state="closing"
-
+            recovery.start()
         } else{
             console.log("pageloader::no page jumping to next ==>"+nextScreen)
             loadNext()
@@ -76,6 +82,7 @@ Loader {
     }
     
     function loadNext(){
+recovery.stop()
 
         if(nextScreen===""){
             console.log("Next Screen error!")
@@ -105,7 +112,7 @@ Loader {
                       {
                           manager.setDceResponse("Command to change to:" + source+ " was successfull")
                           currentScreen=manager.currentScreen
-                          manager.addScreenToHistory(currentScreen)                          
+                          manager.addScreenToHistory(currentScreen)
                           // contentItem=item.screen_root
                       }
                       else if (pageLoader.status == Component.Loading)
@@ -116,9 +123,9 @@ Loader {
                       else if(pageLoader.status == Component.Error)
                       {
                           // pageLoader.e
-                         // source="screens/Screen_X.qml"
+                          // source="screens/Screen_X.qml"
                           console.log("Command to change to:" + source + " failed!")
-                         manager.currentScreen="Screen_X.qml"
+                          manager.currentScreen="Screen_X.qml"
 
                       }
 }

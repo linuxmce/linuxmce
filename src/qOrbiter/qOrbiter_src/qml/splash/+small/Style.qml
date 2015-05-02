@@ -1,6 +1,5 @@
 import QtQuick 2.2
-pragma Singleton
-//this is a qml singleton example to use the style object as a singleton, thus allowing one to override the style based on the selectors
+
 Item{
     id:smallSplashStyle
     property string description:"Small UI Style Definition for small devices."
@@ -12,6 +11,8 @@ Item{
     function scaleY(y){
         return y/100*manager.appHeight
     }
+
+     readonly property double dpRatio:screenInfo.primaryScreen.pixelRatio
 
     /* Transitions */
     readonly property int transition_animationTime:350
@@ -38,14 +39,14 @@ Item{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:14*screenInfo.primaryScreen.pixelRatio
-    readonly property int appFontSize_header:20*screenInfo.primaryScreen.pixelRatio
-    readonly property int appFontSize_description:16*screenInfo.primaryScreen.pixelRatio
-    readonly property int appFontSize_title:22*screenInfo.primaryScreen.pixelRatio
+    readonly property int appFontSize_list:12*dpRatio
+    readonly property int appFontSize_header:18*dpRatio
+    readonly property int appFontSize_description:10*dpRatio
+    readonly property int appFontSize_title:16*dpRatio
 
-    property int fontSize_small:14*screenInfo.primaryScreen.pixelRatio
-    property int fontSize_medium:16*screenInfo.primaryScreen.pixelRatio
-    property int fontSize_large:22*screenInfo.primaryScreen.pixelRatio
+    property int fontSize_small:manager.isProfile ? scaleY(1.7) /dpRatio : scaleY(1.8)/dpRatio
+    property int fontSize_medium:manager.isProfile ? scaleY(1.5) /dpRatio : scaleY(2)/dpRatio
+    property int fontSize_large:manager.isProfile ? scaleY(3) /dpRatio : scaleY(2)/dpRatio
 
     property int fontSize_listItem:14*screenInfo.primaryScreen.pixelRatio
     property int fontSize_listTitle:20*screenInfo.primaryScreen.pixelRatio

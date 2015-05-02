@@ -113,6 +113,7 @@ Item {
                     bottom:parent.bottom
                     margins: 5
                 }
+
             }
             StyledButton{
                 anchors{

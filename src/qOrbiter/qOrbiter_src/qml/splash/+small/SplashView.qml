@@ -44,7 +44,7 @@ Item {
 
         Rectangle{
             id:welcome_container
-            color:Style.appcolor_background
+            color:theme.appcolor_background
             anchors.fill: parent
             opacity: .15
         }
@@ -52,7 +52,7 @@ Item {
         Text {
             id: welcome
             text: qsTr(" Welcome to LinuxMCE")
-            font.pointSize: Style.appFontSize_header
+            font.pointSize: theme.appFontSize_header
             anchors.left:parent.left
             anchors.horizontalCenter: parent.horizontalCenter
             color:"white"
@@ -60,14 +60,14 @@ Item {
         Text {
             id: welcome_select
             text: qsTr("Please Choose an orbiter")
-            font.pointSize: Style.appFontSize_description
+            font.pointSize: theme.appFontSize_description
             anchors.left: welcome.right
             color:"white"
         }
         Text {
             id: ui_name
             text: "smallUI"
-            font.pointSize: Style.appFontSize_description
+            font.pointSize: theme.appFontSize_description
            // font.weight: Font.Light
             anchors.right: optionIcon.left
             anchors.verticalCenter: optionIcon.verticalCenter
