@@ -11,6 +11,7 @@ Panel{
         id:generic_playback
         property bool showingPlaylist:false
         anchors.fill: parent
+        Component.onCompleted: manager.setBoundStatus(true)
         NowPlayingImage {
             id: imgContainer
             anchors{

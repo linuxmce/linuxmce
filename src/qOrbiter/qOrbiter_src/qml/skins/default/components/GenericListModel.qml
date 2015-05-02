@@ -6,6 +6,7 @@ import org.linuxmce.grids 1.0
 Item{
     id:genericListContainer
     width: Style.listViewWidth_medium
+    property alias listView:view
     property alias model:view.model
     property alias label:itemlabel.text
     property alias delegate:view.delegate
@@ -15,14 +16,17 @@ Item{
     property string dataGridLabel:""
 
     function refresh(){
-        if(dataGrid==-1 || dataGridLabel==="")
-            return;
+        if(dataGrid==-1 || dataGridLabel===""){
+            console.log("Invalid model id, cant reset")
+                return;
+        }
 
-        manager.clearDataGrid(dataGrid);
+        manager.clearDataGrid("Playlist");
         view.model=manager.getDataGridModel(dataGridLabel, dataGrid)
     }
 
     Component.onCompleted: {
+
         if(dataGrid==-1 || dataGridLabel==="")
             return;
 

@@ -14,14 +14,16 @@ Item{
     StyledText{
         anchors{
             left:parent.left
+
             verticalCenter: parent.verticalCenter
-            
         }
+        fontSize: Style.appFontSize_title
         text:settingName
     }
     
     StyledText{
         visible: !useSwitch
+        fontSize: Style.appFontSize_title
         anchors{
             right:parent.right
             verticalCenter: parent.verticalCenter
@@ -35,6 +37,7 @@ Item{
         visible:useSwitch
         switchLabel: settingName
         enabled: settingValue
+
         anchors{
             right:parent.right
             verticalCenter: parent.verticalCenter

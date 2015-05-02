@@ -8,19 +8,32 @@ Item{
     height: Style.scaleY(75)
     width: Style.listViewWidth_medium
     //  visible:showingPlaylist
+
+    Connections{
+        target: dcenowplaying
+        onPlayListPositionChanged:{
+            console.log("Playlist position changed to "+dcenowplaying.m_iplaylistPosition)
+
+            generic_model.listView.positionViewAtIndex(dcenowplaying.m_iplaylistPosition, ListView.Beginning)
+            generic_model.refresh()
+
+        }
+    }
     
     GenericListModel{
-        label: qsTr("%1 item(s)").arg(modelCount)        
+        id:generic_model
+        label: qsTr("%1 item(s)").arg(modelCount)
         dataGrid:18
         dataGridLabel:"Playlist"
+        //    model:manager.getDataGridModel("Playlist", 18)
         delegate: Item{
             height:Style.scaleY(10)
             anchors{
                 left:parent.left
                 right:parent.right
             }
-            clip:true            
-            anchors.margins: 5            
+            clip:true
+            anchors.margins: 5
             
             Rectangle{
                 id:fil

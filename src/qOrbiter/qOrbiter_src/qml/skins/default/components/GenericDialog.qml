@@ -26,7 +26,7 @@ Item {
         }
         StyledText{
             anchors.centerIn: hdr
-            font.pointSize: Style.appFontSize_header
+           fontSize: Style.fontSize_listTitle
             text:dlg.title
         }
 

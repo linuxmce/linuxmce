@@ -4,6 +4,7 @@ import "../"
 import org.linuxmce.screens 1.0
 StyledScreen {
     id:screen
+    onScreenOpen: manager.setBoundStatus(false)
 
     NowPlayingButton {
         id: now_playing_button

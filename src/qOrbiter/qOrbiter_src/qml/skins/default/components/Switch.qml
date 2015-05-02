@@ -3,7 +3,7 @@ import org.linuxmce.settings 1.0
 import "../"
 Item{
     id:sw_root
-    width: Style.scaleX(12)
+    width: manager.isProfile ? Style.scaleX(24) :  Style.scaleX(12)
     height: Style.scaleY(6)
     property bool enabled:false
     property string switchLabel:"ipsum"
@@ -41,6 +41,7 @@ Item{
         text:sw_root.state==="on" ? qsTr("Enabled") : qsTr("Disabled")
         color:sw_root.state==="on" ? "green" : "red"
        anchors.margins: 5
+       fontSize: Style.appFontSize_description
     }
 
     MouseArea{

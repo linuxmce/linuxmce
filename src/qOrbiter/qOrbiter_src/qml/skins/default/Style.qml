@@ -57,7 +57,7 @@ QtObject{
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
     readonly property int appFontSize_list:14//manager.isProfile ? scaleY(2) : scaleY(4)
-    readonly property int appFontSize_header:18//scaleY(5)
+    readonly property int appFontSize_header:42//scaleY(5)
     readonly property int appFontSize_description:12//manager.isProfile ? scaleY(2) : scaleY(3.5)
     readonly property int appFontSize_title:22//manager.isProfile ? scaleY(3) :scaleY(4)
 
