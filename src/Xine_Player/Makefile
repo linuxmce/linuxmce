@@ -13,11 +13,13 @@ BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread -ldl -lXext
 
 MYNAME = Xine_Player
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 5mplateID
+MYDEVTEMPLATEID = 5
 
 Gen_Dev_Files = $(GENDEV)/Xine_PlayerBase.cpp
 sources = Main.cpp Xine_Player.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
+
+ARCH = $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 
 CXXFLAGS +=
 CPPFLAGS += $(shell pkg-config --cflags glib-2.0) \
@@ -25,10 +27,10 @@ CPPFLAGS += $(shell pkg-config --cflags glib-2.0) \
 LDFLAGS += -L/usr/X11R6/lib  -L$(ROOT)/Xine_Player
 XTRALDLIBS = -ljpeg -lxine -lXtst -lX11 $(shell pkg-config --libs glib-2.0) -lXmu -lcdda_interface 
 
-ifneq (,$(findstring armhf, $(arch)))
+ifneq (,$(findstring armhf, $(ARCH)))
 	XTRALDLIBS += $(shell pkg-config --libs dvdnav)
 else
-ifneq (,$(findstring amd64, $(arch)))
+ifneq (,$(findstring amd64, $(ARCH)))
 	XTRALDLIBS += -ldvdnav_xine_custom_64b
 else
 	XTRALDLIBS += -ldvdnav_xine_custom
