@@ -14,17 +14,17 @@ NECESSITAS_ROOT=~/necessitas
 ANTPATH=$NECESSITAS_ROOT/apache-ant-1.8.4/bin/ant
 
 if [[ -f /etc/lmce-build/builder.conf ]]; then
-	ANDROID_INSTALL=/opt/Qt5.3.2/5.3/android_armv7/bin
+	ANDROID_INSTALL=/opt/Qt5.4.1/5.4/android_armv7/bin
 	ANDROID_SDK_PATH=/opt/necessitas
-	ANDROIDNDKROOT=$ANDROID_SDK_PATH/android-ndk-r10c
+	ANDROIDNDKROOT=$ANDROID_SDK_PATH/android-ndk-r10d
 	ANTPATH=/usr/bin/ant
 fi
 
 ANDROIDNDKPLATFORM=android-9
 ANDROIDSDKROOT=$ANDROID_SDK_PATH/android-sdk
-TOOLCHAINVERSION=4.6
+TOOLCHAINVERSION=4.9
 TOOLCHAINPATH=$ANDROIDNDKROOT/toolchains/arm-linux-androideabi-$TOOLCHAINVERSION/prebuilt/linux-x86/bin
-JAVAHOME=/usr/lib/jvm/java-6-openjdk-i386
+JAVAHOME=/usr/lib/jvm/java-7-openjdk-i386
 # We stop whenever an error happens.
 set -e
 
