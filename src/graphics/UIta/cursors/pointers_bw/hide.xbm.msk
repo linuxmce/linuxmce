@@ -1,0 +1,4 @@
+#define hide_width 1
+#define hide_height 1
+static char hide_bits[] = {
+ 0x00 };
