@@ -6,6 +6,7 @@
 . /usr/local/lmce-build/common/utils.sh
 
 set -e
+set -x
 
 make_jobs=""
 # set NUMCORES=X in /etc/lmce-build/builder.conf to enable multi-job builds
@@ -65,7 +66,6 @@ function Build_Replacement_Package
 		Update_Changed_Since_Last_Build "$dir_"
 		popd
 
-		return $(/bin/true)
 		return $(/bin/true)
 	fi
 
@@ -147,7 +147,9 @@ function Build_Replacements_Common_ubuntu
 
 	Build_Replacement_Package lmce-mame-snaps extra/snap || :
 
-	Build_Replacement_Package lmce-mame-snaps extra/sample_media || :
+	Build_Replacement_Package lmce-sample-media extra/sample_media || :
+
+	Build_Replacement_Package lmce-avwizard-sounds extra/avwizard-sounds || :
 }
 
 function Build_Replacements_ubuntu_precise
@@ -259,7 +261,7 @@ trap 'Error "Undefined error in $0" ; apt-get install libtool -y' EXIT
 
 DisplayMessage "*** STEP: Building replacement debs"
 # make sure the headers are there
-apt-get --force-yes -y install linux-headers-$KVER 
+#apt-get --force-yes -y install linux-headers-$KVER 
 
 # dir is required even if no replacements are built
 mkdir -pv "${replacements_dir}"
