@@ -6,7 +6,7 @@
 . /usr/local/lmce-build/common/utils.sh
 
 set -e
-set -x
+#set -x
 
 make_jobs=""
 # set NUMCORES=X in /etc/lmce-build/builder.conf to enable multi-job builds
@@ -67,9 +67,9 @@ function Build_Replacement_Package
 		popd
 
 		return $(/bin/true)
+	else
+		return $(/bin/false)
 	fi
-
-	return $(/bin/false)
 }
 
 function Build_Replacements_Common_ubuntu
@@ -102,8 +102,8 @@ function Build_Replacements_Common_ubuntu
 		autoreconf -i && \
 		dpkg-buildpackage -uc -b -tc $make_jobs && \
 		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.deb "${replacements_dir}" && \
-		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.changes "${replacements_dir}" || :
-		Update_Changed_Since_Last_Build "$dir_"
+		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.changes "${replacements_dir}" && \
+		Update_Changed_Since_Last_Build "$dir_" || :
 		popd
 	fi
 
@@ -138,8 +138,8 @@ function Build_Replacements_Common_ubuntu
 		DisplayMessage "Building linux-image-diskless for $KVER"
 		./makepackage.sh && \
 		cp -fr linux-image-diskless_*.deb "${replacements_dir}" && \
-		cp -fr linux-image-diskless_*.changes "${replacements_dir}" || :
-		Update_Changed_Since_Last_Build "$dir_"
+		cp -fr linux-image-diskless_*.changes "${replacements_dir}" && \
+		Update_Changed_Since_Last_Build "$dir_" || :
 		popd
 	fi
 
