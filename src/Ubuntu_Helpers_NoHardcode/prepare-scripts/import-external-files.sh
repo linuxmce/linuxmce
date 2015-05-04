@@ -234,17 +234,17 @@ fi
 #fi
 
 
-if IsReachable "$http_media_host" "http media host"
-then
-	# Import videos
-	ImportWizardVideosFromHTTPHost
-
-	# Import sounds
-	ImportAVWizardSoundsFromHTTPHost
-else
-	echo "Failed to download videos and sounds."
-	echo "If you don't have them already, the build will likely fail."
-fi
+#if IsReachable "$http_media_host" "http media host"
+#then
+##	# Import videos
+##	ImportWizardVideosFromHTTPHost
+#:
+##	# Import sounds
+##	ImportAVWizardSoundsFromHTTPHost
+#else
+#	echo "Failed to download videos and sounds."
+#	echo "If you don't have them already, the build will likely fail."
+#fi
 
 
 echo "*** Done: $0"
