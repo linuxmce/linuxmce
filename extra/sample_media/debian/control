@@ -1,0 +1,12 @@
+Source: lmce-sample-media
+Maintainer: developers <developers@linuxmce.org>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9)
+
+Package: lmce-sample-media
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: sample media for announcements and floorplans
+ sample media for use with announcements and floorplans
