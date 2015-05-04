@@ -16,7 +16,6 @@ docbook-utils
 dpatch
 dpkg-dev
 dpkg-repack
-dvb-s2api-liplianin-headers
 fakeroot
 fuse
 gdb
@@ -182,8 +181,6 @@ libxvidcore-dev
 libfftw3-dev 
 xmlto
 doxygen 
-libc6-dev-amd64 
-lib64gcc1 
 gcc-multilib 
 python-dev
 yasm
@@ -206,7 +203,6 @@ python-support
 python-setuptools
 libqjson-dev
 python-twisted
-libeibclient-dev
 libow-dev
 libcppunit-dev
 libprotobuf-dev
