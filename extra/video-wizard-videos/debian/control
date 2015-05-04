@@ -1,0 +1,12 @@
+Source: video-wizard-videos
+Maintainer: developers <developers@linuxmce.org>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9)
+
+Package: video-wizard-videos
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: videos for Setup Wizard
+ video helpers for Setup Wizard (Sarah)
