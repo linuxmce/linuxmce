@@ -19,9 +19,6 @@ extra_dir=/var/lmce-build/extras
 
 . /etc/lmce-build/builder.conf
 
-# wget fails if http_proxy is set for some reason
-unset http_proxy
-
 function ImportPublicSkinFromRSyncHost {
 	local skins_dir=${base_dir}/graphics
 # we don't want this on a lmce machine
@@ -212,15 +209,15 @@ function IsReachable {
 }
 
 
-# Import skin
-if IsReachable "$rsync_skin_host" "rsync skin host" ; then
-	ImportPublicSkinFromRSyncHost
-elif IsReachable "$http_skin_host" "http skin host" ; then
-	ImportPublicSkinFromHTTPHost
-else
-	echo "Failed to download skins."
-	echo "If you don't have them already, cd2-build.sh will fail."
-fi
+## Import skin
+#if IsReachable "$rsync_skin_host" "rsync skin host" ; then
+#	ImportPublicSkinFromRSyncHost
+#elif IsReachable "$http_skin_host" "http skin host" ; then
+#	ImportPublicSkinFromHTTPHost
+#else
+#	echo "Failed to download skins."
+#	echo "If you don't have them already, cd2-build.sh will fail."
+#fi
 
 # Refs #2350 - sample media is in svn as an extra and built as a replacement pkg now
 ## Import media
