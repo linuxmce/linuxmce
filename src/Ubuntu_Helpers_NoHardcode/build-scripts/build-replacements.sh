@@ -131,7 +131,6 @@ function Build_Replacements_Common_ubuntu
 	# lmce-asterisk
 	Build_Replacement_Package lmce-asterisk src/lmce-asterisk || :
 
-	# TODO Fix this package so it builds against target kernel not running kernel
 	#Package: linux-image-diskless
 	dir_=${svn_dir}/${svn_branch_name}/ubuntu/linux-image-dummy
 	if Changed_Since_Last_Build "$dir_" ;then
@@ -147,6 +146,8 @@ function Build_Replacements_Common_ubuntu
 	Build_Replacement_Package lmce-mame-metadata extra/mamedata || :
 
 	Build_Replacement_Package lmce-mame-snaps extra/snap || :
+
+	Build_Replacement_Package lmce-mame-snaps extra/sample_media || :
 }
 
 function Build_Replacements_ubuntu_precise
