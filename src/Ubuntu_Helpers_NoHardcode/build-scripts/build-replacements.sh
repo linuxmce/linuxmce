@@ -6,7 +6,7 @@
 . /usr/local/lmce-build/common/utils.sh
 
 set -e
-#set -x
+set -x
 
 make_jobs=""
 # set NUMCORES=X in /etc/lmce-build/builder.conf to enable multi-job builds
@@ -25,7 +25,7 @@ function Changed_Since_Last_Build
 	local revision_new=$(svn info $fs_path | grep '^Revision: ' | cut -d' ' -f2)
 	local revision_old=$(cat "$cache_file" | grep "^${url_id}" | cut -d'|' -f2)
 
-	if [ "$revision_new" = "$revision_old" ] ; then
+	if [ "$revision_new" = "$revision_old" ] && [ -n "$revision_old" ]; then
 		return $(/bin/false)
 	fi
 
@@ -150,6 +150,8 @@ function Build_Replacements_Common_ubuntu
 	Build_Replacement_Package lmce-sample-media extra/sample_media || :
 
 	Build_Replacement_Package lmce-avwizard-sounds extra/avwizard-sounds || :
+
+	Build_Replacement_Package video-wizard-videos extra/video-wizard-videos
 }
 
 function Build_Replacements_ubuntu_precise
