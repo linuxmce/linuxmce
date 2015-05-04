@@ -1,0 +1,10 @@
+pluto-avwizard-sounds for Debian
+--------------------------------
+
+Generated new pluto-avwizards-sounds package. Note this is a set of three sound files
+used by the AV Wizard to make sure you have hooked up speakers to your system properly.
+The original download locations Radu used are no longer active. We may want to replace
+these with the same or similar compositions from archive.org before the next release
+so that we still have provable provenance for these files.
+
+ -- Daniel Kristansson <danielk@cuymedia.net>  Sun, 06 Jul 2008 10:27:15 -0400

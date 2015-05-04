@@ -1,0 +1,12 @@
+Source: lmce-avwizard-sounds
+Maintainer: developers <developers@linuxmce.org>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9)
+
+Package: lmce-avwizard-sounds
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: sounds for tests in AVWizard
+ sounds for testing various audio modes in AVWizard
