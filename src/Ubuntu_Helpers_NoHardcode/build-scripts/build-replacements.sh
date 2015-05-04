@@ -145,6 +145,8 @@ function Build_Replacements_Common_ubuntu
 	fi
 
 	Build_Replacement_Package lmce-mame-metadata extra/mamedata || :
+
+	Build_Replacement_Package lmce-mame-snaps extra/snap || :
 }
 
 function Build_Replacements_ubuntu_precise
