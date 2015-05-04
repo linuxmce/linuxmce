@@ -87,7 +87,7 @@ function build_main_debs() {
                         #FIXME Hackozaurus for ubuntu-diskless-tools
                         mkdir -p /home/DisklessFS/
                         diskless_image_name="PlutoMD_Debootstraped.tar.bz2"
-                        cp "${diskless_dir}/$diskless_image_name" /home/DisklessFS
+#                       cp "${diskless_dir}/$diskless_image_name" /home/DisklessFS
 #                       cp "${diskless_dir}/PlutoMD_Debootstraped.tar.bz2" /home/DisklessFS
 
 			case "${build_name}" in
@@ -129,7 +129,7 @@ function build_main_debs() {
 			#FIXME Hackozaurus for ubuntu-diskless-tools
 			mkdir -p /home/DisklessFS/
 		        diskless_image_name="PlutoMD_Debootstraped-$flavor-$build_name-$arch.tar.bz2"
-			cp "${diskless_dir}/$diskless_image_name" /home/DisklessFS
+#			cp "${diskless_dir}/$diskless_image_name" /home/DisklessFS
 
 			case "${build_name}" in
 				wheezy)
