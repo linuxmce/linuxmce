@@ -222,15 +222,16 @@ else
 	echo "If you don't have them already, cd2-build.sh will fail."
 fi
 
-# Import media
-if IsReachable "$rsync_media_host" "rsync media host" ; then
-	ImportPublicMediaFromRSyncHost
-elif IsReachable "$http_media_host" "http media host" ; then
-	ImportPublicMediaFromHTTPHost
-else
-	echo "Failed to download media."
-	echo "If you don't have them already, cd2-build.sh will fail."
-fi
+# Refs #2350 - sample media is in svn as an extra and built as a replacement pkg now
+## Import media
+#if IsReachable "$rsync_media_host" "rsync media host" ; then
+#	ImportPublicMediaFromRSyncHost
+#elif IsReachable "$http_media_host" "http media host" ; then
+#	ImportPublicMediaFromHTTPHost
+#else
+#	echo "Failed to download media."
+#	echo "If you don't have them already, cd2-build.sh will fail."
+#fi
 
 
 if IsReachable "$http_media_host" "http media host"
