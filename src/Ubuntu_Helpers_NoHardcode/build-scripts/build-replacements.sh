@@ -153,7 +153,7 @@ function Build_Replacements_Common_ubuntu
 
 	Build_Replacement_Package video-wizard-videos extra/video-wizard-videos || :
 
-	Build_Replacement_Package lmce-skins src/graphics || :
+	Build_Replacement_Package lmce-skins extra/graphics || :
 }
 
 function Build_Replacements_ubuntu_precise
