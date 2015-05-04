@@ -10,7 +10,7 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 	#define vars what later will be overwritten
 	$out='';
 	$continet='';
-	$city='';
+	$region='';
 	$stations='';
 	
 	$action = isset($_REQUEST['action'])?cleanString($_REQUEST['action']):'form';
@@ -86,14 +86,29 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 		} elseif (isset($_POST['country'])) {
 			$country=grep_internet_radio_data($_POST['continent'],'Dropdown_list','country',$_POST['country']);
 		}
-		if (!isset($_POST['city']) && isset($_POST['country'])) {
-			$city=grep_internet_radio_data($_POST['country'],'Dropdown_list','city','');
-		} elseif (!isset($_POST['city'])) {
+
+		if (!isset($_POST['region']) && isset($_POST['country'])) {
+			$region=grep_internet_radio_data($_POST['country'],'Dropdown_list','region','');
+		} elseif (!isset($_POST['region'])) {
 			$stations=grep_internet_radio_data('http://opml.radiotime.com/Browse.ashx?c=local','list','','');
-		} elseif (isset($_POST['city'])) {
-			$city=grep_internet_radio_data($_POST['country'],'Dropdown_list','city',$_POST['city']);
-			$stations=grep_internet_radio_data($_POST['city'],'list','','');
+		} elseif (isset($_POST['region'])) {
+			$region=grep_internet_radio_data($_POST['country'],'Dropdown_list','region',$_POST['region']);
+			$stations=grep_internet_radio_data($_POST['region'],'list','','');
+		} 
+
+		if (($_POST['country'] == "http://opml.radiotime.com/Browse.ashx?id=r100436" || $_POST['country'] == "http://opml.radiotime.com/Browse.ashx?id=r101227") && $_POST['region'] != "" ) {
+		   if (!isset($_POST['city']) && isset($_POST['region'])) {
+		   	  $city=grep_internet_radio_data($_POST['region'],'Dropdown_list','city','');
+		   } elseif (!isset($_POST['city'])) {
+		   	  $stations=grep_internet_radio_data('http://opml.radiotime.com/Browse.ashx?c=local','list','','');
+		   } elseif (isset($_POST['city'])) {
+			  $city=grep_internet_radio_data($_POST['region'],'Dropdown_list','city',$_POST['city']);
+			  if ($_POST['city'] != "") {	
+		      	 $stations=grep_internet_radio_data($_POST['city'],'list','','');
+			  }																						   
+		   }
 		}
+		
 
 		$out.='<script>
 			function Genre(value){
@@ -152,11 +167,20 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 				document.getElementById(\'internet_radio\').submit();
 			}
 
+			function IRregion()
+			{
+				document.getElementById(\'internet_radio\').appendChild(input);
+				document.getElementById(\'internet_radio\').continent.value;
+				document.getElementById(\'internet_radio\').country.value;
+				document.getElementById(\'internet_radio\').region.value;
+				document.getElementById(\'internet_radio\').submit();
+			}
 			function IRcity()
 			{
 				document.getElementById(\'internet_radio\').appendChild(input);
 				document.getElementById(\'internet_radio\').continent.value;
 				document.getElementById(\'internet_radio\').country.value;
+				document.getElementById(\'internet_radio\').region.value;
 				document.getElementById(\'internet_radio\').city.value;
 				document.getElementById(\'internet_radio\').submit();
 			}
@@ -180,7 +204,49 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 				document.getElementById(\'internet_radio\').stationsUrl.value;
 				document.getElementById(\'internet_radio\').submit();
 			}
-
+			var formblock;
+			var forminputs;
+ 
+ 			function prepare()
+			{
+  			    formblock= document.getElementById(\'internet_radio\');
+  				forminputs = formblock.getElementsByTagName(\'input\');
+			}
+ 
+ 			function selall(value)
+			{
+  			    for (i = 0; i < forminputs.length; i++) {
+    			    if (forminputs[i].type === \'checkbox\') {
+						if (value == \'1\') {
+        				   forminputs[i].checked = true;
+      					} else {
+        				   forminputs[i].checked = false;
+						}
+					}
+					
+  				}
+			}
+ 			function delsel()
+			{
+  			    for (i = 0; i < forminputs.length; i++) {
+    			    if (forminputs[i].type === \'checkbox\') {
+					    if (forminputs[i].checked === true) {
+						    del(forminputs[i].value);
+						}
+					}
+					
+  				}
+			}
+ 
+ 			if (window.addEventListener) {
+     		    window.addEventListener("load", prepare, false);
+			} else if (window.attachEvent) {
+  			    window.attachEvent("onload", prepare)
+			} else if (document.getElementById) {
+  			    window.onload = prepare;
+			}
+			
+			
 			function add_manual()
 			{
 				document.getElementById(\'internet_radio\').appendChild(input2);
@@ -189,6 +255,8 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 				document.getElementById(\'internet_radio\').station_genre.value;
 				document.getElementById(\'internet_radio\').submit();
 			}
+
+				
 		</script>
 		
 		<div class="err">'.(isset($_GET['error'])?strip_tags($_GET['error']):'').'</div>
@@ -245,20 +313,19 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 			<tr>
 				<td width="250">Continent:</td>
 				<td width="250">Country:</td>
-				<td width="250">City:</td>
+				<td width="250">region:</td>
 		    </tr>
 			<tr>
 				<td>'.$continent.'</td>
 				<td>'.$country.'</td>
-				<td>'.$city.'</td>
+				<td>'.$region.'<br>'.$city.'</td>
 				<td><input type="button" class="button" value="add (all)" onclick="add()" /></td>
 			</tr>	
 			<tr>
 				<td colspan="4">Stations:<br>'.$stations.'</td>
 			</tr>
 			</table>
-		<input type="hidden" name="deletepkfile" value="none" />	
-		</form>';
+		<input type="hidden" name="deletepkfile" value="none" />';
 		$out.='<br><form title="delete">
 		<table border="1">
 		<tr>
@@ -273,7 +340,7 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 			   <td>Delete</td>
 			   </tr>';
 		$res=$mediadbADO->Execute('SELECT PK_File, Filename FROM File where EK_Mediatype = 43');
-
+		
 		while($row = $res->FetchRow()){
 				   $out.='<tr>';
 				   
@@ -322,15 +389,18 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 				   }
 				   //URL       		   
 				   $out.='<td><IMG HEIGHT=50 SRC='.$LURL.'></td>';
+				   
 				   $out.='<td>'.$LName.'</td>';
 				   $out.='<td>'.$LGenre.'</td>';
 				   $out.='<td>'.$row["Filename"].'</td>';
-				   $out.='<td><input type="button" class="button" value="Delete" onclick="del('.$row["PK_File"].')" /></td>';
+				   $out.='<td><input type="checkbox" name="check'.$row["PK_File"].'" value="'.$row["PK_File"].'"><input type="button" class="button" value="Delete" onclick="del('.$row["PK_File"].')" /></td>';
 				   $out.='</tr>';
 				   $LLogoN='';
 				   $LURL='';
 		}
-		$out.='</table></form>
+		$out.='</form><tr>
+		<td colspan="4"></td>
+		<td><input type="button" class="button" value="Select All" onclick="selall(1)" /><input type="button" class="button" value="Unselect All" onclick="selall(0)" /><br><input type="button" class="button" value="Delete Selected" onclick="delsel()" /></td></table></form>
 		
 		</td></tr></table></center>';
 
@@ -356,22 +426,26 @@ function internet_radio($output,$mediadbADO,$dbADO) {
         $mediadbADO->Execute("delete from File where PK_File='".$PK_File."'");
 		
 		#Find Hook for Station Name
-		$StationName=$mediadbADO->Execute("SELECT FK_Attribute from File_Attribute where FK_File='".$PK_File."'");
-		
+		$StationName=$mediadbADO->Execute("select b.PK_Attribute from File_Attribute a, Attribute b where a.FK_Attribute = b.PK_Attribute and a.FK_File='".$PK_File."' and b.FK_AttributeType=10");
+		while($Sta1 = $StationName->FetchRow()){
+				$StationID=$Sta1["PK_Attribute"];
+		} 
         #Delete Station Name
-        $mediadbADO->Execute("delete from Attribute where PK_Attribute='".$StationName."'");
+        $mediadbADO->Execute("delete from Attribute where PK_Attribute='".$StationID."' and FK_AttributeType = 10");
 
         #Delete Hooks
         $mediadbADO->Execute("delete from File_Attribute where FK_File='".$PK_File."'");
 		
 		#Find Picture Hook
-        $PicID=$mediadbADO->Execute("select FK_Picture from Picture_Attribute where FK_Attribute='".$StationName."'");
-		
+        $Pic1=$mediadbADO->Execute("select FK_Picture from Picture_Attribute where FK_Attribute='".$StationID."'");
+		while($Pic2 = $Pic1->FetchRow()){
+				$PicID=$Pic2["FK_Picture"];
+		} 
 		#Delete Placeholder for Picture
         $mediadbADO->Execute("delete from Picture where PK_Picture='".$PicID."'");
 
 		#Delete Picture Hooks
-        $mediadbADO->Execute("delete from Picture_Attribute where FK_File='".$PK_File."'");
+        $mediadbADO->Execute("delete from Picture_Attribute where FK_Picture='".$PicID."'");
 
 		header("Location: index.php?section=internetRadio&msg=".translate('TEXT_INTERNETRADIO_STATIONS_UPDATED_CONST'));
 		}
