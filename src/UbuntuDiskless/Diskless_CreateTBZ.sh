@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+#set -x
+
 PROXY=""
 #PROXY=http_proxy=http://10.10.42.99:3142
 
@@ -36,13 +39,12 @@ SQL_DB="pluto_main"
 ###########################################################
 
 Trap_Exit () {
-	umount -fl $TEMP_DIR/var/cache/apt
+	umount -fl $TEMP_DIR/var/cache/apt || :
 	umount -fl $TEMP_DIR/usr/pluto/deb-cache
 	umount -fl $TEMP_DIR/dev/pts
-	umount -fl $TEMP_DIR/dev
+	umount -fl $TEMP_DIR/dev || :
 	umount -fl $TEMP_DIR/proc
 	umount -fl $TEMP_DIR/sys
-	umount -fl $TEMP_DIR/lib/modules/${HOST_KVER}/volatile
 
 	rm -rf $TEMP_DIR
 }
@@ -430,10 +432,10 @@ MD_Install_Packages () {
 
 	echo "Disable all service invocation"
 	# disable service invocation and tools
-	mv -f $TEMP_DIR/sbin/start{,.orig}
-	mv -f $TEMP_DIR/usr/sbin/invoke-rc.d{,.orig}
-	mv -f $TEMP_DIR/sbin/restart{,.orig}
-	mv -f $TEMP_DIR/sbin/initctl{,.orig}
+	mv -f $TEMP_DIR/sbin/start{,.orig} || :
+	mv -f $TEMP_DIR/usr/sbin/invoke-rc.d{,.orig} || :
+	mv -f $TEMP_DIR/sbin/restart{,.orig} || :
+	mv -f $TEMP_DIR/sbin/initctl{,.orig} || :
 
 	cat <<-EOF > $TEMP_DIR/sbin/start
 		#!/bin/bash
@@ -673,21 +675,20 @@ MD_Populate_Debcache () {
 
 MD_Cleanup () {
 	StatsMessage "Cleaning up from package installations..."
-	umount $TEMP_DIR/var/cache/apt
+	umount $TEMP_DIR/var/cache/apt || :
 	umount $TEMP_DIR/usr/pluto/deb-cache
 	umount $TEMP_DIR/dev/pts
 	umount $TEMP_DIR/sys
 	umount $TEMP_DIR/proc
-	umount $TEMP_DIR/lib/modules/${HOST_KVER}/volatile
 
 	#Make sure there is are Packages files on the MD so apt-get update does not fail
 	mkdir -p $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
 	/usr/pluto/bin/update-debcache.sh $TEMP_DIR/usr/pluto/deb-cache/$DEB_CACHE
 
-	mv -f $TEMP_DIR/sbin/invoke-rc.d{.orig,}
-	mv -f $TEMP_DIR/sbin/start{.orig,}
-	mv -f $TEMP_DIR/sbin/restart{.orig,}
-	mv -f $TEMP_DIR/sbin/initctl{.orig,}
+	mv -f $TEMP_DIR/sbin/invoke-rc.d{.orig,} || :
+	mv -f $TEMP_DIR/sbin/start{.orig,} || :
+	mv -f $TEMP_DIR/sbin/restart{.orig,} || :
+	mv -f $TEMP_DIR/sbin/initctl{.orig,} || :
 	#mv -f "$TEMP_DIR"/sbin/start-stop-daemon{.pluto-install,}
 	#mv -f "$TEMP_DIR"/sbin/initctl{.pluto-install,}
 	#rm -f "$TEMP_DIR"/usr/sbin/policy-rc.d
