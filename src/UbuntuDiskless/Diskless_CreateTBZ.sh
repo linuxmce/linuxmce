@@ -689,7 +689,7 @@ MD_Cleanup () {
 	mv -f $TEMP_DIR/sbin/start{.orig,} || :
 	mv -f $TEMP_DIR/sbin/restart{.orig,} || :
 	mv -f $TEMP_DIR/sbin/initctl{.orig,} || :
-	#mv -f "$TEMP_DIR"/sbin/start-stop-daemon{.pluto-install,}
+	mv -f "$TEMP_DIR"/sbin/start-stop-daemon{.pluto-install,} || :
 	#mv -f "$TEMP_DIR"/sbin/initctl{.pluto-install,}
 	#rm -f "$TEMP_DIR"/usr/sbin/policy-rc.d
 
