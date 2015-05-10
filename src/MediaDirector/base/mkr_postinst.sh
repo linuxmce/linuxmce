@@ -84,6 +84,7 @@ cat <<-EOF >/tmp/preseed.cfg
 
 StatsMessage "Dissabling display manager"
 #TODO: add a dpkg-diversion for default-display-manager so it is not overwritten
+mkdir -p "/etc/X11"
 echo '/bin/false' >"/etc/X11/default-display-manager"
 
 #FIXME: this should be in a pkg, not created in a postinst.
