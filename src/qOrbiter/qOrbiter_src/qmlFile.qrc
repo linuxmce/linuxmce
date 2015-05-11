@@ -161,5 +161,7 @@
         <file>qml/skins/default/+large/Style.qml</file>
         <file>qml/skins/default/screens/Screen_17.qml</file>
         <file>qml/skins/default/screens/Screen_205.qml</file>
+        <file>qml/splash/LoadingView.qml</file>
+        <file>qml/skins/default/components/ScrollRow.qml</file>
     </qresource>
 </RCC>

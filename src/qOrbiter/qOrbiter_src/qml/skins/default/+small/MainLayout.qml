@@ -74,15 +74,7 @@ Item {
                 }
                 onActivated: manager.currentScreen="Screen_1.qml"
             }
-            StyledButton{
-                buttonText: roomList.currentRoom
-                anchors{
-                    top:parent.top
-                    bottom:parent.bottom
-                    margins: 5
-                }
-                onActivated: qmlRoot.createPopup(roomSelector)
-            }
+
         }
 
     }
@@ -134,36 +126,55 @@ Item {
     Footer {
         id: footer
 
-        FocusRow{
-
+        ScrollRow{
             anchors.fill: parent
-
-            StyledButton{
-                buttonText: qsTr("Sleeping Menu")
-                anchors{
-                    top:parent.top
-                    bottom:parent.bottom
-                    margins: 5
-                }
-            }
-            StyledButton{
-                anchors{
-                    top:parent.top
-                    bottom:parent.bottom
-                    margins: 5
-                }
-                buttonText: qsTr("Advanced Menu")
-                onActivated: manager.currentScreen = "Screen_44.qml"
-            }
-            StyledButton{
-                anchors{
-                    top:parent.top
-                    bottom:parent.bottom
-                    margins: 5
+            contentHeight:row.height
+            contentWidth:row.width
+            Row{
+                id:row
+                width: children.length*Style.appButtonWidth
+                height:footer.height
+                StyledButton{
+                    buttonText: roomList.currentRoom
+                    anchors{
+                        top:parent.top
+                        bottom:parent.bottom
+                        margins: 5
+                    }
+                    onActivated: qmlRoot.createPopup(roomSelector)
                 }
 
-                buttonText: qsTr("Power")
+                StyledButton{
+                    buttonText: qsTr("Sleeping Menu")
+                    anchors{
+                        top:parent.top
+                        bottom:parent.bottom
+                        margins: 5
+                    }
+                    onActivated:{
+                        manager.currentScreen="Screen_29.qml"
+                    }
+                }
+                StyledButton{
+                    anchors{
+                        top:parent.top
+                        bottom:parent.bottom
+                        margins: 5
+                    }
+                    buttonText: qsTr("Advanced Menu")
+                    onActivated: manager.currentScreen = "Screen_44.qml"
+                }
+                StyledButton{
+                    anchors{
+                        top:parent.top
+                        bottom:parent.bottom
+                        margins: 5
+                    }
+                    buttonText: qsTr("Power")
+                }
             }
+
+
         }
     }
 
