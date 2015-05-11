@@ -1,4 +1,15 @@
 #!/bin/dash
+### BEGIN INIT INFO
+# Provides:          interactor
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      
+# Should-Stop:       
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Disked Interactor
+# Description:       Interacts with LMCE Core
+### END INIT INFO
 
 DEVICEID_FILE="/etc/Disked_DeviceID"
 DTVENDOR_FILE="/etc/pluto/Disked_DTVendor"
