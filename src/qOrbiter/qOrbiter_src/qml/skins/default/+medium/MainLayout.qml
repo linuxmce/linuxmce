@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.4
 import QtGraphicalEffects 1.0
 
 import "."
@@ -87,15 +87,7 @@ Item {
                 }
                 onActivated: manager.currentScreen="Screen_1.qml"
             }
-            StyledButton{
-                buttonText: roomList.currentRoom
-                anchors{
-                    top:parent.top
-                    bottom:parent.bottom
-                    margins: 5
-                }
-                onActivated: qmlRoot.createPopup(roomSelector)
-            }
+
         }
     }
 
@@ -105,6 +97,16 @@ Item {
         FocusRow{
             spacing:5
             anchors.fill: parent
+
+            StyledButton{
+                buttonText: roomList.currentRoom
+                anchors{
+                    top:parent.top
+                    bottom:parent.bottom
+                    margins: 5
+                }
+                onActivated: qmlRoot.createPopup(roomSelector)
+            }
 
             StyledButton{
                 buttonText: qsTr("Sleeping Menu")

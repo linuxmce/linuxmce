@@ -2,7 +2,10 @@ import QtQuick 2.2
 import QtGraphicalEffects 1.0
 import "."
 
-/*! This File is designed to be the main layout that can be switched in and out for various forms */
+/*!
+This File is designed to be the main layout that can be switched in and out for various forms
+the exception is the STB footer, which will operate differently
+*/
 Item{
     id:footer
     focus:true
@@ -38,7 +41,7 @@ Item{
 
     states: [
         State {
-            when:uiOn
+            when:manager.currentScreen==="Screen_1.qml"
             name: "open"
             AnchorChanges{
                 target: footer
@@ -50,7 +53,7 @@ Item{
         },
         State {
             name: "closed"
-            when:!uiOn
+            when:manager.currentScreen!=="Screen_1.qml" || !uiOn
             AnchorChanges{
                 target: footer
                 anchors{

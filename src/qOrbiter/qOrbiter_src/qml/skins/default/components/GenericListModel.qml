@@ -14,6 +14,7 @@ Item{
     property int modelCount:view.count
     property int dataGrid:-1
     property string dataGridLabel:""
+    property string dataGridOptions:""
 
     function refresh(){
         if(dataGrid==-1 || dataGridLabel===""){
@@ -21,8 +22,8 @@ Item{
                 return;
         }
 
-        manager.clearDataGrid("Playlist");
-        view.model=manager.getDataGridModel(dataGridLabel, dataGrid)
+        manager.clearDataGrid(dataGridLabel);
+        view.model=manager.getDataGridModel(dataGridLabel, dataGrid, dataGridOptions)
     }
 
     Component.onCompleted: {
@@ -31,7 +32,7 @@ Item{
             return;
 
             console.log("getting model "+dataGrid)
-            view.model=manager.getDataGridModel(dataGridLabel, dataGrid)
+            view.model=manager.getDataGridModel(dataGridLabel, dataGrid, dataGridOptions)
     }
     onVisibleChanged: if(!visible) manager.clearDataGrid(dataGrid)
 

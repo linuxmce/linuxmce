@@ -5,6 +5,7 @@ NewOrbiterButton		NewOrbiterButton.qml
 SetupNewOrbiter                 SetupNewOrbiter.qml
 Splash                          Splash.qml
 SplashView                      SplashView.qml
+LoadingView                     LoadingView.qml
 StatusRow                       StatusRow.qml
 OptionMenu                      OptionMenu.qml
  Style         1.0     Style.qml
