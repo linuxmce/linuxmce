@@ -119,6 +119,7 @@ bool GenericFlatListModel::setData(const int index, const QString roleName, cons
         return false;
 
     int role = m_prototype->roleNames().key(roleName.toUtf8());
+
     if (role > 0)
         return m_list.at(index-m_windowStart)->setData(role, value);
     else

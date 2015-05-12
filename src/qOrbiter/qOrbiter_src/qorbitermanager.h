@@ -1826,7 +1826,7 @@ public slots:
         appWidth= qorbiterUIwin->width();
         emit orientationChanged();
         qorbiterUIwin->engine()->clearComponentCache();
-       // updateProfileSelector();
+        // updateProfileSelector();
     }
 
     Q_INVOKABLE void qmlReload(){delayedReloadQml();}
@@ -1842,7 +1842,7 @@ private slots:
             m_style->deleteLater();
         }
 
-        QString filePath = m_selector->select(m_localQmlPath+"skins/"+currentSkin+"/Style.qml");        
+        QString filePath = m_selector->select(m_localQmlPath+"skins/"+currentSkin+"/Style.qml");
         filePath.replace("qrc:/", "qrc:///");
         qDebug() << filePath;
         QQmlComponent nustyle(qorbiterUIwin->engine(), QUrl(filePath), QQmlComponent::PreferSynchronous);
@@ -1856,7 +1856,8 @@ private slots:
         qorbiterUIwin->engine()->rootContext()->setContextProperty("Style", m_style);
         QString returnLocation=qorbiterUIwin->source().toString();
         qorbiterUIwin->engine()->clearComponentCache();
-#ifdef simulate        qorbiterUIwin->setSource(QUrl(m_selector->select(m_localQmlPath+"Index.qml")));
+#ifdef simulate
+        qorbiterUIwin->setSource(QUrl(m_selector->select(m_localQmlPath+"Index.qml")));
 
 #else
         qorbiterUIwin->setSource(QUrl("qrc:/qml/qml/Index.qml"));
