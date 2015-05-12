@@ -5,12 +5,15 @@
 #endif
 
 FloorplanDevice::FloorplanDevice(QString name, int deviceNo, int floorplan_device_type, int i_flooplanType, QString position, QObject *parent) :
-    mQS_name(name), mI_deviceNo(deviceNo), mI_floorplan_device_type(floorplan_device_type), mI_floorplanType(i_flooplanType), mQS_position(position)
-
+    mQS_name(name),
+    mI_deviceNo(deviceNo),
+    mI_floorplan_device_type(floorplan_device_type),
+    mI_floorplanType(i_flooplanType),
+    mQS_position(position)
 {
     setCurrentX(0);
     setCurrentY(0);
-   setStatus(false);
+    setStatus(false);
     setupFloorplanPositions();
     setText("There is text");
 
@@ -84,8 +87,8 @@ void FloorplanDevice::setupFloorplanPositions()
     {
         for (int i = 0; i < positions.count(); ++i)
         {
-       // qDebug() << mQS_name << " Floorplan #" << positions.at(i);
-       // qDebug() << "Coordinates" << positions.at(i+1) << "," << positions.at(i+2);
+            // qDebug() << mQS_name << " Floorplan #" << positions.at(i);
+            // qDebug() << "Coordinates" << positions.at(i+1) << "," << positions.at(i+2);
             mm_currentPosition.append(positions.at(i+1)+","+ positions.at(i+2));
 
             if(positions.count() <= i+2)

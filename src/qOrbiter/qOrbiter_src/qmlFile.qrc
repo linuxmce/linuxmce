@@ -163,5 +163,15 @@
         <file>qml/skins/default/screens/Screen_205.qml</file>
         <file>qml/splash/LoadingView.qml</file>
         <file>qml/skins/default/components/ScrollRow.qml</file>
+        <file>qml/skins/default/components/Slider.qml</file>
+        <file>qml/skins/default/components/SendCommandBox.qml</file>
+        <file>qml/skins/default/components/ParamManager.qml</file>
+        <file>qml/skins/default/components/OnOffSwitch.qml</file>
+        <file>qml/skins/default/components/OnButton.qml</file>
+        <file>qml/skins/default/components/OffButton.qml</file>
+        <file>qml/skins/default/components/FpSprite.qml</file>
+        <file>qml/skins/default/components/FloorPlandisplayTemplate.qml</file>
+        <file>qml/skins/default/components/ColorSlider.qml</file>
+        <file>qml/skins/default/components/TabletFloorplanLayout.qml</file>
     </qresource>
 </RCC>

@@ -300,7 +300,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 
 void qorbiterManager::initiateRestart(){
     emit restartOrbiter();
-  //  screenChange("Screen_1.qml");
+    //  screenChange("Screen_1.qml");
 }
 
 //this functions purpose is to change the UI to the new skin pointed to. It will evolve to encompass orbiter regen to some extent
@@ -421,10 +421,22 @@ void qorbiterManager::processConfig(QNetworkReply *config)
         int fpType = floorplan_device_list.at(index).attributes().namedItem("fpType").nodeValue().toInt();
         /*        if (fpType == 7)
             fpType = 6;
-        else */if (fpType == 4) // Move cameras to the security floorplan
-            fpType = 1;
+        else */
+
+        if (fpType == 4)  fpType = 1;// Move cameras to the security floorplan
+
+
         QImage icon;
-        floorplans->appendRow(new FloorplanDevice( name, fp_deviceno, fp_deviceType, fpType, position, floorplans));
+
+        qDebug() << Q_FUNC_INFO << fpType;
+
+        floorplans->appendRow(new FloorplanDevice( name,
+                                                   fp_deviceno,
+                                                   fp_deviceType,
+                                                   fpType,
+                                                   position,
+                                                   floorplans)
+                              );
     }
     emit loadingMessage("Floorplan Devices complete");
     QApplication::processEvents(QEventLoop::AllEvents);
@@ -913,7 +925,7 @@ void qorbiterManager::addDataGridItem(QString dataGridId, int PK_DataGrid, int i
                 GenericModelItem* pItem = DataGridHandler::GetModelItemForCell(PK_DataGrid, pTable, row);
                 // TODO: stop if datagrid model is reset or request stopped
                 m_mapDataGridModels[dataGridId]->insertRow(row, pItem);
-               QApplication::processEvents(QEventLoop::AllEvents);
+                QApplication::processEvents(QEventLoop::AllEvents);
                 count++;
             }
         }
@@ -1604,14 +1616,14 @@ void qorbiterManager::getFloorplanDevices(int floorplantype){
 #ifdef debug
         qDebug() << floorplans->index(i, 0, QModelIndex()).data(1);
 #endif
-
+//qDebug() << Q_FUNC_INFO << floorplans->get(i)->floorplanType() << "::" << floorplantype;
         if(floorplans->index(i).data(6).toInt() == floorplantype)  {
-
             QString markerID = floorplans->index(i).data(1).toString();
             current_floorplan_devices.append(floorplans->find(markerID));
+qDebug() << markerID;
         }
     }
-    //  qorbiterUIwin->rootContext()->setContextProperty("current_floorplan_devices", QVariant::fromValue(current_floorplan_devices));
+     qorbiterUIwin->rootContext()->setContextProperty("current_floorplan_devices", QVariant::fromValue(current_floorplan_devices));
 }
 
 void qorbiterManager::setFloorplanType(int t)
@@ -2274,7 +2286,7 @@ void qorbiterManager::startOrbiter()
         qorbiterUIwin->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 #endif
         //   QApplication::processEvents(QEventLoop::AllEvents);
-     //  setCurrentScreen("Screen_1.qml");
+        //  setCurrentScreen("Screen_1.qml");
         // QApplication::processEvents(QEventLoop::AllEvents);
     }
     else
@@ -2585,7 +2597,7 @@ bool qorbiterManager::restoreSettings()
     qDebug() << Q_FUNC_INFO << "Settings device id" << tId;
     QString trouter = settingsInterface->getOption(SettingsInterfaceType::Settings_Network, SettingsKeyType::Setting_Network_Router).toString();
     mb_useNetworkSkins = settingsInterface->getOption(SettingsInterfaceType::Settings_UI, SettingsKeyType::Setting_Ui_NetworkLoading).toBool();
-   /*Fix Me! */ currentSkin="default";
+    /*Fix Me! */ currentSkin="default";
     qDebug() << "Using network skins?" << mb_useNetworkSkins;
     if(tId && !trouter.isEmpty()){
         qDebug() << Q_FUNC_INFO << "Read Device Number";
@@ -2597,9 +2609,9 @@ bool qorbiterManager::restoreSettings()
 
 bool qorbiterManager::setupNetworkSkins()
 {
-if(m_ipAddress.isEmpty()){
-    m_ipAddress="192.168.80.1";
-}
+    if(m_ipAddress.isEmpty()){
+        m_ipAddress="192.168.80.1";
+    }
 #ifdef __ANDROID__
 
 #ifdef QT5
@@ -2914,6 +2926,12 @@ QString qorbiterManager::getCurrentScreen(){
 
 void qorbiterManager::setCurrentScreen(QString s)
 {
+    qDebug() << Q_FUNC_INFO;
+    if(!s.contains(".qml")){
+        setCurrentScreen(s.toInt());
+        return;
+    }
+
     if(s!=currentScreen){
         currentScreen = s;
         emit screenChange(s);
@@ -2923,6 +2941,7 @@ void qorbiterManager::setCurrentScreen(QString s)
 
 void qorbiterManager::setCurrentScreen(int s)
 {
+    qDebug() << Q_FUNC_INFO;
     QString i = QString("Screen_%1.qml").arg(QString::number(s));
 
     if(i!=currentScreen){
