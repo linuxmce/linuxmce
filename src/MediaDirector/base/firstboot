@@ -224,9 +224,9 @@ MD_Install_Kernel () {
 		VerifyExitCode "Install linux kernel package failed"
 	fi
 
-	StatsMessage "Installing firmware"
-	apt-get -f -y install --no-install-recommends linux-firmware
-	VerifyExitCode "Install linux firmware failed"
+	#StatsMessage "Installing firmware"
+	#apt-get -f -y install --no-install-recommends linux-firmware || :
+	#VerifyExitCode "Install linux firmware failed" || :
 
 	StatsMessage "Running depmod"
 	TARGET_KVER=$(ls -vd /lib/modules/[0-9]* | sed 's/.*\///g' | tail -1)
