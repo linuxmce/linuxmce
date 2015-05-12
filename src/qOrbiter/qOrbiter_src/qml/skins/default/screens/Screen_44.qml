@@ -2,9 +2,10 @@ import QtQuick 2.2
 import "../components"
 StyledScreen {
     id:advancedScreen
+    screen: qsTr("Advanced Options")
     Panel{
         anchors.centerIn: parent
-
+        headerTitle: screen
         useHeader: true
 
         content:  Flickable{

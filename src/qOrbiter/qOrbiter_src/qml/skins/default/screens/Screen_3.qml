@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import "../components"
+import "../."
 import org.linuxmce.grids 1.0
 
 StyledScreen {
@@ -64,7 +65,7 @@ StyledScreen {
                 id:gridBtn
                 buttonText: description
                 textSize: 16
-                height: style.buttonHeight
+                height: Style.buttonHeight
                 width: parent.width
 
                 onActivated: {

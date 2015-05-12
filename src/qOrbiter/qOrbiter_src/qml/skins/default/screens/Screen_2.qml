@@ -1,6 +1,4 @@
 import QtQuick 2.2
-import QtQuick.Controls 1.3
-
 import "../components"
 StyledScreen{
     navigation: "FloorplanNav.qml"
@@ -13,12 +11,13 @@ StyledScreen{
         anchors.right: /*manager.isProfile ?*/ parent.right //: buttonRow.right
         id: lightsFloorplan
         Component.onCompleted: {
-            hideInfoPanel();
-            floorplan_devices.clearAllSelections()
+            floorplan_devices.setCurrentFloorPlanType(2)
+            manager.getFloorplanDevices(2)
+            floorplan_devices.populateSprites()
         }
 
     }
-/*    Item {
+    /*    Item {
         id: buttonRow
         anchors.right: parent.right
         anchors.left: undefined

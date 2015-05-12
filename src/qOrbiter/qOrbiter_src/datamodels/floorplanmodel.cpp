@@ -6,11 +6,11 @@
 FloorPlanModel::FloorPlanModel(FloorplanDevice* prototype, qorbiterManager *r, QObject *parent) :
     QAbstractListModel(parent), m_prototype(prototype), uiRef(r)
 {
-   #ifndef QT5
+#ifndef QT5
     setRoleNames(m_prototype->roleNames());
 #endif
     qRegisterMetaType<QModelIndex>("QModelIndex");
-      qRegisterMetaType<QMap<int, QString*> >("QMap");
+    qRegisterMetaType<QMap<int, QString*> >("QMap");
     setStatus(false);
     multiSelect = true;
 
@@ -18,7 +18,7 @@ FloorPlanModel::FloorPlanModel(FloorplanDevice* prototype, qorbiterManager *r, Q
 #ifdef QT5
 QHash<int, QByteArray> FloorPlanModel::roleNames() const
 {
-     return m_prototype->roleNames();
+    return m_prototype->roleNames();
 }
 #endif
 
@@ -38,8 +38,9 @@ QVariant FloorPlanModel::data(const QModelIndex &index, int role) const
 
 void FloorPlanModel::appendRow( FloorplanDevice *item)
 {
-    appendRows(QList<FloorplanDevice*>() << new FloorplanDevice(item->id(), item->deviceNum(), item->deviceType(), item->floorplanType(), item->pagePosition(), this));
-item->deleteLater();
+    qDebug() << Q_FUNC_INFO << item->floorplanType();
+    appendRows(QList<FloorplanDevice*>() << item);
+
 }
 
 void FloorPlanModel::appendRows(const QList<FloorplanDevice *> &items)
@@ -52,11 +53,9 @@ void FloorPlanModel::appendRows(const QList<FloorplanDevice *> &items)
         QObject::connect(item, SIGNAL(deviceCommandsChanged()), this, SIGNAL(deviceCommandsChanged()));
         QObject::connect(item, SIGNAL(commandParamsChanged()), this, SIGNAL(deviceParamsChanged()));
         m_list.append(item);
-
     }
 
     endInsertRows();
-
     QModelIndex index = indexFromItem(m_list.last());
     QModelIndex index2 = indexFromItem(m_list.first());
     int currentRows= m_list.count() - 1;
@@ -104,7 +103,7 @@ void FloorPlanModel::setDeviceSelection(int devNo)
     for (int i =0; i < m_list.count(); i++){
         if (m_list.at(i)->deviceNum() == devNo){
             if(m_list.at(i)->status == false){
-               selectedDevices.insert(QString::number(devNo), m_list.at(i)->id() );              
+                selectedDevices.insert(QString::number(devNo), m_list.at(i)->id() );
             }
             else
             {
@@ -124,7 +123,7 @@ void FloorPlanModel::setDeviceSelection(int devNo)
     }
     qDebug()<< selectedDevices.count();
     emit selectedDevicesChanged();
- emit selectedDeviceChanged();
+    emit selectedDeviceChanged();
 }
 
 bool FloorPlanModel::getDeviceSelection(int devNo)
@@ -143,18 +142,18 @@ bool FloorPlanModel::getDeviceSelection(int devNo)
 
 void FloorPlanModel::executeDeviceCommand(int deviceId, int cmdId)
 {
-QVariantMap outGoingCommandMsg;
+    QVariantMap outGoingCommandMsg;
 
-QVariantList params;
-int deviceTo;
-int deviceFrom;
+    QVariantList params;
+    int deviceTo;
+    int deviceFrom;
 
-FloorplanDevice *bellWeather = find(deviceId);
-if(bellWeather){
-    qDebug() << bellWeather->getDeviceCommands();
-    QVariantMap t=bellWeather->getDeviceCommands();
-    qDebug() << t;
-}
+    FloorplanDevice *bellWeather = find(deviceId);
+    if(bellWeather){
+        qDebug() << bellWeather->getDeviceCommands();
+        QVariantMap t=bellWeather->getDeviceCommands();
+        qDebug() << t;
+    }
 
 
 
@@ -174,13 +173,13 @@ void FloorPlanModel::handleStatusChange(int device)
 {
     selectedDevices.remove(QString::number(device));
     qDebug() << selectedDevices;
-//    myMap::iterator dev = selectedDevices.begin();
-//    while (dev != selectedDevices.end()) {
-//        if (dev.key() == device)
-//            dev = selectedDevices.erase(dev);
-//        else
-//            ++dev;
-//    }
+    //    myMap::iterator dev = selectedDevices.begin();
+    //    while (dev != selectedDevices.end()) {
+    //        if (dev.key() == device)
+    //            dev = selectedDevices.erase(dev);
+    //        else
+    //            ++dev;
+    //    }
     emit selectedDevicesChanged();
 
 }
@@ -254,8 +253,8 @@ void FloorPlanModel::clear()
 {
     qDeleteAll(m_list);
     m_list.clear();
-    #ifndef QT5
-  this->reset();
+#ifndef QT5
+    this->reset();
 #endif
 }
 
@@ -300,7 +299,7 @@ FloorplanDevice *FloorPlanModel::get(int idx)
 
     FloorplanDevice* item = m_list.at(idx);
     if(item)
-    return item;
+        return item;
     else
         return new FloorplanDevice();
 
@@ -337,7 +336,14 @@ void FloorPlanModel::populateSprites()
 {
     qDebug("Populating Sprites");
     QObject * view = uiRef->qorbiterUIwin->rootObject();
-    QObject * page = view->findChild<QObject*>("floorplan_display");
+    QObject * page = NULL;
+    page = view->findChild<QObject*>("floorplan_display");
+
+    if(page==NULL){
+        qDebug() << "Could not find floorplan object";
+    } else {
+        qDebug () << "Found floorplan object";
+    }
 
 
     foreach(FloorplanDevice* item, m_list) {
@@ -346,9 +352,8 @@ void FloorPlanModel::populateSprites()
         {
             if(item->getCurrentX() != -1)
             {
-#ifdef QT_DEBUG
+
                 qDebug() << "Need to draw" << item->id();
-#endif
                 QMetaObject::invokeMethod(page, "placeSprites", Q_ARG(QVariant,item->getCurrentX()), Q_ARG(QVariant,item->getCurrentY()), Q_ARG(QVariant,item->deviceNum()), Q_ARG(QVariant,false ), Q_ARG(QVariant, item->deviceType()));
             }
         }
