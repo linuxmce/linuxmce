@@ -173,5 +173,42 @@
         <file>qml/skins/default/components/FloorPlandisplayTemplate.qml</file>
         <file>qml/skins/default/components/ColorSlider.qml</file>
         <file>qml/skins/default/components/TabletFloorplanLayout.qml</file>
+        <file>qml/skins/default/images/floorplan/1.png</file>
+        <file>qml/skins/default/images/floorplan/2.png</file>
+        <file>qml/skins/default/images/floorplan/3.png</file>
+        <file>qml/skins/default/images/floorplan/4.png</file>
+        <file>qml/skins/default/images/floorplan/7.png</file>
+        <file>qml/skins/default/images/floorplan/9.png</file>
+        <file>qml/skins/default/images/floorplan/10.png</file>
+        <file>qml/skins/default/images/floorplan/11.png</file>
+        <file>qml/skins/default/images/floorplan/12.png</file>
+        <file>qml/skins/default/images/floorplan/13.png</file>
+        <file>qml/skins/default/images/floorplan/14.png</file>
+        <file>qml/skins/default/images/floorplan/15.png</file>
+        <file>qml/skins/default/images/floorplan/17.png</file>
+        <file>qml/skins/default/images/floorplan/18.png</file>
+        <file>qml/skins/default/images/floorplan/20.png</file>
+        <file>qml/skins/default/images/floorplan/21.png</file>
+        <file>qml/skins/default/images/floorplan/22.png</file>
+        <file>qml/skins/default/images/floorplan/23.png</file>
+        <file>qml/skins/default/images/floorplan/24.png</file>
+        <file>qml/skins/default/images/floorplan/25.png</file>
+        <file>qml/skins/default/images/floorplan/26.png</file>
+        <file>qml/skins/default/images/floorplan/30.png</file>
+        <file>qml/skins/default/images/floorplan/32.png</file>
+        <file>qml/skins/default/images/floorplan/33.png</file>
+        <file>qml/skins/default/images/floorplan/47.png</file>
+        <file>qml/skins/default/images/floorplan/48.png</file>
+        <file>qml/skins/default/images/floorplan/50.png</file>
+        <file>qml/skins/default/images/floorplan/cable.png</file>
+        <file>qml/skins/default/images/floorplan/cd.png</file>
+        <file>qml/skins/default/images/floorplan/minus.png</file>
+        <file>qml/skins/default/images/floorplan/orbiter.png</file>
+        <file>qml/skins/default/images/floorplan/plus.png</file>
+        <file>qml/skins/default/images/floorplan/qmldir</file>
+        <file>qml/skins/default/images/floorplan/remote.png</file>
+        <file>qml/skins/default/images/floorplan/smallpower.png</file>
+        <file>qml/skins/default/images/floorplan/sprinkler.png</file>
+        <file>qml/skins/default/images/floorplan/vcr.png</file>
     </qresource>
 </RCC>
