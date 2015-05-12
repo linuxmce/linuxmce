@@ -43,7 +43,7 @@ Item {
 
     Image {
         id: fpDevice_image
-        source:"../img/floorplanitems/"+deviceType+".png"
+        source:"../images/floorplan/"+deviceType+".png"
         sourceSize:Qt.size(Style.scaleY(6), Style.scaleY(6))
         anchors.centerIn: parent
         anchors.fill: parent
