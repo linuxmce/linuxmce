@@ -7,7 +7,7 @@ StyledScreen {
     TabletFloorplanLayout{
         id: securityFloorplan
         Component.onCompleted: {
-            hideInfoPanel();
+           floorplan_devices.setCurrentFloorPlanType(1)
             floorplan_devices.clearAllSelections()
         }
     }

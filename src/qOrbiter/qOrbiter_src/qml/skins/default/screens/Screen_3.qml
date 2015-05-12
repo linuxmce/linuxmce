@@ -10,8 +10,7 @@ StyledScreen {
     TabletFloorplanLayout{
         id: mediaFloorplan
         Component.onCompleted: {
-            hideInfoPanel();
-            setNavigation();
+            floorplan_devices.setCurrentFloorPlanType(5)
             floorplan_devices.clearAllSelections()
         }
 
@@ -25,7 +24,7 @@ StyledScreen {
             spacing: 10
             StyledButton {
                 id: btOff
-                height: style.buttonHeight
+                height: Style.appButtonHeight
                 width: 100
                 buttonText: "Stop"
                 // call stopMedia with selected EA
