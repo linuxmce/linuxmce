@@ -38,7 +38,7 @@ Item{
             Rectangle{
                 id:fil
                 anchors.fill: parent
-                color:ms.pressed ? style.buttonPressedColor: "black"
+                color:ms.pressed ? Style.buttonPressedColor: "black"
                 opacity:Style.appList_opacity
                 
             }

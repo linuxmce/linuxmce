@@ -12,23 +12,24 @@ StyledScreen {
     Panel{
         id:alarms_info
         headerTitle: screen
+        anchors.centerIn: parent
         content: Item{
             anchors.fill: parent
             GenericListModel{
-                model: manager.getDataGridModel("sleepingAlarms", DataGrids.Alarms_In_Room, String(manager.getlocation()))
-//                dataGrid: DataGrids.Alarms_In_Room
-//                dataGridLabel: "sleepingAlarms"
-//                dataGridOptions: String(manager.getlocation())
-                label:"Alarms in Room"
-
+                id:alarm_model
+                //  model: manager.getDataGridModel("sleepingAlarms", DataGrids.Alarms_In_Room, String(manager.getlocation()))
+                dataGrid: DataGrids.Alarms_In_Room
+                dataGridLabel: "sleepingAlarms"
+                dataGridOptions: String(manager.getlocation())
+                label:qsTr("(%1) Alarms in Room").arg(alarm_model.modelCount)
+                height: parent.height
                 width: parent.width
                 delegate: Item{
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    height: 100
+                    width: parent.width
+                    height: Style.listViewItemHeight
                     Rectangle{
                         anchors.fill: parent
-                        color:/*handler.pressed ? "yellow" :*/ status ? "green" : "red"
+                        color: /*handler.pressed ? "yellow" :*/ status ? "green" : "red"
                         opacity: .75
                         radius:5
                         border.color: "white"
@@ -81,8 +82,8 @@ StyledScreen {
                     MouseArea{
                         anchors.fill: parent
                         onClicked: {
-                            alarmlist.model.setData(index, "status", !status)
-
+                            alarm_model.model.setData(index, "status", !status)
+                            alarm_model.refresh()
                         }
                     }
 

@@ -106,13 +106,19 @@ Item{
     MediaPlayer{
         id:qmlPlayer
         autoPlay: true
-        autoLoad: false
+        autoLoad: true
+
+        onPlaybackStateChanged: console.log(qmlPlayer.source)
+
+        onErrorStringChanged: {
+            console.log(errorString)
+        }
 
         onStopped: {
 
-            if(duration==position){
-                lmceData.qmlPlaybackEnded(false)
-            }
+//            if(duration==position){
+//                lmceData.qmlPlaybackEnded(false)
+//            }
 
         }
 

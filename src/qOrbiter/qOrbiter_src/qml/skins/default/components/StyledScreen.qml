@@ -6,6 +6,10 @@ Item {
     opacity: 0
     anchors.fill: parent
     Keys.onTabPressed: header.forceActiveFocus()
+   Timer{
+    id:failSafe
+
+   }
     Component.onCompleted: {
         console.log("screen opening")
         forceActiveFocus()
@@ -27,7 +31,7 @@ Item {
     }
 
     onScreenOpening: {
-        raiseNavigation(false)
+        //raiseNavigation(false)
         //        raiseNavigation(manager.currentScreen==="Screen_1.qml" ? true :keepHeader )
         //        if(keepHeader){
         //            setNavigation(navigation)
