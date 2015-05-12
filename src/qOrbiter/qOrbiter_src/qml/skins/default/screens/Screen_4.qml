@@ -8,7 +8,7 @@ StyledScreen {
     TabletFloorplanLayout{
         id: climateFloorplan
         Component.onCompleted: {
-            //hideInfoPanel();
+            floorplan_devices.setCurrentFloorPlanType(4);
             floorplan_devices.clearAllSelections()
         }
     }
