@@ -76,12 +76,11 @@ Item{
             }
         }
     }
-    Text{
+    StyledText{
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         text:sliderValue
-        color:"white"
-        font.pointSize: 18
+        color:"white"       
     }
 
 }

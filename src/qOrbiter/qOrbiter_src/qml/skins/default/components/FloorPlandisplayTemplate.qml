@@ -159,38 +159,7 @@ Item {
         }
     }
 
-    Item{
-        height: Style.scaleY(10) + 5
-        width: Style.scaleX(35)
-        anchors.right: parent.right
-        visible:useList
 
-        GenericListModel{
-            model: floorplan_pages
-            label: qsTr("Floorplans")
-            width: Style.scaleX(25)
-            height: Style.scaleY(45)
-            delegate:Rectangle{
-                height: Style.scaleY(9)
-                width: Style.scaleX(35)
-                color: Style.appcolor_background
-                border.color: Style.appcolor_foregroundColor
-                StyledText {
-                    id: desc
-                    text: m_description
-                    width: parent.width
-                    height: parent.height
-                }
-                MouseArea{
-                    anchors.fill: parent
-                    onPressed:{
-                        floorplan_devices.clearAllSelections()
-                        floorplan_devices.setCurrentPage(m_page)
-                    }
-                }
-            }
-        }
-    }
 
 }
 

@@ -1,8 +1,9 @@
-import QtQuick 1.1
+import QtQuick 2.2
 import "../components"
+import "../."
 Item {
-    width: scaleX(45)
-    height: scaleY(20)
+    width: Style.appButtonWidth
+    height: Style.appButtonHeight
 
 
     Item{
@@ -23,11 +24,10 @@ Item {
             border.width: 1
         }
 
-        Text{
+        StyledText{
             anchors.centerIn: parent
             text:qsTr("Off")
-            color:"white"
-            font.pointSize: 18
+            color:"white"           
         }
 
         MouseArea{
