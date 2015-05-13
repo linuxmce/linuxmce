@@ -8,7 +8,7 @@ Item{
     property double max:100.0
     property string handleImagePath:""
     property string fillImagePath:""
-    property string fillColor:androidSystem.greenStandard
+    property string fillColor:"green"
     property string borderColor:"white"
     property double sliderValue: Math.round((calculatedStart / calculatedEnd )* 100)
     property int startingLevel:50
@@ -21,7 +21,7 @@ Item{
         id:phil
         width: 240
         height: 15
-        color:androidSystem.blueStandard
+        color:"blue"
         radius: 5
         border.color: borderColor
         border.width: 1
@@ -33,7 +33,7 @@ Item{
         width: height
         anchors.verticalCenter:phil.verticalCenter
         radius:65
-        color:androidSystem.blueHighlight
+        color:"lightblue"
         opacity: .85
 
 //        onXChanged: {

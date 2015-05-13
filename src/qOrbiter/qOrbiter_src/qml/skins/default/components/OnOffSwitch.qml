@@ -1,8 +1,8 @@
-import QtQuick 1.1
-
+import QtQuick 2.2
+import "../."
 Item {
-    width: scaleX(30)
-    height: scaleY(12)
+    width: Style.scaleX(30)
+    height: Style.scaleY(12)
     anchors.centerIn: parent
 
     Rectangle{
@@ -17,10 +17,10 @@ Item {
         id:options
         height: parent.height
         width: parent.width
-        spacing: scaleX(2)
+        spacing: Style.scaleX(2)
         Item{
-            height:scaleY(6)
-            width:scaleX(10)
+            height:Style.scaleY(6)
+            width:Style.scaleX(10)
 
             Rectangle{
                 anchors.fill: parent
@@ -49,8 +49,8 @@ Item {
             }
         }
         Item{
-            height:scaleY(6)
-            width:scaleX(10)
+            height:Style.scaleY(6)
+            width:Style.scaleX(10)
 
             Rectangle{
                 anchors.fill: parent

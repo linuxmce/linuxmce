@@ -1,17 +1,33 @@
 import QtQuick 2.2
 import "../components"
 import "../."
-Item{
+GenericListModel{
     id:sendCommandBox
-    anchors.verticalCenter: parent.verticalCenter
-    anchors.left: parent.left
+
+
     height: Style.scaleY(75)
     width: Style.scaleX(35)
     focus:true
     clip:true
+    model:availbleCommands
+    label:qsTr("Availible Commands")
     property Item trackedDevice
     property int trackedInt:0
+    delegate: Item{
+        width: parent.width
+        height: Style.listViewItemHeight
 
+        Loader {
+            anchors.fill: parent
+            sourceComponent: getCmdDelegate(command_number)
+            property variant cmdName : command_name
+            property variant cmdNumber : command_number
+        }
+    }
+
+    ListModel{
+        id:availbleCommands
+    }
     Connections{
         target:floorplan_devices
         onDeviceCommandsChanged:{
@@ -24,16 +40,13 @@ Item{
         }
     }
 
-   function refreshCommands(){
-       trackedInt = selections.get(0).device
-       manager.getFloorplanDeviceCommands(trackedInt)
-   }
+    function refreshCommands(){
+        if(selections.count==0)
+            return;
 
-
-    ListModel{
-        id:availbleCommands
+        trackedInt = selections.get(0).device
+        manager.getFloorplanDeviceCommands(trackedInt)
     }
-
 
     Keys.onReleased: {
         event.accepted = true
@@ -47,56 +60,12 @@ Item{
             console.log("Cmd box Recieved key ==>"+event.key+" but not accepting")
             break;
         }
-
     }
 
-    Rectangle{
-        id:phil
-        anchors.fill: parent
-        color:"black"
-        opacity: .85
-    }
-
-    Rectangle{
-        id:controlsContainer
-        height: parent.height*.75
-        width: parent.width*.95
-        color: Style.appcolor_background_light
-        radius: 5
-        border.color: "white"
-        anchors.centerIn: parent
-        visible:parent.visible
-    }
-
-    Text {
-        id: cmdsPrmoptText
-        text: qsTr("Availible Commands")
-        font.pointSize:Style.scaleY(3)
-        color: "black"
-        font.bold: true
-        anchors.top: controlsContainer.top
-        anchors.horizontalCenter: controlsContainer.horizontalCenter
-        anchors.topMargin: 10
-    }
-    ListView{
-        id:cmdView
-        anchors.top: cmdsPrmoptText.bottom
-        width: controlsContainer.width -5
-        height: controlsContainer.height - cmdsPrmoptText.height - 10
-        anchors.horizontalCenter: controlsContainer.horizontalCenter
-        model:availbleCommands
-        clip:true
-        spacing:Style.scaleY(2)
-        delegate: Loader {
-            sourceComponent: getCmdDelegate(command_number)
-            property variant cmdName : command_name
-            property variant cmdNumber : command_number
-        }
-    }
 
     function containsCmd(cmdNo) {
-        for(var i = 0; i < cmdView.model.count; i++) {
-            if (cmdView.model.get(i).command_number == cmdNo)
+        for(var i = 0; i < sendCommandBox.count; i++) {
+            if (sendCommandBox.model.get(i).command_number == cmdNo)
                 return true
         }
         return false;
@@ -132,7 +101,7 @@ Item{
         Rectangle {
             id:cmdEntry
             height: Style.appButtonHeight
-            width: cmdView.width
+            width: parent.width
             color: "black"
             border.color: "white"
             border.width: 1
@@ -148,14 +117,16 @@ Item{
                 width: childrenRect.width
                 spacing: 10
                 StyledButton {
-                    height: Style.appButtonHeight /2
+                    height: Style.appButtonHeight
+                    width: Style.appButtonWidth /2
                     anchors.verticalCenter: parent.verticalCenter
                     label:qsTr( "On")
                     onActivated: sendCommand(cmdNumber, []);
                 }
                 StyledButton {
                     anchors.verticalCenter: parent.verticalCenter
-                    height: Style.appButtonHeight /2
+                    height: Style.appButtonHeight
+                     width: Style.appButtonWidth /2
                     label: "Off"
                     onActivated: sendCommand("193", []);
                 }
@@ -299,7 +270,7 @@ Item{
         Rectangle{
             id:cmdEntry
             height: Style.appButtonHeight
-            width: cmdView.width
+            width: parent.width
             state:"preselect"
             color: "black"
             border.color: "white"
@@ -347,7 +318,7 @@ Item{
                                                       "CommandHint":cl[c].CommandHint,
                                                       "CommandParameter":cl[c].CommandParameter,
                                                       "type":cl[c].type,
-                                                      "value":""
+                                                      "value":undefined
                                                   } )
                             }
                         }
@@ -395,7 +366,6 @@ Item{
                 delegate: Item{
                     id:cmdDelegate
                     clip:false
-
                     Component.onCompleted: {
                         if(Command==="192"){
                             if(CommandParameter!=98){
@@ -438,7 +408,7 @@ Item{
 
 
                     height: state==="selected" !==0 ? 60 : 0
-                    width: parent .height !==0 ? 120 : 0
+                    width: parent.height !==0 ? 120 : 0
                     Column{
                         spacing:5
                         width: parent.width

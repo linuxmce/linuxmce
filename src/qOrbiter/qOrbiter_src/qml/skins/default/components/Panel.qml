@@ -9,6 +9,7 @@ Item {
     property int panelHeaderHeight: useHeader ? Style.appNavigation_panelHeight : 0
     property string headerTitle:"Lorem Ipsum"
     property bool useHeader:true
+    property alias headerRow:control_row
     property alias fillColor:bgfill.color
     property string headerFillColor:Style.appcolor_background_list
     property Component content
@@ -22,6 +23,17 @@ Item {
         border.color: "white"
         border.width: 1
     }
+    Loader{
+        id:panelContent
+        sourceComponent: content
+        anchors{
+            top:panelHeader.bottom
+            left:parent.left
+            right:parent.right
+            bottom:parent.bottom
+            margins: 5
+        }
+    }
 
 
     Rectangle{
@@ -33,6 +45,28 @@ Item {
             top:parent.top
             left:parent.left
             right:parent.right
+        }
+    }
+
+    ScrollRow{
+        height: panelHeader.height *.95
+        contentWidth: control_row.width
+        contentHeight: height
+
+        anchors{
+            right:panelHeader.right
+            left:headerText.right
+            leftMargin: 5
+            verticalCenter: panelHeader.verticalCenter
+        }
+
+        Row{
+            id:control_row
+            spacing: 2
+            width: children.length*Style.appButtonWidth
+            height: panelHeader.height *95
+
+            Component.onCompleted: console.log("ctrl row len"+children.length)
         }
     }
 
@@ -67,16 +101,6 @@ Item {
         color:Style.appbutton_color
     }
 
-    Loader{
-        id:panelContent
-        sourceComponent: content
-        anchors{
-            top:panelHeader.bottom
-            left:parent.left
-            right:parent.right
-            bottom:parent.bottom
-            margins: 5
-        }
-    }
+
 
 }
