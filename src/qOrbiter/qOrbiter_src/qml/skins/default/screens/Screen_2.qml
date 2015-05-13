@@ -3,6 +3,7 @@ import "../components"
 StyledScreen{
     navigation: "FloorplanNav.qml"
     property alias floorplan: lightsFloorplan
+    onScreenOpen: floorplan_devices.clearAllSelections()
 
     TabletFloorplanLayout {
         anchors.top: parent.top

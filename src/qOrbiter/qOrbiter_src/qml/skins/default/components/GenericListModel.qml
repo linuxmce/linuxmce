@@ -15,11 +15,18 @@ Item{
     property int dataGrid:-1
     property string dataGridLabel:""
     property string dataGridOptions:""
+    property bool extended:true
+    onExtendedChanged: console.log(extended)
+
+
+    function toggleView(){
+        extended=!extended
+    }
 
     function refresh(){
         if(dataGrid==-1 || dataGridLabel===""){
             console.log("Invalid model id, cant reset")
-                return;
+            return;
         }
 
         manager.clearDataGrid(dataGridLabel);
@@ -31,8 +38,8 @@ Item{
         if(dataGrid==-1 || dataGridLabel==="")
             return;
 
-            console.log("getting model "+dataGrid)
-            view.model=manager.getDataGridModel(dataGridLabel, dataGrid, dataGridOptions)
+        console.log("getting model "+dataGrid)
+        view.model=manager.getDataGridModel(dataGridLabel, dataGrid, dataGridOptions)
     }
     onVisibleChanged: if(!visible) manager.clearDataGrid(dataGrid)
 
@@ -46,6 +53,7 @@ Item{
         height: Style.appNavigation_panelHeight
         color:Style.appcolor_background_medium
         opacity: Style.appList_opacity
+
     }
     StyledText{
         id:itemlabel
@@ -54,6 +62,25 @@ Item{
         fontSize: Style.appFontSize_title
         color:"white"
     }
+
+    Image {
+        id: toggleSw
+        source: "../images/vertical_arrow.png"
+        rotation: genericListContainer.state==="extended" ? 0 : -90
+        height: hdr.height*.75
+        width: height
+        fillMode: Image.PreserveAspectFit
+        anchors{
+            right:hdr.right
+            verticalCenter: hdr.verticalCenter
+        }
+
+        MouseArea{
+            anchors.fill: parent
+            onClicked: toggleView()
+        }
+    }
+
     ListView{
         id:view
         clip:true
@@ -64,8 +91,46 @@ Item{
         anchors{
             left:parent.left
             top:hdr.bottom
-            bottom:parent.bottom
+
             right:parent.right
         }
-    }    
+    }
+
+    states: [
+        State {
+            name: "extended"
+            when:genericListContainer.extended
+            AnchorChanges{
+                target:view
+                anchors.bottom: parent.bottom
+            }
+        },
+        State {
+            name: "retracted"
+            when:!genericListContainer.extended
+            AnchorChanges{
+                target:view
+                anchors.bottom: hdr.bottom
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+            AnchorAnimation{
+                duration: Style.transition_animationTime
+                easing.type: Easing.InOutCubic
+            }
+
+            PropertyAnimation{
+                duration: Style.transition_animationTime
+                easing.type: Easing.InOutCubic
+            }
+
+        }
+    ]
+
+
 }

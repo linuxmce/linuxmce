@@ -46,6 +46,7 @@ Item{
             //            console.log(floorplan_devices.selectedDevices[prop])
             selections.append({"device":prop, "name":floorplan_devices.selectedDevices[prop]})
         }
+        sendCommandBox.refreshCommands()
     }
 
 
@@ -122,7 +123,7 @@ Item{
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                   floorplanPic.setScaleFactor(15)
+                    floorplanPic.setScaleFactor(15)
                 }
             }
         }
@@ -133,6 +134,7 @@ Item{
     states: [
         State {
             name: "floorplanView"
+            when:selections.count==0
             PropertyChanges {
                 target: floorplanPic
                 visible:true
@@ -148,8 +150,8 @@ Item{
             name: "commandView"
             PropertyChanges {
                 target: floorplanPic
-                opacity:0
-                visible:false
+                opacity:.55
+                visible:true
             }
             PropertyChanges{
                 target: sendCommandBox
@@ -164,7 +166,7 @@ Item{
             from: "*"
             to: "commandView"
             ScriptAction{
-                script: sendCommandBox.forceActiveFocus()
+                script: phoneFloorplanLayout.processSelectedDevices()
             }
         },
         Transition {

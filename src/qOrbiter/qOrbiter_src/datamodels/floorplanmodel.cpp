@@ -99,7 +99,7 @@ QVariantList FloorPlanModel::getCommandParams(int device)
 
 void FloorPlanModel::setDeviceSelection(int devNo)
 {
-    qDebug() << "Handling status change for:" << devNo;
+   // qDebug() << "Handling status change for:" << devNo;
     for (int i =0; i < m_list.count(); i++){
         if (m_list.at(i)->deviceNum() == devNo){
             if(m_list.at(i)->status == false){
@@ -129,7 +129,7 @@ void FloorPlanModel::setDeviceSelection(int devNo)
 bool FloorPlanModel::getDeviceSelection(int devNo)
 {
 #ifdef QT_DEBUG
-    qDebug() << "Handling status request for:" << devNo;
+   // qDebug() << "Handling status request for:" << devNo;
 #endif
     for (int i =0; i < m_list.count(); i++){
         if (m_list.at(i)->deviceNum() == devNo){
@@ -353,7 +353,7 @@ void FloorPlanModel::populateSprites()
             if(item->getCurrentX() != -1)
             {
 
-                qDebug() << "Need to draw" << item->id();
+               // qDebug() << "Need to draw" << item->id();
                 QMetaObject::invokeMethod(page, "placeSprites", Q_ARG(QVariant,item->getCurrentX()), Q_ARG(QVariant,item->getCurrentY()), Q_ARG(QVariant,item->deviceNum()), Q_ARG(QVariant,false ), Q_ARG(QVariant, item->deviceType()));
             }
         }
