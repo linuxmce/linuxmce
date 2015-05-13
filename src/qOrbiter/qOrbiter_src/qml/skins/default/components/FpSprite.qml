@@ -21,8 +21,8 @@ Item {
     property string deviceType: ""
     property string imgUrl: ""
     property bool selected:floorplan_devices.getDeviceSelection(deviceNum)
-    property int itemH:Style.scaleY(3)
-    property int itemW: Style.scaleY(3)
+    property int itemH:Style.scaleY(5)
+    property int itemW: Style.scaleY(5)
     property double iconScale: 1.5
     onSelectedChanged: {
         console.log(deviceNum+" changed to "+selected)

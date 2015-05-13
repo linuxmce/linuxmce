@@ -39,10 +39,11 @@ Item {
             var lcl = floorplan_devices.get(cnt)
             console.log(JSON.stringify(lcl, null, "\t"))
             var c
-            console.log("QML Creating Sprite")
+            //  console.log("QML Creating Sprite")
             c = Qt.createComponent("FpSprite.qml");
             if(c.status === Component.Loading)
-            {   console.log("QML Floorplan object Loading")
+            {
+                console.log("QML Floorplan object Loading")
                 finishPlacingSprites(c,lcl.x,lcl.y, lcl.deviceNum, unknown, lcl.type)
             }
             else if (c.status === Component.Error)
@@ -63,10 +64,11 @@ Item {
         var pX = x; //x point
         var pY = y; //y point
         var c;
-        console.log("Creating Sprite")
+        // console.log("Creating Sprite")
         c = Qt.createComponent("FpSprite.qml");
         if(c.status === Component.Loading)
-        {   console.log("Component Loading")
+        {
+            //console.log("Component Loading")
             finishPlacingSprites(c,pX,pY, num, state, devtype)
         }
         else if (c.status === Component.Error)
@@ -75,7 +77,7 @@ Item {
         }
         else if (c.status === Component.Ready)
         {
-            console.log("Component Ready!")
+            // console.log("Component Ready!")
             var sprite = c.createObject(floorplanimage, {"x": pX, "y": pY, "deviceNum": num, "deviceType": devtype});
         }
     }
@@ -137,21 +139,20 @@ Item {
                     imageFlick.contentY += pinch.previousCenter.y - pinch.center.y;
                     setScaleFactor((pinch.scale-pinch.previousScale)*3000)
                 }
+            }
+            Image {
+                objectName: "floorplan_image"
+                id: floorplanimage
+                fillMode: Image.PreserveAspectCrop
+                source: ""
+                anchors.centerIn: parent
+                transformOrigin: Item.Center
+                scale: Math.min((mainRect.height-40)/floorplanimage.sourceSize.height,(mainRect.width-40)/floorplanimage.sourceSize.width)
 
-                Image {
-                    objectName: "floorplan_image"
-                    id: floorplanimage
-                    fillMode: Image.PreserveAspectCrop
-                    source: ""
-                    anchors.centerIn: parent
-                    transformOrigin: Item.Center
-                    scale: Math.min((mainRect.height-40)/floorplanimage.sourceSize.height,(mainRect.width-40)/floorplanimage.sourceSize.width)
-
-                    Behavior on scale {
-                        PropertyAnimation{
-                            duration: 350
-                            easing.type: Easing.InBounce
-                        }
+                Behavior on scale {
+                    PropertyAnimation{
+                        duration: 350
+                        easing.type: Easing.InBounce
                     }
                 }
             }
@@ -162,30 +163,23 @@ Item {
         height: Style.scaleY(10) + 5
         width: Style.scaleX(35)
         anchors.right: parent.right
-        visible:floorplanlist.visible
-        Text{
-            id:fplabel
-            text: qsTr("Floorplans")
-            height: Style.scaleY(5)
+        visible:useList
 
-        }
-
-        ListView{
-            id:floorplanlist
-            anchors { top: parent.top; bottom: parent.bottom; left: parent.left; right: parent.right }
-            width: Style.scaleX(35)
-            model:floorplan_pages
-            clip:true
-            visible: floorplan_pages.count !==0 ? useList : false
-
+        GenericListModel{
+            model: floorplan_pages
+            label: qsTr("Floorplans")
+            width: Style.scaleX(25)
+            height: Style.scaleY(45)
             delegate:Rectangle{
                 height: Style.scaleY(9)
                 width: Style.scaleX(35)
                 color: Style.appcolor_background
                 border.color: Style.appcolor_foregroundColor
-                Text {
+                StyledText {
                     id: desc
                     text: m_description
+                    width: parent.width
+                    height: parent.height
                 }
                 MouseArea{
                     anchors.fill: parent

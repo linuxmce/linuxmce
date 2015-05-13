@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.2
 import "../components"
 Item{
     id:slider
@@ -8,7 +8,7 @@ Item{
     property double max:255
     property string handleImagePath:""
     property string fillImagePath:""
-    property string fillColor:androidSystem.greenStandard
+    property string fillColor:"green"
     property string borderColor:"white"
     property double sliderValue: Math.round( ((calculatedStart / calculatedEnd )* 100)*conversion )
     property int startingLevel:50
