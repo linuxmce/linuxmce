@@ -14,8 +14,10 @@ ScreenInfo::ScreenInfo(QObject *parent) :
                     screen->logicalDotsPerInch(),
                     screen->physicalDotsPerInch(),
                     screen->orientation(),  screen->primaryOrientation(), screen->nativeOrientation(),
-                    screen->physicalSize().height(), screen->physicalSize().width(),
-                    screen->availableSize().height(), screen->availableSize().width()
+                    screen->physicalSize().height(),
+                    screen->physicalSize().width(),
+                    screen->availableSize().height()==0 ? screen->availableGeometry().height() : screen->availableSize().height(),
+                    screen->availableSize().width()==0 ? screen->availableGeometry().width() : screen->availableSize().width()
                     );
 
         connect(screen, SIGNAL(refreshRateChanged(qreal)), newScreen, SLOT(setRefreshRate(qreal)));

@@ -1,7 +1,7 @@
 // import QtQuick 2.2 // to target S60 5th Edition or Maemo 5
 import QtQuick 2.2
 import QtGraphicalEffects 1.0
-import "."
+import "../."
 Item {
    anchors.fill: parent
     id:splashPage
