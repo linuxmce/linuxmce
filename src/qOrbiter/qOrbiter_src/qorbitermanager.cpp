@@ -1671,6 +1671,16 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
  * \return
  */
 bool qorbiterManager::readLocalConfig(){
+    if(settingsInterface->ready){
+        if(restoreSettings()){
+
+        }
+        return true;
+    } else {
+
+        return false;
+    }
+
     QDomDocument localConfig;
     QString xmlPath;
 

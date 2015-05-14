@@ -1829,7 +1829,7 @@ public slots:
         // updateProfileSelector();
     }
 
-    Q_INVOKABLE void qmlReload(){delayedReloadQml();}
+    Q_INVOKABLE void qmlReload(){resetScreenSize();}
 
     Q_INVOKABLE QVariant systemFontList();
 

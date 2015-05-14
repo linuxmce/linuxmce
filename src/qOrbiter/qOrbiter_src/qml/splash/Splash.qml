@@ -71,6 +71,7 @@ Item {
     Loader{
         id:splash_content
         anchors.fill: parent
+        source:"SplashView.qml"
     }
 
 
@@ -88,39 +89,39 @@ Item {
         //  source: "../../skins-common/fonts/Sawasdee.ttf"
     }
 
-    states: [
-        State {
-            name: "connecting"
-            when: manager.iPK_Device !==-1
+//    states: [
+//        State {
+//            name: "connecting"
+//          //  when: manager.iPK_Device !==-1
 
-            PropertyChanges {
-               target:splash_content
-               source:"LoadingView.qml"
-            }
-        },State {
-             when:manager.iPK_Device==-1 && orbiterList.length===0
-            name: "connected-nodevices"
-            PropertyChanges {
-               target: splash_content
-               source:"LoadingView.qml"
-            }
+//            PropertyChanges {
+//                target:splash_content
+//                source:"LoadingView.qml"
+//            }
+//        },State {
+//         //   when:manager.iPK_Device==-1 && orbiterList.length===0
+//            name: "connected-nodevices"
+//            PropertyChanges {
+//                target: splash_content
+//                source:"SplashView.qml"
+//            }
 
-        }, State {
-            when:manager.iPK_Device==-1
-            name: "connected-devices"
-            PropertyChanges {
-               target: splash_content
-             source:"SplashView.qml"
-            }
+//        }, State {
+//          //  when:manager.iPK_Device==-1
+//            name: "connected-devices"
+//            PropertyChanges {
+//                target: splash_content
+//                source:"SplashView.qml"
+//            }
 
-        },
-        State {
-            name: "new-orbiter"
-            PropertyChanges {
-                // target: object
+//        },
+//        State {
+//            name: "new-orbiter"
+//            PropertyChanges {
+//                // target: object
 
-            }
-        }
+//            }
+//        }
 
-    ]
+//    ]
 }

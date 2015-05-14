@@ -43,7 +43,7 @@ public:
         Device_Small    = 4,    //Phones small
         Device_Medium   = 7,    //Normal Tablets
         Device_Large    = 10,   //Big Tablets
-        Device_XLarge   = 13    //Computer Monitors
+        Device_XLarge   = 13    //Computer Monitors, tvs, etc
     };
 
     virtual ~ScreenData() {}
@@ -103,7 +103,7 @@ public:
         setDiagonalSize(sqrt( pow( (double)m_heightMM,2.0)+pow((double)m_widthMM, 2.0) ));
 
         qDebug() << " Handling Device " <<  heightInches() << "h x " << widthInches() << "w  device measured at " << diagonalInches() << " descriptively";
-        if(  diagonalInches() <= 4.5 ){
+        if(  diagonalInches() <= 5.2 ){
             setStringDeviceSize(tr("Small"));
             setScreenSize(ScreenData::Device_Small);
 
@@ -137,7 +137,9 @@ public:
         else if (m_logicalDpi <= ScreenData::PixelDensity_XXHDPI){ setPixelScale(ScreenData::PixelDensity_XXHDPI);}
         else if (m_logicalDpi <= ScreenData::PixelDensity_XXXHDPI){ setPixelScale(ScreenData::PixelDensity_XXXHDPI);}
 
+
         int cmp = m_height < m_width ? m_height : m_width;
+
         if(cmp <= ScreenData::Device_240) { m_devicePixelSize = ScreenData::Device_240; }
         else  if(cmp <= ScreenData::Device_320) { m_devicePixelSize = ScreenData::Device_320; }
          else  if(cmp <= ScreenData::Device_480) { m_devicePixelSize = ScreenData::Device_480; }
@@ -148,7 +150,6 @@ public:
          else  if(cmp <= ScreenData::Device_960) { m_devicePixelSize = ScreenData::Device_960; }
          else  if(cmp <= ScreenData::Device_1024) { m_devicePixelSize = ScreenData::Device_1024; }
          else  if(cmp <= ScreenData::Device_1280) { m_devicePixelSize = ScreenData::Device_1280; }
-
 
 
     }
@@ -243,7 +244,11 @@ public slots:
         }
     }
 
-    void setPixelRatio(){m_pixelRatio =  ( (double) m_phisicalDpi / m_logicalDpi) ; emit pixelRatioChanged(); qDebug() << Q_FUNC_INFO << m_pixelRatio;}
+    void setPixelRatio(){
+        m_pixelRatio =  ( (double) m_phisicalDpi / m_logicalDpi) ;
+        emit pixelRatioChanged();
+        qDebug() << Q_FUNC_INFO << "Processed Screen Pixel Ratio::" << m_pixelRatio;
+    }
 
 
 signals:
