@@ -3,10 +3,9 @@ import "../components"
 import "../."
 GenericListModel{
     id:sendCommandBox
-
-
+    extended:false
     height: Style.scaleY(75)
-    width: Style.scaleX(35)
+    width: Style.scaleX(25)
     focus:true
     clip:true
     model:availbleCommands
@@ -126,7 +125,7 @@ GenericListModel{
                 StyledButton {
                     anchors.verticalCenter: parent.verticalCenter
                     height: Style.appButtonHeight
-                     width: Style.appButtonWidth /2
+                    width: Style.appButtonWidth /2
                     label: "Off"
                     onActivated: sendCommand("193", []);
                 }

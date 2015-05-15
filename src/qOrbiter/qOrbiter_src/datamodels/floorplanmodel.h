@@ -44,6 +44,7 @@ class FloorPlanModel : public QAbstractListModel
     Q_PROPERTY (int iCurrentPage READ getCurrentIntPage WRITE setCurrentIntPage NOTIFY pageChanged)
     Q_PROPERTY (bool itemSelected READ getStatus WRITE setStatus NOTIFY selectedChanged )
     Q_PROPERTY (int selectedDevice  READ getSelectedDevice WRITE setSelectedDevice NOTIFY selectedDeviceChanged )
+    Q_PROPERTY(int floorplanType READ floorplanType NOTIFY floorplanTypeChanged)
     Q_PROPERTY(QVariantMap selectedDevices READ getSelectedDevices NOTIFY selectedDevicesChanged)
 
     Q_OBJECT
@@ -156,6 +157,8 @@ public slots:
 
     Q_INVOKABLE void setCurrentPage(QString currentPageId);
     QString getCurrentPage() {return currentPage;}
+
+    int floorplanType(){return currentFloorPlanType;}
 
     void setCurrentFloorPlanType(int t) { currentFloorPlanType = t; emit floorplanTypeChanged(); }
     int getCurrentFloorPlanType() {return currentFloorPlanType; }

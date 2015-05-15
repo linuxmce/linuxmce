@@ -6,6 +6,7 @@ import org.linuxmce.grids 1.0
 Item{
     id:genericListContainer
     width: Style.listViewWidth_medium
+
     property alias listView:view
     property alias model:view.model
     property alias label:itemlabel.text
@@ -16,8 +17,8 @@ Item{
     property string dataGridLabel:""
     property string dataGridOptions:""
     property bool extended:true
-    onExtendedChanged: console.log(extended)
 
+    onEnabledChanged: if(!enabled)state="retracted"
 
     function toggleView(){
         extended=!extended
@@ -51,8 +52,22 @@ Item{
             top:parent.top
         }
         height: Style.appNavigation_panelHeight
-        color:Style.appcolor_background_medium
+        color:enabled ? Style.appcolor_background_medium :" grey"
         opacity: Style.appList_opacity
+
+        Behavior on color {
+            ColorAnimation {
+                duration: Style.transition_animationTime
+                easing.type: Easing.InOutCubic
+            }
+        }
+
+        Behavior on opacity {
+            PropertyAnimation {
+                duration: Style.transition_animationTime
+                easing.type: Easing.InOutCubic
+            }
+        }
 
     }
     StyledText{
@@ -128,7 +143,6 @@ Item{
                 duration: Style.transition_animationTime
                 easing.type: Easing.InOutCubic
             }
-
         }
     ]
 
