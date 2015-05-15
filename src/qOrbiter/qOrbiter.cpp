@@ -2261,10 +2261,14 @@ void qOrbiter::requestFileFormats(int type)
 
 void qOrbiter::getFloorplanDeviceCommand(int device)
 {
+    qDebug() << Q_FUNC_INFO << "Enter";
     //todo - add code to dce router get the info back. directly.
     QVariantMap t;
     QVariantList d;
     DCE::DeviceData_Base * fpDevice = this->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(device);
+
+    if(fpDevice==NULL)
+        return;
 
     for (map<int, string>::iterator it = fpDevice->m_mapCommands.begin(); it!=fpDevice->m_mapCommands.end(); ++it){
         QVariantMap l;
@@ -2277,7 +2281,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
     t.insert("device", device);
 
     emit addFloorplanDeviceCommand(t) ;
-
+ qDebug() << Q_FUNC_INFO << "exit";
 }
 
 void qOrbiter::shutdown()
