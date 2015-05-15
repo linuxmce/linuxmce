@@ -132,7 +132,7 @@ Item {
                 }
                 onPinchFinished: {
                     imageFlick.interactive = true;
-                    imageFlick.returnToBounds()
+                  //  imageFlick.returnToBounds()
                 }
                 onPinchUpdated: {
                     imageFlick.contentX += pinch.previousCenter.x - pinch.center.x;

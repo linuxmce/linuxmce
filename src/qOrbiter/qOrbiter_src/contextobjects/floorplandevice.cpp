@@ -15,8 +15,7 @@ FloorplanDevice::FloorplanDevice(QString name, int deviceNo, int floorplan_devic
     setCurrentY(0);
     setStatus(false);
     setupFloorplanPositions();
-    setText("There is text");
-
+    setText(name);
 }
 
 QHash<int, QByteArray> FloorplanDevice::roleNames() const

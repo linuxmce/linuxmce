@@ -88,15 +88,7 @@ Item {
                 }
                 onActivated: manager.currentScreen="Screen_1.qml"
             }
-            StyledButton{
-                buttonText: roomList.currentRoom
-                anchors{
-                    top:parent.top
-                    bottom:parent.bottom
-                    margins: 5
-                }
-                onActivated: qmlRoot.createPopup(roomSelector)
-            }
+
         }
     }
 
@@ -133,6 +125,15 @@ Item {
                 }
 
                 buttonText: qsTr("Power")
+            }
+            StyledButton{
+                buttonText: roomList.currentRoom
+                anchors{
+                    top:parent.top
+                    bottom:parent.bottom
+                    margins: 5
+                }
+                onActivated: qmlRoot.createPopup(roomSelector)
             }
         }
     }

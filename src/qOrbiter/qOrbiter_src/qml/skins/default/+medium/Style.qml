@@ -57,17 +57,17 @@ QtObject{
     readonly property color apptext_color_active:"white"
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
-    readonly property int appFontSize_list:12*dpRatio
-    readonly property int appFontSize_header:18*dpRatio
-    readonly property int appFontSize_description:14*dpRatio
-    readonly property int appFontSize_title:16*dpRatio
+    readonly property int appFontSize_list:11*dpRatio
+    readonly property int appFontSize_header:16*dpRatio
+    readonly property int appFontSize_description:12*dpRatio
+    readonly property int appFontSize_title:14*dpRatio
 
     property int fontSize_small:appFontSize_list
     property int fontSize_medium:appFontSize_description
     property int fontSize_large:appFontSize_title
 
-    property int fontSize_listItem:14*dpRatio
-    property int fontSize_listTitle:16*dpRatio
+    property int fontSize_listItem:11*dpRatio
+    property int fontSize_listTitle:13*dpRatio
     property int fontSize_listAccent:12*dpRatio
 
     /* Application Navigation Bars */

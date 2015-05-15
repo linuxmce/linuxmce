@@ -35,6 +35,7 @@ Panel{
                 media_playback_base.state="airplay"
                 break;
             case MediaTypes.NP_NetworkMedia:
+            case 66:
                 media_playback_base.state="networkmedia"
                 break;
 
@@ -48,7 +49,7 @@ Panel{
         StyledButton{
             Component.onCompleted: parent=media_playback_base_panel.headerRow
             id:power_btn
-            height: parent.height
+            height: Style.appNavigation_panelHeight
             buttonText: qsTr("Power Off", "Turn off Device")
             onConfirm:{
                 manager.exitMediaMenu()
@@ -59,11 +60,11 @@ Panel{
         StyledButton{
             Component.onCompleted: parent=media_playback_base_panel.headerRow
             id:options
-
+            height:Style.appNavigation_panelHeight
             buttonText: media_playback_base.state==="options" ? "Remote" : qsTr("Options")
             onActivated: {
                 if(media_playback_base.state==="options"){
-                    resetState()
+                    media_playback_base.resetState()
                 } else {
                     media_playback_base.state="options"
                 }
@@ -74,7 +75,7 @@ Panel{
             Component.onCompleted: parent=media_playback_base_panel.headerRow
             id:btns
 
-
+        height:Style.appNavigation_panelHeight
             buttonText: qsTr("Buttons", "Additional Tv Buttons")
             onActivated: {
                 if(media_playback_base.state=="buttongrid"){
@@ -84,9 +85,6 @@ Panel{
                 }
             }
         }
-
-
-
 
         Component.onCompleted: {
             manager.setBoundStatus(true)
@@ -242,20 +240,23 @@ Panel{
             },
             State{
                 name:"networkmedia"
-                PropertyChanges {
-                    target: media_playback_base
-                    showingPlaylist: false
-                }
+                when:manager.i_current_mediaType===66
+
                 PropertyChanges {
                     target: directionDiamond
                     visible:true
                 }
                 PropertyChanges {
                     target: options
-                    visible:false
+                    visible:true
                 }
                 PropertyChanges {
-                    target: plst
+                    target: playlistPanel
+                    visible:false
+
+                }
+                PropertyChanges {
+                    target: buttonPanel
                     visible:false
                 }
                 PropertyChanges {

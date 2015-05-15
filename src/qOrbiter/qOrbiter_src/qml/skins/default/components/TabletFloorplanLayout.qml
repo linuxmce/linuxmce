@@ -67,7 +67,8 @@ Panel{
         }
 
         GenericListModel {
-            Component.onCompleted: if(floorplan_devices.floorplanType===5) parent = fp_panel.headerRow
+
+            parent:floorplan_devices.floorplanType===5 ?  fp_panel.headerRow : parent
             id:activeStreams
             label:qsTr("Media Streams")
             visible:floorplan_devices.floorplanType===5
