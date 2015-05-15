@@ -71,8 +71,9 @@ Item {
                 if(children.length===0)
                     return
 
-                children[children.length-1].height=panelHeaderHeight
-                console.log(children)
+                var h = children[children.length-1].height
+                children[children.length-1].height=25
+               children[children.length-1].height=h
             }
         }
     }

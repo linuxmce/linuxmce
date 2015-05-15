@@ -1,4 +1,5 @@
 import QtQuick 2.2
+import org.linuxmce.grids 1.0
 import "../."
 Panel{
     id:fp_panel
@@ -23,6 +24,11 @@ Panel{
             processSelectedDevices()
         }
 
+        Connections{
+            target:floorplan_devices
+            onSelectedDevicesChanged:processSelectedDevices()
+        }
+
         Keys.onReleased: {
             event.accepted=true
             switch(event.key){
@@ -34,14 +40,7 @@ Panel{
                 console.log("Recieved key ==>"+event.key+" but not accepting")
                 break;
             }
-
         }
-
-        ListModel{
-            id:selections
-
-        }
-
         function processSelectedDevices(){
             selections.clear()
 
@@ -54,11 +53,9 @@ Panel{
         }
 
 
-        Connections{
-            target:floorplan_devices
-            onSelectedDevicesChanged:processSelectedDevices()
+        ListModel{
+            id:selections
         }
-
 
         ParamManager{
             id:requestParamManager
@@ -69,16 +66,49 @@ Panel{
             useList: true
         }
 
+        GenericListModel {
+            Component.onCompleted: if(floorplan_devices.floorplanType===5) parent = fp_panel.headerRow
+            id:activeStreams
+            label:qsTr("Media Streams")
+            visible:floorplan_devices.floorplanType===5
+            width: Style.scaleX(25)
+            height: Style.scaleY(45)
+            dataGrid: DataGrids.Floorplan_Media_Streams
+            dataGridLabel:"mediaStreams"
+            delegate:
+                StyledButton{
+                id:gridBtn
+                buttonText: description
+                textSize: 16
+                height: Style.appButtonHeight
+                width: parent.width
+
+                onActivated: {
+                    var list = floorplan_devices.getSelectedDevice()
+                    if (list.length > 0) {
+                        var eas = ''
+                        for (var i = 0; i < list.length; i++)
+                        {
+                            if (i > 0)
+                                eas += ','
+                            eas += list.get(0).device
+                        }
+                        manager.doMoveMedia(eas,streamID)
+                        activeStreams.model.refreshData()
+                    }
+                }
+            }
+        }
+
         GenericListModel{
             model: floorplan_pages
             label: qsTr("Floorplans")
-
-            Component.onCompleted: parent=fp_panel.headerRow
+           Component.onCompleted: parent = fp_panel.headerRow
             width: Style.scaleX(25)
             height: Style.scaleY(45)
             delegate:Rectangle{
                 height: Style.scaleY(9)
-                width: Style.scaleX(35)
+                width:parent.width
                 color: Style.appcolor_background
                 border.color: Style.appcolor_foregroundColor
                 StyledText {
@@ -97,10 +127,55 @@ Panel{
             }
         }
 
-
         SendCommandBox {
             id: sendCommandBox
-           Component.onCompleted: parent=fp_panel.headerRow
+            width: Style.scaleX(25)
+            height: Style.scaleY(65)
+            Component.onCompleted: parent=fp_panel.headerRow
+        }
+
+        ScrollRow{
+            id:row_button_scroll
+            visible:floorplan_devices.floorplanType===5
+            enabled:visible
+            anchors{
+                left:phoneFloorplanLayout.left
+                right:phoneFloorplanLayout.right
+                top:phoneFloorplanLayout.top
+            }
+            height: Style.appNavigation_panelHeight
+
+            Row {
+                id: rowButtons
+                anchors.left:parent.left
+                anchors.right: parent.right
+                spacing:5
+                StyledButton {
+                    id: btOff
+                    height: parent.height
+                    width: Style.appButtonWidth/2
+                    buttonText: "Stop"
+                    // call stopMedia with selected EA
+                    onActivated: {
+                        console.log("manager.stopPlayback with EA = " +  floorplan_devices.getSelectedDevice())
+                        var list = floorplan_devices.getSelectedDevice()
+                        if (list.count > 0) {
+                            console.log("manager.stopPlayback with EA = " + list.get(0).device)
+                            manager.stopMediaOtherLocation(list.get(0).device)
+                            activeStreams.model.refreshData()
+                        }
+                    }
+                }
+                StyledButton {
+                    id: btRemote
+                    height: Style.appButtonHeight
+                    width: 100
+                    buttonText: "Remote"
+                    // open remote for this EA
+                    onActivated: {
+                    }
+                }
+            }
         }
 
         Item{
@@ -131,8 +206,6 @@ Panel{
             }
         }
 
-
-
         states: [
             State {
                 name: "floorplanView"
@@ -144,8 +217,9 @@ Panel{
                 }
                 PropertyChanges{
                     target: sendCommandBox
-                    opacity:0
-                    visible:false
+                    opacity:25
+                    enabled:false
+
                 }
             },
             State {
@@ -157,7 +231,7 @@ Panel{
                 }
                 PropertyChanges{
                     target: sendCommandBox
-                    visible:true
+                    enabled:true
                     opacity:1
                 }
             }

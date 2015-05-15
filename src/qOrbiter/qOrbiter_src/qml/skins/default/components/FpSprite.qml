@@ -43,7 +43,7 @@ Item {
 
     Image {
         id: fpDevice_image
-        source:"../images/floorplan/"+deviceType+".png"
+        source:deviceType==="52" ? "" : "../images/floorplan/"+deviceType+".png"
         sourceSize:Qt.size(Style.scaleY(6), Style.scaleY(6))
         anchors.centerIn: parent
         anchors.fill: parent
@@ -69,8 +69,8 @@ Item {
     Text {
         id: device_number
         text: floorplan_devices.getText(deviceNum) + " " + floorplan_devices.getDeviceStatus(deviceNum)
-        anchors.centerIn: parent
-        font.pixelSize: Style.scaleY(2)
+        anchors.top: fpDevice_image.bottom
+        font.pixelSize: Style.appFontSize_list
     }
 
     Rectangle{
