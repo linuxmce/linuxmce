@@ -6,7 +6,7 @@ Item{
     anchors.fill: parent
     property string title:qsTr("Options")
     Component.onCompleted: state="switch"
-    property int innerBoxWidth:theme.appMenuPanel_widthMedium
+    property int innerBoxWidth:theme.appMenuPanel_widthLarge
     property int innerBoxHeight:scaleY(53)
     ListModel{
         id:languages

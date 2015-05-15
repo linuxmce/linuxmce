@@ -20,7 +20,7 @@ Item{
     Text {
         id: newOrbiterLabel
         text: qsTr("Would you like to create a new orbiter?", "Create a new orbiter.")
-        font.pixelSize: theme.appFontSize_list
+        font.pixelSize: theme.appFontSize_title
         anchors.centerIn: parent
         width: parent.width*.85
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -34,7 +34,7 @@ Item{
         height: parent.height /2
         fillMode: Image.PreserveAspectFit
         anchors{
-           right:parent.right
+            right:parent.right
             verticalCenter: parent.verticalCenter
         }
     }
@@ -47,6 +47,7 @@ Item{
     states: [
         State {
             name: "hidden"
+            when:!window.b_connectionPresent
             PropertyChanges {
                 target: newOrbiterButton
                 opacity:0
@@ -56,6 +57,7 @@ Item{
         },
         State {
             name: "showing"
+            when:window.b_connectionPresent
             PropertyChanges {
                 target: newOrbiterButton
                 height:theme.appNavigation_panelHeight
@@ -65,10 +67,17 @@ Item{
         }
     ]
 
-    transitions: Transition {
-        // smoothly reanchor myRect and move into new position
-        PropertyAnimation{
-            duration: 1000
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+            PropertyAnimation{
+                target: newOrbiterButton
+                property: "height"
+                duration: 350
+            }
         }
-    }
+    ]
+
+
 }

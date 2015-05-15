@@ -3,16 +3,19 @@ import org.linuxmce.enums 1.0
 import org.linuxmce.screens 1.0
 import QtGraphicalEffects 1.0
 import "../."
-Item{
+ScrollRow{
     id:transport_buttons
     anchors{
         bottom:parent.bottom
         horizontalCenter: parent.horizontalCenter
     }
     width: parent.width
+    contentHeight: height
+    contentWidth: content.width
     height: Style.scaleY(8)
     
     Row{
+        id:content
         height: parent.height
         width: childrenRect.width
         anchors.horizontalCenter: parent.horizontalCenter

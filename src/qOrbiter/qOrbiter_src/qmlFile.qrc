@@ -13,9 +13,7 @@
         <file>qml/splash/ExistingOrbiters.qml</file>
         <file>qml/splash/LanguageList.qml</file>
         <file>qml/splash/+small/qmldir</file>
-        <file>qml/splash/+small/SplashView.qml</file>
         <file>qml/splash/+small/Style.qml</file>
-        <file>qml/splash/+large/+ios/SplashView.qml</file>
         <file>qml/splash/+large/+ios/Style.qml</file>
         <file>qml/splash/images/arrow.png</file>
         <file>qml/splash/images/options.png</file>

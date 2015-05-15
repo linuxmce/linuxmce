@@ -5,7 +5,7 @@ import QtGraphicalEffects 1.0
 import "../."
 Item{
     id:arrows
-    
+    visible:false
     height: manager.isProfile ? Style.scaleY(27) :Style.scaleY(50)
     width: height
     

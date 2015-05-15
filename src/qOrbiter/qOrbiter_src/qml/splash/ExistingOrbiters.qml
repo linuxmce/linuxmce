@@ -121,7 +121,9 @@ Item{
         },
         State {
             name: "showing"
+             when:orbiterList.count!==0
             PropertyChanges {
+
                 target: existing_orbiters
                 opacity:1
                 anchors.rightMargin: 10

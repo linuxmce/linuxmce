@@ -29,7 +29,7 @@ StyledScreen {
                 buttonText: "Stop"
                 // call stopMedia with selected EA
                 onActivated: {
-                    var list = mediaFloorplan.selectedDevices
+                    var list = floorplan_devices.getSelectedDevice()
                     if (list.count > 0) {
                         console.log("manager.stopPlayback with EA = " + list.get(0).device)
                         manager.stopMediaOtherLocation(list.get(0).device)
@@ -48,8 +48,11 @@ StyledScreen {
             }*/
         }
 
-        ListView {
+        GenericListModel {
             id:activeStreams
+            label:qsTr("Media Streams")
+            dataGrid: DataGrids.Floorplan_Media_Streams
+            dataGridLabel:"mediaStreams"
             anchors{
                 top: rowButtons.bottom
                 left: rowButtons.left
@@ -58,20 +61,20 @@ StyledScreen {
                 topMargin: 10
                 rightMargin: 10
             }
-            model: manager.getDataGridModel("mediaStreams", DataGrids.Floorplan_Media_Streams)
+
             delegate:
                 StyledButton{
                 id:gridBtn
                 buttonText: description
                 textSize: 16
-                height: Style.buttonHeight
+                height: Style.appButtonHeight
                 width: parent.width
 
                 onActivated: {
-                    var list = mediaFloorplan.selectedDevices
-                    if (list.count > 0) {
+                    var list = floorplan_devices.getSelectedDevice()
+                    if (list.length > 0) {
                         var eas = ''
-                        for (var i = 0; i < list.count; i++)
+                        for (var i = 0; i < list.length; i++)
                         {
                             if (i > 0)
                                 eas += ','
