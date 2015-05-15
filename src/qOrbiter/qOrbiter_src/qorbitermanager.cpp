@@ -281,6 +281,8 @@ void qorbiterManager::addScreenToHistory(QString s)
  */
 bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
 {
+
+    qDebug() << Q_FUNC_INFO << "Enter";
     setDeviceNumber(device_id);
     setDceResponse("Starting Manager with connection to :"+QString::fromStdString(sRouterIP));
 
@@ -292,10 +294,10 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
     if(mb_useNetworkSkins){
         setupNetworkSkins();
     } else {
-
         swapSkins("default");
         emit setSkinStatus(true);
     }
+      qDebug() << Q_FUNC_INFO << "Exit";
 }
 
 void qorbiterManager::initiateRestart(){
@@ -1635,7 +1637,7 @@ void qorbiterManager::setFloorplanType(int t)
 
 void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 {
-    qDebug() << "Current Status ==> " << status;
+      qDebug() << Q_FUNC_INFO << "Enter--" << " Current Status ==> " << status;
 
 
     if(status=="starting"){
@@ -1652,6 +1654,7 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
     } else {
 
     }
+      qDebug() << Q_FUNC_INFO << "Exit ";
 
     //  getConfiguration(); /* Connect to skins ready signal */
 }

@@ -44,58 +44,49 @@ Panel{
             }
         }
 
-        Row{
-            id:controlRow
-            parent:headerRect
-            anchors{
-                top:parent.top
-                right:parent.right
-                bottom:parent.bottom
-                margins: 5
+
+        StyledButton{
+            Component.onCompleted: parent=media_playback_base_panel.headerRow
+            id:power_btn
+            height: parent.height
+            buttonText: qsTr("Power Off", "Turn off Device")
+            onConfirm:{
+                manager.exitMediaMenu()
+                manager.stopMedia()
             }
-            spacing: 5
-
-            StyledButton{
-                id:power_btn
-                height: parent.height
-                anchors.verticalCenter: parent.verticalCenter
-                buttonText: qsTr("Power Off", "Turn off Device")
-                onConfirm:{
-                    manager.exitMediaMenu()
-                    manager.stopMedia()
-                }
-            }
-
-            StyledButton{
-                id:options
-                height: parent.height
-                anchors.verticalCenter: parent.verticalCenter
-                buttonText: media_playback_base.state==="options" ? "Remote" : qsTr("Options")
-                onActivated: {
-                    if(media_playback_base.state==="options"){
-                        resetState()
-                    } else {
-                        media_playback_base.state="options"
-                    }
-                }
-            }
-
-            StyledButton{
-                id:btns
-                height: parent.height
-                anchors.verticalCenter: parent.verticalCenter
-                buttonText: qsTr("Buttons", "Additional Tv Buttons")
-                onActivated: {
-                    if(media_playback_base.state=="buttongrid"){
-                        resetState()
-                    }else {
-                        media_playback_base.state="buttongrid"
-                    }
-                }
-            }
-
-
         }
+
+        StyledButton{
+            Component.onCompleted: parent=media_playback_base_panel.headerRow
+            id:options
+
+            buttonText: media_playback_base.state==="options" ? "Remote" : qsTr("Options")
+            onActivated: {
+                if(media_playback_base.state==="options"){
+                    resetState()
+                } else {
+                    media_playback_base.state="options"
+                }
+            }
+        }
+
+        StyledButton{
+            Component.onCompleted: parent=media_playback_base_panel.headerRow
+            id:btns
+
+
+            buttonText: qsTr("Buttons", "Additional Tv Buttons")
+            onActivated: {
+                if(media_playback_base.state=="buttongrid"){
+                    resetState()
+                }else {
+                    media_playback_base.state="buttongrid"
+                }
+            }
+        }
+
+
+
 
         Component.onCompleted: {
             manager.setBoundStatus(true)

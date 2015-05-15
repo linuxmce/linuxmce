@@ -2,6 +2,7 @@
 import QtQuick 2.2
 import QtGraphicalEffects 1.0
 import "."
+import org.linuxmce.screeninfo 1.0
 Item {
     anchors.fill: parent
     id:splashPage
@@ -51,7 +52,7 @@ Item {
 
         Text {
             id: ui_name
-            text: "defaultUI"
+            text: screenInfo.primaryScreen.stringDeviceSize+"UI"
             font.pixelSize: theme.appFontSize_description
             font.weight: Font.Light
             anchors.right: optionIcon.left
@@ -84,7 +85,7 @@ Item {
         font.weight: Font.Light
         font.pixelSize: theme.appFontSize_header
         anchors{
-            top:topContainer.bottom
+           top:topContainer.top
             horizontalCenter: parent.horizontalCenter
         }
         color:"white"
@@ -95,10 +96,11 @@ Item {
         font.pixelSize: theme.appFontSize_description
         font.weight: Font.Light
         anchors{
-            top:welcome.bottom
+            bottom:topContainer.bottom
             horizontalCenter: welcome.horizontalCenter
         }
         color:"white"
+        visible:orbiterList.count() !==0
     }
 
 

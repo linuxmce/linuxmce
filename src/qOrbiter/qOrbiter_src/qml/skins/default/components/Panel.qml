@@ -13,6 +13,7 @@ Item {
     property alias fillColor:bgfill.color
     property string headerFillColor:Style.appcolor_background_list
     property Component content
+    property alias buttonContent:control_row.children
     clip:true
 
     Rectangle{
@@ -65,8 +66,14 @@ Item {
             spacing: 2
             width: children.length*Style.appButtonWidth
             height: panelHeader.height *95
-
             Component.onCompleted: console.log("ctrl row len"+children.length)
+            onChildrenChanged:{
+                if(children.length===0)
+                    return
+
+                children[children.length-1].height=panelHeaderHeight
+                console.log(children)
+            }
         }
     }
 

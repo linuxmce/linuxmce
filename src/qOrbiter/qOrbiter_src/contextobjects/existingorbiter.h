@@ -17,6 +17,7 @@ public:
 
     explicit ExistingOrbiter(int deviceno, QString title, QObject *parent = 0);
     ExistingOrbiter() {}
+    ExistingOrbiter( const ExistingOrbiter& other);
     QVariant data(int role) const;
     QHash<int, QByteArray> roleNames() const;
 
@@ -48,4 +49,5 @@ private:
     int i_device_number;
 };
 
+Q_DECLARE_METATYPE(ExistingOrbiter)
 #endif // EXISTINGORBITER_H

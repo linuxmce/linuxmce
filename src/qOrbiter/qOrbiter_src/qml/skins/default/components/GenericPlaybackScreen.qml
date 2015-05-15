@@ -61,6 +61,7 @@ Panel{
                         state:"round"
                          height: Style.scaleY(8)
                         buttonText: qsTr("Floorplan")
+                        onActivated: manager.currentScreen="Screen_2.qml"
                     }
                     StyledButton{
                         state:"round"

@@ -8,6 +8,7 @@ Item{
     anchors.verticalCenterOffset:10
     width: scaleX(65)
     height: scaleY(45)
+    opacity:0
     Rectangle {
         anchors.fill: connectionBox
         radius: 7
@@ -179,6 +180,7 @@ Item{
     states: [
         State {
             name: "showing"
+
             PropertyChanges {
                 target: connectionBox
                 opacity:1
@@ -187,10 +189,21 @@ Item{
         },
         State {
             name: "hidden"
+             when:orbiterList.count!==0 || window.b_connectionPresent
             PropertyChanges {
                 target: connectionBox
                 opacity:0
                 scale:0
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+            PropertyAnimation{
+                duration: 350
             }
         }
     ]
