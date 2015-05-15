@@ -7,16 +7,13 @@ Item {
     height: itemH
     objectName:deviceNum
 
-    Rectangle{
-        anchors.fill: parent
-        color:'black'
-    }
+
 
     property color activeColor: "grey"
     property color inactivecolor: "green"
     property double devicelevel:0.0
     property string state: "unknown"
-    property string deviceName: ""
+    property string deviceName: floorplan_devices.getText(Number(deviceNum))
     property string deviceNum:""
     property string deviceType: ""
     property string imgUrl: ""
@@ -66,11 +63,12 @@ Item {
         color: getColor(deviceNum)
     }
 */
-    Text {
-        id: device_number
+    StyledText {
+        id: deviceNumLabel
         text: floorplan_devices.getText(deviceNum) + " " + floorplan_devices.getDeviceStatus(deviceNum)
         anchors.top: fpDevice_image.bottom
-        font.pixelSize: Style.appFontSize_list
+        font.pixelSize: Style.appFontSize_description
+        visible: false
     }
 
     Rectangle{
@@ -92,6 +90,8 @@ Item {
 
     MouseArea{
         anchors.fill: sprite_root
-        onClicked: {updateFpItem()}
+        onClicked: {
+            updateFpItem()
+        }
     }
 }

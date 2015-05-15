@@ -50,6 +50,7 @@ Panel {
 
         DirectionPad{
             id:mainDiamond
+            visible: true
             height: Style.scaleY(12)*3
             width:  height
             anchors{

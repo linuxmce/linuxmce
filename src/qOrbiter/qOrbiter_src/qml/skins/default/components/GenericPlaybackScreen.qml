@@ -211,7 +211,7 @@ Panel{
 
                 PropertyChanges {
                     target: arrows
-                    visible:false
+                    visible:true
                 }
 
                 PropertyChanges{
@@ -231,6 +231,12 @@ Panel{
                     target: transport_buttons
                     visible:false
                 }
+
+            },
+            State {
+                name: "internetmedia"
+                when: manager.i_current_mediaType==66
+                extend:"networkmedia"
 
             },
             State{
