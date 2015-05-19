@@ -7,5 +7,6 @@ clean:
 
 
 install:
-	mkdir -p $(DESTDIR)/home/public/data/avwizard-sounds/
-	cp -avR ./home/* $(DESTDIR)/home/ || true
+	find . -iname "*.mp3" -exec install -m644 -D {} $(DESTDIR)/usr/pluto/orbiter/skins/{} \;
+	find . -iname "*.wav" -exec install -m644 -D {} $(DESTDIR)/usr/pluto/orbiter/skins/{} \;
+	find . -iname "*.ac3" -exec install -m644 -D {} $(DESTDIR)/usr/pluto/orbiter/skins/{} \;
