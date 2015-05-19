@@ -163,10 +163,6 @@ function build_main_debs() {
 					exclude_list=$exclude_list,759,758	# pandora
 					exclude_list=$exclude_list,796,795	# usb game pad
 
-					# needs pre-compiled binary
-					exclude_list=$exclude_list,$mkr_tira
-		                        exclude_list=$exclude_list,453	# IRTrans Wrapper
-
 					# not required for an MD
 					# need build database fixes to build database packages - not required for an MD
 		                        exclude_list=$exclude_list,211	# Pluto System database
@@ -177,7 +173,7 @@ function build_main_debs() {
 		                        exclude_list=$exclude_list,454	# Pluto Audi database
 		                        exclude_list=$exclude_list,472	# Pluto telecom database
 		                        exclude_list=$exclude_list,679	# Pluto game database
-	
+
 					# not building and not required for MD
 					exclude_list=$exclude_list,555,556	# AVWizard
 					exclude_list=$exclude_list,690	# Generic PC Workstation
@@ -193,6 +189,10 @@ function build_main_debs() {
 					exclude_list=$exclude_list,792,791	# airplay plugin
 					exclude_list=$exclude_list,743,742	# hulu plugin
 					exclude_list=$exclude_list,722	# LinuxMCE DPMS Monitor
+					# needs pre-compiled binary
+					exclude_list=$exclude_list,$mkr_tira
+		                        exclude_list=$exclude_list,453	# IRTrans Wrapper
+
 
 					# building but not required for MD
 		                        exclude_list=$exclude_list,204,718,719,727	# Pluto Skins
@@ -262,12 +262,12 @@ function build_main_debs() {
 	echo "\"${mkr_dir}/MakeRelease\" $make_jobs -a -R \"$SVNrevision\" $PLUTO_BUILD_CRED -O \"$out_dir\" -D 'pluto_main_build' -o \"$Distro_ID\" -r \"$RepositorySource\" -m 1 -K \"$exclude_list\" -s \"${svn_dir}/${svn_branch_name}\" -n / -d"
 	arch=$arch "${mkr_dir}/MakeRelease" $make_jobs -a -R "$SVNrevision" $PLUTO_BUILD_CRED -O "$out_dir" -D 'pluto_main_build' -o "$Distro_ID" -r "$RepositorySource" -m 1 -K "$exclude_list" -s "${svn_dir}/${svn_branch_name}" -n / -d || Error "MakeRelease failed"
 
-	# Compile the private packages
-	if [ "$svn_private_url" -a "$svn_private_user" -a "$svn_private_pass" ]
-	then
-		echo "\"${mkr_dir}/MakeRelease\" $make_jobs -a -R \"$SVNrevision\" $PLUTO_BUILD_CRED -O \"$out_dir\" -D 'pluto_main_build' -o \"$Distro_ID\" -r \"$RepositorySource\" -m 1108 -K \"$exclude_list\" -s \"${svn_dir}/${svn_branch_name}\" -n / -d"
-		arch=$arch "${mkr_dir}/MakeRelease" $make_jobs -a -R "$SVNrevision" $PLUTO_BUILD_CRED -O "$out_dir" -D 'pluto_main_build' -o "$Distro_ID" -r "$RepositorySource" -m 1108 -K "$exclude_list" -s "${svn_dir}/${svn_branch_name}" -n / -d || Error "MakeRelease failed on private packages"
-	fi
+#	# Compile the private packages
+#	if [ "$svn_private_url" -a "$svn_private_user" -a "$svn_private_pass" ]
+#	then
+#		echo "\"${mkr_dir}/MakeRelease\" $make_jobs -a -R \"$SVNrevision\" $PLUTO_BUILD_CRED -O \"$out_dir\" -D 'pluto_main_build' -o \"$Distro_ID\" -r \"$RepositorySource\" -m 1108 -K \"$exclude_list\" -s \"${svn_dir}/${svn_branch_name}\" -n / -d"
+#		arch=$arch "${mkr_dir}/MakeRelease" $make_jobs -a -R "$SVNrevision" $PLUTO_BUILD_CRED -O "$out_dir" -D 'pluto_main_build' -o "$Distro_ID" -r "$RepositorySource" -m 1108 -K "$exclude_list" -s "${svn_dir}/${svn_branch_name}" -n / -d || Error "MakeRelease failed on private packages"
+#	fi
 }
 
 

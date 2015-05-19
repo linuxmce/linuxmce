@@ -153,7 +153,8 @@ function Build_Replacements_Common_ubuntu
 
 	Build_Replacement_Package video-wizard-videos extra/video-wizard-videos || :
 
-	Build_Replacement_Package lmce-skins extra/graphics || :
+	Build_Replacement_Package lmce-skins extra/graphics && \
+	cp -fr ${svn_dir}/${svn_branch_name}/extra/graphics/lmce-avwizard-skins* "${replacements_dir}" || :
 }
 
 function Build_Replacements_ubuntu_precise
