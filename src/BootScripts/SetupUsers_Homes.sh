@@ -264,6 +264,5 @@ StartUpdateMedia=$(RunSQL "$Q")
 if [ "$StartUpdateMedia" -ne "0" ] ; then
 /usr/pluto/bin/UpdateMediaDaemonControl.sh -enable
 fi
-/usr/pluto/bin/BootMessage.sh "Done Rebuilding NIS cache" 
 
 exit 0
