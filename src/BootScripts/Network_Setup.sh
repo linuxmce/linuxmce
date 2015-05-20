@@ -97,6 +97,7 @@ fi
 
 # configure PPPoE peer file
 if [[ "$PPPoEEnabled" == "on" ]]; then
+papsecrets=("${papsecrets[@]}" "#PPPOE Configuration\n")
 	echo "Configuring PPPoE xDSL provider"
 	File=/etc/ppp/peers/dsl-provider
 	echo "#####
@@ -120,11 +121,8 @@ debug" >"$File"
 		dhcpv6=("${dhcpv6[@]}" "ppp0")
 	fi
 
-	File=/etc/ppp/pap-secrets
-	# If username already exists in secrets file then delete it first
-	sed -i "/$PPPoEUser/d" /etc/ppp/pap-secrets
-	# Add actual secret to file
-	echo "\"$PPPoEUser\" * \"$PPPoEPass\"" >>"$File"
+	# Add actual secret to the new file
+	papsecrets=("${papsecrets[@]}" "\"$PPPoEUser\" * \"$PPPoEPass\"\n")
 	
 fi
 
@@ -180,38 +178,35 @@ case $ExtIP in
 	;;
 	"dhcp")
 		Setting="dhcp"
-		if [[ ! "$PPPoEEnabled" == "on" ]];then
-			auto=("${auto[@]}" $ExtIf)
-			IfConf="iface $ExtIf inet dhcp"
-			echo "$IfConf" >>"$File"
-			if [[ "$Extv6IP" == "disabled" ]]; then
-				echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=1" >>"$File"
-			else
-				echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=0" >>"$File"
-			fi
+		auto=("${auto[@]}" $ExtIf)
+		IfConf="iface $ExtIf inet dhcp"
+		echo "$IfConf" >>"$File"
+		if [[ "$Extv6IP" == "disabled" ]]; then
+			echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=1" >>"$File"
+		else
+			echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=0" >>"$File"
 		fi
+
 	;;
 	*)
-		if [[ ! "$PPPoEEnabled" == "on" ]];then
-			Setting="static"
-			auto=("${auto[@]}" $ExtIf)
-			IfConf="iface $ExtIf inet static
+		Setting="static"
+		auto=("${auto[@]}" $ExtIf)
+		IfConf="iface $ExtIf inet static
 	address $ExtIP
 	netmask $ExtNetmask
 	gateway $Gateway"
-			echo "$IfConf" >>"$File"
-			if [[ "$Extv6IP" == "disabled" ]]; then
-				echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=1" >>"$File"
-			else
-				echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=0" >>"$File"
-			fi
-			DNSservers=$(echo "$DNS,"; echo "$NetSettings" | tail -1)
-			DNSservers=$(echo "$DNSservers" | tr ',' '\n' | sort -u | tr '\n' ' ')
-			if ! BlacklistConfFiles '/etc/resolv.conf' ;then
-				for i in $DNSservers; do
-					echo "nameserver $i" >>/etc/resolv.conf
-				done
-			fi
+		echo "$IfConf" >>"$File"
+		if [[ "$Extv6IP" == "disabled" ]]; then
+			echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=1" >>"$File"
+		else
+			echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=0" >>"$File"
+		fi
+		DNSservers=$(echo "$DNS,"; echo "$NetSettings" | tail -1)
+		DNSservers=$(echo "$DNSservers" | tr ',' '\n' | sort -u | tr '\n' ' ')
+		if ! BlacklistConfFiles '/etc/resolv.conf' ;then
+			for i in $DNSservers; do
+				echo "nameserver $i" >>/etc/resolv.conf
+			done
 		fi
 	;;
 esac
@@ -321,6 +316,42 @@ iface $Intv6If inet6 static
 		fi
 	;;
 esac
+
+#other IPv6Interfaces configuration
+i=0;
+j=2;
+
+while [ $i -lt $amount_other6Interfaces ] #traverse trough elements
+ do
+	
+	other6interfaceIf=$(CommaField 1 "${interfacesIPv6_array[$j]}")
+        other6interfaceIP=$(CommaField 2 "${interfacesIPv6_array[$j]}")
+	case $other6interfaceIP in
+	        "disabled")
+        	        IntSetting="disabled"
+        	;;
+        	"ra")
+        	        IntSetting="ra"
+        	;;
+	
+	        *)
+        	        IntSetting="error"
+        	        if [[ "$other6interfaceIP" != "" && "$other6interfaceIP" != "$other6interfaceIf" ]]; then
+        	                IntSetting="static"
+        	                auto=("${auto[@]}" $other6interfaceIf)
+                	        v6="$v6
+# --- $other6interfaceIf
+iface $other6interfaceIf inet6 static
+        address $other6interfaceIP
+        netmask $(CommaField 3 "${interfacesIPv6_array[$j]}")"
+                fi
+        ;;
+esac
+
+
+   i=$[$i+1]
+   j=$[$j+1]
+ done
 
 if [[ "$ExtSetting" == "static" ||  "$IntSetting" == "static" || "$IPv6TunnelActive" == "on" ]]
 then
@@ -521,22 +552,59 @@ if [[ "$VPNenabled" == "on" ]]; then
         # PPP users secret file
         Q="SELECT UserName,Password,Use_VPN,VPN_Ip FROM Users"
 		R=$(RunSQL "$Q")
-		echo "# Secrets for authentication using VPN and System Authentacation" > /etc/ppp/pap-secrets
+		papsecrets=("${papsecrets[@]}" "# Secrets for authentication using VPN and System Authentacatio\n")
 		for ROW in $R; do
 			User=$(Field 1 "$ROW")
 			username=$(echo $User | tr '[:upper:]' '[:lower:]');
 			Pass="\"\""
 			use_vpn=$(Field 3 "$ROW")
 			if [[ "$use_vpn" == "0" ]]; then
-				echo "#pluto_$username	*	$Pass	*" >> /etc/ppp/pap-secrets
+				papsecrets=("${papsecrets[@]}" "#pluto_$username	*	$Pass	*\n")
 			else
-				echo "pluto_$username	*	$Pass	$(Field 4 "$ROW")" >> /etc/ppp/pap-secrets
+				papsecrets=("${papsecrets[@]}" "pluto_$username	*	$Pass	$(Field 4 "$ROW")\n")
 			fi
 		done
-	chmod 644 /etc/ppp/pap-secrets
 
+	#Setup ip-up and ip-down script for pppd
+        grep -w "^#Setup iptables" /etc/ppp/ip-up >/dev/null
+        if [[ "$?" -ne "0" ]]; then
+                echo "Setting up /etc/ppp/ip-up"
+
+                ipup=$"#Setup iptables  and update db
+if [[ ! "$6" == "" ]]; then
+	if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
+		R=$(mysql pluto_main -ss -e\"SELECT Protocol FROM Firewall WHERE RuleType='VPN' AND SourceIP='$5' AND Protocol='ip-ipv4' ORDER BY PK_Firewall\")
+		if [ "$R" ]; then
+			mysql pluto_main -ss -e \"UPDATE Firewall SET Offline='0' WHERE RuleType='VPN' AND SourceIP='$5'\"
+		fi
+		/usr/pluto/bin/Network_Firewall.sh
+	fi
+fi"
+
+                echo "$ipup" >> /etc/ppp/ip-up
+        fi
+        grep -w "^#Setup iptables" /etc/ppp/ip-down >/dev/null
+        if [[ "$?" -ne "0" ]]; then
+                echo "Setting up /etc/ppp/ip-down"
+
+                ipdown=$"#Setup iptables  and update db
+if [[ ! "$6" == "" ]]; then
+        if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
+                R=$(mysql pluto_main -ss -e\"SELECT Protocol FROM Firewall WHERE RuleType='VPN' AND SourceIP='$5' AND Protocol='ip-ipv4' ORDER BY PK_Firewall\")
+                if [ "$R" ]; then
+                        mysql pluto_main -ss -e \"UPDATE Firewall SET Offline='1' WHERE RuleType='VPN' AND SourceIP='$5'\"
+                fi
+                /usr/pluto/bin/Network_Firewall.sh
+        fi
+fi"
+
+                echo "$ipdown" >> /etc/ppp/ip-down
+        fi
 fi
-
+#write pap-secrets config file even as VPN is not enabled as PPPOE config earlyer can also have settings for this file.
+echo -e "${papsecrets[@]}"
+echo -e "${papsecrets[@]}" > /etc/ppp/pap-secrets
+chmod 644 /etc/ppp/pap-secrets
 
 if ! BlacklistConfFiles '/etc/default/isc-dhcp-server' ;then
 	if [ ! -e /etc/default/isc-dhcp-server.pbackup ] && [ -e /etc/default/isc-dhcp-server ] ;then
