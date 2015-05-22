@@ -1,3 +1,9 @@
+lmce-skins-all (2.0.0.47.9~lmce3) precise; urgency=medium
+
+  * New weather icons, including night status icons
+
+ -- developers@linuxmce.org <developers@linuxmce.org>  Sun, 26 Apr 2015 06:52:11 +0000
+
 lmce-skins-all (2.0.0.47.9~lmce2) precise; urgency=medium
 
   * Add some missing telecom icons
