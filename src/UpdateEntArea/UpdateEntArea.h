@@ -127,7 +127,7 @@ public:
 
 	CommandGroup *CreateWatchingMediaCommandGroup(CommandGroupArray &commandGroupArray,Row_Room *pRow_Room,int iIsWatching);
 	Row_EventHandler *CreateWatchingMediaEventHandler(CommandGroupArray &commandGroupArray,Row_Room *pRow_Room,int iIsWatching);
-	Row_Criteria *SetWatchingMediaCriteria(Row_EventHandler *pRow_EventHandler);
+	Row_Criteria *SetWatchingMediaCriteria(Row_EventHandler *pRow_EventHandler, long int FK_RoomType);
 
 	CommandGroup *CreateSecurityAlertCommandGroup(CommandGroupArray &commandGroupArray,int PK_Event);
 
