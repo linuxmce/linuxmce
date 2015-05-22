@@ -25,9 +25,16 @@ private:
 	std::string relh_;
 	std::string d_units_;
 	std::string d_lang_;
+	std::string d_radar_;
 	std::string weatherimage_;
 	std::string weatherc_;
 	std::string areadisc_;
+	std::string radar_;
+	std::string data_;
+	std::string night_;
+	std::string icon_temp_;
+
+	int time_;
 	std::vector<std::string> f_temp_F_;
 	std::vector<std::string> f_text_;
 	std::vector<std::string> f_weather_;
@@ -46,7 +53,7 @@ private:
 	    return std::vector<T>(data, data+N);
 	}
 
-	void set_wrap(const std::string& str1,const std::string& str2,const std::string& str3="");
+	void set_wrap(const std::string& str1,const std::string& str2,const std::string& str3="",const std::string& str4="");
 	std::vector<std::vector<std::string> > wrap_;
 
 	void set_dayl(const std::string&);
@@ -55,7 +62,8 @@ private:
 public:
 	WWO();
 	virtual ~WWO();
-	bool Get_WWO(const std::string& data,const std::string& units,const std::string& lang);
+	bool Get_WWO(const std::string& data,const std::string& units,const std::string& lang,const std::string& radar);
+
 	void set_date(std::string const &date);
 	void set_temp_F(std::string const & temp_F);
 	void set_winds(std::string const &winds);

@@ -26,31 +26,38 @@ WWO::WWO() {
         d_lang_="en";
 	icons_.insert(make_pair("","1"));//,	//Unknown
 	icons_.insert(make_pair("113","2"));	//Sunny
-	icons_.insert(make_pair("nskc","3"));icons_.insert(make_pair("nfew","3"));icons_.insert(make_pair("nsct","3"));icons_.insert(make_pair("nbkn","3"));	//Night Clear
-	icons_.insert(make_pair("119","4"));icons_.insert(make_pair("novc","4"));icons_.insert(make_pair("smoke","4"));	//Cloudy
-	icons_.insert(make_pair("bkn","5"));	//Moderately Cloudy
+	icons_.insert(make_pair("113N","3"));icons_.insert(make_pair("nfew","3"));icons_.insert(make_pair("nsct","3"));icons_.insert(make_pair("nbkn","3"));	//Night Clear
+	icons_.insert(make_pair("119","4"));icons_.insert(make_pair("119","4"));icons_.insert(make_pair("smoke","4"));	//Cloudy
+	icons_.insert(make_pair("122","5"));icons_.insert(make_pair("143","5"));	//Moderately Cloudy
 	icons_.insert(make_pair("116","6"));icons_.insert(make_pair("176","6"));	//Partly Cloudy
-	icons_.insert(make_pair("248","7"));icons_.insert(make_pair("nfg","7"));icons_.insert(make_pair("dust","7"));icons_.insert(make_pair("mist","7"));	//Fog
-	icons_.insert(make_pair("302","8"));icons_.insert(make_pair("nra1","8"));	//Light Showers
-	icons_.insert(make_pair("308","9"));icons_.insert(make_pair("hi_shwrs","9"));icons_.insert(make_pair("hi_nshwrs","9"));icons_.insert(make_pair("ra","9"));icons_.insert(make_pair("nra","9"));	//Showers
+	icons_.insert(make_pair("248","7"));icons_.insert(make_pair("dust","7"));icons_.insert(make_pair("mist","7"));	//Fog
+	icons_.insert(make_pair("266","8"));icons_.insert(make_pair("353","8"));icons_.insert(make_pair("362","8"));icons_.insert(make_pair("365","8"));icons_.insert(make_pair("386","8"));icons_.insert(make_pair("389","8"));icons_.insert(make_pair("302","8"));	//Light Showers
+	icons_.insert(make_pair("293","9"));icons_.insert(make_pair("263","9"));icons_.insert(make_pair("356","9"));icons_.insert(make_pair("359","9"));icons_.insert(make_pair("308","9"));icons_.insert(make_pair("hi_shwrs","9"));icons_.insert(make_pair("hi_nshwrs","9"));icons_.insert(make_pair("ra","9"));icons_.insert(make_pair("nra","9"));	//Showers
 	icons_.insert(make_pair("296","10"));icons_.insert(make_pair("ntsra","10"));icons_.insert(make_pair("hi_tsra","10"));icons_.insert(make_pair("hi_ntsra","10"));icons_.insert(make_pair("nsvrtsra","10"));	//Thunder Showers
-	icons_.insert(make_pair("326","11"));icons_.insert(make_pair("nsn","11"));	//Snow Showers
-	icons_.insert(make_pair("353","12"));icons_.insert(make_pair("ip","12"));icons_.insert(make_pair("mix","12"));icons_.insert(make_pair("nmix","12"));icons_.insert(make_pair("raip","12"));icons_.insert(make_pair("rasn","12"));icons_.insert(make_pair("nrasn","12"));icons_.insert(make_pair("fzrara","12"));	//Rain Snow
-	
+	icons_.insert(make_pair("392","11"));icons_.insert(make_pair("395","11"));icons_.insert(make_pair("326","11"));icons_.insert(make_pair("nsn","11"));	//Snow Showers
+	icons_.insert(make_pair("179","12"));icons_.insert(make_pair("358","12"));icons_.insert(make_pair("350","12"));icons_.insert(make_pair("368","12"));icons_.insert(make_pair("371","12"));icons_.insert(make_pair("377","12"));icons_.insert(make_pair("374","12"));icons_.insert(make_pair("ip","12"));icons_.insert(make_pair("mix","12"));icons_.insert(make_pair("nmix","12"));icons_.insert(make_pair("raip","12"));icons_.insert(make_pair("rasn","12"));icons_.insert(make_pair("nrasn","12"));icons_.insert(make_pair("fzrara","12"));	//Rain Snow
+	icons_.insert(make_pair("122N","5"));icons_.insert(make_pair("143N","14"));
+	icons_.insert(make_pair("116N","15"));icons_.insert(make_pair("176N","15"));
 }
 
 WWO::~WWO() {
 	// TODO Auto-generated destructor stub
 }
 
-bool WWO::Get_WWO(const string& data,const std::string& units,const std::string& lang){
+bool WWO::Get_WWO(const string& data,const std::string& units,const std::string& lang,const std::string& radar){
 
 	Json::Value root;
 	Json::Reader reader;
         d_units_=units;
         d_lang_=lang;
+        d_radar_=radar;
 	bool parsingSuccessful = reader.parse(data, root);
     //LoggerWrapper::GetInstance()->Write(LV_ACTION,"Weather: Inside Get_WWO: %s",root.toStyledString().c_str());
+    if (root["meta"]["status_code"].asString() == "504"){
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Get_WWO: Failed timeout");
+        return false;
+
+    }
 
     if(!parsingSuccessful)
     {
@@ -60,17 +67,22 @@ bool WWO::Get_WWO(const string& data,const std::string& units,const std::string&
     }
 
 
-//   cout << root;
+//    cout << root;
 
     parse_data(root);
 
     return true;
 }
 
+
+
+
+
+
+
 void WWO::parse_data(Json::Value const &root){
 
     const Json::Value c_data = root["data"]["current_condition"][0];
-    //cout << c_data;
     set_date(c_data.get("localObsDateTime","No Data").asString());
     set_temp_F(c_data.get("temp_"+d_units_,"No Data").asString());
     set_winds(c_data.get("windspeedKmph","No Data").asString());
@@ -87,31 +99,76 @@ void WWO::parse_data(Json::Value const &root){
       const Json::Value w_data = root["data"]["weather"];
      struct tm tmlol,tm;
      char buffer[80];
-     char buf[255];
-     for (int x = 0; x <5; x=x+1)
+     time_t rawtime;
+     struct tm * timeinfo;
+     time (&rawtime);
+     timeinfo = localtime (&rawtime);
+     night_="";
+     for (int x = 0; x <=w_data.size()-1; x=x+1)
 	{
-          set_date(w_data[x].get("date","No Data").asString());
-           strptime(date_.c_str(),"%Y-%m-%d", &tmlol);
-         
-           memset(&tm, 0, sizeof(struct tm));
-           strptime(date_.c_str(), "%Y-%m-%d %H:%M:%S", &tm);
-          strftime(buffer,80,"%A",&tmlol);
-          f_weather_.push_back(w_data[x]["hourly"][0]["lang_"+d_lang_][0].get("value","No Data").asString());
-          f_icon_.push_back(get_icon(w_data[x]["hourly"][0].get("weatherCode","").asString()));
-          f_temp_F_.push_back(w_data[x].get("maxtemp"+d_units_,"No Data").asString());
-          f_temp_F_.push_back(w_data[x].get("mintemp"+d_units_,"No Data").asString());
-          f_days_.push_back(buffer);    
-     }
+        data_ =w_data[x].get("date","No Data").asString();
+        strptime(data_.c_str(),"%Y-%m-%d", &tmlol);
+	strftime(buffer,80,"%A",&tmlol);
+        f_days_.push_back(buffer);    
+        memset(&tm, 0, sizeof(struct tm));
+        strftime(buffer,80,"%h%M",timeinfo);
+        strftime (buffer,80,"H",timeinfo);
+        icon_temp_=w_data[x]["hourly"][time_].get("weatherCode","").asString();
+        // cout << "debug icon" << icon_temp_ << endl;
+        if (((icon_temp_ =="113") or (icon_temp_ =="116") or (icon_temp_=="112")) and x==0){
+                time_=w_data[x]["hourly"].size();
+              	f_icon_.push_back(get_icon(w_data[x]["hourly"][time_].get("weatherCode","").asString()+"N"));
+		f_weather_.push_back(w_data[x]["hourly"][time_]["lang_"+d_lang_][0].get("value","No Data").asString());
+		f_temp_F_.push_back(w_data[time_].get("maxtemp"+d_units_,"No Data").asString());
+		f_temp_F_.push_back(w_data[time_].get("mintemp"+d_units_,"No Data").asString());
+        } else if (x==0){
+                time_=w_data[x]["hourly"].size()-1;
+	      	f_icon_.push_back(get_icon(w_data[x]["hourly"][time_].get("weatherCode","").asString()));
+		f_weather_.push_back(w_data[x]["hourly"][time_]["lang_"+d_lang_][0].get("value","No Data").asString());
+		f_temp_F_.push_back(w_data[time_].get("maxtemp"+d_units_,"No Data").asString());
+		f_temp_F_.push_back(w_data[time_].get("mintemp"+d_units_,"No Data").asString());
+        }
+        if (atoi(buffer) < 12){
+           time_=0;
+           night_="";
+        }else if (atoi(buffer) <18){
+            time_ =w_data[x]["hourly"].size() -1;
+            night_="";
+        }else{
+	    time_=w_data[x]["hourly"].size();
+            night_ = "N";
+        }
+        if ((icon_temp_ =="113") or (icon_temp_ =="116") or (icon_temp_=="112")){
+	    f_icon_.push_back(get_icon(w_data[x]["hourly"][time_].get("weatherCode","").asString()+night_));
+        }else{
+	    f_icon_.push_back(get_icon(w_data[x]["hourly"][time_].get("weatherCode","").asString()));
+        }
+       f_temp_F_.push_back(w_data[time_].get("maxtemp"+d_units_,"No Data").asString());
+       f_temp_F_.push_back(w_data[time_].get("mintemp"+d_units_,"No Data").asString());
+       f_weather_.push_back(w_data[x]["hourly"][time_]["lang_"+d_lang_][0].get("value","No Data").asString());
 
-   
+     }
+     strftime (buffer,80,"%Y%m%d%H%M",timeinfo);
+     radar_ = string("http://cdn.worldweatheronline.net/charts/mrn_")+string(d_radar_)+string("_3.gif?v=") + string(buffer);
+     radar_ += string("|http://cdn.worldweatheronline.net/charts/mrn_")+string(d_radar_)+string("_6.gif?v=") + string(buffer);
+     radar_ += string("|http://cdn.worldweatheronline.net/charts/mrn_")+string(d_radar_)+string("_9.gif?v=") + string(buffer);
+     radar_ += string("|http://cdn.worldweatheronline.net/charts/mrn_")+string(d_radar_)+string("_12.gif?v=") +string(buffer);
+     radar_ += string("|http://cdn.worldweatheronline.net/charts/mrn_")+string(d_radar_)+string("_15.gif?v=") +string(buffer);
+     radar_ += string("|http://cdn.worldweatheronline.net/charts/mrn_")+string(d_radar_)+string("_18.gif?v=") +string(buffer);
+     radar_ += string("|http://cdn.worldweatheronline.net/charts/mrn_")+string(d_radar_)+string("_21.gif?v=") +string(buffer);// <<"|http://cdn.worldweatheronline.net/charts/mrn_8_24.gif?v=" <<buffer <<"|http://cdn.worldweatheronline.net/charts/mrn_8_27.gif?v=" << buffer << "|http://cdn.worldweatheronline.net/charts/mrn_8_30.gif?v=" << buffer <<"|http://cdn.worldweatheronline.net/charts/mrn_8_33.gif?v=" << buffer << "|http://cdn.worldweatheronline.net/charts/mrn_8_36.gif?v=" << buffer <<"|http://cdn.worldweatheronline.net/charts/mrn_8_39.gif?v="<< buffer ;
+     timeinfo->tm_mday +=5;
+     time_t finaldate=mktime(timeinfo);
+     strftime(buffer,80,"%A",localtime(&finaldate));
+     f_days_.push_back(buffer);    
 }
+
 
 vector<vector<string> > WWO::get_msg(){
 
 	set_wrap("temp_current",temp_F_+"°"+d_units_,temp_F_);
 	set_wrap("temp_tonight",f_temp_F_[0]+"°"+d_units_,f_temp_F_[0]);
-	set_wrap("cond_tonight",f_weather_[0],f_icon_[0]);
-//	set_wrap("forecast_tonight",f_text_[0]);
+       	set_wrap("cond_tonight",f_weather_[0],f_icon_[0]);
+	set_wrap("forecast_tonight","No Data");
 	set_wrap("cond_current",weatherc_,weatherimage_);
 	set_wrap("humidity_current",relh_+"%",relh_);
 	set_wrap("pressure_current",slp_+" Hg",slp_);
@@ -121,32 +178,31 @@ vector<vector<string> > WWO::get_msg(){
 	set_wrap("feelslike_current",wc_+"°"+d_units_,wc_);
 	set_wrap("location",areadisc_);
 	set_wrap("data_age",date_);
-	set_wrap("cond_day1",f_weather_[0],f_icon_[0]);
-	set_wrap("cond_day2",f_weather_[1],f_icon_[1]);
-	set_wrap("cond_day3",f_weather_[2],f_icon_[2]);
-	set_wrap("cond_day4",f_weather_[3],f_icon_[3]);
-	set_wrap("cond_day5",f_weather_[4],f_icon_[4]);
-	set_wrap("cond_day6",f_weather_[4],f_icon_[4]);
-	set_wrap("temp_hi_day1",f_temp_F_[0]+"°"+d_units_,f_temp_F_[0]);
-	set_wrap("temp_lo_day1",f_temp_F_[1]+"°"+d_units_,f_temp_F_[1]);
-	set_wrap("temp_hi_day2",f_temp_F_[2]+"°"+d_units_,f_temp_F_[2]);
-	set_wrap("temp_lo_day2",f_temp_F_[3]+"°"+d_units_,f_temp_F_[3]);
-	set_wrap("temp_hi_day3",f_temp_F_[4]+"°"+d_units_,f_temp_F_[4]);
-	set_wrap("temp_lo_day3",f_temp_F_[5]+"°"+d_units_,f_temp_F_[5]);
-	set_wrap("temp_hi_day4",f_temp_F_[6]+"°"+d_units_,f_temp_F_[6]);
-	set_wrap("temp_lo_day4",f_temp_F_[7]+"°"+d_units_,f_temp_F_[7]);
-	set_wrap("temp_hi_day5",f_temp_F_[8]+"°"+d_units_,f_temp_F_[8]);
-	set_wrap("temp_lo_day5",f_temp_F_[9]+"°"+d_units_,f_temp_F_[9]);
-	set_wrap("temp_hi_day6",f_temp_F_[8]+"°"+d_units_,f_temp_F_[8]);
-	set_wrap("temp_lo_day6",f_temp_F_[9]+"°"+d_units_,f_temp_F_[9]);
-
+	set_wrap("cond_day1",f_weather_[index_+1],f_icon_[index_+1]);
+	set_wrap("cond_day2",f_weather_[index_+2],f_icon_[index_+2]);
+	set_wrap("cond_day3",f_weather_[index_+3],f_icon_[index_+3]);
+	set_wrap("cond_day4",f_weather_[index_+4],f_icon_[index_+4]);
+	set_wrap("cond_day5",f_weather_[index_+5],f_icon_[index_+5]);
+	set_wrap("cond_day6",f_weather_[index_+5],f_icon_[index_+5]);
+	set_wrap("temp_hi_day1",f_temp_F_[1]+"°"+d_units_,f_temp_F_[1]);
+	set_wrap("temp_lo_day1",f_temp_F_[2]+"°"+d_units_,f_temp_F_[2]);
+	set_wrap("temp_hi_day2",f_temp_F_[3]+"°"+d_units_,f_temp_F_[3]);
+	set_wrap("temp_lo_day2",f_temp_F_[4]+"°"+d_units_,f_temp_F_[4]);
+	set_wrap("temp_hi_day3",f_temp_F_[5]+"°"+d_units_,f_temp_F_[5]);
+	set_wrap("temp_lo_day3",f_temp_F_[6]+"°"+d_units_,f_temp_F_[6]);
+	set_wrap("temp_hi_day4",f_temp_F_[7]+"°"+d_units_,f_temp_F_[7]);
+	set_wrap("temp_lo_day4",f_temp_F_[8]+"°"+d_units_,f_temp_F_[8]);
+	set_wrap("temp_hi_day5",f_temp_F_[9]+"°"+d_units_,f_temp_F_[9]);
+	set_wrap("temp_lo_day5",f_temp_F_[10]+"°"+d_units_,f_temp_F_[10]);
+	set_wrap("temp_hi_day6",f_temp_F_[9]+"°"+d_units_,f_temp_F_[9]);
+	set_wrap("temp_lo_day6",f_temp_F_[10]+"°"+d_units_,f_temp_F_[10]);
 	set_wrap("dow_day1",f_days_[0]);
 	set_wrap("dow_day2",f_days_[1]);
 	set_wrap("dow_day3",f_days_[2]);
 	set_wrap("dow_day4",f_days_[3]);
 	set_wrap("dow_day5",f_days_[4]);
 	set_wrap("dow_day6",f_days_[5]);
-
+	set_wrap("1",radar_,"Radar");
 	return wrap_;
 }
 
@@ -219,7 +275,7 @@ void WWO::set_index(Json::Value const &data){
 	}
 }
 
-void WWO::set_wrap(const std::string& str1,const std::string& str2,const std::string& str3){
+void WWO::set_wrap(const std::string& str1,const std::string& str2,const std::string& str3,const std::string& str4){
 	vector<string> str;
 	if(str3==""){
 		string msg[2];

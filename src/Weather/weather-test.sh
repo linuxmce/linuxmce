@@ -36,5 +36,3 @@
 /usr/pluto/bin/MessageSend localhost 0 -1001 2 91 35 "dow_day4" 13 "Thursday"
 /usr/pluto/bin/MessageSend localhost 0 -1001 2 91 35 "dow_day5" 13 "Friday"
 /usr/pluto/bin/MessageSend localhost 0 -1001 2 91 35 "dow_day6" 13 "Saturday"
-/usr/pluto/bin/MessageSend localhost 0 -1001 2 99 40 "1" 13 "http://cdn.worldweatheronline.net/charts/mrn_8_9.gif?v=201503051710"
-

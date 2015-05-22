@@ -28,6 +28,7 @@ private:
 	std::string areadisc_;
 	std::string d_units_;
 	std::string d_lang_;
+        std::string radar_;
 	std::vector<std::string> f_temp_F_;
 	std::vector<std::string> f_text_;
 	std::vector<std::string> f_weather_;
