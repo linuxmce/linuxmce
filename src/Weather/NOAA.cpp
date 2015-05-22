@@ -18,12 +18,13 @@ using namespace std;
 using namespace DCE;
 
 NOAA::NOAA() {
-	f_temp_F_.clear();
+/**	f_temp_F_.clear();
 	f_text_.clear();
 	f_weather_.clear();
 	f_icon_.clear();
-        d_units_="0";
-        d_lang_="english";
+	wrap_.clear();
+	dayl_.clear();
+	icons_.clear();**/
 
 	icons_.insert(make_pair("","1"));//,	//Unknown
 	icons_.insert(make_pair("skc","2"));	//Sunny
@@ -37,6 +38,7 @@ NOAA::NOAA() {
 	icons_.insert(make_pair("tsra","10"));icons_.insert(make_pair("ntsra","10"));icons_.insert(make_pair("hi_tsra","10"));icons_.insert(make_pair("hi_ntsra","10"));icons_.insert(make_pair("nsvrtsra","10"));	//Thunder Showers
 	icons_.insert(make_pair("sn","11"));icons_.insert(make_pair("nsn","11"));	//Snow Showers
 	icons_.insert(make_pair("fzra","12"));icons_.insert(make_pair("ip","12"));icons_.insert(make_pair("mix","12"));icons_.insert(make_pair("nmix","12"));icons_.insert(make_pair("raip","12"));icons_.insert(make_pair("rasn","12"));icons_.insert(make_pair("nrasn","12"));icons_.insert(make_pair("fzrara","12"));	//Rain Snow
+
 	const string str[] = {"Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Washington's Birthday"};
 	set<string> dayl_t(str,str + sizeof(str)/sizeof(str[0]));
 	dayl_=dayl_t;
@@ -45,7 +47,6 @@ NOAA::NOAA() {
 NOAA::~NOAA() {
 	// TODO Auto-generated destructor stub
 }
-
 
 bool NOAA::Get_NOAA(const string& data,const std::string& units,const std::string& lang){
 
@@ -62,7 +63,6 @@ bool NOAA::Get_NOAA(const string& data,const std::string& units,const std::strin
 
     bool parsingSuccessful = reader.parse(data, root);
 
-    //LoggerWrapper::GetInstance()->Write(LV_ACTION,"Weather: Inside Get_NOAA: %s",root.toStyledString().c_str());
 
     if(!parsingSuccessful)
     {
@@ -111,12 +111,20 @@ void NOAA::parse_data(Json::Value const &root){
     set_f_text(w_data["text"]);
     set_f_weather(w_data["weather"]);
     set_f_icon(w_data["iconLink"]);
+    radar_ = "http://www.weather.gov/images/nws/satellite_images/3.jpg|http://www.weather.gov/images/nws/satellite_images/2.jpg|http://www.weather.gov/images/nws/satellite_images/1.jpg";
+    //radar_ += "http://www.weather.gov/images/nws/satellite_images/4.jpg|http://www.weather.gov/images/nws/satellite_images/5.jpg|http://www.weather.gov/images/nws/satellite_images/6.jpg";
+   // radar_ += "http://www.weather.gov/images/nws/satellite_images/7.jpg|http://www.weather.gov/images/nws/satellite_images/8.jpg|http://www.weather.gov/images/nws/satellite_images/9.jpg";
+   // radar_ += "http://www.weather.gov/images/nws/satellite_images/10.jpg|http://www.weather.gov/images/nws/satellite_images/11.jpg|http://www.weather.gov/images/nws/satellite_images/12.jpg";
+   // radar_ += "http://www.weather.gov/images/nws/satellite_images/13.jpg|http://www.weather.gov/images/nws/satellite_images/14.jpg|http://www.weather.gov/images/nws/satellite_images/15.jpg";
+   // radar_ += "http://www.weather.gov/images/nws/satellite_images/16.jpg|http://www.weather.gov/images/nws/satellite_images/17.jpg|http://www.weather.gov/images/nws/satellite_images/18.jpg";
+
+
 }
 
 vector<vector<string> > NOAA::get_msg(){
 
-	set_wrap("temp_current",temp_F_+"°"+d_units_,temp_F_);
-	set_wrap("temp_tonight",f_temp_F_[0]+"°"+d_units_,f_temp_F_[0]);
+	set_wrap("temp_current",temp_F_+"°F",temp_F_);
+	set_wrap("temp_tonight",f_temp_F_[0]+"°F",f_temp_F_[0]);
 	set_wrap("cond_tonight",f_weather_[0],f_icon_[0]);
 	set_wrap("forecast_tonight",f_text_[0]);
 	set_wrap("cond_current",weatherc_,weatherimage_);
@@ -125,7 +133,7 @@ vector<vector<string> > NOAA::get_msg(){
 	set_wrap("wind_current",winds_+" mph",winds_);
 	set_wrap("direction_current",windd_+" deg",windd_);
 	set_wrap("visibility_current",vis_+" mi",vis_);
-	set_wrap("feelslike_current",wc_+"°"+d_units_,wc_);
+	set_wrap("feelslike_current",wc_+"°F",wc_);
 	set_wrap("location",areadisc_);
 	set_wrap("data_age",date_);
 	set_wrap("cond_day1",f_weather_[index_],f_icon_[index_]);
@@ -134,21 +142,21 @@ vector<vector<string> > NOAA::get_msg(){
 	set_wrap("cond_day4",f_weather_[index_+6],f_icon_[index_+6]);
 	set_wrap("cond_day5",f_weather_[index_+8],f_icon_[index_+8]);
 	set_wrap("cond_day6",f_weather_[index_+10],f_icon_[index_+10]);
-	set_wrap("temp_hi_day1",f_temp_F_[index_]+"°"+d_units_,f_temp_F_[index_]);
-	set_wrap("temp_lo_day1",f_temp_F_[index_+1]+"°"+d_units_,f_temp_F_[index_+1]);
-	set_wrap("temp_hi_day2",f_temp_F_[index_+2]+"°"+d_units_,f_temp_F_[index_+2]);
-	set_wrap("temp_lo_day2",f_temp_F_[index_+3]+"°"+d_units_,f_temp_F_[index_+3]);
-	set_wrap("temp_hi_day3",f_temp_F_[index_+4]+"°"+d_units_,f_temp_F_[index_+4]);
-	set_wrap("temp_lo_day3",f_temp_F_[index_+5]+"°"+d_units_,f_temp_F_[index_+5]);
-	set_wrap("temp_hi_day4",f_temp_F_[index_+6]+"°"+d_units_,f_temp_F_[index_+6]);
-	set_wrap("temp_lo_day4",f_temp_F_[index_+7]+"°"+d_units_,f_temp_F_[index_+7]);
-	set_wrap("temp_hi_day5",f_temp_F_[index_+8]+"°"+d_units_,f_temp_F_[index_+8]);
-	set_wrap("temp_lo_day5",f_temp_F_[index_+9]+"°"+d_units_,f_temp_F_[index_+9]);
-	set_wrap("temp_hi_day6",f_temp_F_[index_+10]+"°"+d_units_,f_temp_F_[index_+10]);
+	set_wrap("temp_hi_day1",f_temp_F_[index_]+"°F",f_temp_F_[index_]);
+	set_wrap("temp_lo_day1",f_temp_F_[index_+1]+"°F",f_temp_F_[index_+1]);
+	set_wrap("temp_hi_day2",f_temp_F_[index_+2]+"°F",f_temp_F_[index_+2]);
+	set_wrap("temp_lo_day2",f_temp_F_[index_+3]+"°F",f_temp_F_[index_+3]);
+	set_wrap("temp_hi_day3",f_temp_F_[index_+4]+"°F",f_temp_F_[index_+4]);
+	set_wrap("temp_lo_day3",f_temp_F_[index_+5]+"°F",f_temp_F_[index_+5]);
+	set_wrap("temp_hi_day4",f_temp_F_[index_+6]+"°F",f_temp_F_[index_+6]);
+	set_wrap("temp_lo_day4",f_temp_F_[index_+7]+"°F",f_temp_F_[index_+7]);
+	set_wrap("temp_hi_day5",f_temp_F_[index_+8]+"°F",f_temp_F_[index_+8]);
+	set_wrap("temp_lo_day5",f_temp_F_[index_+9]+"°F",f_temp_F_[index_+9]);
+	set_wrap("temp_hi_day6",f_temp_F_[index_+10]+"°F",f_temp_F_[index_+10]);
 
 	//This could overrun the vector on occasion so we will check
 	if(index_+11<f_temp_F_.size())
-		set_wrap("temp_lo_day6",f_temp_F_[index_+11]+"°"+d_units_,f_temp_F_[index_+11]);
+		set_wrap("temp_lo_day6",f_temp_F_[index_+11]+"°F",f_temp_F_[index_+11]);
 
 	set_wrap("dow_day1",f_days_[index_]);
 	set_wrap("dow_day2",f_days_[index_+2]);
@@ -156,6 +164,7 @@ vector<vector<string> > NOAA::get_msg(){
 	set_wrap("dow_day4",f_days_[index_+6]);
 	set_wrap("dow_day5",f_days_[index_+8]);
 	set_wrap("dow_day6",f_days_[index_+10]);
+	set_wrap("1",radar_,"Radar");
 
 	return wrap_;
 }
@@ -280,6 +289,3 @@ void NOAA::set_wrap(const std::string& str1,const std::string& str2,const std::s
 	wrap_.push_back(str);
 }
 
-/**void NOAA::set_dayl(const string &str2){
-	dayl_.insert(str1);
-}**/

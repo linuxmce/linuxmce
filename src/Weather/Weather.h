@@ -22,6 +22,7 @@
 //class Database_pluto_main;
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include "OpenWM.h"
 
 //<-dceag-decl-b->
 namespace DCE
@@ -36,21 +37,27 @@ namespace DCE
 		std::vector<std::string> split_C(const std::string &s, char delim);
 public:
 		// Public member variables
+
+		//Add additional APIs here
+		bool use_NOAA_;
+		bool use_OWM_;
+		bool use_WWO_;
+
 		pluto_pthread_mutex_t m_MsgMutex;
 		pthread_t m_thr_, i_thr_;
 		pthread_mutex_t lock_x_;
 		pthread_mutex_t m_p_mutx_;
-		bool use_NOAA_;
-		bool use_WWO_;
 		std::string lat_;
 		std::string lon_;
 		std::string units_;
 		std::string lang_;
+		std::string radar_;
 		std::string api_key_;
 		std::string city_;
 		double timer_;
 		pluto_pthread_mutex_t m_CurlMutex;
-		CURLM* m_pCurl;
+		//CURLM* m_pCurl;
+		std::string cid;
 
 //<-dceag-const-b->
 public:
@@ -62,9 +69,14 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
-	   // Database_pluto_main *m_pDatabase_pluto_main;
-		void send_msg(vector<vector<string> > &v);
+		// Database_pluto_main *m_pDatabase_pluto_main;
 		std::string download(const std::string& url);
+
+		/**This is the message sender to the Weather Plug-in.
+		 * It is expecting to receive Vector<Vector<String> >
+		 * as 2 or 3 fields defined as "Variable", "Text", "Value".
+		 * Some weather variables do not need values**/
+		void send_msg(vector<vector<string> > &v);
 
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
