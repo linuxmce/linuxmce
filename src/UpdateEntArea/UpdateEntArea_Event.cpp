@@ -455,7 +455,7 @@ void UpdateEntArea::AddDefaultEventHandlers(Row_Room *pRow_Room)
 		{
 			if( pCommandGroup )
 				pRow_EventHandler->FK_CommandGroup_set( pCommandGroup->m_pRow_CommandGroup->PK_CommandGroup_get() );
-			SetWatchingMediaCriteria(pRow_EventHandler);
+			SetWatchingMediaCriteria(pRow_EventHandler, pRow_Room->FK_RoomType_get());
 			pRow_EventHandler->Table_EventHandler_get()->Commit();
 			ResetEventHandler_psc_mod(pRow_EventHandler);
 		}
@@ -467,7 +467,7 @@ void UpdateEntArea::AddDefaultEventHandlers(Row_Room *pRow_Room)
 		{
 			if( pCommandGroup )
 				pRow_EventHandler->FK_CommandGroup_set( pCommandGroup->m_pRow_CommandGroup->PK_CommandGroup_get() );
-			SetWatchingMediaCriteria(pRow_EventHandler);
+			SetWatchingMediaCriteria(pRow_EventHandler, pRow_Room->FK_RoomType_get());
 			pRow_EventHandler->Table_EventHandler_get()->Commit();
 			ResetEventHandler_psc_mod(pRow_EventHandler);
 		}
@@ -542,7 +542,7 @@ Row_EventHandler *UpdateEntArea::CreateWatchingMediaEventHandler(CommandGroupArr
 	return pRow_EventHandler;
 }
 
-Row_Criteria *UpdateEntArea::SetWatchingMediaCriteria(Row_EventHandler *pRow_EventHandler)
+Row_Criteria *UpdateEntArea::SetWatchingMediaCriteria(Row_EventHandler *pRow_EventHandler, long int FK_RoomType)
 {
 	// (				// NewMode
 	//		Room (#39 EVENTPARAMETER_PK_Room_CONST) = Room
@@ -570,8 +570,11 @@ Row_Criteria *UpdateEntArea::SetWatchingMediaCriteria(Row_EventHandler *pRow_Eve
 		StringUtils::itos(EVENTPARAMETER_PK_Room_CONST),operatorEquals,
 		StringUtils::itos(pRow_EventHandler->TemplateParm1_get()));
 
-	pCriteriaParm = p_criteriaParmNesting_Top->new_CriteriaParm(CRITERIAPARMLIST_Time_of_day_CONST,
-	        "",operatorEquals, "NIGHT");
+	// For all room types except home theatre, only turn on and off the lights if it is night time
+	if (FK_RoomType != ROOMTYPE_Home_Theater_CONST) {
+		pCriteriaParm = p_criteriaParmNesting_Top->new_CriteriaParm(CRITERIAPARMLIST_Time_of_day_CONST,
+									    "",operatorEquals, "NIGHT");
+	}
 
 	if( p_criteriaParmNesting_Top->Commit(NULL) )  // Returns false if the user made any changes
 	{
