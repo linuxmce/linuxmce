@@ -9,7 +9,7 @@ ConfEval
 VIDEO_DIR="/home/public/data/pvr"
 
 # If the user already overwrote the default, get it.
-. /etc/default/vdr
+. /etc/default/vdr || :
 
 # Disable shutdown by VDR
 if ! grep -q "^ENABLE_SHUTDOWN=0" /etc/default/vdr; then
