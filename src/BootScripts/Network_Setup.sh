@@ -533,7 +533,7 @@ if [[ "$VPNenabled" == "on" ]]; then
 	PKG_OK=$(dpkg-query -W --showformat='${Status}\n' openswan|grep "install ok installed")
 	echo Checking Openswan: $PKG_OK
 	if [ "" == "$PKG_OK" ]; then
-		echo "No somelib. Setting up somelib."
+		echo "Setting up openvpn..."
 		apt-get --force-yes --yes install openswan
 	fi
 
