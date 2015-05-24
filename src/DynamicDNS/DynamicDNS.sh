@@ -1,7 +1,7 @@
 #!/bin/bash
 
-. /usr/pluto/bin/Config_Ops.sh 2>/dev/null || exit 1
-. /usr/pluto/bin/Network_Parameters.sh 2>/dev/null || exit 1
+. /usr/pluto/bin/Config_Ops.sh > /dev/null 2>/dev/null || exit 1
+. /usr/pluto/bin/Network_Parameters.sh > /dev/null 2>/dev/null || exit 1
 . /usr/pluto/bin/Utils.sh
 
 function DisplayUsage() {
