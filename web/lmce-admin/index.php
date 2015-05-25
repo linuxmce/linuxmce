@@ -725,6 +725,12 @@ switch ($section) {
 	    include_once('operations/mediaBrowser/internet_radio.php');
 	    internet_radio($output,$mediadbADO,$dbADO);	    
 	break;
+	case 'internetRadioAdd':
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+	    include_once('operations/mediaBrowser/internet_radio_add.php');
+	    internet_radio_add($output,$mediadbADO,$dbADO);	    
+	break;
 	case 'playlists':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
