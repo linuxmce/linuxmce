@@ -12,15 +12,23 @@ GenericListModel{
     label:qsTr("Availible Commands")
     property Item trackedDevice
     property int trackedInt:0
-    delegate: Item{
+    delegate: StyledButton{
         width: parent.width
         height: Style.listViewItemHeight
-
-        Loader {
+        buttonText: command_name
+        //        Loader {
+        //            id:control_comp
+        //            anchors.fill: parent
+        //            sourceComponent: getCmdDelegate(command_number)
+        //            property variant cmdName : command_name
+        //            property variant cmdNumber : command_number
+        //        }
+        MouseArea{
             anchors.fill: parent
-            sourceComponent: getCmdDelegate(command_number)
-            property variant cmdName : command_name
-            property variant cmdNumber : command_number
+            onClicked:{
+                var comp= getCmdDelegate(command_number);
+                popupControls.setCommandDelegate(comp, index )
+            }
         }
     }
 
@@ -108,6 +116,7 @@ GenericListModel{
             StyledText {
                 anchors.left: parent.left
                 text: "On/Off"
+                fontSize: Style.appFontSize_description
             }
             Row {
                 anchors.top: parent.top
@@ -118,6 +127,7 @@ GenericListModel{
                 StyledButton {
                     height: Style.appButtonHeight
                     width: Style.appButtonWidth /2
+                    textSize: Style.appFontSize_description
                     anchors.verticalCenter: parent.verticalCenter
                     label:qsTr( "On")
                     onActivated: sendCommand(cmdNumber, []);
@@ -125,6 +135,7 @@ GenericListModel{
                 StyledButton {
                     anchors.verticalCenter: parent.verticalCenter
                     height: Style.appButtonHeight
+                    fontSize: Style.appFontSize_description
                     width: Style.appButtonWidth /2
                     label: "Off"
                     onActivated: sendCommand("193", []);
@@ -340,10 +351,10 @@ GenericListModel{
                 }
             }
 
-            Text{
+            StyledText{
                 id:lbl
                 text:cmdName
-                font.pointSize: 24
+                fontSize: Style.appFontSize_description
                 color:"white"
 
             }
@@ -365,6 +376,7 @@ GenericListModel{
                 delegate: Item{
                     id:cmdDelegate
                     clip:false
+                    property string sourceString:controls_loader.source
                     Component.onCompleted: {
                         if(Command==="192"){
                             if(CommandParameter!=98){
@@ -405,9 +417,8 @@ GenericListModel{
                         entry_timeout.restart()
                     }
 
-
-                    height: state==="selected" !==0 ? 60 : 0
-                    width: parent.height !==0 ? 120 : 0
+                    height:Style.appButtonHeight
+                    width: parent.width
                     Column{
                         spacing:5
                         width: parent.width
@@ -419,7 +430,7 @@ GenericListModel{
                         Loader{
                             id:controls_loader
                             property int val
-                            onValChanged: setParam(String(val))
+                            onValChanged: cmdDelegate.setParam(String(val))
                         }
                     }
                 }
@@ -434,10 +445,10 @@ GenericListModel{
                 anchors.left: parent.left
                 color: ms.pressed ? "green": "red"
 
-                Text{
+                StyledText{
                     text: "Send"
                     color:"white"
-                    font.pointSize: 18
+                    fontSize: Style.appFontSize_description
                 }
 
                 MouseArea{

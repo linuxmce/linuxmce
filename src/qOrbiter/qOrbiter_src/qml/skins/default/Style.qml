@@ -15,6 +15,8 @@ QtObject{
         console.log((message? message+"\n\t" : "No Message \n\t")+ JSON.stringify(obj, null, "\t"))
     }
 
+    readonly property double dpRatio:screenInfo.primaryScreen.pixelRatio
+
     //picture ratios - will be moved to cpp class
     property double dvdPosterRatio:955/1080
     property double hdPosterRatio:755/1080

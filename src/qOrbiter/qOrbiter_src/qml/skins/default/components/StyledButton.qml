@@ -17,6 +17,7 @@ Item{
 
     property string phil: fly_trap.pressed ? Style.appbutton_confirm_color: Style.appcolor_background_list
     property int textSize:Style.fontSize_listItem
+    property alias fontSize:button_label.fontSize
     property alias buttonText:button_label.text
     property alias txtObj:button_label
     property alias hitArea:fly_trap
@@ -47,6 +48,11 @@ Item{
         border.width: buttonRadius == height ? 0 :1
         radius: 5
         opacity:useHandler ? dceHandler.item.pressed ? 1 : .35 :  fly_trap.pressed ? 1 : .35
+        Behavior on color {
+            ColorAnimation {
+                duration: Style.transition_animationTime
+            }
+        }
 
     }
 

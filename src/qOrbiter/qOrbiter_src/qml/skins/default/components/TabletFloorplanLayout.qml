@@ -67,7 +67,6 @@ Panel{
         }
 
         GenericListModel {
-
             parent:floorplan_devices.floorplanType===5 ?  fp_panel.headerRow : parent
             id:activeStreams
             label:qsTr("Media Streams")
@@ -80,7 +79,7 @@ Panel{
                 StyledButton{
                 id:gridBtn
                 buttonText: description
-                textSize: 16
+                textSize: Style.appFontSize_description
                 height: Style.appButtonHeight
                 width: parent.width
 
@@ -104,7 +103,7 @@ Panel{
         GenericListModel{
             model: floorplan_pages
             label: qsTr("Floorplans")
-           Component.onCompleted: parent = fp_panel.headerRow
+            Component.onCompleted: parent = fp_panel.headerRow
             width: Style.scaleX(25)
             height: Style.scaleY(45)
             delegate:Rectangle{
@@ -117,6 +116,7 @@ Panel{
                     text: m_description
                     width: parent.width
                     height: parent.height
+                    fontSize: Style.fontSize_small
                 }
                 MouseArea{
                     anchors.fill: parent
@@ -206,6 +206,11 @@ Panel{
                 }
             }
         }
+
+        ControlPopupContainer{
+            id:popupControls
+        }
+
 
         states: [
             State {

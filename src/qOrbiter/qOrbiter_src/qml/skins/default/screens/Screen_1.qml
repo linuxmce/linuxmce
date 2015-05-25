@@ -46,7 +46,7 @@ function showFloorplan(idx){
                     left:parent.left
                     verticalCenter: parent.verticalCenter
                 }
-                font.pointSize: Style.appFontSize_list//manager.isProfile ? Style.scaleY(3) : Style.scaleY(5)
+                font.pointSize: Style.appFontSize_title//manager.isProfile ? Style.scaleY(3) : Style.scaleY(5)
                 text:name
 
                 MouseArea{

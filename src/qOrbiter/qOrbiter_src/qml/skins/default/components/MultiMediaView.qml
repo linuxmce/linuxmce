@@ -62,6 +62,7 @@ Item{
             bottom:parent.bottom
             top:parent.top
         }
+        cacheBuffer: 50
         cellHeight: currentCellHeight
         cellWidth:currentCellWidth     
         visible:true //current_view_type===1

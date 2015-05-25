@@ -208,5 +208,7 @@
         <file>qml/skins/default/images/floorplan/smallpower.png</file>
         <file>qml/skins/default/images/floorplan/sprinkler.png</file>
         <file>qml/skins/default/images/floorplan/vcr.png</file>
+        <file>qml/skins/default/components/Alphabetlist.qml</file>
+        <file>qml/skins/default/components/ControlPopupContainer.qml</file>
     </qresource>
 </RCC>
