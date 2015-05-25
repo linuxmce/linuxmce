@@ -41,7 +41,7 @@ Item{
 
     states: [
         State {
-            when:manager.currentScreen==="Screen_1.qml"
+            when:manager.currentScreen==="Screen_1.qml" && !screensaverActive
             name: "open"
             AnchorChanges{
                 target: footer
@@ -53,13 +53,19 @@ Item{
         },
         State {
             name: "closed"
-            when:manager.currentScreen!=="Screen_1.qml" || !uiOn
+            when:manager.currentScreen!=="Screen_1.qml" || !uiOn || qmlRoot.screensaverActive
             AnchorChanges{
                 target: footer
                 anchors{
                     bottom:undefined
                     top:layout.bottom
                 }
+            }
+        }, State {
+            name: "retracted"
+            PropertyChanges {
+                target: object
+
             }
         }
     ]

@@ -172,8 +172,16 @@ Item {
                     }
                     buttonText: qsTr("Power")
                 }
+                StyledButton{
+                    anchors{
+                        top:parent.top
+                        bottom:parent.bottom
+                        margins: 5
+                    }
+                    buttonText: qsTr("Toggle UI")
+                    onActivated: qmlRoot.screenSaverActivated()
+                }
             }
-
 
         }
     }

@@ -58,11 +58,12 @@ Item{
                         bottom:parent.bottom
                         left:selectionDisplay.right
                     }
-                    delegate:  LargeStyledButton {
+                    delegate:  StyledButton {
                         height: Style.appButtonHeight /2
                         width: parent.width
                         buttonRadius: 0
                         buttonText: filterdlg.selectingUser? username: name
+
                         onActivated: {
                             if(filterdlg.selectingUser){
                                 filterdlg.authUser=pkUser
@@ -72,7 +73,7 @@ Item{
 
                             selectionView.model.setSelectionStatus(name); arrow=!arrow
                         }
-                        arrow:filterdlg.selectingUser ? "false" : selectionView.model.getSelectionStatus(name)
+                        // arrow:filterdlg.selectingUser ? "false" : selectionView.model.getSelectionStatus(name)
                     }
                 }
 
@@ -272,11 +273,8 @@ Item{
         fontSize: Style.appFontSize_list
     }
 
-    FocusRow {
-        id: optionContainer
-
-        onEscapeRow: mediaFilesView.forceActiveFocus()
-
+    ScrollRow{
+        id:row_scroll
         anchors{
             top:parent.top
             left: row_label.right
@@ -284,28 +282,58 @@ Item{
             right:parent.right
             margins: 5
         }
-        spacing: 10
+        FocusRow {
+            id: optionContainer
 
-        LargeStyledButton{
-            buttonText: qsTr("Filters", "Media Filters")
-            fontSize: Style.appFontSize_list
-            anchors{
-                top:parent.top
-                bottom:parent.bottom
+            onEscapeRow: mediaFilesView.forceActiveFocus()
+            width: childrenRect.width
+            height: row_scroll.height
+
+            spacing: 10
+
+            LargeStyledButton{
+                buttonText: qsTr("Filters", "Media Filters")
+                fontSize: Style.appFontSize_list
+                arrow:false
+                anchors{
+                    top:parent.top
+                    bottom:parent.bottom
+                }
+                onActivated: qmlRoot.createPopup(mediaFilters)
             }
-            onActivated: qmlRoot.createPopup(mediaFilters)
-        }
-        LargeStyledButton{
-            buttonText: qsTr("Play All", "Play All Media on this Screen")
-            fontSize: Style.appFontSize_description
-            width: Style.appButtonWidth
-            anchors{
-                top:parent.top
-                bottom:parent.bottom
+            LargeStyledButton{
+                buttonText: qsTr("Play All", "Play All Media on this Screen")
+                fontSize: Style.appFontSize_description
+                width: Style.appButtonWidth
+                anchors{
+                    top:parent.top
+                    bottom:parent.bottom
+                }
+                onActivated: manager.playMedia("!G")
             }
-            onActivated: manager.playMedia("!G")
+            LargeStyledButton{
+                buttonText: qsTr("A - Z", "Aplhabet")
+                fontSize: Style.appFontSize_description
+                width: Style.appButtonWidth
+                anchors{
+                    top:parent.top
+                    bottom:parent.bottom
+                }
+
+                onActivated: if(!a_z.sourceComponent){
+                                 a_z.sourceComponent=alpha
+                             } else {
+                                 a_z.sourceComponent=undefined
+                             }
+
+            }
         }
+
     }
+
+
+
+
     BackButton{
         anchors{
             right:parent.right

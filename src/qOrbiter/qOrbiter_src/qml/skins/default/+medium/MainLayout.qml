@@ -98,6 +98,7 @@ Item {
             anchors.fill: parent
             contentHeight:row.height
             contentWidth:row.width
+
             Row{
                 id:row
                 spacing:5
@@ -141,9 +142,16 @@ Item {
                     }
                     buttonText: qsTr("Power")
                 }
+                StyledButton{
+                    anchors{
+                        top:parent.top
+                        bottom:parent.bottom
+                        margins: 5
+                    }
+                    buttonText: qsTr("ToggleUI")
+                    onActivated: qmlRoot.screenSaverActivated()
+                }
             }
-
-
         }
     }
 

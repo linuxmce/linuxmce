@@ -7,11 +7,17 @@ Item{
     height: manager.appHeight
     width: manager.appWidth
     focus:true
+    property bool screensaverActive:false
     signal screenSaverActivated()
     signal resetTimeout()
 
     onResetTimeout: {
         screenSaverTimeout.restart()
+        screensaverActive=false
+    }
+
+    onScreenSaverActivated: {
+        screensaverActive=true
     }
 
     Timer{
@@ -56,11 +62,11 @@ Item{
             modelName:"currentRoomSecurity"
             floorplantype:4
         }
-        ListElement{
-            name:"Advanced"
-            modelName:"advancedMenu"
-            floorplantype:-1
-        }
+//        ListElement{
+//            name:"Advanced"
+//            modelName:"advancedMenu"
+//            floorplantype:-1
+//        }
     }
 
 
@@ -88,7 +94,11 @@ Item{
     MouseArea{
         anchors.fill: parent
         onPressed: {
-            mouse.accepted=false
+            console.log("pressed")
+            if(!screensaverActive)
+                mouse.accepted=false
+
+
             qmlRoot.resetTimeout()
         }
     }

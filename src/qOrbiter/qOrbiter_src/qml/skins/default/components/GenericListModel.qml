@@ -8,6 +8,7 @@ Item{
     width: Style.listViewWidth_medium
 
     property alias listView:view
+    property alias currentItem:view.currentItem
     property alias model:view.model
     property alias label:itemlabel.text
     property alias delegate:view.delegate
@@ -25,7 +26,9 @@ Item{
     }
 
     function refresh(){
-        if(dataGrid==-1 || dataGridLabel===""){
+
+
+        if(dataGrid==-1 || dataGridLabel==="" ){
             console.log("Invalid model id, cant reset")
             return;
         }
@@ -35,6 +38,11 @@ Item{
     }
 
     Component.onCompleted: {
+
+        if(model!==undefined){
+            console.log("Set non DG listmodel")
+            return;
+        }
 
         if(dataGrid==-1 || dataGridLabel==="")
             return;

@@ -50,7 +50,7 @@ Item{
             bottom:bgExtent.bottom
         }
         wrapMode: Text.Wrap
-        fontSize: Style.appFontSize_title
+        fontSize: Style.appFontSize_description
         visible:true //path==="" ? true : false      
         color: "White"
         height: titleBlock.lineCount * 50

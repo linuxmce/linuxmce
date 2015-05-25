@@ -44,9 +44,7 @@ StyledScreen {
             else if(state=="filter")
                 console.log("filter focus")
         }
-        MediaOptionRow {
-            id: option_row
-        }
+
 
         MultiMediaView {
             id: multi_view_list
@@ -58,7 +56,23 @@ StyledScreen {
                 right:parent.right
             }
         }
-
+        MediaOptionRow {
+            id: option_row
+        }
+        Loader{
+            id:a_z
+            anchors{
+                top:option_row.bottom
+                right: parent.right
+                bottom:parent.bottom
+            }
+        }
+        Component{
+            id:alpha
+            Alphabetlist{
+                height: a_z.height
+            }
+        }
         GridView{
             id:typeSelection
             Component.onCompleted: innerContent.forceActiveFocus()

@@ -61,10 +61,10 @@ Item{
             bottom:bgExtent.bottom
         }
         wrapMode: Text.Wrap
-        fontSize: Style.appFontSize_title
-        visible: manager.q_subType!=MediaSubtypes.MOVIES && imdbImg.source!==""       
+        fontSize: Style.appFontSize_description
+      //  visible: manager.q_subType!=MediaSubtypes.MOVIES && imdbImg.source!==""
         color: "White"
-        height: titleBlock.lineCount * 50
+        height: titleBlock.lineCount * Style.dpRatio*25
     }
     Glow{
         anchors.fill: titleBlock
