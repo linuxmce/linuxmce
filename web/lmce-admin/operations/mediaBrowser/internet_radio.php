@@ -7,6 +7,14 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 	/* @var $dbADO ADOConnection */
 	/* @var $res ADORecordSet */
 	
+	$accessFile=$GLOBALS['pluto.conf'];
+	
+	// check pluto.conf
+	exec('cat '.$accessFile.' | grep -v -E "^#|^$" ',$retArray);	
+	foreach ($retArray as $comf){
+		parse_str($comf);
+	}		
+	
 	#define vars what later will be overwritten
 	$out='';
 	$continet='';
@@ -232,11 +240,18 @@ function internet_radio($output,$mediadbADO,$dbADO) {
     			    if (forminputs[i].type === \'checkbox\') {
 					    if (forminputs[i].checked === true) {
 						    del(forminputs[i].value);
+							
 						}
 					}
 					
   				}
 			}
+			
+			function confirmAddInternetRadio()
+        	{
+                        document.getElementById(\'internet_radio\').AddInternetRadio.value;
+						document.getElementById(\'internet_radio\').submit();
+            }
  
  			if (window.addEventListener) {
      		    window.addEventListener("load", prepare, false);
@@ -276,7 +291,7 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 		<table border="1">
 			   <input type="hidden" name="section" value="internetRadio">
 			   <tr>
-			   <td colspan="4" align="left"><legend><b>Manually Add an Internet Radio Station:</b></legend></td>
+			   <td colspan="4" align="left"><legend><b>Add Internet Radio Stations:</b></legend></td>
 			   <td colspan="2" align="right"><legend><b>Set Default Sorting for Radio</b></legend></td>
 			   </tr>
 			   <tr>
@@ -303,28 +318,12 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 			   <td align="right"><input type="hidden" name="setDefaultSortRadio" value="none" />
 			   <input type="button" class="button" value="'.translate('TEXT_DEFAULT_SORT_CONST').'" onclick="sort()"></td>
 			   </tr>
+			   <tr>
+			   <td colspan="5"><input type="button" class="button" value="Auto add based on location" onclick="location.href = \'index.php?section=internetRadioAdd\'" /></td>
+			   </tr>
 		</table>
 		<br>
 		
-		<table border="1">
-		    <tr>
-			   <td colspan="4" align="left"><legend><b>Automaticly Add Internet Radio Stations based on location:</b></legend></td>
-			</tr>
-			<tr>
-				<td width="250">Continent:</td>
-				<td width="250">Country:</td>
-				<td width="250">region:</td>
-		    </tr>
-			<tr>
-				<td>'.$continent.'</td>
-				<td>'.$country.'</td>
-				<td>'.$region.'<br>'.$city.'</td>
-				<td><input type="button" class="button" value="add (all)" onclick="add()" /></td>
-			</tr>	
-			<tr>
-				<td colspan="4">Stations:<br>'.$stations.'</td>
-			</tr>
-			</table>
 		<input type="hidden" name="deletepkfile" value="none" />';
 		$out.='<br><form title="delete">
 		<table border="1">
@@ -411,6 +410,14 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 			header("Location: index.php?section=internetRadio&error=".translate('TEXT_NOT_AUTHORISED_TO_MODIFY_INSTALLATION_CONST'));
 			exit(0);
 		}
+		
+		// Update pluto.conf
+ 		if(isset($_POST['AddInternetRadio'])){
+		//if(@$_POST['AddInternetRadio']=='1'){
+						writeConf($accessFile, 'AddInternetRadio',@$AddInternetRadio,0);
+					}else{
+						writeConf($accessFile, 'AddInternetRadio',@$AddInternetRadio,0);
+					}
 		
 		//add the radio stations by script.
 		if ($_POST['action'] == 'add') {
@@ -499,6 +506,7 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 			$dbADO->Execute("UPDATE MediaType SET EK_AttributeType_DefaultSort=? WHERE PK_MediaType=43",$sortVal);
 			header("Location: index.php?section=internetRadio&msg='Please Regen and Reload for changes to take effect'");
 		}
+		
 	}
 	$output->setMenuTitle(translate('TEXT_ADVANCED_CONST').' |');
 	$output->setPageTitle(translate('TEXT_INTERNETRADIO_STATIONS_CONST'));
@@ -507,5 +515,38 @@ function internet_radio($output,$mediadbADO,$dbADO) {
 	$output->setBody($out);
 	$output->setTitle(APPLICATION_NAME.' :: '.translate('TEXT_INTERNETRADIO_STATIONS_CONST'));
 	$output->output();
+}
+
+function writeConf($accessFile, $variable,$oldValue,$newValue)
+{
+		//header("Location: index.php?section=internetRadio&error=".$variable.$newValue." $accessFile");
+		//exit();
+
+	// include language files
+ 	includeLangFile('common.lang.php');
+	
+	$oldFileArray=@file($accessFile);	
+	if(!$oldFileArray){
+		header("Location: index.php?section=internetRadio&error=".translate('TEXT_ERROR_CANNOT_OPEN_FILE_FOR_READING_CONST')." ".$accessFile);
+		exit();
+	}
+	$oldFile=implode('',$oldFileArray);
+	$stringToReplace=$variable.'='.$oldValue;
+	if(ereg($stringToReplace,$oldFile)){
+		$newFile=str_replace($stringToReplace,$variable.'='.$newValue,$oldFile);
+	}
+	else
+		$newFile=$oldFile.$variable.'='.$newValue."\n";
+	if(!is_writable($accessFile)){
+		header("Location: index.php?section=internetRadio&error=".translate('TEXT_ERROR_CANNOT_WRITE_TO_FILE_CONST')." ".$accessFile);
+		exit();
+	}
+	$handle = fopen($accessFile, 'w');
+
+	if (!fwrite($handle, $newFile)) {
+		header("Location: index.php?section=internetRadio&error=".translate('TEXT_ERROR_CANNOT_WRITE_TO_FILE_CONST')." ".$accessFile);
+		exit();
+	}
+	fclose($handle);
 }
 ?>
