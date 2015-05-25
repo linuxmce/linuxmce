@@ -27,7 +27,7 @@ if [[ -z "$Moon_Architecture" ]]; then
 	Moon_Architecture=i386
 fi
 
-Moon_RootArchive="/usr/pluto/install/PlutoMD-$Moon_Architecture.tar.bz2"
+Moon_RootArchive="/usr/pluto/install/PlutoMD-$Moon_Architecture.tar.xz"
 DisklessImages=$(GetDeviceData "$Moon_DeviceID" "$DEVICEDATA_DisklessImages")
 
 echo "INFO ::::: root:archive = $Moon_RootArchive"

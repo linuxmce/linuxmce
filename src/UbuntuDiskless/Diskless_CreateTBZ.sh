@@ -723,16 +723,16 @@ Create_Diskless_Tar () {
 	case "$TARGET_DISTRO" in
 		"ubuntu")
 			# HACK'O'MATIC And make sure, we have files for both architectures.
-			if [ -f /usr/pluto/install/PlutoMD-i386.tar.bz2 ]; then
+			if [ -f /usr/pluto/install/PlutoMD-i386.tar.xz ]; then
 				FILENEEDED=PlutoMD-amd64
 			else
 				FILENEEDED=PlutoMD-i386
 			fi
-			if [ ! -f /usr/pluto/install/$FILENEEDED.tar.bz2 ]; then
-				ln -sf /usr/pluto/install/$DisklessFS /usr/pluto/install/$FILENEEDED.tar.bz2
+			if [ ! -f /usr/pluto/install/$FILENEEDED.tar.xz ]; then
+				ln -sf /usr/pluto/install/$DisklessFS /usr/pluto/install/$FILENEEDED.tar.xz
 			fi
-			if [ ! -f /usr/pluto/install/$FILENEEDED.tar.bz2.version ]; then
-				ln -sf /usr/pluto/install/$DisklessFS.version /usr/pluto/install/$FILENEEDED.tar.bz2.version
+			if [ ! -f /usr/pluto/install/$FILENEEDED.tar.xz.version ]; then
+				ln -sf /usr/pluto/install/$DisklessFS.version /usr/pluto/install/$FILENEEDED.tar.xz.version
 			fi
 			;;
 	esac
@@ -771,7 +771,7 @@ for TARGET in "$TARGET_TYPES" ; do
 			TARGET_ARCH="$HOST_ARCH"
 			TARGET_REPO="http://archive.ubuntu.com/ubuntu/"
 			DBST_ARCHIVE="PlutoMD_Debootstraped.tar.bz2"
-			DisklessFS="PlutoMD-${TARGET_ARCH}.tar.bz2"
+			DisklessFS="PlutoMD-${TARGET_ARCH}.tar.xz"
 			case "$TARGET_RELEASE" in
 				lucid)
 					TARGET_DISTRO_ID=18
@@ -795,8 +795,8 @@ for TARGET in "$TARGET_TYPES" ; do
 			TARGET_RELEASE="wheezy" #TODO: get from ?
 			TARGET_ARCH="armhf"
 			TARGET_REPO="http://archive.raspbian.org/raspbian/"
-			DBST_ARCHIVE="LMCEMD_Debootstraped-raspbian-armhf.tar.bz2"
-			DisklessFS="LMCEMD-$TARGET_DISTRO-$TARGET_ARCH.tar.bz2"
+			DBST_ARCHIVE="LMCEMD_Debootstraped-raspbian-armhf.tar.xz"
+			DisklessFS="LMCEMD-$TARGET_DISTRO-$TARGET_ARCH.tar.xz"
 			TARGET_DISTRO_ID=19
 			TARGET_REPO_DISTRO_SRC=22
 			TARGET_REPO_LMCE_SRC=23
