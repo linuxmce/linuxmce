@@ -1,0 +1,14 @@
+--- a/xine_frontend_cec.c
++++ b/xine_frontend_cec.c
+@@ -272,7 +272,11 @@
+   p->bMonitorOnly = 0;
+   p->cecVersion = CEC_DEFAULT_SETTING_CEC_VERSION;
+   p->adapterType = ADAPTERTYPE_UNKNOWN;
++#ifdef CEC_DOUBLE_TAP_TIMEOUT_MS
+   p->iDoubleTapTimeoutMs = CEC_DOUBLE_TAP_TIMEOUT_MS;
++#else
++  p->iDoubleTapTimeout50Ms = CEC_DOUBLE_TAP_TIMEOUT_50_MS;
++#endif
+   p->comboKey = CEC_USER_CONTROL_CODE_STOP;
+   p->iComboKeyTimeoutMs = CEC_DEFAULT_COMBO_TIMEOUT_MS;
+ 

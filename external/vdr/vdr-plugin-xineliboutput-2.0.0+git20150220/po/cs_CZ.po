@@ -1,0 +1,769 @@
+# VDR plugin language source file.
+# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
+# This file is distributed under the same license as the VDR package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Xineliboutput 1.1.0\n"
+"Report-Msgid-Bugs-To: <phintuka@users.sourceforge.net>\n"
+"POT-Creation-Date: 2013-10-29 10:29+0200\n"
+"PO-Revision-Date: 2008-03-20 23:57+0100\n"
+"Last-Translator: Maya <maja373@gmail.com>\n"
+"Language-Team: Czech <vdr@linuxtv.org>\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Czech\n"
+"X-Poedit-Country: CZECH REPUBLIC\n"
+
+msgid "custom"
+msgstr "uživatelský"
+
+msgid "tiny"
+msgstr "nejmenší"
+
+msgid "small"
+msgstr "malý"
+
+msgid "medium"
+msgstr "střední"
+
+msgid "large"
+msgstr "velký"
+
+msgid "huge"
+msgstr "největší"
+
+msgid "automatic"
+msgstr "automaticky"
+
+msgid "default"
+msgstr "výchozí"
+
+msgid "Pan&Scan"
+msgstr "Pan&Scan"
+
+msgid "CenterCutOut"
+msgstr ""
+
+msgid "square"
+msgstr "čtvercový"
+
+msgid "anamorphic"
+msgstr "anamorfní"
+
+msgid "DVB"
+msgstr "DVB"
+
+msgid "off"
+msgstr "vypnuto"
+
+msgid "no audio"
+msgstr "bez zvuku"
+
+msgid "no video"
+msgstr "bez obrazu"
+
+msgid "Off"
+msgstr "vypnuto"
+
+msgid "Goom"
+msgstr "Soutěska"
+
+msgid "Oscilloscope"
+msgstr "Osciloskop"
+
+msgid "FFT Scope"
+msgstr "FFT spektrum"
+
+msgid "FFT Graph"
+msgstr "FFT graf"
+
+msgid "Image"
+msgstr ""
+
+msgid "Mono 1.0"
+msgstr "Mono 1.0"
+
+msgid "Stereo 2.0"
+msgstr "Stereo 2.0"
+
+msgid "Headphones 2.0"
+msgstr "Sluchátka 2.0"
+
+msgid "Stereo 2.1"
+msgstr "Stereo 2.1"
+
+msgid "Surround 3.0"
+msgstr "Surround 3.0"
+
+msgid "Surround 4.0"
+msgstr "Surround 4.0"
+
+msgid "Surround 4.1"
+msgstr "Surround 4.1"
+
+msgid "Surround 5.0"
+msgstr "Surround 5.0"
+
+msgid "Surround 5.1"
+msgstr "Surround 5.1"
+
+msgid "Surround 6.0"
+msgstr "Surround 6.0"
+
+msgid "Surround 6.1"
+msgstr "Surround 6.1"
+
+msgid "Surround 7.1"
+msgstr "Surround 7.1"
+
+msgid "Pass Through"
+msgstr "Průchozí"
+
+msgid "very large"
+msgstr "velmi velký"
+
+msgid "Software"
+msgstr "softwarové"
+
+msgid "Hardware"
+msgstr "hardwarové"
+
+msgid "no"
+msgstr "ne"
+
+msgid "grayscale"
+msgstr "odstíny šedi"
+
+msgid "transparent"
+msgstr "průhledný"
+
+msgid "transparent grayscale"
+msgstr ""
+
+msgid "yes"
+msgstr "ano"
+
+msgid "nearest"
+msgstr ""
+
+msgid "bilinear"
+msgstr ""
+
+msgid "LUT8"
+msgstr ""
+
+msgid "TrueColor"
+msgstr ""
+
+msgid "video stream"
+msgstr ""
+
+msgid "none"
+msgstr ""
+
+msgid "nonref"
+msgstr ""
+
+msgid "bidir"
+msgstr ""
+
+msgid "nonkey"
+msgstr ""
+
+msgid "all"
+msgstr ""
+
+msgid "Frontend initialization failed"
+msgstr "Inicializace rozhraní selhala"
+
+msgid "Server initialization failed"
+msgstr "Inicializace serveru selhala"
+
+msgid "Playlist"
+msgstr "Seznam stop"
+
+msgid "Button$Random"
+msgstr "Náhodné"
+
+msgid "Button$Normal"
+msgstr "Normální"
+
+msgid "Button$Add files"
+msgstr "Přidat soubory"
+
+msgid "Button$Remove"
+msgstr "Odstranit"
+
+msgid "Button$Mark"
+msgstr ""
+
+msgid "Queued to playlist"
+msgstr "Přidáno do seznamu stop"
+
+msgid "Random play"
+msgstr "Náhodné přehrávání"
+
+msgid "Normal play"
+msgstr "Normální přehrávání"
+
+msgid "DVD Menu"
+msgstr ""
+
+msgid "Exit DVD menu"
+msgstr ""
+
+msgid "DVD Root menu"
+msgstr ""
+
+msgid "DVD Title menu"
+msgstr ""
+
+msgid "DVD SPU menu"
+msgstr ""
+
+msgid "DVD Audio menu"
+msgstr ""
+
+msgid "Close menu"
+msgstr ""
+
+msgid "BluRay Top menu"
+msgstr ""
+
+msgid "Toggle Pop-Up menu"
+msgstr ""
+
+msgid "Next title"
+msgstr ""
+
+msgid "Previous title"
+msgstr ""
+
+msgid "Delete image ?"
+msgstr "Smazat obrázek ?"
+
+msgid "Play movie title"
+msgstr ""
+
+msgid "Play disc"
+msgstr ""
+
+msgid "Images"
+msgstr "Obrázky"
+
+msgid "Play music"
+msgstr "Přehrát hudbu"
+
+msgid "Add to playlist"
+msgstr "Přidat do seznamu stop"
+
+msgid "Play file"
+msgstr "Přehrát soubor"
+
+msgid "Button$Queue"
+msgstr "Fronta"
+
+msgid "Media"
+msgstr "Média"
+
+msgid "View images"
+msgstr "Prohlížet obrázky"
+
+msgid "Play DVD disc"
+msgstr "Přehrát DVD"
+
+msgid "Play BluRay disc"
+msgstr "Přehrát BluRay"
+
+msgid "Play audio CD"
+msgstr "Přehrát zvukové CD"
+
+msgid "Video settings"
+msgstr "Nastavení obrazu"
+
+msgid "Play only audio"
+msgstr "Přehrávat pouze zvuk"
+
+msgid "Crop letterbox 4:3 to 16:9"
+msgstr "Oříznout letterbox 4:3 na 16:9"
+
+msgid "Overscan (crop image borders)"
+msgstr "Overscan (ořez okrajů obrazu)"
+
+msgid "Audio settings"
+msgstr "Nastavení zvuku"
+
+msgid "Audio Compression"
+msgstr ""
+
+msgid "Audio equalizer"
+msgstr "Korekce zvuku (ekvalizér)"
+
+msgid "Local Frontend"
+msgstr "Lokální rozhraní"
+
+msgid "Aspect ratio"
+msgstr "Poměr stran"
+
+msgid "Video aspect ratio"
+msgstr "Poměr stran obrazu"
+
+msgid "On"
+msgstr "zapnuto"
+
+msgid "Deinterlacing"
+msgstr "Odstranění prokládání"
+
+msgid "Upmix stereo to 5.1"
+msgstr "Převzorkovat stereo na 5.1"
+
+msgid "Downmix AC3 to surround"
+msgstr "Převzorkovat AC3 na surround"
+
+msgid "Default playlist not found"
+msgstr "Výchozí seznam stop nenalezen"
+
+msgid "Default playlist is not symlink"
+msgstr "Výchozí seznam stop není symbolický odkaz"
+
+msgid "Default playlist not defined"
+msgstr "Výchozí seznam stop není definován"
+
+msgid "Delay"
+msgstr "Zpoždění"
+
+msgid "ms"
+msgstr "ms"
+
+#, c-format
+msgid "xineliboutput: hotkey %s not binded"
+msgstr "xineliboutput:  horká klávesa %s není přiřazena"
+
+msgid "Audio"
+msgstr "Zvuk"
+
+msgid "Volume control"
+msgstr "Ovládání hlasitosti"
+
+msgid "Mix to headphones"
+msgstr ""
+
+msgid "Visualization"
+msgstr "Vizualizace"
+
+msgid "Width"
+msgstr "Šířka"
+
+msgid "px"
+msgstr "bodů"
+
+msgid "Height"
+msgstr "Výška"
+
+msgid "Speed"
+msgstr "Rychlost"
+
+msgid "fps"
+msgstr "snímků/sek."
+
+msgid "Background image MRL"
+msgstr ""
+
+msgid "Audio Equalizer"
+msgstr "Korekce zvuku"
+
+msgid "Use Video-Out Driver"
+msgstr ""
+
+msgid "vector"
+msgstr ""
+
+msgid "full"
+msgstr ""
+
+msgid "half (top)"
+msgstr ""
+
+msgid "half (bottom)"
+msgstr ""
+
+msgid "Video"
+msgstr "Obraz"
+
+msgid "Use driver crop"
+msgstr ""
+
+msgid "Autodetect letterbox"
+msgstr "Automaticky detekovat letterbox"
+
+msgid "Crop to"
+msgstr "Oříznout na"
+
+msgid "Autodetect rate"
+msgstr ""
+
+msgid "Stabilize time"
+msgstr ""
+
+msgid "Maximum logo width [%]"
+msgstr ""
+
+msgid "Overscan compensate [%1000]"
+msgstr ""
+
+msgid "Soft start"
+msgstr "Postupné zvětšení"
+
+msgid "Soft start step"
+msgstr ""
+
+msgid "Detect subtitles"
+msgstr "Detekovat titulky"
+
+msgid "Subs detect stabilize time"
+msgstr ""
+
+msgid "Subs detect lifetime"
+msgstr ""
+
+msgid "Use avards analysis"
+msgstr ""
+
+msgid "Bar tone tolerance"
+msgstr ""
+
+msgid "Software scaling"
+msgstr "Softwarové škálování"
+
+msgid "Change aspect ratio"
+msgstr "Změna poměru stran obrazu"
+
+msgid "Change video size"
+msgstr "Změnit velikost obrazu"
+
+msgid "Allow downscaling"
+msgstr "Povolit zmenšení"
+
+msgid "Post processing (ffmpeg)"
+msgstr "Post processing (ffmpeg)"
+
+msgid "Quality"
+msgstr "Kvalita"
+
+msgid "Mode"
+msgstr "Mód"
+
+msgid "Method"
+msgstr "Metoda"
+
+msgid "Cheap mode"
+msgstr "Zjednodušený mód"
+
+msgid "Pulldown"
+msgstr ""
+
+msgid "Frame rate"
+msgstr "Snímková rychlost"
+
+msgid "Judder Correction"
+msgstr "Korekce chvění"
+
+msgid "Use progressive frame flag"
+msgstr ""
+
+msgid "Chroma Filter"
+msgstr ""
+
+msgid "Sharpen / Blur"
+msgstr "Zaostření / rozmazání"
+
+msgid "Width of the luma matrix"
+msgstr ""
+
+msgid "Height of the luma matrix"
+msgstr ""
+
+msgid "Amount of luma sharpness/blur"
+msgstr ""
+
+msgid "Width of the chroma matrix"
+msgstr ""
+
+msgid "Height of the chroma matrix"
+msgstr ""
+
+msgid "Amount of chroma sharpness/blur"
+msgstr ""
+
+msgid "3D Denoiser"
+msgstr "3D odstranění šumu"
+
+msgid "Spatial luma strength"
+msgstr ""
+
+msgid "Spatial chroma strength"
+msgstr ""
+
+msgid "Temporal strength"
+msgstr ""
+
+msgid "HUE"
+msgstr ""
+
+msgid "Saturation"
+msgstr ""
+
+msgid "Contrast"
+msgstr "Kontrast"
+
+msgid "Brightness"
+msgstr "Jas"
+
+msgid "Sharpness"
+msgstr ""
+
+msgid "Noise Reduction"
+msgstr ""
+
+msgid "Smooth fast forward"
+msgstr "Plynulé přetáčení"
+
+msgid "Fastest trick speed"
+msgstr ""
+
+msgid "On-Screen Display"
+msgstr "Obrazovkové menu"
+
+msgid "Hide main menu"
+msgstr "Nezobrazovat v hlavním menu"
+
+msgid "Resolution"
+msgstr ""
+
+msgid "Color depth"
+msgstr ""
+
+msgid "Blending method"
+msgstr ""
+
+msgid "Use hardware for low-res video"
+msgstr ""
+
+msgid "Scaling method"
+msgstr ""
+
+msgid "Scale subtitles"
+msgstr ""
+
+msgid "Show all layers"
+msgstr "Zobrazit všechny vrstvy"
+
+msgid "Dynamic transparency correction"
+msgstr "Úprava dynamické průhlednosti"
+
+msgid "Static transparency correction"
+msgstr "Úprava statické průhlednosti"
+
+msgid "External subtitle size"
+msgstr "Velikost externích titulků"
+
+msgid "DVB subtitle decoder"
+msgstr ""
+
+msgid "Decoder"
+msgstr "Dekodér"
+
+msgid "Buffer size"
+msgstr "Velikost vyrovnávací paměti"
+
+msgid "Number of PES packets"
+msgstr "Počet PES paketů"
+
+msgid "Local Display Frontend"
+msgstr "Lokální zobrazovací rozhraní"
+
+msgid "Use keyboard"
+msgstr "Používat klávesnici"
+
+msgid "Driver"
+msgstr "Ovladač"
+
+msgid "Display address"
+msgstr ""
+
+msgid "Framebuffer device"
+msgstr ""
+
+msgid "Fullscreen mode"
+msgstr "Celoobrazovkový režim"
+
+msgid "Window width"
+msgstr "Šířka okna"
+
+msgid "Window height"
+msgstr "Výška okna"
+
+msgid "Window aspect"
+msgstr "Poměr stran okna"
+
+msgid "Scale to window size"
+msgstr "Škálovat do velikosti okna"
+
+msgid "Port"
+msgstr "Port"
+
+msgid "Speakers"
+msgstr "Reproduktory"
+
+msgid "Remote Clients"
+msgstr "Vzdálení klienti"
+
+msgid "Allow remote clients"
+msgstr "Povolit vzdálené klienty"
+
+msgid "Listen port (TCP and broadcast)"
+msgstr ""
+
+msgid "Listen address"
+msgstr ""
+
+msgid "Remote keyboard"
+msgstr ""
+
+msgid "Max number of clients"
+msgstr ""
+
+msgid "PIPE transport"
+msgstr "PIPE transport"
+
+msgid "TCP transport"
+msgstr "TCP transport"
+
+msgid "UDP transport"
+msgstr "UDP transport"
+
+msgid "RTP (multicast) transport"
+msgstr "RTP (multicast) transport"
+
+msgid "Address"
+msgstr "Adresa"
+
+msgid "TTL"
+msgstr ""
+
+msgid "Transmit always on"
+msgstr "Přenos stále zapnut"
+
+msgid "SAP announcements"
+msgstr ""
+
+msgid "Server announce broadcasts"
+msgstr ""
+
+msgid "HTTP transport for media files"
+msgstr "HTTP transport pro média"
+
+msgid "Additional network services"
+msgstr "Další síťové služby"
+
+msgid "HTTP server"
+msgstr "HTTP server"
+
+msgid "HTTP clients can control VDR"
+msgstr "HTTP klienti mohou ovládat VDR"
+
+msgid "RTSP server"
+msgstr "RTSP server"
+
+msgid "RTSP clients can control VDR"
+msgstr "RTSP klienti mohou ovládat VDR"
+
+msgid "Playlist settings"
+msgstr "Nastavení seznamu stop"
+
+msgid "Show the track number"
+msgstr "Zobrazovat číslo stopy"
+
+msgid "Show the name of the artist"
+msgstr "Zobrazovat jméno autora"
+
+msgid "Show the name of the album"
+msgstr "Zobrazovat název alba"
+
+msgid "Scan for metainfo"
+msgstr "Vyhledávat metainfo"
+
+msgid "Cache metainfo"
+msgstr "Uchovávat metainfo"
+
+msgid "Arrow keys control DVD playback"
+msgstr ""
+
+msgid "Show hidden files"
+msgstr ""
+
+msgid "Allow removing files"
+msgstr ""
+
+msgid "Remember last playback position"
+msgstr ""
+
+msgid "Media Player"
+msgstr "Přehrávač médií"
+
+msgid "Grayscale"
+msgstr "Odstíny šedi"
+
+msgid "Bitmap"
+msgstr "Rastr"
+
+msgid "OSD"
+msgstr "OSD"
+
+msgid "Test Images"
+msgstr "Zkušební obrazce"
+
+msgid "X11/xine-lib output plugin"
+msgstr "X11/xine-lib výstupní plugin"
+
+#~ msgid "normal"
+#~ msgstr "normální"
+
+#~ msgid "inverted"
+#~ msgstr "inverzní"
+
+#~ msgid "Interlaced Field Order"
+#~ msgstr "Pořadí půlsnímků"
+
+#~ msgid "Button$Sort"
+#~ msgstr "Třídění"
+
+#~ msgid "Play file >>"
+#~ msgstr "Přehrát soubor >>"
+
+#~ msgid "Play music >>"
+#~ msgstr "Přehrát hudbu >>"
+
+#~ msgid "View images >>"
+#~ msgstr "Prohlížet obrázky >>"
+
+#~ msgid "Play DVD disc >>"
+#~ msgstr "Přehrát DVD >>"
+
+#~ msgid "Play audio CD >>"
+#~ msgstr "Přehrát zvukové CD >>"
+
+#~ msgid "Play BluRay disc >>"
+#~ msgstr "Přehrát BluRay >>"
+
+#~ msgid "Play remote DVD >>"
+#~ msgstr "Přehrát vzdálené DVD >>"
+
+#~ msgid "Play remote CD >>"
+#~ msgstr "Přehrát vzdálené CD >>"
+
+#~ msgid "Audio equalizer >>"
+#~ msgstr "Korekce zvuku (ekvalizér) >>"

@@ -1,0 +1,342 @@
+diff --git a/menu.c b/menu.c
+index ce1b05a..17255a9 100644
+--- a/menu.c
++++ b/menu.c
+@@ -1010,7 +1010,8 @@ void cMenuScheduleItem::SetMenuItem(cSkinDisplayMenu *DisplayMenu, int Index, bo
+ 
+ class cMenuWhatsOn : public cOsdMenu {
+ private:
+-  bool now;
++  //bool now;
++  int whatsOnId;
+   int helpKeys;
+   int timerState;
+   eOSState Record(void);
+@@ -1019,8 +1020,9 @@ private:
+   static const cEvent *scheduleEvent;
+   bool Update(void);
+   void SetHelpKeys(void);
++  time_t GetTime(int SecondsFromMidnight);
+ public:
+-  cMenuWhatsOn(const cSchedules *Schedules, bool Now, int CurrentChannelNr);
++  cMenuWhatsOn(const cSchedules *Schedules, int WhatsOnId, int CurrentChannelNr);
+   static int CurrentChannel(void) { return currentChannel; }
+   static void SetCurrentChannel(int ChannelNr) { currentChannel = ChannelNr; }
+   static const cEvent *ScheduleEvent(void);
+@@ -1030,11 +1032,16 @@ public:
+ int cMenuWhatsOn::currentChannel = 0;
+ const cEvent *cMenuWhatsOn::scheduleEvent = NULL;
+ 
+-cMenuWhatsOn::cMenuWhatsOn(const cSchedules *Schedules, bool Now, int CurrentChannelNr)
+-:cOsdMenu(Now ? tr("What's on now?") : tr("What's on next?"), CHNUMWIDTH, CHNAMWIDTH, 6, 4, 4)
++#define NOW  (WhatsOnId == EPGTIME_LENGTH)
++#define NEXT (WhatsOnId == EPGTIME_LENGTH + 1)
++#define EPGTIMESTR(i) *cString::sprintf("%02d:%02d", RemoteTimersSetup.epgTime[i] / 100, RemoteTimersSetup.epgTime[i] % 100)
++#define EPGTIMESEC ((RemoteTimersSetup.epgTime[whatsOnId] / 100) * 3600 + (RemoteTimersSetup.epgTime[whatsOnId] % 100) * 60)
++
++cMenuWhatsOn::cMenuWhatsOn(const cSchedules *Schedules, int WhatsOnId, int CurrentChannelNr)
++:cOsdMenu(NOW ? tr("What's on now?") : NEXT ? tr("What's on next?") : *cString::sprintf(trREMOTETIMERS("What's on at %s?"), EPGTIMESTR(WhatsOnId)), CHNUMWIDTH, CHNAMWIDTH, 6, 4, 4)
+ {
+-  SetMenuCategory(RemoteTimersSetup.skinSchedule ? (Now ? mcScheduleNow : mcScheduleNext) : mcPlugin);
+-  now = Now;
++  SetMenuCategory(RemoteTimersSetup.skinSchedule ? (NOW ? mcScheduleNow : mcScheduleNext) : mcPlugin);
++  whatsOnId = WhatsOnId;
+   helpKeys = -1;
+   timerState = 0;
+   Timers.Modified(timerState);
+@@ -1042,9 +1049,9 @@ cMenuWhatsOn::cMenuWhatsOn(const cSchedules *Schedules, bool Now, int CurrentCha
+       if (!Channel->GroupSep()) {
+          const cSchedule *Schedule = Schedules->GetSchedule(Channel);
+          if (Schedule) {
+-            const cEvent *Event = Now ? Schedule->GetPresentEvent() : Schedule->GetFollowingEvent();
++            const cEvent *Event = NOW ? Schedule->GetPresentEvent() : NEXT ? Schedule->GetFollowingEvent() : Schedule->GetEventAround(GetTime(EPGTIMESEC));
+             if (Event)
+-               Add(new cMenuScheduleItem(Event, Channel, false, Now), Channel->Number() == CurrentChannelNr);
++               Add(new cMenuScheduleItem(Event, Channel, false, NOW), Channel->Number() == CurrentChannelNr);
+             }
+          }
+       }
+@@ -1053,7 +1060,21 @@ cMenuWhatsOn::cMenuWhatsOn(const cSchedules *Schedules, bool Now, int CurrentCha
+   SetHelpKeys();
+   int userFilter = USER_FROM_SETUP(RemoteTimersSetup.userFilterSchedule);
+   if (userFilter != 0)
+-     SetTitle(cString::sprintf("%s %s %d", Now ? tr("What's on now?") : tr("What's on next?"), trREMOTETIMERS("User"), userFilter));
++        SetTitle(cString::sprintf("%s %s %d", NOW ? tr("What's on now?") : NEXT ? tr("What's on next?") : *cString::sprintf(trREMOTETIMERS("What's on at %s?"), EPGTIMESTR(whatsOnId)), trREMOTETIMERS("User"), userFilter));
++}
++
++time_t cMenuWhatsOn::GetTime(int SecondsFromMidnight)
++{
++  time_t t = time(NULL);
++  struct tm tm;
++  localtime_r(&t, &tm);
++  if (tm.tm_hour * 3600 + tm.tm_min * 60 + tm.tm_sec > SecondsFromMidnight)
++     tm.tm_mday++;
++  tm.tm_hour = SecondsFromMidnight / 3600;
++  tm.tm_min = (SecondsFromMidnight % 3600) / 60;
++  tm.tm_sec = SecondsFromMidnight % 60;
++  tm.tm_isdst = -1;
++  return mktime(&tm);
+ }
+ 
+ bool cMenuWhatsOn::Update(void)
+@@ -1079,8 +1100,14 @@ void cMenuWhatsOn::SetHelpKeys(void)
+         NewHelpKeys = 1;
+      }
+   if (NewHelpKeys != helpKeys) {
++     static cString GreenTime;
++     int nextId = (whatsOnId + 1) % (EPGTIME_LENGTH + 2);
++     while (nextId < EPGTIME_LENGTH && !RemoteTimersSetup.epgTime[nextId])
++        ++nextId;
++     if (nextId < EPGTIME_LENGTH)
++        GreenTime = EPGTIMESTR(nextId);
+      const char *Red[] = { NULL, tr("Button$Record"), tr("Button$Timer") };
+-     SetHelp(Red[NewHelpKeys], now ? tr("Button$Next") : tr("Button$Now"), tr("Button$Schedule"), RemoteTimersSetup.swapOkBlue ? tr("Button$Info") : tr("Button$Switch"));
++     SetHelp(Red[NewHelpKeys], nextId == EPGTIME_LENGTH ? tr("Button$Now") : nextId > EPGTIME_LENGTH ? tr("Button$Next") : *GreenTime, tr("Button$Schedule"), RemoteTimersSetup.swapOkBlue ? tr("Button$Info") : tr("Button$Switch"));
+      helpKeys = NewHelpKeys;
+      }
+ }
+@@ -1259,7 +1286,8 @@ cMenuSchedule::cMenuSchedule(const char* ServerIp, unsigned short ServerPort)
+ :cOsdMenu("")
+ {
+   SetMenuCategory(RemoteTimersSetup.skinSchedule ? mcSchedule : mcPlugin);
+-  now = next = false;
++  //now = next = false;
++  whatsOnId = -1;
+   otherChannel = 0;
+   helpKeys = -1;
+   timerState = 0;
+@@ -1531,22 +1559,25 @@ eOSState cMenuSchedule::ProcessKey(eKeys Key)
+        case kRecord:
+        case kRed:    return Record();
+        case kGreen:  if (schedules) {
+-                        if (!now && !next) {
++                        if (whatsOnId == -1) {
+                            int ChannelNr = 0;
+                            if (Count()) {
+                               cChannel *channel = Channels.GetByChannelID(((cMenuScheduleItem *)Get(Current()))->event->ChannelID(), true);
+                               if (channel)
+                                  ChannelNr = channel->Number();
+                               }
+-                           now = true;
+-                           return AddSubMenu(new cMenuWhatsOn(schedules, true, ChannelNr));
++                           whatsOnId = EPGTIME_LENGTH; // now
++                           return AddSubMenu(new cMenuWhatsOn(schedules, whatsOnId, ChannelNr));
+                            }
+-                        now = !now;
+-                        next = !next;
+-                        return AddSubMenu(new cMenuWhatsOn(schedules, now, cMenuWhatsOn::CurrentChannel()));
++                        //now = !now;
++                        //next = !next;
++                        whatsOnId = (whatsOnId + 1) % (EPGTIME_LENGTH + 2);
++                        while (whatsOnId < EPGTIME_LENGTH && !RemoteTimersSetup.epgTime[whatsOnId])
++                           ++whatsOnId;
++                        return AddSubMenu(new cMenuWhatsOn(schedules, whatsOnId, cMenuWhatsOn::CurrentChannel()));
+                         }
+        case kYellow: if (schedules)
+-                        return AddSubMenu(new cMenuWhatsOn(schedules, false, cMenuWhatsOn::CurrentChannel()));
++                        return AddSubMenu(new cMenuWhatsOn(schedules, EPGTIME_LENGTH + 1, cMenuWhatsOn::CurrentChannel()));
+                      break;
+        case kBlue:   if (Count() && otherChannel)
+                         return Switch();
+@@ -1559,7 +1590,8 @@ eOSState cMenuSchedule::ProcessKey(eKeys Key)
+        }
+      }
+   else if (!HasSubMenu()) {
+-     now = next = false;
++     // now = next = false;
++     whatsOnId = -1;
+      const cEvent *ei = cMenuWhatsOn::ScheduleEvent();
+      if (ei) {
+         cChannel *channel = Channels.GetByChannelID(ei->ChannelID(), true);
+diff --git a/menu.h b/menu.h
+index 87a3400..8289e99 100644
+--- a/menu.h
++++ b/menu.h
+@@ -86,7 +86,9 @@ class cMenuSchedule : public cOsdMenu {
+ private:
+   cSchedulesLock schedulesLock;
+   const cSchedules *schedules;
+-  bool now, next;
++  // bool now, next;
++  int whatsOnId; // -1: init, 0..EPGTIME_LENGTH-1: custom,
++                 // EPGTIME_LENGTH: now, EPGTIME_LENGTH+1: next
+   int otherChannel;
+   int helpKeys;
+   int timerState;
+diff --git a/po/de_DE.po b/po/de_DE.po
+index d4f0f39..1f54c01 100644
+--- a/po/de_DE.po
++++ b/po/de_DE.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: VDR 1.5.7\n"
+ "Report-Msgid-Bugs-To: <vdrdev@schmirler.de>\n"
+-"POT-Creation-Date: 2013-08-03 21:53+0200\n"
++"POT-Creation-Date: 2013-08-04 02:12+0200\n"
+ "PO-Revision-Date: 2008-02-20 11:48+0100\n"
+ "Last-Translator: Frank Schmirler <vdrdev@schmirler.de>\n"
+ "Language-Team: <vdr@linuxtv.org>\n"
+@@ -50,6 +50,10 @@ msgstr "Abmelden"
+ msgid " tTpP"
+ msgstr " tTpP"
+ 
++#, c-format
++msgid "What's on at %s?"
++msgstr "Was läuft um %s?"
++
+ msgid "Edit recording"
+ msgstr "Aufzeichnung editieren"
+ 
+@@ -149,6 +153,10 @@ msgid "Show progress bar"
+ msgstr "Fortschrittsanzeige"
+ 
+ #, c-format
++msgid "EPG time %d"
++msgstr "EPG Zeit %d"
++
++#, c-format
+ msgid "Key binding of %s/%s"
+ msgstr "Funktion der Tasten %s/%s"
+ 
+diff --git a/po/it_IT.po b/po/it_IT.po
+index c1f4efc..08a11e9 100644
+--- a/po/it_IT.po
++++ b/po/it_IT.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: VDR 1.5.7\n"
+ "Report-Msgid-Bugs-To: <vdrdev@schmirler.de>\n"
+-"POT-Creation-Date: 2013-08-03 21:53+0200\n"
++"POT-Creation-Date: 2013-08-04 02:44+0200\n"
+ "PO-Revision-Date: 2012-06-07 20:30+0100\n"
+ "Last-Translator: Diego Pierotto <vdr-italian@tiscali.it>\n"
+ "Language-Team:  <vdr@linuxtv.org>\n"
+@@ -50,6 +50,10 @@ msgstr "Annulla"
+ msgid " tTpP"
+ msgstr " tTpP"
+ 
++#, c-format
++msgid "What's on at %s?"
++msgstr ""
++
+ msgid "Edit recording"
+ msgstr "Modifica registrazione"
+ 
+@@ -149,6 +153,10 @@ msgid "Show progress bar"
+ msgstr "Mostra barra avanzamento"
+ 
+ #, c-format
++msgid "EPG time %d"
++msgstr ""
++
++#, c-format
+ msgid "Key binding of %s/%s"
+ msgstr "Associazione %s/%s"
+ 
+diff --git a/po/sk_SK.po b/po/sk_SK.po
+index e3e804d..72ef907 100755
+--- a/po/sk_SK.po
++++ b/po/sk_SK.po
+@@ -7,7 +7,7 @@ msgid ""
+ msgstr ""
+ "Project-Id-Version: remotetimers0.1.4\n"
+ "Report-Msgid-Bugs-To: <vdrdev@schmirler.de>\n"
+-"POT-Creation-Date: 2013-08-03 21:53+0200\n"
++"POT-Creation-Date: 2013-08-04 02:44+0200\n"
+ "PO-Revision-Date: 2013-03-13 00:10+0100\n"
+ "Last-Translator: Milan Hrala <hrala.milan@gmail.com>\n"
+ "Language-Team: Slovak <hrala.milan@gmail.com>\n"
+@@ -50,6 +50,10 @@ msgstr "Zru
+ msgid " tTpP"
+ msgstr " tTpP"
+ 
++#, c-format
++msgid "What's on at %s?"
++msgstr ""
++
+ msgid "Edit recording"
+ msgstr "Upravi» nahrávku"
+ 
+@@ -149,6 +153,10 @@ msgid "Show progress bar"
+ msgstr "Zobrazi» stav priebehu"
+ 
+ #, c-format
++msgid "EPG time %d"
++msgstr ""
++
++#, c-format
+ msgid "Key binding of %s/%s"
+ msgstr "Kµúèové prepojenie na  %s/%s"
+ 
+diff --git a/setup.c b/setup.c
+index fd21004..3910dc9 100644
+--- a/setup.c
++++ b/setup.c
+@@ -46,6 +46,8 @@ cRemoteTimersSetup::cRemoteTimersSetup() {
+ 	useChannelId = 1;
+ 	swapOkBlue = 0;
+ 	showProgressBar = 0;
++	for (int i = 0; i < EPGTIME_LENGTH; ++i)
++		epgTime[i] = 0;
+ 	userFilterSchedule = 0;
+ 	userFilterTimers = 0;
+ 	userFilterRecordings = 0;
+@@ -71,6 +73,8 @@ cRemoteTimersSetup& cRemoteTimersSetup::operator=(const cRemoteTimersSetup &Setu
+ 	useChannelId = Setup.useChannelId;
+ 	swapOkBlue = Setup.swapOkBlue;
+ 	showProgressBar = Setup.showProgressBar;
++	for (int i = 0; i < EPGTIME_LENGTH; ++i)
++		epgTime[i] = Setup.epgTime[i];
+ 	userFilterSchedule = Setup.userFilterSchedule;
+ 	userFilterTimers = Setup.userFilterTimers;
+ 	userFilterRecordings = Setup.userFilterRecordings;
+@@ -106,6 +110,11 @@ bool cRemoteTimersSetup::Parse(const char *Name, const char *Value) {
+ 		swapOkBlue = atoi(Value);
+ 	else if (!strcasecmp(Name, "ShowProgressBar"))
+ 		showProgressBar = atoi(Value);
++	else if (!strncasecmp(Name, "EpgTime", 7)) {
++		int i = atoi(Name + 7);
++		if (0 <= i && i < EPGTIME_LENGTH)
++			epgTime[i] = atoi(Value);
++	}
+ 	else if (!strcasecmp(Name, "UserFilterSchedule"))
+ 		userFilterSchedule = atoi(Value);
+ 	else if (!strcasecmp(Name, "UserFilterTimers"))
+@@ -147,6 +156,8 @@ void cRemoteTimersMenuSetup::Store() {
+ 	SetupStore("UseChannelId", setupTmp.useChannelId);
+ 	SetupStore("SwapOkBlue", setupTmp.swapOkBlue);
+ 	SetupStore("ShowProgressBar", setupTmp.showProgressBar);
++	for (int i = 0; i < EPGTIME_LENGTH; ++i)
++		SetupStore(cString::sprintf("EpgTime%d", i), setupTmp.epgTime[i]);
+ 	SetupStore("UserFilterSchedule", setupTmp.userFilterSchedule);
+ 	SetupStore("UserFilterTimers", setupTmp.userFilterTimers);
+ 	SetupStore("UserFilterRecordings", setupTmp.userFilterRecordings);
+@@ -204,6 +215,8 @@ void cRemoteTimersMenuSetup::Set() {
+ #endif
+ 	Add(new cMenuEditBoolItem(trREMOTETIMERS("List style"), &setupTmp.skinSchedule, tr("Plugin"), tr("Setup.OSD$Skin")));
+ 	Add(new cMenuEditBoolItem(trREMOTETIMERS("Show progress bar"), &setupTmp.showProgressBar));
++	for (int i = 0; i < EPGTIME_LENGTH; ++i)
++		Add(new cMenuEditTimeItem(cString::sprintf(trREMOTETIMERS("EPG time %d"), i + 1), &setupTmp.epgTime[i]));
+ 	Add(new cMenuEditBoolItem(cString::sprintf(trREMOTETIMERS("Key binding of %s/%s"), tr("Key$Ok"), tr("Key$Blue")), &setupTmp.swapOkBlue, swapOkBlueFalse, swapOkBlueTrue));
+ 	Add(new cMenuEditIntItem(trREMOTETIMERS("User ID filter"), &setupTmp.userFilterSchedule, -1, MAX_USER, tr("Setup.Replay$Resume ID")));
+ 
+diff --git a/setup.h b/setup.h
+index 1194ec7..b22dc96 100644
+--- a/setup.h
++++ b/setup.h
+@@ -26,6 +26,7 @@
+ #include "menuitems.h"
+ 
+ #define MAX_IP_LENGTH 16
++#define EPGTIME_LENGTH 4
+ 
+ struct cRemoteTimersSetup {
+ 	int hideMainMenuEntry;
+@@ -37,6 +38,7 @@ struct cRemoteTimersSetup {
+ 	int useChannelId;
+ 	int swapOkBlue;
+ 	int showProgressBar;
++	int epgTime[EPGTIME_LENGTH];
+ 	int userFilterSchedule;
+ 	int userFilterTimers;
+ 	int userFilterRecordings;

@@ -1,0 +1,104 @@
+Description = BlueGlass
+clrBackground = 8C1B1B1B 
+
+clrTrackName = FFFFCC66
+clrAlertFg = FFFFFFFF
+clrAlertBg = DCFF0000
+clrChannelName = FFFFFFFF
+clrEventTitle = FF99CCFF
+clrEventTime = FFFFFFFF #FFCC66
+clrEventShortText = FFFFCC66
+clrEventDescription = FF99CCFF
+
+# Pulsanti
+clrButtonRedFg = FF000000
+clrButtonRedBg = DCFF7F7F 
+clrButtonGreenFg = FF000000
+clrButtonGreenBg = DC9df97d
+clrButtonYellowFg = FF000000
+clrButtonYellowBg = DCf9f47d
+clrButtonBlueFg = FF000000
+clrButtonBlueBg = DC7DB4F9
+
+# Messaggi di stato
+clrMessageStatusFg = FFFFFFFF 
+clrMessageStatusBg = DC7DB4F9  
+clrMessageInfoFg = FFFFCC66 #FF000000
+clrMessageInfoBg = DC21244B #DCFFCC00 
+clrMessageWarningFg = FF000000
+clrMessageWarningBg = DCFFCC00  
+clrMessageErrorFg = FFFFFFFF
+clrMessageErrorBg = DCB20000
+
+# Volume 
+clrVolumeFrame = DCFFFFFF #sfondo volume
+clrVolumeSymbol = FF000000
+clrVolumeBarUpper = DCC0C0C0 #barra volume non attivo 
+clrVolumeBarLower = FF336699 #barra volume attivo
+
+# Menu info canale
+clrChannelFrameFg = FFFFFFFF #numero canale e orario programma
+clrChannelFrameBg = DC323D68 #cornice
+clrChannelSymbolOn = FFFFFFFF 
+clrChannelSymbolOff = DC666666 
+clrChannelSymbolRecFg = FFFFFFFF
+clrChannelSymbolRecBg = FFB20000
+
+# Device 
+clrDeviceFg = FFff9900 #testo
+clrDeviceBg = A01B1B1B #sfondo
+clrSignalValue = F0FFCC00 #livello segnale
+clrSignalRest = A0000000 #resto segnale
+
+# Timer Text
+clrTimerFg = FF000000 #testo
+clrTimerBg = DCE9E0DB #sfondo
+
+# Progressbar
+clrSeen = F0F9F6F4 
+
+# Data e ora 
+clrDateFg = FF000000 #testo
+clrDateBg = F0E9E0DB #sfondo
+
+# Menu principale
+clrMenuFrameFg = FFFFCC99 #testo 
+clrMenuFrameBg = DC21244B #cornice 
+clrMenuTitle = FFEA962D #testo titoli
+
+# Menu lista voci
+clrMenuMainBracket = F0202740 #cornice sup/inf
+clrMenuItemCurrentFg = FFffcc99 #Voce selezionata (testo)
+clrMenuItemCurrentBg = FF202740 #Voce selezionata (barra)
+clrMenuItemSelectable = FF99CCFF #Lista delle voci selezionabili
+clrMenuItemNonSelectable = FF8C8C8C #lista delle voci (non selezionabili)
+
+# Tempo registrazione
+clrMenuTimerRecording = FFF6A03D 
+clrMenuDeviceRecording = A01B1B1B  
+
+# Scrollbar
+clrMenuScrollbarTotal = A0202740 
+clrMenuScrollbarShown = FF202740 
+clrMenuScrollbarArrow = FF000000
+clrMenuText = FFFFFFFF #FFff00ff
+
+# Replay OSD
+clrReplayFrameFg = FFFFFFFF 
+clrReplayFrameBg = DC007090 
+clrReplayPosition = FFFFFFFF #testo
+clrReplayJumpFg = FFFFFFFF 
+clrReplayJumpBg = DCFF7F7F #21244B  
+clrReplayProgressSeen = F0FF8F00 
+clrReplayProgressRest = A0CCCCCC
+clrReplayProgressSelected = FFFFFFFF 
+clrReplayProgressMark = FFA00000 #taglio
+clrReplayProgressCurrent = FF990000 #marcatore
+ 
+# Audio
+clrTrackFrameFg = FFFFFFFF 
+clrTrackFrameBg = DC323D68 #Audio skin
+clrTrackItemFg = DC858585 
+clrTrackItemBg = A0FFFFFF #Audio no select
+clrTrackItemCurrentFg = FF000000
+clrTrackItemCurrentBg = FFFFFFFF #Audio select

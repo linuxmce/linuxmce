@@ -1,0 +1,232 @@
+# VDR plugin language source file.
+# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
+# This file is distributed under the same license as the VDR package.
+# Milan Hrala <hrala.milan@gmail.com>, 2011
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: remotetimers0.1.4\n"
+"Report-Msgid-Bugs-To: <vdrdev@schmirler.de>\n"
+"POT-Creation-Date: 2013-08-04 11:41+0200\n"
+"PO-Revision-Date: 2013-03-13 00:10+0100\n"
+"Last-Translator: Milan Hrala <hrala.milan@gmail.com>\n"
+"Language-Team: Slovak <hrala.milan@gmail.com>\n"
+"Language: sk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-2\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Location"
+msgstr "Umiestnenie"
+
+msgid "local"
+msgstr "miestne"
+
+msgid "remote"
+msgstr "vzdialené"
+
+msgid "User ID"
+msgstr "U¾ívateµské identifikaèné èíslo"
+
+#, c-format
+msgid "%.10s\tConflict (Recording %d%%)"
+msgstr ""
+
+msgid "Timer is recording - can't move it to server"
+msgstr "Plán sa nahráva - nedá sa presunú» na server"
+
+#. TRANSLATORS: Indicator for (R)emote or (L)ocal timer in timers list
+msgid "RL"
+msgstr "RL"
+
+msgid "User"
+msgstr "U¾ívateµ"
+
+#. TRANSLATORS: Button displayed instead of "Delete" when there are other users who subscribed to the timer
+msgid "Cancel"
+msgstr "Zru¹i»"
+
+#. TRANSLATORS: Schedule timer match characters (lower case for partial match): no match (blank), normal (tT)imer, (pP)rivate timer
+msgid " tTpP"
+msgstr " tTpP"
+
+#, c-format
+msgid "What's on at %s?"
+msgstr ""
+
+msgid "Edit recording"
+msgstr "Upravi» nahrávku"
+
+msgid "Remote editing process started"
+msgstr "Spustené vzdialené upravovanie procesu"
+
+msgid "Unable to update user ID"
+msgstr "Nemo¾né obnovi» u¾ívateµské ident. èíslo"
+
+msgid "Unable to change priority/lifetime"
+msgstr "Nemo¾no zmeni» prioritu/¾ivotnos»"
+
+msgid "Unable to rename recording"
+msgstr "Nemo¾no premenova» nahrávku"
+
+msgid "Move to other filesystem in background?"
+msgstr "Presun na ïal¹í súborový systém na pozadí?"
+
+msgid "Button$Folder"
+msgstr "Prieèinok"
+
+msgid "Cut"
+msgstr "Vystrihnú»"
+
+msgid "Select folder"
+msgstr "Vybra» prieèinok"
+
+#. TRANSLATORS: Button displayed instead of "Delete" when there are other users who didn't watch the recording yet
+msgid "Release"
+msgstr "Uvolni»"
+
+msgid "Abort moving recording"
+msgstr "Presun nahrávky zru¹ený"
+
+msgid "Remote timers not available"
+msgstr "Vzdialená plánovaè nedostupný"
+
+msgid "Finished moving recording"
+msgstr "Presun nahrávky ukonèený"
+
+msgid "Failed to move recording!"
+msgstr "Chyba pri presune nahrávky!"
+
+msgid "Edit timers on remote VDR"
+msgstr "Upravi» plán na vzdialenom VDR"
+
+msgid "Remote Timers"
+msgstr "Vzdialené plány"
+
+msgid "Moving recording"
+msgstr "Presunú» nahrávku"
+
+msgid "Remote recording failed. Start local recording?"
+msgstr "Vzdialené nahrávanie zlyhalo. Spusti» miestne nahrávanie?"
+
+msgid "Server IP"
+msgstr "IP serveru"
+
+msgid "Server port"
+msgstr "Port serveru"
+
+msgid "from svdrpservice"
+msgstr "zo svdrpservice"
+
+msgid "Map channels using"
+msgstr "Mapova» pou¾ité kanály"
+
+msgid "channel number"
+msgstr "èíslo kanálu"
+
+msgid "channel ID"
+msgstr "I.È. kanálu"
+
+msgid "Hide mainmenu entry"
+msgstr "Schova» v hlavnom menu"
+
+msgid "Defaults for new timers"
+msgstr "Predvolené pre nové plány"
+
+msgid "Instant recordings"
+msgstr "Okam¾ité nahrávania"
+
+msgid "Pause recordings"
+msgstr "Pauza nahrávania"
+
+#, c-format
+msgid "Settings for menu \"%s\""
+msgstr "Nastavenia pre menu \"%s\""
+
+msgid "Replace mainmenu"
+msgstr "Zameni» hlavné menu"
+
+msgid "List style"
+msgstr "Zoznam ¹týlov"
+
+msgid "Show progress bar"
+msgstr "Zobrazi» stav priebehu"
+
+#, c-format
+msgid "Key binding of %s/%s"
+msgstr "Kµúèové prepojenie na  %s/%s"
+
+msgid "User ID filter"
+msgstr "Filter ident. èísla u¾ívateµa"
+
+msgid "Move recording bandwidth limit (Mbit/s)"
+msgstr "Obmedzenie ¹írky pásma pri presune nahrávky  (Mbit / s)"
+
+msgid "unlimited"
+msgstr "neobmedzený "
+
+msgid "Remote recordings"
+msgstr "Vzdialené nahrávania"
+
+msgid "Mounted on subdirectory"
+msgstr "Pripojené na pod adresár"
+
+msgid "Monitor update file"
+msgstr "Sledova» aktualizaèný súbor"
+
+msgid "Updated remote timers list"
+msgstr "Obnovi» zoznam vzdialených plánov"
+
+msgid "Timers are being edited remotely - please try again"
+msgstr "Plány boli upravované vzdialene - prosím skúste znova"
+
+msgid "Timer is recording - please deactivate it first"
+msgstr "Plán sa nahráva - prosím, vypnite ho najprv"
+
+msgid "Timer already defined"
+msgstr "Plán nahrávania je urèený"
+
+msgid "Timers modified remotely - please check remote timers"
+msgstr "Plán zmenený vzdialene - prosím skontrolujte vzdialený plánovaè"
+
+msgid "Unexpected error - please check remote timers"
+msgstr "Neoèakávaná chyba - prosím skontrolujte vzdialený plánovaè"
+
+msgid "Lost SVDRP connection - please check remote timers"
+msgstr "Stratené SVDRP spojenie - prosím skontrolujte vzdialený plánovaè"
+
+msgid "Remote cutter already active or no marks defined"
+msgstr "Vzdialené zostrihanie u¾ v èinnosti alebo nie sú urèené znaèky"
+
+msgid "Recording not found on remote VDR - use local cutter"
+msgstr "Nahrávka sa nena¹la na vzdialenom VDR - pou¾i lokálne zostrihanie"
+
+msgid "Unexpected error - unable to start remote cutter"
+msgstr "Neoèakávaná chyba - nedá sa spusti» vzdialené zostrihanie"
+
+msgid "Lost SVDRP connection - unable to start remote cutter"
+msgstr "Stratené SVDRP spojenie - nemô¾e spusti» vzdialené zostrihanie"
+
+#~ msgid "Edit folder"
+#~ msgstr "Upravi» prieèinok"
+
+#~ msgid "New folder"
+#~ msgstr "Nový prieèinok"
+
+#~ msgid "Sub folder"
+#~ msgstr "Podprieèinok"
+
+#~ msgid "Folder name already exists!"
+#~ msgstr "Prieèinok u¾ existuje!"
+
+#~ msgid "Folder name must not contain '%c'!"
+#~ msgstr "Meno prieèinka nesmie obsahova» '%c'!"
+
+#~ msgid "Button$Select"
+#~ msgstr "Vybra»"
+
+#~ msgid "Delete folder and all sub folders?"
+#~ msgstr "Vymaza» prieèinok a v¹etky podprieèinky?"
+
+#~ msgid "Delete folder?"
+#~ msgstr "Vymaza» prieèinok?"

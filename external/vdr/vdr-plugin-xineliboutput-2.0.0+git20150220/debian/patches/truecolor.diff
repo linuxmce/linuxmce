@@ -1,0 +1,68 @@
+ur xineliboutput-1.0.90.git.1355089073/config.c xineliboutput-1.0.90.git.1355089073.patched/config.c
+--- a/config.c
++++ b/config.c
+@@ -741,7 +741,7 @@
+ 
+ bool config_t::ProcessArgs(int argc, char *argv[])
+ {
+-  static const char short_options[] = "fDw:h:l:mr:A:V:d:P:C:pc";
++  static const char short_options[] = "fDw:h:l:mr:A:V:d:P:C:pct";
+ 
+   static const struct option long_options[] = {
+       { "fullscreen",   no_argument,       NULL, 'f' },
+@@ -764,6 +764,7 @@
+       { "config",       required_argument, NULL, 'C' },
+       { "primary",      no_argument,       NULL, 'p' },
+       { "exit-on-close",no_argument,       NULL, 'c' },
++      { "truecolor",    no_argument,       NULL, 't' },
+       { NULL,           no_argument,       NULL,  0  }
+     };
+ 
+@@ -781,6 +782,8 @@
+               break;
+     case 'f': ProcessArg("Fullscreen", "1");
+               break;
++    case 't': ProcessArg("truecoloreverytime", "1");
++	      break;
+     case 'D': ProcessArg("X11.HUDOSD", "1");
+               if (optarg && strstr(optarg, "xshape")) {
+                 ProcessArg("XShapeHUDOSD", "1");
+@@ -899,6 +902,7 @@
+   else if (!strcasecmp(Name, "X11.OpenglAlways")) opengl = atoi(Value);
+   else if (!strcasecmp(Name, "X11.OpenglHUDOSD")) hud_osd |= (atoi(Value) ? HUD_OPENGL : 0);
+   else if (!strcasecmp(Name, "X11.XShapeHUDOSD")) hud_osd |= (atoi(Value) ? HUD_XSHAPE : 0);
++  else if (!strcasecmp(Name, "truecoloreverytime")) truecoloreverytime = atoi(Value);
+ 
+   else if (!strcasecmp(Name, "Audio.Driver")) STRN0CPY(audio_driver, Value);
+   else if (!strcasecmp(Name, "Audio.Port"))   STRN0CPY(audio_port, Value);
+--- a/config.h
++++ b/config.h
+@@ -294,6 +294,7 @@
+     int  window_id;        // use existing X11 window
+     int  hud_osd;          // head up display OSD
+     int  opengl;           // use opengl acceleration for video and HUD OSD
++    int  truecoloreverytime;
+ 
+     // Audio settings
+     int  speaker_type;
+--- a/frontend_svr.c
++++ b/frontend_svr.c
+@@ -783,7 +783,7 @@
+         has_clients++;
+     }
+ 
+-  return has_clients ? 1 : -1;
++  return has_clients || xc.truecoloreverytime ? 1 : -1;
+ }
+ 
+ int cXinelibServer::PlayFileCtrl(const char *Cmd, int TimeoutMs)
+--- a/xineliboutput.c
++++ b/xineliboutput.c
+@@ -160,6 +160,7 @@
+ "                           there are active frontend(s)\n"
+ "  -c        --exit-on-close  Exit vdr when local frontend window is closed\n"
+ "  -C        --config=file  Use xine-lib config file\n"
++"  -t        --truecolor    Support True Color OSD if no client is connected\n"
+ ;
+ 
+ const char *cPluginXinelibOutput::CommandLineHelp(void)

@@ -1,0 +1,44 @@
+Upstream Homepage:
+    http://www.sourceforge.net/projects/xineliboutput
+
+Upstream Authors:
+    Petri Helin <phelin at users.sourceforge.net>
+    Petri Hintukainen <phintuka at users.sourceforge.net>
+    Steven J. Robinson (cathbard) <stevenjrobinson@yahoo.com> (NoSignal-Image)
+
+Debian Maintainers:
+    Tobias Grimm <etobi@debian.org>
+    Thomas Schmidt <tschmidt@debian.org>
+    Thomas Günther <tom@toms-cafe.de>
+
+Copyright:
+    (C) 2003 - 2011 Petri Hintukainen
+    (C) 2007 - 2008 Petri Helin
+    (C) 2003        Dirk Meyer (post.c)
+    (C) 2006        The Xine Project
+    (C) 2000        Carsten Koch (original lirc code from VDR)
+
+Copyright (Debian packaging):
+    (C) 2003 - 2011 Tobias Grimm, Thomas Günther, Thomas Schmidt
+
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+    The complete text of the GNU General Public License can be found
+    in /usr/share/common-licenses/GPL-2 on most Debian systems.
+
+License (Debian packaging):
+    The Debian packaging is licensed under the GPL, version 2 or any
+    later version, see /usr/share/common-licenses/GPL-2.

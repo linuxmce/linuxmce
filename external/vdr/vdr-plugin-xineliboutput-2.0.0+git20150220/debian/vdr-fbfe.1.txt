@@ -1,0 +1,91 @@
+NAME
+  vdr-fbfe - Remote Framebuffer frontend for vdr-plugin-xineliboutput
+
+SYNOPSIS
+  vdr-fbfe [options] [xvdr[+udp|+tcp|+rtp]:[//host[:port]]]
+
+DESCRIPTION
+  vdr-fbfe is a Framebuffer remote frontend, that plays back streams provided by
+  vdr-plugin-xineliboutput.
+
+OPTIONS
+  --help                                  Show (this) help message
+  --audio=audiodriver[:device]            Select audio driver and optional port
+  --video=videodriver[:fb_device]         Select video driver and optional port
+                                          As far as supported, possible video drivers
+                                          might be: fb, DirectFB, sdl, vidixfb, dxr3, aadxr3
+                                          or none
+  --aspect=[auto|4:3|16:9|16:10|default]  Display aspect ratio (You can us a 
+                                          script to control the HW aspect ratio:
+                                          --aspect=auto:path_to_script)
+  --fullscreen                            Fullscreen mode
+  --hud                                   Head Up Display OSD mode
+  --width=x                               Video window width
+  --height=x                              Video window height
+  --noscaling                             Disable all video scaling
+  --post=name[:arg=val[,arg=val]]         Load and use xine post plugins, e.g.:
+                                          * --post=upmix
+                                          * --post=upmix;tvtime:enabled=1,cheap_mode=1)
+  --lirc[=devicename]                     Use lirc input device
+                                          Optional lirc socket name can be given
+  --verbose                               Verbose debug output
+  --silent                                Silent mode (report only errors)
+  --syslog                                Write all output to system log
+  --nokbd                                 Disable keyboard input
+  --daemon                                Run as daemon (disable keyboard,
+                                          log to syslog and fork to background)
+  --slave                                 Enable slave mode (read commands from stdin)
+  --reconnect                             Automatically reconnect when connection has been lost
+  --tcp, --udp, --rtp                     Use TCP, UDP or RTP transport
+                                          If no transport options are given, transports
+                                          are tried in following order:
+                                          local pipe, rtp, udp, tcp
+
+EXAMPLES
+  Search for VDR (xineliboutput) server, connect to it and
+  negotiate best available transport, use best available audio 
+  and video driver:
+
+    vdr-fbfe
+
+  Connect to 192.168.1.3 default port and negoate best available
+  transport:
+
+     vdr-fbfe xvdr://192.168.1.3
+
+  Connect to 192.168.2.100, port 12550 and use TCP transport:
+
+    vdr-fbfe xvdr+tcp://192.168.2.100:12550
+
+  Automatically search for VDR server and use UDP transport:
+
+    vdr-fbfe xvdr+udp:
+    vdr-fbfe --udp
+
+  Use alsa:
+
+    vdr-fbfe --audio alsa
+
+  Use alsa (and specific card/sub-device):
+
+    vdr-fbfe --audio alsa:plughw:1,1
+
+  Framebuffer driver and device settings:
+
+    vdf-fbfe --video DirectFB
+    vdf-fbfe --video fb:/dev/fb/1
+    vdf-fbfe --video vidixfb
+    vdf-fbfe --video aadxr3
+
+NOTE
+  If deinterlacing post plugin options are not given at command line, 
+  deinterlacing is controlled by VDR plugin configuration menu settings.
+
+  De-interlacing can also be forced on or off with command-line option "--post tvtime".
+  Examples:
+
+    vdr-fbfe --post tvtime:method=Linear,cheap_mode=1,pulldown=0,use_progressive_frame_flag=1
+    vdr-fbfe --post tvtime:enable=0
+
+AUTHOR
+  This manual page was written by Tobias Grimm <etobi@debian.org>

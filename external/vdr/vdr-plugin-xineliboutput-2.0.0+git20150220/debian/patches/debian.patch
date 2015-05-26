@@ -1,0 +1,10 @@
+--- a/Makefile
++++ b/Makefile
+@@ -343,6 +343,7 @@
+ install-lib: $(TARGETS_VDR)
+ ifeq ($(XINELIBOUTPUT_VDRPLUGIN), yes)
+ 	@echo Installing $^
++	mkdir -p $(DESTDIR)$(LIBDIR)
+ 	install -D $^ $(DESTDIR)$(LIBDIR)/
+ endif
+ 

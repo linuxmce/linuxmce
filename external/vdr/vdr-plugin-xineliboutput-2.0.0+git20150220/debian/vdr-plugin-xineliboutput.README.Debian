@@ -1,0 +1,81 @@
+Local frontends
+---------------
+
+To use local frontends, you must install libxineliboutput-fbfe if you want to
+use the framebuffer device, otherwise libxineliboutput-sxfe for the X-Server
+frontend. In /etc/vdr/plugins/plugin.xineliboutput.conf set "--local=sxfe" or
+"local-fbfe".
+
+
+Remote frontends
+--------------
+
+To allow remote clients to connect over the network you must configure the
+allowed network clients or network segments in:
+
+  /etc/vdr/plugins/xineliboutput/allowed_hosts.conf
+
+
+Configuration options
+---------------------
+
+The plugin can be configured in /etc/vdr/plugins/plugin.xineliboutput.conf:
+
+--remote=<LOCALIP>:<PORT>
+    Listen on <LOCALIP>:<PORT> for remote clients. If <LOCALIP> is provided,
+    it will bind to this address. You can completely omit <LOCALIP>
+    (--remote=<PORT>) to bind to all interfaces.
+    The default (if --remote is totally omitted) is, that the remote port 37890,
+    bound to all interfaces is used, but remote access is disabeld. In this
+    case, the remote access can be enabled/disabled in VDR's OSD settings menu.
+
+
+--primary
+    Force xineliboutput to be primary device when there are active frontend(s).
+    This is usually needed, when using remote clients.
+
+
+--local=<NAME>
+
+    Use local frontend <NAME>. Supported frontends are:
+      sxfe    (X11)
+      fbfe    (framebuffer)
+      none    (only remote frontends)
+
+
+--video=<NAME>
+    Use video driver <NAME>. Supported values are:
+      for sxfe: auto, x11, xshm, xv, xvmc, xxmc, none
+      for fbfe: auto, fb, DirectFB, none
+
+
+--audio=<NAME>
+    Use audio driver <NAME>. Supported values are:
+    auto, alsa, oss, arts, esound, none
+
+
+--fullscreen
+    Fullscreen mode (X11)
+
+
+--width=<WIDTH>
+    Window Width
+
+
+--height=<HEIGTH>
+    Window Height
+
+
+--display=<DISP>
+    Use X11 display or framebuffer device name <DISP>
+
+
+--post=<POST>
+    Use xine post plugin <POST>
+      format : --post=pluginname[:arg=val[,arg=val]][,...]
+      example: --post=upmix;tvtime:enabled=1,cheap_mode=1
+    If multiple post plugins are given, all will be initialized.
+
+
+--exit-on-close
+    Exit vdr when local frontend window is closed

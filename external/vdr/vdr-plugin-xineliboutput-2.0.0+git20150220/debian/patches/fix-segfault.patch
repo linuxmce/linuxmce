@@ -1,0 +1,18 @@
+Description: Fixes a segfault when playing audio-only with visualization
+Author: Tobias Grimm <etobi@debian.org>
+Bug-Debian: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=659655
+
+Index: vdr-plugin-xineliboutput-1.1.0-22-g1d98107/xine/xvdr_metronom.c
+===================================================================
+--- vdr-plugin-xineliboutput-1.1.0-22-g1d98107.orig/xine/xvdr_metronom.c	2014-06-17 18:37:14.970198368 +0200
++++ vdr-plugin-xineliboutput-1.1.0-22-g1d98107/xine/xvdr_metronom.c	2014-06-17 18:37:14.942184364 +0200
+@@ -134,7 +134,8 @@
+ 
+   pthread_mutex_unlock(&this->mutex);
+ 
+-  this->orig_metronom->got_video_frame (this->orig_metronom, frame);
++  if (this->orig_metronom)
++    this->orig_metronom->got_video_frame (this->orig_metronom, frame);
+ 
+   frame->pts = pts;
+ }

@@ -1,0 +1,16 @@
+usr/include
+usr/lib/pkgconfig/vdr.pc
+
+Make.config                                 usr/include/vdr/
+
+PLUGINS/src/dvbhddevice/dvbhdffdevice.h     usr/include/vdr/plugins/dvbhddevice/
+PLUGINS/src/dvbhddevice/hdffcmd.h           usr/include/vdr/plugins/dvbhddevice/
+PLUGINS/src/dvbhddevice/libhdffcmd/*.h      usr/include/vdr/plugins/dvbhddevice/libhdffcmd/
+
+PLUGINS/src/dvbsddevice/dvbsdffdevice.h     usr/include/vdr/plugins/dvbsddevice/
+
+debian/debianize-vdrplugin      usr/bin/
+
+debian/plugin-template/         usr/share/vdr-dev/
+debian/dependencies.sh          usr/share/vdr-dev/
+debian/abi-version              usr/share/vdr-dev

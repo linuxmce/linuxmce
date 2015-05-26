@@ -1,0 +1,774 @@
+# VDR plugin language source file.
+# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
+# This file is distributed under the same license as the VDR package.
+# Tomasz Maciej Nowak, 2014
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Xineliboutput 1.1.0\n"
+"Report-Msgid-Bugs-To: <phintuka@users.sourceforge.net>\n"
+"POT-Creation-Date: 2013-10-29 10:29+0200\n"
+"PO-Revision-Date: 2014-11-16 20:03+0100\n"
+"Last-Translator: Tomasz Maciej Nowak <tomek_n@o2.pl>\n"
+"Language-Team: Polish <vdr@linuxtv.org>\n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.6.10\n"
+
+msgid "custom"
+msgstr "własny"
+
+msgid "tiny"
+msgstr "tycie"
+
+msgid "small"
+msgstr "małe"
+
+msgid "medium"
+msgstr "średnie"
+
+msgid "large"
+msgstr "duże"
+
+msgid "huge"
+msgstr "ogromne"
+
+msgid "automatic"
+msgstr "automatyczne"
+
+msgid "default"
+msgstr "standardowe"
+
+msgid "Pan&Scan"
+msgstr "Pan&Scan"
+
+msgid "CenterCutOut"
+msgstr "CenterCutOut"
+
+msgid "square"
+msgstr "kwadratowe"
+
+msgid "anamorphic"
+msgstr "anamorficzne"
+
+msgid "DVB"
+msgstr "DVB"
+
+msgid "off"
+msgstr "wyłączone"
+
+msgid "no audio"
+msgstr "brak dźwięku"
+
+msgid "no video"
+msgstr "brak obrazu"
+
+msgid "Off"
+msgstr "Wyłączone"
+
+msgid "Goom"
+msgstr "Goom"
+
+msgid "Oscilloscope"
+msgstr "Oscyloskop"
+
+msgid "FFT Scope"
+msgstr "Spektrum FFT"
+
+msgid "FFT Graph"
+msgstr "Graficzne FFT"
+
+msgid "Image"
+msgstr "Zdjęcie"
+
+msgid "Mono 1.0"
+msgstr "Mono 1.0"
+
+msgid "Stereo 2.0"
+msgstr "Stereo 2.0"
+
+msgid "Headphones 2.0"
+msgstr "Słuchawki 2.0"
+
+msgid "Stereo 2.1"
+msgstr "Stereo 2.1"
+
+msgid "Surround 3.0"
+msgstr "Surround 3.0"
+
+msgid "Surround 4.0"
+msgstr "Surround 4.0"
+
+msgid "Surround 4.1"
+msgstr "Surround 4.1"
+
+msgid "Surround 5.0"
+msgstr "Surround 5.0"
+
+msgid "Surround 5.1"
+msgstr "Surround 5.1"
+
+msgid "Surround 6.0"
+msgstr "Surround 6.0"
+
+msgid "Surround 6.1"
+msgstr "Surround 6.1"
+
+msgid "Surround 7.1"
+msgstr "Surround 7.1"
+
+msgid "Pass Through"
+msgstr "Przekaż dźwięk dalej"
+
+msgid "very large"
+msgstr "bardzo duże"
+
+msgid "Software"
+msgstr "Programowo"
+
+msgid "Hardware"
+msgstr "Sprzętowo"
+
+msgid "no"
+msgstr "nie"
+
+msgid "grayscale"
+msgstr "odcień szarości"
+
+msgid "transparent"
+msgstr "przeźroczyste"
+
+msgid "transparent grayscale"
+msgstr "przeźroczyste z odcieniem szarości"
+
+msgid "yes"
+msgstr "tak"
+
+msgid "nearest"
+msgstr "najbliższe"
+
+msgid "bilinear"
+msgstr "dwuliniowe"
+
+msgid "LUT8"
+msgstr "LUT8"
+
+msgid "TrueColor"
+msgstr "TrueColor"
+
+msgid "video stream"
+msgstr "strumień wideo"
+
+msgid "none"
+msgstr "żadne"
+
+msgid "nonref"
+msgstr "bez referencji"
+
+#, fuzzy
+msgid "bidir"
+msgstr "tylko ramki B"
+
+msgid "nonkey"
+msgstr "bez klucza"
+
+msgid "all"
+msgstr "wszystko"
+
+msgid "Frontend initialization failed"
+msgstr "Inicjalizacja klienta nie powiodła się"
+
+msgid "Server initialization failed"
+msgstr "Inicjalizacja serwera nie powiodła się"
+
+msgid "Playlist"
+msgstr "Lista odtwarzania"
+
+msgid "Button$Random"
+msgstr "Losowo"
+
+msgid "Button$Normal"
+msgstr "Standardowe"
+
+msgid "Button$Add files"
+msgstr "Dodaj pliki"
+
+msgid "Button$Remove"
+msgstr "Usuń"
+
+msgid "Button$Mark"
+msgstr "Zaznacz"
+
+msgid "Queued to playlist"
+msgstr "Dodane do listy odtwarzania"
+
+msgid "Random play"
+msgstr "Odtwarzanie losowe"
+
+msgid "Normal play"
+msgstr "Odtwarzanie"
+
+msgid "DVD Menu"
+msgstr "Menu DVD"
+
+msgid "Exit DVD menu"
+msgstr "Wyjdź z menu DVD"
+
+msgid "DVD Root menu"
+msgstr "Menu główne DVD"
+
+msgid "DVD Title menu"
+msgstr "Menu tytułów DVD"
+
+msgid "DVD SPU menu"
+msgstr "Menu SPU DVD"
+
+msgid "DVD Audio menu"
+msgstr "Menu dźwięku DVD"
+
+msgid "Close menu"
+msgstr "Zamknij menu"
+
+msgid "BluRay Top menu"
+msgstr "Menu główne BluRay"
+
+msgid "Toggle Pop-Up menu"
+msgstr "Przełącz na menu Pop-Up"
+
+msgid "Next title"
+msgstr "Następny tytuł"
+
+msgid "Previous title"
+msgstr "Poprzedni tytuł"
+
+msgid "Delete image ?"
+msgstr "Usunąć zdjęcie?"
+
+msgid "Play movie title"
+msgstr "Odtwarzaj film"
+
+msgid "Play disc"
+msgstr "Odtwarzaj dysk"
+
+msgid "Images"
+msgstr "Zdjęcia"
+
+msgid "Play music"
+msgstr "Odtwarzaj muzykę"
+
+msgid "Add to playlist"
+msgstr "Dodaj do listy odtwarzania"
+
+msgid "Play file"
+msgstr "Odtwarzaj plik"
+
+msgid "Button$Queue"
+msgstr "Zakolejkuj"
+
+msgid "Media"
+msgstr "Media"
+
+msgid "View images"
+msgstr "Wyświetlaj zdjęcia"
+
+msgid "Play DVD disc"
+msgstr "Odtwarzaj DVD"
+
+msgid "Play BluRay disc"
+msgstr "Odtwarzaj BluRay"
+
+msgid "Play audio CD"
+msgstr "Odtwarzaj CD"
+
+msgid "Video settings"
+msgstr "Ustawienia obrazu"
+
+msgid "Play only audio"
+msgstr "Odtwarzaj tylko dźwięk"
+
+msgid "Crop letterbox 4:3 to 16:9"
+msgstr "Przytnij letterbox z 4:3 na 16:9"
+
+msgid "Overscan (crop image borders)"
+msgstr "Przycięcie krawędzi obrazu"
+
+msgid "Audio settings"
+msgstr "Ustawienia dźwięku"
+
+msgid "Audio Compression"
+msgstr "Kompresja dźwięku"
+
+msgid "Audio equalizer"
+msgstr "Equalizer dźwięku"
+
+msgid "Local Frontend"
+msgstr "Klienci lokalni"
+
+msgid "Aspect ratio"
+msgstr "Proporcje obrazu"
+
+msgid "Video aspect ratio"
+msgstr "Proporcje obrazu wideo"
+
+msgid "On"
+msgstr "Włączone"
+
+msgid "Deinterlacing"
+msgstr "Usuwanie przeplotu"
+
+msgid "Upmix stereo to 5.1"
+msgstr "Miksuj stereo do 5.1"
+
+msgid "Downmix AC3 to surround"
+msgstr "Miksuj AC3 do Surround"
+
+msgid "Default playlist not found"
+msgstr "Nie odnaleziono standardowej listy odtwarzania"
+
+msgid "Default playlist is not symlink"
+msgstr "Standardowa lista odtwarzania to nie symlink"
+
+msgid "Default playlist not defined"
+msgstr "Nie zdefiniowano standardowej listy odtwarzania"
+
+msgid "Delay"
+msgstr "Opóźnienie"
+
+msgid "ms"
+msgstr "ms"
+
+#, c-format
+msgid "xineliboutput: hotkey %s not binded"
+msgstr "xineliboutput: klawisz %s nie jest przypisany"
+
+msgid "Audio"
+msgstr "Dźwięk"
+
+msgid "Volume control"
+msgstr "Kontrola głośności"
+
+msgid "Mix to headphones"
+msgstr "Przełącz na słuchawki"
+
+msgid "Visualization"
+msgstr "Wizualizacja"
+
+msgid "Width"
+msgstr "Szerokość"
+
+msgid "px"
+msgstr "px"
+
+msgid "Height"
+msgstr "Wysokość"
+
+msgid "Speed"
+msgstr "Prędkość"
+
+msgid "fps"
+msgstr "fps"
+
+msgid "Background image MRL"
+msgstr "MRL obrazu tła"
+
+msgid "Audio Equalizer"
+msgstr "Equalizer dźwięku"
+
+msgid "Use Video-Out Driver"
+msgstr "Użyj wyjścia Video-Out"
+
+msgid "vector"
+msgstr "wektor"
+
+msgid "full"
+msgstr "pełne"
+
+msgid "half (top)"
+msgstr "połowa (góra)"
+
+msgid "half (bottom)"
+msgstr "połowa (dół)"
+
+msgid "Video"
+msgstr "Obraz"
+
+msgid "Use driver crop"
+msgstr "Użyj przycięcia"
+
+msgid "Autodetect letterbox"
+msgstr "Automatyczne wykrywanie Letterbox"
+
+msgid "Crop to"
+msgstr "Przytnij do"
+
+msgid "Autodetect rate"
+msgstr "Wykrywanie szybkości"
+
+msgid "Stabilize time"
+msgstr "Czas stabilizacji"
+
+msgid "Maximum logo width [%]"
+msgstr "Maksymalna szerokość loga [%]"
+
+msgid "Overscan compensate [%1000]"
+msgstr "Wyrównanie powiększenia [%1000]"
+
+msgid "Soft start"
+msgstr "Łagodny start"
+
+msgid "Soft start step"
+msgstr "Łagodny start przy przeskoku"
+
+msgid "Detect subtitles"
+msgstr "Wykryj napisy"
+
+#, fuzzy
+msgid "Subs detect stabilize time"
+msgstr "Czas stabilizacji napisów"
+
+#, fuzzy
+msgid "Subs detect lifetime"
+msgstr "Długość życia napisów"
+
+msgid "Use avards analysis"
+msgstr "Użyj analizy AVARDS"
+
+#, fuzzy
+msgid "Bar tone tolerance"
+msgstr "Tolerowanie kaszet"
+
+msgid "Software scaling"
+msgstr "Skalowanie programowe"
+
+msgid "Change aspect ratio"
+msgstr "Zmień proporcje"
+
+msgid "Change video size"
+msgstr "Zmień rozmiar obrazu"
+
+msgid "Allow downscaling"
+msgstr "Pozwól na zmniejszenie"
+
+msgid "Post processing (ffmpeg)"
+msgstr "Przetwarzanie końcowe (ffmpeg)"
+
+msgid "Quality"
+msgstr "Jakość"
+
+msgid "Mode"
+msgstr "Tryb"
+
+msgid "Method"
+msgstr "Metoda"
+
+msgid "Cheap mode"
+msgstr "Tanie"
+
+msgid "Pulldown"
+msgstr "Przez podział"
+
+msgid "Frame rate"
+msgstr "Zmiana ilości klatek na sekundę"
+
+msgid "Judder Correction"
+msgstr "Korekcja przesunięcia"
+
+msgid "Use progressive frame flag"
+msgstr "Użycie następnej flagi klatki"
+
+msgid "Chroma Filter"
+msgstr "Filter chrominancji"
+
+msgid "Sharpen / Blur"
+msgstr "Wyostrz / Rozmyj"
+
+msgid "Width of the luma matrix"
+msgstr "Szerokość matrycy luma"
+
+msgid "Height of the luma matrix"
+msgstr "Wysokość matrycy luma"
+
+msgid "Amount of luma sharpness/blur"
+msgstr "Suma wyostrzeń/rozmyć lumy"
+
+msgid "Width of the chroma matrix"
+msgstr "Szerokość matrycy chroma"
+
+msgid "Height of the chroma matrix"
+msgstr "Wysokość matrycy chroma"
+
+msgid "Amount of chroma sharpness/blur"
+msgstr "Suma wyostrzeń/rozmyć chromy"
+
+msgid "3D Denoiser"
+msgstr "Odszumiacz 3D"
+
+msgid "Spatial luma strength"
+msgstr "Przestrzenna siła lumy"
+
+msgid "Spatial chroma strength"
+msgstr "Przestrzenna siła chromy"
+
+msgid "Temporal strength"
+msgstr "Siła czasowego"
+
+msgid "HUE"
+msgstr "Ton kolorów"
+
+msgid "Saturation"
+msgstr "Nasycenie"
+
+msgid "Contrast"
+msgstr "Kontrast"
+
+msgid "Brightness"
+msgstr "Jasność"
+
+msgid "Sharpness"
+msgstr "Ostrość"
+
+msgid "Noise Reduction"
+msgstr "Redukcja szumu"
+
+msgid "Smooth fast forward"
+msgstr "Płynne przewijanie do przodu"
+
+#, fuzzy
+msgid "Fastest trick speed"
+msgstr "Prędkość postępu"
+
+msgid "On-Screen Display"
+msgstr "On-Screen Display"
+
+msgid "Hide main menu"
+msgstr "Ukryj pozycję w głównym menu"
+
+msgid "Resolution"
+msgstr "Rozdzielczość"
+
+msgid "Color depth"
+msgstr "Głębia koloru"
+
+msgid "Blending method"
+msgstr "Metoda wygładzania"
+
+msgid "Use hardware for low-res video"
+msgstr "Użyj sprzętu dla obrazu o niskiej jakości"
+
+msgid "Scaling method"
+msgstr "Metoda skalowania"
+
+msgid "Scale subtitles"
+msgstr "Skaluj napisy"
+
+msgid "Show all layers"
+msgstr "Pokaż wszystkie warstwy"
+
+msgid "Dynamic transparency correction"
+msgstr "Dynamiczna korekcja przeźroczystości"
+
+msgid "Static transparency correction"
+msgstr "Statyczna korekcja przeźroczystości"
+
+msgid "External subtitle size"
+msgstr "Rozmiar zewnętrznych napisów"
+
+msgid "DVB subtitle decoder"
+msgstr "Dekoder napisów DVB"
+
+msgid "Decoder"
+msgstr "Dekoder"
+
+msgid "Buffer size"
+msgstr "Rozmiar bufora"
+
+msgid "Number of PES packets"
+msgstr "Liczba pakietów PES"
+
+msgid "Local Display Frontend"
+msgstr "Lokalny klient emisji"
+
+msgid "Use keyboard"
+msgstr "Używaj klawiatury"
+
+msgid "Driver"
+msgstr "Sterownik"
+
+msgid "Display address"
+msgstr "Adres wyświetlacza"
+
+msgid "Framebuffer device"
+msgstr "Urządzenie Framebuffer"
+
+msgid "Fullscreen mode"
+msgstr "Pełny ekran"
+
+msgid "Window width"
+msgstr "Szerokość okna"
+
+msgid "Window height"
+msgstr "Wysokość okna"
+
+msgid "Window aspect"
+msgstr "Proporcje okna"
+
+msgid "Scale to window size"
+msgstr "Skaluj do rozmiaru okna"
+
+msgid "Port"
+msgstr "Port"
+
+msgid "Speakers"
+msgstr "Głośniki"
+
+msgid "Remote Clients"
+msgstr "Zdalni klienci"
+
+msgid "Allow remote clients"
+msgstr "Zezwól na zdalnych klientów"
+
+msgid "Listen port (TCP and broadcast)"
+msgstr "Port nasłuchu (TCP i rozgłaszanie)"
+
+msgid "Listen address"
+msgstr "Adres nasłuchiwania"
+
+msgid "Remote keyboard"
+msgstr "Zdalna klawiatura"
+
+msgid "Max number of clients"
+msgstr "Maksymalna liczba klientów"
+
+msgid "PIPE transport"
+msgstr "Transport PIPE"
+
+msgid "TCP transport"
+msgstr "Transport TCP"
+
+msgid "UDP transport"
+msgstr "Transport UDP"
+
+msgid "RTP (multicast) transport"
+msgstr "Transport RTP (multicast)"
+
+msgid "Address"
+msgstr "Adres (multicast)"
+
+msgid "TTL"
+msgstr "TTL (multicast)"
+
+msgid "Transmit always on"
+msgstr "Ciągła transmisja"
+
+msgid "SAP announcements"
+msgstr "Obwieszczenie SAP"
+
+msgid "Server announce broadcasts"
+msgstr "Serwer obwieszcza nadawanie"
+
+msgid "HTTP transport for media files"
+msgstr "Transport HTTP dla multimediów"
+
+msgid "Additional network services"
+msgstr "Dodatkowe serwisy sieciowe"
+
+msgid "HTTP server"
+msgstr "Serwer HTTP"
+
+msgid "HTTP clients can control VDR"
+msgstr "Klienci HTTP mogą kontrolować VDR"
+
+msgid "RTSP server"
+msgstr "Serwer RTSP"
+
+msgid "RTSP clients can control VDR"
+msgstr "Klienci RTSP mogą kontrolować VDR"
+
+msgid "Playlist settings"
+msgstr "Ustawienia listy odtwarzania"
+
+msgid "Show the track number"
+msgstr "Pokaż numer ścieżki"
+
+msgid "Show the name of the artist"
+msgstr "Pokaż nazwę artysty"
+
+msgid "Show the name of the album"
+msgstr "Pokaż nazwę albumu"
+
+msgid "Scan for metainfo"
+msgstr "Skanuj informacje meta"
+
+msgid "Cache metainfo"
+msgstr "Buforuj informacje meta"
+
+msgid "Arrow keys control DVD playback"
+msgstr "Strzałki kontrolują odtwarzanie DVD"
+
+msgid "Show hidden files"
+msgstr "Pokazuj ukryte pliki"
+
+msgid "Allow removing files"
+msgstr "Pozwól na usuwanie plików"
+
+msgid "Remember last playback position"
+msgstr "Pamiętaj miejsce zatrzymania odtwarzania"
+
+msgid "Media Player"
+msgstr "Odtwarzacz multimediów"
+
+msgid "Grayscale"
+msgstr "Odcień szarości"
+
+msgid "Bitmap"
+msgstr "Bitmapa"
+
+msgid "OSD"
+msgstr "OSD"
+
+msgid "Test Images"
+msgstr "Obrazy testowe"
+
+msgid "X11/xine-lib output plugin"
+msgstr "Emisja poprzez X11/xine-lib"
+
+#~ msgid "normal"
+#~ msgstr "Normalne"
+
+#~ msgid "inverted"
+#~ msgstr "Przestawny"
+
+#~ msgid "Interlaced Field Order"
+#~ msgstr "Interlaced Halbbild-Reihenfolge"
+
+#~ msgid "Button$Sort"
+#~ msgstr "Sortuj"
+
+#~ msgid "Play file >>"
+#~ msgstr "Odtwarzaj plik >>"
+
+#~ msgid "Play music >>"
+#~ msgstr "Odtwarzaj muzykę >>"
+
+#~ msgid "View images >>"
+#~ msgstr "Wyświetlaj zdjęcia >>"
+
+#~ msgid "Play DVD disc >>"
+#~ msgstr "Odtwarzaj DVD >>"
+
+#~ msgid "Play audio CD >>"
+#~ msgstr "Odtwarzaj CD >>"
+
+#~ msgid "Play BluRay disc >>"
+#~ msgstr "Odtwarzaj BluRay >>"
+
+#~ msgid "Play remote DVD >>"
+#~ msgstr "Odtwarzaj zdalnie DVD >>"
+
+#~ msgid "Play remote CD >>"
+#~ msgstr "Odtwarzaj CD >>"
+
+#~ msgid "Audio equalizer >>"
+#~ msgstr "Equalizer dźwięku >>"

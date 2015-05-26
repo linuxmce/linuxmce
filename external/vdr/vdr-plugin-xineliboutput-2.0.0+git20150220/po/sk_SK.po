@@ -1,0 +1,768 @@
+# VDR plugin language source file.
+# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
+# This file is distributed under the same license as the VDR package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Xineliboutput 1.1.0\n"
+"Report-Msgid-Bugs-To: <phintuka@users.sourceforge.net>\n"
+"POT-Creation-Date: 2013-10-29 10:29+0200\n"
+"PO-Revision-Date: 2014-02-05 11:12+0100\n"
+"Last-Translator: Milan Hrala <hrala.milan@gmail.com>\n"
+"Language-Team: Slovak <vdr@linuxtv.org>\n"
+"Language: sk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
+
+msgid "custom"
+msgstr "užívateľské"
+
+msgid "tiny"
+msgstr "najmenší"
+
+msgid "small"
+msgstr "malý"
+
+msgid "medium"
+msgstr "stredný"
+
+msgid "large"
+msgstr "veľký"
+
+msgid "huge"
+msgstr "najväčší"
+
+msgid "automatic"
+msgstr "automaticky"
+
+msgid "default"
+msgstr "predvolený"
+
+msgid "Pan&Scan"
+msgstr "Pan&Scan"
+
+msgid "CenterCutOut"
+msgstr "CenterCutOut"
+
+msgid "square"
+msgstr "do štvorca"
+
+msgid "anamorphic"
+msgstr "neforemne"
+
+msgid "DVB"
+msgstr "DVB"
+
+msgid "off"
+msgstr "vypnuté"
+
+msgid "no audio"
+msgstr "bez zvuku"
+
+msgid "no video"
+msgstr "bez obrazu"
+
+msgid "Off"
+msgstr "Vypnuté"
+
+msgid "Goom"
+msgstr "Goom"
+
+msgid "Oscilloscope"
+msgstr "Osciloskop"
+
+msgid "FFT Scope"
+msgstr "FFT spektrum"
+
+msgid "FFT Graph"
+msgstr "FFT graf"
+
+msgid "Image"
+msgstr "Obrázok"
+
+msgid "Mono 1.0"
+msgstr "Mono 1.0"
+
+msgid "Stereo 2.0"
+msgstr "Stereo 2.0"
+
+msgid "Headphones 2.0"
+msgstr "Sluchátka 2.0"
+
+msgid "Stereo 2.1"
+msgstr "Stereo 2.1"
+
+msgid "Surround 3.0"
+msgstr "Surround 3.0"
+
+msgid "Surround 4.0"
+msgstr "Surround 4.0"
+
+msgid "Surround 4.1"
+msgstr "Surround 4.1"
+
+msgid "Surround 5.0"
+msgstr "Surround 5.0"
+
+msgid "Surround 5.1"
+msgstr "Surround 5.1"
+
+msgid "Surround 6.0"
+msgstr "Surround 6.0"
+
+msgid "Surround 6.1"
+msgstr "Surround 6.1"
+
+msgid "Surround 7.1"
+msgstr "Surround 7.1"
+
+msgid "Pass Through"
+msgstr "Pass Through"
+
+msgid "very large"
+msgstr "veľmi veľký"
+
+msgid "Software"
+msgstr "Softwarové"
+
+msgid "Hardware"
+msgstr "Hardwarové"
+
+msgid "no"
+msgstr "nie"
+
+msgid "grayscale"
+msgstr "odtiene šedej"
+
+msgid "transparent"
+msgstr "priehľadný"
+
+msgid "transparent grayscale"
+msgstr "transparentné odtiene šedej"
+
+msgid "yes"
+msgstr "áno"
+
+msgid "nearest"
+msgstr "najbližší"
+
+msgid "bilinear"
+msgstr "bi-lineárne"
+
+msgid "LUT8"
+msgstr "LUT8"
+
+msgid "TrueColor"
+msgstr "Plná farebnosť"
+
+msgid "video stream"
+msgstr "ako video-obraz"
+
+msgid "none"
+msgstr "žiadny"
+
+msgid "nonref"
+msgstr "bez referencií"
+
+msgid "bidir"
+msgstr "iba B-snímky"
+
+msgid "nonkey"
+msgstr "žiadne kľúčové snímky"
+
+msgid "all"
+msgstr "všetko"
+
+msgid "Frontend initialization failed"
+msgstr "Inicializácia rozhrania zlyhala"
+
+msgid "Server initialization failed"
+msgstr "Inicializácia serveru zlyhala"
+
+msgid "Playlist"
+msgstr "Zoznam stôp"
+
+msgid "Button$Random"
+msgstr "Náhodné"
+
+msgid "Button$Normal"
+msgstr "Normálne"
+
+msgid "Button$Add files"
+msgstr "Pridať súbory"
+
+msgid "Button$Remove"
+msgstr "Odstrániť"
+
+msgid "Button$Mark"
+msgstr "Značka"
+
+msgid "Queued to playlist"
+msgstr "Pridaný do zoznamu skladieb"
+
+msgid "Random play"
+msgstr "Náhodné prehrávanie"
+
+msgid "Normal play"
+msgstr "Normálne prehrávanie"
+
+msgid "DVD Menu"
+msgstr "DVD Menu"
+
+msgid "Exit DVD menu"
+msgstr "Opustiť DVD menu"
+
+msgid "DVD Root menu"
+msgstr "Hlavné DVD menu"
+
+msgid "DVD Title menu"
+msgstr "DVD menu titulov"
+
+msgid "DVD SPU menu"
+msgstr "DVD SPU menu"
+
+msgid "DVD Audio menu"
+msgstr "Zvukové menu DVD"
+
+msgid "Close menu"
+msgstr "Zavrieť menu"
+
+msgid "BluRay Top menu"
+msgstr "BluRay hlavné menu"
+
+msgid "Toggle Pop-Up menu"
+msgstr "Prepínač kontextového menu"
+
+msgid "Next title"
+msgstr "Ďalší titul"
+
+msgid "Previous title"
+msgstr "Predchádzajúci titul"
+
+msgid "Delete image ?"
+msgstr "Zmazať obrázok ?"
+
+msgid "Play movie title"
+msgstr "Prehrať titul filmu"
+
+msgid "Play disc"
+msgstr "Prehrať disk"
+
+msgid "Images"
+msgstr "Obrázky"
+
+msgid "Play music"
+msgstr "Prehrať hudbu"
+
+msgid "Add to playlist"
+msgstr "Pridať do zoznamu stôp"
+
+msgid "Play file"
+msgstr "Prehrať súbor"
+
+msgid "Button$Queue"
+msgstr "Zoznam"
+
+msgid "Media"
+msgstr "Média"
+
+msgid "View images"
+msgstr "Prehliadať obrázky"
+
+msgid "Play DVD disc"
+msgstr "Prehrať DVD"
+
+msgid "Play BluRay disc"
+msgstr "Prehrať BluRay"
+
+msgid "Play audio CD"
+msgstr "Prehrať zvukové CD"
+
+msgid "Video settings"
+msgstr "Nastavenie obrazu"
+
+msgid "Play only audio"
+msgstr "Prehrávať iba zvuk"
+
+msgid "Crop letterbox 4:3 to 16:9"
+msgstr "Orezať letterbox 4:3 na 16:9"
+
+msgid "Overscan (crop image borders)"
+msgstr "Overscan (orezať okraje obrazu)"
+
+msgid "Audio settings"
+msgstr "Nastavenie zvuku"
+
+msgid "Audio Compression"
+msgstr "Kompresia zvuku"
+
+msgid "Audio equalizer"
+msgstr "Korekcia zvuku (ekvalizér)"
+
+msgid "Local Frontend"
+msgstr "Lokálne rozhranie"
+
+msgid "Aspect ratio"
+msgstr "Pomer strán"
+
+msgid "Video aspect ratio"
+msgstr "Pomer strán obrazu"
+
+msgid "On"
+msgstr "Zapnuté"
+
+msgid "Deinterlacing"
+msgstr "Odstraňovanie prekladania"
+
+msgid "Upmix stereo to 5.1"
+msgstr "Prevzorkovať stereo na 5.1"
+
+msgid "Downmix AC3 to surround"
+msgstr "Prevzorkovať AC3 na surround"
+
+msgid "Default playlist not found"
+msgstr "Východzí zoznam stôp sa nenašiel"
+
+msgid "Default playlist is not symlink"
+msgstr "Predvolený zoznam stôp nie je symbolický odkaz"
+
+msgid "Default playlist not defined"
+msgstr "Predvolený zoznam stôp nie je určený"
+
+msgid "Delay"
+msgstr "Omeškanie"
+
+msgid "ms"
+msgstr "ms"
+
+#, c-format
+msgid "xineliboutput: hotkey %s not binded"
+msgstr "xineliboutput:  klávesová skratka %s nie je priradená"
+
+msgid "Audio"
+msgstr "Zvuk"
+
+msgid "Volume control"
+msgstr "Ovládanie hlasitosti"
+
+msgid "Mix to headphones"
+msgstr "Miešať zvuk pre slúchadlá"
+
+msgid "Visualization"
+msgstr "Vizualizácia"
+
+msgid "Width"
+msgstr "Šírka"
+
+msgid "px"
+msgstr "bodov"
+
+msgid "Height"
+msgstr "Výška"
+
+msgid "Speed"
+msgstr "Rýchlosť"
+
+msgid "fps"
+msgstr "snímkov/sek."
+
+msgid "Background image MRL"
+msgstr "Obrázok na pozadí MRL"
+
+msgid "Audio Equalizer"
+msgstr "Zvukový equalizér"
+
+msgid "Use Video-Out Driver"
+msgstr "Použiť video-výstupný ovládač"
+
+msgid "vector"
+msgstr "vektor"
+
+msgid "full"
+msgstr "plný"
+
+msgid "half (top)"
+msgstr "polovičný (na vrchu)"
+
+msgid "half (bottom)"
+msgstr "polovičný (na spodku)"
+
+msgid "Video"
+msgstr "Obraz"
+
+msgid "Use driver crop"
+msgstr "Použiť ovládač orezania"
+
+msgid "Autodetect letterbox"
+msgstr "Automaticky identifikovať letterbox"
+
+msgid "Crop to"
+msgstr "Orezať na"
+
+msgid "Autodetect rate"
+msgstr "Detekčná rýchlosť"
+
+msgid "Stabilize time"
+msgstr "Stabilizovať čas"
+
+msgid "Maximum logo width [%]"
+msgstr "Maximálna šírka loga [%]"
+
+msgid "Overscan compensate [%1000]"
+msgstr "Kompenzácia prevzorkovania [%1000]"
+
+msgid "Soft start"
+msgstr "Progresívne spustenie"
+
+msgid "Soft start step"
+msgstr "Krok progresívneho spustenia"
+
+msgid "Detect subtitles"
+msgstr "Zisťovať titulky"
+
+msgid "Subs detect stabilize time"
+msgstr "Stabilizačný čas odhalenia"
+
+msgid "Subs detect lifetime"
+msgstr "Životnosť odhalenia"
+
+msgid "Use avards analysis"
+msgstr "Pomocou analýzy Avards"
+
+msgid "Bar tone tolerance"
+msgstr "Tolerancia ladenia odtieňa"
+
+msgid "Software scaling"
+msgstr "Softvérová zmena obrazu"
+
+msgid "Change aspect ratio"
+msgstr "Zmena pomeru strán obrazu"
+
+msgid "Change video size"
+msgstr "Zmeniť veľkosť obrazu"
+
+msgid "Allow downscaling"
+msgstr "Povoliť zmenšiť"
+
+msgid "Post processing (ffmpeg)"
+msgstr "Post processing (ffmpeg)"
+
+msgid "Quality"
+msgstr "Kvalita"
+
+msgid "Mode"
+msgstr "Mód"
+
+msgid "Method"
+msgstr "Metóda"
+
+msgid "Cheap mode"
+msgstr "Zjednodušený mód"
+
+msgid "Pulldown"
+msgstr "Pulldown"
+
+msgid "Frame rate"
+msgstr "Snímková rýchlosť"
+
+msgid "Judder Correction"
+msgstr "Korekcia chvenia"
+
+msgid "Use progressive frame flag"
+msgstr "Použiť progresívny obraz"
+
+msgid "Chroma Filter"
+msgstr "Filter farebnosti"
+
+msgid "Sharpen / Blur"
+msgstr "Zaostrenie / rozmazanie"
+
+msgid "Width of the luma matrix"
+msgstr "Šírka matice jasu"
+
+msgid "Height of the luma matrix"
+msgstr "Výška matice jasu"
+
+msgid "Amount of luma sharpness/blur"
+msgstr "Množstvo jasu zaostriť/rozmazať"
+
+msgid "Width of the chroma matrix"
+msgstr "Šírka matice farebnosti"
+
+msgid "Height of the chroma matrix"
+msgstr "Výška matice farebnosti"
+
+msgid "Amount of chroma sharpness/blur"
+msgstr "Množstvo farebnosti zaostriť/rozmazať"
+
+msgid "3D Denoiser"
+msgstr "3D redukcia šumu"
+
+msgid "Spatial luma strength"
+msgstr "Priestorová intenzita jasu"
+
+msgid "Spatial chroma strength"
+msgstr "Dispozičná farebná pestrosť"
+
+msgid "Temporal strength"
+msgstr "Časová náročnosť"
+
+msgid "HUE"
+msgstr "Odtieň"
+
+msgid "Saturation"
+msgstr "Sýtosť farby"
+
+msgid "Contrast"
+msgstr "Kontrast"
+
+msgid "Brightness"
+msgstr "Jas"
+
+msgid "Sharpness"
+msgstr "Ostrosť"
+
+msgid "Noise Reduction"
+msgstr "Redukcia šumu"
+
+msgid "Smooth fast forward"
+msgstr "Plynulé pretáčanie"
+
+msgid "Fastest trick speed"
+msgstr "Rýchlejší trik"
+
+msgid "On-Screen Display"
+msgstr "Obrazovkové menu"
+
+msgid "Hide main menu"
+msgstr "Nezobrazovať v hlavnom menu"
+
+msgid "Resolution"
+msgstr "Rozlíšenie"
+
+msgid "Color depth"
+msgstr "Farebná hĺbka"
+
+msgid "Blending method"
+msgstr "Spôsob miešania"
+
+msgid "Use hardware for low-res video"
+msgstr "Použite hardware pre malé rozlíšenie videa"
+
+msgid "Scaling method"
+msgstr "Spôsob úpravy mierky"
+
+msgid "Scale subtitles"
+msgstr "Zväčšiť titulky"
+
+msgid "Show all layers"
+msgstr "Zobraziť všetky vrstvy"
+
+msgid "Dynamic transparency correction"
+msgstr "Úprava dynamické priehľadnosti"
+
+msgid "Static transparency correction"
+msgstr "Úprava statické priehľadnosti"
+
+msgid "External subtitle size"
+msgstr "Veľkosť externých titulkov"
+
+msgid "DVB subtitle decoder"
+msgstr "Použitý dekóder titulok"
+
+msgid "Decoder"
+msgstr "Dekodér"
+
+msgid "Buffer size"
+msgstr "Veľkosť vyrovnávacej pamäte"
+
+msgid "Number of PES packets"
+msgstr "Počet PES paketov"
+
+msgid "Local Display Frontend"
+msgstr "Lokálne zobrazovacie rozhranie"
+
+msgid "Use keyboard"
+msgstr "Používať klávesnicu"
+
+msgid "Driver"
+msgstr "Ovládač"
+
+msgid "Display address"
+msgstr "Adresa obrazovky"
+
+msgid "Framebuffer device"
+msgstr "Framebuffer zariadenie"
+
+msgid "Fullscreen mode"
+msgstr "Celo obrazovkový režim"
+
+msgid "Window width"
+msgstr "Šírka okna"
+
+msgid "Window height"
+msgstr "Výška okna"
+
+msgid "Window aspect"
+msgstr "Pomer strán okna"
+
+msgid "Scale to window size"
+msgstr "Škálovať do velikosti okna"
+
+msgid "Port"
+msgstr "Port"
+
+msgid "Speakers"
+msgstr "Reproduktory"
+
+msgid "Remote Clients"
+msgstr "Vzdialení klienti"
+
+msgid "Allow remote clients"
+msgstr "Povoliť vzdialených klientov"
+
+msgid "Listen port (TCP and broadcast)"
+msgstr "Počúvať port (TCP a vysielanie)"
+
+msgid "Listen address"
+msgstr "Počúvať adresu"
+
+msgid "Remote keyboard"
+msgstr "Vzdialená klávesnica"
+
+msgid "Max number of clients"
+msgstr "Max počet klientov"
+
+msgid "PIPE transport"
+msgstr "PIPE transport"
+
+msgid "TCP transport"
+msgstr "TCP transport"
+
+msgid "UDP transport"
+msgstr "UDP transport"
+
+msgid "RTP (multicast) transport"
+msgstr "RTP (multicast) transport"
+
+msgid "Address"
+msgstr "Adresa"
+
+msgid "TTL"
+msgstr "TTL"
+
+msgid "Transmit always on"
+msgstr "Prenos vždy zapnutý"
+
+msgid "SAP announcements"
+msgstr "SAP oznámenia"
+
+msgid "Server announce broadcasts"
+msgstr "Server oznamuje vysielanie"
+
+msgid "HTTP transport for media files"
+msgstr "HTTP transport pre média"
+
+msgid "Additional network services"
+msgstr "Ďalšie sieťové služby"
+
+msgid "HTTP server"
+msgstr "HTTP server"
+
+msgid "HTTP clients can control VDR"
+msgstr "HTTP klienti môžu ovládať VDR"
+
+msgid "RTSP server"
+msgstr "RTSP server"
+
+msgid "RTSP clients can control VDR"
+msgstr "RTSP klienti môžu ovládať VDR"
+
+msgid "Playlist settings"
+msgstr "Nastavenie zoznamu stop"
+
+msgid "Show the track number"
+msgstr "Zobrazovať číslo stopy"
+
+msgid "Show the name of the artist"
+msgstr "Zobrazovať meno autora"
+
+msgid "Show the name of the album"
+msgstr "Zobrazovať názov albumu"
+
+msgid "Scan for metainfo"
+msgstr "Vyhľadávať metainfo"
+
+msgid "Cache metainfo"
+msgstr "Uchovávať metainfo"
+
+msgid "Arrow keys control DVD playback"
+msgstr "Šipkami ovládať prehrávanie DVD"
+
+msgid "Show hidden files"
+msgstr "Zobraziť skryté súbory"
+
+msgid "Allow removing files"
+msgstr "Povoliť zmazať súbory"
+
+msgid "Remember last playback position"
+msgstr "Pamätať si poslednú pozíciu prehrávania"
+
+msgid "Media Player"
+msgstr "Prehrávač médií"
+
+msgid "Grayscale"
+msgstr "Odtiene šedej"
+
+msgid "Bitmap"
+msgstr "Rastr"
+
+msgid "OSD"
+msgstr "OSD"
+
+msgid "Test Images"
+msgstr "Skúšobné obrazce"
+
+msgid "X11/xine-lib output plugin"
+msgstr "X11/xine-lib výstupný modul"
+
+#~ msgid "normal"
+#~ msgstr "normální"
+
+#~ msgid "inverted"
+#~ msgstr "inverzní"
+
+#~ msgid "Interlaced Field Order"
+#~ msgstr "Pořadí půlsnímků"
+
+#~ msgid "Button$Sort"
+#~ msgstr "Třídění"
+
+#~ msgid "Play file >>"
+#~ msgstr "Přehrát soubor >>"
+
+#~ msgid "Play music >>"
+#~ msgstr "Přehrát hudbu >>"
+
+#~ msgid "View images >>"
+#~ msgstr "Prohlížet obrázky >>"
+
+#~ msgid "Play DVD disc >>"
+#~ msgstr "Přehrát DVD >>"
+
+#~ msgid "Play audio CD >>"
+#~ msgstr "Přehrát zvukové CD >>"
+
+#~ msgid "Play BluRay disc >>"
+#~ msgstr "Přehrát BluRay >>"
+
+#~ msgid "Play remote DVD >>"
+#~ msgstr "Přehrát vzdálené DVD >>"
+
+#~ msgid "Play remote CD >>"
+#~ msgstr "Přehrát vzdálené CD >>"
+
+#~ msgid "Audio equalizer >>"
+#~ msgstr "Korekce zvuku (ekvalizér) >>"

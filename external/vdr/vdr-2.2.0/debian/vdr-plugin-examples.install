@@ -1,0 +1,13 @@
+usr/lib/vdr/plugins/libvdr-hello.so.*
+usr/lib/vdr/plugins/libvdr-osddemo.so.*
+usr/lib/vdr/plugins/libvdr-svccli.so.*
+usr/lib/vdr/plugins/libvdr-svcsvr.so.*
+usr/lib/vdr/plugins/libvdr-skincurses.so.*
+usr/lib/vdr/plugins/libvdr-status.so.*
+usr/lib/vdr/plugins/libvdr-svdrpdemo.so.*
+usr/lib/vdr/plugins/libvdr-pictures.so.*
+usr/lib/vdr/plugins/libvdr-rcu.so.*
+
+usr/share/locale/*/*/vdr-hello.*
+usr/share/locale/*/*/vdr-skincurses.*
+usr/share/locale/*/*/vdr-pictures.*

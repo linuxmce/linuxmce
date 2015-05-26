@@ -1,0 +1,16 @@
+04_newplugin.patch:4b1964ee4ebf7c793333151d299c0611
+06_default_svdrp_port_0.patch:8d5ae3afa660d727237cde0cfec4b8d5
+81_Make_config.patch:0c7ea8e353c4c4403290d39b7be7db5f
+99_ncursesw-include.patch:7a408b2f76b2d2d6e08caf47e91c469c
+opt-24_jumpplay.patch:4361b7bb723b11fc6a7fbe5042038384
+opt-37-x_menuorg.patch:65581c86a52f534d23c1046887d49544
+opt-42-x_MainMenuHooks-v1.0.1.patch:6e9893507448c563fc1a515f6fefd424
+opt-50_graphtft.patch:5107c4989569cb4b7646e4b6fc2edb43
+opt-56_eventdetails_v3.patch:e2ff963982af0673b0436d3f7f6c2048
+opt-57_vdr-remote_instant_recordings.patch:a6adcadd90c13a201145ca9f9e402ed4
+opt-61_dynamite.patch:7ae0a8bb7782424c3ea1cb1fb2fb9463
+opt-65_pin.patch:f0177e4b789ad269cb696aa6c05be4d9
+opt-66_jumpingseconds.patch:6735eb7409071cbd24780a6c12674ac2
+xprmtl-02_permashift-0.5.4.patch:3b89f9f556623ed6ec96b1a58a91a13a
+xprmtl-03_hide-first-recording-level-v3.patch:585313aedd38fc0d4ac15ca089d3659f
+vdr-2.1.6-conf.d-v6.diff:49e4d191dc83a121ce585323d65144fe
