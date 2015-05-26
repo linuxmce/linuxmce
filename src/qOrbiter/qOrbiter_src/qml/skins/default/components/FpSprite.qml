@@ -1,41 +1,41 @@
 // import QtQuick 1.1 // to target S60 5th Edition or Maemo 5
 import QtQuick 2.2
+import org.linuxmce.floorplans 1.0
 import "../."
 Item {
     id:sprite_root
     width: itemW
     height: itemH
     objectName:deviceNum
-
-
-
+    property FloorplanDevice currentDevice:floorplan_devices.getDevice(deviceNum)
     property color activeColor: "grey"
     property color inactivecolor: "green"
     property double devicelevel:0.0
     property string state: "unknown"
-    property string deviceName: floorplan_devices.getText(Number(deviceNum))
+    property string deviceName:currentDevice.deviceName// floorplan_devices.getText(Number(deviceNum))
     property string deviceNum:""
     property string deviceType: ""
     property string imgUrl: ""
-    property bool selected:floorplan_devices.getDeviceSelection(deviceNum)
+    property bool selected:currentDevice.selected
     property int itemH:Style.scaleY(5)
     property int itemW: Style.scaleY(5)
     property double iconScale: 1.5
     onSelectedChanged: {
         console.log(deviceNum+" changed to "+selected)
-        sprite.border.width = selected ? 3 : 0
+
     }
 
     Connections{
         target: floorplan_devices
-        onSelectedDevicesChanged: {selected = floorplan_devices.getDeviceSelection(deviceNum)}
+        onSelectedDevicesChanged: {
+            selected = floorplan_devices.getDeviceSelection(deviceNum)
+        }
     }
 
     scale: iconScale
-    function updateFpItem()
-    {
+    function updateFpItem(){
         floorplan_devices.setDeviceSelection(deviceNum)
-        sprite.border.width = selected ? 3 : 0
+
     }
 
     Image {
@@ -65,10 +65,11 @@ Item {
 */
     StyledText {
         id: deviceNumLabel
-        text: floorplan_devices.getText(deviceNum) + " " + floorplan_devices.getDeviceStatus(deviceNum)
+        text: currentDevice.deviceName  +"\n"+currentDevice.deviceState
         anchors.top: fpDevice_image.bottom
         font.pixelSize: Style.appFontSize_description
-        visible: false
+        visible: true
+        color:"black"
     }
 
     Rectangle{
@@ -91,7 +92,8 @@ Item {
     MouseArea{
         anchors.fill: sprite_root
         onClicked: {
-            updateFpItem()
+         //  currentDevice.selected=!sprite_root.selected
+             updateFpItem()
         }
     }
 }

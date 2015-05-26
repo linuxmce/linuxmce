@@ -1,5 +1,6 @@
 #include "floorplandevice.h"
 #include <QStringList>
+#include "QtGui/qguiapplication.h"
 #ifdef debug
 #include <QDebug>
 #endif
@@ -11,11 +12,17 @@ FloorplanDevice::FloorplanDevice(QString name, int deviceNo, int floorplan_devic
     mI_floorplanType(i_flooplanType),
     mQS_position(position)
 {
+    QObject::connect(this, &FloorplanDevice::selectedChanged, this, &FloorplanDevice::dataChanged);
+    qRegisterMetaType<FloorplanDevice*>("FloorplanDevice*");
     setCurrentX(0);
     setCurrentY(0);
-    setStatus(false);
-    setupFloorplanPositions();
+    setSelected(false);
     setText(name);
+    setSelected(false);
+    setDeviceStatus("UNKNOWN");
+    setDeviceState("UNKNOWN");
+    setupFloorplanPositions();
+
 }
 
 QHash<int, QByteArray> FloorplanDevice::roleNames() const
@@ -38,7 +45,7 @@ QHash<int, QByteArray> FloorplanDevice::roleNames() const
     return names;
 }
 
-QVariant FloorplanDevice::data(int role) const
+QVariant FloorplanDevice::data(int role)
 {
 
     switch(role) {
@@ -63,7 +70,7 @@ QVariant FloorplanDevice::data(int role) const
     case ParamRole:
         return getParams();
     case SelectedRole:
-        return getStatus();
+        return deviceStatus();
     case ColorRole:
         return getColor();
     case TextRole:

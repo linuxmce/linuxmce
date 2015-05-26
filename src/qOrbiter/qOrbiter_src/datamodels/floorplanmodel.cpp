@@ -99,10 +99,10 @@ QVariantList FloorPlanModel::getCommandParams(int device)
 
 void FloorPlanModel::setDeviceSelection(int devNo)
 {
-   // qDebug() << "Handling status change for:" << devNo;
+    // qDebug() << "Handling status change for:" << devNo;
     for (int i =0; i < m_list.count(); i++){
-        if (m_list.at(i)->deviceNum() == devNo){
-            if(m_list.at(i)->status == false){
+        if (m_list.at(i)->deviceNumber() == devNo){
+            if(m_list.at(i)->selected() == false){
                 selectedDevices.insert(QString::number(devNo), m_list.at(i)->id() );
             }
             else
@@ -110,7 +110,7 @@ void FloorPlanModel::setDeviceSelection(int devNo)
                 handleStatusChange(devNo);
             }
 
-            m_list.at(i)->setStatus(!m_list.at(i)->status);
+            m_list.at(i)->setSelected(!m_list.at(i)->selected());
         }
     }
 
@@ -129,12 +129,12 @@ void FloorPlanModel::setDeviceSelection(int devNo)
 bool FloorPlanModel::getDeviceSelection(int devNo)
 {
 #ifdef QT_DEBUG
-   // qDebug() << "Handling status request for:" << devNo;
+    // qDebug() << "Handling status request for:" << devNo;
 #endif
     for (int i =0; i < m_list.count(); i++){
         if (m_list.at(i)->deviceNum() == devNo){
 
-            return m_list.at(i)->status;
+            return m_list.at(i)->selected();
 
         }
     }
@@ -157,6 +157,31 @@ void FloorPlanModel::executeDeviceCommand(int deviceId, int cmdId)
 
 
 
+}
+
+void FloorPlanModel::updateStatus(QString status, QString state, int device)
+{
+    FloorplanDevice *d = find(device);
+    if(d && d->floorplanType() == currentFloorPlanType){
+        QStringList data;
+
+        switch (currentFloorPlanType) {
+        case 2:
+
+            data= state.split("/");
+       qDebug() << Q_FUNC_INFO <<data;
+            if(data.length() > 1){
+
+                d->setDeviceState(data.at(0));
+                d->setDeviceLevel(data.at(1).toInt());
+            }
+
+
+            break;
+        default: d->setDeviceState(state); break;
+        }
+
+    }
 }
 
 void FloorPlanModel::handleItemChange()
@@ -208,7 +233,7 @@ FloorplanDevice * FloorPlanModel::find(const QString &id) const
         }
         else
         {
-            //  qDebug() << item->id();
+            return new FloorplanDevice();
         }
     }
     return 0;
@@ -306,6 +331,11 @@ FloorplanDevice *FloorPlanModel::get(int idx)
 
 }
 
+FloorplanDevice *FloorPlanModel::getDevice(int device)
+{
+    return find(device);
+}
+
 void FloorPlanModel::sortModel(int column, Qt::SortOrder order)
 {
 }
@@ -313,7 +343,7 @@ void FloorPlanModel::sortModel(int column, Qt::SortOrder order)
 void FloorPlanModel::clearAllSelections()
 {
     foreach(FloorplanDevice* item, m_list) {
-        item->setStatus(false);
+        item->setSelected(false);
     }
 }
 
@@ -353,7 +383,7 @@ void FloorPlanModel::populateSprites()
             if(item->getCurrentX() != -1)
             {
 
-               // qDebug() << "Need to draw" << item->id();
+                // qDebug() << "Need to draw" << item->id();
                 QMetaObject::invokeMethod(page, "placeSprites", Q_ARG(QVariant,item->getCurrentX()), Q_ARG(QVariant,item->getCurrentY()), Q_ARG(QVariant,item->deviceNum()), Q_ARG(QVariant,false ), Q_ARG(QVariant, item->deviceType()));
             }
         }
@@ -447,13 +477,8 @@ int FloorPlanModel::columnCount(const QModelIndex &parent) const
 void FloorPlanModel::updateDeviceData()
 {
     foreach(FloorplanDevice* item, m_list) {
-
-        string sResult;
-        uiRef->getDeviceState(item->deviceNum(), &sResult);
-        item->setText(QString(sResult.c_str()));
-        string sStatus;
-        uiRef->getDeviceStatus(item->deviceNum(), &sStatus);
-        item->setDeviceStatus(QString(sStatus.c_str()));
+        if(item->floorplanType()==currentFloorPlanType)
+            emit uiRef->getDeviceStatus(item->deviceNum());
     }
 }
 
@@ -471,9 +496,9 @@ QString FloorPlanModel::getText(int device) const
 {
     FloorplanDevice *d = find(device);
     if(d){
-        return d->getText();
+        return d->deviceName();
     } else {
-        return QString();
+        return QString(tr("Invalid Device"));
     }
 }
 
@@ -481,8 +506,8 @@ QString FloorPlanModel::getDeviceStatus(int device) const
 {
     FloorplanDevice *d = find(device);
     if(d){
-        return d->getDeviceStatus();
+        return d->deviceStatus();
     } else {
-        return QString();
+        return QString(tr("Invalid Device"));
     }
 }

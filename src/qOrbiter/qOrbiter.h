@@ -1525,6 +1525,7 @@ signals:
     void floorPlanImageData(const uchar* ,int);
     void floorplanTypeChanged(int f);
     void addFloorplanDeviceCommand(QVariantMap c);
+    void floorplanDeviceStatus(QString status, QString state, int device);
     ///@}
 
     /** @name Media Signals
@@ -1888,6 +1889,7 @@ public slots:
 
     //floorplans
     void getFloorPlanImage(QString fp_path);
+    void getFloorplanDeviceStatus(int device);
 
     //screensave
     void getScreenSaverImage(QString inc_requested_img_path);
@@ -1943,11 +1945,7 @@ public slots:
     void GetMediaAttributeGrid(QString qs_fk_fileno);
     void GetSecurityCam(int i_inc_pkdevice);
 
-
-
-
     void stop_AV();
-
 
     void moveMedia(QString eas, int streamID);
 

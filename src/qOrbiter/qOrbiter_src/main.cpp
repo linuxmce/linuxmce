@@ -381,6 +381,7 @@ int main(int argc, char* argv[])
         QThread dceThread;
 
         qOrbiter pqOrbiter(PK_Device, sRouter_IP,true,bLocalMode );
+        qmlRegisterType<FloorplanDevice>("org.linuxmce.floorplans",1,0,"FloorplanDevice");
         qmlRegisterType<MediaTypesHelper>("org.linuxmce.enums",1,0,"MediaTypes");
         //qmlRegisterSingletonType<MediaTypesHelper>("media.enums",1,0,"MediaTypesHelper", "Data Only for linuxMCE MediaTypes");
         qmlRegisterSingletonType<MediaTypesHelper>("enums.media", 1, 0, "MediaHelper", MediaTypesHelper::mediatypes_provider);
@@ -615,6 +616,8 @@ int main(int argc, char* argv[])
 
         QObject::connect(&w, SIGNAL(populate_floorplan_device_commands(int)), &pqOrbiter, SLOT(getFloorplanDeviceCommand(int)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(addFloorplanDeviceCommand(QVariantMap)), &w, SLOT(setFloorPlanCommand(QVariantMap)), Qt::QueuedConnection);
+        QObject::connect(&w, &qorbiterManager::getDeviceStatus, &pqOrbiter, &qOrbiter::getFloorplanDeviceStatus, Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, &qOrbiter::floorplanDeviceStatus, w.floorplans, &FloorPlanModel::updateStatus, Qt::QueuedConnection );
         //mediagrid
         QObject::connect(&w, SIGNAL(gridStatus(bool)), &pqOrbiter, SLOT(setGridStatus(bool)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(resetSearchParams()), &pqOrbiter, SLOT(initializeGrid()), Qt::QueuedConnection);

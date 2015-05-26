@@ -2268,8 +2268,8 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
     DCE::DeviceData_Base * fpDevice = this->m_pData->m_AllDevices.m_mapDeviceData_Base_Find(device);
 
     if(fpDevice==NULL){
-          qDebug() << Q_FUNC_INFO << "Could not find device!";
-         return;
+        qDebug() << Q_FUNC_INFO << "Could not find device!";
+        return;
     }
 
 
@@ -2284,7 +2284,7 @@ void qOrbiter::getFloorplanDeviceCommand(int device)
     t.insert("device", device);
 
     emit addFloorplanDeviceCommand(t) ;
- qDebug() << Q_FUNC_INFO << "exit";
+    qDebug() << Q_FUNC_INFO << "exit";
 }
 
 void qOrbiter::shutdown()
@@ -2658,7 +2658,7 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString op
 }
 
 void DCE::qOrbiter::loadDataForDataGrid(QString dataGridId, QString dgName, int PK_DataGrid, QString option, int startRow, int numRows, int numColumns, QString seek) {
-    qDebug() << "loadDataForDataGrid()::"<< option;
+    qDebug() << Q_FUNC_INFO << "loadDataForDataGrid()::" << dataGridId << "--"<< option;
     char *pData = NULL;
     int iData_Size=0;
     int GridCurRow = startRow;
@@ -5017,6 +5017,27 @@ void qOrbiter::getFloorPlanImage(QString fp_path)
 
         emit floorPlanImageData( (const uchar*)picData, picData_Size);
     }
+}
+
+void qOrbiter::getFloorplanDeviceStatus(int device)
+{
+    string status="UNKNOWN";
+    CMD_Get_Device_Status getDeviceStatus(m_dwPK_Device, iPK_Device_GeneralInfoPlugin, device, &status);
+    string cResponse="";
+    if(SendCommand(getDeviceStatus, &cResponse) && cResponse=="OK"){
+
+  //  qDebug() << Q_FUNC_INFO << "Status::" << status.c_str();
+    }
+    cResponse="";
+    string state="UNKNOWN";
+
+    CMD_Get_Device_State getDeviceState(m_dwPK_Device, iPK_Device_GeneralInfoPlugin, device, &state);
+    if(SendCommand(getDeviceState, &cResponse) && cResponse=="OK"){
+
+   // qDebug() << Q_FUNC_INFO << "State:"<<state.c_str();
+    }
+
+    emit floorplanDeviceStatus(QString::fromStdString(status), QString::fromStdString(state), device);
 }
 
 void qOrbiter::getScreenSaverImage(QString inc_requested_img_path)

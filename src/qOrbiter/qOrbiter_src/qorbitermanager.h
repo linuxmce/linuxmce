@@ -732,6 +732,7 @@ signals:
     void osdChanged(bool);
     void newLightLevel(QString l);
     void populate_floorplan_device_commands(int d);
+     void getDeviceStatus(int PK_Device);
 
     //setup related
     void orbiterReady(bool);
@@ -1671,12 +1672,10 @@ public slots:
 
     // generic device
     void getDeviceState(int PK_Device, string* data);
-    void getDeviceStatus(int PK_Device, string* data);
+
 
     // telecom
     void makeCall(int iPK_Users,string sPhoneExtension,string sPK_Device_From,int iPK_Device_To);
-
-
 
     void handleDceGuiCommand(int c){
         QString cmdOut;

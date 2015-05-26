@@ -28,6 +28,7 @@ GenericListModel{
             onClicked:{
                 var comp= getCmdDelegate(command_number);
                 popupControls.setCommandDelegate(comp, index )
+                sendCommandBox.extended=false
             }
         }
     }

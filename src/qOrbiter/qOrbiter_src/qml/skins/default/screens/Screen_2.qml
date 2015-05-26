@@ -4,6 +4,7 @@ StyledScreen{
     navigation: "FloorplanNav.qml"
     property alias floorplan: lightsFloorplan
     onScreenOpen: floorplan_devices.clearAllSelections()
+    onScreenClosing: floorplan_devices.setCurrentFloorPlanType(-1)
 
     TabletFloorplanLayout {
         anchors.top: parent.top
