@@ -50,9 +50,9 @@ class FloorPlanModel : public QAbstractListModel
     Q_OBJECT
 public:
     explicit FloorPlanModel(FloorplanDevice *m_prototype, qorbiterManager *r, QObject *parent = 0);
-typedef QMap <int, QString> myMap;
+    typedef QMap <int, QString> myMap;
 #ifdef QT5
-   QHash<int, QByteArray> roleNames() const;
+    QHash<int, QByteArray> roleNames() const;
 #endif
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
@@ -95,9 +95,9 @@ typedef QMap <int, QString> myMap;
     QDeclarativeEngine *proxyEngine;
 #endif
 
-   //QModelIndex index(int row, int column, const QModelIndex &parent) const ;
-   //QModelIndex parent(const QModelIndex &child) const;
-   //int columnCount(const QModelIndex &parent) const;
+    //QModelIndex index(int row, int column, const QModelIndex &parent) const ;
+    //QModelIndex parent(const QModelIndex &child) const;
+    //int columnCount(const QModelIndex &parent) const;
 
 signals:
 
@@ -116,11 +116,13 @@ signals:
     void sendCommandMessage(QVariantMap cmdMsg);
     void deviceCommandsChanged();
     void deviceParamsChanged();
+    void deviceChanged(int device);
 
 
 public slots:
     FloorplanDevice* find(int device) const;
     FloorplanDevice *get(int idx);
+    Q_INVOKABLE FloorplanDevice *getDevice(int device);
     Q_INVOKABLE int count() { return m_list.size();}
     void clearAllSelections();
     void clear();
@@ -140,6 +142,8 @@ public slots:
 
     int getCurrentIntPage() {return iCurrentPage;}
     void setCurrentIntPage(int i) {iCurrentPage = i; emit changePage( iCurrentPage);}
+
+    void updateStatus(QString status, QString state, int device);
 
     QImage getFloorPlanImage () {return currentImage;}
     QImage getCurrentImage() {return currentImage;}
@@ -163,15 +167,15 @@ public slots:
     void setCurrentFloorPlanType(int t) { currentFloorPlanType = t; emit floorplanTypeChanged(); }
     int getCurrentFloorPlanType() {return currentFloorPlanType; }
 
- void setDeviceParams(QVariantList p, int device);
+    void setDeviceParams(QVariantList p, int device);
 
-QVariantMap getSelectedDevices(){return selectedDevices;}
+    QVariantMap getSelectedDevices(){return selectedDevices;}
 
-QVariantMap getDeviceCommands(int d);
+    QVariantMap getDeviceCommands(int d);
 
-QVariantList getCommandParams(int device);
+    QVariantList getCommandParams(int device);
 
-    void updateDeviceData();
+    Q_INVOKABLE void updateDeviceData();
     int getColor(int device) const;
     QString getText(int device) const;
     QString getDeviceStatus(int device) const;

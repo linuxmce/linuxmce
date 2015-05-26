@@ -40,6 +40,13 @@ class FloorplanDevice : public QObject
 {
     Q_PROPERTY (int currentFloorplanX READ getCurrentX WRITE setCurrentX NOTIFY floorplanXChanged)
     Q_PROPERTY (int currentFloorplanY READ getCurrentY WRITE setCurrentY NOTIFY floorplanYChanged)
+    Q_PROPERTY(QString deviceStatus READ deviceStatus NOTIFY statusChanged)
+    Q_PROPERTY(QString deviceState READ deviceState NOTIFY deviceStateChanged)
+    Q_PROPERTY(QString text READ text  NOTIFY dataChanged)
+    Q_PROPERTY(QString deviceName READ deviceName NOTIFY deviceNameChanged)
+    Q_PROPERTY(int deviceNumber READ deviceNumber NOTIFY deviceNumberChanged)
+    Q_PROPERTY(bool selected READ selected WRITE setSelected NOTIFY selectedChanged)
+
     // Q_PROPERTY(QVariantMap deviceCommands READ getDeviceCommands WRITE setDeviceCommand NOTIFY deviceCommandsChanged)
 
 
@@ -69,8 +76,8 @@ public:
                              int i_flooplanType,
                              QString position,
                              QObject *parent = 0);
-    FloorplanDevice() {}
-    QVariant data(int role) const;
+    FloorplanDevice(QObject*parent=0) {}
+    QVariant data(int role) ;
     QHash<int, QByteArray> roleNames() const;
 
     /*!
@@ -122,41 +129,46 @@ public:
      * \return
      */
     inline int getCurrentY () const {return currentFloorplanY;}
-    /*!
-     * \brief getStatus
-     * \return
-     */
-    inline bool getStatus() const {return status;}
+
 
     inline int getColor() const {return m_iColor;}
     void setColor(int color) { m_iColor = color; }
-    inline QString getText() const {return m_sText;}
-    void setText(QString text) { m_sText = text; }
+
+    QString getText() const {return m_sText;}
+    void setText(QString text) { m_sText = text; emit dataChanged(); }
+
     inline QString getDeviceStatus() const {return m_sDeviceStatus;}
-    void setDeviceStatus(QString status) { m_sDeviceStatus = status; }
+
+    void setDeviceStatus(QString status) { m_sDeviceStatus = status; emit statusChanged();}
 
 
-    QString mQS_name;                       //device name
-    int mI_deviceNo;                        //device number
-    int mI_floorplan_device_type;           //floorplan device type
-    int mI_floorplanType;                   //type of floorplan its associated with
-    QString mQS_position;                   //postion, raw in string form
-    QImage mIM_icon;                        //raw image data
-    QStringList mm_currentPosition;     //map of positions on pages
+    QString text() {return m_sText;}
 
-    QString mQS_iconpath;                   //icon path to be used in the future with skins
-    int currentFloorplanX;
-    int currentFloorplanY;
-    bool status;
+
     /*! The Selected Status of this floorplan object item for the GUI */
-    bool selected;
+
 
     QVariantMap deviceCommands;
     QVariantList commandParams;
 
-    int m_iColor;   // color to use in icon
-    QString m_sText;   // text to display next to icon
-    QString m_sDeviceStatus;   // The status device data field
+
+    //newer api format
+
+    int deviceNumber(){return mI_deviceNo;}
+    QString deviceName(){return mQS_name;}
+    QString deviceStatus() {return m_sDeviceStatus;}
+    QString deviceState() {return m_deviceState;}
+    QString alertStatus() {return m_alertStatus;}
+
+    int deviceLevel() {return mi_deviceLevel;}
+    int xPosition(){return currentFloorplanX;}
+    int yPosition(){return currentFloorplanY;}
+    /*!
+     * \brief selected() returns internal m_selected as property
+     * \return
+     */
+    inline bool selected() const {return m_selected;}
+
 
 signals:
     void statusChanged();
@@ -166,13 +178,21 @@ signals:
     void deviceCommandsChanged();
     void commandParamsChanged();
 
+    void deviceNumberChanged();
+    void deviceNameChanged();
+    void alertStatusChanged();
+    void deviceStateChanged();
+    void deviceLevelChanged();
+    void selectedChanged();
+
 public slots:
+    void setDeviceState(QString s){if(m_deviceState==s)return; m_deviceState=s; emit deviceStateChanged(); }
+      void setDeviceLevel(int i){if(mi_deviceLevel==i)return; mi_deviceLevel=i; emit deviceLevelChanged();}
     void getPagePosition(int page);
     void setCurrentPage(int page);
-
     void setCurrentX(int x) {currentFloorplanX = x; emit floorplanXChanged(); }
     void setCurrentY( int y) {currentFloorplanY = y; emit floorplanYChanged();}
-    void setStatus( bool state) {status = state; emit statusChanged(); emit dataChanged(); }
+    void setSelected( bool isSelected) {if(isSelected==m_selected)return; m_selected=isSelected; emit selectedChanged(); }
     /*!
      * \brief setDeviceCommand
      * \param p
@@ -190,16 +210,37 @@ public slots:
      * The return value is a QVariantMap which should be compatible with parsing as a Javascript Object.
      */
     Q_INVOKABLE inline QVariantMap getDeviceCommands () const {return deviceCommands;}
-
     Q_INVOKABLE inline void setParams(QVariantList p) {commandParams = p; emit commandParamsChanged(); getCommandParameters(); emit dataChanged(); }
-
     Q_INVOKABLE inline QVariantList getParams() const {return commandParams;}
+
+private slots:
+    void setDeviceName(QString n){if(mQS_name==n)return; mQS_name=n; emit deviceNameChanged();}
+    void setDeviceNumber(int d){if(mI_deviceNo==d)return; mI_deviceNo=d; emit deviceNumberChanged();}
 
 
 private:
     void setupFloorplanPositions();
     void getCommandParameters();
 
-};
+    QString mQS_name;                       //device name
+    int mI_deviceNo;                        //device number
+    int mI_floorplan_device_type;           //floorplan device type
+    int mI_floorplanType;                   //type of floorplan its associated with
+    QString mQS_position;                   //postion, raw in string form
+    QImage mIM_icon;                        //raw image data
+    QStringList mm_currentPosition;     //map of positions on pages
 
+    QString mQS_iconpath;                   //icon path to be used in the future with skins
+    int currentFloorplanX;
+    int currentFloorplanY;
+    int m_iColor;   // color to use in icon
+    QString m_sText;   // text to display next to icon
+    QString m_sDeviceStatus;   // The status device data field
+    int mi_deviceLevel;
+    QString m_deviceState;
+    QString m_alertStatus;
+     bool m_selected;
+
+};
+Q_DECLARE_METATYPE(FloorplanDevice*)
 #endif // FLOORPLANDEVICE_H

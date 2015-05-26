@@ -3,11 +3,11 @@ import "../components"
 StyledScreen {
     navigation: "FloorplanNav.qml"
     property alias floorplan: securityFloorplan
-
+    onScreenClosing: floorplan_devices.setCurrentFloorPlanType(-1)
     TabletFloorplanLayout{
         id: securityFloorplan
         Component.onCompleted: {
-           floorplan_devices.setCurrentFloorPlanType(1)
+            floorplan_devices.setCurrentFloorPlanType(1)
             floorplan_devices.clearAllSelections()
         }
     }

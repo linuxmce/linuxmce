@@ -22,11 +22,12 @@ Panel{
         Component.onCompleted: {
             forceActiveFocus();
             processSelectedDevices()
+
         }
 
         Connections{
             target:floorplan_devices
-            onSelectedDevicesChanged:processSelectedDevices()
+            onSelectedDevicesChanged:{processSelectedDevices(); floorplan_devices.updateDeviceData()}
         }
 
         Keys.onReleased: {
@@ -73,8 +74,8 @@ Panel{
             visible:floorplan_devices.floorplanType===5
             width: Style.scaleX(25)
             height: Style.scaleY(45)
-            dataGrid: DataGrids.Floorplan_Media_Streams
-            dataGridLabel:"mediaStreams"
+            //   dataGrid:floorplan_devices.floorplanType === 5 ? DataGrids.Floorplan_Media_Streams : -1
+            // dataGridLabel:"mediaStreams"
             delegate:
                 StyledButton{
                 id:gridBtn
@@ -102,7 +103,7 @@ Panel{
 
         GenericListModel{
             model: floorplan_pages
-            label: qsTr("Floorplans")
+            label: qsTr("Floorplan(s) : %1").arg(modelCount)
             Component.onCompleted: parent = fp_panel.headerRow
             width: Style.scaleX(25)
             height: Style.scaleY(45)
@@ -130,7 +131,7 @@ Panel{
 
         SendCommandBox {
             id: sendCommandBox
-            width: Style.scaleX(25)
+            width: Style.appButtonWidth
             height: Style.scaleY(65)
             Component.onCompleted: parent=fp_panel.headerRow
         }

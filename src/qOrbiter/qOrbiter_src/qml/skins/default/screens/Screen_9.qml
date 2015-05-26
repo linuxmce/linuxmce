@@ -1,5 +1,6 @@
 import QtQuick 2.2
 import "../components"
+import "../."
 StyledScreen{
     id:makecallphonebook
 
@@ -8,7 +9,7 @@ StyledScreen{
         headerTitle: "Make Call from phonebook."
         anchors.centerIn: parent
 
-        Rectangle {
+        content: Rectangle {
             id: phoneList
             border.color : "white"
             border.width : 1
@@ -19,20 +20,27 @@ StyledScreen{
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            anchors.topMargin: scaleY(10)
-            anchors.bottomMargin: scaleY(10)
+            anchors.topMargin: Style.scaleY(10)
+            anchors.bottomMargin: Style.scaleY(10)
+
             ListView {
                 id: phoneBookList
                 property int level: 0
                 model: manager.getDataGridModel("phoneBook", 21)
+                Connections {
+                    target: phoneBookList.model
+                    onScrollToItem: {
+
+                        phoneBookList.positionViewAtIndex(item, ListView.Beginning);
+                    }
+                }
                 anchors.fill : parent
                 anchors.margins: 2
                 delegate: StyledButton{
-                    height: scaleY(10)
                     anchors.left: parent.left
                     anchors.right: parent.right
                     buttonText: description
-                    textSize: 42
+                    textSize: Style.appFontSize_list
                     onActivated:   {
                         if (phoneBookList.level == 0) {
                             phoneBookList.model = manager.getDataGridModel("phoneNumber", 22)
@@ -41,10 +49,7 @@ StyledScreen{
                 }
             }
         }
-        Connections {
-            target: phoneBookList.model
-            onScrollToItem: { phoneBookList.positionViewAtIndex(item, ListView.Beginning); }
-        }
+
 
         Rectangle {
             border.color : "white"
@@ -56,29 +61,30 @@ StyledScreen{
             anchors.left : parent.left
             anchors.right: parent.right
             anchors.margins: 5
-            height: scaleY(10)
+            height: Style.appButtonHeight
+            MouseArea{
+                anchors.fill: parent
+            }
 
             StyledText {
                 id : searchLabel
                 text: "Search..."
                 color: "white"
                 anchors.fill: parent.fill
-                anchors.horizontalCenter: parent.horizontalCenter
-                height: scaleY(5)
-                width: parent.width
+                fontSize: Style.appFontSize_list
             }
             TextInput {
                 id: text_input1
                 anchors.fill: parent
                 anchors.margins: 0
-                anchors.topMargin: scaleY(5)
+                anchors.topMargin: Style.scaleY(5)
                 color: "white"
                 text: ""
                 cursorVisible: true
                 readOnly: false
                 horizontalAlignment: TextInput.AlignHCenter
-                font.pixelSize: 23
-                onTextChanged: manager.seekGrid("phoneBook", text)
+                font.pixelSize: Style.appFontSize_list
+                onTextChanged:manager.getDataGridModel("phoneBook", 21).setOption("1|%"+text) //manager.seekGrid("phoneBook", text)
             }
         }
     }

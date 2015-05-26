@@ -35,6 +35,7 @@ Item {
 
     function placeQmlSprites(){
         console.log("Placing QML Sprites, "+ floorplan_devices.count()+" devices to create.")
+        return;
         for (var cnt = 0; cnt < floorplan_devices.count(); cnt++){
             var lcl = floorplan_devices.get(cnt)
             console.log(JSON.stringify(lcl, null, "\t"))
@@ -56,6 +57,7 @@ Item {
                 var sprite = c.createObject(floorplanimage, {"x": lcl.x, "y": lcl.y, "deviceNum": lcl.deviceno, "deviceType": lcl.type});
             }
         }
+       // floorplan_devices.updateDeviceData()
 
     }
 
@@ -80,6 +82,7 @@ Item {
             // console.log("Component Ready!")
             var sprite = c.createObject(floorplanimage, {"x": pX, "y": pY, "deviceNum": num, "deviceType": devtype});
         }
+
     }
 
     function finishPlacingSprites(c,x,y,num, state, devtype){

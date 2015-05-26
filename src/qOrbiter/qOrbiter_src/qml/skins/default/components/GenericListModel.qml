@@ -79,8 +79,14 @@ Item{
 
     }
     StyledText{
-        id:itemlabel
-        anchors.centerIn: hdr
+        id:itemlabel       
+        anchors{
+            top:hdr.top
+            left:hdr.left
+            right:toggleSw.left
+            bottom:hdr.bottom
+        }
+
         text:genericListContainer.label
         fontSize: Style.appFontSize_title
         color:"white"
@@ -90,7 +96,7 @@ Item{
         id: toggleSw
         source: "../images/vertical_arrow.png"
         rotation: genericListContainer.state==="extended" ? 0 : -90
-        height: hdr.height*.75
+        height: hdr.height*.65
         width: height
         fillMode: Image.PreserveAspectFit
         anchors{

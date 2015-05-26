@@ -7,7 +7,7 @@ StyledScreen {
     navigation: "FloorplanNav.qml"
     property alias floorplan: mediaFloorplan
     onScreenOpen: floorplan_devices.clearAllSelections()
-
+onScreenClosing: floorplan_devices.setCurrentFloorPlanType(-1)
     TabletFloorplanLayout {
         id:mediaFloorplan
         anchors.top: parent.top

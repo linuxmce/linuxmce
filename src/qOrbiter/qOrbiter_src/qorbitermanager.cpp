@@ -1056,7 +1056,7 @@ GenericFlatListModel* qorbiterManager::getDataGridModel(QString dataGridId, int 
 
 
             case DATAGRID_Phone_Book_Auto_Compl_CONST:
-                option = QString::number(iPK_User).append("|%");
+                option = QString::number(iPK_User).append("|%").arg(initOption);
                 break;
 
             case DATAGRID_Media_Browser_CONST:
@@ -2113,12 +2113,6 @@ void qorbiterManager::getDeviceState(int PK_Device, string* data)
     CMD_Get_Device_State getDeviceState(iPK_Device, iPK_Device_GeneralInfoPlugin, PK_Device, data);
     sendDceCommand(getDeviceState);
     LoggerWrapper::GetInstance()->Write(LV_STATUS, "qorbiterManager::getDeviceState done");
-}
-
-void qorbiterManager::getDeviceStatus(int PK_Device, string* data)
-{
-    CMD_Get_Device_Status getDeviceStatus(iPK_Device, iPK_Device_GeneralInfoPlugin, PK_Device, data);
-    sendDceCommand(getDeviceStatus);
 }
 
 void qorbiterManager::updateImageChanged(QImage img)
