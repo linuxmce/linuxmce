@@ -1,0 +1,14 @@
+--- a/device.c
++++ b/device.c
+@@ -1159,7 +1159,11 @@
+   if (TsHasPayload(Data) && TsPayloadOffset(Data) < TS_SIZE) {
+ 
+     int Pid = TsPid(Data);
++#if VDRVERSNUM < 10733
+     if (Pid == 0 || Pid == PatPmtParser()->PmtPid()) {
++#else
++    if (Pid == 0 || PatPmtParser()->IsPmtPid(Pid)) {
++#endif
+ 
+       if (m_server)
+         m_server->SetHeader(Data, Result, Pid == 0);

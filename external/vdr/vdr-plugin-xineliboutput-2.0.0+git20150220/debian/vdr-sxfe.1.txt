@@ -1,0 +1,89 @@
+NAME
+  vdr-sxfe - Remote X-Server frontend for vdr-plugin-xineliboutput
+
+SYNOPSIS
+  vdr-sxfe [options] [xvdr[+udp|+tcp|+rtp]:[//host[:port]]]
+
+DESCRIPTION
+  vdr-sxfe is a X/Xv/XvMc remote frontend, that plays back streams provided by
+  vdr-plugin-xineliboutput.
+
+OPTIONS
+  --help                                  Show (this) help message
+  --audio=audiodriver[:device]            Select audio driver and optional port
+  --video=videodriver[:device]            Select video driver and optional port
+                                          As far as supported, possible video drivers
+                                          might be: xshm, xv, xvmc, xxmc, vidix, XDirectFB,
+                                          opengl, sdl or none
+  --display=displayaddress                X11 display address
+  --wid=id                                Use existing X11 window
+  --aspect=[auto|4:3|16:9|16:10|default]  Display aspect ratio (You can us a 
+                                          script to control the HW aspect ratio:
+                                          --aspect=auto:path_to_script)
+  --fullscreen                            Fullscreen mode
+  --hud                                   Head Up Display OSD mode
+  --width=x                               Video window width
+  --height=x                              Video window height
+  --noscaling                             Disable all video scaling
+  --post=name[:arg=val[,arg=val]]         Load and use xine post plugins, e.g.:
+                                          * --post=upmix
+                                          * --post=upmix;tvtime:enabled=1,cheap_mode=1)
+  --lirc[=devicename]                     Use lirc input device
+                                          Optional lirc socket name can be given
+  --verbose                               Verbose debug output
+  --silent                                Silent mode (report only errors)
+  --syslog                                Write all output to system log
+  --nokbd                                 Disable keyboard input
+  --daemon                                Run as daemon (disable keyboard,
+                                          log to syslog and fork to background)
+  --slave                                 Enable slave mode (read commands from stdin)
+  --reconnect                             Automatically reconnect when connection has been lost
+  --tcp, --udp, --rtp                     Use TCP, UDP or RTP transport
+                                          If no transport options are given, transports
+                                          are tried in following order:
+                                          local pipe, rtp, udp, tcp
+EXAMPLES
+  Search for VDR (xineliboutput) server, connect to it and
+  negotiate best available transport, use best available audio:
+
+    vdr-sxfe
+
+  Connect to 192.168.1.3 default port and negoate best available
+  transport:
+
+    vdr-sxfe xvdr://192.168.1.3
+
+  Connect to 192.168.2.100, port 12550 and use TCP transport:
+
+    vdr-sxfe xvdr+tcp://192.168.2.100:12550
+
+  Automatically search for VDR server and use UDP transport:
+
+    vdr-sxfe xvdr+udp:
+    vdr-syfe --udp
+
+  Use alsa:
+
+    vdr-sxfe --audio alsa
+
+  Use alsa (and specific card/sub-device):
+
+    vdr-sxfe --audio alsa:plughw:1,1
+
+  Video driver (and display / device):
+
+    vdr-sxfe --video xv
+    vdr-sxfe --video xvmc:127.0.0.1:1.0
+
+NOTE
+  If deinterlacing post plugin options are not given at command line, 
+  deinterlacing is controlled by VDR plugin configuration menu settings.
+
+  De-interlacing can also be forced on or off with command-line option "--post tvtime".
+  Examples:
+
+    vdr-sxfe --post tvtime:method=Linear,cheap_mode=1,pulldown=0,use_progressive_frame_flag=1
+    vdr-sxfe --post tvtime:enable=0
+
+AUTHOR
+  This manual page was written by Tobias Grimm <etobi@debian.org>

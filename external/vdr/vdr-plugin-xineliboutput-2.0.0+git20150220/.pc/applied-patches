@@ -1,0 +1,5 @@
+debian.patch
+xineliboutput-dfatmo-switch
+truecolor.diff
+fix-segfault.patch
+libcec-2.2.0.patch

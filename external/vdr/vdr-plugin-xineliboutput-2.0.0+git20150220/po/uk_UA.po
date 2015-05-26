@@ -1,0 +1,742 @@
+# VDR plugin language source file.
+# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
+# This file is distributed under the same license as the VDR package.
+# Vladimir Monchenko
+# Yarema aka Knedlyk <yupadmin@gmail.com>, 2010.
+msgid ""
+msgstr ""
+"Project-Id-Version: Xineliboutput 1.1.0\n"
+"Report-Msgid-Bugs-To: <phintuka@users.sourceforge.net>\n"
+"POT-Creation-Date: 2013-10-29 10:29+0200\n"
+"PO-Revision-Date: 2012-11-29 13:34+0100\n"
+"Last-Translator: Yarema aka Knedlyk <yupadmin@gmail.com>\n"
+"Language-Team: Ukrainian <vdr@linuxtv.org>\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\\n\n"
+
+msgid "custom"
+msgstr "користувача"
+
+msgid "tiny"
+msgstr "дуже малий"
+
+msgid "small"
+msgstr "малий"
+
+msgid "medium"
+msgstr "середній"
+
+msgid "large"
+msgstr "великий"
+
+msgid "huge"
+msgstr "дуже великий"
+
+msgid "automatic"
+msgstr "автоматично"
+
+msgid "default"
+msgstr "типово"
+
+msgid "Pan&Scan"
+msgstr "Pan&Scan"
+
+msgid "CenterCutOut"
+msgstr "ОбрізатиПоБоках"
+
+msgid "square"
+msgstr "квадрат"
+
+msgid "anamorphic"
+msgstr "спотворення"
+
+msgid "DVB"
+msgstr "DVB"
+
+msgid "off"
+msgstr "викл"
+
+msgid "no audio"
+msgstr "немає аудіо"
+
+msgid "no video"
+msgstr "немає відео"
+
+msgid "Off"
+msgstr "Виключити"
+
+msgid "Goom"
+msgstr "Goom"
+
+msgid "Oscilloscope"
+msgstr "Oscilloscope"
+
+msgid "FFT Scope"
+msgstr "FFT Scope"
+
+msgid "FFT Graph"
+msgstr "FFT Graph"
+
+msgid "Image"
+msgstr "Малюнок"
+
+msgid "Mono 1.0"
+msgstr "Моно 1.0"
+
+msgid "Stereo 2.0"
+msgstr "Стерео 2.0"
+
+msgid "Headphones 2.0"
+msgstr "Навушники 2.0"
+
+msgid "Stereo 2.1"
+msgstr "Стерео 2.1"
+
+msgid "Surround 3.0"
+msgstr "Surround 3.0"
+
+msgid "Surround 4.0"
+msgstr "Surround 4.0"
+
+msgid "Surround 4.1"
+msgstr "Surround 4.1"
+
+msgid "Surround 5.0"
+msgstr "Surround 5.0"
+
+msgid "Surround 5.1"
+msgstr "Surround 5.1"
+
+msgid "Surround 6.0"
+msgstr "Surround 6.0"
+
+msgid "Surround 6.1"
+msgstr "Surround 6.1"
+
+msgid "Surround 7.1"
+msgstr "Surround 7.1"
+
+msgid "Pass Through"
+msgstr "Pass Through"
+
+msgid "very large"
+msgstr "дуже великий"
+
+msgid "Software"
+msgstr "Програмне"
+
+msgid "Hardware"
+msgstr "Апаратне"
+
+msgid "no"
+msgstr "ні"
+
+msgid "grayscale"
+msgstr "відтінки сірого"
+
+msgid "transparent"
+msgstr "прозорий"
+
+msgid "transparent grayscale"
+msgstr "прозорі відтінки сірого"
+
+msgid "yes"
+msgstr "так"
+
+msgid "nearest"
+msgstr "найближчий"
+
+msgid "bilinear"
+msgstr "білінійний"
+
+msgid "LUT8"
+msgstr "LUT8"
+
+msgid "TrueColor"
+msgstr "TrueColor"
+
+msgid "video stream"
+msgstr "відеопотік"
+
+msgid "none"
+msgstr "немає"
+
+msgid "nonref"
+msgstr "nonref"
+
+msgid "bidir"
+msgstr "bidir"
+
+msgid "nonkey"
+msgstr "безклавішний"
+
+msgid "all"
+msgstr "все"
+
+msgid "Frontend initialization failed"
+msgstr "Ініціалізація фронтенду не вдалася"
+
+msgid "Server initialization failed"
+msgstr "Ініціалізація сервера не вдалася"
+
+msgid "Playlist"
+msgstr "Список програвання"
+
+msgid "Button$Random"
+msgstr "Випадково"
+
+msgid "Button$Normal"
+msgstr "Нормально"
+
+msgid "Button$Add files"
+msgstr "Додати файли"
+
+msgid "Button$Remove"
+msgstr "Видалити"
+
+msgid "Button$Mark"
+msgstr "Позначка"
+
+msgid "Queued to playlist"
+msgstr "Додано до списку програвання"
+
+msgid "Random play"
+msgstr "Випадкове програвання"
+
+msgid "Normal play"
+msgstr "Нормальне програвання"
+
+msgid "DVD Menu"
+msgstr "Меню DVD"
+
+msgid "Exit DVD menu"
+msgstr "Вийти з меню DVD"
+
+msgid "DVD Root menu"
+msgstr "Корінне меню DVD"
+
+msgid "DVD Title menu"
+msgstr "Меню заголовків DVD"
+
+msgid "DVD SPU menu"
+msgstr "Меню DVD SPU"
+
+msgid "DVD Audio menu"
+msgstr "Меню DVD аудіо"
+
+msgid "Close menu"
+msgstr "Закрити меню"
+
+msgid "BluRay Top menu"
+msgstr "Меню BluRay"
+
+msgid "Toggle Pop-Up menu"
+msgstr "Включити вигулькне меню"
+
+msgid "Next title"
+msgstr "Наступний заголовок"
+
+msgid "Previous title"
+msgstr "Попередній заголовок"
+
+msgid "Delete image ?"
+msgstr "Видалити зображення?"
+
+msgid "Play movie title"
+msgstr "Програвати кінострічку"
+
+msgid "Play disc"
+msgstr "Програвати диск"
+
+msgid "Images"
+msgstr "Малюнки"
+
+msgid "Play music"
+msgstr "Програвати музику"
+
+msgid "Add to playlist"
+msgstr "Додати до списку програвання"
+
+msgid "Play file"
+msgstr "Програвати файл"
+
+msgid "Button$Queue"
+msgstr "Черга"
+
+msgid "Media"
+msgstr "Медіа"
+
+msgid "View images"
+msgstr "Переглядати зображення"
+
+msgid "Play DVD disc"
+msgstr "Програвати диск DVD"
+
+msgid "Play BluRay disc"
+msgstr "Програвати диск  BluRay"
+
+msgid "Play audio CD"
+msgstr "Програвати аудіо CD"
+
+msgid "Video settings"
+msgstr "Налаштування відео"
+
+msgid "Play only audio"
+msgstr "Програвати тільки аудіо"
+
+msgid "Crop letterbox 4:3 to 16:9"
+msgstr "Змінити зображення з 4:3 до 16:9"
+
+msgid "Overscan (crop image borders)"
+msgstr "Пересканувати (обрізати границі зображення)"
+
+msgid "Audio settings"
+msgstr "Налаштування аудіо"
+
+msgid "Audio Compression"
+msgstr "Компресія аудіо"
+
+msgid "Audio equalizer"
+msgstr "Аудіо еквалайзер"
+
+msgid "Local Frontend"
+msgstr "Локальний фронтенд"
+
+msgid "Aspect ratio"
+msgstr "Пропорція"
+
+msgid "Video aspect ratio"
+msgstr "Пропорція відео"
+
+msgid "On"
+msgstr "Вкл"
+
+msgid "Deinterlacing"
+msgstr "Деінтерлесінг"
+
+msgid "Upmix stereo to 5.1"
+msgstr "Перетворити стерео до 5.1"
+
+msgid "Downmix AC3 to surround"
+msgstr "Перетворити AC3 до surround"
+
+msgid "Default playlist not found"
+msgstr "Типовий список програвання не знайдено"
+
+msgid "Default playlist is not symlink"
+msgstr "Типовий список програвання не є символьним посиланням"
+
+msgid "Default playlist not defined"
+msgstr "Типовий список програвання не визначено"
+
+msgid "Delay"
+msgstr "Затримка"
+
+msgid "ms"
+msgstr "мс"
+
+#, c-format
+msgid "xineliboutput: hotkey %s not binded"
+msgstr "xineliboutput: скорочення %s нічому не відповідає"
+
+msgid "Audio"
+msgstr "Аудіо"
+
+msgid "Volume control"
+msgstr "Регулятор гучності"
+
+msgid "Mix to headphones"
+msgstr "Міксувати до навушників"
+
+msgid "Visualization"
+msgstr "Візуалізація"
+
+msgid "Width"
+msgstr "Ширина"
+
+msgid "px"
+msgstr "пікселі"
+
+msgid "Height"
+msgstr "Висота"
+
+msgid "Speed"
+msgstr "Швидкість"
+
+msgid "fps"
+msgstr "кадр за сек"
+
+msgid "Background image MRL"
+msgstr "Малюнок тла MRL"
+
+msgid "Audio Equalizer"
+msgstr "Аудіо еквалайзер"
+
+msgid "Use Video-Out Driver"
+msgstr "Викор. вихідний відео-драйвер"
+
+msgid "vector"
+msgstr "вектор"
+
+msgid "full"
+msgstr "повністю"
+
+msgid "half (top)"
+msgstr "половина (верхня)"
+
+msgid "half (bottom)"
+msgstr "половина (нижня)"
+
+msgid "Video"
+msgstr "Відео"
+
+msgid "Use driver crop"
+msgstr "Використати обрізання з драйвера"
+
+msgid "Autodetect letterbox"
+msgstr "Автовизначення розміру"
+
+msgid "Crop to"
+msgstr "Обрізати до"
+
+msgid "Autodetect rate"
+msgstr "Автовизначення швидкості"
+
+msgid "Stabilize time"
+msgstr "Час стібілізації"
+
+msgid "Maximum logo width [%]"
+msgstr "Макс. ширина лого [%]"
+
+msgid "Overscan compensate [%1000]"
+msgstr "Компенсація перескану [%1000]"
+
+msgid "Soft start"
+msgstr "М'який старт"
+
+msgid "Soft start step"
+msgstr "М’який крок початку"
+
+msgid "Detect subtitles"
+msgstr "Визначити субтитри"
+
+msgid "Subs detect stabilize time"
+msgstr "Час стабілізації детектування сибтитрів"
+
+msgid "Subs detect lifetime"
+msgstr "Тривалість детектування сибтитрів"
+
+msgid "Use avards analysis"
+msgstr "Використання avards аналізу"
+
+msgid "Bar tone tolerance"
+msgstr "Допуск тонів поділок"
+
+msgid "Software scaling"
+msgstr "Програмне масштабування"
+
+msgid "Change aspect ratio"
+msgstr "Змінити пропорції"
+
+msgid "Change video size"
+msgstr "Змінити розмір відео"
+
+msgid "Allow downscaling"
+msgstr "Дозволити масштабування з зменшенням якості"
+
+msgid "Post processing (ffmpeg)"
+msgstr "Післяобробка (ffmpeg)"
+
+msgid "Quality"
+msgstr "Якість"
+
+msgid "Mode"
+msgstr "Режим"
+
+msgid "Method"
+msgstr "Метод"
+
+msgid "Cheap mode"
+msgstr "\"Дешевий\" метод"
+
+msgid "Pulldown"
+msgstr "Зниження"
+
+msgid "Frame rate"
+msgstr "Частота кадрів"
+
+msgid "Judder Correction"
+msgstr "Корекція Judder-а"
+
+msgid "Use progressive frame flag"
+msgstr "Використовувати прогресивну мітку кадру"
+
+msgid "Chroma Filter"
+msgstr "Chroma-фільтр "
+
+msgid "Sharpen / Blur"
+msgstr "Різкість / Затемнення"
+
+msgid "Width of the luma matrix"
+msgstr "Ширина luma-матриці"
+
+msgid "Height of the luma matrix"
+msgstr "Висота luma-матриці"
+
+msgid "Amount of luma sharpness/blur"
+msgstr "Значення різкості/затемнення для luma"
+
+msgid "Width of the chroma matrix"
+msgstr "Ширина chroma-матриці"
+
+msgid "Height of the chroma matrix"
+msgstr "Висота chroma-матриці"
+
+msgid "Amount of chroma sharpness/blur"
+msgstr "Значення різкості/затемнення для chroma"
+
+msgid "3D Denoiser"
+msgstr "3D знімач шумів"
+
+msgid "Spatial luma strength"
+msgstr "Просторова міцність luma"
+
+msgid "Spatial chroma strength"
+msgstr "Просторова міцність chroma"
+
+msgid "Temporal strength"
+msgstr "Тимчасова міцність"
+
+msgid "HUE"
+msgstr "HUE"
+
+msgid "Saturation"
+msgstr "Насиченість"
+
+msgid "Contrast"
+msgstr "Контраст"
+
+msgid "Brightness"
+msgstr "Яскравість"
+
+msgid "Sharpness"
+msgstr "Різкість"
+
+msgid "Noise Reduction"
+msgstr "Зменшення шумів"
+
+msgid "Smooth fast forward"
+msgstr "Гладка перемотка вперед"
+
+msgid "Fastest trick speed"
+msgstr "Найшвидша швидкість тріків"
+
+msgid "On-Screen Display"
+msgstr "Екранне меню"
+
+msgid "Hide main menu"
+msgstr "Сховати екранне меню"
+
+msgid "Resolution"
+msgstr "Роздільна здатність"
+
+msgid "Color depth"
+msgstr "Глибина кольору"
+
+msgid "Blending method"
+msgstr "Метод змішування"
+
+msgid "Use hardware for low-res video"
+msgstr "Викор. ап. засоби для відео з низьк. розд.зд."
+
+msgid "Scaling method"
+msgstr "Метод масштабування"
+
+msgid "Scale subtitles"
+msgstr "Масштабувати субтитри"
+
+msgid "Show all layers"
+msgstr "Показати всі шари"
+
+msgid "Dynamic transparency correction"
+msgstr "Динамічна корекція прозорості"
+
+msgid "Static transparency correction"
+msgstr "Статична корекція прозорості"
+
+msgid "External subtitle size"
+msgstr "Розмір зовнішніх субтитрів"
+
+msgid "DVB subtitle decoder"
+msgstr "Декодер субтитрів DVB"
+
+msgid "Decoder"
+msgstr "Декодер"
+
+msgid "Buffer size"
+msgstr "Розмір буфера"
+
+msgid "Number of PES packets"
+msgstr "Кількість PES пакетів"
+
+msgid "Local Display Frontend"
+msgstr "Локальний фронтенд показу"
+
+msgid "Use keyboard"
+msgstr "Використати клавіатуру"
+
+msgid "Driver"
+msgstr "Драйвер"
+
+msgid "Display address"
+msgstr "Адреса дисплею"
+
+msgid "Framebuffer device"
+msgstr "Пристрій фреймбуфера"
+
+msgid "Fullscreen mode"
+msgstr "Режим повного екрану"
+
+msgid "Window width"
+msgstr "Ширина вікна"
+
+msgid "Window height"
+msgstr "Висота вікна"
+
+msgid "Window aspect"
+msgstr "Пропорція вікна"
+
+msgid "Scale to window size"
+msgstr "Масштабувати до розміру вікна"
+
+msgid "Port"
+msgstr "Порт"
+
+msgid "Speakers"
+msgstr "Колонки"
+
+msgid "Remote Clients"
+msgstr "Віддалені клієнти"
+
+msgid "Allow remote clients"
+msgstr "Дозволити віддалені клієнти"
+
+msgid "Listen port (TCP and broadcast)"
+msgstr "Слухати порт (TCP і трансляція)"
+
+msgid "Listen address"
+msgstr "Слухати адресу"
+
+msgid "Remote keyboard"
+msgstr "Віддалена клавіатура"
+
+msgid "Max number of clients"
+msgstr "Макс. кількість клієнтів"
+
+msgid "PIPE transport"
+msgstr "PIPE транспорт"
+
+msgid "TCP transport"
+msgstr "TCP транспорт"
+
+msgid "UDP transport"
+msgstr "UDP транспорт"
+
+msgid "RTP (multicast) transport"
+msgstr "RTP (multicast) транспорт"
+
+msgid "Address"
+msgstr "Адреса"
+
+msgid "TTL"
+msgstr "TTL"
+
+msgid "Transmit always on"
+msgstr "Передача завжди включена"
+
+msgid "SAP announcements"
+msgstr "SAP оголошення"
+
+msgid "Server announce broadcasts"
+msgstr "Транслювання оголошення сервера"
+
+msgid "HTTP transport for media files"
+msgstr "HTTP транспорт для медіа файлів"
+
+msgid "Additional network services"
+msgstr "Додаткові сервіси інтернету"
+
+msgid "HTTP server"
+msgstr "HTTP сервер"
+
+msgid "HTTP clients can control VDR"
+msgstr "HTTP клієнти можуть контролювати VDR"
+
+msgid "RTSP server"
+msgstr "RTSP сервер"
+
+msgid "RTSP clients can control VDR"
+msgstr "RTSP клінти можуть контролювати VDR"
+
+msgid "Playlist settings"
+msgstr "Налаштування списку програвання"
+
+msgid "Show the track number"
+msgstr "Показувати номер треку"
+
+msgid "Show the name of the artist"
+msgstr "Показувати ім’я виконавця"
+
+msgid "Show the name of the album"
+msgstr "Показувати назву альбому"
+
+msgid "Scan for metainfo"
+msgstr "Сканувати метадані"
+
+msgid "Cache metainfo"
+msgstr "Кешувати метадані"
+
+msgid "Arrow keys control DVD playback"
+msgstr "Клавіші зі стрілками контролюють програвання DVD"
+
+msgid "Show hidden files"
+msgstr "Показати приховані файли"
+
+msgid "Allow removing files"
+msgstr "Дозволяти вилучати файли"
+
+msgid "Remember last playback position"
+msgstr ""
+
+msgid "Media Player"
+msgstr "Програвач медіа"
+
+msgid "Grayscale"
+msgstr "Відтінки сірого"
+
+msgid "Bitmap"
+msgstr "Колір"
+
+msgid "OSD"
+msgstr "Екранне меню"
+
+msgid "Test Images"
+msgstr "Тестові зображення"
+
+msgid "X11/xine-lib output plugin"
+msgstr "X11/xine-lib output плагін"
+
+#~ msgid "normal"
+#~ msgstr "нормально"
+
+#~ msgid "inverted"
+#~ msgstr "обернено"
+
+#~ msgid "Interlaced Field Order"
+#~ msgstr "Порядок поля згладження"
+
+#~ msgid "Button$Sort"
+#~ msgstr "Сортувати"

@@ -1,0 +1,358 @@
+This is a "plugin" for the Video Disk Recorder (VDR).
+
+Written by:                  Frank Schmirler <vdrdev@schmirler.de> 
+Project's homepage:          http://vdr.schmirler.de/
+
+Latest version available at: http://vdr.schmirler.de/
+
+See the file COPYING for license information.
+___________________________________________________________________________
+
+Contents:
+---------
+1. Description
+2. Requirements
+3. Installation
+3.1. Applying patches
+3.2. Deployment
+4. Setup options
+5. Usage
+5.1. Going multiuser
+5.2. Schedule menu
+5.3. Timers menu
+5.4. Recordings menu
+6. Credits
+
+1. Description:
+---------------
+With the remotetimers plugin you can add/edit/remove timers on both, the
+local (client) VDR and a remote (server) VDR. You can even move timers
+between both VDRs. The plugin has its own implementations of the Schedule,
+Timer and Recordings menus. All of them are feature extended copies of VDR's
+original menus, adding e.g. multiuser support.
+
+2. Requirements:
+----------------
+- plugin svdrpservice (available via http://vdr.schmirler.de)
+
+3. Installation:
+----------------
+Straightforward:
+- cd VDR/PLUGINS/src
+- tar xzf vdr-remotetimers-<VERSION>.tgz
+- ln -sf remotetimers-<VERSION> remotetimers
+
+If you didn't do that already:
+- tar xzf vdr-svdrpservice-<VERSION>.tgz
+- ln -sf svdrpservice-<VERSION> svdrpservice
+
+3.1. Applying patches:
+----------------------
+In the patches directory of the remotetimers source distribution you will
+find some patches for VDR. They are all optional, i.e. remotetimers will
+work just fine without them, but add support for some additional features:
+
+- MainMenuHooks: replace the VDR menus "Schedule", "Timers" and "Recordings"
+  with the corresponding plugin menus.
+- remote_instant_recordings: redirects instant recordings to the server VDR
+- skinlcars: show remote timers in mainmenu
+
+A detailed description of the patches and instructions how to apply them can
+be found in the patch files.
+
+Note that the remotetimers plugin checks VDR for the presence of these
+patches at compile time. So don't forget to (re-)compile VDR and
+remotetimers *after* patching VDR.
+
+3.2. Deployment:
+----------------
+When done, compile and install remotetimers (and svdrpservice) as usual.
+Then add both plugins to the script starting your VDR (e.g. runvdr). No
+options required, so simply append:
+
+  -P remotetimers -P svdrpservice
+
+Since svdrpservice-0.0.4 you can already specify the server IP and port
+on the commandline. It will then serve as the default for all plugins
+using svdrpservice:
+
+  -P remotetimers -P 'svdrpservice 192.0.2.1:6419'
+
+Finally check the file svdrphosts.conf on the remote VDR: The IP of the VDR
+running remotetimers must be listed or otherwise the connection will be
+refused.
+
+4. Setup options:
+-----------------
+Before you can connect, your local VDR must know the IP address of the
+remote VDR. Either configure a default IP in the svdrpservice plugin or
+enter it in remotetimers' setup.
+
+The plugin setup offers the following options:
+
+- Server IP
+IP address of SVDRP server. Leave empty or enter "0.0.0.0" if you want
+to use the default IP configured in the svdrpservice plugin.
+
+- Server port
+SVDRP port on server. Since VDR 1.7.15 the default port is 6419, before
+it was 2001. The special value 0 uses the default port configured in
+svdrpservice.
+
+- Map channels using
+The default is "channel ID" and this should not be changed unless you are
+absolutely sure that you know what you are doing. Channels are identified
+using a unique ID. A certain channel may have different channel number on
+client and server. But what if you want to view and record different
+variants of a simulcast channel on client and server?
+* You prefer watching live TV in HD but want to record in SD
+* You have one client which can't do HD but want to record everything in HD
+* Your client uses a local DVB-T card for live TV, the server has DVB-S
+When you select "channel number", timers will stick to the same channel
+number, no matter if it actually belongs to the same channel or not. So
+it's probably a good idea to keep channels in the same order on client
+and server. Just swap the positions of the HD/SD channels or use the
+same channel numbers for corresponding DVB-T/DVB-S channels.
+
+- Hide mainmenu entry
+Should be obvious ;-)
+
+*** Defaults for new timers ***
+
+- Location
+Determines if by default new timers will be created on the local or on
+the remote VDR.
+
+- Instant recordings
+Determines if an instant recording should be handled by the local or by
+the remote VDR. Only available if the remote_instant_recordings patch
+has been applied to VDR before compiling remotetimers.
+
+- Pause recordings
+Dito for paused live view. Note that when pausing live TV, VDR immediately
+starts to replay the new recording. If handled remotely, the local VDR
+must know where the recording will appear. Replay will fail if you don't
+point remotetimers to the correct remote recordings directory (see below).
+
+- User ID
+Select the user IDs new timers should get by default. Use the special
+value "0" to indicate a timer which is always visible, i.e. belongs to
+everyone. If you select "Resume ID", remotetimers will assign the ID of
+the user who is current at the moment the timer is created.
+
+*** Settings for menu "Schedule" ***
+
+- Replace mainmenu
+When enabled, each call to the local VDR Schedule menu will give you
+the remotetimers Schedule menu instead. Only available if MainMenuHooks
+patch has been applied to VDR before compiling remotetimers.
+
+- List style
+Some skins display events in a more sophisticated way. With the default
+"Plugin" you will get a simple list. Select "Skin" if you want the skin
+to draw the list. The downside is that skins are not aware of multiuser,
+so it will display events with normal and private timers the same way
+(see "User ID filter" below).
+
+- Show progress bar in menu "Schedule"
+Adds progress bars to the "What's on now?" menu.
+
+- What's on at ...? 1-4
+You can define up to 4 custom times which will show up in the "Schedule"
+menu in addition to "Now" and "Next". Hit the "Green" button in the
+"Schedule" menu multiple times to cycle through all views. The special
+value 00:00 disables the custom times. Use 00:01 or 23:59 to get the
+EPG for around midnight.
+
+- Key binding of Ok/Blue
+Vanilla VDR shows the EPG details with "Ok" and switches to the selected
+channel with "Blue". Swap it if you like.
+
+- User ID filter
+If set to "0", all timers will be shown. Private timers (as opposed to
+timers of user "0") are indicated with the character "P". If set to a
+specific ID, only timers of user "0" and the selected ID will be marked.
+Select "Resume ID" to filter by the current user.
+
+*** Settings for menu "Timers" ***
+
+- Replace mainmenu
+When enabled, each call to the local VDR Timers menu will give you
+the remotetimers Timers menu instead. Only available if MainMenuHooks
+patch has been applied to VDR before compiling remotetimers.
+
+- List style
+Some skins display timers in a more sophisticated way. With the default
+"Plugin" you will get a simple list. Select "Skin" if you want the skin
+to draw the list. The downside is that skins will display local and
+remote timers the same way.
+
+- User ID filter
+If set to "0", all timers will be listed. When set to a specific ID, only
+timers of this specific user and timers of user "0" will be visible. Select
+"Resume ID" to filter by the current user.
+
+*** Settings for menu "Recordings" ***
+
+- Replace mainmenu
+When enabled, each call to the local VDR Recordings menu will give you
+the remotetimers Recordings menu instead. Only available if MainMenuHooks
+patch has been applied to VDR before compiling remotetimers.
+
+- List style
+Some skins display recordings in a more sophisticated way. With the
+default "Plugin" you will get a simple list. Select "Skin" if you want
+the skin to draw the list. With some skins you will get two free disk
+space indications in the title bar. Remotetimers shows it for the
+current partition, VDR for the main video directory.
+
+- User ID filter
+If set to "0", all recordings will be listed. When set to a specific ID,
+only recordings of this specific user and recordings of user "0" will be
+visible. Select "Resume ID" to filter by the current user. A recording
+inherits the user IDs of the timer.
+
+- Move recording bandwidth limit (Mbit/s)
+If you rename a recording and the new name points to a different filesystem,
+the recording must be copied in the background. If you want to limit the
+bandwidth used for transfer, you can do it here.
+
+*** Remote recordings ***
+
+- Mounted on subdirectory
+Enter the name of the server's recordings directory relativ to the local
+video directory. If e.g. your local video directory is "/video/" and
+"/video/server/" is the mountpoint for the server's recordings, enter
+"server". Leave empty, if the local video directory *is* the mounted server
+directory. Remote cutting and remotely recording paused live view won't
+work as expected when this setting is incorrect.
+
+- Monitor update file
+If the server's recordings directory is mounted on a subdirectory of the
+local recordings directory, the local VDR won't detect updates such as
+new or deleted recordings made by the remote VDR. Likewise, VDR will miss a
+mount or unmount if the local video directory itself is server mounted and
+the timestamp of the update file is older afterwards. Enable this options to
+have remotetimers monitor the .update file and refresh the local recordings
+list when necessary.
+
+5. Usage:
+---------
+The remotetimers menus are more or less a copy of the original VDR
+menus. So it should be quite clear how things work.
+
+5.1. Going multiuser:
+---------------------
+One major different is the multiuser support. Timers and the resulting
+recordings may be associated with one or multiple user IDs. It is then
+possible to filter lists by user.
+
+The special user ID "0" corresponds to a conventional VDR timer/recording.
+It is always visible and can be deleted by anyone. Likewise, when the
+filter of a menu is set to user ID "0", no filtering will apply. All
+entries are visible and may be deleted. Nothing new so far.
+
+The user IDs "1" through "9" are used to identify individual users. It is
+possible to assign multiple IDs to a timer/recording. If e.g. users "1" and
+"3" are interested in viewing a recording, both set their ID on it (or
+rather on the corrensponding timer). Now the menu's filter come into play.
+You can filter the items by one ID. When filtering by ID "2", the recording/
+timer of users "1" and "3" will be hidden. Change the filter to ID "1" and
+the recording/timer will pop up again. Note that the yellow button is not
+labeled "Delete", as when user "1" pushes it, the timer/recording won't be
+deleted. Instead it will just remove ID "1" from it. I decided to not ask
+for confirmation, it only alerts you when really deleting an object. Now
+let's switch the filter to user "3". As expected, the timer/recording is
+still there. This time the yellow button is "Delete", as user "3" is the
+only remaining owner.
+
+"How do I actually switch users?", I hear you ask. Well, in the Timers and
+Recordings list, just press the number key. It is not possible to switch
+users while in the Schedule menu. If a filter applies (i.e. filter is not
+set to user "0"), the current user ID is displayed in the menu's title bar.
+
+Now what about all the setup options related to the user ID? You have to
+make a decision here. On a VDR commonly used by one individual user, it's
+obvious. Simply configure the user's ID everywhere (also as VDR's "Resume
+ID" - see below). If multiple users share the same VDR, there are two
+possibilities: keep user state or not.
+
+The latter means that VDR will forget about the current user everytime you
+enter the menu. The filter is always reset to the value specified in the
+plugin setup (User ID filter in menu "..."). Most likely you will turn off
+filtering by default (i.e. user "0"). For the default user ID of new timers,
+"0" or all user IDs would be a good choice in this case.
+
+If in contrast you want VDR to remember you, select "Resume ID" as user ID
+filter. A change of the current user is then saved to VDR's setup variable
+"Resume ID". Never heard of this option? It's in VDR's "Replay" setup menu.
+VDR keeps a resume file with every recording. If it is missing, the
+recording is new. Otherwise it contains the position where playback has
+been stopped. The default value for "Resume ID" is 0. If you change it to a
+different value, you get an additional, independant resume file. So with
+"Resume ID" backed filtering in remotetimers you will automatically yield
+individual resume status files. The default user ID of new timers can also
+be set to "Resume ID". How to actually select the value "Resume ID" in the
+setup might not be obvious: It corresponds to the value "-1", therefore you
+can select it by pressing "left" until "Resume ID" shows up.
+
+5.2. Schedule menu:
+-------------------
+In the setup you can enable progress bars for the "What's on now?" menu.
+Private timers are indicated by a "P" as oposed to the standard "T"
+character. Private timers of other users can be filtered out.
+
+5.3. Timers menu:
+-----------------
+Looks almost like VDR's original timers menu. A letter in front of the
+channel number indicates if this entry refers to a local or a remote
+timer. Hit the number keys to change the current user ID filter. With
+"0" all timers will be listed. Otherwise the menu title will show you
+which user ID filter currently applies.
+
+When editing a timer two additional menu items will show up: The location
+of the timer (local or remote) and the user IDs it belongs to. Changing
+the location moves the timer from the local to the remote VDR or vice versa.
+Note that you cannot move a running timer. It has to be stopped first. With
+"Red" you can select a folder for the recording.
+
+If a "%" is shown as the second character in the timer list, there's a timer
+conflict. Edit the timer to see the conflicting timers. The conflict check
+relies on the epgsearch plugin. It must be installed on the server to report
+remote timer conflicts and it must be installed on the client to report local
+timer conflicts.
+
+5.4. Recordings menu:
+---------------------
+As in the timers menu, hit the number keys to change the user ID filter.
+In VDR you can change the sort order of recordings with "0". In remotetimers
+hit the current user ID.
+
+The "red" button will neither start to replay a recording nor will it open
+the recording commands menu. Instead it allows you to edit the recording.
+You can change the priority, lifetime, user IDs and the name. "Red" lets
+you change the folder, "green" starts the cutter on the recording and
+"Yellow" gives you the recording commands. For a network mounted recording,
+the cutter is started on the remote VDR.
+
+You can rename a recording or move it into a different folder, too. If the
+destination folder is on a different filesystem, remotetimers will ask you
+if it should move the recording in the background. The bandwidth for this
+background activity can be limited in the plugin setup. It is possible to
+abort the task in the plugin main menu (make sure it isn't hidden).
+
+In contrast to VDR's original recordings menu, the disk space information
+in the title bar always corresponds to the filesystem of the currently
+selected directory. So if there are subdirectories in your video directory
+which live on a different partition or on a network share, the disk space
+information changes when descending into this directory.
+
+The titles of the "Recording info" and "Edit recording" menus include
+the recording's size and length. It will also display the remaining disk
+space in minutes based on size and length of the currently selected
+recording.
+
+6. Credits:
+-----------
+Thanks to Klaus Schmidinger and everyone who contributed to those parts
+of the menu code I copied from VDR.

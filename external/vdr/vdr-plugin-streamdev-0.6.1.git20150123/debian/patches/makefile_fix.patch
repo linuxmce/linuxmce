@@ -1,0 +1,15 @@
+Index: vdr-plugin-streamdev/Makefile
+===================================================================
+--- vdr-plugin-streamdev.orig/Makefile	2013-03-05 22:35:40.000000000 +0100
++++ vdr-plugin-streamdev/Makefile	2013-03-07 18:58:34.000000000 +0100
+@@ -37,8 +37,8 @@
+ -include $(PLGCFG)
+ 
+ ### export all vars for sub-makes, using absolute paths
+-LIBDIR := $(shell cd $(LIBDIR) >/dev/null 2>&1 && pwd)
+-LOCDIR := $(shell cd $(LOCDIR) >/dev/null 2>&1 && pwd)
++# LIBDIR := $(shell cd $(LIBDIR) >/dev/null 2>&1 && pwd)
++# LOCDIR := $(shell cd $(LOCDIR) >/dev/null 2>&1 && pwd)
+ export
+ unexport PLUGIN
+ 

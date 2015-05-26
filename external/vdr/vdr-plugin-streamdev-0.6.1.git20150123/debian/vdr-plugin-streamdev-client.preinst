@@ -1,0 +1,15 @@
+#! /bin/sh
+set -e
+
+#
+# Drop diversions of locale files when upgrading from versions prior to 0.5.0-1
+#
+if [ "$1" = "install" -o "$1" = "upgrade" ]; then
+    if dpkg --compare-versions "$2" lt "0.5.0-1"; then
+        for lang in de_DE fi_FI fr_FR it_IT ru_RU sk_SK; do
+            dpkg-divert --package vdr-plugin-streamdev-client --rename --remove /usr/share/locale/$lang/LC_MESSAGES/vdr-streamdev.mo
+        done
+    fi
+fi
+
+#DEBHELPER#

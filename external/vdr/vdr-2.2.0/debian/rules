@@ -1,0 +1,58 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+CXXFLAGS += $(CPPFLAGS)
+CFLAGS += $(CPPFLAGS)
+PREFIX = /usr
+VIDEODIR = /srv/vdr/video.00
+LIBDIR = /usr/lib/vdr/plugins
+MAKE_OPTIONS = PREFIX=$(PREFIX) VIDEODIR=$(VIDEODIR) LIBDIR=$(LIBDIR)
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	dh_auto_build -- $(MAKE_OPTIONS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o debian/vdr-shutdown.wrapper debian/vdr-shutdown-wrapper.c
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o debian/plugin-loader2 debian/plugin-loader2.cpp
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -f debian/vdr-shutdown.wrapper
+	rm -f debian/plugin-loader2
+
+override_dh_auto_install:
+	dh_auto_install -- $(MAKE_OPTIONS)
+
+override_dh_install:
+	dh_install --fail-missing -Xlibvdr-epgtableid0.so
+	install -D -m 755 newplugin debian/vdr-dev/usr/bin/vdr-newplugin
+	echo -n "vdr:Provides=" >> debian/vdr.substvars
+	cat debian/abi-version >> debian/vdr.substvars
+	for example in hello osddemo pictures servicedemo skincurses status svdrpdemo rcu; do \
+	    install -D PLUGINS/src/$$example/README debian/vdr-plugin-examples/usr/share/doc/vdr-plugin-examples/README.$$example; \
+	done
+
+override_dh_installinit:
+	dh_installinit --no-start --no-restart-on-upgrade
+
+override_dh_strip:
+	dh_strip -p vdr --dbg-package=vdr-dbg
+	dh_strip -p vdr-plugin-dvbsddevice --dbg-package=vdr-plugin-dvbsddevice-dbg
+	dh_strip -p vdr-plugin-dvbhddevice --dbg-package=vdr-plugin-dvbhddevice-dbg
+	dh_strip
+
+override_dh_installchangelogs:
+	dh_installchangelogs -pvdr HISTORY
+	dh_installchangelogs -pvdr-plugin-dvbsddevice PLUGINS/src/dvbsddevice/HISTORY
+	dh_installchangelogs -pvdr-plugin-dvbhddevice PLUGINS/src/dvbhddevice/HISTORY
+	dh_installchangelogs -pvdr-plugin-examples
+	dh_installchangelogs
+
+check-patches:
+	python debian/patchcheck.py -c $(PATCHCHECKOPTION)
+
+accept-patches:
+	python debian/patchcheck.py -u $(PATCHCHECKOPTION)

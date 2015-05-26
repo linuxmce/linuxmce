@@ -1,0 +1,17 @@
+Index: b/osd.c
+===================================================================
+--- a/osd.c
++++ b/osd.c
+@@ -526,10 +526,10 @@
+   if(!m_IsVisible)
+     return;
+ 
+-#ifdef YAEPGHDVERSNUM
++
+   if (vidWin.bpp)
+     CmdVideoWindow(vidWin.x1, vidWin.y1, vidWin.Width(), vidWin.Height());
+-#endif
++
+ 
+ #if VDRVERSNUM >= 10717
+   if (IsTrueColor()) {

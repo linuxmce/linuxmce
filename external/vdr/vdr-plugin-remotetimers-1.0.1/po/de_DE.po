@@ -1,0 +1,232 @@
+# VDR plugin language source file.
+# Copyright (C) 2007 Klaus Schmidinger <kls@cadsoft.de>
+# This file is distributed under the same license as the VDR package.
+# Klaus Schmidinger <kls@cadsoft.de>, 2000
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: VDR 1.5.7\n"
+"Report-Msgid-Bugs-To: <vdrdev@schmirler.de>\n"
+"POT-Creation-Date: 2013-08-04 11:41+0200\n"
+"PO-Revision-Date: 2008-02-20 11:48+0100\n"
+"Last-Translator: Frank Schmirler <vdrdev@schmirler.de>\n"
+"Language-Team: <vdr@linuxtv.org>\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-15\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Location"
+msgstr "Aufnahmeort"
+
+msgid "local"
+msgstr "lokal"
+
+msgid "remote"
+msgstr "Server"
+
+msgid "User ID"
+msgstr "Benutzer-ID"
+
+#, c-format
+msgid "%.10s\tConflict (Recording %d%%)"
+msgstr "%.10s\tKonflikt (%d%% werden aufgenommen)"
+
+msgid "Timer is recording - can't move it to server"
+msgstr "Timer nimmt gerade auf - auf Server verschieben nicht möglich"
+
+#. TRANSLATORS: Indicator for (R)emote or (L)ocal timer in timers list
+msgid "RL"
+msgstr "SL"
+
+msgid "User"
+msgstr "Benutzer"
+
+#. TRANSLATORS: Button displayed instead of "Delete" when there are other users who subscribed to the timer
+msgid "Cancel"
+msgstr "Abmelden"
+
+#. TRANSLATORS: Schedule timer match characters (lower case for partial match): no match (blank), normal (tT)imer, (pP)rivate timer
+msgid " tTpP"
+msgstr " tTpP"
+
+#, c-format
+msgid "What's on at %s?"
+msgstr "Was läuft um %s?"
+
+msgid "Edit recording"
+msgstr "Aufzeichnung editieren"
+
+msgid "Remote editing process started"
+msgstr "Serverseitiger Schnitt gestartet"
+
+msgid "Unable to update user ID"
+msgstr "Fehler beim Ändern der Benutzer-ID"
+
+msgid "Unable to change priority/lifetime"
+msgstr "Fehler beim Ändern der Priorität/Lebensdauer"
+
+msgid "Unable to rename recording"
+msgstr "Fehler beim Umbenennen der Aufzeichnung"
+
+msgid "Move to other filesystem in background?"
+msgstr "Im Hintergrund auf anderes Dateisystem verschieben?"
+
+msgid "Button$Folder"
+msgstr "Verzeichnis"
+
+msgid "Cut"
+msgstr "Schneiden"
+
+msgid "Select folder"
+msgstr "Verzeichnis wählen"
+
+#. TRANSLATORS: Button displayed instead of "Delete" when there are other users who didn't watch the recording yet
+msgid "Release"
+msgstr "Freigeben"
+
+msgid "Abort moving recording"
+msgstr "Aufzeichnung verschieben abbrechen"
+
+msgid "Remote timers not available"
+msgstr "Timer des Servers nicht verfügbar"
+
+msgid "Finished moving recording"
+msgstr "Aufzeichnung verschoben"
+
+msgid "Failed to move recording!"
+msgstr "Fehler beim Verschieben der Aufzeichnung!"
+
+msgid "Edit timers on remote VDR"
+msgstr "Timer eines anderen VDR bearbeiten"
+
+msgid "Remote Timers"
+msgstr "Server Timer"
+
+msgid "Moving recording"
+msgstr "Verschiebe Aufzeichnung"
+
+msgid "Remote recording failed. Start local recording?"
+msgstr "Serverseitige Aufzeichnung fehlgeschlagen. Lokal aufnehmen?"
+
+msgid "Server IP"
+msgstr "Server IP"
+
+msgid "Server port"
+msgstr "Server Port"
+
+msgid "from svdrpservice"
+msgstr "aus svdrpservice"
+
+msgid "Map channels using"
+msgstr "Kanäle zuordnen anhand"
+
+msgid "channel number"
+msgstr "Kanalnummer"
+
+msgid "channel ID"
+msgstr "Kanal-ID"
+
+msgid "Hide mainmenu entry"
+msgstr "Hauptmenüeintrag verstecken"
+
+msgid "Defaults for new timers"
+msgstr "Voreinstellungen für neue Timer"
+
+msgid "Instant recordings"
+msgstr "Direktaufzeichnungen"
+
+msgid "Pause recordings"
+msgstr "Live-Signal anhalten"
+
+#, c-format
+msgid "Settings for menu \"%s\""
+msgstr "Einstellungen für das Menü \"%s\""
+
+msgid "Replace mainmenu"
+msgstr "Hauptmenü ersetzen"
+
+msgid "List style"
+msgstr "Darstellung der Liste"
+
+msgid "Show progress bar"
+msgstr "Fortschrittsanzeige"
+
+#, c-format
+msgid "Key binding of %s/%s"
+msgstr "Funktion der Tasten %s/%s"
+
+msgid "User ID filter"
+msgstr "Benutzer-Filter"
+
+msgid "Move recording bandwidth limit (Mbit/s)"
+msgstr "Max. Bandbreite beim Verschieben (Mbit/s)"
+
+msgid "unlimited"
+msgstr "unbegrenzt"
+
+msgid "Remote recordings"
+msgstr "Server Aufzeichnungen"
+
+msgid "Mounted on subdirectory"
+msgstr "Unterverzeichnis"
+
+msgid "Monitor update file"
+msgstr "Update-Datei beobachten"
+
+msgid "Updated remote timers list"
+msgstr "Timerliste wurde neu geladen"
+
+msgid "Timers are being edited remotely - please try again"
+msgstr "Timerliste auf Server gesperrt - bitte nochmal"
+
+msgid "Timer is recording - please deactivate it first"
+msgstr "Timer nimmt gerade auf - bitte erst deaktivieren"
+
+msgid "Timer already defined"
+msgstr "Timer existiert bereits"
+
+msgid "Timers modified remotely - please check remote timers"
+msgstr "Timer auf Server verändert - bitte prüfen"
+
+msgid "Unexpected error - please check remote timers"
+msgstr "Unerwarteter Fehler - bitte Timer auf Server prüfen"
+
+msgid "Lost SVDRP connection - please check remote timers"
+msgstr "SVDRP-Verbindung verloren - bitte Timer auf Server prüfen"
+
+msgid "Remote cutter already active or no marks defined"
+msgstr "Keine Schnittmarken oder am Server läuft ein Schneidevorgang"
+
+msgid "Recording not found on remote VDR - use local cutter"
+msgstr "Aufzeichnung auf dem Server nicht gefunden - schneide lokal"
+
+msgid "Unexpected error - unable to start remote cutter"
+msgstr "Unerwarteter Fehler - kann Schnitt auf Server nicht starten"
+
+msgid "Lost SVDRP connection - unable to start remote cutter"
+msgstr "SVDRP-Verbindung verloren - kann Schnitt auf Server nicht starten"
+
+#~ msgid "Edit folder"
+#~ msgstr "Verzeichnis editieren"
+
+#~ msgid "New folder"
+#~ msgstr "Neues Verzeichnis"
+
+#~ msgid "Sub folder"
+#~ msgstr "Unterverzeichnis"
+
+#~ msgid "Folder name already exists!"
+#~ msgstr "Verzeichnisname existiert bereits!"
+
+#~ msgid "Folder name must not contain '%c'!"
+#~ msgstr "Verzeichnisname darf kein '%c' enthalten!"
+
+#~ msgid "Button$Select"
+#~ msgstr "Auswählen"
+
+#~ msgid "Delete folder and all sub folders?"
+#~ msgstr "Verzeichnis und alle Unterverzeichnisse löschen?"
+
+#~ msgid "Delete folder?"
+#~ msgstr "Verzeichnis löschen?"

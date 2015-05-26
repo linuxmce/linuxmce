@@ -1,0 +1,105 @@
+Description = LbSense
+clrBackground = A0141717
+
+clrTrackName = FFFFCC66
+clrAlertFg = FFFFFFFF
+clrAlertBg = FFFF0000
+clrChannelName = FFFFFFFF #FF99CCFF
+clrEventTitle = FFFFCC99 #99CCFF
+clrEventTime = FFFFCC66
+clrEventShortText = FF99CCFF #FFCC66
+clrEventDescription = FF99CCFF #99CCFF
+
+# Pulsanti
+clrButtonRedFg = FF000000
+clrButtonRedBg = FFf97d7d
+clrButtonGreenFg = FF000000
+clrButtonGreenBg = FF9df97d
+clrButtonYellowFg = FF000000
+clrButtonYellowBg = FFf9f47d
+clrButtonBlueFg = FF000000
+clrButtonBlueBg = FF7db4f9
+
+# Messaggi di stato
+clrMessageStatusFg = FFFFFFFF 
+clrMessageStatusBg = FF7DB4F9 #FF0000B2 
+clrMessageInfoFg = FF202740 #FFFFFFFF #FF000000
+clrMessageInfoBg = FFFFCC99 #FF00DD00 #FFCC00 #FF00B200 
+clrMessageWarningFg = FF000000
+clrMessageWarningBg = FFFFBB00 #FF9900 #FFBB00 #FFCC00 #FFB2B200  
+clrMessageErrorFg = FFFFFFFF
+clrMessageErrorBg = FFB20000 #FFB20000
+
+# Volume 
+clrVolumeFrame = F0FFCC99 #3C3C3C 
+clrVolumeSymbol = FF000000
+clrVolumeBarUpper = FFCC9966 #CC9863 #FFCC99 #FFFFFF 
+clrVolumeBarLower = FF4D5D6D  
+
+# Menu info canale
+clrChannelFrameFg = FF000000
+clrChannelFrameBg = FF8A9EC9
+clrChannelSymbolOn = FF202740  
+clrChannelSymbolOff = FF738EC9 
+clrChannelSymbolRecFg = FFFFFFFF
+clrChannelSymbolRecBg = FFB20000
+
+# Device 
+clrDeviceFg = FF000000 
+clrDeviceBg = FF8A9EC9  
+clrSignalValue = FFFFCC99 #FFFFFFFF #FFFFCC00  
+clrSignalRest = FF5D6D7D #A08A9EC9 #A0FFCC99 #A0FFFFFF 
+
+# Timer Text
+clrTimerFg = FF000000
+clrTimerBg = FF8A9EC9 #99CCFF
+
+# Progressbar
+clrSeen = FFCC99CC
+
+# Data e ora 
+clrDateFg = FF000000
+clrDateBg = FF99CCFF
+
+# Menu principale
+clrMenuFrameFg = FF202740
+clrMenuFrameBg = FFFFCC99 #FFFF9966
+clrMenuTitle = FFea962d
+
+# Menu lista voci
+clrMenuMainBracket = FF8899EE #FF9999ff
+clrMenuItemCurrentFg = FFFFFFFF #FFFFCC00 #FF000000 
+clrMenuItemCurrentBg = FF7A8EC9 #FF8A9EC9 #FF202740
+clrMenuItemSelectable = FF99CCFF #8A9EC9
+clrMenuItemNonSelectable = FF99CCFF
+
+# Tempo registrazione
+clrMenuTimerRecording = FFF1B1AF
+clrMenuDeviceRecording = FF99CCFF
+
+# Scrollbar
+clrMenuScrollbarTotal = A08A9EC9 #A09999ff #FFFFBC57
+clrMenuScrollbarShown = FFCC99CC
+clrMenuScrollbarArrow = FF000000
+clrMenuText = FFff00ff
+
+# Replay OSD
+clrReplayFrameFg = FF000000
+clrReplayFrameBg = FFCC6666
+clrReplayPosition = FFFFFFFF #testo
+clrReplayJumpFg = FF000000
+clrReplayJumpBg = FFFFCC99 #FFCC99CC
+clrReplayProgressSeen = FFFFCC99 #CC99CC
+clrReplayProgressRest = FFCCCCCC
+clrReplayProgressSelected = FF990000 #FF7A8EC9 #
+clrReplayProgressMark = FF000000
+clrReplayProgressCurrent = FF990000
+
+# Audio
+clrTrackFrameFg = FF000000
+clrTrackFrameBg = FFFFFCC99 #skin
+clrTrackItemFg = DC858585 
+clrTrackItemBg = A0FFFFFF #Audio no select
+clrTrackItemCurrentFg = FF000000
+clrTrackItemCurrentBg = FF99CCFF #Audio select 
+

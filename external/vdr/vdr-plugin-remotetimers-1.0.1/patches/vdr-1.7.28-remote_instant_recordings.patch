@@ -1,0 +1,96 @@
+This is a "patch" for the Video Disk Recorder (VDR).
+
+* Description:
+Apply this patch to VDR if you want to redirect instant recordings to an
+other (server) VDR. This applies to recordings started with the "Record"
+button and paused live TV.
+
+* Requirements:
+The patch relies on either the timersync-plugin or the remotetimers-plugin.
+One of them must be installed on the client.
+
+If the timersync-plugin is installed, the timer for the instant recording
+is added to the local timers list. No recording is started. It is then
+the plugin's job to copy the timer to the server VDR. The local video
+directory must be a network mount of the server's video directory. Otherwise
+the immediate replay of a paused live view will fail.
+
+With the remotetimers-plugin, redirecting instant recordings must be enabled
+in remotetimers' setup. It is possible to handle instant recordings and
+paused live TV differently. Note that you need to (re-)compile the plugin
+after VDR has been patched. Otherwise the setup options won't be available.
+
+* Installation
+Change into the VDR source directory, then issue
+  patch -p0 < path/to/vdr-remote_instant_recordings.patch
+and recompile.
+
+--- config.h.orig	2007-08-04 23:22:47.000000000 +0200
++++ config.h	2008-06-27 20:25:47.000000000 +0200
+@@ -38,2 +38,4 @@
+ 
++#define REMOTEINSTANTVERSION 1.0
++
+ #define MAXPRIORITY       99
+--- menu.c.orig	2008-06-27 20:30:14.000000000 +0200
++++ menu.c	2008-06-27 20:31:01.000000000 +0200
+@@ -32,6 +32,8 @@
+ #include "transfer.h"
+ #include "videodir.h"
+ 
++#include "PLUGINS/src/remotetimers/remotetimers.h"
++
+ #define MAXWAIT4EPGINFO   3 // seconds
+ #define MODETIMEOUT       3 // seconds
+ #define NEWTIMERLIMIT   120 // seconds until the start time of a new timer created from the Schedule menu,
+@@ -4229,6 +4231,50 @@
+ 
+ bool cRecordControls::Start(cTimer *Timer, bool Pause)
+ {
++  if (!Timer) {
++     cTimer *t = new cTimer(true, Pause);
++
++     //get event
++     cSchedulesLock SchedulesLock;
++     const cEvent *event = NULL;;
++     const cSchedules *Schedules = cSchedules::Schedules(SchedulesLock);
++     if (Schedules) {
++        const cSchedule *Schedule = Schedules->GetSchedule(t->Channel());
++        if (Schedule) {
++           event = Schedule->GetEventAround(t->StartTime() + INSTANT_REC_EPG_LOOKAHEAD);
++        }
++     }
++
++     if (cPluginManager::GetPlugin("timersync")) {
++        // sets the file name
++        cRecording recording(t, event);
++        Timers.Add(t);
++        Timers.SetModified();
++        if (!cReplayControl::LastReplayed())
++           cReplayControl::SetRecording(recording.FileName());
++        return true;
++     }
++     else {
++        RemoteTimers_InstantRecording_v1_0 ir;
++        ir.timer = t;
++        ir.pause = Pause;
++        ir.event = event;
++        ir.name = NULL;
++        ir.fileName = NULL;
++ 
++        if (cPluginManager::CallFirstService("RemoteTimers::InstantRecording-v1.0", &ir)) {
++           if (!cReplayControl::LastReplayed())
++              cReplayControl::SetRecording(ir.fileName);
++ 	  delete t;
++ 	  // empty names indicate an error
++ 	  return *ir.fileName && *ir.name;
++        }
++        // service disabled or an error occured and the user confirmed local recording
++        // fall through to local instant recording
++     }
++     delete t;
++  }
++
+   static time_t LastNoDiskSpaceMessage = 0;
+   int FreeMB = 0;
+   if (Timer) {
