@@ -1614,6 +1614,7 @@ void qorbiterManager::displayModelPages(QList<QObject *> pages){
 
 void qorbiterManager::getFloorplanDevices(int floorplantype){
 
+
     for (int i=0; i < floorplans->rowCount(); i++) {
 #ifdef debug
         qDebug() << floorplans->index(i, 0, QModelIndex()).data(1);

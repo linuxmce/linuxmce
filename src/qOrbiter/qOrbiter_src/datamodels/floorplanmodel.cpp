@@ -14,6 +14,7 @@ FloorPlanModel::FloorPlanModel(FloorplanDevice* prototype, qorbiterManager *r, Q
     setStatus(false);
     multiSelect = true;
 
+   // connect(this, &FloorPlanModel::requestNewFloorPlanData, this, &FloorPlanModel::populateSprites);
 }
 #ifdef QT5
 QHash<int, QByteArray> FloorPlanModel::roleNames() const
@@ -169,7 +170,7 @@ void FloorPlanModel::updateStatus(QString status, QString state, int device)
         case 2:
 
             data= state.split("/");
-       qDebug() << Q_FUNC_INFO <<data;
+
             if(data.length() > 1){
 
                 d->setDeviceState(data.at(0));
@@ -191,6 +192,7 @@ void FloorPlanModel::handleItemChange()
     if(index.isValid())
     {
         emit dataChanged(index, index);
+        emit deviceChanged(item->deviceNumber());
     }
 }
 
@@ -380,16 +382,33 @@ void FloorPlanModel::populateSprites()
 
         if(item->floorplanType() == currentFloorPlanType)
         {
+
             if(item->getCurrentX() != -1)
             {
 
+                emit createFloorplanDevice(
+                            item->deviceNum(),
+                            item->xPosition(),
+                            item->yPosition(),
+                            item->deviceType()
+                            );
                 // qDebug() << "Need to draw" << item->id();
-                QMetaObject::invokeMethod(page, "placeSprites", Q_ARG(QVariant,item->getCurrentX()), Q_ARG(QVariant,item->getCurrentY()), Q_ARG(QVariant,item->deviceNum()), Q_ARG(QVariant,false ), Q_ARG(QVariant, item->deviceType()));
+                //                QMetaObject::invokeMethod(
+                //                            page,
+                //                            "placeSprites",
+                //                            Q_ARG(QVariant,item->getCurrentX()),
+                //                            Q_ARG(QVariant,item->getCurrentY()),
+                //                            Q_ARG(QVariant,item->deviceNum()),
+                //                            Q_ARG(QVariant,false ),
+                //                            Q_ARG(QVariant,
+                //                                  item->deviceType()),
+
+                //                            );
             }
         }
         else
         {
-            //  qDebug() << item->id();
+
         }
     }
 }
@@ -403,6 +422,7 @@ void FloorPlanModel::finishSprite()
 
 void FloorPlanModel::setCurrentPage(QString currentPageId)
 {
+
     currentPage = currentPageId;
     setCurrentIntPage( currentPage.toInt());
     QString s = getCurrentImagePath();
@@ -509,5 +529,15 @@ QString FloorPlanModel::getDeviceStatus(int device) const
         return d->deviceStatus();
     } else {
         return QString(tr("Invalid Device"));
+    }
+}
+
+QVariantMap FloorPlanModel::getDeviceData(int device) const
+{
+    FloorplanDevice *d = find(device);
+    if(d){
+        return d->objectData();
+    } else {
+        return QVariantMap();
     }
 }
