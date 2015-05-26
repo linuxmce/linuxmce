@@ -1,10 +1,26 @@
 import QtQuick 2.2
+import org.linuxmce.floorplans 1.0
 import "../."
 
 Item {
     objectName: "floorplan_display"
     id:floorplandisplay
     anchors.fill: parent
+
+    Timer{
+        id:delay
+        interval: 250
+        onTriggered: floorplan_devices.populateSprites()
+
+    }
+
+    Timer{
+        id:refresh
+        interval:2500
+        onTriggered: floorplan_devices.updateDeviceData()
+        running:true
+        repeat:true
+    }
 
     property int scaleFactor:floorplanimage.scale
     property alias bg:phil
@@ -16,8 +32,16 @@ Item {
     }
 
     Connections{
-        target:manager
-        onOrientationChanged:floorplan_devices.setCurrentPage(1)
+        target:floorplan_devices
+        onCreateFloorplanDevice:{
+            placeSprites(
+                        deviceX,
+                        deviceY,
+                        device,
+                        false,
+                        deviceType
+                        )
+        }
     }
 
     function setScaleFactor(factor){
@@ -35,7 +59,7 @@ Item {
 
     function placeQmlSprites(){
         console.log("Placing QML Sprites, "+ floorplan_devices.count()+" devices to create.")
-        return;
+
         for (var cnt = 0; cnt < floorplan_devices.count(); cnt++){
             var lcl = floorplan_devices.get(cnt)
             console.log(JSON.stringify(lcl, null, "\t"))
@@ -57,11 +81,12 @@ Item {
                 var sprite = c.createObject(floorplanimage, {"x": lcl.x, "y": lcl.y, "deviceNum": lcl.deviceno, "deviceType": lcl.type});
             }
         }
-       // floorplan_devices.updateDeviceData()
+        // floorplan_devices.updateDeviceData()
 
     }
 
-    function placeSprites(x,y, num, state, devtype){
+    function placeSprites(x,y, num, state, devtype, ptr){
+
         var i;
         var pX = x; //x point
         var pY = y; //y point
@@ -70,7 +95,7 @@ Item {
         c = Qt.createComponent("FpSprite.qml");
         if(c.status === Component.Loading)
         {
-            //console.log("Component Loading")
+            console.log("Component Loading")
             finishPlacingSprites(c,pX,pY, num, state, devtype)
         }
         else if (c.status === Component.Error)
@@ -79,13 +104,13 @@ Item {
         }
         else if (c.status === Component.Ready)
         {
-            // console.log("Component Ready!")
+           console.log("Component Ready!")
             var sprite = c.createObject(floorplanimage, {"x": pX, "y": pY, "deviceNum": num, "deviceType": devtype});
         }
 
     }
 
-    function finishPlacingSprites(c,x,y,num, state, devtype){
+    function finishPlacingSprites(c,x,y,num, state, devtype, ptr){
         console.log("Finishing Creation")
         if(c.status === Component.Ready ){
             var sprite = c.createObject(floorplanimage, {"x": x, "y": y, "deviceNum": num, "deviceType": devtype});
@@ -95,7 +120,11 @@ Item {
     Connections{
         target: floorplan_devices
         onFloorPlanImageChanged: {
+            for(var i = 0; i < floorplanimage.children.length; i++ ){
+                floorplanimage.children[i].destroy()
+            }
             floorplanimage.source = "image://listprovider/floorplan/"+floorplan_devices.currentPage
+
         }
     }
 
@@ -135,7 +164,7 @@ Item {
                 }
                 onPinchFinished: {
                     imageFlick.interactive = true;
-                  //  imageFlick.returnToBounds()
+                    //  imageFlick.returnToBounds()
                 }
                 onPinchUpdated: {
                     imageFlick.contentX += pinch.previousCenter.x - pinch.center.x;
@@ -151,6 +180,7 @@ Item {
                 anchors.centerIn: parent
                 transformOrigin: Item.Center
                 scale: Math.min((mainRect.height-40)/floorplanimage.sourceSize.height,(mainRect.width-40)/floorplanimage.sourceSize.width)
+                onStatusChanged: if(floorplanimage.status==Image.Ready) delay.restart() //floorplan_devices.populateSprites()
 
                 Behavior on scale {
                     PropertyAnimation{

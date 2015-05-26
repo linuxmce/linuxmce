@@ -117,6 +117,7 @@ signals:
     void deviceCommandsChanged();
     void deviceParamsChanged();
     void deviceChanged(int device);
+    void createFloorplanDevice(int device, int deviceX, int deviceY, int deviceType );
 
 
 public slots:
@@ -150,7 +151,7 @@ public slots:
     QImage getPageImage(QString &id);
 
     void setImageData(const uchar *data, int iData_size);
-    void setImage(QImage fp) { populateSprites();  currentImage = fp; emit floorPlanImageChanged(); emit requestNewFloorPlanData(currentPage);}
+    void setImage(QImage fp) {  currentImage = fp; emit floorPlanImageChanged(); emit requestNewFloorPlanData(currentPage); }
 
     int getDeviceX(int device);
     int getDeviceY(int device);
@@ -179,6 +180,7 @@ public slots:
     int getColor(int device) const;
     QString getText(int device) const;
     QString getDeviceStatus(int device) const;
+    QVariantMap getDeviceData(int device) const ;
 
 private:
     FloorplanDevice* m_prototype;

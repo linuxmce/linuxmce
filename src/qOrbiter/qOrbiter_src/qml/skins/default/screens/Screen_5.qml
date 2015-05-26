@@ -8,7 +8,8 @@ StyledScreen {
         id: securityFloorplan
         Component.onCompleted: {
             floorplan_devices.setCurrentFloorPlanType(1)
-            floorplan_devices.clearAllSelections()
+         // manager.getFloorplanDevices(1)
+
         }
     }
 }

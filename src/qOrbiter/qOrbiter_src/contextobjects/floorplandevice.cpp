@@ -13,6 +13,10 @@ FloorplanDevice::FloorplanDevice(QString name, int deviceNo, int floorplan_devic
     mQS_position(position)
 {
     QObject::connect(this, &FloorplanDevice::selectedChanged, this, &FloorplanDevice::dataChanged);
+    QObject::connect(this, SIGNAL(deviceStateChanged()), this, SIGNAL(dataChanged()));
+    QObject::connect(this, SIGNAL(deviceLevelChanged()), this, SIGNAL(dataChanged()));
+    QObject::connect(this, SIGNAL(statusChanged()), this, SIGNAL(dataChanged()));
+    QObject::connect(this, SIGNAL(alertStatusChanged()), this, SIGNAL(dataChanged()));
     qRegisterMetaType<FloorplanDevice*>("FloorplanDevice*");
     setCurrentX(0);
     setCurrentY(0);
@@ -22,7 +26,6 @@ FloorplanDevice::FloorplanDevice(QString name, int deviceNo, int floorplan_devic
     setDeviceStatus("UNKNOWN");
     setDeviceState("UNKNOWN");
     setupFloorplanPositions();
-
 }
 
 QHash<int, QByteArray> FloorplanDevice::roleNames() const
@@ -43,6 +46,23 @@ QHash<int, QByteArray> FloorplanDevice::roleNames() const
     names[ParamRole]="paramlist";
     names[SelectedRole]="selected";
     return names;
+}
+
+QVariantMap FloorplanDevice::objectData()
+{
+    QVariantMap ret;
+    ret.insert("deviceNumber", deviceNumber());
+    ret.insert("deviceName", deviceName());
+    ret.insert("deviceStatus", deviceStatus());
+    ret.insert("deviceState", deviceState());
+    ret.insert("deviceLevel", deviceLevel());
+    ret.insert("alertStatus", alertStatus());
+    ret.insert("selected", selected());
+    ret.insert("xPos", xPosition());
+    ret.insert("yPos", yPosition());
+qDebug() << ret;
+    return ret;
+
 }
 
 QVariant FloorplanDevice::data(int role)

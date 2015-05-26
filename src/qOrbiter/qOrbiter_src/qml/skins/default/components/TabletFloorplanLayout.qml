@@ -68,7 +68,7 @@ Panel{
         }
 
         GenericListModel {
-            parent:floorplan_devices.floorplanType===5 ?  fp_panel.headerRow : parent
+            parent: fp_panel.headerRow
             id:activeStreams
             label:qsTr("Media Streams")
             visible:floorplan_devices.floorplanType===5

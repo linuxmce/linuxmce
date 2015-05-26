@@ -6,36 +6,67 @@ Item {
     id:sprite_root
     width: itemW
     height: itemH
-    objectName:deviceNum
-    property FloorplanDevice currentDevice:floorplan_devices.getDevice(deviceNum)
+
+    Component.onCompleted: {
+        console.log("assignment of initial state")
+        var d =  floorplan_devices.getDeviceData(deviceNum);
+        deviceNum=d.deviceNumber;
+        deviceStatus=d.deviceStatus;
+        deviceState=d.deviceState;
+        deviceName=d.deviceName;
+        deviceLevel=d.deviceLevel;
+        alertStatus = d.alertStatus;
+        selected=d.selected;
+    }
+
+
     property color activeColor: "grey"
     property color inactivecolor: "green"
     property double devicelevel:0.0
     property string state: "unknown"
-    property string deviceName:currentDevice.deviceName// floorplan_devices.getText(Number(deviceNum))
+    property string deviceName:""// floorplan_devices.getText(Number(deviceNum))
     property string deviceNum:""
+    property string deviceStatus:""
+    property string deviceState:""
+    property int deviceLevel:0
+    property string alertStatus:""
     property string deviceType: ""
     property string imgUrl: ""
-    property bool selected:currentDevice.selected
+    property bool selected:false
     property int itemH:Style.scaleY(5)
     property int itemW: Style.scaleY(5)
     property double iconScale: 1.5
-    onSelectedChanged: {
-        console.log(deviceNum+" changed to "+selected)
-
-    }
 
     Connections{
         target: floorplan_devices
+
+        onDeviceChanged:{
+          //  console.log("Item "+deviceNum+" handling deviceChanged( )"+device)
+            if(device==Number(deviceNum)){
+              console.log("many welps!")
+                var d =  floorplan_devices.getDeviceData(deviceNum);
+
+                deviceNum=d.deviceNumber;
+                deviceStatus=d.deviceStatus;
+                deviceState=d.deviceState;
+                deviceName=d.deviceName;
+                deviceLevel=d.deviceLevel;
+                alertStatus = d.alertStatus;
+                selected=d.selected;
+            }
+        }
+
+        onChangePage:{
+            sprite_root.destroy()
+        }
         onSelectedDevicesChanged: {
-            selected = floorplan_devices.getDeviceSelection(deviceNum)
+            //   selected = floorplan_devices.getDeviceSelection(deviceNum)
         }
     }
 
     scale: iconScale
     function updateFpItem(){
         floorplan_devices.setDeviceSelection(deviceNum)
-
     }
 
     Image {
@@ -65,9 +96,10 @@ Item {
 */
     StyledText {
         id: deviceNumLabel
-        text: currentDevice.deviceName  +"\n"+currentDevice.deviceState
+        anchors.horizontalCenter: fpDevice_image.horizontalCenter
+        text:deviceName  +"\n"+deviceStatus + "::"+deviceLevel
         anchors.top: fpDevice_image.bottom
-        font.pixelSize: Style.appFontSize_description
+        font.pixelSize: Style.fontSize_small
         visible: true
         color:"black"
     }
@@ -84,16 +116,12 @@ Item {
         scale: iconScale
     }
 
-    Connections{
-        target:floorplan_devices
-        onChangePage:sprite_root.destroy()
-    }
 
     MouseArea{
         anchors.fill: sprite_root
         onClicked: {
-         //  currentDevice.selected=!sprite_root.selected
-             updateFpItem()
+            //  currentDevice.selected=!sprite_root.selected
+            updateFpItem()
         }
     }
 }

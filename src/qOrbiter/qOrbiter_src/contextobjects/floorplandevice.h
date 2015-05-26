@@ -186,8 +186,9 @@ signals:
     void selectedChanged();
 
 public slots:
+    QVariantMap objectData();
     void setDeviceState(QString s){if(m_deviceState==s)return; m_deviceState=s; emit deviceStateChanged(); }
-      void setDeviceLevel(int i){if(mi_deviceLevel==i)return; mi_deviceLevel=i; emit deviceLevelChanged();}
+    void setDeviceLevel(int i){if(mi_deviceLevel==i)return; mi_deviceLevel=i;  emit deviceLevelChanged();}
     void getPagePosition(int page);
     void setCurrentPage(int page);
     void setCurrentX(int x) {currentFloorplanX = x; emit floorplanXChanged(); }

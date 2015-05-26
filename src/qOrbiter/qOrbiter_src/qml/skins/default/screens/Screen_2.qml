@@ -3,8 +3,8 @@ import "../components"
 StyledScreen{
     navigation: "FloorplanNav.qml"
     property alias floorplan: lightsFloorplan
-    onScreenOpen: floorplan_devices.clearAllSelections()
-    onScreenClosing: floorplan_devices.setCurrentFloorPlanType(-1)
+ //  onScreenOpening: floorplan_devices.clearAllSelections()
+   onScreenClosing: floorplan_devices.setCurrentFloorPlanType(-1)
 
     TabletFloorplanLayout {
         anchors.top: parent.top
@@ -14,8 +14,7 @@ StyledScreen{
         id: lightsFloorplan
         Component.onCompleted: {
             floorplan_devices.setCurrentFloorPlanType(2)
-            manager.getFloorplanDevices(2)
-            floorplan_devices.populateSprites()
+          //  manager.getFloorplanDevices(2)
         }
 
     }

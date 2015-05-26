@@ -9,8 +9,8 @@ StyledScreen {
     TabletFloorplanLayout{
         id: climateFloorplan
         Component.onCompleted: {
-            floorplan_devices.setCurrentFloorPlanType(4);
-
+            floorplan_devices.setCurrentFloorPlanType(4)
+          //  manager.getFloorplanDevices(4)
 
         }
     }
