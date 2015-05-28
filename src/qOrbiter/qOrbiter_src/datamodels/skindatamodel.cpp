@@ -126,8 +126,10 @@ void SkinDataModel::sortModel(int column, Qt::SortOrder order)
 
 void SkinDataModel::clear()
 {
-    qDeleteAll(m_list.begin(), m_list.end());
-    m_list.clear();
+    if (m_list.size() > 0) {
+        qDeleteAll(m_list.begin(), m_list.end());
+        m_list.clear();
+    }
 }
 
 bool SkinDataModel::removeRow(int row, const QModelIndex &parent)
