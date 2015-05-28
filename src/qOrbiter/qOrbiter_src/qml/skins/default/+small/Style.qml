@@ -58,7 +58,7 @@ QtObject{
     readonly property color apptext_color_inactive:"grey"
     readonly property color apptext_color_list_active:"blue"
     readonly property int appFontSize_list:12*dpRatio
-    readonly property int appFontSize_header:16*dpRatio
+    readonly property int appFontSize_header:15*dpRatio
     readonly property int appFontSize_description:11*dpRatio
     readonly property int appFontSize_title:14*dpRatio
 

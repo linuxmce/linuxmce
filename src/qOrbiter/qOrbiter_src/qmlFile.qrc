@@ -212,5 +212,8 @@
         <file>qml/skins/default/components/ControlPopupContainer.qml</file>
         <file>qml/skins/default/components/FloorplanOnOff.qml</file>
         <file>qml/skins/default/components/FloorplanFanSwitch.qml</file>
+        <file>qml/skins/default/components/FloorplanDefaultControl.qml</file>
+        <file>qml/skins/default/components/FloorplanHeatCool.qml</file>
+        <file>qml/skins/default/components/FloorplanSetTemp.qml</file>
     </qresource>
 </RCC>
