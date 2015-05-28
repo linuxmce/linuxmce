@@ -62,7 +62,6 @@ void SkinLoader::loadSkin(QString name) {
             skinsToLoad.takeAt(loadercounter);
             totalSkinsToLoad = skinsToLoad.size();
             qWarning() << "Updated the list of skins to " << totalSkinsToLoad;
-            loadercounter++;
         }
         else{
 
