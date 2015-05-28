@@ -19,7 +19,7 @@ StyledScreen {
                 id:alarm_model
                 //  model: manager.getDataGridModel("sleepingAlarms", DataGrids.Alarms_In_Room, String(manager.getlocation()))
                 dataGrid: DataGrids.Alarms_In_Room
-                dataGridLabel: "sleepingAlarms"
+              dataGridLabel: "sleepingAlarms"
                 dataGridOptions: String(manager.getlocation())
                 label:qsTr("(%1) Alarms in Room").arg(alarm_model.modelCount)
                 height: parent.height
