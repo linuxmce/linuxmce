@@ -112,7 +112,7 @@ Item {
                 sourceComponent:loadingViewComp
             }
         },State {
-            //   when:manager.iPK_Device==-1 && orbiterList.length===0
+             when:manager.iPK_Device==-1 && orbiterList.length===0
             name: "connected-nodevices"
             PropertyChanges {
                 target: splash_content
