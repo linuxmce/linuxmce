@@ -23,12 +23,9 @@ Item {
 
             if(existing_orbiters.count === 0){
                 screenChange("NewOrbiterSetup.qml")
+                return
             }
-            else{
-                existing_orbiters.state="showing"
-                newOrbiterButton.state="showing"
-                connectionBox.state="hidden"
-            }
+            splashPage.state="selection"
         }
         onPageChanged:screenchange(qmlPage)
     }
@@ -127,6 +124,41 @@ Item {
     NewOrbiterButton {
         id:newOrbiterButton
     }
+
+    states: [
+        State {
+            name: "selection"
+            when:window.b_connectionPresent
+            PropertyChanges {
+                target: connectionBox
+                state:"hidden"
+            }
+            PropertyChanges{
+                target:newOrbiterButton
+                state:"showing"
+            }
+            PropertyChanges{
+                target:existing_orbiters
+                 state:"showing"
+            }
+        },
+        State {
+            name: "noconnection"
+            when:!window.b_connectionPresent
+            PropertyChanges {
+                target: connectionBox
+                state:"showing"
+            }
+            PropertyChanges{
+                target:newOrbiterButton
+                state:"hidden"
+            }
+            PropertyChanges{
+                target:existing_orbiters
+                 state:"hidden"
+            }
+        }
+    ]
 
 }
 
