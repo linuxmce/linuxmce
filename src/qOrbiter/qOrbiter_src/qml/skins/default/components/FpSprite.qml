@@ -1,6 +1,7 @@
 // import QtQuick 1.1 // to target S60 5th Edition or Maemo 5
 import QtQuick 2.2
 import org.linuxmce.floorplans 1.0
+import QtGraphicalEffects 1.0
 import "../."
 Item {
     id:sprite_root
@@ -74,8 +75,27 @@ Item {
         sourceSize:Qt.size(Style.scaleY(6), Style.scaleY(6))
         anchors.centerIn: parent
         anchors.fill: parent
-        cache: false
+        cache: false       
+        opacity: selected ? 1 : .24
     }
+    Colorize {
+           anchors.fill: fpDevice_image
+           source: fpDevice_image
+           hue: 0.2
+           saturation: -0.4
+           lightness: 0.1
+
+           visible: selected
+       }
+
+    Glow {
+           anchors.fill: fpDevice_image
+           radius: 8
+           samples: 16
+           color: "yellow"
+           source: fpDevice_image
+           opacity: deviceLevel/100 && deviceState=="ON"
+       }
 
     function getColor(deviceNum) {
         var t = floorplan_devices.getText(deviceNum)

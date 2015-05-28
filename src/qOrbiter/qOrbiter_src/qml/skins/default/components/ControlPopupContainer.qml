@@ -13,7 +13,7 @@ Item {
         activeIndex = index;
         if(activeIndex==-1){
             visible=false;
-            controlTarget.source=undefined
+            controlTarget.sourceComponent=undefined
             return;
         }
 
@@ -35,7 +35,7 @@ Item {
     MouseArea{
         anchors.fill: parent
         onClicked: {
-            controlTarget.source=""
+            controlTarget.sourceComponent=undefined
             control_popup.visible=false
         }
     }
@@ -60,6 +60,7 @@ Item {
             right:parent.right
             bottom:parent.bottom
             top:header.bottom
+            margins: 5
         }
     }
 }

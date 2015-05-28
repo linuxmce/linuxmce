@@ -558,7 +558,10 @@ for_harmattan{
 
 DISTFILES += \
     qml/skins/default/components/FloorplanOnOff.qml \
-    qml/skins/default/components/FloorplanFanSwitch.qml
+    qml/skins/default/components/FloorplanFanSwitch.qml \
+    qml/skins/default/components/FloorplanSetTemp.qml \
+    qml/skins/default/components/FloorplanHeatCool.qml \
+    qml/skins/default/components/FloorplanDefaultControl.qml
 
 
 
