@@ -97,7 +97,6 @@ firstboot_lmce_rpi2_kernel() {
 firstboot_lmce_rpi2_postinst() {
 	StatsMessage "Installing admin utilities"
 	apt-get -f -y install sudo-ldap
-	return 0
 
 	StatsMessage "Installing RPi X.Org driver fbturbo"
 	apt-get -f -y --no-install-recommends install xserver-xorg-video-fbturbo
