@@ -136,19 +136,21 @@ public:
             bool state = QString::fromStdString(pCell->GetText()).contains("ON");
             //getting the cell to the right
             DataGridCell *pCell2 = pTable->GetData(1, row);
-            eventgrp = atoi(pCell2->GetValue());
-            QString data = QString::fromUtf8(pCell2->GetText());
-            QStringList breakerbreaker = data.split(QRegExp("\n"), QString::KeepEmptyParts );
-            name = breakerbreaker.at(0);
-            days=breakerbreaker.at(2);
-            days.remove("Day of Week");
-            if(!breakerbreaker.at(1).split(QRegExp("\n")).isEmpty())
-            {
-                alarmtime=breakerbreaker.at(1).split(QRegExp(" "),QString::SkipEmptyParts).first();
-                timeleft=breakerbreaker.at(1).split(QRegExp(" "),QString::SkipEmptyParts).last();
-            } else {
-                alarmtime=breakerbreaker.at(1);
-                timeleft = "";
+            if (pCell2 != NULL) {
+                eventgrp = atoi(pCell2->GetValue());
+                QString data = QString::fromUtf8(pCell2->GetText());
+                QStringList breakerbreaker = data.split(QRegExp("\n"), QString::KeepEmptyParts );
+                name = breakerbreaker.at(0);
+                days=breakerbreaker.at(2);
+                days.remove("Day of Week");
+                if(!breakerbreaker.at(1).split(QRegExp("\n")).isEmpty())
+                {
+                    alarmtime=breakerbreaker.at(1).split(QRegExp(" "),QString::SkipEmptyParts).first();
+                    timeleft=breakerbreaker.at(1).split(QRegExp(" "),QString::SkipEmptyParts).last();
+                } else {
+                    alarmtime=breakerbreaker.at(1);
+                    timeleft = "";
+                }
             }
             (static_cast<SleepingAlarm*>(pItem))->setAlarmData(eventgrp, name, alarmtime, state, timeleft, days);
         } else if(PK_DataGrid == DATAGRID_EPG_All_Shows_CONST) {
