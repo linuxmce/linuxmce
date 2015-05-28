@@ -34,11 +34,9 @@ Item {
     }
 
     Component.onCompleted: {
-        console.log("Splash is loaded")
-        splashLogic.state="connecting"
+        console.log("Splash is loaded")       
         window.qmlSetupLmce(manager.iPK_Device, manager.m_ipAddress)
         splashLogic.forceActiveFocus()
-        state="connecting"
     }
     focus:true
 
@@ -55,18 +53,6 @@ Item {
         console.log(screenname)
     }
 
-    Connections{
-        target: window
-        onShowList:{
-            if(!window.hasOrbiters()){
-                splashLogic.state="connected-nodevices"
-            }
-            else{
-                splashLogic.state="connected-devices"
-            }
-        }
-    }
-
     Image {
         id: splash
         anchors.centerIn: parent
@@ -81,10 +67,12 @@ Item {
         opacity: .15
     }
 
+
     Loader{
         id:splash_content
         anchors.fill: parent
-        source:"SplashView.qml"
+        sourceComponent: splashViewComp
+
     }
 
 
@@ -102,28 +90,23 @@ Item {
         //  source: "../../skins-common/fonts/Sawasdee.ttf"
     }
 
+
     states: [
         State {
             name: "connecting"
-            when: manager.iPK_Device !==-1 && window.b_connectionPresent
-
+           when: manager.iPK_Device !=-1 && window.b_connectionPresent
             PropertyChanges {
                 target:splash_content
-                sourceComponent:loadingViewComp
+               // sourceComponent:splashViewComp
             }
-        },State {
-             when:manager.iPK_Device==-1 && orbiterList.length===0
-            name: "connected-nodevices"
+        },
+        State {
+           when:!window.b_connectionPresent
+            name: "disconnected"
             PropertyChanges {
-                target: splash_content
-                sourceComponent:splashViewComp
+                target:splash_content
+              // sourceComponent:splashViewComp
             }
-
-        }, State {
-            //  when:manager.iPK_Device==-1
-            name: "connected-devices"
-            extend:"connected-nodevices"
-
         },
         State {
             name: "new-orbiter"
