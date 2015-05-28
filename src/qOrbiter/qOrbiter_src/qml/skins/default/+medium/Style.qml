@@ -62,13 +62,13 @@ QtObject{
     readonly property int appFontSize_description:12*dpRatio
     readonly property int appFontSize_title:14*dpRatio
 
-    property int fontSize_small:appFontSize_list
+    property int fontSize_small:6*dpRatio
     property int fontSize_medium:appFontSize_description
     property int fontSize_large:appFontSize_title
 
-    property int fontSize_listItem:11*dpRatio
-    property int fontSize_listTitle:13*dpRatio
-    property int fontSize_listAccent:12*dpRatio
+    property int fontSize_listItem:9*dpRatio
+    property int fontSize_listTitle:11*dpRatio
+    property int fontSize_listAccent:10*dpRatio
 
     /* Application Navigation Bars */
     readonly property string appbutton_navigationButtonHeight:manager.isProfile ? scaleY(13) : scaleY(15)

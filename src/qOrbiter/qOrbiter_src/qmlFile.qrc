@@ -210,5 +210,7 @@
         <file>qml/skins/default/images/floorplan/vcr.png</file>
         <file>qml/skins/default/components/Alphabetlist.qml</file>
         <file>qml/skins/default/components/ControlPopupContainer.qml</file>
+        <file>qml/skins/default/components/FloorplanOnOff.qml</file>
+        <file>qml/skins/default/components/FloorplanFanSwitch.qml</file>
     </qresource>
 </RCC>

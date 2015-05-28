@@ -556,6 +556,10 @@ for_harmattan{
         qtc_packaging/debian_harmattan/changelog \
 }
 
+DISTFILES += \
+    qml/skins/default/components/FloorplanOnOff.qml \
+    qml/skins/default/components/FloorplanFanSwitch.qml
+
 
 
 

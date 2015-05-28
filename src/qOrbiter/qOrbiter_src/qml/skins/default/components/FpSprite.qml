@@ -21,8 +21,7 @@ Item {
 
 
     property color activeColor: "grey"
-    property color inactivecolor: "green"
-    property double devicelevel:0.0
+    property color inactivecolor: "green"   
     property string state: "unknown"
     property string deviceName:""// floorplan_devices.getText(Number(deviceNum))
     property string deviceNum:""
@@ -97,7 +96,7 @@ Item {
     StyledText {
         id: deviceNumLabel
         anchors.horizontalCenter: fpDevice_image.horizontalCenter
-        text:deviceName  +"\n"+deviceStatus + "::"+deviceLevel
+        text:deviceName  +"\n"+deviceState + "::"+deviceLevel
         anchors.top: fpDevice_image.bottom
         font.pixelSize: Style.fontSize_small
         visible: true
