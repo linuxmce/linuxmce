@@ -62,8 +62,8 @@ QtObject{
     readonly property int appFontSize_description:11*dpRatio
     readonly property int appFontSize_title:14*dpRatio
 
-    property int fontSize_small:appFontSize_list
-    property int fontSize_medium:appFontSize_description
+    property int fontSize_small:6*dpRatio
+    property int fontSize_medium:8*dpRatio
     property int fontSize_large:appFontSize_title
 
     property int fontSize_listItem:appFontSize_list

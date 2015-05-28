@@ -9,7 +9,7 @@ GenericListModel{
     focus:true
     clip:true
     model:availbleCommands
-    label:qsTr("Availible Commands")
+    label:qsTr("Commands")
     property Item trackedDevice
     property int trackedInt:0
     delegate: StyledButton{
@@ -106,43 +106,8 @@ GenericListModel{
     Component {
         id: onOffDelegate
 
-        Rectangle {
-            id:cmdEntry
-            height: Style.appButtonHeight
-            width: parent.width
-            color: "black"
-            border.color: "white"
-            border.width: 1
-            radius:5
-            StyledText {
-                anchors.left: parent.left
-                text: "On/Off"
-                fontSize: Style.appFontSize_description
-            }
-            Row {
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: childrenRect.width
-                spacing: 10
-                StyledButton {
-                    height: Style.appButtonHeight
-                    width: Style.appButtonWidth /2
-                    textSize: Style.appFontSize_description
-                    anchors.verticalCenter: parent.verticalCenter
-                    label:qsTr( "On")
-                    onActivated: sendCommand(cmdNumber, []);
-                }
-                StyledButton {
-                    anchors.verticalCenter: parent.verticalCenter
-                    height: Style.appButtonHeight
-                    fontSize: Style.appFontSize_description
-                    width: Style.appButtonWidth /2
-                    label: "Off"
-                    onActivated: sendCommand("193", []);
-                }
-            }
-
+        FloorplanOnOff {
+            id: cmdEntry
         }
     }
 
@@ -340,17 +305,7 @@ GenericListModel{
                 id:paramCache
             }
 
-            Timer{
-                id:entry_timeout
-                running:false
-                repeat: true
-                interval:5000
-                onTriggered:{
-                    if(!cmdEntry.isActive)
-                    {parent.state="preselect"}
 
-                }
-            }
 
             StyledText{
                 id:lbl
@@ -364,7 +319,7 @@ GenericListModel{
                 anchors.fill: parent
                 onClicked: {
                     requestParamManager.getParams(cmdNumber, trackedInt);
-                    cmdEntry.state="selected";entry_timeout.start()
+                    cmdEntry.state="selected";
                 }
             }
 
@@ -415,7 +370,7 @@ GenericListModel{
 
                     function setActive(b){
                         cmdEntry.isActive = b
-                        entry_timeout.restart()
+
                     }
 
                     height:Style.appButtonHeight
@@ -482,10 +437,7 @@ GenericListModel{
                         height:0
                         width:0
                     }
-                    PropertyChanges {
-                        target: entry_timeout
-                        running:false
-                    }
+
                 },
                 State{
                     name:"selected"
@@ -509,10 +461,7 @@ GenericListModel{
                         height:(params.count+1)*60
                         width:cmdEntry.width*.65
                     }
-                    PropertyChanges {
-                        target: entry_timeout
-                        running:true
-                    }
+
                 }
 
             ]
