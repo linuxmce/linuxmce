@@ -13,5 +13,9 @@ echo "select" > $COMMAND_FILE
 
 update-rc.d -f switch_cpu_governor start 50 2 3 4 5 . >/dev/null
 
-
+TARGET_DISTRO=$(lsb_release -cs)
+cat <<-EOF > /etc/lsb-release
+	DISTRIB_ID=Raspbian
+	DISTRIB_CODENAME=$TARGET_DISTRO
+	EOF
 
