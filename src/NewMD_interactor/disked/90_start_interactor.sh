@@ -22,10 +22,10 @@ if [ -f "$DEVICEID_FILE" ]; then
 fi
 
 MyIP=""
-while [ -z "$MyIP"]; do
+while [ -z "$MyIP" ] ; do
 	MyIF=$(/sbin/route -n | awk '/^0\.0\.0\.0/ { print $8 }')
 	MyIP=$(/sbin/ifconfig $MyIF | awk 'NR==2 { print substr($2, index($2, ":") + 1) }')
-	if [ -z "$MyIP" ]; then
+	if [ -z "$MyIP" ] ; then
 		echo "Waiting for network configuration to complete..."
 		sleep 1
 	fi
