@@ -94,7 +94,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     nowPlayingButton( new NowPlayingClass(this)),
     mp_screenParameters( new ScreenParamsClass(this)),
     floorplans( new FloorPlanModel ( new FloorplanDevice, this) ),
-    mp_securityVideo( new SecurityVideoClass (this))
+    mp_securityVideo( new SecurityVideoClass (qOrbiter_ptr, this))
 {
 #ifdef __ANDROID__
     int testSize=-1;
