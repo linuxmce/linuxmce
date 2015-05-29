@@ -27,7 +27,7 @@ class SecurityVideoClass : public QObject
     Q_PROPERTY (QString timestamp WRITE setTimeStamp READ getTimeStamp NOTIFY imageUpdated())
 
 public:
-    explicit SecurityVideoClass(QObject *parent = 0);
+    explicit SecurityVideoClass(QObject * qOrbiter_ptr, QObject *parent = 0);
     QMap<int, QImage> cameras; /**< The map of cameras */
     QTimer *requestInterval; /**< The requested interval. \warning do not set this too low, as it will slow down the router. */
     QImage currentFrame; /**< The current security image \warning depreciated */
@@ -37,14 +37,13 @@ public:
      * \brief getTimeStamp getter for timestamp
      * \return
      */
-    QString getTimeStamp () {return QTime::currentTime().toString(); }
+    QString getTimeStamp ();
 
     /*!
      * \brief setTimeStamp setter for timestamp
      * \param t : timecode in QString format
      */
-    void setTimeStamp(QString t) {timestamp = QTime::currentTime().toString(); emit imageUpdated();}
-
+    void setTimeStamp(QString t);
 signals:
     /*!
      * \brief This signal is updated when the security image changes.
@@ -61,17 +60,7 @@ public slots:
      *
      * \todo delete image after camera view closes.
      */
-    void setCameraImage(int cam, QImage img) {
-        if(cameras.find(cam).key()==cam)
-        {
-            cameras.find(cam).value() = img;
-        }
-        else{
-            cameras.insert(cam, img);
-        }
-        currentFrame = img;
-        emit imageUpdated();
-    }
+    void setCameraImage(int cam, QImage img);
     /*!
      * \brief getCameraImage - returns the camera image based on device id.
      * \param cam
@@ -79,17 +68,7 @@ public slots:
      *
      *Returns the security image from the map. If no image is found, an empty QImage is returned
      */
-    QImage getCameraImage(int cam){
-        if(cameras.find(cam).key()==cam)
-        {
-            return cameras.find(cam).value();
-        }
-        else{
-           return QImage();
-        }
-
-    }
-
+    QImage getCameraImage(int cam);
 
 };
 

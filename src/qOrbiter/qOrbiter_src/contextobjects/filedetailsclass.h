@@ -226,7 +226,7 @@ public slots:
     void setMediaTitle (const QString inc_mediaTitle) {mediatitle = inc_mediaTitle;  emit mediaTitleChanged();}
     QString getMediaTitle () {return mediatitle;}
 
-    void setStudio (const QString inc_studio) {channel = inc_studio;  emit studioChanged();}
+    void setStudio (const QString inc_studio) {studio.append(inc_studio) = inc_studio;  emit studioChanged();}
     QString getStudio () {return studio;}
 
     //--tv getters and setters-------------//

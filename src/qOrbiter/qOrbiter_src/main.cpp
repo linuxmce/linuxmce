@@ -479,10 +479,8 @@ int main(int argc, char* argv[])
         // QObject::connect(&dceThread, SIGNAL(finished()),&a, SLOT(quit()));
 
         // Generic DCE command sending signal/slots
-        QObject::connect(&w, SIGNAL(sendDceCommand(DCE::PreformedCommand)), &pqOrbiter, SLOT(handleDceCommand(DCE::PreformedCommand)), Qt::QueuedConnection);
+        QObject::connect(&w, SIGNAL(sendDceCommand(DCE::PreformedCommand)), &pqOrbiter, SLOT(handleDceCommand(DCE::PreformedCommand)), Qt::QueuedConnection); //this somehow still blocks btw. this is why i had a painful but explict bridge. the must be a middle ground. possibly look at posting the event instead of connections.
       //  NO! QObject::connect(&w, SIGNAL(sendDceCommandResponse(DCE::PreformedCommand&, string*)), &pqOrbiter, SLOT(sendDCECommandResponse(DCE::PreformedCommand&, string*)), Qt::QueuedConnection);
-
-
         QObject::connect(&pqOrbiter, SIGNAL(routerConnectionChanged(bool)), &w, SLOT(setConnectedState(bool)), Qt::QueuedConnection);
 
 
@@ -498,7 +496,6 @@ int main(int argc, char* argv[])
         //security video frames
         QObject::connect(&w, SIGNAL(newHouseMode(QString,int)), &pqOrbiter, SLOT(SetSecurityMode(QString,int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(getSingleCam(int,int,int)), &pqOrbiter, SLOT(GetSingleSecurityCam(int,int,int)));
-        QObject::connect(&pqOrbiter, SIGNAL(securityImageReady(int, QImage)), w.mp_securityVideo, SLOT(setCameraImage(int,QImage)),Qt::QueuedConnection);
 
         QObject::connect(&w, SIGNAL(mediaSeperatorChanged(int)), &pqOrbiter, SLOT(setGridSeperator(int)), Qt::QueuedConnection);
 
