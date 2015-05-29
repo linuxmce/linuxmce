@@ -54,7 +54,7 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
 {
     qDebug() << "Constructing";
     QObject::connect(this, SIGNAL(dceIPChanged()), this, SLOT(pingCore()));
-    QObject::connect(this, SIGNAL(transmitDceCommand(PreformedCommand)), this, SLOT(sendDCECommand(PreformedCommand)), Qt::QueuedConnection);
+    QObject::connect(this, SIGNAL(transmitDceCommand(PreformedCommand)), this, SLOT(sendDCECommand(PreformedCommand)), Qt::DirectConnection);
     m_bIsOSD=false;
 }
 //<-dceag-const2-b->
@@ -2345,6 +2345,7 @@ void qOrbiter::sendDCECommand(PreformedCommand cmd) {
 
     qDebug() << Q_FUNC_INFO ;
     SendCommandNoResponse(cmd);
+    return;
 }
 
 void qOrbiter::sendDCECommandResponse(PreformedCommand& cmd, string* p_sResponse) {

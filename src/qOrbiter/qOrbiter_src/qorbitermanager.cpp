@@ -91,7 +91,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     gotoScreenList( new QStringList()),
     m_ipAddress("192.168.80.1"),
     mp_fileDetails(new FileDetailsClass(qOrbiter_ptr, this)),
-    nowPlayingButton( new NowPlayingClass(this)),
+    nowPlayingButton( new NowPlayingClass(qOrbiter_ptr, this)),
     mp_screenParameters( new ScreenParamsClass(this)),
     floorplans( new FloorPlanModel ( new FloorplanDevice, this) ),
     mp_securityVideo( new SecurityVideoClass (qOrbiter_ptr, this))

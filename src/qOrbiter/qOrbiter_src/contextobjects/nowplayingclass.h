@@ -128,7 +128,7 @@ class NowPlayingClass : public QDeclarativeItem
     Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged ) /*!< \brief Aspect ratio \todo Change now playing aspect to enum. \ingroup now_playing*/
 public:
 #if (QT5)
-    explicit NowPlayingClass(QObject *parent = 0);
+    explicit NowPlayingClass(QObject *qOrbiter_ptr, QObject *parent = 0);
 #else
     explicit NowPlayingClass(QDeclarativeItem *parent = 0);
 #endif
