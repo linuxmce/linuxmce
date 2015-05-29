@@ -54,7 +54,7 @@ qOrbiter::qOrbiter(int DeviceID, string ServerAddress,bool bConnectEventHandler,
 {
     qDebug() << "Constructing";
     QObject::connect(this, SIGNAL(dceIPChanged()), this, SLOT(pingCore()));
-    connect(this, SIGNAL(transmitDceCommand(PreformedCommand)), this, SLOT(sendDCECommand(PreformedCommand)));
+    QObject::connect(this, SIGNAL(transmitDceCommand(PreformedCommand)), this, SLOT(sendDCECommand(PreformedCommand)), Qt::QueuedConnection);
     m_bIsOSD=false;
 }
 //<-dceag-const2-b->
@@ -2726,6 +2726,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
     CMD_Get_Attributes_For_Media attribute_detail_get(m_dwPK_Device, iMediaPluginID,  qs_fk_fileno.toStdString(), " ",&s_val );
     SendCommand(attribute_detail_get);
     QString breaker = s_val.c_str();
+    qDebug() << Q_FUNC_INFO << s_val.c_str();
 
     QStringList details = breaker.split(QRegExp("\\t"));
 
@@ -2825,7 +2826,7 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
             DataGridCell *pCell;
             for(MemoryDataTable::iterator it=pDataGridTable->m_MemoryDataTable.begin();it!=pDataGridTable->m_MemoryDataTable.end();++it)
             {
-                //QApplication::processEvents(QEventLoop::AllEvents);
+
                 pCell = it->second;
                 // fk.remove("!F");
                 const char *pPath = pCell->GetImagePath();
@@ -2834,63 +2835,24 @@ void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)
                 QString attribute  = pCell->m_mapAttributes_Find("Name").c_str();
 
                 cellfk = pCell->GetValue();
-                //QApplication::processEvents(QEventLoop::AllEvents);
+
+                qDebug() << Q_FUNC_INFO << attributeType << " :: " << attribute;
 #ifdef debug
-                emit commandResponseChanged(attributeType << " :: " << attribute);
+                emit commandResponseChanged();
 #endif
-                if(attributeType == "Program")
-                {
-                    emit fd_programChanged(attribute);
-                    qDebug("PROGRAM");
-                }
-                else if(attributeType == "Title")
-                {
-                    emit fd_mediaTitleChanged(attribute);
-                }
-                else if(attributeType == "Channel")
-                {
-                    emit fd_chanIdChanged(attribute);
-                }
-                else if(attributeType == "Episode")
-                {
-                    emit fd_episodeChanged(attribute);
-                }
-                else if(attributeType == "Performer")
-                {
-                    emit fd_performersChanged(attribute);
-                }
-                else if(attributeType == "Composer/Writer")
-                {
-                    emit fd_composersChanged(attribute);
-                }
-                else if(attributeType == "Director")
-                {
-                    emit fd_directorChanged(attribute);
-                }
-                else if(attributeType == "Genre")
-                {
-                    emit fd_genreChanged(attribute);
-                }
-                else if(attributeType == "Album")
-                {
-                    emit fd_albumChanged(attribute);
-                }
-                else if(attributeType == "Studio")
-                {
-                    emit fd_studioChanged(attribute);
-                }
-                else if(attributeType == "Track")
-                {
-                    emit fd_trackChanged(attribute);
-                }
-                else if(attributeType == "Rating")
-                {
-                    emit fd_ratingChanged(attribute);
-                    //filedetailsclass->setRating(attribute);
-                }
-                else
-                {
-                    qDebug() << "unhandled attribute" << attributeType << " :: " << attribute;
+                if(attributeType == "Program") { emit fd_programChanged(attribute); }
+                else if(attributeType == "Title") { emit fd_mediaTitleChanged(attribute); }
+                else if(attributeType == "Channel") { emit fd_chanIdChanged(attribute);   }
+                else if(attributeType == "Episode") { emit fd_episodeChanged(attribute);  }
+                else if(attributeType == "Performer") { emit fd_performersChanged(attribute); }
+                else if(attributeType == "Composer/Writer") { emit fd_composersChanged(attribute); }
+                else if(attributeType == "Director") { emit fd_directorChanged(attribute); }
+                else if(attributeType == "Genre") { emit fd_genreChanged(attribute);  }
+                else if(attributeType == "Album") { emit fd_albumChanged(attribute);  }
+                else if(attributeType == "Studio") { emit fd_studioChanged(attribute); }
+                else if(attributeType == "Track")  { emit fd_trackChanged(attribute);  }
+                else if(attributeType == "Rating") { emit fd_ratingChanged(attribute); }
+                else { qDebug() << Q_FUNC_INFO << "unhandled attribute" << attributeType << " :: " << attribute;
                 }
 #ifdef RPI
                 QThread::msleep(100);
@@ -3157,7 +3119,7 @@ void DCE::qOrbiter::GetSingleSecurityCam(int cam_device, int iHeight, int iWidth
 
         QImage returnedFrame;
         returnedFrame.loadFromData(QByteArray(sData, sData_size));
-        //  qDebug()<< "Returned security frame " << returnedFrame.size();
+        qDebug()<< Q_FUNC_INFO << "Returned security frame " << returnedFrame.size();
         emit securityImageReady(cam_device, returnedFrame);
     } else {
 
