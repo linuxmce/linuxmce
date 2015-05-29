@@ -37,6 +37,7 @@
 #include <QDebug>
 #endif
 
+
 /*!
  * \brief The FileDetailsClass class is responsible for presenting a files properties in one object.
  * \ingroup context_objects
@@ -81,7 +82,7 @@ class FileDetailsClass : public QObject
     Q_PROPERTY (int i_aspectW READ getAspectW WRITE setAspectW NOTIFY aspectWChanged)
 
 public:
-    explicit FileDetailsClass(QObject *parent = 0);
+    explicit FileDetailsClass(QObject *qorbiter_ptr, QObject *parent = 0);
 
     QString objecttitle;
     int i_aspectH; //height then width
@@ -184,6 +185,7 @@ signals:
     void episodeChanged();
 
 public slots:
+
     void clear();
 
     void setRating(const QString r) {rating = r; emit ratingChanged();}

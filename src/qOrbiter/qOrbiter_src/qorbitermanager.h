@@ -234,13 +234,13 @@ class qorbiterManager : public QObject
 
 public:
 #if QT5 && !ANDROID
-    qorbiterManager(QQuickView * view, int testSize, SettingInterface *appSettings, QObject *parent=0);  //constructor
+    qorbiterManager(QObject *qOrbiter_ptr, QQuickView * view, int testSize, SettingInterface *appSettings, QObject *parent=0);  //constructor
 #elif ANDROID && QT5
-    qorbiterManager(QQuickView *view, AndroidSystem *jniHelper, SettingInterface *appSettings, QObject *parent=0);
+    qorbiterManager(QObject *qOrbiter_ptr, QQuickView *view, AndroidSystem *jniHelper, SettingInterface *appSettings, QObject *parent=0);
 #elif ANDROID
-    qorbiterManager(QDeclarativeView *view, AndroidSystem *jniHelper, SettingInterface *appSettings,   QObject *parent =0);
+    qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, AndroidSystem *jniHelper, SettingInterface *appSettings,   QObject *parent =0);
 #elif   QT4_8
-    qorbiterManager(QDeclarativeView * view, int testSize,SettingInterface *appSettings, QObject *parent=0);  //constructor
+    qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView * view, int testSize,SettingInterface *appSettings, QObject *parent=0);  //constructor
 #endif
 
     ~qorbiterManager();
@@ -302,12 +302,12 @@ public:
 
 
     //------CUSTOM QML TYPES------------------------------------------------------------------------------------
-    ScreenParamsClass *ScreenParameters;
-    SecurityVideoClass *SecurityVideo;
+    ScreenParamsClass *mp_screenParameters;
+    SecurityVideoClass *mp_securityVideo;
     QList<QObject*> screenshotVars;
 
     //------------media vars-----------------------------------
-    FileDetailsClass *filedetailsclass;
+    FileDetailsClass *mp_fileDetails;
     NowPlayingClass *nowPlayingButton;
     QString aspect; //-- true poster || false landscape
     QString *gridReqType;

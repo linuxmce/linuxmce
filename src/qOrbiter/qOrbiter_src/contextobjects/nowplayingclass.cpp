@@ -1,8 +1,8 @@
 #include "nowplayingclass.h"
 
 #if (QT5)
-NowPlayingClass::NowPlayingClass(QQuickItem *parent) :
-    QQuickItem(parent)
+NowPlayingClass::NowPlayingClass(QObject *parent) :
+    QObject(parent)
 #else
 NowPlayingClass::NowPlayingClass(QDeclarativeItem *parent) :
     QDeclarativeItem(parent)

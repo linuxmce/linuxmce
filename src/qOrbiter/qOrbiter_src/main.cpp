@@ -410,7 +410,7 @@ int main(int argc, char* argv[])
 
 #ifndef ANDROID
 
-        qorbiterManager  w(&orbiterWin.mainView, screenSize, &settings);
+        qorbiterManager  w(&pqOrbiter, &orbiterWin.mainView, screenSize, &settings);
         if(!sRouter_IP.empty()){
             w.setInternalIp(QString::fromStdString(sRouter_IP));
             orbiterWin.setRouterAddress(QString::fromStdString(sRouter_IP));
@@ -426,7 +426,7 @@ int main(int argc, char* argv[])
             qDebug() <<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!SETTING ON SCREEN FLAG!!!!!!!!!!!!!!!!!!!!!!!!";
         }
 #else
-        qorbiterManager w(&orbiterWin.mainView, &androidHelper, &settings);
+        qorbiterManager w(&pqOrbiter, &orbiterWin.mainView, &androidHelper, &settings);
         orbiterWin.mainView.rootContext()->setContextProperty("androidSystem", &androidHelper);
 #endif
         orbiterWin.mainView.rootContext()->setContextProperty("manager", &w);
@@ -498,27 +498,8 @@ int main(int argc, char* argv[])
         //security video frames
         QObject::connect(&w, SIGNAL(newHouseMode(QString,int)), &pqOrbiter, SLOT(SetSecurityMode(QString,int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(getSingleCam(int,int,int)), &pqOrbiter, SLOT(GetSingleSecurityCam(int,int,int)));
-        QObject::connect(&pqOrbiter, SIGNAL(securityImageReady(int, QImage)), w.SecurityVideo, SLOT(setCameraImage(int,QImage)),Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(securityImageReady(int, QImage)), w.mp_securityVideo, SLOT(setCameraImage(int,QImage)),Qt::QueuedConnection);
 
-        //filedetails
-        QObject::connect(&pqOrbiter, SIGNAL(fd_imageUrlChanged(QString)), w.filedetailsclass, SLOT(setScreenshot(QString)));
-        QObject::connect(&pqOrbiter, SIGNAL(fd_titleChanged(QString)), w.filedetailsclass, SLOT(setTitle(QString)), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter,SIGNAL(fd_storageDeviceChanged(QString)), w.filedetailsclass, SLOT(setStorageDevice(QString)), Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(fd_mediaTitleChanged(QString)), w.filedetailsclass, SLOT(setMediaTitle(QString)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(fd_directorChanged(QString)), w.filedetailsclass, SLOT(setDirector(QString)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(fd_programChanged(QString)), w.filedetailsclass, SLOT(setProgram(QString)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(fd_synopChanged(QString)), w.filedetailsclass, SLOT(setSynop(QString)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(fd_albumChanged(QString)), w.filedetailsclass, SLOT(setAlbum(QString)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(fd_performersChanged(QString)), w.filedetailsclass, SLOT(setPerformers(QString)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(fd_genreChanged(QString)), w.filedetailsclass, SLOT(setGenre(QString)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(fd_channelChanged(QString)), w.filedetailsclass, SLOT(setChannel(QString)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(fd_pathChanged(QString)), w.filedetailsclass, SLOT(setPath(QString)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(fd_fileChanged(QString)), w.filedetailsclass, SLOT(setFile(QString)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(fd_fileNameChanged(QString)), w.filedetailsclass, SLOT(setFilename(QString)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(fd_episodeChanged(QString)), w.filedetailsclass, SLOT(setEpisode(QString)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(fd_trackChanged(QString)), w.filedetailsclass, SLOT(setTrack(QString)),Qt::QueuedConnection);
-        QObject::connect(&pqOrbiter, SIGNAL(fd_ratingChanged(QString)), w.filedetailsclass, SLOT(setRating(QString)));
-        QObject::connect(&pqOrbiter,SIGNAL(fd_studioChanged(QString)), w.filedetailsclass, SLOT(setStudio(QString)));
         QObject::connect(&w, SIGNAL(mediaSeperatorChanged(int)), &pqOrbiter, SLOT(setGridSeperator(int)), Qt::QueuedConnection);
 
 
@@ -593,7 +574,7 @@ int main(int argc, char* argv[])
         QObject::connect(&w, SIGNAL(loadingMessage(QString)), &orbiterWin,SLOT(setMessage(QString)), Qt::QueuedConnection);
         QObject::connect(&pqOrbiter,SIGNAL(commandComplete()), &w, SIGNAL(commandCompleted()), Qt::QueuedConnection);
         //operations
-        QObject::connect(&pqOrbiter, SIGNAL(addScreenParam(QString,int)), w.ScreenParameters, SLOT(addParam(QString, int)), Qt::QueuedConnection);
+        QObject::connect(&pqOrbiter, SIGNAL(addScreenParam(QString,int)), w.mp_screenParameters, SLOT(addParam(QString, int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(locationChanged(int,int)), &pqOrbiter, SLOT(setLocation(int,int)),Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(userChanged(int)), &pqOrbiter, SLOT(setUser(int)),Qt::QueuedConnection);
         //QObject::connect(w.ScreenSaver, SIGNAL(requestNewImage(QString)), &pqOrbiter, SLOT(getScreenSaverImage(QString)), Qt::QueuedConnection);

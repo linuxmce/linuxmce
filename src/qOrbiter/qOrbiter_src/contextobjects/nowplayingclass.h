@@ -69,7 +69,7 @@
  * \ingroup context_objects
  */
 #if (QT5)
-class NowPlayingClass : public QQuickItem
+class NowPlayingClass : public QObject
         #else
 class NowPlayingClass : public QDeclarativeItem
         #endif
@@ -128,12 +128,10 @@ class NowPlayingClass : public QDeclarativeItem
     Q_PROPERTY (QString aspect READ getImageAspect WRITE setImageAspect NOTIFY imageAspectChanged ) /*!< \brief Aspect ratio \todo Change now playing aspect to enum. \ingroup now_playing*/
 public:
 #if (QT5)
-    explicit NowPlayingClass(QQuickItem *parent = 0);
+    explicit NowPlayingClass(QObject *parent = 0);
 #else
     explicit NowPlayingClass(QDeclarativeItem *parent = 0);
 #endif
-
-
 
     //general variables - set by now playing slot from dce router when media is started or paused
 

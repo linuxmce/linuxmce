@@ -33,7 +33,7 @@ QImage AbstractImageProvider::floorplanProvider(QSize &requestedSize)
 
 QImage AbstractImageProvider::securityProvider(QSize &requestedSize,int cam)
 {
-    QImage key = managerreference->SecurityVideo->getCameraImage(cam);
+    QImage key = managerreference->mp_securityVideo->getCameraImage(cam);
 
     if (key.isNull())
     {
