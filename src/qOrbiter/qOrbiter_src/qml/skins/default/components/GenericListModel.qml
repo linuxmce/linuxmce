@@ -26,8 +26,6 @@ Item{
     }
 
     function refresh(){
-
-
         if(dataGrid==-1 || dataGridLabel==="" ){
             console.log("Invalid model id, cant reset")
             return;

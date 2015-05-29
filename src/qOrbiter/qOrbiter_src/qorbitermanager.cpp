@@ -72,13 +72,13 @@ using namespace DCE;
   messaging system will be the initial method of communication
 */
 #if (QT5) && !defined (ANDROID)
-qorbiterManager::qorbiterManager(QQuickView *view, int testSize, SettingInterface *appSettings, QObject *parent) :
+qorbiterManager::qorbiterManager(QObject * qOrbiter_ptr, QQuickView *view, int testSize, SettingInterface *appSettings, QObject *parent) :
     #elif ANDROID && QT5
-qorbiterManager::qorbiterManager(QQuickView *view, AndroidSystem *jniHelper,SettingInterface *appSettings,  QObject *parent) :
+qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QQuickView *view, AndroidSystem *jniHelper,SettingInterface *appSettings,  QObject *parent) :
     #elif ANDROID
-qorbiterManager::qorbiterManager(QDeclarativeView *view, AndroidSystem *jniHelper, SettingInterface *appSettings,  QObject *parent) :
+qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, AndroidSystem *jniHelper, SettingInterface *appSettings,  QObject *parent) :
     #else
-qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,SettingInterface *appSettings,  QObject *parent) :
+qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, int testSize,SettingInterface *appSettings,  QObject *parent) :
 
     #endif
     QObject(parent),qorbiterUIwin(view),
@@ -89,7 +89,12 @@ qorbiterManager::qorbiterManager(QDeclarativeView *view, int testSize,SettingInt
     m_fontDir(""),
     iPK_Device(-1),
     gotoScreenList( new QStringList()),
-    m_ipAddress("192.168.80.1")
+    m_ipAddress("192.168.80.1"),
+    mp_fileDetails(new FileDetailsClass(qOrbiter_ptr, this)),
+    nowPlayingButton( new NowPlayingClass(this)),
+    mp_screenParameters( new ScreenParamsClass(this)),
+    floorplans( new FloorPlanModel ( new FloorplanDevice, this) ),
+    mp_securityVideo( new SecurityVideoClass (this))
 {
 #ifdef __ANDROID__
     int testSize=-1;
@@ -297,7 +302,7 @@ bool qorbiterManager::initializeManager(string sRouterIP, int device_id)
         swapSkins("default");
         emit setSkinStatus(true);
     }
-      qDebug() << Q_FUNC_INFO << "Exit";
+    qDebug() << Q_FUNC_INFO << "Exit";
 }
 
 void qorbiterManager::initiateRestart(){
@@ -1619,14 +1624,14 @@ void qorbiterManager::getFloorplanDevices(int floorplantype){
 #ifdef debug
         qDebug() << floorplans->index(i, 0, QModelIndex()).data(1);
 #endif
-//qDebug() << Q_FUNC_INFO << floorplans->get(i)->floorplanType() << "::" << floorplantype;
+        //qDebug() << Q_FUNC_INFO << floorplans->get(i)->floorplanType() << "::" << floorplantype;
         if(floorplans->index(i).data(6).toInt() == floorplantype)  {
             QString markerID = floorplans->index(i).data(1).toString();
             current_floorplan_devices.append(floorplans->find(markerID));
-qDebug() << markerID;
+            qDebug() << markerID;
         }
     }
-     qorbiterUIwin->rootContext()->setContextProperty("current_floorplan_devices", QVariant::fromValue(current_floorplan_devices));
+    qorbiterUIwin->rootContext()->setContextProperty("current_floorplan_devices", QVariant::fromValue(current_floorplan_devices));
 }
 
 void qorbiterManager::setFloorplanType(int t)
@@ -1638,7 +1643,7 @@ void qorbiterManager::setFloorplanType(int t)
 
 void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
 {
-      qDebug() << Q_FUNC_INFO << "Enter--" << " Current Status ==> " << status;
+    qDebug() << Q_FUNC_INFO << "Enter--" << " Current Status ==> " << status;
 
 
     if(status=="starting"){
@@ -1655,7 +1660,7 @@ void qorbiterManager::qmlSetupLmce(QString incdeviceid, QString incrouterip)
     } else {
 
     }
-      qDebug() << Q_FUNC_INFO << "Exit ";
+    qDebug() << Q_FUNC_INFO << "Exit ";
 
     //  getConfiguration(); /* Connect to skins ready signal */
 }
@@ -2045,8 +2050,8 @@ bool qorbiterManager::goBackGrid()
 
 void qorbiterManager::mediaItemSelected(QString itemID)
 {
-    filedetailsclass->setVisible(true);
-    filedetailsclass->setFile(itemID);
+    mp_fileDetails->setVisible(true);
+    mp_fileDetails->setFile(itemID);
 }
 
 void qorbiterManager::requestSecurityPic(int i_pk_camera_device, int h, int w)
@@ -2254,13 +2259,13 @@ bool qorbiterManager::cleanupData()
     roomTelecom->clear();
     roomTelecomScenarios.clear();
     nowPlayingButton->resetData();
-    filedetailsclass->clear();
+    mp_fileDetails->clear();
     devices->clear();
     myOrbiters->clear();
     deviceCommands->clear();
     floorplans->clear();
     nowPlayingButton->resetData();
-    filedetailsclass->clear();
+    mp_fileDetails->clear();
     screensaverImages.clear();
 
     attribFilter->clear();
@@ -2347,23 +2352,15 @@ void qorbiterManager::initializeConnections()
 void qorbiterManager::setupContextObjects()
 {
     //file details object and imageprovider setup
-    filedetailsclass = new FileDetailsClass(this);
-    qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,filedetailsclass);
-    filedetailsclass->clear();
 
-    nowPlayingButton = new NowPlayingClass();
-    qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
+    qorbiterUIwin->rootContext()->setContextProperty("filedetailsclass" ,mp_fileDetails);
+   qorbiterUIwin->rootContext()->setContextProperty("dcenowplaying" , nowPlayingButton);
 
     //screen parameters class that could be extended as needed to fetch other data
-    ScreenParameters = new ScreenParamsClass(this);
-    qorbiterUIwin->rootContext()->setContextProperty("screenparams", ScreenParameters);
-
-    //floorplan model initialization for slots in main.cpp
-    floorplans = new FloorPlanModel( new FloorplanDevice , this);
+    qorbiterUIwin->rootContext()->setContextProperty("screenparams", mp_screenParameters);
 
     //----------------Security Video setup
-    SecurityVideo = new SecurityVideoClass(this);
-    qorbiterUIwin->rootContext()->setContextProperty("securityvideo", SecurityVideo);
+    qorbiterUIwin->rootContext()->setContextProperty("securityvideo", mp_securityVideo);
 
     attribFilter = new AttributeSortModel(new AttributeSortItem,6, this);
     uiFileFilter = new AttributeSortModel(new AttributeSortItem,2, this);
