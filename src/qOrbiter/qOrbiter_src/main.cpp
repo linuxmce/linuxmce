@@ -495,8 +495,7 @@ int main(int argc, char* argv[])
         //QObject::connect(&w, SIGNAL(clearModel()), simpleEPGmodel, SLOT(clear()), Qt::QueuedConnection);
         //security video frames
         QObject::connect(&w, SIGNAL(newHouseMode(QString,int)), &pqOrbiter, SLOT(SetSecurityMode(QString,int)), Qt::QueuedConnection);
-        QObject::connect(&w, SIGNAL(getSingleCam(int,int,int)), &pqOrbiter, SLOT(GetSingleSecurityCam(int,int,int)));
-
+        QObject::connect(&w, SIGNAL(getSingleCam(int,int,int)), &pqOrbiter, SLOT(GetSingleSecurityCam(int,int,int)), Qt::QueuedConnection);
         QObject::connect(&w, SIGNAL(mediaSeperatorChanged(int)), &pqOrbiter, SLOT(setGridSeperator(int)), Qt::QueuedConnection);
 
 

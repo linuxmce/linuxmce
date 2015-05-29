@@ -8,7 +8,9 @@ SecurityVideoClass::SecurityVideoClass(QObject *qOrbiter_ptr, QObject *parent) :
     QObject(parent)
 {
     qOrbiter * ptr = qobject_cast<qOrbiter*>(qOrbiter_ptr);
+
     QObject::connect(ptr, &qOrbiter::securityImageReady,this, &SecurityVideoClass::setCameraImage,Qt::QueuedConnection);
+
     currentFrame.load(":/icons/security.png");
     if (currentFrame.isNull())
     {
