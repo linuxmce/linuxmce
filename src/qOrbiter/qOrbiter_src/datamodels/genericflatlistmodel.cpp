@@ -301,7 +301,7 @@ void GenericFlatListModel::updateItemData(int row, int role, QVariant value)
     LoggerWrapper::GetInstance()->Write(LV_DEBUG, "GenericFlatListModel.updateItemData start");
     // TODO: should make sure model data is identical to when update request was sent
     if (row < m_windowStart || row > m_windowStart+m_list.size()) {
-    //    LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.updateItemData row outside loaded window");
+      LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.updateItemData row outside loaded window");
     return;
     }
     GenericModelItem* pItem = m_list.at(row-m_windowStart);

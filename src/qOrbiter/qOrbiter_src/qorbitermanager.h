@@ -1079,7 +1079,7 @@ public slots:
      */
     void setBoundStatus(bool b) {
         CMD_Bind_to_Media_Remote cmd(iPK_Device, iMediaPluginID, iPK_Device,string("2355") ,b ? "1" :"0", string(""), sEntertainArea, 0, 0);
-        emit emit sendDceCommand(cmd);
+        emit sendDceCommand(cmd);
     }
 
     /*!
@@ -1262,7 +1262,7 @@ public slots:
         }
         //changed to remove media type as that is decided on by the media plugin and passed back
         CMD_MH_Play_Media cmd(iPK_Device, iMediaPluginID, 0 , FK_Media.toStdString(), 0, 0, sEntertainArea, false, false, false, false, false);
-        emit emit sendDceCommand(cmd);
+         emit sendDceCommand(cmd);
     }
 
     void mythTvPlay(){
@@ -1899,6 +1899,7 @@ private slots:
     }
 
 private slots:
+    bool registerConnections(QObject *qOrbiter_ptr);
     bool restoreSettings();
     bool setupNetworkSkins();
     bool setupLocalSkins();
