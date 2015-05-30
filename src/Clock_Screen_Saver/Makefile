@@ -26,8 +26,9 @@ LDFLAGS +=
 XTRALDLIBS = -lmysqlclient_r -lSDL2 -lSDL2_ttf -lSDL2_image
 
 Gen_Dev_Files +=
-sources += CApp.cpp
-
+sources += CApp.cpp \
+	../utilities/linux/window_manager/WMController/WMController.cpp \
+	../utilities/linux/window_manager/wmctrl/wmctrl.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
@@ -47,7 +48,7 @@ Clock_Screen_Saver.so: $(sources:.cpp=.o)
 	cp $@ ../bin
 #	chmod +x post_make.sh
 #	./post_make.sh $@
-		
+
 Clock_Screen_Saver: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	mkdir -p ../bin
