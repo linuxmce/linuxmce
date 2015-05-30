@@ -1,5 +1,6 @@
 #include "CApp.h"
 #include "Clock_Screen_Saver.h"
+#include "utilities/linux/window_manager/WMController/WMController.h"
 
 const CLOCK_STYLE	DEFAULT_CLOCK_STYLE = HOUR24;
 const std::string	DEFAULT_FONT_FILE = "/usr/share/fonts/truetype/msttcorefonts/Verdana.ttf";
@@ -35,6 +36,26 @@ int		CApp::fontSize = 0;
 std::string	CApp::bkgFilename = DEFAULT_BKG_FILE;
 BKG_STYLE	CApp::bkgStyle = DEFAULT_BKG_STYLE;
 SDL_Color	CApp::bkgColor = DEFAULT_BKG_COLOR;
+
+bool CApp::Minimize()
+{
+  WMControllerImpl *pWMController = new WMControllerImpl();
+
+  if (!pWMController)
+    return false;
+
+  return pWMController->SetVisible("Clock_Screen_Saver.Clock_Screen_Saver",false);
+}
+
+bool CApp::Maximize()
+{
+  WMControllerImpl *pWMController = new WMControllerImpl();
+
+  if (!pWMController)
+    return false;
+
+  return pWMController->SetVisible("Clock_Screen_Saver.Clock_Screen_Saver",true);
+}
 
 SDL_Texture *CApp::renderTime(const std::string &message, SDL_Color color, SDL_Renderer *renderer)
 {
@@ -257,6 +278,7 @@ void CApp::ProcessCommand(std::string cmd)
 	if (cmd == "ON")
 	{
 		error ( std::cout, "Turning ON" );
+		CApp::Maximize();
 		SDL_ShowWindow(window);
 		SDL_RaiseWindow(window);
 		SDL_ShowCursor(SDL_DISABLE);
@@ -267,6 +289,7 @@ void CApp::ProcessCommand(std::string cmd)
 	else if (cmd == "OFF")
 	{
 		error ( std::cout, "Turning OFF" );
+		CApp::Minimize();
 		SDL_ShowCursor(SDL_ENABLE);
 		SDL_HideWindow(window);
 		Active = false;

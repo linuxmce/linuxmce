@@ -21,9 +21,9 @@ sources = Main.cpp Clock_Screen_Saver.cpp $(Gen_Dev_Files)
 
 
 CXXFLAGS += -std=c++11
-CPPFLAGS +=
-LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r -lSDL2 -lSDL2_ttf -lSDL2_image
+CPPFLAGS += `pkg-config --cflags glib-2.0`
+LDFLAGS += `pkg-config --libs glib-2.0`
+XTRALDLIBS = -lmysqlclient_r -lSDL2 -lSDL2_ttf -lSDL2_image -lX11 -lXmu
 
 Gen_Dev_Files +=
 sources += CApp.cpp \
