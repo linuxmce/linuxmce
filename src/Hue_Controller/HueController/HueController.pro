@@ -49,7 +49,8 @@ SOURCES += ../Main.cpp \
     ../HueController.cpp \
     huecontrollerhardware.cpp \
     huebulb.cpp \
-    ../huecommand.cpp
+    ../huecommand.cpp \
+    abstractwirelessbulb.cpp
 
 HEADERS += ../../PlutoUtils/ThreadedClass.h \
     ../../PlutoUtils/MultiThreadIncludes.h \
@@ -75,4 +76,5 @@ HEADERS += ../../PlutoUtils/ThreadedClass.h \
     ../HueController.h \
     huecontrollerhardware.h \
     huebulb.h \
-    ../huecommand.h
+    ../huecommand.h \
+    abstractwirelessbulb.h

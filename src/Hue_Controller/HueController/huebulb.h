@@ -22,51 +22,20 @@
 
 #include <QObject>
 #include <QMap>
+#include <abstractwirelessbulb.h>
 
-class HueBulb : public QObject
+class HueBulb : public AbstractWirelessBulb
 {
     Q_OBJECT
 public:
-    explicit HueBulb(QObject *parent = 0);
-
-    enum alert {
-        NOALERT,BLINK,FLASH
-    };
-
-    enum effect {
-      NOEFFECT,COLORLOOP
-    };
-
-    enum colormode{
-        HUESAT,COLORTEMP,XY
-    };
-
-    int lightId;
-    int linuxmceId;
-    QString powerState;
-    quint8 bri;
-    quint16 hue;
-    quint8 sat;
-    QMap<QString*, float> xy;
-    quint16 colorTemp;
-    QString alertStatus;
-    QString effectStatus;
-    QString currentColorMode;
-    bool reachable;
-
-    QString lightType;
-    QString lightName;
-    QString modelId;
-    QString swVersion;
-    QString controller;
+    explicit HueBulb(HueControllerHardware *hw);
+    HueBulb(){}
 
 signals:
     
 public slots:
 
-    int getInternalId() {return lightId;}
-    int getLinuxMceId() {return linuxmceId;}
-    QString getController() {return controller;}
+
 
 
     
