@@ -142,8 +142,7 @@ void Row_ParameterType::SetDefaultValues()
 is_null[0] = false;
 m_Description = "";
 is_null[1] = false;
-m_Define = "";
-is_null[2] = false;
+is_null[2] = true;
 is_null[3] = true;
 is_null[4] = true;
 m_psc_id = 0;
@@ -228,6 +227,9 @@ void Row_ParameterType::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSO
 m_psc_restrict = val; is_modified=true; is_null[9]=false;}
 
 		
+bool Row_ParameterType::Define_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return is_null[2];}
 bool Row_ParameterType::CPPType_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return is_null[3];}
@@ -248,6 +250,10 @@ bool Row_ParameterType::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,t
 return is_null[9];}
 
 			
+void Row_ParameterType::Define_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[2]=val;
+is_modified=true;
+}
 void Row_ParameterType::CPPType_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[3]=val;
 is_modified=true;
@@ -308,8 +314,8 @@ PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 if (is_null[2])
 return "NULL";
 
-char *buf = new char[91];
-db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)45,m_Define.size()));
+char *buf = new char[121];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Define.c_str(), (unsigned long) min((size_t)60,m_Define.size()));
 string s=string()+"\""+buf+"\"";
 delete[] buf;
 return s;

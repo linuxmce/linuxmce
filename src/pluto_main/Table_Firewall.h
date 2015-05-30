@@ -94,20 +94,13 @@ class DECLSPECIFIER Row_Firewall : public TableRow, public SerializeClass
 		Table_Firewall *table;
 		
 		long int m_PK_Firewall;
-string m_Matchname;
-string m_IntIF;
-string m_ExtIF;
 string m_Protocol;
-string m_SourcePort;
+long int m_SourcePort;
 long int m_SourcePortEnd;
-string m_DestinationPort;
+long int m_DestinationPort;
 string m_SourceIP;
 string m_DestinationIP;
 string m_RuleType;
-long int m_Disabled;
-long int m_Offline;
-string m_RPolicy;
-string m_Description;
 long int m_psc_id;
 long int m_psc_batch;
 long int m_psc_user;
@@ -115,24 +108,17 @@ short int m_psc_frozen;
 string m_psc_mod;
 long int m_psc_restrict;
 
-		bool is_null[21];
+		bool is_null[14];
 	
 	public:
 		long int PK_Firewall_get();
-string Matchname_get();
-string IntIF_get();
-string ExtIF_get();
 string Protocol_get();
-string SourcePort_get();
+long int SourcePort_get();
 long int SourcePortEnd_get();
-string DestinationPort_get();
+long int DestinationPort_get();
 string SourceIP_get();
 string DestinationIP_get();
 string RuleType_get();
-long int Disabled_get();
-long int Offline_get();
-string RPolicy_get();
-string Description_get();
 long int psc_id_get();
 long int psc_batch_get();
 long int psc_user_get();
@@ -142,20 +128,13 @@ long int psc_restrict_get();
 
 		
 		void PK_Firewall_set(long int val);
-void Matchname_set(string val);
-void IntIF_set(string val);
-void ExtIF_set(string val);
 void Protocol_set(string val);
-void SourcePort_set(string val);
+void SourcePort_set(long int val);
 void SourcePortEnd_set(long int val);
-void DestinationPort_set(string val);
+void DestinationPort_set(long int val);
 void SourceIP_set(string val);
 void DestinationIP_set(string val);
 void RuleType_set(string val);
-void Disabled_set(long int val);
-void Offline_set(long int val);
-void RPolicy_set(string val);
-void Description_set(string val);
 void psc_id_set(long int val);
 void psc_batch_set(long int val);
 void psc_user_set(long int val);
@@ -164,30 +143,14 @@ void psc_mod_set(string val);
 void psc_restrict_set(long int val);
 
 		
-		bool Matchname_isNull();
-bool IntIF_isNull();
-bool ExtIF_isNull();
-bool SourcePort_isNull();
-bool Disabled_isNull();
-bool Offline_isNull();
-bool RPolicy_isNull();
-bool Description_isNull();
-bool psc_id_isNull();
+		bool psc_id_isNull();
 bool psc_batch_isNull();
 bool psc_user_isNull();
 bool psc_frozen_isNull();
 bool psc_restrict_isNull();
 
 			
-		void Matchname_setNull(bool val);
-void IntIF_setNull(bool val);
-void ExtIF_setNull(bool val);
-void SourcePort_setNull(bool val);
-void Disabled_setNull(bool val);
-void Offline_setNull(bool val);
-void RPolicy_setNull(bool val);
-void Description_setNull(bool val);
-void psc_id_setNull(bool val);
+		void psc_id_setNull(bool val);
 void psc_batch_setNull(bool val);
 void psc_user_setNull(bool val);
 void psc_frozen_setNull(bool val);
@@ -211,15 +174,12 @@ void psc_restrict_setNull(bool val);
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_Firewall+ m_Matchname+ m_IntIF+ m_ExtIF+ m_Protocol+ m_SourcePort+ m_SourcePortEnd+ m_DestinationPort+ m_SourceIP+ m_DestinationIP+ m_RuleType+ m_Disabled+ m_Offline+ m_RPolicy+ m_Description+ m_psc_id+ m_psc_batch+ m_psc_user+ m_psc_frozen+ m_psc_mod+ m_psc_restrict;
+			StartSerializeList() + m_PK_Firewall+ m_Protocol+ m_SourcePort+ m_SourcePortEnd+ m_DestinationPort+ m_SourceIP+ m_DestinationIP+ m_RuleType+ m_psc_id+ m_psc_batch+ m_psc_user+ m_psc_frozen+ m_psc_mod+ m_psc_restrict;
 		}
 	private:
 		void SetDefaultValues();
 		
 		string PK_Firewall_asSQL();
-string Matchname_asSQL();
-string IntIF_asSQL();
-string ExtIF_asSQL();
 string Protocol_asSQL();
 string SourcePort_asSQL();
 string SourcePortEnd_asSQL();
@@ -227,10 +187,6 @@ string DestinationPort_asSQL();
 string SourceIP_asSQL();
 string DestinationIP_asSQL();
 string RuleType_asSQL();
-string Disabled_asSQL();
-string Offline_asSQL();
-string RPolicy_asSQL();
-string Description_asSQL();
 string psc_id_asSQL();
 string psc_batch_asSQL();
 string psc_user_asSQL();
