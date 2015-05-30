@@ -28,6 +28,8 @@
 #include <QUrl>
 #include <huecontrollerhardware.h>
 #include <huebulb.h>
+#include "../huecommand.h"
+
 //<-dceag-decl-b->
 namespace DCE
 {
@@ -58,7 +60,7 @@ public:
 
     void initBridgeConnection();
     bool findControllers();
-    bool downloadControllerConfig(QUrl deviceIp, int index);
+
     void getScreenSaverColor();
     bool setupController(int controllerIndex);
     void setDeviceStatus(int device, QString status);
@@ -200,8 +202,11 @@ public slots:
     HueControllerHardware* getController(int index) {return hueControllers.at(index); }
 
 
-protected:
-    bool sendPowerMessage(QUrl message, QVariant params);
+private slots:
+    bool addMessageToQueue(QUrl msg, QVariant params);
+    void sendCommandMessage();
+    void handleCommandResponse(QNetworkReply *r);
+     bool downloadControllerConfig(QUrl deviceIp);
 
 private:
     QNetworkAccessManager * linkButtonManager;
@@ -214,7 +219,10 @@ private:
     QString targetIpAddress;
     QString authUser;
 
-    QTimer *linkButtonTimer;
+    QTimer *mp_linkButtonTimer;
+    QTimer *mp_pollTimer;
+    QTimer *mp_cmdTimer;
+    QList<HueCommand*> cmdQueue;
 
 };
 
