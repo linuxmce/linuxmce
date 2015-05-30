@@ -84,6 +84,9 @@ class CApp {
 		static		void		OnLoop();
 		static		void		OnRender();
 		static		void		OnCleanup();
+
+		static bool Minimize();
+		static bool Maximize();
 };
 
 #endif
