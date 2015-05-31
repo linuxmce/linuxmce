@@ -1,7 +1,15 @@
 #include "abstractwirelessbulb.h"
 #include "qdebug.h"
+#include "Message.h"
+#include "pluto_main/Define_EventParameter.h"
+#include "pluto_main/Define_Event.h"
 
-AbstractWirelessBulb::AbstractWirelessBulb(HueControllerHardware *p_controller, QObject *parent) : QObject(parent), mp_controller(p_controller)
+AbstractWirelessBulb::AbstractWirelessBulb(HueControllerHardware *p_controller, QObject *parent) :
+    QObject(parent),
+    mp_controller(p_controller),
+    m_CurrentLevel(0.0),
+    m_brightness(0),
+    m_powerOn(false)
 {
     qDebug() << Q_FUNC_INFO << "ctor";
     if(mp_controller){
@@ -66,9 +74,12 @@ double AbstractWirelessBulb::CurrentLevel() const
 
 void AbstractWirelessBulb::setCurrentLevel(double CurrentLevel)
 {
+    qDebug() << Q_FUNC_INFO << CurrentLevel;
     if(m_CurrentLevel == CurrentLevel) return;
+
     m_CurrentLevel = CurrentLevel;
     emit currentLevelChanged();
+    emit dceMessage(EVENT_State_Changed_CONST);
 }
 bool AbstractWirelessBulb::powerOn() const
 {
@@ -80,6 +91,13 @@ void AbstractWirelessBulb::setPowerOn(bool powerOn)
     if(m_powerOn == powerOn) return;
     m_powerOn = powerOn;
     emit powerOnChanged();
+
+    if(linuxmceId()==0)
+        return;
+
+    emit dceMessage(EVENT_Device_OnOff_CONST);
+    qDebug() << QString("%1 Light Changed, sending event").arg(displayName());
+
 }
 int AbstractWirelessBulb::bulbType() const
 {
@@ -128,14 +146,25 @@ void AbstractWirelessBulb::setOnline(bool online)
 }
 
 HueControllerHardware *AbstractWirelessBulb::getController()
-{
-    return mp_controller;
+{    return mp_controller;
 }
 
 void AbstractWirelessBulb::setController(HueControllerHardware *c)
 {
     mp_controller=c;
 }
+
+
+QString AbstractWirelessBulb::getLightType() const
+{
+    return m_lightType;
+}
+
+void AbstractWirelessBulb::setLightType(const QString &lightType)
+{
+    m_lightType = lightType;
+}
+
 QVariant AbstractWirelessBulb::getColorMap() const
 {
     return m_colorMap;
@@ -153,7 +182,17 @@ quint8 AbstractWirelessBulb::getBrightness() const
 
 void AbstractWirelessBulb::setBrightness(const quint8 &brightness)
 {
+
+    if(m_brightness==brightness)
+        return;
+
     m_brightness = brightness;
+    emit brightnessChanged();
+
+    if(linuxmceId()==0); return;
+
+    emit dceMessage(EVENT_Brightness_Changed_CONST);
+    emit dceMessage(EVENT_State_Changed_CONST);
 }
 
 int AbstractWirelessBulb::getBlueLevel() const
