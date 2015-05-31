@@ -136,6 +136,41 @@ void AbstractWirelessBulb::setController(HueControllerHardware *c)
 {
     mp_controller=c;
 }
+QVariant AbstractWirelessBulb::getColorMap() const
+{
+    return m_colorMap;
+}
+
+void AbstractWirelessBulb::setColorMap(const QVariant &colorMap)
+{
+    m_colorMap = colorMap;
+}
+
+quint8 AbstractWirelessBulb::getBrightness() const
+{
+    return m_brightness;
+}
+
+void AbstractWirelessBulb::setBrightness(const quint8 &brightness)
+{
+    m_brightness = brightness;
+}
+
+int AbstractWirelessBulb::getBlueLevel() const
+{
+    return m_blueLevel;
+}
+
+int AbstractWirelessBulb::getGreenLevel() const
+{
+    return m_greenLevel;
+}
+
+int AbstractWirelessBulb::getRedLevel() const
+{
+    return m_redLevel;
+}
+
 QString AbstractWirelessBulb::uniqueId() const
 {
     return m_uniqueId;
@@ -145,6 +180,29 @@ void AbstractWirelessBulb::setUniqueId(const QString &uniqueId)
 {
     m_uniqueId = uniqueId;
     emit uniqueIdChanged();
+}
+
+void AbstractWirelessBulb::setRgb(int r, int g, int b)
+{
+    bool changed=false;
+    if(m_redLevel!=r) {
+        m_redLevel=r;
+        changed=true;
+    }
+
+    if(m_greenLevel!=g){
+        m_greenLevel = g;
+        changed=true;
+    }
+
+    if(m_blueLevel!=b){
+        m_blueLevel=b;
+        changed=true;
+    }
+
+    if(changed){
+        emit rgbColorChanged();
+    }
 }
 
 QString AbstractWirelessBulb::manufacturerName() const
