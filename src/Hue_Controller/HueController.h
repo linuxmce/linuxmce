@@ -187,6 +187,7 @@ signals:
     void initiateConfigDownload(QUrl target);
     void testSignal();
     void linkButtonChanged();
+    void pollController();
 
 
 public slots:
@@ -206,12 +207,14 @@ private slots:
     bool addMessageToQueue(QUrl msg, QVariant params);
     void sendCommandMessage();
     void handleCommandResponse(QNetworkReply *r);
-     bool downloadControllerConfig(QUrl deviceIp);
-     void updateDevice(AbstractWirelessBulb *b, int d);
+    bool downloadControllerConfig(QUrl deviceIp);
+    void updateDevice(AbstractWirelessBulb *b, int d);
+    void checkLightInformation();
 
 private:
     QNetworkAccessManager * linkButtonManager;
     QNetworkAccessManager * commandManager;
+    QNetworkAccessManager * poller;
 
     bool mb_isNew;
     bool validated;

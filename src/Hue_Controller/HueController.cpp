@@ -61,7 +61,8 @@ HueController::HueController(int DeviceID, string ServerAddress, bool bConnectEv
       authUser(""),
       mp_linkButtonTimer(new QTimer()),
       mp_pollTimer(new QTimer()),
-      mp_cmdTimer(new QTimer())
+      mp_cmdTimer(new QTimer()),
+      poller(new QNetworkAccessManager())
 
     //<-dceag-const-e->
 {
@@ -69,8 +70,10 @@ HueController::HueController(int DeviceID, string ServerAddress, bool bConnectEv
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "HueController, Device %d is alive!", this->m_dwPK_Device);
 
     QObject::connect(this, SIGNAL(initiateConfigDownload(QUrl)), this, SLOT(downloadControllerConfig(QUrl)));
+    QObject::connect(mp_pollTimer, SIGNAL(timeout()), this, SLOT(checkLightInformation()));
     // QObject::connect(this, SIGNAL(initiateConfigDownload()), this, SLOT(dummySlot()));
     //QObject::connect(this,SIGNAL(testSignal()), this, SLOT(dummySlot()));
+
 
     mp_cmdTimer->setInterval(200);
     mp_cmdTimer->setSingleShot(false);
@@ -78,6 +81,7 @@ HueController::HueController(int DeviceID, string ServerAddress, bool bConnectEv
 
     mp_linkButtonTimer->setInterval(3000);
     mp_pollTimer->setInterval(5000);
+    mp_pollTimer->start();
     QObject::connect(mp_linkButtonTimer, SIGNAL(timeout()), this, SLOT(checkLinkButton()));
     mp_linkButtonTimer->setSingleShot(false);
     //   QObject::connect(commandManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(handleCommandResponse(QNetworkReply*)));
@@ -358,12 +362,12 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
     int device = pMessage->m_dwPK_Device_To;
 
     int ID=0;
-
+    HueBulb *bulb;
     for (int f = 0; f < hueBulbs.size(); ++f){
         if(hueBulbs.at(f)->linuxmceId()==device){
-            qDebug() << Q_FUNC_INFO << hueBulbs.at(f)->displayName();
-            ID = hueBulbs.at(f)->id();
-
+            bulb=hueBulbs.at(f);
+            qDebug() << Q_FUNC_INFO << bulb->displayName();
+            ID = bulb->id();
         }
     }
 
@@ -383,6 +387,8 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
         qDebug()<<"CMD_SET_LEVEL::"<<setLevelVal;
         setLevelVal = command.at(5);
         setLevelVal.remove("\"");
+        bulb->setCurrentLevel(setLevelVal.toDouble());
+        bulb->setPowerOn(true);
     }
 
     QColor q;
@@ -391,6 +397,7 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
         int greenLevel = command.at(7).toInt();
         int blueLevel = command.at(9).toInt();
         q.setRgb(redLevel,greenLevel,blueLevel);
+        bulb->setRgb(redLevel, greenLevel, blueLevel);
         qDebug() << Q_FUNC_INFO <<"CMD_SET_COLOR+RGB::"<<redLevel<<"::" <<greenLevel << "::"<< blueLevel;
     }
 
@@ -399,6 +406,7 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
         target.setUrl("http://"+targetIpAddress+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
         sCMD_Result = "OFF - OK";
         params.insert("on", false);
+        bulb->setPowerOn(false);
         if(addMessageToQueue(target, params)){
             sCMD_Result = "OK";
 
@@ -411,6 +419,7 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
     case 192:
         target.setUrl("http://"+targetIpAddress+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
         params.insert("on", true);
+        bulb->setPowerOn(true);
         if(addMessageToQueue(target, params))
             sCMD_Result = "ON - OK";
 
@@ -421,6 +430,8 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
         target.setUrl("http://"+targetIpAddress+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
         params.insert("on", true);
         params.insert("bri",int(setLevelVal.toInt()*2.55));
+        bulb->setPowerOn(true);
+        bulb->setBrightness(setLevelVal.toUInt()*2.55);
         if(addMessageToQueue(target, params))
             sCMD_Result = "SET LEVEL - OK";
 
@@ -431,7 +442,7 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
         params.insert("bri",q.lightness());
         params.insert("hue",( q.hsvHue()*conversion_var) );
         params.insert("sat",q.hsvSaturation());
-        if(addMessageToQueue(target, params));
+        addMessageToQueue(target, params);
         sCMD_Result = "SET RBG - OK";
     case 641:
         target.setUrl("http://"+targetIpAddress+"/api/"+authUser+"/lights/"+QString::number(ID)+"/state");
@@ -454,6 +465,8 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
         break;
     }
     qDebug() << "Command " << cmd;
+
+     updateDevice(bulb, ID);
 }
 
 /*
@@ -995,17 +1008,18 @@ void HueController::updateDevice(AbstractWirelessBulb *b, int d)
         DeviceData_Impl *existingBulb = m_pData->m_vectDeviceData_Impl_Children.at(l);
         if(existingBulb->m_dwPK_Device==b->linuxmceId()){
 
-            CMD_Set_Device_Data setUnit(this->m_dwPK_Device, 4,d,StringUtils::itos(b->id()),DEVICEDATA_UnitNo_CONST);
-            string pResonseA = "";
-            if(SendCommand(setUnit, &pResonseA)){
-                qDebug() << "Set internal id";
-            }
-            QString chanaddress = b->getController()->getIpAddress()+":"+QString::number(b->id());
-            qDebug()<< chanaddress;
-            CMD_Set_Device_Data setController(this->m_dwPK_Device, 4, d,chanaddress.toStdString(),DEVICEDATA_PortChannel_Number_CONST);
-            if(SendCommand(setController)){
-                qDebug() << "Set port / channel";
-            }
+
+//            CMD_Set_Device_Data setUnit(this->m_dwPK_Device, 4,d,StringUtils::itos(b->id()),DEVICEDATA_UnitNo_CONST);
+//            string pResonseA = "";
+//            if(SendCommand(setUnit, &pResonseA)){
+//                qDebug() << "Set internal id";
+//            }
+//            QString chanaddress = b->getController()->getIpAddress()+":"+QString::number(b->id());
+//            qDebug()<< chanaddress;
+//            CMD_Set_Device_Data setController(this->m_dwPK_Device, 4, d,chanaddress.toStdString(),DEVICEDATA_PortChannel_Number_CONST);
+//            if(SendCommand(setController)){
+//                qDebug() << "Set port / channel";
+//            }
 
             CMD_Set_Device_Data setName(m_dwPK_Device, 4, d, b->displayName().toStdString(), DEVICEDATA_Name_CONST);
             if(SendCommand(setName)){
@@ -1018,6 +1032,28 @@ void HueController::updateDevice(AbstractWirelessBulb *b, int d)
             }
         }
     }
+}
+
+void HueController::checkLightInformation()
+{
+
+    QString urlBulder=QString("http://%1/api/%2/lights/").arg(hueControllers.first()->getIpAddress()).arg(authUser);
+    QUrl initUrl(urlBulder);
+       qDebug() << Q_FUNC_INFO << urlBulder;
+
+    QNetworkRequest init(initUrl);
+    QNetworkReply * rt = poller->get(QNetworkRequest(init));
+    qDebug() << init.url();
+    QEventLoop respWait;
+    QObject::connect(poller, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
+    respWait.exec();
+    qDebug() << Q_FUNC_INFO;
+
+    QJson::Parser parser;
+    bool ok=false;
+    QVariantMap p = parser.parse(rt->readAll(), &ok).toMap();
+        qDebug() << p.keys();
+    rt->deleteLater();
 }
 
 void HueController::getScreenSaverColor()
@@ -1066,6 +1102,7 @@ bool HueController::addMessageToQueue(QUrl msg, QVariant params)
         return true;
 
    mp_cmdTimer->start();
+   mp_pollTimer->start();
 }
 
 
@@ -1073,7 +1110,8 @@ void HueController::sendCommandMessage()
 {
 
     if(cmdQueue.count()==0){
-        //  mp_cmdTimer->stop();
+        mp_cmdTimer->stop();
+        mp_pollTimer->start();
         return;
     }
     qDebug() << Q_FUNC_INFO << cmdQueue.count() << "commands left";

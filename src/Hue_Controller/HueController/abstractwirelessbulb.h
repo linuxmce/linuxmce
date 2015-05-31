@@ -80,6 +80,20 @@ public:
     QString uniqueId() const;
     void setUniqueId(const QString &uniqueId);
 
+    void setRgb(int r, int g, int b);
+
+    int getRedLevel() const;
+
+    int getGreenLevel() const;
+
+    int getBlueLevel() const;
+
+    quint8 getBrightness() const;
+    void setBrightness(const quint8 &brightness);
+
+    QVariant getColorMap() const;
+    void setColorMap(const QVariant &colorMap);
+
 signals:
     void serialNumberChanged();
     void displayNameChanged();
@@ -96,6 +110,8 @@ signals:
     void softwareVersionChanged();
     void manufacturerChanged();
     void uniqueIdChanged();
+    void rgbColorChanged();
+    void brightnessChanged();
 
 public slots:
      HueControllerHardware * getController();
@@ -123,6 +139,10 @@ private:
     QString m_effect;
     QString m_alert;
     bool m_online;
+    int m_redLevel;
+    int m_greenLevel;
+    int m_blueLevel;
+    QVariant m_colorMap;
 
     HueControllerHardware *mp_controller;
 
