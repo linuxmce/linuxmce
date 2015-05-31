@@ -6,7 +6,7 @@
 #include <qmap.h>
 #include "huecontrollerhardware.h"
 #include <QVariantMap>
-
+#include <Message.h>
 
 class AbstractWirelessBulb : public QObject
 {
@@ -94,6 +94,9 @@ public:
     QVariant getColorMap() const;
     void setColorMap(const QVariant &colorMap);
 
+    QString getLightType() const;
+    void setLightType(const QString &lightType);
+
 signals:
     void serialNumberChanged();
     void displayNameChanged();
@@ -113,11 +116,14 @@ signals:
     void rgbColorChanged();
     void brightnessChanged();
 
+    void dceMessage(int t);
+
 public slots:
      HueControllerHardware * getController();
      void setController(HueControllerHardware * c);
 
      virtual void proccessStateInformation(QVariantMap d)=0;
+
 
 private:
     QString m_lightModel;
@@ -142,9 +148,13 @@ private:
     int m_redLevel;
     int m_greenLevel;
     int m_blueLevel;
+
+    QString m_lightType;
+
     QVariant m_colorMap;
 
     HueControllerHardware *mp_controller;
+
 
      QMap<QString, int> deviceMap;
 

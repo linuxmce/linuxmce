@@ -201,7 +201,7 @@ public slots:
     void processDataStore(const QByteArray data);
 
     HueControllerHardware* getController(int index) {return hueControllers.at(index); }
-
+ void handleDeviceEvent(int whichEvent);
 
 private slots:
     bool addMessageToQueue(QUrl msg, QVariant params);
@@ -210,6 +210,7 @@ private slots:
     bool downloadControllerConfig(QUrl deviceIp);
     void updateDevice(AbstractWirelessBulb *b, int d);
     void checkLightInformation();
+
 
 private:
     QNetworkAccessManager * linkButtonManager;
