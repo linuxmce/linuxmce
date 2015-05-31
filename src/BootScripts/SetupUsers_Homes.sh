@@ -114,7 +114,7 @@ for Users in $R; do
 		PasswdEntry="pluto_$UserName:x:$LinuxUserID:$LinuxUserID:,,,:/home/user_$PlutoUserID:/bin/false"
 		GroupEntry="pluto_$UserName:x:$LinuxUserID:www-data"
 		SambaUnixMap="pluto_$UserName = $UserName"
-		echo "$SambaEntry" >>/etc/samba/smbpasswd.$$
+		echo -e "${SambaPassword}\n${SambaPassword}" | smbpasswd -a "pluto_${UserName}" -s
 		echo "$ShadowEntry" >>/etc/shadow.$$
 		echo "$PasswdEntry" >>/etc/passwd.$$
 		echo "$GroupEntry" >>/etc/group.$$
@@ -246,7 +246,7 @@ if [[ -r /usr/pluto/var/sambaCredentials.secret ]] ;then
 	fi
 
 	if ! BlacklistConfFiles '/etc/samba/smbpasswd' ;then
-		echo "$smbuser:$LinuxUserID:$smbpass:[U          ]:LCT-00000001:,,," >> /etc/samba/smbpasswd 
+		echo -e "${smbpass}\n${smbpass}" | smbpasswd -a "${smbuser}" -s
 	fi
 
 	if [[ "$NeedToRestart" == "true" &&  "$(pidof smbd)" != "" ]] ;then
