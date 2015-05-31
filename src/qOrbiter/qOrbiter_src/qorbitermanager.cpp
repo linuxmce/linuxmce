@@ -3208,7 +3208,7 @@ bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
     QObject::connect(ptr, SIGNAL(mediaTypeChanged(int)), this, SLOT(setMediaType(int)), Qt::QueuedConnection);
 
     QObject::connect(this, SIGNAL(seekPositionChanged(QString)), ptr, SLOT(setPosition(QString)), Qt::QueuedConnection ); /*!< Put in timecode object? */
-    QObject::connect(this, SIGNAL(jogToPosition(QString)),pte, SLOT(JogStream(QString)), Qt::QueuedConnection);          /*!< Put in timecode object? */
+    QObject::connect(this, SIGNAL(jogToPosition(QString)),ptr, SLOT(JogStream(QString)), Qt::QueuedConnection);          /*!< Put in timecode object? */
 
     //attributes
     QObject::connect(ptr, &qOrbiter::screenshotVariablesReady, this, &qorbiterManager::showScreenShotVariables,Qt::QueuedConnection);
