@@ -23,7 +23,7 @@
 #include <QObject>
 #include <QMap>
 #include <abstractwirelessbulb.h>
-
+class QVariant;
 class HueBulb : public AbstractWirelessBulb
 {
     Q_OBJECT
@@ -34,10 +34,7 @@ public:
 signals:
     
 public slots:
-
-
-
-
+    void proccessStateInformation(QVariantMap d);
     
 };
 

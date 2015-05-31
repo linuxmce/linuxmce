@@ -5,6 +5,8 @@
 #include <qcolor.h>
 #include <qmap.h>
 #include "huecontrollerhardware.h"
+#include <QVariantMap>
+
 
 class AbstractWirelessBulb : public QObject
 {
@@ -66,16 +68,16 @@ public:
     int linuxmceId() const;
     void setLinuxmceId(int value);
 
-    QString getLightModel() const;
+    QString lightModel() const;
     void setLightModel(const QString &lightModel);
 
-    QString getSoftwareVersion() const;
+    QString softwareVersion() const;
     void setSoftwareVersion(const QString &softwareVersion);
 
-    QString getManufacturerName() const;
+    QString manufacturerName() const;
     void setManufacturerName(const QString &manufacturerName);
 
-    QString getUniqueId() const;
+    QString uniqueId() const;
     void setUniqueId(const QString &uniqueId);
 
 signals:
@@ -98,6 +100,8 @@ signals:
 public slots:
      HueControllerHardware * getController();
      void setController(HueControllerHardware * c);
+
+     virtual void proccessStateInformation(QVariantMap d)=0;
 
 private:
     QString m_lightModel;

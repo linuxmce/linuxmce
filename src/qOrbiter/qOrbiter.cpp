@@ -2909,6 +2909,8 @@ void qOrbiter::checkTimeCode(int npDevice)
     string sIPAddress ="";
     string defaultPort= m_pEvent->GetDeviceDataFromDatabase(pDevice->m_dwPK_Device, DEVICEDATA_Port_CONST);
 
+
+
     qWarning() << "1st pass result is ==>" << sIPAddress.c_str();
     if( sIPAddress.empty() )
     {
