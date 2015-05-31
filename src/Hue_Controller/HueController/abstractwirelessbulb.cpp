@@ -136,7 +136,7 @@ void AbstractWirelessBulb::setController(HueControllerHardware *c)
 {
     mp_controller=c;
 }
-QString AbstractWirelessBulb::getUniqueId() const
+QString AbstractWirelessBulb::uniqueId() const
 {
     return m_uniqueId;
 }
@@ -147,7 +147,7 @@ void AbstractWirelessBulb::setUniqueId(const QString &uniqueId)
     emit uniqueIdChanged();
 }
 
-QString AbstractWirelessBulb::getManufacturerName() const
+QString AbstractWirelessBulb::manufacturerName() const
 {
     return m_manufacturerName;
 }
@@ -158,7 +158,7 @@ void AbstractWirelessBulb::setManufacturerName(const QString &manufacturerName)
     emit manufacturerChanged();
 }
 
-QString AbstractWirelessBulb::getSoftwareVersion() const
+QString AbstractWirelessBulb::softwareVersion() const
 {
     return m_softwareVersion;
 }
@@ -169,7 +169,7 @@ void AbstractWirelessBulb::setSoftwareVersion(const QString &softwareVersion)
     emit softwareVersionChanged();
 }
 
-QString AbstractWirelessBulb::getLightModel() const
+QString AbstractWirelessBulb::lightModel() const
 {
     return m_lightModel;
 }

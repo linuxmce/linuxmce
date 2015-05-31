@@ -207,6 +207,7 @@ private slots:
     void sendCommandMessage();
     void handleCommandResponse(QNetworkReply *r);
      bool downloadControllerConfig(QUrl deviceIp);
+     void updateDevice(AbstractWirelessBulb *b, int d);
 
 private:
     QNetworkAccessManager * linkButtonManager;
@@ -223,6 +224,15 @@ private:
     QTimer *mp_pollTimer;
     QTimer *mp_cmdTimer;
     QList<HueCommand*> cmdQueue;
+
+    static const char getGroups[];          /*!< Get all groups \note get */
+
+    static const char getAllLights[];       /*!< Get all lights \note get */
+    static const char getNewLights[];       /*!< Get new lights  \note get */
+    static const char searchNewLights[];    /*!< Search new lights \post */
+    static const char getLightInfo[];       /*!< Light information and stat \note get */
+    static const char renameLight[];        /*!< Rename the light \note put */
+    static const char setLightState[];      /*!< Set properties on the light */
 
 };
 
