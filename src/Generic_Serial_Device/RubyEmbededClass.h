@@ -183,7 +183,7 @@ VALUE RubyEmbededClassImpl<T>::callmethod(const char* methodname, const std::lis
 
 		char tmpbuff[12];
 #ifdef RUBY2_0
-		sprintf(tmpbuff, "%d", rb_sourceline);
+		sprintf(tmpbuff, "%d", rb_sourceline());
 #else
 		sprintf(tmpbuff, "%d", ruby_sourceline);
 #endif

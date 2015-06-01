@@ -59,7 +59,7 @@ RubyEmbededClass::_backtrace() {
 	// position
 	char tmpbuff[128];
 #ifdef RUBY2_0
-	sprintf(tmpbuff, "\n\tin: %s: %d", rb_sourcefile, rb_sourceline);
+	sprintf(tmpbuff, "\n\tin: %s: %d", rb_sourcefile(), rb_sourceline());
 #else
 	sprintf(tmpbuff, "\n\tin: %s: %d", ruby_sourcefile, ruby_sourceline);
 #endif
@@ -81,8 +81,9 @@ RubyEmbededClass::_backtrace() {
 
 	// backtrace
 #ifdef RUBY2_0
-	if(!NIL_P(rb_errinfo)) {
-		VALUE ary = rb_funcall(rb_errinfo, rb_intern("backtrace"), 0);
+	VALUE errinfo = rb_errinfo();
+	if(!NIL_P(errinfo)) {
+		VALUE ary = rb_funcall(errinfo, rb_intern("backtrace"), 0);
 		int c;
 		for (c=0; c<RARRAY_LEN(ary); c++) {
 			bcktr += "\tfrom "; bcktr += RSTRING_PTR(RARRAY_PTR(ary)[c]); bcktr += "\n";
