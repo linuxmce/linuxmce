@@ -115,7 +115,7 @@ signals:
     void uniqueIdChanged();
     void rgbColorChanged();
     void brightnessChanged();
-
+    void lightTypeChanged();
     void dceMessage(int t);
 
 public slots:
