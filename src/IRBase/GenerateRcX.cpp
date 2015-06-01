@@ -672,16 +672,16 @@ string ConvertRC5_6(string sCode)
 
 	if( sCode[0]=='5' )
 	{
-		if( sCode[1]='0' )
+		if( sCode[1]=='0' )
 			error = Process5000(argc, argv);
-		else if( sCode[1]='1' )
+		else if( sCode[1]=='1' )
 			error = Process5001(argc, argv);
 	}
 	else if( sCode[0]=='6' )
 	{
-		if( sCode[1]='0' )
+		if( sCode[1]=='0' )
 			error = Process6000(argc, argv);
-		else if( sCode[1]='1' )
+		else if( sCode[1]=='1' )
 			error = Process6001(argc, argv);
 	}
 	if (error >= 0)
