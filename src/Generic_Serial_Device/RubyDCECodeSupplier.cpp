@@ -33,7 +33,8 @@ namespace DCE {
 void 
 RubyDCECodeSupplier::addCode(Command_Impl *pcmdimpl, DeviceData_Impl* pdevicedata, bool io) {
 	if(rcode_.length() == 0) {
-		rcode_ = "require 'Ruby_Generic_Serial_Device'""\n";
+		rcode_ = "$:.unshift('/usr/pluto/bin')\n";
+		rcode_ += "require 'Ruby_Generic_Serial_Device'""\n";
 	}
 
 	unsigned long devtemplid = pdevicedata->m_dwPK_DeviceTemplate;
