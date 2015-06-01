@@ -188,6 +188,8 @@ signals:
     void testSignal();
     void linkButtonChanged();
     void pollController();
+    void lastCommand();
+    void startQueue();
 
 
 public slots:

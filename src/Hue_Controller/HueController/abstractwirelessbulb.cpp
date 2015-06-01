@@ -7,10 +7,10 @@
 AbstractWirelessBulb::AbstractWirelessBulb(HueControllerHardware *p_controller, QObject *parent) :
     QObject(parent),
     mp_controller(p_controller),
-    m_CurrentLevel(0.0),
-    m_brightness(0),
-    m_powerOn(false)
+    m_CurrentLevel(0.0)
 {
+    setPowerOn(false);
+    setBrightness(0);
     qDebug() << Q_FUNC_INFO << "ctor";
     if(mp_controller){
         qDebug() << Q_FUNC_INFO << mp_controller->getIpAddress();
@@ -64,6 +64,7 @@ int AbstractWirelessBulb::id()
 void AbstractWirelessBulb::setId( int id)
 {
     if(m_id==id) return;
+
     m_id = id;
     emit idChanged();
 }
@@ -74,7 +75,7 @@ double AbstractWirelessBulb::CurrentLevel() const
 
 void AbstractWirelessBulb::setCurrentLevel(double CurrentLevel)
 {
-    qDebug() << Q_FUNC_INFO << CurrentLevel;
+
     if(m_CurrentLevel == CurrentLevel) return;
 
     m_CurrentLevel = CurrentLevel;
@@ -89,6 +90,7 @@ bool AbstractWirelessBulb::powerOn() const
 void AbstractWirelessBulb::setPowerOn(bool powerOn)
 {
     if(m_powerOn == powerOn) return;
+
     m_powerOn = powerOn;
     emit powerOnChanged();
 
@@ -107,6 +109,7 @@ int AbstractWirelessBulb::bulbType() const
 void AbstractWirelessBulb::setBulbType(int bulbType)
 {
     if(m_bulbType==bulbType) return;
+
     m_bulbType = bulbType;
     emit bulbTypeChanged();
 }
@@ -130,6 +133,7 @@ QString AbstractWirelessBulb::alert() const
 void AbstractWirelessBulb::setAlert(const QString &alert)
 {
     if(m_alert==alert) return;
+
     m_alert = alert;
     emit alertChanged();
 }
@@ -141,17 +145,23 @@ bool AbstractWirelessBulb::online() const
 void AbstractWirelessBulb::setOnline(bool online)
 {
     if(m_online==online)return;
+
     m_online = online;
     emit onlineChanged();
 }
 
 HueControllerHardware *AbstractWirelessBulb::getController()
-{    return mp_controller;
+{
+    if(mp_controller)
+        return mp_controller;
+    else
+        return new HueControllerHardware();
 }
 
 void AbstractWirelessBulb::setController(HueControllerHardware *c)
 {
-    mp_controller=c;
+    Q_UNUSED(c)
+    mp_controller=0;
 }
 
 
@@ -162,7 +172,10 @@ QString AbstractWirelessBulb::getLightType() const
 
 void AbstractWirelessBulb::setLightType(const QString &lightType)
 {
+    if(m_lightType==lightType) return;
+
     m_lightType = lightType;
+    emit lightTypeChanged();
 }
 
 QVariant AbstractWirelessBulb::getColorMap() const

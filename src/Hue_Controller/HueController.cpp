@@ -75,9 +75,15 @@ HueController::HueController(int DeviceID, string ServerAddress, bool bConnectEv
     //QObject::connect(this,SIGNAL(testSignal()), this, SLOT(dummySlot()));
 
 
-    mp_cmdTimer->setInterval(200);
+    mp_cmdTimer->setInterval(150);
     mp_cmdTimer->setSingleShot(false);
+
     connect(mp_cmdTimer, SIGNAL(timeout()) ,this, SLOT(sendCommandMessage()));
+    connect(this, SIGNAL(startQueue()), mp_cmdTimer, SLOT(start()));
+    connect(this, SIGNAL(lastCommand()), mp_cmdTimer, SLOT(stop()));
+
+    connect(this, SIGNAL(lastCommand()), mp_pollTimer, SLOT(start()));
+    connect(this, SIGNAL(startQueue()), mp_pollTimer, SLOT(stop()));
 
     mp_linkButtonTimer->setInterval(3000);
     mp_pollTimer->setInterval(5000);
@@ -529,12 +535,17 @@ void HueController::CreateChildren()
                 for (int n = 0; n < hueBulbs.size(); n++){
                     if(hueBulbs.at(n)->getController()->getIpAddress() == p.at(0)&& hueBulbs.at(n)->id()==lightID ){
                         hueBulbs.at(n)->setLinuxmceId(linuxmceID);
-
+                        hueBulbs.at(n)->setBrightness(0);
+                        hueBulbs.at(n)->setPowerOn(true);
                         qDebug() << "Linked existing light with linuxmce db. " << hueBulbs.at(n)->displayName();
                     }
                 }
             }
 
+        }
+
+        for (int n = 0; n < hueBulbs.size(); n++){
+            hueBulbs.at(n)->setPowerOn(true);
         }
 
         pCommand->m_pParent = this;
@@ -966,10 +977,7 @@ bool HueController::downloadControllerConfig(QUrl deviceIp)
         connect(b, SIGNAL(dceMessage(int)), this, SLOT(handleDeviceEvent(int)), Qt::QueuedConnection);
         // << " :: " << i.value();
         QVariantMap light = i.value().toMap();
-
         QVariantMap state = light["state"].toMap();
-
-
         b->setPowerOn(state["on"].toBool());
         b->setId(i.key().toInt());
         if(light["manufacturername"].isValid()){ b->setManufacturerName(light["manufacturername"].toString()); } //hue software 1.4
@@ -977,6 +985,7 @@ bool HueController::downloadControllerConfig(QUrl deviceIp)
 
         b->setDisplayName(light["name"].toString());
         b->setLightModel(light["modelid"].toString());
+
         b->setLinuxmceId(0);
 
         //  qDebug() << i.key() << "::" << light["name"].toString() ;
@@ -1045,7 +1054,7 @@ void HueController::checkLightInformation()
 
     QNetworkRequest init(initUrl);
     QNetworkReply * rt = poller->get(QNetworkRequest(init));
-    qDebug() << init.url();
+
     QEventLoop respWait;
     QObject::connect(poller, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
     respWait.exec();
@@ -1109,7 +1118,7 @@ void HueController::handleDeviceEvent(int whichEvent)
                     EVENT_State_Changed_CONST,
                     1 /* number of parameter's pairs (id, value) */,
                     EVENTPARAMETER_State_CONST,
-                    StringUtils::itos(b->CurrentLevel()).c_str()
+                    StringUtils::itos(  ceil(b->CurrentLevel()) ).c_str()
                     );
 
         this->m_pEvent->SendMessage(st);
@@ -1159,14 +1168,14 @@ void HueController::initResponse(){
 bool HueController::addMessageToQueue(QUrl msg, QVariant params)
 {
     HueCommand *t = new HueCommand(msg, params);
+    bool wasEmpty = cmdQueue.isEmpty();
+
     cmdQueue.append(t);
     // LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending Message:: %s ",message.toString(), params.toString());
 
-    if(mp_cmdTimer->isActive())
-        return true;
-
-    mp_cmdTimer->start();
-    mp_pollTimer->start();
+    if(wasEmpty){
+        emit startQueue();
+    }
 }
 
 
@@ -1174,17 +1183,15 @@ void HueController::sendCommandMessage()
 {
 
     if(cmdQueue.count()==0){
-        mp_cmdTimer->stop();
-        mp_pollTimer->start();
+
+        emit lastCommand();
         return;
     }
-    qDebug() << Q_FUNC_INFO << cmdQueue.count() << "commands left";
-
-    // LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending Message:: %s ",message.toString(), params.toString());
 
     QNetworkRequest pr(cmdQueue.at(0)->target);
     QJson::Serializer serializer;
     QByteArray serialized = serializer.serialize(cmdQueue.at(0)->parameters);
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending Message:: %s ",cmdQueue.at(0)->target.toString().toStdString().c_str(), cmdQueue.at(0)->parameters.toString().toStdString().c_str());
     QEventLoop respWait;
     QObject::connect(commandManager, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
     QNetworkReply * ptx =  commandManager->put(pr, serialized);
