@@ -31,14 +31,17 @@ ifneq (,$(findstring ruby, $(PKG_CONFIG)))
 	XTRALDLIBS += $(PKG_CONFIG)
 else
 ifneq (,$(findstring amd64, $(arch))) 
-	CPPFLAGS += -I/usr/lib/ruby/1.8/x86_64-linux
+	CPPFLAGS += -I/usr/lib/ruby/1.9.1/x86_64-linux
 else
 	ifneq (,$(findstring armhf, $(arch)))
-		CPPFLAGS += -I/usr/lib/ruby/1.8/arm-linux-eabihf
+		CPPFLAGS += -I/usr/include/ruby-1.9.1/arm-linux-eabihf/ -I/usr/include/ruby-1.9.1/
 	else
-		CPPFLAGS += -I/usr/lib/ruby/1.8/i386-linux -I/usr/lib/ruby/1.8/i486-linux -I/usr/lib/ruby/1.8/i686-linux
+		#CPPFLAGS += -I/usr/lib/ruby/1.9.1/i386-linux -I/usr/lib/ruby/1.9.1/i486-linux -I/usr/lib/ruby/1.9.1/i686-linux
+		CPPFLAGS += -I/usr/include/ruby-1.9.1/i686-linux/ -I/usr/include/ruby-1.9.1/
 	endif
-	XTRALDLIBS += -lruby1.8
+	CXXFLAGS += -fpermissive
+	CPPFLAGS += -DRUBY2_0
+	XTRALDLIBS += -lruby-1.9.1
 endif
 endif
 
