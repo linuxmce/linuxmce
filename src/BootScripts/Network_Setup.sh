@@ -656,6 +656,12 @@ if [[ "$VPNenabled" == "on" ]]; then
 	service xl2tpd start
 fi
 
+# Connect to pppoe (dsl-provider)
+if [[ "$PPPoEEnabled" == "on" ]]; then
+    echo "reconnect PPPOE ..."
+	pon dsl-provider
+fi
+
 if ! BlacklistConfFiles '/etc/bind/named.conf.forwarders' && ! BlacklistConfFiles '/etc/bind/named.conf.options';then
 if [ ! -e /etc/bind/named.conf.forwarders.pbackup ] && [ -e /etc/bind/named.conf.forwarders ] ;then
 	mv /etc/bind/named.conf.forwarders /etc/bind/named.conf.forwarders.pbackup
