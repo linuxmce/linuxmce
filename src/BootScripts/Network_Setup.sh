@@ -178,15 +178,16 @@ case $ExtIP in
 	;;
 	"dhcp")
 		Setting="dhcp"
-		auto=("${auto[@]}" $ExtIf)
-		IfConf="iface $ExtIf inet dhcp"
-		echo "$IfConf" >>"$File"
-		if [[ "$Extv6IP" == "disabled" ]]; then
-			echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=1" >>"$File"
-		else
-			echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=0" >>"$File"
+		if [[ ! "$PPPoEEnabled" == "on" ]];then
+			auto=("${auto[@]}" $ExtIf)
+			IfConf="iface $ExtIf inet dhcp"
+			echo "$IfConf" >>"$File"
+			if [[ "$Extv6IP" == "disabled" ]]; then
+				echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=1" >>"$File"
+			else
+				echo "	pre-up sysctl -q -e -w  net.ipv6.conf.$ExtIf.disable_ipv6=0" >>"$File"
+			fi
 		fi
-
 	;;
 	*)
 		Setting="static"
