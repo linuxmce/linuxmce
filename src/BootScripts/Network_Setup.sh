@@ -527,15 +527,8 @@ if [ -e /etc/ipsec.secrets ] ;then
 fi
 
 if [[ "$VPNenabled" == "on" ]]; then
-        # Config L2TP/IPSEC VPN server
-        echo "L2TP/IPSEC VPN server enabled, setting up"
-
-	PKG_OK=$(dpkg-query -W --showformat='${Status}\n' openswan|grep "install ok installed")
-	echo Checking Openswan: $PKG_OK
-	if [ "" == "$PKG_OK" ]; then
-		echo "Setting up openswan..."
-		apt-get --force-yes --yes install openswan
-	fi
+    # Config L2TP/IPSEC VPN server
+    echo "L2TP/IPSEC VPN server enabled, setting up"
 
 	# Disabled redirects to prevent Netkey from sending bogus icmp packets
 	for each in /proc/sys/net/ipv4/conf/*
