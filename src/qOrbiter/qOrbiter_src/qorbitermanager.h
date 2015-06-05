@@ -1618,7 +1618,10 @@ public slots:
     Q_INVOKABLE GenericFlatListModel* getDataGridModel(QString dataGridId, int PK_DataGrid, QString initOption);
     Q_INVOKABLE GenericFlatListModel* getDataGridModel(QString dataGridId, int PK_DataGrid);
 
-    void refreshDataGrid(QString dataGridId, int PK_DataGrid, QString option) { emit loadDataGrid(dataGridId, PK_DataGrid, option); }
+    void refreshDataGrid(QString dataGridId, int PK_DataGrid, QString option) {
+        LoggerWrapper::GetInstance()->Write(LV_STATUS, "refreshDataGrid()");
+        emit loadDataGrid(dataGridId, PK_DataGrid, option);
+    }
     void loadMoreData(QString dataGridId, QString dgName, int PK_DataGrid, QString option, int start, int numItems, int numCols, QString seek) { emit loadDataForDataGrid(dataGridId, dgName, PK_DataGrid, option, start, numItems, numCols, seek); }
     Q_INVOKABLE void seekGrid(QString dataGridId, QString s);
 

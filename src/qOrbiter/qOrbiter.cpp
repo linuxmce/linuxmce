@@ -2594,7 +2594,11 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString op
 
     //  QString fx = option.replace(0,1, QString::number(i_currentGridType));
     //  qWarning() << fx;
-    //  LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGridGrid '%s', option = %s", dataGridId.toStdString().c_str(), fx.toStdString().c_str());
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "qOrbiter::loadDataGridGrid PK = '%d', option = %s", PK_DataGrid, option.toStdString().c_str());
+    if (PK_DataGrid < 1) {
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "loadDataGrid() : PK_DataGrid < 1, aborting!");
+        return;
+    }
     //  option = fx;
     string *sResponse;
 
