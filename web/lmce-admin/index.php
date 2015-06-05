@@ -1140,6 +1140,17 @@ switch ($section) {
 	    $output->setHelpSrc('/wiki/index.php/Phone_Lines');
 	    phoneLines($output,$asteriskADO,$dbADO,$telecomADO);
 	break;
+
+	case 'sipConf';
+		$output = new Template($dbADO);
+		$output->setTemplateFileType('large');
+		@include($GLOBALS['globalConfigPath'].'asteriskDB.inc.php');
+		@include($GLOBALS['globalConfigPath'].'telecom.inc.php');
+	    include_once('operations/telecom/sipConf.php');
+	    $output->setHelpSrc('/wiki/index.php/asterisk_sip_conf');
+	    sipConf($output,$asteriskADO,$dbADO,$telecomADO);
+	break;
+
 	case 'fax';
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
