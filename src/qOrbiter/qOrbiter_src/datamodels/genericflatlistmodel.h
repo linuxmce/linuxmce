@@ -14,6 +14,8 @@
 #include <QVariant>
 #include <QDebug>
 #include <QReadWriteLock>
+#include "DCE/Logger.h"
+using namespace DCE;
 
 class GenericFlatListModel : public QAbstractListModel
 {
@@ -59,7 +61,10 @@ public:
     void updateItemData(int row, int role, QVariant value);
     void setModelName(QString s) { modelName = s; }
     void setPK_DataGrid(int PK_DataGrid) { m_PK_DataGrid = PK_DataGrid; }
-    Q_INVOKABLE void setOption(QString option) { m_option = option; refreshData(); }
+    Q_INVOKABLE void setOption(QString option) {
+            m_option = option;
+            // Do not refresh here, as we call this during datagrid setup, before all the required data(PK_DataGrid) is set
+    }
     void seek(QString seek);
     void seekResult(int row);
     bool isSeeking() { return m_seek; }

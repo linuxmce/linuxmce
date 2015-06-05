@@ -424,6 +424,7 @@ double GenericFlatListModel::getProgress()
 }
 
 void GenericFlatListModel::refreshData() {
+    LoggerWrapper::GetInstance()->Write(LV_STATUS, "GenericFlatListModel.refreshData");
     QObject* p = QObject::parent();
     qorbiterManager* pManager = static_cast<qorbiterManager*>(p);
     // Clear all window items and request new datagrid data
