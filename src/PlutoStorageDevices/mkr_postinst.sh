@@ -54,18 +54,18 @@ if [[ -r /usr/pluto/var/sambaCredentials.secret ]] ;then
 	smbuserid=$(id -u $smbuser)
 
 	# This is the correct way to do it but is not tested
-	echo -e "${smbpass}\n${smbpass}" | smbpasswd -a "${smbuser}" -s
+	# echo -e "${smbpass}\n${smbpass}" | smbpasswd -a "${smbuser}" -s
 
 	# This is not the correct way but it works(tm)
-	#if ! BlacklistConfFiles '/etc/samba/smbpasswd' ;then
-	#	if [ ! -e '/etc/samba/smbpasswd.pbackup' ] ;then
-	#		if [ -e '/etc/samba/smbpasswd' ]; then
-	#			cp /etc/samba/smbpasswd /etc/samba/smbpasswd.pbackup || :
-	#		fi
-	#	fi
-	#	smbpass=$(/usr/pluto/bin/smbpass.pl $smbpass)
-	#	echo "$smbuser:$LinuxUserID:$smbpass:[U          ]:LCT-00000001:,,," >> /etc/samba/smbpasswd 
-	#fi
+	if ! BlacklistConfFiles '/etc/samba/smbpasswd' ;then
+		if [ ! -e '/etc/samba/smbpasswd.pbackup' ] ;then
+			if [ -e '/etc/samba/smbpasswd' ]; then
+				cp /etc/samba/smbpasswd /etc/samba/smbpasswd.pbackup || :
+			fi
+		fi
+		smbpass=$(/usr/pluto/bin/smbpass.pl $smbpass)
+		echo "$smbuser:$LinuxUserID:$smbpass:[U          ]:LCT-00000001:,,," >> /etc/samba/smbpasswd 
+	fi
 fi
 
 
