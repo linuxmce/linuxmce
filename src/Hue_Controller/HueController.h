@@ -219,6 +219,7 @@ private:
     QNetworkAccessManager * commandManager;
     QNetworkAccessManager * poller;
 
+    bool m_updateStatus;
     bool mb_isNew;
     bool validated;
     bool linkButton;

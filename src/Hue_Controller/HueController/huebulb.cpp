@@ -5,6 +5,8 @@
 HueBulb::HueBulb(HueControllerHardware *hw)
 {
     setController(hw);
+    setPowerOn(false);
+    setBrightness(0);
 }
 
 void HueBulb::proccessStateInformation(QVariantMap d)
@@ -12,6 +14,7 @@ void HueBulb::proccessStateInformation(QVariantMap d)
    // qDebug() << Q_FUNC_INFO << QString("Device %1").arg(linuxmceId());
    // qDebug() << d["name"];
     QVariantMap stateInfo = d["state"].toMap();
+    setDisplayName(d["name"].toString());
     setBrightness(stateInfo["bri"].toDouble());
     setCurrentLevel(stateInfo["bri"].toUInt()/2.55);
     setOnline(stateInfo["reachable"].toBool());
