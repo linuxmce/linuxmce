@@ -39,6 +39,7 @@ using namespace DCE;
 #include <pthread.h>
 #include <QtGui/QColor>
 #include <math.h>
+#include <QDate>
 
 const char HueController::getGroups[] ="http://%s/api/%s/groups,GET";
 const char HueController::getNewLights[] = "http://%s/api/%s/lights/new,GET";
@@ -62,7 +63,8 @@ HueController::HueController(int DeviceID, string ServerAddress, bool bConnectEv
       mp_linkButtonTimer(new QTimer()),
       mp_pollTimer(new QTimer()),
       mp_cmdTimer(new QTimer()),
-      poller(new QNetworkAccessManager())
+      poller(new QNetworkAccessManager()),
+      m_updateStatus(true)
 
     //<-dceag-const-e->
 {
@@ -414,7 +416,7 @@ void HueController::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,st
         params.insert("on", false);
         bulb->setPowerOn(false);
         if(addMessageToQueue(target, params)){
-            sCMD_Result = "OK";
+            sCMD_Result = "OFF - OK";
 
         }
         else{
@@ -733,11 +735,15 @@ void HueController::CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessa
                     string pResonseA = "";
                     if(SendCommand(setUnit, &pResonseA)){
                         qDebug() << "Set internal id";
-
                     }
                     QString chanaddress = hueBulbs.at(n)->getController()->getIpAddress()+":"+QString::number(hueBulbs.at(n)->id());
                     qDebug()<< chanaddress;
-                    CMD_Set_Device_Data setController(this->m_dwPK_Device, 4, existingBulb->m_dwPK_Device,chanaddress.toStdString(),DEVICEDATA_PortChannel_Number_CONST);
+                    CMD_Set_Device_Data setController(this->m_dwPK_Device,
+                                                      4,
+                                                      existingBulb->m_dwPK_Device,
+                                                      chanaddress.toStdString(),
+                                                      DEVICEDATA_PortChannel_Number_CONST
+                                                      );
                     if(SendCommand(setController)){
                         qDebug() << "Set port / channel";
                     }
@@ -892,6 +898,8 @@ void HueController::CMD_StatusReport(string sArguments,string &sCMD_Result,Messa
 {
     cout << "Need to implement command #788 - StatusReport" << endl;
     cout << "Parm #51 - Arguments=" << sArguments << endl;
+    m_updateStatus=true;
+    sCMD_Result="OK";
 }
 
 //<-dceag-c980-b->
@@ -980,13 +988,15 @@ bool HueController::downloadControllerConfig(QUrl deviceIp)
         QVariantMap state = light["state"].toMap();
         b->setPowerOn(state["on"].toBool());
         b->setId(i.key().toInt());
+
         if(light["manufacturername"].isValid()){ b->setManufacturerName(light["manufacturername"].toString()); } //hue software 1.4
         if(light["uniqueid"].isValid()) { b->setUniqueId(light["uniqueid"].toString());  }                       //hue software 1.7
+        if(light["type"].isValid()) {b->setLightType(light["type"].toString());}
 
         b->setDisplayName(light["name"].toString());
         b->setLightModel(light["modelid"].toString());
-
         b->setLinuxmceId(0);
+        b->setController( hueControllers.at(deviceIndex));
 
         //  qDebug() << i.key() << "::" << light["name"].toString() ;
 
@@ -1059,17 +1069,60 @@ void HueController::checkLightInformation()
     QObject::connect(poller, SIGNAL(finished(QNetworkReply*)), &respWait, SLOT(quit()));
     respWait.exec();
     // qDebug() << Q_FUNC_INFO;
-
+   qDebug() << Q_FUNC_INFO <<  QDateTime::currentDateTime() << " processing status " ;
     QJson::Parser parser;
     bool ok=false;
     QVariantMap p = parser.parse(rt->readAll(), &ok).toMap();
     //  qDebug() << p.keys();
     foreach(HueBulb*b, hueBulbs){
+
         b->proccessStateInformation(p.value(QString::number(b->id())).toMap());
+        if(m_updateStatus){
+
+//            CMD_Set_Device_Data setUnit(this->m_dwPK_Device, 4,b->linuxmceId(),StringUtils::itos(b->id()),DEVICEDATA_UnitNo_CONST);
+//            string pResonseA = "";
+//            if(SendCommand(setUnit, &pResonseA)){
+//                qDebug() << "Set internal id";
+//            }
+
+
+            QString chanaddress = b->getController()->getIpAddress()+":"+QString::number(b->id());
+            qDebug()<< chanaddress;
+            CMD_Set_Device_Data setController(this->m_dwPK_Device, 4, b->linuxmceId(),chanaddress.toStdString(),DEVICEDATA_PortChannel_Number_CONST);
+            if(SendCommand(setController)){
+                qDebug() << "Set port / channel";
+            }
+
+            /* needs fix to check name diff */
+
+            CMD_Set_Device_Data setName(m_dwPK_Device, 4, b->linuxmceId(), b->displayName().toStdString(), DEVICEDATA_Name_CONST);
+            if(SendCommand(setName)){
+                qDebug()<<"Set Device Name";
+            }
+
+            CMD_Set_Device_Data setDesc(m_dwPK_Device, 4, b->linuxmceId(), b->displayName().toStdString(), DEVICEDATA_Description_CONST);
+            if(SendCommand(setDesc)){
+                qDebug() << " Updated display name " << b->displayName();
+            }
+
+
+
+            CMD_Set_Device_Data setId(m_dwPK_Device, 4, b->linuxmceId(), b->uniqueId().toStdString(), DEVICEDATA_Serial_Number_CONST);
+            if(SendCommand(setId)){
+                qDebug()<<"Set uniqueId " << b->uniqueId();
+            }
+
+            CMD_Set_Device_Data setType(m_dwPK_Device, 4, b->linuxmceId(), b->getLightType().toStdString(), DEVICEDATA_Type_CONST );
+            if(SendCommand(setType)){
+                qDebug() <<"Set type";
+            }
+        }
+
     }
 
     rt->deleteLater();
-
+    m_updateStatus=false;
+    qDebug() << Q_FUNC_INFO <<  QDateTime::currentDateTime() << " exit status " ;
 }
 
 void HueController::handleDeviceEvent(int whichEvent)
