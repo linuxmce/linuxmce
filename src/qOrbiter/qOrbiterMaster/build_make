@@ -8,6 +8,6 @@ case "$HOST_ARCH" in
 		make distclean; qmake qOrbiterMaster.pro CONFIG+=opengl; make distclean; qmake qOrbiterMaster.pro CONFIG+=opengl; make clean; make $make_jobs
 		;;
 	armhf)
-		make distclean; qmake qOrbiterMaster.pro CONFIG+=RPI; make distclean; qmake qOrbiterMaster.pro CONFIG+=RPI; make clean; make $make_jobs
+		make distclean; qmake qOrbiterMaster.pro CONFIG+=pi; make distclean; qmake qOrbiterMaster.pro CONFIG+=pi; make clean; make $make_jobs
 		;;
 esac

@@ -31,14 +31,7 @@ local-development{
         !linux-rasp-pi-g++{ DESTDIR = ../QOrbiter-build-$$QT_VERSION }
             }
 } else {
-
-    android-g++{
     DESTDIR = ../build-output
-    }  else  {
-        !linux-rasp-pi-g++{
-            DESTDIR = ../build-output
-                            }
-            }
 }
 
 contains(QT_VERSION,4.8.*){
@@ -113,6 +106,22 @@ common-folder.target = $$DESTDIR/qml
 
 
 #DEPLOYMENTFOLDERS+=common-folder
+
+linux-rasp-pi-g++ || pi{
+
+        DEFINES+=RPI GLENABLED
+        DEFINES-=for_desktop
+       # DEPLOYMENTFOLDERS += folder_02  #folder_01
+        QT+= qml
+        QT-=declarative
+        target.path=/opt/QOrbiter      
+        INSTALLS+=target
+
+        plugins_folder.source = imports
+        plugins_folder.target = $$DESTDIR
+
+       # DEPLOYMENTFOLDERS -= plugins_folder
+}
 
 linux-g++{
       #  TARGET = qorbiter-$$QT_VERSION-core-gl
@@ -203,41 +212,24 @@ macx-g++{
        # QT-=bundle
 }
 
-linux-rasp-pi-g++ || pi{
+index.source=qml/Index.qml
+index.target=$$DESTDIR
 
-        DEFINES+=RPI GLENABLED
-        DEFINES-=for_desktop
-       # DEPLOYMENTFOLDERS += folder_02  #folder_01
-        QT+= qml
-        QT-=declarative
-        target.path=/opt/QOrbiter      
-        INSTALLS+=target
+folder_02.source=qml/skins
+folder_02.target=$$DESTDIR
 
-        plugins_folder.source = imports
-        plugins_folder.target = $$DESTDIR
+folder_03.source=qml/splash
+folder_03.target=$$DESTDIR
 
-       # DEPLOYMENTFOLDERS -= plugins_folder
+folder_04.source=qml/images
+folder_04.target=$$DESTDIR
+
+#folder_01.target=qml
+DEPLOYMENTFOLDERS +=index folder_02 folder_04 folder_03 plugins_folder
+
+linux-rasp-pi-g++{
+	DEPLOYMENTFOLDERS -= plugins_folder
 }
-        index.source=qml/Index.qml
-        index.target=$$DESTDIR
-
-        folder_02.source=qml/skins
-        folder_02.target=$$DESTDIR
-
-        folder_03.source=qml/splash
-        folder_03.target=$$DESTDIR
-
-        folder_04.source=qml/images
-        folder_04.target=$$DESTDIR
-
-        #folder_01.target=qml
-        DEPLOYMENTFOLDERS +=index folder_02 folder_04 folder_03 plugins_folder
-
-        linux-rasp-pi-g++{
-
-        DEPLOYMENTFOLDERS -= plugins_folder
-
-        }
 
 macx-g++{
         index.target=$$APP_RESOURCES_PATH
