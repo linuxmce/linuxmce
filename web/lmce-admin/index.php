@@ -15,6 +15,19 @@ require('include/template.class.inc.php');
 $GLOBALS['server_start_time']=getmicrotime();
 
 $section = @$_REQUEST['section'];
+
+if( !isset($_SESSION['userLoggedIn']) && $section=='authorize' ) {
+	
+      $authorization=$_REQUEST['state'];
+      $client_id=$_GET['client_id'];
+      $client_secret=$_GET['client_secret'];
+ echo "authorizing:".$authorization;
+           if($authorization!=""){
+          die('<script>top.location="index.php?section=login&authorize='.$authorization.'&client_id='.$client_id.'&client_secret='.$client_secret.'"</script>');
+  }
+
+}
+
 if(!isset($_SESSION['userLoggedIn']) && $section!='' && $section!='login' && $section!='wizard' && $section!='proxySocket' && $section!='orbitersWin'){
 
 	if($section=='createUser'){
@@ -29,8 +42,7 @@ if(!isset($_SESSION['userLoggedIn']) && $section!='' && $section!='login' && $se
 		// invalid session, destroy it and send user to login
 		unset($_SESSION);
 		session_destroy();
-
-		die('<script>top.location="index.php?section=login"</script>');
+	die('<script>top.location="index.php?section=login"</script>');
 	}
 }
 // if installation ID is 1 (offline installation), check if it doesn't changed
@@ -1140,17 +1152,6 @@ switch ($section) {
 	    $output->setHelpSrc('/wiki/index.php/Phone_Lines');
 	    phoneLines($output,$asteriskADO,$dbADO,$telecomADO);
 	break;
-
-	case 'sipConf';
-		$output = new Template($dbADO);
-		$output->setTemplateFileType('large');
-		@include($GLOBALS['globalConfigPath'].'asteriskDB.inc.php');
-		@include($GLOBALS['globalConfigPath'].'telecom.inc.php');
-	    include_once('operations/telecom/sipConf.php');
-	    $output->setHelpSrc('/wiki/index.php/asterisk_sip_conf');
-	    sipConf($output,$asteriskADO,$dbADO,$telecomADO);
-	break;
-
 	case 'fax';
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('large');
@@ -1919,7 +1920,12 @@ switch ($section) {
 	    include_once('operations/packages/installWizardList.php');
 	    installWizardList($output,$dbADO);
 	break;
-
+       case 'authorizeApp':
+		$output= new Template($dbADO);
+		$output->setTemplateFileType('small');
+		include_once('../api/authorize.php');
+		doAuth($output,$dbADO );
+	break;
 	case 'index';
 		@$_SESSION['lastLeftFrameSrc']='';
 		@$_SESSION['lastRightFrameSrc']='';
