@@ -22,7 +22,10 @@ function login($output,$dbADO) {
 		//Web orbiter is installed
 		$weborbiterInstalled=true;
 	}
-
+	$authorize="NONE";
+	$app_name= $_GET['client_id'];
+	$app_secret=$_GET['client_secret'];
+	$authorize = @$_REQUEST["authorize"];
 	$version = exec("dpkg -s pluto-website-admin|grep 'Version: '|cut -d ' ' -f 2");
 	$loginFormBig= '
 		<script>
@@ -33,6 +36,11 @@ function login($output,$dbADO) {
 
 	<form name="form1" id="form1" method="post" action="'.$_SERVER['PHP_SELF'].'">
 	<input type="hidden" name="section" value="login">
+	
+	<input type="hidden" name="authorize" value="'.$authorize.'">
+        <input type="hidden" name="client_id" value="'.$client_id.'">
+        <input type="hidden" name="client_secret" value="'.$client_secret.'">
+	<input type="hidden" name="state" value="'.$authorize.'">
 	  <table border="0" align="center" cellpadding="5" cellspacing="0">
 		<tr>
 			<td colspan="2" align="center" height="133" class="left_frame_logo">
@@ -41,8 +49,8 @@ function login($output,$dbADO) {
 		</tr>
 		<tr>
 			<td colspan="2" align="center">
-				<B>'.((isset($_SESSION['logout_msg']))?$_SESSION['logout_msg']:translate('TEXT_WELCOME_MSG_CONST')).'</B>
-			</td>
+				<B>'.((isset($_SESSION['logout_msg']))?$_SESSION['logout_msg']:translate('TEXT_WELCOME_MSG_CONST')).$authorize.'</B>
+ 			</td>
 		</tr>';
 	if(count($users)==0){
 		$loginFormBig.='
@@ -99,7 +107,7 @@ function login($output,$dbADO) {
 		$usernameForm = cleanString($_POST['username']);
 		$passwordForm = cleanString($_POST['password']);
 
-
+		$authorize=$_POST["authorize"];
 		$messages = '';
 
 		if ($usernameForm=='')  {
@@ -223,8 +231,13 @@ function login($output,$dbADO) {
 							$_SESSION['installationIDs'] = $installations;
 							$_SESSION['installationID'] = $installations[0];
 						}
-
-						die('<script>top.location=\'index.php\';</script>');
+						
+						;
+						if($authorize!=""){
+						 header("Location: index.php?section=authorizeApp&state='.authorize.'");
+						}
+                                               die('<script>top.location=\'index.php\';</script>');
+						
 
 					}
 				} else {
