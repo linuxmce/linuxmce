@@ -17,7 +17,6 @@ dpatch
 dpkg-dev
 dpkg-repack
 fakeroot
-fuse-utils
 gdb
 genisoimage
 gnome-applets
@@ -86,7 +85,6 @@ libgnome-desktop-dev
 libpcre3-dev
 libpostproc-dev
 libpulse-dev
-libqt5-dev
 libreadline-dev
 librpm-dev
 libsdl-gfx1.2-dev
@@ -125,9 +123,9 @@ libxv-dev
 libxvmc-dev
 libxxf86vm-dev
 libzvbi-dev
-linux-headers-3.2.0-4-rpi
-linux-image-3.2.0-4-rpi
-linux-source-3.2
+linux-headers-3.13-1-rpi
+linux-image-3.13-1-rpi
+linux-source-3.13
 lirc
 module-assistant
 mysql-client
@@ -142,8 +140,7 @@ sharutils
 squashfs-tools
 subversion
 swig
-tcl
-tcl8.4-dev
+tcl8.6-dev
 texi2html
 texinfo
 transfig
