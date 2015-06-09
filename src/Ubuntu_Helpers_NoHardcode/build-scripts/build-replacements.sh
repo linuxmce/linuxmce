@@ -58,6 +58,11 @@ function Build_Replacement_Package
 	dir_="${svn_dir}/${svn_branch_name}/${pkg_dir}"
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
+
+if [ ! $(head -1 debian/changelog | grep ${build_name}) ] ; then
+	sed -i "1s/)/\~${build_name}1)/" debian/changelog
+fi
+
 		DisplayMessage "Building ${pkg_name}"
 		echo "dpkg-buildpackage -rfakeroot -us -uc -b -tc"
 		dpkg-buildpackage -rfakeroot -us -uc -b -tc $make_jobs
@@ -80,6 +85,9 @@ function Build_Replacements_Common_ubuntu
 	dir_=${svn_dir}/${svn_branch_name}/ubuntu/lirc-0.9.0-0ubuntu1+lmce1
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
+if [ ! $(head -1 debian/changelog | grep ${build_name}) ] ; then
+	sed -i "1s/)/\~${build_name}1)/" debian/changelog
+fi
 		DisplayMessage "Building lirc-0.9.0-0ubuntu1+lmce1"
 		echo "dpkg-buildpackage -rfakeroot -uc -b"
 		dpkg-buildpackage -uc -b && \
@@ -98,6 +106,9 @@ function Build_Replacements_Common_ubuntu
 	dir_=${svn_dir}/${svn_branch_name}/external/ola-0.9.0
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
+if [ ! $(head -1 debian/changelog | grep ${build_name}) ] ; then
+	sed -i "1s/)/\~${build_name}1)/" debian/changelog
+fi
 		DisplayMessage "Building ola-0.9.0"
 		autoreconf -i && \
 		dpkg-buildpackage -uc -b -tc $make_jobs && \
@@ -114,6 +125,9 @@ function Build_Replacements_Common_ubuntu
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu/asterisk"
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
+if [ ! $(head -1 debian/changelog | grep ${build_name}) ] ; then
+	sed -i "1s/)/\~${build_name}1)/" debian/changelog
+fi
 		DisplayMessage "Building pluto-asterisk"
 		./make_package_ubuntu.sh $KVER && \
 		cp -fr asterisk-pluto_*.deb ${replacements_dir} && \
@@ -135,6 +149,9 @@ function Build_Replacements_Common_ubuntu
 	dir_=${svn_dir}/${svn_branch_name}/ubuntu/linux-image-dummy
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
+if [ ! $(head -1 debian/changelog | grep ${build_name}) ] ; then
+	sed -i "1s/)/\~${build_name}1)/" debian/changelog
+fi
 		DisplayMessage "Building linux-image-diskless for $KVER"
 		./makepackage.sh && \
 		cp -fr linux-image-diskless_*.deb "${replacements_dir}" && \
@@ -155,6 +172,12 @@ function Build_Replacements_Common_ubuntu
 
 	Build_Replacement_Package lmce-skins extra/graphics && \
 	cp -fr ${svn_dir}/${svn_branch_name}/extra/graphics/lmce-avwizard-skins* "${replacements_dir}" || :
+
+	# Open ZWave library
+	Build_Replacement_Package zwave external/openzwave-1.3.1025 && \
+        cp ${svn_dir}/${svn_branch_name}/external/openzwave*.deb "${replacements_dir}" && \
+        cp ${svn_dir}/${svn_branch_name}/external/openzwave*.changes "${replacements_dir}" && \
+ 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb || :
 }
 
 function Build_Replacements_ubuntu_precise
@@ -167,10 +190,6 @@ function Build_Replacements_ubuntu_precise
         Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1 || :
 
 	Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2 || :
-
-	# Open ZWave library
-	Build_Replacement_Package libopenzwave1.0 external/openzwave-1.3.1025 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb || :
 
 	#Package: libbluray1
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
@@ -224,10 +243,6 @@ function Build_Replacements_ubuntu_trusty
 
 	#Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2
 
-	# Open ZWave library
-	Build_Replacement_Package zwave external/openzwave-1.3.1025 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb || :
-
 	# libhupnp and libhupnp-av need to build under qt4.
 	QT_SELECT=4 Build_Replacement_Package libhupnp-core external/hupnp/hupnp && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-core*.deb || :
@@ -248,18 +263,45 @@ function Build_Replacements_ubuntu_trusty
 
 function Build_Replacements_Common_raspbian
 {
-	: # no-op
+	# Open ZWave library
+	Build_Replacement_Package libopenzwave1.0 external/openzwave-1.3.1025 && \
+        cp ${svn_dir}/${svn_branch_name}/external/openzwave*.deb "${replacements_dir}" && \
+        cp ${svn_dir}/${svn_branch_name}/external/openzwave*.changes "${replacements_dir}" && \
+ 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb || :
+
+	# ola needs to be configured to the current build environment
+	dir_=${svn_dir}/${svn_branch_name}/external/ola-0.9.0
+	if Changed_Since_Last_Build "$dir_" ;then
+		pushd "$dir_"
+if [ ! $(head -1 debian/changelog | grep ${build_name}) ] ; then
+	sed -i "1s/)/\~${build_name}1)/" debian/changelog
+fi
+		DisplayMessage "Building ola-0.9.0"
+		autoreconf -i && \
+		dpkg-buildpackage -uc -b -tc $make_jobs && \
+		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.deb "${replacements_dir}" && \
+		cp -fr ${svn_dir}/${svn_branch_name}/external/ola*.changes "${replacements_dir}" && \
+		Update_Changed_Since_Last_Build "$dir_" || :
+		popd
+	fi
+
 }
 
 function Build_Replacements_raspbian_wheezy
 {
 	mkdir -pv "$replacements_dir"
+}
 
-	#Package: libcec
-	Build_Replacement_Package libcec raspbian/libcec-2.1.4 && \
-	dpkg -i ${svn_dir}/${svn_branch_name}/raspbian/libcec*.deb && \
-	cp ${svn_dir}/${svn_branch_name}/raspbian/*cec*.deb ${replacements_dir} && \
-	cp ${svn_dir}/${svn_branch_name}/raspbian/*cec*.changes ${replacements_dir} || :
+function Build_Replacements_raspbian_jessie
+{
+	mkdir -pv "$replacements_dir"
+
+	# not in svn yet
+	##Package: libcec
+	#Build_Replacement_Package libcec raspbian/libcec-2.2.0 && \
+	#dpkg -i ${svn_dir}/${svn_branch_name}/raspbian/libcec*.deb && \
+	#cp ${svn_dir}/${svn_branch_name}/raspbian/*cec*.deb ${replacements_dir} && \
+	#cp ${svn_dir}/${svn_branch_name}/raspbian/*cec*.changes ${replacements_dir} || :
 }
 
 trap 'Error "Undefined error in $0" ; apt-get install libtool -y' EXIT
