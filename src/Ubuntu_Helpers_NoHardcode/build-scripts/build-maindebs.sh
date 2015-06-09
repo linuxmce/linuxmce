@@ -36,13 +36,13 @@ function build_main_debs() {
 	export LD_LIBRARY_PATH="$mkr_dir:${svn_dir}/${svn_branch_name}/src/lib"
 	echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 
-	#FIXME Hackozaurus to build SimplePhone
-	export PKG_CONFIG_PATH=/opt/linphone-1.3.5/lib/pkgconfig
-	LinphoneVersion="$(dpkg -s 'liblinphone5' | grep '^Version: ' | cut -d' ' -f2)"
-	if [[ "$LinphoneVersion" != "1.3."* ]]; then
-		# Linphone 1.5.1 in Ubuntu Feisty makes SimplePhone to need this
-		export LINPHONE_CONST=const
-	fi
+	##FIXME Hackozaurus to build SimplePhone
+	#export PKG_CONFIG_PATH=/opt/linphone-1.3.5/lib/pkgconfig
+	#LinphoneVersion="$(dpkg -s 'liblinphone5' | grep '^Version: ' | cut -d' ' -f2)"
+	#if [[ "$LinphoneVersion" != "1.3."* ]]; then
+	#	# Linphone 1.5.1 in Ubuntu Feisty makes SimplePhone to need this
+	#	export LINPHONE_CONST=const
+	#fi
 
 	#FIXME Hackozaurus for pluto-dummy-console-tools
 	mkdir -p /usr/pluto/dummy-packages/
