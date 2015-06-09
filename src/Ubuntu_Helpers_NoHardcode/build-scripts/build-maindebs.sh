@@ -38,7 +38,7 @@ function build_main_debs() {
 
 	#FIXME Hackozaurus to build SimplePhone
 	export PKG_CONFIG_PATH=/opt/linphone-1.3.5/lib/pkgconfig
-	LinphoneVersion="$(dpkg -s 'liblinphone1-lmce' | grep '^Version: ' | cut -d' ' -f2)"
+	LinphoneVersion="$(dpkg -s 'liblinphone5' | grep '^Version: ' | cut -d' ' -f2)"
 	if [[ "$LinphoneVersion" != "1.3."* ]]; then
 		# Linphone 1.5.1 in Ubuntu Feisty makes SimplePhone to need this
 		export LINPHONE_CONST=const
@@ -132,6 +132,58 @@ function build_main_debs() {
 #			cp "${diskless_dir}/$diskless_image_name" /home/DisklessFS
 
 			case "${build_name}" in
+				jessie)
+					Distro_ID="22"
+					Repository_ID="23"
+					Main_Version='2.0.0.47.'
+					# not currently compatible
+					exclude_list=$exclude_list,498,499 # simplephone
+					exclude_list=$exclude_list,772,773 # eib
+					exclude_list=$exclude_list,819,820,821,822 # AirPlay Streamer/Plugin
+
+					# does not compile and/or is not compatible
+		                        exclude_list=$exclude_list,122,142	# Pluto Disk Drive
+		                        exclude_list=$exclude_list,728	# pluto hvr-1600 - incompatible - no pci
+					#exclude_list=$exclude_list,676	# Game Library lmce-game-db - source incompatible??
+					exclude_list=$exclude_list,674	# Game Player
+		                        exclude_list=$exclude_list,683	# MAME
+		                        #exclude_list=$exclude_list,133	# MythTV Player
+		                        #exclude_list=$exclude_list,726	# MythTV Scripts
+		                        exclude_list=$exclude_list,685	# EnOceon TCM120 - code error
+		                        exclude_list=$exclude_list,751	# HAI Control Program - needs Makefile?
+		                        exclude_list=$exclude_list,768	# PLCBUS - code error
+		                        #exclude_list=$exclude_list,773	# EIB - missing header?
+		                        #exclude_list=$exclude_list,785	# OLA - missing dep
+		                        #exclude_list=$exclude_list,794	# LMCE AirPlay Audio Player - missing dep
+					exclude_list=$exclude_list,689	# LMCE Datalogger library - says missing libdataloger...
+					exclude_list=$exclude_list,696	# LMCE Screen Capture Camera
+					exclude_list=$exclude_list,710	# IRTrans Ethernet
+					exclude_list=$exclude_list,712	# Chromoflex LED
+					exclude_list=$exclude_list,714	# VistaICM2
+					exclude_list=$exclude_list,749,748	# hai omni rs232
+					exclude_list=$exclude_list,759,758	# pandora
+					#exclude_list=$exclude_list,796,795	# usb game pad
+
+					# needs pre-compiled binary
+					exclude_list=$exclude_list,$mkr_tira
+		                        exclude_list=$exclude_list,453	# IRTrans Wrapper
+
+					# not building and not required for MD
+					exclude_list=$exclude_list,555,556	# AVWizard
+					exclude_list=$exclude_list,690	# Generic PC Workstation
+		                        exclude_list=$exclude_list,628	# MCE diskless tools - need to update for rpi debootstrapped image
+					exclude_list=$exclude_list,704	# Shoutcast Radio Plugin
+					exclude_list=$exclude_list,687	# LMCE Datalogger plugin - says 'source not compatible with this distro'
+		                        #exclude_list=$exclude_list,134	# MythTV Plugin
+		                        exclude_list=$exclude_list,680	# MAME SNAPS
+		                        exclude_list=$exclude_list,681	# MAME metadata
+					#exclude_list=$exclude_list,679	# Game Database
+					#exclude_list=$exclude_list,780	# LinuxMCE mediatagging
+					#exclude_list=$exclude_list,672	# Game Plugin
+					exclude_list=$exclude_list,792,791	# airplay plugin
+					exclude_list=$exclude_list,743,742	# hulu plugin
+					exclude_list=$exclude_list,722	# LinuxMCE DPMS Monitor
+					;;
 				wheezy)
 					Distro_ID="19"
 					Repository_ID="23"
