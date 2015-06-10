@@ -132,89 +132,21 @@ function build_main_debs() {
 					Repository_ID="23"
 					Main_Version='2.0.0.47.'
 					# not currently compatible
-					exclude_list=$exclude_list,498,499 # simplephone
+					exclude_list=$exclude_list,498,499	# simplephone
 
 					# does not compile
 		                        exclude_list=$exclude_list,682,683	# MAME
 					;;
 				wheezy)
 					Distro_ID="19"
-					Repository_ID="23"
+					RepositorySource=23
 					Main_Version='2.0.0.46.'
-
 					# not currently compatible
-					exclude_list=$exclude_list,819,820,821,822 # AirPlay Streamer/Plugin
+					:
 
-					# does not compile and/or is not compatible
-		                        exclude_list=$exclude_list,683	# MAME
-
-					# not building and not required for MD
-					exclude_list=$exclude_list,555,556	# AVWizard
-					exclude_list=$exclude_list,690	# Generic PC Workstation
-		                        exclude_list=$exclude_list,628	# MCE diskless tools - need to update for rpi debootstrapped image
-					exclude_list=$exclude_list,704	# Shoutcast Radio Plugin
-					exclude_list=$exclude_list,687	# LMCE Datalogger plugin - says 'source not compatible with this distro'
-		                        exclude_list=$exclude_list,680	# MAME metadata
-		                        exclude_list=$exclude_list,681	# MAME snaps
-					exclude_list=$exclude_list,792,791	# airplay plugin
-
-					# needs pre-compiled binary
-					exclude_list=$exclude_list,$mkr_tira
-		                        exclude_list=$exclude_list,453	# IRTrans Wrapper
-
-					# building but not required for MD
-		                        exclude_list=$exclude_list,204,718,719,727	# Pluto Skins
-					exclude_list=$exclude_list,804	# LMCE Skins BlueCrystal
-		                        exclude_list=$exclude_list,422  # Pluto Sample Media
-		                        exclude_list=$exclude_list,701	# lmce mediatomb
-		                        exclude_list=$exclude_list,538,539	# Pluto NewMDInteractor
-		                        exclude_list=$exclude_list,753	# datalog database
-		                        exclude_list=$exclude_list,490	# Pluto nvidia video drivers
-		                        exclude_list=$exclude_list,364	# windows ce libs
-		                        exclude_list=$exclude_list,576	# Pluto dynamic dns
-		                        exclude_list=$exclude_list,578	# Pluto firewire2v4l
-		                        exclude_list=$exclude_list,294	# Pluto qos
-		                        exclude_list=$exclude_list,769	# lmce-hybrid
-		                        exclude_list=$exclude_list,302	# pluto-dhcpd plugin
-		                        exclude_list=$exclude_list,455,456	# pluto motion wrapper
-		                        exclude_list=$exclude_list,424,425	# pluto slimserver plugin
-		                        exclude_list=$exclude_list,618,619	# msi button
-		                        exclude_list=$exclude_list,396,397	# dcegen
-		                        exclude_list=$exclude_list,137,118	# xine plugin
-		                        exclude_list=$exclude_list,161,162	# pluto gc100
-		                        exclude_list=$exclude_list,505,506	# pluto zwave lighting
-		                        exclude_list=$exclude_list,270,271	# pluto asterisk
-		                        exclude_list=$exclude_list,229,339	# pluto voicemail monitor
-		                        exclude_list=$exclude_list,620,621	# pluto hdhomerun
-		                        exclude_list=$exclude_list,199,200	# pluto vip shared lib
-		                        exclude_list=$exclude_list,143,124	# pluto bluetooth dongle, needs vip shared
-		                        exclude_list=$exclude_list,342,341	# pluto updateentarea
-		                        exclude_list=$exclude_list,405,406	# pluto updatemedia
-		                        exclude_list=$exclude_list,492,493	# pluto powerfilec200
-		                        exclude_list=$exclude_list,226,227	# pluto orbitergen
-		                        exclude_list=$exclude_list,392,393	# pluto remote assistance
-		                        exclude_list=$exclude_list,289,290	# pluto slim server streamer
-		                        exclude_list=$exclude_list,487,488	# pluto proxy orbiter
-		                        exclude_list=$exclude_list,330,491	# pluto plutodhcp
-		                        exclude_list=$exclude_list,154,155	# pluto dcerouter
-		                        exclude_list=$exclude_list,206	# pluto development dependencies
-		                        exclude_list=$exclude_list,702	# pluto mediatomb
-		                        exclude_list=$exclude_list,220	# pluto website admin
-		                        exclude_list=$exclude_list,765	# linuxmce internet gateway device support
-		                        exclude_list=$exclude_list,116,135	# pluto standard plugins
-		                        exclude_list=$exclude_list,639,640	# pluto xml data plugin
-		                        exclude_list=$exclude_list,446,447	# pluto makerelease
-		                        exclude_list=$exclude_list,202,203	# pluto sql2cpp (needs pluto-ra)
-		                        exclude_list=$exclude_list,247,248	# pluto ra
-		                        exclude_list=$exclude_list,212,213	# pluto sqlcvs
-		                        exclude_list=$exclude_list,598,599	# pluto tribunetv
-		                        exclude_list=$exclude_list,468,469	# pluto vdr
-		                        exclude_list=$exclude_list,466,467	# pluto vdr plugin
-		                        exclude_list=$exclude_list,239,240	# pluto bi-dir comm lib
-		                        exclude_list=$exclude_list,419,420	# pluto cddb identification
-		                        exclude_list=$exclude_list,403,404	# ansi to html
-		                        exclude_list=$exclude_list,760,761	# mjproxy
-		                        exclude_list=$exclude_list,283,284	# pluto text to speech
+					# does not compile
+					exclude_list=$exclude_list,862,863	# Hue Controller (qt4)
+		                        exclude_list=$exclude_list,682,683	# MAME
 					;;
 			esac
 			;;
@@ -245,3 +177,4 @@ trap 'Error "Undefined error in $0"' EXIT
 build_main_debs
 
 trap - EXIT
+DisplayMessage "*** STEP: Finished MakeRelease"
