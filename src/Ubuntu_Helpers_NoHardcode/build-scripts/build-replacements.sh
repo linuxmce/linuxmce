@@ -59,7 +59,7 @@ function Build_Replacement_Package
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
 
-if [ ! $(head -1 debian/changelog | grep ${build_name}) ] ; then
+if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
 	sed -i "1s/)/\~${build_name}1)/" debian/changelog
 fi
 
@@ -85,7 +85,7 @@ function Build_Replacements_Common_ubuntu
 	dir_=${svn_dir}/${svn_branch_name}/ubuntu/lirc-0.9.0-0ubuntu1+lmce1
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
-if [ ! $(head -1 debian/changelog | grep ${build_name}) ] ; then
+if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
 	sed -i "1s/)/\~${build_name}1)/" debian/changelog
 fi
 		DisplayMessage "Building lirc-0.9.0-0ubuntu1+lmce1"
@@ -106,7 +106,7 @@ fi
 	dir_=${svn_dir}/${svn_branch_name}/external/ola-0.9.0
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
-if [ ! $(head -1 debian/changelog | grep ${build_name}) ] ; then
+if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
 	sed -i "1s/)/\~${build_name}1)/" debian/changelog
 fi
 		DisplayMessage "Building ola-0.9.0"
@@ -125,9 +125,9 @@ fi
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu/asterisk"
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
-if [ ! $(head -1 debian/changelog | grep ${build_name}) ] ; then
-	sed -i "1s/)/\~${build_name}1)/" debian/changelog
-fi
+#if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
+#	sed -i "1s/)/\~${build_name}1)/" debian/changelog
+#fi
 		DisplayMessage "Building pluto-asterisk"
 		./make_package_ubuntu.sh $KVER && \
 		cp -fr asterisk-pluto_*.deb ${replacements_dir} && \
@@ -149,9 +149,9 @@ fi
 	dir_=${svn_dir}/${svn_branch_name}/ubuntu/linux-image-dummy
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
-if [ ! $(head -1 debian/changelog | grep ${build_name}) ] ; then
-	sed -i "1s/)/\~${build_name}1)/" debian/changelog
-fi
+#if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
+#	sed -i "1s/)/\~${build_name}1)/" debian/changelog
+#fi
 		DisplayMessage "Building linux-image-diskless for $KVER"
 		./makepackage.sh && \
 		cp -fr linux-image-diskless_*.deb "${replacements_dir}" && \
@@ -273,7 +273,7 @@ function Build_Replacements_Common_raspbian
 	dir_=${svn_dir}/${svn_branch_name}/external/ola-0.9.0
 	if Changed_Since_Last_Build "$dir_" ;then
 		pushd "$dir_"
-if [ ! $(head -1 debian/changelog | grep ${build_name}) ] ; then
+if [ -z "$(head -1 debian/changelog | grep .${build_name}.\))" ] ; then
 	sed -i "1s/)/\~${build_name}1)/" debian/changelog
 fi
 		DisplayMessage "Building ola-0.9.0"
