@@ -117,11 +117,6 @@ function build_main_debs() {
 					Distro_ID="21"
 					RepositorySource=25
 					Main_Version='2.0.0.47.'
-					# mame snaps, mame - excluded due to long time for compilation.
-					exclude_list=$exclude_list,681,682,683
-
-					# Not building for some reason or other
-					#exclude_list=$exclude_list,782,785 # ola
 					;;
 			esac
 			;;
@@ -138,51 +133,9 @@ function build_main_debs() {
 					Main_Version='2.0.0.47.'
 					# not currently compatible
 					exclude_list=$exclude_list,498,499 # simplephone
-					exclude_list=$exclude_list,772,773 # eib
-					exclude_list=$exclude_list,819,820,821,822 # AirPlay Streamer/Plugin
 
-					# does not compile and/or is not compatible
-		                        exclude_list=$exclude_list,122,142	# Pluto Disk Drive
-		                        exclude_list=$exclude_list,728	# pluto hvr-1600 - incompatible - no pci
-					#exclude_list=$exclude_list,676	# Game Library lmce-game-db - source incompatible??
-					exclude_list=$exclude_list,674	# Game Player
-		                        exclude_list=$exclude_list,683	# MAME
-		                        #exclude_list=$exclude_list,133	# MythTV Player
-		                        #exclude_list=$exclude_list,726	# MythTV Scripts
-		                        exclude_list=$exclude_list,685	# EnOceon TCM120 - code error
-		                        exclude_list=$exclude_list,751	# HAI Control Program - needs Makefile?
-		                        exclude_list=$exclude_list,768	# PLCBUS - code error
-		                        #exclude_list=$exclude_list,773	# EIB - missing header?
-		                        #exclude_list=$exclude_list,785	# OLA - missing dep
-		                        #exclude_list=$exclude_list,794	# LMCE AirPlay Audio Player - missing dep
-					exclude_list=$exclude_list,689	# LMCE Datalogger library - says missing libdataloger...
-					exclude_list=$exclude_list,696	# LMCE Screen Capture Camera
-					exclude_list=$exclude_list,710	# IRTrans Ethernet
-					exclude_list=$exclude_list,712	# Chromoflex LED
-					exclude_list=$exclude_list,714	# VistaICM2
-					exclude_list=$exclude_list,749,748	# hai omni rs232
-					exclude_list=$exclude_list,759,758	# pandora
-					#exclude_list=$exclude_list,796,795	# usb game pad
-
-					# needs pre-compiled binary
-					exclude_list=$exclude_list,$mkr_tira
-		                        exclude_list=$exclude_list,453	# IRTrans Wrapper
-
-					# not building and not required for MD
-					exclude_list=$exclude_list,555,556	# AVWizard
-					exclude_list=$exclude_list,690	# Generic PC Workstation
-		                        exclude_list=$exclude_list,628	# MCE diskless tools - need to update for rpi debootstrapped image
-					exclude_list=$exclude_list,704	# Shoutcast Radio Plugin
-					exclude_list=$exclude_list,687	# LMCE Datalogger plugin - says 'source not compatible with this distro'
-		                        #exclude_list=$exclude_list,134	# MythTV Plugin
-		                        exclude_list=$exclude_list,680	# MAME SNAPS
-		                        exclude_list=$exclude_list,681	# MAME metadata
-					#exclude_list=$exclude_list,679	# Game Database
-					#exclude_list=$exclude_list,780	# LinuxMCE mediatagging
-					#exclude_list=$exclude_list,672	# Game Plugin
-					exclude_list=$exclude_list,792,791	# airplay plugin
-					exclude_list=$exclude_list,743,742	# hulu plugin
-					exclude_list=$exclude_list,722	# LinuxMCE DPMS Monitor
+					# does not compile
+		                        exclude_list=$exclude_list,682,683	# MAME
 					;;
 				wheezy)
 					Distro_ID="19"
@@ -193,38 +146,7 @@ function build_main_debs() {
 					exclude_list=$exclude_list,819,820,821,822 # AirPlay Streamer/Plugin
 
 					# does not compile and/or is not compatible
-		                        exclude_list=$exclude_list,122,142	# Pluto Disk Drive
-		                        exclude_list=$exclude_list,728	# pluto hvr-1600 - incompatible - no pci
-					exclude_list=$exclude_list,676	# Game Library lmce-game-db - source incompatible??
-					exclude_list=$exclude_list,674	# Game Player
 		                        exclude_list=$exclude_list,683	# MAME
-		                        exclude_list=$exclude_list,133	# MythTV Player
-		                        exclude_list=$exclude_list,726	# MythTV Scripts
-		                        exclude_list=$exclude_list,685	# EnOceon TCM120 - code error
-		                        exclude_list=$exclude_list,751	# HAI Control Program - needs Makefile?
-		                        exclude_list=$exclude_list,768	# PLCBUS - code error
-		                        exclude_list=$exclude_list,773	# EIB - missing header?
-		                        exclude_list=$exclude_list,785	# OLA - missing dep
-		                        exclude_list=$exclude_list,794	# LMCE AirPlay Audio Player - missing dep
-					exclude_list=$exclude_list,689	# LMCE Datalogger library - says missing libdataloger...
-					exclude_list=$exclude_list,696	# LMCE Screen Capture Camera
-					exclude_list=$exclude_list,710	# IRTrans Ethernet
-					exclude_list=$exclude_list,712	# Chromoflex LED
-					exclude_list=$exclude_list,714	# VistaICM2
-					exclude_list=$exclude_list,749,748	# hai omni rs232
-					exclude_list=$exclude_list,759,758	# pandora
-					exclude_list=$exclude_list,796,795	# usb game pad
-
-					# not required for an MD
-					# need build database fixes to build database packages - not required for an MD
-		                        exclude_list=$exclude_list,211	# Pluto System database
-		                        exclude_list=$exclude_list,214	# Pluto Local database
-		                        exclude_list=$exclude_list,233	# Pluto media database
-		                        exclude_list=$exclude_list,256	# Pluto security database
-		                        exclude_list=$exclude_list,436	# Pluto Marbella database
-		                        exclude_list=$exclude_list,454	# Pluto Audi database
-		                        exclude_list=$exclude_list,472	# Pluto telecom database
-		                        exclude_list=$exclude_list,679	# Pluto game database
 
 					# not building and not required for MD
 					exclude_list=$exclude_list,555,556	# AVWizard
@@ -232,19 +154,13 @@ function build_main_debs() {
 		                        exclude_list=$exclude_list,628	# MCE diskless tools - need to update for rpi debootstrapped image
 					exclude_list=$exclude_list,704	# Shoutcast Radio Plugin
 					exclude_list=$exclude_list,687	# LMCE Datalogger plugin - says 'source not compatible with this distro'
-		                        exclude_list=$exclude_list,134	# MythTV Plugin
-		                        exclude_list=$exclude_list,680	# MAME SNAPS
-		                        exclude_list=$exclude_list,681	# MAME metadata
-					exclude_list=$exclude_list,679	# Game Database
-					exclude_list=$exclude_list,780	# LinuxMCE mediatagging
-					exclude_list=$exclude_list,672	# Game Plugin
+		                        exclude_list=$exclude_list,680	# MAME metadata
+		                        exclude_list=$exclude_list,681	# MAME snaps
 					exclude_list=$exclude_list,792,791	# airplay plugin
-					exclude_list=$exclude_list,743,742	# hulu plugin
-					exclude_list=$exclude_list,722	# LinuxMCE DPMS Monitor
+
 					# needs pre-compiled binary
 					exclude_list=$exclude_list,$mkr_tira
 		                        exclude_list=$exclude_list,453	# IRTrans Wrapper
-
 
 					# building but not required for MD
 		                        exclude_list=$exclude_list,204,718,719,727	# Pluto Skins
