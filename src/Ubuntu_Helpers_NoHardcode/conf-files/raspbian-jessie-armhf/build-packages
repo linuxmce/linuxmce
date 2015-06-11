@@ -174,3 +174,9 @@ libexosip2-dev
 libspeexdsp-dev
 libow-dev
 libqjson-dev
+
+libdbus-c++-dev
+libudev-dev
+libcppunit-dev
+bison
+flex
