@@ -49,7 +49,7 @@ function login($output,$dbADO) {
 		</tr>
 		<tr>
 			<td colspan="2" align="center">
-				<B>'.((isset($_SESSION['logout_msg']))?$_SESSION['logout_msg']:translate('TEXT_WELCOME_MSG_CONST'))'</B>
+				<B>'.((isset($_SESSION['logout_msg']))?$_SESSION['logout_msg']:translate('TEXT_WELCOME_MSG_CONST')).'</B>
  			</td>
 		</tr>';
 	if(count($users)==0){
