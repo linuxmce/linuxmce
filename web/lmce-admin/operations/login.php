@@ -38,8 +38,8 @@ function login($output,$dbADO) {
 	<input type="hidden" name="section" value="login">
 	
 	<input type="hidden" name="authorize" value="'.$authorize.'">
-        <input type="hidden" name="client_id" value="'.$client_id.'">
-        <input type="hidden" name="client_secret" value="'.$client_secret.'">
+        <input type="hidden" name="client_id" value="'.$app_name.'">
+        <input type="hidden" name="client_secret" value="'.$app_secret.'">
 	<input type="hidden" name="state" value="'.$authorize.'">
 	  <table border="0" align="center" cellpadding="5" cellspacing="0">
 		<tr>
