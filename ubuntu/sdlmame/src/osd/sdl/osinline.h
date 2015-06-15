@@ -83,6 +83,12 @@ _osd_exchange64(INT64 volatile *ptr, INT64 exchange)
 
 #endif /* __ppc64__ || __PPC64__ */
 
+#else
+
+#ifndef YieldProcessor
+#define YieldProcessor() do {} while (0)
+#define osd_yield_processor() YieldProcessor()
+#endif
 
 #endif
 
