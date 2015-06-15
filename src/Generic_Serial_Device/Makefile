@@ -18,7 +18,7 @@ Gen_Dev_Files = $(GENDEV)/Generic_Serial_DeviceBase.cpp
 sources = Main.cpp Generic_Serial_Device.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
-arch := $(shell dpkg-architecture -q DEB_TARGET_ARCH)
+arch := $(shell dpkg-architecture -qDEB_HOST_ARCH)
 
 PKG_CONFIG := $(shell pkg-config --cflags --libs ruby-2.0)
 
