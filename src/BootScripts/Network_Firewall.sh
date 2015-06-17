@@ -594,7 +594,7 @@ fi
 # Configuring open ports on core
 echo "Opening specified ports from exterior"
 
-Q="SELECT Matchname,RuleType FROM Firewall WHERE Protocol='input' AND RuleType LIKE 'policy%' ORDER BY PK_Firewall"
+Q="SELECT Matchname,RuleType FROM Firewall WHERE Protocol='input' AND RuleType LIKE 'policy%' ORDER BY Place, PK_Firewall"
 R=$(RunSQL "$Q")
 
 for Protocol in $R; do
@@ -603,7 +603,7 @@ for Protocol in $R; do
 	RuleType=$(Field 2 "$Protocol")
 	IPVersion=$(echo $RuleType | cut -dy -f2)
 
-			Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType='input' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY PK_Firewall"
+			Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType='input' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY Place, PK_Firewall"
 			   
 			R=$(RunSQL "$Q")
 
@@ -646,7 +646,7 @@ done
 # Configuring all core_forwarding
 echo "Setting up core_forward"
 
-Q="SELECT Matchname,RuleType FROM Firewall WHERE Protocol='forward' AND RuleType LIKE 'policy%' ORDER BY PK_Firewall"
+Q="SELECT Matchname,RuleType FROM Firewall WHERE Protocol='forward' AND RuleType LIKE 'policy%' ORDER BY Place, PK_Firewall"
 R=$(RunSQL "$Q")
 
 for Protocol in $R; do
@@ -655,7 +655,7 @@ for Protocol in $R; do
 	RuleType=$(Field 2 "$Protocol")
 	IPVersion=$(echo $RuleType | cut -dy -f2)
 
-		Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType='forward' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY PK_Firewall"
+		Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType='forward' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY Place, PK_Firewall"
 		R=$(RunSQL "$Q")
 
 			for Port in $R; do
@@ -700,7 +700,7 @@ echo "Setting up Port_forwarding (NAT)"
 ForwardTypeArr=('PREROUTING' 'POSTROUTING' 'OUTPUT' 'MASQUERADE')
 for ForwardType in "${ForwardTypeArr[@]}"; do
 	echo $ForwardType
-	Q="SELECT RuleType,IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType LIKE '%-$ForwardType' AND Protocol LIKE '%ipv4' AND Disabled='0' AND Offline='0' ORDER BY PK_Firewall"
+	Q="SELECT RuleType,IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType LIKE '%-$ForwardType' AND Protocol LIKE '%ipv4' AND Disabled='0' AND Offline='0' ORDER BY Place, PK_Firewall"
 	R=$(RunSQL "$Q")
 			for Port in $R; do
 				IPVersion="ipv4"
@@ -783,7 +783,7 @@ done
 # Configuring all Output ports
 echo "Opening specified ports from exterior"
 
-Q="SELECT Matchname,RuleType FROM Firewall WHERE Protocol='output' AND RuleType LIKE 'policy%' ORDER BY PK_Firewall"
+Q="SELECT Matchname,RuleType FROM Firewall WHERE Protocol='output' AND RuleType LIKE 'policy%' ORDER BY Place, PK_Firewall"
 R=$(RunSQL "$Q")
 
 for Protocol in $R; do
@@ -792,7 +792,7 @@ for Protocol in $R; do
 	RuleType=$(Field 2 "$Protocol")
 	IPVersion=$(echo $RuleType | cut -dy -f2)
 
-		Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType='output' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY PK_Firewall"
+		Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType='output' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY Place, PK_Firewall"
 		R=$(RunSQL "$Q")
 
 		for Port in $R; do
