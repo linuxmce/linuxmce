@@ -408,7 +408,6 @@ int64_t OMXPlayerInterface::Send_Seek(int64_t usecs) {
 }
 
 void OMXPlayerInterface::Do_SetPosition(string sMediaURL, int64_t xPos) {
-    // FIXME: need to check for seek past end
     Log("Do_SetPosition() - calling SetPosition('" + sMediaURL + "', " + to_string(xPos) + ") [" + TimeFromUSec(xPos) + "]");
     if (Send_SetPosition(sMediaURL, xPos) != xPos)
 	Log("Do_SetPosition() - error setting position!");
@@ -458,19 +457,11 @@ void OMXPlayerInterface::Do_SeekBackLarge() {
 }
 
 void OMXPlayerInterface::Do_SeekForwardSmall() {
-    // TODO: MUST!!!
-    //  Add checks for seeking past end, omxplayer
-    //  does not check this and idles if you seek
-    //  past the end of the stream.
     Log("Do_SeekForward() - calling Send_Action(KeyConfig::ACTION_SEEK_FORWARD_SMALL)");
     Send_Action(KeyConfig::ACTION_SEEK_FORWARD_SMALL);
 }
 
 void OMXPlayerInterface::Do_SeekForwardLarge() {
-    // TODO: MUST!!!
-    //  Add checks for seeking past end, omxplayer
-    //  does not check this and idles if you seek
-    //  past the end of the stream.
     Log("Do_SeekForward() - calling Send_Action(KeyConfig::ACTION_SEEK_FORWARD_LARGE)");
     Send_Action(KeyConfig::ACTION_SEEK_FORWARD_LARGE);
 }
@@ -788,31 +779,35 @@ bool OMXPlayerInterface::Play(string sMediaURL, string sMediaPosition) {
     ifstream infile;
     bool bPrivate(true);
 
+
+    // TODO: store this for subsequent playback, this only changes on a reboot of the rpi
     Log("Play() - Opening file '" + OMXPLAYER_DBUS_ADDR + "' to get d-bus address");
-    infile.open(OMXPLAYER_DBUS_ADDR.c_str());
 
     while (++i<=RETRIES && line == "") {
+      infile.open(OMXPLAYER_DBUS_ADDR.c_str());
+
       while (!infile.is_open() && ++i<=RETRIES ) {
         usleep(100000);
         infile.open(OMXPLAYER_DBUS_ADDR.c_str());
       }
       if (!infile.is_open())  {
-        Log("Play() - Could not open file " + OMXPLAYER_DBUS_ADDR + ", exiting... ");
-	Do_QuitOnError();
-        return false;
+        Log("Play() - Could not open file " + OMXPLAYER_DBUS_ADDR);
       }
       else {
         getline(infile, line);
         infile.close();
+        if ( line != "" ) {
+          Log("Play() - Read dbus session line: " + line);
+        }
+        else {
+          Log("Play() - Failed to read D-Bus address line from " + OMXPLAYER_DBUS_ADDR);
+        }
       }
     }
 
-    if ( line != "" ) {
-      Log("Play() - Read line: " + line);
-    }
-    else {
-      Log("Play() - Failed to read D-Bus address line from " + OMXPLAYER_DBUS_ADDR);
-//      Stop();
+    if (i >= RETRIES)  {
+      Log("Play() - Failed to open/read D-Bus address line from " + OMXPLAYER_DBUS_ADDR + " exiting...");
+      Do_QuitOnError();
       return false;
     }
 
