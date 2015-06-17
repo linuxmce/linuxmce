@@ -782,10 +782,9 @@ bool OMXPlayerInterface::Play(string sMediaURL, string sMediaPosition) {
 
     // TODO: store this for subsequent playback, this only changes on a reboot of the rpi
     Log("Play() - Opening file '" + OMXPLAYER_DBUS_ADDR + "' to get d-bus address");
+//    infile.open(OMXPLAYER_DBUS_ADDR.c_str());
 
-    while (++i<=RETRIES && line == "") {
-      infile.open(OMXPLAYER_DBUS_ADDR.c_str());
-
+    while (i<=RETRIES && line == "") {
       while (!infile.is_open() && ++i<=RETRIES ) {
         usleep(100000);
         infile.open(OMXPLAYER_DBUS_ADDR.c_str());
@@ -804,7 +803,6 @@ bool OMXPlayerInterface::Play(string sMediaURL, string sMediaPosition) {
         }
       }
     }
-
     if (i >= RETRIES)  {
       Log("Play() - Failed to open/read D-Bus address line from " + OMXPLAYER_DBUS_ADDR + " exiting...");
       Do_QuitOnError();
@@ -894,6 +892,7 @@ if (i >=DBUS_RETRIES)
     }
     else {
       Log("Play() - FUBAR!");
+      return false;
     }
 
     SetState(STATE::PLAYING);
@@ -927,9 +926,10 @@ OMXPlayerInterface::STATE OMXPlayerInterface::Get_PlayerState(void) {
 
 void OMXPlayerInterface::Inc_Error(void) {
   ++m_iErrCount;
-  Log("[" + to_string(m_iErrCount) + "] - ");
+  Log("Inc_Error() - [" + to_string(m_iErrCount) + "]");
 
   if ( m_iErrCount >= DBUS_RETRIES ) {
+    Log("Inc_Error() - DBUS_RETRIES exceeded, exiting...");
     Stop();
   }
 
