@@ -477,9 +477,9 @@ bool Motion_Wrapper::AddChildDeviceToConfigFile(std::ofstream& conffile, DeviceD
 	string sPortNumber = StringUtils::itos(i+8000);
 	if(!sPortNumber.empty()) {
 		conffile	<< "\n# webcam server settings" << endl;
-		conffile	<< "webcam_port " << sPortNumber << endl;
-		conffile	<< "webcam_localhost off " << endl;
-		conffile	<< "webcam_motion  on " << endl;
+                conffile	<< "stream_port " << sPortNumber << endl;
+                //conffile	<< "webcam_localhost off " << endl;
+                //conffile	<< "webcam_motion  on " << endl;
 	}
 
 	//sending pluto tripped on/off events on motion start/end
