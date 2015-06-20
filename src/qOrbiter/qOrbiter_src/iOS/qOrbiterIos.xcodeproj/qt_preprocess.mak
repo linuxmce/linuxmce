@@ -102,6 +102,43 @@ qrc_qmlFile.cpp: ../qmlFile.qrc \
 		../qml/skins/default/images/ff_up.png \
 		../qml/skins/default/images/arrow.png \
 		../qml/skins/default/images/splash_bg.png \
+		../qml/skins/default/images/floorplan/cd.png \
+		../qml/skins/default/images/floorplan/50.png \
+		../qml/skins/default/images/floorplan/remote.png \
+		../qml/skins/default/images/floorplan/orbiter.png \
+		../qml/skins/default/images/floorplan/30.png \
+		../qml/skins/default/images/floorplan/47.png \
+		../qml/skins/default/images/floorplan/32.png \
+		../qml/skins/default/images/floorplan/48.png \
+		../qml/skins/default/images/floorplan/33.png \
+		../qml/skins/default/images/floorplan/qmldir \
+		../qml/skins/default/images/floorplan/vcr.png \
+		../qml/skins/default/images/floorplan/20.png \
+		../qml/skins/default/images/floorplan/21.png \
+		../qml/skins/default/images/floorplan/22.png \
+		../qml/skins/default/images/floorplan/cable.png \
+		../qml/skins/default/images/floorplan/23.png \
+		../qml/skins/default/images/floorplan/smallpower.png \
+		../qml/skins/default/images/floorplan/24.png \
+		../qml/skins/default/images/floorplan/1.png \
+		../qml/skins/default/images/floorplan/25.png \
+		../qml/skins/default/images/floorplan/2.png \
+		../qml/skins/default/images/floorplan/10.png \
+		../qml/skins/default/images/floorplan/26.png \
+		../qml/skins/default/images/floorplan/3.png \
+		../qml/skins/default/images/floorplan/11.png \
+		../qml/skins/default/images/floorplan/plus.png \
+		../qml/skins/default/images/floorplan/4.png \
+		../qml/skins/default/images/floorplan/12.png \
+		../qml/skins/default/images/floorplan/13.png \
+		../qml/skins/default/images/floorplan/14.png \
+		../qml/skins/default/images/floorplan/minus.png \
+		../qml/skins/default/images/floorplan/sprinkler.png \
+		../qml/skins/default/images/floorplan/15.png \
+		../qml/skins/default/images/floorplan/7.png \
+		../qml/skins/default/images/floorplan/9.png \
+		../qml/skins/default/images/floorplan/17.png \
+		../qml/skins/default/images/floorplan/18.png \
 		../qml/skins/default/+small/Style.qml \
 		../qml/skins/default/+small/MainLayout.qml \
 		../qml/skins/default/+xlarge/Style.qml \
@@ -166,17 +203,22 @@ qrc_qmlFile.cpp: ../qmlFile.qrc \
 		../qml/skins/default/screens/+xlarge/Screen_44.qml \
 		../qml/skins/default/screens/+small/Screen_47.qml \
 		../qml/skins/default/components/GenericPlaybackScreen.qml \
+		../qml/skins/default/components/OnButton.qml \
 		../qml/skins/default/components/RoomSelector.qml \
 		../qml/skins/default/components/ControlDiamond.qml \
 		../qml/skins/default/components/SettingsOption.qml \
+		../qml/skins/default/components/ColorSlider.qml \
 		../qml/skins/default/components/SettingsOptions.qml \
+		../qml/skins/default/components/FpSprite.qml \
 		../qml/skins/default/components/WaitSpinner.qml \
 		../qml/skins/default/components/TvButtonPanel.qml \
 		../qml/skins/default/components/Resend.qml \
 		../qml/skins/default/components/DirectionPad.qml \
 		../qml/skins/default/components/Panel.qml \
 		../qml/skins/default/components/ImageButton.qml \
+		../qml/skins/default/components/FloorPlandisplayTemplate.qml \
 		../qml/skins/default/components/DirectionButton.qml \
+		../qml/skins/default/components/Slider.qml \
 		../qml/skins/default/components/PlaylistPanel.qml \
 		../qml/skins/default/components/MultiMediaView.qml \
 		../qml/skins/default/components/GenericPopup.qml \
@@ -188,6 +230,7 @@ qrc_qmlFile.cpp: ../qmlFile.qrc \
 		../qml/skins/default/components/DirectionDiamond.qml \
 		../qml/skins/default/components/PSMediaSquare.qml \
 		../qml/skins/default/components/TransportButtons.qml \
+		../qml/skins/default/components/SendCommandBox.qml \
 		../qml/skins/default/components/GenericListModel.qml \
 		../qml/skins/default/components/StyledDelegate.qml \
 		../qml/skins/default/components/FileDetails.qml \
@@ -196,12 +239,15 @@ qrc_qmlFile.cpp: ../qmlFile.qrc \
 		../qml/skins/default/components/MediaInterface.qml \
 		../qml/skins/default/components/GenericDialog.qml \
 		../qml/skins/default/components/QmlPictureFrame.qml \
+		../qml/skins/default/components/OnOffSwitch.qml \
 		../qml/skins/default/components/FocusRow.qml \
 		../qml/skins/default/components/ControlButton.qml \
 		../qml/skins/default/components/StyledText.qml \
 		../qml/skins/default/components/StyledHeader.qml \
 		../qml/skins/default/components/VideoDelegate.qml \
 		../qml/skins/default/components/AdvancedMediaOptions.qml \
+		../qml/skins/default/components/OffButton.qml \
+		../qml/skins/default/components/TabletFloorplanLayout.qml \
 		../qml/skins/default/components/Switch.qml \
 		../qml/skins/default/components/MediaNumberPad.qml \
 		../qml/skins/default/components/LargeStyledButton.qml \
@@ -215,12 +261,15 @@ qrc_qmlFile.cpp: ../qmlFile.qrc \
 		../qml/skins/default/components/TvChannelPanel.qml \
 		../qml/skins/default/components/BroadcastMediaBase.qml \
 		../qml/skins/default/components/StyledScreen.qml \
+		../qml/skins/default/components/ScrollRow.qml \
 		../qml/skins/default/components/NowPlayingButton.qml \
+		../qml/skins/default/components/ParamManager.qml \
 		../qml/skins/default/components/+small/MultiMediaView.qml \
 		../qml/skins/default/+medium/Style.qml \
 		../qml/skins/default/+medium/MainLayout.qml \
 		../qml/skins/default/+large/Style.qml \
 		../qml/skins/default/+large/MainLayout.qml \
+		../qml/splash/LoadingView.qml \
 		../qml/splash/ExistingOrbiters.qml \
 		../qml/splash/LanguageList.qml \
 		../qml/splash/SplashView.qml \
@@ -237,10 +286,8 @@ qrc_qmlFile.cpp: ../qmlFile.qrc \
 		../qml/splash/images/options.png \
 		../qml/splash/images/arrow.png \
 		../qml/splash/images/splash_bg.png \
-		../qml/splash/+small/SplashView.qml \
 		../qml/splash/+small/Style.qml \
 		../qml/splash/+small/qmldir \
-		../qml/splash/+large/+ios/SplashView.qml \
 		../qml/splash/+large/+ios/Style.qml
 	/Users/Langstonius/Qt/5.4/ios/bin/rcc -name qmlFile ../qmlFile.qrc -o qrc_qmlFile.cpp
 

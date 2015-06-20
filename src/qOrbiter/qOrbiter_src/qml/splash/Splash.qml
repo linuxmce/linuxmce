@@ -114,6 +114,15 @@ Item {
                 // target: object
 
             }
+        },
+
+        State {
+            name: "no-connection"
+            when:!window.b_connectionPresent
+            PropertyChanges {
+                target: splash_content
+                sourceComponent:splashViewComp
+            }
         }
 
     ]

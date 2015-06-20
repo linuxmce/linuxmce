@@ -98,7 +98,15 @@ Item {
         FocusRow{
             spacing:5
             anchors.fill: parent
-
+            StyledButton{
+                buttonText: roomList.currentRoom
+                anchors{
+                    top:parent.top
+                    bottom:parent.bottom
+                    margins: 5
+                }
+                onActivated: qmlRoot.createPopup(roomSelector)
+            }
             StyledButton{
                 buttonText: qsTr("Sleeping Menu")
                 anchors{
@@ -126,15 +134,7 @@ Item {
 
                 buttonText: qsTr("Power")
             }
-            StyledButton{
-                buttonText: roomList.currentRoom
-                anchors{
-                    top:parent.top
-                    bottom:parent.bottom
-                    margins: 5
-                }
-                onActivated: qmlRoot.createPopup(roomSelector)
-            }
+
         }
     }
 }
