@@ -33,7 +33,7 @@ using namespace DCE;
 #include "pluto_main/Define_Command.h"
 #include "pluto_main/Define_CommandParameter.h"
 
-#define MOTION_CONF_PATH	"/etc/motion/"
+#define MOTION_CONF_PATH	"/etc/motion"
 #define MOTION_CONF_FILE	"motion.conf"
 #define ALARM_PURGE_ARCHIVE	1
 #define SNAPSHOT_SLEEP_TIME	100
@@ -195,10 +195,8 @@ bool Motion_Wrapper::Connect(int iPK_DeviceTemplate) {
 
 
             output  << endl
-					<< "locate on" << endl
-					<< "text_double on" << endl
-					<< "webcam_quality 70" << endl
-					<< "webcam_maxrate 5" << endl
+                                        << "locate_motion_mode on" << endl
+                                        << "text_double on" << endl
 					<< "text_changes on" << endl
 					<< "text_right %d-%m-%Y\\n%T" << endl
 
@@ -209,6 +207,7 @@ bool Motion_Wrapper::Connect(int iPK_DeviceTemplate) {
 					<< "ffmpeg_video_codec msmpeg4" << endl
 
 					 snapshot config  << endl
+                                        << "output_pictures off" << endl
 					<< "snapshot_interval 60" << endl
 					<< "snapshot_filename %Y/%m/%d/%H/%M_%S" << endl
 					<< "jpeg_filename %Y/%m/%d/%H/%M_%S" << endl
@@ -471,15 +470,16 @@ bool Motion_Wrapper::AddChildDeviceToConfigFile(std::ofstream& conffile, DeviceD
 		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Camera output found");
 	}
 		
-	conffile 	<< "target_dir " << sPath << endl;
+        conffile 	<< "target_dir " << sPath << endl;
 
 	//web port (+8000) and child number
 	string sPortNumber = StringUtils::itos(i+8000);
 	if(!sPortNumber.empty()) {
 		conffile	<< "\n# webcam server settings" << endl;
                 conffile	<< "stream_port " << sPortNumber << endl;
-                //conffile	<< "webcam_localhost off " << endl;
-                //conffile	<< "webcam_motion  on " << endl;
+                conffile	<< "stream_quality 70 " << endl;
+                conffile	<< "stream_localhost on " << endl;
+                conffile        << "stream_maxrate 5" << endl;
 	}
 
 	//sending pluto tripped on/off events on motion start/end
