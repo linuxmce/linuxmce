@@ -1926,6 +1926,12 @@ switch ($section) {
 		include_once('../api/authorize.php');
 		doAuth($output,$dbADO );
 	break;
+	    case 'cloudServices':
+		$output= new Template($dbADO);
+		$output->setTemplateFileType('large');
+		include_once('operations/cloudServices/serviceList.php');
+		init_services($mediadbADO, $dbADO, $output);
+	break;
 	case 'index';
 		@$_SESSION['lastLeftFrameSrc']='';
 		@$_SESSION['lastRightFrameSrc']='';
