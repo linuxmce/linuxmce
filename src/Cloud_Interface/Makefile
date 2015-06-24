@@ -11,12 +11,12 @@ CPPFLAGS = -I$(ROOT) -I$(ROOT)/DCE -I/usr/include/mysql $(SNR_CPPFLAGS)
 LDFLAGS = $(SNR_LDFLAGS) -L$(ROOT)/lib
 BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
-MYNAME = ./Cloud_Interface
+MYNAME = Cloud_Interface
 VERSION = 2.0.0
 MYDEVTEMPLATEID = 2315
 
-Gen_Dev_Files = $(GENDEV)/./Cloud_InterfaceBase.cpp
-sources = Main.cpp ./Cloud_Interface.cpp $(Gen_Dev_Files)
+Gen_Dev_Files = $(GENDEV)/Cloud_InterfaceBase.cpp
+sources = Main.cpp Cloud_Interface.cpp $(Gen_Dev_Files)
 #<-dceag-mh-e->
 
 CXXFLAGS +=
@@ -35,25 +35,25 @@ whattodo: all
 
 all: bin so
 
-bin: ./Cloud_Interface
+bin: Cloud_Interface
 
-so: ./Cloud_Interface.so
+so: Cloud_Interface.so
 
-./Cloud_Interface.so: $(sources:.cpp=.o)
+Cloud_Interface.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	mkdir -p ../bin
 	cp $@ ../bin
 #	chmod +x post_make.sh
 #	./post_make.sh $@
 		
-./Cloud_Interface: $(sources:.cpp=.o)
+Cloud_Interface: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
 	mkdir -p ../bin
 	cp $@ ../bin
 #	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) ./Cloud_Interface ./Cloud_Interface.so >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Cloud_Interface Cloud_Interface.so >/dev/null
 
 package:
 	chmod +x make_package.sh
@@ -61,7 +61,7 @@ package:
 
 install:
 	mkdir -p $(DESTDIR)/usr/pluto/bin
-	cp ./Cloud_Interface $(DESTDIR)/usr/pluto/bin
+	cp Cloud_Interface $(DESTDIR)/usr/pluto/bin
 
 include $(ROOT)/PlutoUtils/make.rules
 ifeq (,$(findstring clean, $(MAKECMDGOALS)))

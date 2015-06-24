@@ -12,18 +12,18 @@
 
 */
 //<-dceag-d-b->
-#ifndef ./Cloud_Interface_h
-#define ./Cloud_Interface_h
+#ifndef Cloud_Interface_h
+#define Cloud_Interface_h
 
 //	DCE Implemenation for #2315 Cloud Interface
 
-#include "Gen_Devices/./Cloud_InterfaceBase.h"
+#include "Gen_Devices/Cloud_InterfaceBase.h"
 //<-dceag-d-e->
 
 //<-dceag-decl-b->
 namespace DCE
 {
-	class ./Cloud_Interface : public ./Cloud_Interface_Command
+	class Cloud_Interface : public Cloud_Interface_Command
 	{
 //<-dceag-decl-e->
 		// Private member variables
@@ -35,8 +35,8 @@ public:
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor
-		./Cloud_Interface(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
-		virtual ~./Cloud_Interface();
+		Cloud_Interface(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
+		virtual ~Cloud_Interface();
 		virtual bool GetConfig();
 		virtual bool Register();
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
@@ -46,7 +46,7 @@ public:
 //<-dceag-const2-b->
 		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
 		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-		./Cloud_Interface(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
+		Cloud_Interface(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
 //<-dceag-const2-e->
 
 //<-dceag-h-b->
