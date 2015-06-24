@@ -12,7 +12,7 @@
 
 */
 //<-dceag-d-b->
-#include "./Cloud_Interface.h"
+#include "Cloud_Interface.h"
 #include "DCE/Logger.h"
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
@@ -27,31 +27,31 @@ using namespace DCE;
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
-./Cloud_Interface::./Cloud_Interface(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
-	: ./Cloud_Interface_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
+Cloud_Interface::Cloud_Interface(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
+	: Cloud_Interface_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
 {
 }
 
 //<-dceag-const2-b->
 // The constructor when the class is created as an embedded instance within another stand-alone device
-./Cloud_Interface::./Cloud_Interface(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: ./Cloud_Interface_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
+Cloud_Interface::Cloud_Interface(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+	: Cloud_Interface_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
 {
 }
 
 //<-dceag-dest-b->
-./Cloud_Interface::~./Cloud_Interface()
+Cloud_Interface::~Cloud_Interface()
 //<-dceag-dest-e->
 {
 	
 }
 
 //<-dceag-getconfig-b->
-bool ./Cloud_Interface::GetConfig()
+bool Cloud_Interface::GetConfig()
 {
-	if( !./Cloud_Interface_Command::GetConfig() )
+	if( !Cloud_Interface_Command::GetConfig() )
 		return false;
 //<-dceag-getconfig-e->
 
@@ -62,7 +62,7 @@ bool ./Cloud_Interface::GetConfig()
 
 //<-dceag-reg-b->
 // This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()
-bool ./Cloud_Interface::Register()
+bool Cloud_Interface::Register()
 //<-dceag-reg-e->
 {
 	return Connect(PK_DeviceTemplate_get()); 
@@ -72,9 +72,9 @@ bool ./Cloud_Interface::Register()
 	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
 	can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
 //<-dceag-createinst-b->
-./Cloud_Interface_Command *Create_./Cloud_Interface(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
+Cloud_Interface_Command *Create_Cloud_Interface(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 {
-	return new ./Cloud_Interface(pPrimaryDeviceCommand, pData, pEvent, pRouter);
+	return new Cloud_Interface(pPrimaryDeviceCommand, pData, pEvent, pRouter);
 }
 //<-dceag-createinst-e->
 
@@ -87,7 +87,7 @@ bool ./Cloud_Interface::Register()
 	should change the sCMD_Result to OK
 */
 //<-dceag-cmdch-b->
-void ./Cloud_Interface::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
+void Cloud_Interface::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
 	sCMD_Result = "UNHANDLED CHILD";
@@ -99,7 +99,7 @@ void ./Cloud_Interface::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Imp
 	should change the sCMD_Result to OK
 */
 //<-dceag-cmduk-b->
-void ./Cloud_Interface::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
+void Cloud_Interface::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
 	sCMD_Result = "UNKNOWN COMMAND";
@@ -114,7 +114,7 @@ Without the !, everything between <=dceag-sometag-b-> and <=dceag-sometag-e->
 will be replaced by DCEGenerator each time it is run with the normal merge selection.
 The above blocks are actually <- not <=.  We don't want a substitution here
 
-void ./Cloud_Interface::SomeFunction()
+void Cloud_Interface::SomeFunction()
 {
 	// If this is going to be loaded into the router as a plug-in, you can implement: 	virtual bool Register();
 	// to do all your registration, such as creating message interceptors

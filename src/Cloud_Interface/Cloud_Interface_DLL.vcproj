@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="./Cloud_Interface"
+	Name="Cloud_Interface"
 	ProjectGUID="{BFB764EC-A94C-414F-AE25-7EECDFEE8BBA}"
 	Keyword="Win32Proj">
 	<Platforms>
@@ -33,12 +33,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="pthreadVC.lib wsock32.lib DCE.lib"
-				OutputFile="../Debug/./Cloud_Interface.dll"
+				OutputFile="../Debug/Cloud_Interface.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../libs/Libraries/pthreads-win32/lib;../lib"
-				ModuleDefinitionFile="./Cloud_Interface.def"
+				ModuleDefinitionFile="Cloud_Interface.def"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/./Cloud_Interface.pdb"
+				ProgramDatabaseFile="$(OutDir)/Cloud_Interface.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
@@ -87,10 +87,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="pthreadVC.lib wsock32.lib DCE-r.lib"
-				OutputFile="../bin/./Cloud_Interface.dll"
+				OutputFile="../bin/Cloud_Interface.dll"
 				AdditionalLibraryDirectories="../../libs/Libraries/pthreads-win32/lib;../lib"
 				LinkIncremental="1"
-				ModuleDefinitionFile="./Cloud_Interface.def"
+				ModuleDefinitionFile="Cloud_Interface.def"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -128,13 +128,13 @@
 				RelativePath="Main.cpp">
 			</File>
 			<File
-				RelativePath="./Cloud_Interface.cpp">
+				RelativePath="Cloud_Interface.cpp">
 			</File>
 			<File
-				RelativePath="./Cloud_Interface.def">
+				RelativePath="Cloud_Interface.def">
 			</File>
 			<File
-				RelativePath="..\Gen_Devices\./Cloud_InterfaceBase.cpp">
+				RelativePath="..\Gen_Devices\Cloud_InterfaceBase.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -144,7 +144,7 @@
 				RelativePath="..\DCE\DCEDeviceData_Impl.h">
 			</File>
 			<File
-				RelativePath="./Cloud_Interface.h">
+				RelativePath="Cloud_Interface.h">
 			</File>
 		</Filter>
 		<Filter
