@@ -115,6 +115,9 @@ long int m_FK_UserMode;
 long int m_EK_Dealer;
 long int m_EK_Manufacturer;
 short int m_RequirePinToSelect;
+long int m_Use_VPN;
+string m_VPN_Ip;
+string m_Connect_to;
 long int m_psc_id;
 long int m_psc_batch;
 long int m_psc_user;
@@ -122,7 +125,7 @@ short int m_psc_frozen;
 string m_psc_mod;
 long int m_psc_restrict;
 
-		bool is_null[28];
+		bool is_null[31];
 	
 	public:
 		long int PK_Users_get();
@@ -147,6 +150,9 @@ long int FK_UserMode_get();
 long int EK_Dealer_get();
 long int EK_Manufacturer_get();
 short int RequirePinToSelect_get();
+long int Use_VPN_get();
+string VPN_Ip_get();
+string Connect_to_get();
 long int psc_id_get();
 long int psc_batch_get();
 long int psc_user_get();
@@ -177,6 +183,9 @@ void FK_UserMode_set(long int val);
 void EK_Dealer_set(long int val);
 void EK_Manufacturer_set(long int val);
 void RequirePinToSelect_set(short int val);
+void Use_VPN_set(long int val);
+void VPN_Ip_set(string val);
+void Connect_to_set(string val);
 void psc_id_set(long int val);
 void psc_batch_set(long int val);
 void psc_user_set(long int val);
@@ -250,7 +259,7 @@ void Room_Users_FK_Users_getrows(vector <class Row_Room_Users*> *rows);
 
 		// Setup binary serialization
 		void SetupSerialization(int iSC_Version) {
-			StartSerializeList() + m_PK_Users+ m_UserName+ m_Password+ m_PINCode+ m_HasMailbox+ m_AccessGeneralMailbox+ m_Extension+ m_FirstName+ m_LastName+ m_Nickname+ m_ExtensionRingTimeout+ m_ForwardEmail+ m_FK_Language+ m_FK_Installation_Main+ m_HideFromOrbiter+ m_Staff+ m_Password_Unix+ m_Password_Samba+ m_FK_UserMode+ m_EK_Dealer+ m_EK_Manufacturer+ m_RequirePinToSelect+ m_psc_id+ m_psc_batch+ m_psc_user+ m_psc_frozen+ m_psc_mod+ m_psc_restrict;
+			StartSerializeList() + m_PK_Users+ m_UserName+ m_Password+ m_PINCode+ m_HasMailbox+ m_AccessGeneralMailbox+ m_Extension+ m_FirstName+ m_LastName+ m_Nickname+ m_ExtensionRingTimeout+ m_ForwardEmail+ m_FK_Language+ m_FK_Installation_Main+ m_HideFromOrbiter+ m_Staff+ m_Password_Unix+ m_Password_Samba+ m_FK_UserMode+ m_EK_Dealer+ m_EK_Manufacturer+ m_RequirePinToSelect+ m_Use_VPN+ m_VPN_Ip+ m_Connect_to+ m_psc_id+ m_psc_batch+ m_psc_user+ m_psc_frozen+ m_psc_mod+ m_psc_restrict;
 		}
 	private:
 		void SetDefaultValues();
@@ -277,6 +286,9 @@ string FK_UserMode_asSQL();
 string EK_Dealer_asSQL();
 string EK_Manufacturer_asSQL();
 string RequirePinToSelect_asSQL();
+string Use_VPN_asSQL();
+string VPN_Ip_asSQL();
+string Connect_to_asSQL();
 string psc_id_asSQL();
 string psc_batch_asSQL();
 string psc_user_asSQL();

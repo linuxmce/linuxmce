@@ -181,17 +181,23 @@ is_null[20] = true;
 m_EK_Manufacturer = 0;
 m_RequirePinToSelect = 0;
 is_null[21] = false;
-is_null[22] = true;
+m_Use_VPN = 0;
+is_null[22] = false;
+m_VPN_Ip = "0";
+is_null[23] = false;
+m_Connect_to = "";
+is_null[24] = false;
+is_null[25] = true;
 m_psc_id = 0;
-is_null[23] = true;
+is_null[26] = true;
 m_psc_batch = 0;
-is_null[24] = true;
+is_null[27] = true;
 m_psc_user = 0;
 m_psc_frozen = 0;
-is_null[25] = false;
+is_null[28] = false;
 m_psc_mod = "0000-00-00 00:00:00";
-is_null[26] = false;
-is_null[27] = true;
+is_null[29] = false;
+is_null[30] = true;
 m_psc_restrict = 0;
 
 
@@ -266,6 +272,15 @@ return m_EK_Manufacturer;}
 short int Row_Users::RequirePinToSelect_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_RequirePinToSelect;}
+long int Row_Users::Use_VPN_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return m_Use_VPN;}
+string Row_Users::VPN_Ip_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return m_VPN_Ip;}
+string Row_Users::Connect_to_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+return m_Connect_to;}
 long int Row_Users::psc_id_get(){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 return m_psc_id;}
@@ -352,24 +367,33 @@ m_EK_Manufacturer = val; is_modified=true; is_null[20]=false;}
 void Row_Users::RequirePinToSelect_set(short int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 m_RequirePinToSelect = val; is_modified=true; is_null[21]=false;}
+void Row_Users::Use_VPN_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+m_Use_VPN = val; is_modified=true; is_null[22]=false;}
+void Row_Users::VPN_Ip_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+m_VPN_Ip = val; is_modified=true; is_null[23]=false;}
+void Row_Users::Connect_to_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+m_Connect_to = val; is_modified=true; is_null[24]=false;}
 void Row_Users::psc_id_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_id = val; is_modified=true; is_null[22]=false;}
+m_psc_id = val; is_modified=true; is_null[25]=false;}
 void Row_Users::psc_batch_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_batch = val; is_modified=true; is_null[23]=false;}
+m_psc_batch = val; is_modified=true; is_null[26]=false;}
 void Row_Users::psc_user_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_user = val; is_modified=true; is_null[24]=false;}
+m_psc_user = val; is_modified=true; is_null[27]=false;}
 void Row_Users::psc_frozen_set(short int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_frozen = val; is_modified=true; is_null[25]=false;}
+m_psc_frozen = val; is_modified=true; is_null[28]=false;}
 void Row_Users::psc_mod_set(string val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_mod = val; is_modified=true; is_null[26]=false;}
+m_psc_mod = val; is_modified=true; is_null[29]=false;}
 void Row_Users::psc_restrict_set(long int val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-m_psc_restrict = val; is_modified=true; is_null[27]=false;}
+m_psc_restrict = val; is_modified=true; is_null[30]=false;}
 
 		
 bool Row_Users::Extension_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -410,19 +434,19 @@ bool Row_Users::EK_Manufacturer_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table-
 return is_null[20];}
 bool Row_Users::psc_id_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return is_null[22];}
+return is_null[25];}
 bool Row_Users::psc_batch_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return is_null[23];}
+return is_null[26];}
 bool Row_Users::psc_user_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return is_null[24];}
+return is_null[27];}
 bool Row_Users::psc_frozen_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return is_null[25];}
+return is_null[28];}
 bool Row_Users::psc_restrict_isNull() {PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-return is_null[27];}
+return is_null[30];}
 
 			
 void Row_Users::Extension_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
@@ -474,23 +498,23 @@ is_null[20]=val;
 is_modified=true;
 }
 void Row_Users::psc_id_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[22]=val;
-is_modified=true;
-}
-void Row_Users::psc_batch_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[23]=val;
-is_modified=true;
-}
-void Row_Users::psc_user_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
-is_null[24]=val;
-is_modified=true;
-}
-void Row_Users::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[25]=val;
 is_modified=true;
 }
-void Row_Users::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+void Row_Users::psc_batch_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[26]=val;
+is_modified=true;
+}
+void Row_Users::psc_user_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 is_null[27]=val;
+is_modified=true;
+}
+void Row_Users::psc_frozen_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[28]=val;
+is_modified=true;
+}
+void Row_Users::psc_restrict_setNull(bool val){PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+is_null[30]=val;
 is_modified=true;
 }
 	
@@ -790,11 +814,52 @@ sprintf(buf, "%hi", m_RequirePinToSelect);
 return buf;
 }
 
-string Row_Users::psc_id_asSQL()
+string Row_Users::Use_VPN_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
 if (is_null[22])
+return "NULL";
+
+char buf[32];
+sprintf(buf, "%li", m_Use_VPN);
+
+return buf;
+}
+
+string Row_Users::VPN_Ip_asSQL()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+if (is_null[23])
+return "NULL";
+
+char *buf = new char[91];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_VPN_Ip.c_str(), (unsigned long) min((size_t)45,m_VPN_Ip.size()));
+string s=string()+"\""+buf+"\"";
+delete[] buf;
+return s;
+}
+
+string Row_Users::Connect_to_asSQL()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+if (is_null[24])
+return "NULL";
+
+char *buf = new char[25];
+db_wrapper_real_escape_string(table->database->m_pDB, buf, m_Connect_to.c_str(), (unsigned long) min((size_t)12,m_Connect_to.size()));
+string s=string()+"\""+buf+"\"";
+delete[] buf;
+return s;
+}
+
+string Row_Users::psc_id_asSQL()
+{
+PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
+
+if (is_null[25])
 return "NULL";
 
 char buf[32];
@@ -807,7 +872,7 @@ string Row_Users::psc_batch_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[23])
+if (is_null[26])
 return "NULL";
 
 char buf[32];
@@ -820,7 +885,7 @@ string Row_Users::psc_user_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[24])
+if (is_null[27])
 return "NULL";
 
 char buf[32];
@@ -833,7 +898,7 @@ string Row_Users::psc_frozen_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[25])
+if (is_null[28])
 return "NULL";
 
 char buf[32];
@@ -846,7 +911,7 @@ string Row_Users::psc_mod_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[26])
+if (is_null[29])
 return "NULL";
 
 char *buf = new char[39];
@@ -860,7 +925,7 @@ string Row_Users::psc_restrict_asSQL()
 {
 PLUTO_SAFETY_LOCK_ERRORSONLY(sl,table->database->m_DBMutex);
 
-if (is_null[27])
+if (is_null[30])
 return "NULL";
 
 char buf[32];
@@ -908,10 +973,10 @@ bool Table_Users::Commit(bool bDeleteFailedModifiedRow,bool bDeleteFailedInsertR
 	
 		
 string values_list_comma_separated;
-values_list_comma_separated = values_list_comma_separated + pRow->PK_Users_asSQL()+", "+pRow->UserName_asSQL()+", "+pRow->Password_asSQL()+", "+pRow->PINCode_asSQL()+", "+pRow->HasMailbox_asSQL()+", "+pRow->AccessGeneralMailbox_asSQL()+", "+pRow->Extension_asSQL()+", "+pRow->FirstName_asSQL()+", "+pRow->LastName_asSQL()+", "+pRow->Nickname_asSQL()+", "+pRow->ExtensionRingTimeout_asSQL()+", "+pRow->ForwardEmail_asSQL()+", "+pRow->FK_Language_asSQL()+", "+pRow->FK_Installation_Main_asSQL()+", "+pRow->HideFromOrbiter_asSQL()+", "+pRow->Staff_asSQL()+", "+pRow->Password_Unix_asSQL()+", "+pRow->Password_Samba_asSQL()+", "+pRow->FK_UserMode_asSQL()+", "+pRow->EK_Dealer_asSQL()+", "+pRow->EK_Manufacturer_asSQL()+", "+pRow->RequirePinToSelect_asSQL()+", "+pRow->psc_id_asSQL()+", "+pRow->psc_batch_asSQL()+", "+pRow->psc_user_asSQL()+", "+pRow->psc_frozen_asSQL()+", "+pRow->psc_restrict_asSQL();
+values_list_comma_separated = values_list_comma_separated + pRow->PK_Users_asSQL()+", "+pRow->UserName_asSQL()+", "+pRow->Password_asSQL()+", "+pRow->PINCode_asSQL()+", "+pRow->HasMailbox_asSQL()+", "+pRow->AccessGeneralMailbox_asSQL()+", "+pRow->Extension_asSQL()+", "+pRow->FirstName_asSQL()+", "+pRow->LastName_asSQL()+", "+pRow->Nickname_asSQL()+", "+pRow->ExtensionRingTimeout_asSQL()+", "+pRow->ForwardEmail_asSQL()+", "+pRow->FK_Language_asSQL()+", "+pRow->FK_Installation_Main_asSQL()+", "+pRow->HideFromOrbiter_asSQL()+", "+pRow->Staff_asSQL()+", "+pRow->Password_Unix_asSQL()+", "+pRow->Password_Samba_asSQL()+", "+pRow->FK_UserMode_asSQL()+", "+pRow->EK_Dealer_asSQL()+", "+pRow->EK_Manufacturer_asSQL()+", "+pRow->RequirePinToSelect_asSQL()+", "+pRow->Use_VPN_asSQL()+", "+pRow->VPN_Ip_asSQL()+", "+pRow->Connect_to_asSQL()+", "+pRow->psc_id_asSQL()+", "+pRow->psc_batch_asSQL()+", "+pRow->psc_user_asSQL()+", "+pRow->psc_frozen_asSQL()+", "+pRow->psc_restrict_asSQL();
 
 	
-		string query = "insert into Users (`PK_Users`, `UserName`, `Password`, `PINCode`, `HasMailbox`, `AccessGeneralMailbox`, `Extension`, `FirstName`, `LastName`, `Nickname`, `ExtensionRingTimeout`, `ForwardEmail`, `FK_Language`, `FK_Installation_Main`, `HideFromOrbiter`, `Staff`, `Password_Unix`, `Password_Samba`, `FK_UserMode`, `EK_Dealer`, `EK_Manufacturer`, `RequirePinToSelect`, `psc_id`, `psc_batch`, `psc_user`, `psc_frozen`, `psc_restrict`) values ("+
+		string query = "insert into Users (`PK_Users`, `UserName`, `Password`, `PINCode`, `HasMailbox`, `AccessGeneralMailbox`, `Extension`, `FirstName`, `LastName`, `Nickname`, `ExtensionRingTimeout`, `ForwardEmail`, `FK_Language`, `FK_Installation_Main`, `HideFromOrbiter`, `Staff`, `Password_Unix`, `Password_Samba`, `FK_UserMode`, `EK_Dealer`, `EK_Manufacturer`, `RequirePinToSelect`, `Use_VPN`, `VPN_Ip`, `Connect_to`, `psc_id`, `psc_batch`, `psc_user`, `psc_frozen`, `psc_restrict`) values ("+
 			values_list_comma_separated+")";
 			
 		if (db_wrapper_query(database->m_pDB, query.c_str()))
@@ -977,7 +1042,7 @@ condition = condition + "`PK_Users`=" + tmp_PK_Users;
 			
 		
 string update_values_list;
-update_values_list = update_values_list + "`PK_Users`="+pRow->PK_Users_asSQL()+", `UserName`="+pRow->UserName_asSQL()+", `Password`="+pRow->Password_asSQL()+", `PINCode`="+pRow->PINCode_asSQL()+", `HasMailbox`="+pRow->HasMailbox_asSQL()+", `AccessGeneralMailbox`="+pRow->AccessGeneralMailbox_asSQL()+", `Extension`="+pRow->Extension_asSQL()+", `FirstName`="+pRow->FirstName_asSQL()+", `LastName`="+pRow->LastName_asSQL()+", `Nickname`="+pRow->Nickname_asSQL()+", `ExtensionRingTimeout`="+pRow->ExtensionRingTimeout_asSQL()+", `ForwardEmail`="+pRow->ForwardEmail_asSQL()+", `FK_Language`="+pRow->FK_Language_asSQL()+", `FK_Installation_Main`="+pRow->FK_Installation_Main_asSQL()+", `HideFromOrbiter`="+pRow->HideFromOrbiter_asSQL()+", `Staff`="+pRow->Staff_asSQL()+", `Password_Unix`="+pRow->Password_Unix_asSQL()+", `Password_Samba`="+pRow->Password_Samba_asSQL()+", `FK_UserMode`="+pRow->FK_UserMode_asSQL()+", `EK_Dealer`="+pRow->EK_Dealer_asSQL()+", `EK_Manufacturer`="+pRow->EK_Manufacturer_asSQL()+", `RequirePinToSelect`="+pRow->RequirePinToSelect_asSQL()+", `psc_id`="+pRow->psc_id_asSQL()+", `psc_batch`="+pRow->psc_batch_asSQL()+", `psc_user`="+pRow->psc_user_asSQL()+", `psc_frozen`="+pRow->psc_frozen_asSQL()+", `psc_restrict`="+pRow->psc_restrict_asSQL();
+update_values_list = update_values_list + "`PK_Users`="+pRow->PK_Users_asSQL()+", `UserName`="+pRow->UserName_asSQL()+", `Password`="+pRow->Password_asSQL()+", `PINCode`="+pRow->PINCode_asSQL()+", `HasMailbox`="+pRow->HasMailbox_asSQL()+", `AccessGeneralMailbox`="+pRow->AccessGeneralMailbox_asSQL()+", `Extension`="+pRow->Extension_asSQL()+", `FirstName`="+pRow->FirstName_asSQL()+", `LastName`="+pRow->LastName_asSQL()+", `Nickname`="+pRow->Nickname_asSQL()+", `ExtensionRingTimeout`="+pRow->ExtensionRingTimeout_asSQL()+", `ForwardEmail`="+pRow->ForwardEmail_asSQL()+", `FK_Language`="+pRow->FK_Language_asSQL()+", `FK_Installation_Main`="+pRow->FK_Installation_Main_asSQL()+", `HideFromOrbiter`="+pRow->HideFromOrbiter_asSQL()+", `Staff`="+pRow->Staff_asSQL()+", `Password_Unix`="+pRow->Password_Unix_asSQL()+", `Password_Samba`="+pRow->Password_Samba_asSQL()+", `FK_UserMode`="+pRow->FK_UserMode_asSQL()+", `EK_Dealer`="+pRow->EK_Dealer_asSQL()+", `EK_Manufacturer`="+pRow->EK_Manufacturer_asSQL()+", `RequirePinToSelect`="+pRow->RequirePinToSelect_asSQL()+", `Use_VPN`="+pRow->Use_VPN_asSQL()+", `VPN_Ip`="+pRow->VPN_Ip_asSQL()+", `Connect_to`="+pRow->Connect_to_asSQL()+", `psc_id`="+pRow->psc_id_asSQL()+", `psc_batch`="+pRow->psc_batch_asSQL()+", `psc_user`="+pRow->psc_user_asSQL()+", `psc_frozen`="+pRow->psc_frozen_asSQL()+", `psc_restrict`="+pRow->psc_restrict_asSQL();
 
 	
 		string query = "update Users set " + update_values_list + " where " + condition;
@@ -1355,67 +1420,100 @@ sscanf(row[21], "%hi", &(pRow->m_RequirePinToSelect));
 if (row[22] == NULL)
 {
 pRow->is_null[22]=true;
-pRow->m_psc_id = 0;
+pRow->m_Use_VPN = 0;
 }
 else
 {
 pRow->is_null[22]=false;
-sscanf(row[22], "%li", &(pRow->m_psc_id));
+sscanf(row[22], "%li", &(pRow->m_Use_VPN));
 }
 
 if (row[23] == NULL)
 {
 pRow->is_null[23]=true;
-pRow->m_psc_batch = 0;
+pRow->m_VPN_Ip = "";
 }
 else
 {
 pRow->is_null[23]=false;
-sscanf(row[23], "%li", &(pRow->m_psc_batch));
+pRow->m_VPN_Ip = string(row[23],lengths[23]);
 }
 
 if (row[24] == NULL)
 {
 pRow->is_null[24]=true;
-pRow->m_psc_user = 0;
+pRow->m_Connect_to = "";
 }
 else
 {
 pRow->is_null[24]=false;
-sscanf(row[24], "%li", &(pRow->m_psc_user));
+pRow->m_Connect_to = string(row[24],lengths[24]);
 }
 
 if (row[25] == NULL)
 {
 pRow->is_null[25]=true;
-pRow->m_psc_frozen = 0;
+pRow->m_psc_id = 0;
 }
 else
 {
 pRow->is_null[25]=false;
-sscanf(row[25], "%hi", &(pRow->m_psc_frozen));
+sscanf(row[25], "%li", &(pRow->m_psc_id));
 }
 
 if (row[26] == NULL)
 {
 pRow->is_null[26]=true;
-pRow->m_psc_mod = "";
+pRow->m_psc_batch = 0;
 }
 else
 {
 pRow->is_null[26]=false;
-pRow->m_psc_mod = string(row[26],lengths[26]);
+sscanf(row[26], "%li", &(pRow->m_psc_batch));
 }
 
 if (row[27] == NULL)
 {
 pRow->is_null[27]=true;
-pRow->m_psc_restrict = 0;
+pRow->m_psc_user = 0;
 }
 else
 {
 pRow->is_null[27]=false;
-sscanf(row[27], "%li", &(pRow->m_psc_restrict));
+sscanf(row[27], "%li", &(pRow->m_psc_user));
+}
+
+if (row[28] == NULL)
+{
+pRow->is_null[28]=true;
+pRow->m_psc_frozen = 0;
+}
+else
+{
+pRow->is_null[28]=false;
+sscanf(row[28], "%hi", &(pRow->m_psc_frozen));
+}
+
+if (row[29] == NULL)
+{
+pRow->is_null[29]=true;
+pRow->m_psc_mod = "";
+}
+else
+{
+pRow->is_null[29]=false;
+pRow->m_psc_mod = string(row[29],lengths[29]);
+}
+
+if (row[30] == NULL)
+{
+pRow->is_null[30]=true;
+pRow->m_psc_restrict = 0;
+}
+else
+{
+pRow->is_null[30]=false;
+sscanf(row[30], "%li", &(pRow->m_psc_restrict));
 }
 
 
@@ -1779,67 +1877,100 @@ sscanf(row[21], "%hi", &(pRow->m_RequirePinToSelect));
 if (row[22] == NULL)
 {
 pRow->is_null[22]=true;
-pRow->m_psc_id = 0;
+pRow->m_Use_VPN = 0;
 }
 else
 {
 pRow->is_null[22]=false;
-sscanf(row[22], "%li", &(pRow->m_psc_id));
+sscanf(row[22], "%li", &(pRow->m_Use_VPN));
 }
 
 if (row[23] == NULL)
 {
 pRow->is_null[23]=true;
-pRow->m_psc_batch = 0;
+pRow->m_VPN_Ip = "";
 }
 else
 {
 pRow->is_null[23]=false;
-sscanf(row[23], "%li", &(pRow->m_psc_batch));
+pRow->m_VPN_Ip = string(row[23],lengths[23]);
 }
 
 if (row[24] == NULL)
 {
 pRow->is_null[24]=true;
-pRow->m_psc_user = 0;
+pRow->m_Connect_to = "";
 }
 else
 {
 pRow->is_null[24]=false;
-sscanf(row[24], "%li", &(pRow->m_psc_user));
+pRow->m_Connect_to = string(row[24],lengths[24]);
 }
 
 if (row[25] == NULL)
 {
 pRow->is_null[25]=true;
-pRow->m_psc_frozen = 0;
+pRow->m_psc_id = 0;
 }
 else
 {
 pRow->is_null[25]=false;
-sscanf(row[25], "%hi", &(pRow->m_psc_frozen));
+sscanf(row[25], "%li", &(pRow->m_psc_id));
 }
 
 if (row[26] == NULL)
 {
 pRow->is_null[26]=true;
-pRow->m_psc_mod = "";
+pRow->m_psc_batch = 0;
 }
 else
 {
 pRow->is_null[26]=false;
-pRow->m_psc_mod = string(row[26],lengths[26]);
+sscanf(row[26], "%li", &(pRow->m_psc_batch));
 }
 
 if (row[27] == NULL)
 {
 pRow->is_null[27]=true;
-pRow->m_psc_restrict = 0;
+pRow->m_psc_user = 0;
 }
 else
 {
 pRow->is_null[27]=false;
-sscanf(row[27], "%li", &(pRow->m_psc_restrict));
+sscanf(row[27], "%li", &(pRow->m_psc_user));
+}
+
+if (row[28] == NULL)
+{
+pRow->is_null[28]=true;
+pRow->m_psc_frozen = 0;
+}
+else
+{
+pRow->is_null[28]=false;
+sscanf(row[28], "%hi", &(pRow->m_psc_frozen));
+}
+
+if (row[29] == NULL)
+{
+pRow->is_null[29]=true;
+pRow->m_psc_mod = "";
+}
+else
+{
+pRow->is_null[29]=false;
+pRow->m_psc_mod = string(row[29],lengths[29]);
+}
+
+if (row[30] == NULL)
+{
+pRow->is_null[30]=true;
+pRow->m_psc_restrict = 0;
+}
+else
+{
+pRow->is_null[30]=false;
+sscanf(row[30], "%li", &(pRow->m_psc_restrict));
 }
 
 
