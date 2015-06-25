@@ -74,8 +74,9 @@ namespace DCE
 	return false;
       }
 
-    static const char* const args[] = {"--alsa-audio-device","hdmi:CARD=Card0PCH,DEV=1","--spdif"};
-    m_pInst = libvlc_new(3,args);
+    // static const char* const args[] = {"--alsa-audio-device","hdmi:CARD=Card0PCH,DEV=1","--spdif"};
+    // m_pInst = libvlc_new(3,args);
+    m_pInst = libvlc_new(NULL,NULL);
 
     if (!m_pInst)
       {
@@ -282,29 +283,14 @@ namespace DCE
 	libvlc_media_player_release(m_pMp);
       }
 
-    if ((m_pVLC_Player->m_iPK_MediaType == 28) && (sMediaURL.find("/dev/") != string::npos))
-      {
-	sMediaURL = "bluray://" + sMediaURL;
-      }
-    else if (sMediaURL.find("://") == string::npos)
+    if (sMediaURL.find("://") == string::npos)
       {
 	sMediaURL = "file://" + sMediaURL;
-      }
-    else
-      {
-	sMediaURL = PreProcessMediaURL(sMediaURL);
       }
     
     libvlc_media_t *m = libvlc_media_new_location (m_pInst, sMediaURL.c_str());
     m_pMp = libvlc_media_player_new_from_media(m);
     libvlc_media_player_set_xwindow (m_pMp, m_Window);
-
-    for (int i=0; i<libvlc_audio_output_device_count(m_pInst,"alsa"); i++)
-      {
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Found Sound card: %s",libvlc_audio_output_device_id(m_pInst,"alsa",i));
-      }
-
-//    libvlc_audio_output_device_set(m_pMp, "alsa", "plughw:0,3");
 
     if (!m)
       {
