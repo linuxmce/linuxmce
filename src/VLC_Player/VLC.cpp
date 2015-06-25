@@ -74,10 +74,8 @@ namespace DCE
 	return false;
       }
 
-    // static const char* const args[] = {"--no-video-title-show"};
-
-    // m_pInst = libvlc_new(sizeof args / sizeof *args, args);
-    m_pInst = libvlc_new(NULL, NULL);
+    static const char* const args[] = {"--alsa-audio-device","hdmi:CARD=Card0PCH,DEV=1","--spdif"};
+    m_pInst = libvlc_new(3,args);
 
     if (!m_pInst)
       {
@@ -306,7 +304,7 @@ namespace DCE
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Found Sound card: %s",libvlc_audio_output_device_id(m_pInst,"alsa",i));
       }
 
-    libvlc_audio_output_device_set(m_pMp, "alsa", "plughw:0,3");
+//    libvlc_audio_output_device_set(m_pMp, "alsa", "plughw:0,3");
 
     if (!m)
       {
