@@ -279,7 +279,11 @@ bool VLC_Plugin::StartMedia( MediaStream *pMediaStream,string &sError )
       if( pMediaFile && pMediaFile->m_iTrack )
 	mediaURL += "/" + StringUtils::itos(pMediaFile->m_iTrack);
     }
-
+  else if( mediaURL.size()>5 && mediaURL.substr(0,5)=="/dev/" && pVLCMediaStream->m_iPK_MediaType == MEDIATYPE_pluto_BD_CONST )
+    {
+      mediaURL = "bluray://" + mediaURL;
+    }
+  
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "sending CMD_Play_Media from %d to %d with deq pos %d", 
 					m_dwPK_Device, pMediaStream->m_pMediaDevice_Source->m_pDeviceData_Router->m_dwPK_Device,
 					pMediaStream->m_iDequeMediaFile_Pos);
