@@ -35,8 +35,11 @@ namespace DCE
     //<-dceag-decl-e->
     // Private member variables
   private:
-    // history of all mounted remote DVDs
+    // history of all mounted remote DVDs/Blu-Rays
     vector<pair<int, string> > mountedRemoteDVDs;
+    // history of all mounted local Blu-Rays
+    vector<string> mountedLocalBluRays;
+
     string m_sIPofMD;
     
     // Private methods
@@ -591,6 +594,11 @@ namespace DCE
     int InvokeRemoteDVDHelper(int iComputerID, string sDevice, string sCommand);
     pair<int, string> ExtractComputerAndDeviceFromRemoteDVD(string sURL, bool &bResult);
     bool IsRemoteDVD(string sURL);
+
+    bool IsLocalBD(string sURL);
+    bool MountLocalBD(string sURL);
+    bool UnmountLocalBD(string sURL);
+    bool UnmountLocalBD();
 
 	// From Xine_Player
 	// socket listener for playback info notification

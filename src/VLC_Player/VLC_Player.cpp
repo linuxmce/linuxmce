@@ -63,7 +63,8 @@ VLC_Player::~VLC_Player()
   m_iMediaPlaybackSpeed=0;
 
   UnmountRemoteDVD();
-  
+  UnmountLocalBD();
+
   if (m_config)
     {
       delete m_config;
@@ -421,6 +422,10 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
     {
       MountRemoteDVD(sMediaURL);
     }
+  else if (IsLocalBD(sMediaURL))
+    {
+      MountLocalBD(sMediaURL);
+    }
 
   m_iPK_MediaType = iPK_MediaType;
 
@@ -434,6 +439,7 @@ void VLC_Player::CMD_Play_Media(int iPK_MediaType,int iStreamID,string sMediaPos
   else
     {
       UnmountRemoteDVD();
+      UnmountLocalBD();
       sCMD_Result="ERROR";
       EVENT_Playback_Completed(sMediaURL,iStreamID,true);
     }
@@ -485,6 +491,7 @@ void VLC_Player::CMD_Stop_Media(int iStreamID,string *sMediaPosition,string &sCM
   StopTimecodeReporting();
 
   UnmountRemoteDVD();
+  UnmountLocalBD();
 
 }
 
@@ -1411,6 +1418,70 @@ void VLC_Player::CMD_Set_Media_ID(string sID,int iStreamID,string &sCMD_Result,M
       m_pVLC->SetMediaType(sMediaType, iMediaID);
     }
   
+}
+
+/**
+ * Blu-Ray mounting functions.
+ */
+bool VLC_Player::MountLocalBD(string sURL) {
+	// for simplicity (for now) we'll assume a single BD drive is possible
+	string sDrive = sURL.substr(9);
+	string sMount = FileUtils::ExcludeTrailingSlash("/tmp" + sDrive);
+
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "VLC_Player::MountLocalBD(1) - Drive: %s, Mount: %s (%s)", sDrive.c_str(), sMount.c_str(), sURL.c_str() );
+	if (FileUtils::DirExists(sMount)) {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "VLC_Player::MountLocalBD(2) - Drive: %s, Mount: %s (%s)", sDrive.c_str(), sMount.c_str(), sURL.c_str() );
+		// unmount
+		string sUmountCommand = "umount " + sMount;
+		system(sUmountCommand.c_str());
+		sUmountCommand = "umount " + sDrive;
+		system(sUmountCommand.c_str());
+	}
+
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "VLC_Player::MountLocalBD(3) - Drive: %s, Mount: %s (%s)", sDrive.c_str(), sMount.c_str(), sURL.c_str() );
+	FileUtils::MakeDir(sMount);
+	// mount
+	string sMountCommand = "mount " + sDrive + " " + sMount;
+	system(sMountCommand.c_str());
+	mountedLocalBluRays.push_back(sURL);
+}
+
+bool VLC_Player::UnmountLocalBD(string sURL) {
+	string sDrive = sURL.substr(9);
+	string sMount = FileUtils::ExcludeTrailingSlash("/tmp" + sDrive);
+
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "VLC_Player::UnmountLocalBD(1) - Drive: %s, Mount: %s (%s)", sDrive.c_str(), sMount.c_str(), sURL.c_str() );
+	if (FileUtils::DirExists(sMount)) {
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "VLC_Player::UnmountLocalBD(2) - Drive: %s, Mount: %s (%s)", sDrive.c_str(), sMount.c_str(), sURL.c_str() );
+		// unmount
+		string sUmountCommand = "umount " + sMount;
+		system(sUmountCommand.c_str());
+		sUmountCommand = "umount " + sDrive;
+		system(sUmountCommand.c_str());
+	}
+}
+
+bool VLC_Player::UnmountLocalBD() {
+  if (mountedLocalBluRays.size() != 0)
+    {
+      string sPath = mountedLocalBluRays.back();
+      mountedLocalBluRays.pop_back();
+      bool bResult = UnmountLocalBD(sPath);
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::UnmountLocalBD() unmount %s", (bResult?"succeeded":"failed"));
+      return bResult;
+    }
+  else
+    {
+      LoggerWrapper::GetInstance()->Write(LV_STATUS,"VLC_Player::UnmountLocalBD() no local BD mounted.");
+      return false;
+    }
+}
+
+bool VLC_Player::IsLocalBD(string sURL) {
+	// TODO: Add .BD extension or whatever extension lmce things BD disks are in file format
+	bool bResult = StringUtils::StartsWith(sURL,"bluray:",true);
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "VLC_Player::IsLocalBD() - %s (%s)", bResult ? "YES" : "NO", sURL.c_str() );
+	return bResult;
 }
 
 /**
