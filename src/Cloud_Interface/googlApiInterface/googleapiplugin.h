@@ -13,6 +13,10 @@ public:
     GoogleApiPlugin();
     void setUserList(QList<QObject*>);
     QString name(){return tr("Google Api Plugin");}
-};
-
+    bool suppliesPhotos() {return true;}
+    bool suppliesVideos() {return true;}
+    bool suppliesContacts() {return true;}
+    bool canSendEmail() {return true;}
+    bool canSendFiles() {return true;}
+    bool canSendPhotos() {return true;}
 #endif // GOOGLEAPIPLUGIN_H

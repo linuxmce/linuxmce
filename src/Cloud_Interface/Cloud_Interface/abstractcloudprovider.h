@@ -10,6 +10,13 @@ class CloudServiceInterface
 public:
     virtual ~CloudServiceInterface(){}
     virtual void setUserList(QList<QObject*>)=0;
+    virtual bool suppliesPhotos()=0;
+    virtual bool suppliesVideos()=0;
+    virtual bool suppliesContacts()=0;
+    virtual bool canSendEmail()=0;
+    virtual bool canSendFiles()=0;
+    virtual bool canSendPhotos()=0;
+
    virtual QString name() =0;
 
 };
