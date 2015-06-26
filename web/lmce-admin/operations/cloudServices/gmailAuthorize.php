@@ -14,15 +14,21 @@ $authUrl="https://accounts.google.com/o/oauth2/auth";
 $tokenUrl='token_uri":"https://accounts.google.com/o/oauth2/token';
 $out='';
 $url="https://accounts.google.com/o/oauth2/auth?scope=email%20profile%20".$driveScope."%20".$youTubeScopes.$photosScope."&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&client_id=".$client_id."";
+$out.="<body align=center>";
+$out.='Please click authorize. This will allow you to recieve the authorization code to paste below <br>';
+$out.='<button onclick="myFunction()">Authorize</button> <br><br>';
 
-$out.='<button onclick="myFunction()">Authorize</button>';
+$out.="<form action='index.php?'>";
+$out.="Please Enter Authorization code: <input type=text name='authcode'>";
+$out.="</form>";
+
 $out.='<script>
 function myFunction() {
     
     window.open("'.$url.'");
 }
 </script>';
-	
+	$out.="</body>";
 	$output -> setReloadLeftFrame(false);
 	$output -> setMenuTitle('Cloud Services | Authorize Gmail');
 	$output -> setScriptInBody('bgColor="#F0F3F8" onLoad="$(\'appear_test\').appear(); return false;"');
