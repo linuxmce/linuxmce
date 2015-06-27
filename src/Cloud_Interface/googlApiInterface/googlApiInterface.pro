@@ -15,10 +15,12 @@ DESTDIR=../../bin
 
 DEFINES += GOOGLAPIINTERFACE_LIBRARY
 
-SOURCES += googleapiplugin.cpp
+SOURCES += googleapiplugin.cpp \
+    ../Cloud_Interface/cloudsettings.cpp
 
 HEADERS += googleapiplugin.h\
-        googlapiinterface_global.h
+        googlapiinterface_global.h \
+    ../Cloud_Interface/cloudsettings.h
 
 unix {
     target.path =../../bin

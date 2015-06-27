@@ -13,6 +13,8 @@
 */
 //<-dceag-incl-b->
 #include "Cloud_Interface.h"
+#include "QCoreApplication"
+#include "Cloud_Interface/cloudinterfacecotroller.h"
 #include "DCE/Logger.h"
 #include "ServerLogger.h"
 #include "PlutoUtils/FileUtils.h"
@@ -107,6 +109,7 @@ extern "C" {
 //<-dceag-main-b->
 int main(int argc, char* argv[]) 
 {
+        QCoreApplication a(argc, argv);
 	g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
 	g_sBinaryPath = FileUtils::BasePath(argv[0]);
 
@@ -188,7 +191,7 @@ int main(int argc, char* argv[])
 	}
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d starting.  Connecting to: %s",PK_Device,sRouter_IP.c_str());
-
+        CloudInterfaceController controller;
 	bool bAppError=false;
 	bool bReload=false;
 	try
@@ -238,6 +241,7 @@ int main(int argc, char* argv[])
 		cerr << "Exception: " << s << endl;
 	}
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d ending",PK_Device);
+         return a.exec();
 #ifdef WIN32
     WSACleanup();
 #endif

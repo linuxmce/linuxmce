@@ -39,7 +39,6 @@ CloudInterfaceController::CloudInterfaceController(QObject *parent) : QObject(pa
     qDebug() << "Names:\n " << m_plugins.keys();
 
 
-    qDebug() << Q_FUNC_INFO << "exiting";
-    exit(0);
+
 }
 
