@@ -8,6 +8,8 @@ Build-Depends: debhelper (>= 9)
 Package: lmce-skins-basic
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: pluto-skins-basic
+Replaces: pluto-skins-basic
 Description: Basic Orbiter skin
  Basic Orbiter Skin
 
