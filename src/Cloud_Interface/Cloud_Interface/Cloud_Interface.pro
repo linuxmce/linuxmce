@@ -53,7 +53,8 @@ HEADERS+= \
     ../../pluto_main/Define_DeviceTemplate.h \
     ../../Gen_Devices/Cloud_InterfaceBase.h \
     ../Cloud_Interface.h \
-    cloudinterfacecotroller.h
+    cloudinterfacecotroller.h \
+    cloudsettings.h
 
 HEADERS+= \
 
@@ -89,7 +90,8 @@ SOURCES+= \
     ../../PlutoUtils/getch.cpp \
     ../../Gen_Devices/Cloud_InterfaceBase.cpp \
      ../Cloud_Interface.cpp \
-    cloudinterfacecotroller.cpp
+    cloudinterfacecotroller.cpp \
+    cloudsettings.cpp
 
 #Qt Sources
-SOURCES += main.cpp \
+SOURCES += ../Main.cpp \
