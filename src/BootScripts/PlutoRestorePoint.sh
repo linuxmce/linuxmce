@@ -20,6 +20,7 @@ Usage () {
 	echo "$0 [command]"
 	echo "Commands :"
 	echo "	--backup -> create a system backup"
+	echo "  --autobackup -> create a small backup of the system database"
 	echo "	--restore -> restore system from a backup file"
 	echo "	--restore --skip-md5 -> system restore without md5 control file"
 	exit
@@ -191,9 +192,13 @@ if [[ -z $1 ]]; then
 fi
 
 # create restore point
-if [[ "$1" == "--backup" ]]; then 
+if [[ "$1" == "--backup" ]] || [[ "$1" == "--autobackup" ]]; then 
 	BackupDescription="$2"
-
+	if [[ "$1" == "--backup" ]]; then
+		BACKUPDESTINATION="backup-$BKPDIR"
+	else
+		BACKUPDESTINATION="backup-$BKPDIR-auto"
+	fi
 	# Make the main backup directory if it doesn't exist
 	if [[ ! -d $MASTERDIR ]]; then
 		mkdir -p $MASTERDIR/download
@@ -231,56 +236,58 @@ if [[ "$1" == "--backup" ]]; then
 	# Backup mythtv database
 	mkdir -p $FULLPATH/$DATABASEFOLDER/mythconverg
 	/usr/bin/mysqldump -e --quote-names --allow-keywords --add-drop-table --skip-extended-insert $MYSQL_DB_CRED mythconverg > $FULLPATH/$DATABASEFOLDER/mythconverg/mythconverg.sql
+
+	if [[ "$1" == "--backup" ]] ; then	
+		# Backup pluto_media database
+		mkdir -p $FULLPATH/$DATABASEFOLDER/pluto_media
+		/usr/bin/mysqldump -e --quote-names --allow-keywords --add-drop-table --skip-extended-insert $MYSQL_DB_CRED pluto_media > $FULLPATH/$DATABASEFOLDER/pluto_media/pluto_media.sql
 	
-	# Backup pluto_media database
-	mkdir -p $FULLPATH/$DATABASEFOLDER/pluto_media
-	/usr/bin/mysqldump -e --quote-names --allow-keywords --add-drop-table --skip-extended-insert $MYSQL_DB_CRED pluto_media > $FULLPATH/$DATABASEFOLDER/pluto_media/pluto_media.sql
-
-	# -----------------------
-	# BACKUP FILESYSTEM FILES
-	# -----------------------
-	mkdir -p $FULLPATH/$FILESYSTEMFOLDER
-
-	# Backup lmce-admin
-	mkdir -p $FULLPATH/$FILESYSTEMFOLDER/usr/pluto/orbiter
-	cp -Lr /usr/pluto/orbiter/floorplans $FULLPATH/$FILESYSTEMFOLDER/usr/pluto/orbiter
-	cp -Lr /usr/pluto/orbiter/users $FULLPATH/$FILESYSTEMFOLDER/usr/pluto/orbiter
-	cp -Lr /usr/pluto/orbiter/rooms $FULLPATH/$FILESYSTEMFOLDER/usr/pluto/orbiter
-	cp -Lr /usr/pluto/orbiter/scenarios $FULLPATH/$FILESYSTEMFOLDER/usr/pluto/orbiter
-
-	# Backup coverart and attribute
-	mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mediapics
-	cp -Lr /home/mediapics $FULLPATH/$FILESYSTEMFOLDER/home	
+		# -----------------------
+		# BACKUP FILESYSTEM FILES
+		# -----------------------
+		mkdir -p $FULLPATH/$FILESYSTEMFOLDER
 	
-	# Backup conf files
-	mkdir -p $FULLPATH/$FILESYSTEMFOLDER/etc
-	cp -r /etc/pluto.conf $FULLPATH/$FILESYSTEMFOLDER/etc
+		# Backup lmce-admin
+		mkdir -p $FULLPATH/$FILESYSTEMFOLDER/usr/pluto/orbiter
+		cp -Lr /usr/pluto/orbiter/floorplans $FULLPATH/$FILESYSTEMFOLDER/usr/pluto/orbiter
+		cp -Lr /usr/pluto/orbiter/users $FULLPATH/$FILESYSTEMFOLDER/usr/pluto/orbiter
+		cp -Lr /usr/pluto/orbiter/rooms $FULLPATH/$FILESYSTEMFOLDER/usr/pluto/orbiter
+		cp -Lr /usr/pluto/orbiter/scenarios $FULLPATH/$FILESYSTEMFOLDER/usr/pluto/orbiter
+	
+		# Backup coverart and attribute
+		mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mediapics
+		cp -Lr /home/mediapics $FULLPATH/$FILESYSTEMFOLDER/home	
+		
+		# Backup conf files
+		mkdir -p $FULLPATH/$FILESYSTEMFOLDER/etc
+		cp -r /etc/pluto.conf $FULLPATH/$FILESYSTEMFOLDER/etc
 
-	# Backup Camera Archives
-	mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/cameras
-	cp -Lr /home/cameras/ $FULLPATH/$FILESYSTEMFOLDER/home
+		# Backup Camera Archives
+		mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/cameras
+		cp -Lr /home/cameras/ $FULLPATH/$FILESYSTEMFOLDER/home
 
-	# Backup game player data if available
-	if [[ -d /home/mamedata ]]; then
-		mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mamedata/cfg
-		cp -Lr /home/mamedata/cfg/ $FULLPATH/$FILESYSTEMFOLDER/home/mamedata
-		mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mamedata/inp
-		cp -Lr /home/mamedata/inp/ $FULLPATH/$FILESYSTEMFOLDER/home/mamedata
-		mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mamedata/memcard
-		cp -Lr /home/mamedata/memcard/ $FULLPATH/$FILESYSTEMFOLDER/home/mamedata
-		mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mamedata/nvram
-		cp -Lr /home/mamedata/nvram/ $FULLPATH/$FILESYSTEMFOLDER/home/mamedata
-		mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mamedata/sta
-		cp -Lr /home/mamedata/sta/ $FULLPATH/$FILESYSTEMFOLDER/home/mamedata
+		# Backup game player data if available
+		if [[ -d /home/mamedata ]]; then
+			mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mamedata/cfg
+			cp -Lr /home/mamedata/cfg/ $FULLPATH/$FILESYSTEMFOLDER/home/mamedata
+			mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mamedata/inp
+			cp -Lr /home/mamedata/inp/ $FULLPATH/$FILESYSTEMFOLDER/home/mamedata
+			mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mamedata/memcard
+			cp -Lr /home/mamedata/memcard/ $FULLPATH/$FILESYSTEMFOLDER/home/mamedata
+			mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mamedata/nvram
+			cp -Lr /home/mamedata/nvram/ $FULLPATH/$FILESYSTEMFOLDER/home/mamedata
+			mkdir -p $FULLPATH/$FILESYSTEMFOLDER/home/mamedata/sta
+			cp -Lr /home/mamedata/sta/ $FULLPATH/$FILESYSTEMFOLDER/home/mamedata
+		fi
+
 	fi
-
 	# ----------------
 	# Make the archive
 	# ----------------
 	cd $MASTERDIR/download	
 	# TODO:  make cli option to use either Gzip or Bzip compression (and make an option in the web admin), as the restore section can handle either...
-	tar cfz backup-$BKPDIR.tar.gz $BKPDIR
-	md5sum backup-$BKPDIR.tar.gz > backup-$BKPDIR.md5
+	tar cfz $BACKUPDESTINATION.tar.gz $BKPDIR
+	md5sum $BACKUPDESTINATION.tar.gz > $BACKUPDESTINATION.md5
 
 	echo "Restore point created."
 	rm -rf $FULLPATH
