@@ -5,6 +5,7 @@ error_reporting(-1);
 
 
 function initAuth($mediadbADO, $dbADO, $output){
+
 	$client_id="252010262386-d8djlkh01ag0v0r514jf1lgcflpodb1c.apps.googleusercontent.com";
 $client_secret="ibgv0ECx-N5bK_Abj4cXR1rj";
 $driveScope="https://www.googleapis.com/auth/drive%20https://www.googleapis.com/auth/drive.metadata";
@@ -18,8 +19,9 @@ $out.="<body align=center>";
 $out.='Please click authorize. This will allow you to recieve the authorization code to paste below <br>';
 $out.='<button onclick="myFunction()">Authorize</button> <br><br>';
 
-$out.="<form action='index.php?'>";
-$out.="Please Enter Authorization code: <input type=text name='authcode'>";
+$out.="<form action='index.php?section=cloudServices&service=gmail&action=googleComplete' method='POST'>";
+$out.="Please Enter Authorization code: <input type='text' name='code'>";
+$out.="<button type='submit' value='submit'>Authorize LinuxMCE </button>";
 $out.="</form>";
 
 $out.='<script>
