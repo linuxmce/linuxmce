@@ -8,7 +8,7 @@ function init_services($mediadbADO, $dbADO, $output){
 </style>
 <table class="tg">
   <tr>
-    <th class="tg-031e"> <a href="index.php?section=cloudServices&app=gmail" > <img src="operations/cloudServices/images/gmail.gif" alt="gmail" > </a> </th>
+    <th class="tg-031e"> <a href="index.php?section=cloudServices&service=gmail&action=auth" > <img src="operations/cloudServices/images/gmail.gif" alt="gmail" > </a> </th>
     <th class="tg-031e"> <img src="operations/cloudServices/images/facebook.png" alt="facebook" > </th>
   </tr>
   <tr>

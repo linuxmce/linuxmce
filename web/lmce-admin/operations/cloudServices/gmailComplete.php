@@ -60,7 +60,7 @@ $deviceQuery = 'SELECT
 		
 	print_r($newDataString);	
 		
-	$updateQuery="UPDATE Device_DeviceData SET IK_DeviceData='".$newDataString."'where device=".$ddForDevice['PK_Device']."";
+	$updateQuery="UPDATE Device_DeviceData SET IK_DeviceData='".$newDataString."'where FK_DEVICE=".$ddForDevice['PK_Device']." AND FK_DeviceData=59";
 	$dbADO->Execute($updateQuery);
 	
 	$out='Completed google authorization for '.$_SESSION['hh_username'].'.<br>';

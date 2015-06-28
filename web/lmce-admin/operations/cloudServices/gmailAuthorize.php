@@ -19,8 +19,11 @@ $out.="<body align=center>";
 $out.='Please click authorize. This will allow you to recieve the authorization code to paste below <br>';
 $out.='<button onclick="myFunction()">Authorize</button> <br><br>';
 
-$out.="<form action='index.php?section=cloudServices&service=gmail&action=googleComplete' method='POST'>";
+$out.="<form action='index.php' method='GET'>";
 $out.="Please Enter Authorization code: <input type='text' name='code'>";
+$out.="<input type='hidden' name='section' value='cloudServices'>";
+$out.="<input type='hidden' name='service' value='gmail'>";
+$out.="<input type='hidden' name='action' value='complete'> ";
 $out.="<button type='submit' value='submit'>Authorize LinuxMCE </button>";
 $out.="</form>";
 
