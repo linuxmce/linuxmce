@@ -49,6 +49,13 @@ if(!isset($_SESSION['userLoggedIn']) && $section!='' && $section!='login' && $se
 validate_installation((int)@$_SESSION['installationID'],$dbADO);
 
 switch ($section) {
+		case 'index';
+		@$_SESSION['lastLeftFrameSrc']='';
+		@$_SESSION['lastRightFrameSrc']='';
+
+		die('<script>self.location=\'index.php\'</script>');
+		exit();
+	break;
 	case 'login':
 		$output = new Template($dbADO);
 		$output->setTemplateFileType('small');
@@ -1926,13 +1933,26 @@ switch ($section) {
 		include_once('../api/authorize.php');
 		doAuth($output,$dbADO );
 	break;
-	case 'index';
-		@$_SESSION['lastLeftFrameSrc']='';
-		@$_SESSION['lastRightFrameSrc']='';
-
-		die('<script>self.location=\'index.php\'</script>');
-		exit();
+	 case 'cloudServices':
+		$output= new Template($dbADO);
+		$output->setTemplateFileType('large');
+		echo $_GET['action'];
+		
+		 if($_GET['action']=="complete"){
+				$svc = $_GET['service'];
+			include_once('operations/cloudServices/'.$svc.'Complete.php');
+				completeAuth($mediadbADO, $dbADO, $output);
+		} else if($_GET['action']=="auth"){
+			unset($_GET['action']);
+				$svc = $_GET['service'];
+			include_once('operations/cloudServices/'.$svc.'Authorize.php');
+				initAuth($mediadbADO, $dbADO, $output);
+		}  else {
+			include_once('operations/cloudServices/serviceList.php');
+		init_services($mediadbADO, $dbADO, $output);
+		}		
 	break;
+
 	case '';
 		$output = new Template($dbADO);	
 
