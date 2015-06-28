@@ -1926,19 +1926,6 @@ switch ($section) {
 		include_once('../api/authorize.php');
 		doAuth($output,$dbADO );
 	break;
-	    case 'cloudServices':
-		$output= new Template($dbADO);
-		$output->setTemplateFileType('large');
-		if(isset($_GET['app'])){
-			$app=$_GET['app'];
-			include_once('operations/cloudServices/'.$app.'Authorize.php');
-		initAuth($mediadbADO, $dbADO, $output);
-		} else {
-			include_once('operations/cloudServices/serviceList.php');
-		init_services($mediadbADO, $dbADO, $output);
-		}
-		
-	break;
 	case 'index';
 		@$_SESSION['lastLeftFrameSrc']='';
 		@$_SESSION['lastRightFrameSrc']='';
