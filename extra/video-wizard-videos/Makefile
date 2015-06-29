@@ -7,5 +7,4 @@ clean:
 
 
 install:
-	mkdir -p $(DESTDIR)/home/videowiz/
-	cp -avR ./home/* $(DESTDIR)/home/ || true
+	find . -iname "*.mpg" -exec install -m644 -D {} $(DESTDIR)/{} \;
