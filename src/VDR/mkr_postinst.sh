@@ -4,7 +4,7 @@
 # Get the device ID of this system
 . /usr/pluto/bin/Config_Ops.sh
 ConfEval
-
+DCENETWORK="`echo $DCERouter | cut -f-3 -d"."`.0"
 # Get the video dir of VDR
 VIDEO_DIR="/home/public/data/pvr"
 
@@ -167,7 +167,7 @@ ZapTimeout = 3
 echo "
 svdrpservice.ConnectTimeout = 2
 svdrpservice.ReadTimeout = 5
-svdrpservice.ServerIp = 192.168.80.1
+svdrpservice.ServerIp = $DCErouter
 svdrpservice.ServerPort = 2001
 " >> /var/lib/vdr/setup.conf
 #
@@ -182,13 +182,13 @@ streamdev-server.StartServer = 1
 streamdev-server.SuspendMode = 1
 " >> /var/lib/vdr/setup.conf
 	echo "
-192.168.80.0/24
+$DCENETWORK/24
 "
 >> /etc/vdr/plugins/streamdevhosts.conf
 
 else
 	echo "
-streamdev-client.RemoteIp = 192.168.80.1
+streamdev-client.RemoteIp = $DCERouter
 streamdev-client.RemotePort = 2004
 streamdev-client.StartClient = 1
 streamdev-client.StreamFilters = 1
@@ -235,7 +235,7 @@ remotetimers.ReplaceRecordings = 0
 remotetimers.ReplaceSchedule = 1
 remotetimers.ReplaceTimers = 1
 remotetimers.ServerDir = $VIDEO_DIR
-remotetimers.ServerIp = 192.168.80.1
+remotetimers.ServerIp = $DCERouter
 remotetimers.ServerPort = 2001
 remotetimers.ShowProgressBar = 0
 remotetimers.SwapOkBlue = 0
