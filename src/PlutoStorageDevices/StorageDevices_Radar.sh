@@ -1,6 +1,9 @@
 #!/bin/bash
 . /usr/pluto/bin/SQL_Ops.sh
 
+# Make sure we run with US numbers and stuff.
+LC_ALL=C
+
 export PATH="$PATH:/sbin:/usr/sbin:/usr/local/sbin"
 availPath=""
 mountedDevPath=""
