@@ -4,7 +4,8 @@
 # Get the device ID of this system
 . /usr/pluto/bin/Config_Ops.sh
 ConfEval
-DCENETWORK="`echo $DCERouter | cut -f-3 -d"."`.0"
+DCEROUTERIP=`ping $DCERouter -c1 -n | grep PING | cut -f2 -d"(" | cut -f1 -d")"`
+DCENETWORK="`echo $DCEROUTERIP | cut -f-3 -d"."`.0"
 # Get the video dir of VDR
 VIDEO_DIR="/home/public/data/pvr"
 
