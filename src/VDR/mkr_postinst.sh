@@ -189,7 +189,7 @@ $DCENETWORK/24
 
 else
 	echo "
-streamdev-client.RemoteIp = $DCERouter
+streamdev-client.RemoteIp = $DCEROUTERIP
 streamdev-client.RemotePort = 2004
 streamdev-client.StartClient = 1
 streamdev-client.StreamFilters = 1
@@ -236,7 +236,7 @@ remotetimers.ReplaceRecordings = 0
 remotetimers.ReplaceSchedule = 1
 remotetimers.ReplaceTimers = 1
 remotetimers.ServerDir = $VIDEO_DIR
-remotetimers.ServerIp = $DCERouter
+remotetimers.ServerIp = $DCEROUTERIP
 remotetimers.ServerPort = 2001
 remotetimers.ShowProgressBar = 0
 remotetimers.SwapOkBlue = 0
