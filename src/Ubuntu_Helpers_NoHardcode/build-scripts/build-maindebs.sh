@@ -129,7 +129,7 @@ function build_main_debs() {
 			case "${build_name}" in
 				jessie)
 					Distro_ID="22"
-					Repository_ID="23"
+					RepositorySource=23
 					Main_Version='2.0.0.47.'
 					# not currently compatible
 					exclude_list=$exclude_list,498,499	# simplephone
