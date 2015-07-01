@@ -32,7 +32,7 @@ firstboot_lmce_rpi2_preinst() {
 
 		ROOT_PART=$(find_linux_root_device)
 		PART_NUM=${ROOT_PART#/dev/mmcblk0p}
-		PART_START=$(parted /dev/mmcblk0 -ms unit s p | grep "^${PART_NUM}" | cut -f 2 -d:)
+		PART_START=$(parted /dev/mmcblk0 -ms unit s p | grep "^${PART_NUM}" | cut -f 2 -d: | grep -o '[0-9]*')
 
 		fdisk /dev/mmcblk0 <<EOF
 p
