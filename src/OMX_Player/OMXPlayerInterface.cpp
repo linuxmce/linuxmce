@@ -41,8 +41,9 @@ OMXRootClient::OMXRootClient(DBus::Connection &connection, const char *path, con
 static const char *OMXPLAYER_SERVER_NAME = "org.mpris.MediaPlayer2.omxplayer";
 static const char *OMXPLAYER_SERVER_PATH = "/org/mpris/MediaPlayer2";
 
-static const string OMXPLAYER_DBUS_ADDR = "/tmp/omxplayerdbus";
-#define OMXPLAYER_DBUS_PID /tmp/omxplayerdbus.pid
+// FIXME: get current user
+static const string OMXPLAYER_DBUS_ADDR = "/tmp/omxplayerdbus.root";
+#define OMXPLAYER_DBUS_PID /tmp/omxplayerdbus.root.pid
 
 // constructor
 OMXPlayerInterface::OMXPlayerInterface(string sAudioDevice, bool bPassthrough, string sGpuDeInt) {
