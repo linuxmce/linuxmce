@@ -119,6 +119,8 @@ WriteSccpPhone()
 {
 	# remove : from MAC address
 	local name=$(echo SEP$MacAddress|sed 's/://g'|tr '[:lower:]' '[:upper:]')
+	# if we do not have a mac address, we need something else to distinguish the Sccp phones. Why not the phone number?!
+	name="$name$PhoneNumber"
 	# adds configuration of current SCCP phone to SQL query buffer.
 	PHONESSQL="$PHONESSQL INSERT INTO $DB_SCCP_Device_Table (type,name,description)
 	VALUES ('7970','$name','LinuxMCE ext $PhoneNumber');"
