@@ -59,14 +59,14 @@ fi
 # Generate new postfix config files
 echo "dcerouter       relay:[dcerouter]" >transport 
 echo "*               smtp:[$mta]:$port" >>transport 
-postmap transport 
+/usr/sbin/postmap transport &> /tmp/transportmap
 	 
 echo "[$mta]:$port             $username:$password" >sasl_passwd 
 chown root:root /etc/postfix/sasl_passwd && chmod 600 /etc/postfix/sasl_passwd
-postmap hash:/etc/postfix/sasl_passwd
+/usr/sbin/postmap /etc/postfix/sasl_passwd
 	 
 rm -f generic ; touch generic 
-postmap generic 
+/usr/sbin/postmap generic 
 	 
 echo "" >> main.cf 
 echo "##  SASL Settings" >> main.cf 
@@ -91,9 +91,8 @@ echo "transport_maps = hash:/etc/postfix/transport" >> main.cf
 #chmod 644 cacert.pem 
 #chmod 400 key.pem
  
-if [ $emailservice = "gmail" ]
-then
-cat /etc/ssl/certs/Equifax_Secure_CA.pem >> /etc/postfix/cacert.pem
+if [ "$emailservice" == "gmail" ]; then
+	cat /etc/ssl/certs/Equifax_Secure_CA.pem >> /etc/postfix/cacert.pem
 fi
 
 # reload new config
