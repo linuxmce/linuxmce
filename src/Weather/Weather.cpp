@@ -393,25 +393,15 @@ void * initThread(void * Arg){
 	}
 	double duration=thr2->timer_,t_check;//Seconds
 	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Weather: Timer is set to: %f minutes",thr2->timer_/60);
-	clock_t start,end;
-	bool init=true;
-	start=clock();
 	while(true){
-		end=clock();
-		t_check=(end-start) / (double) CLOCKS_PER_SEC;
-		if(t_check>=thr2->timer_ || init){
-			//msgThread((void *) thr2);
 
-			if (pthread_create(&thr2->m_thr_,NULL, msgThread,(void *) thr2)) {
-				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Weather: Error creating msgThread");
-				//continue; //This crashed here a couple times. No need to exit program
-			}
-			pthread_join(thr2->m_thr_,NULL);
-			init=false;
-			start=clock();
-		}
+        	if (pthread_create(&thr2->m_thr_,NULL, msgThread,(void *) thr2)) {
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Get_Weather: Error creating msgThread");
+				return NULL;
+	 	}
+             sleep(thr2->timer_);
 	}
-	return NULL;
+        return NULL;
 }
 
 void Weather::send_msg(vector<vector<string> > &msg){

@@ -24,20 +24,23 @@ WWO::WWO() {
 	f_icon_.clear();
         d_units_="F";
         d_lang_="en";
-	icons_.insert(make_pair("","1"));//,	//Unknown
+	icons_.insert(make_pair("182","1"));icons_.insert(make_pair("185","1"));icons_.insert(make_pair("227","1"));icons_.insert(make_pair("230","1"));icons_.insert(make_pair("281","1"));icons_.insert(make_pair("311","1"));icons_.insert(make_pair("314","1"));icons_.insert(make_pair("317","1"));icons_.insert(make_pair("","1"));//,	//Unknown
 	icons_.insert(make_pair("113","2"));	//Sunny
 	icons_.insert(make_pair("113N","3"));icons_.insert(make_pair("nfew","3"));icons_.insert(make_pair("nsct","3"));icons_.insert(make_pair("nbkn","3"));	//Night Clear
 	icons_.insert(make_pair("119","4"));icons_.insert(make_pair("119","4"));icons_.insert(make_pair("smoke","4"));	//Cloudy
 	icons_.insert(make_pair("122","5"));icons_.insert(make_pair("143","5"));	//Moderately Cloudy
 	icons_.insert(make_pair("116","6"));icons_.insert(make_pair("176","6"));	//Partly Cloudy
-	icons_.insert(make_pair("248","7"));icons_.insert(make_pair("dust","7"));icons_.insert(make_pair("mist","7"));	//Fog
+	icons_.insert(make_pair("260","7"));icons_.insert(make_pair("248","7"));icons_.insert(make_pair("dust","7"));icons_.insert(make_pair("mist","7"));	//Fog
 	icons_.insert(make_pair("266","8"));icons_.insert(make_pair("353","8"));icons_.insert(make_pair("362","8"));icons_.insert(make_pair("365","8"));icons_.insert(make_pair("386","8"));icons_.insert(make_pair("389","8"));icons_.insert(make_pair("302","8"));	//Light Showers
-	icons_.insert(make_pair("293","9"));icons_.insert(make_pair("263","9"));icons_.insert(make_pair("356","9"));icons_.insert(make_pair("359","9"));icons_.insert(make_pair("308","9"));icons_.insert(make_pair("hi_shwrs","9"));icons_.insert(make_pair("hi_nshwrs","9"));icons_.insert(make_pair("ra","9"));icons_.insert(make_pair("nra","9"));	//Showers
-	icons_.insert(make_pair("296","10"));icons_.insert(make_pair("ntsra","10"));icons_.insert(make_pair("hi_tsra","10"));icons_.insert(make_pair("hi_ntsra","10"));icons_.insert(make_pair("nsvrtsra","10"));	//Thunder Showers
-	icons_.insert(make_pair("392","11"));icons_.insert(make_pair("395","11"));icons_.insert(make_pair("326","11"));icons_.insert(make_pair("nsn","11"));	//Snow Showers
+	icons_.insert(make_pair("305","9"));icons_.insert(make_pair("293","9"));icons_.insert(make_pair("263","9"));icons_.insert(make_pair("356","9"));icons_.insert(make_pair("359","9"));icons_.insert(make_pair("308","9"));icons_.insert(make_pair("hi_shwrs","9"));icons_.insert(make_pair("hi_nshwrs","9"));icons_.insert(make_pair("ra","9"));icons_.insert(make_pair("299","9"));	//Showers
+	icons_.insert(make_pair("200","10"));icons_.insert(make_pair("296","10"));icons_.insert(make_pair("ntsra","10"));icons_.insert(make_pair("hi_tsra","10"));icons_.insert(make_pair("hi_ntsra","10"));icons_.insert(make_pair("nsvrtsra","10"));	//Thunder Showers
+	icons_.insert(make_pair("284","11"));icons_.insert(make_pair("320","11"));icons_.insert(make_pair("323","11"));icons_.insert(make_pair("329","11"));icons_.insert(make_pair("332","11"));icons_.insert(make_pair("335","11"));icons_.insert(make_pair("338","11"));icons_.insert(make_pair("392","11"));icons_.insert(make_pair("395","11"));icons_.insert(make_pair("326","11"));icons_.insert(make_pair("nsn","11"));	//Snow Showers
 	icons_.insert(make_pair("179","12"));icons_.insert(make_pair("358","12"));icons_.insert(make_pair("350","12"));icons_.insert(make_pair("368","12"));icons_.insert(make_pair("371","12"));icons_.insert(make_pair("377","12"));icons_.insert(make_pair("374","12"));icons_.insert(make_pair("ip","12"));icons_.insert(make_pair("mix","12"));icons_.insert(make_pair("nmix","12"));icons_.insert(make_pair("raip","12"));icons_.insert(make_pair("rasn","12"));icons_.insert(make_pair("nrasn","12"));icons_.insert(make_pair("fzrara","12"));	//Rain Snow
 	icons_.insert(make_pair("122N","5"));icons_.insert(make_pair("143N","14"));
 	icons_.insert(make_pair("116N","15"));icons_.insert(make_pair("176N","15"));
+
+
+
 }
 
 WWO::~WWO() {
