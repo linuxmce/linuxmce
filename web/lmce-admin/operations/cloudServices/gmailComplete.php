@@ -1,15 +1,5 @@
 <?php
-/*
- * 
- * {
- * "access_token":"ya29.oAE9CGRIqAq3fXzTmFEo-07eNMSrc7EU9Dw-obfkkEfDwanSAtJPofAtuA7_wx_w_ydEHag-o_TKsQ",
- * "token_type":"Bearer",
- * "expires_in":3600,
- * "id_token":"eyJhbGciOiJSUzI1NiIsImtpZCI6IjEyMzg5MzdjOTBlOGU2MzgzZmYwYzdiYzE0NTlkOGQyNjQzZDFhYzkifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwic3ViIjoiMTEzMjg5MDgxMzkxMjA1NzE3NzAzIiwiYXpwIjoiMjUyMDEwMjYyMzg2LWQ4ZGpsa2gwMWFnMHYwcjUxNGpmMWxnY2ZscG9kYjFjLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwiZW1haWwiOiJnb2xnb2o0QGdtYWlsLmNvbSIsImF0X2hhc2giOiJpWWd6Tll5TFBrM183LVB1SG13dEdRIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF1ZCI6IjI1MjAxMDI2MjM4Ni1kOGRqbGtoMDFhZzB2MHI1MTRqZjFsZ2NmbHBvZGIxYy5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImlhdCI6MTQzNTQ2NTc2NCwiZXhwIjoxNDM1NDY5MzY0fQ.Otlb8fz6fICa9Ncn8OTVbOaORuwkhjPec6DSVgAG-4k3Qob4PzqtlxaRt1qvRSFGXMrdiJ1UgMsVkBKWROvBjnhhI6ABtFpVUbTizx-hbhznapIXbj8MpeqrR0o1nb5WWP1yXmw33bQXz35ZSMjJctbfwNm1ZGnd5VtazhsP76K0N93DAGhY-fQ6YngSY2eb9dznP0TMxxwiD3ywjUXh2oiXj9lfsxM29j454DBEliW8vzrcg81YNkg-8ZbhALlFexyLlL985Ch6SJ1xRaJF9FG_IlavpkWgkgetDWOkmRvKZHWvK5Zf5VQYAohobFv09edOtrYCQfl9qw04R06Xqg","refresh_token":"1\/h6Y5eJqvELDHsv7eLg5HvelYrsZ-FMRa-jS_xxSs929IgOrJDtdun6zK6XiATCKT",
- * "created":1435465764
- * }
- * 
- */
+
 ini_set('display_errors',1);
 ini_set('display_startup_errors',1);
 error_reporting(-1);
@@ -19,7 +9,7 @@ require_once('Google/autoload.php');
   function completeAuth($mediadbADO, $dbADO, $output){
 
 $client = new Google_Client();
-$client->setAuthConfigFile('/tmp/client_secret.json');
+$client->setAuthConfigFile('/var/www/lmce-admin/operations/cloudServices/includes/client_secret.json');
 //$client->setRedirectUri('http://' . $_SERVER['HTTP_HOST'] . '/lmce-amin/index.php?section=cloudServices&app=gmail');
 $client->addScope(Google_Service_Drive::DRIVE_METADATA_READONLY);
 
@@ -48,19 +38,17 @@ $deviceQuery = 'SELECT
 			WHERE Device.FK_DeviceTemplate=2316 AND Device_DeviceData.FK_DeviceData=59 ';
 	$res = $dbADO->Execute($deviceQuery);
 	$ddForDevice = $res->FetchRow();
-	
+	$out="";
 	$out.="<br>";
 	$out.="Device:".$ddForDevice['PK_Device'];
-	$oldData= $ddForDevice['IK_DeviceData'];
+	$oldData= json_decode($ddForDevice['IK_DeviceData']);
 	$newDataString= array( $_SESSION['userID']=>$_SESSION['access_token'] );
+	$accessData = json_decode($_SESSION['access_token']);
 	
-	$parsedOldData= json_decode($oldData, true);
-	$parsedOldData[$_SESSION['userID']] = $_SESSION['access_token'];
+	$parsedOldData= $oldData;
+	$parsedOldData[$_SESSION['userID']] = $accessData;
 	$newDataString = json_encode($parsedOldData);
-		
-	print_r($newDataString);	
-		
-	$updateQuery="UPDATE Device_DeviceData SET IK_DeviceData='".$newDataString."'where FK_DEVICE=".$ddForDevice['PK_Device']." AND FK_DeviceData=59";
+	$updateQuery="UPDATE Device_DeviceData SET IK_DeviceData= ' ".$newDataString." ' where FK_DEVICE=".$ddForDevice['PK_Device']." AND FK_DeviceData=59";
 	$dbADO->Execute($updateQuery);
 	
 	$out='Completed google authorization for '.$_SESSION['hh_username'].'.<br>';
@@ -77,7 +65,7 @@ $deviceQuery = 'SELECT
 	 * 
 	 */
 	
-	print_r($parsedOldData);
+	print_r($newDataString);
 	$out.="Writing to device data.<br>";
 	
 	//$output -> setScriptInHead($scriptInHead);
