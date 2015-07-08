@@ -39,11 +39,13 @@ send "\r"
 spawn cp key.pem key.pem.orig
 
 spawn openssl rsa -in key.pem.orig -out key.pem
-expect -re "Enter pass phrase"
+expect -re "Enter pass phrase for key.pem.orig:"
 send "$password\r"
 expect -re "writing RSA key"
 
 spawn openssl x509 -req -days 365 -in req.pem -signkey key.pem -out cert.pem
-expect -re "Signature ok"
+expect -re "Enter pass phrase for key.pem:"
+send "$password\r"
+#expect -re "Signature ok"
 
 exit 0 

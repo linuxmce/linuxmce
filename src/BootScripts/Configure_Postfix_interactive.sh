@@ -17,12 +17,12 @@ cd /etc/postfix
 
 # reinstall packages, to be honest: I don't know why. It was like this before i touched.
 # Will investigate if be can drop this.
-apt-get -y remove postfix 
+#apt-get -y remove postfix 
 	 
-apt-get -y install postfix 
-apt-get -y install expect 
-apt-get -y install heirloom-mailx nail 
-apt-get -y install ca-certificates 
+#apt-get -y install postfix 
+#apt-get -y install expect 
+#apt-get -y install heirloom-mailx nail 
+#apt-get -y install ca-certificates 
 	 
 if [ -e main.cf.orig ]; then 
 	cp main.cf.orig main.cf 
@@ -38,7 +38,7 @@ if [ "$tls" == "yes" ]; then
 	rm -rf demoCA 
 	rm -f *.pem 
 	rm -f *.pm 
-	/usr/pluto/bin/Configure_Postfix_TLS.sh "$email" "$password" "$name" "$country" "$state" "$org" "/CN=dcerouter/C=$country/ST=$state/O=$org/CN=$name/emailAddress=$email"
+	/usr/pluto/bin/Configure_Postfix_TLS.sh "$email" "$password" "$name" "$country" "$state" "$org" "/CN=dcerouter/C=$country/ST=$state/O=$org/CN=$name/emailAddress=$email" 
 	echo "## TLS Settings" >> main.cf 
 	echo "smtp_tls_loglevel = 1" >> main.cf 
 	echo "smtp_enforce_tls = yes" >> main.cf 
@@ -79,7 +79,7 @@ echo "smtpd_sasl_local_domain = $myhostname" >> main.cf
 echo "smtp_sasl_security_options = noanonymous" >> main.cf 
 echo "#smtp_sasl_security_options =" >> main.cf 
 echo "smtp_sasl_tls_security_options = noanonymous" >> main.cf 
-echo "smtpd_sasl_application_name = smtpd" >> main.cf 
+echo "#smtpd_sasl_application_name = smtpd" >> main.cf 
 echo "" >> main.cf 
 echo "relayhost = [$mta]:$port" >> main.cf 
 echo "disable_dns_lookups = yes" >> main.cf 
@@ -91,7 +91,8 @@ echo "transport_maps = hash:/etc/postfix/transport" >> main.cf
 #chmod 644 cacert.pem 
 #chmod 400 key.pem
  
-if [ "$emailservice" == "gmail" ]; then
+# if [ "$emailservice" == "gmail" ]; then
+if [ "$tls" == "yes" ]; then 
 	cat /etc/ssl/certs/Equifax_Secure_CA.pem >> /etc/postfix/cacert.pem
 fi
 
