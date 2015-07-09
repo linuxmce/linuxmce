@@ -1,5 +1,5 @@
 <?php
-include 'includes/googleApiFunctions.php';
+
 function init_services($mediadbADO, $dbADO, $output){
 	
 	$googleCheck=' SELECT 
@@ -22,19 +22,11 @@ function init_services($mediadbADO, $dbADO, $output){
 	$confData=json_decode($ddForDevice['IK_DeviceData'], true);
 	$userDataArray = $confData[$_SESSION['userID']];	
 
-	if( !empty($userDataArray)){
-		
-		$client = getClient($userDataArray);
-		
-		testMetadata($client);
-		
+	if( !empty($userDataArray)){	
 		$gmailBox='<th class="tg-031e"> 
    <img src="operations/cloudServices/images/gmail.gif" alt="gmail" >
-     <br> Google Services are enabled. <br>
+     <br> Google Services are enabled. <a href="index.php?section=googleFiles">View Files.</a> <br>
    </th>';
-		//if($confData[ $_SESSION['userID'] ]){
-			
-	//	}
 	}
 	
 	$out='<style type="text/css">
