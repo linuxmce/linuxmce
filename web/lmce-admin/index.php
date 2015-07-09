@@ -1952,7 +1952,12 @@ switch ($section) {
 		init_services($mediadbADO, $dbADO, $output);
 		}		
 	break;
-
+	 case 'googleFiles':
+		$output= new Template($dbADO);
+		$output->setTemplateFileType('large');
+		include_once('operations/cloudServices/includes/googleFiles.php');
+		showGoogleDriveFiles($mediadbADO, $dbADO, $output);
+		 break;
 	case '';
 		$output = new Template($dbADO);	
 
