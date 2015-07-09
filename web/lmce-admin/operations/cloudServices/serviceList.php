@@ -1,4 +1,5 @@
 <?php
+include 'includes/googleApiFunctions.php';
 function init_services($mediadbADO, $dbADO, $output){
 	
 	$googleCheck=' SELECT 
@@ -14,20 +15,21 @@ function init_services($mediadbADO, $dbADO, $output){
 			LEFT JOIN DeviceTemplate_DeviceData ON DeviceTemplate_DeviceData.FK_DeviceData=Device_DeviceData.FK_DeviceData AND DeviceTemplate_DeviceData.FK_DeviceTemplate=Device.FK_DeviceTemplate
 			WHERE Device.FK_DeviceTemplate=2316 AND Device_DeviceData.FK_DeviceData=59  ';
 			
-	$gmailBox.='<th class="tg-031e"> <a href="index.php?section=cloudServices&service=gmail&action=auth" > 
-   <img src="operations/cloudServices/images/gmail.gif" alt="gmail" > 
-   </a> 
-   </th>';		
+    $gmailBox='<th class="tg-031e"> <a href="index.php?section=cloudServices&service=gmail&action=auth" ><img src="operations/cloudServices/images/gmail.gif" alt="gmail" ></a></th>';		
 	$res = $dbADO->Execute($googleCheck);
 	$ddForDevice = $res->FetchRow();
 	
 	$confData=json_decode($ddForDevice['IK_DeviceData'], true);
 	$userDataArray = $confData[$_SESSION['userID']];	
 
-	if( !empty($userDataArray)){					
+	if( !empty($userDataArray)){
 		
-		$gmailBox='<th class="tg-031e"> <a href="index.php?section=cloudServices&service=gmail&action=auth" > 
-   <img src="operations/cloudServices/images/gmail.gif" alt="gmail" > </a> 
+		$client = getClient($userDataArray);
+		
+		testMetadata($client);
+		
+		$gmailBox='<th class="tg-031e"> 
+   <img src="operations/cloudServices/images/gmail.gif" alt="gmail" >
      <br> Google Services are enabled. <br>
    </th>';
 		//if($confData[ $_SESSION['userID'] ]){
@@ -53,7 +55,7 @@ function init_services($mediadbADO, $dbADO, $output){
   </tr> 
 </table>';
 	
-	$output -> setScriptInHead($scriptInHead);
+	//$output -> setScriptInHead($scriptInHead);
 	$output -> setReloadLeftFrame(false);
 	$output -> setMenuTitle('Cloud Services ');
 	$output -> setScriptInBody('bgColor="#F0F3F8" onLoad="$(\'appear_test\').appear(); return false;"');
