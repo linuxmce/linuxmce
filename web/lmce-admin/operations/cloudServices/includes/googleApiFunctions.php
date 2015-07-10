@@ -9,9 +9,12 @@ set_include_path('operations/cloudServices/google-api-php-client/src');
 require_once('Google/autoload.php');
 define('CREDENTIALS_PATH', '/tmp/user'.$_SESSION['userID'].'.json');
 define('CLIENT_SECRET_PATH', '/var/www/lmce-admin/operations/cloudServices/includes/client_secret.json');
+define('MIME_TYPE_GDRIVE_FOLDER', "application/vnd.google-apps.folder");
+
 define('SCOPES', implode(' ', array(
-  Google_Service_Drive::DRIVE_METADATA_READONLY)
+   "https://www.googleapis.com/auth/drive")
 ));;
+
 
 function refreshToken($token){	
 	echo "Current Token:".$token;	
@@ -20,9 +23,9 @@ function refreshToken($token){
 
 function getClient($auth){
 		
- $latestToken=file_get_contents(CLIENT_SECRET_PATH);
+  $latestToken=json_decode( file_get_contents(CREDENTIALS_PATH) , true);
   $secret = file_get_contents(CLIENT_SECRET_PATH);
-  if($latestToken==""){
+  if(empty( $latestToken ) && !empty($auth)){
   	$latestToken=$auth;
   }	
   $client = new Google_Client();
@@ -31,7 +34,7 @@ function getClient($auth){
   $client->setAuthConfigFile(CLIENT_SECRET_PATH);
   $client->setAccessType('offline');
 
-  $client->setAccessToken(json_encode($auth));
+  $client->setAccessToken(json_encode($latestToken));
 
   // Refresh the token if it's expired.
   if ($client->isAccessTokenExpired()) {
@@ -63,18 +66,56 @@ function updateTokenData($newToken){
    function testMetadata($gclient){
    	$service = new Google_Service_Drive($gclient);
 		$optParams = array(
-  'maxResults' => 10,
+  	'maxResults' => 50,
+  	"q"=>" mimeType='application/vnd.google-apps.folder'",
+  	"q"=>"title contains 'Linux' "
 );
 $results = $service->files->listFiles($optParams);
 
+$fileData=$results->getItems();
+$returnData="";
+
 if (count($results->getItems()) == 0) {
-  print "No files found.\n";
+ $returnData="No files found.\n";
 } else {
-  print "Files:\n";
+ $returnData.="Files:<br>";
+ $folderExists=false;
   foreach ($results->getItems() as $file) {
-    printf("%s (%s)\n", $file->getTitle(), $file->getId());
+  	if($file->getTitle()==="LinuxMCE Security Images"){
+  		$folderExists=true;
+  	}
+    $returnData.="<b>Filename:".$file->getTitle()."</b> ID:".$file->getId()."<br><br>";
+  }
+  
+  if(!$folderExists){
+  	setupFolder();
   }
 }
+ return $returnData;
+ 
+   }
+   
+   function setupFolder(){
+   	$client=getClient(array());
+	if(!$client->getAccessToken())
+	{
+		return;
+	}
+	$service = new Google_Service_Drive($client);
+
+	
+	$file = new Google_Service_Drive_DriveFile();
+	$file->setTitle("LinuxMCE Security Images");
+	$file->setParents(array ("root"));
+	$file->setDescription("LinuxMCE Security Photos");
+	$file->setMimeType("application/vnd.google-apps.folder");
+	$opts=array(        
+        'mimeType' => "application/vnd.google-apps.folder"
+      );
+	 $createdFile = $service->files->insert($file, $opts);
+	
+ 
+	
    }
    
 ?>
