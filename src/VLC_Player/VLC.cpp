@@ -74,8 +74,8 @@ namespace DCE
 	return false;
       }
 
-    // static const char* const args[] = {"--alsa-audio-device","hdmi:CARD=Card0PCH,DEV=1","--spdif"};
-    // m_pInst = libvlc_new(3,args);
+//    static const char* const args[] = {"--alsa-audio-device","hdmi:CARD=Card0PCH,DEV=1","--spdif"};
+//    m_pInst = libvlc_new(3,args);
     m_pInst = libvlc_new(NULL,NULL);
 
     if (!m_pInst)
@@ -287,8 +287,35 @@ namespace DCE
       {
 	sMediaURL = "file://" + sMediaURL;
       }
-    
-    libvlc_media_t *m = libvlc_media_new_location (m_pInst, sMediaURL.c_str());
+
+    libvlc_media_t *m;
+
+    // Handle audio CDs a bit differently. Since the Disk Drive 
+    // already reports tracks, there is no need for libvlc to do this
+    // and we can just tell it to play specific tracks. 
+    // cdda:///dev/sr0/4
+    if (sMediaURL.find("cdda:") != string::npos)
+      {
+	string::size_type pos=0;
+	string sProtocol = StringUtils::Tokenize(sMediaURL,":",pos);
+	string sDummy1 = StringUtils::Tokenize(sMediaURL,"/",pos);
+	string sDummy2 = StringUtils::Tokenize(sMediaURL,"/",pos);
+	string sDummy3 = StringUtils::Tokenize(sMediaURL,"/",pos);
+	string sDev = StringUtils::Tokenize(sMediaURL,"/",pos);
+	string sDrive = StringUtils::Tokenize(sMediaURL,"/",pos);
+	int iTrack = atoi(StringUtils::Tokenize(sMediaURL,"/",pos).c_str());
+	char cTrack[16];
+	char cDev[16];
+	sprintf(cTrack,"cdda-track=%d",iTrack);
+	sprintf(cDev,"cdda:///dev/%s",sDrive.c_str());
+	m = libvlc_media_new_location(m_pInst,cDev);
+	libvlc_media_add_option(m,cTrack);
+      }
+    else
+      {
+	m = libvlc_media_new_location (m_pInst, sMediaURL.c_str());
+      }
+
     m_pMp = libvlc_media_player_new_from_media(m);
     libvlc_media_player_set_xwindow (m_pMp, m_Window);
 
