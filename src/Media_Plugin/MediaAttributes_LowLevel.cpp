@@ -1742,6 +1742,8 @@ int MediaAttributes_LowLevel::GetMediaType(Row_DiscLocation *pRow_DiscLocation)
 		return MEDIATYPE_pluto_DVD_CONST;
 	case 'M':
 		return MEDIATYPE_pluto_StoredVideo_CONST;
+	case 'R':
+	        return MEDIATYPE_pluto_BD_CONST;
 	}
 	return 0;
 }
