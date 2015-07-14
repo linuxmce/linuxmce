@@ -10,17 +10,6 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 
-/**
- * The State Directory inotify thread.
- */
-void * StartStateDirThread(void * Arg)
-{
-  DCE::EmulatorController *pEmulatorController = (DCE::EmulatorController *) Arg;
-  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-  pEmulatorController->stateDirThread();
-  return NULL;
-}
-
 namespace DCE
 {
 
@@ -36,48 +25,6 @@ namespace DCE
     m_pGame_Player = NULL;	// DO NOT DELETE THE GAME PLAYER PARENT!
     delete m_pEmulatorModel;
     m_pEmulatorModel = NULL;
-  }
-
-  void EmulatorController::stateDirThread()
-  {
-    LoggerWrapper::GetInstance()->Write(LV_WARNING,"Starting State dir inotify thread.");
-    LoggerWrapper::GetInstance()->Write(LV_WARNING,"State Dir: " GAME_PLAYER_STATE_DIR);
-
-    inotify notify;
-    
-    int fd_notify = notify.watch(GAME_PLAYER_STATE_DIR,IN_ALL_EVENTS);
-    LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Watch descriptor for State dir: %d",fd_notify);
-
-    while (m_pEmulatorModel->m_bRunning)
-      {
-	if (notify.pending_events())
-	  {
-	    cpp_inotify_event event = notify.get_event();
-	    LoggerWrapper::GetInstance()->Write(LV_DEBUG,"inotify: %s",event.tostring().c_str());
-	    ProcessStateDirEvent(event);
-	  }
-	Sleep(100);
-      }
-
-    LoggerWrapper::GetInstance()->Write(LV_WARNING,"Ending State dir inotify thread.");
-
-  }
-
-  void EmulatorController::ProcessStateDirEvent(cpp_inotify_event event)
-  {
-    if (event.name == "menu_onscreen" && (event.mask & IN_CREATE))
-      {
-	string sData;
-	bool ret = FileUtils::ReadTextFile(GAME_PLAYER_STATE_DIR "/menu_onscreen",sData);
-	if (ret)
-	  {
-	    m_pGame_Player->CMD_Goto_Media_Menu(m_pEmulatorModel->m_iStreamID,atoi(sData.c_str()));
-	  }
-      }
-    else if (event.name == "menu_onscreen" && (event.mask & IN_DELETE))
-      {
-	m_pGame_Player->CMD_Goto_Media_Menu(m_pEmulatorModel->m_iStreamID,0);
-      }
   }
 
   /**
@@ -266,13 +213,6 @@ namespace DCE
 
     m_pGame_Player->LaunchEmulator();
 
-    // Launch the state dir thread.
-    if (pthread_create(&m_stateDirThread, NULL, StartStateDirThread, (void *)this))
-      {
-	// Failed. Warn.
-	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Could not create State Dir thread.");
-      }
-
     LoggerWrapper::GetInstance()
       ->Write(LV_STATUS,"EmulatorController::run() - sent command back to game player to spawn application");
 
@@ -308,7 +248,6 @@ namespace DCE
     setMediaPosition(""); // clear it.
 
     m_pEmulatorModel->m_bRunning_set(false);
-    pthread_join(m_stateDirThread,NULL);
     // Clear all media from slots.
     // m_pEmulatorModel->m_mapMedia.clear();
 
