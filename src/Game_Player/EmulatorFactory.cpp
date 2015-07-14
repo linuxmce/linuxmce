@@ -12,6 +12,8 @@
 #include "MAMEEmulatorModel.h"
 #include "A2600EmulatorModel.h"
 #include "A2600EmulatorController.h"
+#include "StellaEmulatorModel.h"
+#include "StellaEmulatorController.h"
 #include "A7800EmulatorController.h"
 #include "IntellivisionEmulatorModel.h"
 #include "IntellivisionEmulatorController.h"
@@ -97,7 +99,7 @@ namespace DCE
   bool EmulatorFactory::init()
   {    
     addEmulatorForMediaType(MEDIATYPE_lmce_Game_CONST,new MAMEEmulatorController(m_pGame_Player, new MAMEEmulatorModel()));
-    addEmulatorForMediaType(MEDIATYPE_lmce_Game_a2600_CONST,new A2600EmulatorController(m_pGame_Player, new A2600EmulatorModel()));
+    addEmulatorForMediaType(MEDIATYPE_lmce_Game_a2600_CONST,new StellaEmulatorController(m_pGame_Player, new StellaEmulatorModel()));
     addEmulatorForMediaType(MEDIATYPE_lmce_Game_a7800_CONST,new A7800EmulatorController(m_pGame_Player, new A7800EmulatorModel()));
     addEmulatorForMediaType(MEDIATYPE_lmce_Game_intv_CONST,new IntellivisionEmulatorController(m_pGame_Player, new IntellivisionEmulatorModel()));
     addEmulatorForMediaType(MEDIATYPE_lmce_Game_a5200_CONST,new A5200EmulatorController(m_pGame_Player, new A5200EmulatorModel()));

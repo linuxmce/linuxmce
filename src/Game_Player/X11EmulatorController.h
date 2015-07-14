@@ -39,7 +39,6 @@ namespace DCE
 
     void checkResend();
 
-    virtual void ProcessStateDirEvent(cpp_inotify_event event);
     virtual bool doAction(string sAction);
     virtual bool pressButton(int iPK_Button, Message *pMessage);
     virtual bool pressClick(int iPositionX, int iPositionY, Message *pMessage);

@@ -26,12 +26,16 @@ sources = Main.cpp Game_Player.cpp $(Gen_Dev_Files) \
 	EmulatorController.cpp \
 	X11EmulatorModel.cpp \
 	X11EmulatorController.cpp \
+	INotifyEmulatorModel.cpp \
+	INotifyEmulatorController.cpp \
 	MAMEEmulatorModel.cpp \
 	MAMEEmulatorController.cpp \
 	MESSEmulatorModel.cpp \
 	MESSEmulatorController.cpp \
 	A2600EmulatorModel.cpp \
 	A2600EmulatorController.cpp \
+	StellaEmulatorModel.cpp \
+	StellaEmulatorController.cpp \
 	A7800EmulatorModel.cpp \
 	A7800EmulatorController.cpp \
 	SecondGenEmulatorModel.cpp \

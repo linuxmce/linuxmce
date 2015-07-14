@@ -14,7 +14,6 @@
 #include "Gen_Devices/AllCommandsRequests.h"
 #include "DCE/Message.h"
 #include <list>
-#include "../inotify/inotify_class.h"
 
 namespace DCE
 {
@@ -28,7 +27,6 @@ namespace DCE
     friend class Game_Player;
 
   private:
-    pthread_t m_stateDirThread;
   protected:
     Game_Player *m_pGame_Player;
     EmulatorModel *m_pEmulatorModel;
@@ -37,9 +35,6 @@ namespace DCE
 
     EmulatorController(Game_Player *pGame_Player, EmulatorModel *pEmulatorModel);
     ~EmulatorController();
-
-    // State dir inotify methods.
-    void stateDirThread();
 
     // not so pure virtuals. :P
     virtual bool init();
@@ -57,7 +52,6 @@ namespace DCE
     virtual void setMediaPosition(string sMediaPosition);
     virtual void setOrbiter(long int dwPK_Device_Orbiter);
     virtual void setSystemConfiguration(string sSystemConfiguration);
-    virtual void ProcessStateDirEvent(cpp_inotify_event event);
     // Pure virtuals
     virtual bool doAction(string sAction) = 0;
     virtual void pleaseResend() = 0;
