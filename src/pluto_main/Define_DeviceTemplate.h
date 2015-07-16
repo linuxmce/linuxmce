@@ -2147,6 +2147,12 @@
 #define DEVICETEMPLATE_SmartThings_Hub_V1_CONST 2317
 #define DEVICETEMPLATE_Hue_Lux_Bulb_CONST 2318
 #define DEVICETEMPLATE_Hue_Light_Strips_CONST 2319
+#define DEVICETEMPLATE_Amazon_Internet_Media_CONST 2320
+#define DEVICETEMPLATE_Internet_Radio_Internet_Medi_CONST 2321
+#define DEVICETEMPLATE_Netflix_Internet_Media_CONST 2322
+#define DEVICETEMPLATE_Smart_Apps_Internet_Media_CONST 2323
+#define DEVICETEMPLATE_ESeries_SmartTv_CONST 2325
+#define DEVICETEMPLATE_XBOX_360_Gamepad_Adapter_CONST 2326
 
 #define DEVICETEMPLATE_TABLE "DeviceTemplate"
 #define DEVICETEMPLATE_PK_DEVICETEMPLATE_FIELD "PK_DeviceTemplate"
