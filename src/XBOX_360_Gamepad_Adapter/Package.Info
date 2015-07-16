@@ -1,0 +1,9 @@
+<-dceag-p-b->
+Package = DCE_Destination_Package
+Dir = 
+desc = DCE Implemenation for #2326 XBOX 360 Gamepad Adapter
+Maintainer = DCE_MaintainerName
+Email = DCE_MaintainerEmail
+Depend = DCE_Dependencies
+<-dceag-p-e->
+
