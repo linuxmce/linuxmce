@@ -38,7 +38,8 @@ namespace DCE
 	  pluto_pthread_mutex_t m_GamePadMutex;
 
 		// Private methods
-	  void ProcessGamePad(int fd);
+	  void ProcessGamePad(int fd, int joytype);
+	  int GetJoyType(string iJoyType);
 public:
 		// Public member variables
 	  map<string,pair<string,int> > m_mapCodesToButtons;
@@ -48,6 +49,10 @@ public:
 	  bool m_bJoy2Active;
 	  bool m_bJoy3Active;
 	  bool m_bJoy4Active;
+	  int m_iJoy1Type;
+	  int m_iJoy2Type;
+	  int m_iJoy3Type;
+	  int m_iJoy4Type;
 	  int m_iJoy1fd;
 	  int m_iJoy2fd;
 	  int m_iJoy3fd;

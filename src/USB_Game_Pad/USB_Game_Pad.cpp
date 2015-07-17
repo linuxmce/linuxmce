@@ -48,6 +48,13 @@ using namespace DCE;
 // Alarms
 #define FIND_GAMEPADS 0 
 
+#define JOY_TYPE_GENERIC 0
+#define JOY_TYPE_XBOX360 1
+#define JOY_TYPE_SIXAXIS 2
+#define JOY_TYPE_WIIMOTE 3
+
+#define NAME_LENGTH 128
+
 void * StartInputThread(void * Arg)
 {
   USB_Game_Pad *pUSB_Game_Pad = (USB_Game_Pad *) Arg;  // ahh the joy of pointers...
@@ -71,6 +78,7 @@ USB_Game_Pad::USB_Game_Pad(int DeviceID, string ServerAddress,bool bConnectEvent
   m_DeviceID = 0;
   m_bJoy1Active = m_bJoy2Active = m_bJoy3Active = m_bJoy4Active = false;
   m_iJoy1fd = m_iJoy2fd = m_iJoy3fd = m_iJoy4fd = -1;
+  m_iJoy1Type = m_iJoy2Type = m_iJoy3Type = m_iJoy4Type = JOY_TYPE_GENERIC;
   m_iErrors = 0;
 }
 
@@ -270,10 +278,23 @@ bool USB_Game_Pad::IsJoystick(string sGamePadDevice)
   return false;
 }
 
+int USB_Game_Pad::GetJoyType(string sName)
+{
+  int iRet = JOY_TYPE_GENERIC;
+  if (sName.find("Xbox Gamepad (userspace driver)") != string::npos)
+    iRet = JOY_TYPE_XBOX360;
+  else
+    iRet = JOY_TYPE_GENERIC;
+
+  return iRet;
+}
+
 void USB_Game_Pad::FindGamePads()
 {
 
   struct stat buf;
+  char name[NAME_LENGTH];
+  string sName;
 
   // Joystick 1 ////////////////////////////////////////////////////
 
@@ -293,6 +314,11 @@ void USB_Game_Pad::FindGamePads()
 	    {
 	      // success.
 	      m_bJoy1Active = true;
+	      memset(name,0,NAME_LENGTH);
+	      ioctl(m_iJoy1fd,JSIOCGNAME(NAME_LENGTH),name);
+	      sName = string(name);
+	      LoggerWrapper::GetInstance()->Write(LV_WARNING,"Joystick 1 name is (%s)",sName.c_str());
+	      m_iJoy1Type = GetJoyType(sName);
 	    }
 	}
     }
@@ -330,6 +356,10 @@ void USB_Game_Pad::FindGamePads()
 	    {
 	      // success.
 	      m_bJoy2Active = true;
+	      memset(name,0,NAME_LENGTH);
+	      ioctl(m_iJoy2fd,JSIOCGNAME(NAME_LENGTH),name);
+	      sName = string(name);
+	      m_iJoy2Type = GetJoyType(sName);
 	    }
 	}
     }
@@ -357,7 +387,7 @@ void USB_Game_Pad::FindGamePads()
       if (m_iJoy3fd < 0 && IsJoystick("/dev/input/js2"))
 	{
 	  // not opened. open the joystick device.
-	  m_iJoy1fd = open("/dev/input/js2",O_RDONLY | O_NONBLOCK);
+	  m_iJoy3fd = open("/dev/input/js2",O_RDONLY | O_NONBLOCK);
 	  if (m_iJoy3fd < 0)
 	    {
 	      // failed to open
@@ -367,6 +397,10 @@ void USB_Game_Pad::FindGamePads()
 	    {
 	      // success.
 	      m_bJoy3Active = true;
+	      memset(name,0,NAME_LENGTH);
+	      ioctl(m_iJoy3fd,JSIOCGNAME(NAME_LENGTH),name);
+	      sName = string(name);
+	      m_iJoy3Type = GetJoyType(sName);
 	    }
 	}
     }
@@ -394,7 +428,7 @@ void USB_Game_Pad::FindGamePads()
       if (m_iJoy4fd < 0 && IsJoystick("/dev/input/js3"))
 	{
 	  // not opened. open the joystick device.
-	  m_iJoy1fd = open("/dev/input/js3",O_RDONLY | O_NONBLOCK);
+	  m_iJoy4fd = open("/dev/input/js3",O_RDONLY | O_NONBLOCK);
 	  if (m_iJoy4fd < 0)
 	    {
 	      // failed to open
@@ -404,6 +438,10 @@ void USB_Game_Pad::FindGamePads()
 	    {
 	      // success.
 	      m_bJoy4Active = true;
+	      memset(name,0,NAME_LENGTH);
+	      ioctl(m_iJoy4fd,JSIOCGNAME(NAME_LENGTH),name);
+	      sName = string(name);
+	      m_iJoy4Type = GetJoyType(sName);
 	    }
 	}
     }
@@ -428,7 +466,7 @@ void USB_Game_Pad::FindGamePads()
   m_pAlarmManager->AddRelativeAlarm(3, this, FIND_GAMEPADS, NULL);
 }
 
-void USB_Game_Pad::ProcessGamePad(int fd)
+void USB_Game_Pad::ProcessGamePad(int fd, int joytype)
 {
   if (m_cCurrentScreen != 'Z' || m_iErrors > 10)         // If the current screen is a Game FS, simply ignore.
     {
@@ -444,8 +482,8 @@ void USB_Game_Pad::ProcessGamePad(int fd)
       ioctl(fd, JSIOCGAXES, &axes);
       ioctl(fd, JSIOCGBUTTONS, &buttons);
       ioctl(fd, JSIOCGAXMAP, axmap);
-      ioctl(fd, JSIOCGBTNMAP, btnmap);
-      
+      ioctl(fd, JSIOCGBTNMAP, btnmap);      
+
       while (read(fd, &js, sizeof(struct ::js_event)) == sizeof(struct ::js_event))
 	{
 	  // Parse the joystick event.
@@ -459,6 +497,8 @@ void USB_Game_Pad::ProcessGamePad(int fd)
 		  // button up
 		  string sButtonNum = StringUtils::itos(js.number+1);
 		  string sRet = "USB-GAMEPAD-B"+sButtonNum;
+		  if (joytype == JOY_TYPE_XBOX360)
+		    sRet = "XBOX360-GAMEPAD-B"+sButtonNum;
 		  map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sRet);
 		  if ( it==m_mapCodesToButtons.end() )
 		    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sRet.c_str());
@@ -467,8 +507,16 @@ void USB_Game_Pad::ProcessGamePad(int fd)
 		      // Send it off to IRRecieverBase
 		      if (m_cCurrentScreen == 'G')
 			{
-				if (sRet == "USB-GAMEPAD-B13")
-					ReceivedCode(it->second.second,it->second.first.c_str());
+			  if (joytype == JOY_TYPE_GENERIC)
+			    {
+			      if (sRet == "USB-GAMEPAD-B13")
+				ReceivedCode(it->second.second,it->second.first.c_str());
+			    }
+			  else if (joytype == JOY_TYPE_XBOX360)
+			    {
+			      if (sRet == "XBOX360-GAMEPAD-B9")
+				ReceivedCode(it->second.second,it->second.first.c_str());
+			    }
 			}
 		      else
 			{
@@ -609,13 +657,13 @@ int USB_Game_Pad::Gamepad_Capture(int deviceID)
   while (!m_bQuit_get())
     {
       if (m_bJoy1Active)
-	ProcessGamePad(m_iJoy1fd);
+	ProcessGamePad(m_iJoy1fd,m_iJoy1Type);
       if (m_bJoy2Active)
-	ProcessGamePad(m_iJoy2fd);
+	ProcessGamePad(m_iJoy2fd,m_iJoy2Type);
       if (m_bJoy3Active)
-	ProcessGamePad(m_iJoy3fd);
+	ProcessGamePad(m_iJoy3fd,m_iJoy3Type);
       if (m_bJoy4Active)
-	ProcessGamePad(m_iJoy4fd);
+	ProcessGamePad(m_iJoy4fd,m_iJoy4Type);
       
       usleep(10000);
 
