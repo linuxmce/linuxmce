@@ -1036,6 +1036,9 @@
 #define COMMAND_HDMI_6_CONST 1140
 #define COMMAND_Amazon_CONST 1141
 #define COMMAND_Smart_Apps_CONST 1142
+#define COMMAND_Bluetooth_Pair_Device_CONST 1143
+#define COMMAND_Bluetooth_Connect_Device_CONST 1144
+#define COMMAND_Bluetooth_Disconnect_Device_CONST 1145
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"
