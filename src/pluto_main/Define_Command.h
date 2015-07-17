@@ -1034,6 +1034,8 @@
 #define COMMAND_Submenu_CONST 1138
 #define COMMAND_HDMI_5_CONST 1139
 #define COMMAND_HDMI_6_CONST 1140
+#define COMMAND_Amazon_CONST 1141
+#define COMMAND_Smart_Apps_CONST 1142
 
 #define COMMAND_TABLE "Command"
 #define COMMAND_PK_COMMAND_FIELD "PK_Command"
