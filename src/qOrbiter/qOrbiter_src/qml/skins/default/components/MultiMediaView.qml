@@ -27,6 +27,10 @@ Item{
 
     signal options()
 
+    function seek(seekToken) {
+        manager.seekGrid("MediaFile", seekToken);
+    }
+
     function load(){
        media_grid.model= manager.getDataGridModel("MediaFile", 63)
     }
