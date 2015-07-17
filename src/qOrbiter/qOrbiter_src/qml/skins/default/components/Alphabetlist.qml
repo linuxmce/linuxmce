@@ -6,6 +6,8 @@ GenericListModel{
     height:parent.height
     label: "A-Z"
 
+    signal alphaSelected(string selectedAlpha)
+
     ListModel{
         id:alphabetlist
 
@@ -122,6 +124,7 @@ GenericListModel{
         height: Style.appButtonHeight
         width: parent.width
         buttonText: name
+        onActivated: alphaSelected(name)
     }
 
 }
