@@ -25,6 +25,14 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <bluetooth/bluetooth.h>
+#include <bluetooth/hci.h>
+#include <bluetooth/hci_lib.h>
+
 void * StartAdapterRunloop(void * arg)
 {
   DCE::Bluetooth_Adapter *pBluetooth_Adapter = (DCE::Bluetooth_Adapter *) arg;
@@ -125,8 +133,44 @@ void Bluetooth_Adapter::CreateChildren()
  */
 void Bluetooth_Adapter::AdapterRunloop()
 {
+    inquiry_info *ii = NULL;
+    int max_rsp, num_rsp;
+    int dev_id, sock, len, flags;
+    int i;
+    char addr[19] = { 0 };
+    char name[248] = { 0 };
+
   while (!m_bQuit_get())
     {
+      dev_id = hci_get_route(NULL);
+      sock = hci_open_dev( dev_id );
+      if (dev_id < 0 || sock < 0) {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Bluetooth_Adapter::AdapterRunloop() - Could not open socket to adapter.");
+	break;
+      }
+      len = 8;
+      max_rsp = 255;
+      flags = IREQ_CACHE_FLUSH;
+
+      ii = (inquiry_info*)malloc(max_rsp * sizeof(inquiry_info));
+      
+      num_rsp = hci_inquiry(dev_id, len, max_rsp, NULL, &ii, flags);
+      if (num_rsp < 0)
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Bluetooth_Adapter::AdapterRunloop() - num_resp error.");
+
+      for (i = 0; i < num_rsp; i++) {
+        ba2str(&(ii+i)->bdaddr, addr);
+        memset(name, 0, sizeof(name));
+        if (hci_read_remote_name(sock, &(ii+i)->bdaddr, sizeof(name),
+				 name, 0) < 0)
+	  strcpy(name, "[unknown]");
+	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Bluetooth_Adapter::AdapterRunloop() - Found device (%s): %s",addr,name);
+      }
+      
+      free(ii);
+
+      close(sock);
+      
       usleep(1000000); // for now.
     }
 }
