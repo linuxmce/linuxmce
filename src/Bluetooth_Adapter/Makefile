@@ -22,7 +22,7 @@ sources = Main.cpp Bluetooth_Adapter.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r
+XTRALDLIBS = -lmysqlclient_r -lbluetooth
 
 Gen_Dev_Files +=
 sources +=
