@@ -164,14 +164,14 @@ void Bluetooth_Adapter::AdapterRunloop()
         if (hci_read_remote_name(sock, &(ii+i)->bdaddr, sizeof(name),
 				 name, 0) < 0)
 	  strcpy(name, "[unknown]");
-	LoggerWrapper::GetInstance()->Write(LV_WARNING,"Bluetooth_Adapter::AdapterRunloop() - Found device (%s): %s",addr,name);
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Bluetooth_Adapter::AdapterRunloop() - Found device (%s): %s",addr,name);
       }
       
       free(ii);
 
       close(sock);
       
-      usleep(1000000); // for now.
+      usleep(15000000);
     }
 }
 
