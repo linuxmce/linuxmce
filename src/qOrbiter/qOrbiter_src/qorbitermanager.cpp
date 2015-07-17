@@ -81,7 +81,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
 qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, int testSize,SettingInterface *appSettings,  QObject *parent) :
 
     #endif
-    QObject(parent),qorbiterUIwin(view),
+    QObject(parent),qorbiterUIwin(view), tskinModel(NULL),
     appHeight(view->height()),
     appWidth(view->width()),
     settingsInterface(appSettings),
@@ -2261,7 +2261,10 @@ bool qorbiterManager::cleanupData()
     if(roomMedia){
         roomMedia->clear();
     }
-    tskinModel->clear();
+    if (tskinModel != NULL) {
+        tskinModel->clear();
+        delete tskinModel;
+    }
 
     roomClimate->clear();
     roomClimateScenarios.clear();
