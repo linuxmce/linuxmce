@@ -25,6 +25,14 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+void * StartAdapterRunloop(void * arg)
+{
+  DCE::Bluetooth_Adapter *pBluetooth_Adapter = (DCE::Bluetooth_Adapter *) arg;
+  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+  pBluetooth_Adapter->AdapterRunloop();
+  return NULL;
+}
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Bluetooth_Adapter::Bluetooth_Adapter(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
@@ -95,6 +103,33 @@ void Bluetooth_Adapter::ReceivedUnknownCommand(string &sCMD_Result,Message *pMes
 }
 
 //<-dceag-sample-b->!
+
+/**
+ * CreateChildren - use to spawn the adapter runloop
+ */
+
+void Bluetooth_Adapter::CreateChildren()
+{
+  LoggerWrapper::GetInstance()->Write(LV_WARNING,"Bluetooth_Adapter::CreateChildren() - starting adapter runloop.");
+  if (pthread_create(&m_Adapter_Runloop_Thread, NULL, StartAdapterRunloop, (void *) this))
+    {
+      m_Adapter_Runloop_Thread = (pthread_t)NULL;
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Bluetooth_Adapter::CreateChildren() - failed to create Adapter Runloop Thread");
+      m_bQuit_set(true);
+      exit(1);
+    }
+}
+
+/**
+ * The adapter runloop itself.
+ */
+void Bluetooth_Adapter::AdapterRunloop()
+{
+  while (!m_bQuit_get())
+    {
+      usleep(1000000); // for now.
+    }
+}
 
 /*
 

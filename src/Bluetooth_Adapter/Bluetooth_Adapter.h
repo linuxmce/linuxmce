@@ -31,6 +31,7 @@ namespace DCE
 		// Private methods
 public:
 		// Public member variables
+	  pthread_t m_Adapter_Runloop_Thread;
 
 //<-dceag-const-b->
 public:
@@ -44,6 +45,12 @@ public:
 //<-dceag-const-e->
 
 //<-dceag-const2-b->!
+
+		// Implement adapter runloop.
+		virtual void CreateChildren();
+
+		// The runloop.
+		virtual void AdapterRunloop();
 
 //<-dceag-h-b->
 	/*
