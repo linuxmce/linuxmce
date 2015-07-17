@@ -31128,5 +31128,89 @@ namespace DCE
 			COMMAND_Smart_Apps_CONST,
 			0 /* number of parameters */); }
 	};
+	class CMD_Bluetooth_Pair_Device : public PreformedCommand {
+	public:
+		CMD_Bluetooth_Pair_Device(long DeviceIDFrom, long DeviceIDTo,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, 
+			COMMAND_Bluetooth_Pair_Device_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+	};
+	class CMD_Bluetooth_Pair_Device_DL : public PreformedCommand {
+	public:
+		CMD_Bluetooth_Pair_Device_DL(long DeviceIDFrom, string DeviceIDTo,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Bluetooth_Pair_Device_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+	};
+	class CMD_Bluetooth_Pair_Device_DT : public PreformedCommand {
+	public:
+		CMD_Bluetooth_Pair_Device_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Bluetooth_Pair_Device_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+	};
+	class CMD_Bluetooth_Pair_Device_Cat : public PreformedCommand {
+	public:
+		CMD_Bluetooth_Pair_Device_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Bluetooth_Pair_Device_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+	};
+	class CMD_Bluetooth_Connect_Device : public PreformedCommand {
+	public:
+		CMD_Bluetooth_Connect_Device(long DeviceIDFrom, long DeviceIDTo,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, 
+			COMMAND_Bluetooth_Connect_Device_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+	};
+	class CMD_Bluetooth_Connect_Device_DL : public PreformedCommand {
+	public:
+		CMD_Bluetooth_Connect_Device_DL(long DeviceIDFrom, string DeviceIDTo,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Bluetooth_Connect_Device_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+	};
+	class CMD_Bluetooth_Connect_Device_DT : public PreformedCommand {
+	public:
+		CMD_Bluetooth_Connect_Device_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Bluetooth_Connect_Device_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+	};
+	class CMD_Bluetooth_Connect_Device_Cat : public PreformedCommand {
+	public:
+		CMD_Bluetooth_Connect_Device_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Bluetooth_Connect_Device_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+	};
+	class CMD_Bluetooth_Disconnect_Device : public PreformedCommand {
+	public:
+		CMD_Bluetooth_Disconnect_Device(long DeviceIDFrom, long DeviceIDTo,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND, 
+			COMMAND_Bluetooth_Disconnect_Device_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+	};
+	class CMD_Bluetooth_Disconnect_Device_DL : public PreformedCommand {
+	public:
+		CMD_Bluetooth_Disconnect_Device_DL(long DeviceIDFrom, string DeviceIDTo,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, DeviceIDTo, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Bluetooth_Disconnect_Device_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+	};
+	class CMD_Bluetooth_Disconnect_Device_DT : public PreformedCommand {
+	public:
+		CMD_Bluetooth_Disconnect_Device_DT(long DeviceIDFrom, long MasterDevice, eBroadcastLevel eB,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, MasterDevice, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Bluetooth_Disconnect_Device_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+	};
+	class CMD_Bluetooth_Disconnect_Device_Cat : public PreformedCommand {
+	public:
+		CMD_Bluetooth_Disconnect_Device_Cat(long DeviceIDFrom, long DeviceCategory, bool bIncludeChildren, eBroadcastLevel eB,string sMac_address) { m_pMessage = new Message(DeviceIDFrom, DeviceCategory, bIncludeChildren, eB, PRIORITY_NORMAL, MESSAGETYPE_COMMAND,
+			COMMAND_Bluetooth_Disconnect_Device_CONST,
+			1 /* number of parameters */,
+			COMMANDPARAMETER_Mac_address_CONST, sMac_address.c_str()); }
+	};
 }
 #endif
