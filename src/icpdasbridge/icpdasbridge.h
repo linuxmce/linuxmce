@@ -44,38 +44,7 @@ private:
                 // Begin shared section
                 // These items may be accessed by multiple threads therefore must be locked
                                 
-// 		pluto_pthread_mutex_t gc100_mutex;
-                                        
-                class XineNotification_SocketListener : public SocketListener
-                {
-                        public:
-                                XineNotification_SocketListener(string sName):SocketListener(sName){};
-                                virtual void ReceivedMessage( Socket *pSocket, Message* pMessage ){};
-                                virtual bool ReceivedString( Socket *pSocket, string sLine, int nTimeout = - 1 )
-                                {
-                                        std::cout << "Socket got: " << sLine << std::endl;
-                                        return true; 
-                                };
-                                
-/*                                void SendStringToAll(string sString)
-                                {
-                                        PLUTO_SAFETY_LOCK( lm, m_ListenerMutex );
-                                        for(std::vector<ServerSocket *>::iterator i=m_vectorServerSocket.begin(); i!=m_vectorServerSocket.end(); i++)
-                                        {
-                                                if ((*i)->SendString(sString))
-                                                {
-                                                        LoggerWrapper::GetInstance()->Write(LV_STATUS,"Sending time code %s to %s",sString.c_str(),(*i)->m_sHostName.
-                                                }
-                                                else
-                                                {
-                                                        std::cout << "Not sent timecode to " << (*i)->m_sHostName<<  std::endl;
-                                                }
-                                        }
-                                }
-*/
-                };
-                
-                XineNotification_SocketListener *m_pNotificationSocket;
+// 		pluto_pthread_mutex_t icpdas_mutex;
                                         
 		// Private methods
 public:

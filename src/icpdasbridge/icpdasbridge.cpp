@@ -30,7 +30,6 @@ using namespace DCE;
 
 //<-dceag-const-b->
 
-// gc100 generated events processor: pin change, IR completion
 void * StartEventThread(void * Arg)
 {
 	icpdasbridge * picpdasbridge = (icpdasbridge *) Arg;
@@ -61,7 +60,7 @@ icpdasbridge::~icpdasbridge()
 	m_bQuit_set(false);                    //force quit	
 	Sleep(600);                        //wait a little
 	
-// 	PLUTO_SAFETY_LOCK(sl, gc100_mutex);
+// 	PLUTO_SAFETY_LOCK(sl, icpdas_mutex);
 	
 //	if (m_EventThread != 0)
 //	{
@@ -93,7 +92,6 @@ bool icpdasbridge::GetConfig()
 	return true;
 }
 
-// Must override so we can call IRBase::Start() after creating children
 void icpdasbridge::CreateChildren()
 {
 	string device_data;
@@ -117,7 +115,6 @@ void icpdasbridge::CreateChildren()
 	} while (device_data != "endlistdevices");
 */
 
-//	Start_seriald(); // Start gc_seriald processes according to serial port inventory
 	Sleep(1000);
 //	is_open_for_learning = open_for_learning();
 
@@ -262,9 +259,9 @@ bool icpdasbridge::send_to_icpdas(string Cmd)
 
 	return_value = true;
 
-//	PLUTO_SAFETY_LOCK(sl, gc100_mutex);
+//	PLUTO_SAFETY_LOCK(sl, icpdas_mutex);
 
-	sprintf(command, "%s\r", Cmd.c_str()); // gc100 commands end in CR (w/o LF)
+	sprintf(command, "%s\r", Cmd.c_str()); 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending command %s\n", command);
 
 	result = send(icpdas_socket,command,strlen(command), 0);
@@ -275,7 +272,6 @@ bool icpdasbridge::send_to_icpdas(string Cmd)
 		return_value = false;
 	}
 
-	// allow packet to be sent through the network; gc100 can't distinguish between commands if they go together
 	Sleep(100);
 	return return_value;
 }
