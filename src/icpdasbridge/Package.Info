@@ -1,0 +1,9 @@
+<-dceag-p-b->
+Package = DCE_Destination_Package
+Dir = 
+desc = DCE Implemenation for #2329 icpdas-bridge
+Maintainer = OliverName
+Email = 
+Depend = DCE_Dependencies
+<-dceag-p-e->
+
