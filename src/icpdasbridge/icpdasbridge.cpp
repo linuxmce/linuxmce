@@ -159,16 +159,27 @@ void icpdasbridge::parse_icpdas_reply(std::string message)
 
 //	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Reply received from ICPDAS: %s",message.c_str());
 
-	if (message.length()>7)
+	string sMessage;
+	string sPort;
+	string sNewValue ("");
+	vector<string> vMessage;
+
+	if (message.length()>0)
 	{
-		if (message.substr(0,4)=="INFO")
+		vMessage = StringUtils::Split(message,":");
+
+		if (vMessage[0] == "INFO") 	
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "We got the connect back from ICPDAS: %s",message.c_str());
 			return;
 		}
-		if (message.substr(0,6)=="CHANGE")
+		if (vMessage[0]=="CHANGE")
 		{	
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "We got a CHANGE back from ICPDAS: %s",message.c_str());
+			sPort = vMessage[1] + "/" + vMessage[2] + "/" + vMessage[3];
+			sNewValue = vMessage[4];
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "We think it is port: %s and the new value should be %s",sPort.c_str(), sNewValue.c_str());
+						
 			return;
 		}
 		
