@@ -27,7 +27,11 @@ namespace DCE
 	{
 //<-dceag-decl-e->
 		// Private member variables
-
+	        int icpdas_socket;                              
+        	bool receiving_data;                            
+                int learn_fd;                               
+                char recv_buffer[4096];
+                                        
 		// Private methods
 public:
 		// Public member variables
