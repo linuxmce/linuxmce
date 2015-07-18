@@ -17,7 +17,7 @@
 #include "PlutoUtils/FileUtils.h"
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
-
+#include "PlutoUtils/MultiThreadIncludes.h"
 #include <iostream>
 using namespace std;
 using namespace DCE;
@@ -25,6 +25,8 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 
 //<-dceag-d-e->
+#include <fcntl.h>
+#include <signal.h>
 
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
@@ -46,25 +48,97 @@ icpdasbridge::icpdasbridge(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl 
 icpdasbridge::~icpdasbridge()
 //<-dceag-dest-e->
 {
-	
+//        PLUTO_SAFETY_LOCK(sl, gc100_mutex);        	
 }
 
 //<-dceag-getconfig-b->
 bool icpdasbridge::GetConfig()
 {
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Before command getconfig");
-
 	// Get ICPDAS IP address and port
 
 	if( !icpdasbridge_Command::GetConfig() )
 		return false;
 //<-dceag-getconfig-e->
-        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "After command getconfig for icpdas at IP: %s Port: %d ", DATA_Get_TCP_Address().c_str(), DATA_Get_TCP_Port() );
-        
+	
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Befor opening socket to ICPDAS at IP: %s Port: %d ", DATA_Get_TCP_Address().c_str(), DATA_Get_TCP_Port() ); 
+
+	if (!Open_icpdas_Socket())
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Couldn't open socket connection to ICPDAS at IP: %s Port: %d ", DATA_Get_TCP_Address().c_str(), DATA_Get_TCP_Port() ); 
+		exit(2);	
+	}
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Socket connection opened to ICPDAS at ",DATA_Get_TCP_Address().c_str(), DATA_Get_TCP_Port());
+		                
 	return true;
 }
+
+bool icpdasbridge::Open_icpdas_Socket()
+// Shamelessly copied from gc100
+{
+	bool return_value;
+
+	// socket stuff
+	struct hostent *hp;
+	struct sockaddr_in sin;
+	int res;
+
+//	PLUTO_SAFETY_LOCK(sl, gc100_mutex);
+	return_value=false;
+
+//	ip_addr=DATA_Get_TCP_Address();
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connecting to ICPDAS at IP address: %s", DATA_Get_TCP_Address().c_str());
+
+	// Do the socket connect
+	hp = gethostbyname(DATA_Get_TCP_Address().c_str());
+
+	if (!hp)
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Unable to resolve host name.  Could not connect to ICPDAS");
+	}
+	else
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Trying to allocate socket");
+		icpdas_socket = socket(PF_INET, SOCK_STREAM, 0);
+		if (icpdas_socket < 0)
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Unable to allocate socket.  Could not connect to ICPDAS");
+		}
+		else
+		{
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Socket allocated - dealing with more details");
+			memset(&sin,0,sizeof(sin));
+			sin.sin_family=AF_INET;
+			sin.sin_port=htons(DATA_Get_TCP_Port());
+
+			memcpy(&sin.sin_addr, hp->h_addr, sizeof(sin.sin_addr));
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Socket allocated - memcpy completed");
+			if (connect(icpdas_socket, (sockaddr *) &sin, sizeof(sin)))
+			{
+				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Unable to connect to ICPDAS on socket.");
+				close(icpdas_socket);
+			}
+			else
+			{
+				res = fcntl(icpdas_socket, F_GETFL);
+				if ((res < 0) || (fcntl(icpdas_socket, F_SETFL, res /*| O_NONBLOCK*/) < 0))
+				{
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Unable to set flags on ICPDAS socket.");
+					close(icpdas_socket);
+				}
+				else
+				{
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "ICPDAS socket connect OK");
+					return_value=true;
+				}
+			}
+		}
+	}
+
+	return return_value;
+}
+
 
 //<-dceag-reg-b->
 // This function will only be used if this device is loaded into the DCE Router's memory space as a plug-in.  Otherwise Connect() will be called from the main()
