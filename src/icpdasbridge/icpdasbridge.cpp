@@ -176,7 +176,7 @@ void icpdasbridge::parse_icpdas_reply(std::string message)
 		if (vMessage[0]=="CHANGE")
 		{	
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "We got a CHANGE back from ICPDAS: %s",message.c_str());
-			sPort = vMessage[1] + "/" + vMessage[2] + "/" + vMessage[3];
+			sPort = vMessage[1] + ":" + vMessage[2] + ":" + vMessage[3]; // Stupid to use a different delimited than the source
 			sNewValue = vMessage[4];
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "We think it is port: %s and the new value should be %s",sPort.c_str(), sNewValue.c_str());
 						
@@ -378,6 +378,43 @@ void icpdasbridge::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
 //<-dceag-cmdch-e->
 {
 	sCMD_Result = "UNHANDLED CHILD";
+
+	string portChannel = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+	string command ("");
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Received Command For CHILD %s", portChannel.c_str());
+	switch (pMessage->m_dwID) {
+		case COMMAND_Generic_On_CONST:
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"ON RECEIVED FOR CHILD %s", portChannel.c_str());
+			command="1";
+			break;
+		case COMMAND_Generic_Off_CONST:
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"OFF RECEIVED FOR CHILD %s", portChannel.c_str());
+			command="0";
+			break;
+		case COMMAND_Set_Level_CONST:
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"SET LEVEL RECEIVED FOR CHILD %s", portChannel.c_str());
+			command = pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST]; // .c_str(); 
+			break;
+		case COMMAND_Set_Temperature_CONST:
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"SET TEMPERATURE RECEIVED FOR CHILD %s", portChannel.c_str());
+			command = pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST]; // .c_str(); 
+			break;
+			;;
+		case COMMAND_Set_Fan_CONST:
+			int fan = atoi(pMessage->m_mapParameters[COMMANDPARAMETER_OnOff_CONST].c_str());
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"SET FAN RECEIVED FOR CHILD %s, level: %d",portChannel.c_str(),fan);
+			if (fan == 1) {
+				command = "onhigh";
+			} else {
+				command = "autohigh";
+			}
+			break;
+			;;
+	}
+
+	send_to_icpdas("SET:"+portChannel+":VAL="+command);
+	
+	
 }
 
 /*
