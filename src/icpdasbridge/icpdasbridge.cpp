@@ -29,6 +29,15 @@ using namespace DCE;
 #include <signal.h>
 
 //<-dceag-const-b->
+
+// gc100 generated events processor: pin change, IR completion
+void * StartEventThread(void * Arg)
+{
+	icpdasbridge * picpdasbridge = (icpdasbridge *) Arg;
+	picpdasbridge->EventThread();
+	return NULL;
+}
+
 // The primary constructor when the class is created as a stand-alone device
 icpdasbridge::icpdasbridge(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: icpdasbridge_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
@@ -48,7 +57,17 @@ icpdasbridge::icpdasbridge(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl 
 icpdasbridge::~icpdasbridge()
 //<-dceag-dest-e->
 {
-//        PLUTO_SAFETY_LOCK(sl, gc100_mutex);        	
+	signal(SIGSEGV,SIG_IGN);           //ignore SIGFAULT here
+	m_bQuit_set(false);                    //force quit	
+	Sleep(600);                        //wait a little
+	
+// 	PLUTO_SAFETY_LOCK(sl, gc100_mutex);
+	
+//	if (m_EventThread != 0)
+//	{
+		pthread_cancel(m_EventThread);     //pthread_cancel is asynchron so call it first and continue cleanup		
+		pthread_join(m_EventThread, NULL); //finish
+//	}
 }
 
 //<-dceag-getconfig-b->
@@ -62,17 +81,194 @@ bool icpdasbridge::GetConfig()
 	
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Befor opening socket to ICPDAS at IP: %s Port: %d ", DATA_Get_TCP_Address().c_str(), DATA_Get_TCP_Port() ); 
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Before opening socket to ICPDAS at IP: %s Port: %d ", DATA_Get_TCP_Address().c_str(), DATA_Get_TCP_Port() ); 
 
 	if (!Open_icpdas_Socket())
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Couldn't open socket connection to ICPDAS at IP: %s Port: %d ", DATA_Get_TCP_Address().c_str(), DATA_Get_TCP_Port() ); 
 		exit(2);	
 	}
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Socket connection opened to ICPDAS at ",DATA_Get_TCP_Address().c_str(), DATA_Get_TCP_Port());
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Socket connection opened to ICPDAS at IP : %s Port: %d ",DATA_Get_TCP_Address().c_str(), DATA_Get_TCP_Port());
 		                
 	return true;
 }
+
+// Must override so we can call IRBase::Start() after creating children
+void icpdasbridge::CreateChildren()
+{
+	string device_data;
+
+	icpdasbridge_Command::CreateChildren();
+
+// 	send_to_icpdas("getdevices");
+
+/*	do
+	{
+		struct timeval tv;
+		tv.tv_sec = 5;
+		tv.tv_usec = 0;
+		device_data = read_from_icpdas(&tv);
+		if (device_data == "error") {
+			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Failed to get devices from icpdas");
+			exit(2);
+		}
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Reading data from icpdas");
+		
+	} while (device_data != "endlistdevices");
+*/
+
+//	Start_seriald(); // Start gc_seriald processes according to serial port inventory
+	Sleep(1000);
+//	is_open_for_learning = open_for_learning();
+
+	if (pthread_create(&m_EventThread, NULL, StartEventThread, (void *) this))
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Failed to create Event Thread");
+		m_bQuit_set(true);
+		exit(1);
+	}
+
+/*	if (pthread_create(&m_SocketThread, NULL, StartSocketThread, (void *) this))
+	{
+		LoggerWrapper::GetInstance()->Write(LV_WARNING, "Failed to create Socket Thread");
+	}
+*/
+}
+
+void icpdasbridge::EventThread()
+{
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "EventThread started");
+	
+	while (! m_bQuit_get())
+	{
+		Sleep(50);
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"EventThread");
+		if(read_from_icpdas() == "error")
+		{
+			close(icpdas_socket);
+			Open_icpdas_Socket();
+		}
+	}
+}
+
+void icpdasbridge::parse_icpdas_reply(std::string message)
+{
+	// Main parsing routine for all replies received back from GC100.
+	// Specific message types are dispatched to a specific handling routine
+	// so that this routine stays a manageable size!
+
+//	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Reply received from ICPDAS: %s",message.c_str());
+
+	if (message.length()>7)
+	{
+		if (message.substr(0,4)=="INFO")
+		{
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "We got the connect back from ICPDAS: %s",message.c_str());
+			return;
+		}
+		if (message.substr(0,6)=="CHANGE")
+		{	
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "We got a CHANGE back from ICPDAS: %s",message.c_str());
+			return;
+		}
+		
+	}		
+
+/*	if (bChildrenNeedToBeReported)
+	{
+		cout << "sent messages: " << sent_messages << endl;
+		cout << "received messages: " << received_messages << endl;
+	}
+	if (bChildrenNeedToBeReported && received_messages == sent_messages)
+	{
+		ReportChildren();
+		bChildrenNeedToBeReported = false;
+	}
+*/
+}
+
+std::string icpdasbridge::read_from_icpdas(struct timeval *timeout)
+{
+	std::string return_value;
+	return_value = "";
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Before looping stream");
+	
+
+//	PLUTO_SAFETY_LOCK(sl, icpdas_mutex);
+	while (1)
+	{
+		pthread_testcancel();
+
+		
+		fd_set fdset;
+
+		FD_ZERO(&fdset);
+		FD_SET(icpdas_socket, &fdset);
+
+		struct timeval tv;
+		if (timeout != NULL)
+			tv = *timeout;
+
+		if (
+			select(icpdas_socket + 1, &fdset, NULL, NULL, timeout != NULL ? &tv : NULL) <= 0
+			|| !FD_ISSET(icpdas_socket, &fdset)
+			|| recv(icpdas_socket, &recv_buffer[recv_pos], 1, 0) <= 0
+		)
+		{
+			return_value = "error";
+			break;
+		}
+		pthread_testcancel();
+//		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "before recv_buffer compare");
+		if (recv_buffer[recv_pos] == '\n')
+		{
+			recv_buffer[recv_pos] = '\0';
+
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "recv buffer: %s", recv_buffer);
+			if (strlen(recv_buffer) > 0) {
+				parse_icpdas_reply(string(recv_buffer));
+				recv_pos = 0;
+				return_value = string(recv_buffer);
+//				break;
+			}
+		}
+		else
+		{
+			recv_pos ++;
+//			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "recv buffer: %s",recv_buffer);
+			
+		}
+	}
+	return return_value; // returns the last complete message
+}
+
+bool icpdasbridge::send_to_icpdas(string Cmd)
+{
+	// returns true if it was ready to send, false if blocked because of not ready
+	char command[16384];
+	int result;
+	bool return_value;
+
+	return_value = true;
+
+//	PLUTO_SAFETY_LOCK(sl, gc100_mutex);
+
+	sprintf(command, "%s\r", Cmd.c_str()); // gc100 commands end in CR (w/o LF)
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending command %s\n", command);
+
+	result = send(icpdas_socket,command,strlen(command), 0);
+	if (result < (int) strlen(command))
+	{
+		string x = strerror(errno);
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Short write to GC100: %s (wrote: %d)\n", strerror(errno), result);
+		return_value = false;
+	}
+
+	// allow packet to be sent through the network; gc100 can't distinguish between commands if they go together
+	Sleep(100);
+	return return_value;
+}
+
 
 bool icpdasbridge::Open_icpdas_Socket()
 // Shamelessly copied from gc100
@@ -84,11 +280,11 @@ bool icpdasbridge::Open_icpdas_Socket()
 	struct sockaddr_in sin;
 	int res;
 
-//	PLUTO_SAFETY_LOCK(sl, gc100_mutex);
+//	PLUTO_SAFETY_LOCK(sl, icpdas_mutex);
 	return_value=false;
 
 //	ip_addr=DATA_Get_TCP_Address();
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Connecting to ICPDAS at IP address: %s", DATA_Get_TCP_Address().c_str());
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Connecting to ICPDAS at IP address: %s", DATA_Get_TCP_Address().c_str());
 
 	// Do the socket connect
 	hp = gethostbyname(DATA_Get_TCP_Address().c_str());
@@ -99,7 +295,7 @@ bool icpdasbridge::Open_icpdas_Socket()
 	}
 	else
 	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Trying to allocate socket");
+		LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Trying to allocate socket");
 		icpdas_socket = socket(PF_INET, SOCK_STREAM, 0);
 		if (icpdas_socket < 0)
 		{
@@ -107,13 +303,13 @@ bool icpdasbridge::Open_icpdas_Socket()
 		}
 		else
 		{
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Socket allocated - dealing with more details");
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Socket allocated - dealing with more details");
 			memset(&sin,0,sizeof(sin));
 			sin.sin_family=AF_INET;
 			sin.sin_port=htons(DATA_Get_TCP_Port());
 
 			memcpy(&sin.sin_addr, hp->h_addr, sizeof(sin.sin_addr));
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Socket allocated - memcpy completed");
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Socket allocated - memcpy completed");
 			if (connect(icpdas_socket, (sockaddr *) &sin, sizeof(sin)))
 			{
 				LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Unable to connect to ICPDAS on socket.");
@@ -129,7 +325,7 @@ bool icpdasbridge::Open_icpdas_Socket()
 				}
 				else
 				{
-					LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "ICPDAS socket connect OK");
+					LoggerWrapper::GetInstance()->Write(LV_STATUS, "ICPDAS socket connect OK");
 					return_value=true;
 				}
 			}
