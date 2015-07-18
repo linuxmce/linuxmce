@@ -23,6 +23,7 @@ using namespace std;
 using namespace DCE;
 
 #include "Gen_Devices/AllCommandsRequests.h"
+
 //<-dceag-d-e->
 
 //<-dceag-const-b->
@@ -51,10 +52,15 @@ icpdasbridge::~icpdasbridge()
 //<-dceag-getconfig-b->
 bool icpdasbridge::GetConfig()
 {
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Before command getconfig");
+
+	// Get ICPDAS IP address and port
+
 	if( !icpdasbridge_Command::GetConfig() )
 		return false;
 //<-dceag-getconfig-e->
-
+        LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "After command getconfig for icpdas at IP: %s Port: %d ", DATA_Get_TCP_Address().c_str(), DATA_Get_TCP_Port() );
+        
 	// Put your code here to initialize the data in this class
 	// The configuration parameters DATA_ are now populated
 	return true;
