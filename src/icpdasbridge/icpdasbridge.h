@@ -36,8 +36,8 @@ private:
                 int learn_fd;                               
                 char recv_buffer[4096];
                 int icpdas_socket;
-
-//		pthread_t m_EventThread, m_LearningThread, m_SocketThread;
+                int recv_pos;
+		pthread_t m_EventThread; //, m_LearningThread, m_SocketThread;
         
                 // Public member variables
                 
@@ -87,9 +87,20 @@ public:
 		icpdasbridge(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
 
 		virtual bool Open_icpdas_Socket();
-		virtual ~icpdasbridge();
+                std::string read_from_icpdas(struct timeval *timeout = NULL);
+		bool send_to_icpdas(string Cmd);
+		
+		void parse_icpdas_reply(std::string message);
+		
+                void EventThread();
+                
+                virtual void CreateChildren();                
+ 		
+ 		virtual ~icpdasbridge();
 		virtual bool GetConfig();
 		virtual bool Register();
+		
+		
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
