@@ -157,6 +157,8 @@ void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 {
 	int iValue = 0;
 
+	bool bFound = 0;
+
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "statechange from ICP: Port %s, new state %s", sPort.c_str(), sValue.c_str());
 
 	VectDeviceData_Impl& vDeviceData = m_pData->m_vectDeviceData_Impl_Children;
@@ -168,7 +170,7 @@ void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 		if (sChannel == sPort) 
 		{
 			iValue = 0;
-			
+			bFound = 1;
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "value %s sChannel %s is sPort %s is Device ID %i of type %i category is %i",sValue.c_str(),sChannel.c_str(),sPort.c_str(),vDeviceData[i]->m_dwPK_Device,vDeviceData[i]->m_dwPK_DeviceTemplate,vDeviceData[i]->m_dwPK_DeviceCategory);
 
 			switch (vDeviceData[i]->m_dwPK_DeviceCategory) {
@@ -192,14 +194,22 @@ void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Damn, what category is %i",vDeviceData[i]->m_dwPK_DeviceCategory);
 				break;
 			}
-							
+			
+			break;				
 							
 		}
 		else
 		{
 //			LoggerWrapper::GetInstance()->Write(LV_STATUS, "sChannel %s is NOT sPort %s is Device ID %i of type %i",sChannel.c_str(),sPort.c_str());
 		}
+		
 	}
+	
+	if (! bFound) 
+	{
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Change Event from ICP without corresponding Device entry. Port %s, new state %s", sPort.c_str(), sValue.c_str());
+	}
+		        
 	
 
 }
@@ -477,16 +487,34 @@ void icpdasbridge::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
 	sCMD_Result = "UNHANDLED CHILD";
 
 	string portChannel = pDeviceData_Impl->m_mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+	vector<string> vBlindChannel;
 	string command ("");
+	int deviceTemplate = pDeviceData_Impl->m_dwPK_DeviceTemplate;
+	
 	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Received Command For CHILD %s", portChannel.c_str());
 	switch (pMessage->m_dwID) {
 		case COMMAND_Generic_On_CONST:
+			// Blinds are configured with on/off commands as well. The On is Open or Up, meaning send 1 
+			// to the second port. Both ports are delimited by the pipe symbol |
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"ON RECEIVED FOR CHILD %s", portChannel.c_str());
 			command="1";
+			if (deviceTemplate == DEVICETEMPLATE_Drapes_Switch_CONST) 
+			{
+				vBlindChannel = StringUtils::Split(portChannel,"|");
+				portChannel = vBlindChannel[1];
+			}
 			break;
 		case COMMAND_Generic_Off_CONST:
+			// Blinds are configured with on/off commands as well. The Off is Close or Down, meaning send 1 
+			// to the first port. Both ports are delimited by the pipe symbol |
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"OFF RECEIVED FOR CHILD %s", portChannel.c_str());
 			command="0";
+			if (deviceTemplate == DEVICETEMPLATE_Drapes_Switch_CONST) 
+			{
+				vBlindChannel = StringUtils::Split(portChannel,"|");
+				portChannel = vBlindChannel[0];
+				command="1";
+			}
 			break;
 		case COMMAND_Set_Level_CONST:
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"SET LEVEL RECEIVED FOR CHILD %s", portChannel.c_str());
