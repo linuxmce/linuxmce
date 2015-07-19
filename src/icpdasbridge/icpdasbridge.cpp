@@ -155,36 +155,72 @@ void icpdasbridge::EventThread()
 
 void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 {
+	int iValue = 0;
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "statechange from ICP: Port %s, new state %s", sPort.c_str(), sValue.c_str());
 
-        MapCommand_Impl::iterator child_iter;
-        Command_Impl *result;
-        Command_Impl *pChildDeviceCommand;
-                        
-// find out what the device id in the LinuxMCE universe is, and send the new value to the router.
-
-	for (child_iter=m_mapCommandImpl_Children.begin(); child_iter!=m_mapCommandImpl_Children.end(); ++child_iter)
+	VectDeviceData_Impl& vDeviceData = m_pData->m_vectDeviceData_Impl_Children;
+	for(VectDeviceData_Impl::size_type i = 0; i < vDeviceData.size(); i++)
 	{
-		pChildDeviceCommand = (*child_iter).second;
+		string sChannel = vDeviceData[i]->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+//		LoggerWrapper::GetInstance()->Write(LV_STATUS, "creating child device:ICP address %s is Device ID %i of type %i",sChannel.c_str(),vDeviceData[i]->m_dwPK_Device,vDeviceData[i]->m_dwPK_DeviceTemplate);
 
-		if (pChildDeviceCommand->m_pData->WithinCategory(DEVICECATEGORY_Environment_CONST))
+		if (sChannel == sPort) 
 		{
-			std::string this_pin;
+			iValue = 0;
+			
+			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "value %s sChannel %s is sPort %s is Device ID %i of type %i category is %i",sValue.c_str(),sChannel.c_str(),sPort.c_str(),vDeviceData[i]->m_dwPK_Device,vDeviceData[i]->m_dwPK_DeviceTemplate,vDeviceData[i]->m_dwPK_DeviceCategory);
 
-//			if (pChildDeviceCommand->PK_DeviceTemplate_get() == DEVICETEMPLATE_Generic_Input_Ouput_CONST)
-				Command_Impl * child = pChildDeviceCommand;
+			switch (vDeviceData[i]->m_dwPK_DeviceCategory) {
+			case DEVICECATEGORY_Lighting_Device_CONST:
 
-			this_pin = child->m_pData->m_mapParameters[DEVICEDATA_PortChannel_Number_CONST];
-
-			LoggerWrapper::GetInstance()->Write(LV_STATUS, "statechange Reply: testing %s, %s default state: %s", 
-				child->m_sName.c_str(), this_pin.c_str(), child->m_pData->m_mapParameters[DEVICEDATA_Default_State_CONST].c_str());
-
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "A light - I see a light");
+				if (sValue == "VAL=1") {
+					iValue = 100;
+				} 
+				SendLightChangedEvent(vDeviceData[i]->m_dwPK_Device, iValue);
+				break;
+			case DEVICECATEGORY_Security_Device_CONST:
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "It moves! At least we have a movement sensor");
+				break;
+			default:
+				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Damn, what category is %i",vDeviceData[i]->m_dwPK_DeviceCategory);
+				break;
+			}
+							
+							
+		}
+		else
+		{
+//			LoggerWrapper::GetInstance()->Write(LV_STATUS, "sChannel %s is NOT sPort %s is Device ID %i of type %i",sChannel.c_str(),sPort.c_str());
 		}
 	}
+	
 
 }
 
+void icpdasbridge::SendLightChangedEvent(unsigned int PK_Device, int value)
+{
+        string svalue = StringUtils::itos(value);
+	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Sending EVENT_State_Changed_CONST event from PK_Device %d, level %s",PK_Device,svalue.c_str());
+
+        m_pEvent->SendMessage(
+        	new Message(PK_Device,
+	        DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
+	        EVENT_State_Changed_CONST,1,EVENTPARAMETER_State_CONST,svalue.c_str())
+        );
+        
+} 
+
+void icpdasbridge::SendSensorTrippedEvent(unsigned int PK_Device, bool value)
+{
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sending sensor tripped event from PK_Device %d", PK_Device);
+        m_pEvent->SendMessage( new Message(PK_Device,
+        	DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
+	        EVENT_Sensor_Tripped_CONST,1,EVENTPARAMETER_Tripped_CONST,
+	        value ? "1" : "0")
+	        );
+}
 
 void icpdasbridge::parse_icpdas_reply(std::string message)
 {

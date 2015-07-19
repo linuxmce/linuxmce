@@ -63,6 +63,9 @@ public:
 		void icp2dce(std::string sPort, std::string sValue);
 		void populate_children();
 		
+                void SendLightChangedEvent(unsigned int PK_Device, int value);
+                void SendSensorTrippedEvent(unsigned int PK_Device, bool value);
+                		
                 void EventThread();
                 
                 virtual void CreateChildren();                
