@@ -499,7 +499,7 @@ void icpdasbridge::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
 	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Received Command For CHILD %s", portChannel.c_str());
 	switch (pMessage->m_dwID) {
 		case COMMAND_Generic_On_CONST:
-			// Blinds are configured with on/off commands as well. The On is Open or Up, meaning send 1 
+			// Blinds/drapes are configured with on/off commands as well. The On is Open or Up, meaning send 1 
 			// to the second port. Both ports are delimited by the pipe symbol |
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"ON RECEIVED FOR CHILD %s", portChannel.c_str());
 			command="1";
@@ -507,6 +507,9 @@ void icpdasbridge::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
 			{
 				vBlindChannel = StringUtils::Split(portChannel,"|");
 				portChannel = vBlindChannel[1];
+				// Before sending the new port a power command, we make sure that the other port
+				// has stopped.
+				send_to_icpdas("SET:"+vBlindChannel[0]+":0");
 			}
 			break;
 		case COMMAND_Generic_Off_CONST:
@@ -518,6 +521,7 @@ void icpdasbridge::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
 			{
 				vBlindChannel = StringUtils::Split(portChannel,"|");
 				portChannel = vBlindChannel[0];
+				send_to_icpdas("SET:"+vBlindChannel[1]+":0");
 				command="1";
 			}
 			break;
