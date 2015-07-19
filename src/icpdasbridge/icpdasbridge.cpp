@@ -159,7 +159,10 @@ void icpdasbridge::parse_icpdas_reply(std::string message)
 	string sMessage;
 	string sPort;
 	string sNewValue ("");
+	string sCOM ("");
 	vector<string> vMessage;
+	vector<string> vEntry;
+
 
 	if (message.length()>0)
 	{
@@ -173,7 +176,7 @@ void icpdasbridge::parse_icpdas_reply(std::string message)
 		if (vMessage[0]=="CHANGE")
 		{	
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "We got a CHANGE back from ICPDAS: %s",message.c_str());
-			sPort = vMessage[1] + ":" + vMessage[2] + ":" + vMessage[3]; // Stupid to use a different delimited than the source
+			sPort = StringUtils::Split(vMessage[1],"=")[1]+":"+StringUtils::Split(vMessage[2],"=")[1]+":"+StringUtils::Split(vMessage[3],"=")[1];
 			sNewValue = vMessage[4];
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "We think it is port: %s and the new value should be %s",sPort.c_str(), sNewValue.c_str());
 						
@@ -408,7 +411,7 @@ void icpdasbridge::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
 			;;
 	}
 
-	send_to_icpdas("SET:"+portChannel+":VAL="+command);
+	send_to_icpdas("SET:"+portChannel+":"+command);
 	
 	
 }
