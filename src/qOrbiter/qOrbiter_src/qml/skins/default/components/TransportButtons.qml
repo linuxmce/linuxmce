@@ -27,7 +27,7 @@ ScrollRow{
         StyledButton{
             state:"remote"
             buttonText: qsTr("Prev")
-            onActivated: manager.newTrack(-1)
+            onActivated: manager.newTrack("-1")
 
         }
         StyledButton{
@@ -53,7 +53,7 @@ ScrollRow{
         StyledButton{
             state:"remote"
             buttonText: qsTr("Next")
-            onActivated: manager.newTrack(+1)
+            onActivated: manager.newTrack("+1")
         }
         
     }
