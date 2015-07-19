@@ -1,3 +1,3 @@
 #!/bin/bash
 
-xboxdrv
+xboxdrv -w $1
