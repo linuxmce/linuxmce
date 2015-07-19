@@ -109,7 +109,10 @@ void XBOX_360_Gamepad_Adapter::ReceivedUnknownCommand(string &sCMD_Result,Messag
 
 void XBOX_360_Gamepad_Adapter::CreateChildren()
 {
-  system("screen -d -m -h 3000 -S xboxdrv /usr/pluto/bin/launchXboxdrv.sh");
+  system("screen -d -m -h 3000 -S xboxdrv0 /usr/pluto/bin/launchXboxdrv.sh 0");
+  system("screen -d -m -h 3000 -S xboxdrv1 /usr/pluto/bin/launchXboxdrv.sh 1");
+  system("screen -d -m -h 3000 -S xboxdrv2 /usr/pluto/bin/launchXboxdrv.sh 2");
+  system("screen -d -m -h 3000 -S xboxdrv3 /usr/pluto/bin/launchXboxdrv.sh 3");
 }
 
 
