@@ -182,6 +182,11 @@ void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 				break;
 			case DEVICECATEGORY_Security_Device_CONST:
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "It moves! At least we have a movement sensor");
+				if (sValue == "VAL=1") {
+					iValue = 1;
+				} 
+
+				SendSensorTrippedEvent(vDeviceData[i]->m_dwPK_Device, iValue);
 				break;
 			default:
 				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Damn, what category is %i",vDeviceData[i]->m_dwPK_DeviceCategory);
