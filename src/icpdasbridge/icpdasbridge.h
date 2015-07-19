@@ -60,6 +60,8 @@ public:
 		bool send_to_icpdas(string Cmd);
 		
 		void parse_icpdas_reply(std::string message);
+		void icp2dce(std::string sPort, std::string sValue);
+		void populate_children();
 		
                 void EventThread();
                 
