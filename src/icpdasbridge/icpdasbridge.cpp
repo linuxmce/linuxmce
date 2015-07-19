@@ -206,6 +206,7 @@ void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 
 void icpdasbridge::SendLightChangedEvent(unsigned int PK_Device, int value)
 {
+	// This sends light commands to the LinuxMCE side of things.
         string svalue = StringUtils::itos(value);
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Sending EVENT_State_Changed_CONST event from PK_Device %d, level %s",PK_Device,svalue.c_str());
 
@@ -219,6 +220,7 @@ void icpdasbridge::SendLightChangedEvent(unsigned int PK_Device, int value)
 
 void icpdasbridge::SendSensorTrippedEvent(unsigned int PK_Device, bool value)
 {
+	// This send motion events to the LinuxMCE side of things.
 	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sending sensor tripped event from PK_Device %d", PK_Device);
         m_pEvent->SendMessage( new Message(PK_Device,
         	DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
@@ -489,6 +491,11 @@ void icpdasbridge::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
 		case COMMAND_Set_Level_CONST:
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"SET LEVEL RECEIVED FOR CHILD %s", portChannel.c_str());
 			command = pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST]; // .c_str(); 
+			// this is a cludge as the receiver doesn't understand 100% as on for switches.
+			if (command == "100") 
+			{
+				command = "1";
+			}
 			break;
 		case COMMAND_Set_Temperature_CONST:
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"SET TEMPERATURE RECEIVED FOR CHILD %s", portChannel.c_str());
