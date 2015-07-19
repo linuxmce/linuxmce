@@ -156,7 +156,7 @@ void icpdasbridge::EventThread()
 void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 {
 	int iValue = 0;
-
+	vector<string> vPorts;
 	bool bFound = 0;
 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "statechange from ICP: Port %s, new state %s", sPort.c_str(), sValue.c_str());
@@ -166,43 +166,48 @@ void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 	{
 		string sChannel = vDeviceData[i]->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 //		LoggerWrapper::GetInstance()->Write(LV_STATUS, "creating child device:ICP address %s is Device ID %i of type %i",sChannel.c_str(),vDeviceData[i]->m_dwPK_Device,vDeviceData[i]->m_dwPK_DeviceTemplate);
-
-		if (sChannel == sPort) 
-		{
-			iValue = 0;
-			bFound = 1;
-			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "value %s sChannel %s is sPort %s is Device ID %i of type %i category is %i",sValue.c_str(),sChannel.c_str(),sPort.c_str(),vDeviceData[i]->m_dwPK_Device,vDeviceData[i]->m_dwPK_DeviceTemplate,vDeviceData[i]->m_dwPK_DeviceCategory);
-
-			switch (vDeviceData[i]->m_dwPK_DeviceCategory) {
-			case DEVICECATEGORY_Lighting_Device_CONST:
-
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "A light - I see a light");
-				if (sValue == "VAL=1") {
-					iValue = 100;
-				} 
-				SendLightChangedEvent(vDeviceData[i]->m_dwPK_Device, iValue);
-				break;
-			case DEVICECATEGORY_Security_Device_CONST:
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "It moves! At least we have a movement sensor");
-				if (sValue == "VAL=1") {
-					iValue = 1;
-				} 
-
-				SendSensorTrippedEvent(vDeviceData[i]->m_dwPK_Device, iValue);
-				break;
-			default:
-				LoggerWrapper::GetInstance()->Write(LV_STATUS, "Damn, what category is %i",vDeviceData[i]->m_dwPK_DeviceCategory);
-				break;
-			}
-			
-			break;				
-							
-		}
-		else
-		{
-//			LoggerWrapper::GetInstance()->Write(LV_STATUS, "sChannel %s is NOT sPort %s is Device ID %i of type %i",sChannel.c_str(),sPort.c_str());
-		}
 		
+		vPorts = StringUtils::Split(sChannel,"|");
+
+		for(i=0;i<vPorts.size();i++)
+		{
+			sChannel = vPorts[i];
+			if (sChannel == sPort) 
+			{
+				iValue = 0;
+				bFound = 1;
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "value %s sChannel %s is sPort %s is Device ID %i of type %i category is %i",sValue.c_str(),sChannel.c_str(),sPort.c_str(),vDeviceData[i]->m_dwPK_Device,vDeviceData[i]->m_dwPK_DeviceTemplate,vDeviceData[i]->m_dwPK_DeviceCategory);
+				
+				switch (vDeviceData[i]->m_dwPK_DeviceCategory) {
+				case DEVICECATEGORY_Lighting_Device_CONST:
+				
+					LoggerWrapper::GetInstance()->Write(LV_STATUS, "A light - I see a light");
+					if (sValue == "VAL=1") {
+						iValue = 100;
+					} 
+					SendLightChangedEvent(vDeviceData[i]->m_dwPK_Device, iValue);
+					break;
+				case DEVICECATEGORY_Security_Device_CONST:
+					LoggerWrapper::GetInstance()->Write(LV_STATUS, "It moves! At least we have a movement sensor");
+					if (sValue == "VAL=1") {
+						iValue = 1;
+					} 
+					
+					SendSensorTrippedEvent(vDeviceData[i]->m_dwPK_Device, iValue);
+					break;
+				default:
+					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Damn, what category is %i",vDeviceData[i]->m_dwPK_DeviceCategory);
+					break;
+				}
+				
+				break;				
+								
+			}
+			else
+			{
+			//			LoggerWrapper::GetInstance()->Write(LV_STATUS, "sChannel %s is NOT sPort %s is Device ID %i of type %i",sChannel.c_str(),sPort.c_str());
+			}
+		}		
 	}
 	
 	if (! bFound) 
