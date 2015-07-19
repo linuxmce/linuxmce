@@ -82,6 +82,11 @@ bool icpdasbridge::GetConfig()
 	// The configuration parameters DATA_ are now populated
 	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Before opening socket to ICPDAS at IP: %s Port: %d ", DATA_Get_TCP_Address().c_str(), DATA_Get_TCP_Port() ); 
 
+        LoggerWrapper::GetInstance()->Write(LV_STATUS,"ICPDAS populating clients from LinuxMCE database");
+        populate_children();
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"ICPDAS populating done");
+                        
+
 	if (!Open_icpdas_Socket())
 	{
 		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Couldn't open socket connection to ICPDAS at IP: %s Port: %d ", DATA_Get_TCP_Address().c_str(), DATA_Get_TCP_Port() ); 
@@ -148,6 +153,39 @@ void icpdasbridge::EventThread()
 	}
 }
 
+void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
+{
+
+	LoggerWrapper::GetInstance()->Write(LV_STATUS, "statechange from ICP: Port %s, new state %s", sPort.c_str(), sValue.c_str());
+
+        MapCommand_Impl::iterator child_iter;
+        Command_Impl *result;
+        Command_Impl *pChildDeviceCommand;
+                        
+// find out what the device id in the LinuxMCE universe is, and send the new value to the router.
+
+	for (child_iter=m_mapCommandImpl_Children.begin(); child_iter!=m_mapCommandImpl_Children.end(); ++child_iter)
+	{
+		pChildDeviceCommand = (*child_iter).second;
+
+		if (pChildDeviceCommand->m_pData->WithinCategory(DEVICECATEGORY_Environment_CONST))
+		{
+			std::string this_pin;
+
+//			if (pChildDeviceCommand->PK_DeviceTemplate_get() == DEVICETEMPLATE_Generic_Input_Ouput_CONST)
+				Command_Impl * child = pChildDeviceCommand;
+
+			this_pin = child->m_pData->m_mapParameters[DEVICEDATA_PortChannel_Number_CONST];
+
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "statechange Reply: testing %s, %s default state: %s", 
+				child->m_sName.c_str(), this_pin.c_str(), child->m_pData->m_mapParameters[DEVICEDATA_Default_State_CONST].c_str());
+
+		}
+	}
+
+}
+
+
 void icpdasbridge::parse_icpdas_reply(std::string message)
 {
 	// Main parsing routine for all replies received back from GC100.
@@ -179,7 +217,7 @@ void icpdasbridge::parse_icpdas_reply(std::string message)
 			sPort = StringUtils::Split(vMessage[1],"=")[1]+":"+StringUtils::Split(vMessage[2],"=")[1]+":"+StringUtils::Split(vMessage[3],"=")[1];
 			sNewValue = vMessage[4];
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "We think it is port: %s and the new value should be %s",sPort.c_str(), sNewValue.c_str());
-						
+			icp2dce(sPort,sNewValue);			
 			return;
 		}
 		
@@ -196,6 +234,23 @@ void icpdasbridge::parse_icpdas_reply(std::string message)
 		bChildrenNeedToBeReported = false;
 	}
 */
+}
+
+void icpdasbridge::populate_children()
+{
+	VectDeviceData_Impl& vDeviceData = m_pData->m_vectDeviceData_Impl_Children;
+	for(VectDeviceData_Impl::size_type i = 0; i < vDeviceData.size(); i++)
+	{
+		string sChannel = vDeviceData[i]->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "creating child device:ICP address %s is Device ID %i of type %i",sChannel.c_str(),vDeviceData[i]->m_dwPK_Device,vDeviceData[i]->m_dwPK_DeviceTemplate);
+
+//		icpDevice *child=icpDevice::getICPDevice(vDeviceData[i]);
+/*		if(child!=NULL)
+		{
+//			childrenmap[vDeviceData[i]->m_dwPK_Device]=child;
+			LoggerWrapper::GetInstance()->Write(LV_STATUS, "   child created: %s",child->stype().c_str());
+		}
+*/	}
 }
 
 std::string icpdasbridge::read_from_icpdas(struct timeval *timeout)
