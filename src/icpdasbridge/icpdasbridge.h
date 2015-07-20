@@ -19,7 +19,7 @@
 
 #include "Gen_Devices/icpdasbridgeBase.h"
 // #include "DCE/PlainClientSocket.h"
-#include "DCE/SocketListener.h"
+// #include "DCE/SocketListener.h"
 // #include "DCE/ServerSocket.h"
 
 //<-dceag-d-e->
@@ -44,7 +44,7 @@ private:
                 // Begin shared section
                 // These items may be accessed by multiple threads therefore must be locked
                                 
-// 		pluto_pthread_mutex_t icpdas_mutex;
+ 		pluto_pthread_mutex_t icpdas_mutex;
                                         
 		// Private methods
 public:
