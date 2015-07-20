@@ -171,13 +171,18 @@ void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Statechange from ICP: Port %s, new state %s", sPort.c_str(), sValue.c_str());
 
 	VectDeviceData_Impl& vDeviceData = m_pData->m_vectDeviceData_Impl_Children;
+
+	// We loop through all LinuxMCE devices and check if the LinuxMCE Port Data corresponds to a ICPDAS port that has just changed.
 	for(VectDeviceData_Impl::size_type i = 0; i < vDeviceData.size(); i++)
 	{
 		sDBChannel = vDeviceData[i]->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 		sChannel = "";
 		vPorts = StringUtils::Split(sDBChannel,"|");
 
-		for(j=0;j<vPorts.size();j++)
+
+		for(j=0;j<vPorts.size();j++)  
+		// This loop checks multiple ICPDAS ports inside a single DCE device, ie. for blinds as they have 2 ICPDAS Ports 
+		// But only a single DCE device.
 		{
 			sChannel = vPorts[j];
 
