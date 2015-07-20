@@ -140,9 +140,11 @@ bool Lighting_Plugin::Register()
 		new DataGridGeneratorCallBack( this, ( DCEDataGridGeneratorFn )( &Lighting_Plugin::LightingScenariosGrid ) )
 		, DATAGRID_Lighting_Scenarios_CONST,PK_DeviceTemplate_get() );
 
+//    RegisterMsgInterceptor(( MessageInterceptorFn )( &Lighting_Plugin::LightingCommand ), 0, 0, 0, DEVICECATEGORY_Lighting_Device_CONST, 0, 0 );
     RegisterMsgInterceptor(( MessageInterceptorFn )( &Lighting_Plugin::LightingCommand ), 0, 0, 0, DEVICECATEGORY_Lighting_Device_CONST, MESSAGETYPE_COMMAND, 0 );
     RegisterMsgInterceptor(( MessageInterceptorFn )( &Lighting_Plugin::LightingFollowMe ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Follow_Me_Lighting_CONST );
     RegisterMsgInterceptor(( MessageInterceptorFn )( &Lighting_Plugin::DeviceState ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Device_OnOff_CONST );
+    RegisterMsgInterceptor(( MessageInterceptorFn )( &Lighting_Plugin::DeviceState ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_Brightness_Changed_CONST );
     RegisterMsgInterceptor(( MessageInterceptorFn )( &Lighting_Plugin::DeviceState ), 0, 0, 0, 0, MESSAGETYPE_EVENT, EVENT_State_Changed_CONST );
     RegisterMsgInterceptor(( MessageInterceptorFn )( &Lighting_Plugin::GetVideoFrame ), 0, 0, 0, 0, MESSAGETYPE_COMMAND, COMMAND_Get_Video_Frame_CONST );
 
@@ -223,6 +225,12 @@ bool Lighting_Plugin::DeviceState( class Socket *pSocket, class Message *pMessag
 		} else {
 			SetLightState(pMessage->m_dwPK_Device_From,false,int_sLevel);
 		}
+	} else	if( pMessage->m_dwID == EVENT_Brightness_Changed_CONST ) {
+		LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Lighting_Plugin: EVENT_Brightness_Changed_CONST !");
+		// Replace the current brightness
+		string sLevel = pMessage->m_mapParameters[EVENTPARAMETER_Value_CONST];
+		int iLevel = atoi(sLevel.c_str());
+		SetLightState( pMessage->m_dwPK_Device_From, true, iLevel );
 	}
 	
 	return false;
@@ -441,7 +449,18 @@ void Lighting_Plugin::SetLightState(int PK_Device,bool bIsOn,int Level, bool bRe
 	if( Level==-1 )
 		Level = GetLightingLevel( pDevice );
 
-	pDevice->m_sState_set( (bIsOn ? "ON" : "OFF") + string("/") + StringUtils::itos(Level));
+	switch(pDevice->m_dwPK_DeviceTemplate)
+	{
+		case DEVICETEMPLATE_Brightness_sensor_CONST:
+		case DEVICETEMPLATE_Multilevel_Sensor_CONST:
+			pDevice->m_sState_set(StringUtils::itos(Level));
+			break; 
+		default:
+			pDevice->m_sState_set( (bIsOn ? "ON" : "OFF") + string("/") + StringUtils::itos(Level));
+	}
+	
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Level to store in state %i",Level);
+
 
 	if( bRestore )
 	{
