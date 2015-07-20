@@ -220,7 +220,21 @@ void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 				
 					LoggerWrapper::GetInstance()->Write(LV_STATUS, "A light - I see a light");
 					iValue = icpval2dce(sValue);
-					SendLightChangedEvent(vDeviceData[i]->m_dwPK_Device, iValue);
+					fValue = iValue / 100.00;
+
+					switch (vDeviceData[i]->m_dwPK_DeviceTemplate)
+					{
+					case DEVICETEMPLATE_Light_Switch_onoff_CONST:
+					case DEVICETEMPLATE_Drapes_Switch_CONST:
+						SendLightChangedEvent(vDeviceData[i]->m_dwPK_Device, iValue);
+						break;
+					case DEVICETEMPLATE_Brightness_sensor_CONST:
+						LoggerWrapper::GetInstance()->Write(LV_DEBUG, "It senses! ICP Value %s - DCE Value %i sChannel %s is sPort %s is Device ID %i of type %i category is %i",sValue.c_str(),iValue,sChannel.c_str(),sPort.c_str(),vDeviceData[i]->m_dwPK_Device,vDeviceData[i]->m_dwPK_DeviceTemplate,vDeviceData[i]->m_dwPK_DeviceCategory);
+						SendBrightnessChangedEvent(vDeviceData[i]->m_dwPK_Device, iValue);
+						break;
+					default:
+						LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Don't know what to with DT-type %i",vDeviceData[i]->m_dwPK_DeviceCategory);
+					}
 					break;
 				case DEVICECATEGORY_Security_Device_CONST:
 					LoggerWrapper::GetInstance()->Write(LV_DEBUG, "It moves! At leat we have a security device: value %s sChannel %s is sPort %s is Device ID %i of type %i category is %i",sValue.c_str(),sChannel.c_str(),sPort.c_str(),vDeviceData[i]->m_dwPK_Device,vDeviceData[i]->m_dwPK_DeviceTemplate,vDeviceData[i]->m_dwPK_DeviceCategory);
@@ -228,9 +242,9 @@ void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 					SendSensorTrippedEvent(vDeviceData[i]->m_dwPK_Device, iValue);
 					break;
 				case DEVICECATEGORY_Climate_Device_CONST:
-					LoggerWrapper::GetInstance()->Write(LV_DEBUG, "It moves! At leat we have a security device: value %s sChannel %s is sPort %s is Device ID %i of type %i category is %i",sValue.c_str(),sChannel.c_str(),sPort.c_str(),vDeviceData[i]->m_dwPK_Device,vDeviceData[i]->m_dwPK_DeviceTemplate,vDeviceData[i]->m_dwPK_DeviceCategory);
 					iValue = icpval2dce(sValue);
 					fValue = iValue / 100.00;
+					LoggerWrapper::GetInstance()->Write(LV_DEBUG, "It senses! ICP Value %s - DCE Value %d sChannel %s is sPort %s is Device ID %i of type %i category is %i",sValue.c_str(),fValue,sChannel.c_str(),sPort.c_str(),vDeviceData[i]->m_dwPK_Device,vDeviceData[i]->m_dwPK_DeviceTemplate,vDeviceData[i]->m_dwPK_DeviceCategory);
 					SendTemperatureChangedEvent(vDeviceData[i]->m_dwPK_Device, fValue);
 					break;
 				default:
@@ -296,10 +310,11 @@ void icpdasbridge::SendTemperatureChangedEvent(unsigned int PK_Device, float val
 void icpdasbridge::SendBrightnessChangedEvent(unsigned int PK_Device, int value)
 {
 	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sending brightness level changed event from PK_Device %d, value %d",PK_Device, value);
+	
         m_pEvent->SendMessage( new Message(PK_Device,
         	DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
-		EVENT_Brightness_Changed_CONST, 1,EVENTPARAMETER_Value_CONST, 
-		StringUtils::itos(value).c_str())
+		EVENT_State_Changed_CONST, 1,EVENTPARAMETER_State_CONST, 
+		 StringUtils::itos(value).c_str())
                 );
 }
 
