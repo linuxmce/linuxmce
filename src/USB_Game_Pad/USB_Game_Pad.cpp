@@ -281,7 +281,7 @@ bool USB_Game_Pad::IsJoystick(string sGamePadDevice)
 int USB_Game_Pad::GetJoyType(string sName)
 {
   int iRet = JOY_TYPE_GENERIC;
-  if (sName.find("Xbox Gamepad (userspace driver)") != string::npos)
+  if (sName.find("Xbox 360 Wireless Receiver") != string::npos)
     iRet = JOY_TYPE_XBOX360;
   else
     iRet = JOY_TYPE_GENERIC;
@@ -474,6 +474,9 @@ void USB_Game_Pad::ProcessGamePad(int fd, int joytype)
       unsigned char buttons = 2;
       uint16_t btnmap[KEY_MAX - BTN_MISC + 1];
       uint8_t axmap[ABS_MAX + 1];
+      unsigned int trigger_gradient;
+      bool changed=false;
+
       struct ::js_event js; // one event packet.
       
       timespec ts_now;
@@ -533,7 +536,119 @@ void USB_Game_Pad::ProcessGamePad(int fd, int joytype)
 		}
 	      break;
 	    case 2:  // axes
-	      if (js.number % 2 == 0)
+	      if (js.number == 5 && joytype == JOY_TYPE_XBOX360)
+		{
+		  int adj_value = js.value + 32767;
+		  if (adj_value == 0)
+		    {
+		      trigger_gradient=0;
+		      changed=true;
+		    }
+		  if (adj_value <= 10922 && !(adj_value < 1)) 
+		    {
+		      changed=(trigger_gradient!=1);
+		      trigger_gradient=1;
+		    }
+		  if (adj_value <= 21844 && !(adj_value < 10923))
+		    {
+		      changed=(trigger_gradient!=2);
+		      trigger_gradient=2;
+		    }
+		  if (adj_value <= 32766 && !(adj_value < 21845))
+		    {
+		      changed=(trigger_gradient!=3);
+		      trigger_gradient=3;
+		    }
+		  if (adj_value <= 43688 && !(adj_value < 32767))
+		    {
+		      changed=(trigger_gradient!=4);
+		      trigger_gradient=4;
+		    }
+		  if (adj_value <= 54610 && !(adj_value < 43689))
+		    {
+		      changed=(trigger_gradient!=5);
+		      trigger_gradient=5;
+		    }
+		  if (adj_value <= 65535 && !(adj_value < 54611))
+		    {
+		      changed=(trigger_gradient!=6);
+		      trigger_gradient=6;
+		    }
+
+		  if (changed)
+		    {
+		      changed=false;
+		      map<string,pair<string,int> >::iterator it=m_mapCodesToButtons.find("XBOX360-GAMEPAD-RT"+StringUtils::itos(trigger_gradient));
+		      if (it==m_mapCodesToButtons.end())
+			{
+			  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for trigger XBOX360-GAMEPAD-RT%d",trigger_gradient);
+			}
+		      else
+			{
+			  if (m_cCurrentScreen!='G')
+			    {
+			      ReceivedCode(it->second.second,it->second.first.c_str());
+			    }
+			}
+		    }
+		}
+	      else if (js.number == 2 && joytype == JOY_TYPE_XBOX360)
+		{
+		  int adj_value = js.value + 32767;
+		  if (adj_value == 0)
+		    {
+		      trigger_gradient=0;
+		      changed=true;
+		    }
+		  if (adj_value <= 10922 && !(adj_value < 1)) 
+		    {
+		      changed=(trigger_gradient!=1);
+		      trigger_gradient=1;
+		    }
+		  if (adj_value <= 21844 && !(adj_value < 10923))
+		    {
+		      changed=(trigger_gradient!=2);
+		      trigger_gradient=2;
+		    }
+		  if (adj_value <= 32766 && !(adj_value < 21845))
+		    {
+		      changed=(trigger_gradient!=3);
+		      trigger_gradient=3;
+		    }
+		  if (adj_value <= 43688 && !(adj_value < 32767))
+		    {
+		      changed=(trigger_gradient!=4);
+		      trigger_gradient=4;
+		    }
+		  if (adj_value <= 54610 && !(adj_value < 43689))
+		    {
+		      changed=(trigger_gradient!=5);
+		      trigger_gradient=5;
+		    }
+		  if (adj_value <= 65535 && !(adj_value < 54611))
+		    {
+		      changed=(trigger_gradient!=6);
+		      trigger_gradient=6;
+		    }
+
+		  if (changed)
+		    {
+		      changed=false;
+		      map<string,pair<string,int> >::iterator it=m_mapCodesToButtons.find("XBOX360-GAMEPAD-LT"+StringUtils::itos(trigger_gradient));
+		      if (it==m_mapCodesToButtons.end())
+			{
+			  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for trigger XBOX360-GAMEPAD-LT%d",trigger_gradient);
+			}
+		      else
+			{
+			  if (m_cCurrentScreen!='G')
+			    {
+			      ReceivedCode(it->second.second,it->second.first.c_str());
+			    }
+			}
+		    }
+		}
+	      else if (js.number % 2 == 0)
 		{
 		  // Horizontal axes.
 		  if (js.value < -16384)
