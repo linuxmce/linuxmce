@@ -153,6 +153,7 @@ void icpdasbridge::EventThread()
 		if(read_from_icpdas() == "error")
 		{
 			close(icpdas_socket);
+			Sleep(50);
 			Open_icpdas_Socket();
 		}
 		LoggerWrapper::GetInstance()->Write(LV_STATUS,"EventThread after read_from_icpdas");
