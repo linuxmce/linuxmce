@@ -41,7 +41,10 @@ void * StartEventThread(void * Arg)
 icpdasbridge::icpdasbridge(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: icpdasbridge_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
+	, icpdas_mutex("icpdas")
 {
+        icpdas_mutex.Init(NULL);
+
 }
 
 //<-dceag-const2-b->
@@ -49,7 +52,9 @@ icpdasbridge::icpdasbridge(int DeviceID, string ServerAddress,bool bConnectEvent
 icpdasbridge::icpdasbridge(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
 	: icpdasbridge_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
 //<-dceag-const2-e->
+	, icpdas_mutex("icpdas")
 {
+        icpdas_mutex.Init(NULL);
 }
 
 //<-dceag-dest-b->
@@ -60,13 +65,13 @@ icpdasbridge::~icpdasbridge()
 	m_bQuit_set(false);                    //force quit	
 	Sleep(600);                        //wait a little
 	
-// 	PLUTO_SAFETY_LOCK(sl, icpdas_mutex);
+ 	PLUTO_SAFETY_LOCK(sl, icpdas_mutex);
 	
-//	if (m_EventThread != 0)
-//	{
+	if (m_EventThread != 0)
+	{
 		pthread_cancel(m_EventThread);     //pthread_cancel is asynchron so call it first and continue cleanup		
 		pthread_join(m_EventThread, NULL); //finish
-//	}
+	}
 }
 
 //<-dceag-getconfig-b->
@@ -150,28 +155,32 @@ void icpdasbridge::EventThread()
 			close(icpdas_socket);
 			Open_icpdas_Socket();
 		}
+		LoggerWrapper::GetInstance()->Write(LV_STATUS,"EventThread after read_from_icpdas");
 	}
 }
 
 void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 {
 	int iValue = 0;
+	unsigned int j = 0;
 	vector<string> vPorts;
 	bool bFound = 0;
-
-	LoggerWrapper::GetInstance()->Write(LV_STATUS, "statechange from ICP: Port %s, new state %s", sPort.c_str(), sValue.c_str());
+	string sDBChannel = "";
+	string sChannel = "";
+	
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Statechange from ICP: Port %s, new state %s", sPort.c_str(), sValue.c_str());
 
 	VectDeviceData_Impl& vDeviceData = m_pData->m_vectDeviceData_Impl_Children;
 	for(VectDeviceData_Impl::size_type i = 0; i < vDeviceData.size(); i++)
 	{
-		string sChannel = vDeviceData[i]->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
-//		LoggerWrapper::GetInstance()->Write(LV_STATUS, "creating child device:ICP address %s is Device ID %i of type %i",sChannel.c_str(),vDeviceData[i]->m_dwPK_Device,vDeviceData[i]->m_dwPK_DeviceTemplate);
-		
-		vPorts = StringUtils::Split(sChannel,"|");
+		sDBChannel = vDeviceData[i]->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
+		sChannel = "";
+		vPorts = StringUtils::Split(sDBChannel,"|");
 
-		for(i=0;i<vPorts.size();i++)
+		for(j=0;j<vPorts.size();j++)
 		{
-			sChannel = vPorts[i];
+			sChannel = vPorts[j];
+
 			if (sChannel == sPort) 
 			{
 				iValue = 0;
@@ -202,10 +211,6 @@ void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 				
 				break;				
 								
-			}
-			else
-			{
-			//			LoggerWrapper::GetInstance()->Write(LV_STATUS, "sChannel %s is NOT sPort %s is Device ID %i of type %i",sChannel.c_str(),sPort.c_str());
 			}
 		}		
 	}
@@ -318,7 +323,7 @@ std::string icpdasbridge::read_from_icpdas(struct timeval *timeout)
 	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Before looping stream");
 	
 
-//	PLUTO_SAFETY_LOCK(sl, icpdas_mutex);
+	PLUTO_SAFETY_LOCK(sl, icpdas_mutex);
 	while (1)
 	{
 		pthread_testcancel();
@@ -350,16 +355,20 @@ std::string icpdasbridge::read_from_icpdas(struct timeval *timeout)
 
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "recv buffer: %s", recv_buffer);
 			if (strlen(recv_buffer) > 0) {
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "recv buffer: %s", recv_buffer);
+					
 				parse_icpdas_reply(string(recv_buffer));
+				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "recv buffer: %s", recv_buffer);
+				
 				recv_pos = 0;
 				return_value = string(recv_buffer);
-//				break;
+				break;
 			}
 		}
 		else
 		{
 			recv_pos ++;
-//			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "recv buffer: %s",recv_buffer);
+			if (recv_pos > 80) 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "recv buffer: %s",recv_buffer);
 			
 		}
 	}
@@ -375,7 +384,7 @@ bool icpdasbridge::send_to_icpdas(string Cmd)
 
 	return_value = true;
 
-//	PLUTO_SAFETY_LOCK(sl, icpdas_mutex);
+	PLUTO_SAFETY_LOCK(sl, icpdas_mutex);
 
 	sprintf(command, "%s\r", Cmd.c_str()); 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending command %s\n", command);
@@ -384,7 +393,7 @@ bool icpdasbridge::send_to_icpdas(string Cmd)
 	if (result < (int) strlen(command))
 	{
 		string x = strerror(errno);
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Short write to GC100: %s (wrote: %d)\n", strerror(errno), result);
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Short write to ICPDAS: %s (wrote: %d)\n", strerror(errno), result);
 		return_value = false;
 	}
 
@@ -403,7 +412,7 @@ bool icpdasbridge::Open_icpdas_Socket()
 	struct sockaddr_in sin;
 	int res;
 
-//	PLUTO_SAFETY_LOCK(sl, icpdas_mutex);
+	PLUTO_SAFETY_LOCK(sl, icpdas_mutex);
 	return_value=false;
 
 //	ip_addr=DATA_Get_TCP_Address();
