@@ -159,9 +159,32 @@ void icpdasbridge::EventThread()
 	}
 }
 
+int icpdasbridge::icpval2dce(std::string sValue)
+{	
+	vector<string> vValues;
+	int iValue = 0;
+	if (sValue == "VAL=1") {
+		iValue = 1;
+	} 
+	else if (sValue.substr(4,1)=="+") 
+	{
+		vValues = StringUtils::Split(sValue.substr(5),".");
+		sValue = vValues[0] + vValues[1];
+		iValue = atoi(sValue.c_str());
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "It moves with + value %s which will be stored as %d",sValue.c_str(),iValue );	
+	} 
+	else
+	{
+		LoggerWrapper::GetInstance()->Write(LV_STATUS, "It moves - substr is %s ",sValue.substr(5,1).c_str());
+	}
+	return iValue;
+
+}
+
 void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 {
 	int iValue = 0;
+	float fValue = 0.00;
 	unsigned int j = 0;
 	vector<string> vPorts;
 	bool bFound = 0;
@@ -178,8 +201,7 @@ void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 		sDBChannel = vDeviceData[i]->mapParameters_Find(DEVICEDATA_PortChannel_Number_CONST);
 		sChannel = "";
 		vPorts = StringUtils::Split(sDBChannel,"|");
-
-
+		
 		for(j=0;j<vPorts.size();j++)  
 		// This loop checks multiple ICPDAS ports inside a single DCE device, ie. for blinds as they have 2 ICPDAS Ports 
 		// But only a single DCE device.
@@ -196,21 +218,22 @@ void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 				case DEVICECATEGORY_Lighting_Device_CONST:
 				
 					LoggerWrapper::GetInstance()->Write(LV_STATUS, "A light - I see a light");
-					if (sValue == "VAL=1") {
-						iValue = 100;
-					} 
+					iValue = icpval2dce(sValue);
 					SendLightChangedEvent(vDeviceData[i]->m_dwPK_Device, iValue);
 					break;
 				case DEVICECATEGORY_Security_Device_CONST:
-					LoggerWrapper::GetInstance()->Write(LV_STATUS, "It moves! At least we have a movement sensor");
-					if (sValue == "VAL=1") {
-						iValue = 1;
-					} 
-					
+					LoggerWrapper::GetInstance()->Write(LV_DEBUG, "It moves! At leat we have a security device: value %s sChannel %s is sPort %s is Device ID %i of type %i category is %i",sValue.c_str(),sChannel.c_str(),sPort.c_str(),vDeviceData[i]->m_dwPK_Device,vDeviceData[i]->m_dwPK_DeviceTemplate,vDeviceData[i]->m_dwPK_DeviceCategory);
+					iValue = icpval2dce(sValue);
 					SendSensorTrippedEvent(vDeviceData[i]->m_dwPK_Device, iValue);
 					break;
+				case DEVICECATEGORY_Climate_Device_CONST:
+					LoggerWrapper::GetInstance()->Write(LV_DEBUG, "It moves! At leat we have a security device: value %s sChannel %s is sPort %s is Device ID %i of type %i category is %i",sValue.c_str(),sChannel.c_str(),sPort.c_str(),vDeviceData[i]->m_dwPK_Device,vDeviceData[i]->m_dwPK_DeviceTemplate,vDeviceData[i]->m_dwPK_DeviceCategory);
+					iValue = icpval2dce(sValue);
+					fValue = iValue / 100.00;
+					SendTemperatureChangedEvent(vDeviceData[i]->m_dwPK_Device, fValue);
+					break;
 				default:
-					LoggerWrapper::GetInstance()->Write(LV_STATUS, "Damn, what category is %i",vDeviceData[i]->m_dwPK_DeviceCategory);
+					LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Damn, what category is %i",vDeviceData[i]->m_dwPK_DeviceCategory);
 					break;
 				}
 				
@@ -253,6 +276,32 @@ void icpdasbridge::SendSensorTrippedEvent(unsigned int PK_Device, bool value)
 	        value ? "1" : "0")
 	        );
 }
+
+void icpdasbridge::SendTemperatureChangedEvent(unsigned int PK_Device, float value)
+{
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "agocontrol_Bridge::SendTemperatureChangedEvent(): PK_Device %d", PK_Device);
+	char tempstr[512];
+	sprintf(tempstr, "%.2f", value);
+	m_pEvent->SendMessage( new Message(PK_Device,
+			DEVICEID_EVENTMANAGER,
+			PRIORITY_NORMAL,
+			MESSAGETYPE_EVENT,
+			EVENT_Temperature_Changed_CONST, 1, 
+			EVENTPARAMETER_Value_CONST, tempstr)
+		);
+
+}
+
+void icpdasbridge::SendBrightnessChangedEvent(unsigned int PK_Device, int value)
+{
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sending brightness level changed event from PK_Device %d, value %d",PK_Device, value);
+        m_pEvent->SendMessage( new Message(PK_Device,
+        	DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
+		EVENT_Brightness_Changed_CONST, 1,EVENTPARAMETER_Value_CONST, 
+		StringUtils::itos(value).c_str())
+                );
+}
+
 
 void icpdasbridge::parse_icpdas_reply(std::string message)
 {
