@@ -58,14 +58,18 @@ public:
 		virtual bool Open_icpdas_Socket();
                 std::string read_from_icpdas(struct timeval *timeout = NULL);
 		bool send_to_icpdas(string Cmd);
-		
+                int icpval2dce(std::string sValue);
+                		
 		void parse_icpdas_reply(std::string message);
 		void icp2dce(std::string sPort, std::string sValue);
 		void populate_children();
 		
+		// Shamelessly copied from agecontrolbridge.
                 void SendLightChangedEvent(unsigned int PK_Device, int value);
                 void SendSensorTrippedEvent(unsigned int PK_Device, bool value);
-                		
+                void SendTemperatureChangedEvent(unsigned int PK_Device, float value);
+                void SendBrightnessChangedEvent(unsigned int PK_Device, int value);
+
                 void EventThread();
                 
                 virtual void CreateChildren();                
