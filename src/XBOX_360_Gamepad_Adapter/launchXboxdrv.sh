@@ -1,3 +1,3 @@
 #!/bin/bash
-
-xboxdrv -w $1
+rmmod xpad
+xboxdrv --mimic-xpad-wireless -w $1
