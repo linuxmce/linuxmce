@@ -309,7 +309,7 @@ ConfigSources () {
 
 	AddRepoToSourcesTop "file:${LOCAL_REPO_BASE} ${LOCAL_REPO_DIR}"
 	AddRepoToSources "http://deb.linuxmce.org/ubuntu/ ${DISTRO} ${COMPOS}"
-	AddRepoToSources "http://debian.slimdevices.com/ stable main"
+#	AddRepoToSources "http://debian.slimdevices.com/ stable main"
 
 #	# Check where our distro is hosted and assign the proper variable
 #	DISTRO_HOST=
