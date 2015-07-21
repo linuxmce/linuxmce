@@ -162,11 +162,18 @@ void icpdasbridge::EventThread()
 
 int icpdasbridge::icpval2dce(std::string sValue)
 {	
+	// This converts the VAL=xxx or VAL=+xxx to an integer. It is assumed that
+	// VAL is either 0 or 1, or contains a + 
+	// Also, the decimal delimiter is assumed to be a dot.
+	
 	vector<string> vValues;
 	int iValue = 0;
 	if (sValue == "VAL=1") {
 		iValue = 1;
 	} 
+	else if (sValue == "VAL=0") {
+		iValue = 0;
+	}
 	else if (sValue.substr(4,1)=="+") 
 	{
 		vValues = StringUtils::Split(sValue.substr(5),".");
@@ -176,7 +183,7 @@ int icpdasbridge::icpval2dce(std::string sValue)
 	} 
 	else
 	{
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "It moves - substr is %s ",sValue.substr(5,1).c_str());
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Receiving value we don't know what to do with: %s ",sValue.c_str());
 	}
 	return iValue;
 
@@ -184,6 +191,10 @@ int icpdasbridge::icpval2dce(std::string sValue)
 
 void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 {
+	// This is used to convert the incoming icpdas message into DCE. It first tries to determine
+	// the corresponding LinuxMCE device and after that converts the new value to a DCE compatible
+	// value and sends it off to the relevant Send command.
+	
 	int iValue = 0;
 	float fValue = 0.00;
 	unsigned int j = 0;
@@ -218,7 +229,7 @@ void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 				switch (vDeviceData[i]->m_dwPK_DeviceCategory) {
 				case DEVICECATEGORY_Lighting_Device_CONST:
 				
-					LoggerWrapper::GetInstance()->Write(LV_STATUS, "A light - I see a light");
+					LoggerWrapper::GetInstance()->Write(LV_DEBUG, "A light - I see a light");
 					iValue = icpval2dce(sValue);
 					fValue = iValue / 100.00;
 
@@ -243,8 +254,8 @@ void icpdasbridge::icp2dce(std::string sPort, std::string sValue)
 					break;
 				case DEVICECATEGORY_Climate_Device_CONST:
 					iValue = icpval2dce(sValue);
-					fValue = iValue / 100.00;
-					LoggerWrapper::GetInstance()->Write(LV_DEBUG, "It senses! ICP Value %s - DCE Value %d sChannel %s is sPort %s is Device ID %i of type %i category is %i",sValue.c_str(),fValue,sChannel.c_str(),sPort.c_str(),vDeviceData[i]->m_dwPK_Device,vDeviceData[i]->m_dwPK_DeviceTemplate,vDeviceData[i]->m_dwPK_DeviceCategory);
+					fValue = iValue / 1.00;
+					LoggerWrapper::GetInstance()->Write(LV_DEBUG, "It senses! ICP Value %s - DCE Value %i sChannel %s is sPort %s is Device ID %i of type %i category is %i",sValue.c_str(),iValue,sChannel.c_str(),sPort.c_str(),vDeviceData[i]->m_dwPK_Device,vDeviceData[i]->m_dwPK_DeviceTemplate,vDeviceData[i]->m_dwPK_DeviceCategory);
 					SendTemperatureChangedEvent(vDeviceData[i]->m_dwPK_Device, fValue);
 					break;
 				default:
@@ -297,6 +308,7 @@ void icpdasbridge::SendTemperatureChangedEvent(unsigned int PK_Device, float val
         LoggerWrapper::GetInstance()->Write(LV_WARNING, "agocontrol_Bridge::SendTemperatureChangedEvent(): PK_Device %d", PK_Device);
 	char tempstr[512];
 	sprintf(tempstr, "%.2f", value);
+        LoggerWrapper::GetInstance()->Write(LV_WARNING, "SendTemperatureChangedEvent(): tempstr %s value %f",tempstr, value);
 	m_pEvent->SendMessage( new Message(PK_Device,
 			DEVICEID_EVENTMANAGER,
 			PRIORITY_NORMAL,
@@ -307,15 +319,36 @@ void icpdasbridge::SendTemperatureChangedEvent(unsigned int PK_Device, float val
 
 }
 
+
+/* void icpdasbridge::SendBrightnessChangedEvent(unsigned int PK_Device, int value)
+{
+        LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sending brightness level changed event from PK_Device %d, value %d",PK_Device, value);
+        
+        m_pEvent->SendMessage( new Message(PK_Device,
+        	DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
+        	EVENT_Brightness_Changed_CONST, 1,EVENTPARAMETER_Value_CONST,
+	        StringUtils::itos(value).c_str())
+        );
+                                                                                 
+*/
+
 void icpdasbridge::SendBrightnessChangedEvent(unsigned int PK_Device, int value)
 {
-	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sending brightness level changed event from PK_Device %d, value %d",PK_Device, value);
+/*	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sending state changed event from PK_Device %d, value %d",PK_Device, value);
 	
         m_pEvent->SendMessage( new Message(PK_Device,
         	DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
 		EVENT_State_Changed_CONST, 1,EVENTPARAMETER_State_CONST, 
 		 StringUtils::itos(value).c_str())
                 );
+*/
+        LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Sending brightness level changed event from PK_Device %d, value %d",PK_Device, value);
+        
+        m_pEvent->SendMessage( new Message(PK_Device,
+        	DEVICEID_EVENTMANAGER, PRIORITY_NORMAL, MESSAGETYPE_EVENT,
+        	EVENT_Brightness_Changed_CONST, 1,EVENTPARAMETER_Value_CONST,
+	        StringUtils::itos(value).c_str())
+        );
 }
 
 
@@ -423,12 +456,10 @@ std::string icpdasbridge::read_from_icpdas(struct timeval *timeout)
 		{
 			recv_buffer[recv_pos] = '\0';
 
-			LoggerWrapper::GetInstance()->Write(LV_DEBUG, "recv buffer: %s", recv_buffer);
 			if (strlen(recv_buffer) > 0) {
 				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "recv buffer: %s", recv_buffer);
 					
 				parse_icpdas_reply(string(recv_buffer));
-				LoggerWrapper::GetInstance()->Write(LV_DEBUG, "recv buffer: %s", recv_buffer);
 				
 				recv_pos = 0;
 				return_value = string(recv_buffer);
@@ -438,8 +469,7 @@ std::string icpdasbridge::read_from_icpdas(struct timeval *timeout)
 		else
 		{
 			recv_pos ++;
-			if (recv_pos > 80) 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "recv buffer: %s",recv_buffer);
-			
+			if (recv_pos > 4000) LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Recv buffer already 4000byte - it is nearing its limit: %s", recv_buffer);
 		}
 	}
 	return return_value; // returns the last complete message
