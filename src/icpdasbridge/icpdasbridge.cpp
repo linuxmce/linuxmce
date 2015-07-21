@@ -423,7 +423,7 @@ std::string icpdasbridge::read_from_icpdas(struct timeval *timeout)
 {
 	std::string return_value;
 	return_value = "";
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Before looping stream");
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG, "Before looping stream");
 	
 
 	PLUTO_SAFETY_LOCK(sl, icpdas_mutex);
