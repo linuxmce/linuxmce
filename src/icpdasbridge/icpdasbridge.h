@@ -55,21 +55,24 @@ public:
 		// Constructors/Destructor
 		icpdasbridge(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
 
-		virtual bool Open_icpdas_Socket();
-                std::string read_from_icpdas(struct timeval *timeout = NULL);
-		bool send_to_icpdas(string Cmd);
-                int icpval2dce(std::string sValue);
-                		
-		void parse_icpdas_reply(std::string message);
-		void icp2dce(std::string sPort, std::string sValue);
-		void populate_children();
-		
+		virtual bool Open_icpdas_Socket(); // Opens the socket to the server
+                std::string read_from_icpdas(struct timeval *timeout = NULL);   // Reads data from icpdas but does not interpret them at all
+		void parse_icpdas_reply(std::string message);    // Parses the icpdas by finding out the verb at the beginning, stripping together the port, and the value to call
+		void icp2dce(std::string sPort, std::string sValue); // This gets called with the icpdas port information as stored in lmce and the value as provided by icpdas, i.e. VAL=
+                int icpval2dce(std::string sValue);	// Helper function called by icp2dce to convert VAL values into values usable by lmce
+                // The SendXXXXXEvent functions are used by icp2dce to transfer the received icpdas event to lmce
 		// Shamelessly copied from agecontrolbridge.
                 void SendLightChangedEvent(unsigned int PK_Device, int value);
                 void SendSensorTrippedEvent(unsigned int PK_Device, bool value);
                 void SendTemperatureChangedEvent(unsigned int PK_Device, float value);
                 void SendBrightnessChangedEvent(unsigned int PK_Device, int value);
+                
+                // The next function receives commands from LinuxMCE and formats them so icpdas understands them
+		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
+		bool send_to_icpdas(string Cmd); // Helper function to do the actual command to icpdas.
 
+
+		void populate_children();  // NOT used atm.
                 void EventThread();
                 
                 virtual void CreateChildren();                
@@ -79,7 +82,6 @@ public:
 		virtual bool Register();
 		
 		
-		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
 
