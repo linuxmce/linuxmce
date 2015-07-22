@@ -108,139 +108,6 @@ void OMXPlayerInterface::Init() {
 	SetState(STATE::STOPPED);
 }
 
-
-/* */
-bool OMXPlayerInterface::Connect_Player() {
-    bool bPrivate(true);
-    const char *dbus_addr = m_s_dbus_addr.c_str();
-
-    // setup the dbus 'Player' connection and client
-    if (g_player_conn == NULL) {
-      Log("Reconnect_Player() - Creating connection to 'Player' bus");
-      g_player_conn = new DBus::Connection(dbus_addr, bPrivate);
-      if (!g_player_conn->connected()) {
-        Log("Reconnect_Player() - g_player_conn not connected(), exiting.");
-        return false;
-      }
-      if (!g_player_conn->register_bus()) {
-        Log("Reconnect_Player() - g_player_conn unable to register_bus(), exiting.");
-        return false;
-      }
-    }
-    if (g_player_client == NULL) {
-      Log("Reconnect_Player() - Creating Player_proxy client interface");
-      g_player_client = new OMXPlayerClient(*g_player_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
-      return true;
-    }
-    return false;
-}
-
-void OMXPlayerInterface::Disconnect_Player() {
-    Log("Disconnect_Player() - cleaning up D-Bus interface proxies");
-    // Clean up the player interfaces and connections;
-    if (g_player_client != NULL)
-      delete g_player_client;
-    g_player_client = NULL;
-    if (g_player_conn != NULL)
-      delete g_player_conn;
-    g_player_conn = NULL;
-}
-
-bool OMXPlayerInterface::Reconnect_Player() {
-    Log("Reconnect_Player() - reconnecting dbus player interface");
-    Disconnect_Player();
-    return Connect_Player();
-}
-/* */
-
-/* */
-bool OMXPlayerInterface::Connect_Properties() {
-    bool bPrivate(true);
-    const char *dbus_addr = m_s_dbus_addr.c_str();
-
-    // setup the dbus 'Player' connection and client
-    if (g_props_conn == NULL) {
-      Log("Reconnect_Properties() - Creating connection to 'Player' bus");
-      g_props_conn = new DBus::Connection(dbus_addr, bPrivate);
-      if (!g_props_conn->connected()) {
-        Log("Reconnect_Properties() - g_props_conn not connected(), exiting.");
-        return false;
-      }
-      if (!g_props_conn->register_bus()) {
-        Log("Reconnect_Properties() - g_props_conn unable to register_bus(), exiting.");
-        return false;
-      }
-    }
-    if (g_props_client == NULL) {
-      Log("Reconnect_Properties() - Creating Player_proxy client interface");
-      g_props_client = new OMXPropsClient(*g_props_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
-      return true;
-    }
-    return false;
-}
-
-void OMXPlayerInterface::Disconnect_Properties() {
-    Log("Disconnect_Properties() - cleaning up D-Bus interface proxies");
-    // Clean up the properties interfaces and connections;
-    if (g_props_client != NULL)
-      delete g_props_client;
-    g_props_client = NULL;
-    if (g_props_conn != NULL)
-      delete g_props_conn;
-    g_props_conn = NULL;
-}
-
-bool OMXPlayerInterface::Reconnect_Properties() {
-    Log("Reconnect_Properties() - reconnecting dbus player interface");
-    Disconnect_Properties();
-    return Connect_Properties();
-}
-/* */
-
-/* */
-bool OMXPlayerInterface::Connect_Root() {
-    bool bPrivate(true);
-    const char *dbus_addr = m_s_dbus_addr.c_str();
-
-    // setup the dbus 'Player' connection and client
-    if (g_root_conn == NULL) {
-      Log("Reconnect_Root() - Creating connection to 'Player' bus");
-      g_root_conn = new DBus::Connection(dbus_addr, bPrivate);
-      if (!g_root_conn->connected()) {
-        Log("Reconnect_Root() - g_root_conn not connected(), exiting.");
-        return false;
-      }
-      if (!g_root_conn->register_bus()) {
-        Log("Reconnect_Root() - g_root_conn unable to register_bus(), exiting.");
-        return false;
-      }
-    }
-    if (g_root_client == NULL) {
-      Log("Reconnect_Root() - Creating Player_proxy client interface");
-      g_root_client = new OMXRootClient(*g_root_conn, OMXPLAYER_SERVER_PATH, OMXPLAYER_SERVER_NAME);
-      return true;
-    }
-    return false;
-}
-
-void OMXPlayerInterface::Disconnect_Root() {
-    Log("Disconnect_Root() - cleaning up D-Bus interface proxies");
-    // Clean up the properties interfaces and connections;
-    if (g_root_client != NULL)
-      delete g_root_client;
-    g_root_client = NULL;
-    if (g_root_conn != NULL)
-      delete g_root_conn;
-    g_root_conn = NULL;
-}
-
-bool OMXPlayerInterface::Reconnect_Root() {
-    Log("Reconnect_Root() - reconnecting dbus player interface");
-    Disconnect_Root();
-    return Connect_Root();
-}
-/* */
-
 typedef std::vector< std::string > STRINGARRAY;
 inline const int iterator_to_index(STRINGARRAY &a, STRINGARRAY::iterator it)
 {
@@ -263,7 +130,6 @@ void OMXPlayerInterface::Do_HideSubtitles() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Do_HideSubtitles() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
   }
 }
 
@@ -279,7 +145,6 @@ void OMXPlayerInterface::Do_ShowSubtitles() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Do_ShowSubtitles() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
   }
 }
 
@@ -295,7 +160,6 @@ bool OMXPlayerInterface::Do_SelectSubtitle(int track) {
   }
   catch (DBus::Error &dbus_err) {
     Log("Do_SelectSubtitle() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
   }
   return ret;
 }
@@ -343,7 +207,6 @@ std::vector< std::string > OMXPlayerInterface::Get_ListSubtitles() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Send_Action() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
   }
   return ret;
 }
@@ -361,7 +224,6 @@ bool OMXPlayerInterface::Do_SelectVideo(int track) {
   }
   catch (DBus::Error &dbus_err) {
     Log("Do_SelectVideo() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
   }
   return ret;
 }
@@ -410,7 +272,6 @@ std::vector< std::string > OMXPlayerInterface::Get_ListVideo() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Send_Action() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
   }
   return ret;
 }
@@ -428,7 +289,6 @@ bool OMXPlayerInterface::Do_SelectAudio(int track) {
   }
   catch (DBus::Error &dbus_err) {
     Log("Do_SelectAudio() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
   }
   return ret;
 }
@@ -478,7 +338,6 @@ std::vector< std::string > OMXPlayerInterface::Get_ListAudio() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Send_Action() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
   }
   return ret;
 }
@@ -550,6 +409,7 @@ int64_t OMXPlayerInterface::Send_Seek(int64_t usecs) {
 }
 
 void OMXPlayerInterface::Do_SetPosition(string sMediaURL, int64_t xPos) {
+    // FIXME: need to check for seek past end
     Log("Do_SetPosition() - calling SetPosition('" + sMediaURL + "', " + to_string(xPos) + ") [" + TimeFromUSec(xPos) + "]");
     if (Send_SetPosition(sMediaURL, xPos) != xPos)
 	Log("Do_SetPosition() - error setting position!");
@@ -563,7 +423,6 @@ int64_t OMXPlayerInterface::Send_SetPosition(string sMediaURL, int64_t xPos) {
   }
   catch (DBus::Error &dbus_err) {
     Log("Send_SetPosition() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
   }
   m_sMediaURL = sMediaURL;
   return ret;
@@ -600,11 +459,19 @@ void OMXPlayerInterface::Do_SeekBackLarge() {
 }
 
 void OMXPlayerInterface::Do_SeekForwardSmall() {
+    // TODO: MUST!!!
+    //  Add checks for seeking past end, omxplayer
+    //  does not check this and idles if you seek
+    //  past the end of the stream.
     Log("Do_SeekForward() - calling Send_Action(KeyConfig::ACTION_SEEK_FORWARD_SMALL)");
     Send_Action(KeyConfig::ACTION_SEEK_FORWARD_SMALL);
 }
 
 void OMXPlayerInterface::Do_SeekForwardLarge() {
+    // TODO: MUST!!!
+    //  Add checks for seeking past end, omxplayer
+    //  does not check this and idles if you seek
+    //  past the end of the stream.
     Log("Do_SeekForward() - calling Send_Action(KeyConfig::ACTION_SEEK_FORWARD_LARGE)");
     Send_Action(KeyConfig::ACTION_SEEK_FORWARD_LARGE);
 }
@@ -627,7 +494,6 @@ void OMXPlayerInterface::Send_Action(int Action) {
   }
   catch (DBus::Error &dbus_err) {
     Log("Send_Action() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
   }
 }
 
@@ -643,7 +509,6 @@ void OMXPlayerInterface::Send_Pause() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Send_Pause() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
   }
 }
 
@@ -654,7 +519,6 @@ void OMXPlayerInterface::Send_Stop() {
   }
   catch (DBus::Error &dbus_err) {
     Log("Send_Stop() - D-Bus error - omxplayer has gone away?");
-    Reconnect_Player();
   }
 }
 
@@ -925,39 +789,35 @@ bool OMXPlayerInterface::Play(string sMediaURL, string sMediaPosition) {
     ifstream infile;
     bool bPrivate(true);
 
-
-    // Don't get dbus_addr if we already know it, changes on rpi reboot only
-  if (!m_s_dbus_addr.empty()) {
     Log("Play() - Opening file '" + OMXPLAYER_DBUS_ADDR + "' to get d-bus address");
+    infile.open(OMXPLAYER_DBUS_ADDR.c_str());
 
-    while (i<=RETRIES && line == "") {
+    while (++i<=RETRIES && line == "") {
       while (!infile.is_open() && ++i<=RETRIES ) {
         usleep(100000);
         infile.open(OMXPLAYER_DBUS_ADDR.c_str());
       }
       if (!infile.is_open())  {
-        Log("Play() - Could not open file " + OMXPLAYER_DBUS_ADDR);
+        Log("Play() - Could not open file " + OMXPLAYER_DBUS_ADDR + ", exiting... ");
+	Do_QuitOnError();
+        return false;
       }
       else {
         getline(infile, line);
         infile.close();
-        if ( line != "" ) {
-          Log("Play() - Read dbus session line: " + line);
-        }
-        else {
-          Log("Play() - Failed to read D-Bus address line from " + OMXPLAYER_DBUS_ADDR);
-        }
       }
     }
-    if (i >= RETRIES)  {
-      Log("Play() - Failed to open/read D-Bus address line from " + OMXPLAYER_DBUS_ADDR + " exiting...");
-      Do_QuitOnError();
+
+    if ( line != "" ) {
+      Log("Play() - Read line: " + line);
+    }
+    else {
+      Log("Play() - Failed to read D-Bus address line from " + OMXPLAYER_DBUS_ADDR);
+//      Stop();
       return false;
     }
-    m_s_dbus_addr = line;
-  }
 
-    dbus_addr = m_s_dbus_addr.c_str();
+    dbus_addr = line.c_str();
 
     // setup the dbus 'Player' connection and client
     if (g_player_conn == NULL) {
@@ -1040,7 +900,6 @@ if (i >=DBUS_RETRIES)
     }
     else {
       Log("Play() - FUBAR!");
-      return false;
     }
 
     SetState(STATE::PLAYING);
@@ -1074,10 +933,9 @@ OMXPlayerInterface::STATE OMXPlayerInterface::Get_PlayerState(void) {
 
 void OMXPlayerInterface::Inc_Error(void) {
   ++m_iErrCount;
-  Log("Inc_Error() - [" + to_string(m_iErrCount) + "]");
+  Log("[" + to_string(m_iErrCount) + "] - ");
 
   if ( m_iErrCount >= DBUS_RETRIES ) {
-    Log("Inc_Error() - DBUS_RETRIES exceeded, exiting...");
     Stop();
   }
 

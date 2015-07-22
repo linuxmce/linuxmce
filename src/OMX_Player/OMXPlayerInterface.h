@@ -60,7 +60,6 @@ private:
   OMXPlayerClient *g_player_client;
   OMXPropsClient *g_props_client;
   OMXRootClient *g_root_client;
-  std::string m_s_dbus_addr;
 
   // child data and threads
   pid_t m_iChildPID;
@@ -100,17 +99,6 @@ private:
   mutex m_mtxLog;
 
   // private methods
-  bool Connect_Player(void);
-  void Disconnect_Player(void);
-  bool Reconnect_Player(void);
-  //
-  bool Connect_Properties(void);
-  void Disconnect_Properties(void);
-  bool Reconnect_Properties(void);
-  //
-  bool Connect_Root(void);
-  void Disconnect_Root(void);
-  bool Reconnect_Root(void);
 
   // friend functions (threads)
   friend void* PlayerMonitor(void *pInstance);
