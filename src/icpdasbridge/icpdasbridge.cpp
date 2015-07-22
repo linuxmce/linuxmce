@@ -108,7 +108,7 @@ void icpdasbridge::CreateChildren()
 
 	icpdasbridge_Command::CreateChildren();
 
-// 	send_to_icpdas("getdevices");
+ 	send_to_icpdas("STATUS");
 
 /*	do
 	{
@@ -120,9 +120,10 @@ void icpdasbridge::CreateChildren()
 			LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Failed to get devices from icpdas");
 			exit(2);
 		}
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Reading data from icpdas");
+		LoggerWrapper::GetInstance()->Write(LV_CRITICAL, "Reading STATUS data from icpdas");
 		
-	} while (device_data != "endlistdevices");
+	} while (device_data != "OK\n");
+
 */
 
 	Sleep(1000);
@@ -375,7 +376,13 @@ void icpdasbridge::parse_icpdas_reply(std::string message)
 		if (vMessage[0] == "INFO") 	
 		{
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "We got the connect back from ICPDAS: %s",message.c_str());
-			return;
+			sPort = StringUtils::Split(vMessage[1],"=")[1];
+			if (sPort != "COM") // We have a list of module information - lets ask icp2dce to interpet them
+			{
+				return;
+			} else {
+				vMessage[0] = "CHANGE";
+			}
 		}
 		if (vMessage[0]=="CHANGE")
 		{	
