@@ -76,10 +76,12 @@ bool OMX_Plugin::GetConfig()
 bool OMX_Plugin::Register()
 //<-dceag-reg-e->
 {
-	LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Starting OMX_Plugin::Register()");
+	LoggerWrapper::GetInstance()->Write(LV_STATUS,"Starting OMX_Plugin::Register()");
 
 	m_iPriority=DATA_Get_Priority();
 
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"OMX Plugin is at %i priority for playing media.",m_iPriority);
+	
 	m_pMedia_Plugin=( Media_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
 	m_pOrbiter_Plugin=( Orbiter_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST);
 	if( !m_pMedia_Plugin || !m_pOrbiter_Plugin )

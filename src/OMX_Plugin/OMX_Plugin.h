@@ -42,7 +42,6 @@ namespace DCE
 
 public:
 	// Public member variables
-	  int m_iPriority;
   
 //<-dceag-const-b->
 public:
