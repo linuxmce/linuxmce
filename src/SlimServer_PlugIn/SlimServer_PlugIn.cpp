@@ -70,6 +70,7 @@ bool SlimServer_PlugIn::Register()
 {
 	m_iPriority=DATA_Get_Priority();
 
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"SlimServer Plugin is at %i priority for playing media.",m_iPriority);
 	m_pMedia_Plugin=( Media_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Media_Plugin_CONST);
 	m_pOrbiter_Plugin=( Orbiter_Plugin * ) m_pRouter->FindPluginByTemplate(DEVICETEMPLATE_Orbiter_Plugin_CONST);
 	if( !m_pMedia_Plugin || !m_pOrbiter_Plugin )
