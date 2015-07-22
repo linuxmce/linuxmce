@@ -486,7 +486,7 @@ bool icpdasbridge::send_to_icpdas(string Cmd)
 
 	PLUTO_SAFETY_LOCK(sl, icpdas_mutex);
 
-	sprintf(command, "%s\r", Cmd.c_str()); 
+	sprintf(command, "%s\n", Cmd.c_str()); 
 	LoggerWrapper::GetInstance()->Write(LV_STATUS, "Sending command %s\n", command);
 
 	result = send(icpdas_socket,command,strlen(command), 0);
