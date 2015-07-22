@@ -404,6 +404,7 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 		{
 			try
 			{
+	                        LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Trying to Evaluate the Criteria for this event");
 				if( !pEventHandler->m_pCriteria->Evaluate(pEventInfo,(void *) m_pRouter) )
 					bResult=false;
 			}
@@ -413,6 +414,7 @@ bool Event_Plugin::ProcessEvent(class Socket *pSocket,class Message *pMessage,cl
 				bResult=false;
 			}
 		}
+                LoggerWrapper::GetInstance()->Write(LV_EVENTHANDLER,"Criteria probably evaluated to %i", bResult);
 
 		LoggerWrapper::GetInstance()->Write(LV_EVENTHANDLER,"Evaluated Event Handler: %d to: %d once per: %d last fired %d (time is %d)",
 			pEventHandler->m_PK_EventHander,(int) bResult,
