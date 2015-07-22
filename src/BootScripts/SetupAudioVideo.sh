@@ -60,7 +60,11 @@ case "$PK_Distro" in
 		fi
 
 		# Prevent /etc/asound.conf from being generated on rpi
-		SetDeviceData "$PK_Device" "$DEVICEDATA_Audio_settings" "M"
+		rpioutput='2' // HDMI is default audio out
+		if [[ "$DEVICEDATA_Audio_settings" == "S" ]]; then
+			rpioutput='1'
+		fi
+		amixer cset numid=3 $rpioutput
 		;;
 esac
 
@@ -207,6 +211,10 @@ Setup_AsoundConf()
 	Yalpa=$(aplay -l 2>&1)
 	# Do not mess with asound.conf if Audio Setting is set to Manual. This will only happen after the asound.conf has been generated at least once.
 	if [[ "$AudioSetting" == "M" ]]; then
+		return		
+	fi
+	# Do not mess with raspbian based systems
+	if [[ "$PK_Distro" == "$DEVICEDATA_Distro_Raspbian" ]]; then
 		return
 	fi
 	if grep 'no soundcards found' <<< "$Yalpa"; then
