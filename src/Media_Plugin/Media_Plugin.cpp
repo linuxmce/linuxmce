@@ -806,6 +806,7 @@ static bool MediaFileComparer(MediaFile *a, MediaFile *b)
 static bool MediaHandlerComparer(MediaHandlerInfo *x, MediaHandlerInfo *y)
 {
 	// Reverse since we want highest priorities first
+	LoggerWrapper::GetInstance()->Write(LV_DEBUG,"Priority X %d and Y %d", x->m_pMediaHandlerBase->m_iPriority, y->m_pMediaHandlerBase->m_iPriority);
 	return x->m_pMediaHandlerBase->m_iPriority>y->m_pMediaHandlerBase->m_iPriority;
 }
 
@@ -5338,6 +5339,7 @@ void Media_Plugin::GetMediaHandlersForEA(int iPK_MediaType,int iPK_MediaProvider
 	// to store in vectEA_to_MediaHandler
 	map<MediaHandlerInfo *, vector<EntertainArea *> > mapMediaHandlerInfo;
 	map<int,EntertainArea *> mapEntertainArea_NoHandlers;
+	LoggerWrapper::GetInstance()->Write( LV_DEBUG, "Start of GetMediaHandlersForEA");
 	for(size_t s=0;s<vectEntertainArea.size();++s)
 	{
 		EntertainArea *pEntertainArea=vectEntertainArea[s];
@@ -5375,6 +5377,7 @@ void Media_Plugin::GetMediaHandlersForEA(int iPK_MediaType,int iPK_MediaProvider
 	{
 		// It's easy, save ourselves the trouble of searching we've got 1 handler and it can take care of it
 		vectEA_to_MediaHandler.push_back( make_pair< MediaHandlerInfo *,vector<EntertainArea *> >(mapMediaHandlerInfo.begin()->first,mapMediaHandlerInfo.begin()->second) );
+        	LoggerWrapper::GetInstance()->Write( LV_DEBUG, "We exit out of GetMediaHandlersForEA as we have a media handler");
 		return;
 	}
 
@@ -5427,6 +5430,15 @@ void Media_Plugin::GetMediaHandlersForEA(int iPK_MediaType,int iPK_MediaProvider
 	for( map<MediaHandlerInfo *, vector<EntertainArea *> >::iterator it=mapMediaHandlerInfo.begin();it!=mapMediaHandlerInfo.end();++it )
 		listMediaHandlerInfo.push_back( it->first );
 	listMediaHandlerInfo.sort(MediaHandlerComparer);
+
+	// Debug loop to see what we have atm with regards to priorities.
+	
+	for (list<MediaHandlerInfo *>::iterator it=listMediaHandlerInfo.begin(); it!=listMediaHandlerInfo.end(); ++it)
+	{
+                MediaHandlerInfo *pMediaHandlerInfo = *it;
+                LoggerWrapper::GetInstance()->Write(LV_DEBUG,"After sort DT #%d - MediaType #%d",pMediaHandlerInfo->m_PK_DeviceTemplate,pMediaHandlerInfo->m_PK_MediaType);
+        }
+
 
 	// Now a map to keep track of which EA's we have matched
 	map<int,bool> mapMatched;
