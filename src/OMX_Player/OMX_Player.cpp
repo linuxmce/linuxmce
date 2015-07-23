@@ -114,7 +114,8 @@ bool OMX_Player::GetConfig()
 		m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfCategory(DEVICECATEGORY_Media_Plugins_CONST);
 
 	// TODO:: Need to get sAudioDevice, bPassthrough, sGpuDeInt data
-	m_sAudioDevice = m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(m_dwPK_Device,DEVICEDATA_Audio_settings_CONST);
+	int PK_MD = m_pData->m_dwPK_Device_MD;
+	m_sAudioDevice = m_pData->m_pEvent_Impl->GetDeviceDataFromDatabase(PK_MD,DEVICEDATA_Audio_settings_CONST);
 	// m_sAudioDevice = "hdmi";
         if (m_sAudioDevice == "S") {
         	m_bPassthrough = false;
