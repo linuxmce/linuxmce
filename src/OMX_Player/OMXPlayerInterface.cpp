@@ -707,17 +707,14 @@ bool OMXPlayerInterface::Play(string sMediaURL, string sMediaPosition) {
 
     // check the audio output device
     string sopt;
-    if (m_sAudioDevice == "hdmi") {
-      sopt = "-ohdmi";
+    if (m_sAudioDevice == "H") {
+       sopt = "-ohdmi";
     }
-    else if (m_sAudioDevice == "local") {
-      sopt = "-olocal";
-    }
-    else if (m_sAudioDevice == "both") {
-      sopt = "-oboth";
-    }
+    else if (m_sAudioDevice == "S") {
+        sopt = "-olocal";
+    } 
     else {
-      sopt = "-oboth";
+        sopt = "-oboth";
     }
     args.push_back((char *)sopt.c_str());
 
