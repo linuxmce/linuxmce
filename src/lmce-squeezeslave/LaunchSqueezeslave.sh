@@ -74,9 +74,33 @@ if [[ -n "$AUDIO_DEVICE" ]]; then
 fi
 [[ -z "$OUTPUT" ]] && exit 1
 
-# Announce our presence to the router
-# TODO: Pass Room/EntArea?
-/usr/pluto/bin/MessageSend "$DCERouter" 0 -1001 2 65 5 "$MAC" 52 3 53 5 49 "$DEVICETEMPLATE_Squeezebox_Player"
+# Check if we already are in the database, and if not, let the router create one
+# in our current room.
+
+Q=" SELECT COUNT(*) FROM Device 
+	WHERE FK_DeviceTemplate='$DEVICETEMPLATE_Squeezebox_Player'
+		AND MACaddress='$MAC';"
+INSTALLED=$(RunSQL "$Q")
+
+if [[ "$INSTALLED" == "0" ]]; then
+	# We don't have the corresponding Squeezebox Player in our install
+	# so let's create it. 
+	# We need the room we are in, so we don't bother the user with a question
+	
+	Q="SELECT FK_Room FROM Device WHERE PK_Device = $DEVICE"
+	ROOM=$(RunSQL "$Q")
+
+	if [[ "x$ROOM" == "x" ]]; then
+		# we have no room, so we don't add the information
+		echo ""
+	else
+		# we add the room parameter to the message send.
+		ROOM="57 $ROOM"
+	fi	
+
+	/usr/pluto/bin/MessageSend "$DCERouter" 0 4 1 718 44 "$DEVICETEMPLATE_Squeezebox_Player" 47 "$MAC" $ROOM
+fi
+	
 
 # Build command parameters
 PARAMS=""
