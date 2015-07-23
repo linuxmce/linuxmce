@@ -60,7 +60,7 @@ case "$PK_Distro" in
 		fi
 
 		# Prevent /etc/asound.conf from being generated on rpi
-		rpioutput='2' // HDMI is default audio out
+		rpioutput='2' # HDMI is default audio out
 		if [[ "$DEVICEDATA_Audio_settings" == "S" ]]; then
 			rpioutput='1'
 		fi
