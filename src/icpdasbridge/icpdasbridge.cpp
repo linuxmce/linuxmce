@@ -645,10 +645,38 @@ void icpdasbridge::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,str
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"SET LEVEL RECEIVED FOR CHILD %s", portChannel.c_str());
 			command = pMessage->m_mapParameters[COMMANDPARAMETER_Level_CONST]; // .c_str(); 
 			// this is a cludge as the receiver doesn't understand 100% as on for switches.
-			if (command == "100") 
+			if (command == "100") // Full - we do an on
 			{
 				command = "1";
-			}
+				if (deviceTemplate == DEVICETEMPLATE_Drapes_Switch_CONST) 
+				{
+					vBlindChannel = StringUtils::Split(portChannel,"|");
+					portChannel = vBlindChannel[1];
+					// Before sending the new port a power command, we make sure that the other port
+					// has stopped.
+					send_to_icpdas("SET:"+vBlindChannel[0]+":0");
+				}
+			} else if (command == "0") // same as OFF			
+			{
+				if (deviceTemplate == DEVICETEMPLATE_Drapes_Switch_CONST) 
+				{
+					vBlindChannel = StringUtils::Split(portChannel,"|");
+					portChannel = vBlindChannel[0];
+					send_to_icpdas("SET:"+vBlindChannel[1]+":0");
+					command="1";
+				}
+			} else 	// Everything else will be interpreted as a STOP command for the drapes.
+			{	// we stop by sending the 0 to both blind ports.	
+				if (deviceTemplate == DEVICETEMPLATE_Drapes_Switch_CONST) 
+				{
+					vBlindChannel = StringUtils::Split(portChannel,"|");
+					portChannel = vBlindChannel[1];
+					// Before sending the new port a power command, we make sure that the other port
+					// has stopped.
+					send_to_icpdas("SET:"+vBlindChannel[0]+":0");
+					command = "0"; 
+				}
+			}				
 			break;
 		case COMMAND_Set_Temperature_CONST:
 			LoggerWrapper::GetInstance()->Write(LV_DEBUG,"SET TEMPERATURE RECEIVED FOR CHILD %s", portChannel.c_str());
