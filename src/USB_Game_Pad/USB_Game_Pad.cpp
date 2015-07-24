@@ -81,7 +81,6 @@ USB_Game_Pad::USB_Game_Pad(int DeviceID, string ServerAddress,bool bConnectEvent
   m_iJoy1fd = m_iJoy2fd = m_iJoy3fd = m_iJoy4fd = -1;
   m_iJoy1Type = m_iJoy2Type = m_iJoy3Type = m_iJoy4Type = JOY_TYPE_GENERIC;
   m_iErrors = 0;
-  m_Avg = new Avg();
 }
 
 //<-dceag-const2-b->!
@@ -97,8 +96,6 @@ void USB_Game_Pad::PrepareToDelete()
 USB_Game_Pad::~USB_Game_Pad()
 //<-dceag-dest-e->
 {
-  delete m_Avg;
-
   for (map<int, CurrentInputs* >::iterator it=m_mapFdCurrentInputs.begin();
        it != m_mapFdCurrentInputs.end();
        ++it)
@@ -556,7 +553,7 @@ void USB_Game_Pad::HandleEvent(string sCode, int joytype)
 
 }
 
-void USB_Game_Pad::ProcessGamePad1(int fd, int joytype, bool& active)
+void USB_Game_Pad::ProcessGamePad(int fd, int joytype, bool& active)
 {
   CurrentInputs* pInput = m_mapFdCurrentInputs[fd];
   size_t iBytesRead=0;
@@ -708,301 +705,6 @@ void USB_Game_Pad::ProcessGamePad1(int fd, int joytype, bool& active)
 
 }
 
-void USB_Game_Pad::ProcessGamePad(int fd, int joytype, bool& active)
-{
-  if (m_cCurrentScreen != 'Z' || m_iErrors > 10)         // If the current screen is a Game FS, simply ignore.
-    {
-      unsigned char axes = 2;
-      unsigned char buttons = 2;
-      uint16_t btnmap[KEY_MAX - BTN_MISC + 1];
-      uint8_t axmap[ABS_MAX + 1];
-      unsigned int trigger_gradient;
-      bool changed=false;
-
-      struct ::js_event js; // one event packet.
-      
-      timespec ts_now;
-      //  timespec ts_diff;
-      
-      ioctl(fd, JSIOCGAXES, &axes);
-      ioctl(fd, JSIOCGBUTTONS, &buttons);
-      ioctl(fd, JSIOCGAXMAP, axmap);
-      ioctl(fd, JSIOCGBTNMAP, btnmap);      
-
-      while (read(fd, &js, sizeof(struct ::js_event)) == sizeof(struct ::js_event))
-	{
-	  // Parse the joystick event.
-	  gettimeofday(&ts_now,NULL);
-	  
-	  switch (js.type)
-	    {
-	    case 1:  // buttons
-	      if (js.value == 0)
-		{
-		  // button up
-		  string sButtonNum = StringUtils::itos(js.number+1);
-		  string sRet = "USB-GAMEPAD-B"+sButtonNum;
-		  if (joytype == JOY_TYPE_XBOX360)
-		    sRet = "XBOX360-GAMEPAD-B"+sButtonNum;
-		  map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sRet);
-		  if ( it==m_mapCodesToButtons.end() )
-		    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sRet.c_str());
-		  else
-		    {
-		      // Send it off to IRRecieverBase
-		      if (m_cCurrentScreen == 'G')
-			{
-			  if (joytype == JOY_TYPE_GENERIC)
-			    {
-			      if (sRet == "USB-GAMEPAD-B13")
-				ReceivedCode(it->second.second,it->second.first.c_str());
-			    }
-			  else if (joytype == JOY_TYPE_XBOX360)
-			    {
-			      if (sRet == "XBOX360-GAMEPAD-B9")
-				ReceivedCode(it->second.second,it->second.first.c_str());
-			    }
-			}
-		      else
-			{
-			
-		      	     ReceivedCode(it->second.second,it->second.first.c_str());
-			}
-		      
-		      if (m_dwPK_Device==DEVICEID_MESSAGESEND)
-			{
-			  ForceKeystroke(it->second.first, m_sAVWHost, m_iAVWPort);
-			  return;
-			}
-		    }
-		}
-	      break;
-	    case 2:  // axes
-	      if (js.number == 5 && joytype == JOY_TYPE_XBOX360)
-		{
-		  int adj_value = js.value + 32767;
-		  if (adj_value == 0)
-		    {
-		      trigger_gradient=0;
-		      changed=true;
-		    }
-		  if (adj_value <= 10922 && !(adj_value < 1)) 
-		    {
-		      changed=(trigger_gradient!=1);
-		      trigger_gradient=1;
-		    }
-		  if (adj_value <= 21844 && !(adj_value < 10923))
-		    {
-		      changed=(trigger_gradient!=2);
-		      trigger_gradient=2;
-		    }
-		  if (adj_value <= 32766 && !(adj_value < 21845))
-		    {
-		      changed=(trigger_gradient!=3);
-		      trigger_gradient=3;
-		    }
-		  if (adj_value <= 43688 && !(adj_value < 32767))
-		    {
-		      changed=(trigger_gradient!=4);
-		      trigger_gradient=4;
-		    }
-		  if (adj_value <= 54610 && !(adj_value < 43689))
-		    {
-		      changed=(trigger_gradient!=5);
-		      trigger_gradient=5;
-		    }
-		  if (adj_value <= 65535 && !(adj_value < 54611))
-		    {
-		      changed=(trigger_gradient!=6);
-		      trigger_gradient=6;
-		    }
-
-		  if (changed)
-		    {
-		      changed=false;
-		      map<string,pair<string,int> >::iterator it=m_mapCodesToButtons.find("XBOX360-GAMEPAD-RT"+StringUtils::itos(trigger_gradient));
-		      if (it==m_mapCodesToButtons.end())
-			{
-			  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for trigger XBOX360-GAMEPAD-RT%d",trigger_gradient);
-			}
-		      else
-			{
-			  if (m_cCurrentScreen!='G')
-			    {
-			      ReceivedCode(it->second.second,it->second.first.c_str());
-			    }
-			}
-		    }
-		}
-	      else if (js.number == 2 && joytype == JOY_TYPE_XBOX360)
-		{
-		  int adj_value = js.value + 32767;
-		  if (adj_value == 0)
-		    {
-		      trigger_gradient=0;
-		      changed=true;
-		    }
-		  if (adj_value <= 10922 && !(adj_value < 1)) 
-		    {
-		      changed=(trigger_gradient!=1);
-		      trigger_gradient=1;
-		    }
-		  if (adj_value <= 21844 && !(adj_value < 10923))
-		    {
-		      changed=(trigger_gradient!=2);
-		      trigger_gradient=2;
-		    }
-		  if (adj_value <= 32766 && !(adj_value < 21845))
-		    {
-		      changed=(trigger_gradient!=3);
-		      trigger_gradient=3;
-		    }
-		  if (adj_value <= 43688 && !(adj_value < 32767))
-		    {
-		      changed=(trigger_gradient!=4);
-		      trigger_gradient=4;
-		    }
-		  if (adj_value <= 54610 && !(adj_value < 43689))
-		    {
-		      changed=(trigger_gradient!=5);
-		      trigger_gradient=5;
-		    }
-		  if (adj_value <= 65535 && !(adj_value < 54611))
-		    {
-		      changed=(trigger_gradient!=6);
-		      trigger_gradient=6;
-		    }
-
-		  if (changed)
-		    {
-		      changed=false;
-		      map<string,pair<string,int> >::iterator it=m_mapCodesToButtons.find("XBOX360-GAMEPAD-LT"+StringUtils::itos(trigger_gradient));
-		      if (it==m_mapCodesToButtons.end())
-			{
-			  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for trigger XBOX360-GAMEPAD-LT%d",trigger_gradient);
-			}
-		      else
-			{
-			  if (m_cCurrentScreen!='G')
-			    {
-			      ReceivedCode(it->second.second,it->second.first.c_str());
-			    }
-			}
-		    }
-		}
-	      else if (js.number % 2 == 0)
-		{
-		  // Horizontal axes.
-		  if (js.value < -16384)
-		    {
-		      // left
-		      string sRet = "USB-GAMEPAD-LEFT";
-		      map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sRet);
-		      if ( it==m_mapCodesToButtons.end() )
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sRet.c_str());
-		      else
-			{
-			  // Send it off to IRRecieverBase
-			  if (m_cCurrentScreen != 'G')
-			    {
-			      ReceivedCode(it->second.second,it->second.first.c_str());
-			      if (m_dwPK_Device==DEVICEID_MESSAGESEND)
-				{
-				  ForceKeystroke(it->second.first, m_sAVWHost, m_iAVWPort);
-				  return;
-				}
-			    }
-			}
-		    }
-		  if (js.value > 16384)
-		    {
-		      // right
-		      string sRet = "USB-GAMEPAD-RIGHT";
-		      map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sRet);
-		      if ( it==m_mapCodesToButtons.end() )
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sRet.c_str());
-		      else
-			{
-			  // Send it off to IRRecieverBase
-			  if (m_cCurrentScreen != 'G')
-			    {
-			      ReceivedCode(it->second.second,it->second.first.c_str());
-			      if (m_dwPK_Device==DEVICEID_MESSAGESEND)
-				{
-				  ForceKeystroke(it->second.first, m_sAVWHost, m_iAVWPort);
-				  return;
-				}
-			    }
-			}
-		    }
-		}
-	      else 
-		{
-		  // Vertical axes.
-		  if (js.value < -16384)
-		    {
-		      // up
-		      string sRet = "USB-GAMEPAD-UP";
-		      map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sRet);
-		      if ( it==m_mapCodesToButtons.end() )
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sRet.c_str());
-		      else
-			{
-			  // Send it off to IRRecieverBase
-			  if (m_cCurrentScreen != 'G')
-			    {
-			      ReceivedCode(it->second.second,it->second.first.c_str());
-			      if (m_dwPK_Device==DEVICEID_MESSAGESEND)
-				{
-				  ForceKeystroke(it->second.first, m_sAVWHost, m_iAVWPort);
-				  return;
-				}
-			    }
-			}
-		    }
-		  if (js.value > 16384)
-		    {
-		      // down
-		      string sRet = "USB-GAMEPAD-DOWN";
-		      map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sRet);
-		      if ( it==m_mapCodesToButtons.end() )
-			LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't find a mapping for button %s",sRet.c_str());
-		      else
-			{
-			  // Send it off to IRRecieverBase
-			  if (m_cCurrentScreen != 'G')
-			    {
-			      ReceivedCode(it->second.second,it->second.first.c_str());
-			      if (m_dwPK_Device==DEVICEID_MESSAGESEND)
-				{
-				  ForceKeystroke(it->second.first, m_sAVWHost, m_iAVWPort);
-				  return;
-				}
-			    }
-			}
-		    }
-		}
-	      break;
-	    }
-	  
-	}
-      
-      if (errno != EAGAIN)
-	{
-	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ProcessGamePad(%d) Error reading event packet.",fd);
-	  m_iErrors++;
-	  return;
-	} 
-    }
-    else
-    {
-        // Error Happened, Close the joystick, and let FindGamePads reopen it. 
-        LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"ProcessGamePad(%d) closing this file descriptor and re-opening.",fd);
-        m_iErrors = 0;
-        close(fd);
-    }
-}
-
 int USB_Game_Pad::Gamepad_Capture(int deviceID)
 {
   
@@ -1014,13 +716,13 @@ int USB_Game_Pad::Gamepad_Capture(int deviceID)
   while (!m_bQuit_get())
     {
       if (m_bJoy1Active)
-	ProcessGamePad1(m_iJoy1fd,m_iJoy1Type,m_bJoy1Active);
+	ProcessGamePad(m_iJoy1fd,m_iJoy1Type,m_bJoy1Active);
       if (m_bJoy2Active)
-	ProcessGamePad1(m_iJoy2fd,m_iJoy2Type,m_bJoy2Active);
+	ProcessGamePad(m_iJoy2fd,m_iJoy2Type,m_bJoy2Active);
       if (m_bJoy3Active)
-	ProcessGamePad1(m_iJoy3fd,m_iJoy3Type,m_bJoy3Active);
+	ProcessGamePad(m_iJoy3fd,m_iJoy3Type,m_bJoy3Active);
       if (m_bJoy4Active)
-	ProcessGamePad1(m_iJoy4fd,m_iJoy4Type,m_bJoy4Active);
+	ProcessGamePad(m_iJoy4fd,m_iJoy4Type,m_bJoy4Active);
       
       usleep(10000);
 
