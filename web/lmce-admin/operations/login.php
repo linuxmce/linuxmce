@@ -187,6 +187,13 @@ function login($output,$dbADO) {
 						}
 
 						$messages.=translate('TEXT_ERROR_INVALID_USER_OR_PASSWORD_CONST');
+						//log user login failed
+						$postuser=$usernameForm;
+						$today = date("F j H:i:s");
+						$IPClient= $_SERVER['REMOTE_ADDR'];
+						$logAuth = fopen('/var/log/lmceweb/auth.log', 'a+');
+						fputs($logAuth, $today . " \tServer name " . " lmce-admin: login failure". " as user : " . $postuser . " \t" . $IPClient . "\n");
+						fclose($logAuth);
 						header("Location: index.php?section=login&error=".translate('TEXT_ERROR_INVALID_USER_OR_PASSWORD_CONST'));
 						exit(0);
 					} else {
