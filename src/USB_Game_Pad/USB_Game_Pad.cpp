@@ -281,7 +281,7 @@ bool USB_Game_Pad::IsJoystick(string sGamePadDevice)
   string sOutput, sStdErr;
   char csGamePadDevice[100];
   strcpy(csGamePadDevice,sGamePadDevice.c_str());
-  char * args[] = {"/sbin/udevadm","info","--query","property","--name",csGamePadDevice,NULL};
+  const char * args[] = {"/sbin/udevadm","info","--query","property","--name",csGamePadDevice,NULL};
   if ( ProcessUtils::GetCommandOutput(args[0], args, sOutput, sStdErr) == 0)
     {
       if ( sOutput.find("ID_INPUT_JOYSTICK=1") != string::npos)
