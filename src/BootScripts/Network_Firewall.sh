@@ -393,7 +393,7 @@ Manual_CHain_Rules()
 	IPVersion="$1"
 	chain="$2"
 
-	Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType='$chain' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY PK_Firewall"
+	Q="SELECT IntIf,ExtIf,Matchname,Protocol,SourceIP,SourcePort,SourcePortEnd,DestinationIP,DestinationPort,RPolicy,Description FROM Firewall WHERE RuleType='$chain' AND Protocol LIKE '%-$IPVersion' AND Disabled='0' AND Offline='0' ORDER BY Place, PK_Firewall"
 	R=$(RunSQL "$Q")
 
 	for Port in $R; do
@@ -563,7 +563,7 @@ echo "Setting default Policy"
 #ipv4
 if [[ ! "$DisableIPv4Firewall" == "1" ]]; then
 	echo "Set manual defined chains for ipv4"
-	Q="SELECT Matchname FROM Firewall WHERE Protocol='chain-ipv4' ORDER BY PK_Firewall"
+	Q="SELECT Matchname FROM Firewall WHERE Protocol='chain-ipv4' ORDER BY 	Place, PK_Firewall"
 	R=$(RunSQL "$Q")
 
 	for Chain in $R; do
@@ -579,7 +579,7 @@ fi
 if [[ ! "$DisableIPv6Firewall" == "1" ]]; then
 	echo "Set manual defined chains for ipv6"
 
-	Q="SELECT Matchname FROM Firewall WHERE Protocol='chain-ipv6' ORDER BY PK_Firewall"
+	Q="SELECT Matchname FROM Firewall WHERE Protocol='chain-ipv6' ORDER BY Place, PK_Firewall"
 	R=$(RunSQL "$Q")	
 
 	for Chain in $R; do
