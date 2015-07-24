@@ -191,40 +191,6 @@ namespace DCE
 
   };
   
-  /**
-   * A simple class to average 5 values for smoothing out
-   * input data
-   */
-  class Avg
-  {
-  public:
-
-    map<int, vector<int> > m_mapAxisAvgs;
-
-    Avg() { }
-    ~Avg() { }
-    
-    int value(int axis, int newVal)
-    {
-      size_t i;
-      int v;
-
-      if (m_mapAxisAvgs[axis].size() == 5)
-	m_mapAxisAvgs[axis].erase(m_mapAxisAvgs[axis].begin());
-
-      m_mapAxisAvgs[axis].push_back(newVal);
-      
-      for (i=0;i<m_mapAxisAvgs[axis].size();i++)
-	{
-	  v = v + m_mapAxisAvgs[axis].at(i);
-	}
-
-      return ceil(v/m_mapAxisAvgs[axis].size());
-      
-    }
- 
-  };
-
   class USB_Game_Pad : public USB_Game_Pad_Command, public AlarmEvent, IRReceiverBase, IRBase
 	{
 //<-dceag-decl-e->
@@ -235,7 +201,6 @@ namespace DCE
 
 		// Private methods
 	  void ProcessGamePad(int fd, int joytype, bool& active);
-	  void ProcessGamePad1(int fd, int joytype, bool& active);
 	  int GetJoyType(string iJoyType);
 	  void HandleEvent(string sCode, int joytype);
 public:
@@ -261,7 +226,6 @@ public:
 	  void AlarmCallback (int id, void *param);
 	  string m_sAVWHost;
 	  int m_iAVWPort;
-	  class Avg *m_Avg;
 	  map<int, CurrentInputs *> m_mapFdCurrentInputs;
 	  
 //<-dceag-const-b->
