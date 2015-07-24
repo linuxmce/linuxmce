@@ -25,10 +25,206 @@
 #include "../LIRC_DCE/IRReceiverBase.h"
 #include "IRBase/IRBase.h"
 #include "AlarmManager.h"
+#include <math.h>
 
 //<-dceag-decl-b->
 namespace DCE
 {
+
+  class CurrentInputs
+  {
+  public:
+    string sCodeButton; 
+    string sCodeHoriz;
+    string sCodeVert;
+    bool bChangedButton, bChangedHoriz, bChangedVert;
+    bool bLatchedButton, bLatchedHoriz, bLatchedVert;
+    timeval tvDownButton, tvDownHoriz, tvDownVert;
+
+    CurrentInputs()
+      {
+	sCodeButton="";
+	sCodeHoriz="";
+	sCodeVert="";
+	bChangedButton=bChangedHoriz=bChangedVert=false;
+	tvDownButton.tv_usec=tvDownHoriz.tv_usec=tvDownVert.tv_usec=0;
+	tvDownButton.tv_sec=tvDownHoriz.tv_sec=tvDownVert.tv_sec=0;
+      }
+
+    ~CurrentInputs()
+      {
+      }
+
+    void setHoriz(string sCode)
+    {
+      bChangedHoriz=(sCode!=sCodeHoriz);
+      sCodeHoriz=sCode;
+      if (bChangedHoriz)
+	gettimeofday(&tvDownHoriz,NULL);
+    }
+
+    void setVert(string sCode)
+    {
+      bChangedVert=(sCode!=sCodeVert);
+      sCodeVert=sCode;
+      if (bChangedVert)
+	gettimeofday(&tvDownVert,NULL);
+    }
+
+    void setButton(string sCode)
+    {
+      bChangedButton=(sCode!=sCodeButton);
+      sCodeButton=sCode;
+      if (bChangedButton)
+	gettimeofday(&tvDownButton,NULL);
+    }
+
+    bool isChangedHoriz()
+    {
+      return bChangedHoriz;
+    }
+
+    bool isChangedVert()
+    {
+      return bChangedVert;
+    }
+
+    bool isChangedButton()
+    {
+      return bChangedButton;
+    }
+
+    string getHoriz()
+    {
+      bChangedHoriz=false;
+      return sCodeHoriz;
+    }
+
+    string getVert()
+    {
+      bChangedVert=false;
+      return sCodeVert;
+    }
+
+    string getButton()
+    {
+      bChangedButton=false;
+      return sCodeButton;
+    }
+
+    double timerHoriz(struct timeval tvNow)
+    {
+      return time_diff(tvDownHoriz,tvNow);
+    }
+
+    double timerVert(struct timeval tvNow)
+    {
+      return time_diff(tvDownVert,tvNow);
+    }
+    
+    double timerButton(struct timeval tvNow)
+    {
+      return time_diff(tvDownButton,tvNow);
+    }
+
+    void retriggerHoriz()
+    {
+      gettimeofday(&tvDownHoriz,NULL);
+      bLatchedHoriz=true;
+    }
+
+    void retriggerVert()
+    {
+      gettimeofday(&tvDownVert,NULL);
+      bLatchedVert=true;
+    }
+
+    void retriggerButton()
+    {
+      gettimeofday(&tvDownButton,NULL);
+      bLatchedButton=true;
+    }
+
+    void setLatchedHoriz(bool b)
+    {
+      bLatchedHoriz=b;
+    }
+    
+    void setLatchedVert(bool b)
+    {
+      bLatchedVert=b;
+    }
+
+    void setLatchedButton(bool b)
+    {
+      bLatchedButton=b;
+    }
+
+    bool isLatchedHoriz()
+    {
+      return bLatchedHoriz;
+    }
+
+    bool isLatchedVert()
+    {
+      return bLatchedVert;
+    }
+
+    bool isLatchedButton()
+    {
+      return bLatchedButton;
+    }
+
+  private:
+
+    double time_diff(struct timeval x , struct timeval y)
+    {
+      double x_ms , y_ms , diff;
+      
+      x_ms = (double)x.tv_sec*1000000 + (double)x.tv_usec;
+      y_ms = (double)y.tv_sec*1000000 + (double)y.tv_usec;
+      
+      diff = (double)y_ms - (double)x_ms;
+      
+      return diff;
+    }
+
+  };
+  
+  /**
+   * A simple class to average 5 values for smoothing out
+   * input data
+   */
+  class Avg
+  {
+  public:
+
+    map<int, vector<int> > m_mapAxisAvgs;
+
+    Avg() { }
+    ~Avg() { }
+    
+    int value(int axis, int newVal)
+    {
+      size_t i;
+      int v;
+
+      if (m_mapAxisAvgs[axis].size() == 5)
+	m_mapAxisAvgs[axis].erase(m_mapAxisAvgs[axis].begin());
+
+      m_mapAxisAvgs[axis].push_back(newVal);
+      
+      for (i=0;i<m_mapAxisAvgs[axis].size();i++)
+	{
+	  v = v + m_mapAxisAvgs[axis].at(i);
+	}
+
+      return ceil(v/m_mapAxisAvgs[axis].size());
+      
+    }
+ 
+  };
+
   class USB_Game_Pad : public USB_Game_Pad_Command, public AlarmEvent, IRReceiverBase, IRBase
 	{
 //<-dceag-decl-e->
@@ -38,12 +234,14 @@ namespace DCE
 	  pluto_pthread_mutex_t m_GamePadMutex;
 
 		// Private methods
-	  void ProcessGamePad(int fd, int joytype);
+	  void ProcessGamePad(int fd, int joytype, bool& active);
+	  void ProcessGamePad1(int fd, int joytype, bool& active);
 	  int GetJoyType(string iJoyType);
+	  void HandleEvent(string sCode, int joytype);
 public:
 		// Public member variables
-	  map<string,pair<string,int> > m_mapCodesToButtons;
 	  pthread_t m_inputCaptureThread;
+	  map<string, pair<string, int> > m_mapCodesToButtons;
 	  int m_DeviceID;
 	  bool m_bJoy1Active;
 	  bool m_bJoy2Active;
@@ -58,11 +256,14 @@ public:
 	  int m_iJoy3fd;
 	  int m_iJoy4fd;
 	  int m_iErrors;
+	  map<int, int> m_mapFdToErrors;
 	  class AlarmManager *m_pAlarmManager;
 	  void AlarmCallback (int id, void *param);
 	  string m_sAVWHost;
 	  int m_iAVWPort;
-
+	  class Avg *m_Avg;
+	  map<int, CurrentInputs *> m_mapFdCurrentInputs;
+	  
 //<-dceag-const-b->
 public:
 		// Constructors/Destructor

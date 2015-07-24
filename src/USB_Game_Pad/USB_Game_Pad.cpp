@@ -54,6 +54,7 @@ using namespace DCE;
 #define JOY_TYPE_WIIMOTE 3
 
 #define NAME_LENGTH 128
+#define MAX_ERRORS 5
 
 void * StartInputThread(void * Arg)
 {
@@ -80,6 +81,7 @@ USB_Game_Pad::USB_Game_Pad(int DeviceID, string ServerAddress,bool bConnectEvent
   m_iJoy1fd = m_iJoy2fd = m_iJoy3fd = m_iJoy4fd = -1;
   m_iJoy1Type = m_iJoy2Type = m_iJoy3Type = m_iJoy4Type = JOY_TYPE_GENERIC;
   m_iErrors = 0;
+  m_Avg = new Avg();
 }
 
 //<-dceag-const2-b->!
@@ -95,7 +97,20 @@ void USB_Game_Pad::PrepareToDelete()
 USB_Game_Pad::~USB_Game_Pad()
 //<-dceag-dest-e->
 {
-  
+  delete m_Avg;
+
+  for (map<int, CurrentInputs* >::iterator it=m_mapFdCurrentInputs.begin();
+       it != m_mapFdCurrentInputs.end();
+       ++it)
+    {
+      if (it->second)
+	{
+	  delete it->second;
+	  it->second=NULL;
+	}
+      m_mapFdCurrentInputs.erase(it);
+    }
+
 }
 
 //<-dceag-getconfig-b->
@@ -269,7 +284,7 @@ bool USB_Game_Pad::IsJoystick(string sGamePadDevice)
   string sOutput, sStdErr;
   char csGamePadDevice[100];
   strcpy(csGamePadDevice,sGamePadDevice.c_str());
-  char * const args[] = {"/sbin/udevadm","info","--query","property","--name",csGamePadDevice,NULL};
+  char * args[] = {"/sbin/udevadm","info","--query","property","--name",csGamePadDevice,NULL};
   if ( ProcessUtils::GetCommandOutput(args[0], args, sOutput, sStdErr) == 0)
     {
       if ( sOutput.find("ID_INPUT_JOYSTICK=1") != string::npos)
@@ -314,11 +329,13 @@ void USB_Game_Pad::FindGamePads()
 	    {
 	      // success.
 	      m_bJoy1Active = true;
+	      m_mapFdToErrors[m_iJoy1fd]=0;
 	      memset(name,0,NAME_LENGTH);
 	      ioctl(m_iJoy1fd,JSIOCGNAME(NAME_LENGTH),name);
 	      sName = string(name);
 	      LoggerWrapper::GetInstance()->Write(LV_WARNING,"Joystick 1 name is (%s)",sName.c_str());
 	      m_iJoy1Type = GetJoyType(sName);
+	      m_mapFdCurrentInputs[m_iJoy1fd] = new CurrentInputs();
 	    }
 	}
     }
@@ -333,6 +350,10 @@ void USB_Game_Pad::FindGamePads()
 	{
 	  // close the file descriptor. 
 	  close(m_iJoy1fd);
+	  if (m_mapFdCurrentInputs.find(m_iJoy1fd) != m_mapFdCurrentInputs.end())
+	    {
+	      delete m_mapFdCurrentInputs[m_iJoy1fd];
+	    }
 	  m_iJoy1fd = -1; // explicit reset so that the above logic will work 100%.
 	}
       m_bJoy1Active = false;
@@ -360,6 +381,8 @@ void USB_Game_Pad::FindGamePads()
 	      ioctl(m_iJoy2fd,JSIOCGNAME(NAME_LENGTH),name);
 	      sName = string(name);
 	      m_iJoy2Type = GetJoyType(sName);
+	      m_mapFdToErrors[m_iJoy2fd]=0;
+	      m_mapFdCurrentInputs[m_iJoy2fd] = new CurrentInputs();
 	    }
 	}
     }
@@ -374,6 +397,10 @@ void USB_Game_Pad::FindGamePads()
 	{
 	  // close the file descriptor. 
 	  close(m_iJoy2fd);
+	  if (m_mapFdCurrentInputs.find(m_iJoy2fd) != m_mapFdCurrentInputs.end())
+	    {
+	      delete m_mapFdCurrentInputs[m_iJoy2fd];
+	    }
 	  m_iJoy2fd = -1; // explicit reset so that the above logic will work 100%.
 	}
       m_bJoy2Active = false;
@@ -401,6 +428,8 @@ void USB_Game_Pad::FindGamePads()
 	      ioctl(m_iJoy3fd,JSIOCGNAME(NAME_LENGTH),name);
 	      sName = string(name);
 	      m_iJoy3Type = GetJoyType(sName);
+	      m_mapFdToErrors[m_iJoy3fd]=0;
+	      m_mapFdCurrentInputs[m_iJoy3fd] = new CurrentInputs();
 	    }
 	}
     }
@@ -415,6 +444,10 @@ void USB_Game_Pad::FindGamePads()
 	{
 	  // close the file descriptor. 
 	  close(m_iJoy3fd);
+	  if (m_mapFdCurrentInputs.find(m_iJoy3fd) != m_mapFdCurrentInputs.end())
+	    {
+	      delete m_mapFdCurrentInputs[m_iJoy3fd];
+	    }
 	  m_iJoy3fd = -1; // explicit reset so that the above logic will work 100%.
 	}
       m_bJoy3Active = false;
@@ -442,6 +475,8 @@ void USB_Game_Pad::FindGamePads()
 	      ioctl(m_iJoy4fd,JSIOCGNAME(NAME_LENGTH),name);
 	      sName = string(name);
 	      m_iJoy4Type = GetJoyType(sName);
+	      m_mapFdToErrors[m_iJoy4fd]=0;
+	      m_mapFdCurrentInputs[m_iJoy4fd]=new CurrentInputs();
 	    }
 	}
     }
@@ -456,6 +491,10 @@ void USB_Game_Pad::FindGamePads()
 	{
 	  // close the file descriptor. 
 	  close(m_iJoy4fd);
+	  if (m_mapFdCurrentInputs.find(m_iJoy4fd) != m_mapFdCurrentInputs.end())
+	    {
+	      delete m_mapFdCurrentInputs[m_iJoy4fd];
+	    }
 	  m_iJoy4fd = -1; // explicit reset so that the above logic will work 100%.
 	}
       m_bJoy4Active = false;
@@ -466,7 +505,210 @@ void USB_Game_Pad::FindGamePads()
   m_pAlarmManager->AddRelativeAlarm(3, this, FIND_GAMEPADS, NULL);
 }
 
-void USB_Game_Pad::ProcessGamePad(int fd, int joytype)
+void USB_Game_Pad::HandleEvent(string sCode, int joytype)
+{
+  string sPrefix="";
+  switch (joytype)
+    {
+    case JOY_TYPE_GENERIC:
+      sPrefix="USB-GAMEPAD-";
+      break;
+    case JOY_TYPE_XBOX360:
+      sPrefix="XBOX360-GAMEPAD-";
+      break;
+    case JOY_TYPE_SIXAXIS:
+      sPrefix="SIXAXIS-GAMEPAD-";
+      break;
+    case JOY_TYPE_WIIMOTE:
+      sPrefix="WIIMOTE-";
+      break;
+    }
+
+  string sFinalCode = sPrefix+sCode;
+  map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sFinalCode);
+
+  if (m_cCurrentScreen == 'G')
+    {
+      if (it->second.first == "start")
+	{
+	  // We're good.
+	}
+      else if (it->second.first == "Home")
+	{
+	  // Also good.
+	}
+      else
+	{
+	  return;
+	}
+    }
+
+  if (it==m_mapCodesToButtons.end())
+    {
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"Can't find a mapping for button %s",sFinalCode.c_str());
+    }
+  else
+    {
+      ReceivedCode(it->second.second,it->second.first.c_str());
+    }
+
+  return;
+
+}
+
+void USB_Game_Pad::ProcessGamePad1(int fd, int joytype, bool& active)
+{
+  CurrentInputs* pInput = m_mapFdCurrentInputs[fd];
+  size_t iBytesRead=0;
+  struct ::js_event js; // one event packet.
+  struct timeval tvNow;
+
+  gettimeofday(&tvNow,NULL);
+
+  if (!pInput)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"USB_Game_Pad::ProcessGamePad1 - input NULL for fd %d",fd);
+      return;
+    }
+
+  iBytesRead=read(fd, &js, sizeof(struct ::js_event));
+  
+  if (iBytesRead == sizeof(struct ::js_event))
+    {
+      switch(js.type)
+	{
+	case 1: // buttons
+	  if (js.value>0)
+	    {
+	      // press
+	      pInput->setButton("B"+StringUtils::itos(js.number+1));
+	    }
+	  else
+	    {
+	      // release
+	      pInput->setButton("");
+	    }
+	  break;
+	case 2: // axes
+	  if (js.number==0)
+	    {
+	      // Left/Right
+	      if (js.value < -16384)
+		{
+		  // left
+		  pInput->setHoriz("LEFT");
+		}
+	      else if (js.value < 16384)
+		{
+		  // center
+		  pInput->setHoriz("");
+		}
+	      else if (js.value > 16384)
+		{
+		  // right
+		  pInput->setHoriz("RIGHT");
+		}
+	    }
+	  if (js.number==1)
+	    {
+	      // Up/Down
+	      if (js.value < -16384)
+		{
+		  // up
+		  pInput->setVert("UP");
+		}
+	      else if (js.value < 16384)
+		{
+		  // center
+		  pInput->setVert("");
+		}
+	      else if (js.value > 16384)
+		{
+		  // down
+		  pInput->setVert("DOWN");
+		}
+	    }
+	  break;
+	}
+    }
+  else if (iBytesRead<sizeof(struct ::js_event))
+    {
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"USB_Game_Pad::ProcessGamePad1 - FD #%d Short read. - %d bytes",fd,iBytesRead);
+      m_mapFdToErrors[fd] = m_mapFdToErrors[fd]+1;
+      if (m_mapFdToErrors[fd] > MAX_ERRORS)
+	{
+	  close(fd);
+	  active=false;
+	  LoggerWrapper::GetInstance()->Write(LV_WARNING,"USB_Game_Pad::ProcessGamePad1 - too many errors. Closing FD #%d",fd);
+	  delete pInput;
+	  m_mapFdCurrentInputs.erase(fd);
+	  return;
+	}
+    }
+
+  if (pInput->sCodeButton!="")
+    {
+      if (pInput->isChangedButton())
+	{
+	  if (pInput->timerButton(tvNow) < 1000000)
+	    {
+	      HandleEvent(pInput->getButton(),joytype);
+	      pInput->retriggerButton();
+	    }
+	}
+      if (pInput->isLatchedButton())
+	{
+	  if (pInput->timerButton(tvNow) > 250000)
+	    {
+	      HandleEvent(pInput->getButton(),joytype);
+	      pInput->retriggerButton();
+	    }
+	}
+    }
+
+  if (pInput->sCodeHoriz!="")
+    {
+      if (pInput->isChangedHoriz())
+	{
+	  if (pInput->timerHoriz(tvNow) < 1000000)
+	    {
+	      HandleEvent(pInput->getHoriz(),joytype);
+	      pInput->retriggerHoriz();
+	    }
+	}
+      if (pInput->isLatchedHoriz())
+	{
+	  if (pInput->timerHoriz(tvNow) > 250000)
+	    {
+	      HandleEvent(pInput->getHoriz(),joytype);
+	      pInput->retriggerHoriz();
+	    }
+	}
+    }
+
+  if (pInput->sCodeVert!="")
+    {
+      if (pInput->isChangedVert())
+	{
+	  if (pInput->timerVert(tvNow) < 1000000)
+	    {
+	      HandleEvent(pInput->getVert(),joytype);
+	      pInput->retriggerVert();
+	    }
+	}
+      if (pInput->isLatchedVert())
+	{
+	  if (pInput->timerVert(tvNow) > 250000)
+	    {
+	      HandleEvent(pInput->getVert(),joytype);
+	      pInput->retriggerVert();
+	    }
+	}
+    }
+
+}
+
+void USB_Game_Pad::ProcessGamePad(int fd, int joytype, bool& active)
 {
   if (m_cCurrentScreen != 'Z' || m_iErrors > 10)         // If the current screen is a Game FS, simply ignore.
     {
@@ -772,13 +1014,13 @@ int USB_Game_Pad::Gamepad_Capture(int deviceID)
   while (!m_bQuit_get())
     {
       if (m_bJoy1Active)
-	ProcessGamePad(m_iJoy1fd,m_iJoy1Type);
+	ProcessGamePad1(m_iJoy1fd,m_iJoy1Type,m_bJoy1Active);
       if (m_bJoy2Active)
-	ProcessGamePad(m_iJoy2fd,m_iJoy2Type);
+	ProcessGamePad1(m_iJoy2fd,m_iJoy2Type,m_bJoy2Active);
       if (m_bJoy3Active)
-	ProcessGamePad(m_iJoy3fd,m_iJoy3Type);
+	ProcessGamePad1(m_iJoy3fd,m_iJoy3Type,m_bJoy3Active);
       if (m_bJoy4Active)
-	ProcessGamePad(m_iJoy4fd,m_iJoy4Type);
+	ProcessGamePad1(m_iJoy4fd,m_iJoy4Type,m_bJoy4Active);
       
       usleep(10000);
 
