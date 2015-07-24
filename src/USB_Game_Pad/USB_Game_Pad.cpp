@@ -547,6 +547,10 @@ void USB_Game_Pad::HandleEvent(string sCode, int joytype)
   else
     {
       ReceivedCode(it->second.second,it->second.first.c_str());
+      if (m_dwPK_Device==DEVICEID_MESSAGESEND)
+	{
+	  ForceKeystroke(it->second.first, m_sAVWHost, m_iAVWPort);
+	}
     }
 
   return;
