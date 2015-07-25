@@ -365,11 +365,11 @@ SOURCES += main.cpp \
         ../../DCE/ClientSocket.cpp \
         ../../DCE/DeviceData_Base.cpp \
         ../../DCE/DeviceData_Impl.cpp \
+        ../../PlutoUtils/getch.cpp \
         datamodels/skindatamodel.cpp \
         datamodels/skindataitem.cpp \
         datamodels/DataModelItems/filtermodelitem.cpp \
-        datamodels/DataModelItems/genreitem.cpp \
-        ../../PlutoUtils/getch.cpp \
+        datamodels/DataModelItems/genreitem.cpp \        
         datamodels/DataModelItems/attributesortitem.cpp \
         datamodels/attributesortmodel.cpp \
         datamodels/DataModelItems/mediatypeitem.cpp \
