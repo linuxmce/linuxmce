@@ -44,10 +44,10 @@ case $1 in
 		if [[ $ruletype == "chain" ]]; then
 			Q="DELETE FROM Firewall WHERE Place='0' AND Protocol='ip-ipv4' AND RuleType='input' AND RPolicy='fail2ban-$name'"
                         $(RunSQL "$Q")
-			Q="DELETE FROM Firewall WHERE Place='2' AND Protocol='ip-ipv4' AND RuleType='fail2ban-$name' AND RPolicy='RETURN'"
+			Q="DELETE FROM Firewall WHERE Place='3' AND Protocol='ip-ipv4' AND RuleType='fail2ban-$name' AND RPolicy='RETURN'"
 			$(RunSQL "$Q")
 			Q="DELETE FROM Firewall WHERE Matchname='fail2ban-$name' AND Protocol='chain-ipv4'"
-			nuxMCE Weather Plugin$(RunSQL "$Q")
+			$(RunSQL "$Q")
 		elif [[ $ruletype == "rule" ]]; then
 			protocol="$4"
 			port="$5"
@@ -61,12 +61,16 @@ case $1 in
 
 	add)
 		if [[ $ruletype == "chain" ]];  then
-			Q="INSERT INTO Firewall (Matchname, Protocol) VALUES ('fail2ban-$name','chain-ipv4')"
-                        $(RunSQL "$Q")
-			Q="INSERT INTO Firewall (Place, Protocol, RuleType, RPolicy) VALUES ('2', 'ip-ipv4','fail2ban-$name','RETURN')"
-                        $(RunSQL "$Q")
-			Q="INSERT INTO Firewall (Place, Protocol, RuleType, RPolicy) VALUES ('0', 'ip-ipv4','input','fail2ban-$name')"
-			$(RunSQL "$Q")
+			Check "chain" "$name"
+			echo "$returnCheck"
+			if [[ $returnCheck == "false" ]]; then
+				Q="INSERT INTO Firewall (Matchname, Protocol) VALUES ('fail2ban-$name','chain-ipv4')"
+                        	$(RunSQL "$Q")
+				Q="INSERT INTO Firewall (Place, Protocol, RuleType, RPolicy) VALUES ('3', 'ip-ipv4','fail2ban-$name','RETURN')"
+                        	$(RunSQL "$Q")
+				Q="INSERT INTO Firewall (Place, Protocol, RuleType, RPolicy) VALUES ('0', 'ip-ipv4','input','fail2ban-$name')"
+				$(RunSQL "$Q")
+			fi
 		elif [[ $ruletype == "rule" ]]; then
 			protocol="$4"
 			port="$5"
