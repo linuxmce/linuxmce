@@ -71,6 +71,7 @@ StyledScreen {
             id:alpha
             Alphabetlist{
                 height: a_z.height
+               onAlphaSelected: multi_view_list.seek(selectedAlpha)
             }
         }
         GridView{

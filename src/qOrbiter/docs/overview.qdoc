@@ -1,0 +1,19 @@
+/*! \page qorbiter_overview High level overview
+ *
+ *  \subsection whatisit What is it?
+ * - - -
+ *
+ * \paragraph QOrbiter is a many faceted application. For the case of a LinuxMCE media director, installed in a home theater or similar location,
+ * it could be considered a media center frontend for the Linuxmce open souce home automation system (a mouthfull!) Essentially, this device is stationary from a physical
+ * aspect, but is also integrated into the larger media director software stack itself.
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */

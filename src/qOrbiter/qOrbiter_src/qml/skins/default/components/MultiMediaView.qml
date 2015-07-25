@@ -7,7 +7,7 @@ Item{
 
     focus:true
     onActiveFocusChanged: media_grid.forceActiveFocus()
-     property variant currentDelegate:manager.q_mediaType==5 ? videoItem :audioItem
+    property variant currentDelegate:manager.q_mediaType==5 ? videoItem :audioItem
     property int currentCellHeight:currentCellWidth
     property int currentCellWidth:Style.scaleX(25)
     
@@ -24,15 +24,25 @@ Item{
     property double vhsRatio:1280/620
     property int itemBuffer:25
     property alias currentView:media_grid
+    property int bug:0
 
     signal options()
+
+    Connections{
+        target:manager
+
+       onDgRequestFinished:{
+           media_grid.currentIndex=manager.currentIndex
+            media_grid.positionViewAtIndex(manager.currentIndex, ListView.Beginning)
+        }
+    }
 
     function seek(seekToken) {
         manager.seekGrid("MediaFile", seekToken);
     }
 
     function load(){
-       media_grid.model= manager.getDataGridModel("MediaFile", 63)
+        currentView.model= manager.getDataGridModel("MediaFile", 63)
     }
 
     Component{
@@ -43,11 +53,16 @@ Item{
     }
 
     Connections {
-        target: manager.getDataGridModel("MediaFile", 63)
+        target: manager
         onScrollToItem: {
             console.log("scroll to item : " + item+ " of "+media_grid.count);
             media_grid.positionViewAtIndex(item, ListView.Beginning);
         }
+        //        onCurrentIndexChanged:{
+        //            currentView.lastIndex = manager.currentIndex;
+        //           // console.log("going to index :: " + manager.currentIndex)
+        //           // currentView.positionViewAtIndex(manager.currentIndex, ListView.Beginning);
+        //        }
     }
 
     Component{
@@ -66,12 +81,14 @@ Item{
             bottom:parent.bottom
             top:parent.top
         }
+
         cacheBuffer: 50
         cellHeight: currentCellHeight
-        cellWidth:currentCellWidth     
+        cellWidth:currentCellWidth
         visible:true //current_view_type===1
         delegate:currentDelegate
         Keys.onDigit1Pressed: options()
+        Keys.onMenuPressed: options()
     }
     
     states: [

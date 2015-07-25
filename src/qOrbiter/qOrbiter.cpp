@@ -2701,7 +2701,10 @@ void DCE::qOrbiter::loadDataForDataGrid(QString dataGridId, QString dgName, int 
         emit addDataGridItem(dataGridId, PK_DataGrid, GridCurRow, rows, pDataGridTable);
         delete[] pData;
         pData=NULL;
+
     }
+
+    emit dgRequestFinished(dataGridId);
 }
 
 void DCE::qOrbiter::GetMediaAttributeGrid(QString  qs_fk_fileno)

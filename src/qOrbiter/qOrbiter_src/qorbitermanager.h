@@ -642,6 +642,7 @@ signals:
 
 
     /*Datagrid Signals*/
+    void dgRequestFinished(QString datagridId);
     void currentIndexChanged();
     void subTypeChanged();
     void resetSearchParams();
@@ -1461,11 +1462,11 @@ public slots:
     /*! @name Datagrid Slots*/
     //@{
 
-    void setCurrentIndex(int i){ if(currentIndex!=i) { currentIndex=i; emit currentIndexChanged();}  }
+    void handleDgRequestFinished(QString dgId){ emit dgRequestFinished( dgId); }
+    void setCurrentIndex(int i){ if(currentIndex!=i) { currentIndex=i; emit currentIndexChanged(); }  }
     int getCurrentIndex() {return currentIndex;}
 
     void addRestoreIndex(int i){
-
         setMediaResponse("addRestoreIndex()::Start");
         setMediaResponse("addRestoreIndex()::Set into map index "+QString::number(i)+" for mediatype "+q_mediaType);
         currentIndexMap.append(i);
@@ -1479,7 +1480,6 @@ public slots:
         } else {
             setMediaResponse("removeRestoreIndex()::Found restore index "+QString::number(currentIndexMap.last()));
             setCurrentIndex(currentIndexMap.last());
-
             currentIndexMap.removeLast();
         }
     }

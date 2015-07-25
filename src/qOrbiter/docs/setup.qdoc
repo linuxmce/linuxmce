@@ -1,7 +1,15 @@
 /*! \page setup1 Setting up Build Environment
- * \tableofcontents Contents
- * Setting up the build environment will depend on your target in some cases, so please be attentive to platform specific details.
- * In most cases, it is preferable to use the qt development libraries availible for the current version of your platform.
+ * \tableofcontents
+
+ * \section pre_requisites Development setup links
+ * Setting up QOrbiter will require you to download the linuxmce source, the Qt framework, and optionally additional libraries and frameworks, if you are
+ * compiling for the android target
+ *
+ * \subsection ref_links Reference Links - Android builds are only supported on linux.
+ - Qt - Choose Open source version for your platform
+  - https://www.qt.io/download-open-source/
+ - Linuxmce Sourc Code. This requires the use of SVN.
+  - http://svn.linuxmce.org/svn/trunk/src
  *
  * \section generalsetups General Setup information
  *
@@ -12,16 +20,20 @@
  *
  * \section qtsetup Setting up build environment
  * You have many different options with how you get the Qt version of your choice installed.
- * - The universal method is to install Qt Development libraries from website. http://qt-project.org/downloads . You can find binary installers as well
- * as source files.
+ * - The supported method is to install Qt Development libraries from website. http://qt-project.org/downloads. Utilize the online installer.
  * - Compiling Qt from source is outside of the scope of this documentation, but information can be found here http://qt-project.org/wiki/Building_Qt_Documentation
- * - It is _highly_ recommended that you use the latest QtCreator. The latest as of this writing is Qt Creator 2.7.1 and can be found on the same downloads page. While you can use other IDE's
- * the integrated environment QtCreator provides is difficult to beat. Unless you are not into speed and ease of use.
+ * - It is _highly_ recommended that you use QtCreator. Unless you are not into speed and ease of use.
  *
  * \section runningapplication Running QOrbiter
- * To run the application, you need to open the .pro file, located in src/qOrbiter/qOrbiter_src
- * - For Av support, you will need to compile the AudioVisual plugin.
- * - For Linuxmce UIElements component, you will need to compile the UIElements plugin.
+ * There are multiple build targets for QOrbiter. With this in mind,
+ * QtCreator (which you should be using) make setup this very easy to do automatically.
+ * \note QOrbiter has 1 plugin, AudioVisual. On android compilation is done for you, on x86, it is built automatically, assuming build instructions are followed.
+ *
+ *  \subsection run_desktop desktop/x86
+ *  * To run the application, you need to open the .pro file, located in src/qOrbiter/qOrbiterMaster
+ * - AudioVisual is set to automatically compile with this project.
+ *
+ * \sub_section run_android Android
  * \note The plugins are already setup to place the compiled plugin files (qmldir and shared lib file) into the qOrbiter 'imports' directory. You should not need to change this.
  *
  * \section androidsetup Setting up Android Builds

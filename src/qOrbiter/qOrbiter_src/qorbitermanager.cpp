@@ -154,7 +154,7 @@ qorbiterManager::qorbiterManager(QObject *qOrbiter_ptr, QDeclarativeView *view, 
     iea_area= -1; bAppError = false; isPhone = 0; hostDevice=HostSystemData::OTHER_EMBEDDED; appConfigPath=""; status="starting";
     setUsingExternal(false); disconnectCount=0;  reloadCount=0;
     i_current_command_grp = 0;  i_current_mediaType =0;  videoDefaultSort = "13";  audioDefaultSort = "2"; photoDefaultSort = "13";
-    gamesDefaultSort = "49"; i_currentFloorplanType = 0; backwards = false;  screenSaverTimeout = 60; screenPowerOffTimeout = 60;
+    gamesDefaultSort = "49"; i_currentFloorplanType = 0; backwards = false;  screenSaverTimeout = 60; screenPowerOffTimeout = 60; currentIndex=0;
 
 #ifndef __ANDROID__
     b_localLoading = true; /*! this governs local vs remote loading. condensed to one line, and will be configurable from the ui soon. */
@@ -3051,7 +3051,7 @@ void qorbiterManager::handleScreenChanged(QScreen *screen)
 bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
 {
     qOrbiter * ptr = qobject_cast<qOrbiter*>(qOrbiter_ptr);
-
+    QObject::connect(ptr, &qOrbiter::dgRequestFinished, this, &qorbiterManager::handleDgRequestFinished);
     QObject::connect(ptr, &qOrbiter::discreteAudioChanged, this, &qorbiterManager::setDiscreteAudio);
     QObject::connect(ptr, &qOrbiter::commandResponseChanged, this, &qorbiterManager::setCommandResponse);
     QObject::connect(ptr, &qOrbiter::mediaResponseChanged, this, &qorbiterManager::setMediaResponse);
@@ -3181,6 +3181,7 @@ bool qorbiterManager::registerConnections(QObject *qOrbiter_ptr)
     // Media filter
     QObject::connect(ptr, SIGNAL(showFileListMediaType(int)), &mediaFilter, SLOT(setMediaType(int)), Qt::QueuedConnection);
     QObject::connect(ptr, SIGNAL(showFileListMediaType(int)), this, SLOT(setGridMediaType(QString)), Qt::QueuedConnection);
+   // QObject::connect(&mediaFilter, &MediaFilter::backIndexChanged, this, &qorbiterManager::setCurrentIndex);
 
     //        QObject::connect(ptr, SIGNAL(showFileListMediaType(int)), this, SLOT(prepareFileList()), Qt::QueuedConnection);
     //QObject::connect(this.mediaFilter, SIGNAL(filterChanged(int)), mediaModel, SLOT(clearAndRequest(int)), Qt::QueuedConnection);
