@@ -3042,6 +3042,8 @@
 #define DESIGNOBJ_mnuGamesAtariOSD_CONST 6448
 #define DESIGNOBJ_butEnterGo_Alt_CONST 6449
 #define DESIGNOBJ_butBack_Alt_CONST 6450
+#define DESIGNOBJ_butGameSelectAlt_CONST 6451
+#define DESIGNOBJ_butGameStartAlt_CONST 6452
 
 #define DESIGNOBJ_TABLE "DesignObj"
 #define DESIGNOBJ_PK_DESIGNOBJ_FIELD "PK_DesignObj"
