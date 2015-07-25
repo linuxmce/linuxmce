@@ -28,11 +28,23 @@ Item{
 
     signal options()
 
+    Connections {
+        target: manager.getDataGridModel("MediaFile", 63)
+        onScrollToItem: {
+            manager.currentIndex=item
+            console.log("scroll to item : " + item+ " of "+media_grid.count);
+        }
+    }
     Connections{
         target:manager
 
-       onDgRequestFinished:{
-           media_grid.currentIndex=manager.currentIndex
+        onCurrentIndexChanged:{
+            media_grid.currentIndex=manager.currentIndex
+            media_grid.positionViewAtIndex(manager.currentIndex, ListView.Beginning)
+        }
+
+        onDgRequestFinished:{
+            media_grid.currentIndex=manager.currentIndex
             media_grid.positionViewAtIndex(manager.currentIndex, ListView.Beginning)
         }
     }
@@ -49,6 +61,7 @@ Item{
         id:videoItem
         VideoDelegate {
             id: videoDelegate
+
         }
     }
 

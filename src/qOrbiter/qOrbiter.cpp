@@ -2657,7 +2657,6 @@ void DCE::qOrbiter::loadDataGrid(QString dataGridId, int PK_DataGrid, QString op
         // There might be some race condition going on between the ListView initializing and the model populating,
         // but I have been unable to track this down (yet).
         QThread::msleep(100);
-
         emit prepareDataGrid(dataGridId, dgN, gHeight, gWidth);
     }
 }
