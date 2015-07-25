@@ -26,7 +26,7 @@ Item{
     property int itemBuffer:25
     property int currentView: manager.isProfile ? 1 : 0
     property alias currentGrid:media_grid_container.item
-    property int lastViewIndex:  manager.getDataGridModel("MediaFile", 63).lastIndex
+    property int lastViewIndex: manager.currentIndex
 
     signal options()
 
@@ -42,12 +42,6 @@ Item{
     function load(){
         currentGrid.model= manager.getDataGridModel("MediaFile", 63);
         return;
-
-        switch(currentView){
-        case 0: media_grid.model= manager.getDataGridModel("MediaFile", 63); break;
-        case 1:media_list.model=manager.getDataGridModel("MediaFile", 63); break;
-        default: break;
-        }
     }
 
     function seek(seekToken) {
@@ -61,26 +55,27 @@ Item{
         }
     }
 
-    Connections {
-        target: manager.getDataGridModel("MediaFile", 63)
-        onScrollToItem: {
-            console.log("scroll to item : " + item+ " of "+currentGrid.count);
-            currentGrid.positionViewAtIndex(item, ListView.Beginning);
-            lastViewIndex = item;
+    Connections{
+        target:manager
+
+        onCurrentIndexChanged:{
+            lastViewIndex=manager.currentIndex
+            currentGrid.currentIndex=manager.currentIndex
+            currentGrid.positionViewAtIndex(manager.currentIndex, ListView.Beginning)
         }
 
         onDgRequestFinished:{
-            media_grid.positionViewAtIndex(manager.currentIndex, ListView.Beginning)
-
+           lastViewIndex=manager.currentIndex
+            currentGrid.currentIndex=manager.currentIndex
+            currentGrid.positionViewAtIndex(manager.currentIndex, ListView.Beginning)
         }
     }
 
-    Connections{
-        target: manager
-        onCurrentIndexChanged:{
-            console.log("going to index :: " + manager.currentIndex)
-            currentGrid.positionViewAtIndex(manager.currentIndex, ListView.Beginning);
-            lastViewIndex = manager.currentIndex;
+    Connections {
+        target: manager.getDataGridModel("MediaFile", 63)
+        onScrollToItem: {
+            manager.currentIndex=item
+            console.log("scroll to item : " + item+ " of "+media_grid.count);
         }
     }
 
@@ -96,15 +91,16 @@ Item{
         onSourceChanged: {
             if(media_grid_container.status==Loader.Ready){
                 console.log("!!onSourceChanged!!!")
-                item.model = manager.getDataGridModel("MediaFile", 63)
-            }
+              //  item.model = manager.getDataGridModel("MediaFile", 63)
+
         }
 
         onLoaded: {
             if(media_grid_container.status==Loader.Ready){
                 console.log("!!!on loaded !!!")
                 item.model = manager.getDataGridModel("MediaFile", 63)
-                currentGrid.positionViewAtIndex(lastViewIndex, ListView.Beginning)
+                item.positionViewAtIndex(lastViewIndex, ListView.Beginning)
+            }
             }
         }
 
@@ -137,7 +133,6 @@ Item{
             id:media_list
             clip:true
             spacing: 5
-            onModelChanged: manager.seekGrid(lastViewIndex)
             anchors.fill: parent
             delegate: Item {
                 id: rowDelegate
@@ -176,6 +171,7 @@ Item{
                 MouseArea{
                     id:trap
                     anchors.fill: parent
+                    onPressed: lastViewIndex=index
                     onReleased: {
                         if(name==="back (..)"){
                             manager.goBackGrid()
