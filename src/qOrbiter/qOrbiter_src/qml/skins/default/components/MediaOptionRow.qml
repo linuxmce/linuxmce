@@ -279,7 +279,7 @@ Item{
             top:parent.top
             left: row_label.right
             bottom:parent.bottom
-            right:parent.right
+            right:back.left
             margins: 5
         }
         FocusRow {
@@ -331,10 +331,8 @@ Item{
 
     }
 
-
-
-
     BackButton{
+        id:back
         anchors{
             right:parent.right
             verticalCenter: parent.verticalCenter

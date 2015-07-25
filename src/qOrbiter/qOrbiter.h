@@ -1584,6 +1584,7 @@ signals:
     void addDataGridItem(QString dataGridID, int PK_DataGrid, int indexStart, int numRows, DataGridTable* pTable);
     void updateItemData(QString dataGridId, int row, int role, QVariant value);
     void prepareDataGrid(QString dataGridID, QString dgName, int height, int width);
+    void dgRequestFinished(QString dataGridID);
     ///@}
 
     /** @name Now Playing Signals

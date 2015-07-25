@@ -7,7 +7,7 @@ Item{
     id:multi_view_list
 
     focus:true
-    onActiveFocusChanged: media_grid.forceActiveFocus()
+    onActiveFocusChanged: media_grid_container.forceActiveFocus()
     property variant currentDelegate:manager.q_mediaType==5 ? videoItem :audioItem
     property int currentCellHeight:currentCellWidth
     property int currentCellWidth:Style.scaleX(25)
@@ -24,8 +24,25 @@ Item{
     property double vcdRatio:1080/1080
     property double vhsRatio:1280/620
     property int itemBuffer:25
-    property int currentView:manager.isProfile ? 1 : 0
+    property int currentView: manager.isProfile ? 1 : 0
+    property alias currentGrid:media_grid_container.item
+    property int lastViewIndex:  manager.getDataGridModel("MediaFile", 63).lastIndex
+
+    signal options()
+
     onCurrentViewChanged: {
+        console.log("handle change view.")
+        switch(currentView){
+        case 0:media_grid_container.sourceComponent=grid_view; break;
+        case 1:media_grid_container.sourceComponent=list_view; break;
+        default:media_grid_container.sourceComponent=list_view;
+        }
+    }
+
+    function load(){
+        currentGrid.model= manager.getDataGridModel("MediaFile", 63);
+        return;
+
         switch(currentView){
         case 0: media_grid.model= manager.getDataGridModel("MediaFile", 63); break;
         case 1:media_list.model=manager.getDataGridModel("MediaFile", 63); break;
@@ -33,14 +50,8 @@ Item{
         }
     }
 
-    signal options()
-
-    function load(){
-        switch(currentView){
-        case 0: media_grid.model= manager.getDataGridModel("MediaFile", 63); break;
-        case 1:media_list.model=manager.getDataGridModel("MediaFile", 63); break;
-        default: break;
-        }
+    function seek(seekToken) {
+        manager.seekGrid("MediaFile", seekToken);
     }
 
     Component{
@@ -53,8 +64,23 @@ Item{
     Connections {
         target: manager.getDataGridModel("MediaFile", 63)
         onScrollToItem: {
-            console.log("scroll to item : " + item+ " of "+media_grid.count);
-            currentView.positionViewAtIndex(item, ListView.Beginning);
+            console.log("scroll to item : " + item+ " of "+currentGrid.count);
+            currentGrid.positionViewAtIndex(item, ListView.Beginning);
+            lastViewIndex = item;
+        }
+
+        onDgRequestFinished:{
+            media_grid.positionViewAtIndex(manager.currentIndex, ListView.Beginning)
+
+        }
+    }
+
+    Connections{
+        target: manager
+        onCurrentIndexChanged:{
+            console.log("going to index :: " + manager.currentIndex)
+            currentGrid.positionViewAtIndex(manager.currentIndex, ListView.Beginning);
+            lastViewIndex = manager.currentIndex;
         }
     }
 
@@ -65,82 +91,106 @@ Item{
         }
     }
 
-    GridView{
-        id:media_grid
-        clip:true
+    Loader{
+        id:media_grid_container
+        onSourceChanged: {
+            if(media_grid_container.status==Loader.Ready){
+                console.log("!!onSourceChanged!!!")
+                item.model = manager.getDataGridModel("MediaFile", 63)
+            }
+        }
+
+        onLoaded: {
+            if(media_grid_container.status==Loader.Ready){
+                console.log("!!!on loaded !!!")
+                item.model = manager.getDataGridModel("MediaFile", 63)
+                currentGrid.positionViewAtIndex(lastViewIndex, ListView.Beginning)
+            }
+        }
+
         anchors{
             left:parent.left
             right:parent.right
             bottom:parent.bottom
             top:parent.top
         }
-        visible: currentView===0
-        cellHeight: currentCellHeight
-        cellWidth:currentCellWidth
-        //current_view_type===1
-        delegate:currentDelegate
-        Keys.onDigit1Pressed: options()
+
     }
 
-    ListView{
-        id:media_list
-        clip:true
-        visible: currentView===1
-        spacing: 5
-        anchors{
-            left:parent.left
-            right:parent.right
-            bottom:parent.bottom
-            top:parent.top
+    Component{
+        id:grid_view
+        GridView{
+            id:media_grid
+            anchors.fill: parent
+            cellHeight: currentCellHeight
+            cellWidth:currentCellWidth
+            //current_view_type===1
+            delegate:currentDelegate
+            Keys.onDigit1Pressed: options()
+            Keys.onMenuPressed: options()
         }
-        delegate: Item {
-            id: rowDelegate
-            height: Style.listViewItemHeight
+    }
+
+    Component{
+        id:list_view
+        ListView{
+            id:media_list
             clip:true
-            Image{
-                id:imdbImg
-                fillMode: Image.PreserveAspectCrop
+            spacing: 5
+            onModelChanged: manager.seekGrid(lastViewIndex)
+            anchors.fill: parent
+            delegate: Item {
+                id: rowDelegate
+                height: Style.listViewItemHeight
+                clip:true
+                Image{
+                    id:imdbImg
+                    fillMode: Image.PreserveAspectCrop
 
-                source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
-                anchors.fill: parent
-                anchors.margins: 10
-                smooth: true
-                asynchronous: true
-            }
+                    source:path !=="" ? "http://"+m_ipAddress+"/lmce-admin/imdbImage.php?type=img&val="+path : ""
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    smooth: true
+                    asynchronous: true
+                }
 
-            Rectangle{
-                anchors.fill: parent
-                color:trap.pressed ? Style.appbutton_confirm_color: Style.appcolor_background_list
-                opacity: .85
-            }
+                Rectangle{
+                    anchors.fill: parent
+                    color:trap.pressed ? Style.appbutton_confirm_color: Style.appcolor_background_list
+                    opacity: .85
+                }
 
-            width: parent.width
-            StyledText{
-                id:titleBlock
-                text: name
-                wrapMode: Text.WrapAnywhere
-                width:parent.width
-                height:parent.height
-                verticalAlignment:Text.AlignVCenter
-                fontSize:Style.appFontSize_description
-                visible:true //path==="" ? true : false              
-                color: "White"
-            }
+                width: parent.width
+                StyledText{
+                    id:titleBlock
+                    text: name
+                    wrapMode: Text.WrapAnywhere
+                    width:parent.width
+                    height:parent.height
+                    verticalAlignment:Text.AlignVCenter
+                    fontSize:Style.appFontSize_description
+                    visible:true //path==="" ? true : false
+                    color: "White"
+                }
 
-            MouseArea{
-                id:trap
-                anchors.fill: parent
-                onReleased: {
-                    if(name==="back (..)"){
-                        manager.goBackGrid()
-                    } else {
-                        manager.addRestoreIndex(model.index);
-                        manager.setStringParam(4, id);
+                MouseArea{
+                    id:trap
+                    anchors.fill: parent
+                    onReleased: {
+                        if(name==="back (..)"){
+                            manager.goBackGrid()
+                        } else {
+                            manager.addRestoreIndex(model.index);
+                            manager.setStringParam(4, id);
+                        }
                     }
                 }
             }
         }
     }
+
+
+
 
     states: [
         State {

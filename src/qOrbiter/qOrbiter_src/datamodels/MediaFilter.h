@@ -127,76 +127,36 @@ public:
 
         switch (paramType)
         {
-        case 0:
-            q_mediaType = param.toInt();
-            break;
-        case 1:
-            q_subType = param;
-            break;
-        case 2:
-            q_fileFormat = param;
-            break;
-        case 3:
-            q_attribute_genres = param;
-            break;
+        case 0: q_mediaType = param.toInt(); break;
+        case 1: q_subType = param;           break;
+        case 2: q_fileFormat = param;        break;
+        case 3: q_attribute_genres = param;  break;
         case 4:
-            if (!param.contains("!D")){
+            if (!param.contains("!D")){                                                           //not browsing by directory
                 qDebug() << "Browse by file not engaged.";
-                if(param.contains("!F") || param.contains("!P"))
-                {
-                    emit itemSelected(param);
-                    return;
-                    break;
-                }
-                else
-                {
-                    q_pk_attribute = param.remove("!A");
-                }
-            }
-            else{ // 5||||1,2	!D'/home/public/data/videos/1.82 TB (sdd1) ST2000DL003-9VT [51]'|0|0|0 | 2 |
+                if(param.contains("!F") || param.contains("!P"))  {  emit itemSelected(param);  } // we found a file or playlist marker
+                else  {  q_pk_attribute = param.remove("!A"); }                                   // we found an attribute marker
+            } else{
+                                                                                                  // 5||||1,2	!D'/home/public/data/videos/1.82 TB (sdd1) ST2000DL003-9VT [51]'|0|0|0 | 2 |
                 qDebug() << "Browsing by file";
                 int t = param.indexOf("\t");
-
                 QString apnd = param.mid(t);
-                //  qDebug()<< apnd;
                 q_mediaSources.append(apnd);
                 qDebug() << "mediaFilter()::Current Media sources "<< q_mediaSources;
             }
-            break;
-
-        case 5:
-            q_usersPrivate = "0,"+param;
-            break;
-        case 6:
-            if (param.contains("!P"))
-            {
-                emit itemSelected(param);
-                return;
-                break;
-            }
-            else
-            {
-                q_attributetype_sort = param;
-                break;
-            }
-
-        case 7:
-            q_pk_users = param;
-            break;
-        case 8:
-            q_last_viewed = param;
-            break;
+                                             break;
+        case 5: q_usersPrivate = "0,"+param; break;
+        case 6: if (param.contains("!P")) { emit itemSelected(param);  break; }
+            else { q_attributetype_sort = param;  break; }
+        case 7: q_pk_users = param;          break;
+        case 8: q_last_viewed = param;       break;
         case 9:
-            if(param.contains("!F") || param.contains("!P"))
-            {
-                emit itemSelected(param);
-                return;
-                break;
-            } else {
-                q_pk_attribute = param.remove("!A");
-                break;
-            }
+            if(param.contains("!F") || param.contains("!P")) { emit itemSelected(param); break; }
+            else { q_pk_attribute = param.remove("!A");  }
+                                            break;
+        default: qDebug() << "No Parameter set for media filter!"; break;
         }
+
         // Does this new filter parameter cause a change in the attribute to list?
         updateAttributeToList();
 
@@ -379,6 +339,7 @@ public slots:
             LoggerWrapper::GetInstance()->Write(LV_STATUS, "MediaFilter::goBack() new filter string: %s", getFilterString().toStdString().c_str());
             emit filterChanged(q_mediaType);
             emit filterStringChanged(dataGridId);
+
             newMediaFilter();
             return true;
             //}
@@ -416,6 +377,7 @@ signals:
     void currentMediaTypeChanged(QString m);
     void newMediaFilter();
     void genericOptionsChanged(QString dataGridId);
+    void backIndexChanged(int idx);
 };
 }
 #endif

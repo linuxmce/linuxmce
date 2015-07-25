@@ -14,7 +14,8 @@ OTHER_FILES += \
 SUBDIRS += ../qOrbiter_src/plugins/AudioVisual \
              ../qOrbiter_src/plugins/DceScreenSaver
 }
-SUBDIRS += ../qOrbiter_src
+SUBDIRS += ../qOrbiter_src \
+
 
 
 

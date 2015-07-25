@@ -429,10 +429,17 @@ void GenericFlatListModel::refreshData() {
     qorbiterManager* pManager = static_cast<qorbiterManager*>(p);
     // Clear all window items and request new datagrid data
     clear();
+    if(pManager->currentIndex!=-1){
+        setLastIndex(pManager->currentIndex);
+
+       LoggerWrapper::GetInstance()->Write(LV_STATUS, "GenericFlatListModel.refreshData::found index to return to: %d", lastIndex);
+    }
+
     pManager->refreshDataGrid(modelName, m_PK_DataGrid, m_option);
 }
 
 void GenericFlatListModel::requestMoreData(int row, int direction) {
+
     LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.requestMoreData row = %d", row);
     if (row >= m_requestStart && row <= m_requestEnd) {
         LoggerWrapper::GetInstance()->Write(LV_WARNING, "GenericFlatListModel.requestMoreData row already requested");
