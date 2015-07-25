@@ -71,127 +71,124 @@ Item{
             console.log("scroll to item : " + item+ " of "+media_grid.count);
             media_grid.positionViewAtIndex(item, ListView.Beginning);
         }
-        //        onCurrentIndexChanged:{
-        //            currentView.lastIndex = manager.currentIndex;
-        //           // console.log("going to index :: " + manager.currentIndex)
-        //           // currentView.positionViewAtIndex(manager.currentIndex, ListView.Beginning);
-        //        }
     }
 
-    Component{
-        id:audioItem
-        AudioDelegate {
-            id: audioDelegate
-        }
-    }
-    
-    GridView{
-        id:media_grid
-        clip:true
-        anchors{
-            left:parent.left
-            right:parent.right
-            bottom:parent.bottom
-            top:parent.top
+        Component{
+            id:audioItem
+            AudioDelegate {
+                id: audioDelegate
+            }
         }
 
-        cacheBuffer: 50
-        cellHeight: currentCellHeight
-        cellWidth:currentCellWidth
-        visible:true //current_view_type===1
-        delegate:currentDelegate
-        Keys.onDigit1Pressed: options()
-        Keys.onMenuPressed: options()
+
+        GridView{
+            id:media_grid
+            clip:true
+            anchors{
+                left:parent.left
+                right:parent.right
+                bottom:parent.bottom
+                top:parent.top
+            }
+
+            cacheBuffer: 50
+            cellHeight: currentCellHeight
+            cellWidth:currentCellWidth
+            visible:true //current_view_type===1
+            delegate:currentDelegate
+            Keys.onDigit1Pressed: options()
+            Keys.onMenuPressed: options()
+        }
+
+        states: [
+            State {
+                name: "audio"
+                //  when:manager.q_mediaType == Mediatypes.STORED_AUDIO
+                PropertyChanges {
+                    target: multi_view_list
+                    currentCellHeight:manager.isProfile ? Style.scaleX(18) : Style.scaleX(14)
+                    currentCellWidth:currentCellHeight
+                }
+
+            },
+            State {
+                name: "video"
+                //  when:manager.q_mediaType == Mediatypes.STORED_VIDEO
+                PropertyChanges {
+                    target: multi_view_list
+                    currentCellHeight: Style.scaleY(24)
+                    currentCellWidth:Style.scaleX(19)
+                }
+                StateChangeScript{
+                    script: manager.setGridStatus(false)
+                }
+            },
+            State {
+                name: "video-default"
+                extend:"video"
+                PropertyChanges {
+                    target: multi_view_list
+                    currentCellHeight: Style.scaleY(23)
+                    currentCellWidth:Style.scaleX(17)
+                }
+            },
+            State {
+                name: "tv"
+                when:manager.q_subType==MediaSubtypes.TVSHOWS && manager.q_pk_attribute==""
+                extend:"video"
+                PropertyChanges {
+                    target: multi_view_list
+                    currentCellHeight: Style.scaleY(24)
+                    currentCellWidth:Style.scaleX(33)
+                }
+            },
+            State {
+                name: "movies"
+                when: manager.q_subType==MediaSubtypes.MOVIES && manager.q_mediaType==MediaTypes.LMCE_StoredVideo
+                extend:"video"
+                PropertyChanges {
+                    target: multi_view_list
+                    currentCellHeight: currentCellWidth*hdPosterRatio
+                    currentCellWidth:manager.isProfile ? Style.scaleX(10) : Style.scaleX(14.25)
+                }
+            },
+            State {
+                name: "music-video"
+                when: manager.q_subType==MediaSubtypes.MUSICVIDEOS && manager.q_mediaType==MediaTypes.LMCE_StoredVideo
+                extend:"tv"
+
+            },
+            State {
+                name: "seasons"
+                when:manager.q_attributeType_sort==Attributes.TV_Season_ID && manager.q_subType==MediaSubtypes.TVSHOWS
+                extend:"tv"
+                PropertyChanges {
+                    target: multi_view_list
+                    currentCellHeight: currentCellWidth*hdPosterRatio
+                    currentCellWidth:Style.scaleX(20)
+                }
+            },
+            State {
+                name: "episodes"
+                when:manager.q_attributeType_sort==Attributes.Title && manager.q_subType==MediaSubtypes.TVSHOWS
+                extend:"tv"
+                PropertyChanges {
+                    target: multi_view_list
+                    currentCellHeight: Style.scaleY(33)
+                    currentCellWidth:Style.scaleX(33)
+                }
+            }
+            ,
+            State {
+                name: "radio"
+                when:manager.q_mediaType == MediaTypes.NP_OTARadio
+                extend:"audio"
+                PropertyChanges {
+                    target: multi_view_list
+                    currentCellHeight: Style.scaleY(33)
+                    currentCellWidth:Style.scaleX(33)
+                }
+            }
+        ]
     }
-    
-    states: [
-        State {
-            name: "audio"
-            //  when:manager.q_mediaType == Mediatypes.STORED_AUDIO
-            PropertyChanges {
-                target: multi_view_list
-                currentCellHeight:manager.isProfile ? Style.scaleX(18) : Style.scaleX(14)
-                currentCellWidth:currentCellHeight
-            }
-            
-        },
-        State {
-            name: "video"
-            //  when:manager.q_mediaType == Mediatypes.STORED_VIDEO
-            PropertyChanges {
-                target: multi_view_list
-                currentCellHeight: Style.scaleY(24)
-                currentCellWidth:Style.scaleX(19)
-            }
-            StateChangeScript{
-                script: manager.setGridStatus(false)
-            }
-        },
-        State {
-            name: "video-default"
-            extend:"video"
-            PropertyChanges {
-                target: multi_view_list
-                currentCellHeight: Style.scaleY(23)
-                currentCellWidth:Style.scaleX(17)
-            }
-        },
-        State {
-            name: "tv"
-            when:manager.q_subType==MediaSubtypes.TVSHOWS && manager.q_pk_attribute==""
-            extend:"video"
-            PropertyChanges {
-                target: multi_view_list
-                currentCellHeight: Style.scaleY(24)
-                currentCellWidth:Style.scaleX(33)
-            }
-        },
-        State {
-            name: "movies"
-            when: manager.q_subType==MediaSubtypes.MOVIES && manager.q_mediaType==MediaTypes.LMCE_StoredVideo
-            extend:"video"
-            PropertyChanges {
-                target: multi_view_list
-                currentCellHeight: currentCellWidth*hdPosterRatio
-                currentCellWidth:manager.isProfile ? Style.scaleX(10) : Style.scaleX(14.25)
-            }
-        },
-        State {
-            name: "music-video"
-            when: manager.q_subType==MediaSubtypes.MUSICVIDEOS && manager.q_mediaType==MediaTypes.LMCE_StoredVideo
-            extend:"tv"
-            
-        },
-        State {
-            name: "seasons"
-            when:manager.q_attributeType_sort==Attributes.TV_Season_ID && manager.q_subType==MediaSubtypes.TVSHOWS
-            extend:"tv"
-            PropertyChanges {
-                target: multi_view_list
-                currentCellHeight: currentCellWidth*hdPosterRatio
-                currentCellWidth:Style.scaleX(20)
-            }
-        },
-        State {
-            name: "episodes"
-            when:manager.q_attributeType_sort==Attributes.Title && manager.q_subType==MediaSubtypes.TVSHOWS
-            extend:"tv"
-            PropertyChanges {
-                target: multi_view_list
-                currentCellHeight: Style.scaleY(33)
-                currentCellWidth:Style.scaleX(33)
-            }
-        }
-        ,
-        State {
-            name: "radio"
-            when:manager.q_mediaType == MediaTypes.NP_OTARadio
-            extend:"audio"
-            PropertyChanges {
-                target: multi_view_list
-                currentCellHeight: Style.scaleY(33)
-                currentCellWidth:Style.scaleX(33)
-            }
-        }
-    ]
-}
+
