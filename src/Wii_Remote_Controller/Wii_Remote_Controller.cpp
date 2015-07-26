@@ -336,12 +336,24 @@ void Wii_Remote_Controller::ProcessWiiMote_Key(Wiimote* pWiiMote)
     }
   else
     {
+      if (pWiiMote->getButton(false) == "B")
+	{
+	  struct input_event ev[2];
+	  memset(&ev,0,sizeof(ev));
+	      ev[0].type = EV_KEY;
+	      ev[0].code = BTN_LEFT;
+	      ev[0].value = 0;
+	      ev[1].type = EV_SYN;
+	      ev[1].code = SYN_REPORT;
+	      ev[1].value = 0;
+	      write(pWiiMote->uinput_fd,ev,sizeof(ev));
+	}
       pWiiMote->setButton("");
     }
     
   if (pWiiMote->getButton(false)!="")
     {
-      if (pWiiMote->isChangedButton())
+      if (pWiiMote->isChangedButton() && pWiiMote->getButton(false)!="B")
 	{
 	  if (pWiiMote->timerButton(tvNow) < 1000000)
 	    {
@@ -349,7 +361,7 @@ void Wii_Remote_Controller::ProcessWiiMote_Key(Wiimote* pWiiMote)
 	      pWiiMote->retriggerButton();
 	    }
 	}
-      if (pWiiMote->isLatchedButton())
+      if (pWiiMote->isLatchedButton() && pWiiMote->getButton(false)!="B")
 	{
 	  if (pWiiMote->timerButton(tvNow) > 250000)
 	    {
@@ -357,6 +369,23 @@ void Wii_Remote_Controller::ProcessWiiMote_Key(Wiimote* pWiiMote)
 	      pWiiMote->retriggerButton();
 	    }
 	}
+      if (pWiiMote->isChangedButton() && pWiiMote->getButton(false)=="B")
+	{
+	  // Handle B is left mouse button.
+	  if (m_cCurrentScreen!='G')
+	    {
+	      struct input_event ev[2];
+	      memset(&ev,0,sizeof(ev));
+	      ev[0].type = EV_KEY;
+	      ev[0].code = BTN_LEFT;
+	      ev[0].value = 1;
+	      ev[1].type = EV_SYN;
+	      ev[1].code = SYN_REPORT;
+	      ev[1].value = 0;
+	      write(pWiiMote->uinput_fd,ev,sizeof(ev));
+	    }
+	}
+
     }
 
 }
@@ -365,6 +394,7 @@ void Wii_Remote_Controller::HandleKeyEvent(string sCode)
 {
   string sPrefix="WII-REMOTE-";
   string sFinalCode=sPrefix+sCode;
+  bool bOverride=false;
 
   map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sFinalCode);
 
@@ -383,6 +413,21 @@ void Wii_Remote_Controller::HandleKeyEvent(string sCode)
 	  return;
 	}
     }
+  
+  if (m_cCurrentScreen == 'B') // File browser
+    {
+      if (it->second.first == "up")
+	{
+	  bOverride=true;
+	  ReceivedCode(0,"chup");
+	}
+      else if (it->second.first == "down")
+	{
+	  bOverride=true;
+	  ReceivedCode(0,"chdown");
+	}
+    }
+
 
   if (it==m_mapCodesToButtons.end())
     {
@@ -390,10 +435,13 @@ void Wii_Remote_Controller::HandleKeyEvent(string sCode)
     }
   else
     {
-      ReceivedCode(it->second.second,it->second.first.c_str());
-      if (m_dwPK_Device==DEVICEID_MESSAGESEND)
+      if (!bOverride)
 	{
-	  ForceKeystroke(it->second.first, m_sAVWHost, m_iAVWPort);
+	  ReceivedCode(it->second.second,it->second.first.c_str());
+	  if (m_dwPK_Device==DEVICEID_MESSAGESEND)
+	    {
+	      ForceKeystroke(it->second.first, m_sAVWHost, m_iAVWPort);
+	    }
 	}
     }
 
@@ -488,74 +536,46 @@ pair<int, int> Wii_Remote_Controller::GetAveragedIRXY(Wiimote* pWiiMote)
   
   pWiiMote->ir_last_valid_event = pWiiMote->event.time;
 
-  return make_pair(a->x,a->y);
+  return make_pair(floor(a->x),floor(a->y));
 }
-
- void Wii_Remote_Controller::uinput_mouse_move(Wiimote* pWiiMote, int rel_x, int rel_y) {
-   struct input_event event;
-   
-   if (pWiiMote->uinput_fd <= 0)
-     return;
-   
-   gettimeofday(&event.time, NULL);
-   event.type = EV_REL;
-   event.code = REL_X;
-   event.value = -rel_x;
-   write(pWiiMote->uinput_fd, &event, sizeof(event));
-   
-   event.type = EV_REL;
-   event.code = REL_Y;
-   event.value = rel_y;
-   write(pWiiMote->uinput_fd, &event, sizeof(event));
-   
-   event.type = EV_SYN;
-   event.code = SYN_REPORT;
-   event.value = 0;
-   write(pWiiMote->uinput_fd, &event, sizeof(event));
- }
- 
- void Wii_Remote_Controller::uinput_mouse_move_subpixel(Wiimote* pWiiMote, float rel_x, float rel_y) {
-   int ix, iy;
-   rel_x += pWiiMote->subpixel_residual_x;
-   rel_y += pWiiMote->subpixel_residual_y;
-   ix = (int)floor(rel_x);
-   iy = (int)floor(rel_y);
-   uinput_mouse_move(pWiiMote, ix, iy);
-   pWiiMote->subpixel_residual_x = rel_x - ix;
-   pWiiMote->subpixel_residual_y = rel_y - iy;
- }
- 
- void Wii_Remote_Controller::uinput_mouse_absolute_movement(Wiimote* pWiiMote, float abs_x, float abs_y) {
-   if (pWiiMote->old_abs_valid)
-     uinput_mouse_move_subpixel(pWiiMote, abs_x - pWiiMote->old_abs_x, abs_y - pWiiMote->old_abs_y);
-   pWiiMote->old_abs_x = abs_x;
-   pWiiMote->old_abs_y = abs_y;
-   pWiiMote->old_abs_valid = 1;
- }
 
 void Wii_Remote_Controller::ProcessWiiMote_IR(Wiimote* pWiiMote)
 {
 
   pair<int, int> avgd = GetAveragedIRXY(pWiiMote);
-  uinput_mouse_absolute_movement(pWiiMote,avgd.first,avgd.second);
+  // uinput_mouse_absolute_movement(pWiiMote,avgd.first,avgd.second);
 
-#if 0
   struct input_event ev[3]; // X, Y, and SYN
+  int ir_x=avgd.first;
+  int ir_y=avgd.second;
+
   memset(&ev,0,sizeof(ev));
   
+  if (ir_x==0)
+    {
+      ir_x=pWiiMote->old_ir_x;
+    }
+  
+  if (ir_y==0)
+    {
+      ir_y=pWiiMote->old_ir_y;
+    }
+
+  cout << "\tx:\t" << ir_x << "\ty:\t" << ir_y << endl;
+
   ev[0].type = EV_ABS;
   ev[0].code = ABS_X;
-  ev[0].value = pWiiMote->event.v.abs[0].x;
+  ev[0].value = abs(ir_x-1023);
   ev[1].type = EV_ABS;
   ev[1].code = ABS_Y;
-  ev[1].value = pWiiMote->event.v.abs[0].y;
+  ev[1].value = ir_y;
   ev[2].type = EV_SYN;
-  ev[2].code = 0;
+  ev[2].code = SYN_REPORT;
   ev[2].value = 0;
   write(pWiiMote->uinput_fd,ev,sizeof(ev));
-#endif
 
-  
+  pWiiMote->old_ir_x=avgd.first;
+  pWiiMote->old_ir_y=avgd.second;
 
 }
 
@@ -602,13 +622,17 @@ void Wii_Remote_Controller::SetupIRMouse(Wiimote *pWiiMote)
   uidev.id.vendor  = 0x1234;
   uidev.id.product = 0xfedc;
   uidev.id.version = 1;
+  uidev.absmin[ABS_X] = 0;
+  uidev.absmax[ABS_X] = 1023;
+  uidev.absmin[ABS_Y] = 0;
+  uidev.absmax[ABS_Y] = 767;
 
   pWiiMote->uinput_fd = open("/dev/uinput",O_WRONLY|O_NONBLOCK);
-  ioctl(pWiiMote->uinput_fd, UI_SET_EVBIT, EV_REL);
-  ioctl(pWiiMote->uinput_fd, UI_SET_RELBIT, REL_X);
-  ioctl(pWiiMote->uinput_fd, UI_SET_RELBIT, REL_Y);
+  ioctl(pWiiMote->uinput_fd, UI_SET_EVBIT, EV_ABS);
+  ioctl(pWiiMote->uinput_fd, UI_SET_ABSBIT, ABS_X);
+  ioctl(pWiiMote->uinput_fd, UI_SET_ABSBIT, ABS_Y);
   ioctl(pWiiMote->uinput_fd, UI_SET_EVBIT, EV_KEY);
-  ioctl(pWiiMote->uinput_fd, UI_SET_KEYBIT, BTN_MOUSE);
+  ioctl(pWiiMote->uinput_fd, UI_SET_KEYBIT, BTN_LEFT);
 
   if (pWiiMote->uinput_fd < 0)
     {
