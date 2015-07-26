@@ -86,12 +86,9 @@ namespace DCE
     int ir_avg_weight;
     int ir_keymap_expiry_secs;
 
-    // abs to rel variables
-    float subpixel_residual_x;
-    float subpixel_residual_y;
-    float old_abs_x;
-    float old_abs_y;
-    int old_abs_valid;
+    // old IR coordinates, used to prevent discontinuity (currently, check for 0)
+    int old_ir_x;
+    int old_ir_y;
 
     Wiimote() 
       {
@@ -100,7 +97,6 @@ namespace DCE
 	// event_prev=NULL;
 	m_bActive=false;
 	m_sPath="";
-	subpixel_residual_x=subpixel_residual_y=old_abs_x=old_abs_y=old_abs_valid=0;
       }
 
     ~Wiimote() { }
@@ -189,9 +185,6 @@ public:
 		void HandleKeyEvent(string sCode);
 		void SetupIRMouse(Wiimote *pWiiMote);
 		pair<int, int> GetAveragedIRXY(Wiimote *pWiiMote);
-		void uinput_mouse_absolute_movement(Wiimote* pWiiMote, float abs_x, float abs_y);
-		void uinput_mouse_move_subpixel(Wiimote* pWiiMote, float rel_x, float rel_y);
-		void uinput_mouse_move(Wiimote* pWiiMote, int rel_x, int rel_y);
 
 //<-dceag-const2-b->!
 
