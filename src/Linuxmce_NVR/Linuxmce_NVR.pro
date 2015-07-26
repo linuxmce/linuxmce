@@ -4,9 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core
-
-QT       -= gui
+QT       += core network gui
 
 TARGET = Linuxmce_NVR
 CONFIG   += console c++11
@@ -41,9 +39,15 @@ HEADERS += LinuxMCE_NVR.h \
         ../SerializeClass/SerializeClass.h \
         ../PlutoUtils/FileUtils.h \
         ../pluto_main/Define_DeviceCategory.h \
-        ../pluto_main/Define_DeviceTemplate.h
+        ../pluto_main/Define_DeviceTemplate.h \
+    cameraClasses/abstractcameraevent.h \
+    cameraClasses/abstractpicamera.h \
+    cameraClasses/motionpicamera.h \
+    managerClasses/eventlistener.h \
+    managerClasses/httpresponder.h \
+    managerClasses/NvrManager.h
 
-SOURCES += main.cpp \
+SOURCES += Main.cpp \
            Linuxmce_NVR.cpp \
         ../Gen_Devices/Linuxmce_NVRBase.cpp \
         ../PlutoUtils/uuencode.cpp \
@@ -72,4 +76,10 @@ SOURCES += main.cpp \
         ../DCE/ClientSocket.cpp \
         ../DCE/DeviceData_Base.cpp \
         ../DCE/DeviceData_Impl.cpp \
-        ../PlutoUtils/getch.cpp
+        ../PlutoUtils/getch.cpp \
+    cameraClasses/abstractcameraevent.cpp \
+    cameraClasses/abstractpicamera.cpp \
+    cameraClasses/motionpicamera.cpp \
+    managerClasses/eventlistener.cpp \
+    managerClasses/httpresponder.cpp \
+    managerClasses/NvrManager.cpp
