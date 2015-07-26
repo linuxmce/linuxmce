@@ -19,94 +19,17 @@
 #include "PlutoUtils/StringUtils.h"
 #include "PlutoUtils/Other.h"
 #include "DCERouter.h"
-
+#include <QCoreApplication>
 // include the main LMCE version file
 #include "version.h"
 
 using namespace DCE;
 
-// You can override this block if you don't want the app to reload in the event of a problem
-extern void (*g_pDeadlockHandler)(PlutoLock *pPlutoLock);
-extern void (*g_pSocketCrashHandler)(Socket *pSocket);
-extern Command_Impl *g_pCommand_Impl;
-void DeadlockHandler(PlutoLock *pPlutoLock)
-{
-	// This isn't graceful, but for the moment in the event of a deadlock we'll just kill everything and force a reload
-	if( g_pCommand_Impl )
-	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Deadlock problem.  %d  Going to reload and quit",g_pCommand_Impl->m_dwPK_Device);
-		g_pCommand_Impl->OnReload();
-	}
-}
-void SocketCrashHandler(Socket *pSocket)
-{
-	// This isn't graceful, but for the moment in the event of a socket crash we'll just kill everything and force a reload
-	if( g_pCommand_Impl )
-	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Socket problem. %d  Going to reload and quit",g_pCommand_Impl->m_dwPK_Device);
-		g_pCommand_Impl->OnReload();
-	}
-}
-void Plugin_DeadlockHandler(PlutoLock *pPlutoLock)
-{
-	// This isn't graceful, but for the moment in the event of a deadlock we'll just kill everything and force a reload
-	if( g_pCommand_Impl && g_pCommand_Impl->m_pRouter )
-	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Plugin Deadlock problem.  %d Going to reload",g_pCommand_Impl->m_dwPK_Device);
-		g_pCommand_Impl->m_pRouter->CrashWithinPlugin(g_pCommand_Impl->m_dwPK_Device);
-	}
-}
-void Plugin_SocketCrashHandler(Socket *pSocket)
-{
-	if( g_pCommand_Impl && g_pCommand_Impl->m_pRouter )
-	{
-		LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Plugin Socket problem.  %d",g_pCommand_Impl->m_dwPK_Device);
-		// g_pCommand_Impl->m_pRouter->CrashWithinPlugin(g_pCommand_Impl->m_dwPK_Device);  // Don't reload plugins since sockets can fail
-	}
-}
-//<-dceag-incl-e->
-
-extern "C" {
-	int IsRuntimePlugin() 
-	{ 
-		// If you want this plug-in to be able to register and be used even if it is not in the Device table, set this to true.
-		// Then the Router will scan for all .so or .dll files, and if found they will be registered with a temporary device number
-		bool bIsRuntimePlugin=false;
-		if( bIsRuntimePlugin )
-			return Linuxmce_NVR::PK_DeviceTemplate_get_static();
-		else
-			return 0;
-	}
-}
-
-
-//<-dceag-plug-b->
-extern "C" {
-	class Command_Impl *RegisterAsPlugIn(class Router *pRouter,int PK_Device,Logger *pPlutoLogger)
-	{
-		LoggerWrapper::SetInstance(pPlutoLogger);
-		LoggerWrapper::GetInstance()->Write(LV_STATUS, "Device: %d loaded as plug-in",PK_Device);
-
-		Linuxmce_NVR *pLinuxmce_NVR = new Linuxmce_NVR(PK_Device, "localhost",true,false,pRouter);
-		if( pLinuxmce_NVR->m_bQuit_get()|| !pLinuxmce_NVR->GetConfig() )
-		{
-			delete pLinuxmce_NVR;
-			return NULL;
-		}
-		else
-		{
-			g_pCommand_Impl=pLinuxmce_NVR;
-			g_pDeadlockHandler=Plugin_DeadlockHandler;
-			g_pSocketCrashHandler=Plugin_SocketCrashHandler;
-		}
-		return pLinuxmce_NVR;
-	}
-}
-//<-dceag-plug-e->
 
 //<-dceag-main-b->
 int main(int argc, char* argv[]) 
 {
+     QCoreApplication a(argc, argv);
 	g_sBinary = FileUtils::FilenameWithoutPath(argv[0]);
 	g_sBinaryPath = FileUtils::BasePath(argv[0]);
 
@@ -194,11 +117,9 @@ int main(int argc, char* argv[])
 	try
 	{
 		Linuxmce_NVR *pLinuxmce_NVR = new Linuxmce_NVR(PK_Device, sRouter_IP,true,bLocalMode);
+
 		if ( pLinuxmce_NVR->GetConfig() && pLinuxmce_NVR->Connect(pLinuxmce_NVR->PK_DeviceTemplate_get()) ) 
-		{
-			g_pCommand_Impl=pLinuxmce_NVR;
-			g_pDeadlockHandler=DeadlockHandler;
-			g_pSocketCrashHandler=SocketCrashHandler;
+        {
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
 			pLinuxmce_NVR->CreateChildren();
 			if( bLocalMode )
@@ -207,9 +128,7 @@ int main(int argc, char* argv[])
 			{
 				if(pLinuxmce_NVR->m_RequestHandlerThread)
 					pthread_join(pLinuxmce_NVR->m_RequestHandlerThread, NULL);  // This function will return when the device is shutting down
-			}
-			g_pDeadlockHandler=NULL;
-			g_pSocketCrashHandler=NULL;
+			}			
 		} 
 		else 
 		{
@@ -226,7 +145,7 @@ int main(int argc, char* argv[])
 
 		if( pLinuxmce_NVR->m_bReload )
 			bReload=true;
-
+         return a.exec();
 		delete pLinuxmce_NVR;
 	}
 	catch(string s)

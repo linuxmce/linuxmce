@@ -1,5 +1,5 @@
 /*
-     Copyright (C) 2013 LinuxMCE 
+     Copyright (C) 2013 LinuxMCE
 
      www.linuxmce.org
 
@@ -19,118 +19,129 @@
 
 #include "Gen_Devices/Linuxmce_NVRBase.h"
 //<-dceag-d-e->
-
+#include "qobject.h"
 //<-dceag-decl-b->
 namespace DCE
 {
-	class Linuxmce_NVR : public Linuxmce_NVR_Command
-	{
-//<-dceag-decl-e->
-		// Private member variables
+class Linuxmce_NVR : public QObject, public Linuxmce_NVR_Command
+{
+    //<-dceag-decl-e->
+    // Private member variables
 
-		// Private methods
+    // Private methods
 public:
-		// Public member variables
+    // Public member variables
 
-//<-dceag-const-b->
+    //<-dceag-const-b->
 public:
-		// Constructors/Destructor
-		Linuxmce_NVR(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
-		virtual ~Linuxmce_NVR();
-		virtual bool GetConfig();
-		virtual bool Register();
-		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
-		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
-//<-dceag-const-e->
-
-//<-dceag-const2-b->
-		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
-		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-		Linuxmce_NVR(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
-//<-dceag-const2-e->
-
-//<-dceag-h-b->
-	/*
-				AUTO-GENERATED SECTION
-				Do not change the declarations
-	*/
-
-	/*
-			*****DATA***** accessors inherited from base class
-	string DATA_Get_Configuration();
-	void DATA_Set_Configuration(string Value,bool bUpdateDatabase=false);
-	int DATA_Get_Listen_Port();
-	void DATA_Set_Listen_Port(int Value,bool bUpdateDatabase=false);
-	string DATA_Get_EmailSettings();
-	void DATA_Set_EmailSettings(string Value,bool bUpdateDatabase=false);
-
-			*****EVENT***** accessors inherited from base class
-
-			*****COMMANDS***** we need to implement
-	*/
+    // Constructors/Destructor
+    Linuxmce_NVR(int DeviceID, string ServerAddress,bool bConnectEventHandler=true,bool bLocalMode=false,class Router *pRouter=NULL);
+    virtual ~Linuxmce_NVR();
+    virtual bool GetConfig();
+    virtual bool Register();
+    virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
+    virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
+    //<-dceag-const-e->
 
 
-	/** @brief COMMAND: #277 - Get Capture Video Frame */
-	/** Get a video frame from a specified camera number */
-		/** @param #19 Data */
-			/** The pointer to the video frame */
-		/** @param #112 CameraID */
-			/** The number (ID) of the camera where to capture from */
+    //<-dceag-const2-b->
+    // The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
+    // You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
+    Linuxmce_NVR(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
+    //<-dceag-const2-e->
 
-	virtual void CMD_Get_Capture_Video_Frame(int iCameraID,char **pData,int *iData_Size) { string sCMD_Result; CMD_Get_Capture_Video_Frame(iCameraID,pData,iData_Size,sCMD_Result,NULL);};
-	virtual void CMD_Get_Capture_Video_Frame(int iCameraID,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage);
+    //<-dceag-h-b->
+    /*
+                                AUTO-GENERATED SECTION
+                                Do not change the declarations
+        */
+
+    /*
+                        *****DATA***** accessors inherited from base class
+        string DATA_Get_Configuration();
+        void DATA_Set_Configuration(string Value,bool bUpdateDatabase=false);
+        int DATA_Get_Listen_Port();
+        void DATA_Set_Listen_Port(int Value,bool bUpdateDatabase=false);
+        string DATA_Get_EmailSettings();
+        void DATA_Set_EmailSettings(string Value,bool bUpdateDatabase=false);
+
+                        *****EVENT***** accessors inherited from base class
+
+                        *****COMMANDS***** we need to implement
+        */
 
 
-	/** @brief COMMAND: #756 - Report Child Devices */
-	/** Report all the child sensors this has by firing an event 'Reporting Child Devices' */
+    /** @brief COMMAND: #277 - Get Capture Video Frame */
+    /** Get a video frame from a specified camera number */
+    /** @param #19 Data */
+    /** The pointer to the video frame */
+    /** @param #112 CameraID */
+    /** The number (ID) of the camera where to capture from */
 
-	virtual void CMD_Report_Child_Devices() { string sCMD_Result; CMD_Report_Child_Devices(sCMD_Result,NULL);};
-	virtual void CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #757 - Download Configuration */
-	/** Download new configuration data for this device */
-		/** @param #9 Text */
-			/** Any information the device may want to do the download */
-
-	virtual void CMD_Download_Configuration(string sText) { string sCMD_Result; CMD_Download_Configuration(sText.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Download_Configuration(string sText,string &sCMD_Result,Message *pMessage);
+    virtual void CMD_Get_Capture_Video_Frame(int iCameraID,char **pData,int *iData_Size) { string sCMD_Result; CMD_Get_Capture_Video_Frame(iCameraID,pData,iData_Size,sCMD_Result,NULL);};
+    virtual void CMD_Get_Capture_Video_Frame(int iCameraID,char **pData,int *iData_Size,string &sCMD_Result,Message *pMessage);
 
 
-	/** @brief COMMAND: #760 - Send Command To Child */
-	/** After reporting new child devices, there may be children we want to test, but we haven't done a quick reload router and can't send them messages directly.  This way we can send 'live' messages to children */
-		/** @param #10 ID */
-			/** The internal ID used for this device--not the Pluto device ID. */
-		/** @param #154 PK_Command */
-			/** The command to send */
-		/** @param #202 Parameters */
-			/** Parameters for the command in the format:
+    /** @brief COMMAND: #756 - Report Child Devices */
+    /** Report all the child sensors this has by firing an event 'Reporting Child Devices' */
+
+    virtual void CMD_Report_Child_Devices() { string sCMD_Result; CMD_Report_Child_Devices(sCMD_Result,NULL);};
+    virtual void CMD_Report_Child_Devices(string &sCMD_Result,Message *pMessage);
+
+
+    /** @brief COMMAND: #757 - Download Configuration */
+    /** Download new configuration data for this device */
+    /** @param #9 Text */
+    /** Any information the device may want to do the download */
+
+    virtual void CMD_Download_Configuration(string sText) { string sCMD_Result; CMD_Download_Configuration(sText.c_str(),sCMD_Result,NULL);};
+    virtual void CMD_Download_Configuration(string sText,string &sCMD_Result,Message *pMessage);
+
+
+    /** @brief COMMAND: #760 - Send Command To Child */
+    /** After reporting new child devices, there may be children we want to test, but we haven't done a quick reload router and can't send them messages directly.  This way we can send 'live' messages to children */
+    /** @param #10 ID */
+    /** The internal ID used for this device--not the Pluto device ID. */
+    /** @param #154 PK_Command */
+    /** The command to send */
+    /** @param #202 Parameters */
+    /** Parameters for the command in the format:
 PK_CommandParameter|Value|... */
 
-	virtual void CMD_Send_Command_To_Child(string sID,int iPK_Command,string sParameters) { string sCMD_Result; CMD_Send_Command_To_Child(sID.c_str(),iPK_Command,sParameters.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Send_Command_To_Child(string sID,int iPK_Command,string sParameters,string &sCMD_Result,Message *pMessage);
+    virtual void CMD_Send_Command_To_Child(string sID,int iPK_Command,string sParameters) { string sCMD_Result; CMD_Send_Command_To_Child(sID.c_str(),iPK_Command,sParameters.c_str(),sCMD_Result,NULL);};
+    virtual void CMD_Send_Command_To_Child(string sID,int iPK_Command,string sParameters,string &sCMD_Result,Message *pMessage);
 
 
-	/** @brief COMMAND: #776 - Reset */
-	/** Reset device. */
-		/** @param #51 Arguments */
-			/** Argument string
+    /** @brief COMMAND: #776 - Reset */
+    /** Reset device. */
+    /** @param #51 Arguments */
+    /** Argument string
 NOEMON or CANBUS */
 
-	virtual void CMD_Reset(string sArguments) { string sCMD_Result; CMD_Reset(sArguments.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Reset(string sArguments,string &sCMD_Result,Message *pMessage);
+    virtual void CMD_Reset(string sArguments) { string sCMD_Result; CMD_Reset(sArguments.c_str(),sCMD_Result,NULL);};
+    virtual void CMD_Reset(string sArguments,string &sCMD_Result,Message *pMessage);
 
 
-	/** @brief COMMAND: #788 - StatusReport */
-	/** Test comand. Asq a report */
-		/** @param #51 Arguments */
-			/** Argument string */
+    /** @brief COMMAND: #788 - StatusReport */
+    /** Test comand. Asq a report */
+    /** @param #51 Arguments */
+    /** Argument string */
 
-	virtual void CMD_StatusReport(string sArguments) { string sCMD_Result; CMD_StatusReport(sArguments.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMessage);
+    virtual void CMD_StatusReport(string sArguments) { string sCMD_Result; CMD_StatusReport(sArguments.c_str(),sCMD_Result,NULL);};
+    virtual void CMD_StatusReport(string sArguments,string &sCMD_Result,Message *pMessage);
 
-//<-dceag-h-e->
-	};
+    //<-dceag-h-e->
+signals:
+    void addCamera();
+    void removeCamera();
+    void commandForCamera();
+
+public slots:
+    void cameraEvent();
+
+private:
+    QList<QObject*> cameraDevices;
+};
 
 //<-dceag-end-b->
 }
