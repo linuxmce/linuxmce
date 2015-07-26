@@ -22,17 +22,151 @@
 #include "Gen_Devices/Wii_Remote_ControllerBase.h"
 //<-dceag-d-e->
 
+#include "../LIRC_DCE/IRReceiverBase.h"
+#include "IRBase/IRBase.h"
+#include "AlarmManager.h"
+#include <math.h>
+#include <xwiimote.h>
+#include <linux/input.h>
+#include <linux/uinput.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+
 //<-dceag-decl-b->
 namespace DCE
 {
-	class Wii_Remote_Controller : public Wii_Remote_Controller_Command
+  /**
+   * A single Wii Remote, holding state.  
+   *
+   */
+  class Wiimote
+  {
+  private:
+    string m_sCode;
+    bool m_bLatched;
+    bool m_bChanged;
+    int ir_x, ir_y;
+    struct timeval m_tvDownButton;
+
+    double time_diff(struct timeval x , struct timeval y)
+    {
+      double x_ms , y_ms , diff;
+      
+      x_ms = (double)x.tv_sec*1000000 + (double)x.tv_usec;
+      y_ms = (double)y.tv_sec*1000000 + (double)y.tv_usec;
+      
+      diff = (double)y_ms - (double)x_ms;
+      
+      return diff;
+    }
+
+  public:
+    string m_sPath;
+    bool m_bActive;
+    struct xwii_iface *iface;
+    struct xwii_event event;
+    struct xwii_event event_prev;
+    int uinput_fd;
+
+    // IR fuzzy logic vectors
+    struct timeval ir_last_valid_event;
+    int ir_vec_x;
+    int ir_vec_y;
+    int ir_ref_x;
+    int ir_ref_y;
+    int ir_avg_x;
+    int ir_avg_y;
+    int ir_avg_count;
+    int ir_avg_radius;
+    int ir_avg_max_samples;
+    int ir_avg_min_samples;
+    int ir_avg_weight;
+    int ir_keymap_expiry_secs;
+
+    // abs to rel variables
+    float subpixel_residual_x;
+    float subpixel_residual_y;
+    float old_abs_x;
+    float old_abs_y;
+    int old_abs_valid;
+
+    Wiimote() 
+      {
+	iface=NULL;
+	// event=NULL;
+	// event_prev=NULL;
+	m_bActive=false;
+	m_sPath="";
+	subpixel_residual_x=subpixel_residual_y=old_abs_x=old_abs_y=old_abs_valid=0;
+      }
+
+    ~Wiimote() { }
+    
+    void setButton(string sCode)
+    {
+      m_bChanged=(sCode!=m_sCode);
+      m_sCode=sCode;
+      if (m_bChanged)
+	gettimeofday(&m_tvDownButton,NULL);
+    }
+
+    bool isLatchedButton()
+    {
+      return m_bLatched;
+    }
+
+    bool isChangedButton()
+    {
+      return m_bChanged;
+    }
+
+    string getButton(bool alterChanged)
+    {
+      if (alterChanged)
+	m_bChanged=false;
+      return m_sCode;
+    }
+
+    bool timerButton(struct timeval tvNow)
+    {
+      return time_diff(m_tvDownButton,tvNow);
+    }
+
+    void retriggerButton()
+    {
+      gettimeofday(&m_tvDownButton,NULL);
+      m_bLatched=true;
+    }
+
+  };
+
+  class Wii_Remote_Controller : public Wii_Remote_Controller_Command, public AlarmEvent, IRReceiverBase, IRBase
 	{
 //<-dceag-decl-e->
 		// Private member variables
+	  int m_dwPK_Device_IRPlugin;
+	  int m_iPK_Orbiter;
+	  pluto_pthread_mutex_t m_WiimoteMutex;
+	  pthread_t m_wiimoteCaptureThread;
+	  class AlarmManager *m_pAlarmManager;
+	  void AlarmCallback(int id, void *param);
+	  string m_sAVWHost;
+	  int m_iAVWPort;
+	  pthread_t m_inputCaptureThread;
+	  Wiimote *m_WiiMote1;
+	  Wiimote *m_WiiMote2;
+	  Wiimote *m_WiiMote3;
+	  Wiimote *m_WiiMote4;
 
 		// Private methods
+	  string GetDevice(int num);
 public:
 		// Public member variables
+	  map<string, pair<string, int> > m_mapCodesToButtons;
+	  int m_DeviceID;
 
 //<-dceag-const-b->
 public:
@@ -44,12 +178,22 @@ public:
 		virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
 		virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
 //<-dceag-const-e->
+		virtual void PrepareToDelete();
+		virtual void CreateChildren();
+		void FindWiimotes();
+		virtual void SendIR(string Port, string IRCode, int iRepeat);
+		int Wiimote_Capture(int deviceID);
+		void ProcessWiiMote(Wiimote* pWiiMote);
+		void ProcessWiiMote_Key(Wiimote* pWiiMote);
+		void ProcessWiiMote_IR(Wiimote* pWiiMote);
+		void HandleKeyEvent(string sCode);
+		void SetupIRMouse(Wiimote *pWiiMote);
+		pair<int, int> GetAveragedIRXY(Wiimote *pWiiMote);
+		void uinput_mouse_absolute_movement(Wiimote* pWiiMote, float abs_x, float abs_y);
+		void uinput_mouse_move_subpixel(Wiimote* pWiiMote, float rel_x, float rel_y);
+		void uinput_mouse_move(Wiimote* pWiiMote, int rel_x, int rel_y);
 
-//<-dceag-const2-b->
-		// The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
-		// You can delete this whole section and put an ! after dceag-const2-b tag if you don't want this constructor.  Do the same in the implementation file
-		Wii_Remote_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter);
-//<-dceag-const2-e->
+//<-dceag-const2-b->!
 
 //<-dceag-h-b->
 	/*
@@ -105,15 +249,6 @@ public:
 
 	virtual void CMD_Set_Screen_Type(int iValue) { string sCMD_Result; CMD_Set_Screen_Type(iValue,sCMD_Result,NULL);};
 	virtual void CMD_Set_Screen_Type(int iValue,string &sCMD_Result,Message *pMessage);
-
-
-	/** @brief COMMAND: #1090 - Connect to Device */
-	/** Called to pair WiiUse to the device. */
-		/** @param #47 Mac address */
-			/** The MAC address of the Bluetooth Device to connect. */
-
-	virtual void CMD_Connect_to_Device(string sMac_address) { string sCMD_Result; CMD_Connect_to_Device(sMac_address.c_str(),sCMD_Result,NULL);};
-	virtual void CMD_Connect_to_Device(string sMac_address,string &sCMD_Result,Message *pMessage);
 
 //<-dceag-h-e->
 	};

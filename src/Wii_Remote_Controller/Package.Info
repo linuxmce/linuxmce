@@ -2,8 +2,8 @@
 Package = DCE_Destination_Package
 Dir = 
 desc = DCE Implemenation for #1954 Wii Remote Controller
-Maintainer = thomasName
-Email = thom.cherryhomes@gmail.com
+Maintainer = DCE_MaintainerName
+Email = DCE_MaintainerEmail
 Depend = DCE_Dependencies
 <-dceag-p-e->
 

@@ -27,27 +27,89 @@ using namespace DCE;
 #include "Gen_Devices/AllCommandsRequests.h"
 //<-dceag-d-e->
 
+#define XWIIMOTE_IR_AVG_RADIUS 10
+#define XWIIMOTE_IR_AVG_MAX_SAMPLES 8
+#define XWIIMOTE_IR_AVG_MIN_SAMPLES 4
+#define XWIIMOTE_IR_AVG_WEIGHT 3
+
+#define XWIIMOTE_IR_KEYMAP_EXPIRY_SECS 1
+
+#define XWIIMOTE_DISTSQ(ax, ay, bx, by) \
+	((ax - bx) * (ax - bx) + (ay - by) * (ay - by))
+
+#define FIND_WIIMOTES 0
+
+void * StartInputThread(void * Arg)
+{
+  Wii_Remote_Controller *pWii_Remote_Controller = (Wii_Remote_Controller *) Arg;
+  pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL);
+  pWii_Remote_Controller->Wiimote_Capture(pWii_Remote_Controller->m_DeviceID);
+  return NULL;
+}
+
 //<-dceag-const-b->
 // The primary constructor when the class is created as a stand-alone device
 Wii_Remote_Controller::Wii_Remote_Controller(int DeviceID, string ServerAddress,bool bConnectEventHandler,bool bLocalMode,class Router *pRouter)
 	: Wii_Remote_Controller_Command(DeviceID, ServerAddress,bConnectEventHandler,bLocalMode,pRouter)
 //<-dceag-const-e->
+	,IRReceiverBase(this)
+	,m_WiimoteMutex("wii_remote_controller")
+	,m_iAVWPort(0)
 {
+  m_WiimoteMutex.Init(NULL);
+  m_pAlarmManager=NULL;
+  m_inputCaptureThread=0;
+  m_DeviceID=0;
+  m_WiiMote1 = new Wiimote();
+  m_WiiMote2 = new Wiimote();
+  m_WiiMote3 = new Wiimote();
+  m_WiiMote4 = new Wiimote();
 }
 
-//<-dceag-const2-b->
-// The constructor when the class is created as an embedded instance within another stand-alone device
-Wii_Remote_Controller::Wii_Remote_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-	: Wii_Remote_Controller_Command(pPrimaryDeviceCommand, pData, pEvent, pRouter)
-//<-dceag-const2-e->
+//<-dceag-const2-b->!
+
+void Wii_Remote_Controller::PrepareToDelete()
 {
+  Command_Impl::PrepareToDelete();
+
+  if (m_WiiMote1->m_bActive)
+    {
+      ioctl(m_WiiMote1->uinput_fd,UI_DEV_DESTROY);
+      xwii_iface_close(m_WiiMote1->iface,XWII_IFACE_ALL);
+      xwii_iface_unref(m_WiiMote1->iface);
+    }
+
+  if (m_WiiMote2->m_bActive)
+    {
+      xwii_iface_close(m_WiiMote2->iface,XWII_IFACE_ALL);
+      xwii_iface_unref(m_WiiMote2->iface);
+    }
+
+  if (m_WiiMote3->m_bActive)
+    {
+      xwii_iface_close(m_WiiMote3->iface,XWII_IFACE_ALL);
+      xwii_iface_unref(m_WiiMote3->iface);
+    }
+
+  if (m_WiiMote4->m_bActive)
+    {
+      xwii_iface_close(m_WiiMote4->iface,XWII_IFACE_ALL);
+      xwii_iface_unref(m_WiiMote4->iface);
+    }
+
+  delete m_pAlarmManager;
+  delete m_WiiMote1;
+  delete m_WiiMote2;
+  delete m_WiiMote3;
+  delete m_WiiMote4;
+  m_pAlarmManager=NULL;
 }
 
 //<-dceag-dest-b->
 Wii_Remote_Controller::~Wii_Remote_Controller()
 //<-dceag-dest-e->
 {
-	
+  
 }
 
 //<-dceag-getconfig-b->
@@ -57,9 +119,94 @@ bool Wii_Remote_Controller::GetConfig()
 		return false;
 //<-dceag-getconfig-e->
 
-	// Put your code here to initialize the data in this class
-	// The configuration parameters DATA_ are now populated
+	if ( m_dwPK_Device != DEVICEID_MESSAGESEND && !m_bLocalMode )
+	  {
+	    if ( !m_Virtual_Device_Translator.GetConfig(m_pData) )
+	      return false;
+	    
+	    // Put your code here to initialize the data in this class
+	    // The configuration parameters DATA_ are now populated
+	    	    
+	    IRBase::setCommandImpl(this);
+	    IRBase::setAllDevices(&(GetData()->m_AllDevices));
+	    IRReceiverBase::GetConfig(m_pData);
+	  }
+
+	m_pAlarmManager = new AlarmManager();
+	m_pAlarmManager->Start(2);
+
+	if ( !m_bLocalMode )
+	  {
+	    DeviceData_Base *pDevice = m_pData->m_AllDevices.m_mapDeviceData_Base_FindFirstOfCategory(DEVICECATEGORY_Infrared_Plugins_CONST);
+	    
+	    if ( pDevice )
+	      m_dwPK_Device_IRPlugin = pDevice->m_dwPK_Device;
+	    else
+	      m_dwPK_Device_IRPlugin = 0;
+	    
+	    string sResult;
+	    DCE::CMD_Get_Sibling_Remotes CMD_Get_Sibling_Remotes(m_dwPK_Device,m_dwPK_Device_IRPlugin, DEVICECATEGORY_Wii_Remote_Controls_CONST, &sResult);
+	    SendCommand(CMD_Get_Sibling_Remotes);
+	    
+	    vector<string> vectRemotes;
+	    StringUtils::Tokenize(sResult, "`",vectRemotes);
+	    size_t i;
+	    for (i=0;i<vectRemotes.size();i++)
+	      {
+		vector<string> vectRemoteConfigs;
+		StringUtils::Tokenize(vectRemotes[i],"~",vectRemoteConfigs);
+		if (vectRemoteConfigs.size() == 3)
+		  {
+		    vector<string> vectCodes;
+		    int PK_DeviceRemote = atoi(vectRemoteConfigs[0].c_str());
+		    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Adding remote ID %d, layout %s\r\n",PK_DeviceRemote,vectRemoteConfigs[1].c_str());
+		    StringUtils::Tokenize(vectRemoteConfigs[2],"\r\n",vectCodes);
+		    for (size_t s=0;s<vectCodes.size();++s)
+		      {
+			string::size_type pos=0;
+			string sButton = StringUtils::Tokenize(vectCodes[s]," ",pos);
+			while(pos<vectCodes[s].size())
+			  {
+			    string sCode = StringUtils::Tokenize(vectCodes[s]," ",pos);
+			    m_mapCodesToButtons[sCode] = make_pair<string,int> (sButton,PK_DeviceRemote);
+			    LoggerWrapper::GetInstance()->Write(LV_STATUS,"Code: %s will fire button %s",sCode.c_str(),sButton.c_str());
+			  }
+		      }
+		  }
+	      }
+	  }
+	else
+	  {
+	    // Local mode, hard code values to lookup.
+	    // Button 1 = OK
+	    // Buttons 2-10 = Mode buttons to blindly set video modes.
+	    m_mapCodesToButtons["USB-GAMEPAD-UP"] = make_pair<string,int>("up",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-DOWN"] = make_pair<string,int>("down",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-LEFT"] = make_pair<string,int>("left",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-RIGHT"] = make_pair<string,int>("right",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B1"] = make_pair<string,int>("ok",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B2"] = make_pair<string,int>("1",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B3"] = make_pair<string,int>("q",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B4"] = make_pair<string,int>("a",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B5"] = make_pair<string,int>("2",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B6"] = make_pair<string,int>("w",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B7"] = make_pair<string,int>("3",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B8"] = make_pair<string,int>("4",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B9"] = make_pair<string,int>("-",0);
+	    m_mapCodesToButtons["USB-GAMEPAD-B10"] = make_pair<string,int>("+",0);
+	  }
+	
+	// Create the input thread.
+	if (pthread_create(&m_inputCaptureThread, NULL, StartInputThread, (void *) this))
+	  {
+	    // failed, bail.
+	    LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Failed to create Input thread.");
+	    m_bQuit_set(true);
+	    return false;
+	  }
+
 	return true;
+
 }
 
 //<-dceag-reg-b->
@@ -69,16 +216,6 @@ bool Wii_Remote_Controller::Register()
 {
 	return Connect(PK_DeviceTemplate_get()); 
 }
-
-/*  Since several parents can share the same child class, and each has it's own implementation, the base class in Gen_Devices
-	cannot include the actual implementation.  Instead there's an extern function declared, and the actual new exists here.  You 
-	can safely remove this block (put a ! after the dceag-createinst-b block) if this device is not embedded within other devices. */
-//<-dceag-createinst-b->
-Wii_Remote_Controller_Command *Create_Wii_Remote_Controller(Command_Impl *pPrimaryDeviceCommand, DeviceData_Impl *pData, Event_Impl *pEvent, Router *pRouter)
-{
-	return new Wii_Remote_Controller(pPrimaryDeviceCommand, pData, pEvent, pRouter);
-}
-//<-dceag-createinst-e->
 
 /*
 	When you receive commands that are destined to one of your children,
@@ -92,7 +229,14 @@ Wii_Remote_Controller_Command *Create_Wii_Remote_Controller(Command_Impl *pPrima
 void Wii_Remote_Controller::ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage)
 //<-dceag-cmdch-e->
 {
-	sCMD_Result = "UNHANDLED CHILD";
+  if (IRBase::ProcessMessage(pMessage))
+    {
+      printf("Message Processed by IRBase");
+      sCMD_Result = "OK";
+      return;
+    }
+  
+  sCMD_Result = "UNHANDLED CHILD";
 }
 
 /*
@@ -104,91 +248,478 @@ void Wii_Remote_Controller::ReceivedCommandForChild(DeviceData_Impl *pDeviceData
 void Wii_Remote_Controller::ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage)
 //<-dceag-cmduk-e->
 {
-	sCMD_Result = "UNKNOWN COMMAND";
+	sCMD_Result = "UNKNOWN DEVICE";
 }
 
-//<-dceag-sample-b->
-/*		**** SAMPLE ILLUSTRATING HOW TO USE THE BASE CLASSES ****
+//<-dceag-sample-b->!
 
-**** IF YOU DON'T WANT DCEGENERATOR TO KEEP PUTTING THIS AUTO-GENERATED SECTION ****
-**** ADD AN ! AFTER THE BEGINNING OF THE AUTO-GENERATE TAG, LIKE //<=dceag-sample-b->! ****
-Without the !, everything between <=dceag-sometag-b-> and <=dceag-sometag-e->
-will be replaced by DCEGenerator each time it is run with the normal merge selection.
-The above blocks are actually <- not <=.  We don't want a substitution here
-
-void Wii_Remote_Controller::SomeFunction()
+void Wii_Remote_Controller::ProcessWiiMote(Wiimote* pWiiMote)
 {
-	// If this is going to be loaded into the router as a plug-in, you can implement: 	virtual bool Register();
-	// to do all your registration, such as creating message interceptors
+  int ret;
+  if (!pWiiMote)
+    return;
 
-	// If you use an IDE with auto-complete, after you type DCE:: it should give you a list of all
-	// commands and requests, including the parameters.  See "AllCommandsRequests.h"
+  pWiiMote->event_prev = pWiiMote->event;
+  ret = xwii_iface_poll(pWiiMote->iface,&pWiiMote->event);
 
-	// Examples:
-	
-	// Send a specific the "CMD_Simulate_Mouse_Click" command, which takes an X and Y parameter.  We'll use 55,77 for X and Y.
-	DCE::CMD_Simulate_Mouse_Click CMD_Simulate_Mouse_Click(m_dwPK_Device,OrbiterID,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click);
+  if (ret == -EAGAIN)
+    {
+      // Nothing here. Let's go back and get the next one, and/or sleep.
+      return;
+    }
+  else if (ret)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"Error reading Wiimote event, error #%d",ret);
+      return;
+    }
 
-	// Send the message to orbiters 32898 and 27283 (ie a device list, hence the _DL)
-	// And we want a response, which will be "OK" if the command was successfull
-	string sResponse;
-	DCE::CMD_Simulate_Mouse_Click_DL CMD_Simulate_Mouse_Click_DL(m_dwPK_Device,"32898,27283",55,77)
-	SendCommand(CMD_Simulate_Mouse_Click_DL,&sResponse);
+  switch (pWiiMote->event.type)
+    {
+    case XWII_EVENT_KEY:
+      ProcessWiiMote_Key(pWiiMote);
+      break;
+    case XWII_EVENT_IR:
+      ProcessWiiMote_IR(pWiiMote);
+      break;
+      // Accellerometer events are ignored.
+    }
 
-	// Send the message to all orbiters within the house, which is all devices with the category DEVICECATEGORY_Orbiter_CONST (see pluto_main/Define_DeviceCategory.h)
-	// Note the _Cat for category
-	DCE::CMD_Simulate_Mouse_Click_Cat CMD_Simulate_Mouse_Click_Cat(m_dwPK_Device,DEVICECATEGORY_Orbiter_CONST,true,BL_SameHouse,55,77)
-    SendCommand(CMD_Simulate_Mouse_Click_Cat);
-
-	// Send the message to all "DeviceTemplate_Orbiter_CONST" devices within the room (see pluto_main/Define_DeviceTemplate.h)
-	// Note the _DT.
-	DCE::CMD_Simulate_Mouse_Click_DT CMD_Simulate_Mouse_Click_DT(m_dwPK_Device,DeviceTemplate_Orbiter_CONST,true,BL_SameRoom,55,77);
-	SendCommand(CMD_Simulate_Mouse_Click_DT);
-
-	// This command has a normal string parameter, but also an int as an out parameter
-	int iValue;
-	DCE::CMD_Get_Signal_Strength CMD_Get_Signal_Strength(m_dwDeviceID, DestDevice, sMac_address,&iValue);
-	// This send command will wait for the destination device to respond since there is
-	// an out parameter
-	SendCommand(CMD_Get_Signal_Strength);  
-
-	// This time we don't care about the out parameter.  We just want the command to 
-	// get through, and don't want to wait for the round trip.  The out parameter, iValue,
-	// will not get set
-	SendCommandNoResponse(CMD_Get_Signal_Strength);  
-
-	// This command has an out parameter of a data block.  Any parameter that is a binary
-	// data block is a pair of int and char *
-	// We'll also want to see the response, so we'll pass a string for that too
-
-	int iFileSize;
-	char *pFileContents
-	string sResponse;
-	DCE::CMD_Request_File CMD_Request_File(m_dwDeviceID, DestDevice, "filename",&pFileContents,&iFileSize,&sResponse);
-	SendCommand(CMD_Request_File);
-
-	// If the device processed the command (in this case retrieved the file),
-	// sResponse will be "OK", and iFileSize will be the size of the file
-	// and pFileContents will be the file contents.  **NOTE**  We are responsible
-	// free deleting pFileContents.
-
-
-	// To access our data and events below, you can type this-> if your IDE supports auto complete to see all the data and events you can access
-
-	// Get our IP address from our data
-	string sIP = DATA_Get_IP_Address();
-
-	// Set our data "Filename" to "myfile"
-	DATA_Set_Filename("myfile");
-
-	// Fire the "Finished with file" event, which takes no parameters
-	EVENT_Finished_with_file();
-	// Fire the "Touch or click" which takes an X and Y parameter
-	EVENT_Touch_or_click(10,150);
 }
-*/
-//<-dceag-sample-e->
+
+void Wii_Remote_Controller::ProcessWiiMote_Key(Wiimote* pWiiMote)
+{
+  unsigned int code = pWiiMote->event.v.key.code;
+  bool pressed = pWiiMote->event.v.key.state;
+  string sCode = "";
+  struct timeval tvNow;
+
+  gettimeofday(&tvNow,NULL);
+
+  if (pressed)
+    {
+      switch(code)
+	{
+	case XWII_KEY_LEFT:
+	  pWiiMote->setButton("LEFT");
+	  break;
+	case XWII_KEY_RIGHT:
+	  pWiiMote->setButton("RIGHT");
+	  break;
+	case XWII_KEY_UP:
+	  pWiiMote->setButton("UP");
+	  break;
+	case XWII_KEY_DOWN:
+	  pWiiMote->setButton("DOWN");
+	  break;
+	case XWII_KEY_A:
+	  pWiiMote->setButton("A");
+	  break;
+	case XWII_KEY_B:
+	  pWiiMote->setButton("B");
+	  break;
+	case XWII_KEY_HOME:
+	  pWiiMote->setButton("HOME");
+	  break;
+	case XWII_KEY_MINUS:
+	  pWiiMote->setButton("MINUS");
+	  break;
+	case XWII_KEY_PLUS:
+	  pWiiMote->setButton("PLUS");
+	  break;
+	case XWII_KEY_ONE:
+	  pWiiMote->setButton("ONE");
+	  break;
+	case XWII_KEY_TWO:
+	  pWiiMote->setButton("TWO");
+	  break;
+	}
+    }
+  else
+    {
+      pWiiMote->setButton("");
+    }
+    
+  if (pWiiMote->getButton(false)!="")
+    {
+      if (pWiiMote->isChangedButton())
+	{
+	  if (pWiiMote->timerButton(tvNow) < 1000000)
+	    {
+	      HandleKeyEvent(pWiiMote->getButton(true));
+	      pWiiMote->retriggerButton();
+	    }
+	}
+      if (pWiiMote->isLatchedButton())
+	{
+	  if (pWiiMote->timerButton(tvNow) > 250000)
+	    {
+	      HandleKeyEvent(pWiiMote->getButton(true));
+	      pWiiMote->retriggerButton();
+	    }
+	}
+    }
+
+}
+
+void Wii_Remote_Controller::HandleKeyEvent(string sCode)
+{
+  string sPrefix="WII-REMOTE-";
+  string sFinalCode=sPrefix+sCode;
+
+  map <string,pair<string,int> >::iterator it=m_mapCodesToButtons.find(sFinalCode);
+
+  if (m_cCurrentScreen == 'G')
+    {
+      if (it->second.first == "start")
+	{
+	  // We're good.
+	}
+      else if (it->second.first == "Home")
+	{
+	  // Also good.
+	}
+      else
+	{
+	  return;
+	}
+    }
+
+  if (it==m_mapCodesToButtons.end())
+    {
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"Can't find a mapping for button %s",sFinalCode.c_str());
+    }
+  else
+    {
+      ReceivedCode(it->second.second,it->second.first.c_str());
+      if (m_dwPK_Device==DEVICEID_MESSAGESEND)
+	{
+	  ForceKeystroke(it->second.first, m_sAVWHost, m_iAVWPort);
+	}
+    }
+
+  return;
+
+}
+
+pair<int, int> Wii_Remote_Controller::GetAveragedIRXY(Wiimote* pWiiMote)
+{
+  struct xwii_event_abs *a, *b, *c, d;
+  int i, dists[6];
+  
+  /* Grab first two valid points */
+  a = b = NULL;
+  for (i = 0; i < 4; ++i) {
+    c = &pWiiMote->event.v.abs[i];
+    if (xwii_event_ir_is_valid(c) && (c->x || c->y)) {
+      if (!a) {
+	a = c;
+      } else if (!b) {
+	b = c;
+      } else {
+	/* This may be a noisy point. Keep the two points that are
+	 * closest to the reference points. */
+	d.x = pWiiMote->ir_ref_x + pWiiMote->ir_vec_x;
+	d.y = pWiiMote->ir_ref_y + pWiiMote->ir_vec_y;
+	dists[0] = XWIIMOTE_DISTSQ(c->x, c->y, pWiiMote->ir_ref_x, pWiiMote->ir_ref_y);
+	dists[1] = XWIIMOTE_DISTSQ(c->x, c->y, d.x, d.y);
+	dists[2] = XWIIMOTE_DISTSQ(a->x, a->y, pWiiMote->ir_ref_x, pWiiMote->ir_ref_y);
+	dists[3] = XWIIMOTE_DISTSQ(a->x, a->y, d.x, d.y);
+	dists[4] = XWIIMOTE_DISTSQ(b->x, b->y, pWiiMote->ir_ref_x, pWiiMote->ir_ref_y);
+	dists[5] = XWIIMOTE_DISTSQ(b->x, b->y, d.x, d.y);
+	if (dists[1] < dists[0]) dists[0] = dists[1];
+	if (dists[3] < dists[2]) dists[2] = dists[3];
+	if (dists[5] < dists[4]) dists[4] = dists[5];
+	if (dists[0] < dists[2]) {
+	  if (dists[4] < dists[2]) {
+	    a = c;
+	  } else {
+	    b = c;
+	  }
+	} else if (dists[0] < dists[4]) {
+	  b = c;
+	}
+      }
+    }
+  }
+  if (!a)
+    return make_pair(0,0);
+
+  if (!b) {
+    /* Generate the second point based on historical data */
+    b = &d;
+    b->x = a->x - pWiiMote->ir_vec_x;
+    b->y = a->y - pWiiMote->ir_vec_y;
+    if (XWIIMOTE_DISTSQ(a->x, a->y, pWiiMote->ir_ref_x, pWiiMote->ir_ref_y)
+	< XWIIMOTE_DISTSQ(b->x, b->y, pWiiMote->ir_ref_x, pWiiMote->ir_ref_y)) {
+      b->x = a->x + pWiiMote->ir_vec_x;
+      b->y = a->y + pWiiMote->ir_vec_y;
+      pWiiMote->ir_ref_x = a->x;
+      pWiiMote->ir_ref_y = a->y;
+    } else {
+      pWiiMote->ir_ref_x = b->x;
+      pWiiMote->ir_ref_y = b->y;
+    }
+  } else {
+    /* Record some data in case one of the points disappears */
+    pWiiMote->ir_vec_x = b->x - a->x;
+    pWiiMote->ir_vec_y = b->y - a->y;
+    pWiiMote->ir_ref_x = a->x;
+    pWiiMote->ir_ref_y = a->y;
+  }
+  
+  /* Final point is the average of both points */
+  a->x = (a->x + b->x) / 2;
+  a->y = (a->y + b->y) / 2;
+  
+  /* Start averaging if the location is consistant */
+  pWiiMote->ir_avg_x = (pWiiMote->ir_avg_x * pWiiMote->ir_avg_count + a->x) / (pWiiMote->ir_avg_count+1);
+  pWiiMote->ir_avg_y = (pWiiMote->ir_avg_y * pWiiMote->ir_avg_count + a->y) / (pWiiMote->ir_avg_count+1);
+  if (++pWiiMote->ir_avg_count > pWiiMote->ir_avg_max_samples)
+    pWiiMote->ir_avg_count = pWiiMote->ir_avg_max_samples;
+  if (XWIIMOTE_DISTSQ(a->x, a->y, pWiiMote->ir_avg_x, pWiiMote->ir_avg_y)
+      < pWiiMote->ir_avg_radius * pWiiMote->ir_avg_radius) {
+    if (pWiiMote->ir_avg_count >= pWiiMote->ir_avg_min_samples) {
+      a->x = (a->x + pWiiMote->ir_avg_x * pWiiMote->ir_avg_weight) / (pWiiMote->ir_avg_weight+1);
+      a->y = (a->y + pWiiMote->ir_avg_y * pWiiMote->ir_avg_weight) / (pWiiMote->ir_avg_weight+1);
+    }
+  } else {
+    pWiiMote->ir_avg_count = 0;
+  }
+  
+  pWiiMote->ir_last_valid_event = pWiiMote->event.time;
+
+  return make_pair(a->x,a->y);
+}
+
+ void Wii_Remote_Controller::uinput_mouse_move(Wiimote* pWiiMote, int rel_x, int rel_y) {
+   struct input_event event;
+   
+   if (pWiiMote->uinput_fd <= 0)
+     return;
+   
+   gettimeofday(&event.time, NULL);
+   event.type = EV_REL;
+   event.code = REL_X;
+   event.value = -rel_x;
+   write(pWiiMote->uinput_fd, &event, sizeof(event));
+   
+   event.type = EV_REL;
+   event.code = REL_Y;
+   event.value = rel_y;
+   write(pWiiMote->uinput_fd, &event, sizeof(event));
+   
+   event.type = EV_SYN;
+   event.code = SYN_REPORT;
+   event.value = 0;
+   write(pWiiMote->uinput_fd, &event, sizeof(event));
+ }
+ 
+ void Wii_Remote_Controller::uinput_mouse_move_subpixel(Wiimote* pWiiMote, float rel_x, float rel_y) {
+   int ix, iy;
+   rel_x += pWiiMote->subpixel_residual_x;
+   rel_y += pWiiMote->subpixel_residual_y;
+   ix = (int)floor(rel_x);
+   iy = (int)floor(rel_y);
+   uinput_mouse_move(pWiiMote, ix, iy);
+   pWiiMote->subpixel_residual_x = rel_x - ix;
+   pWiiMote->subpixel_residual_y = rel_y - iy;
+ }
+ 
+ void Wii_Remote_Controller::uinput_mouse_absolute_movement(Wiimote* pWiiMote, float abs_x, float abs_y) {
+   if (pWiiMote->old_abs_valid)
+     uinput_mouse_move_subpixel(pWiiMote, abs_x - pWiiMote->old_abs_x, abs_y - pWiiMote->old_abs_y);
+   pWiiMote->old_abs_x = abs_x;
+   pWiiMote->old_abs_y = abs_y;
+   pWiiMote->old_abs_valid = 1;
+ }
+
+void Wii_Remote_Controller::ProcessWiiMote_IR(Wiimote* pWiiMote)
+{
+
+  pair<int, int> avgd = GetAveragedIRXY(pWiiMote);
+  uinput_mouse_absolute_movement(pWiiMote,avgd.first,avgd.second);
+
+#if 0
+  struct input_event ev[3]; // X, Y, and SYN
+  memset(&ev,0,sizeof(ev));
+  
+  ev[0].type = EV_ABS;
+  ev[0].code = ABS_X;
+  ev[0].value = pWiiMote->event.v.abs[0].x;
+  ev[1].type = EV_ABS;
+  ev[1].code = ABS_Y;
+  ev[1].value = pWiiMote->event.v.abs[0].y;
+  ev[2].type = EV_SYN;
+  ev[2].code = 0;
+  ev[2].value = 0;
+  write(pWiiMote->uinput_fd,ev,sizeof(ev));
+#endif
+
+  
+
+}
+
+int Wii_Remote_Controller::Wiimote_Capture(int deviceID)
+{
+  LoggerWrapper::GetInstance()->Write(LV_WARNING,"Starting Wiimote Capture Thread.");
+  // Schedule an initial device probe.
+  m_pAlarmManager->AddRelativeAlarm(1, this, FIND_WIIMOTES, NULL);
+  Sleep(2000);
+
+  while (!m_bQuit_get())
+    {
+      if (m_WiiMote1->m_bActive)
+	ProcessWiiMote(m_WiiMote1);
+      if (m_WiiMote2->m_bActive)
+	ProcessWiiMote(m_WiiMote2);
+      if (m_WiiMote3->m_bActive)
+	ProcessWiiMote(m_WiiMote3);
+      if (m_WiiMote4->m_bActive)
+	ProcessWiiMote(m_WiiMote4);
+
+      usleep(10000);
+    }
+
+  return 0;
+}
+
+void Wii_Remote_Controller::AlarmCallback(int id, void *param)
+{
+  switch (id)
+    {
+    case FIND_WIIMOTES:
+      FindWiimotes();
+      break;
+    }
+}
+
+void Wii_Remote_Controller::SetupIRMouse(Wiimote *pWiiMote)
+{
+  struct uinput_user_dev uidev;
+  memset(&uidev, 0, sizeof(uidev));
+  snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "WiiMote Mouse");
+  uidev.id.bustype = BUS_USB;
+  uidev.id.vendor  = 0x1234;
+  uidev.id.product = 0xfedc;
+  uidev.id.version = 1;
+
+  pWiiMote->uinput_fd = open("/dev/uinput",O_WRONLY|O_NONBLOCK);
+  ioctl(pWiiMote->uinput_fd, UI_SET_EVBIT, EV_REL);
+  ioctl(pWiiMote->uinput_fd, UI_SET_RELBIT, REL_X);
+  ioctl(pWiiMote->uinput_fd, UI_SET_RELBIT, REL_Y);
+  ioctl(pWiiMote->uinput_fd, UI_SET_EVBIT, EV_KEY);
+  ioctl(pWiiMote->uinput_fd, UI_SET_KEYBIT, BTN_MOUSE);
+
+  if (pWiiMote->uinput_fd < 0)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not open uinput.");
+      return;
+    }
+
+  write(pWiiMote->uinput_fd,&uidev,sizeof(uidev));
+
+  ioctl(pWiiMote->uinput_fd,UI_DEV_CREATE);
+}
+
+void Wii_Remote_Controller::FindWiimotes()
+{
+
+  string sPath1=GetDevice(1);
+  string sPath2=GetDevice(2);
+  string sPath3=GetDevice(3);
+  string sPath4=GetDevice(4);
+  int ret;
+
+  if (!sPath1.empty() && !m_WiiMote1->m_bActive)
+    {
+      m_WiiMote1->m_sPath=sPath1;
+
+      ret = xwii_iface_new(&m_WiiMote1->iface,m_WiiMote1->m_sPath.c_str());
+
+      if (ret)
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not create new interface for Remote 1");
+	  m_WiiMote1->m_bActive=false;
+	  m_WiiMote1->m_sPath="";
+	  return;
+	}
+      
+      ret = xwii_iface_open(m_WiiMote1->iface,XWII_IFACE_CORE | XWII_IFACE_IR);
+
+      if (ret)
+	{
+	  LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Could not open interface for Remote 1");
+	  m_WiiMote1->m_bActive=false;
+	  m_WiiMote1->m_sPath="";
+	  return;
+	}
+      m_WiiMote1->m_bActive=true;
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"Remote 1 active. %s",sPath1.c_str());
+      SetupIRMouse(m_WiiMote1);
+    }
+  else if (sPath1.empty() && m_WiiMote1->m_bActive)
+    {
+      m_WiiMote1->m_sPath="";
+      m_WiiMote1->m_bActive=false;
+      ioctl(m_WiiMote1->uinput_fd,UI_DEV_DESTROY);
+      xwii_iface_close(m_WiiMote1->iface,XWII_IFACE_CORE|XWII_IFACE_IR);
+      xwii_iface_unref(m_WiiMote1->iface);
+      LoggerWrapper::GetInstance()->Write(LV_WARNING,"Remote 1 inactive.",m_WiiMote1->m_sPath.c_str());
+    }
+
+  // Reschedule a check in 3 seconds.
+  m_pAlarmManager->CancelAlarmByType(FIND_WIIMOTES);
+  m_pAlarmManager->AddRelativeAlarm(3, this, FIND_WIIMOTES, NULL);
+
+}
+
+void Wii_Remote_Controller::CreateChildren()
+{
+  Wii_Remote_Controller_Command::CreateChildren();
+  Start();
+}
+
+void Wii_Remote_Controller::SendIR(string Port, string sIRCode, int iRepeat)
+{
+  // not used. but must be implemented.
+}
+
+string Wii_Remote_Controller::GetDevice(int num)
+{
+  struct xwii_monitor *mon;
+  char *ent;
+  int i=0;
+
+  mon = xwii_monitor_new(false, false);
+
+  if (!mon)
+    {
+      LoggerWrapper::GetInstance()->Write(LV_CRITICAL,"Can't create Wiimote Monitor. Quitting");
+      m_bQuit_set(true);
+    }
+
+  while ((ent = xwii_monitor_poll(mon)))
+    {
+      if (++i == num)
+	break;
+      free(ent);
+    }
+
+  xwii_monitor_unref(mon);
+
+  if (!ent)
+    {
+      // Can't find device #'d num, fill this in.
+      return "";
+    }
+
+  // Found it, return the entity.
+  string sRet = string(ent);
+  free(ent);
+
+  return sRet;
+
+}
 
 /*
 
@@ -246,20 +777,6 @@ void Wii_Remote_Controller::CMD_Set_Screen_Type(int iValue,string &sCMD_Result,M
 {
 	cout << "Need to implement command #687 - Set Screen Type" << endl;
 	cout << "Parm #48 - Value=" << iValue << endl;
+	m_cCurrentScreen=(char) iValue;
 }
-
-//<-dceag-c1090-b->
-
-	/** @brief COMMAND: #1090 - Connect to Device */
-	/** Called to pair WiiUse to the device. */
-		/** @param #47 Mac address */
-			/** The MAC address of the Bluetooth Device to connect. */
-
-void Wii_Remote_Controller::CMD_Connect_to_Device(string sMac_address,string &sCMD_Result,Message *pMessage)
-//<-dceag-c1090-e->
-{
-	cout << "Need to implement command #1090 - Connect to Device" << endl;
-	cout << "Parm #47 - Mac_address=" << sMac_address << endl;
-}
-
 

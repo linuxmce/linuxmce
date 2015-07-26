@@ -13,7 +13,7 @@ BASELDLIBS = -lSerializeClass -lDCECommon -lPlutoUtils -lpthread
 
 MYNAME = Wii_Remote_Controller
 VERSION = 2.0.0
-MYDEVTEMPLATEID = 1954mplateID
+MYDEVTEMPLATEID = 1954
 
 Gen_Dev_Files = $(GENDEV)/Wii_Remote_ControllerBase.cpp
 sources = Main.cpp Wii_Remote_Controller.cpp $(Gen_Dev_Files)
@@ -22,15 +22,15 @@ sources = Main.cpp Wii_Remote_Controller.cpp $(Gen_Dev_Files)
 CXXFLAGS +=
 CPPFLAGS +=
 LDFLAGS +=
-XTRALDLIBS = -lmysqlclient_r -lwiiuse
+XTRALDLIBS = -lmysqlclient_r -lxwiimote -lMessageTranslation -lIRBase
 
 Gen_Dev_Files +=
-sources +=
+sources += ../LIRC_DCE/IRReceiverBase.cpp
 
 #<-dceag-mf-b->
 LDLIBS = $(XTRALDLIBS) $(BASELDLIBS)
 
-whattodo:
+whattodo: all
 	@echo "type 'make bin', 'make so' or 'make all'"
 
 all: bin so
@@ -41,21 +41,28 @@ so: Wii_Remote_Controller.so
 
 Wii_Remote_Controller.so: $(sources:.cpp=.o)
 	$(CXX) -shared -o $(MYNAME).so $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
-	chmod +x post_make.sh
-	./post_make.sh $@
-		
+#	chmod +x post_make.sh
+#	./post_make.sh $@
+
+
 Wii_Remote_Controller: $(sources:.cpp=.o)
 	$(CXX) -o $(MYNAME) $(call cpath,$+) $(LDFLAGS) $(LDLIBS)
+	mkdir -p ../bin
 	cp $@ ../bin
-	./post_make.sh $@
+#	./post_make.sh $@
 
 clean: clean-recursive
-	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Wii_Remote_Controller.bin Wii_Remote_Controller.so >/dev/null
+	rm -f $(call cpath,$(sources:.cpp=.o) $(sources:.cpp=.d)) Wii_Remote_Controller Wii_Remote_Controller.so >/dev/null
 
 package:
 	chmod +x make_package.sh
 	./make_package.sh $(MYNAME) $(VERSION) $(MYDEVTEMPLATEID)
+
+install:
+	mkdir -p $(DESTDIR)/usr/pluto/bin
+	cp Wii_Remote_Controller $(DESTDIR)/usr/pluto/bin
 
 include $(ROOT)/PlutoUtils/make.rules
 ifeq (,$(findstring clean, $(MAKECMDGOALS)))
