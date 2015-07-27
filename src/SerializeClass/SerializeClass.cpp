@@ -352,7 +352,7 @@ bool SerializeClass::Serialize( bool bWriting, char *&pcDataBlock, unsigned long
 						Read_string(str);
 						int i1 = Read_unsigned_long();
                         int i2 = Read_unsigned_long();
-#ifdef QT5
+#ifdef QT_QUICK_LIB
                          (*pMap)[str] = make_pair<int,int> (int(i1),int(i2));
 #else
                         (*pMap)[str] = make_pair<int,int> (i1,i2);
