@@ -1,0 +1,13 @@
+Source: raspi2png
+Maintainer: developers <developers@linuxmce.org>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9)
+
+Package: raspi2png
+Architecture: armhf
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: raspberry pi screen capture application
+ Grabs screen captures from the raspberrypi GPU compositor
+

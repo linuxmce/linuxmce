@@ -1,0 +1,5 @@
+raspi2png (0.0.1~lmce1) wheezy; urgency=medium
+
+  * Build for LinuxMCE
+
+ -- developers@linuxmce.org <developers@linuxmce.org>  Sun, 26 Apr 2015 06:52:11 +0000
