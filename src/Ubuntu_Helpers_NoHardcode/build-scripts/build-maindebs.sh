@@ -132,10 +132,10 @@ function build_main_debs() {
 					RepositorySource=23
 					Main_Version='2.0.0.47.'
 					# not currently compatible
-					exclude_list=$exclude_list,498,499	# simplephone - needs api update
+					exclude_list=$exclude_list,498,499	# simplephone
 
 					# does not compile
-		                        #exclude_list=$exclude_list,682,683	# MAME
+		                        exclude_list=$exclude_list,682,683	# MAME
 					;;
 				wheezy)
 					Distro_ID="19"
@@ -146,7 +146,7 @@ function build_main_debs() {
 
 					# does not compile
 					exclude_list=$exclude_list,862,863	# Hue Controller (qt4)
-		                        #exclude_list=$exclude_list,682,683	# MAME
+		                        exclude_list=$exclude_list,682,683	# MAME
 					;;
 			esac
 			;;
