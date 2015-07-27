@@ -47,7 +47,7 @@ function Precompile
 		fi
 
 		echo "SNR_CPPFLAGS=\"\" make $makefile_opt clean"
-		SNR_CPPFLAGS="" make $makefile_opt clean || Error "Failed to clean ${pkg_name} to use for MakeRelease"
+		SNR_CPPFLAGS="" make $make_jobs $makefile_opt clean || Error "Failed to clean ${pkg_name} to use for MakeRelease"
 		echo "SNR_CPPFLAGS=\"\" make $make_jobs $makefile_opt"
 		SNR_CPPFLAGS="" make $make_jobs $makefile_opt || Error "Failed to precompile ${pkg_name} to use for MakeRelease"
 
