@@ -178,6 +178,12 @@ fi
         cp ${svn_dir}/${svn_branch_name}/external/openzwave*.deb "${replacements_dir}" && \
         cp ${svn_dir}/${svn_branch_name}/external/openzwave*.changes "${replacements_dir}" && \
  	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libopenzwave1.0*.deb || :
+
+	# qhttpserver (for LinuxMCE NVR)
+	Build_Replacement_Package libqhttpserver external/qhttpserver && \
+	cp ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb "${replacements_dir}" && \
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb
+
 }
 
 function Build_Replacements_ubuntu_precise
@@ -284,6 +290,11 @@ fi
 		Update_Changed_Since_Last_Build "$dir_" || :
 		popd
 	fi
+
+	# qhttpserver (for LinuxMCE NVR)
+	Build_Replacement_Package libqhttpserver external/qhttpserver && \
+	cp ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb "${replacements_dir}" && \
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb
 
 }
 
