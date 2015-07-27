@@ -6,7 +6,7 @@
 
 QT       += core network gui
 
-TARGET = Linuxmce_NVR
+TARGET = ../Linuxmce_NVR
 CONFIG   += console c++11
 CONFIG   -= app_bundle
 
@@ -18,7 +18,7 @@ INCLUDEPATH += ../../ ../../DCE/
 
 TEMPLATE = app
 
-HEADERS += LinuxMCE_NVR.h \
+HEADERS += ../LinuxMCE_NVR.h \
         ../../Gen_Devices/Linuxmce_NVRBase.h \
         ../../PlutoUtils/ThreadedClass.h \
         ../../PlutoUtils/MultiThreadIncludes.h \
@@ -40,15 +40,15 @@ HEADERS += LinuxMCE_NVR.h \
         ../../PlutoUtils/FileUtils.h \
         ../../pluto_main/Define_DeviceCategory.h \
         ../../pluto_main/Define_DeviceTemplate.h \
-    cameraClasses/abstractcameraevent.h \
-    cameraClasses/abstractpicamera.h \
-    cameraClasses/motionpicamera.h \
-    managerClasses/eventlistener.h \
-    managerClasses/httpresponder.h \
-    managerClasses/NvrManager.h
+    ../cameraClasses/abstractcameraevent.h \
+    ../cameraClasses/abstractpicamera.h \
+    ../cameraClasses/motionpicamera.h \
+    ../managerClasses/eventlistener.h \
+    ../managerClasses/httpresponder.h \
+    ../managerClasses/NvrManager.h
 
 SOURCES += ../Main.cpp \
-           Linuxmce_NVR.cpp \
+           ../Linuxmce_NVR.cpp \
         ../../Gen_Devices/Linuxmce_NVRBase.cpp \
         ../../PlutoUtils/uuencode.cpp \
         ../../PlutoUtils/ThreadedClass.cpp \
@@ -77,9 +77,9 @@ SOURCES += ../Main.cpp \
         ../../DCE/DeviceData_Base.cpp \
         ../../DCE/DeviceData_Impl.cpp \
         ../../PlutoUtils/getch.cpp \
-    cameraClasses/abstractcameraevent.cpp \
-    cameraClasses/abstractpicamera.cpp \
-    cameraClasses/motionpicamera.cpp \
-    managerClasses/eventlistener.cpp \
-    managerClasses/httpresponder.cpp \
-    managerClasses/NvrManager.cpp
+    ../cameraClasses/abstractcameraevent.cpp \
+    ../cameraClasses/abstractpicamera.cpp \
+    ../cameraClasses/motionpicamera.cpp \
+    ../managerClasses/eventlistener.cpp \
+    ../managerClasses/httpresponder.cpp \
+    ../managerClasses/NvrManager.cpp
