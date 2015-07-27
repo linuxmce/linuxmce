@@ -184,6 +184,11 @@ fi
 	cp ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb "${replacements_dir}" && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb
 
+	#Package: raspi2png
+	if [[ "$arch" == "armhf" ]]; then
+		Build_Replacement_Package raspi2png external/raspi2png && \
+		dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/raspi2png*.deb || :
+	fi
 }
 
 function Build_Replacements_ubuntu_precise
@@ -296,6 +301,11 @@ fi
 	cp ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb "${replacements_dir}" && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/libqhttpserver*.deb
 
+	#Package: raspi2png
+	if [[ "$arch" == "armhf" ]]; then
+		Build_Replacement_Package raspi2png external/raspi2png && \
+		dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/raspi2png*.deb || :
+	fi
 }
 
 function Build_Replacements_raspbian_wheezy
