@@ -13,7 +13,7 @@ Description: libqhttpserver
 
 Package: libqhttpserver-dev
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, libqhttpserver
 Description: libqhttpserver dev files
  libqhttpserver dev files
 
