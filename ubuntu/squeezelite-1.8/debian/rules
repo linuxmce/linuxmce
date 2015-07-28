@@ -1,0 +1,44 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# Enable ffmpeg, soxr resampling, visualisation export and disable dlopening
+# libraries
+export OPTS := -DDSD -DFFMPEG -DRESAMPLE -DVISEXPORT -DLINKALL -DIR
+
+# Enable all hardening build flags
+export DEB_BUILD_MAINT_OPTIONS := hardening=+all
+
+# Re-enable compiler warning flags (CFLAGS overridden by dpkg-buildflags)
+export DEB_CFLAGS_MAINT_PREPEND := -Wall
+
+%:
+	dh $@
+
+override_dh_auto_build: build_squeezelite build_squeezelite-pa
+
+override_dh_auto_clean: clean_squeezelite clean_squeezelite-pa
+	# This is needed to fully clean built objects if the Makefile patches
+	# are not applied.
+	rm -f *.o dsd2pcm/*.o
+
+override_dh_installinit:
+	dh_installinit --name=squeezelite
+
+build_squeezelite: clean_squeezelite
+	dh_auto_build -- EXECUTABLE=squeezelite
+
+clean_squeezelite:
+	dh_auto_clean -- EXECUTABLE=squeezelite
+
+build_squeezelite-pa: OPTS += -DPORTAUDIO
+build_squeezelite-pa: clean_squeezelite-pa
+	dh_auto_build -- EXECUTABLE=squeezelite-pa
+
+clean_squeezelite-pa:
+	dh_auto_clean -- EXECUTABLE=squeezelite-pa
+
+.PHONY: build_squeezelite clean_squeezelite \
+	build_squeezelite-pa clean_squeezelite-pa

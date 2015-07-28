@@ -1,0 +1,2 @@
+# watch file uses fakeupstream.cgi; no GPG signatures available
+squeezelite source: debian-watch-may-check-gpg-signature
