@@ -1,9 +1,0 @@
-#!/bin/sh
-
-set -e
-
-if [ "$1" = "remove" ]; then
-       update-alternatives --remove ruby /usr/bin/ruby1.8
-fi
-
-#DEBHELPER#

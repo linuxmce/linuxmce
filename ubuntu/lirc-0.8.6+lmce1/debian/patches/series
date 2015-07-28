@@ -1,7 +1,0 @@
-02_Makefile.in
-13-warning-cleanup
-lirc-i2c-2.6.patch
-lirc_dev-2.6.33.patch
-appleir_repeat_issue.patch
-hauppauge-tv-card.patch
-uinput-send-syn.patch
