@@ -96,7 +96,11 @@ function Build_Replacements_Common_all
 
 function Build_Replacements_Common_ubuntu
 {
-	mkdir -pv "$replacements_dir"
+        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1 || :
+
+	#Package: libxine2
+	Build_Replacement_Package xine ubuntu/xine-lib-1.2.6 && \
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb || :
 
 	#Package: logitechmediaserver-7.8.1
 	Build_Replacement_Package logitechmediaserver external/logitechmediaserver-7.8.1 && \
@@ -210,8 +214,6 @@ function Build_Replacements_ubuntu_precise
 	# lmce-asterisk
 	Build_Replacement_Package lmce-asterisk src/lmce-asterisk || :
 
-        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1 || :
-
 	Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2 || :
 
 	#Package: libbluray1
@@ -219,26 +221,9 @@ function Build_Replacements_ubuntu_precise
 	Build_Replacement_Package bluray ubuntu/libbluray-0.5.0 && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*bluray*.deb || :
 
-	# precise libsmbclient doesn't ship a pkg-config file, but xine checks for it, so lets provide one
+	# precise libsmbclient doesn't ship a pkg-config file, but xine checks for it, so lets provide one for libxine2
 	cp ${svn_dir}/${svn_branch_name}/ubuntu/smbclient.pc /usr/lib/pkgconfig/
-	#Package: libxine2
-	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
-	Build_Replacement_Package xine ubuntu/xine-lib-1.2.6 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb || :
 
-	#Package: protobuf
-	#Build_Replacement_Package protobuf ubuntu/ola/protobuf-2.3.0
-	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/ola/*proto*.deb
-	#dir_="${svn_dir}/${svn_branch_name}/ubuntu/ola"
-	#cp $dir_/*proto*.deb "${replacements_dir}"
-
-	#Package: ola
-	#Build_Replacement_Package ola ubuntu/ola/ola-0.8.9
-	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/ola/*ola*.deb
-	#dir_="${svn_dir}/${svn_branch_name}/ubuntu/ola"
-	#cp $dir_/*ola*.deb "${replacements_dir}"
-
-	#libsoxr-0.1.1/
 	#Package: libsoxr-0.1.1 - for squeezelite
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
 	Build_Replacement_Package soxr ubuntu/libsoxr-0.1.1 && \
@@ -256,8 +241,6 @@ function Build_Replacements_ubuntu_trusty
 	# shairport (AirPlay Audio)
 	Build_Replacement_Package shairport ubuntu/shairport-0.05 || :
 
-        Build_Replacement_Package chan-sccp-b ubuntu/asterisk/chan-sccp-b_V4.1 || :
-
 	#Build_Replacement_Package python-coherence ubuntu/Coherence-0.6.6.2
 
 	# libhupnp and libhupnp-av need to build under qt4.
@@ -266,16 +249,6 @@ function Build_Replacements_ubuntu_trusty
 
 	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb || :
-
-	## Package: libruby1.8, ruby1.8-dev....  ugh.  GSD breaks on 1.9.1 && 2.0
-	#dir_="${svn_dir}/${svn_branch_name}/ubuntu"
-	#Build_Replacement_Package 1.8_1.8.7.375 ubuntu/ruby1.8-1.8.7.375/ && \
-	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*1.8_1.8.7.375*.deb || :
-
-	#Package: libxine2
-	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
-	Build_Replacement_Package xine ubuntu/xine-lib-1.2.6 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*xine*.deb || :
 }
 
 function Build_Replacements_Common_raspbian
