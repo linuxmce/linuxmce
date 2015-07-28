@@ -348,8 +348,13 @@ DisplayMessage "Building Replacements for $flavor $build_name"
 Build_Replacements_${flavor}_${build_name}
 DisplayMessage "Building Replacements for $flavor"
 Build_Replacements_Common_${flavor}
-DisplayMessage "Building Replacements for '_all' pkgs"
-Build_Replacements_Common_all
+
+if [[ -z "$BUILD_ALL_PKGS" ]] || [[ "$BUILD_ALL_PKGS" != "no" ]]; then
+	DisplayMessage "Building Replacements for '_all' pkgs"
+	Build_Replacements_Common_all
+else
+	DisplayMessage "NOT Building Replacements for '_all' pkgs"
+fi
 
 DisplayMessage "Removing duplicate debs from replacements"
 remove_duplicate_debs "${replacements_dir}"
