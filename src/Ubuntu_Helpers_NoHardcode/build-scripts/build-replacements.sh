@@ -98,11 +98,13 @@ function Build_Replacements_Common_ubuntu
 {
 	mkdir -pv "$replacements_dir"
 
-	#ubuntu/squeezelite-1.8
+	#Package: logitechmediaserver-7.8.1
+	Build_Replacement_Package logitechmediaserver external/logitechmediaserver-7.8.1 && \
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/logitechmediaserver*.deb || :
+
 	#Package: squeezelite-1.8
 	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.8*.deb && \
-	dir_="${svn_dir}/${svn_branch_name}/ubuntu" || :
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.8*.deb || :
 
 	#Package: lirc
 	dir_=${svn_dir}/${svn_branch_name}/ubuntu/lirc-0.9.0-0ubuntu1+lmce1
@@ -278,11 +280,14 @@ function Build_Replacements_ubuntu_trusty
 
 function Build_Replacements_Common_raspbian
 {
+	#Package: logitechmediaserver-7.8.1
+	Build_Replacement_Package logitechmediaserver external/logitechmediaserver-7.8.1 && \
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/logitechmediaserver*.deb || :
+
 	#ubuntu/squeezelite-1.8
 	#Package: squeezelite-1.8
 	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.8*.deb && \
-	dir_="${svn_dir}/${svn_branch_name}/ubuntu" || :
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.8*.deb || :
 
 	# Open ZWave library
 	Build_Replacement_Package libopenzwave1.0 external/openzwave-1.3.1025 && \
