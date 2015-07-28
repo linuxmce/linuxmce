@@ -1,0 +1,5 @@
+etc/squeezeboxserver
+usr/sbin
+usr/share/squeezeboxserver
+var/lib/squeezeboxserver
+var/log/squeezeboxserver
