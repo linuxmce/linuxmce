@@ -77,6 +77,23 @@ fi
 	fi
 }
 
+function Build_Replacements_Common_all
+{
+	Build_Replacement_Package lmce-mame-metadata extra/mamedata || :
+
+	Build_Replacement_Package lmce-mame-snaps extra/snap || :
+
+	Build_Replacement_Package lmce-sample-media extra/sample_media || :
+
+	Build_Replacement_Package lmce-avwizard-sounds extra/avwizard-sounds || :
+
+	Build_Replacement_Package video-wizard-videos extra/video-wizard-videos || :
+
+	Build_Replacement_Package lmce-skins extra/graphics && \
+	cp -fr ${svn_dir}/${svn_branch_name}/extra/graphics/lmce-avwizard-skins* "${replacements_dir}" || :
+
+}
+
 function Build_Replacements_Common_ubuntu
 {
 	mkdir -pv "$replacements_dir"
@@ -165,19 +182,6 @@ fi
 		Update_Changed_Since_Last_Build "$dir_" || :
 		popd
 	fi
-
-	Build_Replacement_Package lmce-mame-metadata extra/mamedata || :
-
-	Build_Replacement_Package lmce-mame-snaps extra/snap || :
-
-	Build_Replacement_Package lmce-sample-media extra/sample_media || :
-
-	Build_Replacement_Package lmce-avwizard-sounds extra/avwizard-sounds || :
-
-	Build_Replacement_Package video-wizard-videos extra/video-wizard-videos || :
-
-	Build_Replacement_Package lmce-skins extra/graphics && \
-	cp -fr ${svn_dir}/${svn_branch_name}/extra/graphics/lmce-avwizard-skins* "${replacements_dir}" || :
 
 	# Open ZWave library
 	Build_Replacement_Package zwave external/openzwave-1.3.1025 && \
@@ -344,6 +348,8 @@ DisplayMessage "Building Replacements for $flavor $build_name"
 Build_Replacements_${flavor}_${build_name}
 DisplayMessage "Building Replacements for $flavor"
 Build_Replacements_Common_${flavor}
+DisplayMessage "Building Replacements for '_all' pkgs"
+Build_Replacements_Common_all
 
 DisplayMessage "Removing duplicate debs from replacements"
 remove_duplicate_debs "${replacements_dir}"
