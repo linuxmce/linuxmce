@@ -1310,3 +1310,28 @@ void OMX_Player::CMD_Angle(string sValue_To_Assign,int iStreamID,string &sCMD_Re
 	cout << "Parm #5 - Value_To_Assign=" << sValue_To_Assign << endl;
 	cout << "Parm #41 - StreamID=" << iStreamID << endl;
 }
+//<-dceag-c89-b->
+
+	/** @brief COMMAND: #89 - Vol Up */
+	/** volume up */
+		/** @param #72 Repeat Command */
+			/** If specified, repeat the volume up this many times */
+
+void OMX_Player::CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMessage)
+//<-dceag-c89-e->
+//<-dceag-c90-b->
+
+	/** @brief COMMAND: #90 - Vol Down */
+	/** volume down */
+		/** @param #72 Repeat Command */
+			/** If specified, repeat the volume down this many times. */
+
+void OMX_Player::CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMessage)
+//<-dceag-c90-e->
+//<-dceag-c97-b->
+
+	/** @brief COMMAND: #97 - Mute */
+	/** mute */
+
+void OMX_Player::CMD_Mute(string &sCMD_Result,Message *pMessage)
+//<-dceag-c97-e->
