@@ -240,6 +240,24 @@ public:
 	virtual void CMD_Jump_Position_In_Playlist(string sValue_To_Assign,int iStreamID,string &sCMD_Result,Message *pMessage);
 
 
+	/** @brief COMMAND: #89 - Vol Up */
+	/** volume up */
+		/** @param #72 Repeat Command */
+			/** If specified, repeat the volume up this many times */
+
+	virtual void CMD_Vol_Up(int iRepeat_Command) { string sCMD_Result; CMD_Vol_Up(iRepeat_Command,sCMD_Result,NULL);};
+	virtual void CMD_Vol_Up(int iRepeat_Command,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #90 - Vol Down */
+	/** volume down */
+		/** @param #72 Repeat Command */
+			/** If specified, repeat the volume down this many times. */
+
+	virtual void CMD_Vol_Down(int iRepeat_Command) { string sCMD_Result; CMD_Vol_Down(iRepeat_Command,sCMD_Result,NULL);};
+	virtual void CMD_Vol_Down(int iRepeat_Command,string &sCMD_Result,Message *pMessage);
+
+
 	/** @brief COMMAND: #92 - Pause */
 	/** Pause the media */
 		/** @param #41 StreamID */
@@ -258,6 +276,13 @@ public:
 
 	virtual void CMD_Stop(int iStreamID,bool bEject) { string sCMD_Result; CMD_Stop(iStreamID,bEject,sCMD_Result,NULL);};
 	virtual void CMD_Stop(int iStreamID,bool bEject,string &sCMD_Result,Message *pMessage);
+
+
+	/** @brief COMMAND: #97 - Mute */
+	/** mute */
+
+	virtual void CMD_Mute() { string sCMD_Result; CMD_Mute(sCMD_Result,NULL);};
+	virtual void CMD_Mute(string &sCMD_Result,Message *pMessage);
 
 
 	/** @brief COMMAND: #126 - Guide */
