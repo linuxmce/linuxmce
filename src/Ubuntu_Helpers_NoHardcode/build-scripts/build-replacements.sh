@@ -267,10 +267,10 @@ function Build_Replacements_ubuntu_trusty
 	QT_SELECT=4 Build_Replacement_Package libhupnp-av external/hupnp/hupnp_av && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/external/hupnp/libhupnp-av*.deb || :
 
-	# Package: libruby1.8, ruby1.8-dev....  ugh.  GSD breaks on 1.9.1 && 2.0
-	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
-	Build_Replacement_Package 1.8_1.8.7.375 ubuntu/ruby1.8-1.8.7.375/ && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*1.8_1.8.7.375*.deb || :
+	## Package: libruby1.8, ruby1.8-dev....  ugh.  GSD breaks on 1.9.1 && 2.0
+	#dir_="${svn_dir}/${svn_branch_name}/ubuntu"
+	#Build_Replacement_Package 1.8_1.8.7.375 ubuntu/ruby1.8-1.8.7.375/ && \
+	#dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*1.8_1.8.7.375*.deb || :
 
 	#Package: libxine2
 	dir_="${svn_dir}/${svn_branch_name}/ubuntu"
