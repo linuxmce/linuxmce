@@ -81,6 +81,12 @@ function Build_Replacements_Common_ubuntu
 {
 	mkdir -pv "$replacements_dir"
 
+	#ubuntu/squeezelite-1.8
+	#Package: squeezelite-1.8
+	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8 && \
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.8*.deb && \
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu" || :
+
 	#Package: lirc
 	dir_=${svn_dir}/${svn_branch_name}/ubuntu/lirc-0.9.0-0ubuntu1+lmce1
 	if Changed_Since_Last_Build "$dir_" ;then
@@ -232,12 +238,6 @@ function Build_Replacements_ubuntu_precise
 	Build_Replacement_Package soxr ubuntu/libsoxr-0.1.1 && \
 	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/*soxr*.deb || :
 
-	#ubuntu/squeezelite-1.4
-	#Package: squeezelite-1.4
-	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.4 && \
-	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.4*.deb && \
-	dir_="${svn_dir}/${svn_branch_name}/ubuntu" || :
-
 	#Package: libcec
 	Build_Replacement_Package cec ubuntu/libcec-2.1.4 && \
 	dpkg -i ${svn_dir}/${svn_branch_name}/ubuntu/libcec*.deb || :
@@ -274,6 +274,12 @@ function Build_Replacements_ubuntu_trusty
 
 function Build_Replacements_Common_raspbian
 {
+	#ubuntu/squeezelite-1.8
+	#Package: squeezelite-1.8
+	Build_Replacement_Package squeezelite ubuntu/squeezelite-1.8 && \
+	dpkg -i --force-all ${svn_dir}/${svn_branch_name}/ubuntu/squeezelite_1.8*.deb && \
+	dir_="${svn_dir}/${svn_branch_name}/ubuntu" || :
+
 	# Open ZWave library
 	Build_Replacement_Package libopenzwave1.0 external/openzwave-1.3.1025 && \
         cp ${svn_dir}/${svn_branch_name}/external/openzwave*.deb "${replacements_dir}" && \
