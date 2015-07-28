@@ -19,6 +19,14 @@ Description: LinuxMCE base files
 Package: lmce-base
 Section: libs
 Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, lmce-base-libs
+Description: LinuxMCE base package
+ Package contains all the libraries need for setting up a LinuxMCE
+ development environment, and to run various apps.
+
+Package: lmce-base-libs
+Section: libs
+Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: LinuxMCE base libs
  Package contains all the libraries need for setting up a LinuxMCE
