@@ -3,7 +3,7 @@ Section: sound
 Priority: extra
 Maintainer: Chris Boot <debian@bootc.net>
 Build-Depends: debhelper (>= 9~), libasound2-dev, libflac-dev, libmad0-dev,
- libvorbis-dev, libfaad-dev, libmpg123-dev, libsoxr-dev, libavformat-dev,
+ libvorbis-dev, libfaad-dev, libmpg123-dev, libsoxr-dev, libavformat-dev | libavformat-ffmpeg-dev,
  portaudio19-dev, liblircclient-dev
 Standards-Version: 3.9.6
 Homepage: https://code.google.com/p/squeezelite/
