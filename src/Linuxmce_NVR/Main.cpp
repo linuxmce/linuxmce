@@ -20,6 +20,7 @@
 #include "PlutoUtils/Other.h"
 #include "DCERouter.h"
 #include <QCoreApplication>
+#include "managerClasses/NvrManager.h"
 // include the main LMCE version file
 #include "version.h"
 
@@ -121,7 +122,10 @@ int main(int argc, char* argv[])
 		if ( pLinuxmce_NVR->GetConfig() && pLinuxmce_NVR->Connect(pLinuxmce_NVR->PK_DeviceTemplate_get()) ) 
         {
 			LoggerWrapper::GetInstance()->Write(LV_STATUS, "Connect OK");
+            //add own child routine here
 			pLinuxmce_NVR->CreateChildren();
+            NvrManager manager(pLinuxmce_NVR);
+            manager.startUp(pLinuxmce_NVR->DATA_Get_Listen_Port());
 			if( bLocalMode )
 				pLinuxmce_NVR->RunLocalMode();
 			else
