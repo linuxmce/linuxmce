@@ -4,7 +4,7 @@
 #include <QObject>
 #include "qlist.h"
 #include "eventlistener.h"
-#include "../Linuxmce_NVR.h"
+#include "Linuxmce_NVR.h"
 class AbstractNvrCamera;
 
 class NvrManager : public QObject
