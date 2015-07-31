@@ -10,7 +10,7 @@
 #include "../cameraClasses/abstractcameraevent.h"
 #include "qimage.h"
 #include "qfile.h";
-MotionEventListener::MotionEventListener(quint16 listen_port, QObject *parent)
+MotionEventListener::MotionEventListener(int listen_port, QObject *parent) : m_listenPort(listen_port)
 {
     server = new QHttpServer();
     connect(server, &QHttpServer::newRequest, this, &MotionEventListener::handleEvent);
@@ -27,12 +27,12 @@ void MotionEventListener::setIsReady(bool isReady)
     if(m_isReady==isReady)return;
     m_isReady = isReady; emit isReadyChanged();
 }
-quint16 MotionEventListener::listenPort() const
+int MotionEventListener::listenPort() const
 {
     return m_listenPort;
 }
 
-void MotionEventListener::setListenPort(const quint16 &listenPort)
+void MotionEventListener::setListenPort(const int &listenPort)
 {
     if(m_listenPort==listenPort)return;
 
@@ -52,6 +52,12 @@ void MotionEventListener::setListenPort(const quint16 &listenPort)
 
 }
 
+QString MotionEventListener::currentHost()
+{
+
+  return QString("192.168.80.194");
+}
+
 void MotionEventListener::log(QString msg)
 {
     qDebug() << QDateTime::currentDateTime().toLocalTime().toString() << msg;
@@ -60,11 +66,12 @@ void MotionEventListener::log(QString msg)
 void MotionEventListener::handleEvent(QHttpRequest *r, QHttpResponse *a)
 {
 
+    qDebug() << "incoming data";
     int hdrLength= r->header("content-length").toInt();
     if(hdrLength > 100){
         qDebug() << r->header("content-length") << " << content length, likely image.";
        // qDebug() << r->headers();
-r->storeBody();
+        r->storeBody();
        // QObject::connect(r, &QHttpRequest::data, this, &MotionEventListener::handleImageData);
         QByteArray standardResponse("OK");
         // a->setHeader("Content-Length", QString::number(standardResponse.length()));

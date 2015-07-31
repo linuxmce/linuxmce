@@ -4,6 +4,7 @@
 #include "qnetworkreply.h"
 #include "qvariant.h"
 #include "qurlquery.h"
+#include "qeventloop.h"
 
 const QString MotionPiCamera::WRITE_SETTINGS="/0/config/writeyes";
 const QString MotionPiCamera::ALL_CAMERAS="/0";
@@ -30,52 +31,63 @@ const QString MotionPiCamera::ON_MOTION_DETECTED="on_motion_detected";
 const QString MotionPiCamera::ON_MOVIE_END="on_movie_end";
 const QString MotionPiCamera::ON_MOVIE_START="on_movie_start";
 
-const QString MotionPiCamera::CURL_EVENT_START= "curl --data \"{'ip':'192.168.80.xxx','host': 'HOSTNAME','event': {'type': 'motion','status': 'started'} }\" http://192.168.80.194:8001";
-const QString MotionPiCamera::CURL_EVENT_END="curl --data \"{'ip':'192.168.80.xxx','host': 'HOSTNAME','event': {'type': 'motion','status': 'stopped'} }\" http://192.168.80.194:8001";
-const QString MotionPiCamera::CURL_MOTION_DETECTED="curl --data \"{'ip':'192.168.80.xxx','host': 'HOSTNAME','event': {'type': 'motion','status': 'detected'} }\" http://192.168.80.194:8001";
-const QString MotionPiCamera::CURL_SEND_PICTURE="curl  --form \"fileupload=@%f\" http://192.168.80.194:8001";
+const QString MotionPiCamera::CURL_EVENT_START= "curl --data \"{'ip':'192.168.80.xxx','host': 'HOSTNAME','event': {'type': 'motion','status': 'started'} }\" http://SERVER_TARGET:SERVER_PORT";
+const QString MotionPiCamera::CURL_EVENT_END="curl --data \"{'ip':'192.168.80.xxx','host': 'HOSTNAME','event': {'type': 'motion','status': 'stopped'} }\" http://SERVER_TARGET:SERVER_PORT";
+const QString MotionPiCamera::CURL_MOTION_DETECTED="curl --data \"{'ip':'192.168.80.xxx','host': 'HOSTNAME','event': {'type': 'motion','status': 'detected'} }\" SERVER_TARGET:SERVER_PORT";
+const QString MotionPiCamera::CURL_SEND_PICTURE="curl  --form \"fileupload=@%f\" http://SERVER_TARGET:SERVER_PORT";
 
 
-MotionPiCamera::MotionPiCamera(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url, AbstractNvrCamera::CameraType t, AbstractNvrCamera::AudioType a, QObject *parent) :
-    AbstractNvrCamera( cameraName, userName, password,port, control_port, url, parent = 0) {
+MotionPiCamera::MotionPiCamera(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url, NvrCameraBase::CameraType t, NvrCameraBase::AudioType a, QObject *parent) :
+    NvrCameraBase( cameraName, userName, password,port, control_port, url, parent = 0) {
 
-    httpManager = new QNetworkAccessManager();
     QObject::connect(this,&MotionPiCamera::initialized, this, &MotionPiCamera::setConnections);
+
     setAudioType(a);
     setCameraType(t);
+
+    if(constructed())
+        initialized();
+
 }
 
 void MotionPiCamera::setConnections()
 {
+    httpManager = new QNetworkAccessManager();
+    QObject::connect(httpManager, &QNetworkAccessManager::finished, this, &MotionPiCamera::handleControlReply);
+
     log( QString(Q_FUNC_INFO)+" motion camera setting connections"  );
     testControlPort();
     QString e = CURL_EVENT_END;
     e.replace("192.168.80.xxx", controlUrl().host());
+    e.replace("SERVER_TARGET",managerUrl());
+    e.replace("SERVER_PORT", managerPort());
     QVariant end(e.replace("HOSTNAME", cameraName()));
 
     QString s = CURL_EVENT_START;
     s.replace("192.168.80.xxx", controlUrl().host());
+    s.replace("SERVER_TARGET",managerUrl());
+    s.replace("SERVER_PORT", managerPort());
     QVariant start(s .replace("HOSTNAME", cameraName()));
 
     QString m = CURL_MOTION_DETECTED;
     m.replace("192.168.80.xxx", controlUrl().host());
-
+    m.replace("SERVER_TARGET",managerUrl());
+    m.replace("SERVER_PORT", managerPort());
     QVariant motion(m.replace("HOSTNAME", cameraName()));
 
-
+    QString pic = CURL_SEND_PICTURE;
+    pic.replace("SERVER_TARGET",managerUrl());
+    pic.replace("SERVER_PORT", managerPort());
 
     setMotionSetting(MotionPiCamera::ON_EVENT_START, start );
     setMotionSetting(MotionPiCamera::ON_EVENT_END, end);
     setMotionSetting(MotionPiCamera::ON_MOTION_DETECTED, motion);
-    setMotionSetting(MotionPiCamera::ON_PICTURE_SAVE, QVariant(CURL_SEND_PICTURE));
-
-
+    setMotionSetting(MotionPiCamera::ON_PICTURE_SAVE, QVariant(pic));
 }
 
 void MotionPiCamera::testControlPort()
 {
 
-    QObject::connect(httpManager, &QNetworkAccessManager::finished, this, &MotionPiCamera::handleControlReply);
     QNetworkRequest req(controlUrl());
     httpManager->get(req);
 }
@@ -83,7 +95,7 @@ void MotionPiCamera::testControlPort()
 void MotionPiCamera::handleControlReply(QNetworkReply *p)
 {
 
-    // log(Q_FUNC_INFO);
+    log(Q_FUNC_INFO);
     QString preParsed= p->readAll();
 
     if(preParsed.indexOf("<b>Done</b>")!=-1 || preParsed.indexOf(" write done !")!=-1 ){
@@ -94,14 +106,14 @@ void MotionPiCamera::handleControlReply(QNetworkReply *p)
         QString setting;
 
         if(i!=-1){
-             setting=r.cap(0);
-         //   qDebug() << "setting::" << setting.remove("set?").remove(">") ;
+            setting=r.cap(0);
+            //   qDebug() << "setting::" << setting.remove("set?").remove(">") ;
         }
 
         QRegExp val(" = (.*.)</li>");
         val.setMinimal(true);
         int valCheck = val.indexIn(preParsed);
-     //   qDebug() << "value::" << val.cap(1)<< "\n";
+        //   qDebug() << "value::" << val.cap(1)<< "\n";
 
         if(preParsed.indexOf("write done")!=-1){
 
@@ -115,7 +127,7 @@ void MotionPiCamera::handleControlReply(QNetworkReply *p)
 
 }
 
-void MotionPiCamera::setCameraType(AbstractNvrCamera::CameraType t)
+void MotionPiCamera::setCameraType(NvrCameraBase::CameraType t)
 {
     if(m_cameraType==t)
         return;
@@ -124,7 +136,7 @@ void MotionPiCamera::setCameraType(AbstractNvrCamera::CameraType t)
     emit cameraTypeChanged();
 }
 
-void MotionPiCamera::setAudioType(AbstractNvrCamera::AudioType a)
+void MotionPiCamera::setAudioType(NvrCameraBase::AudioType a)
 {
     if(m_audioType == a)
         return;
@@ -135,7 +147,7 @@ void MotionPiCamera::setAudioType(AbstractNvrCamera::AudioType a)
 
 void MotionPiCamera::sendDetectionCommand(MotionPiCamera::DetectionCommand d)
 {
-    QUrl  cmdUrl(controlUrl());
+    QUrl cmdUrl(controlUrl());
 
     switch (d) {
     case MotionPiCamera::COMMAND_PAUSE:
@@ -168,22 +180,25 @@ void MotionPiCamera::getMotionSetting(QString s)
 
 void MotionPiCamera::setMotionSetting(QString Setting, QVariant val)
 {
-
     QString pt =controlUrl().toString();
     pt.append("0/config/set?"+Setting+"="+val.toString());
     QUrl test(pt);
     QNetworkRequest req(test);
     qDebug() << test.url();
-    httpManager->get(req);
+    QNetworkReply *rep= httpManager->get(req);
 
+    QEventLoop e;
+    connect(rep, &QNetworkReply::finished, &e, &QEventLoop::quit);
+    e.exec();
+    handleControlReply(rep);
+    qDebug() << Q_FUNC_INFO;
 }
 
 void MotionPiCamera::writeSettings()
 {
-
     QUrl writeUrl(controlUrl());
     writeUrl.setPath(WRITE_SETTINGS);
-    QNetworkRequest req(writeUrl);   
+    QNetworkRequest req(writeUrl);
     httpManager->get(req);
 
 }

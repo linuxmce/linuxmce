@@ -23,7 +23,7 @@ public:
     };
     Q_ENUMS(NotificationStatus)
 
-    explicit CameraEvent(QString host, QString name, QString url, QString status, CameraEvent::SensorState stat,  QObject *parent = 0);
+     CameraEvent(QString host, QString name, QString url, QString status, CameraEvent::SensorState stat,  QObject *parent = 0);
 
     QString host() const;
     void setHost(const QString &host);
@@ -61,5 +61,7 @@ private:
     NotificationStatus m_notificationStatus;
     SensorState m_sensorState;
 };
+
+
 
 #endif // ABSTRACTCAMERAEVENT_H

@@ -5,13 +5,19 @@
 #include <qdatetime.h>
 #include "../cameraClasses/motionpicamera.h"
 #include "../Linuxmce_NVR.h"
+#include "qdebug.h"
 
-NvrManager::NvrManager(DCE::Linuxmce_NVR *dceObject, QObject *parent) : QObject(parent) , mp_Linuxmce_NVR(dceObject)
+NvrManager::NvrManager(QObject *parent) : QObject(parent), m_listener(new MotionEventListener())
 {
     verbose=false;
 
     log(QString(Q_FUNC_INFO)+"::Started");
-    listener = new MotionEventListener();
+}
+
+NvrManager::NvrManager(int listenPort, QObject *parent) :QObject(parent), m_listener(new MotionEventListener())
+{
+
+    startUp(listenPort);
 }
 
 int NvrManager::cameraCount()
@@ -19,10 +25,12 @@ int NvrManager::cameraCount()
     return cam_list.count();
 }
 
-void NvrManager::addCamera(AbstractNvrCamera *c)
+void NvrManager::addCamera(NvrCameraBase *c)
 {
+    qDebug() << Q_FUNC_INFO;
     cam_list.append(c);
     c->setManager(this);
+
     emit cameraCountChanged();
 
 }
@@ -30,11 +38,22 @@ void NvrManager::addCamera(AbstractNvrCamera *c)
 void NvrManager::log(QString logMsg)
 {
     QString outMsg = QDateTime::currentDateTime().toLocalTime().toString()+logMsg;
-    mp_Linuxmce_NVR->handleManagerMessage(outMsg);
+    //mp_Linuxmce_NVR->handleManagerMessage(outMsg);
+    emit newManagerMessage(outMsg);
 
     if(verbose)
         qDebug()<< logMsg;
 }
+MotionEventListener *NvrManager::listener() const
+{
+    return m_listener;
+}
+
+void NvrManager::setListener(MotionEventListener *listener)
+{
+    m_listener = listener;
+}
+
 
 void NvrManager::shutDown()
 {
@@ -44,6 +63,6 @@ void NvrManager::shutDown()
 
 void NvrManager::startUp(int listenPort)
 {
-    listener->setListenPort(listenPort);
+    m_listener->setListenPort(listenPort);
 }
 
