@@ -5,20 +5,22 @@
 #include "qurl.h"
 class NvrManager;
 /*!
- * \brief The AbstractPiCamera class. Base object for different version of the camera to use
+ * \brief The NvrCameraBase class. Base object for different version of the camera to use
  *
  */
-class AbstractNvrCamera : public QObject
+class NvrCameraBase : public QObject
 {
     Q_OBJECT
 public:
-    explicit AbstractNvrCamera(QString cameraName,
-                              QString userName,
-                              QString password,
-                              quint16 port,
-                              quint16 control_port,
-                              QUrl url,
-                              QObject *parent = 0);
+    explicit NvrCameraBase(QObject*parent=0);
+     NvrCameraBase(QString cameraName,
+                               QString userName,
+                               QString password,
+                               quint16 port,
+                               quint16 control_port,
+                               QUrl url,
+                               QObject *parent = 0);
+
     enum CameraType{
         PI_VLC_STREAM,
         PI_MOTION_STREAM,
@@ -60,29 +62,43 @@ public:
     QUrl controlUrl() const;
     void setControlUrl(const QUrl &controlUrl);
 
+    void setCameraType(CameraType t) ;
     CameraType camType();
+
+
+    void setAudioType(AudioType a) ;
+
+
+    bool constructed() const;
+    void setConstructed(bool constructed);
+
+    QString managerUrl() const;
+    void setManagerUrl(const QString &managerUrl);
+
+    QString managerPort() const;
+    void setManagerPort(const QString &managerPort);
+
 signals:
     void cameraNameChanged();
     void cameraTypeChanged();
     void audioTypeChanged();
     void passWordChanged();
-   void userNameChanged();
-   void portChanged();
-   void controlPortChanged();
-   void urlChanged();
-   void controlUrlChanged();
-   void usingPasswordChanged();
-   void isOnlineChanged();
-   void initialized();
+    void userNameChanged();
+    void portChanged();
+    void controlPortChanged();
+    void urlChanged();
+    void controlUrlChanged();
+    void usingPasswordChanged();
+    void isOnlineChanged();
+    void initialized();
 
 public slots:
-    virtual void setCameraType(CameraType t)= 0;
-    virtual void setAudioType(AudioType a)=0;
+
 
 protected:
     CameraType m_cameraType;
     AudioType m_audioType;
-void log(QString msg);
+    void log(QString msg);
 private:
     void doConnections();
 
@@ -98,6 +114,10 @@ private:
     bool m_isOnline;
     NvrManager *m_manager;
     bool m_usingPass;
+    bool m_constructed;
+    QString m_managerUrl;
+    QString m_managerPort;
 };
+//Q_DECLARE_METATYPE(NvrCameraBase)
 
 #endif // ABSTRACTPICAMERA_H

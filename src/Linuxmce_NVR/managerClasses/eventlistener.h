@@ -9,13 +9,13 @@ class MotionEventListener : public QObject
 {
     Q_OBJECT
 public:
-    explicit MotionEventListener(quint16 listen_port=8001 , QObject *parent = 0);
+    explicit MotionEventListener(int listen_port=8001 , QObject *parent = 0);
 
     bool isReady() const;
     void setIsReady(bool isReady);
 
-    quint16 listenPort() const;
-    void setListenPort(const quint16 &listenPort);
+    int listenPort() const;
+    void setListenPort(const int &listenPort);
 
 
 signals:
@@ -24,7 +24,7 @@ signals:
     void isReadyChanged();
 
 public slots:
-
+    QString currentHost();
     void log(QString msg);
 
 private slots:
@@ -35,7 +35,7 @@ private slots:
 
 private:
     QHttpServer *server;
-    quint16 m_listenPort;
+    int m_listenPort;
     bool m_isReady;
     QList<QPair<QHttpRequest*, QHttpResponse*> > qued_http_requests;
 

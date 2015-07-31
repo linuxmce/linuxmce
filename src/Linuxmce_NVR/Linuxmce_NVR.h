@@ -20,11 +20,13 @@
 #include "Gen_Devices/Linuxmce_NVRBase.h"
 //<-dceag-d-e->
 #include "qobject.h"
+#include "cameraClasses/abstractpicamera.h"
 //<-dceag-decl-b->
 namespace DCE
 {
 class Linuxmce_NVR : public QObject, public Linuxmce_NVR_Command
 {
+    Q_OBJECT
     //<-dceag-decl-e->
     // Private member variables
 
@@ -41,8 +43,10 @@ public:
     virtual bool Register();
     virtual void ReceivedCommandForChild(DeviceData_Impl *pDeviceData_Impl,string &sCMD_Result,Message *pMessage);
     virtual void ReceivedUnknownCommand(string &sCMD_Result,Message *pMessage);
-    //<-dceag-const-e->
 
+    //<-dceag-const-e->
+    bool OnReplaceHandler(string r);
+    void CreateChildren();
 
     //<-dceag-const2-b->
     // The following constructor is only used if this a class instance embedded within a DCE Device.  In that case, it won't create it's own connection to the router
@@ -132,18 +136,21 @@ NOEMON or CANBUS */
 
     //<-dceag-h-e->
 signals:
-    void addCamera();
+    void addCamera(NvrCameraBase *c);
     void removeCamera();
     void commandForCamera();
     void newListenPort(int p);
 
 public slots:
-    void cameraEvent();
 
    void handleManagerMessage(QString msg);
 
 private:
+    bool createManager();
+
+private:
     QList<QObject*> cameraDevices;
+     NvrManager *mp_manager;
 };
 
 //<-dceag-end-b->

@@ -5,24 +5,30 @@
 #include "qlist.h"
 #include "eventlistener.h"
 #include "../Linuxmce_NVR.h"
-class AbstractNvrCamera;
+class NvrCameraBase;
 
 class NvrManager : public QObject
 {
     Q_OBJECT
 public:
-    explicit NvrManager(DCE::Linuxmce_NVR *dceObject, QObject *parent = 0);
-
+    explicit NvrManager( QObject *parent = 0);
+    NvrManager(int listenPort, QObject*parent=0);
     int cameraCount();
+
+    MotionEventListener *listener() const;
+    void setListener(MotionEventListener *listener);
+
 signals:
     void cameraCountChanged();
     void cameraAdded(QString cameraName);
     void cameraRemoved(QString cameraName);
     void cameraFailed(QString cameraName);
+    void newManagerMessage(QString msg);
+
 
 
 public slots:
-    void addCamera(AbstractNvrCamera* c);
+    void addCamera(NvrCameraBase* c);
     void shutDown();
     void startUp(int listenPort);
 
@@ -34,10 +40,10 @@ private:
 
 
 private:
-    QList<AbstractNvrCamera*> cam_list;
-    MotionEventListener *listener;
-    DCE::Linuxmce_NVR *mp_Linuxmce_NVR;
 
+    MotionEventListener *m_listener;
+    DCE::Linuxmce_NVR *mp_Linuxmce_NVR;
+    QList<NvrCameraBase*> cam_list;
 };
 
 #endif // PIMANAGER_H

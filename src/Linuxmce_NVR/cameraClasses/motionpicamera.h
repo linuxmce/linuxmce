@@ -5,7 +5,7 @@
 class QVariant;
 
 //picture save
-class MotionPiCamera : public AbstractNvrCamera
+class MotionPiCamera : public NvrCameraBase
 {
 public:
     MotionPiCamera(
@@ -67,8 +67,6 @@ private slots:
     void setConnections();
     void testControlPort();
     void handleControlReply(QNetworkReply*p);
-
-
 
 public slots:
     void setCameraType(CameraType t);
