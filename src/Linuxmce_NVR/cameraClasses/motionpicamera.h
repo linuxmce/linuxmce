@@ -67,6 +67,7 @@ private slots:
     void setConnections();
     void testControlPort();
     void handleControlReply(QNetworkReply*p);
+    void handleRequest(QNetworkRequest q);
 
 public slots:
     void setCameraType(CameraType t);
@@ -78,6 +79,7 @@ void writeSettings();
 
 private:
     QNetworkAccessManager *httpManager;
+
 
 private:
 

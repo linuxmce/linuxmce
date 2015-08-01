@@ -122,6 +122,7 @@ bool Linuxmce_NVR::OnReplaceHandler(string r)
 
 void Linuxmce_NVR::CreateChildren()
 {
+    qDebug() << this->thread();
     if(!createManager()) return;
 
     for( int i=0; i < (int)m_pData->m_vectDeviceData_Impl_Children.size(); i++ )
@@ -392,9 +393,10 @@ bool Linuxmce_NVR::createManager()
     int lp = DATA_Get_Listen_Port();
     qDebug() << lp;
     mp_manager = new NvrManager( lp);
+    mp_manager->moveToThread(t);
     QObject::connect(this, &Linuxmce_NVR::addCamera, mp_manager, &NvrManager::addCamera, Qt::QueuedConnection);
     QObject::connect(mp_manager, &NvrManager::newManagerMessage, this, &Linuxmce_NVR::handleManagerMessage, Qt::QueuedConnection);
-    mp_manager->moveToThread(t);
+
     t->start();
 
     return true;

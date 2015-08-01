@@ -40,6 +40,7 @@ const QString MotionPiCamera::CURL_SEND_PICTURE="curl  --form \"fileupload=@%f\"
 MotionPiCamera::MotionPiCamera(QString cameraName, QString userName, QString password, quint16 port, quint16 control_port, QUrl url, NvrCameraBase::CameraType t, NvrCameraBase::AudioType a, QObject *parent) :
     NvrCameraBase( cameraName, userName, password,port, control_port, url, parent = 0) {
 
+    qDebug() << "MotionPiCamera" << this->thread();
     QObject::connect(this,&MotionPiCamera::initialized, this, &MotionPiCamera::setConnections);
 
     setAudioType(a);
@@ -83,6 +84,7 @@ void MotionPiCamera::setConnections()
     setMotionSetting(MotionPiCamera::ON_EVENT_END, end);
     setMotionSetting(MotionPiCamera::ON_MOTION_DETECTED, motion);
     setMotionSetting(MotionPiCamera::ON_PICTURE_SAVE, QVariant(pic));
+    sendDetectionCommand(COMMAND_PAUSE);
 }
 
 void MotionPiCamera::testControlPort()
@@ -96,6 +98,7 @@ void MotionPiCamera::handleControlReply(QNetworkReply *p)
 {
 
     log(Q_FUNC_INFO);
+
     QString preParsed= p->readAll();
 
     if(preParsed.indexOf("<b>Done</b>")!=-1 || preParsed.indexOf(" write done !")!=-1 ){
@@ -184,14 +187,7 @@ void MotionPiCamera::setMotionSetting(QString Setting, QVariant val)
     pt.append("0/config/set?"+Setting+"="+val.toString());
     QUrl test(pt);
     QNetworkRequest req(test);
-    qDebug() << test.url();
-    QNetworkReply *rep= httpManager->get(req);
-
-    QEventLoop e;
-    connect(rep, &QNetworkReply::finished, &e, &QEventLoop::quit);
-    e.exec();
-    handleControlReply(rep);
-    qDebug() << Q_FUNC_INFO;
+    httpManager->get(req);
 }
 
 void MotionPiCamera::writeSettings()
